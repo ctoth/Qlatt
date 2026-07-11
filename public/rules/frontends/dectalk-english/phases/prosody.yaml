@@ -47,6 +47,7 @@ rules:
         && (prev == null || prev.phoneme == "SIL")
         && word_count() > 3
     insert:
+      relation: PhraseCommand
       layer: baseline
       at: at_sync(current.sync_left)
       value: 0
@@ -88,6 +89,7 @@ rules:
         && (prev == null || prev.phoneme == "SIL")
         && word_count() <= 3
     insert:
+      relation: PhraseCommand
       layer: baseline
       at: at_sync(current.sync_left)
       value: 0
@@ -151,6 +153,7 @@ rules:
         : params.policy.f0.hat_rise_hz
     constraint: is_hat_begins
     insert:
+      relation: Tilt
       layer: hat
       at: at_sync(current.sync_left)
       value: rise_hz
@@ -244,6 +247,7 @@ rules:
         hat_size_hz + scaled_clause_fall_hz
     constraint: is_hat_ends
     insert:
+      relation: Tilt
       layer: hat
       at: >-
         merge(current, {"ratio": fall_ratio})
@@ -303,6 +307,7 @@ rules:
     constraint: 'is_hat_ends && terminal == "?"'
     # Small dip earlier in the vowel (DECtalk F0_QGesture1=-151).
     insert:
+      relation: Tilt
       layer: boundary
       at: 'merge(current, {"ratio": 0.75})'
       value: params.policy.f0.question_gesture_dip_hz
@@ -337,6 +342,7 @@ rules:
     # question hat-fall -- rather than a transient impulse spike that decays
     # away. (DECtalk's GLIDE-form question gesture, ph_inton1.c:1635.)
     insert:
+      relation: Tilt
       layer: question_glide
       at: 'merge(current, {"ratio": 0.5})'
       value: params.policy.f0.question_gesture_rise_hz
@@ -370,6 +376,7 @@ rules:
         && prev != null && prev.phoneme != "SIL"
         && has(current.punctuationSymbol) && current.punctuationSymbol == "?"
     insert:
+      relation: Tilt
       layer: question_glide
       at: at_sync(current.sync_left)
       value: "-(params.policy.f0.question_gesture_rise_hz)"
@@ -412,6 +419,7 @@ rules:
         : null
     constraint: 'is_hat_ends && terminal == ","'
     insert:
+      relation: Tilt
       layer: boundary
       at: 'merge(current, {"ratio": 0.75})'
       value: params.policy.f0.comma_gesture1_hz
@@ -440,6 +448,7 @@ rules:
         : null
     constraint: 'is_hat_ends && terminal == ","'
     insert:
+      relation: Tilt
       layer: boundary
       at: 'merge(current, {"ratio": 1.0})'
       value: params.policy.f0.comma_gesture2_hz
@@ -489,6 +498,7 @@ rules:
         (stress_component + position_component) * scale_factor
         * params.policy.f0.stress_impulse_initial_multiplier
     insert:
+      relation: Tilt
       layer: stress
       at: at_sync(current.sync_left)
       value: impulse_hz
@@ -531,6 +541,7 @@ rules:
       reset_value: >-
         params.policy.f0.final_fall_hz
     insert:
+      relation: Tilt
       layer: hat
       at: at_sync(current.sync_left)
       value: reset_value

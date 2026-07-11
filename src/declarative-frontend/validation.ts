@@ -1846,6 +1846,26 @@ function validateRules(
         }
       }
     }
+    if (isPlainObject(r.insert_f0_layer)) {
+      const relation = r.insert_f0_layer.relation;
+      if (relation !== "PhraseCommand" && relation !== "Tilt") {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_F0_CONTROL_RELATION_INVALID",
+            `Rule '${name}' f0_layer insert relation must be PhraseCommand or Tilt`,
+            `rules.${name}.insert.relation`,
+          ),
+        );
+      } else if (!relationByName.has(relation)) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_RULE_RELATION_UNKNOWN",
+            `Rule '${name}' references unknown F0 control relation '${relation}'`,
+            `rules.${name}.insert.relation`,
+          ),
+        );
+      }
+    }
 
     for (const { spec: pointSpec, path: pointPath, label: pointLabel } of pointInsertSpecs) {
       const valueExpr = pointSpec.value;

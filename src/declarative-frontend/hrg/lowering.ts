@@ -5,15 +5,15 @@
  * decision id of the write that produced it, so the lowered track is itself
  * queryable (see provenance-query.ts).
  *
- * This is the basic segment -> duration -> param round-trip. Intonation / Tilt /
- * PhraseCommand / Affect relations are designed for but not yet projected here;
- * the per-frame provenance index is the seam they will plug into.
+ * Segment, F0Point, Tilt, and PhraseCommand values are projected here. Affect
+ * and speaker/source projection join the same pass in their Phase 4 families.
  *
  * Citations: Klatt 1980 (time-varying control parameters); Allen 1987 MITalk PHONET (flatten
  * the structure to a parameter track only at the end);
  * design/beauty-synthesis/11-sota-frontend-architecture.md §5 (one final lowering).
  */
 import type { KlattFrame } from "../../tts-frontend-types";
+import { getF0FilterExports, RENDER_OK } from "../../f0-filters-loader";
 import type { Utterance } from "./utterance";
 import type { Item } from "./item";
 import type { FeatureValue } from "./types";
@@ -26,6 +26,49 @@ type LocusEntry = {
 
 type LocusTable = Readonly<Record<string, Readonly<Record<string, Readonly<Record<string, LocusEntry>>>>>>;
 type VowelCategoryTable = Readonly<Record<string, { forward?: number; backward?: number }>>;
+
+type LayerType = "profile" | "persistent" | "impulse" | "glide";
+type DecayMode = "halving" | "linear" | "exponential";
+
+type LayerConfig = {
+  type: LayerType;
+  decay?: DecayMode;
+  initial_decay_divisor?: number;
+  termination_threshold?: number;
+  exponential_factor?: number;
+};
+
+type LayeredFilterConfig = {
+  type: "lowpass_2pole_coefficient";
+  alpha_param?: string;
+  default_alpha: number;
+};
+
+type SpeakerScaleConfig = {
+  minimum_param: string;
+  range_param: string;
+  reference: number;
+  divisor: number;
+  output_scale: number;
+};
+
+export type LayeredF0ModelConfig = {
+  type: "layered_additive";
+  frame_period_sec: number;
+  filter: LayeredFilterConfig;
+  layers: Readonly<Record<string, LayerConfig>>;
+  speaker_scale?: SpeakerScaleConfig;
+  output_clamp: { min_hz: number; max_hz: number };
+};
+
+type F0LayerCommand = {
+  layer: string;
+  time: number;
+  value: number;
+  durationFrames?: number;
+  profilePoints?: number[];
+  tag?: string;
+};
 
 export interface LowerOptions {
   /** Required backend parameter columns, in declared output order. */
@@ -84,6 +127,11 @@ export interface LowerOptions {
   /** Feature key holding the segment class used by duration policy (default "type"). */
   typeKey?: string;
 }
+
+export type LowerContext = {
+  f0Model?: LayeredF0ModelConfig;
+  speakerParams?: Readonly<Record<string, unknown>>;
+};
 
 /** Per-segment realized timing window (ms). */
 export interface SegmentTiming {
@@ -273,6 +321,217 @@ function requirePolicyNumber(value: number, path: string): number {
   return value;
 }
 
+function requireFiniteNumber(value: unknown, path: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`E_HRG_LOWER_F0_MODEL: '${path}' must be finite`);
+  }
+  return value;
+}
+
+function requirePositiveNumber(value: unknown, path: string): number {
+  const number = requireFiniteNumber(value, path);
+  if (number <= 0) throw new Error(`E_HRG_LOWER_F0_MODEL: '${path}' must be positive`);
+  return number;
+}
+
+function resolveSpeakerNumber(
+  speakerParams: Readonly<Record<string, unknown>> | undefined,
+  path: string,
+): number {
+  let value: unknown = speakerParams;
+  for (const key of path.split(".")) {
+    value = value != null && typeof value === "object" && !Array.isArray(value)
+      ? (value as Readonly<Record<string, unknown>>)[key]
+      : undefined;
+  }
+  return requireFiniteNumber(value, `speaker.${path}`);
+}
+
+function optionalSpeakerNumber(
+  speakerParams: Readonly<Record<string, unknown>> | undefined,
+  path: string,
+): number | undefined {
+  let value: unknown = speakerParams;
+  for (const key of path.split(".")) {
+    value = value != null && typeof value === "object" && !Array.isArray(value)
+      ? (value as Readonly<Record<string, unknown>>)[key]
+      : undefined;
+  }
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function interpolateProfile(points: readonly number[], position: number): number {
+  if (points.length === 0) return 0;
+  if (points.length === 1) return points[0] ?? 0;
+  const floatIndex = Math.max(0, Math.min(1, position)) * (points.length - 1);
+  const lowIndex = Math.floor(floatIndex);
+  const highIndex = Math.min(lowIndex + 1, points.length - 1);
+  const low = points[lowIndex] ?? 0;
+  const high = points[highIndex] ?? low;
+  return low + (high - low) * (floatIndex - lowIndex);
+}
+
+/**
+ * Realize selected PhraseCommand/Tilt Items through the f0-filters ABI.
+ *
+ * Citations: DECtalk 4.63 Ph_drwt02.c (command cadence, two-pole coefficient
+ * smoothing, speaker scaling); Klatt 1982 (hat-pattern layers); Fujisaki,
+ * Information, Prosody, and Modeling (additive phrase/accent commands).
+ */
+function renderLayeredF0(
+  commands: readonly F0LayerCommand[],
+  model: LayeredF0ModelConfig,
+  totalDurationSec: number,
+  speakerParams?: Readonly<Record<string, unknown>>,
+): Array<{ time: number; f0: number }> {
+  const framePeriod = requirePositiveNumber(model.frame_period_sec, "f0_model.frame_period_sec");
+  const frameCount = Math.ceil(totalDurationSec / framePeriod) + 1;
+  const alpha = requireFiniteNumber(model.filter.default_alpha, "f0_model.filter.default_alpha");
+  const resolvedAlpha = model.filter.alpha_param
+    ? optionalSpeakerNumber(speakerParams, model.filter.alpha_param) ?? alpha
+    : alpha;
+  const scale = model.speaker_scale;
+  const f0Minimum = scale ? resolveSpeakerNumber(speakerParams, scale.minimum_param) : 0;
+  const f0ScaleFactor = scale ? resolveSpeakerNumber(speakerParams, scale.range_param) : 1;
+  const reference = scale ? requireFiniteNumber(scale.reference, "f0_model.speaker_scale.reference") : 0;
+  const divisor = scale ? requirePositiveNumber(scale.divisor, "f0_model.speaker_scale.divisor") : 1;
+  const outputScale = scale
+    ? requirePositiveNumber(scale.output_scale, "f0_model.speaker_scale.output_scale")
+    : 1;
+  const baseF0 = speakerParams?.base_f0_hz;
+  const baseBias = scale && typeof baseF0 === "number" && Number.isFinite(baseF0)
+    ? baseF0 - f0Minimum * outputScale
+    : 0;
+  const minHz = requireFiniteNumber(model.output_clamp?.min_hz, "f0_model.output_clamp.min_hz");
+  const maxHz = requireFiniteNumber(model.output_clamp?.max_hz, "f0_model.output_clamp.max_hz");
+
+  const layerNames = Object.keys(model.layers);
+  const commandsByLayer = new Map<string, F0LayerCommand[]>();
+  for (const name of layerNames) commandsByLayer.set(name, []);
+  for (const command of commands) {
+    const layerCommands = commandsByLayer.get(command.layer);
+    if (!layerCommands) throw new Error(`E_HRG_LOWER_F0_MODEL: unknown layer '${command.layer}'`);
+    layerCommands.push(command);
+  }
+  let initialTotal = 0;
+  for (const name of layerNames) {
+    const config = model.layers[name];
+    if (!config) continue;
+    for (const command of commandsByLayer.get(name) ?? []) {
+      if (command.time > framePeriod * 0.5) break;
+      if (config.type === "persistent") initialTotal += command.value;
+      if (config.type === "profile" && command.profilePoints) {
+        initialTotal += interpolateProfile(command.profilePoints, 0);
+      }
+    }
+  }
+
+  const layerTypeCodes: Record<LayerType, number> = { profile: 0, persistent: 1, impulse: 2, glide: 3 };
+  const decayCodes: Record<DecayMode, number> = { halving: 0, linear: 1, exponential: 2 };
+  // f0-filters ABI constants; keep synchronized with crates/f0-filters/src/lib.rs.
+  const commandDescriptorWidth = 5;
+  const coefficientTwoPoleFilterMode = 2;
+  const layerDescriptors: number[] = [];
+  const commandDescriptors: number[] = [];
+  const profilePool: number[] = [];
+  const maximumCommandTime = (frameCount - 1) * framePeriod + framePeriod * 0.5;
+  for (const name of layerNames) {
+    const config = model.layers[name];
+    if (!config) throw new Error(`E_HRG_LOWER_F0_MODEL: layer '${name}' is missing`);
+    const layerCommands = commandsByLayer.get(name) ?? [];
+    const commandStart = commandDescriptors.length / commandDescriptorWidth;
+    const impulse = config.type === "impulse";
+    const decayCode = impulse && config.decay
+      ? decayCodes[config.decay]
+      : 0;
+    const initialDecayDivisor = impulse
+      ? requirePositiveNumber(config.initial_decay_divisor, `f0_model.layers.${name}.initial_decay_divisor`)
+      : 0;
+    const terminationThreshold = impulse
+      ? requirePositiveNumber(config.termination_threshold, `f0_model.layers.${name}.termination_threshold`)
+      : 0;
+    const exponentialFactor = impulse && config.decay === "exponential"
+      ? requirePositiveNumber(config.exponential_factor, `f0_model.layers.${name}.exponential_factor`)
+      : 0;
+    let cursorLive = true;
+    for (const command of layerCommands) {
+      const reachable = cursorLive && command.time <= maximumCommandTime;
+      if (!reachable) cursorLive = false;
+      const durationFrames = impulse && reachable
+        ? requirePositiveNumber(command.durationFrames, `f0_control.${name}.durationFrames`)
+        : typeof command.durationFrames === "number" && Number.isFinite(command.durationFrames)
+          ? command.durationFrames
+          : 0;
+      const profileStart = profilePool.length;
+      const profileCount = config.type === "profile" ? command.profilePoints?.length ?? 0 : 0;
+      if (profileCount > 0 && command.profilePoints) profilePool.push(...command.profilePoints);
+      commandDescriptors.push(command.time, command.value, durationFrames, profileStart, profileCount);
+    }
+    layerDescriptors.push(
+      layerTypeCodes[config.type],
+      decayCode,
+      initialDecayDivisor,
+      terminationThreshold,
+      exponentialFactor,
+      commandStart,
+      layerCommands.length,
+    );
+  }
+
+  const scalars = [
+    framePeriod,
+    totalDurationSec,
+    coefficientTwoPoleFilterMode,
+    resolvedAlpha,
+    0, 0, 0, 0, 0,
+    scale ? 1 : 0,
+    f0Minimum,
+    f0ScaleFactor,
+    reference,
+    divisor,
+    outputScale,
+    baseBias,
+    minHz,
+    maxHz,
+    initialTotal,
+  ];
+  const exports = getF0FilterExports();
+  const allocate = (values: readonly number[]): { ptr: number; len: number } => {
+    if (values.length === 0) return { ptr: 0, len: 0 };
+    const ptr = exports.alloc_f64(values.length);
+    new Float64Array(exports.memory.buffer, ptr, values.length).set(values);
+    return { ptr, len: values.length };
+  };
+  const scalarBuffer = allocate(scalars);
+  const layerBuffer = allocate(layerDescriptors);
+  const commandBuffer = allocate(commandDescriptors);
+  const profileBuffer = allocate(profilePool);
+  const outputPtr = exports.alloc_f64(frameCount);
+  try {
+    const status = exports.render_f0(
+      scalarBuffer.ptr,
+      scalarBuffer.len,
+      layerBuffer.ptr,
+      layerNames.length,
+      commandBuffer.ptr,
+      commandDescriptors.length / commandDescriptorWidth,
+      profileBuffer.ptr,
+      profilePool.length,
+      outputPtr,
+      frameCount,
+    );
+    if (status !== RENDER_OK) throw new Error(`E_HRG_LOWER_F0_RENDER: status ${status}`);
+    const values = new Float64Array(new Float64Array(exports.memory.buffer, outputPtr, frameCount));
+    return Array.from(values, (f0, index) => ({ time: index * framePeriod, f0 }));
+  } finally {
+    if (scalarBuffer.ptr) exports.dealloc_f64(scalarBuffer.ptr, scalarBuffer.len);
+    if (layerBuffer.ptr) exports.dealloc_f64(layerBuffer.ptr, layerBuffer.len);
+    if (commandBuffer.ptr) exports.dealloc_f64(commandBuffer.ptr, commandBuffer.len);
+    if (profileBuffer.ptr) exports.dealloc_f64(profileBuffer.ptr, profileBuffer.len);
+    exports.dealloc_f64(outputPtr, frameCount);
+  }
+}
+
 function resolveF0AtTime(points: readonly ResolvedF0Point[], timeMs: number): ResolvedF0Point | null {
   if (points.length === 0) return null;
   for (let index = 0; index < points.length - 1; index += 1) {
@@ -293,7 +552,11 @@ function resolveF0AtTime(points: readonly ResolvedF0Point[], timeMs: number): Re
 }
 
 /** Lower an utterance's Segment relation into a KlattFrame[] track. */
-export function lowerToFrames(utterance: Utterance, options: LowerOptions): LoweredTrack {
+export function lowerToFrames(
+  utterance: Utterance,
+  options: LowerOptions,
+  context: LowerContext = {},
+): LoweredTrack {
   const durationKey = options.durationKey ?? "duration";
   const phonemeKey = options.phonemeKey ?? "phoneme";
   const typeKey = options.typeKey ?? "type";
@@ -645,9 +908,85 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
       });
     }
   }
-  const f0Points = [...f0PointsByTime.values()].sort((left, right) => left.timeMs - right.timeMs);
+  let f0Points = [...f0PointsByTime.values()].sort((left, right) => left.timeMs - right.timeMs);
   if (f0Points.length > 0 && (f0Points[0]?.timeMs ?? Number.POSITIVE_INFINITY) > 1e-6) {
     throw new Error("E_HRG_LOWER_F0_INITIAL_POINT: point_interpolation requires an explicit point at 0 ms");
+  }
+
+  const phraseCommands = utterance.getRelation("PhraseCommand")?.listItems() ?? [];
+  const tiltEvents = utterance.getRelation("Tilt")?.listItems() ?? [];
+  const f0ControlItems = [...phraseCommands, ...tiltEvents];
+  if (f0ControlItems.length > 0) {
+    if (options.f0?.renderer.type !== "layered_additive") {
+      throw new Error("E_HRG_LOWER_F0_RENDERER: PhraseCommand/Tilt requires the layered_additive policy");
+    }
+    if (!context.f0Model || context.f0Model.type !== "layered_additive") {
+      throw new Error("E_HRG_LOWER_F0_MODEL: layered_additive requires the selected F0 model");
+    }
+    const commands = f0ControlItems.map((item): F0LayerCommand => {
+      const timeMs = utterance.resolveAnchorTime(item);
+      const layer = item.get("layer");
+      const value = item.get("value");
+      const valueWrite = item.latestWrite("value");
+      if (
+        timeMs == null
+        || !Number.isFinite(timeMs)
+        || typeof layer !== "string"
+        || layer.length === 0
+        || typeof value !== "number"
+        || !Number.isFinite(value)
+        || !valueWrite
+      ) {
+        utterance.diagnostics.error(
+          "Layered intonation Item is unresolved, invalid, or unstamped during final lowering",
+          { itemId: item.id, layer, timeMs, value },
+          "HRG_LOWER_F0_CONTROL_REQUIRED",
+        );
+        throw new Error(`E_HRG_LOWER_F0_CONTROL_REQUIRED: control Item '${item.id}' is invalid`);
+      }
+      const durationFrames = finiteFeatureNumber(item.get("duration_frames"));
+      const rawProfilePoints = item.get("profile_points");
+      const profilePoints = Array.isArray(rawProfilePoints)
+        ? rawProfilePoints.filter((entry): entry is number => typeof entry === "number" && Number.isFinite(entry))
+        : undefined;
+      const tag = item.get("tag");
+      return {
+        layer,
+        time: Math.max(0, timeMs) / 1000,
+        value,
+        ...(durationFrames != null ? { durationFrames } : {}),
+        ...(profilePoints && profilePoints.length > 0 ? { profilePoints } : {}),
+        ...(typeof tag === "string" ? { tag } : {}),
+      };
+    });
+    const rendered = renderLayeredF0(
+      commands,
+      context.f0Model,
+      (initialSilenceMs + segmentTotalMs + finalSilenceMs) / 1000,
+      context.speakerParams,
+    );
+    const commandWrites = f0ControlItems
+      .map((item) => ({
+        decisionId: item.latestWrite("value")?.decisionId,
+        timeMs: utterance.resolveAnchorTime(item),
+      }))
+      .filter((entry): entry is { decisionId: string; timeMs: number } => (
+        typeof entry.decisionId === "string" && typeof entry.timeMs === "number" && Number.isFinite(entry.timeMs)
+      ))
+      .sort((left, right) => left.timeMs - right.timeMs);
+    f0Points = rendered.map((point) => {
+      let producer = commandWrites[0];
+      for (const command of commandWrites) {
+        if (command.timeMs <= point.time * 1000 + 1e-6) producer = command;
+        else break;
+      }
+      if (!producer) throw new Error("E_HRG_LOWER_F0_CONTROL_REQUIRED: no stamped layered command");
+      return {
+        decisionId: producer.decisionId,
+        timeMs: point.time * 1000,
+        valueHz: point.f0,
+      };
+    });
   }
 
   const segmentCanVoice = (item: Item): boolean => {

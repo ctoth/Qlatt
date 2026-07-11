@@ -209,7 +209,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 033 | Phase 4 family 3D: universal midpoint fallback | kept | `1df89f04` | DECtalk P-to-release 72.2 ms event and 6 cells exact; selected smooth-all policy only |
 | 034 | Phase 4 family 3E: locus and forward transitions | kept | `4bdd79bf` | 5 captured AE locus states + 2 universal T states exact; per-key spans/adjustments/glue policy |
 | 035 | Phase 4 family 3 exit: transition matrix | kept | `4bb3a3f5` | every emitted qlatt/beauty transition event and blend cell matches production; direction policy corrected; family gate green |
-| 036 | Phase 4 family 4: explicit F0 points | kept | pending slice commit | every emitted qlatt F0 cell matches production; graph-time anchors, voice gating, last-point-wins, invalid-point rejection |
+| 036 | Phase 4 family 4: explicit F0 points | kept | `839518a4` | every emitted qlatt F0 cell matches production; graph-time anchors, voice gating, last-point-wins, invalid-point rejection |
+| 037 | Phase 4 family 5: PhraseCommand and Tilt | kept | pending slice commit | canonical relations; selected layered renderer; all 196 voiced cadence cells and 250+ shared production events exact |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1746,3 +1747,41 @@ PASS
 Next Phase 4 family: realize typed `Tilt` and `PhraseCommand` Items, including
 the selected layered-additive F0 policy, against the captured DECtalk production
 frames.
+
+## Iteration 037 — Phase 4 family 5: PhraseCommand and Tilt
+
+Status: kept. Phase 4 family 5 is complete.
+
+The earlier graph-native preparation was wrong: it wrote a legacy `f0_layer`
+relation, contradicting the plan's canonical prosody relations. This slice
+corrects the compiled DECtalk graph schema and rule actions before lowering:
+
+- baseline/declination profiles are stamped `PhraseCommand` Items;
+- hat, stress, boundary, and question gestures are stamped `Tilt` Items;
+- every F0-control action names its target relation explicitly;
+- the compiler rejects a missing or non-canonical target relation; and
+- finalization resolves both canonical point relations.
+
+The final lowerer consumes both relations, validates their anchors and stamped
+values, realizes the selected DECtalk coefficient-filtered additive model
+through the f0-filters ABI, applies selected speaker scaling, and inserts the
+6.4 ms internal contour anchors only inside voice-capable Segments. It does not
+import or call the legacy track assembler.
+
+The direct captured DECtalk fixture proves all 196 voiced production cadence
+cells exactly and more than 250 lowerer/production events at shared timestamps.
+Missing selected layered-model data is rejected. The unchanged production path
+also passes the DECtalk end-to-end suite after the canonical rulepack migration.
+
+Verification:
+
+```text
+npm test -- test/hrg-rule-engine-prosody-controls.test.ts test/hrg-lowering-intonation.test.ts test/hrg-lowering-f0-points.test.ts test/hrg-lowering-timing.test.ts test/hrg-lowering-scalars.test.ts test/hrg-lowering-control-windows.test.ts test/hrg-lowering-midpoint-transitions.test.ts test/hrg-lowering-locus-transitions.test.ts test/hrg-lowering-transition-matrix.test.ts test/declarative-frontend-schema.test.ts test/declarative-frontend-rulepack-prosody.test.ts test/dectalk-e2e.test.ts
+PASS: 12 files, 97 tests
+
+npm run typecheck:core
+PASS
+```
+
+Next Phase 4 family: project typed `Affect` Items and their voice-quality
+deltas without reconstructing direction intent from finalized Segment values.

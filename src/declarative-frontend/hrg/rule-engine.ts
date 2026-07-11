@@ -794,19 +794,24 @@ function applyPointActions(
   predicates: Readonly<Record<string, unknown>>,
 ): void {
   const actions = [
-    ...(isPlainObject(rule.insert_point) ? [{ spec: rule.insert_point, relationName: rule.insert_point.relation }] : []),
+    ...(isPlainObject(rule.insert_point)
+      ? [{ spec: rule.insert_point, relationName: rule.insert_point.relation, f0Layer: false }]
+      : []),
     ...(Array.isArray(rule.insert_points)
       ? rule.insert_points
         .filter(isPlainObject)
-        .map((spec) => ({ spec, relationName: spec.relation }))
+        .map((spec) => ({ spec, relationName: spec.relation, f0Layer: false }))
       : []),
     ...(isPlainObject(rule.insert_f0_layer)
-      ? [{ spec: rule.insert_f0_layer, relationName: "f0_layer" }]
+      ? [{ spec: rule.insert_f0_layer, relationName: rule.insert_f0_layer.relation, f0Layer: true }]
       : []),
   ];
   for (let index = 0; index < actions.length; index += 1) {
-    const { spec, relationName } = actions[index];
-    if (typeof relationName !== "string") continue;
+    const { spec, relationName, f0Layer } = actions[index];
+    if (typeof relationName !== "string" || relationName.length === 0) {
+      if (f0Layer) throw new Error("E_HRG_F0_CONTROL_RELATION: f0_layer insert requires a relation");
+      continue;
+    }
     if (spec.when != null && !conditionMatches(spec.when, context, predicates)) continue;
     const relation = utterance.relation(relationName);
     const itemTypes = relation.itemTypes();
@@ -829,7 +834,7 @@ function applyPointActions(
     );
     match.transaction.set(point, "value", evaluateDispatch(spec.value, context, predicates));
     if (typeof spec.tag === "string") match.transaction.set(point, "tag", spec.tag);
-    if (relationName === "f0_layer") {
+    if (f0Layer) {
       if (typeof spec.layer === "string") match.transaction.set(point, "layer", spec.layer);
       if (Object.prototype.hasOwnProperty.call(spec, "duration_frames")) {
         match.transaction.set(point, "duration_frames", evaluate(spec.duration_frames, context));

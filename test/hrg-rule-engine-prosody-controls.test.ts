@@ -24,7 +24,8 @@ const SCHEMA = {
   },
   relations: {
     Segment: { kind: "list", itemTypes: ["segment"] },
-    f0_layer: { kind: "list", itemTypes: ["f0Layer"] },
+    PhraseCommand: { kind: "list", itemTypes: ["f0Layer"] },
+    Tilt: { kind: "list", itemTypes: ["f0Layer"] },
   },
 } as const satisfies HrgSchema;
 
@@ -36,7 +37,7 @@ const META = {
   citations: ["Taylor, Black & Caley 2001"],
 };
 
-describe("graph-native F0-layer execution", () => {
+describe("graph-native prosody-control execution", () => {
   it("records profile and gesture commands as anchored typed Items", () => {
     const utterance = new Utterance(SCHEMA);
     const fixture = utterance.beginTransaction(META);
@@ -49,13 +50,15 @@ describe("graph-native F0-layer execution", () => {
     const spec = compileRuleEngineSpec({
       relations: {
         Segment: { type: "base", features: { phoneme: [], active: [true, false] } },
-        f0_layer: { type: "point", value_type: "number" },
+        PhraseCommand: { type: "point", value_type: "number" },
+        Tilt: { type: "point", value_type: "number" },
       },
       rules: {
         baseline: {
           kind: "f0_layer",
           select: { relation: "Segment", where: "current.id == 'vowel'" },
           insert: {
+            relation: "PhraseCommand",
             layer: "baseline",
             at: "at_sync(current.sync_left)",
             value: 0,
@@ -68,6 +71,7 @@ describe("graph-native F0-layer execution", () => {
           kind: "f0_layer",
           select: { relation: "Segment", where: "current.id == 'vowel'" },
           insert: {
+            relation: "Tilt",
             layer: "hat",
             at: "merge(current, {'ratio': 0.75})",
             value: 25,
@@ -82,15 +86,32 @@ describe("graph-native F0-layer execution", () => {
 
     runGraphRuleEngine(utterance, spec);
 
-    const commands = utterance.relation("f0_layer").listItems();
-    expect(commands.map((item) => [item.get("layer"), item.get("value")])).toEqual([
-      ["baseline", 0],
-      ["hat", 25],
-    ]);
-    expect(commands[0].get("profile_points")).toEqual([1100, 1050, 1000]);
-    expect(commands[1].get("duration_frames")).toBe(4);
-    expect(utterance.temporalAnchor(commands[0])).toEqual(expect.objectContaining({ ratio: 0 }));
-    expect(utterance.temporalAnchor(commands[1])).toEqual(expect.objectContaining({ ratio: 0.75 }));
+    const phraseCommand = utterance.relation("PhraseCommand").listItems()[0];
+    const tilt = utterance.relation("Tilt").listItems()[0];
+    expect([phraseCommand.get("layer"), phraseCommand.get("value")]).toEqual(["baseline", 0]);
+    expect([tilt.get("layer"), tilt.get("value")]).toEqual(["hat", 25]);
+    expect(phraseCommand.get("profile_points")).toEqual([1100, 1050, 1000]);
+    expect(tilt.get("duration_frames")).toBe(4);
+    expect(utterance.temporalAnchor(phraseCommand)).toEqual(expect.objectContaining({ ratio: 0 }));
+    expect(utterance.temporalAnchor(tilt)).toEqual(expect.objectContaining({ ratio: 0.75 }));
     expect(replayJournal(SCHEMA, utterance.journal()).graphDigest()).toBe(utterance.graphDigest());
+  });
+
+  it("rejects a legacy or missing control relation during compilation", () => {
+    expect(() => compileRuleEngineSpec({
+      relations: {
+        Segment: { type: "base", features: { phoneme: [] } },
+        PhraseCommand: { type: "point", value_type: "number" },
+      },
+      rules: {
+        invalid: {
+          kind: "f0_layer",
+          select: { relation: "Segment", where: "true" },
+          insert: { layer: "baseline", at: "at_sync(current.sync_left)", value: 0, tag: "f0" },
+          citations: ["Klatt 1982"],
+        },
+      },
+      phases: [{ name: "prosody", rules: ["invalid"] }],
+    })).toThrowError(/E_F0_CONTROL_RELATION_INVALID/);
   });
 });

@@ -24,7 +24,13 @@ export {
   lowerToFrames,
   frameIndexAt,
 } from "./lowering";
-export type { LowerOptions, LoweredTrack, SegmentTiming } from "./lowering";
+export type {
+  LayeredF0ModelConfig,
+  LowerContext,
+  LowerOptions,
+  LoweredTrack,
+  SegmentTiming,
+} from "./lowering";
 export {
   decisionChain,
   whyFeature,

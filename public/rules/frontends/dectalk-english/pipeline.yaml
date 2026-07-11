@@ -226,7 +226,11 @@ relations:
     type: point
     value_type: number
     unit: Hz
-  f0_layer:
+  PhraseCommand:
+    type: point
+    value_type: number
+    unit: Hz
+  Tilt:
     type: point
     value_type: number
     unit: Hz
@@ -354,4 +358,4 @@ phases:
     after: [duration, structural, formant, prosody]
     rules: []
     compute_times: true
-    resolve_points: [f0, f0_layer]
+    resolve_points: [f0, PhraseCommand, Tilt]

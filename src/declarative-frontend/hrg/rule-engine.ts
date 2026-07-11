@@ -79,10 +79,17 @@ function buildEvaluationContext(
     const distance = typeof amount === "number" ? Math.trunc(amount) : 1;
     return sourceIndex >= 0 ? view(items[sourceIndex + distance]) : null;
   };
-  const merge = (left: unknown, right: unknown): Record<string, unknown> => ({
-    ...(isPlainObject(left) ? left : {}),
-    ...(isPlainObject(right) ? right : {}),
-  });
+  const merge = (left: unknown, right: unknown): Record<string, unknown> => {
+    const source = resolveItem(left);
+    const anchor = source ? utterance.temporalAnchor(source) : undefined;
+    if (anchor) transaction.dependOn(anchor.decisionId);
+    return {
+      ...(anchor
+        ? { leftMarkId: anchor.leftMarkId, rightMarkId: anchor.rightMarkId, ratio: 0 }
+        : isPlainObject(left) ? left : {}),
+      ...(isPlainObject(right) ? right : {}),
+    };
+  };
   const association = (sourceValue: unknown, nameValue: unknown): Readonly<Record<string, unknown>>[] => {
     const source = resolveItem(sourceValue);
     if (!source || typeof nameValue !== "string") return [];
@@ -485,17 +492,24 @@ function applyPointActions(
   context: EvaluationContext,
   predicates: Readonly<Record<string, unknown>>,
 ): void {
-  const specs = [
-    ...(isPlainObject(rule.insert_point) ? [rule.insert_point] : []),
-    ...(Array.isArray(rule.insert_points) ? rule.insert_points.filter(isPlainObject) : []),
+  const actions = [
+    ...(isPlainObject(rule.insert_point) ? [{ spec: rule.insert_point, relationName: rule.insert_point.relation }] : []),
+    ...(Array.isArray(rule.insert_points)
+      ? rule.insert_points
+        .filter(isPlainObject)
+        .map((spec) => ({ spec, relationName: spec.relation }))
+      : []),
+    ...(isPlainObject(rule.insert_f0_layer)
+      ? [{ spec: rule.insert_f0_layer, relationName: "f0_layer" }]
+      : []),
   ];
-  for (let index = 0; index < specs.length; index += 1) {
-    const spec = specs[index];
-    if (typeof spec.relation !== "string") continue;
-    const relation = utterance.relation(spec.relation);
+  for (let index = 0; index < actions.length; index += 1) {
+    const { spec, relationName } = actions[index];
+    if (typeof relationName !== "string") continue;
+    const relation = utterance.relation(relationName);
     const itemTypes = relation.itemTypes();
     if (itemTypes.length !== 1) {
-      throw new Error(`E_HRG_POINT_ITEM_TYPE: relation '${spec.relation}' must declare exactly one Item type`);
+      throw new Error(`E_HRG_POINT_ITEM_TYPE: relation '${relationName}' must declare exactly one Item type`);
     }
     const anchorValue = evaluate(spec.at, context);
     if (
@@ -513,7 +527,16 @@ function applyPointActions(
     );
     match.transaction.set(point, "value", evaluateDispatch(spec.value, context, predicates));
     if (typeof spec.tag === "string") match.transaction.set(point, "tag", spec.tag);
-    match.transaction.append(spec.relation, point);
+    if (relationName === "f0_layer") {
+      if (typeof spec.layer === "string") match.transaction.set(point, "layer", spec.layer);
+      if (Object.prototype.hasOwnProperty.call(spec, "duration_frames")) {
+        match.transaction.set(point, "duration_frames", evaluate(spec.duration_frames, context));
+      }
+      if (Array.isArray(spec.profile_points)) {
+        match.transaction.set(point, "profile_points", spec.profile_points);
+      }
+    }
+    match.transaction.append(relationName, point);
     match.transaction.anchorPoint(
       point,
       anchorValue.leftMarkId,

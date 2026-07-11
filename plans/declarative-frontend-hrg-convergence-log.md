@@ -193,7 +193,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 017 | Phase 3 graph engine replace-range splice | kept | `e9180fb2` | typed insertion and anchor partition replay; 38 HRG tests; core/scripts typecheck pass |
 | 018 | Phase 3 graph engine explicit points | kept | `d3c5f467` | midpoint/ratio/sync point replay; 39 HRG tests; core/scripts typecheck pass |
 | 019 | Phase 3 boundary-insertion proof | kept | `e6c7ded5` | relation/temporal adjacency proof; 40 HRG tests; core/scripts typecheck pass |
-| 020 | Phase 3 graph engine phrase contours | kept | pending slice commit | selected-duration progress and break reset; 41 HRG tests; core/scripts typecheck pass |
+| 020 | Phase 3 graph engine phrase contours | kept | `bf4f956a` | selected-duration progress and break reset; 41 HRG tests; core/scripts typecheck pass |
+| 021 | Phase 3 graph engine F0 layers | kept | pending slice commit | typed profile/gesture commands and replay; 42 HRG tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1031,3 +1032,39 @@ PASS: 11 files, 41 tests
 ```
 
 Next graph-engine sub-slice: F0-layer commands and phase finalization.
+
+## Iteration 021 — Phase 3 graph engine F0 layers
+
+Status: kept as the sixth target-owner sub-slice of the replacement engine.
+
+The direct F0-layer fixture was red because normalized `kind: f0_layer` inserts
+had no graph action. The retained implementation treats them as typed,
+point-anchored Items on the declared `f0_layer` Relation rather than creating a
+second contour representation.
+
+Kept convergence:
+
+- stages layer, value, tag, optional duration-frame, and optional profile-point
+  features in the matched rule transaction;
+- binds the existing `merge(current, {ratio: ...})` form to the current Item's
+  stamped temporal interval while preserving generic map merge behavior;
+- appends profile and gesture commands to the one declared layer Relation;
+- anchors every command through the existing journaled point-anchor operation;
+  and
+- proves profile and gesture histories replay to the identical graph digest.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- --run test/hrg
+PASS: 12 files, 42 tests
+```
+
+Next graph-engine sub-slice: phase finalization, timing writes, point
+resolution, dirty guard, and checkpoint/invalidation proof.

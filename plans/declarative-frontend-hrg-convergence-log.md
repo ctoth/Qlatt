@@ -196,7 +196,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 020 | Phase 3 graph engine phrase contours | kept | `bf4f956a` | selected-duration progress and break reset; 41 HRG tests; core/scripts typecheck pass |
 | 021 | Phase 3 graph engine F0 layers | kept | `eb320851` | typed profile/gesture commands and replay; 42 HRG tests; core/scripts typecheck pass |
 | 022 | Phase 3 graph engine finalization | kept | `246fd8ba` | journaled timing, dirty guard, replay; 45 HRG tests; core/scripts typecheck pass |
-| 023 | Phase 3 CEL isolation/topology reads | kept | pending slice commit | nested evaluation isolation and exact navigation parents; 53 focused tests; core/scripts typecheck pass |
+| 023 | Phase 3 CEL isolation/topology reads | kept | `fd8e6b0e` | nested evaluation isolation and exact navigation parents; 53 focused tests; core/scripts typecheck pass |
+| 024 | Phase 3 graph predicate navigation | kept | pending slice commit | tracked inline/named scans; 54 focused tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1153,3 +1154,39 @@ ZERO HIT
 
 Next Phase 3 slice: finish graph-native predicate/path/catalog navigation and
 run the complete replacement-engine exit gate before advancing to Phase 4.
+
+## Iteration 024 — Phase 3 graph predicate navigation
+
+Status: kept as the ninth target-owner sub-slice of the replacement engine.
+
+The direct scan fixture required inline and named-predicate lookaround to run
+against shared relation Items while retaining the caller's transaction-local
+read tracker.
+
+Kept convergence:
+
+- implements `look_back_where`, `look_back_pred`, and `look_ahead_pred` over the
+  selected Relation's active Item order;
+- evaluates each candidate with `current`, `candidate`, `source`, and signed
+  scan offset bound to the same explicit transaction;
+- supports recursive predicate objects through the compiled predicate library;
+- records each visited membership and only the candidate features actually read;
+- adds graph-native `total` and prior-point relation query ownership with
+  topology/anchor parents; and
+- proves inline and named scans agree on shared Item identity.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- --run test/declarative-frontend-cel-expressions.test.ts test/hrg
+PASS: 16 files, 54 tests
+```
+
+Next Phase 3 slice: shared-tree word/syllable/path catalog functions and the
+complete replacement-engine exit gate.

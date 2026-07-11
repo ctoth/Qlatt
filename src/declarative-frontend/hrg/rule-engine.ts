@@ -46,6 +46,7 @@ function buildEvaluationContext(
   extra: Readonly<Record<string, unknown>> = {},
   bindings: Readonly<Record<string, Item>> = {},
   relationName?: string,
+  predicates: Readonly<Record<string, unknown>> = {},
 ): EvaluationContext {
   const views = new Map<Item, Readonly<Record<string, unknown>>>();
   const itemByView = new WeakMap<object, Item>();
@@ -120,6 +121,53 @@ function buildEvaluationContext(
     transaction.dependOn(anchor.decisionId);
     return { leftMarkId: anchor.leftMarkId, rightMarkId: anchor.rightMarkId, ratio };
   };
+  const scan = (
+    sourceValue: unknown,
+    maxStepsValue: unknown,
+    condition: unknown,
+    direction: -1 | 1,
+  ): Readonly<Record<string, unknown>> | null => {
+    const source = resolveItem(sourceValue);
+    const maxSteps = Math.trunc(Number(maxStepsValue));
+    const sourceIndex = source ? items.indexOf(source) : -1;
+    if (sourceIndex < 0 || !Number.isFinite(maxSteps) || maxSteps <= 0) return null;
+    for (let offsetIndex = 1; offsetIndex <= maxSteps; offsetIndex += 1) {
+      const candidateIndex = sourceIndex + direction * offsetIndex;
+      const candidate = items[candidateIndex];
+      if (!candidate) return null;
+      if (relationName) {
+        const write = utterance.relation(relationName).node(candidate)?.write;
+        if (write) transaction.dependOn(write.decisionId);
+      }
+      const candidateContext = buildEvaluationContext(
+        utterance,
+        transaction,
+        items,
+        candidateIndex,
+        params,
+        {
+          source: view(source),
+          candidate: view(candidate),
+          scan_offset: direction * offsetIndex,
+        },
+        {},
+        relationName,
+        predicates,
+      );
+      if (conditionMatches(condition, candidateContext, predicates)) return view(candidate);
+    }
+    return null;
+  };
+  const relationItems = (nameValue: unknown): Item[] => {
+    if (typeof nameValue !== "string") return [];
+    const relation = utterance.getRelation(nameValue);
+    if (!relation) throw new Error(`E_RELATION_UNKNOWN: unknown relation '${nameValue}'`);
+    return activeItems(relation.listItems()).map((item) => {
+      const write = relation.node(item)?.write;
+      if (write) transaction.dependOn(write.decisionId);
+      return item;
+    });
+  };
   const bindingViews = Object.fromEntries(
     Object.entries(bindings).map(([name, item]) => [name, view(item)]),
   );
@@ -152,7 +200,7 @@ function buildEvaluationContext(
     functions: {
       ahead: (source, amount = 1) => offset(source, amount),
       behind: (source, amount = 1) => offset(source, -Number(amount)),
-      total: () => items.length,
+      total: (name) => relationItems(name).length,
       max: (...args) => numericAggregate(args, "max"),
       min: (...args) => numericAggregate(args, "min"),
       exp: (value) => Math.exp(Number(value)),
@@ -171,6 +219,30 @@ function buildEvaluationContext(
       at_sync: (markId) => typeof markId === "string"
         ? { leftMarkId: markId, rightMarkId: markId, ratio: 0 }
         : null,
+      prev_point: (name) => {
+        const current = items[index];
+        const currentAnchor = current ? utterance.temporalAnchor(current) : undefined;
+        if (!currentAnchor) return null;
+        transaction.dependOn(currentAnchor.decisionId);
+        const candidates = relationItems(name)
+          .filter((item) => {
+            const anchor = utterance.temporalAnchor(item);
+            if (!anchor) return false;
+            transaction.dependOn(anchor.decisionId);
+            return utterance.axis.compare(anchor.leftMarkId, currentAnchor.leftMarkId) < 0;
+          });
+        return view(candidates[candidates.length - 1]);
+      },
+      look_back_where: (source, maxSteps, expression) =>
+        scan(source, maxSteps, expression, -1),
+      look_back_pred: (source, maxSteps, predicateName) =>
+        typeof predicateName === "string"
+          ? scan(source, maxSteps, { predicate: predicateName }, -1)
+          : null,
+      look_ahead_pred: (source, maxSteps, predicateName) =>
+        typeof predicateName === "string"
+          ? scan(source, maxSteps, { predicate: predicateName }, 1)
+          : null,
     },
   };
 }
@@ -586,6 +658,7 @@ function executeMatch(
     match.contour ? { contour: match.contour } : {},
     match.bindings,
     match.relationName,
+    predicates,
   );
   const definitions: Record<string, unknown> = {};
   if (isPlainObject(rule.define)) {
@@ -600,6 +673,7 @@ function executeMatch(
         { ...(match.contour ? { contour: match.contour } : {}), ...definitions },
         match.bindings,
         match.relationName,
+        predicates,
       );
     }
   }
@@ -657,6 +731,7 @@ function selectMatches(
       {},
       {},
       rule.select.relation,
+      predicates,
     );
     if (!conditionMatches(rule.select.where, context, predicates)) continue;
     const node = relation.node(items[index]);
@@ -713,6 +788,7 @@ function patternMatches(
         {},
         bindings,
         pattern.relation,
+        predicates,
       );
       if (!conditionMatches(step.where, context, predicates)) {
         matched = false;
@@ -736,6 +812,7 @@ function patternMatches(
       {},
       bindings,
       pattern.relation,
+      predicates,
     );
     if (!conditionMatches(pattern.constraint, context, predicates)) continue;
     matches.push({

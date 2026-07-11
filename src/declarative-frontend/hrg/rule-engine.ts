@@ -2,6 +2,7 @@ import type { CompiledRulepack } from "../rule-pack";
 import { evaluateExpression } from "../cel-expressions";
 import { isPlainObject } from "../../yaml-loader";
 import type { Item } from "./item";
+import type { HrgNode } from "./relation";
 import type { HrgTransaction } from "./transaction";
 import type { FeatureValue, TransactionJournalEntry } from "./types";
 import type { Utterance } from "./utterance";
@@ -37,11 +38,13 @@ type EvaluationContext = {
 };
 
 function buildEvaluationContext(
+  utterance: Utterance,
   transaction: HrgTransaction,
   items: readonly Item[],
   index: number,
   params: Readonly<Record<string, unknown>>,
   extra: Readonly<Record<string, unknown>> = {},
+  bindings: Readonly<Record<string, Item>> = {},
 ): EvaluationContext {
   const views = new Map<Item, Readonly<Record<string, unknown>>>();
   const itemByView = new WeakMap<object, Item>();
@@ -67,12 +70,31 @@ function buildEvaluationContext(
     ...(isPlainObject(left) ? left : {}),
     ...(isPlainObject(right) ? right : {}),
   });
+  const association = (sourceValue: unknown, nameValue: unknown): Readonly<Record<string, unknown>>[] => {
+    const source = resolveItem(sourceValue);
+    if (!source || typeof nameValue !== "string") return [];
+    const targets: Readonly<Record<string, unknown>>[] = [];
+    for (const write of utterance.latestAssociationWrites(source, nameValue)) {
+      transaction.dependOn(write.decisionId);
+      if (!write.active) continue;
+      const target = utterance.getItem(write.toItemId);
+      if (!target) continue;
+      if (target.has("active") && transaction.read(target, "active") === false) continue;
+      const targetView = view(target);
+      if (targetView) targets.push(targetView);
+    }
+    return targets;
+  };
+  const bindingViews = Object.fromEntries(
+    Object.entries(bindings).map(([name, item]) => [name, view(item)]),
+  );
   return {
     values: {
       current: view(items[index]),
       prev: view(items[index - 1]),
       next: view(items[index + 1]),
       params,
+      ...bindingViews,
       ...extra,
     },
     functions: {
@@ -91,6 +113,7 @@ function buildEvaluationContext(
           ? container.includes(String(candidate))
           : Array.isArray(container) && container.includes(candidate),
       merge,
+      assoc: association,
     },
   };
 }
@@ -171,7 +194,8 @@ function updateNestedValue(
 
 function applyEffects(
   transaction: HrgTransaction,
-  item: Item,
+  resolveTarget: (name: string) => Item | undefined,
+  defaultTarget: string,
   effects: unknown,
   context: EvaluationContext,
   predicates: Readonly<Record<string, unknown>>,
@@ -179,8 +203,12 @@ function applyEffects(
   if (!Array.isArray(effects)) return;
   for (const effect of effects) {
     if (!isPlainObject(effect) || typeof effect.field !== "string") continue;
+    const targetName = typeof effect.target === "string" ? effect.target : defaultTarget;
+    const item = resolveTarget(targetName);
+    if (!item) throw new Error(`E_EFFECT_TARGET_UNKNOWN: unknown effect target '${targetName}'`);
     const incoming = evaluateDispatch(effect.value, context, predicates);
-    const current = transaction.read(item, effect.field);
+    const root = effect.field.split(".")[0];
+    const current = transaction.read(item, root);
     let resolved: unknown = incoming;
     switch (effect.op) {
       case "add":
@@ -214,6 +242,205 @@ function ruleTag(rule: Readonly<Record<string, unknown>>, ruleName: string): str
   return ruleName;
 }
 
+interface Match {
+  transaction: HrgTransaction;
+  items: readonly Item[];
+  index: number;
+  bindings: Readonly<Record<string, Item>>;
+  nodes: Readonly<Record<string, HrgNode>>;
+  defaultTarget: string;
+}
+
+function beginRuleTransaction(
+  utterance: Utterance,
+  phaseName: string,
+  ruleName: string,
+  rule: Readonly<Record<string, unknown>>,
+): HrgTransaction {
+  return utterance.beginTransaction({
+    ruleId: ruleName,
+    phase: phaseName,
+    tag: ruleTag(rule, ruleName),
+    reason: `${ruleName} matched`,
+    citations: stringArray(rule.citations),
+  });
+}
+
+function applyAssociations(
+  transaction: HrgTransaction,
+  specs: unknown,
+  active: boolean,
+  resolveTarget: (name: string) => Item | undefined,
+): void {
+  if (!Array.isArray(specs)) return;
+  for (const spec of specs) {
+    if (!isPlainObject(spec) || typeof spec.assoc_name !== "string" || !spec.assoc_name) continue;
+    const fromName = typeof spec.from === "string" ? spec.from : "current";
+    const toName = typeof spec.to === "string" ? spec.to : "current";
+    const from = resolveTarget(fromName);
+    const to = resolveTarget(toName);
+    if (!from || !to) continue;
+    if (active) transaction.associate(spec.assoc_name, from, to);
+    else transaction.disassociate(spec.assoc_name, from, to);
+  }
+}
+
+function executeMatch(
+  utterance: Utterance,
+  rule: Readonly<Record<string, unknown>>,
+  match: Match,
+  params: Readonly<Record<string, unknown>>,
+  predicates: Readonly<Record<string, unknown>>,
+): void {
+  const resolveTarget = (name: string): Item | undefined =>
+    name === "current" ? match.items[match.index] : match.bindings[name];
+  let context = buildEvaluationContext(
+    utterance,
+    match.transaction,
+    match.items,
+    match.index,
+    params,
+    {},
+    match.bindings,
+  );
+  const definitions: Record<string, unknown> = {};
+  if (isPlainObject(rule.define)) {
+    for (const [name, expression] of Object.entries(rule.define)) {
+      definitions[name] = evaluate(expression, context);
+      context = buildEvaluationContext(
+        utterance,
+        match.transaction,
+        match.items,
+        match.index,
+        params,
+        definitions,
+        match.bindings,
+      );
+    }
+  }
+  if (!conditionMatches(rule.constraint, context, predicates)) return;
+  applyEffects(
+    match.transaction,
+    resolveTarget,
+    match.defaultTarget,
+    rule.apply,
+    context,
+    predicates,
+  );
+  applyAssociations(match.transaction, rule.associate, true, resolveTarget);
+  applyAssociations(match.transaction, rule.disassociate, false, resolveTarget);
+  if (rule.suppress === true || rule.delete === true) {
+    for (const item of new Set(Object.values(match.bindings))) {
+      match.transaction.set(item, "active", false);
+    }
+  }
+  match.transaction.commit();
+}
+
+function selectMatches(
+  utterance: Utterance,
+  phaseName: string,
+  ruleName: string,
+  rule: Readonly<Record<string, unknown>>,
+  params: Readonly<Record<string, unknown>>,
+  predicates: Readonly<Record<string, unknown>>,
+): Match[] {
+  if (!isPlainObject(rule.select) || typeof rule.select.relation !== "string") return [];
+  const items = activeItems(utterance.relation(rule.select.relation).listItems());
+  const relation = utterance.relation(rule.select.relation);
+  const matches: Match[] = [];
+  for (let index = 0; index < items.length; index += 1) {
+    const transaction = beginRuleTransaction(utterance, phaseName, ruleName, rule);
+    const context = buildEvaluationContext(utterance, transaction, items, index, params);
+    if (!conditionMatches(rule.select.where, context, predicates)) continue;
+    const node = relation.node(items[index]);
+    if (!node) throw new Error("E_HRG_MATCH_NODE: selected Item has no relation node");
+    matches.push({
+      transaction,
+      items,
+      index,
+      bindings: Object.freeze({ current: items[index] }),
+      nodes: Object.freeze({ current: node }),
+      defaultTarget: "current",
+    });
+  }
+  return matches;
+}
+
+function patternMatches(
+  utterance: Utterance,
+  phaseName: string,
+  ruleName: string,
+  rule: Readonly<Record<string, unknown>>,
+  patterns: Readonly<Record<string, unknown>>,
+  params: Readonly<Record<string, unknown>>,
+  predicates: Readonly<Record<string, unknown>>,
+): Match[] {
+  if (typeof rule.match !== "string") return [];
+  const pattern = patterns[rule.match];
+  if (!isPlainObject(pattern) || typeof pattern.relation !== "string" || !Array.isArray(pattern.sequence)) {
+    return [];
+  }
+  const items = activeItems(utterance.relation(pattern.relation).listItems());
+  const relation = utterance.relation(pattern.relation);
+  const matches: Match[] = [];
+  for (let start = 0; start < items.length; start += 1) {
+    const transaction = beginRuleTransaction(utterance, phaseName, ruleName, rule);
+    const bindings: Record<string, Item> = {};
+    const nodes: Record<string, HrgNode> = {};
+    let matched = true;
+    for (let offset = 0; offset < pattern.sequence.length; offset += 1) {
+      const step = pattern.sequence[offset];
+      const index = start + offset;
+      const item = items[index];
+      if (!item || !isPlainObject(step) || typeof step.capture !== "string") {
+        matched = false;
+        break;
+      }
+      const context = buildEvaluationContext(
+        utterance,
+        transaction,
+        items,
+        index,
+        params,
+        {},
+        bindings,
+      );
+      if (!conditionMatches(step.where, context, predicates)) {
+        matched = false;
+        break;
+      }
+      bindings[step.capture] = item;
+      const node = relation.node(item);
+      if (!node) throw new Error("E_HRG_MATCH_NODE: pattern Item has no relation node");
+      nodes[step.capture] = node;
+    }
+    const captureNames = Object.keys(bindings);
+    if (!matched || captureNames.length === 0) continue;
+    const defaultTarget = captureNames[0];
+    const index = items.indexOf(bindings[defaultTarget]);
+    const context = buildEvaluationContext(
+      utterance,
+      transaction,
+      items,
+      index,
+      params,
+      {},
+      bindings,
+    );
+    if (!conditionMatches(pattern.constraint, context, predicates)) continue;
+    matches.push({
+      transaction,
+      items,
+      index,
+      bindings: Object.freeze({ ...bindings }),
+      nodes: Object.freeze({ ...nodes }),
+      defaultTarget,
+    });
+  }
+  return matches;
+}
+
 export function runGraphRuleEngine(
   utterance: Utterance,
   spec: CompiledRulepack,
@@ -228,31 +455,11 @@ export function runGraphRuleEngine(
     if (selectedPhases && !selectedPhases.has(phase.name)) continue;
     for (const ruleName of phase.rules) {
       const rule = spec.rules[ruleName];
-      if (!isPlainObject(rule) || !isPlainObject(rule.select)) continue;
-      const relationName = rule.select.relation;
-      if (typeof relationName !== "string") continue;
-      const items = activeItems(utterance.relation(relationName).listItems());
-      for (let index = 0; index < items.length; index += 1) {
-        const transaction = utterance.beginTransaction({
-          ruleId: ruleName,
-          phase: phase.name,
-          tag: ruleTag(rule, ruleName),
-          reason: `${ruleName} matched`,
-          citations: stringArray(rule.citations),
-        });
-        let context = buildEvaluationContext(transaction, items, index, params);
-        if (!conditionMatches(rule.select.where, context, predicates)) continue;
-        const definitions: Record<string, unknown> = {};
-        if (isPlainObject(rule.define)) {
-          for (const [name, expression] of Object.entries(rule.define)) {
-            definitions[name] = evaluate(expression, context);
-            context = buildEvaluationContext(transaction, items, index, params, definitions);
-          }
-        }
-        if (!conditionMatches(rule.constraint, context, predicates)) continue;
-        applyEffects(transaction, items[index], rule.apply, context, predicates);
-        transaction.commit();
-      }
+      if (!isPlainObject(rule)) continue;
+      const matches = isPlainObject(rule.select)
+        ? selectMatches(utterance, phase.name, ruleName, rule, params, predicates)
+        : patternMatches(utterance, phase.name, ruleName, rule, spec.patterns, params, predicates);
+      for (const match of matches) executeMatch(utterance, rule, match, params, predicates);
     }
   }
   return {

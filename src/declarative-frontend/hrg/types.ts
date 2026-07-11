@@ -65,6 +65,23 @@ export interface HrgSchema {
 export type RelationKind = "list" | "tree";
 export type RelationWriteOperation = "append" | "add_root" | "add_daughter";
 
+/** One version of a named directed association edge between shared Items. */
+export interface AssociationWrite {
+  readonly name: string;
+  readonly fromItemId: string;
+  readonly toItemId: string;
+  readonly active: boolean;
+  readonly version: number;
+  readonly decisionId: string;
+  readonly reason: string;
+  readonly ruleId?: string;
+  readonly tag?: string;
+  readonly citations: readonly string[];
+  readonly parents: readonly string[];
+  readonly stage: ProvenanceStage;
+  readonly timestampMs?: number;
+}
+
 export interface RelationWriteInput {
   reason: string;
   ruleId?: string;
@@ -124,6 +141,12 @@ export type JournalOperation =
       readonly relationName: string;
       readonly parentItemId: string;
       readonly itemId: string;
+    }
+  | {
+      readonly kind: "associate" | "disassociate";
+      readonly name: string;
+      readonly fromItemId: string;
+      readonly toItemId: string;
     };
 
 export interface TransactionJournalEntry {

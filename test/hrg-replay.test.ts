@@ -67,4 +67,31 @@ describe("HRG checkpoints and deterministic replay", () => {
     expect(finalized.journalLength).toBe(2);
     expect(utterance.checkpoints()).toEqual([structural, finalized]);
   });
+
+  it("replays active and suppressed association edge versions exactly", () => {
+    const utterance = new Utterance(SCHEMA);
+    const create = utterance.beginTransaction(META);
+    const from = create.createItem("segment", "from");
+    const to = create.createItem("segment", "to");
+    create.set(from, "phoneme", "T");
+    create.set(to, "phoneme", "AA");
+    create.append("Segment", from);
+    create.append("Segment", to);
+    create.commit();
+
+    const link = utterance.beginTransaction({ ...META, ruleId: "link" });
+    link.associate("cv", from, to);
+    link.commit();
+    const unlink = utterance.beginTransaction({ ...META, ruleId: "unlink" });
+    unlink.disassociate("cv", from, to);
+    unlink.commit();
+
+    const replayed = replayJournal(SCHEMA, utterance.journal());
+    const replayedFrom = replayed.getItem("from");
+    const replayedTo = replayed.getItem("to");
+    if (!replayedFrom || !replayedTo) throw new Error("missing replayed association items");
+    expect(replayed.graphDigest()).toBe(utterance.graphDigest());
+    expect(replayed.associationWrites(replayedFrom, "cv", replayedTo).map((write) => write.active))
+      .toEqual([true, false]);
+  });
 });

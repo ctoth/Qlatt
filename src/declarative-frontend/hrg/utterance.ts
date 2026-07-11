@@ -14,6 +14,7 @@ import { Relation } from "./relation";
 import { TemporalAxis, type TemporalMark } from "./temporal-axis";
 import { HrgTransaction } from "./transaction";
 import type {
+  AssociationWrite,
   FeatureValue,
   FeatureWrite,
   FeatureWriteInput,
@@ -116,6 +117,7 @@ export class Utterance {
   private readonly typeCounters = new Map<string, number>();
   private readonly anchorHistoryByItemId = new Map<string, TemporalAnchorWrite[]>();
   private readonly markTimeHistoryById = new Map<string, MarkTimeWrite[]>();
+  private readonly associationHistoryByEdge = new Map<string, AssociationWrite[]>();
   private readonly transactionJournal: TransactionJournalEntry[] = [];
   private transactionCounter = 0;
   private readonly phaseCheckpoints: PhaseCheckpoint[] = [];
@@ -220,6 +222,80 @@ export class Utterance {
     relation._pushWrite(write);
     return write;
   };
+
+  private associationKey(from: Item, name: string, to: Item): string {
+    return JSON.stringify([from.id, name, to.id]);
+  }
+
+  _writeAssociation(
+    from: Item,
+    name: string,
+    to: Item,
+    active: boolean,
+    input: FeatureWriteInput,
+  ): AssociationWrite {
+    this._assertOwnedItem(from);
+    this._assertOwnedItem(to);
+    if (!name) throw new Error("E_HRG_ASSOCIATION_NAME: association name is required");
+    const key = this.associationKey(from, name, to);
+    const history = this.associationHistoryByEdge.get(key) ?? [];
+    const prior = history[history.length - 1];
+    const parents = new Set(input.parents ?? []);
+    if (prior) parents.add(prior.decisionId);
+    const decision = this.provenance.add({
+      stage: input.stage ?? "rules",
+      type: active ? "relation_associate" : "relation_disassociate",
+      subject: `association:${name}:${from.id}:${to.id}`,
+      reason: input.reason,
+      citations: input.citations ?? [],
+      parents: parents.size > 0 ? [...parents] : undefined,
+      timestampMs: input.timestampMs,
+    });
+    const write: AssociationWrite = Object.freeze({
+      name,
+      fromItemId: from.id,
+      toItemId: to.id,
+      active,
+      version: history.length,
+      decisionId: decision.id,
+      reason: decision.reason,
+      ...(input.ruleId ? { ruleId: input.ruleId } : {}),
+      ...(input.tag ? { tag: input.tag } : {}),
+      citations: Object.freeze([...decision.citations]),
+      parents: Object.freeze(decision.parents ? [...decision.parents] : []),
+      stage: decision.stage,
+      timestampMs: decision.timestampMs,
+    });
+    history.push(write);
+    this.associationHistoryByEdge.set(key, history);
+    return write;
+  }
+
+  associationWrites(from: Item, name: string, to: Item): readonly AssociationWrite[] {
+    this._assertOwnedItem(from);
+    this._assertOwnedItem(to);
+    return Object.freeze([...(this.associationHistoryByEdge.get(this.associationKey(from, name, to)) ?? [])]);
+  }
+
+  latestAssociationWrites(from: Item, name: string): readonly AssociationWrite[] {
+    this._assertOwnedItem(from);
+    const writes: AssociationWrite[] = [];
+    for (const history of this.associationHistoryByEdge.values()) {
+      const latest = history[history.length - 1];
+      if (latest?.fromItemId === from.id && latest.name === name) writes.push(latest);
+    }
+    return Object.freeze(writes);
+  }
+
+  associatedItems(from: Item, name: string): Item[] {
+    const targets: Item[] = [];
+    for (const latest of this.latestAssociationWrites(from, name)) {
+      if (!latest.active) continue;
+      const target = this.getItem(latest.toItemId);
+      if (target?.get("active") !== false) targets.push(target);
+    }
+    return targets;
+  }
 
   /** Create a fresh item with a stable, type-prefixed id. */
   createItem(type: string, explicitId?: string): Item {
@@ -334,7 +410,10 @@ export class Utterance {
     const markTimes = [...this.markTimeHistoryById.entries()]
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([markId, writes]) => ({ markId, writes }));
-    const canonical = JSON.stringify({ items, relations, marks, anchors, markTimes });
+    const associations = [...this.associationHistoryByEdge.entries()]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, writes]) => ({ key, writes }));
+    const canonical = JSON.stringify({ items, relations, associations, marks, anchors, markTimes });
     let hash = 2166136261;
     for (let index = 0; index < canonical.length; index += 1) {
       hash ^= canonical.charCodeAt(index);

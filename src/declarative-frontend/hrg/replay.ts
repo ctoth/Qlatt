@@ -41,6 +41,20 @@ export function replayJournal(
             requireItem(operation.itemId),
           );
           break;
+        case "associate":
+          transaction.associate(
+            operation.name,
+            requireItem(operation.fromItemId),
+            requireItem(operation.toItemId),
+          );
+          break;
+        case "disassociate":
+          transaction.disassociate(
+            operation.name,
+            requireItem(operation.fromItemId),
+            requireItem(operation.toItemId),
+          );
+          break;
       }
     }
     const replayed = transaction.commit();

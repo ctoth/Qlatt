@@ -13,7 +13,8 @@ type StagedOperation =
   | { kind: "set_feature"; item: Item; key: string; value: unknown }
   | { kind: "append"; relationName: string; item: Item }
   | { kind: "add_root"; relationName: string; item: Item }
-  | { kind: "add_daughter"; relationName: string; parent: Item; item: Item };
+  | { kind: "add_daughter"; relationName: string; parent: Item; item: Item }
+  | { kind: "associate" | "disassociate"; name: string; from: Item; to: Item };
 
 type PreparedOperation =
   | { journal: JournalOperation; commit: () => string };
@@ -125,6 +126,18 @@ export class HrgTransaction {
     return this;
   }
 
+  associate(name: string, from: Item, to: Item): this {
+    this.assertOpen();
+    this.operations.push({ kind: "associate", name, from, to });
+    return this;
+  }
+
+  disassociate(name: string, from: Item, to: Item): this {
+    this.assertOpen();
+    this.operations.push({ kind: "disassociate", name, from, to });
+    return this;
+  }
+
   private writeInput(): {
     reason: string;
     ruleId: string;
@@ -151,6 +164,24 @@ export class HrgTransaction {
     const input = this.writeInput();
 
     for (const operation of this.operations) {
+      if (operation.kind === "associate" || operation.kind === "disassociate") {
+        this.assertAvailableItem(operation.from);
+        this.assertAvailableItem(operation.to);
+        if (!operation.name) throw new Error("E_HRG_ASSOCIATION_NAME: association name is required");
+        const active = operation.kind === "associate";
+        prepared.push({
+          journal: Object.freeze({
+            kind: operation.kind,
+            name: operation.name,
+            fromItemId: operation.from.id,
+            toItemId: operation.to.id,
+          }),
+          commit: () => this.utterance
+            ._writeAssociation(operation.from, operation.name, operation.to, active, input)
+            .decisionId,
+        });
+        continue;
+      }
       this.assertAvailableItem(operation.item);
       if (operation.kind === "create_item") {
         const journal = Object.freeze({

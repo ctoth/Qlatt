@@ -188,7 +188,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 012 | Phase 3 atomic HRG transactions | kept | `343b181e` | 28 HRG tests; rejection diagnostics; core/scripts typecheck pass |
 | 013 | Phase 3 checkpoints and replay | kept | `725530cc` | digest-equal replay; 29 HRG tests; core/scripts typecheck pass |
 | 014 | Phase 3 Direction Track attachment | kept | `6f41d95c` | 50 input/HRG tests; provenance parent proof; core/scripts typecheck pass |
-| 015 | Phase 3 graph engine select/scalar core | kept | pending slice commit | exact tracked read parents; 31 HRG tests; core/scripts typecheck pass |
+| 015 | Phase 3 graph engine select/scalar core | kept | `c5dcf35e` | exact tracked read parents; 31 HRG tests; core/scripts typecheck pass |
+| 016 | Phase 3 graph engine patterns/associations | kept | pending slice commit | atomic pattern rewrites; versioned association replay; 36 HRG tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -836,3 +837,54 @@ ZERO HIT
 
 Next graph-engine sub-slice: pattern matching and association/disassociation
 semantics through the same transaction rewrite owner.
+
+## Iteration 016 — Phase 3 graph engine patterns and associations
+
+Status: kept as the second target-owner sub-slice of the replacement engine.
+
+The graph-native tests were red because the replacement engine ignored pattern
+rules and the HRG had no durable owner for named directed association edges.
+The retained implementation extends the existing Utterance and transaction
+owners; it does not recreate mutable token association fields or a second
+rewrite pipeline.
+
+Kept convergence:
+
+- makes select and pattern matching produce one internal Match shape consumed
+  by one transaction rewrite executor;
+- binds named pattern captures to shared Item identities and supports targeted
+  effects, pattern constraints, definitions, and the same tracked CEL context
+  as select rules;
+- records association and disassociation as append-only versioned graph writes
+  with provenance, prior-version parents, journal operations, and digest state;
+- implements transaction-local `assoc()` navigation over active association
+  versions and active target Items, recording association and lifecycle reads;
+- implements rule suppression as stamped `active = false` feature versions,
+  preserving Item identity and relation topology;
+- replays association histories deterministically to an identical graph digest;
+  and
+- proves a transaction containing an association and an invalid feature write
+  rejects without either partial mutation.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- --run test/hrg
+PASS: 8 files, 36 tests
+
+rg -n "from .*engine|runRuleEngine" src/declarative-frontend/hrg/rule-engine.ts
+ZERO HIT
+```
+
+The repository has no configured ESLint script or config. The attempted
+`npm run lint` and `npx eslint` commands therefore could not provide a lint
+gate; the configured core/scripts TypeScript authorities passed.
+
+Next graph-engine sub-slice: structural splice/insertion, point/contour/F0
+actions, and finalization through this same Match-to-transaction executor.

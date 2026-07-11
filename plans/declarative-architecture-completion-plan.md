@@ -1,18 +1,36 @@
 # Declarative Architecture Completion Plan
 
-**Status:** Draft coordinator plan
+**Status:** Active coordinator; frontend single-IR convergence completed
 
 **Frontend IR authority amendment (2026-07-11):**
 `plans/declarative-frontend-hrg-convergence-plan.md` governs the frontend IR
 boundary and execution order. Where this coordinator describes a standalone
-`DeclarativeControlScore` as the canonical working IR, that language is
-superseded: backend-neutral control intent lives as typed relations/features in
-the provenance-stamped HRG, followed by one final lowering. The existing
-standalone control-score object is transitional production debt scheduled for
-deletion by the focused convergence plan. The remaining normalization, policy,
-backend-adapter, and runtime-concept work in this coordinator stays active.
+control-score object as the canonical working IR, that language is superseded:
+backend-neutral control intent lives as typed relations/features in the
+provenance-stamped HRG, followed by one final lowering. The standalone object,
+builder, validator, output field, schema, flat engine, and old track assembler
+have been deleted. Remaining normalization, policy, backend-realization, and
+runtime-concept work must extend the HRG or the backend semantics/runtime owner;
+it must not recreate a second frontend representation.
 
 ## 0. Progress Updates
+
+### 2026-07-11 — frontend IR convergence
+
+Completed under `plans/declarative-frontend-hrg-convergence-plan.md`:
+
+1. all bundled frontends construct and enrich one typed `Utterance`;
+2. graph-native select/pattern rules commit atomic, cited, tagged writes;
+3. Direction Track input attaches directly to typed control Relations;
+4. one final HRG lowerer projects frames and per-cell provenance;
+5. the flat engine, reconstruction bridge, standalone control score,
+   trace-derived provenance, and old track assembler are deleted; and
+6. field explanation, structured why-not evidence, phase views, and exact
+   replay derive from one execution journal/history.
+
+The 2026-03-16 list below is historical progress. Entries naming deleted
+control-score or flat-engine surfaces describe milestones that were subsequently
+migrated into the HRG owner; they are not current implementation guidance.
 
 ### 2026-03-16
 
@@ -194,13 +212,14 @@ primitives, for example:
 
 ### 3.3 Keep one canonical intermediate representation
 
-The architecture should converge on one backend-neutral control score between:
+The architecture has converged on one backend-neutral `Utterance` HRG between:
 
 1. frontend linguistic/phonetic rules; and
 2. backend-specific realization logic.
 
-That control score must be more abstract than raw Klatt parameters but more
-concrete than orthographic or phonological text tokens.
+Its typed control Relations are more abstract than raw Klatt parameters but
+more concrete than orthographic input. They are not serialized into a parallel
+score object before lowering.
 
 ### 3.4 Raise the abstraction of reusable runtime concepts
 
@@ -456,9 +475,9 @@ The target pipeline should be:
 `text`
 -> `normalization policy`
 -> `lexical resolver policy`
--> `frontend structural rules`
--> `declarative control score`
--> `backend adapter`
+-> `typed Utterance construction`
+-> `graph-native frontend rules and control relations`
+-> `one final lowering`
 -> `backend track/runtime realization`
 -> `audio graph`
 
@@ -471,10 +490,10 @@ Responsibilities:
    - dictionary, morphology, LTS, orthographic join/split behavior
 3. frontend structural rules
    - symbolic segmental and prosodic structure
-4. declarative control score
-   - time-aligned phonetic controls, not raw backend knobs
-5. backend adapter
-   - map score into backend-specific controls
+4. HRG control relations
+   - time-aligned phonetic intent, not raw backend knobs
+5. final lowering
+   - project current typed graph values into backend frame controls once
 6. backend runtime
    - execute graph, semantics, scheduling
 
@@ -842,31 +861,23 @@ This roadmap is complete when:
 
 1. `src/prosodic-annotator.ts` no longer owns English tune inventory and tune
    selection policy;
-2. `src/track-assembler.ts` is mainly backend adaptation and scheduling
-   expansion, not phonetic policy planning;
+2. the sole HRG lowerer contains projection/realization but no hidden frontend
+   policy or fallback reconstruction;
 3. text normalization and lexical resolution policy are externally specified and
    frontend-configurable;
 4. speaker identity, voice quality, and source planning are first-class
    declarative controls;
 5. nasal, source-routing, and burst behavior are exposed as stable acoustic
    abstractions rather than graph tricks;
-6. backend adapters consume a canonical control score;
+6. backend realization consumes the canonical HRG's final lowering without a
+   second frontend IR;
 7. provenance explains these decisions at the stage where they are really made;
 8. new frontend or backend variants can be added by authoring specs instead of
    copying TS policy.
 
 ## 12. Immediate Next Action
 
-The correct next action is not "start coding everywhere".
-
-The next action is:
-
-1. treat the control-score boundary as the primary program;
-2. sequence all other declarativization work around that boundary;
-3. use the nasal subsystem plan and frontend-quality plan as subordinate
-   workstreams, not separate architectural directions.
-
-In short:
-
-Build the middle layer first, then move policy onto it, then raise recurring
-runtime concepts, then delete the old glue.
+The frontend middle-layer migration is complete. The next coordinator action is
+to re-audit remaining normalization, lexical, backend-realization, and runtime
+concept work against the canonical HRG. New work extends the selected owner and
+must not recreate the deleted flat engine, standalone score, or assembly path.

@@ -15,7 +15,14 @@ This separation enables:
 - Reusing primitives across synthesizers
 - Declarative parameter conversion (dB to linear, proximity corrections)
 - Automatic dependency ordering for derived parameters
-- Declarative frontend rule ownership (phonological/phonetic behavior in `src/declarative-frontend/rule-pack.ts`)
+- A stable boundary from the frontend's typed `Utterance` to backend frames
+
+A synthesizer experiment is a backend. It does not own transcription,
+phonological rules, or frontend Item structure. If the new backend needs a
+backend-neutral control that the selected frontend does not produce, add that
+typed feature or control Relation to the frontend schema/rules with citations,
+then project it in final lowering. Do not add a parallel control-score object or
+infer linguistic intent from completed frames.
 
 ## Architecture
 
@@ -25,14 +32,14 @@ This separation enables:
 Text Input
     |
     v
-[tts-frontend.ts] normalizeText() -> transcribeText() -> inventory mapping (`public/rules/inventory.yaml`)
+[tts-frontend.ts] normalizeText() -> transcribeText() -> selected frontend inventory
     |
     v
-[declarative-frontend/engine.ts] execute rule-pack phases
+[declarative-frontend/hrg/rule-engine.ts] enrich one typed Utterance
   structural -> duration -> prosody -> finalize
     |
     v
-[textToKlattTrack()] Generate KlattTrack (time-stamped parameter frames)
+[declarative-frontend/hrg/lowering.ts] project once to KlattTrack frames
     |
     v
 [klatt-interpreter.ts] Evaluate semantics.yaml rules per frame
@@ -44,9 +51,20 @@ Text Input
 WebAudio destination -> Audio output
 ```
 
-`public/rules/inventory.yaml` is the inventory/default source; `src/declarative-frontend/inventory.ts` loads and exposes inventory helpers (`PHONEME_TARGETS`, defaults, materializers). Frontend behavioral rules are owned by the declarative rule pack. The default bundled frontend entrypoint is `public/rules/frontends/qlatt-english/frontend.yaml`, which includes the frontend-local `pipeline.yaml` and `phases/*.yaml`.
+Each frontend package owns its declared inventory and resources. The compiled
+frontend spec resolves those resources before graph construction; generic
+runtime code does not fall back to qlatt-English inventory data. Frontend
+behavioral rules operate on typed Relations declared by the package. The
+default bundled frontend entrypoint is
+`public/rules/frontends/qlatt-english/frontend.yaml`, which includes the
+frontend-local `pipeline.yaml` and `phases/*.yaml`.
 
 If you add another frontend, register it in `src/declarative-frontend/rule-pack.ts` so callers can select it by `frontendId` instead of hardcoding a path.
+
+The frontend compiler accepts `relations:` and `select.relation`. The removed
+`streams:`/`select.stream` vocabulary is not a compatibility surface. Every
+rule requires citations, and every behavioral application requires a tag so
+the transaction can stamp the resulting feature or topology write.
 
 ### File Relationships
 

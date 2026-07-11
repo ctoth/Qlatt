@@ -5,15 +5,19 @@ This document describes how Klatt parameters flow from text to audio output in t
 ## Data Flow Overview
 
 ```
-Text -> preprocess -> declarative frontend -> Klatt track -> interpreter -> WebAudio graph
-         (normalize/transcribe)   (structural/duration/prosody/finalize)
-         src/tts-frontend.ts      src/declarative-frontend/*
+Text -> normalize/transcribe -> Utterance HRG -> graph rules -> final lowering -> frames -> interpreter -> WebAudio graph
+        src/tts-frontend.ts       src/declarative-frontend/hrg/*
 ```
 
-`src/tts-frontend.ts` still owns text normalization/transcription and final frame emission. Rule behavior is owned by `src/declarative-frontend/rule-pack.ts` and executed by `src/declarative-frontend/engine.ts`. Available bundled frontends:
+`src/tts-frontend.ts` orchestrates resource selection and constructs one typed
+`Utterance`. Rule behavior is compiled by
+`src/declarative-frontend/rule-pack.ts` and executed transactionally by
+`src/declarative-frontend/hrg/rule-engine.ts`. The sole frame projection is
+`src/declarative-frontend/hrg/lowering.ts`. Available bundled frontends:
 
-- **qlatt-english** (default): `public/rules/frontends/qlatt-english/frontend.yaml` — CMU dictionary, Elovitz LTS, shared inventory (`public/rules/inventory.yaml`)
+- **qlatt-english** (default): `public/rules/frontends/qlatt-english/frontend.yaml` — CMU dictionary, Elovitz LTS, and its declared inventory
 - **dectalk-english**: `public/rules/frontends/dectalk-english/frontend.yaml` — DECtalk 4.63 duration/F0 models, own inventory and LTS rules
+- **qlatt-beauty**: `public/rules/frontends/qlatt-beauty/frontend.yaml` — graph-native scaffold with independent resource identity
 
 For graph topology and extension points, see `docs/synthesizer-architecture.md`. For the full authoring workflow, see `docs/adding-a-synthesizer.md`.
 
@@ -50,38 +54,44 @@ interface KlattFrame {
 
 Defined in `public/experiments/klatt80-baseline/semantics.yaml` under `params:` section.
 
-## Frontend: Declarative Track Generation
+## Frontend: Graph Construction and Final Lowering
 
 ### Active pipeline
 
 `textToKlattTrack()` in `src/tts-frontend.ts` executes:
 
-1. `normalizeText()` and `transcribeText()`
-2. baseline inventory mapping (loaded via `src/declarative-frontend/inventory.ts`; `qlatt-english` uses `public/rules/inventory.yaml`, `dectalk-english` uses its own `inventory.yaml`)
-3. declarative phases via `runDeclarativeFrontend()`:
-   - `structural`
-   - `duration`
-   - `prosody`
-   - `finalize`
-4. final `KlattFrame[]` emission with F0 interpolation from resolved declarative point stream tokens
+1. load the selected immutable compiled frontend and its declared resources;
+2. normalize/transcribe into stable Token, Word, Syllable, and Segment Items,
+   with shared SylStructure identity;
+3. attach Direction Track input to typed control Relations;
+4. run the selected graph-native phase sequence over the same `Utterance`;
+5. commit typed feature/topology writes with citations, tags, read parents, and
+   journal entries; and
+6. invoke `lowerToFrames()` once to project Segment, Transition, F0Point,
+   Intonation, Tilt, PhraseCommand, Affect, Break, speaker, source, and lowering
+   policy into `KlattFrame[]`.
 
-The phase ordering and frontend-level policy defaults come from `public/rules/frontends/qlatt-english/frontend.yaml`, which includes `pipeline.yaml` and the frontend-local `phases/*.yaml` files in that same package.
+Phase ordering and frontend policy come from the selected package's
+`frontend.yaml`, `pipeline.yaml`, and `phases/*.yaml`; generic code does not name
+one frontend's inventory or policy as a fallback.
 
 Legacy imperative frontend mutators (`rule_K_Context`, `rule_GenerateF0Contour`) are removed from runtime usage and exports.
 
-### Inventory Targets (not rule mutators)
+### Inventory and graph features
 
-`public/rules/inventory.yaml` is the inventory/default source of truth; `src/declarative-frontend/inventory.ts` loads it and exposes `PHONEME_TARGETS`, `fillDefaultParams`, and `materializePhonemeTarget`.
+The selected frontend's `inventory_path` is the source of its baseline Segment
+targets. Rules then create versioned feature writes. The latest version is the
+current value used by lowering, while earlier versions and their producing
+decisions remain available to `--item ... --field ...` explanation.
 
-### Current transition smoothing in frame emission
+### Transition scheduling before the interpreter
 
-```javascript
-const blendFactor = 0.35;
-const smoothTypes = new Set(["vowel", "nasal", "liquid", "glide"]);
-const blendKeys = ["F1", "F2", "F3", "B1", "B2", "B3"];
-```
-
-Only applies to vowel/sonorant transitions at frame emission time; most transitions remain stepwise.
+Transition and control-window intent is explicit HRG data, not a hardcoded
+frame-emission blend. Final lowering realizes declared locus transitions,
+midpoint windows, per-parameter steady times, explicit F0 points/layers, and
+step-sensitive branch controls. Missing required timing or lowering data is an
+error with diagnostics; it is not replaced by an implicit 30 ms or 100 ms
+fallback.
 
 ## Interpreter: Parameter Scheduling
 
@@ -145,10 +155,9 @@ Builtin functions (`src/builtin-functions.ts`) include `dbToLinear`, `proximity`
 
 ## Current Limitations
 
-1. No spectral-distance metric in frame blending (`blendFactor` is fixed)
-2. Limited smoothing coverage (mainly vowel/sonorant handoff)
-3. No explicit delta/delta-delta trajectory model
-4. Transition window is fixed by `transitionMs` (default 30 ms)
+1. No explicit delta/delta-delta trajectory model
+2. The command-line `transitionMs` value remains an input policy value where a
+   selected frontend consumes it; it is not a lowerer fallback
 
 ## Potential Improvements
 

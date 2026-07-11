@@ -1,13 +1,15 @@
 # Declarative Control Score Roadmap
 
-**Status (2026-07-11): historical field-vocabulary input, superseded as a
-production IR.** The authoritative execution plan is
+**Status (2026-07-11): completed by supersession; historical field-vocabulary
+input only.** The authoritative execution record is
 `plans/declarative-frontend-hrg-convergence-plan.md`. Useful backend-neutral
-fields and citations from this roadmap migrate into typed HRG control relations
-or final-lowering policy; the standalone `DeclarativeControlScore` object,
-builder, validator, output field, and schema do not survive convergence.
+fields and citations from this roadmap now live in typed HRG control relations
+or final-lowering policy. The standalone score object, builder, validator,
+output field, schema, flat engine, and old assembly path were deleted. Do not
+execute the proposed file/phase/commit lists below; they remain only as the
+historical rationale and vocabulary record that preceded the HRG decision.
 
-## Goal
+## Historical Goal
 
 Move Qlatt toward a two-layer architecture:
 
@@ -19,7 +21,7 @@ Move Qlatt toward a two-layer architecture:
 This is the path to higher paper fidelity without concentrating more policy in
 `src/tts-frontend.ts`.
 
-## Architectural Target
+## Historical Architectural Target
 
 ### Layer 1: Control Score
 

@@ -2,6 +2,10 @@
 
 *Research brief for the explainable, rule-based Klatt-style frontend: a "compiler" from intent (text + expressive direction) to a Klatt control-frame track, where every decision is a cited, traceable declarative rule.*
 
+Status: research decision adopted. The shared provenance-stamped HRG and one
+final lowering were implemented on 2026-07-11; this brief remains the rationale
+for that choice rather than a description of pending migration work.
+
 The crux question is **the IR** — the internal data structure(s) that the linguistic, prosodic, and affective stages operate on. Everything else (which rules, which citations) is downstream of getting that structure right. This brief surveys the classic best-in-class frontends, lays out the three candidate IR families, explains Festival's Heterogeneous Relation Graph (HRG) in depth, covers symbolic prosody-from-text, ties each IR choice to provenance, and ends with one concrete recommendation.
 
 ---

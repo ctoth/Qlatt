@@ -40,6 +40,7 @@ The harness exposes a `Frontend` selector. Available bundled frontends:
 
 - **qlatt-english** — default frontend with CMU dictionary lookup, Elovitz LTS rules, and prosody modeled from Pierrehumbert/O'Shaughnessy
 - **dectalk-english** — faithful recreation of DECtalk 4.63 timing, duration, F0 (hat pattern), stop/fricative models, and LTS rules
+- **qlatt-beauty** — graph-native frontend scaffold used to validate independent resource ownership and lowering
 
 ## Common Commands
 
@@ -59,6 +60,9 @@ npm run explain -- "hello world" --verbose            # all decisions
 npm run explain -- "hello world" --format json --out report.json
 npm run explain -- "hello world" --stage rules        # filter by pipeline stage
 npm run explain -- "hello world" --why d000045        # trace ancestry of a decision
+npm run explain -- "hello world" --item segment_0 --field duration
+npm run explain -- "hello world" --item segment_0 --why-not the_prevocalic_reduction
+npm run explain -- "hello world" --phase-views --verify-replay --tooling-only --format json
 npm run explain -- "hello world" --strict-citations   # exit code 2 if any uncited
 npm run explain:summary -- report.json                # summarize a JSON report
 ```
@@ -66,12 +70,16 @@ npm run explain:summary -- report.json                # summarize a JSON report
 ### TTS DSL Inspector
 
 ```bash
-npm run tts-dsl -- run --spec <file>       # run the rule engine on a spec
-npm run tts-dsl -- validate --spec <file>  # validate a spec
-npm run tts-dsl -- explain --spec <file>   # explain rule firing
-npm run tts-dsl -- diff --spec <file>      # diff phase snapshots
-npm run tts-dsl -- why-not --spec <file>   # explain why a rule did not fire
+npm run tts-dsl -- phases "hello world" --frontend qlatt-english
+npm run tts-dsl -- field "hello world" --item segment_0 --field duration
+npm run tts-dsl -- why-not "hello world" --item segment_0 --rule the_prevocalic_reduction
+npm run tts-dsl -- replay "hello world"
+npm run tts-dsl -- explain "hello world" --why d000045
 ```
+
+These commands inspect the journal, feature history, and rule-attempt evidence
+from one real frontend execution. They do not rerun phase prefixes or compare
+JSON-cloned snapshots.
 
 ### Offline Rendering
 
@@ -94,15 +102,17 @@ npm run oracle:compare -- --a test/oracle-output/dectalk/ --b test/oracle-output
 
 ```
 Text → normalizeText() → transcribeText() → [inventory lookup]
-     → rule phases (postlexical → structural → duration → formant → prosody)
-     → assembleKlattTrack() → frames → interpreter → WebAudio graph
+     → typed Utterance HRG
+     → graph rule phases (postlexical → structural → duration → formant → prosody)
+     → one final HRG lowering → frames → interpreter → WebAudio graph
 ```
 
-- `src/tts-frontend.ts` — normalizes text, transcribes it, applies declarative rule phases, and emits `KlattFrame[]`.
+- `src/tts-frontend.ts` — orchestrates frontend resource selection, constructs one typed `Utterance`, runs graph-native rules, and invokes final lowering once.
+- `src/declarative-frontend/hrg/` — owns Item identity, relations, temporal state, typed feature history, transactions, rule execution, replay, explanation, and the sole frontend-to-frame lowerer.
 - `public/rules/frontends/<frontend-id>/` — each frontend is a self-contained package with `frontend.yaml`, `pipeline.yaml`, `inventory.yaml`, `lts-rules.yaml`, and `phases/*.yaml`.
 - `public/experiments/` — synthesizer configurations (`registry.yaml`, `graph.yaml`, `semantics.yaml`). Active configs: `klatt80-baseline`, `dectalk-english`, `klsyn88`, `stevens91`.
 - `src/semantics/` — evaluates CEL expressions in dependency order to realize AudioParam values.
-- `src/declarative-frontend/` — rule engine, parser, validation, inventory, and diagnostic tooling.
+- `src/declarative-frontend/` — compiles immutable frontend/rulepack data; its `hrg/` owner executes that program.
 - `src/rendering/` — offline WAV rendering backends (node-web-audio-api, headless browser).
 - `src/worklets/` — TypeScript AudioWorklet sources; compiled JS and WASM artifacts land in `public/worklets/`.
 - `crates/` — Rust DSP primitives compiled to WebAssembly (resonator, antiresonator, LF source, decay envelope, edge detector, signal switch, aerodynamic model, Fujisaki resonator, tilt filter, and more).
@@ -111,7 +121,7 @@ Text → normalizeText() → transcribeText() → [inventory lookup]
 
 ## Project Conventions
 
-- Rules in `public/rules/frontends/<frontend-id>/phases/*.yaml` must carry `citations:` and should use `tag:` on each behavioral modification.
+- Rules in `public/rules/frontends/<frontend-id>/phases/*.yaml` must carry `citations:`, and every behavioral application must carry a `tag:`.
 - Non-trivial pipeline decisions should emit provenance records so frontend and runtime choices stay explainable.
 - Runtime clamps, defaults, and fallbacks should emit diagnostics.
 - Every magic number needs a citation. If you can't cite it, label it `# engineering estimate`.

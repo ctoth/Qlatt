@@ -1,7 +1,12 @@
 # Plan: Minimal Provenance + Citations (v1)
 
-Status: Proposed  
-Scope: Design only
+Status: Implemented and extended
+Scope: Historical v1 design plus current graph-native disposition
+
+The v1 CLI and decision DAG exist. Frontend rule provenance is now created
+atomically with typed HRG feature/topology writes; it is not reconstructed from
+trace events. Field history, structured why-not evidence, phase checkpoints,
+and exact journal replay extend the original design.
 
 ## 1. What we are building
 
@@ -38,10 +43,10 @@ That is enough for both humans and agents.
 
 ## 4. Citation sources (v1)
 
-1. Rule citations from `public/rules/frontend.yaml`:
-   - `rules.<name>.citation`
-2. Policy citations from `public/rules/frontend.yaml`:
-   - `parameters.policy.*.citations`
+1. Rule citations from the selected compiled frontend's
+   `public/rules/frontends/<frontend-id>/phases/*.yaml` entries.
+2. Policy/resource citations from the selected frontend package and shared
+   policy documents it explicitly declares.
 3. Semantics citations from:
    - inline `citation/citations` on realize rules, or
    - a simple sidecar map file if inline is not ready
@@ -53,7 +58,7 @@ No canonical resolver system in v1. We keep citation strings as they are.
 Proposed command:
 
 ```bash
-npm run explain -- --phrase "hello world"
+npm run explain -- "hello world"
 ```
 
 Flags:
@@ -129,14 +134,13 @@ Emit:
 2. fallback pronunciation chosen
 3. inventory target selection
 
-## 7.2 `src/declarative-frontend/engine.ts`
+## 7.2 `src/declarative-frontend/hrg/rule-engine.ts`
 
-Emit from existing trace:
-
-1. rule matched
-2. rule rewrite applied
-
-Attach rule citation automatically.
+Superseded by `src/declarative-frontend/hrg/rule-engine.ts`, transactions, and
+versioned Item/Relation histories. A committed mutation and its
+`DecisionRecord` are one atomic operation. Trace is optional observation and is
+not provenance authority. Failed match/constraint/target/transaction evidence
+is recorded by the real matcher for why-not queries without a second execution.
 
 ## 7.3 `src/semantics/topological-evaluator.ts`
 
@@ -193,22 +197,25 @@ If `--strict-citations`:
 
 ## 11. Implementation phases
 
-Phase 1:
+Phase 1 (completed):
 
 1. decision collector
 2. CLI command (`text` + `json`)
-3. rule trace + frontend provenance
+3. frontend and atomic graph-write provenance
 
-Phase 2:
+Phase 2 (completed):
 
 1. semantics provenance
 2. interpreter/runtime provenance
 3. strict citation gate
 
-Phase 3:
+Phase 3 (completed and extended):
 
 1. cleanup/tuning of text readability
 2. integration tests for strict mode and fallback paths
+3. field-version explanation and cited parent traversal
+4. one-run phase checkpoints and structured why-not evidence
+5. exact transaction-journal replay with provenance-sensitive graph digest
 
 ## 12. Deferred on purpose
 

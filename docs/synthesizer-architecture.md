@@ -4,7 +4,7 @@
 
 ## Quick Orientation
 
-Qlatt is a WebAudio Klatt formant synthesizer. It implements the Klatt 1980 cascade/parallel architecture using WASM-backed AudioWorklets for DSP, driven by a declarative YAML configuration system. The architecture separates concerns cleanly: YAML files define *what* the synthesizer is, TypeScript runtime code handles *how* it runs.
+Qlatt is a WebAudio Klatt formant synthesizer. It implements the Klatt 1980 cascade/parallel architecture using WASM-backed AudioWorklets for DSP, driven by a declarative YAML configuration system. Frontend YAML compiles into a typed program that enriches one provenance-stamped Heterogeneous Relation Graph (`Utterance`); backend YAML defines how the resulting frames drive the audio graph.
 
 When implementing findings from a paper, you typically work at one of three levels:
 1. **Parameter derivation** (semantics.yaml) - change how input parameters map to node parameters
@@ -26,23 +26,26 @@ Most paper implementations touch only semantics.yaml. New filter types require n
           +------------+------------+-------------------------+
                        |
                        v
-+------+    +---------------+    +-------------+    +-----------+    +----------+
-| Text | -> | TTS Frontend  | -> | Klatt Track | -> |Interpreter| -> | WebAudio |
-+------+    | (rules, CMU)  |    | (frames)    |    | (schedule)|    | Graph    |
-            +---------------+    +-------------+    +-----------+    +----------+
-                                       |                  |
-                                       |                  v
-                                       |           CEL Evaluator
-                                       |           (topological)
-                                       |                  |
-                                       +------------------+
-                                   Frame params + semantics rules
-                                        = realized AudioParams
++------+   +----------------+   +----------------+   +-------------+   +-----------+   +----------+
+| Text | ->| TTS Frontend   | ->| Utterance HRG  | ->| Final lower | ->|Interpreter| ->| WebAudio |
++------+   | normalize/CMU  |   | graph rules    |   | frames once |   | schedule  |   | Graph    |
+           +----------------+   +----------------+   +-------------+   +-----------+   +----------+
+                                                                                |
+                                                                                v
+                                                                         CEL semantics
+                                                                                |
+                                                                         realized params
 ```
+
+**Utterance**: The sole frontend working representation. Stable Items can appear in multiple list/tree Relations without copied feature bundles. Feature and topology writes are typed, versioned, transactional, and provenance-stamped.
 
 **Track**: Array of time-stamped frames, each containing Klatt parameters (F0, F1-F6, AV, AH, AF, etc.)
 
 **Interpreter**: For each frame, evaluates semantics rules to derive node parameters, then schedules AudioParam changes using `setValueAtTime` (step) or `linearRampToValueAtTime` (ramp).
+
+The frontend/backend boundary is `src/declarative-frontend/hrg/lowering.ts`. It
+is the only HRG-to-frame projection. No completed frame track or phone summary
+is converted back into frontend structure.
 
 ## The Three Configuration Files
 

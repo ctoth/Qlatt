@@ -1,8 +1,11 @@
 # P3 Foundation — Frontend Architecture Recommendation
 
-Status: 2026-06-29. Synthesizes `10-sota-control-surface.md` (input contract) and
-`11-sota-frontend-architecture.md` (internal IR) into ONE coherent FE design for the
-clean-room beautiful synth. Both grounded in SOTA + the paper library, not armchair.
+Status: adopted and implemented at the shared frontend IR boundary on 2026-07-11.
+This document synthesizes `10-sota-control-surface.md` (input contract) and
+`11-sota-frontend-architecture.md` (internal IR) into one coherent frontend
+design for the clean-room beautiful synth. The shared typed HRG, Direction Track
+attachment, transaction/provenance model, and single lowering now exist;
+qlatt-beauty's fresh content remains a separate workstream.
 
 ## The unifying thesis: one substance, three representations
 
@@ -100,15 +103,15 @@ is inherently cross-level; would reinvent a graph via back-pointers).
 
 ## 4. Engine-reuse verdict (Q's "reuse nothing" boundary)
 
-**Reuse the toolchain; replace the IR; write all-new content.** Specifically:
+**Reuse the toolchain; replace the IR; write all-new content.** The first two
+parts are complete at the shared frontend boundary. Specifically:
 - **REUSE** the declarative rule-engine *framework* — the CEL evaluator, the rule-phase
   processor, the `ProvenanceCollector`/`DecisionRecord` plumbing. It's a "language," not an
   "engine"; rebuilding it is months for no gain. Report `11` confirms the fit: our existing
   `prev/next/ahead/look_back_where` navigation *becomes* HRG path operators, and the
   DecisionRecord schema is exactly what HRG write-stamping needs.
-- **REPLACE** the engine's internal data structure: from the current flat token-stream/track
-  model to the **provenance-stamped HRG**. This is a real, substantial change to the engine's
-  core — not a lazy reuse — and it's what makes the whole thing explainable-by-construction.
+- **REPLACED** the engine's internal data structure: the production frontend now
+  operates on the **provenance-stamped HRG** and lowers to frames once.
 - **WRITE FRESH** (clean-room, per Q): all inventory, rule phases, semantics, the affect
   preset library, the prosody rules. Zero reuse of the old engines' rule content.
 
@@ -117,7 +120,9 @@ So "reuse nothing" holds for the *synth* (new content end to end); we reuse a *t
 
 ## 5. The FE pipeline, restated as graph enrichment
 
-Each stage ADDS items/relations/features to the one shared HRG; nothing overwrites:
+Each stage enriches the one shared HRG. A new feature version may supersede the
+current value, but no Item, topology, feature-write history, or provenance is
+erased:
 0. Intent ingestion — score → `Token`; Direction Track → global state + span items.
 1. Linguistic — normalize, G2P (dict+LTS), syllabify, stress, POS, given/new, phrasing →
    `Word`/`Syllable`/`Segment`/`SylStructure`.
@@ -132,6 +137,7 @@ Each stage ADDS items/relations/features to the one shared HRG; nothing overwrit
 7. Lowering — single pass: leaf relations → 5 ms Klatt frame track + sample-accurate events.
 
 ## Next
-P3 detail: schema the HRG relations + item types; spec the Direction Track format; pick the
-final-lowering smoothing constants. Then the engine IR-swap (flat-stream → stamped HRG) is the
-first concrete FE build task. (Parallelizable with P2 backend / the source bake-off.)
+
+Author the clean-room qlatt-beauty inventory/rule/prosody content on the shared
+HRG owners. Do not fork the IR, transaction engine, Direction attachment, or
+lowering architecture for beauty-specific content.

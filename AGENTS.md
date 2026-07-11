@@ -121,24 +121,28 @@ Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes
 
 ```
 Text → normalizeText() → transcribeText() → [inventory lookup]
-     → rule phases (postlexical → structural → duration → formant → prosody)
-     → assembleKlattTrack() → frames → interpreter → WebAudio Graph
+     → typed Utterance HRG
+     → graph rule phases (postlexical → structural → duration → formant → prosody)
+     → one final HRG lowering → frames → interpreter → WebAudio Graph
 ```
 
 1. **TTS Frontend** (`src/tts-frontend.ts`)
    - `normalizeText()` — text normalization (numbers, abbreviations, currency)
    - `transcribeText()` — CMU dictionary lookup + LTS fallback (`src/g2p/`)
-   - Inventory lookup — maps phonemes to acoustic targets (`public/rules/inventory.yaml`)
-   - Rule phases — declarative YAML rules modify duration, formants, prosody
-   - `assembleKlattTrack()` — converts token stream + F0 contour to Klatt frames
+   - Selected-frontend inventory lookup maps phonemes to typed Segment Items
+   - Constructs the canonical `Utterance` with shared Token, Word, Syllable,
+     Segment, and SylStructure identity
+   - Runs graph-native rules and invokes `hrg/lowering.ts` exactly once
 
-2. **Declarative Rule Engine** (`src/declarative-frontend/engine.ts`)
+2. **Declarative HRG Rule Engine** (`src/declarative-frontend/hrg/rule-engine.ts`)
    - Processes rule phases defined in `public/rules/frontends/<frontend-id>/phases/*.yaml`
+   - Reads and writes typed Items and Relations through atomic transactions
    - Rule kinds: `scalar` (modify values), `point` (insert F0 targets), `postlexical` (splice/replace tokens), `structural` (expand phonemes into sub-segments)
    - Rules use CEL expressions for conditions and values
-   - Navigation: `prev`, `next`, `ahead(n)`, `behind(n)`, `look_back_where()`, `look_ahead_pred()`
-   - Every rule has `citations:` and optionally `tag:` for provenance
-   - Pipeline configuration: `public/rules/frontends/qlatt-english/frontend.yaml`
+   - Navigation is relation-aware and preserves shared Item identity
+   - Every committed write is versioned and provenance-stamped from the rule's
+     required `citations:` and application `tag:`
+   - Phase checkpoints, rule attempts, and replay come from the same execution
 
 3. **Runtime/Interpreter System** (`src/klatt-runtime.ts`, `src/klatt-interpreter.ts`)
    - **Runtime**: Creates WebAudio graph from YAML graph definition

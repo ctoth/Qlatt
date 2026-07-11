@@ -186,7 +186,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 010 | Phase 3 stamped relation topology | kept | `4360c5f5` | 22 HRG tests; immutable histories; core/scripts typecheck pass |
 | 011 | Phase 3 Utterance temporal axis | kept | `70ababdd` | 232 declarative/HRG tests; old axis zero-hit; core/scripts typecheck pass |
 | 012 | Phase 3 atomic HRG transactions | kept | `343b181e` | 28 HRG tests; rejection diagnostics; core/scripts typecheck pass |
-| 013 | Phase 3 checkpoints and replay | kept | pending slice commit | digest-equal replay; 29 HRG tests; core/scripts typecheck pass |
+| 013 | Phase 3 checkpoints and replay | kept | `725530cc` | digest-equal replay; 29 HRG tests; core/scripts typecheck pass |
+| 014 | Phase 3 Direction Track attachment | kept | pending slice commit | 50 input/HRG tests; provenance parent proof; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -746,3 +747,48 @@ Next slice: implement Direction Track attachment in the existing input owner
 against static Utterance fixtures, attach typed records to declared control
 relations, and preserve input DecisionRecords as parents before production
 wiring.
+
+## Iteration 014 — Phase 3 Direction Track attachment
+
+Status: kept.
+
+The static attachment contract was red because the existing input parser only
+advertised future HRG-compatible shapes. Its resolved Directions and upstream
+DecisionRecords were already the correct owners; no parsing replacement was
+needed.
+
+Kept convergence:
+
+- added the discriminated `DIRECTION_ITEM_SCHEMA` in the existing input owner,
+  covering kind/tag, utterance or token-range scope, labels, the complete typed
+  voice-quality delta, compiled affect summary, voice identity, and citations;
+- added `attachDirectionsToUtterance()` beside `parseDirectionInput()`;
+- requires the static Utterance to share the ParseResult provenance collector,
+  preventing dangling parent ids;
+- attaches each resolved record through one atomic HRG transaction to its
+  declared `Affect`, `Intonation`, or `Break` relation;
+- uses the originating input `DecisionRecord` as an explicit parent of Item
+  creation, every feature version, and relation membership; and
+- leaves the attachment function absent from production orchestration until the
+  Phase 5 flag day.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+$hrg = (Get-ChildItem -File test\hrg*.test.ts).FullName
+npm test -- $hrg test/input.test.ts test/input-hrg-attachment.test.ts
+PASS: 8 files, 50 tests
+
+rg -n "attachDirectionsToUtterance" src test -g "*.ts"
+ONLY: definition in src/input/parse.ts and static fixture test
+```
+
+Next slice: build the complete graph-native rule engine under the HRG owner
+against the final compiled relation DSL, with direct static-Utterance tests and
+no production export or flat-engine call.

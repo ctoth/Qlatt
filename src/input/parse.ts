@@ -33,6 +33,7 @@ import type {
 import { GESTURE_LIBRARY, materializeVoiceQualityDelta, scaleVoiceQualityDelta } from "./direction-track";
 import type { CompiledAffect } from "./affect";
 import { compileAffect } from "./affect";
+import type { Item, ItemTypeSchema, Utterance } from "../declarative-frontend/hrg";
 
 /** The kind of resolved direction (drives the tag + downstream HRG relation). */
 export type DirectionKind =
@@ -62,7 +63,7 @@ export interface Direction {
   /** "utterance" for global state; a token range for local spans. */
   scope: "utterance" | TokenRange;
   /** The HRG relation this directive should later attach to (not wired now). */
-  hrgRelation: "Affect" | "Intonation" | "Break" | "Word";
+  hrgRelation: "Affect" | "Intonation" | "Break";
   /** Compiled affect substrate (for affect kinds). */
   affect?: CompiledAffect;
   /** The resolved voice-quality / prosody delta this direction imposes. */
@@ -96,6 +97,97 @@ export interface ParseOptions {
   /** Optional injected provenance collector (else one is created). */
   provenance?: ProvenanceCollector;
 }
+
+const DELTA_FIELDS = {
+  rdDelta: { kind: "number" },
+  f0Scale: { kind: "number" },
+  f0VarianceScale: { kind: "number" },
+  durationScale: { kind: "number" },
+  intensityBoost: { kind: "number" },
+  ahBoost: { kind: "number" },
+  spectralTiltBoost: { kind: "number" },
+  pauseScale: { kind: "number" },
+  f1Delta: { kind: "number" },
+  f2Delta: { kind: "number" },
+  f3Delta: { kind: "number" },
+  fbw1Scale: { kind: "number" },
+  fbw2Scale: { kind: "number" },
+  fbw3Scale: { kind: "number" },
+  jitterScale: { kind: "number" },
+  shimmerScale: { kind: "number" },
+} as const;
+
+/** Item schema consumed by the HRG attachment stage for resolved directions. */
+export const DIRECTION_ITEM_SCHEMA = {
+  features: {
+    kind: {
+      kind: "string",
+      values: [
+        "voice_identity",
+        "global_affect",
+        "local_affect",
+        "emphasis",
+        "break",
+        "pitch",
+        "rate",
+        "voice_quality",
+        "gesture",
+      ],
+    },
+    tag: {
+      kind: "string",
+      values: ["affect", "voice_quality", "emphasis", "break", "gesture", "pitch", "rate", "voice"],
+    },
+    scope: {
+      kind: "union",
+      variants: [
+        {
+          kind: "object",
+          fields: { kind: { kind: "literal", value: "utterance" } },
+        },
+        {
+          kind: "object",
+          fields: {
+            kind: { kind: "literal", value: "token_range" },
+            startToken: { kind: "number" },
+            endToken: { kind: "number" },
+          },
+        },
+      ],
+    },
+    label: { kind: "string" },
+    delta: { kind: "object", fields: DELTA_FIELDS },
+    affect: {
+      kind: "object",
+      fields: {
+        label: { kind: "string" },
+        group: { kind: "string" },
+        degree: { kind: "number" },
+        resolvedSex: { kind: "string", values: ["male", "female"] },
+        dimensions: {
+          kind: "object",
+          fields: {
+            valence: { kind: "number" },
+            arousal: { kind: "number" },
+            dominance: { kind: "number" },
+          },
+        },
+        citations: { kind: "array", items: { kind: "string" } },
+      },
+      optional: ["resolvedSex"],
+    },
+    voice: {
+      kind: "object",
+      fields: {
+        name: { kind: "string" },
+        sex: { kind: "string", values: ["male", "female"] },
+        baseF0Hz: { kind: "number" },
+      },
+      optional: ["name", "sex", "baseF0Hz"],
+    },
+    citations: { kind: "array", items: { kind: "string" } },
+  },
+} as const satisfies ItemTypeSchema;
 
 // ---------------------------------------------------------------------------
 // Tokenization
@@ -210,6 +302,62 @@ export function parseDirectionInput(input: DirectionInput, options: ParseOptions
   }
 
   return { score, directions, decisions: provenance.getDecisions(), provenance };
+}
+
+/** Attach already-resolved Direction Track records to a static schema-bound HRG. */
+export function attachDirectionsToUtterance(
+  parsed: ParseResult,
+  utterance: Utterance,
+): Item[] {
+  if (utterance.provenance !== parsed.provenance) {
+    throw new Error(
+      "E_DIRECTION_HRG_PROVENANCE: attachment requires the ParseResult provenance collector",
+    );
+  }
+  const attached: Item[] = [];
+  for (const direction of parsed.directions) {
+    const transaction = utterance.beginTransaction({
+      ruleId: `direction_attach:${direction.kind}`,
+      phase: "input",
+      tag: direction.tag,
+      reason: `Attach resolved ${direction.kind} direction to ${direction.hrgRelation}`,
+      citations: direction.citations,
+      stage: "frontend",
+    });
+    transaction.dependOn(direction.decision.id);
+    const item = transaction.createItem("direction", `direction_${direction.id}`);
+    transaction.set(item, "kind", direction.kind);
+    transaction.set(item, "tag", direction.tag);
+    transaction.set(
+      item,
+      "scope",
+      direction.scope === "utterance"
+        ? { kind: "utterance" }
+        : {
+            kind: "token_range",
+            startToken: direction.scope.startToken,
+            endToken: direction.scope.endToken,
+          },
+    );
+    transaction.set(item, "citations", direction.citations);
+    if (direction.label != null) transaction.set(item, "label", direction.label);
+    if (direction.delta) transaction.set(item, "delta", direction.delta);
+    if (direction.affect) {
+      transaction.set(item, "affect", {
+        label: direction.affect.label,
+        group: direction.affect.group,
+        degree: direction.affect.degree,
+        ...(direction.affect.resolvedSex ? { resolvedSex: direction.affect.resolvedSex } : {}),
+        dimensions: direction.affect.dimensions,
+        citations: direction.affect.citations,
+      });
+    }
+    if (direction.voice) transaction.set(item, "voice", direction.voice);
+    transaction.append(direction.hrgRelation, item);
+    transaction.commit();
+    attached.push(item);
+  }
+  return attached;
 }
 
 function lowerAffect(

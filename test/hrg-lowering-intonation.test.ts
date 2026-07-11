@@ -273,5 +273,8 @@ describe("HRG lowering layered intonation", () => {
     const utterance = buildUtterance(baseline.segments, baseline.commands, baseline.policy);
 
     expect(() => lowerToFrames(utterance, baseline.policy)).toThrowError(/E_HRG_LOWER_F0_MODEL/);
+    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
+      code: "HRG_LOWER_F0_MODEL_REQUIRED",
+    }));
   });
 });

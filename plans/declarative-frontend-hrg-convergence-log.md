@@ -214,7 +214,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 038 | Phase 4 family 6: Affect projection | kept | `6e0e4a99` | authored-field/precedence retention; global/local composition; time, VQ, jitter and exact write provenance |
 | 039 | Phase 4 family 7: selected speaker/source projection | kept | `971474f8` | exact qlatt/DECtalk silence edges; policy-only preload; female locus selected from data; exact write provenance |
 | 040 | Phase 4 family 8: backend semantics handoff | kept | `95ad363b` | scoped F0 variance projection; false shimmer control deleted; no duplicated backend realization |
-| 041 | Phase 4 family 9: per-frame provenance projection | kept | pending slice commit | every populated qlatt/DECtalk/point/layer cell resolves to an Utterance decision; projection views identical |
+| 041 | Phase 4 family 9: per-frame provenance projection | kept | `90921f97` | every populated qlatt/DECtalk/point/layer cell resolves to an Utterance decision; projection views identical |
+| 042 | Phase 4 family 10: lowering diagnostics and exit gate | kept | pending slice commit | declared columns required; floors/clamps/rejections/missing data diagnosed; 97-test Phase 4 gate |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1942,3 +1943,48 @@ PASS: 3 files, 10 tests
 
 Next Phase 4 family: require diagnostics alongside every rejected, clamped,
 defaulted, or missing-data lowering path, then run the Phase 4 exit gate.
+
+## Iteration 042 — Phase 4 family 10: diagnostics and exit gate
+
+Status: kept. Phase 4 family 10 and Phase 4 are complete.
+
+Final lowering no longer silently accepts incomplete backend rows. Every active
+Segment must carry a finite stamped value for every column declared by the
+selected lowering policy. Timing-only fixtures now explicitly declare zero
+acoustic columns instead of using incomplete Segment data as a substitute.
+
+Structured diagnostics now accompany:
+
+- invalid selected policy numbers and transition weights;
+- missing duration, interval timing, declared columns, Affect attachment/data,
+  F0 points/controls/model data, and silence-resource provenance;
+- rejected control-window, Affect scope/field/time, F0 renderer/model, and
+  negative F0-variance inputs;
+- selected duration-floor application; and
+- effective-Rd, formant, bandwidth/source-scale, and voiced-F0 clamps, including
+  requested and retained values.
+
+Global Affect attachment now stamps explicit precedence and declaration order,
+so lowering can require the same complete metadata already required from local
+directives instead of recreating defaults. Direct tests cover representative
+floor, clamp, rejection, and missing-data diagnostics. The complete Phase 4
+gate retains exact qlatt-English and DECtalk production comparisons, beauty
+structural coverage, complete per-cell provenance, and all ten lowering families.
+
+Verification:
+
+```text
+npm test -- test/hrg-lowering-control-windows.test.ts test/hrg-lowering-affect.test.ts test/hrg-lowering-scalars.test.ts test/hrg-lowering-intonation.test.ts test/hrg-lowering-f0-points.test.ts test/hrg-lowering-locus-transitions.test.ts test/hrg-lowering-midpoint-transitions.test.ts test/hrg-lowering-transition-matrix.test.ts test/hrg-lowering-timing.test.ts test/input-hrg-attachment.test.ts test/apply-affect.test.ts test/input.test.ts test/declarative-frontend-schema.test.ts test/hrg.test.ts
+PASS: 14 files, 97 tests
+
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+```
+
+Next plan phase: Phase 5 production HRG flag day. Delete the flat engine,
+trace-derived provenance, standalone control-score, and track-assembler route
+first; then let compiler/test failures enumerate the literal production callers
+that must move to the already-complete graph-native owners.

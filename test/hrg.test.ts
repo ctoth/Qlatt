@@ -106,6 +106,8 @@ function buildTheCat() {
     const seg = u.createItem("segment");
     seg.set("phoneme", phoneme, { reason: "inventory lookup", stage: "rules", citations: CITE });
     seg.set("dur_ms", durMs, { reason: "duration rule", stage: "prosody", citations: CITE });
+    seg.set("F0", 100, { reason: "baseline F0", stage: "rules", citations: CITE });
+    seg.set("F1", 500, { reason: "baseline F1", stage: "rules", citations: CITE });
     u.segments.append(seg, RELATION_INPUT);
     return seg;
   };

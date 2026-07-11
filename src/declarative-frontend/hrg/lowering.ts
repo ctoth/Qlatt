@@ -408,8 +408,13 @@ function resolveLocusFormants(
   return resolved;
 }
 
-function requirePolicyNumber(value: number, path: string): number {
+function requirePolicyNumber(value: number, path: string, utterance: Utterance): number {
   if (!Number.isFinite(value) || value < 0) {
+    utterance.diagnostics.error(
+      "Selected lowering policy requires a finite non-negative number",
+      { path, value },
+      "HRG_LOWER_POLICY_REJECTED",
+    );
     throw new Error(`E_HRG_LOWER_POLICY_NUMBER: '${path}' must be finite and non-negative`);
   }
   return value;
@@ -657,25 +662,35 @@ export function lowerToFrames(
   const initialSilenceMs = requirePolicyNumber(
     options.timeline.initial_silence_ms.value,
     "timeline.initial_silence_ms.value",
+    utterance,
   );
   const finalSilenceMs = requirePolicyNumber(
     options.timeline.final_silence_ms.value,
     "timeline.final_silence_ms.value",
+    utterance,
   );
   const stopReleaseFloorMs = requirePolicyNumber(
     options.timeline.duration_floors.stop_release_ms.value,
     "timeline.duration_floors.stop_release_ms.value",
+    utterance,
   );
   const defaultFloorMs = requirePolicyNumber(
     options.timeline.duration_floors.default_ms.value,
     "timeline.duration_floors.default_ms.value",
+    utterance,
   );
   const defaultTransitionMs = requirePolicyNumber(
     options.transitions.default_transition_ms.value,
     "transitions.default_transition_ms.value",
+    utterance,
   );
   const blendFactor = options.transitions.blend.factor.value;
   if (!Number.isFinite(blendFactor) || blendFactor < 0 || blendFactor > 1) {
+    utterance.diagnostics.error(
+      "Selected transition blend factor must be within [0,1]",
+      { path: "transitions.blend.factor.value", value: blendFactor },
+      "HRG_LOWER_POLICY_REJECTED",
+    );
     throw new Error("E_HRG_LOWER_POLICY_NUMBER: 'transitions.blend.factor.value' must be within [0,1]");
   }
 
@@ -696,6 +711,17 @@ export function lowerToFrames(
         `E_HRG_LOWER_DURATION_REQUIRED: Segment '${item.id}' requires a finite positive '${durationKey}'`,
       );
     }
+    for (const key of options.columns) {
+      const value = item.get(key);
+      const write = item.latestWrite(key);
+      if (typeof value === "number" && Number.isFinite(value) && write) continue;
+      utterance.diagnostics.error(
+        "Segment is missing a finite stamped value for a declared backend column",
+        { itemId: item.id, key, value },
+        "HRG_LOWER_COLUMN_REQUIRED",
+      );
+      throw new Error(`E_HRG_LOWER_COLUMN_REQUIRED: Segment '${item.id}' requires '${key}'`);
+    }
     const anchor = utterance.intervalAnchor(item);
     const startMs = anchor ? utterance.axis.getMarkTime(anchor.leftMarkId) : null;
     const endMs = anchor ? utterance.axis.getMarkTime(anchor.rightMarkId) : null;
@@ -711,6 +737,18 @@ export function lowerToFrames(
     const isStopRelease = segmentType === "stop_release" || segmentType === "stop_aspiration";
     const durationFloorMs = isStopRelease ? stopReleaseFloorMs : defaultFloorMs;
     const effectiveDurationMs = Math.max(rawDuration, durationFloorMs);
+    if (effectiveDurationMs !== rawDuration) {
+      utterance.diagnostics.info(
+        "Selected lowering policy raised Segment duration to its declared floor",
+        {
+          itemId: item.id,
+          requestedMs: rawDuration,
+          effectiveMs: effectiveDurationMs,
+          floorMs: durationFloorMs,
+        },
+        "HRG_LOWER_DURATION_FLOORED",
+      );
+    }
     const resolvedDurationMs = endMs - startMs;
     if (
       resolvedDurationMs <= 0
@@ -791,9 +829,18 @@ export function lowerToFrames(
   }
   const sonorantF2 = options.transitions.sonorant_f2;
   if (sonorantF2) {
-    const spanMs = requirePolicyNumber(sonorantF2.span_ms.value, "transitions.sonorant_f2.span_ms.value");
+    const spanMs = requirePolicyNumber(
+      sonorantF2.span_ms.value,
+      "transitions.sonorant_f2.span_ms.value",
+      utterance,
+    );
     const neighborWeight = sonorantF2.neighbor_weight.value;
     if (!Number.isFinite(neighborWeight) || neighborWeight < 0 || neighborWeight > 1) {
+      utterance.diagnostics.error(
+        "Selected sonorant neighbor weight must be within [0,1]",
+        { path: "transitions.sonorant_f2.neighbor_weight.value", value: neighborWeight },
+        "HRG_LOWER_POLICY_REJECTED",
+      );
       throw new Error(
         "E_HRG_LOWER_POLICY_NUMBER: 'transitions.sonorant_f2.neighbor_weight.value' must be within [0,1]",
       );
@@ -920,10 +967,20 @@ export function lowerToFrames(
     if (!Array.isArray(rawWindows)) return;
     const windowWrite = sourceItem.latestWrite("control_windows");
     if (!windowWrite) {
+      utterance.diagnostics.error(
+        "Control windows have no producing Segment write",
+        { itemId: sourceItem.id },
+        "HRG_LOWER_CONTROL_WINDOW_REJECTED",
+      );
       throw new Error(`E_HRG_LOWER_CONTROL_WINDOW: Segment '${sourceItem.id}' has unstamped controls`);
     }
     rawWindows.forEach((rawWindow) => {
       if (!isFeatureObject(rawWindow)) {
+        utterance.diagnostics.error(
+          "Control window is not a typed object",
+          { itemId: sourceItem.id },
+          "HRG_LOWER_CONTROL_WINDOW_REJECTED",
+        );
         throw new Error(`E_HRG_LOWER_CONTROL_WINDOW: Segment '${sourceItem.id}' has invalid controls`);
       }
       const targetName = typeof rawWindow.target === "string" ? rawWindow.target : "current";
@@ -950,11 +1007,21 @@ export function lowerToFrames(
         );
         return;
       }
-      const resolved: ResolvedControlWindow = {
-        ...span,
-        fields: parseControlFields(rawWindow.fields),
-        decisionId: windowWrite.decisionId,
-      };
+      let fields: Readonly<Record<string, ResolvedControlField>>;
+      try {
+        fields = parseControlFields(rawWindow.fields);
+      } catch (error) {
+        utterance.diagnostics.error(
+          "Control window fields failed final-lowering validation",
+          {
+            itemId: sourceItem.id,
+            error: error instanceof Error ? error.message : String(error),
+          },
+          "HRG_LOWER_CONTROL_WINDOW_REJECTED",
+        );
+        throw error;
+      }
+      const resolved: ResolvedControlWindow = { ...span, fields, decisionId: windowWrite.decisionId };
       const targetWindows = controlWindowsByItem.get(targetTiming.item);
       if (targetWindows) targetWindows.push(resolved);
       else controlWindowsByItem.set(targetTiming.item, [resolved]);
@@ -962,13 +1029,21 @@ export function lowerToFrames(
   });
 
   const affectItems = utterance.getRelation("Affect")?.listItems() ?? [];
-  const affectDirectives = affectItems.flatMap((item, relationOrder): AffectDirective[] => {
+  const affectDirectives = affectItems.flatMap((item): AffectDirective[] => {
     const delta = item.get("delta");
     if (delta == null) return [];
     const deltaWrite = item.latestWrite("delta");
     const rawFields = item.get("delta_fields");
     const rawScope = item.get("scope");
-    if (!deltaWrite || !Array.isArray(rawFields) || !isFeatureObject(rawScope)) {
+    const declarationOrder = finiteFeatureNumber(item.get("declaration_order"));
+    const precedence = finiteFeatureNumber(item.get("precedence"));
+    if (
+      !deltaWrite
+      || !Array.isArray(rawFields)
+      || !isFeatureObject(rawScope)
+      || declarationOrder == null
+      || precedence == null
+    ) {
       utterance.diagnostics.error(
         "Affect Item is missing stamped delta fields or typed scope during final lowering",
         { itemId: item.id },
@@ -979,6 +1054,11 @@ export function lowerToFrames(
     const fields = new Set<AffectField>();
     for (const field of rawFields) {
       if (!isAffectField(field)) {
+        utterance.diagnostics.error(
+          "Affect Item names a field outside the live Direction Track contract",
+          { itemId: item.id, field },
+          "HRG_LOWER_AFFECT_REJECTED",
+        );
         throw new Error(`E_HRG_LOWER_AFFECT_FIELD: Affect Item '${item.id}' has unknown field`);
       }
       fields.add(field);
@@ -994,14 +1074,32 @@ export function lowerToFrames(
             endToken: finiteFeatureNumber(rawScope.endToken) ?? 0,
           }
         : null;
-    if (!scope) throw new Error(`E_HRG_LOWER_AFFECT_SCOPE: Affect Item '${item.id}' has invalid scope`);
+    if (!scope) {
+      utterance.diagnostics.error(
+        "Affect Item has an invalid typed scope",
+        { itemId: item.id, scope: rawScope },
+        "HRG_LOWER_AFFECT_REJECTED",
+      );
+      throw new Error(`E_HRG_LOWER_AFFECT_SCOPE: Affect Item '${item.id}' has invalid scope`);
+    }
+    let values: AffectValues;
+    try {
+      values = parseAffectValues(delta, item.id);
+    } catch (error) {
+      utterance.diagnostics.error(
+        "Affect Item delta failed final-lowering validation",
+        { itemId: item.id, error: error instanceof Error ? error.message : String(error) },
+        "HRG_LOWER_AFFECT_REJECTED",
+      );
+      throw error;
+    }
     return [{
-      declarationOrder: finiteFeatureNumber(item.get("declaration_order")) ?? relationOrder,
+      declarationOrder,
       decisionId: deltaWrite.decisionId,
       fields,
-      precedence: finiteFeatureNumber(item.get("precedence")) ?? 0,
+      precedence,
       scope,
-      values: parseAffectValues(delta, item.id),
+      values,
     }];
   });
   const globalAffectDirectives = affectDirectives.filter((directive) => directive.scope.kind === "utterance");
@@ -1059,6 +1157,11 @@ export function lowerToFrames(
   const outputTimingByItem = new Map<Item, { startMs: number; scale: number }>();
   const globalPauseScale = globalAffect.values.durationScale * globalAffect.values.pauseScale;
   if (!Number.isFinite(globalPauseScale) || globalPauseScale <= 0) {
+    utterance.diagnostics.error(
+      "Global Affect duration/pause projection must be finite and positive",
+      { durationScale: globalAffect.values.durationScale, pauseScale: globalAffect.values.pauseScale },
+      "HRG_LOWER_AFFECT_TIME_REJECTED",
+    );
     throw new Error("E_HRG_LOWER_AFFECT_TIME: global duration/pause scale must be positive");
   }
   const leadingAxisMs = timings[0]?.startMs ?? 0;
@@ -1069,6 +1172,11 @@ export function lowerToFrames(
     const segmentScale = affect.values.durationScale
       * (timing.item.get(typeKey) === "silence" ? affect.values.pauseScale : 1);
     if (!Number.isFinite(segmentScale) || segmentScale <= 0) {
+      utterance.diagnostics.error(
+        "Segment Affect duration/pause projection must be finite and positive",
+        { itemId: timing.item.id, scale: segmentScale },
+        "HRG_LOWER_AFFECT_TIME_REJECTED",
+      );
       throw new Error(`E_HRG_LOWER_AFFECT_TIME: Segment '${timing.item.id}' scale must be positive`);
     }
     outputTimingByItem.set(timing.item, { startMs: outputCursorMs, scale: segmentScale });
@@ -1081,6 +1189,11 @@ export function lowerToFrames(
   const f0PointsByTime = new Map<number, ResolvedF0Point>();
   if (pointItems.length > 0) {
     if (options.f0?.renderer.type !== "point_interpolation") {
+      utterance.diagnostics.error(
+        "Explicit F0 points are incompatible with the selected renderer",
+        { renderer: options.f0?.renderer.type },
+        "HRG_LOWER_F0_RENDERER_REJECTED",
+      );
       throw new Error("E_HRG_LOWER_F0_RENDERER: F0Point requires the point_interpolation policy");
     }
     for (const point of pointItems) {
@@ -1102,6 +1215,13 @@ export function lowerToFrames(
         throw new Error(`E_HRG_LOWER_F0_POINT_REQUIRED: F0Point '${point.id}' is invalid`);
       }
       const timeMs = Math.max(0, resolvedTimeMs);
+      if (timeMs !== resolvedTimeMs) {
+        utterance.diagnostics.warn(
+          "Explicit F0 point time was clamped to the graph axis origin",
+          { itemId: point.id, requestedMs: resolvedTimeMs, clampedMs: timeMs },
+          "HRG_LOWER_VALUE_CLAMPED",
+        );
+      }
       const displaced = f0PointsByTime.get(timeMs);
       if (displaced) {
         utterance.diagnostics.warn(
@@ -1125,6 +1245,11 @@ export function lowerToFrames(
   }
   let f0Points = [...f0PointsByTime.values()].sort((left, right) => left.timeMs - right.timeMs);
   if (f0Points.length > 0 && (f0Points[0]?.timeMs ?? Number.POSITIVE_INFINITY) > 1e-6) {
+    utterance.diagnostics.error(
+      "Point-interpolation contour is missing its required origin point",
+      { firstPointMs: f0Points[0]?.timeMs },
+      "HRG_LOWER_F0_INITIAL_POINT_REQUIRED",
+    );
     throw new Error("E_HRG_LOWER_F0_INITIAL_POINT: point_interpolation requires an explicit point at 0 ms");
   }
 
@@ -1133,9 +1258,19 @@ export function lowerToFrames(
   const f0ControlItems = [...phraseCommands, ...tiltEvents];
   if (f0ControlItems.length > 0) {
     if (options.f0?.renderer.type !== "layered_additive") {
+      utterance.diagnostics.error(
+        "PhraseCommand/Tilt controls are incompatible with the selected renderer",
+        { renderer: options.f0?.renderer.type },
+        "HRG_LOWER_F0_RENDERER_REJECTED",
+      );
       throw new Error("E_HRG_LOWER_F0_RENDERER: PhraseCommand/Tilt requires the layered_additive policy");
     }
     if (!context.f0Model || context.f0Model.type !== "layered_additive") {
+      utterance.diagnostics.error(
+        "Layered intonation requires the selected backend F0 model",
+        { modelType: context.f0Model?.type },
+        "HRG_LOWER_F0_MODEL_REQUIRED",
+      );
       throw new Error("E_HRG_LOWER_F0_MODEL: layered_additive requires the selected F0 model");
     }
     const commands = f0ControlItems.map((item): F0LayerCommand => {
@@ -1174,12 +1309,22 @@ export function lowerToFrames(
         ...(typeof tag === "string" ? { tag } : {}),
       };
     });
-    const rendered = renderLayeredF0(
-      commands,
-      context.f0Model,
-      (initialSilenceMs + segmentTotalMs + finalSilenceMs) / 1000,
-      context.speakerParams,
-    );
+    let rendered: Array<{ time: number; f0: number }>;
+    try {
+      rendered = renderLayeredF0(
+        commands,
+        context.f0Model,
+        (initialSilenceMs + segmentTotalMs + finalSilenceMs) / 1000,
+        context.speakerParams,
+      );
+    } catch (error) {
+      utterance.diagnostics.error(
+        "Selected layered F0 model failed final realization",
+        { error: error instanceof Error ? error.message : String(error) },
+        "HRG_LOWER_F0_MODEL_REJECTED",
+      );
+      throw error;
+    }
     const commandWrites = f0ControlItems
       .map((item) => ({
         decisionId: item.latestWrite("value")?.decisionId,
@@ -1195,7 +1340,14 @@ export function lowerToFrames(
         if (command.timeMs <= point.time * 1000 + 1e-6) producer = command;
         else break;
       }
-      if (!producer) throw new Error("E_HRG_LOWER_F0_CONTROL_REQUIRED: no stamped layered command");
+      if (!producer) {
+        utterance.diagnostics.error(
+          "Layered F0 output has no producing stamped command",
+          { timeMs: point.time * 1000 },
+          "HRG_LOWER_F0_CONTROL_REQUIRED",
+        );
+        throw new Error("E_HRG_LOWER_F0_CONTROL_REQUIRED: no stamped layered command");
+      }
       return {
         decisionId: producer.decisionId,
         timeMs: point.time * 1000,
@@ -1221,10 +1373,20 @@ export function lowerToFrames(
     const affect = affectByItem.get(timing.item);
     if (!affect || affect.values.f0VarianceScale === 1 || !segmentCanVoice(timing.item)) return;
     if (affect.values.f0VarianceScale < 0) {
+      utterance.diagnostics.error(
+        "Affect F0-variance scale must be non-negative",
+        { itemId: timing.item.id, scale: affect.values.f0VarianceScale },
+        "HRG_LOWER_F0_VARIANCE_REJECTED",
+      );
       throw new Error(`E_HRG_LOWER_F0_VARIANCE: Segment '${timing.item.id}' scale must be non-negative`);
     }
     const decisionId = affect.decisions.f0VarianceScale;
     if (!decisionId) {
+      utterance.diagnostics.error(
+        "Affect F0-variance scale has no producing graph write",
+        { itemId: timing.item.id, scale: affect.values.f0VarianceScale },
+        "HRG_LOWER_F0_VARIANCE_REQUIRED",
+      );
       throw new Error(`E_HRG_LOWER_F0_VARIANCE: Segment '${timing.item.id}' scale is unstamped`);
     }
     const samples = f0VarianceSamplesByDecision.get(decisionId) ?? [];
@@ -1272,6 +1434,11 @@ export function lowerToFrames(
         (decision) => decision.id === context.silence?.decisionId,
       );
       if (!resourceKnown) {
+        utterance.diagnostics.error(
+          "Selected silence/source resource decision is absent from the Utterance",
+          { decisionId: context.silence.decisionId, edge: silenceEdge },
+          "HRG_LOWER_SILENCE_PROVENANCE_REQUIRED",
+        );
         throw new Error("E_HRG_LOWER_SILENCE_PROVENANCE: selected silence decision is unknown");
       }
       const sourceParams = silenceEdge === "initial"
@@ -1371,22 +1538,40 @@ export function lowerToFrames(
           const base = params[key];
           const scale = affect.values[field];
           if (typeof base !== "number" || scale === 1) return;
-          params[key] = Math.max(floor, base * scale);
+          const requested = base * scale;
+          params[key] = Math.max(floor, requested);
           const decision = affect.decisions[field];
           if (decision) provenance[key] = decision;
+          if (params[key] !== requested) {
+            utterance.diagnostics.warn(
+              "Affect projection clamped a scaled backend parameter",
+              { itemId: item.id, key, requested, clamped: params[key], min: floor },
+              "HRG_LOWER_VALUE_CLAMPED",
+            );
+          }
         };
         if (typeof params.F0 === "number" && params.F0 > 0) {
           if (affect.values.f0VarianceScale !== 1) {
             const decision = affect.decisions.f0VarianceScale;
             const center = decision ? f0VarianceCenterByDecision.get(decision) : undefined;
             if (center == null) {
+              utterance.diagnostics.error(
+                "Affect F0-variance projection has no voiced contour reference",
+                { itemId: item.id, decisionId: decision },
+                "HRG_LOWER_F0_VARIANCE_REQUIRED",
+              );
               throw new Error(`E_HRG_LOWER_F0_VARIANCE: Segment '${item.id}' has no voiced contour reference`);
             }
-            params.F0 = Math.max(
-              0.001,
-              center + (params.F0 - center) * affect.values.f0VarianceScale,
-            );
+            const requestedF0 = center + (params.F0 - center) * affect.values.f0VarianceScale;
+            params.F0 = Math.max(0.001, requestedF0);
             provenance.F0 = decision;
+            if (params.F0 !== requestedF0) {
+              utterance.diagnostics.warn(
+                "Affect F0-variance projection clamped voiced F0 above zero",
+                { itemId: item.id, key: "F0", requested: requestedF0, clamped: params.F0, min: 0.001 },
+                "HRG_LOWER_VALUE_CLAMPED",
+              );
+            }
           }
           if (affect.values.f0Scale !== 1) {
             params.F0 *= affect.values.f0Scale;
@@ -1397,18 +1582,40 @@ export function lowerToFrames(
         if (affect.values.rdDelta !== 0 && typeof params.Rd === "number") {
           const priorOffset = params.RdPhraseOffset ?? 0;
           // Fant 1997 effective-Rd range.
-          const effective = Math.max(0.3, Math.min(2.7, params.Rd + priorOffset + affect.values.rdDelta));
+          const requestedEffective = params.Rd + priorOffset + affect.values.rdDelta;
+          const effective = Math.max(0.3, Math.min(2.7, requestedEffective));
           params.RdPhraseOffset = effective - params.Rd;
           const decision = affect.decisions.rdDelta;
           if (decision) provenance.RdPhraseOffset = decision;
+          if (effective !== requestedEffective) {
+            utterance.diagnostics.warn(
+              "Affect projection clamped effective Rd to the cited Fant range",
+              {
+                itemId: item.id,
+                key: "RdPhraseOffset",
+                requested: requestedEffective,
+                clamped: effective,
+                min: 0.3,
+                max: 2.7,
+              },
+              "HRG_LOWER_VALUE_CLAMPED",
+            );
+          }
         }
         // 1 Hz formant and 20 Hz bandwidth floors are explicit engineering bounds.
         applyAdd("F1", "f1Delta");
         applyAdd("F2", "f2Delta");
         applyAdd("F3", "f3Delta");
-        if (typeof params.F1 === "number") params.F1 = Math.max(1, params.F1);
-        if (typeof params.F2 === "number") params.F2 = Math.max(1, params.F2);
-        if (typeof params.F3 === "number") params.F3 = Math.max(1, params.F3);
+        for (const key of ["F1", "F2", "F3"]) {
+          const requested = params[key];
+          if (typeof requested !== "number" || requested >= 1) continue;
+          params[key] = 1;
+          utterance.diagnostics.warn(
+            "Affect projection clamped a formant frequency above zero",
+            { itemId: item.id, key, requested, clamped: 1, min: 1 },
+            "HRG_LOWER_VALUE_CLAMPED",
+          );
+        }
         applyScale("B1", "fbw1Scale", 20);
         applyScale("B2", "fbw2Scale", 20);
         applyScale("B3", "fbw3Scale", 20);

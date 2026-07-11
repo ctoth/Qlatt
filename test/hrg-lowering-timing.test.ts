@@ -165,7 +165,7 @@ function loadTimingPolicy(frontendId: string): LowerOptions {
     throw new Error("compiled lowering timeline missing");
   }
   return {
-    columns: lowering.columns,
+    columns: [],
     transitions: transitions(lowering.transitions),
     timeline: {
       initial_silence_ms: citedNumber(lowering.timeline.initial_silence_ms, "initial_silence_ms"),
@@ -329,6 +329,48 @@ describe("HRG lowering production event timing", () => {
     );
     expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
       code: "HRG_LOWER_TIMING_MISMATCH",
+    }));
+  });
+
+  it("reports a selected duration floor instead of applying it silently", () => {
+    const utterance = new Utterance(SCHEMA);
+    const build = utterance.beginTransaction(META);
+    const segment = build.createItem("segment", "floored");
+    build.set(segment, "phoneme", "AA");
+    build.set(segment, "type", "vowel");
+    build.set(segment, "duration", 10);
+    build.set(segment, "active", true);
+    build.append("Segment", segment);
+    build.partitionAnchors([segment], utterance.axis.start.id, utterance.axis.end.id);
+    build.commit();
+    const timing = utterance.beginTransaction({ ...META, ruleId: "timing", tag: "timing" });
+    timing.resolveMarkTime(utterance.axis.start.id, 0);
+    timing.resolveMarkTime(utterance.axis.end.id, 20);
+    timing.commit();
+
+    lowerToFrames(utterance, loadTimingPolicy("qlatt-english"));
+
+    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
+      code: "HRG_LOWER_DURATION_FLOORED",
+      data: expect.objectContaining({ itemId: "floored", requestedMs: 10, effectiveMs: 20 }),
+    }));
+  });
+
+  it("rejects an invalid selected lowering policy with a diagnostic", () => {
+    const utterance = new Utterance(SCHEMA);
+    const base = loadTimingPolicy("qlatt-english");
+    const policy: LowerOptions = {
+      ...base,
+      transitions: {
+        ...base.transitions,
+        blend: { ...base.transitions.blend, factor: { value: 2 } },
+      },
+    };
+
+    expect(() => lowerToFrames(utterance, policy)).toThrowError(/E_HRG_LOWER_POLICY_NUMBER/);
+    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
+      code: "HRG_LOWER_POLICY_REJECTED",
+      data: expect.objectContaining({ path: "transitions.blend.factor.value", value: 2 }),
     }));
   });
 });

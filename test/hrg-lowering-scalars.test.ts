@@ -401,4 +401,26 @@ describe("HRG lowering scalar histories", () => {
     const segmentIndex = lowered.frames.findIndex((frame) => frame.segmentId === "history");
     expect(lowered.provenanceByFrame[segmentIndex].F1).toBe(latest.decisionId);
   });
+
+  it("rejects a missing declared backend column with a diagnostic", () => {
+    const utterance = new Utterance(schemaFor(["F1", "F2"]));
+    const build = utterance.beginTransaction(META);
+    const segment = build.createItem("segment", "missing-column");
+    build.set(segment, "phoneme", "AA");
+    build.set(segment, "duration", 10);
+    build.set(segment, "active", true);
+    build.set(segment, "F1", 700);
+    build.append("Segment", segment);
+    build.partitionAnchors([segment], utterance.axis.start.id, utterance.axis.end.id);
+    build.commit();
+    resolveSingleSegment(utterance, segment, 10);
+
+    expect(() => lowerToFrames(utterance, loweringOptions(["F1", "F2"]))).toThrowError(
+      /E_HRG_LOWER_COLUMN_REQUIRED/,
+    );
+    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
+      code: "HRG_LOWER_COLUMN_REQUIRED",
+      data: expect.objectContaining({ itemId: "missing-column", key: "F2" }),
+    }));
+  });
 });

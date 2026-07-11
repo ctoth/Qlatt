@@ -306,6 +306,8 @@ export function parseDirectionInput(input: DirectionInput, options: ParseOptions
   let globalAffectDecisionId: string | undefined;
   if (global?.affect) {
     const dir = lowerAffect(provenance, global.affect, "global_affect", "utterance", sex, undefined);
+    dir.precedence = 0;
+    dir.declarationOrder = -1;
     directions.push(dir);
     globalAffectDecisionId = dir.decision.id;
   }

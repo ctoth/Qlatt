@@ -178,7 +178,7 @@ function buildAspirationFixture(): {
     citations: ["DECtalk 4.63 p_us_st1.c"],
   });
   resolveTimes(utterance, [closure, release, vowel], [83, 90, 244]);
-  return { utterance, release, vowel, windowDecisionId: window.decisionId };
+  return { utterance, closure, release, vowel, windowDecisionId: window.decisionId };
 }
 
 describe("HRG lowering control windows", () => {
@@ -202,14 +202,16 @@ describe("HRG lowering control windows", () => {
   });
 
   it("applies numeric shorthand and every field operation without changing graph state", () => {
-    const { utterance, release, vowel } = buildAspirationFixture();
+    const { utterance, closure, release, vowel } = buildAspirationFixture();
     release.set("control_windows", [], {
       reason: "isolate current-target operation fixture",
       citations: ["Burkhardt 2009"],
     });
-    vowel.set("maxParam", 5, { reason: "operation fixture", citations: ["Burkhardt 2009"] });
-    vowel.set("minParam", 15, { reason: "operation fixture", citations: ["Burkhardt 2009"] });
-    vowel.set("unsetParam", 20, { reason: "operation fixture", citations: ["Burkhardt 2009"] });
+    for (const segment of [closure, release, vowel]) {
+      segment.set("maxParam", 5, { reason: "operation fixture", citations: ["Burkhardt 2009"] });
+      segment.set("minParam", 15, { reason: "operation fixture", citations: ["Burkhardt 2009"] });
+      segment.set("unsetParam", 20, { reason: "operation fixture", citations: ["Burkhardt 2009"] });
+    }
     const base = {
       AH: vowel.get("AH"),
       B1: vowel.get("B1"),

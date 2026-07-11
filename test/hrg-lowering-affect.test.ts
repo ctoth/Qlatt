@@ -218,6 +218,10 @@ describe("HRG lowering Affect projection", () => {
     expect(lowered.provenanceByFrame[lowered.frames.indexOf(second)].GO).toBe(
       utterance.relation("Affect").listItems().at(-1)?.latestWrite("delta")?.decisionId,
     );
+    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
+      code: "HRG_LOWER_VALUE_CLAMPED",
+      data: expect.objectContaining({ itemId: "segment-0", key: "RdPhraseOffset" }),
+    }));
   });
 
   it("scales completed F0 excursion around its voiced mean with Affect provenance", () => {
@@ -243,5 +247,18 @@ describe("HRG lowering Affect projection", () => {
       ?.latestWrite("delta")?.decisionId;
     expect(lowered.provenanceByFrame[lowered.frames.indexOf(first)].F0).toBe(varianceDecision);
     expect(lowered.provenanceByFrame[lowered.frames.indexOf(second)].F0).toBe(varianceDecision);
+  });
+
+  it("rejects a negative F0-variance scale with a diagnostic", () => {
+    const utterance = varianceFixture();
+    const affect = utterance.relation("Affect").listItems()[0];
+    if (!affect) throw new Error("variance Affect Item missing");
+    affect.set("delta", { ...compileAffect("angry", 1).vq, f0VarianceScale: -1 }, META);
+
+    expect(() => lowerToFrames(utterance, POLICY)).toThrowError(/E_HRG_LOWER_F0_VARIANCE/);
+    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
+      code: "HRG_LOWER_F0_VARIANCE_REJECTED",
+      data: expect.objectContaining({ itemId: "variance-segment-0", scale: -1 }),
+    }));
   });
 });

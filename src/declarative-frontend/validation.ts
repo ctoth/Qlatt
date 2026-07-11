@@ -2291,6 +2291,71 @@ function validateLoweringSpec(
       },
       diagnostics,
     );
+    if (transitions.sonorant_f2 !== undefined) {
+      const policy = transitions.sonorant_f2;
+      if (!isPlainObject(policy)) {
+        diagnostics.push(makeDiagnostic(
+          "E_LOWERING_SPEC_REQUIRED",
+          "output.lowering.transitions.sonorant_f2 must be an object",
+          "output.lowering.transitions.sonorant_f2",
+        ));
+      } else {
+        if (typeof policy.key !== "string" || policy.key.length === 0) {
+          diagnostics.push(makeDiagnostic(
+            "E_LOWERING_SPEC_REQUIRED",
+            "output.lowering.transitions.sonorant_f2.key is required",
+            "output.lowering.transitions.sonorant_f2.key",
+          ));
+        }
+        validateCitedNumber(
+          policy.span_ms,
+          diagnostics,
+          "output.lowering.transitions.sonorant_f2.span_ms",
+          "output.lowering.transitions.sonorant_f2.span_ms",
+        );
+        validateCitedNumber(
+          policy.neighbor_weight,
+          diagnostics,
+          "output.lowering.transitions.sonorant_f2.neighbor_weight",
+          "output.lowering.transitions.sonorant_f2.neighbor_weight",
+        );
+        if (
+          isPlainObject(policy.span_ms)
+          && typeof policy.span_ms.value === "number"
+          && policy.span_ms.value <= 0
+        ) {
+          diagnostics.push(makeDiagnostic(
+            "E_LOWERING_SPEC_NUMBER",
+            "output.lowering.transitions.sonorant_f2.span_ms.value must be positive",
+            "output.lowering.transitions.sonorant_f2.span_ms.value",
+          ));
+        }
+        if (
+          isPlainObject(policy.neighbor_weight)
+          && typeof policy.neighbor_weight.value === "number"
+          && (policy.neighbor_weight.value < 0 || policy.neighbor_weight.value > 1)
+        ) {
+          diagnostics.push(makeDiagnostic(
+            "E_LOWERING_SPEC_NUMBER",
+            "output.lowering.transitions.sonorant_f2.neighbor_weight.value must be within [0,1]",
+            "output.lowering.transitions.sonorant_f2.neighbor_weight.value",
+          ));
+        }
+        if (typeof policy.current_type !== "string" || policy.current_type.length === 0) {
+          diagnostics.push(makeDiagnostic(
+            "E_LOWERING_SPEC_REQUIRED",
+            "output.lowering.transitions.sonorant_f2.current_type is required",
+            "output.lowering.transitions.sonorant_f2.current_type",
+          ));
+        }
+        validateStringArray(
+          policy.neighbor_types,
+          diagnostics,
+          "output.lowering.transitions.sonorant_f2.neighbor_types",
+          "output.lowering.transitions.sonorant_f2.neighbor_types",
+        );
+      }
+    }
   }
 
   const f0 = lowering.f0;

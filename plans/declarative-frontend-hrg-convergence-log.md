@@ -204,7 +204,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 028 | Phase 4 production-contract reconciliation | kept | `cd7efe64` | sparse boundary events match captured production schedules; bridge oracles deleted from Phase 4 tests; 20 tests; core/scripts typecheck pass |
 | 029 | Phase 4 lowering family 2: production scalar cells | kept | `5d481234` | 1,443 base-scalar boundary cells exact against production events; latest-write provenance retained |
 | 030 | Phase 4 family 3A: graph control windows | kept | `42e2f0a4` | DECtalk next-target production cells exact; all field ops/targets/span forms; window provenance |
-| 031 | Phase 4 family 3B: midpoint transitions | kept | pending slice commit | qlatt EH-to-L production event and 5 ordinary blend cells exact; policy-driven types/keys/factor/span |
+| 031 | Phase 4 family 3B: midpoint transitions | kept | `0b4b2e01` | qlatt EH-to-L production event and 5 ordinary blend cells exact; policy-driven types/keys/factor/span |
+| 032 | Phase 4 family 3C: sonorant F2 ramps | kept | pending slice commit | cited 45 ms/75% policy; qlatt F2 ramp start/interior production cells exact; compiler range validation |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1556,3 +1557,40 @@ PASS: 5 files, 27 tests
 
 Next source slice remains family 3: migrate and prove the cited sonorant F2
 edge policy, then DECtalk locus/universal transitions and full family parity.
+
+## Iteration 032 — Phase 4 family 3C: sonorant F2 ramps
+
+Status: kept. Family 3 remains active for DECtalk locus/universal transitions.
+
+The previously hardcoded sonorant F2 behavior is now explicit selected lowering
+policy in all three bundled frontends:
+
+- affected key: F2;
+- span: cited 45 ms;
+- boundary target: cited 75% neighboring sonorant value;
+- current type: vowel; and
+- neighbor types: nasal, liquid, glide.
+
+The compiler validates the complete block, citations, positive span, and
+neighbor weight range. Generic lowering evaluates backward and forward per-key
+ramps at every emitted event without naming a frontend or phoneme.
+
+Captured qlatt-English EH-to-L proof:
+
+```text
+520 ms: F2=1799 exactly at the 45 ms ramp start
+535 ms: F2=1574.25 exactly at the ordinary midpoint event
+```
+
+The second value is an analytic interpolation toward the 75%-neighbor boundary
+target; it is not another midpoint and not a uniform sampling approximation.
+
+Verification:
+
+```text
+npm test -- --run test/hrg-lowering-midpoint-transitions.test.ts test/declarative-frontend-schema.test.ts test/yaml-frontend-config.test.ts test/track-assembler-output-config.test.ts
+PASS: 4 files, 39 tests
+```
+
+Next source slice remains family 3: DECtalk policy-driven locus and universal
+boundary transitions, then a complete transition/control-event parity matrix.

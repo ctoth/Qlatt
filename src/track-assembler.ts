@@ -173,6 +173,14 @@ export type TrackLoweringSpec = {
      * ph_sttr2.c:303-307; p_us_rom.h us_place[]; ph_defs.h:345-346.
      */
     f2_back?: Record<string, { forward?: boolean; backward?: boolean }>;
+    /** Generic per-key sonorant-edge ramp policy, currently used for F2. */
+    sonorant_f2?: {
+      key: string;
+      span_ms: CitedNumberSpec;
+      neighbor_weight: CitedNumberSpec;
+      current_type: string;
+      neighbor_types: string[];
+    };
   };
   f0: {
     renderer: {

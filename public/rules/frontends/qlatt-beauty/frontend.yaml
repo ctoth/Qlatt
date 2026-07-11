@@ -1027,6 +1027,18 @@ output:
             - "Engineering estimate: 35% blend factor for formant transition smoothing"
         keys: [F1, F2, F3, B1, B2, B3]
         smooth_types: [vowel, nasal, liquid, glide]
+      sonorant_f2:
+        key: F2
+        span_ms:
+          value: 45
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:442-455,837-849 (sonorant-edge F2 smoothing uses NF45MS)"
+        neighbor_weight:
+          value: 0.75
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:442-455,837-849 (sonorant-edge F2 boundary uses a 75/25 neighbor weighting)"
+        current_type: vowel
+        neighbor_types: [nasal, liquid, glide]
     f0:
       renderer:
         type: point_interpolation

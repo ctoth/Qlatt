@@ -28,6 +28,13 @@ const loweringOutput = {
         keys: ["F1", "F2"],
         smooth_types: ["vowel"],
       },
+      sonorant_f2: {
+        key: "F2",
+        span_ms: { value: 45, citations: ["test"] },
+        neighbor_weight: { value: 0.75, citations: ["test"] },
+        current_type: "vowel",
+        neighbor_types: ["nasal", "liquid", "glide"],
+      },
     },
     f0: {
       renderer: { type: "point_interpolation" },
@@ -109,6 +116,29 @@ describe("declarative frontend schema coverage", () => {
     const codes = diagnostics.map((d) => d.code);
 
     expect(codes.includes("E_LOWERING_SPEC_REQUIRED")).toBe(true);
+  });
+
+  it("rejects an out-of-range sonorant transition weight", () => {
+    const spec = parseDslSpec({
+      relations: { phone: { type: "base" } },
+      output: {
+        lowering: {
+          ...loweringOutput.lowering,
+          transitions: {
+            ...loweringOutput.lowering.transitions,
+            sonorant_f2: {
+              ...loweringOutput.lowering.transitions.sonorant_f2,
+              neighbor_weight: { value: 1.5, citations: ["test"] },
+            },
+          },
+        },
+      },
+    });
+
+    expect(validateDslSpec(spec)).toContainEqual(expect.objectContaining({
+      code: "E_LOWERING_SPEC_NUMBER",
+      path: "output.lowering.transitions.sonorant_f2.neighbor_weight.value",
+    }));
   });
 
   it("allows engine-only specs to omit track lowering output by default", () => {

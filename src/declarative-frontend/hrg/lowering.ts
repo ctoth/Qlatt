@@ -44,6 +44,13 @@ export interface LowerOptions {
       smooth_types: readonly string[];
       smooth_all_boundaries?: boolean;
     };
+    sonorant_f2?: {
+      key: string;
+      span_ms: { value: number };
+      neighbor_weight: { value: number };
+      current_type: string;
+      neighbor_types: readonly string[];
+    };
   };
   /** Feature key holding each segment's realized duration in ms (default "duration"). */
   durationKey?: string;
@@ -88,6 +95,8 @@ type ResolvedControlWindow = {
 type ResolvedSegmentTransition = {
   startMs: number;
   fields: Readonly<Record<string, number>>;
+  endMs?: number;
+  linearFields?: Readonly<Record<string, { startValue: number; endValue: number }>>;
 };
 
 function isFeatureObject(value: FeatureValue | undefined): value is { readonly [key: string]: FeatureValue } {
@@ -279,6 +288,11 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
   const paramKeys = options.columns.slice();
   const smoothTypes = new Set(options.transitions.blend.smooth_types);
   const transitionsByItem = new Map<Item, ResolvedSegmentTransition[]>();
+  const appendTransition = (item: Item, transition: ResolvedSegmentTransition): void => {
+    const existing = transitionsByItem.get(item);
+    if (existing) existing.push(transition);
+    else transitionsByItem.set(item, [transition]);
+  };
   timings.forEach((timing, index) => {
     const nextTiming = timings[index + 1];
     if (!nextTiming) return;
@@ -299,9 +313,62 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
       fields[key] = currentValue + (nextValue - currentValue) * blendFactor;
     }
     if (Object.keys(fields).length > 0) {
-      transitionsByItem.set(timing.item, [{ startMs, fields }]);
+      appendTransition(timing.item, { startMs, fields });
     }
   });
+  const sonorantF2 = options.transitions.sonorant_f2;
+  if (sonorantF2) {
+    const spanMs = requirePolicyNumber(sonorantF2.span_ms.value, "transitions.sonorant_f2.span_ms.value");
+    const neighborWeight = sonorantF2.neighbor_weight.value;
+    if (!Number.isFinite(neighborWeight) || neighborWeight < 0 || neighborWeight > 1) {
+      throw new Error(
+        "E_HRG_LOWER_POLICY_NUMBER: 'transitions.sonorant_f2.neighbor_weight.value' must be within [0,1]",
+      );
+    }
+    const neighborTypes = new Set(sonorantF2.neighbor_types);
+    timings.forEach((timing, index) => {
+      if (timing.item.get(typeKey) !== sonorantF2.current_type) return;
+      const currentValue = timing.item.get(sonorantF2.key);
+      if (typeof currentValue !== "number") return;
+      const previous = timings[index - 1];
+      if (previous && neighborTypes.has(String(previous.item.get(typeKey)))) {
+        const previousValue = previous.item.get(sonorantF2.key);
+        const endMs = Math.min(spanMs, timing.durationMs - 20);
+        if (typeof previousValue === "number" && endMs > 0) {
+          appendTransition(timing.item, {
+            startMs: 0,
+            endMs,
+            fields: {},
+            linearFields: {
+              [sonorantF2.key]: {
+                startValue: currentValue + (previousValue - currentValue) * neighborWeight,
+                endValue: currentValue,
+              },
+            },
+          });
+        }
+      }
+      const next = timings[index + 1];
+      if (next && neighborTypes.has(String(next.item.get(typeKey)))) {
+        const nextValue = next.item.get(sonorantF2.key);
+        const transitionSpanMs = Math.min(spanMs, timing.durationMs);
+        const startMs = Math.max(20, timing.durationMs - transitionSpanMs);
+        if (typeof nextValue === "number" && startMs < timing.durationMs) {
+          appendTransition(timing.item, {
+            startMs,
+            endMs: timing.durationMs,
+            fields: {},
+            linearFields: {
+              [sonorantF2.key]: {
+                startValue: currentValue,
+                endValue: currentValue + (nextValue - currentValue) * neighborWeight,
+              },
+            },
+          });
+        }
+      }
+    });
+  }
   const controlWindowsByItem = new Map<Item, ResolvedControlWindow[]>();
   segmentItems.forEach((sourceItem, sourceIndex) => {
     const rawWindows = sourceItem.get("control_windows");
@@ -376,6 +443,17 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
           const write = item.latestWrite(key);
           if (write) provenance[key] = write.decisionId;
         }
+        if (transition.linearFields && transition.endMs != null) {
+          const durationMs = transition.endMs - transition.startMs;
+          const fraction = durationMs <= 0
+            ? 1
+            : Math.max(0, Math.min(1, (segmentOffsetMs - transition.startMs) / durationMs));
+          for (const [key, values] of Object.entries(transition.linearFields)) {
+            params[key] = values.startValue + (values.endValue - values.startValue) * fraction;
+            const write = item.latestWrite(key);
+            if (write) provenance[key] = write.decisionId;
+          }
+        }
       }
       for (const window of controlWindowsByItem.get(item) ?? []) {
         if (segmentOffsetMs < window.startMs - 1e-6 || segmentOffsetMs >= window.endMs - 1e-6) {
@@ -427,6 +505,13 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
       for (const transition of transitionsByItem.get(timing.item) ?? []) {
         if (transition.startMs > 1e-6 && transition.startMs < timing.durationMs - 1e-6) {
           offsets.add(transition.startMs);
+        }
+        if (
+          transition.endMs != null
+          && transition.endMs > 1e-6
+          && transition.endMs < timing.durationMs - 1e-6
+        ) {
+          offsets.add(transition.endMs);
         }
       }
     }

@@ -13,6 +13,7 @@ const SCHEMA = {
         type: { kind: "string" },
         duration: { kind: "number" },
         F1: { kind: "number" },
+        F2: { kind: "number" },
         F3: { kind: "number" },
         B1: { kind: "number" },
         B2: { kind: "number" },
@@ -24,7 +25,7 @@ const SCHEMA = {
 } as const satisfies HrgSchema;
 
 const POLICY = {
-  columns: ["F1", "F3", "B1", "B2", "B3"],
+  columns: ["F1", "F2", "F3", "B1", "B2", "B3"],
   timeline: {
     initial_silence_ms: { value: 30 },
     final_silence_ms: { value: 100 },
@@ -45,6 +46,13 @@ const POLICY = {
       factor: { value: 0.35 },
       keys: ["F1", "F2", "F3", "B1", "B2", "B3"],
       smooth_types: ["vowel", "nasal", "liquid", "glide"],
+    },
+    sonorant_f2: {
+      key: "F2",
+      span_ms: { value: 45 },
+      neighbor_weight: { value: 0.75 },
+      current_type: "vowel",
+      neighbor_types: ["nasal", "liquid", "glide"],
     },
   },
 } as const satisfies LowerOptions;
@@ -106,10 +114,10 @@ describe("HRG lowering midpoint transitions", () => {
     const utterance = new Utterance(SCHEMA);
     const build = utterance.beginTransaction(META);
     const eh = addSegment(build, "seg_3", "EH", "vowel", 155, {
-      F1: 580, F3: 2605, B1: 70, B2: 90, B3: 130,
+      F1: 580, F2: 1799, F3: 2605, B1: 70, B2: 90, B3: 130,
     });
     const l = addSegment(build, "seg_4", "L", "liquid", 65, {
-      F1: 310, F3: 2400, B1: 50, B2: 100, B3: 200,
+      F1: 310, F2: 900, F3: 2400, B1: 50, B2: 100, B3: 200,
     });
     build.partitionAnchors([eh, l], utterance.axis.start.id, utterance.axis.end.id);
     build.commit();
@@ -126,11 +134,15 @@ describe("HRG lowering midpoint transitions", () => {
     const transition = lowered.frames.find(
       (frame) => frame.segmentId === eh.id && Math.abs(frame.time - 0.535) <= 1e-9,
     );
+    const f2Start = lowered.frames.find(
+      (frame) => frame.segmentId === eh.id && Math.abs(frame.time - 0.52) <= 1e-9,
+    );
     const production = productionTransitionParams();
 
     expect(transition).toBeDefined();
     for (const column of POLICY.columns) {
       expect(transition?.params[column], column).toBe(production[column]);
     }
+    expect(f2Start?.params.F2).toBe(1799);
   });
 });

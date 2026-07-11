@@ -5,10 +5,27 @@ import { validateDslSpec } from "../src/declarative-frontend/validation";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 import {
   CEL_FUNCTION_CATALOG,
+  evaluateExpression,
   validateExpressionSyntax,
 } from "../src/declarative-frontend/cel-expressions";
 
 describe("declarative frontend CEL expressions", () => {
+  it("keeps nested evaluations isolated from the caller's function bindings", () => {
+    const result = evaluateExpression(
+      "max(1) + max(2)",
+      {},
+      {
+        max: (value: unknown) => Number(value) + Number(evaluateExpression(
+          "min(10)",
+          {},
+          { min: (nested: unknown) => nested },
+        )),
+      },
+    );
+
+    expect(result).toBe(23);
+  });
+
   it("owns every CEL function name and exact arity in one frontend-neutral catalog", () => {
     const names = CEL_FUNCTION_CATALOG.map((entry) => entry.name);
     expect(new Set(names).size).toBe(names.length);

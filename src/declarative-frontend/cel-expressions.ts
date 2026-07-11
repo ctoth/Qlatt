@@ -88,17 +88,13 @@ const RELATION_HELPER_PATTERN = /\b(total|prev_point)\s*\(\s*(['"])([^'"]+)\2\s*
 const CURSOR_DEPTH_PATTERN = /\b(prev|next)(\d+)\b/g;
 
 /**
- * Mutable binding for current evaluation's custom functions.
- * Safe because CEL evaluation is synchronous — no concurrent calls.
- */
-let _currentFunctions: Record<string, (...args: unknown[]) => unknown> = {};
-
-/**
- * Create the shared CEL Environment with:
+ * Create a CEL Environment with:
  * - Mixed int/double arithmetic operators (CEL spec is strict about types)
- * - All known custom function signatures dispatching through _currentFunctions
+ * - All known custom function signatures bound to one evaluation registry
  */
-function createCelEnvironment(): Environment {
+function createCelEnvironment(
+  functions: Readonly<Record<string, unknown>> | null = null,
+): Environment {
   const env = new Environment({
     unlistedVariablesAreDyn: true,
     homogeneousAggregateLiterals: false,
@@ -122,10 +118,9 @@ function createCelEnvironment(): Environment {
   env.registerOperator("int % double", (a: bigint, b: number) => Number(a) % b);
   env.registerOperator("double == int", (a: number, b: bigint) => a === Number(b));
 
-  // Register all known custom function signatures.
-  // These dispatch through _currentFunctions so that the actual implementation
-  // can change per evaluateExpression() call (navigation functions are built
-  // dynamically with closures over the token sequence).
+  // Register all known custom function signatures against this Environment's
+  // immutable evaluation owner. Bound environments are cached by the explicit
+  // function-registry object; no module-global dispatch participates.
   //
   // "double" and "string" are CEL built-in type casts and must NOT be
   // re-registered. Our codebase's double(x) => Number(x) and string(x) =>
@@ -136,8 +131,8 @@ function createCelEnvironment(): Environment {
       const args = Array.from({ length: arity }, () => "dyn").join(", ");
       const signature = `${name}(${args}): dyn`;
       env.registerFunction(signature, (...args: unknown[]) => {
-        const fn = _currentFunctions[name];
-        if (!fn) throw new Error(`CEL function '${name}' not available in current context`);
+        const fn = functions?.[name];
+        if (!isCallable(fn)) throw new Error(`CEL function '${name}' not available in current context`);
         return fn(...args);
       });
     }
@@ -147,6 +142,23 @@ function createCelEnvironment(): Environment {
 }
 
 const celEnv = createCelEnvironment();
+const boundExpressionCaches = new WeakMap<object, Map<string, CompiledCelExpression>>();
+
+function compileBoundExpression(
+  expression: string,
+  functions: Readonly<Record<string, unknown>>,
+): CompiledCelExpression {
+  let cache = boundExpressionCaches.get(functions);
+  if (!cache) {
+    cache = new Map<string, CompiledCelExpression>();
+    boundExpressionCaches.set(functions, cache);
+  }
+  const cached = cache.get(expression);
+  if (cached) return cached;
+  const compiled = createCelEnvironment(functions).parse(expression);
+  cache.set(expression, compiled);
+  return compiled;
+}
 
 /**
  * Coerce @marcbachmann/cel-js results: BigInt (CEL int) → JS number.
@@ -241,28 +253,16 @@ export function evaluateExpression(
   functions: Record<string, unknown> | null = null
 ): unknown {
   _celEvalCount++;
-  const compiled = compileExpression(expression);
+  const syntaxCompiled = compileExpression(expression);
+  const compiled = functions && typeof functions === "object"
+    ? compileBoundExpression(expression, functions)
+    : syntaxCompiled;
 
-  // Set up the mutable function binding for this evaluation
-  const registry: Record<string, (...args: unknown[]) => unknown> = {};
-  if (functions && typeof functions === "object") {
-    for (const [name, fn] of Object.entries(functions)) {
-      if (isCallable(fn)) {
-        registry[name] = fn;
-      }
-    }
+  if (_celTimingEnabled) {
+    const t0 = performance.now();
+    const result = coerceResult(compiled(isRecord(context) ? context : {}));
+    _celEvalTimeMs += performance.now() - t0;
+    return result;
   }
-  _currentFunctions = registry;
-
-  try {
-    if (_celTimingEnabled) {
-      const t0 = performance.now();
-      const result = coerceResult(compiled(isRecord(context) ? context : {}));
-      _celEvalTimeMs += performance.now() - t0;
-      return result;
-    }
-    return coerceResult(compiled(isRecord(context) ? context : {}));
-  } finally {
-    _currentFunctions = {};
-  }
+  return coerceResult(compiled(isRecord(context) ? context : {}));
 }

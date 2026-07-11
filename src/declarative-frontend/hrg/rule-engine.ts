@@ -45,6 +45,7 @@ function buildEvaluationContext(
   params: Readonly<Record<string, unknown>>,
   extra: Readonly<Record<string, unknown>> = {},
   bindings: Readonly<Record<string, Item>> = {},
+  relationName?: string,
 ): EvaluationContext {
   const views = new Map<Item, Readonly<Record<string, unknown>>>();
   const itemByView = new WeakMap<object, Item>();
@@ -77,7 +78,12 @@ function buildEvaluationContext(
     const source = resolveItem(value);
     const sourceIndex = source ? items.indexOf(source) : -1;
     const distance = typeof amount === "number" ? Math.trunc(amount) : 1;
-    return sourceIndex >= 0 ? view(items[sourceIndex + distance]) : null;
+    const target = sourceIndex >= 0 ? items[sourceIndex + distance] : undefined;
+    if (target && relationName) {
+      const write = utterance.relation(relationName).node(target)?.write;
+      if (write) transaction.dependOn(write.decisionId);
+    }
+    return view(target);
   };
   const merge = (left: unknown, right: unknown): Record<string, unknown> => {
     const source = resolveItem(left);
@@ -117,8 +123,13 @@ function buildEvaluationContext(
   const bindingViews = Object.fromEntries(
     Object.entries(bindings).map(([name, item]) => [name, view(item)]),
   );
-  return {
-    values: {
+  const navigationItems: Readonly<Record<string, Item | undefined>> = {
+    current: items[index],
+    prev: items[index - 1],
+    next: items[index + 1],
+    ...bindings,
+  };
+  const values = {
       current: view(items[index]),
       prev: view(items[index - 1]),
       next: view(items[index + 1]),
@@ -126,7 +137,18 @@ function buildEvaluationContext(
       params,
       ...bindingViews,
       ...extra,
-    },
+  };
+  return {
+    values: new Proxy(values, {
+      get: (target, property, receiver) => {
+        if (typeof property === "string" && relationName) {
+          const item = navigationItems[property];
+          const write = item ? utterance.relation(relationName).node(item)?.write : undefined;
+          if (write) transaction.dependOn(write.decisionId);
+        }
+        return Reflect.get(target, property, receiver);
+      },
+    }),
     functions: {
       ahead: (source, amount = 1) => offset(source, amount),
       behind: (source, amount = 1) => offset(source, -Number(amount)),
@@ -563,6 +585,7 @@ function executeMatch(
     params,
     match.contour ? { contour: match.contour } : {},
     match.bindings,
+    match.relationName,
   );
   const definitions: Record<string, unknown> = {};
   if (isPlainObject(rule.define)) {
@@ -576,6 +599,7 @@ function executeMatch(
         params,
         { ...(match.contour ? { contour: match.contour } : {}), ...definitions },
         match.bindings,
+        match.relationName,
       );
     }
   }
@@ -624,7 +648,16 @@ function selectMatches(
   const matches: Match[] = [];
   for (let index = 0; index < items.length; index += 1) {
     const transaction = beginRuleTransaction(utterance, phaseName, ruleName, rule);
-    const context = buildEvaluationContext(utterance, transaction, items, index, params);
+    const context = buildEvaluationContext(
+      utterance,
+      transaction,
+      items,
+      index,
+      params,
+      {},
+      {},
+      rule.select.relation,
+    );
     if (!conditionMatches(rule.select.where, context, predicates)) continue;
     const node = relation.node(items[index]);
     if (!node) throw new Error("E_HRG_MATCH_NODE: selected Item has no relation node");
@@ -679,6 +712,7 @@ function patternMatches(
         params,
         {},
         bindings,
+        pattern.relation,
       );
       if (!conditionMatches(step.where, context, predicates)) {
         matched = false;
@@ -701,6 +735,7 @@ function patternMatches(
       params,
       {},
       bindings,
+      pattern.relation,
     );
     if (!conditionMatches(pattern.constraint, context, predicates)) continue;
     matches.push({

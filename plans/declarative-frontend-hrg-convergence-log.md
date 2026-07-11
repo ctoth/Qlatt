@@ -195,7 +195,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 019 | Phase 3 boundary-insertion proof | kept | `e6c7ded5` | relation/temporal adjacency proof; 40 HRG tests; core/scripts typecheck pass |
 | 020 | Phase 3 graph engine phrase contours | kept | `bf4f956a` | selected-duration progress and break reset; 41 HRG tests; core/scripts typecheck pass |
 | 021 | Phase 3 graph engine F0 layers | kept | `eb320851` | typed profile/gesture commands and replay; 42 HRG tests; core/scripts typecheck pass |
-| 022 | Phase 3 graph engine finalization | kept | pending slice commit | journaled timing, dirty guard, replay; 45 HRG tests; core/scripts typecheck pass |
+| 022 | Phase 3 graph engine finalization | kept | `246fd8ba` | journaled timing, dirty guard, replay; 45 HRG tests; core/scripts typecheck pass |
+| 023 | Phase 3 CEL isolation/topology reads | kept | pending slice commit | nested evaluation isolation and exact navigation parents; 53 focused tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1110,3 +1111,45 @@ PASS: 13 files, 45 tests
 Next Phase 3 slice: delete module-global CEL function dispatch, complete tracked
 navigation/path/predicate read proofs, and run the complete replacement-engine
 exit gate before advancing to Phase 4.
+
+## Iteration 023 — Phase 3 CEL isolation and topology reads
+
+Status: kept as the eighth target-owner sub-slice of the replacement engine.
+
+The nested-evaluation test was red because the shared CEL Environment dispatched
+custom functions through `_currentFunctions`; an inner evaluation cleared its
+caller's bindings before the caller's second function invocation. The topology
+fixtures also established the missing exact relation-read contract.
+
+Kept convergence:
+
+- deletes `_currentFunctions` and its synchronous-global safety assumption;
+- binds each explicit function-registry object to its own CEL Environment and
+  weakly cached compiled-expression set;
+- preserves the existing syntax cache/counters independently of runtime
+  function bindings;
+- proves nested evaluation cannot corrupt the caller's function registry;
+- wraps evaluation variables so `current`, `prev`, `next`, and named capture
+  access records the selected Relation membership decision lazily;
+- makes `ahead`/`behind` record the reached membership decision; and
+- proves a short-circuited navigation branch contributes neither its feature
+  nor membership decision, while an executed branch contributes both.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- --run test/declarative-frontend-cel-expressions.test.ts test/hrg
+PASS: 15 files, 53 tests
+
+rg -n "_currentFunctions" src test
+ZERO HIT
+```
+
+Next Phase 3 slice: finish graph-native predicate/path/catalog navigation and
+run the complete replacement-engine exit gate before advancing to Phase 4.

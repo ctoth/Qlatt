@@ -13,8 +13,38 @@ import {
   decisionChain,
 } from "../src/declarative-frontend/hrg";
 import type { Item } from "../src/declarative-frontend/hrg/item";
+import type { HrgSchema } from "../src/declarative-frontend/hrg";
 
 const CITE = ["Taylor 2001 HRG"];
+const TEST_SCHEMA = {
+  itemTypes: {
+    word: {
+      features: {
+        text: { kind: "string" },
+        pos: { kind: "string" },
+      },
+    },
+    syllable: {
+      features: {
+        accented: { kind: "boolean" },
+      },
+    },
+    segment: {
+      features: {
+        phoneme: { kind: "string" },
+        dur_ms: { kind: "number" },
+        F0: { kind: "number" },
+        F1: { kind: "number" },
+      },
+    },
+  },
+  relations: {
+    Word: { kind: "list", itemTypes: ["word"] },
+    Syllable: { kind: "list", itemTypes: ["syllable"] },
+    Segment: { kind: "list", itemTypes: ["segment"] },
+    SylStructure: { kind: "tree", itemTypes: ["word", "syllable", "segment"] },
+  },
+} as const satisfies HrgSchema;
 
 /**
  * Build a small "the cat" utterance:
@@ -26,7 +56,7 @@ const CITE = ["Taylor 2001 HRG"];
  * Returns handles needed by the tests.
  */
 function buildTheCat() {
-  const u = new Utterance();
+  const u = new Utterance(TEST_SCHEMA);
 
   // Words (flat Word list).
   const theW = u.createItem("word");
@@ -161,7 +191,7 @@ describe("HRG path navigation", () => {
 
 describe("HRG write-stamping and provenance chain", () => {
   it("a first write records a feature_write DecisionRecord with citations", () => {
-    const u = new Utterance();
+    const u = new Utterance(TEST_SCHEMA);
     const seg = u.createItem("segment");
     const write = seg.set("F1", 500, { reason: "AE F1 target", citations: ["Peterson & Barney 1952"] });
     expect(write.version).toBe(0);
@@ -174,7 +204,7 @@ describe("HRG write-stamping and provenance chain", () => {
   });
 
   it("an overwrite is append-only and links to the prior value's decision", () => {
-    const u = new Utterance();
+    const u = new Utterance(TEST_SCHEMA);
     const seg = u.createItem("segment");
     const v0 = seg.set("dur_ms", 120, { reason: "inherent duration", citations: ["Klatt 1976"] });
     const v1 = seg.set("dur_ms", 84, {
@@ -197,7 +227,7 @@ describe("HRG write-stamping and provenance chain", () => {
   });
 
   it("read-set parents thread a derivation chain (pos -> accent -> F0)", () => {
-    const u = new Utterance();
+    const u = new Utterance(TEST_SCHEMA);
     const word = u.createItem("word");
     const posWrite = word.set("pos", "NN", { reason: "POS tag", stage: "transcribe", citations: ["MITalk"] });
 
@@ -253,7 +283,7 @@ describe("HRG lowering to Klatt frames", () => {
   });
 
   it("a segment missing a duration falls back to the default", () => {
-    const u = new Utterance();
+    const u = new Utterance(TEST_SCHEMA);
     const seg = u.createItem("segment");
     seg.set("phoneme", "AA", { reason: "x", citations: CITE });
     seg.set("F1", 700, { reason: "x", citations: CITE });

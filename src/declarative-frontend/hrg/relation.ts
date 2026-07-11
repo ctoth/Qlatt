@@ -52,9 +52,15 @@ export class Relation {
   constructor(
     readonly name: string,
     readonly kind: RelationKind,
+    private readonly allowedItemTypes: ReadonlySet<string>,
   ) {}
 
   private attach(item: Item): HrgNode {
+    if (!this.allowedItemTypes.has(item.type)) {
+      throw new Error(
+        `E_HRG_RELATION_ITEM_TYPE: relation '${this.name}' does not allow item type '${item.type}'`,
+      );
+    }
     if (this.nodesById.has(item.id)) {
       throw new Error(
         `E_HRG_DUPLICATE_NODE: item '${item.id}' is already in relation '${this.name}'`,

@@ -21,8 +21,44 @@
 import type { ProvenanceStage } from "../../provenance";
 import type { Item } from "./item";
 
-/** A leaf feature value. Items are typed feature bundles of these. */
-export type FeatureValue = string | number | boolean | null;
+export type PrimitiveFeatureValue = string | number | boolean | null;
+
+/** Immutable validated value stored in an Item feature history. */
+export type FeatureValue =
+  | PrimitiveFeatureValue
+  | readonly FeatureValue[]
+  | { readonly [key: string]: FeatureValue };
+
+/** Discriminated runtime schema for one Item feature. */
+export type FeatureSchema =
+  | { kind: "string"; values?: readonly string[] }
+  | { kind: "number" }
+  | { kind: "boolean" }
+  | { kind: "null" }
+  | { kind: "literal"; value: PrimitiveFeatureValue }
+  | { kind: "array"; items: FeatureSchema }
+  | {
+      kind: "object";
+      fields: Readonly<Record<string, FeatureSchema>>;
+      optional?: readonly string[];
+      additional?: FeatureSchema;
+    }
+  | { kind: "union"; variants: readonly FeatureSchema[] };
+
+export interface ItemTypeSchema {
+  features: Readonly<Record<string, FeatureSchema>>;
+}
+
+export interface RelationSchema {
+  kind: RelationKind;
+  itemTypes: readonly string[];
+}
+
+/** Complete schema owned and enforced by one Utterance. */
+export interface HrgSchema {
+  itemTypes: Readonly<Record<string, ItemTypeSchema>>;
+  relations: Readonly<Record<string, RelationSchema>>;
+}
 
 /** Relations are either flat ordered lists or parent/daughter trees. */
 export type RelationKind = "list" | "tree";

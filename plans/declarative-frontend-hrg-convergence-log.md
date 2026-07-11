@@ -181,7 +181,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 005 | Phase 2B immutable compiled rulepacks | kept | `46903895` | 204 declarative tests; 57 integration tests; core/scripts typecheck pass |
 | 006 | Phase 2C final relation DSL vocabulary | kept | `e1a16553` | 205 declarative tests; 124/125 downstream baseline; three strict explain runs; core/scripts typecheck pass |
 | 007 | Phase 2D CEL neutrality | kept | `c76fcfe6` | 246 focused tests; DECtalk strict explain 192/0; core/scripts typecheck pass |
-| 008 | Phase 2E structural invalidation owner | kept | pending slice commit | exact two-firing count; 207 declarative tests; core/scripts typecheck pass |
+| 008 | Phase 2E structural invalidation owner | kept | `f5f30bc1` | exact two-firing count; 207 declarative tests; core/scripts typecheck pass |
+| 009 | Phase 3 typed Item/relation schemas | kept | pending slice commit | 19 HRG tests; core/scripts typecheck pass; no HRG any |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -515,3 +516,46 @@ ONLY: the trace emission, the exact-count assertion, and the select/pattern per-
 Next phase: Phase 3. Complete the HRG owner in the plan's stated slice order,
 starting with typed Item/relation schema enforcement and immutable structured
 feature values.
+
+## Iteration 009 — Phase 3 typed Item/relation schemas
+
+Status: kept.
+
+Five direct schema contracts were red against the old free-form owner:
+undeclared Item types and features were accepted, value types were unchecked,
+structured values could not be stored safely, relation membership was
+unconstrained, and caller-owned schema objects could poison an existing graph.
+
+Kept convergence:
+
+- introduced discriminated primitive, literal, array, object, and union feature
+  schemas plus Item type, relation, and complete Utterance schema types;
+- made `Utterance` require and privately compile a frozen schema copy;
+- made `createItem()` reject undeclared Item types before pool mutation;
+- made the existing `Item.set()` owner validate declared feature keys and
+  recursively validate, clone, and freeze structured values before stamping;
+- made the existing `Relation` owner enforce its declared allowed Item types
+  before node or topology mutation;
+- deleted caller-selected relation kinds from `Utterance.relation()` so the
+  schema is the sole topology-kind authority; and
+- migrated the static HRG fixtures to an explicit schema without adding a
+  facade, wrapper Item, or parallel graph representation.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- test/hrg-schema.test.ts test/hrg.test.ts
+PASS: 2 files, 19 tests
+
+rg -n "Record<string, any>|\\bany\\b" src/declarative-frontend/hrg
+ZERO CODE HIT
+```
+
+Next slice: stamp relation membership/topology writes through the Utterance
+owner, retain append-only history, and add direct why queries before committing.

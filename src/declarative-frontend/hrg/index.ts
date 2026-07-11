@@ -19,8 +19,12 @@ export type { LowerOptions, LoweredTrack, SegmentTiming } from "./lowering";
 export { decisionChain, whyFeature, whyParamAt } from "./provenance-query";
 export type {
   FeatureValue,
+  FeatureSchema,
   FeatureWrite,
   FeatureWriteInput,
+  HrgSchema,
+  ItemTypeSchema,
+  RelationSchema,
   RelationKind,
   Stamper,
 } from "./types";

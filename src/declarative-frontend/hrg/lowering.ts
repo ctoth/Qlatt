@@ -178,12 +178,102 @@ type ResolvedF0Point = {
   valueHz: number;
 };
 
+const AFFECT_FIELDS = [
+  "rdDelta",
+  "f0Scale",
+  "f0VarianceScale",
+  "durationScale",
+  "intensityBoost",
+  "ahBoost",
+  "spectralTiltBoost",
+  "pauseScale",
+  "f1Delta",
+  "f2Delta",
+  "f3Delta",
+  "fbw1Scale",
+  "fbw2Scale",
+  "fbw3Scale",
+  "jitterScale",
+  "shimmerScale",
+] as const;
+
+type AffectField = (typeof AFFECT_FIELDS)[number];
+type AffectValues = Record<AffectField, number>;
+
+type ResolvedAffect = {
+  values: AffectValues;
+  decisions: Partial<Record<AffectField, string>>;
+};
+
+type AffectDirective = {
+  declarationOrder: number;
+  decisionId: string;
+  fields: ReadonlySet<AffectField>;
+  precedence: number;
+  scope: { kind: "utterance" } | { kind: "token_range"; startToken: number; endToken: number };
+  values: AffectValues;
+};
+
+const NEUTRAL_AFFECT: AffectValues = {
+  rdDelta: 0,
+  f0Scale: 1,
+  f0VarianceScale: 1,
+  durationScale: 1,
+  intensityBoost: 0,
+  ahBoost: 0,
+  spectralTiltBoost: 0,
+  pauseScale: 1,
+  f1Delta: 0,
+  f2Delta: 0,
+  f3Delta: 0,
+  fbw1Scale: 1,
+  fbw2Scale: 1,
+  fbw3Scale: 1,
+  jitterScale: 1,
+  shimmerScale: 1,
+};
+
+const MULTIPLICATIVE_AFFECT_FIELDS = new Set<AffectField>([
+  "f0Scale",
+  "f0VarianceScale",
+  "durationScale",
+  "pauseScale",
+  "fbw1Scale",
+  "fbw2Scale",
+  "fbw3Scale",
+  "jitterScale",
+  "shimmerScale",
+]);
+
 function isFeatureObject(value: FeatureValue | undefined): value is { readonly [key: string]: FeatureValue } {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
 function finiteFeatureNumber(value: FeatureValue | undefined): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function isAffectField(value: FeatureValue): value is AffectField {
+  return typeof value === "string" && AFFECT_FIELDS.some((field) => field === value);
+}
+
+function parseAffectValues(value: FeatureValue | undefined, itemId: string): AffectValues {
+  if (!isFeatureObject(value)) {
+    throw new Error(`E_HRG_LOWER_AFFECT_DELTA: Affect Item '${itemId}' requires a typed delta`);
+  }
+  const parsed = { ...NEUTRAL_AFFECT };
+  for (const field of AFFECT_FIELDS) {
+    const number = finiteFeatureNumber(value[field]);
+    if (number == null) {
+      throw new Error(`E_HRG_LOWER_AFFECT_DELTA: Affect Item '${itemId}' has invalid '${field}'`);
+    }
+    parsed[field] = number;
+  }
+  return parsed;
+}
+
+function composeAffectField(base: number, over: number, field: AffectField): number {
+  return MULTIPLICATIVE_AFFECT_FIELDS.has(field) ? base * over : base + over;
 }
 
 function parseControlFields(value: FeatureValue | undefined): Record<string, ResolvedControlField> {
@@ -334,15 +424,17 @@ function requirePositiveNumber(value: unknown, path: string): number {
   return number;
 }
 
+function isUnknownObject(value: unknown): value is Readonly<Record<string, unknown>> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
 function resolveSpeakerNumber(
   speakerParams: Readonly<Record<string, unknown>> | undefined,
   path: string,
 ): number {
   let value: unknown = speakerParams;
   for (const key of path.split(".")) {
-    value = value != null && typeof value === "object" && !Array.isArray(value)
-      ? (value as Readonly<Record<string, unknown>>)[key]
-      : undefined;
+    value = isUnknownObject(value) ? value[key] : undefined;
   }
   return requireFiniteNumber(value, `speaker.${path}`);
 }
@@ -353,9 +445,7 @@ function optionalSpeakerNumber(
 ): number | undefined {
   let value: unknown = speakerParams;
   for (const key of path.split(".")) {
-    value = value != null && typeof value === "object" && !Array.isArray(value)
-      ? (value as Readonly<Record<string, unknown>>)[key]
-      : undefined;
+    value = isUnknownObject(value) ? value[key] : undefined;
   }
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
@@ -862,6 +952,122 @@ export function lowerToFrames(
     });
   });
 
+  const affectItems = utterance.getRelation("Affect")?.listItems() ?? [];
+  const affectDirectives = affectItems.flatMap((item, relationOrder): AffectDirective[] => {
+    const delta = item.get("delta");
+    if (delta == null) return [];
+    const deltaWrite = item.latestWrite("delta");
+    const rawFields = item.get("delta_fields");
+    const rawScope = item.get("scope");
+    if (!deltaWrite || !Array.isArray(rawFields) || !isFeatureObject(rawScope)) {
+      utterance.diagnostics.error(
+        "Affect Item is missing stamped delta fields or typed scope during final lowering",
+        { itemId: item.id },
+        "HRG_LOWER_AFFECT_REQUIRED",
+      );
+      throw new Error(`E_HRG_LOWER_AFFECT_REQUIRED: Affect Item '${item.id}' is incomplete`);
+    }
+    const fields = new Set<AffectField>();
+    for (const field of rawFields) {
+      if (!isAffectField(field)) {
+        throw new Error(`E_HRG_LOWER_AFFECT_FIELD: Affect Item '${item.id}' has unknown field`);
+      }
+      fields.add(field);
+    }
+    const scope = rawScope.kind === "utterance"
+      ? { kind: "utterance" as const }
+      : rawScope.kind === "token_range"
+          && finiteFeatureNumber(rawScope.startToken) != null
+          && finiteFeatureNumber(rawScope.endToken) != null
+        ? {
+            kind: "token_range" as const,
+            startToken: finiteFeatureNumber(rawScope.startToken) ?? 0,
+            endToken: finiteFeatureNumber(rawScope.endToken) ?? 0,
+          }
+        : null;
+    if (!scope) throw new Error(`E_HRG_LOWER_AFFECT_SCOPE: Affect Item '${item.id}' has invalid scope`);
+    return [{
+      declarationOrder: finiteFeatureNumber(item.get("declaration_order")) ?? relationOrder,
+      decisionId: deltaWrite.decisionId,
+      fields,
+      precedence: finiteFeatureNumber(item.get("precedence")) ?? 0,
+      scope,
+      values: parseAffectValues(delta, item.id),
+    }];
+  });
+  const globalAffectDirectives = affectDirectives.filter((directive) => directive.scope.kind === "utterance");
+  const wordItems = utterance.getRelation("Word")?.listItems() ?? [];
+  const wordIndexByItem = new Map(wordItems.map((item, index) => [item, index]));
+  const tokenIndexForSegment = (item: Item): number | null => {
+    let node = item.node("SylStructure");
+    while (node) {
+      const wordIndex = wordIndexByItem.get(node.item);
+      if (wordIndex != null) return wordIndex;
+      node = node.parent;
+    }
+    return null;
+  };
+  const resolveAffect = (item?: Item): ResolvedAffect => {
+    const values = { ...NEUTRAL_AFFECT };
+    const decisions: Partial<Record<AffectField, string>> = {};
+    for (const directive of globalAffectDirectives) {
+      for (const field of directive.fields) {
+        values[field] = composeAffectField(values[field], directive.values[field], field);
+        decisions[field] = directive.decisionId;
+      }
+    }
+    if (!item) return { values, decisions };
+    const tokenIndex = tokenIndexForSegment(item);
+    const local = affectDirectives.filter((directive) => (
+      directive.scope.kind === "token_range"
+      && tokenIndex != null
+      && tokenIndex >= directive.scope.startToken
+      && tokenIndex <= directive.scope.endToken
+    ));
+    if (tokenIndex == null && affectDirectives.some((directive) => directive.scope.kind === "token_range")) {
+      utterance.diagnostics.error(
+        "Local Affect cannot resolve a Segment through Word/SylStructure identity",
+        { itemId: item.id },
+        "HRG_LOWER_AFFECT_ATTACHMENT_REQUIRED",
+      );
+      throw new Error(`E_HRG_LOWER_AFFECT_ATTACHMENT_REQUIRED: Segment '${item.id}' has no Word attachment`);
+    }
+    for (const field of AFFECT_FIELDS) {
+      const winner = local
+        .filter((directive) => directive.fields.has(field))
+        .sort((left, right) => (
+          right.precedence - left.precedence
+          || right.declarationOrder - left.declarationOrder
+        ))[0];
+      if (!winner) continue;
+      values[field] = composeAffectField(values[field], winner.values[field], field);
+      decisions[field] = winner.decisionId;
+    }
+    return { values, decisions };
+  };
+  const globalAffect = resolveAffect();
+  const affectByItem = new Map(timings.map((timing) => [timing.item, resolveAffect(timing.item)]));
+  const outputTimingByItem = new Map<Item, { startMs: number; scale: number }>();
+  const globalPauseScale = globalAffect.values.durationScale * globalAffect.values.pauseScale;
+  if (!Number.isFinite(globalPauseScale) || globalPauseScale <= 0) {
+    throw new Error("E_HRG_LOWER_AFFECT_TIME: global duration/pause scale must be positive");
+  }
+  const leadingAxisMs = timings[0]?.startMs ?? 0;
+  let outputCursorMs = initialSilenceMs * globalPauseScale
+    + leadingAxisMs * globalAffect.values.durationScale;
+  for (const timing of timings) {
+    const affect = affectByItem.get(timing.item) ?? globalAffect;
+    const segmentScale = affect.values.durationScale
+      * (timing.item.get(typeKey) === "silence" ? affect.values.pauseScale : 1);
+    if (!Number.isFinite(segmentScale) || segmentScale <= 0) {
+      throw new Error(`E_HRG_LOWER_AFFECT_TIME: Segment '${timing.item.id}' scale must be positive`);
+    }
+    outputTimingByItem.set(timing.item, { startMs: outputCursorMs, scale: segmentScale });
+    outputCursorMs += timing.durationMs * segmentScale;
+  }
+  const outputFinalResetMs = outputCursorMs;
+  const outputTotalMs = outputFinalResetMs + finalSilenceMs * globalPauseScale;
+
   const pointItems = utterance.getRelation("F0Point")?.listItems() ?? [];
   const f0PointsByTime = new Map<number, ResolvedF0Point>();
   if (pointItems.length > 0) {
@@ -1009,6 +1215,7 @@ export function lowerToFrames(
     item?: Item,
     phonemeOverride?: string,
     segmentOffsetMs = 0,
+    outputTimeOverrideMs?: number,
   ): void => {
     const params: Record<string, number> = {};
     const provenance: Record<string, string> = {};
@@ -1071,9 +1278,60 @@ export function lowerToFrames(
           }
         }
       }
+      const affect = affectByItem.get(item);
+      if (affect) {
+        const applyAdd = (key: string, field: AffectField): void => {
+          const base = params[key];
+          const delta = affect.values[field];
+          if (typeof base !== "number" || delta === 0) return;
+          params[key] = base + delta;
+          const decision = affect.decisions[field];
+          if (decision) provenance[key] = decision;
+        };
+        const applyScale = (key: string, field: AffectField, floor: number): void => {
+          const base = params[key];
+          const scale = affect.values[field];
+          if (typeof base !== "number" || scale === 1) return;
+          params[key] = Math.max(floor, base * scale);
+          const decision = affect.decisions[field];
+          if (decision) provenance[key] = decision;
+        };
+        if (typeof params.F0 === "number" && params.F0 > 0 && affect.values.f0Scale !== 1) {
+          params.F0 *= affect.values.f0Scale;
+          const decision = affect.decisions.f0Scale;
+          if (decision) provenance.F0 = decision;
+        }
+        if (affect.values.rdDelta !== 0 && typeof params.Rd === "number") {
+          const priorOffset = params.RdPhraseOffset ?? 0;
+          // Fant 1997 effective-Rd range.
+          const effective = Math.max(0.3, Math.min(2.7, params.Rd + priorOffset + affect.values.rdDelta));
+          params.RdPhraseOffset = effective - params.Rd;
+          const decision = affect.decisions.rdDelta;
+          if (decision) provenance.RdPhraseOffset = decision;
+        }
+        // 1 Hz formant and 20 Hz bandwidth floors are explicit engineering bounds.
+        applyAdd("F1", "f1Delta");
+        applyAdd("F2", "f2Delta");
+        applyAdd("F3", "f3Delta");
+        if (typeof params.F1 === "number") params.F1 = Math.max(1, params.F1);
+        if (typeof params.F2 === "number") params.F2 = Math.max(1, params.F2);
+        if (typeof params.F3 === "number") params.F3 = Math.max(1, params.F3);
+        applyScale("B1", "fbw1Scale", 20);
+        applyScale("B2", "fbw2Scale", 20);
+        applyScale("B3", "fbw3Scale", 20);
+        applyAdd("TL", "spectralTiltBoost");
+        applyAdd("AH", "ahBoost");
+        applyAdd("GO", "intensityBoost");
+        applyScale("jitter", "jitterScale", 0);
+      }
     }
+    const outputTimeMs = outputTimeOverrideMs
+      ?? (item
+        ? (outputTimingByItem.get(item)?.startMs ?? timeMs)
+          + segmentOffsetMs * (outputTimingByItem.get(item)?.scale ?? 1)
+        : timeMs);
     const frame: KlattFrame = {
-      time: timeMs / 1000,
+      time: outputTimeMs / 1000,
       params,
       provenance,
     };
@@ -1130,14 +1388,14 @@ export function lowerToFrames(
     }
   }
   const finalResetMs = initialSilenceMs + segmentTotalMs;
-  appendFrame(finalResetMs, undefined, "SIL");
+  appendFrame(finalResetMs, undefined, "SIL", 0, outputFinalResetMs);
   const totalMs = finalResetMs + finalSilenceMs;
-  if (totalMs > finalResetMs) appendFrame(totalMs, undefined, "SIL");
+  if (totalMs > finalResetMs) appendFrame(totalMs, undefined, "SIL", 0, outputTotalMs);
 
   return {
     frames,
     provenanceByFrame,
-    totalMs,
+    totalMs: outputTotalMs,
     paramKeys,
     timings,
     utterance,

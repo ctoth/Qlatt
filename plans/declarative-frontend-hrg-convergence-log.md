@@ -210,7 +210,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 034 | Phase 4 family 3E: locus and forward transitions | kept | `4bdd79bf` | 5 captured AE locus states + 2 universal T states exact; per-key spans/adjustments/glue policy |
 | 035 | Phase 4 family 3 exit: transition matrix | kept | `4bb3a3f5` | every emitted qlatt/beauty transition event and blend cell matches production; direction policy corrected; family gate green |
 | 036 | Phase 4 family 4: explicit F0 points | kept | `839518a4` | every emitted qlatt F0 cell matches production; graph-time anchors, voice gating, last-point-wins, invalid-point rejection |
-| 037 | Phase 4 family 5: PhraseCommand and Tilt | kept | pending slice commit | canonical relations; selected layered renderer; all 196 voiced cadence cells and 250+ shared production events exact |
+| 037 | Phase 4 family 5: PhraseCommand and Tilt | kept | `8837b6e5` | canonical relations; selected layered renderer; all 196 voiced cadence cells and 250+ shared production events exact |
+| 038 | Phase 4 family 6: Affect projection | kept | pending slice commit | authored-field/precedence retention; global/local composition; time, VQ, jitter and exact write provenance |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1785,3 +1786,46 @@ PASS
 
 Next Phase 4 family: project typed `Affect` Items and their voice-quality
 deltas without reconstructing direction intent from finalized Segment values.
+
+## Iteration 038 — Phase 4 family 6: Affect projection
+
+Status: kept. Phase 4 family 6 is complete.
+
+The Direction attachment stage previously materialized every local delta to a
+full neutral-filled vector but discarded which fields were authored, plus span
+precedence and declaration order. That made correct local composition
+impossible. The graph now retains all three as typed, provenance-parented Affect
+features.
+
+Final lowering now:
+
+- composes utterance Affect directives with field-wise winning local directives;
+- resolves local scopes through shared Word/SylStructure/Segment identity;
+- rejects a local directive when that graph attachment is missing;
+- applies duration and pause scaling as a piecewise output-time projection;
+- realizes F0, effective Rd, F1-F3, B1-B3, TL, AH, GO, and jitter deltas;
+- preserves unvoiced F0 at zero and clamps effective Rd to the cited Fant range;
+- points every affected parameter cell at the winning Affect delta write; and
+- leaves no-Affect graph timestamps and values unchanged, including fixtures
+  whose first retained Segment begins after axis time zero.
+
+The direct fixture uses two Word-linked Segments, a global angry affect, and two
+overlapping local voice-quality directives. It proves precedence, multiplicative
+and additive composition, piecewise timing, Rd clamping, jitter projection, and
+exact local-write provenance. The old affect suite remains green as the captured
+behavioral oracle. F0-variance and shimmer realization remain assigned to
+family 8's backend-specific handoff because the current frame vocabulary has no
+shimmer column and variance operates on the completed selected contour.
+
+Verification:
+
+```text
+npm test -- test/hrg-lowering-affect.test.ts test/input-hrg-attachment.test.ts test/apply-affect.test.ts test/hrg-lowering-intonation.test.ts test/hrg-lowering-f0-points.test.ts test/hrg-lowering-timing.test.ts test/hrg-lowering-scalars.test.ts test/hrg-lowering-control-windows.test.ts test/hrg-lowering-midpoint-transitions.test.ts test/hrg-lowering-locus-transitions.test.ts test/hrg-lowering-transition-matrix.test.ts test/hrg.test.ts
+PASS: 12 files, 48 tests
+
+npm run typecheck:core
+PASS
+```
+
+Next Phase 4 family: selected speaker/source projection, including female locus
+selection, initial/final silence parameters, and source-contour values.

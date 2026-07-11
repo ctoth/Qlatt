@@ -30,7 +30,12 @@ import type {
   VoiceIdentity,
   VoiceQualityDelta,
 } from "./direction-track";
-import { GESTURE_LIBRARY, materializeVoiceQualityDelta, scaleVoiceQualityDelta } from "./direction-track";
+import {
+  GESTURE_LIBRARY,
+  NEUTRAL_VQ,
+  materializeVoiceQualityDelta,
+  scaleVoiceQualityDelta,
+} from "./direction-track";
 import type { CompiledAffect } from "./affect";
 import { compileAffect } from "./affect";
 import type { Item, ItemTypeSchema, Utterance } from "../declarative-frontend/hrg";
@@ -68,6 +73,11 @@ export interface Direction {
   affect?: CompiledAffect;
   /** The resolved voice-quality / prosody delta this direction imposes. */
   delta?: VoiceQualityDelta;
+  /** Delta keys explicitly supplied by this direction before neutral materialization. */
+  deltaFields?: string[];
+  /** Span precedence and declaration order retained for deterministic field-wise overrides. */
+  precedence?: number;
+  declarationOrder?: number;
   /** The author label (preset name, gesture name, emphasis level, …). */
   label?: string;
   /** Voice identity payload (for voice_identity). */
@@ -116,6 +126,7 @@ const DELTA_FIELDS = {
   jitterScale: { kind: "number" },
   shimmerScale: { kind: "number" },
 } as const;
+const ALL_DELTA_FIELDS = Object.freeze(Object.keys(DELTA_FIELDS));
 
 /** Item schema consumed by the HRG attachment stage for resolved directions. */
 export const DIRECTION_ITEM_SCHEMA = {
@@ -157,6 +168,12 @@ export const DIRECTION_ITEM_SCHEMA = {
     },
     label: { kind: "string" },
     delta: { kind: "object", fields: DELTA_FIELDS },
+    delta_fields: {
+      kind: "array",
+      items: { kind: "string", values: ALL_DELTA_FIELDS },
+    },
+    precedence: { kind: "number" },
+    declaration_order: { kind: "number" },
     affect: {
       kind: "object",
       fields: {
@@ -296,9 +313,16 @@ export function parseDirectionInput(input: DirectionInput, options: ParseOptions
 
   // 3. Local override spans, in declaration order.
   const spans = input.directionTrack.spans ?? [];
-  for (const span of spans) {
+  for (let declarationOrder = 0; declarationOrder < spans.length; declarationOrder += 1) {
+    const span = spans[declarationOrder];
+    if (!span) continue;
     const range = resolveAnchor(span.anchor, score);
-    directions.push(...lowerSpan(provenance, span, range, sex, globalAffectDecisionId));
+    const lowered = lowerSpan(provenance, span, range, sex, globalAffectDecisionId);
+    for (const direction of lowered) {
+      direction.precedence = span.precedence ?? 0;
+      direction.declarationOrder = declarationOrder;
+    }
+    directions.push(...lowered);
   }
 
   return { score, directions, decisions: provenance.getDecisions(), provenance };
@@ -342,6 +366,11 @@ export function attachDirectionsToUtterance(
     transaction.set(item, "citations", direction.citations);
     if (direction.label != null) transaction.set(item, "label", direction.label);
     if (direction.delta) transaction.set(item, "delta", direction.delta);
+    if (direction.deltaFields) transaction.set(item, "delta_fields", direction.deltaFields);
+    if (direction.precedence != null) transaction.set(item, "precedence", direction.precedence);
+    if (direction.declarationOrder != null) {
+      transaction.set(item, "declaration_order", direction.declarationOrder);
+    }
     if (direction.affect) {
       transaction.set(item, "affect", {
         label: direction.affect.label,
@@ -391,6 +420,7 @@ function lowerAffect(
     hrgRelation: "Affect",
     affect: compiled,
     delta: compiled.vq,
+    deltaFields: [...ALL_DELTA_FIELDS],
     label: spec.preset,
     citations: decision.citations,
     decision,
@@ -476,6 +506,7 @@ function lowerSpan(
       scope: range,
       hrgRelation: "Intonation",
       delta,
+      deltaFields: ["f0Scale"],
       citations: decision.citations,
       decision,
     });
@@ -499,6 +530,7 @@ function lowerSpan(
       scope: range,
       hrgRelation: "Affect",
       delta,
+      deltaFields: ["durationScale"],
       citations: decision.citations,
       decision,
     });
@@ -520,6 +552,7 @@ function lowerSpan(
       scope: range,
       hrgRelation: "Affect",
       delta,
+      deltaFields: Object.keys(span.voiceQuality),
       citations: decision.citations,
       decision,
     });
@@ -556,6 +589,7 @@ function lowerGesture(
     scope: range,
     hrgRelation: "Affect",
     delta,
+    deltaFields: Object.keys(def.delta),
     label: name,
     citations: decision.citations,
     decision,

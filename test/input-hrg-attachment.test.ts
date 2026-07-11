@@ -61,6 +61,7 @@ describe("Direction Track attachment to static HRG fixtures", () => {
 
     const affect = utterance.relation("Affect").listItems()[0];
     expect(affect.get("delta")).toMatchObject({ durationScale: expect.any(Number) });
+    expect(affect.get("delta_fields")).toEqual(expect.arrayContaining(["durationScale", "rdDelta"]));
     expect(Object.isFrozen(affect.get("delta"))).toBe(true);
   });
 });

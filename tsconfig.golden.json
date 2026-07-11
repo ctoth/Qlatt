@@ -1,11 +1,15 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true
+  },
   "include": [
     "scripts/run-golden.ts",
     "scripts/render-phrase.ts",
     "scripts/klatt-tract-wasm-compare.ts",
     "scripts/lf-source-wasm-compare.ts",
-    "src/worklets/wasm-utils.ts"
+    "src/worklets/wasm-utils.ts",
+    "src/semantics/external-modules.d.ts"
   ],
   "exclude": ["node_modules", "dist", "public"]
 }

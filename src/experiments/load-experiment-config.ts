@@ -18,15 +18,22 @@ export interface ExperimentConfig {
   registry: Registry;
 }
 
-function deepMerge(target: Record<string, unknown>, source: Record<string, unknown>) {
-  const result: Record<string, unknown> = { ...(target || {}) };
-  for (const key of Object.keys(source || {})) {
-    const value = source[key];
-    if (value && typeof value === "object" && !Array.isArray(value)) {
-      result[key] = deepMerge(
-        (result[key] as Record<string, unknown>) || {},
-        value as Record<string, unknown>,
-      );
+type SemanticsConstants = NonNullable<SemanticsDocument["constants"]>;
+type NestedConstants = Exclude<SemanticsConstants[string], string | number | boolean>;
+
+function isNestedConstants(value: SemanticsConstants[string] | undefined): value is NestedConstants {
+  return value != null && typeof value === "object";
+}
+
+function mergeConstants(parent: SemanticsConstants, child: SemanticsConstants): SemanticsConstants {
+  const result: SemanticsConstants = { ...parent };
+  for (const [key, value] of Object.entries(child)) {
+    if (isNestedConstants(value)) {
+      const inherited = result[key];
+      result[key] = {
+        ...(isNestedConstants(inherited) ? inherited : {}),
+        ...value,
+      };
     } else {
       result[key] = value;
     }
@@ -53,10 +60,7 @@ function mergeSemantics(
   } as SemanticsDocument;
 
   merged.params = { ...(parent.params || {}), ...(child.params || {}) };
-  merged.constants = deepMerge(
-    (parent.constants as Record<string, unknown>) || {},
-    (child.constants as Record<string, unknown>) || {},
-  );
+  merged.constants = mergeConstants(parent.constants ?? {}, child.constants ?? {});
   merged.realize = { ...(parent.realize || {}), ...(child.realize || {}) };
 
   return merged;

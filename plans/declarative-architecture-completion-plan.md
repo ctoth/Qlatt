@@ -2,6 +2,16 @@
 
 **Status:** Draft coordinator plan
 
+**Frontend IR authority amendment (2026-07-11):**
+`plans/declarative-frontend-hrg-convergence-plan.md` governs the frontend IR
+boundary and execution order. Where this coordinator describes a standalone
+`DeclarativeControlScore` as the canonical working IR, that language is
+superseded: backend-neutral control intent lives as typed relations/features in
+the provenance-stamped HRG, followed by one final lowering. The existing
+standalone control-score object is transitional production debt scheduled for
+deletion by the focused convergence plan. The remaining normalization, policy,
+backend-adapter, and runtime-concept work in this coordinator stays active.
+
 ## 0. Progress Updates
 
 ### 2026-03-16

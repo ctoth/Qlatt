@@ -1,5 +1,12 @@
 # Declarative Control Score Roadmap
 
+**Status (2026-07-11): historical field-vocabulary input, superseded as a
+production IR.** The authoritative execution plan is
+`plans/declarative-frontend-hrg-convergence-plan.md`. Useful backend-neutral
+fields and citations from this roadmap migrate into typed HRG control relations
+or final-lowering policy; the standalone `DeclarativeControlScore` object,
+builder, validator, output field, and schema do not survive convergence.
+
 ## Goal
 
 Move Qlatt toward a two-layer architecture:

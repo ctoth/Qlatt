@@ -9,6 +9,7 @@ import type {
 } from "./types";
 
 type StagedOperation =
+  | { kind: "create_item"; item: Item }
   | { kind: "set_feature"; item: Item; key: string; value: unknown }
   | { kind: "append"; relationName: string; item: Item }
   | { kind: "add_root"; relationName: string; item: Item }
@@ -33,6 +34,7 @@ function freezeMetadata(metadata: TransactionMetadata): TransactionMetadata {
 export class HrgTransaction {
   private readonly operations: StagedOperation[] = [];
   private readonly reads = new Set<string>();
+  private readonly stagedItems = new Set<Item>();
   private closed = false;
 
   readonly metadata: TransactionMetadata;
@@ -48,9 +50,24 @@ export class HrgTransaction {
     if (this.closed) throw new Error("E_HRG_TRANSACTION_CLOSED");
   }
 
+  private assertAvailableItem(item: Item): void {
+    if (!this.stagedItems.has(item)) this.utterance._assertOwnedItem(item);
+  }
+
+  createItem(type: string, explicitId: string): Item {
+    this.assertOpen();
+    if ([...this.stagedItems].some((item) => item.id === explicitId)) {
+      throw new Error(`E_HRG_DUPLICATE_ITEM: item id '${explicitId}' is staged twice`);
+    }
+    const item = this.utterance._createDetachedItem(type, explicitId);
+    this.stagedItems.add(item);
+    this.operations.push({ kind: "create_item", item });
+    return item;
+  }
+
   read(item: Item, key: string): FeatureValue | undefined {
     this.assertOpen();
-    this.utterance._assertOwnedItem(item);
+    this.assertAvailableItem(item);
     const write = item.latestWrite(key);
     if (write) this.reads.add(write.decisionId);
     return item.get(key);
@@ -59,6 +76,12 @@ export class HrgTransaction {
   set(item: Item, key: string, value: unknown): this {
     this.assertOpen();
     this.operations.push({ kind: "set_feature", item, key, value });
+    return this;
+  }
+
+  dependOn(decisionId: string): this {
+    this.assertOpen();
+    if (decisionId) this.reads.add(decisionId);
     return this;
   }
 
@@ -106,7 +129,19 @@ export class HrgTransaction {
     const input = this.writeInput();
 
     for (const operation of this.operations) {
-      this.utterance._assertOwnedItem(operation.item);
+      this.assertAvailableItem(operation.item);
+      if (operation.kind === "create_item") {
+        const journal = Object.freeze({
+          kind: "create_item" as const,
+          itemId: operation.item.id,
+          itemType: operation.item.type,
+        });
+        prepared.push({
+          journal,
+          commit: () => this.utterance._commitItemCreation(operation.item, input),
+        });
+        continue;
+      }
       if (operation.kind === "set_feature") {
         const value = operation.item._validateFeature(operation.key, operation.value);
         const journal = Object.freeze({
@@ -149,7 +184,7 @@ export class HrgTransaction {
         continue;
       }
 
-      this.utterance._assertOwnedItem(operation.parent);
+      this.assertAvailableItem(operation.parent);
       const parentKey = `${operation.relationName}\u0000${operation.parent.id}`;
       const existingParent = relation.node(operation.parent);
       if (!existingParent && !plannedMembership.has(parentKey)) {

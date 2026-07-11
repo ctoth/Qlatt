@@ -20,6 +20,7 @@ import type {
   FeatureSchema,
   HrgSchema,
   MarkTimeWrite,
+  PhaseCheckpoint,
   RelationStamper,
   RelationWrite,
   Stamper,
@@ -117,6 +118,7 @@ export class Utterance {
   private readonly markTimeHistoryById = new Map<string, MarkTimeWrite[]>();
   private readonly transactionJournal: TransactionJournalEntry[] = [];
   private transactionCounter = 0;
+  private readonly phaseCheckpoints: PhaseCheckpoint[] = [];
 
   constructor(
     schema: HrgSchema,
@@ -221,22 +223,44 @@ export class Utterance {
 
   /** Create a fresh item with a stable, type-prefixed id. */
   createItem(type: string, explicitId?: string): Item {
-    const itemSchema = this.schema.itemTypes[type];
-    if (!itemSchema) {
-      throw new Error(`E_HRG_ITEM_TYPE_UNDECLARED: item type '${type}' is not declared`);
-    }
     let id = explicitId;
     if (id == null) {
       const next = this.typeCounters.get(type) ?? 0;
       this.typeCounters.set(type, next + 1);
       id = `${type}_${next}`;
     }
-    if (this.items.has(id)) {
-      throw new Error(`E_HRG_DUPLICATE_ITEM: item id '${id}' already exists`);
-    }
-    const item = new Item(id, type, this.stamp, itemSchema);
+    const item = this._createDetachedItem(type, id);
     this.items.set(id, item);
     return item;
+  }
+
+  _createDetachedItem(type: string, id: string): Item {
+    const itemSchema = this.schema.itemTypes[type];
+    if (!itemSchema) {
+      throw new Error(`E_HRG_ITEM_TYPE_UNDECLARED: item type '${type}' is not declared`);
+    }
+    if (!id || this.items.has(id)) {
+      throw new Error(`E_HRG_DUPLICATE_ITEM: item id '${id}' already exists`);
+    }
+    return new Item(id, type, this.stamp, itemSchema);
+  }
+
+  _commitItemCreation(item: Item, input: FeatureWriteInput): string {
+    if (this.items.has(item.id)) {
+      throw new Error(`E_HRG_DUPLICATE_ITEM: item id '${item.id}' already exists`);
+    }
+    const decision = this.provenance.add({
+      stage: input.stage ?? "rules",
+      type: "item_create",
+      subject: `item:${item.id}`,
+      reason: input.reason,
+      citations: input.citations ?? [],
+      parents: input.parents,
+      timestampMs: input.timestampMs,
+    });
+    item._setCreationDecision(decision.id);
+    this.items.set(item.id, item);
+    return decision.id;
   }
 
   getItem(id: string): Item | undefined {
@@ -279,6 +303,59 @@ export class Utterance {
 
   journal(): readonly TransactionJournalEntry[] {
     return Object.freeze([...this.transactionJournal]);
+  }
+
+  graphDigest(): string {
+    const items = this.allItems()
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .map((item) => ({
+        id: item.id,
+        type: item.type,
+        creationDecisionId: item.creationDecisionId(),
+        features: item.featureKeys().sort().map((key) => ({ key, writes: item.writes(key) })),
+      }));
+    const relations = this.relationNames()
+      .sort()
+      .map((name) => {
+        const relation = this.getRelation(name);
+        return relation ? { name, kind: relation.kind, writes: relation.writes() } : null;
+      });
+    const marks = [...this.axis.marks.values()]
+      .sort((left, right) => this.axis.compare(left.id, right.id))
+      .map((mark) => ({
+        id: mark.id,
+        order: mark.order,
+        time: mark.time,
+        creationDecisionId: mark.creationDecisionId,
+      }));
+    const anchors = [...this.anchorHistoryByItemId.entries()]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([itemId, writes]) => ({ itemId, writes }));
+    const markTimes = [...this.markTimeHistoryById.entries()]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([markId, writes]) => ({ markId, writes }));
+    const canonical = JSON.stringify({ items, relations, marks, anchors, markTimes });
+    let hash = 2166136261;
+    for (let index = 0; index < canonical.length; index += 1) {
+      hash ^= canonical.charCodeAt(index);
+      hash = Math.imul(hash, 16777619);
+    }
+    return `hrg-${(hash >>> 0).toString(16).padStart(8, "0")}`;
+  }
+
+  checkpoint(phase: string): PhaseCheckpoint {
+    if (!phase) throw new Error("E_HRG_CHECKPOINT_PHASE: phase is required");
+    const checkpoint = Object.freeze({
+      phase,
+      journalLength: this.transactionJournal.length,
+      digest: this.graphDigest(),
+    });
+    this.phaseCheckpoints.push(checkpoint);
+    return checkpoint;
+  }
+
+  checkpoints(): readonly PhaseCheckpoint[] {
+    return Object.freeze([...this.phaseCheckpoints]);
   }
 
   _assertOwnedItem(item: Item): void {

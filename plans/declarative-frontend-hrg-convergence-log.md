@@ -185,7 +185,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 009 | Phase 3 typed Item/relation schemas | kept | `9980a7ac` | 19 HRG tests; core/scripts typecheck pass; no HRG any |
 | 010 | Phase 3 stamped relation topology | kept | `4360c5f5` | 22 HRG tests; immutable histories; core/scripts typecheck pass |
 | 011 | Phase 3 Utterance temporal axis | kept | `70ababdd` | 232 declarative/HRG tests; old axis zero-hit; core/scripts typecheck pass |
-| 012 | Phase 3 atomic HRG transactions | kept | pending slice commit | 28 HRG tests; rejection diagnostics; core/scripts typecheck pass |
+| 012 | Phase 3 atomic HRG transactions | kept | `343b181e` | 28 HRG tests; rejection diagnostics; core/scripts typecheck pass |
+| 013 | Phase 3 checkpoints and replay | kept | pending slice commit | digest-equal replay; 29 HRG tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -698,3 +699,50 @@ ZERO HIT
 
 Next slice: phase checkpoints and deterministic transaction replay, including
 an exact graph digest equality proof without reevaluating expressions.
+
+## Iteration 013 — Phase 3 checkpoints and deterministic replay
+
+Status: kept.
+
+The replay contract was red because Item creation was still outside the
+journal. The transaction owner was extended rather than introducing a snapshot
+adapter: explicit-ID Item creation is now a first-class staged, stamped, and
+journaled operation.
+
+Kept convergence:
+
+- journals and stamps Item creation in the same atomic batch as its initial
+  feature and topology writes;
+- adds immutable phase checkpoints containing the journal position and graph
+  digest from the one live execution;
+- adds a canonical digest over Item creation/feature histories, relation
+  topology histories, temporal marks, anchors, and resolved-time histories;
+- adds deterministic replay from serializable journal operations into a fresh
+  schema-bound Utterance;
+- restores recorded read-set parents directly during replay without evaluating
+  expressions against current external state; and
+- proves replayed transaction ids, DecisionRecord ids, journals, frozen
+  structured values, and final/checkpoint digests match after the source object
+  has been mutated.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+$hrg = (Get-ChildItem -File test\hrg*.test.ts).FullName
+npm test -- $hrg
+PASS: 6 files, 29 tests
+
+rg -n "Record<string, any>|\\bany\\b" src/declarative-frontend/hrg -g "*.ts"
+ZERO CODE HIT
+```
+
+Next slice: implement Direction Track attachment in the existing input owner
+against static Utterance fixtures, attach typed records to declared control
+relations, and preserve input DecisionRecords as parents before production
+wiring.

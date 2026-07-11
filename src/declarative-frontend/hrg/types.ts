@@ -115,6 +115,7 @@ export interface TransactionMetadata {
 }
 
 export type JournalOperation =
+  | { readonly kind: "create_item"; readonly itemId: string; readonly itemType: string }
   | { readonly kind: "set_feature"; readonly itemId: string; readonly key: string; readonly value: FeatureValue }
   | { readonly kind: "append"; readonly relationName: string; readonly itemId: string }
   | { readonly kind: "add_root"; readonly relationName: string; readonly itemId: string }
@@ -131,6 +132,12 @@ export interface TransactionJournalEntry {
   readonly readSet: readonly string[];
   readonly operations: readonly JournalOperation[];
   readonly decisionIds: readonly string[];
+}
+
+export interface PhaseCheckpoint {
+  readonly phase: string;
+  readonly journalLength: number;
+  readonly digest: string;
 }
 
 export interface RelationWrite {

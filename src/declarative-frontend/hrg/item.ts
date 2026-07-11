@@ -123,6 +123,7 @@ export class Item {
 
   /** Append-only version stacks: featureKey -> writes (latest is current). */
   private readonly featureWrites = new Map<string, FeatureWrite[]>();
+  private creationDecision: string | null = null;
 
   constructor(
     readonly id: string,
@@ -178,6 +179,15 @@ export class Item {
   /** The node wrapping this item in `relationName`, or undefined if absent. */
   node(relationName: string): HrgNode | undefined {
     return this.nodes.get(relationName);
+  }
+
+  creationDecisionId(): string | null {
+    return this.creationDecision;
+  }
+
+  _setCreationDecision(decisionId: string): void {
+    if (this.creationDecision) throw new Error(`E_HRG_ITEM_ALREADY_CREATED: '${this.id}'`);
+    this.creationDecision = decisionId;
   }
 
   /** Internal: append a write to a feature's version stack. Use {@link set}. */

@@ -9,6 +9,7 @@ export { Item } from "./item";
 export { Relation, HrgNode } from "./relation";
 export { Utterance } from "./utterance";
 export { HrgTransaction } from "./transaction";
+export { replayJournal } from "./replay";
 export {
   TemporalAxis,
   START_ORDER,
@@ -39,6 +40,7 @@ export type {
   HrgSchema,
   ItemTypeSchema,
   MarkTimeWrite,
+  PhaseCheckpoint,
   RelationSchema,
   RelationKind,
   RelationStamper,

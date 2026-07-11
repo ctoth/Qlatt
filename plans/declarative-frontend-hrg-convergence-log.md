@@ -213,7 +213,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 037 | Phase 4 family 5: PhraseCommand and Tilt | kept | `8837b6e5` | canonical relations; selected layered renderer; all 196 voiced cadence cells and 250+ shared production events exact |
 | 038 | Phase 4 family 6: Affect projection | kept | `6e0e4a99` | authored-field/precedence retention; global/local composition; time, VQ, jitter and exact write provenance |
 | 039 | Phase 4 family 7: selected speaker/source projection | kept | `971474f8` | exact qlatt/DECtalk silence edges; policy-only preload; female locus selected from data; exact write provenance |
-| 040 | Phase 4 family 8: backend semantics handoff | kept | pending slice commit | scoped F0 variance projection; false shimmer control deleted; no duplicated backend realization |
+| 040 | Phase 4 family 8: backend semantics handoff | kept | `95ad363b` | scoped F0 variance projection; false shimmer control deleted; no duplicated backend realization |
+| 041 | Phase 4 family 9: per-frame provenance projection | kept | pending slice commit | every populated qlatt/DECtalk/point/layer cell resolves to an Utterance decision; projection views identical |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1911,3 +1912,33 @@ PASS
 
 Next Phase 4 family: audit every emitted frame cell's projection back to its
 producing graph/resource write and close any missing per-frame provenance.
+
+## Iteration 041 — Phase 4 family 9: per-frame provenance projection
+
+Status: kept as a test-only accountability slice. Phase 4 family 9 is complete.
+
+The audit did not find a missing production projection and therefore made no
+production edit. The retained tests enumerate every populated parameter cell
+across the direct qlatt-English and DECtalk sparse schedules, including selected
+silence resources and transition events. They prove that:
+
+- the frame-local `provenance` object is the same projection recorded in the
+  parallel `provenanceByFrame` result;
+- every populated key has a decision id; and
+- every projected id exists in that run's Utterance provenance collector.
+
+The same completeness assertion now covers every explicit-point Segment frame
+and all layered DECtalk Segment frames, including more than 250 shared production
+events and all 196 voiced cadence cells. Existing family-specific assertions
+continue to prove the exact selected resource, Segment write, control-window,
+point, PhraseCommand/Tilt, and Affect decision used for derived cells.
+
+Verification:
+
+```text
+npm test -- test/hrg-lowering-scalars.test.ts test/hrg-lowering-f0-points.test.ts test/hrg-lowering-intonation.test.ts
+PASS: 3 files, 10 tests
+```
+
+Next Phase 4 family: require diagnostics alongside every rejected, clamped,
+defaulted, or missing-data lowering path, then run the Phase 4 exit gate.

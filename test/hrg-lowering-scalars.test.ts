@@ -364,6 +364,15 @@ describe("HRG lowering scalar histories", () => {
       expect(initial.params[column], `initial.${column}`).toBe(productionInitial.params[column]);
       expect(final.params[column], `final.${column}`).toBe(productionFinal.params[column]);
     }
+    const knownDecisions = new Set(utterance.provenance.getDecisions().map((decision) => decision.id));
+    lowered.frames.forEach((frame, frameIndex) => {
+      expect(frame.provenance).toBe(lowered.provenanceByFrame[frameIndex]);
+      for (const key of Object.keys(frame.params)) {
+        const decisionId = frame.provenance?.[key];
+        expect(decisionId, `${frontendId}[${frameIndex}].${key} provenance`).toBeTypeOf("string");
+        expect(knownDecisions.has(decisionId ?? ""), `${frontendId}[${frameIndex}].${key} decision`).toBe(true);
+      }
+    });
   });
 
   it("uses the latest stamped value and decision from a feature write history", () => {

@@ -258,6 +258,14 @@ describe("HRG lowering layered intonation", () => {
     for (const { frame, production } of comparable) {
       expect(frame.params.F0, `${frame.segmentId}@${frame.time}.F0`).toBeCloseTo(production.f0, 9);
     }
+    const knownDecisions = new Set(utterance.provenance.getDecisions().map((decision) => decision.id));
+    for (const frame of segmentFrames) {
+      for (const key of Object.keys(frame.params)) {
+        const decisionId = frame.provenance?.[key];
+        expect(decisionId, `${frame.segmentId}@${frame.time}.${key} provenance`).toBeTypeOf("string");
+        expect(knownDecisions.has(decisionId ?? ""), `${frame.segmentId}@${frame.time}.${key} decision`).toBe(true);
+      }
+    }
   });
 
   it("rejects layered controls when the selected model is absent", () => {

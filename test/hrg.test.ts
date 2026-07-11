@@ -26,6 +26,12 @@ const TEST_LOWERING = {
       stop_release_ms: { value: 0 },
       default_ms: { value: 0 },
     },
+    event_points: {
+      include_segment_start: true,
+      include_control_boundaries: true,
+      include_f0_anchors: true,
+      include_transition_steady_time: true,
+    },
   },
   durationKey: "dur_ms",
 } as const satisfies LowerOptions;

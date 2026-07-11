@@ -112,6 +112,24 @@ function citedNumber(value: unknown, path: string): { value: number } {
   return { value: value.value };
 }
 
+function eventPoints(value: unknown): LowerOptions["timeline"]["event_points"] {
+  if (
+    !isPlainObject(value)
+    || typeof value.include_segment_start !== "boolean"
+    || typeof value.include_control_boundaries !== "boolean"
+    || typeof value.include_f0_anchors !== "boolean"
+    || typeof value.include_transition_steady_time !== "boolean"
+  ) {
+    throw new Error("compiled lowering event-point policy missing");
+  }
+  return {
+    include_segment_start: value.include_segment_start,
+    include_control_boundaries: value.include_control_boundaries,
+    include_f0_anchors: value.include_f0_anchors,
+    include_transition_steady_time: value.include_transition_steady_time,
+  };
+}
+
 function loadTimingPolicy(frontendId: string): LowerOptions {
   const spec: unknown = loadBundledRulepackSpec(frontendId);
   if (!isPlainObject(spec) || !isPlainObject(spec.output) || !isPlainObject(spec.output.lowering)) {
@@ -139,6 +157,7 @@ function loadTimingPolicy(frontendId: string): LowerOptions {
           "duration_floors.default_ms",
         ),
       },
+      event_points: eventPoints(lowering.timeline.event_points),
     },
   };
 }

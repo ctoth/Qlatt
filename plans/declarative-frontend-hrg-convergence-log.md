@@ -202,7 +202,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 026 | Phase 4 lowering family 1: timing | invalid evidence; reconciled | `a40b6230` | used deleted bridge samples instead of production events; validation retained, parity claim withdrawn |
 | 027 | Phase 4 lowering family 2: scalar histories | invalid evidence; reconciled | `6c920c3f` | used a graph-to-itself scalar comparison; policy columns/history retained, parity claim withdrawn |
 | 028 | Phase 4 production-contract reconciliation | kept | `cd7efe64` | sparse boundary events match captured production schedules; bridge oracles deleted from Phase 4 tests; 20 tests; core/scripts typecheck pass |
-| 029 | Phase 4 lowering family 2: production scalar cells | kept | pending slice commit | 1,443 base-scalar boundary cells exact against production events; latest-write provenance retained |
+| 029 | Phase 4 lowering family 2: production scalar cells | kept | `5d481234` | 1,443 base-scalar boundary cells exact against production events; latest-write provenance retained |
+| 030 | Phase 4 family 3A: graph control windows | kept | pending slice commit | DECtalk next-target production cells exact; all field ops/targets/span forms; window provenance |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1474,3 +1475,51 @@ PASS: 1 file, 4 tests
 
 Phase 4 family 2 is now accepted against the production contract. Next is
 family 3, transition/control-window realization directly from typed graph state.
+
+## Iteration 030 — Phase 4 family 3A: graph control windows
+
+Status: kept. Family 3 remains active for neighbor-transition realization.
+
+The final lowerer now reads the current typed `control_windows` feature directly
+from Segment Items. It does not construct `ControlScoreTimedControl`, a flat
+phone array, or any other second authority.
+
+Kept capability:
+
+- resolves `current`, `prev`, and `next` targets against active Segment identity;
+- resolves explicit millisecond, ratio, prefix, and suffix spans against the
+  target Segment's effective duration;
+- emits exact interior start/end automation events when the selected policy
+  enables control boundaries;
+- applies numeric `set` shorthand plus `set`, `add`, `mul`, `max`, `min`, and
+  `unset` operations in graph/window order;
+- leaves versioned graph values unchanged while projecting event-local values;
+- attributes affected frame cells to the real `control_windows` feature-write
+  decision and reverted cells to their base Segment writes; and
+- diagnoses out-of-range targets and empty spans without inventing data.
+
+Production proof uses a direct typed three-Segment fixture for the first captured
+DECtalk `P_REL -> AE` aspiration window. It declares the cited window on the
+release Segment and compares only to `oldProduction.sourceFrames`:
+
+```text
+109.2 ms AE window start: AH=48, B1=380, B2=160 exact
+162.2 ms AE window end:   AH=0,  B1=130, B2=90  exact
+```
+
+Verification:
+
+```text
+npm test -- --run test/hrg-lowering-control-windows.test.ts test/hrg-lowering-scalars.test.ts test/hrg-lowering-timing.test.ts test/hrg.test.ts test/trajectory-control-windows.test.ts
+PASS: 5 files, 27 tests
+
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+```
+
+Next source slice stays within family 3: policy-driven midpoint and locus
+transitions from neighboring Segment graph state, followed by full family-3
+production event/cell parity before advancing to explicit F0 points.

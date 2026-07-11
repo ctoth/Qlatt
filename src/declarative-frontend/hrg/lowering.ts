@@ -16,6 +16,7 @@
 import type { KlattFrame } from "../../tts-frontend-types";
 import type { Utterance } from "./utterance";
 import type { Item } from "./item";
+import type { FeatureValue } from "./types";
 
 export interface LowerOptions {
   /** Required backend parameter columns, in declared output order. */
@@ -27,6 +28,12 @@ export interface LowerOptions {
     duration_floors: {
       stop_release_ms: { value: number };
       default_ms: { value: number };
+    };
+    event_points: {
+      include_segment_start: boolean;
+      include_control_boundaries: boolean;
+      include_f0_anchors: boolean;
+      include_transition_steady_time: boolean;
     };
   };
   /** Feature key holding each segment's realized duration in ms (default "duration"). */
@@ -53,6 +60,111 @@ export interface LoweredTrack {
   paramKeys: string[];
   timings: SegmentTiming[];
   utterance: Utterance;
+}
+
+type ControlFieldOperation = "set" | "add" | "mul" | "max" | "min" | "unset";
+
+type ResolvedControlField = {
+  operation: ControlFieldOperation;
+  value?: number;
+};
+
+type ResolvedControlWindow = {
+  startMs: number;
+  endMs: number;
+  fields: Readonly<Record<string, ResolvedControlField>>;
+  decisionId: string;
+};
+
+function isFeatureObject(value: FeatureValue | undefined): value is { readonly [key: string]: FeatureValue } {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function finiteFeatureNumber(value: FeatureValue | undefined): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function parseControlFields(value: FeatureValue | undefined): Record<string, ResolvedControlField> {
+  if (!isFeatureObject(value)) {
+    throw new Error("E_HRG_LOWER_CONTROL_WINDOW: fields must be a typed object");
+  }
+  const fields: Record<string, ResolvedControlField> = {};
+  for (const [fieldName, fieldValue] of Object.entries(value)) {
+    if (typeof fieldValue === "number" && Number.isFinite(fieldValue)) {
+      fields[fieldName] = { operation: "set", value: fieldValue };
+      continue;
+    }
+    if (!isFeatureObject(fieldValue) || typeof fieldValue.op !== "string") {
+      throw new Error(`E_HRG_LOWER_CONTROL_WINDOW: field '${fieldName}' is invalid`);
+    }
+    const operation = fieldValue.op;
+    if (
+      operation !== "set"
+      && operation !== "add"
+      && operation !== "mul"
+      && operation !== "max"
+      && operation !== "min"
+      && operation !== "unset"
+    ) {
+      throw new Error(`E_HRG_LOWER_CONTROL_WINDOW: field '${fieldName}' has invalid operation`);
+    }
+    if (operation === "unset") {
+      fields[fieldName] = { operation };
+      continue;
+    }
+    const operand = finiteFeatureNumber(fieldValue.value);
+    if (operand == null) {
+      throw new Error(`E_HRG_LOWER_CONTROL_WINDOW: field '${fieldName}' requires a finite value`);
+    }
+    fields[fieldName] = { operation, value: operand };
+  }
+  if (Object.keys(fields).length === 0) {
+    throw new Error("E_HRG_LOWER_CONTROL_WINDOW: fields cannot be empty");
+  }
+  return fields;
+}
+
+function resolveWindowSpan(
+  value: { readonly [key: string]: FeatureValue },
+  durationMs: number,
+): { startMs: number; endMs: number } | null {
+  const prefixMs = finiteFeatureNumber(value.prefix_ms);
+  if (prefixMs != null) {
+    const endMs = Math.max(0, Math.min(durationMs, prefixMs));
+    return endMs > 0 ? { startMs: 0, endMs } : null;
+  }
+  const suffixMs = finiteFeatureNumber(value.suffix_ms);
+  if (suffixMs != null) {
+    const spanMs = Math.max(0, Math.min(durationMs, suffixMs));
+    const startMs = Math.max(0, durationMs - spanMs);
+    return durationMs > startMs ? { startMs, endMs: durationMs } : null;
+  }
+  const startMsValue = finiteFeatureNumber(value.start_ms);
+  const endMsValue = finiteFeatureNumber(value.end_ms);
+  const startRatio = finiteFeatureNumber(value.start_ratio);
+  const endRatio = finiteFeatureNumber(value.end_ratio);
+  const rawStartMs = startMsValue ?? durationMs * Math.max(0, Math.min(1, startRatio ?? 0));
+  const rawEndMs = endMsValue ?? durationMs * Math.max(0, Math.min(1, endRatio ?? 1));
+  const startMs = Math.max(0, Math.min(durationMs, rawStartMs));
+  const endMs = Math.max(startMs, Math.min(durationMs, rawEndMs));
+  return endMs > startMs ? { startMs, endMs } : null;
+}
+
+function resolveControlField(baseValue: number | undefined, field: ResolvedControlField): number | undefined {
+  switch (field.operation) {
+    case "unset":
+      return undefined;
+    case "set":
+      return field.value;
+    case "add":
+      return (baseValue ?? 0) + (field.value ?? 0);
+    case "mul":
+      return (baseValue ?? 0) * (field.value ?? 1);
+    case "max":
+      return Math.max(baseValue ?? Number.NEGATIVE_INFINITY, field.value ?? Number.NEGATIVE_INFINITY);
+    case "min":
+      return Math.min(baseValue ?? Number.POSITIVE_INFINITY, field.value ?? Number.POSITIVE_INFINITY);
+  }
 }
 
 function requirePolicyNumber(value: number, path: string): number {
@@ -143,11 +255,62 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
   const segmentTotalMs = previousEndMs ?? 0;
 
   const paramKeys = options.columns.slice();
+  const controlWindowsByItem = new Map<Item, ResolvedControlWindow[]>();
+  segmentItems.forEach((sourceItem, sourceIndex) => {
+    const rawWindows = sourceItem.get("control_windows");
+    if (!Array.isArray(rawWindows)) return;
+    const windowWrite = sourceItem.latestWrite("control_windows");
+    if (!windowWrite) {
+      throw new Error(`E_HRG_LOWER_CONTROL_WINDOW: Segment '${sourceItem.id}' has unstamped controls`);
+    }
+    rawWindows.forEach((rawWindow) => {
+      if (!isFeatureObject(rawWindow)) {
+        throw new Error(`E_HRG_LOWER_CONTROL_WINDOW: Segment '${sourceItem.id}' has invalid controls`);
+      }
+      const targetName = typeof rawWindow.target === "string" ? rawWindow.target : "current";
+      const targetIndex = targetName === "next"
+        ? sourceIndex + 1
+        : targetName === "prev"
+          ? sourceIndex - 1
+          : sourceIndex;
+      const targetTiming = timings[targetIndex];
+      if (!targetTiming) {
+        utterance.diagnostics.warn(
+          "Control window target falls outside the active Segment relation",
+          { sourceItemId: sourceItem.id, target: targetName },
+          "HRG_LOWER_CONTROL_WINDOW_TARGET",
+        );
+        return;
+      }
+      const span = resolveWindowSpan(rawWindow, targetTiming.durationMs);
+      if (!span) {
+        utterance.diagnostics.warn(
+          "Control window has an empty resolved span",
+          { sourceItemId: sourceItem.id, targetItemId: targetTiming.item.id },
+          "HRG_LOWER_CONTROL_WINDOW_EMPTY",
+        );
+        return;
+      }
+      const resolved: ResolvedControlWindow = {
+        ...span,
+        fields: parseControlFields(rawWindow.fields),
+        decisionId: windowWrite.decisionId,
+      };
+      const targetWindows = controlWindowsByItem.get(targetTiming.item);
+      if (targetWindows) targetWindows.push(resolved);
+      else controlWindowsByItem.set(targetTiming.item, [resolved]);
+    });
+  });
 
   const frames: KlattFrame[] = [];
   const provenanceByFrame: Array<Record<string, string>> = [];
 
-  const appendFrame = (timeMs: number, item?: Item, phonemeOverride?: string): void => {
+  const appendFrame = (
+    timeMs: number,
+    item?: Item,
+    phonemeOverride?: string,
+    segmentOffsetMs = 0,
+  ): void => {
     const params: Record<string, number> = {};
     const provenance: Record<string, string> = {};
     if (item) {
@@ -157,6 +320,21 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
           params[key] = value;
           const write = item.latestWrite(key);
           if (write) provenance[key] = write.decisionId;
+        }
+      }
+      for (const window of controlWindowsByItem.get(item) ?? []) {
+        if (segmentOffsetMs < window.startMs - 1e-6 || segmentOffsetMs >= window.endMs - 1e-6) {
+          continue;
+        }
+        for (const [key, field] of Object.entries(window.fields)) {
+          const value = resolveControlField(params[key], field);
+          if (value == null || !Number.isFinite(value)) {
+            delete params[key];
+            delete provenance[key];
+          } else {
+            params[key] = value;
+            provenance[key] = window.decisionId;
+          }
         }
       }
     }
@@ -178,7 +356,21 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
 
   appendFrame(0);
   for (const timing of timings) {
-    appendFrame(initialSilenceMs + timing.startMs, timing.item);
+    const offsets = new Set<number>();
+    if (options.timeline.event_points.include_segment_start) offsets.add(0);
+    if (options.timeline.event_points.include_control_boundaries) {
+      for (const window of controlWindowsByItem.get(timing.item) ?? []) {
+        if (window.startMs > 1e-6 && window.startMs < timing.durationMs - 1e-6) {
+          offsets.add(window.startMs);
+        }
+        if (window.endMs > 1e-6 && window.endMs < timing.durationMs - 1e-6) {
+          offsets.add(window.endMs);
+        }
+      }
+    }
+    for (const offsetMs of [...offsets].sort((left, right) => left - right)) {
+      appendFrame(initialSilenceMs + timing.startMs + offsetMs, timing.item, undefined, offsetMs);
+    }
   }
   const finalResetMs = initialSilenceMs + segmentTotalMs;
   appendFrame(finalResetMs, undefined, "SIL");

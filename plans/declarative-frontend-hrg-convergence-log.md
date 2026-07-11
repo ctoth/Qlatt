@@ -175,7 +175,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | Iteration | Phase/slice | Result | Commit | Evidence |
 |---:|---|---|---|---|
 | 001 | Phase 0 baseline/oracles | kept | `bf303b2f` | results and fixture paths above |
-| 002 | Phase 1A invalid debug coverage | kept | pending slice commit | 148 owning tests pass; unconditional-pass search zero-hit |
+| 002 | Phase 1A invalid debug coverage | kept | `80392caf` | 148 owning tests pass; unconditional-pass search zero-hit |
+| 003 | Phase 1B backwards bridge deletion | kept | pending slice commit | bridge search zero-hit; HRG core 14/14; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -213,3 +214,43 @@ PASS
 Next slice: Phase 1B. Delete the completed-track reconstruction bridge first,
 then delete its bridge-only test and renderer, update only status prose that
 claims it is a live architecture, prove the retained HRG core, and commit.
+
+## Iteration 003 — Phase 1B backwards bridge deletion
+
+Status: kept.
+
+The production bridge was deleted first. Its resulting references were exactly
+the bridge-only test, bridge-only renderer, historical WAV demo, and stale
+morning-report claims. The test's reusable expectations—shared relation identity,
+non-empty final lowering, complete parameter columns, and field-level provenance—
+remain scheduled as graph-native Phase 4/5 acceptance tests and are preserved in
+the immutable Phase 0 fixtures; no conversion implementation was retained.
+
+Kept reduction:
+
+- deleted `src/declarative-frontend/hrg/bridge.ts`;
+- deleted `test/hrg-bridge.test.ts`;
+- deleted `scripts/render-hrg.ts`;
+- deleted `design/beauty-synthesis/demo/hrg-moon.wav`;
+- corrected `design/beauty-synthesis/MORNING-REPORT.md` to call the old route a
+  historical reconstruction feasibility demo, not graph-native execution.
+
+Verification:
+
+```text
+rg -n "buildUtteranceFromPhrase|hrg/bridge|scripts/render-hrg|test/hrg-bridge|HRG drives synthesis end-to-end|proven via render-hrg" src test scripts design -g "!test/fixtures/hrg-convergence-baseline/**"
+ZERO HIT
+
+npm test -- test/hrg.test.ts
+PASS: 1 file, 14 tests
+
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+```
+
+Next slice: Phase 2A resource ownership. Delete `defaultInventoryResolver`, make
+the selected frontend's compiled resource declaration authoritative, add three
+direct inventory-identity tests first, then commit the kept convergence.

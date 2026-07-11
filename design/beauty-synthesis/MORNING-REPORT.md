@@ -56,15 +56,14 @@ angry F0 224 / fast / loud; tender breathy (HNR 11.3) / slow; sad slowest; happy
   (clean); the earlier `beauty-*`/`affect-*` WAVs were rendered pre-fix and still clip. HF
   gained +2-3 dB/octave (still ~12 dB under Monson's ideal — bounded by the broadband limiter;
   documented as future HF-crest work).
-- **HRG drives synthesis end-to-end (DONE, committed `e7cb1128`):** rather than risk the
-  working voice with an overnight swap of the live engine's IR (large shared-code refactor,
-  zero audible payoff), I proved the HRG is a live synthesis IR the SAFE additive way:
-  `scripts/render-hrg.ts` renders phrase -> HRG -> frames -> WAV. `demo/hrg-moon.wav` measures
-  as a valid female voice (F0 193, female formants, HNR 23), `whyParamAt` traces F0 -> "AA"
-  -> syllable -> word "calm" (cited), and the default path is byte-identical (cmp verified).
-  Honest gap: the HRG lowering is stepwise (no intra-segment ramps yet) -- a simpler render of
-  the same speaker, the documented next seam. Swapping the HRG in as the DEFAULT live IR
-  (replacing the flat-track engine) is the one remaining refactor, best done awake with you.
+- **Historical HRG feasibility demo (committed `e7cb1128`, now removed):** the additive
+  demo reconstructed an HRG from an already completed frontend track and rendered that
+  second track. It proved that the HRG data structures and provenance queries could carry
+  synthesis parameters, but it did not prove graph-native frontend execution. The backwards
+  bridge, bridge-only renderer/test, and `demo/hrg-moon.wav` were deleted when convergence
+  began. Immutable historical graph/control/frame fixtures remain under
+  `test/fixtures/hrg-convergence-baseline/`; the graph-native replacement is governed by
+  `plans/declarative-frontend-hrg-convergence-plan.md`.
 - **Browser validation:** the demos are node-rendered (real, playable audio). The source has
   NOT been browser-validated (needs Chrome; memory warns node-voiced ≠ browser-voiced for a
   web-app default). Flagged for daylight.
@@ -82,16 +81,16 @@ beauty branch is a 5-minute morning job to do together — say the word.
 ## Build status: COMPLETE
 Every subsystem of the designed synth is built, tested, committed, and verified by real audio:
 new backend (energized HF), new frontend (female inventory + voice quality + prosody),
-provenance-stamped HRG IR (and proven to drive audio), score+direction-track input, and the
+provenance-stamped HRG core (with its historical feasibility evidence frozen as fixtures), score+direction-track input, and the
 affect engine — a clean, female, expressive, non-clipping voice you can play right now.
 Three honest gaps remain, all documented above and none blocking listening: HF ~12 dB under
-Monson's ideal, the HRG isn't yet the *default* live IR (it's proven via render-hrg), and the
+Monson's ideal, graph-native frontend convergence is still in progress, and the
 source hasn't been browser-validated. 14 beauty commits; `beauty-synth` branch pointer marks
 them all.
 
 ## Suggested first moves this morning
-1. Play `demo/tuned-moon.wav` + the affect set (`affect-tender/sad/happy/angry`) + `hrg-moon.wav`.
+1. Play `demo/tuned-moon.wav` + the affect set (`affect-tender/sad/happy/angry`).
 2. Tell me what your ear wants more/less of — she's fully tunable (every knob cited).
-3. Decide the next refactor: make the HRG the default live IR, browser-validate the source,
-   close the HF-to-ideal gap, or tune toward a specific beauty. And let's untangle the
+3. Continue the governed HRG convergence, browser-validate the source, close the HF-to-ideal
+   gap, or tune toward a specific beauty. And let's untangle the
    `beauty-synth` branch from the klsyn88 commits (a 5-minute job, together).

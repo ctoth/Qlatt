@@ -199,8 +199,9 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 023 | Phase 3 CEL isolation/topology reads | kept | `fd8e6b0e` | nested evaluation isolation and exact navigation parents; 53 focused tests; core/scripts typecheck pass |
 | 024 | Phase 3 graph predicate navigation | kept | `7ca960f2` | tracked inline/named scans; 54 focused tests; core/scripts typecheck pass |
 | 025 | Phase 3 graph path/resource catalog and exit gate | kept | `7fb4fdbc` | shared-tree/resource catalog; guarded/prior points; 72 combined focused tests; core/scripts typecheck pass |
-| 026 | Phase 4 lowering family 1: timing | kept | `a40b6230` | exact 2375/2900/2134 ms oracle parity; no duration fallback; 19 tests; core/scripts typecheck pass |
-| 027 | Phase 4 lowering family 2: scalar histories | kept | pending slice commit | explicit selected-policy columns; 3 exact frame-column proofs; latest-write provenance; core/scripts typecheck pass |
+| 026 | Phase 4 lowering family 1: timing | invalid evidence; reconciled | `a40b6230` | used deleted bridge samples instead of production events; validation retained, parity claim withdrawn |
+| 027 | Phase 4 lowering family 2: scalar histories | invalid evidence; reconciled | `6c920c3f` | used a graph-to-itself scalar comparison; policy columns/history retained, parity claim withdrawn |
+| 028 | Phase 4 production-contract reconciliation | kept | pending slice commit | sparse boundary events match captured production schedules; bridge oracles deleted from Phase 4 tests; 20 tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1251,7 +1252,13 @@ required-duration validation against the committed baseline fixtures.
 
 ## Iteration 026 — Phase 4 lowering family 1: segment timing
 
-Status: kept.
+Status: implementation partially kept; parity evidence invalidated by Iteration 028.
+
+Correction: the measurements below used `reconstructedLowering`, the deleted
+bridge's uniform 5 ms projection, instead of `oldProduction.sourceFrames`, the
+captured production automation-event contract. The duration/timing diagnostics
+remain useful, but the frame counts and parity claim below are historical error,
+not acceptance evidence.
 
 The direct timing fixture was red for both required reasons: the lowerer still
 looked for historical `dur_ms` by default and silently substituted 100 ms when
@@ -1302,7 +1309,13 @@ frame fixtures before commit.
 
 ## Iteration 027 — Phase 4 lowering family 2: scalar histories
 
-Status: kept.
+Status: implementation partially kept; parity evidence invalidated by Iteration 028.
+
+Correction: the measurements below read expected scalar values from the same
+reconstructed graph used to build the test Utterance. That was a round-trip
+self-comparison, not production parity. The declared-column policy and
+latest-write provenance unit remain useful, but the field-count parity claim
+below is historical error, not acceptance evidence.
 
 The direct scalar fixture was red because `hrg/lowering.ts` ignored the selected
 frontend policy and substituted its own partial `DEFAULT_KLATT_PARAMS` list.
@@ -1351,3 +1364,74 @@ ZERO HIT
 Next Phase 4 slice: transition/control-window realization from graph relations,
 compared against the committed qlatt-English and DECtalk frame fixtures before
 commit.
+
+## Iteration 028 — Phase 4 production-contract reconciliation
+
+Status: kept.
+
+The prior two slices substituted `reconstructedLowering` for the named
+production-frame oracle. Direct inspection proved the artifacts are not
+equivalent:
+
+```text
+frontend          production events/end       deleted bridge samples/end
+qlatt-English     46 / 2.505 s                 476 / 2.375 s
+DECtalk English   309 / 2.9222 s               581 / 2.900 s
+qlatt-beauty      48 / 2.264 s                 427 / 2.130 s
+```
+
+`klatt-interpreter.ts` schedules each production frame timestamp directly as a
+Web Audio automation event. Ramp bindings interpolate between those events;
+other bindings step. Uniform 5 ms samples therefore change the schedule and are
+the stepwise approximation forbidden by plan section 9.
+
+Independent Claude and agy reviews inspected the same repository evidence and
+agreed on the correction: keep required timing validation, explicit selected
+policy columns, and latest-write provenance; delete the uniform sampling loop
+and both invalid parity tests. Their strongest additional finding was that the
+scalar fixture was graph-to-itself rather than production-to-graph evidence.
+
+Kept convergence:
+
+- deletes `framePeriodSec`, `frameCount`, `findCovering`, and the uniform 5 ms
+  sampling loop from the final lowerer;
+- emits the first production-event family only: initial state, segment starts,
+  final reset, and final-silence endpoint;
+- consumes cited initial/final silence and duration-floor values from the
+  selected lowering policy, with no bundled fallback;
+- validates resolved axis intervals against the effective policy-floored
+  duration, including DECtalk's 27 ms flap raised to its cited 30 ms floor;
+- compares event times and phonemes only to the matching subset of
+  `oldProduction.sourceFrames`, within the existing 1e-6 event epsilon;
+- deletes every Phase 4 test read of `reconstructedLowering`; and
+- removes the three tautological scalar parity cases while retaining the real
+  two-write current-value/provenance unit.
+
+Measured production-event boundary skeleton:
+
+```text
+qlatt-English:           27/27 boundary/silence events exact within epsilon
+DECtalk English:         39/39 boundary/silence events exact within epsilon
+qlatt-beauty structural: 22/22 boundary/silence events exact within epsilon
+```
+
+Verification:
+
+```text
+npm test -- --run test/hrg-lowering-timing.test.ts test/hrg-lowering-scalars.test.ts test/hrg.test.ts
+PASS: 3 files, 20 tests
+
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+rg -n "reconstructedLowering|framePeriodSec|frameCount|findCovering|5 ms param track|5 ms Klatt" test/hrg-lowering-timing.test.ts test/hrg-lowering-scalars.test.ts test/hrg.test.ts src/declarative-frontend/hrg/lowering.ts
+ZERO HIT
+```
+
+Phase 4 family 1 is now accepted against the production contract. Family 2
+still requires a non-tautological current-value comparison at production event
+cells before it can be accepted. Transition/control-window work does not begin
+until that corrected scalar family is committed.

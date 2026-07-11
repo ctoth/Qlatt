@@ -1,6 +1,6 @@
 /**
  * HRG lowering — the single final pass: project leaf `Segment` features into a
- * flat 5 ms Klatt control-frame track (the synthesizer's input vocabulary,
+ * sparse timestamped Klatt automation-event track (the synthesizer's input vocabulary,
  * `KlattFrame` from tts-frontend-types). Each emitted param carries the
  * decision id of the write that produced it, so the lowered track is itself
  * queryable (see provenance-query.ts).
@@ -9,7 +9,7 @@
  * PhraseCommand / Affect relations are designed for but not yet projected here;
  * the per-frame provenance index is the seam they will plug into.
  *
- * Citations: Klatt 1980 (5 ms control frames); Allen 1987 MITalk PHONET (flatten
+ * Citations: Klatt 1980 (time-varying control parameters); Allen 1987 MITalk PHONET (flatten
  * the structure to a parameter track only at the end);
  * design/beauty-synthesis/11-sota-frontend-architecture.md §5 (one final lowering).
  */
@@ -20,12 +20,21 @@ import type { Item } from "./item";
 export interface LowerOptions {
   /** Required backend parameter columns, in declared output order. */
   columns: readonly string[];
-  /** Frame period in seconds (default 0.005 = 5 ms). */
-  framePeriodSec?: number;
+  /** Selected frontend timing policy. No bundled fallback is permitted. */
+  timeline: {
+    initial_silence_ms: { value: number };
+    final_silence_ms: { value: number };
+    duration_floors: {
+      stop_release_ms: { value: number };
+      default_ms: { value: number };
+    };
+  };
   /** Feature key holding each segment's realized duration in ms (default "duration"). */
   durationKey?: string;
   /** Feature key holding each segment's phoneme label (default "phoneme"). */
   phonemeKey?: string;
+  /** Feature key holding the segment class used by duration policy (default "type"). */
+  typeKey?: string;
 }
 
 /** Per-segment realized timing window (ms). */
@@ -40,35 +49,40 @@ export interface LoweredTrack {
   frames: KlattFrame[];
   /** Parallel to `frames`: paramKey -> decision id that produced it. */
   provenanceByFrame: Array<Record<string, string>>;
-  framePeriodSec: number;
   totalMs: number;
   paramKeys: string[];
   timings: SegmentTiming[];
   utterance: Utterance;
 }
 
-function findCovering(timings: SegmentTiming[], tMs: number): SegmentTiming | null {
-  const epsilon = 1e-6;
-  for (const timing of timings) {
-    if (tMs >= timing.startMs - epsilon && tMs < timing.endMs - epsilon) {
-      return timing;
-    }
+function requirePolicyNumber(value: number, path: string): number {
+  if (!Number.isFinite(value) || value < 0) {
+    throw new Error(`E_HRG_LOWER_POLICY_NUMBER: '${path}' must be finite and non-negative`);
   }
-  // Clamp the final boundary (t == totalMs) to the last segment.
-  const last = timings[timings.length - 1];
-  if (last && tMs >= last.endMs - epsilon) return last;
-  return null;
+  return value;
 }
 
 /** Lower an utterance's Segment relation into a KlattFrame[] track. */
 export function lowerToFrames(utterance: Utterance, options: LowerOptions): LoweredTrack {
-  const framePeriodSec = options.framePeriodSec ?? 0.005;
-  const framePeriodMs = framePeriodSec * 1000;
   const durationKey = options.durationKey ?? "duration";
   const phonemeKey = options.phonemeKey ?? "phoneme";
-  if (!Number.isFinite(framePeriodSec) || framePeriodSec <= 0) {
-    throw new Error("E_HRG_LOWER_FRAME_PERIOD: frame period must be finite and positive");
-  }
+  const typeKey = options.typeKey ?? "type";
+  const initialSilenceMs = requirePolicyNumber(
+    options.timeline.initial_silence_ms.value,
+    "timeline.initial_silence_ms.value",
+  );
+  const finalSilenceMs = requirePolicyNumber(
+    options.timeline.final_silence_ms.value,
+    "timeline.final_silence_ms.value",
+  );
+  const stopReleaseFloorMs = requirePolicyNumber(
+    options.timeline.duration_floors.stop_release_ms.value,
+    "timeline.duration_floors.stop_release_ms.value",
+  );
+  const defaultFloorMs = requirePolicyNumber(
+    options.timeline.duration_floors.default_ms.value,
+    "timeline.duration_floors.default_ms.value",
+  );
 
   const segmentItems = utterance.segments.listItems()
     .filter((item) => item.get("active") !== false);
@@ -98,65 +112,82 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
       );
       throw new Error(`E_HRG_LOWER_TIME_REQUIRED: Segment '${item.id}' requires resolved interval timing`);
     }
+    const segmentType = item.get(typeKey);
+    const isStopRelease = segmentType === "stop_release" || segmentType === "stop_aspiration";
+    const durationFloorMs = isStopRelease ? stopReleaseFloorMs : defaultFloorMs;
+    const effectiveDurationMs = Math.max(rawDuration, durationFloorMs);
     const resolvedDurationMs = endMs - startMs;
     if (
       resolvedDurationMs <= 0
-      || Math.abs(resolvedDurationMs - rawDuration) > 1e-6
+      || Math.abs(resolvedDurationMs - effectiveDurationMs) > 1e-6
       || (previousEndMs != null && Math.abs(startMs - previousEndMs) > 1e-6)
     ) {
       utterance.diagnostics.error(
         "Segment duration and resolved interval timing disagree",
-        { itemId: item.id, durationMs: rawDuration, startMs, endMs, previousEndMs },
+        {
+          itemId: item.id,
+          durationMs: rawDuration,
+          effectiveDurationMs,
+          durationFloorMs,
+          startMs,
+          endMs,
+          previousEndMs,
+        },
         "HRG_LOWER_TIMING_MISMATCH",
       );
       throw new Error(`E_HRG_LOWER_TIMING_MISMATCH: Segment '${item.id}' has inconsistent timing`);
     }
-    timings.push({ item, startMs, endMs, durationMs: rawDuration });
+    timings.push({ item, startMs, endMs, durationMs: effectiveDurationMs });
     previousEndMs = endMs;
   }
-  const totalMs = previousEndMs ?? 0;
+  const segmentTotalMs = previousEndMs ?? 0;
 
   const paramKeys = options.columns.slice();
 
   const frames: KlattFrame[] = [];
   const provenanceByFrame: Array<Record<string, string>> = [];
 
-  const epsilon = 1e-6;
-  const frameCount = totalMs <= 0 ? 0 : Math.floor(totalMs / framePeriodMs + epsilon) + 1;
-
-  for (let frameIndex = 0; frameIndex < frameCount; frameIndex++) {
-    const tMs = frameIndex * framePeriodMs;
-    const timing = findCovering(timings, tMs);
-    if (!timing) continue;
-
-    const item = timing.item;
+  const appendFrame = (timeMs: number, item?: Item, phonemeOverride?: string): void => {
     const params: Record<string, number> = {};
     const provenance: Record<string, string> = {};
-    for (const key of paramKeys) {
-      const value = item.get(key);
-      if (typeof value === "number") {
-        params[key] = value;
-        const write = item.latestWrite(key);
-        if (write) provenance[key] = write.decisionId;
+    if (item) {
+      for (const key of paramKeys) {
+        const value = item.get(key);
+        if (typeof value === "number") {
+          params[key] = value;
+          const write = item.latestWrite(key);
+          if (write) provenance[key] = write.decisionId;
+        }
       }
     }
-
-    const phoneme = item.get(phonemeKey);
     const frame: KlattFrame = {
-      time: tMs / 1000,
+      time: timeMs / 1000,
       params,
-      segmentId: item.id,
       provenance,
     };
-    if (typeof phoneme === "string") frame.phoneme = phoneme;
+    if (item) {
+      frame.segmentId = item.id;
+      const phoneme = item.get(phonemeKey);
+      if (typeof phoneme === "string") frame.phoneme = phoneme;
+    } else if (phonemeOverride) {
+      frame.phoneme = phonemeOverride;
+    }
     frames.push(frame);
     provenanceByFrame.push(provenance);
+  };
+
+  appendFrame(0);
+  for (const timing of timings) {
+    appendFrame(initialSilenceMs + timing.startMs, timing.item);
   }
+  const finalResetMs = initialSilenceMs + segmentTotalMs;
+  appendFrame(finalResetMs, undefined, "SIL");
+  const totalMs = finalResetMs + finalSilenceMs;
+  if (totalMs > finalResetMs) appendFrame(totalMs, undefined, "SIL");
 
   return {
     frames,
     provenanceByFrame,
-    framePeriodSec,
     totalMs,
     paramKeys,
     timings,

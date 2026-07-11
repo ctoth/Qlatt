@@ -13,10 +13,22 @@ import {
   decisionChain,
 } from "../src/declarative-frontend/hrg";
 import type { Item } from "../src/declarative-frontend/hrg/item";
-import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import type { HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
 
 const CITE = ["Taylor 2001 HRG"];
 const RELATION_INPUT = { reason: "fixture relation construction", citations: CITE };
+const TEST_LOWERING = {
+  columns: ["F0", "F1"],
+  timeline: {
+    initial_silence_ms: { value: 0 },
+    final_silence_ms: { value: 0 },
+    duration_floors: {
+      stop_release_ms: { value: 0 },
+      default_ms: { value: 0 },
+    },
+  },
+  durationKey: "dur_ms",
+} as const satisfies LowerOptions;
 const TEST_SCHEMA = {
   itemTypes: {
     word: {
@@ -293,22 +305,22 @@ describe("HRG write-stamping and provenance chain", () => {
 });
 
 describe("HRG lowering to Klatt frames", () => {
-  it("segments -> durations -> a 5 ms param track that round-trips", () => {
+  it("segments -> durations -> sparse automation events that round-trip", () => {
     const { u, dh, ae } = buildTheCat();
     // Give two segments distinct F1 targets so we can locate them in time.
     dh.set("F1", 300, { reason: "DH F1", citations: CITE });
     ae.set("F1", 660, { reason: "AE F1", citations: CITE });
 
-    const track = lowerToFrames(u, { columns: ["F1"], durationKey: "dur_ms" });
-    // Total = 60+80+70+120+90 = 420 ms; 5 ms frames => floor(420/5)+1 = 85 frames.
+    const track = lowerToFrames(u, { ...TEST_LOWERING, columns: ["F1"] });
+    // Initial state + five segment starts + final reset.
     expect(track.totalMs).toBe(420);
-    expect(track.frames.length).toBe(85);
+    expect(track.frames.length).toBe(7);
     expect(track.paramKeys).toContain("F1");
 
-    // First frame is the DH segment.
-    expect(track.frames[0].time).toBeCloseTo(0, 9);
-    expect(track.frames[0].phoneme).toBe("DH");
-    expect(track.frames[0].params.F1).toBe(300);
+    const firstSegmentFrame = track.frames.find((frame) => frame.segmentId === dh.id);
+    expect(firstSegmentFrame?.time).toBeCloseTo(0, 9);
+    expect(firstSegmentFrame?.phoneme).toBe("DH");
+    expect(firstSegmentFrame?.params.F1).toBe(300);
 
     // AE spans [60+80+70=210ms, 330ms). Sample at 250 ms.
     const aeIndex = frameIndexAt(track, 0.25);
@@ -339,7 +351,7 @@ describe("HRG end-to-end: build -> lower -> trace why", () => {
     // Give the vowel an F1 too, and a baseline F0 on the first segment.
     ae.set("F1", 660, { reason: "AE F1 target", citations: CITE });
 
-    const track = lowerToFrames(u, { columns: ["F0", "F1"], durationKey: "dur_ms" });
+    const track = lowerToFrames(u, TEST_LOWERING);
 
     // The AE vowel spans [210ms, 330ms): sample F0 at 250 ms.
     const aeIndex = frameIndexAt(track, 0.25);

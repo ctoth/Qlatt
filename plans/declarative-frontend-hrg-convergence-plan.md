@@ -1,6 +1,7 @@
 # Declarative Frontend HRG Convergence Plan
 
-Status: execution specification; implementation not started
+Status: complete as of 2026-07-11. All phases and gates are recorded in
+`plans/declarative-frontend-hrg-convergence-log.md`; no phase was deferred.
 
 Authority: this plan specializes and amends `plans/declarative-architecture-completion-plan.md` for the frontend IR boundary. The architecture decision comes from `design/beauty-synthesis/11-sota-frontend-architecture.md` and `design/beauty-synthesis/12-fe-architecture-recommendation.md`.
 
@@ -760,9 +761,11 @@ This plan is complete only when:
 
 “Substantial progress,” “HRG audio works,” “the tests pass,” or “the flag day landed” are not substitutes for this definition.
 
-## 21. Immediate first implementation action
+## 21. Historical first implementation action
 
-When the user authorizes execution, do not begin by adding a new engine abstraction. Create the baseline/log artifact, verify the fake debug test's meaningful assertion ownership, and complete Phase 1A. Then reread this plan and continue in order.
+Execution began with the baseline/log artifact and Phase 1A as required. This
+section is retained to record the ordering constraint that governed the now-
+completed work.
 
 ## Cross-References
 

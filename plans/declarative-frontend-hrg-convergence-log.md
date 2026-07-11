@@ -2182,3 +2182,127 @@ Next plan phase: Phase 7 fixed-point deletion and documentation convergence.
 Run and classify every forbidden-surface gate, converge all architecture and
 authoring documents, resolve the remaining final static/golden/browser gates,
 and record the final proof before declaring the plan complete.
+
+## Iteration 045 — Phase 7 fixed point and final proof
+
+Status: kept. Phase 7 and the complete convergence plan are complete. No phase
+was deferred and no source slice remains.
+
+The first fixed-point search found one live forbidden type and one stale build
+configuration: the orphaned `src/nasal-subsystem.ts` declared the old untyped
+`TokenLike` and synthesized post-hoc provenance, while `tsconfig.core.json`
+still named the deleted flat engine and axis. The module was imported only by
+its own self-test, so both were deleted instead of retyped or adapted. This
+removed 465 dead lines and committed as `995c549c`.
+
+Architecture and authoring documentation now describe the implemented path:
+one selected-frontend resource owner, one typed `Utterance`, graph-native
+transactions, one final lowerer, and one-run history/journal tooling. README's
+previously fictional `tts-dsl --spec` snapshot commands were replaced with the
+real `phases`, `field`, `why-not`, `replay`, and `explain` commands and executed
+successfully. The coordinator plan records frontend IR convergence, the old
+control-score roadmap is explicitly completed by supersession, and the two
+beauty architecture authorities distinguish completed shared architecture from
+the remaining clean-room content work. This committed as `1378e0d3`.
+
+The final matrix originally inherited a Phase 0 `typecheck:golden` failure. It
+was resolved rather than deferred: the golden tsconfig now admits the checked
+scripts' TypeScript-extension imports and existing ambient module declarations,
+and experiment semantics constants merge against their exact optional,
+one-nested-map type rather than recursive `unknown`. Golden and core typechecks
+plus experiment-config tests pass. This committed as `9ed57f2b`.
+
+A reusable Playwright gate now drives the real application UI, real Start Audio
+and Speak controls, selected frontend/experiment pair, WebAudio runtime, and
+scheduled track. Each frontend runs in a fresh page/AudioContext so the gate
+does not manufacture an unsupported rapid-switch race. It cross-checks the UI
+track against a browser-local selected-frontend run and verifies the
+`inventory_selected` provenance subject. This committed as `e916f77e`. One
+remaining stale test comment was rewritten and committed as `5acf2b5a`.
+
+Final forbidden-surface commands and results:
+
+```text
+git grep -n -E "buildUtteranceFromPhrase|sourceTrack|SPEC_VALIDATED|defaultInventoryResolver|type TokenLike = Record<string, any>|RuntimeLike = Record<string, any>|_currentFunctions|emitRuleTraceDecisions|buildRuleCitationsMap|RULE_CITATIONS|includeTrace|DeclarativeControlScore|buildDeclarativeControlScore|validateDeclarativeControlScore|FrontendPhoneSummary|dectalk_obstruent_profile|selectDectalkObstruentProfile|select\\.stream|token\\.stream|\\.stream[[:space:]]*(===|==)|phaseNames\\.slice\\(0|expect\\(true\\)\\.toBe\\(true\\)|evaluateRuleMatchEvidence" -- src scripts public
+ZERO HITS
+
+git ls-files | Select-String -Pattern 'src/declarative-frontend/hrg/bridge|src/declarative-frontend/engine\\.ts|src/declarative-frontend/dectalk-helpers|src/declarative-frontend/axis\\.ts|src/control-score|src/track-assembler|test/debug-duration-tmp|test/hrg-bridge|scripts/render-hrg|test/control-score-schema|test/control-score-builder|public/rules/control-score\\.yaml'
+ZERO HITS
+
+git grep -n -E "JSON\\.parse\\(JSON\\.stringify|phaseNames\\.slice\\(0|snapshot" -- src/declarative-frontend/hrg/tooling.ts src/declarative-frontend/hrg/replay.ts scripts/explain-phrase.ts scripts/tts-dsl.ts
+ZERO HITS
+```
+
+Remaining test-only terms are classified, not hidden:
+
+- `streams:` is the explicit compiler-rejection fixture required by Phase 2;
+- `controlScore` in `test/fixtures/hrg-convergence-baseline/**` and the two
+  lowering readers is immutable Phase 0 historical-oracle data;
+- `"controlScore" in result` assertions prove current frontend output omits the
+  deleted field; and
+- explain CLI `prefix` variables implement subject-wildcard matching, not phase
+  prefix replay.
+
+Structural proof:
+
+```text
+git grep -n "function executeMatch\\|executeMatch(" -- src/declarative-frontend/hrg/rule-engine.ts
+ONE DEFINITION, ONE CALL SITE
+
+git grep -n "lowerToFrames(" -- src
+ONE DEFINITION, ONE PRODUCTION CALL SITE
+
+git grep -n -E "invalidateRelationCache|relation_cache_invalidated" -- src
+ZERO HITS; committed transactions own graph/index state
+
+direct Relation append/addRoot/addDaughter outside stamped Utterance transactions
+ZERO HITS
+
+frontend-named identifiers in generic CEL/rule transaction owners
+ZERO HITS
+```
+
+Final verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm run typecheck:audio
+PASS
+
+npm run typecheck:golden
+PASS
+
+npm run build
+PASS
+
+npm run test:golden
+PASS: resonator, antiresonator, and LF-source comparisons inside tolerance
+
+npm test
+PASS: 115 files, 936 tests; 5,400-word audit; 0 processing errors; 0 duration-floor violations
+
+npm run explain -- "hello world" --frontend qlatt-english --strict-citations
+PASS: 1,581 decisions, 0 uncited
+
+npm run explain -- "hello world" --frontend dectalk-english --strict-citations
+PASS: 1,254 decisions, 0 uncited
+
+npm run explain -- "she sees a calm blue moon" --frontend qlatt-beauty --strict-citations
+PASS: 2,466 decisions, 0 uncited
+
+npm run dev -- --host 127.0.0.1 --port 8000
+node scripts/verify-frontend-browser.mjs
+PASS: qlatt-english/klatt80-baseline 27 finite frames, 1.141 s, inventory:qlatt-english
+PASS: dectalk-english/dectalk-english 151 finite frames, 1.458 s, inventory:dectalk-english
+```
+
+The unrelated pre-existing tracked edits in the oversampled glottal source,
+generated WASM, and KLSyn test remain unstaged and unchanged by this work. The
+large set of unrelated untracked research/diagnostic artifacts also remains
+untouched. The final convergence ledger commit contains only this plan status
+and execution-log proof.

@@ -101,6 +101,39 @@ function buildTheCat() {
   u.sylStructure.addDaughter(catSylNode, ae, RELATION_INPUT);
   u.sylStructure.addDaughter(catSylNode, t, RELATION_INPUT);
 
+  const segments = [dh, ah, k, ae, t];
+  const anchors = u.beginTransaction({
+    ruleId: "fixture_anchors",
+    phase: "finalize",
+    tag: "timing",
+    reason: "fixture segment anchors",
+    citations: CITE,
+  });
+  anchors.partitionAnchors(segments, u.axis.start.id, u.axis.end.id);
+  anchors.commit();
+  const times = u.beginTransaction({
+    ruleId: "fixture_times",
+    phase: "finalize",
+    tag: "timing",
+    reason: "fixture resolved segment times",
+    citations: CITE,
+  });
+  let elapsedMs = 0;
+  const resolvedMarks = new Set<string>();
+  for (const segment of segments) {
+    const anchor = u.intervalAnchor(segment);
+    const duration = segment.get("dur_ms");
+    if (!anchor || typeof duration !== "number") throw new Error("fixture timing missing");
+    if (!resolvedMarks.has(anchor.leftMarkId)) {
+      times.resolveMarkTime(anchor.leftMarkId, elapsedMs);
+      resolvedMarks.add(anchor.leftMarkId);
+    }
+    elapsedMs += duration;
+    times.resolveMarkTime(anchor.rightMarkId, elapsedMs);
+    resolvedMarks.add(anchor.rightMarkId);
+  }
+  times.commit();
+
   return { u, theW, catW, catPos, theSyl, catSyl, dh, ah, k, ae, t };
 }
 
@@ -266,7 +299,7 @@ describe("HRG lowering to Klatt frames", () => {
     dh.set("F1", 300, { reason: "DH F1", citations: CITE });
     ae.set("F1", 660, { reason: "AE F1", citations: CITE });
 
-    const track = lowerToFrames(u);
+    const track = lowerToFrames(u, { durationKey: "dur_ms" });
     // Total = 60+80+70+120+90 = 420 ms; 5 ms frames => floor(420/5)+1 = 85 frames.
     expect(track.totalMs).toBe(420);
     expect(track.frames.length).toBe(85);
@@ -283,17 +316,6 @@ describe("HRG lowering to Klatt frames", () => {
     expect(track.frames[aeIndex].params.F1).toBe(660);
   });
 
-  it("a segment missing a duration falls back to the default", () => {
-    const u = new Utterance(TEST_SCHEMA);
-    const seg = u.createItem("segment");
-    seg.set("phoneme", "AA", { reason: "x", citations: CITE });
-    seg.set("F1", 700, { reason: "x", citations: CITE });
-    u.segments.append(seg, RELATION_INPUT);
-    const track = lowerToFrames(u, { defaultDurationMs: 50 });
-    expect(track.totalMs).toBe(50);
-    expect(track.frames.length).toBe(11); // floor(50/5)+1
-    expect(track.frames.every((f) => f.params.F1 === 700)).toBe(true);
-  });
 });
 
 describe("HRG end-to-end: build -> lower -> trace why", () => {
@@ -317,7 +339,7 @@ describe("HRG end-to-end: build -> lower -> trace why", () => {
     // Give the vowel an F1 too, and a baseline F0 on the first segment.
     ae.set("F1", 660, { reason: "AE F1 target", citations: CITE });
 
-    const track = lowerToFrames(u);
+    const track = lowerToFrames(u, { durationKey: "dur_ms" });
 
     // The AE vowel spans [210ms, 330ms): sample F0 at 250 ms.
     const aeIndex = frameIndexAt(track, 0.25);

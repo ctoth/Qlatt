@@ -198,7 +198,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 022 | Phase 3 graph engine finalization | kept | `246fd8ba` | journaled timing, dirty guard, replay; 45 HRG tests; core/scripts typecheck pass |
 | 023 | Phase 3 CEL isolation/topology reads | kept | `fd8e6b0e` | nested evaluation isolation and exact navigation parents; 53 focused tests; core/scripts typecheck pass |
 | 024 | Phase 3 graph predicate navigation | kept | `7ca960f2` | tracked inline/named scans; 54 focused tests; core/scripts typecheck pass |
-| 025 | Phase 3 graph path/resource catalog and exit gate | kept | pending slice commit | shared-tree/resource catalog; guarded/prior points; 72 combined focused tests; core/scripts typecheck pass |
+| 025 | Phase 3 graph path/resource catalog and exit gate | kept | `7fb4fdbc` | shared-tree/resource catalog; guarded/prior points; 72 combined focused tests; core/scripts typecheck pass |
+| 026 | Phase 4 lowering family 1: timing | kept | pending slice commit | exact 2375/2900/2134 ms oracle parity; no duration fallback; 19 tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1246,3 +1247,54 @@ engine remains unexported from production and has zero flat-engine calls.
 
 Phase 3 status: complete. Next: Phase 4 lowering family 1, segment timing and
 required-duration validation against the committed baseline fixtures.
+
+## Iteration 026 — Phase 4 lowering family 1: segment timing
+
+Status: kept.
+
+The direct timing fixture was red for both required reasons: the lowerer still
+looked for historical `dur_ms` by default and silently substituted 100 ms when
+the final `duration` feature was absent. It also ignored the Utterance temporal
+axis entirely.
+
+Kept convergence:
+
+- changes the final graph vocabulary default to `duration` while retaining an
+  explicit feature-key option only for reading the immutable historical fixture;
+- deletes `defaultDurationMs` and the implicit 100 ms policy;
+- excludes lifecycle-suppressed Segment Items from the active lowering view;
+- requires every active Segment to have a finite positive duration, a stamped
+  interval anchor, and resolved left/right mark times;
+- rejects non-contiguous or duration-disagreeing intervals instead of silently
+  reconstructing timing;
+- emits exact diagnostics for missing duration, unresolved time, and timing
+  mismatch before throwing; and
+- replaces the obsolete fallback test with required-data tests.
+
+Measured immutable-oracle parity:
+
+```text
+qlatt-English fricatives: 2375 ms, 476 frames, exact
+DECtalk English stops:    2900 ms, 581 frames, exact
+qlatt-beauty structural:  2134 ms, 427 frames, exact
+```
+
+Verification:
+
+```text
+npm test -- --run test/hrg-lowering-timing.test.ts test/hrg.test.ts
+PASS: 2 files, 19 tests
+
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+rg -n "defaultDurationMs|default 100 ms|defaultDuration" src/declarative-frontend/hrg test/hrg*.test.ts
+ZERO HIT after the owning historical fallback test was deleted
+```
+
+Next Phase 4 slice: scalar/current-value resolution from versioned write
+histories, compared field-by-field with the committed qlatt-English and DECtalk
+frame fixtures before commit.

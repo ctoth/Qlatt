@@ -28,10 +28,8 @@ export const DEFAULT_KLATT_PARAMS: readonly string[] = [
 export interface LowerOptions {
   /** Frame period in seconds (default 0.005 = 5 ms). */
   framePeriodSec?: number;
-  /** Feature key holding each segment's realized duration in ms (default "dur_ms"). */
+  /** Feature key holding each segment's realized duration in ms (default "duration"). */
   durationKey?: string;
-  /** Duration to use for a segment missing its duration feature (default 100 ms). */
-  defaultDurationMs?: number;
   /** Feature key holding each segment's phoneme label (default "phoneme"). */
   phonemeKey?: string;
   /** Explicit param column set. Defaults to present-valued DEFAULT_KLATT_PARAMS. */
@@ -74,22 +72,57 @@ function findCovering(timings: SegmentTiming[], tMs: number): SegmentTiming | nu
 export function lowerToFrames(utterance: Utterance, options: LowerOptions = {}): LoweredTrack {
   const framePeriodSec = options.framePeriodSec ?? 0.005;
   const framePeriodMs = framePeriodSec * 1000;
-  const durationKey = options.durationKey ?? "dur_ms";
+  const durationKey = options.durationKey ?? "duration";
   const phonemeKey = options.phonemeKey ?? "phoneme";
-  const defaultDurationMs = options.defaultDurationMs ?? 100;
+  if (!Number.isFinite(framePeriodSec) || framePeriodSec <= 0) {
+    throw new Error("E_HRG_LOWER_FRAME_PERIOD: frame period must be finite and positive");
+  }
 
-  const segmentItems = utterance.segments.listItems();
+  const segmentItems = utterance.segments.listItems()
+    .filter((item) => item.get("active") !== false);
 
   const timings: SegmentTiming[] = [];
-  let cursorMs = 0;
+  let previousEndMs: number | null = null;
   for (const item of segmentItems) {
     const rawDuration = item.get(durationKey);
-    const durationMs =
-      typeof rawDuration === "number" && rawDuration > 0 ? rawDuration : defaultDurationMs;
-    timings.push({ item, startMs: cursorMs, endMs: cursorMs + durationMs, durationMs });
-    cursorMs += durationMs;
+    if (typeof rawDuration !== "number" || !Number.isFinite(rawDuration) || rawDuration <= 0) {
+      utterance.diagnostics.error(
+        "Required Segment duration is missing or invalid during final lowering",
+        { itemId: item.id, durationKey, value: rawDuration },
+        "HRG_LOWER_DURATION_REQUIRED",
+      );
+      throw new Error(
+        `E_HRG_LOWER_DURATION_REQUIRED: Segment '${item.id}' requires a finite positive '${durationKey}'`,
+      );
+    }
+    const anchor = utterance.intervalAnchor(item);
+    const startMs = anchor ? utterance.axis.getMarkTime(anchor.leftMarkId) : null;
+    const endMs = anchor ? utterance.axis.getMarkTime(anchor.rightMarkId) : null;
+    if (!anchor || startMs == null || endMs == null) {
+      utterance.diagnostics.error(
+        "Required Segment timing is unresolved during final lowering",
+        { itemId: item.id },
+        "HRG_LOWER_TIME_REQUIRED",
+      );
+      throw new Error(`E_HRG_LOWER_TIME_REQUIRED: Segment '${item.id}' requires resolved interval timing`);
+    }
+    const resolvedDurationMs = endMs - startMs;
+    if (
+      resolvedDurationMs <= 0
+      || Math.abs(resolvedDurationMs - rawDuration) > 1e-6
+      || (previousEndMs != null && Math.abs(startMs - previousEndMs) > 1e-6)
+    ) {
+      utterance.diagnostics.error(
+        "Segment duration and resolved interval timing disagree",
+        { itemId: item.id, durationMs: rawDuration, startMs, endMs, previousEndMs },
+        "HRG_LOWER_TIMING_MISMATCH",
+      );
+      throw new Error(`E_HRG_LOWER_TIMING_MISMATCH: Segment '${item.id}' has inconsistent timing`);
+    }
+    timings.push({ item, startMs, endMs, durationMs: rawDuration });
+    previousEndMs = endMs;
   }
-  const totalMs = cursorMs;
+  const totalMs = previousEndMs ?? 0;
 
   const paramKeys = (
     options.paramKeys ??

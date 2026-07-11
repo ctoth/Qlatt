@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend navigation helpers", () => {
   it("supports prev cursor over active stream order", () => {
@@ -25,7 +26,7 @@ describe("declarative frontend navigation helpers", () => {
       { stream: "phone", phoneme: "S", duration: 80, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].duration).toBe(80);
     expect(out[1].duration).toBe(100);
     expect(out[2].duration).toBe(80);
@@ -54,7 +55,7 @@ describe("declarative frontend navigation helpers", () => {
       { stream: "phone", phoneme: "S", duration: 80, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].duration).toBe(70);
     expect(out[1].duration).toBe(100);
     expect(out[2].duration).toBe(85);
@@ -112,7 +113,7 @@ describe("declarative frontend navigation helpers", () => {
       { stream: "phone", phoneme: "D", duration: 100, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].duration).toBe(77);
     expect(out[2].duration).toBe(80);
     expect(out[4].duration).toBe(109);
@@ -153,7 +154,7 @@ describe("declarative frontend navigation helpers", () => {
       { stream: "phone", phoneme: "K", type: "stop", duration: 60, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[4].duration).toBe(73);
   });
 
@@ -197,7 +198,7 @@ describe("declarative frontend navigation helpers", () => {
       { stream: "phone", phoneme: "K", type: "stop", duration: 60, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[3].duration).toBe(71);
   });
 
@@ -234,7 +235,7 @@ describe("declarative frontend navigation helpers", () => {
       { stream: "phone", phoneme: "SIL", breakIndex: 4, duration: 40, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].duration).toBe(87);
     expect(out[1].duration).toBe(117);
     expect(out[2].duration).toBe(97);
@@ -276,7 +277,7 @@ describe("declarative frontend navigation helpers", () => {
       { stream: "phone", phoneme: "SIL", type: "silence", word: ".", duration: 300, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].duration).toBe(117);
   });
 
@@ -309,7 +310,7 @@ describe("declarative frontend navigation helpers", () => {
       { id: "p5", stream: "phone", parent: "s2", phoneme: "SIL", breakIndex: 3, duration: 40, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out.find((t) => t.id === "p1")?.duration).toBe(70);
     expect(out.find((t) => t.id === "p2")?.duration).toBe(100);
     expect(out.find((t) => t.id === "p3")?.duration).toBe(99);
@@ -357,7 +358,7 @@ describe("declarative frontend navigation helpers", () => {
       { stream: "phone", phoneme: "L", type: "liquid", word: "later", duration: 90, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[4].duration).toBe(100);
   });
 });

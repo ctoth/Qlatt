@@ -1,6 +1,7 @@
 import { runRuleEngine } from "./engine";
 import {
   QLATT_ENGLISH_RULEPACK,
+  compileRuleEngineSpec,
   loadBundledRulepackSpec,
   loadRulepackSpecFromPath,
 } from "./rule-pack";
@@ -32,19 +33,18 @@ export function runDeclarativeFrontend(
   sequence: Array<Record<string, unknown>>,
   options: DeclarativeFrontendOptions = {}
 ): RuleEngineResult | DeclarativeFrontendSequence {
-  const specSource =
-    options.specSource ??
-    (typeof options.specPath === "string" && options.specPath.length > 0
+  const spec =
+    options.specSource !== undefined
+      ? compileRuleEngineSpec(options.specSource)
+      : typeof options.specPath === "string" && options.specPath.length > 0
       ? loadRulepackSpecFromPath(options.specPath)
       : typeof options.frontendId === "string" && options.frontendId.length > 0
         ? loadBundledRulepackSpec(options.frontendId)
-        : QLATT_ENGLISH_RULEPACK);
+        : QLATT_ENGLISH_RULEPACK;
   const resources =
     options.inventoryResolver == null &&
-    typeof specSource === "object" &&
-    specSource !== null &&
-    "inventory_path" in specSource
-      ? loadFrontendResources(specSource)
+    typeof spec.inventory_path === "string"
+      ? loadFrontendResources(spec)
       : null;
   const inventoryResolver =
     options.inventoryResolver ??
@@ -52,7 +52,7 @@ export function runDeclarativeFrontend(
       ? (phoneme: string) =>
           materializePhonemeTarget(phoneme, { inventorySpec: resources.inventory })
       : undefined);
-  const result = runRuleEngine(sequence, specSource, {
+  const result = runRuleEngine(sequence, spec, {
     phases: options.phases,
     parameters: options.parameters,
     inventoryResolver,

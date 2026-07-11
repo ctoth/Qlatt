@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
 import { validateDslSpec } from "../src/declarative-frontend/validation";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend CEL expressions", () => {
   it("evaluates CEL where and value expressions with params", () => {
@@ -37,7 +38,7 @@ describe("declarative frontend CEL expressions", () => {
       { stream: "phone", type: "vowel", duration: 100, status: 1 },
       { stream: "phone", type: "stop", duration: 80, status: 1 },
     ];
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
 
     expect(out[0].duration).toBe(160);
     expect(out[1].duration).toBe(80);
@@ -104,7 +105,7 @@ describe("declarative frontend CEL expressions", () => {
     };
 
     const input = [{ stream: "phone", type: "stop", phoneme: "K_CL", duration: 80, params: {}, status: 1 }];
-    const out = runRuleEngine(input, spec, {
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec), {
       inventoryResolver: (phoneme) => {
         if (phoneme !== "K_REL") return null;
         return { phoneme: "K_REL", duration: 35, params: { AF: 47 } };
@@ -150,7 +151,7 @@ describe("declarative frontend CEL expressions", () => {
       { stream: "phone", phoneme: "SIL", type: "silence", status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
 
     expect(out[0].whole).toBe(6);
     expect(out[0].clause).toBe(3);

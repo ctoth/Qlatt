@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
 import { validateDslSpec } from "../src/declarative-frontend/validation";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend hierarchy navigation helpers", () => {
   it("materializes parent stream fields on current token", () => {
@@ -29,7 +30,7 @@ describe("declarative frontend hierarchy navigation helpers", () => {
       { id: "p2", stream: "phone", parent: "sy2", duration: 100, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const p1 = out.find((t) => t.id === "p1");
     const p2 = out.find((t) => t.id === "p2");
     expect(p1?.duration).toBe(110);

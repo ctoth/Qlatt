@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 // Chunk 0.5 — `dispatch when:` must accept `{ predicate: <name> }` objects so
 // that the predicate library is reachable from dispatch rows the same way it
@@ -67,7 +68,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].duration).toBeCloseTo(50);
     expect(out[1].duration).toBeCloseTo(100);
     expect(out[2].duration).toBeCloseTo(100);
@@ -115,7 +116,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       { id: "p4", stream: "phone", phoneme: "T", voiced: false, duration: 100, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].duration).toBeCloseTo(100);
     expect(out[1].duration).toBeCloseTo(100);
     expect(out[2].duration).toBeCloseTo(50);
@@ -160,7 +161,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       { id: "p1", stream: "phone", phoneme: "S", duration: 100, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(/E_PREDICATE_UNKNOWN/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_PREDICATE_UNKNOWN/);
   });
 
   // Chunk 0.5.1 — the validator must reject a `when: { predicate: <name> }`
@@ -198,7 +199,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       { id: "p1", stream: "phone", phoneme: "S", duration: 100, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(
       /E_RULE_EXPRESSION_INVALID.*when object must be \{ predicate: <non-empty name> \} with no extra keys/s
     );
   });
@@ -237,7 +238,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       { id: "p1", stream: "phone", phoneme: "S", duration: 100, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(
       /E_RULE_EXPRESSION_INVALID.*when object must be \{ predicate: <non-empty name> \} with no extra keys/s
     );
   });

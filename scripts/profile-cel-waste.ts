@@ -21,7 +21,6 @@ const INVENTORY = loadInventorySpecFromPath(
 );
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
 import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
-import { parseDslSpec } from "../src/declarative-frontend/parser";
 import {
   getCelEvalCount,
   resetCelCounters,
@@ -126,7 +125,7 @@ async function main() {
   await preloadCmuDictionaryFromPath(DEFAULT_CMU_DICTIONARY_PATH);
 
   // Get spec for rule analysis
-  const spec = parseDslSpec(QLATT_ENGLISH_RULEPACK);
+  const spec = QLATT_ENGLISH_RULEPACK;
 
   // Sample words
   const dict = await preloadCmuDictionaryFromPath(DEFAULT_CMU_DICTIONARY_PATH);

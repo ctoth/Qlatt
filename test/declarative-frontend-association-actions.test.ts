@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend association actions", () => {
   it("supports pattern associate + downstream $assoc query", () => {
@@ -42,7 +43,7 @@ describe("declarative frontend association actions", () => {
       { id: "p3", stream: "phone", type: "fricative", duration: 80, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const p1 = out.find((t) => t.id === "p1");
     const p2 = out.find((t) => t.id === "p2");
     expect(p1?.duration).toBe(80);
@@ -92,7 +93,7 @@ describe("declarative frontend association actions", () => {
       { id: "p2", stream: "phone", type: "vowel", duration: 100, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const p1 = out.find((t) => t.id === "p1");
     expect(p1?.duration).toBe(70);
   });

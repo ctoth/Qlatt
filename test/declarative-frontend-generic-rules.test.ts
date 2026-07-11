@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend generic select rules", () => {
   it("applies select/apply rules in declared order", () => {
@@ -21,7 +22,7 @@ describe("declarative frontend generic select rules", () => {
     };
 
     const input = [{ phoneme: "AE", stream: "phone", duration: 20, status: 1 }];
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].duration).toBe(60);
   });
 
@@ -67,7 +68,7 @@ describe("declarative frontend generic select rules", () => {
         sync_right: { kind: "END" },
       },
     ];
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
 
     expect(out[0].status).toBe(2);
     expect(out[0].duration).toBe(100);
@@ -119,7 +120,7 @@ describe("declarative frontend generic select rules", () => {
       { id: "p3", stream: "phone", phoneme: "SIL", duration: 50, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].duration).toBeCloseTo(85);
     expect(out[1].duration).toBeCloseTo(96);
     expect(out[2].duration).toBeCloseTo(60);

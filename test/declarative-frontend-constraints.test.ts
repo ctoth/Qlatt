@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend rule constraints", () => {
   it("applies select rule effects only when constraint evaluates true", () => {
@@ -27,7 +28,7 @@ describe("declarative frontend rule constraints", () => {
       { id: "p2", stream: "phone", type: "vowel", duration: 80, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out.find((t) => t.id === "p1")?.duration).toBe(110);
     expect(out.find((t) => t.id === "p2")?.duration).toBe(80);
   });
@@ -67,7 +68,7 @@ describe("declarative frontend rule constraints", () => {
       { id: "p4", stream: "phone", type: "vowel", duration: 100, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out.find((t) => t.id === "p2")?.duration).toBe(105);
     expect(out.find((t) => t.id === "p4")?.duration).toBe(100);
   });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
 import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 const loweringOutput = {
   lowering: {
@@ -111,7 +112,7 @@ describe("declarative frontend point actions and helpers", () => {
       },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const points = out.filter((t) => t.stream === "f0");
     expect(points).toHaveLength(2);
     expect(points[0].anchor_left).toEqual(s0);
@@ -165,7 +166,7 @@ describe("declarative frontend point actions and helpers", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const points = out.filter((t) => t.stream === "f0");
     expect(points).toHaveLength(2);
     expect(points[0].ratio).toBe(0.25);
@@ -217,7 +218,7 @@ describe("declarative frontend point actions and helpers", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const points = out.filter((t) => t.stream === "f0");
 
     expect(points).toHaveLength(2);
@@ -271,7 +272,7 @@ describe("declarative frontend point actions and helpers", () => {
       { id: "p2", stream: "phone", sync_left: s2, sync_right: s3, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const points = out.filter((t) => t.stream === "f0");
 
     expect(points.map((point) => point.tag)).toEqual(["lead", "lead", "tail", "tail"]);
@@ -347,7 +348,7 @@ describe("declarative frontend point actions and helpers", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, duration: 120, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const points = out.filter((t) => t.stream === "f0");
     const p1 = out.find((t) => t.id === "p1");
     const p2 = out.find((t) => t.id === "p2");
@@ -389,6 +390,6 @@ describe("declarative frontend point actions and helpers", () => {
     };
 
     const input = [{ id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 }];
-    expect(() => runRuleEngine(input, spec)).toThrowError(/E_INVALID_RATIO/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_INVALID_RATIO/);
   });
 });

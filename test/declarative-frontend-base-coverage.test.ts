@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
 import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend base coverage invariants", () => {
   const spec = {
@@ -23,11 +24,11 @@ describe("declarative frontend base coverage invariants", () => {
       { id: "p3", stream: "phone", sync_left: s2, sync_right: s3, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).not.toThrow();
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).not.toThrow();
   });
 
   it("accepts empty utterance base stream coverage", () => {
-    expect(() => runRuleEngine([], spec)).not.toThrow();
+    expect(() => runRuleEngine([], compileRuleEngineSpec(spec))).not.toThrow();
   });
 
   it("rejects overlapping active base tokens", () => {
@@ -41,7 +42,7 @@ describe("declarative frontend base coverage invariants", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s3, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_OVERLAP");
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_OVERLAP");
   });
 
   it("rejects gapped active base coverage", () => {
@@ -55,7 +56,7 @@ describe("declarative frontend base coverage invariants", () => {
       { id: "p2", stream: "phone", sync_left: s2, sync_right: s3, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_NOT_CONTIGUOUS");
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_NOT_CONTIGUOUS");
   });
 
   it("rejects non-empty stream with no ACTIVE base coverage", () => {
@@ -66,7 +67,7 @@ describe("declarative frontend base coverage invariants", () => {
       { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 2 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_NOT_CONTIGUOUS");
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_NOT_CONTIGUOUS");
   });
 
   it("accepts anchored START/END object-order coverage", () => {
@@ -78,7 +79,7 @@ describe("declarative frontend base coverage invariants", () => {
       { id: "p2", stream: "phone", sync_left: mid, sync_right: end, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).not.toThrow();
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).not.toThrow();
   });
 
   it("rejects object-order coverage that does not start at START", () => {
@@ -88,7 +89,7 @@ describe("declarative frontend base coverage invariants", () => {
       { id: "p1", stream: "phone", sync_left: left, sync_right: right, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_NOT_CONTIGUOUS");
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_NOT_CONTIGUOUS");
   });
 
   it("rejects object-order coverage that does not end at END", () => {
@@ -98,6 +99,6 @@ describe("declarative frontend base coverage invariants", () => {
       { id: "p1", stream: "phone", sync_left: start, sync_right: right, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_NOT_CONTIGUOUS");
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_NOT_CONTIGUOUS");
   });
 });

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend scalar resolution", () => {
   it("resolves standard scalar effects in rule order with min/max clamp", () => {
@@ -30,7 +31,7 @@ describe("declarative frontend scalar resolution", () => {
     };
 
     const input = [{ id: "p1", stream: "phone", energy: 1, status: 1 }];
-    const result = runRuleEngine(input, spec);
+    const result = runRuleEngine(input, compileRuleEngineSpec(spec));
     const out = result.sequence;
 
     expect(out[0].energy).toBe(7);
@@ -95,7 +96,7 @@ describe("declarative frontend scalar resolution", () => {
       },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].duration).toBe(42);
   });
 });

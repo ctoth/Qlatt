@@ -1,30 +1,24 @@
-import { parseDslSpec, SPEC_VALIDATED } from "./parser";
+import {
+  DSL_ROOT_KEYS,
+  parseDslSpec,
+  type NormalizedDslSpec,
+} from "./parser";
 import { assertValidSpec } from "./validation";
-import { loadYamlSource, loadYamlSourceSync, resolveIncludePath } from "../yaml-loader";
+import {
+  cloneValue,
+  isPlainObject,
+  loadYamlSource,
+  loadYamlSourceSync,
+  resolveIncludePath,
+} from "../yaml-loader";
 
 type PlainObject = Record<string, unknown>;
 
-const ROOT_DSL_KEYS = new Set([
-  "version",
-  "inventory_path",
-  "lts_path",
-  "f0_model",
-  "parameters",
-  "input_contract",
-  "streams",
-  "topology",
-  "predicates",
-  "string_sets",
-  "maps",
-  "syllabification",
-  "patterns",
-  "phases",
-  "rules",
-  "interpolation",
-  "output",
-  "transcription",
-  "include",
-]);
+function freezeRecursively(value: unknown): void {
+  if (value === null || typeof value !== "object" || Object.isFrozen(value)) return;
+  for (const nested of Object.values(value)) freezeRecursively(nested);
+  Object.freeze(value);
+}
 
 const MERGED_CHILD_ROOT_KEYS = new Set([
   "rules",
@@ -73,7 +67,15 @@ export const DEFAULT_RULEPACK_PATH = BUNDLED_FRONTEND_RULEPACK_PATHS[DEFAULT_FRO
  * - topology: concat + dedup each sub-key (hierarchy, parallel, point)
  * - All other fields (version, parameters, output, etc.): root wins, child ignored
  */
-function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: string): void {
+function mergeChildIntoRoot(
+  root: PlainObject,
+  child: PlainObject,
+  childPath: string,
+): PlainObject {
+  const merged = cloneValue(root);
+  if (!isPlainObject(merged)) {
+    throw new Error("E_RULEPACK_COMPILE: normalized root must remain an object");
+  }
   // Merge keyed dictionaries (error on duplicate).
   // Chunk 3: `string_sets` and `maps` are pipeline-level reusable literal-data
   // blocks; merge them the same way as predicates so a child include can
@@ -88,8 +90,8 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
   ] as const) {
     const childDict = (child[key] ?? {}) as Record<string, unknown>;
     for (const [k, v] of Object.entries(childDict)) {
-      if (!root[key]) root[key] = {};
-      const rootDict = root[key] as Record<string, unknown>;
+      if (!merged[key]) merged[key] = {};
+      const rootDict = merged[key] as Record<string, unknown>;
       if (rootDict[k] !== undefined) {
         throw new Error(`Duplicate ${key} "${k}" in included file ${childPath}`);
       }
@@ -100,23 +102,23 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
   // Syllabification: a single whole-object block (not a keyed dictionary).  A
   // child include may supply it; error if both root and child declare one.
   if (child.syllabification !== undefined && hasNonEmptyValue(child.syllabification)) {
-    if (root.syllabification !== undefined && hasNonEmptyValue(root.syllabification)) {
+    if (merged.syllabification !== undefined && hasNonEmptyValue(merged.syllabification)) {
       throw new Error(`Duplicate syllabification block in included file ${childPath}`);
     }
-    root.syllabification = child.syllabification;
+    merged.syllabification = child.syllabification;
   }
 
   // Phases: concat (root first, then child in include order)
   const childPhases = child.phases as unknown[];
   if (Array.isArray(childPhases) && childPhases.length > 0) {
-    root.phases = [...(Array.isArray(root.phases) ? root.phases : []), ...childPhases];
+    merged.phases = [...(Array.isArray(merged.phases) ? merged.phases : []), ...childPhases];
   }
 
   // Topology: concat + dedup each sub-key
   const childTopology = child.topology as PlainObject | undefined;
   if (childTopology && typeof childTopology === "object") {
-    if (!root.topology) root.topology = {};
-    const rootTopology = root.topology as PlainObject;
+    if (!merged.topology) merged.topology = {};
+    const rootTopology = merged.topology as PlainObject;
     for (const sub of ["hierarchy", "parallel", "point"] as const) {
       const childArr = (childTopology as Record<string, unknown>)[sub];
       if (Array.isArray(childArr) && childArr.length > 0) {
@@ -133,12 +135,14 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
   for (const [key, value] of Object.entries(child)) {
     if (MERGED_CHILD_ROOT_KEYS.has(key)) continue;
     if (ALLOWED_UNMERGED_CHILD_ROOT_KEYS.has(key)) continue;
-    if (!ROOT_DSL_KEYS.has(key)) continue;
+    if (!DSL_ROOT_KEYS.has(key)) continue;
     if (!hasNonEmptyValue(value)) continue;
     throw new Error(
       `E_UNMERGED_CHILD_ROOT_KEY: included file ${childPath} declares non-empty root key "${key}", but mergeChildIntoRoot does not merge that key`
     );
   }
+
+  return merged;
 }
 
 /**
@@ -155,6 +159,8 @@ function resolveIncludesSync(
   const includes = spec.include as string[] | undefined;
   if (!includes || includes.length === 0) return spec;
 
+  let resolved = spec;
+
   for (const relPath of includes) {
     const absPath = resolveIncludePath(parentPath, relPath);
     if (seenPaths.has(absPath)) {
@@ -164,11 +170,11 @@ function resolveIncludesSync(
 
     const source = loadYamlSourceSync(absPath);
     const childSpec = parseDslSpec(source);
-    resolveIncludesSync(childSpec, absPath, seenPaths);
-    mergeChildIntoRoot(spec, childSpec, absPath);
+    const resolvedChild = resolveIncludesSync(childSpec, absPath, seenPaths);
+    resolved = mergeChildIntoRoot(resolved, resolvedChild, absPath);
   }
 
-  return spec;
+  return resolved;
 }
 
 /**
@@ -184,6 +190,8 @@ async function resolveIncludesAsync(
   const includes = spec.include as string[] | undefined;
   if (!includes || includes.length === 0) return spec;
 
+  let resolved = spec;
+
   for (const relPath of includes) {
     const absPath = resolveIncludePath(parentPath, relPath);
     if (seenPaths.has(absPath)) {
@@ -193,14 +201,23 @@ async function resolveIncludesAsync(
 
     const source = await loadYamlSource(absPath);
     const childSpec = parseDslSpec(source);
-    await resolveIncludesAsync(childSpec, absPath, seenPaths);
-    mergeChildIntoRoot(spec, childSpec, absPath);
+    const resolvedChild = await resolveIncludesAsync(childSpec, absPath, seenPaths);
+    resolved = mergeChildIntoRoot(resolved, resolvedChild, absPath);
   }
 
-  return spec;
+  return resolved;
 }
 
-const BUNDLED_RULEPACK_CACHE = new Map<string, PlainObject>();
+export type CompiledRulepack = Readonly<NormalizedDslSpec>;
+
+const BUNDLED_RULEPACK_CACHE = new Map<string, CompiledRulepack>();
+
+export function compileRuleEngineSpec(source: unknown): CompiledRulepack {
+  const spec = parseDslSpec(source);
+  assertValidSpec(spec);
+  freezeRecursively(spec);
+  return spec;
+}
 
 export function listBundledFrontendIds(): string[] {
   return Object.keys(BUNDLED_FRONTEND_RULEPACK_PATHS).sort();
@@ -229,7 +246,9 @@ export function listBundledRulepackPaths(): string[] {
   return [...known].sort();
 }
 
-export function loadRulepackSpecFromPath(specPath: string = DEFAULT_RULEPACK_PATH): PlainObject {
+export function loadRulepackSpecFromPath(
+  specPath: string = DEFAULT_RULEPACK_PATH,
+): CompiledRulepack {
   const cached = BUNDLED_RULEPACK_CACHE.get(specPath);
   if (cached) return cached;
 
@@ -244,17 +263,17 @@ export function loadRulepackSpecFromPath(specPath: string = DEFAULT_RULEPACK_PAT
     );
   }
 
-  const spec = parseDslSpec(source);
-  resolveIncludesSync(spec, specPath);
+  const parsed = parseDslSpec(source);
+  const spec = parseDslSpec(resolveIncludesSync(parsed, specPath));
   assertValidSpec(spec, { requireLoweringSpec: true });
-  (spec as any)[SPEC_VALIDATED] = true;
+  freezeRecursively(spec);
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;
 }
 
 export async function preloadRulepackSpecFromPath(
   specPath: string = DEFAULT_RULEPACK_PATH
-): Promise<PlainObject> {
+): Promise<CompiledRulepack> {
   const cached = BUNDLED_RULEPACK_CACHE.get(specPath);
   if (cached) return cached;
 
@@ -269,23 +288,23 @@ export async function preloadRulepackSpecFromPath(
     );
   }
 
-  const spec = parseDslSpec(source);
-  await resolveIncludesAsync(spec, specPath);
+  const parsed = parseDslSpec(source);
+  const spec = parseDslSpec(await resolveIncludesAsync(parsed, specPath));
   assertValidSpec(spec, { requireLoweringSpec: true });
-  (spec as any)[SPEC_VALIDATED] = true;
+  freezeRecursively(spec);
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;
 }
 
 export function loadBundledRulepackSpec(
   frontendId: string = DEFAULT_FRONTEND_ID
-): PlainObject {
+): CompiledRulepack {
   return loadRulepackSpecFromPath(resolveBundledRulepackPath(frontendId));
 }
 
 export async function preloadBundledRulepackSpec(
   frontendId: string = DEFAULT_FRONTEND_ID
-): Promise<PlainObject> {
+): Promise<CompiledRulepack> {
   return preloadRulepackSpecFromPath(resolveBundledRulepackPath(frontendId));
 }
 

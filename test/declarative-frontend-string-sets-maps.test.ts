@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 // Chunk 3 — Additive engine schema features:
 //
@@ -52,7 +53,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       { id: "t3", stream: "orthography", tokenType: "word", word: "b", status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].isLetter).toBe(true);
     expect(out[1].isLetter).toBeUndefined();
     expect(out[2].isLetter).toBe(true);
@@ -93,7 +94,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       { id: "t2", stream: "orthography", tokenType: "word", word: "b", status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].pronunciationKey).toBe("ALPHA");
     expect(out[1].pronunciationKey).toBe("BRAVO");
   });
@@ -142,7 +143,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       { id: "t1", stream: "orthography", tokenType: "word", word: "q", status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(/No such key/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/No such key/);
   });
 
   it("rejects malformed string_sets: at validation time (value must be array of strings)", () => {
@@ -167,7 +168,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(
       /E_STRING_SET_INVALID/
     );
   });
@@ -191,7 +192,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(/E_STRING_SET_INVALID/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_STRING_SET_INVALID/);
   });
 
   it("rejects malformed string_sets: when an element is not a string", () => {
@@ -215,7 +216,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(
       /E_STRING_SET_INVALID/
     );
   });
@@ -242,7 +243,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(/E_MAP_INVALID/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_MAP_INVALID/);
   });
 
   it("rejects malformed top-level maps: at validation time", () => {
@@ -264,7 +265,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(/E_MAP_INVALID/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_MAP_INVALID/);
   });
 
   it("rejects malformed maps: when a value is not a string", () => {
@@ -288,7 +289,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(/E_MAP_INVALID/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_MAP_INVALID/);
   });
 
   it("rejects empty name keys in string_sets: and maps:", () => {
@@ -312,13 +313,13 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, specSets)).toThrowError(/E_STRING_SET_INVALID/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(specSets))).toThrowError(/E_STRING_SET_INVALID/);
 
     const specMaps = {
       ...specSets,
       string_sets: { ascii_letter: ["a"] },
       maps: { "": { a: "ALPHA" } },
     };
-    expect(() => runRuleEngine(input, specMaps)).toThrowError(/E_MAP_INVALID/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(specMaps))).toThrowError(/E_MAP_INVALID/);
   });
 });

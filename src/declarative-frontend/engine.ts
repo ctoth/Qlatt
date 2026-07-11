@@ -1,5 +1,4 @@
-import { parseDslSpec, SPEC_VALIDATED } from "./parser";
-import { assertValidSpec } from "./validation";
+import type { CompiledRulepack } from "./rule-pack";
 import { evaluateExpression } from "./cel-expressions";
 import { passesPrefilter } from "./where-prefilter";
 import type { Prefilter } from "./where-prefilter";
@@ -3177,23 +3176,13 @@ type RunRuleEngineOptions = {
 
 export function runRuleEngine(
   sequence: TokenLike[],
-  specSource: unknown,
+  spec: CompiledRulepack,
   options: RunRuleEngineOptions = {}
 ) {
-  // Performance: skip redundant parse+validate when the spec carries the SPEC_VALIDATED
-  // marker (set by rule-pack.ts on module init). Saves ~1.88ms/call (33% of pipeline).
-  const alreadyValidated =
-    specSource != null &&
-    typeof specSource === "object" &&
-    (specSource as any)[SPEC_VALIDATED] === true;
-  const spec = alreadyValidated ? (specSource as Record<string, any>) : parseDslSpec(specSource);
-  const diagnostics = alreadyValidated ? [] : assertValidSpec(spec);
-  if (!alreadyValidated) {
-    (spec as any)[SPEC_VALIDATED] = true;
-  }
+  const diagnostics: TokenLike[] = [];
   let current = cloneSequence(sequence);
 
-  const streams = (spec.streams ?? {}) as Record<string, TokenLike>;
+  const streams = spec.streams;
   const pointStreams = new Set(
     Object.entries(streams)
       .filter(([, stream]) => stream?.type === "point")
@@ -3206,8 +3195,8 @@ export function runRuleEngine(
   );
   const knownStreams = new Set(Object.keys(streams));
   const hierarchyStreams = new Set(
-    Array.isArray(spec.topology?.hierarchy) && spec.topology.hierarchy.length > 0
-      ? spec.topology.hierarchy.filter((name: unknown) => typeof name === "string" && knownStreams.has(name))
+    spec.topology.hierarchy.length > 0
+      ? spec.topology.hierarchy.filter((name) => knownStreams.has(name))
       : Object.entries(streams)
           .filter(([, stream]) => stream?.type === "span")
           .map(([name]) => name)
@@ -3215,15 +3204,11 @@ export function runRuleEngine(
   const scalarSpecsByStream = new Map(
     Object.entries(streams).map(([name, stream]) => [
       name,
-      stream && typeof stream.scalars === "object" && !Array.isArray(stream.scalars)
-        ? stream.scalars
-        : {},
+      stream.scalars,
     ])
   );
   const allScalarFields = new Set(
-    [...scalarSpecsByStream.values()].flatMap((scalars) =>
-      scalars && typeof scalars === "object" ? Object.keys(scalars) : []
-    )
+    [...scalarSpecsByStream.values()].flatMap((scalars) => Object.keys(scalars))
   );
   const usedTokenIds = new Set(
     current
@@ -3233,27 +3218,18 @@ export function runRuleEngine(
 
   const runtime: RuntimeLike = {
     params: buildRuntimeParams(spec.parameters, options.parameters),
-    predicates:
-      spec.predicates && typeof spec.predicates === "object" && !Array.isArray(spec.predicates)
-        ? spec.predicates
-        : {},
+    predicates: spec.predicates,
     // Chunk 3: pipeline-level reusable literal data — admitted by the
     // validator (validateStringSets / validateMaps) and surfaced as `sets`
     // and `maps` CEL identifiers via buildContext above.
-    string_sets:
-      spec.string_sets && typeof spec.string_sets === "object" && !Array.isArray(spec.string_sets)
-        ? spec.string_sets
-        : {},
-    maps:
-      spec.maps && typeof spec.maps === "object" && !Array.isArray(spec.maps)
-        ? spec.maps
-        : {},
+    string_sets: spec.string_sets,
+    maps: spec.maps,
     // Pipeline-level syllabification tables (DATA): onset clusters, nuclei,
     // affixes, and the phoneme->ascky map.  Parsed/validated into normalized
     // tables here so the syllabify builtins can run the maximal-onset algorithm.
     // null when the frontend declares no `syllabification:` block (no-op).
     syllabification: parseSyllabificationTables(spec.syllabification),
-    patterns: spec.patterns ?? {},
+    patterns: spec.patterns,
     pointStreams,
     baseStreams,
     knownStreams,
@@ -3271,8 +3247,7 @@ export function runRuleEngine(
     tokenMarkRefs: new WeakMap(),
     trace: null,
     finalized: false,
-    inventoryResolver:
-      typeof options.inventoryResolver === "function" ? options.inventoryResolver : null,
+    inventoryResolver: options.inventoryResolver ?? null,
   };
 
   initializeBaseStreamSyncMarks(current, baseStreams);

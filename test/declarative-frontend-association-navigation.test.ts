@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend association navigation helpers", () => {
   it("supports $assoc(current, name) over active associated tokens", () => {
@@ -31,7 +32,7 @@ describe("declarative frontend association navigation helpers", () => {
       { id: "t3", stream: "tone", duration: 80, status: 2 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].duration).toBe(55);
   });
 });

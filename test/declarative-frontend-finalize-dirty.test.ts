@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
 import { endOrder, startOrder } from "./utils/order-marks";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend finalize dirty guard", () => {
   it("throws E_FINALIZE_DIRTY when structural rewrites run after finalize", () => {
@@ -27,7 +28,7 @@ describe("declarative frontend finalize dirty guard", () => {
       { id: "p1", stream: "phone", duration: 100, sync_left: s0, sync_right: s1, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(/E_FINALIZE_DIRTY/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_FINALIZE_DIRTY/);
   });
 
   it("allows scalar-only apply rules after finalize", () => {
@@ -54,7 +55,7 @@ describe("declarative frontend finalize dirty guard", () => {
       { id: "p1", stream: "phone", duration: 100, sync_left: s0, sync_right: s1, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].duration).toBe(105);
   });
 });

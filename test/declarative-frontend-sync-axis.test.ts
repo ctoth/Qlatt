@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 type TokenLike = {
   id?: string;
@@ -63,7 +64,7 @@ describe("declarative frontend sync axis bootstrap", () => {
       { id: "p3", stream: "phone", status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const p1 = out.find((t: TokenLike) => t.id === "p1");
     const p2 = out.find((t: TokenLike) => t.id === "p2");
     const p3 = out.find((t: TokenLike) => t.id === "p3");
@@ -108,7 +109,7 @@ describe("declarative frontend sync axis bootstrap", () => {
       { id: "p2", stream: "phone", status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const ids = out.map((t: TokenLike) => t.id ?? t.name);
     const a = out.find((t: TokenLike) => t.name === "A");
     const b = out.find((t: TokenLike) => t.name === "B");
@@ -158,7 +159,7 @@ describe("declarative frontend sync axis bootstrap", () => {
       { id: "p3", stream: "phone", sync_left: { kind: "FINITE", rank: "000000000002" }, sync_right: { kind: "END" }, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const a = out.find((t: TokenLike) => t.name === "A");
     const b = out.find((t: TokenLike) => t.name === "B");
     expect(a?.sync_right?.kind).toBe("FINITE");
@@ -180,6 +181,6 @@ describe("declarative frontend sync axis bootstrap", () => {
       { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(/E_SYNC_MARK_INVALID/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_SYNC_MARK_INVALID/);
   });
 });

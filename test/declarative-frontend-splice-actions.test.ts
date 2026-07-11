@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
 import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend splice actions", () => {
   it("supports pattern replace_range with suppression + insertion", () => {
@@ -43,7 +44,7 @@ describe("declarative frontend splice actions", () => {
       { id: "p3", stream: "phone", type: "fricative", sync_left: s2, sync_right: s3, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const p1 = out.find((t) => t.id === "p1");
     const p2 = out.find((t) => t.id === "p2");
     const inserted = out.find((t) => t.name === "CV");
@@ -88,7 +89,7 @@ describe("declarative frontend splice actions", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_OVERLAP");
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_OVERLAP");
   });
 
   it("rejects unsuppressed left-side insert_at_boundary overlap", () => {
@@ -122,7 +123,7 @@ describe("declarative frontend splice actions", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_OVERLAP");
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_OVERLAP");
   });
 
   it("uses injected inventory resolver for $target materialization", () => {
@@ -173,7 +174,7 @@ describe("declarative frontend splice actions", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec, {
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec), {
       inventoryResolver: (phoneme) =>
         phoneme === "REL"
           ? {
@@ -232,7 +233,7 @@ describe("declarative frontend splice actions", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const a = out.find((t) => t.name === "A" && t.status === 1);
     const b = out.find((t) => t.name === "B" && t.status === 1);
 
@@ -303,7 +304,7 @@ describe("declarative frontend splice actions", () => {
       },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const inserted = out.find((t) => t.name === "COPY" && t.status === 1);
 
     expect(inserted).toBeTruthy();
@@ -377,7 +378,7 @@ describe("declarative frontend splice actions", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec, {
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec), {
       inventoryResolver: (phoneme) =>
         phoneme === "REL"
           ? {
@@ -451,7 +452,7 @@ describe("declarative frontend splice actions", () => {
       { id: "p2", stream: "phone", phoneme: "SIL", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const inserted = out.find((t) => t.phoneme === "REL" && t.status === 1);
 
     expect(inserted).toBeTruthy();
@@ -493,7 +494,7 @@ describe("declarative frontend splice actions", () => {
       },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const inserted = out.filter((t) => t.stream === "phone" && t.status === 1 && (t.name === "A" || t.name === "B"));
     expect(inserted).toHaveLength(2);
     const first = inserted.find((t) => t.name === "A");
@@ -543,7 +544,7 @@ describe("declarative frontend splice actions", () => {
       },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrow("insert_at_boundary splice requires boundary");
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("insert_at_boundary splice requires boundary");
   });
 
   it("rejects overlapping inserts from multiple after-boundary rules at the same mark", () => {
@@ -583,7 +584,7 @@ describe("declarative frontend splice actions", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_OVERLAP");
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_OVERLAP");
   });
 
   // NOTE: replace_range overlap test removed — the original test injected raw order-mark
@@ -648,7 +649,7 @@ describe("declarative frontend splice actions", () => {
       },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const inserted = out.find((token) => token.status === 1 && token.id !== "p1");
 
     expect(inserted?.control_windows).toEqual([

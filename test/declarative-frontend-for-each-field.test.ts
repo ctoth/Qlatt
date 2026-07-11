@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 // Chunk 7 — `for_each_field:` is a parse-time template expansion that lets a
 // single effect block stand in for N concrete effect blocks where only the
@@ -43,7 +44,7 @@ describe("declarative frontend for_each_field expansion", () => {
       },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].params.A1).toBe(11);
     expect(out[0].params.A2).toBe(22);
     expect(out[0].params.A3).toBe(33);
@@ -81,7 +82,7 @@ describe("declarative frontend for_each_field expansion", () => {
       },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].params.A1).toBe(7);
   });
 
@@ -103,7 +104,7 @@ describe("declarative frontend for_each_field expansion", () => {
       },
       phases: [{ name: "formant", rules: ["bad"] }],
     };
-    expect(() => runRuleEngine([], spec)).toThrow(/E_FOR_EACH_FIELD_INVALID/);
+    expect(() => runRuleEngine([], compileRuleEngineSpec(spec))).toThrow(/E_FOR_EACH_FIELD_INVALID/);
   });
 
   it("rejects malformed for_each_field shape (non-string entry)", () => {
@@ -124,7 +125,7 @@ describe("declarative frontend for_each_field expansion", () => {
       },
       phases: [{ name: "formant", rules: ["bad"] }],
     };
-    expect(() => runRuleEngine([], spec)).toThrow(/E_FOR_EACH_FIELD_INVALID/);
+    expect(() => runRuleEngine([], compileRuleEngineSpec(spec))).toThrow(/E_FOR_EACH_FIELD_INVALID/);
   });
 
   it("substitutes {field} inside dispatch row values", () => {
@@ -175,7 +176,7 @@ describe("declarative frontend for_each_field expansion", () => {
       },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].params.A2).toBe(50);
     expect(out[0].params.A3).toBe(40);
   });

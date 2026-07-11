@@ -177,7 +177,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 001 | Phase 0 baseline/oracles | kept | `bf303b2f` | results and fixture paths above |
 | 002 | Phase 1A invalid debug coverage | kept | `80392caf` | 148 owning tests pass; unconditional-pass search zero-hit |
 | 003 | Phase 1B backwards bridge deletion | kept | `01f4c48c` | bridge search zero-hit; HRG core 14/14; core/scripts typecheck pass |
-| 004 | Phase 2A selected resource ownership | kept | pending slice commit | three inventory identities pass; 87 adjacent tests; core/scripts typecheck pass |
+| 004 | Phase 2A selected resource ownership | kept | `2c3e53fa` | three inventory identities pass; 87 adjacent tests; core/scripts typecheck pass |
+| 005 | Phase 2B immutable compiled rulepacks | kept | pending slice commit | 204 declarative tests; 57 integration tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -296,3 +297,56 @@ Next slice: Phase 2B. Specify the compiled rulepack type at the parser boundary,
 write immutability/cache tests first, make include resolution non-mutating,
 freeze before caching, move engine/tooling to compiled-only input, and delete
 the `SPEC_VALIDATED` trust marker and parse-or-trust branch.
+
+## Iteration 005 — Phase 2B immutable compiled rulepacks
+
+Status: kept.
+
+The first test proved the bundled cache was mutable. After the initial freeze,
+deleting duplicate root-key knowledge exposed a fabricated child
+`skip_dictionary: false`; the parser was corrected to preserve absence rather
+than manufacturing an optional declaration. Failure count then returned to the
+starting state before caller migration continued.
+
+Kept convergence:
+
+- introduced inferred `NormalizedDslSpec` and `CompiledRulepack` boundary types;
+- added `compileRuleEngineSpec()` as the sole raw authoring-spec compiler for
+  engine-only fixtures;
+- changed include composition to clone and return fresh roots/children instead
+  of mutating parsed inputs;
+- deeply froze validated programs before cache insertion and proved cache
+  poisoning fails;
+- made the rule engine accept only `CompiledRulepack` and deleted
+  `SPEC_VALIDATED`, its symbol mutation, and the runtime parse-or-trust branch;
+- removed the duplicate root-key set from the loader and made the parser's root
+  catalog authoritative;
+- removed compiled-shape defensive branches from engine initialization;
+- moved production orchestration, tooling, CLI, profiles, and all direct engine
+  tests to the compiler boundary;
+- used and then deleted a temporary TypeScript AST migration script for the 99
+  direct test calls.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+$tests = (Get-ChildItem -File test\declarative-frontend-*.test.ts).FullName; npm test -- $tests
+PASS: 36 files, 204 tests
+
+npm test -- test/explain-phrase-cli.test.ts test/provenance-range.test.ts test/tts-frontend-declarative-corpus.test.ts test/dectalk-e2e.test.ts test/declarative-frontend-rule-pack-includes.test.ts test/declarative-frontend-resource-identity.test.ts
+PASS: 6 files, 57 tests
+
+rg -n "SPEC_VALIDATED|ROOT_DSL_KEYS|alreadyValidated|parseDslSpec\(QLATT_ENGLISH_RULEPACK\)" src test scripts
+ZERO HIT
+```
+
+Next slice: Phase 2C. Replace the authoring vocabulary atomically with
+`relations`/`relation`, migrate all bundled YAML and fixtures, make the compiler
+reject the old `streams`/`stream` shape, and keep only the final vocabulary in
+the existing executor before committing.

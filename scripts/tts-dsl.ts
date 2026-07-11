@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 import { validateDslSpec } from "../src/declarative-frontend/validation";
 import {
   buildPhaseSnapshots,
@@ -158,7 +159,7 @@ export async function runTtsDslCli(argv: string[], io: CliIo = defaultIo()) {
       const input = readInputSequence(positional[0], io);
       const spec = loadSpec(flags.spec ?? null);
       const phases = computeRunPhases(spec, flags);
-      const result = runRuleEngine(input, spec, {
+      const result = runRuleEngine(input, compileRuleEngineSpec(spec), {
         phases,
         inventoryResolver: materializePhonemeTarget,
       });

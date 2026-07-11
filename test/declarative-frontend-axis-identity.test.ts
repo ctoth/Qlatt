@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
 import type { SyncAxis } from "../src/declarative-frontend/axis";
 import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 type TokenLike = {
   id?: string;
@@ -44,7 +45,7 @@ describe("declarative frontend SyncAxis identity", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    const result = runRuleEngine(input, spec);
+    const result = runRuleEngine(input, compileRuleEngineSpec(spec));
     const axis = requireAxis(result);
     const p1 = result.sequence.find((t: TokenLike) => t.id === "p1");
     const p2 = result.sequence.find((t: TokenLike) => t.id === "p2");
@@ -93,7 +94,7 @@ describe("declarative frontend SyncAxis identity", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    const result = runRuleEngine(input, spec);
+    const result = runRuleEngine(input, compileRuleEngineSpec(spec));
     const axis = requireAxis(result);
     const p1 = result.sequence.find((t: TokenLike) => t.id === "p1");
     const rel = result.sequence.find((t: TokenLike) => t.name === "REL");
@@ -125,7 +126,7 @@ describe("declarative frontend SyncAxis identity", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, duration: 80, status: 1 },
     ];
 
-    const result = runRuleEngine(input, spec);
+    const result = runRuleEngine(input, compileRuleEngineSpec(spec));
     const axis = requireAxis(result);
     const p1 = result.sequence.find((t: TokenLike) => t.id === "p1");
     const p2 = result.sequence.find((t: TokenLike) => t.id === "p2");

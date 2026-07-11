@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend pattern rules", () => {
   it("suppresses all captures for a matched pattern", () => {
@@ -54,7 +55,7 @@ describe("declarative frontend pattern rules", () => {
         sync_right: { kind: "END" },
       },
     ];
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
 
     expect(out[0].status).toBe(2);
     expect(out[1].status).toBe(2);
@@ -93,7 +94,7 @@ describe("declarative frontend pattern rules", () => {
       { stream: "phone", phoneme: "AE", type: "vowel", duration: 100, status: 1 },
       { stream: "phone", phoneme: "K", type: "stop", duration: 70, status: 1 },
     ];
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
 
     expect(out[1].duration).toBe(120);
     expect(out[0].duration).toBe(80);

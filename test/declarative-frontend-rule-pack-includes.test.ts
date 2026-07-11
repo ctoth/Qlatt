@@ -2,13 +2,30 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { loadRulepackSpecFromPath } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadRulepackSpecFromPath,
+} from "../src/declarative-frontend/rule-pack";
 
 function asYamlPath(path: string): string {
   return path.replace(/\\/g, "/");
 }
 
 describe("declarative frontend rule-pack includes", () => {
+  it("caches a deeply immutable compiled bundled rulepack", () => {
+    const first = loadBundledRulepackSpec("qlatt-english");
+
+    expect(Object.isFrozen(first)).toBe(true);
+    expect(Object.isFrozen(first.rules)).toBe(true);
+    expect(Object.isFrozen(first.phases)).toBe(true);
+    expect(Object.isFrozen(first.rules.stress_duration)).toBe(true);
+    expect(Reflect.set(first.rules, "cache_poison", {})).toBe(false);
+
+    const second = loadBundledRulepackSpec("qlatt-english");
+    expect(second).toBe(first);
+    expect(second.rules.cache_poison).toBeUndefined();
+  });
+
   it("throws when a child include declares a non-empty unmerged root key", () => {
     const dir = mkdtempSync(join(tmpdir(), "qlatt-rule-pack-include-"));
     try {

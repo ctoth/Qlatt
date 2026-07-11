@@ -265,7 +265,7 @@ function buildTextToKlattTrackDetailed(
 
   // Load inventory, LTS, and morphology paths from the frontend spec.
   // Every resource path originates in frontend.yaml — no hardcoded defaults.
-  const resources = loadFrontendResources(frontendSpec as Record<string, unknown>);
+  const resources = loadFrontendResources(frontendSpec);
   const { inventory: frontendInventory, ltsPath, morphologyPath, dictionaryPath } = resources;
   const inventoryCitation = resources.inventoryPath;
 
@@ -302,9 +302,7 @@ function buildTextToKlattTrackDetailed(
     citations: [`/rules/frontends/${frontendId}/frontend.yaml`],
   });
   const speakerProfilePath =
-    typeof (frontendSpec as { speaker_profile_path?: unknown })?.speaker_profile_path === "string"
-      ? (frontendSpec as { speaker_profile_path: string }).speaker_profile_path
-      : DEFAULT_SPEAKER_PROFILE_PATH;
+    frontendSpec.speaker_profile_path ?? DEFAULT_SPEAKER_PROFILE_PATH;
   const speakerProfileSpec = loadSpeakerProfileSync(speakerProfilePath);
 
   // Resolve the `speaker` option into (a) a numeric profile override and
@@ -360,9 +358,7 @@ function buildTextToKlattTrackDetailed(
   });
 
   const sourceContourPath =
-    typeof (frontendSpec as { source_contour_path?: unknown })?.source_contour_path === "string"
-      ? (frontendSpec as { source_contour_path: string }).source_contour_path
-      : DEFAULT_SOURCE_CONTOUR_PATH;
+    frontendSpec.source_contour_path ?? DEFAULT_SOURCE_CONTOUR_PATH;
   const sourceContourSpec = loadSourceContourSync(sourceContourPath);
   const sourceContour = resolveSourceContour({
     spec: sourceContourSpec,

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend contour primitive", () => {
   it("computes phrase-local progress from token midpoint time", () => {
@@ -35,7 +36,7 @@ describe("declarative frontend contour primitive", () => {
       { id: "c", stream: "phone", phoneme: "IY", duration: 200, x: 0, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].x).toBeCloseTo(0.125, 6);
     expect(out[1].x).toBeCloseTo(0.625, 6);
     expect(out[3].x).toBeCloseTo(0.5, 6);
@@ -73,8 +74,8 @@ describe("declarative frontend contour primitive", () => {
       { id: "b", stream: "phone", phoneme: "IY", duration: 100, x: 0, status: 1 },
     ];
 
-    const noResetAtBi3 = runRuleEngine(input, mkSpec(4)).sequence;
-    const resetAtBi3 = runRuleEngine(input, mkSpec(3)).sequence;
+    const noResetAtBi3 = runRuleEngine(input, compileRuleEngineSpec(mkSpec(4))).sequence;
+    const resetAtBi3 = runRuleEngine(input, compileRuleEngineSpec(mkSpec(3))).sequence;
 
     expect(noResetAtBi3[0].x).toBeCloseTo(0.25, 6);
     expect(noResetAtBi3[2].x).toBeCloseTo(0.75, 6);
@@ -109,7 +110,7 @@ describe("declarative frontend contour primitive", () => {
       { id: "b", stream: "phone", phoneme: "IY", duration: 100, x: 0, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     expect(out[0].x).toBeCloseTo(0.25, 6);
     expect(out[1].x).toBeCloseTo(0.75, 6);
   });

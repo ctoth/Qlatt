@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
 import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend finalize stages", () => {
   it("computes sync times from active base durations and resolves point times", () => {
@@ -55,7 +56,7 @@ describe("declarative frontend finalize stages", () => {
       },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const point = out.find((t) => t.stream === "f0");
     expect(point).toBeTruthy();
     expect(point?.time).toBe(50);
@@ -98,7 +99,7 @@ describe("declarative frontend finalize stages", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, duration: 80, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const point = out.find((t) => t.stream === "f0");
     expect(point).toBeTruthy();
     expect(point?.time).toBe(30);
@@ -158,7 +159,7 @@ describe("declarative frontend finalize stages", () => {
       },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const point = out.find((t) => t.stream === "f0");
     expect(point).toBeTruthy();
     expect(point?.time).toBe(60);
@@ -202,6 +203,6 @@ describe("declarative frontend finalize stages", () => {
       { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, duration: 100, status: 1 },
     ];
 
-    expect(() => runRuleEngine(input, spec)).toThrowError(/E_TIME_NO_BASE_SUPPORT/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_TIME_NO_BASE_SUPPORT/);
   });
 });

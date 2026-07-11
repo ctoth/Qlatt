@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 const loweringOutput = {
   lowering: {
@@ -55,8 +56,8 @@ describe("declarative frontend integration diagnostics", () => {
       ],
     };
 
-    expect(() => runRuleEngine([], invalidSpec)).toThrowError(/E_RULE_UNKNOWN/);
-    expect(() => runRuleEngine([], invalidSpec)).toThrowError(
+    expect(() => runRuleEngine([], compileRuleEngineSpec(invalidSpec))).toThrowError(/E_RULE_UNKNOWN/);
+    expect(() => runRuleEngine([], compileRuleEngineSpec(invalidSpec))).toThrowError(
       /E_PHASE_RESOLVE_POINT_STREAM_INVALID/
     );
   });
@@ -77,8 +78,8 @@ describe("declarative frontend integration diagnostics", () => {
     };
 
     const input = [{ id: "p1", stream: "phone", duration: 100, status: 1 }];
-    expect(() => runRuleEngine(input, spec)).toThrowError(/E_EFFECT_TARGET_UNKNOWN/);
-    expect(() => runRuleEngine(input, spec)).toThrowError(/phase=duration/);
-    expect(() => runRuleEngine(input, spec)).toThrowError(/path=rules\.bad/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_EFFECT_TARGET_UNKNOWN/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/phase=duration/);
+    expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/path=rules\.bad/);
   });
 });

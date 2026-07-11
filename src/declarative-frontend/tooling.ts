@@ -1,7 +1,6 @@
-import { parseDslSpec } from "./parser";
 import { runRuleEngine } from "./engine";
 import type { InventoryResolver } from "./engine";
-import { validateDslSpec } from "./validation";
+import { compileRuleEngineSpec } from "./rule-pack";
 
 /**
  * Internal tooling token type. Intentionally loose — tooling inspects arbitrary
@@ -59,13 +58,13 @@ export function buildPhaseSnapshots(
   specSource: unknown,
   options: { parameters?: Record<string, unknown>; inventoryResolver?: InventoryResolver } = {}
 ): PhaseSnapshotsModel {
-  const spec = parseDslSpec(specSource);
+  const spec = compileRuleEngineSpec(specSource);
   const phaseNames = spec.phases.map((phase: any) => phase.name as string);
   const snapshots = new Map<string, TokenLike[]>();
   snapshots.set("init", cloneJson(sequence));
   let finalResult: any = {
     sequence: cloneJson(sequence),
-    diagnostics: validateDslSpec(spec),
+    diagnostics: [],
     trace: [],
     axis: null,
   };
@@ -150,7 +149,7 @@ export function whyNotRule(
   phase: string | null = null,
   options: { inventoryResolver?: InventoryResolver } = {}
 ) {
-  const spec = parseDslSpec(specSource);
+  const spec = compileRuleEngineSpec(specSource);
   const result = runRuleEngine(sequence, spec, {
     inventoryResolver: options.inventoryResolver,
   });

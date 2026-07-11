@@ -1,13 +1,6 @@
 import { parseYamlString, isPlainObject, cloneValue } from "../yaml-loader";
 import { extractPrefilterFromCondition } from "./where-prefilter";
 
-/**
- * Symbol marker for specs that have already been through parseDslSpec + assertValidSpec.
- * When present on an object, runRuleEngine can skip redundant re-parsing and re-validation.
- * Performance optimization: avoids ~1.88ms/call of wasted parse+validate on pre-processed specs.
- */
-export const SPEC_VALIDATED = Symbol("spec-validated");
-
 type PlainObject = Record<string, any>;
 
 type NormalizedPhase = {
@@ -125,10 +118,17 @@ function expandForEachField(entries: unknown[]): PlainObject[] {
   return out;
 }
 
-const ROOT_DSL_KEYS = new Set([
+export const DSL_ROOT_KEYS = new Set([
   "version",
   "inventory_path",
   "lts_path",
+  "morphology_path",
+  "dictionary_path",
+  "speaker_profile_path",
+  "source_contour_path",
+  "normalization",
+  "speakers",
+  "skip_dictionary",
   "f0_model",
   "parameters",
   "input_contract",
@@ -293,7 +293,7 @@ function normalizeRule(rule: unknown): PlainObject {
   };
 }
 
-export function parseDslSpec(source: unknown): PlainObject {
+export function parseDslSpec(source: unknown) {
   let raw = source;
 
   if (typeof source === "string") {
@@ -317,7 +317,7 @@ export function parseDslSpec(source: unknown): PlainObject {
   const hasSyllabification = Object.prototype.hasOwnProperty.call(raw, "syllabification");
   const extraRootFields = Object.fromEntries(
     Object.entries(raw)
-      .filter(([key]) => !ROOT_DSL_KEYS.has(key))
+      .filter(([key]) => !DSL_ROOT_KEYS.has(key))
       .map(([key, value]) => [key, cloneValue(value)])
   );
 
@@ -326,6 +326,15 @@ export function parseDslSpec(source: unknown): PlainObject {
     version: raw.version ?? null,
     inventory_path: asString(raw.inventory_path, null),
     lts_path: asString(raw.lts_path, null),
+    morphology_path: asString(raw.morphology_path, null),
+    dictionary_path: asString(raw.dictionary_path, null),
+    speaker_profile_path: asString(raw.speaker_profile_path, null),
+    source_contour_path: asString(raw.source_contour_path, null),
+    normalization: cloneObject(raw.normalization),
+    speakers: cloneObject(raw.speakers),
+    ...(Object.prototype.hasOwnProperty.call(raw, "skip_dictionary")
+      ? { skip_dictionary: Boolean(raw.skip_dictionary) }
+      : {}),
     f0_model: isPlainObject(raw.f0_model) ? raw.f0_model : null,
     parameters,
     input_contract: cloneObject(raw.input_contract),
@@ -368,3 +377,5 @@ export function parseDslSpec(source: unknown): PlainObject {
     include: Array.isArray(raw.include) ? raw.include.slice() : [],
   };
 }
+
+export type NormalizedDslSpec = ReturnType<typeof parseDslSpec>;

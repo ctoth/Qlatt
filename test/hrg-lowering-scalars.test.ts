@@ -329,6 +329,43 @@ describe("HRG lowering scalar histories", () => {
     }
   });
 
+  it.each([
+    ["qlatt-English", "qlatt-english", "qlatt-english-fricatives.json"],
+    ["DECtalk English", "dectalk-english", "dectalk-english-stops.json"],
+  ])("projects selected %s silence/source params at both track edges", (_label, frontendId, fileName) => {
+    const baseline = loadScalarBaseline(fileName, frontendId);
+    const utterance = buildBaselineUtterance(baseline);
+    const resourceDecision = utterance.provenance.add({
+      stage: "frontend",
+      type: "selected_silence_resource",
+      subject: `frontend:${frontendId}:SIL`,
+      reason: "selected frontend SIL inventory and source policy",
+      citations: ["Klatt 1980"],
+    });
+    const productionInitial = baseline.productionFrames[0];
+    const productionFinal = baseline.productionFrames.at(-1);
+    if (!productionInitial || !productionFinal) throw new Error("production silence frames missing");
+
+    const initialParams = { ...productionInitial.params };
+    for (const key of baseline.policy.transitions.blend.keys) {
+      initialParams[key] = productionFinal.params[key];
+    }
+    const lowered = lowerToFrames(utterance, baseline.policy, {
+      silence: {
+        initialParams,
+        finalParams: productionFinal.params,
+        decisionId: resourceDecision.id,
+      },
+    });
+    const initial = lowered.frames[0];
+    const final = lowered.frames.at(-1);
+    if (!initial || !final) throw new Error("lowered silence frames missing");
+    for (const column of baseline.policy.columns) {
+      expect(initial.params[column], `initial.${column}`).toBe(productionInitial.params[column]);
+      expect(final.params[column], `final.${column}`).toBe(productionFinal.params[column]);
+    }
+  });
+
   it("uses the latest stamped value and decision from a feature write history", () => {
     const utterance = new Utterance(schemaFor(["F1"]));
     const build = utterance.beginTransaction(META);

@@ -106,6 +106,7 @@ export interface LowerOptions {
       backward: boolean;
     };
     loci?: LocusTable;
+    loci_female?: LocusTable;
     vowel_category?: VowelCategoryTable;
     obstruent_place?: Readonly<Record<string, { palatal_or_dental?: boolean }>>;
     rounded_sonorant_consonant?: readonly string[];
@@ -131,6 +132,12 @@ export interface LowerOptions {
 export type LowerContext = {
   f0Model?: LayeredF0ModelConfig;
   speakerParams?: Readonly<Record<string, unknown>>;
+  speakerSex?: string;
+  silence?: {
+    initialParams: Readonly<Record<string, number>>;
+    finalParams: Readonly<Record<string, number>>;
+    decisionId: string;
+  };
 };
 
 /** Per-segment realized timing window (ms). */
@@ -363,10 +370,10 @@ function resolveLocusFormants(
   vowel: Item,
   obstruent: Item,
   edge: "forward" | "backward",
+  loci: LocusTable | undefined,
   options: LowerOptions,
   phonemeKey: string,
 ): Array<{ key: string; boundaryValue: number; spanMs: number }> {
-  const loci = options.transitions.loci;
   const categories = options.transitions.vowel_category;
   const vowelPhoneme = vowel.get(phonemeKey);
   const obstruentPhoneme = obstruent.get(phonemeKey);
@@ -839,6 +846,9 @@ export function lowerToFrames(
     });
   }
   const locusGlueTypes = new Set(options.transitions.locus_glue_types ?? []);
+  const selectedLoci = context.speakerSex === "female" && options.transitions.loci_female
+    ? options.transitions.loci_female
+    : options.transitions.loci;
   const adjacentLocusObstruent = (index: number, direction: -1 | 1): Item | undefined => {
     let neighborIndex = index + direction;
     while (timings[neighborIndex] && locusGlueTypes.has(String(timings[neighborIndex].item.get(typeKey)))) {
@@ -847,9 +857,9 @@ export function lowerToFrames(
     const neighbor = timings[neighborIndex]?.item;
     if (!neighbor || smoothTypes.has(String(neighbor.get(typeKey)))) return undefined;
     const phoneme = neighbor.get(phonemeKey);
-    return typeof phoneme === "string" && options.transitions.loci?.[phoneme] ? neighbor : undefined;
+    return typeof phoneme === "string" && selectedLoci?.[phoneme] ? neighbor : undefined;
   };
-  if (options.transitions.loci && options.transitions.vowel_category) {
+  if (selectedLoci && options.transitions.vowel_category) {
     timings.forEach((timing, index) => {
       if (!smoothTypes.has(String(timing.item.get(typeKey)))) return;
       const previousObstruent = adjacentLocusObstruent(index, -1);
@@ -858,6 +868,7 @@ export function lowerToFrames(
           timing.item,
           previousObstruent,
           "forward",
+          selectedLoci,
           options,
           phonemeKey,
         )) {
@@ -883,6 +894,7 @@ export function lowerToFrames(
           timing.item,
           nextObstruent,
           "backward",
+          selectedLoci,
           options,
           phonemeKey,
         )) {
@@ -1216,9 +1228,41 @@ export function lowerToFrames(
     phonemeOverride?: string,
     segmentOffsetMs = 0,
     outputTimeOverrideMs?: number,
+    silenceEdge?: "initial" | "final",
   ): void => {
     const params: Record<string, number> = {};
     const provenance: Record<string, string> = {};
+    if (!item && silenceEdge && context.silence) {
+      const resourceKnown = utterance.provenance.getDecisions().some(
+        (decision) => decision.id === context.silence?.decisionId,
+      );
+      if (!resourceKnown) {
+        throw new Error("E_HRG_LOWER_SILENCE_PROVENANCE: selected silence decision is unknown");
+      }
+      const sourceParams = silenceEdge === "initial"
+        ? context.silence.initialParams
+        : context.silence.finalParams;
+      for (const key of paramKeys) {
+        const value = sourceParams[key];
+        if (typeof value === "number" && Number.isFinite(value)) {
+          params[key] = value;
+          provenance[key] = context.silence.decisionId;
+        }
+      }
+      if (silenceEdge === "initial" && initialSilenceMs > 0) {
+        const firstSegment = timings[0]?.item;
+        if (firstSegment) {
+          for (const key of options.transitions.blend.keys) {
+            const value = firstSegment.get(key);
+            const write = firstSegment.latestWrite(key);
+            if (typeof value === "number" && write) {
+              params[key] = value;
+              provenance[key] = write.decisionId;
+            }
+          }
+        }
+      }
+    }
     if (item) {
       for (const key of paramKeys) {
         const value = item.get(key);
@@ -1346,7 +1390,7 @@ export function lowerToFrames(
     provenanceByFrame.push(provenance);
   };
 
-  appendFrame(0);
+  appendFrame(0, undefined, undefined, 0, undefined, "initial");
   for (const timing of timings) {
     const offsets = new Set<number>();
     if (options.timeline.event_points.include_segment_start) offsets.add(0);
@@ -1388,9 +1432,9 @@ export function lowerToFrames(
     }
   }
   const finalResetMs = initialSilenceMs + segmentTotalMs;
-  appendFrame(finalResetMs, undefined, "SIL", 0, outputFinalResetMs);
+  appendFrame(finalResetMs, undefined, "SIL", 0, outputFinalResetMs, "final");
   const totalMs = finalResetMs + finalSilenceMs;
-  if (totalMs > finalResetMs) appendFrame(totalMs, undefined, "SIL", 0, outputTotalMs);
+  if (totalMs > finalResetMs) appendFrame(totalMs, undefined, "SIL", 0, outputTotalMs, "final");
 
   return {
     frames,

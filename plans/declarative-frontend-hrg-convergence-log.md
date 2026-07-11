@@ -211,7 +211,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 035 | Phase 4 family 3 exit: transition matrix | kept | `4bb3a3f5` | every emitted qlatt/beauty transition event and blend cell matches production; direction policy corrected; family gate green |
 | 036 | Phase 4 family 4: explicit F0 points | kept | `839518a4` | every emitted qlatt F0 cell matches production; graph-time anchors, voice gating, last-point-wins, invalid-point rejection |
 | 037 | Phase 4 family 5: PhraseCommand and Tilt | kept | `8837b6e5` | canonical relations; selected layered renderer; all 196 voiced cadence cells and 250+ shared production events exact |
-| 038 | Phase 4 family 6: Affect projection | kept | pending slice commit | authored-field/precedence retention; global/local composition; time, VQ, jitter and exact write provenance |
+| 038 | Phase 4 family 6: Affect projection | kept | `6e0e4a99` | authored-field/precedence retention; global/local composition; time, VQ, jitter and exact write provenance |
+| 039 | Phase 4 family 7: selected speaker/source projection | kept | pending slice commit | exact qlatt/DECtalk silence edges; policy-only preload; female locus selected from data; exact write provenance |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1829,3 +1830,35 @@ PASS
 
 Next Phase 4 family: selected speaker/source projection, including female locus
 selection, initial/final silence parameters, and source-contour values.
+
+## Iteration 039 — Phase 4 family 7: selected speaker/source projection
+
+Status: kept. Phase 4 family 7 is complete.
+
+Final lowering now receives the already-selected initial and final source
+resources and projects them onto the initial and trailing silence frames. For
+positive initial silence it preloads exactly the configured transition blend
+keys from the first Segment; all other columns retain the selected initial
+resource values. Silence-resource cells point to the selected resource decision,
+while preloaded cells retain their originating Segment-write provenance.
+
+The transition lowerer selects the female locus table from the explicit speaker
+sex in lowering context. There is no voice-name test or frontend-specific branch.
+The direct qlatt and DECtalk fixtures prove every configured initial and trailing
+frame column exactly against the captured production frames, including DECtalk's
+distinct initial and final source contours. The female fixture separately proves
+F1, F2, and F3 boundary targets from the selected female locus table.
+
+Verification:
+
+```text
+npm test -- test/hrg-lowering-scalars.test.ts test/hrg-lowering-locus-transitions.test.ts test/hrg-lowering-affect.test.ts test/hrg-lowering-intonation.test.ts test/hrg-lowering-f0-points.test.ts test/hrg-lowering-timing.test.ts test/hrg-lowering-control-windows.test.ts test/hrg-lowering-midpoint-transitions.test.ts test/hrg-lowering-transition-matrix.test.ts test/hrg.test.ts
+PASS: 10 files, 41 tests
+
+npm run typecheck:core
+PASS
+```
+
+Next Phase 4 family: backend-specific semantics handoff, including the remaining
+F0-variance and shimmer affect projections against the selected backend
+vocabulary.

@@ -220,4 +220,51 @@ describe("HRG lowering locus transitions", () => {
     // F3: prcnt 25 -> rounded floor(25/2)+50 = 62; 2200 + .62*(3000-2200).
     expect(boundary?.params.F3).toBe(2696);
   });
+
+  it("selects the declared female locus table from speaker data", () => {
+    const utterance = new Utterance(SCHEMA);
+    const build = utterance.beginTransaction(META);
+    const closure = addSegment(build, "female_p", "P", "stop_closure", 83, {
+      F1: 350, F2: 1051, F3: 2150,
+    });
+    const vowel = addSegment(build, "female_ae", "AE", "vowel", 100, {
+      F1: 680, F2: 1600, F3: 2430,
+    });
+    build.partitionAnchors([closure, vowel], utterance.axis.start.id, utterance.axis.end.id);
+    build.commit();
+    const timing = utterance.beginTransaction({ ...META, ruleId: "timing", tag: "timing" });
+    const closureAnchor = utterance.intervalAnchor(closure);
+    const vowelAnchor = utterance.intervalAnchor(vowel);
+    if (!closureAnchor || !vowelAnchor) throw new Error("fixture anchors missing");
+    timing.resolveMarkTime(closureAnchor.leftMarkId, 0);
+    timing.resolveMarkTime(closureAnchor.rightMarkId, 83);
+    timing.resolveMarkTime(vowelAnchor.rightMarkId, 183);
+    timing.commit();
+    const policy: LowerOptions = {
+      ...POLICY,
+      timeline: { ...POLICY.timeline, initial_silence_ms: { value: 0 } },
+      transitions: {
+        ...POLICY.transitions,
+        loci_female: {
+          P: {
+            "1": {
+              F1: { locus_hz: 400, prcnt: 50, durtran_ms: 20 },
+              F2: { locus_hz: 1200, prcnt: 50, durtran_ms: 50 },
+              F3: { locus_hz: 2500, prcnt: 50, durtran_ms: 50 },
+            },
+          },
+        },
+      },
+    };
+
+    const male = lowerToFrames(utterance, policy);
+    const female = lowerToFrames(utterance, policy, { speakerSex: "female" });
+    const maleBoundary = male.frames.find((frame) => frame.segmentId === vowel.id && frame.time === 0.083);
+    const femaleBoundary = female.frames.find((frame) => frame.segmentId === vowel.id && frame.time === 0.083);
+
+    expect(maleBoundary?.params.F1).toBe(531.5);
+    expect(femaleBoundary?.params.F1).toBe(540);
+    expect(femaleBoundary?.params.F2).toBe(1400);
+    expect(femaleBoundary?.params.F3).toBe(2465);
+  });
 });

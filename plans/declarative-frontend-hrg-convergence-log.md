@@ -201,7 +201,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 025 | Phase 3 graph path/resource catalog and exit gate | kept | `7fb4fdbc` | shared-tree/resource catalog; guarded/prior points; 72 combined focused tests; core/scripts typecheck pass |
 | 026 | Phase 4 lowering family 1: timing | invalid evidence; reconciled | `a40b6230` | used deleted bridge samples instead of production events; validation retained, parity claim withdrawn |
 | 027 | Phase 4 lowering family 2: scalar histories | invalid evidence; reconciled | `6c920c3f` | used a graph-to-itself scalar comparison; policy columns/history retained, parity claim withdrawn |
-| 028 | Phase 4 production-contract reconciliation | kept | pending slice commit | sparse boundary events match captured production schedules; bridge oracles deleted from Phase 4 tests; 20 tests; core/scripts typecheck pass |
+| 028 | Phase 4 production-contract reconciliation | kept | `cd7efe64` | sparse boundary events match captured production schedules; bridge oracles deleted from Phase 4 tests; 20 tests; core/scripts typecheck pass |
+| 029 | Phase 4 lowering family 2: production scalar cells | kept | pending slice commit | 1,443 base-scalar boundary cells exact against production events; latest-write provenance retained |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1435,3 +1436,41 @@ Phase 4 family 1 is now accepted against the production contract. Family 2
 still requires a non-tautological current-value comparison at production event
 cells before it can be accepted. Transition/control-window work does not begin
 until that corrected scalar family is committed.
+
+## Iteration 029 — Phase 4 lowering family 2: production scalar cells
+
+Status: kept.
+
+The invalid graph-to-itself cases were replaced with direct comparisons between
+current versioned Segment values and the matching captured production boundary
+events. Expected values come only from `oldProduction.sourceFrames`; the
+historical graph supplies input values, identities, and durations.
+
+The asserted base-scalar family explicitly excludes columns owned by later
+transition, F0, affect/voice-quality, and speaker/source lowering families. It
+includes higher filter constants, nasal filter/place controls, stable parallel
+amplitudes, and backend filter controls. Every bundled frontend declares its
+own subset through `output.lowering.columns`.
+
+Measured exact production cells:
+
+```text
+qlatt-English:            24 Segment events * 21 columns = 504 cells
+DECtalk English:          36 Segment events * 15 columns = 540 cells
+qlatt-beauty structural:  19 Segment events * 21 columns = 399 cells
+total:                                                     1,443 cells
+```
+
+The independent two-write unit additionally proves that current-value lowering
+uses the newest feature version and its real producing decision id in both the
+frame and parallel provenance projection.
+
+Verification:
+
+```text
+npm test -- --run test/hrg-lowering-scalars.test.ts
+PASS: 1 file, 4 tests
+```
+
+Phase 4 family 2 is now accepted against the production contract. Next is
+family 3, transition/control-window realization directly from typed graph state.

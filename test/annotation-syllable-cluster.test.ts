@@ -25,7 +25,7 @@ describe("annotation phase: syllable count and cluster position", () => {
   });
 
   it("polysyllabic word 'splendid' gets word_syllable_count=2 on vowels", () => {
-    // Run pipeline and inspect controlScore tokens for duration effects.
+    // Run the graph-native pipeline and inspect Segment duration writes.
     // We cannot directly observe word_syllable_count on output tokens, but
     // we verify the pipeline completes and polysyllabic_shortening fires
     // by checking that the word produces valid output with reasonable duration.

@@ -1406,6 +1406,11 @@ function buildNavigationFunctions(
     // Token indices change after a structural mutation, so the run-indexed
     // syllabification memo is stale and must be dropped.
     syllableRunCache.clear();
+    runtime?.trace?.push({
+      type: "relation_cache_invalidated",
+      phase: runtime.currentPhase ?? null,
+      rule: runtime.currentRuleName ?? null,
+    });
   };
 
   // Sync a field value to the cached cursor view so that later CEL expressions
@@ -3254,7 +3259,7 @@ export function runRuleEngine(
     trace.push({ type: "phase_start", phase: phase.name, t0: phaseT0 });
     // Build navigation bundle ONCE per phase — shared across all rules in this phase.
     // Non-structural rules leave the sequence unchanged, so the bundle stays valid.
-    // Structural rules mutate the sequence; invalidateRelationCache() is called after each.
+    // Structural rules mutate the sequence; each firing invalidates the shared bundle.
     const phaseNavigation = buildNavigationFunctions(current, runtime);
     for (const ruleName of phase.rules) {
       const rule = spec.rules[ruleName];
@@ -3277,10 +3282,6 @@ export function runRuleEngine(
             error instanceof Error ? error.message : typeof error === "string" ? error : String(error),
         });
         throw annotateRuntimeRuleError(error, phase.name, ruleName);
-      }
-      // After structural rules, invalidate relation cache so the next rule sees fresh data
-      if (isStructuralRule(rule)) {
-        phaseNavigation.invalidateRelationCache();
       }
       trace.push({ type: "rule_end", phase: phase.name, rule: ruleName, elapsed: performance.now() - ruleT0 });
       runtime.currentRuleName = null;

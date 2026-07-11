@@ -180,7 +180,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 004 | Phase 2A selected resource ownership | kept | `2c3e53fa` | three inventory identities pass; 87 adjacent tests; core/scripts typecheck pass |
 | 005 | Phase 2B immutable compiled rulepacks | kept | `46903895` | 204 declarative tests; 57 integration tests; core/scripts typecheck pass |
 | 006 | Phase 2C final relation DSL vocabulary | kept | `e1a16553` | 205 declarative tests; 124/125 downstream baseline; three strict explain runs; core/scripts typecheck pass |
-| 007 | Phase 2D CEL neutrality | kept | pending slice commit | 246 focused tests; DECtalk strict explain 192/0; core/scripts typecheck pass |
+| 007 | Phase 2D CEL neutrality | kept | `c76fcfe6` | 246 focused tests; DECtalk strict explain 192/0; core/scripts typecheck pass |
+| 008 | Phase 2E structural invalidation owner | kept | pending slice commit | exact two-firing count; 207 declarative tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -470,3 +471,47 @@ ONLY: the two negative CEL catalog assertions for the deleted DECtalk function
 Next slice: Phase 2E. Establish the transaction-level invalidation owner with
 an exact count/behavior test, delete the duplicate invalidation site, prove one
 owner remains, and commit.
+
+## Iteration 008 — Phase 2E structural invalidation owner
+
+Status: kept.
+
+Source inspection established that select and pattern rules snapshot their
+matches before applying them, but later firings still evaluate defines,
+constraints, and navigation after earlier firings may have changed the
+sequence. The per-firing invalidation is therefore the transaction owner; the
+phase loop's additional post-rule invalidation was redundant.
+
+The exact-count contract was red at zero because invalidation was not yet
+observable in the existing rule trace. After tracing the existing operation,
+the pre-deletion implementation would produce three events for two firings.
+Deleting the phase-level call leaves exactly two.
+
+Kept convergence:
+
+- emits one `relation_cache_invalidated` trace record from the existing cache
+  invalidation operation;
+- proves a two-token structural rule produces exactly two invalidations; and
+- deletes the phase-loop invalidation and updates its ownership comment, while
+  retaining the select- and pattern-firing calls that share the single
+  transaction-level policy.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+$tests = (Get-ChildItem -File test\declarative-frontend-*.test.ts).FullName; npm test -- $tests
+PASS: 36 files, 207 tests
+
+rg -n "invalidateRelationCache\\(\\)|relation_cache_invalidated" src/declarative-frontend/engine.ts test/declarative-frontend-splice-actions.test.ts
+ONLY: the trace emission, the exact-count assertion, and the select/pattern per-firing calls
+```
+
+Next phase: Phase 3. Complete the HRG owner in the plan's stated slice order,
+starting with typed Item/relation schema enforcement and immutable structured
+feature values.

@@ -669,4 +669,37 @@ describe("declarative frontend splice actions", () => {
       },
     ]);
   });
+
+  it("invalidates relation caches exactly once per structural rule firing", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+    const spec = {
+      relations: {
+        phone: { type: "base", features: { type: ["vowel"] } },
+        f0: { type: "point", features: {} },
+      },
+      rules: {
+        add_midpoint: {
+          select: { relation: "phone", where: "true" },
+          insert_point: {
+            relation: "f0",
+            at: "midpoint(current)",
+            value: "100",
+          },
+        },
+      },
+      phases: [{ name: "prosody", rules: ["add_midpoint"] }],
+    };
+
+    const result = runRuleEngine(
+      [
+        { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, type: "vowel", status: 1 },
+        { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, type: "vowel", status: 1 },
+      ],
+      compileRuleEngineSpec(spec),
+    );
+
+    expect(result.trace.filter((entry) => entry.type === "relation_cache_invalidated")).toHaveLength(2);
+  });
 });

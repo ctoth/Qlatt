@@ -909,3 +909,24 @@ describe("duration model — edge cases", () => {
     expect(dur).toBeGreaterThan(inherent * 1.3);
   });
 });
+
+describe("duration model — speech rate", () => {
+  it("treats qlatt-English rate as an inverse duration multiplier", () => {
+    const phrase = "hello world";
+    const slow = textToKlattTrack(phrase, 110, 30, { rate: 0.5 });
+    const normal = textToKlattTrack(phrase, 110, 30, { rate: 1 });
+    const fast = textToKlattTrack(phrase, 110, 30, { rate: 2 });
+
+    const slowEnd = slow.at(-1)?.time;
+    const normalEnd = normal.at(-1)?.time;
+    const fastEnd = fast.at(-1)?.time;
+
+    expect(slowEnd).toBeDefined();
+    expect(normalEnd).toBeDefined();
+    expect(fastEnd).toBeDefined();
+    if (slowEnd == null || normalEnd == null || fastEnd == null) return;
+
+    expect(slowEnd).toBeGreaterThan(normalEnd);
+    expect(fastEnd).toBeLessThan(normalEnd);
+  });
+});

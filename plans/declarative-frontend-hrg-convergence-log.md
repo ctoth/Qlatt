@@ -174,4 +174,42 @@ remains, run its owning targeted tests, reread the plan, and commit.
 
 | Iteration | Phase/slice | Result | Commit | Evidence |
 |---:|---|---|---|---|
-| 001 | Phase 0 baseline/oracles | kept | pending baseline commit | results and fixture paths above |
+| 001 | Phase 0 baseline/oracles | kept | `bf303b2f` | results and fixture paths above |
+| 002 | Phase 1A invalid debug coverage | kept | pending slice commit | 148 owning tests pass; unconditional-pass search zero-hit |
+
+## Iteration 002 — Phase 1A invalid debug coverage
+
+Status: kept.
+
+Evidence before edit showed that pre-boundary lengthening was already owned by
+`test/duration-model.test.ts`, including direct BI=4 comparisons and full-pipeline
+ordering. Qlatt-English speech-rate behavior was unique to the debug file; the
+only other frontend-rate test selected DECtalk.
+
+Kept reduction:
+
+- moved qlatt-English inverse duration/rate behavior into the duration owner as
+  an API-level slow/normal/fast comparison;
+- deleted `test/debug-duration-tmp.test.ts` and its caught errors, logs, unsafe
+  casts, and unconditional assertion;
+- deleted two logging-only cases from `test/contraction-probe.test.ts` while
+  preserving its two real typography assertions;
+- replaced the G2P benchmark's unconditional summary assertion with the actual
+  90 percent accuracy floor already met by its 18/20 baseline.
+
+Verification:
+
+```text
+rg -n "expect\(true\)\.toBe\(true\)|Always pass|debug duration|debug-duration-tmp" test src scripts
+ZERO HIT
+
+npm test -- test/duration-model.test.ts test/contraction-probe.test.ts test/g2p-pipeline.test.ts test/dectalk-e2e.test.ts test/declarative-frontend-rulepack-context.test.ts
+PASS: 5 files, 148 tests
+
+npm run typecheck:core
+PASS
+```
+
+Next slice: Phase 1B. Delete the completed-track reconstruction bridge first,
+then delete its bridge-only test and renderer, update only status prose that
+claims it is a live architecture, prove the retained HRG core, and commit.

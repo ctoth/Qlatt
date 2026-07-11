@@ -268,7 +268,8 @@ describe("pronounce() accuracy benchmark", () => {
           `  [benchmark] "${word}": expected [${expectedBase}] got [${actualBase}]`
         );
       }
-      // Always pass -- this is informational
+      // Each case must at least produce a pronunciation; the suite-level test
+      // below owns the benchmark accuracy threshold.
       expect(result.phonemes.length).toBeGreaterThan(0);
     });
   }
@@ -277,6 +278,6 @@ describe("pronounce() accuracy benchmark", () => {
     console.log(
       `\n  [G2P Accuracy Benchmark] ${correct}/${total} words matched CMU reference (${((correct / total) * 100).toFixed(1)}%)`
     );
-    expect(true).toBe(true); // Always pass
+    expect(correct / total).toBeGreaterThanOrEqual(0.9);
   });
 });

@@ -21,6 +21,13 @@ type StagedOperation =
       items: readonly Item[];
       leftMarkId: string;
       rightMarkId: string;
+    }
+  | {
+      kind: "anchor_point";
+      item: Item;
+      leftMarkId: string;
+      rightMarkId: string;
+      ratio: number;
     };
 
 type PreparedOperation =
@@ -166,6 +173,17 @@ export class HrgTransaction {
     return this;
   }
 
+  anchorPoint(
+    item: Item,
+    leftMarkId: string,
+    rightMarkId: string,
+    ratio: number,
+  ): this {
+    this.assertOpen();
+    this.operations.push({ kind: "anchor_point", item, leftMarkId, rightMarkId, ratio });
+    return this;
+  }
+
   private writeInput(): {
     reason: string;
     ruleId: string;
@@ -232,6 +250,35 @@ export class HrgTransaction {
             operation.rightMarkId,
             input,
           ),
+        });
+        continue;
+      }
+      if (operation.kind === "anchor_point") {
+        this.assertAvailableItem(operation.item);
+        if (!this.utterance.axis.get(operation.leftMarkId) || !this.utterance.axis.get(operation.rightMarkId)) {
+          throw new Error("E_HRG_TEMPORAL_MARK_UNKNOWN");
+        }
+        if (this.utterance.axis.compare(operation.leftMarkId, operation.rightMarkId) > 0) {
+          throw new Error("E_HRG_TEMPORAL_ORDER");
+        }
+        if (!Number.isFinite(operation.ratio) || operation.ratio < 0 || operation.ratio > 1) {
+          throw new Error("E_HRG_TEMPORAL_RATIO");
+        }
+        prepared.push({
+          journal: Object.freeze({
+            kind: "anchor_point",
+            itemId: operation.item.id,
+            leftMarkId: operation.leftMarkId,
+            rightMarkId: operation.rightMarkId,
+            ratio: operation.ratio,
+          }),
+          commit: () => [this.utterance.anchorPoint(
+            operation.item,
+            operation.leftMarkId,
+            operation.rightMarkId,
+            operation.ratio,
+            input,
+          ).decisionId],
         });
         continue;
       }

@@ -64,6 +64,10 @@ export class Relation {
     private readonly stamper: RelationStamper,
   ) {}
 
+  itemTypes(): readonly string[] {
+    return Object.freeze([...this.allowedItemTypes]);
+  }
+
   _validateAttach(item: Item): void {
     if (!this.allowedItemTypes.has(item.type)) {
       throw new Error(

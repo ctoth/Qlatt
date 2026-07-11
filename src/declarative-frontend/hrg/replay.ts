@@ -69,6 +69,14 @@ export function replayJournal(
             operation.rightMarkId,
           );
           break;
+        case "anchor_point":
+          transaction.anchorPoint(
+            requireItem(operation.itemId),
+            operation.leftMarkId,
+            operation.rightMarkId,
+            operation.ratio,
+          );
+          break;
       }
     }
     const replayed = transaction.commit();

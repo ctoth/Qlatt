@@ -190,7 +190,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 014 | Phase 3 Direction Track attachment | kept | `6f41d95c` | 50 input/HRG tests; provenance parent proof; core/scripts typecheck pass |
 | 015 | Phase 3 graph engine select/scalar core | kept | `c5dcf35e` | exact tracked read parents; 31 HRG tests; core/scripts typecheck pass |
 | 016 | Phase 3 graph engine patterns/associations | kept | `7f5b0e03` | atomic pattern rewrites; versioned association replay; 36 HRG tests; core/scripts typecheck pass |
-| 017 | Phase 3 graph engine replace-range splice | kept | pending slice commit | typed insertion and anchor partition replay; 38 HRG tests; core/scripts typecheck pass |
+| 017 | Phase 3 graph engine replace-range splice | kept | `e9180fb2` | typed insertion and anchor partition replay; 38 HRG tests; core/scripts typecheck pass |
+| 018 | Phase 3 graph engine explicit points | kept | pending slice commit | midpoint/ratio/sync point replay; 39 HRG tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -931,3 +932,40 @@ PASS: 9 files, 38 tests
 
 Next graph-engine sub-slice: boundary insertion and explicit point actions,
 followed by contour/F0-layer and phase finalization behavior.
+
+## Iteration 018 — Phase 3 graph engine explicit point actions
+
+Status: kept as the fourth target-owner sub-slice of the replacement engine.
+
+The direct point fixture was red because the graph engine ignored
+`insert_point`/`insert_points`, the transaction could not stage point anchors,
+and the CEL context did not bind the existing anchor helper vocabulary.
+
+Kept convergence:
+
+- binds `midpoint`, `at_ratio`, and `at_sync` per evaluation against stamped
+  Utterance anchors, with anchor reads added to the transaction read set;
+- exposes `current_index` without reintroducing flat token state;
+- derives the point Item type from the declared target Relation and rejects an
+  ambiguous relation schema;
+- creates typed point Items and commits value/tag features, relation
+  membership, and point anchors in the matched rule transaction;
+- journals and replays point-anchor operations; and
+- proves midpoint, fractional, and coincident-boundary points reproduce the
+  same graph digest.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- --run test/hrg
+PASS: 10 files, 39 tests
+```
+
+Next graph-engine sub-slice: boundary insertion, then contour/F0-layer and
+phase finalization behavior.

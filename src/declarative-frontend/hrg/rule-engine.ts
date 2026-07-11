@@ -98,6 +98,15 @@ function buildEvaluationContext(
     }
     return targets;
   };
+  const pointAnchor = (sourceValue: unknown, ratioValue: unknown): Record<string, unknown> | null => {
+    const source = resolveItem(sourceValue);
+    const ratio = Number(ratioValue);
+    if (!source || !Number.isFinite(ratio)) return null;
+    const anchor = utterance.temporalAnchor(source);
+    if (!anchor) return null;
+    transaction.dependOn(anchor.decisionId);
+    return { leftMarkId: anchor.leftMarkId, rightMarkId: anchor.rightMarkId, ratio };
+  };
   const bindingViews = Object.fromEntries(
     Object.entries(bindings).map(([name, item]) => [name, view(item)]),
   );
@@ -106,6 +115,7 @@ function buildEvaluationContext(
       current: view(items[index]),
       prev: view(items[index - 1]),
       next: view(items[index + 1]),
+      current_index: index,
       params,
       ...bindingViews,
       ...extra,
@@ -127,6 +137,11 @@ function buildEvaluationContext(
           : Array.isArray(container) && container.includes(candidate),
       merge,
       assoc: association,
+      midpoint: (source) => pointAnchor(source, 0.5),
+      at_ratio: pointAnchor,
+      at_sync: (markId) => typeof markId === "string"
+        ? { leftMarkId: markId, rightMarkId: markId, ratio: 0 }
+        : null,
     },
   };
 }
@@ -412,6 +427,51 @@ function applySplice(
   }
 }
 
+function applyPointActions(
+  utterance: Utterance,
+  match: Match,
+  rule: Readonly<Record<string, unknown>>,
+  context: EvaluationContext,
+  predicates: Readonly<Record<string, unknown>>,
+): void {
+  const specs = [
+    ...(isPlainObject(rule.insert_point) ? [rule.insert_point] : []),
+    ...(Array.isArray(rule.insert_points) ? rule.insert_points.filter(isPlainObject) : []),
+  ];
+  for (let index = 0; index < specs.length; index += 1) {
+    const spec = specs[index];
+    if (typeof spec.relation !== "string") continue;
+    const relation = utterance.relation(spec.relation);
+    const itemTypes = relation.itemTypes();
+    if (itemTypes.length !== 1) {
+      throw new Error(`E_HRG_POINT_ITEM_TYPE: relation '${spec.relation}' must declare exactly one Item type`);
+    }
+    const anchorValue = evaluate(spec.at, context);
+    if (
+      !isPlainObject(anchorValue)
+      || typeof anchorValue.leftMarkId !== "string"
+      || typeof anchorValue.rightMarkId !== "string"
+      || typeof anchorValue.ratio !== "number"
+    ) {
+      throw new Error("E_HRG_POINT_ANCHOR: point action requires a valid temporal anchor");
+    }
+    const source = match.items[match.index];
+    const point = match.transaction.createItem(
+      itemTypes[0],
+      `${source.id}:${match.transaction.metadata.ruleId}:point:${index.toString()}`,
+    );
+    match.transaction.set(point, "value", evaluateDispatch(spec.value, context, predicates));
+    if (typeof spec.tag === "string") match.transaction.set(point, "tag", spec.tag);
+    match.transaction.append(spec.relation, point);
+    match.transaction.anchorPoint(
+      point,
+      anchorValue.leftMarkId,
+      anchorValue.rightMarkId,
+      anchorValue.ratio,
+    );
+  }
+}
+
 function executeMatch(
   utterance: Utterance,
   rule: Readonly<Record<string, unknown>>,
@@ -457,6 +517,7 @@ function executeMatch(
   applyAssociations(match.transaction, rule.associate, true, resolveTarget);
   applyAssociations(match.transaction, rule.disassociate, false, resolveTarget);
   applySplice(utterance, match, rule.splice, context);
+  applyPointActions(utterance, match, rule, context, predicates);
   if (rule.suppress === true || rule.delete === true) {
     for (const item of new Set(Object.values(match.bindings))) {
       match.transaction.set(item, "active", false);

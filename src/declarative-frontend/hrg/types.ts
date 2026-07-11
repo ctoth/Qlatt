@@ -159,6 +159,13 @@ export type JournalOperation =
       readonly itemIds: readonly string[];
       readonly leftMarkId: string;
       readonly rightMarkId: string;
+    }
+  | {
+      readonly kind: "anchor_point";
+      readonly itemId: string;
+      readonly leftMarkId: string;
+      readonly rightMarkId: string;
+      readonly ratio: number;
     };
 
 export interface TransactionJournalEntry {

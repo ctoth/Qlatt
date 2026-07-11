@@ -166,6 +166,11 @@ export type JournalOperation =
       readonly leftMarkId: string;
       readonly rightMarkId: string;
       readonly ratio: number;
+    }
+  | {
+      readonly kind: "resolve_mark_time";
+      readonly markId: string;
+      readonly timeMs: number;
     };
 
 export interface TransactionJournalEntry {

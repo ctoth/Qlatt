@@ -28,7 +28,8 @@ type StagedOperation =
       leftMarkId: string;
       rightMarkId: string;
       ratio: number;
-    };
+    }
+  | { kind: "resolve_mark_time"; markId: string; timeMs: number };
 
 type PreparedOperation =
   | { journal: JournalOperation; commit: () => readonly string[] };
@@ -184,6 +185,12 @@ export class HrgTransaction {
     return this;
   }
 
+  resolveMarkTime(markId: string, timeMs: number): this {
+    this.assertOpen();
+    this.operations.push({ kind: "resolve_mark_time", markId, timeMs });
+    return this;
+  }
+
   private writeInput(): {
     reason: string;
     ruleId: string;
@@ -277,6 +284,25 @@ export class HrgTransaction {
             operation.leftMarkId,
             operation.rightMarkId,
             operation.ratio,
+            input,
+          ).decisionId],
+        });
+        continue;
+      }
+      if (operation.kind === "resolve_mark_time") {
+        if (!this.utterance.axis.get(operation.markId)) {
+          throw new Error(`E_HRG_TEMPORAL_MARK_UNKNOWN: '${operation.markId}'`);
+        }
+        if (!Number.isFinite(operation.timeMs)) throw new Error("E_HRG_TEMPORAL_TIME");
+        prepared.push({
+          journal: Object.freeze({
+            kind: "resolve_mark_time",
+            markId: operation.markId,
+            timeMs: operation.timeMs,
+          }),
+          commit: () => [this.utterance.resolveMarkTime(
+            operation.markId,
+            operation.timeMs,
             input,
           ).decisionId],
         });

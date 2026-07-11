@@ -77,6 +77,9 @@ export function replayJournal(
             operation.ratio,
           );
           break;
+        case "resolve_mark_time":
+          transaction.resolveMarkTime(operation.markId, operation.timeMs);
+          break;
       }
     }
     const replayed = transaction.commit();

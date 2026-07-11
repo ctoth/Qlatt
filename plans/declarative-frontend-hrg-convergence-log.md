@@ -194,7 +194,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 018 | Phase 3 graph engine explicit points | kept | `d3c5f467` | midpoint/ratio/sync point replay; 39 HRG tests; core/scripts typecheck pass |
 | 019 | Phase 3 boundary-insertion proof | kept | `e6c7ded5` | relation/temporal adjacency proof; 40 HRG tests; core/scripts typecheck pass |
 | 020 | Phase 3 graph engine phrase contours | kept | `bf4f956a` | selected-duration progress and break reset; 41 HRG tests; core/scripts typecheck pass |
-| 021 | Phase 3 graph engine F0 layers | kept | pending slice commit | typed profile/gesture commands and replay; 42 HRG tests; core/scripts typecheck pass |
+| 021 | Phase 3 graph engine F0 layers | kept | `eb320851` | typed profile/gesture commands and replay; 42 HRG tests; core/scripts typecheck pass |
+| 022 | Phase 3 graph engine finalization | kept | pending slice commit | journaled timing, dirty guard, replay; 45 HRG tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1068,3 +1069,44 @@ PASS: 12 files, 42 tests
 
 Next graph-engine sub-slice: phase finalization, timing writes, point
 resolution, dirty guard, and checkpoint/invalidation proof.
+
+## Iteration 022 — Phase 3 graph engine finalization
+
+Status: kept as the seventh target-owner sub-slice of the replacement engine.
+
+The finalization fixtures were red because phase metadata was ignored and mark
+times could only be written outside the transaction journal. The retained
+implementation adds timing to the existing transaction/replay owner and keeps
+phase control in the graph engine.
+
+Kept convergence:
+
+- identifies the sole compiled base Relation for `compute_times` and rejects an
+  ambiguous base topology;
+- validates active base interval contiguity and finite non-negative duration;
+- records all interval-anchor and duration reads as parents of one phase timing
+  transaction;
+- journals, stamps, and replays resolved mark-time writes;
+- verifies every requested point Relation has base-time support;
+- records one graph-digest checkpoint after each executed phase;
+- rejects matched point, association, suppression, or splice rules after timing
+  finalization before they mutate the graph; and
+- retains scalar-only post-finalization behavior explicitly covered by the old
+  contract.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- --run test/hrg
+PASS: 13 files, 45 tests
+```
+
+Next Phase 3 slice: delete module-global CEL function dispatch, complete tracked
+navigation/path/predicate read proofs, and run the complete replacement-engine
+exit gate before advancing to Phase 4.

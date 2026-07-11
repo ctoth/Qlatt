@@ -716,6 +716,74 @@ function patternMatches(
   return matches;
 }
 
+function isStructuralRule(rule: Readonly<Record<string, unknown>>): boolean {
+  return isPlainObject(rule.splice)
+    || isPlainObject(rule.insert_point)
+    || (Array.isArray(rule.insert_points) && rule.insert_points.length > 0)
+    || isPlainObject(rule.insert_f0_layer)
+    || rule.suppress === true
+    || rule.delete === true
+    || (Array.isArray(rule.associate) && rule.associate.length > 0)
+    || (Array.isArray(rule.disassociate) && rule.disassociate.length > 0);
+}
+
+function finalizePhase(
+  utterance: Utterance,
+  spec: CompiledRulepack,
+  phase: CompiledRulepack["phases"][number],
+): void {
+  if (phase.compute_times) {
+    const baseRelations = Object.entries(spec.relations)
+      .filter((entry) => isPlainObject(entry[1]) && entry[1].type === "base")
+      .map(([name]) => name);
+    if (baseRelations.length !== 1) {
+      throw new Error("E_TIME_BASE_RELATION: compute_times requires exactly one base relation");
+    }
+    const items = activeItems(utterance.relation(baseRelations[0]).listItems());
+    const transaction = utterance.beginTransaction({
+      ruleId: `${phase.name}:compute_times`,
+      phase: phase.name,
+      tag: "timing",
+      reason: `resolve temporal marks after ${phase.name}`,
+      citations: ["Taylor, Black & Caley 2001"],
+    });
+    const markTimes = new Map<string, number>();
+    let elapsedMs = 0;
+    let previousRight: string | null = null;
+    for (const item of items) {
+      const anchor = utterance.intervalAnchor(item);
+      if (!anchor) throw new Error(`E_TIME_ANCHOR_REQUIRED: Item '${item.id}' has no interval anchor`);
+      transaction.dependOn(anchor.decisionId);
+      if (previousRight && utterance.axis.compare(previousRight, anchor.leftMarkId) !== 0) {
+        throw new Error("E_BASE_OVERLAP: active base intervals are not contiguous");
+      }
+      const duration = transaction.read(item, "duration");
+      if (typeof duration !== "number" || !Number.isFinite(duration) || duration < 0) {
+        throw new Error(`E_TIME_DURATION_REQUIRED: Item '${item.id}' has no finite non-negative duration`);
+      }
+      const existingLeft = markTimes.get(anchor.leftMarkId);
+      if (existingLeft != null && existingLeft !== elapsedMs) throw new Error("E_BASE_OVERLAP");
+      markTimes.set(anchor.leftMarkId, elapsedMs);
+      elapsedMs += duration;
+      const existingRight = markTimes.get(anchor.rightMarkId);
+      if (existingRight != null && existingRight !== elapsedMs) throw new Error("E_BASE_OVERLAP");
+      markTimes.set(anchor.rightMarkId, elapsedMs);
+      previousRight = anchor.rightMarkId;
+    }
+    for (const [markId, timeMs] of markTimes) transaction.resolveMarkTime(markId, timeMs);
+    transaction.commit();
+  }
+
+  for (const relationName of phase.resolve_points) {
+    for (const item of activeItems(utterance.relation(relationName).listItems())) {
+      if (utterance.resolveAnchorTime(item) == null) {
+        throw new Error(`E_TIME_NO_BASE_SUPPORT: point Item '${item.id}' cannot be resolved`);
+      }
+    }
+  }
+  utterance.checkpoint(phase.name);
+}
+
 export function runGraphRuleEngine(
   utterance: Utterance,
   spec: CompiledRulepack,
@@ -725,6 +793,7 @@ export function runGraphRuleEngine(
   const selectedPhases = options.phases ? new Set(options.phases) : null;
   const params = Object.freeze({ ...spec.parameters, ...(options.parameters ?? {}) });
   const predicates = spec.predicates;
+  let timingFinalized = false;
 
   for (const phase of spec.phases) {
     if (selectedPhases && !selectedPhases.has(phase.name)) continue;
@@ -735,8 +804,15 @@ export function runGraphRuleEngine(
         ? selectMatches(utterance, phase.name, ruleName, rule, params, predicates)
         : patternMatches(utterance, phase.name, ruleName, rule, spec.patterns, params, predicates);
       attachContourContexts(matches, rule);
+      if (timingFinalized && matches.length > 0 && isStructuralRule(rule)) {
+        throw new Error(
+          `E_FINALIZE_DIRTY: structural rule '${ruleName}' executed after finalize stage`,
+        );
+      }
       for (const match of matches) executeMatch(utterance, rule, match, params, predicates);
     }
+    finalizePhase(utterance, spec, phase);
+    if (phase.compute_times) timingFinalized = true;
   }
   return {
     transactions: utterance.journal().slice(startJournalLength),

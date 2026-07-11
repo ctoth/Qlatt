@@ -16,6 +16,7 @@ import type { Item } from "../src/declarative-frontend/hrg/item";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
 
 const CITE = ["Taylor 2001 HRG"];
+const RELATION_INPUT = { reason: "fixture relation construction", citations: CITE };
 const TEST_SCHEMA = {
   itemTypes: {
     word: {
@@ -65,21 +66,21 @@ function buildTheCat() {
   const catW = u.createItem("word");
   catW.set("text", "cat", { reason: "score token", stage: "transcribe", citations: CITE });
   const catPos = catW.set("pos", "NN", { reason: "POS tag", stage: "transcribe", citations: CITE });
-  u.words.append(theW);
-  u.words.append(catW);
+  u.words.append(theW, RELATION_INPUT);
+  u.words.append(catW, RELATION_INPUT);
 
   // Syllables (flat Syllable list).
   const theSyl = u.createItem("syllable");
   const catSyl = u.createItem("syllable");
-  u.syllables.append(theSyl);
-  u.syllables.append(catSyl);
+  u.syllables.append(theSyl, RELATION_INPUT);
+  u.syllables.append(catSyl, RELATION_INPUT);
 
   // Segments (flat Segment list).
   const mk = (phoneme: string, durMs: number): Item => {
     const seg = u.createItem("segment");
     seg.set("phoneme", phoneme, { reason: "inventory lookup", stage: "rules", citations: CITE });
     seg.set("dur_ms", durMs, { reason: "duration rule", stage: "prosody", citations: CITE });
-    u.segments.append(seg);
+    u.segments.append(seg, RELATION_INPUT);
     return seg;
   };
   const dh = mk("DH", 60);
@@ -89,16 +90,16 @@ function buildTheCat() {
   const t = mk("T", 90);
 
   // SylStructure tree (word -> syllable -> segment), reusing the SAME items.
-  const theWNode = u.sylStructure.addRoot(theW);
-  const theSylNode = u.sylStructure.addDaughter(theWNode, theSyl);
-  u.sylStructure.addDaughter(theSylNode, dh);
-  u.sylStructure.addDaughter(theSylNode, ah);
+  const theWNode = u.sylStructure.addRoot(theW, RELATION_INPUT);
+  const theSylNode = u.sylStructure.addDaughter(theWNode, theSyl, RELATION_INPUT);
+  u.sylStructure.addDaughter(theSylNode, dh, RELATION_INPUT);
+  u.sylStructure.addDaughter(theSylNode, ah, RELATION_INPUT);
 
-  const catWNode = u.sylStructure.addRoot(catW);
-  const catSylNode = u.sylStructure.addDaughter(catWNode, catSyl);
-  u.sylStructure.addDaughter(catSylNode, k);
-  u.sylStructure.addDaughter(catSylNode, ae);
-  u.sylStructure.addDaughter(catSylNode, t);
+  const catWNode = u.sylStructure.addRoot(catW, RELATION_INPUT);
+  const catSylNode = u.sylStructure.addDaughter(catWNode, catSyl, RELATION_INPUT);
+  u.sylStructure.addDaughter(catSylNode, k, RELATION_INPUT);
+  u.sylStructure.addDaughter(catSylNode, ae, RELATION_INPUT);
+  u.sylStructure.addDaughter(catSylNode, t, RELATION_INPUT);
 
   return { u, theW, catW, catPos, theSyl, catSyl, dh, ah, k, ae, t };
 }
@@ -287,7 +288,7 @@ describe("HRG lowering to Klatt frames", () => {
     const seg = u.createItem("segment");
     seg.set("phoneme", "AA", { reason: "x", citations: CITE });
     seg.set("F1", 700, { reason: "x", citations: CITE });
-    u.segments.append(seg);
+    u.segments.append(seg, RELATION_INPUT);
     const track = lowerToFrames(u, { defaultDurationMs: 50 });
     expect(track.totalMs).toBe(50);
     expect(track.frames.length).toBe(11); // floor(50/5)+1

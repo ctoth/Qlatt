@@ -182,7 +182,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 006 | Phase 2C final relation DSL vocabulary | kept | `e1a16553` | 205 declarative tests; 124/125 downstream baseline; three strict explain runs; core/scripts typecheck pass |
 | 007 | Phase 2D CEL neutrality | kept | `c76fcfe6` | 246 focused tests; DECtalk strict explain 192/0; core/scripts typecheck pass |
 | 008 | Phase 2E structural invalidation owner | kept | `f5f30bc1` | exact two-firing count; 207 declarative tests; core/scripts typecheck pass |
-| 009 | Phase 3 typed Item/relation schemas | kept | pending slice commit | 19 HRG tests; core/scripts typecheck pass; no HRG any |
+| 009 | Phase 3 typed Item/relation schemas | kept | `9980a7ac` | 19 HRG tests; core/scripts typecheck pass; no HRG any |
+| 010 | Phase 3 stamped relation topology | kept | pending slice commit | 22 HRG tests; immutable histories; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -559,3 +560,42 @@ ZERO CODE HIT
 
 Next slice: stamp relation membership/topology writes through the Utterance
 owner, retain append-only history, and add direct why queries before committing.
+
+## Iteration 010 — Phase 3 stamped relation topology
+
+Status: kept.
+
+Three direct contracts were red: relation methods returned unstamped nodes,
+tree topology carried no parentage, and rejected mutations had no queryable
+empty-history authority.
+
+Kept convergence:
+
+- added immutable, versioned `RelationWrite` records for list append, tree root,
+  and tree daughter operations;
+- made every relation mutation require reason/citations input and stamp a
+  `DecisionRecord` through the owning Utterance;
+- automatically parent ordered-list/root writes to the prior sibling and tree
+  daughter writes to both their parent membership and prior sibling membership;
+- attached each node to the exact write that made it reachable;
+- retained immutable append-only relation and feature history snapshots;
+- added `whyRelationMembership()` as the direct provenance-DAG query; and
+- proved validation failure occurs before relation history, graph topology, or
+  provenance mutation.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- test/hrg-relation-history.test.ts test/hrg-schema.test.ts test/hrg.test.ts
+PASS: 3 files, 22 tests
+```
+
+Next slice: move temporal axis identity, anchors, and resolved time marks behind
+the Utterance owner, then delete or reduce the old axis owner as the evidence
+requires before committing.

@@ -16,7 +16,12 @@ export {
   DEFAULT_KLATT_PARAMS,
 } from "./lowering";
 export type { LowerOptions, LoweredTrack, SegmentTiming } from "./lowering";
-export { decisionChain, whyFeature, whyParamAt } from "./provenance-query";
+export {
+  decisionChain,
+  whyFeature,
+  whyParamAt,
+  whyRelationMembership,
+} from "./provenance-query";
 export type {
   FeatureValue,
   FeatureSchema,
@@ -26,5 +31,9 @@ export type {
   ItemTypeSchema,
   RelationSchema,
   RelationKind,
+  RelationStamper,
+  RelationWrite,
+  RelationWriteInput,
+  RelationWriteOperation,
   Stamper,
 } from "./types";

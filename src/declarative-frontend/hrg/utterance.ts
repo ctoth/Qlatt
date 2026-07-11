@@ -16,6 +16,8 @@ import type {
   FeatureWriteInput,
   FeatureSchema,
   HrgSchema,
+  RelationStamper,
+  RelationWrite,
   Stamper,
 } from "./types";
 
@@ -135,20 +137,65 @@ export class Utterance {
       timestampMs: input.timestampMs,
     });
 
-    const write: FeatureWrite = {
+    const write: FeatureWrite = Object.freeze({
       itemId: item.id,
       key,
       value,
       version,
       decisionId: decision.id,
       reason: input.reason,
-      citations: [...decision.citations],
+      citations: Object.freeze([...decision.citations]),
       stage: decision.stage,
       type: decision.type,
-      parents: decision.parents ? [...decision.parents] : [],
+      parents: Object.freeze(decision.parents ? [...decision.parents] : []),
       timestampMs: decision.timestampMs,
-    };
+    });
     item._push(write);
+    return write;
+  };
+
+  private readonly stampRelation: RelationStamper = (
+    relation,
+    operation,
+    item,
+    parent,
+    previous,
+    input,
+  ): RelationWrite => {
+    const parents = new Set(input.parents ?? []);
+    if (parent) {
+      const parentWrite = relation.latestWrite(parent);
+      if (parentWrite) parents.add(parentWrite.decisionId);
+    }
+    if (previous) {
+      const previousWrite = relation.latestWrite(previous);
+      if (previousWrite) parents.add(previousWrite.decisionId);
+    }
+
+    const decision = this.provenance.add({
+      stage: input.stage ?? "rules",
+      type: `relation_${operation}`,
+      subject: `relation:${relation.name}:${item.id}`,
+      reason: input.reason,
+      citations: input.citations ?? [],
+      parents: parents.size > 0 ? [...parents] : undefined,
+      timestampMs: input.timestampMs,
+    });
+    const write: RelationWrite = Object.freeze({
+      relationName: relation.name,
+      operation,
+      itemId: item.id,
+      ...(parent ? { parentItemId: parent.id } : {}),
+      ...(previous ? { previousItemId: previous.id } : {}),
+      version: relation.writes().length,
+      decisionId: decision.id,
+      reason: decision.reason,
+      citations: Object.freeze([...decision.citations]),
+      parents: Object.freeze(decision.parents ? [...decision.parents] : []),
+      stage: decision.stage,
+      timestampMs: decision.timestampMs,
+    });
+    relation._pushWrite(write);
     return write;
   };
 
@@ -188,7 +235,12 @@ export class Utterance {
     }
     const existing = this.relations.get(name);
     if (existing) return existing;
-    const created = new Relation(name, relationSchema.kind, new Set(relationSchema.itemTypes));
+    const created = new Relation(
+      name,
+      relationSchema.kind,
+      new Set(relationSchema.itemTypes),
+      this.stampRelation,
+    );
     this.relations.set(name, created);
     return created;
   }

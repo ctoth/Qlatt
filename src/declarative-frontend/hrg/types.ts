@@ -20,6 +20,7 @@
  */
 import type { ProvenanceStage } from "../../provenance";
 import type { Item } from "./item";
+import type { Relation } from "./relation";
 
 export type PrimitiveFeatureValue = string | number | boolean | null;
 
@@ -62,6 +63,30 @@ export interface HrgSchema {
 
 /** Relations are either flat ordered lists or parent/daughter trees. */
 export type RelationKind = "list" | "tree";
+export type RelationWriteOperation = "append" | "add_root" | "add_daughter";
+
+export interface RelationWriteInput {
+  reason: string;
+  citations?: string[];
+  parents?: string[];
+  stage?: ProvenanceStage;
+  timestampMs?: number;
+}
+
+export interface RelationWrite {
+  readonly relationName: string;
+  readonly operation: RelationWriteOperation;
+  readonly itemId: string;
+  readonly parentItemId?: string;
+  readonly previousItemId?: string;
+  readonly version: number;
+  readonly decisionId: string;
+  readonly reason: string;
+  readonly citations: readonly string[];
+  readonly parents: readonly string[];
+  readonly stage: ProvenanceStage;
+  readonly timestampMs?: number;
+}
 
 /**
  * Input to a stamped feature-write. `reason` is mandatory (explainability is not
@@ -87,20 +112,20 @@ export interface FeatureWriteInput {
  * is answerable. `decisionId` links into the ProvenanceCollector's DAG.
  */
 export interface FeatureWrite {
-  itemId: string;
-  key: string;
-  value: FeatureValue;
+  readonly itemId: string;
+  readonly key: string;
+  readonly value: FeatureValue;
   /** 0-based version; increments on each overwrite. */
-  version: number;
+  readonly version: number;
   /** Id of the DecisionRecord created for this write. */
-  decisionId: string;
-  reason: string;
-  citations: string[];
-  stage: ProvenanceStage;
-  type: string;
+  readonly decisionId: string;
+  readonly reason: string;
+  readonly citations: readonly string[];
+  readonly stage: ProvenanceStage;
+  readonly type: string;
   /** Decision-id parents recorded on this write (read-set + prior value). */
-  parents: string[];
-  timestampMs?: number;
+  readonly parents: readonly string[];
+  readonly timestampMs?: number;
 }
 
 /** Records a stamped feature-write into the provenance DAG and the item. */
@@ -110,3 +135,12 @@ export type Stamper = (
   value: FeatureValue,
   input: FeatureWriteInput,
 ) => FeatureWrite;
+
+export type RelationStamper = (
+  relation: Relation,
+  operation: RelationWriteOperation,
+  item: Item,
+  parent: Item | null,
+  previous: Item | null,
+  input: RelationWriteInput,
+) => RelationWrite;

@@ -44,6 +44,17 @@ export function whyFeature(utterance: Utterance, item: Item, key: string): Decis
   return decisionChain(utterance.provenance, write.decisionId);
 }
 
+/** The decision chain behind an Item's membership/topology in one relation. */
+export function whyRelationMembership(
+  utterance: Utterance,
+  item: Item,
+  relationName: string,
+): DecisionRecord[] {
+  const relation = utterance.getRelation(relationName);
+  const write = relation?.latestWrite(item);
+  return write ? decisionChain(utterance.provenance, write.decisionId) : [];
+}
+
 /**
  * The decision chain behind a lowered frame parameter at time `timeSec`.
  * Returns [] if no frame covers the time or the param has no provenance there.

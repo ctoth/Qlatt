@@ -11,7 +11,12 @@
  * SylStructure tree). See design/beauty-synthesis/11-sota-frontend-architecture.md §2c.
  */
 import type { Item } from "./item";
-import type { RelationKind } from "./types";
+import type {
+  RelationKind,
+  RelationStamper,
+  RelationWrite,
+  RelationWriteInput,
+} from "./types";
 
 /** Relation-specific topology for one item in one relation. */
 export class HrgNode {
@@ -23,6 +28,7 @@ export class HrgNode {
   constructor(
     readonly item: Item,
     readonly relation: Relation,
+    readonly write: RelationWrite,
   ) {}
 
   /** First node in this node's sibling chain (follow prev to the head). */
@@ -48,14 +54,17 @@ export class Relation {
   tail: HrgNode | null = null;
   /** Tree roots (top-level nodes). */
   readonly roots: HrgNode[] = [];
+  private readonly writeHistory: RelationWrite[] = [];
+  private readonly latestWriteByItemId = new Map<string, RelationWrite>();
 
   constructor(
     readonly name: string,
     readonly kind: RelationKind,
     private readonly allowedItemTypes: ReadonlySet<string>,
+    private readonly stamper: RelationStamper,
   ) {}
 
-  private attach(item: Item): HrgNode {
+  private validateAttach(item: Item): void {
     if (!this.allowedItemTypes.has(item.type)) {
       throw new Error(
         `E_HRG_RELATION_ITEM_TYPE: relation '${this.name}' does not allow item type '${item.type}'`,
@@ -66,7 +75,10 @@ export class Relation {
         `E_HRG_DUPLICATE_NODE: item '${item.id}' is already in relation '${this.name}'`,
       );
     }
-    const node = new HrgNode(item, this);
+  }
+
+  private attach(item: Item, write: RelationWrite): HrgNode {
+    const node = new HrgNode(item, this, write);
     item.nodes.set(this.name, node);
     this.nodesById.set(item.id, node);
     return node;
@@ -80,11 +92,14 @@ export class Relation {
   }
 
   /** Append an item to a flat list relation. */
-  append(item: Item): HrgNode {
+  append(item: Item, input: RelationWriteInput): HrgNode {
     if (this.kind !== "list") {
       throw new Error(`E_HRG_RELATION_KIND: append requires a 'list' relation, '${this.name}' is '${this.kind}'`);
     }
-    const node = this.attach(item);
+    this.validateAttach(item);
+    const previous = this.tail?.item ?? null;
+    const write = this.stamper(this, "append", item, null, previous, input);
+    const node = this.attach(item, write);
     this.linkAfter(this.tail, node);
     if (!this.head) this.head = node;
     this.tail = node;
@@ -92,11 +107,14 @@ export class Relation {
   }
 
   /** Add a top-level (root) item to a tree relation. */
-  addRoot(item: Item): HrgNode {
+  addRoot(item: Item, input: RelationWriteInput): HrgNode {
     if (this.kind !== "tree") {
       throw new Error(`E_HRG_RELATION_KIND: addRoot requires a 'tree' relation, '${this.name}' is '${this.kind}'`);
     }
-    const node = this.attach(item);
+    this.validateAttach(item);
+    const previous = this.roots[this.roots.length - 1]?.item ?? null;
+    const write = this.stamper(this, "add_root", item, null, previous, input);
+    const node = this.attach(item, write);
     this.linkAfter(this.roots[this.roots.length - 1] ?? null, node);
     this.roots.push(node);
     if (!this.head) this.head = node;
@@ -105,14 +123,17 @@ export class Relation {
   }
 
   /** Add `item` as the last daughter of `parent` in a tree relation. */
-  addDaughter(parent: HrgNode, item: Item): HrgNode {
+  addDaughter(parent: HrgNode, item: Item, input: RelationWriteInput): HrgNode {
     if (this.kind !== "tree") {
       throw new Error(`E_HRG_RELATION_KIND: addDaughter requires a 'tree' relation, '${this.name}' is '${this.kind}'`);
     }
     if (parent.relation !== this) {
       throw new Error(`E_HRG_PARENT_RELATION: parent node is not in relation '${this.name}'`);
     }
-    const node = this.attach(item);
+    this.validateAttach(item);
+    const previous = parent.daughters[parent.daughters.length - 1]?.item ?? null;
+    const write = this.stamper(this, "add_daughter", item, parent.item, previous, input);
+    const node = this.attach(item, write);
     node.parent = parent;
     this.linkAfter(parent.daughters[parent.daughters.length - 1] ?? null, node);
     parent.daughters.push(node);
@@ -140,5 +161,20 @@ export class Relation {
   /** Items of a list relation in order. */
   listItems(): Item[] {
     return this.listNodes().map((node) => node.item);
+  }
+
+  /** Append-only membership/topology history in commit order. */
+  writes(): readonly RelationWrite[] {
+    return Object.freeze([...this.writeHistory]);
+  }
+
+  latestWrite(item: Item): RelationWrite | undefined {
+    return this.latestWriteByItemId.get(item.id);
+  }
+
+  /** Internal: record a stamped relation write. */
+  _pushWrite(write: RelationWrite): void {
+    this.writeHistory.push(write);
+    this.latestWriteByItemId.set(write.itemId, write);
   }
 }

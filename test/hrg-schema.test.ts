@@ -76,9 +76,9 @@ describe("HRG schema enforcement", () => {
     const point = utterance.createItem("point");
 
     expect(() => utterance.relation("Unknown")).toThrowError(/E_HRG_RELATION_UNDECLARED/);
-    expect(() => utterance.relation("Segment").append(point)).toThrowError(/E_HRG_RELATION_ITEM_TYPE/);
+    expect(() => utterance.relation("Segment").append(point, WRITE)).toThrowError(/E_HRG_RELATION_ITEM_TYPE/);
     expect(point.node("Segment")).toBeUndefined();
-    expect(utterance.relation("Segment").append(segment).item).toBe(segment);
+    expect(utterance.relation("Segment").append(segment, WRITE).item).toBe(segment);
   });
 
   it("cannot be schema-poisoned through caller-owned objects after construction", () => {
@@ -101,6 +101,6 @@ describe("HRG schema enforcement", () => {
     segmentItemTypes.push("point");
 
     expect(() => segment.set("mystery", 1, WRITE)).toThrowError(/E_HRG_FEATURE_UNDECLARED/);
-    expect(() => utterance.relation("Segment").append(point)).toThrowError(/E_HRG_RELATION_ITEM_TYPE/);
+    expect(() => utterance.relation("Segment").append(point, WRITE)).toThrowError(/E_HRG_RELATION_ITEM_TYPE/);
   });
 });

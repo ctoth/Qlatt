@@ -156,7 +156,7 @@ export class Item {
 
   /** All versioned writes of a feature, oldest first. */
   writes(key: string): readonly FeatureWrite[] {
-    return this.featureWrites.get(key) ?? [];
+    return Object.freeze([...(this.featureWrites.get(key) ?? [])]);
   }
 
   /** Latest (current) write of a feature, or undefined. */

@@ -69,6 +69,7 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "look_back_pred", arities: [3], binding: "context" },
   { name: "look_ahead_pred", arities: [3], binding: "context" },
   { name: "find_within_word", arities: [2, 3], binding: "context" },
+  { name: "path", arities: [2], binding: "context" },
   { name: "span_ms", arities: [2], binding: "context" },
   { name: "trajectory_control_windows", arities: [2], binding: "context" },
   { name: "count_word_vowels", arities: [0], binding: "context" },

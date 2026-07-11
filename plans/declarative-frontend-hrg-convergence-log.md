@@ -197,7 +197,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 021 | Phase 3 graph engine F0 layers | kept | `eb320851` | typed profile/gesture commands and replay; 42 HRG tests; core/scripts typecheck pass |
 | 022 | Phase 3 graph engine finalization | kept | `246fd8ba` | journaled timing, dirty guard, replay; 45 HRG tests; core/scripts typecheck pass |
 | 023 | Phase 3 CEL isolation/topology reads | kept | `fd8e6b0e` | nested evaluation isolation and exact navigation parents; 53 focused tests; core/scripts typecheck pass |
-| 024 | Phase 3 graph predicate navigation | kept | pending slice commit | tracked inline/named scans; 54 focused tests; core/scripts typecheck pass |
+| 024 | Phase 3 graph predicate navigation | kept | `7ca960f2` | tracked inline/named scans; 54 focused tests; core/scripts typecheck pass |
+| 025 | Phase 3 graph path/resource catalog and exit gate | kept | pending slice commit | shared-tree/resource catalog; guarded/prior points; 72 combined focused tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1190,3 +1191,58 @@ PASS: 16 files, 54 tests
 
 Next Phase 3 slice: shared-tree word/syllable/path catalog functions and the
 complete replacement-engine exit gate.
+
+## Iteration 025 — Phase 3 graph path and resource catalog
+
+Status: kept as the tenth target-owner sub-slice of the replacement engine.
+
+The shared-tree fixture established the remaining graph-query contract, while
+the target fixture exposed that inventory materialization needed an explicit
+resource DecisionRecord parent. The trajectory function was still incorrectly
+owned by the standalone control-score module scheduled for deletion.
+
+Kept convergence:
+
+- derives owning Word/Syllable, daughters, parent, word-local segments, vowel
+  count, syllable index/role/position, consonant-cluster position, phone/clause
+  counts, and temporal spans from shared HRG identity;
+- implements tracked `find_within_word` without loose token-array word scans;
+- adds catalog-owned `path(item, pathname)` with tracked Festival relation
+  switches, parent/daughter/list traversal, and terminal feature reads;
+- makes `target()` require the selected inventory resource plus its provenance
+  DecisionRecord and parents every materialized value on that decision;
+- moves trajectory-to-window projection out of the standalone control-score
+  owner into a frontend-neutral declarative owner used by both engines; and
+- proves tree/path/resource values all parent their exact topology, feature, or
+  resource decisions.
+
+Final capability closure in this slice also makes `insert_points[*].when`
+transaction-local and makes `prev_point()` return the latest active command in
+the requested point Relation, including a command in the same source interval.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- --run test/declarative-frontend-cel-expressions.test.ts test/trajectory-control-windows.test.ts test/hrg
+PASS: 17 files, 57 tests
+
+npm test -- --run test/declarative-frontend-point-actions.test.ts test/declarative-frontend-navigation.test.ts test/declarative-frontend-cel-expressions.test.ts test/trajectory-control-windows.test.ts test/hrg
+PASS: 19 files, 72 tests
+
+rg -n "buildTrajectoryControlWindows" src test
+ZERO HIT
+```
+
+The complete legacy capability-family gate also passed: model, navigation,
+pattern, association actions/navigation, splice, point, scalar, contour,
+sync-axis, finalize, and finalize-dirty (12 files, 51 tests). The replacement
+engine remains unexported from production and has zero flat-engine calls.
+
+Phase 3 status: complete. Next: Phase 4 lowering family 1, segment timing and
+required-duration validation against the committed baseline fixtures.

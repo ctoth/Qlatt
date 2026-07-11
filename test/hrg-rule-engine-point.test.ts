@@ -67,6 +67,7 @@ describe("graph-native point action execution", () => {
           insert_points: [
             { relation: "F0Point", at: "midpoint(current)", value: "params.base + current_index", tag: "mid" },
             { relation: "F0Point", at: "at_ratio(current, 0.25)", value: "120", tag: "ratio" },
+            { relation: "F0Point", when: "false", at: "midpoint(current)", value: "999", tag: "guarded" },
           ],
           citations: ["O'Shaughnessy 1976"],
         },
@@ -75,7 +76,7 @@ describe("graph-native point action execution", () => {
           insert_point: {
             relation: "F0Point",
             at: "at_sync(current.sync_right)",
-            value: "90",
+            value: "prev_point('F0Point').value - 30",
             tag: "tail",
           },
           citations: ["O'Shaughnessy 1976"],

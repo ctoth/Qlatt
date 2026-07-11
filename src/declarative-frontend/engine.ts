@@ -17,7 +17,7 @@ import {
   TemporalAxis,
   toNumericOrder,
 } from "./hrg/temporal-axis";
-import { buildTrajectoryControlWindows } from "../control-score";
+import { trajectoryControlWindows } from "./trajectory-control-windows";
 import {
   parseSyllabificationTables,
   syllabifyWord,
@@ -1234,7 +1234,7 @@ function buildNavigationFunctions(
       return total;
     },
     trajectory_control_windows: (trajectory: unknown, durationMs: unknown) =>
-      buildTrajectoryControlWindows(trajectory, durationMs),
+      trajectoryControlWindows(trajectory, durationMs),
     // count_word_vowels(): Count vowel tokens sharing the same word as the
     // current token.  Returns 0 for tokens without a word or SIL tokens.
     // Citation: Klatt 1976 Rule 4 (polysyllabic shortening)

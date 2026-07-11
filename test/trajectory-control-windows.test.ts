@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildTrajectoryControlWindows } from "../src/control-score";
+import { trajectoryControlWindows } from "../src/declarative-frontend/trajectory-control-windows";
 
 describe("trajectory control-window lowering", () => {
   it("builds frontend-neutral scaled piecewise control windows", () => {
-    const windows = buildTrajectoryControlWindows(
+    const windows = trajectoryControlWindows(
       {
         F1: [
           { value: 500, time: 20 },

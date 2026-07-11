@@ -1,4 +1,7 @@
 import type { CompiledRulepack } from "../rule-pack";
+import { materializePhonemeTarget, type InventorySpec } from "../inventory";
+import { trajectoryControlWindows } from "../trajectory-control-windows";
+import { isNavOp, step as stepPath } from "./path";
 import { evaluateExpression } from "../cel-expressions";
 import { isPlainObject } from "../../yaml-loader";
 import type { Item } from "./item";
@@ -10,6 +13,12 @@ import type { Utterance } from "./utterance";
 export interface GraphRuleEngineOptions {
   phases?: readonly string[];
   parameters?: Readonly<Record<string, unknown>>;
+  inventory?: GraphInventoryResource;
+}
+
+export interface GraphInventoryResource {
+  spec: InventorySpec;
+  decisionId: string;
 }
 
 export interface GraphRuleEngineResult {
@@ -47,9 +56,29 @@ function buildEvaluationContext(
   bindings: Readonly<Record<string, Item>> = {},
   relationName?: string,
   predicates: Readonly<Record<string, unknown>> = {},
+  inventory?: GraphInventoryResource,
 ): EvaluationContext {
   const views = new Map<Item, Readonly<Record<string, unknown>>>();
   const itemByView = new WeakMap<object, Item>();
+  const structureRelation = utterance.getRelation("SylStructure");
+  const structureAncestor = (item: Item, type: string): Item | undefined => {
+    let node = structureRelation?.node(item) ?? null;
+    while (node) {
+      transaction.dependOn(node.write.decisionId);
+      if (node.item.type.toLowerCase() === type) return node.item;
+      node = node.parent;
+    }
+    return undefined;
+  };
+  const structureChildren = (item: Item): Item[] => {
+    const node = structureRelation?.node(item);
+    if (!node) return [];
+    transaction.dependOn(node.write.decisionId);
+    return node.daughters.map((daughter) => {
+      transaction.dependOn(daughter.write.decisionId);
+      return daughter.item;
+    });
+  };
   const view = (item: Item | undefined): Readonly<Record<string, unknown>> | null => {
     if (!item) return null;
     let result = views.get(item);
@@ -63,18 +92,44 @@ function buildEvaluationContext(
             transaction.dependOn(anchor.decisionId);
             return property === "sync_left" ? anchor.leftMarkId : anchor.rightMarkId;
           }
+          if (property === "syllable" && !item.has("syllable")) {
+            return view(structureAncestor(item, "syllable"));
+          }
+          if (property === "word" && !item.has("word")) {
+            return view(structureAncestor(item, "word"));
+          }
+          if (property === "parent" && !item.has("parent")) {
+            const parent = structureRelation?.node(item)?.parent;
+            if (parent) transaction.dependOn(parent.write.decisionId);
+            return view(parent?.item);
+          }
+          if (property === "daughters" && !item.has("daughters")) {
+            return structureChildren(item).map((child) => view(child));
+          }
           return Reflect.get(target, property, receiver);
         },
         has: (target, property) =>
-          property === "sync_left" || property === "sync_right" || Reflect.has(target, property),
+          property === "sync_left"
+          || property === "sync_right"
+          || (property === "syllable" && structureAncestor(item, "syllable") != null)
+          || (property === "word" && structureAncestor(item, "word") != null)
+          || (property === "parent" && structureRelation?.node(item)?.parent != null)
+          || (property === "daughters" && structureChildren(item).length > 0)
+          || Reflect.has(target, property),
       });
       views.set(item, result);
       itemByView.set(result, item);
     }
     return result;
   };
-  const resolveItem = (value: unknown): Item | undefined =>
-    value != null && typeof value === "object" ? itemByView.get(value) : undefined;
+  const resolveItem = (value: unknown): Item | undefined => {
+    if (value == null || typeof value !== "object") return undefined;
+    const local = itemByView.get(value);
+    if (local) return local;
+    if (!("id" in value)) return undefined;
+    const id = Reflect.get(value, "id");
+    return typeof id === "string" ? utterance.getItem(id) : undefined;
+  };
   const offset = (value: unknown, amount: unknown): Readonly<Record<string, unknown>> | null => {
     const source = resolveItem(value);
     const sourceIndex = source ? items.indexOf(source) : -1;
@@ -153,6 +208,7 @@ function buildEvaluationContext(
         {},
         relationName,
         predicates,
+        inventory,
       );
       if (conditionMatches(condition, candidateContext, predicates)) return view(candidate);
     }
@@ -167,6 +223,88 @@ function buildEvaluationContext(
       if (write) transaction.dependOn(write.decisionId);
       return item;
     });
+  };
+  const wordSegments = (source: Item): Item[] => {
+    const word = structureAncestor(source, "word");
+    if (!word) return [];
+    const segments: Item[] = [];
+    const visit = (item: Item): void => {
+      if (item.type.toLowerCase() === "segment") {
+        segments.push(item);
+        return;
+      }
+      for (const child of structureChildren(item)) visit(child);
+    };
+    visit(word);
+    return segments;
+  };
+  const findWithinWord = (
+    sourceValue: unknown,
+    condition: unknown,
+    directionValue: unknown = "ahead",
+  ): Readonly<Record<string, unknown>> | null => {
+    const source = resolveItem(sourceValue);
+    if (!source) return null;
+    const word = structureAncestor(source, "word");
+    const sourceIndex = items.indexOf(source);
+    if (!word || sourceIndex < 0) return null;
+    const directionName = typeof directionValue === "string" ? directionValue : "ahead";
+    const directions: readonly (-1 | 1)[] = directionName === "behind"
+      ? [-1]
+      : directionName === "both" ? [1, -1] : [1];
+    for (const direction of directions) {
+      for (let candidateIndex = sourceIndex + direction; candidateIndex >= 0 && candidateIndex < items.length; candidateIndex += direction) {
+        const candidate = items[candidateIndex];
+        if (structureAncestor(candidate, "word") !== word) break;
+        const candidateContext = buildEvaluationContext(
+          utterance,
+          transaction,
+          items,
+          candidateIndex,
+          params,
+          { source: view(source), candidate: view(candidate) },
+          {},
+          relationName,
+          predicates,
+          inventory,
+        );
+        if (conditionMatches(condition, candidateContext, predicates)) return view(candidate);
+      }
+    }
+    return null;
+  };
+  const spanMs = (leftValue: unknown, rightValue: unknown): number => {
+    const left = resolveItem(leftValue);
+    const right = resolveItem(rightValue);
+    let leftIndex = left ? items.indexOf(left) : -1;
+    let rightIndex = right ? items.indexOf(right) : -1;
+    if (leftIndex < 0 || rightIndex < 0) return 0;
+    if (leftIndex > rightIndex) [leftIndex, rightIndex] = [rightIndex, leftIndex];
+    let durationMs = 0;
+    for (let itemIndex = leftIndex; itemIndex <= rightIndex; itemIndex += 1) {
+      const duration = transaction.read(items[itemIndex], "duration");
+      if (typeof duration === "number" && Number.isFinite(duration)) durationMs += duration;
+    }
+    return durationMs;
+  };
+  const navigatePath = (
+    sourceValue: unknown,
+    pathValue: unknown,
+  ): Readonly<Record<string, unknown>> | FeatureValue | undefined | null => {
+    const source = resolveItem(sourceValue);
+    if (!source || typeof pathValue !== "string") return null;
+    const segments = pathValue.split(".").map((segment) => segment.trim()).filter(Boolean);
+    let node = relationName ? utterance.relation(relationName).node(source) ?? null : null;
+    if (!node) node = source.nodes.values().next().value ?? null;
+    for (let pathIndex = 0; pathIndex < segments.length; pathIndex += 1) {
+      if (!node) return null;
+      const segment = segments[pathIndex];
+      const final = pathIndex === segments.length - 1;
+      if (final && !isNavOp(segment)) return transaction.read(node.item, segment);
+      node = stepPath(node, segment);
+      if (node) transaction.dependOn(node.write.decisionId);
+    }
+    return view(node?.item);
   };
   const bindingViews = Object.fromEntries(
     Object.entries(bindings).map(([name, item]) => [name, view(item)]),
@@ -213,6 +351,11 @@ function buildEvaluationContext(
           ? container.includes(String(candidate))
           : Array.isArray(container) && container.includes(candidate),
       merge,
+      target: (phoneme) => {
+        if (!inventory) throw new Error("E_HRG_INVENTORY_REQUIRED: target() requires the selected frontend inventory");
+        transaction.dependOn(inventory.decisionId);
+        return materializePhonemeTarget(phoneme, { inventorySpec: inventory.spec });
+      },
       assoc: association,
       midpoint: (source) => pointAnchor(source, 0.5),
       at_ratio: pointAnchor,
@@ -220,18 +363,11 @@ function buildEvaluationContext(
         ? { leftMarkId: markId, rightMarkId: markId, ratio: 0 }
         : null,
       prev_point: (name) => {
-        const current = items[index];
-        const currentAnchor = current ? utterance.temporalAnchor(current) : undefined;
-        if (!currentAnchor) return null;
-        transaction.dependOn(currentAnchor.decisionId);
-        const candidates = relationItems(name)
-          .filter((item) => {
-            const anchor = utterance.temporalAnchor(item);
-            if (!anchor) return false;
-            transaction.dependOn(anchor.decisionId);
-            return utterance.axis.compare(anchor.leftMarkId, currentAnchor.leftMarkId) < 0;
-          });
-        return view(candidates[candidates.length - 1]);
+        const candidates = relationItems(name);
+        const candidate = candidates[candidates.length - 1];
+        const anchor = candidate ? utterance.temporalAnchor(candidate) : undefined;
+        if (anchor) transaction.dependOn(anchor.decisionId);
+        return view(candidate);
       },
       look_back_where: (source, maxSteps, expression) =>
         scan(source, maxSteps, expression, -1),
@@ -243,6 +379,77 @@ function buildEvaluationContext(
         typeof predicateName === "string"
           ? scan(source, maxSteps, { predicate: predicateName }, 1)
           : null,
+      find_within_word: findWithinWord,
+      path: navigatePath,
+      span_ms: spanMs,
+      trajectory_control_windows: trajectoryControlWindows,
+      word_count: () => relationItems("Word").length,
+      phone_count: () => relationItems("Segment").filter((item) => {
+        const phoneme = transaction.read(item, "phoneme");
+        return phoneme !== "SIL";
+      }).length,
+      clause_phone_count: () => {
+        let left = index;
+        let right = index;
+        while (left > 0 && transaction.read(items[left - 1], "phoneme") !== "SIL") left -= 1;
+        while (right + 1 < items.length && transaction.read(items[right + 1], "phoneme") !== "SIL") right += 1;
+        let count = 0;
+        for (let itemIndex = left; itemIndex <= right; itemIndex += 1) {
+          if (transaction.read(items[itemIndex], "phoneme") !== "SIL") count += 1;
+        }
+        return count;
+      },
+      count_word_vowels: () => {
+        const source = items[index];
+        return source ? wordSegments(source).filter((item) => transaction.read(item, "type") === "vowel").length : 0;
+      },
+      cluster_position_in_word: () => {
+        const source = items[index];
+        if (!source) return 0;
+        const segments = wordSegments(source);
+        const sourceIndex = segments.indexOf(source);
+        if (sourceIndex < 0 || transaction.read(source, "type") === "vowel") return 0;
+        let position = 0;
+        for (let itemIndex = sourceIndex - 1; itemIndex >= 0; itemIndex -= 1) {
+          if (transaction.read(segments[itemIndex], "type") === "vowel") break;
+          position += 1;
+        }
+        return position;
+      },
+      syllable_index: () => {
+        const source = items[index];
+        const syllable = source ? structureAncestor(source, "syllable") : undefined;
+        const word = source ? structureAncestor(source, "word") : undefined;
+        if (!syllable || !word) return null;
+        return structureChildren(word)
+          .filter((item) => item.type.toLowerCase() === "syllable")
+          .indexOf(syllable);
+      },
+      syllable_role: () => {
+        const source = items[index];
+        const syllable = source ? structureAncestor(source, "syllable") : undefined;
+        if (!source || !syllable) return null;
+        const segments = structureChildren(syllable)
+          .filter((item) => item.type.toLowerCase() === "segment");
+        const sourceIndex = segments.indexOf(source);
+        const nucleusIndex = segments.findIndex((item) => transaction.read(item, "type") === "vowel");
+        if (sourceIndex < 0 || nucleusIndex < 0) return null;
+        return sourceIndex < nucleusIndex ? "onset" : sourceIndex === nucleusIndex ? "nucleus" : "coda";
+      },
+      syllable_position_in_word: () => {
+        const source = items[index];
+        const syllable = source ? structureAncestor(source, "syllable") : undefined;
+        const word = source ? structureAncestor(source, "word") : undefined;
+        if (!syllable || !word) return null;
+        const syllables = structureChildren(word)
+          .filter((item) => item.type.toLowerCase() === "syllable");
+        const syllableIndex = syllables.indexOf(syllable);
+        if (syllableIndex < 0) return null;
+        if (syllables.length === 1) return "only";
+        if (syllableIndex === 0) return "initial";
+        if (syllableIndex === syllables.length - 1) return "final";
+        return "medial";
+      },
     },
   };
 }
@@ -600,6 +807,7 @@ function applyPointActions(
   for (let index = 0; index < actions.length; index += 1) {
     const { spec, relationName } = actions[index];
     if (typeof relationName !== "string") continue;
+    if (spec.when != null && !conditionMatches(spec.when, context, predicates)) continue;
     const relation = utterance.relation(relationName);
     const itemTypes = relation.itemTypes();
     if (itemTypes.length !== 1) {
@@ -646,6 +854,7 @@ function executeMatch(
   match: Match,
   params: Readonly<Record<string, unknown>>,
   predicates: Readonly<Record<string, unknown>>,
+  inventory?: GraphInventoryResource,
 ): void {
   const resolveTarget = (name: string): Item | undefined =>
     name === "current" ? match.items[match.index] : match.bindings[name];
@@ -659,6 +868,7 @@ function executeMatch(
     match.bindings,
     match.relationName,
     predicates,
+    inventory,
   );
   const definitions: Record<string, unknown> = {};
   if (isPlainObject(rule.define)) {
@@ -674,6 +884,7 @@ function executeMatch(
         match.bindings,
         match.relationName,
         predicates,
+        inventory,
       );
     }
   }
@@ -715,6 +926,7 @@ function selectMatches(
   rule: Readonly<Record<string, unknown>>,
   params: Readonly<Record<string, unknown>>,
   predicates: Readonly<Record<string, unknown>>,
+  inventory?: GraphInventoryResource,
 ): Match[] {
   if (!isPlainObject(rule.select) || typeof rule.select.relation !== "string") return [];
   const items = activeItems(utterance.relation(rule.select.relation).listItems());
@@ -732,6 +944,7 @@ function selectMatches(
       {},
       rule.select.relation,
       predicates,
+      inventory,
     );
     if (!conditionMatches(rule.select.where, context, predicates)) continue;
     const node = relation.node(items[index]);
@@ -757,6 +970,7 @@ function patternMatches(
   patterns: Readonly<Record<string, unknown>>,
   params: Readonly<Record<string, unknown>>,
   predicates: Readonly<Record<string, unknown>>,
+  inventory?: GraphInventoryResource,
 ): Match[] {
   if (typeof rule.match !== "string") return [];
   const pattern = patterns[rule.match];
@@ -789,6 +1003,7 @@ function patternMatches(
         bindings,
         pattern.relation,
         predicates,
+        inventory,
       );
       if (!conditionMatches(step.where, context, predicates)) {
         matched = false;
@@ -813,6 +1028,7 @@ function patternMatches(
       bindings,
       pattern.relation,
       predicates,
+      inventory,
     );
     if (!conditionMatches(pattern.constraint, context, predicates)) continue;
     matches.push({
@@ -913,15 +1129,26 @@ export function runGraphRuleEngine(
       const rule = spec.rules[ruleName];
       if (!isPlainObject(rule)) continue;
       const matches = isPlainObject(rule.select)
-        ? selectMatches(utterance, phase.name, ruleName, rule, params, predicates)
-        : patternMatches(utterance, phase.name, ruleName, rule, spec.patterns, params, predicates);
+        ? selectMatches(utterance, phase.name, ruleName, rule, params, predicates, options.inventory)
+        : patternMatches(
+          utterance,
+          phase.name,
+          ruleName,
+          rule,
+          spec.patterns,
+          params,
+          predicates,
+          options.inventory,
+        );
       attachContourContexts(matches, rule);
       if (timingFinalized && matches.length > 0 && isStructuralRule(rule)) {
         throw new Error(
           `E_FINALIZE_DIRTY: structural rule '${ruleName}' executed after finalize stage`,
         );
       }
-      for (const match of matches) executeMatch(utterance, rule, match, params, predicates);
+      for (const match of matches) {
+        executeMatch(utterance, rule, match, params, predicates, options.inventory);
+      }
     }
     finalizePhase(utterance, spec, phase);
     if (phase.compute_times) timingFinalized = true;

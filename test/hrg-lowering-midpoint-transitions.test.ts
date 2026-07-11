@@ -109,7 +109,7 @@ function productionTransitionParams(): Record<string, number> {
   return params;
 }
 
-function dectalkProductionParams(): Record<string, number> {
+function dectalkProductionParams(phoneme: string, time: number): Record<string, number> {
   const parsed: unknown = JSON.parse(readFileSync(
     new URL("./fixtures/hrg-convergence-baseline/dectalk-english-stops.json", import.meta.url),
     "utf8",
@@ -121,9 +121,9 @@ function dectalkProductionParams(): Record<string, number> {
   if (!Array.isArray(frames)) throw new Error("DECtalk production frames missing");
   const frame = frames.find(
     (candidate) => isPlainObject(candidate)
-      && candidate.phoneme === "P"
+      && candidate.phoneme === phoneme
       && typeof candidate.time === "number"
-      && Math.abs(candidate.time - 0.0722) <= 1e-9,
+      && Math.abs(candidate.time - time) <= 1e-9,
   );
   if (!isPlainObject(frame) || !isPlainObject(frame.params)) {
     throw new Error("captured DECtalk universal midpoint event missing");
@@ -217,11 +217,65 @@ describe("HRG lowering midpoint transitions", () => {
     const transition = lowered.frames.find(
       (frame) => frame.segmentId === closure.id && Math.abs(frame.time - 0.0722) <= 1e-9,
     );
-    const production = dectalkProductionParams();
+    const production = dectalkProductionParams("P", 0.0722);
 
     expect(transition).toBeDefined();
     for (const column of policy.columns) {
       expect(transition?.params[column], column).toBe(production[column]);
+    }
+  });
+
+  it("matches captured DECtalk forward universal midpoint hold and steady events", () => {
+    const utterance = new Utterance(SCHEMA);
+    const build = utterance.beginTransaction(META);
+    const vowel = addSegment(build, "seg_2", "AE", "vowel", 154, {
+      F1: 680, F2: 1600, F3: 2430, B1: 130, B2: 90, B3: 290,
+    });
+    const closure = addSegment(build, "seg_3", "T", "stop_closure", 65, {
+      F1: 350, F2: 1700, F3: 2600, B1: 200, B2: 150, B3: 240,
+    });
+    build.partitionAnchors([vowel, closure], utterance.axis.start.id, utterance.axis.end.id);
+    build.commit();
+    const timing = utterance.beginTransaction({ ...META, ruleId: "timing", tag: "timing" });
+    const vowelAnchor = utterance.intervalAnchor(vowel);
+    const closureAnchor = utterance.intervalAnchor(closure);
+    if (!vowelAnchor || !closureAnchor) throw new Error("fixture anchors missing");
+    timing.resolveMarkTime(vowelAnchor.leftMarkId, 90);
+    timing.resolveMarkTime(vowelAnchor.rightMarkId, 244);
+    timing.resolveMarkTime(closureAnchor.rightMarkId, 309);
+    timing.commit();
+    const policy: LowerOptions = {
+      ...POLICY,
+      timeline: {
+        ...POLICY.timeline,
+        initial_silence_ms: { value: 19.2 },
+        final_silence_ms: { value: 0 },
+        duration_floors: {
+          stop_release_ms: { value: 7 },
+          default_ms: { value: 30 },
+        },
+      },
+      transitions: {
+        default_transition_ms: { value: 30 },
+        blend: {
+          factor: { value: 0.5 },
+          keys: ["F1", "F2", "F3", "B1", "B2", "B3"],
+          smooth_types: ["vowel", "nasal", "liquid", "glide"],
+          smooth_all_boundaries: true,
+        },
+      },
+    };
+
+    const lowered = lowerToFrames(utterance, policy);
+    for (const time of [0.2632, 0.2932]) {
+      const frame = lowered.frames.find(
+        (candidate) => candidate.segmentId === closure.id && Math.abs(candidate.time - time) <= 1e-9,
+      );
+      const production = dectalkProductionParams("T", time);
+      expect(frame, `frame ${time}`).toBeDefined();
+      for (const column of policy.columns) {
+        expect(frame?.params[column], `${time}.${column}`).toBe(production[column]);
+      }
     }
   });
 });

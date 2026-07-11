@@ -2291,6 +2291,14 @@ function validateLoweringSpec(
       },
       diagnostics,
     );
+    if (transitions.locus_glue_types !== undefined) {
+      validateStringArray(
+        transitions.locus_glue_types,
+        diagnostics,
+        "output.lowering.transitions.locus_glue_types",
+        "output.lowering.transitions.locus_glue_types",
+      );
+    }
     if (transitions.sonorant_f2 !== undefined) {
       const policy = transitions.sonorant_f2;
       if (!isPlainObject(policy)) {

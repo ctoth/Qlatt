@@ -173,6 +173,8 @@ export type TrackLoweringSpec = {
      * ph_sttr2.c:303-307; p_us_rom.h us_place[]; ph_defs.h:345-346.
      */
     f2_back?: Record<string, { forward?: boolean; backward?: boolean }>;
+    /** Segment classes skipped when locating an underlying locus obstruent. */
+    locus_glue_types?: string[];
     /** Generic per-key sonorant-edge ramp policy, currently used for F2. */
     sonorant_f2?: {
       key: string;

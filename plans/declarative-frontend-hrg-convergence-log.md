@@ -206,7 +206,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 030 | Phase 4 family 3A: graph control windows | kept | `42e2f0a4` | DECtalk next-target production cells exact; all field ops/targets/span forms; window provenance |
 | 031 | Phase 4 family 3B: midpoint transitions | kept | `0b4b2e01` | qlatt EH-to-L production event and 5 ordinary blend cells exact; policy-driven types/keys/factor/span |
 | 032 | Phase 4 family 3C: sonorant F2 ramps | kept | `18a9b829` | cited 45 ms/75% policy; qlatt F2 ramp start/interior production cells exact; compiler range validation |
-| 033 | Phase 4 family 3D: universal midpoint fallback | kept | pending slice commit | DECtalk P-to-release 72.2 ms event and 6 cells exact; selected smooth-all policy only |
+| 033 | Phase 4 family 3D: universal midpoint fallback | kept | `1df89f04` | DECtalk P-to-release 72.2 ms event and 6 cells exact; selected smooth-all policy only |
+| 034 | Phase 4 family 3E: locus and forward transitions | kept | pending slice commit | 5 captured AE locus states + 2 universal T states exact; per-key spans/adjustments/glue policy |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1621,3 +1622,46 @@ PASS: 1 file, 2 tests
 
 Next source slice remains family 3: selected locus tables, per-formant ramp
 spans, forward/backward edge realization, then full family parity.
+
+## Iteration 034 — Phase 4 family 3E: locus and forward transitions
+
+Status: kept. Family 3 remains active for its exhaustive parity gate.
+
+The lowerer now consumes selected locus data directly from transition policy:
+
+- male locus table and per-edge vowel category;
+- policy-declared release/aspiration glue Segment classes;
+- independent F1/F2/F3 `durtran` spans;
+- forward boundary-to-steady and backward steady-to-boundary analytic ramps;
+- rounded-sonorant/non-palatal place adjustment; and
+- F2 back-cavity percent/span adjustment.
+
+Generic code branches only on selected data and Segment features. It does not
+name DECtalk, a bundled phoneme, or a fixed locus value. Universal forward
+midpoint holds are also realized through `smooth_all_boundaries`, ending at the
+selected transition span before base values resume.
+
+Captured production proof:
+
+```text
+P -> AE forward locus:
+  109.2 ms, 129.2 ms, 159.2 ms: F1/F2/F3 exact (9 cells)
+AE -> T backward locus:
+  218.2 ms, 228.2 ms: F1/F2/F3 exact (6 cells)
+AE -> T universal forward hold on T:
+  263.2 ms, 293.2 ms: F1/F2/F3/B1/B2/B3 exact (12 cells)
+```
+
+The direct adjustment fixture additionally proves the selected integer formulas:
+F2 percent 56 -> rounded 78 -> back-affiliation 84, and F3 percent 25 ->
+rounded 62, without mutating Segment values.
+
+Verification:
+
+```text
+npm test -- --run test/hrg-lowering-midpoint-transitions.test.ts test/hrg-lowering-locus-transitions.test.ts
+PASS: 2 files, 5 tests
+```
+
+Next source slice stays in family 3: exhaustive transition/control event and
+owned-cell parity against the captured qlatt-English and DECtalk schedules.

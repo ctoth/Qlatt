@@ -652,6 +652,7 @@ output:
             - "DECtalk 4.63 p_us_st1.c:442-455,837-849 (sonorant-edge F2 boundary uses a 75/25 neighbor weighting)"
         current_type: vowel
         neighbor_types: [nasal, liquid, glide]
+      locus_glue_types: [stop_release, stop_aspiration]
       # Obstruent->sonorant formant LOCUS tables (DATA), extracted from
       # DECtalk 4.63 PH/p_us_rom.h us_maleloc[] (Paul / male voice) via the
       # dectalk repo scripts/extract_loci.py, reshaped by

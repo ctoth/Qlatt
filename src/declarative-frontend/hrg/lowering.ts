@@ -18,6 +18,15 @@ import type { Utterance } from "./utterance";
 import type { Item } from "./item";
 import type { FeatureValue } from "./types";
 
+type LocusEntry = {
+  locus_hz: number;
+  prcnt: number;
+  durtran_ms: number;
+};
+
+type LocusTable = Readonly<Record<string, Readonly<Record<string, Readonly<Record<string, LocusEntry>>>>>>;
+type VowelCategoryTable = Readonly<Record<string, { forward?: number; backward?: number }>>;
+
 export interface LowerOptions {
   /** Required backend parameter columns, in declared output order. */
   columns: readonly string[];
@@ -51,6 +60,12 @@ export interface LowerOptions {
       current_type: string;
       neighbor_types: readonly string[];
     };
+    loci?: LocusTable;
+    vowel_category?: VowelCategoryTable;
+    obstruent_place?: Readonly<Record<string, { palatal_or_dental?: boolean }>>;
+    rounded_sonorant_consonant?: readonly string[];
+    f2_back?: Readonly<Record<string, { forward?: boolean; backward?: boolean }>>;
+    locus_glue_types?: readonly string[];
   };
   /** Feature key holding each segment's realized duration in ms (default "duration"). */
   durationKey?: string;
@@ -190,6 +205,51 @@ function resolveControlField(baseValue: number | undefined, field: ResolvedContr
   }
 }
 
+function resolveLocusFormants(
+  vowel: Item,
+  obstruent: Item,
+  edge: "forward" | "backward",
+  options: LowerOptions,
+  phonemeKey: string,
+): Array<{ key: string; boundaryValue: number; spanMs: number }> {
+  const loci = options.transitions.loci;
+  const categories = options.transitions.vowel_category;
+  const vowelPhoneme = vowel.get(phonemeKey);
+  const obstruentPhoneme = obstruent.get(phonemeKey);
+  if (!loci || !categories || typeof vowelPhoneme !== "string" || typeof obstruentPhoneme !== "string") {
+    return [];
+  }
+  const category = categories[vowelPhoneme];
+  const categoryId = edge === "forward" ? category?.forward : category?.backward;
+  const formants = categoryId == null ? undefined : loci[obstruentPhoneme]?.[String(categoryId)];
+  if (!formants) return [];
+  const rounded = options.transitions.rounded_sonorant_consonant?.includes(vowelPhoneme) ?? false;
+  const palatalOrDental = options.transitions.obstruent_place?.[obstruentPhoneme]?.palatal_or_dental ?? false;
+  const f2Back = edge === "forward"
+    ? options.transitions.f2_back?.[vowelPhoneme]?.forward === true
+    : options.transitions.f2_back?.[vowelPhoneme]?.backward === true;
+  const resolved: Array<{ key: string; boundaryValue: number; spanMs: number }> = [];
+  for (const key of options.transitions.blend.keys) {
+    const entry = formants[key];
+    const currentValue = vowel.get(key);
+    if (!entry || typeof currentValue !== "number") continue;
+    let percent = entry.prcnt;
+    let spanMs = entry.durtran_ms;
+    if (rounded && (key === "F2" || key === "F3") && !palatalOrDental) {
+      percent = Math.floor(percent / 2) + 50;
+    }
+    if (key === "F2" && f2Back) {
+      percent += 25 - Math.floor(percent / 4);
+      spanMs = Math.floor(spanMs / 2) + 2;
+    }
+    const boundaryValue = entry.locus_hz + (percent * (currentValue - entry.locus_hz)) / 100;
+    if (Number.isFinite(boundaryValue) && Number.isFinite(spanMs) && spanMs > 0) {
+      resolved.push({ key, boundaryValue, spanMs });
+    }
+  }
+  return resolved;
+}
+
 function requirePolicyNumber(value: number, path: string): number {
   if (!Number.isFinite(value) || value < 0) {
     throw new Error(`E_HRG_LOWER_POLICY_NUMBER: '${path}' must be finite and non-negative`);
@@ -317,6 +377,26 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
       appendTransition(timing.item, { startMs, fields });
     }
   });
+  if (options.transitions.blend.smooth_all_boundaries === true) {
+    timings.forEach((timing, index) => {
+      const previous = timings[index - 1];
+      if (!previous) return;
+      const itemTransitionMs = finiteFeatureNumber(timing.item.get("transition_ms"));
+      const transitionMs = itemTransitionMs ?? defaultTransitionMs;
+      const endMs = Math.min(timing.durationMs - 20, transitionMs);
+      if (endMs <= 0) return;
+      const fields: Record<string, number> = {};
+      for (const key of options.transitions.blend.keys) {
+        const currentValue = timing.item.get(key);
+        const previousValue = previous.item.get(key);
+        if (typeof currentValue !== "number" || typeof previousValue !== "number") continue;
+        fields[key] = currentValue + (previousValue - currentValue) * blendFactor;
+      }
+      if (Object.keys(fields).length > 0) {
+        appendTransition(timing.item, { startMs: 0, endMs, fields });
+      }
+    });
+  }
   const sonorantF2 = options.transitions.sonorant_f2;
   if (sonorantF2) {
     const spanMs = requirePolicyNumber(sonorantF2.span_ms.value, "transitions.sonorant_f2.span_ms.value");
@@ -363,6 +443,73 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
               [sonorantF2.key]: {
                 startValue: currentValue,
                 endValue: currentValue + (nextValue - currentValue) * neighborWeight,
+              },
+            },
+          });
+        }
+      }
+    });
+  }
+  const locusGlueTypes = new Set(options.transitions.locus_glue_types ?? []);
+  const adjacentLocusObstruent = (index: number, direction: -1 | 1): Item | undefined => {
+    let neighborIndex = index + direction;
+    while (timings[neighborIndex] && locusGlueTypes.has(String(timings[neighborIndex].item.get(typeKey)))) {
+      neighborIndex += direction;
+    }
+    const neighbor = timings[neighborIndex]?.item;
+    if (!neighbor || smoothTypes.has(String(neighbor.get(typeKey)))) return undefined;
+    const phoneme = neighbor.get(phonemeKey);
+    return typeof phoneme === "string" && options.transitions.loci?.[phoneme] ? neighbor : undefined;
+  };
+  if (options.transitions.loci && options.transitions.vowel_category) {
+    timings.forEach((timing, index) => {
+      if (!smoothTypes.has(String(timing.item.get(typeKey)))) return;
+      const previousObstruent = adjacentLocusObstruent(index, -1);
+      if (previousObstruent) {
+        for (const formant of resolveLocusFormants(
+          timing.item,
+          previousObstruent,
+          "forward",
+          options,
+          phonemeKey,
+        )) {
+          const endMs = Math.min(timing.durationMs - 20, formant.spanMs);
+          const currentValue = timing.item.get(formant.key);
+          if (typeof currentValue !== "number" || endMs <= 0) continue;
+          appendTransition(timing.item, {
+            startMs: 0,
+            endMs,
+            fields: {},
+            linearFields: {
+              [formant.key]: {
+                startValue: formant.boundaryValue,
+                endValue: currentValue,
+              },
+            },
+          });
+        }
+      }
+      const nextObstruent = adjacentLocusObstruent(index, 1);
+      if (nextObstruent) {
+        for (const formant of resolveLocusFormants(
+          timing.item,
+          nextObstruent,
+          "backward",
+          options,
+          phonemeKey,
+        )) {
+          const spanMs = Math.min(timing.durationMs, formant.spanMs);
+          const startMs = Math.max(20, timing.durationMs - spanMs);
+          const currentValue = timing.item.get(formant.key);
+          if (typeof currentValue !== "number" || startMs >= timing.durationMs) continue;
+          appendTransition(timing.item, {
+            startMs,
+            endMs: timing.durationMs,
+            fields: {},
+            linearFields: {
+              [formant.key]: {
+                startValue: currentValue,
+                endValue: formant.boundaryValue,
               },
             },
           });
@@ -439,10 +586,13 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
       }
       for (const transition of transitionsByItem.get(item) ?? []) {
         if (segmentOffsetMs < transition.startMs - 1e-6) continue;
-        for (const [key, value] of Object.entries(transition.fields)) {
-          params[key] = value;
-          const write = item.latestWrite(key);
-          if (write) provenance[key] = write.decisionId;
+        const staticFieldsActive = transition.endMs == null || segmentOffsetMs <= transition.endMs + 1e-6;
+        if (staticFieldsActive) {
+          for (const [key, value] of Object.entries(transition.fields)) {
+            params[key] = value;
+            const write = item.latestWrite(key);
+            if (write) provenance[key] = write.decisionId;
+          }
         }
         if (transition.linearFields && transition.endMs != null) {
           const durationMs = transition.endMs - transition.startMs;

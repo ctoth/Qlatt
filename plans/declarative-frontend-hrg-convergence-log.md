@@ -208,7 +208,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 032 | Phase 4 family 3C: sonorant F2 ramps | kept | `18a9b829` | cited 45 ms/75% policy; qlatt F2 ramp start/interior production cells exact; compiler range validation |
 | 033 | Phase 4 family 3D: universal midpoint fallback | kept | `1df89f04` | DECtalk P-to-release 72.2 ms event and 6 cells exact; selected smooth-all policy only |
 | 034 | Phase 4 family 3E: locus and forward transitions | kept | `4bdd79bf` | 5 captured AE locus states + 2 universal T states exact; per-key spans/adjustments/glue policy |
-| 035 | Phase 4 family 3 exit: transition matrix | kept | pending slice commit | every emitted qlatt/beauty transition event and blend cell matches production; direction policy corrected; family gate green |
+| 035 | Phase 4 family 3 exit: transition matrix | kept | `4bb3a3f5` | every emitted qlatt/beauty transition event and blend cell matches production; direction policy corrected; family gate green |
+| 036 | Phase 4 family 4: explicit F0 points | kept | pending slice commit | every emitted qlatt F0 cell matches production; graph-time anchors, voice gating, last-point-wins, invalid-point rejection |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1708,3 +1709,40 @@ PASS
 
 Next Phase 4 family: explicit point and contour realization from Intonation
 graph Items and the selected point-interpolation policy.
+
+## Iteration 036 — Phase 4 family 4: explicit F0 points
+
+Status: kept. Phase 4 family 4 is complete.
+
+The final lowerer now consumes stamped, temporally anchored `F0Point` Items
+directly. It resolves their graph-axis times without applying the Segment
+initial-silence offset, stably deduplicates coincident points in relation order,
+linearly interpolates F0 at every emitted automation event, and inserts interior
+point events only for Segments whose base or control-window values can voice.
+Per-event AV/AVS state still gates the resulting F0 to zero.
+
+The direct qlatt-English graph fixture reconstructs every captured explicit
+point, including the later 190 Hz override at 380 ms. It proves that:
+
+- the 449.75 ms voiced point is emitted exactly;
+- the 380 ms point inside an unvoiced Segment shapes later interpolation but
+  does not create an automation event;
+- every emitted Segment event's F0 cell matches `oldProduction.sourceFrames`;
+- coincident points emit a diagnostic naming the displaced and retained values;
+  and
+- unresolved or unstamped points fail with a diagnostic instead of receiving
+  an invented time or value.
+
+Verification:
+
+```text
+npm test -- test/hrg-lowering-f0-points.test.ts test/hrg-lowering-timing.test.ts test/hrg-lowering-scalars.test.ts test/hrg-lowering-control-windows.test.ts test/hrg-lowering-midpoint-transitions.test.ts test/hrg-lowering-locus-transitions.test.ts test/hrg-lowering-transition-matrix.test.ts
+PASS: 7 files, 22 tests
+
+npm run typecheck:core
+PASS
+```
+
+Next Phase 4 family: realize typed `Tilt` and `PhraseCommand` Items, including
+the selected layered-additive F0 policy, against the captured DECtalk production
+frames.

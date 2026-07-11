@@ -69,6 +69,14 @@ export interface LowerOptions {
     f2_back?: Readonly<Record<string, { forward?: boolean; backward?: boolean }>>;
     locus_glue_types?: readonly string[];
   };
+  f0?: {
+    renderer: { type: "point_interpolation" | "layered_additive" };
+    layered_model_ref?: string;
+    output_clamp: {
+      min_hz: { value: number };
+      max_hz: { value: number };
+    };
+  };
   /** Feature key holding each segment's realized duration in ms (default "duration"). */
   durationKey?: string;
   /** Feature key holding each segment's phoneme label (default "phoneme"). */
@@ -114,6 +122,12 @@ type ResolvedSegmentTransition = {
   fields: Readonly<Record<string, number>>;
   endMs?: number;
   linearFields?: Readonly<Record<string, { startValue: number; endValue: number }>>;
+};
+
+type ResolvedF0Point = {
+  decisionId: string;
+  timeMs: number;
+  valueHz: number;
 };
 
 function isFeatureObject(value: FeatureValue | undefined): value is { readonly [key: string]: FeatureValue } {
@@ -257,6 +271,25 @@ function requirePolicyNumber(value: number, path: string): number {
     throw new Error(`E_HRG_LOWER_POLICY_NUMBER: '${path}' must be finite and non-negative`);
   }
   return value;
+}
+
+function resolveF0AtTime(points: readonly ResolvedF0Point[], timeMs: number): ResolvedF0Point | null {
+  if (points.length === 0) return null;
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const left = points[index];
+    const right = points[index + 1];
+    if (!left || !right || timeMs < left.timeMs || timeMs > right.timeMs) continue;
+    const spanMs = right.timeMs - left.timeMs;
+    if (Math.abs(spanMs) < 1e-6) return left;
+    const fraction = (timeMs - left.timeMs) / spanMs;
+    return {
+      decisionId: fraction < 1 ? left.decisionId : right.decisionId,
+      timeMs,
+      valueHz: left.valueHz + (right.valueHz - left.valueHz) * fraction,
+    };
+  }
+  const last = points[points.length - 1];
+  return last ? { ...last, timeMs } : null;
 }
 
 /** Lower an utterance's Segment relation into a KlattFrame[] track. */
@@ -566,6 +599,69 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
     });
   });
 
+  const pointItems = utterance.getRelation("F0Point")?.listItems() ?? [];
+  const f0PointsByTime = new Map<number, ResolvedF0Point>();
+  if (pointItems.length > 0) {
+    if (options.f0?.renderer.type !== "point_interpolation") {
+      throw new Error("E_HRG_LOWER_F0_RENDERER: F0Point requires the point_interpolation policy");
+    }
+    for (const point of pointItems) {
+      const resolvedTimeMs = utterance.resolveAnchorTime(point);
+      const valueHz = point.get("value");
+      const valueWrite = point.latestWrite("value");
+      if (
+        resolvedTimeMs == null
+        || !Number.isFinite(resolvedTimeMs)
+        || typeof valueHz !== "number"
+        || !Number.isFinite(valueHz)
+        || !valueWrite
+      ) {
+        utterance.diagnostics.error(
+          "Explicit F0 point is unresolved, invalid, or unstamped during final lowering",
+          { itemId: point.id, resolvedTimeMs, valueHz },
+          "HRG_LOWER_F0_POINT_REQUIRED",
+        );
+        throw new Error(`E_HRG_LOWER_F0_POINT_REQUIRED: F0Point '${point.id}' is invalid`);
+      }
+      const timeMs = Math.max(0, resolvedTimeMs);
+      const displaced = f0PointsByTime.get(timeMs);
+      if (displaced) {
+        utterance.diagnostics.warn(
+          "Coincident F0 points: later relation Item overrides earlier at the same instant",
+          {
+            droppedDecisionId: displaced.decisionId,
+            droppedHz: displaced.valueHz,
+            keptDecisionId: valueWrite.decisionId,
+            keptHz: valueHz,
+            timeMs,
+          },
+          "F0_POINT_COINCIDENT_OVERRIDE",
+        );
+      }
+      f0PointsByTime.set(timeMs, {
+        decisionId: valueWrite.decisionId,
+        timeMs,
+        valueHz,
+      });
+    }
+  }
+  const f0Points = [...f0PointsByTime.values()].sort((left, right) => left.timeMs - right.timeMs);
+  if (f0Points.length > 0 && (f0Points[0]?.timeMs ?? Number.POSITIVE_INFINITY) > 1e-6) {
+    throw new Error("E_HRG_LOWER_F0_INITIAL_POINT: point_interpolation requires an explicit point at 0 ms");
+  }
+
+  const segmentCanVoice = (item: Item): boolean => {
+    const baseAv = finiteFeatureNumber(item.get("AV"));
+    const baseAvs = finiteFeatureNumber(item.get("AVS"));
+    if ((baseAv ?? 0) > 0 || (baseAvs ?? 0) > 0) return true;
+    for (const window of controlWindowsByItem.get(item) ?? []) {
+      const av = window.fields.AV ? resolveControlField(baseAv, window.fields.AV) : baseAv;
+      const avs = window.fields.AVS ? resolveControlField(baseAvs, window.fields.AVS) : baseAvs;
+      if ((av ?? 0) > 0 || (avs ?? 0) > 0) return true;
+    }
+    return false;
+  };
+
   const frames: KlattFrame[] = [];
   const provenanceByFrame: Array<Record<string, string>> = [];
 
@@ -623,6 +719,19 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
           }
         }
       }
+      if (f0Points.length > 0 && paramKeys.includes("F0")) {
+        const phoneme = item.get(phonemeKey);
+        const voiced = (params.AV ?? 0) > 0 || (params.AVS ?? 0) > 0;
+        if (phoneme === "SIL" || !voiced) {
+          params.F0 = 0;
+        } else {
+          const resolvedF0 = resolveF0AtTime(f0Points, timeMs);
+          if (resolvedF0) {
+            params.F0 = resolvedF0.valueHz;
+            provenance.F0 = resolvedF0.decisionId;
+          }
+        }
+      }
     }
     const frame: KlattFrame = {
       time: timeMs / 1000,
@@ -665,6 +774,15 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
           && transition.endMs < timing.durationMs - 1e-6
         ) {
           offsets.add(transition.endMs);
+        }
+      }
+    }
+    if (options.timeline.event_points.include_f0_anchors && segmentCanVoice(timing.item)) {
+      const segmentStartMs = initialSilenceMs + timing.startMs;
+      const segmentEndMs = initialSilenceMs + timing.endMs;
+      for (const point of f0Points) {
+        if (point.timeMs > segmentStartMs + 1e-6 && point.timeMs < segmentEndMs - 1e-6) {
+          offsets.add(point.timeMs - segmentStartMs);
         }
       }
     }

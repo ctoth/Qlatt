@@ -201,7 +201,6 @@ const AFFECT_FIELDS = [
   "fbw2Scale",
   "fbw3Scale",
   "jitterScale",
-  "shimmerScale",
 ] as const;
 
 type AffectField = (typeof AFFECT_FIELDS)[number];
@@ -237,7 +236,6 @@ const NEUTRAL_AFFECT: AffectValues = {
   fbw2Scale: 1,
   fbw3Scale: 1,
   jitterScale: 1,
-  shimmerScale: 1,
 };
 
 const MULTIPLICATIVE_AFFECT_FIELDS = new Set<AffectField>([
@@ -249,7 +247,6 @@ const MULTIPLICATIVE_AFFECT_FIELDS = new Set<AffectField>([
   "fbw2Scale",
   "fbw3Scale",
   "jitterScale",
-  "shimmerScale",
 ]);
 
 function isFeatureObject(value: FeatureValue | undefined): value is { readonly [key: string]: FeatureValue } {
@@ -1219,6 +1216,44 @@ export function lowerToFrames(
     return false;
   };
 
+  const f0VarianceSamplesByDecision = new Map<string, number[]>();
+  timings.forEach((timing, index) => {
+    const affect = affectByItem.get(timing.item);
+    if (!affect || affect.values.f0VarianceScale === 1 || !segmentCanVoice(timing.item)) return;
+    if (affect.values.f0VarianceScale < 0) {
+      throw new Error(`E_HRG_LOWER_F0_VARIANCE: Segment '${timing.item.id}' scale must be non-negative`);
+    }
+    const decisionId = affect.decisions.f0VarianceScale;
+    if (!decisionId) {
+      throw new Error(`E_HRG_LOWER_F0_VARIANCE: Segment '${timing.item.id}' scale is unstamped`);
+    }
+    const samples = f0VarianceSamplesByDecision.get(decisionId) ?? [];
+    const sampleCountBeforeSegment = samples.length;
+    const startMs = initialSilenceMs + timing.startMs;
+    const endMs = initialSilenceMs + timing.endMs;
+    for (const point of f0Points) {
+      const atFinalBoundary = index === timings.length - 1 && Math.abs(point.timeMs - endMs) <= 1e-6;
+      if (point.timeMs >= startMs - 1e-6 && (point.timeMs < endMs - 1e-6 || atFinalBoundary)) {
+        if (point.valueHz > 0) samples.push(point.valueHz);
+      }
+    }
+    if (samples.length === sampleCountBeforeSegment) {
+      const contourValue = f0Points.length > 0
+        ? resolveF0AtTime(f0Points, startMs)?.valueHz
+        : finiteFeatureNumber(timing.item.get("F0"));
+      if (contourValue != null && contourValue > 0) samples.push(contourValue);
+    }
+    f0VarianceSamplesByDecision.set(decisionId, samples);
+  });
+  const f0VarianceCenterByDecision = new Map<string, number>();
+  for (const [decisionId, samples] of f0VarianceSamplesByDecision) {
+    if (samples.length === 0) continue;
+    f0VarianceCenterByDecision.set(
+      decisionId,
+      samples.reduce((sum, value) => sum + value, 0) / samples.length,
+    );
+  }
+
   const frames: KlattFrame[] = [];
   const provenanceByFrame: Array<Record<string, string>> = [];
 
@@ -1340,10 +1375,24 @@ export function lowerToFrames(
           const decision = affect.decisions[field];
           if (decision) provenance[key] = decision;
         };
-        if (typeof params.F0 === "number" && params.F0 > 0 && affect.values.f0Scale !== 1) {
-          params.F0 *= affect.values.f0Scale;
-          const decision = affect.decisions.f0Scale;
-          if (decision) provenance.F0 = decision;
+        if (typeof params.F0 === "number" && params.F0 > 0) {
+          if (affect.values.f0VarianceScale !== 1) {
+            const decision = affect.decisions.f0VarianceScale;
+            const center = decision ? f0VarianceCenterByDecision.get(decision) : undefined;
+            if (center == null) {
+              throw new Error(`E_HRG_LOWER_F0_VARIANCE: Segment '${item.id}' has no voiced contour reference`);
+            }
+            params.F0 = Math.max(
+              0.001,
+              center + (params.F0 - center) * affect.values.f0VarianceScale,
+            );
+            provenance.F0 = decision;
+          }
+          if (affect.values.f0Scale !== 1) {
+            params.F0 *= affect.values.f0Scale;
+            const decision = affect.decisions.f0Scale;
+            if (decision) provenance.F0 = decision;
+          }
         }
         if (affect.values.rdDelta !== 0 && typeof params.Rd === "number") {
           const priorOffset = params.RdPhraseOffset ?? 0;

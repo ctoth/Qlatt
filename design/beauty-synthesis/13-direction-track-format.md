@@ -94,7 +94,7 @@ The rule-drivable acoustic substrate is the `VoiceQualityDelta` vector
 ```
 rdDelta, f0Scale, f0VarianceScale, durationScale, intensityBoost, ahBoost,
 spectralTiltBoost, pauseScale, f1Delta, f2Delta, f3Delta, fbw1Scale, fbw2Scale,
-fbw3Scale, jitterScale, shimmerScale
+fbw3Scale, jitterScale
 ```
 
 `NEUTRAL_VQ` is the identity (Rutledge_1995 multiplicative style-vectors;

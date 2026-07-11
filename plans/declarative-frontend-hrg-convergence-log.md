@@ -212,7 +212,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 036 | Phase 4 family 4: explicit F0 points | kept | `839518a4` | every emitted qlatt F0 cell matches production; graph-time anchors, voice gating, last-point-wins, invalid-point rejection |
 | 037 | Phase 4 family 5: PhraseCommand and Tilt | kept | `8837b6e5` | canonical relations; selected layered renderer; all 196 voiced cadence cells and 250+ shared production events exact |
 | 038 | Phase 4 family 6: Affect projection | kept | `6e0e4a99` | authored-field/precedence retention; global/local composition; time, VQ, jitter and exact write provenance |
-| 039 | Phase 4 family 7: selected speaker/source projection | kept | pending slice commit | exact qlatt/DECtalk silence edges; policy-only preload; female locus selected from data; exact write provenance |
+| 039 | Phase 4 family 7: selected speaker/source projection | kept | `971474f8` | exact qlatt/DECtalk silence edges; policy-only preload; female locus selected from data; exact write provenance |
+| 040 | Phase 4 family 8: backend semantics handoff | kept | pending slice commit | scoped F0 variance projection; false shimmer control deleted; no duplicated backend realization |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1862,3 +1863,51 @@ PASS
 Next Phase 4 family: backend-specific semantics handoff, including the remaining
 F0-variance and shimmer affect projections against the selected backend
 vocabulary.
+
+## Iteration 040 — Phase 4 family 8: backend semantics handoff
+
+Status: kept. Phase 4 family 8 is complete.
+
+Claude and agy independently reviewed the current lowering, semantics,
+interpreter, worklet, and DSP boundary. Both identified the same live defect:
+`f0VarianceScale` and `shimmerScale` were accepted and composed by the Affect
+contract but silently discarded. They also agreed that shimmer could only be a
+real handoff if a frame column, semantics binding, worklet control, and source
+DSP primitive landed together.
+
+The governing plan explicitly bounds this frontend migration away from unrelated
+backend-fidelity work. The deletion-first classification is therefore:
+
+- F0 variance belongs to final lowering because it operates on the completed
+  selected contour. The lowerer now scales voiced excursion around the contour
+  center for the winning Affect decision scope, then applies mean-F0 scaling.
+  Neutral variance is an exact no-op and changed cells retain Affect provenance.
+- Raw backend columns remain selected frontend policy. Their downstream CEL and
+  DSP realization remains owned by the interpreter/selected semantics; the
+  lowerer does not duplicate it.
+- `shimmerScale` was a false frontend capability: no selected frontend declared
+  a shimmer column, and no semantics, AudioWorklet, or DSP owner consumed one.
+  It is deleted from the live Direction Track type, parser schema, presets,
+  attachment/lowering vocabulary, and active direction-format documentation.
+  No substitute use of jitter, diplophonia, or a fake passthrough column was made.
+
+Deleting the unused shimmer field preserves the captured production acoustics;
+realizing F0 variance is the intentional correction required by the plan's
+complete Affect family. Direct tests prove the excursion and mean composition,
+the winning write provenance, and absence of the false clinical field.
+
+Verification:
+
+```text
+npm test -- test/hrg-lowering-affect.test.ts test/input-hrg-attachment.test.ts test/apply-affect.test.ts test/input.test.ts test/hrg-lowering-intonation.test.ts test/hrg-lowering-f0-points.test.ts test/hrg-lowering-timing.test.ts test/hrg-lowering-scalars.test.ts test/hrg-lowering-control-windows.test.ts test/hrg-lowering-midpoint-transitions.test.ts test/hrg-lowering-locus-transitions.test.ts test/hrg-lowering-transition-matrix.test.ts test/hrg.test.ts
+PASS: 13 files, 72 tests
+
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+```
+
+Next Phase 4 family: audit every emitted frame cell's projection back to its
+producing graph/resource write and close any missing per-frame provenance.

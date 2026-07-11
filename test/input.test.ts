@@ -153,6 +153,8 @@ describe("input contract — clinical sex-inversion (Kaczmarek-Majer 2024)", () 
     // Jitter (roughness) inverts: male rougher (>1), female smoother (<1).
     expect(male.vq.jitterScale).toBeGreaterThan(1);
     expect(female.vq.jitterScale).toBeLessThan(1);
+    expect("shimmerScale" in male.vq).toBe(false);
+    expect("shimmerScale" in female.vq).toBe(false);
 
     // Arousal dimension inverts too.
     expect(male.dimensions.arousal).toBeGreaterThan(0);

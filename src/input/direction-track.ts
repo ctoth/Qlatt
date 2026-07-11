@@ -67,9 +67,8 @@ export interface VoiceQualityDelta {
   fbw1Scale: DeltaValue;
   fbw2Scale: DeltaValue;
   fbw3Scale: DeltaValue;
-  /** Source jitter/shimmer multipliers (Kaczmarek-Majer_2024 roughness). */
+  /** Source jitter multiplier (Kaczmarek-Majer_2024 roughness). */
   jitterScale: DeltaValue;
-  shimmerScale: DeltaValue;
 }
 
 /** The neutral baseline: applying this to any render is a no-op (the (c) case). */
@@ -89,7 +88,6 @@ export const NEUTRAL_VQ: Readonly<VoiceQualityDelta> = Object.freeze({
   fbw2Scale: 1,
   fbw3Scale: 1,
   jitterScale: 1,
-  shimmerScale: 1,
 });
 
 /**
@@ -107,7 +105,6 @@ export const MULTIPLICATIVE_VQ_FIELDS: ReadonlyArray<keyof VoiceQualityDelta> = 
   "fbw2Scale",
   "fbw3Scale",
   "jitterScale",
-  "shimmerScale",
 ];
 
 /** The dimensional substrate: valence × arousal × dominance, each in [-1, 1]. */

@@ -32,18 +32,68 @@ function schema(): HrgSchema {
   return {
     itemTypes: {
       direction: DIRECTION_ITEM_SCHEMA,
+      f0Point: { features: { value: { kind: "number" } } },
       segment: { features: segmentFeatures },
       word: { features: { text: { kind: "string" } } },
     },
     relations: {
       Affect: { kind: "list", itemTypes: ["direction"] },
       Break: { kind: "list", itemTypes: ["direction"] },
+      F0Point: { kind: "list", itemTypes: ["f0Point"] },
       Intonation: { kind: "list", itemTypes: ["direction"] },
       Segment: { kind: "list", itemTypes: ["segment"] },
       SylStructure: { kind: "tree", itemTypes: ["word", "segment"] },
       Word: { kind: "list", itemTypes: ["word"] },
     },
   };
+}
+
+function varianceFixture(): Utterance {
+  const parsed = parseDirectionInput({
+    score: { text: "red moon" },
+    directionTrack: {
+      version: "1",
+      global: { affect: { preset: "angry", degree: 1 } },
+    },
+  });
+  const utterance = new Utterance(schema(), parsed.provenance);
+  attachDirectionsToUtterance(parsed, utterance);
+
+  const build = utterance.beginTransaction(META);
+  const segments = ["EH", "UW"].map((phoneme, index) => {
+    const segment = build.createItem("segment", `variance-segment-${index}`);
+    build.set(segment, "phoneme", phoneme);
+    build.set(segment, "type", "vowel");
+    build.set(segment, "duration", 100);
+    build.set(segment, "active", true);
+    for (const [key, value] of Object.entries(params())) build.set(segment, key, value);
+    build.append("Segment", segment);
+    return segment;
+  });
+  build.partitionAnchors(segments, utterance.axis.start.id, utterance.axis.end.id);
+  build.commit();
+
+  const timing = utterance.beginTransaction({ ...META, ruleId: "timing", tag: "timing" });
+  timing.resolveMarkTime(utterance.axis.start.id, 0);
+  const firstAnchor = utterance.intervalAnchor(segments[0]);
+  if (!firstAnchor) throw new Error("first variance Segment anchor missing");
+  timing.resolveMarkTime(firstAnchor.rightMarkId, 100);
+  timing.resolveMarkTime(utterance.axis.end.id, 200);
+  timing.commit();
+
+  const contour = utterance.beginTransaction({ ...META, ruleId: "contour", tag: "f0" });
+  const values = [100, 200];
+  segments.forEach((segment, index) => {
+    const anchor = utterance.intervalAnchor(segment);
+    const value = values[index];
+    if (!anchor || value == null) throw new Error("variance contour anchor missing");
+    const point = contour.createItem("f0Point", `variance-point-${index}`);
+    contour.set(point, "value", value);
+    contour.append("F0Point", point);
+    contour.anchorPoint(point, anchor.leftMarkId, anchor.rightMarkId, 0);
+  });
+  contour.commit();
+  return utterance;
 }
 
 const POLICY: LowerOptions = {
@@ -62,6 +112,10 @@ const POLICY: LowerOptions = {
   transitions: {
     default_transition_ms: { value: 0 },
     blend: { factor: { value: 0.5 }, keys: [], smooth_types: [] },
+  },
+  f0: {
+    renderer: { type: "point_interpolation" },
+    output_clamp: { min_hz: { value: 0 }, max_hz: { value: 500 } },
   },
 };
 
@@ -164,5 +218,30 @@ describe("HRG lowering Affect projection", () => {
     expect(lowered.provenanceByFrame[lowered.frames.indexOf(second)].GO).toBe(
       utterance.relation("Affect").listItems().at(-1)?.latestWrite("delta")?.decisionId,
     );
+  });
+
+  it("scales completed F0 excursion around its voiced mean with Affect provenance", () => {
+    const angry = compileAffect("angry", 1).vq;
+    const utterance = varianceFixture();
+    const lowered = lowerToFrames(utterance, POLICY);
+    const voiced = lowered.frames.filter((frame) => frame.segmentId != null);
+    const first = voiced[0];
+    const second = voiced[1];
+    if (!first || !second) throw new Error("variance frames missing");
+
+    const mean = 150;
+    expect(first.params.F0).toBeCloseTo(
+      (mean + (100 - mean) * angry.f0VarianceScale) * angry.f0Scale,
+      9,
+    );
+    expect(second.params.F0).toBeCloseTo(
+      (mean + (200 - mean) * angry.f0VarianceScale) * angry.f0Scale,
+      9,
+    );
+    expect((first.params.F0 + second.params.F0) / 2).toBeCloseTo(mean * angry.f0Scale, 9);
+    const varianceDecision = utterance.relation("Affect").listItems()[0]
+      ?.latestWrite("delta")?.decisionId;
+    expect(lowered.provenanceByFrame[lowered.frames.indexOf(first)].F0).toBe(varianceDecision);
+    expect(lowered.provenanceByFrame[lowered.frames.indexOf(second)].F0).toBe(varianceDecision);
   });
 });

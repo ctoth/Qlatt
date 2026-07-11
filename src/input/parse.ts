@@ -124,7 +124,6 @@ const DELTA_FIELDS = {
   fbw2Scale: { kind: "number" },
   fbw3Scale: { kind: "number" },
   jitterScale: { kind: "number" },
-  shimmerScale: { kind: "number" },
 } as const;
 const ALL_DELTA_FIELDS = Object.freeze(Object.keys(DELTA_FIELDS));
 

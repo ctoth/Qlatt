@@ -34,10 +34,10 @@
  *   ahBoost            -> params.AH (ADD dB; aspiration / breathiness).
  *   intensityBoost     -> params.GO (ADD dB; overall gain).
  *
- * f0VarianceScale, jitterScale and shimmerScale are not realized here: F0
+ * f0VarianceScale and jitterScale are not realized here: F0
  * excursion is baked into the assembled contour (re-scaling variance needs the
- * pre-contour F0 anchors), and jitter/shimmer are per-frame source params the
- * beauty inventory does not vary by token. They are documented as deferred so
+ * pre-contour F0 anchors), and jitter is a per-frame source param the beauty
+ * inventory does not vary by token. They are documented as deferred so
  * the mapping stays honest rather than silently dropping them.
  *
  * Citations: Rutledge_1995, Murray_1993, Fant_1997 (Rd channel), plus whatever

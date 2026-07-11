@@ -278,6 +278,57 @@ interface Match {
   nodes: Readonly<Record<string, HrgNode>>;
   defaultTarget: string;
   relationName: string;
+  contour?: Readonly<Record<string, unknown>>;
+}
+
+function attachContourContexts(
+  matches: Match[],
+  rule: Readonly<Record<string, unknown>>,
+): void {
+  if (!isPlainObject(rule.contour) || rule.contour.domain !== "phrase" || matches.length === 0) return;
+  const resetBreakIndex = typeof rule.contour.reset_break_index === "number"
+    ? rule.contour.reset_break_index
+    : 4;
+  const groups: Match[][] = [];
+  let group: Match[] = [];
+  let previousIndex = -1;
+  for (const match of matches) {
+    const reset = previousIndex >= 0 && match.items
+      .slice(previousIndex + 1, match.index + 1)
+      .some((item) => Number(item.get("breakIndex") ?? 0) >= resetBreakIndex);
+    if (reset && group.length > 0) {
+      groups.push(group);
+      group = [];
+    }
+    group.push(match);
+    previousIndex = match.index;
+  }
+  if (group.length > 0) groups.push(group);
+
+  for (const phrase of groups) {
+    for (const match of phrase) {
+      let phraseDurationMs = 0;
+      let elapsedMs = 0;
+      for (const member of phrase) {
+        const item = member.items[member.index];
+        const duration = match.transaction.read(item, "duration");
+        if (typeof duration !== "number" || !Number.isFinite(duration)) {
+          throw new Error(`E_CONTOUR_DURATION_REQUIRED: Item '${item.id}' has no finite duration`);
+        }
+        if (member === match) elapsedMs += duration / 2;
+        else if (member.index < match.index) elapsedMs += duration;
+        phraseDurationMs += duration;
+      }
+      for (const item of match.items) {
+        if (item.has("breakIndex")) match.transaction.read(item, "breakIndex");
+      }
+      match.contour = Object.freeze({
+        elapsed_sec: elapsedMs / 1000,
+        phrase_duration_sec: phraseDurationMs / 1000,
+        progress: phraseDurationMs > 0 ? elapsedMs / phraseDurationMs : 0,
+      });
+    }
+  }
 }
 
 function beginRuleTransaction(
@@ -487,7 +538,7 @@ function executeMatch(
     match.items,
     match.index,
     params,
-    {},
+    match.contour ? { contour: match.contour } : {},
     match.bindings,
   );
   const definitions: Record<string, unknown> = {};
@@ -500,7 +551,7 @@ function executeMatch(
         match.items,
         match.index,
         params,
-        definitions,
+        { ...(match.contour ? { contour: match.contour } : {}), ...definitions },
         match.bindings,
       );
     }
@@ -514,6 +565,16 @@ function executeMatch(
     context,
     predicates,
   );
+  if (isPlainObject(rule.contour)) {
+    applyEffects(
+      match.transaction,
+      resolveTarget,
+      match.defaultTarget,
+      rule.contour.apply,
+      context,
+      predicates,
+    );
+  }
   applyAssociations(match.transaction, rule.associate, true, resolveTarget);
   applyAssociations(match.transaction, rule.disassociate, false, resolveTarget);
   applySplice(utterance, match, rule.splice, context);
@@ -650,6 +711,7 @@ export function runGraphRuleEngine(
       const matches = isPlainObject(rule.select)
         ? selectMatches(utterance, phase.name, ruleName, rule, params, predicates)
         : patternMatches(utterance, phase.name, ruleName, rule, spec.patterns, params, predicates);
+      attachContourContexts(matches, rule);
       for (const match of matches) executeMatch(utterance, rule, match, params, predicates);
     }
   }

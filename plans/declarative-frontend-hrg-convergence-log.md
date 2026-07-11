@@ -192,7 +192,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 016 | Phase 3 graph engine patterns/associations | kept | `7f5b0e03` | atomic pattern rewrites; versioned association replay; 36 HRG tests; core/scripts typecheck pass |
 | 017 | Phase 3 graph engine replace-range splice | kept | `e9180fb2` | typed insertion and anchor partition replay; 38 HRG tests; core/scripts typecheck pass |
 | 018 | Phase 3 graph engine explicit points | kept | `d3c5f467` | midpoint/ratio/sync point replay; 39 HRG tests; core/scripts typecheck pass |
-| 019 | Phase 3 boundary-insertion proof | kept | pending slice commit | relation/temporal adjacency proof; 40 HRG tests; core/scripts typecheck pass |
+| 019 | Phase 3 boundary-insertion proof | kept | `e6c7ded5` | relation/temporal adjacency proof; 40 HRG tests; core/scripts typecheck pass |
+| 020 | Phase 3 graph engine phrase contours | kept | pending slice commit | selected-duration progress and break reset; 41 HRG tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -995,3 +996,38 @@ PASS: 10 files, 40 tests
 ```
 
 Next graph-engine sub-slice: contour/F0-layer actions and phase finalization.
+
+## Iteration 020 — Phase 3 graph engine phrase contours
+
+Status: kept as the fifth target-owner sub-slice of the replacement engine.
+
+The direct contour fixture was red before the Match owner supplied phrase-local
+timing context. The retained implementation computes that context from the
+matched shared Items and their typed duration/break features.
+
+Kept convergence:
+
+- groups selected Items into phrases at the rule's declared break-index
+  threshold;
+- computes midpoint elapsed time, selected phrase duration, and normalized
+  progress without counting unselected boundary/silence duration;
+- exposes the frozen contour context to both sequential `define` expressions
+  and contour effects;
+- records every contributing duration and break feature version in each
+  matched transaction read set; and
+- keeps contour effects in the single Match-to-transaction rewrite executor.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- --run test/hrg
+PASS: 11 files, 41 tests
+```
+
+Next graph-engine sub-slice: F0-layer commands and phase finalization.

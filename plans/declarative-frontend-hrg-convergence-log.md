@@ -187,7 +187,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 011 | Phase 3 Utterance temporal axis | kept | `70ababdd` | 232 declarative/HRG tests; old axis zero-hit; core/scripts typecheck pass |
 | 012 | Phase 3 atomic HRG transactions | kept | `343b181e` | 28 HRG tests; rejection diagnostics; core/scripts typecheck pass |
 | 013 | Phase 3 checkpoints and replay | kept | `725530cc` | digest-equal replay; 29 HRG tests; core/scripts typecheck pass |
-| 014 | Phase 3 Direction Track attachment | kept | pending slice commit | 50 input/HRG tests; provenance parent proof; core/scripts typecheck pass |
+| 014 | Phase 3 Direction Track attachment | kept | `6f41d95c` | 50 input/HRG tests; provenance parent proof; core/scripts typecheck pass |
+| 015 | Phase 3 graph engine select/scalar core | kept | pending slice commit | exact tracked read parents; 31 HRG tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -792,3 +793,46 @@ ONLY: definition in src/input/parse.ts and static fixture test
 Next slice: build the complete graph-native rule engine under the HRG owner
 against the final compiled relation DSL, with direct static-Utterance tests and
 no production export or flat-engine call.
+
+## Iteration 015 — Phase 3 graph engine select/scalar core
+
+Status: kept as the first target-owner sub-slice of the replacement engine.
+
+The initial select/scalar contracts were red because no graph-native engine
+module existed. The retained implementation is under `hrg/`, imports the
+compiled rulepack and generic CEL evaluator only, and is intentionally absent
+from the HRG public/production entrypoint.
+
+Kept convergence:
+
+- executes compiled select rules over active Items in the selected HRG
+  relation without materializing token dictionaries;
+- exposes transaction-local Item tracking views for direct, bracket, nested,
+  optional/`has`, and short-circuited CEL property reads;
+- resolves sequential define bindings, predicate/expr/all/any/not conditions,
+  constraints, and dispatch values;
+- supports set/add/mul/min/max/unset and nested structured feature effects;
+- commits every matched firing through one `HrgTransaction`, with exact read
+  decisions as parents of every effect; and
+- proves an invalid later effect rejects the complete firing without an earlier
+  scalar write or journal entry.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+$hrg = (Get-ChildItem -File test\hrg*.test.ts).FullName
+npm test -- $hrg
+PASS: 7 files, 31 tests
+
+rg -n "from .*engine|runRuleEngine" src/declarative-frontend/hrg/rule-engine.ts
+ZERO HIT
+```
+
+Next graph-engine sub-slice: pattern matching and association/disassociation
+semantics through the same transaction rewrite owner.

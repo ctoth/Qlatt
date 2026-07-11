@@ -73,6 +73,28 @@ export class HrgTransaction {
     return item.get(key);
   }
 
+  view(item: Item): Readonly<Record<string, unknown>> {
+    this.assertAvailableItem(item);
+    return new Proxy<Record<string, unknown>>(
+      {},
+      {
+        get: (_target, property) => {
+          if (property === "id") return item.id;
+          if (property === "itemType") return item.type;
+          return typeof property === "string" ? this.read(item, property) : undefined;
+        },
+        has: (_target, property) => {
+          if (property === "id" || property === "itemType") return true;
+          if (typeof property !== "string") return false;
+          if (item.has(property)) this.read(item, property);
+          return item.has(property);
+        },
+        ownKeys: () => ["id", "itemType", ...item.featureKeys()],
+        getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }),
+      },
+    );
+  }
+
   set(item: Item, key: string, value: unknown): this {
     this.assertOpen();
     this.operations.push({ kind: "set_feature", item, key, value });

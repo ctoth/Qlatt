@@ -1988,3 +1988,115 @@ Next plan phase: Phase 5 production HRG flag day. Delete the flat engine,
 trace-derived provenance, standalone control-score, and track-assembler route
 first; then let compiler/test failures enumerate the literal production callers
 that must move to the already-complete graph-native owners.
+
+## Iteration 043 — Phase 5 production HRG flag day
+
+Status: kept. Phase 5 is complete.
+
+The production frontend now constructs one typed `Utterance`, runs every bundled
+frontend through the graph-native rule engine, and invokes the sole HRG lowerer
+once. The flag day deleted the flat engine, trace-to-provenance middleware,
+standalone control score, old track assembler, duplicate phone-summary output,
+and the tracked probes, profilers, snapshots, and tests whose only subject was a
+deleted authority. No bridge, adapter, fallback reader, or dual execution branch
+was retained.
+
+The replacement path includes:
+
+- real Token, Word, Syllable, Segment, and SylStructure identity from
+  normalization/transcription onward;
+- production Direction Track attachment before graph rule realization;
+- one select/pattern transaction executor with compiled citations, tags, and
+  tracked feature/relation read parents;
+- structured splice targets and nested CEL results without mutable decoded-YAML
+  values crossing the execution boundary;
+- one frontend-owned inventory/resource choice for qlatt-English, DECtalk, and
+  qlatt-beauty;
+- graph-native prosody, point, layered-F0, control-window, Affect, speaker, and
+  source projection;
+- public frame provenance projected from the graph decisions that produced each
+  populated parameter cell; and
+- a rulepack-scoped `GraphRuleEvaluationOwner` that reuses immutable CEL
+  bindings without retaining request, Utterance, policy, or match state.
+
+Deleted-test ownership was mapped rather than silently dropped. Flat
+association/navigation/pattern/splice/point/scalar/finalize families map to the
+`hrg-rule-engine-*` transaction, navigation, pattern, structural, point,
+contour, finalize, read-set, and prosody-control suites. Control-score schema and
+builder tests map to compiled relation-schema, Utterance construction, Direction
+attachment, and HRG lowering tests. Track-assembler families map to the ten
+Phase 4 lowering families. Trace-provenance middleware maps to atomic feature
+and relation history, read-parentage, replay, per-cell lowering provenance, and
+explain CLI tests. The old monolithic snapshots were removed after exact
+family-by-family lowerer fixtures and the locked corpus summary owned their
+behavioral assertions.
+
+Two gate-discovered defects were resolved in the same atomic slice:
+
+1. DECtalk structured targets exposed missing nested-object CEL normalization,
+   structured splice evaluation, nullable schema projection, and field-copy
+   semantics. Direct DECtalk target and all 39 end-to-end cases now pass.
+2. The graph executor initially treated declared Klatt scalar multiplication as
+   plain arithmetic. A red direct test proved the defect (`80 ms * 0.25 = 20
+   ms`); the restored relation-declared resolver scales only the compressible
+   range (`40 + 0.25 * (80 - 40) = 50 ms`), rounds millisecond scalars, applies
+   declared limits, and records floor inputs through the active transaction.
+   The unchanged 5,400-word audit moved from 4,178 sonorant floor violations to
+   zero across 19,354 checked segments.
+
+The first graph-native implementation was too slow for the unchanged dictionary
+audit. Reusable `scripts/profile-tts.ts` instrumentation measured 100 words at
+724.58 ms mean / 707.49 ms median, projecting roughly one hour. CPU evidence
+localized most time in repeated CEL environment construction. Reusing immutable
+compiled bindings per rulepack reduced the same 100-word measurement to 65.31 ms
+mean / 63.07 ms median, projecting roughly six minutes. A direct two-Utterance
+test proves that different runtime parameters do not leak through the owner. The
+full dictionary audit subsequently completed in 434 seconds inside the final
+suite. This was a measured fallback investigation rather than a formal clean-
+branch experiment record because Phase 5 is intentionally one uncommitted atomic
+flag-day slice under the governing plan.
+
+The locked declarative corpus summary was regenerated only after Klatt scalar
+semantics were restored. Phase 0 had already recorded that the prior lock was
+stale against the pre-flag-day current path; the final lock now records the one
+canonical HRG result and its focused test passes.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- test/dectalk-e2e.test.ts test/tts-frontend-hrg.test.ts test/apply-affect.test.ts test/tts-frontend-declarative-corpus.test.ts
+PASS: 4 files, 52 tests
+
+npm test -- test/audit-dictionary.test.ts
+PASS: 1 file, 11 tests; 5,400 words; 0 processing errors; 0 duration-floor violations
+
+npm run explain -- "hello world" --frontend qlatt-english --strict-citations
+PASS: 1,581 decisions, 0 uncited
+
+npm run explain -- "hello world" --frontend dectalk-english --strict-citations
+PASS: 1,254 decisions, 0 uncited
+
+npm run explain -- "she sees a calm blue moon" --frontend qlatt-beauty --strict-citations
+PASS: 2,466 decisions, 0 uncited
+
+npm run build
+PASS
+
+npm test
+PASS: 114 files, 935 tests
+```
+
+Tracked live-source search is zero-hit for the deleted execution authorities.
+The only tracked `frontendPhones` occurrence is the explicit negative assertion
+in `test/tts-frontend-hrg.test.ts`. Untracked historical diagnostic scripts are
+not part of this source slice and were not deleted or staged.
+
+Next plan phase: Phase 6 graph-native tooling and explanation. Reintroduce only
+tooling that reads the one execution journal/history, with phase checkpoints,
+field explanation, structured why-not evidence, and replay digest proof.

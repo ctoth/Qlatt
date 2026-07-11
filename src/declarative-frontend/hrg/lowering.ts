@@ -17,6 +17,7 @@ import { getF0FilterExports, RENDER_OK } from "../../f0-filters-loader";
 import type { Utterance } from "./utterance";
 import type { Item } from "./item";
 import type { FeatureValue } from "./types";
+import { isPlainObject } from "../../yaml-loader";
 
 type LocusEntry = {
   locus_hz: number;
@@ -156,6 +157,38 @@ export interface LoweredTrack {
   paramKeys: string[];
   timings: SegmentTiming[];
   utterance: Utterance;
+}
+
+/** Recover the already compiler-validated lowering policy without a second representation. */
+export function readLowerOptions(value: unknown): LowerOptions {
+  if (!isPlainObject(value)) {
+    throw new Error("E_HRG_LOWER_POLICY: output.lowering must be an object");
+  }
+  if (!Array.isArray(value.columns) || !value.columns.every((column) => typeof column === "string")) {
+    throw new Error("E_HRG_LOWER_POLICY: output.lowering.columns must be string[]");
+  }
+  if (!isPlainObject(value.timeline) || !isPlainObject(value.transitions)) {
+    throw new Error("E_HRG_LOWER_POLICY: output.lowering timeline/transitions are required");
+  }
+  const candidate: unknown = value;
+  if (!isLowerOptions(candidate)) {
+    throw new Error("E_HRG_LOWER_POLICY: compiled lowering policy is incomplete");
+  }
+  return candidate;
+}
+
+function isLowerOptions(value: unknown): value is LowerOptions {
+  if (!isPlainObject(value) || !Array.isArray(value.columns)) return false;
+  if (!isPlainObject(value.timeline) || !isPlainObject(value.transitions)) return false;
+  const timeline = value.timeline;
+  const transitions = value.transitions;
+  return value.columns.every((column) => typeof column === "string")
+    && isPlainObject(timeline.initial_silence_ms)
+    && isPlainObject(timeline.final_silence_ms)
+    && isPlainObject(timeline.duration_floors)
+    && isPlainObject(timeline.event_points)
+    && isPlainObject(transitions.default_transition_ms)
+    && isPlainObject(transitions.blend);
 }
 
 type ControlFieldOperation = "set" | "add" | "mul" | "max" | "min" | "unset";
@@ -720,7 +753,9 @@ export function lowerToFrames(
         { itemId: item.id, key, value },
         "HRG_LOWER_COLUMN_REQUIRED",
       );
-      throw new Error(`E_HRG_LOWER_COLUMN_REQUIRED: Segment '${item.id}' requires '${key}'`);
+      throw new Error(
+        `E_HRG_LOWER_COLUMN_REQUIRED: Segment '${item.id}' requires '${key}' (value=${String(value)}, write=${write?.decisionId ?? "none"})`,
+      );
     }
     const anchor = utterance.intervalAnchor(item);
     const startMs = anchor ? utterance.axis.getMarkTime(anchor.leftMarkId) : null;
@@ -1106,7 +1141,7 @@ export function lowerToFrames(
   const wordItems = utterance.getRelation("Word")?.listItems() ?? [];
   const wordIndexByItem = new Map(wordItems.map((item, index) => [item, index]));
   const tokenIndexForSegment = (item: Item): number | null => {
-    let node = item.node("SylStructure");
+    let node = item.node("SylStructure") ?? null;
     while (node) {
       const wordIndex = wordIndexByItem.get(node.item);
       if (wordIndex != null) return wordIndex;
@@ -1553,7 +1588,15 @@ export function lowerToFrames(
         if (typeof params.F0 === "number" && params.F0 > 0) {
           if (affect.values.f0VarianceScale !== 1) {
             const decision = affect.decisions.f0VarianceScale;
-            const center = decision ? f0VarianceCenterByDecision.get(decision) : undefined;
+            if (!decision) {
+              utterance.diagnostics.error(
+                "Affect F0-variance projection has no producing graph write",
+                { itemId: item.id },
+                "HRG_LOWER_F0_VARIANCE_REQUIRED",
+              );
+              throw new Error(`E_HRG_LOWER_F0_VARIANCE: Segment '${item.id}' scale is unstamped`);
+            }
+            const center = f0VarianceCenterByDecision.get(decision);
             if (center == null) {
               utterance.diagnostics.error(
                 "Affect F0-variance projection has no voiced contour reference",
@@ -1639,6 +1682,8 @@ export function lowerToFrames(
       frame.segmentId = item.id;
       const phoneme = item.get(phonemeKey);
       if (typeof phoneme === "string") frame.phoneme = phoneme;
+      const word = item.get("word");
+      if (typeof word === "string") frame.word = word;
     } else if (phonemeOverride) {
       frame.phoneme = phonemeOverride;
     }

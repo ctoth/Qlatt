@@ -117,13 +117,13 @@ maps:
     N: ""
     Y: ""
 relations:
-  orthography:
-    type: base
+  Token:
+    type: parallel
     features:
       tokenType:
         - word
         - punctuation
-  phone:
+  Segment:
     type: base
     features:
       type:
@@ -144,7 +144,7 @@ relations:
         resolution: klatt
         max: 500
         floor_field: durationFloor
-  f0:
+  F0Point:
     type: point
     value_type: number
     unit: Hz
@@ -250,4 +250,4 @@ phases:
     rules: []
     compute_times: true
     resolve_points:
-      - f0
+      - F0Point

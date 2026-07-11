@@ -15,7 +15,8 @@ type StagedOperation =
   | { kind: "insert_after"; relationName: string; previous: Item; item: Item }
   | { kind: "add_root"; relationName: string; item: Item }
   | { kind: "add_daughter"; relationName: string; parent: Item; item: Item }
-  | { kind: "associate" | "disassociate"; name: string; from: Item; to: Item }
+  | { kind: "associate"; name: string; from: Item; to: Item }
+  | { kind: "disassociate"; name: string; from: Item; to: Item }
   | {
       kind: "partition_anchors";
       items: readonly Item[];
@@ -242,7 +243,9 @@ export class HrgTransaction {
           throw new Error("E_HRG_TEMPORAL_MARK_UNKNOWN");
         }
         if (this.utterance.axis.compare(operation.leftMarkId, operation.rightMarkId) >= 0) {
-          throw new Error("E_HRG_TEMPORAL_ORDER");
+          throw new Error(
+            `E_HRG_TEMPORAL_ORDER: rule '${this.metadata.ruleId}' cannot partition ${operation.leftMarkId}..${operation.rightMarkId}`,
+          );
         }
         prepared.push({
           journal: Object.freeze({
@@ -322,7 +325,16 @@ export class HrgTransaction {
         continue;
       }
       if (operation.kind === "set_feature") {
-        const value = operation.item._validateFeature(operation.key, operation.value);
+        let value: FeatureValue;
+        try {
+          value = operation.item._validateFeature(operation.key, operation.value);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          throw new Error(
+            `${message} (rule '${this.metadata.ruleId}', item '${operation.item.id}')`,
+            { cause: error },
+          );
+        }
         const journal = Object.freeze({
           kind: "set_feature" as const,
           itemId: operation.item.id,

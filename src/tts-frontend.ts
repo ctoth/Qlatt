@@ -1,35 +1,28 @@
-import {
-  materializePhonemeTarget,
-  loadFrontendResources,
-  type InventorySpec,
-  type FrontendResources,
-} from "./declarative-frontend/inventory";
 import { loadCmuDictionaryFromPathSync } from "./cmu-dictionary-loader";
+import {
+  loadFrontendResources,
+  materializePhonemeTarget,
+  type InventorySpec,
+} from "./declarative-frontend/inventory";
+import { loadBundledRulepackSpec, type CompiledRulepack } from "./declarative-frontend/rule-pack";
+import {
+  lowerToFrames,
+  readLowerOptions,
+  Utterance,
+  type FeatureSchema,
+  type HrgSchema,
+  type LayeredF0ModelConfig,
+} from "./declarative-frontend/hrg";
+import {
+  GraphRuleEvaluationOwner,
+  runGraphRuleEngine,
+} from "./declarative-frontend/hrg/rule-engine";
 import { normalizeText } from "./g2p/text-normalize";
-import { loadBundledRulepackSpec } from "./declarative-frontend/rule-pack";
-import type { ProvenanceCollector } from "./provenance";
-import { transcribeText } from "./transcribe-text";
-import {
-  lowerControlScoreToKlattTrack,
-} from "./track-assembler";
-import type {
-  VoiceQualityOverrides,
-  LayeredF0ModelConfig,
-  TrackLoweringSpec,
-} from "./track-assembler";
-import type { TranscriptionConfig, KlattFrame } from "./tts-frontend-types";
-import {
-  recordInventoryDecision,
-  runPhasesWithProvenance,
-} from "./tts-frontend-provenance";
 import { annotateProsody } from "./prosodic-annotator";
+import { createProvenanceCollector, type ProvenanceCollector } from "./provenance";
+import { transcribeText } from "./transcribe-text";
 import type { Diagnostics } from "./diagnostics";
-import { emitNasalSubsystemExplainability } from "./nasal-subsystem";
-import {
-  buildDeclarativeControlScore,
-  validateDeclarativeControlScore,
-} from "./control-score";
-import type { DeclarativeControlScore } from "./tts-frontend-types";
+import type { KlattFrame, TranscriptionConfig, TranscriptionToken } from "./tts-frontend-types";
 import {
   DEFAULT_SPEAKER_PROFILE_PATH,
   collectSpeakerProfileCitations,
@@ -43,795 +36,669 @@ import {
   DEFAULT_SOURCE_CONTOUR_PATH,
   loadSourceContourSync,
   resolveSourceContour,
+  type SourceContourVoiceQuality,
 } from "./source-contour";
+import { DIRECTION_ITEM_SCHEMA, attachDirectionsToUtterance, parseDirectionInput } from "./input/parse";
+import type { DirectionTrack } from "./input/direction-track";
+import { parseSyllabificationTables, syllabifyWord } from "./declarative-frontend/syllabify";
+import { isPlainObject } from "./yaml-loader";
 
-/**
- * Loose token type for intermediate pipeline stages.
- * Starts as TranscriptionToken shape, gains fields through inventory lookup
- * and rule application, eventually becomes a PhoneToken or F0PointToken.
- *
- * Internal to the pipeline — module boundaries use {@link KlattFrame}.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type PipelineToken = Record<string, any>;
-
-/** Voice quality preset names.
- *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
-export type VoiceQuality = 'modal' | 'breathy' | 'pressed' | 'creaky' | 'whispery' | 'falsetto';
-
-/** Resolved voice quality preset values (from the selected frontend spec's voice_quality_presets). */
-export interface VoiceQualityPreset {
-  rd: number;
-  oq: number;
-  tl: number;
-  ah_offset_db: number;
-  flutter: number;
-  jitter: number;
-  f0_scale: number;
-}
+export type VoiceQuality = SourceContourVoiceQuality;
 
 export type TextToKlattTrackOptions = {
   provenance?: ProvenanceCollector | null;
   frontendId?: string;
-  /** Speech rate multiplier: 1.0 = normal, 2.0 = double speed, 0.5 = half speed.
-   *  Clamped to [0.5, 2.0]. Citation: Klatt 1976 §III */
   rate?: number;
-  /** Speaker selection. Either:
-   *   - a voice NAME (string) registered in the frontend's `speakers:` block
-   *     (e.g. "paul", "betty"); the named voice's YAML populates the speaker
-   *     policy and F0 speaker-scaling fields. Frontend must declare a registry.
-   *   - a partial numeric OVERRIDE object, merged into params.policy.speaker.
-   *  Defaults are defined in the selected frontend spec under parameters.policy.speaker.
-   *  Citations: O'Shaughnessy 1976, Kent & Vorperian 2018, Fant 1997, Klatt & Klatt 1990,
-   *  DECtalk 4.63 ph_vset.c (voice tables) */
-  speaker?:
-    | string
-    | {
-        /** Baseline fundamental frequency in Hz. Male default: 110, Female: ~200, Child: ~260.
-         *  Citation: O'Shaughnessy 1976 */
-        base_f0_hz?: number;
-        /** Uniform formant frequency multiplier. Male: 1.0, Female: ~1.17, Child: ~1.3.
-         *  Citation: Kent & Vorperian 2018 (approximation; real scaling is non-uniform) */
-        formant_scale?: number;
-        /** Default Rd parameter for LF glottal source. Male: 0.7, Female: ~1.4.
-         *  Citation: Fant 1997 Table 1 */
-        rd_default?: number;
-        /** Additive spectral tilt offset in dB. Male: 0, Female: ~6.
-         *  Citation: Klatt & Klatt 1990 (H1-H2 gender difference) */
-        spectral_tilt_offset_db?: number;
-      };
-  /** Voice quality preset. Controls glottal source shape (Rd), aspiration noise (AH),
-   *  spectral tilt (TL), flutter, and jitter. 'modal' or undefined = no change.
-   *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
+  speaker?: string | SpeakerProfileOverride;
   voiceQuality?: VoiceQuality;
+  directionTrack?: DirectionTrack;
   diagnostics?: Diagnostics | null;
-};
-
-export type FrontendPhoneSummary = {
-  index: number;
-  phoneme: string;
-  stress?: number | null;
-  word?: string;
-  durationMs: number;
-  minimumDurationMs?: number;
-  /** Syllable structure annotation (present only when the frontend declares a
-   *  `syllabification:` table block and the annotation phase wrote it). */
-  syllableIndex?: number;
-  syllableRole?: string;
-  syllablePositionInWord?: string;
 };
 
 export type TextToKlattTrackDetailedResult = {
   track: KlattFrame[];
-  frontendPhones: FrontendPhoneSummary[];
-  controlScore: DeclarativeControlScore;
-  /** Resolved speaker profile (base_f0_hz, formant_scale, rd_default, spectral_tilt_offset_db). */
+  utterance: Utterance;
   resolvedSpeaker: ResolvedSpeakerProfile;
-  /** Speaker policy parameters fed to the layered F0 model (when present). */
   speakerParams?: Record<string, unknown>;
 };
 
-function getTrackLoweringSpec(specSource: unknown): TrackLoweringSpec {
-  const lowering = (specSource as { output?: { lowering?: unknown } })?.output?.lowering;
-  if (!lowering || typeof lowering !== "object" || Array.isArray(lowering)) {
-    throw new Error("E_TRACK_LOWERING_SPEC_REQUIRED: frontend spec must contain output.lowering");
+const ruleEvaluationOwners = new WeakMap<CompiledRulepack, GraphRuleEvaluationOwner>();
+
+const STRING_OR_NULL: FeatureSchema = {
+  kind: "union",
+  variants: [{ kind: "string" }, { kind: "null" }],
+};
+const NUMBER_OR_NULL: FeatureSchema = {
+  kind: "union",
+  variants: [{ kind: "number" }, { kind: "null" }],
+};
+const CONTROL_FIELD_SCHEMA: FeatureSchema = {
+  kind: "union",
+  variants: [
+    { kind: "number" },
+    {
+      kind: "object",
+      fields: {
+        op: { kind: "string", values: ["set", "add", "mul", "max", "min", "unset"] },
+        value: { kind: "number" },
+      },
+      optional: ["value"],
+    },
+  ],
+};
+const CONTROL_WINDOW_SCHEMA: FeatureSchema = {
+  kind: "object",
+  fields: {
+    target: { kind: "string", values: ["current", "next", "prev"] },
+    start_ms: { kind: "number" },
+    end_ms: { kind: "number" },
+    start_ratio: { kind: "number" },
+    end_ratio: { kind: "number" },
+    prefix_ms: { kind: "number" },
+    suffix_ms: { kind: "number" },
+    fields: { kind: "object", fields: {}, additional: CONTROL_FIELD_SCHEMA },
+    tag: { kind: "string" },
+  },
+  optional: [
+    "target", "start_ms", "end_ms", "start_ratio", "end_ratio",
+    "prefix_ms", "suffix_ms", "fields", "tag",
+  ],
+};
+
+function schemaForValue(value: unknown): FeatureSchema | null {
+  if (value === null) return { kind: "null" };
+  if (typeof value === "string") return { kind: "string" };
+  if (typeof value === "number") return Number.isFinite(value) ? { kind: "number" } : null;
+  if (typeof value === "boolean") return { kind: "boolean" };
+  if (Array.isArray(value)) {
+    const variants = value.map(schemaForValue).filter((entry): entry is FeatureSchema => entry !== null);
+    const items = variants.length === 0 ? { kind: "string" } satisfies FeatureSchema : mergeSchemas(variants);
+    return { kind: "array", items };
   }
-  return lowering as TrackLoweringSpec;
+  if (!isPlainObject(value)) return null;
+  const fields: Record<string, FeatureSchema> = {};
+  for (const [key, nested] of Object.entries(value)) {
+    const schema = schemaForValue(nested);
+    if (schema) fields[key] = schema;
+  }
+  return { kind: "object", fields };
 }
 
-function getRulepackTranscriptionConfig(specSource: unknown): TranscriptionConfig | undefined {
-  return (specSource as any)?.transcription ?? undefined;
+function mergeSchemas(schemas: readonly FeatureSchema[]): FeatureSchema {
+  if (schemas.length > 0 && schemas.every((schema) => schema.kind === "array")) {
+    return {
+      kind: "array",
+      items: mergeSchemas(schemas.map((schema) => schema.items)),
+    };
+  }
+  if (schemas.length > 0 && schemas.every((schema) => schema.kind === "object")) {
+    const objects = schemas;
+    const keys = new Set(objects.flatMap((schema) => Object.keys(schema.fields)));
+    const fields: Record<string, FeatureSchema> = {};
+    const optional: string[] = [];
+    for (const key of keys) {
+      const observed = objects.flatMap((schema) => schema.fields[key] ? [schema.fields[key]] : []);
+      fields[key] = mergeSchemas(observed);
+      if (observed.length !== objects.length || objects.some((schema) => schema.optional?.includes(key))) {
+        optional.push(key);
+      }
+    }
+    return optional.length > 0
+      ? { kind: "object", fields, optional }
+      : { kind: "object", fields };
+  }
+  const unique = new Map<string, FeatureSchema>();
+  for (const schema of schemas) unique.set(JSON.stringify(schema), schema);
+  const variants = [...unique.values()];
+  return variants.length === 1 ? variants[0] : { kind: "union", variants };
+}
+
+function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
+  const segmentFeatures: Record<string, FeatureSchema> = {
+    phoneme: { kind: "string" },
+    type: { kind: "string" },
+    word: { kind: "string" },
+    sourceTokenId: { kind: "string" },
+    punctuationSymbol: STRING_OR_NULL,
+    stress: NUMBER_OR_NULL,
+    duration: { kind: "number" },
+    durationFloor: { kind: "number" },
+    inherentDuration: NUMBER_OR_NULL,
+    active: { kind: "boolean" },
+    inventorySW: { kind: "number" },
+    minimumDuration: { kind: "number" },
+    word_syllable_count: { kind: "number" },
+    cluster_position: { kind: "number" },
+    syllable_index: { kind: "number" },
+    syllable_role: STRING_OR_NULL,
+    syllable_position_in_word: { kind: "string" },
+    isFunctionWord: { kind: "boolean" },
+    isContentWord: { kind: "boolean" },
+    isAccented: { kind: "boolean" },
+    isAccentCarrier: { kind: "boolean" },
+    isNuclearAccent: { kind: "boolean" },
+    accentType: STRING_OR_NULL,
+    accentIndexInPhrase: { kind: "number" },
+    breakIndex: { kind: "number" },
+    initialBoundaryTone: STRING_OR_NULL,
+    phraseAccent: STRING_OR_NULL,
+    boundaryTone: STRING_OR_NULL,
+    control_windows: { kind: "array", items: CONTROL_WINDOW_SCHEMA },
+    transition_ms: { kind: "number" },
+    weak: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
+    glottal: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
+  };
+  for (const key of Object.keys(inventory.base_params)) segmentFeatures[key] = { kind: "number" };
+  for (const target of Object.values(inventory.phoneme_targets)) {
+    for (const [key, value] of Object.entries(target)) {
+      if (key === "dur" || key === "SW" || key === "type") continue;
+      const observed = schemaForValue(value);
+      const schema = observed?.kind === "boolean"
+        ? mergeSchemas([observed, { kind: "null" }])
+        : observed;
+      if (!schema) continue;
+      segmentFeatures[key] = segmentFeatures[key]
+        ? mergeSchemas([segmentFeatures[key], schema])
+        : schema;
+    }
+  }
+  const pointFeatures = {
+    value: { kind: "number" },
+    tag: { kind: "string" },
+    layer: { kind: "string" },
+    duration_frames: { kind: "number" },
+    profile_points: { kind: "array", items: { kind: "number" } },
+    active: { kind: "boolean" },
+  } as const;
+  return {
+    itemTypes: {
+      token: {
+        features: {
+          word: { kind: "string" },
+          tokenType: { kind: "string", values: ["word", "punctuation"] },
+          punctuationSymbol: STRING_OR_NULL,
+          pronunciationKey: STRING_OR_NULL,
+          active: { kind: "boolean" },
+        },
+      },
+      word: { features: { text: { kind: "string" }, tokenIndex: { kind: "number" } } },
+      syllable: {
+        features: {
+          index: { kind: "number" }, stress: NUMBER_OR_NULL, positionInWord: { kind: "string" },
+        },
+      },
+      segment: { features: segmentFeatures },
+      f0Point: { features: pointFeatures },
+      phraseCommand: { features: pointFeatures },
+      tilt: { features: pointFeatures },
+      direction: DIRECTION_ITEM_SCHEMA,
+      transition: { features: { active: { kind: "boolean" } } },
+    },
+    relations: {
+      Token: { kind: "list", itemTypes: ["token"] },
+      Word: { kind: "list", itemTypes: ["word"] },
+      Syllable: { kind: "list", itemTypes: ["syllable"] },
+      Segment: { kind: "list", itemTypes: ["segment"] },
+      SylStructure: { kind: "tree", itemTypes: ["word", "syllable", "segment"] },
+      Transition: { kind: "list", itemTypes: ["transition"] },
+      Intonation: { kind: "list", itemTypes: ["direction"] },
+      Tilt: { kind: "list", itemTypes: ["tilt"] },
+      PhraseCommand: { kind: "list", itemTypes: ["phraseCommand"] },
+      Affect: { kind: "list", itemTypes: ["direction"] },
+      Break: { kind: "list", itemTypes: ["direction"] },
+      F0Point: { kind: "list", itemTypes: ["f0Point"] },
+    },
+  };
+}
+
+function getTranscriptionConfig(spec: CompiledRulepack): TranscriptionConfig | undefined {
+  const value = spec.transcription;
+  if (!isPlainObject(value)) return undefined;
+  const diagnosticSymbols = isPlainObject(value.diagnostic_symbols)
+    ? Object.fromEntries(Object.entries(value.diagnostic_symbols).filter((entry): entry is [string, string[]] =>
+      Array.isArray(entry[1]) && entry[1].every((item) => typeof item === "string")))
+    : undefined;
+  const letterNames = isPlainObject(value.letter_names)
+    ? Object.fromEntries(Object.entries(value.letter_names).filter((entry): entry is [string, string[]] =>
+      Array.isArray(entry[1]) && entry[1].every((item) => typeof item === "string")))
+    : undefined;
+  const punctuationTokens = Array.isArray(value.punctuation_tokens)
+    ? value.punctuation_tokens.filter((item): item is string => typeof item === "string")
+    : undefined;
+  return { diagnostic_symbols: diagnosticSymbols, letter_names: letterNames, punctuation_tokens: punctuationTokens };
 }
 
 function readPolicyNumber(entry: unknown): number | undefined {
   if (typeof entry === "number" && Number.isFinite(entry)) return entry;
-  if (
-    entry &&
-    typeof entry === "object" &&
-    typeof (entry as { value?: unknown }).value === "number" &&
-    Number.isFinite((entry as { value: number }).value)
-  ) {
-    return (entry as { value: number }).value;
-  }
-  return undefined;
+  return isPlainObject(entry) && typeof entry.value === "number" && Number.isFinite(entry.value)
+    ? entry.value
+    : undefined;
 }
 
 function requirePolicyNumber(entry: unknown, path: string): number {
   const value = readPolicyNumber(entry);
-  if (value === undefined) {
-    throw new Error(`E_POLICY_REQUIRED: parameters.policy.${path} must be a finite number`);
-  }
+  if (value === undefined) throw new Error(`E_POLICY_REQUIRED: parameters.policy.${path} must be finite`);
   return value;
 }
 
-const SPEAKER_FORMANT_KEYS = [
-  "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10",
-] as const;
-
-function applySpeakerProfileToParams(
-  params: Record<string, number> | null | undefined,
-  speaker: ResolvedSpeakerProfile,
-  sourceContourBaseline: {
-    source_mode: number;
-    rd: number;
-    rd_ref: number;
-    spectral_tilt_offset_db: number;
-  },
-  voiceFrameStamp?: {
-    /** Full numeric parameter record of the selected voice. */
-    params: Record<string, number>;
-    /** Declared list of fields to stamp (absolute set) onto frame params. */
-    fields: readonly string[];
-  },
-  voiceGainOffsets?: readonly {
-    /** Per-frame Klatt dB param the offset is added to. */
-    param: string;
-    /** Paul-relative additive dB offset (selectedVoice[gain] - default[gain]). */
-    offsetDb: number;
-  }[],
-): void {
-  if (!params) return;
-
-  params.sourceMode = sourceContourBaseline.source_mode;
-  params.Rd = sourceContourBaseline.rd;
-  params.RdRef = sourceContourBaseline.rd_ref;
-  if (sourceContourBaseline.spectral_tilt_offset_db !== 0) {
-    params.TL = (params.TL ?? 0) + sourceContourBaseline.spectral_tilt_offset_db;
-  }
-  if (speaker.formant_scale !== 1.0) {
-    for (const key of SPEAKER_FORMANT_KEYS) {
-      const value = params[key];
-      if (typeof value === "number" && Number.isFinite(value) && value > 0) {
-        params[key] = value * speaker.formant_scale;
-      }
-    }
-  }
-
-  // Generic, data-declared speaker-field -> frame-param stamping. The set of
-  // fields is data (frontend.yaml `speakers.speaker_frame_params`); the loop is
-  // a voice-agnostic copy with no per-voice or per-field branches. DECtalk voice
-  // formants are ABSOLUTE speaker-config values (ph_vset.c writes them once into
-  // the chip's resonator registers), so they are SET after the formant_scale
-  // loop — they are not re-multiplied by formant_scale. The selected voice's
-  // value overrides the inventory base_params default for that frame param.
-  // Citation: DECtalk 4.63 ph_vset.c (speaker-dependent resonator config).
-  if (voiceFrameStamp) {
-    for (const field of voiceFrameStamp.fields) {
-      const value = voiceFrameStamp.params[field];
-      if (typeof value === "number" && Number.isFinite(value)) {
-        params[field] = value;
-      }
-    }
-  }
-
-  // Generic, data-declared per-voice GAIN offsets, applied as Paul-relative
-  // ADDITIVE dB offsets onto the per-frame gain dB params (AV/AVS/AH/AF/A1..A5).
-  // Every offset is (selectedVoice[gain] - defaultVoice[gain]); the default
-  // voice (Paul) yields 0 for every entry, so Paul/default frames are
-  // byte-identical. The mapping (which gain -> which frame param) is data
-  // (frontend.yaml speakers.speaker_gain_offsets); this loop is voice-agnostic
-  // with no per-voice or per-gain branches. Adding the offset to the frame's
-  // dB param is identical to adding a term inside dbToLinear(GO + <param> + ...)
-  // in semantics, but touches no shared semantics formula.
-  // Citation: DECtalk 4.63 ph_vset.c (per-speaker source/parallel gain config).
-  if (voiceGainOffsets) {
-    for (const { param, offsetDb } of voiceGainOffsets) {
-      if (offsetDb === 0) continue;
-      const current = params[param];
-      if (typeof current === "number" && Number.isFinite(current)) {
-        params[param] = current + offsetDb;
-      }
-    }
-  }
+function policyRecord(spec: CompiledRulepack): Record<string, unknown> {
+  return isPlainObject(spec.parameters.policy) ? spec.parameters.policy : {};
 }
 
-// Re-export normalizeText from g2p/text-normalize
-export { normalizeText } from "./g2p/text-normalize";
+function recordOrEmpty(value: unknown): Record<string, unknown> {
+  return isPlainObject(value) ? value : {};
+}
 
-// Re-export transcribeText from transcribe-text (backward compatibility)
+function mergedPolicy(spec: CompiledRulepack, additions: Record<string, unknown>): Record<string, unknown> {
+  const base = policyRecord(spec);
+  const output: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(additions)) {
+    output[key] = isPlainObject(base[key]) && isPlainObject(value) ? { ...base[key], ...value } : value;
+  }
+  return { policy: output };
+}
+
+function isLayeredF0Model(value: unknown): value is LayeredF0ModelConfig {
+  return isPlainObject(value)
+    && value.type === "layered_additive"
+    && typeof value.frame_period_sec === "number"
+    && isPlainObject(value.filter)
+    && isPlainObject(value.layers)
+    && isPlainObject(value.output_clamp);
+}
+
+function createStructure(
+  utterance: Utterance,
+  transcribed: readonly TranscriptionToken[],
+  segments: readonly ReturnType<Utterance["allItems"]>[number][],
+  spec: CompiledRulepack,
+): void {
+  const tables = parseSyllabificationTables(spec.syllabification);
+  const byToken = new Map<string, Array<{ token: TranscriptionToken; segment: typeof segments[number] }>>();
+  transcribed.forEach((token, index) => {
+    if (token.isPunctuation) return;
+    const segment = segments[index];
+    if (!segment) return;
+    const group = byToken.get(token.sourceTokenId) ?? [];
+    group.push({ token, segment });
+    byToken.set(token.sourceTokenId, group);
+  });
+  const transaction = utterance.beginTransaction({
+    ruleId: "linguistic_structure",
+    phase: "transcribe",
+    tag: "structure",
+    reason: "Create shared Word, Syllable, and Segment identity in SylStructure",
+    citations: ["Taylor, Black & Caley 2001", "DECtalk 4.63 ph_syl.c ph_syllab"],
+    stage: "transcribe",
+  });
+  let wordIndex = 0;
+  for (const [tokenId, group] of byToken) {
+    const word = transaction.createItem("word", `word_${wordIndex.toString()}`);
+    transaction.set(word, "text", group[0].token.word);
+    transaction.set(word, "tokenIndex", wordIndex);
+    transaction.append("Word", word);
+    transaction.addRoot("SylStructure", word);
+    const annotations = tables
+      ? syllabifyWord(group.map((entry) => entry.token.phoneme), tables)
+      : group.map((entry, index, all) => {
+          const nuclei = all.map((candidate, candidateIndex) =>
+            utterance.getItem(`segment_${candidateIndex.toString()}`)?.get("type") === "vowel" ? candidateIndex : -1)
+            .filter((candidateIndex) => candidateIndex >= 0);
+          const syllableIndex = Math.max(0, nuclei.findIndex((nucleus, nucleusIndex) =>
+            index <= (nuclei[nucleusIndex + 1] ?? Number.POSITIVE_INFINITY) - 1));
+          return { syllableIndex, role: "onset", positionInWord: nuclei.length <= 1 ? "only" : "medial", syllableCount: Math.max(1, nuclei.length) };
+        });
+    const syllables = new Map<number, ReturnType<typeof transaction.createItem>>();
+    for (let index = 0; index < group.length; index += 1) {
+      const annotation = annotations[index];
+      const syllableIndex = annotation?.syllableIndex ?? 0;
+      let syllable = syllables.get(syllableIndex);
+      if (!syllable) {
+        syllable = transaction.createItem("syllable", `${word.id}:syllable_${syllableIndex.toString()}`);
+        transaction.set(syllable, "index", syllableIndex);
+        transaction.set(syllable, "stress", null);
+        transaction.set(syllable, "positionInWord", annotation?.positionInWord ?? "only");
+        transaction.append("Syllable", syllable);
+        transaction.addDaughter("SylStructure", word, syllable);
+        syllables.set(syllableIndex, syllable);
+      }
+      if (group[index].token.stress === 1) transaction.set(syllable, "stress", 1);
+      transaction.addDaughter("SylStructure", syllable, group[index].segment);
+      transaction.associate("source_token", group[index].segment, utterance.getItem(tokenId) ?? word);
+    }
+    wordIndex += 1;
+  }
+  transaction.commit();
+}
+
+export { normalizeText } from "./g2p/text-normalize";
 export { transcribeText } from "./transcribe-text";
 
-// --- Main Pipeline ---
 function buildTextToKlattTrackDetailed(
   inputText: string,
-  baseF0: number | undefined = undefined,
-  transitionMs = 30,
-  options: TextToKlattTrackOptions = {}
+  baseF0: number | undefined,
+  transitionMs: number,
+  options: TextToKlattTrackOptions,
 ): TextToKlattTrackDetailedResult {
   const frontendId = options.frontendId ?? "qlatt-english";
-  const frontendSpec = loadBundledRulepackSpec(frontendId);
-  const loweringSpec = getTrackLoweringSpec(frontendSpec);
-  const rulepackTranscriptionConfig = getRulepackTranscriptionConfig(frontendSpec);
+  const spec = loadBundledRulepackSpec(frontendId);
+  const lowering = readLowerOptions(spec.output.lowering);
+  const resources = loadFrontendResources(spec);
+  const provenance = options.provenance ?? createProvenanceCollector();
+  const utterance = new Utterance(buildUtteranceSchema(resources.inventory), provenance, options.diagnostics ?? undefined);
+  for (const relationName of Object.keys(buildUtteranceSchema(resources.inventory).relations)) {
+    utterance.relation(relationName);
+  }
 
-  // Load inventory, LTS, and morphology paths from the frontend spec.
-  // Every resource path originates in frontend.yaml — no hardcoded defaults.
-  const resources = loadFrontendResources(frontendSpec);
-  const { inventory: frontendInventory, ltsPath, morphologyPath, dictionaryPath } = resources;
-  const inventoryCitation = resources.inventoryPath;
-
-  // No-op dictionary lookup for frontends with custom LTS rules that declare
-  // neither the global CMU default nor a per-frontend `dictionary_path`.
-  const noOpDictLookup = (): null => null;
-
-  // Per-frontend pronunciation dictionary (generic: a path -> a map). When a
-  // frontend declares `dictionary_path`, it does dictionary-first lookup
-  // against that map with LTS fallback (the g2p chain handles the fallback).
-  // Frontends without it keep prior behavior (global CMU map, or no-op when
-  // `skip_dictionary` is set).
-  const frontendDictionaryMap = dictionaryPath
-    ? loadCmuDictionaryFromPathSync(dictionaryPath)
+  const dictionary = resources.dictionaryPath
+    ? loadCmuDictionaryFromPathSync(resources.dictionaryPath)
     : undefined;
-
-  const provenance = options.provenance ?? null;
-  const requestedRate = options.rate ?? 1.0;
-  const diagnostics = options.diagnostics ?? null;
-  // Explainability (AGENTS.md principle 3): a per-frontend dictionary load is a
-  // non-trivial decision — make it observable rather than silent.
-  if (frontendDictionaryMap) {
-    diagnostics?.info(
-      `Loaded per-frontend dictionary '${dictionaryPath}' (${Object.keys(frontendDictionaryMap).length} entries)`,
-      { dictionaryPath, entries: Object.keys(frontendDictionaryMap).length },
+  if (dictionary) {
+    options.diagnostics?.info(
+      `Loaded per-frontend dictionary '${resources.dictionaryPath}' (${Object.keys(dictionary).length} entries)`,
+      { dictionaryPath: resources.dictionaryPath, entries: Object.keys(dictionary).length },
       "I_FRONTEND_DICTIONARY_LOADED",
     );
   }
-  provenance?.add({
-    stage: "frontend",
-    type: "lowering_spec_validated",
-    subject: `lowering_spec:${loweringSpec.id}`,
-    reason: `Loaded validated track lowering spec ${loweringSpec.id}`,
-    citations: [`/rules/frontends/${frontendId}/frontend.yaml`],
-  });
-  const speakerProfilePath =
-    frontendSpec.speaker_profile_path ?? DEFAULT_SPEAKER_PROFILE_PATH;
-  const speakerProfileSpec = loadSpeakerProfileSync(speakerProfilePath);
 
-  // Resolve the `speaker` option into (a) a numeric profile override and
-  // (b) an optional selected voice whose full parameter record feeds the F0
-  // speaker policy. A string `speaker` is a voice NAME resolved against the
-  // frontend's declarative `speakers:` registry; an object is a direct
-  // partial override. This is generic infrastructure — there are no per-voice
-  // branches; the registry maps names to YAML files.
-  let speakerOverride: SpeakerProfileOverride | undefined;
+  const registry = getVoiceRegistry(spec);
   let selectedVoice: ResolvedVoice | null = null;
-  let voiceRegistry: ReturnType<typeof getVoiceRegistry> = null;
+  let speakerOverride: SpeakerProfileOverride | undefined;
   if (typeof options.speaker === "string") {
-    voiceRegistry = getVoiceRegistry(frontendSpec);
-    if (!voiceRegistry) {
-      throw new Error(
-        `E_VOICE_REGISTRY_MISSING: frontend '${frontendId}' declares no speakers registry; ` +
-          `cannot select voice '${options.speaker}'`,
-      );
-    }
-    selectedVoice = resolveVoice(voiceRegistry, options.speaker);
+    if (!registry) throw new Error(`E_VOICE_REGISTRY_MISSING: frontend '${frontendId}' has no voice registry`);
+    selectedVoice = resolveVoice(registry, options.speaker);
     speakerOverride = selectedVoice.override;
-  } else if (options.speaker === undefined) {
-    // No `speaker` option: if the frontend declares a `speakers:` registry,
-    // resolve its DECLARED default voice (registry.default) via the exact same
-    // path as an explicit string selection. Generic — the default voice name is
-    // data from the registry, not hardcoded here. Frontends without a registry
-    // (e.g. qlatt-english) fall through with speakerOverride undefined, keeping
-    // the generic speaker profile as before.
-    voiceRegistry = getVoiceRegistry(frontendSpec);
-    if (voiceRegistry) {
-      selectedVoice = resolveVoice(voiceRegistry, voiceRegistry.default);
-      speakerOverride = selectedVoice.override;
-    }
-  } else {
+  } else if (options.speaker) {
     speakerOverride = options.speaker;
+  } else if (registry) {
+    selectedVoice = resolveVoice(registry, registry.default);
+    speakerOverride = selectedVoice.override;
   }
 
-  const resolvedSpeaker = resolveSpeakerProfile({
-    baseF0,
-    speakerOverride,
-    profileSpec: speakerProfileSpec,
-  });
-  let effectiveBaseF0 = resolvedSpeaker.base_f0_hz;
-  // Speaker profile overrides — merged into policy.speaker for all rule phases.
-  // Citations: O'Shaughnessy 1976, Kent & Vorperian 2018, Fant 1997, Klatt & Klatt 1990
-  const speakerOverrides = { speaker: resolvedSpeaker };
-  provenance?.add({
+  const speakerProfilePath = spec.speaker_profile_path ?? DEFAULT_SPEAKER_PROFILE_PATH;
+  const speakerProfile = loadSpeakerProfileSync(speakerProfilePath);
+  const resolvedSpeaker = resolveSpeakerProfile({ baseF0, speakerOverride, profileSpec: speakerProfile });
+  const speakerDecision = provenance.add({
     stage: "frontend",
     type: "speaker_profile_selected",
     subject: "speaker_profile",
     reason: `Resolved speaker profile base_f0_hz=${resolvedSpeaker.base_f0_hz}, formant_scale=${resolvedSpeaker.formant_scale}, rd_default=${resolvedSpeaker.rd_default}, spectral_tilt_offset_db=${resolvedSpeaker.spectral_tilt_offset_db}`,
-    citations: collectSpeakerProfileCitations(speakerProfileSpec, speakerProfilePath),
+    citations: collectSpeakerProfileCitations(speakerProfile, speakerProfilePath),
   });
 
-  const sourceContourPath =
-    frontendSpec.source_contour_path ?? DEFAULT_SOURCE_CONTOUR_PATH;
-  const sourceContourSpec = loadSourceContourSync(sourceContourPath);
-  const sourceContour = resolveSourceContour({
-    spec: sourceContourSpec,
+  const sourcePath = spec.source_contour_path ?? DEFAULT_SOURCE_CONTOUR_PATH;
+  const source = resolveSourceContour({
+    spec: loadSourceContourSync(sourcePath),
     requestedQuality: options.voiceQuality,
     speaker: resolvedSpeaker,
-    baseF0Hz: effectiveBaseF0,
+    baseF0Hz: resolvedSpeaker.base_f0_hz,
   });
-  let voiceQualityOverrides: VoiceQualityOverrides | undefined = sourceContour.voiceQualityOverrides;
-  effectiveBaseF0 = sourceContour.effectiveBaseF0Hz;
-  provenance?.add({
+  const sourceDecision = provenance.add({
     stage: "frontend",
     type: "source_contour_selected",
     subject: "source_contour",
-    reason: `Resolved source contour preset=${sourceContour.presetName}, source_mode=${sourceContour.baseline.source_mode}, rd=${sourceContour.baseline.rd}, rd_ref=${sourceContour.baseline.rd_ref}, base_f0_hz=${effectiveBaseF0}`,
-    citations: sourceContour.citations,
+    reason: `Resolved source contour preset=${source.presetName}, source_mode=${source.baseline.source_mode}, rd=${source.baseline.rd}, rd_ref=${source.baseline.rd_ref}, base_f0_hz=${source.effectiveBaseF0Hz}`,
+    citations: source.citations,
+    parents: [speakerDecision.id],
   });
 
-  const tokenDecisionIds = new Map<string, string>();
-  // Per-frontend text-normalization policy (generic, data-driven). A frontend
-  // may declare a `normalization` block naming its own tables/pipeline YAML
-  // paths; absent that, normalizeText uses the qlatt-english defaults, so any
-  // frontend without the block is byte-identical to before. No per-frontend
-  // branch here — we only forward whatever paths the spec declares.
-  const normalizationSpec = (frontendSpec as { normalization?: unknown }).normalization;
-  const normalizationConfig =
-    normalizationSpec && typeof normalizationSpec === "object"
-      ? {
-          tablesPath: (normalizationSpec as { tables_path?: unknown }).tables_path as
-            | string
-            | undefined,
-          pipelinePath: (normalizationSpec as { pipeline_path?: unknown }).pipeline_path as
-            | string
-            | undefined,
-        }
-      : undefined;
-  const normalized = normalizeText(inputText, normalizationConfig);
-  // Transcribe returns a flat list of phoneme objects with word info
-  let parameterSequence: PipelineToken[] = transcribeText(normalized, {
+  const normalization = isPlainObject(spec.normalization)
+    ? {
+        tablesPath: typeof spec.normalization.tables_path === "string" ? spec.normalization.tables_path : undefined,
+        pipelinePath: typeof spec.normalization.pipeline_path === "string" ? spec.normalization.pipeline_path : undefined,
+      }
+    : undefined;
+  const normalized = normalizeText(inputText, normalization);
+  const transcribed = transcribeText(normalized, {
     provenance,
-    transcriptionConfig: rulepackTranscriptionConfig,
-    ltsPath,
-    morphologyPath,
-    // Dictionary selection (generic, no per-frontend branches):
-    //  - `dictionary_path` declared -> use that loaded map (dict-first, LTS fallback).
-    //  - else `skip_dictionary` -> no-op lookup (pure LTS).
-    //  - else -> undefined -> global CMU default map.
-    dictionaryMap: frontendDictionaryMap,
-    dictLookup:
-      frontendDictionaryMap == null && (frontendSpec as Record<string, unknown>).skip_dictionary
-        ? noOpDictLookup
-        : undefined,
-    specSource: frontendSpec,
+    utterance,
+    compiledSpec: spec,
+    transcriptionConfig: getTranscriptionConfig(spec),
+    ltsPath: resources.ltsPath,
+    morphologyPath: resources.morphologyPath,
+    dictionaryMap: dictionary,
+    dictLookup: dictionary == null && spec.skip_dictionary ? () => null : undefined,
   });
 
-  // --- Prepare Parameter Sequence (Map phonemes to targets, fill params) ---
-  parameterSequence = parameterSequence.map((ph: PipelineToken, index: number) => {
-    let targetKeyBase = ph.phoneme;
-
-    // Delegate stress-aware inventory lookup to materializePhonemeTarget
-    const materialized = materializePhonemeTarget(targetKeyBase, {
-      stress: ph.stress,
-      inventorySpec: frontendInventory,
+  const inventoryDecision = provenance.add({
+    stage: "frontend",
+    type: "inventory_selected",
+    subject: `inventory:${frontendId}`,
+    reason: `Selected frontend inventory '${resources.inventoryPath}'`,
+    citations: [resources.inventoryPath],
+  });
+  const construct = utterance.beginTransaction({
+    ruleId: "inventory_materialization",
+    phase: "transcribe",
+    tag: "inventory",
+    reason: "Materialize transcribed phonemes as typed Segment Items",
+    citations: [resources.inventoryPath],
+    stage: "transcribe",
+  });
+  construct.dependOn(inventoryDecision.id);
+  const segments = transcribed.map((token, index) => {
+    if (token._pronDecisionId) construct.dependOn(token._pronDecisionId);
+    const materialized = materializePhonemeTarget(token.phoneme, {
+      stress: token.stress,
+      inventorySpec: resources.inventory,
     });
-
-    // Warn if phoneme was not found (materialized falls back to SIL internally)
-    const phonemeTargets = frontendInventory.phoneme_targets;
-    const isStructuralStopBase = materialized.is_stop_base === true;
-    if (
-      !isStructuralStopBase &&
-      !phonemeTargets[materialized.phoneme] &&
-      !phonemeTargets[targetKeyBase]
-    ) {
-      diagnostics?.warn(
-        `No baseline target found for phoneme '${targetKeyBase}'. Using SIL.`,
-        { phoneme: targetKeyBase, stress: ph.stress, word: ph.word },
-        "W_PHONEME_NOT_IN_INVENTORY",
-      );
+    const item = construct.createItem("segment", `segment_${index.toString()}`);
+    construct.set(item, "phoneme", token.phoneme);
+    construct.set(item, "stress", token.stress);
+    construct.set(item, "word", token.word);
+    construct.set(item, "sourceTokenId", token.sourceTokenId);
+    construct.set(item, "punctuationSymbol", token.isPunctuation ? token.symbol ?? null : null);
+    construct.set(item, "active", true);
+    for (const [key, value] of Object.entries(materialized)) {
+      if (key === "phoneme" || key === "params") continue;
+      construct.set(item, key, value ?? null);
     }
-
-    const tokenId = `ph_${index}`;
-    const decisionId = recordInventoryDecision(
-      provenance,
-      index,
-      targetKeyBase,
-      ph.phoneme,
-      ph._pronDecisionId,
-      inventoryCitation,
-    );
-    if (decisionId) {
-      tokenDecisionIds.set(tokenId, decisionId);
-    }
-
-    // Return the enriched phoneme data object for the sequence.
-    // Spread materialized (params, duration, inherentDuration, type, boolean flags,
-    // inventorySW) then override phoneme with the base key (stress suffix stripped).
-    return {
-      id: tokenId,
-      ...materialized,
-      phoneme: targetKeyBase,
-      stress: ph.stress,
-      punctuationSymbol: ph.isPunctuation ? ph.symbol : null,
-      word: ph.word,
-    };
+    for (const [key, value] of Object.entries(materialized.params)) construct.set(item, key, value);
+    construct.append("Segment", item);
+    return item;
   });
+  if (segments.length > 0) {
+    construct.partitionAnchors(segments, utterance.axis.start.id, utterance.axis.end.id);
+  }
+  construct.commit();
+  createStructure(utterance, transcribed, segments, spec);
 
-  // --- Apply Rules (Rules operate on the enriched parameterSequence) ---
-  // Wrap materializePhonemeTarget to always inject the frontend inventory.
-  const effectiveMaterialize = (phoneme: unknown, opts?: { stress?: number | null }) =>
-    materializePhonemeTarget(phoneme, { ...opts, inventorySpec: frontendInventory });
-
-  const runPhases = (
-    sequence: PipelineToken[],
-    phases: string[],
-    parameters?: Record<string, unknown>,
-  ): PipelineToken[] =>
-    runPhasesWithProvenance(
-      sequence,
-      phases,
-      effectiveMaterialize,
-      provenance,
-      tokenDecisionIds,
-      parameters,
-      frontendSpec,
-    );
-
-  const policyDefaults =
-    frontendSpec?.parameters &&
-    typeof frontendSpec.parameters === "object" &&
-    "policy" in frontendSpec.parameters &&
-    frontendSpec.parameters.policy &&
-    typeof frontendSpec.parameters.policy === "object"
-      ? (frontendSpec.parameters.policy as Record<string, unknown>)
-      : null;
-  const durationPolicyDefaults =
-    policyDefaults &&
-    "duration" in policyDefaults &&
-    policyDefaults.duration &&
-    typeof policyDefaults.duration === "object"
-      ? (policyDefaults.duration as Record<string, unknown>)
-      : null;
-
-  const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
-    !!value && typeof value === "object" && !Array.isArray(value);
-
-  const mergePhaseParameters = (
-    overrides?: Record<string, unknown>,
-  ): Record<string, unknown> | undefined => {
-    if (!isPlainRecord(overrides) && !isPlainRecord(policyDefaults)) {
-      return overrides;
-    }
-
-    const next: Record<string, unknown> = isPlainRecord(overrides) ? { ...overrides } : {};
-    const overridePolicy = isPlainRecord(next.policy) ? next.policy : {};
-    const mergedPolicy: Record<string, unknown> = isPlainRecord(policyDefaults)
-      ? { ...policyDefaults }
-      : {};
-
-    for (const [key, value] of Object.entries(overridePolicy)) {
-      const baseValue = mergedPolicy[key];
-      if (isPlainRecord(baseValue) && isPlainRecord(value)) {
-        mergedPolicy[key] = { ...baseValue, ...value };
-        continue;
-      }
-      mergedPolicy[key] = value;
-    }
-
-    if (Object.keys(mergedPolicy).length > 0) {
-      next.policy = mergedPolicy;
-    }
-
-    return next;
-  };
-  const rateReference =
-    durationPolicyDefaults &&
-    "rate_reference" in durationPolicyDefaults &&
-    typeof durationPolicyDefaults.rate_reference === "number"
-      ? durationPolicyDefaults.rate_reference
-      : null;
-  const normalizedRate =
-    rateReference != null && Number.isFinite(rateReference) && rateReference > 0
-      ? requestedRate / rateReference
-      : requestedRate;
-  const rate = Math.max(0.5, Math.min(2.0, normalizedRate));
-
-  // Speaker defaults/overrides are always present so declarative rules can
-  // reference the same policy surface as the runtime defaults.
-  const speakerPolicy = mergePhaseParameters({ policy: { ...speakerOverrides } });
-
-  // Run phone normalization before postlexical rules so LTS-internal symbols
-  // (AX/NX/WH) are mapped onto inventory-compatible ARPABET.
-  // Citation: Elovitz et al. 1976; Allen et al. 1987
-  parameterSequence = runPhases(parameterSequence, ["normalize"], speakerPolicy);
-
-  // Run postlexical rules first (t-flapping, the-reduction operate on raw phonemes).
-  // t_flapping must see raw T between vowels; structural would split T into
-  // T_CL + T_REL + T_ASP, breaking the adjacency check.
-  // Citation: Miller 1998, Pronunciation Modeling in Speech Synthesis
-  parameterSequence = runPhases(parameterSequence, ["postlexical"], speakerPolicy);
-  parameterSequence = runPhases(parameterSequence, ["structural"], speakerPolicy);
-  // Ensure id/relation/status fields exist before prosodic annotation.
-  // The annotator reads phoneme, word, stress, punctuationSymbol — all present
-  // after structural rules. It only ADDS new properties (breakIndex, isAccented,
-  // isNuclearAccent, accentType, isFunctionWord, isContentWord, phraseAccent,
-  // boundaryTone) so this is safe to run before duration rules.
-  parameterSequence = parameterSequence.map((token: PipelineToken, index: number) => ({
-    ...token,
-    id: token.id ?? `ph_${index}`,
-    relation: "phone",
-    status: token.status ?? 1,
-  }));
-
-  // --- Syllable Count & Cluster Position Annotation ---
-  // Now handled declaratively by the annotation phase (phases/annotation.yaml).
-  // CEL functions count_word_vowels() and cluster_position_in_word() replicate
-  // the logic that was previously in imperative loops here.
-  // Citations: Klatt 1976 Rule 4 (polysyllabic shortening), Klatt 1973 (cluster shortening)
-  parameterSequence = runPhases(parameterSequence, ["annotation"], speakerPolicy);
-
-  // --- Prosodic Structure Annotation ---
-  // Annotate tokens with prosodic structure (break indices, accent types,
-  // function/content word classification, nuclear accent) BEFORE duration rules.
-  // Moved before duration phase so that breakIndex, isAccented, isNuclearAccent
-  // are available for break-index pre-boundary lengthening and accent lengthening.
-  // Citations: Silverman 1992, Pierrehumbert 1980, O'Shaughnessy 1976, Allen 1987
-  parameterSequence = annotateProsody(parameterSequence, {
-    provenance: provenance ?? undefined,
-    baseF0: effectiveBaseF0,
+  const requestedRate = options.rate ?? 1;
+  const durationPolicy = recordOrEmpty(policyRecord(spec).duration);
+  const referenceRate = readPolicyNumber(durationPolicy.rate_reference);
+  const rate = Math.max(0.5, Math.min(2, referenceRate && referenceRate > 0
+    ? requestedRate / referenceRate
+    : requestedRate));
+  const speakerPolicy = { speaker: resolvedSpeaker };
+  const graphInventory = { spec: resources.inventory, decisionId: inventoryDecision.id };
+  let evaluationOwner = ruleEvaluationOwners.get(spec);
+  if (!evaluationOwner) {
+    evaluationOwner = new GraphRuleEvaluationOwner();
+    ruleEvaluationOwners.set(spec, evaluationOwner);
+  }
+  runGraphRuleEngine(utterance, spec, {
+    evaluationOwner,
+    phases: ["normalize", "postlexical", "structural"],
+    parameters: mergedPolicy(spec, speakerPolicy),
+    inventory: graphInventory,
   });
-  // Rate-scaling policy coefficients live in YAML (parameters.policy.rate).
-  // Citations: Lindblom 1963 (undershoot), Ladd 2008 Ch.9 (F0 range),
-  //            Broad & Fertig 1970 (transition scaling).
-  const ratePolicy = (frontendSpec as any)?.parameters?.policy?.rate;
-  const undershootCoefficient = requirePolicyNumber(
-    ratePolicy?.undershoot_coefficient,
-    "rate.undershoot_coefficient",
-  );
-  const f0RangeExponent = requirePolicyNumber(
-    ratePolicy?.f0_range_exponent,
-    "rate.f0_range_exponent",
-  );
-  const transitionScaleExponent = requirePolicyNumber(
-    ratePolicy?.transition_scale_exponent,
-    "rate.transition_scale_exponent",
-  );
-  // At rate=1.0: factor=0 → undershoot rule guard prevents matching.
-  const rateUndershootFactor = Math.max(0, (rate - 1.0) * undershootCoefficient);
-  parameterSequence = runPhases(parameterSequence, ["duration"], mergePhaseParameters({
-    policy: {
-      ...speakerOverrides,
+  runGraphRuleEngine(utterance, spec, {
+    evaluationOwner,
+    phases: ["annotation"],
+    parameters: mergedPolicy(spec, speakerPolicy),
+    inventory: graphInventory,
+  });
+  annotateProsody(utterance);
+
+  if (options.directionTrack) {
+    const parsed = parseDirectionInput(
+      { score: { text: normalized }, directionTrack: options.directionTrack },
+      { provenance },
+    );
+    attachDirectionsToUtterance(parsed, utterance);
+  }
+
+  const ratePolicy = recordOrEmpty(policyRecord(spec).rate);
+  const undershoot = requirePolicyNumber(ratePolicy.undershoot_coefficient, "rate.undershoot_coefficient");
+  const f0Exponent = requirePolicyNumber(ratePolicy.f0_range_exponent, "rate.f0_range_exponent");
+  const transitionExponent = requirePolicyNumber(ratePolicy.transition_scale_exponent, "rate.transition_scale_exponent");
+  const formantRate = Math.max(0, (rate - 1) * undershoot);
+  runGraphRuleEngine(utterance, spec, {
+    evaluationOwner,
+    phases: ["duration"],
+    parameters: mergedPolicy(spec, {
+      ...speakerPolicy,
       duration: { rate_scale: rate },
-      // Vowel centralization increases at fast rates (Lindblom 1963).
-      formant: { rate_undershoot_factor: rateUndershootFactor },
-    },
-  }));
-  parameterSequence = runPhases(parameterSequence, ["formant"], mergePhaseParameters({
-    policy: {
-      ...speakerOverrides,
-      formant: { rate_undershoot_factor: rateUndershootFactor },
-    },
-  }));
-  // F0 range narrows at fast speaking rates (Ladd 2008 Ch.9).
-  // At rate=1.0, f0RangeFactor=1.0 and all values are unchanged.
-  const f0RangeFactor = Math.pow(rate, -f0RangeExponent);
-  const f0Policy = (frontendSpec as any)?.parameters?.policy?.f0;
-  parameterSequence = runPhases(parameterSequence, ["prosody", "finalize"], mergePhaseParameters({
-    policy: {
-      ...speakerOverrides,
-      f0: {
-        base_hz: effectiveBaseF0,
-        continuation_rise_hz: (readPolicyNumber(f0Policy?.continuation_rise_hz) ?? 8) * f0RangeFactor,
-        continuation_minor_rise_hz: (readPolicyNumber(f0Policy?.continuation_minor_rise_hz) ?? 5) * f0RangeFactor,
-      },
-    },
-  }));
-  // Build the generic per-frame voice stamp: the selected voice's numeric params
-  // plus the frontend's data-declared `speaker_frame_params` field list. When no
-  // voice is selected (default) or the list is empty, no stamp is applied — the
-  // default voice stays byte-identical. No per-voice branches: both pieces are data.
-  const voiceFrameStamp =
-    selectedVoice && voiceRegistry && voiceRegistry.speakerFrameParams.length > 0
-      ? { params: selectedVoice.params, fields: voiceRegistry.speakerFrameParams }
-      : undefined;
-  // Build the generic per-voice GAIN offset list: each declared
-  // speaker_gain_offsets entry becomes a Paul-relative additive dB offset
-  // (selectedVoice[gain] - defaultVoice[gain]) onto the mapped frame dB param.
-  // The reference is the registry default voice's own values (DATA, resolved
-  // from `speakers.default` — not a hardcoded constant). The default voice
-  // therefore yields 0 for every entry (byte-identical). No per-voice branches.
-  const voiceGainOffsets =
-    selectedVoice && voiceRegistry && voiceRegistry.speakerGainOffsets.length > 0
-      ? (() => {
-          const reference = resolveVoice(voiceRegistry, voiceRegistry.default).params;
-          return voiceRegistry.speakerGainOffsets
-            .map(({ gain, param }) => {
-              const voiceVal = selectedVoice!.params[gain];
-              const refVal = reference[gain];
-              if (
-                typeof voiceVal !== "number" ||
-                !Number.isFinite(voiceVal) ||
-                typeof refVal !== "number" ||
-                !Number.isFinite(refVal)
-              ) {
-                return null;
-              }
-              return { param, offsetDb: voiceVal - refVal };
-            })
-            .filter((e): e is { param: string; offsetDb: number } => e !== null);
-        })()
-      : undefined;
-  parameterSequence = parameterSequence.map((token: PipelineToken) => {
-    if (
-      token?.relation === "f0" ||
-      !token?.params ||
-      typeof token.params !== "object" ||
-      Array.isArray(token.params)
-    ) {
-      return token;
-    }
-    const nextToken = {
-      ...token,
-      params: { ...(token.params as Record<string, number>) },
-    };
-    applySpeakerProfileToParams(
-      nextToken.params,
-      resolvedSpeaker,
-      sourceContour.baseline,
-      voiceFrameStamp,
-      voiceGainOffsets,
-    );
-    return nextToken;
+      formant: { rate_undershoot_factor: formantRate },
+    }),
+    inventory: graphInventory,
   });
-  const phoneSequence = parameterSequence.filter(
-    (token: PipelineToken) => token?.relation !== "f0" && token?.relation !== "f0_layer" && token?.status !== 2
-  );
+  const durationFloorTransaction = utterance.beginTransaction({
+    ruleId: "lowering_duration_floor",
+    phase: "duration",
+    tag: "duration_floor",
+    reason: "Project the selected lowering duration floor before temporal finalization",
+    citations: [`/rules/frontends/${frontendId}/frontend.yaml`],
+    stage: "rules",
+  });
+  const stopFloor = lowering.timeline.duration_floors.stop_release_ms.value;
+  const defaultFloor = lowering.timeline.duration_floors.default_ms.value;
+  for (const item of utterance.relation("Segment").listItems()) {
+    if (item.get("active") === false) continue;
+    const duration = durationFloorTransaction.read(item, "duration");
+    const type = durationFloorTransaction.read(item, "type");
+    const floor = type === "stop_release" || type === "stop_aspiration" ? stopFloor : defaultFloor;
+    if (typeof duration === "number" && duration < floor) {
+      durationFloorTransaction.set(item, "duration", floor);
+    }
+  }
+  durationFloorTransaction.commit();
+  runGraphRuleEngine(utterance, spec, {
+    evaluationOwner,
+    phases: ["formant"],
+    parameters: mergedPolicy(spec, { ...speakerPolicy, formant: { rate_undershoot_factor: formantRate } }),
+    inventory: graphInventory,
+  });
+  const f0Policy = recordOrEmpty(policyRecord(spec).f0);
+  const f0Range = Math.pow(rate, -f0Exponent);
+  runGraphRuleEngine(utterance, spec, {
+    evaluationOwner,
+    phases: ["prosody", "finalize"],
+    parameters: mergedPolicy(spec, {
+      ...speakerPolicy,
+      f0: {
+        base_hz: source.effectiveBaseF0Hz,
+        continuation_rise_hz: (readPolicyNumber(f0Policy.continuation_rise_hz) ?? 8) * f0Range,
+        continuation_minor_rise_hz: (readPolicyNumber(f0Policy.continuation_minor_rise_hz) ?? 5) * f0Range,
+      },
+    }),
+    inventory: graphInventory,
+  });
 
-  // Read layered additive F0 model config from the frontend spec.
-  // When present, the track assembler uses the layered renderer instead of
-  // the declarative point-interpolation path.
-  // Citations: Fujisaki (command-response), Klatt 1982 (hat-pattern),
-  //            Rabiner 1968 (three-component F0)
-  const f0ModelRaw = (frontendSpec as any)?.f0_model;
-  const f0Model: LayeredF0ModelConfig | undefined =
-    f0ModelRaw && typeof f0ModelRaw === "object" && f0ModelRaw.type === "layered_additive"
-      ? (f0ModelRaw as LayeredF0ModelConfig)
-      : undefined;
-
-  // Build speakerParams for the layered F0 model's speaker scaling.
-  // Extracts numeric values from the frontend spec's speaker policy entries
-  // (which may be plain numbers or { value: N, citations: [...] } objects).
-  // Citation: DECtalk 4.63 ph_vset.c (speaker-dependent F0 parameters)
-  const frontendSpeakerPolicy = (frontendSpec as any)?.parameters?.policy?.speaker;
-  let speakerParams: Record<string, unknown> | undefined;
-  if (f0Model) {
-    if (frontendSpeakerPolicy && typeof frontendSpeakerPolicy === "object") {
-      const extracted: Record<string, unknown> = {};
-      for (const key of Object.keys(frontendSpeakerPolicy)) {
-        const val = readPolicyNumber(frontendSpeakerPolicy[key]);
-        if (val !== undefined) {
-          extracted[key] = val;
-        }
+  const referenceVoice = registry ? resolveVoice(registry, registry.default) : null;
+  const speakerStamp = utterance.beginTransaction({
+    ruleId: "speaker_source_projection",
+    phase: "frontend",
+    tag: "speaker",
+    reason: "Project selected speaker and source policy onto final Segment targets",
+    citations: [...source.citations, ...collectSpeakerProfileCitations(speakerProfile, speakerProfilePath)],
+    stage: "frontend",
+  });
+  speakerStamp.dependOn(speakerDecision.id).dependOn(sourceDecision.id);
+  for (const item of utterance.relation("Segment").listItems()) {
+    if (item.get("active") === false) continue;
+    speakerStamp.set(item, "sourceMode", source.baseline.source_mode);
+    speakerStamp.set(item, "Rd", source.voiceQualityOverrides?.rd ?? source.baseline.rd);
+    speakerStamp.set(item, "RdRef", source.baseline.rd_ref);
+    if (source.voiceQualityOverrides?.oq !== undefined) speakerStamp.set(item, "OQ", source.voiceQualityOverrides.oq);
+    const currentTl = item.get("TL");
+    if (typeof currentTl === "number") {
+      speakerStamp.set(item, "TL", source.voiceQualityOverrides?.tl
+        ?? currentTl + source.baseline.spectral_tilt_offset_db);
+    }
+    const currentAh = item.get("AH");
+    if (typeof currentAh === "number" && source.voiceQualityOverrides?.ah_offset_db !== undefined) {
+      speakerStamp.set(item, "AH", currentAh + source.voiceQualityOverrides.ah_offset_db);
+    }
+    if (source.voiceQualityOverrides?.flutter !== undefined) {
+      speakerStamp.set(item, "flutter", source.voiceQualityOverrides.flutter);
+    }
+    if (source.voiceQualityOverrides?.jitter !== undefined) {
+      speakerStamp.set(item, "jitter", source.voiceQualityOverrides.jitter);
+    }
+    if (resolvedSpeaker.formant_scale !== 1) {
+      for (let formant = 1; formant <= 10; formant += 1) {
+        const key = `F${formant.toString()}`;
+        const value = item.get(key);
+        if (typeof value === "number" && value > 0) speakerStamp.set(item, key, value * resolvedSpeaker.formant_scale);
       }
-      // When a registered voice is selected, its numeric parameters override
-      // the inline policy defaults for every field the voice declares. This is
-      // a generic merge — the voice record is data loaded by name, not code.
-      if (selectedVoice) {
-        for (const [key, val] of Object.entries(selectedVoice.params)) {
-          extracted[key] = val;
-        }
+    }
+    if (selectedVoice && registry) {
+      for (const field of registry.speakerFrameParams) {
+        const value = selectedVoice.params[field];
+        if (typeof value === "number" && Number.isFinite(value)) speakerStamp.set(item, field, value);
       }
-      extracted.base_f0_hz = resolvedSpeaker.base_f0_hz;
-      if (Object.keys(extracted).length > 0) {
-        speakerParams = extracted;
+      if (referenceVoice) {
+        for (const mapping of registry.speakerGainOffsets) {
+          const selected = selectedVoice.params[mapping.gain];
+          const reference = referenceVoice.params[mapping.gain];
+          const current = item.get(mapping.param);
+          if (typeof selected === "number" && typeof reference === "number" && typeof current === "number") {
+            speakerStamp.set(item, mapping.param, current + selected - reference);
+          }
+        }
       }
     }
   }
+  speakerStamp.commit();
 
-  const frontendPhones: FrontendPhoneSummary[] = phoneSequence.map(
-    (token: PipelineToken, index: number) => {
-      const duration = Number(token?.duration ?? 0);
-      const minimumDuration = Number(token?.minimumDuration ?? NaN);
-      const summary: FrontendPhoneSummary = {
-        index,
-        phoneme: String(token?.phoneme ?? ""),
-        durationMs: Number.isFinite(duration) ? duration : 0,
-      };
-      if (typeof token?.stress === "number" && Number.isFinite(token.stress)) {
-        summary.stress = token.stress;
-      }
-      if (typeof token?.word === "string" && token.word.length > 0) {
-        summary.word = token.word;
-      }
-      if (Number.isFinite(minimumDuration)) {
-        summary.minimumDurationMs = minimumDuration;
-      }
-      // Syllable annotation fields are written by the (optional) declarative
-      // syllabify annotation pass; surface them when present so downstream
-      // tooling (probes, duration rules) can read syllable structure.
-      if (typeof token?.syllable_index === "number") {
-        summary.syllableIndex = token.syllable_index;
-      }
-      if (typeof token?.syllable_role === "string") {
-        summary.syllableRole = token.syllable_role;
-      }
-      if (typeof token?.syllable_position_in_word === "string") {
-        summary.syllablePositionInWord = token.syllable_position_in_word;
-      }
-      return summary;
+  let speakerParams: Record<string, unknown> | undefined;
+  if (isLayeredF0Model(spec.f0_model)) {
+    speakerParams = {};
+    const configured = recordOrEmpty(policyRecord(spec).speaker);
+    for (const [key, value] of Object.entries(configured)) {
+      const number = readPolicyNumber(value);
+      if (number !== undefined) speakerParams[key] = number;
     }
-  );
+    if (selectedVoice) Object.assign(speakerParams, selectedVoice.params);
+    speakerParams.base_f0_hz = resolvedSpeaker.base_f0_hz;
+  }
 
-  const loweringSpecId = (frontendSpec as any)?.output?.lowering?.id;
-  const controlScore = buildDeclarativeControlScore(frontendId, parameterSequence, {
-    loweringSpecId: typeof loweringSpecId === "string" && loweringSpecId.length > 0
-      ? loweringSpecId
-      : `${frontendId}:track-lowering`,
-    policyPaths: ["/rules/control-score.yaml", `/rules/frontends/${frontendId}/frontend.yaml`],
-    voiceQuality: voiceQualityOverrides ?? null,
-    diagnostics,
-  });
-  validateDeclarativeControlScore(controlScore);
-  provenance?.add({
+  const silence = materializePhonemeTarget("SIL", { inventorySpec: resources.inventory });
+  const silenceDecision = provenance.add({
     stage: "frontend",
-    type: "control_score_created",
-    subject: `control_score:${frontendId}`,
-    reason: `Created declarative control score with ${controlScore.segments.length} segments, ${controlScore.timed_controls.length} timed controls, ${controlScore.f0_points.length} F0 points, and ${controlScore.f0_layer_commands.length} F0 layer commands`,
-    citations: ["/rules/control-score.yaml"],
+    type: "silence_resource_selected",
+    subject: `inventory:${frontendId}:SIL`,
+    reason: "Selected declared inventory silence target for lowering edges",
+    citations: [resources.inventoryPath],
+    parents: [inventoryDecision.id],
   });
-
-  const track = lowerControlScoreToKlattTrack(controlScore, loweringSpec, {
-    inventorySpec: frontendInventory,
-    baseF0: effectiveBaseF0,
-    // Transition durations scale by rate^(-transition_scale_exponent).
-    // At rate=1.0: unchanged; at exponent=1.0: classic 1/rate inverse scaling.
-    // Citation: Broad & Fertig 1970 (transitions scale inversely with rate).
-    transitionMs: transitionMs * Math.pow(rate, -transitionScaleExponent),
-    f0Model,
-    speakerParams,
-    // Selected voice's `sex` data field selects the male vs female formant locus
-    // table generically (no per-voice-name branch). Undefined for the default
-    // voice / when no voice is selected -> male table (byte-identical to before).
-    voiceSex: selectedVoice?.sex,
-    diagnostics,
-  });
-  provenance?.add({
-    stage: "frontend",
-    type: "control_score_lowered",
-    subject: `track:${frontendId}`,
-    reason: `Lowered declarative control score ${controlScore.frontend_id} with lowering spec ${loweringSpec.id} into ${track.length} Klatt frames`,
-    citations: controlScore.lowering_refs.policy_paths,
-  });
-
-  emitNasalSubsystemExplainability(
-    phoneSequence,
-    track,
-    provenance,
-    diagnostics,
-    tokenDecisionIds,
-  );
-
-  return {
-    track,
-    frontendPhones,
-    controlScore,
-    resolvedSpeaker,
-    speakerParams,
+  const scaledTransition = transitionMs * Math.pow(rate, -transitionExponent);
+  const lowerOptions = {
+    ...lowering,
+    transitions: {
+      ...lowering.transitions,
+      default_transition_ms: { value: scaledTransition },
+    },
   };
+  const lowered = lowerToFrames(utterance, lowerOptions, {
+    f0Model: isLayeredF0Model(spec.f0_model) ? spec.f0_model : undefined,
+    speakerParams,
+    speakerSex: selectedVoice?.sex,
+    silence: {
+      initialParams: silence.params,
+      finalParams: silence.params,
+      decisionId: silenceDecision.id,
+    },
+  });
+  return { track: lowered.frames, utterance, resolvedSpeaker, speakerParams };
 }
 
 export function textToKlattTrackDetailed(
   inputText: string,
   baseF0: number | undefined = undefined,
   transitionMs = 30,
-  options: TextToKlattTrackOptions = {}
+  options: TextToKlattTrackOptions = {},
 ): TextToKlattTrackDetailedResult {
   return buildTextToKlattTrackDetailed(inputText, baseF0, transitionMs, options);
 }
@@ -840,16 +707,7 @@ export function textToKlattTrack(
   inputText: string,
   baseF0: number | undefined = undefined,
   transitionMs = 30,
-  options: TextToKlattTrackOptions = {}
+  options: TextToKlattTrackOptions = {},
 ): KlattFrame[] {
   return buildTextToKlattTrackDetailed(inputText, baseF0, transitionMs, options).track;
-}
-
-export function textToControlScore(
-  inputText: string,
-  baseF0: number | undefined = undefined,
-  transitionMs = 30,
-  options: TextToKlattTrackOptions = {}
-): DeclarativeControlScore {
-  return buildTextToKlattTrackDetailed(inputText, baseF0, transitionMs, options).controlScore;
 }

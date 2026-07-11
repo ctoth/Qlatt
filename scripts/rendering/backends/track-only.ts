@@ -44,9 +44,7 @@ export const trackOnlyBackend: RenderBackend = {
       length: Math.max(1, Math.ceil(totalTime * request.sampleRate)),
       metrics: { rms: 0, peak: 0 },
       trackSummary: summarizeTrack(track),
-      frontendPhones: frontend.frontendPhones,
       diagnostics: diagnostics.getEntries(),
-      ...(frontend.f0LayerCommands ? { f0LayerCommands: frontend.f0LayerCommands } : {}),
       samples: [],
     };
     if (request.includeTrack) {

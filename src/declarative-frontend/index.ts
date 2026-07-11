@@ -1,88 +1,11 @@
-import { runRuleEngine } from "./engine";
-import {
-  QLATT_ENGLISH_RULEPACK,
+export { runGraphRuleEngine as runRuleEngine } from "./hrg/rule-engine";
+export type { GraphRuleEngineOptions, GraphRuleEngineResult } from "./hrg/rule-engine";
+export {
   compileRuleEngineSpec,
   loadBundledRulepackSpec,
   loadRulepackSpecFromPath,
 } from "./rule-pack";
-import { loadFrontendResources, materializePhonemeTarget } from "./inventory";
-import type { InventoryResolver } from "./engine";
-
-type DeclarativeFrontendOptions = {
-  includeTrace?: boolean;
-  phases?: string[];
-  parameters?: Record<string, unknown>;
-  inventoryResolver?: InventoryResolver;
-  frontendId?: string;
-  specSource?: unknown;
-  specPath?: string;
-};
-
-type RuleEngineResult = ReturnType<typeof runRuleEngine>;
-type DeclarativeFrontendSequence = RuleEngineResult["sequence"];
-
-export function runDeclarativeFrontend(
-  sequence: Array<Record<string, unknown>>,
-  options: DeclarativeFrontendOptions & { includeTrace: true }
-): RuleEngineResult;
-export function runDeclarativeFrontend(
-  sequence: Array<Record<string, unknown>>,
-  options?: DeclarativeFrontendOptions & { includeTrace?: false | undefined }
-): DeclarativeFrontendSequence;
-export function runDeclarativeFrontend(
-  sequence: Array<Record<string, unknown>>,
-  options: DeclarativeFrontendOptions = {}
-): RuleEngineResult | DeclarativeFrontendSequence {
-  const spec =
-    options.specSource !== undefined
-      ? compileRuleEngineSpec(options.specSource)
-      : typeof options.specPath === "string" && options.specPath.length > 0
-      ? loadRulepackSpecFromPath(options.specPath)
-      : typeof options.frontendId === "string" && options.frontendId.length > 0
-        ? loadBundledRulepackSpec(options.frontendId)
-        : QLATT_ENGLISH_RULEPACK;
-  const resources =
-    options.inventoryResolver == null &&
-    typeof spec.inventory_path === "string"
-      ? loadFrontendResources(spec)
-      : null;
-  const inventoryResolver =
-    options.inventoryResolver ??
-    (resources
-      ? (phoneme: string) =>
-          materializePhonemeTarget(phoneme, { inventorySpec: resources.inventory })
-      : undefined);
-  const result = runRuleEngine(sequence, spec, {
-    phases: options.phases,
-    parameters: options.parameters,
-    inventoryResolver,
-  });
-  if (options.includeTrace) return result;
-  return result.sequence;
-}
-
-export { runRuleEngine } from "./engine";
+export type { CompiledRulepack } from "./rule-pack";
 export { parseDslSpec } from "./parser";
 export { validateDslSpec } from "./validation";
-export {
-  TokenStatus,
-  normalizeTokenStatus,
-  joinTokenStatus,
-  isActiveToken,
-} from "./model";
-export {
-  buildPhaseSnapshots,
-  explainField,
-  whyNotRule,
-  diffPhaseState,
-} from "./tooling";
-export type {
-  PhoneToken,
-  F0PointToken,
-  EngineToken,
-  KlattFrame,
-} from "../tts-frontend-types";
-export {
-  isPhoneToken,
-  isF0PointToken,
-} from "../tts-frontend-types";
+export * from "./hrg";

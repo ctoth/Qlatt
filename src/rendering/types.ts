@@ -31,8 +31,6 @@ export interface RenderPayload {
   length: number;
   metrics: RenderMetrics;
   trackSummary: RenderTrackSummary;
-  frontendPhones?: unknown;
-  f0LayerCommands?: unknown;
   diagnostics?: unknown;
   track?: unknown;
   samples: number[];

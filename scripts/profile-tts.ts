@@ -17,8 +17,9 @@ import {
 } from "../src/cmu-dictionary-loader";
 
 // ---- Configuration ----
-const WORD_COUNT = 500;
+const WORD_COUNT = Number(process.env.PROFILE_WORD_COUNT ?? 500);
 const WARMUP_COUNT = 5; // warmup words before timing
+const BATCH_WORD_COUNT = Number(process.env.PROFILE_BATCH_WORD_COUNT ?? 5000);
 
 async function main() {
   // Suppress console.warn spam from the pipeline (e.g. "word not found in dictionary")
@@ -153,17 +154,18 @@ async function main() {
   console.log(`Second call for "${freshWord}": ${secondTime.toFixed(2)}ms`);
 
   // Step 7: Batch of 5000 to match original test conditions
-  console.log("\n=== Batch of 5000 words ===\n");
-  const batchWords = allWords.slice(0, 5000);
+  if (BATCH_WORD_COUNT <= 0) return;
+  console.log(`\n=== Batch of ${BATCH_WORD_COUNT} words ===\n`);
+  const batchWords = allWords.slice(0, BATCH_WORD_COUNT);
   let batchErrors = 0;
   const batchStart = performance.now();
   for (const word of batchWords) {
     try { textToKlattTrack(word); } catch { batchErrors++; }
   }
   const batchTime = performance.now() - batchStart;
-  console.log(`5000 words: ${batchTime.toFixed(0)}ms total (${batchErrors} errors)`);
-  console.log(`Average: ${(batchTime / 5000).toFixed(2)}ms per word`);
-  console.log(`Throughput: ${(5000 / (batchTime / 1000)).toFixed(0)} words/sec`);
+  console.log(`${BATCH_WORD_COUNT} words: ${batchTime.toFixed(0)}ms total (${batchErrors} errors)`);
+  console.log(`Average: ${(batchTime / BATCH_WORD_COUNT).toFixed(2)}ms per word`);
+  console.log(`Throughput: ${(BATCH_WORD_COUNT / (batchTime / 1000)).toFixed(0)} words/sec`);
 }
 
 main().catch((err) => {

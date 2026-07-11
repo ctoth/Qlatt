@@ -56,13 +56,12 @@
         if (!Array.isArray(track)) {
           await preloadF0Filters(F0_FILTERS_WASM_URL);
         }
-        const frontend = Array.isArray(track)
-          ? { track, frontendPhones: [] }
+        const resolvedTrack = Array.isArray(track)
+          ? track
           : textToKlattTrackDetailed(phrase, baseF0, transitionMs, {
               frontendId,
               rate,
-            });
-        const resolvedTrack = frontend.track;
+            }).track;
         const totalTime =
           (resolvedTrack.length ? resolvedTrack[resolvedTrack.length - 1].time : 0) +
           leadTime +
@@ -213,7 +212,6 @@
           metrics: { rms, peak },
           agc: applyAgc ? { target, scale: agcScale, mode: agcMode } : undefined,
           trackSummary: summarizeTrack(resolvedTrack),
-          frontendPhones: frontend.frontendPhones,
           track: includeTrack ? resolvedTrack : undefined,
           telemetry: includeTelemetry ? telemetry : undefined,
           samples,

@@ -43,10 +43,10 @@ rules:
   stress_rd_adduction:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type == 'vowel' && has(current.stress)"
     apply:
-      - field: params.RdPhraseOffset
+      - field: RdPhraseOffset
         op: add
         dispatch:
           - when: "current.stress == 1"
@@ -71,13 +71,13 @@ rules:
   effort_rd_adduction:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type == 'vowel' && has(current.stress)"
     define:
       # Effort in dB relative to neutral, mapped from binary stress.
       effort_db: "current.stress == 1 ? 3.0 : (current.stress == 0 ? -1.5 : 0.0)"
     apply:
-      - field: params.RdPhraseOffset
+      - field: RdPhraseOffset
         op: add
         # rdPerDb = -0.05 (Liénard 1999): louder/more effortful => lower Rd.
         value: "effort_db * -0.05"
@@ -108,7 +108,7 @@ rules:
   phrase_rd_contour:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.phoneme != 'SIL'"
     contour:
       domain: phrase
@@ -116,7 +116,7 @@ rules:
       # where the source contour resets.
       reset_break_index: 3
       apply:
-        - field: params.RdPhraseOffset
+        - field: RdPhraseOffset
           op: add
           value: rd_phrase_delta
           tag: voice_quality_phrase

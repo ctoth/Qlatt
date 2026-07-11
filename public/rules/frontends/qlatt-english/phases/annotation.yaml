@@ -3,7 +3,7 @@ rules:
   syllable_count_annotation:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type == 'vowel'"
     apply:
       - field: word_syllable_count
@@ -16,7 +16,7 @@ rules:
   cluster_position_annotation:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type != 'vowel' && current.phoneme != 'SIL' && has(current.word) && current.word != ''"
     apply:
       - field: cluster_position

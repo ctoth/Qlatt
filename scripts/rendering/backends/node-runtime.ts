@@ -135,9 +135,7 @@ export const nodeRuntimeBackend: RenderBackend = {
           length,
           metrics: { rms, peak },
           trackSummary: summarizeTrack(track),
-          frontendPhones: frontend.frontendPhones,
           diagnostics: diagnostics.getEntries(),
-          ...(frontend.f0LayerCommands ? { f0LayerCommands: frontend.f0LayerCommands } : {}),
           samples,
         };
         if (request.includeTrack) {

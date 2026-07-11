@@ -42,13 +42,6 @@ type CompareJson = {
 };
 
 type QlattPayload = {
-  frontendPhones?: Array<{
-    index?: number;
-    phoneme?: string;
-    word?: string;
-    durationMs?: number;
-    minimumDurationMs?: number;
-  }>;
   track?: Array<{
     time?: number;
     phoneme?: string;
@@ -154,14 +147,6 @@ function main(): void {
     const f2Values = groupFrames.map((frame) => finiteNumber(frame.out.F2)).filter((value): value is number => value != null);
     console.log(
       `  phoneIndex=${group.phoneIndex} frames=${group.firstFrame}-${group.lastFrame} time=${startSec.toFixed(4)}..${endSec.toFixed(4)} ph=${group.ph} ph2=${group.ph2} du=${group.du} F2 ${summarizeValues(f2Values)}`,
-    );
-  }
-
-  console.log("\nQlatt frontend phones:");
-  for (const phone of qlatt.frontendPhones ?? []) {
-    if (phone.word !== "yelled") continue;
-    console.log(
-      `  index=${phone.index ?? "?"} phoneme=${phone.phoneme ?? "?"} durationMs=${phone.durationMs ?? "?"} minMs=${phone.minimumDurationMs ?? "?"}`,
     );
   }
 

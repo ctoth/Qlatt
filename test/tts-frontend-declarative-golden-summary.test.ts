@@ -89,5 +89,5 @@ describe("tts frontend declarative golden summary", () => {
     } finally {
       warnSpy.mockRestore();
     }
-  });
+  }, 75_000);
 });

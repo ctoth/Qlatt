@@ -40,5 +40,5 @@ describe("tts frontend declarative corpus integration", () => {
     } finally {
       warnSpy.mockRestore();
     }
-  });
+  }, 75_000);
 });

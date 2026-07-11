@@ -15,10 +15,12 @@ import {
   DEFAULT_CMU_DICTIONARY_PATH,
   preloadCmuDictionaryFromPath,
 } from "./cmu-dictionary-loader";
-import { QLATT_ENGLISH_RULEPACK } from "./declarative-frontend/rule-pack";
+import { QLATT_ENGLISH_RULEPACK, type CompiledRulepack } from "./declarative-frontend/rule-pack";
+import { runGraphRuleEngine } from "./declarative-frontend/hrg/rule-engine";
+import { Utterance } from "./declarative-frontend/hrg";
+import type { HrgSchema } from "./declarative-frontend/hrg";
 import { pronounce } from "./g2p";
 import type { DictLookup, PronunciationResult } from "./g2p/types";
-import { runPhasesWithProvenance } from "./tts-frontend-provenance";
 import type { TranscriptionConfig, TranscriptionToken, TranscriptionOptions } from "./tts-frontend-types";
 
 // ---------------------------------------------------------------------------
@@ -35,24 +37,29 @@ const SYMBOL_PRONUNCIATION_CITATION =
 const LETTER_NAME_PRONUNCIATION_CITATION =
   "Allen et al. 1987 Ch.2-3 (symbol strings pronounced as LETTER-* morphs)";
 
-type OrderMark =
-  | { kind: "START" }
-  | { kind: "END" }
-  | { kind: "FINITE"; rank: string };
-
-type OrthographyToken = {
-  id: string;
-  relation: "orthography";
-  word: string;
-  tokenType: "word" | "punctuation";
-  punctuationSymbol?: string | null;
-  pronunciationKey?: string | null;
-  sync_left: OrderMark;
-  sync_right: OrderMark;
-  status: 1;
-};
+const TOKEN_SCHEMA = {
+  itemTypes: {
+    token: {
+      features: {
+        word: { kind: "string" },
+        tokenType: { kind: "string", values: ["word", "punctuation"] },
+        punctuationSymbol: {
+          kind: "union",
+          variants: [{ kind: "string" }, { kind: "null" }],
+        },
+        pronunciationKey: {
+          kind: "union",
+          variants: [{ kind: "string" }, { kind: "null" }],
+        },
+        active: { kind: "boolean" },
+      },
+    },
+  },
+  relations: { Token: { kind: "list", itemTypes: ["token"] } },
+} as const satisfies HrgSchema;
 
 type OrthographyInputToken = {
+  tokenId: string;
   word: string;
   isPunctuation: boolean;
   symbol?: string;
@@ -141,10 +148,6 @@ export function shouldUseDiagnosticSymbolMode(words: string[]): boolean {
   );
 }
 
-function finiteOrder(rank: number): OrderMark {
-  return { kind: "FINITE", rank: rank.toString(36).padStart(12, "0") };
-}
-
 function requireStringArray(value: unknown, path: string): string[] {
   if (!Array.isArray(value) || value.length === 0) {
     throw new Error(`E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.${path} must be a non-empty string array`);
@@ -207,57 +210,58 @@ function getDiagnosticSymbolPronunciationWithTables(
   return Array.isArray(phones) && phones.length > 0 ? [...phones] : null;
 }
 
-function buildOrthographyTokens(words: string[], tables: RequiredTranscriptionTables): OrthographyToken[] {
-  return words
-    .filter((word) => word.length > 0)
-    .map((word, index, entries) => ({
-      id: `orth_${index}`,
-      relation: "orthography" as const,
-      word,
-      tokenType: isPunctuationTokenWithTables(word, tables) ? "punctuation" : "word",
-      punctuationSymbol: isPunctuationTokenWithTables(word, tables) ? word : null,
-      pronunciationKey: null,
-      sync_left: index === 0 ? { kind: "START" as const } : finiteOrder(index - 1),
-      sync_right: index === entries.length - 1 ? { kind: "END" as const } : finiteOrder(index),
-      status: 1 as const,
-    }));
-}
-
 function rewriteOrthographyTokens(
   words: string[],
   provenance: TranscriptionOptions["provenance"],
   tables: RequiredTranscriptionTables,
-  specSource?: unknown,
+  compiledSpec: CompiledRulepack,
+  existingUtterance?: Utterance,
 ): OrthographyInputToken[] {
-  const orthographyTokens = buildOrthographyTokens(words, tables);
-  if (orthographyTokens.length === 0) return [];
+  const entries = words.filter((word) => word.length > 0);
+  if (entries.length === 0) return [];
+  const utterance = existingUtterance ?? new Utterance(TOKEN_SCHEMA, provenance ?? undefined);
+  const input = utterance.beginTransaction({
+    ruleId: "transcription_tokenize",
+    phase: "transcribe",
+    tag: "orthography",
+    reason: "Tokenized normalized text into canonical Token Items",
+    citations: ["Allen et al. 1987 Ch.2-3"],
+  });
+  entries.forEach((word, index) => {
+    const punctuation = isPunctuationTokenWithTables(word, tables);
+    const token = input.createItem("token", `token_${index.toString()}`);
+    input.set(token, "word", word);
+    input.set(token, "tokenType", punctuation ? "punctuation" : "word");
+    input.set(token, "punctuationSymbol", punctuation ? word : null);
+    input.set(token, "pronunciationKey", null);
+    input.set(token, "active", true);
+    input.append("Token", token);
+  });
+  input.commit();
+  runGraphRuleEngine(utterance, compiledSpec, { phases: ["orthography"] });
 
-  const tokenDecisionIds = new Map<string, string>();
-  const rewritten = runPhasesWithProvenance(
-    orthographyTokens,
-    ["orthography"],
-    () => ({}),
-    provenance ?? null,
-    tokenDecisionIds,
-    undefined,
-    specSource ?? QLATT_ENGLISH_RULEPACK,
-  );
-
-  return rewritten
-    .filter(
-      (token): token is OrthographyToken =>
-        token?.relation === "orthography" && token?.status === 1,
-    )
-    .map((token) => ({
-      word: token.word,
-      isPunctuation: token.tokenType === "punctuation",
-      symbol: token.punctuationSymbol ?? undefined,
-      pronunciationKey:
-        typeof token.pronunciationKey === "string" && token.pronunciationKey.length > 0
-          ? token.pronunciationKey
-          : undefined,
-      parentDecisionId: tokenDecisionIds.get(token.id),
-    }));
+  return utterance.relation("Token").listItems()
+    .filter((token) => token.get("active") !== false)
+    .map((token) => {
+      const word = token.get("word");
+      const tokenType = token.get("tokenType");
+      const punctuationSymbol = token.get("punctuationSymbol");
+      const pronunciationKey = token.get("pronunciationKey");
+      if (typeof word !== "string" || (tokenType !== "word" && tokenType !== "punctuation")) {
+        throw new Error(`E_TRANSCRIPTION_TOKEN_REQUIRED: Token '${token.id}' is incomplete`);
+      }
+      return {
+        tokenId: token.id,
+        word,
+        isPunctuation: tokenType === "punctuation",
+        ...(typeof punctuationSymbol === "string" ? { symbol: punctuationSymbol } : {}),
+        ...(typeof pronunciationKey === "string" && pronunciationKey.length > 0
+          ? { pronunciationKey }
+          : {}),
+        parentDecisionId: token.latestWrite("pronunciationKey")?.decisionId
+          ?? token.latestWrite("word")?.decisionId,
+      };
+    });
 }
 
 // ---------------------------------------------------------------------------
@@ -290,8 +294,8 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
     (options.dictionaryMap ? makeDictLookup(options.dictionaryMap) : cmuDictLookup);
   const ltsPath = options.ltsPath;
   const morphologyPath = options.morphologyPath;
-  const specSource = options.specSource ?? QLATT_ENGLISH_RULEPACK;
-  const cfg = options.transcriptionConfig ?? getSpecTranscriptionConfig(specSource);
+  const compiledSpec = options.compiledSpec ?? QLATT_ENGLISH_RULEPACK;
+  const cfg = options.transcriptionConfig ?? getSpecTranscriptionConfig(compiledSpec);
   const transcriptionTables = requireTranscriptionTables(cfg);
 
   const isEffectivePunctuation = (word: string): boolean =>
@@ -304,7 +308,8 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
     text.split(" "),
     provenance,
     transcriptionTables,
-    specSource,
+    compiledSpec,
+    options.utterance,
   );
   const flatPhonemeList: TranscriptionToken[] = [];
   const hasDirectDictionaryEntry = (token: string): boolean =>
@@ -328,6 +333,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
       flatPhonemeList.push({
         phoneme: "SIL",
         stress: null,
+        sourceTokenId: inputToken.tokenId,
         isPunctuation: true,
         symbol: inputToken.symbol ?? word,
         word: word, // Associate punctuation with itself as the 'word'
@@ -433,6 +439,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
             flatPhonemeList.push({
               phoneme: match[1],
               stress: match[2] ? parseInt(match[2]) : null,
+              sourceTokenId: inputToken.tokenId,
               word: sourceWord,
               _pronDecisionId: pronunciationDecision?.id,
             });
@@ -440,6 +447,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
             flatPhonemeList.push({
               phoneme: "SIL",
               stress: null,
+              sourceTokenId: inputToken.tokenId,
               word: sourceWord,
               _pronDecisionId: pronunciationDecision?.id,
             });
@@ -450,6 +458,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
         flatPhonemeList.push({
           phoneme: "SIL",
           stress: null,
+          sourceTokenId: inputToken.tokenId,
           duration: 50,
           word: sourceWord,
           _pronDecisionId: pronunciationDecision?.id,

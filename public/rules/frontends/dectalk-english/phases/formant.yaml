@@ -3,10 +3,10 @@ rules:
   dectalk_sw_explicit_override:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: has(current.inventorySW)
     apply:
-      - field: params.SW
+      - field: SW
         op: set
         value: current.inventorySW
         tag: source_routing
@@ -17,10 +17,10 @@ rules:
   dectalk_sw_default_assignment:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "!has(current.inventorySW)"
     apply:
-      - field: params.SW
+      - field: SW
         op: set
         value: "current.type in ['fricative', 'affricate', 'stop_release', 'stop_aspiration'] ? 1 : 0"
         tag: source_routing
@@ -31,7 +31,7 @@ rules:
   dectalk_obstruent_parallel_amplitudes:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'F' || current.phoneme == 'V' ||
         current.phoneme == 'TH' || current.phoneme == 'DH' ||
@@ -58,7 +58,7 @@ rules:
         (ref_is_back_rounded ? 'back_rounded' :
         (ref_is_front_vowel ? 'front' : 'back_unrounded'))
     apply:
-      - field: params.A3
+      - field: A3
         op: set
         dispatch:
           - when: phoneme == 'SH'
@@ -72,9 +72,9 @@ rules:
           - when: phoneme == 'JH'
             value: >-
               following_class == 'front' ? 42 : 45
-          - default: "has(current.?params.A3) ? current.params.A3 : 0"
+          - default: "has(current.A3) ? current.A3 : 0"
         tag: fricative_spectrum
-      - field: params.A4
+      - field: A4
         op: set
         dispatch:
           - when: phoneme == 'S'
@@ -93,16 +93,16 @@ rules:
             value: >-
               following_class == 'front' ? 42 :
               (following_class == 'back_unrounded' ? 51 : 46)
-          - default: "has(current.?params.A4) ? current.params.A4 : 0"
+          - default: "has(current.A4) ? current.A4 : 0"
         tag: fricative_spectrum
-      - field: params.A5
+      - field: A5
         op: set
         dispatch:
           - when: phoneme == 'S'
             value: 50
-          - default: "has(current.?params.A5) ? current.params.A5 : 0"
+          - default: "has(current.A5) ? current.A5 : 0"
         tag: fricative_spectrum
-      - field: params.A6
+      - field: A6
         op: set
         dispatch:
           - when: phoneme == 'TH'
@@ -123,9 +123,9 @@ rules:
             value: >-
               following_class == 'front' ? 42 :
               (following_class == 'back_unrounded' ? 44 : 38)
-          - default: "has(current.?params.A6) ? current.params.A6 : 0"
+          - default: "has(current.A6) ? current.A6 : 0"
         tag: fricative_spectrum
-      - field: params.AB
+      - field: AB
         op: set
         dispatch:
           - when: phoneme == 'F'
@@ -140,7 +140,7 @@ rules:
           - when: phoneme == 'DH'
             value: >-
               following_class in ['back_rounded', 'obstruent'] ? 43 : 46
-          - default: "has(current.?params.AB) ? current.params.AB : 0"
+          - default: "has(current.AB) ? current.AB : 0"
         tag: fricative_spectrum
     citations:
       - "DECtalk 4.63 p_us_st1.c (A2-A6/AB selected through ptram + p_amp by following segment class)"
@@ -155,7 +155,7 @@ rules:
   dectalk_special_coartic_f3:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type == 'vowel' && current.phoneme != 'RR'"
     define:
       # The preceding token of a vowel after a stop is the stop_release glue
@@ -179,7 +179,7 @@ rules:
       offset: >-
         scaled > clamp_hi ? clamp_hi : (scaled < (0.0 - clamp_hi) ? (0.0 - clamp_hi) : scaled)
     apply:
-      - field: params.F3
+      - field: F3
         op: add
         value: offset
         tag: coarticulation
@@ -198,7 +198,7 @@ rules:
   dectalk_special_coartic_f2:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type == 'vowel'"
     define:
       # Skip stop_release/aspiration glue to reach the base preceding phoneme
@@ -229,7 +229,7 @@ rules:
       offset: >-
         scaled > clamp_hi ? clamp_hi : (scaled < (0.0 - clamp_hi) ? (0.0 - clamp_hi) : scaled)
     apply:
-      - field: params.F2
+      - field: F2
         op: add
         value: offset
         tag: coarticulation
@@ -241,36 +241,36 @@ rules:
   dectalk_silence_carries_formants:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'SIL' &&
         prev != null &&
         prev.phoneme != 'SIL' &&
         !(prev.type in ['stop_closure', 'stop_release', 'stop_aspiration'])
     apply:
-      - field: params.F1
+      - field: F1
         op: set
-        value: "has(prev.?params.F1) ? prev.params.F1 : current.params.F1"
+        value: "has(prev.F1) ? prev.F1 : current.F1"
         tag: silence_boundary
-      - field: params.F2
+      - field: F2
         op: set
-        value: "has(prev.?params.F2) ? prev.params.F2 : current.params.F2"
+        value: "has(prev.F2) ? prev.F2 : current.F2"
         tag: silence_boundary
-      - field: params.F3
+      - field: F3
         op: set
-        value: "has(prev.?params.F3) ? prev.params.F3 : current.params.F3"
+        value: "has(prev.F3) ? prev.F3 : current.F3"
         tag: silence_boundary
-      - field: params.B1
+      - field: B1
         op: set
-        value: "has(prev.?params.B1) ? prev.params.B1 : current.params.B1"
+        value: "has(prev.B1) ? prev.B1 : current.B1"
         tag: silence_boundary
-      - field: params.B2
+      - field: B2
         op: set
-        value: "has(prev.?params.B2) ? prev.params.B2 : current.params.B2"
+        value: "has(prev.B2) ? prev.B2 : current.B2"
         tag: silence_boundary
-      - field: params.B3
+      - field: B3
         op: set
-        value: "has(prev.?params.B3) ? prev.params.B3 : current.params.B3"
+        value: "has(prev.B3) ? prev.B3 : current.B3"
         tag: silence_boundary
     citations:
       - "DECtalk 4.63 oracle -lt trace: terminal GEN_SIL carries the preceding formant trajectory while AV/AP/A2-A6/AB fall silent"

@@ -22,10 +22,10 @@ rules:
   tobi_baseline_init:
     kind: point
     select:
-      relation: phone
+      relation: Segment
       where: prev == null
     insert_point:
-      relation: f0
+      relation: F0Point
       at: at_sync(current.sync_left)
       value: params.policy.f0.base_hz
       tag: f0_baseline
@@ -39,11 +39,11 @@ rules:
   tobi_initial_boundary_high:
     kind: point
     select:
-      relation: phone
+      relation: Segment
       where: >-
         has(current.initialBoundaryTone) && current.initialBoundaryTone == '%H'
     insert_point:
-      relation: f0
+      relation: F0Point
       at: at_sync(current.sync_left)
       value: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
@@ -56,7 +56,7 @@ rules:
   # ToBI pitch accents (collapsed 8 rules -> 1). Each point self-selects via a
   # per-point when: guard on current.accentType. Inline insertion (no by_point)
   # lets the leading-H accents (H+!H*, H+L*) read the previous accent's peak via
-  # prev_point('f0').
+  # prev_point('F0Point').
   #
   # Interpretation note (unchanged): Ladd 2008 / Pierrehumbert 1980 treat final
   # lowering as a separate phrase-final effect; downstep is suppressed on the
@@ -66,14 +66,14 @@ rules:
   tobi_accent:
     kind: point
     select:
-      relation: phone
+      relation: Segment
       where:
         all:
           - &where_voiced_accent_stressed_vowel >-
               has(current.isAccented) && current.isAccented == true && current.stress == 1
-              && current.params != null
-              && ((has(current.params.AV) && current.params.AV > 0)
-                  || (has(current.params.AVS) && current.params.AVS > 0))
+              && has(current.F1)
+              && ((has(current.AV) && current.AV > 0)
+                  || (has(current.AVS) && current.AVS > 0))
           - >-
               has(current.accentType) && current.accentType in
               ['H*', 'H*+L', 'L+H*', 'H+!H*', 'H*+H', 'H+L*', 'L*', 'L*+H']
@@ -92,24 +92,24 @@ rules:
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
       high_floor_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
-      prev_f0: prev_point('f0')
+      prev_f0: prev_point('F0Point')
       lead_hz: >-
         prev_f0 == null ? high_floor_hz : max([prev_f0.value, high_floor_hz])
     insert_points:
-      - { relation: f0, when: "current.accentType == 'H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star }
-      - { relation: f0, when: "current.accentType == 'H*+L'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_l_peak }
-      - { relation: f0, when: "current.accentType == 'H*+L'", at: "at_sync(current.sync_right)", value: low_hz, tag: f0_h_star_plus_l_tail }
-      - { relation: f0, when: "current.accentType == 'L+H*'", at: "at_sync(current.sync_left)", value: low_hz, tag: f0_l_leading }
-      - { relation: f0, when: "current.accentType == 'L+H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_l_plus_h_star }
-      - { relation: f0, when: "current.accentType == 'H+!H*'", at: "at_sync(current.sync_left)", value: lead_hz, tag: f0_h_leading }
-      - { relation: f0, when: "current.accentType == 'H+!H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_plus_downstepped_h_star }
-      - { relation: f0, when: "current.accentType == 'H*+H'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_h_peak }
-      - { relation: f0, when: "current.accentType == 'H*+H'", at: "at_sync(current.sync_right)", value: "max([target_hz, high_floor_hz])", tag: f0_h_star_plus_h_tail }
-      - { relation: f0, when: "current.accentType == 'H+L*'", at: "at_sync(current.sync_left)", value: lead_hz, tag: f0_h_plus_l_star_lead }
-      - { relation: f0, when: "current.accentType == 'H+L*'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_h_plus_l_star }
-      - { relation: f0, when: "current.accentType == 'L*'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_l_star }
-      - { relation: f0, when: "current.accentType == 'L*+H'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_l_star }
-      - { relation: f0, when: "current.accentType == 'L*+H'", at: "at_sync(current.sync_right)", value: high_floor_hz, tag: f0_l_star_plus_h }
+      - { relation: F0Point, when: "current.accentType == 'H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star }
+      - { relation: F0Point, when: "current.accentType == 'H*+L'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_l_peak }
+      - { relation: F0Point, when: "current.accentType == 'H*+L'", at: "at_sync(current.sync_right)", value: low_hz, tag: f0_h_star_plus_l_tail }
+      - { relation: F0Point, when: "current.accentType == 'L+H*'", at: "at_sync(current.sync_left)", value: low_hz, tag: f0_l_leading }
+      - { relation: F0Point, when: "current.accentType == 'L+H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_l_plus_h_star }
+      - { relation: F0Point, when: "current.accentType == 'H+!H*'", at: "at_sync(current.sync_left)", value: lead_hz, tag: f0_h_leading }
+      - { relation: F0Point, when: "current.accentType == 'H+!H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_plus_downstepped_h_star }
+      - { relation: F0Point, when: "current.accentType == 'H*+H'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_h_peak }
+      - { relation: F0Point, when: "current.accentType == 'H*+H'", at: "at_sync(current.sync_right)", value: "max([target_hz, high_floor_hz])", tag: f0_h_star_plus_h_tail }
+      - { relation: F0Point, when: "current.accentType == 'H+L*'", at: "at_sync(current.sync_left)", value: lead_hz, tag: f0_h_plus_l_star_lead }
+      - { relation: F0Point, when: "current.accentType == 'H+L*'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_h_plus_l_star }
+      - { relation: F0Point, when: "current.accentType == 'L*'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_l_star }
+      - { relation: F0Point, when: "current.accentType == 'L*+H'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_l_star }
+      - { relation: F0Point, when: "current.accentType == 'L*+H'", at: "at_sync(current.sync_right)", value: high_floor_hz, tag: f0_l_star_plus_h }
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"
@@ -120,21 +120,21 @@ rules:
   tobi_unaccented_declination:
     kind: point
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme != 'SIL'
         && (has(current.isAccented) ? current.isAccented != true : true)
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
+        && has(current.F1)
+        && ((has(current.AV) && current.AV > 0)
+            || (has(current.AVS) && current.AVS > 0))
     define:
-      prev_f0: prev_point('f0')
+      prev_f0: prev_point('F0Point')
       base: params.policy.f0.base_hz
       fallback: "prev_f0 == null ? base : prev_f0.value"
       target: >-
         max([fallback * 0.98, base])
     insert_point:
-      relation: f0
+      relation: F0Point
       at: at_sync(current.sync_right)
       value: target
       tag: f0_unaccented
@@ -148,18 +148,18 @@ rules:
   tobi_phrase_accent_high:
     kind: point
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'SIL'
         && has(current.phraseAccent) && current.phraseAccent == 'H-'
     define:
-      prev_f0: prev_point('f0')
+      prev_f0: prev_point('F0Point')
       floor_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
       target_hz: >-
         prev_f0 == null ? floor_hz : max([prev_f0.value, floor_hz])
     insert_point:
-      relation: f0
+      relation: F0Point
       at: at_sync(current.sync_left)
       value: target_hz
       tag: f0_phrase_high
@@ -173,12 +173,12 @@ rules:
   tobi_phrase_accent_low:
     kind: point
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'SIL'
         && has(current.phraseAccent) && current.phraseAccent == 'L-'
     insert_point:
-      relation: f0
+      relation: F0Point
       at: at_sync(current.sync_left)
       value: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
@@ -193,13 +193,13 @@ rules:
   tobi_boundary_low:
     kind: point
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'SIL'
         && has(current.boundaryTone) && current.boundaryTone != null
         && current.boundaryTone == 'L%'
     insert_point:
-      relation: f0
+      relation: F0Point
       at: at_sync(current.sync_right)
       value: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
@@ -214,13 +214,13 @@ rules:
   tobi_boundary_rise:
     kind: point
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'SIL'
         && has(current.boundaryTone) && current.boundaryTone != null
         && current.boundaryTone == 'H%'
     define:
-      prev_f0: prev_point('f0')
+      prev_f0: prev_point('F0Point')
       high_floor_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
       ceiling_hz: >-
@@ -233,7 +233,7 @@ rules:
               prev_f0.value + params.policy.f0.upstep_factor * (ceiling_hz - prev_f0.value)
             ])
     insert_point:
-      relation: f0
+      relation: F0Point
       at: at_sync(current.sync_right)
       value: target_hz
       tag: f0_boundary_rise
@@ -247,7 +247,7 @@ rules:
   tobi_register_reset:
     kind: point
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme != 'SIL'
         && (prev != null
@@ -256,7 +256,7 @@ rules:
                 : false)
             : false)
     insert_point:
-      relation: f0
+      relation: F0Point
       at: at_sync(current.sync_left)
       value: params.policy.f0.base_hz
       tag: f0_register_reset
@@ -278,16 +278,16 @@ rules:
   f0_voiceless_onset_perturbation:
     kind: point
     select:
-      relation: phone
+      relation: Segment
       where:
         all:
           - current.type == 'vowel'
           - prev != null && prev.type in ['stop_release', 'stop_aspiration', 'fricative']
           - { predicate: prev_is_voiceless }
     define:
-      prev_f0: prev_point('f0')
+      prev_f0: prev_point('F0Point')
     insert_point:
-      relation: f0
+      relation: F0Point
       at: at_sync(current.sync_left)
       value: >-
         min([(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiceless_onset_raise,
@@ -304,16 +304,16 @@ rules:
   f0_voiced_onset_perturbation:
     kind: point
     select:
-      relation: phone
+      relation: Segment
       where:
         all:
           - current.type == 'vowel'
           - prev != null && prev.type in ['stop_closure', 'stop_release']
           - { predicate: prev_is_voiced }
     define:
-      prev_f0: prev_point('f0')
+      prev_f0: prev_point('F0Point')
     insert_point:
-      relation: f0
+      relation: F0Point
       at: at_sync(current.sync_left)
       value: >-
         min([(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiced_onset_lower,
@@ -334,15 +334,15 @@ rules:
   f0_continuation_rise:
     kind: point
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'SIL' && (has(current.punctuationSymbol) ? current.punctuationSymbol in [',', ';', ':'] :
         false)
         && (!has(current.boundaryTone) || current.boundaryTone == null)
     define:
-      prev_f0: prev_point('f0')
+      prev_f0: prev_point('F0Point')
     insert_point:
-      relation: f0
+      relation: F0Point
       at: at_sync(current.sync_left)
       value: >-
         (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value)
@@ -368,22 +368,22 @@ rules:
   connected_speech_source_contour:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme != 'SIL'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
+        && has(current.F1)
+        && ((has(current.AV) && current.AV > 0)
+            || (has(current.AVS) && current.AVS > 0))
     contour:
       domain: phrase
       # Silverman et al. 1992 ToBI: BI=3 marks intermediate phrase boundaries.
       reset_break_index: 3
       apply:
-        - field: params.EePhraseDb
+        - field: EePhraseDb
           op: add
           value: ee_total_db
           tag: source_contour
-        - field: params.RdPhraseOffset
+        - field: RdPhraseOffset
           op: add
           value: "params.policy.source_contour.rd_final_offset * final_progress"
           tag: source_contour
@@ -437,10 +437,10 @@ rules:
   stress_spectral_tilt:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type == 'vowel' && has(current.stress) && current.stress >= 1"
     apply:
-      - field: params.TL
+      - field: TL
         op: add
         value: "-6"
         tag: stress

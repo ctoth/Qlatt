@@ -3,7 +3,7 @@ rules:
   dectalk_apply_diphthong_trajectories:
     kind: structural
     select:
-      relation: phone
+      relation: Segment
       where: current.type == 'vowel' && has(current.trajectory)
     splice:
       type: replace_range
@@ -20,7 +20,7 @@ rules:
   dectalk_ow_alveolar_stop_late_f2_locus:
     kind: structural
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'OW' &&
         next != null &&
@@ -56,7 +56,6 @@ rules:
             - mid
             - back
             - is_back_rounded
-            - params
             - trajectory
             - control_windows
           control_windows:
@@ -71,7 +70,7 @@ rules:
   dectalk_insert_voiceless_stop_release_into_silence:
     kind: structural
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme in ['P', 'T', 'K'] && next != null && next.phoneme == 'SIL'
     define:
       rel: "current.phoneme + \"_REL\""
@@ -98,16 +97,16 @@ rules:
       next_min_duration: "has(next_token.minimumDuration) ? next_token.minimumDuration : 0"
       closure_duration: "max([current_min_duration, current.duration - rel_duration])"
       silence_tail_duration: "max([next_min_duration, next_token.duration - dummy_duration])"
-      open_glottis_b1: "silence_target.params.B1 + params.policy.duration.open_glottis_b1_widen_hz"
-      open_glottis_b2: "silence_target.params.B2 + params.policy.duration.open_glottis_b2_widen_hz"
-      carrier_params: "merge(silence_target.params, {'SW': 0})"
+      open_glottis_b1: "silence_target.B1 + params.policy.duration.open_glottis_b1_widen_hz"
+      open_glottis_b2: "silence_target.B2 + params.policy.duration.open_glottis_b2_widen_hz"
+      carrier_params: "merge(silence_target, {'SW': 0})"
       rel_window_params: >-
-        merge(rel_target.params, merge({'A2': max([0, rel_profile.A2 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A3': max([0, rel_profile.A3 - params.policy.duration.dummy_vowel_burst_reduction_db]),
+        merge(rel_target, merge({'A2': max([0, rel_profile.A2 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A3': max([0, rel_profile.A3 - params.policy.duration.dummy_vowel_burst_reduction_db]),
         'A4': max([0, rel_profile.A4 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A5': max([0, rel_profile.A5 - params.policy.duration.dummy_vowel_burst_reduction_db]),
         'A6': max([0, rel_profile.A6 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'AB': max([0, rel_profile.AB - params.policy.duration.dummy_vowel_burst_reduction_db])},
         {'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1}))
       asp_window_params: >-
-        merge(asp_target.params, {'AH': max([0, asp_target.params.AH - params.policy.duration.dummy_vowel_aspiration_reduction_db]),
+        merge(asp_target, {'AH': max([0, asp_target.AH - params.policy.duration.dummy_vowel_aspiration_reduction_db]),
         'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1})
     splice:
       type: replace_range
@@ -120,7 +119,6 @@ rules:
             - stress
             - word
             - weak
-            - params
             - control_windows
             - duration
             - inherentDuration
@@ -140,7 +138,7 @@ rules:
           word: "has(current.word) ? current.word : null"
           weak: weak
           dummy_vowel: true
-          params: carrier_params
+          target: carrier_params
           duration: dummy_duration
           inherentDuration: dummy_duration
           minimumDuration: 0
@@ -156,25 +154,7 @@ rules:
               end_ms: dummy_duration
               fields: asp_window_params
               tag: "'stop_aspiration'"
-        - copy_from: next_token
-          copy_fields:
-            - phoneme
-            - stress
-            - word
-            - weak
-            - params
-            - duration
-            - inherentDuration
-            - minimumDuration
-            - type
-            - voiced
-            - voiceless
-            - is_obstruent
-            - is_stop_base
-            - bilabial
-            - alveolar
-            - velar
-            - punctuationSymbol
+        - copy_from: next
           duration: silence_tail_duration
     citations:
       - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
@@ -185,7 +165,7 @@ rules:
   dectalk_insert_voiceless_stop_release_and_aspiration:
     kind: structural
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme in ['P', 'T', 'K'] && (next != null ? !(next.type in ['stop_closure',
         'stop_release', 'stop_aspiration']) : false) && (next != null ? next.phoneme != 'SIL' : false)
@@ -229,11 +209,11 @@ rules:
         (next_unstressed ? params.policy.duration.voiceless_vot_aspiration_unstressed_reduction_db : 0) +
         (next_is_sonorant_consonant || next_token.phoneme in ['ER', 'RR'] ? params.policy.duration.voiceless_vot_aspiration_sonorant_bonus_db : 0)
       rel_params: >-
-        merge(rel_target.params, merge(rel_profile, {'AF': weak ? max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]) : rel_target.params.AF,
+        merge(rel_target, merge(rel_profile, {'AF': weak ? max([0, rel_target.AF - params.policy.duration.weak_release_amplitude_reduction_db]) : rel_target.AF,
         'AH': max([0, asp_window_ah])}))
       asp_window_params: >-
-        {'AH': max([0, asp_window_ah]), 'AV': 0, 'B1': next_token.params.B1 + params.policy.duration.open_glottis_b1_widen_hz,
-        'B2': next_token.params.B2 + params.policy.duration.open_glottis_b2_widen_hz}
+        {'AH': max([0, asp_window_ah]), 'AV': 0, 'B1': next_token.B1 + params.policy.duration.open_glottis_b1_widen_hz,
+        'B2': next_token.B2 + params.policy.duration.open_glottis_b2_widen_hz}
       rel_duration: >-
         weak ? max([params.policy.duration.weak_release_min_ms, rel_duration_base *
         params.policy.duration.weak_release_scale]) : rel_duration_base
@@ -253,7 +233,6 @@ rules:
             - stress
             - word
             - weak
-            - params
             - control_windows
             - duration
             - inherentDuration
@@ -272,7 +251,7 @@ rules:
           stress: "has(current.stress) ? current.stress : null"
           word: "has(current.word) ? current.word : null"
           weak: weak
-          params: rel_params
+          target: rel_params
           duration: rel_duration
           inherentDuration: rel_target.inherentDuration
           minimumDuration: "has(rel_target.minimumDuration) ? rel_target.minimumDuration : null"
@@ -284,26 +263,7 @@ rules:
               end_ms: asp_duration
               fields: asp_window_params
               tag: "'stop_aspiration'"
-        - copy_from: next_token
-          copy_fields:
-            - phoneme
-            - stress
-            - word
-            - weak
-            - params
-            - control_windows
-            - duration
-            - inherentDuration
-            - minimumDuration
-            - type
-            - voiced
-            - voiceless
-            - is_obstruent
-            - is_stop_base
-            - bilabial
-            - alveolar
-            - velar
-            - punctuationSymbol
+        - copy_from: next
     citations:
       - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
       - "DECtalk 4.63 p_us_st1.c Special Rule 2 (aspiration/VOT extends into the following sonorant)"
@@ -314,7 +274,7 @@ rules:
   dectalk_insert_voiceless_stop_release_and_aspiration_final:
     kind: structural
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme in ['P', 'T', 'K'] && next == null
     define:
       rel: "current.phoneme + \"_REL\""
@@ -336,16 +296,16 @@ rules:
       asp_duration: "vot_target - rel_duration"
       current_min_duration: "has(current.minimumDuration) ? current.minimumDuration : 0"
       closure_duration: "max([current_min_duration, current.duration - rel_duration])"
-      open_glottis_b1: "silence_target.params.B1 + params.policy.duration.open_glottis_b1_widen_hz"
-      open_glottis_b2: "silence_target.params.B2 + params.policy.duration.open_glottis_b2_widen_hz"
-      carrier_params: "merge(silence_target.params, {'SW': 0})"
+      open_glottis_b1: "silence_target.B1 + params.policy.duration.open_glottis_b1_widen_hz"
+      open_glottis_b2: "silence_target.B2 + params.policy.duration.open_glottis_b2_widen_hz"
+      carrier_params: "merge(silence_target, {'SW': 0})"
       rel_window_params: >-
-        merge(rel_target.params, merge({'A2': max([0, rel_profile.A2 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A3': max([0, rel_profile.A3 - params.policy.duration.dummy_vowel_burst_reduction_db]),
+        merge(rel_target, merge({'A2': max([0, rel_profile.A2 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A3': max([0, rel_profile.A3 - params.policy.duration.dummy_vowel_burst_reduction_db]),
         'A4': max([0, rel_profile.A4 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A5': max([0, rel_profile.A5 - params.policy.duration.dummy_vowel_burst_reduction_db]),
         'A6': max([0, rel_profile.A6 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'AB': max([0, rel_profile.AB - params.policy.duration.dummy_vowel_burst_reduction_db])},
         {'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1}))
       asp_window_params: >-
-        merge(asp_target.params, {'AH': max([0, asp_target.params.AH - params.policy.duration.dummy_vowel_aspiration_reduction_db]),
+        merge(asp_target, {'AH': max([0, asp_target.AH - params.policy.duration.dummy_vowel_aspiration_reduction_db]),
         'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1})
     splice:
       type: replace_range
@@ -358,7 +318,6 @@ rules:
             - stress
             - word
             - weak
-            - params
             - control_windows
             - duration
             - inherentDuration
@@ -371,7 +330,7 @@ rules:
           word: "has(current.word) ? current.word : null"
           weak: weak
           dummy_vowel: true
-          params: carrier_params
+          target: carrier_params
           duration: dummy_duration
           inherentDuration: dummy_duration
           minimumDuration: 0
@@ -397,7 +356,7 @@ rules:
   dectalk_insert_voiced_stop_release:
     kind: structural
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme in ['B', 'D', 'G'] && (next != null ? !(next.type in ['stop_closure',
         'stop_release', 'stop_aspiration']) : false)
@@ -415,8 +374,8 @@ rules:
         (has(profile_ref.is_back_rounded) && profile_ref.is_back_rounded == true ? 'back_rounded_vowel' : 'back_unrounded_vowel'))
       rel_profile: "rel_target.stopReleaseProfiles[profile_class]"
       rel_params: >-
-        weak ? merge(rel_target.params, merge(rel_profile, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH -
-        params.policy.duration.weak_release_amplitude_reduction_db])})) : merge(rel_target.params, rel_profile)
+        weak ? merge(rel_target, merge(rel_profile, {'AF': max([0, rel_target.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.AH -
+        params.policy.duration.weak_release_amplitude_reduction_db])})) : merge(rel_target, rel_profile)
       rel_duration: >-
         weak ? max([params.policy.duration.weak_release_min_ms, (has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration) *
         params.policy.duration.weak_release_scale]) : (has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration)
@@ -433,7 +392,6 @@ rules:
             - stress
             - word
             - weak
-            - params
             - control_windows
             - duration
             - inherentDuration
@@ -452,25 +410,13 @@ rules:
           stress: "has(current.stress) ? current.stress : null"
           word: "has(current.word) ? current.word : null"
           weak: weak
-          params: rel_params
+          target: rel_params
           duration: rel_duration
           inherentDuration: rel_target.inherentDuration
           minimumDuration: "has(rel_target.minimumDuration) ? rel_target.minimumDuration : null"
           type: rel_target.type
           inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
-        - copy_from: next_token
-          copy_fields:
-            - phoneme
-            - stress
-            - word
-            - weak
-            - params
-            - control_windows
-            - duration
-            - inherentDuration
-            - minimumDuration
-            - type
-            - punctuationSymbol
+        - copy_from: next
     citations:
       - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
       - "DECtalk 4.63 p_us_st1.c Special Rule 3 (voiced stop burst/voicebar is realized within the burst interval, not as added segment time)"
@@ -480,7 +426,7 @@ rules:
   dectalk_insert_voiced_stop_release_final:
     kind: structural
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme in ['B', 'D', 'G'] && next == null
     define:
       rel: "current.phoneme + \"_REL\""
@@ -492,20 +438,21 @@ rules:
         (profile_ref.type == 'vowel' && has(profile_ref.front) && profile_ref.front == true ? 'front_vowel' :
         (has(profile_ref.is_back_rounded) && profile_ref.is_back_rounded == true ? 'back_rounded_vowel' : 'back_unrounded_vowel'))
       rel_profile: "rel_target.stopReleaseProfiles[profile_class]"
-      rel_params: "merge(rel_target.params, merge(rel_profile, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])}))"
+      rel_params: "merge(rel_target, merge(rel_profile, {'AF': max([0, rel_target.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.AH - params.policy.duration.weak_release_amplitude_reduction_db])}))"
       rel_duration: >-
         max([params.policy.duration.weak_release_min_ms, (has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration) *
         params.policy.duration.weak_release_scale])
     splice:
       type: replace_range
-      range_left: current.sync_right
+      range_left: current.sync_left
       range_right: current.sync_right
       insert:
+        - copy_from: current
         - phoneme: rel
           stress: "has(current.stress) ? current.stress : null"
           word: "has(current.word) ? current.word : null"
           weak: weak
-          params: rel_params
+          target: rel_params
           duration: rel_duration
           inherentDuration: rel_target.inherentDuration
           minimumDuration: "has(rel_target.minimumDuration) ? rel_target.minimumDuration : null"
@@ -519,13 +466,12 @@ rules:
   dectalk_weaken_interdental_frication:
     kind: structural
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme in ['TH', 'DH']
     define:
       next_token: next
-      quiet_params: "merge(current.params, {'AF': 0, 'SW': 0})"
       active_tail_window: >-
-        {'AF': has(current.?params.AF) ? current.params.AF : 0,
+        {'AF': has(current.AF) ? current.AF : 0,
         'SW': 1}
       breathy_next_ms: >-
         current.phoneme == 'TH' &&
@@ -539,8 +485,8 @@ rules:
         params.policy.formant.voiced_fricative_voicing_onset_ms : 0
       voiced_onset_av: >-
         max([
-          has(current.?params.AV) ? current.params.AV : 0,
-          (has(next_token.?params.AV) ? next_token.params.AV : 0) - params.policy.formant.source_onset_boundary_drop_db
+          has(current.AV) ? current.AV : 0,
+          (has(next_token.AV) ? next_token.AV : 0) - params.policy.formant.source_onset_boundary_drop_db
         ])
       breathy_window: "{'AH': params.policy.formant.voiceless_open_tract_breathy_onset_db}"
       voiced_onset_window: "{'AV': voiced_onset_av}"
@@ -550,21 +496,8 @@ rules:
       range_right: current.sync_right
       insert:
         - copy_from: current
-          copy_fields:
-            - phoneme
-            - stress
-            - word
-            - weak
-            - duration
-            - inherentDuration
-            - minimumDuration
-            - type
-            - punctuationSymbol
-            - voiced
-            - voiceless
-            - dental
-            - control_windows
-          params: quiet_params
+          AF: 0
+          SW: 0
           inventorySW: 0
           control_windows:
             - suffix_ms: params.policy.formant.weak_interdental_fricative_tail_ms
@@ -591,7 +524,7 @@ rules:
   dectalk_add_voiced_fricative_soft_voicing_onset:
     kind: structural
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme in ['V', 'Z', 'ZH', 'JH'] &&
         (next != null ? (next.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
@@ -600,8 +533,8 @@ rules:
       next_token: next
       voiced_onset_av: >-
         max([
-          has(current.?params.AV) ? current.params.AV : 0,
-          (has(next_token.?params.AV) ? next_token.params.AV : 0) - params.policy.formant.source_onset_boundary_drop_db
+          has(current.AV) ? current.AV : 0,
+          (has(next_token.AV) ? next_token.AV : 0) - params.policy.formant.source_onset_boundary_drop_db
         ])
       voiced_onset_window: "{'AV': voiced_onset_av}"
     splice:
@@ -615,7 +548,6 @@ rules:
             - stress
             - word
             - weak
-            - params
             - control_windows
             - duration
             - inherentDuration
@@ -633,30 +565,7 @@ rules:
               end_ms: params.policy.formant.voiced_fricative_voicing_onset_ms
               fields: voiced_onset_window
               tag: "'soft_voicing_onset'"
-        - copy_from: next_token
-          copy_fields:
-            - phoneme
-            - stress
-            - word
-            - weak
-            - params
-            - control_windows
-            - duration
-            - inherentDuration
-            - minimumDuration
-            - type
-            - punctuationSymbol
-            - voiced
-            - voiceless
-            - nasal
-            - liquid
-            - glide
-            - hi
-            - mid
-            - low
-            - front
-            - back
-            - rhotic
+        - copy_from: next
     citations:
       - "DECtalk 4.63 p_us_st1.c (PAV onset is abrupt except after a voiced fricative)"
       - "DECtalk 4.63 p_us_st1.c (source onset boundary value is target-10 dB when amplitude is increasing)"
@@ -665,7 +574,7 @@ rules:
   dectalk_add_voiceless_fricative_breathy_onset:
     kind: structural
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme in ['F', 'S', 'SH'] &&
         (next != null ? (next.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
@@ -684,7 +593,6 @@ rules:
             - stress
             - word
             - weak
-            - params
             - control_windows
             - duration
             - inherentDuration
@@ -703,34 +611,7 @@ rules:
               end_ms: params.policy.formant.voiceless_open_tract_breathy_onset_ms
               fields: breathy_window
               tag: "'breathy_onset'"
-        - copy_from: next_token
-          copy_fields:
-            - phoneme
-            - stress
-            - word
-            - weak
-            - params
-            - control_windows
-            - duration
-            - inherentDuration
-            - minimumDuration
-            - type
-            - punctuationSymbol
-            - voiced
-            - voiceless
-            - dental
-            - labiodental
-            - alveolar
-            - postalveolar
-            - nasal
-            - liquid
-            - glide
-            - hi
-            - mid
-            - low
-            - front
-            - back
-            - rhotic
+        - copy_from: next
     citations:
       - "DECtalk 4.63 p_us_st1.c (PAP backward smoothing: onset of a vowel from voiceless open vocal tract is breathy)"
       - "DECtalk 4.63 ph_defs.h (NF40MS breathy onset span)"
@@ -739,7 +620,7 @@ rules:
   dectalk_add_vowel_breathy_offset:
     kind: structural
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.type == 'vowel' &&
         (has(current.voiced) ? current.voiced == true : true) &&
@@ -758,7 +639,6 @@ rules:
             - stress
             - word
             - weak
-            - params
             - control_windows
             - duration
             - inherentDuration
@@ -772,19 +652,7 @@ rules:
             - front
             - back
             - rhotic
-        - copy_from: next_token
-          copy_fields:
-            - phoneme
-            - stress
-            - word
-            - weak
-            - params
-            - control_windows
-            - duration
-            - inherentDuration
-            - minimumDuration
-            - type
-            - punctuationSymbol
+        - copy_from: next
           control_windows:
             - start_ms: 0
               target: "'current'"

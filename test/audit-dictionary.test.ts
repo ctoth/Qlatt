@@ -168,7 +168,7 @@ describe("full dictionary audit", () => {
           }
           currentWordForWarnings = null;
           processed++;
-          if (processed % 5000 === 0) {
+          if (processed % 500 === 0) {
             console.log(
               `  processed ${processed}/${auditWords.length}...`
             );

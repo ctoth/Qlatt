@@ -31,7 +31,7 @@ version: v1
 #
 # Mechanism: a structural splice over the single T/D token, replacing it with one
 # token that keeps the original stress/word but adopts the DF/DX inventory target
-# (phoneme, type, params, durations).  A bare `apply op:set phoneme` would only
+# (phoneme, type, durations).  A bare `apply op:set phoneme` would only
 # rename the token and leave the stop's acoustics (engine applyEffectToToken does
 # not re-materialize params on rename), so the splice + target() form is needed
 # to actually realize the flap.  This matches the qlatt-english t_flapping rule.
@@ -47,7 +47,7 @@ rules:
   dectalk_reduce_article_a:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: "current.phoneme == 'EY'"
     define:
       ax: "target('AX0')"
@@ -65,12 +65,11 @@ rules:
             - word
           phoneme: "'AX'"
           type: ax.type
-          params: ax.params
+          target: ax
           duration: ax.duration
           inherentDuration: ax.inherentDuration
           minimumDuration: "has(ax.minimumDuration) ? ax.minimumDuration : ax.duration"
           voiced: "has(ax.voiced) ? ax.voiced : true"
-          trajectory: "has(ax.trajectory) ? ax.trajectory : null"
     citations:
       - "DECtalk 4.63 Dic_us.txt (article dictionary entry: a,N,e...)"
       - "DECtalk 4.63 oracle -lp for 'a cat.' (runtime phoneme log emits AX for unstressed article a)"
@@ -109,7 +108,7 @@ rules:
   dectalk_geminate_delete:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.type in ['fricative', 'stop_closure', 'affricate']
     define:
@@ -128,7 +127,6 @@ rules:
           copy_fields:
             - phoneme
             - type
-            - params
             - stress
             - word
             - inherentDuration
@@ -166,7 +164,7 @@ rules:
   dectalk_assimilate_sibilant_sh:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme in ['S', 'Z']
     define:
       n: next
@@ -186,7 +184,7 @@ rules:
             - word
           phoneme: assim_name
           type: at.type
-          params: at.params
+          target: at
           duration: "min([current.duration, at.duration])"
           inherentDuration: at.inherentDuration
           minimumDuration: "has(at.minimumDuration) ? at.minimumDuration : at.duration"
@@ -198,7 +196,7 @@ rules:
   dectalk_flap_t:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'T'
     define:
       p: prev
@@ -235,7 +233,7 @@ rules:
             - word
           phoneme: "'DF'"
           type: df.type
-          params: df.params
+          target: df
           duration: "min([current.duration, df.duration])"
           inherentDuration: df.inherentDuration
           minimumDuration: "has(df.minimumDuration) ? df.minimumDuration : df.duration"
@@ -248,7 +246,7 @@ rules:
   dectalk_flap_d:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'D'
     define:
       p: prev
@@ -285,7 +283,7 @@ rules:
             - word
           phoneme: "'DX'"
           type: dx.type
-          params: dx.params
+          target: dx
           duration: "min([current.duration, dx.duration])"
           inherentDuration: dx.inherentDuration
           minimumDuration: "has(dx.minimumDuration) ? dx.minimumDuration : dx.duration"
@@ -310,7 +308,7 @@ rules:
   dectalk_palatalize_t:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'T'
     define:
       n: next
@@ -329,7 +327,7 @@ rules:
             - word
           phoneme: "'CH'"
           type: ch.type
-          params: ch.params
+          target: ch
           duration: ch.duration
           inherentDuration: ch.inherentDuration
           minimumDuration: "has(ch.minimumDuration) ? ch.minimumDuration : ch.duration"
@@ -341,7 +339,7 @@ rules:
   dectalk_palatalize_d:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'D'
     define:
       n: next
@@ -360,7 +358,7 @@ rules:
             - word
           phoneme: "'JH'"
           type: jh.type
-          params: jh.params
+          target: jh
           duration: jh.duration
           inherentDuration: jh.inherentDuration
           minimumDuration: "has(jh.minimumDuration) ? jh.minimumDuration : jh.duration"
@@ -391,7 +389,7 @@ rules:
   dectalk_glottalize_t:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'T'
     define:
       p: prev
@@ -427,7 +425,7 @@ rules:
             - word
           phoneme: glot_target
           type: gt.type
-          params: gt.params
+          target: gt
           duration: "min([current.duration, gt.duration])"
           inherentDuration: gt.inherentDuration
           minimumDuration: "has(gt.minimumDuration) ? gt.minimumDuration : gt.duration"
@@ -485,7 +483,7 @@ rules:
   dectalk_syllabic_n_after_tx:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: current.type == 'vowel'
     define:
       p: prev
@@ -507,7 +505,7 @@ rules:
             - word
           phoneme: "'EN'"
           type: en.type
-          params: en.params
+          target: en
           duration: en.duration
           inherentDuration: en.inherentDuration
           minimumDuration: "has(en.minimumDuration) ? en.minimumDuration : en.duration"
@@ -520,7 +518,7 @@ rules:
   dectalk_dental_dh:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'DH'
     define:
       p: prev
@@ -540,7 +538,7 @@ rules:
             - word
           phoneme: "'DZ'"
           type: dz.type
-          params: dz.params
+          target: dz
           duration: "min([current.duration, dz.duration])"
           inherentDuration: dz.inherentDuration
           minimumDuration: "has(dz.minimumDuration) ? dz.minimumDuration : dz.duration"
@@ -580,14 +578,14 @@ rules:
   #
   # Mechanism: a structural splice over the [vowel, R] range, replacing it with ONE
   # token copied from the vowel (keeping its stress/word) but adopting the fused
-  # rhotic vowel's target (phoneme, type, params, durations).  This both rewrites
+  # rhotic vowel's target (phoneme, type, durations).  This both rewrites
   # the vowel and deletes the /R/ in a single edit (DECtalk's "replace last output
   # + dodelete").
   # -------------------------------------------------------------------------
   dectalk_fuse_vowel_r:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'R'
     define:
       p: prev
@@ -624,12 +622,11 @@ rules:
             - word
           phoneme: fused_name
           type: fv.type
-          params: fv.params
+          target: fv
           duration: fv.duration
           inherentDuration: fv.inherentDuration
           minimumDuration: "has(fv.minimumDuration) ? fv.minimumDuration : fv.duration"
           voiced: "has(fv.voiced) ? fv.voiced : true"
-          trajectory: "has(fv.trajectory) ? fv.trajectory : null"
     citations:
       - "DECtalk 4.63 ph_aloph.c:835-872 (A13 postvocalic vowel+R fusion: prev vowel rewritten to rhotic vowel, /R/ deleted)"
       - "DECtalk 4.63 ph_aloph.c:823-824 (postvocalic gate: (FSTRESS|FWINITC) IS_MINUS && prev FVOWEL+)"
@@ -666,7 +663,7 @@ rules:
   dectalk_prevocalic_r_rr:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'R'
     define:
       n: next
@@ -689,7 +686,7 @@ rules:
             - word
           phoneme: "'RR'"
           type: rr.type
-          params: rr.params
+          target: rr
           duration: rr.duration
           inherentDuration: rr.inherentDuration
           minimumDuration: "has(rr.minimumDuration) ? rr.minimumDuration : rr.duration"

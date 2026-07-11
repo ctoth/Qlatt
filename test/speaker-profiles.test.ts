@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import { runDeclarativeFrontend } from "../src/declarative-frontend";
 import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrack } from "../src/tts-frontend";
 
@@ -34,41 +33,6 @@ describe("speaker profile context", () => {
       expect(speaker.spectral_tilt_offset_db).toBeDefined();
       expect(speaker.spectral_tilt_offset_db.value).toBe(0);
       expect(speaker.spectral_tilt_offset_db.citations).toContain("Klatt & Klatt 1990");
-    });
-  });
-
-  describe("parameter merging", () => {
-    it("speaker overrides passed to runDeclarativeFrontend do not corrupt other policy keys", () => {
-      const sequence = [
-        {
-          phoneme: "AA",
-          type: "vowel",
-          low: true,
-          stress: 1,
-          params: { F1: 700, F2: 1220, AV: 64 },
-          duration: 180,
-          inherentDuration: 180,
-        },
-      ];
-
-      // Pass both speaker and duration overrides to verify deep merge preserves both
-      const withOverrides = runDeclarativeFrontend(sequence, {
-        phases: ["duration"],
-        parameters: {
-          policy: {
-            speaker: { base_f0_hz: 200 },
-            duration: { stress_primary_multiplier: 2.0 },
-          },
-        },
-      });
-
-      const withoutOverrides = runDeclarativeFrontend(
-        [{ ...sequence[0] }],
-        { phases: ["duration"] },
-      );
-
-      // With stress_primary_multiplier=2.0, the vowel should be longer than default (1.3)
-      expect(withOverrides[0].duration).toBeGreaterThan(withoutOverrides[0].duration);
     });
   });
 

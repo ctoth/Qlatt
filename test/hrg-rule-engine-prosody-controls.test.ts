@@ -73,7 +73,7 @@ describe("graph-native prosody-control execution", () => {
           insert: {
             relation: "Tilt",
             layer: "hat",
-            at: "merge(current, {'ratio': 0.75})",
+            at: "at_ratio(current, 0.75)",
             value: 25,
             duration_frames: 4,
             tag: "accent",

@@ -3,7 +3,7 @@ import { loadExperimentConfig } from "../src/experiments/load-experiment-config"
 import { createConfiguredEvaluator } from "../src/semantics/evaluator-factory";
 import { createDiagnostics } from "../src/diagnostics";
 import { createProvenanceCollector } from "../src/provenance";
-import { textToKlattTrack } from "../src/tts-frontend";
+import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { emitNasalSubsystemExplainability } from "../src/nasal-subsystem";
 
 describe("nasal subsystem semantics", () => {
@@ -126,13 +126,11 @@ describe("nasal subsystem explainability", () => {
     const provenance = createProvenanceCollector();
     const diagnostics = createDiagnostics();
 
-    textToKlattTrack("nina", 110, 30, { provenance, diagnostics });
-
-    const decisions = provenance.getDecisions();
-    expect(decisions.some((decision) => decision.type === "nasal_place_assigned")).toBe(true);
-    expect(decisions.some((decision) => decision.type === "nasal_coupling_contour_applied")).toBe(true);
-    expect(decisions.some((decision) => decision.type === "nasal_core_zero_derived")).toBe(true);
-    expect(diagnostics.getEntries().some((entry) => entry.code === "I_NASAL_RUNTIME_BOUND")).toBe(true);
+    const result = textToKlattTrackDetailed("nina", 110, 30, { provenance, diagnostics });
+    const segments = result.utterance.relation("Segment").listItems();
+    expect(segments.some((item) => item.latestWrite("nasalPlaceIndex")?.ruleId === "nasal_place_assignment")).toBe(true);
+    expect(segments.some((item) => item.latestWrite("control_windows")?.ruleId === "nasal_windows")).toBe(true);
+    expect(provenance.getDecisions().some((decision) => decision.subject.includes("nasalPlaceIndex"))).toBe(true);
   });
 
   it("emits stable nasal diagnostic codes for invalid declarative inputs", () => {

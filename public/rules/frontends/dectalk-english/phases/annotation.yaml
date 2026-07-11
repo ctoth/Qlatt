@@ -16,7 +16,7 @@ rules:
   syllable_index_annotation:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.phoneme != 'SIL' && has(current.word) && current.word != ''"
     apply:
       - field: syllable_index
@@ -30,7 +30,7 @@ rules:
   syllable_role_annotation:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.phoneme != 'SIL' && has(current.word) && current.word != ''"
     apply:
       - field: syllable_role
@@ -44,7 +44,7 @@ rules:
   syllable_position_annotation:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.phoneme != 'SIL' && has(current.word) && current.word != ''"
     apply:
       - field: syllable_position_in_word
@@ -57,7 +57,7 @@ rules:
   dectalk_single_word_fallback_primary_stress:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type == 'vowel' && word_count() == 1"
     define:
       prev_primary_or_boundary: >-
@@ -83,7 +83,7 @@ rules:
   dectalk_onset_y_stress:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'Y'
         && has(current.word) && current.word != ''

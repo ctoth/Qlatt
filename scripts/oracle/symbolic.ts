@@ -19,12 +19,6 @@ type QlattSegment = {
   durationMs: number;
 };
 
-type FrontendPhoneSummary = {
-  phoneme?: unknown;
-  word?: unknown;
-  durationMs?: unknown;
-};
-
 type QlattRegion = {
   startMs: number;
   durationMs: number;
@@ -530,79 +524,8 @@ export function extractQlattSymbolic(payload: unknown): {
       ? (payload as { track?: unknown }).track
       : null,
   );
-  const frontendPhones =
-    payload && typeof payload === "object"
-      ? (payload as { frontendPhones?: unknown }).frontendPhones
-      : null;
   const swRegions = extractTrackSwRegions(trackEvents);
   const trackBurstRegions = extractTrackBurstRegions(trackEvents);
-
-  if (Array.isArray(frontendPhones)) {
-    const segments = frontendPhones
-      .map((phone, index) => {
-        const entry = phone as FrontendPhoneSummary;
-        const rawPhoneme =
-          typeof entry?.phoneme === "string" ? entry.phoneme.trim() : "";
-        const normalized = normalizeQlattPhoneme(rawPhoneme);
-        if (!rawPhoneme || !normalized) return null;
-        const durationMs = Number(entry?.durationMs ?? 0);
-        return {
-          index,
-          rawPhoneme,
-          phoneme: normalized,
-          word: typeof entry?.word === "string" ? entry.word : undefined,
-          durationMs: Number.isFinite(durationMs) ? durationMs : 0,
-        };
-      })
-      .filter(
-        (
-          segment,
-        ): segment is {
-          index: number;
-          rawPhoneme: string;
-          phoneme: string;
-          word?: string;
-          durationMs: number;
-        } => !!segment,
-      );
-
-    let cursorMs = 0;
-    const qlattSegments: QlattSegment[] = segments.map((segment) => {
-      const next: QlattSegment = {
-        rawPhoneme: segment.rawPhoneme,
-        phoneme: segment.phoneme,
-        ...(segment.word ? { word: segment.word } : {}),
-        startMs: cursorMs,
-        durationMs: segment.durationMs,
-      };
-      cursorMs += segment.durationMs;
-      return next;
-    });
-
-    const phonemeSequence = qlattSegments.map((segment) => segment.phoneme);
-    const comparisonTokens = mapQlattComparisonSegments(qlattSegments);
-    const labeledBurstRegions = qlattSegments
-      .filter(
-        (segment) =>
-          segment.rawPhoneme.endsWith("_REL") || segment.rawPhoneme.endsWith("_ASP"),
-      )
-      .map((segment) => ({
-        startMs: segment.startMs,
-        durationMs: segment.durationMs,
-        phoneme: segment.rawPhoneme,
-        kind: segment.rawPhoneme.endsWith("_ASP") ? "aspiration" : "release",
-      }));
-    const burstRegions = labeledBurstRegions.length > 0 ? labeledBurstRegions : trackBurstRegions;
-
-    return {
-      segmentCount: qlattSegments.length,
-      segments: qlattSegments,
-      phonemeSequence,
-      comparisonTokens,
-      swRegions,
-      burstRegions,
-    };
-  }
 
   if (trackEvents.length === 0) {
     return {

@@ -8,7 +8,7 @@ rules:
   spelling_mode_letter_names:
     kind: scalar
     select:
-      relation: orthography
+      relation: Token
       where: >-
         current.tokenType == 'word' && current.word in sets.ascii_letter &&
         ((prev != null && prev.tokenType == 'word' && prev.word in sets.ascii_letter &&

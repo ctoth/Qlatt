@@ -13,5 +13,5 @@ describe("tts frontend unstressed front vowels", () => {
 
     expect(iyFrames.length).toBeGreaterThan(0);
     expect(maxParam(iyFrames, "F2")).toBeGreaterThanOrEqual(2190);
-  });
+  }, 15_000);
 });

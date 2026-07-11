@@ -3,7 +3,7 @@ rules:
   place_f2_locus:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme in sets.place_locus_closures
     define:
       place: maps.place_locus_closure_place[current.phoneme]
@@ -14,7 +14,7 @@ rules:
         cand.hi == true : false))
       back_vowel: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
     apply:
-      - field: params.F2
+      - field: F2
         op: set
         dispatch:
           - when: "place == 'velar' && back_vowel"
@@ -45,18 +45,18 @@ rules:
   place_rel_copy:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme in sets.place_locus_releases && prev != null && prev.phoneme in sets.place_locus_closures &&
         maps.place_locus_release_for_closure[prev.phoneme] == current.phoneme
     define:
       place: maps.place_locus_release_place[current.phoneme]
     apply:
-      - field: params.F2
+      - field: F2
         op: set
         dispatch:
-          - when: "prev != null && has(prev.?params.F2)"
-            value: prev.params.F2
+          - when: "prev != null && has(prev.F2)"
+            value: prev.F2
           - when: "place == 'velar'"
             value: params.policy.formant.place_loci.velar.locus_default
           - when: "place == 'bilabial'"
@@ -71,18 +71,18 @@ rules:
   nasal_place_assignment:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.type == 'nasal'
     apply:
-      - field: params.nasalPlaceIndex
+      - field: nasalPlaceIndex
         op: set
         value: target(current.phoneme).nasal_place_index
         tag: nasal_place
-      - field: params.nasalMurmurStrength
+      - field: nasalMurmurStrength
         op: set
         value: params.policy.nasal.murmur_strength
         tag: nasal_murmur
-      - field: params.nasalCoupling
+      - field: nasalCoupling
         op: set
         value: 1
         tag: nasal_coupling
@@ -92,7 +92,7 @@ rules:
   nasal_place_assimilation:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'N'
     define:
       "n": next
@@ -101,7 +101,7 @@ rules:
       next_velar: "next_is_obstruent ? (has(n.velar) ? n.velar == true : false) : false"
     constraint: next_is_obstruent
     apply:
-      - field: params.nasalPlaceIndex
+      - field: nasalPlaceIndex
         op: set
         dispatch:
           - when: next_bilabial
@@ -110,14 +110,14 @@ rules:
             value: 3
           - default: 2
         tag: nasal_place
-      - field: params.F2
+      - field: F2
         op: set
         dispatch:
           - when: next_bilabial
             value: params.policy.formant.place_loci.bilabial.locus_default
           - when: next_velar
-            value: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.nasal_n_f2_default"
-          - default: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.nasal_n_f2_default"
+            value: "has(current.F2) ? current.F2 : params.policy.formant.nasal_n_f2_default"
+          - default: "has(current.F2) ? current.F2 : params.policy.formant.nasal_n_f2_default"
         tag: nasal_place
     citations:
       - Allen et al. 1987
@@ -126,7 +126,7 @@ rules:
   nasal_windows:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.type == 'nasal'
     define:
       anticipatory_window_ms: >-
@@ -239,24 +239,24 @@ rules:
   dark_l_allophony:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'L'
     apply:
-      - field: params.F2
+      - field: F2
         op: set
         dispatch:
           - when:
               predicate: is_coda
             value: params.policy.formant.dark_l_f2
-          - default: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.light_l_f2"
+          - default: "has(current.F2) ? current.F2 : params.policy.formant.light_l_f2"
         tag: lateral_allophony
-      - field: params.F3
+      - field: F3
         op: set
         dispatch:
           - when:
               predicate: is_coda
             value: params.policy.formant.dark_l_f3
-          - default: "has(current.?params.F3) ? current.params.F3 : params.policy.formant.light_l_f3"
+          - default: "has(current.F3) ? current.F3 : params.policy.formant.light_l_f3"
         tag: lateral_allophony
     citations:
       - Recasens 2012 (lateral allophones)
@@ -264,10 +264,10 @@ rules:
   r_f3_lowering:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'R'
     apply:
-      - field: params.F3
+      - field: F3
         op: set
         dispatch:
           - when:
@@ -281,10 +281,10 @@ rules:
   f1_stop_onset:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.type == 'stop_release'
     apply:
-      - field: params.F1
+      - field: F1
         op: set
         dispatch:
           - when:
@@ -303,7 +303,7 @@ rules:
   burst_spectral_template:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.type in ['stop_release', 'stop_aspiration']
     apply:
       # Chunk 7: one templated effect block expands to 9 concrete blocks
@@ -311,7 +311,7 @@ rules:
       # amplitude field from the nested policy table keyed by formant index
       # and place of articulation.
       - for_each_field: [A2, A3, A4, A5, A6, A7, A8, A9, A10]
-        field: "params.{field}"
+        field: "{field}"
         op: set
         dispatch:
           - when:
@@ -323,7 +323,7 @@ rules:
           - when:
               predicate: is_velar
             value: "params.policy.formant.burst_amplitudes.{field}.velar"
-          - default: "has(current.?params.{field}) ? current.params.{field} : 0"
+          - default: "has(current.?{field}) ? current.{field} : 0"
         tag: burst_spectrum
     citations:
       - Blumstein & Stevens 1979 (burst spectral invariance)
@@ -334,13 +334,13 @@ rules:
   weak_stop_release_parallel_attenuation:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type == 'stop_release' && has(current.weak) && current.weak == true"
     apply:
       # Chunk 7: one templated effect block expands to 10 concrete `add -18`
       # blocks across A1..A10 at rule-load time.
       - for_each_field: [A1, A2, A3, A4, A5, A6, A7, A8, A9, A10]
-        field: "params.{field}"
+        field: "{field}"
         op: add
         value: -18
         tag: weak_release_spectrum
@@ -351,18 +351,18 @@ rules:
   weak_final_voiced_stop_closure_attenuation:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type == 'stop_closure' && has(current.voiced) && current.voiced == true"
     define:
       n: next
       before_weak_release: "n != null && n.type == 'stop_release' && has(n.weak) && n.weak == true"
     constraint: before_weak_release
     apply:
-      - field: params.AV
+      - field: AV
         op: add
         value: -24
         tag: weak_coda_devoicing
-      - field: params.AVS
+      - field: AVS
         op: set
         value: -70
         tag: weak_coda_devoicing
@@ -373,7 +373,7 @@ rules:
   vcv_coarticulation:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type in ['stop_closure', 'nasal', 'liquid', 'glide'] && (prev != null ? prev.type == 'vowel' : false)"
     define:
       "n": next
@@ -381,32 +381,32 @@ rules:
         n == null ? null : (n.type == 'vowel' ? n : (has(n.type) ? (n.type in ['stop_release', 'stop_aspiration'] ?
         ahead(current, 2) : null) : null))
       has_flanking: "next_vowel != null ? (next_vowel.type == 'vowel' ? true : false) : false"
-      prev_f1: "has(prev.?params.F1) ? prev.params.F1 : params.policy.formant.default_f1_fallback"
-      next_f1: "has_flanking ? (has(next_vowel.?params.F1) ? next_vowel.params.F1 : params.policy.formant.default_f1_fallback) : params.policy.formant.default_f1_fallback"
+      prev_f1: "has(prev.F1) ? prev.F1 : params.policy.formant.default_f1_fallback"
+      next_f1: "has_flanking ? (has(next_vowel.F1) ? next_vowel.F1 : params.policy.formant.default_f1_fallback) : params.policy.formant.default_f1_fallback"
       flanking_avg_f1: "has_flanking ? (prev_f1 + next_f1) / 2 : 0"
-      cur_f1: "has(current.?params.F1) ? current.params.F1 : params.policy.formant.default_f1_fallback"
-      prev_f2: "has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.default_f2_fallback"
-      next_f2: "has_flanking ? (has(next_vowel.?params.F2) ? next_vowel.params.F2 : params.policy.formant.default_f2_fallback) : params.policy.formant.default_f2_fallback"
+      cur_f1: "has(current.F1) ? current.F1 : params.policy.formant.default_f1_fallback"
+      prev_f2: "has(prev.F2) ? prev.F2 : params.policy.formant.default_f2_fallback"
+      next_f2: "has_flanking ? (has(next_vowel.F2) ? next_vowel.F2 : params.policy.formant.default_f2_fallback) : params.policy.formant.default_f2_fallback"
       flanking_avg_f2: "has_flanking ? (prev_f2 + next_f2) / 2 : 0"
-      cur_f2: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.default_f2_fallback"
-      prev_f3: "has(prev.?params.F3) ? prev.params.F3 : params.policy.formant.default_f3_fallback"
-      next_f3: "has_flanking ? (has(next_vowel.?params.F3) ? next_vowel.params.F3 : params.policy.formant.default_f3_fallback) : params.policy.formant.default_f3_fallback"
+      cur_f2: "has(current.F2) ? current.F2 : params.policy.formant.default_f2_fallback"
+      prev_f3: "has(prev.F3) ? prev.F3 : params.policy.formant.default_f3_fallback"
+      next_f3: "has_flanking ? (has(next_vowel.F3) ? next_vowel.F3 : params.policy.formant.default_f3_fallback) : params.policy.formant.default_f3_fallback"
       flanking_avg_f3: "has_flanking ? (prev_f3 + next_f3) / 2 : 0"
-      cur_f3: "has(current.?params.F3) ? current.params.F3 : params.policy.formant.default_f3_fallback"
+      cur_f3: "has(current.F3) ? current.F3 : params.policy.formant.default_f3_fallback"
       dac_value: "has(current.dac) ? current.dac : 1"
       resistance: "dac_value / 3.0"
       dac_weight: "params.policy.formant.vcv_coarticulation_rate * (1.0 - resistance)"
     constraint: has_flanking
     apply:
-      - field: params.F1
+      - field: F1
         op: set
         value: "cur_f1 + (flanking_avg_f1 - cur_f1) * dac_weight"
         tag: coarticulation
-      - field: params.F2
+      - field: F2
         op: set
         value: "cur_f2 + (flanking_avg_f2 - cur_f2) * dac_weight"
         tag: coarticulation
-      - field: params.F3
+      - field: F3
         op: set
         value: "cur_f3 + (flanking_avg_f3 - cur_f3) * dac_weight"
         tag: coarticulation
@@ -417,9 +417,9 @@ rules:
   vowel_reduction:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: >-
-        current.type == 'vowel' && has(current.params) && has(current.?params.F1) && (has(current.stress) ?
+        current.type == 'vowel' && has(current.F1) && has(current.F1) && (has(current.stress) ?
         current.stress == 0 : false)
     define:
       reduction_rate: >-
@@ -428,16 +428,16 @@ rules:
         params.policy.formant.vowel_reduction_rate_high_front :
         params.policy.formant.vowel_reduction_rate
     apply:
-      - field: params.F1
+      - field: F1
         op: set
         value: >-
-          current.params.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.params.F1) *
+          current.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.F1) *
           reduction_rate
         tag: vowel_reduction
-      - field: params.F2
+      - field: F2
         op: set
         value: >-
-          current.params.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.params.F2) *
+          current.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.F2) *
           reduction_rate
         tag: vowel_reduction
     citations:
@@ -449,21 +449,21 @@ rules:
   vowel_rate_undershoot:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: >-
-        current.type == 'vowel' && has(current.params) && has(current.?params.F1)
+        current.type == 'vowel' && has(current.F1) && has(current.F1)
     constraint: params.policy.formant.rate_undershoot_factor > 0
     apply:
-      - field: params.F1
+      - field: F1
         op: set
         value: >-
-          current.params.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.params.F1) *
+          current.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.F1) *
           params.policy.formant.rate_undershoot_factor
         tag: rate_undershoot
-      - field: params.F2
+      - field: F2
         op: set
         value: >-
-          current.params.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.params.F2) *
+          current.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.F2) *
           params.policy.formant.rate_undershoot_factor
         tag: rate_undershoot
     citations:
@@ -472,23 +472,23 @@ rules:
   schwa_coronal_fronting:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme in ['AH', 'AH0'] && current.type == 'vowel' &&
         (has(current.stress) ? current.stress == 0 : true)
     constraint:
       predicate: one_coronal
     apply:
-      - field: params.F2
+      - field: F2
         op: set
         dispatch:
           - when:
               predicate: both_coronal
             value: >-
-              current.params.F2 + (params.policy.formant.schwa_coronal_f2_target - current.params.F2) *
+              current.F2 + (params.policy.formant.schwa_coronal_f2_target - current.F2) *
               params.policy.formant.schwa_coronal_fronting_rate
           - default: >-
-              current.params.F2 + (params.policy.formant.schwa_coronal_f2_target - current.params.F2) *
+              current.F2 + (params.policy.formant.schwa_coronal_f2_target - current.F2) *
               params.policy.formant.schwa_coronal_fronting_rate * 0.5
         tag: coronal_fronting
     citations:
@@ -496,21 +496,21 @@ rules:
   uw_coronal_fronting:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme in ['UW1', 'UW0', 'UW'] && current.type == 'vowel'
     constraint:
       predicate: one_coronal
     apply:
-      - field: params.F2
+      - field: F2
         op: set
         dispatch:
           - when:
               predicate: both_coronal
             value: >-
-              current.params.F2 + (params.policy.formant.uw_coronal_f2_target - current.params.F2) *
+              current.F2 + (params.policy.formant.uw_coronal_f2_target - current.F2) *
               params.policy.formant.uw_coronal_fronting_rate
           - default: >-
-              current.params.F2 + (params.policy.formant.uw_coronal_f2_target - current.params.F2) *
+              current.F2 + (params.policy.formant.uw_coronal_f2_target - current.F2) *
               params.policy.formant.uw_coronal_fronting_rate * 0.5
         tag: coronal_fronting
     citations:
@@ -519,7 +519,7 @@ rules:
   transition_override:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "true"
     apply:
       - field: transition_ms
@@ -532,10 +532,10 @@ rules:
   sw_explicit_override:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: has(current.inventorySW)
     apply:
-      - field: params.SW
+      - field: SW
         op: set
         value: current.inventorySW
         tag: branch_switch
@@ -545,10 +545,10 @@ rules:
   sw_default_assignment:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "!has(current.inventorySW)"
     apply:
-      - field: params.SW
+      - field: SW
         op: set
         value: "current.type in ['fricative', 'affricate', 'stop_release', 'stop_aspiration'] ? 1 : 0"
         tag: branch_switch

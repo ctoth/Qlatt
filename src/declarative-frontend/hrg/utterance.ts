@@ -152,7 +152,7 @@ export class Utterance {
       type: input.type ?? (prior ? "feature_overwrite" : "feature_write"),
       subject: `item:${item.id}.${key}`,
       reason: input.reason,
-      citations: input.citations ?? [],
+      citations: [...(input.citations ?? [])],
       parents: parents.length > 0 ? parents : undefined,
       timestampMs: input.timestampMs,
     });
@@ -199,7 +199,7 @@ export class Utterance {
       type: `relation_${operation}`,
       subject: `relation:${relation.name}:${item.id}`,
       reason: input.reason,
-      citations: input.citations ?? [],
+      citations: [...(input.citations ?? [])],
       parents: parents.size > 0 ? [...parents] : undefined,
       timestampMs: input.timestampMs,
     });
@@ -247,7 +247,7 @@ export class Utterance {
       type: active ? "relation_associate" : "relation_disassociate",
       subject: `association:${name}:${from.id}:${to.id}`,
       reason: input.reason,
-      citations: input.citations ?? [],
+      citations: [...(input.citations ?? [])],
       parents: parents.size > 0 ? [...parents] : undefined,
       timestampMs: input.timestampMs,
     });
@@ -292,7 +292,7 @@ export class Utterance {
     for (const latest of this.latestAssociationWrites(from, name)) {
       if (!latest.active) continue;
       const target = this.getItem(latest.toItemId);
-      if (target?.get("active") !== false) targets.push(target);
+      if (target && target.get("active") !== false) targets.push(target);
     }
     return targets;
   }
@@ -330,8 +330,8 @@ export class Utterance {
       type: "item_create",
       subject: `item:${item.id}`,
       reason: input.reason,
-      citations: input.citations ?? [],
-      parents: input.parents,
+      citations: [...(input.citations ?? [])],
+      parents: input.parents ? [...input.parents] : undefined,
       timestampMs: input.timestampMs,
     });
     item._setCreationDecision(decision.id);
@@ -478,8 +478,8 @@ export class Utterance {
       type: "temporal_mark_insert",
       subject: `axis:${leftMarkId}:${rightMarkId}`,
       reason: input.reason,
-      citations: input.citations ?? [],
-      parents: input.parents,
+      citations: [...(input.citations ?? [])],
+      parents: input.parents ? [...input.parents] : undefined,
       timestampMs: input.timestampMs,
     });
     return this.axis.createBetween(leftMarkId, rightMarkId, decision.id);
@@ -507,8 +507,8 @@ export class Utterance {
         type: "temporal_mark_insert",
         subject: `axis:${markId}`,
         reason: input.reason,
-        citations: input.citations ?? [],
-        parents: input.parents,
+        citations: [...(input.citations ?? [])],
+        parents: input.parents ? [...input.parents] : undefined,
         timestampMs: input.timestampMs,
       });
       mark.creationDecisionId = decision.id;
@@ -550,7 +550,7 @@ export class Utterance {
       type: prior ? "temporal_anchor_overwrite" : "temporal_anchor_write",
       subject: `item:${item.id}.temporal_anchor`,
       reason: input.reason,
-      citations: input.citations ?? [],
+      citations: [...(input.citations ?? [])],
       parents: parents.size > 0 ? [...parents] : undefined,
       timestampMs: input.timestampMs,
     });
@@ -616,7 +616,7 @@ export class Utterance {
       type: prior ? "temporal_time_overwrite" : "temporal_time_write",
       subject: `axis:${markId}.time_ms`,
       reason: input.reason,
-      citations: input.citations ?? [],
+      citations: [...(input.citations ?? [])],
       parents: parents.size > 0 ? [...parents] : undefined,
       timestampMs: input.timestampMs,
     });

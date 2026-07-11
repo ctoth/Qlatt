@@ -25,12 +25,12 @@ describe("explain phrase cli", () => {
       "--stage",
       "transcribe",
       "--range",
-      "seq:1-4",
+      "seq:17-17",
     ]);
 
     expect(result.code).toBe(0);
     const payload = JSON.parse(result.stdout);
-    expect(payload.rangeApplied).toBe("seq:1-4");
+    expect(payload.rangeApplied).toBe("seq:17-17");
     expect(payload.summary.decisionCount).toBe(1);
     expect(payload.decisions.every((decision: any) => decision.stage === "transcribe")).toBe(true);
   });
@@ -55,12 +55,12 @@ describe("explain phrase cli", () => {
       "--format",
       "json",
       "--subject",
-      "token:0*",
+      "item:segment_0*",
     ]);
     expect(prefix.code).toBe(0);
     const prefixPayload = JSON.parse(prefix.stdout);
     expect(prefixPayload.decisions.length).toBeGreaterThan(0);
-    expect(prefixPayload.decisions.every((decision: any) => decision.subject.startsWith("token:0"))).toBe(true);
+    expect(prefixPayload.decisions.every((decision: any) => decision.subject.startsWith("item:segment_0"))).toBe(true);
   });
 
   it("supports why ancestry chain output", async () => {
@@ -90,8 +90,8 @@ describe("explain phrase cli", () => {
     const explainPayload = JSON.parse(explain.stdout);
     const rewrite = explainPayload.decisions.find(
       (decision: any) =>
-        decision.type === "rule_rewrite_applied" && typeof decision.subject === "string" &&
-        decision.subject.startsWith("token:")
+        decision.stage === "rules" && decision.type === "feature_overwrite" &&
+        typeof decision.subject === "string" && decision.subject.startsWith("item:segment_")
     );
     expect(rewrite).toBeTruthy();
 

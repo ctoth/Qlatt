@@ -17,12 +17,6 @@ type TrackEvent = {
   params?: Record<string, unknown>;
 };
 
-type FrontendPhone = {
-  phoneme?: string;
-  durationMs?: number;
-  minimumDurationMs?: number;
-};
-
 type ParamSummary = {
   compared: number;
   meanAbs: number;
@@ -182,21 +176,14 @@ function dectalkA2Db(frame: DectalkTraceFrame): number | null {
 
 function loadPayload(filePath: string): {
   track: TrackEvent[];
-  frontendPhones: FrontendPhone[];
 } {
   const parsed = JSON.parse(fs.readFileSync(filePath, "utf8")) as Record<string, unknown>;
   const track = parsed.track;
   if (!Array.isArray(track)) {
     throw new Error(`Qlatt payload has no track array: ${filePath}`);
   }
-  const frontendPhones = Array.isArray(parsed.frontendPhones)
-    ? parsed.frontendPhones.filter(
-        (phone): phone is FrontendPhone => phone != null && typeof phone === "object",
-      )
-    : [];
   return {
     track: track.filter((event): event is TrackEvent => event != null && typeof event === "object"),
-    frontendPhones,
   };
 }
 
@@ -360,11 +347,6 @@ function main(): number {
     durationDeltaSec: lastTrackTime - Number(oracle.summary.durationSec ?? 0),
     oraclePhoneGroups: groupOraclePhones(oracle.frames),
     qlattTrackRuns: groupTrackRuns(track),
-    qlattFrontendPhones: payload.frontendPhones.map((phone) => ({
-      phoneme: phone.phoneme ?? "",
-      durationMs: finiteNumber(phone.durationMs),
-      minimumDurationMs: finiteNumber(phone.minimumDurationMs),
-    })),
     params,
     ranked,
   };

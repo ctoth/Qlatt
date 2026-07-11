@@ -22,6 +22,7 @@ export { evalPath, pathNode, pathFeature, isNavOp, step } from "./path";
 export type { PathResult } from "./path";
 export {
   lowerToFrames,
+  readLowerOptions,
   frameIndexAt,
 } from "./lowering";
 export type {

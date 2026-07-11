@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
+import {
+  GraphRuleEvaluationOwner,
+  runGraphRuleEngine,
+} from "../src/declarative-frontend/hrg/rule-engine";
 import { Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
@@ -10,6 +13,8 @@ const SCHEMA = {
       features: {
         type: { kind: "string", values: ["vowel", "stop"] },
         duration: { kind: "number" },
+        inherentDuration: { kind: "number" },
+        durationFloor: { kind: "number" },
         energy: { kind: "number" },
         metadata: {
           kind: "object",
@@ -121,5 +126,71 @@ describe("graph-native rule engine select/scalar execution", () => {
     expect(utterance.diagnostics.getEntries()).toContainEqual(
       expect.objectContaining({ code: "HRG_TRANSACTION_REJECTED" }),
     );
+  });
+
+  it("reuses one evaluation owner without leaking match parameters between utterances", () => {
+    const spec = compileRuleEngineSpec({
+      relations: {
+        Segment: { type: "base", features: { type: ["vowel", "stop"] }, scalars: { duration: {} } },
+      },
+      rules: {
+        scale_vowel: {
+          kind: "scalar",
+          select: { relation: "Segment", where: "current.type == 'vowel'" },
+          apply: [{ field: "duration", op: "mul", value: "params.scale", tag: "duration" }],
+          citations: ["Klatt 1976"],
+        },
+      },
+      phases: [{ name: "duration", rules: ["scale_vowel"] }],
+    });
+    const owner = new GraphRuleEvaluationOwner();
+    const first = fixture();
+    const second = fixture();
+
+    runGraphRuleEngine(first.utterance, spec, { parameters: { scale: 2 }, evaluationOwner: owner });
+    runGraphRuleEngine(second.utterance, spec, { parameters: { scale: 3 }, evaluationOwner: owner });
+
+    expect(first.utterance.getItem(first.vowelId)?.get("duration")).toBe(200);
+    expect(second.utterance.getItem(second.vowelId)?.get("duration")).toBe(300);
+  });
+
+  it("applies declared Klatt scalar multiplication above the incompressible floor", () => {
+    const { utterance, stopId } = fixture();
+    const stop = utterance.getItem(stopId);
+    if (!stop) throw new Error("missing stop fixture");
+    stop.set("inherentDuration", 100, INPUT);
+    const spec = compileRuleEngineSpec({
+      relations: {
+        Segment: {
+          type: "base",
+          features: { type: ["vowel", "stop"], inherentDuration: [] },
+          scalars: {
+            duration: { unit: "ms", resolution: "klatt", max: 500, floor_field: "durationFloor" },
+          },
+        },
+      },
+      rules: {
+        shorten_stop: {
+          kind: "scalar",
+          select: { relation: "Segment", where: "current.type == 'stop'" },
+          apply: [{ field: "duration", op: "mul", value: "0.25", tag: "duration" }],
+          citations: ["Klatt 1976"],
+        },
+      },
+      phases: [{ name: "duration", rules: ["shorten_stop"], resolve_scalars: ["duration"] }],
+    });
+
+    runGraphRuleEngine(utterance, spec, {
+      parameters: {
+        policy: {
+          duration: {
+            incompressibility_ratio_vowel: 0.3,
+            incompressibility_ratio_consonant: 0.4,
+          },
+        },
+      },
+    });
+
+    expect(stop.get("duration")).toBe(50);
   });
 });

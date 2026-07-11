@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { textToKlattTrack, textToKlattTrackDetailed } from "../src/tts-frontend";
+import type { Item } from "../src/declarative-frontend/hrg";
+
+function activeSegments(result: ReturnType<typeof textToKlattTrackDetailed>): Item[] {
+  return result.utterance.relation("Segment").listItems()
+    .filter((item) => item.get("active") !== false);
+}
 
 describe("annotation phase: syllable count and cluster position", () => {
   // Suppress console.warn from frontend diagnostics during tests.
@@ -29,8 +35,8 @@ describe("annotation phase: syllable count and cluster position", () => {
     // The word "splendid" has 2 vowels (EH1, IH0). Polysyllabic shortening
     // should apply (word_syllable_count > 1). Verify the output phonemes
     // include the expected vowels.
-    const vowelPhones = result.frontendPhones.filter(
-      (p) => p.phoneme === "EH" || p.phoneme === "IH"
+    const vowelPhones = activeSegments(result).filter(
+      (item) => item.get("phoneme") === "EH" || item.get("phoneme") === "IH"
     );
     expect(vowelPhones.length).toBeGreaterThanOrEqual(2);
   });
@@ -39,8 +45,8 @@ describe("annotation phase: syllable count and cluster position", () => {
     const result = textToKlattTrackDetailed("cat", 120);
     expect(result.track.length).toBeGreaterThan(2);
     // Single vowel — polysyllabic shortening should NOT fire.
-    const vowelPhones = result.frontendPhones.filter(
-      (p) => p.phoneme === "AE"
+    const vowelPhones = activeSegments(result).filter(
+      (item) => item.get("phoneme") === "AE"
     );
     expect(vowelPhones.length).toBeGreaterThanOrEqual(1);
   });
@@ -50,10 +56,10 @@ describe("annotation phase: syllable count and cluster position", () => {
     // should NOT fire on either word. Both words complete successfully.
     const result = textToKlattTrackDetailed("big cat", 120);
     expect(result.track.length).toBeGreaterThan(2);
-    const phones = result.frontendPhones;
+    const phones = activeSegments(result);
     // Verify both words are represented
-    const bigPhones = phones.filter((p) => p.word === "big");
-    const catPhones = phones.filter((p) => p.word === "cat");
+    const bigPhones = phones.filter((item) => item.get("word") === "big");
+    const catPhones = phones.filter((item) => item.get("word") === "cat");
     expect(bigPhones.length).toBeGreaterThan(0);
     expect(catPhones.length).toBeGreaterThan(0);
   });
@@ -67,10 +73,10 @@ describe("annotation phase: syllable count and cluster position", () => {
     expect(result.track.length).toBeGreaterThan(2);
 
     // Verify consonant phonemes from "splendid" are present
-    const consonantPhonemes = result.frontendPhones
-      .filter((p) => p.word === "splendid" && p.phoneme !== "SIL")
-      .filter((p) => !["EH", "IH"].includes(p.phoneme))
-      .map((p) => p.phoneme);
+    const consonantPhonemes = activeSegments(result)
+      .filter((item) => item.get("word") === "splendid" && item.get("phoneme") !== "SIL")
+      .map((item) => item.get("phoneme"))
+      .filter((phoneme): phoneme is string => typeof phoneme === "string" && !["EH", "IH"].includes(phoneme));
     // Should include S, P, L, N, D (some may be expanded to closures/releases)
     expect(consonantPhonemes.length).toBeGreaterThan(0);
   });

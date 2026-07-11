@@ -41,7 +41,7 @@ rules:
   dectalk_baseline_declination:
     kind: f0_layer
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme != "SIL"
         && (prev == null || prev.phoneme == "SIL")
@@ -83,7 +83,7 @@ rules:
   dectalk_short_declarative_baseline_declination:
     kind: f0_layer
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme != "SIL"
         && (prev == null || prev.phoneme == "SIL")
@@ -135,7 +135,7 @@ rules:
   dectalk_hat_rise:
     kind: f0_layer
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -188,7 +188,7 @@ rules:
   dectalk_hat_fall:
     kind: f0_layer
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -250,7 +250,7 @@ rules:
       relation: Tilt
       layer: hat
       at: >-
-        merge(current, {"ratio": fall_ratio})
+        at_ratio(current, fall_ratio)
       value: "-(fall_hz)"
       tag: f0_hat_fall
     citations:
@@ -290,7 +290,7 @@ rules:
   dectalk_question_dip:
     kind: f0_layer
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -309,7 +309,7 @@ rules:
     insert:
       relation: Tilt
       layer: boundary
-      at: 'merge(current, {"ratio": 0.75})'
+      at: 'at_ratio(current, 0.75)'
       value: params.policy.f0.question_gesture_dip_hz
       duration_frames: params.policy.f0.boundary_gesture_duration_frames
       tag: f0_question_dip
@@ -320,7 +320,7 @@ rules:
   dectalk_question_rise:
     kind: f0_layer
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -344,7 +344,7 @@ rules:
     insert:
       relation: Tilt
       layer: question_glide
-      at: 'merge(current, {"ratio": 0.5})'
+      at: 'at_ratio(current, 0.5)'
       value: params.policy.f0.question_gesture_rise_hz
       duration_frames: params.policy.f0.question_rise_glide_frames
       tag: f0_question_rise
@@ -366,7 +366,7 @@ rules:
   dectalk_question_glide_reset:
     kind: f0_layer
     select:
-      relation: phone
+      relation: Segment
       # Only at a question boundary SIL: that is the only place a +451 question
       # rise was added to question_glide (dectalk_question_rise fires when the
       # final stressed vowel looks ahead to THIS '?' SIL).  Resetting elsewhere
@@ -403,7 +403,7 @@ rules:
   dectalk_comma_rise1:
     kind: f0_layer
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -421,7 +421,7 @@ rules:
     insert:
       relation: Tilt
       layer: boundary
-      at: 'merge(current, {"ratio": 0.75})'
+      at: 'at_ratio(current, 0.75)'
       value: params.policy.f0.comma_gesture1_hz
       duration_frames: params.policy.f0.boundary_gesture_duration_frames
       tag: f0_comma_rise
@@ -432,7 +432,7 @@ rules:
   dectalk_comma_rise2:
     kind: f0_layer
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -450,7 +450,7 @@ rules:
     insert:
       relation: Tilt
       layer: boundary
-      at: 'merge(current, {"ratio": 1.0})'
+      at: 'at_ratio(current, 1.0)'
       value: params.policy.f0.comma_gesture2_hz
       duration_frames: params.policy.f0.boundary_gesture_duration_frames
       tag: f0_comma_rise
@@ -481,7 +481,7 @@ rules:
   dectalk_stress_impulse:
     kind: f0_layer
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -530,7 +530,7 @@ rules:
   dectalk_boundary_reset:
     kind: f0_layer
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == "SIL"
         && prev != null && prev.phoneme != "SIL"
@@ -559,22 +559,22 @@ rules:
   dectalk_connected_speech_source_contour:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme != 'SIL'
-        && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && has(current.F1)
+        && ((current.AV != null && current.AV > 0)
+            || (current.AVS != null && current.AVS > 0))
     contour:
       domain: phrase
       # Silverman et al. 1992 ToBI: BI=4 marks intonational phrase boundaries.
       reset_break_index: 4
       apply:
-        - field: params.EePhraseDb
+        - field: EePhraseDb
           op: add
           value: ee_total_db
           tag: source_contour
-        - field: params.RdPhraseOffset
+        - field: RdPhraseOffset
           op: add
           value: "params.policy.source_contour.rd_final_offset * final_progress"
           tag: source_contour

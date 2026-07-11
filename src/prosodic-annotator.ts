@@ -16,9 +16,8 @@
  * - Ladd 2008 (prosodic phonology overview, nuclear accent = last accent in phrase)
  */
 
-import type { ProvenanceCollector } from "./provenance";
+import type { Item, Utterance } from "./declarative-frontend/hrg";
 import {
-  DEFAULT_ACCENT_POLICY_PATH,
   classifyWordProsody,
   getFunctionWordSet,
   loadAccentPolicySync,
@@ -26,7 +25,6 @@ import {
   type AccentPolicy,
 } from "./accent-policy";
 import {
-  DEFAULT_BREAK_POLICY_PATH,
   loadBreakPolicySync,
   resolveLongPhraseBreak,
   resolvePunctuationBreakIndex,
@@ -35,13 +33,24 @@ import {
 } from "./break-policy";
 import { loadTuneGrammarSync, selectTuneForPhrase, type TuneSelection } from "./tune-grammar";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type PipelineToken = Record<string, any>;
-
-export interface ProsodicAnnotatorOptions {
-  provenance?: ProvenanceCollector | null;
-  /** Base F0 in Hz (for provenance reporting only). */
-  baseF0?: number;
+interface ProsodyToken {
+  item: Item;
+  active: boolean;
+  phoneme: string;
+  stress: number | null;
+  word: string;
+  punctuationSymbol: string | null;
+  phraseAccent: string | null;
+  boundaryTone: string | null;
+  initialBoundaryTone: string | null;
+  isFunctionWord: boolean;
+  isContentWord: boolean;
+  isAccented: boolean;
+  isAccentCarrier: boolean;
+  isNuclearAccent: boolean;
+  accentType: string | null;
+  accentIndexInPhrase: number;
+  breakIndex: number;
 }
 
 export const FUNCTION_WORDS: ReadonlySet<string> = getFunctionWordSet(loadAccentPolicySync());
@@ -59,8 +68,8 @@ interface Phrase {
   punctuation: string | null;
 }
 
-function isSuppressedToken(token: PipelineToken | null | undefined): boolean {
-  return token?.status === 2;
+function isSuppressedToken(token: ProsodyToken | null | undefined): boolean {
+  return token?.active === false;
 }
 
 // ---------------------------------------------------------------------------
@@ -90,18 +99,46 @@ function isSuppressedToken(token: PipelineToken | null | undefined): boolean {
  * - Allen, Hunnicutt & Klatt 1987 (MITalk accent levels)
  * - Ladd 2008 (nuclear accent = last accent in phrase, DTE)
  */
-export function annotateProsody(
-  tokens: PipelineToken[],
-  options: ProsodicAnnotatorOptions = {},
-): PipelineToken[] {
-  const provenance = options.provenance ?? null;
+export function annotateProsody(utterance: Utterance): void {
   const accentPolicy = loadAccentPolicySync();
   const breakPolicy = loadBreakPolicySync();
   const tuneGrammar = loadTuneGrammarSync();
-
-  // Work on a shallow copy of each token so we never mutate the input array
-  // entries directly. The spread preserves all existing properties.
-  const result = tokens.map((t) => ({ ...t }));
+  const transaction = utterance.beginTransaction({
+    ruleId: "prosodic_structure_annotation",
+    phase: "annotation",
+    tag: "prosody",
+    reason: "Derive word class, accent, break, and ToBI phrase annotations",
+    citations: [
+      "Silverman et al. 1992",
+      "Pierrehumbert 1980",
+      "O'Shaughnessy 1976",
+      "Allen, Hunnicutt & Klatt 1987",
+      "Ladd 2008",
+    ],
+    stage: "prosody",
+  });
+  const result: ProsodyToken[] = utterance.relation("Segment").listItems().map((item) => {
+    const view = transaction.view(item);
+    return {
+      item,
+      active: view.active !== false,
+      phoneme: typeof view.phoneme === "string" ? view.phoneme : "",
+      stress: typeof view.stress === "number" ? view.stress : null,
+      word: typeof view.word === "string" ? view.word : "",
+      punctuationSymbol: typeof view.punctuationSymbol === "string" ? view.punctuationSymbol : null,
+      phraseAccent: null,
+      boundaryTone: null,
+      initialBoundaryTone: null,
+      isFunctionWord: false,
+      isContentWord: false,
+      isAccented: false,
+      isAccentCarrier: false,
+      isNuclearAccent: false,
+      accentType: null,
+      accentIndexInPhrase: -1,
+      breakIndex: 0,
+    };
+  });
 
   // Step 1: Identify phrases by splitting at SIL tokens with punctuation.
   const phrases = identifyPhrases(result);
@@ -111,10 +148,6 @@ export function annotateProsody(
 
   // Step 3: Assign accent (stress==1 AND content word).
   assignAccent(result, accentPolicy);
-
-  if (provenance) {
-    emitAccentPolicyProvenance(provenance, accentPolicy);
-  }
 
   // Steps 4-7: Per-phrase passes (nuclear accent, accent types, edge tones, long-phrase breaking).
   for (let pi = 0; pi < phrases.length; pi++) {
@@ -138,12 +171,8 @@ export function annotateProsody(
     // Step 7: Long phrase breaking heuristic.
     const breakDecision = applyLongPhraseBreaking(result, phrase, breakPolicy);
 
-    // Provenance
-    if (provenance) {
-      emitTuneSelectionProvenance(provenance, phrase, pi, tuneSelection, hasPrenuclearAccent);
-      emitBreakPolicyProvenance(provenance, phrase, pi, breakDecision, breakPolicy);
-      emitPhraseProvenance(provenance, result, phrase, pi);
-    }
+    void pi;
+    void breakDecision;
   }
 
   // Step 8: Assign break indices.
@@ -154,14 +183,27 @@ export function annotateProsody(
   // (breakIndex=3). Citations: Pierrehumbert 1980, Ladd 2008
   assignAccentIndices(result);
 
-  return result;
+  for (const token of result) {
+    transaction.set(token.item, "isFunctionWord", token.isFunctionWord);
+    transaction.set(token.item, "isContentWord", token.isContentWord);
+    transaction.set(token.item, "isAccented", token.isAccented);
+    transaction.set(token.item, "isAccentCarrier", token.isAccentCarrier);
+    transaction.set(token.item, "isNuclearAccent", token.isNuclearAccent);
+    transaction.set(token.item, "accentType", token.accentType);
+    transaction.set(token.item, "accentIndexInPhrase", token.accentIndexInPhrase);
+    transaction.set(token.item, "breakIndex", token.breakIndex);
+    transaction.set(token.item, "initialBoundaryTone", token.initialBoundaryTone);
+    transaction.set(token.item, "phraseAccent", token.phraseAccent);
+    transaction.set(token.item, "boundaryTone", token.boundaryTone);
+  }
+  transaction.commit();
 }
 
 // ---------------------------------------------------------------------------
 // Step 1: Identify phrases
 // ---------------------------------------------------------------------------
 
-function identifyPhrases(tokens: PipelineToken[]): Phrase[] {
+function identifyPhrases(tokens: ProsodyToken[]): Phrase[] {
   const phrases: Phrase[] = [];
   let currentIndices: number[] = [];
 
@@ -203,7 +245,7 @@ function identifyPhrases(tokens: PipelineToken[]): Phrase[] {
 // Step 2: Mark function/content words
 // ---------------------------------------------------------------------------
 
-function markFunctionWords(tokens: PipelineToken[], accentPolicy: AccentPolicy): void {
+function markFunctionWords(tokens: ProsodyToken[], accentPolicy: AccentPolicy): void {
   for (const token of tokens) {
     // Initialize phrase-edge tone properties on ALL tokens for consistency.
     // These are only set to non-null values on SIL tokens at phrase boundaries
@@ -230,7 +272,7 @@ function markFunctionWords(tokens: PipelineToken[], accentPolicy: AccentPolicy):
 // Step 3: Assign accent
 // ---------------------------------------------------------------------------
 
-function assignAccent(tokens: PipelineToken[], accentPolicy: AccentPolicy): void {
+function assignAccent(tokens: ProsodyToken[], accentPolicy: AccentPolicy): void {
   // First pass: determine which words are accented (content word + primary stress).
   // We need to propagate accent to ALL phones of the same word within a phrase.
   // A word is accented if ANY of its phones has stress==1 and the word is a content word.
@@ -312,7 +354,7 @@ function assignAccent(tokens: PipelineToken[], accentPolicy: AccentPolicy): void
 // Step 4: Identify nuclear accent (per phrase)
 // ---------------------------------------------------------------------------
 
-function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
+function identifyNuclearAccent(tokens: ProsodyToken[], phrase: Phrase): void {
   // Nuclear accent = last accent carrier in the phrase.
   // This is the first active stressed segment of the accented word, which keeps
   // diphthong offglides from receiving separate pitch accents.
@@ -349,7 +391,7 @@ function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
  * Citations: Pierrehumbert 1980, Ladd 2008 Ch.3
  */
 function assignAccentTypes(
-  tokens: PipelineToken[],
+  tokens: ProsodyToken[],
   phrase: Phrase,
   tuneSelection: TuneSelection,
 ): void {
@@ -385,7 +427,7 @@ function assignAccentTypes(
  * - Pierrehumbert 1980 (downstep formula H_n = V * k^n)
  * - Ladd 2008 Ch.2 (constant-proportion downstep ratio)
  */
-function assignAccentIndices(tokens: PipelineToken[]): void {
+function assignAccentIndices(tokens: ProsodyToken[]): void {
   let accentCount = 0;
   for (const token of tokens) {
     if (!isSuppressedToken(token) && token.isAccentCarrier === true) {
@@ -417,7 +459,7 @@ function assignAccentIndices(tokens: PipelineToken[]): void {
  *
  * Citation: Silverman et al. 1992 (ToBI break index tier)
  */
-function assignBreakIndices(tokens: PipelineToken[], phrases: Phrase[], breakPolicy: BreakPolicy): void {
+function assignBreakIndices(tokens: ProsodyToken[], phrases: Phrase[], breakPolicy: BreakPolicy): void {
   // Default all to 0.
   for (const token of tokens) {
     if (token.breakIndex == null) {
@@ -495,7 +537,7 @@ function assignBreakIndices(tokens: PipelineToken[], phrases: Phrase[], breakPol
  * Citations: Pierrehumbert 1980, Silverman et al. 1992
  */
 function assignPhraseEdgeTones(
-  tokens: PipelineToken[],
+  tokens: ProsodyToken[],
   phrase: Phrase,
   tuneSelection: TuneSelection,
 ): void {
@@ -528,7 +570,7 @@ function assignPhraseEdgeTones(
  * Citation: O'Shaughnessy 1976
  */
 function applyLongPhraseBreaking(
-  tokens: PipelineToken[],
+  tokens: ProsodyToken[],
   phrase: Phrase,
   breakPolicy: BreakPolicy,
 ): LongPhraseBreakDecision {
@@ -567,100 +609,11 @@ function applyLongPhraseBreaking(
   return breakDecision;
 }
 
-function phraseHasPrenuclearAccent(tokens: PipelineToken[], phrase: Phrase): boolean {
+function phraseHasPrenuclearAccent(tokens: ProsodyToken[], phrase: Phrase): boolean {
   return phrase.tokenIndices.some(
     (idx) =>
       !isSuppressedToken(tokens[idx]) &&
       tokens[idx].isAccentCarrier === true &&
       tokens[idx].isNuclearAccent !== true,
   );
-}
-
-// ---------------------------------------------------------------------------
-// Provenance
-// ---------------------------------------------------------------------------
-
-function emitPhraseProvenance(
-  provenance: ProvenanceCollector,
-  tokens: PipelineToken[],
-  phrase: Phrase,
-  phraseIndex: number,
-): void {
-  // Count content words and find nuclear word.
-  let contentWordCount = 0;
-  let nuclearWord = "";
-  let prevWord: string | null = null;
-
-  for (const idx of phrase.tokenIndices) {
-    const token = tokens[idx];
-    const word = token.word ?? "";
-    if (word !== prevWord) {
-      if (token.isContentWord === true) contentWordCount++;
-      prevWord = word;
-    }
-    if (token.isNuclearAccent === true) {
-      nuclearWord = word;
-    }
-  }
-
-  provenance.add({
-    stage: "prosody",
-    type: "prosodic_annotation",
-    subject: `phrase:${phraseIndex}`,
-    reason: `Identified phrase with ${contentWordCount} content words${nuclearWord ? `, nuclear accent on "${nuclearWord}"` : ", no nuclear accent"}`,
-    citations: ["Silverman 1992", "O'Shaughnessy 1976", "Allen 1987"],
-  });
-}
-
-function emitAccentPolicyProvenance(
-  provenance: ProvenanceCollector,
-  accentPolicy: AccentPolicy,
-): void {
-  provenance.add({
-    stage: "prosody",
-    type: "accent_policy_selected",
-    subject: "utterance:0",
-    reason: `Applied accent policy require_content_word=${accentPolicy.accent_assignment.require_content_word}, required_stress=${accentPolicy.accent_assignment.required_stress}, carrier_selection=${accentPolicy.accent_assignment.carrier_selection}, function_words=${accentPolicy.function_words.length}`,
-    citations: [
-      DEFAULT_ACCENT_POLICY_PATH,
-      ...accentPolicy.citations,
-    ],
-  });
-}
-
-function emitTuneSelectionProvenance(
-  provenance: ProvenanceCollector,
-  phrase: Phrase,
-  phraseIndex: number,
-  tuneSelection: TuneSelection,
-  hasPrenuclearAccent: boolean,
-): void {
-  provenance.add({
-    stage: "prosody",
-    type: "tune_selected",
-    subject: `phrase:${phraseIndex}`,
-    reason: `Selected ${tuneSelection.phraseType} tune for punctuation ${phrase.punctuation ?? "<default>"} with hasPrenuclearAccent=${hasPrenuclearAccent}, nuclear=${tuneSelection.nuclearAccent}, edge=${tuneSelection.phraseAccent ?? "null"} ${tuneSelection.boundaryTone ?? "null"}`,
-    citations: tuneSelection.citations,
-  });
-}
-
-function emitBreakPolicyProvenance(
-  provenance: ProvenanceCollector,
-  phrase: Phrase,
-  phraseIndex: number,
-  breakDecision: LongPhraseBreakDecision,
-  breakPolicy: BreakPolicy,
-): void {
-  if (breakDecision.breakTokenIndex == null) return;
-
-  provenance.add({
-    stage: "prosody",
-    type: "phrase_break_selected",
-    subject: `phrase:${phraseIndex}`,
-    reason: `Selected long-phrase break for punctuation ${phrase.punctuation ?? "<default>"} with contentWordCount=${breakDecision.contentWordCount}, breakTokenIndex=${breakDecision.breakTokenIndex}, breakIndex=${breakDecision.breakIndex}, placement=${breakPolicy.long_phrase_breaking.placement}`,
-    citations: [
-      DEFAULT_BREAK_POLICY_PATH,
-      ...breakPolicy.citations,
-    ],
-  });
 }

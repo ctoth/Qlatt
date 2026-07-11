@@ -214,7 +214,7 @@ syllabification:
     OR: "R"
     UR: "R"
 relations:
-  phone:
+  Segment:
     type: base
     features:
       type: [vowel, stop_closure, stop_release, stop_aspiration, fricative, affricate, silence, liquid, nasal, glide, flap]
@@ -222,7 +222,7 @@ relations:
       # DECtalk ph_defs.h defines NF640MS=100 frames; terminal nfperiod=94
       # frames must survive scalar validation for punctuation pauses.
       duration: { unit: ms, resolution: klatt, max: 640, floor_field: minimumDuration }
-  f0:
+  F0Point:
     type: point
     value_type: number
     unit: Hz
@@ -358,4 +358,4 @@ phases:
     after: [duration, structural, formant, prosody]
     rules: []
     compute_times: true
-    resolve_points: [f0, PhraseCommand, Tilt]
+    resolve_points: [F0Point, PhraseCommand, Tilt]

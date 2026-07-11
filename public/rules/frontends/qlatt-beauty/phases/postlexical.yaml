@@ -1,7 +1,7 @@
 version: v1
 patterns:
   palatalization_dy_pattern:
-    relation: phone
+    relation: Segment
     sequence:
       - capture: d_token
         where:
@@ -12,7 +12,7 @@ patterns:
         where: >-
           current.phoneme == 'Y'
   palatalization_ty_pattern:
-    relation: phone
+    relation: Segment
     sequence:
       - capture: t_token
         where:
@@ -26,14 +26,13 @@ rules:
   the_prevocalic_reduction:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'AH' && (has(current.stress) ? current.stress == 0 : false) && (has(current.word) ?
         current.word == 'the' : false) && next != null && (has(next.word) ? next.word != 'the' : false) && next.type ==
         'vowel'
     define:
       ih_target: target("IH0")
-      ih_params: ih_target.params
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -47,20 +46,19 @@ rules:
             - inherentDuration
             - type
           phoneme: "\"IH\""
-          params: ih_params
+          target: ih_target
     citations:
       - Miller 1998 (postlexical rule inventory)
   to_reduction:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'UW' && (has(current.stress) ? current.stress == 0 : false) &&
         (has(current.word) ? current.word == 'to' : false) &&
         next != null && next.type != 'vowel'
     define:
       schwa_target: target("AH0")
-      schwa_params: schwa_target.params
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -74,20 +72,19 @@ rules:
             - inherentDuration
             - type
           phoneme: "\"AH\""
-          params: schwa_params
+          target: schwa_target
     citations:
       - Miller 1998 (function word reduction)
       - Klatt 1979
   t_flapping:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'T' && prev != null && prev.type == 'vowel' && (has(prev.stress) ? prev.stress == 1 : false)
         && next != null && next.type == 'vowel' && (has(next.stress) ? next.stress == 0 : false)
     define:
       dx_target: target("DX")
-      dx_params: dx_target.params
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -101,13 +98,13 @@ rules:
           type: "\"flap\""
           duration: "params.policy.duration.flap_duration_ms"
           inherentDuration: "params.policy.duration.flap_duration_ms"
-          params: dx_params
+          target: dx_target
     citations:
       - Miller 1998 (postlexical rule inventory)
   t_deletion:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where:
         all:
           - "current.phoneme == 'T'"
@@ -125,15 +122,15 @@ rules:
         op: set
         value: 0
         tag: t_deletion
-      - field: params.AV
+      - field: AV
         op: set
         value: 0
         tag: t_deletion
-      - field: params.AF
+      - field: AF
         op: set
         value: 0
         tag: t_deletion
-      - field: params.AH
+      - field: AH
         op: set
         value: 0
         tag: t_deletion
@@ -143,7 +140,7 @@ rules:
   t_glottalization:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where:
         all:
           - "current.phoneme == 'T'"
@@ -151,7 +148,6 @@ rules:
           - predicate: next_same_word
     define:
       gs_target: target("GS")
-      gs_params: gs_target.params
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -162,7 +158,7 @@ rules:
             - stress
             - word
           phoneme: "\"GS\""
-          params: gs_params
+          target: gs_target
           duration: 30
           inherentDuration: 30
           type: "\"stop_closure\""
@@ -172,13 +168,12 @@ rules:
   d_flapping:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme == 'D' && prev != null && prev.type == 'vowel' && (has(prev.stress) ? prev.stress == 1 : false)
         && next != null && next.type == 'vowel' && (has(next.stress) ? next.stress == 0 : false)
     define:
       dx_target: target("DX")
-      dx_params: dx_target.params
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -192,13 +187,13 @@ rules:
           type: "\"flap\""
           duration: "params.policy.duration.flap_duration_ms"
           inherentDuration: "params.policy.duration.flap_duration_ms"
-          params: dx_params
+          target: dx_target
     citations:
       - Miller 1998 (postlexical rule inventory -- /d/ flapping mirrors /t/ flapping)
   d_deletion:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where:
         all:
           - "current.phoneme == 'D'"
@@ -216,15 +211,15 @@ rules:
         op: set
         value: 0
         tag: d_deletion
-      - field: params.AV
+      - field: AV
         op: set
         value: 0
         tag: d_deletion
-      - field: params.AF
+      - field: AF
         op: set
         value: 0
         tag: d_deletion
-      - field: params.AH
+      - field: AH
         op: set
         value: 0
         tag: d_deletion
@@ -236,7 +231,6 @@ rules:
     match: palatalization_dy_pattern
     define:
       jh_target: target("JH")
-      jh_params: jh_target.params
     splice:
       type: replace_range
       range_left: d_token.sync_left
@@ -250,7 +244,7 @@ rules:
             - stress
             - word
           phoneme: "\"JH\""
-          params: jh_params
+          target: jh_target
           type: "\"affricate\""
           duration: 80
           inherentDuration: 80
@@ -262,7 +256,6 @@ rules:
     match: palatalization_ty_pattern
     define:
       ch_target: target("CH")
-      ch_params: ch_target.params
     splice:
       type: replace_range
       range_left: t_token.sync_left
@@ -276,7 +269,7 @@ rules:
             - stress
             - word
           phoneme: "\"CH\""
-          params: ch_params
+          target: ch_target
           type: "\"affricate\""
           duration: 90
           inherentDuration: 90
@@ -285,7 +278,7 @@ rules:
   glottal_stop_insertion:
     kind: postlexical
     select:
-      relation: phone
+      relation: Segment
       where:
         all:
           - "current.type == 'vowel'"
@@ -294,14 +287,13 @@ rules:
           - "prev == null || prev.type == 'vowel' || has(prev.boundary)"
     define:
       gs_target: target("GS")
-      gs_params: gs_target.params
     splice:
       type: replace_range
       range_left: current.sync_left
       range_right: current.sync_right
       insert:
         - phoneme: "\"GS\""
-          params: gs_params
+          target: gs_target
           duration: 30
           inherentDuration: 30
           type: "\"stop_closure\""

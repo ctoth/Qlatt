@@ -112,7 +112,12 @@ function validateFeatureValue(
           }
         }
       }
-      return featureValueError(itemType, key, path, "one of the declared union variants");
+      return featureValueError(
+        itemType,
+        key,
+        path,
+        `one of the declared union variants (received ${typeof value})`,
+      );
     }
   }
 }

@@ -1,4 +1,3 @@
-import type { VoiceQualityOverrides } from "./track-assembler";
 import type { ResolvedSpeakerProfile } from "./speaker-profile";
 import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
@@ -11,6 +10,15 @@ export type SourceContourVoiceQuality =
   | "creaky"
   | "whispery"
   | "falsetto";
+
+export interface VoiceQualityOverrides {
+  rd?: number;
+  oq?: number;
+  tl?: number;
+  ah_offset_db?: number;
+  flutter?: number;
+  jitter?: number;
+}
 
 export interface SourceContourPreset {
   rd: number;

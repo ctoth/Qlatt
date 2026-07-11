@@ -3,7 +3,7 @@ rules:
   non_word_initial_consonant_shortening:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where:
         all:
           - predicate: is_pausable_consonant
@@ -18,7 +18,7 @@ rules:
   word_medial_consonant_shortening:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where:
         all:
           - predicate: is_pausable_consonant
@@ -34,7 +34,7 @@ rules:
   unstressed_consonant_shortening:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where:
         all:
           - predicate: is_pausable_consonant
@@ -49,7 +49,7 @@ rules:
   word_initial_lengthening:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where:
         all:
           - predicate: is_pausable_consonant
@@ -64,7 +64,7 @@ rules:
   punctuation_pause:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'SIL' && has(current.punctuationSymbol)
     apply:
       - field: duration
@@ -84,7 +84,7 @@ rules:
   stress_duration:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.type == 'vowel'
     apply:
       - field: duration
@@ -101,7 +101,7 @@ rules:
   vowel_shortening:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.type == 'vowel'
     define:
       "n": next
@@ -137,7 +137,7 @@ rules:
   accent_vowel_lengthening:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.type == 'vowel' && has(current.isAccented) && current.isAccented == true
     apply:
       - field: duration
@@ -156,7 +156,7 @@ rules:
   polysyllabic_shortening:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type == 'vowel' && has(current.word_syllable_count) && current.word_syllable_count > 1"
     apply:
       - field: duration
@@ -168,7 +168,7 @@ rules:
   cluster_shortening:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: "current.type != 'vowel' && has(current.cluster_position)"
     apply:
       - field: duration
@@ -182,7 +182,7 @@ rules:
   pre_boundary_lengthening:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: >-
         current.phoneme != 'SIL' && (current.type == 'vowel'
         || (prev != null ? prev.type == 'vowel' || prev.type == 'nasal' || prev.type == 'liquid' || prev.type == 'glide' : false))
@@ -238,7 +238,7 @@ rules:
   fricative_minimum_duration:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.type == 'fricative'
     define:
       fricative_target: target(current.phoneme)
@@ -257,7 +257,7 @@ rules:
   lock_stop_release_duration:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.type in ['stop_release', 'stop_aspiration']
     apply:
       - field: duration
@@ -269,13 +269,13 @@ rules:
   stop_unreleasing:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.type == 'stop_release'
     define:
       "n": next
     constraint: "n != null ? n.type == 'stop_closure' : false"
     apply:
-      - field: params.AF
+      - field: AF
         op: set
         value: 0
         tag: stop_unrelease
@@ -289,7 +289,7 @@ rules:
   s_cluster_aspiration_reduction:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.type == 'stop_aspiration'
     define:
       s_token: look_back_where(current, 4, "current.phoneme == 'S'")
@@ -299,7 +299,7 @@ rules:
         op: set
         value: params.policy.duration.s_cluster_aspiration_ms
         tag: s_cluster_aspiration
-      - field: params.AH
+      - field: AH
         op: add
         value: "-(params.policy.duration.s_cluster_ah_reduction_db)"
         tag: s_cluster_aspiration
@@ -309,13 +309,13 @@ rules:
   aspiration_frication_carryover:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.type == 'stop_aspiration'
     define:
       weak_scale: >-
         (has(current.weak) && current.weak == true) ? params.policy.duration.aspiration_frication_weak_scale : 1.0
     apply:
-      - field: params.AF
+      - field: AF
         op: set
         dispatch:
           - when: has(current.alveolar) && current.alveolar == true
@@ -333,7 +333,7 @@ rules:
   speech_rate_scaling:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme != 'SIL'
     constraint: params.policy.duration.rate_scale != 1.0
     apply:
@@ -347,7 +347,7 @@ rules:
   pause_rate_scaling:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme == 'SIL' && has(current.punctuationSymbol)
     constraint: params.policy.duration.rate_scale != 1.0
     apply:
@@ -360,7 +360,7 @@ rules:
   duration_cap:
     kind: scalar
     select:
-      relation: phone
+      relation: Segment
       where: current.phoneme != 'SIL' && has(current.inherentDuration)
     apply:
       - field: duration

@@ -176,6 +176,7 @@ function resolveSequenceWindowFromStringBounds(
   const matchesSelector = (value: string, needle: string): boolean => {
     if (value === needle) return true;
     if (selector === "subject" && value.endsWith(`:${needle}`)) return true;
+    if (selector === "subject" && value.startsWith(`item:${needle}.`)) return true;
     return false;
   };
 

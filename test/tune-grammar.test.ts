@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { loadYamlSourceSync } from "../src/yaml-loader";
-import { annotateProsody } from "../src/prosodic-annotator";
-import { createProvenanceCollector } from "../src/provenance";
 import {
   DEFAULT_TUNE_GRAMMAR_PATH,
   classifyTunePhraseType,
@@ -9,27 +7,6 @@ import {
   selectTuneForPhrase,
 } from "../src/tune-grammar";
 
-type MinimalToken = Record<string, unknown>;
-
-function phone(
-  phoneme: string,
-  word: string,
-  stress: number | null = null,
-  type: string = "vowel",
-): MinimalToken {
-  return { phoneme, word, stress, type, params: {} };
-}
-
-function sil(punctuation?: string): MinimalToken {
-  return {
-    phoneme: "SIL",
-    word: "",
-    stress: null,
-    type: "silence",
-    punctuationSymbol: punctuation ?? null,
-    params: {},
-  };
-}
 
 describe("tune grammar", () => {
   it("declares the canonical tune grammar document", () => {
@@ -100,31 +77,4 @@ describe("tune grammar", () => {
     expect(loneQuestion.nuclearAccent).toBe("L*");
   });
 
-  it("records the selected tune as a declarative provenance decision", () => {
-    const provenance = createProvenanceCollector();
-    const tokens = [
-      sil(),
-      phone("IH", "is", 0),
-      phone("Z", "is"),
-      phone("DH", "the"),
-      phone("AH", "the", 0),
-      phone("K", "cat"),
-      phone("AE", "cat", 1),
-      phone("T", "cat"),
-      phone("HH", "here"),
-      phone("IY", "here", 1),
-      phone("R", "here"),
-      sil("?"),
-    ];
-
-    annotateProsody(tokens, { provenance });
-
-    const decisions = provenance.getDecisions();
-    const tuneDecision = decisions.find((decision) => decision.type === "tune_selected");
-
-    expect(tuneDecision).toBeDefined();
-    expect(tuneDecision?.subject).toBe("phrase:0");
-    expect(tuneDecision?.reason).toContain("question");
-    expect(tuneDecision?.citations).toContain(DEFAULT_TUNE_GRAMMAR_PATH);
-  });
 });

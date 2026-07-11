@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { textToKlattTrack, textToKlattTrackDetailed, type KlattFrame } from "../src/tts-frontend";
+import type { Item } from "../src/declarative-frontend/hrg";
 
 function averageParam(frames: KlattFrame[], key: string): number {
   if (frames.length === 0) return 0;
@@ -16,20 +17,20 @@ function rhoticTailFrames(track: KlattFrame[], word: string): KlattFrame[] {
   return track.filter((frame) => frame.word === word && frame.phoneme === "R");
 }
 
-function rhoticCodaPairs(phones: Array<{ phoneme?: string; word?: string | null; durationMs?: number }>, word: string) {
+function rhoticCodaPairs(segments: readonly Item[], word: string) {
   const pairs: Array<{ erDurationMs: number; rDurationMs: number }> = [];
-  for (let i = 0; i < phones.length - 1; i += 1) {
-    const current = phones[i];
-    const next = phones[i + 1];
+  for (let i = 0; i < segments.length - 1; i += 1) {
+    const current = segments[i];
+    const next = segments[i + 1];
     if (
-      current?.word === word &&
-      current?.phoneme === "ER" &&
-      next?.word === word &&
-      next?.phoneme === "R"
+      current?.get("word") === word &&
+      current.get("phoneme") === "ER" &&
+      next?.get("word") === word &&
+      next.get("phoneme") === "R"
     ) {
       pairs.push({
-        erDurationMs: Number(current.durationMs ?? 0),
-        rDurationMs: Number(next.durationMs ?? 0),
+        erDurationMs: Number(current.get("duration") ?? 0),
+        rDurationMs: Number(next.get("duration") ?? 0),
       });
     }
   }
@@ -100,16 +101,17 @@ describe("tts frontend rhotic vowels", () => {
   });
 
   it("avoids over-crowding ER0 in compound words", () => {
-    const track = textToKlattTrack("authorship commercebancorp", 110);
-
-    const authorshipEr = rhoticFrames(track, "authorship");
-    const commerceEr = rhoticFrames(track, "commercebancorp");
+    const result = textToKlattTrackDetailed("authorship commercebancorp", 110);
+    const segments = result.utterance.relation("Segment").listItems()
+      .filter((item) => item.get("active") !== false && item.get("phoneme") === "ER");
+    const authorshipEr = segments.filter((item) => item.get("word") === "authorship");
+    const commerceEr = segments.filter((item) => item.get("word") === "commercebancorp");
 
     expect(authorshipEr.length).toBeGreaterThan(0);
     expect(commerceEr.length).toBeGreaterThan(0);
 
-    const authorshipGap = averageParam(authorshipEr, "F3") - averageParam(authorshipEr, "F2");
-    const commerceGap = averageParam(commerceEr, "F3") - averageParam(commerceEr, "F2");
+    const authorshipGap = Number(authorshipEr[0].get("F3")) - Number(authorshipEr[0].get("F2"));
+    const commerceGap = Number(commerceEr[0].get("F3")) - Number(commerceEr[0].get("F2"));
 
     // Espy-Wilson et al. 2000 place /r/ in a low-F3, mid-F2 region, but these
     // tokens should still keep enough F2/F3 separation to avoid sounding
@@ -121,8 +123,10 @@ describe("tts frontend rhotic vowels", () => {
   it("keeps coda rhotic tails shorter than the ER nucleus in repeated unstressed words", () => {
     const result = textToKlattTrackDetailed("other brother other brother", 110);
 
-    const otherPairs = rhoticCodaPairs(result.frontendPhones, "other");
-    const brotherPairs = rhoticCodaPairs(result.frontendPhones, "brother");
+    const segments = result.utterance.relation("Segment").listItems()
+      .filter((item) => item.get("active") !== false);
+    const otherPairs = rhoticCodaPairs(segments, "other");
+    const brotherPairs = rhoticCodaPairs(segments, "brother");
 
     expect(otherPairs.length).toBeGreaterThan(0);
     expect(brotherPairs.length).toBeGreaterThan(0);

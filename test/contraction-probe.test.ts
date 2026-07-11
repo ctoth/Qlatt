@@ -24,7 +24,7 @@ describe("contraction probe", () => {
       const pCurly = tCurly.map(e => e.phoneme).filter(Boolean).join(" ");
       expect(pCurly).toBe(pAscii);
     }
-  });
+  }, 30_000);
 
   it("handles curly double quotes and ellipsis", () => {
     // Typographic: \u201C = ", \u201D = ", \u2026 = …

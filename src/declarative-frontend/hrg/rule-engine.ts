@@ -14,6 +14,7 @@ export interface GraphRuleEngineOptions {
   phases?: readonly string[];
   parameters?: Readonly<Record<string, unknown>>;
   inventory?: GraphInventoryResource;
+  evaluationOwner?: GraphRuleEvaluationOwner;
 }
 
 export interface GraphInventoryResource {
@@ -35,6 +36,29 @@ function activeItems(items: readonly Item[]): Item[] {
   return items.filter((item) => item.get("active") !== false);
 }
 
+function projectPolicyValues(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(projectPolicyValues);
+  if (!isPlainObject(value)) return value;
+  if (Object.prototype.hasOwnProperty.call(value, "value")) return projectPolicyValues(value.value);
+  return Object.fromEntries(
+    Object.entries(value).map(([key, nested]) => [key, projectPolicyValues(nested)]),
+  );
+}
+
+function mergeParameterRecords(
+  base: Readonly<Record<string, unknown>>,
+  override: Readonly<Record<string, unknown>>,
+): Record<string, unknown> {
+  const merged: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(override)) {
+    const current = merged[key];
+    merged[key] = isPlainObject(current) && isPlainObject(value)
+      ? mergeParameterRecords(current, value)
+      : value;
+  }
+  return merged;
+}
+
 function numericAggregate(args: unknown[], mode: "min" | "max"): number {
   const values = (args.length === 1 && Array.isArray(args[0]) ? args[0] : args)
     .filter((value): value is number => typeof value === "number" && Number.isFinite(value));
@@ -44,11 +68,35 @@ function numericAggregate(args: unknown[], mode: "min" | "max"): number {
 type EvaluationContext = {
   values: Record<string, unknown>;
   functions: Record<string, (...args: unknown[]) => unknown>;
+  isItemView: (value: unknown) => boolean;
+  owner: GraphRuleEvaluationOwner;
 };
+
+export class GraphRuleEvaluationOwner {
+  private activeFunctions: Record<string, (...args: unknown[]) => unknown> | null = null;
+  private readonly boundFunctions = new Proxy<Record<string, (...args: unknown[]) => unknown>>({}, {
+    get: (_target, property) => typeof property === "string" ? this.activeFunctions?.[property] : undefined,
+  });
+
+  evaluate(
+    expression: string,
+    values: Record<string, unknown>,
+    functions: Record<string, (...args: unknown[]) => unknown>,
+  ): unknown {
+    const previous = this.activeFunctions;
+    this.activeFunctions = functions;
+    try {
+      return evaluateExpression(expression, values, this.boundFunctions);
+    } finally {
+      this.activeFunctions = previous;
+    }
+  }
+}
 
 function buildEvaluationContext(
   utterance: Utterance,
   transaction: HrgTransaction,
+  owner: GraphRuleEvaluationOwner,
   items: readonly Item[],
   index: number,
   params: Readonly<Record<string, unknown>>,
@@ -79,6 +127,30 @@ function buildEvaluationContext(
       return daughter.item;
     });
   };
+  const isFinalSyllable = (item: Item): boolean => {
+    if (item.type !== "syllable") return false;
+    const parent = structureRelation?.node(item)?.parent?.item;
+    if (!parent) return true;
+    const siblings = structureChildren(parent).filter((candidate) => candidate.type === "syllable");
+    return siblings[siblings.length - 1] === item;
+  };
+  const nextBoundary = (item: Item): Item | undefined => {
+    const word = item.get("word");
+    if (typeof word !== "string" || item.get("phoneme") === "SIL") return undefined;
+    const start = items.indexOf(item);
+    for (let candidateIndex = start + 1; candidateIndex < items.length; candidateIndex += 1) {
+      const candidate = items[candidateIndex];
+      const breakIndex = candidate.get("breakIndex");
+      if (
+        candidate.get("phoneme") === "SIL"
+        || candidate.get("punctuationSymbol") != null
+        || (typeof breakIndex === "number" && breakIndex >= 2)
+      ) return candidate;
+      const candidateWord = candidate.get("word");
+      if (typeof candidateWord === "string" && candidateWord !== word) return undefined;
+    }
+    return undefined;
+  };
   const view = (item: Item | undefined): Readonly<Record<string, unknown>> | null => {
     if (!item) return null;
     let result = views.get(item);
@@ -106,6 +178,10 @@ function buildEvaluationContext(
           if (property === "daughters" && !item.has("daughters")) {
             return structureChildren(item).map((child) => view(child));
           }
+          if (property === "is_final" && item.type === "syllable") {
+            return isFinalSyllable(item);
+          }
+          if (property === "next_boundary") return view(nextBoundary(item));
           return Reflect.get(target, property, receiver);
         },
         has: (target, property) =>
@@ -115,6 +191,8 @@ function buildEvaluationContext(
           || (property === "word" && structureAncestor(item, "word") != null)
           || (property === "parent" && structureRelation?.node(item)?.parent != null)
           || (property === "daughters" && structureChildren(item).length > 0)
+          || (property === "is_final" && item.type === "syllable")
+          || property === "next_boundary"
           || Reflect.has(target, property),
       });
       views.set(item, result);
@@ -142,13 +220,8 @@ function buildEvaluationContext(
     return view(target);
   };
   const merge = (left: unknown, right: unknown): Record<string, unknown> => {
-    const source = resolveItem(left);
-    const anchor = source ? utterance.temporalAnchor(source) : undefined;
-    if (anchor) transaction.dependOn(anchor.decisionId);
     return {
-      ...(anchor
-        ? { leftMarkId: anchor.leftMarkId, rightMarkId: anchor.rightMarkId, ratio: 0 }
-        : isPlainObject(left) ? left : {}),
+      ...(isPlainObject(left) ? left : {}),
       ...(isPlainObject(right) ? right : {}),
     };
   };
@@ -197,6 +270,7 @@ function buildEvaluationContext(
       const candidateContext = buildEvaluationContext(
         utterance,
         transaction,
+        owner,
         items,
         candidateIndex,
         params,
@@ -259,6 +333,7 @@ function buildEvaluationContext(
         const candidateContext = buildEvaluationContext(
           utterance,
           transaction,
+          owner,
           items,
           candidateIndex,
           params,
@@ -321,10 +396,14 @@ function buildEvaluationContext(
       next: view(items[index + 1]),
       current_index: index,
       params,
+      sets: params.sets,
+      maps: params.maps,
       ...bindingViews,
       ...extra,
   };
   return {
+    owner,
+    isItemView: (value) => value !== null && typeof value === "object" && itemByView.has(value),
     values: new Proxy(values, {
       get: (target, property, receiver) => {
         if (typeof property === "string" && relationName) {
@@ -354,7 +433,8 @@ function buildEvaluationContext(
       target: (phoneme) => {
         if (!inventory) throw new Error("E_HRG_INVENTORY_REQUIRED: target() requires the selected frontend inventory");
         transaction.dependOn(inventory.decisionId);
-        return materializePhonemeTarget(phoneme, { inventorySpec: inventory.spec });
+        const materialized = materializePhonemeTarget(phoneme, { inventorySpec: inventory.spec });
+        return Object.freeze({ ...materialized, ...materialized.params });
       },
       assoc: association,
       midpoint: (source) => pointAnchor(source, 0.5),
@@ -459,7 +539,43 @@ function evaluate(
   context: EvaluationContext,
 ): unknown {
   if (typeof expression !== "string") return expression;
-  return evaluateExpression(expression, context.values, context.functions);
+  return normalizeCelValue(
+    context.owner.evaluate(expression, context.values, context.functions),
+    context.isItemView,
+  );
+}
+
+function normalizeCelValue(value: unknown, isItemView: (value: unknown) => boolean): unknown {
+  if (isItemView(value)) return value;
+  if (typeof value === "bigint") {
+    const number = Number(value);
+    if (!Number.isSafeInteger(number)) {
+      throw new Error(`E_HRG_CEL_INTEGER_RANGE: ${value.toString()} is outside the safe integer range`);
+    }
+    return number;
+  }
+  if (value instanceof Map) {
+    return Object.fromEntries(
+      [...value.entries()].map(([key, nested]) => [String(key), normalizeCelValue(nested, isItemView)]),
+    );
+  }
+  if (Array.isArray(value)) return value.map((entry) => normalizeCelValue(entry, isItemView));
+  if (!isPlainObject(value)) return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, nested]) => [key, normalizeCelValue(nested, isItemView)]),
+  );
+}
+
+function evaluateStructured(
+  value: unknown,
+  context: EvaluationContext,
+): unknown {
+  if (typeof value === "string") return evaluate(value, context);
+  if (Array.isArray(value)) return value.map((entry) => evaluateStructured(entry, context));
+  if (!isPlainObject(value)) return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entry]) => [key, evaluateStructured(entry, context)]),
+  );
 }
 
 function conditionMatches(
@@ -489,14 +605,16 @@ function evaluateDispatch(
   context: EvaluationContext,
   predicates: Readonly<Record<string, unknown>>,
 ): unknown {
-  if (!isPlainObject(value) || !Array.isArray(value.dispatch)) return evaluate(value, context);
+  if (!isPlainObject(value) || !Array.isArray(value.dispatch)) {
+    return evaluateStructured(value, context);
+  }
   for (const branch of value.dispatch) {
     if (!isPlainObject(branch)) continue;
     if (branch.when != null && conditionMatches(branch.when, context, predicates)) {
-      return evaluate(branch.value, context);
+      return evaluateStructured(branch.value, context);
     }
     if (Object.prototype.hasOwnProperty.call(branch, "default")) {
-      return evaluate(branch.default, context);
+      return evaluateStructured(branch.default, context);
     }
   }
   return null;
@@ -535,6 +653,8 @@ function applyEffects(
   effects: unknown,
   context: EvaluationContext,
   predicates: Readonly<Record<string, unknown>>,
+  relationSpec: unknown,
+  params: Readonly<Record<string, unknown>>,
 ): void {
   if (!Array.isArray(effects)) return;
   for (const effect of effects) {
@@ -542,16 +662,66 @@ function applyEffects(
     const targetName = typeof effect.target === "string" ? effect.target : defaultTarget;
     const item = resolveTarget(targetName);
     if (!item) throw new Error(`E_EFFECT_TARGET_UNKNOWN: unknown effect target '${targetName}'`);
-    const incoming = evaluateDispatch(effect.value, context, predicates);
+    const incomingSource = Array.isArray(effect.dispatch)
+      ? { dispatch: effect.dispatch }
+      : effect.value;
+    const incoming = evaluateDispatch(incomingSource, context, predicates);
     const root = effect.field.split(".")[0];
     const current = transaction.read(item, root);
+    const scalarConfigs = isPlainObject(relationSpec) && isPlainObject(relationSpec.scalars)
+      ? relationSpec.scalars
+      : {};
+    const scalarConfig = !effect.field.includes(".") && isPlainObject(scalarConfigs[root])
+      ? scalarConfigs[root]
+      : null;
+    const resolution = scalarConfig && typeof scalarConfig.resolution === "string"
+      ? scalarConfig.resolution.toLowerCase()
+      : scalarConfig ? "standard" : null;
+    const round = root === "duration" || scalarConfig?.unit === "ms";
+    const roundValue = (value: number): number => round ? Math.round(value) : value;
+    let floor = Number.NEGATIVE_INFINITY;
+    if (resolution === "klatt" && scalarConfig) {
+      if (typeof scalarConfig.floor === "number" && Number.isFinite(scalarConfig.floor)) {
+        floor = scalarConfig.floor;
+      } else if (typeof scalarConfig.floor_field === "string") {
+        const declaredFloor = transaction.read(item, scalarConfig.floor_field);
+        if (typeof declaredFloor === "number" && Number.isFinite(declaredFloor)) floor = declaredFloor;
+      }
+      if (!Number.isFinite(floor) && root === "duration") {
+        const inherent = transaction.read(item, "inherentDuration");
+        const type = transaction.read(item, "type");
+        const policy = isPlainObject(params.policy) && isPlainObject(params.policy.duration)
+          ? params.policy.duration
+          : null;
+        const ratioKey = type === "vowel"
+          ? "incompressibility_ratio_vowel"
+          : "incompressibility_ratio_consonant";
+        const ratio = policy?.[ratioKey];
+        if (
+          typeof inherent !== "number"
+          || !Number.isFinite(inherent)
+          || typeof ratio !== "number"
+          || !Number.isFinite(ratio)
+        ) {
+          throw new Error(`E_DURATION_POLICY_REQUIRED: params.policy.duration.${ratioKey} and inherentDuration are required for Klatt duration resolution`);
+        }
+        floor = inherent * ratio;
+      }
+      if (!Number.isFinite(floor)) {
+        floor = typeof scalarConfig.min === "number" && Number.isFinite(scalarConfig.min)
+          ? scalarConfig.min
+          : 0;
+      }
+    }
     let resolved: unknown = incoming;
     switch (effect.op) {
       case "add":
-        resolved = Number(current ?? 0) + Number(incoming);
+        resolved = roundValue(Number(current ?? 0) + Number(incoming));
         break;
       case "mul":
-        resolved = Number(current ?? 0) * Number(incoming);
+        resolved = resolution === "klatt"
+          ? roundValue(Number(incoming) * (Number(current ?? 0) - floor) + floor)
+          : roundValue(Number(current ?? 0) * Number(incoming));
         break;
       case "max":
         resolved = Math.max(Number(current), Number(incoming));
@@ -563,7 +733,20 @@ function applyEffects(
         resolved = null;
         break;
       default:
+        if (typeof resolved === "number") resolved = roundValue(resolved);
         break;
+    }
+    if (typeof resolved === "number" && scalarConfig) {
+      let numericResolved = resolution === "klatt" && resolved < floor ? floor : resolved;
+      const minimum = scalarConfig.min;
+      const maximum = scalarConfig.max;
+      if (typeof minimum === "number" && Number.isFinite(minimum)) {
+        numericResolved = Math.max(numericResolved, minimum);
+      }
+      if (typeof maximum === "number" && Number.isFinite(maximum)) {
+        numericResolved = Math.min(numericResolved, maximum);
+      }
+      resolved = roundValue(numericResolved);
     }
     updateNestedValue(transaction, item, effect.field, resolved);
   }
@@ -682,7 +865,13 @@ function applySplice(
   if (!isPlainObject(splice) || !Array.isArray(splice.insert) || splice.insert.length === 0) return;
   const transaction = match.transaction;
   const resolveTarget = (name: string): Item | undefined =>
-    name === "current" ? match.items[match.index] : match.bindings[name];
+    name === "current"
+      ? match.items[match.index]
+      : name === "next"
+        ? match.items[match.index + 1]
+        : name === "prev"
+          ? match.items[match.index - 1]
+          : match.bindings[name];
   if (splice.type !== "replace_range" && splice.type !== "insert_at_boundary") {
     throw new Error(`E_SPLICE_TYPE_UNSUPPORTED: unsupported splice type '${String(splice.type)}'`);
   }
@@ -736,18 +925,29 @@ function applySplice(
     );
     const copySourceName = typeof template.copy_from === "string" ? template.copy_from : null;
     const copySource = copySourceName ? resolveTarget(copySourceName) : undefined;
-    if (copySource && Array.isArray(template.copy_fields)) {
-      for (const field of stringArray(template.copy_fields)) {
+    if (copySource) {
+      const copyFields = Array.isArray(template.copy_fields)
+        && Object.prototype.hasOwnProperty.call(template, "target")
+        ? stringArray(template.copy_fields)
+        : copySource.featureKeys();
+      for (const field of copyFields) {
         const value = transaction.read(copySource, field);
         if (value !== undefined) transaction.set(item, field, value);
       }
     }
-    const target = segment && Object.prototype.hasOwnProperty.call(segment, "target")
-      ? evaluate(segment.target, context)
+    const targetExpression = Object.prototype.hasOwnProperty.call(template, "target")
+      ? template.target
       : null;
+    const target = targetExpression !== null ? evaluate(targetExpression, context) : null;
+    if (targetExpression !== null && !isPlainObject(target)) {
+      throw new Error(
+        `E_HRG_SPLICE_TARGET: rule '${transaction.metadata.ruleId}' target must evaluate to an object`,
+      );
+    }
     if (isPlainObject(target)) {
-      for (const field of ["phoneme", "type", "duration", "inherentDuration", "params", "inventorySW"]) {
-        if (Object.prototype.hasOwnProperty.call(target, field)) transaction.set(item, field, target[field]);
+      for (const [field, value] of Object.entries(target)) {
+        if (field === "params") continue;
+        transaction.set(item, field, value);
       }
     }
     const templateFields = segment && isPlainObject(segment.fields)
@@ -757,10 +957,13 @@ function applySplice(
       : template;
     for (const [field, expression] of Object.entries(templateFields)) {
       if (field === "copy_from" || field === "copy_fields" || field === "target" || field === "fields") continue;
-      const value = evaluate(expression, context);
+      const value = evaluateStructured(expression, context);
       if (value !== undefined) transaction.set(item, field, value);
     }
     transaction.insertAfter(match.relationName, previous, item);
+    const structure = utterance.getRelation("SylStructure");
+    const structuralParent = structure?.node(source)?.parent?.item;
+    if (structuralParent) transaction.addDaughter("SylStructure", structuralParent, item);
     inserted.push(item);
     previous = item;
   }
@@ -855,7 +1058,9 @@ function applyPointActions(
 
 function executeMatch(
   utterance: Utterance,
+  owner: GraphRuleEvaluationOwner,
   rule: Readonly<Record<string, unknown>>,
+  relationSpec: unknown,
   match: Match,
   params: Readonly<Record<string, unknown>>,
   predicates: Readonly<Record<string, unknown>>,
@@ -866,6 +1071,7 @@ function executeMatch(
   let context = buildEvaluationContext(
     utterance,
     match.transaction,
+    owner,
     match.items,
     match.index,
     params,
@@ -882,6 +1088,7 @@ function executeMatch(
       context = buildEvaluationContext(
         utterance,
         match.transaction,
+        owner,
         match.items,
         match.index,
         params,
@@ -901,6 +1108,8 @@ function executeMatch(
     rule.apply,
     context,
     predicates,
+    relationSpec,
+    params,
   );
   if (isPlainObject(rule.contour)) {
     applyEffects(
@@ -910,6 +1119,8 @@ function executeMatch(
       rule.contour.apply,
       context,
       predicates,
+      relationSpec,
+      params,
     );
   }
   applyAssociations(match.transaction, rule.associate, true, resolveTarget);
@@ -926,6 +1137,7 @@ function executeMatch(
 
 function selectMatches(
   utterance: Utterance,
+  owner: GraphRuleEvaluationOwner,
   phaseName: string,
   ruleName: string,
   rule: Readonly<Record<string, unknown>>,
@@ -942,6 +1154,7 @@ function selectMatches(
     const context = buildEvaluationContext(
       utterance,
       transaction,
+      owner,
       items,
       index,
       params,
@@ -969,6 +1182,7 @@ function selectMatches(
 
 function patternMatches(
   utterance: Utterance,
+  owner: GraphRuleEvaluationOwner,
   phaseName: string,
   ruleName: string,
   rule: Readonly<Record<string, unknown>>,
@@ -1001,6 +1215,7 @@ function patternMatches(
       const context = buildEvaluationContext(
         utterance,
         transaction,
+        owner,
         items,
         index,
         params,
@@ -1026,6 +1241,7 @@ function patternMatches(
     const context = buildEvaluationContext(
       utterance,
       transaction,
+      owner,
       items,
       index,
       params,
@@ -1124,8 +1340,18 @@ export function runGraphRuleEngine(
 ): GraphRuleEngineResult {
   const startJournalLength = utterance.journal().length;
   const selectedPhases = options.phases ? new Set(options.phases) : null;
-  const params = Object.freeze({ ...spec.parameters, ...(options.parameters ?? {}) });
+  const specParameters = projectPolicyValues(spec.parameters);
+  const optionParameters = projectPolicyValues(options.parameters ?? {});
+  if (!isPlainObject(specParameters) || !isPlainObject(optionParameters)) {
+    throw new Error("E_HRG_PARAMETERS: compiled and runtime parameters must be objects");
+  }
+  const params = Object.freeze({
+    ...mergeParameterRecords(specParameters, optionParameters),
+    sets: spec.string_sets,
+    maps: spec.maps,
+  });
   const predicates = spec.predicates;
+  const evaluationOwner = options.evaluationOwner ?? new GraphRuleEvaluationOwner();
   let timingFinalized = false;
 
   for (const phase of spec.phases) {
@@ -1134,9 +1360,10 @@ export function runGraphRuleEngine(
       const rule = spec.rules[ruleName];
       if (!isPlainObject(rule)) continue;
       const matches = isPlainObject(rule.select)
-        ? selectMatches(utterance, phase.name, ruleName, rule, params, predicates, options.inventory)
+        ? selectMatches(utterance, evaluationOwner, phase.name, ruleName, rule, params, predicates, options.inventory)
         : patternMatches(
           utterance,
+          evaluationOwner,
           phase.name,
           ruleName,
           rule,
@@ -1152,7 +1379,16 @@ export function runGraphRuleEngine(
         );
       }
       for (const match of matches) {
-        executeMatch(utterance, rule, match, params, predicates, options.inventory);
+        executeMatch(
+          utterance,
+          evaluationOwner,
+          rule,
+          spec.relations[match.relationName],
+          match,
+          params,
+          predicates,
+          options.inventory,
+        );
       }
     }
     finalizePhase(utterance, spec, phase);

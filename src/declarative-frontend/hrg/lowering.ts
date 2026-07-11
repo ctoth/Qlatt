@@ -299,7 +299,8 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
     const currentType = timing.item.get(typeKey);
     const nextType = nextTiming.item.get(typeKey);
     if (typeof currentType !== "string" || typeof nextType !== "string") return;
-    if (!smoothTypes.has(currentType) || !smoothTypes.has(nextType)) return;
+    const bothSmoothed = smoothTypes.has(currentType) && smoothTypes.has(nextType);
+    if (!bothSmoothed && options.transitions.blend.smooth_all_boundaries !== true) return;
     const itemTransitionMs = finiteFeatureNumber(timing.item.get("transition_ms"));
     const transitionMs = itemTransitionMs ?? defaultTransitionMs;
     if (transitionMs <= 0) return;

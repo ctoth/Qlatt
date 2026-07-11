@@ -205,7 +205,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 029 | Phase 4 lowering family 2: production scalar cells | kept | `5d481234` | 1,443 base-scalar boundary cells exact against production events; latest-write provenance retained |
 | 030 | Phase 4 family 3A: graph control windows | kept | `42e2f0a4` | DECtalk next-target production cells exact; all field ops/targets/span forms; window provenance |
 | 031 | Phase 4 family 3B: midpoint transitions | kept | `0b4b2e01` | qlatt EH-to-L production event and 5 ordinary blend cells exact; policy-driven types/keys/factor/span |
-| 032 | Phase 4 family 3C: sonorant F2 ramps | kept | pending slice commit | cited 45 ms/75% policy; qlatt F2 ramp start/interior production cells exact; compiler range validation |
+| 032 | Phase 4 family 3C: sonorant F2 ramps | kept | `18a9b829` | cited 45 ms/75% policy; qlatt F2 ramp start/interior production cells exact; compiler range validation |
+| 033 | Phase 4 family 3D: universal midpoint fallback | kept | pending slice commit | DECtalk P-to-release 72.2 ms event and 6 cells exact; selected smooth-all policy only |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1594,3 +1595,29 @@ PASS: 4 files, 39 tests
 
 Next source slice remains family 3: DECtalk policy-driven locus and universal
 boundary transitions, then a complete transition/control-event parity matrix.
+
+## Iteration 033 — Phase 4 family 3D: universal midpoint fallback
+
+Status: kept. Family 3 remains active for DECtalk locus transitions.
+
+The selected `smooth_all_boundaries` policy now extends ordinary midpoint
+realization to boundaries outside the declared smooth Segment types. Frontends
+that omit the flag retain smooth-type-only behavior; generic code contains no
+DECtalk branch.
+
+The direct production proof covers DECtalk's first P closure to P release
+boundary. At 72.2 ms, all six policy columns equal the captured 50% boundary:
+
+```text
+F1=375, F2=1075.5, F3=2150, B1=250, B2=165, B3=200
+```
+
+Verification:
+
+```text
+npm test -- --run test/hrg-lowering-midpoint-transitions.test.ts
+PASS: 1 file, 2 tests
+```
+
+Next source slice remains family 3: selected locus tables, per-formant ramp
+spans, forward/backward edge realization, then full family parity.

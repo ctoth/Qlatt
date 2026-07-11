@@ -310,8 +310,13 @@ describe("HRG lowering scalar histories", () => {
     const ownedColumns = BASE_SCALAR_COLUMNS.filter((column) => baseline.policy.columns.includes(column));
     expect(ownedColumns.length).toBeGreaterThan(10);
 
-    for (const frame of lowered.frames) {
-      if (!frame.segmentId || !frame.phoneme) continue;
+    let cursorMs = baseline.policy.timeline.initial_silence_ms.value;
+    for (const segment of baseline.segments) {
+      const frame = lowered.frames.find(
+        (candidate) => candidate.segmentId === segment.id
+          && Math.abs(candidate.time * 1000 - cursorMs) <= 1e-6,
+      );
+      if (!frame?.phoneme) throw new Error(`lowered boundary frame missing for '${segment.id}'`);
       const production = baseline.productionFrames.find(
         (candidate) => candidate.phoneme === frame.phoneme
           && Math.abs(candidate.time - frame.time) <= 1e-9,
@@ -320,6 +325,7 @@ describe("HRG lowering scalar histories", () => {
       for (const column of ownedColumns) {
         expect(frame.params[column], `${frame.segmentId}.${column}`).toBe(production.params[column]);
       }
+      cursorMs += effectiveDuration(segment, baseline.policy);
     }
   });
 

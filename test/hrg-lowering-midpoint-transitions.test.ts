@@ -109,6 +109,32 @@ function productionTransitionParams(): Record<string, number> {
   return params;
 }
 
+function dectalkProductionParams(): Record<string, number> {
+  const parsed: unknown = JSON.parse(readFileSync(
+    new URL("./fixtures/hrg-convergence-baseline/dectalk-english-stops.json", import.meta.url),
+    "utf8",
+  ));
+  if (!isPlainObject(parsed) || !isPlainObject(parsed.oldProduction)) {
+    throw new Error("DECtalk production fixture missing");
+  }
+  const frames = parsed.oldProduction.sourceFrames;
+  if (!Array.isArray(frames)) throw new Error("DECtalk production frames missing");
+  const frame = frames.find(
+    (candidate) => isPlainObject(candidate)
+      && candidate.phoneme === "P"
+      && typeof candidate.time === "number"
+      && Math.abs(candidate.time - 0.0722) <= 1e-9,
+  );
+  if (!isPlainObject(frame) || !isPlainObject(frame.params)) {
+    throw new Error("captured DECtalk universal midpoint event missing");
+  }
+  const params: Record<string, number> = {};
+  for (const [key, value] of Object.entries(frame.params)) {
+    if (typeof value === "number") params[key] = value;
+  }
+  return params;
+}
+
 describe("HRG lowering midpoint transitions", () => {
   it("matches captured qlatt-English EH-to-L midpoint cells", () => {
     const utterance = new Utterance(SCHEMA);
@@ -144,5 +170,58 @@ describe("HRG lowering midpoint transitions", () => {
       expect(transition?.params[column], column).toBe(production[column]);
     }
     expect(f2Start?.params.F2).toBe(1799);
+  });
+
+  it("matches the captured DECtalk universal P-to-release midpoint cells", () => {
+    const utterance = new Utterance(SCHEMA);
+    const build = utterance.beginTransaction(META);
+    const closure = addSegment(build, "seg_0", "P", "stop_closure", 83, {
+      F1: 350, F2: 1051, F3: 2150, B1: 200, B2: 180, B3: 180,
+    });
+    const release = addSegment(build, "seg_1", "P_REL", "stop_release", 7, {
+      F1: 400, F2: 1100, F3: 2150, B1: 300, B2: 150, B3: 220,
+    });
+    build.partitionAnchors([closure, release], utterance.axis.start.id, utterance.axis.end.id);
+    build.commit();
+    const timing = utterance.beginTransaction({ ...META, ruleId: "timing", tag: "timing" });
+    const closureAnchor = utterance.intervalAnchor(closure);
+    const releaseAnchor = utterance.intervalAnchor(release);
+    if (!closureAnchor || !releaseAnchor) throw new Error("fixture anchors missing");
+    timing.resolveMarkTime(closureAnchor.leftMarkId, 0);
+    timing.resolveMarkTime(closureAnchor.rightMarkId, 83);
+    timing.resolveMarkTime(releaseAnchor.rightMarkId, 90);
+    timing.commit();
+    const policy: LowerOptions = {
+      ...POLICY,
+      timeline: {
+        ...POLICY.timeline,
+        initial_silence_ms: { value: 19.2 },
+        final_silence_ms: { value: 0 },
+        duration_floors: {
+          stop_release_ms: { value: 7 },
+          default_ms: { value: 30 },
+        },
+      },
+      transitions: {
+        default_transition_ms: { value: 30 },
+        blend: {
+          factor: { value: 0.5 },
+          keys: ["F1", "F2", "F3", "B1", "B2", "B3"],
+          smooth_types: ["vowel", "nasal", "liquid", "glide"],
+          smooth_all_boundaries: true,
+        },
+      },
+    };
+
+    const lowered = lowerToFrames(utterance, policy);
+    const transition = lowered.frames.find(
+      (frame) => frame.segmentId === closure.id && Math.abs(frame.time - 0.0722) <= 1e-9,
+    );
+    const production = dectalkProductionParams();
+
+    expect(transition).toBeDefined();
+    for (const column of policy.columns) {
+      expect(transition?.params[column], column).toBe(production[column]);
+    }
   });
 });

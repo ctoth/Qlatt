@@ -184,7 +184,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 008 | Phase 2E structural invalidation owner | kept | `f5f30bc1` | exact two-firing count; 207 declarative tests; core/scripts typecheck pass |
 | 009 | Phase 3 typed Item/relation schemas | kept | `9980a7ac` | 19 HRG tests; core/scripts typecheck pass; no HRG any |
 | 010 | Phase 3 stamped relation topology | kept | `4360c5f5` | 22 HRG tests; immutable histories; core/scripts typecheck pass |
-| 011 | Phase 3 Utterance temporal axis | kept | pending slice commit | 232 declarative/HRG tests; old axis zero-hit; core/scripts typecheck pass |
+| 011 | Phase 3 Utterance temporal axis | kept | `70ababdd` | 232 declarative/HRG tests; old axis zero-hit; core/scripts typecheck pass |
+| 012 | Phase 3 atomic HRG transactions | kept | pending slice commit | 28 HRG tests; rejection diagnostics; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -652,3 +653,48 @@ ZERO HIT
 Next slice: atomic transaction construction, whole-transaction validation and
 commit, rejection diagnostics, explicit read-set capture, and the deterministic
 journal owner.
+
+## Iteration 012 — Phase 3 atomic HRG transactions
+
+Status: kept.
+
+Three contracts were red before implementation: an invalid later feature write
+could not be batched with an earlier write, invalid relation attachment had no
+whole-batch boundary, and reads had no transaction-local path into write
+parentage or a journal.
+
+Kept convergence:
+
+- added the durable `HrgTransaction` owner with required rule id, phase, tag,
+  reason, citations, and optional stage/timestamp metadata;
+- stages feature, list-append, tree-root, and tree-daughter operations without
+  mutation;
+- prevalidates every target, feature value, relation kind/membership, duplicate
+  membership, and parent reachability before the first commit;
+- records explicit feature reads in a transaction-local set and parents every
+  committed feature/relation write to that read set;
+- retains rule id and application tag on the exact versioned writes;
+- emits `HRG_TRANSACTION_REJECTED` diagnostics and closes rejected
+  transactions without graph, provenance, or journal mutation; and
+- appends only committed, serializable, deeply immutable operation/read/decision
+  records to the Utterance-owned journal.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+$hrg = (Get-ChildItem -File test\hrg*.test.ts).FullName
+npm test -- $hrg
+PASS: 5 files, 28 tests
+
+rg -n "Record<string, any>|\\bany\\b" src/declarative-frontend/hrg/transaction.ts
+ZERO HIT
+```
+
+Next slice: phase checkpoints and deterministic transaction replay, including
+an exact graph digest equality proof without reevaluating expressions.

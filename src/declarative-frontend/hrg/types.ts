@@ -67,8 +67,10 @@ export type RelationWriteOperation = "append" | "add_root" | "add_daughter";
 
 export interface RelationWriteInput {
   reason: string;
-  citations?: string[];
-  parents?: string[];
+  ruleId?: string;
+  tag?: string;
+  citations?: readonly string[];
+  parents?: readonly string[];
   stage?: ProvenanceStage;
   timestampMs?: number;
 }
@@ -102,6 +104,35 @@ export interface MarkTimeWrite {
   readonly timestampMs?: number;
 }
 
+export interface TransactionMetadata {
+  readonly ruleId: string;
+  readonly phase: string;
+  readonly tag: string;
+  readonly reason: string;
+  readonly citations: readonly string[];
+  readonly stage?: ProvenanceStage;
+  readonly timestampMs?: number;
+}
+
+export type JournalOperation =
+  | { readonly kind: "set_feature"; readonly itemId: string; readonly key: string; readonly value: FeatureValue }
+  | { readonly kind: "append"; readonly relationName: string; readonly itemId: string }
+  | { readonly kind: "add_root"; readonly relationName: string; readonly itemId: string }
+  | {
+      readonly kind: "add_daughter";
+      readonly relationName: string;
+      readonly parentItemId: string;
+      readonly itemId: string;
+    };
+
+export interface TransactionJournalEntry {
+  readonly id: string;
+  readonly metadata: TransactionMetadata;
+  readonly readSet: readonly string[];
+  readonly operations: readonly JournalOperation[];
+  readonly decisionIds: readonly string[];
+}
+
 export interface RelationWrite {
   readonly relationName: string;
   readonly operation: RelationWriteOperation;
@@ -111,6 +142,8 @@ export interface RelationWrite {
   readonly version: number;
   readonly decisionId: string;
   readonly reason: string;
+  readonly ruleId?: string;
+  readonly tag?: string;
   readonly citations: readonly string[];
   readonly parents: readonly string[];
   readonly stage: ProvenanceStage;
@@ -125,9 +158,11 @@ export interface RelationWrite {
  */
 export interface FeatureWriteInput {
   reason: string;
-  citations?: string[];
+  ruleId?: string;
+  tag?: string;
+  citations?: readonly string[];
   /** Read-set: decision ids this write was derived from. */
-  parents?: string[];
+  parents?: readonly string[];
   /** Pipeline stage; defaults to "rules". */
   stage?: ProvenanceStage;
   /** Decision type string; defaults to feature_write / feature_overwrite. */
@@ -149,6 +184,8 @@ export interface FeatureWrite {
   /** Id of the DecisionRecord created for this write. */
   readonly decisionId: string;
   readonly reason: string;
+  readonly ruleId?: string;
+  readonly tag?: string;
   readonly citations: readonly string[];
   readonly stage: ProvenanceStage;
   readonly type: string;

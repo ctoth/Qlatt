@@ -133,14 +133,19 @@ export class Item {
 
   /** Stamped feature write. Returns the recorded write (with its decision id). */
   set(key: string, value: unknown, input: FeatureWriteInput): FeatureWrite {
+    const validated = this._validateFeature(key, value);
+    return this.stamper(this, key, validated, input);
+  }
+
+  /** Internal transaction preflight; validates and snapshots without mutation. */
+  _validateFeature(key: string, value: unknown): FeatureValue {
     const featureSchema = this.schema.features[key];
     if (!featureSchema) {
       throw new Error(
         `E_HRG_FEATURE_UNDECLARED: item type '${this.type}' does not declare feature '${key}'`,
       );
     }
-    const validated = validateFeatureValue(this.type, key, value, featureSchema);
-    return this.stamper(this, key, validated, input);
+    return validateFeatureValue(this.type, key, value, featureSchema);
   }
 
   /** Current value of a feature, or undefined if never written. */

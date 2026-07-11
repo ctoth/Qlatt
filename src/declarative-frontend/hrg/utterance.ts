@@ -8,9 +8,11 @@
  * (write-stamping fuses HRG with the provenance DAG); src/provenance.ts schema.
  */
 import { createProvenanceCollector, type ProvenanceCollector } from "../../provenance";
+import { createDiagnostics, type Diagnostics } from "../../diagnostics";
 import { Item } from "./item";
 import { Relation } from "./relation";
 import { TemporalAxis, type TemporalMark } from "./temporal-axis";
+import { HrgTransaction } from "./transaction";
 import type {
   FeatureValue,
   FeatureWrite,
@@ -23,6 +25,8 @@ import type {
   Stamper,
   TemporalAnchorWrite,
   TemporalWriteInput,
+  TransactionJournalEntry,
+  TransactionMetadata,
 } from "./types";
 
 function cloneFeatureSchema(schema: FeatureSchema): FeatureSchema {
@@ -103,6 +107,7 @@ function compileHrgSchema(input: HrgSchema): HrgSchema {
 
 export class Utterance {
   readonly provenance: ProvenanceCollector;
+  readonly diagnostics: Diagnostics;
   readonly axis = new TemporalAxis();
   private readonly schema: HrgSchema;
   private readonly items = new Map<string, Item>();
@@ -110,12 +115,16 @@ export class Utterance {
   private readonly typeCounters = new Map<string, number>();
   private readonly anchorHistoryByItemId = new Map<string, TemporalAnchorWrite[]>();
   private readonly markTimeHistoryById = new Map<string, MarkTimeWrite[]>();
+  private readonly transactionJournal: TransactionJournalEntry[] = [];
+  private transactionCounter = 0;
 
   constructor(
     schema: HrgSchema,
     provenance?: ProvenanceCollector,
+    diagnostics?: Diagnostics,
   ) {
     this.provenance = provenance ?? createProvenanceCollector();
+    this.diagnostics = diagnostics ?? createDiagnostics();
     this.schema = compileHrgSchema(schema);
   }
 
@@ -151,6 +160,8 @@ export class Utterance {
       version,
       decisionId: decision.id,
       reason: input.reason,
+      ...(input.ruleId ? { ruleId: input.ruleId } : {}),
+      ...(input.tag ? { tag: input.tag } : {}),
       citations: Object.freeze([...decision.citations]),
       stage: decision.stage,
       type: decision.type,
@@ -197,6 +208,8 @@ export class Utterance {
       version: relation.writes().length,
       decisionId: decision.id,
       reason: decision.reason,
+      ...(input.ruleId ? { ruleId: input.ruleId } : {}),
+      ...(input.tag ? { tag: input.tag } : {}),
       citations: Object.freeze([...decision.citations]),
       parents: Object.freeze(decision.parents ? [...decision.parents] : []),
       stage: decision.stage,
@@ -258,6 +271,42 @@ export class Utterance {
 
   relationNames(): string[] {
     return [...this.relations.keys()];
+  }
+
+  beginTransaction(metadata: TransactionMetadata): HrgTransaction {
+    return new HrgTransaction(this, metadata);
+  }
+
+  journal(): readonly TransactionJournalEntry[] {
+    return Object.freeze([...this.transactionJournal]);
+  }
+
+  _assertOwnedItem(item: Item): void {
+    if (this.items.get(item.id) !== item) {
+      throw new Error(`E_HRG_ITEM_OWNER: item '${item.id}' is not owned by this Utterance`);
+    }
+  }
+
+  _nextTransactionId(): string {
+    const id = `tx_${this.transactionCounter.toString().padStart(6, "0")}`;
+    this.transactionCounter += 1;
+    return id;
+  }
+
+  _recordTransaction(entry: TransactionJournalEntry): void {
+    this.transactionJournal.push(entry);
+  }
+
+  _recordTransactionRejection(metadata: TransactionMetadata, error: unknown): void {
+    this.diagnostics.error(
+      "Rejected HRG transaction before commit",
+      {
+        ruleId: metadata.ruleId,
+        phase: metadata.phase,
+        message: error instanceof Error ? error.message : String(error),
+      },
+      "HRG_TRANSACTION_REJECTED",
+    );
   }
 
   createMarkBetween(

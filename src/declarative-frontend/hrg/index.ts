@@ -8,6 +8,7 @@
 export { Item } from "./item";
 export { Relation, HrgNode } from "./relation";
 export { Utterance } from "./utterance";
+export { HrgTransaction } from "./transaction";
 export {
   TemporalAxis,
   START_ORDER,
@@ -47,4 +48,7 @@ export type {
   Stamper,
   TemporalAnchorWrite,
   TemporalWriteInput,
+  TransactionJournalEntry,
+  TransactionMetadata,
+  JournalOperation,
 } from "./types";

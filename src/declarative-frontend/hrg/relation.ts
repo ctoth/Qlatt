@@ -64,7 +64,7 @@ export class Relation {
     private readonly stamper: RelationStamper,
   ) {}
 
-  private validateAttach(item: Item): void {
+  _validateAttach(item: Item): void {
     if (!this.allowedItemTypes.has(item.type)) {
       throw new Error(
         `E_HRG_RELATION_ITEM_TYPE: relation '${this.name}' does not allow item type '${item.type}'`,
@@ -96,7 +96,7 @@ export class Relation {
     if (this.kind !== "list") {
       throw new Error(`E_HRG_RELATION_KIND: append requires a 'list' relation, '${this.name}' is '${this.kind}'`);
     }
-    this.validateAttach(item);
+    this._validateAttach(item);
     const previous = this.tail?.item ?? null;
     const write = this.stamper(this, "append", item, null, previous, input);
     const node = this.attach(item, write);
@@ -111,7 +111,7 @@ export class Relation {
     if (this.kind !== "tree") {
       throw new Error(`E_HRG_RELATION_KIND: addRoot requires a 'tree' relation, '${this.name}' is '${this.kind}'`);
     }
-    this.validateAttach(item);
+    this._validateAttach(item);
     const previous = this.roots[this.roots.length - 1]?.item ?? null;
     const write = this.stamper(this, "add_root", item, null, previous, input);
     const node = this.attach(item, write);
@@ -130,7 +130,7 @@ export class Relation {
     if (parent.relation !== this) {
       throw new Error(`E_HRG_PARENT_RELATION: parent node is not in relation '${this.name}'`);
     }
-    this.validateAttach(item);
+    this._validateAttach(item);
     const previous = parent.daughters[parent.daughters.length - 1]?.item ?? null;
     const write = this.stamper(this, "add_daughter", item, parent.item, previous, input);
     const node = this.attach(item, write);

@@ -17,10 +17,7 @@ import {
   isStartOrder,
   toNumericOrder,
 } from "./axis";
-import {
-  buildTrajectoryControlWindows,
-  selectDectalkObstruentProfile,
-} from "./dectalk-helpers";
+import { buildTrajectoryControlWindows } from "../control-score";
 import {
   parseSyllabificationTables,
   syllabifyWord,
@@ -1236,20 +1233,8 @@ function buildNavigationFunctions(
       }
       return total;
     },
-    trajectory_to_windows: (trajectory: unknown, durationMs: unknown) =>
+    trajectory_control_windows: (trajectory: unknown, durationMs: unknown) =>
       buildTrajectoryControlWindows(trajectory, durationMs),
-    dectalk_obstruent_profile: (
-      profiles: unknown,
-      current: unknown,
-      previous: unknown,
-      next: unknown
-    ) =>
-      selectDectalkObstruentProfile(
-        profiles,
-        current as Record<string, any> | null | undefined,
-        previous as Record<string, any> | null | undefined,
-        next as Record<string, any> | null | undefined
-      ),
     // count_word_vowels(): Count vowel tokens sharing the same word as the
     // current token.  Returns 0 for tokens without a word or SIL tokens.
     // Citation: Klatt 1976 Rule 4 (polysyllabic shortening)

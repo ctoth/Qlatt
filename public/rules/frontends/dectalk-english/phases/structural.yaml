@@ -11,7 +11,7 @@ rules:
       range_right: current.sync_right
       insert:
         - copy_from: current
-          control_windows: "trajectory_to_windows(current.trajectory, current.duration)"
+          control_windows: "trajectory_control_windows(current.trajectory, current.duration)"
     citations:
       - "DECtalk 4.63 p_us_rom.h (us_maltar/us_maldip male diphthong trajectories)"
       - "DECtalk 4.63 ph_setar.c set_trans() (trajectory points are realized as time-ordered target transitions across the vowel)"
@@ -84,7 +84,14 @@ rules:
       dummy_duration: params.policy.duration.voiceless_vot_base_ms
       vot_target: dummy_duration
       rel_burst_duration: "has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration"
-      rel_profile: "dectalk_obstruent_profile(rel_target.stopReleaseProfiles, current, prev, null)"
+      # DECtalk 4.63 p_us_st1.c chooses the release spectrum from the adjacent
+      # sound class; the inventory owns the class-keyed spectral data.
+      profile_ref: "prev != null && prev.phoneme != 'SIL' ? prev : current"
+      profile_class: >-
+        has(profile_ref.is_obstruent) && profile_ref.is_obstruent == true ? 'obstruent' :
+        (profile_ref.type == 'vowel' && has(profile_ref.front) && profile_ref.front == true ? 'front_vowel' :
+        (has(profile_ref.is_back_rounded) && profile_ref.is_back_rounded == true ? 'back_rounded_vowel' : 'back_unrounded_vowel'))
+      rel_profile: "rel_target.stopReleaseProfiles[profile_class]"
       rel_duration: "min([vot_target, rel_burst_duration])"
       asp_duration: "vot_target - rel_duration"
       current_min_duration: "has(current.minimumDuration) ? current.minimumDuration : 0"
@@ -199,7 +206,14 @@ rules:
         prev_token != null && prev_token.phoneme == 'S' &&
         (has(prev_token.word) && has(current.word) ? prev_token.word == current.word : false)
       rel_burst_duration: "has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration"
-      rel_profile: "dectalk_obstruent_profile(rel_target.stopReleaseProfiles, current, prev_token, next_token)"
+      profile_ref: >-
+        next_token != null && next_token.phoneme != 'SIL' ? next_token :
+        (prev_token != null && prev_token.phoneme != 'SIL' ? prev_token : current)
+      profile_class: >-
+        has(profile_ref.is_obstruent) && profile_ref.is_obstruent == true ? 'obstruent' :
+        (profile_ref.type == 'vowel' && has(profile_ref.front) && profile_ref.front == true ? 'front_vowel' :
+        (has(profile_ref.is_back_rounded) && profile_ref.is_back_rounded == true ? 'back_rounded_vowel' : 'back_unrounded_vowel'))
+      rel_profile: "rel_target.stopReleaseProfiles[profile_class]"
       vot_target: >-
         next_is_sonorant_consonant ?
         ((next_unstressed ? params.policy.duration.voiceless_vot_unstressed_ms : params.policy.duration.voiceless_vot_base_ms) +
@@ -312,7 +326,12 @@ rules:
       dummy_duration: params.policy.duration.voiceless_vot_base_ms
       vot_target: dummy_duration
       rel_burst_duration: "has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration"
-      rel_profile: "dectalk_obstruent_profile(rel_target.stopReleaseProfiles, current, prev, null)"
+      profile_ref: "prev != null && prev.phoneme != 'SIL' ? prev : current"
+      profile_class: >-
+        has(profile_ref.is_obstruent) && profile_ref.is_obstruent == true ? 'obstruent' :
+        (profile_ref.type == 'vowel' && has(profile_ref.front) && profile_ref.front == true ? 'front_vowel' :
+        (has(profile_ref.is_back_rounded) && profile_ref.is_back_rounded == true ? 'back_rounded_vowel' : 'back_unrounded_vowel'))
+      rel_profile: "rel_target.stopReleaseProfiles[profile_class]"
       rel_duration: "min([vot_target, rel_burst_duration])"
       asp_duration: "vot_target - rel_duration"
       current_min_duration: "has(current.minimumDuration) ? current.minimumDuration : 0"
@@ -387,7 +406,14 @@ rules:
       next_token: next
       weak: "next_token != null ? next_token.phoneme == \"SIL\" : false"
       rel_target: target(rel)
-      rel_profile: "dectalk_obstruent_profile(rel_target.stopReleaseProfiles, current, prev, next_token)"
+      profile_ref: >-
+        next_token != null && next_token.phoneme != 'SIL' ? next_token :
+        (prev != null && prev.phoneme != 'SIL' ? prev : current)
+      profile_class: >-
+        has(profile_ref.is_obstruent) && profile_ref.is_obstruent == true ? 'obstruent' :
+        (profile_ref.type == 'vowel' && has(profile_ref.front) && profile_ref.front == true ? 'front_vowel' :
+        (has(profile_ref.is_back_rounded) && profile_ref.is_back_rounded == true ? 'back_rounded_vowel' : 'back_unrounded_vowel'))
+      rel_profile: "rel_target.stopReleaseProfiles[profile_class]"
       rel_params: >-
         weak ? merge(rel_target.params, merge(rel_profile, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH -
         params.policy.duration.weak_release_amplitude_reduction_db])})) : merge(rel_target.params, rel_profile)
@@ -460,7 +486,12 @@ rules:
       rel: "current.phoneme + \"_REL\""
       weak: "true"
       rel_target: target(rel)
-      rel_profile: "dectalk_obstruent_profile(rel_target.stopReleaseProfiles, current, prev, null)"
+      profile_ref: "prev != null && prev.phoneme != 'SIL' ? prev : current"
+      profile_class: >-
+        has(profile_ref.is_obstruent) && profile_ref.is_obstruent == true ? 'obstruent' :
+        (profile_ref.type == 'vowel' && has(profile_ref.front) && profile_ref.front == true ? 'front_vowel' :
+        (has(profile_ref.is_back_rounded) && profile_ref.is_back_rounded == true ? 'back_rounded_vowel' : 'back_unrounded_vowel'))
+      rel_profile: "rel_target.stopReleaseProfiles[profile_class]"
       rel_params: "merge(rel_target.params, merge(rel_profile, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])}))"
       rel_duration: >-
         max([params.policy.duration.weak_release_min_ms, (has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration) *

@@ -3,8 +3,28 @@ import { runRuleEngine } from "../src/declarative-frontend/engine";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
 import { validateDslSpec } from "../src/declarative-frontend/validation";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  CEL_FUNCTION_CATALOG,
+  validateExpressionSyntax,
+} from "../src/declarative-frontend/cel-expressions";
 
 describe("declarative frontend CEL expressions", () => {
+  it("owns every CEL function name and exact arity in one frontend-neutral catalog", () => {
+    const names = CEL_FUNCTION_CATALOG.map((entry) => entry.name);
+    expect(new Set(names).size).toBe(names.length);
+    expect(names).not.toContain("dectalk_obstruent_profile");
+    expect(CEL_FUNCTION_CATALOG).toContainEqual({
+      name: "trajectory_control_windows",
+      arities: [2],
+      binding: "context",
+    });
+
+    expect(validateExpressionSyntax("trajectory_control_windows({}, 100)")).toBeNull();
+    expect(validateExpressionSyntax("dectalk_obstruent_profile({}, {}, {}, {})")).toMatch(
+      /Unknown function/
+    );
+  });
+
   it("evaluates CEL where and value expressions with params", () => {
     const spec = {
       parameters: { enabled: true, mul: 1.5, add: 10 },

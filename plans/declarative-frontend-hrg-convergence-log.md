@@ -179,7 +179,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 003 | Phase 1B backwards bridge deletion | kept | `01f4c48c` | bridge search zero-hit; HRG core 14/14; core/scripts typecheck pass |
 | 004 | Phase 2A selected resource ownership | kept | `2c3e53fa` | three inventory identities pass; 87 adjacent tests; core/scripts typecheck pass |
 | 005 | Phase 2B immutable compiled rulepacks | kept | `46903895` | 204 declarative tests; 57 integration tests; core/scripts typecheck pass |
-| 006 | Phase 2C final relation DSL vocabulary | kept | pending slice commit | 205 declarative tests; 124/125 downstream baseline; three strict explain runs; core/scripts typecheck pass |
+| 006 | Phase 2C final relation DSL vocabulary | kept | `e1a16553` | 205 declarative tests; 124/125 downstream baseline; three strict explain runs; core/scripts typecheck pass |
+| 007 | Phase 2D CEL neutrality | kept | pending slice commit | 246 focused tests; DECtalk strict explain 192/0; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -417,3 +418,55 @@ Next slice: Phase 2D. Replace DECtalk profile selection with cited rule/data
 logic, delete DECtalk-named CEL machinery, consolidate the CEL catalog, classify
 and relocate or declaratively express `trajectory_to_windows`, delete
 `dectalk-helpers.ts`, and commit.
+
+## Iteration 007 — Phase 2D CEL neutrality
+
+Status: kept.
+
+Two direct contracts were red before implementation: the CEL catalog did not
+exist as one typed value, and the generic trajectory-to-window behavior was not
+owned by `control-score.ts`. The first DECtalk end-to-end run then exposed an
+unguarded optional feature read in the declarative replacement; adding the
+ordinary CEL `has()` guard restored the complete suite.
+
+Kept convergence:
+
+- replaced all five `dectalk_obstruent_profile` calls with cited DECtalk rule
+  definitions that classify the adjacent token and index the inventory-owned
+  `stopReleaseProfiles` map directly;
+- deleted the DECtalk-named CEL implementation, environment registration, and
+  allowlist entry;
+- consolidated every accepted CEL name, exact supported arity, and builtin vs
+  context binding in the typed `CEL_FUNCTION_CATALOG`, which now drives both
+  syntax validation and environment overload registration;
+- removed the unused custom allowlist option so a second function-name owner
+  cannot be supplied;
+- proved the trajectory conversion is frontend-neutral timed-control lowering,
+  moved it to `control-score.ts`, and renamed the CEL operation to
+  `trajectory_control_windows`;
+- replaced the DECtalk helper test with an owner-native trajectory lowering
+  test; and
+- deleted `src/declarative-frontend/dectalk-helpers.ts` and its old test.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+$tests = (Get-ChildItem -File test\declarative-frontend-*.test.ts).FullName; npm test -- $tests test/trajectory-control-windows.test.ts test/dectalk-e2e.test.ts
+PASS: 38 files, 246 tests
+
+npm run explain -- "hello world" --frontend dectalk-english --strict-citations
+PASS: 192 decisions, 0 uncited
+
+rg -n "dectalk_obstruent_profile|trajectory_to_windows|dectalk-helpers" src test public/rules/frontends scripts plans/frontend-spec.md -g "*.ts" -g "*.yaml" -g "*.md"
+ONLY: the two negative CEL catalog assertions for the deleted DECtalk function
+```
+
+Next slice: Phase 2E. Establish the transaction-level invalidation owner with
+an exact count/behavior test, delete the duplicate invalidation site, prove one
+owner remains, and commit.

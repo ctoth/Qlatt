@@ -1,13 +1,20 @@
 import { Environment } from "@marcbachmann/cel-js";
 
-type CompiledCelExpression = (context?: Record<string, any>) => any;
+type CompiledCelExpression = (context?: Record<string, unknown>) => unknown;
 
 export type ExpressionValidationOptions = {
-  allowedFunctions?: Iterable<string>;
   relationNames?: Iterable<string>;
 };
 
 const expressionCache = new Map<string, CompiledCelExpression>();
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value != null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isCallable(value: unknown): value is (...args: unknown[]) => unknown {
+  return typeof value === "function";
+}
 
 // --- CEL evaluation counter (for profiling) ---
 let _celEvalCount = 0;
@@ -29,45 +36,52 @@ export function setCelTimingEnabled(enabled: boolean): void { _celTimingEnabled 
 /** Reset all CEL profiling counters to zero. */
 export function resetCelCounters(): void { _celEvalCount = 0; _celCacheHitCount = 0; _celCacheMissCount = 0; _celEvalTimeMs = 0; }
 
-const DEFAULT_ALLOWED_FUNCTIONS = new Set([
-  "has",
-  "size",
-  "midpoint",
-  "at_ratio",
-  "at_sync",
-  "prev_point",
-  "ahead",
-  "behind",
-  "total",
-  "target",
-  "assoc",
-  "double",
-  "string",
-  "max",
-  "min",
-  "exp",
-  "sqrt",
-  "abs",
-  "log",
-  "pow",
-  "contains",
-  "merge",
-  "look_back_where",
-  "look_back_pred",
-  "look_ahead_pred",
-  "find_within_word",
-  "span_ms",
-  "trajectory_to_windows",
-  "dectalk_obstruent_profile",
-  "count_word_vowels",
-  "cluster_position_in_word",
-  "word_count",
-  "phone_count",
-  "clause_phone_count",
-  "syllable_index",
-  "syllable_role",
-  "syllable_position_in_word",
-]);
+type CelFunctionCatalogEntry = {
+  name: string;
+  arities: readonly number[];
+  binding: "builtin" | "context";
+};
+
+export const CEL_FUNCTION_CATALOG = [
+  { name: "has", arities: [1], binding: "builtin" },
+  { name: "size", arities: [1], binding: "builtin" },
+  { name: "double", arities: [1], binding: "builtin" },
+  { name: "string", arities: [1], binding: "builtin" },
+  { name: "midpoint", arities: [1], binding: "context" },
+  { name: "at_ratio", arities: [2], binding: "context" },
+  { name: "at_sync", arities: [1], binding: "context" },
+  { name: "prev_point", arities: [1], binding: "context" },
+  { name: "ahead", arities: [1, 2], binding: "context" },
+  { name: "behind", arities: [1, 2], binding: "context" },
+  { name: "total", arities: [1], binding: "context" },
+  { name: "target", arities: [1], binding: "context" },
+  { name: "assoc", arities: [2], binding: "context" },
+  { name: "max", arities: [1, 2, 3, 4], binding: "context" },
+  { name: "min", arities: [1, 2, 3, 4], binding: "context" },
+  { name: "exp", arities: [1], binding: "context" },
+  { name: "sqrt", arities: [1], binding: "context" },
+  { name: "abs", arities: [1], binding: "context" },
+  { name: "log", arities: [1], binding: "context" },
+  { name: "pow", arities: [2], binding: "context" },
+  { name: "contains", arities: [2], binding: "context" },
+  { name: "merge", arities: [2], binding: "context" },
+  { name: "look_back_where", arities: [3], binding: "context" },
+  { name: "look_back_pred", arities: [3], binding: "context" },
+  { name: "look_ahead_pred", arities: [3], binding: "context" },
+  { name: "find_within_word", arities: [2, 3], binding: "context" },
+  { name: "span_ms", arities: [2], binding: "context" },
+  { name: "trajectory_control_windows", arities: [2], binding: "context" },
+  { name: "count_word_vowels", arities: [0], binding: "context" },
+  { name: "cluster_position_in_word", arities: [0], binding: "context" },
+  { name: "word_count", arities: [0], binding: "context" },
+  { name: "phone_count", arities: [0], binding: "context" },
+  { name: "clause_phone_count", arities: [0], binding: "context" },
+  { name: "syllable_index", arities: [0], binding: "context" },
+  { name: "syllable_role", arities: [0], binding: "context" },
+  { name: "syllable_position_in_word", arities: [0], binding: "context" },
+] as const satisfies readonly CelFunctionCatalogEntry[];
+
+const DEFAULT_ALLOWED_FUNCTIONS = new Set(CEL_FUNCTION_CATALOG.map(({ name }) => name));
 
 const FUNCTION_CALL_PATTERN = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
 const RELATION_HELPER_PATTERN = /\b(total|prev_point)\s*\(\s*(['"])([^'"]+)\2\s*\)/g;
@@ -77,7 +91,7 @@ const CURSOR_DEPTH_PATTERN = /\b(prev|next)(\d+)\b/g;
  * Mutable binding for current evaluation's custom functions.
  * Safe because CEL evaluation is synchronous — no concurrent calls.
  */
-let _currentFunctions: Record<string, (...args: any[]) => unknown> = {};
+let _currentFunctions: Record<string, (...args: unknown[]) => unknown> = {};
 
 /**
  * Create the shared CEL Environment with:
@@ -116,45 +130,12 @@ function createCelEnvironment(): Environment {
   // "double" and "string" are CEL built-in type casts and must NOT be
   // re-registered. Our codebase's double(x) => Number(x) and string(x) =>
   // String(x) are functionally identical to the CEL builtins.
-  // Register all known custom function names with overloads for arities
-  // 1, 2, 3, and 4. This covers all call patterns used in YAML rule expressions.
-  const knownFunctionNames = [
-    "midpoint", "at_ratio", "at_sync", "prev_point",
-    "ahead", "behind", "total", "target", "assoc",
-    "max", "min", "exp", "sqrt", "abs", "log", "pow", "contains", "merge",
-    "look_back_where", "look_back_pred", "look_ahead_pred", "find_within_word", "span_ms",
-    "trajectory_to_windows", "dectalk_obstruent_profile",
-    "count_word_vowels", "cluster_position_in_word", "word_count", "phone_count",
-    "clause_phone_count",
-    "syllable_index", "syllable_role", "syllable_position_in_word",
-  ];
-
-  // Functions that take zero arguments (use implicit currentToken via closure).
-  const zeroArgFunctions = new Set([
-    "count_word_vowels",
-    "cluster_position_in_word",
-    "word_count",
-    "phone_count",
-    "clause_phone_count",
-    "syllable_index",
-    "syllable_role",
-    "syllable_position_in_word",
-  ]);
-
-  const knownFunctions: Array<[string, string[]]> = knownFunctionNames.map((name) => [
-    name,
-    [
-      ...(zeroArgFunctions.has(name) ? [`${name}(): dyn`] : []),
-      `${name}(dyn): dyn`,
-      `${name}(dyn, dyn): dyn`,
-      `${name}(dyn, dyn, dyn): dyn`,
-      `${name}(dyn, dyn, dyn, dyn): dyn`,
-    ],
-  ]);
-
-  for (const [name, signatures] of knownFunctions) {
-    for (const sig of signatures) {
-      env.registerFunction(sig, (...args: any[]) => {
+  for (const { name, arities, binding } of CEL_FUNCTION_CATALOG) {
+    if (binding === "builtin") continue;
+    for (const arity of arities) {
+      const args = Array.from({ length: arity }, () => "dyn").join(", ");
+      const signature = `${name}(${args}): dyn`;
+      env.registerFunction(signature, (...args: unknown[]) => {
         const fn = _currentFunctions[name];
         if (!fn) throw new Error(`CEL function '${name}' not available in current context`);
         return fn(...args);
@@ -239,10 +220,7 @@ export function validateExpressionSyntax(
     return error instanceof Error ? error.message : String(error);
   }
 
-  const allowedFunctions = new Set(
-    options.allowedFunctions ? [...options.allowedFunctions] : [...DEFAULT_ALLOWED_FUNCTIONS]
-  );
-  const functionError = validateFunctionSurface(expression, allowedFunctions);
+  const functionError = validateFunctionSurface(expression, DEFAULT_ALLOWED_FUNCTIONS);
   if (functionError) return functionError;
 
   const cursorDepthError = validateCursorDepth(expression);
@@ -269,8 +247,8 @@ export function evaluateExpression(
   const registry: Record<string, (...args: unknown[]) => unknown> = {};
   if (functions && typeof functions === "object") {
     for (const [name, fn] of Object.entries(functions)) {
-      if (typeof fn === "function") {
-        registry[name] = fn as (...args: unknown[]) => unknown;
+      if (isCallable(fn)) {
+        registry[name] = fn;
       }
     }
   }
@@ -279,11 +257,11 @@ export function evaluateExpression(
   try {
     if (_celTimingEnabled) {
       const t0 = performance.now();
-      const result = coerceResult(compiled((context ?? {}) as Record<string, any>));
+      const result = coerceResult(compiled(isRecord(context) ? context : {}));
       _celEvalTimeMs += performance.now() - t0;
       return result;
     }
-    return coerceResult(compiled((context ?? {}) as Record<string, any>));
+    return coerceResult(compiled(isRecord(context) ? context : {}));
   } finally {
     _currentFunctions = {};
   }

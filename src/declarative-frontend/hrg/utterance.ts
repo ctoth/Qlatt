@@ -10,15 +10,19 @@
 import { createProvenanceCollector, type ProvenanceCollector } from "../../provenance";
 import { Item } from "./item";
 import { Relation } from "./relation";
+import { TemporalAxis, type TemporalMark } from "./temporal-axis";
 import type {
   FeatureValue,
   FeatureWrite,
   FeatureWriteInput,
   FeatureSchema,
   HrgSchema,
+  MarkTimeWrite,
   RelationStamper,
   RelationWrite,
   Stamper,
+  TemporalAnchorWrite,
+  TemporalWriteInput,
 } from "./types";
 
 function cloneFeatureSchema(schema: FeatureSchema): FeatureSchema {
@@ -99,10 +103,13 @@ function compileHrgSchema(input: HrgSchema): HrgSchema {
 
 export class Utterance {
   readonly provenance: ProvenanceCollector;
+  readonly axis = new TemporalAxis();
   private readonly schema: HrgSchema;
   private readonly items = new Map<string, Item>();
   private readonly relations = new Map<string, Relation>();
   private readonly typeCounters = new Map<string, number>();
+  private readonly anchorHistoryByItemId = new Map<string, TemporalAnchorWrite[]>();
+  private readonly markTimeHistoryById = new Map<string, MarkTimeWrite[]>();
 
   constructor(
     schema: HrgSchema,
@@ -251,6 +258,152 @@ export class Utterance {
 
   relationNames(): string[] {
     return [...this.relations.keys()];
+  }
+
+  createMarkBetween(
+    leftMarkId: string,
+    rightMarkId: string,
+    input: TemporalWriteInput,
+  ): TemporalMark {
+    if (this.axis.compare(leftMarkId, rightMarkId) >= 0) {
+      throw new Error("E_HRG_TEMPORAL_ORDER: left mark must precede right mark");
+    }
+    const decision = this.provenance.add({
+      stage: input.stage ?? "rules",
+      type: "temporal_mark_insert",
+      subject: `axis:${leftMarkId}:${rightMarkId}`,
+      reason: input.reason,
+      citations: input.citations ?? [],
+      parents: input.parents,
+      timestampMs: input.timestampMs,
+    });
+    return this.axis.createBetween(leftMarkId, rightMarkId, decision.id);
+  }
+
+  private stampAnchor(
+    item: Item,
+    kind: "interval" | "point",
+    leftMarkId: string,
+    rightMarkId: string,
+    ratio: number | undefined,
+    input: TemporalWriteInput,
+  ): TemporalAnchorWrite {
+    const left = this.axis.get(leftMarkId);
+    const right = this.axis.get(rightMarkId);
+    if (!left || !right) throw new Error("E_HRG_TEMPORAL_MARK_UNKNOWN");
+    if (this.axis.compare(leftMarkId, rightMarkId) > 0) {
+      throw new Error("E_HRG_TEMPORAL_ORDER: anchor left mark must not follow right mark");
+    }
+    if (kind === "point" && (ratio == null || !Number.isFinite(ratio) || ratio < 0 || ratio > 1)) {
+      throw new Error("E_HRG_TEMPORAL_RATIO: point ratio must be finite and within [0, 1]");
+    }
+    const history = this.anchorHistoryByItemId.get(item.id) ?? [];
+    const prior = history[history.length - 1];
+    const parents = new Set(input.parents ?? []);
+    if (left.creationDecisionId) parents.add(left.creationDecisionId);
+    if (right.creationDecisionId) parents.add(right.creationDecisionId);
+    if (prior) parents.add(prior.decisionId);
+    const decision = this.provenance.add({
+      stage: input.stage ?? "rules",
+      type: prior ? "temporal_anchor_overwrite" : "temporal_anchor_write",
+      subject: `item:${item.id}.temporal_anchor`,
+      reason: input.reason,
+      citations: input.citations ?? [],
+      parents: parents.size > 0 ? [...parents] : undefined,
+      timestampMs: input.timestampMs,
+    });
+    const write: TemporalAnchorWrite = Object.freeze({
+      itemId: item.id,
+      kind,
+      leftMarkId,
+      rightMarkId,
+      ...(ratio != null ? { ratio } : {}),
+      version: history.length,
+      decisionId: decision.id,
+      reason: decision.reason,
+      citations: Object.freeze([...decision.citations]),
+      parents: Object.freeze(decision.parents ? [...decision.parents] : []),
+      stage: decision.stage,
+      timestampMs: decision.timestampMs,
+    });
+    history.push(write);
+    this.anchorHistoryByItemId.set(item.id, history);
+    return write;
+  }
+
+  anchorInterval(
+    item: Item,
+    leftMarkId: string,
+    rightMarkId: string,
+    input: TemporalWriteInput,
+  ): TemporalAnchorWrite {
+    return this.stampAnchor(item, "interval", leftMarkId, rightMarkId, undefined, input);
+  }
+
+  anchorPoint(
+    item: Item,
+    leftMarkId: string,
+    rightMarkId: string,
+    ratio: number,
+    input: TemporalWriteInput,
+  ): TemporalAnchorWrite {
+    return this.stampAnchor(item, "point", leftMarkId, rightMarkId, ratio, input);
+  }
+
+  temporalAnchor(item: Item): TemporalAnchorWrite | undefined {
+    const history = this.anchorHistoryByItemId.get(item.id);
+    return history?.[history.length - 1];
+  }
+
+  intervalAnchor(item: Item): TemporalAnchorWrite | undefined {
+    const anchor = this.temporalAnchor(item);
+    return anchor?.kind === "interval" ? anchor : undefined;
+  }
+
+  resolveMarkTime(markId: string, timeMs: number, input: TemporalWriteInput): MarkTimeWrite {
+    const mark = this.axis.get(markId);
+    if (!mark) throw new Error(`E_HRG_TEMPORAL_MARK_UNKNOWN: '${markId}'`);
+    if (!Number.isFinite(timeMs)) throw new Error("E_HRG_TEMPORAL_TIME: time must be finite");
+    const history = this.markTimeHistoryById.get(markId) ?? [];
+    const prior = history[history.length - 1];
+    const parents = new Set(input.parents ?? []);
+    if (mark.creationDecisionId) parents.add(mark.creationDecisionId);
+    if (prior) parents.add(prior.decisionId);
+    const decision = this.provenance.add({
+      stage: input.stage ?? "rules",
+      type: prior ? "temporal_time_overwrite" : "temporal_time_write",
+      subject: `axis:${markId}.time_ms`,
+      reason: input.reason,
+      citations: input.citations ?? [],
+      parents: parents.size > 0 ? [...parents] : undefined,
+      timestampMs: input.timestampMs,
+    });
+    const write: MarkTimeWrite = Object.freeze({
+      markId,
+      timeMs,
+      version: history.length,
+      decisionId: decision.id,
+      reason: decision.reason,
+      citations: Object.freeze([...decision.citations]),
+      parents: Object.freeze(decision.parents ? [...decision.parents] : []),
+      stage: decision.stage,
+      timestampMs: decision.timestampMs,
+    });
+    history.push(write);
+    this.markTimeHistoryById.set(markId, history);
+    this.axis.setMarkTime(markId, timeMs);
+    return write;
+  }
+
+  resolveAnchorTime(item: Item): number | null {
+    const anchor = this.temporalAnchor(item);
+    if (!anchor) return null;
+    const left = this.axis.getMarkTime(anchor.leftMarkId);
+    const right = this.axis.getMarkTime(anchor.rightMarkId);
+    if (left == null || right == null) return null;
+    return anchor.kind === "point"
+      ? left + (right - left) * (anchor.ratio ?? 0)
+      : left;
   }
 
   // --- Canonical backbone relations (created lazily on first access) ---

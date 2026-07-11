@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
-import type { SyncAxis } from "../src/declarative-frontend/axis";
+import type { SyncAxis } from "../src/declarative-frontend/hrg/temporal-axis";
 import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 

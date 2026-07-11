@@ -73,6 +73,35 @@ export interface RelationWriteInput {
   timestampMs?: number;
 }
 
+export type TemporalWriteInput = RelationWriteInput;
+
+export interface TemporalAnchorWrite {
+  readonly itemId: string;
+  readonly kind: "interval" | "point";
+  readonly leftMarkId: string;
+  readonly rightMarkId: string;
+  readonly ratio?: number;
+  readonly version: number;
+  readonly decisionId: string;
+  readonly reason: string;
+  readonly citations: readonly string[];
+  readonly parents: readonly string[];
+  readonly stage: ProvenanceStage;
+  readonly timestampMs?: number;
+}
+
+export interface MarkTimeWrite {
+  readonly markId: string;
+  readonly timeMs: number;
+  readonly version: number;
+  readonly decisionId: string;
+  readonly reason: string;
+  readonly citations: readonly string[];
+  readonly parents: readonly string[];
+  readonly stage: ProvenanceStage;
+  readonly timestampMs?: number;
+}
+
 export interface RelationWrite {
   readonly relationName: string;
   readonly operation: RelationWriteOperation;

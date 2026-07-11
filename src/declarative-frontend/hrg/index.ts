@@ -8,6 +8,14 @@
 export { Item } from "./item";
 export { Relation, HrgNode } from "./relation";
 export { Utterance } from "./utterance";
+export {
+  TemporalAxis,
+  START_ORDER,
+  END_ORDER,
+  buildInitialBoundaryOrders,
+  compareTemporalOrder,
+} from "./temporal-axis";
+export type { TemporalMark, TemporalOrder } from "./temporal-axis";
 export { evalPath, pathNode, pathFeature, isNavOp, step } from "./path";
 export type { PathResult } from "./path";
 export {
@@ -29,6 +37,7 @@ export type {
   FeatureWriteInput,
   HrgSchema,
   ItemTypeSchema,
+  MarkTimeWrite,
   RelationSchema,
   RelationKind,
   RelationStamper,
@@ -36,4 +45,6 @@ export type {
   RelationWriteInput,
   RelationWriteOperation,
   Stamper,
+  TemporalAnchorWrite,
+  TemporalWriteInput,
 } from "./types";

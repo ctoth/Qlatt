@@ -11,12 +11,12 @@ import {
 } from "./model";
 import {
   buildInitialBoundaryOrders,
-  buildSyncAxis,
   compareOrderValue,
   isEndOrder,
   isStartOrder,
+  TemporalAxis,
   toNumericOrder,
-} from "./axis";
+} from "./hrg/temporal-axis";
 import { buildTrajectoryControlWindows } from "../control-score";
 import {
   parseSyllabificationTables,
@@ -3241,7 +3241,13 @@ export function runRuleEngine(
   };
 
   initializeBaseRelationSyncMarks(current, baseRelations);
-  runtime.axis = buildSyncAxis(current);
+  runtime.axis = new TemporalAxis();
+  for (const token of current) {
+    runtime.axis.ensureMark(token?.sync_left);
+    runtime.axis.ensureMark(token?.sync_right);
+    runtime.axis.ensureMark(token?.anchor_left);
+    runtime.axis.ensureMark(token?.anchor_right);
+  }
   canonicalizeSequenceAxisRefs(current, runtime);
 
   const selectedPhases = Array.isArray(options.phases) && options.phases.length > 0

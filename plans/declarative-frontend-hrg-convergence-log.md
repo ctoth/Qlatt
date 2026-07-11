@@ -183,7 +183,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 007 | Phase 2D CEL neutrality | kept | `c76fcfe6` | 246 focused tests; DECtalk strict explain 192/0; core/scripts typecheck pass |
 | 008 | Phase 2E structural invalidation owner | kept | `f5f30bc1` | exact two-firing count; 207 declarative tests; core/scripts typecheck pass |
 | 009 | Phase 3 typed Item/relation schemas | kept | `9980a7ac` | 19 HRG tests; core/scripts typecheck pass; no HRG any |
-| 010 | Phase 3 stamped relation topology | kept | pending slice commit | 22 HRG tests; immutable histories; core/scripts typecheck pass |
+| 010 | Phase 3 stamped relation topology | kept | `4360c5f5` | 22 HRG tests; immutable histories; core/scripts typecheck pass |
+| 011 | Phase 3 Utterance temporal axis | kept | pending slice commit | 232 declarative/HRG tests; old axis zero-hit; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -599,3 +600,55 @@ PASS: 3 files, 22 tests
 Next slice: move temporal axis identity, anchors, and resolved time marks behind
 the Utterance owner, then delete or reduce the old axis owner as the evidence
 requires before committing.
+
+## Iteration 011 — Phase 3 Utterance temporal axis
+
+Status: kept.
+
+Three HRG contracts were red before implementation: no Utterance axis existed,
+Items could not own interval/point anchors, and mark times had no versioned
+provenance. Moving the flat rank implementation initially exposed two
+compatibility errors: START/END lookups replaced order-object identity, and an
+invalid finite rank failed too early. Exact failed tests drove restoration of
+lookup purity and the old nullable/lexical comparison semantics.
+
+Kept convergence:
+
+- added the Utterance-owned `TemporalAxis` with stable START/END/finite mark
+  identity, deterministic equal-range insertion, and identity-preserving
+  rebalance;
+- added stamped/versioned interval and ratio-point anchors directly to the
+  Utterance owner;
+- added stamped/versioned resolved mark times and anchor-time interpolation;
+- proved later axis insertion and structural Item suppression do not destroy
+  mark or anchor identity;
+- made invalid/reversed anchors and unknown marks fail before provenance
+  mutation;
+- moved the temporary flat engine to consume the HRG axis implementation
+  directly; and
+- deleted `src/declarative-frontend/axis.ts`, with no compatibility module or
+  loose-token axis factory retained.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+$declarative = (Get-ChildItem -File test\declarative-frontend-*.test.ts).FullName
+$hrg = (Get-ChildItem -File test\hrg*.test.ts).FullName
+npm test -- $declarative $hrg
+PASS: 40 files, 232 tests
+
+rg -n -F "declarative-frontend/axis" src test scripts -g "*.ts"
+rg -n -F "./axis" src test scripts -g "*.ts"
+rg -n "buildSyncAxis" src test scripts -g "*.ts"
+ZERO HIT
+```
+
+Next slice: atomic transaction construction, whole-transaction validation and
+commit, rejection diagnostics, explicit read-set capture, and the deterministic
+journal owner.

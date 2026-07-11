@@ -4,7 +4,7 @@ type CompiledCelExpression = (context?: Record<string, any>) => any;
 
 export type ExpressionValidationOptions = {
   allowedFunctions?: Iterable<string>;
-  streamNames?: Iterable<string>;
+  relationNames?: Iterable<string>;
 };
 
 const expressionCache = new Map<string, CompiledCelExpression>();
@@ -70,7 +70,7 @@ const DEFAULT_ALLOWED_FUNCTIONS = new Set([
 ]);
 
 const FUNCTION_CALL_PATTERN = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
-const STREAM_HELPER_PATTERN = /\b(total|prev_point)\s*\(\s*(['"])([^'"]+)\2\s*\)/g;
+const RELATION_HELPER_PATTERN = /\b(total|prev_point)\s*\(\s*(['"])([^'"]+)\2\s*\)/g;
 const CURSOR_DEPTH_PATTERN = /\b(prev|next)(\d+)\b/g;
 
 /**
@@ -208,12 +208,12 @@ function validateFunctionSurface(
   return null;
 }
 
-function validateStreamHelpers(expression: string, streamNames: Set<string>): string | null {
-  for (const match of expression.matchAll(STREAM_HELPER_PATTERN)) {
-    const streamName = match[3];
-    if (!streamName) continue;
-    if (!streamNames.has(streamName)) {
-      return `Unknown stream '${streamName}' in ${match[1]}()`;
+function validateRelationHelpers(expression: string, relationNames: Set<string>): string | null {
+  for (const match of expression.matchAll(RELATION_HELPER_PATTERN)) {
+    const relationName = match[3];
+    if (!relationName) continue;
+    if (!relationNames.has(relationName)) {
+      return `Unknown relation '${relationName}' in ${match[1]}()`;
     }
   }
   return null;
@@ -248,10 +248,10 @@ export function validateExpressionSyntax(
   const cursorDepthError = validateCursorDepth(expression);
   if (cursorDepthError) return cursorDepthError;
 
-  if (options.streamNames) {
-    const streamNames = new Set([...options.streamNames]);
-    const streamError = validateStreamHelpers(expression, streamNames);
-    if (streamError) return streamError;
+  if (options.relationNames) {
+    const relationNames = new Set([...options.relationNames]);
+    const relationError = validateRelationHelpers(expression, relationNames);
+    if (relationError) return relationError;
   }
 
   return null;

@@ -62,7 +62,7 @@ for (const [name, idx] of enumByName) {
 // BEFORE r-fusion -- at that stage the word still contains a separate /R/
 // (e.g. "car" = K AH R) so the rhotic vowel code does not yet exist.  The
 // Qlatt port runs r-fusion (postlexical) BEFORE the syllabify annotation pass,
-// so by syllabify time the stream carries the fused rhotic vowel as the
+// so by syllabify time the relation carries the fused rhotic vowel as the
 // syllable nucleus.  Map them to the syllabic-r nucleus char 'R' (= US_RR's
 // ascky char, which IS in us_syl_vowels) so they count as nuclei.
 // Citation: DECtalk 4.63 p_us_sy1.c us_syl_vowels (US_RR -> 'R' nucleus);

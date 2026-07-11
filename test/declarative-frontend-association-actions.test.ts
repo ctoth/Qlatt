@@ -5,7 +5,7 @@ import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 describe("declarative frontend association actions", () => {
   it("supports pattern associate + downstream $assoc query", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["stop", "vowel", "fricative"] },
@@ -14,7 +14,7 @@ describe("declarative frontend association actions", () => {
       },
       patterns: {
         cv: {
-          stream: "phone",
+          relation: "phone",
           sequence: [
             { capture: "c", where: "current.type == 'stop'" },
             { capture: "v", where: "current.type == 'vowel'" },
@@ -28,7 +28,7 @@ describe("declarative frontend association actions", () => {
         },
         boost_linked: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "size(assoc(current, 'link')) == 1",
           },
           apply: [{ field: "duration", op: "add", value: "10", tag: "assoc" }],
@@ -38,9 +38,9 @@ describe("declarative frontend association actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", type: "stop", duration: 70, status: 1 },
-      { id: "p2", stream: "phone", type: "vowel", duration: 100, status: 1 },
-      { id: "p3", stream: "phone", type: "fricative", duration: 80, status: 1 },
+      { id: "p1", relation: "phone", type: "stop", duration: 70, status: 1 },
+      { id: "p2", relation: "phone", type: "vowel", duration: 100, status: 1 },
+      { id: "p3", relation: "phone", type: "fricative", duration: 80, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -52,7 +52,7 @@ describe("declarative frontend association actions", () => {
 
   it("supports disassociate by suppressing active association edges", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["stop", "vowel"] },
@@ -61,7 +61,7 @@ describe("declarative frontend association actions", () => {
       },
       patterns: {
         cv: {
-          stream: "phone",
+          relation: "phone",
           sequence: [
             { capture: "c", where: "current.type == 'stop'" },
             { capture: "v", where: "current.type == 'vowel'" },
@@ -79,7 +79,7 @@ describe("declarative frontend association actions", () => {
         },
         boost_linked: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "size(assoc(current, 'link')) == 1",
           },
           apply: [{ field: "duration", op: "add", value: "10", tag: "assoc" }],
@@ -89,8 +89,8 @@ describe("declarative frontend association actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", type: "stop", duration: 70, status: 1 },
-      { id: "p2", stream: "phone", type: "vowel", duration: 100, status: 1 },
+      { id: "p1", relation: "phone", type: "stop", duration: 70, status: 1 },
+      { id: "p2", relation: "phone", type: "vowel", duration: 100, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;

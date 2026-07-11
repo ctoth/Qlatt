@@ -145,12 +145,12 @@ const inventory = { inventoryResolver };
       }) as FrontendToken[];
       stageTimings["runPhases(duration)"] += performance.now() - t;
 
-      // Stage 7: re-ID and stream tagging
+      // Stage 7: re-ID and relation tagging
       t = performance.now();
       parameterSequence = parameterSequence.map((token: FrontendToken, index: number) => ({
         ...token,
         id: token.id ?? `ph_${index}`,
-        stream: "phone",
+        relation: "phone",
         status: token.status ?? 1,
       }));
       stageTimings.reIdAndTag += performance.now() - t;
@@ -223,7 +223,7 @@ const inventory = { inventoryResolver };
       paramSeq = paramSeq.map((token: FrontendToken, index: number) => ({
         ...token,
         id: token.id ?? `ph_${index}`,
-        stream: "phone",
+        relation: "phone",
         status: token.status ?? 1,
       }));
     }

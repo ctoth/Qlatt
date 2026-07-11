@@ -32,7 +32,7 @@ describe("declarative frontend CLI contracts", () => {
     const tracePath = join(dir, "trace.json");
 
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           scalars: {
@@ -42,11 +42,11 @@ describe("declarative frontend CLI contracts", () => {
       },
       rules: {
         stretch: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           apply: [{ field: "duration", op: "mul", value: "2" }],
         },
         never: {
-          select: { stream: "phone", where: "current.id == 'missing'" },
+          select: { relation: "phone", where: "current.id == 'missing'" },
           apply: [{ field: "duration", op: "set", value: "1" }],
         },
       },
@@ -54,8 +54,8 @@ describe("declarative frontend CLI contracts", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", duration: 100, sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", duration: 80, sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p1", relation: "phone", duration: 100, sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", duration: 80, sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     writeFileSync(specPath, JSON.stringify(spec, null, 2), "utf8");

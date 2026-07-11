@@ -20,7 +20,7 @@ function makeDiagnostic(
   return { code, message, path, severity };
 }
 
-const ALLOWED_STREAM_TYPES = new Set(["base", "span", "parallel", "point"]);
+const ALLOWED_RELATION_TYPES = new Set(["base", "span", "parallel", "point"]);
 const POLICY_REF_PATTERN = /\bparams\.policy((?:\.[A-Za-z_][A-Za-z0-9_]*)+)/g;
 const NUMERIC_LITERAL_PATTERN = /(^|[^A-Za-z0-9_])(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)(?=$|[^A-Za-z0-9_])/g;
 const CRITICAL_IDENTIFIER_PATTERN = /\b(duration|vot|f0)\b/i;
@@ -200,50 +200,50 @@ function isCriticalScalarField(field: unknown): boolean {
   return normalized === "duration" || normalized === "vot" || normalized === "f0";
 }
 
-function validateStreams(spec: PlainObject, diagnostics: ValidationDiagnostic[]): Map<string, any> {
-  const streamNames = Object.keys(spec.streams || {});
-  const streamByName = new Map();
+function validateRelations(spec: PlainObject, diagnostics: ValidationDiagnostic[]): Map<string, any> {
+  const relationNames = Object.keys(spec.relations || {});
+  const relationByName = new Map();
 
-  for (const name of streamNames) {
-    streamByName.set(name, spec.streams[name]);
+  for (const name of relationNames) {
+    relationByName.set(name, spec.relations[name]);
   }
 
-  for (const [name, stream] of streamByName.entries()) {
-    const path = `streams.${name}`;
-    if (!isPlainObject(stream)) {
+  for (const [name, relation] of relationByName.entries()) {
+    const path = `relations.${name}`;
+    if (!isPlainObject(relation)) {
       diagnostics.push(
-        makeDiagnostic("E_STREAM_SCHEMA", `Stream '${name}' must be an object`, path)
+        makeDiagnostic("E_RELATION_SCHEMA", `Relation '${name}' must be an object`, path)
       );
       continue;
     }
 
-    if (!ALLOWED_STREAM_TYPES.has(stream.type as string)) {
+    if (!ALLOWED_RELATION_TYPES.has(relation.type as string)) {
       diagnostics.push(
         makeDiagnostic(
-          "E_STREAM_TYPE_INVALID",
-          `Stream '${name}' has invalid type '${stream.type}'`,
+          "E_RELATION_TYPE_INVALID",
+          `Relation '${name}' has invalid type '${relation.type}'`,
           `${path}.type`
         )
       );
     }
 
-    if (stream.type === "span" && stream.spans && !streamByName.has(stream.spans)) {
+    if (relation.type === "span" && relation.spans && !relationByName.has(relation.spans)) {
       diagnostics.push(
         makeDiagnostic(
-          "E_STREAM_SPANS_UNKNOWN",
-          `Span stream '${name}' references unknown child stream '${stream.spans}'`,
+          "E_RELATION_SPANS_UNKNOWN",
+          `Span relation '${name}' references unknown child relation '${relation.spans}'`,
           `${path}.spans`
         )
       );
     }
   }
 
-  return streamByName;
+  return relationByName;
 }
 
 function validateTopology(
   spec: PlainObject,
-  streamByName: Map<string, any>,
+  relationByName: Map<string, any>,
   diagnostics: ValidationDiagnostic[]
 ): void {
   const sections = ["hierarchy", "parallel", "point"];
@@ -251,38 +251,38 @@ function validateTopology(
     const values = Array.isArray(spec.topology?.[section]) ? spec.topology[section] : [];
     const seen = new Set();
     for (let i = 0; i < values.length; i += 1) {
-      const stream = values[i];
-      if (!streamByName.has(stream)) {
+      const relation = values[i];
+      if (!relationByName.has(relation)) {
         diagnostics.push(
           makeDiagnostic(
-            "E_TOPOLOGY_STREAM_UNKNOWN",
-            `Topology '${section}' references unknown stream '${stream}'`,
+            "E_TOPOLOGY_RELATION_UNKNOWN",
+            `Topology '${section}' references unknown relation '${relation}'`,
             `topology.${section}[${i}]`
           )
         );
       }
-      if (seen.has(stream)) {
+      if (seen.has(relation)) {
         diagnostics.push(
           makeDiagnostic(
-            "E_TOPOLOGY_STREAM_DUP",
-            `Topology '${section}' repeats stream '${stream}'`,
+            "E_TOPOLOGY_RELATION_DUP",
+            `Topology '${section}' repeats relation '${relation}'`,
             `topology.${section}[${i}]`
           )
         );
       }
-      seen.add(stream);
+      seen.add(relation);
     }
   }
 }
 
 function validatePatterns(
   spec: PlainObject,
-  streamByName: Map<string, any>,
+  relationByName: Map<string, any>,
   predicates: PlainObject,
   policyState: PolicyValidationState,
   diagnostics: ValidationDiagnostic[]
 ): void {
-  const streamNames = new Set(streamByName.keys());
+  const relationNames = new Set(relationByName.keys());
   const patterns = isPlainObject(spec.patterns) ? spec.patterns : {};
   for (const [name, pattern] of Object.entries(patterns)) {
     if (!isPlainObject(pattern)) {
@@ -296,12 +296,12 @@ function validatePatterns(
       continue;
     }
 
-    if (!pattern.stream || !streamByName.has(pattern.stream as string)) {
+    if (!pattern.relation || !relationByName.has(pattern.relation as string)) {
       diagnostics.push(
         makeDiagnostic(
-          "E_PATTERN_STREAM_UNKNOWN",
-          `Pattern '${name}' references unknown stream '${pattern.stream}'`,
-          `patterns.${name}.stream`
+          "E_PATTERN_RELATION_UNKNOWN",
+          `Pattern '${name}' references unknown relation '${pattern.relation}'`,
+          `patterns.${name}.relation`
         )
       );
     }
@@ -343,9 +343,9 @@ function validatePatterns(
 
       validateConditionSpec(
         step.where,
-        streamByName,
-        pattern.stream,
-        streamNames,
+        relationByName,
+        pattern.relation,
+        relationNames,
         predicates,
         diagnostics,
         `patterns.${name}.sequence[${i}].where`,
@@ -357,9 +357,9 @@ function validatePatterns(
     if (pattern.constraint != null) {
       validateConditionSpec(
         pattern.constraint,
-        streamByName,
-        pattern.stream,
-        streamNames,
+        relationByName,
+        pattern.relation,
+        relationNames,
         predicates,
         diagnostics,
         `patterns.${name}.constraint`,
@@ -372,10 +372,10 @@ function validatePatterns(
 
 function collectScalarFields(spec: PlainObject): Set<string> {
   const fields = new Set<string>();
-  const streams = isPlainObject(spec.streams) ? spec.streams : {};
-  for (const stream of Object.values(streams)) {
-    if (!isPlainObject(stream)) continue;
-    const scalars = isPlainObject(stream.scalars) ? stream.scalars : {};
+  const relations = isPlainObject(spec.relations) ? spec.relations : {};
+  for (const relation of Object.values(relations)) {
+    if (!isPlainObject(relation)) continue;
+    const scalars = isPlainObject(relation.scalars) ? relation.scalars : {};
     for (const field of Object.keys(scalars)) {
       fields.add(field);
     }
@@ -383,30 +383,30 @@ function collectScalarFields(spec: PlainObject): Set<string> {
   return fields;
 }
 
-function streamHasDeclaredTypeField(streamByName: Map<string, any>, streamName: unknown): boolean {
-  if (typeof streamName !== "string" || streamName.length === 0) return false;
-  const stream = streamByName.get(streamName);
-  if (!isPlainObject(stream)) return false;
-  const features = isPlainObject(stream.features) ? stream.features : null;
+function relationHasDeclaredTypeField(relationByName: Map<string, any>, relationName: unknown): boolean {
+  if (typeof relationName !== "string" || relationName.length === 0) return false;
+  const relation = relationByName.get(relationName);
+  if (!isPlainObject(relation)) return false;
+  const features = isPlainObject(relation.features) ? relation.features : null;
   if (!features) return false;
   return Object.prototype.hasOwnProperty.call(features, "type");
 }
 
 function validateDeclaredTypeFieldUsage(
   expression: string,
-  streamByName: Map<string, any>,
-  streamName: unknown,
+  relationByName: Map<string, any>,
+  relationName: unknown,
   diagnostics: ValidationDiagnostic[],
   path: string,
   contextLabel: string
 ): void {
   if (!/\.type\b/.test(expression)) return;
-  if (streamHasDeclaredTypeField(streamByName, streamName)) return;
+  if (relationHasDeclaredTypeField(relationByName, relationName)) return;
   diagnostics.push(
     makeDiagnostic(
       "E_TOKEN_FIELD_UNDECLARED",
-      `${contextLabel} uses '.type' but stream '${String(
-        streamName ?? ""
+      `${contextLabel} uses '.type' but relation '${String(
+        relationName ?? ""
       )}' does not declare features.type`,
       path
     )
@@ -436,9 +436,9 @@ function notePredicateEdge(
 
 function validateConditionSpec(
   condition: unknown,
-  streamByName: Map<string, any>,
-  streamName: unknown,
-  streamNames: Set<string>,
+  relationByName: Map<string, any>,
+  relationName: unknown,
+  relationNames: Set<string>,
   predicates: PlainObject,
   diagnostics: ValidationDiagnostic[],
   path: string,
@@ -449,7 +449,7 @@ function validateConditionSpec(
 
   const validateExpressionWithContext = (expression: string, expressionPath: string): void => {
     if (expression.length === 0) return;
-    const syntaxError = validateExpressionSyntax(expression, { streamNames });
+    const syntaxError = validateExpressionSyntax(expression, { relationNames });
     if (syntaxError) {
       diagnostics.push(
         makeDiagnostic(
@@ -460,11 +460,11 @@ function validateConditionSpec(
       );
       return;
     }
-    if (typeof streamName === "string" && streamName.length > 0) {
+    if (typeof relationName === "string" && relationName.length > 0) {
       validateDeclaredTypeFieldUsage(
         expression,
-        streamByName,
-        streamName,
+        relationByName,
+        relationName,
         diagnostics,
         expressionPath,
         contextLabel
@@ -556,9 +556,9 @@ function validateConditionSpec(
       nextStack.add(value);
       validateConditionSpec(
         predicates[value],
-        streamByName,
-        streamName,
-        streamNames,
+        relationByName,
+        relationName,
+        relationNames,
         predicates,
         diagnostics,
         `predicates.${value}`,
@@ -588,9 +588,9 @@ function validateConditionSpec(
     for (let i = 0; i < value.length; i += 1) {
       validateConditionSpec(
         value[i],
-        streamByName,
-        streamName,
-        streamNames,
+        relationByName,
+        relationName,
+        relationNames,
         predicates,
         diagnostics,
         `${path}.${key}[${i}]`,
@@ -604,9 +604,9 @@ function validateConditionSpec(
   if (key === "not") {
     validateConditionSpec(
       value,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       predicates,
       diagnostics,
       `${path}.not`,
@@ -672,12 +672,12 @@ function detectPredicateCycles(
 
 function validatePredicates(
   spec: PlainObject,
-  streamByName: Map<string, any>,
+  relationByName: Map<string, any>,
   policyState: PolicyValidationState,
   diagnostics: ValidationDiagnostic[]
 ): PlainObject {
   const predicates = isPlainObject(spec.predicates) ? spec.predicates : {};
-  const streamNames = new Set(streamByName.keys());
+  const relationNames = new Set(relationByName.keys());
   const graph = new Map<string, Set<string>>();
 
   for (const name of Object.keys(predicates)) {
@@ -687,9 +687,9 @@ function validatePredicates(
   for (const [name, predicateSpec] of Object.entries(predicates)) {
     validateConditionSpec(
       predicateSpec,
-      streamByName,
+      relationByName,
       null,
-      streamNames,
+      relationNames,
       predicates,
       diagnostics,
       `predicates.${name}`,
@@ -708,9 +708,9 @@ function validatePredicates(
 
 function validateDispatchValueExpression(
   expr: unknown,
-  streamByName: Map<string, any>,
-  streamName: unknown,
-  streamNames: Set<string>,
+  relationByName: Map<string, any>,
+  relationName: unknown,
+  relationNames: Set<string>,
   policyState: PolicyValidationState,
   criticalContext: boolean,
   valueMode: "numeric" | "set",
@@ -721,9 +721,9 @@ function validateDispatchValueExpression(
   if (valueMode === "set") {
     validateSetValueExpression(
       expr,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       diagnostics,
       path,
@@ -754,14 +754,14 @@ function validateDispatchValueExpression(
     return;
   }
   if (expr.length === 0) return;
-  const syntaxError = validateExpressionSyntax(expr, { streamNames });
+  const syntaxError = validateExpressionSyntax(expr, { relationNames });
   if (syntaxError) {
     diagnostics.push(
       makeDiagnostic("E_CEL_INVALID", `${contextLabel} has invalid CEL expression: ${syntaxError}`, path)
     );
     return;
   }
-  validateDeclaredTypeFieldUsage(expr, streamByName, streamName, diagnostics, path, contextLabel);
+  validateDeclaredTypeFieldUsage(expr, relationByName, relationName, diagnostics, path, contextLabel);
   validatePolicyReferencesAndLiterals(
     expr,
     path,
@@ -774,9 +774,9 @@ function validateDispatchValueExpression(
 
 function validateDispatchSpec(
   dispatchValue: unknown,
-  streamByName: Map<string, any>,
-  streamName: unknown,
-  streamNames: Set<string>,
+  relationByName: Map<string, any>,
+  relationName: unknown,
+  relationNames: Set<string>,
   policyState: PolicyValidationState,
   criticalContext: boolean,
   valueMode: "numeric" | "set",
@@ -829,7 +829,7 @@ function validateDispatchSpec(
       } else if (typeof row.when !== "string") {
         diagnostics.push(makeDiagnostic("E_RULE_EXPRESSION_INVALID", `${contextLabel} row ${i} when must be a string expression or condition object`, `${rowPath}.when`));
       } else {
-        const syntaxError = validateExpressionSyntax(row.when, { streamNames });
+        const syntaxError = validateExpressionSyntax(row.when, { relationNames });
         if (syntaxError) {
           diagnostics.push(
             makeDiagnostic(
@@ -861,9 +861,9 @@ function validateDispatchSpec(
       } else {
       validateDispatchValueExpression(
         row.value,
-        streamByName,
-        streamName,
-        streamNames,
+        relationByName,
+        relationName,
+        relationNames,
         policyState,
         criticalContext,
         valueMode,
@@ -878,9 +878,9 @@ function validateDispatchSpec(
       hasDefault = true;
       validateDispatchValueExpression(
         row.default,
-        streamByName,
-        streamName,
-        streamNames,
+        relationByName,
+        relationName,
+        relationNames,
         policyState,
         criticalContext,
         valueMode,
@@ -904,9 +904,9 @@ function validateDispatchSpec(
 
 function validateSetValueExpression(
   value: unknown,
-  streamByName: Map<string, any>,
-  streamName: unknown,
-  streamNames: Set<string>,
+  relationByName: Map<string, any>,
+  relationName: unknown,
+  relationNames: Set<string>,
   policyState: PolicyValidationState,
   diagnostics: ValidationDiagnostic[],
   path: string,
@@ -922,14 +922,14 @@ function validateSetValueExpression(
 
   if (typeof value === "string") {
     if (value.length === 0) return;
-    const syntaxError = validateExpressionSyntax(value, { streamNames });
+    const syntaxError = validateExpressionSyntax(value, { relationNames });
     if (syntaxError) {
       diagnostics.push(
         makeDiagnostic("E_CEL_INVALID", `${contextLabel} has invalid CEL expression: ${syntaxError}`, path)
       );
       return;
     }
-    validateDeclaredTypeFieldUsage(value, streamByName, streamName, diagnostics, path, contextLabel);
+    validateDeclaredTypeFieldUsage(value, relationByName, relationName, diagnostics, path, contextLabel);
     validatePolicyReferencesAndLiterals(value, path, contextLabel, diagnostics, policyState);
     return;
   }
@@ -938,9 +938,9 @@ function validateSetValueExpression(
     for (let i = 0; i < value.length; i += 1) {
       validateSetValueExpression(
         value[i],
-        streamByName,
-        streamName,
-        streamNames,
+        relationByName,
+        relationName,
+        relationNames,
         policyState,
         diagnostics,
         `${path}[${i}]`,
@@ -953,9 +953,9 @@ function validateSetValueExpression(
   if (isPlainObject(value) && Object.prototype.hasOwnProperty.call(value, "dispatch")) {
     validateDispatchSpec(
       value.dispatch,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       false,
       "set",
@@ -980,9 +980,9 @@ function validateSetValueExpression(
   for (const [key, nested] of Object.entries(value)) {
     validateSetValueExpression(
       nested,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       diagnostics,
       `${path}.${key}`,
@@ -993,9 +993,9 @@ function validateSetValueExpression(
 
 function validateTemplateDispatchExpressions(
   value: unknown,
-  streamByName: Map<string, any>,
-  streamName: unknown,
-  streamNames: Set<string>,
+  relationByName: Map<string, any>,
+  relationName: unknown,
+  relationNames: Set<string>,
   policyState: PolicyValidationState,
   diagnostics: ValidationDiagnostic[],
   path: string,
@@ -1005,9 +1005,9 @@ function validateTemplateDispatchExpressions(
     for (let i = 0; i < value.length; i += 1) {
       validateTemplateDispatchExpressions(
         value[i],
-        streamByName,
-        streamName,
-        streamNames,
+        relationByName,
+        relationName,
+        relationNames,
         policyState,
         diagnostics,
         `${path}[${i}]`,
@@ -1021,9 +1021,9 @@ function validateTemplateDispatchExpressions(
   if (Object.prototype.hasOwnProperty.call(value, "dispatch")) {
     validateDispatchSpec(
       value.dispatch,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       false,
       "numeric",
@@ -1037,9 +1037,9 @@ function validateTemplateDispatchExpressions(
   for (const [key, nested] of Object.entries(value)) {
     validateTemplateDispatchExpressions(
       nested,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       diagnostics,
       `${path}.${key}`,
@@ -1050,9 +1050,9 @@ function validateTemplateDispatchExpressions(
 
 function validateTemplateNumericExpression(
   value: unknown,
-  streamByName: Map<string, any>,
-  streamName: unknown,
-  streamNames: Set<string>,
+  relationByName: Map<string, any>,
+  relationName: unknown,
+  relationNames: Set<string>,
   policyState: PolicyValidationState,
   diagnostics: ValidationDiagnostic[],
   path: string,
@@ -1062,9 +1062,9 @@ function validateTemplateNumericExpression(
   if (isPlainObject(value) && Object.prototype.hasOwnProperty.call(value, "dispatch")) {
     validateDispatchSpec(
       value.dispatch,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       false,
       "numeric",
@@ -1085,7 +1085,7 @@ function validateTemplateNumericExpression(
     return;
   }
 
-  const syntaxError = validateExpressionSyntax(value, { streamNames });
+  const syntaxError = validateExpressionSyntax(value, { relationNames });
   if (syntaxError) {
     diagnostics.push(
       makeDiagnostic(
@@ -1097,15 +1097,15 @@ function validateTemplateNumericExpression(
     return;
   }
 
-  validateDeclaredTypeFieldUsage(value, streamByName, streamName, diagnostics, path, contextLabel);
+  validateDeclaredTypeFieldUsage(value, relationByName, relationName, diagnostics, path, contextLabel);
   validatePolicyReferencesAndLiterals(value, path, contextLabel, diagnostics, policyState);
 }
 
 function validateControlWindowTemplate(
   value: unknown,
-  streamByName: Map<string, any>,
-  streamName: unknown,
-  streamNames: Set<string>,
+  relationByName: Map<string, any>,
+  relationName: unknown,
+  relationNames: Set<string>,
   policyState: PolicyValidationState,
   diagnostics: ValidationDiagnostic[],
   path: string,
@@ -1115,9 +1115,9 @@ function validateControlWindowTemplate(
   if (isPlainObject(value) && Object.prototype.hasOwnProperty.call(value, "dispatch")) {
     validateDispatchSpec(
       value.dispatch,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       false,
       "set",
@@ -1128,7 +1128,7 @@ function validateControlWindowTemplate(
     return;
   }
   if (typeof value === "string") {
-    const syntaxError = validateExpressionSyntax(value, { streamNames });
+    const syntaxError = validateExpressionSyntax(value, { relationNames });
     if (syntaxError) {
       diagnostics.push(
         makeDiagnostic(
@@ -1178,7 +1178,7 @@ function validateControlWindowTemplate(
           )
         );
       } else if (!["current", "next", "prev"].includes(entry.target)) {
-        const syntaxError = validateExpressionSyntax(entry.target, { streamNames });
+        const syntaxError = validateExpressionSyntax(entry.target, { relationNames });
         if (syntaxError) {
           diagnostics.push(
             makeDiagnostic(
@@ -1193,9 +1193,9 @@ function validateControlWindowTemplate(
 
     validateTemplateNumericExpression(
       entry.start_ms,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       diagnostics,
       `${entryPath}.start_ms`,
@@ -1203,9 +1203,9 @@ function validateControlWindowTemplate(
     );
     validateTemplateNumericExpression(
       entry.end_ms,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       diagnostics,
       `${entryPath}.end_ms`,
@@ -1213,9 +1213,9 @@ function validateControlWindowTemplate(
     );
     validateTemplateNumericExpression(
       entry.start_ratio,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       diagnostics,
       `${entryPath}.start_ratio`,
@@ -1223,9 +1223,9 @@ function validateControlWindowTemplate(
     );
     validateTemplateNumericExpression(
       entry.end_ratio,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       diagnostics,
       `${entryPath}.end_ratio`,
@@ -1233,9 +1233,9 @@ function validateControlWindowTemplate(
     );
     validateTemplateNumericExpression(
       entry.prefix_ms,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       diagnostics,
       `${entryPath}.prefix_ms`,
@@ -1243,9 +1243,9 @@ function validateControlWindowTemplate(
     );
     validateTemplateNumericExpression(
       entry.suffix_ms,
-      streamByName,
-      streamName,
-      streamNames,
+      relationByName,
+      relationName,
+      relationNames,
       policyState,
       diagnostics,
       `${entryPath}.suffix_ms`,
@@ -1254,7 +1254,7 @@ function validateControlWindowTemplate(
 
     const fieldsSpec = entry.fields;
     if (typeof fieldsSpec === "string") {
-      const syntaxError = validateExpressionSyntax(fieldsSpec, { streamNames });
+      const syntaxError = validateExpressionSyntax(fieldsSpec, { relationNames });
       if (syntaxError) {
         diagnostics.push(
           makeDiagnostic(
@@ -1266,8 +1266,8 @@ function validateControlWindowTemplate(
       } else {
         validateDeclaredTypeFieldUsage(
           fieldsSpec,
-          streamByName,
-          streamName,
+          relationByName,
+          relationName,
           diagnostics,
           `${entryPath}.fields`,
           `${entryLabel}.fields`
@@ -1291,9 +1291,9 @@ function validateControlWindowTemplate(
     } else {
       validateTemplateDispatchExpressions(
         fieldsSpec,
-        streamByName,
-        streamName,
-        streamNames,
+        relationByName,
+        relationName,
+        relationNames,
         policyState,
         diagnostics,
         `${entryPath}.fields`,
@@ -1303,9 +1303,9 @@ function validateControlWindowTemplate(
         if (!isPlainObject(fieldSpec)) {
           validateTemplateNumericExpression(
             fieldSpec,
-            streamByName,
-            streamName,
-            streamNames,
+            relationByName,
+            relationName,
+            relationNames,
             policyState,
             diagnostics,
             `${entryPath}.fields.${fieldName}`,
@@ -1324,7 +1324,7 @@ function validateControlWindowTemplate(
             )
           );
         } else if (!["set", "add", "mul", "max", "min", "unset"].includes(opSpec)) {
-          const syntaxError = validateExpressionSyntax(opSpec, { streamNames });
+          const syntaxError = validateExpressionSyntax(opSpec, { relationNames });
           if (syntaxError) {
             diagnostics.push(
               makeDiagnostic(
@@ -1339,9 +1339,9 @@ function validateControlWindowTemplate(
         if (Object.prototype.hasOwnProperty.call(fieldSpec, "value")) {
           validateTemplateNumericExpression(
             fieldSpec.value,
-            streamByName,
-            streamName,
-            streamNames,
+            relationByName,
+            relationName,
+            relationNames,
             policyState,
             diagnostics,
             `${entryPath}.fields.${fieldName}.value`,
@@ -1379,7 +1379,7 @@ function validateControlWindowTemplate(
           )
         );
       } else {
-        const syntaxError = validateExpressionSyntax(entry.tag, { streamNames });
+        const syntaxError = validateExpressionSyntax(entry.tag, { relationNames });
         if (syntaxError) {
           diagnostics.push(
             makeDiagnostic(
@@ -1396,12 +1396,12 @@ function validateControlWindowTemplate(
 
 function validateRules(
   spec: PlainObject,
-  streamByName: Map<string, any>,
+  relationByName: Map<string, any>,
   predicates: PlainObject,
   policyState: PolicyValidationState,
   diagnostics: ValidationDiagnostic[]
 ): void {
-  const streamNames = new Set(streamByName.keys());
+  const relationNames = new Set(relationByName.keys());
   const patterns = isPlainObject(spec.patterns) ? spec.patterns : {};
   const rules = isPlainObject(spec.rules) ? spec.rules : {};
 
@@ -1418,10 +1418,10 @@ function validateRules(
     const hasMatch = typeof r.match === "string" && r.match.length > 0;
     const hasCustomOp = typeof r.op === "string" && r.op.length > 0;
     const matchPattern = hasMatch ? patterns[r.match] : null;
-    const ruleStreamName = hasSelect
-      ? r.select.stream
+    const ruleRelationName = hasSelect
+      ? r.select.relation
       : isPlainObject(matchPattern)
-        ? matchPattern.stream
+        ? matchPattern.relation
         : null;
     if ((hasSelect && hasMatch) || (!hasSelect && !hasMatch && !hasCustomOp)) {
       diagnostics.push(
@@ -1443,21 +1443,21 @@ function validateRules(
     }
 
     if (hasSelect) {
-      const stream = r.select.stream;
-      if (!streamByName.has(stream)) {
+      const relation = r.select.relation;
+      if (!relationByName.has(relation)) {
         diagnostics.push(
           makeDiagnostic(
-            "E_RULE_STREAM_UNKNOWN",
-            `Rule '${name}' references unknown select stream '${stream}'`,
-            `rules.${name}.select.stream`
+            "E_RULE_RELATION_UNKNOWN",
+            `Rule '${name}' references unknown select relation '${relation}'`,
+            `rules.${name}.select.relation`
           )
         );
       }
       validateConditionSpec(
         r.select.where,
-        streamByName,
-        r.select.stream,
-        streamNames,
+        relationByName,
+        r.select.relation,
+        relationNames,
         predicates,
         diagnostics,
         `rules.${name}.select.where`,
@@ -1478,9 +1478,9 @@ function validateRules(
 
     validateConditionSpec(
       r.constraint,
-      streamByName,
-      ruleStreamName,
-      streamNames,
+      relationByName,
+      ruleRelationName,
+      relationNames,
       predicates,
       diagnostics,
       `rules.${name}.constraint`,
@@ -1500,7 +1500,7 @@ function validateRules(
           );
           continue;
         }
-        const syntaxError = validateExpressionSyntax(defineExpr, { streamNames });
+        const syntaxError = validateExpressionSyntax(defineExpr, { relationNames });
         if (syntaxError) {
           diagnostics.push(
             makeDiagnostic(
@@ -1512,8 +1512,8 @@ function validateRules(
         } else {
           validateDeclaredTypeFieldUsage(
             defineExpr,
-            streamByName,
-            ruleStreamName,
+            relationByName,
+            ruleRelationName,
             diagnostics,
             `rules.${name}.define.${defineKey}`,
             `Rule '${name}' define.${defineKey}`
@@ -1559,9 +1559,9 @@ function validateRules(
           const criticalContext = isCriticalScalarField(effect?.field);
           validateDispatchSpec(
             effect?.dispatch,
-            streamByName,
-            ruleStreamName,
-            streamNames,
+            relationByName,
+            ruleRelationName,
+            relationNames,
             policyState,
             criticalContext,
             effect?.op === "set" ? "set" : "numeric",
@@ -1602,16 +1602,16 @@ function validateRules(
           if (valueMode === "set") {
             validateSetValueExpression(
               effect?.value,
-              streamByName,
-              ruleStreamName,
-              streamNames,
+              relationByName,
+              ruleRelationName,
+              relationNames,
               policyState,
               diagnostics,
               `rules.${name}.apply[${i}].value`,
               `Rule '${name}' apply[${i}] value`
             );
           } else if (typeof effect?.value === "string" && effect.value.length > 0) {
-            const syntaxError = validateExpressionSyntax(effect.value, { streamNames });
+            const syntaxError = validateExpressionSyntax(effect.value, { relationNames });
             if (syntaxError) {
               diagnostics.push(
                 makeDiagnostic(
@@ -1623,8 +1623,8 @@ function validateRules(
             } else {
               validateDeclaredTypeFieldUsage(
                 effect.value,
-                streamByName,
-                ruleStreamName,
+                relationByName,
+                ruleRelationName,
                 diagnostics,
                 `rules.${name}.apply[${i}].value`,
                 `Rule '${name}' apply[${i}] value`
@@ -1706,9 +1706,9 @@ function validateRules(
             const criticalContext = isCriticalScalarField(effect?.field);
             validateDispatchSpec(
               effect?.dispatch,
-              streamByName,
-              ruleStreamName,
-              streamNames,
+              relationByName,
+              ruleRelationName,
+              relationNames,
               policyState,
               criticalContext,
               effect?.op === "set" ? "set" : "numeric",
@@ -1749,16 +1749,16 @@ function validateRules(
             if (valueMode === "set") {
               validateSetValueExpression(
                 effect?.value,
-                streamByName,
-                ruleStreamName,
-                streamNames,
+                relationByName,
+                ruleRelationName,
+                relationNames,
                 policyState,
                 diagnostics,
                 `rules.${name}.contour.apply[${i}].value`,
                 `Rule '${name}' contour.apply[${i}] value`
               );
             } else if (typeof effect?.value === "string" && effect.value.length > 0) {
-              const syntaxError = validateExpressionSyntax(effect.value, { streamNames });
+              const syntaxError = validateExpressionSyntax(effect.value, { relationNames });
               if (syntaxError) {
                 diagnostics.push(
                   makeDiagnostic(
@@ -1770,8 +1770,8 @@ function validateRules(
               } else {
                 validateDeclaredTypeFieldUsage(
                   effect.value,
-                  streamByName,
-                  ruleStreamName,
+                  relationByName,
+                  ruleRelationName,
                   diagnostics,
                   `rules.${name}.contour.apply[${i}].value`,
                   `Rule '${name}' contour.apply[${i}] value`
@@ -1795,9 +1795,9 @@ function validateRules(
       for (let i = 0; i < r.splice.insert.length; i += 1) {
         validateTemplateDispatchExpressions(
           r.splice.insert[i],
-          streamByName,
-          ruleStreamName,
-          streamNames,
+          relationByName,
+          ruleRelationName,
+          relationNames,
           policyState,
           diagnostics,
           `rules.${name}.splice.insert[${i}]`,
@@ -1807,9 +1807,9 @@ function validateRules(
         if (isPlainObject(insertSpec) && Object.prototype.hasOwnProperty.call(insertSpec, "control_windows")) {
           validateControlWindowTemplate(
             insertSpec.control_windows,
-            streamByName,
-            ruleStreamName,
-            streamNames,
+            relationByName,
+            ruleRelationName,
+            relationNames,
             policyState,
             diagnostics,
             `rules.${name}.splice.insert[${i}].control_windows`,
@@ -1868,7 +1868,7 @@ function validateRules(
         );
       }
       if (typeof valueExpr === "string" && valueExpr.length > 0) {
-        const syntaxError = validateExpressionSyntax(valueExpr, { streamNames });
+        const syntaxError = validateExpressionSyntax(valueExpr, { relationNames });
         if (syntaxError) {
           diagnostics.push(
             makeDiagnostic(
@@ -1880,8 +1880,8 @@ function validateRules(
         } else {
           validateDeclaredTypeFieldUsage(
             valueExpr,
-            streamByName,
-            ruleStreamName,
+            relationByName,
+            ruleRelationName,
             diagnostics,
             `${pointPath}.value`,
             `${pointLabel}.value`
@@ -1892,8 +1892,8 @@ function validateRules(
             `${pointLabel}.value`,
             diagnostics,
             policyState,
-            typeof pointSpec.stream === "string" &&
-              pointSpec.stream.toLowerCase() === "f0"
+            typeof pointSpec.relation === "string" &&
+              pointSpec.relation.toLowerCase() === "f0"
           );
         }
       }
@@ -1910,7 +1910,7 @@ function validateRules(
         );
       }
       if (typeof whenExpr === "string" && whenExpr.length > 0) {
-        const whenSyntaxError = validateExpressionSyntax(whenExpr, { streamNames });
+        const whenSyntaxError = validateExpressionSyntax(whenExpr, { relationNames });
         if (whenSyntaxError) {
           diagnostics.push(
             makeDiagnostic(
@@ -2481,15 +2481,15 @@ export function validateDslSpec(
   const phaseByName = new Map();
   const phaseNames = [];
   const policyState = analyzePolicyState(spec.parameters);
-  const streamByName = validateStreams(spec, diagnostics);
-  validateTopology(spec, streamByName, diagnostics);
-  const predicates = validatePredicates(spec, streamByName, policyState, diagnostics);
+  const relationByName = validateRelations(spec, diagnostics);
+  validateTopology(spec, relationByName, diagnostics);
+  const predicates = validatePredicates(spec, relationByName, policyState, diagnostics);
   validateStringSets(spec, diagnostics);
   validateLoweringSpec(spec, diagnostics, options);
   validateMaps(spec, diagnostics);
   validateSyllabification(spec, diagnostics);
-  validatePatterns(spec, streamByName, predicates, policyState, diagnostics);
-  validateRules(spec, streamByName, predicates, policyState, diagnostics);
+  validatePatterns(spec, relationByName, predicates, policyState, diagnostics);
+  validateRules(spec, relationByName, predicates, policyState, diagnostics);
   const scalarFields = collectScalarFields(spec);
 
   for (let i = 0; i < spec.phases.length; i += 1) {
@@ -2536,13 +2536,13 @@ export function validateDslSpec(
       }
     }
 
-    for (const pointStream of phase.resolve_points) {
-      const stream = streamByName.get(pointStream);
-      if (!stream || stream.type !== "point") {
+    for (const pointRelation of phase.resolve_points) {
+      const relation = relationByName.get(pointRelation);
+      if (!relation || relation.type !== "point") {
         diagnostics.push(
           makeDiagnostic(
-            "E_PHASE_RESOLVE_POINT_STREAM_INVALID",
-            `Phase '${phase.name}' resolves unknown/non-point stream '${pointStream}'`,
+            "E_PHASE_RESOLVE_POINT_RELATION_INVALID",
+            `Phase '${phase.name}' resolves unknown/non-point relation '${pointRelation}'`,
             `phases[${i}].resolve_points`
           )
         );

@@ -3,7 +3,7 @@ rules:
   place_f2_locus:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme in sets.place_locus_closures
     define:
       place: maps.place_locus_closure_place[current.phoneme]
@@ -45,7 +45,7 @@ rules:
   place_rel_copy:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme in sets.place_locus_releases && prev != null && prev.phoneme in sets.place_locus_closures &&
         maps.place_locus_release_for_closure[prev.phoneme] == current.phoneme
@@ -71,7 +71,7 @@ rules:
   nasal_place_assignment:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'nasal'
     apply:
       - field: params.nasalPlaceIndex
@@ -92,7 +92,7 @@ rules:
   nasal_place_assimilation:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'N'
     define:
       "n": next
@@ -126,7 +126,7 @@ rules:
   nasal_windows:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'nasal'
     define:
       anticipatory_window_ms: >-
@@ -239,7 +239,7 @@ rules:
   dark_l_allophony:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'L'
     apply:
       - field: params.F2
@@ -264,7 +264,7 @@ rules:
   r_f3_lowering:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'R'
     apply:
       - field: params.F3
@@ -281,7 +281,7 @@ rules:
   f1_stop_onset:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'stop_release'
     apply:
       - field: params.F1
@@ -303,7 +303,7 @@ rules:
   burst_spectral_template:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type in ['stop_release', 'stop_aspiration']
     apply:
       # Chunk 7: one templated effect block expands to 9 concrete blocks
@@ -334,7 +334,7 @@ rules:
   weak_stop_release_parallel_attenuation:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "current.type == 'stop_release' && has(current.weak) && current.weak == true"
     apply:
       # Chunk 7: one templated effect block expands to 10 concrete `add -18`
@@ -351,7 +351,7 @@ rules:
   weak_final_voiced_stop_closure_attenuation:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "current.type == 'stop_closure' && has(current.voiced) && current.voiced == true"
     define:
       n: next
@@ -373,7 +373,7 @@ rules:
   vcv_coarticulation:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "current.type in ['stop_closure', 'nasal', 'liquid', 'glide'] && (prev != null ? prev.type == 'vowel' : false)"
     define:
       "n": next
@@ -417,7 +417,7 @@ rules:
   vowel_reduction:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type == 'vowel' && has(current.params) && has(current.?params.F1) && (has(current.stress) ?
         current.stress == 0 : false)
@@ -449,7 +449,7 @@ rules:
   vowel_rate_undershoot:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type == 'vowel' && has(current.params) && has(current.?params.F1)
     constraint: params.policy.formant.rate_undershoot_factor > 0
@@ -472,7 +472,7 @@ rules:
   schwa_coronal_fronting:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme in ['AH', 'AH0'] && current.type == 'vowel' &&
         (has(current.stress) ? current.stress == 0 : true)
@@ -496,7 +496,7 @@ rules:
   uw_coronal_fronting:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme in ['UW1', 'UW0', 'UW'] && current.type == 'vowel'
     constraint:
       predicate: one_coronal
@@ -519,7 +519,7 @@ rules:
   transition_override:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "true"
     apply:
       - field: transition_ms
@@ -532,7 +532,7 @@ rules:
   sw_explicit_override:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: has(current.inventorySW)
     apply:
       - field: params.SW
@@ -545,7 +545,7 @@ rules:
   sw_default_assignment:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "!has(current.inventorySW)"
     apply:
       - field: params.SW

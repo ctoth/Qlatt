@@ -558,7 +558,7 @@ function buildTextToKlattTrackDetailed(
   // Citation: Miller 1998, Pronunciation Modeling in Speech Synthesis
   parameterSequence = runPhases(parameterSequence, ["postlexical"], speakerPolicy);
   parameterSequence = runPhases(parameterSequence, ["structural"], speakerPolicy);
-  // Ensure id/stream/status fields exist before prosodic annotation.
+  // Ensure id/relation/status fields exist before prosodic annotation.
   // The annotator reads phoneme, word, stress, punctuationSymbol — all present
   // after structural rules. It only ADDS new properties (breakIndex, isAccented,
   // isNuclearAccent, accentType, isFunctionWord, isContentWord, phraseAccent,
@@ -566,7 +566,7 @@ function buildTextToKlattTrackDetailed(
   parameterSequence = parameterSequence.map((token: PipelineToken, index: number) => ({
     ...token,
     id: token.id ?? `ph_${index}`,
-    stream: "phone",
+    relation: "phone",
     status: token.status ?? 1,
   }));
 
@@ -670,7 +670,7 @@ function buildTextToKlattTrackDetailed(
       : undefined;
   parameterSequence = parameterSequence.map((token: PipelineToken) => {
     if (
-      token?.stream === "f0" ||
+      token?.relation === "f0" ||
       !token?.params ||
       typeof token.params !== "object" ||
       Array.isArray(token.params)
@@ -691,7 +691,7 @@ function buildTextToKlattTrackDetailed(
     return nextToken;
   });
   const phoneSequence = parameterSequence.filter(
-    (token: PipelineToken) => token?.stream !== "f0" && token?.stream !== "f0_layer" && token?.status !== 2
+    (token: PipelineToken) => token?.relation !== "f0" && token?.relation !== "f0_layer" && token?.status !== 2
   );
 
   // Read layered additive F0 model config from the frontend spec.

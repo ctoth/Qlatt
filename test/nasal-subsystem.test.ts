@@ -143,7 +143,7 @@ describe("nasal subsystem explainability", () => {
       [
         {
           id: "ph_0",
-          stream: "phone",
+          relation: "phone",
           type: "nasal",
           phoneme: "N",
           params: { nasalCoupling: 1.5, nasalPlaceIndex: 9, FNZ: 1700 },

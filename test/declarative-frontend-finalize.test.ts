@@ -10,7 +10,7 @@ describe("declarative frontend finalize stages", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["vowel", "stop"] },
@@ -20,9 +20,9 @@ describe("declarative frontend finalize stages", () => {
       },
       rules: {
         f0_targets: {
-          select: { stream: "phone", where: "current.type == 'vowel'" },
+          select: { relation: "phone", where: "current.type == 'vowel'" },
           insert_point: {
-            stream: "f0",
+            relation: "f0",
             at: "midpoint(current)",
             value: "100",
             tag: "f0",
@@ -38,7 +38,7 @@ describe("declarative frontend finalize stages", () => {
     const input = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         type: "vowel",
         sync_left: s0,
         sync_right: s1,
@@ -47,7 +47,7 @@ describe("declarative frontend finalize stages", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         type: "stop",
         sync_left: s1,
         sync_right: s2,
@@ -57,7 +57,7 @@ describe("declarative frontend finalize stages", () => {
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
-    const point = out.find((t) => t.stream === "f0");
+    const point = out.find((t) => t.relation === "f0");
     expect(point).toBeTruthy();
     expect(point?.time).toBe(50);
   });
@@ -68,7 +68,7 @@ describe("declarative frontend finalize stages", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["vowel", "stop"] },
@@ -78,9 +78,9 @@ describe("declarative frontend finalize stages", () => {
       },
       rules: {
         first: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           insert_point: {
-            stream: "f0",
+            relation: "f0",
             at: "at_ratio(current, 0.25)",
             value: "110",
             tag: "f0",
@@ -95,12 +95,12 @@ describe("declarative frontend finalize stages", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, duration: 120, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, duration: 80, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, duration: 120, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, duration: 80, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
-    const point = out.find((t) => t.stream === "f0");
+    const point = out.find((t) => t.relation === "f0");
     expect(point).toBeTruthy();
     expect(point?.time).toBe(30);
   });
@@ -111,7 +111,7 @@ describe("declarative frontend finalize stages", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["vowel", "stop"] },
@@ -121,9 +121,9 @@ describe("declarative frontend finalize stages", () => {
       },
       rules: {
         target: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           insert_point: {
-            stream: "f0",
+            relation: "f0",
             at: {
               anchor_left: finiteOrder("000000000006"),
               anchor_right: finiteOrder("000000000006"),
@@ -143,7 +143,7 @@ describe("declarative frontend finalize stages", () => {
     const input = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         sync_left: s0,
         sync_right: s1,
         duration: 120,
@@ -151,7 +151,7 @@ describe("declarative frontend finalize stages", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         sync_left: s1,
         sync_right: s2,
         duration: 120,
@@ -160,7 +160,7 @@ describe("declarative frontend finalize stages", () => {
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
-    const point = out.find((t) => t.stream === "f0");
+    const point = out.find((t) => t.relation === "f0");
     expect(point).toBeTruthy();
     expect(point?.time).toBe(60);
   });
@@ -170,7 +170,7 @@ describe("declarative frontend finalize stages", () => {
     const s1 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["vowel", "stop"] },
@@ -180,9 +180,9 @@ describe("declarative frontend finalize stages", () => {
       },
       rules: {
         target: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           insert_point: {
-            stream: "f0",
+            relation: "f0",
             at: {
               anchor_left: { kind: "FINITE", rank: "not-orderable-mark" },
               anchor_right: { kind: "FINITE", rank: "not-orderable-mark" },
@@ -200,7 +200,7 @@ describe("declarative frontend finalize stages", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, duration: 100, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, duration: 100, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_TIME_NO_BASE_SUPPORT/);

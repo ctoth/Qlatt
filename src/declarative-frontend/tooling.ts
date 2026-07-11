@@ -32,18 +32,18 @@ function selectToken(sequence: TokenLike[], selector: string): TokenLike | null 
     return null;
   }
   if (selector.includes(":")) {
-    const [stream, indexRaw] = selector.split(":");
+    const [relation, indexRaw] = selector.split(":");
     const index = Number(indexRaw);
-    if (!stream || !Number.isInteger(index) || index < 0) return null;
-    const inStream = sequence.filter((token) => token?.stream === stream);
-    return inStream[index] ?? null;
+    if (!relation || !Number.isInteger(index) || index < 0) return null;
+    const inRelation = sequence.filter((token) => token?.relation === relation);
+    return inRelation[index] ?? null;
   }
   return sequence.find((token) => token?.id === selector) ?? null;
 }
 
 function tokenKey(token: TokenLike, index: number): string {
   if (typeof token?.id === "string" && token.id.length > 0) return token.id;
-  return `${String(token?.stream ?? "token")}#${index}`;
+  return `${String(token?.relation ?? "token")}#${index}`;
 }
 
 function normalizePhaseName(name: string, phaseNames: string[]): string | null {
@@ -191,7 +191,7 @@ export function diffPhaseState(
   snapshotsModel: PhaseSnapshotsModel,
   fromPhase: string,
   toPhase: string,
-  stream: string | null = null
+  relation: string | null = null
 ) {
   const fromName = normalizePhaseName(fromPhase, snapshotsModel.phaseNames);
   const toName = normalizePhaseName(toPhase, snapshotsModel.phaseNames);
@@ -199,10 +199,10 @@ export function diffPhaseState(
   if (!toName) throw new Error(`Unknown to-phase '${toPhase}'`);
 
   const fromSeq = (snapshotsModel.snapshots.get(fromName) ?? []).filter(
-    (token) => !stream || token?.stream === stream
+    (token) => !relation || token?.relation === relation
   );
   const toSeq = (snapshotsModel.snapshots.get(toName) ?? []).filter(
-    (token) => !stream || token?.stream === stream
+    (token) => !relation || token?.relation === relation
   );
 
   const fromMap = new Map<string, TokenLike>(fromSeq.map((token, index) => [tokenKey(token, index), token]));
@@ -231,7 +231,7 @@ export function diffPhaseState(
   return {
     from: fromName,
     to: toName,
-    stream: stream ?? null,
+    relation: relation ?? null,
     added,
     removed,
     modified,

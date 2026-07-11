@@ -23,7 +23,7 @@ import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 describe("declarative frontend string_sets:/maps: engine schema", () => {
   it("admits membership tests against sets.<name> declared in string_sets:", () => {
     const spec = {
-      streams: {
+      relations: {
         orthography: { type: "base", features: { tokenType: ["word"] } },
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
@@ -33,7 +33,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       rules: {
         tag_letters: {
           select: {
-            stream: "orthography",
+            relation: "orthography",
             where: "has(current.word) && current.word in sets.ascii_letter",
           },
           apply: [
@@ -46,11 +46,11 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
 
     const input = [
       // 'a' is in the set → fires.
-      { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
+      { id: "t1", relation: "orthography", tokenType: "word", word: "a", status: 1 },
       // 'q' is not in the set → does not fire.
-      { id: "t2", stream: "orthography", tokenType: "word", word: "q", status: 1 },
+      { id: "t2", relation: "orthography", tokenType: "word", word: "q", status: 1 },
       // 'b' is in the set → fires.
-      { id: "t3", stream: "orthography", tokenType: "word", word: "b", status: 1 },
+      { id: "t3", relation: "orthography", tokenType: "word", word: "b", status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -61,7 +61,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
 
   it("admits lookup against maps.<name>[key] declared in maps:", () => {
     const spec = {
-      streams: {
+      relations: {
         orthography: { type: "base", features: { tokenType: ["word"] } },
       },
       string_sets: {
@@ -73,7 +73,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       rules: {
         spell_letters: {
           select: {
-            stream: "orthography",
+            relation: "orthography",
             where: "has(current.word) && current.word in sets.ascii_letter",
           },
           apply: [
@@ -90,8 +90,8 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
     };
 
     const input = [
-      { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
-      { id: "t2", stream: "orthography", tokenType: "word", word: "b", status: 1 },
+      { id: "t1", relation: "orthography", tokenType: "word", word: "a", status: 1 },
+      { id: "t2", relation: "orthography", tokenType: "word", word: "b", status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -113,7 +113,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
     // missing-key behavior surfaces. In real rules the `select.where`
     // membership test prevents this path from being taken.
     const spec = {
-      streams: {
+      relations: {
         orthography: { type: "base", features: { tokenType: ["word"] } },
       },
       maps: {
@@ -122,7 +122,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       rules: {
         unguarded_lookup: {
           select: {
-            stream: "orthography",
+            relation: "orthography",
             where: "has(current.word)",
           },
           apply: [
@@ -140,7 +140,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
 
     const input = [
       // 'q' is not a key of the map → bracket access throws inside the rule.
-      { id: "t1", stream: "orthography", tokenType: "word", word: "q", status: 1 },
+      { id: "t1", relation: "orthography", tokenType: "word", word: "q", status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/No such key/);
@@ -148,7 +148,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
 
   it("rejects malformed string_sets: at validation time (value must be array of strings)", () => {
     const spec = {
-      streams: {
+      relations: {
         orthography: { type: "base", features: { tokenType: ["word"] } },
       },
       string_sets: {
@@ -157,7 +157,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       },
       rules: {
         noop: {
-          select: { stream: "orthography", where: "true" },
+          select: { relation: "orthography", where: "true" },
           apply: [{ field: "x", op: "set", value: "1", tag: "t" }],
         },
       },
@@ -165,7 +165,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
     };
 
     const input = [
-      { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
+      { id: "t1", relation: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(
@@ -175,13 +175,13 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
 
   it("rejects malformed top-level string_sets: at validation time", () => {
     const spec = {
-      streams: {
+      relations: {
         orthography: { type: "base", features: { tokenType: ["word"] } },
       },
       string_sets: "abc",
       rules: {
         noop: {
-          select: { stream: "orthography", where: "true" },
+          select: { relation: "orthography", where: "true" },
           apply: [{ field: "x", op: "set", value: "1", tag: "t" }],
         },
       },
@@ -189,7 +189,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
     };
 
     const input = [
-      { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
+      { id: "t1", relation: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_STRING_SET_INVALID/);
@@ -197,7 +197,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
 
   it("rejects malformed string_sets: when an element is not a string", () => {
     const spec = {
-      streams: {
+      relations: {
         orthography: { type: "base", features: { tokenType: ["word"] } },
       },
       string_sets: {
@@ -205,7 +205,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       },
       rules: {
         noop: {
-          select: { stream: "orthography", where: "true" },
+          select: { relation: "orthography", where: "true" },
           apply: [{ field: "x", op: "set", value: "1", tag: "t" }],
         },
       },
@@ -213,7 +213,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
     };
 
     const input = [
-      { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
+      { id: "t1", relation: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(
@@ -223,7 +223,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
 
   it("rejects malformed maps: at validation time (value must be object of string→string)", () => {
     const spec = {
-      streams: {
+      relations: {
         orthography: { type: "base", features: { tokenType: ["word"] } },
       },
       maps: {
@@ -232,7 +232,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       },
       rules: {
         noop: {
-          select: { stream: "orthography", where: "true" },
+          select: { relation: "orthography", where: "true" },
           apply: [{ field: "x", op: "set", value: "1", tag: "t" }],
         },
       },
@@ -240,7 +240,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
     };
 
     const input = [
-      { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
+      { id: "t1", relation: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_MAP_INVALID/);
@@ -248,13 +248,13 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
 
   it("rejects malformed top-level maps: at validation time", () => {
     const spec = {
-      streams: {
+      relations: {
         orthography: { type: "base", features: { tokenType: ["word"] } },
       },
       maps: ["a", "b"],
       rules: {
         noop: {
-          select: { stream: "orthography", where: "true" },
+          select: { relation: "orthography", where: "true" },
           apply: [{ field: "x", op: "set", value: "1", tag: "t" }],
         },
       },
@@ -262,7 +262,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
     };
 
     const input = [
-      { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
+      { id: "t1", relation: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_MAP_INVALID/);
@@ -270,7 +270,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
 
   it("rejects malformed maps: when a value is not a string", () => {
     const spec = {
-      streams: {
+      relations: {
         orthography: { type: "base", features: { tokenType: ["word"] } },
       },
       maps: {
@@ -278,7 +278,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       },
       rules: {
         noop: {
-          select: { stream: "orthography", where: "true" },
+          select: { relation: "orthography", where: "true" },
           apply: [{ field: "x", op: "set", value: "1", tag: "t" }],
         },
       },
@@ -286,7 +286,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
     };
 
     const input = [
-      { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
+      { id: "t1", relation: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_MAP_INVALID/);
@@ -294,7 +294,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
 
   it("rejects empty name keys in string_sets: and maps:", () => {
     const specSets = {
-      streams: {
+      relations: {
         orthography: { type: "base", features: { tokenType: ["word"] } },
       },
       string_sets: {
@@ -302,7 +302,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
       },
       rules: {
         noop: {
-          select: { stream: "orthography", where: "true" },
+          select: { relation: "orthography", where: "true" },
           apply: [{ field: "x", op: "set", value: "1", tag: "t" }],
         },
       },
@@ -310,7 +310,7 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
     };
 
     const input = [
-      { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
+      { id: "t1", relation: "orthography", tokenType: "word", word: "a", status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(specSets))).toThrowError(/E_STRING_SET_INVALID/);

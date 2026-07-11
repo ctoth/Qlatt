@@ -1,7 +1,7 @@
 version: v1
 patterns:
   palatalization_dy_pattern:
-    stream: phone
+    relation: phone
     sequence:
       - capture: d_token
         where:
@@ -12,7 +12,7 @@ patterns:
         where: >-
           current.phoneme == 'Y'
   palatalization_ty_pattern:
-    stream: phone
+    relation: phone
     sequence:
       - capture: t_token
         where:
@@ -26,7 +26,7 @@ rules:
   the_prevocalic_reduction:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme == 'AH' && (has(current.stress) ? current.stress == 0 : false) && (has(current.word) ?
         current.word == 'the' : false) && next != null && (has(next.word) ? next.word != 'the' : false) && next.type ==
@@ -53,7 +53,7 @@ rules:
   to_reduction:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme == 'UW' && (has(current.stress) ? current.stress == 0 : false) &&
         (has(current.word) ? current.word == 'to' : false) &&
@@ -81,7 +81,7 @@ rules:
   t_flapping:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme == 'T' && prev != null && prev.type == 'vowel' && (has(prev.stress) ? prev.stress == 1 : false)
         && next != null && next.type == 'vowel' && (has(next.stress) ? next.stress == 0 : false)
@@ -107,7 +107,7 @@ rules:
   t_deletion:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where:
         all:
           - "current.phoneme == 'T'"
@@ -143,7 +143,7 @@ rules:
   t_glottalization:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where:
         all:
           - "current.phoneme == 'T'"
@@ -172,7 +172,7 @@ rules:
   d_flapping:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme == 'D' && prev != null && prev.type == 'vowel' && (has(prev.stress) ? prev.stress == 1 : false)
         && next != null && next.type == 'vowel' && (has(next.stress) ? next.stress == 0 : false)
@@ -198,7 +198,7 @@ rules:
   d_deletion:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where:
         all:
           - "current.phoneme == 'D'"
@@ -285,7 +285,7 @@ rules:
   glottal_stop_insertion:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where:
         all:
           - "current.type == 'vowel'"

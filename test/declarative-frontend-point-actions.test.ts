@@ -59,7 +59,7 @@ describe("declarative frontend point actions and helpers", () => {
           },
         },
       },
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["vowel", "stop"] },
@@ -69,9 +69,9 @@ describe("declarative frontend point actions and helpers", () => {
       },
       rules: {
         f0_targets: {
-          select: { stream: "phone", where: "current.type == 'vowel'" },
+          select: { relation: "phone", where: "current.type == 'vowel'" },
           insert_point: {
-            stream: "f0",
+            relation: "f0",
             at: "midpoint(current)",
             value: "params.policy.f0.base_hz + current_index",
             tag: "f0",
@@ -85,7 +85,7 @@ describe("declarative frontend point actions and helpers", () => {
     const input = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         type: "vowel",
         sync_left: s0,
         sync_right: s1,
@@ -94,7 +94,7 @@ describe("declarative frontend point actions and helpers", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         type: "stop",
         sync_left: s1,
         sync_right: s2,
@@ -103,7 +103,7 @@ describe("declarative frontend point actions and helpers", () => {
       },
       {
         id: "p3",
-        stream: "phone",
+        relation: "phone",
         type: "vowel",
         sync_left: s2,
         sync_right: s3,
@@ -113,7 +113,7 @@ describe("declarative frontend point actions and helpers", () => {
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     expect(points).toHaveLength(2);
     expect(points[0].anchor_left).toEqual(s0);
     expect(points[0].anchor_right).toEqual(s1);
@@ -136,21 +136,21 @@ describe("declarative frontend point actions and helpers", () => {
           },
         },
       },
-      streams: { phone: { type: "base" }, f0: { type: "point" } },
+      relations: { phone: { type: "base" }, f0: { type: "point" } },
       rules: {
         ratio_point: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           insert_point: {
-            stream: "f0",
+            relation: "f0",
             at: "at_ratio(current, 0.25)",
             value: "params.policy.f0.ratio_point_hz",
             tag: "f0",
           },
         },
         sync_point: {
-          select: { stream: "phone", where: "current.id == 'p2'" },
+          select: { relation: "phone", where: "current.id == 'p2'" },
           insert_point: {
-            stream: "f0",
+            relation: "f0",
             at: "at_sync(current.sync_right)",
             value: "params.policy.f0.sync_point_hz",
             tag: "f0",
@@ -162,12 +162,12 @@ describe("declarative frontend point actions and helpers", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     expect(points).toHaveLength(2);
     expect(points[0].ratio).toBe(0.25);
     expect(points[1].anchor_left).toEqual(s2);
@@ -189,19 +189,19 @@ describe("declarative frontend point actions and helpers", () => {
           },
         },
       },
-      streams: { phone: { type: "base" }, f0: { type: "point" } },
+      relations: { phone: { type: "base" }, f0: { type: "point" } },
       rules: {
         rise_fall: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           insert_points: [
             {
-              stream: "f0",
+              relation: "f0",
               at: "at_ratio(current, 0.25)",
               value: "params.policy.f0.high_hz",
               tag: "f0_peak",
             },
             {
-              stream: "f0",
+              relation: "f0",
               at: "at_sync(current.sync_right)",
               value: "params.policy.f0.low_hz",
               tag: "f0_tail",
@@ -214,12 +214,12 @@ describe("declarative frontend point actions and helpers", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
 
     expect(points).toHaveLength(2);
     expect(points[0]).toMatchObject({ ratio: 0.25, value: 145, tag: "f0_peak" });
@@ -241,20 +241,20 @@ describe("declarative frontend point actions and helpers", () => {
           },
         },
       },
-      streams: { phone: { type: "base" }, f0: { type: "point" } },
+      relations: { phone: { type: "base" }, f0: { type: "point" } },
       rules: {
         paired_targets: {
-          select: { stream: "phone", where: "current.id in ['p1', 'p2']" },
+          select: { relation: "phone", where: "current.id in ['p1', 'p2']" },
           insert_points_order: "by_point",
           insert_points: [
             {
-              stream: "f0",
+              relation: "f0",
               at: "at_sync(current.sync_left)",
               value: "params.policy.f0.base_hz + current_index",
               tag: "lead",
             },
             {
-              stream: "f0",
+              relation: "f0",
               at: "at_sync(current.sync_right)",
               value: "(prev_point('f0') == null ? params.policy.f0.base_hz : prev_point('f0').value) + params.policy.f0.step_hz",
               tag: "tail",
@@ -267,13 +267,13 @@ describe("declarative frontend point actions and helpers", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "gap", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s2, sync_right: s3, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "gap", relation: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s2, sync_right: s3, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
 
     expect(points.map((point) => point.tag)).toEqual(["lead", "lead", "tail", "tail"]);
     expect(points.map((point) => point.value)).toEqual([100, 102, 107, 107]);
@@ -296,28 +296,28 @@ describe("declarative frontend point actions and helpers", () => {
           },
         },
       },
-      streams: {
+      relations: {
         word: { type: "span" },
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
         f0: { type: "point" },
       },
       rules: {
         insert_a: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           insert_point: {
-            stream: "f0",
+            relation: "f0",
             at: "midpoint(current)",
             value: "params.policy.f0.base_hz",
             tag: "f0",
           },
         },
         insert_b: {
-          select: { stream: "phone", where: "current.id == 'p2'" },
+          select: { relation: "phone", where: "current.id == 'p2'" },
           define: {
             prev_f0: "prev_point('f0')",
           },
           insert_point: {
-            stream: "f0",
+            relation: "f0",
             at: "midpoint(current)",
             value: "prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value + params.policy.f0.step_hz",
             tag: "f0",
@@ -325,7 +325,7 @@ describe("declarative frontend point actions and helpers", () => {
         },
         mark_total: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "total('word') == 1",
           },
           apply: [
@@ -343,13 +343,13 @@ describe("declarative frontend point actions and helpers", () => {
     };
 
     const input = [
-      { id: "w1", stream: "word", sync_left: s0, sync_right: s2, status: 1 },
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, duration: 100, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, duration: 120, status: 1 },
+      { id: "w1", relation: "word", sync_left: s0, sync_right: s2, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, duration: 100, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, duration: 120, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     const p1 = out.find((t) => t.id === "p1");
     const p2 = out.find((t) => t.id === "p2");
     expect(points).toHaveLength(2);
@@ -370,15 +370,15 @@ describe("declarative frontend point actions and helpers", () => {
           },
         },
       },
-      streams: {
+      relations: {
         phone: { type: "base" },
         f0: { type: "point" },
       },
       rules: {
         invalid_ratio: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           insert_point: {
-            stream: "f0",
+            relation: "f0",
             at: { anchor_left: s0, anchor_right: s1, ratio: 1.2 },
             value: "params.policy.f0.base_hz",
             tag: "f0",
@@ -389,7 +389,7 @@ describe("declarative frontend point actions and helpers", () => {
       output: loweringOutput,
     };
 
-    const input = [{ id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 }];
+    const input = [{ id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 }];
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_INVALID_RATIO/);
   });
 });

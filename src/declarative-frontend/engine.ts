@@ -63,14 +63,14 @@ type NavigationBundle = {
     token: TokenLike | null,
     pointCursor?: Map<string, number> | null
   ) => void;
-  invalidateStreamCache: () => void;
+  invalidateRelationCache: () => void;
   syncCursorView: (token: TokenLike, field: string, value: unknown) => void;
 };
 
 function isTokenLike(value: unknown): value is TokenLike {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   return (
-    Object.prototype.hasOwnProperty.call(value, "stream") ||
+    Object.prototype.hasOwnProperty.call(value, "relation") ||
     Object.prototype.hasOwnProperty.call(value, "sync_left") ||
     Object.prototype.hasOwnProperty.call(value, "sync_right") ||
     Object.prototype.hasOwnProperty.call(value, "anchor_left") ||
@@ -198,28 +198,28 @@ function materializeInventoryTarget(
   return payload;
 }
 
-function getTokenStream(token: TokenLike | null | undefined): string {
-  return token?.stream ?? "phone";
+function getTokenRelation(token: TokenLike | null | undefined): string {
+  return token?.relation ?? "phone";
 }
 
-function initializeBaseStreamSyncMarks(sequence: TokenLike[], baseStreams: Set<string>): void {
-  if (!(baseStreams instanceof Set) || baseStreams.size === 0) return;
+function initializeBaseRelationSyncMarks(sequence: TokenLike[], baseRelations: Set<string>): void {
+  if (!(baseRelations instanceof Set) || baseRelations.size === 0) return;
 
-  for (const stream of baseStreams) {
-    const activeStreamTokens = sequence.filter(
-      (token) => isActiveToken(token) && getTokenStream(token) === stream
+  for (const relation of baseRelations) {
+    const activeRelationTokens = sequence.filter(
+      (token) => isActiveToken(token) && getTokenRelation(token) === relation
     );
-    if (activeStreamTokens.length === 0) continue;
+    if (activeRelationTokens.length === 0) continue;
 
-    const needsInitialization = activeStreamTokens.some(
+    const needsInitialization = activeRelationTokens.some(
       (token) => token?.sync_left == null || token?.sync_right == null
     );
     if (!needsInitialization) continue;
 
-    const boundaries = buildInitialBoundaryOrders(activeStreamTokens.length);
-    for (let i = 0; i < activeStreamTokens.length; i += 1) {
-      activeStreamTokens[i].sync_left = boundaries[i];
-      activeStreamTokens[i].sync_right = boundaries[i + 1];
+    const boundaries = buildInitialBoundaryOrders(activeRelationTokens.length);
+    for (let i = 0; i < activeRelationTokens.length; i += 1) {
+      activeRelationTokens[i].sync_left = boundaries[i];
+      activeRelationTokens[i].sync_right = boundaries[i + 1];
     }
   }
 }
@@ -509,8 +509,8 @@ function buildNavigationFunctions(
   options: RuntimeLike = {}
 ): NavigationBundle {
   let currentToken = options.currentToken ?? null;
-  let pointCursorByStream: Map<string, number> | null =
-    options.pointCursorByStream instanceof Map ? options.pointCursorByStream : null;
+  let pointCursorByRelation: Map<string, number> | null =
+    options.pointCursorByRelation instanceof Map ? options.pointCursorByRelation : null;
   const cache = new Map<string, TokenLike[]>();
   const indexMaps = new Map<string, Map<TokenLike, number>>();
   const activeById = new Map();
@@ -526,13 +526,13 @@ function buildNavigationFunctions(
     activeIdIndexComplete = true;
   };
 
-  const getActiveStreamTokens = (stream: string): TokenLike[] => {
-    const key = stream || "phone";
+  const getActiveRelationTokens = (relation: string): TokenLike[] => {
+    const key = relation || "phone";
     if (cache.has(key)) return cache.get(key)!;
     let active = sequence.filter(
-      (token) => isActiveToken(token) && getTokenStream(token) === key
+      (token) => isActiveToken(token) && getTokenRelation(token) === key
     );
-    if (runtime?.pointStreams?.has(key)) {
+    if (runtime?.pointRelations?.has(key)) {
       active = active.slice().sort((left, right) => comparePointTokenOrder(left, right, runtime));
     }
     cache.set(key, active);
@@ -548,43 +548,43 @@ function buildNavigationFunctions(
     return active;
   };
 
-  const getTokenIndex = (token: TokenLike, stream: string): number => {
-    const key = stream || "phone";
-    getActiveStreamTokens(key); // ensures cache + indexMap are populated
+  const getTokenIndex = (token: TokenLike, relation: string): number => {
+    const key = relation || "phone";
+    getActiveRelationTokens(key); // ensures cache + indexMap are populated
     return indexMaps.get(key)?.get(token) ?? -1;
   };
 
   const getIndex = (token: TokenLike): number => {
-    const stream = getTokenStream(token);
-    return getTokenIndex(token, stream);
+    const relation = getTokenRelation(token);
+    return getTokenIndex(token, relation);
   };
 
-  const getPointCursor = (stream: string): number => {
-    if (pointCursorByStream?.has(stream)) {
-      const cursor = pointCursorByStream.get(stream);
+  const getPointCursor = (relation: string): number => {
+    if (pointCursorByRelation?.has(relation)) {
+      const cursor = pointCursorByRelation.get(relation);
       return cursor ?? -1;
     }
     if (
       currentToken &&
       isActiveToken(currentToken) &&
-      runtime?.pointStreams?.has(stream) &&
-      getTokenStream(currentToken) === stream
+      runtime?.pointRelations?.has(relation) &&
+      getTokenRelation(currentToken) === relation
     ) {
-      return getTokenIndex(currentToken, stream);
+      return getTokenIndex(currentToken, relation);
     }
-    // Cross-stream lookup: when the current token's stream differs from the
-    // requested point stream (e.g. phone-stream rule asking for prev_point('f0')),
-    // find the last point in the target stream whose anchor is temporally at or
+    // Cross-relation lookup: when the current token's relation differs from the
+    // requested point relation (e.g. phone-relation rule asking for prev_point('f0')),
+    // find the last point in the target relation whose anchor is temporally at or
     // before the current token's right boundary.  Return cursor = lastIndex + 1
     // so that prevPointFn (which subtracts 1) yields that point.
     if (
       currentToken &&
       isActiveToken(currentToken) &&
-      runtime?.pointStreams?.has(stream)
+      runtime?.pointRelations?.has(relation)
     ) {
       const currentBounds = getTokenBounds(currentToken, runtime);
       if (currentBounds && currentBounds.right != null) {
-        const points = getActiveStreamTokens(stream);
+        const points = getActiveRelationTokens(relation);
         let lastBefore = -1;
         for (let i = 0; i < points.length; i++) {
           const pointBounds = getTokenBounds(points[i], runtime);
@@ -608,11 +608,11 @@ function buildNavigationFunctions(
     token?.phoneme === "SIL" && token?.punctuationSymbol != null;
 
   const getPhraseWindow = (token: TokenLike): { index: number; total: number } => {
-    const stream = getTokenStream(token);
-    const active = getActiveStreamTokens(stream);
-    const index = getTokenIndex(token, stream);
+    const relation = getTokenRelation(token);
+    const active = getActiveRelationTokens(relation);
+    const index = getTokenIndex(token, relation);
     if (index < 0) return { index: -1, total: 0 };
-    if (stream !== "phone") {
+    if (relation !== "phone") {
       return { index, total: active.length };
     }
 
@@ -639,17 +639,17 @@ function buildNavigationFunctions(
   };
 
   const getPrevToken = (token: TokenLike): TokenLike | null => {
-    const stream = getTokenStream(token);
-    const active = getActiveStreamTokens(stream);
-    const index = getTokenIndex(token, stream);
+    const relation = getTokenRelation(token);
+    const active = getActiveRelationTokens(relation);
+    const index = getTokenIndex(token, relation);
     if (index <= 0) return null;
     return active[index - 1];
   };
 
   const getNextToken = (token: TokenLike): TokenLike | null => {
-    const stream = getTokenStream(token);
-    const active = getActiveStreamTokens(stream);
-    const index = getTokenIndex(token, stream);
+    const relation = getTokenRelation(token);
+    const active = getActiveRelationTokens(relation);
+    const index = getTokenIndex(token, relation);
     if (index < 0 || index + 1 >= active.length) return null;
     return active[index + 1];
   };
@@ -667,9 +667,9 @@ function buildNavigationFunctions(
     if (typeof word !== "string" || word.length === 0 || token.phoneme === "SIL") {
       return null;
     }
-    const stream = getTokenStream(token);
-    const active = getActiveStreamTokens(stream);
-    const index = getTokenIndex(token, stream);
+    const relation = getTokenRelation(token);
+    const active = getActiveRelationTokens(relation);
+    const index = getTokenIndex(token, relation);
     if (index < 0) return null;
     for (let i = index + 1; i < active.length; i += 1) {
       const candidate = active[i];
@@ -701,9 +701,9 @@ function buildNavigationFunctions(
     const delta = Math.trunc(Number(offset));
     if (!Number.isFinite(delta)) return null;
     if (delta === 0) return token;
-    const stream = getTokenStream(token);
-    const active = getActiveStreamTokens(stream);
-    const index = getTokenIndex(token, stream);
+    const relation = getTokenRelation(token);
+    const active = getActiveRelationTokens(relation);
+    const index = getTokenIndex(token, relation);
     const nextIndex = index + delta;
     if (index < 0 || nextIndex < 0 || nextIndex >= active.length) return null;
     return active[nextIndex];
@@ -715,27 +715,27 @@ function buildNavigationFunctions(
     return activeById.get(token.parent) ?? null;
   };
 
-  const resolveAncestorInStream = (token: TokenLike, stream: string): TokenLike | null => {
+  const resolveAncestorInRelation = (token: TokenLike, relation: string): TokenLike | null => {
     let cursor = getParentToken(token);
     while (cursor) {
-      if (getTokenStream(cursor) === stream) return cursor;
+      if (getTokenRelation(cursor) === relation) return cursor;
       cursor = getParentToken(cursor);
     }
     return null;
   };
 
-  const hierarchyStreams =
-    runtime?.hierarchyStreams instanceof Set ? [...runtime.hierarchyStreams] : [];
+  const hierarchyRelations =
+    runtime?.hierarchyRelations instanceof Set ? [...runtime.hierarchyRelations] : [];
   const viewCache = new WeakMap<TokenLike, TokenLike>();
   const viewToOriginal = new WeakMap<TokenLike, TokenLike>();
 
   const getSyllableWord = (syllable: TokenLike): string | null => {
     const ownWord = syllable?.word;
     if (typeof ownWord === "string" && ownWord.length > 0) return ownWord;
-    const active = getActiveStreamTokens("phone");
+    const active = getActiveRelationTokens("phone");
     for (const token of active) {
       if (token.phoneme === "SIL") continue;
-      if (resolveAncestorInStream(token, getTokenStream(syllable)) !== syllable) continue;
+      if (resolveAncestorInRelation(token, getTokenRelation(syllable)) !== syllable) continue;
       const word = token.word;
       if (typeof word === "string" && word.length > 0) return word;
     }
@@ -743,16 +743,16 @@ function buildNavigationFunctions(
   };
 
   const isFinalSyllable = (syllable: TokenLike): boolean => {
-    if (getTokenStream(syllable) !== "syllable") return false;
+    if (getTokenRelation(syllable) !== "syllable") return false;
     const word = getSyllableWord(syllable);
     if (!word) return false;
-    const active = getActiveStreamTokens("phone");
+    const active = getActiveRelationTokens("phone");
     for (const token of active) {
       if (token.phoneme === "SIL" || token.word !== word) continue;
-      const ancestor = resolveAncestorInStream(token, "syllable");
+      const ancestor = resolveAncestorInRelation(token, "syllable");
       if (ancestor && ancestor !== syllable) {
-        const syllableIndex = getTokenIndex(syllable, getTokenStream(syllable));
-        const ancestorIndex = getTokenIndex(ancestor, getTokenStream(ancestor));
+        const syllableIndex = getTokenIndex(syllable, getTokenRelation(syllable));
+        const ancestorIndex = getTokenIndex(ancestor, getTokenRelation(ancestor));
         if (syllableIndex >= 0 && ancestorIndex > syllableIndex) return false;
       }
     }
@@ -772,7 +772,7 @@ function buildNavigationFunctions(
         get: () => toCursorView(getNextBoundaryToken(token)),
       });
     }
-    if (getTokenStream(token) === "syllable" && !Object.prototype.hasOwnProperty.call(view, "is_final")) {
+    if (getTokenRelation(token) === "syllable" && !Object.prototype.hasOwnProperty.call(view, "is_final")) {
       Object.defineProperty(view, "is_final", {
         enumerable: false,
         configurable: true,
@@ -783,9 +783,9 @@ function buildNavigationFunctions(
 
     const nextSeen = new Set(seen);
     nextSeen.add(token);
-    for (const streamName of hierarchyStreams) {
-      const ancestor = resolveAncestorInStream(token, streamName);
-      view[streamName] = ancestor ? toCursorView(ancestor, nextSeen) : null;
+    for (const relationName of hierarchyRelations) {
+      const ancestor = resolveAncestorInRelation(token, relationName);
+      view[relationName] = ancestor ? toCursorView(ancestor, nextSeen) : null;
     }
     return view;
   };
@@ -916,20 +916,20 @@ function buildNavigationFunctions(
     };
   };
 
-  const totalFn = (stream: string) => {
-    const streamName = typeof stream === "string" ? stream : "";
-    if (!streamName) return 0;
-    if (runtime?.knownStreams instanceof Set && !runtime.knownStreams.has(streamName)) {
-      throw new Error(`E_STREAM_UNKNOWN: unknown stream '${streamName}' in total()`);
+  const totalFn = (relation: string) => {
+    const relationName = typeof relation === "string" ? relation : "";
+    if (!relationName) return 0;
+    if (runtime?.knownRelations instanceof Set && !runtime.knownRelations.has(relationName)) {
+      throw new Error(`E_RELATION_UNKNOWN: unknown relation '${relationName}' in total()`);
     }
-    return getActiveStreamTokens(streamName).length;
+    return getActiveRelationTokens(relationName).length;
   };
 
-  const prevPointFn = (stream: string) => {
-    const streamName = typeof stream === "string" && stream.length > 0 ? stream : null;
-    if (!streamName || !runtime?.pointStreams?.has(streamName)) return null;
-    const points = getActiveStreamTokens(streamName);
-    const cursor = getPointCursor(streamName);
+  const prevPointFn = (relation: string) => {
+    const relationName = typeof relation === "string" && relation.length > 0 ? relation : null;
+    if (!relationName || !runtime?.pointRelations?.has(relationName)) return null;
+    const points = getActiveRelationTokens(relationName);
+    const cursor = getPointCursor(relationName);
     const index = cursor >= 0 ? cursor - 1 : points.length - 1;
     if (index < 0 || index >= points.length) return null;
     return toCursorView(points[index]);
@@ -1080,9 +1080,9 @@ function buildNavigationFunctions(
     const steps = Math.trunc(Number(maxSteps));
     if (!Number.isFinite(steps) || steps <= 0) return null;
 
-    const stream = getTokenStream(source);
-    const active = getActiveStreamTokens(stream);
-    const sourceIndex = getTokenIndex(source, stream);
+    const relation = getTokenRelation(source);
+    const active = getActiveRelationTokens(relation);
+    const sourceIndex = getTokenIndex(source, relation);
     if (sourceIndex < 0) return null;
 
     const maxAvailable =
@@ -1144,9 +1144,9 @@ function buildNavigationFunctions(
     const rawDirection = typeof directionArg === "string" ? directionArg.toLowerCase() : "ahead";
     const directions: Array<-1 | 1> =
       rawDirection === "behind" ? [-1] : rawDirection === "both" ? [1, -1] : [1];
-    const stream = getTokenStream(source);
-    const active = getActiveStreamTokens(stream);
-    const sourceIndex = getTokenIndex(source, stream);
+    const relation = getTokenRelation(source);
+    const active = getActiveRelationTokens(relation);
+    const sourceIndex = getTokenIndex(source, relation);
     if (sourceIndex < 0) return null;
 
     const scanDirection = (direction: -1 | 1): TokenLike | null => {
@@ -1221,12 +1221,12 @@ function buildNavigationFunctions(
       const a = resolveLiveToken(tokenRefA);
       const b = resolveLiveToken(tokenRefB);
       if (!a || !b) return 0;
-      const streamA = getTokenStream(a);
-      const streamB = getTokenStream(b);
-      if (streamA !== streamB) return 0;
-      const active = getActiveStreamTokens(streamA);
-      let idxA = getTokenIndex(a, streamA);
-      let idxB = getTokenIndex(b, streamB);
+      const relationA = getTokenRelation(a);
+      const relationB = getTokenRelation(b);
+      if (relationA !== relationB) return 0;
+      const active = getActiveRelationTokens(relationA);
+      let idxA = getTokenIndex(a, relationA);
+      let idxB = getTokenIndex(b, relationB);
       if (idxA < 0 || idxB < 0) return 0;
       if (idxA > idxB) { const tmp = idxA; idxA = idxB; idxB = tmp; }
       let total = 0;
@@ -1259,14 +1259,14 @@ function buildNavigationFunctions(
       const word = token.word;
       if (typeof word !== "string" || word.length === 0) return 0;
       if (token.phoneme === "SIL") return 0;
-      const active = getActiveStreamTokens("phone");
+      const active = getActiveRelationTokens("phone");
       let count = 0;
       for (const t of active) {
         if (t.type === "vowel" && t.word === word) count++;
       }
       return count;
     },
-    // word_count(): Positional count of words in the phone stream (DECtalk
+    // word_count(): Positional count of words in the phone relation (DECtalk
     // number_words). Counts maximal runs of consecutive tokens sharing the
     // same word, so a repeated surface word ("the cat the dog" -> 4) is NOT
     // deduplicated; SIL/pause breaks a run. Used by phrase-level gates such
@@ -1274,7 +1274,7 @@ function buildNavigationFunctions(
     // three words.
     // Citation: DECtalk 4.63 ph_aloph.c (number_words >= 3 phrase gate)
     word_count: (): number => {
-      const active = getActiveStreamTokens("phone");
+      const active = getActiveRelationTokens("phone");
       let count = 0;
       let prevWord: string | undefined;
       for (const t of active) {
@@ -1295,7 +1295,7 @@ function buildNavigationFunctions(
     // than number_words.
     // Citation: DECtalk 4.63 p_us_tim.c:790-805 Rule 17 (nallotot < 10)
     phone_count: (): number => {
-      const active = getActiveStreamTokens("phone");
+      const active = getActiveRelationTokens("phone");
       let count = 0;
       for (const t of active) {
         if (t.phoneme !== "SIL") count++;
@@ -1309,7 +1309,7 @@ function buildNavigationFunctions(
     clause_phone_count: (): number => {
       const token = currentToken;
       if (!token || token.phoneme === "SIL") return 0;
-      const active = getActiveStreamTokens("phone");
+      const active = getActiveRelationTokens("phone");
       const idx = getTokenIndex(token, "phone");
       if (idx < 0) return 0;
 
@@ -1336,7 +1336,7 @@ function buildNavigationFunctions(
       const word = token.word;
       if (typeof word !== "string" || word.length === 0) return 0;
       if (token.type === "vowel" || token.phoneme === "SIL") return 0;
-      const active = getActiveStreamTokens("phone");
+      const active = getActiveRelationTokens("phone");
       const idx = getTokenIndex(token, "phone");
       if (idx < 0) return 0;
       let pos = 0;
@@ -1371,7 +1371,7 @@ function buildNavigationFunctions(
   };
 
   // Memoize syllabification per same-word run, keyed by the run's start index in
-  // the active phone stream (NOT the word string, so a repeated surface word
+  // the active phone relation (NOT the word string, so a repeated surface word
   // gets its own run).  Maps run-start index -> annotation per token-in-run.
   const syllableRunCache = new Map<number, SyllableAnnotation[]>();
   const syllableField = (
@@ -1383,7 +1383,7 @@ function buildNavigationFunctions(
     if (!token) return null;
     const word = token.word;
     if (typeof word !== "string" || word.length === 0) return null;
-    const active = getActiveStreamTokens("phone");
+    const active = getActiveRelationTokens("phone");
     const idx = getTokenIndex(token, "phone");
     if (idx < 0) return null;
     // Find the start of the contiguous same-word run containing idx.
@@ -1411,10 +1411,10 @@ function buildNavigationFunctions(
     pointCursor: Map<string, number> | null = null
   ): void => {
     currentToken = token;
-    pointCursorByStream = pointCursor;
+    pointCursorByRelation = pointCursor;
   };
 
-  const invalidateStreamCache = (): void => {
+  const invalidateRelationCache = (): void => {
     cache.clear();
     indexMaps.clear();
     activeIdIndexComplete = false;
@@ -1438,7 +1438,7 @@ function buildNavigationFunctions(
     evaluateConditionInContext: (condition, context) =>
       evaluateConditionInContext(condition, context),
     rebindCurrentToken,
-    invalidateStreamCache,
+    invalidateRelationCache,
     syncCursorView,
   };
 }
@@ -1466,10 +1466,10 @@ function toFiniteOrNull(value: unknown): number | null {
 
 function getScalarConfig(runtime: RuntimeLike, token: TokenLike, field: string): TokenLike | null {
   if (!runtime || !token || typeof field !== "string") return null;
-  const stream = getTokenStream(token);
-  const byStream = runtime.scalarSpecsByStream?.get(stream);
-  if (!byStream || typeof byStream !== "object") return null;
-  const config = byStream[field];
+  const relation = getTokenRelation(token);
+  const byRelation = runtime.scalarSpecsByRelation?.get(relation);
+  if (!byRelation || typeof byRelation !== "object") return null;
+  const config = byRelation[field];
   return config && typeof config === "object" ? config : null;
 }
 
@@ -1829,7 +1829,7 @@ function deepEvaluateTemplate(
 
 const RESERVED_SPLICE_COPY_FIELDS = new Set([
   "id",
-  "stream",
+  "relation",
   "status",
   "sync_left",
   "sync_right",
@@ -1915,8 +1915,8 @@ function materializeInventorySegment(
   return segmentFields;
 }
 
-function nextInsertedTokenId(runtime: RuntimeLike, stream: unknown): string {
-  const key = typeof stream === "string" && stream.length > 0 ? stream : "token";
+function nextInsertedTokenId(runtime: RuntimeLike, relation: unknown): string {
+  const key = typeof relation === "string" && relation.length > 0 ? relation : "token";
   if (!runtime.insertCounters) runtime.insertCounters = new Map();
   const existing = runtime.insertCounters.get(key) ?? 0;
   let counter = existing;
@@ -1951,7 +1951,7 @@ function withinClosedRange(token: TokenLike, leftId: string, rightId: string, ru
 
 function buildSpliceInsertions(
   insertSpecs: unknown,
-  stream: string,
+  relation: string,
   bounds: { leftId: string; rightId: string },
   context: RuntimeLike,
   runtime: RuntimeLike,
@@ -1982,7 +1982,7 @@ function buildSpliceInsertions(
       ...segmentFields,
       ...copiedFields,
       ...evaluatedObject,
-      stream: evaluatedObject.stream ?? stream,
+      relation: evaluatedObject.relation ?? relation,
       status: TokenStatus.ACTIVE,
       ...markProps,
     };
@@ -1993,7 +1993,7 @@ function buildSpliceInsertions(
       ];
     }
     if (typeof token.id !== "string" || token.id.length === 0) {
-      token.id = nextInsertedTokenId(runtime, token.stream);
+      token.id = nextInsertedTokenId(runtime, token.relation);
     } else {
       runtime.usedTokenIds.add(token.id);
     }
@@ -2005,7 +2005,7 @@ function buildSpliceInsertions(
 
 function findInsertionIndexForRange(
   sequence: TokenLike[],
-  stream: string,
+  relation: string,
   rightId: string,
   suppressedSet: Set<TokenLike>,
   runtime: RuntimeLike
@@ -2019,7 +2019,7 @@ function findInsertionIndexForRange(
 
   for (let i = 0; i < sequence.length; i += 1) {
     const token = sequence[i];
-    if (getTokenStream(token) !== stream) continue;
+    if (getTokenRelation(token) !== relation) continue;
     const { leftId } = ensureTokenSyncMarkRefs(token, runtime);
     if (!leftId) continue;
     if (compareMarkIds(runtime, leftId, rightId) >= 0) return i;
@@ -2037,7 +2037,7 @@ type BoundaryAdjacency = {
 
 function findBoundaryAdjacency(
   sequence: TokenLike[],
-  stream: string,
+  relation: string,
   boundaryId: string,
   runtime: RuntimeLike
 ): BoundaryAdjacency {
@@ -2049,7 +2049,7 @@ function findBoundaryAdjacency(
 
   for (let i = 0; i < sequence.length; i += 1) {
     const token = sequence[i];
-    if (!isActiveToken(token) || getTokenStream(token) !== stream) continue;
+    if (!isActiveToken(token) || getTokenRelation(token) !== relation) continue;
     activeCount += 1;
     const { leftId, rightId } = ensureTokenSyncMarkRefs(token, runtime);
     if (rightId && compareMarkIds(runtime, rightId, boundaryId) === 0) {
@@ -2101,7 +2101,7 @@ function resolveBoundaryInsertBounds(
   if (adjacency.activeCount === 0) {
     if (boundaryId !== startId) {
       throw new Error(
-        "E_SPLICE_BOUNDARY_ADJACENT_REQUIRED: empty base stream insertion requires boundary START"
+        "E_SPLICE_BOUNDARY_ADJACENT_REQUIRED: empty base relation insertion requires boundary START"
       );
     }
     return { leftId: startId, rightId: endId };
@@ -2146,10 +2146,10 @@ function applySpliceSpec(
   if (!target) {
     throw new Error(`E_SPLICE_TARGET_UNKNOWN: unknown splice target '${targetName}' in slice engine`);
   }
-  const stream = getTokenStream(target);
+  const relation = getTokenRelation(target);
   const context = navigation.buildContext(target, params, extraContext);
-  const activeStreamTokens = sequence.filter(
-    (token) => isActiveToken(token) && getTokenStream(token) === stream
+  const activeRelationTokens = sequence.filter(
+    (token) => isActiveToken(token) && getTokenRelation(token) === relation
   );
 
   if (spliceSpec.type === "replace_range") {
@@ -2162,7 +2162,7 @@ function applySpliceSpec(
     }
 
     const suppressedSet = new Set(
-      activeStreamTokens.filter((token) => withinClosedRange(token, leftId, rightId, runtime))
+      activeRelationTokens.filter((token) => withinClosedRange(token, leftId, rightId, runtime))
     );
     const explicitSuppress = Array.isArray(spliceSpec.suppress) ? spliceSpec.suppress : [];
     for (const name of explicitSuppress) {
@@ -2175,14 +2175,14 @@ function applySpliceSpec(
 
     const insertionIndex = findInsertionIndexForRange(
       sequence,
-      stream,
+      relation,
       rightId,
       suppressedSet,
       runtime
     );
     const inserts = buildSpliceInsertions(
       spliceSpec.insert,
-      stream,
+      relation,
       { leftId, rightId },
       context,
       runtime,
@@ -2202,12 +2202,12 @@ function applySpliceSpec(
       throw new Error("E_SPLICE_BOUNDARY_REQUIRED: insert_at_boundary splice requires boundary");
     }
 
-    const adjacency = findBoundaryAdjacency(sequence, stream, boundaryId, runtime);
+    const adjacency = findBoundaryAdjacency(sequence, relation, boundaryId, runtime);
     const bounds = resolveBoundaryInsertBounds(runtime, boundaryId, side, adjacency);
     const insertionIndex = findInsertionIndexForBoundary(adjacency, side);
     const inserts = buildSpliceInsertions(
       spliceSpec.insert,
-      stream,
+      relation,
       bounds,
       context,
       runtime,
@@ -2222,8 +2222,8 @@ function applySpliceSpec(
   throw new Error(`E_SPLICE_TYPE_UNSUPPORTED: unsupported splice type '${spliceSpec.type}' in slice engine`);
 }
 
-function nextPointId(runtime: RuntimeLike, stream: string): string {
-  const key = typeof stream === "string" && stream.length > 0 ? stream : "point";
+function nextPointId(runtime: RuntimeLike, relation: string): string {
+  const key = typeof relation === "string" && relation.length > 0 ? relation : "point";
   const existing = runtime.pointCounters.get(key) ?? 0;
   let counter = existing;
   let candidate = `${key}_pt_${counter}`;
@@ -2264,9 +2264,9 @@ function applyInsertPointSpec(
   extraContext: RuntimeLike | null = null
 ) {
   if (!pointSpec || typeof pointSpec !== "object") return;
-  const stream = pointSpec.stream;
-  if (typeof stream !== "string" || stream.length === 0) {
-    throw new Error("E_POINT_STREAM_INVALID: insert_point.stream must be a non-empty string");
+  const relation = pointSpec.relation;
+  if (typeof relation !== "string" || relation.length === 0) {
+    throw new Error("E_POINT_RELATION_INVALID: insert_point.relation must be a non-empty string");
   }
 
   const targetName = pointSpec.target ?? defaultTargetName;
@@ -2276,12 +2276,12 @@ function applyInsertPointSpec(
   }
 
   const activePointCount = sequence.filter(
-    (token) => isActiveToken(token) && getTokenStream(token) === stream
+    (token) => isActiveToken(token) && getTokenRelation(token) === relation
   ).length;
 
   const pointFunctions = buildNavigationFunctions(sequence, runtime, {
     currentToken: target,
-    pointCursorByStream: new Map([[stream, activePointCount]]),
+    pointCursorByRelation: new Map([[relation, activePointCount]]),
   });
   // Optional per-point guard: a CEL boolean evaluated against the same context
   // as `at`/`value`. When present and falsy, this point is not emitted. This
@@ -2305,8 +2305,8 @@ function applyInsertPointSpec(
       : evaluateNumericExpression(pointSpec.value, target, params, pointFunctions, extraContext);
 
   const pointToken: TokenLike = {
-    id: nextPointId(runtime, stream),
-    stream,
+    id: nextPointId(runtime, relation),
+    relation,
     status: TokenStatus.ACTIVE,
     anchor_left: anchor.anchor_left,
     anchor_right: anchor.anchor_right,
@@ -2348,7 +2348,7 @@ function applyInsertPointSpecs(
  * Insert an F0 layer command token into the sequence.
  *
  * Handles the `kind: f0_layer` rule semantics, creating a token with
- * `stream: "f0_layer"` that carries the layer name, value, and timing info.
+ * `relation: "f0_layer"` that carries the layer name, value, and timing info.
  * The control-score builder reads these tokens into `f0_layer_commands`.
  *
  * Citations:
@@ -2381,7 +2381,7 @@ function applyInsertF0LayerSpec(
   // Build navigation functions for evaluating expressions.
   const navFunctions = buildNavigationFunctions(sequence, runtime, {
     currentToken: target,
-    pointCursorByStream: new Map(),
+    pointCursorByRelation: new Map(),
   });
 
   // Resolve the time anchor.
@@ -2426,7 +2426,7 @@ function applyInsertF0LayerSpec(
 
   const layerToken: TokenLike = {
     id: tokenId,
-    stream: "f0_layer",
+    relation: "f0_layer",
     status: TokenStatus.ACTIVE,
     layer: layerName,
     value,
@@ -2501,23 +2501,23 @@ function buildContourContexts(
     Number.isFinite(rawResetBreak) && rawResetBreak >= 1 ? Math.floor(rawResetBreak) : 4;
 
   const selectedSet = new Set(selected);
-  const stream =
-    typeof rule?.select?.stream === "string" && rule.select.stream.length > 0
-      ? rule.select.stream
+  const relation =
+    typeof rule?.select?.relation === "string" && rule.select.relation.length > 0
+      ? rule.select.relation
       : "phone";
-  const activeStreamTokens = sequence.filter(
-    (token) => isActiveToken(token) && getTokenStream(token) === stream
+  const activeRelationTokens = sequence.filter(
+    (token) => isActiveToken(token) && getTokenRelation(token) === relation
   );
 
   const phraseBuckets: TokenLike[][] = [];
   let bucket: TokenLike[] = [];
-  for (const token of activeStreamTokens) {
+  for (const token of activeRelationTokens) {
     if (selectedSet.has(token)) {
       bucket.push(token);
     }
     const breakIndex = Number(token?.breakIndex);
     const boundary =
-      stream === "phone" &&
+      relation === "phone" &&
       token?.phoneme === "SIL" &&
       Number.isFinite(breakIndex) &&
       breakIndex >= resetBreakIndex;
@@ -2577,14 +2577,14 @@ function buildContourContexts(
 
 function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike, navigation: NavigationBundle): TokenLike[] {
   const select = rule.select ?? {};
-  const stream = select.stream;
+  const relation = select.relation;
   const where = select.where ?? "true";
   const prefilter: Prefilter | null = select._prefilter ?? null;
   const selected = [];
 
   for (const token of sequence) {
     if (!isActiveToken(token)) continue;
-    if (stream && getTokenStream(token) !== stream) continue;
+    if (relation && getTokenRelation(token) !== relation) continue;
     // Fast-reject via prefilter: skip full CEL evaluation for tokens that
     // cannot match the where-clause based on their own properties.
     if (prefilter && !passesPrefilter(token, prefilter)) continue;
@@ -2706,7 +2706,7 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
     }
     // Invalidate caches after structural mutations (splice, insert_point, suppress, delete, insert_f0_layer)
     if (structural) {
-      navigation.invalidateStreamCache();
+      navigation.invalidateRelationCache();
     }
     runtime.trace?.push({
       type: "rewrite",
@@ -2764,7 +2764,7 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
   }
 
   const active = sequence.filter(
-    (token: TokenLike) => isActiveToken(token) && getTokenStream(token) === pattern.stream
+    (token: TokenLike) => isActiveToken(token) && getTokenRelation(token) === pattern.relation
   );
   const matches: Array<Record<string, TokenLike>> = [];
 
@@ -2867,7 +2867,7 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
     }
     // Invalidate caches after structural mutations (splice, insert_point, suppress, delete, insert_f0_layer)
     if (structural) {
-      navigation.invalidateStreamCache();
+      navigation.invalidateRelationCache();
     }
     runtime.trace?.push({
       type: "rewrite",
@@ -3025,7 +3025,7 @@ function computeSyncTimes(sequence: TokenLike[], runtime: RuntimeLike): void {
     .filter(
       (token) =>
         isActiveToken(token) &&
-        runtime.baseStreams.has(getTokenStream(token)) &&
+        runtime.baseRelations.has(getTokenRelation(token)) &&
         token?.sync_left != null &&
         token?.sync_right != null
     )
@@ -3067,17 +3067,17 @@ function computeSyncTimes(sequence: TokenLike[], runtime: RuntimeLike): void {
 function resolvePointTimes(
   sequence: TokenLike[],
   runtime: RuntimeLike,
-  pointStreams: unknown
+  pointRelations: unknown
 ): void {
   const selected =
-    Array.isArray(pointStreams) && pointStreams.length > 0
-      ? new Set(pointStreams)
-      : runtime.pointStreams;
+    Array.isArray(pointRelations) && pointRelations.length > 0
+      ? new Set(pointRelations)
+      : runtime.pointRelations;
 
   for (const token of sequence) {
     if (!isActiveToken(token)) continue;
-    const stream = getTokenStream(token);
-    if (!selected.has(stream)) continue;
+    const relation = getTokenRelation(token);
+    if (!selected.has(relation)) continue;
     const leftId = readTokenMarkId(token, runtime, "anchor_left");
     const rightId = readTokenMarkId(token, runtime, "anchor_right");
     if (!leftId || !rightId) continue;
@@ -3096,15 +3096,15 @@ function resolvePointTimes(
 }
 
 function assertActiveBaseCoverage(sequence: TokenLike[], runtime: RuntimeLike): void {
-  if (!(runtime?.baseStreams instanceof Set) || runtime.baseStreams.size === 0) return;
+  if (!(runtime?.baseRelations instanceof Set) || runtime.baseRelations.size === 0) return;
 
-  for (const stream of runtime.baseStreams) {
-    const hasAnyStreamToken = sequence.some((token: TokenLike) => getTokenStream(token) === stream);
+  for (const relation of runtime.baseRelations) {
+    const hasAnyRelationToken = sequence.some((token: TokenLike) => getTokenRelation(token) === relation);
     const active = sequence
       .filter(
         (token: TokenLike) =>
           isActiveToken(token) &&
-          getTokenStream(token) === stream &&
+          getTokenRelation(token) === relation &&
           token?.sync_left != null &&
           token?.sync_right != null
       )
@@ -3119,9 +3119,9 @@ function assertActiveBaseCoverage(sequence: TokenLike[], runtime: RuntimeLike): 
       });
 
     if (active.length === 0) {
-      if (hasAnyStreamToken) {
+      if (hasAnyRelationToken) {
         throw new Error(
-          `E_BASE_NOT_CONTIGUOUS: stream '${stream}' has no ACTIVE tokens to cover [START, END]`
+          `E_BASE_NOT_CONTIGUOUS: relation '${relation}' has no ACTIVE tokens to cover [START, END]`
         );
       }
       continue;
@@ -3135,12 +3135,12 @@ function assertActiveBaseCoverage(sequence: TokenLike[], runtime: RuntimeLike): 
     const lastRightOrder = getOrderForMarkId(runtime, lastBounds.rightId);
     if (!isStartOrder(firstLeftOrder)) {
       throw new Error(
-        `E_BASE_NOT_CONTIGUOUS: stream '${stream}' active base does not start at START`
+        `E_BASE_NOT_CONTIGUOUS: relation '${relation}' active base does not start at START`
       );
     }
     if (!isEndOrder(lastRightOrder)) {
       throw new Error(
-        `E_BASE_NOT_CONTIGUOUS: stream '${stream}' active base does not end at END`
+        `E_BASE_NOT_CONTIGUOUS: relation '${relation}' active base does not end at END`
       );
     }
 
@@ -3152,14 +3152,14 @@ function assertActiveBaseCoverage(sequence: TokenLike[], runtime: RuntimeLike): 
       const cmp = compareMarkIds(runtime, leftBounds.rightId, rightBounds.leftId);
       if (cmp > 0) {
         throw new Error(
-          `E_BASE_OVERLAP: stream '${stream}' overlap between '${String(left.id ?? i)}' and '${String(
+          `E_BASE_OVERLAP: relation '${relation}' overlap between '${String(left.id ?? i)}' and '${String(
             right.id ?? i + 1
           )}'`
         );
       }
       if (cmp < 0) {
         throw new Error(
-          `E_BASE_NOT_CONTIGUOUS: stream '${stream}' gap between '${String(
+          `E_BASE_NOT_CONTIGUOUS: relation '${relation}' gap between '${String(
             left.id ?? i
           )}' and '${String(right.id ?? i + 1)}'`
         );
@@ -3182,33 +3182,33 @@ export function runRuleEngine(
   const diagnostics: TokenLike[] = [];
   let current = cloneSequence(sequence);
 
-  const streams = spec.streams;
-  const pointStreams = new Set(
-    Object.entries(streams)
-      .filter(([, stream]) => stream?.type === "point")
+  const relations = spec.relations;
+  const pointRelations = new Set(
+    Object.entries(relations)
+      .filter(([, relation]) => relation?.type === "point")
       .map(([name]) => name)
   );
-  const baseStreams = new Set(
-    Object.entries(streams)
-      .filter(([, stream]) => stream?.type === "base")
+  const baseRelations = new Set(
+    Object.entries(relations)
+      .filter(([, relation]) => relation?.type === "base")
       .map(([name]) => name)
   );
-  const knownStreams = new Set(Object.keys(streams));
-  const hierarchyStreams = new Set(
+  const knownRelations = new Set(Object.keys(relations));
+  const hierarchyRelations = new Set(
     spec.topology.hierarchy.length > 0
-      ? spec.topology.hierarchy.filter((name) => knownStreams.has(name))
-      : Object.entries(streams)
-          .filter(([, stream]) => stream?.type === "span")
+      ? spec.topology.hierarchy.filter((name) => knownRelations.has(name))
+      : Object.entries(relations)
+          .filter(([, relation]) => relation?.type === "span")
           .map(([name]) => name)
   );
-  const scalarSpecsByStream = new Map(
-    Object.entries(streams).map(([name, stream]) => [
+  const scalarSpecsByRelation = new Map(
+    Object.entries(relations).map(([name, relation]) => [
       name,
-      stream.scalars,
+      relation.scalars,
     ])
   );
   const allScalarFields = new Set(
-    [...scalarSpecsByStream.values()].flatMap((scalars) => Object.keys(scalars))
+    [...scalarSpecsByRelation.values()].flatMap((scalars) => Object.keys(scalars))
   );
   const usedTokenIds = new Set(
     current
@@ -3230,13 +3230,13 @@ export function runRuleEngine(
     // null when the frontend declares no `syllabification:` block (no-op).
     syllabification: parseSyllabificationTables(spec.syllabification),
     patterns: spec.patterns,
-    pointStreams,
-    baseStreams,
-    knownStreams,
-    hierarchyStreams,
+    pointRelations,
+    baseRelations,
+    knownRelations,
+    hierarchyRelations,
     pointCounters: new Map(),
     insertCounters: new Map(),
-    scalarSpecsByStream,
+    scalarSpecsByRelation,
     allScalarFields,
     scalarStates: new Map(),
     scalarEffectOrder: 0,
@@ -3250,7 +3250,7 @@ export function runRuleEngine(
     inventoryResolver: options.inventoryResolver ?? null,
   };
 
-  initializeBaseStreamSyncMarks(current, baseStreams);
+  initializeBaseRelationSyncMarks(current, baseRelations);
   runtime.axis = buildSyncAxis(current);
   canonicalizeSequenceAxisRefs(current, runtime);
 
@@ -3269,7 +3269,7 @@ export function runRuleEngine(
     trace.push({ type: "phase_start", phase: phase.name, t0: phaseT0 });
     // Build navigation bundle ONCE per phase — shared across all rules in this phase.
     // Non-structural rules leave the sequence unchanged, so the bundle stays valid.
-    // Structural rules mutate the sequence; invalidateStreamCache() is called after each.
+    // Structural rules mutate the sequence; invalidateRelationCache() is called after each.
     const phaseNavigation = buildNavigationFunctions(current, runtime);
     for (const ruleName of phase.rules) {
       const rule = spec.rules[ruleName];
@@ -3293,9 +3293,9 @@ export function runRuleEngine(
         });
         throw annotateRuntimeRuleError(error, phase.name, ruleName);
       }
-      // After structural rules, invalidate stream cache so the next rule sees fresh data
+      // After structural rules, invalidate relation cache so the next rule sees fresh data
       if (isStructuralRule(rule)) {
-        phaseNavigation.invalidateStreamCache();
+        phaseNavigation.invalidateRelationCache();
       }
       trace.push({ type: "rule_end", phase: phase.name, rule: ruleName, elapsed: performance.now() - ruleT0 });
       runtime.currentRuleName = null;
@@ -3319,7 +3319,7 @@ export function runRuleEngine(
     }
     if (Array.isArray(phase.resolve_points) && phase.resolve_points.length > 0) {
       resolvePointTimes(current, runtime, phase.resolve_points);
-      trace.push({ type: "points_resolved", phase: phase.name, streams: phase.resolve_points });
+      trace.push({ type: "points_resolved", phase: phase.name, relations: phase.resolve_points });
     }
     if (phase.compute_times || (Array.isArray(phase.resolve_points) && phase.resolve_points.length > 0)) {
       runtime.finalized = true;

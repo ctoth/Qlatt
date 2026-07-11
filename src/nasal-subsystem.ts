@@ -41,7 +41,7 @@ function emitRulesStageEvents(
 ): void {
   for (let i = 0; i < tokens.length; i += 1) {
     const token = tokens[i];
-    if (token?.stream === "f0" || token?.status === 2) continue;
+    if (token?.relation === "f0" || token?.status === 2) continue;
     const tokenId = getTokenId(token, `ph_${i}`);
     const parents = getTokenParent(tokenDecisionIds, token, `ph_${i}`);
     const regime = regimeForToken(token);

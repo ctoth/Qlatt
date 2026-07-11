@@ -43,7 +43,7 @@ const loweringOutput = {
 describe("declarative frontend integration diagnostics", () => {
   it("surfaces validator diagnostics through engine entrypoint for invalid specs", () => {
     const invalidSpec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {},
@@ -58,18 +58,18 @@ describe("declarative frontend integration diagnostics", () => {
 
     expect(() => runRuleEngine([], compileRuleEngineSpec(invalidSpec))).toThrowError(/E_RULE_UNKNOWN/);
     expect(() => runRuleEngine([], compileRuleEngineSpec(invalidSpec))).toThrowError(
-      /E_PHASE_RESOLVE_POINT_STREAM_INVALID/
+      /E_PHASE_RESOLVE_POINT_RELATION_INVALID/
     );
   });
 
   it("annotates runtime rule errors with stable code and blame path", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         bad: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [{ target: "other", field: "duration", op: "set", value: "10" }],
         },
       },
@@ -77,7 +77,7 @@ describe("declarative frontend integration diagnostics", () => {
       output: loweringOutput,
     };
 
-    const input = [{ id: "p1", stream: "phone", duration: 100, status: 1 }];
+    const input = [{ id: "p1", relation: "phone", duration: 100, status: 1 }];
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_EFFECT_TARGET_UNKNOWN/);
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/phase=duration/);
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/path=rules\.bad/);

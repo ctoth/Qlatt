@@ -5,12 +5,12 @@ import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 describe("declarative frontend contour primitive", () => {
   it("computes phrase-local progress from token midpoint time", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { x: { unit: "ratio" } } },
       },
       rules: {
         contour_progress: {
-          select: { stream: "phone", where: "current.phoneme != 'SIL'" },
+          select: { relation: "phone", where: "current.phoneme != 'SIL'" },
           contour: {
             domain: "phrase",
             reset_break_index: 4,
@@ -22,18 +22,18 @@ describe("declarative frontend contour primitive", () => {
     };
 
     const input = [
-      { id: "a", stream: "phone", phoneme: "AA", duration: 100, x: 0, status: 1 },
-      { id: "b", stream: "phone", phoneme: "L", duration: 300, x: 0, status: 1 },
+      { id: "a", relation: "phone", phoneme: "AA", duration: 100, x: 0, status: 1 },
+      { id: "b", relation: "phone", phoneme: "L", duration: 300, x: 0, status: 1 },
       {
         id: "s1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         duration: 50,
         breakIndex: 4,
         x: 0,
         status: 1,
       },
-      { id: "c", stream: "phone", phoneme: "IY", duration: 200, x: 0, status: 1 },
+      { id: "c", relation: "phone", phoneme: "IY", duration: 200, x: 0, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -44,12 +44,12 @@ describe("declarative frontend contour primitive", () => {
 
   it("resets phrase contour at configurable break index", () => {
     const mkSpec = (resetBreakIndex: number) => ({
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { x: { unit: "ratio" } } },
       },
       rules: {
         contour_progress: {
-          select: { stream: "phone", where: "current.phoneme != 'SIL'" },
+          select: { relation: "phone", where: "current.phoneme != 'SIL'" },
           contour: {
             domain: "phrase",
             reset_break_index: resetBreakIndex,
@@ -61,17 +61,17 @@ describe("declarative frontend contour primitive", () => {
     });
 
     const input = [
-      { id: "a", stream: "phone", phoneme: "AA", duration: 100, x: 0, status: 1 },
+      { id: "a", relation: "phone", phoneme: "AA", duration: 100, x: 0, status: 1 },
       {
         id: "s1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         duration: 50,
         breakIndex: 3,
         x: 0,
         status: 1,
       },
-      { id: "b", stream: "phone", phoneme: "IY", duration: 100, x: 0, status: 1 },
+      { id: "b", relation: "phone", phoneme: "IY", duration: 100, x: 0, status: 1 },
     ];
 
     const noResetAtBi3 = runRuleEngine(input, compileRuleEngineSpec(mkSpec(4))).sequence;
@@ -85,12 +85,12 @@ describe("declarative frontend contour primitive", () => {
 
   it("exposes contour variables to define expressions", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { x: { unit: "ratio" } } },
       },
       rules: {
         contour_define: {
-          select: { stream: "phone", where: "current.phoneme != 'SIL'" },
+          select: { relation: "phone", where: "current.phoneme != 'SIL'" },
           contour: {
             domain: "phrase",
             reset_break_index: 4,
@@ -106,8 +106,8 @@ describe("declarative frontend contour primitive", () => {
     };
 
     const input = [
-      { id: "a", stream: "phone", phoneme: "AA", duration: 100, x: 0, status: 1 },
-      { id: "b", stream: "phone", phoneme: "IY", duration: 100, x: 0, status: 1 },
+      { id: "a", relation: "phone", phoneme: "AA", duration: 100, x: 0, status: 1 },
+      { id: "b", relation: "phone", phoneme: "IY", duration: 100, x: 0, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;

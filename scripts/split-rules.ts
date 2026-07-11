@@ -213,13 +213,13 @@ function main(): void {
   doc.include = includeList;
 
   // Write the rewritten frontend.yaml
-  // We need to preserve the top-level key order: version, parameters, predicates, streams, phases, include, output, transcription
+  // We need to preserve the top-level key order: version, parameters, predicates, relations, phases, include, output, transcription
   const orderedDoc: Record<string, any> = {};
   const keyOrder = [
     "version",
     "parameters",
     "predicates",
-    "streams",
+    "relations",
     "phases",
     "include",
     "output",

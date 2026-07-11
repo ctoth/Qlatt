@@ -132,7 +132,7 @@ export const DSL_ROOT_KEYS = new Set([
   "f0_model",
   "parameters",
   "input_contract",
-  "streams",
+  "relations",
   "topology",
   "predicates",
   // Chunk 3: pipeline-level reusable string-set and string-keyed map blocks.
@@ -195,17 +195,17 @@ function normalizePhase(phase: unknown): NormalizedPhase {
   };
 }
 
-function normalizeStream(stream: unknown): PlainObject {
-  if (!isPlainObject(stream)) return {};
+function normalizeRelation(relation: unknown): PlainObject {
+  if (!isPlainObject(relation)) return {};
   return {
-    ...stream,
-    type: asString(stream.type),
-    spans: asString(stream.spans, null),
-    features: cloneObject(stream.features),
-    scalars: cloneObject(stream.scalars),
-    inventory: cloneObject(stream.inventory),
-    value_type: asString(stream.value_type, null),
-    unit: asString(stream.unit, null),
+    ...relation,
+    type: asString(relation.type),
+    spans: asString(relation.spans, null),
+    features: cloneObject(relation.features),
+    scalars: cloneObject(relation.scalars),
+    inventory: cloneObject(relation.inventory),
+    value_type: asString(relation.value_type, null),
+    unit: asString(relation.unit, null),
   };
 }
 
@@ -226,7 +226,7 @@ function normalizePattern(pattern: unknown): PlainObject {
   if (!isPlainObject(pattern)) return {};
   return {
     ...pattern,
-    stream: asString(pattern.stream),
+    relation: asString(pattern.relation),
     scope: asString(pattern.scope),
     cross_boundary: Boolean(pattern.cross_boundary),
     max_lookahead: Number.isInteger(pattern.max_lookahead) ? pattern.max_lookahead : null,
@@ -266,7 +266,7 @@ function normalizeRule(rule: unknown): PlainObject {
           const normalizedWhere = normalizeConditionSpec(rule.select.where);
           return {
             ...rule.select,
-            stream: asString(rule.select.stream),
+            relation: asString(rule.select.relation),
             where: normalizedWhere,
             _prefilter: extractPrefilterFromCondition(normalizedWhere),
           };
@@ -303,9 +303,14 @@ export function parseDslSpec(source: unknown) {
   if (!isPlainObject(raw)) {
     throw new Error("DSL spec must be an object or YAML object document");
   }
+  if (Object.prototype.hasOwnProperty.call(raw, "streams")) {
+    throw new Error(
+      "E_LEGACY_STREAMS: 'streams' is no longer accepted; declare 'relations'",
+    );
+  }
 
   const phases = Array.isArray(raw.phases) ? raw.phases : [];
-  const streams = isPlainObject(raw.streams) ? raw.streams : {};
+  const relations = isPlainObject(raw.relations) ? raw.relations : {};
   const patterns = isPlainObject(raw.patterns) ? raw.patterns : {};
   const rules = isPlainObject(raw.rules) ? raw.rules : {};
   const predicates = isPlainObject(raw.predicates) ? raw.predicates : {};
@@ -338,8 +343,8 @@ export function parseDslSpec(source: unknown) {
     f0_model: isPlainObject(raw.f0_model) ? raw.f0_model : null,
     parameters,
     input_contract: cloneObject(raw.input_contract),
-    streams: Object.fromEntries(
-      Object.entries(streams).map(([name, stream]) => [name, normalizeStream(stream)])
+    relations: Object.fromEntries(
+      Object.entries(relations).map(([name, relation]) => [name, normalizeRelation(relation)])
     ),
     topology: {
       hierarchy: asStringArray(topology.hierarchy),

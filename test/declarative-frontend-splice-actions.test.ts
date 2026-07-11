@@ -11,12 +11,12 @@ describe("declarative frontend splice actions", () => {
     const s3 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", features: { type: ["stop", "vowel", "fricative"] } },
       },
       patterns: {
         cv: {
-          stream: "phone",
+          relation: "phone",
           sequence: [
             { capture: "c", where: "current.type == 'stop'" },
             { capture: "v", where: "current.type == 'vowel'" },
@@ -39,16 +39,16 @@ describe("declarative frontend splice actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", type: "stop", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", type: "vowel", sync_left: s1, sync_right: s2, status: 1 },
-      { id: "p3", stream: "phone", type: "fricative", sync_left: s2, sync_right: s3, status: 1 },
+      { id: "p1", relation: "phone", type: "stop", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", type: "vowel", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p3", relation: "phone", type: "fricative", sync_left: s2, sync_right: s3, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
     const p1 = out.find((t) => t.id === "p1");
     const p2 = out.find((t) => t.id === "p2");
     const inserted = out.find((t) => t.name === "CV");
-    const activePhone = out.filter((t) => t.stream === "phone" && t.status === 1);
+    const activePhone = out.filter((t) => t.relation === "phone" && t.status === 1);
 
     expect(p1?.status).toBe(2);
     expect(p2?.status).toBe(2);
@@ -64,13 +64,13 @@ describe("declarative frontend splice actions", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         add_release: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.id == 'p1'",
           },
           splice: {
@@ -85,8 +85,8 @@ describe("declarative frontend splice actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_OVERLAP");
@@ -98,13 +98,13 @@ describe("declarative frontend splice actions", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         add_preboundary: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.id == 'p2'",
           },
           splice: {
@@ -119,8 +119,8 @@ describe("declarative frontend splice actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_OVERLAP");
@@ -132,13 +132,13 @@ describe("declarative frontend splice actions", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         add_release: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.id == 'p1'",
           },
           define: {
@@ -160,7 +160,7 @@ describe("declarative frontend splice actions", () => {
         },
         suppress_right_neighbor: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.id == 'p2'",
           },
           suppress: true,
@@ -170,8 +170,8 @@ describe("declarative frontend splice actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec), {
@@ -207,12 +207,12 @@ describe("declarative frontend splice actions", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         insert_pair: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -221,7 +221,7 @@ describe("declarative frontend splice actions", () => {
           },
         },
         suppress_right_neighbor: {
-          select: { stream: "phone", where: "current.id == 'p2'" },
+          select: { relation: "phone", where: "current.id == 'p2'" },
           suppress: true,
         },
       },
@@ -229,8 +229,8 @@ describe("declarative frontend splice actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -251,12 +251,12 @@ describe("declarative frontend splice actions", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         copy_right_neighbor: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -281,7 +281,7 @@ describe("declarative frontend splice actions", () => {
           },
         },
         suppress_right_neighbor: {
-          select: { stream: "phone", where: "current.id == 'p2'" },
+          select: { relation: "phone", where: "current.id == 'p2'" },
           suppress: true,
         },
       },
@@ -289,10 +289,10 @@ describe("declarative frontend splice actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         word: "cat",
@@ -327,12 +327,12 @@ describe("declarative frontend splice actions", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         add_release: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           define: {
             rel_target: "target('REL')",
           },
@@ -358,7 +358,7 @@ describe("declarative frontend splice actions", () => {
           },
         },
         suppress_right_neighbor: {
-          select: { stream: "phone", where: "current.id == 'p2'" },
+          select: { relation: "phone", where: "current.id == 'p2'" },
           suppress: true,
         },
       },
@@ -368,14 +368,14 @@ describe("declarative frontend splice actions", () => {
     const input = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         sync_left: s0,
         sync_right: s1,
         status: 1,
         stress: 1,
         word: "top",
       },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec), {
@@ -413,12 +413,12 @@ describe("declarative frontend splice actions", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         insert_release: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           define: {
             weak: "next != null && next.phoneme == 'SIL'",
           },
@@ -440,7 +440,7 @@ describe("declarative frontend splice actions", () => {
           },
         },
         suppress_right_neighbor: {
-          select: { stream: "phone", where: "current.id == 'p2'" },
+          select: { relation: "phone", where: "current.id == 'p2'" },
           suppress: true,
         },
       },
@@ -448,8 +448,8 @@ describe("declarative frontend splice actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", phoneme: "SIL", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", phoneme: "SIL", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -466,12 +466,12 @@ describe("declarative frontend splice actions", () => {
     const s1 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         split_token: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "replace_range",
             range_left: "current.sync_left",
@@ -487,7 +487,7 @@ describe("declarative frontend splice actions", () => {
     const input = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         sync_left: s0,
         sync_right: s1,
         status: 1,
@@ -495,7 +495,7 @@ describe("declarative frontend splice actions", () => {
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
-    const inserted = out.filter((t) => t.stream === "phone" && t.status === 1 && (t.name === "A" || t.name === "B"));
+    const inserted = out.filter((t) => t.relation === "phone" && t.status === 1 && (t.name === "A" || t.name === "B"));
     expect(inserted).toHaveLength(2);
     const first = inserted.find((t) => t.name === "A");
     const second = inserted.find((t) => t.name === "B");
@@ -507,13 +507,13 @@ describe("declarative frontend splice actions", () => {
 
   it("requires a resolved boundary for insert_at_boundary", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         add_release: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.id == 'p1'",
           },
           splice: {
@@ -530,14 +530,14 @@ describe("declarative frontend splice actions", () => {
     const input = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         sync_left: startOrder(),
         sync_right: finiteOrder(1),
         status: 1,
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         sync_left: finiteOrder(1),
         sync_right: endOrder(),
         status: 1,
@@ -553,12 +553,12 @@ describe("declarative frontend splice actions", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         insert_a: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -567,7 +567,7 @@ describe("declarative frontend splice actions", () => {
           },
         },
         insert_b: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -580,8 +580,8 @@ describe("declarative frontend splice actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_OVERLAP");
@@ -598,12 +598,12 @@ describe("declarative frontend splice actions", () => {
     const s1 = endOrder();
 
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         rewrite: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "replace_range",
             range_left: "current.sync_left",
@@ -632,7 +632,7 @@ describe("declarative frontend splice actions", () => {
     const input = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         sync_left: s0,
         sync_right: s1,
         status: 1,

@@ -110,7 +110,7 @@ function wordDuration(segments: SegmentInfo[], word: string): number {
 describe("duration model — Klatt 1976 Eq. 1 incompressibility", () => {
   const eq1Spec = {
     version: "klatt-eq1-test",
-    streams: {
+    relations: {
       phone: {
         type: "base",
         scalars: {
@@ -128,7 +128,7 @@ describe("duration model — Klatt 1976 Eq. 1 incompressibility", () => {
     rules: {
       scale_duration: {
         kind: "scalar",
-        select: { stream: "phone", where: "true" },
+        select: { relation: "phone", where: "true" },
         apply: [
           {
             field: "duration",
@@ -166,7 +166,7 @@ describe("duration model — Klatt 1976 Eq. 1 incompressibility", () => {
   it("matches Klatt Table II vowel examples", () => {
     expect(
       runEq1Case(
-        { phoneme: "AE", type: "vowel", duration: 240, inherentDuration: 240, stream: "phone", status: 1 },
+        { phoneme: "AE", type: "vowel", duration: 240, inherentDuration: 240, relation: "phone", status: 1 },
         0.6,
         { vowel: 105 / 240, consonant: 0.6 },
       ),
@@ -174,7 +174,7 @@ describe("duration model — Klatt 1976 Eq. 1 incompressibility", () => {
 
     expect(
       runEq1Case(
-        { phoneme: "IH", type: "vowel", duration: 160, inherentDuration: 160, stream: "phone", status: 1 },
+        { phoneme: "IH", type: "vowel", duration: 160, inherentDuration: 160, relation: "phone", status: 1 },
         0.4,
         { vowel: 65 / 160, consonant: 0.6 },
       ),
@@ -184,7 +184,7 @@ describe("duration model — Klatt 1976 Eq. 1 incompressibility", () => {
   it("matches Klatt Table III consonant example", () => {
     expect(
       runEq1Case(
-        { phoneme: "B", type: "stop_closure", duration: 100, inherentDuration: 100, stream: "phone", status: 1 },
+        { phoneme: "B", type: "stop_closure", duration: 100, inherentDuration: 100, relation: "phone", status: 1 },
         0.7,
         { vowel: 0.42, consonant: 0.6 },
       ),
@@ -202,7 +202,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
       params: { F1: 660, F2: 1720, AV: 64 },
       duration: 120,
       inherentDuration: 120,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       isAccented: false,
       isNuclearAccent: false,
@@ -216,7 +216,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
       params: { AV: 47 },
       duration: 50,
       inherentDuration: 50,
-      stream: "phone",
+      relation: "phone",
       status: 1,
     };
     const voicelessClosure = {
@@ -228,7 +228,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
       params: { AV: 0 },
       duration: 50,
       inherentDuration: 50,
-      stream: "phone",
+      relation: "phone",
       status: 1,
     };
 
@@ -318,7 +318,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
       params: { F1: 660, F2: 1720, AV: 60 },
       duration: 120,
       inherentDuration: 120,
-      stream: "phone",
+      relation: "phone",
       status: 1,
     };
     const sonorantToken = {
@@ -329,7 +329,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
       params: { F1: 300, F2: 1500, AV: 60 },
       duration: 100,
       inherentDuration: 100,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       isAccented: false,
       isNuclearAccent: false,
@@ -344,7 +344,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
       params: { F1: 660, F2: 1720, AV: 60 },
       duration: 120,
       inherentDuration: 120,
-      stream: "phone",
+      relation: "phone",
       status: 1,
     };
     const obstruentToken = {
@@ -355,7 +355,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
       params: { F1: 300, F2: 1500, AF: 60 },
       duration: 100,
       inherentDuration: 100,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       isAccented: false,
       isNuclearAccent: false,
@@ -370,7 +370,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
       params: {},
       duration: 300,
       inherentDuration: 300,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       breakIndex: 4,
     };
@@ -418,7 +418,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
         params: { F1: 590, F2: 1200, AV: 58 },
         duration: 70,
         inherentDuration: 70,
-        stream: "phone",
+        relation: "phone",
         status: 1,
       },
       {
@@ -429,7 +429,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
         params: { F1: 440, F2: 1020, AV: 57 },
         duration: 60,
         inherentDuration: 60,
-        stream: "phone",
+        relation: "phone",
         status: 1,
       },
       {
@@ -442,7 +442,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
         params: {},
         duration: 40,
         inherentDuration: 40,
-        stream: "phone",
+        relation: "phone",
         status: 1,
       },
       {
@@ -455,7 +455,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
         params: { AF: 58, AH: 0 },
         duration: 15,
         inherentDuration: 15,
-        stream: "phone",
+        relation: "phone",
         status: 1,
       },
       {
@@ -468,7 +468,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
         params: { AH: 55 },
         duration: 55,
         inherentDuration: 55,
-        stream: "phone",
+        relation: "phone",
         status: 1,
       },
       {
@@ -479,7 +479,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
         params: { F1: 580, F2: 1790, AV: 62 },
         duration: 120,
         inherentDuration: 120,
-        stream: "phone",
+        relation: "phone",
         status: 1,
       },
       {
@@ -490,7 +490,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
         params: { F1: 310, F2: 1050, F3: 2600, AV: 59 },
         duration: 60,
         inherentDuration: 60,
-        stream: "phone",
+        relation: "phone",
         status: 1,
       },
     ];
@@ -502,7 +502,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
       params: {},
       duration: 300,
       inherentDuration: 300,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       breakIndex: 4,
     };
@@ -597,7 +597,7 @@ describe("duration model — accent vowel lengthening", () => {
       params: { F1: 700, F2: 1220, AV: 64 },
       duration: 180,
       inherentDuration: 180,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       breakIndex: 0,
       isAccented: true,
@@ -617,7 +617,7 @@ describe("duration model — accent vowel lengthening", () => {
       params: {},
       duration: 300,
       inherentDuration: 300,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       breakIndex: 0,
     };
@@ -670,7 +670,7 @@ describe("duration model — duration cap", () => {
       params: { F1: 660, F2: 1720, AV: 64 },
       duration: 130,
       inherentDuration: 130,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       breakIndex: 0,
       isAccented: true,
@@ -687,7 +687,7 @@ describe("duration model — duration cap", () => {
       params: {},
       duration: 300,
       inherentDuration: 300,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       breakIndex: 4,
     };
@@ -754,7 +754,7 @@ describe("duration model — pipeline ordering", () => {
       params: { F1: 660, F2: 1720, AV: 64 },
       duration: 130,
       inherentDuration: 130,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       breakIndex: 0,  // No BI on the vowel itself
       isAccented: false,
@@ -770,7 +770,7 @@ describe("duration model — pipeline ordering", () => {
       params: {},
       duration: 300,
       inherentDuration: 300,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       breakIndex: 4,  // BI=4 on the SIL
     };
@@ -781,7 +781,7 @@ describe("duration model — pipeline ordering", () => {
       params: {},
       duration: 100,
       inherentDuration: 100,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       breakIndex: 0,
     };
@@ -866,7 +866,7 @@ describe("duration model — edge cases", () => {
       params: { F1: 660, F2: 1720, AV: 64 },
       duration: 130,
       inherentDuration: 130,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       breakIndex: 4,
       isAccented: true,
@@ -883,7 +883,7 @@ describe("duration model — edge cases", () => {
       params: {},
       duration: 300,
       inherentDuration: 300,
-      stream: "phone",
+      relation: "phone",
       status: 1,
       breakIndex: 4,
     };

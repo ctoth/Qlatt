@@ -3,7 +3,7 @@ rules:
   remap_stops_to_closures:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme in ['P', 'T', 'K', 'B', 'D', 'G']
     define:
       cl_key: current.phoneme + "_CL"
@@ -33,7 +33,7 @@ rules:
   expand_affricates_with_closure:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme in ['CH', 'JH']
     define:
       cl_key: current.phoneme + "_CL"
@@ -77,7 +77,7 @@ rules:
   expand_diphthongs:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme in ['EY', 'AY', 'OW', 'OY', 'AW']
     define:
       stress_suffix: "has(current.stress) && current.stress == 1 ? \"1\" : \"0\""
@@ -122,7 +122,7 @@ rules:
   expand_rhotic_vowels:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'ER'
     define:
       stress_suffix: "has(current.stress) && current.stress == 1 ? \"1\" : \"0\""
@@ -165,7 +165,7 @@ rules:
       - Stevens 1998 §9.3 (liquid formant movement is transitional; keep the rhotic tail subordinate to the nucleus)
   insert_mapped_voiceless_release_and_aspiration:
     kind: structural
-    select: { stream: phone, where: "current.phoneme in ['P_CL', 'T_CL', 'K_CL'] && (next != null ? !(next.type in ['stop', 'stop_closure', 'stop_release', 'stop_aspiration']) : false)" }
+    select: { relation: phone, where: "current.phoneme in ['P_CL', 'T_CL', 'K_CL'] && (next != null ? !(next.type in ['stop', 'stop_closure', 'stop_release', 'stop_aspiration']) : false)" }
     define:
       rel: maps.phoneme_release_map[current.phoneme]
       asp: maps.phoneme_aspiration_map[current.phoneme]
@@ -223,7 +223,7 @@ rules:
     citations: ["Lisker & Abramson 1964 (English sentence VOT defaults: initial /p/=28, /t/=39, /k/=43 ms; non-initial /p/=34, /t/=37, /k/=49 ms)", Stevens 1998, Allen et al. 1987]
   insert_mapped_voiceless_release_and_aspiration_final:
     kind: structural
-    select: { stream: phone, where: "current.phoneme in ['P_CL', 'T_CL', 'K_CL'] && next == null" }
+    select: { relation: phone, where: "current.phoneme in ['P_CL', 'T_CL', 'K_CL'] && next == null" }
     define:
       rel: maps.phoneme_release_map[current.phoneme]
       asp: maps.phoneme_aspiration_map[current.phoneme]
@@ -278,7 +278,7 @@ rules:
     citations: ["Lisker & Abramson 1964 (utterance-final voiceless stops receive weak release; connected-speech VOT defaults)", Stevens 1998]
   insert_mapped_voiced_release:
     kind: structural
-    select: { stream: phone, where: "current.phoneme in ['B_CL', 'D_CL', 'G_CL'] && (next != null ? !(next.type in ['stop', 'stop_closure', 'stop_release', 'stop_aspiration']) : false)" }
+    select: { relation: phone, where: "current.phoneme in ['B_CL', 'D_CL', 'G_CL'] && (next != null ? !(next.type in ['stop', 'stop_closure', 'stop_release', 'stop_aspiration']) : false)" }
     define:
       rel: maps.phoneme_release_map[current.phoneme]
       next_token: next
@@ -310,7 +310,7 @@ rules:
     citations: ["Lisker & Abramson 1964 (English voiced stop short-lag mode for /b d g/ in initial position)", Stevens 1998, Allen et al. 1987]
   insert_mapped_voiced_release_final:
     kind: structural
-    select: { stream: phone, where: "current.phoneme in ['B_CL', 'D_CL', 'G_CL'] && next == null" }
+    select: { relation: phone, where: "current.phoneme in ['B_CL', 'D_CL', 'G_CL'] && next == null" }
     define:
       rel: maps.phoneme_release_map[current.phoneme]
       weak: "true"

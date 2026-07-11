@@ -139,7 +139,7 @@ describe("declarative frontend rulepack context migration", () => {
   it("applies weaker terminal pre-boundary lengthening to obstruents than sonorants", () => {
     // Pre-boundary lengthening uses break-index from the adjacent SIL token.
     // Sonorants get bi4 multiplier (1.5), obstruents get bi4 obstruent multiplier (1.2).
-    // Tokens need stream/status/breakIndex for the rule to fire.
+    // Tokens need relation/status/breakIndex for the rule to fire.
     // Rule requires prev to be a vowel/nasal/liquid/glide for consonant selection
     const sonorant = runDeclarativeFrontend(
       [
@@ -150,7 +150,7 @@ describe("declarative frontend rulepack context migration", () => {
           params: { F1: 570, F2: 840, AV: 60 },
           duration: 120,
           inherentDuration: 120,
-          stream: "phone",
+          relation: "phone",
           status: 1,
           word: "raw",
         },
@@ -160,7 +160,7 @@ describe("declarative frontend rulepack context migration", () => {
           params: {},
           duration: 100,
           inherentDuration: 100,
-          stream: "phone",
+          relation: "phone",
           status: 1,
           word: "last",
         },
@@ -171,7 +171,7 @@ describe("declarative frontend rulepack context migration", () => {
           punctuationSymbol: ".",
           duration: 300,
           inherentDuration: 300,
-          stream: "phone",
+          relation: "phone",
           status: 1,
           breakIndex: 4,
         },
@@ -188,7 +188,7 @@ describe("declarative frontend rulepack context migration", () => {
           params: { F1: 660, F2: 1720, AV: 60 },
           duration: 120,
           inherentDuration: 120,
-          stream: "phone",
+          relation: "phone",
           status: 1,
           word: "fat",
         },
@@ -200,7 +200,7 @@ describe("declarative frontend rulepack context migration", () => {
           params: { AF: 60 },
           duration: 100,
           inherentDuration: 100,
-          stream: "phone",
+          relation: "phone",
           status: 1,
           word: "sir",
         },
@@ -211,7 +211,7 @@ describe("declarative frontend rulepack context migration", () => {
           punctuationSymbol: ".",
           duration: 300,
           inherentDuration: 300,
-          stream: "phone",
+          relation: "phone",
           status: 1,
           breakIndex: 4,
         },

@@ -122,7 +122,7 @@ maps:
     D_CL: D_REL
     N: ""
     Y: ""
-streams:
+relations:
   orthography:
     type: base
     features:

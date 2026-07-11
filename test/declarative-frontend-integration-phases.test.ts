@@ -9,7 +9,7 @@ describe("declarative frontend integration phases", () => {
       [
         {
           id: "ph0",
-          stream: "phone",
+          relation: "phone",
           phoneme: "AX",
           type: "vowel",
           stress: 0,
@@ -44,7 +44,7 @@ describe("declarative frontend integration phases", () => {
     const sequence = [
       {
         id: "ph0",
-        stream: "phone",
+        relation: "phone",
         phoneme: "P_CL",
         type: "stop_closure",
         stress: 0,
@@ -57,7 +57,7 @@ describe("declarative frontend integration phases", () => {
       },
       {
         id: "ph1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         stress: 1,
@@ -70,7 +70,7 @@ describe("declarative frontend integration phases", () => {
       },
       {
         id: "ph2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -108,7 +108,7 @@ describe("declarative frontend integration phases", () => {
     expect(pointResolved.length).toBe(1);
     expect(pointResolved[0].phase).toBe("finalize");
 
-    const points = result.sequence.filter((token) => token.stream === "f0");
+    const points = result.sequence.filter((token) => token.relation === "f0");
     expect(points.length).toBeGreaterThan(0);
     expect(points.every((point) => Number.isFinite(point.time))).toBe(true);
   });

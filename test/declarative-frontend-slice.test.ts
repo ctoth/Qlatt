@@ -213,7 +213,7 @@ describe("declarative frontend first migration slice", () => {
     expect(asp?.params?.AH).toBe(42);
   });
 
-  it("initializes sync marks on base stream tokens during structural phase", () => {
+  it("initializes sync marks on base relation tokens during structural phase", () => {
     const sequence = [
       { phoneme: "P_CL", stress: 1, word: "pat", type: "stop_closure", status: 1 },
       { phoneme: "AE", stress: 1, word: "pat", type: "vowel", status: 1 },
@@ -221,7 +221,7 @@ describe("declarative frontend first migration slice", () => {
     ];
 
     const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
-    const phones = out.filter((token) => (token.stream ?? "phone") === "phone");
+    const phones = out.filter((token) => (token.relation ?? "phone") === "phone");
     expect(phones.length).toBeGreaterThan(0);
     expect(
       phones.every(
@@ -246,7 +246,7 @@ describe("declarative frontend first migration slice", () => {
       {
         specSource: {
           version: "v1",
-          streams: {
+          relations: {
             phone: {
               type: "base",
               scalars: { duration: { unit: "ms", resolution: "klatt" } },
@@ -254,7 +254,7 @@ describe("declarative frontend first migration slice", () => {
           },
           rules: {
             structured_set: {
-              select: { stream: "phone", where: "true" },
+              select: { relation: "phone", where: "true" },
               apply: [
                 {
                   field: "control_windows",

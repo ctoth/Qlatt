@@ -8,7 +8,7 @@ describe("declarative frontend CEL expressions", () => {
   it("evaluates CEL where and value expressions with params", () => {
     const spec = {
       parameters: { enabled: true, mul: 1.5, add: 10 },
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["vowel", "stop"] },
@@ -18,7 +18,7 @@ describe("declarative frontend CEL expressions", () => {
       rules: {
         scale_and_add: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.type == 'vowel' && params.enabled == true",
           },
           apply: [
@@ -35,8 +35,8 @@ describe("declarative frontend CEL expressions", () => {
     };
 
     const input = [
-      { stream: "phone", type: "vowel", duration: 100, status: 1 },
-      { stream: "phone", type: "stop", duration: 80, status: 1 },
+      { relation: "phone", type: "vowel", duration: 100, status: 1 },
+      { relation: "phone", type: "stop", duration: 80, status: 1 },
     ];
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
 
@@ -46,7 +46,7 @@ describe("declarative frontend CEL expressions", () => {
 
   it("emits E_CEL_INVALID for malformed expressions", () => {
     const spec = parseDslSpec({
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["vowel", "stop"] },
@@ -55,7 +55,7 @@ describe("declarative frontend CEL expressions", () => {
       },
       rules: {
         bad: {
-          select: { stream: "phone", where: "current.type ==" },
+          select: { relation: "phone", where: "current.type ==" },
           apply: [{ field: "duration", op: "add", value: "1", tag: "x" }],
         },
       },
@@ -68,7 +68,7 @@ describe("declarative frontend CEL expressions", () => {
 
   it("evaluates rule-level define bindings once per firing", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["vowel", "stop"] },
@@ -78,7 +78,7 @@ describe("declarative frontend CEL expressions", () => {
       rules: {
         use_define: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.type == 'stop'",
           },
           define: {
@@ -104,7 +104,7 @@ describe("declarative frontend CEL expressions", () => {
       phases: [{ name: "duration", rules: ["use_define"] }],
     };
 
-    const input = [{ stream: "phone", type: "stop", phoneme: "K_CL", duration: 80, params: {}, status: 1 }];
+    const input = [{ relation: "phone", type: "stop", phoneme: "K_CL", duration: 80, params: {}, status: 1 }];
     const out = runRuleEngine(input, compileRuleEngineSpec(spec), {
       inventoryResolver: (phoneme) => {
         if (phoneme !== "K_REL") return null;
@@ -118,7 +118,7 @@ describe("declarative frontend CEL expressions", () => {
 
   it("counts phones in the current SIL-delimited clause", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["vowel", "stop", "silence"] },
@@ -128,7 +128,7 @@ describe("declarative frontend CEL expressions", () => {
       rules: {
         count_scope: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.phoneme != 'SIL'",
           },
           apply: [
@@ -141,14 +141,14 @@ describe("declarative frontend CEL expressions", () => {
     };
 
     const input = [
-      { stream: "phone", phoneme: "R", type: "stop", status: 1 },
-      { stream: "phone", phoneme: "EH", type: "vowel", status: 1 },
-      { stream: "phone", phoneme: "D", type: "stop", status: 1 },
-      { stream: "phone", phoneme: "SIL", type: "silence", status: 1 },
-      { stream: "phone", phoneme: "B", type: "stop", status: 1 },
-      { stream: "phone", phoneme: "L", type: "stop", status: 1 },
-      { stream: "phone", phoneme: "UW", type: "vowel", status: 1 },
-      { stream: "phone", phoneme: "SIL", type: "silence", status: 1 },
+      { relation: "phone", phoneme: "R", type: "stop", status: 1 },
+      { relation: "phone", phoneme: "EH", type: "vowel", status: 1 },
+      { relation: "phone", phoneme: "D", type: "stop", status: 1 },
+      { relation: "phone", phoneme: "SIL", type: "silence", status: 1 },
+      { relation: "phone", phoneme: "B", type: "stop", status: 1 },
+      { relation: "phone", phoneme: "L", type: "stop", status: 1 },
+      { relation: "phone", phoneme: "UW", type: "vowel", status: 1 },
+      { relation: "phone", phoneme: "SIL", type: "silence", status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;

@@ -47,7 +47,7 @@ rules:
   dectalk_reduce_article_a:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: "current.phoneme == 'EY'"
     define:
       ax: "target('AX0')"
@@ -79,7 +79,7 @@ rules:
   # -------------------------------------------------------------------------
   # GEMINATE OBSTRUENT DELETION (ph_aloph.c:558-562, A1).  When an obstruent is
   # immediately followed by an identical phoneme, the first copy is deleted.  In
-  # DECtalk's `phonemes[]` stream, word-boundary markers sit between ordinary
+  # DECtalk's `phonemes[]` relation, word-boundary markers sit between ordinary
   # words, so cross-word pairs such as "Pat tapped" are not adjacent and must not
   # collapse.  Within a lexical word, an adjacent doubled obstruent is realized as
   # a single longer-than-normal obstruent ("bookkeeper" K K -> K).  Source:
@@ -98,18 +98,18 @@ rules:
   # ph_aloph.c:563).
   #
   # Mechanism: DECtalk's `dodelete` removes the FIRST copy, leaving the second to
-  # carry the (now longer) segment.  A bare `delete: true` on a base-stream token
+  # carry the (now longer) segment.  A bare `delete: true` on a base-relation token
   # would leave a time gap and trip the engine's contiguity check
   # (E_BASE_NOT_CONTIGUOUS), so we express the deletion as a structural splice over
   # the [current, next] range that re-inserts a single copy of the SECOND
   # (surviving) obstruent spanning the whole range -- removing the first copy while
-  # keeping the stream contiguous.  This is the same delete-via-replace_range
+  # keeping the relation contiguous.  This is the same delete-via-replace_range
   # mechanism the vowel+R fusion and syllabic-n rules use.
   # -------------------------------------------------------------------------
   dectalk_geminate_delete:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type in ['fricative', 'stop_closure', 'affricate']
     define:
@@ -166,7 +166,7 @@ rules:
   dectalk_assimilate_sibilant_sh:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme in ['S', 'Z']
     define:
       n: next
@@ -198,7 +198,7 @@ rules:
   dectalk_flap_t:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'T'
     define:
       p: prev
@@ -248,7 +248,7 @@ rules:
   dectalk_flap_d:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'D'
     define:
       p: prev
@@ -310,7 +310,7 @@ rules:
   dectalk_palatalize_t:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'T'
     define:
       n: next
@@ -341,7 +341,7 @@ rules:
   dectalk_palatalize_d:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'D'
     define:
       n: next
@@ -391,7 +391,7 @@ rules:
   dectalk_glottalize_t:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'T'
     define:
       p: prev
@@ -485,7 +485,7 @@ rules:
   dectalk_syllabic_n_after_tx:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'vowel'
     define:
       p: prev
@@ -520,7 +520,7 @@ rules:
   dectalk_dental_dh:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'DH'
     define:
       p: prev
@@ -587,7 +587,7 @@ rules:
   dectalk_fuse_vowel_r:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'R'
     define:
       p: prev
@@ -653,7 +653,7 @@ rules:
   # fusable vowel.
   #
   # DECtalk's source test looks only at the immediate next input phone.  In the
-  # trace stream, stressed nuclei keep their stress mark between /R/ and the
+  # trace relation, stressed nuclei keep their stress mark between /R/ and the
   # vowel (for example `r ' eh` in "Red" and `r ' ow` in "roll"), so A5 does not
   # see FSYLL and leaves the phone as US_R.  Qlatt stores that stress mark on the
   # vowel token, so we must treat a stressed next vowel as the same blocker.
@@ -666,7 +666,7 @@ rules:
   dectalk_prevocalic_r_rr:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'R'
     define:
       n: next

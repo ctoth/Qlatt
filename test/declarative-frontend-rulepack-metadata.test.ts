@@ -10,7 +10,7 @@ speaker_profile_path: /rules/policy/speaker-profile.yaml
 source_contour_path: /rules/policy/source-contour.yaml
 custom_policy_path: /rules/frontends/qlatt-english/policy/custom.yaml
 parameters: {}
-streams: {}
+relations: {}
 topology: {}
 predicates: {}
 patterns: {}

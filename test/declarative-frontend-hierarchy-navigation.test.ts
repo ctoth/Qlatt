@@ -5,16 +5,16 @@ import { validateDslSpec } from "../src/declarative-frontend/validation";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend hierarchy navigation helpers", () => {
-  it("materializes parent stream fields on current token", () => {
+  it("materializes parent relation fields on current token", () => {
     const spec = {
-      streams: {
+      relations: {
         syllable: { type: "span" },
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       rules: {
         stressed_parent_boost: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.syllable.stress == 1",
           },
           apply: [{ field: "duration", op: "add", value: "10", tag: "h1" }],
@@ -24,10 +24,10 @@ describe("declarative frontend hierarchy navigation helpers", () => {
     };
 
     const input = [
-      { id: "sy1", stream: "syllable", stress: 1, status: 1 },
-      { id: "p1", stream: "phone", parent: "sy1", duration: 100, status: 1 },
-      { id: "sy2", stream: "syllable", stress: 0, status: 1 },
-      { id: "p2", stream: "phone", parent: "sy2", duration: 100, status: 1 },
+      { id: "sy1", relation: "syllable", stress: 1, status: 1 },
+      { id: "p1", relation: "phone", parent: "sy1", duration: 100, status: 1 },
+      { id: "sy2", relation: "syllable", stress: 0, status: 1 },
+      { id: "p2", relation: "phone", parent: "sy2", duration: 100, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -39,14 +39,14 @@ describe("declarative frontend hierarchy navigation helpers", () => {
 
   it("rejects deprecated navigation helpers in CEL expressions", () => {
     const spec = parseDslSpec({
-      streams: {
+      relations: {
         syllable: { type: "span" },
         phone: { type: "base" },
       },
       rules: {
         mark_if_two_children: {
           select: {
-            stream: "syllable",
+            relation: "syllable",
             where: "size(children(current, 'phone')) == 2",
           },
           apply: [{ field: "marked", op: "set", value: "1", tag: "h2" }],

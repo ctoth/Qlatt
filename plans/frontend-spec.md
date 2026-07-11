@@ -18,7 +18,7 @@ A domain-specific language for phonological and phonetic rules in speech synthes
 
 
 
-A single \*\*global sync axis\*\* coordinates all streams.
+A single \*\*global sync axis\*\* coordinates all relations.
 
 
 
@@ -78,7 +78,7 @@ interface IntervalToken {
 
 &nbsp; id: string;
 
-&nbsp; stream: string;
+&nbsp; relation: string;
 
 &nbsp; name: string;
 
@@ -114,7 +114,7 @@ interface PointToken {
 
 &nbsp; id: string;
 
-&nbsp; stream: string;
+&nbsp; relation: string;
 
 &nbsp; anchor\_left: SyncMarkId;
 
@@ -146,7 +146,7 @@ interface PointToken {
 
 
 
-\### 1.5 Stream Types
+\### 1.5 Relation Types
 
 
 
@@ -334,17 +334,17 @@ Expressions use \[JSONata](https://jsonata.org).
 
 | `$next\_sibling(t)` | Token \\| null |
 
-| `$parent(t, stream)` | Token \\| null |
+| `$parent(t, relation)` | Token \\| null |
 
-| `$children(t, stream)` | Token\[] |
+| `$children(t, relation)` | Token\[] |
 
 | `$assoc(t, name)` | Token\[] |
 
-| `$spanning(t, stream)` | Token\[] |
+| `$spanning(t, relation)` | Token\[] |
 
 | `$index(t)` | number |
 
-| `$total(stream)` | number |
+| `$total(relation)` | number |
 
 | `$midpoint(t)` | Anchor |
 
@@ -426,17 +426,17 @@ constraint: "$next(stop).f.manner in \['vowel', 'nasal'] and $parent(stop, 'word
 
 
 
-\## Part 3: Stream Definitions
+\## Part 3: Relation Definitions
 
 
 
-\### 3.1 Base Stream
+\### 3.1 Base Relation
 
 
 
 ```yaml
 
-streams:
+relations:
 
 &nbsp; phone:
 
@@ -578,13 +578,13 @@ streams:
 
 ```python
 
-def rebuild\_span\_boundaries(span\_stream, child\_stream):
+def rebuild\_span\_boundaries(span\_relation, child\_relation):
 
 &nbsp;   """Update span boundaries from children. Spans must already exist."""
 
-&nbsp;   for span in span\_stream.tokens:
+&nbsp;   for span in span\_relation.tokens:
 
-&nbsp;       children = \[t for t in child\_stream.tokens if t.parent == span.id]
+&nbsp;       children = \[t for t in child\_relation.tokens if t.parent == span.id]
 
 &nbsp;       if not children:
 
@@ -634,7 +634,7 @@ patterns:
 
 &nbsp; stop\_before\_sonorant:
 
-&nbsp;   stream: phone
+&nbsp;   relation: phone
 
 &nbsp;   scope: syllable
 
@@ -664,7 +664,7 @@ patterns:
 
 &nbsp; d\_j\_coalescence:
 
-&nbsp;   stream: phone
+&nbsp;   relation: phone
 
 &nbsp;   scope: phrase
 
@@ -700,7 +700,7 @@ patterns:
 
 &nbsp; utterance\_final:
 
-&nbsp;   stream: phone
+&nbsp;   relation: phone
 
 &nbsp;   scope: utterance
 
@@ -746,7 +746,7 @@ patterns:
 
 ```
 
-1\. SNAPSHOT           Copy-on-write view of streams
+1\. SNAPSHOT           Copy-on-write view of relations
 
 2\. MATCH + EVALUATE   Find matches, evaluate expressions
 
@@ -780,7 +780,7 @@ patterns:
 
 ```typescript
 
-// Base stream splice (replaces delete + insert for base)
+// Base relation splice (replaces delete + insert for base)
 
 interface SpliceBasePatch {
 
@@ -814,7 +814,7 @@ interface InsertIntervalPatch {
 
 &nbsp; type: 'insert\_interval';
 
-&nbsp; stream: string;               // NOT base
+&nbsp; relation: string;               // NOT base
 
 &nbsp; sync\_left: SyncMarkId;
 
@@ -842,7 +842,7 @@ interface InsertPointPatch {
 
 &nbsp; type: 'insert\_point';
 
-&nbsp; stream: string;
+&nbsp; relation: string;
 
 &nbsp; anchor\_left: SyncMarkId;
 
@@ -868,7 +868,7 @@ interface InsertPointPatch {
 
 
 
-// Modification (any stream)
+// Modification (any relation)
 
 interface ModifyPatch {
 
@@ -898,7 +898,7 @@ interface DeletePatch {
 
 &nbsp; type: 'delete';
 
-&nbsp; stream: string;               // NOT base
+&nbsp; relation: string;               // NOT base
 
 &nbsp; target: TokenId;
 
@@ -988,11 +988,11 @@ All patches use this universal key. For non-range patches:
 
 
 
-\### 5.5 Base Stream Splice
+\### 5.5 Base Relation Splice
 
 
 
-All base stream mutations use `SpliceBasePatch`. This handles:
+All base relation mutations use `SpliceBasePatch`. This handles:
 
 \- Simple insertion (delete\_tokens empty)
 
@@ -1008,7 +1008,7 @@ All base stream mutations use `SpliceBasePatch`. This handles:
 
 ```python
 
-def apply\_base\_splices(base\_stream, patches):
+def apply\_base\_splices(base\_relation, patches):
 
 &nbsp;   """Apply all base splices as a single batched operation."""
 
@@ -1042,7 +1042,7 @@ def apply\_base\_splices(base\_stream, patches):
 
 &nbsp;       # 3. Insert new tokens partitioning \[merged\_left, merged\_right]
 
-&nbsp;       execute\_splice(base\_stream, merged\_left, merged\_right, 
+&nbsp;       execute\_splice(base\_relation, merged\_left, merged\_right, 
 
 &nbsp;                      all\_deletes, all\_inserts)
 
@@ -1130,9 +1130,9 @@ After base splices, recompute span boundaries bottom-up through hierarchy:
 
 ```python
 
-for stream in reversed(topology.hierarchy\[:-1]):  # skip base
+for relation in reversed(topology.hierarchy\[:-1]):  # skip base
 
-&nbsp;   rebuild\_span\_boundaries(stream, child\_stream\_of(stream))
+&nbsp;   rebuild\_span\_boundaries(relation, child\_relation\_of(relation))
 
 ```
 
@@ -1192,13 +1192,13 @@ def resolve\_klatt(base, floor, effects, max\_val):
 
 ```python
 
-def compute\_times(base\_stream, all\_sync\_marks):
+def compute\_times(base\_relation, all\_sync\_marks):
 
 &nbsp;   # Step 1: Base boundaries
 
 &nbsp;   time = 0
 
-&nbsp;   for token in base\_stream.tokens\_in\_order():
+&nbsp;   for token in base\_relation.tokens\_in\_order():
 
 &nbsp;       token.sync\_left.time = time
 
@@ -1220,11 +1220,11 @@ def compute\_times(base\_stream, all\_sync\_marks):
 
 &nbsp;       # Find containing base token by order
 
-&nbsp;       container = find\_base\_containing(mark.order, base\_stream)
+&nbsp;       container = find\_base\_containing(mark.order, base\_relation)
 
 &nbsp;       if container is None:
 
-&nbsp;           # Mark is outside base stream (orphaned)
+&nbsp;           # Mark is outside base relation (orphaned)
 
 &nbsp;           # Assign to nearest boundary
 
@@ -1256,9 +1256,9 @@ def compute\_times(base\_stream, all\_sync\_marks):
 
 ```python
 
-def resolve\_points(point\_stream, context\_map):
+def resolve\_points(point\_relation, context\_map):
 
-&nbsp;   for pt in point\_stream.tokens:
+&nbsp;   for pt in point\_relation.tokens:
 
 &nbsp;       # Compute time from anchors
 
@@ -1302,7 +1302,7 @@ rules:
 
 &nbsp;   select:
 
-&nbsp;     stream: phone
+&nbsp;     relation: phone
 
 &nbsp;     where: "f.manner = 'vowel'"
 
@@ -1404,13 +1404,13 @@ rules:
 
 &nbsp;   select:
 
-&nbsp;     stream: phone
+&nbsp;     relation: phone
 
 &nbsp;     where: "f.manner = 'vowel'"
 
 &nbsp;   insert\_point:
 
-&nbsp;     stream: f0
+&nbsp;     relation: f0
 
 &nbsp;     at: "$midpoint(current)"
 
@@ -1434,7 +1434,7 @@ rules:
 
 &nbsp;   select:
 
-&nbsp;     stream: tone
+&nbsp;     relation: tone
 
 &nbsp;     where: "f.floating = true"
 
@@ -1590,7 +1590,7 @@ output:
 
 &nbsp; mapping:
 
-&nbsp;   F0: {source: point, stream: f0}
+&nbsp;   F0: {source: point, relation: f0}
 
 &nbsp;   F1: {source: scalar, field: F1}
 
@@ -1622,9 +1622,9 @@ validation:
 
 &nbsp; errors:
 
-&nbsp;   - pattern\_missing\_stream
+&nbsp;   - pattern\_missing\_relation
 
-&nbsp;   - unknown\_stream\_reference
+&nbsp;   - unknown\_relation\_reference
 
 &nbsp;   - invalid\_jsonata\_syntax
 
@@ -1682,7 +1682,7 @@ Use copy-on-write:
 
 \- Snapshot = immutable view (shared structure)
 
-\- Patch application creates new arrays only for affected streams
+\- Patch application creates new arrays only for affected relations
 
 \- Same semantics, no quadratic copying
 
@@ -1736,9 +1736,9 @@ const expr = jsonata("$parent(current, 'syllable').f.stress = 1");
 
 // Register navigation functions
 
-expr.registerFunction('parent', (token, stream) => {
+expr.registerFunction('parent', (token, relation) => {
 
-&nbsp;   return engine.getParent(token, stream);
+&nbsp;   return engine.getParent(token, relation);
 
 });
 
@@ -1768,7 +1768,7 @@ const result = expr.evaluate({
 
 ```yaml
 
-include: \[streams.yaml]
+include: \[relations.yaml]
 
 
 
@@ -1786,7 +1786,7 @@ patterns:
 
 &nbsp; stop\_before\_sonorant:
 
-&nbsp;   stream: phone
+&nbsp;   relation: phone
 
 &nbsp;   scope: syllable
 
@@ -1806,7 +1806,7 @@ patterns:
 
 &nbsp; d\_j\_coalescence:
 
-&nbsp;   stream: phone
+&nbsp;   relation: phone
 
 &nbsp;   scope: phrase
 
@@ -1902,7 +1902,7 @@ rules:
 
 &nbsp;   select:
 
-&nbsp;     stream: phone
+&nbsp;     relation: phone
 
 &nbsp;     where: "f.manner = 'vowel'"
 
@@ -1922,13 +1922,13 @@ rules:
 
 &nbsp;   select:
 
-&nbsp;     stream: phone
+&nbsp;     relation: phone
 
 &nbsp;     where: "f.manner = 'vowel'"
 
 &nbsp;   insert\_point:
 
-&nbsp;     stream: f0
+&nbsp;     relation: f0
 
 &nbsp;     at: "$midpoint(current)"
 
@@ -1958,7 +1958,7 @@ rules:
 
 | Interior mark | Sync mark inside a base interval (interpolated time) |
 
-| Splice | Atomic delete+insert on base stream |
+| Splice | Atomic delete+insert on base relation |
 
 | Span | Stable token whose boundaries are recomputed from children |
 

@@ -10,7 +10,7 @@ describe("declarative frontend ruleset override", () => {
   it("runs against a caller-provided specSource instead of the default rulepack", () => {
     const customSpec = {
       version: "test-override",
-      streams: {
+      relations: {
         phone: {
           type: "base",
           scalars: {
@@ -29,7 +29,7 @@ describe("declarative frontend ruleset override", () => {
         double_duration: {
           kind: "scalar",
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "true",
           },
           apply: [
@@ -47,7 +47,7 @@ describe("declarative frontend ruleset override", () => {
     const input = [
       {
         id: "ph_0",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AA",
         duration: 50,
         params: {},

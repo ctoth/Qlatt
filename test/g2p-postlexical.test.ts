@@ -22,7 +22,7 @@ function makeToken(
 ) {
   return {
     id,
-    stream: "phone",
+    relation: "phone",
     phoneme,
     type,
     stress,
@@ -39,7 +39,7 @@ function makeToken(
 function getActivePhoneTokens(result: any): any[] {
   const seq = result.sequence ?? result;
   return (seq as any[]).filter(
-    (t: any) => t.stream === "phone" && t.status === 1
+    (t: any) => t.relation === "phone" && t.status === 1
   );
 }
 

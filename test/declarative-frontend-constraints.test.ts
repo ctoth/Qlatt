@@ -5,7 +5,7 @@ import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 describe("declarative frontend rule constraints", () => {
   it("applies select rule effects only when constraint evaluates true", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["vowel"] },
@@ -15,7 +15,7 @@ describe("declarative frontend rule constraints", () => {
       parameters: { min_duration: 90 },
       rules: {
         long_vowels_only: {
-          select: { stream: "phone", where: "current.type == 'vowel'" },
+          select: { relation: "phone", where: "current.type == 'vowel'" },
           constraint: "current.duration >= params.min_duration",
           apply: [{ field: "duration", op: "add", value: "10", tag: "c1" }],
         },
@@ -24,8 +24,8 @@ describe("declarative frontend rule constraints", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", type: "vowel", duration: 100, status: 1 },
-      { id: "p2", stream: "phone", type: "vowel", duration: 80, status: 1 },
+      { id: "p1", relation: "phone", type: "vowel", duration: 100, status: 1 },
+      { id: "p2", relation: "phone", type: "vowel", duration: 80, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -35,7 +35,7 @@ describe("declarative frontend rule constraints", () => {
 
   it("applies pattern rule effects only when post-match constraint passes", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["stop", "vowel"] },
@@ -44,7 +44,7 @@ describe("declarative frontend rule constraints", () => {
       },
       patterns: {
         cv: {
-          stream: "phone",
+          relation: "phone",
           sequence: [
             { capture: "c", where: "current.type == 'stop'" },
             { capture: "v", where: "current.type == 'vowel'" },
@@ -62,10 +62,10 @@ describe("declarative frontend rule constraints", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", type: "stop", duration: 70, status: 1 },
-      { id: "p2", stream: "phone", type: "vowel", duration: 100, status: 1 },
-      { id: "p3", stream: "phone", type: "stop", duration: 70, status: 1 },
-      { id: "p4", stream: "phone", type: "vowel", duration: 100, status: 1 },
+      { id: "p1", relation: "phone", type: "stop", duration: 70, status: 1 },
+      { id: "p2", relation: "phone", type: "vowel", duration: 100, status: 1 },
+      { id: "p3", relation: "phone", type: "stop", duration: 70, status: 1 },
+      { id: "p4", relation: "phone", type: "vowel", duration: 100, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;

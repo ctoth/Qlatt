@@ -630,7 +630,7 @@ export type LayeredF0ModelConfig = {
 };
 
 /** A command inserted into an F0 layer by a rule.
- *  Stored as tokens with stream === "f0_layer" in the parameter sequence. */
+ *  Stored as tokens with relation === "f0_layer" in the parameter sequence. */
 export type F0LayerCommand = {
   /** Name of the target layer (must match a key in f0_model.layers). */
   layer: string;

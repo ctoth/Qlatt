@@ -5,7 +5,7 @@ import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 describe("declarative frontend pattern rules", () => {
   it("suppresses all captures for a matched pattern", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["stop", "vowel", "fricative"] },
@@ -13,7 +13,7 @@ describe("declarative frontend pattern rules", () => {
       },
       patterns: {
         cv: {
-          stream: "phone",
+          relation: "phone",
           sequence: [
             { capture: "c", where: "current.type == 'stop'" },
             { capture: "v", where: "current.type == 'vowel'" },
@@ -31,7 +31,7 @@ describe("declarative frontend pattern rules", () => {
 
     const input = [
       {
-        stream: "phone",
+        relation: "phone",
         phoneme: "T",
         type: "stop",
         status: 1,
@@ -39,7 +39,7 @@ describe("declarative frontend pattern rules", () => {
         sync_right: { kind: "FINITE", rank: "000000000001" },
       },
       {
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         status: 1,
@@ -47,7 +47,7 @@ describe("declarative frontend pattern rules", () => {
         sync_right: { kind: "FINITE", rank: "000000000002" },
       },
       {
-        stream: "phone",
+        relation: "phone",
         phoneme: "S",
         type: "fricative",
         status: 1,
@@ -64,7 +64,7 @@ describe("declarative frontend pattern rules", () => {
 
   it("applies targeted effects to captures", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["stop", "vowel"] },
@@ -73,7 +73,7 @@ describe("declarative frontend pattern rules", () => {
       },
       patterns: {
         cv: {
-          stream: "phone",
+          relation: "phone",
           sequence: [
             { capture: "c", where: "current.type == 'stop'" },
             { capture: "v", where: "current.type == 'vowel'" },
@@ -90,9 +90,9 @@ describe("declarative frontend pattern rules", () => {
     };
 
     const input = [
-      { stream: "phone", phoneme: "T", type: "stop", duration: 80, status: 1 },
-      { stream: "phone", phoneme: "AE", type: "vowel", duration: 100, status: 1 },
-      { stream: "phone", phoneme: "K", type: "stop", duration: 70, status: 1 },
+      { relation: "phone", phoneme: "T", type: "stop", duration: 80, status: 1 },
+      { relation: "phone", phoneme: "AE", type: "vowel", duration: 100, status: 1 },
+      { relation: "phone", phoneme: "K", type: "stop", duration: 70, status: 1 },
     ];
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
 

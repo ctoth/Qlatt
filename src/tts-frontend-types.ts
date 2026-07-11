@@ -238,7 +238,7 @@ export interface ControlWindowSpec {
 // ---------------------------------------------------------------------------
 
 /**
- * A phone-stream token with typed known fields.
+ * A phone-relation token with typed known fields.
  *
  * Produced by the TTS frontend pipeline: transcription -> inventory lookup ->
  * rule engine phases -> track assembly. The index signature allows rule-injected
@@ -247,8 +247,8 @@ export interface ControlWindowSpec {
 export interface PhoneToken {
   /** Unique token identifier (e.g. "ph_0", "ph_1") */
   id: string;
-  /** Stream discriminator — always "phone" for phone tokens */
-  stream: "phone";
+  /** Relation discriminator — always "phone" for phone tokens */
+  relation: "phone";
   /** Token status: 1 = active, 2 = deleted/suppressed */
   status: number;
   /** ARPABET phoneme symbol (e.g. "HH", "AH", "SIL") */
@@ -290,7 +290,7 @@ export interface PhoneToken {
 }
 
 /**
- * An F0-stream (or other point-stream) token.
+ * An F0-relation (or other point-relation) token.
  *
  * Point tokens carry a single scalar value anchored to the time axis.
  * They are produced by prosody rules (insert_point actions).
@@ -298,8 +298,8 @@ export interface PhoneToken {
 export interface F0PointToken {
   /** Unique token identifier (e.g. "f0_0", "f0_1") */
   id: string;
-  /** Stream name — typically "f0" for pitch contour points */
-  stream: string;
+  /** Relation name — typically "f0" for pitch contour points */
+  relation: string;
   /** Token status: 1 = active, 2 = deleted/suppressed */
   status: number;
   /** The scalar value (e.g. F0 in Hz) */
@@ -344,10 +344,10 @@ export interface KlattFrame {
 
 /** Type guard for phone tokens */
 export function isPhoneToken(token: EngineToken): token is PhoneToken {
-  return token.stream === "phone";
+  return token.relation === "phone";
 }
 
 /** Type guard for F0/point tokens */
 export function isF0PointToken(token: EngineToken): token is F0PointToken {
-  return typeof token.stream === "string" && token.stream !== "phone";
+  return typeof token.relation === "string" && token.relation !== "phone";
 }

@@ -3,15 +3,15 @@ import { runRuleEngine } from "../src/declarative-frontend/engine";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend navigation helpers", () => {
-  it("supports prev cursor over active stream order", () => {
+  it("supports prev cursor over active relation order", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       rules: {
         first_only: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "prev == null",
           },
           apply: [{ field: "duration", op: "add", value: "10", tag: "n" }],
@@ -21,9 +21,9 @@ describe("declarative frontend navigation helpers", () => {
     };
 
     const input = [
-      { stream: "phone", phoneme: "T", duration: 70, status: 1 },
-      { stream: "phone", phoneme: "AE", duration: 100, status: 1 },
-      { stream: "phone", phoneme: "S", duration: 80, status: 1 },
+      { relation: "phone", phoneme: "T", duration: 70, status: 1 },
+      { relation: "phone", phoneme: "AE", duration: 100, status: 1 },
+      { relation: "phone", phoneme: "S", duration: 80, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -34,13 +34,13 @@ describe("declarative frontend navigation helpers", () => {
 
   it("filters suppressed tokens for next cursor", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       rules: {
         last_active_only: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "next == null",
           },
           apply: [{ field: "duration", op: "add", value: "5", tag: "n2" }],
@@ -50,9 +50,9 @@ describe("declarative frontend navigation helpers", () => {
     };
 
     const input = [
-      { stream: "phone", phoneme: "T", duration: 70, status: 1 },
-      { stream: "phone", phoneme: "AE", duration: 100, status: 2 },
-      { stream: "phone", phoneme: "S", duration: 80, status: 1 },
+      { relation: "phone", phoneme: "T", duration: 70, status: 1 },
+      { relation: "phone", phoneme: "AE", duration: 100, status: 2 },
+      { relation: "phone", phoneme: "S", duration: 80, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -63,13 +63,13 @@ describe("declarative frontend navigation helpers", () => {
 
   it("supports ahead()/behind() for deeper active-token navigation", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       rules: {
         ahead_rule: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.phoneme == 'A'",
           },
           define: {
@@ -86,7 +86,7 @@ describe("declarative frontend navigation helpers", () => {
         },
         behind_rule: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.phoneme == 'D'",
           },
           define: {
@@ -106,11 +106,11 @@ describe("declarative frontend navigation helpers", () => {
     };
 
     const input = [
-      { stream: "phone", phoneme: "A", duration: 70, status: 1 },
-      { stream: "phone", phoneme: "X", duration: 50, status: 2 },
-      { stream: "phone", phoneme: "B", duration: 80, status: 1 },
-      { stream: "phone", phoneme: "C", duration: 90, status: 1 },
-      { stream: "phone", phoneme: "D", duration: 100, status: 1 },
+      { relation: "phone", phoneme: "A", duration: 70, status: 1 },
+      { relation: "phone", phoneme: "X", duration: 50, status: 2 },
+      { relation: "phone", phoneme: "B", duration: 80, status: 1 },
+      { relation: "phone", phoneme: "C", duration: 90, status: 1 },
+      { relation: "phone", phoneme: "D", duration: 100, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -121,13 +121,13 @@ describe("declarative frontend navigation helpers", () => {
 
   it("supports look_back_where() for predicate-based backward scans", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       rules: {
         lookback_rule: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.phoneme == 'K'",
           },
           define: {
@@ -147,11 +147,11 @@ describe("declarative frontend navigation helpers", () => {
     };
 
     const input = [
-      { stream: "phone", phoneme: "P", type: "stop", duration: 70, status: 1 },
-      { stream: "phone", phoneme: "AA", type: "vowel", stress: 1, duration: 100, status: 2 },
-      { stream: "phone", phoneme: "EH", type: "vowel", stress: 1, duration: 80, status: 1 },
-      { stream: "phone", phoneme: "IH", type: "vowel", stress: 0, duration: 90, status: 1 },
-      { stream: "phone", phoneme: "K", type: "stop", duration: 60, status: 1 },
+      { relation: "phone", phoneme: "P", type: "stop", duration: 70, status: 1 },
+      { relation: "phone", phoneme: "AA", type: "vowel", stress: 1, duration: 100, status: 2 },
+      { relation: "phone", phoneme: "EH", type: "vowel", stress: 1, duration: 80, status: 1 },
+      { relation: "phone", phoneme: "IH", type: "vowel", stress: 0, duration: 90, status: 1 },
+      { relation: "phone", phoneme: "K", type: "stop", duration: 60, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -160,7 +160,7 @@ describe("declarative frontend navigation helpers", () => {
 
   it("supports structural where predicates and look_back_pred()", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", features: { type: ["vowel", "stop"] }, scalars: { duration: { unit: "ms" } } },
       },
       predicates: {
@@ -170,7 +170,7 @@ describe("declarative frontend navigation helpers", () => {
       rules: {
         lookback_rule: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: {
               all: [{ predicate: "is_stop" }, { expr: "current.phoneme == 'K'" }],
             },
@@ -192,10 +192,10 @@ describe("declarative frontend navigation helpers", () => {
     };
 
     const input = [
-      { stream: "phone", phoneme: "P", type: "stop", duration: 70, status: 1 },
-      { stream: "phone", phoneme: "EH", type: "vowel", stress: 1, duration: 80, status: 1 },
-      { stream: "phone", phoneme: "IH", type: "vowel", stress: 0, duration: 90, status: 1 },
-      { stream: "phone", phoneme: "K", type: "stop", duration: 60, status: 1 },
+      { relation: "phone", phoneme: "P", type: "stop", duration: 70, status: 1 },
+      { relation: "phone", phoneme: "EH", type: "vowel", stress: 1, duration: 80, status: 1 },
+      { relation: "phone", phoneme: "IH", type: "vowel", stress: 0, duration: 90, status: 1 },
+      { relation: "phone", phoneme: "K", type: "stop", duration: 60, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -204,13 +204,13 @@ describe("declarative frontend navigation helpers", () => {
 
   it("exposes current.next_boundary for the nearest same-word SIL break", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       rules: {
         boundary_rule: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.word == 'same'",
           },
           apply: [
@@ -227,12 +227,12 @@ describe("declarative frontend navigation helpers", () => {
     };
 
     const input = [
-      { stream: "phone", phoneme: "S", type: "fricative", word: "same", duration: 70, status: 1 },
-      { stream: "phone", phoneme: "EY", type: "vowel", word: "same", duration: 100, status: 1 },
-      { stream: "phone", phoneme: "M", type: "nasal", word: "same", duration: 80, status: 1 },
-      { stream: "phone", phoneme: "SIL", breakIndex: 3, duration: 40, status: 1 },
-      { stream: "phone", phoneme: "N", type: "nasal", word: "other", duration: 75, status: 1 },
-      { stream: "phone", phoneme: "SIL", breakIndex: 4, duration: 40, status: 1 },
+      { relation: "phone", phoneme: "S", type: "fricative", word: "same", duration: 70, status: 1 },
+      { relation: "phone", phoneme: "EY", type: "vowel", word: "same", duration: 100, status: 1 },
+      { relation: "phone", phoneme: "M", type: "nasal", word: "same", duration: 80, status: 1 },
+      { relation: "phone", phoneme: "SIL", breakIndex: 3, duration: 40, status: 1 },
+      { relation: "phone", phoneme: "N", type: "nasal", word: "other", duration: 75, status: 1 },
+      { relation: "phone", phoneme: "SIL", breakIndex: 4, duration: 40, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -244,13 +244,13 @@ describe("declarative frontend navigation helpers", () => {
 
   it("exposes punctuation SIL as current.next_boundary after same-word release tokens", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       rules: {
         boundary_rule: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.phoneme == 'AE'",
           },
           define: {
@@ -270,11 +270,11 @@ describe("declarative frontend navigation helpers", () => {
     };
 
     const input = [
-      { stream: "phone", phoneme: "AE", type: "vowel", word: "mat", duration: 100, status: 1 },
-      { stream: "phone", phoneme: "T_CL", type: "stop_closure", word: "mat", duration: 40, status: 1 },
-      { stream: "phone", phoneme: "T_REL", type: "stop_release", word: "mat", duration: 15, status: 1 },
-      { stream: "phone", phoneme: "T_ASP", type: "stop_aspiration", word: "mat", duration: 15, status: 1 },
-      { stream: "phone", phoneme: "SIL", type: "silence", word: ".", duration: 300, status: 1 },
+      { relation: "phone", phoneme: "AE", type: "vowel", word: "mat", duration: 100, status: 1 },
+      { relation: "phone", phoneme: "T_CL", type: "stop_closure", word: "mat", duration: 40, status: 1 },
+      { relation: "phone", phoneme: "T_REL", type: "stop_release", word: "mat", duration: 15, status: 1 },
+      { relation: "phone", phoneme: "T_ASP", type: "stop_aspiration", word: "mat", duration: 15, status: 1 },
+      { relation: "phone", phoneme: "SIL", type: "silence", word: ".", duration: 300, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -283,7 +283,7 @@ describe("declarative frontend navigation helpers", () => {
 
   it("exposes current.syllable.is_final for the final syllable of a word", () => {
     const spec = {
-      streams: {
+      relations: {
         syllable: { type: "span", spans: "phone" },
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
@@ -291,7 +291,7 @@ describe("declarative frontend navigation helpers", () => {
       rules: {
         final_syllable_rule: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.syllable.is_final",
           },
           apply: [{ field: "duration", op: "add", value: "19", tag: "final_syllable" }],
@@ -301,13 +301,13 @@ describe("declarative frontend navigation helpers", () => {
     };
 
     const input = [
-      { id: "s1", stream: "syllable", status: 1 },
-      { id: "p1", stream: "phone", parent: "s1", phoneme: "B", type: "stop", word: "better", duration: 70, status: 1 },
-      { id: "p2", stream: "phone", parent: "s1", phoneme: "EH", type: "vowel", word: "better", duration: 100, status: 1 },
-      { id: "s2", stream: "syllable", status: 1 },
-      { id: "p3", stream: "phone", parent: "s2", phoneme: "T", type: "stop", word: "better", duration: 80, status: 1 },
-      { id: "p4", stream: "phone", parent: "s2", phoneme: "ER", type: "vowel", word: "better", duration: 110, status: 1 },
-      { id: "p5", stream: "phone", parent: "s2", phoneme: "SIL", breakIndex: 3, duration: 40, status: 1 },
+      { id: "s1", relation: "syllable", status: 1 },
+      { id: "p1", relation: "phone", parent: "s1", phoneme: "B", type: "stop", word: "better", duration: 70, status: 1 },
+      { id: "p2", relation: "phone", parent: "s1", phoneme: "EH", type: "vowel", word: "better", duration: 100, status: 1 },
+      { id: "s2", relation: "syllable", status: 1 },
+      { id: "p3", relation: "phone", parent: "s2", phoneme: "T", type: "stop", word: "better", duration: 80, status: 1 },
+      { id: "p4", relation: "phone", parent: "s2", phoneme: "ER", type: "vowel", word: "better", duration: 110, status: 1 },
+      { id: "p5", relation: "phone", parent: "s2", phoneme: "SIL", breakIndex: 3, duration: 40, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -319,7 +319,7 @@ describe("declarative frontend navigation helpers", () => {
 
   it("supports find_within_word() scans that stop at word boundaries", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           features: { type: ["vowel", "stop", "liquid"] },
@@ -329,7 +329,7 @@ describe("declarative frontend navigation helpers", () => {
       rules: {
         find_rule: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: "current.phoneme == 'AE'",
           },
           define: {
@@ -349,13 +349,13 @@ describe("declarative frontend navigation helpers", () => {
     };
 
     const input = [
-      { stream: "phone", phoneme: "K", type: "stop", word: "call", duration: 70, status: 1 },
-      { stream: "phone", phoneme: "AO", type: "vowel", word: "call", duration: 100, status: 1 },
-      { stream: "phone", phoneme: "L", type: "liquid", word: "call", duration: 80, status: 1 },
-      { stream: "phone", phoneme: "K", type: "stop", word: "cat", duration: 70, status: 1 },
-      { stream: "phone", phoneme: "AE", type: "vowel", word: "cat", duration: 100, status: 1 },
-      { stream: "phone", phoneme: "T", type: "stop", word: "cat", duration: 80, status: 1 },
-      { stream: "phone", phoneme: "L", type: "liquid", word: "later", duration: 90, status: 1 },
+      { relation: "phone", phoneme: "K", type: "stop", word: "call", duration: 70, status: 1 },
+      { relation: "phone", phoneme: "AO", type: "vowel", word: "call", duration: 100, status: 1 },
+      { relation: "phone", phoneme: "L", type: "liquid", word: "call", duration: 80, status: 1 },
+      { relation: "phone", phoneme: "K", type: "stop", word: "cat", duration: 70, status: 1 },
+      { relation: "phone", phoneme: "AE", type: "vowel", word: "cat", duration: 100, status: 1 },
+      { relation: "phone", phoneme: "T", type: "stop", word: "cat", duration: 80, status: 1 },
+      { relation: "phone", phoneme: "L", type: "liquid", word: "later", duration: 90, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;

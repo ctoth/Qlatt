@@ -11,7 +11,7 @@
  *  - Taylor, Black & Caley 2001, "Heterogeneous relation graphs as a formalism
  *    for representing linguistic information," Speech Communication — the HRG
  *    item/relation/shared-identity model and feature-function pathnames.
- *  - Hertz 1987 (Delta) — multi-stream relation IR driving a Klatt synthesizer;
+ *  - Hertz 1987 (Delta) — multi-relation relation IR driving a Klatt synthesizer;
  *    existence proof for formant synthesis specifically.
  *  - Festival Utterance structure (Black/Taylor/Caley) — Word/Syllable/Segment
  *    relations + the SylStructure tree backbone.

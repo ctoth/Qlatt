@@ -42,7 +42,7 @@ type OrderMark =
 
 type OrthographyToken = {
   id: string;
-  stream: "orthography";
+  relation: "orthography";
   word: string;
   tokenType: "word" | "punctuation";
   punctuationSymbol?: string | null;
@@ -212,7 +212,7 @@ function buildOrthographyTokens(words: string[], tables: RequiredTranscriptionTa
     .filter((word) => word.length > 0)
     .map((word, index, entries) => ({
       id: `orth_${index}`,
-      stream: "orthography" as const,
+      relation: "orthography" as const,
       word,
       tokenType: isPunctuationTokenWithTables(word, tables) ? "punctuation" : "word",
       punctuationSymbol: isPunctuationTokenWithTables(word, tables) ? word : null,
@@ -246,7 +246,7 @@ function rewriteOrthographyTokens(
   return rewritten
     .filter(
       (token): token is OrthographyToken =>
-        token?.stream === "orthography" && token?.status === 1,
+        token?.relation === "orthography" && token?.status === 1,
     )
     .map((token) => ({
       word: token.word,

@@ -3,7 +3,7 @@ rules:
   dectalk_sw_explicit_override:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: has(current.inventorySW)
     apply:
       - field: params.SW
@@ -17,7 +17,7 @@ rules:
   dectalk_sw_default_assignment:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "!has(current.inventorySW)"
     apply:
       - field: params.SW
@@ -31,7 +31,7 @@ rules:
   dectalk_obstruent_parallel_amplitudes:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme == 'F' || current.phoneme == 'V' ||
         current.phoneme == 'TH' || current.phoneme == 'DH' ||
@@ -155,7 +155,7 @@ rules:
   dectalk_special_coartic_f3:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "current.type == 'vowel' && current.phoneme != 'RR'"
     define:
       # The preceding token of a vowel after a stop is the stop_release glue
@@ -198,7 +198,7 @@ rules:
   dectalk_special_coartic_f2:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "current.type == 'vowel'"
     define:
       # Skip stop_release/aspiration glue to reach the base preceding phoneme
@@ -241,7 +241,7 @@ rules:
   dectalk_silence_carries_formants:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme == 'SIL' &&
         prev != null &&

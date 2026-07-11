@@ -5,7 +5,7 @@ import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 describe("declarative frontend scalar resolution", () => {
   it("resolves standard scalar effects in rule order with min/max clamp", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           scalars: {
@@ -15,22 +15,22 @@ describe("declarative frontend scalar resolution", () => {
       },
       rules: {
         set_energy: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [{ field: "energy", op: "set", value: "4", tag: "set" }],
         },
         mul_energy: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [{ field: "energy", op: "mul", value: "2", tag: "mul" }],
         },
         add_energy: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [{ field: "energy", op: "add", value: "-1", tag: "add" }],
         },
       },
       phases: [{ name: "duration", rules: ["set_energy", "mul_energy", "add_energy"] }],
     };
 
-    const input = [{ id: "p1", stream: "phone", energy: 1, status: 1 }];
+    const input = [{ id: "p1", relation: "phone", energy: 1, status: 1 }];
     const result = runRuleEngine(input, compileRuleEngineSpec(spec));
     const out = result.sequence;
 
@@ -48,7 +48,7 @@ describe("declarative frontend scalar resolution", () => {
 
   it("resolves klatt duration with incompressible floor and clamp", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: {
           type: "base",
           scalars: {
@@ -68,11 +68,11 @@ describe("declarative frontend scalar resolution", () => {
       },
       rules: {
         half_duration: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [{ field: "duration", op: "mul", value: "params.policy.duration.test_multiplier", tag: "mul" }],
         },
         subtract_duration: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [{ field: "duration", op: "add", value: "params.policy.duration.test_offset_ms", tag: "add" }],
         },
       },
@@ -88,7 +88,7 @@ describe("declarative frontend scalar resolution", () => {
     const input = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         type: "vowel",
         duration: 100,
         inherentDuration: 100,

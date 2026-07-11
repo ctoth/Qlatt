@@ -178,7 +178,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 002 | Phase 1A invalid debug coverage | kept | `80392caf` | 148 owning tests pass; unconditional-pass search zero-hit |
 | 003 | Phase 1B backwards bridge deletion | kept | `01f4c48c` | bridge search zero-hit; HRG core 14/14; core/scripts typecheck pass |
 | 004 | Phase 2A selected resource ownership | kept | `2c3e53fa` | three inventory identities pass; 87 adjacent tests; core/scripts typecheck pass |
-| 005 | Phase 2B immutable compiled rulepacks | kept | pending slice commit | 204 declarative tests; 57 integration tests; core/scripts typecheck pass |
+| 005 | Phase 2B immutable compiled rulepacks | kept | `46903895` | 204 declarative tests; 57 integration tests; core/scripts typecheck pass |
+| 006 | Phase 2C final relation DSL vocabulary | kept | pending slice commit | 205 declarative tests; 124/125 downstream baseline; three strict explain runs; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -350,3 +351,69 @@ Next slice: Phase 2C. Replace the authoring vocabulary atomically with
 `relations`/`relation`, migrate all bundled YAML and fixtures, make the compiler
 reject the old `streams`/`stream` shape, and keep only the final vocabulary in
 the existing executor before committing.
+
+## Iteration 006 — Phase 2C final relation DSL vocabulary
+
+Status: kept.
+
+The compiler-rejection test was red first: a raw authoring spec with a
+`streams:` root still compiled. The implementation then cut over the parser,
+validator, executor, bundled YAML, fixtures, scripts, and public DSL spec as one
+atomic vocabulary migration. No alias or compatibility reader was added.
+
+Kept convergence:
+
+- made `relations:` the only declaration root and `relation` the only token,
+  selector, pattern, point-insertion, and output-mapping field;
+- added explicit `E_LEGACY_STREAMS` rejection before root normalization and a
+  test proving compiled rulepacks expose no `streams` property;
+- renamed relation-owned validation diagnostics and executor state rather than
+  retaining stream-named internal concepts;
+- migrated all three bundled frontends, direct engine fixtures, CLI fixtures,
+  profiles, extraction/splitting tools, downstream token consumers, and
+  `plans/frontend-spec.md`;
+- used and deleted three temporary TypeScript migration scripts; and
+- repaired generic Node read/write-stream and MIME vocabulary caught by the
+  mechanical corruption scan.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+$tests = (Get-ChildItem -File test\declarative-frontend-*.test.ts).FullName; npm test -- $tests
+PASS: 36 files, 205 tests
+
+npm test -- test/control-score-builder.test.ts test/duration-model.test.ts test/g2p-postlexical.test.ts test/nasal-subsystem.test.ts test/track-assembler-output-config.test.ts test/track-assembler.test.ts test/tts-frontend.test.ts test/tts-frontend-declarative.test.ts test/tts-frontend-declarative-corpus.test.ts test/dectalk-e2e.test.ts test/explain-phrase-cli.test.ts
+BASELINE: 11 files, 124 passed, 1 known track-assembler F3 failure
+
+npm run explain -- "hello world" --frontend qlatt-english --strict-citations
+PASS: 225 decisions, 0 uncited
+
+npm run explain -- "hello world" --frontend qlatt-beauty --strict-citations
+PASS: 500 decisions, 0 uncited
+
+npm run explain -- "hello world" --frontend dectalk-english --strict-citations
+PASS: 262 decisions, 0 uncited
+
+npm test -- test/tts-frontend-declarative-corpus.test.ts
+PASS: 1 file, 1 test
+
+rg -n "^\\s*streams:|^\\s*stream:|select\\.stream|token\\.stream|\\.stream\\b" public/rules src test scripts plans/frontend-spec.md -g "*.yaml" -g "*.ts" -g "*.md"
+ONLY: explicit E_LEGACY_STREAMS compiler rejection and its test fixture
+```
+
+The first full-suite attempt was terminated after the normally silent
+dictionary audit exceeded five minutes under parallel load. Before termination
+it showed the known baseline failures plus one corpus-test failure; the exact
+corpus test passed immediately in isolation, so that extra result was not a
+persistent migration regression and is not represented as a passing full gate.
+
+Next slice: Phase 2D. Replace DECtalk profile selection with cited rule/data
+logic, delete DECtalk-named CEL machinery, consolidate the CEL catalog, classify
+and relocate or declaratively express `trajectory_to_windows`, delete
+`dectalk-helpers.ts`, and commit.

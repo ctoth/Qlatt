@@ -45,7 +45,7 @@ describe("track lowering output config", () => {
 
   it("rejects missing lowering sections with stable validation codes", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base" } },
+      relations: { phone: { type: "base" } },
       output: {
         lowering: {
           id: "bad",
@@ -62,7 +62,7 @@ describe("track lowering output config", () => {
 
   it("rejects uncited numeric lowering policy", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base" } },
+      relations: { phone: { type: "base" } },
       output: {
         lowering: {
           id: "bad",

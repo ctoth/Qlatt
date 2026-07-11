@@ -10,7 +10,7 @@ rules:
   dectalk_single_word_fallback_primary_retarget:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "current.type == 'vowel' && word_count() == 1"
     define:
       prev_primary_or_boundary: >-
@@ -57,7 +57,7 @@ rules:
   dectalk_pause_duration:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'SIL' && has(current.punctuationSymbol)
     apply:
       - field: duration
@@ -78,7 +78,7 @@ rules:
   dectalk_clause_final_lengthening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme != 'SIL' && !(current.type in ['stop_release', 'stop_aspiration'])
     define:
       "n": next
@@ -115,7 +115,7 @@ rules:
   dectalk_non_final_shortening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'vowel'
     define:
       "n": next
@@ -159,7 +159,7 @@ rules:
   dectalk_unstressed_nonobstruent_floor_adjustment:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "current.phoneme != 'SIL' && has(current.minimumDuration) && has(current.inherentDuration)"
     define:
       stress_val: "has(current.stress) ? current.stress : 0"
@@ -189,7 +189,7 @@ rules:
   dectalk_monosyllable_stress_shortening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'vowel' && has(current.syllable_position_in_word)
     define:
       stress_val: "has(current.stress) ? current.stress : 0"
@@ -220,7 +220,7 @@ rules:
   dectalk_polysyllable_nonfinal_shortening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'vowel' && has(current.syllable_position_in_word)
     define:
       "n": next
@@ -249,7 +249,7 @@ rules:
   dectalk_polysyllabic_shortening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'vowel' && has(current.syllable_position_in_word)
     constraint: current.syllable_position_in_word != 'only'
     apply:
@@ -269,7 +269,7 @@ rules:
   dectalk_non_initial_consonant_shortening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type in ['fricative', 'stop_closure', 'affricate', 'nasal', 'liquid', 'glide']
     define:
@@ -322,7 +322,7 @@ rules:
   dectalk_unstressed_shortening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme != 'SIL'
     define:
       stress_val: "has(current.stress) ? current.stress : 0"
@@ -356,7 +356,7 @@ rules:
   dectalk_emphasis_lengthening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme != 'SIL'
     define:
       is_emphasized: "has(current.stress) ? current.stress == 3 : false"
@@ -384,7 +384,7 @@ rules:
   dectalk_postvocalic_voiceless_shortening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'vowel'
     define:
       "n": next
@@ -427,7 +427,7 @@ rules:
   dectalk_postvocalic_voiced_lengthening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'vowel'
     define:
       "n": next
@@ -459,7 +459,7 @@ rules:
   dectalk_consonant_cluster_shortening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type in ['fricative', 'stop_closure', 'affricate', 'nasal', 'liquid', 'glide']
     define:
@@ -487,7 +487,7 @@ rules:
   dectalk_phrase_initial_vowel_lengthening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'vowel'
     define:
       "p": prev
@@ -513,7 +513,7 @@ rules:
   dectalk_nt_cluster_nasal_shortening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'N'
     define:
       "n": next
@@ -540,7 +540,7 @@ rules:
   dectalk_two_vowel_first_lengthening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'vowel'
     define:
       "n": next
@@ -564,7 +564,7 @@ rules:
   dectalk_word_initial_stressed_vowel_lengthening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'vowel' && has(current.syllable_position_in_word)
     define:
       "p": prev
@@ -591,7 +591,7 @@ rules:
   dectalk_function_word_final_th_shortening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'TH' && has(current.syllable_position_in_word)
     define:
       "n": next
@@ -621,7 +621,7 @@ rules:
   dectalk_the_iy_prevocalic_lengthening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'IY' && has(current.syllable_position_in_word)
     define:
       "n": next
@@ -647,7 +647,7 @@ rules:
   dectalk_pre_df_flap_shortening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'vowel'
     define:
       "n": next
@@ -668,7 +668,7 @@ rules:
   dectalk_pre_ng_shortening:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme != 'SIL'
     define:
       "n": next
@@ -694,7 +694,7 @@ rules:
   dectalk_short_phrase_duration_bonus:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme != 'SIL' && has(current.inherentDuration) && has(current.minimumDuration)
     define:
       compressible_range_ms: current.inherentDuration - current.minimumDuration
@@ -716,7 +716,7 @@ rules:
   dectalk_rate_scaling:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme != 'SIL'
     constraint: params.policy.duration.rate_scale != 1.0
     apply:

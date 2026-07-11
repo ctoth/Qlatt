@@ -213,7 +213,7 @@ syllabification:
     AR: "R"
     OR: "R"
     UR: "R"
-streams:
+relations:
   phone:
     type: base
     features:

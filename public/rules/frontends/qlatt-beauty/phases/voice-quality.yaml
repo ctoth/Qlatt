@@ -43,7 +43,7 @@ rules:
   stress_rd_adduction:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "current.type == 'vowel' && has(current.stress)"
     apply:
       - field: params.RdPhraseOffset
@@ -71,7 +71,7 @@ rules:
   effort_rd_adduction:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "current.type == 'vowel' && has(current.stress)"
     define:
       # Effort in dB relative to neutral, mapped from binary stress.
@@ -108,7 +108,7 @@ rules:
   phrase_rd_contour:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: "current.phoneme != 'SIL'"
     contour:
       domain: phrase

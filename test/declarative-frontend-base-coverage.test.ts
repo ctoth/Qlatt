@@ -5,7 +5,7 @@ import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend base coverage invariants", () => {
   const spec = {
-    streams: {
+    relations: {
       phone: { type: "base" },
     },
     rules: {},
@@ -19,15 +19,15 @@ describe("declarative frontend base coverage invariants", () => {
     const s3 = endOrder();
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
-      { id: "p3", stream: "phone", sync_left: s2, sync_right: s3, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p3", relation: "phone", sync_left: s2, sync_right: s3, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).not.toThrow();
   });
 
-  it("accepts empty utterance base stream coverage", () => {
+  it("accepts empty utterance base relation coverage", () => {
     expect(() => runRuleEngine([], compileRuleEngineSpec(spec))).not.toThrow();
   });
 
@@ -38,8 +38,8 @@ describe("declarative frontend base coverage invariants", () => {
     const s3 = endOrder();
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s2, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s3, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s2, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s3, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_OVERLAP");
@@ -52,19 +52,19 @@ describe("declarative frontend base coverage invariants", () => {
     const s3 = endOrder();
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s2, sync_right: s3, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s2, sync_right: s3, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_NOT_CONTIGUOUS");
   });
 
-  it("rejects non-empty stream with no ACTIVE base coverage", () => {
+  it("rejects non-empty relation with no ACTIVE base coverage", () => {
     const s0 = startOrder();
     const s1 = endOrder();
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 2 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 2 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_NOT_CONTIGUOUS");
@@ -75,8 +75,8 @@ describe("declarative frontend base coverage invariants", () => {
     const mid = finiteOrder(1);
     const end = endOrder();
     const input = [
-      { id: "p1", stream: "phone", sync_left: start, sync_right: mid, status: 1 },
-      { id: "p2", stream: "phone", sync_left: mid, sync_right: end, status: 1 },
+      { id: "p1", relation: "phone", sync_left: start, sync_right: mid, status: 1 },
+      { id: "p2", relation: "phone", sync_left: mid, sync_right: end, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).not.toThrow();
@@ -86,7 +86,7 @@ describe("declarative frontend base coverage invariants", () => {
     const left = finiteOrder(1);
     const right = endOrder();
     const input = [
-      { id: "p1", stream: "phone", sync_left: left, sync_right: right, status: 1 },
+      { id: "p1", relation: "phone", sync_left: left, sync_right: right, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_NOT_CONTIGUOUS");
@@ -96,7 +96,7 @@ describe("declarative frontend base coverage invariants", () => {
     const start = startOrder();
     const right = finiteOrder("00000000000z");
     const input = [
-      { id: "p1", stream: "phone", sync_left: start, sync_right: right, status: 1 },
+      { id: "p1", relation: "phone", sync_left: start, sync_right: right, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrow("E_BASE_NOT_CONTIGUOUS");

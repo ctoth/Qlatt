@@ -50,7 +50,7 @@ const loweringOutput = {
 describe("declarative frontend sync axis bootstrap", () => {
   it("initializes missing base sync marks using START/FINITE/END order keys", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {},
@@ -59,9 +59,9 @@ describe("declarative frontend sync axis bootstrap", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", status: 1 },
-      { id: "p2", stream: "phone", status: 1 },
-      { id: "p3", stream: "phone", status: 1 },
+      { id: "p1", relation: "phone", status: 1 },
+      { id: "p2", relation: "phone", status: 1 },
+      { id: "p3", relation: "phone", status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -82,12 +82,12 @@ describe("declarative frontend sync axis bootstrap", () => {
 
   it("supports multi-token boundary insertion on initialized finite boundaries", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         insert_pair: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -96,7 +96,7 @@ describe("declarative frontend sync axis bootstrap", () => {
           },
         },
         suppress_right_neighbor: {
-          select: { stream: "phone", where: "current.id == 'p2'" },
+          select: { relation: "phone", where: "current.id == 'p2'" },
           suppress: true,
         },
       },
@@ -105,8 +105,8 @@ describe("declarative frontend sync axis bootstrap", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", status: 1 },
-      { id: "p2", stream: "phone", status: 1 },
+      { id: "p1", relation: "phone", status: 1 },
+      { id: "p2", relation: "phone", status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -125,12 +125,12 @@ describe("declarative frontend sync axis bootstrap", () => {
 
   it("rebalances finite ranks when boundary insertion has no interior split space", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {
         insert_pair: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -139,7 +139,7 @@ describe("declarative frontend sync axis bootstrap", () => {
           },
         },
         suppress_middle: {
-          select: { stream: "phone", where: "current.id == 'p2'" },
+          select: { relation: "phone", where: "current.id == 'p2'" },
           suppress: true,
         },
       },
@@ -148,15 +148,15 @@ describe("declarative frontend sync axis bootstrap", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: { kind: "START" }, sync_right: { kind: "FINITE", rank: "000000000001" }, status: 1 },
+      { id: "p1", relation: "phone", sync_left: { kind: "START" }, sync_right: { kind: "FINITE", rank: "000000000001" }, status: 1 },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         sync_left: { kind: "FINITE", rank: "000000000001" },
         sync_right: { kind: "FINITE", rank: "000000000002" },
         status: 1,
       },
-      { id: "p3", stream: "phone", sync_left: { kind: "FINITE", rank: "000000000002" }, sync_right: { kind: "END" }, status: 1 },
+      { id: "p3", relation: "phone", sync_left: { kind: "FINITE", rank: "000000000002" }, sync_right: { kind: "END" }, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -169,7 +169,7 @@ describe("declarative frontend sync axis bootstrap", () => {
 
   it("rejects legacy non-object sync marks", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base" },
       },
       rules: {},
@@ -178,7 +178,7 @@ describe("declarative frontend sync axis bootstrap", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, status: 1 },
+      { id: "p1", relation: "phone", sync_left: 0, sync_right: 1, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_SYNC_MARK_INVALID/);

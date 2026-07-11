@@ -194,7 +194,7 @@ const inventory = { inventoryResolver };
       paramSeq = paramSeq.map((token: FrontendToken, index: number) => ({
         ...token,
         id: token.id ?? `ph_${index}`,
-        stream: "phone",
+        relation: "phone",
         status: token.status ?? 1,
       }));
 
@@ -289,49 +289,49 @@ const inventory = { inventoryResolver };
     );
   }
 
-  // Stream filter analysis from spec
-  console.log("\n\n=== Stream Filter Coverage ===\n");
+  // Relation filter analysis from spec
+  console.log("\n\n=== Relation Filter Coverage ===\n");
   const phases = spec.phases as any[];
   const rules = spec.rules as Record<string, any>;
-  let withStream = 0;
-  let withoutStream = 0;
-  const phaseStreamCoverage: { phase: string; withStream: number; withoutStream: number; rules: string[] }[] = [];
+  let withRelation = 0;
+  let withoutRelation = 0;
+  const phaseRelationCoverage: { phase: string; withRelation: number; withoutRelation: number; rules: string[] }[] = [];
 
   for (const phase of phases) {
     let phaseWith = 0;
     let phaseWithout = 0;
-    const noStreamRules: string[] = [];
+    const noRelationRules: string[] = [];
     for (const ruleName of (phase.rules ?? []) as string[]) {
       const rule = rules[ruleName];
       if (!rule) continue;
-      if (rule.select?.stream) {
+      if (rule.select?.relation) {
         phaseWith++;
-        withStream++;
+        withRelation++;
       } else if (rule.match) {
-        // Pattern rules get stream from the pattern definition
+        // Pattern rules get relation from the pattern definition
         phaseWith++;
-        withStream++;
+        withRelation++;
       } else {
         phaseWithout++;
-        withoutStream++;
-        noStreamRules.push(ruleName);
+        withoutRelation++;
+        noRelationRules.push(ruleName);
       }
     }
-    phaseStreamCoverage.push({
+    phaseRelationCoverage.push({
       phase: phase.name,
-      withStream: phaseWith,
-      withoutStream: phaseWithout,
-      rules: noStreamRules,
+      withRelation: phaseWith,
+      withoutRelation: phaseWithout,
+      rules: noRelationRules,
     });
   }
 
-  console.log(`Total rules with stream filter: ${withStream}`);
-  console.log(`Total rules without stream filter: ${withoutStream}`);
+  console.log(`Total rules with relation filter: ${withRelation}`);
+  console.log(`Total rules without relation filter: ${withoutRelation}`);
   console.log();
-  for (const p of phaseStreamCoverage) {
-    console.log(`  ${p.phase.padEnd(20)} ${p.withStream} with filter, ${p.withoutStream} without`);
+  for (const p of phaseRelationCoverage) {
+    console.log(`  ${p.phase.padEnd(20)} ${p.withRelation} with filter, ${p.withoutRelation} without`);
     for (const r of p.rules) {
-      console.log(`    - ${r} (NO stream filter)`);
+      console.log(`    - ${r} (NO relation filter)`);
     }
   }
 

@@ -212,7 +212,7 @@ export async function runTtsDslCli(argv: string[], io: CliIo = defaultIo()) {
       const snapshots = buildPhaseSnapshots(input, spec, {
         inventoryResolver: materializePhonemeTarget,
       });
-      const payload = diffPhaseState(snapshots, from, to, flags.stream ?? null);
+      const payload = diffPhaseState(snapshots, from, to, flags.relation ?? null);
       writeOutput(io, render(payload, format), flags.output);
       return 0;
     }

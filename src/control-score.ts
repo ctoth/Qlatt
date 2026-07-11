@@ -442,17 +442,17 @@ export function buildDeclarativeControlScore(
 ): DeclarativeControlScore {
   const activePhoneTokens = parameterSequence.filter(
     (token) =>
-      (token?.stream === "phone" || token?.stream == null) &&
+      (token?.relation === "phone" || token?.relation == null) &&
       token?.status !== 2,
   );
   const segments = activePhoneTokens.map(buildSegment);
   const syncTimeByKey = buildSyncTimeMap(segments);
   const f0Points = parameterSequence
-    .filter((token) => token?.stream === "f0" && token?.status !== 2)
+    .filter((token) => token?.relation === "f0" && token?.status !== 2)
     .map((token) => buildF0Point(token, syncTimeByKey))
     .filter((event): event is ControlScoreF0Point => event !== null);
   const f0LayerCommands = parameterSequence
-    .filter((token) => token?.stream === "f0_layer" && token?.status !== 2)
+    .filter((token) => token?.relation === "f0_layer" && token?.status !== 2)
     .map((token) => buildF0LayerCommand(token, syncTimeByKey))
     .filter((event): event is ControlScoreF0LayerCommand => event !== null);
 

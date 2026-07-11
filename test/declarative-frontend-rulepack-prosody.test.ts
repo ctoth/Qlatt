@@ -48,7 +48,7 @@ describe("declarative frontend rulepack prosody phase", () => {
     const sequence = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         stress: 1,
@@ -67,7 +67,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -91,7 +91,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       parameters: TOBI_PARAMS,
     });
 
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     const baseline = points.find((p) => p.tag === "f0_baseline");
     expect(baseline).toBeTruthy();
     expect(baseline!.value).toBe(110);
@@ -107,7 +107,7 @@ describe("declarative frontend rulepack prosody phase", () => {
     const sequence = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         stress: 1,
@@ -126,7 +126,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -150,7 +150,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       parameters: TOBI_PARAMS,
     });
 
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     const hStar = points.find((p) => p.tag === "f0_h_star");
     expect(hStar).toBeTruthy();
     // Nuclear H* peak is no longer directly final-lowered; lowering is carried by
@@ -169,7 +169,7 @@ describe("declarative frontend rulepack prosody phase", () => {
     const sequence = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         stress: 1,
@@ -188,7 +188,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         stress: 1,
@@ -207,7 +207,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p3",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -232,7 +232,7 @@ describe("declarative frontend rulepack prosody phase", () => {
     });
 
     const hStars = out
-      .filter((t) => t.stream === "f0" && t.tag === "f0_h_star")
+      .filter((t) => t.relation === "f0" && t.tag === "f0_h_star")
       .sort((a, b) => Number(a.time) - Number(b.time));
 
     expect(hStars.length).toBe(2);
@@ -253,7 +253,7 @@ describe("declarative frontend rulepack prosody phase", () => {
     const sequence = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "IY",
         type: "vowel",
         stress: 1,
@@ -272,7 +272,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -296,7 +296,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       parameters: TOBI_PARAMS,
     });
 
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     const lStar = points.find((p) => p.tag === "f0_l_star");
     expect(lStar).toBeTruthy();
     // L*: 110 + 80 * 0.15 = 122
@@ -313,7 +313,7 @@ describe("declarative frontend rulepack prosody phase", () => {
     const sequence = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         stress: 1,
@@ -332,7 +332,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -356,7 +356,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       parameters: TOBI_PARAMS,
     });
 
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     const boundary = points.find((p) => p.tag === "f0_boundary_low");
     expect(boundary).toBeTruthy();
     // L%: 110 + 80 * 0.0 = 110
@@ -371,7 +371,7 @@ describe("declarative frontend rulepack prosody phase", () => {
     const sequence = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "IY",
         type: "vowel",
         stress: 1,
@@ -390,7 +390,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -414,7 +414,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       parameters: TOBI_PARAMS,
     });
 
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     const boundary = points.find((p) => p.tag === "f0_boundary_rise");
     expect(boundary).toBeTruthy();
     // H%: max(high_floor=174, prev_f0 + 0.2*(ceiling - prev_f0))
@@ -434,7 +434,7 @@ describe("declarative frontend rulepack prosody phase", () => {
     const sequence = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         stress: 1,
@@ -453,7 +453,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -472,7 +472,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p3",
-        stream: "phone",
+        relation: "phone",
         phoneme: "IY",
         type: "vowel",
         stress: 1,
@@ -491,7 +491,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p4",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -515,7 +515,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       parameters: TOBI_PARAMS,
     });
 
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     const reset = points.find((p) => p.tag === "f0_register_reset");
     expect(reset).toBeTruthy();
     expect(reset!.value).toBe(110);
@@ -532,7 +532,7 @@ describe("declarative frontend rulepack prosody phase", () => {
     const sequence = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "T_REL",
         type: "stop_release",
         voiceless: true,
@@ -552,7 +552,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         stress: 1,
@@ -571,7 +571,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p3",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -595,7 +595,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       parameters: TOBI_PARAMS,
     });
 
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     const onset = points.find((p) => p.tag === "f0_onset_perturbation");
     expect(onset).toBeTruthy();
     // prev F0 = baseline 110, perturbation = 110 * 1.2 = 132
@@ -611,7 +611,7 @@ describe("declarative frontend rulepack prosody phase", () => {
     const sequence = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "B_REL",
         type: "stop_release",
         voiced: true,
@@ -631,7 +631,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         stress: 1,
@@ -650,7 +650,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p3",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -674,7 +674,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       parameters: TOBI_PARAMS,
     });
 
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     const onset = points.find((p) => p.tag === "f0_onset_perturbation");
     expect(onset).toBeTruthy();
     // prev F0 = baseline 110, perturbation = 110 * 0.95 = 104.5
@@ -695,7 +695,7 @@ describe("declarative frontend rulepack prosody phase", () => {
     const sequence = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         stress: 1,
@@ -714,7 +714,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 150,
@@ -733,7 +733,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p3",
-        stream: "phone",
+        relation: "phone",
         phoneme: "IY",
         type: "vowel",
         stress: 0,
@@ -752,7 +752,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p4",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -776,7 +776,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       parameters: TOBI_PARAMS,
     });
 
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     const continuation = points.find((p) => p.tag === "f0_continuation");
     expect(continuation).toBeTruthy();
     // The rise should be ~8 Hz above the previous F0 point
@@ -794,7 +794,7 @@ describe("declarative frontend rulepack prosody phase", () => {
     const sequence = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AE",
         type: "vowel",
         stress: 1,
@@ -813,7 +813,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 150,
@@ -832,7 +832,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       },
       {
         id: "p3",
-        stream: "phone",
+        relation: "phone",
         phoneme: "SIL",
         type: "silence",
         duration: 300,
@@ -856,7 +856,7 @@ describe("declarative frontend rulepack prosody phase", () => {
       parameters: TOBI_PARAMS,
     });
 
-    const points = out.filter((t) => t.stream === "f0");
+    const points = out.filter((t) => t.relation === "f0");
     // tobi_boundary_rise should fire (boundaryTone == 'H%')
     const boundaryRise = points.find((p) => p.tag === "f0_boundary_rise");
     expect(boundaryRise).toBeTruthy();

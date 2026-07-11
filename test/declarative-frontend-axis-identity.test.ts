@@ -35,14 +35,14 @@ describe("declarative frontend SyncAxis identity", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: { phone: { type: "base" } },
+      relations: { phone: { type: "base" } },
       rules: {},
       phases: [{ name: "structural", rules: [] }],
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const result = runRuleEngine(input, compileRuleEngineSpec(spec));
@@ -70,10 +70,10 @@ describe("declarative frontend SyncAxis identity", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: { phone: { type: "base" } },
+      relations: { phone: { type: "base" } },
       rules: {
         insert_release: {
-          select: { stream: "phone", where: "current.id == 'p1'" },
+          select: { relation: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -82,7 +82,7 @@ describe("declarative frontend SyncAxis identity", () => {
           },
         },
         suppress_right_neighbor: {
-          select: { stream: "phone", where: "current.id == 'p2'" },
+          select: { relation: "phone", where: "current.id == 'p2'" },
           suppress: true,
         },
       },
@@ -90,8 +90,8 @@ describe("declarative frontend SyncAxis identity", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const result = runRuleEngine(input, compileRuleEngineSpec(spec));
@@ -116,14 +116,14 @@ describe("declarative frontend SyncAxis identity", () => {
     const s2 = endOrder();
 
     const spec = {
-      streams: { phone: { type: "base" } },
+      relations: { phone: { type: "base" } },
       rules: {},
       phases: [{ name: "finalize", rules: [], compute_times: true }],
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, duration: 120, status: 1 },
-      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, duration: 80, status: 1 },
+      { id: "p1", relation: "phone", sync_left: s0, sync_right: s1, duration: 120, status: 1 },
+      { id: "p2", relation: "phone", sync_left: s1, sync_right: s2, duration: 80, status: 1 },
     ];
 
     const result = runRuleEngine(input, compileRuleEngineSpec(spec));

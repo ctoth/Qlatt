@@ -12,7 +12,7 @@ rules:
   normalize_schwa:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'AX'
     define:
       # AX always maps to AH; stress digit preserved from Hunnicutt assignment.
@@ -42,7 +42,7 @@ rules:
   normalize_velar_nasal:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'NX'
     define:
       ng_target: target("NG")
@@ -66,7 +66,7 @@ rules:
   normalize_wh_merger:
     kind: postlexical
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'WH'
     define:
       w_target: target("W")

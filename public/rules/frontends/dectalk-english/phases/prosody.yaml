@@ -41,7 +41,7 @@ rules:
   dectalk_baseline_declination:
     kind: f0_layer
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme != "SIL"
         && (prev == null || prev.phoneme == "SIL")
@@ -82,7 +82,7 @@ rules:
   dectalk_short_declarative_baseline_declination:
     kind: f0_layer
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme != "SIL"
         && (prev == null || prev.phoneme == "SIL")
@@ -133,7 +133,7 @@ rules:
   dectalk_hat_rise:
     kind: f0_layer
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -185,7 +185,7 @@ rules:
   dectalk_hat_fall:
     kind: f0_layer
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -286,7 +286,7 @@ rules:
   dectalk_question_dip:
     kind: f0_layer
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -315,7 +315,7 @@ rules:
   dectalk_question_rise:
     kind: f0_layer
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -360,7 +360,7 @@ rules:
   dectalk_question_glide_reset:
     kind: f0_layer
     select:
-      stream: phone
+      relation: phone
       # Only at a question boundary SIL: that is the only place a +451 question
       # rise was added to question_glide (dectalk_question_rise fires when the
       # final stressed vowel looks ahead to THIS '?' SIL).  Resetting elsewhere
@@ -396,7 +396,7 @@ rules:
   dectalk_comma_rise1:
     kind: f0_layer
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -424,7 +424,7 @@ rules:
   dectalk_comma_rise2:
     kind: f0_layer
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -472,7 +472,7 @@ rules:
   dectalk_stress_impulse:
     kind: f0_layer
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type == "vowel"
         && has(current.stress) && current.stress == 1
@@ -520,7 +520,7 @@ rules:
   dectalk_boundary_reset:
     kind: f0_layer
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme == "SIL"
         && prev != null && prev.phoneme != "SIL"
@@ -543,12 +543,12 @@ rules:
   # Rule 6: Connected-speech source contour (Fant 1997)
   #
   # Applies phrase-level Ee/Rd shaping on voiced segments to preserve
-  # connected-speech source dynamics in the Klatt parameter stream.
+  # connected-speech source dynamics in the Klatt parameter relation.
   # --------------------------------------------------------------------------
   dectalk_connected_speech_source_contour:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme != 'SIL'
         && current.params != null

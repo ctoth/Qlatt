@@ -64,7 +64,7 @@ describe("declarative control score builder", () => {
     const score = buildDeclarativeControlScore("test", [
       {
         id: "ph_0",
-        stream: "phone",
+        relation: "phone",
         status: 1,
         phoneme: "AE",
         type: "vowel",
@@ -73,7 +73,7 @@ describe("declarative control score builder", () => {
       },
       {
         id: "ph_1",
-        stream: "phone",
+        relation: "phone",
         status: 1,
         phoneme: "N",
         type: "nasal",
@@ -111,7 +111,7 @@ describe("declarative control score builder", () => {
     const score = buildDeclarativeControlScore("test", [
       {
         id: "ph_0",
-        stream: "phone",
+        relation: "phone",
         status: 1,
         phoneme: "AA",
         type: "vowel",
@@ -137,7 +137,7 @@ describe("declarative control score builder", () => {
     const score = buildDeclarativeControlScore("test", [
       {
         id: "ph_0",
-        stream: "phone",
+        relation: "phone",
         status: 1,
         phoneme: "AA",
         type: "vowel",
@@ -148,7 +148,7 @@ describe("declarative control score builder", () => {
       },
       {
         id: "f0_0",
-        stream: "f0",
+        relation: "f0",
         status: 1,
         anchor_left: "m0",
         anchor_right: "m1",
@@ -159,7 +159,7 @@ describe("declarative control score builder", () => {
       },
       {
         id: "f0_layer_0",
-        stream: "f0_layer",
+        relation: "f0_layer",
         status: 1,
         layer: "stress",
         anchor_left: "m0",
@@ -199,7 +199,7 @@ describe("declarative control score builder", () => {
       [
         {
           id: "ph_0",
-          stream: "phone",
+          relation: "phone",
           status: 1,
           phoneme: "AA",
           type: "vowel",
@@ -209,7 +209,7 @@ describe("declarative control score builder", () => {
         },
         {
           id: "ph_deleted",
-          stream: "phone",
+          relation: "phone",
           status: 2,
           phoneme: "SIL",
           type: "silence",

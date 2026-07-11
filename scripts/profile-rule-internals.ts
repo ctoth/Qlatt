@@ -146,7 +146,7 @@ async function main() {
           paramSeq = paramSeq.map((token: FrontendToken, index: number) => ({
             ...token,
             id: token.id ?? `ph_${index}`,
-            stream: "phone",
+            relation: "phone",
             status: token.status ?? 1,
           }));
         }
@@ -230,7 +230,7 @@ async function main() {
   const phaseOverhead = totalWallMs - totalRuleMs;
   console.log("--- Phase-Level Overhead (outside rules) ---\n");
   console.log(`Phase overhead (wall - rule): ${phaseOverhead.toFixed(1)}ms  (${pct(phaseOverhead, totalWallMs)} of wall)  (${(phaseOverhead / wordCount).toFixed(3)} ms/word)`);
-  console.log(`  (cloneSequence, stream classification, axis init, scalar resolution, etc.)`);
+  console.log(`  (cloneSequence, relation classification, axis init, scalar resolution, etc.)`);
   console.log();
 
   // Full pie chart
@@ -355,7 +355,7 @@ async function main() {
       paramSeq = paramSeq.map((token: FrontendToken, index: number) => ({
         ...token,
         id: token.id ?? `ph_${index}`,
-        stream: "phone",
+        relation: "phone",
         status: token.status ?? 1,
       }));
     }

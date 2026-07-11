@@ -165,7 +165,7 @@ async function main() {
       paramSeq = paramSeq.map((token: FrontendToken, index: number) => ({
         ...token,
         id: token.id ?? `ph_${index}`,
-        stream: "phone",
+        relation: "phone",
         status: token.status ?? 1,
       }));
 
@@ -277,7 +277,7 @@ async function main() {
       paramSeq = paramSeq.map((token: FrontendToken, index: number) => ({
         ...token,
         id: token.id ?? `ph_${index}`,
-        stream: "phone",
+        relation: "phone",
         status: token.status ?? 1,
       }));
     }
@@ -308,7 +308,7 @@ async function main() {
   paramSeq = paramSeq.map((token: FrontendToken, index: number) => ({
     ...token,
     id: token.id ?? `ph_${index}`,
-    stream: "phone",
+    relation: "phone",
     status: token.status ?? 1,
   }));
 

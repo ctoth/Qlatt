@@ -3,7 +3,7 @@ rules:
   dectalk_apply_diphthong_trajectories:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: current.type == 'vowel' && has(current.trajectory)
     splice:
       type: replace_range
@@ -20,7 +20,7 @@ rules:
   dectalk_ow_alveolar_stop_late_f2_locus:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme == 'OW' &&
         next != null &&
@@ -71,7 +71,7 @@ rules:
   dectalk_insert_voiceless_stop_release_into_silence:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme in ['P', 'T', 'K'] && next != null && next.phoneme == 'SIL'
     define:
       rel: "current.phoneme + \"_REL\""
@@ -178,7 +178,7 @@ rules:
   dectalk_insert_voiceless_stop_release_and_aspiration:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme in ['P', 'T', 'K'] && (next != null ? !(next.type in ['stop_closure',
         'stop_release', 'stop_aspiration']) : false) && (next != null ? next.phoneme != 'SIL' : false)
@@ -300,7 +300,7 @@ rules:
   dectalk_insert_voiceless_stop_release_and_aspiration_final:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme in ['P', 'T', 'K'] && next == null
     define:
       rel: "current.phoneme + \"_REL\""
@@ -378,7 +378,7 @@ rules:
   dectalk_insert_voiced_stop_release:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme in ['B', 'D', 'G'] && (next != null ? !(next.type in ['stop_closure',
         'stop_release', 'stop_aspiration']) : false)
@@ -454,7 +454,7 @@ rules:
   dectalk_insert_voiced_stop_release_final:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme in ['B', 'D', 'G'] && next == null
     define:
       rel: "current.phoneme + \"_REL\""
@@ -488,7 +488,7 @@ rules:
   dectalk_weaken_interdental_frication:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme in ['TH', 'DH']
     define:
       next_token: next
@@ -560,7 +560,7 @@ rules:
   dectalk_add_voiced_fricative_soft_voicing_onset:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme in ['V', 'Z', 'ZH', 'JH'] &&
         (next != null ? (next.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
@@ -634,7 +634,7 @@ rules:
   dectalk_add_voiceless_fricative_breathy_onset:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.phoneme in ['F', 'S', 'SH'] &&
         (next != null ? (next.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
@@ -708,7 +708,7 @@ rules:
   dectalk_add_vowel_breathy_offset:
     kind: structural
     select:
-      stream: phone
+      relation: phone
       where: >-
         current.type == 'vowel' &&
         (has(current.voiced) ? current.voiced == true : true) &&

@@ -1,7 +1,7 @@
 /**
  * Migration script: Extract pipeline orchestration to pipeline.yaml.
  *
- * Reads public/rules/frontend.yaml, extracts the predicates, streams,
+ * Reads public/rules/frontend.yaml, extracts the predicates, relations,
  * and phases blocks into public/rules/pipeline.yaml, removes those
  * blocks from frontend.yaml, and adds pipeline.yaml to the include list.
  *
@@ -9,7 +9,7 @@
  *   version, include, parameters, output, transcription
  *
  * And pipeline.yaml contains:
- *   predicates, streams, phases
+ *   predicates, relations, phases
  *
  * Usage: npx tsx scripts/extract-pipeline.ts
  */
@@ -31,13 +31,13 @@ function main(): void {
   }
 
   // 2. Verify the blocks we need to extract exist
-  const { predicates, streams, phases } = doc;
+  const { predicates, relations, phases } = doc;
 
   if (!predicates || typeof predicates !== "object") {
     throw new Error("No 'predicates:' block found in frontend.yaml");
   }
-  if (!streams || typeof streams !== "object") {
-    throw new Error("No 'streams:' block found in frontend.yaml");
+  if (!relations || typeof relations !== "object") {
+    throw new Error("No 'relations:' block found in frontend.yaml");
   }
   if (!Array.isArray(phases)) {
     throw new Error("No 'phases:' block found in frontend.yaml");
@@ -46,7 +46,7 @@ function main(): void {
   // 3. Build the pipeline document
   const pipelineDoc: Record<string, any> = {
     predicates,
-    streams,
+    relations,
     phases,
   };
 
@@ -65,7 +65,7 @@ function main(): void {
 
   // 5. Remove extracted blocks from doc
   delete doc.predicates;
-  delete doc.streams;
+  delete doc.relations;
   delete doc.phases;
 
   // 6. Add pipeline.yaml to the include list (prepend before rule files)
@@ -112,7 +112,7 @@ function main(): void {
   // 8. Print summary
   console.log("\n=== Pipeline Extraction Summary ===\n");
   console.log(`  predicates: ${Object.keys(predicates).length} entries`);
-  console.log(`  streams: ${Object.keys(streams).length} entries`);
+  console.log(`  relations: ${Object.keys(relations).length} entries`);
   console.log(`  phases: ${phases.length} entries`);
   console.log(`\n  pipeline.yaml created at: ${PIPELINE_YAML}`);
   console.log(`  frontend.yaml rewritten with include: [${doc.include.join(", ")}]`);

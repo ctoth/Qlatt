@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 import { validateDslSpec } from "../src/declarative-frontend/validation";
 
 const loweringOutput = {
@@ -41,10 +42,24 @@ const loweringOutput = {
 };
 
 describe("declarative frontend schema coverage", () => {
+  it("accepts only the final relation vocabulary at the compiler boundary", () => {
+    expect(() =>
+      compileRuleEngineSpec({
+        streams: { phone: { type: "base" } },
+      }),
+    ).toThrowError(/E_LEGACY_STREAMS/);
+
+    const compiled = compileRuleEngineSpec({
+      relations: { phone: { type: "base" } },
+    });
+    expect(compiled.relations.phone.type).toBe("base");
+    expect("streams" in compiled).toBe(false);
+  });
+
   it("normalizes v11 top-level sections beyond phase/rule slice", () => {
     const spec = parseDslSpec({
       version: "v11",
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
         syllable: { type: "span", spans: "phone" },
         f0: { type: "point", unit: "Hz" },
@@ -55,7 +70,7 @@ describe("declarative frontend schema coverage", () => {
       },
       patterns: {
         cv: {
-          stream: "phone",
+          relation: "phone",
           scope: "syllable",
           sequence: [
             { capture: "c", where: "current.f.manner == 'stop'" },
@@ -65,7 +80,7 @@ describe("declarative frontend schema coverage", () => {
       },
       rules: {
         stress_lengthening: {
-          select: { stream: "phone", where: "current.f.manner == 'vowel'" },
+          select: { relation: "phone", where: "current.f.manner == 'vowel'" },
           apply: [{ field: "duration", op: "mul", value: "1.3", tag: "stress" }],
         },
       },
@@ -74,8 +89,8 @@ describe("declarative frontend schema coverage", () => {
       output: loweringOutput,
     });
 
-    expect(spec.streams.phone.type).toBe("base");
-    expect(spec.streams.syllable.spans).toBe("phone");
+    expect(spec.relations.phone.type).toBe("base");
+    expect(spec.relations.syllable.spans).toBe("phone");
     expect(spec.topology.hierarchy).toEqual(["syllable", "phone"]);
     expect(spec.patterns.cv.sequence).toHaveLength(2);
     expect(spec.interpolation.points.f0.method).toBe("monotone_cubic");
@@ -84,7 +99,7 @@ describe("declarative frontend schema coverage", () => {
 
   it("requires the complete track lowering output spec", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base" } },
+      relations: { phone: { type: "base" } },
       output: { lowering: { id: "incomplete" } },
     });
 
@@ -96,7 +111,7 @@ describe("declarative frontend schema coverage", () => {
 
   it("allows engine-only specs to omit track lowering output by default", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base" } },
+      relations: { phone: { type: "base" } },
     });
 
     const codes = validateDslSpec(spec).map((d) => d.code);
@@ -106,7 +121,7 @@ describe("declarative frontend schema coverage", () => {
 
   it("requires track lowering output when strict rulepack validation is requested", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base" } },
+      relations: { phone: { type: "base" } },
     });
 
     const codes = validateDslSpec(spec, { requireLoweringSpec: true }).map((d) => d.code);
@@ -114,21 +129,21 @@ describe("declarative frontend schema coverage", () => {
     expect(codes.includes("E_LOWERING_SPEC_REQUIRED")).toBe(true);
   });
 
-  it("validates cross references for streams, patterns, rules and phase resolution", () => {
+  it("validates cross references for relations, patterns, rules and phase resolution", () => {
     const spec = parseDslSpec({
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
         f0: { type: "point" },
       },
       patterns: {
         bad_stream_pattern: {
-          stream: "missing_stream",
+          relation: "missing_stream",
           sequence: [{ capture: "x", where: "true" }],
         },
       },
       rules: {
         bad_select: {
-          select: { stream: "missing_stream", where: "true" },
+          select: { relation: "missing_stream", where: "true" },
         },
         bad_match: {
           match: "missing_pattern",
@@ -147,20 +162,20 @@ describe("declarative frontend schema coverage", () => {
     const diagnostics = validateDslSpec(spec);
     const codes = new Set(diagnostics.map((d) => d.code));
 
-    expect(codes.has("E_PATTERN_STREAM_UNKNOWN")).toBe(true);
-    expect(codes.has("E_RULE_STREAM_UNKNOWN")).toBe(true);
+    expect(codes.has("E_PATTERN_RELATION_UNKNOWN")).toBe(true);
+    expect(codes.has("E_RULE_RELATION_UNKNOWN")).toBe(true);
     expect(codes.has("E_RULE_PATTERN_UNKNOWN")).toBe(true);
     expect(codes.has("E_PHASE_RESOLVE_SCALAR_UNKNOWN")).toBe(true);
-    expect(codes.has("E_PHASE_RESOLVE_POINT_STREAM_INVALID")).toBe(true);
+    expect(codes.has("E_PHASE_RESOLVE_POINT_RELATION_INVALID")).toBe(true);
   });
 
   it("enforces select/match rule shape for non-slice rules", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base" } },
-      patterns: { p: { stream: "phone", sequence: [{ capture: "x", where: "true" }] } },
+      relations: { phone: { type: "base" } },
+      patterns: { p: { relation: "phone", sequence: [{ capture: "x", where: "true" }] } },
       rules: {
         invalid_both: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           match: "p",
         },
         invalid_neither: {
@@ -177,18 +192,18 @@ describe("declarative frontend schema coverage", () => {
 
   it("rejects forward point references", () => {
     const spec = parseDslSpec({
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: {} } },
         f0: { type: "point" },
       },
-      patterns: { p: { stream: "phone", sequence: [{ capture: "x", where: "true" }] } },
+      patterns: { p: { relation: "phone", sequence: [{ capture: "x", where: "true" }] } },
       rules: {
         bad_expr: {
-          select: { stream: "phone", where: 42 },
+          select: { relation: "phone", where: 42 },
           constraint: { nope: true },
           apply: [{ field: "duration", op: "mul", value: 1.2 }],
           insert_point: {
-            stream: "f0",
+            relation: "f0",
             at: "midpoint(current)",
             value: "next_point('f0').value + 10",
           },
@@ -204,7 +219,7 @@ describe("declarative frontend schema coverage", () => {
 
   it("rejects unknown custom rule ops", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base" } },
+      relations: { phone: { type: "base" } },
       rules: {
         unknown_op: { op: "super_new_behavior" },
       },
@@ -219,14 +234,14 @@ describe("declarative frontend schema coverage", () => {
 
   it("rejects next3/prev3 cursor fields and points users to ahead/behind helpers", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      relations: { phone: { type: "base", scalars: { duration: {} } } },
       rules: {
         bad_depth: {
-          select: { stream: "phone", where: "next3 != null" },
+          select: { relation: "phone", where: "next3 != null" },
         },
         ok_depth: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where:
               "ahead(current, 3) == null || behind(current, 1) != null || look_back_where(current, 4, \"current.phoneme == 'AA'\") == null",
           },
@@ -246,10 +261,10 @@ describe("declarative frontend schema coverage", () => {
 
   it("validates dispatch exclusivity and default requirements", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      relations: { phone: { type: "base", scalars: { duration: {} } } },
       rules: {
         bad_effect: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               field: "duration",
@@ -260,7 +275,7 @@ describe("declarative frontend schema coverage", () => {
           ],
         },
         missing_default: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               field: "duration",
@@ -293,22 +308,22 @@ describe("declarative frontend schema coverage", () => {
     expect(codes.filter((code) => code === "E_DISPATCH_NO_DEFAULT").length).toBeGreaterThan(0);
   });
 
-  it("requires streams to declare features.type when rules reference .type", () => {
+  it("requires relations to declare features.type when rules reference .type", () => {
     const missing = parseDslSpec({
-      streams: { phone: { type: "base", features: { manner: ["vowel"] } } },
+      relations: { phone: { type: "base", features: { manner: ["vowel"] } } },
       rules: {
         bad: {
-          select: { stream: "phone", where: "current.type == 'vowel'" },
+          select: { relation: "phone", where: "current.type == 'vowel'" },
         },
       },
       phases: [{ name: "duration", rules: ["bad"] }],
     });
 
     const ok = parseDslSpec({
-      streams: { phone: { type: "base", features: { type: ["vowel"] } } },
+      relations: { phone: { type: "base", features: { type: ["vowel"] } } },
       rules: {
         good: {
-          select: { stream: "phone", where: "current.type == 'vowel'" },
+          select: { relation: "phone", where: "current.type == 'vowel'" },
         },
       },
       phases: [{ name: "duration", rules: ["good"] }],
@@ -323,10 +338,10 @@ describe("declarative frontend schema coverage", () => {
 
   it("accepts control_windows with explicit ops and object-valued field expressions", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      relations: { phone: { type: "base", scalars: { duration: {} } } },
       rules: {
         good: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           define: {
             release_fields: "{'AH': 48, 'AV': 0}",
           },
@@ -370,10 +385,10 @@ describe("declarative frontend schema coverage", () => {
 
   it("accepts structured apply values for set while keeping numeric ops numeric-only", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      relations: { phone: { type: "base", scalars: { duration: {} } } },
       rules: {
         good_set: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               field: "control_windows",
@@ -394,7 +409,7 @@ describe("declarative frontend schema coverage", () => {
           ],
         },
         bad_add: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               field: "duration",
@@ -435,7 +450,7 @@ rules:
   citation_fixture:
     kind: scalar
     select:
-      stream: phone
+      relation: phone
       where: current.phoneme == 'AA'
     apply:
       - field: duration
@@ -452,7 +467,7 @@ rules:
 
   it("accepts structural condition maps with predicate references", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base", features: { type: ["vowel", "stop"] } } },
+      relations: { phone: { type: "base", features: { type: ["vowel", "stop"] } } },
       predicates: {
         is_stop: { expr: "current.type == 'stop'" },
         in_question: {
@@ -465,7 +480,7 @@ rules:
       rules: {
         good: {
           select: {
-            stream: "phone",
+            relation: "phone",
             where: {
               all: [{ predicate: "in_question" }, { not: { expr: "current.phoneme == 'P'" } }],
             },
@@ -484,14 +499,14 @@ rules:
 
   it("reports unknown and cyclic predicate references", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base", features: { type: ["vowel"] } } },
+      relations: { phone: { type: "base", features: { type: ["vowel"] } } },
       predicates: {
         a: { predicate: "b" },
         b: { predicate: "a" },
       },
       rules: {
         bad_ref: {
-          select: { stream: "phone", where: { predicate: "missing_pred" } },
+          select: { relation: "phone", where: { predicate: "missing_pred" } },
         },
       },
       phases: [{ name: "duration", rules: ["bad_ref"] }],
@@ -505,9 +520,9 @@ rules:
 
   it("validates contour schema and select-only usage", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      relations: { phone: { type: "base", scalars: { duration: {} } } },
       patterns: {
-        p: { stream: "phone", sequence: [{ capture: "x", where: "true" }] },
+        p: { relation: "phone", sequence: [{ capture: "x", where: "true" }] },
       },
       rules: {
         bad_contour_shape: {
@@ -542,14 +557,14 @@ rules:
           },
         },
       },
-      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      relations: { phone: { type: "base", scalars: { duration: {} } } },
       rules: {
         bad_path: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [{ field: "duration", op: "mul", value: "params.policy.duration.missing", tag: "x" }],
         },
         bad_literal: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [{ field: "duration", op: "mul", value: "1.3", tag: "x" }],
         },
       },
@@ -577,10 +592,10 @@ rules:
           },
         },
       },
-      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      relations: { phone: { type: "base", scalars: { duration: {} } } },
       rules: {
         use_policy: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               field: "duration",

@@ -4,7 +4,7 @@ import { qlattInventoryResolver } from "./utils/qlatt-english-inventory";
 
 function getActivePhoneTokens(result: Record<string, unknown>[]) {
   return result
-    .filter((t) => (t.stream === "phone" || t.stream == null) && t.status !== 2)
+    .filter((t) => (t.relation === "phone" || t.relation == null) && t.status !== 2)
     .map((t) => ({ phoneme: t.phoneme, type: t.type }));
 }
 

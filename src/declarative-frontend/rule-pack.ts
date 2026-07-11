@@ -24,7 +24,7 @@ const MERGED_CHILD_ROOT_KEYS = new Set([
   "rules",
   "predicates",
   "patterns",
-  "streams",
+  "relations",
   "string_sets",
   "maps",
   "syllabification",
@@ -62,7 +62,7 @@ export const DEFAULT_RULEPACK_PATH = BUNDLED_FRONTEND_RULEPACK_PATHS[DEFAULT_FRO
  * Merge a child spec into the root spec, mutating root in-place.
  *
  * Merge semantics:
- * - rules, predicates, patterns, streams: merge by key, error on duplicate
+ * - rules, predicates, patterns, relations: merge by key, error on duplicate
  * - phases: concat (root first, then child)
  * - topology: concat + dedup each sub-key (hierarchy, parallel, point)
  * - All other fields (version, parameters, output, etc.): root wins, child ignored
@@ -84,7 +84,7 @@ function mergeChildIntoRoot(
     "rules",
     "predicates",
     "patterns",
-    "streams",
+    "relations",
     "string_sets",
     "maps",
   ] as const) {

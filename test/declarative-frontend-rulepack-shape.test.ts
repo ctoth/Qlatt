@@ -17,9 +17,9 @@ describe("declarative frontend rulepack shape", () => {
     expect(ruleOp(short)).toBeFalsy();
     expect(ruleOp(boundary)).toBeFalsy();
 
-    expect(stress?.select?.stream).toBe("phone");
-    expect(short?.select?.stream).toBe("phone");
-    expect(boundary?.select?.stream).toBe("phone");
+    expect(stress?.select?.relation).toBe("phone");
+    expect(short?.select?.relation).toBe("phone");
+    expect(boundary?.select?.relation).toBe("phone");
 
     expect(Array.isArray(stress?.apply)).toBe(true);
     expect(Array.isArray(short?.apply)).toBe(true);

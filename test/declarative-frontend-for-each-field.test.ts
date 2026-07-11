@@ -11,12 +11,12 @@ import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 describe("declarative frontend for_each_field expansion", () => {
   it("expands a templated effect into one effect per listed field", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       rules: {
         copy_bursts: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               for_each_field: ["A1", "A2", "A3"],
@@ -34,7 +34,7 @@ describe("declarative frontend for_each_field expansion", () => {
     const input = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "P",
         type: "stop_release",
         status: 1,
@@ -52,12 +52,12 @@ describe("declarative frontend for_each_field expansion", () => {
 
   it("leaves rules WITHOUT for_each_field unaffected", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       rules: {
         plain_rule: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               field: "params.A1",
@@ -74,7 +74,7 @@ describe("declarative frontend for_each_field expansion", () => {
     const input = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "P",
         type: "stop_release",
         status: 1,
@@ -88,10 +88,10 @@ describe("declarative frontend for_each_field expansion", () => {
 
   it("rejects malformed for_each_field shape (non-array)", () => {
     const spec = {
-      streams: { phone: { type: "base", scalars: {} } },
+      relations: { phone: { type: "base", scalars: {} } },
       rules: {
         bad: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               for_each_field: "A1",
@@ -109,10 +109,10 @@ describe("declarative frontend for_each_field expansion", () => {
 
   it("rejects malformed for_each_field shape (non-string entry)", () => {
     const spec = {
-      streams: { phone: { type: "base", scalars: {} } },
+      relations: { phone: { type: "base", scalars: {} } },
       rules: {
         bad: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               for_each_field: ["A1", 2],
@@ -130,7 +130,7 @@ describe("declarative frontend for_each_field expansion", () => {
 
   it("substitutes {field} inside dispatch row values", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       predicates: {
@@ -138,7 +138,7 @@ describe("declarative frontend for_each_field expansion", () => {
       },
       rules: {
         burst_dispatch: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               for_each_field: ["A2", "A3"],
@@ -162,7 +162,7 @@ describe("declarative frontend for_each_field expansion", () => {
     const input = [
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "P",
         type: "stop_release",
         place: "bilabial",

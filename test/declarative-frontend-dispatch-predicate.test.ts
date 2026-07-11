@@ -10,7 +10,7 @@ import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 describe("declarative frontend dispatch when: predicate support", () => {
   it("fires a row when the predicate condition is true", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       predicates: {
@@ -19,7 +19,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       },
       rules: {
         per_segment_scale: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               field: "duration",
@@ -40,7 +40,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       // Should match the predicate → duration * 0.5.
       {
         id: "p1",
-        stream: "phone",
+        relation: "phone",
         phoneme: "S",
         type: "fricative",
         voiceless: true,
@@ -50,7 +50,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       // Should NOT match → duration unchanged.
       {
         id: "p2",
-        stream: "phone",
+        relation: "phone",
         phoneme: "AA",
         type: "vowel",
         duration: 100,
@@ -59,7 +59,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       // Should NOT match (voiced fricative) → duration unchanged.
       {
         id: "p3",
-        stream: "phone",
+        relation: "phone",
         phoneme: "Z",
         type: "fricative",
         voiceless: false,
@@ -80,7 +80,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
   // is voiced.
   it("evaluates predicates that reference prev/next neighbors", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       predicates: {
@@ -88,7 +88,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       },
       rules: {
         scale_after_voiced: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               field: "duration",
@@ -107,13 +107,13 @@ describe("declarative frontend dispatch when: predicate support", () => {
 
     const input = [
       // No prev → predicate false → unchanged.
-      { id: "p1", stream: "phone", phoneme: "S", voiced: false, duration: 100, status: 1 },
+      { id: "p1", relation: "phone", phoneme: "S", voiced: false, duration: 100, status: 1 },
       // prev (p1) is voiceless → predicate false → unchanged.
-      { id: "p2", stream: "phone", phoneme: "AA", voiced: true, duration: 100, status: 1 },
+      { id: "p2", relation: "phone", phoneme: "AA", voiced: true, duration: 100, status: 1 },
       // prev (p2) is voiced → predicate true → duration * 0.5.
-      { id: "p3", stream: "phone", phoneme: "N", voiced: true, duration: 100, status: 1 },
+      { id: "p3", relation: "phone", phoneme: "N", voiced: true, duration: 100, status: 1 },
       // prev (p3) is voiced → predicate true → duration * 0.5.
-      { id: "p4", stream: "phone", phoneme: "T", voiced: false, duration: 100, status: 1 },
+      { id: "p4", relation: "phone", phoneme: "T", voiced: false, duration: 100, status: 1 },
     ];
 
     const out = runRuleEngine(input, compileRuleEngineSpec(spec)).sequence;
@@ -130,7 +130,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
   // time only — see chunk-0.5-analyst Finding 2.)
   it("throws E_PREDICATE_UNKNOWN when dispatch when: references an unknown predicate", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       predicates: {
@@ -140,7 +140,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       },
       rules: {
         bad_reference: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               field: "duration",
@@ -158,7 +158,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", phoneme: "S", duration: 100, status: 1 },
+      { id: "p1", relation: "phone", phoneme: "S", duration: 100, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(/E_PREDICATE_UNKNOWN/);
@@ -170,7 +170,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
   // silently slip through to runtime.
   it("rejects malformed predicate shape at validation time", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       predicates: {
@@ -178,7 +178,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       },
       rules: {
         malformed_shape: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               field: "duration",
@@ -196,7 +196,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", phoneme: "S", duration: 100, status: 1 },
+      { id: "p1", relation: "phone", phoneme: "S", duration: 100, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(
@@ -209,7 +209,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
   // engine.ts:929. Closes analyst Finding 1.
   it("rejects { predicate: \"\" } at validation time", () => {
     const spec = {
-      streams: {
+      relations: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
       },
       predicates: {
@@ -217,7 +217,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
       },
       rules: {
         empty_predicate_name: {
-          select: { stream: "phone", where: "true" },
+          select: { relation: "phone", where: "true" },
           apply: [
             {
               field: "duration",
@@ -235,7 +235,7 @@ describe("declarative frontend dispatch when: predicate support", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", phoneme: "S", duration: 100, status: 1 },
+      { id: "p1", relation: "phone", phoneme: "S", duration: 100, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, compileRuleEngineSpec(spec))).toThrowError(

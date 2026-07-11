@@ -82,7 +82,12 @@ describe("graph-native phase finalization", () => {
     expect(utterance.axis.getMarkTime(secondAnchor.rightMarkId)).toBe(150);
     const point = utterance.relation("F0Point").listItems()[0];
     expect(utterance.resolveAnchorTime(point)).toBe(50);
-    expect(utterance.checkpoints().map((checkpoint) => checkpoint.phase)).toEqual(["prosody", "finalize"]);
+    expect(utterance.checkpoints().map((checkpoint) => [checkpoint.phase, checkpoint.boundary])).toEqual([
+      ["prosody", "before"],
+      ["prosody", "after"],
+      ["finalize", "before"],
+      ["finalize", "after"],
+    ]);
     expect(utterance.journal().at(-1)?.operations.map((operation) => operation.kind)).toEqual([
       "resolve_mark_time",
       "resolve_mark_time",

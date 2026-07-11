@@ -2100,3 +2100,85 @@ not part of this source slice and were not deleted or staged.
 Next plan phase: Phase 6 graph-native tooling and explanation. Reintroduce only
 tooling that reads the one execution journal/history, with phase checkpoints,
 field explanation, structured why-not evidence, and replay digest proof.
+
+## Iteration 044 — Phase 6 graph-native tooling and explanation
+
+Status: kept. Phase 6 is complete.
+
+Tooling now derives from one graph-native execution. `Utterance` owns an
+append-only rule-attempt history and before/after phase checkpoints. The real
+matcher records structured select, pattern-step, constraint, missing-target,
+transaction-rejection, and fired evidence as it executes; `whyNotRule()` only
+queries those records. It does not rerun CEL, reconstruct phase prefixes, or
+maintain a second matcher.
+
+Feature explanation reads versioned Item history. Phase views replay journal
+prefixes against the compiled schema and compare provenance-sensitive graph
+digests. Replay consumes and validates the original `DecisionRecord`s, retains
+their exact ids and parents even when external resource decisions precede the
+first transaction, and does not mint replacement provenance. The explain CLI
+and the thin `tts-dsl` router expose field history, phase views, structured
+why-not evidence, and exact replay verification.
+
+The first draft did not satisfy those ownership constraints. An agy
+architectural review recommended journal-derived checkpoints and explicitly
+warned against prefix reruns and short-circuit loss. A narrow Claude diff review
+then found that the draft had introduced a second match evaluator, used
+incorrect same-phase replay state, recorded non-item-scoped rejection evidence,
+queried the wrong pattern capture, and weakened replay proof by stripping
+decision ids from the digest. That draft was not committed. The retained design
+deleted the second evaluator, records attempts inside the production matcher,
+preserves CEL short-circuit evidence, identifies all candidate-window Items,
+records the exact journal position of each attempt, and verifies the original
+provenance graph. A direct same-phase test proves that a later rule's failure is
+observed after an earlier rule's committed mutation.
+
+Tooling capture is explicitly opt-in at the production orchestration boundary.
+The first full-capture profiler measured 100 words at 112.84 ms mean / 108.89 ms
+median. With capture disabled on ordinary synthesis, the same 100-word profiler
+measured 19.74 ms mean / 17.79 ms median with zero errors. Explain and DSL calls
+enable capture for their single execution.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm run typecheck:audio
+PASS
+
+npm run typecheck:golden
+PRE-EXISTING FAIL: the baseline TS5097 rendering imports, experiment-config
+unknown assignment, and missing toposort declarations remain. The earlier
+f0LayerCommands error is gone.
+
+npm test -- test/hrg-tooling.test.ts test/tts-dsl.test.ts test/hrg-replay.test.ts test/hrg-rule-engine-finalize.test.ts test/hrg-rule-engine-select.test.ts test/hrg-rule-engine-pattern.test.ts
+PASS: 6 files, 22 tests
+
+npm test
+PASS: 116 files, 944 tests; 5,400-word audit; 0 processing errors
+
+npm run build
+PASS
+
+npm run explain -- "hello world" --frontend qlatt-english --strict-citations
+PASS: 1,581 decisions, 0 uncited
+
+npm run explain -- "hello world" --frontend dectalk-english --strict-citations
+PASS: 1,254 decisions, 0 uncited
+
+npm run explain -- "she sees a calm blue moon" --frontend qlatt-beauty --strict-citations
+PASS: 2,466 decisions, 0 uncited
+```
+
+Tracked production search is zero-hit for `evaluateRuleMatchEvidence`, prefix
+phase replay, JSON-cloned tooling snapshots, and absence-only why-not answers.
+
+Next plan phase: Phase 7 fixed-point deletion and documentation convergence.
+Run and classify every forbidden-surface gate, converge all architecture and
+authoring documents, resolve the remaining final static/golden/browser gates,
+and record the final proof before declaring the plan complete.

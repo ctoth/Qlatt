@@ -53,6 +53,7 @@ export type TextToKlattTrackOptions = {
   voiceQuality?: VoiceQuality;
   directionTrack?: DirectionTrack;
   diagnostics?: Diagnostics | null;
+  captureTooling?: boolean;
 };
 
 export type TextToKlattTrackDetailedResult = {
@@ -511,6 +512,7 @@ function buildTextToKlattTrackDetailed(
     : requestedRate));
   const speakerPolicy = { speaker: resolvedSpeaker };
   const graphInventory = { spec: resources.inventory, decisionId: inventoryDecision.id };
+  const captureTooling = options.captureTooling === true;
   let evaluationOwner = ruleEvaluationOwners.get(spec);
   if (!evaluationOwner) {
     evaluationOwner = new GraphRuleEvaluationOwner();
@@ -521,12 +523,14 @@ function buildTextToKlattTrackDetailed(
     phases: ["normalize", "postlexical", "structural"],
     parameters: mergedPolicy(spec, speakerPolicy),
     inventory: graphInventory,
+    captureTooling,
   });
   runGraphRuleEngine(utterance, spec, {
     evaluationOwner,
     phases: ["annotation"],
     parameters: mergedPolicy(spec, speakerPolicy),
     inventory: graphInventory,
+    captureTooling,
   });
   annotateProsody(utterance);
 
@@ -552,6 +556,7 @@ function buildTextToKlattTrackDetailed(
       formant: { rate_undershoot_factor: formantRate },
     }),
     inventory: graphInventory,
+    captureTooling,
   });
   const durationFloorTransaction = utterance.beginTransaction({
     ruleId: "lowering_duration_floor",
@@ -578,6 +583,7 @@ function buildTextToKlattTrackDetailed(
     phases: ["formant"],
     parameters: mergedPolicy(spec, { ...speakerPolicy, formant: { rate_undershoot_factor: formantRate } }),
     inventory: graphInventory,
+    captureTooling,
   });
   const f0Policy = recordOrEmpty(policyRecord(spec).f0);
   const f0Range = Math.pow(rate, -f0Exponent);
@@ -593,6 +599,7 @@ function buildTextToKlattTrackDetailed(
       },
     }),
     inventory: graphInventory,
+    captureTooling,
   });
 
   const referenceVoice = registry ? resolveVoice(registry, registry.default) : null;

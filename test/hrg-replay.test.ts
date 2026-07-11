@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { replayJournal, Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { createProvenanceCollector } from "../src/provenance";
 
 const SCHEMA = {
   itemTypes: {
@@ -93,5 +94,37 @@ describe("HRG checkpoints and deterministic replay", () => {
     expect(replayed.graphDigest()).toBe(utterance.graphDigest());
     expect(replayed.associationWrites(replayedFrom, "cv", replayedTo).map((write) => write.active))
       .toEqual([true, false]);
+  });
+
+  it("preserves original decision ids when non-graph decisions precede transactions", () => {
+    const provenance = createProvenanceCollector();
+    provenance.add({
+      stage: "frontend",
+      type: "resource_selected",
+      subject: "resource:fixture",
+      reason: "select fixture resource",
+      citations: ["Taylor, Black & Caley 2001"],
+    });
+    const utterance = new Utterance(SCHEMA, provenance);
+    const create = utterance.beginTransaction(META);
+    const segment = create.createItem("segment", "s1");
+    create.set(segment, "phoneme", "AA");
+    create.append("Segment", segment);
+    create.commit();
+
+    const replayed = replayJournal(
+      SCHEMA,
+      utterance.journal(),
+      provenance.getDecisions(),
+    );
+    expect(replayed.graphDigest()).toBe(utterance.graphDigest());
+    expect(replayed.getItem("s1")?.latestWrite("phoneme")?.decisionId).toBe(
+      utterance.getItem("s1")?.latestWrite("phoneme")?.decisionId,
+    );
+    expect(replayed.provenance.getDecisions().map((decision) => decision.id)).toEqual([
+      "d000002",
+      "d000003",
+      "d000004",
+    ]);
   });
 });

@@ -38,6 +38,7 @@
     "test:golden": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/run-golden.ts",
     "golden:declarative-summary": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/export-declarative-corpus-summary.ts",
     "explain": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/explain-phrase.ts",
+    "tts-dsl": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/tts-dsl.ts",
     "explain:summary": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/explain-summary.ts",
     "probe:harness": "node scripts/probe-harness.mjs",
     "analyze:render": "node scripts/analyze-render.mjs",

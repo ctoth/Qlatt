@@ -38,8 +38,15 @@ export {
   whyParamAt,
   whyRelationMembership,
 } from "./provenance-query";
+export {
+  explainFeature,
+  replayPhaseView,
+  whyNotRule,
+} from "./tooling";
+export type { FieldExplanation, WhyNotRuleResult } from "./tooling";
 export type {
   FeatureValue,
+  ConditionEvidence,
   FeatureSchema,
   FeatureWrite,
   FeatureWriteInput,
@@ -53,6 +60,7 @@ export type {
   RelationWrite,
   RelationWriteInput,
   RelationWriteOperation,
+  RuleAttempt,
   Stamper,
   TemporalAnchorWrite,
   TemporalWriteInput,

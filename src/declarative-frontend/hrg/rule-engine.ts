@@ -7,7 +7,12 @@ import { isPlainObject } from "../../yaml-loader";
 import type { Item } from "./item";
 import type { HrgNode } from "./relation";
 import type { HrgTransaction } from "./transaction";
-import type { FeatureValue, TransactionJournalEntry } from "./types";
+import type {
+  ConditionEvidence,
+  FeatureValue,
+  RuleAttempt,
+  TransactionJournalEntry,
+} from "./types";
 import type { Utterance } from "./utterance";
 
 export interface GraphRuleEngineOptions {
@@ -15,6 +20,7 @@ export interface GraphRuleEngineOptions {
   parameters?: Readonly<Record<string, unknown>>;
   inventory?: GraphInventoryResource;
   evaluationOwner?: GraphRuleEvaluationOwner;
+  captureTooling?: boolean;
 }
 
 export interface GraphInventoryResource {
@@ -578,26 +584,94 @@ function evaluateStructured(
   );
 }
 
+function evaluateCondition(
+  condition: unknown,
+  context: EvaluationContext,
+  predicates: Readonly<Record<string, unknown>>,
+): ConditionEvidence {
+  if (condition == null || condition === "") {
+    return Object.freeze({ kind: "constant", value: condition, matched: true });
+  }
+  if (typeof condition === "string") {
+    const value = evaluate(condition, context);
+    return Object.freeze({ kind: "expression", expression: condition, value, matched: Boolean(value) });
+  }
+  if (!isPlainObject(condition)) {
+    return Object.freeze({ kind: "constant", value: condition, matched: Boolean(condition) });
+  }
+  if (typeof condition.predicate === "string") {
+    const evidence = evaluateCondition(predicates[condition.predicate], context, predicates);
+    return Object.freeze({
+      kind: "predicate",
+      predicate: condition.predicate,
+      matched: evidence.matched,
+      evidence,
+    });
+  }
+  if (typeof condition.expr === "string") {
+    const value = evaluate(condition.expr, context);
+    return Object.freeze({
+      kind: "expression",
+      expression: condition.expr,
+      value,
+      matched: Boolean(value),
+    });
+  }
+  if (Array.isArray(condition.all)) {
+    const evaluated: ConditionEvidence[] = [];
+    for (const entry of condition.all) {
+      const evidence = evaluateCondition(entry, context, predicates);
+      evaluated.push(evidence);
+      if (!evidence.matched) {
+        return Object.freeze({
+          kind: "all",
+          matched: false,
+          evaluated: Object.freeze(evaluated),
+          total: condition.all.length,
+        });
+      }
+    }
+    return Object.freeze({
+      kind: "all",
+      matched: true,
+      evaluated: Object.freeze(evaluated),
+      total: condition.all.length,
+    });
+  }
+  if (Array.isArray(condition.any)) {
+    const evaluated: ConditionEvidence[] = [];
+    for (const entry of condition.any) {
+      const evidence = evaluateCondition(entry, context, predicates);
+      evaluated.push(evidence);
+      if (evidence.matched) {
+        return Object.freeze({
+          kind: "any",
+          matched: true,
+          evaluated: Object.freeze(evaluated),
+          total: condition.any.length,
+        });
+      }
+    }
+    return Object.freeze({
+      kind: "any",
+      matched: false,
+      evaluated: Object.freeze(evaluated),
+      total: condition.any.length,
+    });
+  }
+  if (condition.not != null) {
+    const evidence = evaluateCondition(condition.not, context, predicates);
+    return Object.freeze({ kind: "not", matched: !evidence.matched, evidence });
+  }
+  return Object.freeze({ kind: "constant", value: condition, matched: false });
+}
+
 function conditionMatches(
   condition: unknown,
   context: EvaluationContext,
   predicates: Readonly<Record<string, unknown>>,
 ): boolean {
-  if (condition == null || condition === "") return true;
-  if (typeof condition === "string") return Boolean(evaluate(condition, context));
-  if (!isPlainObject(condition)) return Boolean(condition);
-  if (typeof condition.predicate === "string") {
-    return conditionMatches(predicates[condition.predicate], context, predicates);
-  }
-  if (typeof condition.expr === "string") return Boolean(evaluate(condition.expr, context));
-  if (Array.isArray(condition.all)) {
-    return condition.all.every((entry) => conditionMatches(entry, context, predicates));
-  }
-  if (Array.isArray(condition.any)) {
-    return condition.any.some((entry) => conditionMatches(entry, context, predicates));
-  }
-  if (condition.not != null) return !conditionMatches(condition.not, context, predicates);
-  return false;
+  return evaluateCondition(condition, context, predicates).matched;
 }
 
 function evaluateDispatch(
@@ -762,6 +836,8 @@ function ruleTag(rule: Readonly<Record<string, unknown>>, ruleName: string): str
 }
 
 interface Match {
+  phaseName: string;
+  ruleName: string;
   transaction: HrgTransaction;
   items: readonly Item[];
   index: number;
@@ -770,6 +846,7 @@ interface Match {
   defaultTarget: string;
   relationName: string;
   contour?: Readonly<Record<string, unknown>>;
+  attemptItemIds: readonly string[];
 }
 
 function attachContourContexts(
@@ -1064,6 +1141,7 @@ function executeMatch(
   match: Match,
   params: Readonly<Record<string, unknown>>,
   predicates: Readonly<Record<string, unknown>>,
+  captureTooling: boolean,
   inventory?: GraphInventoryResource,
 ): void {
   const resolveTarget = (name: string): Item | undefined =>
@@ -1081,58 +1159,110 @@ function executeMatch(
     predicates,
     inventory,
   );
-  const definitions: Record<string, unknown> = {};
-  if (isPlainObject(rule.define)) {
-    for (const [name, expression] of Object.entries(rule.define)) {
-      definitions[name] = evaluate(expression, context);
-      context = buildEvaluationContext(
-        utterance,
-        match.transaction,
-        owner,
-        match.items,
-        match.index,
-        params,
-        { ...(match.contour ? { contour: match.contour } : {}), ...definitions },
-        match.bindings,
-        match.relationName,
-        predicates,
-        inventory,
-      );
-    }
-  }
-  if (!conditionMatches(rule.constraint, context, predicates)) return;
-  applyEffects(
+  context = evaluateRuleDefinitions(rule, context, (definitions) => buildEvaluationContext(
+    utterance,
     match.transaction,
-    resolveTarget,
-    match.defaultTarget,
-    rule.apply,
-    context,
-    predicates,
-    relationSpec,
+    owner,
+    match.items,
+    match.index,
     params,
-  );
-  if (isPlainObject(rule.contour)) {
+    { ...(match.contour ? { contour: match.contour } : {}), ...definitions },
+    match.bindings,
+    match.relationName,
+    predicates,
+    inventory,
+  ));
+  const constraintEvidence = evaluateCondition(rule.constraint, context, predicates);
+  if (!constraintEvidence.matched) {
+    if (captureTooling) utterance._recordRuleAttempt({
+      status: "constraint_failed",
+      phase: match.phaseName,
+      rule: match.ruleName,
+      itemIds: match.attemptItemIds,
+      journalLength: utterance.journal().length,
+      source: "rule",
+      evidence: constraintEvidence,
+    });
+    return;
+  }
+  try {
     applyEffects(
       match.transaction,
       resolveTarget,
       match.defaultTarget,
-      rule.contour.apply,
+      rule.apply,
       context,
       predicates,
       relationSpec,
       params,
     );
-  }
-  applyAssociations(match.transaction, rule.associate, true, resolveTarget);
-  applyAssociations(match.transaction, rule.disassociate, false, resolveTarget);
-  applySplice(utterance, match, rule.splice, context);
-  applyPointActions(utterance, match, rule, context, predicates);
-  if (rule.suppress === true || rule.delete === true) {
-    for (const item of new Set(Object.values(match.bindings))) {
-      match.transaction.set(item, "active", false);
+    if (isPlainObject(rule.contour)) {
+      applyEffects(
+        match.transaction,
+        resolveTarget,
+        match.defaultTarget,
+        rule.contour.apply,
+        context,
+        predicates,
+        relationSpec,
+        params,
+      );
     }
+    applyAssociations(match.transaction, rule.associate, true, resolveTarget);
+    applyAssociations(match.transaction, rule.disassociate, false, resolveTarget);
+    applySplice(utterance, match, rule.splice, context);
+    applyPointActions(utterance, match, rule, context, predicates);
+    if (rule.suppress === true || rule.delete === true) {
+      for (const item of new Set(Object.values(match.bindings))) {
+        match.transaction.set(item, "active", false);
+      }
+    }
+    const transaction = match.transaction.commit();
+    if (captureTooling) utterance._recordRuleAttempt({
+      status: "fired",
+      phase: match.phaseName,
+      rule: match.ruleName,
+      itemIds: match.attemptItemIds,
+      journalLength: utterance.journal().length,
+      transactionId: transaction.id,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const missingTarget = /unknown effect target '([^']+)'/.exec(message)?.[1];
+    if (captureTooling) utterance._recordRuleAttempt(missingTarget
+      ? {
+          status: "missing_target",
+          phase: match.phaseName,
+          rule: match.ruleName,
+          itemIds: match.attemptItemIds,
+          journalLength: utterance.journal().length,
+          target: missingTarget,
+        }
+      : {
+          status: "transaction_rejected",
+          phase: match.phaseName,
+          rule: match.ruleName,
+          itemIds: match.attemptItemIds,
+          journalLength: utterance.journal().length,
+          message,
+        });
+    throw error;
   }
-  match.transaction.commit();
+}
+
+function evaluateRuleDefinitions(
+  rule: Readonly<Record<string, unknown>>,
+  initialContext: EvaluationContext,
+  rebuild: (definitions: Readonly<Record<string, unknown>>) => EvaluationContext,
+): EvaluationContext {
+  if (!isPlainObject(rule.define)) return initialContext;
+  const definitions: Record<string, unknown> = {};
+  let context = initialContext;
+  for (const [name, expression] of Object.entries(rule.define)) {
+    definitions[name] = evaluate(expression, context);
+    context = rebuild(definitions);
+  }
+  return context;
 }
 
 function selectMatches(
@@ -1143,6 +1273,7 @@ function selectMatches(
   rule: Readonly<Record<string, unknown>>,
   params: Readonly<Record<string, unknown>>,
   predicates: Readonly<Record<string, unknown>>,
+  captureTooling: boolean,
   inventory?: GraphInventoryResource,
 ): Match[] {
   if (!isPlainObject(rule.select) || typeof rule.select.relation !== "string") return [];
@@ -1164,10 +1295,23 @@ function selectMatches(
       predicates,
       inventory,
     );
-    if (!conditionMatches(rule.select.where, context, predicates)) continue;
+    const evidence = evaluateCondition(rule.select.where, context, predicates);
+    if (!evidence.matched) {
+      if (captureTooling) utterance._recordRuleAttempt({
+        status: "select_where_failed",
+        phase: phaseName,
+        rule: ruleName,
+        itemIds: Object.freeze([items[index].id]),
+        journalLength: utterance.journal().length,
+        evidence,
+      });
+      continue;
+    }
     const node = relation.node(items[index]);
     if (!node) throw new Error("E_HRG_MATCH_NODE: selected Item has no relation node");
     matches.push({
+      phaseName,
+      ruleName,
       transaction,
       items,
       index,
@@ -1175,6 +1319,7 @@ function selectMatches(
       nodes: Object.freeze({ current: node }),
       defaultTarget: "current",
       relationName: rule.select.relation,
+      attemptItemIds: Object.freeze([items[index].id]),
     });
   }
   return matches;
@@ -1189,6 +1334,7 @@ function patternMatches(
   patterns: Readonly<Record<string, unknown>>,
   params: Readonly<Record<string, unknown>>,
   predicates: Readonly<Record<string, unknown>>,
+  captureTooling: boolean,
   inventory?: GraphInventoryResource,
 ): Match[] {
   if (typeof rule.match !== "string") return [];
@@ -1200,6 +1346,9 @@ function patternMatches(
   const relation = utterance.relation(pattern.relation);
   const matches: Match[] = [];
   for (let start = 0; start < items.length; start += 1) {
+    const attemptItemIds = Object.freeze(
+      items.slice(start, start + pattern.sequence.length).map((item) => item.id),
+    );
     const transaction = beginRuleTransaction(utterance, phaseName, ruleName, rule);
     const bindings: Record<string, Item> = {};
     const nodes: Record<string, HrgNode> = {};
@@ -1209,6 +1358,22 @@ function patternMatches(
       const index = start + offset;
       const item = items[index];
       if (!item || !isPlainObject(step) || typeof step.capture !== "string") {
+        const evidence: ConditionEvidence = Object.freeze({
+          kind: "constant",
+          value: item ? step : null,
+          matched: false,
+        });
+        if (captureTooling) utterance._recordRuleAttempt({
+          status: "pattern_step_failed",
+          phase: phaseName,
+          rule: ruleName,
+          itemIds: attemptItemIds,
+          journalLength: utterance.journal().length,
+          pattern: rule.match,
+          stepIndex: offset,
+          capture: isPlainObject(step) && typeof step.capture === "string" ? step.capture : null,
+          evidence,
+        });
         matched = false;
         break;
       }
@@ -1225,7 +1390,19 @@ function patternMatches(
         predicates,
         inventory,
       );
-      if (!conditionMatches(step.where, context, predicates)) {
+      const evidence = evaluateCondition(step.where, context, predicates);
+      if (!evidence.matched) {
+        if (captureTooling) utterance._recordRuleAttempt({
+          status: "pattern_step_failed",
+          phase: phaseName,
+          rule: ruleName,
+          itemIds: attemptItemIds,
+          journalLength: utterance.journal().length,
+          pattern: rule.match,
+          stepIndex: offset,
+          capture: step.capture,
+          evidence,
+        });
         matched = false;
         break;
       }
@@ -1251,8 +1428,22 @@ function patternMatches(
       predicates,
       inventory,
     );
-    if (!conditionMatches(pattern.constraint, context, predicates)) continue;
+    const constraintEvidence = evaluateCondition(pattern.constraint, context, predicates);
+    if (!constraintEvidence.matched) {
+      if (captureTooling) utterance._recordRuleAttempt({
+        status: "constraint_failed",
+        phase: phaseName,
+        rule: ruleName,
+        itemIds: attemptItemIds,
+        journalLength: utterance.journal().length,
+        source: "pattern",
+        evidence: constraintEvidence,
+      });
+      continue;
+    }
     matches.push({
+      phaseName,
+      ruleName,
       transaction,
       items,
       index,
@@ -1260,6 +1451,7 @@ function patternMatches(
       nodes: Object.freeze({ ...nodes }),
       defaultTarget,
       relationName: pattern.relation,
+      attemptItemIds,
     });
   }
   return matches;
@@ -1280,6 +1472,7 @@ function finalizePhase(
   utterance: Utterance,
   spec: CompiledRulepack,
   phase: CompiledRulepack["phases"][number],
+  captureTooling: boolean,
 ): void {
   if (phase.compute_times) {
     const baseRelations = Object.entries(spec.relations)
@@ -1330,7 +1523,7 @@ function finalizePhase(
       }
     }
   }
-  utterance.checkpoint(phase.name);
+  if (captureTooling) utterance.checkpoint(phase.name, "after");
 }
 
 export function runGraphRuleEngine(
@@ -1352,15 +1545,27 @@ export function runGraphRuleEngine(
   });
   const predicates = spec.predicates;
   const evaluationOwner = options.evaluationOwner ?? new GraphRuleEvaluationOwner();
+  const captureTooling = options.captureTooling ?? true;
   let timingFinalized = false;
 
   for (const phase of spec.phases) {
     if (selectedPhases && !selectedPhases.has(phase.name)) continue;
+    if (captureTooling) utterance.checkpoint(phase.name, "before");
     for (const ruleName of phase.rules) {
       const rule = spec.rules[ruleName];
       if (!isPlainObject(rule)) continue;
       const matches = isPlainObject(rule.select)
-        ? selectMatches(utterance, evaluationOwner, phase.name, ruleName, rule, params, predicates, options.inventory)
+        ? selectMatches(
+            utterance,
+            evaluationOwner,
+            phase.name,
+            ruleName,
+            rule,
+            params,
+            predicates,
+            captureTooling,
+            options.inventory,
+          )
         : patternMatches(
           utterance,
           evaluationOwner,
@@ -1370,6 +1575,7 @@ export function runGraphRuleEngine(
           spec.patterns,
           params,
           predicates,
+          captureTooling,
           options.inventory,
         );
       attachContourContexts(matches, rule);
@@ -1387,11 +1593,12 @@ export function runGraphRuleEngine(
           match,
           params,
           predicates,
+          captureTooling,
           options.inventory,
         );
       }
     }
-    finalizePhase(utterance, spec, phase);
+    finalizePhase(utterance, spec, phase, captureTooling);
     if (phase.compute_times) timingFinalized = true;
   }
   return {

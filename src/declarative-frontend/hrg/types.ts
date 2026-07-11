@@ -183,9 +183,77 @@ export interface TransactionJournalEntry {
 
 export interface PhaseCheckpoint {
   readonly phase: string;
+  readonly boundary: "before" | "after";
   readonly journalLength: number;
   readonly digest: string;
 }
+
+export type ConditionEvidence =
+  | {
+      readonly kind: "expression";
+      readonly expression: string;
+      readonly value: unknown;
+      readonly matched: boolean;
+    }
+  | {
+      readonly kind: "predicate";
+      readonly predicate: string;
+      readonly matched: boolean;
+      readonly evidence: ConditionEvidence;
+    }
+  | {
+      readonly kind: "all" | "any";
+      readonly matched: boolean;
+      readonly evaluated: readonly ConditionEvidence[];
+      readonly total: number;
+    }
+  | {
+      readonly kind: "not";
+      readonly matched: boolean;
+      readonly evidence: ConditionEvidence;
+    }
+  | {
+      readonly kind: "constant";
+      readonly value: unknown;
+      readonly matched: boolean;
+    };
+
+type RuleAttemptBase = {
+  readonly phase: string;
+  readonly rule: string;
+  readonly itemIds: readonly string[];
+  readonly journalLength: number;
+};
+
+export type RuleAttempt =
+  | (RuleAttemptBase & {
+      readonly status: "fired";
+      readonly transactionId: string;
+    })
+  | (RuleAttemptBase & {
+      readonly status: "select_where_failed";
+      readonly evidence: ConditionEvidence;
+    })
+  | (RuleAttemptBase & {
+      readonly status: "pattern_step_failed";
+      readonly pattern: string;
+      readonly stepIndex: number;
+      readonly capture: string | null;
+      readonly evidence: ConditionEvidence;
+    })
+  | (RuleAttemptBase & {
+      readonly status: "constraint_failed";
+      readonly source: "pattern" | "rule";
+      readonly evidence: ConditionEvidence;
+    })
+  | (RuleAttemptBase & {
+      readonly status: "missing_target";
+      readonly target: string;
+    })
+  | (RuleAttemptBase & {
+      readonly status: "transaction_rejected";
+      readonly message: string;
+    });
 
 export interface RelationWrite {
   readonly relationName: string;

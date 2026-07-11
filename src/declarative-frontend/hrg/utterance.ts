@@ -24,6 +24,7 @@ import type {
   PhaseCheckpoint,
   RelationStamper,
   RelationWrite,
+  RuleAttempt,
   Stamper,
   TemporalAnchorWrite,
   TemporalWriteInput,
@@ -121,6 +122,7 @@ export class Utterance {
   private readonly transactionJournal: TransactionJournalEntry[] = [];
   private transactionCounter = 0;
   private readonly phaseCheckpoints: PhaseCheckpoint[] = [];
+  private readonly ruleAttemptHistory: RuleAttempt[] = [];
 
   constructor(
     schema: HrgSchema,
@@ -373,6 +375,10 @@ export class Utterance {
     return [...this.relations.keys()];
   }
 
+  schemaDefinition(): HrgSchema {
+    return this.schema;
+  }
+
   beginTransaction(metadata: TransactionMetadata): HrgTransaction {
     return new HrgTransaction(this, metadata);
   }
@@ -388,13 +394,16 @@ export class Utterance {
         id: item.id,
         type: item.type,
         creationDecisionId: item.creationDecisionId(),
-        features: item.featureKeys().sort().map((key) => ({ key, writes: item.writes(key) })),
+        features: item.featureKeys().sort().map((key) => ({
+          key,
+          writes: item.writes(key),
+        })),
       }));
-    const relations = this.relationNames()
+    const relations = Object.keys(this.schema.relations)
       .sort()
       .map((name) => {
-        const relation = this.getRelation(name);
-        return relation ? { name, kind: relation.kind, writes: relation.writes() } : null;
+        const relation = this.relation(name);
+        return { name, kind: relation.kind, writes: relation.writes() };
       });
     const marks = [...this.axis.marks.values()]
       .sort((left, right) => this.axis.compare(left.id, right.id))
@@ -422,10 +431,14 @@ export class Utterance {
     return `hrg-${(hash >>> 0).toString(16).padStart(8, "0")}`;
   }
 
-  checkpoint(phase: string): PhaseCheckpoint {
+  checkpoint(
+    phase: string,
+    boundary: "before" | "after" = "after",
+  ): PhaseCheckpoint {
     if (!phase) throw new Error("E_HRG_CHECKPOINT_PHASE: phase is required");
     const checkpoint = Object.freeze({
       phase,
+      boundary,
       journalLength: this.transactionJournal.length,
       digest: this.graphDigest(),
     });
@@ -435,6 +448,14 @@ export class Utterance {
 
   checkpoints(): readonly PhaseCheckpoint[] {
     return Object.freeze([...this.phaseCheckpoints]);
+  }
+
+  _recordRuleAttempt(attempt: RuleAttempt): void {
+    this.ruleAttemptHistory.push(Object.freeze(attempt));
+  }
+
+  ruleAttempts(): readonly RuleAttempt[] {
+    return Object.freeze([...this.ruleAttemptHistory]);
   }
 
   _assertOwnedItem(item: Item): void {

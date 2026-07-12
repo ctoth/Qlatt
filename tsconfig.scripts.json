@@ -7,6 +7,8 @@
     "scripts/explain-summary.ts",
     "scripts/measure/measure.ts",
     "scripts/lint-audio.ts",
+    "scripts/oracle/dectalk-trace.ts",
+    "scripts/oracle/compare-trace.ts",
     "scripts/oracle/klatt-frames-to-doc.ts",
     "scripts/oracle/compare-klsyn88.ts",
     "scripts/oracle/klatt-frames-to-paramdoc.ts",

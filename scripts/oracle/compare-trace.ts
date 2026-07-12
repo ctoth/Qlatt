@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { parseDectalkTraceFile, type DectalkTraceFrame } from "./dectalk-trace";
-
-const FRAME_PERIOD_SEC = 0.0064;
+import {
+  DECTALK_NATIVE_SAMPLE_RATE_HZ,
+  DECTALK_SAMPLES_PER_FRAME,
+  dectalkFrameStartSample,
+  dectalkFrameStartSec,
+  parseDectalkTraceFile,
+  type DectalkTraceFrame,
+} from "./dectalk-trace";
 
 type Args = {
   oracleTrace: string;
@@ -19,11 +24,33 @@ type TrackEvent = {
 
 type ParamSummary = {
   compared: number;
+  missingQlatt: number;
   meanAbs: number;
   maxAbs: number;
   maxFrame: number | null;
+  maxPacketStartSample: number | null;
+  maxPacketStartSec: number | null;
   oracleAtMax: number | null;
   qlattAtMax: number | null;
+  firstMismatch: FrameMismatch | null;
+  mismatchRanges: MismatchRange[];
+};
+
+type FrameMismatch = {
+  frame: number;
+  packetStartSample: number;
+  packetStartSec: number;
+  oracle: number;
+  qlatt: number;
+  abs: number;
+};
+
+type MismatchRange = {
+  firstFrame: number;
+  lastFrame: number;
+  firstPacketStartSample: number;
+  lastPacketEndSample: number;
+  frameCount: number;
 };
 
 type OraclePhoneGroup = {
@@ -52,6 +79,10 @@ const USP_R = US_PHONE + 26;
 const USP_LL = US_PHONE + 27;
 const USP_HX = US_PHONE + 28;
 const USP_CZ = US_PHONE + 58;
+// Engineering tolerance for JSON-decoded floating controls. DECtalk's emitted
+// integers still compare exactly; this avoids inventing mismatches from binary
+// representation of a Qlatt float value.
+const MATCH_EPSILON = 1e-9;
 
 const PARAM_MAP: Array<{
   label: string;
@@ -216,39 +247,102 @@ function summarizeParam(
   qlattScale = 1,
 ): ParamSummary {
   let compared = 0;
+  let missingQlatt = 0;
   let sumAbs = 0;
   let maxAbs = 0;
   let maxFrame: number | null = null;
+  let maxPacketStartSample: number | null = null;
+  let maxPacketStartSec: number | null = null;
   let oracleAtMax: number | null = null;
   let qlattAtMax: number | null = null;
+  let firstMismatch: FrameMismatch | null = null;
+  const mismatchRanges: MismatchRange[] = [];
+  let activeMismatchRange: MismatchRange | null = null;
 
-  for (let frameIndex = 0; frameIndex < oracleFrames.length; frameIndex += 1) {
-    const oracleFrame = oracleFrames[frameIndex]!;
+  const closeMismatchRange = (): void => {
+    if (activeMismatchRange != null) {
+      mismatchRanges.push(activeMismatchRange);
+      activeMismatchRange = null;
+    }
+  };
+
+  for (const oracleFrame of oracleFrames) {
     const oracleValue =
       oracleValueForFrame?.(oracleFrame) ??
       (oracleKey == null ? null : finiteNumber(oracleFrame.out[oracleKey]));
-    const event = eventAt(track, frameIndex * FRAME_PERIOD_SEC);
+    const packetStartSample = dectalkFrameStartSample(oracleFrame.frame);
+    const packetStartSec = dectalkFrameStartSec(oracleFrame.frame);
+    const event = eventAt(track, packetStartSec);
     const qlatt = qlattValue(event, qlattKey, qlattScale);
-    if (oracleValue == null || qlatt == null) continue;
+    if (oracleValue == null) {
+      closeMismatchRange();
+      continue;
+    }
+    if (qlatt == null) {
+      missingQlatt += 1;
+      closeMismatchRange();
+      continue;
+    }
 
     const abs = Math.abs(qlatt - oracleValue);
     compared += 1;
     sumAbs += abs;
+    if (abs > MATCH_EPSILON) {
+      const mismatch: FrameMismatch = {
+        frame: oracleFrame.frame,
+        packetStartSample,
+        packetStartSec,
+        oracle: oracleValue,
+        qlatt,
+        abs,
+      };
+      if (firstMismatch == null) {
+        firstMismatch = mismatch;
+      }
+      if (
+        activeMismatchRange == null ||
+        oracleFrame.frame !== activeMismatchRange.lastFrame + 1
+      ) {
+        closeMismatchRange();
+        activeMismatchRange = {
+          firstFrame: oracleFrame.frame,
+          lastFrame: oracleFrame.frame,
+          firstPacketStartSample: packetStartSample,
+          lastPacketEndSample: packetStartSample + DECTALK_SAMPLES_PER_FRAME,
+          frameCount: 1,
+        };
+      } else {
+        activeMismatchRange.lastFrame = oracleFrame.frame;
+        activeMismatchRange.lastPacketEndSample =
+          packetStartSample + DECTALK_SAMPLES_PER_FRAME;
+        activeMismatchRange.frameCount += 1;
+      }
+    } else {
+      closeMismatchRange();
+    }
     if (abs > maxAbs) {
       maxAbs = abs;
-      maxFrame = frameIndex;
+      maxFrame = oracleFrame.frame;
+      maxPacketStartSample = packetStartSample;
+      maxPacketStartSec = packetStartSec;
       oracleAtMax = oracleValue;
       qlattAtMax = qlatt;
     }
   }
+  closeMismatchRange();
 
   return {
     compared,
+    missingQlatt,
     meanAbs: compared > 0 ? sumAbs / compared : 0,
     maxAbs,
     maxFrame,
+    maxPacketStartSample,
+    maxPacketStartSec,
     oracleAtMax,
     qlattAtMax,
+    firstMismatch,
+    mismatchRanges,
   };
 }
 
@@ -261,7 +355,9 @@ function groupOraclePhones(
     if (last && last.phoneIndex === frame.phoneIndex) {
       last.lastFrame = frame.frame;
       last.frameCount += 1;
-      last.durationSec = last.frameCount * FRAME_PERIOD_SEC;
+      last.durationSec =
+        (last.frameCount * DECTALK_SAMPLES_PER_FRAME) /
+        DECTALK_NATIVE_SAMPLE_RATE_HZ;
       continue;
     }
     groups.push({
@@ -269,7 +365,7 @@ function groupOraclePhones(
       firstFrame: frame.frame,
       lastFrame: frame.frame,
       frameCount: 1,
-      durationSec: FRAME_PERIOD_SEC,
+      durationSec: DECTALK_SAMPLES_PER_FRAME / DECTALK_NATIVE_SAMPLE_RATE_HZ,
       ph: frame.out.PH,
       ph2: frame.out.PH2,
       du: frame.out.DU,
@@ -338,6 +434,11 @@ function main(): number {
 
   const report = {
     schemaVersion: "v1",
+    timing: {
+      oracleSampleRateHz: DECTALK_NATIVE_SAMPLE_RATE_HZ,
+      oracleSamplesPerFrame: DECTALK_SAMPLES_PER_FRAME,
+      qlattLookup: "frame packet start at frame * 71 / 11025 seconds",
+    },
     oracleTrace: args.oracleTrace,
     qlattPayload: args.qlattPayload,
     oracleFrameCount: oracle.frames.length,

@@ -1,9 +1,12 @@
 import fs from "node:fs";
 
-// DECtalk 4.63 emits one trace row per synthesizer frame in ph_claus.c, which
-// documents the clause loop as "For each 6.4 msec frame of current clause".
-// Citation: C:\Users\Q\src\dectalk\463\dapi\src\PH\ph_claus.c
-const DECTALK_TRACE_FRAME_PERIOD_SEC = 0.0064;
+// DECtalk's frontend loop is nominally 6.4 ms (ph_claus.c), but the VTM
+// controller emits one concrete 71-sample packet at 11,025 Hz for each traced
+// delaypars packet (VTM/vtmiont.c:491-515, 1351-1378). Keep the control and
+// audio domains distinct: L1/L3 diagnostics use the emitted packet boundary.
+export const DECTALK_NATIVE_SAMPLE_RATE_HZ = 11_025;
+export const DECTALK_SAMPLES_PER_FRAME = 71;
+export const DECTALK_NOMINAL_CONTROL_FRAME_PERIOD_SEC = 0.0064;
 
 export type DectalkTraceFrame = {
   frame: number;
@@ -33,6 +36,29 @@ export type DectalkTraceFrame = {
     TLT: number;
   };
 };
+
+export type DectalkTraceSummary = {
+  frameCount: number;
+  durationFrames: number;
+  durationSamples: number;
+  durationSec: number;
+  nominalControlDurationSec: number;
+  voicedFrameCount: number;
+  voicedRatio: number;
+  f0MinHz: number | null;
+  f0MaxHz: number | null;
+  f0MeanHz: number | null;
+  meanAv: number | null;
+  meanAp: number | null;
+};
+
+export function dectalkFrameStartSample(frame: number): number {
+  return frame * DECTALK_SAMPLES_PER_FRAME;
+}
+
+export function dectalkFrameStartSec(frame: number): number {
+  return dectalkFrameStartSample(frame) / DECTALK_NATIVE_SAMPLE_RATE_HZ;
+}
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
@@ -77,7 +103,7 @@ function parseFrame(line: string): DectalkTraceFrame | null {
   };
 }
 
-export function summarizeDectalkTrace(frames: DectalkTraceFrame[]): Record<string, unknown> {
+export function summarizeDectalkTrace(frames: DectalkTraceFrame[]): DectalkTraceSummary {
   const voicedFrames = frames.filter((frame) => frame.out.AV > 0);
   const voicedF0 = voicedFrames
     .map((frame) => frame.f0prime / 10)
@@ -92,14 +118,17 @@ export function summarizeDectalkTrace(frames: DectalkTraceFrame[]): Record<strin
       ? voicedF0.reduce((sum, value) => sum + value, 0) / voicedF0.length
       : null;
 
-  const durationFrames =
-    frames.length > 0 ? frames[frames.length - 1]!.timeFrames + 1 : 0;
-  const durationSec = durationFrames * DECTALK_TRACE_FRAME_PERIOD_SEC;
+  const durationFrames = frames.length;
+  const durationSamples = durationFrames * DECTALK_SAMPLES_PER_FRAME;
+  const durationSec = durationSamples / DECTALK_NATIVE_SAMPLE_RATE_HZ;
 
   return {
     frameCount: frames.length,
     durationFrames,
+    durationSamples,
     durationSec,
+    nominalControlDurationSec:
+      durationFrames * DECTALK_NOMINAL_CONTROL_FRAME_PERIOD_SEC,
     voicedFrameCount: voicedFrames.length,
     voicedRatio: frames.length > 0 ? voicedFrames.length / frames.length : 0,
     f0MinHz,
@@ -118,7 +147,7 @@ export function summarizeDectalkTrace(frames: DectalkTraceFrame[]): Record<strin
 
 export function parseDectalkTraceJsonl(raw: string): {
   frames: DectalkTraceFrame[];
-  summary: Record<string, unknown>;
+  summary: DectalkTraceSummary;
 } {
   const frames = raw
     .split(/\r?\n/u)
@@ -132,7 +161,7 @@ export function parseDectalkTraceJsonl(raw: string): {
 
 export function parseDectalkTraceFile(filePath: string): {
   frames: DectalkTraceFrame[];
-  summary: Record<string, unknown>;
+  summary: DectalkTraceSummary;
 } {
   return parseDectalkTraceJsonl(fs.readFileSync(filePath, "utf8"));
 }

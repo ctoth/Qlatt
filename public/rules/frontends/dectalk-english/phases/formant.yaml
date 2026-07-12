@@ -28,6 +28,35 @@ rules:
       - "Klatt 1980 (cascade/parallel source routing)"
       - "DECtalk 4.63 p_us_st1.c"
 
+  # HX has default (-1) formant-table entries in us_maltar[]. The source does
+  # not send those generic defaults: ph_setar.c asks for the following onset
+  # target and the initial GEN_SIL forward boundary uses that target. Carry the
+  # following vowel's declared formants into HH so the existing lowerer's
+  # initial-silence blend emits the same successor-conditioned state.
+  dectalk_hx_carries_following_vowel_formants:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme == 'HH' && next != null && next.type == 'vowel'"
+    apply:
+      - field: F1
+        op: set
+        value: next.F1
+        tag: coarticulation
+      - field: F2
+        op: set
+        value: next.F2
+        tag: coarticulation
+      - field: F3
+        op: set
+        value: next.F3
+        tag: coarticulation
+    citations:
+      - "DECtalk 4.63 p_us_rom.h us_maltar[HX]: F1/F2/F3 are -1 defaults"
+      - "DECtalk 4.63 ph_setar.c:384 and :1073-1117 (next onset target is getbegtar(nphone + 1))"
+      - "DECtalk 4.63 p_us_st1.c:493-504 (initial GEN_SIL forward boundary takes tarnex)"
+      - "DECtalk 4.63 -lt oracle: Hello world frames 0-14 carry EH-conditioned HX F1/F2/F3"
+
   dectalk_obstruent_parallel_amplitudes:
     kind: scalar
     select:

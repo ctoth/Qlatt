@@ -14,6 +14,143 @@ const LINEAR_TILT: [f32; 35] = [
 ];
 
 const DOUBLET: [f32; 3] = [0.0, 13_000_000.0, -13_000_000.0];
+
+// --- Fixed-virtual-rate glottal source + decimation (browser-silence fix) ---
+//
+// klsyn88's reference C (`~/src/klsyn/c/parwv.c`, `pitch_synch_par_reset`,
+// lines 590-627) clamps the glottal open-phase length (`nopen`) to a raw
+// absolute 4x-tick count (263, floor 40) that is NEVER rescaled by `samrate`
+// -- unlike other constants in the same file (`FLPhz`/`BLPhz`,
+// parwv.c:333-334, explicitly rescaled by `samrate/10000`) -- and the
+// reference's own warning text ("truncated to 6.6 ms" = 263/(4*10000))
+// confirms this clamp implicitly assumes klsyn88's native ~10kHz reference
+// rate. Driving this primitive from a real WebAudio context (44100/48000Hz)
+// collapses the open-phase duty cycle toward inaudibility. Fix (Q's chosen
+// direction B, see investigations/dectalk-klglott-worklet-voice.md and the
+// implementation plan): run all internal tick-domain physics at a FIXED
+// virtual sample rate safely above real device rates (so decimation is
+// always downsampling, never upsampling), and decimate down to whatever the
+// live device rate actually is.
+const VIRTUAL_SAMPLE_RATE: f32 = 192_000.0;
+// klsyn88's implicit reference rate for the nopen/B0 clamp (see above).
+const NOPEN_REFERENCE_RATE: f32 = 10_000.0;
+const TICK_RESCALE: f32 = VIRTUAL_SAMPLE_RATE / NOPEN_REFERENCE_RATE; // 19.2
+const NOPEN_MAX_TICKS: i32 = 5050; // round(263.0 * TICK_RESCALE)
+const NOPEN_MIN_TICKS: i32 = 768; // round(40.0 * TICK_RESCALE)
+
+/// A single 2-pole all-pole IIR section using this crate's existing
+/// `setabc`-derived coefficient convention (`out = a*x + b*y[-1] + c*y[-2]`,
+/// same difference equation as the `rlpa/rlpb/rlpc` downsample filter and
+/// `rgla/rglb/rglc` impulsive-source filter already in this file). Extracted
+/// as a small helper so the antialiasing cascade below (2 sections x 2
+/// channels) does not duplicate the difference equation four times.
+#[derive(Clone, Copy, Default)]
+struct TwoPoleSection {
+    a: f32,
+    b: f32,
+    c: f32,
+    y1: f32,
+    y2: f32,
+}
+
+impl TwoPoleSection {
+    fn set_coeffs(&mut self, a: f32, b: f32, c: f32) {
+        self.a = a;
+        self.b = b;
+        self.c = c;
+    }
+
+    fn step(&mut self, x: f32) -> f32 {
+        let y = self.a * x + self.b * self.y1 + self.c * self.y2;
+        self.y2 = self.y1;
+        self.y1 = y;
+        y
+    }
+
+    fn reset_state(&mut self) {
+        self.y1 = 0.0;
+        self.y2 = 0.0;
+    }
+}
+
+/// Two cascaded `TwoPoleSection`s: the antialiasing filter used to decimate
+/// the fixed 192kHz internal glottal-source stream down to the device output
+/// rate. A single 2-pole section (like the existing `rlpa/rlpb/rlpc` filter)
+/// gives only ~12-13dB of rejection at 44.1/48kHz decimation ratios --
+/// inadequate, especially for the noise channel, which previously had no
+/// antialiasing filter at all. Cutoff is tied to the actual device Nyquist
+/// (not a fixed historical ratio) and is near-critically-damped (`freq =
+/// 0.0`) rather than the old resonant Q~1.5 tuning used by `rlpa/rlpb/rlpc`,
+/// since this filter's only job is antialiasing, not timbre shaping --
+/// labeled an engineering estimate; revisit if `npm run lint:audio`/`npm run
+/// measure` show residual aliasing.
+#[derive(Clone, Copy, Default)]
+struct AaCascade {
+    stage1: TwoPoleSection,
+    stage2: TwoPoleSection,
+}
+
+impl AaCascade {
+    fn set_coeffs(&mut self, a: f32, b: f32, c: f32) {
+        self.stage1.set_coeffs(a, b, c);
+        self.stage2.set_coeffs(a, b, c);
+    }
+
+    fn step(&mut self, x: f32) -> f32 {
+        self.stage2.step(self.stage1.step(x))
+    }
+
+    fn reset_state(&mut self) {
+        self.stage1.reset_state();
+        self.stage2.reset_state();
+    }
+}
+
+/// Solve for the `setabc(sample_rate, 0.0, bw)` bandwidth parameter that
+/// makes an `AaCascade` (2 identical DC-centered 2-pole `TwoPoleSection`s,
+/// used here purely as an antialiasing lowpass) land its actual -3dB point
+/// at `cutoff_hz`, instead of assuming `bw == cutoff_hz` directly.
+///
+/// Round-1 delivered `aa_bw = 0.45 * device_rate` and passed it straight to
+/// `setabc` as `bw`. A round-2 investigation (frequency-response calculation
+/// reimplementing `setabc`'s pole formula, corroborated numerically here via
+/// bisection before deriving this closed form) found that mapping puts the
+/// cascade's real -3dB point ~4.6x more aggressive than intended (e.g. at
+/// device_sr=44100, intended cutoff ~19845Hz landed at ~4339Hz) -- because a
+/// single freq=0 `TwoPoleSection` is a *double* real pole (not a single
+/// pole), and this file cascades *two* of them (4 poles total), so `bw`
+/// (which `setabc` calibrates as a single-resonance -3dB half-bandwidth) is
+/// nowhere near the cascade's actual half-power point.
+///
+/// Derivation: with `freq = 0.0`, `setabc` gives a double real pole at
+/// `r = exp(-pi*bw/sample_rate)`. A single DC-normalized section has
+/// magnitude `H(w) = (1-r)^2 / (1 - 2r*cos(w) + r^2)`; the 2-section cascade
+/// has magnitude `H(w)^2`. Setting `H(w_c)^2 = 1/sqrt(2)` (the -3dB point,
+/// `w_c = 2*pi*cutoff_hz/sample_rate`) and solving for `r` yields a
+/// quadratic: `(1-K)*r^2 + 2*(K - cos(w_c))*r + (1-K) = 0`, `K = 2^(1/4)`.
+/// The root in `(0, 1)` is the physically valid pole radius; invert
+/// `r = exp(-pi*bw/sample_rate)` for `bw`. Verified against an independent
+/// bisection search (scratch script, not committed) before landing on this
+/// closed form -- both agree to within floating-point tolerance across
+/// 11025/22050/44100/48000Hz device rates.
+///
+/// Still an **engineering estimate** in the sense that "cutoff = 0.45 x
+/// device rate" is itself a judgment call carried over from round 1 (per the
+/// plan) -- this function only makes the bw->actual-cutoff mapping land
+/// exactly on whatever target cutoff is passed in, re-validated via
+/// `npm run lint:audio`/`npm run measure` rather than assumed correct from
+/// formula alone.
+fn aa_cascade_bw_for_cutoff(sample_rate: f32, cutoff_hz: f32) -> f32 {
+    let wc = 2.0 * PI * cutoff_hz / sample_rate;
+    let k = 2f32.powf(0.25); // K = 2^(1/4), see derivation above
+    let a = 1.0 - k;
+    let b = 2.0 * (k - wc.cos());
+    let c = 1.0 - k;
+    let disc = (b * b - 4.0 * a * c).max(0.0);
+    let r = ((-b + disc.sqrt()) / (2.0 * a)).clamp(1e-6, 1.0 - 1e-6);
+    -sample_rate * r.ln() / PI
+}
+
 const KLSYN_AMPTABLE: [f32; 88] = [
     0.0, 0.0, 0.0, 0.0, 0.0,
     0.0, 0.0, 0.0, 0.0, 0.0,
@@ -84,7 +221,19 @@ const B0_TABLE: [f32; 224] = [
 
 #[repr(C)]
 pub struct OversampledGlottalSource {
+    // Internal tick-domain physics always run at VIRTUAL_SAMPLE_RATE
+    // (192kHz), decoupled from the live device rate -- see the
+    // fixed-virtual-rate design note above. Every existing tick-domain
+    // formula (t0, nopen, RGL bandwidth, skew, dipl_phase, flutter timing)
+    // is a ratio of sample-rate-scaled quantities, so it stays algebraically
+    // correct with this field simply always holding VIRTUAL_SAMPLE_RATE.
     sample_rate: f32,
+
+    // The live device output rate, as passed to `new()`. Used only by the
+    // decimation stage in `process()` to compute the internal-tick/output
+    // ratio and the antialiasing filter cutoff -- never used for tick-domain
+    // physics (that's `sample_rate`, above).
+    device_sample_rate: f32,
 
     // Period tracking in 4x sample units
     t0: i32,
@@ -95,7 +244,40 @@ pub struct OversampledGlottalSource {
 
     // Absolute output-sample clock, used to evaluate F0 flutter in seconds.
     // Reference: Klatt & Klatt 1990, eq. 1 (flutter is a function of absolute time).
+    // Repurposed (without changing its meaning) as the internal 192kHz-tick
+    // counter for the decimation stage: it is still incremented exactly once
+    // per `process_sample()` call, which now IS the 192kHz tick, so
+    // `t = output_sample_count / sample_rate` is still real elapsed seconds.
     output_sample_count: i64,
+
+    // Count of requested OUTPUT (device-rate) samples produced across all
+    // `process()` calls. Drift-free by construction: `target` internal-tick
+    // index for each output sample is recomputed fresh from this counter
+    // every time (`floor(device_sample_count * ratio)`), never accumulated,
+    // so long renders cannot accumulate rounding drift.
+    device_sample_count: i64,
+
+    // Antialiasing-filtered internal-tick samples bracketing the most
+    // recently produced output sample's fractional position, used for linear
+    // interpolation down to the device rate. `curr` is always exactly one
+    // internal tick ahead of `prev` (a persistent 1-tick lookahead buffer,
+    // primed by running one internal tick before the very first output
+    // sample is computed -- see `process()`).
+    voice_prev: f32,
+    voice_curr: f32,
+    noise_prev: f32,
+    noise_curr: f32,
+
+    // Antialiasing cascades (2 cascaded 2-pole sections each) applied to
+    // every internal 192kHz tick before decimation. Coefficients are
+    // construction-time constants (derived from device_sample_rate), only
+    // the state registers are reset by `reset()`.
+    voice_aa: AaCascade,
+    noise_aa: AaCascade,
+
+    // Rescaled noise recursive-smoother coefficient (see NOISE_SMOOTH_COEFF
+    // derivation comment in `new()`). Construction-time constant.
+    noise_smooth_coeff: f32,
 
     // Diplophonia (Klatt & Klatt 1990, §3): alternate glottal pulses are delayed and
     // attenuated. `dipl_phase` toggles each period (0 = normal pulse, 1 = alternate
@@ -149,17 +331,82 @@ pub struct OversampledGlottalSource {
 }
 
 impl OversampledGlottalSource {
+    /// `sample_rate` here means the DEVICE output rate (the FFI contract is
+    /// unchanged from before this fix). Internal tick-domain physics always
+    /// run at the fixed `VIRTUAL_SAMPLE_RATE`; `sample_rate` (the struct
+    /// field) is hardcoded to that constant so every existing tick-domain
+    /// formula in this file stays correct unchanged. `device_sample_rate`
+    /// stores the real argument for use by the decimation stage.
     pub fn new(sample_rate: f32) -> Self {
-        let sr = if sample_rate > 0.0 { sample_rate } else { 44_100.0 };
-        let (rlpa, rlpb, rlpc) = setabc(sr, 0.095 * sr, 0.063 * sr);
+        let device_sr = if sample_rate > 0.0 { sample_rate } else { 44_100.0 };
+        let virtual_sr = VIRTUAL_SAMPLE_RATE;
+
+        // Downsample low-pass filter (klsyn88 parwv.c:151-152, "Low-pass
+        // filter voicing waveform before downsampling from 4*samrate to
+        // samrate"): this filter reduces the 4x-oversampled tick-domain
+        // signal down to the *internal* 192kHz stream, so it must run at
+        // VIRTUAL_SAMPLE_RATE now, not device_sample_rate -- same formula as
+        // before, just fed the fixed virtual rate.
+        let (rlpa, rlpb, rlpc) = setabc(virtual_sr, 0.095 * virtual_sr, 0.063 * virtual_sr);
+
+        // Antialiasing cascade coefficients: run at VIRTUAL_SAMPLE_RATE (the
+        // rate the internal tick stream is actually sampled at), cutoff tied
+        // to the real device Nyquist. Edge case: if device_sample_rate ever
+        // exceeds VIRTUAL_SAMPLE_RATE (hypothetical future >192kHz device),
+        // clamp the reference rate at VIRTUAL_SAMPLE_RATE rather than letting
+        // the cutoff exceed the internal Nyquist -- upsampling is explicitly
+        // out of scope for this fix (known limitation, not silently wrong).
+        let aa_reference_rate = device_sr.min(VIRTUAL_SAMPLE_RATE);
+        // engineering estimate: target cutoff is 0.45x the device rate,
+        // near-critically-damped (freq = 0.0); revisit if lint:audio/measure
+        // show residual aliasing post-fix. `aa_bw` here is NOT passed
+        // directly as `setabc`'s `bw` argument -- passing the target cutoff
+        // straight through was round-1's implementation, and a round-2
+        // investigation found that puts the cascade's actual -3dB point
+        // ~4.6x more aggressive than intended (a single freq=0
+        // `TwoPoleSection` is a double pole, and this cascade has two of
+        // them). `aa_cascade_bw_for_cutoff` solves for the `bw` value that
+        // actually lands the 2-section cascade's -3dB point at this target;
+        // see its doc comment for the derivation.
+        let aa_cutoff_hz = 0.45 * aa_reference_rate;
+        let aa_bw = aa_cascade_bw_for_cutoff(virtual_sr, aa_cutoff_hz);
+        let (aa_a, aa_b, aa_c) = setabc(virtual_sr, 0.0, aa_bw);
+        let mut voice_aa = AaCascade::default();
+        voice_aa.set_coeffs(aa_a, aa_b, aa_c);
+        let mut noise_aa = AaCascade::default();
+        noise_aa.set_coeffs(aa_a, aa_b, aa_c);
+
+        // klsyn88 gen_noise (parwv.c:844-853) applies `noise = nrand +
+        // 0.75*nlast` once per call, at whatever `samrate` klsyn88 was
+        // configured for -- confirmed (by reading parwv.c) that gen_noise()
+        // is called once per outer `ns` (samrate-domain) loop iteration, the
+        // same implicit ~10kHz reference rate as the nopen/B0 clamp (see
+        // TICK_RESCALE above). process_sample() (which contains this
+        // smoother) now runs once per internal 192kHz tick instead of once
+        // per device-rate output sample -- ~19.2x more often than the
+        // reference's implicit call rate. To hold the real-time decay of a
+        // one-pole smoother y[n] = x[n] + a*y[n-1] constant across a change
+        // in call rate from rate_a to rate_b: a_b = a_a ^ (rate_a / rate_b).
+        // So 0.75 tuned at ~10kHz becomes, at 192kHz: 0.75^(10000/192000).
+        let noise_smooth_coeff = 0.75f32.powf(NOPEN_REFERENCE_RATE / VIRTUAL_SAMPLE_RATE);
+
         Self {
-            sample_rate: sr,
+            sample_rate: virtual_sr,
+            device_sample_rate: device_sr,
             t0: 0,
             nper: 0,
             nopen: 0,
             nmod: 0,
             skew: 0,
             output_sample_count: 0,
+            device_sample_count: 0,
+            voice_prev: 0.0,
+            voice_curr: 0.0,
+            noise_prev: 0.0,
+            noise_curr: 0.0,
+            voice_aa,
+            noise_aa,
+            noise_smooth_coeff,
             dipl_phase: 0,
             dipl_amp: 1.0,
             source: 2,
@@ -200,6 +447,13 @@ impl OversampledGlottalSource {
         self.nmod = 0;
         self.skew = 0;
         self.output_sample_count = 0;
+        self.device_sample_count = 0;
+        self.voice_prev = 0.0;
+        self.voice_curr = 0.0;
+        self.noise_prev = 0.0;
+        self.noise_curr = 0.0;
+        self.voice_aa.reset_state();
+        self.noise_aa.reset_state();
         self.dipl_phase = 0;
         self.dipl_amp = 1.0;
         self.nlast = 0.0;
@@ -288,28 +542,57 @@ impl OversampledGlottalSource {
 
             let mut nopen = (self.t0 as f32 * (open_quotient / 100.0)).floor() as i32;
 
-            if (source == 1 || source == 2) && nopen > 263 {
-                nopen = 263;
+            // nopen clamp, rescaled from klsyn88's raw ~10kHz-reference tick
+            // counts (263/40) to this crate's fixed VIRTUAL_SAMPLE_RATE via
+            // TICK_RESCALE -- see the fixed-virtual-rate design note above.
+            if (source == 1 || source == 2) && nopen > NOPEN_MAX_TICKS {
+                nopen = NOPEN_MAX_TICKS;
             }
             if nopen >= (self.t0 - 1) {
                 nopen = self.t0 - 2;
             }
-            if nopen < 40 {
-                nopen = 40;
+            if nopen < NOPEN_MIN_TICKS {
+                nopen = NOPEN_MIN_TICKS;
             }
             self.nopen = nopen;
             self.nmod = if av_db > 0.0 { self.nopen } else { self.t0 };
 
             // Natural source coefficients
-            // Reference: klsyn88 parwvt.h B0 table.
-            let b0 = B0_TABLE[(nopen - 40) as usize];
-            self.b = b0;
-            self.a = (b0 * nopen as f32) * 0.333;
+            // Reference: klsyn88 parwvt.h B0 table. B0_TABLE is indexed by
+            // raw ~10kHz-reference tick count (224 entries, nopen 40..263 in
+            // that domain) -- reindex the rescaled `nopen` back to an
+            // "equivalent 10kHz-tick" index for the lookup while `nopen`
+            // itself (used for the real open/closed-phase timing gate) stays
+            // in the rescaled 192kHz-tick domain.
+            let b0_index = ((nopen as f32 / TICK_RESCALE).round() as i32 - 40).clamp(0, (B0_TABLE.len() - 1) as i32);
+            let b0 = B0_TABLE[b0_index as usize];
+            // `self.a`/`self.b` drive a double integrator in process_sample's
+            // source==2 branch (`self.a -= self.b; self.vwave += self.a;`),
+            // run once per 192kHz-domain subtick with no explicit per-step
+            // Δt term. Refining the tick rate by TICK_RESCALE without
+            // compensating both accumulator steps inflates the doubly-
+            // integrated `vwave` output by TICK_RESCALE squared, not just
+            // TICK_RESCALE -- confirmed by round-2 investigation (simulated
+            // against native-10kHz ground truth at DECtalk KLGLOTT runtime
+            // parameters, f0=108.246Hz, swept f0=80-450Hz/oq=30-70%): single
+            // rescale of both terms still comes out ~19x too big; this
+            // double-rescale of `self.b` alone (with `self.a` derived from
+            // the already-rescaled `self.b`) lands at 0.93x-0.99x of ground
+            // truth. See plan CORRECTION (post-coder-round-1) in
+            // validated-growing-lecun.md for the full derivation.
+            self.b = b0 / (TICK_RESCALE * TICK_RESCALE);
+            self.a = self.b * (nopen as f32) * 0.333;
 
-            // Impulsive source low-pass
+            // Impulsive source low-pass (source==1 branch). Not currently
+            // exercised by DECtalk (graph.yaml hardcodes source: 2.0), but
+            // `temp1` has the same raw-unrescaled-`nopen` pattern as the
+            // natural-source coefficients above (matches klsyn88 parwv.c:
+            // 640-641, itself never rescaled by samrate even in the
+            // reference) -- reindex back to the "equivalent 10kHz-tick"
+            // domain via TICK_RESCALE for consistency, per plan.
             let bw = self.sample_rate / (nopen as f32);
             let (mut a, b, c) = setabc(self.sample_rate, 0.0, bw);
-            let temp1 = nopen as f32 * 0.00833;
+            let temp1 = (nopen as f32 / TICK_RESCALE) * 0.00833;
             a *= temp1 * temp1;
             self.rgla = a;
             self.rglb = b;
@@ -438,9 +721,11 @@ impl OversampledGlottalSource {
         }
 
         // Noise generation
-        // Reference implementation: klsyn88 parwv.c (gen_noise).
+        // Reference implementation: klsyn88 parwv.c (gen_noise). Coefficient
+        // rescaled from the reference's implicit ~10kHz call rate to this
+        // crate's 192kHz internal tick rate -- see derivation in `new()`.
         let nrand = (self.rand31() >> 17) - 8192;
-        let mut noise = (nrand as f32) + (0.75 * self.nlast);
+        let mut noise = (nrand as f32) + (self.noise_smooth_coeff * self.nlast);
         self.nlast = noise;
         if self.nper > self.nmod {
             noise *= 0.5;
@@ -561,6 +846,13 @@ impl OversampledGlottalSource {
         let flutter_len = flutter.len();
         let dipl_len = diplophonia.len();
 
+        // Fixed-virtual-rate decimation (see design note above `VIRTUAL_SAMPLE_RATE`):
+        // internal tick-domain physics run at VIRTUAL_SAMPLE_RATE regardless
+        // of device_sample_rate. `ratio` internal ticks are needed per
+        // requested output (device-rate) sample; `.max(1.0)` floors it at 1.0
+        // per the ">VIRTUAL_SAMPLE_RATE device" edge case (never upsample).
+        let ratio = (VIRTUAL_SAMPLE_RATE / self.device_sample_rate).max(1.0) as f64;
+
         for i in 0..len {
             let f0_val = if f0_len == 0 { 0.0 } else if f0_len > 1 { f0[i % f0_len] } else { f0[0] };
             let av_val = if av_len == 0 { 0.0 } else if av_len > 1 { av[i % av_len] } else { av[0] };
@@ -575,20 +867,56 @@ impl OversampledGlottalSource {
             let dipl_val = if dipl_len == 0 { 0.0 } else if dipl_len > 1 { diplophonia[i % dipl_len] } else { diplophonia[0] };
 
             self.set_seed(seed_val.round() as i32);
-            let (voice, noise) = self.process_sample(
-                f0_val,
-                av_val,
-                aturb_val,
-                tilt_val,
-                oq_val,
-                skew_val,
-                asym_val,
-                source_val.round() as i32,
-                flutter_val,
-                dipl_val,
-            );
-            voice_out[i] = voice;
-            noise_out[i] = noise;
+            let source_i = source_val.round() as i32;
+
+            // Prime the 1-tick lookahead buffer the very first time this
+            // source ever generates an internal tick (construction, or right
+            // after reset() -- both leave output_sample_count == 0). Without
+            // this, the first interpolated output sample would read
+            // zero-initialized voice_prev/curr (silently wrong,
+            // discontinuous).
+            if self.output_sample_count == 0 {
+                let (v0, n0) = self.process_sample(
+                    f0_val, av_val, aturb_val, tilt_val, oq_val, skew_val, asym_val,
+                    source_i, flutter_val, dipl_val,
+                );
+                let vf0 = self.voice_aa.step(v0);
+                let nf0 = self.noise_aa.step(n0);
+                self.voice_prev = vf0;
+                self.voice_curr = vf0;
+                self.noise_prev = nf0;
+                self.noise_curr = nf0;
+            }
+
+            // Drift-free index tracking: `target` is recomputed fresh from
+            // `device_sample_count` every output sample (never accumulated),
+            // so long renders cannot accumulate phase drift.
+            self.device_sample_count += 1;
+            let position = self.device_sample_count as f64 * ratio;
+            let target = position.floor() as i64;
+
+            // Generate internal ticks until `voice_curr`/`noise_curr` hold
+            // tick #(target + 1) and `voice_prev`/`noise_prev` hold tick
+            // #target -- the two internal samples bracketing this output
+            // sample's fractional position (`<=` keeps the 1-tick lookahead
+            // primed above intact: `output_sample_count` already equals the
+            // previous iteration's `target + 1` on entry).
+            while self.output_sample_count <= target {
+                let (v, n) = self.process_sample(
+                    f0_val, av_val, aturb_val, tilt_val, oq_val, skew_val, asym_val,
+                    source_i, flutter_val, dipl_val,
+                );
+                let vf = self.voice_aa.step(v);
+                let nf = self.noise_aa.step(n);
+                self.voice_prev = self.voice_curr;
+                self.voice_curr = vf;
+                self.noise_prev = self.noise_curr;
+                self.noise_curr = nf;
+            }
+
+            let frac = (position - target as f64) as f32;
+            voice_out[i] = self.voice_prev + frac * (self.voice_curr - self.voice_prev);
+            noise_out[i] = self.noise_prev + frac * (self.noise_curr - self.noise_prev);
         }
     }
 }

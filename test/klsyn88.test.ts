@@ -154,6 +154,18 @@ describe('klsyn88 Primitives', () => {
       exports.oversampled_glottal_source_free(state);
 
       expect(voicePeak).toBeGreaterThan(100);
+      // Round-2 regression guard: `self.a`/`self.b` (pitch_sync_reset,
+      // source==2 branch) drive a double integrator, so an unrescaled or
+      // singly-rescaled TICK_RESCALE factor inflates `vwave` by
+      // TICK_RESCALE^2 (round-1's delivered code peaked here at ~2,956,782
+      // -- a ~309x blowup off this exact f0=100/av=60/oq=50/sampleRate=11025
+      // configuration -- and a since-reverted single-rescale diagnostic
+      // still overshot to ~1057x native scale with a mistimed pulse). The
+      // corrected double-rescale (`self.b = b0 / TICK_RESCALE^2`) should
+      // land this near klsyn88's native ~9-10k peak scale for these
+      // parameters; 50000 gives ~5x headroom above the expected ~9200 while
+      // still catching a >5x regression toward either blowup.
+      expect(voicePeak).toBeLessThan(50000);
     });
 
     it('should generate voice and noise outputs', () => {
@@ -377,6 +389,106 @@ describe('klsyn88 Primitives', () => {
       exports.oversampled_glottal_source_free(state);
 
       expect(voicePeak).toBeGreaterThan(100);
+    });
+
+    it('should keep aggregate voice RMS consistent across device sample rates', () => {
+      // Regression test for the fixed-virtual-rate/decimation fix: before the
+      // fix, `nopen` (glottal open-phase duty cycle) was clamped to a raw
+      // 4x-tick count (263/40) calibrated for klsyn88's implicit ~10kHz
+      // reference rate and never rescaled, so the open-phase duty cycle
+      // collapsed at real browser sample rates (44100/48000Hz) relative to
+      // the CLI-only-tested 22050Hz path. See
+      // investigations/dectalk-klglott-worklet-voice.md for the full
+      // reproduction. This runs the DECtalk KLGLOTT88 runtime parameters
+      // (same values as the "should generate voice with DECtalk KLGLOTT
+      // runtime parameters" test above) across many render quanta, at each
+      // of the sample rates a real WebAudio context can use, and checks that
+      // aggregate voice RMS does not collapse at the higher rates relative
+      // to 22050Hz.
+      const exports = wasm.exports as any;
+      const blockSize = 128;
+      const numBlocks = 200; // ~1.16s @ 22050Hz, ~0.58s @ 44100Hz, ~0.53s @ 48000Hz
+
+      function aggregateVoiceRms(sampleRate: number): number {
+        const state = exports.oversampled_glottal_source_new(sampleRate);
+
+        const f0 = allocF32(exports, 1);
+        const av = allocF32(exports, 1);
+        const aturb = allocF32(exports, 1);
+        const tilt = allocF32(exports, 1);
+        const oq = allocF32(exports, 1);
+        const skew = allocF32(exports, 1);
+        const asym = allocF32(exports, 1);
+        const source = allocF32(exports, 1);
+        const seed = allocF32(exports, 1);
+        const flutter = allocF32(exports, 1);
+        const diplophonia = allocF32(exports, 1);
+        const voice = allocF32(exports, blockSize);
+        const noise = allocF32(exports, blockSize);
+
+        f0.view[0] = 108.24613952636719;
+        av.view[0] = 65;
+        aturb.view[0] = 0;
+        tilt.view[0] = 3;
+        oq.view[0] = 50;
+        skew.view[0] = 0;
+        asym.view[0] = 50;
+        source.view[0] = 2;
+        seed.view[0] = 305419889;
+        flutter.view[0] = 0;
+        diplophonia.view[0] = 0;
+
+        let sumSquares = 0;
+        let count = 0;
+        for (let block = 0; block < numBlocks; block += 1) {
+          exports.oversampled_glottal_source_process(
+            state,
+            f0.ptr, 1, av.ptr, 1, aturb.ptr, 1, tilt.ptr, 1,
+            oq.ptr, 1, skew.ptr, 1, asym.ptr, 1, source.ptr, 1, seed.ptr, 1,
+            flutter.ptr, 1, diplophonia.ptr, 1,
+            voice.ptr, noise.ptr, blockSize
+          );
+          for (let i = 0; i < blockSize; i++) {
+            sumSquares += voice.view[i] * voice.view[i];
+            count += 1;
+          }
+        }
+
+        deallocF32(exports, f0.ptr, 1);
+        deallocF32(exports, av.ptr, 1);
+        deallocF32(exports, aturb.ptr, 1);
+        deallocF32(exports, tilt.ptr, 1);
+        deallocF32(exports, oq.ptr, 1);
+        deallocF32(exports, skew.ptr, 1);
+        deallocF32(exports, asym.ptr, 1);
+        deallocF32(exports, source.ptr, 1);
+        deallocF32(exports, seed.ptr, 1);
+        deallocF32(exports, flutter.ptr, 1);
+        deallocF32(exports, diplophonia.ptr, 1);
+        deallocF32(exports, voice.ptr, blockSize);
+        deallocF32(exports, noise.ptr, blockSize);
+        exports.oversampled_glottal_source_free(state);
+
+        return Math.sqrt(sumSquares / count);
+      }
+
+      const rms22050 = aggregateVoiceRms(22050);
+      const rms44100 = aggregateVoiceRms(44100);
+      const rms48000 = aggregateVoiceRms(48000);
+
+      console.log('=== Aggregate voice RMS across device sample rates ===');
+      console.log(`22050Hz: ${rms22050.toFixed(2)}`);
+      console.log(`44100Hz: ${rms44100.toFixed(2)} (ratio vs 22050: ${(rms44100 / rms22050).toFixed(3)})`);
+      console.log(`48000Hz: ${rms48000.toFixed(2)} (ratio vs 22050: ${(rms48000 / rms22050).toFixed(3)})`);
+
+      // All three rates are driven by the same virtual-rate physics after the
+      // fix, so aggregate RMS should be close across rates (allow ~1.4dB of
+      // slack for antialiasing-filter/decimation-phase differences). Before
+      // the fix this ratio was measured (see investigation doc) at roughly
+      // 0.68-0.71 (~-3dB), a real, reproducible, sample-rate-dependent
+      // collapse -- this assertion is the regression gate for that collapse.
+      expect(rms44100).toBeGreaterThan(rms22050 * 0.85);
+      expect(rms48000).toBeGreaterThan(rms22050 * 0.85);
     });
   });
 

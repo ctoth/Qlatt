@@ -1,0 +1,21 @@
+CHANGES-REQUIRED
+
+HIGH
+
+- `test/harness/runtime.js:44`, `src/f0-filters-loader.ts:67`, `src/f0-filters-loader.ts:72`: the browser `dectalk-english` path now throws before synthesis because `speak()` calls synchronous `textToKlattTrack()` directly, while `getF0FilterExports()` only works in the browser after `setF0FilterWasmBytes()` has already been called. `index.html:47` exposes the DECtalk frontend in the harness, and `rg -F "setF0FilterWasmBytes" src test public` finds only the loader's own definition/docs. This is not covered by Node vitest/parity. Suggested fix: wire a real browser preload path before any layered F0 render, for example fetch `${import.meta.env.BASE_URL}worklets/f0-filters.wasm` in the harness/app init or at the start of `speak()`, call `setF0FilterWasmBytes(bytes)`, then call `textToKlattTrack()`. Keep the loader's absent-bytes error for true missing preload.
+
+MED
+
+- `crates/f0-filters/src/lib.rs:192`, `crates/f0-filters/src/lib.rs:193`, `crates/f0-filters/src/lib.rs:234`, `crates/f0-filters/src/lib.rs:379`, `crates/f0-filters/src/lib.rs:384`, `crates/f0-filters/src/lib.rs:399`, `crates/f0-filters/src/lib.rs:421`: `render_f0` trusts all descriptor counts and offsets. A bad `cmd_start/cmd_count` panics at `inp.cmds[layer.cmd_start + cursor]`; a bad profile range panics at `profile_points[start..start + count]`; nonzero counts with null pointers produce empty raw slices and then panic while decoding. In wasm that is a trap. Suggested fix: validate all FFI shape before rendering and return a status code: checked stride multiplication, non-null pointer for every nonzero count, `cmd_start <= n_cmds`, `cmd_count <= n_cmds - cmd_start`, and `profile_start/profile_count` within `n_profiles`. Avoid indexing/slicing until those checks pass.
+
+- `src/track-assembler.ts:827`, `master:src/track-assembler.ts:830`, `master:src/track-assembler.ts:838`: `durationFrames` validation moved from command execution to marshalling. The old loop only threw for impulse commands that actually reached the per-frame cursor; commands after the rendered duration, or commands with `NaN` time that never satisfy the cursor comparison, did not throw. The new loop validates every impulse command before rendering. Suggested fix: either preserve the old trigger condition by validating only commands whose time can be processed by the frame loop, or add an explicit earlier config-validation phase and update tests/error-contract docs to make the stricter behavior intentional.
+
+- `src/track-assembler.ts:816`, `crates/f0-filters/src/lib.rs:291`, `crates/f0-filters/src/lib.rs:302`, `master:src/track-assembler.ts:925`: a truthy but unsupported impulse `decay` string changes behavior silently. The old TS code did not match any branch and therefore left the impulse value unchanged until removal. The new TS lookup writes `undefined` into a `Float64Array` as `NaN`; Rust casts that descriptor to an integer decay tag, which can select a real mode instead of the old no-op. Suggested fix: validate `cfg.decay` against `halving | linear | exponential` before marshalling and throw a clear `E_F0_MODEL_REQUIRED`/unsupported-decay error, or intentionally encode an unknown mode that preserves the previous no-op behavior.
+
+- `src/track-assembler.ts:884`, `src/track-assembler.ts:893`, `src/track-assembler.ts:899`, `src/track-assembler.ts:910`, `src/track-assembler.ts:915`: wasm buffers are freed only on the successful path. A trap from `render_f0`, a thrown view construction, or a later allocation failure after earlier buffers were allocated leaves memory in the cached wasm instance. Suggested fix: allocate into `let` pointer records initialized to zero and put the `render_f0` call plus readback in `try/finally`, freeing every nonzero pointer in the finally block.
+
+LOW
+
+- `src/worklets/wasm-utils.ts:105`, `src/worklets/wasm-utils.ts:109`, `src/f0-filters-loader.ts:43`: `initWasmModuleSync()` accepts `ArrayBufferView` but compiles `bytes.buffer`, ignoring `byteOffset` and `byteLength`. A caller that injects a `Uint8Array.subarray()` will compile the entire backing buffer, not the view. Suggested fix: pass the `ArrayBufferView` directly to `WebAssembly.Module`, or slice `bytes.buffer` from `byteOffset` to `byteOffset + byteLength`.
+
+No build.ps1/build.sh crate-name or copy-name issue found in the reviewed diff.

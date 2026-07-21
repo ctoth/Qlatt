@@ -610,6 +610,14 @@ function summarizeParam(
     const event = selection?.event ?? null;
     const qlatt = qlattValue(event, qlattKey, qlattScale);
     if (oracleValue == null || qlatt == null) continue;
+    if (qlattKey === "F0") {
+      const oracleAv = finiteNumber(oracleFrame.out.AV);
+      const qlattAv = qlattValue(event, "AV");
+      // DECtalk maintains f0prime through unvoiced frames while Qlatt exposes
+      // F0=0 there. Compare audible pitch only when both engines are voiced;
+      // AV and voiced-ratio metrics retain the voicing disagreement itself.
+      if (oracleAv == null || qlattAv == null || oracleAv <= 0 || qlattAv <= 0) continue;
+    }
 
     const abs = Math.abs(qlatt - oracleValue);
     const oraclePhone = oracleSourcePhoneForFrame(oracleFrame, oracleComparisonTokens);

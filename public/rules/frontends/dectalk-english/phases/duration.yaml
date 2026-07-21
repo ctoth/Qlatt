@@ -82,8 +82,11 @@ rules:
       relation: Segment
       where: current.phoneme != 'SIL' && !(current.type in ['stop_release', 'stop_aspiration'])
     define:
-      "n": next
-      at_boundary: "n == null ? true : n.phoneme == 'SIL'"
+      next_syllabic_or_boundary: >-
+        look_ahead_pred(current, 100, 'is_syllabic_or_boundary')
+      at_boundary: >-
+        next_syllabic_or_boundary == null
+        || next_syllabic_or_boundary.phoneme == 'SIL'
       is_obstruent: >-
         current.type in ['fricative', 'stop_closure', 'affricate']
       is_plosive: current.type == 'stop_closure'

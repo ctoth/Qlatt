@@ -115,6 +115,25 @@ describe("dectalk-english end-to-end", () => {
     ).toBe(19);
   });
 
+  it("applies DECtalk Rule 2 to the final-rime vowel before a coda stop", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const ey = result.utterance.relation("Segment").listItems()
+      .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
+    const durationWrites = ey?.writes("duration") ?? [];
+    const rule2Index = durationWrites.findIndex(
+      (write) => write.reason === "dectalk_clause_final_lengthening matched",
+    );
+
+    expect(ey).toBeDefined();
+    expect(rule2Index).toBeGreaterThan(0);
+    expect(
+      Number(durationWrites[rule2Index].value) - Number(durationWrites[rule2Index - 1].value),
+    ).toBe(38);
+  });
+
   it("preserves required segment features when reducing a same-word geminate", () => {
     const result = textToKlattTrackDetailed("Safe zones feel fuzzy.", 110, 30, {
       frontendId: "dectalk-english",

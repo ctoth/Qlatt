@@ -5,6 +5,9 @@ predicates:
   is_stressed_vowel_or_boundary: >-
     (current.type == "vowel" && has(current.stress) && current.stress == 1)
     || current.phoneme == "SIL"
+  is_syllabic_or_boundary: >-
+    current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"]
+    || current.phoneme == "SIL"
 # Syllabification tables (DATA) for the generic `syllabify` pass.  Extracted
 # from DECtalk 4.63 by scripts/dt10-extract-syllable-tables.ts:
 #   - nuclei         <- p_us_sy1.c us_syl_vowels

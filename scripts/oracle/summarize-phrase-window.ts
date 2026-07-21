@@ -8,6 +8,7 @@ const FRAME_PERIOD_SEC = 0.0064;
 type Args = {
   runRoot: string;
   phraseId: string;
+  param: string;
   startSec: number;
   endSec: number;
 };
@@ -67,12 +68,13 @@ function parseArgs(argv: string[]): Args {
   const runRoot = flags.get("run-root");
   const phraseId = flags.get("phrase-id");
   if (!runRoot || !phraseId) {
-    throw new Error("Usage: summarize-phrase-window --run-root dir --phrase-id id [--start-sec n] [--end-sec n]");
+    throw new Error("Usage: summarize-phrase-window --run-root dir --phrase-id id [--param name] [--start-sec n] [--end-sec n]");
   }
 
   return {
     runRoot: path.resolve(runRoot),
     phraseId,
+    param: flags.get("param") ?? "F2",
     startSec: numberFlag(flags, "start-sec", 0),
     endSec: numberFlag(flags, "end-sec", Number.POSITIVE_INFINITY),
   };
@@ -131,10 +133,10 @@ function main(): void {
   console.log(`# ${args.phraseId}`);
   console.log(`runRoot=${args.runRoot}`);
   console.log(`window=${args.startSec.toFixed(4)}..${args.endSec.toFixed(4)} sec`);
-  const f2 = compare.params?.F2;
-  if (f2) {
+  const paramSummary = compare.params?.[args.param];
+  if (paramSummary) {
     console.log(
-      `F2 compared=${f2.compared} meanAbs=${f2.meanAbs} maxAbs=${f2.maxAbs} maxFrame=${f2.maxFrame} oracleAtMax=${f2.oracleAtMax} qlattAtMax=${f2.qlattAtMax}`,
+      `${args.param} compared=${paramSummary.compared} meanAbs=${paramSummary.meanAbs} maxAbs=${paramSummary.maxAbs} maxFrame=${paramSummary.maxFrame} oracleAtMax=${paramSummary.oracleAtMax} qlattAtMax=${paramSummary.qlattAtMax}`,
     );
   }
 
@@ -144,9 +146,11 @@ function main(): void {
     const endSec = (group.lastFrame + 1) * FRAME_PERIOD_SEC;
     if (endSec < args.startSec || startSec > args.endSec) continue;
     const groupFrames = oracle.slice(group.firstFrame, group.lastFrame + 1);
-    const f2Values = groupFrames.map((frame) => finiteNumber(frame.out.F2)).filter((value): value is number => value != null);
+    const paramValues = groupFrames
+      .map((frame) => finiteNumber(frame.out[args.param]))
+      .filter((value): value is number => value != null);
     console.log(
-      `  phoneIndex=${group.phoneIndex} frames=${group.firstFrame}-${group.lastFrame} time=${startSec.toFixed(4)}..${endSec.toFixed(4)} ph=${group.ph} ph2=${group.ph2} du=${group.du} F2 ${summarizeValues(f2Values)}`,
+      `  phoneIndex=${group.phoneIndex} frames=${group.firstFrame}-${group.lastFrame} time=${startSec.toFixed(4)}..${endSec.toFixed(4)} ph=${group.ph} ph2=${group.ph2} du=${group.du} ${args.param} ${summarizeValues(paramValues)}`,
     );
   }
 
@@ -154,28 +158,28 @@ function main(): void {
   for (const run of compare.qlattTrackRuns ?? []) {
     if (run.endSec < args.startSec || run.startSec > args.endSec) continue;
     const events = qlattWindow.filter(({ timeSec }) => timeSec != null && timeSec >= run.startSec && timeSec <= run.endSec);
-    const f2Values = events
-      .map(({ event }) => finiteNumber(event.params?.F2))
+    const paramValues = events
+      .map(({ event }) => finiteNumber(event.params?.[args.param]))
       .filter((value): value is number => value != null);
     console.log(
-      `  phoneme=${run.phoneme} events=${run.firstEvent}-${run.lastEvent} time=${run.startSec.toFixed(4)}..${run.endSec.toFixed(4)} duration=${run.durationSec.toFixed(4)} F2 ${summarizeValues(f2Values)}`,
+      `  phoneme=${run.phoneme} events=${run.firstEvent}-${run.lastEvent} time=${run.startSec.toFixed(4)}..${run.endSec.toFixed(4)} duration=${run.durationSec.toFixed(4)} ${args.param} ${summarizeValues(paramValues)}`,
     );
   }
 
   console.log("\nFrame window:");
   for (const { frame, frameIndex, timeSec } of oracleWindow) {
-    const qlattEvent = qlattWindow.reduce<{ eventIndex: number; f2: number | null } | null>((best, candidate) => {
+    const qlattEvent = qlattWindow.reduce<{ eventIndex: number; value: number | null } | null>((best, candidate) => {
       if (candidate.timeSec == null || candidate.timeSec > timeSec) return best;
       return {
         eventIndex: candidate.eventIndex,
-        f2: finiteNumber(candidate.event.params?.F2),
+        value: finiteNumber(candidate.event.params?.[args.param]),
       };
     }, null);
-    const oracleF2 = finiteNumber(frame.out.F2);
-    const qlattF2 = qlattEvent?.f2 ?? null;
-    const delta = oracleF2 != null && qlattF2 != null ? qlattF2 - oracleF2 : null;
+    const oracleValue = finiteNumber(frame.out[args.param]);
+    const qlattValue = qlattEvent?.value ?? null;
+    const delta = oracleValue != null && qlattValue != null ? qlattValue - oracleValue : null;
     console.log(
-      `  frame=${frameIndex} t=${timeSec.toFixed(4)} ph=${finiteNumber(frame.out.PH) ?? "?"} ph2=${finiteNumber(frame.out.PH2) ?? "?"} oracleF2=${oracleF2 ?? "?"} qlattEvent=${qlattEvent?.eventIndex ?? "?"} qlattF2=${qlattF2 ?? "?"} delta=${delta == null ? "?" : delta.toFixed(3)}`,
+      `  frame=${frameIndex} t=${timeSec.toFixed(4)} ph=${finiteNumber(frame.out.PH) ?? "?"} ph2=${finiteNumber(frame.out.PH2) ?? "?"} oracle${args.param}=${oracleValue ?? "?"} qlattEvent=${qlattEvent?.eventIndex ?? "?"} qlatt${args.param}=${qlattValue ?? "?"} delta=${delta == null ? "?" : delta.toFixed(3)}`,
     );
   }
 }

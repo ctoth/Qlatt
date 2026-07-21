@@ -694,13 +694,13 @@ parameters:
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_dummy_ix_formant_trace_windows:
         value:
-          - { start_ms: 0.0, end_ms: 12.4, fields: { F2: 1900, F3: 2425, B3: 233 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { F2: 1830, F3: 2438, B3: 226 }, tag: dectalk_trace_exact }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { F2: 1760, F3: 2450, B3: 219 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { F2: 1733, F3: 2474, B3: 213 }, tag: dectalk_trace_exact }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { F2: 1706, F3: 2498, B3: 206 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 12.4, fields: { F1: 353, F2: 1900, F3: 2425, B3: 233 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 382, F2: 1830, F3: 2438, B3: 226 }, tag: dectalk_trace_exact }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 410, F2: 1760, F3: 2450, B3: 219 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 426, F2: 1733, F3: 2474, B3: 213 }, tag: dectalk_trace_exact }
+          - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 442, F2: 1706, F3: 2498, B3: 206 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F2/F3/B3 values at frames 73-77)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F1/F2/F3/B3 values at frames 73-77)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_terminal_silence_f2_hz:
         value: 1670

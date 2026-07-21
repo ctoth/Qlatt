@@ -297,12 +297,16 @@ rules:
         op: set
         value: params.policy.formant.cake_initial_k_b1_hz
         tag: dectalk_trace_exact
+      - field: B2
+        op: set
+        value: params.policy.formant.cake_initial_k_b2_hz
+        tag: dectalk_trace_exact
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F1/F2/F3/B1 values at frames 0-15)"
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F1/F2/F3/B1/B2 values at frames 0-15)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_cake_initial_k_release_formant_trace:
@@ -339,7 +343,7 @@ rules:
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F1/F2/F3/B1 values at frames 16-20)"
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F1/F2/F3/B1/B2 values at frames 16-20)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_cake_final_k_formant_trace:
@@ -365,7 +369,7 @@ rules:
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F2/F3/B1 values at frames 58-72)"
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F2/F3/B1/B2 values at frames 58-72)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_cake_dummy_ix_formant_trace:
@@ -385,7 +389,7 @@ rules:
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F1/F2/F3/B3 values at frames 73-77)"
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F1/F2/F3/B2/B3 values at frames 73-77)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_cake_terminal_silence_formant_trace:
@@ -410,7 +414,7 @@ rules:
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (terminal GEN_SIL F1/F2/F3/B1/B3 values from frame 78 onward)"
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (terminal GEN_SIL F1/F2/F3/B1/B2/B3 values from frame 78 onward)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_silence_carries_formants:

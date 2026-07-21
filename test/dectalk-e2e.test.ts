@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it, vi, afterAll } from "vitest";
-import { textToKlattTrack } from "../src/tts-frontend";
+import { textToKlattTrack, textToKlattTrackDetailed } from "../src/tts-frontend";
 import type { KlattFrame } from "../src/tts-frontend-types";
 
 // Suppress console.warn from the pipeline (missing inventory targets, etc.)
@@ -83,6 +83,18 @@ const TEST_PHRASES = [
 // ---------------------------------------------------------------------------
 
 describe("dectalk-english end-to-end", () => {
+  it("preserves required segment features when reducing a same-word geminate", () => {
+    const result = textToKlattTrackDetailed("Safe zones feel fuzzy.", 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    const activeSegments = result.utterance.relation("Segment").listItems()
+      .filter((item) => item.get("active") !== false);
+
+    expect(activeSegments.length).toBeGreaterThan(0);
+    expect(activeSegments.every((item) => typeof item.get("phoneme") === "string")).toBe(true);
+    expect(activeSegments.every((item) => typeof item.get("type") === "string")).toBe(true);
+  });
+
   for (const phrase of TEST_PHRASES) {
     describe(`phrase: "${phrase}"`, () => {
       let track: KlattFrame[];

@@ -123,7 +123,7 @@ rules:
       range_left: current.sync_left
       range_right: n.sync_right
       insert:
-        - copy_from: n
+        - copy_from: current
           copy_fields:
             - phoneme
             - type

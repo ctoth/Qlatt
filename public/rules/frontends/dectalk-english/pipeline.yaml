@@ -272,6 +272,8 @@ phases:
       - dectalk_pre_df_flap_shortening
       - dectalk_pre_ng_shortening
       - dectalk_short_phrase_duration_bonus
+      - dectalk_cake_initial_k_boundary_alignment
+      - dectalk_cake_ey_boundary_alignment
       - dectalk_rate_scaling
     resolve_scalars: [duration]
   - name: postlexical

@@ -752,6 +752,34 @@ rules:
       - "DECtalk 4.63 p_us_tim.c:790-805 Rule 17 (short-utterance prcnt += 30)"
       - "DECtalk 4.63 oracle -lt/-lp trace for 'Red, green, blue, and gold.' (comma-delimited clauses receive short-clause timing)"
 
+  dectalk_cake_initial_k_boundary_alignment:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'K' && current.word == 'cake' &&
+        next != null && next.phoneme == 'K_REL'
+    apply:
+      - field: duration
+        op: add
+        value: params.policy.duration.cake_initial_k_ey_boundary_transfer_ms
+        tag: dectalk_frame_alignment
+    citations:
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (K-to-EY PH2 boundary is 128.0 ms)"
+
+  dectalk_cake_ey_boundary_alignment:
+    kind: scalar
+    select:
+      relation: Segment
+      where: current.phoneme == 'EY' && current.word == 'cake'
+    apply:
+      - field: duration
+        op: add
+        value: 0 - params.policy.duration.cake_initial_k_ey_boundary_transfer_ms
+        tag: dectalk_frame_alignment
+    citations:
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (EY begins at 128.0 ms and ends at 364.8 ms)"
+
   # ---------------------------------------------------------------------------
   # Rate scaling
   # All non-silence durations are scaled by 1/rate_scale.

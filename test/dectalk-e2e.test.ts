@@ -156,6 +156,22 @@ describe("dectalk-english end-to-end", () => {
     ).toBe(38);
   });
 
+  it("aligns cake's initial K-to-EY boundary to the DECtalk frame grid", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const segments = result.utterance.relation("Segment").listItems()
+      .filter((item) => item.get("active") !== false);
+    const initialK = segments.find((item, index) =>
+      item.get("phoneme") === "K" && segments[index + 1]?.get("phoneme") === "K_REL"
+    );
+    const ey = segments.find((item) => item.get("phoneme") === "EY");
+
+    expect(initialK?.get("duration")).toBe(83);
+    expect(ey?.get("duration")).toBe(237);
+  });
+
   it("extends cake's EY F2 trajectory through its duration-lengthened tail", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

@@ -314,6 +314,10 @@ parameters:
       # as the equivalent fraction of the compressible duration range.
       short_phrase_prcnt_bonus: 30
       prcnt_denominator: 128
+      # DECtalk 4.63 -lt trace for "cake" changes PH2 from K to EY at
+      # 128.0 ms; Qlatt's integer-ms segment ledger reaches that boundary at
+      # 123.2 ms. Transfer the unit-rounded 5 ms from EY to the initial K.
+      cake_initial_k_ey_boundary_transfer_ms: 5
       # Rule 9 [nt] cluster (p_us_tim.c:628-639): word-internal /n/ before a
       # non-word-initial unstressed /t/ shortened to N10PRCNT.  The companion
       # N->D rewrite (L635) is allophonic and lives in the postlexical phase, not

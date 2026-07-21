@@ -68,7 +68,7 @@ describe("f0-filters-loader", () => {
     const exports = getF0FilterExports();
     // one-pole pass-through, no scale, wide clamp, frame_period 0.005.
     const scalars = [
-      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 4096, 0.1, 0, -1e9, 1e9, 0,
+      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0,
     ];
     const layers = [1, 0, 4, 0.01, 0.9, 0, 1]; // persistent, cmd_start 0, count 1
     const cmds = [0, 100, 0, 0, 0];
@@ -103,7 +103,7 @@ describe("f0-filters-loader", () => {
 
   it("render_f0 returns RENDER_ERR_SCALARS when the header is too short", () => {
     const exports = getF0FilterExports();
-    const scalars = [0.005, 0.05]; // < 18
+    const scalars = [0.005, 0.05]; // < 16
     const scalarsPtr = writeF64(exports, scalars);
     const outPtr = exports.alloc_f64(4);
     const status = exports.render_f0(scalarsPtr, scalars.length, 0, 0, 0, 0, 0, 0, outPtr, 4);
@@ -115,7 +115,7 @@ describe("f0-filters-loader", () => {
   it("render_f0 returns RENDER_ERR_OUT when out pointer is null", () => {
     const exports = getF0FilterExports();
     const scalars = [
-      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 4096, 0.1, 0, -1e9, 1e9, 0,
+      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0,
     ];
     const scalarsPtr = writeF64(exports, scalars);
     const status = exports.render_f0(scalarsPtr, scalars.length, 0, 0, 0, 0, 0, 0, 0, 4);
@@ -126,7 +126,7 @@ describe("f0-filters-loader", () => {
   it("render_f0 returns RENDER_ERR_BUFFER when a nonzero count has a null pointer", () => {
     const exports = getF0FilterExports();
     const scalars = [
-      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 4096, 0.1, 0, -1e9, 1e9, 0,
+      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0,
     ];
     const scalarsPtr = writeF64(exports, scalars);
     const outPtr = exports.alloc_f64(4);
@@ -140,7 +140,7 @@ describe("f0-filters-loader", () => {
   it("render_f0 returns RENDER_ERR_CMD_RANGE when a layer overruns the commands buffer", () => {
     const exports = getF0FilterExports();
     const scalars = [
-      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 4096, 0.1, 0, -1e9, 1e9, 0,
+      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0,
     ];
     const layers = [1, 0, 4, 0.01, 0.9, 0, 5]; // cmd_count 5 but only 1 command
     const cmds = [0, 100, 0, 0, 0];
@@ -174,7 +174,7 @@ describe("f0-filters-loader", () => {
   it("render_f0 returns RENDER_ERR_PROFILE_RANGE when a command overruns the profile pool", () => {
     const exports = getF0FilterExports();
     const scalars = [
-      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 4096, 0.1, 0, -1e9, 1e9, 0,
+      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0,
     ];
     const layers = [0, 0, 4, 0.01, 0.9, 0, 1]; // profile layer
     const cmds = [0, 0, 0, 0, 4]; // profile_start 0, profile_count 4

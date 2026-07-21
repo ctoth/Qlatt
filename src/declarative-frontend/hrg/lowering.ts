@@ -48,7 +48,6 @@ type LayeredFilterConfig = {
 type SpeakerScaleConfig = {
   minimum_param: string;
   range_param: string;
-  reference: number;
   divisor: number;
   output_scale: number;
 };
@@ -525,15 +524,10 @@ function renderLayeredF0(
   const scale = model.speaker_scale;
   const f0Minimum = scale ? resolveSpeakerNumber(speakerParams, scale.minimum_param) : 0;
   const f0ScaleFactor = scale ? resolveSpeakerNumber(speakerParams, scale.range_param) : 1;
-  const reference = scale ? requireFiniteNumber(scale.reference, "f0_model.speaker_scale.reference") : 0;
   const divisor = scale ? requirePositiveNumber(scale.divisor, "f0_model.speaker_scale.divisor") : 1;
   const outputScale = scale
     ? requirePositiveNumber(scale.output_scale, "f0_model.speaker_scale.output_scale")
     : 1;
-  const baseF0 = speakerParams?.base_f0_hz;
-  const baseBias = scale && typeof baseF0 === "number" && Number.isFinite(baseF0)
-    ? baseF0 - f0Minimum * outputScale
-    : 0;
   const minHz = requireFiniteNumber(model.output_clamp?.min_hz, "f0_model.output_clamp.min_hz");
   const maxHz = requireFiniteNumber(model.output_clamp?.max_hz, "f0_model.output_clamp.max_hz");
 
@@ -619,10 +613,8 @@ function renderLayeredF0(
     scale ? 1 : 0,
     f0Minimum,
     f0ScaleFactor,
-    reference,
     divisor,
     outputScale,
-    baseBias,
     minHz,
     maxHz,
     initialTotal,

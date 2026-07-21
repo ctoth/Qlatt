@@ -170,10 +170,8 @@ struct RenderInputs<'a> {
     has_scale: bool,
     f0_minimum: f64,
     f0_scale_factor: f64,
-    f0_reference: f64,
     scale_divisor: f64,
     scale_output: f64,
-    base_f0_bias_hz: f64,
     min_hz: f64,
     max_hz: f64,
     init_total: f64,
@@ -321,10 +319,9 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
 
         // Speaker scaling (DECtalk Ph_drwt02.c) or pass-through.
         let mut f0_hz = if inp.has_scale {
-            let v = (inp.f0_minimum
-                + (filtered - inp.f0_reference) * inp.f0_scale_factor / inp.scale_divisor)
-                * inp.scale_output;
-            v + inp.base_f0_bias_hz
+            (inp.f0_minimum
+                + (filtered - inp.f0_minimum) * inp.f0_scale_factor / inp.scale_divisor)
+                * inp.scale_output
         } else {
             filtered
         };
@@ -454,7 +451,7 @@ pub unsafe extern "C" fn render_f0(
     out_ptr: *mut f64,
     num_frames: usize,
 ) -> i32 {
-    if scalars_ptr.is_null() || scalars_len < 18 {
+    if scalars_ptr.is_null() || scalars_len < 16 {
         return RENDER_ERR_SCALARS;
     }
     if out_ptr.is_null() {
@@ -487,13 +484,11 @@ pub unsafe extern "C" fn render_f0(
     let has_scale = s[9] != 0.0;
     let f0_minimum = s[10];
     let f0_scale_factor = s[11];
-    let f0_reference = s[12];
-    let scale_divisor = s[13];
-    let scale_output = s[14];
-    let base_f0_bias_hz = s[15];
-    let min_hz = s[16];
-    let max_hz = s[17];
-    let init_total = if scalars_len > 18 { s[18] } else { 0.0 };
+    let scale_divisor = s[12];
+    let scale_output = s[13];
+    let min_hz = s[14];
+    let max_hz = s[15];
+    let init_total = if scalars_len > 16 { s[16] } else { 0.0 };
 
     let layers_raw = if n_layers > 0 && !layers_ptr.is_null() {
         core::slice::from_raw_parts(layers_ptr, n_layers * LAYER_STRIDE)
@@ -567,10 +562,8 @@ pub unsafe extern "C" fn render_f0(
         has_scale,
         f0_minimum,
         f0_scale_factor,
-        f0_reference,
         scale_divisor,
         scale_output,
-        base_f0_bias_hz,
         min_hz,
         max_hz,
         init_total,
@@ -646,6 +639,57 @@ mod tests {
             let dc = (b0 + b1 + b2) / (1.0 + a1 + a2);
             assert!((dc - 1.0).abs() < 1e-9, "dc gain {dc} for cut={cut} sr={sr}");
         }
+    }
+
+    #[test]
+    fn dectalk_speaker_scaling_uses_f0_minimum_as_pivot() {
+        let layers = vec![LayerDesc {
+            layer_type: LAYER_PERSISTENT,
+            decay_mode: DECAY_HALVING,
+            initial_decay_divisor: 4.0,
+            termination_threshold: 0.01,
+            exponential_factor: 0.9,
+            cmd_start: 0,
+            cmd_count: 1,
+        }];
+        let cmds = vec![CmdDesc {
+            time: 0.0,
+            value: 1160.0,
+            duration_frames: 0.0,
+            profile_start: 0,
+            profile_count: 0,
+        }];
+        let inp = RenderInputs {
+            frame_period: 0.005,
+            total_duration: 0.0,
+            num_frames: 1,
+            filter_mode: FILTER_ONE_POLE,
+            one_pole_alpha: 1.0,
+            coeffs: IIRFilterCoefficients {
+                b0: 0.0,
+                b1: 0.0,
+                b2: 0.0,
+                a1: 0.0,
+                a2: 0.0,
+            },
+            has_scale: true,
+            f0_minimum: 1100.0,
+            f0_scale_factor: 4100.0,
+            scale_divisor: 4096.0,
+            scale_output: 0.1,
+            min_hz: 40.0,
+            max_hz: 500.0,
+            init_total: 0.0,
+            layers: &layers,
+            cmds: &cmds,
+            profile_points: &[],
+        };
+        let mut out = [0.0];
+
+        render(&inp, &mut out);
+
+        let expected = (1100.0 + (1160.0 - 1100.0) * 4100.0 / 4096.0) * 0.1;
+        assert!((out[0] - expected).abs() < 1e-12, "{} != {expected}", out[0]);
     }
 
     // ---- Filter stability ----------------------------------------------------
@@ -771,10 +815,8 @@ mod tests {
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
-            f0_reference: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
-            base_f0_bias_hz: 0.0,
             min_hz: -1e9,
             max_hz: 1e9,
             init_total: 0.0,
@@ -819,10 +861,8 @@ mod tests {
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
-            f0_reference: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
-            base_f0_bias_hz: 0.0,
             min_hz: -1e9,
             max_hz: 1e9,
             init_total: 0.0,
@@ -861,10 +901,8 @@ mod tests {
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
-            f0_reference: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
-            base_f0_bias_hz: 0.0,
             min_hz: 50.0,
             max_hz: 120.0,
             init_total: 0.0,
@@ -913,10 +951,8 @@ mod tests {
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
-            f0_reference: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
-            base_f0_bias_hz: 0.0,
             min_hz: -1e9,
             max_hz: 1e9,
             init_total: 0.0,
@@ -971,10 +1007,8 @@ mod tests {
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
-            f0_reference: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
-            base_f0_bias_hz: 0.0,
             min_hz: -1e9,
             max_hz: 1e9,
             init_total: 0.0,
@@ -1033,10 +1067,8 @@ mod tests {
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
-            f0_reference: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
-            base_f0_bias_hz: 0.0,
             min_hz: -1e9,
             max_hz: 1e9,
             init_total: 0.0,
@@ -1084,10 +1116,8 @@ mod tests {
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
-            f0_reference: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
-            base_f0_bias_hz: 0.0,
             min_hz: -1e9,
             max_hz: 1e9,
             init_total: 0.0,
@@ -1135,10 +1165,10 @@ mod tests {
         (status, out)
     }
 
-    fn valid_scalars() -> [f64; 19] {
+    fn valid_scalars() -> [f64; 17] {
         // one-pole pass-through, no scale, wide clamp, frame_period 0.005.
         [
-            0.005, 0.05, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 4096.0, 0.1, 0.0,
+            0.005, 0.05, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 4096.0, 0.1,
             -1e9, 1e9, 0.0,
         ]
     }
@@ -1156,7 +1186,7 @@ mod tests {
 
     #[test]
     fn render_f0_err_scalars_when_header_too_short() {
-        let scalars = [0.005, 0.05]; // < 18
+        let scalars = [0.005, 0.05]; // < 16
         let (status, _) = call_render_f0(&scalars, &[], 0, &[], 0, &[], 0, 4);
         assert_eq!(status, RENDER_ERR_SCALARS);
     }

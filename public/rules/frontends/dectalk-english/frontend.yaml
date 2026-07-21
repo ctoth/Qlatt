@@ -164,15 +164,14 @@ f0_model:
       type: glide
   combine: sum
   # Speaker scaling: converts internal Hz*10 units to final Hz using the
-  # DECtalk formula (Ph_drwt02.c line 2309):
-  #   f0prime = f0minimum + frac4mul(f0prime - 1300, f0scalefac)
+  # DECtalk formula:
+  #   f0prime = f0minimum + frac4mul(f0prime - f0minimum, f0scalefac)
   #   Hz = f0prime / 10
-  # The minimum_param and range_param reference fields in parameters.policy.speaker.
-  # Citation: DECtalk 4.63 Ph_drwt02.c (speaker-dependent F0 scaling)
+  # The minimum_param and range_param fields reference parameters.policy.speaker.
+  # Citation: DECtalk 4.63 Ph_drwt02it.c (speaker-dependent F0 scaling)
   speaker_scale:
     minimum_param: f0_minimum
     range_param: f0_scale_factor
-    reference: 1300
     # DECtalk frac4mul(x,y) = (x*y) >> 12 = (x*y) / 4096.
     divisor: 4096
     # DECtalk stores F0 internally as Hz*10; divide by 10 for output Hz.

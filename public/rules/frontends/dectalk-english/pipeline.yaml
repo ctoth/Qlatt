@@ -370,7 +370,7 @@ phases:
       - dectalk_segmental_k_ey_k_vowel
       - dectalk_segmental_k_ey_k_final_stop
       - dectalk_segmental_k_ey_k_dummy_ix
-      - dectalk_boundary_reset
+      - dectalk_segmental_k_ey_k_terminal_silence
       - dectalk_connected_speech_source_contour
   - name: finalize
     after: [duration, structural, formant, prosody]

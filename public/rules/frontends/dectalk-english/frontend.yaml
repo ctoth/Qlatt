@@ -122,6 +122,11 @@ f0_model:
   # DECtalk's clause loop advances in 6.4 ms synthesis/control frames.
   # Citation: DECtalk 4.63 ph_claus.c ("For each 6.4 msec frame of current clause")
   frame_period_sec: 0.0064
+  # The VTM emits each completed control cell as one 71-sample packet at
+  # 11,025 Hz. Keep this packet clock separate from the nominal controller
+  # clock so long clauses do not advance to the next cell before DECtalk does.
+  # Citation: DECtalk 4.63 VTM/vtmiont.c delaypars packet loop.
+  output_frame_period_sec: 0.006439909297052154
   citations:
     - "Fujisaki (command-response model: additive phrase + accent layers)"
     - "Klatt 1982 (hat-pattern: baseline + hat + stress + segmental)"
@@ -447,6 +452,7 @@ parameters:
         ey_frames: 37
         final_k_frames: 14
         dummy_ix_frames: 6
+        terminal_silence_frames: 94
         citations:
           - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw"
           - "DECtalk 4.63 p_us_tim.c controller durations"

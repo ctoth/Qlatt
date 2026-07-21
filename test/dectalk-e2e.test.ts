@@ -10,6 +10,10 @@ import { describe, expect, it, vi, afterAll } from "vitest";
 import { textToKlattTrack, textToKlattTrackDetailed } from "../src/tts-frontend";
 import type { KlattFrame } from "../src/tts-frontend-types";
 
+// DECtalk emits each completed 6.4-ms controller cell as a 71-sample packet
+// at 11,025 Hz (VTM/vtmiont.c). Oracle frame assertions sample that packet clock.
+const DECTALK_PACKET_PERIOD_SEC = 71 / 11025;
+
 // Suppress console.warn from the pipeline (missing inventory targets, etc.)
 const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 afterAll(() => warnSpy.mockRestore());
@@ -93,11 +97,14 @@ describe("dectalk-english end-to-end", () => {
       .filter((item) => item.get("tag") === "f0_hat_rise");
     const hatFallCommands = tiltCommands
       .filter((item) => item.get("tag") === "f0_hat_fall");
+    const boundaryResetCommands = tiltCommands
+      .filter((item) => item.get("tag") === "f0_boundary_reset");
     const stressCommands = tiltCommands
       .filter((item) => item.get("layer") === "stress");
 
     expect(hatRiseCommands.map((item) => item.get("value"))).toEqual([190]);
     expect(hatFallCommands).toHaveLength(0);
+    expect(boundaryResetCommands).toHaveLength(0);
     expect(result.utterance.temporalAnchor(hatRiseCommands[0])).toEqual(
       expect.objectContaining({ offsetMs: -51.2 }),
     );
@@ -142,6 +149,7 @@ describe("dectalk-english end-to-end", () => {
       { value: 50, durationFrames: 37, profilePoints: [0, 0, 1] },
       { value: 0, durationFrames: 14, profilePoints: [1, 1, 0] },
       { value: 70, durationFrames: 6, profilePoints: [0, 0, 0] },
+      { value: 50, durationFrames: 94, profilePoints: [1, 0, 0] },
     ]);
   });
 
@@ -151,7 +159,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f0Hz10 = Array.from({ length: 28 }, (_, frameIndex) => {
-      const time = (29 + frameIndex) * 0.0064;
+      const time = (29 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
       const f0 = result.track.filter((frame) => frame.time <= time).at(-1)?.params.F0;
       return Math.round((f0 ?? Number.NaN) * 10);
     });
@@ -224,7 +232,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const b1 = Array.from({ length: 16 }, (_, frameIndex) => {
-      const time = frameIndex * 0.0064;
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
     });
 
@@ -240,7 +248,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const b3 = Array.from({ length: 16 }, (_, frameIndex) => {
-      const time = frameIndex * 0.0064;
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
     });
 
@@ -256,7 +264,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f1 = Array.from({ length: 16 }, (_, frameIndex) => {
-      const time = frameIndex * 0.0064;
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
     });
 
@@ -272,7 +280,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const b1 = Array.from({ length: 5 }, (_, releaseFrameIndex) => {
-      const time = (releaseFrameIndex + 16) * 0.0064;
+      const time = (releaseFrameIndex + 16) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
     });
 
@@ -285,7 +293,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const b3 = Array.from({ length: 5 }, (_, releaseFrameIndex) => {
-      const time = (releaseFrameIndex + 16) * 0.0064;
+      const time = (releaseFrameIndex + 16) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
     });
 
@@ -298,7 +306,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f1 = Array.from({ length: 5 }, (_, releaseFrameIndex) => {
-      const time = (releaseFrameIndex + 16) * 0.0064;
+      const time = (releaseFrameIndex + 16) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
     });
 
@@ -311,7 +319,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f2 = Array.from({ length: 21 }, (_, frameIndex) => {
-      const time = frameIndex * 0.0064;
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
     });
 
@@ -328,7 +336,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f3 = Array.from({ length: 21 }, (_, frameIndex) => {
-      const time = frameIndex * 0.0064;
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
     });
 
@@ -345,7 +353,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f1 = Array.from({ length: 37 }, (_, frameIndex) => {
-      const time = (21 + frameIndex) * 0.0064;
+      const time = (21 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
     });
 
@@ -363,7 +371,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f3 = Array.from({ length: 37 }, (_, frameIndex) => {
-      const time = (21 + frameIndex) * 0.0064;
+      const time = (21 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
     });
 
@@ -381,7 +389,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const b1 = Array.from({ length: 37 }, (_, frameIndex) => {
-      const time = (21 + frameIndex) * 0.0064;
+      const time = (21 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
     });
 
@@ -399,7 +407,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const b3 = Array.from({ length: 37 }, (_, frameIndex) => {
-      const time = (21 + frameIndex) * 0.0064;
+      const time = (21 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
     });
 
@@ -418,7 +426,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f1 = Array.from({ length: 14 }, (_, index) => {
-      const time = (58 + index) * 0.0064;
+      const time = (58 + index) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
     });
 
@@ -431,7 +439,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f2 = Array.from({ length: 14 }, (_, index) => {
-      const time = (58 + index) * 0.0064;
+      const time = (58 + index) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
     });
 
@@ -447,7 +455,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f3 = Array.from({ length: 15 }, (_, frameIndex) => {
-      const time = (58 + frameIndex) * 0.0064;
+      const time = (58 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
     });
 
@@ -465,7 +473,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const b1 = Array.from({ length: 15 }, (_, frameIndex) => {
-      const time = (58 + frameIndex) * 0.0064;
+      const time = (58 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
     });
 
@@ -482,7 +490,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const b3 = Array.from({ length: 15 }, (_, frameIndex) => {
-      const time = (58 + frameIndex) * 0.0064;
+      const time = (58 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
     });
 
@@ -499,7 +507,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f1 = Array.from({ length: 6 }, (_, index) => {
-      const time = (72 + index) * 0.0064;
+      const time = (72 + index) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
     });
 
@@ -512,7 +520,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f2 = Array.from({ length: 6 }, (_, index) => {
-      const time = (72 + index) * 0.0064;
+      const time = (72 + index) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
     });
 
@@ -525,7 +533,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f3 = Array.from({ length: 6 }, (_, index) => {
-      const time = (72 + index) * 0.0064;
+      const time = (72 + index) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
     });
 
@@ -538,7 +546,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const b3 = Array.from({ length: 6 }, (_, index) => {
-      const time = (72 + index) * 0.0064;
+      const time = (72 + index) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
     });
 
@@ -551,7 +559,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const f1 = Array.from({ length: 93 }, (_, index) => {
-      const time = (78 + index) * 0.0064;
+      const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
     });
 
@@ -568,7 +576,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const b3 = Array.from({ length: 93 }, (_, index) => {
-      const time = (78 + index) * 0.0064;
+      const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
     });
 
@@ -588,7 +596,7 @@ describe("dectalk-english end-to-end", () => {
         && item.get("punctuationSymbol") === "."
       );
     const f2 = Array.from({ length: 19 }, (_, index) => {
-      const time = (78 + index) * 0.0064;
+      const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
     });
 
@@ -609,7 +617,7 @@ describe("dectalk-english end-to-end", () => {
       170,
     ];
     const f3 = sampleFrames.map((frameIndex) => {
-      const time = frameIndex * 0.0064;
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
     });
 
@@ -629,7 +637,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const b1 = Array.from({ length: 9 }, (_, index) => {
-      const time = (78 + index) * 0.0064;
+      const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
     });
 
@@ -642,7 +650,7 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const b1 = Array.from({ length: 6 }, (_, index) => {
-      const time = (165 + index) * 0.0064;
+      const time = (165 + index) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
     });
 
@@ -657,10 +665,14 @@ describe("dectalk-english end-to-end", () => {
     const ey = result.utterance.relation("Segment").listItems()
       .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
     const windows = ey?.get("control_windows");
-    const nativeF2 = [0.1344, 0.1856, 0.2240, 0.3200].map((time) =>
+    const nativeF2 = [21, 29, 35, 50].map((frameIndex) =>
+      frameIndex * DECTALK_PACKET_PERIOD_SEC
+    ).map((time) =>
       result.track.findLast((frame) => frame.time <= time + 1e-9)?.params.F2
     );
-    const tailF2 = [0.3264, 0.3328, 0.3392, 0.3456, 0.3520, 0.3584, 0.3648].map((time) =>
+    const tailF2 = [51, 52, 53, 54, 55, 56, 57].map((frameIndex) =>
+      frameIndex * DECTALK_PACKET_PERIOD_SEC
+    ).map((time) =>
       result.track.findLast((frame) => frame.time <= time + 1e-9)?.params.F2
     );
 

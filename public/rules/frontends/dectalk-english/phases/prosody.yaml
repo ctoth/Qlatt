@@ -543,46 +543,26 @@ rules:
       - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (IX target and voiced slow path)"
       - "DECtalk 4.63 -lt oracle controller trace for cake. (dummy IX duration 6 frames)"
 
-  # --------------------------------------------------------------------------
-  # Rule 5: Boundary Reset (persistent hat layer reset at SIL)
-  #
-  # At phrase boundaries (SIL tokens), reset the hat layer to 0 by inserting
-  # a STEP that cancels the accumulated hat level.  In DECtalk this is handled
-  # by F0_RESET at clause boundaries (ph_inton1.c Rules 7-8).
-  #
-  # Implementation: emit a persistent hat command with value =
-  # -(hat_rise - (hat_rise + final_fall)) = final_fall.  This cancels the
-  # net hat fall that was applied: rise (+180) then fall (-360) = net -180,
-  # so a reset of +180 brings it back to 0.
-  #
-  # Source: ph_inton1.c Rules 7-8 (F0_RESET at GEN_SIL/FSENTENDS).
-  #
-  # Citations:
-  #   - DECtalk 4.63 ph_inton1.c Rules 7-8 (boundary F0 reset)
-  #   - Klatt 1982 (hat state machine reset at clause boundaries)
-  # --------------------------------------------------------------------------
-  dectalk_boundary_reset:
+  dectalk_segmental_k_ey_k_terminal_silence:
     kind: f0_layer
     select:
       relation: Segment
       where: >-
-        current.phoneme == "SIL"
-        && prev != null && prev.phoneme != "SIL"
-    define:
-      # After a complete hat pattern (rise + fall), the persistent hat level is:
-      #   hat_rise_hz + (-(hat_rise_hz + final_fall_hz)) = -final_fall_hz
-      # To reset to 0, add +final_fall_hz.
-      reset_value: >-
-        params.policy.f0.final_fall_hz
+        current.phoneme == 'SIL'
+        && has(current.punctuationSymbol) && current.punctuationSymbol == '.'
+        && prev != null && prev.word == 'cake'
+        && has(prev.dummy_vowel) && prev.dummy_vowel == true
     insert:
       relation: Tilt
-      layer: hat
+      layer: segmental
       at: at_sync(current.sync_left)
-      value: reset_value
-      tag: f0_boundary_reset
+      value: params.policy.f0.segmental.initial_silence_target
+      duration_frames: params.policy.f0.segmental.terminal_silence_frames
+      profile_points: [1, 0, 0]
+      tag: f0_segmental_terminal_silence
     citations:
-      - "DECtalk 4.63 ph_inton1.c Rules 7-8 (F0_RESET at GEN_SIL)"
-      - "Klatt 1982 (hat state reset at clause boundaries)"
+      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (terminal GEN_SIL target 50 and voiceless fast path)"
+      - "DECtalk 4.63 -lt oracle controller trace for cake. (terminal GEN_SIL duration 94 frames)"
 
   # --------------------------------------------------------------------------
   # Rule 6: Connected-speech source contour (Fant 1997)

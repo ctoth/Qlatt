@@ -294,13 +294,18 @@ describe("HRG lowering layered intonation", () => {
         },
       },
     };
+    const outputFramePeriod = baseline.f0Model.output_frame_period_sec;
+    if (typeof outputFramePeriod !== "number") throw new Error("layered F0 output period missing");
 
     const voicedF0 = (policy: LowerOptions, activeCommands: BaselineCommand[]) => lowerToFrames(
       buildUtterance([segment], activeCommands, policy),
       policy,
       { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
     ).frames
-      .filter((frame) => frame.segmentId === "voiced")
+      .filter((frame) => (
+        frame.segmentId === "voiced"
+        && Math.abs(frame.time / outputFramePeriod - Math.round(frame.time / outputFramePeriod)) < 1e-9
+      ))
       .slice(0, 8)
       .map((frame) => frame.params.F0);
     const commandEffect = (policy: LowerOptions) => {
@@ -342,8 +347,8 @@ describe("HRG lowering layered intonation", () => {
       (frame) => frame.segmentId === "second-voiced",
     );
     if (!interstitialSegmentStart) throw new Error("second voiced segment frame missing");
-    const framePeriod = baseline.f0Model.frame_period_sec;
-    if (typeof framePeriod !== "number") throw new Error("layered F0 frame period missing");
+    const framePeriod = baseline.f0Model.output_frame_period_sec;
+    if (typeof framePeriod !== "number") throw new Error("layered F0 output period missing");
     const nativeCells = lowered.frames.filter((frame) => (
       Math.abs(frame.time / framePeriod - Math.round(frame.time / framePeriod)) < 1e-9
     ));
@@ -384,9 +389,9 @@ describe("HRG lowering layered intonation", () => {
       .filter((frame) => frame.segmentId === "unvoiced")
       .map((frame) => frame.params.F0);
     const segmentStart = lowered.frames.find((frame) => frame.segmentId === "unvoiced");
-    const framePeriod = baseline.f0Model.frame_period_sec;
+    const framePeriod = baseline.f0Model.output_frame_period_sec;
     if (!segmentStart || typeof framePeriod !== "number") {
-      throw new Error("unvoiced segment timing or layered F0 frame period missing");
+      throw new Error("unvoiced segment timing or layered F0 output period missing");
     }
     const nextNativeCellTime = Math.ceil((segmentStart.time + 1e-9) / framePeriod) * framePeriod;
     const hasNextNativeCell = lowered.frames.some((frame) => (
@@ -399,7 +404,54 @@ describe("HRG lowering layered intonation", () => {
     expect(hasNextNativeCell).toBe(true);
   });
 
-  it("keeps the DECtalk baseline clock independent of terminal silence", () => {
+  it("preserves layered F0 controller cells through initial and terminal silence", () => {
+    const baseline = readFixture();
+    const sourceSegment = baseline.segments.find((segment) => (segment.params.AV ?? 0) > 0);
+    const sourceSilence = baseline.segments.find((segment) => segment.phoneme === "SIL");
+    if (!sourceSegment || !sourceSilence) throw new Error("voiced or silence fixture segment missing");
+    const segment = { ...sourceSegment, duration: 100, id: "voiced" };
+    const terminalSilence = { ...sourceSilence, duration: 50, id: "terminal-silence" };
+    const policy: LowerOptions = {
+      ...baseline.policy,
+      timeline: {
+        ...baseline.policy.timeline,
+        final_silence_ms: {
+          ...baseline.policy.timeline.final_silence_ms,
+          value: 0,
+        },
+      },
+    };
+    const commands: BaselineCommand[] = [{
+      id: "baseline",
+      layer: "baseline",
+      profilePoints: [1160, 950],
+      timeMs: 0,
+      value: 0,
+    }];
+
+    const lowered = lowerToFrames(
+      buildUtterance([segment, terminalSilence], commands, policy),
+      policy,
+      { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
+    );
+    const framePeriod = baseline.f0Model.output_frame_period_sec;
+    if (typeof framePeriod !== "number") throw new Error("layered F0 output period missing");
+    const initialCell = lowered.frames.find((frame) => Math.abs(frame.time - framePeriod) < 1e-9);
+    const terminalStart = lowered.frames.find((frame) => frame.segmentId === "terminal-silence");
+    if (!terminalStart) throw new Error("terminal silence frame missing");
+    const terminalCellTime = Math.ceil((terminalStart.time + 1e-9) / framePeriod) * framePeriod;
+    const terminalCell = lowered.frames.find((frame) => (
+      frame.segmentId === "terminal-silence"
+      && Math.abs(frame.time - terminalCellTime) < 1e-9
+    ));
+
+    expect(initialCell?.segmentId).toBeUndefined();
+    expect(initialCell?.params.F0).toBeGreaterThan(0);
+    expect(terminalCell?.segmentId).toBe("terminal-silence");
+    expect(terminalCell?.params.F0).toBeGreaterThan(0);
+  });
+
+  it("keeps the DECtalk baseline clock independent of the terminal segmental controller", () => {
     const baseline = readFixture();
     const sourceSegment = baseline.segments.find((segment) => (segment.params.AV ?? 0) > 0);
     if (!sourceSegment) throw new Error("voiced fixture segment missing");
@@ -419,6 +471,18 @@ describe("HRG lowering layered intonation", () => {
         profilePoints: [0, 0, 0],
         timeMs: 0,
         value: 0,
+      },
+    ];
+    const commandsWithTerminalController: BaselineCommand[] = [
+      ...commands,
+      {
+        durationFrames: 94,
+        id: "terminal-segmental",
+        layer: "segmental",
+        profilePoints: [1, 0, 0],
+        tag: "f0_segmental_terminal_silence",
+        timeMs: 102.4,
+        value: 50,
       },
     ];
     const withoutTerminalSilence: LowerOptions = {
@@ -442,15 +506,61 @@ describe("HRG lowering layered intonation", () => {
       },
     };
 
-    const voicedF0 = (policy: LowerOptions) => lowerToFrames(
-      buildUtterance([segment], commands, policy),
+    const voicedF0 = (controls: BaselineCommand[], policy: LowerOptions) => lowerToFrames(
+      buildUtterance([segment], controls, policy),
       policy,
       { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
     ).frames
       .filter((frame) => frame.segmentId === "voiced")
       .map((frame) => frame.params.F0);
 
-    expect(voicedF0(withLongTerminalSilence)).toEqual(voicedF0(withoutTerminalSilence));
+    expect(voicedF0(commandsWithTerminalController, withLongTerminalSilence).slice(0, 12)).toEqual(
+      voicedF0(commands, withoutTerminalSilence).slice(0, 12),
+    );
+  });
+
+  it("schedules layered F0 cells on the declared output packet clock", () => {
+    const baseline = readFixture();
+    const sourceSegment = baseline.segments.find((segment) => (segment.params.AV ?? 0) > 0);
+    if (!sourceSegment) throw new Error("voiced fixture segment missing");
+    const segment = { ...sourceSegment, duration: 100, id: "voiced" };
+    const controlPeriod = baseline.f0Model.frame_period_sec;
+    if (typeof controlPeriod !== "number") throw new Error("layered F0 control period missing");
+    const outputPacketPeriod = 71 / 11025;
+    const f0Model = {
+      ...baseline.f0Model,
+      output_frame_period_sec: outputPacketPeriod,
+    };
+    const policy: LowerOptions = {
+      ...baseline.policy,
+      timeline: {
+        ...baseline.policy.timeline,
+        final_silence_ms: { ...baseline.policy.timeline.final_silence_ms, value: 0 },
+        initial_silence_ms: { ...baseline.policy.timeline.initial_silence_ms, value: 0 },
+        event_points: {
+          include_segment_start: false,
+          include_control_boundaries: false,
+          include_f0_anchors: true,
+          include_transition_steady_time: false,
+        },
+      },
+    };
+    const commands: BaselineCommand[] = [{
+      id: "baseline",
+      layer: "baseline",
+      profilePoints: [1160, 950],
+      timeMs: 0,
+      value: 0,
+    }];
+
+    const lowered = lowerToFrames(
+      buildUtterance([segment], commands, policy),
+      policy,
+      { f0Model, speakerParams: baseline.speakerParams },
+    );
+
+    expect(lowered.frames.some((frame) => Math.abs(frame.time - outputPacketPeriod) < 1e-9)).toBe(true);
+    expect(lowered.frames.some((frame) => Math.abs(frame.time - controlPeriod) < 1e-9)).toBe(false);
   });
 
   it("rejects layered controls when the selected model is absent", () => {

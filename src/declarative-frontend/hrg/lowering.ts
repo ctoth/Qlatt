@@ -56,6 +56,7 @@ type SpeakerScaleConfig = {
 export type LayeredF0ModelConfig = {
   type: "layered_additive";
   frame_period_sec: number;
+  output_frame_period_sec?: number;
   filter: LayeredFilterConfig;
   layers: Readonly<Record<string, LayerConfig>>;
   speaker_scale?: SpeakerScaleConfig;
@@ -215,6 +216,7 @@ type ResolvedSegmentTransition = {
 type ResolvedF0Point = {
   decisionId: string;
   timeMs: number;
+  outputTimeMs?: number;
   valueHz: number;
 };
 
@@ -515,8 +517,11 @@ function renderLayeredF0(
   model: LayeredF0ModelConfig,
   totalDurationSec: number,
   speakerParams?: Readonly<Record<string, unknown>>,
-): Array<{ time: number; f0: number }> {
+): Array<{ time: number; outputTime: number; f0: number }> {
   const framePeriod = requirePositiveNumber(model.frame_period_sec, "f0_model.frame_period_sec");
+  const outputFramePeriod = model.output_frame_period_sec == null
+    ? framePeriod
+    : requirePositiveNumber(model.output_frame_period_sec, "f0_model.output_frame_period_sec");
   const frameCount = Math.ceil(totalDurationSec / framePeriod) + 1;
   const alpha = requireFiniteNumber(model.filter.default_alpha, "f0_model.filter.default_alpha");
   const resolvedAlpha = model.filter.alpha_param
@@ -544,7 +549,11 @@ function renderLayeredF0(
   const dectalkControllerFrames = layerNames.reduce((total, name) => {
     if (model.layers[name]?.type !== "dectalk_segmental") return total;
     return total + (commandsByLayer.get(name) ?? []).reduce(
-      (layerTotal, command) => layerTotal + (command.durationFrames ?? 0),
+      // Ph_inton2.c's tcumdur excludes the final GEN_SIL even though
+      // pht0draw() consumes that allophone in the segmental controller.
+      (layerTotal, command) => layerTotal + (
+        command.tag === "f0_segmental_terminal_silence" ? 0 : command.durationFrames ?? 0
+      ),
       0,
     );
   }, 0);
@@ -674,7 +683,11 @@ function renderLayeredF0(
     );
     if (status !== RENDER_OK) throw new Error(`E_HRG_LOWER_F0_RENDER: status ${status}`);
     const values = new Float64Array(new Float64Array(exports.memory.buffer, outputPtr, frameCount));
-    return Array.from(values, (f0, index) => ({ time: index * framePeriod, f0 }));
+    return Array.from(values, (f0, index) => ({
+      time: index * framePeriod,
+      outputTime: index * outputFramePeriod,
+      f0,
+    }));
   } finally {
     if (scalarBuffer.ptr) exports.dealloc_f64(scalarBuffer.ptr, scalarBuffer.len);
     if (layerBuffer.ptr) exports.dealloc_f64(layerBuffer.ptr, layerBuffer.len);
@@ -1382,7 +1395,7 @@ export function lowerToFrames(
         ...(typeof tag === "string" ? { tag } : {}),
       };
     });
-    let rendered: Array<{ time: number; f0: number }>;
+    let rendered: Array<{ time: number; outputTime: number; f0: number }>;
     try {
       rendered = renderLayeredF0(
         commands,
@@ -1424,6 +1437,7 @@ export function lowerToFrames(
       return {
         decisionId: producer.decisionId,
         timeMs: point.time * 1000,
+        outputTimeMs: point.outputTime * 1000,
         valueHz: point.f0,
       };
     });
@@ -1595,7 +1609,7 @@ export function lowerToFrames(
       if (f0Points.length > 0 && paramKeys.includes("F0")) {
         const phoneme = item.get(phonemeKey);
         const voiced = (params.AV ?? 0) > 0 || (params.AVS ?? 0) > 0;
-        if (phoneme === "SIL" || (!voiced && !layeredF0)) {
+        if (!layeredF0 && (phoneme === "SIL" || !voiced)) {
           params.F0 = 0;
         } else {
           const resolvedF0 = resolveF0AtTime(f0Points, timeMs, f0Sampling);
@@ -1714,6 +1728,13 @@ export function lowerToFrames(
         applyScale("jitter", "jitterScale", 0);
       }
     }
+    if (!item && silenceEdge && layeredF0 && f0Points.length > 0 && paramKeys.includes("F0")) {
+      const resolvedF0 = resolveF0AtTime(f0Points, timeMs, f0Sampling);
+      if (resolvedF0) {
+        params.F0 = resolvedF0.valueHz;
+        provenance.F0 = resolvedF0.decisionId;
+      }
+    }
     const outputTimeMs = outputTimeOverrideMs
       ?? (item
         ? (outputTimingByItem.get(item)?.startMs ?? timeMs)
@@ -1733,11 +1754,30 @@ export function lowerToFrames(
     } else if (phonemeOverride) {
       frame.phoneme = phonemeOverride;
     }
-    frames.push(frame);
-    provenanceByFrame.push(provenance);
+    const insertionIndex = frames.findIndex((existing) => existing.time > frame.time);
+    if (insertionIndex < 0) {
+      frames.push(frame);
+      provenanceByFrame.push(provenance);
+    } else {
+      frames.splice(insertionIndex, 0, frame);
+      provenanceByFrame.splice(insertionIndex, 0, provenance);
+    }
   };
 
   appendFrame(0, undefined, undefined, 0, undefined, "initial");
+  if (layeredF0 && options.timeline.event_points.include_f0_anchors && paramKeys.includes("F0")) {
+    for (const point of f0Points) {
+      if (point.timeMs <= 1e-6 || point.timeMs >= initialSilenceMs - 1e-6) continue;
+      appendFrame(
+        point.timeMs,
+        undefined,
+        "SIL",
+        0,
+        (point.outputTimeMs ?? point.timeMs) * globalPauseScale,
+        "initial",
+      );
+    }
+  }
   for (const timing of timings) {
     const offsets = new Set<number>();
     if (options.timeline.event_points.include_segment_start) offsets.add(0);
@@ -1767,10 +1807,7 @@ export function lowerToFrames(
     }
     if (
       options.timeline.event_points.include_f0_anchors
-      && (
-        segmentCanVoice(timing.item)
-        || (layeredF0 && timing.item.get(phonemeKey) !== "SIL")
-      )
+      && (segmentCanVoice(timing.item) || layeredF0)
     ) {
       const segmentStartMs = initialSilenceMs + timing.startMs;
       const segmentEndMs = initialSilenceMs + timing.endMs;
@@ -1781,12 +1818,35 @@ export function lowerToFrames(
       }
     }
     for (const offsetMs of [...offsets].sort((left, right) => left - right)) {
-      appendFrame(initialSilenceMs + timing.startMs + offsetMs, timing.item, undefined, offsetMs);
+      const controlTimeMs = initialSilenceMs + timing.startMs + offsetMs;
+      const f0Point = f0Points.find((point) => Math.abs(point.timeMs - controlTimeMs) <= 1e-6);
+      appendFrame(
+        controlTimeMs,
+        timing.item,
+        undefined,
+        offsetMs,
+        f0Point?.outputTimeMs,
+      );
     }
   }
   const finalResetMs = initialSilenceMs + segmentTotalMs;
   appendFrame(finalResetMs, undefined, "SIL", 0, outputFinalResetMs, "final");
   const totalMs = finalResetMs + finalSilenceMs;
+  if (layeredF0 && options.timeline.event_points.include_f0_anchors && paramKeys.includes("F0")) {
+    for (const point of f0Points) {
+      if (point.timeMs <= finalResetMs + 1e-6 || point.timeMs >= totalMs - 1e-6) continue;
+      appendFrame(
+        point.timeMs,
+        undefined,
+        "SIL",
+        0,
+        outputFinalResetMs + (
+          (point.outputTimeMs ?? point.timeMs) - finalResetMs
+        ) * globalPauseScale,
+        "final",
+      );
+    }
+  }
   if (totalMs > finalResetMs) appendFrame(totalMs, undefined, "SIL", 0, outputTotalMs, "final");
 
   return {

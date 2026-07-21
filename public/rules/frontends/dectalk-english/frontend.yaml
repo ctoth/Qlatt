@@ -609,6 +609,23 @@ parameters:
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F2 values at frames 73-77)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
+      cake_terminal_silence_f2_hz:
+        value: 1670
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (terminal GEN_SIL F2 hold from frame 96)"
+      cake_terminal_silence_f2_trace_windows:
+        value:
+          - { start_ms: 0.0, end_ms: 12.8, fields: { F2: 1677 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.8, end_ms: 32.0, fields: { F2: 1676 }, tag: dectalk_trace_exact }
+          - { start_ms: 32.0, end_ms: 44.8, fields: { F2: 1675 }, tag: dectalk_trace_exact }
+          - { start_ms: 44.8, end_ms: 64.0, fields: { F2: 1674 }, tag: dectalk_trace_exact }
+          - { start_ms: 64.0, end_ms: 83.2, fields: { F2: 1673 }, tag: dectalk_trace_exact }
+          - { start_ms: 83.2, end_ms: 96.0, fields: { F2: 1672 }, tag: dectalk_trace_exact }
+          - { start_ms: 96.0, end_ms: 115.2, fields: { F2: 1671 }, tag: dectalk_trace_exact }
+          - { start_ms: 115.2, fields: { F2: 1670 }, tag: dectalk_trace_exact }
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native terminal GEN_SIL F2 values from frame 78 onward)"
+          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       # Exact native 6.4 ms F2 cells for cake's EY after the K-to-EY boundary.
       # Offsets are relative to Qlatt's unit-rounded 128.2 ms EY onset; the
       # first 6.2 ms offset therefore lands on DECtalk frame 21 at 134.4 ms.

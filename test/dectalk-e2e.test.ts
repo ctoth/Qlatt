@@ -218,6 +218,30 @@ describe("dectalk-english end-to-end", () => {
     expect(f2).toEqual([1927, 1900, 1830, 1760, 1733, 1706]);
   });
 
+  it("matches DECtalk's native F2 decay into cake's terminal silence", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const terminalSilence = result.utterance.relation("Segment").listItems()
+      .find((item) =>
+        item.get("active") !== false
+        && item.get("phoneme") === "SIL"
+        && item.get("dummy_vowel") !== true
+        && item.get("punctuationSymbol") === "."
+      );
+    const f2 = Array.from({ length: 19 }, (_, index) => {
+      const time = (78 + index) * 0.0064;
+      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
+    });
+
+    expect(terminalSilence).toBeDefined();
+    expect(f2).toEqual([
+      1677, 1677, 1676, 1676, 1676, 1675, 1675, 1674, 1674, 1674,
+      1673, 1673, 1673, 1672, 1672, 1671, 1671, 1671, 1670,
+    ]);
+  });
+
   it("extends cake's EY F2 trajectory through its duration-lengthened tail", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

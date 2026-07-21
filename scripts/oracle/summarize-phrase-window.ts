@@ -118,6 +118,8 @@ function summarizeValues(values: number[]): string {
 
 function main(): void {
   const args = parseArgs(process.argv.slice(2));
+  // compare-trace.ts maps DECtalk AP to Qlatt's public AH control.
+  const qlattParam = args.param === "AP" ? "AH" : args.param;
   const phraseRoot = path.join(args.runRoot, args.phraseId);
   const comparePath = path.join(args.runRoot, `${args.phraseId}-trace-compare.json`);
   const parentComparePath = path.join(path.dirname(args.runRoot), `${args.phraseId}-trace-compare.json`);
@@ -171,7 +173,7 @@ function main(): void {
     if (run.endSec < args.startSec || run.startSec > args.endSec) continue;
     const events = qlattWindow.filter(({ timeSec }) => timeSec != null && timeSec >= run.startSec && timeSec <= run.endSec);
     const paramValues = events
-      .map(({ event }) => finiteNumber(event.params?.[args.param]))
+      .map(({ event }) => finiteNumber(event.params?.[qlattParam]))
       .filter((value): value is number => value != null);
     console.log(
       `  phoneme=${run.phoneme} events=${run.firstEvent}-${run.lastEvent} time=${run.startSec.toFixed(4)}..${run.endSec.toFixed(4)} duration=${run.durationSec.toFixed(4)} ${args.param} ${summarizeValues(paramValues)}`,
@@ -187,7 +189,7 @@ function main(): void {
       ) return best;
       return {
         eventIndex: candidate.eventIndex,
-        value: finiteNumber(candidate.event.params?.[args.param]),
+        value: finiteNumber(candidate.event.params?.[qlattParam]),
       };
     }, null);
     const oracleValue = oracleParameterValue(frame, args.param);

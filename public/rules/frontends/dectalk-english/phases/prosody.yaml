@@ -463,8 +463,9 @@ rules:
   #
   # Fires at every primary-stressed vowel.  Inserts an impulse whose magnitude
   # is stress_level_primary + a phrase-position component. For a single word,
-  # DECtalk applies its integer one-word reduction to the first-position value:
-  # (71 + 140) - ((71 + 140) >> 2) = 159.
+  # DECtalk applies its integer one-word reduction and then subtracts
+  # Reduce_last=50 for the final stress:
+  # (71 + 140) - ((71 + 140) >> 2) - 50 = 109.
   #
   # The impulse decays over stress_impulse_duration_frames (20 frames = 100ms)
   # using the source IMPULSE triangle in Ph_drwt02it.c.
@@ -498,7 +499,7 @@ rules:
         params.policy.speaker.scale_str_rise / 32.0
       impulse_hz: >-
         word_count() == 1
-        ? params.policy.f0.stress_single_word_primary_hz * scale_factor
+        ? params.policy.f0.stress_single_word_final_primary_hz * scale_factor
         : (stress_component + position_component) * scale_factor
     insert:
       relation: Tilt
@@ -508,7 +509,7 @@ rules:
       duration_frames: params.policy.f0.stress_impulse_duration_frames
       tag: f0_stress_impulse
     citations:
-      - "DECtalk 4.63 ph_inton1.c Rule 2 and one-word reduction branch (primary stress command 159)"
+      - "DECtalk 4.63 ph_inton1.c Rule 2 one-word and final-stress branches (primary stress command 109)"
       - "DECtalk 4.63 Ph_drwt02it.c IMPULSE case (duration-controlled triangular tarimp)"
       - "Klatt 1982 (stress-component F0 impulse)"
 

@@ -83,7 +83,7 @@ const TEST_PHRASES = [
 // ---------------------------------------------------------------------------
 
 describe("dectalk-english end-to-end", () => {
-  it("emits DECtalk's integer-reduced single-word primary stress command", () => {
+  it("emits DECtalk's reduced final-stress command for a single word", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",
       speaker: "paul",
@@ -92,7 +92,7 @@ describe("dectalk-english end-to-end", () => {
       .filter((item) => item.get("layer") === "stress");
 
     expect(stressCommands).toHaveLength(1);
-    expect(stressCommands[0].get("value")).toBe(159);
+    expect(stressCommands[0].get("value")).toBe(109);
     expect(stressCommands[0].get("duration_frames")).toBe(20);
   });
 

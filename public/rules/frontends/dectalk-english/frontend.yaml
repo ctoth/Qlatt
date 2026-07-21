@@ -405,10 +405,11 @@ parameters:
       stress_level_primary_hz: 71
       stress_level_secondary_hz: 31
       stress_level_emphasis_hz: 281
-      # Exact one-word primary command after DECtalk's integer reduction:
-      # (71 + 140) - ((71 + 140) >> 2) = 159.
-      # Source: ph_inton1.c one-word non-emphasis branch.
-      stress_single_word_primary_hz: 159
+      # Exact one-word final-primary command after DECtalk's integer reduction
+      # and final-stress reduction:
+      # (71 + 140) - ((71 + 140) >> 2) - 50 = 109.
+      # Source: ph_inton1.c one-word and FHAT_ENDS/FPERNEXT branches.
+      stress_single_word_final_primary_hz: 109
       # Fixed phrase-position impulse component (internal Hz*10 units).
       # Simplified from f0_mphrase_position[] = {140,90,60,40,10,10,10}.
       # Using average of first 4 positions: (140+90+60+40)/4 = 82.5.

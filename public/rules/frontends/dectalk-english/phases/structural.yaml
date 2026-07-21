@@ -28,16 +28,17 @@ rules:
       trace_windows: params.policy.formant.cake_ey_f2_trace_windows
       tail_windows: params.policy.formant.cake_ey_f2_tail_windows
       f3_windows: params.policy.formant.cake_ey_f3_trace_windows
+      b1_windows: params.policy.formant.cake_ey_b1_trace_windows
     splice:
       type: replace_range
       range_left: current.sync_left
       range_right: current.sync_right
       insert:
         - copy_from: current
-          control_windows: "current.control_windows + trace_windows + tail_windows + f3_windows"
+          control_windows: "current.control_windows + trace_windows + tail_windows + f3_windows + b1_windows"
     citations:
       - "DECtalk 4.63 ph_setar.c set_trans() (diphthong targets continue across the realized vowel duration)"
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY F2/F3 values at frames 21-57)"
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY F2/F3/B1 values at frames 21-57)"
       - "Engineering representation: append exact native trace cells after duration rules lengthen EY beyond its structural trajectory span"
 
   dectalk_ow_alveolar_stop_late_f2_locus:

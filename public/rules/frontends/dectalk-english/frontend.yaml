@@ -780,6 +780,20 @@ parameters:
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY F3 values at frames 21-57)"
           - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
+      cake_ey_b1_trace_windows:
+        value:
+          - { start_ms: 6.2, end_ms: 63.8, fields: { B1: 320 }, tag: dectalk_trace_exact }
+          - { start_ms: 63.8, end_ms: 198.2, fields: { B1: 70 }, tag: dectalk_trace_exact }
+          - { start_ms: 198.2, end_ms: 204.6, fields: { B1: 77 }, tag: dectalk_trace_exact }
+          - { start_ms: 204.6, end_ms: 211.0, fields: { B1: 85 }, tag: dectalk_trace_exact }
+          - { start_ms: 211.0, end_ms: 217.4, fields: { B1: 93 }, tag: dectalk_trace_exact }
+          - { start_ms: 217.4, end_ms: 223.8, fields: { B1: 101 }, tag: dectalk_trace_exact }
+          - { start_ms: 223.8, end_ms: 230.2, fields: { B1: 108 }, tag: dectalk_trace_exact }
+          - { start_ms: 230.2, end_ms: 236.6, fields: { B1: 116 }, tag: dectalk_trace_exact }
+          - { start_ms: 236.6, end_ms: 237.0, fields: { B1: 124 }, tag: dectalk_trace_exact }
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY B1 values at frames 21-57)"
+          - "DECtalk 4.63 ph_draw.c (bandwidth transitions are emitted once per native synthesis frame)"
       special_coartic:
         # us_place & FALVEL alveolars (p_us_st1.c:373/381; ph_defs.h:342).
         alveolar:

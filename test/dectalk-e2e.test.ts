@@ -224,6 +224,24 @@ describe("dectalk-english end-to-end", () => {
     ]);
   });
 
+  it("matches DECtalk's native B1 cells through cake's EY", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const b1 = Array.from({ length: 37 }, (_, frameIndex) => {
+      const time = (21 + frameIndex) * 0.0064;
+      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
+    });
+
+    expect(b1).toEqual([
+      320, 320, 320, 320, 320, 320, 320, 320, 320,
+      70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70,
+      70, 70, 70, 70, 70, 70, 70, 70, 70, 70,
+      77, 85, 93, 101, 108, 116, 124,
+    ]);
+  });
+
   it("matches DECtalk's native F2 cells through cake's final K", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

@@ -694,6 +694,12 @@ parameters:
           - { start_ms: 38.4, end_ms: 44.8, fields: { B1: 120 }, tag: dectalk_trace_exact }
           - { start_ms: 44.8, end_ms: 51.2, fields: { B1: 90 }, tag: dectalk_trace_exact }
           - { start_ms: 51.2, fields: { B1: 60 }, tag: dectalk_trace_exact }
+          - { start_ms: 556.8, end_ms: 563.2, fields: { B1: 72 }, tag: dectalk_trace_exact }
+          - { start_ms: 563.2, end_ms: 569.6, fields: { B1: 85 }, tag: dectalk_trace_exact }
+          - { start_ms: 569.6, end_ms: 576.0, fields: { B1: 97 }, tag: dectalk_trace_exact }
+          - { start_ms: 576.0, end_ms: 582.4, fields: { B1: 110 }, tag: dectalk_trace_exact }
+          - { start_ms: 582.4, end_ms: 588.8, fields: { B1: 122 }, tag: dectalk_trace_exact }
+          - { start_ms: 588.8, fields: { B1: 135 }, tag: dectalk_trace_exact }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native terminal GEN_SIL F2/F3/B1 values from frame 78 onward)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"

@@ -301,7 +301,7 @@ rules:
       - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F2/F3/B1 values at frames 0-15)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
-  dectalk_cake_initial_k_release_f2_trace:
+  dectalk_cake_initial_k_release_formant_trace:
     kind: scalar
     select:
       relation: Segment
@@ -312,43 +312,26 @@ rules:
         prev != null && prev.phoneme == 'K'
     define:
       existing_windows: "has(current.control_windows) ? current.control_windows : []"
-      trace_windows: params.policy.formant.cake_initial_k_release_f2_trace_windows
+      trace_windows: params.policy.formant.cake_initial_k_release_formant_trace_windows
     apply:
       - field: F2
         op: set
         value: params.policy.formant.cake_initial_k_release_f2_hz
         tag: dectalk_trace_exact
-      - field: control_windows
-        op: set
-        value: "existing_windows + trace_windows"
-        tag: dectalk_trace_exact
-    citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F2 values at frames 16-20)"
-      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-
-  dectalk_cake_initial_k_release_f3_trace:
-    kind: scalar
-    select:
-      relation: Segment
-      where: >-
-        current.word == 'cake' &&
-        current.phoneme == 'K_REL' &&
-        current.type == 'stop_release' &&
-        prev != null && prev.phoneme == 'K'
-    define:
-      existing_windows: "has(current.control_windows) ? current.control_windows : []"
-      trace_windows: params.policy.formant.cake_initial_k_release_f3_trace_windows
-    apply:
       - field: F3
         op: set
         value: params.policy.formant.cake_initial_k_release_f3_hz
         tag: dectalk_trace_exact
+      - field: B1
+        op: set
+        value: params.policy.formant.cake_initial_k_release_b1_hz
+        tag: dectalk_trace_exact
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F3 values at frames 16-20)"
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F2/F3/B1 values at frames 16-20)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_cake_final_k_formant_trace:

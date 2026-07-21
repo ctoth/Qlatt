@@ -588,15 +588,27 @@ parameters:
         value: 1969
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release F2 at frame 16)"
-      cake_initial_k_release_f2_trace_windows:
+      cake_initial_k_release_b1_hz:
+        value: 200
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release B1 at frame 16)"
+      cake_initial_k_release_formant_trace_windows:
         value:
           - { start_ms: 0.0, end_ms: 6.6, fields: { F2: 1969 }, tag: dectalk_trace_exact }
           - { start_ms: 6.6, end_ms: 13.0, fields: { F2: 1960 }, tag: dectalk_trace_exact }
           - { start_ms: 13.0, end_ms: 19.4, fields: { F2: 1951 }, tag: dectalk_trace_exact }
           - { start_ms: 19.4, end_ms: 25.8, fields: { F2: 1942 }, tag: dectalk_trace_exact }
           - { start_ms: 25.8, end_ms: 26.0, fields: { F2: 1933 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 6.6, fields: { F3: 2398 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.6, end_ms: 13.0, fields: { F3: 2374 }, tag: dectalk_trace_exact }
+          - { start_ms: 13.0, end_ms: 19.4, fields: { F3: 2349 }, tag: dectalk_trace_exact }
+          - { start_ms: 19.4, end_ms: 25.8, fields: { F3: 2325 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.8, end_ms: 26.0, fields: { F3: 2300 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 19.4, fields: { B1: 200 }, tag: dectalk_trace_exact }
+          - { start_ms: 19.4, end_ms: 25.8, fields: { B1: 178 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.8, end_ms: 26.0, fields: { B1: 156 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F2 values at frames 16-20)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F2/F3/B1 values at frames 16-20)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_initial_k_f3_hz:
         value: 2702
@@ -606,16 +618,6 @@ parameters:
         value: 2398
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release F3 at frame 16)"
-      cake_initial_k_release_f3_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 6.6, fields: { F3: 2398 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.6, end_ms: 13.0, fields: { F3: 2374 }, tag: dectalk_trace_exact }
-          - { start_ms: 13.0, end_ms: 19.4, fields: { F3: 2349 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { F3: 2325 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { F3: 2300 }, tag: dectalk_trace_exact }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F3 values at frames 16-20)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_final_k_f2_hz:
         value: 1993
         citations:

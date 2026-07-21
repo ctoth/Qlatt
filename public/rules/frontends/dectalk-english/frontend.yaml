@@ -592,9 +592,22 @@ parameters:
           - { start_ms: 70.0, end_ms: 76.4, fields: { F2: 1945 }, tag: dectalk_trace_exact }
           - { start_ms: 76.4, end_ms: 82.8, fields: { F2: 1940 }, tag: dectalk_trace_exact }
           - { start_ms: 82.8, end_ms: 89.2, fields: { F2: 1936 }, tag: dectalk_trace_exact }
-          - { start_ms: 89.2, end_ms: 96.0, fields: { F2: 1931 }, tag: dectalk_trace_exact }
+          - { start_ms: 89.2, end_ms: 95.599, fields: { F2: 1931 }, tag: dectalk_trace_exact }
+          # Engineering compensation: 365.2 + 95.6 is represented just after
+          # the native 460.8 ms sample boundary in JavaScript.
+          - { start_ms: 95.599, end_ms: 96.0, fields: { F2: 1927 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F2 values at frames 58-71)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F2 values at frames 58-72)"
+          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
+      cake_dummy_ix_f2_trace_windows:
+        value:
+          - { start_ms: 0.0, end_ms: 12.4, fields: { F2: 1900 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { F2: 1830 }, tag: dectalk_trace_exact }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { F2: 1760 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.2, end_ms: 31.6, fields: { F2: 1733 }, tag: dectalk_trace_exact }
+          - { start_ms: 31.6, end_ms: 38.0, fields: { F2: 1706 }, tag: dectalk_trace_exact }
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F2 values at frames 73-77)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       # Exact native 6.4 ms F2 cells for cake's EY after the K-to-EY boundary.
       # Offsets are relative to Qlatt's unit-rounded 128.2 ms EY onset; the

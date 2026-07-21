@@ -205,6 +205,19 @@ describe("dectalk-english end-to-end", () => {
     ]);
   });
 
+  it("matches DECtalk's native F2 cells through cake's dummy IX carrier", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const f2 = Array.from({ length: 6 }, (_, index) => {
+      const time = (72 + index) * 0.0064;
+      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
+    });
+
+    expect(f2).toEqual([1927, 1900, 1830, 1760, 1733, 1706]);
+  });
+
   it("extends cake's EY F2 trajectory through its duration-lengthened tail", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",
@@ -255,15 +268,13 @@ describe("dectalk-english end-to-end", () => {
     expect(dummyVowels[0].get("F2")).toBe(1680);
     expect(dummyVowels[0].get("F3")).toBe(2520);
     expect(dummyVowels[0].get("TL")).toBe(10);
-    expect(dummyVowels[0].get("control_windows")).toEqual([
-      {
-        start_ms: 0,
-        target: "current",
-        end_ms: 38,
-        fields: { AV: 0, AH: 42, B1: 310, B2: 170 },
-        tag: "stop_aspiration",
-      },
-    ]);
+    expect(dummyVowels[0].get("control_windows")).toContainEqual({
+      start_ms: 0,
+      target: "current",
+      end_ms: 38,
+      fields: { AV: 0, AH: 42, B1: 310, B2: 170 },
+      tag: "stop_aspiration",
+    });
   });
 
   it("preserves required segment features when reducing a same-word geminate", () => {

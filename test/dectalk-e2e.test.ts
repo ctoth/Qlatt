@@ -172,6 +172,23 @@ describe("dectalk-english end-to-end", () => {
     expect(ey?.get("duration")).toBe(237);
   });
 
+  it("matches DECtalk's native F2 cells through cake's initial K", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const f2 = Array.from({ length: 21 }, (_, frameIndex) => {
+      const time = frameIndex * 0.0064;
+      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
+    });
+
+    expect(f2).toEqual([
+      2091, 2091, 2091, 2091, 2078, 2069, 2060,
+      2051, 2041, 2032, 2023, 2014, 2005, 1996,
+      1987, 1978, 1969, 1960, 1951, 1942, 1933,
+    ]);
+  });
+
   it("extends cake's EY F2 trajectory through its duration-lengthened tail", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

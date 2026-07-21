@@ -349,6 +349,8 @@ phases:
       - dectalk_obstruent_parallel_amplitudes
       - dectalk_special_coartic_f3
       - dectalk_special_coartic_f2
+      - dectalk_cake_initial_k_f2_trace
+      - dectalk_cake_initial_k_release_f2_trace
       - dectalk_silence_carries_formants
   - name: prosody
     rules:

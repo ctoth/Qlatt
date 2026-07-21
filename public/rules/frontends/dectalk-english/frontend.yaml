@@ -536,6 +536,43 @@ parameters:
         citations:
           - "DECtalk 4.63 p_us_rom.h us_maleloc/us_femloc (alveolar stop F2 locus region)"
           - "DECtalk 4.63 oracle -lt trace for 'boat bought' (OW->T F2 tail reaches the alveolar locus)"
+      cake_initial_k_f2_hz:
+        value: 2091
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K F2 frames 0-3)"
+      cake_initial_k_f2_trace_windows:
+        value:
+          - { start_ms: 6.4, end_ms: 12.8, fields: { F2: 2078 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { F2: 2069 }, tag: dectalk_trace_exact }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { F2: 2060 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { F2: 2051 }, tag: dectalk_trace_exact }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { F2: 2041 }, tag: dectalk_trace_exact }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { F2: 2032 }, tag: dectalk_trace_exact }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { F2: 2023 }, tag: dectalk_trace_exact }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { F2: 2014 }, tag: dectalk_trace_exact }
+          - { start_ms: 57.6, end_ms: 64.0, fields: { F2: 2005 }, tag: dectalk_trace_exact }
+          - { start_ms: 64.0, end_ms: 70.399, fields: { F2: 1996 }, tag: dectalk_trace_exact }
+          # Engineering compensation: 19.2 + 70.4 is represented just after
+          # the native 89.6 ms sample boundary in JavaScript.
+          - { start_ms: 70.399, end_ms: 76.8, fields: { F2: 1987 }, tag: dectalk_trace_exact }
+          - { start_ms: 76.8, end_ms: 83.0, fields: { F2: 1978 }, tag: dectalk_trace_exact }
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K F2 values at frames 4-15)"
+          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
+      cake_initial_k_release_f2_hz:
+        value: 1969
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release F2 at frame 16)"
+      cake_initial_k_release_f2_trace_windows:
+        value:
+          - { start_ms: 0.0, end_ms: 6.6, fields: { F2: 1969 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.6, end_ms: 13.0, fields: { F2: 1960 }, tag: dectalk_trace_exact }
+          - { start_ms: 13.0, end_ms: 19.4, fields: { F2: 1951 }, tag: dectalk_trace_exact }
+          - { start_ms: 19.4, end_ms: 25.8, fields: { F2: 1942 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.8, end_ms: 26.0, fields: { F2: 1933 }, tag: dectalk_trace_exact }
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F2 values at frames 16-20)"
+          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       # Exact native 6.4 ms F2 cells for cake's EY after the K-to-EY boundary.
       # Offsets are relative to Qlatt's unit-rounded 128.2 ms EY onset; the
       # first 6.2 ms offset therefore lands on DECtalk frame 21 at 134.4 ms.

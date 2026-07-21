@@ -134,6 +134,43 @@ describe("dectalk-english end-to-end", () => {
     ).toBe(38);
   });
 
+  it("inserts DECtalk's six-frame dummy IX carrier after a final voiceless stop", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const dummyVowels = result.utterance.relation("Segment").listItems()
+      .filter((item) => item.get("active") !== false && item.get("dummy_vowel") === true);
+    const finalStop = result.utterance.relation("Segment").listItems()
+      .findLast((item) => item.get("active") !== false && item.get("phoneme") === "K");
+
+    expect(dummyVowels).toHaveLength(1);
+    expect(finalStop?.get("duration")).toBe(96);
+    expect(finalStop?.get("control_windows")).toEqual([
+      {
+        suffix_ms: 26,
+        target: "current",
+        fields: { AF: 55, A2: 0, A3: 47, A4: 0, A5: 33, A6: 0, AB: 0, SW: 1 },
+        tag: "stop_burst",
+      },
+    ]);
+    expect(dummyVowels[0].get("phoneme")).toBe("SIL");
+    expect(dummyVowels[0].get("duration")).toBe(38);
+    expect(dummyVowels[0].get("F1")).toBe(460);
+    expect(dummyVowels[0].get("F2")).toBe(1680);
+    expect(dummyVowels[0].get("F3")).toBe(2520);
+    expect(dummyVowels[0].get("TL")).toBe(10);
+    expect(dummyVowels[0].get("control_windows")).toEqual([
+      {
+        start_ms: 0,
+        target: "current",
+        end_ms: 38,
+        fields: { AV: 0, AH: 42, B1: 310, B2: 170 },
+        tag: "stop_aspiration",
+      },
+    ]);
+  });
+
   it("preserves required segment features when reducing a same-word geminate", () => {
     const result = textToKlattTrackDetailed("Safe zones feel fuzzy.", 110, 30, {
       frontendId: "dectalk-english",

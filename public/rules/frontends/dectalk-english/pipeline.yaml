@@ -319,6 +319,7 @@ phases:
     rules:
       - dectalk_apply_diphthong_trajectories
       - dectalk_ow_alveolar_stop_late_f2_locus
+      - dectalk_insert_voiceless_stop_release_into_silence
       - dectalk_insert_voiceless_stop_release_and_aspiration
       - dectalk_insert_voiceless_stop_release_and_aspiration_final
       - dectalk_insert_voiced_stop_release

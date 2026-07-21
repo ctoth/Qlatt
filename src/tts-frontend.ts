@@ -186,6 +186,7 @@ function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
     boundaryTone: STRING_OR_NULL,
     control_windows: { kind: "array", items: CONTROL_WINDOW_SCHEMA },
     transition_ms: { kind: "number" },
+    dummy_vowel: { kind: "boolean" },
     weak: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
     glottal: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
   };

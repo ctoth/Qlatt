@@ -74,40 +74,32 @@ rules:
       where: current.phoneme in ['P', 'T', 'K'] && next != null && next.phoneme == 'SIL'
     define:
       rel: "current.phoneme + \"_REL\""
-      asp: "current.phoneme + \"_ASP\""
       weak: "true"
       next_token: next
       rel_target: target(rel)
-      asp_target: target(asp)
-      silence_target: "target('SIL')"
-      dummy_duration: params.policy.duration.voiceless_vot_base_ms
-      vot_target: dummy_duration
+      ix_target: "target('IX0')"
+      dummy_duration: params.policy.duration.dummy_vowel_duration_ms
       rel_burst_duration: "has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration"
-      # DECtalk 4.63 p_us_st1.c chooses the release spectrum from the adjacent
-      # sound class; the inventory owns the class-keyed spectral data.
-      profile_ref: "prev != null && prev.phoneme != 'SIL' ? prev : current"
-      profile_class: >-
-        has(profile_ref.is_obstruent) && profile_ref.is_obstruent == true ? 'obstruent' :
-        (profile_ref.type == 'vowel' && has(profile_ref.front) && profile_ref.front == true ? 'front_vowel' :
-        (has(profile_ref.is_back_rounded) && profile_ref.is_back_rounded == true ? 'back_rounded_vowel' : 'back_unrounded_vowel'))
-      rel_profile: "rel_target.stopReleaseProfiles[profile_class]"
-      rel_duration: "min([vot_target, rel_burst_duration])"
-      asp_duration: "vot_target - rel_duration"
-      current_min_duration: "has(current.minimumDuration) ? current.minimumDuration : 0"
-      next_min_duration: "has(next_token.minimumDuration) ? next_token.minimumDuration : 0"
-      closure_duration: "max([current_min_duration, current.duration - rel_duration])"
-      silence_tail_duration: "max([next_min_duration, next_token.duration - dummy_duration])"
-      open_glottis_b1: "silence_target.B1 + params.policy.duration.open_glottis_b1_widen_hz"
-      open_glottis_b2: "silence_target.B2 + params.policy.duration.open_glottis_b2_widen_hz"
-      carrier_params: "merge(silence_target, {'SW': 0})"
+      # DECtalk 4.63 p_us_st1.c us_gettar() selects the burst-amplitude row
+      # from the following dummy IX, whose beginning type is front vowel.
+      rel_profile: "rel_target.stopReleaseProfiles.front_vowel"
+      rel_duration: "min([current.duration, rel_burst_duration])"
+      open_glottis_b1: "ix_target.B1 + params.policy.duration.open_glottis_b1_widen_hz"
+      open_glottis_b2: "ix_target.B2 + params.policy.duration.open_glottis_b2_widen_hz"
+      carrier_params: "merge(ix_target, {'TL': params.policy.duration.dummy_vowel_tilt_db, 'SW': 0})"
       rel_window_params: >-
-        merge(rel_target, merge({'A2': max([0, rel_profile.A2 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A3': max([0, rel_profile.A3 - params.policy.duration.dummy_vowel_burst_reduction_db]),
-        'A4': max([0, rel_profile.A4 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A5': max([0, rel_profile.A5 - params.policy.duration.dummy_vowel_burst_reduction_db]),
-        'A6': max([0, rel_profile.A6 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'AB': max([0, rel_profile.AB - params.policy.duration.dummy_vowel_burst_reduction_db])},
-        {'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1}))
+        {'AF': rel_target.AF,
+        'A2': rel_profile.A2 >= params.policy.duration.dummy_vowel_burst_reduction_db ? rel_profile.A2 - params.policy.duration.dummy_vowel_burst_reduction_db : rel_profile.A2,
+        'A3': rel_profile.A3 >= params.policy.duration.dummy_vowel_burst_reduction_db ? rel_profile.A3 - params.policy.duration.dummy_vowel_burst_reduction_db : rel_profile.A3,
+        'A4': rel_profile.A4 >= params.policy.duration.dummy_vowel_burst_reduction_db ? rel_profile.A4 - params.policy.duration.dummy_vowel_burst_reduction_db : rel_profile.A4,
+        'A5': rel_profile.A5 >= params.policy.duration.dummy_vowel_burst_reduction_db ? rel_profile.A5 - params.policy.duration.dummy_vowel_burst_reduction_db : rel_profile.A5,
+        'A6': rel_profile.A6 >= params.policy.duration.dummy_vowel_burst_reduction_db ? rel_profile.A6 - params.policy.duration.dummy_vowel_burst_reduction_db : rel_profile.A6,
+        'AB': rel_profile.AB >= params.policy.duration.dummy_vowel_burst_reduction_db ? rel_profile.AB - params.policy.duration.dummy_vowel_burst_reduction_db : rel_profile.AB,
+        'SW': 1}
       asp_window_params: >-
-        merge(asp_target, {'AH': max([0, asp_target.AH - params.policy.duration.dummy_vowel_aspiration_reduction_db]),
-        'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1})
+        {'AV': 0,
+        'AH': params.policy.duration.voiceless_vot_aspiration_front_db - params.policy.duration.dummy_vowel_aspiration_reduction_db,
+        'B1': open_glottis_b1, 'B2': open_glottis_b2}
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -132,7 +124,11 @@ rules:
             - alveolar
             - velar
             - punctuationSymbol
-          duration: closure_duration
+          control_windows:
+            - suffix_ms: rel_duration
+              target: "'current'"
+              fields: rel_window_params
+              tag: "'stop_burst'"
         - phoneme: "'SIL'"
           stress: "has(current.stress) ? current.stress : null"
           word: "has(current.word) ? current.word : null"
@@ -146,21 +142,16 @@ rules:
           control_windows:
             - start_ms: 0
               target: "'current'"
-              end_ms: rel_duration
-              fields: rel_window_params
-              tag: "'stop_burst'"
-            - start_ms: rel_duration
-              target: "'current'"
               end_ms: dummy_duration
               fields: asp_window_params
               tag: "'stop_aspiration'"
         - copy_from: next
-          duration: silence_tail_duration
     citations:
       - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
       - "DECtalk 4.63 p_us_st1.c Special Rule 2 (a dummy vowel releases a final voiceless plosive into silence)"
       - "DECtalk 4.63 p_us_st1.c (dummy-vowel release reduces burst by 3 dB, aspiration by 6 dB, and widens B1/B2 during the open-glottis interval)"
-      - "Engineering approximation: split explicit silence into a dummy-vowel carrier plus remaining silence tail"
+      - "DECtalk 4.63 p_us_rom.h (US_IX target values)"
+      - "Engineering representation: keep the acoustically IX dummy non-syllabic so fixed Rule 9 duration survives later vowel rules"
 
   dectalk_insert_voiceless_stop_release_and_aspiration:
     kind: structural

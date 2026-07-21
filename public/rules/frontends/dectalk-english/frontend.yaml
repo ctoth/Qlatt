@@ -223,6 +223,11 @@ parameters:
       # amplitudes by 3 dB and aspiration by 6 dB.
       dummy_vowel_burst_reduction_db: 3
       dummy_vowel_aspiration_reduction_db: 6
+      # DECtalk 4.63 ph_inton1.c Rule 9 inserts SCHWA2/IX for NF40MS
+      # after a burst plosive before silence; ph_defs.h defines NF40MS=6 frames.
+      dummy_vowel_duration_ms: 38
+      # DECtalk 4.63 p_us_st1.c us_gettar() assigns TL=10 to FDUMMY_VOWEL.
+      dummy_vowel_tilt_db: 10
       # DECtalk 4.63 p_us_st1.c: open-glottis interval widens B1/B2 by +250/+70 Hz.
       open_glottis_b1_widen_hz: 250
       open_glottis_b2_widen_hz: 70

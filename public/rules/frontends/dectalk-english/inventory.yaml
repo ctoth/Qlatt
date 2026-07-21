@@ -125,6 +125,23 @@ phoneme_targets:
     type: vowel
     voiced: true
     mid: true
+  # DECtalk 4.63 US_IX code 18 from p_us_rom.h
+  # us_maltar/us_inhdr/us_mindur; used directly by the final dummy-vowel rule.
+  IX0:
+    TL: 3
+    F1: 460
+    F2: 1680
+    F3: 2520
+    B1: 60
+    B2: 100
+    B3: 200
+    AV: 63
+    dur: 160
+    minimumDuration: 60
+    type: vowel
+    voiced: true
+    mid: true
+    front: true
   EY1:
     TL: 3
     F1: 520

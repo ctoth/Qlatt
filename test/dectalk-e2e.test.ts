@@ -413,6 +413,19 @@ describe("dectalk-english end-to-end", () => {
     expect(f3).toEqual([2401, 2425, 2438, 2450, 2474, 2498]);
   });
 
+  it("matches DECtalk's native B3 cells through cake's dummy IX carrier", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const b3 = Array.from({ length: 6 }, (_, index) => {
+      const time = (72 + index) * 0.0064;
+      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
+    });
+
+    expect(b3).toEqual([239, 233, 226, 219, 213, 206]);
+  });
+
   it("matches DECtalk's native F2 decay into cake's terminal silence", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

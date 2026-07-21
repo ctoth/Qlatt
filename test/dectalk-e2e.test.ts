@@ -188,6 +188,22 @@ describe("dectalk-english end-to-end", () => {
     ]);
   });
 
+  it("matches DECtalk's native B3 cells through cake's initial silence and K closure", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const b3 = Array.from({ length: 16 }, (_, frameIndex) => {
+      const time = frameIndex * 0.0064;
+      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
+    });
+
+    expect(b3).toEqual([
+      280, 280, 280, 280, 280, 280, 280, 280,
+      280, 280, 280, 280, 280, 280, 280, 280,
+    ]);
+  });
+
   it("matches DECtalk's native B1 cells through cake's initial K release", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

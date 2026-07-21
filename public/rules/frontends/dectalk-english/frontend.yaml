@@ -581,8 +581,9 @@ parameters:
           - { start_ms: 44.8, end_ms: 51.2, fields: { B1: 225 }, tag: dectalk_trace_exact }
           - { start_ms: 51.2, end_ms: 57.6, fields: { B1: 212 }, tag: dectalk_trace_exact }
           - { start_ms: 57.6, end_ms: 83.0, fields: { B1: 200 }, tag: dectalk_trace_exact }
+          - { start_ms: 57.6, end_ms: 83.0, fields: { B3: 280 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F2/F3/B1 values at frames 0-15)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F2/F3/B1/B3 values at frames 0-15)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_initial_k_release_f2_hz:
         value: 1969

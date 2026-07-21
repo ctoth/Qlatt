@@ -287,6 +287,25 @@ describe("dectalk-english end-to-end", () => {
     expect(b2).toEqual(expected);
   });
 
+  it("matches every native AV cell through cake's complete trace", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const av = Array.from({ length: 171 }, (_, frameIndex) => {
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.AV;
+    });
+    const expected = [
+      ...Array(29).fill(0),
+      ...Array(28).fill(65),
+      ...Array(114).fill(0),
+    ];
+
+    expect(expected).toHaveLength(171);
+    expect(av).toEqual(expected);
+  });
+
   it("matches DECtalk's native F1 cells through cake's initial silence and K closure", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

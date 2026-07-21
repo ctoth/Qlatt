@@ -773,9 +773,9 @@ parameters:
           - { start_ms: 19.0, end_ms: 25.4, fields: { F1: 397, F2: 1871 }, tag: dectalk_trace_exact }
           - { start_ms: 25.4, end_ms: 31.8, fields: { F1: 417, F2: 1844 }, tag: dectalk_trace_exact }
           - { start_ms: 31.8, end_ms: 38.2, fields: { F1: 434, F2: 1831 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.2, end_ms: 44.6, fields: { F1: 451, F2: 1817 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 468, F2: 1804 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 486, F2: 1790 }, tag: dectalk_trace_exact }
+          - { start_ms: 38.2, end_ms: 44.6, fields: { F1: 451, F2: 1817, AV: 0 }, tag: dectalk_trace_exact }
+          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 468, F2: 1804, AV: 0 }, tag: dectalk_trace_exact }
+          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 486, F2: 1790, AV: 0 }, tag: dectalk_trace_exact }
           - { start_ms: 57.4, end_ms: 63.8, fields: { F1: 483, F2: 1777 }, tag: dectalk_trace_exact }
           - { start_ms: 63.8, end_ms: 70.2, fields: { F1: 481, F2: 1790 }, tag: dectalk_trace_exact }
           - { start_ms: 70.2, end_ms: 76.6, fields: { F1: 478, F2: 1804 }, tag: dectalk_trace_exact }
@@ -799,7 +799,7 @@ parameters:
           - { start_ms: 185.4, end_ms: 191.8, fields: { F1: 448, F2: 1997 }, tag: dectalk_trace_exact }
           - { start_ms: 191.8, end_ms: 195.0, fields: { F1: 447, F2: 2006 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native F1/F2 values at frames 21-50)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native F1/F2 values at frames 21-50 and AV onset at frame 29)"
           - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
       cake_ey_primary_formant_tail_windows:
         value:
@@ -810,9 +810,9 @@ parameters:
           - { start_ms: 217.4, end_ms: 223.8, fields: { F1: 398, F2: 2001 }, tag: dectalk_trace_exact }
           - { start_ms: 223.8, end_ms: 230.2, fields: { F1: 383, F2: 1998 }, tag: dectalk_trace_exact }
           - { start_ms: 230.2, end_ms: 236.6, fields: { F1: 367, F2: 1996 }, tag: dectalk_trace_exact }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { F1: 351, F2: 1994 }, tag: dectalk_trace_exact }
+          - { start_ms: 236.6, end_ms: 237.0, fields: { F1: 351, F2: 1994, AV: 0 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native F1/F2 values at frames 51-57)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native F1/F2 values at frames 51-57 and AV offset at frame 57)"
           - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
       cake_ey_f3_trace_windows:
         value:

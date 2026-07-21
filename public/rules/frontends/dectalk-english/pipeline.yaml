@@ -349,9 +349,8 @@ phases:
       - dectalk_obstruent_parallel_amplitudes
       - dectalk_special_coartic_f3
       - dectalk_special_coartic_f2
-      - dectalk_cake_initial_k_f2_trace
+      - dectalk_cake_initial_k_formant_trace
       - dectalk_cake_initial_k_release_f2_trace
-      - dectalk_cake_initial_k_f3_trace
       - dectalk_cake_initial_k_release_f3_trace
       - dectalk_cake_final_k_formant_trace
       - dectalk_cake_dummy_ix_formant_trace

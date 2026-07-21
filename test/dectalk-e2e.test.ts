@@ -172,6 +172,22 @@ describe("dectalk-english end-to-end", () => {
     expect(ey?.get("duration")).toBe(237);
   });
 
+  it("matches DECtalk's native B1 cells through cake's initial silence and K closure", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const b1 = Array.from({ length: 16 }, (_, frameIndex) => {
+      const time = frameIndex * 0.0064;
+      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
+    });
+
+    expect(b1).toEqual([
+      300, 300, 300, 300, 300, 287, 275, 262,
+      250, 237, 225, 212, 200, 200, 200, 200,
+    ]);
+  });
+
   it("matches DECtalk's native F2 cells through cake's initial K", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

@@ -156,6 +156,26 @@ describe("dectalk-english end-to-end", () => {
     ).toBe(38);
   });
 
+  it("extends cake's EY F2 trajectory through its duration-lengthened tail", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const ey = result.utterance.relation("Segment").listItems()
+      .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
+    const windows = ey?.get("control_windows");
+    const tailFrame = result.track.findLast((frame) => frame.time <= 0.3264);
+
+    expect(Array.isArray(windows)).toBe(true);
+    expect(windows).toContainEqual({
+      suffix_ms: 42,
+      fields: { F2: 2006 },
+      tag: "dectalk_trajectory_tail",
+    });
+    expect(tailFrame?.phoneme).toBe("EY");
+    expect(tailFrame?.params.F2).toBe(2006);
+  });
+
   it("inserts DECtalk's six-frame dummy IX carrier after a final voiceless stop", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

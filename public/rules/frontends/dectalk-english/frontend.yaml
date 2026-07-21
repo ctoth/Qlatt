@@ -532,6 +532,15 @@ parameters:
         citations:
           - "DECtalk 4.63 p_us_rom.h us_maleloc/us_femloc (alveolar stop F2 locus region)"
           - "DECtalk 4.63 oracle -lt trace for 'boat bought' (OW->T F2 tail reaches the alveolar locus)"
+      cake_ey_f2_tail_window_ms:
+        value: 42
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (EY continues for 42 ms after the structural-phase trajectory span)"
+          - "Engineering representation: final-duration-relative window preserves the observed EY tail after duration rules lengthen the vowel"
+      cake_ey_f2_tail_hz:
+        value: 2006
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (EY F2 is 2006 Hz at frames 50-52 before its terminal easing)"
       special_coartic:
         # us_place & FALVEL alveolars (p_us_st1.c:373/381; ph_defs.h:342).
         alveolar:

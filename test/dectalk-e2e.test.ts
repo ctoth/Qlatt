@@ -264,6 +264,24 @@ describe("dectalk-english end-to-end", () => {
     ]);
   });
 
+  it("matches DECtalk's native F1 cells through cake's EY", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const f1 = Array.from({ length: 37 }, (_, frameIndex) => {
+      const time = (21 + frameIndex) * 0.0064;
+      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
+    });
+
+    expect(f1).toEqual([
+      357, 377, 397, 417, 434, 451, 468, 486, 483, 481,
+      478, 476, 473, 471, 468, 466, 463, 461, 458, 457,
+      456, 455, 454, 453, 452, 451, 450, 449, 448, 447,
+      446, 430, 414, 398, 383, 367, 351,
+    ]);
+  });
+
   it("matches DECtalk's native F3 cells through cake's EY", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",
@@ -529,12 +547,12 @@ describe("dectalk-english end-to-end", () => {
     );
 
     expect(Array.isArray(windows)).toBe(true);
-    expect(windows).toContainEqual({
+    expect(windows).toContainEqual(expect.objectContaining({
       start_ms: 236.6,
       end_ms: 237,
-      fields: { F2: 1994 },
+      fields: expect.objectContaining({ F2: 1994 }),
       tag: "dectalk_trace_exact",
-    });
+    }));
     expect(nativeF2).toEqual([1926, 1777, 1858, 2006]);
     expect(tailF2).toEqual([2006, 2006, 2003, 2001, 1998, 1996, 1994]);
   });

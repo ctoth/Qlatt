@@ -180,6 +180,9 @@ describe("dectalk-english end-to-end", () => {
     const ey = result.utterance.relation("Segment").listItems()
       .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
     const windows = ey?.get("control_windows");
+    const nativeF2 = [0.1344, 0.1856, 0.2240, 0.3200].map((time) =>
+      result.track.findLast((frame) => frame.time <= time + 1e-9)?.params.F2
+    );
     const tailFrame = result.track.findLast((frame) => frame.time <= 0.3264);
 
     expect(Array.isArray(windows)).toBe(true);
@@ -188,6 +191,7 @@ describe("dectalk-english end-to-end", () => {
       fields: { F2: 2006 },
       tag: "dectalk_trajectory_tail",
     });
+    expect(nativeF2).toEqual([1926, 1777, 1858, 2006]);
     expect(tailFrame?.phoneme).toBe("EY");
     expect(tailFrame?.params.F2).toBe(2006);
   });

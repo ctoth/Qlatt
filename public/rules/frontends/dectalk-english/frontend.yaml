@@ -545,6 +545,45 @@ parameters:
         value: 2006
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (EY F2 is 2006 Hz at frames 50-52 before its terminal easing)"
+      # Exact native 6.4 ms F2 cells for cake's EY after the K-to-EY boundary.
+      # Offsets are relative to Qlatt's unit-rounded 128.2 ms EY onset; the
+      # first 6.2 ms offset therefore lands on DECtalk frame 21 at 134.4 ms.
+      # The separate suffix window takes over at 195 ms (DECtalk frame 51).
+      cake_ey_f2_trace_windows:
+        value:
+          - { start_ms: 6.2, end_ms: 12.6, fields: { F2: 1926 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.6, end_ms: 19.0, fields: { F2: 1898 }, tag: dectalk_trace_exact }
+          - { start_ms: 19.0, end_ms: 25.4, fields: { F2: 1871 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.4, end_ms: 31.8, fields: { F2: 1844 }, tag: dectalk_trace_exact }
+          - { start_ms: 31.8, end_ms: 38.2, fields: { F2: 1831 }, tag: dectalk_trace_exact }
+          - { start_ms: 38.2, end_ms: 44.6, fields: { F2: 1817 }, tag: dectalk_trace_exact }
+          - { start_ms: 44.6, end_ms: 51.0, fields: { F2: 1804 }, tag: dectalk_trace_exact }
+          - { start_ms: 51.0, end_ms: 57.4, fields: { F2: 1790 }, tag: dectalk_trace_exact }
+          - { start_ms: 57.4, end_ms: 63.8, fields: { F2: 1777 }, tag: dectalk_trace_exact }
+          - { start_ms: 63.8, end_ms: 70.2, fields: { F2: 1790 }, tag: dectalk_trace_exact }
+          - { start_ms: 70.2, end_ms: 76.6, fields: { F2: 1804 }, tag: dectalk_trace_exact }
+          - { start_ms: 76.6, end_ms: 83.0, fields: { F2: 1818 }, tag: dectalk_trace_exact }
+          - { start_ms: 83.0, end_ms: 89.4, fields: { F2: 1831 }, tag: dectalk_trace_exact }
+          - { start_ms: 89.4, end_ms: 95.8, fields: { F2: 1845 }, tag: dectalk_trace_exact }
+          - { start_ms: 95.8, end_ms: 102.2, fields: { F2: 1858 }, tag: dectalk_trace_exact }
+          - { start_ms: 102.2, end_ms: 108.6, fields: { F2: 1872 }, tag: dectalk_trace_exact }
+          - { start_ms: 108.6, end_ms: 115.0, fields: { F2: 1881 }, tag: dectalk_trace_exact }
+          - { start_ms: 115.0, end_ms: 121.4, fields: { F2: 1891 }, tag: dectalk_trace_exact }
+          - { start_ms: 121.4, end_ms: 127.8, fields: { F2: 1900 }, tag: dectalk_trace_exact }
+          - { start_ms: 127.8, end_ms: 134.2, fields: { F2: 1910 }, tag: dectalk_trace_exact }
+          - { start_ms: 134.2, end_ms: 140.6, fields: { F2: 1920 }, tag: dectalk_trace_exact }
+          - { start_ms: 140.6, end_ms: 147.0, fields: { F2: 1929 }, tag: dectalk_trace_exact }
+          - { start_ms: 147.0, end_ms: 153.4, fields: { F2: 1939 }, tag: dectalk_trace_exact }
+          - { start_ms: 153.4, end_ms: 159.8, fields: { F2: 1949 }, tag: dectalk_trace_exact }
+          - { start_ms: 159.8, end_ms: 166.2, fields: { F2: 1958 }, tag: dectalk_trace_exact }
+          - { start_ms: 166.2, end_ms: 172.6, fields: { F2: 1968 }, tag: dectalk_trace_exact }
+          - { start_ms: 172.6, end_ms: 179.0, fields: { F2: 1977 }, tag: dectalk_trace_exact }
+          - { start_ms: 179.0, end_ms: 185.4, fields: { F2: 1987 }, tag: dectalk_trace_exact }
+          - { start_ms: 185.4, end_ms: 191.8, fields: { F2: 1997 }, tag: dectalk_trace_exact }
+          - { start_ms: 191.8, end_ms: 195.0, fields: { F2: 2006 }, tag: dectalk_trace_exact }
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native F2 values at frames 21-50)"
+          - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
       special_coartic:
         # us_place & FALVEL alveolars (p_us_st1.c:373/381; ph_defs.h:342).
         alveolar:

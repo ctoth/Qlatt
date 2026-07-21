@@ -358,6 +358,11 @@ phases:
       - dectalk_comma_rise1
       - dectalk_comma_rise2
       - dectalk_stress_impulse
+      - dectalk_segmental_k_ey_k_initial_silence
+      - dectalk_segmental_k_ey_k_initial_stop
+      - dectalk_segmental_k_ey_k_vowel
+      - dectalk_segmental_k_ey_k_final_stop
+      - dectalk_segmental_k_ey_k_dummy_ix
       - dectalk_boundary_reset
       - dectalk_connected_speech_source_contour
   - name: finalize

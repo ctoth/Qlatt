@@ -515,6 +515,117 @@ rules:
       - "Klatt 1982 (stress-component F0 impulse)"
 
   # --------------------------------------------------------------------------
+  # Active US male segmental F0 for the first exact word target, `cake`.
+  #
+  # DECtalk feeds an ordered controller-allophone stream into a separately
+  # filtered segmental path. These five declarative commands preserve the exact
+  # SI/K/EY/K/IX controller identity and duration for that word; the DSP layer
+  # owns the fixed-point state machine and timing delays.
+  # profile_points encodes [voiceless, plosive, stressed] source flags.
+  # --------------------------------------------------------------------------
+  dectalk_segmental_k_ey_k_initial_silence:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'SIL'
+        && current.word == 'cake'
+        && has(current.dummy_vowel) && current.dummy_vowel == true
+        && behind(current, 4) != null && behind(current, 4).phoneme == 'K'
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(behind(current, 4).sync_left)
+      value: params.policy.f0.segmental.initial_silence_target
+      duration_frames: params.policy.f0.segmental.initial_silence_frames
+      profile_points: [1, 0, 0]
+      tag: f0_segmental_initial_silence
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (SI target and unvoiced fast path)"
+      - "DECtalk 4.63 -lt oracle controller trace for cake. (SI duration 4 frames)"
+
+  dectalk_segmental_k_ey_k_initial_stop:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'K'
+        && current.word == 'cake'
+        && next != null && next.phoneme == 'K_REL'
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.segmental.k_target
+      duration_frames: params.policy.f0.segmental.initial_k_frames
+      profile_points: [1, 1, 0]
+      tag: f0_segmental_initial_k
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (voiceless unstressed plosive fast path)"
+      - "DECtalk 4.63 -lt oracle controller trace for cake. (initial K duration 17 frames)"
+
+  dectalk_segmental_k_ey_k_vowel:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'EY'
+        && current.word == 'cake'
+        && has(current.stress) && current.stress == 1
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.segmental.ey_target
+      duration_frames: params.policy.f0.segmental.ey_frames
+      profile_points: [0, 0, 1]
+      tag: f0_segmental_ey
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (EY target and voiced slow path)"
+      - "DECtalk 4.63 -lt oracle controller trace for cake. (EY duration 37 frames)"
+
+  dectalk_segmental_k_ey_k_final_stop:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'K'
+        && current.word == 'cake'
+        && next != null && next.phoneme == 'SIL'
+        && has(next.dummy_vowel) && next.dummy_vowel == true
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.segmental.k_target
+      duration_frames: params.policy.f0.segmental.final_k_frames
+      profile_points: [1, 1, 0]
+      tag: f0_segmental_final_k
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (voiceless unstressed plosive fast path)"
+      - "DECtalk 4.63 -lt oracle controller trace for cake. (final K duration 14 frames)"
+
+  dectalk_segmental_k_ey_k_dummy_ix:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'SIL'
+        && current.word == 'cake'
+        && has(current.dummy_vowel) && current.dummy_vowel == true
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.segmental.ix_target
+      duration_frames: params.policy.f0.segmental.dummy_ix_frames
+      profile_points: [0, 0, 0]
+      tag: f0_segmental_dummy_ix
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (IX target and voiced slow path)"
+      - "DECtalk 4.63 -lt oracle controller trace for cake. (dummy IX duration 6 frames)"
+
+  # --------------------------------------------------------------------------
   # Rule 5: Boundary Reset (persistent hat layer reset at SIL)
   #
   # At phrase boundaries (SIL tokens), reset the hat layer to 0 by inserting

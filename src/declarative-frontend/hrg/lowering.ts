@@ -28,7 +28,7 @@ type LocusEntry = {
 type LocusTable = Readonly<Record<string, Readonly<Record<string, Readonly<Record<string, LocusEntry>>>>>>;
 type VowelCategoryTable = Readonly<Record<string, { forward?: number; backward?: number }>>;
 
-type LayerType = "profile" | "persistent" | "impulse" | "glide";
+type LayerType = "profile" | "persistent" | "impulse" | "glide" | "dectalk_segmental";
 type DecayMode = "halving" | "step_plus_ramp" | "exponential";
 
 type LayerConfig = {
@@ -552,7 +552,13 @@ function renderLayeredF0(
     }
   }
 
-  const layerTypeCodes: Record<LayerType, number> = { profile: 0, persistent: 1, impulse: 2, glide: 3 };
+  const layerTypeCodes: Record<LayerType, number> = {
+    profile: 0,
+    persistent: 1,
+    impulse: 2,
+    glide: 3,
+    dectalk_segmental: 4,
+  };
   const decayCodes: Record<DecayMode, number> = { halving: 0, step_plus_ramp: 1, exponential: 2 };
   // f0-filters ABI constants; keep synchronized with crates/f0-filters/src/lib.rs.
   const commandDescriptorWidth = 5;
@@ -567,6 +573,7 @@ function renderLayeredF0(
     const layerCommands = commandsByLayer.get(name) ?? [];
     const commandStart = commandDescriptors.length / commandDescriptorWidth;
     const impulse = config.type === "impulse";
+    const dectalkSegmental = config.type === "dectalk_segmental";
     const decayCode = impulse && config.decay
       ? decayCodes[config.decay]
       : 0;
@@ -583,13 +590,20 @@ function renderLayeredF0(
     for (const command of layerCommands) {
       const reachable = cursorLive && command.time <= maximumCommandTime;
       if (!reachable) cursorLive = false;
-      const durationFrames = impulse && reachable
+      const durationFrames = (impulse && reachable) || dectalkSegmental
         ? requirePositiveNumber(command.durationFrames, `f0_control.${name}.durationFrames`)
         : typeof command.durationFrames === "number" && Number.isFinite(command.durationFrames)
           ? command.durationFrames
           : 0;
       const profileStart = profilePool.length;
-      const profileCount = config.type === "profile" ? command.profilePoints?.length ?? 0 : 0;
+      const profileCount = config.type === "profile" || dectalkSegmental
+        ? command.profilePoints?.length ?? 0
+        : 0;
+      if (dectalkSegmental && profileCount !== 3) {
+        throw new Error(
+          `E_HRG_LOWER_F0_MODEL: f0_control.${name}.profilePoints requires [voiceless, plosive, stressed]`,
+        );
+      }
       if (profileCount > 0 && command.profilePoints) profilePool.push(...command.profilePoints);
       commandDescriptors.push(command.time, command.value, durationFrames, profileStart, profileCount);
     }

@@ -160,6 +160,12 @@ f0_model:
     # the `boundary` layer above. Reset to 0 at the next SIL keeps it clause-local.
     question_glide:
       type: glide
+    # Separate post-command-filter segmental path. Each command carries the
+    # active allophone target, exact controller duration, and source flags
+    # [voiceless, plosive, stressed]. The Rust kernel reproduces pht0draw() and
+    # filter_seg_commands() in signed Q14 arithmetic.
+    segmental:
+      type: dectalk_segmental
   combine: sum
   # Speaker scaling: converts internal Hz*10 units to final Hz using the
   # DECtalk formula:
@@ -423,6 +429,24 @@ parameters:
       # Stress impulse duration in native DECtalk control frames.
       # Source: ph_inton1.c make_f0_command(... IMPULSE, ..., 20, ...).
       stress_impulse_duration_frames: 20
+      segmental:
+        # Active US male allophone targets, internal Hz*10.
+        # Source: Ph_drwt02.c us_f0msegtars[] (SI=50, EY=50, K=0, IX=70).
+        initial_silence_target: 50
+        ey_target: 50
+        k_target: 0
+        ix_target: 70
+        # Exact p_us_tim.c controller output for the active K-EY-K word family.
+        # Source: DECtalk 4.63 -lt controller/allophone trace for `cake.`.
+        initial_silence_frames: 4
+        initial_k_frames: 17
+        ey_frames: 37
+        final_k_frames: 14
+        dummy_ix_frames: 6
+        citations:
+          - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw"
+          - "DECtalk 4.63 p_us_tim.c controller durations"
+          - "DECtalk 4.63 -lt oracle trace for cake."
       citations:
         - "DECtalk 4.63 ph_inton1.c (hat-pattern F0 model)"
         - "DECtalk 4.63 Ph_drwt02.c (baseline profiles, speaker scaling)"

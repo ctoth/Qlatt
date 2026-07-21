@@ -31,6 +31,11 @@ const LAYER_IMPULSE: i32 = 2;
 // span (duration_frames) come from the declarative command data, no gesture
 // constants here.
 const LAYER_GLIDE: i32 = 3;
+// DECtalk's segmental term bypasses the main command filter. It has a separate
+// fixed-point two-pole state, with a one-pole injection for voiceless
+// allophones, and is added immediately before speaker scaling.
+// Source: DECtalk 4.63 Ph_drwt02.c pht0draw()/filter_seg_commands().
+const LAYER_DECTALK_SEGMENTAL: i32 = 4;
 const FILTER_ONE_POLE: i32 = 1;
 const FILTER_COEFFICIENT_2POLE: i32 = 2;
 
@@ -159,6 +164,84 @@ struct CmdDesc {
     profile_count: usize,
 }
 
+#[derive(Default)]
+struct DectalkSegmentalState {
+    command_index: Option<usize>,
+    nframs: i32,
+    segment_duration: i32,
+    extra_duration: i32,
+    slow_target: i32,
+    fast_target: i32,
+    first_pole_state: i32,
+    second_pole_state: i32,
+}
+
+fn q14_multiply(left: i32, right: i32) -> i32 {
+    ((left as i64 * right as i64) >> 14) as i32
+}
+
+impl DectalkSegmentalState {
+    fn command_flag(command: &CmdDesc, profile_points: &[f64], offset: usize) -> bool {
+        command.profile_count > offset
+            && profile_points
+                .get(command.profile_start + offset)
+                .is_some_and(|value| *value != 0.0)
+    }
+
+    fn render_frame(&mut self, commands: &[CmdDesc], profile_points: &[f64]) -> f64 {
+        let can_advance = self.command_index.map_or(!commands.is_empty(), |index| {
+            index + 1 < commands.len() && self.nframs >= self.segment_duration + self.extra_duration
+        });
+        if can_advance {
+            let next_index = self.command_index.map_or(0, |index| index + 1);
+            if self.command_index.is_some() {
+                self.nframs -= self.segment_duration;
+            }
+            self.command_index = Some(next_index);
+            let command = &commands[next_index];
+            self.segment_duration = command.duration_frames as i32;
+
+            // Source delay compensation when initialized SI advances to the
+            // first spoken allophone.
+            if next_index == 1 {
+                self.nframs = -3;
+            }
+
+            let next_is_voiceless = commands
+                .get(next_index + 1)
+                .is_some_and(|next| Self::command_flag(next, profile_points, 0));
+            self.extra_duration = if next_is_voiceless { 0 } else { -3 };
+
+            let target = command.value as i32;
+            if Self::command_flag(command, profile_points, 0) {
+                self.slow_target = 0;
+                self.fast_target = target;
+                self.extra_duration = 1;
+                if Self::command_flag(command, profile_points, 1) {
+                    self.extra_duration = if Self::command_flag(command, profile_points, 2) {
+                        5
+                    } else {
+                        3
+                    };
+                }
+            } else {
+                self.slow_target = target;
+                self.fast_target = 0;
+            }
+        }
+
+        self.slow_target = q14_multiply(self.slow_target, 16064);
+        let first = q14_multiply(3000 << 3, self.slow_target)
+            + q14_multiply(16384 - 3000, self.first_pole_state);
+        self.first_pole_state = first;
+        let second = q14_multiply(3000, first + (self.fast_target << 3))
+            + q14_multiply(16384 - 3000, self.second_pole_state);
+        self.second_pole_state = second;
+        self.nframs += 1;
+        (second >> 3) as f64
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 struct RenderInputs<'a> {
     frame_period: f64,
@@ -213,6 +296,9 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
     // (a ramped persistent that holds after the ramp completes).
     let mut glide_totals = vec![0.0f64; n_layers];
     let mut active_glides: Vec<Vec<ActiveGlide>> = (0..n_layers).map(|_| Vec::new()).collect();
+    let mut segmental_states: Vec<DectalkSegmentalState> = (0..n_layers)
+        .map(|_| DectalkSegmentalState::default())
+        .collect();
     // profile_data: index into profile_points + count for the currently active profile.
     let mut profile_active: Vec<Option<(usize, usize)>> = vec![None; n_layers];
     let mut command_cursors = vec![0usize; n_layers];
@@ -225,6 +311,9 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
         // Process pending commands for each layer up to current time.
         for li in 0..n_layers {
             let layer = &inp.layers[li];
+            if layer.layer_type == LAYER_DECTALK_SEGMENTAL {
+                continue;
+            }
             let mut cursor = command_cursors[li];
             while cursor < layer.cmd_count {
                 let cmd = &inp.cmds[layer.cmd_start + cursor];
@@ -330,6 +419,7 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
                 LAYER_GLIDE => {
                     total += glide_totals[li];
                 }
+                LAYER_DECTALK_SEGMENTAL => {}
                 _ => {}
             }
         }
@@ -348,13 +438,26 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
             iir_filter_2pole(total, &mut filter_state, &inp.coeffs)
         };
 
+        // DECtalk adds the independently filtered segmental term after the
+        // main command filter and immediately before speaker scaling.
+        let mut segmental = 0.0f64;
+        for li in 0..n_layers {
+            let layer = &inp.layers[li];
+            if layer.layer_type != LAYER_DECTALK_SEGMENTAL {
+                continue;
+            }
+            let commands = &inp.cmds[layer.cmd_start..layer.cmd_start + layer.cmd_count];
+            segmental += segmental_states[li].render_frame(commands, inp.profile_points);
+        }
+        let unscaled_f0 = filtered + segmental;
+
         // Speaker scaling (DECtalk Ph_drwt02.c) or pass-through.
         let mut f0_hz = if inp.has_scale {
             (inp.f0_minimum
-                + (filtered - inp.f0_minimum) * inp.f0_scale_factor / inp.scale_divisor)
+                + (unscaled_f0 - inp.f0_minimum) * inp.f0_scale_factor / inp.scale_divisor)
                 * inp.scale_output
         } else {
-            filtered
+            unscaled_f0
         };
         f0_hz = inp.min_hz.max(inp.max_hz.min(f0_hz));
         out[frame] = f0_hz;
@@ -1218,6 +1321,112 @@ mod tests {
         }
         assert!((out[span as usize] - delta).abs() < 1e-9);
         assert!((out[num_frames - 1] - delta).abs() < 1e-9, "did not hold the floor");
+    }
+
+    #[test]
+    fn dectalk_segmental_layer_matches_cake_q14_recurrence() {
+        // Active US male allophones for `cake.`: SI(4), K(17), EY(37),
+        // K(14), IX(6). profile_points stores source flags
+        // [voiceless, plosive, stressed] for each controller allophone.
+        //
+        // DECtalk 4.63 Ph_drwt02.c us_f0msegtars, pht0draw(), and
+        // filter_seg_commands(); ph_defs.h mlsh1 Q14 arithmetic.
+        let layers = vec![LayerDesc {
+            layer_type: LAYER_DECTALK_SEGMENTAL,
+            decay_mode: 0,
+            initial_decay_divisor: 0.0,
+            termination_threshold: 0.0,
+            exponential_factor: 0.0,
+            cmd_start: 0,
+            cmd_count: 5,
+        }];
+        let metadata = vec![
+            1.0, 0.0, 0.0, // SI
+            1.0, 1.0, 0.0, // K
+            0.0, 0.0, 1.0, // EY
+            1.0, 1.0, 0.0, // K
+            0.0, 0.0, 0.0, // IX
+        ];
+        let cmds = vec![
+            CmdDesc {
+                time: 0.0,
+                value: 50.0,
+                duration_frames: 4.0,
+                profile_start: 0,
+                profile_count: 3,
+            },
+            CmdDesc {
+                time: 0.0,
+                value: 0.0,
+                duration_frames: 17.0,
+                profile_start: 3,
+                profile_count: 3,
+            },
+            CmdDesc {
+                time: 0.0,
+                value: 50.0,
+                duration_frames: 37.0,
+                profile_start: 6,
+                profile_count: 3,
+            },
+            CmdDesc {
+                time: 0.0,
+                value: 0.0,
+                duration_frames: 14.0,
+                profile_start: 9,
+                profile_count: 3,
+            },
+            CmdDesc {
+                time: 0.0,
+                value: 70.0,
+                duration_frames: 6.0,
+                profile_start: 12,
+                profile_count: 3,
+            },
+        ];
+        let inp = RenderInputs {
+            frame_period: 0.0064,
+            total_duration: 0.0064 * 90.0,
+            num_frames: 90,
+            filter_mode: FILTER_ONE_POLE,
+            one_pole_alpha: 1.0,
+            coeffs: IIRFilterCoefficients {
+                b0: 0.0,
+                b1: 0.0,
+                b2: 0.0,
+                a1: 0.0,
+                a2: 0.0,
+            },
+            has_scale: true,
+            f0_minimum: 0.0,
+            f0_scale_factor: 4100.0,
+            scale_divisor: 4096.0,
+            scale_output: 0.1,
+            min_hz: -1e9,
+            max_hz: 1e9,
+            init_total: 0.0,
+            layers: &layers,
+            cmds: &cmds,
+            profile_points: &metadata,
+        };
+        let mut out = vec![0.0; 90];
+        render(&inp, &mut out);
+
+        assert!(
+            (out[28] - 0.10009765625).abs() < 1e-12,
+            "EY onset: {}",
+            out[28]
+        );
+        assert!(
+            (out[40] - 3.10302734375).abs() < 1e-12,
+            "EY frame 40: {}",
+            out[40]
+        );
+        assert!(
+            (out[62] - 2.10205078125).abs() < 1e-12,
+            "final K onset: {}",
+            out[62]
+        );
     }
 
     // ---- render_f0 FFI shape validation status codes -------------------------

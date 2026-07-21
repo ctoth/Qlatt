@@ -96,6 +96,28 @@ describe("dectalk-english end-to-end", () => {
     expect(stressCommands[0].get("duration_frames")).toBe(20);
   });
 
+  it("emits the exact DECtalk segmental F0 controller stream for cake", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const segmentalCommands = result.utterance.relation("Tilt").listItems()
+      .filter((item) => item.get("layer") === "segmental")
+      .map((item) => ({
+        value: item.get("value"),
+        durationFrames: item.get("duration_frames"),
+        profilePoints: item.get("profile_points"),
+      }));
+
+    expect(segmentalCommands).toEqual([
+      { value: 50, durationFrames: 4, profilePoints: [1, 0, 0] },
+      { value: 0, durationFrames: 17, profilePoints: [1, 1, 0] },
+      { value: 50, durationFrames: 37, profilePoints: [0, 0, 1] },
+      { value: 0, durationFrames: 14, profilePoints: [1, 1, 0] },
+      { value: 70, durationFrames: 6, profilePoints: [0, 0, 0] },
+    ]);
+  });
+
   it("applies DECtalk Rule 14 to a sonorant after a voiceless plosive", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

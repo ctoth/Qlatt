@@ -1515,15 +1515,20 @@ export function lowerToFrames(
           if (write) provenance[key] = write.decisionId;
         }
       }
-      for (const transition of transitionsByItem.get(item) ?? []) {
+      const itemTransitions = transitionsByItem.get(item) ?? [];
+      for (const transition of itemTransitions) {
         if (segmentOffsetMs < transition.startMs - 1e-6) continue;
-        const staticFieldsActive = transition.endMs == null || segmentOffsetMs <= transition.endMs + 1e-6;
-        if (staticFieldsActive) {
-          for (const [key, value] of Object.entries(transition.fields)) {
-            params[key] = value;
-            const write = item.latestWrite(key);
-            if (write) provenance[key] = write.decisionId;
-          }
+        for (const [key, value] of Object.entries(transition.fields)) {
+          const staticFieldsActive = transition.endMs == null || segmentOffsetMs <= transition.endMs + 1e-6;
+          const superseded = !staticFieldsActive && itemTransitions.some((candidate) => (
+            candidate.startMs > transition.startMs + 1e-6
+            && candidate.startMs <= segmentOffsetMs + 1e-6
+            && (candidate.fields[key] !== undefined || candidate.linearFields?.[key] !== undefined)
+          ));
+          if (superseded) continue;
+          params[key] = value;
+          const write = item.latestWrite(key);
+          if (write) provenance[key] = write.decisionId;
         }
         if (transition.linearFields && transition.endMs != null) {
           const durationMs = transition.endMs - transition.startMs;

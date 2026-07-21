@@ -201,6 +201,52 @@ describe("HRG lowering control windows", () => {
     }
   });
 
+  it("preserves a held transition value at an unrelated control boundary", () => {
+    const utterance = new Utterance(SCHEMA);
+    const build = utterance.beginTransaction(META);
+    const closure = addSegment(build, "seg_0", "K", "stop_closure", 83, {
+      AH: 0, B1: 200, B2: 180,
+    });
+    const release = addSegment(build, "seg_1", "K_REL", "stop_release", 26, {
+      AH: 48, B1: 300, B2: 150,
+    });
+    const vowel = addSegment(build, "seg_2", "EY", "vowel", 154, {
+      AH: 0, B1: 100, B2: 90,
+    });
+    build.partitionAnchors([closure, release, vowel], utterance.axis.start.id, utterance.axis.end.id);
+    build.commit();
+    release.set("control_windows", [{
+      start_ms: 13,
+      end_ms: 14,
+      fields: { AH: 7 },
+    }], { reason: "unrelated control-boundary fixture", citations: ["DECtalk 4.63 ph_draw.c"] });
+    resolveTimes(utterance, [closure, release, vowel], [83, 109, 263]);
+    const policy: LowerOptions = {
+      ...POLICY,
+      transitions: {
+        default_transition_ms: { value: 30 },
+        blend: {
+          factor: { value: 0.5 },
+          keys: ["B1"],
+          smooth_types: [],
+          smooth_all_boundaries: true,
+        },
+      },
+    };
+
+    const lowered = lowerToFrames(utterance, policy);
+    const controlStart = lowered.frames.find(
+      (frame) => frame.segmentId === release.id && Math.abs(frame.time - 0.1152) <= 1e-9,
+    );
+    const laterTransition = lowered.frames.find(
+      (frame) => frame.segmentId === release.id && Math.abs(frame.time - 0.1222) <= 1e-9,
+    );
+
+    expect(controlStart?.params.AH).toBe(7);
+    expect(controlStart?.params.B1).toBe(250);
+    expect(laterTransition?.params.B1).toBe(200);
+  });
+
   it("applies numeric shorthand and every field operation without changing graph state", () => {
     const { utterance, closure, release, vowel } = buildAspirationFixture();
     release.set("control_windows", [], {

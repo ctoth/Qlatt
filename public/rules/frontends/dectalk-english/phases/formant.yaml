@@ -343,7 +343,7 @@ rules:
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F1/F2/F3/B1/B2/AP values at frames 16-20)"
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F1/F2/F3/B1/B2/AP/A2 values at frames 16-20)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_cake_final_k_formant_trace:

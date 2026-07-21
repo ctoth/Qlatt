@@ -628,6 +628,7 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (final K F2 at frame 58)"
       cake_final_k_formant_trace_windows:
         value:
+          - { start_ms: 0.0, end_ms: 96.0, fields: { F1: 337 }, tag: dectalk_trace_exact }
           - { start_ms: 0.0, end_ms: 12.4, fields: { F2: 1993 }, tag: dectalk_trace_exact }
           - { start_ms: 12.4, end_ms: 18.8, fields: { F2: 1988 }, tag: dectalk_trace_exact }
           - { start_ms: 18.8, end_ms: 25.2, fields: { F2: 1983 }, tag: dectalk_trace_exact }
@@ -664,7 +665,7 @@ parameters:
           - { start_ms: 89.2, end_ms: 95.599, fields: { B3: 253 }, tag: dectalk_trace_exact }
           - { start_ms: 95.599, end_ms: 96.0, fields: { B3: 239 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F2/F3/B1/B3 values at frames 58-72)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F1/F2/F3/B1/B3 values at frames 58-72)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_dummy_ix_formant_trace_windows:
         value:

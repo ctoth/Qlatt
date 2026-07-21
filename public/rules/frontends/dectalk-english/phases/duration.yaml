@@ -483,6 +483,45 @@ rules:
       - "DECtalk 4.63 p_us_tim.c Rule 13 (consonant cluster shortening, N70PRCNT)"
 
   # ---------------------------------------------------------------------------
+  # Rule 14: lengthen a sonorant after a voiceless plosive.
+  # DECtalk evaluates this on its unsplit allophone sequence.  The declarative
+  # structural phase has already split a stop into closure/release carriers, so
+  # look through those carriers to the preceding stop closure.
+  # ---------------------------------------------------------------------------
+  dectalk_post_plosive_sonorant_lengthening:
+    kind: scalar
+    select:
+      relation: Segment
+      where: current.type in ['vowel', 'glide', 'liquid', 'nasal']
+    define:
+      "p": prev
+      p2: "behind(current, 2)"
+      p3: "behind(current, 3)"
+      p_is_voiceless_stop: >-
+        p != null && p.type == 'stop_closure'
+        && has(p.voiceless) && p.voiceless == true
+      p2_is_voiceless_stop_through_release: >-
+        p != null && p.type in ['stop_release', 'stop_aspiration']
+        && p2 != null && p2.type == 'stop_closure'
+        && has(p2.voiceless) && p2.voiceless == true
+      p3_is_voiceless_stop_through_release: >-
+        p != null && p.type in ['stop_release', 'stop_aspiration']
+        && p2 != null && p2.type in ['stop_release', 'stop_aspiration']
+        && p3 != null && p3.type == 'stop_closure'
+        && has(p3.voiceless) && p3.voiceless == true
+    constraint: >-
+      p_is_voiceless_stop || p2_is_voiceless_stop_through_release
+      || p3_is_voiceless_stop_through_release
+    apply:
+      - field: duration
+        op: add
+        value: params.policy.duration.post_voiceless_plosive_lengthening_ms
+        tag: post_plosive
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:757-766 Rule 14 (sonorant after voiceless plosive, +NF20MS)"
+      - "DECtalk 4.63 ph_defs.h NF20MS=3 controller frames (19 ms in the frontend duration policy)"
+
+  # ---------------------------------------------------------------------------
   # Rule 15: Phrase-initial vowel after silence
   # ---------------------------------------------------------------------------
   dectalk_phrase_initial_vowel_lengthening:

@@ -258,6 +258,7 @@ phases:
       # Rule 9 [nt] cluster nasal shortening (p_us_tim.c:628-639).
       - dectalk_nt_cluster_nasal_shortening
       - dectalk_consonant_cluster_shortening
+      - dectalk_post_plosive_sonorant_lengthening
       - dectalk_phrase_initial_vowel_lengthening
       # Added numbered rules 10/11/19/20/23/24 (p_us_tim.c:647-889), in source
       # order, keyed on syllable annotations and flap/NG allophones.

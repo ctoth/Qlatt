@@ -96,6 +96,25 @@ describe("dectalk-english end-to-end", () => {
     expect(stressCommands[0].get("duration_frames")).toBe(20);
   });
 
+  it("applies DECtalk Rule 14 to a sonorant after a voiceless plosive", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const ey = result.utterance.relation("Segment").listItems()
+      .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
+    const durationWrites = ey?.writes("duration") ?? [];
+    const rule14Index = durationWrites.findIndex(
+      (write) => write.reason === "dectalk_post_plosive_sonorant_lengthening matched",
+    );
+
+    expect(ey).toBeDefined();
+    expect(rule14Index).toBeGreaterThan(0);
+    expect(
+      Number(durationWrites[rule14Index].value) - Number(durationWrites[rule14Index - 1].value),
+    ).toBe(19);
+  });
+
   it("preserves required segment features when reducing a same-word geminate", () => {
     const result = textToKlattTrackDetailed("Safe zones feel fuzzy.", 110, 30, {
       frontendId: "dectalk-english",

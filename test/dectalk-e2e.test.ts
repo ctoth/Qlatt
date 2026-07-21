@@ -183,17 +183,19 @@ describe("dectalk-english end-to-end", () => {
     const nativeF2 = [0.1344, 0.1856, 0.2240, 0.3200].map((time) =>
       result.track.findLast((frame) => frame.time <= time + 1e-9)?.params.F2
     );
-    const tailFrame = result.track.findLast((frame) => frame.time <= 0.3264);
+    const tailF2 = [0.3264, 0.3328, 0.3392, 0.3456, 0.3520, 0.3584, 0.3648].map((time) =>
+      result.track.findLast((frame) => frame.time <= time + 1e-9)?.params.F2
+    );
 
     expect(Array.isArray(windows)).toBe(true);
     expect(windows).toContainEqual({
-      suffix_ms: 42,
-      fields: { F2: 2006 },
-      tag: "dectalk_trajectory_tail",
+      start_ms: 236.6,
+      end_ms: 237,
+      fields: { F2: 1994 },
+      tag: "dectalk_trace_exact",
     });
     expect(nativeF2).toEqual([1926, 1777, 1858, 2006]);
-    expect(tailFrame?.phoneme).toBe("EY");
-    expect(tailFrame?.params.F2).toBe(2006);
+    expect(tailF2).toEqual([2006, 2006, 2003, 2001, 1998, 1996, 1994]);
   });
 
   it("inserts DECtalk's six-frame dummy IX carrier after a final voiceless stop", () => {

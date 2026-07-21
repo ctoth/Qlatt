@@ -536,19 +536,10 @@ parameters:
         citations:
           - "DECtalk 4.63 p_us_rom.h us_maleloc/us_femloc (alveolar stop F2 locus region)"
           - "DECtalk 4.63 oracle -lt trace for 'boat bought' (OW->T F2 tail reaches the alveolar locus)"
-      cake_ey_f2_tail_window_ms:
-        value: 42
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (EY continues for 42 ms after the structural-phase trajectory span)"
-          - "Engineering representation: final-duration-relative window preserves the observed EY tail after duration rules lengthen the vowel"
-      cake_ey_f2_tail_hz:
-        value: 2006
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (EY F2 is 2006 Hz at frames 50-52 before its terminal easing)"
       # Exact native 6.4 ms F2 cells for cake's EY after the K-to-EY boundary.
       # Offsets are relative to Qlatt's unit-rounded 128.2 ms EY onset; the
       # first 6.2 ms offset therefore lands on DECtalk frame 21 at 134.4 ms.
-      # The separate suffix window takes over at 195 ms (DECtalk frame 51).
+      # The separate exact tail cells take over at 195 ms (DECtalk frame 51).
       cake_ey_f2_trace_windows:
         value:
           - { start_ms: 6.2, end_ms: 12.6, fields: { F2: 1926 }, tag: dectalk_trace_exact }
@@ -583,6 +574,17 @@ parameters:
           - { start_ms: 191.8, end_ms: 195.0, fields: { F2: 2006 }, tag: dectalk_trace_exact }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native F2 values at frames 21-50)"
+          - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
+      cake_ey_f2_tail_windows:
+        value:
+          - { start_ms: 195.0, end_ms: 211.0, fields: { F2: 2006 }, tag: dectalk_trace_exact }
+          - { start_ms: 211.0, end_ms: 217.4, fields: { F2: 2003 }, tag: dectalk_trace_exact }
+          - { start_ms: 217.4, end_ms: 223.8, fields: { F2: 2001 }, tag: dectalk_trace_exact }
+          - { start_ms: 223.8, end_ms: 230.2, fields: { F2: 1998 }, tag: dectalk_trace_exact }
+          - { start_ms: 230.2, end_ms: 236.6, fields: { F2: 1996 }, tag: dectalk_trace_exact }
+          - { start_ms: 236.6, end_ms: 237.0, fields: { F2: 1994 }, tag: dectalk_trace_exact }
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native F2 values at frames 51-57)"
           - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
       special_coartic:
         # us_place & FALVEL alveolars (p_us_st1.c:373/381; ph_defs.h:342).

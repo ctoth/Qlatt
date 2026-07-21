@@ -459,7 +459,7 @@ rules:
       - "DECtalk 4.63 ph_inton1.c:1364 (comma gesture timing delayf0 -= NF20MS)"
 
   # --------------------------------------------------------------------------
-  # Rule 4: Stress Impulse (triangular pulse into stress layer)
+  # Rule 4: Stress Impulse (sustained step-plus-ramp into stress layer)
   #
   # Fires at every primary-stressed vowel.  Inserts an impulse whose magnitude
   # is stress_level_primary + a phrase-position component. For a single word,
@@ -467,15 +467,16 @@ rules:
   # Reduce_last=50 for the final stress:
   # (71 + 140) - ((71 + 140) >> 2) - 50 = 109.
   #
-  # The impulse decays over stress_impulse_duration_frames (20 frames = 100ms)
-  # using the source IMPULSE triangle in Ph_drwt02it.c.
+  # The impulse lasts stress_impulse_duration_frames (20 frames = 128ms at
+  # DECtalk's 6.4ms controller cadence) using the US non-reading IMPULSE
+  # step-plus-ramp in Ph_drwt02.c.
   #
   # Simplification: DECtalk tracks nrises_sofar to index into
   # f0_mphrase_position[], which requires stateful counting.  We use a fixed
   # average of the first 4 entries: (140+90+60+40)/4 = 82.5 Hz*10.
   #
   # Source: ph_inton1.c Rule 2 (stress impulse at FSTRESS_1) and the one-word
-  # reduction branch; Ph_drwt02it.c IMPULSE case (per-frame triangle).
+  # reduction branch; Ph_drwt02.c IMPULSE case (sustained step-plus-ramp).
   #
   # Citations:
   #   - DECtalk 4.63 ph_inton1.c Rule 2 (stress impulse generation)
@@ -510,7 +511,7 @@ rules:
       tag: f0_stress_impulse
     citations:
       - "DECtalk 4.63 ph_inton1.c Rule 2 one-word and final-stress branches (primary stress command 109)"
-      - "DECtalk 4.63 Ph_drwt02it.c IMPULSE case (duration-controlled triangular tarimp)"
+      - "DECtalk 4.63 Ph_drwt02.c US non-reading IMPULSE case (duration-controlled step-plus-ramp tarimp)"
       - "Klatt 1982 (stress-component F0 impulse)"
 
   # --------------------------------------------------------------------------

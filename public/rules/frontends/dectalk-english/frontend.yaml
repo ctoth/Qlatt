@@ -141,10 +141,11 @@ f0_model:
       type: persistent
     stress:
       type: impulse
-      decay: triangular
-      # DECtalk 4.63 Ph_drwt02it.c IMPULSE updates tarimp before filtering:
-      # rise by (f0command / length) << 1 for half the command, then fall by
-      # the same integer delta for the remaining half.
+      decay: step_plus_ramp
+      # DECtalk 4.63 Ph_drwt02.c US non-reading IMPULSE path: initialize
+      # tarimp=2*f0command, subtract f0command>>2 before the first filtered
+      # frame, then restore and halve that correction while holding the step
+      # for the command's duration.
     boundary:
       type: impulse
       decay: halving
@@ -165,7 +166,7 @@ f0_model:
   #   f0prime = f0minimum + frac4mul(f0prime - f0minimum, f0scalefac)
   #   Hz = f0prime / 10
   # The minimum_param and range_param fields reference parameters.policy.speaker.
-  # Citation: DECtalk 4.63 Ph_drwt02it.c (speaker-dependent F0 scaling)
+  # Citation: DECtalk 4.63 Ph_drwt02.c (speaker-dependent F0 scaling)
   speaker_scale:
     minimum_param: f0_minimum
     range_param: f0_scale_factor

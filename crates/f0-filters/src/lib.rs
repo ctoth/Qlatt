@@ -36,7 +36,7 @@ const FILTER_COEFFICIENT_2POLE: i32 = 2;
 
 // Decay mode tags for impulse layers.
 const DECAY_HALVING: i32 = 0;
-const DECAY_TRIANGULAR: i32 = 1;
+const DECAY_STEP_PLUS_RAMP: i32 = 1;
 const DECAY_EXPONENTIAL: i32 = 2;
 
 /// 2-pole Butterworth coefficients via bilinear transform.
@@ -127,8 +127,6 @@ struct ActiveImpulse {
     value: f64,
     decay: f64,
     remaining_frames: f64,
-    elapsed_frames: f64,
-    rise_frames: f64,
 }
 
 /// A single in-progress glide ramp (mirrors the TS `ActiveGlide` object).
@@ -236,17 +234,19 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
                             persistent_levels[li] += cmd.value;
                         }
                         LAYER_IMPULSE => {
-                            let triangular = layer.decay_mode == DECAY_TRIANGULAR;
+                            let step_plus_ramp = layer.decay_mode == DECAY_STEP_PLUS_RAMP;
                             active_impulses[li].push(ActiveImpulse {
-                                value: cmd.value,
-                                decay: if triangular {
-                                    (cmd.value / cmd.duration_frames).trunc() * 2.0
+                                value: if step_plus_ramp {
+                                    cmd.value * 2.0
+                                } else {
+                                    cmd.value
+                                },
+                                decay: if step_plus_ramp {
+                                    (cmd.value / 4.0).floor()
                                 } else {
                                     cmd.value / layer.initial_decay_divisor
                                 },
                                 remaining_frames: cmd.duration_frames,
-                                elapsed_frames: 0.0,
-                                rise_frames: (cmd.duration_frames.trunc() / 2.0).floor(),
                             });
                         }
                         LAYER_PROFILE => {
@@ -279,12 +279,13 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
             command_cursors[li] = cursor;
         }
 
-        // DECtalk 4.63 Ph_drwt02it.c updates IMPULSE tarimp before adding it
-        // to f0in. The first half rises by integer-truncated delimp and the
-        // second half falls by the same amount for exactly nimp frames.
+        // DECtalk 4.63 Ph_drwt02.c initializes a non-reading US IMPULSE at
+        // 2*f0command, then subtracts delimp=f0command>>2 before sampling it.
+        // The post-sample update below restores delimp and halves it, producing
+        // a sustained step with a short rising correction for exactly nimp frames.
         for li in 0..n_layers {
             let layer = &inp.layers[li];
-            if layer.layer_type != LAYER_IMPULSE || layer.decay_mode != DECAY_TRIANGULAR {
+            if layer.layer_type != LAYER_IMPULSE || layer.decay_mode != DECAY_STEP_PLUS_RAMP {
                 continue;
             }
             let impulses = &mut active_impulses[li];
@@ -295,12 +296,7 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
                     impulses.remove(i);
                     continue;
                 }
-                if impulses[i].elapsed_frames < impulses[i].rise_frames {
-                    impulses[i].value += impulses[i].decay;
-                } else {
-                    impulses[i].value -= impulses[i].decay;
-                }
-                impulses[i].elapsed_frames += 1.0;
+                impulses[i].value -= impulses[i].decay;
                 impulses[i].remaining_frames -= 1.0;
             }
         }
@@ -369,9 +365,6 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
             if layer.layer_type != LAYER_IMPULSE {
                 continue;
             }
-            if layer.decay_mode == DECAY_TRIANGULAR {
-                continue;
-            }
             let termination_threshold = layer.termination_threshold;
             let exponential_factor = layer.exponential_factor;
             let impulses = &mut active_impulses[li];
@@ -380,6 +373,13 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
             let mut i = impulses.len();
             while i > 0 {
                 i -= 1;
+                if layer.decay_mode == DECAY_STEP_PLUS_RAMP {
+                    if impulses[i].value != 0.0 {
+                        impulses[i].value += impulses[i].decay;
+                    }
+                    impulses[i].decay = (impulses[i].decay / 2.0).floor();
+                    continue;
+                }
                 impulses[i].remaining_frames -= 1.0;
                 if impulses[i].remaining_frames <= 0.0
                     || impulses[i].value.abs() < termination_threshold
@@ -911,10 +911,10 @@ mod tests {
     }
 
     #[test]
-    fn dectalk_impulse_updates_as_a_duration_controlled_triangle() {
+    fn dectalk_impulse_updates_as_a_sustained_step_plus_ramp() {
         let layers = vec![LayerDesc {
             layer_type: LAYER_IMPULSE,
-            decay_mode: DECAY_TRIANGULAR,
+            decay_mode: DECAY_STEP_PLUS_RAMP,
             initial_decay_divisor: 8.0,
             termination_threshold: 0.01,
             exponential_factor: 0.0,
@@ -923,7 +923,7 @@ mod tests {
         }];
         let cmds = vec![CmdDesc {
             time: 0.0,
-            value: 159.0,
+            value: 109.0,
             duration_frames: 20.0,
             profile_start: 0,
             profile_count: 0,
@@ -954,9 +954,9 @@ mod tests {
         assert_eq!(
             out,
             vec![
-                173.0, 187.0, 201.0, 215.0, 229.0, 243.0, 257.0, 271.0, 285.0,
-                299.0, 285.0, 271.0, 257.0, 243.0, 229.0, 215.0, 201.0, 187.0,
-                173.0, 159.0, 0.0,
+                191.0, 205.0, 212.0, 215.0, 217.0, 218.0, 218.0, 218.0, 218.0,
+                218.0, 218.0, 218.0, 218.0, 218.0, 218.0, 218.0, 218.0, 218.0,
+                218.0, 218.0, 0.0,
             ],
         );
     }

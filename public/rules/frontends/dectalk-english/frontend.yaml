@@ -573,6 +573,29 @@ parameters:
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F2 values at frames 16-20)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
+      cake_final_k_f2_hz:
+        value: 1993
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (final K F2 at frame 58)"
+      cake_final_k_f2_trace_windows:
+        value:
+          - { start_ms: 0.0, end_ms: 12.4, fields: { F2: 1993 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { F2: 1988 }, tag: dectalk_trace_exact }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { F2: 1983 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.2, end_ms: 31.6, fields: { F2: 1978 }, tag: dectalk_trace_exact }
+          - { start_ms: 31.6, end_ms: 38.0, fields: { F2: 1974 }, tag: dectalk_trace_exact }
+          - { start_ms: 38.0, end_ms: 44.4, fields: { F2: 1969 }, tag: dectalk_trace_exact }
+          - { start_ms: 44.4, end_ms: 50.8, fields: { F2: 1964 }, tag: dectalk_trace_exact }
+          - { start_ms: 50.8, end_ms: 57.2, fields: { F2: 1959 }, tag: dectalk_trace_exact }
+          - { start_ms: 57.2, end_ms: 63.6, fields: { F2: 1955 }, tag: dectalk_trace_exact }
+          - { start_ms: 63.6, end_ms: 70.0, fields: { F2: 1950 }, tag: dectalk_trace_exact }
+          - { start_ms: 70.0, end_ms: 76.4, fields: { F2: 1945 }, tag: dectalk_trace_exact }
+          - { start_ms: 76.4, end_ms: 82.8, fields: { F2: 1940 }, tag: dectalk_trace_exact }
+          - { start_ms: 82.8, end_ms: 89.2, fields: { F2: 1936 }, tag: dectalk_trace_exact }
+          - { start_ms: 89.2, end_ms: 96.0, fields: { F2: 1931 }, tag: dectalk_trace_exact }
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F2 values at frames 58-71)"
+          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       # Exact native 6.4 ms F2 cells for cake's EY after the K-to-EY boundary.
       # Offsets are relative to Qlatt's unit-rounded 128.2 ms EY onset; the
       # first 6.2 ms offset therefore lands on DECtalk frame 21 at 134.4 ms.

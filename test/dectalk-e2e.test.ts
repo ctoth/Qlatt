@@ -189,6 +189,22 @@ describe("dectalk-english end-to-end", () => {
     ]);
   });
 
+  it("matches DECtalk's native F2 cells through cake's final K", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const f2 = Array.from({ length: 14 }, (_, index) => {
+      const time = (58 + index) * 0.0064;
+      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
+    });
+
+    expect(f2).toEqual([
+      1993, 1988, 1983, 1978, 1974, 1969, 1964,
+      1959, 1955, 1950, 1945, 1940, 1936, 1931,
+    ]);
+  });
+
   it("extends cake's EY F2 trajectory through its duration-lengthened tail", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",
@@ -227,14 +243,12 @@ describe("dectalk-english end-to-end", () => {
 
     expect(dummyVowels).toHaveLength(1);
     expect(finalStop?.get("duration")).toBe(96);
-    expect(finalStop?.get("control_windows")).toEqual([
-      {
-        suffix_ms: 26,
-        target: "current",
-        fields: { AF: 55, A2: 0, A3: 47, A4: 0, A5: 33, A6: 0, AB: 0, SW: 1 },
-        tag: "stop_burst",
-      },
-    ]);
+    expect(finalStop?.get("control_windows")).toContainEqual({
+      suffix_ms: 26,
+      target: "current",
+      fields: { AF: 55, A2: 0, A3: 47, A4: 0, A5: 33, A6: 0, AB: 0, SW: 1 },
+      tag: "stop_burst",
+    });
     expect(dummyVowels[0].get("phoneme")).toBe("SIL");
     expect(dummyVowels[0].get("duration")).toBe(38);
     expect(dummyVowels[0].get("F1")).toBe(460);

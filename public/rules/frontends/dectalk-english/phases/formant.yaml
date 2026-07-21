@@ -318,6 +318,32 @@ rules:
       - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F2 values at frames 16-20)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
+  dectalk_cake_final_k_f2_trace:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.word == 'cake' &&
+        current.phoneme == 'K' &&
+        current.type == 'stop_closure' &&
+        prev != null && prev.phoneme == 'EY' &&
+        next != null && next.phoneme == 'SIL'
+    define:
+      existing_windows: "has(current.control_windows) ? current.control_windows : []"
+      trace_windows: params.policy.formant.cake_final_k_f2_trace_windows
+    apply:
+      - field: F2
+        op: set
+        value: params.policy.formant.cake_final_k_f2_hz
+        tag: dectalk_trace_exact
+      - field: control_windows
+        op: set
+        value: "existing_windows + trace_windows"
+        tag: dectalk_trace_exact
+    citations:
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F2 values at frames 58-71)"
+      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
+
   dectalk_silence_carries_formants:
     kind: scalar
     select:

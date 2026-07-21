@@ -645,15 +645,15 @@ parameters:
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F3 values at frames 58-72)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      cake_dummy_ix_f2_trace_windows:
+      cake_dummy_ix_formant_trace_windows:
         value:
-          - { start_ms: 0.0, end_ms: 12.4, fields: { F2: 1900 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { F2: 1830 }, tag: dectalk_trace_exact }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { F2: 1760 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { F2: 1733 }, tag: dectalk_trace_exact }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { F2: 1706 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 12.4, fields: { F2: 1900, F3: 2425 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { F2: 1830, F3: 2438 }, tag: dectalk_trace_exact }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { F2: 1760, F3: 2450 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.2, end_ms: 31.6, fields: { F2: 1733, F3: 2474 }, tag: dectalk_trace_exact }
+          - { start_ms: 31.6, end_ms: 38.0, fields: { F2: 1706, F3: 2498 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F2 values at frames 73-77)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F2/F3 values at frames 73-77)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_terminal_silence_f2_hz:
         value: 1670

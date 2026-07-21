@@ -1441,7 +1441,8 @@ export function lowerToFrames(
     return false;
   };
 
-  const f0Sampling = options.f0?.renderer.type === "layered_additive" ? "step" : "linear";
+  const layeredF0 = options.f0?.renderer.type === "layered_additive";
+  const f0Sampling = layeredF0 ? "step" : "linear";
 
   const f0VarianceSamplesByDecision = new Map<string, number[]>();
   timings.forEach((timing, index) => {
@@ -1594,7 +1595,7 @@ export function lowerToFrames(
       if (f0Points.length > 0 && paramKeys.includes("F0")) {
         const phoneme = item.get(phonemeKey);
         const voiced = (params.AV ?? 0) > 0 || (params.AVS ?? 0) > 0;
-        if (phoneme === "SIL" || !voiced) {
+        if (phoneme === "SIL" || (!voiced && !layeredF0)) {
           params.F0 = 0;
         } else {
           const resolvedF0 = resolveF0AtTime(f0Points, timeMs, f0Sampling);
@@ -1764,7 +1765,13 @@ export function lowerToFrames(
         }
       }
     }
-    if (options.timeline.event_points.include_f0_anchors && segmentCanVoice(timing.item)) {
+    if (
+      options.timeline.event_points.include_f0_anchors
+      && (
+        segmentCanVoice(timing.item)
+        || (layeredF0 && timing.item.get(phonemeKey) !== "SIL")
+      )
+    ) {
       const segmentStartMs = initialSilenceMs + timing.startMs;
       const segmentEndMs = initialSilenceMs + timing.endMs;
       for (const point of f0Points) {

@@ -675,8 +675,17 @@ parameters:
           - { start_ms: 76.8, end_ms: 102.4, fields: { F3: 2525 }, tag: dectalk_trace_exact }
           - { start_ms: 102.4, end_ms: 127.6, fields: { F3: 2526 }, tag: dectalk_trace_exact }
           - { start_ms: 127.6, fields: { F3: 2527 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 6.4, fields: { B1: 300 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.4, end_ms: 12.8, fields: { B1: 270 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { B1: 240 }, tag: dectalk_trace_exact }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { B1: 210 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { B1: 180 }, tag: dectalk_trace_exact }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { B1: 150 }, tag: dectalk_trace_exact }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { B1: 120 }, tag: dectalk_trace_exact }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { B1: 90 }, tag: dectalk_trace_exact }
+          - { start_ms: 51.2, fields: { B1: 60 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native terminal GEN_SIL F2/F3 values from frame 78 onward)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native terminal GEN_SIL F2/F3/B1 values from frame 78 onward)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       # Exact native 6.4 ms F2 cells for cake's EY after the K-to-EY boundary.
       # Offsets are relative to Qlatt's unit-rounded 128.2 ms EY onset; the

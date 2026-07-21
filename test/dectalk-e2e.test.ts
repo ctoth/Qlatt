@@ -332,6 +332,19 @@ describe("dectalk-english end-to-end", () => {
     ]);
   });
 
+  it("matches DECtalk's native B1 decay in cake's terminal silence", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const b1 = Array.from({ length: 9 }, (_, index) => {
+      const time = (78 + index) * 0.0064;
+      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
+    });
+
+    expect(b1).toEqual([300, 270, 240, 210, 180, 150, 120, 90, 60]);
+  });
+
   it("extends cake's EY F2 trajectory through its duration-lengthened tail", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

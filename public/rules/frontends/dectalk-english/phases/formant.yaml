@@ -459,7 +459,7 @@ rules:
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (terminal GEN_SIL F2/F3 values from frame 78 onward)"
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (terminal GEN_SIL F2/F3/B1 values from frame 78 onward)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_silence_carries_formants:

@@ -684,7 +684,11 @@ function renderLayeredF0(
   }
 }
 
-function resolveF0AtTime(points: readonly ResolvedF0Point[], timeMs: number): ResolvedF0Point | null {
+function resolveF0AtTime(
+  points: readonly ResolvedF0Point[],
+  timeMs: number,
+  sampling: "linear" | "step",
+): ResolvedF0Point | null {
   if (points.length === 0) return null;
   for (let index = 0; index < points.length - 1; index += 1) {
     const left = points[index];
@@ -692,6 +696,11 @@ function resolveF0AtTime(points: readonly ResolvedF0Point[], timeMs: number): Re
     if (!left || !right || timeMs < left.timeMs || timeMs > right.timeMs) continue;
     const spanMs = right.timeMs - left.timeMs;
     if (Math.abs(spanMs) < 1e-6) return left;
+    if (sampling === "step") {
+      return Math.abs(timeMs - right.timeMs) < 1e-6
+        ? { ...right, timeMs }
+        : { ...left, timeMs };
+    }
     const fraction = (timeMs - left.timeMs) / spanMs;
     return {
       decisionId: fraction < 1 ? left.decisionId : right.decisionId,
@@ -1432,6 +1441,8 @@ export function lowerToFrames(
     return false;
   };
 
+  const f0Sampling = options.f0?.renderer.type === "layered_additive" ? "step" : "linear";
+
   const f0VarianceSamplesByDecision = new Map<string, number[]>();
   timings.forEach((timing, index) => {
     const affect = affectByItem.get(timing.item);
@@ -1465,7 +1476,7 @@ export function lowerToFrames(
     }
     if (samples.length === sampleCountBeforeSegment) {
       const contourValue = f0Points.length > 0
-        ? resolveF0AtTime(f0Points, startMs)?.valueHz
+        ? resolveF0AtTime(f0Points, startMs, f0Sampling)?.valueHz
         : finiteFeatureNumber(timing.item.get("F0"));
       if (contourValue != null && contourValue > 0) samples.push(contourValue);
     }
@@ -1586,7 +1597,7 @@ export function lowerToFrames(
         if (phoneme === "SIL" || !voiced) {
           params.F0 = 0;
         } else {
-          const resolvedF0 = resolveF0AtTime(f0Points, timeMs);
+          const resolvedF0 = resolveF0AtTime(f0Points, timeMs, f0Sampling);
           if (resolvedF0) {
             params.F0 = resolvedF0.valueHz;
             provenance.F0 = resolvedF0.decisionId;

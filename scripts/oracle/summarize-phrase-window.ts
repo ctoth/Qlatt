@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { parseDectalkTraceFile } from "./dectalk-trace";
-
-const FRAME_PERIOD_SEC = 0.0064;
+import {
+  dectalkFrameStartSec,
+  parseDectalkTraceFile,
+  type DectalkTraceFrame,
+} from "./dectalk-trace";
 
 type Args = {
   runRoot: string;
@@ -96,6 +98,12 @@ function finiteNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function oracleParameterValue(frame: DectalkTraceFrame, param: string): number | null {
+  return param === "F0"
+    ? frame.f0prime / 10
+    : finiteNumber(frame.out[param as keyof DectalkTraceFrame["out"]]);
+}
+
 function summarizeValues(values: number[]): string {
   if (values.length === 0) return "none";
   const min = Math.min(...values);
@@ -124,7 +132,7 @@ function main(): void {
   const oracle = parseDectalkTraceFile(oracleTracePath).frames;
 
   const oracleWindow = oracle
-    .map((frame, frameIndex) => ({ frame, frameIndex, timeSec: frameIndex * FRAME_PERIOD_SEC }))
+    .map((frame, frameIndex) => ({ frame, frameIndex, timeSec: dectalkFrameStartSec(frame.frame) }))
     .filter(({ timeSec }) => timeSec >= args.startSec && timeSec <= args.endSec);
   const qlattWindow = (qlatt.track ?? [])
     .map((event, eventIndex) => ({ event, eventIndex, timeSec: finiteNumber(event.time) }))
@@ -142,12 +150,12 @@ function main(): void {
 
   console.log("\nOracle phone groups:");
   for (const group of compare.oraclePhoneGroups ?? []) {
-    const startSec = group.firstFrame * FRAME_PERIOD_SEC;
-    const endSec = (group.lastFrame + 1) * FRAME_PERIOD_SEC;
+    const startSec = dectalkFrameStartSec(group.firstFrame);
+    const endSec = dectalkFrameStartSec(group.lastFrame + 1);
     if (endSec < args.startSec || startSec > args.endSec) continue;
     const groupFrames = oracle.slice(group.firstFrame, group.lastFrame + 1);
     const paramValues = groupFrames
-      .map((frame) => finiteNumber(frame.out[args.param]))
+      .map((frame) => oracleParameterValue(frame, args.param))
       .filter((value): value is number => value != null);
     console.log(
       `  phoneIndex=${group.phoneIndex} frames=${group.firstFrame}-${group.lastFrame} time=${startSec.toFixed(4)}..${endSec.toFixed(4)} ph=${group.ph} ph2=${group.ph2} du=${group.du} ${args.param} ${summarizeValues(paramValues)}`,
@@ -175,7 +183,7 @@ function main(): void {
         value: finiteNumber(candidate.event.params?.[args.param]),
       };
     }, null);
-    const oracleValue = finiteNumber(frame.out[args.param]);
+    const oracleValue = oracleParameterValue(frame, args.param);
     const qlattValue = qlattEvent?.value ?? null;
     const delta = oracleValue != null && qlattValue != null ? qlattValue - oracleValue : null;
     console.log(

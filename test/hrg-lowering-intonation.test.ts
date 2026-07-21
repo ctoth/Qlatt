@@ -317,6 +317,47 @@ describe("HRG lowering layered intonation", () => {
     });
   });
 
+  it("holds layered F0 cells at interstitial lowerer events", () => {
+    const baseline = readFixture();
+    const sourceSegment = baseline.segments.find((segment) => (segment.params.AV ?? 0) > 0);
+    if (!sourceSegment) throw new Error("voiced fixture segment missing");
+    const segments = [
+      { ...sourceSegment, duration: 100, id: "first-voiced" },
+      { ...sourceSegment, duration: 100, id: "second-voiced" },
+    ];
+    const commands: BaselineCommand[] = [{
+      id: "baseline",
+      layer: "baseline",
+      profilePoints: [1160, 950],
+      timeMs: 0,
+      value: 0,
+    }];
+
+    const lowered = lowerToFrames(
+      buildUtterance(segments, commands, baseline.policy),
+      baseline.policy,
+      { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
+    );
+    const interstitialSegmentStart = lowered.frames.find(
+      (frame) => frame.segmentId === "second-voiced",
+    );
+    if (!interstitialSegmentStart) throw new Error("second voiced segment frame missing");
+    const framePeriod = baseline.f0Model.frame_period_sec;
+    if (typeof framePeriod !== "number") throw new Error("layered F0 frame period missing");
+    const nativeCells = lowered.frames.filter((frame) => (
+      Math.abs(frame.time / framePeriod - Math.round(frame.time / framePeriod)) < 1e-9
+    ));
+    const previousNativeCell = nativeCells
+      .filter((frame) => frame.time < interstitialSegmentStart.time - 1e-9)
+      .at(-1);
+    const nextNativeCell = nativeCells.find(
+      (frame) => frame.time > interstitialSegmentStart.time + 1e-9,
+    );
+
+    expect(previousNativeCell?.params.F0).not.toBe(nextNativeCell?.params.F0);
+    expect(interstitialSegmentStart.params.F0).toBe(previousNativeCell?.params.F0);
+  });
+
   it("keeps the DECtalk baseline clock independent of terminal silence", () => {
     const baseline = readFixture();
     const sourceSegment = baseline.segments.find((segment) => (segment.params.AV ?? 0) > 0);

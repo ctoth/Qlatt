@@ -27,6 +27,11 @@ export interface BaseProcessorOptions {
 
 type WasmBytes = ArrayBuffer | ArrayBufferView | null;
 
+const wasmInstanceCache = new Map<
+  string,
+  Promise<WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance>
+>();
+
 export interface WasmAllocExports {
   memory: WebAssembly.Memory;
   alloc_f32(len: number): number;
@@ -60,33 +65,51 @@ export async function initWasmModule(
   imports: WebAssembly.Imports = {},
   wasmBytes: WasmBytes = null
 ) {
-  if (wasmBytes) {
-    const bytes = wasmBytes instanceof ArrayBuffer ? wasmBytes : wasmBytes.buffer;
-    return await WebAssembly.instantiate(bytes, imports);
+  const cacheKey = url == null ? null : String(url);
+  if (cacheKey) {
+    const cached = wasmInstanceCache.get(cacheKey);
+    if (cached) return await cached;
   }
 
-  if (typeof fetch !== "function") {
-    throw new Error("fetch is not available in this worklet; provide wasmBytes");
-  }
-
-  if (!url) {
-    throw new Error("WASM URL is required when wasmBytes is not provided");
-  }
-  // Cache-bust WASM URLs so rebuilt modules load immediately in dev.
-  const bustUrl = typeof url === "string"
-    ? url + (url.includes("?") ? "&" : "?") + "v=" + Date.now()
-    : url;
-  const response = await fetch(bustUrl);
-  if (WebAssembly.instantiateStreaming) {
-    try {
-      return await WebAssembly.instantiateStreaming(response, imports);
-    } catch {
-      const bytes = await response.arrayBuffer();
+  const instancePromise = (async () => {
+    if (wasmBytes) {
+      const bytes = wasmBytes instanceof ArrayBuffer ? wasmBytes : wasmBytes.buffer;
       return await WebAssembly.instantiate(bytes, imports);
     }
+
+    if (typeof fetch !== "function") {
+      throw new Error("fetch is not available in this worklet; provide wasmBytes");
+    }
+
+    if (!url) {
+      throw new Error("WASM URL is required when wasmBytes is not provided");
+    }
+    // Cache-bust WASM URLs so rebuilt modules load immediately in dev.
+    const bustUrl = typeof url === "string"
+      ? url + (url.includes("?") ? "&" : "?") + "v=" + Date.now()
+      : url;
+    const response = await fetch(bustUrl);
+    if (WebAssembly.instantiateStreaming) {
+      try {
+        return await WebAssembly.instantiateStreaming(response, imports);
+      } catch {
+        const bytes = await response.arrayBuffer();
+        return await WebAssembly.instantiate(bytes, imports);
+      }
+    }
+    const bytes = await response.arrayBuffer();
+    return await WebAssembly.instantiate(bytes, imports);
+  })();
+
+  if (cacheKey) wasmInstanceCache.set(cacheKey, instancePromise);
+  try {
+    return await instancePromise;
+  } catch (error) {
+    if (cacheKey && wasmInstanceCache.get(cacheKey) === instancePromise) {
+      wasmInstanceCache.delete(cacheKey);
+    }
+    throw error;
   }
-  const bytes = await response.arrayBuffer();
-  return await WebAssembly.instantiate(bytes, imports);
 }
 
 /**

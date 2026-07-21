@@ -1,5 +1,6 @@
 import { computeRmsPeak } from "./wasm-utils.js";
 class NoiseSourceProcessor extends AudioWorkletProcessor {
+    disposed = false;
     y1;
     alpha;
     _lastCutoff;
@@ -36,6 +37,11 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
         this.reportInterval = opts?.processorOptions?.reportInterval || 50;
         this._reportCountdown = this.reportInterval;
         this.port.onmessage = (event) => {
+            if (event?.data?.type === "dispose") {
+                this.disposed = true;
+                this.port.close();
+                return;
+            }
             if (event?.data?.type === "ping") {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
             }
@@ -59,6 +65,8 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
         this._lastCutoff = clamped;
     }
     process(inputs, outputs, parameters) {
+        if (this.disposed)
+            return false;
         const output = outputs[0];
         if (!output || !output[0]) {
             return true;

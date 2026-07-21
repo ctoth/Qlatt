@@ -29,6 +29,7 @@ interface TiltFilterMetricsMessage {
 const wasmUrl = resolveWasmUrl("./tilt-filter.wasm");
 
 class TiltFilterProcessor extends AudioWorkletProcessor {
+  private disposed = false;
   wasm: TiltFilterWasmExports | null;
   state: number;
   ready: boolean;
@@ -57,6 +58,11 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
     this._reportCountdown = this.reportInterval;
 
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
+      if (event?.data?.type === "dispose") {
+        this.disposed = true;
+        this.port.close();
+        return;
+      }
       if (event?.data?.type === "ping" && this.ready) {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       } else if (event?.data?.type === "reset") {
@@ -82,6 +88,7 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
     outputs: Float32Array[][],
     parameters: Record<string, Float32Array>
   ): boolean {
+    if (this.disposed) return false;
     const input = inputs[0];
     const output = outputs[0];
 

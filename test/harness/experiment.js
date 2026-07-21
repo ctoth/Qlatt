@@ -43,6 +43,10 @@ export function onExperimentChange() {
     state.newRuntimeSemantics = null;
     state.newRuntimeRegistry = null;
     // Also clear runtime and interpreter since they depend on config
+    if (state.diagEngine) {
+      state.diagEngine.destroy();
+      state.diagEngine = null;
+    }
     if (state.newRuntime) {
       state.newRuntime.disconnect();
       state.newRuntime = null;

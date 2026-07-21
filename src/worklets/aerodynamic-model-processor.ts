@@ -60,6 +60,7 @@ type AerodynamicModelProcessorOptions = Pick<BaseProcessorOptions, "processorOpt
 const wasmUrl = resolveWasmUrl("./aerodynamic-model.wasm");
 
 class AerodynamicModelProcessor extends AudioWorkletProcessor {
+  private disposed = false;
   wasm: AerodynamicModelWasmExports | null;
   state: number;
   ready: boolean;
@@ -113,6 +114,11 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
     };
 
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
+      if (event?.data?.type === "dispose") {
+        this.disposed = true;
+        this.port.close();
+        return;
+      }
       if (event?.data?.type === "ping" && this.ready) {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       } else if (event?.data?.type === "reset") {
@@ -150,6 +156,7 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
     outputs: Float32Array[][],
     parameters: Record<string, Float32Array>
   ): boolean {
+    if (this.disposed) return false;
     const voicingOut = outputs[0];
     const aspirationOut = outputs[1];
     const fricationOut = outputs[2];

@@ -7,7 +7,8 @@
  * 3. Cleans up the message handler on timeout
  */
 import { describe, it, expect, vi } from 'vitest';
-import { waitForNodeReady } from '../src/klatt-runtime';
+import { createKlattRuntime, waitForNodeReady } from '../src/klatt-runtime';
+import { initWasmModule } from '../src/worklets/wasm-utils';
 
 // ---------------------------------------------------------------------------
 // Mock AudioWorkletNode with a controllable MessagePort
@@ -136,5 +137,157 @@ describe('waitForNodeReady', () => {
     mock.sendReady();
 
     await expect(promise).resolves.toBeUndefined();
+  });
+});
+
+describe('KlattRuntime worklet lifecycle', () => {
+  it('reuses one WASM instance for nodes backed by the same worklet module', async () => {
+    const instance = { exports: {} } as unknown as WebAssembly.Instance;
+    const instantiate = vi
+      .spyOn(WebAssembly, 'instantiate')
+      .mockResolvedValue({ instance, module: {} as WebAssembly.Module });
+
+    try {
+      const url = `https://qlatt.test/resonator-${Date.now()}.wasm`;
+      const first = await initWasmModule(url, {}, new ArrayBuffer(8));
+      const second = await initWasmModule(url, {}, new ArrayBuffer(8));
+
+      expect(second).toBe(first);
+      expect(instantiate).toHaveBeenCalledOnce();
+    } finally {
+      instantiate.mockRestore();
+    }
+  });
+
+  it('tells worklet processors to dispose and closes their ports on disconnect', async () => {
+    const messageHandlers: MockHandler[] = [];
+
+    class MockAudioWorkletNode {
+      static instances: MockAudioWorkletNode[] = [];
+      parameters = new Map();
+      connect = vi.fn();
+      disconnect = vi.fn();
+      port = {
+        addEventListener: vi.fn((event: string, handler: MockHandler) => {
+          if (event === 'message') messageHandlers.push(handler);
+        }),
+        removeEventListener: vi.fn((event: string, handler: MockHandler) => {
+          const index = messageHandlers.indexOf(handler);
+          if (index >= 0) messageHandlers.splice(index, 1);
+        }),
+        start: vi.fn(),
+        close: vi.fn(),
+        postMessage: vi.fn((message: { type?: string }) => {
+          if (message.type === 'ping') {
+            queueMicrotask(() => {
+              for (const handler of [...messageHandlers]) {
+                handler({ data: { type: 'ready' } });
+              }
+            });
+          }
+        }),
+      };
+
+      constructor() {
+        MockAudioWorkletNode.instances.push(this);
+      }
+    }
+
+    const runtime = await createKlattRuntime({
+      audioContext: {
+        audioWorklet: { addModule: vi.fn(async () => {}) },
+      } as unknown as AudioContext,
+      graph: {
+        bacon: '0.1',
+        nodes: { source: { type: 'source' } },
+      },
+      semantics: { params: {} },
+      registry: {
+        primitives: {
+          source: {
+            worklet: 'source-processor.js',
+            inputs: 0,
+            outputs: 1,
+          },
+        },
+      },
+      audioWorkletNodeCtor:
+        MockAudioWorkletNode as unknown as NonNullable<
+          Parameters<typeof createKlattRuntime>[0]['audioWorkletNodeCtor']
+        >,
+      assetLoader: {
+        resolveWorkletModule: (moduleName) => moduleName,
+        loadWasmModule: vi.fn(),
+      },
+    });
+
+    const [node] = MockAudioWorkletNode.instances;
+    runtime.disconnect();
+
+    expect(node.port.postMessage).toHaveBeenCalledWith({ type: 'dispose' });
+    expect(node.port.close).toHaveBeenCalledOnce();
+    expect(node.disconnect).toHaveBeenCalledOnce();
+  });
+
+  it('rejects and disposes the graph when a worklet never becomes ready', async () => {
+    vi.useFakeTimers();
+    try {
+      class UnreadyAudioWorkletNode {
+        static instances: UnreadyAudioWorkletNode[] = [];
+        parameters = new Map();
+        connect = vi.fn();
+        disconnect = vi.fn();
+        port = {
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+          start: vi.fn(),
+          close: vi.fn(),
+          postMessage: vi.fn(),
+        };
+
+        constructor() {
+          UnreadyAudioWorkletNode.instances.push(this);
+        }
+      }
+
+      const runtimePromise = createKlattRuntime({
+        audioContext: {
+          audioWorklet: { addModule: vi.fn(async () => {}) },
+        } as unknown as AudioContext,
+        graph: {
+          bacon: '0.1',
+          nodes: { source: { type: 'source' } },
+        },
+        semantics: { params: {} },
+        registry: {
+          primitives: {
+            source: {
+              worklet: 'source-processor.js',
+              inputs: 0,
+              outputs: 1,
+            },
+          },
+        },
+        audioWorkletNodeCtor:
+          UnreadyAudioWorkletNode as unknown as NonNullable<
+            Parameters<typeof createKlattRuntime>[0]['audioWorkletNodeCtor']
+          >,
+        assetLoader: {
+          resolveWorkletModule: (moduleName) => moduleName,
+          loadWasmModule: vi.fn(),
+        },
+      });
+      const rejection = expect(runtimePromise).rejects.toThrow(/failed to initialize.*worklet/i);
+
+      await vi.advanceTimersByTimeAsync(2100);
+      await rejection;
+
+      const [node] = UnreadyAudioWorkletNode.instances;
+      expect(node.port.postMessage).toHaveBeenCalledWith({ type: 'dispose' });
+      expect(node.port.close).toHaveBeenCalledOnce();
+      expect(node.disconnect).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

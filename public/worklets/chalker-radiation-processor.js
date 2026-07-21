@@ -39,6 +39,7 @@ import { computeRmsPeak } from "./wasm-utils.js";
  */
 const C2_WEIGHT = 1 / 24;
 class ChalkerRadiationProcessor extends AudioWorkletProcessor {
+    disposed = false;
     prev1;
     prev2;
     debug;
@@ -65,6 +66,11 @@ class ChalkerRadiationProcessor extends AudioWorkletProcessor {
         this.reportInterval = opts?.processorOptions?.reportInterval || 50;
         this._reportCountdown = this.reportInterval;
         this.port.onmessage = (event) => {
+            if (event?.data?.type === "dispose") {
+                this.disposed = true;
+                this.port.close();
+                return;
+            }
             if (event?.data?.type === "ping") {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
             }
@@ -72,6 +78,8 @@ class ChalkerRadiationProcessor extends AudioWorkletProcessor {
         this.port.postMessage({ type: "ready", node: this.nodeId });
     }
     process(inputs, outputs, _parameters) {
+        if (this.disposed)
+            return false;
         const input = inputs[0];
         const output = outputs[0];
         if (!input || !output) {

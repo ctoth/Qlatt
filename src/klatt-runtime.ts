@@ -211,17 +211,29 @@ async function awaitWorkletReady(
 
   log(`Waiting for ${workletNodes.length} worklets to be ready`);
 
-  await Promise.all(
+  const failures = await Promise.all(
     workletNodes.map(async ([id, node]) => {
       try {
         await waitForNodeReady(node, timeoutMs, log);
         log(`  ${id} ready`);
+        return null;
       } catch (err) {
-        log(`  Warning: ${id} - ${err instanceof Error ? err.message : String(err)}`);
-        // Continue: worklet may still work, just unconfirmed ready
+        const message = `${id} - ${err instanceof Error ? err.message : String(err)}`;
+        log(`  Error: ${message}`);
+        return message;
       }
     })
   );
+
+  const failed = failures.filter((message): message is string => message !== null);
+  if (failed.length > 0) {
+    for (const [, node] of workletNodes) {
+      node.port.postMessage({ type: 'dispose' });
+      node.port.close();
+      node.disconnect();
+    }
+    throw new Error(`Failed to initialize ${failed.length} worklet(s): ${failed.join('; ')}`);
+  }
 }
 
 /**
@@ -711,6 +723,10 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
     disconnect(): void {
       for (const node of nodes.values()) {
+        if (isAudioWorkletNode(node, audioWorkletNodeCtor)) {
+          node.port.postMessage({ type: 'dispose' });
+          node.port.close();
+        }
         node.disconnect();
       }
     },

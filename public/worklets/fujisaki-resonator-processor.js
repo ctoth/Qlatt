@@ -1,6 +1,7 @@
 import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./fujisaki-resonator.wasm");
 class FujisakiResonatorProcessor extends AudioWorkletProcessor {
+    disposed = false;
     wasm;
     state;
     inputBuffer;
@@ -31,6 +32,11 @@ class FujisakiResonatorProcessor extends AudioWorkletProcessor {
         this.reportInterval = opts?.processorOptions?.reportInterval || 50;
         this._reportCountdown = this.reportInterval;
         this.port.onmessage = (event) => {
+            if (event?.data?.type === "dispose") {
+                this.disposed = true;
+                this.port.close();
+                return;
+            }
             if (event?.data?.type === "ping" && this.ready) {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
             }
@@ -47,6 +53,8 @@ class FujisakiResonatorProcessor extends AudioWorkletProcessor {
         });
     }
     process(inputs, outputs, parameters) {
+        if (this.disposed)
+            return false;
         const output = outputs[0];
         if (!output || !output[0]) {
             return true;

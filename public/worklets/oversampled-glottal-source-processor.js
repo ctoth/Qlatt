@@ -7,6 +7,7 @@
 import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, UNINITIALIZED_ALLOC, fillParamBuffer } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./oversampled-glottal-source.wasm");
 class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
+    disposed = false;
     wasm;
     state;
     ready;
@@ -66,6 +67,11 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
             diplophonia: new WasmBuffer(UNINITIALIZED_ALLOC),
         };
         this.port.onmessage = (event) => {
+            if (event?.data?.type === "dispose") {
+                this.disposed = true;
+                this.port.close();
+                return;
+            }
             if (event?.data?.type === "ping" && this.ready) {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
             }
@@ -91,6 +97,8 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
         });
     }
     process(_inputs, outputs, parameters) {
+        if (this.disposed)
+            return false;
         const voiceOut = outputs[0];
         const noiseOut = outputs[1];
         if (!voiceOut || !voiceOut[0] || !noiseOut || !noiseOut[0]) {

@@ -50,6 +50,7 @@ interface ChalkerMetricsMessage {
 const C2_WEIGHT = 1 / 24;
 
 class ChalkerRadiationProcessor extends AudioWorkletProcessor {
+  private disposed = false;
   prev1: number[];
   prev2: number[];
   debug: boolean;
@@ -81,6 +82,11 @@ class ChalkerRadiationProcessor extends AudioWorkletProcessor {
     this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
+      if (event?.data?.type === "dispose") {
+        this.disposed = true;
+        this.port.close();
+        return;
+      }
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       }
@@ -93,6 +99,7 @@ class ChalkerRadiationProcessor extends AudioWorkletProcessor {
     outputs: Float32Array[][],
     _parameters: Record<string, Float32Array>
   ): boolean {
+    if (this.disposed) return false;
     const input = inputs[0];
     const output = outputs[0];
     if (!input || !output) {

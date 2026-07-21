@@ -21,6 +21,7 @@
  */
 import { computeRmsPeak } from "./wasm-utils.js";
 class GlottalModProcessor extends AudioWorkletProcessor {
+    disposed = false;
     phase;
     lastF0;
     debug;
@@ -43,6 +44,11 @@ class GlottalModProcessor extends AudioWorkletProcessor {
         this.reportInterval = opts?.processorOptions?.reportInterval || 50;
         this._reportCountdown = this.reportInterval;
         this.port.onmessage = (event) => {
+            if (event?.data?.type === "dispose") {
+                this.disposed = true;
+                this.port.close();
+                return;
+            }
             if (event?.data?.type === "ping") {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
             }
@@ -50,6 +56,8 @@ class GlottalModProcessor extends AudioWorkletProcessor {
         this.port.postMessage({ type: "ready", node: this.nodeId });
     }
     process(_inputs, outputs, parameters) {
+        if (this.disposed)
+            return false;
         const output = outputs[0];
         if (!output || !output[0]) {
             return true;

@@ -36,6 +36,7 @@ interface ReconstructionFilterMetricsMessage {
 const wasmUrl = resolveWasmUrl("./reconstruction-filter.wasm");
 
 class ReconstructionFilterProcessor extends AudioWorkletProcessor {
+  private disposed = false;
   wasm: ReconstructionFilterWasmExports | null;
   state: number;
   inputBuffer: WasmBuffer | null;
@@ -62,6 +63,11 @@ class ReconstructionFilterProcessor extends AudioWorkletProcessor {
     this._reportCountdown = this.reportInterval;
 
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
+      if (event?.data?.type === "dispose") {
+        this.disposed = true;
+        this.port.close();
+        return;
+      }
       if (event?.data?.type === "ping" && this.ready) {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       } else if (event?.data?.type === "reset") {
@@ -89,6 +95,7 @@ class ReconstructionFilterProcessor extends AudioWorkletProcessor {
     outputs: Float32Array[][],
     _parameters: Record<string, Float32Array>
   ): boolean {
+    if (this.disposed) return false;
     const output = outputs[0];
     if (!output || !output[0]) {
       return true;

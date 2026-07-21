@@ -30,6 +30,7 @@ interface TriangularSourceMetricsMessage {
 const wasmUrl = resolveWasmUrl("./triangular-source.wasm");
 
 class TriangularSourceProcessor extends AudioWorkletProcessor {
+  private disposed = false;
   wasm: TriangularSourceWasmExports | null;
   state: number;
   ready: boolean;
@@ -70,6 +71,11 @@ class TriangularSourceProcessor extends AudioWorkletProcessor {
     this._reportCountdown = this.reportInterval;
 
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
+      if (event?.data?.type === "dispose") {
+        this.disposed = true;
+        this.port.close();
+        return;
+      }
       if (event?.data?.type === "ping" && this.ready) {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       } else if (event?.data?.type === "reset") {
@@ -95,6 +101,7 @@ class TriangularSourceProcessor extends AudioWorkletProcessor {
     outputs: Float32Array[][],
     parameters: Record<string, Float32Array>
   ): boolean {
+    if (this.disposed) return false;
     const output = outputs[0];
     if (!output || !output[0]) {
       return true;

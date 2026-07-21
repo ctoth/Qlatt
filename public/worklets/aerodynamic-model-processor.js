@@ -19,6 +19,7 @@
 import { initWasmModule, WasmBuffer, resolveWasmUrl, UNINITIALIZED_ALLOC, fillParamBuffer } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./aerodynamic-model.wasm");
 class AerodynamicModelProcessor extends AudioWorkletProcessor {
+    disposed = false;
     wasm;
     state;
     ready;
@@ -68,6 +69,11 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
             ps: new WasmBuffer(UNINITIALIZED_ALLOC),
         };
         this.port.onmessage = (event) => {
+            if (event?.data?.type === "dispose") {
+                this.disposed = true;
+                this.port.close();
+                return;
+            }
             if (event?.data?.type === "ping" && this.ready) {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
             }
@@ -99,6 +105,8 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
         });
     }
     process(_inputs, outputs, parameters) {
+        if (this.disposed)
+            return false;
         const voicingOut = outputs[0];
         const aspirationOut = outputs[1];
         const fricationOut = outputs[2];

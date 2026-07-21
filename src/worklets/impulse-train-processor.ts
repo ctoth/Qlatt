@@ -15,6 +15,7 @@ interface ImpulseTrainMetricsMessage {
 }
 
 class ImpulseTrainProcessor extends AudioWorkletProcessor {
+  private disposed = false;
   periodLength: number;
   openPhaseLength: number;
   positionInPeriod: number;
@@ -52,6 +53,11 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
     this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
+      if (event?.data?.type === "dispose") {
+        this.disposed = true;
+        this.port.close();
+        return;
+      }
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       }
@@ -64,6 +70,7 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
     outputs: Float32Array[][],
     parameters: Record<string, Float32Array>
   ): boolean {
+    if (this.disposed) return false;
     const output = outputs[0];
     if (!output || !output[0]) return true;
     const outputChannel = output[0];

@@ -83,6 +83,19 @@ const TEST_PHRASES = [
 // ---------------------------------------------------------------------------
 
 describe("dectalk-english end-to-end", () => {
+  it("emits DECtalk's integer-reduced single-word primary stress command", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const stressCommands = result.utterance.relation("Tilt").listItems()
+      .filter((item) => item.get("layer") === "stress");
+
+    expect(stressCommands).toHaveLength(1);
+    expect(stressCommands[0].get("value")).toBe(159);
+    expect(stressCommands[0].get("duration_frames")).toBe(20);
+  });
+
   it("preserves required segment features when reducing a same-word geminate", () => {
     const result = textToKlattTrackDetailed("Safe zones feel fuzzy.", 110, 30, {
       frontendId: "dectalk-english",

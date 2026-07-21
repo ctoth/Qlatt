@@ -29,7 +29,7 @@ type LocusTable = Readonly<Record<string, Readonly<Record<string, Readonly<Recor
 type VowelCategoryTable = Readonly<Record<string, { forward?: number; backward?: number }>>;
 
 type LayerType = "profile" | "persistent" | "impulse" | "glide";
-type DecayMode = "halving" | "linear" | "exponential";
+type DecayMode = "halving" | "triangular" | "exponential";
 
 type LayerConfig = {
   type: LayerType;
@@ -553,7 +553,7 @@ function renderLayeredF0(
   }
 
   const layerTypeCodes: Record<LayerType, number> = { profile: 0, persistent: 1, impulse: 2, glide: 3 };
-  const decayCodes: Record<DecayMode, number> = { halving: 0, linear: 1, exponential: 2 };
+  const decayCodes: Record<DecayMode, number> = { halving: 0, triangular: 1, exponential: 2 };
   // f0-filters ABI constants; keep synchronized with crates/f0-filters/src/lib.rs.
   const commandDescriptorWidth = 5;
   const coefficientTwoPoleFilterMode = 2;
@@ -570,10 +570,10 @@ function renderLayeredF0(
     const decayCode = impulse && config.decay
       ? decayCodes[config.decay]
       : 0;
-    const initialDecayDivisor = impulse
+    const initialDecayDivisor = impulse && config.decay === "halving"
       ? requirePositiveNumber(config.initial_decay_divisor, `f0_model.layers.${name}.initial_decay_divisor`)
       : 0;
-    const terminationThreshold = impulse
+    const terminationThreshold = impulse && config.decay !== "triangular"
       ? requirePositiveNumber(config.termination_threshold, `f0_model.layers.${name}.termination_threshold`)
       : 0;
     const exponentialFactor = impulse && config.decay === "exponential"

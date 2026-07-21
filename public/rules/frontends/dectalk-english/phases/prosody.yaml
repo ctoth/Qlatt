@@ -13,7 +13,7 @@ rules:
   #
   # All values are in DECtalk internal units (Hz*10).  Speaker scaling in
   # renderLayeredF0() converts to final Hz via the DECtalk formula:
-  #   Hz = (f0minimum + (total - 1300) * f0scalefac / 4096) / 10
+  #   Hz = (f0minimum + (total - f0minimum) * f0scalefac / 4096) / 10
   #
   # Citations:
   #   - Klatt 1982 "The KLATTalk text-to-speech conversion system"
@@ -459,20 +459,22 @@ rules:
       - "DECtalk 4.63 ph_inton1.c:1364 (comma gesture timing delayf0 -= NF20MS)"
 
   # --------------------------------------------------------------------------
-  # Rule 4: Stress Impulse (decaying pulse into stress layer)
+  # Rule 4: Stress Impulse (triangular pulse into stress layer)
   #
   # Fires at every primary-stressed vowel.  Inserts an impulse whose magnitude
-  # is stress_level_primary + a fixed phrase-position component (simplified
-  # from the position-dependent f0_mphrase_position[] table).
+  # is stress_level_primary + a phrase-position component. For a single word,
+  # DECtalk applies its integer one-word reduction to the first-position value:
+  # (71 + 140) - ((71 + 140) >> 2) = 159.
   #
   # The impulse decays over stress_impulse_duration_frames (20 frames = 100ms)
-  # using halving decay (DECtalk style: value -= decay, decay /= 2).
+  # using the source IMPULSE triangle in Ph_drwt02it.c.
   #
   # Simplification: DECtalk tracks nrises_sofar to index into
   # f0_mphrase_position[], which requires stateful counting.  We use a fixed
   # average of the first 4 entries: (140+90+60+40)/4 = 82.5 Hz*10.
   #
-  # Source: ph_inton1.c Rule 2 (stress impulse at FSTRESS_1).
+  # Source: ph_inton1.c Rule 2 (stress impulse at FSTRESS_1) and the one-word
+  # reduction branch; Ph_drwt02it.c IMPULSE case (per-frame triangle).
   #
   # Citations:
   #   - DECtalk 4.63 ph_inton1.c Rule 2 (stress impulse generation)
@@ -495,8 +497,9 @@ rules:
       scale_factor: >-
         params.policy.speaker.scale_str_rise / 32.0
       impulse_hz: >-
-        (stress_component + position_component) * scale_factor
-        * params.policy.f0.stress_impulse_initial_multiplier
+        word_count() == 1
+        ? params.policy.f0.stress_single_word_primary_hz * scale_factor
+        : (stress_component + position_component) * scale_factor
     insert:
       relation: Tilt
       layer: stress
@@ -505,8 +508,8 @@ rules:
       duration_frames: params.policy.f0.stress_impulse_duration_frames
       tag: f0_stress_impulse
     citations:
-      - "DECtalk 4.63 ph_inton1.c Rule 2 (stress impulse)"
-      - "DECtalk 4.63 Ph_drwt02.c IMPULSE case (non-reading path sets tarimp = f0command << 1)"
+      - "DECtalk 4.63 ph_inton1.c Rule 2 and one-word reduction branch (primary stress command 159)"
+      - "DECtalk 4.63 Ph_drwt02it.c IMPULSE case (duration-controlled triangular tarimp)"
       - "Klatt 1982 (stress-component F0 impulse)"
 
   # --------------------------------------------------------------------------

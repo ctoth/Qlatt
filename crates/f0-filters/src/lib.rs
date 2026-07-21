@@ -36,7 +36,7 @@ const FILTER_COEFFICIENT_2POLE: i32 = 2;
 
 // Decay mode tags for impulse layers.
 const DECAY_HALVING: i32 = 0;
-const DECAY_LINEAR: i32 = 1;
+const DECAY_TRIANGULAR: i32 = 1;
 const DECAY_EXPONENTIAL: i32 = 2;
 
 /// 2-pole Butterworth coefficients via bilinear transform.
@@ -127,6 +127,8 @@ struct ActiveImpulse {
     value: f64,
     decay: f64,
     remaining_frames: f64,
+    elapsed_frames: f64,
+    rise_frames: f64,
 }
 
 /// A single in-progress glide ramp (mirrors the TS `ActiveGlide` object).
@@ -234,10 +236,17 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
                             persistent_levels[li] += cmd.value;
                         }
                         LAYER_IMPULSE => {
+                            let triangular = layer.decay_mode == DECAY_TRIANGULAR;
                             active_impulses[li].push(ActiveImpulse {
                                 value: cmd.value,
-                                decay: cmd.value / layer.initial_decay_divisor,
+                                decay: if triangular {
+                                    (cmd.value / cmd.duration_frames).trunc() * 2.0
+                                } else {
+                                    cmd.value / layer.initial_decay_divisor
+                                },
                                 remaining_frames: cmd.duration_frames,
+                                elapsed_frames: 0.0,
+                                rise_frames: (cmd.duration_frames.trunc() / 2.0).floor(),
                             });
                         }
                         LAYER_PROFILE => {
@@ -268,6 +277,32 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
                 }
             }
             command_cursors[li] = cursor;
+        }
+
+        // DECtalk 4.63 Ph_drwt02it.c updates IMPULSE tarimp before adding it
+        // to f0in. The first half rises by integer-truncated delimp and the
+        // second half falls by the same amount for exactly nimp frames.
+        for li in 0..n_layers {
+            let layer = &inp.layers[li];
+            if layer.layer_type != LAYER_IMPULSE || layer.decay_mode != DECAY_TRIANGULAR {
+                continue;
+            }
+            let impulses = &mut active_impulses[li];
+            let mut i = impulses.len();
+            while i > 0 {
+                i -= 1;
+                if impulses[i].remaining_frames <= 0.0 {
+                    impulses.remove(i);
+                    continue;
+                }
+                if impulses[i].elapsed_frames < impulses[i].rise_frames {
+                    impulses[i].value += impulses[i].decay;
+                } else {
+                    impulses[i].value -= impulses[i].decay;
+                }
+                impulses[i].elapsed_frames += 1.0;
+                impulses[i].remaining_frames -= 1.0;
+            }
         }
 
         // Sum all layers (layer order preserved from TS Object.keys order).
@@ -334,6 +369,9 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
             if layer.layer_type != LAYER_IMPULSE {
                 continue;
             }
+            if layer.decay_mode == DECAY_TRIANGULAR {
+                continue;
+            }
             let termination_threshold = layer.termination_threshold;
             let exponential_factor = layer.exponential_factor;
             let impulses = &mut active_impulses[li];
@@ -353,9 +391,6 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
                     DECAY_HALVING => {
                         impulses[i].value -= impulses[i].decay;
                         impulses[i].decay /= 2.0;
-                    }
-                    DECAY_LINEAR => {
-                        impulses[i].value -= impulses[i].decay;
                     }
                     DECAY_EXPONENTIAL => {
                         impulses[i].value *= exponential_factor;
@@ -873,6 +908,57 @@ mod tests {
         let mut out = vec![0.0; 1001];
         render(&inp, &mut out);
         assert!(out[1000].abs() < 0.01, "exp impulse did not terminate: {}", out[1000]);
+    }
+
+    #[test]
+    fn dectalk_impulse_updates_as_a_duration_controlled_triangle() {
+        let layers = vec![LayerDesc {
+            layer_type: LAYER_IMPULSE,
+            decay_mode: DECAY_TRIANGULAR,
+            initial_decay_divisor: 8.0,
+            termination_threshold: 0.01,
+            exponential_factor: 0.0,
+            cmd_start: 0,
+            cmd_count: 1,
+        }];
+        let cmds = vec![CmdDesc {
+            time: 0.0,
+            value: 159.0,
+            duration_frames: 20.0,
+            profile_start: 0,
+            profile_count: 0,
+        }];
+        let inp = RenderInputs {
+            frame_period: 0.005,
+            total_duration: 0.1,
+            num_frames: 21,
+            filter_mode: FILTER_ONE_POLE,
+            one_pole_alpha: 1.0,
+            coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
+            has_scale: false,
+            f0_minimum: 0.0,
+            f0_scale_factor: 1.0,
+            scale_divisor: 4096.0,
+            scale_output: 0.1,
+            min_hz: -1e9,
+            max_hz: 1e9,
+            init_total: 0.0,
+            layers: &layers,
+            cmds: &cmds,
+            profile_points: &[],
+        };
+        let mut out = vec![0.0; 21];
+
+        render(&inp, &mut out);
+
+        assert_eq!(
+            out,
+            vec![
+                173.0, 187.0, 201.0, 215.0, 229.0, 243.0, 257.0, 271.0, 285.0,
+                299.0, 285.0, 271.0, 257.0, 243.0, 229.0, 215.0, 201.0, 187.0,
+                173.0, 159.0, 0.0,
+            ],
+        );
     }
 
     #[test]

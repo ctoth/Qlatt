@@ -141,13 +141,10 @@ f0_model:
       type: persistent
     stress:
       type: impulse
-      decay: linear
-      # DECtalk 4.63 Ph_drwt02.c IMPULSE doubles stress tarimp and subtracts
-      # original_command / 4 per frame. The stress rule already doubles tarimp,
-      # so the equivalent linear decrement is doubled_value / 8.
-      initial_decay_divisor: 8
-      # Engineering threshold: impulse removed when |value| < 0.01.
-      termination_threshold: 0.01
+      decay: triangular
+      # DECtalk 4.63 Ph_drwt02it.c IMPULSE updates tarimp before filtering:
+      # rise by (f0command / length) << 1 for half the command, then fall by
+      # the same integer delta for the remaining half.
     boundary:
       type: impulse
       decay: halving
@@ -317,7 +314,7 @@ parameters:
       # All F0 policy values are in DECtalk internal units (Hz*10), matching
       # the values used by Ph_drwt02.c and ph_inton1.c.  Speaker scaling
       # converts these to final Hz via:
-      #   Hz = (f0minimum + (val - 1300) * f0scalefac / 4096) / 10
+      #   Hz = (f0minimum + (val - f0minimum) * f0scalefac / 4096) / 10
       #
       # Baseline declination profile: Ph_drwt02.c f0basetypes[0][] (declarative).
       # 17 equidistant points spanning the utterance duration.
@@ -408,17 +405,16 @@ parameters:
       stress_level_primary_hz: 71
       stress_level_secondary_hz: 31
       stress_level_emphasis_hz: 281
+      # Exact one-word primary command after DECtalk's integer reduction:
+      # (71 + 140) - ((71 + 140) >> 2) = 159.
+      # Source: ph_inton1.c one-word non-emphasis branch.
+      stress_single_word_primary_hz: 159
       # Fixed phrase-position impulse component (internal Hz*10 units).
       # Simplified from f0_mphrase_position[] = {140,90,60,40,10,10,10}.
       # Using average of first 4 positions: (140+90+60+40)/4 = 82.5.
       stress_phrase_position_hz: 82.5
-      # DECtalk's non-reading IMPULSE path realizes the command as
-      # tarimp = f0command << 1 before per-frame decay.
-      # Source: Ph_drwt02.c IMPULSE case.
-      stress_impulse_initial_multiplier: 2
       # Stress impulse duration in native DECtalk control frames.
-      # The source IMPULSE path is a longer step-plus-ramp; Qlatt keeps a
-      # 20-frame declarative approximation here. # engineering approximation
+      # Source: ph_inton1.c make_f0_command(... IMPULSE, ..., 20, ...).
       stress_impulse_duration_frames: 20
       citations:
         - "DECtalk 4.63 ph_inton1.c (hat-pattern F0 model)"

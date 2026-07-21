@@ -308,6 +308,30 @@ describe("dectalk-english end-to-end", () => {
     ]);
   });
 
+  it("matches DECtalk's native F3 rise and hold in cake's terminal silence", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const sampleFrames = [
+      ...Array.from({ length: 21 }, (_, index) => 78 + index),
+      170,
+    ];
+    const f3 = sampleFrames.map((frameIndex) => {
+      const time = frameIndex * 0.0064;
+      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
+    });
+
+    expect(f3).toEqual([
+      2522, 2522, 2522, 2522,
+      2523, 2523, 2523, 2523,
+      2524, 2524, 2524, 2524,
+      2525, 2525, 2525, 2525,
+      2526, 2526, 2526, 2526,
+      2527, 2527,
+    ]);
+  });
+
   it("extends cake's EY F2 trajectory through its duration-lengthened tail", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

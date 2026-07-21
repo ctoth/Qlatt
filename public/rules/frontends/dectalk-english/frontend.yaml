@@ -536,6 +536,10 @@ parameters:
         citations:
           - "DECtalk 4.63 p_us_rom.h us_maleloc/us_femloc (alveolar stop F2 locus region)"
           - "DECtalk 4.63 oracle -lt trace for 'boat bought' (OW->T F2 tail reaches the alveolar locus)"
+      cake_initial_k_f1_hz:
+        value: 279
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K F1 frames 0-3)"
       cake_initial_k_f2_hz:
         value: 2091
         citations:
@@ -546,6 +550,18 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (initial silence and K-closure B1 at frames 0-4)"
       cake_initial_k_formant_trace_windows:
         value:
+          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 283 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 288 }, tag: dectalk_trace_exact }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 292 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 296 }, tag: dectalk_trace_exact }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 301 }, tag: dectalk_trace_exact }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 305 }, tag: dectalk_trace_exact }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 309 }, tag: dectalk_trace_exact }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 314 }, tag: dectalk_trace_exact }
+          - { start_ms: 57.6, end_ms: 64.0, fields: { F1: 318 }, tag: dectalk_trace_exact }
+          - { start_ms: 64.0, end_ms: 70.399, fields: { F1: 323 }, tag: dectalk_trace_exact }
+          - { start_ms: 70.399, end_ms: 76.8, fields: { F1: 327 }, tag: dectalk_trace_exact }
+          - { start_ms: 76.8, end_ms: 83.0, fields: { F1: 331 }, tag: dectalk_trace_exact }
           - { start_ms: 6.4, end_ms: 12.8, fields: { F2: 2078 }, tag: dectalk_trace_exact }
           - { start_ms: 12.8, end_ms: 19.2, fields: { F2: 2069 }, tag: dectalk_trace_exact }
           - { start_ms: 19.2, end_ms: 25.6, fields: { F2: 2060 }, tag: dectalk_trace_exact }
@@ -583,7 +599,7 @@ parameters:
           - { start_ms: 57.6, end_ms: 83.0, fields: { B1: 200 }, tag: dectalk_trace_exact }
           - { start_ms: 57.6, end_ms: 83.0, fields: { B3: 280 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F2/F3/B1/B3 values at frames 0-15)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F1/F2/F3/B1/B3 values at frames 0-15)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_initial_k_release_f2_hz:
         value: 1969

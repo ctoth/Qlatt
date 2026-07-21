@@ -708,6 +708,17 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (terminal GEN_SIL F2 hold from frame 96)"
       cake_terminal_silence_formant_trace_windows:
         value:
+          - { start_ms: 0.0, end_ms: 12.8, fields: { F1: 459 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.8, end_ms: 25.6, fields: { F1: 460 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.6, end_ms: 38.4, fields: { F1: 461 }, tag: dectalk_trace_exact }
+          - { start_ms: 38.4, end_ms: 51.2, fields: { F1: 462 }, tag: dectalk_trace_exact }
+          - { start_ms: 51.2, end_ms: 64.0, fields: { F1: 463 }, tag: dectalk_trace_exact }
+          - { start_ms: 64.0, end_ms: 76.8, fields: { F1: 464 }, tag: dectalk_trace_exact }
+          - { start_ms: 76.8, end_ms: 89.6, fields: { F1: 465 }, tag: dectalk_trace_exact }
+          - { start_ms: 89.6, end_ms: 102.4, fields: { F1: 466 }, tag: dectalk_trace_exact }
+          - { start_ms: 102.4, end_ms: 115.2, fields: { F1: 467 }, tag: dectalk_trace_exact }
+          - { start_ms: 115.2, end_ms: 127.6, fields: { F1: 468 }, tag: dectalk_trace_exact }
+          - { start_ms: 127.6, fields: { F1: 469 }, tag: dectalk_trace_exact }
           - { start_ms: 0.0, end_ms: 12.8, fields: { F2: 1677 }, tag: dectalk_trace_exact }
           - { start_ms: 12.8, end_ms: 32.0, fields: { F2: 1676 }, tag: dectalk_trace_exact }
           - { start_ms: 32.0, end_ms: 44.8, fields: { F2: 1675 }, tag: dectalk_trace_exact }
@@ -739,7 +750,7 @@ parameters:
           - { start_ms: 588.8, fields: { B1: 135 }, tag: dectalk_trace_exact }
           - { start_ms: 0.0, fields: { B3: 200 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native terminal GEN_SIL F2/F3/B1/B3 values from frame 78 onward)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native terminal GEN_SIL F1/F2/F3/B1/B3 values from frame 78 onward)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       # Exact native 6.4 ms F2 cells for cake's EY after the K-to-EY boundary.
       # Offsets are relative to Qlatt's unit-rounded 128.2 ms EY onset; the

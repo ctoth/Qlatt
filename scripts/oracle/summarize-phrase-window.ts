@@ -53,6 +53,10 @@ type QlattPayload = {
   }>;
 };
 
+// Match compare-trace.ts event selection so binary representation at an exact
+// packet boundary cannot make the diagnostic summarize a different event.
+const EVENT_TIME_EPSILON_SEC = 1e-9;
+
 function parseArgs(argv: string[]): Args {
   const flags = new Map<string, string>();
   for (let index = 0; index < argv.length; index += 1) {
@@ -177,7 +181,10 @@ function main(): void {
   console.log("\nFrame window:");
   for (const { frame, frameIndex, timeSec } of oracleWindow) {
     const qlattEvent = qlattWindow.reduce<{ eventIndex: number; value: number | null } | null>((best, candidate) => {
-      if (candidate.timeSec == null || candidate.timeSec > timeSec) return best;
+      if (
+        candidate.timeSec == null
+        || candidate.timeSec > timeSec + EVENT_TIME_EPSILON_SEC
+      ) return best;
       return {
         eventIndex: candidate.eventIndex,
         value: finiteNumber(candidate.event.params?.[args.param]),

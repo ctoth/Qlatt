@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
@@ -92,6 +92,68 @@ describe("DECtalk trace packet timing", () => {
       expect(arrayAt(f1, "mismatchRanges")).toHaveLength(0);
       expect(f1.firstMismatch).toBeNull();
       expect(numberAt(report, "oracleDurationSec")).toBe(142 / 11_025);
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("summarizes events within the comparator's packet-time tolerance", () => {
+    const directory = mkdtempSync(path.join(tmpdir(), "qlatt-dectalk-summary-"));
+    try {
+      const phraseId = "packet-boundary";
+      const phraseRoot = path.join(directory, phraseId);
+      const oracleDirectory = path.join(phraseRoot, "oracle");
+      const qlattDirectory = path.join(phraseRoot, "qlatt");
+      mkdirSync(oracleDirectory, { recursive: true });
+      mkdirSync(qlattDirectory, { recursive: true });
+      const packetTime = dectalkFrameStartSec(57);
+      writeFileSync(
+        path.join(oracleDirectory, "oracle.trace.jsonl"),
+        JSON.stringify({
+          frame: 57,
+          timeFrames: 57,
+          tcum: 58,
+          phoneIndex: 0,
+          f0prime: 1000,
+          out: { AV: 0 },
+        }),
+      );
+      writeFileSync(
+        path.join(qlattDirectory, "qlatt.json"),
+        JSON.stringify({
+          track: [
+            { time: packetTime - 0.001, params: { AV: 0 } },
+            { time: packetTime + Number.EPSILON, params: { AV: 65 } },
+          ],
+        }),
+      );
+      writeFileSync(
+        path.join(directory, `${phraseId}-trace-compare.json`),
+        JSON.stringify({
+          params: { AV: { compared: 1, meanAbs: 65, maxAbs: 65, maxFrame: 57 } },
+          oraclePhoneGroups: [],
+          qlattTrackRuns: [],
+        }),
+      );
+
+      const stdout = execFileSync(
+        process.execPath,
+        [
+          "--loader",
+          "ts-node/esm/transpile-only",
+          "--experimental-specifier-resolution=node",
+          "scripts/oracle/summarize-phrase-window.ts",
+          "--run-root",
+          directory,
+          "--phrase-id",
+          phraseId,
+          "--param",
+          "AV",
+        ],
+        { cwd: process.cwd(), encoding: "utf8" },
+      );
+
+      expect(stdout).toContain("qlattAV=65 delta=65.000");
     } finally {
       rmSync(directory, { recursive: true, force: true });
     }

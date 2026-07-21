@@ -1,10 +1,9 @@
 //! F0 control-rate DSP kernel for the layered-additive F0 renderer.
 //!
-//! This crate extracts the per-frame DSP loop of `renderLayeredF0`
-//! (`src/track-assembler.ts`) into Rust→WASM. It is a BYTE-EXACT port: every
-//! arithmetic operation mirrors the TypeScript reference, using `f64`
-//! throughout (the TS code uses JS doubles / `Float64Array`, and the output is
-//! golden-sensitive control-rate F0, so `f32` would drift).
+//! This crate owns the per-frame DSP loop of `renderLayeredF0` in Rust→WASM.
+//! Generic layered commands retain double-precision behavior, while the active
+//! DECtalk coefficient renderer follows Ph_drwt02.c's signed integer control
+//! recurrences and output-cell ordering.
 //!
 //! Config resolution (filter type, speaker scaling, clamps, speaker-param path
 //! walks against loosely-typed YAML) stays in TypeScript and is marshalled into
@@ -39,6 +38,16 @@ const LAYER_DECTALK_SEGMENTAL: i32 = 4;
 const FILTER_ONE_POLE: i32 = 1;
 const FILTER_COEFFICIENT_2POLE: i32 = 2;
 
+// DECtalk 4.63 ph_romi.c getcosine table used by Ph_drwt02.c's deterministic
+// 3 Hz / 5 Hz control-frame pseudojitter.
+const DECTALK_COSINE: [i32; 64] = [
+    164, 163, 161, 158, 154, 148, 141, 132, 123, 112, 100, 86, 72, 56, 38, 20,
+    0, -20, -38, -56, -72, -86, -100, -112, -123, -132, -141, -148, -154, -158,
+    -161, -163, -164, -163, -161, -158, -154, -148, -141, -132, -123, -112, -100,
+    -86, -72, -56, -38, -20, 0, 20, 38, 56, 72, 86, 100, 112, 123, 132, 141, 148,
+    154, 158, 161, 163,
+];
+
 // Decay mode tags for impulse layers.
 const DECAY_HALVING: i32 = 0;
 const DECAY_STEP_PLUS_RAMP: i32 = 1;
@@ -47,7 +56,10 @@ const DECAY_EXPONENTIAL: i32 = 2;
 /// 2-pole Butterworth coefficients via bilinear transform.
 /// Mirrors `computeButterworth2Coefficients` in track-assembler.ts.
 /// Returns (b0, b1, b2, a1, a2).
-pub fn compute_butterworth2_coefficients(cutoff_hz: f64, sample_rate: f64) -> (f64, f64, f64, f64, f64) {
+pub fn compute_butterworth2_coefficients(
+    cutoff_hz: f64,
+    sample_rate: f64,
+) -> (f64, f64, f64, f64, f64) {
     let wc = ((PI * cutoff_hz) / sample_rate).tan();
     let wc2 = wc * wc;
     let sqrt2 = core::f64::consts::SQRT_2;
@@ -98,33 +110,15 @@ fn one_pole_lowpass(input: f64, y: &mut f64, alpha: f64) -> f64 {
     *y
 }
 
-/// Two cascaded first-order low-pass poles using the same coefficient.
-/// Mirrors DECtalk 4.63 Ph_drwt02.c filter_commands(): f0a1/f0b then
-/// f0a2/f0b, with f0a1's fixed-point scaling collapsed into alpha here.
-fn coefficient_2pole_lowpass(input: f64, y1: &mut f64, y2: &mut f64, alpha: f64) -> f64 {
-    let first = one_pole_lowpass(input, y1, alpha);
-    one_pole_lowpass(first, y2, alpha)
-}
-
-/// Piecewise-linear interpolation over equidistant control points in [0,1].
-/// Mirrors `interpolateProfile`.
-pub fn interpolate_profile(points: &[f64], normalized_position: f64) -> f64 {
-    if points.is_empty() {
-        return 0.0;
-    }
-    if points.len() == 1 {
-        return points[0];
-    }
-    let t = normalized_position.max(0.0).min(1.0);
-    let max_idx = points.len() - 1;
-    let float_idx = t * (max_idx as f64);
-    let low_idx = float_idx.floor() as usize;
-    let high_idx = (low_idx + 1).min(max_idx);
-    if low_idx == high_idx {
-        return points[low_idx];
-    }
-    let frac = float_idx - (low_idx as f64);
-    points[low_idx] + frac * (points[high_idx] - points[low_idx])
+/// DECtalk 4.63 Ph_drwt02.c filter_commands() signed-Q14 recurrence.
+fn coefficient_2pole_lowpass(input: f64, y1: &mut i32, y2: &mut i32, alpha: f64) -> f64 {
+    let coefficient = (alpha * 16384.0).round() as i32;
+    let complement = 16384 - coefficient;
+    let first = q14_multiply(coefficient << 3, input as i32) + q14_multiply(complement, *y1);
+    *y1 = first;
+    let second = q14_multiply(coefficient, first) + q14_multiply(complement, *y2);
+    *y2 = second;
+    (second >> 3) as f64
 }
 
 /// A single active impulse (mirrors the TS `ActiveImpulse` object).
@@ -253,6 +247,7 @@ struct RenderInputs<'a> {
     has_scale: bool,
     f0_minimum: f64,
     f0_scale_factor: f64,
+    scale_pivot: f64,
     scale_divisor: f64,
     scale_output: f64,
     min_hz: f64,
@@ -264,12 +259,15 @@ struct RenderInputs<'a> {
 }
 
 /// The core per-frame F0 render loop. Writes `num_frames` f64 values into `out`.
-/// Mirrors lines 818–935 of track-assembler.ts exactly.
+/// Generic layer behavior follows the former TypeScript renderer; DECtalk's
+/// coefficient path follows the cited native integer recurrences.
 fn render(inp: &RenderInputs, out: &mut [f64]) {
     let mut filter_state = IIRFilterState::default();
     let mut one_pole_y = 0.0f64;
-    let mut coefficient_2pole_y1 = 0.0f64;
-    let mut coefficient_2pole_y2 = 0.0f64;
+    let mut coefficient_2pole_y1 = 0i32;
+    let mut coefficient_2pole_y2 = 0i32;
+    let mut dectalk_timecos3 = 0i32;
+    let mut dectalk_timecos5 = 0i32;
 
     // Pre-fill filter state to avoid startup transient (init_total computed in TS
     // — it is exact: persistent cmd.value sums + profile point[0]).
@@ -277,8 +275,8 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
         if inp.filter_mode == FILTER_ONE_POLE {
             one_pole_y = inp.init_total;
         } else if inp.filter_mode == FILTER_COEFFICIENT_2POLE {
-            coefficient_2pole_y1 = inp.init_total;
-            coefficient_2pole_y2 = inp.init_total;
+            coefficient_2pole_y1 = (inp.init_total as i32) << 3;
+            coefficient_2pole_y2 = (inp.init_total as i32) << 3;
         } else {
             filter_state.y1 = inp.init_total;
             filter_state.y2 = inp.init_total;
@@ -301,11 +299,23 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
         .collect();
     // profile_data: index into profile_points + count for the currently active profile.
     let mut profile_active: Vec<Option<(usize, usize)>> = vec![None; n_layers];
+    let mut profile_last_base = vec![0i32; n_layers];
+    let mut profile_base_time = vec![0i32; n_layers];
+    let mut profile_base_counter = vec![0usize; n_layers];
+    let mut profile_base_step = vec![0i32; n_layers];
+    let mut profile_elapsed_frames = vec![0i32; n_layers];
     let mut command_cursors = vec![0usize; n_layers];
 
     let frame_period = inp.frame_period;
+    let profile_duration_frames = (inp.total_duration / frame_period).round().max(1.0) as i32;
+    // ph_draw.c writes each -lt cell after the active Ph_drwt02.c path has
+    // completed the following F0 control update. Run and discard that first
+    // internal cell for the complete DECtalk coefficient+speaker renderer.
+    let output_phase_lead = usize::from(
+        inp.filter_mode == FILTER_COEFFICIENT_2POLE && inp.has_scale,
+    );
 
-    for frame in 0..inp.num_frames {
+    for frame in 0..inp.num_frames + output_phase_lead {
         let time = (frame as f64) * frame_period;
 
         // Process pending commands for each layer up to current time.
@@ -317,7 +327,7 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
             let mut cursor = command_cursors[li];
             while cursor < layer.cmd_count {
                 let cmd = &inp.cmds[layer.cmd_start + cursor];
-                if cmd.time <= time + frame_period * 0.5 {
+                if cmd.time <= time {
                     match layer.layer_type {
                         LAYER_PERSISTENT => {
                             persistent_levels[li] += cmd.value;
@@ -341,6 +351,12 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
                         LAYER_PROFILE => {
                             if cmd.profile_count > 0 {
                                 profile_active[li] = Some((cmd.profile_start, cmd.profile_count));
+                                profile_last_base[li] =
+                                    (inp.profile_points[cmd.profile_start] as i32) << 2;
+                                profile_base_time[li] = 0;
+                                profile_base_counter[li] = 0;
+                                profile_base_step[li] = 0;
+                                profile_elapsed_frames[li] = 0;
                             }
                         }
                         LAYER_GLIDE => {
@@ -368,10 +384,8 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
             command_cursors[li] = cursor;
         }
 
-        // DECtalk 4.63 Ph_drwt02.c initializes a non-reading US IMPULSE at
-        // 2*f0command, then subtracts delimp=f0command>>2 before sampling it.
-        // The post-sample update below restores delimp and halves it, producing
-        // a sustained step with a short rising correction for exactly nimp frames.
+        // Ph_drwt02.c decrements the active stress ramp before sampling it,
+        // then restores delimp and halves delimp after the sampled frame.
         for li in 0..n_layers {
             let layer = &inp.layers[li];
             if layer.layer_type != LAYER_IMPULSE || layer.decay_mode != DECAY_STEP_PLUS_RAMP {
@@ -398,13 +412,22 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
                 LAYER_PROFILE => {
                     if let Some((start, count)) = profile_active[li] {
                         if count > 0 {
-                            let normalized_pos = if inp.total_duration > 0.0 {
-                                time / inp.total_duration
-                            } else {
-                                0.0
-                            };
-                            let pts = &inp.profile_points[start..start + count];
-                            total += interpolate_profile(pts, normalized_pos);
+                            // DECtalk Ph_drwt02.c advances the 17-point baseline
+                            // through integer lastbase/basetime state over tcumdur.
+                            let elapsed = profile_elapsed_frames[li];
+                            if (elapsed << 4) >= profile_base_time[li] {
+                                let next = (profile_base_counter[li] + 1).min(count - 1);
+                                profile_base_step[li] = (profile_last_base[li] >> 2)
+                                    - inp.profile_points[start + next] as i32;
+                                profile_base_time[li] += profile_duration_frames;
+                                if profile_base_counter[li] + 2 < count {
+                                    profile_base_counter[li] += 1;
+                                }
+                            }
+                            profile_last_base[li] -=
+                                (profile_base_step[li] << 6) / profile_duration_frames;
+                            total += (profile_last_base[li] >> 2) as f64;
+                            profile_elapsed_frames[li] += 1;
                         }
                     }
                 }
@@ -449,18 +472,46 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
             let commands = &inp.cmds[layer.cmd_start..layer.cmd_start + layer.cmd_count];
             segmental += segmental_states[li].render_frame(commands, inp.profile_points);
         }
-        let unscaled_f0 = filtered + segmental;
+        let mut unscaled_f0 = filtered + segmental;
+
+        // The active non-singing DECtalk renderer advances both zero-initialized
+        // cosine phases on every output frame, then adds signed-Q14 pseudojitter
+        // after the main and segmental filters and before speaker scaling.
+        if inp.filter_mode == FILTER_COEFFICIENT_2POLE && inp.has_scale {
+            dectalk_timecos5 += 131;
+            if dectalk_timecos5 > 4096 {
+                dectalk_timecos5 -= 4096;
+            }
+            dectalk_timecos3 += 79;
+            if dectalk_timecos3 > 4096 {
+                dectalk_timecos3 -= 4096;
+            }
+            let pseudojitter = DECTALK_COSINE[(dectalk_timecos5 >> 6) as usize]
+                - DECTALK_COSINE[(dectalk_timecos3 >> 6) as usize];
+            unscaled_f0 += q14_multiply(pseudojitter, 700) as f64;
+        }
 
         // Speaker scaling (DECtalk Ph_drwt02.c) or pass-through.
         let mut f0_hz = if inp.has_scale {
-            (inp.f0_minimum
-                + (unscaled_f0 - inp.f0_minimum) * inp.f0_scale_factor / inp.scale_divisor)
-                * inp.scale_output
+            if inp.filter_mode == FILTER_COEFFICIENT_2POLE && inp.scale_divisor == 4096.0 {
+                let scaled_internal = inp.f0_minimum as i32
+                    + (((unscaled_f0 as i32 - inp.scale_pivot as i32)
+                        * inp.f0_scale_factor as i32)
+                        >> 12);
+                scaled_internal as f64 * inp.scale_output
+            } else {
+                (inp.f0_minimum
+                    + (unscaled_f0 - inp.scale_pivot) * inp.f0_scale_factor
+                        / inp.scale_divisor)
+                    * inp.scale_output
+            }
         } else {
             unscaled_f0
         };
         f0_hz = inp.min_hz.max(inp.max_hz.min(f0_hz));
-        out[frame] = f0_hz;
+        if frame >= output_phase_lead {
+            out[frame - output_phase_lead] = f0_hz;
+        }
 
         // Advance impulse decay for all impulse layers.
         for li in 0..n_layers {
@@ -627,6 +678,7 @@ pub unsafe extern "C" fn render_f0(
     let min_hz = s[14];
     let max_hz = s[15];
     let init_total = if scalars_len > 16 { s[16] } else { 0.0 };
+    let scale_pivot = if scalars_len > 17 { s[17] } else { f0_minimum };
 
     let layers_raw = if n_layers > 0 && !layers_ptr.is_null() {
         core::slice::from_raw_parts(layers_ptr, n_layers * LAYER_STRIDE)
@@ -700,6 +752,7 @@ pub unsafe extern "C" fn render_f0(
         has_scale,
         f0_minimum,
         f0_scale_factor,
+        scale_pivot,
         scale_divisor,
         scale_output,
         min_hz,
@@ -775,12 +828,15 @@ mod tests {
         for &(cut, sr) in &[(30.0, 200.0), (50.0, 156.25), (10.0, 200.0), (90.0, 200.0)] {
             let (b0, b1, b2, a1, a2) = compute_butterworth2_coefficients(cut, sr);
             let dc = (b0 + b1 + b2) / (1.0 + a1 + a2);
-            assert!((dc - 1.0).abs() < 1e-9, "dc gain {dc} for cut={cut} sr={sr}");
+            assert!(
+                (dc - 1.0).abs() < 1e-9,
+                "dc gain {dc} for cut={cut} sr={sr}"
+            );
         }
     }
 
     #[test]
-    fn dectalk_speaker_scaling_uses_f0_minimum_as_pivot() {
+    fn dectalk_speaker_scaling_uses_declared_fixed_pivot() {
         let layers = vec![LayerDesc {
             layer_type: LAYER_PERSISTENT,
             decay_mode: DECAY_HALVING,
@@ -813,6 +869,7 @@ mod tests {
             has_scale: true,
             f0_minimum: 1100.0,
             f0_scale_factor: 4100.0,
+            scale_pivot: 1300.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
             min_hz: 40.0,
@@ -826,8 +883,12 @@ mod tests {
 
         render(&inp, &mut out);
 
-        let expected = (1100.0 + (1160.0 - 1100.0) * 4100.0 / 4096.0) * 0.1;
-        assert!((out[0] - expected).abs() < 1e-12, "{} != {expected}", out[0]);
+        let expected = (1100.0 + (1160.0 - 1300.0) * 4100.0 / 4096.0) * 0.1;
+        assert!(
+            (out[0] - expected).abs() < 1e-12,
+            "{} != {expected}",
+            out[0]
+        );
     }
 
     // ---- Filter stability ----------------------------------------------------
@@ -845,7 +906,10 @@ mod tests {
             assert!(last.is_finite());
             assert!(last.abs() < 1e6, "diverged: {last}");
         }
-        assert!((last - 100.0).abs() < 1e-3, "did not converge to step: {last}");
+        assert!(
+            (last - 100.0).abs() < 1e-3,
+            "did not converge to step: {last}"
+        );
     }
 
     #[test]
@@ -854,7 +918,7 @@ mod tests {
         let mut y = 0.0;
         let out = one_pole_lowpass(50.0, &mut y, 5.0);
         assert_eq!(out, 50.0); // clamped to 1.0 -> jumps straight to input
-        // alpha=0 -> never moves.
+                               // alpha=0 -> never moves.
         let mut y2 = 7.0;
         let out2 = one_pole_lowpass(50.0, &mut y2, -3.0);
         assert_eq!(out2, 7.0);
@@ -871,54 +935,84 @@ mod tests {
     }
 
     #[test]
-    fn coefficient_2pole_is_two_cascaded_one_poles() {
-        // DECtalk Ph_drwt02.c filters F0 commands through two first-order poles
-        // with the same coefficient. With alpha=0.5 and a unit step:
-        // y1: 0.5, 0.75, 0.875
-        // y2: 0.25, 0.5, 0.6875
-        let mut y1 = 0.0;
-        let mut y2 = 0.0;
+    fn coefficient_2pole_matches_dectalk_q14_recurrence() {
+        // DECtalk Ph_drwt02.c filter_commands() with Paul's 2100/16384
+        // coefficient and a 1000-unit step. The active male path filters the
+        // full input, keeps both pole states in Q3-scaled integers, and shifts
+        // the second pole back down for output.
+        let mut y1 = 0;
+        let mut y2 = 0;
+        let alpha = 2100.0 / 16384.0;
         let values = [
-            coefficient_2pole_lowpass(1.0, &mut y1, &mut y2, 0.5),
-            coefficient_2pole_lowpass(1.0, &mut y1, &mut y2, 0.5),
-            coefficient_2pole_lowpass(1.0, &mut y1, &mut y2, 0.5),
+            coefficient_2pole_lowpass(1000.0, &mut y1, &mut y2, alpha),
+            coefficient_2pole_lowpass(1000.0, &mut y1, &mut y2, alpha),
+            coefficient_2pole_lowpass(1000.0, &mut y1, &mut y2, alpha),
         ];
-        assert!((values[0] - 0.25).abs() < 1e-12);
-        assert!((values[1] - 0.5).abs() < 1e-12);
-        assert!((values[2] - 0.6875).abs() < 1e-12);
-    }
-
-    // ---- Interpolation: monotonic between points -----------------------------
-
-    #[test]
-    fn interpolate_endpoints_and_midpoints() {
-        let pts = [0.0, 10.0, 20.0];
-        assert_eq!(interpolate_profile(&pts, 0.0), 0.0);
-        assert_eq!(interpolate_profile(&pts, 1.0), 20.0);
-        assert_eq!(interpolate_profile(&pts, 0.5), 10.0);
-        assert_eq!(interpolate_profile(&pts, 0.25), 5.0);
-        // Clamps out-of-range.
-        assert_eq!(interpolate_profile(&pts, -1.0), 0.0);
-        assert_eq!(interpolate_profile(&pts, 2.0), 20.0);
-        // Degenerate cases.
-        assert_eq!(interpolate_profile(&[], 0.5), 0.0);
-        assert_eq!(interpolate_profile(&[42.0], 0.5), 42.0);
+        assert_eq!(values, [16.0, 44.0, 82.0]);
     }
 
     #[test]
-    fn interpolate_monotonic_between_points() {
-        // Property: between two adjacent equal-or-increasing points the result
-        // is monotonic non-decreasing in position.
-        let pts = [1.0, 3.0, 3.0, 9.0];
-        let mut prev = f64::NEG_INFINITY;
-        let mut t = 0.0;
-        while t <= 1.0 {
-            let v = interpolate_profile(&pts, t);
-            assert!(v >= prev - 1e-12, "not monotonic at t={t}: {v} < {prev}");
-            assert!(v >= 1.0 - 1e-12 && v <= 9.0 + 1e-12, "out of bounds: {v}");
-            prev = v;
-            t += 0.001;
-        }
+    fn dectalk_profile_matches_short_declarative_baseline_clock() {
+        let profile = [
+            1160.0, 1150.0, 1140.0, 1152.0, 1132.0, 1140.0, 1130.0, 1124.0, 1110.0,
+            1100.0, 1080.0, 1060.0, 1040.0, 1020.0, 980.0, 960.0, 950.0,
+        ];
+        let expected = [
+            1158.0, 1156.0, 1154.0, 1152.0, 1150.0, 1148.0, 1146.0, 1144.0, 1142.0,
+            1140.0, 1142.0, 1144.0, 1146.0, 1149.0, 1151.0, 1147.0, 1143.0, 1140.0,
+            1136.0, 1132.0, 1134.0, 1135.0, 1137.0, 1138.0, 1140.0, 1138.0, 1136.0,
+            1134.0, 1132.0, 1130.0, 1129.0, 1128.0, 1127.0, 1126.0, 1125.0, 1122.0,
+            1119.0, 1116.0, 1113.0, 1110.0, 1108.0, 1105.0, 1103.0, 1100.0, 1096.0,
+            1092.0, 1088.0, 1084.0, 1080.0, 1076.0, 1072.0, 1068.0, 1064.0, 1060.0,
+            1056.0, 1052.0, 1048.0,
+        ];
+        let layers = [LayerDesc {
+            layer_type: LAYER_PROFILE,
+            decay_mode: 0,
+            initial_decay_divisor: 0.0,
+            termination_threshold: 0.0,
+            exponential_factor: 0.0,
+            cmd_start: 0,
+            cmd_count: 1,
+        }];
+        let commands = [CmdDesc {
+            time: 0.0,
+            value: 0.0,
+            duration_frames: 0.0,
+            profile_start: 0,
+            profile_count: profile.len(),
+        }];
+        let inputs = RenderInputs {
+            frame_period: 0.0064,
+            total_duration: 78.0 * 0.0064,
+            num_frames: expected.len(),
+            filter_mode: FILTER_ONE_POLE,
+            one_pole_alpha: 1.0,
+            coeffs: IIRFilterCoefficients {
+                b0: 0.0,
+                b1: 0.0,
+                b2: 0.0,
+                a1: 0.0,
+                a2: 0.0,
+            },
+            has_scale: false,
+            f0_minimum: 0.0,
+            f0_scale_factor: 1.0,
+            scale_pivot: 0.0,
+            scale_divisor: 4096.0,
+            scale_output: 0.1,
+            min_hz: -1e9,
+            max_hz: 1e9,
+            init_total: 1160.0,
+            layers: &layers,
+            cmds: &commands,
+            profile_points: &profile,
+        };
+        let mut output = [0.0; 57];
+
+        render(&inputs, &mut output);
+
+        assert_eq!(output, expected);
     }
 
     // ---- Impulse decay termination -------------------------------------------
@@ -949,10 +1043,17 @@ mod tests {
             num_frames: 1001,
             filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0, // pass-through filter to observe raw decay
-            coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
+            coeffs: IIRFilterCoefficients {
+                b0: 0.0,
+                b1: 0.0,
+                b2: 0.0,
+                a1: 0.0,
+                a2: 0.0,
+            },
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
+            scale_pivot: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
             min_hz: -1e9,
@@ -966,7 +1067,11 @@ mod tests {
         render(&inp, &mut out);
         // The halving impulse decays geometrically; by the end the contribution
         // must have collapsed to ~0 (below termination threshold).
-        assert!(out[1000].abs() < 0.01, "impulse did not terminate: {}", out[1000]);
+        assert!(
+            out[1000].abs() < 0.01,
+            "impulse did not terminate: {}",
+            out[1000]
+        );
         // Frame 0 carries the initial impulse value (alpha=1 pass-through).
         assert!((out[0] - 10.0).abs() < 1e-12);
     }
@@ -995,10 +1100,17 @@ mod tests {
             num_frames: 1001,
             filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0,
-            coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
+            coeffs: IIRFilterCoefficients {
+                b0: 0.0,
+                b1: 0.0,
+                b2: 0.0,
+                a1: 0.0,
+                a2: 0.0,
+            },
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
+            scale_pivot: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
             min_hz: -1e9,
@@ -1010,11 +1122,15 @@ mod tests {
         };
         let mut out = vec![0.0; 1001];
         render(&inp, &mut out);
-        assert!(out[1000].abs() < 0.01, "exp impulse did not terminate: {}", out[1000]);
+        assert!(
+            out[1000].abs() < 0.01,
+            "exp impulse did not terminate: {}",
+            out[1000]
+        );
     }
 
     #[test]
-    fn dectalk_impulse_updates_as_a_sustained_step_plus_ramp() {
+    fn dectalk_nonreading_male_impulse_matches_step_plus_ramp() {
         let layers = vec![LayerDesc {
             layer_type: LAYER_IMPULSE,
             decay_mode: DECAY_STEP_PLUS_RAMP,
@@ -1026,7 +1142,7 @@ mod tests {
         }];
         let cmds = vec![CmdDesc {
             time: 0.0,
-            value: 109.0,
+            value: 191.0,
             duration_frames: 20.0,
             profile_start: 0,
             profile_count: 0,
@@ -1037,10 +1153,17 @@ mod tests {
             num_frames: 21,
             filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0,
-            coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
+            coeffs: IIRFilterCoefficients {
+                b0: 0.0,
+                b1: 0.0,
+                b2: 0.0,
+                a1: 0.0,
+                a2: 0.0,
+            },
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
+            scale_pivot: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
             min_hz: -1e9,
@@ -1057,9 +1180,8 @@ mod tests {
         assert_eq!(
             out,
             vec![
-                191.0, 205.0, 212.0, 215.0, 217.0, 218.0, 218.0, 218.0, 218.0,
-                218.0, 218.0, 218.0, 218.0, 218.0, 218.0, 218.0, 218.0, 218.0,
-                218.0, 218.0, 0.0,
+                335.0, 359.0, 371.0, 377.0, 380.0, 381.0, 382.0, 382.0, 382.0, 382.0, 382.0, 382.0,
+                382.0, 382.0, 382.0, 382.0, 382.0, 382.0, 382.0, 382.0, 0.0,
             ],
         );
     }
@@ -1077,8 +1199,20 @@ mod tests {
             cmd_count: 2,
         }];
         let cmds = vec![
-            CmdDesc { time: 0.0, value: 100.0, duration_frames: 0.0, profile_start: 0, profile_count: 0 },
-            CmdDesc { time: 0.0, value: 50.0, duration_frames: 0.0, profile_start: 0, profile_count: 0 },
+            CmdDesc {
+                time: 0.0,
+                value: 100.0,
+                duration_frames: 0.0,
+                profile_start: 0,
+                profile_count: 0,
+            },
+            CmdDesc {
+                time: 0.0,
+                value: 50.0,
+                duration_frames: 0.0,
+                profile_start: 0,
+                profile_count: 0,
+            },
         ];
         let inp = RenderInputs {
             frame_period: 0.005,
@@ -1086,10 +1220,17 @@ mod tests {
             num_frames: 11,
             filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0,
-            coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
+            coeffs: IIRFilterCoefficients {
+                b0: 0.0,
+                b1: 0.0,
+                b2: 0.0,
+                a1: 0.0,
+                a2: 0.0,
+            },
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
+            scale_pivot: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
             min_hz: 50.0,
@@ -1136,10 +1277,17 @@ mod tests {
             num_frames: 6,
             filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0,
-            coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
+            coeffs: IIRFilterCoefficients {
+                b0: 0.0,
+                b1: 0.0,
+                b2: 0.0,
+                a1: 0.0,
+                a2: 0.0,
+            },
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
+            scale_pivot: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
             min_hz: -1e9,
@@ -1192,10 +1340,17 @@ mod tests {
             num_frames,
             filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0, // pass-through to observe the raw ramp
-            coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
+            coeffs: IIRFilterCoefficients {
+                b0: 0.0,
+                b1: 0.0,
+                b2: 0.0,
+                a1: 0.0,
+                a2: 0.0,
+            },
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
+            scale_pivot: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
             min_hz: -1e9,
@@ -1217,12 +1372,20 @@ mod tests {
         // Linear during the ramp: frame f (1..=span) == delta * f / span.
         for f in 1..=(span as usize) {
             let expected = delta * (f as f64) / span;
-            assert!((out[f] - expected).abs() < 1e-9, "frame {f}: {} != {expected}", out[f]);
+            assert!(
+                (out[f] - expected).abs() < 1e-9,
+                "frame {f}: {} != {expected}",
+                out[f]
+            );
         }
         // Reaches the target exactly at the end of the span and HOLDS after.
         assert!((out[span as usize] - delta).abs() < 1e-9);
         for f in (span as usize)..num_frames {
-            assert!((out[f] - delta).abs() < 1e-9, "glide did not hold at frame {f}: {}", out[f]);
+            assert!(
+                (out[f] - delta).abs() < 1e-9,
+                "glide did not hold at frame {f}: {}",
+                out[f]
+            );
         }
     }
 
@@ -1252,10 +1415,17 @@ mod tests {
             num_frames: 5,
             filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0,
-            coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
+            coeffs: IIRFilterCoefficients {
+                b0: 0.0,
+                b1: 0.0,
+                b2: 0.0,
+                a1: 0.0,
+                a2: 0.0,
+            },
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
+            scale_pivot: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
             min_hz: -1e9,
@@ -1301,10 +1471,17 @@ mod tests {
             num_frames,
             filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0,
-            coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
+            coeffs: IIRFilterCoefficients {
+                b0: 0.0,
+                b1: 0.0,
+                b2: 0.0,
+                a1: 0.0,
+                a2: 0.0,
+            },
             has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 1.0,
+            scale_pivot: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
             min_hz: -1e9,
@@ -1317,10 +1494,18 @@ mod tests {
         let mut out = vec![0.0; num_frames];
         render(&inp, &mut out);
         for w in out.windows(2) {
-            assert!(w[1] <= w[0] + 1e-12, "not monotonically decreasing: {} -> {}", w[0], w[1]);
+            assert!(
+                w[1] <= w[0] + 1e-12,
+                "not monotonically decreasing: {} -> {}",
+                w[0],
+                w[1]
+            );
         }
         assert!((out[span as usize] - delta).abs() < 1e-9);
-        assert!((out[num_frames - 1] - delta).abs() < 1e-9, "did not hold the floor");
+        assert!(
+            (out[num_frames - 1] - delta).abs() < 1e-9,
+            "did not hold the floor"
+        );
     }
 
     #[test]
@@ -1342,7 +1527,7 @@ mod tests {
         }];
         let metadata = vec![
             1.0, 0.0, 0.0, // SI
-            1.0, 1.0, 0.0, // K
+            1.0, 1.0, 1.0, // initial K in the stressed syllable
             0.0, 0.0, 1.0, // EY
             1.0, 1.0, 0.0, // K
             0.0, 0.0, 0.0, // IX
@@ -1386,8 +1571,8 @@ mod tests {
         ];
         let inp = RenderInputs {
             frame_period: 0.0064,
-            total_duration: 0.0064 * 90.0,
-            num_frames: 90,
+            total_duration: 0.0064 * 82.0,
+            num_frames: 82,
             filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0,
             coeffs: IIRFilterCoefficients {
@@ -1397,9 +1582,10 @@ mod tests {
                 a1: 0.0,
                 a2: 0.0,
             },
-            has_scale: true,
+            has_scale: false,
             f0_minimum: 0.0,
             f0_scale_factor: 4100.0,
+            scale_pivot: 0.0,
             scale_divisor: 4096.0,
             scale_output: 0.1,
             min_hz: -1e9,
@@ -1409,23 +1595,20 @@ mod tests {
             cmds: &cmds,
             profile_points: &metadata,
         };
-        let mut out = vec![0.0; 90];
+        let mut out = vec![0.0; 82];
         render(&inp, &mut out);
 
-        assert!(
-            (out[28] - 0.10009765625).abs() < 1e-12,
-            "EY onset: {}",
-            out[28]
-        );
-        assert!(
-            (out[40] - 3.10302734375).abs() < 1e-12,
-            "EY frame 40: {}",
-            out[40]
-        );
-        assert!(
-            (out[62] - 2.10205078125).abs() < 1e-12,
-            "final K onset: {}",
-            out[62]
+        assert_eq!(
+            out,
+            vec![
+                9.0, 16.0, 22.0, 27.0, 31.0, 25.0, 20.0, 17.0, 13.0, 11.0, 9.0, 7.0,
+                6.0, 4.0, 3.0, 3.0, 2.0, 2.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 4.0, 7.0, 10.0, 13.0, 16.0, 19.0,
+                22.0, 24.0, 26.0, 28.0, 30.0, 31.0, 32.0, 32.0, 33.0, 33.0, 33.0,
+                33.0, 33.0, 32.0, 32.0, 31.0, 31.0, 30.0, 30.0, 29.0, 28.0, 27.0,
+                26.0, 26.0, 25.0, 23.0, 21.0, 19.0, 17.0, 15.0, 13.0, 12.0, 10.0,
+                8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 3.0, 2.0, 2.0, 3.0, 7.0, 11.0,
+            ],
         );
     }
 
@@ -1447,11 +1630,23 @@ mod tests {
             render_f0(
                 scalars.as_ptr(),
                 scalars.len(),
-                if layers.is_empty() { core::ptr::null() } else { layers.as_ptr() },
+                if layers.is_empty() {
+                    core::ptr::null()
+                } else {
+                    layers.as_ptr()
+                },
                 n_layers,
-                if cmds.is_empty() { core::ptr::null() } else { cmds.as_ptr() },
+                if cmds.is_empty() {
+                    core::ptr::null()
+                } else {
+                    cmds.as_ptr()
+                },
                 n_cmds,
-                if profiles.is_empty() { core::ptr::null() } else { profiles.as_ptr() },
+                if profiles.is_empty() {
+                    core::ptr::null()
+                } else {
+                    profiles.as_ptr()
+                },
                 n_profiles,
                 out.as_mut_ptr(),
                 num_frames,
@@ -1463,8 +1658,8 @@ mod tests {
     fn valid_scalars() -> [f64; 17] {
         // one-pole pass-through, no scale, wide clamp, frame_period 0.005.
         [
-            0.005, 0.05, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 4096.0, 0.1,
-            -1e9, 1e9, 0.0,
+            0.005, 0.05, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 4096.0, 0.1, -1e9, 1e9,
+            0.0,
         ]
     }
 
@@ -1477,6 +1672,95 @@ mod tests {
         let (status, out) = call_render_f0(&scalars, &layers, 1, &cmds, 1, &[], 0, 11);
         assert_eq!(status, RENDER_OK);
         assert_eq!(out[10], 100.0);
+    }
+
+    #[test]
+    fn renderer_does_not_fire_a_command_before_its_timestamp() {
+        // The DECtalk control loop consumes a command on the first frame whose
+        // clock has reached its timestamp. A command just after frame 1 must
+        // therefore wait for frame 2; nearest-frame rounding fires it early.
+        let scalars = [
+            0.0064, 0.0192, FILTER_ONE_POLE as f64, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 4096.0, 1.0, -1e9, 1e9, 0.0,
+        ];
+        let layers = [1.0, 0.0, 4.0, 0.01, 0.9, 0.0, 1.0];
+        let cmds = [0.0065, 100.0, 0.0, 0.0, 0.0];
+
+        let (status, out) = call_render_f0(&scalars, &layers, 1, &cmds, 1, &[], 0, 3);
+
+        assert_eq!(status, RENDER_OK);
+        assert_eq!(out, [0.0, 0.0, 100.0]);
+    }
+
+    #[test]
+    fn coefficient_2pole_uses_active_male_path_initial_state_scaling() {
+        // Active DECtalk 4.63 Ph_drwt02.c initializes both memories to
+        // f0basestart << F0SHFT, filters the full input, and returns
+        // f0out2 >> F0SHFT. Integer truncation makes this first cell 1159.
+        let scalars = [
+            0.0064,
+            0.0,
+            FILTER_COEFFICIENT_2POLE as f64,
+            2100.0 / 16384.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            4096.0,
+            0.1,
+            -1e9,
+            1e9,
+            1160.0,
+        ];
+        let layers = [1.0, 0.0, 4.0, 0.01, 0.9, 0.0, 1.0];
+        let cmds = [0.0, 1160.0, 0.0, 0.0, 0.0];
+
+        let (status, out) = call_render_f0(&scalars, &layers, 1, &cmds, 1, &[], 0, 1);
+
+        assert_eq!(status, RENDER_OK);
+        assert_eq!(out, [1159.0]);
+    }
+
+    #[test]
+    fn coefficient_2pole_matches_dectalk_output_phase_jitter_and_integer_scale() {
+        // DECtalk 4.63 Ph_drwt02.c starts timecos5/timecos3 at zero, advances
+        // them by 131/79, and adds mlsh1(cos[2] - cos[1], 700) = -1 to
+        // the filtered internal F0. Its following frac4mul is an arithmetic
+        // right shift, so 1100 + ((1298 - 1300) * 4100 >> 12) = 1097.
+        // The -lt output cell reflects the following completed F0 control update;
+        // after one discarded warm-up cell, the first four emitted jitter terms
+        // are -1, -1, -2, -2 internal units.
+        let scalars = [
+            0.0064,
+            0.0064,
+            FILTER_COEFFICIENT_2POLE as f64,
+            2100.0 / 16384.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1100.0,
+            4100.0,
+            4096.0,
+            0.1,
+            -1e9,
+            1e9,
+            1300.0,
+            1300.0,
+        ];
+        let layers = [1.0, 0.0, 4.0, 0.01, 0.9, 0.0, 1.0];
+        let cmds = [0.0, 1300.0, 0.0, 0.0, 0.0];
+
+        let (status, out) = call_render_f0(&scalars, &layers, 1, &cmds, 1, &[], 0, 4);
+
+        assert_eq!(status, RENDER_OK);
+        assert_eq!(out, [1097.0 * 0.1, 1097.0 * 0.1, 1096.0 * 0.1, 1096.0 * 0.1]);
     }
 
     #[test]
@@ -1572,6 +1856,9 @@ mod tests {
             )
         };
         assert_eq!(status, RENDER_ERR_CMD_RANGE);
-        assert!(out.iter().all(|&v| v == -12345.0), "out was modified on error");
+        assert!(
+            out.iter().all(|&v| v == -12345.0),
+            "out was modified on error"
+        );
     }
 }

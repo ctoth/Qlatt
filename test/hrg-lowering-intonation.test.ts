@@ -231,6 +231,146 @@ describe("HRG lowering layered intonation", () => {
     }
   });
 
+  it("filters time-zero persistent controls from the first output cell", () => {
+    const baseline = readFixture();
+    const sourceSegment = baseline.segments.find((segment) => (segment.params.AV ?? 0) > 0);
+    if (!sourceSegment) throw new Error("voiced fixture segment missing");
+    const segment = { ...sourceSegment, duration: 100, id: "voiced" };
+    const commands: BaselineCommand[] = [
+      {
+        id: "baseline",
+        layer: "baseline",
+        profilePoints: [1160, 1160],
+        timeMs: 0,
+        value: 0,
+      },
+      { id: "hat", layer: "hat", timeMs: 0, value: 100 },
+    ];
+    const delayed = lowerToFrames(
+      buildUtterance([segment], commands, baseline.policy),
+      baseline.policy,
+      { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
+    );
+    const baselineOnly = lowerToFrames(
+      buildUtterance([segment], commands.slice(0, 1), baseline.policy),
+      baseline.policy,
+      { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
+    );
+
+    const initialVoicedF0 = (frames: typeof delayed.frames) => frames
+      .filter((frame) => frame.segmentId === "voiced")
+      .slice(0, 5)
+      .map((frame) => frame.params.F0);
+    const deltas = initialVoicedF0(delayed.frames).map(
+      (f0, index) => f0 - (initialVoicedF0(baselineOnly.frames)[index] ?? f0),
+    );
+    expect(deltas[0]).toBeGreaterThan(0);
+    expect(deltas[0]).toBeLessThan(1);
+    expect(deltas.at(-1)).toBeGreaterThan(deltas[0] ?? 0);
+  });
+
+  it("keeps speech-relative F0 commands aligned when initial silence changes", () => {
+    const baseline = readFixture();
+    const sourceSegment = baseline.segments.find((segment) => (segment.params.AV ?? 0) > 0);
+    if (!sourceSegment) throw new Error("voiced fixture segment missing");
+    const segment = { ...sourceSegment, duration: 100, id: "voiced" };
+    const commands: BaselineCommand[] = [
+      {
+        id: "baseline",
+        layer: "baseline",
+        profilePoints: [1160, 1160],
+        timeMs: 0,
+        value: 0,
+      },
+      { id: "hat", layer: "hat", timeMs: 0, value: 100 },
+    ];
+    const withoutInitialSilence: LowerOptions = {
+      ...baseline.policy,
+      timeline: {
+        ...baseline.policy.timeline,
+        initial_silence_ms: {
+          ...baseline.policy.timeline.initial_silence_ms,
+          value: 0,
+        },
+      },
+    };
+
+    const voicedF0 = (policy: LowerOptions, activeCommands: BaselineCommand[]) => lowerToFrames(
+      buildUtterance([segment], activeCommands, policy),
+      policy,
+      { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
+    ).frames
+      .filter((frame) => frame.segmentId === "voiced")
+      .slice(0, 8)
+      .map((frame) => frame.params.F0);
+    const commandEffect = (policy: LowerOptions) => {
+      const withCommand = voicedF0(policy, commands);
+      const withoutCommand = voicedF0(policy, commands.slice(0, 1));
+      return withCommand.map((f0, index) => f0 - (withoutCommand[index] ?? f0));
+    };
+
+    const withSilence = commandEffect(baseline.policy);
+    const withoutSilence = commandEffect(withoutInitialSilence);
+    expect(withSilence).toHaveLength(withoutSilence.length);
+    withSilence.forEach((f0, index) => {
+      expect(Math.abs(f0 - (withoutSilence[index] ?? f0))).toBeLessThanOrEqual(0.11);
+    });
+  });
+
+  it("keeps the DECtalk baseline clock independent of terminal silence", () => {
+    const baseline = readFixture();
+    const sourceSegment = baseline.segments.find((segment) => (segment.params.AV ?? 0) > 0);
+    if (!sourceSegment) throw new Error("voiced fixture segment missing");
+    const segment = { ...sourceSegment, duration: 102.4, id: "voiced" };
+    const commands: BaselineCommand[] = [
+      {
+        id: "baseline",
+        layer: "baseline",
+        profilePoints: [1160, 950],
+        timeMs: 0,
+        value: 0,
+      },
+      {
+        durationFrames: 16,
+        id: "segmental",
+        layer: "segmental",
+        profilePoints: [0, 0, 0],
+        timeMs: 0,
+        value: 0,
+      },
+    ];
+    const withoutTerminalSilence: LowerOptions = {
+      ...baseline.policy,
+      timeline: {
+        ...baseline.policy.timeline,
+        final_silence_ms: {
+          ...baseline.policy.timeline.final_silence_ms,
+          value: 0,
+        },
+      },
+    };
+    const withLongTerminalSilence: LowerOptions = {
+      ...baseline.policy,
+      timeline: {
+        ...baseline.policy.timeline,
+        final_silence_ms: {
+          ...baseline.policy.timeline.final_silence_ms,
+          value: 600,
+        },
+      },
+    };
+
+    const voicedF0 = (policy: LowerOptions) => lowerToFrames(
+      buildUtterance([segment], commands, policy),
+      policy,
+      { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
+    ).frames
+      .filter((frame) => frame.segmentId === "voiced")
+      .map((frame) => frame.params.F0);
+
+    expect(voicedF0(withLongTerminalSilence)).toEqual(voicedF0(withoutTerminalSilence));
+  });
+
   it("rejects layered controls when the selected model is absent", () => {
     const baseline = readFixture();
     const utterance = buildUtterance(baseline.segments, baseline.commands, baseline.policy);

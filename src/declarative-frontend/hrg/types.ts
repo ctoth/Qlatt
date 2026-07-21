@@ -100,6 +100,7 @@ export interface TemporalAnchorWrite {
   readonly leftMarkId: string;
   readonly rightMarkId: string;
   readonly ratio?: number;
+  readonly offsetMs?: number;
   readonly version: number;
   readonly decisionId: string;
   readonly reason: string;
@@ -166,6 +167,7 @@ export type JournalOperation =
       readonly leftMarkId: string;
       readonly rightMarkId: string;
       readonly ratio: number;
+      readonly offsetMs?: number;
     }
   | {
       readonly kind: "resolve_mark_time";

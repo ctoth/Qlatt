@@ -83,17 +83,44 @@ const TEST_PHRASES = [
 // ---------------------------------------------------------------------------
 
 describe("dectalk-english end-to-end", () => {
-  it("emits DECtalk's reduced final-stress command for a single word", () => {
+  it("emits DECtalk's active citation-mode hat and stress commands for a single word", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const stressCommands = result.utterance.relation("Tilt").listItems()
+    const tiltCommands = result.utterance.relation("Tilt").listItems();
+    const hatRiseCommands = tiltCommands
+      .filter((item) => item.get("tag") === "f0_hat_rise");
+    const hatFallCommands = tiltCommands
+      .filter((item) => item.get("tag") === "f0_hat_fall");
+    const stressCommands = tiltCommands
       .filter((item) => item.get("layer") === "stress");
 
+    expect(hatRiseCommands.map((item) => item.get("value"))).toEqual([190]);
+    expect(hatFallCommands).toHaveLength(0);
+    expect(result.utterance.temporalAnchor(hatRiseCommands[0])).toEqual(
+      expect.objectContaining({ offsetMs: -51.2 }),
+    );
     expect(stressCommands).toHaveLength(1);
-    expect(stressCommands[0].get("value")).toBe(109);
+    expect(stressCommands[0].get("value")).toBe(191);
     expect(stressCommands[0].get("duration_frames")).toBe(20);
+    expect(result.utterance.temporalAnchor(stressCommands[0])).toEqual(
+      expect.objectContaining({ offsetMs: -51.2 }),
+    );
+  });
+
+  it("uses DECtalk's short declarative baseline table for cake", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const baseline = result.utterance.relation("PhraseCommand").listItems()
+      .find((item) => item.get("layer") === "baseline");
+
+    expect(baseline?.get("profile_points")).toEqual([
+      1160, 1150, 1140, 1152, 1132, 1140, 1130, 1124, 1110,
+      1100, 1080, 1060, 1040, 1020, 980, 960, 950,
+    ]);
   });
 
   it("emits the exact DECtalk segmental F0 controller stream for cake", () => {
@@ -111,10 +138,29 @@ describe("dectalk-english end-to-end", () => {
 
     expect(segmentalCommands).toEqual([
       { value: 50, durationFrames: 4, profilePoints: [1, 0, 0] },
-      { value: 0, durationFrames: 17, profilePoints: [1, 1, 0] },
+      { value: 0, durationFrames: 17, profilePoints: [1, 1, 1] },
       { value: 50, durationFrames: 37, profilePoints: [0, 0, 1] },
       { value: 0, durationFrames: 14, profilePoints: [1, 1, 0] },
       { value: 70, durationFrames: 6, profilePoints: [0, 0, 0] },
+    ]);
+  });
+
+  it("matches DECtalk's native voiced F0 cells through cake's EY", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const f0Hz10 = Array.from({ length: 28 }, (_, frameIndex) => {
+      const time = (29 + frameIndex) * 0.0064;
+      const f0 = result.track.filter((frame) => frame.time <= time).at(-1)?.params.F0;
+      return Math.round((f0 ?? Number.NaN) * 10);
+    });
+
+    expect(f0Hz10).toEqual([
+      1361, 1379, 1395, 1403, 1404, 1400, 1394,
+      1385, 1371, 1358, 1343, 1328, 1313, 1297,
+      1282, 1269, 1254, 1242, 1229, 1219, 1207,
+      1197, 1187, 1179, 1171, 1164, 1157, 1149,
     ]);
   });
 

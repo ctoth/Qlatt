@@ -48,6 +48,7 @@ type LayeredFilterConfig = {
 type SpeakerScaleConfig = {
   minimum_param: string;
   range_param: string;
+  pivot: number;
   divisor: number;
   output_scale: number;
 };
@@ -524,6 +525,7 @@ function renderLayeredF0(
   const scale = model.speaker_scale;
   const f0Minimum = scale ? resolveSpeakerNumber(speakerParams, scale.minimum_param) : 0;
   const f0ScaleFactor = scale ? resolveSpeakerNumber(speakerParams, scale.range_param) : 1;
+  const scalePivot = scale ? requireFiniteNumber(scale.pivot, "f0_model.speaker_scale.pivot") : 0;
   const divisor = scale ? requirePositiveNumber(scale.divisor, "f0_model.speaker_scale.divisor") : 1;
   const outputScale = scale
     ? requirePositiveNumber(scale.output_scale, "f0_model.speaker_scale.output_scale")
@@ -539,13 +541,24 @@ function renderLayeredF0(
     if (!layerCommands) throw new Error(`E_HRG_LOWER_F0_MODEL: unknown layer '${command.layer}'`);
     layerCommands.push(command);
   }
+  const dectalkControllerFrames = layerNames.reduce((total, name) => {
+    if (model.layers[name]?.type !== "dectalk_segmental") return total;
+    return total + (commandsByLayer.get(name) ?? []).reduce(
+      (layerTotal, command) => layerTotal + (command.durationFrames ?? 0),
+      0,
+    );
+  }, 0);
+  // Ph_drwt02.c clocks its 17-point baseline over tcumdur, the controller
+  // allophones through the dummy carrier; terminal silence is not in tcumdur.
+  const profileDurationSec = dectalkControllerFrames > 0
+    ? dectalkControllerFrames * framePeriod
+    : totalDurationSec;
   let initialTotal = 0;
   for (const name of layerNames) {
     const config = model.layers[name];
     if (!config) continue;
     for (const command of commandsByLayer.get(name) ?? []) {
       if (command.time > framePeriod * 0.5) break;
-      if (config.type === "persistent") initialTotal += command.value;
       if (config.type === "profile" && command.profilePoints) {
         initialTotal += interpolateProfile(command.profilePoints, 0);
       }
@@ -620,7 +633,7 @@ function renderLayeredF0(
 
   const scalars = [
     framePeriod,
-    totalDurationSec,
+    profileDurationSec,
     coefficientTwoPoleFilterMode,
     resolvedAlpha,
     0, 0, 0, 0, 0,
@@ -632,6 +645,7 @@ function renderLayeredF0(
     minHz,
     maxHz,
     initialTotal,
+    scalePivot,
   ];
   const exports = getF0FilterExports();
   const allocate = (values: readonly number[]): { ptr: number; len: number } => {
@@ -1314,6 +1328,7 @@ export function lowerToFrames(
       );
       throw new Error("E_HRG_LOWER_F0_MODEL: layered_additive requires the selected F0 model");
     }
+    const f0Model = context.f0Model;
     const commands = f0ControlItems.map((item): F0LayerCommand => {
       const timeMs = utterance.resolveAnchorTime(item);
       const layer = item.get("layer");
@@ -1341,9 +1356,17 @@ export function lowerToFrames(
         ? rawProfilePoints.filter((entry): entry is number => typeof entry === "number" && Number.isFinite(entry))
         : undefined;
       const tag = item.get("tag");
+      const layerType = f0Model.layers[layer]?.type;
+      // Phrase commands are timed on Ph_inton2.c's speech clock, while
+      // Ph_drwt02.c consumes them on the output clock that includes the
+      // initial silence. Profiles and segmental commands already originate on
+      // that output clock and must not be projected a second time.
+      const outputTimeMs = layerType === "persistent" || layerType === "impulse" || layerType === "glide"
+        ? timeMs + initialSilenceMs
+        : timeMs;
       return {
         layer,
-        time: Math.max(0, timeMs) / 1000,
+        time: Math.max(0, outputTimeMs) / 1000,
         value,
         ...(durationFrames != null ? { durationFrames } : {}),
         ...(profilePoints && profilePoints.length > 0 ? { profilePoints } : {}),
@@ -1354,7 +1377,7 @@ export function lowerToFrames(
     try {
       rendered = renderLayeredF0(
         commands,
-        context.f0Model,
+        f0Model,
         (initialSilenceMs + segmentTotalMs + finalSilenceMs) / 1000,
         context.speakerParams,
       );
@@ -1367,9 +1390,9 @@ export function lowerToFrames(
       throw error;
     }
     const commandWrites = f0ControlItems
-      .map((item) => ({
+      .map((item, index) => ({
         decisionId: item.latestWrite("value")?.decisionId,
-        timeMs: utterance.resolveAnchorTime(item),
+        timeMs: commands[index]?.time == null ? undefined : commands[index].time * 1000,
       }))
       .filter((entry): entry is { decisionId: string; timeMs: number } => (
         typeof entry.decisionId === "string" && typeof entry.timeMs === "number" && Number.isFinite(entry.timeMs)

@@ -1,8 +1,8 @@
 # DECtalk voice "Paul" — converted from DECtalk 4.63 voice tables.
 # Imported by scripts/dt1-import-voices.ts from the canonical converted
 # source (dectalk/463 ph_vset.c / Ph_drwt02.c voice parameter set).
-# f0_lp_filter_alpha is derived: f0_lp_filter / 4096
-# (DECtalk 4.63 Ph_drwt02.c frac4mul coefficient).
+# f0_lp_filter_alpha is derived: f0_lp_filter / 16384
+# (DECtalk 4.63 Ph_drwt02.c signed Q14 coefficient).
 #
 # F4-F8, per-voice gains (GF/GH/GV/GN/G1-G4/LO), and glottal params
 # (AGO/AGVO/AGUO/UNVOW/CHINK, smoothness/breathiness/richness/...) are
@@ -19,8 +19,8 @@ spectral_tilt_offset_db: 0
 f0_minimum: 1100
 f0_scale_factor: 4100
 f0_lp_filter: 2100
-f0_lp_filter_alpha: 0.5126953125
-hat_rise_hz10: 180
+f0_lp_filter_alpha: 0.128173828125
+hat_rise_hz10: 120
 scale_str_rise: 32
 assertiveness: 2870
 baseline_fall_hz10: 180

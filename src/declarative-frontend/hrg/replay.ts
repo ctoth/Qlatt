@@ -144,6 +144,7 @@ export function replayJournal(
             operation.leftMarkId,
             operation.rightMarkId,
             operation.ratio,
+            operation.offsetMs,
           );
           break;
         case "resolve_mark_time":

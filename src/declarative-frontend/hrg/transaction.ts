@@ -29,6 +29,7 @@ type StagedOperation =
       leftMarkId: string;
       rightMarkId: string;
       ratio: number;
+      offsetMs?: number;
     }
   | { kind: "resolve_mark_time"; markId: string; timeMs: number };
 
@@ -180,9 +181,10 @@ export class HrgTransaction {
     leftMarkId: string,
     rightMarkId: string,
     ratio: number,
+    offsetMs?: number,
   ): this {
     this.assertOpen();
-    this.operations.push({ kind: "anchor_point", item, leftMarkId, rightMarkId, ratio });
+    this.operations.push({ kind: "anchor_point", item, leftMarkId, rightMarkId, ratio, offsetMs });
     return this;
   }
 
@@ -274,6 +276,9 @@ export class HrgTransaction {
         if (!Number.isFinite(operation.ratio) || operation.ratio < 0 || operation.ratio > 1) {
           throw new Error("E_HRG_TEMPORAL_RATIO");
         }
+        if (operation.offsetMs != null && !Number.isFinite(operation.offsetMs)) {
+          throw new Error("E_HRG_TEMPORAL_OFFSET");
+        }
         prepared.push({
           journal: Object.freeze({
             kind: "anchor_point",
@@ -281,6 +286,7 @@ export class HrgTransaction {
             leftMarkId: operation.leftMarkId,
             rightMarkId: operation.rightMarkId,
             ratio: operation.ratio,
+            ...(operation.offsetMs != null ? { offsetMs: operation.offsetMs } : {}),
           }),
           commit: () => [this.utterance.anchorPoint(
             operation.item,
@@ -288,6 +294,7 @@ export class HrgTransaction {
             operation.rightMarkId,
             operation.ratio,
             input,
+            operation.offsetMs,
           ).decisionId],
         });
         continue;

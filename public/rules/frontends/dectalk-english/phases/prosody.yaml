@@ -4,16 +4,15 @@ rules:
   # DECtalk Hat-Pattern F0 Model (Klatt 1982)
   #
   # Generates F0 layer commands for the layered additive F0 engine.
-  # Five components:
-  #   1. Baseline declination (profile layer) -- 17-point piecewise-linear
+  # Four components:
+  #   1. Baseline declination (profile layer) -- 17-point integer source recurrence
   #   2. Hat rise (persistent/hat layer) -- STEP at first stressed vowel
-  #   3. Hat fall (persistent/hat layer) -- negative STEP at last stressed vowel
-  #   4. Stress impulses (impulse/stress layer) -- at each stressed vowel
-  #   5. Boundary reset (persistent/hat layer) -- reset at SIL boundaries
+  #   3. Stress impulses (impulse/stress layer) -- at each stressed vowel
+  #   4. Boundary reset (persistent/hat layer) -- reset at SIL boundaries
   #
   # All values are in DECtalk internal units (Hz*10).  Speaker scaling in
   # renderLayeredF0() converts to final Hz via the DECtalk formula:
-  #   Hz = (f0minimum + (total - f0minimum) * f0scalefac / 4096) / 10
+  #   Hz = (f0minimum + frac4mul(total - 1300, f0scalefac)) / 10
   #
   # Citations:
   #   - Klatt 1982 "The KLATTalk text-to-speech conversion system"
@@ -124,7 +123,7 @@ rules:
   # or SIL is either SIL or not found (meaning no prior stressed vowel in
   # this phrase).
   #
-  # Source: ph_inton1.c Rule 1 (FHAT_BEGINS -> STEP command).
+  # Source: Ph_inton2.c Rule 1 (citation-mode FHAT_BEGINS -> STEP command).
   # ph_aloph.c (FHAT_BEGINS placed on first stressed syllabic in phrase).
   #
   # Citations:
@@ -147,118 +146,32 @@ rules:
         look_back_where(current, 100, '(candidate.type == "vowel" && has(candidate.stress) && candidate.stress == 1) || candidate.phoneme == "SIL"')
       is_hat_begins: >-
         nearest_back == null || nearest_back.phoneme == "SIL"
-      rise_hz: >-
-        word_count() < params.policy.f0.short_phrase_hat_word_limit
-        ? params.policy.f0.hat_rise_hz / params.policy.f0.short_phrase_hat_divisor
-        : params.policy.f0.hat_rise_hz
-    constraint: is_hat_begins
-    insert:
-      relation: Tilt
-      layer: hat
-      at: at_sync(current.sync_left)
-      value: rise_hz
-      # Smooth GLIDE onset of the hat accent: ramp to the rise target over
-      # hat_rise_glide_frames rather than an instantaneous step (DECtalk renders
-      # the hat rise as a GLIDE, ph_inton1.c:715). The hat layer is type: glide,
-      # so this command ramps then holds; fall/reset use span 0 (instant).
-      duration_frames: params.policy.f0.hat_rise_glide_frames
-      tag: f0_hat_rise
-    citations:
-      - "DECtalk 4.63 ph_inton1.c:713-715 (FHAT_BEGINS hat rise; GLIDE form length 30)"
-      - "DECtalk 4.63 ph_inton1.c (number_words < 3 quarters all hat gestures)"
-      - "Klatt 1982 (hat rise at first accent in phrase)"
-
-  # --------------------------------------------------------------------------
-  # Rule 3: Hat Fall (negative STEP into hat layer)
-  #
-  # Fires at the last stressed vowel in each phrase.  Detection: current is
-  # a primary-stressed vowel AND looking forward, the nearest stressed vowel
-  # or SIL is either SIL or not found (meaning no later stressed vowel in
-  # this phrase).
-  #
-  # The fall magnitude = hat_rise + final_fall (returns to baseline AND goes
-  # below by final_fall amount).
-  #
-  # Source: ph_inton1.c Rule 3 (FHAT_ENDS -> negative STEP).
-  #
-  # Citations:
-  #   - DECtalk 4.63 ph_inton1.c Rule 3 (hat fall generation)
-  #   - Klatt 1982 (hat fall at last accent + phrase-final lowering)
-  # --------------------------------------------------------------------------
-  dectalk_hat_fall:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.type == "vowel"
-        && has(current.stress) && current.stress == 1
-    define:
-      # Look forward for the nearest stressed vowel or SIL boundary.
-      # If the result is SIL or null, current is the last stressed vowel.
       nearest_forward: >-
         look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
       is_hat_ends: >-
         nearest_forward == null || nearest_forward.phoneme == "SIL"
-      # Clause type of the boundary this hat ends into.  When is_hat_ends is
-      # true via the SIL branch, nearest_forward IS the terminal SIL, whose
-      # punctuationSymbol names the clause type ('.', '!', '?', ',', ';', ':').
-      # Null (utterance-internal SIL or no SIL) falls through to declarative.
-      # DECtalk 4.63 ph_inton1.c keys f0fall on the boundary feature
-      # (FQUENEXT/FCBNEXT/FPERNEXT) of the clause-final stressed vowel.
-      terminal: >-
-        nearest_forward != null && nearest_forward.phoneme == "SIL"
-        && has(nearest_forward.punctuationSymbol)
-        ? nearest_forward.punctuationSymbol
-        : null
-      # Clause-dependent terminal fall depth (DECtalk internal Hz*10):
-      #   '?' -> F0_QSYLL_FALL = 80   (smallest; the rise gesture dominates)
-      #   ',' -> F0_COMMA_FALL = 120
-      #   ';'/':' -> F0_NON_FINAL_FALL = 150
-      #   '.'/'!'/null -> F0_FINAL_FALL = 180  (largest)
-      # Source: ph_inton1.c:1125 (final), :1137 (comma), :1142 (non-final),
-      # :1210 (question).
-      clause_fall_hz: >-
-        terminal == "?" ? params.policy.f0.question_fall_hz
-        : terminal == "," ? params.policy.f0.comma_fall_hz
-        : (terminal == ";" || terminal == ":") ? params.policy.f0.non_final_fall_hz
-        : params.policy.f0.final_fall_hz
-      scaled_clause_fall_hz: >-
-        clause_fall_hz * params.policy.speaker.assertiveness / params.policy.f0.assertiveness_divisor
-      hat_size_hz: >-
-        word_count() < params.policy.f0.short_phrase_hat_word_limit
-        ? params.policy.f0.hat_rise_hz / params.policy.f0.short_phrase_hat_divisor
-        : params.policy.f0.hat_rise_hz
-      has_following_sonorant: >-
-        next != null
-        && (next.type == "vowel" || next.type == "liquid" || next.type == "nasal" || next.type == "glide")
-      fall_delay_ms: >-
-        has_following_sonorant
-        ? params.policy.f0.hat_fall_following_sonorant_delay_ms
-        : (
-            current.duration - params.policy.f0.hat_fall_early_offset_ms < params.policy.f0.hat_fall_min_delay_ms
-            ? params.policy.f0.hat_fall_min_delay_ms
-            : current.duration - params.policy.f0.hat_fall_early_offset_ms
-          )
-      fall_ratio: >-
-        current.duration > 0 ? fall_delay_ms / current.duration : 0
-      # Total fall: hat_rise (cancel the rise) + clause_fall (below baseline,
-      # depth selected by terminal clause type per DECtalk f0fall).
-      fall_hz: >-
-        hat_size_hz + scaled_clause_fall_hz
-    constraint: is_hat_ends
+      prior_vowel_or_boundary: >-
+        look_back_where(current, 100, 'candidate.type == "vowel" || candidate.phoneme == "SIL"')
+      is_first_syllable: >-
+        prior_vowel_or_boundary == null || prior_vowel_or_boundary.phoneme == "SIL"
+      rise_offset_ms: >-
+        is_hat_ends ? -params.policy.f0.hat_rise_same_vowel_early_offset_ms : 0
+      rise_hz: >-
+        params.policy.f0.hat_rise_hz
+        + (is_first_syllable ? params.policy.f0.hat_first_syllable_bonus_hz : 0)
+    constraint: is_hat_begins
     insert:
       relation: Tilt
       layer: hat
-      at: >-
-        at_ratio(current, fall_ratio)
-      value: "-(fall_hz)"
-      tag: f0_hat_fall
+      at: at_offset(current.sync_left, rise_offset_ms)
+      value: rise_hz
+      # The citation-mode generator emits a STEP. The hat layer is persistent;
+      # duration_frames preserves the source descriptor length for diagnostics.
+      duration_frames: params.policy.f0.hat_rise_glide_frames
+      tag: f0_hat_rise
     citations:
-      - "DECtalk 4.63 ph_inton1.c Rule 3 (FHAT_ENDS timing and negative STEP)"
-      - "DECtalk 4.63 ph_inton1.c:1125,:1137,:1142,:1210 (clause-type f0fall: final 180 / comma 120 / non-final 150 / question 80)"
-      - "DECtalk 4.63 ph_inton1.c (f0fall scaled by assertiveness before adding hatsize)"
-      - "DECtalk 4.63 ph_inton1.c (number_words < 3 quarters all hat gestures)"
-      - "Klatt 1982 (hat fall: cancel rise + phrase-final lowering)"
+      - "DECtalk 4.63 Ph_inton2.c Rule 1 (citation-mode FHAT_BEGINS STEP, Paul HR*10 plus first-syllable 70)"
+      - "Klatt 1982 (hat rise at first accent in phrase)"
 
   # --------------------------------------------------------------------------
   # Rule 3b: Question Terminal Rise (boundary IMPULSE pair)
@@ -462,10 +375,9 @@ rules:
   # Rule 4: Stress Impulse (sustained step-plus-ramp into stress layer)
   #
   # Fires at every primary-stressed vowel.  Inserts an impulse whose magnitude
-  # is stress_level_primary + a phrase-position component. For a single word,
-  # DECtalk applies its integer one-word reduction and then subtracts
-  # Reduce_last=50 for the final stress:
-  # (71 + 140) - ((71 + 140) >> 2) - 50 = 109.
+  # is stress_level_primary + a phrase-position component. Citation-mode
+  # Ph_inton2.c leaves its one-word reduction commented out and subtracts 50
+  # for the final stress: 81 + 160 - 50 = 191.
   #
   # The impulse lasts stress_impulse_duration_frames (20 frames = 128ms at
   # DECtalk's 6.4ms controller cadence) using the US non-reading IMPULSE
@@ -475,11 +387,11 @@ rules:
   # f0_mphrase_position[], which requires stateful counting.  We use a fixed
   # average of the first 4 entries: (140+90+60+40)/4 = 82.5 Hz*10.
   #
-  # Source: ph_inton1.c Rule 2 (stress impulse at FSTRESS_1) and the one-word
-  # reduction branch; Ph_drwt02.c IMPULSE case (sustained step-plus-ramp).
+  # Source: Ph_inton2.c Rule 2 (citation-mode stress impulse at FSTRESS_1);
+  # Ph_drwt02.c IMPULSE case (sustained step-plus-ramp).
   #
   # Citations:
-  #   - DECtalk 4.63 ph_inton1.c Rule 2 (stress impulse generation)
+  #   - DECtalk 4.63 Ph_inton2.c Rule 2 (citation-mode stress impulse)
   #   - Klatt 1982 (stress component: impulse at stressed syllables)
   # --------------------------------------------------------------------------
   dectalk_stress_impulse:
@@ -498,6 +410,12 @@ rules:
         params.policy.f0.stress_phrase_position_hz
       scale_factor: >-
         params.policy.speaker.scale_str_rise / 32.0
+      nearest_forward: >-
+        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
+      is_final_stress: >-
+        nearest_forward == null || nearest_forward.phoneme == "SIL"
+      stress_offset_ms: >-
+        is_final_stress ? -params.policy.f0.stress_final_early_offset_ms : 0
       impulse_hz: >-
         word_count() == 1
         ? params.policy.f0.stress_single_word_final_primary_hz * scale_factor
@@ -505,12 +423,12 @@ rules:
     insert:
       relation: Tilt
       layer: stress
-      at: at_sync(current.sync_left)
+      at: at_offset(current.sync_left, stress_offset_ms)
       value: impulse_hz
       duration_frames: params.policy.f0.stress_impulse_duration_frames
       tag: f0_stress_impulse
     citations:
-      - "DECtalk 4.63 ph_inton1.c Rule 2 one-word and final-stress branches (primary stress command 109)"
+      - "DECtalk 4.63 Ph_inton2.c Rule 2 (citation-mode first primary stress 81+160, final reduction 50, command 191)"
       - "DECtalk 4.63 Ph_drwt02.c US non-reading IMPULSE case (duration-controlled step-plus-ramp tarimp)"
       - "Klatt 1982 (stress-component F0 impulse)"
 
@@ -558,10 +476,10 @@ rules:
       at: at_sync(current.sync_left)
       value: params.policy.f0.segmental.k_target
       duration_frames: params.policy.f0.segmental.initial_k_frames
-      profile_points: [1, 1, 0]
+      profile_points: [1, 1, 1]
       tag: f0_segmental_initial_k
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (voiceless unstressed plosive fast path)"
+      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (voiceless stressed plosive fast path)"
       - "DECtalk 4.63 -lt oracle controller trace for cake. (initial K duration 17 frames)"
 
   dectalk_segmental_k_ey_k_vowel:

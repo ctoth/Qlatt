@@ -549,6 +549,7 @@ export class Utterance {
     leftMarkId: string,
     rightMarkId: string,
     ratio: number | undefined,
+    offsetMs: number | undefined,
     input: TemporalWriteInput,
   ): TemporalAnchorWrite {
     const left = this.axis.get(leftMarkId);
@@ -559,6 +560,9 @@ export class Utterance {
     }
     if (kind === "point" && (ratio == null || !Number.isFinite(ratio) || ratio < 0 || ratio > 1)) {
       throw new Error("E_HRG_TEMPORAL_RATIO: point ratio must be finite and within [0, 1]");
+    }
+    if (offsetMs != null && !Number.isFinite(offsetMs)) {
+      throw new Error("E_HRG_TEMPORAL_OFFSET: point offset must be finite");
     }
     const history = this.anchorHistoryByItemId.get(item.id) ?? [];
     const prior = history[history.length - 1];
@@ -581,6 +585,7 @@ export class Utterance {
       leftMarkId,
       rightMarkId,
       ...(ratio != null ? { ratio } : {}),
+      ...(offsetMs != null ? { offsetMs } : {}),
       version: history.length,
       decisionId: decision.id,
       reason: decision.reason,
@@ -600,7 +605,7 @@ export class Utterance {
     rightMarkId: string,
     input: TemporalWriteInput,
   ): TemporalAnchorWrite {
-    return this.stampAnchor(item, "interval", leftMarkId, rightMarkId, undefined, input);
+    return this.stampAnchor(item, "interval", leftMarkId, rightMarkId, undefined, undefined, input);
   }
 
   anchorPoint(
@@ -609,8 +614,9 @@ export class Utterance {
     rightMarkId: string,
     ratio: number,
     input: TemporalWriteInput,
+    offsetMs?: number,
   ): TemporalAnchorWrite {
-    return this.stampAnchor(item, "point", leftMarkId, rightMarkId, ratio, input);
+    return this.stampAnchor(item, "point", leftMarkId, rightMarkId, ratio, offsetMs, input);
   }
 
   temporalAnchor(item: Item): TemporalAnchorWrite | undefined {
@@ -665,7 +671,7 @@ export class Utterance {
     const right = this.axis.getMarkTime(anchor.rightMarkId);
     if (left == null || right == null) return null;
     return anchor.kind === "point"
-      ? left + (right - left) * (anchor.ratio ?? 0)
+      ? left + (right - left) * (anchor.ratio ?? 0) + (anchor.offsetMs ?? 0)
       : left;
   }
 

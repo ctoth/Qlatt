@@ -360,7 +360,6 @@ phases:
       - dectalk_short_declarative_baseline_declination
       - dectalk_baseline_declination
       - dectalk_hat_rise
-      - dectalk_hat_fall
       - dectalk_question_dip
       - dectalk_question_rise
       - dectalk_comma_rise1

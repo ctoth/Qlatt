@@ -131,7 +131,7 @@ f0_model:
     # DECtalk 4.63 Ph_drwt02.c filter_commands() cascades two first-order poles
     # using the speaker's native F0 smoothing coefficient, normalized to [0, 1].
     alpha_param: policy.speaker.f0_lp_filter_alpha.value
-    default_alpha: 0.5126953125
+    default_alpha: 0.128173828125
   layers:
     baseline:
       type: profile
@@ -169,13 +169,15 @@ f0_model:
   combine: sum
   # Speaker scaling: converts internal Hz*10 units to final Hz using the
   # DECtalk formula:
-  #   f0prime = f0minimum + frac4mul(f0prime - f0minimum, f0scalefac)
+  #   f0prime = f0minimum + frac4mul(f0prime - 1300, f0scalefac)
   #   Hz = f0prime / 10
   # The minimum_param and range_param fields reference parameters.policy.speaker.
   # Citation: DECtalk 4.63 Ph_drwt02.c (speaker-dependent F0 scaling)
   speaker_scale:
     minimum_param: f0_minimum
     range_param: f0_scale_factor
+    # Fixed reference pitch in the active male renderer.
+    pivot: 1300
     # DECtalk frac4mul(x,y) = (x*y) >> 12 = (x*y) / 4096.
     divisor: 4096
     # DECtalk stores F0 internally as Hz*10; divide by 10 for output Hz.
@@ -330,7 +332,7 @@ parameters:
       # All F0 policy values are in DECtalk internal units (Hz*10), matching
       # the values used by Ph_drwt02.c and ph_inton1.c.  Speaker scaling
       # converts these to final Hz via:
-      #   Hz = (f0minimum + (val - f0minimum) * f0scalefac / 4096) / 10
+      #   Hz = (f0minimum + (val - 1300) * f0scalefac / 4096) / 10
       #
       # Baseline declination profile: Ph_drwt02.c f0basetypes[0][] (declarative).
       # 17 equidistant points spanning the utterance duration.
@@ -352,12 +354,12 @@ parameters:
         - 980
         - 952
         - 863
-      # Hat rise (internal Hz*10 units).
-      # Paul: HR=18, general path -> size_hat_rise = HR*10 = 180.
-      hat_rise_hz: 180
-      # DECtalk quarters all hat gestures for short phrases
-      # (pDph_t->number_words < 3) before emitting the F0 command.
-      # Source: ph_inton1.c around the FHAT_BEGINS command path.
+      # Citation-mode hat rise (internal Hz*10 units).
+      # Paul: HR=12, general ph_vset.c path -> size_hat_rise = HR*10 = 120.
+      # Ph_inton2.c adds 70 when the stressed nucleus is in the first syllable.
+      hat_rise_hz: 120
+      hat_first_syllable_bonus_hz: 70
+      # Retained for the classic reading-mode/reset paths below.
       short_phrase_hat_word_limit: 3
       short_phrase_hat_divisor: 4
       # Final fall below baseline at declarative sentence end (internal Hz*10).
@@ -373,6 +375,11 @@ parameters:
       # DECtalk 4.63 ph_inton1.c Rule 3:
       # if sonorants follow the nucleus, delay the fall by 90 ms instead.
       hat_fall_following_sonorant_delay_ms: 90
+      # The citation-mode command clock begins at -6 frames, then applies the
+      # first-syllable hat's -2-frame delay: -8 native 6.4 ms frames total.
+      # The immediately following final-stress command clamps to that timestamp.
+      hat_rise_same_vowel_early_offset_ms: 51.2
+      stress_final_early_offset_ms: 51.2
       # Non-final clause boundary fall (internal Hz*10).
       # Source: ph_inton1.c F0_NON_FINAL_FALL = 150.
       non_final_fall_hz: 150
@@ -403,11 +410,8 @@ parameters:
       # Gesture IMPULSE length in native DECtalk control frames.
       # Source: ph_inton1.c:1352 (make_f0_command ... length 24).
       boundary_gesture_duration_frames: 24
-      # Hat-rise GLIDE span in native DECtalk control frames. DECtalk renders the
-      # hat rise as a GLIDE (linear F0 movement to the hat target) over 30 frames
-      # rather than an instantaneous step, giving a smooth onset of the accent.
-      # Source: ph_inton1.c:715 (make_f0_command GLIDE, hatsize, length 30).
-      hat_rise_glide_frames: 30
+      # Citation-mode Ph_inton2.c emits the US hat rise as a STEP with length 15.
+      hat_rise_glide_frames: 15
       # Question terminal-rise GLIDE span in native DECtalk control frames. The
       # +451 yes/no rise is rendered as a GLIDE that climbs to the target over
       # the final vowel rather than a transient impulse, so the contour rises
@@ -416,20 +420,16 @@ parameters:
       # allodurs[nphon]; ~24 control frames at the 6.4 ms cadence for a ~150 ms
       # final vowel). # engineering span estimate (final-vowel-length proxy)
       question_rise_glide_frames: 24
-      # Stress impulse magnitudes (internal Hz*10 units).
-      # Source: ph_inton1.c f0_mstress_level[] = {1, 71, 31, 281}.
-      stress_level_primary_hz: 71
-      stress_level_secondary_hz: 31
-      stress_level_emphasis_hz: 281
-      # Exact one-word final-primary command after DECtalk's integer reduction
-      # and final-stress reduction:
-      # (71 + 140) - ((71 + 140) >> 2) - 50 = 109.
-      # Source: ph_inton1.c one-word and FHAT_ENDS/FPERNEXT branches.
-      stress_single_word_final_primary_hz: 109
-      # Fixed phrase-position impulse component (internal Hz*10 units).
-      # Simplified from f0_mphrase_position[] = {140,90,60,40,10,10,10}.
-      # Using average of first 4 positions: (140+90+60+40)/4 = 82.5.
-      stress_phrase_position_hz: 82.5
+      # Citation-mode US stress magnitudes (internal Hz*10 units).
+      # Source: Ph_inton2.c us_f0_mstress_level[] and
+      # us_f0_mphrase_position[].
+      stress_level_primary_hz: 81
+      stress_level_secondary_hz: 61
+      stress_level_emphasis_hz: 261
+      # First primary stress: 81 + 160; phrase-final reduction: -50.
+      # The single-word reduction in Ph_inton2.c is commented out.
+      stress_single_word_final_primary_hz: 191
+      stress_phrase_position_hz: 160
       # Stress impulse duration in native DECtalk control frames.
       # Source: ph_inton1.c make_f0_command(... IMPULSE, ..., 20, ...).
       stress_impulse_duration_frames: 20
@@ -947,10 +947,10 @@ parameters:
         value: 2100
         citations: ["DECtalk 4.63 Paul 1500+15*QU, ph_vset.c general path"]
       f0_lp_filter_alpha:
-        value: 0.5126953125
-        citations: ["DECtalk 4.63 Ph_drwt02.c filter coefficient 2100/4096 (Paul)"]
+        value: 0.128173828125
+        citations: ["DECtalk 4.63 Ph_drwt02.c filter coefficient 2100/16384 (Paul)"]
       hat_rise_hz10:
-        value: 180
+        value: 120
         citations: ["DECtalk 4.63 Paul HR*10, ph_vset.c general path"]
       scale_str_rise:
         value: 32

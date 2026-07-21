@@ -50,6 +50,7 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "midpoint", arities: [1], binding: "context" },
   { name: "at_ratio", arities: [2], binding: "context" },
   { name: "at_sync", arities: [1], binding: "context" },
+  { name: "at_offset", arities: [2], binding: "context" },
   { name: "prev_point", arities: [1], binding: "context" },
   { name: "ahead", arities: [1, 2], binding: "context" },
   { name: "behind", arities: [1, 2], binding: "context" },

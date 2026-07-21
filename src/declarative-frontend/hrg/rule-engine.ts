@@ -448,6 +448,12 @@ function buildEvaluationContext(
       at_sync: (markId) => typeof markId === "string"
         ? { leftMarkId: markId, rightMarkId: markId, ratio: 0 }
         : null,
+      at_offset: (markId, offsetMs) => {
+        const offset = Number(offsetMs);
+        return typeof markId === "string" && Number.isFinite(offset)
+          ? { leftMarkId: markId, rightMarkId: markId, ratio: 0, offsetMs: offset }
+          : null;
+      },
       prev_point: (name) => {
         const candidates = relationItems(name);
         const candidate = candidates[candidates.length - 1];
@@ -1104,6 +1110,7 @@ function applyPointActions(
       || typeof anchorValue.leftMarkId !== "string"
       || typeof anchorValue.rightMarkId !== "string"
       || typeof anchorValue.ratio !== "number"
+      || (anchorValue.offsetMs != null && typeof anchorValue.offsetMs !== "number")
     ) {
       throw new Error("E_HRG_POINT_ANCHOR: point action requires a valid temporal anchor");
     }
@@ -1129,6 +1136,7 @@ function applyPointActions(
       anchorValue.leftMarkId,
       anchorValue.rightMarkId,
       anchorValue.ratio,
+      typeof anchorValue.offsetMs === "number" ? anchorValue.offsetMs : undefined,
     );
   }
 }

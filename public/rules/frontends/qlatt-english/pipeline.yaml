@@ -364,6 +364,7 @@ phases:
       - mark_function_words
       - assign_accent
       - identify_nuclear_accent
+      - assign_accent_types
   - name: duration
     rules:
       - non_word_initial_consonant_shortening

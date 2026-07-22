@@ -133,7 +133,9 @@ export function annotateProsody(utterance: Utterance): void {
       // pass); read the committed value so the accent-type pass sees identical
       // nuclear/prenuclear classification.
       isNuclearAccent: view.isNuclearAccent === true,
-      accentType: null,
+      // accentType is now assigned by the declarative `assign_accent_types` scan
+      // rule (annotation phase, runs before this pass); read the committed value.
+      accentType: typeof view.accentType === "string" ? view.accentType : null,
       breakIndex: 0,
     };
   });
@@ -159,8 +161,8 @@ export function annotateProsody(utterance: Utterance): void {
       hasPrenuclearAccent,
     });
 
-    // Step 5: Assign accent types.
-    assignAccentTypes(result, phrase, tuneSelection);
+    // Step 5: Assign accent types — now the declarative `assign_accent_types`
+    // scan rule (annotation phase), read into result above via the item view.
 
     // Step 6: Assign phrase accent and boundary tone on phrase boundary.
     assignPhraseEdgeTones(result, phrase, tuneSelection);
@@ -186,7 +188,8 @@ export function annotateProsody(utterance: Utterance): void {
     // rule (annotation phase); not re-committed here.
     // isNuclearAccent is written by the declarative identify_nuclear_accent rule
     // (annotation phase); not re-committed here.
-    transaction.set(token.item, "accentType", token.accentType);
+    // accentType is written by the declarative assign_accent_types rule
+    // (annotation phase); not re-committed here.
     // accentIndexInPhrase is now written by the declarative
     // accent_index_in_phrase scan rule (prosody phase); not committed here.
     transaction.set(token.item, "breakIndex", token.breakIndex);
@@ -238,50 +241,6 @@ function identifyPhrases(tokens: ProsodyToken[]): Phrase[] {
 
   return phrases;
 }
-
-// ---------------------------------------------------------------------------
-// Step 5: Assign accent types (per phrase)
-// ---------------------------------------------------------------------------
-
-/**
- * Assign accent types within the frontend's Pierrehumbert-style inventory.
- *
- * - Initial prenuclear accent: L+H* (common rising prenuclear default)
- * - Later prenuclear accents: H+!H*
- * - Nuclear accent in declarative (. or no punctuation): H* or H*+L
- * - Nuclear accent in continuation (, ; :): H+L*
- * - Nuclear accent in exclamation (!): H*+L
- * - Nuclear accent in question (?): L* if lone accent, L*+H if postnuclear rise is available
- *
- * Accent labels intentionally follow the original Pierrehumbert/Ladd symbols
- * used by the rulepack, while break indices remain ToBI-compatible.
- *
- * Citations: Pierrehumbert 1980, Ladd 2008 Ch.3
- */
-function assignAccentTypes(
-  tokens: ProsodyToken[],
-  phrase: Phrase,
-  tuneSelection: TuneSelection,
-): void {
-  let prenuclearAccentCount = 0;
-  for (const idx of phrase.tokenIndices) {
-    const token = tokens[idx];
-    if (isSuppressedToken(token) || token.isAccentCarrier !== true) continue;
-
-    if (token.isNuclearAccent) {
-      token.accentType = tuneSelection.nuclearAccent;
-    } else if (prenuclearAccentCount === 0) {
-      token.accentType = tuneSelection.prenuclearFirstAccent;
-    } else {
-      token.accentType = tuneSelection.prenuclearLaterAccent;
-    }
-    prenuclearAccentCount += token.isNuclearAccent ? 0 : 1;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Step 9: Assign accentIndexInPhrase
-// ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
 // Step 8: Assign break indices

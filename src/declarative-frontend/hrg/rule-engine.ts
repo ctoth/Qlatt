@@ -546,6 +546,25 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
         }
         return true;
       },
+      // Terminal punctuation of the current item's intonational phrase.
+      //
+      // Scans forward (in selection order, over active items) to the first SIL
+      // that carries a punctuation symbol and returns that symbol — the phrase
+      // boundary the imperative `identifyPhrases` used to type the phrase
+      // (declarative/question/exclamation/continuation). Returns "" when no
+      // trailing punctuation SIL exists (the final phrase of unterminated text),
+      // which the caller maps to the default declarative tune. Suppressed SILs
+      // are excluded from `items`, matching the imperative !isSuppressedToken
+      // boundary guard. Citations: Pierrehumbert 1980, Ladd 2008 Ch.3.
+      phrase_terminal_punctuation: () => {
+        for (let k = index; k < items.length; k += 1) {
+          if (transaction.read(items[k], "phoneme") === "SIL") {
+            const punct = transaction.read(items[k], "punctuationSymbol");
+            if (typeof punct === "string" && punct !== "") return punct;
+          }
+        }
+        return "";
+      },
       syllable_index: () => {
         const source = items[index];
         const syllable = source ? structureAncestor(source, "syllable") : undefined;

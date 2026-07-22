@@ -122,3 +122,53 @@ rules:
     citations:
       - Ladd 2008
       - Pierrehumbert 1980
+
+  # Accent-type assignment (former prosodic-annotator assignAccentTypes pass).
+  # Each accent carrier receives a Pierrehumbert/Ladd pitch-accent label drawn
+  # from the tune inventory (was policy/tune-grammar.yaml) keyed by the phrase's
+  # terminal punctuation type:
+  #   - nuclear (last carrier): nuclear.with_prenuclear when the phrase has >=2
+  #     carriers, else nuclear.without_prenuclear;
+  #   - first prenuclear carrier (index 0): prenuclear.first;
+  #   - later prenuclear carriers: prenuclear.later (H+!H*).
+  # The phrase-domain scan groups carriers by the same punctuation-SIL boundary
+  # as the nuclear pass; `phrase.count` gives the has-prenuclear test (a phrase
+  # with 2+ carriers necessarily has a non-nuclear carrier) and `phrase.index`
+  # the prenuclear ordinal. `phrase_terminal_punctuation()` reads the phrase's
+  # trailing punctuation symbol (declarative/question/exclamation/continuation;
+  # anything else, including none, defaults to declarative).
+  #
+  # Citations: Pierrehumbert 1980 (accent inventory), Ladd 2008 Ch.3 (tunes).
+  assign_accent_types:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "isTrue(current, 'isAccentCarrier')"
+    scan:
+      domain: phrase
+      reset_where: >-
+        current.phoneme == 'SIL'
+        && (has(current.punctuationSymbol) ? current.punctuationSymbol != null : false)
+    define:
+      phrase_punct: "phrase_terminal_punctuation()"
+      phrase_type: >-
+        phrase_punct == '?' ? 'question'
+          : phrase_punct == '!' ? 'exclamation'
+          : (phrase_punct == ',' || phrase_punct == ';' || phrase_punct == ':') ? 'continuation'
+          : 'declarative'
+      has_prenuclear: "phrase.count >= 2"
+    apply:
+      - field: accentType
+        op: set
+        value: >-
+          phrase.is_last
+            ? (has_prenuclear
+                ? {'declarative': 'H*+L', 'question': 'L*+H', 'exclamation': 'H*+L', 'continuation': 'H+L*'}[phrase_type]
+                : {'declarative': 'H*', 'question': 'L*', 'exclamation': 'H*+L', 'continuation': 'H+L*'}[phrase_type])
+            : (phrase.index == 0
+                ? {'declarative': 'L+H*', 'question': 'L+H*', 'exclamation': 'L+H*', 'continuation': 'H*+H'}[phrase_type]
+                : 'H+!H*')
+        tag: accent_type
+    citations:
+      - Pierrehumbert 1980
+      - Ladd 2008 Ch.3

@@ -92,6 +92,18 @@ describe("prosody pass 3: declarative accent assignment", () => {
     expect(nuclear.length).toBe(3);
   });
 
+  it("labels declarative prenuclear and nuclear accents from the tune inventory", () => {
+    // Declarative phrase: first prenuclear carrier -> L+H*, nuclear (last, with
+    // a prenuclear present) -> H*+L.
+    const result = textToKlattTrackDetailed("Bob bought a big blue balloon.", 110);
+    const carriers = activeSegments(result).filter((s) => s.get("isAccentCarrier") === true);
+    expect(carriers.length).toBeGreaterThan(1);
+    expect(carriers[0].get("accentType")).toBe("L+H*");
+    const nuclear = carriers[carriers.length - 1];
+    expect(nuclear.get("isNuclearAccent")).toBe(true);
+    expect(nuclear.get("accentType")).toBe("H*+L");
+  });
+
   afterAll(() => {
     warnSpy.mockRestore();
   });

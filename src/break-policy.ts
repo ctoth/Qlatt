@@ -74,13 +74,6 @@ function parseBreakPolicyDocument(value: unknown): BreakPolicy {
   }
 
   const longPhraseBreaking = value.long_phrase_breaking;
-  const placement = expectNonEmptyString(
-    longPhraseBreaking.placement,
-    "long_phrase_breaking.placement",
-  );
-  if (placement !== "pre_midpoint_content_word_end") {
-    throw new Error(`E_BREAK_POLICY_SCHEMA: unsupported placement '${placement}'`);
-  }
 
   // Parse punctuation_break_indices section
   if (!isPlainObject(value.punctuation_break_indices)) {

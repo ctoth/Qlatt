@@ -76,15 +76,6 @@ function parseAccentPolicyDocument(value: unknown): AccentPolicy {
   }
 
   const accentAssignment = value.accent_assignment;
-  const carrierSelection = expectNonEmptyString(
-    accentAssignment.carrier_selection,
-    "accent_assignment.carrier_selection",
-  );
-  if (carrierSelection !== "first_primary_stress") {
-    throw new Error(
-      `E_ACCENT_POLICY_SCHEMA: unsupported carrier_selection '${carrierSelection}'`,
-    );
-  }
 
   return {
     version: expectNonEmptyString(value.version, "version"),

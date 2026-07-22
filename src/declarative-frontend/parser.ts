@@ -384,6 +384,7 @@ function normalizeRule(ruleInput: unknown): PlainObject {
       : null,
     apply: Array.isArray(rule.apply) ? expandForEachField(rule.apply) : [],
     contour: isPlainObject(rule.contour) ? cloneObject(rule.contour) : null,
+    scan: isPlainObject(rule.scan) ? cloneObject(rule.scan) : null,
     splice: isPlainObject(rule.splice) ? cloneObject(rule.splice) : null,
     insert_point: isPlainObject(rule.insert_point) ? cloneObject(rule.insert_point) : null,
     insert_points: Array.isArray(rule.insert_points)

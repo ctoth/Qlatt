@@ -579,6 +579,54 @@ rules:
     expect(codes.includes("E_CONTOUR_APPLY_REQUIRED")).toBe(true);
   });
 
+  it("validates phrase-domain scan schema and select-only usage", () => {
+    const spec = parseDslSpec({
+      relations: { phone: { type: "base", scalars: { duration: {} } } },
+      patterns: {
+        p: { relation: "phone", sequence: [{ capture: "x", where: "true" }] },
+      },
+      rules: {
+        bad_scan_shape: {
+          match: "p",
+          scan: {
+            domain: "word",
+            reset_break_index: 0,
+          },
+        },
+      },
+      phases: [{ name: "prosody", rules: ["bad_scan_shape"] }],
+    });
+
+    const diagnostics = validateDslSpec(spec);
+    const codes = diagnostics.map((d) => d.code);
+    expect(codes.includes("E_SCAN_SELECT_REQUIRED")).toBe(true);
+    expect(codes.includes("E_SCAN_DOMAIN_INVALID")).toBe(true);
+    expect(codes.includes("E_SCAN_RESET_BREAK_INVALID")).toBe(true);
+  });
+
+  it("accepts a well-formed phrase-domain scan on a select rule", () => {
+    const spec = parseDslSpec({
+      relations: {
+        phone: { type: "base", features: { phoneme: [] }, scalars: { breakIndex: {}, mark: {} } },
+      },
+      rules: {
+        good_scan: {
+          select: { relation: "phone", where: "true" },
+          scan: { domain: "phrase", reset_break_index: 4 },
+          apply: [{ field: "mark", op: "set", value: "phrase.index", tag: "prosody" }],
+          citations: ["Ladd 2008"],
+        },
+      },
+      phases: [{ name: "prosody", rules: ["good_scan"] }],
+    });
+
+    const diagnostics = validateDslSpec(spec);
+    const scanErrors = diagnostics
+      .filter((d) => d.severity === "error")
+      .filter((d) => d.code.startsWith("E_SCAN_"));
+    expect(scanErrors).toHaveLength(0);
+  });
+
   it("enforces policy-path references and critical literal bans", () => {
     const spec = parseDslSpec({
       parameters: {

@@ -1759,6 +1759,44 @@ function validateRules(
       }
     }
 
+    if (isPlainObject(r.scan)) {
+      if (!hasSelect) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_SCAN_SELECT_REQUIRED",
+            `Rule '${name}' scan requires a select rule shape`,
+            `rules.${name}.scan`
+          )
+        );
+      }
+
+      if (
+        Object.prototype.hasOwnProperty.call(r.scan, "domain") &&
+        r.scan.domain !== "phrase"
+      ) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_SCAN_DOMAIN_INVALID",
+            `Rule '${name}' scan.domain must be 'phrase'`,
+            `rules.${name}.scan.domain`
+          )
+        );
+      }
+
+      if (Object.prototype.hasOwnProperty.call(r.scan, "reset_break_index")) {
+        const breakIndex = Number(r.scan.reset_break_index);
+        if (!Number.isFinite(breakIndex) || breakIndex < 1) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_SCAN_RESET_BREAK_INVALID",
+              `Rule '${name}' scan.reset_break_index must be a finite number >= 1`,
+              `rules.${name}.scan.reset_break_index`
+            )
+          );
+        }
+      }
+    }
+
     if (isPlainObject(r.splice) && Array.isArray(r.splice.insert)) {
       for (let i = 0; i < r.splice.insert.length; i += 1) {
         validateTemplateDispatchExpressions(

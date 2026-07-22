@@ -846,17 +846,23 @@ interface Match {
   defaultTarget: string;
   relationName: string;
   contour?: Readonly<Record<string, unknown>>;
+  phrase?: Readonly<Record<string, unknown>>;
   attemptItemIds: readonly string[];
 }
 
-function attachContourContexts(
-  matches: Match[],
-  rule: Readonly<Record<string, unknown>>,
-): void {
-  if (!isPlainObject(rule.contour) || rule.contour.domain !== "phrase" || matches.length === 0) return;
-  const resetBreakIndex = typeof rule.contour.reset_break_index === "number"
-    ? rule.contour.reset_break_index
-    : 4;
+/**
+ * Group phrase-domain matches into phrases.
+ *
+ * A phrase ends when an item between two consecutive matches (inclusive of the
+ * later match) carries a `breakIndex` at or above `resetBreakIndex`. The reset
+ * boundary is detected on ANY intervening relation item — including non-matched
+ * items such as a punctuation SIL — so a boundary between two selected carriers
+ * still splits the group. Shared by the `contour` timing seed and the `scan`
+ * positional primitive so both derive identical phrase boundaries.
+ *
+ * Citation: Silverman et al. 1992 (ToBI break index tier).
+ */
+function groupMatchesByPhrase(matches: readonly Match[], resetBreakIndex: number): Match[][] {
   const groups: Match[][] = [];
   let group: Match[] = [];
   let previousIndex = -1;
@@ -872,6 +878,18 @@ function attachContourContexts(
     previousIndex = match.index;
   }
   if (group.length > 0) groups.push(group);
+  return groups;
+}
+
+function attachContourContexts(
+  matches: Match[],
+  rule: Readonly<Record<string, unknown>>,
+): void {
+  if (!isPlainObject(rule.contour) || rule.contour.domain !== "phrase" || matches.length === 0) return;
+  const resetBreakIndex = typeof rule.contour.reset_break_index === "number"
+    ? rule.contour.reset_break_index
+    : 4;
+  const groups = groupMatchesByPhrase(matches, resetBreakIndex);
 
   for (const phrase of groups) {
     for (const match of phrase) {
@@ -894,6 +912,64 @@ function attachContourContexts(
         elapsed_sec: elapsedMs / 1000,
         phrase_duration_sec: phraseDurationMs / 1000,
         progress: phraseDurationMs > 0 ? elapsedMs / phraseDurationMs : 0,
+      });
+    }
+  }
+}
+
+/**
+ * Phrase-domain SCAN primitive.
+ *
+ * Generalizes the `contour` timing seed: where `contour` exposes phrase-relative
+ * *timing* aggregates for its own `apply`, `scan` exposes phrase-relative
+ * *positional* aggregates over the selected matches, consumed by the rule's own
+ * `constraint`/`define`/`apply`. The selected items (those passing `select.where`)
+ * are grouped into phrases by the same `reset_break_index` boundary logic; each
+ * match then receives a frozen `phrase` context:
+ *
+ * - `count`         — number of selected matches in this phrase group
+ * - `index`         — 0-based position of the current match within its group
+ * - `is_first`      — index === 0
+ * - `is_last`       — index === count - 1 (e.g. "last accent carrier in phrase")
+ * - `midpoint_index`— floor(count / 2) - 1 (the pre-midpoint member; -1 if count < 2)
+ * - `is_midpoint`   — index === midpoint_index and midpoint_index >= 0
+ *
+ * `index` doubles as an index-within-phrase counter that resets at each phrase
+ * boundary (via `reset_break_index`). Provenance: breakIndex reads on the match
+ * items are recorded so writes derived from the `phrase` context depend on the
+ * boundary decisions that defined the grouping.
+ *
+ * Citations: Silverman et al. 1992 (break index tier), Ladd 2008 (nuclear accent
+ * = last accent in phrase; constant-proportion downstep resets at IP boundary),
+ * O'Shaughnessy 1976 (long-phrase midpoint break).
+ */
+function attachPhraseScanContexts(
+  matches: Match[],
+  rule: Readonly<Record<string, unknown>>,
+): void {
+  if (!isPlainObject(rule.scan) || rule.scan.domain !== "phrase" || matches.length === 0) return;
+  const resetBreakIndex = typeof rule.scan.reset_break_index === "number"
+    ? rule.scan.reset_break_index
+    : 4;
+  const groups = groupMatchesByPhrase(matches, resetBreakIndex);
+
+  for (const phrase of groups) {
+    const count = phrase.length;
+    const midpointIndex = Math.floor(count / 2) - 1;
+    for (let position = 0; position < phrase.length; position += 1) {
+      const match = phrase[position];
+      // Record breakIndex reads so writes derived from `phrase.*` depend on the
+      // boundary decisions that defined this grouping (mirrors `contour`).
+      for (const item of match.items) {
+        if (item.has("breakIndex")) match.transaction.read(item, "breakIndex");
+      }
+      match.phrase = Object.freeze({
+        count,
+        index: position,
+        is_first: position === 0,
+        is_last: position === count - 1,
+        midpoint_index: midpointIndex,
+        is_midpoint: midpointIndex >= 0 && position === midpointIndex,
       });
     }
   }
@@ -1160,11 +1236,14 @@ function executeMatch(
     predicates,
     inventory,
   };
-  const contourExtra = match.contour ? { contour: match.contour } : {};
-  let context = buildEvaluationContext({ ...contextBase, extra: contourExtra });
+  const scopeExtra = {
+    ...(match.contour ? { contour: match.contour } : {}),
+    ...(match.phrase ? { phrase: match.phrase } : {}),
+  };
+  let context = buildEvaluationContext({ ...contextBase, extra: scopeExtra });
   context = evaluateRuleDefinitions(rule, context, (definitions) => buildEvaluationContext({
     ...contextBase,
-    extra: { ...contourExtra, ...definitions },
+    extra: { ...scopeExtra, ...definitions },
   }));
   const constraintEvidence = evaluateCondition(rule.constraint, context, predicates);
   if (!constraintEvidence.matched) {
@@ -1558,6 +1637,7 @@ export function runGraphRuleEngine(
           options.inventory,
         );
       attachContourContexts(matches, rule);
+      attachPhraseScanContexts(matches, rule);
       if (timingFinalized && matches.length > 0 && isStructuralRule(rule)) {
         throw new Error(
           `E_FINALIZE_DIRTY: structural rule '${ruleName}' executed after finalize stage`,

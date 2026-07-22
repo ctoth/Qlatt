@@ -8,7 +8,6 @@
 import { createConfiguredEvaluator } from './semantics/evaluator-factory';
 import { applyParamValue } from './audio-param-utils';
 import { expandFormantBanks } from './formant-bank';
-import type { FormantBankSpec } from './formant-bank';
 import type { SemanticsDocument, EvaluationContext, ParamValue } from './semantics/types';
 import { createBrowserRuntimeAssetLoader } from './runtime-assets/browser-loader';
 import type { RuntimeAssetLoader } from './runtime-assets/types';
@@ -276,7 +275,8 @@ export function waitForNodeReady(
 export interface BaconGraph {
   bacon: string;
   name?: string;
-  formantBanks?: Record<string, FormantBankSpec>;
+  // Qlatt extension data (e.g. formantBanks) lives here, per Bacon IR
+  meta?: Record<string, unknown>;
   nodes: Record<string, BaconNode>;
   connections?: BaconConnection[];
   outputs?: PortRef[];
@@ -598,10 +598,16 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
               log(`  Warning: AudioParam '${toParamName}' not found on AudioWorkletNode '${toId}'`);
             }
           } else {
-            // Native nodes (GainNode, etc.): access as property
+            // Native nodes (GainNode, etc.): access as property. Duck-typed
+            // rather than `instanceof AudioParam` — Node hosts have no
+            // AudioParam global (same reason as audio-param-utils.ts).
             const audioParam = (toNode as unknown as Record<string, unknown>)[toParamName];
-            if (audioParam instanceof AudioParam) {
-              fromNode.connect(audioParam, fromIndex);
+            if (
+              typeof audioParam === 'object' &&
+              audioParam !== null &&
+              typeof (audioParam as { setValueAtTime?: unknown }).setValueAtTime === 'function'
+            ) {
+              fromNode.connect(audioParam as AudioParam, fromIndex);
               log(`  Connected ${fromId}[${fromIndex}] -> ${toId}.${toParamName} (AudioParam)`);
             } else {
               log(`  Warning: AudioParam '${toParamName}' not found on native node '${toId}'`);

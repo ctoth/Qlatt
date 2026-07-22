@@ -42,6 +42,13 @@ export interface FormantBankSpec {
   parallel: { output: string };
   proximity: ProximitySpec[];
   formants: FormantSpec[];
+  /**
+   * Extra connections that reference the bank's generated nodes (e.g. an
+   * aerodynamic model driving cascadeF1.bandwidth). They live here rather than
+   * in the graph's `connections` so the static document only references nodes
+   * that exist before expansion; appended verbatim during expansion.
+   */
+  connections?: BaconConnection[];
 }
 
 // ---------------------------------------------------------------------------
@@ -58,7 +65,9 @@ export function expandFormantBanks(
   graph: BaconGraph,
   semantics: SemanticsDocument,
 ): void {
-  const banks = (graph as any).formantBanks as
+  // formantBanks is Qlatt macro data, carried in the graph's `meta` extension
+  // point (Bacon IR graphs allow only their own keys at top level)
+  const banks = (graph.meta as Record<string, unknown> | undefined)?.formantBanks as
     | Record<string, FormantBankSpec>
     | undefined;
   if (!banks) return;
@@ -152,6 +161,14 @@ export function expandFormantBanks(
     }
 
     // ------------------------------------------------------------------
+    // 3b. Append the bank's declared extra connections (references to
+    // generated nodes, e.g. aeroModel -> cascadeF1.bandwidth)
+    // ------------------------------------------------------------------
+    if (bank.connections) {
+      graph.connections.push(...bank.connections);
+    }
+
+    // ------------------------------------------------------------------
     // 4. Generate semantics params
     // ------------------------------------------------------------------
     if (!semantics.params) semantics.params = {};
@@ -200,6 +217,6 @@ export function expandFormantBanks(
     };
   }
 
-  // Clean up: remove the formantBanks key from the graph
-  delete (graph as any).formantBanks;
+  // Clean up: remove the formantBanks key from the graph meta
+  delete (graph.meta as Record<string, unknown>).formantBanks;
 }

@@ -147,6 +147,18 @@ primitives:
         unit: "dB"
         default: 0
         description: "Klatt 1990 spectral-tilt override in dB at 3 kHz. 0 = derive from Rd"
+      flutter:
+        type: float
+        default: 0
+        description: "F0 flutter (Klatt & Klatt 1990, 0-100). 0 = none"
+      jitter:
+        type: float
+        default: 0
+        description: "F0 jitter (Fraj 2011, 0-100). 0 = none"
+      di:
+        type: float
+        default: 0
+        description: "Diplophonia index (Gobl & Ni Chasaide 2003, 0-100). 0 = uniform amplitude, 100 = odd periods silent"
     inputs: 0
     outputs: 1
 

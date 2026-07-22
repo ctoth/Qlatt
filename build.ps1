@@ -15,6 +15,7 @@ cargo build --release --target wasm32-unknown-unknown -p oversampled-glottal-sou
 cargo build --release --target wasm32-unknown-unknown -p fujisaki-resonator
 cargo build --release --target wasm32-unknown-unknown -p aerodynamic-model
 cargo build --release --target wasm32-unknown-unknown -p biquad-notch
+cargo build --release --target wasm32-unknown-unknown -p dynamics-compressor
 cargo build --release --target wasm32-unknown-unknown -p reconstruction-filter
 cargo build --release --target wasm32-unknown-unknown -p f0-filters
 
@@ -37,6 +38,7 @@ Copy-Item "$targetDir/oversampled_glottal_source.wasm" "$destDir/oversampled-glo
 Copy-Item "$targetDir/fujisaki_resonator.wasm" "$destDir/fujisaki-resonator.wasm" -Force
 Copy-Item "$targetDir/aerodynamic_model.wasm" "$destDir/aerodynamic-model.wasm" -Force
 Copy-Item "$targetDir/biquad_notch.wasm" "$destDir/biquad-notch.wasm" -Force
+Copy-Item "$targetDir/dynamics_compressor.wasm" "$destDir/dynamics-compressor.wasm" -Force
 Copy-Item "$targetDir/reconstruction_filter.wasm" "$destDir/reconstruction-filter.wasm" -Force
 Copy-Item "$targetDir/f0_filters.wasm" "$destDir/f0-filters.wasm" -Force
 

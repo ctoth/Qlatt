@@ -7,112 +7,111 @@ meta:
     Klatt 80 formant synthesizer topology per Klatt (1980).
     Conditional routing (source selection, cascade/parallel switching)
     is implemented via gain-gated paths with CEL expressions in semantics.yaml.
-
-formantBanks:
-  main:
-    cascade:
-      input: np
-      output: cascadeOutGain
-    parallel:
-      output: parallelSum
-    proximity:
-      - { pair: [1, 2], offset: 0 }
-      - { pair: [2, 3], offset: 50 }
-      - { pair: [3, 4], offset: 150 }
-    formants:
-      - index: 1
-        freqRange: [200, 1000]
-        freqDefault: 500
-        bwRange: [40, 1000]
-        bwDefault: 60
-        ndbScale: -58
-        sign: 1
-        parallelSource: parallelSourceGain
-        bypassAtZero: true
-      - index: 2
-        freqRange: [500, 3000]
-        freqDefault: 1500
-        bwRange: [40, 1000]
-        bwDefault: 90
-        ndbScale: -65
-        sign: -1
-        parallelSource: parallelDiffSum
-      - index: 3
-        freqRange: [1500, 4000]
-        freqDefault: 2500
-        bwRange: [40, 1000]
-        bwDefault: 150
-        ndbScale: -73
-        sign: 1
-        parallelSource: parallelDiffSum
-      - index: 4
-        freqRange: [2500, 5000]
-        freqDefault: 3500
-        bwRange: [100, 1000]
-        bwDefault: 200
-        ndbScale: -78
-        sign: -1
-        parallelSource: parallelDiffSum
-      - index: 5
-        freqRange: [3500, 6000]
-        freqDefault: 4500
-        bwRange: [100, 1000]
-        bwDefault: 200
-        ndbScale: -79
-        sign: 1
-        parallelSource: parallelFricGain
-      - index: 6
-        freqRange: [4000, 7000]
-        freqDefault: 5500
-        bwRange: [100, 1000]
-        bwDefault: 500
-        ndbScale: -80
-        sign: -1
-        parallelSource: parallelFricGain
-      # F7-F10: Higher formants with both cascade and parallel routing.
-      # Cascade: shapes voiced speech spectrum (though contribution is small due to cascade attenuation).
-      # Parallel: shapes fricative/burst spectra above 6 kHz; this requires the
-      # output reconstruction stage below to be bypassed in this experiment.
-      # Shadle et al. (2023) report fricative spectra to 15 kHz; Monson et al.
-      # (2014) covers perceptual significance of high-frequency energy.
-      # A7-A10 default to 0; frontend rules must supply non-zero values for audible parallel output.
-      # Fant neutral model spacing (1000 Hz from F6), Rabiner (1968) Q-factor bandwidths.
-      - index: 7
-        freqRange: [5000, 8000]
-        freqDefault: 6500
-        bwRange: [200, 2000]
-        bwDefault: 722
-        parallelSource: parallelFricGain
-        ndbScale: -81
-        sign: 1
-        # Rabiner (1968) Q=9; parallel source: frication only (same as F5-F6)
-      - index: 8
-        freqRange: [6000, 9000]
-        freqDefault: 7500
-        bwRange: [400, 3000]
-        bwDefault: 1250
-        parallelSource: parallelFricGain
-        ndbScale: -82
-        sign: -1
-        # Rabiner (1968) Q=6; parallel source: frication only (same as F5-F6)
-      - index: 9
-        freqRange: [7000, 10000]
-        freqDefault: 8500
-        bwRange: [500, 5000]
-        bwDefault: 2125
-        parallelSource: parallelFricGain
-        ndbScale: -83
-        sign: 1
-        # Rabiner (1968) Q=4; parallel source: frication only (same as F5-F6)
-      - index: 10
-        freqRange: [8000, 12000]
-        freqDefault: 9500
-        bwRange: [1000, 8000]
-        bwDefault: 4750
-        parallelSource: parallelFricGain
-        ndbScale: -84
-        sign: -1
-        # Rabiner (1968) Q=2; parallel source: frication only (same as F5-F6)
+  formantBanks:
+    main:
+      cascade:
+        input: np
+        output: cascadeOutGain
+      parallel:
+        output: parallelSum
+      proximity:
+        - { pair: [1, 2], offset: 0 }
+        - { pair: [2, 3], offset: 50 }
+        - { pair: [3, 4], offset: 150 }
+      formants:
+        - index: 1
+          freqRange: [200, 1000]
+          freqDefault: 500
+          bwRange: [40, 1000]
+          bwDefault: 60
+          ndbScale: -58
+          sign: 1
+          parallelSource: parallelSourceGain
+          bypassAtZero: true
+        - index: 2
+          freqRange: [500, 3000]
+          freqDefault: 1500
+          bwRange: [40, 1000]
+          bwDefault: 90
+          ndbScale: -65
+          sign: -1
+          parallelSource: parallelDiffSum
+        - index: 3
+          freqRange: [1500, 4000]
+          freqDefault: 2500
+          bwRange: [40, 1000]
+          bwDefault: 150
+          ndbScale: -73
+          sign: 1
+          parallelSource: parallelDiffSum
+        - index: 4
+          freqRange: [2500, 5000]
+          freqDefault: 3500
+          bwRange: [100, 1000]
+          bwDefault: 200
+          ndbScale: -78
+          sign: -1
+          parallelSource: parallelDiffSum
+        - index: 5
+          freqRange: [3500, 6000]
+          freqDefault: 4500
+          bwRange: [100, 1000]
+          bwDefault: 200
+          ndbScale: -79
+          sign: 1
+          parallelSource: parallelFricGain
+        - index: 6
+          freqRange: [4000, 7000]
+          freqDefault: 5500
+          bwRange: [100, 1000]
+          bwDefault: 500
+          ndbScale: -80
+          sign: -1
+          parallelSource: parallelFricGain
+        # F7-F10: Higher formants with both cascade and parallel routing.
+        # Cascade: shapes voiced speech spectrum (though contribution is small due to cascade attenuation).
+        # Parallel: shapes fricative/burst spectra above 6 kHz; this requires the
+        # output reconstruction stage below to be bypassed in this experiment.
+        # Shadle et al. (2023) report fricative spectra to 15 kHz; Monson et al.
+        # (2014) covers perceptual significance of high-frequency energy.
+        # A7-A10 default to 0; frontend rules must supply non-zero values for audible parallel output.
+        # Fant neutral model spacing (1000 Hz from F6), Rabiner (1968) Q-factor bandwidths.
+        - index: 7
+          freqRange: [5000, 8000]
+          freqDefault: 6500
+          bwRange: [200, 2000]
+          bwDefault: 722
+          parallelSource: parallelFricGain
+          ndbScale: -81
+          sign: 1
+          # Rabiner (1968) Q=9; parallel source: frication only (same as F5-F6)
+        - index: 8
+          freqRange: [6000, 9000]
+          freqDefault: 7500
+          bwRange: [400, 3000]
+          bwDefault: 1250
+          parallelSource: parallelFricGain
+          ndbScale: -82
+          sign: -1
+          # Rabiner (1968) Q=6; parallel source: frication only (same as F5-F6)
+        - index: 9
+          freqRange: [7000, 10000]
+          freqDefault: 8500
+          bwRange: [500, 5000]
+          bwDefault: 2125
+          parallelSource: parallelFricGain
+          ndbScale: -83
+          sign: 1
+          # Rabiner (1968) Q=4; parallel source: frication only (same as F5-F6)
+        - index: 10
+          freqRange: [8000, 12000]
+          freqDefault: 9500
+          bwRange: [1000, 8000]
+          bwDefault: 4750
+          parallelSource: parallelFricGain
+          ndbScale: -84
+          sign: -1
+          # Rabiner (1968) Q=2; parallel source: frication only (same as F5-F6)
 
 nodes:
   # ---------------------------------------------------------------------------
@@ -477,6 +476,10 @@ nodes:
       ratio: 12         # aggressive compression above threshold
       attack: 0.003     # 3 ms — fast enough for transients
       release: 0.1      # 100 ms — faster than default 250 ms for speech
+      # engineering estimate — restores loudness parity with the former
+      # DynamicsCompressorNode's automatic makeup stage (measured 2026-07-22:
+      # auto-makeup ~ +13.6 dB RMS; +9 dB chosen for peak parity with 3.5 dB headroom)
+      makeup: 9
 
   outputGain:
     type: gain

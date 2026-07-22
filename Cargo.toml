@@ -16,6 +16,7 @@ members = [
   "crates/fujisaki-resonator",
   "crates/aerodynamic-model",
   "crates/biquad-notch",
+  "crates/dynamics-compressor",
   "crates/reconstruction-filter",
   "crates/f0-filters",
 ]

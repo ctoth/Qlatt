@@ -38,8 +38,9 @@ primitives:
     outputs: 1
 
   dynamics-compressor:
-    description: "WebAudio DynamicsCompressorNode - mimics FORTRAN 16-bit hard clipping. Klatt 1980 COEWAV.FOR line 251 scales by 170x then truncates to [-32767,32767]; in float audio the compressor serves the same role, taming cascade peaks while preserving quieter parallel-branch fricatives."
-    native: DynamicsCompressorNode
+    description: "Feedforward dynamic range compressor (Giannoulis, Massberg & Reiss 2012: log-domain gain computer with quadratic soft knee, branching attack/release smoother). Output-stage peak taming: Klatt 1980 COEWAV.FOR line 251 scales by 170x then truncates to [-32767,32767]; in float audio the compressor serves the same role, taming cascade peaks while preserving quieter parallel-branch fricatives. Replaces the former DynamicsCompressorNode binding — deliberately no lookahead pre-delay (~6 ms in the native node) and no automatic makeup gain (makeup is the explicit `makeup` param below)."
+    worklet: "dynamics-compressor-processor.js"
+    wasm: "dynamics-compressor.wasm"
     params:
       threshold:
         type: float
@@ -65,6 +66,11 @@ primitives:
         unit: "s"
         default: 0.1
         description: "Time to release compression after signal drops below threshold"
+      makeup:
+        type: float
+        unit: "dB"
+        default: 0
+        description: "Explicit post-compression makeup gain. The former DynamicsCompressorNode applied an implementation-defined automatic makeup stage; here the graph must declare it."
     inputs: 1
     outputs: 1
 

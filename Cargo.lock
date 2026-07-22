@@ -31,6 +31,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "dynamics-compressor"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
 name = "edge-detector"
 version = "0.1.0"
 dependencies = [

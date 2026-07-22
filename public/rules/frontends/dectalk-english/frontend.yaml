@@ -508,6 +508,13 @@ parameters:
     formant:
       coarticulation_weight: 0.3
       transition_time_ms: 30
+      # DECtalk 4.63 p_us_st1.c:132-140: N/EN/NX B3 becomes 1600 Hz
+      # when the preceding phone has F2BACKF or the following phone has
+      # F2BACKI. ph_defs.h:345-346 and the source us_place table identify
+      # these exact directional phoneme sets.
+      nasal_high_front_b3_hz: 1600
+      nasal_b3_preceding_f2backf: [EY, IY, Y]
+      nasal_b3_following_f2backi: [Y, YU]
       # DECtalk 4.63 p_us_st1.c Special Rule 2:
       # PAP.pspesh = 52 for onset of a voiced non-obstruent from silence or
       # a voiceless open-vocal-tract fricative (/f, th, s, sh/), with a
@@ -1229,6 +1236,10 @@ output:
             - "Engineering estimate: preserves legacy DECtalk frontend 50% formant-transition blend"
         keys: [F1, F2, F3, B1, B2, B3]
         smooth_types: [vowel, nasal, liquid, glide]
+        # DECtalk 4.63 p_us_st1.c:661-665,1035-1039: nasal bandwidths
+        # stay at their selected target instead of taking boundary transitions.
+        step_keys_by_phoneme:
+          N: [B3]
         # DECtalk smooths every parameter at every boundary (p_us_st1.c
         # us_forw/back_smooth_rules; default 50% midpoint, ph_setar.c:784-785,
         # 903-904). Enable the universal midpoint fallback so obstruent-adjacent

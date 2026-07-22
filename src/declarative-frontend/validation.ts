@@ -2296,6 +2296,16 @@ function validateLoweringSpec(
       validateCitedNumber(transitions.blend.factor, diagnostics, "output.lowering.transitions.blend.factor", "output.lowering.transitions.blend.factor");
       validateStringArray(transitions.blend.keys, diagnostics, "output.lowering.transitions.blend.keys", "output.lowering.transitions.blend.keys");
       validateStringArray(transitions.blend.smooth_types, diagnostics, "output.lowering.transitions.blend.smooth_types", "output.lowering.transitions.blend.smooth_types");
+      if (transitions.blend.step_keys_by_phoneme !== undefined) {
+        const base = "output.lowering.transitions.blend.step_keys_by_phoneme";
+        if (!isPlainObject(transitions.blend.step_keys_by_phoneme)) {
+          diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base));
+        } else {
+          for (const [phoneme, keys] of Object.entries(transitions.blend.step_keys_by_phoneme)) {
+            validateStringArray(keys, diagnostics, `${base}.${phoneme}`, `${base}.${phoneme}`);
+          }
+        }
+      }
     }
     // Optional obstruent<->sonorant locus tables (DECtalk-style). The male
     // (`loci`), female (`loci_female`), and `vowel_category` blocks are all

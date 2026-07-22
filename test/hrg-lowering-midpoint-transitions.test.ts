@@ -280,4 +280,58 @@ describe("HRG lowering midpoint transitions", () => {
       }
     }
   });
+
+  it("steps a phoneme-specific key while retaining its other midpoint transitions", () => {
+    const utterance = new Utterance(SCHEMA);
+    const build = utterance.beginTransaction(META);
+    const ey = addSegment(build, "seg_0", "EY", "vowel", 100, {
+      F1: 500, F2: 1800, F3: 2500, B1: 80, B2: 100, B3: 200,
+    });
+    const n = addSegment(build, "seg_1", "N", "nasal", 100, {
+      F1: 300, F2: 1300, F3: 2600, B1: 90, B2: 200, B3: 1600,
+    });
+    const ih = addSegment(build, "seg_2", "IH", "vowel", 100, {
+      F1: 400, F2: 1900, F3: 2550, B1: 70, B2: 90, B3: 190,
+    });
+    build.partitionAnchors([ey, n, ih], utterance.axis.start.id, utterance.axis.end.id);
+    build.commit();
+    const timing = utterance.beginTransaction({ ...META, ruleId: "timing", tag: "timing" });
+    const eyAnchor = utterance.intervalAnchor(ey);
+    const nAnchor = utterance.intervalAnchor(n);
+    const ihAnchor = utterance.intervalAnchor(ih);
+    if (!eyAnchor || !nAnchor || !ihAnchor) throw new Error("fixture anchors missing");
+    timing.resolveMarkTime(eyAnchor.leftMarkId, 0);
+    timing.resolveMarkTime(eyAnchor.rightMarkId, 100);
+    timing.resolveMarkTime(nAnchor.rightMarkId, 200);
+    timing.resolveMarkTime(ihAnchor.rightMarkId, 300);
+    timing.commit();
+    const policy = {
+      ...POLICY,
+      timeline: {
+        ...POLICY.timeline,
+        initial_silence_ms: { value: 0 },
+        final_silence_ms: { value: 0 },
+      },
+      transitions: {
+        ...POLICY.transitions,
+        blend: {
+          ...POLICY.transitions.blend,
+          factor: { value: 0.5 },
+          smooth_all_boundaries: true,
+          step_keys_by_phoneme: { N: ["B3"] },
+        },
+      },
+    } as const satisfies LowerOptions;
+
+    const lowered = lowerToFrames(utterance, policy);
+    const paramsAt = (segmentId: string, time: number): Readonly<Record<string, number>> | undefined =>
+      lowered.frames.find(
+        (frame) => frame.segmentId === segmentId && Math.abs(frame.time - time) <= 1e-9,
+      )?.params;
+
+    expect(paramsAt(ey.id, 0.07)).toMatchObject({ F1: 400, B3: 200 });
+    expect(paramsAt(n.id, 0.1)).toMatchObject({ F1: 400, B3: 1600 });
+    expect(paramsAt(n.id, 0.17)).toMatchObject({ F1: 350, B3: 1600 });
+    expect(paramsAt(ih.id, 0.2)).toMatchObject({ F1: 350, B3: 190 });
+  });
 });

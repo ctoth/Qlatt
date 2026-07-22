@@ -349,6 +349,7 @@ phases:
       - dectalk_obstruent_parallel_amplitudes
       - dectalk_special_coartic_f3
       - dectalk_special_coartic_f2
+      - dectalk_n_high_front_b3
       - dectalk_the_dh_f1_trace
       - dectalk_the_ax_f1_trace
       - dectalk_the_terminal_silence_f1_trace

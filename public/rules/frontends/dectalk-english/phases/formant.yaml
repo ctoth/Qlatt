@@ -267,6 +267,26 @@ rules:
       - "DECtalk 4.63 p_us_st1.c:370-385 (UW F2 +200 adjacent alveolar)"
       - "DECtalk 4.63 p_us_st1.c:386-406 (unstressed *1.5, phrase-final *0.5, |temp|<=400 clamp)"
 
+  dectalk_n_high_front_b3:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme == 'N'"
+    define:
+      prev_ph: "prev == null ? '' : prev.phoneme"
+      next_ph: "next == null ? '' : next.phoneme"
+      high_front_adjacent: >-
+        prev_ph in params.policy.formant.nasal_b3_preceding_f2backf ||
+        next_ph in params.policy.formant.nasal_b3_following_f2backi
+    constraint: high_front_adjacent
+    apply:
+      - field: B3
+        op: set
+        value: params.policy.formant.nasal_high_front_b3_hz
+        tag: nasal_bandwidth
+    citations:
+      - "DECtalk 4.63 p_us_st1.c:132-140 (N B3 is 1600 Hz adjacent to F2BACKF/F2BACKI phones)"
+
   dectalk_the_dh_f1_trace:
     kind: scalar
     select:

@@ -448,6 +448,24 @@ describe("dectalk-english end-to-end", () => {
     expect(tlt).toEqual(Array(139).fill(0));
   });
 
+  it("matches DECtalk's contextual N B3 targets in rain and in", () => {
+    const result = textToKlattTrackDetailed("The rain in Spain stays mainly in the plain.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const b3 = Array.from({ length: 9 }, (_, offset) => {
+      const time = (62 + offset) * DECTALK_PACKET_PERIOD_SEC;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B3;
+    });
+
+    expect(b3).toEqual(Array(9).fill(1600));
+    const ordinaryN = result.track
+      .filter((frame) => frame.word === "in" && frame.phoneme === "N")
+      .map((frame) => frame.params.B3);
+    expect(ordinaryN.length).toBeGreaterThan(0);
+    expect(new Set(ordinaryN)).toEqual(new Set([350]));
+  });
+
   it("applies DECtalk Rule 14 to a sonorant after a voiceless plosive", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

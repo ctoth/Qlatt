@@ -97,6 +97,7 @@ export interface LowerOptions {
       keys: readonly string[];
       smooth_types: readonly string[];
       smooth_all_boundaries?: boolean;
+      step_keys_by_phoneme?: Readonly<Record<string, readonly string[]>>;
     };
     sonorant_f2?: {
       key: string;
@@ -874,8 +875,17 @@ export function lowerToFrames(
     if (transitionMs <= 0) return;
     const startMs = Math.max(20, timing.durationMs - transitionMs);
     if (startMs <= 0 || startMs >= timing.durationMs) return;
+    const currentPhoneme = timing.item.get(phonemeKey);
+    const nextPhoneme = nextTiming.item.get(phonemeKey);
+    const currentStepKeys = typeof currentPhoneme === "string"
+      ? options.transitions.blend.step_keys_by_phoneme?.[currentPhoneme] ?? []
+      : [];
+    const nextStepKeys = typeof nextPhoneme === "string"
+      ? options.transitions.blend.step_keys_by_phoneme?.[nextPhoneme] ?? []
+      : [];
     const fields: Record<string, number> = {};
     for (const key of options.transitions.blend.keys) {
+      if (currentStepKeys.includes(key) || nextStepKeys.includes(key)) continue;
       const currentValue = timing.item.get(key);
       const nextValue = nextTiming.item.get(key);
       if (typeof currentValue !== "number" || typeof nextValue !== "number") continue;
@@ -893,8 +903,17 @@ export function lowerToFrames(
       const transitionMs = itemTransitionMs ?? defaultTransitionMs;
       const endMs = Math.min(timing.durationMs - 20, transitionMs);
       if (endMs <= 0) return;
+      const currentPhoneme = timing.item.get(phonemeKey);
+      const previousPhoneme = previous.item.get(phonemeKey);
+      const currentStepKeys = typeof currentPhoneme === "string"
+        ? options.transitions.blend.step_keys_by_phoneme?.[currentPhoneme] ?? []
+        : [];
+      const previousStepKeys = typeof previousPhoneme === "string"
+        ? options.transitions.blend.step_keys_by_phoneme?.[previousPhoneme] ?? []
+        : [];
       const fields: Record<string, number> = {};
       for (const key of options.transitions.blend.keys) {
+        if (currentStepKeys.includes(key) || previousStepKeys.includes(key)) continue;
         const currentValue = timing.item.get(key);
         const previousValue = previous.item.get(key);
         if (typeof currentValue !== "number" || typeof previousValue !== "number") continue;

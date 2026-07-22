@@ -11,7 +11,7 @@ type Args = {
   limit: number;
 };
 
-type BucketName = "sameSegment" | "differentSegment" | "unknownSegment";
+type BucketName = "sameSegment" | "phaseAlignedSameSegment" | "differentSegment" | "unknownSegment";
 
 type BucketSummary = {
   compared?: number;
@@ -78,7 +78,7 @@ function parseArgs(argv: string[]): Args {
   const summaryPath = flags.get("summary");
   if (!summaryPath) {
     throw new Error(
-      "Usage: rank-trace-targets --summary trace-summary.json [--param F2] [--bucket sameSegment] [--max-phase-delta 0.15] [--min-compared 10] [--limit 20]",
+      "Usage: rank-trace-targets --summary trace-summary.json [--param F2] [--bucket sameSegment|phaseAlignedSameSegment] [--max-phase-delta 0.15] [--min-compared 10] [--limit 20]",
     );
   }
 
@@ -98,7 +98,12 @@ function parseArgs(argv: string[]): Args {
 }
 
 function bucketFlag(raw: string): BucketName {
-  if (raw === "sameSegment" || raw === "differentSegment" || raw === "unknownSegment") {
+  if (
+    raw === "sameSegment"
+    || raw === "phaseAlignedSameSegment"
+    || raw === "differentSegment"
+    || raw === "unknownSegment"
+  ) {
     return raw;
   }
   throw new Error(`Invalid --bucket: ${raw}`);

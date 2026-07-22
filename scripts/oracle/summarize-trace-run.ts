@@ -8,6 +8,7 @@ const FRAME_PERIOD_SEC = 0.0064;
 type Args = {
   runRoot: string;
   outPath?: string;
+  maxPhaseDelta: number | null;
 };
 
 type TrackEvent = {
@@ -66,6 +67,7 @@ type ParamSummary = {
   maxQlattSegmentPhase: number | null;
   maxSegmentPhaseDelta: number | null;
   sameSegment: ParamBucketSummary;
+  phaseAlignedSameSegment: ParamBucketSummary;
   differentSegment: ParamBucketSummary;
   unknownSegment: ParamBucketSummary;
 };
@@ -264,15 +266,21 @@ function parseArgs(argv: string[]): Args {
   }
 
   if (flags.has("help")) {
-    throw new Error("Usage: summarize-trace-run --run-root dir [--out file]");
+    throw new Error("Usage: summarize-trace-run --run-root dir [--out file] [--max-phase-delta n]");
   }
   const runRoot = flags.get("run-root");
   if (!runRoot) {
     throw new Error("Missing required --run-root");
   }
+  const maxPhaseDeltaRaw = flags.get("max-phase-delta");
+  const maxPhaseDelta = maxPhaseDeltaRaw == null ? null : Number(maxPhaseDeltaRaw);
+  if (maxPhaseDelta != null && (!Number.isFinite(maxPhaseDelta) || maxPhaseDelta < 0)) {
+    throw new Error(`Invalid --max-phase-delta: ${maxPhaseDeltaRaw}`);
+  }
   return {
     runRoot: path.resolve(runRoot),
     outPath: flags.get("out") ? path.resolve(flags.get("out") as string) : undefined,
+    maxPhaseDelta,
   };
 }
 
@@ -575,6 +583,7 @@ function summarizeParam(
   oracleValueForFrame: ((frame: DectalkTraceFrame) => number | null) | undefined,
   qlattKey: string,
   qlattScale = 1,
+  maxPhaseDelta: number | null = null,
 ): ParamSummary {
   let compared = 0;
   let sumAbs = 0;
@@ -594,9 +603,11 @@ function summarizeParam(
   let maxQlattSegmentPhase: number | null = null;
   let maxSegmentPhaseDelta: number | null = null;
   let sameSegmentSumAbs = 0;
+  let phaseAlignedSameSegmentSumAbs = 0;
   let differentSegmentSumAbs = 0;
   let unknownSegmentSumAbs = 0;
   const sameSegment = emptyBucket();
+  const phaseAlignedSameSegment = emptyBucket();
   const differentSegment = emptyBucket();
   const unknownSegment = emptyBucket();
 
@@ -659,6 +670,25 @@ function summarizeParam(
         oraclePhase,
         qlattPhase,
       );
+      const phaseDelta = oraclePhase.phase != null && qlattPhase.phase != null
+        ? Math.abs(qlattPhase.phase - oraclePhase.phase)
+        : null;
+      if (maxPhaseDelta != null && phaseDelta != null && phaseDelta <= maxPhaseDelta) {
+        phaseAlignedSameSegmentSumAbs = accumulateBucket(
+          phaseAlignedSameSegment,
+          phaseAlignedSameSegmentSumAbs,
+          frameIndex,
+          oracleValue,
+          qlatt,
+          abs,
+          oraclePhone,
+          oracleOutputPhone,
+          qlattPhone,
+          segmentMatch,
+          oraclePhase,
+          qlattPhase,
+        );
+      }
     } else {
       differentSegmentSumAbs = accumulateBucket(
         differentSegment,
@@ -716,6 +746,7 @@ function summarizeParam(
     maxQlattSegmentPhase,
     maxSegmentPhaseDelta,
     sameSegment,
+    phaseAlignedSameSegment,
     differentSegment,
     unknownSegment,
   };
@@ -763,7 +794,7 @@ function phraseDirs(runRoot: string): string[] {
     .sort((left, right) => path.basename(left).localeCompare(path.basename(right)));
 }
 
-function summarizePhrase(phraseDir: string): PhraseSummary {
+function summarizePhrase(phraseDir: string, maxPhaseDelta: number | null): PhraseSummary {
   const oracleTrace = path.join(phraseDir, "oracle", "oracle.trace.jsonl");
   const qlattPayload = path.join(phraseDir, "qlatt", "qlatt.json");
   const oracle = parseDectalkTraceFile(oracleTrace);
@@ -782,6 +813,7 @@ function summarizePhrase(phraseDir: string): PhraseSummary {
         entry.oracleValue,
         entry.qlatt,
         entry.qlattScale ?? 1,
+        maxPhaseDelta,
       ),
     ]),
   ) as Record<string, ParamSummary>;
@@ -919,10 +951,11 @@ function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
 
 function main(): number {
   const args = parseArgs(process.argv.slice(2));
-  const phrases = phraseDirs(args.runRoot).map(summarizePhrase);
+  const phrases = phraseDirs(args.runRoot).map((phraseDir) => summarizePhrase(phraseDir, args.maxPhaseDelta));
   const report = {
     schemaVersion: "v1",
     runRoot: args.runRoot,
+    phaseAlignmentMaxDelta: args.maxPhaseDelta,
     summary: summarizeCorpus(phrases),
     phrases,
   };

@@ -200,6 +200,75 @@ describe("DECtalk trace packet timing", () => {
       rmSync(directory, { recursive: true, force: true });
     }
   });
+
+  it("recomputes a same-segment bucket from cells within the requested phase delta", () => {
+    const directory = mkdtempSync(path.join(tmpdir(), "qlatt-dectalk-phase-summary-"));
+    try {
+      const phraseId = "phase-filter";
+      const phraseRoot = path.join(directory, phraseId);
+      const oracleDirectory = path.join(phraseRoot, "oracle");
+      const qlattDirectory = path.join(phraseRoot, "qlatt");
+      mkdirSync(oracleDirectory, { recursive: true });
+      mkdirSync(qlattDirectory, { recursive: true });
+      writeFileSync(
+        path.join(oracleDirectory, "oracle.trace.jsonl"),
+        [0, 1, 2].map((frame) => JSON.stringify({
+          frame,
+          timeFrames: frame,
+          tcum: frame + 1,
+          phoneIndex: 1,
+          f0prime: 1000,
+          out: { PH: 288, B3: 100 },
+        })).join("\n"),
+      );
+      writeFileSync(
+        path.join(oracleDirectory, "oracle.json"),
+        JSON.stringify({ symbolic: { comparisonTokens: ["n"] } }),
+      );
+      writeFileSync(
+        path.join(qlattDirectory, "qlatt.json"),
+        JSON.stringify({
+          track: [
+            { time: 0, phoneme: "N", params: { B3: 100 } },
+            { time: 0.0064, phoneme: "N", params: { B3: 130 } },
+            { time: 0.0128, phoneme: "N", params: { B3: 160 } },
+            { time: 0.0384, phoneme: "IH", params: { B3: 190 } },
+          ],
+        }),
+      );
+
+      const stdout = execFileSync(
+        process.execPath,
+        [
+          "--loader",
+          "ts-node/esm/transpile-only",
+          "--experimental-specifier-resolution=node",
+          "scripts/oracle/summarize-trace-run.ts",
+          "--run-root",
+          directory,
+          "--max-phase-delta",
+          "0.2",
+        ],
+        { cwd: process.cwd(), encoding: "utf8" },
+      );
+      const report: unknown = JSON.parse(stdout);
+      const phrases = arrayAt(report, "phrases");
+      const phrase = phrases[0];
+      const params = objectAt(phrase, "params");
+      const b3 = objectAt(params, "B3");
+      const sameSegment = objectAt(b3, "sameSegment");
+      const phaseAligned = objectAt(b3, "phaseAlignedSameSegment");
+
+      expect(numberAt(sameSegment, "compared")).toBe(3);
+      expect(numberAt(sameSegment, "maxAbs")).toBe(60);
+      expect(numberAt(phaseAligned, "compared")).toBe(2);
+      expect(numberAt(phaseAligned, "meanAbs")).toBe(15);
+      expect(numberAt(phaseAligned, "maxAbs")).toBe(30);
+      expect(numberAt(phaseAligned, "maxFrame")).toBe(1);
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
 });
 
 function isRecord(value: unknown): value is Record<string, unknown> {

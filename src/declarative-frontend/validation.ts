@@ -1,5 +1,6 @@
 import { validateExpressionSyntax } from "./cel-expressions";
 import { cloneValue, isPlainObject } from "../yaml-loader";
+import * as S from "./struct-schema";
 
 type DiagnosticSeverity = "error" | "warning";
 type ValidationDiagnostic = {
@@ -1914,55 +1915,45 @@ function validateRules(
 
 // Chunk 3: validate pipeline-level `string_sets:` block.
 // Shape: Record<non-empty string, string[]> where every element is a string.
+const stringSetsSchema = S.record({
+  code: "E_STRING_SET_INVALID",
+  notObject: "string_sets must be an object mapping name to an array of strings",
+  keyCheck: (name, keyPath, sink) => {
+    if (typeof name !== "string" || name.length === 0) {
+      sink.push(
+        makeDiagnostic(
+          "E_STRING_SET_INVALID",
+          `string_sets name must be a non-empty string (got '${String(name)}')`,
+          keyPath
+        )
+      );
+      return false;
+    }
+  },
+  value: (name) =>
+    S.array({
+      code: "E_STRING_SET_INVALID",
+      notArray: `string_sets['${name}'] must be an array of strings`,
+      element: (i) => (v, p, sink) => {
+        if (typeof v !== "string") {
+          sink.push(
+            makeDiagnostic(
+              "E_STRING_SET_INVALID",
+              `string_sets['${name}'][${i}] must be a string (got ${typeof v})`,
+              p
+            )
+          );
+        }
+      },
+    }),
+});
+
 function validateStringSets(
   spec: PlainObject,
   diagnostics: ValidationDiagnostic[]
 ): void {
   if (!Object.prototype.hasOwnProperty.call(spec, "string_sets")) return;
-  const block = spec.string_sets;
-  if (!isPlainObject(block)) {
-    diagnostics.push(
-      makeDiagnostic(
-        "E_STRING_SET_INVALID",
-        "string_sets must be an object mapping name to an array of strings",
-        "string_sets"
-      )
-    );
-    return;
-  }
-  for (const [name, value] of Object.entries(block)) {
-    if (typeof name !== "string" || name.length === 0) {
-      diagnostics.push(
-        makeDiagnostic(
-          "E_STRING_SET_INVALID",
-          `string_sets name must be a non-empty string (got '${String(name)}')`,
-          `string_sets.${String(name)}`
-        )
-      );
-      continue;
-    }
-    if (!Array.isArray(value)) {
-      diagnostics.push(
-        makeDiagnostic(
-          "E_STRING_SET_INVALID",
-          `string_sets['${name}'] must be an array of strings`,
-          `string_sets.${name}`
-        )
-      );
-      continue;
-    }
-    for (let i = 0; i < value.length; i += 1) {
-      if (typeof value[i] !== "string") {
-        diagnostics.push(
-          makeDiagnostic(
-            "E_STRING_SET_INVALID",
-            `string_sets['${name}'][${i}] must be a string (got ${typeof value[i]})`,
-            `string_sets.${name}[${i}]`
-          )
-        );
-      }
-    }
-  }
+  stringSetsSchema(spec.string_sets, "string_sets", diagnostics);
 }
 
 function hasCitationArray(value: unknown): boolean {
@@ -2011,33 +2002,63 @@ function validateStringArray(
   }
 }
 
+const eventPointsSchema = S.object({
+  code: "E_LOWERING_SPEC_REQUIRED",
+  notObject: "output.lowering.timeline.event_points must be an object",
+  fields: [
+    "include_segment_start",
+    "include_control_boundaries",
+    "include_f0_anchors",
+    "include_transition_steady_time",
+  ].map((key) => ({
+    key,
+    schema: S.boolean("E_LOWERING_SPEC_BOOLEAN", (p) => `${p} must be boolean`),
+  })),
+});
+
 function validateEventPointPolicy(value: unknown, diagnostics: ValidationDiagnostic[]): void {
-  if (!isPlainObject(value)) {
-    diagnostics.push(
-      makeDiagnostic(
-        "E_LOWERING_SPEC_REQUIRED",
-        "output.lowering.timeline.event_points must be an object",
-        "output.lowering.timeline.event_points"
-      )
-    );
-    return;
-  }
-  for (const field of ["include_segment_start", "include_control_boundaries", "include_f0_anchors", "include_transition_steady_time"]) {
-    if (typeof value[field] !== "boolean") {
-      diagnostics.push(
-        makeDiagnostic(
-          "E_LOWERING_SPEC_BOOLEAN",
-          `output.lowering.timeline.event_points.${field} must be boolean`,
-          `output.lowering.timeline.event_points.${field}`
-        )
-      );
-    }
-  }
+  eventPointsSchema(value, "output.lowering.timeline.event_points", diagnostics);
 }
 
-function isFiniteNumber(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value);
-}
+// Shared structural-schema vocabulary for the lowering-spec data tables. Code is
+// always E_LOWERING_SPEC_REQUIRED and messages are `${path} <suffix>` (subject
+// equals path), so the combinators reproduce the hand-rolled diagnostics exactly.
+const LS_REQ = "E_LOWERING_SPEC_REQUIRED";
+const mustBeObject: S.Msg = (p) => `${p} must be an object`;
+const mustBeFiniteNumber: S.Msg = (p) => `${p} must be a finite number`;
+const mustBeBoolean: S.Msg = (p) => `${p} must be a boolean`;
+
+// One locus entry: { locus_hz, prcnt, durtran_ms } — each a required finite
+// number (absent field and non-finite field both report "must be a finite
+// number", matching the original per-field isFiniteNumber loop).
+const locusEntrySchema = S.object({
+  code: LS_REQ,
+  notObject: mustBeObject,
+  fields: ["locus_hz", "prcnt", "durtran_ms"].map((key) => ({
+    key,
+    schema: S.finiteNumber(LS_REQ, mustBeFiniteNumber),
+  })),
+});
+
+// table[obstruent][sontyx "1"|"2"|"3"][formant] -> locus entry. The sontyx key
+// enum is a key-level check that does not stop descent (matches the original).
+const locusTableSchema = S.optional(
+  S.record({
+    code: LS_REQ,
+    notObject: mustBeObject,
+    value: () =>
+      S.record({
+        code: LS_REQ,
+        notObject: mustBeObject,
+        keyCheck: (key, keyPath, sink) => {
+          if (key !== "1" && key !== "2" && key !== "3") {
+            sink.push(makeDiagnostic(LS_REQ, `${keyPath} key must be "1", "2", or "3"`, keyPath));
+          }
+        },
+        value: () => S.record({ code: LS_REQ, notObject: mustBeObject, value: () => locusEntrySchema }),
+      }),
+  })
+);
 
 /**
  * Validate one optional locus table (`loci` or `loci_female`) at `base`. Shape:
@@ -2051,42 +2072,7 @@ function validateLocusTable(
   base: string,
   diagnostics: ValidationDiagnostic[]
 ): void {
-  if (table === undefined) return;
-  if (!isPlainObject(table)) {
-    diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base));
-    return;
-  }
-  for (const [obstruent, block] of Object.entries(table)) {
-    const obPath = `${base}.${obstruent}`;
-    if (!isPlainObject(block)) {
-      diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${obPath} must be an object`, obPath));
-      continue;
-    }
-    for (const [sontyx, formants] of Object.entries(block)) {
-      const sxPath = `${obPath}.${sontyx}`;
-      if (sontyx !== "1" && sontyx !== "2" && sontyx !== "3") {
-        diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${sxPath} key must be "1", "2", or "3"`, sxPath));
-      }
-      if (!isPlainObject(formants)) {
-        diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${sxPath} must be an object`, sxPath));
-        continue;
-      }
-      for (const [formant, entry] of Object.entries(formants)) {
-        const fPath = `${sxPath}.${formant}`;
-        if (!isPlainObject(entry)) {
-          diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${fPath} must be an object`, fPath));
-          continue;
-        }
-        for (const field of ["locus_hz", "prcnt", "durtran_ms"]) {
-          if (!isFiniteNumber((entry as Record<string, unknown>)[field])) {
-            diagnostics.push(
-              makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${fPath}.${field} must be a finite number`, `${fPath}.${field}`)
-            );
-          }
-        }
-      }
-    }
-  }
+  locusTableSchema(table, base, diagnostics);
 }
 
 /**
@@ -2097,6 +2083,55 @@ function validateLocusTable(
  * The engine treats a missing/partial entry as "no locus" (legacy fallback), so
  * this only flags structurally malformed data, not coverage gaps.
  */
+// Optional setloc prcnt-adjustment DATA (ph_sttr2.c:294-307). Each is a
+// Record<phoneme, {flags}>; every flag field is optional (present-undefined and
+// absent both skip). Boolean flags for obstruent_place/f2_back, {1,2,3} enum for
+// vowel_category edges.
+const obstruentPlaceSchema = S.optional(
+  S.record({
+    code: LS_REQ,
+    notObject: mustBeObject,
+    value: () =>
+      S.object({
+        code: LS_REQ,
+        notObject: mustBeObject,
+        fields: [{ key: "palatal_or_dental", optional: true, schema: S.boolean(LS_REQ, mustBeBoolean) }],
+      }),
+  })
+);
+const f2BackSchema = S.optional(
+  S.record({
+    code: LS_REQ,
+    notObject: mustBeObject,
+    value: () =>
+      S.object({
+        code: LS_REQ,
+        notObject: mustBeObject,
+        fields: ["forward", "backward"].map((key) => ({
+          key,
+          optional: true,
+          schema: S.boolean(LS_REQ, mustBeBoolean),
+        })),
+      }),
+  })
+);
+const vowelCategorySchema = S.optional(
+  S.record({
+    code: LS_REQ,
+    notObject: mustBeObject,
+    value: () =>
+      S.object({
+        code: LS_REQ,
+        notObject: mustBeObject,
+        fields: ["forward", "backward"].map((key) => ({
+          key,
+          optional: true,
+          schema: S.enumOf([1, 2, 3], LS_REQ, (p) => `${p} must be 1, 2, or 3`),
+        })),
+      }),
+  })
+);
+
 function validateLocusTables(
   loci: unknown,
   lociFemale: unknown,
@@ -2111,28 +2146,8 @@ function validateLocusTables(
   validateLocusTable(loci, "output.lowering.transitions.loci", diagnostics);
   validateLocusTable(lociFemale, "output.lowering.transitions.loci_female", diagnostics);
 
-  // Optional setloc prcnt-adjustment DATA (ph_sttr2.c:294-307). All optional.
   const { obstruentPlace, roundedSonorantConsonant, f2Back } = prcntAdjust;
-  if (obstruentPlace !== undefined) {
-    const base = "output.lowering.transitions.obstruent_place";
-    if (!isPlainObject(obstruentPlace)) {
-      diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base));
-    } else {
-      for (const [phoneme, flags] of Object.entries(obstruentPlace)) {
-        const pPath = `${base}.${phoneme}`;
-        if (!isPlainObject(flags)) {
-          diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${pPath} must be an object`, pPath));
-          continue;
-        }
-        const v = (flags as Record<string, unknown>).palatal_or_dental;
-        if (v !== undefined && typeof v !== "boolean") {
-          diagnostics.push(
-            makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${pPath}.palatal_or_dental must be a boolean`, `${pPath}.palatal_or_dental`)
-          );
-        }
-      }
-    }
-  }
+  obstruentPlaceSchema(obstruentPlace, "output.lowering.transitions.obstruent_place", diagnostics);
   if (roundedSonorantConsonant !== undefined) {
     validateStringArray(
       roundedSonorantConsonant,
@@ -2141,52 +2156,8 @@ function validateLocusTables(
       "output.lowering.transitions.rounded_sonorant_consonant"
     );
   }
-  if (f2Back !== undefined) {
-    const base = "output.lowering.transitions.f2_back";
-    if (!isPlainObject(f2Back)) {
-      diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base));
-    } else {
-      for (const [phoneme, flags] of Object.entries(f2Back)) {
-        const pPath = `${base}.${phoneme}`;
-        if (!isPlainObject(flags)) {
-          diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${pPath} must be an object`, pPath));
-          continue;
-        }
-        for (const edge of ["forward", "backward"]) {
-          const v = (flags as Record<string, unknown>)[edge];
-          if (v !== undefined && typeof v !== "boolean") {
-            diagnostics.push(
-              makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${pPath}.${edge} must be a boolean`, `${pPath}.${edge}`)
-            );
-          }
-        }
-      }
-    }
-  }
-
-  if (vowelCategory !== undefined) {
-    const base = "output.lowering.transitions.vowel_category";
-    if (!isPlainObject(vowelCategory)) {
-      diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base));
-    } else {
-      for (const [sonorant, edges] of Object.entries(vowelCategory)) {
-        const sPath = `${base}.${sonorant}`;
-        if (!isPlainObject(edges)) {
-          diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${sPath} must be an object`, sPath));
-          continue;
-        }
-        for (const edge of ["forward", "backward"]) {
-          const value = (edges as Record<string, unknown>)[edge];
-          if (value === undefined) continue;
-          if (value !== 1 && value !== 2 && value !== 3) {
-            diagnostics.push(
-              makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${sPath}.${edge} must be 1, 2, or 3`, `${sPath}.${edge}`)
-            );
-          }
-        }
-      }
-    }
-  }
+  f2BackSchema(f2Back, "output.lowering.transitions.f2_back", diagnostics);
+  vowelCategorySchema(vowelCategory, "output.lowering.transitions.vowel_category", diagnostics);
 }
 
 export type ValidateDslSpecOptions = {
@@ -2420,142 +2391,104 @@ function validateLoweringSpec(
 //   affixes: string[] (affix strings in ascky chars)
 //   ascky: Record<string, single-char string> (ARPABET symbol -> ascky char)
 // Absent block is fine (frontend opts out of syllabification).
+const SYLL_INVALID = "E_SYLLABIFICATION_INVALID";
+const syllabificationSchema = S.object({
+  code: SYLL_INVALID,
+  notObject: "syllabification must be an object with nuclei/onset_clusters/affixes/ascky",
+  fields: [
+    {
+      key: "nuclei",
+      schema: S.nonEmptyString(SYLL_INVALID, "syllabification.nuclei must be a non-empty string of ascky chars"),
+    },
+    ...(["onset_clusters", "affixes"] as const).map((key) => ({
+      key,
+      schema: S.array({
+        code: SYLL_INVALID,
+        notArray: `syllabification.${key} must be an array of strings`,
+        element: (i: number) => (v: unknown, p: string, sink: S.Sink) => {
+          if (typeof v !== "string") {
+            sink.push(
+              makeDiagnostic(SYLL_INVALID, `syllabification.${key}[${i}] must be a string (got ${typeof v})`, p)
+            );
+          }
+        },
+      }),
+    })),
+    {
+      key: "ascky",
+      schema: S.object({
+        code: SYLL_INVALID,
+        notObject: "syllabification.ascky must be an object mapping ARPABET symbol to a single ascky char",
+        fields: [],
+        refine: (obj, path, sink) => {
+          for (const [k, v] of Object.entries(obj)) {
+            if (typeof v !== "string" || v.length !== 1) {
+              sink.push(
+                makeDiagnostic(
+                  SYLL_INVALID,
+                  `syllabification.ascky['${k}'] must be a single character (got '${String(v)}')`,
+                  `${path}.${k}`
+                )
+              );
+            }
+          }
+        },
+      }),
+    },
+  ],
+});
+
 function validateSyllabification(
   spec: PlainObject,
   diagnostics: ValidationDiagnostic[]
 ): void {
   if (!Object.prototype.hasOwnProperty.call(spec, "syllabification")) return;
-  const block = spec.syllabification;
-  if (!isPlainObject(block)) {
-    diagnostics.push(
-      makeDiagnostic(
-        "E_SYLLABIFICATION_INVALID",
-        "syllabification must be an object with nuclei/onset_clusters/affixes/ascky",
-        "syllabification"
-      )
-    );
-    return;
-  }
-  const b = block as PlainObject;
-  if (typeof b.nuclei !== "string" || b.nuclei.length === 0) {
-    diagnostics.push(
-      makeDiagnostic(
-        "E_SYLLABIFICATION_INVALID",
-        "syllabification.nuclei must be a non-empty string of ascky chars",
-        "syllabification.nuclei"
-      )
-    );
-  }
-  for (const key of ["onset_clusters", "affixes"] as const) {
-    const arr = b[key];
-    if (!Array.isArray(arr)) {
-      diagnostics.push(
-        makeDiagnostic(
-          "E_SYLLABIFICATION_INVALID",
-          `syllabification.${key} must be an array of strings`,
-          `syllabification.${key}`
-        )
-      );
-      continue;
-    }
-    for (let i = 0; i < arr.length; i += 1) {
-      if (typeof arr[i] !== "string") {
-        diagnostics.push(
-          makeDiagnostic(
-            "E_SYLLABIFICATION_INVALID",
-            `syllabification.${key}[${i}] must be a string (got ${typeof arr[i]})`,
-            `syllabification.${key}[${i}]`
-          )
-        );
-      }
-    }
-  }
-  if (!isPlainObject(b.ascky)) {
-    diagnostics.push(
-      makeDiagnostic(
-        "E_SYLLABIFICATION_INVALID",
-        "syllabification.ascky must be an object mapping ARPABET symbol to a single ascky char",
-        "syllabification.ascky"
-      )
-    );
-  } else {
-    for (const [k, v] of Object.entries(b.ascky as PlainObject)) {
-      if (typeof v !== "string" || v.length !== 1) {
-        diagnostics.push(
-          makeDiagnostic(
-            "E_SYLLABIFICATION_INVALID",
-            `syllabification.ascky['${k}'] must be a single character (got '${String(v)}')`,
-            `syllabification.ascky.${k}`
-          )
-        );
-      }
-    }
-  }
+  syllabificationSchema(spec.syllabification, "syllabification", diagnostics);
 }
 
 // Chunk 3: validate pipeline-level `maps:` block.
 // Shape: Record<non-empty string, Record<string, string>> — a string→string
 // lookup table for each named map. Numeric or nested-object values are
 // rejected here; if a future caller needs them we can broaden the schema.
+const mapsSchema = S.record({
+  code: "E_MAP_INVALID",
+  notObject: "maps must be an object mapping name to a string→string lookup table",
+  keyCheck: (name, keyPath, sink) => {
+    if (typeof name !== "string" || name.length === 0) {
+      sink.push(
+        makeDiagnostic("E_MAP_INVALID", `maps name must be a non-empty string (got '${String(name)}')`, keyPath)
+      );
+      return false;
+    }
+  },
+  value: (name) =>
+    S.record({
+      code: "E_MAP_INVALID",
+      notObject: `maps['${name}'] must be an object with string keys and string values`,
+      keyCheck: (k, kPath, sink) => {
+        if (typeof k !== "string" || k.length === 0) {
+          sink.push(
+            makeDiagnostic("E_MAP_INVALID", `maps['${name}'] keys must be non-empty strings (got '${String(k)}')`, kPath)
+          );
+          return false;
+        }
+      },
+      value: (k) => (v, p, sink) => {
+        if (typeof v !== "string") {
+          sink.push(
+            makeDiagnostic("E_MAP_INVALID", `maps['${name}']['${k}'] must be a string (got ${typeof v})`, p)
+          );
+        }
+      },
+    }),
+});
+
 function validateMaps(
   spec: PlainObject,
   diagnostics: ValidationDiagnostic[]
 ): void {
   if (!Object.prototype.hasOwnProperty.call(spec, "maps")) return;
-  const block = spec.maps;
-  if (!isPlainObject(block)) {
-    diagnostics.push(
-      makeDiagnostic(
-        "E_MAP_INVALID",
-        "maps must be an object mapping name to a string→string lookup table",
-        "maps"
-      )
-    );
-    return;
-  }
-  for (const [name, value] of Object.entries(block)) {
-    if (typeof name !== "string" || name.length === 0) {
-      diagnostics.push(
-        makeDiagnostic(
-          "E_MAP_INVALID",
-          `maps name must be a non-empty string (got '${String(name)}')`,
-          `maps.${String(name)}`
-        )
-      );
-      continue;
-    }
-    if (!isPlainObject(value)) {
-      diagnostics.push(
-        makeDiagnostic(
-          "E_MAP_INVALID",
-          `maps['${name}'] must be an object with string keys and string values`,
-          `maps.${name}`
-        )
-      );
-      continue;
-    }
-    for (const [k, v] of Object.entries(value)) {
-      if (typeof k !== "string" || k.length === 0) {
-        diagnostics.push(
-          makeDiagnostic(
-            "E_MAP_INVALID",
-            `maps['${name}'] keys must be non-empty strings (got '${String(k)}')`,
-            `maps.${name}.${String(k)}`
-          )
-        );
-        continue;
-      }
-      if (typeof v !== "string") {
-        diagnostics.push(
-          makeDiagnostic(
-            "E_MAP_INVALID",
-            `maps['${name}']['${k}'] must be a string (got ${typeof v})`,
-            `maps.${name}.${k}`
-          )
-        );
-      }
-    }
-  }
+  mapsSchema(spec.maps, "maps", diagnostics);
 }
 
 export function validateDslSpec(

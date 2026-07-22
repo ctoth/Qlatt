@@ -155,11 +155,19 @@ Text → normalizeText() → transcribeText() → [inventory lookup]
 
 ### Declarative Configuration (Bacon IR)
 
-Configuration lives in `experiments/klatt80-baseline/`:
+Configuration lives in `public/experiments/<experiment-id>/` (e.g.
+`public/experiments/klatt80-baseline/`; experiments may `extends` a parent via
+`public/experiments/manifest.json`):
 
 - **`registry.yaml`**: Primitive node definitions (resonator, gain, etc.)
-- **`graph.yaml`**: Audio graph topology (nodes + connections)
+- **`graph.yaml`**: Audio graph topology (nodes + connections); Qlatt macro
+  data such as `formantBanks` lives under the graph's `meta:` key
 - **`semantics.yaml`**: Parameter derivation rules using CEL expressions
+
+The Bacon IR schemas and validator live in the sibling `../bacon` repo;
+`bacon check public/experiments/<id>/graph.yaml` validates a graph against its
+declared registry layers. See `docs/host-contract.md` for the execution
+semantics a host must implement.
 
 ### Semantics Evaluation Pipeline
 

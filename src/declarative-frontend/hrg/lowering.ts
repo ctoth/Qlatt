@@ -881,6 +881,36 @@ export function lowerToFrames(
     if (existing) existing.push(transition);
     else transitionsByItem.set(item, [transition]);
   };
+  /**
+   * Build one edge transition, applying each caller's exact edge arithmetic and
+   * clamps so the four blend/locus sites share a single window computation.
+   * A "leading" edge (segment head) runs the window [0, min(spanMs, dur - EDGE)]
+   * and is dropped unless that end is positive; a "trailing" edge (segment tail)
+   * runs [max(EDGE, dur - spanMs), dur] and is dropped unless that start falls
+   * before the segment end. EDGE is MIN_TRANSITION_EDGE_MS (20 ms, > 0), so the
+   * historic dead `startMs <= 0` sub-guard is not reproduced. `build` receives
+   * the resolved window and returns the transition body (choosing its own
+   * fields / linearFields / omitted endMs) or null to skip the append.
+   */
+  const addLinearTransition = (
+    item: Item,
+    durationMs: number,
+    edge: "leading" | "trailing",
+    spanMs: number,
+    build: (window: { startMs: number; endMs: number }) => ResolvedSegmentTransition | null,
+  ): void => {
+    if (edge === "leading") {
+      const endMs = Math.min(spanMs, durationMs - MIN_TRANSITION_EDGE_MS);
+      if (endMs <= 0) return;
+      const transition = build({ startMs: 0, endMs });
+      if (transition) appendTransition(item, transition);
+      return;
+    }
+    const startMs = Math.max(MIN_TRANSITION_EDGE_MS, durationMs - spanMs);
+    if (startMs >= durationMs) return;
+    const transition = build({ startMs, endMs: durationMs });
+    if (transition) appendTransition(item, transition);
+  };
   timings.forEach((timing, index) => {
     const nextTiming = timings[index + 1];
     if (!nextTiming) return;
@@ -892,27 +922,25 @@ export function lowerToFrames(
     const itemTransitionMs = finiteFeatureNumber(timing.item.get("transition_ms"));
     const transitionMs = itemTransitionMs ?? defaultTransitionMs;
     if (transitionMs <= 0) return;
-    const startMs = Math.max(MIN_TRANSITION_EDGE_MS, timing.durationMs - transitionMs);
-    if (startMs <= 0 || startMs >= timing.durationMs) return;
-    const currentPhoneme = timing.item.get(phonemeKey);
-    const nextPhoneme = nextTiming.item.get(phonemeKey);
-    const currentStepKeys = typeof currentPhoneme === "string"
-      ? options.transitions.blend.step_keys_by_phoneme?.[currentPhoneme] ?? []
-      : [];
-    const nextStepKeys = typeof nextPhoneme === "string"
-      ? options.transitions.blend.step_keys_by_phoneme?.[nextPhoneme] ?? []
-      : [];
-    const fields: Record<string, number> = {};
-    for (const key of options.transitions.blend.keys) {
-      if (currentStepKeys.includes(key) || nextStepKeys.includes(key)) continue;
-      const currentValue = timing.item.get(key);
-      const nextValue = nextTiming.item.get(key);
-      if (typeof currentValue !== "number" || typeof nextValue !== "number") continue;
-      fields[key] = currentValue + (nextValue - currentValue) * blendFactor;
-    }
-    if (Object.keys(fields).length > 0) {
-      appendTransition(timing.item, { startMs, fields });
-    }
+    addLinearTransition(timing.item, timing.durationMs, "trailing", transitionMs, ({ startMs }) => {
+      const currentPhoneme = timing.item.get(phonemeKey);
+      const nextPhoneme = nextTiming.item.get(phonemeKey);
+      const currentStepKeys = typeof currentPhoneme === "string"
+        ? options.transitions.blend.step_keys_by_phoneme?.[currentPhoneme] ?? []
+        : [];
+      const nextStepKeys = typeof nextPhoneme === "string"
+        ? options.transitions.blend.step_keys_by_phoneme?.[nextPhoneme] ?? []
+        : [];
+      const fields: Record<string, number> = {};
+      for (const key of options.transitions.blend.keys) {
+        if (currentStepKeys.includes(key) || nextStepKeys.includes(key)) continue;
+        const currentValue = timing.item.get(key);
+        const nextValue = nextTiming.item.get(key);
+        if (typeof currentValue !== "number" || typeof nextValue !== "number") continue;
+        fields[key] = currentValue + (nextValue - currentValue) * blendFactor;
+      }
+      return Object.keys(fields).length > 0 ? { startMs, fields } : null;
+    });
   });
   if (options.transitions.blend.smooth_all_boundaries === true) {
     timings.forEach((timing, index) => {
@@ -920,27 +948,25 @@ export function lowerToFrames(
       if (!previous) return;
       const itemTransitionMs = finiteFeatureNumber(timing.item.get("transition_ms"));
       const transitionMs = itemTransitionMs ?? defaultTransitionMs;
-      const endMs = Math.min(timing.durationMs - MIN_TRANSITION_EDGE_MS, transitionMs);
-      if (endMs <= 0) return;
-      const currentPhoneme = timing.item.get(phonemeKey);
-      const previousPhoneme = previous.item.get(phonemeKey);
-      const currentStepKeys = typeof currentPhoneme === "string"
-        ? options.transitions.blend.step_keys_by_phoneme?.[currentPhoneme] ?? []
-        : [];
-      const previousStepKeys = typeof previousPhoneme === "string"
-        ? options.transitions.blend.step_keys_by_phoneme?.[previousPhoneme] ?? []
-        : [];
-      const fields: Record<string, number> = {};
-      for (const key of options.transitions.blend.keys) {
-        if (currentStepKeys.includes(key) || previousStepKeys.includes(key)) continue;
-        const currentValue = timing.item.get(key);
-        const previousValue = previous.item.get(key);
-        if (typeof currentValue !== "number" || typeof previousValue !== "number") continue;
-        fields[key] = currentValue + (previousValue - currentValue) * blendFactor;
-      }
-      if (Object.keys(fields).length > 0) {
-        appendTransition(timing.item, { startMs: 0, endMs, fields });
-      }
+      addLinearTransition(timing.item, timing.durationMs, "leading", transitionMs, ({ endMs }) => {
+        const currentPhoneme = timing.item.get(phonemeKey);
+        const previousPhoneme = previous.item.get(phonemeKey);
+        const currentStepKeys = typeof currentPhoneme === "string"
+          ? options.transitions.blend.step_keys_by_phoneme?.[currentPhoneme] ?? []
+          : [];
+        const previousStepKeys = typeof previousPhoneme === "string"
+          ? options.transitions.blend.step_keys_by_phoneme?.[previousPhoneme] ?? []
+          : [];
+        const fields: Record<string, number> = {};
+        for (const key of options.transitions.blend.keys) {
+          if (currentStepKeys.includes(key) || previousStepKeys.includes(key)) continue;
+          const currentValue = timing.item.get(key);
+          const previousValue = previous.item.get(key);
+          if (typeof currentValue !== "number" || typeof previousValue !== "number") continue;
+          fields[key] = currentValue + (previousValue - currentValue) * blendFactor;
+        }
+        return Object.keys(fields).length > 0 ? { startMs: 0, endMs, fields } : null;
+      });
     });
   }
   const sonorantF2 = options.transitions.sonorant_f2;
@@ -969,10 +995,10 @@ export function lowerToFrames(
       const previous = timings[index - 1];
       if (sonorantF2.forward && previous && neighborTypes.has(String(previous.item.get(typeKey)))) {
         const previousValue = previous.item.get(sonorantF2.key);
-        const endMs = Math.min(spanMs, timing.durationMs - MIN_TRANSITION_EDGE_MS);
-        if (typeof previousValue === "number" && endMs > 0) {
-          appendTransition(timing.item, {
-            startMs: 0,
+        addLinearTransition(timing.item, timing.durationMs, "leading", spanMs, ({ startMs, endMs }) => {
+          if (typeof previousValue !== "number") return null;
+          return {
+            startMs,
             endMs,
             fields: {},
             linearFields: {
@@ -981,18 +1007,18 @@ export function lowerToFrames(
                 endValue: currentValue,
               },
             },
-          });
-        }
+          };
+        });
       }
       const next = timings[index + 1];
       if (sonorantF2.backward && next && neighborTypes.has(String(next.item.get(typeKey)))) {
         const nextValue = next.item.get(sonorantF2.key);
         const transitionSpanMs = Math.min(spanMs, timing.durationMs);
-        const startMs = Math.max(MIN_TRANSITION_EDGE_MS, timing.durationMs - transitionSpanMs);
-        if (typeof nextValue === "number" && startMs < timing.durationMs) {
-          appendTransition(timing.item, {
+        addLinearTransition(timing.item, timing.durationMs, "trailing", transitionSpanMs, ({ startMs, endMs }) => {
+          if (typeof nextValue !== "number") return null;
+          return {
             startMs,
-            endMs: timing.durationMs,
+            endMs,
             fields: {},
             linearFields: {
               [sonorantF2.key]: {
@@ -1000,8 +1026,8 @@ export function lowerToFrames(
                 endValue: currentValue + (nextValue - currentValue) * neighborWeight,
               },
             },
-          });
-        }
+          };
+        });
       }
     });
   }
@@ -1033,20 +1059,24 @@ export function lowerToFrames(
           options,
           phonemeKey,
         )) {
-          const endMs = Math.min(timing.durationMs - MIN_TRANSITION_EDGE_MS, formant.spanMs);
           const currentValue = timing.item.get(formant.key);
-          if (typeof currentValue !== "number" || endMs <= 0) continue;
-          appendTransition(timing.item, {
-            startMs: 0,
-            endMs,
-            fields: {},
-            linearFields: {
-              [formant.key]: {
-                startValue: formant.boundaryValue,
-                endValue: currentValue,
+          let applied = false;
+          addLinearTransition(timing.item, timing.durationMs, "leading", formant.spanMs, ({ startMs, endMs }) => {
+            if (typeof currentValue !== "number") return null;
+            applied = true;
+            return {
+              startMs,
+              endMs,
+              fields: {},
+              linearFields: {
+                [formant.key]: {
+                  startValue: formant.boundaryValue,
+                  endValue: currentValue,
+                },
               },
-            },
+            };
           });
+          if (!applied) continue;
           // DECtalk p_us_st1.c applies the same locus boundary while drawing
           // the preceding plosive, with durtran equal to the full phone.
           // ph_draw.c emits the current accumulator before its per-frame
@@ -1112,19 +1142,20 @@ export function lowerToFrames(
           phonemeKey,
         )) {
           const spanMs = Math.min(timing.durationMs, formant.spanMs);
-          const startMs = Math.max(MIN_TRANSITION_EDGE_MS, timing.durationMs - spanMs);
           const currentValue = timing.item.get(formant.key);
-          if (typeof currentValue !== "number" || startMs >= timing.durationMs) continue;
-          appendTransition(timing.item, {
-            startMs,
-            endMs: timing.durationMs,
-            fields: {},
-            linearFields: {
-              [formant.key]: {
-                startValue: currentValue,
-                endValue: formant.boundaryValue,
+          addLinearTransition(timing.item, timing.durationMs, "trailing", spanMs, ({ startMs, endMs }) => {
+            if (typeof currentValue !== "number") return null;
+            return {
+              startMs,
+              endMs,
+              fields: {},
+              linearFields: {
+                [formant.key]: {
+                  startValue: currentValue,
+                  endValue: formant.boundaryValue,
+                },
               },
-            },
+            };
           });
         }
       }

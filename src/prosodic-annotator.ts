@@ -24,7 +24,6 @@ import {
   type BreakPolicy,
   type LongPhraseBreakDecision,
 } from "./break-policy";
-import { loadTuneGrammarSync, selectTuneForPhrase, type TuneSelection } from "./tune-grammar";
 
 interface ProsodyToken {
   item: Item;
@@ -90,7 +89,6 @@ function isSuppressedToken(token: ProsodyToken | null | undefined): boolean {
  */
 export function annotateProsody(utterance: Utterance): void {
   const breakPolicy = loadBreakPolicySync();
-  const tuneGrammar = loadTuneGrammarSync();
   const transaction = utterance.beginTransaction({
     ruleId: "prosodic_structure_annotation",
     phase: "annotation",
@@ -114,6 +112,9 @@ export function annotateProsody(utterance: Utterance): void {
       stress: typeof view.stress === "number" ? view.stress : null,
       word: typeof view.word === "string" ? view.word : "",
       punctuationSymbol: typeof view.punctuationSymbol === "string" ? view.punctuationSymbol : null,
+      // phraseAccent / boundaryTone / initialBoundaryTone are now assigned by the
+      // declarative `assign_phrase_edge_tones` and `assign_initial_boundary_tone`
+      // rules (annotation phase, run before this pass); not consumed here.
       phraseAccent: null,
       boundaryTone: null,
       initialBoundaryTone: null,
@@ -149,29 +150,11 @@ export function annotateProsody(utterance: Utterance): void {
   // Step 3: Assign accent — now the declarative `assign_accent` rule
   // (phases/annotation.yaml), read into result above via the item view.
 
-  // Steps 5-7: Per-phrase passes (accent types, edge tones, long-phrase breaking).
-  // Step 4 (nuclear accent) is now the declarative `identify_nuclear_accent`
-  // scan rule (annotation phase), read into result above via the item view.
-  for (let pi = 0; pi < phrases.length; pi++) {
-    const phrase = phrases[pi];
-
-    const hasPrenuclearAccent = phraseHasPrenuclearAccent(result, phrase);
-    const tuneSelection = selectTuneForPhrase(tuneGrammar, {
-      punctuation: phrase.punctuation,
-      hasPrenuclearAccent,
-    });
-
-    // Step 5: Assign accent types — now the declarative `assign_accent_types`
-    // scan rule (annotation phase), read into result above via the item view.
-
-    // Step 6: Assign phrase accent and boundary tone on phrase boundary.
-    assignPhraseEdgeTones(result, phrase, tuneSelection);
-
-    // Step 7: Long phrase breaking heuristic.
-    const breakDecision = applyLongPhraseBreaking(result, phrase, breakPolicy);
-
-    void pi;
-    void breakDecision;
+  // Step 7: Long phrase breaking heuristic (per phrase). Steps 4-6 (nuclear
+  // accent, accent types, phrase-edge tones) are now declarative annotation-phase
+  // rules, read into result above via the item view.
+  for (const phrase of phrases) {
+    applyLongPhraseBreaking(result, phrase, breakPolicy);
   }
 
   // Step 8: Assign break indices.
@@ -192,10 +175,9 @@ export function annotateProsody(utterance: Utterance): void {
     // (annotation phase); not re-committed here.
     // accentIndexInPhrase is now written by the declarative
     // accent_index_in_phrase scan rule (prosody phase); not committed here.
+    // phraseAccent / boundaryTone / initialBoundaryTone are written by the
+    // declarative edge-tone rules (annotation phase); not re-committed here.
     transaction.set(token.item, "breakIndex", token.breakIndex);
-    transaction.set(token.item, "initialBoundaryTone", token.initialBoundaryTone);
-    transaction.set(token.item, "phraseAccent", token.phraseAccent);
-    transaction.set(token.item, "boundaryTone", token.boundaryTone);
   }
   transaction.commit();
 }
@@ -321,42 +303,6 @@ function assignBreakIndices(tokens: ProsodyToken[], phrases: Phrase[], breakPoli
 }
 
 // ---------------------------------------------------------------------------
-// Step 6: Assign phrase accent and boundary tone
-// ---------------------------------------------------------------------------
-
-/**
- * Assign phrase accent and boundary tone at phrase edges.
- *
- * - Declarative (.): phraseAccent='L-', boundaryTone='L%'
- * - Question (?): phraseAccent='H-', boundaryTone='H%'
- * - Continuation (,, ;, :): phraseAccent='L-', boundaryTone='H%'
- * - Question onset: initialBoundaryTone='%H'
- *
- * Set on the SIL token at the phrase boundary.
- *
- * Citations: Pierrehumbert 1980, Silverman et al. 1992
- */
-function assignPhraseEdgeTones(
-  tokens: ProsodyToken[],
-  phrase: Phrase,
-  tuneSelection: TuneSelection,
-): void {
-  if (phrase.trailingSilIndex < 0) return;
-
-  const silToken = tokens[phrase.trailingSilIndex];
-  const firstTokenIndex = phrase.tokenIndices.find(
-    (idx) => !isSuppressedToken(tokens[idx]) && tokens[idx].phoneme !== "SIL",
-  );
-
-  if (firstTokenIndex != null && firstTokenIndex >= 0) {
-    tokens[firstTokenIndex].initialBoundaryTone = tuneSelection.initialBoundaryTone;
-  }
-
-  silToken.phraseAccent = tuneSelection.phraseAccent;
-  silToken.boundaryTone = tuneSelection.boundaryTone;
-}
-
-// ---------------------------------------------------------------------------
 // Step 7: Long phrase breaking
 // ---------------------------------------------------------------------------
 
@@ -407,13 +353,4 @@ function applyLongPhraseBreaking(
     tokens[breakDecision.breakTokenIndex].breakIndex = breakDecision.breakIndex;
   }
   return breakDecision;
-}
-
-function phraseHasPrenuclearAccent(tokens: ProsodyToken[], phrase: Phrase): boolean {
-  return phrase.tokenIndices.some(
-    (idx) =>
-      !isSuppressedToken(tokens[idx]) &&
-      tokens[idx].isAccentCarrier === true &&
-      tokens[idx].isNuclearAccent !== true,
-  );
 }

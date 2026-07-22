@@ -365,6 +365,8 @@ phases:
       - assign_accent
       - identify_nuclear_accent
       - assign_accent_types
+      - assign_phrase_edge_tones
+      - assign_initial_boundary_tone
   - name: duration
     rules:
       - non_word_initial_consonant_shortening

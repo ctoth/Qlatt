@@ -172,3 +172,62 @@ rules:
     citations:
       - Pierrehumbert 1980
       - Ladd 2008 Ch.3
+
+  # Phrase accent + boundary tone (former prosodic-annotator assignPhraseEdgeTones,
+  # the trailing-SIL half). Set on each ACTIVE SIL that carries a punctuation
+  # symbol — the intonational/intermediate phrase boundary. Values come from the
+  # tune inventory keyed by that SIL's own punctuation type:
+  #   phraseAccent  = H- for questions, else L-;
+  #   boundaryTone  = H% for questions and continuation (, ; :), else L%.
+  # Citations: Pierrehumbert 1980 (phrase accent/boundary tone), Silverman 1992.
+  assign_phrase_edge_tones:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'SIL'
+        && (has(current.punctuationSymbol) ? current.punctuationSymbol != null : false)
+    apply:
+      - field: phraseAccent
+        op: set
+        value: "current.punctuationSymbol == '?' ? 'H-' : 'L-'"
+        tag: phrase_accent
+      - field: boundaryTone
+        op: set
+        value: >-
+          (current.punctuationSymbol == '?'
+            || current.punctuationSymbol == ','
+            || current.punctuationSymbol == ';'
+            || current.punctuationSymbol == ':') ? 'H%' : 'L%'
+        tag: boundary_tone
+    citations:
+      - Pierrehumbert 1980
+      - Silverman et al. 1992
+
+  # Initial boundary tone (former assignPhraseEdgeTones first-phone half). Only
+  # question phrases carry an initial %H edge; it is placed on the first active
+  # phone of the phrase. The phrase-domain scan groups phones by the punctuation
+  # SIL boundary so `phrase.is_first` selects the phrase-initial phone and
+  # `phrase_terminal_punctuation()` types the phrase. Non-initial phones (and
+  # non-question phrases) receive the empty-string sentinel, which the only
+  # reader (`... == '%H'`) treats identically to the old null default.
+  # Citations: Pierrehumbert 1980, Ladd 2008 (%H initial boundary tone).
+  assign_initial_boundary_tone:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme != 'SIL'"
+    scan:
+      domain: phrase
+      reset_where: >-
+        current.phoneme == 'SIL'
+        && (has(current.punctuationSymbol) ? current.punctuationSymbol != null : false)
+    apply:
+      - field: initialBoundaryTone
+        op: set
+        value: >-
+          (phrase.is_first && phrase_terminal_punctuation() == '?') ? '%H' : ''
+        tag: initial_boundary_tone
+    citations:
+      - Pierrehumbert 1980
+      - Ladd 2008

@@ -189,6 +189,16 @@ phases:
     rules:
       - syllable_count_annotation
       - cluster_position_annotation
+      # Phrase-edge tones (phraseAccent / boundaryTone / initialBoundaryTone) were
+      # previously supplied to qlatt-beauty by the shared imperative prosodic
+      # annotator (independent of accent status). Now that those passes are
+      # declarative annotation-phase rules (inherited from qlatt-english via
+      # `extends`), beauty must list them so its SIL boundary tones — read
+      # unguarded by the duration/prosody rules — keep being assigned. beauty
+      # remains accent-less (it does not run mark_function_words / assign_accent),
+      # exactly as before; these two rules depend only on punctuation.
+      - assign_phrase_edge_tones
+      - assign_initial_boundary_tone
   - name: duration
     rules:
       - non_word_initial_consonant_shortening

@@ -52,8 +52,6 @@ export class Relation {
   /** List head/tail (also tracks tree root chain head/tail). */
   head: HrgNode | null = null;
   tail: HrgNode | null = null;
-  /** Tree roots (top-level nodes). */
-  readonly roots: HrgNode[] = [];
   private readonly writeHistory: RelationWrite[] = [];
   private readonly latestWriteByItemId = new Map<string, RelationWrite>();
 
@@ -136,11 +134,13 @@ export class Relation {
       throw new Error(`E_HRG_RELATION_KIND: addRoot requires a 'tree' relation, '${this.name}' is '${this.kind}'`);
     }
     this._validateAttach(item);
-    const previous = this.roots[this.roots.length - 1]?.item ?? null;
+    // In a tree relation only addRoot mutates head/tail (addDaughter never
+    // touches them and append/insertAfter throw), so `tail` is always the last
+    // root of the root chain.
+    const previous = this.tail?.item ?? null;
     const write = this.stamper(this, "add_root", item, null, previous, input);
     const node = this.attach(item, write);
-    this.linkAfter(this.roots[this.roots.length - 1] ?? null, node);
-    this.roots.push(node);
+    this.linkAfter(this.tail, node);
     if (!this.head) this.head = node;
     this.tail = node;
     return node;

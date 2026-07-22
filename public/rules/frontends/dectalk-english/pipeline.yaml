@@ -275,6 +275,8 @@ phases:
       - dectalk_cake_initial_k_boundary_alignment
       - dectalk_cake_ey_boundary_alignment
       - dectalk_rate_scaling
+      - duration_floor_stop_release
+      - duration_floor_default
     resolve_scalars: [duration]
   - name: postlexical
     # Order encodes DECtalk ph_aloph.c source precedence (each /t,d/ rule has goto

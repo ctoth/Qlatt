@@ -548,37 +548,27 @@ function buildTextToKlattTrackDetailed(
   const f0Exponent = requirePolicyNumber(ratePolicy.f0_range_exponent, "rate.f0_range_exponent");
   const transitionExponent = requirePolicyNumber(ratePolicy.transition_scale_exponent, "rate.transition_scale_exponent");
   const formantRate = Math.max(0, (rate - 1) * undershoot);
+  // Duration floors are projected by the `duration_floor_*` scalar rules at the
+  // end of the duration phase (traced, cited). The floor magnitudes live in the
+  // frontend's `output.lowering.timeline.duration_floors` block and are passed
+  // into the rule engine as duration policy so the rules stay data-driven.
+  const stopReleaseFloorMs = lowering.timeline.duration_floors.stop_release_ms.value;
+  const defaultDurationFloorMs = lowering.timeline.duration_floors.default_ms.value;
   runGraphRuleEngine(utterance, spec, {
     evaluationOwner,
     phases: ["duration"],
     parameters: mergedPolicy(spec, {
       ...speakerPolicy,
-      duration: { rate_scale: rate },
+      duration: {
+        rate_scale: rate,
+        stop_release_floor_ms: stopReleaseFloorMs,
+        default_floor_ms: defaultDurationFloorMs,
+      },
       formant: { rate_undershoot_factor: formantRate },
     }),
     inventory: graphInventory,
     captureTooling,
   });
-  const durationFloorTransaction = utterance.beginTransaction({
-    ruleId: "lowering_duration_floor",
-    phase: "duration",
-    tag: "duration_floor",
-    reason: "Project the selected lowering duration floor before temporal finalization",
-    citations: [`/rules/frontends/${frontendId}/frontend.yaml`],
-    stage: "rules",
-  });
-  const stopFloor = lowering.timeline.duration_floors.stop_release_ms.value;
-  const defaultFloor = lowering.timeline.duration_floors.default_ms.value;
-  for (const item of utterance.relation("Segment").listItems()) {
-    if (item.get("active") === false) continue;
-    const duration = durationFloorTransaction.read(item, "duration");
-    const type = durationFloorTransaction.read(item, "type");
-    const floor = type === "stop_release" || type === "stop_aspiration" ? stopFloor : defaultFloor;
-    if (typeof duration === "number" && duration < floor) {
-      durationFloorTransaction.set(item, "duration", floor);
-    }
-  }
-  durationFloorTransaction.commit();
   runGraphRuleEngine(utterance, spec, {
     evaluationOwner,
     phases: ["formant"],

@@ -217,6 +217,13 @@ parameters:
       # documented; DECtalk WPM mapping belongs in an adapter layer instead.
       # Engineering boundary: multiplier normalization happens before frontend rules.
       rate_reference: 1.0
+      # Duration floors consumed by the duration_floor_* rules. The canonical
+      # magnitudes live in output.lowering.timeline.duration_floors (also read by
+      # lowerToFrames); tts-frontend injects those values here at runtime, so
+      # these declarations mirror them and satisfy the rule policy-path validator.
+      # DECtalk 4.63 ph_defs.h: NF7MS (~7ms/1 frame) and NF30MS (30ms/5 frames).
+      stop_release_floor_ms: 7
+      default_floor_ms: 30
       vot_target_ms:
         p: 58
         t: 70

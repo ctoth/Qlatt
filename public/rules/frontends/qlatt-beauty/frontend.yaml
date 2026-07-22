@@ -43,6 +43,18 @@ parameters:
         value: 1.0
         citations:
           - Klatt 1976 §III (speech rate scaling)
+      # Duration floors consumed by the duration_floor_* rules. The canonical
+      # magnitudes live in output.lowering.timeline.duration_floors (also read by
+      # lowerToFrames); tts-frontend injects those values here at runtime, so
+      # these declarations mirror them and satisfy the rule policy-path validator.
+      stop_release_floor_ms:
+        value: 5
+        citations:
+          - "Engineering estimate: minimum 5ms for stop release burst visibility"
+      default_floor_ms:
+        value: 20
+        citations:
+          - "Engineering estimate: minimum 20ms segment duration"
       vot_target_ms:
         initial:
           p:

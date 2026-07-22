@@ -204,6 +204,8 @@ phases:
       - stop_unreleasing
       - s_cluster_aspiration_reduction
       - aspiration_frication_carryover
+      - duration_floor_stop_release
+      - duration_floor_default
     resolve_scalars:
       - duration
   - name: formant

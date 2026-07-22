@@ -373,3 +373,34 @@ rules:
     citations:
       - Klatt 1976
       - "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+  # Hard duration floors, projected as the final duration-phase step (replaces the
+  # former imperative `durationFloorTransaction` loop in tts-frontend.ts). Floor
+  # magnitudes are supplied as duration policy from the frontend's
+  # output.lowering.timeline.duration_floors block, preserving a single source of
+  # truth. `op: max` reproduces "if duration < floor, set floor" exactly.
+  duration_floor_stop_release:
+    kind: scalar
+    select:
+      relation: Segment
+      where: current.type in ['stop_release', 'stop_aspiration']
+    constraint: has(current.duration)
+    apply:
+      - field: duration
+        op: max
+        value: params.policy.duration.stop_release_floor_ms
+        tag: duration_floor
+    citations:
+      - "Engineering estimate: minimum stop release burst duration for visibility (frontend.yaml output.lowering.timeline.duration_floors.stop_release_ms)"
+  duration_floor_default:
+    kind: scalar
+    select:
+      relation: Segment
+      where: current.type != 'stop_release' && current.type != 'stop_aspiration'
+    constraint: has(current.duration)
+    apply:
+      - field: duration
+        op: max
+        value: params.policy.duration.default_floor_ms
+        tag: duration_floor
+    citations:
+      - "Engineering estimate: minimum segment duration (frontend.yaml output.lowering.timeline.duration_floors.default_ms)"

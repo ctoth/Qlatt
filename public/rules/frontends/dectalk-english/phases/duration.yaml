@@ -797,3 +797,34 @@ rules:
         tag: rate
     citations:
       - "DECtalk 4.63 ph_timng.c (speaking rate calibration)"
+  # Hard duration floors, projected as the final duration-phase step (replaces the
+  # former imperative `durationFloorTransaction` loop in tts-frontend.ts). Floor
+  # magnitudes are supplied as duration policy from the frontend's
+  # output.lowering.timeline.duration_floors block, preserving a single source of
+  # truth. `op: max` reproduces "if duration < floor, set floor" exactly.
+  duration_floor_stop_release:
+    kind: scalar
+    select:
+      relation: Segment
+      where: current.type in ['stop_release', 'stop_aspiration']
+    constraint: has(current.duration)
+    apply:
+      - field: duration
+        op: max
+        value: params.policy.duration.stop_release_floor_ms
+        tag: duration_floor
+    citations:
+      - "DECtalk 4.63 ph_defs.h: NF7MS = 1 synthesis frame; frtoms(1) is approximately 7ms at NSAMP_FRAME=71"
+  duration_floor_default:
+    kind: scalar
+    select:
+      relation: Segment
+      where: current.type != 'stop_release' && current.type != 'stop_aspiration'
+    constraint: has(current.duration)
+    apply:
+      - field: duration
+        op: max
+        value: params.policy.duration.default_floor_ms
+        tag: duration_floor
+    citations:
+      - "DECtalk 4.63 ph_defs.h: NF30MS = 5 synthesis frames; named 30ms floor preserves legacy frontend default"

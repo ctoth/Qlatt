@@ -34,6 +34,7 @@ const SCHEMA = {
         isMid: { kind: "boolean" },
         nuclear: { kind: "boolean" },
         active: { kind: "boolean" },
+        punctuationSymbol: { kind: "string" },
       },
     },
   },
@@ -261,6 +262,73 @@ describe("phrase-domain scan primitive", () => {
 
     expect(utterance.getItem("only")?.get("mid")).toBe(-1);
     expect(utterance.getItem("only")?.get("isMid")).toBe(false);
+  });
+
+  it("groups on a reset_where predicate (punctuation SIL), mirroring identifyPhrases", () => {
+    // Two clauses joined by a plain (non-punctuation) SIL that must NOT split,
+    // then a punctuation SIL that must split — exactly the identifyPhrases basis
+    // used by the nuclear-accent and long-phrase passes, which run before break
+    // indices are assigned (so breakIndex is still 0 everywhere here).
+    const utterance = new Utterance(SCHEMA);
+    const transaction = utterance.beginTransaction(META);
+    const rows: Array<[string, string, string | null]> = [
+      ["a", "AA", null],
+      ["b", "L", null],
+      ["plain", "SIL", null],
+      ["c", "IY", null],
+      ["dot", "SIL", "."],
+      ["d", "OW", null],
+      ["e", "N", null],
+    ];
+    const items = rows.map(([id]) => transaction.createItem("segment", id));
+    for (let i = 0; i < items.length; i += 1) {
+      const [, phoneme, punct] = rows[i];
+      transaction.set(items[i], "phoneme", phoneme);
+      transaction.set(items[i], "duration", 100);
+      transaction.set(items[i], "breakIndex", 0);
+      transaction.set(items[i], "carrier", true);
+      transaction.set(items[i], "active", true);
+      if (punct != null) transaction.set(items[i], "punctuationSymbol", punct);
+      transaction.append("Segment", items[i]);
+    }
+    transaction.partitionAnchors(items, utterance.axis.start.id, utterance.axis.end.id);
+    transaction.commit();
+
+    const spec = compileRuleEngineSpec({
+      relations: {
+        Segment: {
+          type: "base" as const,
+          features: { phoneme: [], breakIndex: [], carrier: [true, false], active: [true, false] },
+          scalars: { idx: {}, cnt: {} },
+        },
+      },
+      rules: {
+        phrase_position: {
+          select: { relation: "Segment", where: "current.phoneme != 'SIL'" },
+          scan: {
+            domain: "phrase",
+            reset_where: "current.phoneme == 'SIL' && has(current.punctuationSymbol)",
+          },
+          apply: [
+            { field: "idx", op: "set", value: "phrase.index", tag: "prosody" },
+            { field: "cnt", op: "set", value: "phrase.count", tag: "prosody" },
+          ],
+          citations: ["Ladd 2008"],
+        },
+      },
+      phases: [{ name: "prosody", rules: ["phrase_position"] }],
+    });
+
+    runGraphRuleEngine(utterance, spec);
+
+    // Group 1: [a, b, c] (plain SIL does not split), Group 2: [d, e].
+    expect(utterance.getItem("a")?.get("idx")).toBe(0);
+    expect(utterance.getItem("b")?.get("idx")).toBe(1);
+    expect(utterance.getItem("c")?.get("idx")).toBe(2);
+    expect(utterance.getItem("a")?.get("cnt")).toBe(3);
+    expect(utterance.getItem("d")?.get("idx")).toBe(0);
+    expect(utterance.getItem("e")?.get("idx")).toBe(1);
+    expect(utterance.getItem("d")?.get("cnt")).toBe(2);
   });
 
   it("links writes derived from phrase.* to the breakIndex boundary decision (provenance)", () => {

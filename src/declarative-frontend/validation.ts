@@ -1733,6 +1733,22 @@ function validateRules(
         }
       }
 
+      if (Object.prototype.hasOwnProperty.call(r.contour, "reset_where")) {
+        const resetWhere = r.contour.reset_where;
+        const syntaxError = typeof resetWhere === "string"
+          ? validateExpressionSyntax(resetWhere, { relationNames })
+          : "reset_where must be a CEL expression string";
+        if (syntaxError) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_CEL_INVALID",
+              `Rule '${name}' contour.reset_where has invalid CEL expression: ${syntaxError}`,
+              `rules.${name}.contour.reset_where`
+            )
+          );
+        }
+      }
+
       if (!Array.isArray(r.contour.apply) || r.contour.apply.length === 0) {
         diagnostics.push(
           makeDiagnostic(
@@ -1791,6 +1807,22 @@ function validateRules(
               "E_SCAN_RESET_BREAK_INVALID",
               `Rule '${name}' scan.reset_break_index must be a finite number >= 1`,
               `rules.${name}.scan.reset_break_index`
+            )
+          );
+        }
+      }
+
+      if (Object.prototype.hasOwnProperty.call(r.scan, "reset_where")) {
+        const resetWhere = r.scan.reset_where;
+        const syntaxError = typeof resetWhere === "string"
+          ? validateExpressionSyntax(resetWhere, { relationNames })
+          : "reset_where must be a CEL expression string";
+        if (syntaxError) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_CEL_INVALID",
+              `Rule '${name}' scan.reset_where has invalid CEL expression: ${syntaxError}`,
+              `rules.${name}.scan.reset_where`
             )
           );
         }

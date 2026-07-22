@@ -860,16 +860,31 @@ interface Match {
  * still splits the group. Shared by the `contour` timing seed and the `scan`
  * positional primitive so both derive identical phrase boundaries.
  *
+ * The reset condition is supplied by the caller as `shouldReset(item, itemIndex,
+ * referenceMatch)`. The default (`reset_break_index`) tests the intervening
+ * item's `breakIndex`; the `reset_where` variant evaluates a CEL predicate on
+ * the intervening item, mirroring `identifyPhrases` (split at a SIL carrying a
+ * punctuation symbol) from the imperative annotator.
+ *
  * Citation: Silverman et al. 1992 (ToBI break index tier).
  */
-function groupMatchesByPhrase(matches: readonly Match[], resetBreakIndex: number): Match[][] {
+function groupMatchesByPhrase(
+  matches: readonly Match[],
+  shouldReset: (item: Item, itemIndex: number, referenceMatch: Match) => boolean,
+): Match[][] {
   const groups: Match[][] = [];
   let group: Match[] = [];
   let previousIndex = -1;
   for (const match of matches) {
-    const reset = previousIndex >= 0 && match.items
-      .slice(previousIndex + 1, match.index + 1)
-      .some((item) => Number(item.get("breakIndex") ?? 0) >= resetBreakIndex);
+    let reset = false;
+    if (previousIndex >= 0) {
+      for (let itemIndex = previousIndex + 1; itemIndex <= match.index; itemIndex += 1) {
+        if (shouldReset(match.items[itemIndex], itemIndex, match)) {
+          reset = true;
+          break;
+        }
+      }
+    }
     if (reset && group.length > 0) {
       groups.push(group);
       group = [];
@@ -881,15 +896,56 @@ function groupMatchesByPhrase(matches: readonly Match[], resetBreakIndex: number
   return groups;
 }
 
+/**
+ * Build the phrase-group reset predicate for a phrase-domain rule block
+ * (`contour` or `scan`). A `reset_where` CEL predicate takes precedence and is
+ * evaluated per intervening item against a full evaluation context (so it can
+ * see `current.*`, declared sets/maps, and the `lower()`/`isTrue()` builtins);
+ * otherwise the block resets on `breakIndex >= reset_break_index` (default 4),
+ * matching the historical behaviour with a raw feature read.
+ */
+function makePhraseResetPredicate(
+  block: Readonly<Record<string, unknown>>,
+  deps: PhraseGroupingDeps,
+): (item: Item, itemIndex: number, referenceMatch: Match) => boolean {
+  if (typeof block.reset_where === "string") {
+    const resetWhere = block.reset_where;
+    return (_item, itemIndex, referenceMatch) => {
+      const context = buildEvaluationContext({
+        utterance: deps.utterance,
+        transaction: referenceMatch.transaction,
+        owner: deps.owner,
+        items: referenceMatch.items,
+        index: itemIndex,
+        params: deps.params,
+        relationName: referenceMatch.relationName,
+        predicates: deps.predicates,
+        inventory: deps.inventory,
+      });
+      return conditionMatches(resetWhere, context, deps.predicates);
+    };
+  }
+  const resetBreakIndex = typeof block.reset_break_index === "number"
+    ? block.reset_break_index
+    : 4;
+  return (item) => Number(item.get("breakIndex") ?? 0) >= resetBreakIndex;
+}
+
+interface PhraseGroupingDeps {
+  utterance: Utterance;
+  owner: GraphRuleEvaluationOwner;
+  params: Readonly<Record<string, unknown>>;
+  predicates: Readonly<Record<string, unknown>>;
+  inventory?: GraphInventoryResource;
+}
+
 function attachContourContexts(
   matches: Match[],
   rule: Readonly<Record<string, unknown>>,
+  deps: PhraseGroupingDeps,
 ): void {
   if (!isPlainObject(rule.contour) || rule.contour.domain !== "phrase" || matches.length === 0) return;
-  const resetBreakIndex = typeof rule.contour.reset_break_index === "number"
-    ? rule.contour.reset_break_index
-    : 4;
-  const groups = groupMatchesByPhrase(matches, resetBreakIndex);
+  const groups = groupMatchesByPhrase(matches, makePhraseResetPredicate(rule.contour, deps));
 
   for (const phrase of groups) {
     for (const match of phrase) {
@@ -946,12 +1002,10 @@ function attachContourContexts(
 function attachPhraseScanContexts(
   matches: Match[],
   rule: Readonly<Record<string, unknown>>,
+  deps: PhraseGroupingDeps,
 ): void {
   if (!isPlainObject(rule.scan) || rule.scan.domain !== "phrase" || matches.length === 0) return;
-  const resetBreakIndex = typeof rule.scan.reset_break_index === "number"
-    ? rule.scan.reset_break_index
-    : 4;
-  const groups = groupMatchesByPhrase(matches, resetBreakIndex);
+  const groups = groupMatchesByPhrase(matches, makePhraseResetPredicate(rule.scan, deps));
 
   for (const phrase of groups) {
     const count = phrase.length;
@@ -1636,8 +1690,15 @@ export function runGraphRuleEngine(
           captureTooling,
           options.inventory,
         );
-      attachContourContexts(matches, rule);
-      attachPhraseScanContexts(matches, rule);
+      const phraseGroupingDeps: PhraseGroupingDeps = {
+        utterance,
+        owner: evaluationOwner,
+        params,
+        predicates,
+        inventory: options.inventory,
+      };
+      attachContourContexts(matches, rule, phraseGroupingDeps);
+      attachPhraseScanContexts(matches, rule, phraseGroupingDeps);
       if (timingFinalized && matches.length > 0 && isStructuralRule(rule)) {
         throw new Error(
           `E_FINALIZE_DIRTY: structural rule '${ruleName}' executed after finalize stage`,

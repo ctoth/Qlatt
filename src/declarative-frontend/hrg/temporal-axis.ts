@@ -45,56 +45,13 @@ function numericOrder(order: TemporalOrder): bigint {
   return parsed;
 }
 
-export function compareTemporalOrder(left: TemporalOrder, right: TemporalOrder): number {
+function compareTemporalOrder(left: TemporalOrder, right: TemporalOrder): number {
   const kindOrder = { START: 0, FINITE: 1, END: 2 } as const;
   if (left.kind !== right.kind) return kindOrder[left.kind] - kindOrder[right.kind];
   if (left.kind === "FINITE" && right.kind === "FINITE") {
     return left.rank < right.rank ? -1 : left.rank > right.rank ? 1 : 0;
   }
   return 0;
-}
-
-export function isOrderObject(value: unknown): value is TemporalOrder {
-  if (!value || typeof value !== "object" || Array.isArray(value) || !("kind" in value)) return false;
-  if (value.kind === "START" || value.kind === "END") return true;
-  return value.kind === "FINITE" && "rank" in value && typeof value.rank === "string";
-}
-
-export function isStartOrder(value: unknown): boolean {
-  return isOrderObject(value) && value.kind === "START";
-}
-
-export function isEndOrder(value: unknown): boolean {
-  return isOrderObject(value) && value.kind === "END";
-}
-
-export function toNumericOrder(value: unknown): number | null {
-  if (!isOrderObject(value)) return null;
-  if (value.kind === "START") return 0;
-  if (value.kind === "END") return Number(MAX_RANK);
-  const rank = parseRank(value.rank);
-  return rank == null ? null : Number(rank);
-}
-
-export function compareOrderValue(left: unknown, right: unknown): number {
-  if (left === right) return 0;
-  if (isOrderObject(left) && isOrderObject(right)) return compareTemporalOrder(left, right);
-  if (typeof left === "number" && typeof right === "number") return left < right ? -1 : 1;
-  const leftText = left == null ? "" : String(left);
-  const rightText = right == null ? "" : String(right);
-  return leftText < rightText ? -1 : leftText > rightText ? 1 : 0;
-}
-
-export function buildInitialBoundaryOrders(count: number): TemporalOrder[] {
-  if (!Number.isInteger(count) || count <= 0) return [];
-  if (count === 1) return [START_ORDER, END_ORDER];
-  const orders: TemporalOrder[] = [START_ORDER];
-  for (let index = 1; index < count; index += 1) {
-    const rank = formatRank((MAX_RANK * BigInt(index)) / BigInt(count));
-    orders.push({ kind: "FINITE", rank, id: `M_${rank}` });
-  }
-  orders.push(END_ORDER);
-  return orders;
 }
 
 function orderKey(order: TemporalOrder): string {
@@ -132,21 +89,6 @@ export class TemporalAxis {
     return mark;
   }
 
-  ensureMark(order: unknown): string | null {
-    if (!order || typeof order !== "object" || Array.isArray(order) || !("kind" in order)) return null;
-    if (order.kind === "START") {
-      if (isOrderObject(order)) this.start.order = order;
-      return this.start.id;
-    }
-    if (order.kind === "END") {
-      if (isOrderObject(order)) this.end.order = order;
-      return this.end.id;
-    }
-    if (order.kind !== "FINITE" || !("rank" in order) || typeof order.rank !== "string") return null;
-    const explicitId = "id" in order && typeof order.id === "string" ? order.id : null;
-    return this.addOrder({ kind: "FINITE", rank: order.rank, ...(explicitId ? { id: explicitId } : {}) }, null).id;
-  }
-
   get(id: string): TemporalMark | null {
     return this.marks.get(id) ?? null;
   }
@@ -155,25 +97,11 @@ export class TemporalAxis {
     return typeof id === "string" ? this.get(id) : null;
   }
 
-  getOrderById(id: string | null | undefined): TemporalOrder | null {
-    return this.getMarkById(id)?.order ?? null;
-  }
-
-  getMarkId(order: unknown): string | null {
-    if (!isOrderObject(order)) return null;
-    return this.idByOrder.get(orderKey(order)) ?? null;
-  }
-
   compare(leftId: string, rightId: string): number {
     const left = this.get(leftId);
     const right = this.get(rightId);
     if (!left || !right) throw new Error("E_HRG_TEMPORAL_MARK_UNKNOWN");
     return compareTemporalOrder(left.order, right.order);
-  }
-
-  compareMarkIds(leftId: string | null | undefined, rightId: string | null | undefined): number {
-    if (typeof leftId !== "string" || typeof rightId !== "string") return 0;
-    return this.compare(leftId, rightId);
   }
 
   private rebalance(): void {
@@ -258,5 +186,3 @@ export class TemporalAxis {
     return this.getMarkById(id)?.time ?? null;
   }
 }
-
-export type SyncAxis = TemporalAxis;

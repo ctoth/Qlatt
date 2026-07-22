@@ -14,8 +14,6 @@ export {
   TemporalAxis,
   START_ORDER,
   END_ORDER,
-  buildInitialBoundaryOrders,
-  compareTemporalOrder,
 } from "./temporal-axis";
 export type { TemporalMark, TemporalOrder } from "./temporal-axis";
 export { evalPath, pathNode, pathFeature, isNavOp, step } from "./path";

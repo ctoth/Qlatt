@@ -91,7 +91,7 @@ rules:
         current.type in ['fricative', 'stop_closure', 'affricate']
       is_plosive: current.type == 'stop_closure'
       is_voiced_obstruent: >-
-        is_obstruent && (has(current.voiced) ? current.voiced == true : false)
+        is_obstruent && isTrue(current, 'voiced')
     constraint: at_boundary
     apply:
       - field: duration
@@ -290,7 +290,7 @@ rules:
         current.type in ['fricative', 'affricate']
       is_word_final_voiceless_fricative: >-
         is_word_final && current.type == 'fricative'
-        && (has(current.voiceless) ? current.voiceless == true : false)
+        && isTrue(current, 'voiceless')
     constraint: "!is_word_initial"
     apply:
       - field: duration
@@ -395,8 +395,7 @@ rules:
       nn: "ahead(current, 2)"
       syll_pos: "syllable_position_in_word()"
       next_voiceless: >-
-        n == null ? false :
-        (has(n.voiceless) ? n.voiceless == true : false)
+        n == null ? false : isTrue(n, 'voiceless')
       next_is_fricative: "n == null ? false : n.type == 'fricative'"
       next_is_plosive: "n == null ? false : n.type == 'stop_closure'"
       next_is_affricate: "n == null ? false : n.type == 'affricate'"
@@ -436,8 +435,7 @@ rules:
     define:
       "n": next
       next_voiced: >-
-        n == null ? false :
-        (has(n.voiced) ? n.voiced == true : false)
+        n == null ? false : isTrue(n, 'voiced')
       next_is_obstruent: >-
         n == null ? false :
         n.type in ['fricative', 'stop_closure', 'affricate']

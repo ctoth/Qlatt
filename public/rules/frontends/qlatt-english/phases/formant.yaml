@@ -10,9 +10,8 @@ rules:
       release_phoneme: maps.place_locus_release_for_closure[current.phoneme]
       cand: "release_phoneme != \"\" && next != null && next.phoneme == release_phoneme ? ahead(current, 2) : next"
       front_or_high_vowel: >-
-        cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi) ?
-        cand.hi == true : false))
-      back_vowel: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
+        cand != null && cand.type == 'vowel' && (isTrue(cand, 'front') || isTrue(cand, 'hi'))
+      back_vowel: "cand != null && cand.type == 'vowel' && isTrue(cand, 'back')"
     apply:
       - field: F2
         op: set
@@ -99,8 +98,8 @@ rules:
     define:
       "n": next
       next_is_obstruent: "n != null ? (n.type in ['stop_closure', 'stop_release', 'fricative', 'affricate']) : false"
-      next_bilabial: "next_is_obstruent ? (has(n.bilabial) ? n.bilabial == true : false) : false"
-      next_velar: "next_is_obstruent ? (has(n.velar) ? n.velar == true : false) : false"
+      next_bilabial: "next_is_obstruent ? isTrue(n, 'bilabial') : false"
+      next_velar: "next_is_obstruent ? isTrue(n, 'velar') : false"
     constraint: next_is_obstruent
     apply:
       - field: nasalPlaceIndex
@@ -426,7 +425,7 @@ rules:
     define:
       reduction_rate: >-
         (current.phoneme in ['IY', 'IY0', 'IY1'] ||
-        ((has(current.front) ? current.front == true : false) && (has(current.hi) ? current.hi == true : false))) ?
+        (isTrue(current, 'front') && isTrue(current, 'hi'))) ?
         params.policy.formant.vowel_reduction_rate_high_front :
         params.policy.formant.vowel_reduction_rate
     apply:

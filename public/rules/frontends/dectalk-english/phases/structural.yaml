@@ -492,12 +492,12 @@ rules:
       breathy_next_ms: >-
         current.phoneme == 'TH' &&
         (next_token != null ? (next_token.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
-        (next_token != null ? (has(next_token.voiced) ? next_token.voiced == true : false) : false) ?
+        (next_token != null ? isTrue(next_token, 'voiced') : false) ?
         params.policy.formant.voiceless_open_tract_breathy_onset_ms : 0
       voiced_onset_ms: >-
         current.phoneme == 'DH' &&
         (next_token != null ? (next_token.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
-        (next_token != null ? (has(next_token.voiced) ? next_token.voiced == true : false) : false) ?
+        (next_token != null ? isTrue(next_token, 'voiced') : false) ?
         params.policy.formant.voiced_fricative_voicing_onset_ms : 0
       voiced_onset_av: >-
         max([
@@ -544,7 +544,7 @@ rules:
       where: >-
         current.phoneme in ['V', 'Z', 'ZH', 'JH'] &&
         (next != null ? (next.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
-        (next != null ? (has(next.voiced) ? next.voiced == true : false) : false)
+        (next != null ? isTrue(next, 'voiced') : false)
     define:
       next_token: next
       voiced_onset_av: >-
@@ -594,7 +594,7 @@ rules:
       where: >-
         current.phoneme in ['F', 'S', 'SH'] &&
         (next != null ? (next.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
-        (next != null ? (has(next.voiced) ? next.voiced == true : false) : false)
+        (next != null ? isTrue(next, 'voiced') : false)
     define:
       next_token: next
       breathy_window: "{'AH': params.policy.formant.voiceless_open_tract_breathy_onset_db}"

@@ -39,11 +39,35 @@ export function resetCelCounters(): void { _celEvalCount = 0; _celCacheHitCount 
 type CelFunctionCatalogEntry = {
   name: string;
   arities: readonly number[];
-  binding: "builtin" | "context";
+  // "builtin" — provided natively by cel-js (has, size); not registered here.
+  // "context" — dispatched at eval time to the per-call functions registry.
+  // "pure"    — a fixed, context-free implementation registered on every env.
+  binding: "builtin" | "context" | "pure";
 };
+
+/**
+ * Safe optional-bool accessor for CEL rule expressions.
+ *
+ * `isTrue(obj, field)` returns `true` iff `obj` is a non-null object whose
+ * `field` property is strictly the boolean `true`. An absent field yields
+ * `false`; a present-but-not-`true` value (false, 0, "", null, a non-bool)
+ * yields `false`. This replaces the `has(obj.field) ? obj.field == true : false`
+ * guard idiom repeated across the rule phase files.
+ *
+ * The field is passed BY NAME (two-arg), not dereferenced by the caller,
+ * because a bare `obj.missingField` access throws "No such key" in cel-js —
+ * the very reason the old idiom needed the `has()` guard. Passing the name
+ * keeps the accessor throw-safe for absent fields.
+ */
+function isTrueValue(obj: unknown, field: unknown): boolean {
+  if (obj == null || typeof obj !== "object") return false;
+  const key = typeof field === "string" ? field : String(field);
+  return (obj as Record<string, unknown>)[key] === true;
+}
 
 export const CEL_FUNCTION_CATALOG = [
   { name: "has", arities: [1], binding: "builtin" },
+  { name: "isTrue", arities: [2], binding: "pure" },
   { name: "size", arities: [1], binding: "builtin" },
   { name: "double", arities: [1], binding: "builtin" },
   { name: "string", arities: [1], binding: "builtin" },
@@ -127,8 +151,13 @@ function createCelEnvironment(
   // "double" and "string" are CEL built-in type casts and must NOT be
   // re-registered. Our codebase's double(x) => Number(x) and string(x) =>
   // String(x) are functionally identical to the CEL builtins.
+  // Context-free ("pure") catalog functions: fixed implementation on every env.
+  env.registerFunction("isTrue(dyn, dyn): dyn", (obj: unknown, field: unknown) =>
+    isTrueValue(obj, field)
+  );
+
   for (const { name, arities, binding } of CEL_FUNCTION_CATALOG) {
-    if (binding === "builtin") continue;
+    if (binding !== "context") continue;
     for (const arity of arities) {
       const args = Array.from({ length: arity }, () => "dyn").join(", ");
       const signature = `${name}(${args}): dyn`;

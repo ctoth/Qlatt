@@ -991,6 +991,137 @@ function validateSetValueExpression(
   }
 }
 
+/**
+ * Validate one effect row of a `rules[].apply` or `rules[].contour.apply`
+ * block. Both sites share this exact logic; only the path/label prefix and the
+ * (apply-only) `for_each_field` leftover check differ. `pathPrefix` is e.g.
+ * `rules.foo.apply` and `labelPrefix` is e.g. `Rule 'foo' apply`; the caller's
+ * index `i` is appended here so error codes/paths/messages stay identical.
+ */
+function validateApplyEffect(
+  effect: any,
+  i: number,
+  pathPrefix: string,
+  labelPrefix: string,
+  checkForEachField: boolean,
+  relationByName: Map<string, any>,
+  ruleRelationName: unknown,
+  relationNames: Set<string>,
+  policyState: PolicyValidationState,
+  diagnostics: ValidationDiagnostic[]
+): void {
+  const itemPath = `${pathPrefix}[${i}]`;
+  const itemLabel = `${labelPrefix}[${i}]`;
+  // Chunk 7: `for_each_field` is expanded at parse-time (see
+  // parser.ts:expandForEachField). If it survived to validation, the parser
+  // was bypassed — defense-in-depth diagnostic (apply block only).
+  if (checkForEachField && effect && Object.prototype.hasOwnProperty.call(effect, "for_each_field")) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_FOR_EACH_FIELD_UNEXPANDED",
+        `${itemLabel} still has 'for_each_field'; expected parse-time expansion`,
+        `${itemPath}.for_each_field`
+      )
+    );
+  }
+  const hasValue = effect && Object.prototype.hasOwnProperty.call(effect, "value");
+  const hasDispatch = effect && Object.prototype.hasOwnProperty.call(effect, "dispatch");
+  if (hasValue && hasDispatch) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_DISPATCH_AND_VALUE",
+        `${itemLabel} cannot specify both value and dispatch`,
+        itemPath
+      )
+    );
+  }
+  if (hasDispatch) {
+    const criticalContext = isCriticalScalarField(effect?.field);
+    validateDispatchSpec(
+      effect?.dispatch,
+      relationByName,
+      ruleRelationName,
+      relationNames,
+      policyState,
+      criticalContext,
+      effect?.op === "set" ? "set" : "numeric",
+      diagnostics,
+      `${itemPath}.dispatch`,
+      `${itemLabel} dispatch`
+    );
+  } else if (hasValue) {
+    const criticalContext = isCriticalScalarField(effect?.field);
+    const valueMode = effect?.op === "set" ? "set" : "numeric";
+    if (
+      valueMode === "numeric" &&
+      effect?.value != null &&
+      typeof effect.value !== "string" &&
+      typeof effect.value !== "number"
+    ) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_RULE_EXPRESSION_INVALID",
+          `${itemLabel} has non-string/non-number value expression`,
+          `${itemPath}.value`
+        )
+      );
+    }
+    if (valueMode === "numeric" && typeof effect?.value === "number" && policyState.policyTree && criticalContext) {
+      if (!isAllowedInlinePolicyLiteral(String(effect.value))) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_POLICY_LITERAL_CRITICAL",
+            `${itemLabel} value uses inline critical numeric literal '${String(
+              effect.value
+            )}'; use params.policy.*`,
+            `${itemPath}.value`
+          )
+        );
+      }
+    }
+    if (valueMode === "set") {
+      validateSetValueExpression(
+        effect?.value,
+        relationByName,
+        ruleRelationName,
+        relationNames,
+        policyState,
+        diagnostics,
+        `${itemPath}.value`,
+        `${itemLabel} value`
+      );
+    } else if (typeof effect?.value === "string" && effect.value.length > 0) {
+      const syntaxError = validateExpressionSyntax(effect.value, { relationNames });
+      if (syntaxError) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_CEL_INVALID",
+            `${itemLabel} has invalid CEL value expression: ${syntaxError}`,
+            `${itemPath}.value`
+          )
+        );
+      } else {
+        validateDeclaredTypeFieldUsage(
+          effect.value,
+          relationByName,
+          ruleRelationName,
+          diagnostics,
+          `${itemPath}.value`,
+          `${itemLabel} value`
+        );
+        validatePolicyReferencesAndLiterals(
+          effect.value,
+          `${itemPath}.value`,
+          `${itemLabel} value`,
+          diagnostics,
+          policyState,
+          criticalContext
+        );
+      }
+    }
+  }
+}
+
 function validateTemplateDispatchExpressions(
   value: unknown,
   relationByName: Map<string, any>,
@@ -1531,115 +1662,18 @@ function validateRules(
 
     if (Array.isArray(r.apply)) {
       for (let i = 0; i < r.apply.length; i += 1) {
-        const effect = r.apply[i];
-        // Chunk 7: `for_each_field` is expanded at parse-time (see
-        // parser.ts:expandForEachField). If it survived to validation, the
-        // parser was bypassed — defense-in-depth diagnostic.
-        if (effect && Object.prototype.hasOwnProperty.call(effect, "for_each_field")) {
-          diagnostics.push(
-            makeDiagnostic(
-              "E_FOR_EACH_FIELD_UNEXPANDED",
-              `Rule '${name}' apply[${i}] still has 'for_each_field'; expected parse-time expansion`,
-              `rules.${name}.apply[${i}].for_each_field`
-            )
-          );
-        }
-        const hasValue = effect && Object.prototype.hasOwnProperty.call(effect, "value");
-        const hasDispatch = effect && Object.prototype.hasOwnProperty.call(effect, "dispatch");
-        if (hasValue && hasDispatch) {
-          diagnostics.push(
-            makeDiagnostic(
-              "E_DISPATCH_AND_VALUE",
-              `Rule '${name}' apply[${i}] cannot specify both value and dispatch`,
-              `rules.${name}.apply[${i}]`
-            )
-          );
-        }
-        if (hasDispatch) {
-          const criticalContext = isCriticalScalarField(effect?.field);
-          validateDispatchSpec(
-            effect?.dispatch,
-            relationByName,
-            ruleRelationName,
-            relationNames,
-            policyState,
-            criticalContext,
-            effect?.op === "set" ? "set" : "numeric",
-            diagnostics,
-            `rules.${name}.apply[${i}].dispatch`,
-            `Rule '${name}' apply[${i}] dispatch`
-          );
-        } else if (hasValue) {
-          const criticalContext = isCriticalScalarField(effect?.field);
-          const valueMode = effect?.op === "set" ? "set" : "numeric";
-          if (
-            valueMode === "numeric" &&
-            effect?.value != null &&
-            typeof effect.value !== "string" &&
-            typeof effect.value !== "number"
-          ) {
-            diagnostics.push(
-              makeDiagnostic(
-                "E_RULE_EXPRESSION_INVALID",
-                `Rule '${name}' apply[${i}] has non-string/non-number value expression`,
-                `rules.${name}.apply[${i}].value`
-              )
-            );
-          }
-          if (valueMode === "numeric" && typeof effect?.value === "number" && policyState.policyTree && criticalContext) {
-            if (!isAllowedInlinePolicyLiteral(String(effect.value))) {
-              diagnostics.push(
-                makeDiagnostic(
-                  "E_POLICY_LITERAL_CRITICAL",
-                  `Rule '${name}' apply[${i}] value uses inline critical numeric literal '${String(
-                    effect.value
-                  )}'; use params.policy.*`,
-                  `rules.${name}.apply[${i}].value`
-                )
-              );
-            }
-          }
-          if (valueMode === "set") {
-            validateSetValueExpression(
-              effect?.value,
-              relationByName,
-              ruleRelationName,
-              relationNames,
-              policyState,
-              diagnostics,
-              `rules.${name}.apply[${i}].value`,
-              `Rule '${name}' apply[${i}] value`
-            );
-          } else if (typeof effect?.value === "string" && effect.value.length > 0) {
-            const syntaxError = validateExpressionSyntax(effect.value, { relationNames });
-            if (syntaxError) {
-              diagnostics.push(
-                makeDiagnostic(
-                  "E_CEL_INVALID",
-                  `Rule '${name}' apply[${i}] has invalid CEL value expression: ${syntaxError}`,
-                  `rules.${name}.apply[${i}].value`
-                )
-              );
-            } else {
-              validateDeclaredTypeFieldUsage(
-                effect.value,
-                relationByName,
-                ruleRelationName,
-                diagnostics,
-                `rules.${name}.apply[${i}].value`,
-                `Rule '${name}' apply[${i}] value`
-              );
-              validatePolicyReferencesAndLiterals(
-                effect.value,
-                `rules.${name}.apply[${i}].value`,
-                `Rule '${name}' apply[${i}] value`,
-                diagnostics,
-                policyState,
-                criticalContext
-              );
-            }
-          }
-        }
+        validateApplyEffect(
+          r.apply[i],
+          i,
+          `rules.${name}.apply`,
+          `Rule '${name}' apply`,
+          true,
+          relationByName,
+          ruleRelationName,
+          relationNames,
+          policyState,
+          diagnostics
+        );
       }
     }
 
@@ -1690,103 +1724,18 @@ function validateRules(
         );
       } else {
         for (let i = 0; i < r.contour.apply.length; i += 1) {
-          const effect = r.contour.apply[i];
-          const hasValue = effect && Object.prototype.hasOwnProperty.call(effect, "value");
-          const hasDispatch = effect && Object.prototype.hasOwnProperty.call(effect, "dispatch");
-          if (hasValue && hasDispatch) {
-            diagnostics.push(
-              makeDiagnostic(
-                "E_DISPATCH_AND_VALUE",
-                `Rule '${name}' contour.apply[${i}] cannot specify both value and dispatch`,
-                `rules.${name}.contour.apply[${i}]`
-              )
-            );
-          }
-          if (hasDispatch) {
-            const criticalContext = isCriticalScalarField(effect?.field);
-            validateDispatchSpec(
-              effect?.dispatch,
-              relationByName,
-              ruleRelationName,
-              relationNames,
-              policyState,
-              criticalContext,
-              effect?.op === "set" ? "set" : "numeric",
-              diagnostics,
-              `rules.${name}.contour.apply[${i}].dispatch`,
-              `Rule '${name}' contour.apply[${i}] dispatch`
-            );
-          } else if (hasValue) {
-            const criticalContext = isCriticalScalarField(effect?.field);
-            const valueMode = effect?.op === "set" ? "set" : "numeric";
-            if (
-              valueMode === "numeric" &&
-              effect?.value != null &&
-              typeof effect.value !== "string" &&
-              typeof effect.value !== "number"
-            ) {
-              diagnostics.push(
-                makeDiagnostic(
-                  "E_RULE_EXPRESSION_INVALID",
-                  `Rule '${name}' contour.apply[${i}] has non-string/non-number value expression`,
-                  `rules.${name}.contour.apply[${i}].value`
-                )
-              );
-            }
-            if (valueMode === "numeric" && typeof effect?.value === "number" && policyState.policyTree && criticalContext) {
-              if (!isAllowedInlinePolicyLiteral(String(effect.value))) {
-                diagnostics.push(
-                  makeDiagnostic(
-                    "E_POLICY_LITERAL_CRITICAL",
-                    `Rule '${name}' contour.apply[${i}] value uses inline critical numeric literal '${String(
-                      effect.value
-                    )}'; use params.policy.*`,
-                    `rules.${name}.contour.apply[${i}].value`
-                  )
-                );
-              }
-            }
-            if (valueMode === "set") {
-              validateSetValueExpression(
-                effect?.value,
-                relationByName,
-                ruleRelationName,
-                relationNames,
-                policyState,
-                diagnostics,
-                `rules.${name}.contour.apply[${i}].value`,
-                `Rule '${name}' contour.apply[${i}] value`
-              );
-            } else if (typeof effect?.value === "string" && effect.value.length > 0) {
-              const syntaxError = validateExpressionSyntax(effect.value, { relationNames });
-              if (syntaxError) {
-                diagnostics.push(
-                  makeDiagnostic(
-                    "E_CEL_INVALID",
-                    `Rule '${name}' contour.apply[${i}] has invalid CEL value expression: ${syntaxError}`,
-                    `rules.${name}.contour.apply[${i}].value`
-                  )
-                );
-              } else {
-                validateDeclaredTypeFieldUsage(
-                  effect.value,
-                  relationByName,
-                  ruleRelationName,
-                  diagnostics,
-                  `rules.${name}.contour.apply[${i}].value`,
-                  `Rule '${name}' contour.apply[${i}] value`
-                );
-                validatePolicyReferencesAndLiterals(
-                  effect.value,
-                  `rules.${name}.contour.apply[${i}].value`,
-                  `Rule '${name}' contour.apply[${i}] value`,
-                  diagnostics,
-                  policyState,
-                  criticalContext
-                );
-              }
-            }
-          }
+          validateApplyEffect(
+            r.contour.apply[i],
+            i,
+            `rules.${name}.contour.apply`,
+            `Rule '${name}' contour.apply`,
+            false,
+            relationByName,
+            ruleRelationName,
+            relationNames,
+            policyState,
+            diagnostics
+          );
         }
       }
     }

@@ -358,6 +358,7 @@ function parseControlFields(value: FeatureValue | undefined): Record<string, Res
 function resolveWindowSpan(
   value: { readonly [key: string]: FeatureValue },
   durationMs: number,
+  earliestStartMs = 0,
 ): { startMs: number; endMs: number } | null {
   const prefixMs = finiteFeatureNumber(value.prefix_ms);
   if (prefixMs != null) {
@@ -376,8 +377,8 @@ function resolveWindowSpan(
   const endRatio = finiteFeatureNumber(value.end_ratio);
   const rawStartMs = startMsValue ?? durationMs * Math.max(0, Math.min(1, startRatio ?? 0));
   const rawEndMs = endMsValue ?? durationMs * Math.max(0, Math.min(1, endRatio ?? 1));
-  const startMs = Math.max(0, Math.min(durationMs, rawStartMs));
-  const endMs = Math.max(startMs, Math.min(durationMs, rawEndMs));
+  const startMs = Math.max(earliestStartMs, Math.min(durationMs, rawStartMs));
+  const endMs = Math.max(startMs, Math.max(earliestStartMs, Math.min(durationMs, rawEndMs)));
   return endMs > startMs ? { startMs, endMs } : null;
 }
 
@@ -1075,7 +1076,11 @@ export function lowerToFrames(
         );
         return;
       }
-      const span = resolveWindowSpan(rawWindow, targetTiming.durationMs);
+      const span = resolveWindowSpan(
+        rawWindow,
+        targetTiming.durationMs,
+        targetIndex === 0 ? -initialSilenceMs : 0,
+      );
       if (!span) {
         utterance.diagnostics.warn(
           "Control window has an empty resolved span",
@@ -1556,26 +1561,28 @@ export function lowerToFrames(
   ): void => {
     const params: Record<string, number> = {};
     const provenance: Record<string, string> = {};
-    if (!item && silenceEdge && context.silence) {
-      const resourceKnown = utterance.provenance.getDecisions().some(
-        (decision) => decision.id === context.silence?.decisionId,
-      );
-      if (!resourceKnown) {
-        utterance.diagnostics.error(
-          "Selected silence/source resource decision is absent from the Utterance",
-          { decisionId: context.silence.decisionId, edge: silenceEdge },
-          "HRG_LOWER_SILENCE_PROVENANCE_REQUIRED",
+    if (!item && silenceEdge) {
+      if (context.silence) {
+        const resourceKnown = utterance.provenance.getDecisions().some(
+          (decision) => decision.id === context.silence?.decisionId,
         );
-        throw new Error("E_HRG_LOWER_SILENCE_PROVENANCE: selected silence decision is unknown");
-      }
-      const sourceParams = silenceEdge === "initial"
-        ? context.silence.initialParams
-        : context.silence.finalParams;
-      for (const key of paramKeys) {
-        const value = sourceParams[key];
-        if (typeof value === "number" && Number.isFinite(value)) {
-          params[key] = value;
-          provenance[key] = context.silence.decisionId;
+        if (!resourceKnown) {
+          utterance.diagnostics.error(
+            "Selected silence/source resource decision is absent from the Utterance",
+            { decisionId: context.silence.decisionId, edge: silenceEdge },
+            "HRG_LOWER_SILENCE_PROVENANCE_REQUIRED",
+          );
+          throw new Error("E_HRG_LOWER_SILENCE_PROVENANCE: selected silence decision is unknown");
+        }
+        const sourceParams = silenceEdge === "initial"
+          ? context.silence.initialParams
+          : context.silence.finalParams;
+        for (const key of paramKeys) {
+          const value = sourceParams[key];
+          if (typeof value === "number" && Number.isFinite(value)) {
+            params[key] = value;
+            provenance[key] = context.silence.decisionId;
+          }
         }
       }
       if (silenceEdge === "initial" && initialSilenceMs > 0) {
@@ -1587,6 +1594,21 @@ export function lowerToFrames(
             if (typeof value === "number" && write) {
               params[key] = value;
               provenance[key] = write.decisionId;
+            }
+          }
+          for (const window of controlWindowsByItem.get(firstSegment) ?? []) {
+            if (segmentOffsetMs < window.startMs - 1e-6 || segmentOffsetMs >= window.endMs - 1e-6) {
+              continue;
+            }
+            for (const [key, field] of Object.entries(window.fields)) {
+              const value = resolveControlField(params[key], field);
+              if (value == null || !Number.isFinite(value)) {
+                delete params[key];
+                delete provenance[key];
+              } else {
+                params[key] = value;
+                provenance[key] = window.decisionId;
+              }
             }
           }
         }
@@ -1801,19 +1823,34 @@ export function lowerToFrames(
     }
   };
 
-  appendFrame(0, undefined, undefined, 0, undefined, "initial");
+  const initialEventTimes = new Set<number>([0]);
+  const firstTiming = timings[0];
+  if (options.timeline.event_points.include_control_boundaries && firstTiming) {
+    for (const window of controlWindowsByItem.get(firstTiming.item) ?? []) {
+      for (const offsetMs of [window.startMs, window.endMs]) {
+        const timeMs = initialSilenceMs + offsetMs;
+        if (timeMs > 1e-6 && timeMs < initialSilenceMs - 1e-6) initialEventTimes.add(timeMs);
+      }
+    }
+  }
   if (layeredF0 && options.timeline.event_points.include_f0_anchors && paramKeys.includes("F0")) {
     for (const point of f0Points) {
       if (point.timeMs <= 1e-6 || point.timeMs >= initialSilenceMs - 1e-6) continue;
-      appendFrame(
-        point.timeMs,
-        undefined,
-        "SIL",
-        0,
-        (point.outputTimeMs ?? point.timeMs) * globalPauseScale,
-        "initial",
-      );
+      initialEventTimes.add(point.timeMs);
     }
+  }
+  for (const timeMs of [...initialEventTimes].sort((left, right) => left - right)) {
+    const f0Point = f0Points.find((point) => Math.abs(point.timeMs - timeMs) <= 1e-6);
+    appendFrame(
+      timeMs,
+      undefined,
+      timeMs > 1e-6 ? "SIL" : undefined,
+      timeMs - initialSilenceMs,
+      timeMs <= 1e-6 || f0Point == null
+        ? undefined
+        : (f0Point.outputTimeMs ?? f0Point.timeMs) * globalPauseScale,
+      "initial",
+    );
   }
   for (const timing of timings) {
     const offsets = new Set<number>();

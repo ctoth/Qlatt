@@ -396,6 +396,26 @@ describe("dectalk-english end-to-end", () => {
     expect(ap).toEqual(expected);
   });
 
+  it("matches every native A6 cell through the complete the trace", () => {
+    const result = textToKlattTrackDetailed("the.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const a6 = Array.from({ length: 139 }, (_, frameIndex) => {
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.A6;
+    });
+    const expected = [
+      0, 9, 18, 27,
+      ...Array(7).fill(0),
+      46, 41, 37, 32, 26, 19, 13, 6,
+      ...Array(120).fill(0),
+    ];
+
+    expect(expected).toHaveLength(139);
+    expect(a6).toEqual(expected);
+  });
+
   it("applies DECtalk Rule 14 to a sonorant after a voiceless plosive", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

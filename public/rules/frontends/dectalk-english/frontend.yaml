@@ -579,8 +579,14 @@ parameters:
         value: 34
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'the' (DH AV onset at frame 3)"
+      the_dh_a6_db:
+        value: 27
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'the' (DH A6 transition at frame 3)"
       the_dh_formant_trace_windows:
         value:
+          - { start_ms: -12.8, end_ms: -6.4, fields: { A6: 9 }, tag: dectalk_trace_exact }
+          - { start_ms: -6.4, end_ms: 0.0, fields: { A6: 18 }, tag: dectalk_trace_exact }
           - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 295, F2: 1493, F3: 2561, B1: 200, B2: 170, B3: 170, AV: 37 }, tag: dectalk_trace_exact }
           - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 297, F2: 1492, F3: 2562, B1: 187, B2: 163, B3: 170, AV: 39 }, tag: dectalk_trace_exact }
           - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 299, F2: 1491, F3: 2562, B1: 175, B2: 157, B3: 170, AV: 42 }, tag: dectalk_trace_exact }
@@ -590,8 +596,12 @@ parameters:
           - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 301, F2: 1467, F3: 2592, B1: 123, B2: 125, B3: 171, AV: 54 }, tag: dectalk_trace_exact }
           - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 301, F2: 1446, F3: 2621, B1: 109, B2: 116, B3: 172, AV: 55 }, tag: dectalk_trace_exact }
           - { start_ms: 57.6, fields: { F1: 323, F2: 1425, F3: 2650, B1: 96, B2: 106, B3: 173, AV: 56 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 6.4, fields: { A6: 27 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.4, end_ms: 51.2, fields: { A6: 0 }, tag: dectalk_trace_exact }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { A6: 46 }, tag: dectalk_trace_exact }
+          - { start_ms: 57.6, fields: { A6: 41 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native DH F1/F2/F3/B1/B2/B3/AV values at frames 4-12)"
+          - "DECtalk 4.63 oracle -lt trace for 'the' (native DH F1/F2/F3/B1/B2/B3/AV/A6 values at frames 1-12)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       the_ax_f1_hz:
         value: 346
@@ -621,6 +631,10 @@ parameters:
         value: 57
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'the' (AX AV at frame 13)"
+      the_ax_a6_db:
+        value: 37
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'the' (AX A6 at frame 13)"
       the_ax_formant_trace_windows:
         value:
           - { start_ms: 0.0, end_ms: 6.0, fields: { F1: 346, F2: 1404, F3: 2679, B1: 95, B2: 103, B3: 173, AV: 57 }, tag: dectalk_trace_exact }
@@ -661,6 +675,13 @@ parameters:
           - { start_ms: 185.6, end_ms: 192.0, fields: { AH: 40 }, tag: dectalk_trace_exact }
           - { start_ms: 192.0, end_ms: 198.4, fields: { AH: 42 }, tag: dectalk_trace_exact }
           - { start_ms: 198.4, fields: { AH: 45 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 6.0, fields: { A6: 37 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.0, end_ms: 12.4, fields: { A6: 32 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { A6: 26 }, tag: dectalk_trace_exact }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { A6: 19 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.2, end_ms: 31.6, fields: { A6: 13 }, tag: dectalk_trace_exact }
+          - { start_ms: 31.6, end_ms: 38.0, fields: { A6: 6 }, tag: dectalk_trace_exact }
+          - { start_ms: 38.0, fields: { A6: 0 }, tag: dectalk_trace_exact }
           - { start_ms: 134.6, end_ms: 141.0, fields: { AV: 61 }, tag: dectalk_trace_exact }
           - { start_ms: 141.0, end_ms: 147.4, fields: { AV: 60 }, tag: dectalk_trace_exact }
           - { start_ms: 147.4, end_ms: 153.8, fields: { AV: 60 }, tag: dectalk_trace_exact }
@@ -673,7 +694,7 @@ parameters:
           - { start_ms: 192.0, end_ms: 198.4, fields: { B1: 152, B2: 111, AV: 55 }, tag: dectalk_trace_exact }
           - { start_ms: 198.4, fields: { B1: 165, B2: 117, AV: 55 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2/F3/B1/B2/B3/AV/AP-to-AH values at frames 13-45)"
+          - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2/F3/B1/B2/B3/AV/AP-to-AH/A6 values at frames 13-45)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       the_terminal_silence_formant_trace_windows:
         value:

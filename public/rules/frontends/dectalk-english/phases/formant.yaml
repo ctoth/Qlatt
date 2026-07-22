@@ -307,12 +307,16 @@ rules:
         op: set
         value: params.policy.formant.the_dh_av_db
         tag: dectalk_trace_exact
+      - field: A6
+        op: set
+        value: params.policy.formant.the_dh_a6_db
+        tag: dectalk_trace_exact
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'the' (native initialized-SI and DH F1/F2/F3/B1/B2/B3/AV values at frames 0-12)"
+      - "DECtalk 4.63 oracle -lt trace for 'the' (native initialized-SI and DH F1/F2/F3/B1/B2/B3/AV/A6 values at frames 0-12)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_the_ax_f1_trace:
@@ -352,12 +356,16 @@ rules:
         op: set
         value: params.policy.formant.the_ax_av_db
         tag: dectalk_trace_exact
+      - field: A6
+        op: set
+        value: params.policy.formant.the_ax_a6_db
+        tag: dectalk_trace_exact
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2/F3/B1/B2/B3/AV/AP-to-AH values at frames 13-45)"
+      - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2/F3/B1/B2/B3/AV/AP-to-AH/A6 values at frames 13-45)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_the_terminal_silence_f1_trace:

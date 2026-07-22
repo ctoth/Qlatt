@@ -334,4 +334,34 @@ describe("HRG lowering control windows", () => {
     expect(release.get("B1")).toBe(300);
     expect(vowel.get("AH")).toBe(0);
   });
+
+  it("projects first-segment negative windows into the initial controller silence", () => {
+    const { utterance, closure } = buildAspirationFixture();
+    const windows = closure.set("control_windows", [
+      {
+        start_ms: -12.8,
+        end_ms: -6.4,
+        fields: { AH: { op: "set", value: 9 } },
+      },
+      {
+        start_ms: -6.4,
+        end_ms: 0,
+        fields: { AH: { op: "set", value: 18 } },
+      },
+    ], {
+      reason: "Initialized DECtalk controls anticipate the first active segment",
+      citations: ["DECtalk 4.63 ph_draw.c"],
+    });
+
+    const lowered = lowerToFrames(utterance, POLICY);
+    const firstPreRoll = lowered.frames.find((frame) => Math.abs(frame.time - 0.0064) <= 1e-9);
+    const secondPreRoll = lowered.frames.find((frame) => Math.abs(frame.time - 0.0128) <= 1e-9);
+    const segmentStart = lowered.frames.find((frame) => Math.abs(frame.time - 0.0192) <= 1e-9);
+
+    expect(firstPreRoll?.params.AH).toBe(9);
+    expect(firstPreRoll?.provenance.AH).toBe(windows.decisionId);
+    expect(secondPreRoll?.params.AH).toBe(18);
+    expect(secondPreRoll?.provenance.AH).toBe(windows.decisionId);
+    expect(segmentStart?.params.AH).toBe(0);
+  });
 });

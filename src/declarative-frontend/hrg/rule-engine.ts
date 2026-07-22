@@ -502,6 +502,50 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
         }
         return position;
       },
+      // ---------------------------------------------------------------------
+      // Contiguous word-run accent helpers.
+      //
+      // Faithful port of the prosodic-annotator `assignAccent` word grouping:
+      // a "word run" is the maximal contiguous run of non-SIL selected items
+      // (suppressed items are already excluded from `items`) that share the
+      // same `word` string, bounded by a SIL token or a word-string change.
+      // Two ADJACENT words with identical orthography (e.g. "sip sip") merge
+      // into one run exactly as the imperative pass merged them by contiguous
+      // string equality — preserving byte-identical carrier placement rather
+      // than the SylStructure word split.
+      //
+      // Citations: O'Shaughnessy 1976 (accent by word class),
+      //   Allen, Hunnicutt & Klatt 1987 (accent levels).
+      // ---------------------------------------------------------------------
+      word_run_has_primary_stress: () => {
+        const source = items[index];
+        if (!source || transaction.read(source, "phoneme") === "SIL") return false;
+        const word = transaction.read(source, "word");
+        let hasPrimaryStress = false;
+        for (let k = index; k >= 0; k -= 1) {
+          if (transaction.read(items[k], "phoneme") === "SIL") break;
+          if (transaction.read(items[k], "word") !== word) break;
+          if (transaction.read(items[k], "stress") === 1) hasPrimaryStress = true;
+        }
+        for (let k = index + 1; k < items.length; k += 1) {
+          if (transaction.read(items[k], "phoneme") === "SIL") break;
+          if (transaction.read(items[k], "word") !== word) break;
+          if (transaction.read(items[k], "stress") === 1) hasPrimaryStress = true;
+        }
+        return hasPrimaryStress;
+      },
+      is_first_primary_stress_in_word_run: () => {
+        const source = items[index];
+        if (!source || transaction.read(source, "phoneme") === "SIL") return false;
+        if (transaction.read(source, "stress") !== 1) return false;
+        const word = transaction.read(source, "word");
+        for (let k = index - 1; k >= 0; k -= 1) {
+          if (transaction.read(items[k], "phoneme") === "SIL") break;
+          if (transaction.read(items[k], "word") !== word) break;
+          if (transaction.read(items[k], "stress") === 1) return false;
+        }
+        return true;
+      },
       syllable_index: () => {
         const source = items[index];
         const syllable = source ? structureAncestor(source, "syllable") : undefined;

@@ -114,6 +114,8 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "trajectory_control_windows", arities: [2], binding: "context" },
   { name: "count_word_vowels", arities: [0], binding: "context" },
   { name: "cluster_position_in_word", arities: [0], binding: "context" },
+  { name: "word_run_has_primary_stress", arities: [0], binding: "context" },
+  { name: "is_first_primary_stress_in_word_run", arities: [0], binding: "context" },
   { name: "word_count", arities: [0], binding: "context" },
   { name: "phone_count", arities: [0], binding: "context" },
   { name: "clause_phone_count", arities: [0], binding: "context" },

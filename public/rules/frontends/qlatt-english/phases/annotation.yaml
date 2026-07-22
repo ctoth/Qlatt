@@ -54,3 +54,40 @@ rules:
     citations:
       - O'Shaughnessy 1976
       - Allen, Hunnicutt & Klatt 1987
+
+  # Accent assignment (former prosodic-annotator assignAccent pass).
+  #
+  # A word is accented iff it is a content word (require_content_word: true in
+  # accent-policy.yaml) AND some phone in its contiguous word run carries primary
+  # stress (required_stress: 1). Every phone of an accented word receives
+  # isAccented=true; the accent CARRIER is the first primary-stressed phone of the
+  # run (carrier_selection: first_primary_stress), which keeps expanded-diphthong
+  # offglides from receiving separate pitch accents.
+  #
+  # The word run is the maximal contiguous run of like-`word` phones (SIL/word
+  # change bound the run); two adjacent identical words merge, matching the
+  # imperative pass byte-for-byte. Suppressed phones are invisible to selection
+  # so they neither receive nor carry accent, exactly as before.
+  #
+  # These flags gate the downstream nuclear-accent, accent-type, and downstep
+  # (accent_index_in_phrase) passes.
+  assign_accent:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme != 'SIL'"
+    apply:
+      - field: isAccented
+        op: set
+        value: >-
+          isTrue(current, 'isContentWord') && word_run_has_primary_stress()
+        tag: accent
+      - field: isAccentCarrier
+        op: set
+        value: >-
+          isTrue(current, 'isContentWord') && word_run_has_primary_stress()
+            && is_first_primary_stress_in_word_run()
+        tag: accent
+    citations:
+      - O'Shaughnessy 1976
+      - Allen, Hunnicutt & Klatt 1987

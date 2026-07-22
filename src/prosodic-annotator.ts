@@ -18,11 +18,6 @@
 
 import type { Item, Utterance } from "./declarative-frontend/hrg";
 import {
-  loadAccentPolicySync,
-  resolveAccentAssignment,
-  type AccentPolicy,
-} from "./accent-policy";
-import {
   loadBreakPolicySync,
   resolveLongPhraseBreak,
   resolvePunctuationBreakIndex,
@@ -94,7 +89,6 @@ function isSuppressedToken(token: ProsodyToken | null | undefined): boolean {
  * - Ladd 2008 (nuclear accent = last accent in phrase, DTE)
  */
 export function annotateProsody(utterance: Utterance): void {
-  const accentPolicy = loadAccentPolicySync();
   const breakPolicy = loadBreakPolicySync();
   const tuneGrammar = loadTuneGrammarSync();
   const transaction = utterance.beginTransaction({
@@ -128,8 +122,12 @@ export function annotateProsody(utterance: Utterance): void {
       // value so the remaining accent passes see identical classification.
       isFunctionWord: view.isFunctionWord === true,
       isContentWord: view.isContentWord === true,
-      isAccented: false,
-      isAccentCarrier: false,
+      // isAccented / isAccentCarrier are now assigned by the declarative
+      // `assign_accent` rule (annotation phase, runs before this pass); read the
+      // committed values so the remaining phrase passes (nuclear, accent types)
+      // see identical carrier placement.
+      isAccented: view.isAccented === true,
+      isAccentCarrier: view.isAccentCarrier === true,
       isNuclearAccent: false,
       accentType: null,
       breakIndex: 0,
@@ -142,8 +140,8 @@ export function annotateProsody(utterance: Utterance): void {
   // Step 2: Mark function/content words — now the declarative `mark_function_words`
   // rule (phases/annotation.yaml), read into result above via the item view.
 
-  // Step 3: Assign accent (stress==1 AND content word).
-  assignAccent(result, accentPolicy);
+  // Step 3: Assign accent — now the declarative `assign_accent` rule
+  // (phases/annotation.yaml), read into result above via the item view.
 
   // Steps 4-7: Per-phrase passes (nuclear accent, accent types, edge tones, long-phrase breaking).
   for (let pi = 0; pi < phrases.length; pi++) {
@@ -181,8 +179,8 @@ export function annotateProsody(utterance: Utterance): void {
   for (const token of result) {
     // isFunctionWord / isContentWord are written by the declarative
     // mark_function_words rule (annotation phase); not re-committed here.
-    transaction.set(token.item, "isAccented", token.isAccented);
-    transaction.set(token.item, "isAccentCarrier", token.isAccentCarrier);
+    // isAccented / isAccentCarrier are written by the declarative assign_accent
+    // rule (annotation phase); not re-committed here.
     transaction.set(token.item, "isNuclearAccent", token.isNuclearAccent);
     transaction.set(token.item, "accentType", token.accentType);
     // accentIndexInPhrase is now written by the declarative
@@ -235,88 +233,6 @@ function identifyPhrases(tokens: ProsodyToken[]): Phrase[] {
   }
 
   return phrases;
-}
-
-// ---------------------------------------------------------------------------
-// Step 3: Assign accent
-// ---------------------------------------------------------------------------
-
-function assignAccent(tokens: ProsodyToken[], accentPolicy: AccentPolicy): void {
-  // First pass: determine which words are accented (content word + primary stress).
-  // We need to propagate accent to ALL phones of the same word within a phrase.
-  // A word is accented if ANY of its phones has stress==1 and the word is a content word.
-
-  // Build word groups: map from (word, contiguous group index) to token indices.
-  const wordGroups: number[][] = [];
-  let currentGroup: number[] = [];
-  let currentWord: string | null = null;
-
-  for (let i = 0; i < tokens.length; i++) {
-    const token = tokens[i];
-    if (token.phoneme === "SIL") {
-      if (currentGroup.length > 0) {
-        wordGroups.push(currentGroup);
-        currentGroup = [];
-        currentWord = null;
-      }
-      token.isAccented = false;
-      token.isAccentCarrier = false;
-      token.isNuclearAccent = false;
-      token.accentType = null;
-      continue;
-    }
-    if (isSuppressedToken(token)) {
-      token.isAccented = false;
-      token.isAccentCarrier = false;
-      token.isNuclearAccent = false;
-      token.accentType = null;
-      continue;
-    }
-
-    const word = token.word ?? "";
-    if (word !== currentWord) {
-      if (currentGroup.length > 0) {
-        wordGroups.push(currentGroup);
-      }
-      currentGroup = [i];
-      currentWord = word;
-    } else {
-      currentGroup.push(i);
-    }
-
-    // Initialize defaults — will be overwritten below.
-    token.isAccented = false;
-    token.isAccentCarrier = false;
-    token.isNuclearAccent = false;
-    token.accentType = null;
-  }
-  if (currentGroup.length > 0) {
-    wordGroups.push(currentGroup);
-  }
-
-  // For each word group, determine if accented.
-  for (const group of wordGroups) {
-    const isContent = group.some((idx) => tokens[idx].isContentWord === true);
-    const accentDecision = resolveAccentAssignment(accentPolicy, {
-      isContentWord: isContent,
-      stresses: group.map((idx) => tokens[idx].stress),
-    });
-    let primaryStressOrdinal = 0;
-    for (const idx of group) {
-      tokens[idx].isAccented = accentDecision.accented;
-      tokens[idx].isAccentCarrier = false;
-      if (tokens[idx].stress === accentDecision.carrierStress) {
-        const isSelectedCarrier =
-          accentDecision.accented &&
-          accentDecision.carrierOrdinal != null &&
-          primaryStressOrdinal === accentDecision.carrierOrdinal;
-        if (isSelectedCarrier && !isSuppressedToken(tokens[idx])) {
-          tokens[idx].isAccentCarrier = true;
-        }
-        primaryStressOrdinal += 1;
-      }
-    }
-  }
 }
 
 // ---------------------------------------------------------------------------

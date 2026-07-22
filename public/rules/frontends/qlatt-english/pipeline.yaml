@@ -411,6 +411,7 @@ phases:
       - sw_default_assignment
   - name: prosody
     rules:
+      - accent_index_in_phrase
       - tobi_baseline_init
       - tobi_initial_boundary_high
       - tobi_accent

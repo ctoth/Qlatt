@@ -47,7 +47,6 @@ interface ProsodyToken {
   isAccentCarrier: boolean;
   isNuclearAccent: boolean;
   accentType: string | null;
-  accentIndexInPhrase: number;
   breakIndex: number;
 }
 
@@ -82,7 +81,6 @@ function isSuppressedToken(token: ProsodyToken | null | undefined): boolean {
  * - isAccentCarrier (boolean)
  * - isNuclearAccent (boolean)
  * - accentType (string | null) — "H*", "L*", "L+H*", etc.
- * - accentIndexInPhrase (number) — 0-based index of accented token within phrase; -1 for non-accented
  * - breakIndex (number 0-4)
  * - initialBoundaryTone (string | null) — "%H" when phrase-initial high edge is marked
  * - phraseAccent (string | null) — "H-" or "L-"
@@ -134,7 +132,6 @@ export function annotateProsody(utterance: Utterance): void {
       isAccentCarrier: false,
       isNuclearAccent: false,
       accentType: null,
-      accentIndexInPhrase: -1,
       breakIndex: 0,
     };
   });
@@ -177,10 +174,9 @@ export function annotateProsody(utterance: Utterance): void {
   // Step 8: Assign break indices.
   assignBreakIndices(result, phrases, breakPolicy);
 
-  // Step 9: Assign accentIndexInPhrase. This depends on break indices because
-  // downstep resets only at IP boundaries (breakIndex=4), not at ip boundaries
-  // (breakIndex=3). Citations: Pierrehumbert 1980, Ladd 2008
-  assignAccentIndices(result);
+  // Step 9: Assign accentIndexInPhrase — now the declarative
+  // `accent_index_in_phrase` scan rule (phases/prosody.yaml), which runs after
+  // this annotator and reads the committed isAccentCarrier / breakIndex.
 
   for (const token of result) {
     // isFunctionWord / isContentWord are written by the declarative
@@ -189,7 +185,8 @@ export function annotateProsody(utterance: Utterance): void {
     transaction.set(token.item, "isAccentCarrier", token.isAccentCarrier);
     transaction.set(token.item, "isNuclearAccent", token.isNuclearAccent);
     transaction.set(token.item, "accentType", token.accentType);
-    transaction.set(token.item, "accentIndexInPhrase", token.accentIndexInPhrase);
+    // accentIndexInPhrase is now written by the declarative
+    // accent_index_in_phrase scan rule (prosody phase); not committed here.
     transaction.set(token.item, "breakIndex", token.breakIndex);
     transaction.set(token.item, "initialBoundaryTone", token.initialBoundaryTone);
     transaction.set(token.item, "phraseAccent", token.phraseAccent);
@@ -386,33 +383,6 @@ function assignAccentTypes(
 // ---------------------------------------------------------------------------
 // Step 9: Assign accentIndexInPhrase
 // ---------------------------------------------------------------------------
-
-/**
- * Assign a 0-based accent index to each accent carrier within the
- * current intonational phrase. Non-accented tokens get accentIndexInPhrase = -1.
- *
- * The index is used by the Pierrehumbert downstep formula: H_n = V * k^n, where n is
- * accentIndexInPhrase. The counter resets only at breakIndex=4 (IP boundary)
- * and intentionally continues across breakIndex=3 (intermediate phrase).
- *
- * Citations:
- * - Pierrehumbert 1980 (downstep formula H_n = V * k^n)
- * - Ladd 2008 Ch.2 (constant-proportion downstep ratio)
- */
-function assignAccentIndices(tokens: ProsodyToken[]): void {
-  let accentCount = 0;
-  for (const token of tokens) {
-    if (!isSuppressedToken(token) && token.isAccentCarrier === true) {
-      token.accentIndexInPhrase = accentCount;
-      accentCount++;
-    } else {
-      token.accentIndexInPhrase = -1;
-    }
-    if (token.breakIndex >= 4) {
-      accentCount = 0;
-    }
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Step 8: Assign break indices

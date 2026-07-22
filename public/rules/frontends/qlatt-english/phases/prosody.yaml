@@ -17,6 +17,34 @@ rules:
   # ==========================================================================
 
   # --------------------------------------------------------------------------
+  # Rule 0: Accent index within the intonational phrase (downstep counter)
+  #
+  # Ports the prosodic-annotator assignAccentIndices pass to a traced rule using
+  # the phrase-domain scan primitive. Each accent carrier gets a 0-based index
+  # within its intonational phrase; the counter resets only at IP boundaries
+  # (breakIndex >= 4) and intentionally continues across intermediate phrases
+  # (breakIndex 3). Non-carriers are left unset, which the downstream `accent_idx`
+  # define (has-guarded) reads as 0 — identical to the annotator's -1 sentinel.
+  # This feeds the Pierrehumbert downstep H_n = V * k^n.
+  # --------------------------------------------------------------------------
+  accent_index_in_phrase:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "has(current.isAccentCarrier) && current.isAccentCarrier == true"
+    scan:
+      domain: phrase
+      reset_break_index: 4
+    apply:
+      - field: accentIndexInPhrase
+        op: set
+        value: "phrase.index"
+        tag: downstep_index
+    citations:
+      - Pierrehumbert 1980
+      - Ladd 2008 Ch.2
+
+  # --------------------------------------------------------------------------
   # Rule 1: Baseline initialization
   # --------------------------------------------------------------------------
   tobi_baseline_init:

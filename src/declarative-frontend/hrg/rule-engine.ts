@@ -546,6 +546,23 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
         }
         return true;
       },
+      // True iff the current phone is the LAST phone of its contiguous word run
+      // (the next active item is a SIL, a different word, or the end of the
+      // utterance). This is the declarative-correct "last phone of the word" the
+      // imperative assignBreakIndices word-boundary pass computed by raw-order
+      // walking — but WITHOUT that walk's suppressed-SIL flush quirk (a suppressed
+      // punctuation SIL wedged mid-word made the old pass stamp a spurious
+      // word-INTERNAL breakIndex=1). Suppressed items are excluded from `items`,
+      // so the run is not split by them. Citation: Silverman et al. 1992.
+      is_last_in_word_run: () => {
+        const source = items[index];
+        if (!source || transaction.read(source, "phoneme") === "SIL") return false;
+        const word = transaction.read(source, "word");
+        const next = items[index + 1];
+        if (!next) return true;
+        if (transaction.read(next, "phoneme") === "SIL") return true;
+        return transaction.read(next, "word") !== word;
+      },
       // Terminal punctuation of the current item's intonational phrase.
       //
       // Scans forward (in selection order, over active items) to the first SIL

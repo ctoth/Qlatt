@@ -231,3 +231,83 @@ rules:
     citations:
       - Pierrehumbert 1980
       - Ladd 2008
+
+  # ==========================================================================
+  # Break-index tier (former prosodic-annotator assignBreakIndices +
+  # applyLongPhraseBreaking passes). ToBI break indices (Silverman et al. 1992):
+  #   4 = intonational phrase boundary (terminal . ? !)
+  #   3 = intermediate phrase boundary (clause , ; :)
+  #   2 = weak intermediate boundary inserted mid long phrase (O'Shaughnessy 1976)
+  #   1 = ordinary word boundary
+  #   0 = word-internal (left unset; guarded readers treat absent as 0)
+  # The three rules run in order: long-phrase break (2) -> punctuation (4/3) ->
+  # word boundary (1). The word-boundary rule preserves any already-assigned
+  # break >0 so it never overwrites a long-phrase 2.
+  # ==========================================================================
+
+  # breakIndex=2 at the pre-midpoint content word of a long phrase (>=7 content
+  # words, no internal punctuation). Selecting the last phone of each content
+  # word run and grouping by the punctuation-SIL phrase boundary, the scan's
+  # `midpoint_index` (floor(count/2)-1) is exactly the imperative pre-midpoint
+  # index; `is_midpoint` marks it. Other content-word ends are set to 0 so the
+  # word-boundary rule can raise them to 1.
+  # Citations: O'Shaughnessy 1976 (~1 break per 4 content words), Silverman 1992.
+  assign_long_phrase_break:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme != 'SIL' && isTrue(current, 'isContentWord')
+        && is_last_in_word_run()
+    scan:
+      domain: phrase
+      reset_where: >-
+        current.phoneme == 'SIL'
+        && (has(current.punctuationSymbol) ? current.punctuationSymbol != null : false)
+    apply:
+      - field: breakIndex
+        op: set
+        value: "(phrase.count >= 7 && phrase.is_midpoint) ? 2 : 0"
+        tag: boundary
+    citations:
+      - O'Shaughnessy 1976
+      - Silverman et al. 1992
+
+  # breakIndex 4/3 on the active punctuation SIL at each phrase boundary.
+  # terminal (. ? !) -> 4; clause (, ; :) -> 3.
+  # Citation: Silverman et al. 1992 (ToBI break index tier).
+  assign_punctuation_break_index:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'SIL'
+        && (has(current.punctuationSymbol) ? current.punctuationSymbol != null : false)
+    apply:
+      - field: breakIndex
+        op: set
+        value: >-
+          current.punctuationSymbol in ['.', '?', '!'] ? 4
+            : (current.punctuationSymbol in [',', ';', ':'] ? 3 : 0)
+        tag: boundary
+    citations:
+      - Silverman et al. 1992
+
+  # breakIndex=1 on the last phone of every word run (ordinary word boundary),
+  # unless a stronger break (a long-phrase 2) is already assigned there. This is
+  # the declarative-correct word boundary: it ignores suppressed SILs, so it does
+  # NOT stamp the spurious word-INTERNAL break=1 the imperative pass produced when
+  # a suppressed punctuation SIL was wedged mid-word.
+  # Citation: Silverman et al. 1992 (ToBI break index tier).
+  assign_word_boundary_break_index:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme != 'SIL' && is_last_in_word_run()"
+    apply:
+      - field: breakIndex
+        op: set
+        value: "(has(current.breakIndex) && current.breakIndex > 0) ? current.breakIndex : 1"
+        tag: boundary
+    citations:
+      - Silverman et al. 1992

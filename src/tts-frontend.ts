@@ -18,7 +18,6 @@ import {
   runGraphRuleEngine,
 } from "./declarative-frontend/hrg/rule-engine";
 import { normalizeText } from "./g2p/text-normalize";
-import { annotateProsody } from "./prosodic-annotator";
 import { createProvenanceCollector, type ProvenanceCollector } from "./provenance";
 import { transcribeText } from "./transcribe-text";
 import type { Diagnostics } from "./diagnostics";
@@ -527,6 +526,9 @@ function buildTextToKlattTrackDetailed(
     inventory: graphInventory,
     captureTooling,
   });
+  // Prosodic structure (word class, accent, nuclear accent, accent types,
+  // phrase-edge tones, break indices) is now fully declarative: the `annotation`
+  // phase rules replace the former imperative annotateProsody() pass.
   runGraphRuleEngine(utterance, spec, {
     evaluationOwner,
     phases: ["annotation"],
@@ -534,7 +536,6 @@ function buildTextToKlattTrackDetailed(
     inventory: graphInventory,
     captureTooling,
   });
-  annotateProsody(utterance);
 
   if (options.directionTrack) {
     const parsed = parseDirectionInput(

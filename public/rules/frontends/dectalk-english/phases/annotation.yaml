@@ -13,6 +13,31 @@ version: v1
 # Selection excludes SIL/silence and word-less tokens (the builtins return null
 # for them anyway; the guard avoids writing null fields).
 rules:
+  # Break-index tier (punctuation half) — replaces the shared imperative
+  # prosodic annotator, which is now deleted. The DECtalk source contour
+  # (phases/prosody.yaml, `reset_break_index: 4`) resets at intonational phrase
+  # boundaries, which requires breakIndex=4 on terminal-punctuation SILs. This
+  # is the only break-index information DECtalk consumes (its DECtalk-native
+  # duration model does not use ToBI pre-boundary lengthening), so only the
+  # punctuation half is ported here. terminal (. ? !) -> 4; clause (, ; :) -> 3.
+  # Citation: Silverman et al. 1992 (ToBI break index tier).
+  assign_punctuation_break_index:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'SIL'
+        && (has(current.punctuationSymbol) ? current.punctuationSymbol != null : false)
+    apply:
+      - field: breakIndex
+        op: set
+        value: >-
+          current.punctuationSymbol in ['.', '?', '!'] ? 4
+            : (current.punctuationSymbol in [',', ';', ':'] ? 3 : 0)
+        tag: boundary
+    citations:
+      - Silverman et al. 1992
+
   syllable_index_annotation:
     kind: scalar
     select:

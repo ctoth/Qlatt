@@ -338,6 +338,7 @@ phases:
   # later duration rules.  ANNOTATION ONLY -- nothing reads these fields yet.
   - name: annotation
     rules:
+      - assign_punctuation_break_index
       - syllable_index_annotation
       - syllable_role_annotation
       - syllable_position_annotation

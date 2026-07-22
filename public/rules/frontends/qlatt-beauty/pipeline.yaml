@@ -199,6 +199,14 @@ phases:
       # exactly as before; these two rules depend only on punctuation.
       - assign_phrase_edge_tones
       - assign_initial_boundary_tone
+      # Break-index tier (punctuation 4/3, word boundary 1, long-phrase 2) was
+      # also supplied by the shared imperative annotator and is read (guarded) by
+      # the duration/prosody rules. beauty is accent-less and runs no
+      # mark_function_words, so assign_long_phrase_break never fires (no content
+      # words) — exactly as the imperative long-phrase pass behaved for beauty.
+      - assign_long_phrase_break
+      - assign_punctuation_break_index
+      - assign_word_boundary_break_index
   - name: duration
     rules:
       - non_word_initial_consonant_shortening

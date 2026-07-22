@@ -367,6 +367,9 @@ phases:
       - assign_accent_types
       - assign_phrase_edge_tones
       - assign_initial_boundary_tone
+      - assign_long_phrase_break
+      - assign_punctuation_break_index
+      - assign_word_boundary_break_index
   - name: duration
     rules:
       - non_word_initial_consonant_shortening

@@ -128,6 +128,9 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
     predicates = {},
     inventory,
   } = options;
+  const recurseBase = { utterance, transaction, owner, items, params, relationName, predicates, inventory };
+  const recurse = (index: number, extra: Readonly<Record<string, unknown>>): EvaluationContext =>
+    buildEvaluationContext({ ...recurseBase, index, extra });
   const views = new Map<Item, Readonly<Record<string, unknown>>>();
   const itemByView = new WeakMap<object, Item>();
   const structureRelation = utterance.getRelation("SylStructure");
@@ -289,21 +292,10 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
         const write = utterance.relation(relationName).node(candidate)?.write;
         if (write) transaction.dependOn(write.decisionId);
       }
-      const candidateContext = buildEvaluationContext({
-        utterance,
-        transaction,
-        owner,
-        items,
-        index: candidateIndex,
-        params,
-        extra: {
-          source: view(source),
-          candidate: view(candidate),
-          scan_offset: direction * offsetIndex,
-        },
-        relationName,
-        predicates,
-        inventory,
+      const candidateContext = recurse(candidateIndex, {
+        source: view(source),
+        candidate: view(candidate),
+        scan_offset: direction * offsetIndex,
       });
       if (conditionMatches(condition, candidateContext, predicates)) return view(candidate);
     }
@@ -351,18 +343,7 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
       for (let candidateIndex = sourceIndex + direction; candidateIndex >= 0 && candidateIndex < items.length; candidateIndex += direction) {
         const candidate = items[candidateIndex];
         if (structureAncestor(candidate, "word") !== word) break;
-        const candidateContext = buildEvaluationContext({
-          utterance,
-          transaction,
-          owner,
-          items,
-          index: candidateIndex,
-          params,
-          extra: { source: view(source), candidate: view(candidate) },
-          relationName,
-          predicates,
-          inventory,
-        });
+        const candidateContext = recurse(candidateIndex, { source: view(source), candidate: view(candidate) });
         if (conditionMatches(condition, candidateContext, predicates)) return view(candidate);
       }
     }
@@ -1167,31 +1148,23 @@ function executeMatch(
 ): void {
   const resolveTarget = (name: string): Item | undefined =>
     name === "current" ? match.items[match.index] : match.bindings[name];
-  let context = buildEvaluationContext({
+  const contextBase = {
     utterance,
     transaction: match.transaction,
     owner,
     items: match.items,
     index: match.index,
     params,
-    extra: match.contour ? { contour: match.contour } : {},
     bindings: match.bindings,
     relationName: match.relationName,
     predicates,
     inventory,
-  });
+  };
+  const contourExtra = match.contour ? { contour: match.contour } : {};
+  let context = buildEvaluationContext({ ...contextBase, extra: contourExtra });
   context = evaluateRuleDefinitions(rule, context, (definitions) => buildEvaluationContext({
-    utterance,
-    transaction: match.transaction,
-    owner,
-    items: match.items,
-    index: match.index,
-    params,
-    extra: { ...(match.contour ? { contour: match.contour } : {}), ...definitions },
-    bindings: match.bindings,
-    relationName: match.relationName,
-    predicates,
-    inventory,
+    ...contextBase,
+    extra: { ...contourExtra, ...definitions },
   }));
   const constraintEvidence = evaluateCondition(rule.constraint, context, predicates);
   if (!constraintEvidence.matched) {
@@ -1371,6 +1344,17 @@ function patternMatches(
     const transaction = beginRuleTransaction(utterance, phaseName, ruleName, rule);
     const bindings: Record<string, Item> = {};
     const nodes: Record<string, HrgNode> = {};
+    const contextBase = {
+      utterance,
+      transaction,
+      owner,
+      items,
+      params,
+      bindings,
+      relationName: pattern.relation,
+      predicates,
+      inventory,
+    };
     let matched = true;
     for (let offset = 0; offset < pattern.sequence.length; offset += 1) {
       const step = pattern.sequence[offset];
@@ -1396,18 +1380,7 @@ function patternMatches(
         matched = false;
         break;
       }
-      const context = buildEvaluationContext({
-        utterance,
-        transaction,
-        owner,
-        items,
-        index,
-        params,
-        bindings,
-        relationName: pattern.relation,
-        predicates,
-        inventory,
-      });
+      const context = buildEvaluationContext({ ...contextBase, index });
       const evidence = evaluateCondition(step.where, context, predicates);
       if (!evidence.matched) {
         if (captureTooling) utterance._recordRuleAttempt({
@@ -1433,18 +1406,7 @@ function patternMatches(
     if (!matched || captureNames.length === 0) continue;
     const defaultTarget = captureNames[0];
     const index = items.indexOf(bindings[defaultTarget]);
-    const context = buildEvaluationContext({
-      utterance,
-      transaction,
-      owner,
-      items,
-      index,
-      params,
-      bindings,
-      relationName: pattern.relation,
-      predicates,
-      inventory,
-    });
+    const context = buildEvaluationContext({ ...contextBase, index });
     const constraintEvidence = evaluateCondition(pattern.constraint, context, predicates);
     if (!constraintEvidence.matched) {
       if (captureTooling) utterance._recordRuleAttempt({

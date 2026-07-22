@@ -7,7 +7,12 @@
  * Citations: design/beauty-synthesis/11-sota-frontend-architecture.md §4-5
  * (write-stamping fuses HRG with the provenance DAG); src/provenance.ts schema.
  */
-import { createProvenanceCollector, type ProvenanceCollector } from "../../provenance";
+import {
+  createProvenanceCollector,
+  type DecisionRecord,
+  type ProvenanceCollector,
+  type ProvenanceStage,
+} from "../../provenance";
 import { createDiagnostics, type Diagnostics } from "../../diagnostics";
 import { Item } from "./item";
 import { Relation } from "./relation";
@@ -25,6 +30,7 @@ import type {
   RelationStamper,
   RelationWrite,
   RuleAttempt,
+  StampedWrite,
   Stamper,
   TemporalAnchorWrite,
   TemporalWriteInput,
@@ -134,6 +140,74 @@ export class Utterance {
     this.schema = compileHrgSchema(schema);
   }
 
+  /**
+   * Shared engine for the five versioned-write recorders (feature, relation,
+   * association, temporal-anchor, mark-time): record ONE provenance
+   * DecisionRecord for a write, applying the "rules" stage default. The caller
+   * assembles the parent decision-id list and, afterwards, the per-type write
+   * object — whose field *order* is load-bearing (see {@link graphDigest}).
+   */
+  private recordVersionedWrite(request: {
+    stage?: ProvenanceStage;
+    type: string;
+    subject: string;
+    reason: string;
+    citations?: readonly string[];
+    timestampMs?: number;
+    parents: readonly string[];
+  }): DecisionRecord {
+    return this.provenance.add({
+      stage: request.stage ?? "rules",
+      type: request.type,
+      subject: request.subject,
+      reason: request.reason,
+      citations: [...(request.citations ?? [])],
+      parents: request.parents.length > 0 ? [...request.parents] : undefined,
+      timestampMs: request.timestampMs,
+    });
+  }
+
+  /**
+   * Assemble a de-duplicated parent decision-id list: the input read-set first,
+   * then each supplied structural parent (prior write, boundary marks, …) in
+   * order. Falsy ids are skipped. Insertion order and Set de-duplication are
+   * both load-bearing for the recorded provenance DAG.
+   */
+  private static dedupeParents(
+    base: readonly string[] | undefined,
+    ...extra: readonly (string | null | undefined)[]
+  ): string[] {
+    const parents = new Set(base ?? []);
+    for (const id of extra) if (id) parents.add(id);
+    return [...parents];
+  }
+
+  /**
+   * The trailing fields shared, in identical key order, by relation /
+   * association / temporal-anchor / mark-time writes:
+   * `version, decisionId, reason, [ruleId?, tag?,] citations, parents, stage,
+   * timestampMs`. Spread AFTER the per-type head fields to preserve the exact
+   * serialized shape. `ruleId`/`tag` are only carried when passed (temporal
+   * writes never carry them, matching prior behavior).
+   */
+  private stampedTail(
+    version: number,
+    decision: DecisionRecord,
+    tags: { ruleId?: string; tag?: string } = {},
+  ): StampedWrite & { ruleId?: string; tag?: string } {
+    return {
+      version,
+      decisionId: decision.id,
+      reason: decision.reason,
+      ...(tags.ruleId ? { ruleId: tags.ruleId } : {}),
+      ...(tags.tag ? { tag: tags.tag } : {}),
+      citations: Object.freeze([...decision.citations]),
+      parents: Object.freeze(decision.parents ? [...decision.parents] : []),
+      stage: decision.stage,
+      timestampMs: decision.timestampMs,
+    };
+  }
+
   /** The stamper recording every feature-write into the provenance DAG. */
   private readonly stamp: Stamper = (
     item: Item,
@@ -145,18 +219,19 @@ export class Utterance {
     const version = prior ? prior.version + 1 : 0;
 
     // Read-set parents + (on overwrite) the prior value's decision, so
-    // "why did X change?" walks back to the value it replaced.
+    // "why did X change?" walks back to the value it replaced. Feature writes
+    // preserve duplicates (array, not Set), unlike the other recorders.
     const parents = [...(input.parents ?? [])];
     if (prior) parents.push(prior.decisionId);
 
-    const decision = this.provenance.add({
-      stage: input.stage ?? "rules",
+    const decision = this.recordVersionedWrite({
+      stage: input.stage,
       type: input.type ?? (prior ? "feature_overwrite" : "feature_write"),
       subject: `item:${item.id}.${key}`,
       reason: input.reason,
-      citations: [...(input.citations ?? [])],
-      parents: parents.length > 0 ? parents : undefined,
+      citations: input.citations,
       timestampMs: input.timestampMs,
+      parents,
     });
 
     const write: FeatureWrite = Object.freeze({
@@ -186,24 +261,18 @@ export class Utterance {
     previous,
     input,
   ): RelationWrite => {
-    const parents = new Set(input.parents ?? []);
-    if (parent) {
-      const parentWrite = relation.latestWrite(parent);
-      if (parentWrite) parents.add(parentWrite.decisionId);
-    }
-    if (previous) {
-      const previousWrite = relation.latestWrite(previous);
-      if (previousWrite) parents.add(previousWrite.decisionId);
-    }
+    const parentDecisionId = parent ? relation.latestWrite(parent)?.decisionId : undefined;
+    const previousDecisionId = previous ? relation.latestWrite(previous)?.decisionId : undefined;
+    const parents = Utterance.dedupeParents(input.parents, parentDecisionId, previousDecisionId);
 
-    const decision = this.provenance.add({
-      stage: input.stage ?? "rules",
+    const decision = this.recordVersionedWrite({
+      stage: input.stage,
       type: `relation_${operation}`,
       subject: `relation:${relation.name}:${item.id}`,
       reason: input.reason,
-      citations: [...(input.citations ?? [])],
-      parents: parents.size > 0 ? [...parents] : undefined,
+      citations: input.citations,
       timestampMs: input.timestampMs,
+      parents,
     });
     const write: RelationWrite = Object.freeze({
       relationName: relation.name,
@@ -211,15 +280,10 @@ export class Utterance {
       itemId: item.id,
       ...(parent ? { parentItemId: parent.id } : {}),
       ...(previous ? { previousItemId: previous.id } : {}),
-      version: relation.writes().length,
-      decisionId: decision.id,
-      reason: decision.reason,
-      ...(input.ruleId ? { ruleId: input.ruleId } : {}),
-      ...(input.tag ? { tag: input.tag } : {}),
-      citations: Object.freeze([...decision.citations]),
-      parents: Object.freeze(decision.parents ? [...decision.parents] : []),
-      stage: decision.stage,
-      timestampMs: decision.timestampMs,
+      ...this.stampedTail(relation.writes().length, decision, {
+        ruleId: input.ruleId,
+        tag: input.tag,
+      }),
     });
     relation._pushWrite(write);
     return write;
@@ -242,31 +306,25 @@ export class Utterance {
     const key = this.associationKey(from, name, to);
     const history = this.associationHistoryByEdge.get(key) ?? [];
     const prior = history[history.length - 1];
-    const parents = new Set(input.parents ?? []);
-    if (prior) parents.add(prior.decisionId);
-    const decision = this.provenance.add({
-      stage: input.stage ?? "rules",
+    const parents = Utterance.dedupeParents(input.parents, prior?.decisionId);
+    const decision = this.recordVersionedWrite({
+      stage: input.stage,
       type: active ? "relation_associate" : "relation_disassociate",
       subject: `association:${name}:${from.id}:${to.id}`,
       reason: input.reason,
-      citations: [...(input.citations ?? [])],
-      parents: parents.size > 0 ? [...parents] : undefined,
+      citations: input.citations,
       timestampMs: input.timestampMs,
+      parents,
     });
     const write: AssociationWrite = Object.freeze({
       name,
       fromItemId: from.id,
       toItemId: to.id,
       active,
-      version: history.length,
-      decisionId: decision.id,
-      reason: decision.reason,
-      ...(input.ruleId ? { ruleId: input.ruleId } : {}),
-      ...(input.tag ? { tag: input.tag } : {}),
-      citations: Object.freeze([...decision.citations]),
-      parents: Object.freeze(decision.parents ? [...decision.parents] : []),
-      stage: decision.stage,
-      timestampMs: decision.timestampMs,
+      ...this.stampedTail(history.length, decision, {
+        ruleId: input.ruleId,
+        tag: input.tag,
+      }),
     });
     history.push(write);
     this.associationHistoryByEdge.set(key, history);
@@ -566,18 +624,20 @@ export class Utterance {
     }
     const history = this.anchorHistoryByItemId.get(item.id) ?? [];
     const prior = history[history.length - 1];
-    const parents = new Set(input.parents ?? []);
-    if (left.creationDecisionId) parents.add(left.creationDecisionId);
-    if (right.creationDecisionId) parents.add(right.creationDecisionId);
-    if (prior) parents.add(prior.decisionId);
-    const decision = this.provenance.add({
-      stage: input.stage ?? "rules",
+    const parents = Utterance.dedupeParents(
+      input.parents,
+      left.creationDecisionId,
+      right.creationDecisionId,
+      prior?.decisionId,
+    );
+    const decision = this.recordVersionedWrite({
+      stage: input.stage,
       type: prior ? "temporal_anchor_overwrite" : "temporal_anchor_write",
       subject: `item:${item.id}.temporal_anchor`,
       reason: input.reason,
-      citations: [...(input.citations ?? [])],
-      parents: parents.size > 0 ? [...parents] : undefined,
+      citations: input.citations,
       timestampMs: input.timestampMs,
+      parents,
     });
     const write: TemporalAnchorWrite = Object.freeze({
       itemId: item.id,
@@ -586,13 +646,7 @@ export class Utterance {
       rightMarkId,
       ...(ratio != null ? { ratio } : {}),
       ...(offsetMs != null ? { offsetMs } : {}),
-      version: history.length,
-      decisionId: decision.id,
-      reason: decision.reason,
-      citations: Object.freeze([...decision.citations]),
-      parents: Object.freeze(decision.parents ? [...decision.parents] : []),
-      stage: decision.stage,
-      timestampMs: decision.timestampMs,
+      ...this.stampedTail(history.length, decision),
     });
     history.push(write);
     this.anchorHistoryByItemId.set(item.id, history);
@@ -635,28 +689,24 @@ export class Utterance {
     if (!Number.isFinite(timeMs)) throw new Error("E_HRG_TEMPORAL_TIME: time must be finite");
     const history = this.markTimeHistoryById.get(markId) ?? [];
     const prior = history[history.length - 1];
-    const parents = new Set(input.parents ?? []);
-    if (mark.creationDecisionId) parents.add(mark.creationDecisionId);
-    if (prior) parents.add(prior.decisionId);
-    const decision = this.provenance.add({
-      stage: input.stage ?? "rules",
+    const parents = Utterance.dedupeParents(
+      input.parents,
+      mark.creationDecisionId,
+      prior?.decisionId,
+    );
+    const decision = this.recordVersionedWrite({
+      stage: input.stage,
       type: prior ? "temporal_time_overwrite" : "temporal_time_write",
       subject: `axis:${markId}.time_ms`,
       reason: input.reason,
-      citations: [...(input.citations ?? [])],
-      parents: parents.size > 0 ? [...parents] : undefined,
+      citations: input.citations,
       timestampMs: input.timestampMs,
+      parents,
     });
     const write: MarkTimeWrite = Object.freeze({
       markId,
       timeMs,
-      version: history.length,
-      decisionId: decision.id,
-      reason: decision.reason,
-      citations: Object.freeze([...decision.citations]),
-      parents: Object.freeze(decision.parents ? [...decision.parents] : []),
-      stage: decision.stage,
-      timestampMs: decision.timestampMs,
+      ...this.stampedTail(history.length, decision),
     });
     history.push(write);
     this.markTimeHistoryById.set(markId, history);

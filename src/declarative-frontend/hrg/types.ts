@@ -65,21 +65,34 @@ export interface HrgSchema {
 export type RelationKind = "list" | "tree";
 export type RelationWriteOperation = "append" | "insert_after" | "add_root" | "add_daughter";
 
-/** One version of a named directed association edge between shared Items. */
-export interface AssociationWrite {
-  readonly name: string;
-  readonly fromItemId: string;
-  readonly toItemId: string;
-  readonly active: boolean;
+/**
+ * Fields shared by every provenance-stamped, versioned HRG write (feature,
+ * relation, association, temporal-anchor, mark-time). Each concrete write
+ * interface extends this base.
+ *
+ * NOTE: the field *order* in the concrete write object literals (utterance.ts)
+ * is load-bearing — {@link HrgSchema} digests FNV-hash `JSON.stringify` of the
+ * whole graph, so key insertion order must be preserved exactly when these
+ * writes are constructed.
+ */
+export interface StampedWrite {
   readonly version: number;
   readonly decisionId: string;
   readonly reason: string;
-  readonly ruleId?: string;
-  readonly tag?: string;
   readonly citations: readonly string[];
   readonly parents: readonly string[];
   readonly stage: ProvenanceStage;
   readonly timestampMs?: number;
+}
+
+/** One version of a named directed association edge between shared Items. */
+export interface AssociationWrite extends StampedWrite {
+  readonly name: string;
+  readonly fromItemId: string;
+  readonly toItemId: string;
+  readonly active: boolean;
+  readonly ruleId?: string;
+  readonly tag?: string;
 }
 
 export interface RelationWriteInput {
@@ -94,32 +107,18 @@ export interface RelationWriteInput {
 
 export type TemporalWriteInput = RelationWriteInput;
 
-export interface TemporalAnchorWrite {
+export interface TemporalAnchorWrite extends StampedWrite {
   readonly itemId: string;
   readonly kind: "interval" | "point";
   readonly leftMarkId: string;
   readonly rightMarkId: string;
   readonly ratio?: number;
   readonly offsetMs?: number;
-  readonly version: number;
-  readonly decisionId: string;
-  readonly reason: string;
-  readonly citations: readonly string[];
-  readonly parents: readonly string[];
-  readonly stage: ProvenanceStage;
-  readonly timestampMs?: number;
 }
 
-export interface MarkTimeWrite {
+export interface MarkTimeWrite extends StampedWrite {
   readonly markId: string;
   readonly timeMs: number;
-  readonly version: number;
-  readonly decisionId: string;
-  readonly reason: string;
-  readonly citations: readonly string[];
-  readonly parents: readonly string[];
-  readonly stage: ProvenanceStage;
-  readonly timestampMs?: number;
 }
 
 export interface TransactionMetadata {
@@ -257,21 +256,14 @@ export type RuleAttempt =
       readonly message: string;
     });
 
-export interface RelationWrite {
+export interface RelationWrite extends StampedWrite {
   readonly relationName: string;
   readonly operation: RelationWriteOperation;
   readonly itemId: string;
   readonly parentItemId?: string;
   readonly previousItemId?: string;
-  readonly version: number;
-  readonly decisionId: string;
-  readonly reason: string;
   readonly ruleId?: string;
   readonly tag?: string;
-  readonly citations: readonly string[];
-  readonly parents: readonly string[];
-  readonly stage: ProvenanceStage;
-  readonly timestampMs?: number;
 }
 
 /**
@@ -299,23 +291,13 @@ export interface FeatureWriteInput {
  * feature is the latest write; prior writes are retained so "why did X change?"
  * is answerable. `decisionId` links into the ProvenanceCollector's DAG.
  */
-export interface FeatureWrite {
+export interface FeatureWrite extends StampedWrite {
   readonly itemId: string;
   readonly key: string;
   readonly value: FeatureValue;
-  /** 0-based version; increments on each overwrite. */
-  readonly version: number;
-  /** Id of the DecisionRecord created for this write. */
-  readonly decisionId: string;
-  readonly reason: string;
   readonly ruleId?: string;
   readonly tag?: string;
-  readonly citations: readonly string[];
-  readonly stage: ProvenanceStage;
   readonly type: string;
-  /** Decision-id parents recorded on this write (read-set + prior value). */
-  readonly parents: readonly string[];
-  readonly timestampMs?: number;
 }
 
 /** Records a stamped feature-write into the provenance DAG and the item. */

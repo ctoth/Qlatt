@@ -287,12 +287,16 @@ rules:
         op: set
         value: params.policy.formant.the_dh_f2_hz
         tag: dectalk_trace_exact
+      - field: F3
+        op: set
+        value: params.policy.formant.the_dh_f3_hz
+        tag: dectalk_trace_exact
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'the' (native initialized-SI and DH F1/F2 values at frames 0-12)"
+      - "DECtalk 4.63 oracle -lt trace for 'the' (native initialized-SI and DH F1/F2/F3 values at frames 0-12)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_the_ax_f1_trace:
@@ -312,12 +316,16 @@ rules:
         op: set
         value: params.policy.formant.the_ax_f2_hz
         tag: dectalk_trace_exact
+      - field: F3
+        op: set
+        value: params.policy.formant.the_ax_f3_hz
+        tag: dectalk_trace_exact
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2 values at frames 13-45)"
+      - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2/F3 values at frames 13-45)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_the_terminal_silence_f1_trace:
@@ -337,7 +345,7 @@ rules:
         value: "existing_windows + trace_windows"
         tag: dectalk_trace_exact
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'the' (native terminal GEN_SIL F1/F2 values from frame 44 onward)"
+      - "DECtalk 4.63 oracle -lt trace for 'the' (native terminal GEN_SIL F1/F2/F3 values from frame 44 onward)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
 
   dectalk_cake_initial_k_formant_trace:

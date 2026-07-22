@@ -268,6 +268,28 @@ describe("dectalk-english end-to-end", () => {
     ]);
   });
 
+  it("matches every native F3 cell through the complete the trace", () => {
+    const result = textToKlattTrackDetailed("the.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const f3 = Array.from({ length: 139 }, (_, frameIndex) => {
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F3;
+    });
+
+    expect(f3).toEqual([
+      2562, 2562, 2562, 2562, 2561, 2562, 2562,
+      2562, 2562, 2563, 2592, 2621, 2650, 2679,
+      2709, 2695, 2681, 2667, 2653, 2639, 2625,
+      2611, 2598, 2598, 2598, 2599, 2599, 2599,
+      2599, 2600, 2600, 2600, 2600, 2600, 2600,
+      2600, 2600, 2600, 2600, 2600, 2600, 2600,
+      2600, 2600, 2600, 2600,
+      ...Array(93).fill(2602),
+    ]);
+  });
+
   it("applies DECtalk Rule 14 to a sonorant after a voiceless plosive", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

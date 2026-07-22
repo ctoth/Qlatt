@@ -559,19 +559,23 @@ parameters:
         value: 1500
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH F2 at frames 0-3)"
+      the_dh_f3_hz:
+        value: 2562
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH F3 at frames 0-3)"
       the_dh_formant_trace_windows:
         value:
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 295, F2: 1493 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 297, F2: 1492 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 299, F2: 1491 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 301, F2: 1490 }, tag: dectalk_trace_exact }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 301, F2: 1489 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 301, F2: 1488 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 301, F2: 1467 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 301, F2: 1446 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.6, fields: { F1: 323, F2: 1425 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 295, F2: 1493, F3: 2561 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 297, F2: 1492, F3: 2562 }, tag: dectalk_trace_exact }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 299, F2: 1491, F3: 2562 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 301, F2: 1490, F3: 2562 }, tag: dectalk_trace_exact }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 301, F2: 1489, F3: 2562 }, tag: dectalk_trace_exact }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 301, F2: 1488, F3: 2563 }, tag: dectalk_trace_exact }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 301, F2: 1467, F3: 2592 }, tag: dectalk_trace_exact }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 301, F2: 1446, F3: 2621 }, tag: dectalk_trace_exact }
+          - { start_ms: 57.6, fields: { F1: 323, F2: 1425, F3: 2650 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native DH F1/F2 values at frames 4-12)"
+          - "DECtalk 4.63 oracle -lt trace for 'the' (native DH F1/F2/F3 values at frames 4-12)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       the_ax_f1_hz:
         value: 346
@@ -581,57 +585,61 @@ parameters:
         value: 1404
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'the' (AX F2 at frame 13)"
+      the_ax_f3_hz:
+        value: 2679
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'the' (AX F3 at frame 13)"
       the_ax_formant_trace_windows:
         value:
-          - { start_ms: 0.0, end_ms: 6.0, fields: { F1: 346, F2: 1404 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.0, end_ms: 12.4, fields: { F1: 368, F2: 1384 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 390, F2: 1371 }, tag: dectalk_trace_exact }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 412, F2: 1358 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 435, F2: 1345 }, tag: dectalk_trace_exact }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 457, F2: 1333 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.0, end_ms: 44.6, fields: { F1: 479, F2: 1320 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 501, F2: 1307 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 524, F2: 1294 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.4, end_ms: 63.8, fields: { F1: 526, F2: 1280 }, tag: dectalk_trace_exact }
-          - { start_ms: 63.8, end_ms: 70.2, fields: { F1: 528, F2: 1278 }, tag: dectalk_trace_exact }
-          - { start_ms: 70.2, end_ms: 76.6, fields: { F1: 530, F2: 1276 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.6, end_ms: 83.0, fields: { F1: 533, F2: 1274 }, tag: dectalk_trace_exact }
-          - { start_ms: 83.0, end_ms: 89.4, fields: { F1: 535, F2: 1272 }, tag: dectalk_trace_exact }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { F1: 537, F2: 1270 }, tag: dectalk_trace_exact }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { F1: 539, F2: 1268 }, tag: dectalk_trace_exact }
-          - { start_ms: 102.2, end_ms: 108.8, fields: { F1: 542, F2: 1266 }, tag: dectalk_trace_exact }
-          - { start_ms: 108.8, end_ms: 115.4, fields: { F1: 544, F2: 1264 }, tag: dectalk_trace_exact }
-          - { start_ms: 115.4, end_ms: 121.8, fields: { F1: 546, F2: 1262 }, tag: dectalk_trace_exact }
-          - { start_ms: 121.8, fields: { F1: 548, F2: 1260 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 6.0, fields: { F1: 346, F2: 1404, F3: 2679 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.0, end_ms: 12.4, fields: { F1: 368, F2: 1384, F3: 2709 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 390, F2: 1371, F3: 2695 }, tag: dectalk_trace_exact }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 412, F2: 1358, F3: 2681 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 435, F2: 1345, F3: 2667 }, tag: dectalk_trace_exact }
+          - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 457, F2: 1333, F3: 2653 }, tag: dectalk_trace_exact }
+          - { start_ms: 38.0, end_ms: 44.6, fields: { F1: 479, F2: 1320, F3: 2639 }, tag: dectalk_trace_exact }
+          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 501, F2: 1307, F3: 2625 }, tag: dectalk_trace_exact }
+          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 524, F2: 1294, F3: 2611 }, tag: dectalk_trace_exact }
+          - { start_ms: 57.4, end_ms: 63.8, fields: { F1: 526, F2: 1280, F3: 2598 }, tag: dectalk_trace_exact }
+          - { start_ms: 63.8, end_ms: 70.2, fields: { F1: 528, F2: 1278, F3: 2598 }, tag: dectalk_trace_exact }
+          - { start_ms: 70.2, end_ms: 76.6, fields: { F1: 530, F2: 1276, F3: 2598 }, tag: dectalk_trace_exact }
+          - { start_ms: 76.6, end_ms: 83.0, fields: { F1: 533, F2: 1274, F3: 2599 }, tag: dectalk_trace_exact }
+          - { start_ms: 83.0, end_ms: 89.4, fields: { F1: 535, F2: 1272, F3: 2599 }, tag: dectalk_trace_exact }
+          - { start_ms: 89.4, end_ms: 95.8, fields: { F1: 537, F2: 1270, F3: 2599 }, tag: dectalk_trace_exact }
+          - { start_ms: 95.8, end_ms: 102.2, fields: { F1: 539, F2: 1268, F3: 2599 }, tag: dectalk_trace_exact }
+          - { start_ms: 102.2, end_ms: 108.8, fields: { F1: 542, F2: 1266, F3: 2600 }, tag: dectalk_trace_exact }
+          - { start_ms: 108.8, end_ms: 115.4, fields: { F1: 544, F2: 1264, F3: 2600 }, tag: dectalk_trace_exact }
+          - { start_ms: 115.4, end_ms: 121.8, fields: { F1: 546, F2: 1262, F3: 2600 }, tag: dectalk_trace_exact }
+          - { start_ms: 121.8, fields: { F1: 548, F2: 1260, F3: 2600 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2 values at frames 13-45)"
+          - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2/F3 values at frames 13-45)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       the_terminal_silence_formant_trace_windows:
         value:
-          - { start_ms: 0.0, end_ms: 6.4, fields: { F1: 548, F2: 1260 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 547, F2: 1259 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 547, F2: 1261 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 547, F2: 1263 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 547, F2: 1265 }, tag: dectalk_trace_exact }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 548, F2: 1268 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 548, F2: 1270 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 548, F2: 1272 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 548, F2: 1274 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F1: 549, F2: 1276 }, tag: dectalk_trace_exact }
-          - { start_ms: 64.0, end_ms: 70.4, fields: { F1: 549, F2: 1278 }, tag: dectalk_trace_exact }
-          - { start_ms: 70.4, end_ms: 76.8, fields: { F1: 549, F2: 1280 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.8, end_ms: 83.2, fields: { F1: 549, F2: 1282 }, tag: dectalk_trace_exact }
-          - { start_ms: 83.2, end_ms: 89.6, fields: { F1: 550, F2: 1285 }, tag: dectalk_trace_exact }
-          - { start_ms: 89.6, end_ms: 96.0, fields: { F1: 550, F2: 1287 }, tag: dectalk_trace_exact }
-          - { start_ms: 96.0, end_ms: 102.4, fields: { F1: 550, F2: 1289 }, tag: dectalk_trace_exact }
-          - { start_ms: 102.4, end_ms: 108.8, fields: { F1: 550, F2: 1291 }, tag: dectalk_trace_exact }
-          - { start_ms: 108.8, end_ms: 115.2, fields: { F1: 551, F2: 1293 }, tag: dectalk_trace_exact }
-          - { start_ms: 115.2, end_ms: 121.6, fields: { F1: 551, F2: 1295 }, tag: dectalk_trace_exact }
-          - { start_ms: 121.6, end_ms: 128.0, fields: { F1: 551, F2: 1297 }, tag: dectalk_trace_exact }
-          - { start_ms: 128.0, end_ms: 134.4, fields: { F1: 551, F2: 1299 }, tag: dectalk_trace_exact }
-          - { start_ms: 134.4, fields: { F1: 552, F2: 1302 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 6.4, fields: { F1: 548, F2: 1260, F3: 2600 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 547, F2: 1259, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 547, F2: 1261, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 547, F2: 1263, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 547, F2: 1265, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 548, F2: 1268, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 548, F2: 1270, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 548, F2: 1272, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 548, F2: 1274, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 57.6, end_ms: 64.0, fields: { F1: 549, F2: 1276, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 64.0, end_ms: 70.4, fields: { F1: 549, F2: 1278, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 70.4, end_ms: 76.8, fields: { F1: 549, F2: 1280, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 76.8, end_ms: 83.2, fields: { F1: 549, F2: 1282, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 83.2, end_ms: 89.6, fields: { F1: 550, F2: 1285, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 89.6, end_ms: 96.0, fields: { F1: 550, F2: 1287, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 96.0, end_ms: 102.4, fields: { F1: 550, F2: 1289, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 102.4, end_ms: 108.8, fields: { F1: 550, F2: 1291, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 108.8, end_ms: 115.2, fields: { F1: 551, F2: 1293, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 115.2, end_ms: 121.6, fields: { F1: 551, F2: 1295, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 121.6, end_ms: 128.0, fields: { F1: 551, F2: 1297, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 128.0, end_ms: 134.4, fields: { F1: 551, F2: 1299, F3: 2602 }, tag: dectalk_trace_exact }
+          - { start_ms: 134.4, fields: { F1: 552, F2: 1302, F3: 2602 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native terminal GEN_SIL F1/F2 values from frame 44 onward)"
+          - "DECtalk 4.63 oracle -lt trace for 'the' (native terminal GEN_SIL F1/F2/F3 values from frame 44 onward)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_initial_k_f1_hz:
         value: 279

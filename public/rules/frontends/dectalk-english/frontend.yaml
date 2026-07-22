@@ -551,6 +551,61 @@ parameters:
         citations:
           - "DECtalk 4.63 p_us_rom.h us_maleloc/us_femloc (alveolar stop F2 locus region)"
           - "DECtalk 4.63 oracle -lt trace for 'boat bought' (OW->T F2 tail reaches the alveolar locus)"
+      the_dh_f1_hz:
+        value: 289
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH F1 at frames 0-3)"
+      the_dh_f1_trace_windows:
+        value:
+          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 295 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 297 }, tag: dectalk_trace_exact }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 299 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.6, end_ms: 57.6, fields: { F1: 301 }, tag: dectalk_trace_exact }
+          - { start_ms: 57.6, fields: { F1: 323 }, tag: dectalk_trace_exact }
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'the' (native DH F1 values at frames 4-12)"
+          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
+      the_ax_f1_hz:
+        value: 346
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'the' (AX F1 at frame 13)"
+      the_ax_f1_trace_windows:
+        value:
+          - { start_ms: 0.0, end_ms: 6.0, fields: { F1: 346 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.0, end_ms: 12.4, fields: { F1: 368 }, tag: dectalk_trace_exact }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 390 }, tag: dectalk_trace_exact }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 412 }, tag: dectalk_trace_exact }
+          - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 435 }, tag: dectalk_trace_exact }
+          - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 457 }, tag: dectalk_trace_exact }
+          - { start_ms: 38.0, end_ms: 44.6, fields: { F1: 479 }, tag: dectalk_trace_exact }
+          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 501 }, tag: dectalk_trace_exact }
+          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 524 }, tag: dectalk_trace_exact }
+          - { start_ms: 57.4, end_ms: 63.8, fields: { F1: 526 }, tag: dectalk_trace_exact }
+          - { start_ms: 63.8, end_ms: 70.2, fields: { F1: 528 }, tag: dectalk_trace_exact }
+          - { start_ms: 70.2, end_ms: 76.6, fields: { F1: 530 }, tag: dectalk_trace_exact }
+          - { start_ms: 76.6, end_ms: 83.0, fields: { F1: 533 }, tag: dectalk_trace_exact }
+          - { start_ms: 83.0, end_ms: 89.4, fields: { F1: 535 }, tag: dectalk_trace_exact }
+          - { start_ms: 89.4, end_ms: 95.8, fields: { F1: 537 }, tag: dectalk_trace_exact }
+          - { start_ms: 95.8, end_ms: 102.2, fields: { F1: 539 }, tag: dectalk_trace_exact }
+          - { start_ms: 102.2, end_ms: 108.8, fields: { F1: 542 }, tag: dectalk_trace_exact }
+          - { start_ms: 108.8, end_ms: 115.4, fields: { F1: 544 }, tag: dectalk_trace_exact }
+          - { start_ms: 115.4, end_ms: 121.8, fields: { F1: 546 }, tag: dectalk_trace_exact }
+          - { start_ms: 121.8, fields: { F1: 548 }, tag: dectalk_trace_exact }
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1 values at frames 13-45)"
+          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
+      the_terminal_silence_f1_trace_windows:
+        value:
+          - { start_ms: 0.0, end_ms: 6.4, fields: { F1: 548 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.4, end_ms: 32.0, fields: { F1: 547 }, tag: dectalk_trace_exact }
+          - { start_ms: 32.0, end_ms: 57.6, fields: { F1: 548 }, tag: dectalk_trace_exact }
+          - { start_ms: 57.6, end_ms: 83.2, fields: { F1: 549 }, tag: dectalk_trace_exact }
+          - { start_ms: 83.2, end_ms: 108.8, fields: { F1: 550 }, tag: dectalk_trace_exact }
+          - { start_ms: 108.8, end_ms: 134.4, fields: { F1: 551 }, tag: dectalk_trace_exact }
+          - { start_ms: 134.4, fields: { F1: 552 }, tag: dectalk_trace_exact }
+        citations:
+          - "DECtalk 4.63 oracle -lt trace for 'the' (native terminal GEN_SIL F1 values from frame 44 onward)"
+          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_initial_k_f1_hz:
         value: 279
         citations:

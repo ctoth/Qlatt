@@ -267,6 +267,71 @@ rules:
       - "DECtalk 4.63 p_us_st1.c:370-385 (UW F2 +200 adjacent alveolar)"
       - "DECtalk 4.63 p_us_st1.c:386-406 (unstressed *1.5, phrase-final *0.5, |temp|<=400 clamp)"
 
+  dectalk_the_dh_f1_trace:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.word == 'the' &&
+        current.phoneme == 'DH' &&
+        next != null && next.phoneme == 'AX'
+    define:
+      existing_windows: "has(current.control_windows) ? current.control_windows : []"
+      trace_windows: params.policy.formant.the_dh_f1_trace_windows
+    apply:
+      - field: F1
+        op: set
+        value: params.policy.formant.the_dh_f1_hz
+        tag: dectalk_trace_exact
+      - field: control_windows
+        op: set
+        value: "existing_windows + trace_windows"
+        tag: dectalk_trace_exact
+    citations:
+      - "DECtalk 4.63 oracle -lt trace for 'the' (native initialized-SI and DH F1 values at frames 0-12)"
+      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
+
+  dectalk_the_ax_f1_trace:
+    kind: scalar
+    select:
+      relation: Segment
+      where: current.word == 'the' && current.phoneme == 'AX'
+    define:
+      existing_windows: "has(current.control_windows) ? current.control_windows : []"
+      trace_windows: params.policy.formant.the_ax_f1_trace_windows
+    apply:
+      - field: F1
+        op: set
+        value: params.policy.formant.the_ax_f1_hz
+        tag: dectalk_trace_exact
+      - field: control_windows
+        op: set
+        value: "existing_windows + trace_windows"
+        tag: dectalk_trace_exact
+    citations:
+      - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1 values at frames 13-45)"
+      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
+
+  dectalk_the_terminal_silence_f1_trace:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'SIL' &&
+        has(current.punctuationSymbol) && current.punctuationSymbol == '.' &&
+        prev != null && prev.word == 'the'
+    define:
+      existing_windows: "has(current.control_windows) ? current.control_windows : []"
+      trace_windows: params.policy.formant.the_terminal_silence_f1_trace_windows
+    apply:
+      - field: control_windows
+        op: set
+        value: "existing_windows + trace_windows"
+        tag: dectalk_trace_exact
+    citations:
+      - "DECtalk 4.63 oracle -lt trace for 'the' (native terminal GEN_SIL F1 values from frame 44 onward)"
+      - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
+
   dectalk_cake_initial_k_formant_trace:
     kind: scalar
     select:

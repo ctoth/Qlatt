@@ -209,6 +209,40 @@ describe("dectalk-english end-to-end", () => {
     ]);
   });
 
+  it("matches every native F1 cell through the complete the trace", () => {
+    const result = textToKlattTrackDetailed("the.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const f1 = Array.from({ length: 139 }, (_, frameIndex) => {
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F1;
+    });
+
+    expect(f1).toEqual([
+      289, 289, 289, 289, 295, 297, 299,
+      301, 301, 301, 301, 301, 323, 346,
+      368, 390, 412, 435, 457, 479, 501,
+      524, 526, 528, 530, 533, 535, 537,
+      539, 542, 544, 546, 548, 548, 548,
+      548, 548, 548, 548, 548, 548, 548,
+      548, 548, 548, 548, 547, 547, 547,
+      547, 548, 548, 548, 548, 549, 549,
+      549, 549, 550, 550, 550, 550, 551,
+      551, 551, 551, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552,
+    ]);
+  });
+
   it("applies DECtalk Rule 14 to a sonorant after a voiceless plosive", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

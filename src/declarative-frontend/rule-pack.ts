@@ -9,10 +9,20 @@ import {
   isPlainObject,
   loadYamlSource,
   loadYamlSourceSync,
+  parseYamlString,
   resolveIncludePath,
 } from "../yaml-loader";
 
 type PlainObject = Record<string, unknown>;
+
+/** Parse a rulepack YAML source into a raw object document (no DSL normalization). */
+function parseRulepackDocument(source: string, label: string): PlainObject {
+  const document = parseYamlString(source, label);
+  if (!isPlainObject(document)) {
+    throw new Error(`E_RULEPACK_DOCUMENT: ${label} must be a YAML object document`);
+  }
+  return document;
+}
 
 function freezeRecursively(value: unknown): void {
   if (value === null || typeof value !== "object" || Object.isFrozen(value)) return;
@@ -169,8 +179,8 @@ function resolveIncludesSync(
     seenPaths.add(absPath);
 
     const source = loadYamlSourceSync(absPath);
-    const childSpec = parseDslSpec(source);
-    const resolvedChild = resolveIncludesSync(childSpec, absPath, seenPaths);
+    const childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    const resolvedChild = resolveIncludesSync(childDocument, absPath, seenPaths);
     resolved = mergeChildIntoRoot(resolved, resolvedChild, absPath);
   }
 
@@ -200,8 +210,8 @@ async function resolveIncludesAsync(
     seenPaths.add(absPath);
 
     const source = await loadYamlSource(absPath);
-    const childSpec = parseDslSpec(source);
-    const resolvedChild = await resolveIncludesAsync(childSpec, absPath, seenPaths);
+    const childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    const resolvedChild = await resolveIncludesAsync(childDocument, absPath, seenPaths);
     resolved = mergeChildIntoRoot(resolved, resolvedChild, absPath);
   }
 
@@ -263,8 +273,15 @@ export function loadRulepackSpecFromPath(
     );
   }
 
-  const parsed = parseDslSpec(source);
-  const spec = parseDslSpec(resolveIncludesSync(parsed, specPath));
+  // Resolve includes on the raw parsed YAML, then normalize the merged tree
+  // exactly once. Previously the root was normalized twice: once before include
+  // resolution and again on the merged result. Normalizing only the final
+  // merged tree parses each spec (root and every child) exactly one time.
+  const merged = resolveIncludesSync(
+    parseRulepackDocument(source, specPath),
+    specPath,
+  );
+  const spec = parseDslSpec(merged);
   assertValidSpec(spec, { requireLoweringSpec: true });
   freezeRecursively(spec);
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
@@ -288,8 +305,13 @@ export async function preloadRulepackSpecFromPath(
     );
   }
 
-  const parsed = parseDslSpec(source);
-  const spec = parseDslSpec(await resolveIncludesAsync(parsed, specPath));
+  // See loadRulepackSpecFromPath: resolve includes on the raw YAML, then
+  // normalize the merged tree exactly once.
+  const merged = await resolveIncludesAsync(
+    parseRulepackDocument(source, specPath),
+    specPath,
+  );
+  const spec = parseDslSpec(merged);
   assertValidSpec(spec, { requireLoweringSpec: true });
   freezeRecursively(spec);
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);

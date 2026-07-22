@@ -269,6 +269,66 @@ describe("DECtalk trace packet timing", () => {
       rmSync(directory, { recursive: true, force: true });
     }
   });
+
+  it("ranks the phase-aligned bucket rather than the unknown-segment bucket", () => {
+    const directory = mkdtempSync(path.join(tmpdir(), "qlatt-dectalk-phase-rank-"));
+    try {
+      const summaryPath = path.join(directory, "trace-summary.json");
+      writeFileSync(
+        summaryPath,
+        JSON.stringify({
+          phrases: [{
+            phraseId: "phase-rank",
+            params: {
+              B3: {
+                phaseAlignedSameSegment: {
+                  compared: 3,
+                  meanAbs: 15,
+                  maxAbs: 30,
+                  maxFrame: 7,
+                  oracleAtMax: 100,
+                  qlattAtMax: 130,
+                  maxOraclePhone: "N",
+                  maxOracleOutputPhone: "N",
+                  maxQlattPhone: "N",
+                  maxOracleSegmentPhase: 0.4,
+                  maxQlattSegmentPhase: 0.5,
+                  maxSegmentPhaseDelta: 0.1,
+                },
+                unknownSegment: {
+                  compared: 2,
+                  meanAbs: 502,
+                  maxAbs: 502,
+                  maxFrame: 0,
+                },
+              },
+            },
+          }],
+        }),
+      );
+
+      const stdout = execFileSync(
+        process.execPath,
+        [
+          "--loader",
+          "ts-node/esm/transpile-only",
+          "--experimental-specifier-resolution=node",
+          "scripts/oracle/rank-trace-targets.ts",
+          "--summary",
+          summaryPath,
+          "--bucket",
+          "phaseAlignedSameSegment",
+        ],
+        { cwd: process.cwd(), encoding: "utf8" },
+      );
+
+      expect(stdout).toContain("phase-rank\tB3\t3\t15.000\t30.000\t7\t100.000\t130.000");
+      expect(stdout).toContain("N/N/N\t0.4000/0.5000\t0.1000");
+      expect(stdout).not.toContain("502.000");
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
 });
 
 function isRecord(value: unknown): value is Record<string, unknown> {

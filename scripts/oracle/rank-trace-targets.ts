@@ -31,6 +31,7 @@ type BucketSummary = {
 
 type ParamSummary = BucketSummary & {
   sameSegment?: BucketSummary;
+  phaseAlignedSameSegment?: BucketSummary;
   differentSegment?: BucketSummary;
   unknownSegment?: BucketSummary;
 };
@@ -138,6 +139,7 @@ function readSummary(summaryPath: string): TraceSummary {
 
 function bucketFor(param: ParamSummary, bucket: BucketName): BucketSummary | null {
   if (bucket === "sameSegment") return param.sameSegment ?? null;
+  if (bucket === "phaseAlignedSameSegment") return param.phaseAlignedSameSegment ?? null;
   if (bucket === "differentSegment") return param.differentSegment ?? null;
   return param.unknownSegment ?? null;
 }

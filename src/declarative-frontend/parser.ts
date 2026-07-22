@@ -1,5 +1,4 @@
 import { parseYamlString, isPlainObject, cloneValue } from "../yaml-loader";
-import { extractPrefilterFromCondition } from "./where-prefilter";
 
 type PlainObject = Record<string, any>;
 
@@ -216,7 +215,6 @@ function normalizePatternStep(step: unknown): PlainObject {
     ...step,
     capture: asString(step.capture),
     where: normalizedWhere,
-    _prefilter: extractPrefilterFromCondition(normalizedWhere),
     optional: Boolean(step.optional),
     repeat: step.repeat === "*" || step.repeat === "+" ? step.repeat : null,
   };
@@ -268,7 +266,6 @@ function normalizeRule(rule: unknown): PlainObject {
             ...rule.select,
             relation: asString(rule.select.relation),
             where: normalizedWhere,
-            _prefilter: extractPrefilterFromCondition(normalizedWhere),
           };
         })()
       : null,

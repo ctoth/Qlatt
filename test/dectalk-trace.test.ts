@@ -115,15 +115,15 @@ describe("DECtalk trace packet timing", () => {
           tcum: 58,
           phoneIndex: 0,
           f0prime: 1000,
-          out: { AP: 0, AV: 0 },
+          out: { AP: 0, AV: 0, TLT: 0 },
         }),
       );
       writeFileSync(
         path.join(qlattDirectory, "qlatt.json"),
         JSON.stringify({
           track: [
-            { time: packetTime - 0.001, params: { AH: 0, AV: 0 } },
-            { time: packetTime + Number.EPSILON, params: { AH: 48, AV: 65 } },
+            { time: packetTime - 0.001, params: { AH: 0, AV: 0, TL: 0 } },
+            { time: packetTime + Number.EPSILON, params: { AH: 48, AV: 65, TL: 10 } },
           ],
         }),
       );
@@ -133,6 +133,7 @@ describe("DECtalk trace packet timing", () => {
           params: {
             AP: { compared: 1, meanAbs: 48, maxAbs: 48, maxFrame: 57 },
             AV: { compared: 1, meanAbs: 65, maxAbs: 65, maxFrame: 57 },
+            TLT: { compared: 1, meanAbs: 10, maxAbs: 10, maxFrame: 57 },
           },
           oraclePhoneGroups: [],
           qlattTrackRuns: [],
@@ -176,6 +177,25 @@ describe("DECtalk trace packet timing", () => {
       );
 
       expect(apStdout).toContain("qlattAP=48 delta=48.000");
+
+      const tltStdout = execFileSync(
+        process.execPath,
+        [
+          "--loader",
+          "ts-node/esm/transpile-only",
+          "--experimental-specifier-resolution=node",
+          "scripts/oracle/summarize-phrase-window.ts",
+          "--run-root",
+          directory,
+          "--phrase-id",
+          phraseId,
+          "--param",
+          "TLT",
+        ],
+        { cwd: process.cwd(), encoding: "utf8" },
+      );
+
+      expect(tltStdout).toContain("qlattTLT=10 delta=10.000");
     } finally {
       rmSync(directory, { recursive: true, force: true });
     }

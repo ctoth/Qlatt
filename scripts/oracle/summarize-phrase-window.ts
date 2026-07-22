@@ -118,8 +118,8 @@ function summarizeValues(values: number[]): string {
 
 function main(): void {
   const args = parseArgs(process.argv.slice(2));
-  // compare-trace.ts maps DECtalk AP to Qlatt's public AH control.
-  const qlattParam = args.param === "AP" ? "AH" : args.param;
+  // Keep DECtalk trace labels aligned with compare-trace.ts's Qlatt controls.
+  const qlattParam = args.param === "AP" ? "AH" : args.param === "TLT" ? "TL" : args.param;
   const phraseRoot = path.join(args.runRoot, args.phraseId);
   const comparePath = path.join(args.runRoot, `${args.phraseId}-trace-compare.json`);
   const parentComparePath = path.join(path.dirname(args.runRoot), `${args.phraseId}-trace-compare.json`);

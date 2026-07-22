@@ -65,9 +65,24 @@ function isTrueValue(obj: unknown, field: unknown): boolean {
   return (obj as Record<string, unknown>)[key] === true;
 }
 
+/**
+ * Case-folding accessor for CEL rule expressions.
+ *
+ * `lower(x)` returns the lower-cased string form of `x`. A string is folded
+ * directly (`toLowerCase()`); any other value is coerced with `String(...)`
+ * first, so `lower(current.word)` folds the stored orthography exactly the way
+ * the accent policy's `word.toLowerCase()` membership check does. This makes
+ * `lower(current.word) in sets.function_words` a byte-identical replacement for
+ * the imperative `classifyWordProsody` lower-cased set lookup.
+ */
+function lowerValue(value: unknown): string {
+  return (typeof value === "string" ? value : String(value)).toLowerCase();
+}
+
 export const CEL_FUNCTION_CATALOG = [
   { name: "has", arities: [1], binding: "builtin" },
   { name: "isTrue", arities: [2], binding: "pure" },
+  { name: "lower", arities: [1], binding: "pure" },
   { name: "size", arities: [1], binding: "builtin" },
   { name: "double", arities: [1], binding: "builtin" },
   { name: "string", arities: [1], binding: "builtin" },
@@ -155,6 +170,7 @@ function createCelEnvironment(
   env.registerFunction("isTrue(dyn, dyn): dyn", (obj: unknown, field: unknown) =>
     isTrueValue(obj, field)
   );
+  env.registerFunction("lower(dyn): dyn", (value: unknown) => lowerValue(value));
 
   for (const { name, arities, binding } of CEL_FUNCTION_CATALOG) {
     if (binding !== "context") continue;

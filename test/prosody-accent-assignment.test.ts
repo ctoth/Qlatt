@@ -68,6 +68,30 @@ describe("prosody pass 3: declarative accent assignment", () => {
     expect(gagSegs.every((s) => s.get("isAccented") === true)).toBe(true);
   });
 
+  it("marks the last carrier of each phrase as the nuclear accent", () => {
+    // Two intonational phrases split by the comma. Each phrase's LAST accent
+    // carrier is nuclear; earlier carriers are prenuclear (not nuclear).
+    const result = textToKlattTrackDetailed("Bob bought a big blue balloon.", 110);
+    const carriers = activeSegments(result).filter((s) => s.get("isAccentCarrier") === true);
+    expect(carriers.length).toBeGreaterThan(1);
+    const nuclear = carriers.filter((s) => s.get("isNuclearAccent") === true);
+    // Single phrase (one period) -> exactly one nuclear accent (the last carrier).
+    expect(nuclear.length).toBe(1);
+    expect(nuclear[0]).toBe(carriers[carriers.length - 1]);
+    // All earlier carriers are non-nuclear.
+    for (let i = 0; i < carriers.length - 1; i += 1) {
+      expect(carriers[i].get("isNuclearAccent")).not.toBe(true);
+    }
+  });
+
+  it("resets the nuclear accent at each punctuation phrase boundary", () => {
+    // "Gag, gang, and gunk go together." -> three phrases (Gag, / gang, /
+    // and gunk go together.). Each phrase gets its own nuclear accent.
+    const result = textToKlattTrackDetailed("Gag, gang, and gunk go together.", 110);
+    const nuclear = activeSegments(result).filter((s) => s.get("isNuclearAccent") === true);
+    expect(nuclear.length).toBe(3);
+  });
+
   afterAll(() => {
     warnSpy.mockRestore();
   });

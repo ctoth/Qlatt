@@ -128,7 +128,11 @@ export function annotateProsody(utterance: Utterance): void {
       // see identical carrier placement.
       isAccented: view.isAccented === true,
       isAccentCarrier: view.isAccentCarrier === true,
-      isNuclearAccent: false,
+      // isNuclearAccent is now assigned by the declarative
+      // `identify_nuclear_accent` scan rule (annotation phase, runs before this
+      // pass); read the committed value so the accent-type pass sees identical
+      // nuclear/prenuclear classification.
+      isNuclearAccent: view.isNuclearAccent === true,
       accentType: null,
       breakIndex: 0,
     };
@@ -143,12 +147,11 @@ export function annotateProsody(utterance: Utterance): void {
   // Step 3: Assign accent — now the declarative `assign_accent` rule
   // (phases/annotation.yaml), read into result above via the item view.
 
-  // Steps 4-7: Per-phrase passes (nuclear accent, accent types, edge tones, long-phrase breaking).
+  // Steps 5-7: Per-phrase passes (accent types, edge tones, long-phrase breaking).
+  // Step 4 (nuclear accent) is now the declarative `identify_nuclear_accent`
+  // scan rule (annotation phase), read into result above via the item view.
   for (let pi = 0; pi < phrases.length; pi++) {
     const phrase = phrases[pi];
-
-    // Step 4: find last accented token in phrase (nuclear accent).
-    identifyNuclearAccent(result, phrase);
 
     const hasPrenuclearAccent = phraseHasPrenuclearAccent(result, phrase);
     const tuneSelection = selectTuneForPhrase(tuneGrammar, {
@@ -181,7 +184,8 @@ export function annotateProsody(utterance: Utterance): void {
     // mark_function_words rule (annotation phase); not re-committed here.
     // isAccented / isAccentCarrier are written by the declarative assign_accent
     // rule (annotation phase); not re-committed here.
-    transaction.set(token.item, "isNuclearAccent", token.isNuclearAccent);
+    // isNuclearAccent is written by the declarative identify_nuclear_accent rule
+    // (annotation phase); not re-committed here.
     transaction.set(token.item, "accentType", token.accentType);
     // accentIndexInPhrase is now written by the declarative
     // accent_index_in_phrase scan rule (prosody phase); not committed here.
@@ -233,27 +237,6 @@ function identifyPhrases(tokens: ProsodyToken[]): Phrase[] {
   }
 
   return phrases;
-}
-
-// ---------------------------------------------------------------------------
-// Step 4: Identify nuclear accent (per phrase)
-// ---------------------------------------------------------------------------
-
-function identifyNuclearAccent(tokens: ProsodyToken[], phrase: Phrase): void {
-  // Nuclear accent = last accent carrier in the phrase.
-  // This is the first active stressed segment of the accented word, which keeps
-  // diphthong offglides from receiving separate pitch accents.
-  let lastAccentedStressIndex = -1;
-
-  for (const idx of phrase.tokenIndices) {
-    if (!isSuppressedToken(tokens[idx]) && tokens[idx].isAccentCarrier === true) {
-      lastAccentedStressIndex = idx;
-    }
-  }
-
-  if (lastAccentedStressIndex >= 0) {
-    tokens[lastAccentedStressIndex].isNuclearAccent = true;
-  }
 }
 
 // ---------------------------------------------------------------------------

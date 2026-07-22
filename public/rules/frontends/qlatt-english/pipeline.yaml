@@ -363,6 +363,7 @@ phases:
       - cluster_position_annotation
       - mark_function_words
       - assign_accent
+      - identify_nuclear_accent
   - name: duration
     rules:
       - non_word_initial_consonant_shortening

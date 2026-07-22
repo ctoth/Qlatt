@@ -91,3 +91,34 @@ rules:
     citations:
       - O'Shaughnessy 1976
       - Allen, Hunnicutt & Klatt 1987
+
+  # Nuclear-accent identification (former prosodic-annotator identifyNuclearAccent
+  # pass). The nuclear accent is the LAST accent carrier within the intonational
+  # phrase (Ladd 2008, designated terminal element). The phrase-domain scan groups
+  # the selected carriers by the same boundary logic as the imperative
+  # `identifyPhrases`: a group ends at an ACTIVE SIL that carries a punctuation
+  # symbol (period, comma, etc.). Each group's last carrier receives
+  # isNuclearAccent=true; earlier carriers get false, feeding the accent-type pass
+  # (prenuclear vs nuclear) and downstep suppression downstream.
+  #
+  # Suppressed punctuation SILs (e.g. a comma-SIL wedged mid-word) are excluded
+  # from selection on both sides, so they never split a phrase — matching the
+  # imperative `!isSuppressedToken` guard on the phrase boundary.
+  identify_nuclear_accent:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "isTrue(current, 'isAccentCarrier')"
+    scan:
+      domain: phrase
+      reset_where: >-
+        current.phoneme == 'SIL'
+        && (has(current.punctuationSymbol) ? current.punctuationSymbol != null : false)
+    apply:
+      - field: isNuclearAccent
+        op: set
+        value: "phrase.is_last"
+        tag: nuclear_accent
+    citations:
+      - Ladd 2008
+      - Pierrehumbert 1980

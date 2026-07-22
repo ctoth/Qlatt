@@ -706,6 +706,225 @@ function validatePredicates(
   return predicates;
 }
 
+/**
+ * Shared threading context for the value-shape validator family. Bundles the
+ * five arguments (relation maps, relation names, policy state, diagnostics sink)
+ * that every recursor passed positionally.
+ */
+type ValueShapeCtx = {
+  relationByName: Map<string, any>;
+  relationName: unknown;
+  relationNames: Set<string>;
+  policyState: PolicyValidationState;
+  diagnostics: ValidationDiagnostic[];
+};
+
+/**
+ * One parameterized description of the recursive value shape
+ * `value = number | CEL string | {dispatch} | array | nested object`. Each
+ * former recursor (`validateSetValueExpression`,
+ * `validateDispatchValueExpression` numeric mode, `validateTemplateNumericExpression`,
+ * `validateTemplateDispatchExpressions`) is now just a spec over the single
+ * `validateValueShape` recursion. An absent `invalidCode` means unhandled
+ * leaves are silently ignored (the template-walk behaviour).
+ */
+type ValueShapeSpec = {
+  acceptNull: boolean;
+  acceptBoolean: boolean;
+  numberCriticalCheck: boolean;
+  validateLeaves: boolean;
+  celSkipEmpty: boolean;
+  celUsesCriticalContext: boolean;
+  handleDispatch: boolean;
+  dispatchMode: "numeric" | "set";
+  recurseContainers: boolean;
+  invalidCode?: string;
+  invalidMessage?: (label: string) => string;
+};
+
+// value = set literal (recurses arrays + objects, accepts null/bool, CEL leaves).
+const SET_VALUE_SHAPE: ValueShapeSpec = {
+  acceptNull: true,
+  acceptBoolean: true,
+  numberCriticalCheck: false,
+  validateLeaves: true,
+  celSkipEmpty: true,
+  celUsesCriticalContext: false,
+  handleDispatch: true,
+  dispatchMode: "set",
+  recurseContainers: true,
+  invalidCode: "E_RULE_EXPRESSION_INVALID",
+  invalidMessage: (l) => `${l} must be a CEL expression, literal, array, object, or dispatch block`,
+};
+
+// value = a single numeric dispatch-row value (number or CEL string only).
+const DISPATCH_VALUE_NUMERIC_SHAPE: ValueShapeSpec = {
+  acceptNull: false,
+  acceptBoolean: false,
+  numberCriticalCheck: true,
+  validateLeaves: true,
+  celSkipEmpty: true,
+  celUsesCriticalContext: true,
+  handleDispatch: false,
+  dispatchMode: "numeric",
+  recurseContainers: false,
+  invalidCode: "E_RULE_EXPRESSION_INVALID",
+  invalidMessage: (l) => `${l} must be a string/number expression`,
+};
+
+// value = number | CEL string | {dispatch} (template numeric slot, no recursion).
+const TEMPLATE_NUMERIC_SHAPE: ValueShapeSpec = {
+  acceptNull: true,
+  acceptBoolean: false,
+  numberCriticalCheck: false,
+  validateLeaves: true,
+  celSkipEmpty: false,
+  celUsesCriticalContext: false,
+  handleDispatch: true,
+  dispatchMode: "numeric",
+  recurseContainers: false,
+  invalidCode: "E_RULE_EXPRESSION_INVALID",
+  invalidMessage: (l) => `${l} must be a number, string expression, or dispatch block`,
+};
+
+// structural walk: descend arrays/objects only to validate nested dispatch
+// blocks; every non-dispatch leaf is ignored (no invalidCode).
+const TEMPLATE_DISPATCH_WALK_SHAPE: ValueShapeSpec = {
+  acceptNull: true,
+  acceptBoolean: true,
+  numberCriticalCheck: false,
+  validateLeaves: false,
+  celSkipEmpty: false,
+  celUsesCriticalContext: false,
+  handleDispatch: true,
+  dispatchMode: "numeric",
+  recurseContainers: true,
+};
+
+/**
+ * Validate one CEL string leaf: syntax, declared-type field usage, and policy
+ * reference/critical-literal checks. Shared by every value-shape leaf and by the
+ * control-window `.fields` string form.
+ */
+function validateCelExpressionLeaf(
+  value: string,
+  ctx: ValueShapeCtx,
+  path: string,
+  label: string,
+  skipEmpty: boolean,
+  criticalContext: boolean
+): void {
+  if (skipEmpty && value.length === 0) return;
+  const syntaxError = validateExpressionSyntax(value, { relationNames: ctx.relationNames });
+  if (syntaxError) {
+    ctx.diagnostics.push(
+      makeDiagnostic("E_CEL_INVALID", `${label} has invalid CEL expression: ${syntaxError}`, path)
+    );
+    return;
+  }
+  validateDeclaredTypeFieldUsage(value, ctx.relationByName, ctx.relationName, ctx.diagnostics, path, label);
+  validatePolicyReferencesAndLiterals(value, path, label, ctx.diagnostics, ctx.policyState, criticalContext);
+}
+
+/**
+ * The single recursion the value-shape validator family collapses to. `spec`
+ * selects which composite forms are accepted/recursed and how leaves are
+ * validated; `criticalContext` threads the inline-critical-literal flag for the
+ * numeric dispatch-value case.
+ */
+function validateValueShape(
+  value: unknown,
+  ctx: ValueShapeCtx,
+  spec: ValueShapeSpec,
+  criticalContext: boolean,
+  path: string,
+  label: string
+): void {
+  const emitInvalid = (): void => {
+    if (!spec.invalidCode || !spec.invalidMessage) return;
+    ctx.diagnostics.push(makeDiagnostic(spec.invalidCode, spec.invalidMessage(label), path));
+  };
+
+  if (value === null || value === undefined) {
+    if (!spec.acceptNull) emitInvalid();
+    return;
+  }
+  if (typeof value === "number") {
+    if (
+      spec.numberCriticalCheck &&
+      ctx.policyState.policyTree &&
+      criticalContext &&
+      !isAllowedInlinePolicyLiteral(String(value))
+    ) {
+      ctx.diagnostics.push(
+        makeDiagnostic(
+          "E_POLICY_LITERAL_CRITICAL",
+          `${label} uses inline critical numeric literal '${String(value)}'; use params.policy.*`,
+          path
+        )
+      );
+    }
+    return;
+  }
+  if (typeof value === "boolean") {
+    if (!spec.acceptBoolean) emitInvalid();
+    return;
+  }
+  if (typeof value === "string") {
+    if (spec.validateLeaves) {
+      validateCelExpressionLeaf(
+        value,
+        ctx,
+        path,
+        label,
+        spec.celSkipEmpty,
+        spec.celUsesCriticalContext ? criticalContext : false
+      );
+    }
+    return;
+  }
+  if (
+    spec.handleDispatch &&
+    isPlainObject(value) &&
+    Object.prototype.hasOwnProperty.call(value, "dispatch")
+  ) {
+    validateDispatchSpec(
+      (value as PlainObject).dispatch,
+      ctx.relationByName,
+      ctx.relationName,
+      ctx.relationNames,
+      ctx.policyState,
+      false,
+      spec.dispatchMode,
+      ctx.diagnostics,
+      `${path}.dispatch`,
+      label
+    );
+    return;
+  }
+  if (Array.isArray(value)) {
+    if (spec.recurseContainers) {
+      for (let i = 0; i < value.length; i += 1) {
+        validateValueShape(value[i], ctx, spec, criticalContext, `${path}[${i}]`, label);
+      }
+      return;
+    }
+    emitInvalid();
+    return;
+  }
+  if (isPlainObject(value)) {
+    if (spec.recurseContainers) {
+      for (const [key, nested] of Object.entries(value)) {
+        validateValueShape(nested, ctx, spec, criticalContext, `${path}.${key}`, label);
+      }
+      return;
+    }
+    emitInvalid();
+    return;
+  }
+  emitInvalid();
+}
+
 function validateDispatchValueExpression(
   expr: unknown,
   relationByName: Map<string, any>,
@@ -718,57 +937,13 @@ function validateDispatchValueExpression(
   path: string,
   contextLabel: string
 ): void {
-  if (valueMode === "set") {
-    validateSetValueExpression(
-      expr,
-      relationByName,
-      relationName,
-      relationNames,
-      policyState,
-      diagnostics,
-      path,
-      contextLabel
-    );
-    return;
-  }
-  if (typeof expr === "number") {
-    if (policyState.policyTree && criticalContext && !isAllowedInlinePolicyLiteral(String(expr))) {
-      diagnostics.push(
-        makeDiagnostic(
-          "E_POLICY_LITERAL_CRITICAL",
-          `${contextLabel} uses inline critical numeric literal '${String(expr)}'; use params.policy.*`,
-          path
-        )
-      );
-    }
-    return;
-  }
-  if (typeof expr !== "string") {
-    diagnostics.push(
-      makeDiagnostic(
-        "E_RULE_EXPRESSION_INVALID",
-        `${contextLabel} must be a string/number expression`,
-        path
-      )
-    );
-    return;
-  }
-  if (expr.length === 0) return;
-  const syntaxError = validateExpressionSyntax(expr, { relationNames });
-  if (syntaxError) {
-    diagnostics.push(
-      makeDiagnostic("E_CEL_INVALID", `${contextLabel} has invalid CEL expression: ${syntaxError}`, path)
-    );
-    return;
-  }
-  validateDeclaredTypeFieldUsage(expr, relationByName, relationName, diagnostics, path, contextLabel);
-  validatePolicyReferencesAndLiterals(
+  validateValueShape(
     expr,
+    { relationByName, relationName, relationNames, policyState, diagnostics },
+    valueMode === "set" ? SET_VALUE_SHAPE : DISPATCH_VALUE_NUMERIC_SHAPE,
+    criticalContext,
     path,
-    contextLabel,
-    diagnostics,
-    policyState,
-    criticalContext
+    contextLabel
   );
 }
 
@@ -912,83 +1087,14 @@ function validateSetValueExpression(
   path: string,
   contextLabel: string
 ): void {
-  if (
-    value == null ||
-    typeof value === "number" ||
-    typeof value === "boolean"
-  ) {
-    return;
-  }
-
-  if (typeof value === "string") {
-    if (value.length === 0) return;
-    const syntaxError = validateExpressionSyntax(value, { relationNames });
-    if (syntaxError) {
-      diagnostics.push(
-        makeDiagnostic("E_CEL_INVALID", `${contextLabel} has invalid CEL expression: ${syntaxError}`, path)
-      );
-      return;
-    }
-    validateDeclaredTypeFieldUsage(value, relationByName, relationName, diagnostics, path, contextLabel);
-    validatePolicyReferencesAndLiterals(value, path, contextLabel, diagnostics, policyState);
-    return;
-  }
-
-  if (Array.isArray(value)) {
-    for (let i = 0; i < value.length; i += 1) {
-      validateSetValueExpression(
-        value[i],
-        relationByName,
-        relationName,
-        relationNames,
-        policyState,
-        diagnostics,
-        `${path}[${i}]`,
-        contextLabel
-      );
-    }
-    return;
-  }
-
-  if (isPlainObject(value) && Object.prototype.hasOwnProperty.call(value, "dispatch")) {
-    validateDispatchSpec(
-      value.dispatch,
-      relationByName,
-      relationName,
-      relationNames,
-      policyState,
-      false,
-      "set",
-      diagnostics,
-      `${path}.dispatch`,
-      contextLabel
-    );
-    return;
-  }
-
-  if (!isPlainObject(value)) {
-    diagnostics.push(
-      makeDiagnostic(
-        "E_RULE_EXPRESSION_INVALID",
-        `${contextLabel} must be a CEL expression, literal, array, object, or dispatch block`,
-        path
-      )
-    );
-    return;
-  }
-
-  for (const [key, nested] of Object.entries(value)) {
-    validateSetValueExpression(
-      nested,
-      relationByName,
-      relationName,
-      relationNames,
-      policyState,
-      diagnostics,
-      `${path}.${key}`,
-      contextLabel
-    );
-  }
+  validateValueShape(
+    value,
+    { relationByName, relationName, relationNames, policyState, diagnostics },
+    SET_VALUE_SHAPE,
+    false,
+    path,
+    contextLabel
+  );
 }
 
 /**
@@ -1132,51 +1238,14 @@ function validateTemplateDispatchExpressions(
   path: string,
   contextLabel: string
 ): void {
-  if (Array.isArray(value)) {
-    for (let i = 0; i < value.length; i += 1) {
-      validateTemplateDispatchExpressions(
-        value[i],
-        relationByName,
-        relationName,
-        relationNames,
-        policyState,
-        diagnostics,
-        `${path}[${i}]`,
-        contextLabel
-      );
-    }
-    return;
-  }
-
-  if (!isPlainObject(value)) return;
-  if (Object.prototype.hasOwnProperty.call(value, "dispatch")) {
-    validateDispatchSpec(
-      value.dispatch,
-      relationByName,
-      relationName,
-      relationNames,
-      policyState,
-      false,
-      "numeric",
-      diagnostics,
-      `${path}.dispatch`,
-      contextLabel
-    );
-    return;
-  }
-
-  for (const [key, nested] of Object.entries(value)) {
-    validateTemplateDispatchExpressions(
-      nested,
-      relationByName,
-      relationName,
-      relationNames,
-      policyState,
-      diagnostics,
-      `${path}.${key}`,
-      contextLabel
-    );
-  }
+  validateValueShape(
+    value,
+    { relationByName, relationName, relationNames, policyState, diagnostics },
+    TEMPLATE_DISPATCH_WALK_SHAPE,
+    false,
+    path,
+    contextLabel
+  );
 }
 
 function validateTemplateNumericExpression(
@@ -1189,47 +1258,14 @@ function validateTemplateNumericExpression(
   path: string,
   contextLabel: string
 ): void {
-  if (value == null || typeof value === "number") return;
-  if (isPlainObject(value) && Object.prototype.hasOwnProperty.call(value, "dispatch")) {
-    validateDispatchSpec(
-      value.dispatch,
-      relationByName,
-      relationName,
-      relationNames,
-      policyState,
-      false,
-      "numeric",
-      diagnostics,
-      `${path}.dispatch`,
-      contextLabel
-    );
-    return;
-  }
-  if (typeof value !== "string") {
-    diagnostics.push(
-      makeDiagnostic(
-        "E_RULE_EXPRESSION_INVALID",
-        `${contextLabel} must be a number, string expression, or dispatch block`,
-        path
-      )
-    );
-    return;
-  }
-
-  const syntaxError = validateExpressionSyntax(value, { relationNames });
-  if (syntaxError) {
-    diagnostics.push(
-      makeDiagnostic(
-        "E_CEL_INVALID",
-        `${contextLabel} has invalid CEL expression: ${syntaxError}`,
-        path
-      )
-    );
-    return;
-  }
-
-  validateDeclaredTypeFieldUsage(value, relationByName, relationName, diagnostics, path, contextLabel);
-  validatePolicyReferencesAndLiterals(value, path, contextLabel, diagnostics, policyState);
+  validateValueShape(
+    value,
+    { relationByName, relationName, relationNames, policyState, diagnostics },
+    TEMPLATE_NUMERIC_SHAPE,
+    false,
+    path,
+    contextLabel
+  );
 }
 
 function validateControlWindowTemplate(
@@ -1385,32 +1421,14 @@ function validateControlWindowTemplate(
 
     const fieldsSpec = entry.fields;
     if (typeof fieldsSpec === "string") {
-      const syntaxError = validateExpressionSyntax(fieldsSpec, { relationNames });
-      if (syntaxError) {
-        diagnostics.push(
-          makeDiagnostic(
-            "E_CEL_INVALID",
-            `${entryLabel}.fields has invalid CEL expression: ${syntaxError}`,
-            `${entryPath}.fields`
-          )
-        );
-      } else {
-        validateDeclaredTypeFieldUsage(
-          fieldsSpec,
-          relationByName,
-          relationName,
-          diagnostics,
-          `${entryPath}.fields`,
-          `${entryLabel}.fields`
-        );
-        validatePolicyReferencesAndLiterals(
-          fieldsSpec,
-          `${entryPath}.fields`,
-          `${entryLabel}.fields`,
-          diagnostics,
-          policyState
-        );
-      }
+      validateCelExpressionLeaf(
+        fieldsSpec,
+        { relationByName, relationName, relationNames, policyState, diagnostics },
+        `${entryPath}.fields`,
+        `${entryLabel}.fields`,
+        false,
+        false
+      );
     } else if (!isPlainObject(fieldsSpec)) {
       diagnostics.push(
         makeDiagnostic(

@@ -1,7 +1,7 @@
 import type { CompiledRulepack } from "../rule-pack";
 import { materializePhonemeTarget, type InventorySpec } from "../inventory";
 import { trajectoryControlWindows } from "../trajectory-control-windows";
-import { isNavOp, step as stepPath } from "./path";
+import { isNavOp, evalPath } from "./path";
 import { evaluateExpression } from "../cel-expressions";
 import { isPlainObject } from "../../yaml-loader";
 import type { Item } from "./item";
@@ -374,18 +374,17 @@ function buildEvaluationContext(
   ): Readonly<Record<string, unknown>> | FeatureValue | undefined | null => {
     const source = resolveItem(sourceValue);
     if (!source || typeof pathValue !== "string") return null;
+    let startNode = relationName ? utterance.relation(relationName).node(source) ?? null : null;
+    if (!startNode) startNode = source.nodes.values().next().value ?? null;
+    if (!startNode) return null;
     const segments = pathValue.split(".").map((segment) => segment.trim()).filter(Boolean);
-    let node = relationName ? utterance.relation(relationName).node(source) ?? null : null;
-    if (!node) node = source.nodes.values().next().value ?? null;
-    for (let pathIndex = 0; pathIndex < segments.length; pathIndex += 1) {
-      if (!node) return null;
-      const segment = segments[pathIndex];
-      const final = pathIndex === segments.length - 1;
-      if (final && !isNavOp(segment)) return transaction.read(node.item, segment);
-      node = stepPath(node, segment);
-      if (node) transaction.dependOn(node.write.decisionId);
-    }
-    return view(node?.item);
+    const endsInFeature = segments.length > 0 && !isNavOp(segments[segments.length - 1]);
+    const result = evalPath(startNode, pathValue, {
+      onStep: (node) => transaction.dependOn(node.write.decisionId),
+      readFeature: (item, key) => transaction.read(item, key),
+    });
+    if (endsInFeature) return result.node ? result.value : null;
+    return view(result.node?.item);
   };
   const bindingViews = Object.fromEntries(
     Object.entries(bindings).map(([name, item]) => [name, view(item)]),

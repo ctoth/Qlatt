@@ -17,7 +17,7 @@ export {
 } from "./temporal-axis";
 export type { TemporalMark, TemporalOrder } from "./temporal-axis";
 export { evalPath, pathNode, pathFeature, isNavOp, step } from "./path";
-export type { PathResult } from "./path";
+export type { PathResult, PathHooks } from "./path";
 export {
   lowerToFrames,
   readLowerOptions,

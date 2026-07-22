@@ -82,6 +82,19 @@ export interface PathResult {
   value?: FeatureValue;
 }
 
+/**
+ * Optional side-effect hooks for a provenance-aware walk. The HRG rule engine
+ * passes these so path navigation records the same dependency edges and
+ * versioned feature reads as the rest of its transaction; default callers
+ * (tests, tooling) omit them and get a plain in-memory read.
+ */
+export interface PathHooks {
+  /** Called with each node successfully stepped onto (not the start node). */
+  onStep?: (node: HrgNode) => void;
+  /** How to read the terminal feature; defaults to `item.get(key)`. */
+  readFeature?: (item: HrgNode["item"], key: string) => FeatureValue | undefined;
+}
+
 function splitPath(path: string): string[] {
   return path
     .split(".")
@@ -94,7 +107,7 @@ function splitPath(path: string): string[] {
  * (not a nav op), the result carries that feature's value; otherwise the result
  * is the navigated node.
  */
-export function evalPath(start: HrgNode, path: string): PathResult {
+export function evalPath(start: HrgNode, path: string, hooks?: PathHooks): PathResult {
   const segments = splitPath(path);
   if (segments.length === 0) return { node: start };
 
@@ -105,11 +118,13 @@ export function evalPath(start: HrgNode, path: string): PathResult {
   for (const op of navSegments) {
     if (!node) break;
     node = step(node, op);
+    if (node) hooks?.onStep?.(node);
   }
 
   if (lastIsFeature) {
     const featureKey = segments[segments.length - 1];
-    return { node, value: node ? node.item.get(featureKey) : undefined };
+    const readFeature = hooks?.readFeature ?? ((item, key) => item.get(key));
+    return { node, value: node ? readFeature(node.item, featureKey) : undefined };
   }
   return { node };
 }

@@ -355,6 +355,27 @@ describe("dectalk-english end-to-end", () => {
     expect(b3).toEqual(expected);
   });
 
+  it("matches every native AV cell through the complete the trace", () => {
+    const result = textToKlattTrackDetailed("the.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const av = Array.from({ length: 139 }, (_, frameIndex) => {
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.AV;
+    });
+    const expected = [
+      0, 0, 0,
+      34, 37, 39, 42, 45, 47, 50, 54, 55, 56, 57, 58, 59, 60, 61,
+      ...Array(16).fill(62),
+      61, 60, 60, 59, 58, 58, 57, 57, 56, 55, 55,
+      ...Array(94).fill(0),
+    ];
+
+    expect(expected).toHaveLength(139);
+    expect(av).toEqual(expected);
+  });
+
   it("applies DECtalk Rule 14 to a sonorant after a voiceless plosive", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

@@ -1642,135 +1642,179 @@ export function lowerToFrames(
   const frames: KlattFrame[] = [];
   const provenanceByFrame: Array<Record<string, string>> = [];
 
-  const appendFrame = (
-    timeMs: number,
-    item?: Item,
-    phonemeOverride?: string,
-    segmentOffsetMs = 0,
-    outputTimeOverrideMs?: number,
-    silenceEdge?: "initial" | "final",
+  // appendFrame builds one KlattFrame by running these ordered sub-steps below,
+  // each of which mutates the shared params/provenance maps in place.
+
+  /**
+   * Silence-edge frames: copy the selected silence resource's params, and for
+   * the initial edge blend in the first segment's boundary + control-window
+   * values so the run-in glides toward the first phone.
+   */
+  const applySilenceEdgeParams = (
+    params: Record<string, number>,
+    provenance: Record<string, string>,
+    segmentOffsetMs: number,
+    silenceEdge: "initial" | "final",
   ): void => {
-    const params: Record<string, number> = {};
-    const provenance: Record<string, string> = {};
-    if (!item && silenceEdge) {
-      if (context.silence) {
-        const resourceKnown = utterance.provenance.getDecisions().some(
-          (decision) => decision.id === context.silence?.decisionId,
+    if (context.silence) {
+      const resourceKnown = utterance.provenance.getDecisions().some(
+        (decision) => decision.id === context.silence?.decisionId,
+      );
+      if (!resourceKnown) {
+        utterance.diagnostics.error(
+          "Selected silence/source resource decision is absent from the Utterance",
+          { decisionId: context.silence.decisionId, edge: silenceEdge },
+          "HRG_LOWER_SILENCE_PROVENANCE_REQUIRED",
         );
-        if (!resourceKnown) {
-          utterance.diagnostics.error(
-            "Selected silence/source resource decision is absent from the Utterance",
-            { decisionId: context.silence.decisionId, edge: silenceEdge },
-            "HRG_LOWER_SILENCE_PROVENANCE_REQUIRED",
-          );
-          throw new Error("E_HRG_LOWER_SILENCE_PROVENANCE: selected silence decision is unknown");
-        }
-        const sourceParams = silenceEdge === "initial"
-          ? context.silence.initialParams
-          : context.silence.finalParams;
-        for (const key of paramKeys) {
-          const value = sourceParams[key];
-          if (typeof value === "number" && Number.isFinite(value)) {
-            params[key] = value;
-            provenance[key] = context.silence.decisionId;
-          }
+        throw new Error("E_HRG_LOWER_SILENCE_PROVENANCE: selected silence decision is unknown");
+      }
+      const sourceParams = silenceEdge === "initial"
+        ? context.silence.initialParams
+        : context.silence.finalParams;
+      for (const key of paramKeys) {
+        const value = sourceParams[key];
+        if (typeof value === "number" && Number.isFinite(value)) {
+          params[key] = value;
+          provenance[key] = context.silence.decisionId;
         }
       }
-      if (silenceEdge === "initial" && initialSilenceMs > 0) {
-        const firstSegment = timings[0]?.item;
-        if (firstSegment) {
-          for (const key of options.transitions.blend.keys) {
-            const value = firstSegment.get(key);
-            const write = firstSegment.latestWrite(key);
-            if (typeof value === "number" && write) {
-              params[key] = value;
-              provenance[key] = write.decisionId;
-            }
+    }
+    if (silenceEdge === "initial" && initialSilenceMs > 0) {
+      const firstSegment = timings[0]?.item;
+      if (firstSegment) {
+        for (const key of options.transitions.blend.keys) {
+          const value = firstSegment.get(key);
+          const write = firstSegment.latestWrite(key);
+          if (typeof value === "number" && write) {
+            params[key] = value;
+            provenance[key] = write.decisionId;
           }
-          for (const window of controlWindowsByItem.get(firstSegment) ?? []) {
-            if (segmentOffsetMs < window.startMs - 1e-6 || segmentOffsetMs >= window.endMs - 1e-6) {
-              continue;
-            }
-            for (const [key, field] of Object.entries(window.fields)) {
-              const value = resolveControlField(params[key], field);
-              if (value == null || !Number.isFinite(value)) {
-                delete params[key];
-                delete provenance[key];
-              } else {
-                params[key] = value;
-                provenance[key] = window.decisionId;
-              }
+        }
+        for (const window of controlWindowsByItem.get(firstSegment) ?? []) {
+          if (segmentOffsetMs < window.startMs - 1e-6 || segmentOffsetMs >= window.endMs - 1e-6) {
+            continue;
+          }
+          for (const [key, field] of Object.entries(window.fields)) {
+            const value = resolveControlField(params[key], field);
+            if (value == null || !Number.isFinite(value)) {
+              delete params[key];
+              delete provenance[key];
+            } else {
+              params[key] = value;
+              provenance[key] = window.decisionId;
             }
           }
         }
       }
     }
-    if (item) {
-      for (const key of paramKeys) {
-        const value = item.get(key);
-        if (typeof value === "number") {
-          params[key] = value;
+  };
+
+  /** Copy the Segment Item's own stamped scalar params into the frame. */
+  const applyItemParams = (
+    params: Record<string, number>,
+    provenance: Record<string, string>,
+    item: Item,
+  ): void => {
+    for (const key of paramKeys) {
+      const value = item.get(key);
+      if (typeof value === "number") {
+        params[key] = value;
+        const write = item.latestWrite(key);
+        if (write) provenance[key] = write.decisionId;
+      }
+    }
+  };
+
+  /** Apply steady (static) and linear transition fields active at this offset. */
+  const applyItemTransitions = (
+    params: Record<string, number>,
+    provenance: Record<string, string>,
+    item: Item,
+    segmentOffsetMs: number,
+  ): void => {
+    const itemTransitions = transitionsByItem.get(item) ?? [];
+    for (const transition of itemTransitions) {
+      if (segmentOffsetMs < transition.startMs - 1e-6) continue;
+      for (const [key, value] of Object.entries(transition.fields)) {
+        const staticFieldsActive = transition.endMs == null || segmentOffsetMs <= transition.endMs + 1e-6;
+        const superseded = !staticFieldsActive && itemTransitions.some((candidate) => (
+          candidate.startMs > transition.startMs + 1e-6
+          && candidate.startMs <= segmentOffsetMs + 1e-6
+          && (candidate.fields[key] !== undefined || candidate.linearFields?.[key] !== undefined)
+        ));
+        if (superseded) continue;
+        params[key] = value;
+        const write = item.latestWrite(key);
+        if (write) provenance[key] = write.decisionId;
+      }
+      if (transition.linearFields && transition.endMs != null) {
+        const durationMs = transition.endMs - transition.startMs;
+        const fraction = durationMs <= 0
+          ? 1
+          : Math.max(0, Math.min(1, (segmentOffsetMs - transition.startMs) / durationMs));
+        for (const [key, values] of Object.entries(transition.linearFields)) {
+          params[key] = values.startValue + (values.endValue - values.startValue) * fraction;
           const write = item.latestWrite(key);
           if (write) provenance[key] = write.decisionId;
         }
       }
-      const itemTransitions = transitionsByItem.get(item) ?? [];
-      for (const transition of itemTransitions) {
-        if (segmentOffsetMs < transition.startMs - 1e-6) continue;
-        for (const [key, value] of Object.entries(transition.fields)) {
-          const staticFieldsActive = transition.endMs == null || segmentOffsetMs <= transition.endMs + 1e-6;
-          const superseded = !staticFieldsActive && itemTransitions.some((candidate) => (
-            candidate.startMs > transition.startMs + 1e-6
-            && candidate.startMs <= segmentOffsetMs + 1e-6
-            && (candidate.fields[key] !== undefined || candidate.linearFields?.[key] !== undefined)
-          ));
-          if (superseded) continue;
-          params[key] = value;
-          const write = item.latestWrite(key);
-          if (write) provenance[key] = write.decisionId;
-        }
-        if (transition.linearFields && transition.endMs != null) {
-          const durationMs = transition.endMs - transition.startMs;
-          const fraction = durationMs <= 0
-            ? 1
-            : Math.max(0, Math.min(1, (segmentOffsetMs - transition.startMs) / durationMs));
-          for (const [key, values] of Object.entries(transition.linearFields)) {
-            params[key] = values.startValue + (values.endValue - values.startValue) * fraction;
-            const write = item.latestWrite(key);
-            if (write) provenance[key] = write.decisionId;
-          }
-        }
+    }
+  };
+
+  /** Apply control-window field overrides active at this offset. */
+  const applyControlWindows = (
+    params: Record<string, number>,
+    provenance: Record<string, string>,
+    item: Item,
+    segmentOffsetMs: number,
+  ): void => {
+    for (const window of controlWindowsByItem.get(item) ?? []) {
+      if (segmentOffsetMs < window.startMs - 1e-6 || segmentOffsetMs >= window.endMs - 1e-6) {
+        continue;
       }
-      for (const window of controlWindowsByItem.get(item) ?? []) {
-        if (segmentOffsetMs < window.startMs - 1e-6 || segmentOffsetMs >= window.endMs - 1e-6) {
-          continue;
-        }
-        for (const [key, field] of Object.entries(window.fields)) {
-          const value = resolveControlField(params[key], field);
-          if (value == null || !Number.isFinite(value)) {
-            delete params[key];
-            delete provenance[key];
-          } else {
-            params[key] = value;
-            provenance[key] = window.decisionId;
-          }
-        }
-      }
-      if (f0Points.length > 0 && paramKeys.includes("F0")) {
-        const phoneme = item.get(phonemeKey);
-        const voiced = (params.AV ?? 0) > 0 || (params.AVS ?? 0) > 0;
-        if (!layeredF0 && (phoneme === "SIL" || !voiced)) {
-          params.F0 = 0;
+      for (const [key, field] of Object.entries(window.fields)) {
+        const value = resolveControlField(params[key], field);
+        if (value == null || !Number.isFinite(value)) {
+          delete params[key];
+          delete provenance[key];
         } else {
-          const resolvedF0 = resolveF0AtTime(f0Points, timeMs, f0Sampling);
-          if (resolvedF0) {
-            params.F0 = resolvedF0.valueHz;
-            provenance.F0 = resolvedF0.decisionId;
-          }
+          params[key] = value;
+          provenance[key] = window.decisionId;
         }
       }
-      const affect = affectByItem.get(item);
-      if (affect) {
+    }
+  };
+
+  /** Sample the F0 contour into the frame (unvoiced/SIL forced to 0). */
+  const applyItemF0Sample = (
+    params: Record<string, number>,
+    provenance: Record<string, string>,
+    item: Item,
+    timeMs: number,
+  ): void => {
+    if (f0Points.length > 0 && paramKeys.includes("F0")) {
+      const phoneme = item.get(phonemeKey);
+      const voiced = (params.AV ?? 0) > 0 || (params.AVS ?? 0) > 0;
+      if (!layeredF0 && (phoneme === "SIL" || !voiced)) {
+        params.F0 = 0;
+      } else {
+        const resolvedF0 = resolveF0AtTime(f0Points, timeMs, f0Sampling);
+        if (resolvedF0) {
+          params.F0 = resolvedF0.valueHz;
+          provenance.F0 = resolvedF0.decisionId;
+        }
+      }
+    }
+  };
+
+  /** Project affect deltas/scales onto backend params with cited clamps. */
+  const applyAffectProjection = (
+    params: Record<string, number>,
+    provenance: Record<string, string>,
+    item: Item,
+  ): void => {
+    const affect = affectByItem.get(item);
+    if (affect) {
         const applyAdd = (key: string, field: AffectField): void => {
           const base = params[key];
           const delta = affect.values[field];
@@ -1877,6 +1921,27 @@ export function lowerToFrames(
         applyAdd("GO", "intensityBoost");
         applyScale("jitter", "jitterScale", 0);
       }
+  };
+
+  const appendFrame = (
+    timeMs: number,
+    item?: Item,
+    phonemeOverride?: string,
+    segmentOffsetMs = 0,
+    outputTimeOverrideMs?: number,
+    silenceEdge?: "initial" | "final",
+  ): void => {
+    const params: Record<string, number> = {};
+    const provenance: Record<string, string> = {};
+    if (!item && silenceEdge) {
+      applySilenceEdgeParams(params, provenance, segmentOffsetMs, silenceEdge);
+    }
+    if (item) {
+      applyItemParams(params, provenance, item);
+      applyItemTransitions(params, provenance, item, segmentOffsetMs);
+      applyControlWindows(params, provenance, item, segmentOffsetMs);
+      applyItemF0Sample(params, provenance, item, timeMs);
+      applyAffectProjection(params, provenance, item);
     }
     if (!item && silenceEdge && layeredF0 && f0Points.length > 0 && paramKeys.includes("F0")) {
       const resolvedF0 = resolveF0AtTime(f0Points, timeMs, f0Sampling);

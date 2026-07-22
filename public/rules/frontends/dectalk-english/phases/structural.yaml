@@ -39,7 +39,7 @@ rules:
           control_windows: "current.control_windows + trace_windows + tail_windows + f3_windows + b1_windows + b3_windows"
     citations:
       - "DECtalk 4.63 ph_setar.c set_trans() (diphthong targets continue across the realized vowel duration)"
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY F1/F2/F3/B1/B2/B3/AP/AV/A3/A5 values at frames 21-57)"
+      - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY F1/F2/F3/B1/B2/B3/AP/AV/A3/A5/TLT values at frames 21-57)"
       - "Engineering representation: append exact native trace cells after duration rules lengthen EY beyond its structural trajectory span"
 
   dectalk_ow_alveolar_stop_late_f2_locus:

@@ -383,6 +383,19 @@ describe("dectalk-english end-to-end", () => {
     expect(a5).toEqual(expected);
   });
 
+  it("matches every native TLT cell through cake's complete trace", () => {
+    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const tlt = Array.from({ length: 171 }, (_, frameIndex) => {
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.TL;
+    });
+
+    expect(tlt).toEqual(Array(171).fill(0));
+  });
+
   it("matches DECtalk's native F1 cells through cake's initial silence and K closure", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

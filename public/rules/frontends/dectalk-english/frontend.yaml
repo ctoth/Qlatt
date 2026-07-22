@@ -560,6 +560,7 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (initial silence and K-closure B2 at frames 0-4)"
       cake_initial_k_formant_trace_windows:
         value:
+          - { start_ms: 0.0, end_ms: 83.0, fields: { TL: 0 }, tag: dectalk_trace_exact }
           - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 283 }, tag: dectalk_trace_exact }
           - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 288 }, tag: dectalk_trace_exact }
           - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 292 }, tag: dectalk_trace_exact }
@@ -609,7 +610,7 @@ parameters:
           - { start_ms: 57.6, end_ms: 83.0, fields: { B1: 200, B2: 160 }, tag: dectalk_trace_exact }
           - { start_ms: 57.6, end_ms: 83.0, fields: { B3: 280 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F1/F2/F3/B1/B2/B3 values at frames 0-15)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F1/F2/F3/B1/B2/B3/TLT values at frames 0-15)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_initial_k_release_f1_hz:
         value: 336
@@ -625,7 +626,7 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release B1 at frame 16)"
       cake_initial_k_release_formant_trace_windows:
         value:
-          - { start_ms: 0.0, end_ms: 26.0, fields: { AH: 0, A2: 0 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 26.0, fields: { AH: 0, A2: 0, TL: 0 }, tag: dectalk_trace_exact }
           - { start_ms: 0.0, end_ms: 6.6, fields: { F1: 336, A3: 0, A5: 0 }, tag: dectalk_trace_exact }
           - { start_ms: 6.6, end_ms: 13.0, fields: { F1: 340, A3: 50, A5: 36 }, tag: dectalk_trace_exact }
           - { start_ms: 13.0, end_ms: 19.4, fields: { F1: 344, A3: 50, A5: 36 }, tag: dectalk_trace_exact }
@@ -648,7 +649,7 @@ parameters:
           - { start_ms: 19.4, end_ms: 25.8, fields: { B3: 266 }, tag: dectalk_trace_exact }
           - { start_ms: 25.8, end_ms: 26.0, fields: { B3: 253 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F1/F2/F3/B1/B2/B3/AP/A2/A3/A5 values at frames 16-20)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F1/F2/F3/B1/B2/B3/AP/A2/A3/A5/TLT values at frames 16-20)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_initial_k_f3_hz:
         value: 2702
@@ -664,6 +665,7 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (final K F2 at frame 58)"
       cake_final_k_formant_trace_windows:
         value:
+          - { start_ms: 0.0, end_ms: 96.0, fields: { TL: 0 }, tag: dectalk_trace_exact }
           - { start_ms: 0.0, end_ms: 96.0, fields: { F1: 337 }, tag: dectalk_trace_exact }
           - { start_ms: 0.0, end_ms: 12.4, fields: { F2: 1993 }, tag: dectalk_trace_exact }
           - { start_ms: 12.4, end_ms: 18.8, fields: { F2: 1988 }, tag: dectalk_trace_exact }
@@ -701,17 +703,18 @@ parameters:
           - { start_ms: 89.2, end_ms: 95.599, fields: { B3: 253 }, tag: dectalk_trace_exact }
           - { start_ms: 95.599, end_ms: 96.0, fields: { B3: 239 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F1/F2/F3/B1/B2/B3/AP/A3/A5 values at frames 58-72)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F1/F2/F3/B1/B2/B3/AP/A3/A5/TLT values at frames 58-72)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_dummy_ix_formant_trace_windows:
         value:
+          - { start_ms: 0.0, end_ms: 38.0, fields: { TL: 0 }, tag: dectalk_trace_exact }
           - { start_ms: 0.0, end_ms: 12.4, fields: { F1: 353, F2: 1900, F3: 2425, B2: 170, B3: 233, AH: 39, A3: 22, A5: 13 }, tag: dectalk_trace_exact }
           - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 382, F2: 1830, F3: 2438, B2: 170, B3: 226, AH: 39, A3: 11, A5: 6 }, tag: dectalk_trace_exact }
           - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 410, F2: 1760, F3: 2450, B2: 170, B3: 219, AH: 39 }, tag: dectalk_trace_exact }
           - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 426, F2: 1733, F3: 2474, B2: 170, B3: 213, AH: 39 }, tag: dectalk_trace_exact }
           - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 442, F2: 1706, F3: 2498, B2: 170, B3: 206, AH: 39 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F1/F2/F3/B2/B3/AP/A3/A5 values at frames 73-77)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F1/F2/F3/B2/B3/AP/A3/A5/TLT values at frames 73-77)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_terminal_silence_f2_hz:
         value: 1670
@@ -782,6 +785,7 @@ parameters:
       # The separate exact tail cells take over at 195 ms (DECtalk frame 51).
       cake_ey_primary_formant_trace_windows:
         value:
+          - { start_ms: 6.2, end_ms: 237.0, fields: { TL: 0 }, tag: dectalk_trace_exact }
           - { start_ms: 6.2, end_ms: 63.8, fields: { AH: 48 }, tag: dectalk_trace_exact }
           - { start_ms: 6.2, end_ms: 12.6, fields: { F1: 357, F2: 1926, A3: 36, A5: 22 }, tag: dectalk_trace_exact }
           - { start_ms: 12.6, end_ms: 19.0, fields: { F1: 377, F2: 1898, A3: 24, A5: 15 }, tag: dectalk_trace_exact }
@@ -814,7 +818,7 @@ parameters:
           - { start_ms: 185.4, end_ms: 191.8, fields: { F1: 448, F2: 1997 }, tag: dectalk_trace_exact }
           - { start_ms: 191.8, end_ms: 195.0, fields: { F1: 447, F2: 2006 }, tag: dectalk_trace_exact }
         citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native F1/F2/AP/A3/A5 values at frames 21-50 and AV onset at frame 29)"
+          - "DECtalk 4.63 oracle -lt trace for 'cake' (native F1/F2/AP/A3/A5/TLT values at frames 21-50 and AV onset at frame 29)"
           - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
       cake_ey_primary_formant_tail_windows:
         value:

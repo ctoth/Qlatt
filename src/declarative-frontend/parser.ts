@@ -117,6 +117,115 @@ function expandForEachField(entries: unknown[]): PlainObject[] {
   return out;
 }
 
+/**
+ * Phase 5.2 — `foreach` rule-template expansion.
+ *
+ * A `foreach` directive is an array element of the form
+ *   { foreach: [ {k1: v1, k2: v2, ...}, ... ], template: { ... } }
+ * It expands in-place into one substituted copy of `template` per binding map.
+ * The literal substring `{k}` inside any string of the cloned template — at any
+ * nesting depth (e.g. `dispatch[*].when`, `dispatch[*].value`) — is replaced by
+ * that binding's value for key `k`.
+ *
+ * Unlike `for_each_field` (which expands one placeholder over a flat field list
+ * on an effect block), `foreach` supports multiple placeholders per binding and
+ * runs anywhere an array appears inside a rule — notably inside a `dispatch`
+ * array, where cross-product switch tables are written longhand. The binding
+ * list is explicit and ordered, so the expansion reproduces the exact longhand
+ * entries in the exact order given (order can be semantically load-bearing:
+ * `dispatch` is first-match-wins).
+ *
+ * Sibling entries (before/after the directive) are preserved in order. When a
+ * rule contains no `foreach` directive the walk is a structure-preserving deep
+ * clone, so compiled output is byte-identical to the pre-expansion rule.
+ */
+function substituteBindings(value: unknown, bindings: Record<string, string>): unknown {
+  if (typeof value === "string") {
+    if (value.indexOf("{") === -1) return value;
+    let out = value;
+    for (const [key, replacement] of Object.entries(bindings)) {
+      out = out.replaceAll(`{${key}}`, replacement);
+    }
+    return out;
+  }
+  if (Array.isArray(value)) {
+    return value.map((entry) => substituteBindings(entry, bindings));
+  }
+  if (isPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, substituteBindings(entry, bindings)])
+    );
+  }
+  return value;
+}
+
+function isForeachDirective(entry: unknown): boolean {
+  return isPlainObject(entry) && Object.prototype.hasOwnProperty.call(entry, "foreach");
+}
+
+function expandForeachArray(entries: unknown[]): unknown[] {
+  const out: unknown[] = [];
+  for (const entry of entries) {
+    if (!isForeachDirective(entry)) {
+      out.push(expandForeachValue(entry));
+      continue;
+    }
+    const directive = entry as PlainObject;
+    for (const key of Object.keys(directive)) {
+      if (key !== "foreach" && key !== "template") {
+        throw new Error(
+          `E_FOREACH_INVALID: a 'foreach' directive may only contain 'foreach' and 'template', got extra key '${key}'`
+        );
+      }
+    }
+    const items = directive.foreach;
+    const template = directive.template;
+    if (!Array.isArray(items) || items.length === 0) {
+      throw new Error(
+        `E_FOREACH_INVALID: 'foreach' must be a non-empty array of binding maps, got ${JSON.stringify(items)}`
+      );
+    }
+    if (!isPlainObject(template)) {
+      throw new Error(
+        `E_FOREACH_INVALID: 'foreach' requires an object 'template', got ${JSON.stringify(template)}`
+      );
+    }
+    for (const item of items) {
+      if (!isPlainObject(item)) {
+        throw new Error(
+          `E_FOREACH_INVALID: 'foreach' items must be binding maps, got ${JSON.stringify(item)}`
+        );
+      }
+      const bindings: Record<string, string> = {};
+      for (const [key, binding] of Object.entries(item)) {
+        if (typeof binding !== "string" && typeof binding !== "number" && typeof binding !== "boolean") {
+          throw new Error(
+            `E_FOREACH_INVALID: 'foreach' binding '${key}' must be a scalar (string/number/boolean), got ${JSON.stringify(binding)}`
+          );
+        }
+        bindings[key] = String(binding);
+      }
+      const cloned = cloneValue(template);
+      const substituted = substituteBindings(cloned, bindings);
+      // Recurse to allow nested foreach inside a template.
+      out.push(expandForeachValue(substituted));
+    }
+  }
+  return out;
+}
+
+function expandForeachValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return expandForeachArray(value);
+  }
+  if (isPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, expandForeachValue(entry)])
+    );
+  }
+  return value;
+}
+
 export const DSL_ROOT_KEYS = new Set([
   "version",
   "inventory_path",
@@ -235,8 +344,12 @@ function normalizePattern(pattern: unknown): PlainObject {
   };
 }
 
-function normalizeRule(rule: unknown): PlainObject {
-  if (!isPlainObject(rule)) return {};
+function normalizeRule(ruleInput: unknown): PlainObject {
+  if (!isPlainObject(ruleInput)) return {};
+  // Expand any `foreach` template directives before field normalization so the
+  // engine and validation never see the directive itself. Structure-preserving
+  // when no directive is present.
+  const rule = expandForeachValue(ruleInput) as PlainObject;
   const define =
     isPlainObject(rule.define)
       ? Object.fromEntries(

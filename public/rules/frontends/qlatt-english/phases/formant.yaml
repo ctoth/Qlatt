@@ -17,22 +17,23 @@ rules:
       - field: F2
         op: set
         dispatch:
-          - when: "place == 'velar' && back_vowel"
-            value: params.policy.formant.place_loci.velar.locus_back
-          - when: "place == 'velar' && front_or_high_vowel"
-            value: params.policy.formant.place_loci.velar.locus_front
-          - when: "place == 'bilabial' && front_or_high_vowel"
-            value: params.policy.formant.place_loci.bilabial.locus_front
-          - when: "place == 'bilabial' && back_vowel"
-            value: params.policy.formant.place_loci.bilabial.locus_back
-          - when: "place == 'alveolar' && front_or_high_vowel"
-            value: params.policy.formant.place_loci.alveolar.locus_front
-          - when: "place == 'alveolar' && back_vowel"
-            value: params.policy.formant.place_loci.alveolar.locus_back
-          - when: "place == 'palatal' && back_vowel"
-            value: params.policy.formant.place_loci.palatal.locus_back
-          - when: "place == 'palatal' && front_or_high_vowel"
-            value: params.policy.formant.place_loci.palatal.locus_front
+          # {velar,bilabial,alveolar,palatal} x {front-or-high, back} F2 locus.
+          # The per-place vowel ORDER is load-bearing (first-match-wins): for a
+          # high-back vowel both `front_or_high_vowel` and `back_vowel` are true,
+          # so the combo listed first for each place decides the locus. This
+          # ordered binding list reproduces the exact longhand order.
+          - foreach:
+              - { place: velar, cond: back_vowel, locus: locus_back }
+              - { place: velar, cond: front_or_high_vowel, locus: locus_front }
+              - { place: bilabial, cond: front_or_high_vowel, locus: locus_front }
+              - { place: bilabial, cond: back_vowel, locus: locus_back }
+              - { place: alveolar, cond: front_or_high_vowel, locus: locus_front }
+              - { place: alveolar, cond: back_vowel, locus: locus_back }
+              - { place: palatal, cond: back_vowel, locus: locus_back }
+              - { place: palatal, cond: front_or_high_vowel, locus: locus_front }
+            template:
+              when: "place == '{place}' && {cond}"
+              value: "params.policy.formant.place_loci.{place}.{locus}"
           - default: >-
               place == 'velar' ? params.policy.formant.place_loci.velar.locus_default :
               (place == 'bilabial' ? params.policy.formant.place_loci.bilabial.locus_default :
@@ -57,12 +58,13 @@ rules:
         dispatch:
           - when: "prev != null && has(prev.F2)"
             value: prev.F2
-          - when: "place == 'velar'"
-            value: params.policy.formant.place_loci.velar.locus_default
-          - when: "place == 'bilabial'"
-            value: params.policy.formant.place_loci.bilabial.locus_default
-          - when: "place == 'alveolar'"
-            value: params.policy.formant.place_loci.alveolar.locus_default
+          - foreach:
+              - { place: velar }
+              - { place: bilabial }
+              - { place: alveolar }
+            template:
+              when: "place == '{place}'"
+              value: "params.policy.formant.place_loci.{place}.locus_default"
           - default: params.policy.formant.place_loci.palatal.locus_default
         tag: place_locus
     citations:

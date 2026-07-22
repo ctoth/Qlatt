@@ -38,6 +38,7 @@ import {
   resolveSourceContour,
   type SourceContourVoiceQuality,
 } from "./source-contour";
+import { projectSpeakerFields } from "./speaker-projection";
 import { DIRECTION_ITEM_SCHEMA, attachDirectionsToUtterance, parseDirectionInput } from "./input/parse";
 import type { DirectionTrack } from "./input/direction-track";
 import { parseSyllabificationTables, syllabifyWord } from "./declarative-frontend/syllabify";
@@ -605,32 +606,23 @@ function buildTextToKlattTrackDetailed(
   speakerStamp.dependOn(speakerDecision.id).dependOn(sourceDecision.id);
   for (const item of utterance.relation("Segment").listItems()) {
     if (item.get("active") === false) continue;
-    speakerStamp.set(item, "sourceMode", source.baseline.source_mode);
-    speakerStamp.set(item, "Rd", source.voiceQualityOverrides?.rd ?? source.baseline.rd);
-    speakerStamp.set(item, "RdRef", source.baseline.rd_ref);
-    if (source.voiceQualityOverrides?.oq !== undefined) speakerStamp.set(item, "OQ", source.voiceQualityOverrides.oq);
-    const currentTl = item.get("TL");
-    if (typeof currentTl === "number") {
-      speakerStamp.set(item, "TL", source.voiceQualityOverrides?.tl
-        ?? currentTl + source.baseline.spectral_tilt_offset_db);
-    }
-    const currentAh = item.get("AH");
-    if (typeof currentAh === "number" && source.voiceQualityOverrides?.ah_offset_db !== undefined) {
-      speakerStamp.set(item, "AH", currentAh + source.voiceQualityOverrides.ah_offset_db);
-    }
-    if (source.voiceQualityOverrides?.flutter !== undefined) {
-      speakerStamp.set(item, "flutter", source.voiceQualityOverrides.flutter);
-    }
-    if (source.voiceQualityOverrides?.jitter !== undefined) {
-      speakerStamp.set(item, "jitter", source.voiceQualityOverrides.jitter);
-    }
-    if (resolvedSpeaker.formant_scale !== 1) {
-      for (let formant = 1; formant <= 10; formant += 1) {
-        const key = `F${formant.toString()}`;
-        const value = item.get(key);
-        if (typeof value === "number" && value > 0) speakerStamp.set(item, key, value * resolvedSpeaker.formant_scale);
-      }
-    }
+    // Project the resolved source/speaker policy via the declarative projection
+    // table (src/speaker-projection.ts) — kills the hardcoded field list and the
+    // baked-in 1..10 formant count while preserving byte-identical values.
+    projectSpeakerFields(
+      {
+        get: (field) => item.get(field),
+        set: (field, value) => speakerStamp.set(item, field, value),
+      },
+      {
+        source_mode: source.baseline.source_mode,
+        rd: source.baseline.rd,
+        rd_ref: source.baseline.rd_ref,
+        spectral_tilt_offset_db: source.baseline.spectral_tilt_offset_db,
+      },
+      source.voiceQualityOverrides,
+      resolvedSpeaker.formant_scale,
+    );
     if (selectedVoice && registry) {
       for (const field of registry.speakerFrameParams) {
         const value = selectedVoice.params[field];

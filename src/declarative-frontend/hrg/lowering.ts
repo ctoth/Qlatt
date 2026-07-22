@@ -20,6 +20,16 @@ import type { FeatureValue } from "./types";
 import { isPlainObject } from "../../yaml-loader";
 import { applyScalarOp } from "./scalar-op";
 
+/**
+ * Minimum offset (ms) between a segment boundary and the start/end of a formant
+ * transition ramp: transition edges are clamped this far inside the segment so
+ * a ramp never collapses onto the boundary instant (which would produce a
+ * zero-width or boundary-coincident automation event). Klatt (1980) CV formant
+ * transitions run ~40-60 ms; 20 ms is a conservative floor below that band.
+ * engineering estimate — no single paper fixes this guard value.
+ */
+const MIN_TRANSITION_EDGE_MS = 20;
+
 type LocusEntry = {
   locus_hz: number;
   prcnt: number;
@@ -882,7 +892,7 @@ export function lowerToFrames(
     const itemTransitionMs = finiteFeatureNumber(timing.item.get("transition_ms"));
     const transitionMs = itemTransitionMs ?? defaultTransitionMs;
     if (transitionMs <= 0) return;
-    const startMs = Math.max(20, timing.durationMs - transitionMs);
+    const startMs = Math.max(MIN_TRANSITION_EDGE_MS, timing.durationMs - transitionMs);
     if (startMs <= 0 || startMs >= timing.durationMs) return;
     const currentPhoneme = timing.item.get(phonemeKey);
     const nextPhoneme = nextTiming.item.get(phonemeKey);
@@ -910,7 +920,7 @@ export function lowerToFrames(
       if (!previous) return;
       const itemTransitionMs = finiteFeatureNumber(timing.item.get("transition_ms"));
       const transitionMs = itemTransitionMs ?? defaultTransitionMs;
-      const endMs = Math.min(timing.durationMs - 20, transitionMs);
+      const endMs = Math.min(timing.durationMs - MIN_TRANSITION_EDGE_MS, transitionMs);
       if (endMs <= 0) return;
       const currentPhoneme = timing.item.get(phonemeKey);
       const previousPhoneme = previous.item.get(phonemeKey);
@@ -959,7 +969,7 @@ export function lowerToFrames(
       const previous = timings[index - 1];
       if (sonorantF2.forward && previous && neighborTypes.has(String(previous.item.get(typeKey)))) {
         const previousValue = previous.item.get(sonorantF2.key);
-        const endMs = Math.min(spanMs, timing.durationMs - 20);
+        const endMs = Math.min(spanMs, timing.durationMs - MIN_TRANSITION_EDGE_MS);
         if (typeof previousValue === "number" && endMs > 0) {
           appendTransition(timing.item, {
             startMs: 0,
@@ -978,7 +988,7 @@ export function lowerToFrames(
       if (sonorantF2.backward && next && neighborTypes.has(String(next.item.get(typeKey)))) {
         const nextValue = next.item.get(sonorantF2.key);
         const transitionSpanMs = Math.min(spanMs, timing.durationMs);
-        const startMs = Math.max(20, timing.durationMs - transitionSpanMs);
+        const startMs = Math.max(MIN_TRANSITION_EDGE_MS, timing.durationMs - transitionSpanMs);
         if (typeof nextValue === "number" && startMs < timing.durationMs) {
           appendTransition(timing.item, {
             startMs,
@@ -1023,7 +1033,7 @@ export function lowerToFrames(
           options,
           phonemeKey,
         )) {
-          const endMs = Math.min(timing.durationMs - 20, formant.spanMs);
+          const endMs = Math.min(timing.durationMs - MIN_TRANSITION_EDGE_MS, formant.spanMs);
           const currentValue = timing.item.get(formant.key);
           if (typeof currentValue !== "number" || endMs <= 0) continue;
           appendTransition(timing.item, {
@@ -1102,7 +1112,7 @@ export function lowerToFrames(
           phonemeKey,
         )) {
           const spanMs = Math.min(timing.durationMs, formant.spanMs);
-          const startMs = Math.max(20, timing.durationMs - spanMs);
+          const startMs = Math.max(MIN_TRANSITION_EDGE_MS, timing.durationMs - spanMs);
           const currentValue = timing.item.get(formant.key);
           if (typeof currentValue !== "number" || startMs >= timing.durationMs) continue;
           appendTransition(timing.item, {

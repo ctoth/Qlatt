@@ -12,6 +12,23 @@ export type InventorySpec = {
 };
 
 /**
+ * Source parameters that force silence when a segment has no inventory target.
+ * Klatt (1980) expresses the source amplitudes AV/AF/AH in dB with 0 dB = off,
+ * and F0 = 0 disables the voicing source. AVS is driven to its floor; the
+ * -70 dB value is an engineering estimate (effectively -inf), not a tabulated
+ * Klatt constant.
+ */
+const SILENCE_PARAMS = Object.freeze({ AV: 0, AF: 0, AH: 0, AVS: -70, F0: 0 });
+
+/**
+ * Fallback segment duration (ms) used when a phoneme target declares no `dur`.
+ * Klatt (1976) reports inherent segment durations well above this; 30 ms is a
+ * short non-zero floor so a duration-less target still yields an audible frame.
+ * engineering estimate — not a tabulated Klatt value.
+ */
+const DEFAULT_SEGMENT_DURATION_MS = 30;
+
+/**
  * Resources loaded from a frontend.yaml spec.
  * Every path originates in the frontend spec — no hardcoded defaults.
  */
@@ -151,11 +168,11 @@ export function fillDefaultParams(
     }
   } else {
     // If no target provided, ensure output is silent.
-    filled.AV = 0;
-    filled.AF = 0;
-    filled.AH = 0;
-    filled.AVS = -70;
-    filled.F0 = 0;
+    filled.AV = SILENCE_PARAMS.AV;
+    filled.AF = SILENCE_PARAMS.AF;
+    filled.AH = SILENCE_PARAMS.AH;
+    filled.AVS = SILENCE_PARAMS.AVS;
+    filled.F0 = SILENCE_PARAMS.F0;
   }
 
   return filled;
@@ -230,7 +247,7 @@ export function materializePhonemeTarget(
   } = {
     phoneme: resolvedKey,
     params: filledParams,
-    duration: targetDuration || 30,
+    duration: targetDuration || DEFAULT_SEGMENT_DURATION_MS,
     inherentDuration: targetDuration,
   };
 

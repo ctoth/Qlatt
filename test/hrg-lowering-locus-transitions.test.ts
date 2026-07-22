@@ -38,6 +38,7 @@ const POLICY = {
     },
   },
   transitions: {
+    native_frame_ms: { value: 6.4 },
     default_transition_ms: { value: 30 },
     blend: {
       factor: { value: 0.5 },
@@ -160,8 +161,12 @@ describe("HRG lowering locus transitions", () => {
     const releaseStart = lowered.frames.find(
       (frame) => frame.segmentId === release.id && Math.abs(frame.time - 0.1022) <= 1e-9,
     );
+    const releaseTransitionEnd = lowered.frames.find(
+      (frame) => frame.segmentId === release.id && Math.abs(frame.time - 0.1086) <= 1e-9,
+    );
     expect(closureStart?.params.F3).toBe(2150);
-    expect(releaseStart?.params.F3).toBe(2257.5);
+    expect(releaseStart?.params.F3).toBeCloseTo(2249.210843373494, 10);
+    expect(releaseTransitionEnd?.params.F3).toBe(2257.5);
 
     for (const time of [0.1092, 0.1292, 0.1592]) {
       const frame = lowered.frames.find(

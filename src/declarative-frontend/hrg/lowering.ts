@@ -91,6 +91,7 @@ export interface LowerOptions {
     };
   };
   transitions: {
+    native_frame_ms?: { value: number };
     default_transition_ms: { value: number };
     blend: {
       factor: { value: number };
@@ -761,6 +762,13 @@ export function lowerToFrames(
     "transitions.default_transition_ms.value",
     utterance,
   );
+  const nativeFrameMs = options.transitions.native_frame_ms == null
+    ? 0
+    : requirePolicyNumber(
+      options.transitions.native_frame_ms.value,
+      "transitions.native_frame_ms.value",
+      utterance,
+    );
   const blendFactor = options.transitions.blend.factor.value;
   if (!Number.isFinite(blendFactor) || blendFactor < 0 || blendFactor > 1) {
     utterance.diagnostics.error(
@@ -1030,30 +1038,54 @@ export function lowerToFrames(
           });
           // DECtalk p_us_st1.c applies the same locus boundary while drawing
           // the preceding plosive, with durtran equal to the full phone.
+          // ph_draw.c emits the current accumulator before its per-frame
+          // update, so a selected native frame period delays that trajectory
+          // by one synthesis frame and lets it finish in release glue.
           if (previousTiming?.item.get(typeKey) === "stop_closure") {
             const obstruentValue = previousObstruent.get(formant.key);
             if (typeof obstruentValue === "number" && previousTiming.durationMs > 0) {
+              const transitionElapsedMs = Math.max(0, previousTiming.durationMs - nativeFrameMs);
+              const closureEndValue = obstruentValue
+                + (formant.boundaryValue - obstruentValue)
+                  * Math.min(1, transitionElapsedMs / previousTiming.durationMs);
               appendTransition(previousObstruent, {
-                startMs: 0,
+                startMs: Math.min(nativeFrameMs, previousTiming.durationMs),
                 endMs: previousTiming.durationMs,
                 fields: {},
                 linearFields: {
                   [formant.key]: {
                     startValue: obstruentValue,
-                    endValue: formant.boundaryValue,
+                    endValue: closureEndValue,
                   },
                 },
               });
             }
             const previousTimingIndex = timings.indexOf(previousTiming);
+            let transitionElapsedMs = Math.max(0, previousTiming.durationMs - nativeFrameMs);
             for (let glueIndex = previousTimingIndex + 1; glueIndex < index; glueIndex += 1) {
               const glueTiming = timings[glueIndex];
               if (!glueTiming || !locusGlueTypes.has(String(glueTiming.item.get(typeKey)))) continue;
+              const remainingTransitionMs = Math.max(0, previousTiming.durationMs - transitionElapsedMs);
+              const glueTransitionMs = Math.min(glueTiming.durationMs, remainingTransitionMs);
+              const startValue = typeof obstruentValue !== "number"
+                ? formant.boundaryValue
+                : obstruentValue
+                  + (formant.boundaryValue - obstruentValue)
+                    * Math.min(1, transitionElapsedMs / previousTiming.durationMs);
+              const endValue = typeof obstruentValue !== "number"
+                ? formant.boundaryValue
+                : obstruentValue
+                  + (formant.boundaryValue - obstruentValue)
+                    * Math.min(1, (transitionElapsedMs + glueTransitionMs) / previousTiming.durationMs);
               appendTransition(glueTiming.item, {
                 startMs: 0,
-                endMs: glueTiming.durationMs,
-                fields: { [formant.key]: formant.boundaryValue },
+                endMs: glueTransitionMs,
+                fields: {},
+                linearFields: {
+                  [formant.key]: { startValue, endValue },
+                },
               });
+              transitionElapsedMs += glueTiming.durationMs;
             }
           }
         }

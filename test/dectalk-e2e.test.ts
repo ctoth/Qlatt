@@ -477,10 +477,24 @@ describe("dectalk-english end-to-end", () => {
     });
     const initialK = result.track.find((frame) => frame.phoneme === "K");
     const initialRelease = result.track.find((frame) => frame.phoneme === "K_REL");
+    if (!initialK || !initialRelease) throw new Error("initial K carriers missing");
+    const closureDurationMs = result.utterance.relation("Segment").listItems()
+      .find((item) => item.get("active") !== false && item.get("phoneme") === "K")
+      ?.get("duration");
+    if (typeof closureDurationMs !== "number") throw new Error("initial K duration missing");
+    const nativeFrameMs = 6.4;
+    const expectedReleaseStart = initialK.params.F3
+      + (2287.5 - initialK.params.F3)
+        * ((closureDurationMs - nativeFrameMs) / closureDurationMs);
+    const releaseBoundary = result.track.find(
+      (frame) => frame.phoneme === "K_REL"
+        && Math.abs(frame.time - initialRelease.time - nativeFrameMs / 1000) <= 1e-9,
+    );
 
     expect(initialSilence).toEqual([2702, 2702, 2702, 2702]);
-    expect(initialK?.params.F3).toBe(2702);
-    expect(initialRelease?.params.F3).toBe(2287.5);
+    expect(initialK.params.F3).toBe(2702);
+    expect(initialRelease.params.F3).toBeCloseTo(expectedReleaseStart, 10);
+    expect(releaseBoundary?.params.F3).toBe(2287.5);
   });
 
   it("applies DECtalk Rule 14 to a sonorant after a voiceless plosive", () => {

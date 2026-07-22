@@ -1226,6 +1226,11 @@ output:
         include_f0_anchors: true
         include_transition_steady_time: true
     transitions:
+      native_frame_ms:
+        value: 6.4
+        citations:
+          - "DECtalk 4.63 ph_defs.h: NSAMP_FRAME=71 at 11.025kHz; -lt oracle traces expose the controller cadence as 6.4ms"
+          - "DECtalk 4.63 ph_draw.c: current ftran contributes to output before dftran is subtracted once per synthesis frame"
       default_transition_ms:
         value: 30
         citations:

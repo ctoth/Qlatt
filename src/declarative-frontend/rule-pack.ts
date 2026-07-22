@@ -155,15 +155,80 @@ function mergeChildIntoRoot(
   return merged;
 }
 
+// ---------------------------------------------------------------------------
+// Cross-frontend inheritance: `extends: <baseFrontendId>`
+// ---------------------------------------------------------------------------
+//
+// A frontend rulepack may declare `extends: qlatt-english` to inherit the base
+// frontend's root document (version, parameters/policy tree, output, speaker/
+// source paths, transcription, …). The child's own root keys override the base
+// via deep merge (child wins at every leaf; arrays and scalars replace, nested
+// objects merge). This lets a near-clone frontend (e.g. qlatt-beauty) be
+// expressed as "base + delta" instead of a full copy.
+//
+// Included files are resolved with a base-directory FALLBACK: a relative
+// include that is absent under the child frontend's directory is resolved
+// against the base frontend's directory instead. This is how the child inherits
+// the base's byte-identical phase files without keeping local copies — beauty's
+// own files (which exist under its directory) override "by path", and any file
+// it does not provide falls through to the base.
+//
+// Only the child's root document is merged (NOT the base's resolved includes),
+// so the base contributes root-level data (parameters, output, …) while rules/
+// phases come from the child's own (fallback-resolved) include list.
+
+/** Directory portion of a "/"-separated resource path. */
+function dirOfPath(path: string): string {
+  return path.substring(0, path.lastIndexOf("/"));
+}
+
+/**
+ * Deep-merge two plain objects, child winning at every leaf.
+ * - Two plain objects → merge keys recursively.
+ * - Anything else (arrays, scalars, type mismatch) → child value replaces base.
+ */
+function deepMergeChildWins(base: unknown, child: unknown): unknown {
+  if (isPlainObject(base) && isPlainObject(child)) {
+    const out: PlainObject = {};
+    for (const key of Object.keys(base)) out[key] = cloneValue(base[key]);
+    for (const [key, value] of Object.entries(child)) {
+      out[key] = key in out ? deepMergeChildWins(out[key], value) : cloneValue(value);
+    }
+    return out;
+  }
+  return cloneValue(child);
+}
+
+/** Base-directory fallback for include resolution under `extends`. */
+type IncludeFallback = { readonly fromDir: string; readonly toDir: string };
+
+/**
+ * Rewrite a child-directory absolute include path to its base-directory
+ * equivalent, when the child does not provide the file. Returns null when no
+ * fallback applies.
+ */
+function fallbackIncludePath(
+  absPath: string,
+  fallback: IncludeFallback | undefined,
+): string | null {
+  if (!fallback) return null;
+  const prefix = fallback.fromDir + "/";
+  if (!absPath.startsWith(prefix)) return null;
+  return fallback.toDir + "/" + absPath.slice(prefix.length);
+}
+
 /**
  * Synchronously resolve includes for a parsed spec.
  * Recursively loads, parses, and merges child specs.
  * Detects circular includes via a set of already-seen paths.
+ * When `fallback` is set (child `extends` a base frontend), a relative include
+ * absent under the child directory is loaded from the base directory instead.
  */
 function resolveIncludesSync(
   spec: PlainObject,
   parentPath: string,
-  seen?: Set<string>
+  seen?: Set<string>,
+  fallback?: IncludeFallback,
 ): PlainObject {
   const seenPaths = seen ?? new Set([parentPath]);
   const includes = spec.include as string[] | undefined;
@@ -172,19 +237,72 @@ function resolveIncludesSync(
   let resolved = spec;
 
   for (const relPath of includes) {
-    const absPath = resolveIncludePath(parentPath, relPath);
+    let absPath = resolveIncludePath(parentPath, relPath);
+    let source: string;
+    try {
+      source = loadYamlSourceSync(absPath);
+    } catch (error) {
+      const altPath = fallbackIncludePath(absPath, fallback);
+      if (altPath === null) throw error;
+      source = loadYamlSourceSync(altPath);
+      absPath = altPath;
+    }
     if (seenPaths.has(absPath)) {
       throw new Error(`Circular include detected: ${absPath} (from ${parentPath})`);
     }
     seenPaths.add(absPath);
 
-    const source = loadYamlSourceSync(absPath);
     const childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
-    const resolvedChild = resolveIncludesSync(childDocument, absPath, seenPaths);
+    const resolvedChild = resolveIncludesSync(childDocument, absPath, seenPaths, fallback);
     resolved = mergeChildIntoRoot(resolved, resolvedChild, absPath);
   }
 
   return resolved;
+}
+
+/**
+ * Synchronously resolve a root document's `extends` clause, returning the merged
+ * root and the include fallback (child dir → base dir) to use when resolving the
+ * merged root's includes. When no `extends` is present, the document and an
+ * undefined fallback are returned unchanged.
+ */
+function resolveExtendsSync(
+  rootDoc: PlainObject,
+  rootPath: string,
+): { doc: PlainObject; fallback: IncludeFallback | undefined } {
+  const baseId = rootDoc.extends;
+  if (typeof baseId !== "string" || baseId.length === 0) {
+    return { doc: rootDoc, fallback: undefined };
+  }
+  const basePath = resolveBundledRulepackPath(baseId);
+  const baseSource = loadYamlSourceSync(basePath);
+  const baseDoc = parseRulepackDocument(baseSource, `base rulepack ${basePath}`);
+  const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
+  delete merged.extends;
+  return {
+    doc: merged,
+    fallback: { fromDir: dirOfPath(rootPath), toDir: dirOfPath(basePath) },
+  };
+}
+
+/** Async counterpart to {@link resolveExtendsSync}. */
+async function resolveExtendsAsync(
+  rootDoc: PlainObject,
+  rootPath: string,
+): Promise<{ doc: PlainObject; fallback: IncludeFallback | undefined }> {
+  const baseId = rootDoc.extends;
+  if (typeof baseId !== "string" || baseId.length === 0) {
+    return { doc: rootDoc, fallback: undefined };
+  }
+  const basePath = resolveBundledRulepackPath(baseId);
+  const baseSource = await loadYamlSource(basePath);
+  const baseDoc = parseRulepackDocument(baseSource, `base rulepack ${basePath}`);
+  const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
+  delete merged.extends;
+  return {
+    doc: merged,
+    fallback: { fromDir: dirOfPath(rootPath), toDir: dirOfPath(basePath) },
+  };
 }
 
 /**
@@ -194,7 +312,8 @@ function resolveIncludesSync(
 async function resolveIncludesAsync(
   spec: PlainObject,
   parentPath: string,
-  seen?: Set<string>
+  seen?: Set<string>,
+  fallback?: IncludeFallback,
 ): Promise<PlainObject> {
   const seenPaths = seen ?? new Set([parentPath]);
   const includes = spec.include as string[] | undefined;
@@ -203,15 +322,23 @@ async function resolveIncludesAsync(
   let resolved = spec;
 
   for (const relPath of includes) {
-    const absPath = resolveIncludePath(parentPath, relPath);
+    let absPath = resolveIncludePath(parentPath, relPath);
+    let source: string;
+    try {
+      source = await loadYamlSource(absPath);
+    } catch (error) {
+      const altPath = fallbackIncludePath(absPath, fallback);
+      if (altPath === null) throw error;
+      source = await loadYamlSource(altPath);
+      absPath = altPath;
+    }
     if (seenPaths.has(absPath)) {
       throw new Error(`Circular include detected: ${absPath} (from ${parentPath})`);
     }
     seenPaths.add(absPath);
 
-    const source = await loadYamlSource(absPath);
     const childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
-    const resolvedChild = await resolveIncludesAsync(childDocument, absPath, seenPaths);
+    const resolvedChild = await resolveIncludesAsync(childDocument, absPath, seenPaths, fallback);
     resolved = mergeChildIntoRoot(resolved, resolvedChild, absPath);
   }
 
@@ -273,14 +400,16 @@ export function loadRulepackSpecFromPath(
     );
   }
 
-  // Resolve includes on the raw parsed YAML, then normalize the merged tree
-  // exactly once. Previously the root was normalized twice: once before include
-  // resolution and again on the merged result. Normalizing only the final
-  // merged tree parses each spec (root and every child) exactly one time.
-  const merged = resolveIncludesSync(
+  // Resolve `extends` (cross-frontend inheritance) first, then resolve includes
+  // on the raw parsed YAML, then normalize the merged tree exactly once.
+  // Previously the root was normalized twice: once before include resolution and
+  // again on the merged result. Normalizing only the final merged tree parses
+  // each spec (root and every child) exactly one time.
+  const { doc: rootDoc, fallback } = resolveExtendsSync(
     parseRulepackDocument(source, specPath),
     specPath,
   );
+  const merged = resolveIncludesSync(rootDoc, specPath, undefined, fallback);
   const spec = parseDslSpec(merged);
   assertValidSpec(spec, { requireLoweringSpec: true });
   freezeRecursively(spec);
@@ -305,12 +434,13 @@ export async function preloadRulepackSpecFromPath(
     );
   }
 
-  // See loadRulepackSpecFromPath: resolve includes on the raw YAML, then
-  // normalize the merged tree exactly once.
-  const merged = await resolveIncludesAsync(
+  // See loadRulepackSpecFromPath: resolve `extends` then includes on the raw
+  // YAML, then normalize the merged tree exactly once.
+  const { doc: rootDoc, fallback } = await resolveExtendsAsync(
     parseRulepackDocument(source, specPath),
     specPath,
   );
+  const merged = await resolveIncludesAsync(rootDoc, specPath, undefined, fallback);
   const spec = parseDslSpec(merged);
   assertValidSpec(spec, { requireLoweringSpec: true });
   freezeRecursively(spec);

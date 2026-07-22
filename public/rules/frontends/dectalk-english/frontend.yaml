@@ -858,10 +858,17 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F1/F2/F3/B1/B2/B3/AP/A2/A3/A5/TLT values at frames 16-20)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       initial_k_f3_hz:
-        value: 2702
+        value: 2690
         citations:
-          - "DECtalk 4.63 oracle -lt traces for 'cake.' and 'Can you hear me?' (initial GEN_SIL and K F3 state)"
-          - "DECtalk 4.63 p_us_st1.c:509-514,535-545 (plosive-long obstruent/sonorant locus smoothing)"
+          - "DECtalk 4.63 oracle -lt trace for 'Can you hear me?' (first K packet F3=2690)"
+          - "DECtalk 4.63 ph_setar.c gettar() (US_K F3 adjustment and unstressed formant coarticulation)"
+      initial_k_silence_formant_windows:
+        value:
+          - { start_ms: -19.2, end_ms: 6.4, fields: { F3: 2702 }, tag: coarticulation }
+        citations:
+          - "DECtalk 4.63 oracle -lt traces for 'cake.' and 'Can you hear me?' (four initial GEN_SIL packets hold F3=2702)"
+          - "DECtalk 4.63 ph_defs.h: one native controller frame is nominally 6.4ms"
+          - "DECtalk 4.63 p_us_st1.c:493-504 (initial GEN_SIL forward boundary)"
       cake_initial_k_release_f3_hz:
         value: 2398
         citations:

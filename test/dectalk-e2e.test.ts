@@ -476,15 +476,18 @@ describe("dectalk-english end-to-end", () => {
       return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F3;
     });
     const initialK = result.track.find((frame) => frame.phoneme === "K");
+    const firstKPacket = result.track
+      .filter((frame) => frame.time <= 4 * DECTALK_PACKET_PERIOD_SEC + 1e-9)
+      .at(-1);
     const initialRelease = result.track.find((frame) => frame.phoneme === "K_REL");
-    if (!initialK || !initialRelease) throw new Error("initial K carriers missing");
+    if (!initialK || !firstKPacket || !initialRelease) throw new Error("initial K carriers missing");
     const closureDurationMs = result.utterance.relation("Segment").listItems()
       .find((item) => item.get("active") !== false && item.get("phoneme") === "K")
       ?.get("duration");
     if (typeof closureDurationMs !== "number") throw new Error("initial K duration missing");
     const nativeFrameMs = 6.4;
-    const expectedReleaseStart = initialK.params.F3
-      + (2287.5 - initialK.params.F3)
+    const expectedReleaseStart = firstKPacket.params.F3
+      + (2287.5 - firstKPacket.params.F3)
         * ((closureDurationMs - nativeFrameMs) / closureDurationMs);
     const releaseBoundary = result.track.find(
       (frame) => frame.phoneme === "K_REL"
@@ -493,6 +496,7 @@ describe("dectalk-english end-to-end", () => {
 
     expect(initialSilence).toEqual([2702, 2702, 2702, 2702]);
     expect(initialK.params.F3).toBe(2702);
+    expect(firstKPacket.params.F3).toBe(2690);
     expect(initialRelease.params.F3).toBeCloseTo(expectedReleaseStart, 10);
     expect(releaseBoundary?.params.F3).toBe(2287.5);
   });

@@ -57,9 +57,10 @@ rules:
       - "DECtalk 4.63 p_us_st1.c:493-504 (initial GEN_SIL forward boundary takes tarnex)"
       - "DECtalk 4.63 -lt oracle: Hello world frames 0-14 carry EH-conditioned HX F1/F2/F3"
 
-  # Clause-initial GEN_SIL retains DECtalk's initialized F3 state into the
-  # first velar stop. The plosive-long locus transition is rendered by the
-  # lowerer from this state toward the following sonorant boundary.
+  # Clause-initial GEN_SIL retains DECtalk's initialized F3 state until the
+  # first velar stop, whose own current/coarticulated target begins at the
+  # first K packet. The lowerer renders the plosive-long locus transition from
+  # that distinct K target toward the following sonorant boundary.
   dectalk_initial_k_f3:
     kind: scalar
     select:
@@ -68,14 +69,22 @@ rules:
         current.phoneme == 'K' &&
         current.type == 'stop_closure' &&
         prev == null
+    define:
+      existing_windows: "has(current.control_windows) ? current.control_windows : []"
+      silence_windows: params.policy.formant.initial_k_silence_formant_windows
     apply:
       - field: F3
         op: set
         value: params.policy.formant.initial_k_f3_hz
         tag: coarticulation
+      - field: control_windows
+        op: set
+        value: "existing_windows + silence_windows"
+        tag: coarticulation
     citations:
-      - "DECtalk 4.63 p_us_st1.c:509-514,535-545 (obstruent/sonorant locus smoothing spans the full current plosive)"
-      - "DECtalk 4.63 -lt oracle: initial GEN_SIL and K F3 state is 2702 for both 'cake.' and 'Can you hear me?'"
+      - "DECtalk 4.63 ph_setar.c gettar() (US_K F3 adjustment and unstressed formant coarticulation)"
+      - "DECtalk 4.63 p_us_st1.c:493-504,509-514,535-545 (initial GEN_SIL boundary and plosive-long locus smoothing)"
+      - "DECtalk 4.63 -lt oracle for 'Can you hear me?': GEN_SIL F3=2702; first K F3=2690"
 
   dectalk_obstruent_parallel_amplitudes:
     kind: scalar

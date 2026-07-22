@@ -18,6 +18,7 @@ import type { Utterance } from "./utterance";
 import type { Item } from "./item";
 import type { FeatureValue } from "./types";
 import { isPlainObject } from "../../yaml-loader";
+import { applyScalarOp } from "./scalar-op";
 
 type LocusEntry = {
   locus_hz: number;
@@ -391,13 +392,13 @@ function resolveControlField(baseValue: number | undefined, field: ResolvedContr
     case "set":
       return field.value;
     case "add":
-      return (baseValue ?? 0) + (field.value ?? 0);
+      return applyScalarOp("add", baseValue ?? 0, field.value ?? 0);
     case "mul":
-      return (baseValue ?? 0) * (field.value ?? 1);
+      return applyScalarOp("mul", baseValue ?? 0, field.value ?? 1);
     case "max":
-      return Math.max(baseValue ?? Number.NEGATIVE_INFINITY, field.value ?? Number.NEGATIVE_INFINITY);
+      return applyScalarOp("max", baseValue ?? Number.NEGATIVE_INFINITY, field.value ?? Number.NEGATIVE_INFINITY);
     case "min":
-      return Math.min(baseValue ?? Number.POSITIVE_INFINITY, field.value ?? Number.POSITIVE_INFINITY);
+      return applyScalarOp("min", baseValue ?? Number.POSITIVE_INFINITY, field.value ?? Number.POSITIVE_INFINITY);
   }
 }
 

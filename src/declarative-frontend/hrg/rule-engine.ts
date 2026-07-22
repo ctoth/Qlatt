@@ -2,6 +2,7 @@ import type { CompiledRulepack } from "../rule-pack";
 import { materializePhonemeTarget, type InventorySpec } from "../inventory";
 import { trajectoryControlWindows } from "../trajectory-control-windows";
 import { isNavOp, evalPath } from "./path";
+import { applyScalarOp } from "./scalar-op";
 import { evaluateExpression } from "../cel-expressions";
 import { isPlainObject } from "../../yaml-loader";
 import type { Item } from "./item";
@@ -795,18 +796,18 @@ function applyEffects(
     let resolved: unknown = incoming;
     switch (effect.op) {
       case "add":
-        resolved = roundValue(Number(current ?? 0) + Number(incoming));
+        resolved = roundValue(applyScalarOp("add", Number(current ?? 0), Number(incoming)));
         break;
       case "mul":
         resolved = resolution === "klatt"
           ? roundValue(Number(incoming) * (Number(current ?? 0) - floor) + floor)
-          : roundValue(Number(current ?? 0) * Number(incoming));
+          : roundValue(applyScalarOp("mul", Number(current ?? 0), Number(incoming)));
         break;
       case "max":
-        resolved = Math.max(Number(current), Number(incoming));
+        resolved = applyScalarOp("max", Number(current), Number(incoming));
         break;
       case "min":
-        resolved = Math.min(Number(current), Number(incoming));
+        resolved = applyScalarOp("min", Number(current), Number(incoming));
         break;
       case "unset":
         resolved = null;

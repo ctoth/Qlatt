@@ -466,6 +466,23 @@ describe("dectalk-english end-to-end", () => {
     expect(new Set(ordinaryN)).toEqual(new Set([350]));
   });
 
+  it("projects punct-question's initial K F3 through the K-to-AE locus", () => {
+    const result = textToKlattTrackDetailed("Can you hear me?", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const initialSilence = Array.from({ length: 4 }, (_, frameIndex) => {
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F3;
+    });
+    const initialK = result.track.find((frame) => frame.phoneme === "K");
+    const initialRelease = result.track.find((frame) => frame.phoneme === "K_REL");
+
+    expect(initialSilence).toEqual([2702, 2702, 2702, 2702]);
+    expect(initialK?.params.F3).toBe(2702);
+    expect(initialRelease?.params.F3).toBe(2287.5);
+  });
+
   it("applies DECtalk Rule 14 to a sonorant after a voiceless plosive", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

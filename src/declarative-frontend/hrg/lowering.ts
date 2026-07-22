@@ -1005,6 +1005,7 @@ export function lowerToFrames(
       if (!smoothTypes.has(String(timing.item.get(typeKey)))) return;
       const previousObstruent = adjacentLocusObstruent(index, -1);
       if (previousObstruent) {
+        const previousTiming = timings.find((candidate) => candidate.item === previousObstruent);
         for (const formant of resolveLocusFormants(
           timing.item,
           previousObstruent,
@@ -1027,6 +1028,34 @@ export function lowerToFrames(
               },
             },
           });
+          // DECtalk p_us_st1.c applies the same locus boundary while drawing
+          // the preceding plosive, with durtran equal to the full phone.
+          if (previousTiming?.item.get(typeKey) === "stop_closure") {
+            const obstruentValue = previousObstruent.get(formant.key);
+            if (typeof obstruentValue === "number" && previousTiming.durationMs > 0) {
+              appendTransition(previousObstruent, {
+                startMs: 0,
+                endMs: previousTiming.durationMs,
+                fields: {},
+                linearFields: {
+                  [formant.key]: {
+                    startValue: obstruentValue,
+                    endValue: formant.boundaryValue,
+                  },
+                },
+              });
+            }
+            const previousTimingIndex = timings.indexOf(previousTiming);
+            for (let glueIndex = previousTimingIndex + 1; glueIndex < index; glueIndex += 1) {
+              const glueTiming = timings[glueIndex];
+              if (!glueTiming || !locusGlueTypes.has(String(glueTiming.item.get(typeKey)))) continue;
+              appendTransition(glueTiming.item, {
+                startMs: 0,
+                endMs: glueTiming.durationMs,
+                fields: { [formant.key]: formant.boundaryValue },
+              });
+            }
+          }
         }
       }
       const nextObstruent = adjacentLocusObstruent(index, 1);

@@ -154,6 +154,15 @@ describe("HRG lowering locus transitions", () => {
     timing.commit();
 
     const lowered = lowerToFrames(utterance, POLICY);
+    const closureStart = lowered.frames.find(
+      (frame) => frame.segmentId === closure.id && Math.abs(frame.time - 0.0192) <= 1e-9,
+    );
+    const releaseStart = lowered.frames.find(
+      (frame) => frame.segmentId === release.id && Math.abs(frame.time - 0.1022) <= 1e-9,
+    );
+    expect(closureStart?.params.F3).toBe(2150);
+    expect(releaseStart?.params.F3).toBe(2257.5);
+
     for (const time of [0.1092, 0.1292, 0.1592]) {
       const frame = lowered.frames.find(
         (candidate) => candidate.segmentId === vowel.id && Math.abs(candidate.time - time) <= 1e-9,

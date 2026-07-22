@@ -297,6 +297,39 @@ const MULTIPLICATIVE_AFFECT_FIELDS = new Set<AffectField>([
   "jitterScale",
 ]);
 
+/**
+ * Declarative affect projection table (phase 4 item 4).
+ *
+ * Ten of the fifteen affect fields project onto a backend param by a uniform rule:
+ * additive delta, or multiplicative scale with a floor. Those rows are pure data
+ * and are declared here; `applyAffectProjection` iterates the table via the shared
+ * add/scale helpers. The remaining fields (f0Scale, f0VarianceScale, rdDelta) need
+ * bespoke handling (variance centering, Rd effective-range clamp) and stay inline,
+ * and durationScale/pauseScale are consumed earlier in the pipeline, not here.
+ *
+ * Citations:
+ * - Fant 1997 Table 1 (Rd / bandwidth interaction; effective-Rd range handled inline)
+ * - Klatt & Klatt 1990 (spectral tilt, aspiration)
+ * - Gobl 2003, Burkhardt 2009 (affect->source parameter mapping)
+ * - Engineering bounds: 20 Hz bandwidth floor, 1 Hz formant floor (applied inline).
+ */
+type AffectProjectionRow =
+  | { backendKey: string; affectField: AffectField; mode: "add" }
+  | { backendKey: string; affectField: AffectField; mode: "scale"; floor: number };
+
+const AFFECT_PROJECTION_TABLE: readonly AffectProjectionRow[] = [
+  { backendKey: "F1", affectField: "f1Delta", mode: "add" },
+  { backendKey: "F2", affectField: "f2Delta", mode: "add" },
+  { backendKey: "F3", affectField: "f3Delta", mode: "add" },
+  { backendKey: "B1", affectField: "fbw1Scale", mode: "scale", floor: 20 },
+  { backendKey: "B2", affectField: "fbw2Scale", mode: "scale", floor: 20 },
+  { backendKey: "B3", affectField: "fbw3Scale", mode: "scale", floor: 20 },
+  { backendKey: "TL", affectField: "spectralTiltBoost", mode: "add" },
+  { backendKey: "AH", affectField: "ahBoost", mode: "add" },
+  { backendKey: "GO", affectField: "intensityBoost", mode: "add" },
+  { backendKey: "jitter", affectField: "jitterScale", mode: "scale", floor: 0 },
+];
+
 function isFeatureObject(value: FeatureValue | undefined): value is { readonly [key: string]: FeatureValue } {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -1930,10 +1963,15 @@ export function lowerToFrames(
             );
           }
         }
-        // 1 Hz formant and 20 Hz bandwidth floors are explicit engineering bounds.
-        applyAdd("F1", "f1Delta");
-        applyAdd("F2", "f2Delta");
-        applyAdd("F3", "f3Delta");
+        // Project the pure {backendKey, affectField, mode, floor} affect rows via
+        // the declarative table. 1 Hz formant and 20 Hz bandwidth floors are
+        // explicit engineering bounds. The F1/F2/F3 >=1 Hz clamp runs after the
+        // table loop: only the f1/f2/f3 Delta rows touch F1/F2/F3, so applying the
+        // clamp after the intervening (B/TL/AH/GO/jitter) rows is order-equivalent.
+        for (const row of AFFECT_PROJECTION_TABLE) {
+          if (row.mode === "add") applyAdd(row.backendKey, row.affectField);
+          else applyScale(row.backendKey, row.affectField, row.floor);
+        }
         for (const key of ["F1", "F2", "F3"]) {
           const requested = params[key];
           if (typeof requested !== "number" || requested >= 1) continue;
@@ -1944,13 +1982,6 @@ export function lowerToFrames(
             "HRG_LOWER_VALUE_CLAMPED",
           );
         }
-        applyScale("B1", "fbw1Scale", 20);
-        applyScale("B2", "fbw2Scale", 20);
-        applyScale("B3", "fbw3Scale", 20);
-        applyAdd("TL", "spectralTiltBoost");
-        applyAdd("AH", "ahBoost");
-        applyAdd("GO", "intensityBoost");
-        applyScale("jitter", "jitterScale", 0);
       }
   };
 

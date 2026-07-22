@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { parseDectalkTraceFile, type DectalkTraceFrame } from "./dectalk-trace";
-
-const FRAME_PERIOD_SEC = 0.0064;
+import {
+  dectalkFrameStartSec,
+  parseDectalkTraceFile,
+  type DectalkTraceFrame,
+} from "./dectalk-trace";
 
 type Args = {
   runRoot: string;
@@ -524,10 +526,10 @@ function oracleSegmentPhaseAt(
   ) {
     lastFrame += 1;
   }
-  const startSec = firstFrame * FRAME_PERIOD_SEC;
-  const endSec = (lastFrame + 1) * FRAME_PERIOD_SEC;
+  const startSec = dectalkFrameStartSec(oracleFrames[firstFrame]!.frame);
+  const endSec = dectalkFrameStartSec(oracleFrames[lastFrame]!.frame + 1);
   const spanSec = endSec - startSec;
-  const frameSec = frameIndex * FRAME_PERIOD_SEC;
+  const frameSec = dectalkFrameStartSec(frame.frame);
   return {
     startSec,
     endSec,
@@ -616,7 +618,7 @@ function summarizeParam(
     const oracleValue =
       oracleValueForFrame?.(oracleFrame) ??
       (oracleKey == null ? null : finiteNumber(oracleFrame.out[oracleKey]));
-    const frameTimeSec = frameIndex * FRAME_PERIOD_SEC;
+    const frameTimeSec = dectalkFrameStartSec(oracleFrame.frame);
     const selection = eventSelectionAt(track, frameTimeSec);
     const event = selection?.event ?? null;
     const qlatt = qlattValue(event, qlattKey, qlattScale);
@@ -762,7 +764,7 @@ function summarizeAlignment(
   let unknown = 0;
   for (let frameIndex = 0; frameIndex < oracleFrames.length; frameIndex += 1) {
     const oraclePhone = oracleSourcePhoneForFrame(oracleFrames[frameIndex]!, oracleComparisonTokens);
-    const event = eventAt(track, frameIndex * FRAME_PERIOD_SEC);
+    const event = eventAt(track, dectalkFrameStartSec(oracleFrames[frameIndex]!.frame));
     const qlattPhone = normalizeQlattPhone(event?.phoneme);
     if (oraclePhone == null || qlattPhone == null) {
       unknown += 1;

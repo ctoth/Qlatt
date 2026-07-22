@@ -230,8 +230,10 @@ describe("DECtalk trace packet timing", () => {
         JSON.stringify({
           track: [
             { time: 0, phoneme: "N", params: { B3: 100 } },
-            { time: 0.0064, phoneme: "N", params: { B3: 130 } },
-            { time: 0.0128, phoneme: "N", params: { B3: 160 } },
+            { time: 0.0064, phoneme: "N", params: { B3: 999 } },
+            { time: dectalkFrameStartSec(1), phoneme: "N", params: { B3: 130 } },
+            { time: 0.0128, phoneme: "N", params: { B3: 999 } },
+            { time: dectalkFrameStartSec(2), phoneme: "N", params: { B3: 160 } },
             { time: 0.0384, phoneme: "IH", params: { B3: 190 } },
           ],
         }),

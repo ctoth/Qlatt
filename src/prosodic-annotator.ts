@@ -18,8 +18,6 @@
 
 import type { Item, Utterance } from "./declarative-frontend/hrg";
 import {
-  classifyWordProsody,
-  getFunctionWordSet,
   loadAccentPolicySync,
   resolveAccentAssignment,
   type AccentPolicy,
@@ -52,8 +50,6 @@ interface ProsodyToken {
   accentIndexInPhrase: number;
   breakIndex: number;
 }
-
-export const FUNCTION_WORDS: ReadonlySet<string> = getFunctionWordSet(loadAccentPolicySync());
 
 // ---------------------------------------------------------------------------
 // Types for internal phrase representation
@@ -129,8 +125,11 @@ export function annotateProsody(utterance: Utterance): void {
       phraseAccent: null,
       boundaryTone: null,
       initialBoundaryTone: null,
-      isFunctionWord: false,
-      isContentWord: false,
+      // Word-class flags are now assigned by the declarative `mark_function_words`
+      // rule in the annotation phase (runs before this pass); read the committed
+      // value so the remaining accent passes see identical classification.
+      isFunctionWord: view.isFunctionWord === true,
+      isContentWord: view.isContentWord === true,
       isAccented: false,
       isAccentCarrier: false,
       isNuclearAccent: false,
@@ -143,8 +142,8 @@ export function annotateProsody(utterance: Utterance): void {
   // Step 1: Identify phrases by splitting at SIL tokens with punctuation.
   const phrases = identifyPhrases(result);
 
-  // Step 2: Mark function/content words.
-  markFunctionWords(result, accentPolicy);
+  // Step 2: Mark function/content words — now the declarative `mark_function_words`
+  // rule (phases/annotation.yaml), read into result above via the item view.
 
   // Step 3: Assign accent (stress==1 AND content word).
   assignAccent(result, accentPolicy);
@@ -184,8 +183,8 @@ export function annotateProsody(utterance: Utterance): void {
   assignAccentIndices(result);
 
   for (const token of result) {
-    transaction.set(token.item, "isFunctionWord", token.isFunctionWord);
-    transaction.set(token.item, "isContentWord", token.isContentWord);
+    // isFunctionWord / isContentWord are written by the declarative
+    // mark_function_words rule (annotation phase); not re-committed here.
     transaction.set(token.item, "isAccented", token.isAccented);
     transaction.set(token.item, "isAccentCarrier", token.isAccentCarrier);
     transaction.set(token.item, "isNuclearAccent", token.isNuclearAccent);
@@ -239,33 +238,6 @@ function identifyPhrases(tokens: ProsodyToken[]): Phrase[] {
   }
 
   return phrases;
-}
-
-// ---------------------------------------------------------------------------
-// Step 2: Mark function/content words
-// ---------------------------------------------------------------------------
-
-function markFunctionWords(tokens: ProsodyToken[], accentPolicy: AccentPolicy): void {
-  for (const token of tokens) {
-    // Initialize phrase-edge tone properties on ALL tokens for consistency.
-    // These are only set to non-null values on SIL tokens at phrase boundaries
-    // (in assignPhraseEdgeTones), but initializing to null prevents undefined
-    // in CEL expressions. Citation: Silverman et al. 1992 (ToBI tone tier).
-    // Reserved for future phrase accent rules (H-, L-)
-    token.phraseAccent = null;
-    token.boundaryTone = null;
-    token.initialBoundaryTone = null;
-
-    if (token.phoneme === "SIL" || isSuppressedToken(token)) {
-      // SIL and suppressed structural source tokens are not prosodic carriers.
-      token.isFunctionWord = false;
-      token.isContentWord = false;
-      continue;
-    }
-    const classification = classifyWordProsody(accentPolicy, token.word);
-    token.isFunctionWord = classification.isFunctionWord;
-    token.isContentWord = classification.isContentWord;
-  }
 }
 
 // ---------------------------------------------------------------------------

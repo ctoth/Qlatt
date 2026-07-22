@@ -25,3 +25,32 @@ rules:
         tag: cluster_position
     citations:
       - Klatt 1973 (cluster shortening)
+
+  # Word-class classification (former prosodic-annotator markFunctionWords pass).
+  # A word is a function word iff its lower-cased orthography is in the declared
+  # `function_words` set (pipeline.yaml string_sets); otherwise it is a content
+  # word. SIL tokens are neither. Matches the imperative classifyWordProsody
+  # exactly: absent/empty word folds to "" (a content word), and the lookup is
+  # case-folded via lower(). These flags gate accent assignment downstream.
+  mark_function_words:
+    kind: scalar
+    select:
+      relation: Segment
+    apply:
+      - field: isFunctionWord
+        op: set
+        value: >-
+          current.phoneme == 'SIL'
+            ? false
+            : ((has(current.word) ? lower(current.word) : '') in sets.function_words)
+        tag: word_class
+      - field: isContentWord
+        op: set
+        value: >-
+          current.phoneme == 'SIL'
+            ? false
+            : !((has(current.word) ? lower(current.word) : '') in sets.function_words)
+        tag: word_class
+    citations:
+      - O'Shaughnessy 1976
+      - Allen, Hunnicutt & Klatt 1987

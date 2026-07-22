@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 import { loadYamlSourceSync } from "../src/yaml-loader";
 import {
   DEFAULT_ACCENT_POLICY_PATH,
-  classifyWordProsody,
   loadAccentPolicySync,
   resolveAccentAssignment,
 } from "../src/accent-policy";
 
+// The function-word membership list moved to pipeline.yaml `string_sets`
+// (single source of truth for the declarative `mark_function_words` rule), so
+// the former `function_words` / `classifyWordProsody` assertions here were
+// relocated to declarative-frontend-function-words.test.ts. This file now
+// covers only the accent-assignment rule that remains in accent-policy.yaml.
 
 describe("accent policy", () => {
   it("declares the canonical accent policy document", () => {
@@ -15,22 +19,8 @@ describe("accent policy", () => {
 
     expect(source).toContain("version: v1");
     expect(policy.version).toBe("v1");
-    expect(policy.function_words.length).toBeGreaterThanOrEqual(100);
     expect(policy.accent_assignment.required_stress).toBe(1);
     expect(policy.accent_assignment.carrier_selection).toBe("first_primary_stress");
-  });
-
-  it("classifies function and content words from the declarative lexicon", () => {
-    const policy = loadAccentPolicySync();
-
-    expect(classifyWordProsody(policy, "the")).toEqual({
-      isFunctionWord: true,
-      isContentWord: false,
-    });
-    expect(classifyWordProsody(policy, "cat")).toEqual({
-      isFunctionWord: false,
-      isContentWord: true,
-    });
   });
 
   it("encodes the current accent-priority rule", () => {

@@ -11,13 +11,7 @@ export interface AccentAssignmentPolicy {
 export interface AccentPolicy {
   version: string;
   citations: string[];
-  function_words: string[];
   accent_assignment: AccentAssignmentPolicy;
-}
-
-export interface WordProsodyClassification {
-  isFunctionWord: boolean;
-  isContentWord: boolean;
 }
 
 export interface ResolveAccentAssignmentOptions {
@@ -32,7 +26,6 @@ export interface AccentAssignmentDecision {
 }
 
 let accentPolicyCache: AccentPolicy | null = null;
-let functionWordSetCache: ReadonlySet<string> | null = null;
 
 function expectNonEmptyString(value: unknown, label: string): string {
   if (typeof value !== "string" || value.trim().length === 0) {
@@ -63,10 +56,6 @@ function expectStringArray(value: unknown, label: string): string[] {
   return value.map((entry, index) => expectNonEmptyString(entry, `${label}[${index}]`));
 }
 
-function expectLowerCaseStringArray(value: unknown, label: string): string[] {
-  return expectStringArray(value, label).map((entry) => entry.toLowerCase());
-}
-
 function parseAccentPolicyDocument(value: unknown): AccentPolicy {
   if (!isPlainObject(value)) {
     throw new Error("E_ACCENT_POLICY_SCHEMA: top-level document must be an object");
@@ -80,7 +69,6 @@ function parseAccentPolicyDocument(value: unknown): AccentPolicy {
   return {
     version: expectNonEmptyString(value.version, "version"),
     citations: expectStringArray(value.citations ?? [], "citations"),
-    function_words: expectLowerCaseStringArray(value.function_words ?? [], "function_words"),
     accent_assignment: {
       require_content_word: expectBoolean(
         accentAssignment.require_content_word,
@@ -105,32 +93,6 @@ export function loadAccentPolicySync(specPath: string = DEFAULT_ACCENT_POLICY_PA
     accentPolicyCache = policy;
   }
   return policy;
-}
-
-export function getFunctionWordSet(
-  policy: AccentPolicy = loadAccentPolicySync(),
-): ReadonlySet<string> {
-  if (policy === accentPolicyCache && functionWordSetCache) {
-    return functionWordSetCache;
-  }
-
-  const set = new Set(policy.function_words.map((word) => word.toLowerCase()));
-  if (policy === accentPolicyCache) {
-    functionWordSetCache = set;
-  }
-  return set;
-}
-
-export function classifyWordProsody(
-  policy: AccentPolicy,
-  word: string | null | undefined,
-): WordProsodyClassification {
-  const normalized = typeof word === "string" ? word.toLowerCase() : "";
-  const isFunctionWord = getFunctionWordSet(policy).has(normalized);
-  return {
-    isFunctionWord,
-    isContentWord: !isFunctionWord,
-  };
 }
 
 export function resolveAccentAssignment(

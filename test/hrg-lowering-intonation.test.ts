@@ -322,6 +322,73 @@ describe("HRG lowering layered intonation", () => {
     });
   });
 
+  it("keeps DECtalk commands on the controller clock when acoustic timing changes", () => {
+    const baseline = readFixture();
+    const sourceSegment = baseline.segments.find((segment) => (segment.params.AV ?? 0) > 0);
+    if (!sourceSegment) throw new Error("voiced fixture segment missing");
+    const outputFramePeriod = baseline.f0Model.output_frame_period_sec;
+    if (typeof outputFramePeriod !== "number") throw new Error("layered F0 output period missing");
+
+    const nativeCells = (firstDuration: number) => {
+      const segments = [
+        { ...sourceSegment, duration: firstDuration, id: "first" },
+        { ...sourceSegment, duration: 205, id: "vowel" },
+      ];
+      const commands: BaselineCommand[] = [
+        {
+          id: "baseline",
+          layer: "baseline",
+          profilePoints: [1160, 1150, 1140, 1152, 1132, 1140, 1130, 1124, 1110, 1100, 1080, 1060, 1040, 1020, 980, 960, 950],
+          timeMs: 0,
+          value: 0,
+        },
+        {
+          durationFrames: 4,
+          id: "initial-silence",
+          layer: "segmental",
+          profilePoints: [1, 0, 0],
+          timeMs: 0,
+          value: 50,
+        },
+        {
+          durationFrames: 10,
+          id: "initial-consonant",
+          layer: "segmental",
+          profilePoints: [0, 0, 0],
+          timeMs: 0,
+          value: 0,
+        },
+        {
+          durationFrames: 15,
+          id: "hat",
+          layer: "hat",
+          timeMs: firstDuration - 51.2,
+          value: 190,
+        },
+        {
+          durationFrames: 32,
+          id: "vowel-controller",
+          layer: "segmental",
+          profilePoints: [0, 0, 1],
+          timeMs: firstDuration,
+          value: 30,
+        },
+      ];
+      return lowerToFrames(
+        buildUtterance(segments, commands, baseline.policy),
+        baseline.policy,
+        { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
+      ).frames
+        .filter((frame) => (
+          Math.abs(frame.time / outputFramePeriod - Math.round(frame.time / outputFramePeriod)) < 1e-9
+        ))
+        .slice(0, 30)
+        .map((frame) => frame.params.F0);
+    };
+
+    expect(nativeCells(59)).toEqual(nativeCells(80));
+  });
+
   it("holds layered F0 cells at interstitial lowerer events", () => {
     const baseline = readFixture();
     const sourceSegment = baseline.segments.find((segment) => (segment.params.AV ?? 0) > 0);

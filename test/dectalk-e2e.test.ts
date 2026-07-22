@@ -172,6 +172,43 @@ describe("dectalk-english end-to-end", () => {
     ]);
   });
 
+  it("matches every native F0 cell through the's complete trace", () => {
+    const result = textToKlattTrackDetailed("the.", 110, 30, {
+      frontendId: "dectalk-english",
+      speaker: "paul",
+    });
+    const f0Hz10 = Array.from({ length: 139 }, (_, frameIndex) => {
+      const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
+      const f0 = result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F0;
+      return Math.round((f0 ?? Number.NaN) * 10);
+    });
+
+    expect(f0Hz10).toEqual([
+      973, 979, 982, 985, 978, 979, 990,
+      1005, 1025, 1049, 1074, 1102, 1128,
+      1155, 1183, 1209, 1236, 1261, 1286,
+      1308, 1330, 1349, 1367, 1384, 1397,
+      1403, 1403, 1397, 1388, 1374, 1360,
+      1343, 1325, 1305, 1286, 1267, 1248,
+      1226, 1206, 1186, 1166, 1148, 1129,
+      1114, 1097, 1081, 1067, 1055, 1044,
+      1043, 1041, 1038, 1037, 1034, 1032,
+      1031, 1028, 1026, 1024, 1021, 1019,
+      1018, 1015, 1015, 1012, 1011, 1008,
+      1006, 1004, 1000, 998, 997, 995,
+      993, 992, 992, 991, 990, 990, 989,
+      989, 989, 989, 990, 991, 992, 993,
+      993, 992, 992, 991, 991, 989, 989,
+      988, 987, 986, 984, 982, 981, 979,
+      977, 975, 974, 973, 973, 972, 973,
+      973, 974, 975, 976, 978, 979, 982,
+      985, 987, 990, 992, 994, 995, 997,
+      998, 998, 999, 999, 998, 998, 997,
+      996, 994, 992, 990, 988, 987, 985,
+      984, 983, 982,
+    ]);
+  });
+
   it("applies DECtalk Rule 14 to a sonorant after a voiceless plosive", () => {
     const result = textToKlattTrackDetailed("cake.", 110, 30, {
       frontendId: "dectalk-english",

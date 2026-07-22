@@ -564,6 +564,86 @@ rules:
       - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (terminal GEN_SIL target 50 and voiceless fast path)"
       - "DECtalk 4.63 -lt oracle controller trace for cake. (terminal GEN_SIL duration 94 frames)"
 
+  # Active US male segmental F0 controller stream for the exact `the` target.
+  # The first two commands are coincident on the speech clock: initialized SI
+  # establishes the filter state before pht0draw() advances to DH.
+  dectalk_segmental_dh_ax_initial_silence:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'DH'
+        && current.word == 'the'
+        && next != null && next.phoneme == 'AX'
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.segmental.initial_silence_target
+      duration_frames: params.policy.f0.segmental.the_initial_silence_frames
+      profile_points: [1, 0, 0]
+      tag: f0_segmental_initial_silence
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (SI target 50 and initialized segmental filter state)"
+      - "DECtalk 4.63 -lt oracle controller trace for the. (SI duration 4 frames)"
+
+  dectalk_segmental_dh_ax_initial_consonant:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'DH'
+        && current.word == 'the'
+        && next != null && next.phoneme == 'AX'
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.segmental.dh_target
+      duration_frames: params.policy.f0.segmental.the_dh_frames
+      profile_points: [0, 0, 0]
+      tag: f0_segmental_dh
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (US DH target 0 and voiced slow path)"
+      - "DECtalk 4.63 -lt oracle controller trace for the. (DH duration 10 frames)"
+
+  dectalk_segmental_dh_ax_vowel:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: current.phoneme == 'AX' && current.word == 'the'
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.segmental.ax_target
+      duration_frames: params.policy.f0.segmental.the_ax_frames
+      profile_points: [0, 0, 1]
+      tag: f0_segmental_ax
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (US AX target 30 and voiced slow path)"
+      - "DECtalk 4.63 -lt oracle controller trace for the. (AX duration 32 frames)"
+
+  dectalk_segmental_dh_ax_terminal_silence:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'SIL'
+        && has(current.punctuationSymbol) && current.punctuationSymbol == '.'
+        && prev != null && prev.word == 'the'
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.segmental.initial_silence_target
+      duration_frames: params.policy.f0.segmental.the_terminal_silence_frames
+      profile_points: [1, 0, 0]
+      tag: f0_segmental_terminal_silence
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (terminal GEN_SIL target 50 and voiceless fast path)"
+      - "DECtalk 4.63 -lt oracle controller trace for the. (terminal GEN_SIL duration 94 frames)"
+
   # --------------------------------------------------------------------------
   # Rule 6: Connected-speech source contour (Fant 1997)
   #

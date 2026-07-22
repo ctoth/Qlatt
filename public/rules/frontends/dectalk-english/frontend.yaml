@@ -453,10 +453,19 @@ parameters:
         final_k_frames: 14
         dummy_ix_frames: 6
         terminal_silence_frames: 94
+        # Exact p_us_tim.c controller output for the active DH-AX word family.
+        # Source: DECtalk 4.63 -lt controller/allophone trace for `the.`.
+        dh_target: 0
+        ax_target: 30
+        the_initial_silence_frames: 4
+        the_dh_frames: 10
+        the_ax_frames: 32
+        the_terminal_silence_frames: 94
         citations:
           - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw"
           - "DECtalk 4.63 p_us_tim.c controller durations"
           - "DECtalk 4.63 -lt oracle trace for cake."
+          - "DECtalk 4.63 -lt oracle trace for the."
       citations:
         - "DECtalk 4.63 ph_inton1.c (hat-pattern F0 model)"
         - "DECtalk 4.63 Ph_drwt02.c (baseline profiles, speaker scaling)"

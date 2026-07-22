@@ -1351,6 +1351,9 @@ export function lowerToFrames(
       throw new Error("E_HRG_LOWER_F0_MODEL: layered_additive requires the selected F0 model");
     }
     const f0Model = context.f0Model;
+    const usesSegmentalControllerClock = f0ControlItems.some(
+      (item) => f0Model.layers[String(item.get("layer"))]?.type === "dectalk_segmental",
+    );
     const commands = f0ControlItems.map((item): F0LayerCommand => {
       const timeMs = utterance.resolveAnchorTime(item);
       const layer = item.get("layer");
@@ -1379,12 +1382,12 @@ export function lowerToFrames(
         : undefined;
       const tag = item.get("tag");
       const layerType = f0Model.layers[layer]?.type;
-      // Phrase commands are timed on Ph_inton2.c's speech clock, while
-      // Ph_drwt02.c consumes them on the output clock that includes the
-      // initial silence. Profiles and segmental commands already originate on
-      // that output clock and must not be projected a second time.
+      // Without DECtalk controller allophones, project speech-relative
+      // commands across the synthesized initial-silence edge. When the exact
+      // segmental stream exists, its integer durations own this projection
+      // below; acoustic Segment timing is not the DECtalk command clock.
       const outputTimeMs = layerType === "persistent" || layerType === "impulse" || layerType === "glide"
-        ? timeMs + initialSilenceMs
+        ? timeMs + (usesSegmentalControllerClock ? 0 : initialSilenceMs)
         : timeMs;
       return {
         layer,
@@ -1395,6 +1398,40 @@ export function lowerToFrames(
         ...(typeof tag === "string" ? { tag } : {}),
       };
     });
+    if (usesSegmentalControllerClock) {
+      // Ph_inton2.c and pht0draw() share the ordered allodurs[] controller
+      // clock. Preserve a command's offset from its following acoustic
+      // allophone boundary, but place that boundary at the cumulative native
+      // controller duration carried by the existing segmental commands.
+      // DECtalk 4.63 Ph_inton2.c make_f0_command(); Ph_drwt02.c pht0draw().
+      const controllerTimeByAcousticTime = new Map<number, number>();
+      let controllerFrames = 0;
+      for (const command of commands) {
+        if (f0Model.layers[command.layer]?.type !== "dectalk_segmental") continue;
+        controllerTimeByAcousticTime.set(command.time, controllerFrames * f0Model.frame_period_sec);
+        if (command.tag !== "f0_segmental_terminal_silence") {
+          controllerFrames += command.durationFrames ?? 0;
+        }
+      }
+      const controllerAnchors = [...controllerTimeByAcousticTime]
+        .map(([acousticTime, controllerTime]) => ({ acousticTime, controllerTime }))
+        .sort((left, right) => left.acousticTime - right.acousticTime);
+      for (let index = 0; index < commands.length; index += 1) {
+        const command = commands[index];
+        if (!command) continue;
+        const layerType = f0Model.layers[command.layer]?.type;
+        if (layerType !== "persistent" && layerType !== "impulse" && layerType !== "glide") continue;
+        const anchor = controllerAnchors.find(
+          (candidate) => candidate.acousticTime >= command.time - 1e-9,
+        ) ?? controllerAnchors.at(-1);
+        if (!anchor) continue;
+        const mappedTime = Math.max(0, anchor.controllerTime - (anchor.acousticTime - command.time));
+        commands[index] = {
+          ...command,
+          time: Math.round(mappedTime / f0Model.frame_period_sec) * f0Model.frame_period_sec,
+        };
+      }
+    }
     let rendered: Array<{ time: number; outputTime: number; f0: number }>;
     try {
       rendered = renderLayeredF0(

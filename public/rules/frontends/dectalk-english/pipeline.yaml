@@ -371,6 +371,10 @@ phases:
       - dectalk_segmental_k_ey_k_final_stop
       - dectalk_segmental_k_ey_k_dummy_ix
       - dectalk_segmental_k_ey_k_terminal_silence
+      - dectalk_segmental_dh_ax_initial_silence
+      - dectalk_segmental_dh_ax_initial_consonant
+      - dectalk_segmental_dh_ax_vowel
+      - dectalk_segmental_dh_ax_terminal_silence
       - dectalk_connected_speech_source_contour
   - name: finalize
     after: [duration, structural, formant, prosody]

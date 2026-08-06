@@ -3,12 +3,16 @@
  * Wraps the tilt-filter WASM primitive
  * One-pole lowpass for spectral tilt control
  */
-import { initWasmModule, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
+import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
 
 interface TiltFilterWasmExports {
+  memory: WebAssembly.Memory;
+  alloc_f32(len: number): number;
+  dealloc_f32(ptr: number, len: number): void;
   tilt_filter_new(): number;
   tilt_filter_set_tilt(state: number, tilt: number): void;
   tilt_filter_process(state: number, sample: number): number;
+  tilt_filter_process_block(state: number, inputPtr: number, outputPtr: number, len: number): void;
   tilt_filter_reset?: (state: number) => void;
 }
 
@@ -32,6 +36,8 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
   private disposed = false;
   wasm: TiltFilterWasmExports | null;
   state: number;
+  inputBuffer: WasmBuffer | null;
+  outputBuffer: WasmBuffer | null;
   ready: boolean;
   lastTilt: number;
   debug: boolean;
@@ -50,6 +56,8 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
     const opts = options as TiltFilterProcessorOptions | undefined;
     this.wasm = null;
     this.state = 0;
+    this.inputBuffer = null;
+    this.outputBuffer = null;
     this.ready = false;
     this.lastTilt = -1;
     this.debug = Boolean(opts?.processorOptions?.debug);
@@ -78,6 +86,8 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
         instantiated instanceof WebAssembly.Instance ? instantiated : instantiated.instance;
       this.wasm = instance.exports as unknown as TiltFilterWasmExports;
       this.state = this.wasm.tilt_filter_new();
+      this.inputBuffer = new WasmBuffer(this.wasm);
+      this.outputBuffer = new WasmBuffer(this.wasm);
       this.ready = true;
       this.port.postMessage({ type: "ready", node: this.nodeId });
     });
@@ -100,7 +110,7 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
     const outputChannel = output[0];
     const blockSize = outputChannel.length;
 
-    if (!this.ready || !this.wasm) {
+    if (!this.ready || !this.wasm || !this.inputBuffer || !this.outputBuffer) {
       outputChannel.fill(0);
       return true;
     }
@@ -112,13 +122,27 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
       this.lastTilt = tilt;
     }
 
-    // Process samples
-    for (let i = 0; i < blockSize; i += 1) {
-      outputChannel[i] = this.wasm.tilt_filter_process(
-        this.state,
-        inputChannel[i] || 0
-      );
+    this.inputBuffer.ensure(blockSize);
+    this.outputBuffer.ensure(blockSize);
+    const inputView = this.inputBuffer.view;
+    if (!inputView || !this.outputBuffer.view) {
+      outputChannel.fill(0);
+      return true;
     }
+
+    inputView.set(inputChannel);
+    this.wasm.tilt_filter_process_block(
+      this.state,
+      this.inputBuffer.ptr,
+      this.outputBuffer.ptr,
+      blockSize,
+    );
+    this.outputBuffer.refresh();
+    if (!this.outputBuffer.view) {
+      outputChannel.fill(0);
+      return true;
+    }
+    outputChannel.set(this.outputBuffer.view);
 
     this._reportMetrics(outputChannel, { tilt });
     return true;

@@ -107,20 +107,24 @@ impl BiquadNotch {
             return;
         }
 
-        for (i, x) in input.iter().enumerate() {
+        let mut x1 = self.x1;
+        let mut x2 = self.x2;
+        let mut y1 = self.y1;
+        let mut y2 = self.y2;
+        for (out, x) in output.iter_mut().zip(input) {
             // Direct Form I biquad:
             // y[n] = b0*x[n] + b1*x[n-1] + b2*x[n-2] - a1*y[n-1] - a2*y[n-2]
-            let y = self.b0 * x
-                + self.b1 * self.x1
-                + self.b2 * self.x2
-                - self.a1 * self.y1
-                - self.a2 * self.y2;
-            self.x2 = self.x1;
-            self.x1 = *x;
-            self.y2 = self.y1;
-            self.y1 = y;
-            output[i] = y * self.gain;
+            let y = self.b0 * x + self.b1 * x1 + self.b2 * x2 - self.a1 * y1 - self.a2 * y2;
+            x2 = x1;
+            x1 = *x;
+            y2 = y1;
+            y1 = y;
+            *out = y * self.gain;
         }
+        self.x1 = x1;
+        self.x2 = x2;
+        self.y1 = y1;
+        self.y2 = y2;
     }
 }
 

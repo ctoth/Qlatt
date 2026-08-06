@@ -57,18 +57,22 @@ impl Resonator {
 
     fn process(&mut self, input: &[f32], output: &mut [f32]) {
         if self.bypass {
-            for (i, x) in input.iter().enumerate() {
-                output[i] = x * self.gain;
+            for (out, x) in output.iter_mut().zip(input) {
+                *out = x * self.gain;
             }
             return;
         }
 
-        for (i, x) in input.iter().enumerate() {
-            let y = self.b0 * x + self.a1 * self.y1 + self.a2 * self.y2;
-            self.y2 = self.y1;
-            self.y1 = y;
-            output[i] = y * self.gain;
+        let mut y1 = self.y1;
+        let mut y2 = self.y2;
+        for (out, x) in output.iter_mut().zip(input) {
+            let y = self.b0 * x + self.a1 * y1 + self.a2 * y2;
+            y2 = y1;
+            y1 = y;
+            *out = y * self.gain;
         }
+        self.y1 = y1;
+        self.y2 = y2;
     }
 }
 

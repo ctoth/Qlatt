@@ -47,6 +47,8 @@
     "oracle:run": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/oracle/run-corpus.ts",
     "oracle:compare": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/oracle/compare-audio.ts",
     "measure": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/measure/measure.ts",
+    "filter-perf:build": "node scripts/filter-perf/build.mjs",
+    "filter-perf": "node scripts/filter-perf/harness.mjs",
     "lint:audio": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/lint-audio.ts"
   },
   "dependencies": {

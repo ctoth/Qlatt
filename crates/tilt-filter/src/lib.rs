@@ -44,6 +44,12 @@ impl TiltFilter {
         self.y1 = output;
         output
     }
+
+    pub fn process_block(&mut self, input: &[f32], output: &mut [f32]) {
+        for (out, sample) in output.iter_mut().zip(input) {
+            *out = self.process(klatt_wasm_common::normalize_worklet_sample(*sample));
+        }
+    }
 }
 
 // FFI exports
@@ -79,5 +85,50 @@ pub unsafe extern "C" fn tilt_filter_process(ptr: *mut TiltFilter, input: f32) -
         filter.process(input)
     } else {
         0.0
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn tilt_filter_process_block(
+    ptr: *mut TiltFilter,
+    input_ptr: *const f32,
+    output_ptr: *mut f32,
+    len: usize,
+) {
+    if ptr.is_null() || input_ptr.is_null() || output_ptr.is_null() || len == 0 {
+        return;
+    }
+    let input = core::slice::from_raw_parts(input_ptr, len);
+    let output = core::slice::from_raw_parts_mut(output_ptr, len);
+    (*ptr).process_block(input, output);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn block_api_is_bit_identical_to_scalar_worklet_calls() {
+        let input = [1.0_f32, -0.0, f32::NAN, -0.25, 0.5, f32::from_bits(1)];
+        let mut scalar = TiltFilter::new();
+        let mut block = TiltFilter::new();
+        scalar.set_tilt(17);
+        block.set_tilt(17);
+
+        let expected: Vec<f32> = input
+            .iter()
+            .map(|sample| scalar.process(klatt_wasm_common::normalize_worklet_sample(*sample)))
+            .collect();
+        let mut actual = [0.0_f32; 6];
+        block.process_block(&input, &mut actual);
+
+        assert_eq!(
+            actual.map(f32::to_bits).as_slice(),
+            expected
+                .iter()
+                .copied()
+                .map(f32::to_bits)
+                .collect::<Vec<_>>()
+        );
     }
 }

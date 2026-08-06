@@ -12,6 +12,8 @@ class FujisakiResonatorProcessor extends AudioWorkletProcessor {
     bypassAtZero;
     reportInterval;
     _reportCountdown;
+    lastFrequency;
+    lastBandwidth;
     static get parameterDescriptors() {
         return [
             { name: "frequency", defaultValue: 500, minValue: 0, maxValue: 20000, automationRate: "k-rate" },
@@ -31,6 +33,8 @@ class FujisakiResonatorProcessor extends AudioWorkletProcessor {
         this.bypassAtZero = Boolean(opts?.processorOptions?.bypassAtZero);
         this.reportInterval = opts?.processorOptions?.reportInterval || 50;
         this._reportCountdown = this.reportInterval;
+        this.lastFrequency = Number.NaN;
+        this.lastBandwidth = Number.NaN;
         this.port.onmessage = (event) => {
             if (event?.data?.type === "dispose") {
                 this.disposed = true;
@@ -89,7 +93,14 @@ class FujisakiResonatorProcessor extends AudioWorkletProcessor {
             }
         }
         else {
-            this.wasm.fujisaki_resonator_set_params(this.state, freq, bw, sampleRate);
+            if (!Number.isFinite(freq) ||
+                !Number.isFinite(bw) ||
+                !Object.is(freq, this.lastFrequency) ||
+                !Object.is(bw, this.lastBandwidth)) {
+                this.wasm.fujisaki_resonator_set_params(this.state, freq, bw, sampleRate);
+                this.lastFrequency = freq;
+                this.lastBandwidth = bw;
+            }
             this.wasm.fujisaki_resonator_process(this.state, this.inputBuffer.ptr, this.outputBuffer.ptr, blockSize);
         }
         this.outputBuffer.refresh();

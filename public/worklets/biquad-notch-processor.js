@@ -15,6 +15,9 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
     bypassAtZero;
     reportInterval;
     _reportCountdown;
+    lastFrequency;
+    lastBandwidth;
+    lastGain;
     static get parameterDescriptors() {
         return [
             { name: "frequency", defaultValue: 500, minValue: 0, maxValue: 20000, automationRate: "k-rate" },
@@ -35,6 +38,9 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
         this.bypassAtZero = Boolean(opts?.processorOptions?.bypassAtZero);
         this.reportInterval = opts?.processorOptions?.reportInterval || 50;
         this._reportCountdown = this.reportInterval;
+        this.lastFrequency = Number.NaN;
+        this.lastBandwidth = Number.NaN;
+        this.lastGain = Number.NaN;
         this.port.onmessage = (event) => {
             if (event?.data?.type === "dispose") {
                 this.disposed = true;
@@ -99,8 +105,18 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
         else {
             inputView.fill(0);
         }
-        this.wasm.biquad_notch_set_params(this.state, freq, bw, sampleRate);
-        this.wasm.biquad_notch_set_gain(this.state, gain);
+        if (!Number.isFinite(freq) ||
+            !Number.isFinite(bw) ||
+            !Object.is(freq, this.lastFrequency) ||
+            !Object.is(bw, this.lastBandwidth)) {
+            this.wasm.biquad_notch_set_params(this.state, freq, bw, sampleRate);
+            this.lastFrequency = freq;
+            this.lastBandwidth = bw;
+        }
+        if (!Object.is(gain, this.lastGain)) {
+            this.wasm.biquad_notch_set_gain(this.state, gain);
+            this.lastGain = gain;
+        }
         this.wasm.biquad_notch_process(this.state, this.inputBuffer.ptr, this.outputBuffer.ptr, blockSize);
         this.outputBuffer.refresh();
         if (!this.outputBuffer.view) {

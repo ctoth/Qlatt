@@ -66,18 +66,22 @@ impl AntiResonator {
 
     fn process(&mut self, input: &[f32], output: &mut [f32]) {
         if self.bypass {
-            for (i, x) in input.iter().enumerate() {
-                output[i] = x * self.gain;
+            for (out, x) in output.iter_mut().zip(input) {
+                *out = x * self.gain;
             }
             return;
         }
 
-        for (i, x) in input.iter().enumerate() {
-            let y = self.a0 * x + self.b1 * self.x1 + self.b2 * self.x2;
-            self.x2 = self.x1;
-            self.x1 = *x;
-            output[i] = y * self.gain;
+        let mut x1 = self.x1;
+        let mut x2 = self.x2;
+        for (out, x) in output.iter_mut().zip(input) {
+            let y = self.a0 * x + self.b1 * x1 + self.b2 * x2;
+            x2 = x1;
+            x1 = *x;
+            *out = y * self.gain;
         }
+        self.x1 = x1;
+        self.x2 = x2;
     }
 }
 

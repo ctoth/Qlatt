@@ -27,3 +27,18 @@ opt-level = "z"
 lto = true
 codegen-units = 1
 panic = "abort"
+
+# Audio and control filters are hot for every rendered sample/frame. Keep the
+# workspace's size-first WASM default for other primitives, but let these
+# measured kernels use the speed optimizer.
+[profile.release.package.antiresonator]
+opt-level = 3
+
+[profile.release.package.biquad-notch]
+opt-level = 3
+
+[profile.release.package.reconstruction-filter]
+opt-level = 3
+
+[profile.release.package.f0-filters]
+opt-level = 3

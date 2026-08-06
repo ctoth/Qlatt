@@ -3,6 +3,26 @@
 //! These functions are required for the AudioWorklet WASM pattern where
 //! JavaScript needs to allocate/deallocate f32 buffers in WASM linear memory.
 
+/// Match JavaScript's `sample || 0` numeric normalization without a data-dependent
+/// branch: NaNs and signed zero become positive zero; finite nonzero values and
+/// infinities retain their exact bits.
+///
+/// The masks follow the IEEE 754-2019 binary32 interchange format.
+#[inline]
+pub fn normalize_worklet_sample(sample: f32) -> f32 {
+    const MAGNITUDE_MASK: u32 = 0x7fff_ffff;
+    const EXPONENT_MASK: u32 = 0x7f80_0000;
+    const SIGNIFICAND_MASK: u32 = 0x007f_ffff;
+
+    let bits = sample.to_bits();
+    let is_zero = ((bits & MAGNITUDE_MASK) == 0) as u32;
+    let exponent_is_all_ones = (bits & EXPONENT_MASK) == EXPONENT_MASK;
+    let significand_is_nonzero = (bits & SIGNIFICAND_MASK) != 0;
+    let is_nan = (exponent_is_all_ones & significand_is_nonzero) as u32;
+    let keep = ((is_zero | is_nan) == 0) as u32;
+    f32::from_bits(bits & 0_u32.wrapping_sub(keep))
+}
+
 /// Allocate a zeroed f32 buffer in WASM linear memory.
 ///
 /// # Arguments
@@ -63,4 +83,19 @@ macro_rules! export_alloc_fns {
             $crate::dealloc_f32(ptr, len)
         }
     };
+}
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_worklet_sample;
+
+    #[test]
+    fn worklet_sample_normalization_matches_javascript_or_zero() {
+        for input in [1.25_f32, -7.0, f32::INFINITY, f32::NEG_INFINITY] {
+            assert_eq!(normalize_worklet_sample(input).to_bits(), input.to_bits());
+        }
+        for input in [0.0_f32, -0.0, f32::NAN, f32::from_bits(0xffc0_1234)] {
+            assert_eq!(normalize_worklet_sample(input).to_bits(), 0.0_f32.to_bits());
+        }
+    }
 }

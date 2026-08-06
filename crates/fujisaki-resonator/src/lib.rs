@@ -62,12 +62,16 @@ impl FujisakiResonator {
     }
 
     fn process(&mut self, input: &[f32], output: &mut [f32]) {
-        for (i, x) in input.iter().enumerate() {
-            let y = self.a * x + self.b * self.y1 + self.c * self.y2;
-            self.y2 = self.y1;
-            self.y1 = y;
-            output[i] = y;
+        let mut y1 = self.y1;
+        let mut y2 = self.y2;
+        for (out, x) in output.iter_mut().zip(input) {
+            let y = self.a * x + self.b * y1 + self.c * y2;
+            y2 = y1;
+            y1 = y;
+            *out = y;
         }
+        self.y1 = y1;
+        self.y2 = y2;
     }
 }
 

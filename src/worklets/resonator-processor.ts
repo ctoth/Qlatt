@@ -48,6 +48,9 @@ class ResonatorProcessor extends AudioWorkletProcessor {
   bypassAtZero: boolean;
   reportInterval: number;
   _reportCountdown: number;
+  lastFrequency: number;
+  lastBandwidth: number;
+  lastGain: number;
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
@@ -70,6 +73,9 @@ class ResonatorProcessor extends AudioWorkletProcessor {
     this.bypassAtZero = Boolean(opts?.processorOptions?.bypassAtZero);
     this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
+    this.lastFrequency = Number.NaN;
+    this.lastBandwidth = Number.NaN;
+    this.lastGain = Number.NaN;
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
       if (event?.data?.type === "dispose") {
         this.disposed = true;
@@ -138,8 +144,20 @@ class ResonatorProcessor extends AudioWorkletProcessor {
         outputView[i] = (inputView[i] || 0) * scale;
       }
     } else {
-      this.wasm.resonator_set_params(this.state, freq, bw, sampleRate);
-      this.wasm.resonator_set_gain(this.state, gain);
+      if (
+        !Number.isFinite(freq) ||
+        !Number.isFinite(bw) ||
+        !Object.is(freq, this.lastFrequency) ||
+        !Object.is(bw, this.lastBandwidth)
+      ) {
+        this.wasm.resonator_set_params(this.state, freq, bw, sampleRate);
+        this.lastFrequency = freq;
+        this.lastBandwidth = bw;
+      }
+      if (!Object.is(gain, this.lastGain)) {
+        this.wasm.resonator_set_gain(this.state, gain);
+        this.lastGain = gain;
+      }
       this.wasm.resonator_process(
         this.state,
         this.inputBuffer.ptr,

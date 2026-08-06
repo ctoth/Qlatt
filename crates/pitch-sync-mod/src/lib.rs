@@ -224,6 +224,36 @@ impl PitchSyncResonator {
         self.y1 = output;
         output
     }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn process_block(
+        &mut self,
+        input: &[f32],
+        output: &mut [f32],
+        f0: &[f32],
+        open_quotient: f32,
+        frequency: &[f32],
+        bandwidth: &[f32],
+        delta_freq: &[f32],
+        delta_bw: &[f32],
+        skew_param: f32,
+        source: f32,
+    ) {
+        for (index, (out, sample)) in output.iter_mut().zip(input).enumerate() {
+            let value_at = |values: &[f32]| values[if values.len() == 1 { 0 } else { index }];
+            *out = self.process(
+                klatt_wasm_common::normalize_worklet_sample(*sample),
+                value_at(f0),
+                open_quotient,
+                value_at(frequency),
+                value_at(bandwidth),
+                value_at(delta_freq),
+                value_at(delta_bw),
+                skew_param,
+                source,
+            );
+        }
+    }
 }
 
 // FFI exports
@@ -276,9 +306,129 @@ pub unsafe extern "C" fn pitch_sync_resonator_process(
     }
 }
 
+#[no_mangle]
+#[allow(clippy::too_many_arguments)]
+pub unsafe extern "C" fn pitch_sync_resonator_process_block(
+    ptr: *mut PitchSyncResonator,
+    input_ptr: *const f32,
+    output_ptr: *mut f32,
+    len: usize,
+    f0_ptr: *const f32,
+    f0_len: usize,
+    open_quotient: f32,
+    frequency_ptr: *const f32,
+    frequency_len: usize,
+    bandwidth_ptr: *const f32,
+    bandwidth_len: usize,
+    delta_freq_ptr: *const f32,
+    delta_freq_len: usize,
+    delta_bw_ptr: *const f32,
+    delta_bw_len: usize,
+    skew_param: f32,
+    source: f32,
+) {
+    let valid_rate = |rate_len: usize| rate_len == 1 || rate_len >= len;
+    if ptr.is_null()
+        || input_ptr.is_null()
+        || output_ptr.is_null()
+        || f0_ptr.is_null()
+        || frequency_ptr.is_null()
+        || bandwidth_ptr.is_null()
+        || delta_freq_ptr.is_null()
+        || delta_bw_ptr.is_null()
+        || len == 0
+        || !valid_rate(f0_len)
+        || !valid_rate(frequency_len)
+        || !valid_rate(bandwidth_len)
+        || !valid_rate(delta_freq_len)
+        || !valid_rate(delta_bw_len)
+    {
+        return;
+    }
+
+    let input = core::slice::from_raw_parts(input_ptr, len);
+    let output = core::slice::from_raw_parts_mut(output_ptr, len);
+    let f0 = core::slice::from_raw_parts(f0_ptr, f0_len);
+    let frequency = core::slice::from_raw_parts(frequency_ptr, frequency_len);
+    let bandwidth = core::slice::from_raw_parts(bandwidth_ptr, bandwidth_len);
+    let delta_freq = core::slice::from_raw_parts(delta_freq_ptr, delta_freq_len);
+    let delta_bw = core::slice::from_raw_parts(delta_bw_ptr, delta_bw_len);
+    (*ptr).process_block(
+        input,
+        output,
+        f0,
+        open_quotient,
+        frequency,
+        bandwidth,
+        delta_freq,
+        delta_bw,
+        skew_param,
+        source,
+    );
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn assert_block_matches_scalar(automated: bool) {
+        let mut scalar = PitchSyncResonator::new(48_000.0);
+        let mut block = PitchSyncResonator::new(48_000.0);
+        let mut input: Vec<f32> = (0..64)
+            .map(|index| (index as f32 * 0.37).sin() * 0.75)
+            .collect();
+        input[0] = -0.0;
+        input[1] = f32::NAN;
+        let parameter_len = if automated { input.len() } else { 1 };
+        let parameter = |base: f32, scale: f32| -> Vec<f32> {
+            (0..parameter_len)
+                .map(|index| base + (index as f32 % 11.0) * scale)
+                .collect()
+        };
+        let f0 = parameter(110.0, 0.25);
+        let f1 = parameter(500.0, 1.0);
+        let b1 = parameter(80.0, 0.5);
+        let d_f1 = parameter(90.0, 1.0);
+        let d_b1 = parameter(40.0, 0.5);
+        let mut expected = vec![0.0_f32; input.len()];
+        for (index, sample) in input.iter().enumerate() {
+            let parameter_index = if automated { index } else { 0 };
+            expected[index] = scalar.process(
+                klatt_wasm_common::normalize_worklet_sample(*sample),
+                f0[parameter_index],
+                50.0,
+                f1[parameter_index],
+                b1[parameter_index],
+                d_f1[parameter_index],
+                d_b1[parameter_index],
+                0.0,
+                2.0,
+            );
+        }
+
+        let mut actual = vec![0.0_f32; input.len()];
+        block.process_block(
+            &input,
+            &mut actual,
+            &f0,
+            50.0,
+            &f1,
+            &b1,
+            &d_f1,
+            &d_b1,
+            0.0,
+            2.0,
+        );
+
+        assert_eq!(
+            actual.iter().copied().map(f32::to_bits).collect::<Vec<_>>(),
+            expected
+                .iter()
+                .copied()
+                .map(f32::to_bits)
+                .collect::<Vec<_>>()
+        );
+    }
 
     #[test]
     fn applies_fujisaki_compensation_on_downward_shift() {
@@ -287,5 +437,15 @@ mod tests {
         let y1_before = r.y1;
         let _ = r.process(1.0, 100.0, 50.0, 300.0, 80.0, 0.0, 0.0, 0.0, 2.0);
         assert!(r.y1.abs() <= y1_before.abs() + 1e-6);
+    }
+
+    #[test]
+    fn block_api_matches_scalar_for_k_rate_parameters() {
+        assert_block_matches_scalar(false);
+    }
+
+    #[test]
+    fn block_api_matches_scalar_for_a_rate_parameters() {
+        assert_block_matches_scalar(true);
     }
 }

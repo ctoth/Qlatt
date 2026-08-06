@@ -49,6 +49,9 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
   bypassAtZero: boolean;
   reportInterval: number;
   _reportCountdown: number;
+  lastFrequency: number;
+  lastBandwidth: number;
+  lastGain: number;
   _explosionLogged: boolean;
   explosionRmsThreshold: number;
 
@@ -73,6 +76,9 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
     this.bypassAtZero = Boolean(opts?.processorOptions?.bypassAtZero);
     this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
+    this.lastFrequency = Number.NaN;
+    this.lastBandwidth = Number.NaN;
+    this.lastGain = Number.NaN;
     this._explosionLogged = false;
     const explosionRmsThreshold = opts?.processorOptions?.explosionRmsThreshold;
     this.explosionRmsThreshold =
@@ -154,8 +160,20 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
       inputView.fill(0);
     }
 
-    this.wasm.antiresonator_set_params(this.state, freq, bw, sampleRate);
-    this.wasm.antiresonator_set_gain(this.state, gain);
+    if (
+      !Number.isFinite(freq) ||
+      !Number.isFinite(bw) ||
+      !Object.is(freq, this.lastFrequency) ||
+      !Object.is(bw, this.lastBandwidth)
+    ) {
+      this.wasm.antiresonator_set_params(this.state, freq, bw, sampleRate);
+      this.lastFrequency = freq;
+      this.lastBandwidth = bw;
+    }
+    if (!Object.is(gain, this.lastGain)) {
+      this.wasm.antiresonator_set_gain(this.state, gain);
+      this.lastGain = gain;
+    }
     this.wasm.antiresonator_process(
       this.state,
       this.inputBuffer.ptr,

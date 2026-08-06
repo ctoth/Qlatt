@@ -85,17 +85,22 @@ impl DynamicBranch {
         }
     }
 
-    fn stamp(&self, a: &mut [[f64; 4]; 4], b: &mut [f64; 4]) {
+    fn stamp_matrix(&self, a: &mut [[f64; 4]; 4]) {
         let g = self.conductance;
-        let ieq = self.history_current();
 
         a[self.node_a][self.node_a] += g;
-        b[self.node_a] -= ieq;
 
         if let Some(node_b) = self.node_b {
             a[node_b][node_b] += g;
             a[self.node_a][node_b] -= g;
             a[node_b][self.node_a] -= g;
+        }
+    }
+
+    fn stamp_rhs(&self, b: &mut [f64; 4]) {
+        let ieq = self.history_current();
+        b[self.node_a] -= ieq;
+        if let Some(node_b) = self.node_b {
             b[node_b] += ieq;
         }
     }
@@ -115,54 +120,107 @@ impl DynamicBranch {
     }
 }
 
-fn solve_4x4(mut a: [[f64; 4]; 4], mut b: [f64; 4]) -> [f64; 4] {
-    for pivot in 0..4 {
-        let mut pivot_row = pivot;
-        let mut pivot_mag = a[pivot][pivot].abs();
-        for row in (pivot + 1)..4 {
-            let mag = a[row][pivot].abs();
-            if mag > pivot_mag {
-                pivot_mag = mag;
-                pivot_row = row;
+#[derive(Clone, Copy)]
+struct SolveStep {
+    pivot: usize,
+    pivot_row: usize,
+    pivot_value: f64,
+    factors: [f64; 4],
+    active_rows: [bool; 4],
+}
+
+#[derive(Clone, Copy)]
+struct SolvePlan {
+    steps: [SolveStep; 4],
+}
+
+impl SolvePlan {
+    /// Precompute Gaussian-elimination decisions for the constant ladder matrix.
+    /// Applying the plan to each changing RHS retains the original operation
+    /// order, including every division and subtraction, so output bits remain
+    /// identical while matrix stamping and elimination leave the audio loop.
+    #[allow(clippy::needless_range_loop)] // exact legacy elimination order is the bit-level contract
+    fn new(mut a: [[f64; 4]; 4]) -> Self {
+        let empty = SolveStep {
+            pivot: 0,
+            pivot_row: 0,
+            pivot_value: 1.0,
+            factors: [0.0; 4],
+            active_rows: [false; 4],
+        };
+        let mut steps = [empty; 4];
+
+        for pivot in 0..4 {
+            let mut pivot_row = pivot;
+            let mut pivot_mag = a[pivot][pivot].abs();
+            for row in (pivot + 1)..4 {
+                let mag = a[row][pivot].abs();
+                if mag > pivot_mag {
+                    pivot_mag = mag;
+                    pivot_row = row;
+                }
             }
-        }
 
-        assert!(pivot_mag > 1e-18, "singular reconstruction-filter matrix");
+            assert!(pivot_mag > 1e-18, "singular reconstruction-filter matrix");
 
-        if pivot_row != pivot {
-            a.swap(pivot, pivot_row);
-            b.swap(pivot, pivot_row);
-        }
-
-        let pivot_value = a[pivot][pivot];
-        for col in pivot..4 {
-            a[pivot][col] /= pivot_value;
-        }
-        b[pivot] /= pivot_value;
-
-        for row in 0..4 {
-            if row == pivot {
-                continue;
+            if pivot_row != pivot {
+                a.swap(pivot, pivot_row);
             }
-            let factor = a[row][pivot];
-            if factor.abs() < 1e-18 {
-                continue;
-            }
+
+            let pivot_value = a[pivot][pivot];
             for col in pivot..4 {
-                a[row][col] -= factor * a[pivot][col];
+                a[pivot][col] /= pivot_value;
             }
-            b[row] -= factor * b[pivot];
+
+            let mut factors = [0.0; 4];
+            let mut active_rows = [false; 4];
+            for row in 0..4 {
+                if row == pivot {
+                    continue;
+                }
+                let factor = a[row][pivot];
+                if factor.abs() < 1e-18 {
+                    continue;
+                }
+                factors[row] = factor;
+                active_rows[row] = true;
+                for col in pivot..4 {
+                    a[row][col] -= factor * a[pivot][col];
+                }
+            }
+            steps[pivot] = SolveStep {
+                pivot,
+                pivot_row,
+                pivot_value,
+                factors,
+                active_rows,
+            };
         }
+
+        Self { steps }
     }
 
-    b
+    fn solve(&self, mut b: [f64; 4]) -> [f64; 4] {
+        for step in self.steps {
+            if step.pivot_row != step.pivot {
+                b.swap(step.pivot, step.pivot_row);
+            }
+            b[step.pivot] /= step.pivot_value;
+            for row in 0..4 {
+                if step.active_rows[row] {
+                    b[row] -= step.factors[row] * b[step.pivot];
+                }
+            }
+        }
+        b
+    }
 }
 
 #[repr(C)]
 pub struct ReconstructionFilter {
     source_conductance: f64,
-    load_conductance: f64,
     branches: [DynamicBranch; 10],
+    solve_plan: SolvePlan,
 }
 
 impl ReconstructionFilter {
@@ -175,21 +233,32 @@ impl ReconstructionFilter {
         let omega_warp = 2.0 * core::f64::consts::PI * PREWARP_FREQ_HZ;
         let trap_k = omega_warp / (omega_warp / (2.0 * sr)).tan();
 
+        let source_conductance = 1.0 / R_SOURCE;
+        let load_conductance = 1.0 / R_LOAD;
+        let branches = [
+            DynamicBranch::shunt_cap(0, 0.0131 * U_F, trap_k),
+            DynamicBranch::series_ind(0, 1, 135.0 * M_H, trap_k),
+            DynamicBranch::series_cap(0, 1, 0.0031 * U_F, trap_k),
+            DynamicBranch::shunt_cap(1, 0.0117 * U_F, trap_k),
+            DynamicBranch::series_ind(1, 2, 52.0 * M_H, trap_k),
+            DynamicBranch::series_cap(1, 2, 0.0192 * U_F, trap_k),
+            DynamicBranch::shunt_cap(2, 0.00852 * U_F, trap_k),
+            DynamicBranch::series_ind(2, 3, 72.0 * M_H, trap_k),
+            DynamicBranch::series_cap(2, 3, 0.0119 * U_F, trap_k),
+            DynamicBranch::shunt_cap(3, 0.00887 * U_F, trap_k),
+        ];
+
+        let mut matrix = [[0.0_f64; 4]; 4];
+        matrix[0][0] += source_conductance;
+        matrix[3][3] += load_conductance;
+        for branch in &branches {
+            branch.stamp_matrix(&mut matrix);
+        }
+
         Self {
-            source_conductance: 1.0 / R_SOURCE,
-            load_conductance: 1.0 / R_LOAD,
-            branches: [
-                DynamicBranch::shunt_cap(0, 0.0131 * U_F, trap_k),
-                DynamicBranch::series_ind(0, 1, 135.0 * M_H, trap_k),
-                DynamicBranch::series_cap(0, 1, 0.0031 * U_F, trap_k),
-                DynamicBranch::shunt_cap(1, 0.0117 * U_F, trap_k),
-                DynamicBranch::series_ind(1, 2, 52.0 * M_H, trap_k),
-                DynamicBranch::series_cap(1, 2, 0.0192 * U_F, trap_k),
-                DynamicBranch::shunt_cap(2, 0.00852 * U_F, trap_k),
-                DynamicBranch::series_ind(2, 3, 72.0 * M_H, trap_k),
-                DynamicBranch::series_cap(2, 3, 0.0119 * U_F, trap_k),
-                DynamicBranch::shunt_cap(3, 0.00887 * U_F, trap_k),
-            ],
+            source_conductance,
+            branches,
+            solve_plan: SolvePlan::new(matrix),
         }
     }
 
@@ -200,18 +269,15 @@ impl ReconstructionFilter {
     }
 
     fn process_sample(&mut self, input: f32) -> f32 {
-        let mut a = [[0.0_f64; 4]; 4];
         let mut b = [0.0_f64; 4];
 
-        a[0][0] += self.source_conductance;
         b[0] += self.source_conductance * input as f64;
-        a[3][3] += self.load_conductance;
 
         for branch in &self.branches {
-            branch.stamp(&mut a, &mut b);
+            branch.stamp_rhs(&mut b);
         }
 
-        let node_voltages = solve_4x4(a, b);
+        let node_voltages = self.solve_plan.solve(b);
 
         for branch in &mut self.branches {
             branch.update(&node_voltages);
@@ -221,8 +287,8 @@ impl ReconstructionFilter {
     }
 
     fn process(&mut self, input: &[f32], output: &mut [f32]) {
-        for (index, sample) in input.iter().enumerate() {
-            output[index] = self.process_sample(*sample);
+        for (out, sample) in output.iter_mut().zip(input) {
+            *out = self.process_sample(*sample);
         }
     }
 }
@@ -268,6 +334,66 @@ klatt_wasm_common::export_alloc_fns!();
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[allow(clippy::needless_range_loop)] // intentionally mirrors the legacy indexed solver
+    fn solve_4x4_reference(mut a: [[f64; 4]; 4], mut b: [f64; 4]) -> [f64; 4] {
+        for pivot in 0..4 {
+            let mut pivot_row = pivot;
+            let mut pivot_mag = a[pivot][pivot].abs();
+            for row in (pivot + 1)..4 {
+                let mag = a[row][pivot].abs();
+                if mag > pivot_mag {
+                    pivot_mag = mag;
+                    pivot_row = row;
+                }
+            }
+            assert!(pivot_mag > 1e-18);
+            if pivot_row != pivot {
+                a.swap(pivot, pivot_row);
+                b.swap(pivot, pivot_row);
+            }
+            let pivot_value = a[pivot][pivot];
+            for col in pivot..4 {
+                a[pivot][col] /= pivot_value;
+            }
+            b[pivot] /= pivot_value;
+            for row in 0..4 {
+                if row == pivot {
+                    continue;
+                }
+                let factor = a[row][pivot];
+                if factor.abs() < 1e-18 {
+                    continue;
+                }
+                for col in pivot..4 {
+                    a[row][col] -= factor * a[pivot][col];
+                }
+                b[row] -= factor * b[pivot];
+            }
+        }
+        b
+    }
+
+    #[test]
+    fn cached_solve_plan_is_bit_identical_to_per_sample_elimination() {
+        let filter = ReconstructionFilter::new(48_000.0);
+        let mut matrix = [[0.0_f64; 4]; 4];
+        matrix[0][0] += filter.source_conductance;
+        matrix[3][3] += 1.0 / R_LOAD;
+        for branch in &filter.branches {
+            branch.stamp_matrix(&mut matrix);
+        }
+
+        for rhs in [
+            [0.0, 0.0, 0.0, 0.0],
+            [1.0, -2.0, 3.0, -4.0],
+            [f64::MIN_POSITIVE, 1e-12, -1e12, f64::EPSILON],
+        ] {
+            let expected = solve_4x4_reference(matrix, rhs);
+            let actual = filter.solve_plan.solve(rhs);
+            assert_eq!(actual.map(f64::to_bits), expected.map(f64::to_bits));
+        }
+    }
 
     fn rms(signal: &[f32]) -> f32 {
         (signal.iter().map(|x| x * x).sum::<f32>() / signal.len() as f32).sqrt()

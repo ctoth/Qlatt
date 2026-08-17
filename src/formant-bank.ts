@@ -12,6 +12,7 @@
 
 import type { BaconGraph, BaconNode, BaconConnection } from './klatt-runtime';
 import type { SemanticsDocument } from './semantics/types';
+import { generatePfeRules } from './semantics/pfe-codegen';
 import { z } from 'zod';
 
 // ---------------------------------------------------------------------------
@@ -304,7 +305,7 @@ export function expandFormantBanks(
   const banks = parseFormantBanks(source);
   validateExpansionContract(graph, semantics, banks);
 
-  for (const [bankName, bank] of Object.entries(banks)) {
+  for (const [, bank] of Object.entries(banks)) {
     const sortedFormants = [...bank.formants].sort(
       (a, b) => a.index - b.index,
     );
@@ -431,22 +432,14 @@ export function expandFormantBanks(
     }
 
     // ------------------------------------------------------------------
-    // 5. Preserve bank spec for evaluator-native PFE amplitude computation (Lin 1995)
+    // 5. Compile Lin (1995) PFE amplitudes into ordinary semantics rules.
     // ------------------------------------------------------------------
-    // Instead of generating ndbScale constants, proximity rules, and a{N}Linear
-    // realize rules, we store the bank spec on semantics so the topological
-    // evaluator can compute formant amplitudes natively per-frame using PFE.
-    if (!semantics.formantBanks) semantics.formantBanks = {};
-    semantics.formantBanks[bankName] = {
-      formants: sortedFormants.map(f => ({
-        index: f.index,
-        freqDefault: f.freqDefault,
-        bwDefault: f.bwDefault,
-        ndbScale: f.ndbScale,
-        sign: f.sign,
-        parallelSource: f.parallelSource,
-      })),
-    };
+    // Expansion runs before interpreter construction, so generated bindings
+    // participate in the same realization and scheduling contract as authored
+    // rules. Validation above rejects authored/generated name collisions.
+    if (!semantics.realize) semantics.realize = {};
+    const pfeRules = generatePfeRules(sortedFormants);
+    Object.assign(semantics.realize, pfeRules);
   }
 
   // Clean up: remove the formantBanks key from the graph meta

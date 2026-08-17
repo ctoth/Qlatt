@@ -8,12 +8,12 @@
  */
 import { describe, it, expect } from 'vitest';
 import { generatePfeRules } from '../src/semantics/pfe-codegen';
+import type { PfeFormantSpec } from '../src/semantics/pfe-codegen';
 import { createCelEvaluator } from '../src/semantics/cel-evaluator';
 import { registerNumericBuiltins } from '../src/semantics/register-builtins';
 import { createTopologicalEvaluator } from '../src/semantics/topological-evaluator';
 import { expandFormantBanks } from '../src/formant-bank';
 import { resonatorMagnitudeDb, dbToLinear } from '../src/builtin-functions';
-import type { FormantBankEvalSpec } from '../src/semantics/types';
 import type { SemanticsDocument, EvaluationContext } from '../src/semantics/types';
 import type { BaconGraph } from '../src/klatt-runtime';
 import { readFileSync } from 'fs';
@@ -21,35 +21,27 @@ import { resolve } from 'path';
 import { parseYamlString } from '../src/yaml-loader';
 
 // A minimal 6-formant bank for unit tests (matches klatt80-baseline formants 1-6)
-const sixFormantBank: Record<string, FormantBankEvalSpec> = {
-  main: {
-    formants: [
-      { index: 1, freqDefault: 500, bwDefault: 60, ndbScale: -58, sign: 1, parallelSource: 'src' },
-      { index: 2, freqDefault: 1500, bwDefault: 90, ndbScale: -65, sign: -1, parallelSource: 'src' },
-      { index: 3, freqDefault: 2500, bwDefault: 150, ndbScale: -73, sign: 1, parallelSource: 'src' },
-      { index: 4, freqDefault: 3500, bwDefault: 200, ndbScale: -78, sign: -1, parallelSource: 'src' },
-      { index: 5, freqDefault: 4500, bwDefault: 200, ndbScale: -79, sign: 1, parallelSource: 'src' },
-      { index: 6, freqDefault: 5500, bwDefault: 500, ndbScale: -80, sign: -1, parallelSource: 'src' },
-    ],
-  },
-};
+const sixFormants: PfeFormantSpec[] = [
+  { index: 1, ndbScale: -58, sign: 1, parallelSource: 'src' },
+  { index: 2, ndbScale: -65, sign: -1, parallelSource: 'src' },
+  { index: 3, ndbScale: -73, sign: 1, parallelSource: 'src' },
+  { index: 4, ndbScale: -78, sign: -1, parallelSource: 'src' },
+  { index: 5, ndbScale: -79, sign: 1, parallelSource: 'src' },
+  { index: 6, ndbScale: -80, sign: -1, parallelSource: 'src' },
+];
 
 // A 3-formant bank where only some have parallelSource
-const threeParallelBank: Record<string, FormantBankEvalSpec> = {
-  test: {
-    formants: [
-      { index: 1, freqDefault: 500, bwDefault: 60, ndbScale: -58, sign: 1, parallelSource: 'src' },
-      { index: 2, freqDefault: 1500, bwDefault: 90 },  // no parallelSource
-      { index: 3, freqDefault: 2500, bwDefault: 150, ndbScale: -73, sign: 1, parallelSource: 'src' },
-      { index: 4, freqDefault: 3500, bwDefault: 200 },  // no parallelSource
-      { index: 5, freqDefault: 4500, bwDefault: 200, ndbScale: -79, sign: 1, parallelSource: 'src' },
-    ],
-  },
-};
+const threeParallelFormants: PfeFormantSpec[] = [
+  { index: 1, ndbScale: -58, sign: 1, parallelSource: 'src' },
+  { index: 2 },
+  { index: 3, ndbScale: -73, sign: 1, parallelSource: 'src' },
+  { index: 4 },
+  { index: 5, ndbScale: -79, sign: 1, parallelSource: 'src' },
+];
 
 describe('generatePfeRules', () => {
   it('produces one rule per formant with parallelSource: true', () => {
-    const rules = generatePfeRules(sixFormantBank);
+    const rules = generatePfeRules(sixFormants);
     // All 6 formants have parallelSource, so 6 rules
     expect(Object.keys(rules)).toHaveLength(6);
     for (let i = 1; i <= 6; i++) {
@@ -58,14 +50,14 @@ describe('generatePfeRules', () => {
   });
 
   it('generated rule for formant 1 (in 6-formant bank) has CEL with 5 resonatorMagnitudeDb calls', () => {
-    const rules = generatePfeRules(sixFormantBank);
+    const rules = generatePfeRules(sixFormants);
     const expr = (rules['a1Linear'] as { expr: string }).expr;
     const matches = expr.match(/resonatorMagnitudeDb/g);
     expect(matches).toHaveLength(5);
   });
 
   it('generated rule deps include all F, B, A params plus sampleRate and parallelScale', () => {
-    const rules = generatePfeRules(sixFormantBank);
+    const rules = generatePfeRules(sixFormants);
     const rule = rules['a1Linear'] as { expr: string; deps: string[] };
     // Must depend on A1, F1 (own freq), and all other F/B pairs, plus sampleRate, parallelScale
     expect(rule.deps).toContain('A1');
@@ -80,7 +72,7 @@ describe('generatePfeRules', () => {
   });
 
   it('for a bank with only 3 formants with parallelSource, exactly 3 rules are generated', () => {
-    const rules = generatePfeRules(threeParallelBank);
+    const rules = generatePfeRules(threeParallelFormants);
     expect(Object.keys(rules)).toHaveLength(3);
     expect(rules).toHaveProperty('a1Linear');
     expect(rules).not.toHaveProperty('a2Linear');
@@ -92,7 +84,7 @@ describe('generatePfeRules', () => {
   it('evaluating generated rules produces identical values to imperative loop (within 1e-10)', () => {
     // Reproduce the imperative loop logic manually for comparison
     const sr = 44100;
-    const formants = sixFormantBank.main.formants;
+    const formants = sixFormants;
     const params: Record<string, number> = {
       F1: 520, F2: 1480, F3: 2510, F4: 3600, F5: 4400, F6: 5600,
       B1: 70, B2: 100, B3: 160, B4: 210, B5: 190, B6: 520,
@@ -107,15 +99,15 @@ describe('generatePfeRules', () => {
       const f = formants[i];
       if (!f.parallelSource) continue;
       const idx = f.index;
-      const evalFreq = params[`F${idx}`] ?? f.freqDefault;
+      const evalFreq = params[`F${idx}`];
       const ampDb = params[`A${idx}`] ?? 0;
       const ndbScaleVal = f.ndbScale ?? 0;
       let correctionDb = 0;
       for (let j = 0; j < formants.length; j++) {
         if (j === i) continue;
         const jIdx = formants[j].index;
-        const otherFreq = params[`F${jIdx}`] ?? formants[j].freqDefault;
-        const otherBw = params[`B${jIdx}`] ?? formants[j].bwDefault;
+        const otherFreq = params[`F${jIdx}`];
+        const otherBw = params[`B${jIdx}`];
         correctionDb += resonatorMagnitudeDb(evalFreq, otherFreq, otherBw, sr);
       }
       const sign = f.sign ?? 1;
@@ -124,7 +116,7 @@ describe('generatePfeRules', () => {
     }
 
     // Now evaluate via generated CEL rules
-    const rules = generatePfeRules(sixFormantBank);
+    const rules = generatePfeRules(sixFormants);
     const celEvaluator = createCelEvaluator();
     registerNumericBuiltins(celEvaluator);
 
@@ -185,7 +177,7 @@ describe('PFE codegen integration: full pipeline produces identical results', ()
       };
 
       const context: EvaluationContext = {
-        params: { ...params } as Record<string, unknown>,
+        params: { ...params },
         constants: sem.constants ?? {},
       };
 

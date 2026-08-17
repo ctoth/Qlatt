@@ -6,7 +6,6 @@
 import toposort from 'toposort';
 import type { SemanticsDocument, EvaluationResult, RealizationRule, ParamValue, EvaluationContext } from './types';
 import type { CelEvaluator } from './cel-evaluator';
-import { generatePfeRules } from './pfe-codegen';
 
 export interface TopologicalEvaluator {
   evaluate(semantics: SemanticsDocument, context: EvaluationContext): EvaluationResult;
@@ -40,7 +39,43 @@ function getAllNodes(realize: Record<string, RealizationRule | string>): string[
   return Object.keys(realize);
 }
 
+function buildEvaluationOrder(realize: Record<string, RealizationRule | string>): string[] {
+  const edges = buildEdges(realize);
+  const allNodes = getAllNodes(realize);
+
+  let sorted: string[];
+  try {
+    sorted = toposort(edges);
+  } catch (error: unknown) {
+    throw new Error(`cycle: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  const sortedSet = new Set(sorted);
+  for (const node of allNodes) {
+    if (!sortedSet.has(node)) sorted.unshift(node);
+  }
+  return sorted.filter((node) => allNodes.includes(node));
+}
+
 export function createTopologicalEvaluator(celEvaluator: CelEvaluator): TopologicalEvaluator {
+  // A semantics realization document is compiled before interpreter creation
+  // and then treated as immutable. Cache its dependency order so per-frame
+  // evaluation only executes CEL rules.
+  const orderCache = new WeakMap<
+    Record<string, RealizationRule | string>,
+    readonly string[]
+  >();
+
+  function getCompiledOrder(
+    realize: Record<string, RealizationRule | string>,
+  ): readonly string[] {
+    const cached = orderCache.get(realize);
+    if (cached !== undefined) return cached;
+    const order = buildEvaluationOrder(realize);
+    orderCache.set(realize, order);
+    return order;
+  }
+
   return {
     evaluate(semantics: SemanticsDocument, context: EvaluationContext): EvaluationResult {
       const seededParams: Record<string, ParamValue> = {};
@@ -60,42 +95,20 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
         return result;
       }
 
-      // Merge PFE-generated realize rules into the realize map before toposort.
-      // generatePfeRules() reads formantBanks and produces one CEL rule per
-      // parallel-source formant, replacing the former imperative PFE loop.
-      // Citation: Lin 1995 (Partial Fraction Expansion)
-      let realize = semantics.realize;
-      if (semantics.formantBanks) {
-        const pfeRules = generatePfeRules(semantics.formantBanks);
-        realize = { ...semantics.realize, ...pfeRules };
-      }
+      const realize = semantics.realize;
 
-      // Get evaluation order using merged realize map (includes PFE-generated rules)
-      let order: string[];
+      // Reuse the dependency order compiled for this realization map.
+      let order: readonly string[];
       try {
-        const edges = buildEdges(realize);
-        const allNodes = getAllNodes(realize);
-        let sorted: string[];
-        try {
-          sorted = toposort(edges);
-        } catch (e) {
-          throw new Error(`cycle: ${e instanceof Error ? e.message : String(e)}`);
+        order = getCompiledOrder(realize);
+      } catch (error: unknown) {
+        if (error instanceof Error && error.message.includes('cycle')) {
+          throw new Error(`Dependency cycle detected: ${error.message}`);
         }
-        const sortedSet = new Set(sorted);
-        for (const node of allNodes) {
-          if (!sortedSet.has(node)) {
-            sorted.unshift(node);
-          }
-        }
-        order = sorted.filter(node => allNodes.includes(node));
-      } catch (e) {
-        if (e instanceof Error && e.message.includes('cycle')) {
-          throw new Error(`Dependency cycle detected: ${e.message}`);
-        }
-        throw e;
+        throw error;
       }
 
-      // Evaluate rules in topological order (PFE rules are now part of realize)
+      // Evaluate rules in topological order.
       for (const name of order) {
         const rule = realize[name];
         if (!rule) continue;
@@ -125,37 +138,8 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
         return [];
       }
 
-      // Include PFE-generated rules so callers see the full evaluation order
-      let realize = semantics.realize;
-      if (semantics.formantBanks) {
-        const pfeRules = generatePfeRules(semantics.formantBanks);
-        realize = { ...semantics.realize, ...pfeRules };
-      }
-
-      const edges = buildEdges(realize);
-      const allNodes = getAllNodes(realize);
-
-      // toposort returns nodes in dependency order
-      // We need to handle nodes with no edges (they won't appear in toposort result)
-      let sorted: string[];
-      try {
-        sorted = toposort(edges);
-      } catch (e) {
-        // toposort throws on cycles - add "cycle" to error message
-        throw new Error(`cycle: ${e instanceof Error ? e.message : String(e)}`);
-      }
-
-      // Add any nodes that weren't in edges (no dependencies)
-      const sortedSet = new Set(sorted);
-      for (const node of allNodes) {
-        if (!sortedSet.has(node)) {
-          // Nodes with no dependencies can go first
-          sorted.unshift(node);
-        }
-      }
-
-      // Filter to only nodes that are actual rules
-      return sorted.filter(node => allNodes.includes(node));
+      const realize = semantics.realize;
+      return [...getCompiledOrder(realize)];
     },
   };
 }

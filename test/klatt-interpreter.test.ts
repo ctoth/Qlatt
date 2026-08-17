@@ -15,7 +15,9 @@ import {
   type TelemetryEvent,
 } from '../src/klatt-interpreter';
 import type { SemanticsDocument } from '../src/semantics/types';
-import type { KlattRuntime, BindingSpec } from '../src/klatt-runtime';
+import type { KlattRuntime, BindingSpec, BaconGraph } from '../src/klatt-runtime';
+import { expandFormantBanks } from '../src/formant-bank';
+import { dbToLinear } from '../src/builtin-functions';
 
 // ---------------------------------------------------------------------------
 // Helpers: minimal mocks for AudioContext / AudioParam / KlattRuntime
@@ -49,10 +51,13 @@ function mockAudioParam(): AudioParam {
 }
 
 /** Create a mock AudioWorkletNode with a parameters map */
-function mockWorkletNode(paramNames: string[]): AudioNode {
+function mockWorkletNode(
+  paramNames: string[],
+  overrides: ReadonlyMap<string, AudioParam> = new Map(),
+): AudioNode {
   const params = new Map<string, AudioParam>();
   for (const name of paramNames) {
-    params.set(name, mockAudioParam());
+    params.set(name, overrides.get(name) ?? mockAudioParam());
   }
   return { parameters: params } as unknown as AudioNode;
 }
@@ -250,6 +255,88 @@ describe('Binding categorization (tagged union)', () => {
     const f0Param = params.get('f0')!;
     expect(f0Param.setValueAtTime).toHaveBeenCalledTimes(3);
     expect(f0Param.linearRampToValueAtTime).not.toHaveBeenCalled();
+  });
+});
+
+describe('compiled formant-bank realization bindings', () => {
+  it('schedules a generated PFE gain from evaluated semantics', () => {
+    const graph: BaconGraph = {
+      bacon: '0.1',
+      meta: {
+        formantBanks: {
+          main: {
+            cascade: { input: 'input', output: 'cascadeOutput' },
+            parallel: { output: 'parallelOutput' },
+            formants: [{
+              index: 1,
+              freqRange: [200, 1000],
+              freqDefault: 500,
+              bwRange: [40, 1000],
+              bwDefault: 60,
+              ndbScale: -58,
+              sign: 1,
+              parallelSource: 'parallelSource',
+            }],
+          },
+        },
+      },
+      nodes: {
+        input: { type: 'gain' },
+        cascadeOutput: { type: 'gain' },
+        parallelOutput: { type: 'gain' },
+        parallelSource: { type: 'gain' },
+      },
+    };
+    const semantics: SemanticsDocument = {
+      name: 'compiled-formant-bank-test',
+      params: {
+        parallelScale: { type: 'float', range: [0, 1], default: 0.85 },
+      },
+      constants: { ...PLSTEP_CONSTANTS },
+      realize: {},
+    };
+
+    expandFormantBanks(graph, semantics);
+    expect(semantics.realize).toHaveProperty('a1Linear');
+
+    const gainParam = mockAudioParam();
+    const gainNode = mockWorkletNode(
+      ['gain'],
+      new Map([['gain', gainParam]]),
+    );
+    const bindingMap = new Map<string, BindingSpec[]>([
+      ['a1Linear', [{
+        nodeId: 'parallelF1Gain',
+        paramName: 'gain',
+        bindName: 'a1Linear',
+      }]],
+    ]);
+    const runtime: KlattRuntime = {
+      ...mockRuntime(),
+      getNode: vi.fn((nodeId: string) => (
+        nodeId === 'parallelF1Gain' ? gainNode : undefined
+      )),
+      getBindingMap: vi.fn(() => bindingMap),
+    };
+    const interpreter = createKlattInterpreter({
+      audioContext: mockAudioContext(),
+      runtime,
+      semantics,
+      bindingMap,
+    });
+
+    interpreter.scheduleTrack([{
+      time: 0,
+      params: {
+        F1: 500,
+        B1: 60,
+        A1: 60,
+        parallelScale: 0.85,
+      },
+    }], 0);
+
+    const expectedGain = dbToLinear(60 - 58) * 0.85;
+    expect(gainParam.setValueAtTime).toHaveBeenCalledWith(expectedGain, 0);
   });
 });
 

@@ -1,10 +1,10 @@
 /**
  * Tests that parallel formant amplitude corrections are correctly computed
- * by the evaluator-native PFE (Partial Fraction Expansion) system.
+ * by compiled PFE (Partial Fraction Expansion) realization rules.
  *
  * Previously, formant bank expansion generated proximity correction rules
  * (n12Cor, n23Cor, n34Cor) and a{N}Linear rules using static ndbScale constants.
- * Now the topological evaluator computes a{N}Linear directly via PFE,
+ * Formant-bank expansion now compiles a{N}Linear into ordinary semantics rules
  * using resonatorMagnitudeDb() to get the actual transfer function magnitude
  * of each resonator at every other formant's frequency.
  *
@@ -35,7 +35,7 @@ const graphRaw = readFileSync(graphPath, 'utf-8');
 const graph = parseYamlString<BaconGraph>(graphRaw, graphPath);
 
 // Run formant bank expansion (now only generates graph nodes/connections + params;
-// amplitude computation happens in the evaluator via PFE)
+// amplitude computation is compiled into semantics via PFE)
 expandFormantBanks(graph, semantics);
 
 describe('PFE-based parallel formant amplitudes from semantics pipeline', () => {
@@ -58,7 +58,7 @@ describe('PFE-based parallel formant amplitudes from semantics pipeline', () => 
     };
 
     const context: EvaluationContext = {
-      params: { ...params } as Record<string, unknown>,
+      params: { ...params },
       constants: semantics.constants ?? {},
     };
 
@@ -106,7 +106,7 @@ describe('PFE-based parallel formant amplitudes from semantics pipeline', () => 
     };
 
     const context: EvaluationContext = {
-      params: { ...params } as Record<string, unknown>,
+      params: { ...params },
       constants: semantics.constants ?? {},
     };
 

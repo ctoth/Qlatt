@@ -4,6 +4,7 @@ import { resolve } from 'path';
 
 import type { BaconGraph, Registry } from '../src/klatt-runtime';
 import { parseYamlString } from '../src/yaml-loader';
+import { parseFormantBanks } from '../src/formant-bank';
 
 const basePath = resolve(__dirname, '../public/experiments/klatt80-baseline');
 
@@ -28,9 +29,10 @@ describe('outputLp configuration', () => {
   });
 
   it('does not route high-frequency parallel formants through an active 5 kHz low-pass', () => {
-    const highParallelFormants = graph.formantBanks?.main?.formants.filter((formant) => (
+    const formantBanks = parseFormantBanks(graph.meta?.formantBanks);
+    const highParallelFormants = formantBanks.main.formants.filter((formant) => (
       formant.parallelSource && formant.index >= 7
-    )) ?? [];
+    ));
 
     expect(highParallelFormants.map((formant) => formant.index)).toEqual([7, 8, 9, 10]);
 

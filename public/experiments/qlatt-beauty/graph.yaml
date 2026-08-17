@@ -14,10 +14,6 @@ meta:
         output: cascadeOutGain
       parallel:
         output: parallelSum
-      proximity:
-        - { pair: [1, 2], offset: 0 }
-        - { pair: [2, 3], offset: 50 }
-        - { pair: [3, 4], offset: 150 }
       formants:
         - index: 1
           freqRange: [200, 1000]

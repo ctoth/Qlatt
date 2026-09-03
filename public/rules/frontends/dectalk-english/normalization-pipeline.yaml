@@ -179,8 +179,17 @@ steps:
     type: builtin
     handler: punctuationCleanup
     description: >
-      Protect lexical apostrophes, separate pause-generating punctuation
-      (, . ? ! ; :) into tokens, strip remaining punctuation.
+      Protect lexical apostrophes, separate the selected frontend's
+      transcription.punctuation_tokens, and strip remaining punctuation.
+    punctuation_policy:
+      preserved_character_pattern: "[\\w\\s]"
+      strip_unlisted: true
+      lexical_apostrophe:
+        symbol: "'"
+        word_character_pattern: "[a-z]"
+        word_character_flags: "i"
+        preserve_between_word_characters: true
+        preserve_trailing_after_word_character: true
     citations:
       - Allen, Hunnicutt & Klatt 1987 Ch.3
 

@@ -58,6 +58,8 @@ interface PipelineStep {
   number_policy?: NumberPolicy;
   /** Fraction-reading policy for the readFractionInline builtin (data-driven). */
   fraction_policy?: FractionPolicy;
+  /** Character handling policy for the punctuationCleanup builtin. */
+  punctuation_policy?: PunctuationPolicy;
 }
 
 interface NormalizationPipeline {
@@ -108,12 +110,30 @@ interface NumberPolicy {
   hundreds_remainder_compound_word?: string;
 }
 
+interface PunctuationPolicy {
+  preserved_character_pattern: string;
+  preserved_character_flags?: string;
+  strip_unlisted: boolean;
+  lexical_apostrophe: {
+    symbol: string;
+    word_character_pattern: string;
+    word_character_flags?: string;
+    preserve_between_word_characters: boolean;
+    preserve_trailing_after_word_character: boolean;
+  };
+}
+
+interface NormalizationContext {
+  punctuationTokens: readonly string[];
+}
+
 // ---------------------------------------------------------------------------
 // YAML loading (cached, following morphology.ts pattern)
 // ---------------------------------------------------------------------------
 
 const DEFAULT_TABLES_PATH = "/rules/frontends/qlatt-english/normalization-tables.yaml";
 const DEFAULT_PIPELINE_PATH = "/rules/frontends/qlatt-english/normalization-pipeline.yaml";
+const DEFAULT_FRONTEND_PATH = "/rules/frontends/qlatt-english/frontend.yaml";
 
 /**
  * Per-frontend normalization config. A frontend may declare its own tables and
@@ -124,12 +144,35 @@ const DEFAULT_PIPELINE_PATH = "/rules/frontends/qlatt-english/normalization-pipe
 export interface NormalizationConfig {
   tablesPath?: string;
   pipelinePath?: string;
+  /** Shared with transcription.punctuation_tokens from the selected frontend. */
+  punctuationTokens?: readonly string[];
 }
 
 // Caches keyed by resolved YAML path so distinct frontends (e.g. qlatt-english
 // vs dectalk-english) never share a cache entry.
 const tablesCacheByPath = new Map<string, NormalizationTables>();
 const pipelineCacheByPath = new Map<string, NormalizationPipeline>();
+let defaultPunctuationTokens: readonly string[] | undefined;
+
+function getDefaultPunctuationTokens(): readonly string[] {
+  if (!defaultPunctuationTokens) {
+    const frontend = loadYamlDocumentSync<{ transcription?: { punctuation_tokens?: unknown } }>(
+      DEFAULT_FRONTEND_PATH,
+    );
+    const tokens = frontend.transcription?.punctuation_tokens;
+    if (
+      !Array.isArray(tokens) ||
+      tokens.length === 0 ||
+      !tokens.every((token): token is string => typeof token === "string" && token.length > 0)
+    ) {
+      throw new Error(
+        "E_NORMALIZE_CONFIG: frontend transcription.punctuation_tokens must be a non-empty string array",
+      );
+    }
+    defaultPunctuationTokens = tokens;
+  }
+  return defaultPunctuationTokens;
+}
 
 function getTables(tablesPath: string = DEFAULT_TABLES_PATH): NormalizationTables {
   let cached = tablesCacheByPath.get(tablesPath);
@@ -590,7 +633,10 @@ function isoDateToWords(yearRaw: string, monthRaw: string, dayRaw: string): stri
  * Map of handler name → function for builtin pipeline steps.
  * The YAML pipeline references these by name in the `handler` field.
  */
-const BUILTIN_HANDLERS: Record<string, (result: string, step: PipelineStep) => string> = {
+const BUILTIN_HANDLERS: Record<
+  string,
+  (result: string, step: PipelineStep, context: NormalizationContext) => string
+> = {
   lowercase: (result) => result.toLowerCase(),
 
   dateToWords: (result, step) => {
@@ -676,22 +722,55 @@ const BUILTIN_HANDLERS: Record<string, (result: string, step: PipelineStep) => s
     );
   },
 
-  punctuationCleanup: (result) => {
-    const PLACEHOLDER = "\x00";
-    let text = result;
-    // Protect lexical apostrophes (fixed-point loop for multiple internal apostrophes)
-    let previous = "";
-    while (previous !== text) {
-      previous = text;
-      text = text.replace(/([a-z])'([a-z])/gi, `$1${PLACEHOLDER}$2`);
+  punctuationCleanup: (result, step, context) => {
+    const policy = step.punctuation_policy!;
+    const apostrophe = policy.lexical_apostrophe;
+    const wordCharacter = new RegExp(
+      `^(?:${apostrophe.word_character_pattern})$`,
+      apostrophe.word_character_flags,
+    );
+    const preservedCharacter = new RegExp(
+      `^(?:${policy.preserved_character_pattern})$`,
+      policy.preserved_character_flags,
+    );
+    const punctuationTokens = [...context.punctuationTokens].sort((left, right) => right.length - left.length);
+    let text = "";
+
+    for (let index = 0; index < result.length; ) {
+      const codePoint = result.codePointAt(index)!;
+      const character = String.fromCodePoint(codePoint);
+      const nextIndex = index + character.length;
+      const previousCharacter = Array.from(result.slice(0, index)).at(-1) ?? "";
+      const nextCharacter = String.fromCodePoint(result.codePointAt(nextIndex) ?? 0);
+      const punctuationToken = punctuationTokens.find((token) => result.startsWith(token, index));
+
+      if (character === apostrophe.symbol) {
+        const betweenWordCharacters =
+          apostrophe.preserve_between_word_characters &&
+          wordCharacter.test(previousCharacter) &&
+          wordCharacter.test(nextCharacter);
+        const beforeTrailingBoundary =
+          apostrophe.preserve_trailing_after_word_character &&
+          wordCharacter.test(previousCharacter) &&
+          (nextIndex === result.length ||
+            /\s/u.test(nextCharacter) ||
+            punctuationTokens.some((token) => result.startsWith(token, nextIndex)));
+        if (betweenWordCharacters || beforeTrailingBoundary) {
+          text += character;
+          index = nextIndex;
+          continue;
+        }
+      }
+
+      if (punctuationToken) {
+        text += ` ${punctuationToken} `;
+        index += punctuationToken.length;
+        continue;
+      }
+
+      text += preservedCharacter.test(character) || !policy.strip_unlisted ? character : " ";
+      index = nextIndex;
     }
-    // Preserve trailing apostrophes for colloquial elision spellings
-    text = text.replace(/([a-z])'(?=\s|$|[,.\?!;:])/gi, `$1${PLACEHOLDER}`);
-    // Surround pause-generating punctuation with spaces
-    text = text.replace(/([,.\?!;:])/g, " $1 ");
-    // Strip all remaining punctuation
-    text = text.replace(/[^\w\s\x00,.\?!;:]/g, " ");
-    text = text.replace(new RegExp(PLACEHOLDER, "g"), "'");
     return text;
   },
 };
@@ -716,6 +795,33 @@ export function validateNormalizationPipelineConfig(
     if (step.type === "builtin") {
       if (!step.handler || !BUILTIN_HANDLERS[step.handler]) {
         throw new Error(`E_NORMALIZE_CONFIG: builtin step '${step.name}' references unknown handler`);
+      }
+      if (step.handler === "punctuationCleanup") {
+        const policy = step.punctuation_policy;
+        const apostrophe = policy?.lexical_apostrophe;
+        if (
+          !policy ||
+          typeof policy.preserved_character_pattern !== "string" ||
+          typeof policy.strip_unlisted !== "boolean" ||
+          !apostrophe ||
+          typeof apostrophe.symbol !== "string" ||
+          apostrophe.symbol.length === 0 ||
+          typeof apostrophe.word_character_pattern !== "string" ||
+          typeof apostrophe.preserve_between_word_characters !== "boolean" ||
+          typeof apostrophe.preserve_trailing_after_word_character !== "boolean"
+        ) {
+          throw new Error(
+            `E_NORMALIZE_CONFIG: builtin step '${step.name}' must define punctuation_policy`,
+          );
+        }
+        try {
+          new RegExp(policy.preserved_character_pattern, policy.preserved_character_flags);
+          new RegExp(apostrophe.word_character_pattern, apostrophe.word_character_flags);
+        } catch (error) {
+          throw new Error(
+            `E_NORMALIZE_CONFIG: builtin step '${step.name}' has invalid punctuation_policy regex: ${String(error)}`,
+          );
+        }
       }
       continue;
     }
@@ -794,14 +900,14 @@ function executeTableReplace(result: string, step: PipelineStep): string {
   return text;
 }
 
-function executeStep(result: string, step: PipelineStep): string {
+function executeStep(result: string, step: PipelineStep, context: NormalizationContext): string {
   switch (step.type) {
     case "builtin": {
       const handler = BUILTIN_HANDLERS[step.handler!];
       if (!handler) {
         throw new Error(`E_NORMALIZE: unknown builtin handler '${step.handler}'`);
       }
-      return handler(result, step);
+      return handler(result, step, context);
     }
     case "regex_replace":
       return executeRegexReplace(result, step);
@@ -835,6 +941,7 @@ export function normalizeText(text: string, config: NormalizationConfig = {}): s
   const pipelinePath = config.pipelinePath ?? DEFAULT_PIPELINE_PATH;
 
   const pipeline = getPipeline(pipelinePath, tablesPath);
+  const punctuationTokens = config.punctuationTokens ?? getDefaultPunctuationTokens();
 
   // Builtin handlers resolve tables via the active path; set it for the
   // duration of this call and restore afterward (single-threaded JS — no
@@ -844,7 +951,7 @@ export function normalizeText(text: string, config: NormalizationConfig = {}): s
   try {
     let result = text;
     for (const step of pipeline.steps) {
-      result = executeStep(result, step);
+      result = executeStep(result, step, { punctuationTokens });
     }
     return result;
   } finally {

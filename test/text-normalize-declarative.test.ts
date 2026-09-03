@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { normalizeText, validateNormalizationPipelineConfig } from "../src/g2p/text-normalize";
+import { transcribeText } from "../src/transcribe-text";
+import type { TranscriptionConfig } from "../src/tts-frontend-types";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 interface NormalizationTables {
@@ -27,6 +29,16 @@ interface PipelineStep {
   pattern?: string;
   table?: string;
   rules?: RegexRule[];
+  punctuation_policy?: {
+    preserved_character_pattern: string;
+    strip_unlisted: boolean;
+    lexical_apostrophe: {
+      symbol: string;
+      word_character_pattern: string;
+      preserve_between_word_characters: boolean;
+      preserve_trailing_after_word_character: boolean;
+    };
+  };
   citations: string[];
 }
 
@@ -133,6 +145,36 @@ describe("text normalization YAML pipeline", () => {
 
     const initialismStep = pipeline.steps.find((step) => step.name === "expand_initialisms");
     expect(initialismStep?.rules?.[0]).toMatchObject({ handler: "expandInitialism" });
+  });
+
+  it("uses one punctuation inventory for normalization and transcription", () => {
+    const punctuationStep = pipeline.steps.find((step) => step.name === "punctuation_cleanup");
+    expect(punctuationStep?.punctuation_policy).toMatchObject({
+      preserved_character_pattern: "[\\w\\s]",
+      strip_unlisted: true,
+      lexical_apostrophe: {
+        symbol: "'",
+        word_character_pattern: "[a-z]",
+        preserve_between_word_characters: true,
+        preserve_trailing_after_word_character: true,
+      },
+    });
+
+    const frontend = loadYamlDocumentSync<{ transcription: TranscriptionConfig }>(
+      "/rules/frontends/qlatt-english/frontend.yaml",
+    );
+    const transcription = {
+      ...frontend.transcription,
+      punctuation_tokens: ["~"],
+    };
+
+    const normalized = normalizeText("hello~world!", {
+      punctuationTokens: transcription.punctuation_tokens,
+    });
+    expect(normalized).toBe("hello ~ world");
+
+    const tokens = transcribeText(normalized, { transcriptionConfig: transcription });
+    expect(tokens.filter((token) => token.isPunctuation).map((token) => token.symbol)).toEqual(["~"]);
   });
 
   it("rejects table_replace steps that reference missing tables", () => {

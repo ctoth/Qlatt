@@ -444,18 +444,20 @@ function buildTextToKlattTrackDetailed(
     parents: [speakerDecision.id],
   });
 
+  const transcriptionConfig = getTranscriptionConfig(spec);
   const normalization = isPlainObject(spec.normalization)
     ? {
         tablesPath: typeof spec.normalization.tables_path === "string" ? spec.normalization.tables_path : undefined,
         pipelinePath: typeof spec.normalization.pipeline_path === "string" ? spec.normalization.pipeline_path : undefined,
+        punctuationTokens: transcriptionConfig?.punctuation_tokens,
       }
-    : undefined;
+    : { punctuationTokens: transcriptionConfig?.punctuation_tokens };
   const normalized = normalizeText(inputText, normalization);
   const transcribed = transcribeText(normalized, {
     provenance,
     utterance,
     compiledSpec: spec,
-    transcriptionConfig: getTranscriptionConfig(spec),
+    transcriptionConfig,
     ltsPath: resources.ltsPath,
     morphologyPath: resources.morphologyPath,
     dictionaryMap: dictionary,

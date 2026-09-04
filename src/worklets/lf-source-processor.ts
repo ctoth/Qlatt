@@ -1,4 +1,10 @@
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  computeRmsPeak,
+  initWasmModule,
+  resolveWasmUrl,
+  WasmBuffer,
+} from "./wasm-utils.js";
 
 interface LfSourceWasmExports {
   memory: WebAssembly.Memory;
@@ -19,7 +25,7 @@ interface LfSourceWasmExports {
     jitter: number,
     di: number,
     outputPtr: number,
-    blockSize: number
+    blockSize: number,
   ): void;
   lf_source_set_mode?: (state: number, mode: number) => void;
 }
@@ -58,14 +64,50 @@ class LfSourceProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors() {
     return [
-      { name: "f0", defaultValue: 110, minValue: 0, maxValue: 500, automationRate: "a-rate" as const },
-      { name: "rd", defaultValue: 1.0, minValue: 0.3, maxValue: 2.7, automationRate: "a-rate" as const },
-      { name: "lfMode", defaultValue: 0, minValue: 0, maxValue: 2, automationRate: "k-rate" as const },
-      { name: "oq", defaultValue: 0, minValue: 0, maxValue: 99, automationRate: "a-rate" as const },       // Klatt 1990: OQ percentage. 0 = derive from Rd
-      { name: "tl", defaultValue: 0, minValue: 0, maxValue: 41, automationRate: "a-rate" as const },       // Klatt 1990: dB at 3 kHz. 0 = derive from Rd
-      { name: "flutter", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" as const }, // Klatt & Klatt 1990 Eq. 1 scale
-      { name: "jitter", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" as const },  // Normalized 0-100, maps to Fraj 2011 b=[0, 4.5]
-      { name: "di", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" as const },        // Gobl & Ni Chasaide 2003: diplophonia index
+      {
+        name: "f0",
+        defaultValue: 110,
+        minValue: 0,
+        maxValue: 500,
+        automationRate: "a-rate" as const,
+      },
+      {
+        name: "rd",
+        defaultValue: 1.0,
+        minValue: 0.3,
+        maxValue: 2.7,
+        automationRate: "a-rate" as const,
+      },
+      {
+        name: "lfMode",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 2,
+        automationRate: "k-rate" as const,
+      },
+      { name: "oq", defaultValue: 0, minValue: 0, maxValue: 99, automationRate: "a-rate" as const }, // Klatt 1990: OQ percentage. 0 = derive from Rd
+      { name: "tl", defaultValue: 0, minValue: 0, maxValue: 41, automationRate: "a-rate" as const }, // Klatt 1990: dB at 3 kHz. 0 = derive from Rd
+      {
+        name: "flutter",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 100,
+        automationRate: "k-rate" as const,
+      }, // Klatt & Klatt 1990 Eq. 1 scale
+      {
+        name: "jitter",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 100,
+        automationRate: "k-rate" as const,
+      }, // Normalized 0-100, maps to Fraj 2011 b=[0, 4.5]
+      {
+        name: "di",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 100,
+        automationRate: "k-rate" as const,
+      }, // Gobl & Ni Chasaide 2003: diplophonia index
     ];
   }
 
@@ -117,7 +159,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
   process(
     _inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const output = outputs[0];
@@ -127,7 +169,15 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     const outputChannel = output[0];
     const blockSize = outputChannel.length;
 
-    if (!this.ready || !this.wasm || !this.outputBuffer || !this.f0Buffer || !this.rdBuffer || !this.oqBuffer || !this.tlBuffer) {
+    if (
+      !this.ready ||
+      !this.wasm ||
+      !this.outputBuffer ||
+      !this.f0Buffer ||
+      !this.rdBuffer ||
+      !this.oqBuffer ||
+      !this.tlBuffer
+    ) {
       outputChannel.fill(0);
       return true;
     }
@@ -200,7 +250,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
       jitter,
       di,
       this.outputBuffer.ptr,
-      blockSize
+      blockSize,
     );
 
     this.outputBuffer.refresh();

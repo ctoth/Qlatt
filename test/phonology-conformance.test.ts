@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { normalizeText, transcribeText, textToKlattTrack } from "../src/tts-frontend";
+import { normalizeText, textToKlattTrack, transcribeText } from "../src/tts-frontend";
 import {
   FULL_PIPELINE_WORD_CASES,
   NORMALIZATION_CONFORMANCE_CASES,
@@ -34,9 +34,9 @@ describe("phonology conformance", () => {
         const occurrence = testCase.occurrence ?? 0;
 
         if (testCase.transcribe?.exactPhonemes) {
-          expect(
-            getTranscriptionWordOccurrence(transcription, testCase.word, occurrence)
-          ).toEqual(testCase.transcribe.exactPhonemes);
+          expect(getTranscriptionWordOccurrence(transcription, testCase.word, occurrence)).toEqual(
+            testCase.transcribe.exactPhonemes,
+          );
         }
 
         const trackPhonemes = getTrackWordOccurrence(track, testCase.word, occurrence);
@@ -52,9 +52,7 @@ describe("phonology conformance", () => {
           expect(trackPhonemes).not.toContain(phoneme);
         }
         if (testCase.track?.primaryStressCount !== undefined) {
-          expect(countPrimaryStressVowels(trackPhonemes)).toBe(
-            testCase.track.primaryStressCount
-          );
+          expect(countPrimaryStressVowels(trackPhonemes)).toBe(testCase.track.primaryStressCount);
         }
       });
     }

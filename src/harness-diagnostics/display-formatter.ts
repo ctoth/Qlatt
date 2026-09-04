@@ -1,39 +1,41 @@
 // Display formatter — takes check results, state, and display config sections,
 // and produces formatted text output. Each section is dispatched by its `source` type.
 
+import type { PlstepEvent, TelemetryDatum } from "../track-analysis";
+import {
+  analyzeTrackGains,
+  collectParamRange,
+  findTimingMismatches,
+  findVoicingIssues,
+  formatMeters,
+  formatPlstepEventsRelative,
+  formatRange,
+  formatTelemetry,
+  summarizeLfMode,
+  summarizeParallel,
+  summarizeTrack,
+} from "../track-analysis";
 import type {
-  DisplayConfig,
-  DisplaySection,
   CheckResult,
   CheckStatus,
+  DisplayConfig,
+  DisplaySection,
+  PlayHistoryEntry,
   RunInfo,
   TrackEvent,
 } from "./types";
-import {
-  summarizeTrack,
-  formatTelemetry,
-  formatMeters,
-  formatPlstepEventsRelative,
-  collectParamRange,
-  formatRange,
-  summarizeParallel,
-  summarizeLfMode,
-  analyzeTrackGains,
-  findTimingMismatches,
-  findVoicingIssues,
-} from "../track-analysis";
 
 /** State bag passed to formatters — everything they might need. */
 export interface DisplayState {
   run: RunInfo | null;
   checkResults: Map<string, CheckResult>;
-  telemetry: Map<string, any>;
-  telemetryMax: Map<string, any>;
-  meterValues: Map<string, any>;
-  meterMax: Map<string, any>;
-  plstepEvents: any[];
+  telemetry: Map<string, TelemetryDatum>;
+  telemetryMax: Map<string, TelemetryDatum>;
+  meterValues: Map<string, TelemetryDatum>;
+  meterMax: Map<string, TelemetryDatum>;
+  plstepEvents: PlstepEvent[];
   plstepTotalCount: number;
-  playHistory: any[];
+  playHistory: PlayHistoryEntry[];
   sessionId: number;
   sliderParams: Record<string, number>;
   sampleRate: number;

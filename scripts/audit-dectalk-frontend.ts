@@ -21,13 +21,7 @@ type RuleFile = {
 
 const REPO_ROOT = process.cwd();
 const DEFAULT_DAPI_SRC = "C:/Users/Q/src/dectalk/463/dapi/src";
-const FRONTEND_ROOT = path.join(
-  REPO_ROOT,
-  "public",
-  "rules",
-  "frontends",
-  "dectalk-english",
-);
+const FRONTEND_ROOT = path.join(REPO_ROOT, "public", "rules", "frontends", "dectalk-english");
 
 function parseShortArray(source: string, arrayName: string): number[] {
   const pattern = new RegExp(
@@ -45,7 +39,7 @@ function countDiphthongPointers(values: number[]): number {
 }
 
 function hasAnyKey(entry: Record<string, unknown>, keys: string[]): boolean {
-  return keys.some((key) => Object.prototype.hasOwnProperty.call(entry, key));
+  return keys.some((key) => Object.hasOwn(entry, key));
 }
 
 function countMatching(
@@ -97,12 +91,8 @@ function main(): void {
   const usMalamp = parseShortArray(romSource, "us_malamp");
   const usPhoneCount = usInhdr.length;
 
-  const inventory = loadYamlDocumentSync<InventoryDoc>(
-    path.join(FRONTEND_ROOT, "inventory.yaml"),
-  );
-  const frontend = loadYamlDocumentSync<FrontendDoc>(
-    path.join(FRONTEND_ROOT, "frontend.yaml"),
-  );
+  const inventory = loadYamlDocumentSync<InventoryDoc>(path.join(FRONTEND_ROOT, "inventory.yaml"));
+  const frontend = loadYamlDocumentSync<FrontendDoc>(path.join(FRONTEND_ROOT, "frontend.yaml"));
   const structural = loadYamlDocumentSync<RuleFile>(
     path.join(FRONTEND_ROOT, "phases", "structural.yaml"),
   );
@@ -122,30 +112,23 @@ function main(): void {
   const releaseTokens = names.filter((name) => name.includes("_REL")).length;
   const aspirationTokens = names.filter((name) => name.includes("_ASP")).length;
 
-  const explicitMinDur = countMatching(
-    targets,
-    (_name, entry) => Object.prototype.hasOwnProperty.call(entry, "minimumDuration"),
+  const explicitMinDur = countMatching(targets, (_name, entry) =>
+    Object.hasOwn(entry, "minimumDuration"),
   );
-  const explicitBurstDur = countMatching(
-    targets,
-    (_name, entry) =>
-      hasAnyKey(entry, ["burst", "burstDuration", "burst_duration", "releaseDuration"]),
+  const explicitBurstDur = countMatching(targets, (_name, entry) =>
+    hasAnyKey(entry, ["burst", "burstDuration", "burst_duration", "releaseDuration"]),
   );
-  const explicitCoreFormants = countMatching(
-    targets,
-    (_name, entry) => hasAnyKey(entry, ["F1", "F2", "F3", "B1", "B2", "B3", "AV"]),
+  const explicitCoreFormants = countMatching(targets, (_name, entry) =>
+    hasAnyKey(entry, ["F1", "F2", "F3", "B1", "B2", "B3", "AV"]),
   );
-  const explicitHighFormants = countMatching(
-    targets,
-    (_name, entry) => hasAnyKey(entry, ["F4", "F5", "F6", "F7", "F8", "B4", "B5", "B6", "B7", "B8"]),
+  const explicitHighFormants = countMatching(targets, (_name, entry) =>
+    hasAnyKey(entry, ["F4", "F5", "F6", "F7", "F8", "B4", "B5", "B6", "B7", "B8"]),
   );
-  const explicitParallelSpectrum = countMatching(
-    targets,
-    (_name, entry) => hasAnyKey(entry, ["AB", "A1", "A2", "A3", "A4", "A5", "A6"]),
+  const explicitParallelSpectrum = countMatching(targets, (_name, entry) =>
+    hasAnyKey(entry, ["AB", "A1", "A2", "A3", "A4", "A5", "A6"]),
   );
-  const exactFeatureMirrors = countMatching(
-    targets,
-    (_name, entry) => hasAnyKey(entry, ["features", "place", "featb_raw", "place_raw"]),
+  const exactFeatureMirrors = countMatching(targets, (_name, entry) =>
+    hasAnyKey(entry, ["features", "place", "featb_raw", "place_raw"]),
   );
 
   const formantRuleNames = listRuleNames(formant);
@@ -156,8 +139,8 @@ function main(): void {
   const hasObstruentSpectrumRule = formantRuleNames.includes(
     "dectalk_obstruent_parallel_amplitudes",
   );
-  const hasStopReleaseRules = structuralRuleNames.some((name) =>
-    name.startsWith("dectalk_insert_") && name.includes("stop_release"),
+  const hasStopReleaseRules = structuralRuleNames.some(
+    (name) => name.startsWith("dectalk_insert_") && name.includes("stop_release"),
   );
   const hasFullSourceSmoothingRules = formantRuleNames.some((name) =>
     /smooth|backward|carryover|th|dh/i.test(name),
@@ -171,11 +154,19 @@ function main(): void {
   lines.push("DECtalk Frontend Audit");
   lines.push("");
   lines.push("Source tables:");
-  lines.push(`- us_featb/us_place: ${usFeatb.length} total feature rows, ${usPlace.length} place rows (${usPhoneCount} US phones consume the first ${usPhoneCount})`);
-  lines.push(`- us_inhdr/us_mindur/us_burdr: ${usInhdr.length}/${usMindur.length}/${usBurdr.length} entries`);
-  lines.push(`- us_maltar/us_femtar: ${usMaltar.length}/${usFemtar.length} shorts (${usMaltar.length / usPhoneCount}/${usFemtar.length / usPhoneCount} blocks)`);
+  lines.push(
+    `- us_featb/us_place: ${usFeatb.length} total feature rows, ${usPlace.length} place rows (${usPhoneCount} US phones consume the first ${usPhoneCount})`,
+  );
+  lines.push(
+    `- us_inhdr/us_mindur/us_burdr: ${usInhdr.length}/${usMindur.length}/${usBurdr.length} entries`,
+  );
+  lines.push(
+    `- us_maltar/us_femtar: ${usMaltar.length}/${usFemtar.length} shorts (${usMaltar.length / usPhoneCount}/${usFemtar.length / usPhoneCount} blocks)`,
+  );
   lines.push(`- us_maldip/us_femdip: ${usMaldip.length}/${usFemdip.length} shorts`);
-  lines.push(`- us_ptram/us_begtyp/us_endtyp/us_malamp: ${usPtram.length}/${usBegtyp.length}/${usEndtyp.length}/${usMalamp.length}`);
+  lines.push(
+    `- us_ptram/us_begtyp/us_endtyp/us_malamp: ${usPtram.length}/${usBegtyp.length}/${usEndtyp.length}/${usMalamp.length}`,
+  );
   lines.push(`- male target diphthong pointers in us_maltar: ${countDiphthongPointers(usMaltar)}`);
   lines.push("");
   lines.push("Current declarative frontend:");
@@ -193,59 +184,95 @@ function main(): void {
   lines.push(`- duration rules: ${durationRuleNames.length}`);
   lines.push(`- formant rules: ${formantRuleNames.length}`);
   lines.push(`- prosody rules: ${prosodyRuleNames.length}`);
-  lines.push(`- speaker policy fields: ${speakerFieldCount}${baseF0Hz != null ? ` (base_f0_hz=${baseF0Hz})` : ""}`);
+  lines.push(
+    `- speaker policy fields: ${speakerFieldCount}${baseF0Hz != null ? ` (base_f0_hz=${baseF0Hz})` : ""}`,
+  );
   lines.push("");
   lines.push("Likely gaps:");
 
   if (explicitBurstDur === 0) {
-    lines.push("- `us_burdr[]` is not represented as an explicit per-token declarative field. Stop release timing is synthesized procedurally in structural rules, so the original burst table is not directly auditable in the frontend data.");
+    lines.push(
+      "- `us_burdr[]` is not represented as an explicit per-token declarative field. Stop release timing is synthesized procedurally in structural rules, so the original burst table is not directly auditable in the frontend data.",
+    );
   }
 
   if (countDiphthongPointers(usMaltar) > 0) {
-    lines.push("- `us_maldip[]`/`us_femdip[]` diphthong trajectories are still flattened into static inventory targets. The frontend does not preserve the original trajectory tables as declarative path data.");
+    lines.push(
+      "- `us_maldip[]`/`us_femdip[]` diphthong trajectories are still flattened into static inventory targets. The frontend does not preserve the original trajectory tables as declarative path data.",
+    );
   }
 
   if (explicitHighFormants === 0) {
-    lines.push("- The inventory does not carry explicit per-phoneme F4+ targets. High-formant coloration is mostly generic runtime defaulting right now, which leaves consonant identity under-specified.");
+    lines.push(
+      "- The inventory does not carry explicit per-phoneme F4+ targets. High-formant coloration is mostly generic runtime defaulting right now, which leaves consonant identity under-specified.",
+    );
   }
 
   if (!hasObstruentSpectrumRule) {
     lines.push("- `us_ptram[]`/`us_malamp[]` obstruent spectra are not ported at all.");
   } else {
-    lines.push("- `us_ptram[]`/`us_malamp[]` are only partially ported. There is one declarative spectrum rule, but it currently covers fricatives/affricates only; stop-release/burst class selection from the same table family still needs explicit declarative coverage.");
+    lines.push(
+      "- `us_ptram[]`/`us_malamp[]` are only partially ported. There is one declarative spectrum rule, but it currently covers fricatives/affricates only; stop-release/burst class selection from the same table family still needs explicit declarative coverage.",
+    );
   }
 
   if (!hasStopReleaseRules) {
     lines.push("- Stop release insertion from `p_us_st1.c` is missing.");
   } else {
-    lines.push("- Stop release insertion exists, but it is still a hand-ported approximation of `p_us_st1.c`. It should be audited against the original burst/VOT tables and source-amplitude carryover paths, not treated as complete.");
+    lines.push(
+      "- Stop release insertion exists, but it is still a hand-ported approximation of `p_us_st1.c`. It should be audited against the original burst/VOT tables and source-amplitude carryover paths, not treated as complete.",
+    );
   }
 
   if (!hasFullSourceSmoothingRules) {
-    lines.push("- The formant phase does not yet mirror most of `ph_setar.c` / `p_us_st1.c` dynamic target logic (backward smoothing, source-amplitude carryover, TH/DH special handling, boundary-value interpolation). Current formant rules are still extremely thin.");
+    lines.push(
+      "- The formant phase does not yet mirror most of `ph_setar.c` / `p_us_st1.c` dynamic target logic (backward smoothing, source-amplitude carryover, TH/DH special handling, boundary-value interpolation). Current formant rules are still extremely thin.",
+    );
   }
 
   if (exactFeatureMirrors === 0) {
-    lines.push("- `us_featb[]`/`us_place[]` are not preserved 1:1 in the declarative inventory. We keep coarse type/feature booleans, but not the original feature-table surface for rule parity auditing.");
+    lines.push(
+      "- `us_featb[]`/`us_place[]` are not preserved 1:1 in the declarative inventory. We keep coarse type/feature booleans, but not the original feature-table surface for rule parity auditing.",
+    );
   }
 
   if (speakerFieldCount > 0) {
-  lines.push("- The frontend has only a single baked speaker policy surface (effectively Paul defaults). DECtalk’s wider speaker table family is not yet exposed as a declarative speaker roster.");
+    lines.push(
+      "- The frontend has only a single baked speaker policy surface (effectively Paul defaults). DECtalk’s wider speaker table family is not yet exposed as a declarative speaker roster.",
+    );
   }
 
   lines.push("");
   lines.push("Concrete checklist (table -> target):");
-  lines.push("- `us_maldip[]` / `us_femdip[]` -> extract with `scripts/extract-dectalk-diphthong-trajectories.ts` -> store trajectory payloads in `public/rules/frontends/dectalk-english/inventory.yaml` -> preserve through `src/declarative-frontend/inventory.ts` -> consume as timed declarative windows in `public/rules/frontends/dectalk-english/phases/structural.yaml`.");
-  lines.push("- `us_burdr[]` -> reuse `C:/Users/Q/src/dectalk/463/scripts/extract_durations.py` semantics -> add explicit `burstDuration` fields in `public/rules/frontends/dectalk-english/inventory.yaml` -> read them in `public/rules/frontends/dectalk-english/phases/structural.yaml` instead of burying release timing in formulas only.");
-  lines.push("- `us_ptram[]` / `us_malamp[]` -> extract with `scripts/extract-dectalk-obstruent-amps.ts` -> keep fricative and stop-burst spectra declarative in `public/rules/frontends/dectalk-english/phases/formant.yaml` and `public/rules/frontends/dectalk-english/phases/structural.yaml`.");
-  lines.push("- `us_featb[]` / `us_place[]` -> reuse `C:/Users/Q/src/dectalk/463/scripts/extract_features.py` -> mirror raw feature/place metadata into `public/rules/frontends/dectalk-english/inventory.yaml` so future rules can match the original DECtalk feature surface directly.");
-  lines.push("- speaker tables (`ph_vset.c` / extracted speaker data) -> reuse `C:/Users/Q/src/dectalk/463/scripts/extract_speakers.py` and `convert_speakers.py` -> expose a declarative speaker roster in `public/rules/frontends/dectalk-english/frontend.yaml`.");
+  lines.push(
+    "- `us_maldip[]` / `us_femdip[]` -> extract with `scripts/extract-dectalk-diphthong-trajectories.ts` -> store trajectory payloads in `public/rules/frontends/dectalk-english/inventory.yaml` -> preserve through `src/declarative-frontend/inventory.ts` -> consume as timed declarative windows in `public/rules/frontends/dectalk-english/phases/structural.yaml`.",
+  );
+  lines.push(
+    "- `us_burdr[]` -> reuse `C:/Users/Q/src/dectalk/463/scripts/extract_durations.py` semantics -> add explicit `burstDuration` fields in `public/rules/frontends/dectalk-english/inventory.yaml` -> read them in `public/rules/frontends/dectalk-english/phases/structural.yaml` instead of burying release timing in formulas only.",
+  );
+  lines.push(
+    "- `us_ptram[]` / `us_malamp[]` -> extract with `scripts/extract-dectalk-obstruent-amps.ts` -> keep fricative and stop-burst spectra declarative in `public/rules/frontends/dectalk-english/phases/formant.yaml` and `public/rules/frontends/dectalk-english/phases/structural.yaml`.",
+  );
+  lines.push(
+    "- `us_featb[]` / `us_place[]` -> reuse `C:/Users/Q/src/dectalk/463/scripts/extract_features.py` -> mirror raw feature/place metadata into `public/rules/frontends/dectalk-english/inventory.yaml` so future rules can match the original DECtalk feature surface directly.",
+  );
+  lines.push(
+    "- speaker tables (`ph_vset.c` / extracted speaker data) -> reuse `C:/Users/Q/src/dectalk/463/scripts/extract_speakers.py` and `convert_speakers.py` -> expose a declarative speaker roster in `public/rules/frontends/dectalk-english/frontend.yaml`.",
+  );
   lines.push("");
   lines.push("Priority porting targets:");
-  lines.push("1. Port the original diphthong trajectory tables (`us_maldip`) into declarative vowel paths/control windows instead of static first-point vowels.");
-  lines.push("2. Port stop-burst spectra from the same `us_ptram/us_malamp` family used for fricatives so releases are table-driven instead of approximated.");
-  lines.push("3. Port more of `ph_setar.c` / `p_us_st1.c` target-smoothing logic into declarative formant/source rules; the current formant phase only has three rules.");
-  lines.push("4. Decide whether `us_burdr[]` should become an explicit inventory field so burst timing is directly traceable instead of hidden inside procedural splices.");
+  lines.push(
+    "1. Port the original diphthong trajectory tables (`us_maldip`) into declarative vowel paths/control windows instead of static first-point vowels.",
+  );
+  lines.push(
+    "2. Port stop-burst spectra from the same `us_ptram/us_malamp` family used for fricatives so releases are table-driven instead of approximated.",
+  );
+  lines.push(
+    "3. Port more of `ph_setar.c` / `p_us_st1.c` target-smoothing logic into declarative formant/source rules; the current formant phase only has three rules.",
+  );
+  lines.push(
+    "4. Decide whether `us_burdr[]` should become an explicit inventory field so burst timing is directly traceable instead of hidden inside procedural splices.",
+  );
   lines.push("5. Add a declarative speaker roster if we want parity beyond Paul.");
 
   console.log(lines.join("\n"));

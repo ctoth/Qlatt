@@ -37,7 +37,7 @@ export interface SemanticsDocument {
    *  Individual realize rules can override with step: true or ramp: true.
    *  Citation: Klatt 1980 — all parameters linearly interpolated between
    *  update frames at the 5 ms update rate. */
-  defaultScheduling?: 'step' | 'ramp';
+  defaultScheduling?: "step" | "ramp";
   params?: Record<string, ParamDefinition>;
   constants?: Record<string, ParamValue | Record<string, ParamValue>>;
   realize?: Record<string, RealizationRule | CelExpression>;
@@ -45,7 +45,7 @@ export interface SemanticsDocument {
 
 /** Parameter definition */
 export interface ParamDefinition {
-  type?: 'float' | 'int' | 'bool';
+  type?: "float" | "int" | "bool";
   range?: [number, number];
   default?: ParamValue;
   unit?: string;

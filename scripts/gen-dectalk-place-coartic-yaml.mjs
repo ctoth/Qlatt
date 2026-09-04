@@ -17,14 +17,11 @@ import { readFileSync } from "node:fs";
 import yaml from "js-yaml";
 
 const src = process.argv[2] ?? "C:/Users/Q/src/dectalk/463/output/us_place_coartic.yaml";
-const frontendPath =
-  process.argv[3] ?? "public/rules/frontends/dectalk-english/frontend.yaml";
+const frontendPath = process.argv[3] ?? "public/rules/frontends/dectalk-english/frontend.yaml";
 
 const data = yaml.load(readFileSync(src, "utf8"));
 const frontend = yaml.load(readFileSync(frontendPath, "utf8"));
-const lociObstruents = new Set(
-  Object.keys(frontend.output.lowering.transitions.loci ?? {}),
-);
+const lociObstruents = new Set(Object.keys(frontend.output.lowering.transitions.loci ?? {}));
 
 const indent = "      "; // 6 spaces: under transitions: (4)
 const out = [];
@@ -37,7 +34,9 @@ out.push(`${indent}# resolver (resolveLocusBoundary): no per-phoneme literals in
 
 // obstruent_place: palatal_or_dental, scoped to obstruents with a locus block.
 out.push(`${indent}# obstruent_place[obstruent].palatal_or_dental = us_place & (FPALATL|FDENTAL)`);
-out.push(`${indent}# (ph_defs.h:340-341). Adjustment (a) fires only for NON-palatal/dental obstruents.`);
+out.push(
+  `${indent}# (ph_defs.h:340-341). Adjustment (a) fires only for NON-palatal/dental obstruents.`,
+);
 out.push(`${indent}obstruent_place:`);
 for (const ph of Object.keys(data.obstruent_place).sort()) {
   if (!lociObstruents.has(ph)) continue;
@@ -53,11 +52,15 @@ out.push(`${indent}rounded_sonorant_consonant: [${rounded.join(", ")}]`);
 
 // f2_back: F2BACKI (forward) / F2BACKF (backward) per vowel.
 out.push(`${indent}# f2_back[vowel] = { forward: us_place & F2BACKI, backward: & F2BACKF }`);
-out.push(`${indent}# (ph_defs.h:345-346). Adjustment (b) on F2: prcnt += 25-(prcnt>>2); durtran=(durtran>>1)+2.`);
+out.push(
+  `${indent}# (ph_defs.h:345-346). Adjustment (b) on F2: prcnt += 25-(prcnt>>2); durtran=(durtran>>1)+2.`,
+);
 out.push(`${indent}f2_back:`);
 for (const ph of Object.keys(data.f2_back).sort()) {
   const c = data.f2_back[ph];
-  out.push(`${indent}  ${ph}: { forward: ${c.forward === true}, backward: ${c.backward === true} }`);
+  out.push(
+    `${indent}  ${ph}: { forward: ${c.forward === true}, backward: ${c.backward === true} }`,
+  );
 }
 
 process.stdout.write(out.join("\n") + "\n");

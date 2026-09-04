@@ -34,7 +34,14 @@ export const controlSpec = [
   { id: "fricationCutoff", label: "Frication Cutoff", min: 500, max: 9000, step: 10 },
   { id: "masterGain", label: "Output Boost", min: 0, max: 5, step: 0.05 },
   { id: "parallelMix", label: "Parallel Mix", min: 0, max: 1, step: 0.01 },
-  { id: "parallelGainScale", label: "Parallel Gain Scale", min: 0, max: 1, step: 0.01, format: "fixed2" },
+  {
+    id: "parallelGainScale",
+    label: "Parallel Gain Scale",
+    min: 0,
+    max: 1,
+    step: 0.01,
+    format: "fixed2",
+  },
   { id: "parallelVoiceGain", label: "Parallel Voice", min: 0, max: 1, step: 0.01 },
   { id: "parallelFricationGain", label: "Parallel Frication", min: 0, max: 1, step: 0.01 },
   { id: "AB", label: "Bypass (AB dB)", min: -70, max: 70, step: 1 },
@@ -102,13 +109,38 @@ export function getCurrentSliderParams() {
 export function bindControls() {
   // Default slider values: use semantics when available, otherwise midpoint
   const sliderDefaults = {
-    f0: 110, rd: 1.0, lfMode: 1, sourceMode: 1, openPhaseRatio: 0.7,
-    voiceGain: 1, noiseGain: 0, noiseCutoff: 4000, fricationCutoff: 5000,
-    masterGain: 1, parallelMix: 0, parallelGainScale: 1, parallelVoiceGain: 0,
-    parallelFricationGain: 0, AB: -70, AN: -70,
-    A1: -70, A2: -70, A3: -70, A4: -70, A5: -70, A6: -70,
-    F1: 500, F2: 1500, F3: 2500, B1: 60, B2: 90, B3: 150,
-    FNZ: 280, BNZ: 90, FNP: 280, BNP: 90,
+    f0: 110,
+    rd: 1.0,
+    lfMode: 1,
+    sourceMode: 1,
+    openPhaseRatio: 0.7,
+    voiceGain: 1,
+    noiseGain: 0,
+    noiseCutoff: 4000,
+    fricationCutoff: 5000,
+    masterGain: 1,
+    parallelMix: 0,
+    parallelGainScale: 1,
+    parallelVoiceGain: 0,
+    parallelFricationGain: 0,
+    AB: -70,
+    AN: -70,
+    A1: -70,
+    A2: -70,
+    A3: -70,
+    A4: -70,
+    A5: -70,
+    A6: -70,
+    F1: 500,
+    F2: 1500,
+    F3: 2500,
+    B1: 60,
+    B2: 90,
+    B3: 150,
+    FNZ: 280,
+    BNZ: 90,
+    FNP: 280,
+    BNP: 90,
   };
 
   for (const spec of controlSpec) {
@@ -128,15 +160,15 @@ export function applyUrlParams() {
   const params = new URLSearchParams(window.location.search);
 
   // Apply phrase
-  if (params.has('phrase')) {
-    document.getElementById('phrase').value = params.get('phrase');
+  if (params.has("phrase")) {
+    document.getElementById("phrase").value = params.get("phrase");
   }
 
   // Apply baseF0
-  if (params.has('baseF0')) {
-    const val = Number(params.get('baseF0'));
+  if (params.has("baseF0")) {
+    const val = Number(params.get("baseF0"));
     if (Number.isFinite(val)) {
-      document.getElementById('baseF0').value = val;
+      document.getElementById("baseF0").value = val;
     }
   }
 
@@ -154,5 +186,4 @@ export function applyUrlParams() {
       }
     }
   }
-
 }

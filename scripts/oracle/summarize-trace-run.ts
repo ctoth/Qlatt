@@ -2,9 +2,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  type DectalkTraceFrame,
   dectalkFrameStartSec,
   parseDectalkTraceFile,
-  type DectalkTraceFrame,
 } from "./dectalk-trace";
 
 type Args = {
@@ -233,7 +233,7 @@ const PARAM_MAP: Array<{
 }> = [
   {
     label: "F0",
-    oracleValue: (frame) => finiteNumber(frame.f0prime) == null ? null : frame.f0prime / 10,
+    oracleValue: (frame) => (finiteNumber(frame.f0prime) == null ? null : frame.f0prime / 10),
     qlatt: "F0",
   },
   { label: "F1", oracle: "F1", qlatt: "F1" },
@@ -306,7 +306,10 @@ function oracleTokenToQlatt(token: unknown): string | null {
 
 function normalizeQlattPhone(phoneme: unknown): string | null {
   if (typeof phoneme !== "string") return null;
-  const trimmed = phoneme.trim().toUpperCase().replace(/[0-2]$/u, "");
+  const trimmed = phoneme
+    .trim()
+    .toUpperCase()
+    .replace(/[0-2]$/u, "");
   if (!trimmed) return null;
   if (trimmed.endsWith("_REL") || trimmed.endsWith("_ASP")) {
     return trimmed.slice(0, trimmed.lastIndexOf("_"));
@@ -513,10 +516,7 @@ function oracleSegmentPhaseAt(
   const frame = oracleFrames[frameIndex];
   if (!frame) return { startSec: null, endSec: null, phase: null };
   let firstFrame = frameIndex;
-  while (
-    firstFrame > 0 &&
-    oracleFrames[firstFrame - 1]?.phoneIndex === frame.phoneIndex
-  ) {
+  while (firstFrame > 0 && oracleFrames[firstFrame - 1]?.phoneIndex === frame.phoneIndex) {
     firstFrame -= 1;
   }
   let lastFrame = frameIndex;
@@ -547,10 +547,7 @@ function qlattSegmentPhaseAt(
   if (selectedPhone == null) return { startSec: null, endSec: null, phase: null };
 
   let firstIndex = selection.index;
-  while (
-    firstIndex > 0 &&
-    normalizeQlattPhone(track[firstIndex - 1]?.phoneme) === selectedPhone
-  ) {
+  while (firstIndex > 0 && normalizeQlattPhone(track[firstIndex - 1]?.phoneme) === selectedPhone) {
     firstIndex -= 1;
   }
 
@@ -672,9 +669,10 @@ function summarizeParam(
         oraclePhase,
         qlattPhase,
       );
-      const phaseDelta = oraclePhase.phase != null && qlattPhase.phase != null
-        ? Math.abs(qlattPhase.phase - oraclePhase.phase)
-        : null;
+      const phaseDelta =
+        oraclePhase.phase != null && qlattPhase.phase != null
+          ? Math.abs(qlattPhase.phase - oraclePhase.phase)
+          : null;
       if (maxPhaseDelta != null && phaseDelta != null && phaseDelta <= maxPhaseDelta) {
         phaseAlignedSameSegmentSumAbs = accumulateBucket(
           phaseAlignedSameSegment,
@@ -763,7 +761,10 @@ function summarizeAlignment(
   let differentSegment = 0;
   let unknown = 0;
   for (let frameIndex = 0; frameIndex < oracleFrames.length; frameIndex += 1) {
-    const oraclePhone = oracleSourcePhoneForFrame(oracleFrames[frameIndex]!, oracleComparisonTokens);
+    const oraclePhone = oracleSourcePhoneForFrame(
+      oracleFrames[frameIndex]!,
+      oracleComparisonTokens,
+    );
     const event = eventAt(track, dectalkFrameStartSec(oracleFrames[frameIndex]!.frame));
     const qlattPhone = normalizeQlattPhone(event?.phoneme);
     if (oraclePhone == null || qlattPhone == null) {
@@ -871,8 +872,7 @@ function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
       sameCompared += summary.sameSegment.compared;
       sameWeightedAbs += summary.sameSegment.meanAbs * summary.sameSegment.compared;
       differentCompared += summary.differentSegment.compared;
-      differentWeightedAbs +=
-        summary.differentSegment.meanAbs * summary.differentSegment.compared;
+      differentWeightedAbs += summary.differentSegment.meanAbs * summary.differentSegment.compared;
       unknownCompared += summary.unknownSegment.compared;
       unknownWeightedAbs += summary.unknownSegment.meanAbs * summary.unknownSegment.compared;
       if (summary.maxAbs > maxAbs) {
@@ -918,8 +918,7 @@ function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
       sameSegmentCompared: sameCompared,
       sameSegmentMeanAbs: sameCompared > 0 ? sameWeightedAbs / sameCompared : 0,
       differentSegmentCompared: differentCompared,
-      differentSegmentMeanAbs:
-        differentCompared > 0 ? differentWeightedAbs / differentCompared : 0,
+      differentSegmentMeanAbs: differentCompared > 0 ? differentWeightedAbs / differentCompared : 0,
       unknownSegmentCompared: unknownCompared,
       unknownSegmentMeanAbs: unknownCompared > 0 ? unknownWeightedAbs / unknownCompared : 0,
     };
@@ -953,7 +952,9 @@ function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
 
 function main(): number {
   const args = parseArgs(process.argv.slice(2));
-  const phrases = phraseDirs(args.runRoot).map((phraseDir) => summarizePhrase(phraseDir, args.maxPhaseDelta));
+  const phrases = phraseDirs(args.runRoot).map((phraseDir) =>
+    summarizePhrase(phraseDir, args.maxPhaseDelta),
+  );
   const report = {
     schemaVersion: "v1",
     runRoot: args.runRoot,

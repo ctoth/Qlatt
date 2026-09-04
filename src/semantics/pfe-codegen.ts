@@ -15,7 +15,7 @@
  * Citation: Klatt 1980 (original synthesizer specification)
  */
 
-import type { RealizationRule } from './types';
+import type { RealizationRule } from "./types";
 
 export interface PfeFormantSpec {
   index: number;
@@ -58,15 +58,14 @@ export function generatePfeRules(
 
     // Build the full expression:
     // sign * dbToLinear(A{idx} + (correction1 + correction2 + ...) + ndbScale) * parallelScale
-    const correctionExpr = correctionTerms.length > 0
-      ? correctionTerms.join(' + ')
-      : '0';
+    const correctionExpr = correctionTerms.length > 0 ? correctionTerms.join(" + ") : "0";
 
     // Use literal numbers for sign and ndbScale (they come from the cited bank spec, not runtime).
     const innerExpr = `A${idx} + (${correctionExpr}) + (${ndbScaleVal})`;
-    const expr = sign === 1
-      ? `dbToLinear(${innerExpr}) * parallelScale`
-      : `-(dbToLinear(${innerExpr}) * parallelScale)`;
+    const expr =
+      sign === 1
+        ? `dbToLinear(${innerExpr}) * parallelScale`
+        : `-(dbToLinear(${innerExpr}) * parallelScale)`;
 
     // Collect deps: A{i}, F{i}, all other F{j}/B{j}, sampleRate, parallelScale
     const deps: string[] = [`A${idx}`, `F${idx}`];
@@ -76,7 +75,7 @@ export function generatePfeRules(
       if (!deps.includes(`F${jIdx}`)) deps.push(`F${jIdx}`);
       deps.push(`B${jIdx}`);
     }
-    deps.push('sampleRate', 'parallelScale');
+    deps.push("sampleRate", "parallelScale");
 
     rules[`a${idx}Linear`] = { expr, deps };
   }

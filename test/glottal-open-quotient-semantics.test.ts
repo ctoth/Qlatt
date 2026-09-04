@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import { describe, expect, it } from "vitest";
 import { createConfiguredEvaluator } from "../src/semantics/evaluator-factory";
 import type { EvaluationContext, SemanticsDocument } from "../src/semantics/types";
 import { parseYamlString } from "../src/yaml-loader";

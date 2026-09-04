@@ -10,11 +10,11 @@
  */
 
 import { performance } from "node:perf_hooks";
-import { textToKlattTrack } from "../src/tts-frontend";
 import {
-  preloadCmuDictionaryFromPath,
   DEFAULT_CMU_DICTIONARY_PATH,
+  preloadCmuDictionaryFromPath,
 } from "../src/cmu-dictionary-loader";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 // ---- Configuration ----
 const WORD_COUNT = Number(process.env.PROFILE_WORD_COUNT ?? 500);
@@ -23,7 +23,7 @@ const BATCH_WORD_COUNT = Number(process.env.PROFILE_BATCH_WORD_COUNT ?? 5000);
 
 async function main() {
   // Suppress console.warn spam from the pipeline (e.g. "word not found in dictionary")
-  const originalWarn = console.warn;
+  const _originalWarn = console.warn;
   console.warn = () => {};
 
   console.log("=== textToKlattTrack() Performance Profile ===\n");
@@ -105,25 +105,25 @@ async function main() {
     slowWords
       .sort((a, b) => b.time - a.time)
       .slice(0, 10)
-      .forEach(({ word, time }) => console.log(`  ${word}: ${time.toFixed(1)}ms`));
+      .forEach(({ word, time }) => {
+        console.log(`  ${word}: ${time.toFixed(1)}ms`);
+      });
   }
 
   // Step 5: Distribution histogram
   const buckets = [0, 1, 2, 5, 10, 20, 50, 100, 200, Infinity];
   const histogram: Record<string, number> = {};
   for (let i = 0; i < buckets.length - 1; i++) {
-    const label = buckets[i + 1] === Infinity
-      ? `${buckets[i]}ms+`
-      : `${buckets[i]}-${buckets[i + 1]}ms`;
+    const label =
+      buckets[i + 1] === Infinity ? `${buckets[i]}ms+` : `${buckets[i]}-${buckets[i + 1]}ms`;
     histogram[label] = 0;
   }
 
   for (const t of timings) {
     for (let i = 0; i < buckets.length - 1; i++) {
       if (t >= buckets[i] && t < buckets[i + 1]) {
-        const label = buckets[i + 1] === Infinity
-          ? `${buckets[i]}ms+`
-          : `${buckets[i]}-${buckets[i + 1]}ms`;
+        const label =
+          buckets[i + 1] === Infinity ? `${buckets[i]}ms+` : `${buckets[i]}-${buckets[i + 1]}ms`;
         histogram[label]++;
         break;
       }
@@ -132,7 +132,7 @@ async function main() {
 
   console.log("\n=== Distribution ===\n");
   for (const [label, count] of Object.entries(histogram)) {
-    const bar = "#".repeat(Math.ceil(count / testWords.length * 50));
+    const bar = "#".repeat(Math.ceil((count / testWords.length) * 50));
     const pct = ((count / testWords.length) * 100).toFixed(1);
     console.log(`  ${label.padEnd(12)} ${String(count).padStart(4)} (${pct.padStart(5)}%) ${bar}`);
   }
@@ -143,11 +143,15 @@ async function main() {
   const freshWord = allWords[WORD_COUNT + 100] || "supercalifragilistic";
   // Force a fresh test (expressionCache should already be warm from earlier runs)
   const firstStart = performance.now();
-  try { textToKlattTrack(freshWord); } catch {}
+  try {
+    textToKlattTrack(freshWord);
+  } catch {}
   const firstTime = performance.now() - firstStart;
 
   const secondStart = performance.now();
-  try { textToKlattTrack(freshWord); } catch {}
+  try {
+    textToKlattTrack(freshWord);
+  } catch {}
   const secondTime = performance.now() - secondStart;
 
   console.log(`First call  for "${freshWord}": ${firstTime.toFixed(2)}ms`);
@@ -160,7 +164,11 @@ async function main() {
   let batchErrors = 0;
   const batchStart = performance.now();
   for (const word of batchWords) {
-    try { textToKlattTrack(word); } catch { batchErrors++; }
+    try {
+      textToKlattTrack(word);
+    } catch {
+      batchErrors++;
+    }
   }
   const batchTime = performance.now() - batchStart;
   console.log(`${BATCH_WORD_COUNT} words: ${batchTime.toFixed(0)}ms total (${batchErrors} errors)`);

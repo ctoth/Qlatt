@@ -93,7 +93,7 @@ const DECTALK_US_TOKENS = new Set([
   "=",
   "`",
   "'",
-  "\"",
+  '"',
   "/",
   "\\",
   "/\\",
@@ -136,7 +136,7 @@ const NON_COMPARISON_TOKENS = new Set([
   "=",
   "`",
   "'",
-  "\"",
+  '"',
   "/",
   "\\",
   "/\\",
@@ -256,10 +256,7 @@ function normalizeComparisonToken(token: string): string {
 
 function isSameWord(left: QlattSegment, right: QlattSegment): boolean {
   return (
-    left.word != null &&
-    right.word != null &&
-    left.word.length > 0 &&
-    left.word === right.word
+    left.word != null && right.word != null && left.word.length > 0 && left.word === right.word
   );
 }
 
@@ -287,12 +284,8 @@ function mapQlattComparisonSegments(segments: QlattSegment[]): string[] {
   );
   return collapseQlattComparisonTokens(
     comparisonSegments
-      .map((segment, index) =>
-        mapQlattComparisonSegment(segment, comparisonSegments[index + 1]),
-      )
-      .filter(
-        (token): token is string => typeof token === "string" && token.length > 0,
-      )
+      .map((segment, index) => mapQlattComparisonSegment(segment, comparisonSegments[index + 1]))
+      .filter((token): token is string => typeof token === "string" && token.length > 0)
       .map(normalizeComparisonToken),
   );
 }
@@ -332,9 +325,7 @@ function isStructuralTransientPhoneme(rawPhoneme: string): boolean {
 
 function toTrackEvents(value: unknown): TrackEvent[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(
-    (item): item is TrackEvent => !!item && typeof item === "object",
-  );
+  return value.filter((item): item is TrackEvent => !!item && typeof item === "object");
 }
 
 function extractTrackSwRegions(trackEvents: TrackEvent[]): QlattRegion[] {
@@ -412,12 +403,8 @@ function extractTrackBurstRegions(trackEvents: TrackEvent[]): QlattBurstRegion[]
         ? Number(trackEvents[j].time)
         : null;
       if (candidateTime == null) continue;
-      const candidateRawValue = useAf
-        ? trackEvents[j]?.params?.AF
-        : trackEvents[j]?.params?.AH;
-      const candidateValue = isFiniteNumber(candidateRawValue)
-        ? Number(candidateRawValue)
-        : 0;
+      const candidateRawValue = useAf ? trackEvents[j]?.params?.AF : trackEvents[j]?.params?.AH;
+      const candidateValue = isFiniteNumber(candidateRawValue) ? Number(candidateRawValue) : 0;
       endTime = candidateTime;
       if (candidateValue < ACTIVE_BURST_DB) {
         break;
@@ -449,11 +436,7 @@ function levenshteinDistance(left: string[], right: string[]): number {
     current[0] = i;
     for (let j = 1; j <= right.length; j += 1) {
       const cost = left[i - 1] === right[j - 1] ? 0 : 1;
-      current[j] = Math.min(
-        current[j - 1] + 1,
-        previous[j] + 1,
-        previous[j - 1] + cost,
-      );
+      current[j] = Math.min(current[j - 1] + 1, previous[j] + 1, previous[j - 1] + cost);
     }
     for (let j = 0; j <= right.length; j += 1) previous[j] = current[j];
   }
@@ -520,9 +503,7 @@ export function extractQlattSymbolic(payload: unknown): {
   burstRegions: QlattBurstRegion[];
 } {
   const trackEvents = toTrackEvents(
-    payload && typeof payload === "object"
-      ? (payload as { track?: unknown }).track
-      : null,
+    payload && typeof payload === "object" ? (payload as { track?: unknown }).track : null,
   );
   const swRegions = extractTrackSwRegions(trackEvents);
   const trackBurstRegions = extractTrackBurstRegions(trackEvents);
@@ -539,14 +520,12 @@ export function extractQlattSymbolic(payload: unknown): {
   }
 
   const segments: QlattSegment[] = [];
-  let activeSegment:
-    | {
-        rawPhoneme: string;
-        phoneme: string;
-        word?: string;
-        startTime: number;
-      }
-    | null = null;
+  let activeSegment: {
+    rawPhoneme: string;
+    phoneme: string;
+    word?: string;
+    startTime: number;
+  } | null = null;
 
   const lastTrackTime = isFiniteNumber(trackEvents[trackEvents.length - 1]?.time)
     ? Number(trackEvents[trackEvents.length - 1]?.time)
@@ -603,16 +582,15 @@ export function extractQlattSymbolic(payload: unknown): {
   const comparisonTokens = mapQlattComparisonSegments(segments);
 
   const labeledBurstRegions = segments
-    .filter(
-      (segment) =>
-        segment.rawPhoneme.endsWith("_REL") || segment.rawPhoneme.endsWith("_ASP"),
-    )
-    .map((segment) => ({
-      startMs: segment.startMs,
-      durationMs: segment.durationMs,
-      phoneme: segment.rawPhoneme,
-      kind: segment.rawPhoneme.endsWith("_ASP") ? "aspiration" : "release",
-    }));
+    .filter((segment) => segment.rawPhoneme.endsWith("_REL") || segment.rawPhoneme.endsWith("_ASP"))
+    .map(
+      (segment): QlattBurstRegion => ({
+        startMs: segment.startMs,
+        durationMs: segment.durationMs,
+        phoneme: segment.rawPhoneme,
+        kind: segment.rawPhoneme.endsWith("_ASP") ? "aspiration" : "release",
+      }),
+    );
   const burstRegions = labeledBurstRegions.length > 0 ? labeledBurstRegions : trackBurstRegions;
 
   return {
@@ -650,10 +628,8 @@ export function buildSymbolicComparison(
 
   return {
     oracle: {
-      rawPhonemeLog:
-        typeof oracle.rawPhonemeLog === "string" ? oracle.rawPhonemeLog : "",
-      phonemeTokens:
-        Array.isArray(oracle.phonemeTokens) ? oracle.phonemeTokens : [],
+      rawPhonemeLog: typeof oracle.rawPhonemeLog === "string" ? oracle.rawPhonemeLog : "",
+      phonemeTokens: Array.isArray(oracle.phonemeTokens) ? oracle.phonemeTokens : [],
       comparisonTokens: oracleTokens,
       ...(typeof oracle.phonemeLogPath === "string"
         ? { phonemeLogPath: oracle.phonemeLogPath }

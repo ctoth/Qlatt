@@ -1,18 +1,23 @@
 import { describe, expect, it, vi } from "vitest";
-import { textToKlattTrack } from "../src/tts-frontend";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { readLowerOptions } from "../src/declarative-frontend/hrg";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 describe("tts frontend output contract", () => {
   it("returns KlattFrame[] with stable key schema and finite params", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
       const track = textToKlattTrack("the quick brown fox jumps over the lazy dog.", 120);
-      const expectedParamKeys = [...readLowerOptions(
-        loadBundledRulepackSpec("qlatt-english").output.lowering,
-      ).columns].sort();
+      const expectedParamKeys = [
+        ...readLowerOptions(loadBundledRulepackSpec("qlatt-english").output.lowering).columns,
+      ].sort();
       const allowedFrameKeys = new Set([
-        "time", "params", "phoneme", "word", "segmentId", "provenance",
+        "time",
+        "params",
+        "phoneme",
+        "word",
+        "segmentId",
+        "provenance",
       ]);
 
       expect(Array.isArray(track)).toBe(true);

@@ -2,11 +2,11 @@
 // Each tap resolves a node ID (or list of candidates) from the runtime,
 // creates an AnalyserNode, and connects the graph node to it.
 
-import type { TapDef } from "./types";
+import type { ConnectableAudioNode, RuntimeNodeResolver, TapDef } from "./types";
 
 export interface TapManagerOptions {
   audioContext: AudioContext;
-  runtime: any; // KlattRuntime — has getNode(id: string): AudioNode | null
+  runtime: RuntimeNodeResolver;
   taps: Record<string, TapDef>;
 }
 
@@ -14,7 +14,7 @@ const DEFAULT_FFT_SIZE = 2048;
 
 export class TapManager {
   private audioContext: AudioContext;
-  private runtime: any;
+  private runtime: RuntimeNodeResolver;
   private tapDefs: Record<string, TapDef>;
   private analysers: Map<string, AnalyserNode>;
 
@@ -60,7 +60,7 @@ export class TapManager {
    * If node is a string, try runtime.getNode(node).
    * If node is a string[], try each in order, use first found.
    */
-  private resolveNode(node: string | string[]): AudioNode | null {
+  private resolveNode(node: string | string[]): ConnectableAudioNode | null {
     if (typeof node === "string") {
       return this.runtime.getNode(node) ?? null;
     }

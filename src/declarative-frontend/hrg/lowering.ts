@@ -12,13 +12,14 @@
  * the structure to a parameter track only at the end);
  * design/beauty-synthesis/11-sota-frontend-architecture.md §5 (one final lowering).
  */
-import type { KlattFrame } from "../../tts-frontend-types";
+
 import { getF0FilterExports, RENDER_OK } from "../../f0-filters-loader";
-import type { Utterance } from "./utterance";
-import type { Item } from "./item";
-import type { FeatureValue } from "./types";
+import type { KlattFrame } from "../../tts-frontend-types";
 import { isPlainObject } from "../../yaml-loader";
+import type { Item } from "./item";
 import { applyScalarOp } from "./scalar-op";
+import type { FeatureValue } from "./types";
+import type { Utterance } from "./utterance";
 
 /**
  * Minimum offset (ms) between a segment boundary and the start/end of a formant
@@ -36,7 +37,9 @@ type LocusEntry = {
   durtran_ms: number;
 };
 
-type LocusTable = Readonly<Record<string, Readonly<Record<string, Readonly<Record<string, LocusEntry>>>>>>;
+type LocusTable = Readonly<
+  Record<string, Readonly<Record<string, Readonly<Record<string, LocusEntry>>>>>
+>;
 type VowelCategoryTable = Readonly<Record<string, { forward?: number; backward?: number }>>;
 
 type LayerType = "profile" | "persistent" | "impulse" | "glide" | "dectalk_segmental";
@@ -83,16 +86,23 @@ type F0LayerCommand = {
   tag?: string;
 };
 
+interface CitedNumber {
+  value: number;
+  citations?: readonly string[];
+}
+
 export interface LowerOptions {
+  /** Optional configuration identity retained for diagnostics and inspection. */
+  id?: string;
   /** Required backend parameter columns, in declared output order. */
   columns: readonly string[];
   /** Selected frontend timing policy. No bundled fallback is permitted. */
   timeline: {
-    initial_silence_ms: { value: number };
-    final_silence_ms: { value: number };
+    initial_silence_ms: CitedNumber;
+    final_silence_ms: CitedNumber;
     duration_floors: {
-      stop_release_ms: { value: number };
-      default_ms: { value: number };
+      stop_release_ms: CitedNumber;
+      default_ms: CitedNumber;
     };
     event_points: {
       include_segment_start: boolean;
@@ -102,10 +112,10 @@ export interface LowerOptions {
     };
   };
   transitions: {
-    native_frame_ms?: { value: number };
-    default_transition_ms: { value: number };
+    native_frame_ms?: CitedNumber;
+    default_transition_ms: CitedNumber;
     blend: {
-      factor: { value: number };
+      factor: CitedNumber;
       keys: readonly string[];
       smooth_types: readonly string[];
       smooth_all_boundaries?: boolean;
@@ -113,8 +123,8 @@ export interface LowerOptions {
     };
     sonorant_f2?: {
       key: string;
-      span_ms: { value: number };
-      neighbor_weight: { value: number };
+      span_ms: CitedNumber;
+      neighbor_weight: CitedNumber;
       current_type: string;
       neighbor_types: readonly string[];
       forward: boolean;
@@ -132,9 +142,12 @@ export interface LowerOptions {
     renderer: { type: "point_interpolation" | "layered_additive" };
     layered_model_ref?: string;
     output_clamp: {
-      min_hz: { value: number };
-      max_hz: { value: number };
+      min_hz: CitedNumber;
+      max_hz: CitedNumber;
     };
+  };
+  overlays?: {
+    operation_order: readonly string[];
   };
   /** Feature key holding each segment's realized duration in ms (default "duration"). */
   durationKey?: string;
@@ -178,7 +191,10 @@ export function readLowerOptions(value: unknown): LowerOptions {
   if (!isPlainObject(value)) {
     throw new Error("E_HRG_LOWER_POLICY: output.lowering must be an object");
   }
-  if (!Array.isArray(value.columns) || !value.columns.every((column) => typeof column === "string")) {
+  if (
+    !Array.isArray(value.columns) ||
+    !value.columns.every((column) => typeof column === "string")
+  ) {
     throw new Error("E_HRG_LOWER_POLICY: output.lowering.columns must be string[]");
   }
   if (!isPlainObject(value.timeline) || !isPlainObject(value.transitions)) {
@@ -196,13 +212,15 @@ function isLowerOptions(value: unknown): value is LowerOptions {
   if (!isPlainObject(value.timeline) || !isPlainObject(value.transitions)) return false;
   const timeline = value.timeline;
   const transitions = value.transitions;
-  return value.columns.every((column) => typeof column === "string")
-    && isPlainObject(timeline.initial_silence_ms)
-    && isPlainObject(timeline.final_silence_ms)
-    && isPlainObject(timeline.duration_floors)
-    && isPlainObject(timeline.event_points)
-    && isPlainObject(transitions.default_transition_ms)
-    && isPlainObject(transitions.blend);
+  return (
+    value.columns.every((column) => typeof column === "string") &&
+    isPlainObject(timeline.initial_silence_ms) &&
+    isPlainObject(timeline.final_silence_ms) &&
+    isPlainObject(timeline.duration_floors) &&
+    isPlainObject(timeline.event_points) &&
+    isPlainObject(transitions.default_transition_ms) &&
+    isPlainObject(transitions.blend)
+  );
 }
 
 type ControlFieldOperation = "set" | "add" | "mul" | "max" | "min" | "unset";
@@ -330,7 +348,9 @@ const AFFECT_PROJECTION_TABLE: readonly AffectProjectionRow[] = [
   { backendKey: "jitter", affectField: "jitterScale", mode: "scale", floor: 0 },
 ];
 
-function isFeatureObject(value: FeatureValue | undefined): value is { readonly [key: string]: FeatureValue } {
+function isFeatureObject(
+  value: FeatureValue | undefined,
+): value is { readonly [key: string]: FeatureValue } {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
@@ -376,12 +396,12 @@ function parseControlFields(value: FeatureValue | undefined): Record<string, Res
     }
     const operation = fieldValue.op;
     if (
-      operation !== "set"
-      && operation !== "add"
-      && operation !== "mul"
-      && operation !== "max"
-      && operation !== "min"
-      && operation !== "unset"
+      operation !== "set" &&
+      operation !== "add" &&
+      operation !== "mul" &&
+      operation !== "max" &&
+      operation !== "min" &&
+      operation !== "unset"
     ) {
       throw new Error(`E_HRG_LOWER_CONTROL_WINDOW: field '${fieldName}' has invalid operation`);
     }
@@ -428,7 +448,10 @@ function resolveWindowSpan(
   return endMs > startMs ? { startMs, endMs } : null;
 }
 
-function resolveControlField(baseValue: number | undefined, field: ResolvedControlField): number | undefined {
+function resolveControlField(
+  baseValue: number | undefined,
+  field: ResolvedControlField,
+): number | undefined {
   switch (field.operation) {
     case "unset":
       return undefined;
@@ -439,9 +462,17 @@ function resolveControlField(baseValue: number | undefined, field: ResolvedContr
     case "mul":
       return applyScalarOp("mul", baseValue ?? 0, field.value ?? 1);
     case "max":
-      return applyScalarOp("max", baseValue ?? Number.NEGATIVE_INFINITY, field.value ?? Number.NEGATIVE_INFINITY);
+      return applyScalarOp(
+        "max",
+        baseValue ?? Number.NEGATIVE_INFINITY,
+        field.value ?? Number.NEGATIVE_INFINITY,
+      );
     case "min":
-      return applyScalarOp("min", baseValue ?? Number.POSITIVE_INFINITY, field.value ?? Number.POSITIVE_INFINITY);
+      return applyScalarOp(
+        "min",
+        baseValue ?? Number.POSITIVE_INFINITY,
+        field.value ?? Number.POSITIVE_INFINITY,
+      );
   }
 }
 
@@ -456,7 +487,12 @@ function resolveLocusFormants(
   const categories = options.transitions.vowel_category;
   const vowelPhoneme = vowel.get(phonemeKey);
   const obstruentPhoneme = obstruent.get(phonemeKey);
-  if (!loci || !categories || typeof vowelPhoneme !== "string" || typeof obstruentPhoneme !== "string") {
+  if (
+    !loci ||
+    !categories ||
+    typeof vowelPhoneme !== "string" ||
+    typeof obstruentPhoneme !== "string"
+  ) {
     return [];
   }
   const category = categories[vowelPhoneme];
@@ -464,10 +500,12 @@ function resolveLocusFormants(
   const formants = categoryId == null ? undefined : loci[obstruentPhoneme]?.[String(categoryId)];
   if (!formants) return [];
   const rounded = options.transitions.rounded_sonorant_consonant?.includes(vowelPhoneme) ?? false;
-  const palatalOrDental = options.transitions.obstruent_place?.[obstruentPhoneme]?.palatal_or_dental ?? false;
-  const f2Back = edge === "forward"
-    ? options.transitions.f2_back?.[vowelPhoneme]?.forward === true
-    : options.transitions.f2_back?.[vowelPhoneme]?.backward === true;
+  const palatalOrDental =
+    options.transitions.obstruent_place?.[obstruentPhoneme]?.palatal_or_dental ?? false;
+  const f2Back =
+    edge === "forward"
+      ? options.transitions.f2_back?.[vowelPhoneme]?.forward === true
+      : options.transitions.f2_back?.[vowelPhoneme]?.backward === true;
   const resolved: Array<{ key: string; boundaryValue: number; spanMs: number }> = [];
   for (const key of options.transitions.blend.keys) {
     const entry = formants[key];
@@ -566,19 +604,22 @@ function renderLayeredF0(
   speakerParams?: Readonly<Record<string, unknown>>,
 ): Array<{ time: number; outputTime: number; f0: number }> {
   const framePeriod = requirePositiveNumber(model.frame_period_sec, "f0_model.frame_period_sec");
-  const outputFramePeriod = model.output_frame_period_sec == null
-    ? framePeriod
-    : requirePositiveNumber(model.output_frame_period_sec, "f0_model.output_frame_period_sec");
+  const outputFramePeriod =
+    model.output_frame_period_sec == null
+      ? framePeriod
+      : requirePositiveNumber(model.output_frame_period_sec, "f0_model.output_frame_period_sec");
   const frameCount = Math.ceil(totalDurationSec / framePeriod) + 1;
   const alpha = requireFiniteNumber(model.filter.default_alpha, "f0_model.filter.default_alpha");
   const resolvedAlpha = model.filter.alpha_param
-    ? optionalSpeakerNumber(speakerParams, model.filter.alpha_param) ?? alpha
+    ? (optionalSpeakerNumber(speakerParams, model.filter.alpha_param) ?? alpha)
     : alpha;
   const scale = model.speaker_scale;
   const f0Minimum = scale ? resolveSpeakerNumber(speakerParams, scale.minimum_param) : 0;
   const f0ScaleFactor = scale ? resolveSpeakerNumber(speakerParams, scale.range_param) : 1;
   const scalePivot = scale ? requireFiniteNumber(scale.pivot, "f0_model.speaker_scale.pivot") : 0;
-  const divisor = scale ? requirePositiveNumber(scale.divisor, "f0_model.speaker_scale.divisor") : 1;
+  const divisor = scale
+    ? requirePositiveNumber(scale.divisor, "f0_model.speaker_scale.divisor")
+    : 1;
   const outputScale = scale
     ? requirePositiveNumber(scale.output_scale, "f0_model.speaker_scale.output_scale")
     : 1;
@@ -595,20 +636,22 @@ function renderLayeredF0(
   }
   const dectalkControllerFrames = layerNames.reduce((total, name) => {
     if (model.layers[name]?.type !== "dectalk_segmental") return total;
-    return total + (commandsByLayer.get(name) ?? []).reduce(
-      // Ph_inton2.c's tcumdur excludes the final GEN_SIL even though
-      // pht0draw() consumes that allophone in the segmental controller.
-      (layerTotal, command) => layerTotal + (
-        command.tag === "f0_segmental_terminal_silence" ? 0 : command.durationFrames ?? 0
-      ),
-      0,
+    return (
+      total +
+      (commandsByLayer.get(name) ?? []).reduce(
+        // Ph_inton2.c's tcumdur excludes the final GEN_SIL even though
+        // pht0draw() consumes that allophone in the segmental controller.
+        (layerTotal, command) =>
+          layerTotal +
+          (command.tag === "f0_segmental_terminal_silence" ? 0 : (command.durationFrames ?? 0)),
+        0,
+      )
     );
   }, 0);
   // Ph_drwt02.c clocks its 17-point baseline over tcumdur, the controller
   // allophones through the dummy carrier; terminal silence is not in tcumdur.
-  const profileDurationSec = dectalkControllerFrames > 0
-    ? dectalkControllerFrames * framePeriod
-    : totalDurationSec;
+  const profileDurationSec =
+    dectalkControllerFrames > 0 ? dectalkControllerFrames * framePeriod : totalDurationSec;
   let initialTotal = 0;
   for (const name of layerNames) {
     const config = model.layers[name];
@@ -643,38 +686,54 @@ function renderLayeredF0(
     const commandStart = commandDescriptors.length / commandDescriptorWidth;
     const impulse = config.type === "impulse";
     const dectalkSegmental = config.type === "dectalk_segmental";
-    const decayCode = impulse && config.decay
-      ? decayCodes[config.decay]
-      : 0;
-    const initialDecayDivisor = impulse && config.decay === "halving"
-      ? requirePositiveNumber(config.initial_decay_divisor, `f0_model.layers.${name}.initial_decay_divisor`)
-      : 0;
-    const terminationThreshold = impulse && config.decay !== "step_plus_ramp"
-      ? requirePositiveNumber(config.termination_threshold, `f0_model.layers.${name}.termination_threshold`)
-      : 0;
-    const exponentialFactor = impulse && config.decay === "exponential"
-      ? requirePositiveNumber(config.exponential_factor, `f0_model.layers.${name}.exponential_factor`)
-      : 0;
+    const decayCode = impulse && config.decay ? decayCodes[config.decay] : 0;
+    const initialDecayDivisor =
+      impulse && config.decay === "halving"
+        ? requirePositiveNumber(
+            config.initial_decay_divisor,
+            `f0_model.layers.${name}.initial_decay_divisor`,
+          )
+        : 0;
+    const terminationThreshold =
+      impulse && config.decay !== "step_plus_ramp"
+        ? requirePositiveNumber(
+            config.termination_threshold,
+            `f0_model.layers.${name}.termination_threshold`,
+          )
+        : 0;
+    const exponentialFactor =
+      impulse && config.decay === "exponential"
+        ? requirePositiveNumber(
+            config.exponential_factor,
+            `f0_model.layers.${name}.exponential_factor`,
+          )
+        : 0;
     let cursorLive = true;
     for (const command of layerCommands) {
       const reachable = cursorLive && command.time <= maximumCommandTime;
       if (!reachable) cursorLive = false;
-      const durationFrames = (impulse && reachable) || dectalkSegmental
-        ? requirePositiveNumber(command.durationFrames, `f0_control.${name}.durationFrames`)
-        : typeof command.durationFrames === "number" && Number.isFinite(command.durationFrames)
-          ? command.durationFrames
-          : 0;
+      const durationFrames =
+        (impulse && reachable) || dectalkSegmental
+          ? requirePositiveNumber(command.durationFrames, `f0_control.${name}.durationFrames`)
+          : typeof command.durationFrames === "number" && Number.isFinite(command.durationFrames)
+            ? command.durationFrames
+            : 0;
       const profileStart = profilePool.length;
-      const profileCount = config.type === "profile" || dectalkSegmental
-        ? command.profilePoints?.length ?? 0
-        : 0;
+      const profileCount =
+        config.type === "profile" || dectalkSegmental ? (command.profilePoints?.length ?? 0) : 0;
       if (dectalkSegmental && profileCount !== 3) {
         throw new Error(
           `E_HRG_LOWER_F0_MODEL: f0_control.${name}.profilePoints requires [voiceless, plosive, stressed]`,
         );
       }
       if (profileCount > 0 && command.profilePoints) profilePool.push(...command.profilePoints);
-      commandDescriptors.push(command.time, command.value, durationFrames, profileStart, profileCount);
+      commandDescriptors.push(
+        command.time,
+        command.value,
+        durationFrames,
+        profileStart,
+        profileCount,
+      );
     }
     layerDescriptors.push(
       layerTypeCodes[config.type],
@@ -692,7 +751,11 @@ function renderLayeredF0(
     profileDurationSec,
     coefficientTwoPoleFilterMode,
     resolvedAlpha,
-    0, 0, 0, 0, 0,
+    0,
+    0,
+    0,
+    0,
+    0,
     scale ? 1 : 0,
     f0Minimum,
     f0ScaleFactor,
@@ -757,9 +820,7 @@ function resolveF0AtTime(
     const spanMs = right.timeMs - left.timeMs;
     if (Math.abs(spanMs) < 1e-6) return left;
     if (sampling === "step") {
-      return Math.abs(timeMs - right.timeMs) < 1e-6
-        ? { ...right, timeMs }
-        : { ...left, timeMs };
+      return Math.abs(timeMs - right.timeMs) < 1e-6 ? { ...right, timeMs } : { ...left, timeMs };
     }
     const fraction = (timeMs - left.timeMs) / spanMs;
     return {
@@ -806,13 +867,14 @@ export function lowerToFrames(
     "transitions.default_transition_ms.value",
     utterance,
   );
-  const nativeFrameMs = options.transitions.native_frame_ms == null
-    ? 0
-    : requirePolicyNumber(
-      options.transitions.native_frame_ms.value,
-      "transitions.native_frame_ms.value",
-      utterance,
-    );
+  const nativeFrameMs =
+    options.transitions.native_frame_ms == null
+      ? 0
+      : requirePolicyNumber(
+          options.transitions.native_frame_ms.value,
+          "transitions.native_frame_ms.value",
+          utterance,
+        );
   const blendFactor = options.transitions.blend.factor.value;
   if (!Number.isFinite(blendFactor) || blendFactor < 0 || blendFactor > 1) {
     utterance.diagnostics.error(
@@ -820,10 +882,13 @@ export function lowerToFrames(
       { path: "transitions.blend.factor.value", value: blendFactor },
       "HRG_LOWER_POLICY_REJECTED",
     );
-    throw new Error("E_HRG_LOWER_POLICY_NUMBER: 'transitions.blend.factor.value' must be within [0,1]");
+    throw new Error(
+      "E_HRG_LOWER_POLICY_NUMBER: 'transitions.blend.factor.value' must be within [0,1]",
+    );
   }
 
-  const segmentItems = utterance.segments.listItems()
+  const segmentItems = utterance.segments
+    .listItems()
     .filter((item) => item.get("active") !== false);
 
   const timings: SegmentTiming[] = [];
@@ -862,7 +927,9 @@ export function lowerToFrames(
         { itemId: item.id },
         "HRG_LOWER_TIME_REQUIRED",
       );
-      throw new Error(`E_HRG_LOWER_TIME_REQUIRED: Segment '${item.id}' requires resolved interval timing`);
+      throw new Error(
+        `E_HRG_LOWER_TIME_REQUIRED: Segment '${item.id}' requires resolved interval timing`,
+      );
     }
     const segmentType = item.get(typeKey);
     const isStopRelease = segmentType === "stop_release" || segmentType === "stop_aspiration";
@@ -882,9 +949,9 @@ export function lowerToFrames(
     }
     const resolvedDurationMs = endMs - startMs;
     if (
-      resolvedDurationMs <= 0
-      || Math.abs(resolvedDurationMs - effectiveDurationMs) > 1e-6
-      || (previousEndMs != null && Math.abs(startMs - previousEndMs) > 1e-6)
+      resolvedDurationMs <= 0 ||
+      Math.abs(resolvedDurationMs - effectiveDurationMs) > 1e-6 ||
+      (previousEndMs != null && Math.abs(startMs - previousEndMs) > 1e-6)
     ) {
       utterance.diagnostics.error(
         "Segment duration and resolved interval timing disagree",
@@ -958,12 +1025,14 @@ export function lowerToFrames(
     addLinearTransition(timing.item, timing.durationMs, "trailing", transitionMs, ({ startMs }) => {
       const currentPhoneme = timing.item.get(phonemeKey);
       const nextPhoneme = nextTiming.item.get(phonemeKey);
-      const currentStepKeys = typeof currentPhoneme === "string"
-        ? options.transitions.blend.step_keys_by_phoneme?.[currentPhoneme] ?? []
-        : [];
-      const nextStepKeys = typeof nextPhoneme === "string"
-        ? options.transitions.blend.step_keys_by_phoneme?.[nextPhoneme] ?? []
-        : [];
+      const currentStepKeys =
+        typeof currentPhoneme === "string"
+          ? (options.transitions.blend.step_keys_by_phoneme?.[currentPhoneme] ?? [])
+          : [];
+      const nextStepKeys =
+        typeof nextPhoneme === "string"
+          ? (options.transitions.blend.step_keys_by_phoneme?.[nextPhoneme] ?? [])
+          : [];
       const fields: Record<string, number> = {};
       for (const key of options.transitions.blend.keys) {
         if (currentStepKeys.includes(key) || nextStepKeys.includes(key)) continue;
@@ -984,12 +1053,14 @@ export function lowerToFrames(
       addLinearTransition(timing.item, timing.durationMs, "leading", transitionMs, ({ endMs }) => {
         const currentPhoneme = timing.item.get(phonemeKey);
         const previousPhoneme = previous.item.get(phonemeKey);
-        const currentStepKeys = typeof currentPhoneme === "string"
-          ? options.transitions.blend.step_keys_by_phoneme?.[currentPhoneme] ?? []
-          : [];
-        const previousStepKeys = typeof previousPhoneme === "string"
-          ? options.transitions.blend.step_keys_by_phoneme?.[previousPhoneme] ?? []
-          : [];
+        const currentStepKeys =
+          typeof currentPhoneme === "string"
+            ? (options.transitions.blend.step_keys_by_phoneme?.[currentPhoneme] ?? [])
+            : [];
+        const previousStepKeys =
+          typeof previousPhoneme === "string"
+            ? (options.transitions.blend.step_keys_by_phoneme?.[previousPhoneme] ?? [])
+            : [];
         const fields: Record<string, number> = {};
         for (const key of options.transitions.blend.keys) {
           if (currentStepKeys.includes(key) || previousStepKeys.includes(key)) continue;
@@ -1028,49 +1099,65 @@ export function lowerToFrames(
       const previous = timings[index - 1];
       if (sonorantF2.forward && previous && neighborTypes.has(String(previous.item.get(typeKey)))) {
         const previousValue = previous.item.get(sonorantF2.key);
-        addLinearTransition(timing.item, timing.durationMs, "leading", spanMs, ({ startMs, endMs }) => {
-          if (typeof previousValue !== "number") return null;
-          return {
-            startMs,
-            endMs,
-            fields: {},
-            linearFields: {
-              [sonorantF2.key]: {
-                startValue: currentValue + (previousValue - currentValue) * neighborWeight,
-                endValue: currentValue,
+        addLinearTransition(
+          timing.item,
+          timing.durationMs,
+          "leading",
+          spanMs,
+          ({ startMs, endMs }) => {
+            if (typeof previousValue !== "number") return null;
+            return {
+              startMs,
+              endMs,
+              fields: {},
+              linearFields: {
+                [sonorantF2.key]: {
+                  startValue: currentValue + (previousValue - currentValue) * neighborWeight,
+                  endValue: currentValue,
+                },
               },
-            },
-          };
-        });
+            };
+          },
+        );
       }
       const next = timings[index + 1];
       if (sonorantF2.backward && next && neighborTypes.has(String(next.item.get(typeKey)))) {
         const nextValue = next.item.get(sonorantF2.key);
         const transitionSpanMs = Math.min(spanMs, timing.durationMs);
-        addLinearTransition(timing.item, timing.durationMs, "trailing", transitionSpanMs, ({ startMs, endMs }) => {
-          if (typeof nextValue !== "number") return null;
-          return {
-            startMs,
-            endMs,
-            fields: {},
-            linearFields: {
-              [sonorantF2.key]: {
-                startValue: currentValue,
-                endValue: currentValue + (nextValue - currentValue) * neighborWeight,
+        addLinearTransition(
+          timing.item,
+          timing.durationMs,
+          "trailing",
+          transitionSpanMs,
+          ({ startMs, endMs }) => {
+            if (typeof nextValue !== "number") return null;
+            return {
+              startMs,
+              endMs,
+              fields: {},
+              linearFields: {
+                [sonorantF2.key]: {
+                  startValue: currentValue,
+                  endValue: currentValue + (nextValue - currentValue) * neighborWeight,
+                },
               },
-            },
-          };
-        });
+            };
+          },
+        );
       }
     });
   }
   const locusGlueTypes = new Set(options.transitions.locus_glue_types ?? []);
-  const selectedLoci = context.speakerSex === "female" && options.transitions.loci_female
-    ? options.transitions.loci_female
-    : options.transitions.loci;
+  const selectedLoci =
+    context.speakerSex === "female" && options.transitions.loci_female
+      ? options.transitions.loci_female
+      : options.transitions.loci;
   const adjacentLocusObstruent = (index: number, direction: -1 | 1): Item | undefined => {
     let neighborIndex = index + direction;
-    while (timings[neighborIndex] && locusGlueTypes.has(String(timings[neighborIndex].item.get(typeKey)))) {
+    while (
+      timings[neighborIndex] &&
+      locusGlueTypes.has(String(timings[neighborIndex].item.get(typeKey)))
+    ) {
       neighborIndex += direction;
     }
     const neighbor = timings[neighborIndex]?.item;
@@ -1094,21 +1181,27 @@ export function lowerToFrames(
         )) {
           const currentValue = timing.item.get(formant.key);
           let applied = false;
-          addLinearTransition(timing.item, timing.durationMs, "leading", formant.spanMs, ({ startMs, endMs }) => {
-            if (typeof currentValue !== "number") return null;
-            applied = true;
-            return {
-              startMs,
-              endMs,
-              fields: {},
-              linearFields: {
-                [formant.key]: {
-                  startValue: formant.boundaryValue,
-                  endValue: currentValue,
+          addLinearTransition(
+            timing.item,
+            timing.durationMs,
+            "leading",
+            formant.spanMs,
+            ({ startMs, endMs }) => {
+              if (typeof currentValue !== "number") return null;
+              applied = true;
+              return {
+                startMs,
+                endMs,
+                fields: {},
+                linearFields: {
+                  [formant.key]: {
+                    startValue: formant.boundaryValue,
+                    endValue: currentValue,
+                  },
                 },
-              },
-            };
-          });
+              };
+            },
+          );
           if (!applied) continue;
           // DECtalk p_us_st1.c applies the same locus boundary while drawing
           // the preceding plosive, with durtran equal to the full phone.
@@ -1119,9 +1212,10 @@ export function lowerToFrames(
             const obstruentValue = previousObstruent.get(formant.key);
             if (typeof obstruentValue === "number" && previousTiming.durationMs > 0) {
               const transitionElapsedMs = Math.max(0, previousTiming.durationMs - nativeFrameMs);
-              const closureEndValue = obstruentValue
-                + (formant.boundaryValue - obstruentValue)
-                  * Math.min(1, transitionElapsedMs / previousTiming.durationMs);
+              const closureEndValue =
+                obstruentValue +
+                (formant.boundaryValue - obstruentValue) *
+                  Math.min(1, transitionElapsedMs / previousTiming.durationMs);
               appendTransition(previousObstruent, {
                 startMs: Math.min(nativeFrameMs, previousTiming.durationMs),
                 endMs: previousTiming.durationMs,
@@ -1138,19 +1232,28 @@ export function lowerToFrames(
             let transitionElapsedMs = Math.max(0, previousTiming.durationMs - nativeFrameMs);
             for (let glueIndex = previousTimingIndex + 1; glueIndex < index; glueIndex += 1) {
               const glueTiming = timings[glueIndex];
-              if (!glueTiming || !locusGlueTypes.has(String(glueTiming.item.get(typeKey)))) continue;
-              const remainingTransitionMs = Math.max(0, previousTiming.durationMs - transitionElapsedMs);
+              if (!glueTiming || !locusGlueTypes.has(String(glueTiming.item.get(typeKey))))
+                continue;
+              const remainingTransitionMs = Math.max(
+                0,
+                previousTiming.durationMs - transitionElapsedMs,
+              );
               const glueTransitionMs = Math.min(glueTiming.durationMs, remainingTransitionMs);
-              const startValue = typeof obstruentValue !== "number"
-                ? formant.boundaryValue
-                : obstruentValue
-                  + (formant.boundaryValue - obstruentValue)
-                    * Math.min(1, transitionElapsedMs / previousTiming.durationMs);
-              const endValue = typeof obstruentValue !== "number"
-                ? formant.boundaryValue
-                : obstruentValue
-                  + (formant.boundaryValue - obstruentValue)
-                    * Math.min(1, (transitionElapsedMs + glueTransitionMs) / previousTiming.durationMs);
+              const startValue =
+                typeof obstruentValue !== "number"
+                  ? formant.boundaryValue
+                  : obstruentValue +
+                    (formant.boundaryValue - obstruentValue) *
+                      Math.min(1, transitionElapsedMs / previousTiming.durationMs);
+              const endValue =
+                typeof obstruentValue !== "number"
+                  ? formant.boundaryValue
+                  : obstruentValue +
+                    (formant.boundaryValue - obstruentValue) *
+                      Math.min(
+                        1,
+                        (transitionElapsedMs + glueTransitionMs) / previousTiming.durationMs,
+                      );
               appendTransition(glueTiming.item, {
                 startMs: 0,
                 endMs: glueTransitionMs,
@@ -1176,20 +1279,26 @@ export function lowerToFrames(
         )) {
           const spanMs = Math.min(timing.durationMs, formant.spanMs);
           const currentValue = timing.item.get(formant.key);
-          addLinearTransition(timing.item, timing.durationMs, "trailing", spanMs, ({ startMs, endMs }) => {
-            if (typeof currentValue !== "number") return null;
-            return {
-              startMs,
-              endMs,
-              fields: {},
-              linearFields: {
-                [formant.key]: {
-                  startValue: currentValue,
-                  endValue: formant.boundaryValue,
+          addLinearTransition(
+            timing.item,
+            timing.durationMs,
+            "trailing",
+            spanMs,
+            ({ startMs, endMs }) => {
+              if (typeof currentValue !== "number") return null;
+              return {
+                startMs,
+                endMs,
+                fields: {},
+                linearFields: {
+                  [formant.key]: {
+                    startValue: currentValue,
+                    endValue: formant.boundaryValue,
+                  },
                 },
-              },
-            };
-          });
+              };
+            },
+          );
         }
       }
     });
@@ -1205,7 +1314,9 @@ export function lowerToFrames(
         { itemId: sourceItem.id },
         "HRG_LOWER_CONTROL_WINDOW_REJECTED",
       );
-      throw new Error(`E_HRG_LOWER_CONTROL_WINDOW: Segment '${sourceItem.id}' has unstamped controls`);
+      throw new Error(
+        `E_HRG_LOWER_CONTROL_WINDOW: Segment '${sourceItem.id}' has unstamped controls`,
+      );
     }
     rawWindows.forEach((rawWindow) => {
       if (!isFeatureObject(rawWindow)) {
@@ -1214,14 +1325,17 @@ export function lowerToFrames(
           { itemId: sourceItem.id },
           "HRG_LOWER_CONTROL_WINDOW_REJECTED",
         );
-        throw new Error(`E_HRG_LOWER_CONTROL_WINDOW: Segment '${sourceItem.id}' has invalid controls`);
+        throw new Error(
+          `E_HRG_LOWER_CONTROL_WINDOW: Segment '${sourceItem.id}' has invalid controls`,
+        );
       }
       const targetName = typeof rawWindow.target === "string" ? rawWindow.target : "current";
-      const targetIndex = targetName === "next"
-        ? sourceIndex + 1
-        : targetName === "prev"
-          ? sourceIndex - 1
-          : sourceIndex;
+      const targetIndex =
+        targetName === "next"
+          ? sourceIndex + 1
+          : targetName === "prev"
+            ? sourceIndex - 1
+            : sourceIndex;
       const targetTiming = timings[targetIndex];
       if (!targetTiming) {
         utterance.diagnostics.warn(
@@ -1258,7 +1372,11 @@ export function lowerToFrames(
         );
         throw error;
       }
-      const resolved: ResolvedControlWindow = { ...span, fields, decisionId: windowWrite.decisionId };
+      const resolved: ResolvedControlWindow = {
+        ...span,
+        fields,
+        decisionId: windowWrite.decisionId,
+      };
       const targetWindows = controlWindowsByItem.get(targetTiming.item);
       if (targetWindows) targetWindows.push(resolved);
       else controlWindowsByItem.set(targetTiming.item, [resolved]);
@@ -1275,11 +1393,11 @@ export function lowerToFrames(
     const declarationOrder = finiteFeatureNumber(item.get("declaration_order"));
     const precedence = finiteFeatureNumber(item.get("precedence"));
     if (
-      !deltaWrite
-      || !Array.isArray(rawFields)
-      || !isFeatureObject(rawScope)
-      || declarationOrder == null
-      || precedence == null
+      !deltaWrite ||
+      !Array.isArray(rawFields) ||
+      !isFeatureObject(rawScope) ||
+      declarationOrder == null ||
+      precedence == null
     ) {
       utterance.diagnostics.error(
         "Affect Item is missing stamped delta fields or typed scope during final lowering",
@@ -1300,17 +1418,18 @@ export function lowerToFrames(
       }
       fields.add(field);
     }
-    const scope = rawScope.kind === "utterance"
-      ? { kind: "utterance" as const }
-      : rawScope.kind === "token_range"
-          && finiteFeatureNumber(rawScope.startToken) != null
-          && finiteFeatureNumber(rawScope.endToken) != null
-        ? {
-            kind: "token_range" as const,
-            startToken: finiteFeatureNumber(rawScope.startToken) ?? 0,
-            endToken: finiteFeatureNumber(rawScope.endToken) ?? 0,
-          }
-        : null;
+    const scope =
+      rawScope.kind === "utterance"
+        ? { kind: "utterance" as const }
+        : rawScope.kind === "token_range" &&
+            finiteFeatureNumber(rawScope.startToken) != null &&
+            finiteFeatureNumber(rawScope.endToken) != null
+          ? {
+              kind: "token_range" as const,
+              startToken: finiteFeatureNumber(rawScope.startToken) ?? 0,
+              endToken: finiteFeatureNumber(rawScope.endToken) ?? 0,
+            }
+          : null;
     if (!scope) {
       utterance.diagnostics.error(
         "Affect Item has an invalid typed scope",
@@ -1330,16 +1449,20 @@ export function lowerToFrames(
       );
       throw error;
     }
-    return [{
-      declarationOrder,
-      decisionId: deltaWrite.decisionId,
-      fields,
-      precedence,
-      scope,
-      values,
-    }];
+    return [
+      {
+        declarationOrder,
+        decisionId: deltaWrite.decisionId,
+        fields,
+        precedence,
+        scope,
+        values,
+      },
+    ];
   });
-  const globalAffectDirectives = affectDirectives.filter((directive) => directive.scope.kind === "utterance");
+  const globalAffectDirectives = affectDirectives.filter(
+    (directive) => directive.scope.kind === "utterance",
+  );
   const wordItems = utterance.getRelation("Word")?.listItems() ?? [];
   const wordIndexByItem = new Map(wordItems.map((item, index) => [item, index]));
   const tokenIndexForSegment = (item: Item): number | null => {
@@ -1362,27 +1485,33 @@ export function lowerToFrames(
     }
     if (!item) return { values, decisions };
     const tokenIndex = tokenIndexForSegment(item);
-    const local = affectDirectives.filter((directive) => (
-      directive.scope.kind === "token_range"
-      && tokenIndex != null
-      && tokenIndex >= directive.scope.startToken
-      && tokenIndex <= directive.scope.endToken
-    ));
-    if (tokenIndex == null && affectDirectives.some((directive) => directive.scope.kind === "token_range")) {
+    const local = affectDirectives.filter(
+      (directive) =>
+        directive.scope.kind === "token_range" &&
+        tokenIndex != null &&
+        tokenIndex >= directive.scope.startToken &&
+        tokenIndex <= directive.scope.endToken,
+    );
+    if (
+      tokenIndex == null &&
+      affectDirectives.some((directive) => directive.scope.kind === "token_range")
+    ) {
       utterance.diagnostics.error(
         "Local Affect cannot resolve a Segment through Word/SylStructure identity",
         { itemId: item.id },
         "HRG_LOWER_AFFECT_ATTACHMENT_REQUIRED",
       );
-      throw new Error(`E_HRG_LOWER_AFFECT_ATTACHMENT_REQUIRED: Segment '${item.id}' has no Word attachment`);
+      throw new Error(
+        `E_HRG_LOWER_AFFECT_ATTACHMENT_REQUIRED: Segment '${item.id}' has no Word attachment`,
+      );
     }
     for (const field of AFFECT_FIELDS) {
       const winner = local
         .filter((directive) => directive.fields.has(field))
-        .sort((left, right) => (
-          right.precedence - left.precedence
-          || right.declarationOrder - left.declarationOrder
-        ))[0];
+        .sort(
+          (left, right) =>
+            right.precedence - left.precedence || right.declarationOrder - left.declarationOrder,
+        )[0];
       if (!winner) continue;
       values[field] = composeAffectField(values[field], winner.values[field], field);
       decisions[field] = winner.decisionId;
@@ -1396,25 +1525,31 @@ export function lowerToFrames(
   if (!Number.isFinite(globalPauseScale) || globalPauseScale <= 0) {
     utterance.diagnostics.error(
       "Global Affect duration/pause projection must be finite and positive",
-      { durationScale: globalAffect.values.durationScale, pauseScale: globalAffect.values.pauseScale },
+      {
+        durationScale: globalAffect.values.durationScale,
+        pauseScale: globalAffect.values.pauseScale,
+      },
       "HRG_LOWER_AFFECT_TIME_REJECTED",
     );
     throw new Error("E_HRG_LOWER_AFFECT_TIME: global duration/pause scale must be positive");
   }
   const leadingAxisMs = timings[0]?.startMs ?? 0;
-  let outputCursorMs = initialSilenceMs * globalPauseScale
-    + leadingAxisMs * globalAffect.values.durationScale;
+  let outputCursorMs =
+    initialSilenceMs * globalPauseScale + leadingAxisMs * globalAffect.values.durationScale;
   for (const timing of timings) {
     const affect = affectByItem.get(timing.item) ?? globalAffect;
-    const segmentScale = affect.values.durationScale
-      * (timing.item.get(typeKey) === "silence" ? affect.values.pauseScale : 1);
+    const segmentScale =
+      affect.values.durationScale *
+      (timing.item.get(typeKey) === "silence" ? affect.values.pauseScale : 1);
     if (!Number.isFinite(segmentScale) || segmentScale <= 0) {
       utterance.diagnostics.error(
         "Segment Affect duration/pause projection must be finite and positive",
         { itemId: timing.item.id, scale: segmentScale },
         "HRG_LOWER_AFFECT_TIME_REJECTED",
       );
-      throw new Error(`E_HRG_LOWER_AFFECT_TIME: Segment '${timing.item.id}' scale must be positive`);
+      throw new Error(
+        `E_HRG_LOWER_AFFECT_TIME: Segment '${timing.item.id}' scale must be positive`,
+      );
     }
     outputTimingByItem.set(timing.item, { startMs: outputCursorMs, scale: segmentScale });
     outputCursorMs += timing.durationMs * segmentScale;
@@ -1438,11 +1573,11 @@ export function lowerToFrames(
       const valueHz = point.get("value");
       const valueWrite = point.latestWrite("value");
       if (
-        resolvedTimeMs == null
-        || !Number.isFinite(resolvedTimeMs)
-        || typeof valueHz !== "number"
-        || !Number.isFinite(valueHz)
-        || !valueWrite
+        resolvedTimeMs == null ||
+        !Number.isFinite(resolvedTimeMs) ||
+        typeof valueHz !== "number" ||
+        !Number.isFinite(valueHz) ||
+        !valueWrite
       ) {
         utterance.diagnostics.error(
           "Explicit F0 point is unresolved, invalid, or unstamped during final lowering",
@@ -1487,7 +1622,9 @@ export function lowerToFrames(
       { firstPointMs: f0Points[0]?.timeMs },
       "HRG_LOWER_F0_INITIAL_POINT_REQUIRED",
     );
-    throw new Error("E_HRG_LOWER_F0_INITIAL_POINT: point_interpolation requires an explicit point at 0 ms");
+    throw new Error(
+      "E_HRG_LOWER_F0_INITIAL_POINT: point_interpolation requires an explicit point at 0 ms",
+    );
   }
 
   const phraseCommands = utterance.getRelation("PhraseCommand")?.listItems() ?? [];
@@ -1500,7 +1637,9 @@ export function lowerToFrames(
         { renderer: options.f0?.renderer.type },
         "HRG_LOWER_F0_RENDERER_REJECTED",
       );
-      throw new Error("E_HRG_LOWER_F0_RENDERER: PhraseCommand/Tilt requires the layered_additive policy");
+      throw new Error(
+        "E_HRG_LOWER_F0_RENDERER: PhraseCommand/Tilt requires the layered_additive policy",
+      );
     }
     if (!context.f0Model || context.f0Model.type !== "layered_additive") {
       utterance.diagnostics.error(
@@ -1520,13 +1659,13 @@ export function lowerToFrames(
       const value = item.get("value");
       const valueWrite = item.latestWrite("value");
       if (
-        timeMs == null
-        || !Number.isFinite(timeMs)
-        || typeof layer !== "string"
-        || layer.length === 0
-        || typeof value !== "number"
-        || !Number.isFinite(value)
-        || !valueWrite
+        timeMs == null ||
+        !Number.isFinite(timeMs) ||
+        typeof layer !== "string" ||
+        layer.length === 0 ||
+        typeof value !== "number" ||
+        !Number.isFinite(value) ||
+        !valueWrite
       ) {
         utterance.diagnostics.error(
           "Layered intonation Item is unresolved, invalid, or unstamped during final lowering",
@@ -1538,7 +1677,9 @@ export function lowerToFrames(
       const durationFrames = finiteFeatureNumber(item.get("duration_frames"));
       const rawProfilePoints = item.get("profile_points");
       const profilePoints = Array.isArray(rawProfilePoints)
-        ? rawProfilePoints.filter((entry): entry is number => typeof entry === "number" && Number.isFinite(entry))
+        ? rawProfilePoints.filter(
+            (entry): entry is number => typeof entry === "number" && Number.isFinite(entry),
+          )
         : undefined;
       const tag = item.get("tag");
       const layerType = f0Model.layers[layer]?.type;
@@ -1546,9 +1687,10 @@ export function lowerToFrames(
       // commands across the synthesized initial-silence edge. When the exact
       // segmental stream exists, its integer durations own this projection
       // below; acoustic Segment timing is not the DECtalk command clock.
-      const outputTimeMs = layerType === "persistent" || layerType === "impulse" || layerType === "glide"
-        ? timeMs + (usesSegmentalControllerClock ? 0 : initialSilenceMs)
-        : timeMs;
+      const outputTimeMs =
+        layerType === "persistent" || layerType === "impulse" || layerType === "glide"
+          ? timeMs + (usesSegmentalControllerClock ? 0 : initialSilenceMs)
+          : timeMs;
       return {
         layer,
         time: Math.max(0, outputTimeMs) / 1000,
@@ -1580,12 +1722,16 @@ export function lowerToFrames(
         const command = commands[index];
         if (!command) continue;
         const layerType = f0Model.layers[command.layer]?.type;
-        if (layerType !== "persistent" && layerType !== "impulse" && layerType !== "glide") continue;
-        const anchor = controllerAnchors.find(
-          (candidate) => candidate.acousticTime >= command.time - 1e-9,
-        ) ?? controllerAnchors.at(-1);
+        if (layerType !== "persistent" && layerType !== "impulse" && layerType !== "glide")
+          continue;
+        const anchor =
+          controllerAnchors.find((candidate) => candidate.acousticTime >= command.time - 1e-9) ??
+          controllerAnchors.at(-1);
         if (!anchor) continue;
-        const mappedTime = Math.max(0, anchor.controllerTime - (anchor.acousticTime - command.time));
+        const mappedTime = Math.max(
+          0,
+          anchor.controllerTime - (anchor.acousticTime - command.time),
+        );
         commands[index] = {
           ...command,
           time: Math.round(mappedTime / f0Model.frame_period_sec) * f0Model.frame_period_sec,
@@ -1613,9 +1759,12 @@ export function lowerToFrames(
         decisionId: item.latestWrite("value")?.decisionId,
         timeMs: commands[index]?.time == null ? undefined : commands[index].time * 1000,
       }))
-      .filter((entry): entry is { decisionId: string; timeMs: number } => (
-        typeof entry.decisionId === "string" && typeof entry.timeMs === "number" && Number.isFinite(entry.timeMs)
-      ))
+      .filter(
+        (entry): entry is { decisionId: string; timeMs: number } =>
+          typeof entry.decisionId === "string" &&
+          typeof entry.timeMs === "number" &&
+          Number.isFinite(entry.timeMs),
+      )
       .sort((left, right) => left.timeMs - right.timeMs);
     f0Points = rendered.map((point) => {
       let producer = commandWrites[0];
@@ -1665,7 +1814,9 @@ export function lowerToFrames(
         { itemId: timing.item.id, scale: affect.values.f0VarianceScale },
         "HRG_LOWER_F0_VARIANCE_REJECTED",
       );
-      throw new Error(`E_HRG_LOWER_F0_VARIANCE: Segment '${timing.item.id}' scale must be non-negative`);
+      throw new Error(
+        `E_HRG_LOWER_F0_VARIANCE: Segment '${timing.item.id}' scale must be non-negative`,
+      );
     }
     const decisionId = affect.decisions.f0VarianceScale;
     if (!decisionId) {
@@ -1681,15 +1832,17 @@ export function lowerToFrames(
     const startMs = initialSilenceMs + timing.startMs;
     const endMs = initialSilenceMs + timing.endMs;
     for (const point of f0Points) {
-      const atFinalBoundary = index === timings.length - 1 && Math.abs(point.timeMs - endMs) <= 1e-6;
+      const atFinalBoundary =
+        index === timings.length - 1 && Math.abs(point.timeMs - endMs) <= 1e-6;
       if (point.timeMs >= startMs - 1e-6 && (point.timeMs < endMs - 1e-6 || atFinalBoundary)) {
         if (point.valueHz > 0) samples.push(point.valueHz);
       }
     }
     if (samples.length === sampleCountBeforeSegment) {
-      const contourValue = f0Points.length > 0
-        ? resolveF0AtTime(f0Points, startMs, f0Sampling)?.valueHz
-        : finiteFeatureNumber(timing.item.get("F0"));
+      const contourValue =
+        f0Points.length > 0
+          ? resolveF0AtTime(f0Points, startMs, f0Sampling)?.valueHz
+          : finiteFeatureNumber(timing.item.get("F0"));
       if (contourValue != null && contourValue > 0) samples.push(contourValue);
     }
     f0VarianceSamplesByDecision.set(decisionId, samples);
@@ -1721,9 +1874,9 @@ export function lowerToFrames(
     silenceEdge: "initial" | "final",
   ): void => {
     if (context.silence) {
-      const resourceKnown = utterance.provenance.getDecisions().some(
-        (decision) => decision.id === context.silence?.decisionId,
-      );
+      const resourceKnown = utterance.provenance
+        .getDecisions()
+        .some((decision) => decision.id === context.silence?.decisionId);
       if (!resourceKnown) {
         utterance.diagnostics.error(
           "Selected silence/source resource decision is absent from the Utterance",
@@ -1732,9 +1885,8 @@ export function lowerToFrames(
         );
         throw new Error("E_HRG_LOWER_SILENCE_PROVENANCE: selected silence decision is unknown");
       }
-      const sourceParams = silenceEdge === "initial"
-        ? context.silence.initialParams
-        : context.silence.finalParams;
+      const sourceParams =
+        silenceEdge === "initial" ? context.silence.initialParams : context.silence.finalParams;
       for (const key of paramKeys) {
         const value = sourceParams[key];
         if (typeof value === "number" && Number.isFinite(value)) {
@@ -1800,12 +1952,16 @@ export function lowerToFrames(
     for (const transition of itemTransitions) {
       if (segmentOffsetMs < transition.startMs - 1e-6) continue;
       for (const [key, value] of Object.entries(transition.fields)) {
-        const staticFieldsActive = transition.endMs == null || segmentOffsetMs <= transition.endMs + 1e-6;
-        const superseded = !staticFieldsActive && itemTransitions.some((candidate) => (
-          candidate.startMs > transition.startMs + 1e-6
-          && candidate.startMs <= segmentOffsetMs + 1e-6
-          && (candidate.fields[key] !== undefined || candidate.linearFields?.[key] !== undefined)
-        ));
+        const staticFieldsActive =
+          transition.endMs == null || segmentOffsetMs <= transition.endMs + 1e-6;
+        const superseded =
+          !staticFieldsActive &&
+          itemTransitions.some(
+            (candidate) =>
+              candidate.startMs > transition.startMs + 1e-6 &&
+              candidate.startMs <= segmentOffsetMs + 1e-6 &&
+              (candidate.fields[key] !== undefined || candidate.linearFields?.[key] !== undefined),
+          );
         if (superseded) continue;
         params[key] = value;
         const write = item.latestWrite(key);
@@ -1813,9 +1969,10 @@ export function lowerToFrames(
       }
       if (transition.linearFields && transition.endMs != null) {
         const durationMs = transition.endMs - transition.startMs;
-        const fraction = durationMs <= 0
-          ? 1
-          : Math.max(0, Math.min(1, (segmentOffsetMs - transition.startMs) / durationMs));
+        const fraction =
+          durationMs <= 0
+            ? 1
+            : Math.max(0, Math.min(1, (segmentOffsetMs - transition.startMs) / durationMs));
         for (const [key, values] of Object.entries(transition.linearFields)) {
           params[key] = values.startValue + (values.endValue - values.startValue) * fraction;
           const write = item.latestWrite(key);
@@ -1879,110 +2036,118 @@ export function lowerToFrames(
   ): void => {
     const affect = affectByItem.get(item);
     if (affect) {
-        const applyAdd = (key: string, field: AffectField): void => {
-          const base = params[key];
-          const delta = affect.values[field];
-          if (typeof base !== "number" || delta === 0) return;
-          params[key] = base + delta;
-          const decision = affect.decisions[field];
-          if (decision) provenance[key] = decision;
-        };
-        const applyScale = (key: string, field: AffectField, floor: number): void => {
-          const base = params[key];
-          const scale = affect.values[field];
-          if (typeof base !== "number" || scale === 1) return;
-          const requested = base * scale;
-          params[key] = Math.max(floor, requested);
-          const decision = affect.decisions[field];
-          if (decision) provenance[key] = decision;
-          if (params[key] !== requested) {
-            utterance.diagnostics.warn(
-              "Affect projection clamped a scaled backend parameter",
-              { itemId: item.id, key, requested, clamped: params[key], min: floor },
-              "HRG_LOWER_VALUE_CLAMPED",
+      const applyAdd = (key: string, field: AffectField): void => {
+        const base = params[key];
+        const delta = affect.values[field];
+        if (typeof base !== "number" || delta === 0) return;
+        params[key] = base + delta;
+        const decision = affect.decisions[field];
+        if (decision) provenance[key] = decision;
+      };
+      const applyScale = (key: string, field: AffectField, floor: number): void => {
+        const base = params[key];
+        const scale = affect.values[field];
+        if (typeof base !== "number" || scale === 1) return;
+        const requested = base * scale;
+        params[key] = Math.max(floor, requested);
+        const decision = affect.decisions[field];
+        if (decision) provenance[key] = decision;
+        if (params[key] !== requested) {
+          utterance.diagnostics.warn(
+            "Affect projection clamped a scaled backend parameter",
+            { itemId: item.id, key, requested, clamped: params[key], min: floor },
+            "HRG_LOWER_VALUE_CLAMPED",
+          );
+        }
+      };
+      if (typeof params.F0 === "number" && params.F0 > 0) {
+        if (affect.values.f0VarianceScale !== 1) {
+          const decision = affect.decisions.f0VarianceScale;
+          if (!decision) {
+            utterance.diagnostics.error(
+              "Affect F0-variance projection has no producing graph write",
+              { itemId: item.id },
+              "HRG_LOWER_F0_VARIANCE_REQUIRED",
+            );
+            throw new Error(`E_HRG_LOWER_F0_VARIANCE: Segment '${item.id}' scale is unstamped`);
+          }
+          const center = f0VarianceCenterByDecision.get(decision);
+          if (center == null) {
+            utterance.diagnostics.error(
+              "Affect F0-variance projection has no voiced contour reference",
+              { itemId: item.id, decisionId: decision },
+              "HRG_LOWER_F0_VARIANCE_REQUIRED",
+            );
+            throw new Error(
+              `E_HRG_LOWER_F0_VARIANCE: Segment '${item.id}' has no voiced contour reference`,
             );
           }
-        };
-        if (typeof params.F0 === "number" && params.F0 > 0) {
-          if (affect.values.f0VarianceScale !== 1) {
-            const decision = affect.decisions.f0VarianceScale;
-            if (!decision) {
-              utterance.diagnostics.error(
-                "Affect F0-variance projection has no producing graph write",
-                { itemId: item.id },
-                "HRG_LOWER_F0_VARIANCE_REQUIRED",
-              );
-              throw new Error(`E_HRG_LOWER_F0_VARIANCE: Segment '${item.id}' scale is unstamped`);
-            }
-            const center = f0VarianceCenterByDecision.get(decision);
-            if (center == null) {
-              utterance.diagnostics.error(
-                "Affect F0-variance projection has no voiced contour reference",
-                { itemId: item.id, decisionId: decision },
-                "HRG_LOWER_F0_VARIANCE_REQUIRED",
-              );
-              throw new Error(`E_HRG_LOWER_F0_VARIANCE: Segment '${item.id}' has no voiced contour reference`);
-            }
-            const requestedF0 = center + (params.F0 - center) * affect.values.f0VarianceScale;
-            params.F0 = Math.max(0.001, requestedF0);
-            provenance.F0 = decision;
-            if (params.F0 !== requestedF0) {
-              utterance.diagnostics.warn(
-                "Affect F0-variance projection clamped voiced F0 above zero",
-                { itemId: item.id, key: "F0", requested: requestedF0, clamped: params.F0, min: 0.001 },
-                "HRG_LOWER_VALUE_CLAMPED",
-              );
-            }
-          }
-          if (affect.values.f0Scale !== 1) {
-            params.F0 *= affect.values.f0Scale;
-            const decision = affect.decisions.f0Scale;
-            if (decision) provenance.F0 = decision;
-          }
-        }
-        if (affect.values.rdDelta !== 0 && typeof params.Rd === "number") {
-          const priorOffset = params.RdPhraseOffset ?? 0;
-          // Fant 1997 effective-Rd range.
-          const requestedEffective = params.Rd + priorOffset + affect.values.rdDelta;
-          const effective = Math.max(0.3, Math.min(2.7, requestedEffective));
-          params.RdPhraseOffset = effective - params.Rd;
-          const decision = affect.decisions.rdDelta;
-          if (decision) provenance.RdPhraseOffset = decision;
-          if (effective !== requestedEffective) {
+          const requestedF0 = center + (params.F0 - center) * affect.values.f0VarianceScale;
+          params.F0 = Math.max(0.001, requestedF0);
+          provenance.F0 = decision;
+          if (params.F0 !== requestedF0) {
             utterance.diagnostics.warn(
-              "Affect projection clamped effective Rd to the cited Fant range",
+              "Affect F0-variance projection clamped voiced F0 above zero",
               {
                 itemId: item.id,
-                key: "RdPhraseOffset",
-                requested: requestedEffective,
-                clamped: effective,
-                min: 0.3,
-                max: 2.7,
+                key: "F0",
+                requested: requestedF0,
+                clamped: params.F0,
+                min: 0.001,
               },
               "HRG_LOWER_VALUE_CLAMPED",
             );
           }
         }
-        // Project the pure {backendKey, affectField, mode, floor} affect rows via
-        // the declarative table. 1 Hz formant and 20 Hz bandwidth floors are
-        // explicit engineering bounds. The F1/F2/F3 >=1 Hz clamp runs after the
-        // table loop: only the f1/f2/f3 Delta rows touch F1/F2/F3, so applying the
-        // clamp after the intervening (B/TL/AH/GO/jitter) rows is order-equivalent.
-        for (const row of AFFECT_PROJECTION_TABLE) {
-          if (row.mode === "add") applyAdd(row.backendKey, row.affectField);
-          else applyScale(row.backendKey, row.affectField, row.floor);
+        if (affect.values.f0Scale !== 1) {
+          params.F0 *= affect.values.f0Scale;
+          const decision = affect.decisions.f0Scale;
+          if (decision) provenance.F0 = decision;
         }
-        for (const key of ["F1", "F2", "F3"]) {
-          const requested = params[key];
-          if (typeof requested !== "number" || requested >= 1) continue;
-          params[key] = 1;
+      }
+      if (affect.values.rdDelta !== 0 && typeof params.Rd === "number") {
+        const priorOffset = params.RdPhraseOffset ?? 0;
+        // Fant 1997 effective-Rd range.
+        const requestedEffective = params.Rd + priorOffset + affect.values.rdDelta;
+        const effective = Math.max(0.3, Math.min(2.7, requestedEffective));
+        params.RdPhraseOffset = effective - params.Rd;
+        const decision = affect.decisions.rdDelta;
+        if (decision) provenance.RdPhraseOffset = decision;
+        if (effective !== requestedEffective) {
           utterance.diagnostics.warn(
-            "Affect projection clamped a formant frequency above zero",
-            { itemId: item.id, key, requested, clamped: 1, min: 1 },
+            "Affect projection clamped effective Rd to the cited Fant range",
+            {
+              itemId: item.id,
+              key: "RdPhraseOffset",
+              requested: requestedEffective,
+              clamped: effective,
+              min: 0.3,
+              max: 2.7,
+            },
             "HRG_LOWER_VALUE_CLAMPED",
           );
         }
       }
+      // Project the pure {backendKey, affectField, mode, floor} affect rows via
+      // the declarative table. 1 Hz formant and 20 Hz bandwidth floors are
+      // explicit engineering bounds. The F1/F2/F3 >=1 Hz clamp runs after the
+      // table loop: only the f1/f2/f3 Delta rows touch F1/F2/F3, so applying the
+      // clamp after the intervening (B/TL/AH/GO/jitter) rows is order-equivalent.
+      for (const row of AFFECT_PROJECTION_TABLE) {
+        if (row.mode === "add") applyAdd(row.backendKey, row.affectField);
+        else applyScale(row.backendKey, row.affectField, row.floor);
+      }
+      for (const key of ["F1", "F2", "F3"]) {
+        const requested = params[key];
+        if (typeof requested !== "number" || requested >= 1) continue;
+        params[key] = 1;
+        utterance.diagnostics.warn(
+          "Affect projection clamped a formant frequency above zero",
+          { itemId: item.id, key, requested, clamped: 1, min: 1 },
+          "HRG_LOWER_VALUE_CLAMPED",
+        );
+      }
+    }
   };
 
   const appendFrame = (
@@ -2012,10 +2177,11 @@ export function lowerToFrames(
         provenance.F0 = resolvedF0.decisionId;
       }
     }
-    const outputTimeMs = outputTimeOverrideMs
-      ?? (item
-        ? (outputTimingByItem.get(item)?.startMs ?? timeMs)
-          + segmentOffsetMs * (outputTimingByItem.get(item)?.scale ?? 1)
+    const outputTimeMs =
+      outputTimeOverrideMs ??
+      (item
+        ? (outputTimingByItem.get(item)?.startMs ?? timeMs) +
+          segmentOffsetMs * (outputTimingByItem.get(item)?.scale ?? 1)
         : timeMs);
     const frame: KlattFrame = {
       time: outputTimeMs / 1000,
@@ -2089,17 +2255,17 @@ export function lowerToFrames(
           offsets.add(transition.startMs);
         }
         if (
-          transition.endMs != null
-          && transition.endMs > 1e-6
-          && transition.endMs < timing.durationMs - 1e-6
+          transition.endMs != null &&
+          transition.endMs > 1e-6 &&
+          transition.endMs < timing.durationMs - 1e-6
         ) {
           offsets.add(transition.endMs);
         }
       }
     }
     if (
-      options.timeline.event_points.include_f0_anchors
-      && (segmentCanVoice(timing.item) || layeredF0)
+      options.timeline.event_points.include_f0_anchors &&
+      (segmentCanVoice(timing.item) || layeredF0)
     ) {
       const segmentStartMs = initialSilenceMs + timing.startMs;
       const segmentEndMs = initialSilenceMs + timing.endMs;
@@ -2112,13 +2278,7 @@ export function lowerToFrames(
     for (const offsetMs of [...offsets].sort((left, right) => left - right)) {
       const controlTimeMs = initialSilenceMs + timing.startMs + offsetMs;
       const f0Point = f0Points.find((point) => Math.abs(point.timeMs - controlTimeMs) <= 1e-6);
-      appendFrame(
-        controlTimeMs,
-        timing.item,
-        undefined,
-        offsetMs,
-        f0Point?.outputTimeMs,
-      );
+      appendFrame(controlTimeMs, timing.item, undefined, offsetMs, f0Point?.outputTimeMs);
     }
   }
   const finalResetMs = initialSilenceMs + segmentTotalMs;
@@ -2132,9 +2292,8 @@ export function lowerToFrames(
         undefined,
         "SIL",
         0,
-        outputFinalResetMs + (
-          (point.outputTimeMs ?? point.timeMs) - finalResetMs
-        ) * globalPauseScale,
+        outputFinalResetMs +
+          ((point.outputTimeMs ?? point.timeMs) - finalResetMs) * globalPauseScale,
         "final",
       );
     }

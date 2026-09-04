@@ -2,11 +2,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { textToKlattTrack } from "../src/tts-frontend";
 import {
-  preloadCmuDictionaryFromPath,
   DEFAULT_CMU_DICTIONARY_PATH,
+  preloadCmuDictionaryFromPath,
 } from "../src/cmu-dictionary-loader";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 type ParsedArgs = {
   full: boolean;
@@ -118,7 +118,7 @@ export async function runDictionaryMissScan(argv: string[]): Promise<number> {
 
       logger.info(
         `[dict-miss] mode=${args.full ? "FULL" : "SUBSET"} words=${words.length} ` +
-          `(progress-every=${args.progressEvery})`
+          `(progress-every=${args.progressEvery})`,
       );
 
       let processed = 0;
@@ -128,7 +128,7 @@ export async function runDictionaryMissScan(argv: string[]): Promise<number> {
         } catch (error) {
           errorCount += 1;
           logger.warn(
-            `[dict-miss] error word="${word}" reason="${error instanceof Error ? error.message : String(error)}"`
+            `[dict-miss] error word="${word}" reason="${error instanceof Error ? error.message : String(error)}"`,
           );
         }
         processed += 1;
@@ -137,11 +137,11 @@ export async function runDictionaryMissScan(argv: string[]): Promise<number> {
         }
       }
 
-      const topMisses = [...missWordCounts.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 20);
+      const topMisses = [...missWordCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20);
 
-      logger.info(`[dict-miss] done words=${words.length} errors=${errorCount} dict_miss_count=${missCount}`);
+      logger.info(
+        `[dict-miss] done words=${words.length} errors=${errorCount} dict_miss_count=${missCount}`,
+      );
       if (topMisses.length === 0) {
         logger.info("[dict-miss] miss_words=<none>");
       } else {

@@ -26,10 +26,7 @@ const FIELDS = ["F4", "B4", "F5", "B5"] as const;
 // stage the phoneme label has no stress digit, so match on voicing instead.
 function firstVowelFrame(frames: KlattFrame[]): KlattFrame | undefined {
   return frames.find(
-    (f) =>
-      typeof f.params?.F4 === "number" &&
-      typeof f.params?.AV === "number" &&
-      f.params.AV > 0,
+    (f) => typeof f.params?.F4 === "number" && typeof f.params?.AV === "number" && f.params.AV > 0,
   );
 }
 
@@ -51,11 +48,7 @@ function probe(label: string, speaker?: string): Record<string, unknown> {
   return out;
 }
 
-const results = [
-  probe("default", undefined),
-  probe("paul", "paul"),
-  probe("betty", "betty"),
-];
+const results = [probe("default", undefined), probe("paul", "paul"), probe("betty", "betty")];
 
 for (const r of results) {
   console.log(JSON.stringify(r));
@@ -88,7 +81,10 @@ assert(betty.F4 !== paul.F4, `betty F4 must differ from paul F4`);
 //   betty formant_scale=1.17       -> F5 becomes 4500*1.17=5265.
 // So the right invariant is "paul == default" (both 1.0). Betty's F5 differs
 // only via formant_scale, NOT via stamping.
-assert(paul.F5 === def.F5, `paul F5 should equal default (F5 not stamped), got ${paul.F5} vs ${def.F5}`);
+assert(
+  paul.F5 === def.F5,
+  `paul F5 should equal default (F5 not stamped), got ${paul.F5} vs ${def.F5}`,
+);
 assert(
   betty.F5 === 5265,
   `betty F5 should be inventory 4500 * formant_scale 1.17 = 5265 (NOT voice 6000), got ${betty.F5}`,

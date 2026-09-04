@@ -1,4 +1,4 @@
-import { computeRmsPeak, BaseProcessorOptions } from "./wasm-utils.js";
+import { type BaseProcessorOptions, computeRmsPeak } from "./wasm-utils.js";
 
 interface ImpulseTrainMetricsParams {
   gainAvg: number;
@@ -31,9 +31,27 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "f0", defaultValue: 0, minValue: 0, maxValue: 2000, automationRate: "a-rate" as const },
-      { name: "gain", defaultValue: 1, minValue: 0, maxValue: 1, automationRate: "a-rate" as const },
-      { name: "openPhaseRatio", defaultValue: 0.7, minValue: 0, maxValue: 1, automationRate: "k-rate" as const },
+      {
+        name: "f0",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 2000,
+        automationRate: "a-rate" as const,
+      },
+      {
+        name: "gain",
+        defaultValue: 1,
+        minValue: 0,
+        maxValue: 1,
+        automationRate: "a-rate" as const,
+      },
+      {
+        name: "openPhaseRatio",
+        defaultValue: 0.7,
+        minValue: 0,
+        maxValue: 1,
+        automationRate: "k-rate" as const,
+      },
     ];
   }
 
@@ -68,7 +86,7 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
   process(
     _inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const output = outputs[0];
@@ -85,7 +103,8 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
     let gainPeak = 0;
     for (let i = 0; i < blockSize; i += 1) {
       const f0 = f0Values.length > 1 ? (f0Values[i] ?? f0Values[0] ?? 0) : (f0Values[0] ?? 0);
-      const gain = gainValues.length > 1 ? (gainValues[i] ?? gainValues[0] ?? 0) : (gainValues[0] ?? 0);
+      const gain =
+        gainValues.length > 1 ? (gainValues[i] ?? gainValues[0] ?? 0) : (gainValues[0] ?? 0);
       gainSum += gain;
       if (gain > gainPeak) gainPeak = gain;
 
@@ -99,7 +118,7 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
         this.periodLength = periodLength;
         this.openPhaseLength = Math.max(
           0,
-          Math.round(this.periodLength * Math.max(0, Math.min(1, openPhaseRatio)))
+          Math.round(this.periodLength * Math.max(0, Math.min(1, openPhaseRatio))),
         );
         this.positionInPeriod = 0;
         this._setImpulseResonator(sr);
@@ -110,9 +129,7 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
         continue;
       }
 
-      const pulse = (this.positionInPeriod === 1)
-        ? 1
-        : (this.positionInPeriod === 2) ? -1 : 0;
+      const pulse = this.positionInPeriod === 1 ? 1 : this.positionInPeriod === 2 ? -1 : 0;
       this.positionInPeriod += 1;
       if (this.positionInPeriod >= this.periodLength) {
         this.positionInPeriod = 0;
@@ -141,7 +158,7 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
       this.y2 = 0;
       return;
     }
-    const r = Math.exp(-Math.PI * bw / sr);
+    const r = Math.exp((-Math.PI * bw) / sr);
     const w = 0;
     this.c = -(r ** 2);
     this.b = 2 * r * Math.cos(w);

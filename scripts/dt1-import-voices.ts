@@ -21,14 +21,7 @@ const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), "..");
 
 const SOURCE_DIR = "C:/Users/Q/src/dectalk/463/output/qlatt/speakers";
-const OUT_DIR = path.join(
-  repoRoot,
-  "public",
-  "rules",
-  "frontends",
-  "dectalk-english",
-  "speakers",
-);
+const OUT_DIR = path.join(repoRoot, "public", "rules", "frontends", "dectalk-english", "speakers");
 
 const VOICES = [
   "paul",

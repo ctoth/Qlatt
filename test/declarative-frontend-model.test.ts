@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-  TokenStatus,
+  isActiveToken,
   joinTokenStatus,
   normalizeTokenStatus,
-  isActiveToken,
+  TokenStatus,
 } from "../src/declarative-frontend/model";
 
 describe("declarative frontend token model", () => {
@@ -18,10 +18,10 @@ describe("declarative frontend token model", () => {
   it("joins token statuses monotonically", () => {
     expect(joinTokenStatus(TokenStatus.UNKNOWN, TokenStatus.ACTIVE)).toBe(TokenStatus.ACTIVE);
     expect(joinTokenStatus(TokenStatus.ACTIVE, TokenStatus.SUPPRESSED)).toBe(
-      TokenStatus.SUPPRESSED
+      TokenStatus.SUPPRESSED,
     );
     expect(joinTokenStatus(TokenStatus.SUPPRESSED, TokenStatus.ACTIVE)).toBe(
-      TokenStatus.SUPPRESSED
+      TokenStatus.SUPPRESSED,
     );
   });
 
@@ -31,4 +31,3 @@ describe("declarative frontend token model", () => {
     expect(isActiveToken({ status: TokenStatus.SUPPRESSED })).toBe(false);
   });
 });
-

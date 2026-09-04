@@ -49,8 +49,7 @@ export function extractSegments(track: Frame[]): Segment[] {
     const ph = i < track.length ? (track[i].phoneme ?? "SIL") : null;
     if (ph !== currentPhoneme) {
       const startTime = track[startIdx].time;
-      const endTime =
-        i < track.length ? track[i].time : track[track.length - 1].time;
+      const endTime = i < track.length ? track[i].time : track[track.length - 1].time;
       segments.push({
         phoneme: currentPhoneme,
         startTime,
@@ -118,9 +117,7 @@ export function selectAuditWords(dict: Record<string, string>): [string, string]
     let count = 0;
     for (const [word, arpabet] of entries) {
       if (selected.has(word)) continue;
-      if (
-        arpabet.split(" ").some((p) => cat.phones.includes(stripStress(p)))
-      ) {
+      if (arpabet.split(" ").some((p) => cat.phones.includes(stripStress(p)))) {
         selected.set(word, arpabet);
         if (++count >= cat.max) break;
       }
@@ -162,9 +159,7 @@ export function isAuditReportOnlyMode(): boolean {
 
 export function expectNoViolationsOrReport<T>(violations: T[], assertionMessage: string): void {
   if (isAuditReportOnlyMode() && violations.length > 0) {
-    console.warn(
-      `[audit report-only] ${assertionMessage} | violations=${violations.length}`
-    );
+    console.warn(`[audit report-only] ${assertionMessage} | violations=${violations.length}`);
     return;
   }
 

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
+import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { isPlainObject } from "../src/yaml-loader";
 
 const CONTROL_FIELD_SCHEMA = {
@@ -31,8 +31,14 @@ const CONTROL_WINDOW_SCHEMA = {
     tag: { kind: "string" },
   },
   optional: [
-    "target", "start_ms", "end_ms", "start_ratio", "end_ratio",
-    "prefix_ms", "suffix_ms", "tag",
+    "target",
+    "start_ms",
+    "end_ms",
+    "start_ratio",
+    "end_ratio",
+    "prefix_ms",
+    "suffix_ms",
+    "tag",
   ],
 } as const satisfies FeatureSchema;
 
@@ -109,7 +115,11 @@ function addSegment(
   return segment;
 }
 
-function resolveTimes(utterance: Utterance, segments: readonly Item[], endsMs: readonly number[]): void {
+function resolveTimes(
+  utterance: Utterance,
+  segments: readonly Item[],
+  endsMs: readonly number[],
+): void {
   const transaction = utterance.beginTransaction({ ...META, ruleId: "timing", tag: "timing" });
   segments.forEach((segment, index) => {
     const anchor = utterance.intervalAnchor(segment);
@@ -123,20 +133,23 @@ function resolveTimes(utterance: Utterance, segments: readonly Item[], endsMs: r
 }
 
 function productionParams(time: number): Record<string, number> {
-  const parsed: unknown = JSON.parse(readFileSync(
-    new URL("./fixtures/hrg-convergence-baseline/dectalk-english-stops.json", import.meta.url),
-    "utf8",
-  ));
+  const parsed: unknown = JSON.parse(
+    readFileSync(
+      new URL("./fixtures/hrg-convergence-baseline/dectalk-english-stops.json", import.meta.url),
+      "utf8",
+    ),
+  );
   if (!isPlainObject(parsed) || !isPlainObject(parsed.oldProduction)) {
     throw new Error("production fixture missing");
   }
   const frames = parsed.oldProduction.sourceFrames;
   if (!Array.isArray(frames)) throw new Error("production frames missing");
   const frame = frames.find(
-    (candidate) => isPlainObject(candidate)
-      && candidate.phoneme === "AE"
-      && typeof candidate.time === "number"
-      && Math.abs(candidate.time - time) <= 1e-9,
+    (candidate) =>
+      isPlainObject(candidate) &&
+      candidate.phoneme === "AE" &&
+      typeof candidate.time === "number" &&
+      Math.abs(candidate.time - time) <= 1e-9,
   );
   if (!isPlainObject(frame) || !isPlainObject(frame.params)) {
     throw new Error(`production AE frame missing at ${time}`);
@@ -150,6 +163,7 @@ function productionParams(time: number): Record<string, number> {
 
 function buildAspirationFixture(): {
   utterance: Utterance;
+  closure: Item;
   release: Item;
   vowel: Item;
   windowDecisionId: string;
@@ -157,26 +171,36 @@ function buildAspirationFixture(): {
   const utterance = new Utterance(SCHEMA);
   const build = utterance.beginTransaction(META);
   const closure = addSegment(build, "seg_0", "P", "stop_closure", 83, { AH: 0, B1: 200, B2: 180 });
-  const release = addSegment(build, "seg_1", "P_REL", "stop_release", 7, { AH: 48, B1: 300, B2: 150 });
+  const release = addSegment(build, "seg_1", "P_REL", "stop_release", 7, {
+    AH: 48,
+    B1: 300,
+    B2: 150,
+  });
   const vowel = addSegment(build, "seg_2", "AE", "vowel", 154, { AH: 0, B1: 130, B2: 90 });
   build.partitionAnchors([closure, release, vowel], utterance.axis.start.id, utterance.axis.end.id);
   build.commit();
-  const window = release.set("control_windows", [{
-    target: "next",
-    start_ms: 0,
-    end_ms: 53,
-    fields: {
-      AH: { op: "set", value: 48 },
-      B1: { op: "set", value: 380 },
-      B2: { op: "set", value: 160 },
+  const window = release.set(
+    "control_windows",
+    [
+      {
+        target: "next",
+        start_ms: 0,
+        end_ms: 53,
+        fields: {
+          AH: { op: "set", value: 48 },
+          B1: { op: "set", value: 380 },
+          B2: { op: "set", value: 160 },
+        },
+        tag: "stop_aspiration",
+      },
+    ],
+    {
+      reason: "Carry release aspiration into the following vowel",
+      ruleId: "dectalk_voiceless_stop_aspiration",
+      tag: "stop_aspiration",
+      citations: ["DECtalk 4.63 p_us_st1.c"],
     },
-    tag: "stop_aspiration",
-  }], {
-    reason: "Carry release aspiration into the following vowel",
-    ruleId: "dectalk_voiceless_stop_aspiration",
-    tag: "stop_aspiration",
-    citations: ["DECtalk 4.63 p_us_st1.c"],
-  });
+  );
   resolveTimes(utterance, [closure, release, vowel], [83, 90, 244]);
   return { utterance, closure, release, vowel, windowDecisionId: window.decisionId };
 }
@@ -186,8 +210,12 @@ describe("HRG lowering control windows", () => {
     const { utterance, vowel, windowDecisionId } = buildAspirationFixture();
 
     const lowered = lowerToFrames(utterance, POLICY);
-    const start = lowered.frames.find((frame) => frame.segmentId === vowel.id && Math.abs(frame.time - 0.1092) <= 1e-9);
-    const end = lowered.frames.find((frame) => frame.segmentId === vowel.id && Math.abs(frame.time - 0.1622) <= 1e-9);
+    const start = lowered.frames.find(
+      (frame) => frame.segmentId === vowel.id && Math.abs(frame.time - 0.1092) <= 1e-9,
+    );
+    const end = lowered.frames.find(
+      (frame) => frame.segmentId === vowel.id && Math.abs(frame.time - 0.1622) <= 1e-9,
+    );
     const productionStart = productionParams(0.1092);
     const productionEnd = productionParams(0.1622);
 
@@ -196,8 +224,10 @@ describe("HRG lowering control windows", () => {
     for (const column of POLICY.columns) {
       expect(start?.params[column], `start.${column}`).toBe(productionStart[column]);
       expect(end?.params[column], `end.${column}`).toBe(productionEnd[column]);
-      expect(start?.provenance[column], `start.${column}.provenance`).toBe(windowDecisionId);
-      expect(end?.provenance[column], `end.${column}.provenance`).toBe(vowel.latestWrite(column)?.decisionId);
+      expect(start?.provenance?.[column], `start.${column}.provenance`).toBe(windowDecisionId);
+      expect(end?.provenance?.[column], `end.${column}.provenance`).toBe(
+        vowel.latestWrite(column)?.decisionId,
+      );
     }
   });
 
@@ -205,21 +235,37 @@ describe("HRG lowering control windows", () => {
     const utterance = new Utterance(SCHEMA);
     const build = utterance.beginTransaction(META);
     const closure = addSegment(build, "seg_0", "K", "stop_closure", 83, {
-      AH: 0, B1: 200, B2: 180,
+      AH: 0,
+      B1: 200,
+      B2: 180,
     });
     const release = addSegment(build, "seg_1", "K_REL", "stop_release", 26, {
-      AH: 48, B1: 300, B2: 150,
+      AH: 48,
+      B1: 300,
+      B2: 150,
     });
     const vowel = addSegment(build, "seg_2", "EY", "vowel", 154, {
-      AH: 0, B1: 100, B2: 90,
+      AH: 0,
+      B1: 100,
+      B2: 90,
     });
-    build.partitionAnchors([closure, release, vowel], utterance.axis.start.id, utterance.axis.end.id);
+    build.partitionAnchors(
+      [closure, release, vowel],
+      utterance.axis.start.id,
+      utterance.axis.end.id,
+    );
     build.commit();
-    release.set("control_windows", [{
-      start_ms: 13,
-      end_ms: 14,
-      fields: { AH: 7 },
-    }], { reason: "unrelated control-boundary fixture", citations: ["DECtalk 4.63 ph_draw.c"] });
+    release.set(
+      "control_windows",
+      [
+        {
+          start_ms: 13,
+          end_ms: 14,
+          fields: { AH: 7 },
+        },
+      ],
+      { reason: "unrelated control-boundary fixture", citations: ["DECtalk 4.63 ph_draw.c"] },
+    );
     resolveTimes(utterance, [closure, release, vowel], [83, 109, 263]);
     const policy: LowerOptions = {
       ...POLICY,
@@ -266,25 +312,35 @@ describe("HRG lowering control windows", () => {
       minParam: vowel.get("minParam"),
       unsetParam: vowel.get("unsetParam"),
     };
-    vowel.set("control_windows", [{
-      target: "current",
-      prefix_ms: 20,
-      fields: {
-        AH: 7,
-        B1: { op: "add", value: 20 },
-        B2: { op: "mul", value: 2 },
-        maxParam: { op: "max", value: 10 },
-        minParam: { op: "min", value: 10 },
-        unsetParam: { op: "unset" },
-      },
-    }], { reason: "operation fixture", citations: ["Burkhardt 2009"] });
+    vowel.set(
+      "control_windows",
+      [
+        {
+          target: "current",
+          prefix_ms: 20,
+          fields: {
+            AH: 7,
+            B1: { op: "add", value: 20 },
+            B2: { op: "mul", value: 2 },
+            maxParam: { op: "max", value: 10 },
+            minParam: { op: "min", value: 10 },
+            unsetParam: { op: "unset" },
+          },
+        },
+      ],
+      { reason: "operation fixture", citations: ["Burkhardt 2009"] },
+    );
 
     const lowered = lowerToFrames(utterance, {
       ...POLICY,
       columns: [...POLICY.columns, "maxParam", "minParam", "unsetParam"],
     });
-    const start = lowered.frames.find((frame) => frame.segmentId === vowel.id && Math.abs(frame.time - 0.1092) <= 1e-9);
-    const end = lowered.frames.find((frame) => frame.segmentId === vowel.id && Math.abs(frame.time - 0.1292) <= 1e-9);
+    const start = lowered.frames.find(
+      (frame) => frame.segmentId === vowel.id && Math.abs(frame.time - 0.1092) <= 1e-9,
+    );
+    const end = lowered.frames.find(
+      (frame) => frame.segmentId === vowel.id && Math.abs(frame.time - 0.1292) <= 1e-9,
+    );
 
     expect(start?.params).toMatchObject({ AH: 7, B1: 150, B2: 180, maxParam: 10, minParam: 10 });
     expect(start?.params).not.toHaveProperty("unsetParam");
@@ -301,19 +357,23 @@ describe("HRG lowering control windows", () => {
 
   it("resolves previous targets plus suffix and ratio spans on target durations", () => {
     const { utterance, release, vowel } = buildAspirationFixture();
-    const windows = vowel.set("control_windows", [
-      {
-        target: "prev",
-        suffix_ms: 5,
-        fields: { B1: { op: "set", value: 999 } },
-      },
-      {
-        target: "current",
-        start_ratio: 0.25,
-        end_ratio: 0.5,
-        fields: { AH: { op: "set", value: 12 } },
-      },
-    ], { reason: "target/span fixture", citations: ["Volenec 2015"] });
+    const windows = vowel.set(
+      "control_windows",
+      [
+        {
+          target: "prev",
+          suffix_ms: 5,
+          fields: { B1: { op: "set", value: 999 } },
+        },
+        {
+          target: "current",
+          start_ratio: 0.25,
+          end_ratio: 0.5,
+          fields: { AH: { op: "set", value: 12 } },
+        },
+      ],
+      { reason: "target/span fixture", citations: ["Volenec 2015"] },
+    );
 
     const lowered = lowerToFrames(utterance, POLICY);
     const releaseSuffixStart = lowered.frames.find(
@@ -327,9 +387,9 @@ describe("HRG lowering control windows", () => {
     );
 
     expect(releaseSuffixStart?.params.B1).toBe(999);
-    expect(releaseSuffixStart?.provenance.B1).toBe(windows.decisionId);
+    expect(releaseSuffixStart?.provenance?.B1).toBe(windows.decisionId);
     expect(ratioStart?.params.AH).toBe(12);
-    expect(ratioStart?.provenance.AH).toBe(windows.decisionId);
+    expect(ratioStart?.provenance?.AH).toBe(windows.decisionId);
     expect(ratioEnd?.params.AH).toBe(0);
     expect(release.get("B1")).toBe(300);
     expect(vowel.get("AH")).toBe(0);
@@ -337,21 +397,25 @@ describe("HRG lowering control windows", () => {
 
   it("projects first-segment negative windows into the initial controller silence", () => {
     const { utterance, closure } = buildAspirationFixture();
-    const windows = closure.set("control_windows", [
+    const windows = closure.set(
+      "control_windows",
+      [
+        {
+          start_ms: -12.8,
+          end_ms: -6.4,
+          fields: { AH: { op: "set", value: 9 } },
+        },
+        {
+          start_ms: -6.4,
+          end_ms: 0,
+          fields: { AH: { op: "set", value: 18 } },
+        },
+      ],
       {
-        start_ms: -12.8,
-        end_ms: -6.4,
-        fields: { AH: { op: "set", value: 9 } },
+        reason: "Initialized DECtalk controls anticipate the first active segment",
+        citations: ["DECtalk 4.63 ph_draw.c"],
       },
-      {
-        start_ms: -6.4,
-        end_ms: 0,
-        fields: { AH: { op: "set", value: 18 } },
-      },
-    ], {
-      reason: "Initialized DECtalk controls anticipate the first active segment",
-      citations: ["DECtalk 4.63 ph_draw.c"],
-    });
+    );
 
     const lowered = lowerToFrames(utterance, POLICY);
     const firstPreRoll = lowered.frames.find((frame) => Math.abs(frame.time - 0.0064) <= 1e-9);
@@ -359,9 +423,9 @@ describe("HRG lowering control windows", () => {
     const segmentStart = lowered.frames.find((frame) => Math.abs(frame.time - 0.0192) <= 1e-9);
 
     expect(firstPreRoll?.params.AH).toBe(9);
-    expect(firstPreRoll?.provenance.AH).toBe(windows.decisionId);
+    expect(firstPreRoll?.provenance?.AH).toBe(windows.decisionId);
     expect(secondPreRoll?.params.AH).toBe(18);
-    expect(secondPreRoll?.provenance.AH).toBe(windows.decisionId);
+    expect(secondPreRoll?.provenance?.AH).toBe(windows.decisionId);
     expect(segmentStart?.params.AH).toBe(0);
   });
 });

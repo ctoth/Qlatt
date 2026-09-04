@@ -1,5 +1,5 @@
 import yaml from "js-yaml";
-import { normalizePath, isNodeRuntime, readFileFromFsSync } from "./path-utils";
+import { isNodeRuntime, normalizePath, readFileFromFsSync } from "./path-utils";
 
 type PlainObject = Record<string, unknown>;
 
@@ -22,7 +22,9 @@ function parseYaml<T = unknown>(source: string, label: string): T {
 
 export function loadYamlSourceSync(specPath: string): string {
   const normalizedPath = normalizePath(specPath);
-  const attempts = [normalizedPath, specPath].filter((value, index, all) => all.indexOf(value) === index);
+  const attempts = [normalizedPath, specPath].filter(
+    (value, index, all) => all.indexOf(value) === index,
+  );
 
   for (const attempt of attempts) {
     const fromUrl = readYamlSourceFromUrlSync(attempt);
@@ -39,7 +41,9 @@ export function loadYamlSourceSync(specPath: string): string {
 
 export async function loadYamlSource(specPath: string): Promise<string> {
   const normalizedPath = normalizePath(specPath);
-  const attempts = [normalizedPath, specPath].filter((value, index, all) => all.indexOf(value) === index);
+  const attempts = [normalizedPath, specPath].filter(
+    (value, index, all) => all.indexOf(value) === index,
+  );
 
   // In Node/test/CLI, prefer filesystem paths to avoid failed fetch() probes.
   if (isNodeRuntime()) {
@@ -111,7 +115,7 @@ export function cloneValue(value: unknown): unknown {
   }
   if (isPlainObject(value)) {
     return Object.fromEntries(
-      Object.entries(value).map(([key, entry]) => [key, cloneValue(entry)])
+      Object.entries(value).map(([key, entry]) => [key, cloneValue(entry)]),
     );
   }
   return value;

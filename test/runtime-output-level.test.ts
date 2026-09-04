@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import path from "node:path";
+import { describe, expect, it } from "vitest";
 import { nodeRuntimeBackend } from "../scripts/rendering/backends/node-runtime";
 import type { RenderRequest } from "../src/rendering/types";
 
@@ -27,14 +27,20 @@ function makeRequest(phrase: string): RenderRequest {
 }
 
 describe("runtime output level", () => {
-  it("keeps hello world near full scale without clipping the final render", { timeout: 30000 }, async () => {
+  it("keeps hello world near full scale without clipping the final render", {
+    timeout: 30000,
+  }, async () => {
     const payload = await nodeRuntimeBackend.render(makeRequest("hello world"));
     expect(payload.metrics.peak).toBeLessThanOrEqual(1.05);
   });
 
-  it("keeps a fricative-heavy phrase near full scale without clipping the final render", { timeout: 30000 }, async () => {
+  it("keeps a fricative-heavy phrase near full scale without clipping the final render", {
+    timeout: 30000,
+  }, async () => {
     const payload = await nodeRuntimeBackend.render(
-      makeRequest("Holy shit! How well is this shit functioning now? Filter fat frogs from fragrant flats."),
+      makeRequest(
+        "Holy shit! How well is this shit functioning now? Filter fat frogs from fragrant flats.",
+      ),
     );
     expect(payload.metrics.peak).toBeLessThanOrEqual(1.05);
   });

@@ -3,9 +3,15 @@
  * Uses toposort package for dependency ordering.
  */
 
-import toposort from 'toposort';
-import type { SemanticsDocument, EvaluationResult, RealizationRule, ParamValue, EvaluationContext } from './types';
-import type { CelEvaluator } from './cel-evaluator';
+import toposort from "toposort";
+import type { CelEvaluator } from "./cel-evaluator";
+import type {
+  EvaluationContext,
+  EvaluationResult,
+  ParamValue,
+  RealizationRule,
+  SemanticsDocument,
+} from "./types";
 
 export interface TopologicalEvaluator {
   evaluate(semantics: SemanticsDocument, context: EvaluationContext): EvaluationResult;
@@ -20,7 +26,7 @@ function buildEdges(realize: Record<string, RealizationRule | string>): [string,
   const edges: [string, string][] = [];
 
   for (const [name, rule] of Object.entries(realize)) {
-    const ruleObj = typeof rule === 'string' ? { expr: rule } : rule;
+    const ruleObj = typeof rule === "string" ? { expr: rule } : rule;
     const deps = ruleObj.deps || [];
 
     for (const dep of deps) {
@@ -61,14 +67,9 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
   // A semantics realization document is compiled before interpreter creation
   // and then treated as immutable. Cache its dependency order so per-frame
   // evaluation only executes CEL rules.
-  const orderCache = new WeakMap<
-    Record<string, RealizationRule | string>,
-    readonly string[]
-  >();
+  const orderCache = new WeakMap<Record<string, RealizationRule | string>, readonly string[]>();
 
-  function getCompiledOrder(
-    realize: Record<string, RealizationRule | string>,
-  ): readonly string[] {
+  function getCompiledOrder(realize: Record<string, RealizationRule | string>): readonly string[] {
     const cached = orderCache.get(realize);
     if (cached !== undefined) return cached;
     const order = buildEvaluationOrder(realize);
@@ -102,7 +103,7 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
       try {
         order = getCompiledOrder(realize);
       } catch (error: unknown) {
-        if (error instanceof Error && error.message.includes('cycle')) {
+        if (error instanceof Error && error.message.includes("cycle")) {
           throw new Error(`Dependency cycle detected: ${error.message}`);
         }
         throw error;
@@ -113,7 +114,7 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
         const rule = realize[name];
         if (!rule) continue;
 
-        const ruleObj = typeof rule === 'string' ? { expr: rule } : rule;
+        const ruleObj = typeof rule === "string" ? { expr: rule } : rule;
 
         try {
           const celContext: EvaluationContext = {

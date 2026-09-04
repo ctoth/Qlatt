@@ -1,7 +1,7 @@
-import { loadYamlDocument, loadYamlDocumentOrNull } from "../yaml-loader";
-import { normalizePath, readFileFromFsSync } from "../path-utils";
 import type { BaconGraph, Registry } from "../klatt-runtime";
+import { normalizePath, readFileFromFsSync } from "../path-utils";
 import type { SemanticsDocument } from "../semantics/types";
+import { loadYamlDocument, loadYamlDocumentOrNull } from "../yaml-loader";
 
 type ExperimentManifestEntry = {
   id: string;
@@ -21,7 +21,9 @@ export interface ExperimentConfig {
 type SemanticsConstants = NonNullable<SemanticsDocument["constants"]>;
 type NestedConstants = Exclude<SemanticsConstants[string], string | number | boolean>;
 
-function isNestedConstants(value: SemanticsConstants[string] | undefined): value is NestedConstants {
+function isNestedConstants(
+  value: SemanticsConstants[string] | undefined,
+): value is NestedConstants {
   return value != null && typeof value === "object";
 }
 
@@ -84,15 +86,9 @@ async function loadJsonDocument<T>(specPath: string): Promise<T> {
   throw new Error(`Unable to load JSON resource '${specPath}'`);
 }
 
-export async function loadExperimentConfig(
-  experimentId: string,
-): Promise<ExperimentConfig> {
-  const manifest = await loadJsonDocument<ExperimentManifest>(
-    "/experiments/manifest.json",
-  );
-  const entry = manifest?.experiments?.find(
-    (candidate) => candidate.id === experimentId,
-  );
+export async function loadExperimentConfig(experimentId: string): Promise<ExperimentConfig> {
+  const manifest = await loadJsonDocument<ExperimentManifest>("/experiments/manifest.json");
+  const entry = manifest?.experiments?.find((candidate) => candidate.id === experimentId);
   const basePath = `/experiments/${experimentId}`;
 
   const [childGraph, childSemantics, childRegistry] = await Promise.all([

@@ -1,17 +1,18 @@
-import { Utterance } from "./utterance";
+import type { AddDecisionInput, DecisionRecord, ProvenanceCollector } from "../../provenance";
 import type { Item } from "./item";
 import type { HrgSchema, TransactionJournalEntry } from "./types";
-import type {
-  AddDecisionInput,
-  DecisionRecord,
-  ProvenanceCollector,
-} from "../../provenance";
+import { Utterance } from "./utterance";
 
-function equalStrings(left: readonly string[] | undefined, right: readonly string[] | undefined): boolean {
+function equalStrings(
+  left: readonly string[] | undefined,
+  right: readonly string[] | undefined,
+): boolean {
   const leftValues = left ?? [];
   const rightValues = right ?? [];
-  return leftValues.length === rightValues.length
-    && leftValues.every((value, index) => value === rightValues[index]);
+  return (
+    leftValues.length === rightValues.length &&
+    leftValues.every((value, index) => value === rightValues[index])
+  );
 }
 
 function createReplayProvenance(decisions: readonly DecisionRecord[]): {
@@ -31,13 +32,13 @@ function createReplayProvenance(decisions: readonly DecisionRecord[]): {
         const expected = byId.get(id);
         if (!expected) throw new Error(`E_HRG_REPLAY_DECISION_UNKNOWN: '${id}'`);
         if (
-          expected.stage !== input.stage
-          || expected.type !== input.type
-          || expected.subject !== input.subject
-          || expected.reason !== input.reason
-          || !equalStrings(expected.citations, input.citations)
-          || !equalStrings(expected.parents, input.parents)
-          || expected.timestampMs !== input.timestampMs
+          expected.stage !== input.stage ||
+          expected.type !== input.type ||
+          expected.subject !== input.subject ||
+          expected.reason !== input.reason ||
+          !equalStrings(expected.citations, input.citations) ||
+          !equalStrings(expected.parents, input.parents) ||
+          expected.timestampMs !== input.timestampMs
         ) {
           throw new Error(`E_HRG_REPLAY_DECISION_MISMATCH: '${id}'`);
         }

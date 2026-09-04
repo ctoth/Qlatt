@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
@@ -69,12 +69,14 @@ describe("graph-native predicate navigation", () => {
             expression_hit: "look_back_where(current, 4, 'candidate.stress == 1')",
             predicate_hit: "look_back_pred(current, 4, 'is_stressed')",
           },
-          apply: [{
-            field: "duration",
-            op: "add",
-            value: "expression_hit.id == predicate_hit.id ? 10 : 0",
-            tag: "navigation",
-          }],
+          apply: [
+            {
+              field: "duration",
+              op: "add",
+              value: "expression_hit.id == predicate_hit.id ? 10 : 0",
+              tag: "navigation",
+            },
+          ],
           citations: ["Taylor, Black & Caley 2001"],
         },
       },
@@ -88,12 +90,14 @@ describe("graph-native predicate navigation", () => {
     const ih = utterance.getItem("ih");
     if (!k || !eh || !ih) throw new Error("missing fixture Items");
     expect(k.get("duration")).toBe(20);
-    expect(k.latestWrite("duration")?.parents).toEqual(expect.arrayContaining([
-      eh.latestWrite("stress")?.decisionId,
-      ih.latestWrite("stress")?.decisionId,
-      utterance.relation("Segment").node(eh)?.write.decisionId,
-      utterance.relation("Segment").node(ih)?.write.decisionId,
-    ]));
+    expect(k.latestWrite("duration")?.parents).toEqual(
+      expect.arrayContaining([
+        eh.latestWrite("stress")?.decisionId,
+        ih.latestWrite("stress")?.decisionId,
+        utterance.relation("Segment").node(eh)?.write.decisionId,
+        utterance.relation("Segment").node(ih)?.write.decisionId,
+      ]),
+    );
   });
 
   it("derives word, syllable, role, position, and span queries from shared tree identity", () => {
@@ -124,11 +128,7 @@ describe("graph-native predicate navigation", () => {
       transaction.set(item, "type", index === 1 || index === 3 ? "vowel" : "stop");
       transaction.set(item, "duration", 10);
       transaction.append("Segment", item);
-      transaction.addDaughter(
-        "SylStructure",
-        index < 2 ? firstSyllable : secondSyllable,
-        item,
-      );
+      transaction.addDaughter("SylStructure", index < 2 ? firstSyllable : secondSyllable, item);
     }
     transaction.commit();
     const spec = compileRuleEngineSpec({
@@ -148,22 +148,24 @@ describe("graph-native predicate navigation", () => {
             first: "find_within_word(current, \"current.phoneme == 'B'\", 'behind')",
             word_text: "path(current, 'R:SylStructure.parent.parent.R:Word.text')",
           },
-          apply: [{
-            field: "duration",
-            op: "set",
-            value: [
-              "word_count()",
-              "count_word_vowels()",
-              "syllable_index() * 10",
-              "(syllable_role() == 'nucleus' ? 20 : 0)",
-              "(syllable_position_in_word() == 'final' ? 30 : 0)",
-              "(current.syllable.id == 's2' ? 40 : 0)",
-              "(first != null ? span_ms(first, current) : 0)",
-              "(first != null ? 50 : 0)",
-              "(word_text == 'better' ? 60 : 0)",
-            ].join(" + "),
-            tag: "graph_navigation",
-          }],
+          apply: [
+            {
+              field: "duration",
+              op: "set",
+              value: [
+                "word_count()",
+                "count_word_vowels()",
+                "syllable_index() * 10",
+                "(syllable_role() == 'nucleus' ? 20 : 0)",
+                "(syllable_position_in_word() == 'final' ? 30 : 0)",
+                "(current.syllable.id == 's2' ? 40 : 0)",
+                "(first != null ? span_ms(first, current) : 0)",
+                "(first != null ? 50 : 0)",
+                "(word_text == 'better' ? 60 : 0)",
+              ].join(" + "),
+              tag: "graph_navigation",
+            },
+          ],
           citations: ["Taylor, Black & Caley 2001"],
         },
       },
@@ -202,7 +204,9 @@ describe("graph-native predicate navigation", () => {
       rules: {
         target_duration: {
           select: { relation: "Segment", where: "current.id == 'source'" },
-          apply: [{ field: "duration", op: "set", value: "target('REL').duration", tag: "inventory" }],
+          apply: [
+            { field: "duration", op: "set", value: "target('REL').duration", tag: "inventory" },
+          ],
           citations: ["Klatt 1980"],
         },
       },

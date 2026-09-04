@@ -127,7 +127,8 @@ export class TemporalAxis {
       const rightRank = numericOrder(right.order);
       if (leftRank >= rightRank) throw new Error("E_HRG_TEMPORAL_ORDER");
       const rankValue = leftRank + (rightRank - leftRank) / 2n;
-      if (rankValue <= leftRank || rankValue >= rightRank) throw new Error("E_HRG_TEMPORAL_RANK_SPACE");
+      if (rankValue <= leftRank || rankValue >= rightRank)
+        throw new Error("E_HRG_TEMPORAL_RANK_SPACE");
       const rank = formatRank(rankValue);
       return this.addOrder({ kind: "FINITE", rank, id: `M_${rank}` }, creationDecisionId);
     };
@@ -140,8 +141,13 @@ export class TemporalAxis {
     }
   }
 
-  splitMarkRange(leftId: string | null | undefined, rightId: string | null | undefined, count: number): Array<{ leftId: string; rightId: string }> {
-    if (typeof leftId !== "string" || typeof rightId !== "string") throw new Error("E_SYNC_MARK_UNKNOWN");
+  splitMarkRange(
+    leftId: string | null | undefined,
+    rightId: string | null | undefined,
+    count: number,
+  ): Array<{ leftId: string; rightId: string }> {
+    if (typeof leftId !== "string" || typeof rightId !== "string")
+      throw new Error("E_SYNC_MARK_UNKNOWN");
     if (count <= 0) return [];
     const split = (): string[] => {
       const left = this.get(leftId);
@@ -172,7 +178,9 @@ export class TemporalAxis {
       this.rebalance();
       boundaries = split();
     }
-    return boundaries.slice(0, -1).map((id, index) => ({ leftId: id, rightId: boundaries[index + 1] }));
+    return boundaries
+      .slice(0, -1)
+      .map((id, index) => ({ leftId: id, rightId: boundaries[index + 1] }));
   }
 
   setMarkTime(id: string | null | undefined, timeMs: number): boolean {

@@ -15,9 +15,27 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
     _reportCountdown;
     static get parameterDescriptors() {
         return [
-            { name: "f0", defaultValue: 0, minValue: 0, maxValue: 2000, automationRate: "a-rate" },
-            { name: "gain", defaultValue: 1, minValue: 0, maxValue: 1, automationRate: "a-rate" },
-            { name: "openPhaseRatio", defaultValue: 0.7, minValue: 0, maxValue: 1, automationRate: "k-rate" },
+            {
+                name: "f0",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 2000,
+                automationRate: "a-rate",
+            },
+            {
+                name: "gain",
+                defaultValue: 1,
+                minValue: 0,
+                maxValue: 1,
+                automationRate: "a-rate",
+            },
+            {
+                name: "openPhaseRatio",
+                defaultValue: 0.7,
+                minValue: 0,
+                maxValue: 1,
+                automationRate: "k-rate",
+            },
         ];
     }
     constructor(options) {
@@ -83,9 +101,7 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
                 outputChannel[i] = 0;
                 continue;
             }
-            const pulse = (this.positionInPeriod === 1)
-                ? 1
-                : (this.positionInPeriod === 2) ? -1 : 0;
+            const pulse = this.positionInPeriod === 1 ? 1 : this.positionInPeriod === 2 ? -1 : 0;
             this.positionInPeriod += 1;
             if (this.positionInPeriod >= this.periodLength) {
                 this.positionInPeriod = 0;
@@ -111,7 +127,7 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
             this.y2 = 0;
             return;
         }
-        const r = Math.exp(-Math.PI * bw / sr);
+        const r = Math.exp((-Math.PI * bw) / sr);
         const w = 0;
         this.c = -(r ** 2);
         this.b = 2 * r * Math.cos(w);

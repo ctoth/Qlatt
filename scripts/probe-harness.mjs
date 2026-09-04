@@ -175,8 +175,8 @@ try {
     snapshot,
     summary: {
       topTelemetryMax: topTelemetryMax(snapshot.telemetryMax),
-      failingChecks: snapshot.diagResults.filter((entry) =>
-        entry.status === "warn" || entry.status === "fail" || entry.assertionFailed,
+      failingChecks: snapshot.diagResults.filter(
+        (entry) => entry.status === "warn" || entry.status === "fail" || entry.assertionFailed,
       ),
     },
   };
@@ -186,20 +186,26 @@ try {
     fs.writeFileSync(outJson, JSON.stringify(result, null, 2));
   }
 
-  console.log(JSON.stringify({
-    statusText: snapshot.statusText,
-    selectedExperiment: snapshot.selectedExperiment,
-    currentExperimentId: snapshot.currentExperimentId,
-    diagnosticsChars: snapshot.diagnostics.length,
-    telemetryNodes: mapEntries(new Map(snapshot.telemetryMax)).length,
-    topTelemetryMax: result.summary.topTelemetryMax.slice(0, 5),
-    failingChecks: result.summary.failingChecks,
-    plstepTotalCount: snapshot.plstepTotalCount,
-    consoleErrors: consoleLogs.filter((entry) => entry.type === "error").length,
-    pageErrors: pageErrors.length,
-    failedRequests: failedRequests.length,
-    outJson,
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        statusText: snapshot.statusText,
+        selectedExperiment: snapshot.selectedExperiment,
+        currentExperimentId: snapshot.currentExperimentId,
+        diagnosticsChars: snapshot.diagnostics.length,
+        telemetryNodes: mapEntries(new Map(snapshot.telemetryMax)).length,
+        topTelemetryMax: result.summary.topTelemetryMax.slice(0, 5),
+        failingChecks: result.summary.failingChecks,
+        plstepTotalCount: snapshot.plstepTotalCount,
+        consoleErrors: consoleLogs.filter((entry) => entry.type === "error").length,
+        pageErrors: pageErrors.length,
+        failedRequests: failedRequests.length,
+        outJson,
+      },
+      null,
+      2,
+    ),
+  );
 } finally {
   await browser.close();
 }

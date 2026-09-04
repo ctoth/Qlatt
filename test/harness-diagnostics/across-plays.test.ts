@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  AcrossPlaysAccumulator,
-} from "../../src/harness-diagnostics/across-plays";
+import { AcrossPlaysAccumulator } from "../../src/harness-diagnostics/across-plays";
 
 describe("AcrossPlaysAccumulator", () => {
   it("identical plays pass with CV=0", () => {

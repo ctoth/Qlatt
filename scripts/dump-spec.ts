@@ -8,7 +8,10 @@
  * restructuring the YAML files, so we can diff after each step to
  * verify nothing changed semantically.
  */
-import { loadRulepackSpecFromPath, DEFAULT_RULEPACK_PATH } from "../src/declarative-frontend/rule-pack";
+import {
+  DEFAULT_RULEPACK_PATH,
+  loadRulepackSpecFromPath,
+} from "../src/declarative-frontend/rule-pack";
 
 const spec = loadRulepackSpecFromPath(DEFAULT_RULEPACK_PATH);
 process.stdout.write(JSON.stringify(spec, null, 2) + "\n");

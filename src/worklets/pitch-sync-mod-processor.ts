@@ -3,7 +3,13 @@
  * Wraps the pitch-sync-mod WASM primitive
  * F1/B1 modulation synchronized to glottal cycle
  */
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  computeRmsPeak,
+  initWasmModule,
+  resolveWasmUrl,
+  WasmBuffer,
+} from "./wasm-utils.js";
 
 interface PitchSyncModWasmExports {
   memory: WebAssembly.Memory;
@@ -20,7 +26,7 @@ interface PitchSyncModWasmExports {
     dF1: number,
     dB1: number,
     skew: number,
-    source: number
+    source: number,
   ): number;
   pitch_sync_resonator_process_block(
     state: number,
@@ -83,7 +89,13 @@ class PitchSyncModProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "f0", defaultValue: 100, minValue: 20, maxValue: 500, automationRate: "a-rate" as const },
+      {
+        name: "f0",
+        defaultValue: 100,
+        minValue: 20,
+        maxValue: 500,
+        automationRate: "a-rate" as const,
+      },
       {
         name: "openQuotient",
         defaultValue: 50,
@@ -91,12 +103,48 @@ class PitchSyncModProcessor extends AudioWorkletProcessor {
         maxValue: 100,
         automationRate: "k-rate" as const,
       },
-      { name: "f1", defaultValue: 500, minValue: 100, maxValue: 1500, automationRate: "a-rate" as const },
-      { name: "b1", defaultValue: 80, minValue: 30, maxValue: 500, automationRate: "a-rate" as const },
-      { name: "dF1", defaultValue: 0, minValue: 0, maxValue: 500, automationRate: "a-rate" as const },
-      { name: "dB1", defaultValue: 0, minValue: 0, maxValue: 500, automationRate: "a-rate" as const },
-      { name: "skew", defaultValue: 0, minValue: 0, maxValue: 200, automationRate: "k-rate" as const },
-      { name: "source", defaultValue: 2, minValue: 1, maxValue: 4, automationRate: "k-rate" as const },
+      {
+        name: "f1",
+        defaultValue: 500,
+        minValue: 100,
+        maxValue: 1500,
+        automationRate: "a-rate" as const,
+      },
+      {
+        name: "b1",
+        defaultValue: 80,
+        minValue: 30,
+        maxValue: 500,
+        automationRate: "a-rate" as const,
+      },
+      {
+        name: "dF1",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 500,
+        automationRate: "a-rate" as const,
+      },
+      {
+        name: "dB1",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 500,
+        automationRate: "a-rate" as const,
+      },
+      {
+        name: "skew",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 200,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "source",
+        defaultValue: 2,
+        minValue: 1,
+        maxValue: 4,
+        automationRate: "k-rate" as const,
+      },
     ];
   }
 
@@ -154,7 +202,7 @@ class PitchSyncModProcessor extends AudioWorkletProcessor {
   process(
     inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const input = inputs[0];
@@ -207,9 +255,7 @@ class PitchSyncModProcessor extends AudioWorkletProcessor {
       oq.length > 1 ||
       skew.length > 1 ||
       source.length > 1 ||
-      [f0, f1, b1, dF1, dB1].some(
-        (values) => values.length !== 1 && values.length < blockSize,
-      );
+      [f0, f1, b1, dF1, dB1].some((values) => values.length !== 1 && values.length < blockSize);
     if (hasNonstandardRates) {
       for (let i = 0; i < blockSize; i += 1) {
         outputChannel[i] = this.wasm.pitch_sync_resonator_process(

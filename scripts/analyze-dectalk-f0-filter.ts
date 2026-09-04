@@ -2,17 +2,14 @@
 // filter_commands() recurrence against a captured DEBUGF0 main-filter trace.
 
 const baseline = [
-  1160, 1150, 1140, 1152, 1132, 1140, 1130, 1124, 1110,
-  1100, 1080, 1060, 1040, 1020, 980, 960, 950,
+  1160, 1150, 1140, 1152, 1132, 1140, 1130, 1124, 1110, 1100, 1080, 1060, 1040, 1020, 980, 960, 950,
 ];
 
 const observedMain = [
-  1159, 1159, 1159, 1158, 1158, 1157, 1157, 1156, 1155, 1154,
-  1153, 1152, 1151, 1159, 1174, 1194, 1218, 1244, 1271, 1299,
-  1327, 1355, 1381, 1407, 1431, 1454, 1476, 1496, 1515, 1532,
-  1548, 1563, 1576, 1582, 1582, 1577, 1569, 1559, 1547, 1534,
-  1520, 1505, 1491, 1476, 1462, 1449, 1435, 1423, 1410, 1399,
-  1388, 1377, 1367, 1357, 1348, 1339, 1331,
+  1159, 1159, 1159, 1158, 1158, 1157, 1157, 1156, 1155, 1154, 1153, 1152, 1151, 1159, 1174, 1194,
+  1218, 1244, 1271, 1299, 1327, 1355, 1381, 1407, 1431, 1454, 1476, 1496, 1515, 1532, 1548, 1563,
+  1576, 1582, 1582, 1577, 1569, 1559, 1547, 1534, 1520, 1505, 1491, 1476, 1462, 1449, 1435, 1423,
+  1410, 1399, 1388, 1377, 1367, 1357, 1348, 1339, 1331,
 ];
 
 const q14 = (left: number, right: number): number => (left * right) >> 14;
@@ -39,7 +36,7 @@ function renderMain(tcumdur: number): number[] {
       impulseFrames = 20;
     }
 
-    if ((frame << 4) >= basetime) {
+    if (frame << 4 >= basetime) {
       basestep = (lastbase >> 2) - baseline[basecntr + 1];
       basetime += tcumdur;
       if (basecntr <= 14) basecntr += 1;
@@ -83,6 +80,8 @@ const candidates = Array.from({ length: 300 }, (_, offset) => offset + 1)
 
 const observedClock = candidates.find((candidate) => candidate.tcumdur === 78);
 if (!observedClock || observedClock.exactCells !== observedMain.length) {
-  throw new Error("DECtalk's observed 78-frame controller clock did not reproduce the captured main-filter trace");
+  throw new Error(
+    "DECtalk's observed 78-frame controller clock did not reproduce the captured main-filter trace",
+  );
 }
 console.log(JSON.stringify({ best: candidates.slice(0, 5), observedClock }, null, 2));

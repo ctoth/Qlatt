@@ -8,8 +8,8 @@
  * Since AudioWorkletNode is not a global in Node.js, tests mock it via
  * globalThis to simulate browser and non-browser environments.
  */
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { isAudioWorkletNode } from '../src/klatt-runtime';
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { isAudioWorkletNode } from "../src/klatt-runtime";
 
 // ---------------------------------------------------------------------------
 // Mock AudioWorkletNode class for tests
@@ -24,76 +24,77 @@ class MockAudioWorkletNode {
 }
 
 // Store original so we can restore after tests
-const originalAudioWorkletNode = (globalThis as any).AudioWorkletNode;
+const originalAudioWorkletNode: unknown = Reflect.get(globalThis, "AudioWorkletNode");
+const mockAudioWorkletNodeConstructor = MockAudioWorkletNode;
 
-describe('isAudioWorkletNode', () => {
-  describe('when AudioWorkletNode is defined globally', () => {
+describe("isAudioWorkletNode", () => {
+  describe("when AudioWorkletNode is defined globally", () => {
     beforeAll(() => {
       // Install mock as global so instanceof checks work
-      (globalThis as any).AudioWorkletNode = MockAudioWorkletNode;
+      Reflect.set(globalThis, "AudioWorkletNode", mockAudioWorkletNodeConstructor);
     });
 
     afterAll(() => {
       // Restore original (undefined in Node.js)
       if (originalAudioWorkletNode !== undefined) {
-        (globalThis as any).AudioWorkletNode = originalAudioWorkletNode;
+        Reflect.set(globalThis, "AudioWorkletNode", originalAudioWorkletNode);
       } else {
-        delete (globalThis as any).AudioWorkletNode;
+        Reflect.deleteProperty(globalThis, "AudioWorkletNode");
       }
     });
 
-    it('returns true for AudioWorkletNode instances', () => {
+    it("returns true for AudioWorkletNode instances", () => {
       const node = new MockAudioWorkletNode();
-      expect(isAudioWorkletNode(node as unknown as AudioNode, MockAudioWorkletNode as any)).toBe(true);
+      expect(isAudioWorkletNode(node, mockAudioWorkletNodeConstructor)).toBe(true);
     });
 
-    it('returns false for a plain object with a port property', () => {
+    it("returns false for a plain object with a port property", () => {
       // This is the key regression test: the old 'port' in node check
       // would return true for this, but instanceof should return false.
       const fakeNode = { port: {}, connect() {}, disconnect() {} };
-      expect(isAudioWorkletNode(fakeNode as unknown as AudioNode, MockAudioWorkletNode as any)).toBe(false);
+      expect(isAudioWorkletNode(fakeNode, mockAudioWorkletNodeConstructor)).toBe(false);
     });
 
-    it('returns false for GainNode-like objects', () => {
+    it("returns false for GainNode-like objects", () => {
       const gainLike = {
         gain: { value: 1 },
         connect() {},
         disconnect() {},
       };
-      expect(isAudioWorkletNode(gainLike as unknown as AudioNode, MockAudioWorkletNode as any)).toBe(false);
+      expect(isAudioWorkletNode(gainLike, mockAudioWorkletNodeConstructor)).toBe(false);
     });
 
-    it('returns false for ConstantSourceNode-like objects', () => {
+    it("returns false for ConstantSourceNode-like objects", () => {
       const constSourceLike = {
         offset: { value: 0 },
         connect() {},
         disconnect() {},
       };
-      expect(isAudioWorkletNode(constSourceLike as unknown as AudioNode, MockAudioWorkletNode as any)).toBe(false);
+      expect(isAudioWorkletNode(constSourceLike, mockAudioWorkletNodeConstructor)).toBe(false);
     });
   });
 
-  describe('when AudioWorkletNode is NOT defined globally', () => {
+  describe("when AudioWorkletNode is NOT defined globally", () => {
     beforeAll(() => {
       // Remove the global to simulate environments where it does not exist
-      delete (globalThis as any).AudioWorkletNode;
+      Reflect.deleteProperty(globalThis, "AudioWorkletNode");
     });
 
     afterAll(() => {
       // Restore for any subsequent test suites
       if (originalAudioWorkletNode !== undefined) {
-        (globalThis as any).AudioWorkletNode = originalAudioWorkletNode;
+        Reflect.set(globalThis, "AudioWorkletNode", originalAudioWorkletNode);
       }
     });
 
-    it('returns false for any node (cannot instanceof a missing class)', () => {
+    it("returns false for any node (cannot instanceof a missing class)", () => {
       const node = new MockAudioWorkletNode();
-      expect(isAudioWorkletNode(node as unknown as AudioNode, undefined)).toBe(false);
+      expect(isAudioWorkletNode(node, undefined)).toBe(false);
     });
 
-    it('returns false for plain objects with port property', () => {
+    it("returns false for plain objects with port property", () => {
       const fakeNode = { port: {}, connect() {}, disconnect() {} };
-      expect(isAudioWorkletNode(fakeNode as unknown as AudioNode, undefined)).toBe(false);
+      expect(isAudioWorkletNode(fakeNode, undefined)).toBe(false);
     });
   });
 });

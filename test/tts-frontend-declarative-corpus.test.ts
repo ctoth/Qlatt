@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
+import { describe, expect, it, vi } from "vitest";
 import { textToKlattTrack } from "../src/tts-frontend";
 
 type PhraseCorpus = {

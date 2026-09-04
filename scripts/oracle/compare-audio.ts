@@ -3,12 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { stoi } from "../../src/metrics/stoi";
-import type {
-  AudioComparisonReport,
-  AudioNormalizationConfig,
-  OracleArtifact,
-} from "./types";
 import { buildSymbolicComparison } from "./symbolic";
+import type { AudioComparisonReport, AudioNormalizationConfig, OracleArtifact } from "./types";
 import {
   alignByLag,
   correlation,
@@ -100,9 +96,7 @@ function readMetricNumber(
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-function summarizeQlattTrackInternal(
-  track: unknown,
-): Record<string, number> | null {
+function summarizeQlattTrackInternal(track: unknown): Record<string, number> | null {
   if (!Array.isArray(track) || track.length === 0) {
     return null;
   }
@@ -115,11 +109,8 @@ function summarizeQlattTrackInternal(
     const current = track[index] as Record<string, unknown>;
     const next = track[index + 1] as Record<string, unknown>;
     const currentTime =
-      typeof current.time === "number" && Number.isFinite(current.time)
-        ? current.time
-        : null;
-    const nextTime =
-      typeof next.time === "number" && Number.isFinite(next.time) ? next.time : null;
+      typeof current.time === "number" && Number.isFinite(current.time) ? current.time : null;
+    const nextTime = typeof next.time === "number" && Number.isFinite(next.time) ? next.time : null;
     if (currentTime == null || nextTime == null || nextTime <= currentTime) {
       continue;
     }
@@ -130,13 +121,9 @@ function summarizeQlattTrackInternal(
         ? (current.params as Record<string, unknown>)
         : null;
     const av =
-      params && typeof params.AV === "number" && Number.isFinite(params.AV)
-        ? params.AV
-        : 0;
+      params && typeof params.AV === "number" && Number.isFinite(params.AV) ? params.AV : 0;
     const ah =
-      params && typeof params.AH === "number" && Number.isFinite(params.AH)
-        ? params.AH
-        : 0;
+      params && typeof params.AH === "number" && Number.isFinite(params.AH) ? params.AH : 0;
 
     weightedAv += av * duration;
     weightedAh += ah * duration;
@@ -190,8 +177,7 @@ function buildVerdict(report: AudioComparisonReport): AudioComparisonReport["ver
   if (
     reasons.some(
       (reason) =>
-        reason.startsWith("Duration ratio") ||
-        reason.startsWith("Low symbolic token similarity"),
+        reason.startsWith("Duration ratio") || reason.startsWith("Low symbolic token similarity"),
     )
   ) {
     return { status: "fail", reasons };
@@ -225,29 +211,15 @@ export function compareAudioFiles(args: CompareAudioArgs): AudioComparisonReport
     qlattWav.sampleRate,
     cfg.comparisonSampleRate,
   );
-  const oracleTrimmed = trimSilence(
-    oracleResampled,
-    cfg.trimThresholdRatio,
-    trimWindowSamples,
-  );
-  const qlattTrimmed = trimSilence(
-    qlattResampled,
-    cfg.trimThresholdRatio,
-    trimWindowSamples,
-  );
+  const oracleTrimmed = trimSilence(oracleResampled, cfg.trimThresholdRatio, trimWindowSamples);
+  const qlattTrimmed = trimSilence(qlattResampled, cfg.trimThresholdRatio, trimWindowSamples);
   const oracleNorm = normalizeRms(oracleTrimmed, cfg.targetRms).samples;
   const qlattNorm = normalizeRms(qlattTrimmed, cfg.targetRms).samples;
 
-  const maxLagSamples = Math.max(
-    0,
-    Math.round((cfg.maxLagMs / 1000) * cfg.comparisonSampleRate),
-  );
+  const maxLagSamples = Math.max(0, Math.round((cfg.maxLagMs / 1000) * cfg.comparisonSampleRate));
   const lagSamples = estimateLag(oracleNorm, qlattNorm, maxLagSamples);
   const aligned = alignByLag(oracleNorm, qlattNorm, lagSamples);
-  const overlapLength = Math.min(
-    aligned.reference.length,
-    aligned.candidate.length,
-  );
+  const overlapLength = Math.min(aligned.reference.length, aligned.candidate.length);
   const oracleAligned = aligned.reference.slice(0, overlapLength);
   const qlattAligned = aligned.candidate.slice(0, overlapLength);
 
@@ -268,10 +240,7 @@ export function compareAudioFiles(args: CompareAudioArgs): AudioComparisonReport
   const qlattArtifact = loadArtifact(args.qlattMeta);
   const qlattPayload =
     args.qlattPayload && fs.existsSync(args.qlattPayload)
-      ? (JSON.parse(fs.readFileSync(args.qlattPayload, "utf8")) as Record<
-          string,
-          unknown
-        >)
+      ? (JSON.parse(fs.readFileSync(args.qlattPayload, "utf8")) as Record<string, unknown>)
       : null;
   const symbolic = buildSymbolicComparison(oracleArtifact.symbolic, qlattPayload);
   const oracleTrace =
@@ -303,8 +272,8 @@ export function compareAudioFiles(args: CompareAudioArgs): AudioComparisonReport
     qlattTrackVoicedRatioFromSummary != null
       ? qlattTrackVoicedRatioFromSummary
       : qlattTrackEvents != null && qlattTrackEvents > 0 && qlattTrackVoicedEvents != null
-      ? qlattTrackVoicedEvents / qlattTrackEvents
-      : null;
+        ? qlattTrackVoicedEvents / qlattTrackEvents
+        : null;
   const oracleTraceVoicedRatio = readMetricNumber(oracleTrace, "voicedRatio");
   const oracleTraceMeanAv = readMetricNumber(oracleTrace, "meanAv");
   const oracleTraceMeanAp = readMetricNumber(oracleTrace, "meanAp");
@@ -427,8 +396,7 @@ async function main(): Promise<number> {
 }
 
 const isMain =
-  process.argv[1] != null &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  process.argv[1] != null && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isMain) {
   main().then((code) => process.exit(code));

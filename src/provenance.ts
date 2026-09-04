@@ -62,12 +62,14 @@ export function createProvenanceCollector(): ProvenanceCollector {
         reason: input.reason,
         citations: Array.isArray(input.citations)
           ? input.citations
-            .map((citation) => normalizeCitation(citation))
-            .filter((citation): citation is string => typeof citation === "string" && citation.length > 0)
+              .map((citation) => normalizeCitation(citation))
+              .filter(
+                (citation): citation is string =>
+                  typeof citation === "string" && citation.length > 0,
+              )
           : [],
-        parents: Array.isArray(input.parents) && input.parents.length > 0
-          ? [...input.parents]
-          : undefined,
+        parents:
+          Array.isArray(input.parents) && input.parents.length > 0 ? [...input.parents] : undefined,
         timestampMs: Number.isFinite(input.timestampMs) ? Number(input.timestampMs) : undefined,
       };
       decisions.push(decision);
@@ -229,7 +231,7 @@ export function applyRange(decisions: DecisionRecord[], range: RangeSpec): Decis
       typeof range.end === "string" ? range.end : undefined,
     );
     return decisions.filter((decision) =>
-      isWithinNumericRange(decision.seq, bounds.startSeq, bounds.endSeq)
+      isWithinNumericRange(decision.seq, bounds.startSeq, bounds.endSeq),
     );
   }
 
@@ -240,6 +242,6 @@ export function applyRange(decisions: DecisionRecord[], range: RangeSpec): Decis
     typeof range.end === "string" ? range.end : undefined,
   );
   return decisions.filter((decision) =>
-    isWithinNumericRange(decision.seq, bounds.startSeq, bounds.endSeq)
+    isWithinNumericRange(decision.seq, bounds.startSeq, bounds.endSeq),
   );
 }

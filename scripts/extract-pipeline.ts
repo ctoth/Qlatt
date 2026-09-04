@@ -24,7 +24,7 @@ const PIPELINE_YAML = path.join(RULES_DIR, "pipeline.yaml");
 function main(): void {
   // 1. Read and parse frontend.yaml
   const rawYaml = fs.readFileSync(FRONTEND_YAML, "utf-8");
-  const doc = yaml.load(rawYaml) as Record<string, any>;
+  const doc = yaml.load(rawYaml) as Record<string, unknown>;
 
   if (!doc || typeof doc !== "object") {
     throw new Error("frontend.yaml did not parse to an object");
@@ -44,7 +44,7 @@ function main(): void {
   }
 
   // 3. Build the pipeline document
-  const pipelineDoc: Record<string, any> = {
+  const pipelineDoc: Record<string, unknown> = {
     predicates,
     relations,
     phases,
@@ -69,21 +69,19 @@ function main(): void {
   delete doc.phases;
 
   // 6. Add pipeline.yaml to the include list (prepend before rule files)
-  const currentInclude: string[] = doc.include || [];
+  const currentInclude = Array.isArray(doc.include)
+    ? doc.include.filter((entry): entry is string => typeof entry === "string")
+    : [];
+  let finalInclude = currentInclude;
   if (!currentInclude.includes("pipeline.yaml")) {
-    doc.include = ["pipeline.yaml", ...currentInclude];
+    finalInclude = ["pipeline.yaml", ...currentInclude];
+    doc.include = finalInclude;
   }
 
   // 7. Rewrite frontend.yaml with desired key order:
   //    version, include, parameters, output, transcription
-  const orderedDoc: Record<string, any> = {};
-  const keyOrder = [
-    "version",
-    "include",
-    "parameters",
-    "output",
-    "transcription",
-  ];
+  const orderedDoc: Record<string, unknown> = {};
+  const keyOrder = ["version", "include", "parameters", "output", "transcription"];
 
   for (const key of keyOrder) {
     if (doc[key] !== undefined) {
@@ -115,7 +113,7 @@ function main(): void {
   console.log(`  relations: ${Object.keys(relations).length} entries`);
   console.log(`  phases: ${phases.length} entries`);
   console.log(`\n  pipeline.yaml created at: ${PIPELINE_YAML}`);
-  console.log(`  frontend.yaml rewritten with include: [${doc.include.join(", ")}]`);
+  console.log(`  frontend.yaml rewritten with include: [${finalInclude.join(", ")}]`);
   console.log(`\n  frontend.yaml remaining keys: ${Object.keys(orderedDoc).join(", ")}`);
   console.log("\nDone.\n");
 }

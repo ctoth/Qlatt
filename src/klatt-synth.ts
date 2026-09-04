@@ -1,9 +1,64 @@
-import { dbToLinear, proximity, ndbScale } from './builtin-functions';
+import { dbToLinear, ndbScale, proximity } from "./builtin-functions";
+
+interface KlattSynthNodes {
+  lfSource: AudioWorkletNode;
+  impulseSource: AudioWorkletNode;
+  noiseSource: AudioWorkletNode;
+  fricationSource: AudioWorkletNode;
+  rgp: AudioWorkletNode;
+  rgz: AudioWorkletNode;
+  rgs: AudioWorkletNode;
+  glottalMod: AudioWorkletNode;
+  rgpAvs: AudioWorkletNode;
+  rgzAvs: AudioWorkletNode;
+  diff: AudioWorkletNode;
+  radiationDiff: AudioWorkletNode;
+  radiationDiffAvs: AudioWorkletNode;
+  nz: AudioWorkletNode;
+  np: AudioWorkletNode;
+  cascade: AudioWorkletNode[];
+  parallelNasal: AudioWorkletNode;
+  parallelFormants: AudioWorkletNode[];
+  outputLp: AudioWorkletNode;
+  sourceSum: GainNode;
+  lfSourceGain: GainNode;
+  impulseGain: GainNode;
+  sourceBypassGain: GainNode;
+  sourceDirectGain: GainNode;
+  sourceDiffGain: GainNode;
+  avsBypassGain: GainNode;
+  avsDirectGain: GainNode;
+  avsDiffGain: GainNode;
+  voiceGain: GainNode;
+  avsGain: GainNode;
+  noiseGain: GainNode;
+  mixer: GainNode;
+  parallelMixer: GainNode;
+  parallelSourceGain: GainNode;
+  parallelDiffGain: GainNode;
+  parallelFricGain: GainNode;
+  parallelDiffSum: GainNode;
+  parallelBypassGain: GainNode;
+  parallelNasalGain: GainNode;
+  parallelFormantGains: GainNode[];
+  parallelSum: GainNode;
+  parallelOutGain: GainNode;
+  cascadeOutGain: GainNode;
+  outputSum: GainNode;
+  masterGain: GainNode;
+  outputGain: GainNode;
+  plstepSource: ConstantSourceNode;
+  plstepGain: GainNode;
+}
+
+export interface KlattSynthOptions {
+  noiseSeed?: number;
+}
 
 export class KlattSynth {
   ctx: AudioContext;
-  options: Record<string, any>;
-  nodes: Record<string, any>;
+  options: KlattSynthOptions;
+  nodes: KlattSynthNodes;
   params: Record<string, number>;
   isInitialized: boolean;
   telemetryHandler: ((event: unknown) => void) | null = null;
@@ -12,10 +67,10 @@ export class KlattSynth {
   _readyPromise?: Promise<void>;
   wasmBytes?: Record<string, ArrayBuffer>;
 
-  constructor(audioContext: AudioContext, options: Record<string, any> = {}) {
+  constructor(audioContext: AudioContext, options: KlattSynthOptions = {}) {
     this.ctx = audioContext;
     this.options = options;
-    this.nodes = {};
+    this.nodes = {} as KlattSynthNodes;
     this.params = this._defaultParams();
     this.isInitialized = false;
     // PLSTEP burst state tracking (Klatt 80 plosive release transient)
@@ -39,9 +94,7 @@ export class KlattSynth {
       new URL("./worklets/chalker-radiation-processor.ts", import.meta.url),
     ];
     await this._loadWasmBytes(workletBase);
-    await Promise.all([
-      ...workletModules.map((url) => this.ctx.audioWorklet.addModule(url.href)),
-    ]);
+    await Promise.all([...workletModules.map((url) => this.ctx.audioWorklet.addModule(url.href))]);
 
     this._createNodes();
     this._connectGraph();
@@ -254,15 +307,17 @@ export class KlattSynth {
         reportInterval,
       },
     });
-    N.cascade = Array.from({ length: 6 }, (_, index) =>
-      new AudioWorkletNode(ctx, "resonator-processor", {
-        processorOptions: {
-          wasmBytes: wasm?.resonator,
-          debug: telemetry,
-          nodeId: `cascade-${index + 1}`,
-          reportInterval,
-        },
-      })
+    N.cascade = Array.from(
+      { length: 6 },
+      (_, index) =>
+        new AudioWorkletNode(ctx, "resonator-processor", {
+          processorOptions: {
+            wasmBytes: wasm?.resonator,
+            debug: telemetry,
+            nodeId: `cascade-${index + 1}`,
+            reportInterval,
+          },
+        }),
     );
     N.parallelNasal = new AudioWorkletNode(ctx, "resonator-processor", {
       processorOptions: {
@@ -273,15 +328,17 @@ export class KlattSynth {
         reportInterval,
       },
     });
-    N.parallelFormants = Array.from({ length: 6 }, (_, index) =>
-      new AudioWorkletNode(ctx, "resonator-processor", {
-        processorOptions: {
-          wasmBytes: wasm?.resonator,
-          debug: telemetry,
-          nodeId: `parallel-formant-${index + 1}`,
-          reportInterval,
-        },
-      })
+    N.parallelFormants = Array.from(
+      { length: 6 },
+      (_, index) =>
+        new AudioWorkletNode(ctx, "resonator-processor", {
+          processorOptions: {
+            wasmBytes: wasm?.resonator,
+            debug: telemetry,
+            nodeId: `parallel-formant-${index + 1}`,
+            reportInterval,
+          },
+        }),
     );
 
     N.sourceSum = ctx.createGain();
@@ -368,7 +425,11 @@ export class KlattSynth {
     N.avsGain.connect(N.parallelMixer);
     N.sourceSum.connect(N.avsBypassGain).connect(N.avsGain);
     N.rgpAvs.connect(N.avsDirectGain).connect(N.avsGain);
-    N.rgpAvs.connect(N.rgzAvs).connect(N.radiationDiffAvs).connect(N.avsDiffGain).connect(N.avsGain);
+    N.rgpAvs
+      .connect(N.rgzAvs)
+      .connect(N.radiationDiffAvs)
+      .connect(N.avsDiffGain)
+      .connect(N.avsGain);
     N.glottalMod.connect(N.noiseSource);
     N.glottalMod.connect(N.fricationSource);
     N.noiseSource.connect(N.noiseGain);
@@ -378,7 +439,7 @@ export class KlattSynth {
     // When sourceMode = impulse (classic), we apply RGZ + radiationDiff.
     // When sourceMode = LF, we bypass radiationDiff because LF source is pre-differentiated.
     // Klatt-syn cascade order: nasal antiformant -> nasal formant -> F1..F6 -> output
-    let current = N.mixer;
+    let current: AudioNode = N.mixer;
     current.connect(N.nz);
     current = N.nz;
     current.connect(N.np);
@@ -424,7 +485,11 @@ export class KlattSynth {
     // The gain-controlled DC step is added directly to outputSum
     N.plstepSource.connect(N.plstepGain).connect(N.outputSum);
 
-    N.outputSum.connect(N.outputLp).connect(N.masterGain).connect(N.outputGain).connect(this.ctx.destination);
+    N.outputSum
+      .connect(N.outputLp)
+      .connect(N.masterGain)
+      .connect(N.outputGain)
+      .connect(this.ctx.destination);
   }
 
   _applyAllParams(atTime: number): void {
@@ -439,7 +504,11 @@ export class KlattSynth {
     this._setAudioParam(this.nodes.lfSource.parameters.get("f0"), p.f0, atTime);
     this._setAudioParam(this.nodes.impulseSource.parameters.get("f0"), p.f0, atTime);
     this._setAudioParam(this.nodes.impulseSource.parameters.get("gain"), 1.0, atTime);
-    this._setAudioParam(this.nodes.impulseSource.parameters.get("openPhaseRatio"), p.openPhaseRatio, atTime);
+    this._setAudioParam(
+      this.nodes.impulseSource.parameters.get("openPhaseRatio"),
+      p.openPhaseRatio,
+      atTime,
+    );
     this._setAudioParam(this.nodes.lfSource.parameters.get("rd"), p.rd, atTime);
     this._setAudioParam(this.nodes.lfSource.parameters.get("lfMode"), p.lfMode, atTime);
     this._setAudioParam(this.nodes.glottalMod.parameters.get("f0"), p.f0, atTime);
@@ -464,33 +533,35 @@ export class KlattSynth {
 
     this._applySourceMode(p.sourceMode, atTime);
     this.nodes.voiceGain.gain.setValueAtTime(p.voiceGain, atTime);
-    const avsGain = dbToLinear((p.AVS ?? -70) + (-44)) * 10;
+    const avsGain = dbToLinear((p.AVS ?? -70) + -44) * 10;
     this.nodes.avsGain.gain.setValueAtTime(avsGain, atTime);
     this.nodes.noiseGain.gain.setValueAtTime(p.noiseGain, atTime);
     this.nodes.masterGain.gain.setValueAtTime(p.masterGain, atTime);
     this.nodes.outputGain.gain.setValueAtTime(p.outputGain, atTime);
-    const parallelScale = Number.isFinite(p.parallelGainScale)
-      ? p.parallelGainScale
-      : 1.0;
+    const parallelScale = Number.isFinite(p.parallelGainScale) ? p.parallelGainScale : 1.0;
     this.nodes.parallelSourceGain.gain.setValueAtTime(p.parallelVoiceGain, atTime);
     this.nodes.parallelDiffGain.gain.setValueAtTime(p.parallelVoiceGain, atTime);
     this.nodes.parallelFricGain.gain.setValueAtTime(p.parallelFricationGain, atTime);
     const bypassGain = Number.isFinite(p.AB)
-      // Apply ndbScale.AB (-84) for safe Klatt parameter conversion
-      ? -dbToLinear(p.AB + (-84)) * parallelScale
+      ? // Apply ndbScale.AB (-84) for safe Klatt parameter conversion
+        -dbToLinear(p.AB + -84) * parallelScale
       : p.parallelBypassGain;
     this.nodes.parallelBypassGain.gain.setValueAtTime(bypassGain, atTime);
     const nasalDb = Number.isFinite(p.parallelNasalGain) ? p.parallelNasalGain : p.AN;
     this.nodes.parallelNasalGain.gain.setValueAtTime(
       // Apply ndbScale.AN (-58) for safe Klatt parameter conversion
-      dbToLinear(nasalDb + (-58)) * parallelScale,
-      atTime
+      dbToLinear(nasalDb + -58) * parallelScale,
+      atTime,
     );
 
     this._setAudioParam(this.nodes.noiseSource.parameters.get("gain"), 1.0, atTime);
     this._setAudioParam(this.nodes.noiseSource.parameters.get("cutoff"), p.noiseCutoff, atTime);
     this._setAudioParam(this.nodes.fricationSource.parameters.get("gain"), 1.0, atTime);
-    this._setAudioParam(this.nodes.fricationSource.parameters.get("cutoff"), p.fricationCutoff, atTime);
+    this._setAudioParam(
+      this.nodes.fricationSource.parameters.get("cutoff"),
+      p.fricationCutoff,
+      atTime,
+    );
 
     const formants = [
       { f: p.F1, b: p.B1 },
@@ -531,8 +602,8 @@ export class KlattSynth {
     const lfGain = useLf ? 1 : 0;
     const impulseGain = useLf ? 0 : 1;
     const bypassGain = useBypass ? 1 : 0;
-    const directGain = useBypass ? 0 : (useLf ? 1 : 0);
-    const diffGain = useBypass ? 0 : (useLf ? 0 : 1);
+    const directGain = useBypass ? 0 : useLf ? 1 : 0;
+    const diffGain = useBypass ? 0 : useLf ? 0 : 1;
     this.nodes.lfSourceGain.gain.setValueAtTime(lfGain, atTime);
     this.nodes.impulseGain.gain.setValueAtTime(impulseGain, atTime);
     this.nodes.sourceBypassGain.gain.setValueAtTime(bypassGain, atTime);
@@ -551,7 +622,7 @@ export class KlattSynth {
   _resolveNoiseSeed(channel: string): number | undefined {
     const configured = this.options?.noiseSeed;
     if (!Number.isFinite(configured)) return undefined;
-    const base = (Math.trunc(Number(configured)) >>> 0) || 1;
+    const base = Math.trunc(Number(configured)) >>> 0 || 1;
     const salt = channel === "frication" ? 0x9e3779b9 : 0x243f6a88;
     const derived = (base ^ salt) >>> 0;
     return derived || 1;
@@ -566,13 +637,15 @@ export class KlattSynth {
       : 1.0;
     const linear = dbToLinear(dbValue) * scale;
     const sign = index >= 1 ? (index % 2 === 1 ? -1 : 1) : 1;
-    this.nodes.parallelFormantGains[index].gain.setValueAtTime(
-      sign * linear,
-      atTime
-    );
+    this.nodes.parallelFormantGains[index].gain.setValueAtTime(sign * linear, atTime);
   }
 
-  _scheduleAudioParam(param: AudioParam | undefined | null, value: number, atTime: number, ramp: boolean): void {
+  _scheduleAudioParam(
+    param: AudioParam | undefined | null,
+    value: number,
+    atTime: number,
+    ramp: boolean,
+  ): void {
     if (!param || !Number.isFinite(value)) return;
     const automationRate = param.automationRate;
     const allowRamp = !automationRate || automationRate === "a-rate";
@@ -675,7 +748,8 @@ export class KlattSynth {
     // PARCOE.FOR line 184: IMPULS = IMPULS * NNF0 — F0-dependent voice amplitude scaling.
     // ndbScale.AV = -119 was calibrated at F0 ≈ 228 Hz (2^(47/6)). Scale by F0/228.
     const f0 = params.F0 ?? 0;
-    const voiceGain = dbToLinear(goDb + voiceDb + ndbScale.AV) * (f0 > 0 ? Math.min(f0, 500) / 228 : 0);
+    const voiceGain =
+      dbToLinear(goDb + voiceDb + ndbScale.AV) * (f0 > 0 ? Math.min(f0, 500) / 228 : 0);
     const parallelScale = Number.isFinite(this.params.parallelGainScale)
       ? this.params.parallelGainScale
       : 1.0;
@@ -687,13 +761,10 @@ export class KlattSynth {
     const aspGain = dbToLinear(goDb + aspDb + ndbScale.AH);
     const fricDbAdjusted = params.SW === 1 ? Math.max(fricDb, aspDb) : fricDb;
     // PARCOE.FOR line 126-127: NDBAF = NNG0 + NNAF + NDBSCA(11), AFF = GETAMP(NDBAF)
-    const fricGain =
-      dbToLinear(goDb + fricDbAdjusted + ndbScale.AF) * parallelScale;
+    const fricGain = dbToLinear(goDb + fricDbAdjusted + ndbScale.AF) * parallelScale;
     // Master gain: simple user-controllable scaling (WebAudio addition, not in Klatt 80)
     // G0 is now correctly incorporated in individual source amplitudes above
-    const masterGain = Number.isFinite(this.params.masterGain)
-      ? this.params.masterGain
-      : 10.0;
+    const masterGain = Number.isFinite(this.params.masterGain) ? this.params.masterGain : 10.0;
 
     const mix = this.params.parallelMix;
     const allParallel = params.SW === 1;
@@ -709,13 +780,18 @@ export class KlattSynth {
     const openPhaseRatio = params.openPhaseRatio ?? this.params.openPhaseRatio;
 
     this._scheduleAudioParam(this.nodes.lfSource.parameters.get("f0"), params.F0, atTime, ramp);
-    this._scheduleAudioParam(this.nodes.impulseSource.parameters.get("f0"), params.F0, atTime, ramp);
+    this._scheduleAudioParam(
+      this.nodes.impulseSource.parameters.get("f0"),
+      params.F0,
+      atTime,
+      ramp,
+    );
     this._scheduleAudioParam(this.nodes.impulseSource.parameters.get("gain"), 1.0, atTime, ramp);
     this._scheduleAudioParam(
       this.nodes.impulseSource.parameters.get("openPhaseRatio"),
       openPhaseRatio,
       atTime,
-      ramp
+      ramp,
     );
     this._scheduleAudioParam(this.nodes.glottalMod.parameters.get("f0"), params.F0, atTime, ramp);
     this._scheduleAudioParam(this.nodes.lfSource.parameters.get("rd"), rd, atTime, ramp);
@@ -794,25 +870,25 @@ export class KlattSynth {
         this.nodes.cascade[index].parameters.get("frequency"),
         params[fKey],
         atTime,
-        ramp
+        ramp,
       );
       this._scheduleAudioParam(
         this.nodes.cascade[index].parameters.get("bandwidth"),
         params[bKey],
         atTime,
-        ramp
+        ramp,
       );
       this._scheduleAudioParam(
         this.nodes.parallelFormants[index].parameters.get("frequency"),
         params[fKey],
         atTime,
-        ramp
+        ramp,
       );
       this._scheduleAudioParam(
         this.nodes.parallelFormants[index].parameters.get("bandwidth"),
         params[bKey],
         atTime,
-        ramp
+        ramp,
       );
     });
 
@@ -834,7 +910,7 @@ export class KlattSynth {
         this.nodes.parallelFormantGains[i].gain,
         sign * linear,
         atTime,
-        ramp
+        ramp,
       );
     }
     if (Number.isFinite(params.AB)) {
@@ -842,7 +918,7 @@ export class KlattSynth {
         this.nodes.parallelBypassGain.gain,
         -dbToLinear(params.AB + ndbScale.AB) * parallelScale,
         atTime,
-        ramp
+        ramp,
       );
     }
     if (Number.isFinite(params.AN)) {
@@ -850,7 +926,7 @@ export class KlattSynth {
         this.nodes.parallelNasalGain.gain,
         dbToLinear(params.AN + ndbScale.AN) * parallelScale,
         atTime,
-        ramp
+        ramp,
       );
     }
 
@@ -858,11 +934,24 @@ export class KlattSynth {
     this._scheduleAudioParam(this.nodes.nz.parameters.get("bandwidth"), params.BNZ, atTime, ramp);
     this._scheduleAudioParam(this.nodes.np.parameters.get("frequency"), params.FNP, atTime, ramp);
     this._scheduleAudioParam(this.nodes.np.parameters.get("bandwidth"), params.BNP, atTime, ramp);
-    this._scheduleAudioParam(this.nodes.parallelNasal.parameters.get("frequency"), params.FNP, atTime, ramp);
-    this._scheduleAudioParam(this.nodes.parallelNasal.parameters.get("bandwidth"), params.BNP, atTime, ramp);
+    this._scheduleAudioParam(
+      this.nodes.parallelNasal.parameters.get("frequency"),
+      params.FNP,
+      atTime,
+      ramp,
+    );
+    this._scheduleAudioParam(
+      this.nodes.parallelNasal.parameters.get("bandwidth"),
+      params.BNP,
+      atTime,
+      ramp,
+    );
   }
 
-  scheduleTrack(track: Array<{ time: number; phoneme?: string; params: Record<string, number> }>, startTime = this.ctx.currentTime + 0.05): void {
+  scheduleTrack(
+    track: Array<{ time: number; phoneme?: string; params: Record<string, number> }>,
+    startTime = this.ctx.currentTime + 0.05,
+  ): void {
     if (!track || track.length === 0) return;
     this._cancelScheduledValues(startTime);
     const baseTime = startTime;
@@ -893,11 +982,11 @@ export class KlattSynth {
         const nextGoDb = next.params.GO ?? 47;
         const nextAspDb = next.params.AH ?? -70;
         const nextFricDb = next.params.AF ?? -70;
-        const nextFricDbAdjusted = next.params.SW === 1
-          ? Math.max(nextFricDb, nextAspDb)
-          : nextFricDb;
+        const nextFricDbAdjusted =
+          next.params.SW === 1 ? Math.max(nextFricDb, nextAspDb) : nextFricDb;
         const nextAspGain = dbToLinear(nextGoDb + nextAspDb + ndbScale.AH);
-        const nextFricGain = dbToLinear(nextGoDb + nextFricDbAdjusted + ndbScale.AF) * parallelScale;
+        const nextFricGain =
+          dbToLinear(nextGoDb + nextFricDbAdjusted + ndbScale.AF) * parallelScale;
 
         // Only ramp aspiration/frication (Klatt80 linear interpolation within frame)
         this._scheduleAudioParam(this.nodes.noiseGain.gain, nextAspGain, nextTime, true);
@@ -915,7 +1004,8 @@ export class KlattSynth {
       // Our AF values are scaled differently (typical burst AF is 15-20, not 50-55).
       // Detect burst when: previous AF was near-zero AND current AF is significant,
       // OR when AH (aspiration) jumps significantly (for aspirated releases).
-      const isStopRelease = typeof event.phoneme === "string" &&
+      const isStopRelease =
+        typeof event.phoneme === "string" &&
         (event.phoneme.endsWith("_REL") || event.phoneme.endsWith("_ASP"));
       const currentAF = event.params.AF ?? 0;
       const currentAH = event.params.AH ?? 0;
@@ -923,17 +1013,16 @@ export class KlattSynth {
       const ahDelta = currentAH - (this._lastAH ?? 0);
       // MITalk PLSTEP rule: trigger burst on 50 dB AF increase (we use 49 as threshold)
       // This matches Klatt 80: IF (NNAF - NAFLAS >= 49) PLSTEP = ...
-      const isBurst = (this._lastAF <= 5 && afDelta >= 49) ||
-                      ((this._lastAH ?? 0) <= 5 && ahDelta >= 49);
+      const isBurst =
+        (this._lastAF <= 5 && afDelta >= 49) || ((this._lastAH ?? 0) <= 5 && ahDelta >= 49);
       if (isStopRelease && isBurst) {
         // Determine which parameter triggered the burst
-        const triggerParam = (this._lastAF <= 5 && afDelta >= 49) ? 'AF' : 'AH';
-        const triggerDelta = triggerParam === 'AF' ? afDelta : ahDelta;
+        const triggerParam = this._lastAF <= 5 && afDelta >= 49 ? "AF" : "AH";
+        const triggerDelta = triggerParam === "AF" ? afDelta : ahDelta;
         this._scheduleBurstTransient(t, event.params, triggerParam, triggerDelta);
       }
       this._lastAF = currentAF;
       this._lastAH = currentAH;
-
     }
   }
 
@@ -953,7 +1042,12 @@ export class KlattSynth {
    * @param {string} [triggerParam] - Which parameter triggered the burst ('AF' or 'AH')
    * @param {number} [triggerDelta] - The delta value that triggered the burst
    */
-  _scheduleBurstTransient(atTime: number, params: Record<string, number>, triggerParam = 'AF', triggerDelta = 0): void {
+  _scheduleBurstTransient(
+    atTime: number,
+    params: Record<string, number>,
+    triggerParam = "AF",
+    triggerDelta = 0,
+  ): void {
     // Calculate PLSTEP amplitude per PARCOE.FOR line 131:
     // PLSTEP = GETAMP(NNG0 + NDBSCA(11) + 44)
     // where NDBSCA(11) = -72 (AF scale factor)
@@ -966,14 +1060,14 @@ export class KlattSynth {
     // In our system, we must use the same ndbScale offset as other source amplitudes:
     // burstDb = G0 + ndbScale.AF + 44 = G0 + (-119) + 44 = G0 - 75
     const goDb = params.GO ?? 47;
-    const burstDb = goDb - 75;  // Was goDb - 28, corrected for ndbScale compensation
+    const burstDb = goDb - 75; // Was goDb - 28, corrected for ndbScale compensation
     const burstAmplitude = dbToLinear(burstDb);
 
     // Emit telemetry for PLSTEP burst
     if (this.telemetryHandler) {
       this.telemetryHandler({
-        type: 'plstep',
-        nodeId: 'plstep',
+        type: "plstep",
+        nodeId: "plstep",
         time: atTime,
         amplitudeLinear: burstAmplitude,
         amplitudeDb: burstDb,
@@ -1004,7 +1098,13 @@ export class KlattSynth {
     plstepGain.setValueAtTime(0, decayEnd + 0.001);
   }
 
-  _setParallelMix(value: number, atTime: number, updateParam = true, ramp = false, allParallel = false): void {
+  _setParallelMix(
+    value: number,
+    atTime: number,
+    updateParam = true,
+    _ramp = false,
+    allParallel = false,
+  ): void {
     const mix = Math.max(0, Math.min(1, Number(value)));
     if (updateParam) {
       this.params.parallelMix = mix;
@@ -1059,7 +1159,7 @@ export class KlattSynth {
     if (this._readyPromise) return this._readyPromise;
     const nodes = Object.values(this.nodes).filter((node) => node?.port);
     this._readyPromise = Promise.all(
-      nodes.map((node) => this._waitForNodeReady(node, timeoutMs))
+      nodes.map((node) => this._waitForNodeReady(node, timeoutMs)),
     ).then(() => undefined);
     return this._readyPromise;
   }
@@ -1118,7 +1218,11 @@ export class KlattSynth {
         this._setAudioParam(this.nodes.glottalMod.parameters.get("f0"), value, atTime);
         break;
       case "openPhaseRatio":
-        this._setAudioParam(this.nodes.impulseSource.parameters.get("openPhaseRatio"), value, atTime);
+        this._setAudioParam(
+          this.nodes.impulseSource.parameters.get("openPhaseRatio"),
+          value,
+          atTime,
+        );
         break;
       case "rd":
         this._setAudioParam(this.nodes.lfSource.parameters.get("rd"), value, atTime);
@@ -1130,7 +1234,7 @@ export class KlattSynth {
         this.nodes.voiceGain.gain.setValueAtTime(value, atTime);
         break;
       case "AVS":
-        this.nodes.avsGain.gain.setValueAtTime(dbToLinear(value + (-44)) * 10, atTime);
+        this.nodes.avsGain.gain.setValueAtTime(dbToLinear(value + -44) * 10, atTime);
         break;
       case "noiseGain":
         this.nodes.noiseGain.gain.setValueAtTime(value, atTime);
@@ -1215,7 +1319,7 @@ export class KlattSynth {
       case "parallelNasalGain":
       case "AN":
         // Apply ndbScale.AN (-58) to convert Klatt parameter to safe linear
-        this.nodes.parallelNasalGain.gain.setValueAtTime(dbToLinear(value + (-58)), atTime);
+        this.nodes.parallelNasalGain.gain.setValueAtTime(dbToLinear(value + -58), atTime);
         break;
       case "A1":
       case "A2":
@@ -1231,7 +1335,7 @@ export class KlattSynth {
       }
       case "AB":
         // Apply ndbScale.AB (-84) to convert Klatt parameter to safe linear
-        this.nodes.parallelBypassGain.gain.setValueAtTime(-dbToLinear(value + (-84)), atTime);
+        this.nodes.parallelBypassGain.gain.setValueAtTime(-dbToLinear(value + -84), atTime);
         break;
       default:
         {
@@ -1240,7 +1344,11 @@ export class KlattSynth {
             const index = Number(formantMatch[1]) - 1;
             const paramName = name.startsWith("F") ? "frequency" : "bandwidth";
             this._setAudioParam(this.nodes.cascade[index].parameters.get(paramName), value, atTime);
-            this._setAudioParam(this.nodes.parallelFormants[index].parameters.get(paramName), value, atTime);
+            this._setAudioParam(
+              this.nodes.parallelFormants[index].parameters.get(paramName),
+              value,
+              atTime,
+            );
           }
         }
         break;

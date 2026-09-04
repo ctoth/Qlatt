@@ -15,7 +15,7 @@ describe("trajectory control-window lowering", () => {
           { value: 1500, time: null },
         ],
       },
-      200
+      200,
     );
 
     expect(windows).toEqual([

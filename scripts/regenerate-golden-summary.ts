@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import { textToKlattTrack } from "../src/tts-frontend";
 import { summarizeTrackMetrics } from "../src/analysis/track-metrics";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 const corpus = JSON.parse(readFileSync("test/phrase-sets/linguistic.json", "utf8"));
 const summaries = corpus.phrases.map((phrase: string) => {

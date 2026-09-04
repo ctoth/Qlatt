@@ -37,7 +37,8 @@ export async function runTtsDslCli(
 ): Promise<number> {
   try {
     const [command, ...rest] = argv;
-    if (!command) throw new Error("Usage: tts-dsl <phases|field|why-not|replay|explain> <phrase> [flags]");
+    if (!command)
+      throw new Error("Usage: tts-dsl <phases|field|why-not|replay|explain> <phrase> [flags]");
     const common = ["--format", "json", "--tooling-only"];
     switch (command) {
       case "phases":
@@ -59,8 +60,8 @@ export async function runTtsDslCli(
   }
 }
 
-const isMain = process.argv[1] != null
-  && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMain =
+  process.argv[1] != null && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isMain) {
   runTtsDslCli(process.argv.slice(2)).then((code) => {

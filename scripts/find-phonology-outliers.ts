@@ -3,10 +3,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { textToKlattTrack } from "../src/tts-frontend";
 import {
+  type Frame,
   loadCmuDictionary,
   selectAuditWords,
   stripStress,
-  type Frame,
 } from "../test/utils/cmudict-audit";
 
 type ParsedArgs = {
@@ -73,9 +73,7 @@ function parseArgs(argv: string[]): ParsedArgs {
 
 function averageParam(frames: Frame[], key: string): number {
   if (frames.length === 0) return 0;
-  return (
-    frames.reduce((sum, frame) => sum + Number(frame.params?.[key] ?? 0), 0) / frames.length
-  );
+  return frames.reduce((sum, frame) => sum + Number(frame.params?.[key] ?? 0), 0) / frames.length;
 }
 
 function maxParam(frames: Frame[], key: string): number {
@@ -86,7 +84,7 @@ function maxParam(frames: Frame[], key: string): number {
 function printSection<T>(
   title: string,
   rows: T[],
-  render: (row: T, index: number) => string
+  render: (row: T, index: number) => string,
 ): void {
   console.log(`\n${title}`);
   if (rows.length === 0) {
@@ -102,14 +100,16 @@ export async function runPhonologyOutlierScan(argv: string[]): Promise<number> {
   try {
     const args = parseArgs(argv);
     const dictionary = loadCmuDictionary();
-    const entries = args.full ? Object.entries(dictionary) : selectAuditWords(dictionary).slice(0, args.limit);
+    const entries = args.full
+      ? Object.entries(dictionary)
+      : selectAuditWords(dictionary).slice(0, args.limit);
 
     const weakDentals: WeakDentalOutlier[] = [];
     const rhoticCrowding: RhoticOutlier[] = [];
     const darkFrontVowels: FrontVowelOutlier[] = [];
 
     console.log(
-      `[phonology-outliers] mode=${args.full ? "FULL" : "SUBSET"} words=${entries.length} per-category=${args.perCategory}`
+      `[phonology-outliers] mode=${args.full ? "FULL" : "SUBSET"} words=${entries.length} per-category=${args.perCategory}`,
     );
 
     for (const [word, arpabet] of entries) {
@@ -160,20 +160,20 @@ export async function runPhonologyOutlierScan(argv: string[]): Promise<number> {
       "Weak dental fricatives",
       weakDentals.sort((a, b) => a.maxAF - b.maxAF).slice(0, args.perCategory),
       (row, index) =>
-        `  ${String(index + 1).padStart(2)}. ${row.word} [${row.phone}] AF.max=${row.maxAF.toFixed(1)} AB.max=${row.maxAB.toFixed(1)}`
+        `  ${String(index + 1).padStart(2)}. ${row.word} [${row.phone}] AF.max=${row.maxAF.toFixed(1)} AB.max=${row.maxAB.toFixed(1)}`,
     );
     printSection(
       "Rhotic crowding (smallest F3-F2 gap)",
       rhoticCrowding.sort((a, b) => a.gap - b.gap).slice(0, args.perCategory),
       (row, index) =>
         `  ${String(index + 1).padStart(2)}. ${row.word} [${row.exactPhone}] gap=${row.gap.toFixed(1)} ` +
-        `F2.avg=${row.averageF2.toFixed(1)} F3.avg=${row.averageF3.toFixed(1)}`
+        `F2.avg=${row.averageF2.toFixed(1)} F3.avg=${row.averageF3.toFixed(1)}`,
     );
     printSection(
       "Dark front vowels (lowest IY max F2)",
       darkFrontVowels.sort((a, b) => a.maxF2 - b.maxF2).slice(0, args.perCategory),
       (row, index) =>
-        `  ${String(index + 1).padStart(2)}. ${row.word} IY.maxF2=${row.maxF2.toFixed(1)} frames=${row.segmentCount}`
+        `  ${String(index + 1).padStart(2)}. ${row.word} IY.maxF2=${row.maxF2.toFixed(1)} frames=${row.segmentCount}`,
     );
 
     return 0;

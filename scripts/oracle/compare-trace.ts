@@ -4,10 +4,10 @@ import path from "node:path";
 import {
   DECTALK_NATIVE_SAMPLE_RATE_HZ,
   DECTALK_SAMPLES_PER_FRAME,
+  type DectalkTraceFrame,
   dectalkFrameStartSample,
   dectalkFrameStartSec,
   parseDectalkTraceFile,
-  type DectalkTraceFrame,
 } from "./dectalk-trace";
 
 type Args = {
@@ -93,7 +93,7 @@ const PARAM_MAP: Array<{
 }> = [
   {
     label: "F0",
-    oracleValue: (frame) => finiteNumber(frame.f0prime) == null ? null : frame.f0prime / 10,
+    oracleValue: (frame) => (finiteNumber(frame.f0prime) == null ? null : frame.f0prime / 10),
     qlatt: "F0",
   },
   { label: "F1", oracle: "F1", qlatt: "F1" },
@@ -128,9 +128,7 @@ function parseArgs(argv: string[]): Args {
   }
 
   if (flags.has("help")) {
-    throw new Error(
-      "Usage: compare-trace --oracle-trace file --qlatt-payload file [--out file]",
-    );
+    throw new Error("Usage: compare-trace --oracle-trace file --qlatt-payload file [--out file]");
   }
   const oracleTrace = flags.get("oracle-trace");
   const qlattPayload = flags.get("qlatt-payload");
@@ -299,10 +297,7 @@ function summarizeParam(
       if (firstMismatch == null) {
         firstMismatch = mismatch;
       }
-      if (
-        activeMismatchRange == null ||
-        oracleFrame.frame !== activeMismatchRange.lastFrame + 1
-      ) {
+      if (activeMismatchRange == null || oracleFrame.frame !== activeMismatchRange.lastFrame + 1) {
         closeMismatchRange();
         activeMismatchRange = {
           firstFrame: oracleFrame.frame,
@@ -313,8 +308,7 @@ function summarizeParam(
         };
       } else {
         activeMismatchRange.lastFrame = oracleFrame.frame;
-        activeMismatchRange.lastPacketEndSample =
-          packetStartSample + DECTALK_SAMPLES_PER_FRAME;
+        activeMismatchRange.lastPacketEndSample = packetStartSample + DECTALK_SAMPLES_PER_FRAME;
         activeMismatchRange.frameCount += 1;
       }
     } else {
@@ -356,8 +350,7 @@ function groupOraclePhones(
       last.lastFrame = frame.frame;
       last.frameCount += 1;
       last.durationSec =
-        (last.frameCount * DECTALK_SAMPLES_PER_FRAME) /
-        DECTALK_NATIVE_SAMPLE_RATE_HZ;
+        (last.frameCount * DECTALK_SAMPLES_PER_FRAME) / DECTALK_NATIVE_SAMPLE_RATE_HZ;
       continue;
     }
     groups.push({

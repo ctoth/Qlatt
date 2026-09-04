@@ -5,13 +5,13 @@
  * - Lin 1995: Partial Fraction Expansion for parallel formant amplitude correction
  * - Klatt 1980: Original synthesizer specification (ndbScale values)
  */
-import { describe, it, expect } from 'vitest';
-import { resonatorMagnitudeDb, dbToLinear, ndbScale } from '../src/builtin-functions';
+import { describe, expect, it } from "vitest";
+import { resonatorMagnitudeDb } from "../src/builtin-functions";
 
-describe('resonatorMagnitudeDb', () => {
+describe("resonatorMagnitudeDb", () => {
   const SR = 10000;
 
-  it('gives peak gain at the pole frequency', () => {
+  it("gives peak gain at the pole frequency", () => {
     // At pole frequency, the evaluation point is closest to the poles,
     // so magnitude should be at its maximum.
     const atPole = resonatorMagnitudeDb(500, 500, 60, SR);
@@ -19,7 +19,7 @@ describe('resonatorMagnitudeDb', () => {
     expect(atPole).toBeGreaterThan(offPole);
   });
 
-  it('peak gain approximates 20*log10(SR / (pi * BW)) for narrow bandwidth', () => {
+  it("peak gain approximates 20*log10(SR / (pi * BW)) for narrow bandwidth", () => {
     // For a narrow-bandwidth 2-pole resonator, peak gain ≈ 20*log10(SR/(pi*BW))
     const bw = 60;
     const peak = resonatorMagnitudeDb(500, 500, bw, SR);
@@ -29,33 +29,33 @@ describe('resonatorMagnitudeDb', () => {
     expect(Math.abs(peak - expected)).toBeLessThan(5);
   });
 
-  it('shows rolloff at DC', () => {
+  it("shows rolloff at DC", () => {
     const atPole = resonatorMagnitudeDb(500, 500, 60, SR);
     const atDC = resonatorMagnitudeDb(0, 500, 60, SR);
     expect(atPole).toBeGreaterThan(atDC);
   });
 
-  it('shows rolloff at Nyquist', () => {
+  it("shows rolloff at Nyquist", () => {
     const atPole = resonatorMagnitudeDb(500, 500, 60, SR);
     const atNyquist = resonatorMagnitudeDb(SR / 2, 500, 60, SR);
     expect(atPole).toBeGreaterThan(atNyquist);
   });
 
-  it('magnitude is symmetric (even function for |H(e^jw)|)', () => {
+  it("magnitude is symmetric (even function for |H(e^jw)|)", () => {
     // |H(e^jw)| = |H(e^-jw)| — magnitude is an even function
     const pos = resonatorMagnitudeDb(200, 500, 60, SR);
     const neg = resonatorMagnitudeDb(-200, 500, 60, SR);
     expect(pos).toBeCloseTo(neg, 10);
   });
 
-  it('wider bandwidth gives lower peak', () => {
+  it("wider bandwidth gives lower peak", () => {
     const narrow = resonatorMagnitudeDb(500, 500, 60, SR);
     const wide = resonatorMagnitudeDb(500, 500, 200, SR);
     expect(narrow).toBeGreaterThan(wide);
   });
 });
 
-describe('PFE regression: PFE corrections vs old static ndbScale', () => {
+describe("PFE regression: PFE corrections vs old static ndbScale", () => {
   // At Klatt's default formant positions, PFE-based corrections should be
   // in the same ballpark as the old static ndbScale values.
   // The old values are approximate; PFE is physics-based. They won't match
@@ -88,8 +88,8 @@ describe('PFE regression: PFE corrections vs old static ndbScale', () => {
   }
 });
 
-describe('PFE proximity subsumption', () => {
-  it('produces large correction when formants are close (F2=800, F3=900)', () => {
+describe("PFE proximity subsumption", () => {
+  it("produces large correction when formants are close (F2=800, F3=900)", () => {
     const SR = 10000;
     // When formants are 100 Hz apart, the old proximity function gave ndbCor[1] = 9 dB
     // The PFE correction from a nearby formant should also be significant
@@ -100,7 +100,7 @@ describe('PFE proximity subsumption', () => {
     expect(correction).toBeGreaterThan(5);
   });
 
-  it('produces small correction when formants are far apart (F1=500, F2=1500)', () => {
+  it("produces small correction when formants are far apart (F1=500, F2=1500)", () => {
     const SR = 10000;
     const correction = resonatorMagnitudeDb(500, 1500, 90, SR);
     // At 1000 Hz separation, the other resonator contributes very little

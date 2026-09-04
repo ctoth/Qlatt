@@ -310,7 +310,10 @@ export function isMultiplicativeField(field: keyof VoiceQualityDelta): boolean {
  * fields interpolate from 1, additive fields from 0, so degree=0 ⇒ NEUTRAL_VQ
  * and degree=1 ⇒ the input unchanged. This is the continuous-degree knob.
  */
-export function scaleVoiceQualityDelta(delta: VoiceQualityDelta, degree: number): VoiceQualityDelta {
+export function scaleVoiceQualityDelta(
+  delta: VoiceQualityDelta,
+  degree: number,
+): VoiceQualityDelta {
   const d = clampUnit(degree);
   const out = { ...NEUTRAL_VQ } as VoiceQualityDelta;
   for (const key of Object.keys(NEUTRAL_VQ) as Array<keyof VoiceQualityDelta>) {
@@ -354,7 +357,9 @@ export function composeVoiceQualityDelta(
 }
 
 /** Fold a partial VQ override onto the neutral baseline into a full vector. */
-export function materializeVoiceQualityDelta(partial: Partial<VoiceQualityDelta>): VoiceQualityDelta {
+export function materializeVoiceQualityDelta(
+  partial: Partial<VoiceQualityDelta>,
+): VoiceQualityDelta {
   return composeVoiceQualityDelta({ ...NEUTRAL_VQ }, partial);
 }
 
@@ -416,7 +421,8 @@ function parseGlobalState(input: unknown): GlobalState {
       }
       voice.sex = v.sex;
     }
-    if (v.baseF0Hz !== undefined) voice.baseF0Hz = requireFiniteNumber(v.baseF0Hz, "global.voice.baseF0Hz");
+    if (v.baseF0Hz !== undefined)
+      voice.baseF0Hz = requireFiniteNumber(v.baseF0Hz, "global.voice.baseF0Hz");
     global.voice = voice;
   }
   if (obj.affect !== undefined) {
@@ -458,7 +464,8 @@ function parseSpan(input: unknown, index: number): DirectionSpan {
   if (obj.pitch !== undefined) span.pitch = obj.pitch as PitchDelta;
   if (obj.rate !== undefined) span.rate = requireFiniteNumber(obj.rate, `spans[${index}].rate`);
   if (obj.affect !== undefined) span.affect = parseAffectSpec(obj.affect, `spans[${index}].affect`);
-  if (obj.voiceQuality !== undefined) span.voiceQuality = obj.voiceQuality as Partial<VoiceQualityDelta>;
+  if (obj.voiceQuality !== undefined)
+    span.voiceQuality = obj.voiceQuality as Partial<VoiceQualityDelta>;
   if (obj.gesture !== undefined) span.gesture = obj.gesture as GestureRef;
   return span;
 }
@@ -473,7 +480,8 @@ function parseAnchor(input: unknown, index: number): AnchorRange {
   }
   const start = requireFiniteNumber(obj.start, `spans[${index}].anchor.start`);
   const anchor: AnchorRange = { unit: obj.unit, start };
-  if (obj.end !== undefined) anchor.end = requireFiniteNumber(obj.end, `spans[${index}].anchor.end`);
+  if (obj.end !== undefined)
+    anchor.end = requireFiniteNumber(obj.end, `spans[${index}].anchor.end`);
   return anchor;
 }
 

@@ -6,8 +6,7 @@
 
 import { loadYamlDocumentOrNull } from "../../src/yaml-loader.ts";
 
-const FRONTEND_SPEC_PATH = (frontendId) =>
-  `/rules/frontends/${frontendId}/frontend.yaml`;
+const FRONTEND_SPEC_PATH = (frontendId) => `/rules/frontends/${frontendId}/frontend.yaml`;
 
 function getSelectedFrontendId() {
   const select = document.getElementById("frontendSelect");

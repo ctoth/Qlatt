@@ -19,7 +19,7 @@
  *   - Fant 1997 Table 1 (Rd-to-OQi values)
  *   - Klatt & Klatt 1990 (Klatt OQ definition and override parameter)
  */
-import { computeRmsPeak, BaseProcessorOptions } from "./wasm-utils.js";
+import { type BaseProcessorOptions, computeRmsPeak } from "./wasm-utils.js";
 
 interface GlottalModMetricsMessage {
   type: "metrics";
@@ -40,8 +40,20 @@ class GlottalModProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "f0", defaultValue: 110, minValue: 0, maxValue: 500, automationRate: "a-rate" as const },
-      { name: "oq", defaultValue: 0.5, minValue: 0.1, maxValue: 1.0, automationRate: "k-rate" as const },
+      {
+        name: "f0",
+        defaultValue: 110,
+        minValue: 0,
+        maxValue: 500,
+        automationRate: "a-rate" as const,
+      },
+      {
+        name: "oq",
+        defaultValue: 0.5,
+        minValue: 0.1,
+        maxValue: 1.0,
+        automationRate: "k-rate" as const,
+      },
     ];
   }
 
@@ -70,7 +82,7 @@ class GlottalModProcessor extends AudioWorkletProcessor {
   process(
     _inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const output = outputs[0];
@@ -96,7 +108,9 @@ class GlottalModProcessor extends AudioWorkletProcessor {
 
     for (let i = 0; i < blockSize; i += 1) {
       const f0 = hasF0
-        ? (f0Values.length > 1 ? (f0Values[i] ?? f0Values[0] ?? 0) : (f0Values[0] ?? 0))
+        ? f0Values.length > 1
+          ? (f0Values[i] ?? f0Values[0] ?? 0)
+          : (f0Values[0] ?? 0)
         : 0;
       if (!f0 || f0 <= 0) {
         out[i] = 0.5;
@@ -111,7 +125,7 @@ class GlottalModProcessor extends AudioWorkletProcessor {
         const openDuration = oq * period;
         if (this.phase < openDuration) {
           // Open phase: sinusoidal modulation peaking at 1.0
-          out[i] = 0.5 + 0.5 * Math.sin(Math.PI * this.phase / openDuration);
+          out[i] = 0.5 + 0.5 * Math.sin((Math.PI * this.phase) / openDuration);
         } else {
           // Closed phase: constant half-amplitude
           out[i] = 0.5;

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { initWasmModule, WasmBuffer, type WasmAllocExports } from "../src/worklets/wasm-utils";
+import { initWasmModule, type WasmAllocExports, WasmBuffer } from "../src/worklets/wasm-utils";
 
 const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), "..");
@@ -12,14 +12,24 @@ const sampleRate = Number(golden.sampleRate);
 
 interface ResonatorExports extends WasmAllocExports {
   resonator_new(): number;
-  resonator_set_params(state: number, frequency: number, bandwidth: number, sampleRate: number): void;
+  resonator_set_params(
+    state: number,
+    frequency: number,
+    bandwidth: number,
+    sampleRate: number,
+  ): void;
   resonator_set_gain(state: number, gain: number): void;
   resonator_process(state: number, inputPtr: number, outputPtr: number, len: number): void;
 }
 
 interface AntiresonatorExports extends WasmAllocExports {
   antiresonator_new(): number;
-  antiresonator_set_params(state: number, frequency: number, bandwidth: number, sampleRate: number): void;
+  antiresonator_set_params(
+    state: number,
+    frequency: number,
+    bandwidth: number,
+    sampleRate: number,
+  ): void;
   antiresonator_set_gain(state: number, gain: number): void;
   antiresonator_process(state: number, inputPtr: number, outputPtr: number, len: number): void;
 }
@@ -141,9 +151,7 @@ const payload = {
   sampleRate,
   results: results.map((result) => ({
     ...result,
-    maxRelError: result.maxAbsExpected
-      ? result.maxDelta / result.maxAbsExpected
-      : 0,
+    maxRelError: result.maxAbsExpected ? result.maxDelta / result.maxAbsExpected : 0,
   })),
 };
 

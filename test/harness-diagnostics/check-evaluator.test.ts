@@ -1,19 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
-  evaluateCheck,
-  matchesWhen,
-  matchesTrackSelect,
-  evaluateTrackAnalysis,
   createCheckState,
+  evaluateCheck,
+  evaluateTrackAnalysis,
+  matchesTrackSelect,
+  matchesWhen,
   updateParamRange,
 } from "../../src/harness-diagnostics/check-evaluator";
+import type { TimingSnapshot } from "../../src/harness-diagnostics/timing-context";
 import type {
   CheckDef,
-  TrackEvent,
-  WhenClause,
   TrackAnalysisCheckDef,
+  TrackEvent,
 } from "../../src/harness-diagnostics/types";
-import type { TimingSnapshot } from "../../src/harness-diagnostics/timing-context";
 
 function makeSnapshot(overrides: Partial<TimingSnapshot> = {}): TimingSnapshot {
   return {
@@ -407,9 +406,17 @@ describe("evaluateCheck", () => {
       severity: "error",
       message: "Output varies across identical plays",
     };
-    const result = evaluateCheck("state_leak", def, new Map(), makeSnapshot(), createCheckState(), 0, {
-      acrossPlayResult: { cv: null, values: [0.4, 0.41], ready: false },
-    });
+    const result = evaluateCheck(
+      "state_leak",
+      def,
+      new Map(),
+      makeSnapshot(),
+      createCheckState(),
+      0,
+      {
+        acrossPlayResult: { cv: null, values: [0.4, 0.41], ready: false },
+      },
+    );
 
     expect(result.status).toBe("pending");
     expect(result.value).toBe(2);
@@ -426,9 +433,17 @@ describe("evaluateCheck", () => {
       severity: "error",
       message: "Output varies across identical plays",
     };
-    const result = evaluateCheck("state_leak", def, new Map(), makeSnapshot(), createCheckState(), 0, {
-      acrossPlayResult: { cv: 0.12, values: [0.4, 0.5, 0.6], ready: true },
-    });
+    const result = evaluateCheck(
+      "state_leak",
+      def,
+      new Map(),
+      makeSnapshot(),
+      createCheckState(),
+      0,
+      {
+        acrossPlayResult: { cv: 0.12, values: [0.4, 0.5, 0.6], ready: true },
+      },
+    );
 
     expect(result.status).toBe("fail");
     expect(result.assertionFailed).toBe(true);
@@ -474,9 +489,7 @@ describe("updateParamRange", () => {
 
   it("handles missing param gracefully", () => {
     const state = createCheckState();
-    const track: TrackEvent[] = [
-      { time: 0, params: { AV: 60 } },
-    ];
+    const track: TrackEvent[] = [{ time: 0, params: { AV: 60 } }];
     updateParamRange(state, "F0", track);
     // No F0 in params — paramRange stays null
     expect(state.paramRange).toBeNull();
@@ -546,7 +559,7 @@ describe("evaluateTrackAnalysis", () => {
     };
     const track: TrackEvent[] = [
       { time: 0.1, phoneme: "S", params: { SW: 1, AF: 55 } },
-      { time: 0.2, phoneme: "S", params: { SW: 1, AF: 0 } },  // fails
+      { time: 0.2, phoneme: "S", params: { SW: 1, AF: 0 } }, // fails
       { time: 0.3, phoneme: "S", params: { SW: 1, AF: 60 } },
     ];
     const result = evaluateTrackAnalysis("test_check", def, track);
@@ -582,7 +595,11 @@ describe("evaluateTrackAnalysis", () => {
       message: "No parallel spectral amplitudes",
     };
     const track: TrackEvent[] = [
-      { time: 0.1, phoneme: "F", params: { SW: 1, AF: 42, AB: 57, A2: 0, A3: 0, A4: 0, A5: 0, A6: 0 } },
+      {
+        time: 0.1,
+        phoneme: "F",
+        params: { SW: 1, AF: 42, AB: 57, A2: 0, A3: 0, A4: 0, A5: 0, A6: 0 },
+      },
     ];
     const result = evaluateTrackAnalysis("test_check", def, track);
     expect(result.status).toBe("pass");
@@ -597,9 +614,7 @@ describe("evaluateTrackAnalysis", () => {
       severity: "warn",
       message: "No formant amplitudes",
     };
-    const track: TrackEvent[] = [
-      { time: 0.1, phoneme: "S", params: { SW: 1, A2: 0, A3: 0 } },
-    ];
+    const track: TrackEvent[] = [{ time: 0.1, phoneme: "S", params: { SW: 1, A2: 0, A3: 0 } }];
     const result = evaluateTrackAnalysis("test_check", def, track);
     expect(result.status).toBe("warn");
     expect(result.collected).toHaveLength(1);

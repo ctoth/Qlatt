@@ -28,9 +28,7 @@ function generateTrack(
 
 /** Find frames that correspond to actual phonemes (not initial/final SIL) */
 function phonemeFrames(track: KlattFrame[]): KlattFrame[] {
-  return track.filter(
-    (f) => f.phoneme !== undefined && f.phoneme !== "SIL"
-  );
+  return track.filter((f) => f.phoneme !== undefined && f.phoneme !== "SIL");
 }
 
 describe("voice quality presets", () => {
@@ -48,11 +46,7 @@ describe("voice quality presets", () => {
         const noParams = noPreset[i].params;
         const modalParams = modalPreset[i].params;
         for (const key of Object.keys(noParams)) {
-          expect(modalParams[key]).toBeCloseTo(
-            noParams[key],
-            6,
-            `Frame ${i}, param ${key} differs between no-preset and modal`,
-          );
+          expect(modalParams[key]).toBeCloseTo(noParams[key], 6);
         }
       }
     });
@@ -107,29 +101,23 @@ describe("voice quality presets", () => {
     it("voiceQuality='falsetto' scales F0 by 1.5x", () => {
       // Burkhardt 2009: F0 increase for falsetto; conservative 1.5x multiplier
       const baseF0 = 110;
-      const expectedF0 = Math.round(baseF0 * 1.5); // 165 Hz
+      const _expectedF0 = Math.round(baseF0 * 1.5); // 165 Hz
 
       const noPreset = generateTrack("hello", undefined, baseF0);
       const falsetto = generateTrack("hello", "falsetto", baseF0);
 
       // Find voiced frames (F0 > 0) in both tracks
-      const noVoicedFrames = phonemeFrames(noPreset).filter(
-        (f) => f.params.F0 > 0
-      );
-      const falsettoVoicedFrames = phonemeFrames(falsetto).filter(
-        (f) => f.params.F0 > 0
-      );
+      const noVoicedFrames = phonemeFrames(noPreset).filter((f) => f.params.F0 > 0);
+      const falsettoVoicedFrames = phonemeFrames(falsetto).filter((f) => f.params.F0 > 0);
 
       expect(noVoicedFrames.length).toBeGreaterThan(0);
       expect(falsettoVoicedFrames.length).toBeGreaterThan(0);
 
       // The average F0 for falsetto should be approximately 1.5x the no-preset average
       const avgNoPresetF0 =
-        noVoicedFrames.reduce((sum, f) => sum + f.params.F0, 0) /
-        noVoicedFrames.length;
+        noVoicedFrames.reduce((sum, f) => sum + f.params.F0, 0) / noVoicedFrames.length;
       const avgFalsettoF0 =
-        falsettoVoicedFrames.reduce((sum, f) => sum + f.params.F0, 0) /
-        falsettoVoicedFrames.length;
+        falsettoVoicedFrames.reduce((sum, f) => sum + f.params.F0, 0) / falsettoVoicedFrames.length;
 
       // Allow 10% tolerance because prosody rules modify F0 around the base
       const ratio = avgFalsettoF0 / avgNoPresetF0;
@@ -166,10 +154,7 @@ describe("voice quality presets", () => {
       for (let i = 0; i < whisperyFrames.length; i++) {
         expect(whisperyFrames[i].params.TL).toBe(10);
         expect(whisperyFrames[i].params.jitter).toBe(5);
-        expect(whisperyFrames[i].params.AH).toBeCloseTo(
-          noFrames[i].params.AH + 30,
-          1,
-        );
+        expect(whisperyFrames[i].params.AH).toBeCloseTo(noFrames[i].params.AH + 30, 1);
       }
     });
   });

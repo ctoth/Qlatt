@@ -22,9 +22,9 @@ describe("phonology probe suite", () => {
         expect(trackPhonemes.length).toBeGreaterThan(0);
 
         if (wordCase.track?.transcriptionExact) {
-          expect(
-            getTranscriptionWordOccurrence(transcription, wordCase.word, occurrence)
-          ).toEqual(wordCase.track.transcriptionExact);
+          expect(getTranscriptionWordOccurrence(transcription, wordCase.word, occurrence)).toEqual(
+            wordCase.track.transcriptionExact,
+          );
         }
 
         for (const phoneme of wordCase.track?.mustContain ?? []) {
@@ -38,8 +38,7 @@ describe("phonology probe suite", () => {
         for (const [param, minimum] of Object.entries(wordCase.track?.minMaxParam ?? {})) {
           const matchingFrames = track.filter(
             (frame) =>
-              frame.word === wordCase.word &&
-              trackPhonemes.includes(String(frame.phoneme ?? ""))
+              frame.word === wordCase.word && trackPhonemes.includes(String(frame.phoneme ?? "")),
           );
           expect(maxTrackParam(matchingFrames, param)).toBeGreaterThanOrEqual(minimum);
         }
@@ -48,12 +47,12 @@ describe("phonology probe suite", () => {
           const erFrames = getTrackFramesForWordPhoneme(
             track,
             wordCase.word,
-            wordCase.rhotic.erPhoneme
+            wordCase.rhotic.erPhoneme,
           );
           const tailFrames = getTrackFramesForWordPhoneme(
             track,
             wordCase.word,
-            wordCase.rhotic.tailPhoneme
+            wordCase.rhotic.tailPhoneme,
           );
 
           expect(erFrames.length).toBeGreaterThan(0);
@@ -61,7 +60,7 @@ describe("phonology probe suite", () => {
 
           for (const param of wordCase.rhotic.tailLowerParams) {
             expect(averageTrackParam(tailFrames, param)).toBeLessThan(
-              averageTrackParam(erFrames, param)
+              averageTrackParam(erFrames, param),
             );
           }
         }

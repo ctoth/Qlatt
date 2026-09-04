@@ -1,8 +1,8 @@
+import { once } from "node:events";
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { once } from "node:events";
 import { chromium } from "playwright-core";
 
 const args = new Map();
@@ -38,10 +38,10 @@ const sourceMode = Number(args.get("source-mode"));
 const openPhaseRatio = Number(args.get("open-phase-ratio"));
 const includeTelemetry = (args.get("include-telemetry") ?? "0") === "1";
 const outJson = path.resolve(
-  args.get("out-json") ?? path.join(repoRoot, "test", "golden", "qlatt-track.json")
+  args.get("out-json") ?? path.join(repoRoot, "test", "golden", "qlatt-track.json"),
 );
 const outWav = path.resolve(
-  args.get("out-wav") ?? path.join(repoRoot, "test", "golden", "qlatt-track.wav")
+  args.get("out-wav") ?? path.join(repoRoot, "test", "golden", "qlatt-track.wav"),
 );
 
 function resolveChromePath() {
@@ -146,23 +146,26 @@ await page.goto(`http://localhost:${port}/test/render-offline.html`, {
   waitUntil: "networkidle",
 });
 
-const result = await page.evaluate(async (opts) => {
-  const output = await window.renderOffline(opts);
-  return output;
-}, {
-  phrase: payload.phrase ?? "track",
-  baseF0: payload.baseF0 ?? 110,
-  sampleRate,
-  leadTime,
-  tailTime,
-  track,
-  agcRmsLevel,
-  applyAgc,
-  agcMode,
-  sourceMode: Number.isFinite(sourceMode) ? sourceMode : undefined,
-  openPhaseRatio: Number.isFinite(openPhaseRatio) ? openPhaseRatio : undefined,
-  includeTelemetry,
-});
+const result = await page.evaluate(
+  async (opts) => {
+    const output = await window.renderOffline(opts);
+    return output;
+  },
+  {
+    phrase: payload.phrase ?? "track",
+    baseF0: payload.baseF0 ?? 110,
+    sampleRate,
+    leadTime,
+    tailTime,
+    track,
+    agcRmsLevel,
+    applyAgc,
+    agcMode,
+    sourceMode: Number.isFinite(sourceMode) ? sourceMode : undefined,
+    openPhaseRatio: Number.isFinite(openPhaseRatio) ? openPhaseRatio : undefined,
+    includeTelemetry,
+  },
+);
 
 await browser.close();
 server.close();

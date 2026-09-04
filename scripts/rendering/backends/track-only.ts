@@ -1,11 +1,7 @@
-import { textToKlattTrackDetailed } from "../../../src/tts-frontend.ts";
 import { createDiagnostics } from "../../../src/diagnostics.ts";
 import { summarizeTrack } from "../../../src/rendering/track-summary.ts";
-import type {
-  RenderBackend,
-  RenderPayload,
-  RenderRequest,
-} from "../../../src/rendering/types.ts";
+import type { RenderBackend, RenderPayload, RenderRequest } from "../../../src/rendering/types.ts";
+import { textToKlattTrackDetailed } from "../../../src/tts-frontend.ts";
 
 export const trackOnlyBackend: RenderBackend = {
   id: "track-only",
@@ -26,9 +22,7 @@ export const trackOnlyBackend: RenderBackend = {
     );
     const track = frontend.track;
     const totalTime =
-      (track.length ? track[track.length - 1].time : 0) +
-      request.leadTime +
-      request.tailTime;
+      (track.length ? track[track.length - 1].time : 0) + request.leadTime + request.tailTime;
 
     const payload: RenderPayload = {
       phrase: request.phrase,

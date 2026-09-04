@@ -165,15 +165,21 @@ function main(): void {
   const atFtp = gainDb(input, separated, FTP);
 
   console.log("=== TRACHEAL pole-zero (FTP/BTP/FTZ/BTZ) signature verification ===");
-  console.log(`white noise ${NUM_SAMPLES} samples @ ${SAMPLE_RATE} Hz, zero->pole chain (antiresonator.wasm -> resonator.wasm)`);
+  console.log(
+    `white noise ${NUM_SAMPLES} samples @ ${SAMPLE_RATE} Hz, zero->pole chain (antiresonator.wasm -> resonator.wasm)`,
+  );
   console.log("");
   console.log("Case 1 COINCIDENT (FTP=FTZ=2150, BTP=BTZ=180):");
-  console.log(`  max |gain| ripple over 200..4000 Hz = ${maxRipple.toFixed(3)} dB (should be ~0 -> transparent)`);
+  console.log(
+    `  max |gain| ripple over 200..4000 Hz = ${maxRipple.toFixed(3)} dB (should be ~0 -> transparent)`,
+  );
   console.log("");
   console.log("Case 2 SEPARATED (FTZ=1500, FTP=2150, BW=180):");
   console.log(`  notch: ${notch.f} Hz @ ${notch.db.toFixed(2)} dB`);
   console.log(`  peak : ${peak.f} Hz @ ${peak.db.toFixed(2)} dB`);
-  console.log(`  ref(200Hz)=${refDb.toFixed(2)} dB  gain@FTZ(1500)=${atFtz.toFixed(2)} dB  gain@FTP(2150)=${atFtp.toFixed(2)} dB`);
+  console.log(
+    `  ref(200Hz)=${refDb.toFixed(2)} dB  gain@FTZ(1500)=${atFtz.toFixed(2)} dB  gain@FTP(2150)=${atFtp.toFixed(2)} dB`,
+  );
   console.log("");
 
   const checks: Array<[string, boolean]> = [

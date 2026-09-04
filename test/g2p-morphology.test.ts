@@ -1,192 +1,192 @@
-import { describe, it, expect } from 'vitest';
-import { decomposeWord, getStressHintForWord } from '../src/g2p/morphology';
-import type { DictLookup } from '../src/g2p/types';
+import { describe, expect, it } from "vitest";
+import { decomposeWord, getStressHintForWord } from "../src/g2p/morphology";
+import type { DictLookup } from "../src/g2p/types";
 
 const QLATT_MORPHOLOGY_PATH = "/rules/frontends/qlatt-english/morphology.yaml";
 
 // Mock dictionary for testing
 const mockDict: Record<string, string[]> = {
-  'run': ['R', 'AH1', 'N'],
-  'walk': ['W', 'AO1', 'K'],
-  'plan': ['P', 'L', 'AE1', 'N'],
-  'want': ['W', 'AA1', 'N', 'T'],
-  'happy': ['HH', 'AE1', 'P', 'IY0'],
-  'start': ['S', 'T', 'AA1', 'R', 'T'],
-  'believe': ['B', 'IH0', 'L', 'IY1', 'V'],
-  'water': ['W', 'AO1', 'T', 'ER0'],
-  'under': ['AH1', 'N', 'D', 'ER0'],
-  'the': ['DH', 'AH0'],
-  'sing': ['S', 'IH1', 'NG'],
-  'play': ['P', 'L', 'EY1'],
-  'kind': ['K', 'AY1', 'N', 'D'],
-  'quick': ['K', 'W', 'IH1', 'K'],
-  'love': ['L', 'AH1', 'V'],
-  'hope': ['HH', 'OW1', 'P'],
+  run: ["R", "AH1", "N"],
+  walk: ["W", "AO1", "K"],
+  plan: ["P", "L", "AE1", "N"],
+  want: ["W", "AA1", "N", "T"],
+  happy: ["HH", "AE1", "P", "IY0"],
+  start: ["S", "T", "AA1", "R", "T"],
+  believe: ["B", "IH0", "L", "IY1", "V"],
+  water: ["W", "AO1", "T", "ER0"],
+  under: ["AH1", "N", "D", "ER0"],
+  the: ["DH", "AH0"],
+  sing: ["S", "IH1", "NG"],
+  play: ["P", "L", "EY1"],
+  kind: ["K", "AY1", "N", "D"],
+  quick: ["K", "W", "IH1", "K"],
+  love: ["L", "AH1", "V"],
+  hope: ["HH", "OW1", "P"],
 };
 const mockLookup: DictLookup = (w) => mockDict[w.toLowerCase()] ?? null;
 
-describe('decomposeWord', () => {
-  describe('suffix stripping + dict lookup', () => {
+describe("decomposeWord", () => {
+  describe("suffix stripping + dict lookup", () => {
     it('"running" -> strip -ing -> "run" + IH0 NG', () => {
-      const result = decomposeWord('running', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("running", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).not.toBeNull();
-      expect(result!.source).toBe('morphology');
-      expect(result!.rootWord).toBe('run');
-      expect(result!.phonemes).toEqual(['R', 'AH1', 'N', 'IH0', 'NG']);
+      expect(result!.source).toBe("morphology");
+      expect(result!.rootWord).toBe("run");
+      expect(result!.phonemes).toEqual(["R", "AH1", "N", "IH0", "NG"]);
     });
 
     it('"walked" -> strip -ed -> "walk" + T (voiceless final)', () => {
-      const result = decomposeWord('walked', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("walked", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).not.toBeNull();
-      expect(result!.source).toBe('morphology');
-      expect(result!.rootWord).toBe('walk');
+      expect(result!.source).toBe("morphology");
+      expect(result!.rootWord).toBe("walk");
       // walk ends in K (voiceless) -> -ed = T
-      expect(result!.phonemes).toEqual(['W', 'AO1', 'K', 'T']);
+      expect(result!.phonemes).toEqual(["W", "AO1", "K", "T"]);
     });
 
     it('"planned" -> strip -ed -> doubled consonant -> "plan" + D (voiced final)', () => {
-      const result = decomposeWord('planned', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("planned", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).not.toBeNull();
-      expect(result!.source).toBe('morphology');
-      expect(result!.rootWord).toBe('plan');
+      expect(result!.source).toBe("morphology");
+      expect(result!.rootWord).toBe("plan");
       // plan ends in N (voiced) -> -ed = D
-      expect(result!.phonemes).toEqual(['P', 'L', 'AE1', 'N', 'D']);
+      expect(result!.phonemes).toEqual(["P", "L", "AE1", "N", "D"]);
     });
 
     it('"wanted" -> strip -ed -> "want" + IH0 D (after t/d)', () => {
-      const result = decomposeWord('wanted', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("wanted", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).not.toBeNull();
-      expect(result!.source).toBe('morphology');
-      expect(result!.rootWord).toBe('want');
+      expect(result!.source).toBe("morphology");
+      expect(result!.rootWord).toBe("want");
       // want ends in T -> -ed = IH0 D
-      expect(result!.phonemes).toEqual(['W', 'AA1', 'N', 'T', 'IH0', 'D']);
+      expect(result!.phonemes).toEqual(["W", "AA1", "N", "T", "IH0", "D"]);
     });
 
     it('"playing" -> strip -ing -> "play" + IH0 NG', () => {
-      const result = decomposeWord('playing', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("playing", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).not.toBeNull();
-      expect(result!.source).toBe('morphology');
-      expect(result!.rootWord).toBe('play');
-      expect(result!.phonemes).toEqual(['P', 'L', 'EY1', 'IH0', 'NG']);
+      expect(result!.source).toBe("morphology");
+      expect(result!.rootWord).toBe("play");
+      expect(result!.phonemes).toEqual(["P", "L", "EY1", "IH0", "NG"]);
     });
 
     it('"kindly" -> strip -ly -> "kind" + L IY0', () => {
-      const result = decomposeWord('kindly', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("kindly", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).not.toBeNull();
-      expect(result!.source).toBe('morphology');
-      expect(result!.rootWord).toBe('kind');
-      expect(result!.phonemes).toEqual(['K', 'AY1', 'N', 'D', 'L', 'IY0']);
+      expect(result!.source).toBe("morphology");
+      expect(result!.rootWord).toBe("kind");
+      expect(result!.phonemes).toEqual(["K", "AY1", "N", "D", "L", "IY0"]);
     });
 
     it('"quickly" -> strip -ly -> "quick" + L IY0', () => {
-      const result = decomposeWord('quickly', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("quickly", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).not.toBeNull();
-      expect(result!.source).toBe('morphology');
-      expect(result!.rootWord).toBe('quick');
-      expect(result!.phonemes).toEqual(['K', 'W', 'IH1', 'K', 'L', 'IY0']);
+      expect(result!.source).toBe("morphology");
+      expect(result!.rootWord).toBe("quick");
+      expect(result!.phonemes).toEqual(["K", "W", "IH1", "K", "L", "IY0"]);
     });
 
     it('"loved" -> strip -ed -> try "lov" (fail) -> try "love" (silent e) -> L AH1 V + D', () => {
-      const result = decomposeWord('loved', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("loved", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).not.toBeNull();
-      expect(result!.source).toBe('morphology');
-      expect(result!.rootWord).toBe('love');
+      expect(result!.source).toBe("morphology");
+      expect(result!.rootWord).toBe("love");
       // love ends in V (voiced) -> -ed = D
-      expect(result!.phonemes).toEqual(['L', 'AH1', 'V', 'D']);
+      expect(result!.phonemes).toEqual(["L", "AH1", "V", "D"]);
     });
 
     it('"hoping" -> strip -ing -> "hop" not in dict -> try "hope" (silent e) -> HH OW1 P + IH0 NG', () => {
-      const result = decomposeWord('hoping', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("hoping", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).not.toBeNull();
-      expect(result!.source).toBe('morphology');
-      expect(result!.rootWord).toBe('hope');
-      expect(result!.phonemes).toEqual(['HH', 'OW1', 'P', 'IH0', 'NG']);
+      expect(result!.source).toBe("morphology");
+      expect(result!.rootWord).toBe("hope");
+      expect(result!.phonemes).toEqual(["HH", "OW1", "P", "IH0", "NG"]);
     });
   });
 
-  describe('prefix stripping', () => {
+  describe("prefix stripping", () => {
     it('"unhappy" -> strip un- -> "happy" -> AH0 N + HH AE1 P IY0', () => {
-      const result = decomposeWord('unhappy', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("unhappy", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).not.toBeNull();
-      expect(result!.source).toBe('morphology');
-      expect(result!.rootWord).toBe('happy');
-      expect(result!.phonemes).toEqual(['AH0', 'N', 'HH', 'AE1', 'P', 'IY0']);
+      expect(result!.source).toBe("morphology");
+      expect(result!.rootWord).toBe("happy");
+      expect(result!.phonemes).toEqual(["AH0", "N", "HH", "AE1", "P", "IY0"]);
     });
 
     it('"restart" -> strip re- -> "start" -> R IY0 + S T AA1 R T', () => {
-      const result = decomposeWord('restart', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("restart", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).not.toBeNull();
-      expect(result!.source).toBe('morphology');
-      expect(result!.rootWord).toBe('start');
-      expect(result!.phonemes).toEqual(['R', 'IY0', 'S', 'T', 'AA1', 'R', 'T']);
+      expect(result!.source).toBe("morphology");
+      expect(result!.rootWord).toBe("start");
+      expect(result!.phonemes).toEqual(["R", "IY0", "S", "T", "AA1", "R", "T"]);
     });
 
     it('"unkindness" -> un- + (kind + -ness)', () => {
-      const result = decomposeWord('unkindness', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("unkindness", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).not.toBeNull();
-      expect(result!.source).toBe('morphology');
-      expect(result!.rootWord).toBe('kind');
-      expect(result!.phonemes).toEqual(['AH0', 'N', 'K', 'AY1', 'N', 'D', 'N', 'AH0', 'S']);
+      expect(result!.source).toBe("morphology");
+      expect(result!.rootWord).toBe("kind");
+      expect(result!.phonemes).toEqual(["AH0", "N", "K", "AY1", "N", "D", "N", "AH0", "S"]);
     });
   });
 
-  describe('guard rails (should return null)', () => {
+  describe("guard rails (should return null)", () => {
     it('"water" -> strip -er -> "wat" NOT in dict -> null', () => {
-      const result = decomposeWord('water', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("water", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).toBeNull();
     });
 
     it('"under" -> strip un- -> "der" NOT in dict -> null', () => {
       // "under" is in the dict directly but morphology shouldn't handle direct lookups
       // When called, it tries stripping and fails
-      const result = decomposeWord('under', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("under", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).toBeNull();
     });
 
     it('"the" -> too short (< 4 chars) -> null', () => {
-      const result = decomposeWord('the', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("the", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).toBeNull();
     });
 
     it('"a" -> too short -> null', () => {
-      const result = decomposeWord('a', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("a", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).toBeNull();
     });
 
     it('"sing" -> strip -ing -> "s" too short (min root 3) -> null', () => {
-      const result = decomposeWord('sing', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("sing", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).toBeNull();
     });
   });
 
-  describe('edge cases', () => {
+  describe("edge cases", () => {
     it('"" -> null', () => {
-      const result = decomposeWord('', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).toBeNull();
     });
 
     it('"xyz" -> no affixes match or roots not in dict -> null', () => {
-      const result = decomposeWord('xyz', mockLookup, QLATT_MORPHOLOGY_PATH);
+      const result = decomposeWord("xyz", mockLookup, QLATT_MORPHOLOGY_PATH);
       expect(result).toBeNull();
     });
   });
 });
 
-describe('getStressHintForWord', () => {
-  it('returns forcing-penult hint for -ation words', () => {
-    expect(getStressHintForWord('celebration', QLATT_MORPHOLOGY_PATH)).toEqual({
-      stressType: 'forcing',
-      stressTarget: 'penult',
+describe("getStressHintForWord", () => {
+  it("returns forcing-penult hint for -ation words", () => {
+    expect(getStressHintForWord("celebration", QLATT_MORPHOLOGY_PATH)).toEqual({
+      stressType: "forcing",
+      stressTarget: "penult",
     });
   });
 
-  it('returns non-affecting hint for -ness words', () => {
-    expect(getStressHintForWord('kindness', QLATT_MORPHOLOGY_PATH)).toEqual({
-      stressType: 'non_affecting',
+  it("returns non-affecting hint for -ness words", () => {
+    expect(getStressHintForWord("kindness", QLATT_MORPHOLOGY_PATH)).toEqual({
+      stressType: "non_affecting",
     });
   });
 
-  it('returns undefined when no configured suffix matches', () => {
-    expect(getStressHintForWord('blorf', QLATT_MORPHOLOGY_PATH)).toBeUndefined();
+  it("returns undefined when no configured suffix matches", () => {
+    expect(getStressHintForWord("blorf", QLATT_MORPHOLOGY_PATH)).toBeUndefined();
   });
 });

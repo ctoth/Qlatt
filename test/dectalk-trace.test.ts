@@ -1,8 +1,8 @@
-import { describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { describe, expect, it } from "vitest";
 import {
   DECTALK_NATIVE_SAMPLE_RATE_HZ,
   DECTALK_SAMPLES_PER_FRAME,
@@ -55,8 +55,22 @@ describe("DECtalk trace packet timing", () => {
       writeFileSync(
         tracePath,
         [
-          JSON.stringify({ frame: 0, timeFrames: 0, tcum: 1, phoneIndex: 0, f0prime: 1000, out: { F1: 100 } }),
-          JSON.stringify({ frame: 1, timeFrames: 1, tcum: 2, phoneIndex: 0, f0prime: 1000, out: { F1: 200 } }),
+          JSON.stringify({
+            frame: 0,
+            timeFrames: 0,
+            tcum: 1,
+            phoneIndex: 0,
+            f0prime: 1000,
+            out: { F1: 100 },
+          }),
+          JSON.stringify({
+            frame: 1,
+            timeFrames: 1,
+            tcum: 2,
+            phoneIndex: 0,
+            f0prime: 1000,
+            out: { F1: 200 },
+          }),
         ].join("\n"),
       );
       writeFileSync(
@@ -212,14 +226,18 @@ describe("DECtalk trace packet timing", () => {
       mkdirSync(qlattDirectory, { recursive: true });
       writeFileSync(
         path.join(oracleDirectory, "oracle.trace.jsonl"),
-        [0, 1, 2].map((frame) => JSON.stringify({
-          frame,
-          timeFrames: frame,
-          tcum: frame + 1,
-          phoneIndex: 1,
-          f0prime: 1000,
-          out: { PH: 288, B3: 100 },
-        })).join("\n"),
+        [0, 1, 2]
+          .map((frame) =>
+            JSON.stringify({
+              frame,
+              timeFrames: frame,
+              tcum: frame + 1,
+              phoneIndex: 1,
+              f0prime: 1000,
+              out: { PH: 288, B3: 100 },
+            }),
+          )
+          .join("\n"),
       );
       writeFileSync(
         path.join(oracleDirectory, "oracle.json"),
@@ -279,33 +297,35 @@ describe("DECtalk trace packet timing", () => {
       writeFileSync(
         summaryPath,
         JSON.stringify({
-          phrases: [{
-            phraseId: "phase-rank",
-            params: {
-              B3: {
-                phaseAlignedSameSegment: {
-                  compared: 3,
-                  meanAbs: 15,
-                  maxAbs: 30,
-                  maxFrame: 7,
-                  oracleAtMax: 100,
-                  qlattAtMax: 130,
-                  maxOraclePhone: "N",
-                  maxOracleOutputPhone: "N",
-                  maxQlattPhone: "N",
-                  maxOracleSegmentPhase: 0.4,
-                  maxQlattSegmentPhase: 0.5,
-                  maxSegmentPhaseDelta: 0.1,
-                },
-                unknownSegment: {
-                  compared: 2,
-                  meanAbs: 502,
-                  maxAbs: 502,
-                  maxFrame: 0,
+          phrases: [
+            {
+              phraseId: "phase-rank",
+              params: {
+                B3: {
+                  phaseAlignedSameSegment: {
+                    compared: 3,
+                    meanAbs: 15,
+                    maxAbs: 30,
+                    maxFrame: 7,
+                    oracleAtMax: 100,
+                    qlattAtMax: 130,
+                    maxOraclePhone: "N",
+                    maxOracleOutputPhone: "N",
+                    maxQlattPhone: "N",
+                    maxOracleSegmentPhase: 0.4,
+                    maxQlattSegmentPhase: 0.5,
+                    maxSegmentPhaseDelta: 0.1,
+                  },
+                  unknownSegment: {
+                    compared: 2,
+                    meanAbs: 502,
+                    maxAbs: 502,
+                    maxFrame: 0,
+                  },
                 },
               },
             },
-          }],
+          ],
         }),
       );
 

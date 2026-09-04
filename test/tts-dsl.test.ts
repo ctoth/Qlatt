@@ -17,10 +17,12 @@ describe("graph-native tts-dsl CLI", () => {
     expect(result.code).toBe(0);
     const payload = JSON.parse(result.stdout);
     expect(payload.checkpoints.length).toBeGreaterThan(0);
-    expect(payload.checkpoints.some(
-      (checkpoint: { phase: string; boundary: string }) =>
-        checkpoint.phase === "duration" && checkpoint.boundary === "before",
-    )).toBe(true);
+    expect(
+      payload.checkpoints.some(
+        (checkpoint: { phase: string; boundary: string }) =>
+          checkpoint.phase === "duration" && checkpoint.boundary === "before",
+      ),
+    ).toBe(true);
     expect(payload.replay.matches).toBe(true);
     expect(payload.replay.replayDigest).toBe(payload.replay.originalDigest);
   });
@@ -40,10 +42,12 @@ describe("graph-native tts-dsl CLI", () => {
     expect(payload.field.itemId).toBe("segment_0");
     expect(payload.field.key).toBe("duration");
     expect(payload.field.history.length).toBeGreaterThan(0);
-    expect(payload.field.history.every(
-      (write: { decisionId?: string; citations?: string[] }) =>
-        typeof write.decisionId === "string" && (write.citations?.length ?? 0) > 0,
-    )).toBe(true);
+    expect(
+      payload.field.history.every(
+        (write: { decisionId?: string; citations?: string[] }) =>
+          typeof write.decisionId === "string" && (write.citations?.length ?? 0) > 0,
+      ),
+    ).toBe(true);
   });
 
   it("names the exact failed select condition for why-not", async () => {

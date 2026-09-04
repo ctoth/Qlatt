@@ -1,7 +1,13 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
-import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
+import type {
+  FeatureSchema,
+  HrgSchema,
+  Item,
+  LayeredF0ModelConfig,
+  LowerOptions,
+} from "../src/declarative-frontend/hrg";
+import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-frontend/hrg";
 import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
@@ -72,38 +78,43 @@ function schemaFor(columns: readonly string[]): HrgSchema {
 
 function readFixture(): {
   commands: BaselineCommand[];
-  f0Model: Readonly<Record<string, unknown>>;
+  f0Model: LayeredF0ModelConfig;
   policy: LowerOptions;
   segments: BaselineSegment[];
   speakerParams: Readonly<Record<string, unknown>>;
 } {
-  const parsed: unknown = JSON.parse(readFileSync(
-    new URL("./fixtures/hrg-convergence-baseline/dectalk-english-stops.json", import.meta.url),
-    "utf8",
-  ));
+  const parsed: unknown = JSON.parse(
+    readFileSync(
+      new URL("./fixtures/hrg-convergence-baseline/dectalk-english-stops.json", import.meta.url),
+      "utf8",
+    ),
+  );
   const spec = loadBundledRulepackSpec("dectalk-english");
   if (
-    !isPlainObject(parsed)
-    || !isPlainObject(parsed.reconstructedGraph)
-    || !Array.isArray(parsed.reconstructedGraph.items)
-    || !isPlainObject(parsed.oldProduction)
-    || !isPlainObject(parsed.oldProduction.controlScore)
-    || !Array.isArray(parsed.oldProduction.controlScore.f0_layer_commands)
-    || !isPlainObject(parsed.oldProduction.speakerParams)
-    || typeof spec.inventory_path !== "string"
-    || !isPlainObject(spec.f0_model)
+    !isPlainObject(parsed) ||
+    !isPlainObject(parsed.reconstructedGraph) ||
+    !Array.isArray(parsed.reconstructedGraph.items) ||
+    !isPlainObject(parsed.oldProduction) ||
+    !isPlainObject(parsed.oldProduction.controlScore) ||
+    !Array.isArray(parsed.oldProduction.controlScore.f0_layer_commands) ||
+    !isPlainObject(parsed.oldProduction.speakerParams) ||
+    typeof spec.inventory_path !== "string" ||
+    !isPlainObject(spec.f0_model) ||
+    !isPlainObject(spec.output)
   ) {
     throw new Error("layered-intonation fixture/spec invalid");
   }
-  const policy: LowerOptions = spec.output.lowering;
+  const policy = readLowerOptions(spec.output.lowering);
   const inventory = loadInventorySpecFromPath(spec.inventory_path).phoneme_targets;
   const segments = parsed.reconstructedGraph.items.flatMap((item): BaselineSegment[] => {
     if (!isPlainObject(item) || item.type !== "segment" || typeof item.id !== "string") return [];
     const phoneme = latestFeature(item, "phoneme");
     const duration = latestFeature(item, "dur_ms");
-    if (typeof phoneme !== "string" || typeof duration !== "number") throw new Error("baseline Segment invalid");
+    if (typeof phoneme !== "string" || typeof duration !== "number")
+      throw new Error("baseline Segment invalid");
     const target = inventory[phoneme] ?? inventory[`${phoneme}0`] ?? inventory[`${phoneme}1`];
-    if (!target || typeof target.type !== "string") throw new Error(`inventory type missing for ${phoneme}`);
+    if (!target || typeof target.type !== "string")
+      throw new Error(`inventory type missing for ${phoneme}`);
     const params: Record<string, number> = {};
     for (const column of policy.columns) {
       const value = latestFeature(item, column);
@@ -112,34 +123,38 @@ function readFixture(): {
     }
     return [{ duration, id: item.id, params, phoneme, type: target.type }];
   });
-  const commands = parsed.oldProduction.controlScore.f0_layer_commands.map((command): BaselineCommand => {
-    if (
-      !isPlainObject(command)
-      || typeof command.id !== "string"
-      || !isPlainObject(command.timing)
-      || command.timing.kind !== "absolute"
-      || typeof command.timing.time_ms !== "number"
-      || typeof command.layer !== "string"
-      || typeof command.value !== "number"
-    ) {
-      throw new Error("baseline layered command invalid");
-    }
-    const profilePoints = Array.isArray(command.profile_points)
-      ? command.profile_points.filter((value): value is number => typeof value === "number")
-      : undefined;
-    return {
-      id: command.id,
-      layer: command.layer,
-      timeMs: command.timing.time_ms,
-      value: command.value,
-      ...(typeof command.duration_frames === "number" ? { durationFrames: command.duration_frames } : {}),
-      ...(profilePoints ? { profilePoints } : {}),
-      ...(typeof command.tag === "string" ? { tag: command.tag } : {}),
-    };
-  });
+  const commands = parsed.oldProduction.controlScore.f0_layer_commands.map(
+    (command): BaselineCommand => {
+      if (
+        !isPlainObject(command) ||
+        typeof command.id !== "string" ||
+        !isPlainObject(command.timing) ||
+        command.timing.kind !== "absolute" ||
+        typeof command.timing.time_ms !== "number" ||
+        typeof command.layer !== "string" ||
+        typeof command.value !== "number"
+      ) {
+        throw new Error("baseline layered command invalid");
+      }
+      const profilePoints = Array.isArray(command.profile_points)
+        ? command.profile_points.filter((value): value is number => typeof value === "number")
+        : undefined;
+      return {
+        id: command.id,
+        layer: command.layer,
+        timeMs: command.timing.time_ms,
+        value: command.value,
+        ...(typeof command.duration_frames === "number"
+          ? { durationFrames: command.duration_frames }
+          : {}),
+        ...(profilePoints ? { profilePoints } : {}),
+        ...(typeof command.tag === "string" ? { tag: command.tag } : {}),
+      };
+    },
+  );
   return {
     commands,
-    f0Model: spec.f0_model,
+    f0Model: spec.f0_model as unknown as LayeredF0ModelConfig,
     policy,
     segments,
     speakerParams: parsed.oldProduction.speakerParams,
@@ -191,7 +206,10 @@ function buildUtterance(
 
   const prosody = utterance.beginTransaction(META);
   for (const command of commands) {
-    const span = spans.find((candidate) => command.timeMs >= candidate.startMs - 1e-6 && command.timeMs <= candidate.endMs + 1e-6);
+    const span = spans.find(
+      (candidate) =>
+        command.timeMs >= candidate.startMs - 1e-6 && command.timeMs <= candidate.endMs + 1e-6,
+    );
     if (!span) throw new Error(`command ${command.id} lies outside the temporal axis`);
     const anchor = utterance.intervalAnchor(span.item);
     if (!anchor) throw new Error("fixture command span missing");
@@ -199,11 +217,15 @@ function buildUtterance(
     const item = prosody.createItem(phraseCommand ? "phraseCommand" : "tilt", command.id);
     prosody.set(item, "layer", command.layer);
     prosody.set(item, "value", command.value);
-    if (command.durationFrames != null) prosody.set(item, "duration_frames", command.durationFrames);
+    if (command.durationFrames != null)
+      prosody.set(item, "duration_frames", command.durationFrames);
     if (command.profilePoints) prosody.set(item, "profile_points", command.profilePoints);
     if (command.tag) prosody.set(item, "tag", command.tag);
     prosody.append(phraseCommand ? "PhraseCommand" : "Tilt", item);
-    const ratio = span.endMs === span.startMs ? 0 : (command.timeMs - span.startMs) / (span.endMs - span.startMs);
+    const ratio =
+      span.endMs === span.startMs
+        ? 0
+        : (command.timeMs - span.startMs) / (span.endMs - span.startMs);
     prosody.anchorPoint(item, anchor.leftMarkId, anchor.rightMarkId, ratio);
   }
   prosody.commit();
@@ -220,13 +242,20 @@ describe("HRG lowering layered intonation", () => {
     });
     const segmentFrames = lowered.frames.filter((frame) => frame.segmentId != null);
     expect(segmentFrames.length).toBeGreaterThan(250);
-    const knownDecisions = new Set(utterance.provenance.getDecisions().map((decision) => decision.id));
+    const knownDecisions = new Set(
+      utterance.provenance.getDecisions().map((decision) => decision.id),
+    );
     for (const frame of segmentFrames) {
       expect(Number.isFinite(frame.params.F0), `${frame.segmentId}@${frame.time}.F0`).toBe(true);
       for (const key of Object.keys(frame.params)) {
         const decisionId = frame.provenance?.[key];
-        expect(decisionId, `${frame.segmentId}@${frame.time}.${key} provenance`).toBeTypeOf("string");
-        expect(knownDecisions.has(decisionId ?? ""), `${frame.segmentId}@${frame.time}.${key} decision`).toBe(true);
+        expect(decisionId, `${frame.segmentId}@${frame.time}.${key} provenance`).toBeTypeOf(
+          "string",
+        );
+        expect(
+          knownDecisions.has(decisionId ?? ""),
+          `${frame.segmentId}@${frame.time}.${key} decision`,
+        ).toBe(true);
       }
     }
   });
@@ -257,10 +286,11 @@ describe("HRG lowering layered intonation", () => {
       { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
     );
 
-    const initialVoicedF0 = (frames: typeof delayed.frames) => frames
-      .filter((frame) => frame.segmentId === "voiced")
-      .slice(0, 5)
-      .map((frame) => frame.params.F0);
+    const initialVoicedF0 = (frames: typeof delayed.frames) =>
+      frames
+        .filter((frame) => frame.segmentId === "voiced")
+        .slice(0, 5)
+        .map((frame) => frame.params.F0);
     const deltas = initialVoicedF0(delayed.frames).map(
       (f0, index) => f0 - (initialVoicedF0(baselineOnly.frames)[index] ?? f0),
     );
@@ -297,17 +327,19 @@ describe("HRG lowering layered intonation", () => {
     const outputFramePeriod = baseline.f0Model.output_frame_period_sec;
     if (typeof outputFramePeriod !== "number") throw new Error("layered F0 output period missing");
 
-    const voicedF0 = (policy: LowerOptions, activeCommands: BaselineCommand[]) => lowerToFrames(
-      buildUtterance([segment], activeCommands, policy),
-      policy,
-      { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
-    ).frames
-      .filter((frame) => (
-        frame.segmentId === "voiced"
-        && Math.abs(frame.time / outputFramePeriod - Math.round(frame.time / outputFramePeriod)) < 1e-9
-      ))
-      .slice(0, 8)
-      .map((frame) => frame.params.F0);
+    const voicedF0 = (policy: LowerOptions, activeCommands: BaselineCommand[]) =>
+      lowerToFrames(buildUtterance([segment], activeCommands, policy), policy, {
+        f0Model: baseline.f0Model,
+        speakerParams: baseline.speakerParams,
+      })
+        .frames.filter(
+          (frame) =>
+            frame.segmentId === "voiced" &&
+            Math.abs(frame.time / outputFramePeriod - Math.round(frame.time / outputFramePeriod)) <
+              1e-9,
+        )
+        .slice(0, 8)
+        .map((frame) => frame.params.F0);
     const commandEffect = (policy: LowerOptions) => {
       const withCommand = voicedF0(policy, commands);
       const withoutCommand = voicedF0(policy, commands.slice(0, 1));
@@ -338,7 +370,10 @@ describe("HRG lowering layered intonation", () => {
         {
           id: "baseline",
           layer: "baseline",
-          profilePoints: [1160, 1150, 1140, 1152, 1132, 1140, 1130, 1124, 1110, 1100, 1080, 1060, 1040, 1020, 980, 960, 950],
+          profilePoints: [
+            1160, 1150, 1140, 1152, 1132, 1140, 1130, 1124, 1110, 1100, 1080, 1060, 1040, 1020, 980,
+            960, 950,
+          ],
           timeMs: 0,
           value: 0,
         },
@@ -374,14 +409,15 @@ describe("HRG lowering layered intonation", () => {
           value: 30,
         },
       ];
-      return lowerToFrames(
-        buildUtterance(segments, commands, baseline.policy),
-        baseline.policy,
-        { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
-      ).frames
-        .filter((frame) => (
-          Math.abs(frame.time / outputFramePeriod - Math.round(frame.time / outputFramePeriod)) < 1e-9
-        ))
+      return lowerToFrames(buildUtterance(segments, commands, baseline.policy), baseline.policy, {
+        f0Model: baseline.f0Model,
+        speakerParams: baseline.speakerParams,
+      })
+        .frames.filter(
+          (frame) =>
+            Math.abs(frame.time / outputFramePeriod - Math.round(frame.time / outputFramePeriod)) <
+            1e-9,
+        )
         .slice(0, 30)
         .map((frame) => frame.params.F0);
     };
@@ -397,13 +433,15 @@ describe("HRG lowering layered intonation", () => {
       { ...sourceSegment, duration: 100, id: "first-voiced" },
       { ...sourceSegment, duration: 100, id: "second-voiced" },
     ];
-    const commands: BaselineCommand[] = [{
-      id: "baseline",
-      layer: "baseline",
-      profilePoints: [1160, 950],
-      timeMs: 0,
-      value: 0,
-    }];
+    const commands: BaselineCommand[] = [
+      {
+        id: "baseline",
+        layer: "baseline",
+        profilePoints: [1160, 950],
+        timeMs: 0,
+        value: 0,
+      },
+    ];
 
     const lowered = lowerToFrames(
       buildUtterance(segments, commands, baseline.policy),
@@ -416,9 +454,9 @@ describe("HRG lowering layered intonation", () => {
     if (!interstitialSegmentStart) throw new Error("second voiced segment frame missing");
     const framePeriod = baseline.f0Model.output_frame_period_sec;
     if (typeof framePeriod !== "number") throw new Error("layered F0 output period missing");
-    const nativeCells = lowered.frames.filter((frame) => (
-      Math.abs(frame.time / framePeriod - Math.round(frame.time / framePeriod)) < 1e-9
-    ));
+    const nativeCells = lowered.frames.filter(
+      (frame) => Math.abs(frame.time / framePeriod - Math.round(frame.time / framePeriod)) < 1e-9,
+    );
     const previousNativeCell = nativeCells
       .filter((frame) => frame.time < interstitialSegmentStart.time - 1e-9)
       .at(-1);
@@ -432,20 +470,23 @@ describe("HRG lowering layered intonation", () => {
 
   it("preserves layered F0 controller cells on unvoiced segments", () => {
     const baseline = readFixture();
-    const sourceSegment = baseline.segments.find((segment) => (
-      segment.phoneme !== "SIL"
-      && (segment.params.AV ?? 0) <= 0
-      && (segment.params.AVS ?? 0) <= 0
-    ));
+    const sourceSegment = baseline.segments.find(
+      (segment) =>
+        segment.phoneme !== "SIL" &&
+        (segment.params.AV ?? 0) <= 0 &&
+        (segment.params.AVS ?? 0) <= 0,
+    );
     if (!sourceSegment) throw new Error("unvoiced fixture segment missing");
     const segment = { ...sourceSegment, duration: 100, id: "unvoiced" };
-    const commands: BaselineCommand[] = [{
-      id: "baseline",
-      layer: "baseline",
-      profilePoints: [1160, 1160],
-      timeMs: 0,
-      value: 0,
-    }];
+    const commands: BaselineCommand[] = [
+      {
+        id: "baseline",
+        layer: "baseline",
+        profilePoints: [1160, 1160],
+        timeMs: 0,
+        value: 0,
+      },
+    ];
 
     const lowered = lowerToFrames(
       buildUtterance([segment], commands, baseline.policy),
@@ -461,10 +502,9 @@ describe("HRG lowering layered intonation", () => {
       throw new Error("unvoiced segment timing or layered F0 output period missing");
     }
     const nextNativeCellTime = Math.ceil((segmentStart.time + 1e-9) / framePeriod) * framePeriod;
-    const hasNextNativeCell = lowered.frames.some((frame) => (
-      frame.segmentId === "unvoiced"
-      && Math.abs(frame.time - nextNativeCellTime) < 1e-9
-    ));
+    const hasNextNativeCell = lowered.frames.some(
+      (frame) => frame.segmentId === "unvoiced" && Math.abs(frame.time - nextNativeCellTime) < 1e-9,
+    );
 
     expect(f0Cells.length).toBeGreaterThan(0);
     expect(f0Cells.every((f0) => f0 > 0)).toBe(true);
@@ -475,7 +515,8 @@ describe("HRG lowering layered intonation", () => {
     const baseline = readFixture();
     const sourceSegment = baseline.segments.find((segment) => (segment.params.AV ?? 0) > 0);
     const sourceSilence = baseline.segments.find((segment) => segment.phoneme === "SIL");
-    if (!sourceSegment || !sourceSilence) throw new Error("voiced or silence fixture segment missing");
+    if (!sourceSegment || !sourceSilence)
+      throw new Error("voiced or silence fixture segment missing");
     const segment = { ...sourceSegment, duration: 100, id: "voiced" };
     const terminalSilence = { ...sourceSilence, duration: 50, id: "terminal-silence" };
     const policy: LowerOptions = {
@@ -488,13 +529,15 @@ describe("HRG lowering layered intonation", () => {
         },
       },
     };
-    const commands: BaselineCommand[] = [{
-      id: "baseline",
-      layer: "baseline",
-      profilePoints: [1160, 950],
-      timeMs: 0,
-      value: 0,
-    }];
+    const commands: BaselineCommand[] = [
+      {
+        id: "baseline",
+        layer: "baseline",
+        profilePoints: [1160, 950],
+        timeMs: 0,
+        value: 0,
+      },
+    ];
 
     const lowered = lowerToFrames(
       buildUtterance([segment, terminalSilence], commands, policy),
@@ -507,10 +550,10 @@ describe("HRG lowering layered intonation", () => {
     const terminalStart = lowered.frames.find((frame) => frame.segmentId === "terminal-silence");
     if (!terminalStart) throw new Error("terminal silence frame missing");
     const terminalCellTime = Math.ceil((terminalStart.time + 1e-9) / framePeriod) * framePeriod;
-    const terminalCell = lowered.frames.find((frame) => (
-      frame.segmentId === "terminal-silence"
-      && Math.abs(frame.time - terminalCellTime) < 1e-9
-    ));
+    const terminalCell = lowered.frames.find(
+      (frame) =>
+        frame.segmentId === "terminal-silence" && Math.abs(frame.time - terminalCellTime) < 1e-9,
+    );
 
     expect(initialCell?.segmentId).toBeUndefined();
     expect(initialCell?.params.F0).toBeGreaterThan(0);
@@ -573,13 +616,13 @@ describe("HRG lowering layered intonation", () => {
       },
     };
 
-    const voicedF0 = (controls: BaselineCommand[], policy: LowerOptions) => lowerToFrames(
-      buildUtterance([segment], controls, policy),
-      policy,
-      { f0Model: baseline.f0Model, speakerParams: baseline.speakerParams },
-    ).frames
-      .filter((frame) => frame.segmentId === "voiced")
-      .map((frame) => frame.params.F0);
+    const voicedF0 = (controls: BaselineCommand[], policy: LowerOptions) =>
+      lowerToFrames(buildUtterance([segment], controls, policy), policy, {
+        f0Model: baseline.f0Model,
+        speakerParams: baseline.speakerParams,
+      })
+        .frames.filter((frame) => frame.segmentId === "voiced")
+        .map((frame) => frame.params.F0);
 
     expect(voicedF0(commandsWithTerminalController, withLongTerminalSilence).slice(0, 12)).toEqual(
       voicedF0(commands, withoutTerminalSilence).slice(0, 12),
@@ -612,21 +655,24 @@ describe("HRG lowering layered intonation", () => {
         },
       },
     };
-    const commands: BaselineCommand[] = [{
-      id: "baseline",
-      layer: "baseline",
-      profilePoints: [1160, 950],
-      timeMs: 0,
-      value: 0,
-    }];
+    const commands: BaselineCommand[] = [
+      {
+        id: "baseline",
+        layer: "baseline",
+        profilePoints: [1160, 950],
+        timeMs: 0,
+        value: 0,
+      },
+    ];
 
-    const lowered = lowerToFrames(
-      buildUtterance([segment], commands, policy),
-      policy,
-      { f0Model, speakerParams: baseline.speakerParams },
+    const lowered = lowerToFrames(buildUtterance([segment], commands, policy), policy, {
+      f0Model,
+      speakerParams: baseline.speakerParams,
+    });
+
+    expect(lowered.frames.some((frame) => Math.abs(frame.time - outputPacketPeriod) < 1e-9)).toBe(
+      true,
     );
-
-    expect(lowered.frames.some((frame) => Math.abs(frame.time - outputPacketPeriod) < 1e-9)).toBe(true);
     expect(lowered.frames.some((frame) => Math.abs(frame.time - controlPeriod) < 1e-9)).toBe(false);
   });
 
@@ -635,8 +681,10 @@ describe("HRG lowering layered intonation", () => {
     const utterance = buildUtterance(baseline.segments, baseline.commands, baseline.policy);
 
     expect(() => lowerToFrames(utterance, baseline.policy)).toThrowError(/E_HRG_LOWER_F0_MODEL/);
-    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
-      code: "HRG_LOWER_F0_MODEL_REQUIRED",
-    }));
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "HRG_LOWER_F0_MODEL_REQUIRED",
+      }),
+    );
   });
 });

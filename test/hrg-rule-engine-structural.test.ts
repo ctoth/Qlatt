@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { replayJournal, Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { replayJournal, Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
@@ -187,7 +187,10 @@ describe("graph-native structural splice execution", () => {
     });
     const first = fixture.createItem("segment", "first");
     const second = fixture.createItem("segment", "second");
-    for (const [item, phoneme] of [[first, "T"], [second, "AA"]] as const) {
+    for (const [item, phoneme] of [
+      [first, "T"],
+      [second, "AA"],
+    ] as const) {
       fixture.set(item, "phoneme", phoneme);
       fixture.set(item, "duration", 100);
       fixture.set(item, "active", true);
@@ -224,9 +227,11 @@ describe("graph-native structural splice execution", () => {
     expect(items.map((item) => item.id)).toEqual(["first", "first:release:0", "second"]);
     const insertedAnchor = utterance.intervalAnchor(items[1]);
     const secondAnchor = utterance.intervalAnchor(second);
-    expect(insertedAnchor).toEqual(expect.objectContaining({
-      leftMarkId: secondAnchor?.leftMarkId,
-      rightMarkId: secondAnchor?.rightMarkId,
-    }));
+    expect(insertedAnchor).toEqual(
+      expect.objectContaining({
+        leftMarkId: secondAnchor?.leftMarkId,
+        rightMarkId: secondAnchor?.rightMarkId,
+      }),
+    );
   });
 });

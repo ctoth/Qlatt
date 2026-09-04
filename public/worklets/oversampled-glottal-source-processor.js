@@ -4,7 +4,7 @@
  *   output[0] = voice waveform (post-tilt + breathiness)
  *   output[1] = modulated noise (for aspiration/frication)
  */
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, UNINITIALIZED_ALLOC, fillParamBuffer } from "./wasm-utils.js";
+import { computeRmsPeak, fillParamBuffer, initWasmModule, resolveWasmUrl, UNINITIALIZED_ALLOC, WasmBuffer, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./oversampled-glottal-source.wasm");
 class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
     disposed = false;
@@ -20,10 +20,34 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
     paramBuffers;
     static get parameterDescriptors() {
         return [
-            { name: "f0", defaultValue: 100, minValue: 0, maxValue: 500, automationRate: "a-rate" },
-            { name: "av", defaultValue: 60, minValue: 0, maxValue: 80, automationRate: "k-rate" },
-            { name: "aturb", defaultValue: 0, minValue: 0, maxValue: 80, automationRate: "k-rate" },
-            { name: "tilt", defaultValue: 0, minValue: 0, maxValue: 34, automationRate: "k-rate" },
+            {
+                name: "f0",
+                defaultValue: 100,
+                minValue: 0,
+                maxValue: 500,
+                automationRate: "a-rate",
+            },
+            {
+                name: "av",
+                defaultValue: 60,
+                minValue: 0,
+                maxValue: 80,
+                automationRate: "k-rate",
+            },
+            {
+                name: "aturb",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 80,
+                automationRate: "k-rate",
+            },
+            {
+                name: "tilt",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 34,
+                automationRate: "k-rate",
+            },
             {
                 name: "openQuotient",
                 defaultValue: 50,
@@ -31,14 +55,50 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
                 maxValue: 100,
                 automationRate: "k-rate",
             },
-            { name: "skew", defaultValue: 0, minValue: 0, maxValue: 200, automationRate: "k-rate" },
-            { name: "asymmetry", defaultValue: 50, minValue: 0, maxValue: 100, automationRate: "k-rate" },
-            { name: "source", defaultValue: 2, minValue: 1, maxValue: 4, automationRate: "k-rate" },
-            { name: "seed", defaultValue: 1, minValue: 1, maxValue: 2147483647, automationRate: "k-rate" },
+            {
+                name: "skew",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 200,
+                automationRate: "k-rate",
+            },
+            {
+                name: "asymmetry",
+                defaultValue: 50,
+                minValue: 0,
+                maxValue: 100,
+                automationRate: "k-rate",
+            },
+            {
+                name: "source",
+                defaultValue: 2,
+                minValue: 1,
+                maxValue: 4,
+                automationRate: "k-rate",
+            },
+            {
+                name: "seed",
+                defaultValue: 1,
+                minValue: 1,
+                maxValue: 2147483647,
+                automationRate: "k-rate",
+            },
             // Klatt & Klatt 1990 eq. 1 F0 flutter (percent). Default 0 = no-op.
-            { name: "flutter", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" },
+            {
+                name: "flutter",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 100,
+                automationRate: "k-rate",
+            },
             // Klatt & Klatt 1990 §3 diplophonia (percent). Default 0 = no-op.
-            { name: "diplophonia", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" },
+            {
+                name: "diplophonia",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 100,
+                automationRate: "k-rate",
+            },
         ];
     }
     constructor(options) {

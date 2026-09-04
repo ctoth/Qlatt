@@ -74,16 +74,19 @@ try {
   const started = Date.now();
   await page.goto(url, { waitUntil: "commit", timeout: 60000 });
   const committed = Date.now();
-  await page.waitForFunction(() => {
-    const select = document.getElementById("experimentSelect");
-    if (!(select instanceof HTMLSelectElement)) return false;
-    return Array.from(select.options).some(
-      (option) =>
-        option.value === "klatt80-baseline" &&
-        option.textContent !== null &&
-        option.textContent.trim() !== "Loading...",
-    );
-  }, { timeout: 60000 });
+  await page.waitForFunction(
+    () => {
+      const select = document.getElementById("experimentSelect");
+      if (!(select instanceof HTMLSelectElement)) return false;
+      return Array.from(select.options).some(
+        (option) =>
+          option.value === "klatt80-baseline" &&
+          option.textContent !== null &&
+          option.textContent.trim() !== "Loading...",
+      );
+    },
+    { timeout: 60000 },
+  );
   const dropdownReady = Date.now();
   const timings = await page.evaluate(() => {
     const nav = performance.getEntriesByType("navigation")[0];
@@ -116,29 +119,36 @@ try {
     window.stop();
   });
 
-  console.log(JSON.stringify({
-    url,
-    commitMs: committed - started,
-    dropdownReadyMs: dropdownReady - started,
-    domContentLoadedMs: timings.domContentLoadedMs,
-    loadEventMs: timings.loadEventMs,
-    options: selectedText,
-    requests: relativeRequests,
-    resources: timings.resourceNames
-      .filter((entry) =>
-        entry.name.includes("manifest.json") ||
-        entry.name.includes("frontend.yaml") ||
-        entry.name.includes("phases/") ||
-        entry.name.includes("test-harness") ||
-        entry.name.includes("runtime.js"),
-      )
-      .map((entry) => ({
-        name: entry.name.replace(url, "/"),
-        startTime: entry.startTime,
-        duration: entry.duration,
-        transferSize: entry.transferSize,
-      })),
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        url,
+        commitMs: committed - started,
+        dropdownReadyMs: dropdownReady - started,
+        domContentLoadedMs: timings.domContentLoadedMs,
+        loadEventMs: timings.loadEventMs,
+        options: selectedText,
+        requests: relativeRequests,
+        resources: timings.resourceNames
+          .filter(
+            (entry) =>
+              entry.name.includes("manifest.json") ||
+              entry.name.includes("frontend.yaml") ||
+              entry.name.includes("phases/") ||
+              entry.name.includes("test-harness") ||
+              entry.name.includes("runtime.js"),
+          )
+          .map((entry) => ({
+            name: entry.name.replace(url, "/"),
+            startTime: entry.startTime,
+            duration: entry.duration,
+            transferSize: entry.transferSize,
+          })),
+      },
+      null,
+      2,
+    ),
+  );
 } finally {
   await browser.close();
   await server.close();

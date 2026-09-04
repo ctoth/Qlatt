@@ -2,8 +2,8 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { textToKlattTrack } from "../src/tts-frontend";
 import { createProvenanceCollector, type DecisionRecord } from "../src/provenance";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 type CliIo = {
   stdout: (text: string) => void;
@@ -86,7 +86,7 @@ function summarizeUncited(items: UncitedDecision[], limit: number): string {
   for (const item of shown) {
     lines.push(
       `${item.phrase} | #${item.decision.seq} [${item.decision.stage}] ` +
-      `${item.decision.type} ${item.decision.subject}`
+        `${item.decision.type} ${item.decision.subject}`,
     );
   }
   if (items.length > shown.length) {
@@ -110,9 +110,7 @@ export function runStrictCitationsCheck(argv: string[], io: CliIo = defaultIo())
       throw new Error(`No phrases found in ${args.corpusPath}`);
     }
 
-    const selectedPhrases = args.phraseLimit != null
-      ? phrases.slice(0, args.phraseLimit)
-      : phrases;
+    const selectedPhrases = args.phraseLimit != null ? phrases.slice(0, args.phraseLimit) : phrases;
     const baseF0 = args.baseF0Override ?? Number(corpus.baseF0 ?? 110);
     if (!Number.isFinite(baseF0) || baseF0 <= 0) {
       throw new Error(`Invalid baseF0 '${String(corpus.baseF0)}' in corpus`);
@@ -135,11 +133,13 @@ export function runStrictCitationsCheck(argv: string[], io: CliIo = defaultIo())
 
     io.stdout(
       `checked ${selectedPhrases.length} phrases from ${args.corpusPath}` +
-      ` | decisions=${decisionCount} uncited=${uncited.length}\n`
+        ` | decisions=${decisionCount} uncited=${uncited.length}\n`,
     );
 
     if (uncited.length > 0) {
-      io.stderr(`strict-citations failed with uncited decisions:\n${summarizeUncited(uncited, 30)}\n`);
+      io.stderr(
+        `strict-citations failed with uncited decisions:\n${summarizeUncited(uncited, 30)}\n`,
+      );
       return 2;
     }
 

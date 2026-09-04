@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import type { FeatureSchema, HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
+import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { compileAffect } from "../src/input/affect";
 import {
   attachDirectionsToUtterance,
@@ -17,8 +17,20 @@ const META = {
 };
 
 const COLUMNS = [
-  "F0", "F1", "F2", "F3", "B1", "B2", "B3", "AV", "AH", "GO", "TL",
-  "Rd", "RdPhraseOffset", "jitter",
+  "F0",
+  "F1",
+  "F2",
+  "F3",
+  "B1",
+  "B2",
+  "B3",
+  "AV",
+  "AH",
+  "GO",
+  "TL",
+  "Rd",
+  "RdPhraseOffset",
+  "jitter",
 ] as const;
 
 function schema(): HrgSchema {
@@ -218,10 +230,12 @@ describe("HRG lowering Affect projection", () => {
     expect(lowered.provenanceByFrame[lowered.frames.indexOf(second)].GO).toBe(
       utterance.relation("Affect").listItems().at(-1)?.latestWrite("delta")?.decisionId,
     );
-    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
-      code: "HRG_LOWER_VALUE_CLAMPED",
-      data: expect.objectContaining({ itemId: "segment-0", key: "RdPhraseOffset" }),
-    }));
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "HRG_LOWER_VALUE_CLAMPED",
+        data: expect.objectContaining({ itemId: "segment-0", key: "RdPhraseOffset" }),
+      }),
+    );
   });
 
   it("scales completed F0 excursion around its voiced mean with Affect provenance", () => {
@@ -243,7 +257,9 @@ describe("HRG lowering Affect projection", () => {
       9,
     );
     expect((first.params.F0 + second.params.F0) / 2).toBeCloseTo(mean * angry.f0Scale, 9);
-    const varianceDecision = utterance.relation("Affect").listItems()[0]
+    const varianceDecision = utterance
+      .relation("Affect")
+      .listItems()[0]
       ?.latestWrite("delta")?.decisionId;
     expect(lowered.provenanceByFrame[lowered.frames.indexOf(first)].F0).toBe(varianceDecision);
     expect(lowered.provenanceByFrame[lowered.frames.indexOf(second)].F0).toBe(varianceDecision);
@@ -256,9 +272,11 @@ describe("HRG lowering Affect projection", () => {
     affect.set("delta", { ...compileAffect("angry", 1).vq, f0VarianceScale: -1 }, META);
 
     expect(() => lowerToFrames(utterance, POLICY)).toThrowError(/E_HRG_LOWER_F0_VARIANCE/);
-    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
-      code: "HRG_LOWER_F0_VARIANCE_REJECTED",
-      data: expect.objectContaining({ itemId: "variance-segment-0", scale: -1 }),
-    }));
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "HRG_LOWER_F0_VARIANCE_REJECTED",
+        data: expect.objectContaining({ itemId: "variance-segment-0", scale: -1 }),
+      }),
+    );
   });
 });

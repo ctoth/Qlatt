@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { loadYamlSourceSync } from "../src/yaml-loader";
+import { createProvenanceCollector } from "../src/provenance";
 import {
   DEFAULT_SOURCE_CONTOUR_PATH,
   loadSourceContourSync,
   resolveSourceContour,
 } from "../src/source-contour";
-import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import { loadYamlSourceSync } from "../src/yaml-loader";
 
 describe("source contour", () => {
   it("declares the canonical source contour document", () => {
@@ -121,7 +121,9 @@ describe("source contour", () => {
       warnSpy.mockRestore();
     }
 
-    const decision = provenance.getDecisions().find((entry) => entry.type === "source_contour_selected");
+    const decision = provenance
+      .getDecisions()
+      .find((entry) => entry.type === "source_contour_selected");
     expect(decision).toBeDefined();
     expect(decision?.stage).toBe("frontend");
     expect(decision?.citations).toContain(DEFAULT_SOURCE_CONTOUR_PATH);

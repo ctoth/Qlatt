@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
+import type { VoiceQualityOverrides } from "../src/source-contour";
 import {
+  projectSpeakerFields,
   SPEAKER_FORMANT_KEYS,
   SPEAKER_PROJECTION_TABLE,
-  projectSpeakerFields,
   type SpeakerProjectionBaseline,
 } from "../src/speaker-projection";
-import type { VoiceQualityOverrides } from "../src/source-contour";
 
 /**
  * Locks the declarative speaker/source projection table (phase 4 item 3) to the
@@ -107,12 +107,30 @@ describe("speaker projection table", () => {
   });
 
   it("declares all ten formant keys", () => {
-    expect(SPEAKER_FORMANT_KEYS).toEqual(["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10"]);
+    expect(SPEAKER_FORMANT_KEYS).toEqual([
+      "F1",
+      "F2",
+      "F3",
+      "F4",
+      "F5",
+      "F6",
+      "F7",
+      "F8",
+      "F9",
+      "F10",
+    ]);
   });
 
   it("table rows are ordered exactly as the original loop applied them", () => {
     expect(SPEAKER_PROJECTION_TABLE.map((row) => row.field)).toEqual([
-      "sourceMode", "Rd", "RdRef", "OQ", "TL", "AH", "flutter", "jitter",
+      "sourceMode",
+      "Rd",
+      "RdRef",
+      "OQ",
+      "TL",
+      "AH",
+      "flutter",
+      "jitter",
     ]);
   });
 });

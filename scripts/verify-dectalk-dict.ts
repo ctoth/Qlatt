@@ -14,9 +14,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { textToKlattTrack } from "../src/tts-frontend";
-import { createProvenanceCollector } from "../src/provenance";
 import { loadCmuDictionaryFromPathSync } from "../src/cmu-dictionary-loader";
+import { createProvenanceCollector } from "../src/provenance";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dictPath = path.resolve(__dirname, "../public/dectalk-dictionary.json");
@@ -49,9 +49,7 @@ for (const word of sampleWords) {
   const invSel = decisions.filter(
     (d) => d.stage === "transcribe" && d.type === "inventory_target_selected",
   );
-  const phonemes = invSel
-    .map((d) => d.subject.replace(/^token:\d+:/, ""))
-    .join(" ");
+  const phonemes = invSel.map((d) => d.subject.replace(/^token:\d+:/, "")).join(" ");
 
   const f0Frames = track.filter(
     (f) => typeof f.params?.F0 === "number" && (f.params.F0 as number) > 0,

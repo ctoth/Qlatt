@@ -45,11 +45,8 @@
  */
 
 import type { KlattFrame } from "../tts-frontend-types";
-import {
-  NEUTRAL_VQ,
-  type VoiceQualityDelta,
-} from "./direction-track";
 import type { CompiledAffect } from "./affect";
+import { NEUTRAL_VQ, type VoiceQualityDelta } from "./direction-track";
 
 /** Effective-Rd clamp bounds (Fant 1997 Rd range), mirrored from the backend. */
 const RD_MIN = 0.3;
@@ -131,13 +128,12 @@ export function applyAffectToTrack(
 
     // --- Rd channel (breathy/pressed) via RdPhraseOffset ------------------
     if (vq.rdDelta !== 0) {
-      const rdBase = typeof params.Rd === "number" && Number.isFinite(params.Rd)
-        ? params.Rd
-        : RD_FALLBACK;
-      const prevOffset = typeof params.RdPhraseOffset === "number" &&
-        Number.isFinite(params.RdPhraseOffset)
-        ? params.RdPhraseOffset
-        : 0;
+      const rdBase =
+        typeof params.Rd === "number" && Number.isFinite(params.Rd) ? params.Rd : RD_FALLBACK;
+      const prevOffset =
+        typeof params.RdPhraseOffset === "number" && Number.isFinite(params.RdPhraseOffset)
+          ? params.RdPhraseOffset
+          : 0;
       // Clamp the EFFECTIVE Rd (what the backend will actually use) to the Fant
       // range, then write back the offset that achieves it.
       const desiredEffective = rdBase + prevOffset + vq.rdDelta;

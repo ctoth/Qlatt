@@ -1,5 +1,5 @@
-import { validateExpressionSyntax } from "./cel-expressions";
 import { cloneValue, isPlainObject } from "../yaml-loader";
+import { validateExpressionSyntax } from "./cel-expressions";
 import * as S from "./struct-schema";
 
 type DiagnosticSeverity = "error" | "warning";
@@ -9,21 +9,29 @@ type ValidationDiagnostic = {
   path: string;
   severity: DiagnosticSeverity;
 };
-type PlainObject = Record<string, any>;
+type PlainObject = Record<string, unknown>;
+type PhaseSpec = {
+  name: string;
+  after: string[];
+  rules: string[];
+  resolve_points: string[];
+  resolve_scalars: string[];
+};
 const ALLOWED_CUSTOM_RULE_OPS = new Set(["noop"]);
 
 function makeDiagnostic(
   code: string,
   message: string,
   path: string,
-  severity: DiagnosticSeverity = "error"
+  severity: DiagnosticSeverity = "error",
 ): ValidationDiagnostic {
   return { code, message, path, severity };
 }
 
 const ALLOWED_RELATION_TYPES = new Set(["base", "span", "parallel", "point"]);
 const POLICY_REF_PATTERN = /\bparams\.policy((?:\.[A-Za-z_][A-Za-z0-9_]*)+)/g;
-const NUMERIC_LITERAL_PATTERN = /(^|[^A-Za-z0-9_])(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)(?=$|[^A-Za-z0-9_])/g;
+const NUMERIC_LITERAL_PATTERN =
+  /(^|[^A-Za-z0-9_])(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)(?=$|[^A-Za-z0-9_])/g;
 const CRITICAL_IDENTIFIER_PATTERN = /\b(duration|vot|f0)\b/i;
 const ALLOWED_INLINE_POLICY_LITERALS = new Set(["0", "1", "-1", "0.0", "1.0", "-1.0"]);
 
@@ -36,11 +44,11 @@ type PolicyValidationState = {
 
 function projectPolicyValueTree(node: unknown): unknown {
   if (!isPlainObject(node)) return cloneValue(node);
-  if (Object.prototype.hasOwnProperty.call(node, "value")) {
+  if (Object.hasOwn(node, "value")) {
     return cloneValue(node.value);
   }
   return Object.fromEntries(
-    Object.entries(node).map(([key, value]) => [key, projectPolicyValueTree(value)])
+    Object.entries(node).map(([key, value]) => [key, projectPolicyValueTree(value)]),
   );
 }
 
@@ -66,8 +74,8 @@ function analyzePolicyState(parameters: unknown): PolicyValidationState {
       return;
     }
 
-    const hasValue = Object.prototype.hasOwnProperty.call(node, "value");
-    const hasCitations = Object.prototype.hasOwnProperty.call(node, "citations");
+    const hasValue = Object.hasOwn(node, "value");
+    const hasCitations = Object.hasOwn(node, "citations");
     if (hasValue || hasCitations) {
       state.leafPaths.add(path);
       const citations = node.citations;
@@ -117,7 +125,7 @@ function policyPathExists(policyTree: PlainObject | null, path: string): boolean
   let cursor: unknown = policyTree;
   const segments = path.split(".");
   for (const segment of segments) {
-    if (!isPlainObject(cursor) || !Object.prototype.hasOwnProperty.call(cursor, segment)) {
+    if (!isPlainObject(cursor) || !Object.hasOwn(cursor, segment)) {
       return false;
     }
     cursor = cursor[segment];
@@ -164,7 +172,7 @@ function validatePolicyReferencesAndLiterals(
   contextLabel: string,
   diagnostics: ValidationDiagnostic[],
   policyState: PolicyValidationState | undefined,
-  criticalContext = false
+  criticalContext = false,
 ): void {
   if (!policyState) return;
 
@@ -174,8 +182,8 @@ function validatePolicyReferencesAndLiterals(
         makeDiagnostic(
           "E_POLICY_PARAM_UNKNOWN",
           `${contextLabel} references unknown policy path 'params.policy.${referencePath}'`,
-          path
-        )
+          path,
+        ),
       );
       continue;
     }
@@ -190,8 +198,8 @@ function validatePolicyReferencesAndLiterals(
     makeDiagnostic(
       "E_POLICY_LITERAL_CRITICAL",
       `${contextLabel} uses inline critical numeric literal(s): ${badLiterals.join(", ")}; use params.policy.*`,
-      path
-    )
+      path,
+    ),
   );
 }
 
@@ -201,19 +209,23 @@ function isCriticalScalarField(field: unknown): boolean {
   return normalized === "duration" || normalized === "vot" || normalized === "f0";
 }
 
-function validateRelations(spec: PlainObject, diagnostics: ValidationDiagnostic[]): Map<string, any> {
-  const relationNames = Object.keys(spec.relations || {});
+function validateRelations(
+  spec: PlainObject,
+  diagnostics: ValidationDiagnostic[],
+): Map<string, unknown> {
+  const relations = isPlainObject(spec.relations) ? spec.relations : {};
+  const relationNames = Object.keys(relations);
   const relationByName = new Map();
 
   for (const name of relationNames) {
-    relationByName.set(name, spec.relations[name]);
+    relationByName.set(name, relations[name]);
   }
 
   for (const [name, relation] of relationByName.entries()) {
     const path = `relations.${name}`;
     if (!isPlainObject(relation)) {
       diagnostics.push(
-        makeDiagnostic("E_RELATION_SCHEMA", `Relation '${name}' must be an object`, path)
+        makeDiagnostic("E_RELATION_SCHEMA", `Relation '${name}' must be an object`, path),
       );
       continue;
     }
@@ -223,8 +235,8 @@ function validateRelations(spec: PlainObject, diagnostics: ValidationDiagnostic[
         makeDiagnostic(
           "E_RELATION_TYPE_INVALID",
           `Relation '${name}' has invalid type '${relation.type}'`,
-          `${path}.type`
-        )
+          `${path}.type`,
+        ),
       );
     }
 
@@ -233,8 +245,8 @@ function validateRelations(spec: PlainObject, diagnostics: ValidationDiagnostic[
         makeDiagnostic(
           "E_RELATION_SPANS_UNKNOWN",
           `Span relation '${name}' references unknown child relation '${relation.spans}'`,
-          `${path}.spans`
-        )
+          `${path}.spans`,
+        ),
       );
     }
   }
@@ -244,12 +256,14 @@ function validateRelations(spec: PlainObject, diagnostics: ValidationDiagnostic[
 
 function validateTopology(
   spec: PlainObject,
-  relationByName: Map<string, any>,
-  diagnostics: ValidationDiagnostic[]
+  relationByName: Map<string, unknown>,
+  diagnostics: ValidationDiagnostic[],
 ): void {
+  const topology = isPlainObject(spec.topology) ? spec.topology : {};
   const sections = ["hierarchy", "parallel", "point"];
   for (const section of sections) {
-    const values = Array.isArray(spec.topology?.[section]) ? spec.topology[section] : [];
+    const sectionValue = topology[section];
+    const values = Array.isArray(sectionValue) ? sectionValue : [];
     const seen = new Set();
     for (let i = 0; i < values.length; i += 1) {
       const relation = values[i];
@@ -258,8 +272,8 @@ function validateTopology(
           makeDiagnostic(
             "E_TOPOLOGY_RELATION_UNKNOWN",
             `Topology '${section}' references unknown relation '${relation}'`,
-            `topology.${section}[${i}]`
-          )
+            `topology.${section}[${i}]`,
+          ),
         );
       }
       if (seen.has(relation)) {
@@ -267,8 +281,8 @@ function validateTopology(
           makeDiagnostic(
             "E_TOPOLOGY_RELATION_DUP",
             `Topology '${section}' repeats relation '${relation}'`,
-            `topology.${section}[${i}]`
-          )
+            `topology.${section}[${i}]`,
+          ),
         );
       }
       seen.add(relation);
@@ -278,10 +292,10 @@ function validateTopology(
 
 function validatePatterns(
   spec: PlainObject,
-  relationByName: Map<string, any>,
+  relationByName: Map<string, unknown>,
   predicates: PlainObject,
   policyState: PolicyValidationState,
-  diagnostics: ValidationDiagnostic[]
+  diagnostics: ValidationDiagnostic[],
 ): void {
   const relationNames = new Set(relationByName.keys());
   const patterns = isPlainObject(spec.patterns) ? spec.patterns : {};
@@ -291,8 +305,8 @@ function validatePatterns(
         makeDiagnostic(
           "E_PATTERN_SCHEMA",
           `Pattern '${name}' must be an object`,
-          `patterns.${name}`
-        )
+          `patterns.${name}`,
+        ),
       );
       continue;
     }
@@ -302,8 +316,8 @@ function validatePatterns(
         makeDiagnostic(
           "E_PATTERN_RELATION_UNKNOWN",
           `Pattern '${name}' references unknown relation '${pattern.relation}'`,
-          `patterns.${name}.relation`
-        )
+          `patterns.${name}.relation`,
+        ),
       );
     }
 
@@ -312,8 +326,8 @@ function validatePatterns(
         makeDiagnostic(
           "E_PATTERN_SEQUENCE_EMPTY",
           `Pattern '${name}' must define a non-empty sequence`,
-          `patterns.${name}.sequence`
-        )
+          `patterns.${name}.sequence`,
+        ),
       );
       continue;
     }
@@ -326,8 +340,8 @@ function validatePatterns(
           makeDiagnostic(
             "E_PATTERN_STEP_INVALID",
             `Pattern '${name}' step ${i} is missing capture`,
-            `patterns.${name}.sequence[${i}]`
-          )
+            `patterns.${name}.sequence[${i}]`,
+          ),
         );
         continue;
       }
@@ -336,8 +350,8 @@ function validatePatterns(
           makeDiagnostic(
             "E_PATTERN_CAPTURE_DUP",
             `Pattern '${name}' uses duplicate capture '${step.capture}'`,
-            `patterns.${name}.sequence[${i}].capture`
-          )
+            `patterns.${name}.sequence[${i}].capture`,
+          ),
         );
       }
       captures.add(step.capture);
@@ -351,7 +365,7 @@ function validatePatterns(
         diagnostics,
         `patterns.${name}.sequence[${i}].where`,
         `Pattern '${name}' step ${i} where`,
-        { expandPredicateBodies: true, policyState }
+        { expandPredicateBodies: true, policyState },
       );
     }
 
@@ -365,7 +379,7 @@ function validatePatterns(
         diagnostics,
         `patterns.${name}.constraint`,
         `Pattern '${name}' constraint`,
-        { expandPredicateBodies: true, policyState }
+        { expandPredicateBodies: true, policyState },
       );
     }
   }
@@ -384,22 +398,25 @@ function collectScalarFields(spec: PlainObject): Set<string> {
   return fields;
 }
 
-function relationHasDeclaredTypeField(relationByName: Map<string, any>, relationName: unknown): boolean {
+function relationHasDeclaredTypeField(
+  relationByName: Map<string, unknown>,
+  relationName: unknown,
+): boolean {
   if (typeof relationName !== "string" || relationName.length === 0) return false;
   const relation = relationByName.get(relationName);
   if (!isPlainObject(relation)) return false;
   const features = isPlainObject(relation.features) ? relation.features : null;
   if (!features) return false;
-  return Object.prototype.hasOwnProperty.call(features, "type");
+  return Object.hasOwn(features, "type");
 }
 
 function validateDeclaredTypeFieldUsage(
   expression: string,
-  relationByName: Map<string, any>,
+  relationByName: Map<string, unknown>,
   relationName: unknown,
   diagnostics: ValidationDiagnostic[],
   path: string,
-  contextLabel: string
+  contextLabel: string,
 ): void {
   if (!/\.type\b/.test(expression)) return;
   if (relationHasDeclaredTypeField(relationByName, relationName)) return;
@@ -407,10 +424,10 @@ function validateDeclaredTypeFieldUsage(
     makeDiagnostic(
       "E_TOKEN_FIELD_UNDECLARED",
       `${contextLabel} uses '.type' but relation '${String(
-        relationName ?? ""
+        relationName ?? "",
       )}' does not declare features.type`,
-      path
-    )
+      path,
+    ),
   );
 }
 
@@ -426,7 +443,7 @@ type ConditionValidationOptions = {
 function notePredicateEdge(
   graph: Map<string, Set<string>> | undefined,
   owner: string | null | undefined,
-  dependency: string
+  dependency: string,
 ): void {
   if (!graph || !owner) return;
   if (!graph.has(owner)) {
@@ -437,14 +454,14 @@ function notePredicateEdge(
 
 function validateConditionSpec(
   condition: unknown,
-  relationByName: Map<string, any>,
+  relationByName: Map<string, unknown>,
   relationName: unknown,
   relationNames: Set<string>,
   predicates: PlainObject,
   diagnostics: ValidationDiagnostic[],
   path: string,
   contextLabel: string,
-  options: ConditionValidationOptions = {}
+  options: ConditionValidationOptions = {},
 ): void {
   if (condition == null) return;
 
@@ -456,8 +473,8 @@ function validateConditionSpec(
         makeDiagnostic(
           "E_CEL_INVALID",
           `${contextLabel} has invalid CEL expression: ${syntaxError}`,
-          expressionPath
-        )
+          expressionPath,
+        ),
       );
       return;
     }
@@ -468,7 +485,7 @@ function validateConditionSpec(
         relationName,
         diagnostics,
         expressionPath,
-        contextLabel
+        contextLabel,
       );
     }
     validatePolicyReferencesAndLiterals(
@@ -477,7 +494,7 @@ function validateConditionSpec(
       contextLabel,
       diagnostics,
       options.policyState,
-      options.criticalContext
+      options.criticalContext,
     );
   };
 
@@ -491,8 +508,8 @@ function validateConditionSpec(
       makeDiagnostic(
         "E_RULE_EXPRESSION_INVALID",
         `${contextLabel} must be a string expression or condition object`,
-        path
-      )
+        path,
+      ),
     );
     return;
   }
@@ -503,8 +520,8 @@ function validateConditionSpec(
       makeDiagnostic(
         "E_RULE_EXPRESSION_INVALID",
         `${contextLabel} condition object must declare exactly one of expr/predicate/all/any/not`,
-        path
-      )
+        path,
+      ),
     );
     return;
   }
@@ -518,8 +535,8 @@ function validateConditionSpec(
         makeDiagnostic(
           "E_RULE_EXPRESSION_INVALID",
           `${contextLabel} expr must be a string expression`,
-          `${path}.expr`
-        )
+          `${path}.expr`,
+        ),
       );
       return;
     }
@@ -533,19 +550,19 @@ function validateConditionSpec(
         makeDiagnostic(
           "E_RULE_EXPRESSION_INVALID",
           `${contextLabel} predicate must be a non-empty string`,
-          `${path}.predicate`
-        )
+          `${path}.predicate`,
+        ),
       );
       return;
     }
     notePredicateEdge(options.predicateGraph, options.graphOwner, value);
-    if (!Object.prototype.hasOwnProperty.call(predicates, value)) {
+    if (!Object.hasOwn(predicates, value)) {
       diagnostics.push(
         makeDiagnostic(
           "E_PREDICATE_UNKNOWN",
           `${contextLabel} references unknown predicate '${value}'`,
-          `${path}.predicate`
-        )
+          `${path}.predicate`,
+        ),
       );
       return;
     }
@@ -569,7 +586,7 @@ function validateConditionSpec(
           expansionStack: nextStack,
           policyState: options.policyState,
           criticalContext: options.criticalContext,
-        }
+        },
       );
     }
     return;
@@ -581,8 +598,8 @@ function validateConditionSpec(
         makeDiagnostic(
           "E_RULE_EXPRESSION_INVALID",
           `${contextLabel} ${key} must be an array`,
-          `${path}.${key}`
-        )
+          `${path}.${key}`,
+        ),
       );
       return;
     }
@@ -596,7 +613,7 @@ function validateConditionSpec(
         diagnostics,
         `${path}.${key}[${i}]`,
         `${contextLabel} ${key}[${i}]`,
-        options
+        options,
       );
     }
     return;
@@ -612,7 +629,7 @@ function validateConditionSpec(
       diagnostics,
       `${path}.not`,
       `${contextLabel} not`,
-      options
+      options,
     );
     return;
   }
@@ -621,14 +638,14 @@ function validateConditionSpec(
     makeDiagnostic(
       "E_RULE_EXPRESSION_INVALID",
       `${contextLabel} condition object has unknown key '${key}'`,
-      path
-    )
+      path,
+    ),
   );
 }
 
 function detectPredicateCycles(
   graph: Map<string, Set<string>>,
-  diagnostics: ValidationDiagnostic[]
+  diagnostics: ValidationDiagnostic[],
 ): void {
   const state = new Map<string, 0 | 1 | 2>();
   const stack: string[] = [];
@@ -653,8 +670,8 @@ function detectPredicateCycles(
             makeDiagnostic(
               "E_PREDICATE_CYCLE",
               `Predicate cycle detected: ${cycle.join(" -> ")}`,
-              `predicates.${dep}`
-            )
+              `predicates.${dep}`,
+            ),
           );
           emitted.add(key);
         }
@@ -673,9 +690,9 @@ function detectPredicateCycles(
 
 function validatePredicates(
   spec: PlainObject,
-  relationByName: Map<string, any>,
+  relationByName: Map<string, unknown>,
   policyState: PolicyValidationState,
-  diagnostics: ValidationDiagnostic[]
+  diagnostics: ValidationDiagnostic[],
 ): PlainObject {
   const predicates = isPlainObject(spec.predicates) ? spec.predicates : {};
   const relationNames = new Set(relationByName.keys());
@@ -699,7 +716,7 @@ function validatePredicates(
         predicateGraph: graph,
         graphOwner: name,
         policyState,
-      }
+      },
     );
   }
 
@@ -713,7 +730,7 @@ function validatePredicates(
  * that every recursor passed positionally.
  */
 type ValueShapeCtx = {
-  relationByName: Map<string, any>;
+  relationByName: Map<string, unknown>;
   relationName: unknown;
   relationNames: Set<string>;
   policyState: PolicyValidationState;
@@ -813,18 +830,32 @@ function validateCelExpressionLeaf(
   path: string,
   label: string,
   skipEmpty: boolean,
-  criticalContext: boolean
+  criticalContext: boolean,
 ): void {
   if (skipEmpty && value.length === 0) return;
   const syntaxError = validateExpressionSyntax(value, { relationNames: ctx.relationNames });
   if (syntaxError) {
     ctx.diagnostics.push(
-      makeDiagnostic("E_CEL_INVALID", `${label} has invalid CEL expression: ${syntaxError}`, path)
+      makeDiagnostic("E_CEL_INVALID", `${label} has invalid CEL expression: ${syntaxError}`, path),
     );
     return;
   }
-  validateDeclaredTypeFieldUsage(value, ctx.relationByName, ctx.relationName, ctx.diagnostics, path, label);
-  validatePolicyReferencesAndLiterals(value, path, label, ctx.diagnostics, ctx.policyState, criticalContext);
+  validateDeclaredTypeFieldUsage(
+    value,
+    ctx.relationByName,
+    ctx.relationName,
+    ctx.diagnostics,
+    path,
+    label,
+  );
+  validatePolicyReferencesAndLiterals(
+    value,
+    path,
+    label,
+    ctx.diagnostics,
+    ctx.policyState,
+    criticalContext,
+  );
 }
 
 /**
@@ -839,7 +870,7 @@ function validateValueShape(
   spec: ValueShapeSpec,
   criticalContext: boolean,
   path: string,
-  label: string
+  label: string,
 ): void {
   const emitInvalid = (): void => {
     if (!spec.invalidCode || !spec.invalidMessage) return;
@@ -861,8 +892,8 @@ function validateValueShape(
         makeDiagnostic(
           "E_POLICY_LITERAL_CRITICAL",
           `${label} uses inline critical numeric literal '${String(value)}'; use params.policy.*`,
-          path
-        )
+          path,
+        ),
       );
     }
     return;
@@ -879,16 +910,12 @@ function validateValueShape(
         path,
         label,
         spec.celSkipEmpty,
-        spec.celUsesCriticalContext ? criticalContext : false
+        spec.celUsesCriticalContext ? criticalContext : false,
       );
     }
     return;
   }
-  if (
-    spec.handleDispatch &&
-    isPlainObject(value) &&
-    Object.prototype.hasOwnProperty.call(value, "dispatch")
-  ) {
+  if (spec.handleDispatch && isPlainObject(value) && Object.hasOwn(value, "dispatch")) {
     validateDispatchSpec(
       (value as PlainObject).dispatch,
       ctx.relationByName,
@@ -899,7 +926,7 @@ function validateValueShape(
       spec.dispatchMode,
       ctx.diagnostics,
       `${path}.dispatch`,
-      label
+      label,
     );
     return;
   }
@@ -928,7 +955,7 @@ function validateValueShape(
 
 function validateDispatchValueExpression(
   expr: unknown,
-  relationByName: Map<string, any>,
+  relationByName: Map<string, unknown>,
   relationName: unknown,
   relationNames: Set<string>,
   policyState: PolicyValidationState,
@@ -936,7 +963,7 @@ function validateDispatchValueExpression(
   valueMode: "numeric" | "set",
   diagnostics: ValidationDiagnostic[],
   path: string,
-  contextLabel: string
+  contextLabel: string,
 ): void {
   validateValueShape(
     expr,
@@ -944,13 +971,13 @@ function validateDispatchValueExpression(
     valueMode === "set" ? SET_VALUE_SHAPE : DISPATCH_VALUE_NUMERIC_SHAPE,
     criticalContext,
     path,
-    contextLabel
+    contextLabel,
   );
 }
 
 function validateDispatchSpec(
   dispatchValue: unknown,
-  relationByName: Map<string, any>,
+  relationByName: Map<string, unknown>,
   relationName: unknown,
   relationNames: Set<string>,
   policyState: PolicyValidationState,
@@ -958,15 +985,15 @@ function validateDispatchSpec(
   valueMode: "numeric" | "set",
   diagnostics: ValidationDiagnostic[],
   path: string,
-  contextLabel: string
+  contextLabel: string,
 ): void {
   if (!Array.isArray(dispatchValue)) {
     diagnostics.push(
       makeDiagnostic(
         "E_RULE_EXPRESSION_INVALID",
         `${contextLabel} must be an array of dispatch rows`,
-        path
-      )
+        path,
+      ),
     );
     return;
   }
@@ -977,13 +1004,17 @@ function validateDispatchSpec(
     const rowPath = `${path}[${i}]`;
     if (!isPlainObject(row)) {
       diagnostics.push(
-        makeDiagnostic("E_RULE_EXPRESSION_INVALID", `${contextLabel} row ${i} must be an object`, rowPath)
+        makeDiagnostic(
+          "E_RULE_EXPRESSION_INVALID",
+          `${contextLabel} row ${i} must be an object`,
+          rowPath,
+        ),
       );
       continue;
     }
 
-    const rowHasWhen = Object.prototype.hasOwnProperty.call(row, "when");
-    const rowHasDefault = Object.prototype.hasOwnProperty.call(row, "default");
+    const rowHasWhen = Object.hasOwn(row, "when");
+    const rowHasDefault = Object.hasOwn(row, "default");
     if (rowHasWhen) {
       if (isPlainObject(row.when)) {
         const wk = Object.keys(row.when as Record<string, unknown>);
@@ -998,12 +1029,18 @@ function validateDispatchSpec(
             makeDiagnostic(
               "E_RULE_EXPRESSION_INVALID",
               `${contextLabel} row ${i} when object must be { predicate: <non-empty name> } with no extra keys`,
-              `${rowPath}.when`
-            )
+              `${rowPath}.when`,
+            ),
           );
         }
       } else if (typeof row.when !== "string") {
-        diagnostics.push(makeDiagnostic("E_RULE_EXPRESSION_INVALID", `${contextLabel} row ${i} when must be a string expression or condition object`, `${rowPath}.when`));
+        diagnostics.push(
+          makeDiagnostic(
+            "E_RULE_EXPRESSION_INVALID",
+            `${contextLabel} row ${i} when must be a string expression or condition object`,
+            `${rowPath}.when`,
+          ),
+        );
       } else {
         const syntaxError = validateExpressionSyntax(row.when, { relationNames });
         if (syntaxError) {
@@ -1011,8 +1048,8 @@ function validateDispatchSpec(
             makeDiagnostic(
               "E_CEL_INVALID",
               `${contextLabel} row ${i} has invalid CEL when expression: ${syntaxError}`,
-              `${rowPath}.when`
-            )
+              `${rowPath}.when`,
+            ),
           );
         } else {
           validatePolicyReferencesAndLiterals(
@@ -1021,32 +1058,32 @@ function validateDispatchSpec(
             `${contextLabel} row ${i} when`,
             diagnostics,
             policyState,
-            criticalContext
+            criticalContext,
           );
         }
       }
 
-      if (!Object.prototype.hasOwnProperty.call(row, "value")) {
+      if (!Object.hasOwn(row, "value")) {
         diagnostics.push(
           makeDiagnostic(
             "E_RULE_EXPRESSION_INVALID",
             `${contextLabel} row ${i} must include value`,
-            `${rowPath}.value`
-          )
+            `${rowPath}.value`,
+          ),
         );
       } else {
-      validateDispatchValueExpression(
-        row.value,
-        relationByName,
-        relationName,
-        relationNames,
-        policyState,
-        criticalContext,
-        valueMode,
-        diagnostics,
-        `${rowPath}.value`,
-        `${contextLabel} row ${i} value`
-      );
+        validateDispatchValueExpression(
+          row.value,
+          relationByName,
+          relationName,
+          relationNames,
+          policyState,
+          criticalContext,
+          valueMode,
+          diagnostics,
+          `${rowPath}.value`,
+          `${contextLabel} row ${i} value`,
+        );
       }
     }
 
@@ -1062,7 +1099,7 @@ function validateDispatchSpec(
         valueMode,
         diagnostics,
         `${rowPath}.default`,
-        `${contextLabel} row ${i} default`
+        `${contextLabel} row ${i} default`,
       );
     }
   }
@@ -1072,21 +1109,21 @@ function validateDispatchSpec(
       makeDiagnostic(
         "E_DISPATCH_NO_DEFAULT",
         `${contextLabel} is missing required default dispatch row`,
-        path
-      )
+        path,
+      ),
     );
   }
 }
 
 function validateSetValueExpression(
   value: unknown,
-  relationByName: Map<string, any>,
+  relationByName: Map<string, unknown>,
   relationName: unknown,
   relationNames: Set<string>,
   policyState: PolicyValidationState,
   diagnostics: ValidationDiagnostic[],
   path: string,
-  contextLabel: string
+  contextLabel: string,
 ): void {
   validateValueShape(
     value,
@@ -1094,7 +1131,7 @@ function validateSetValueExpression(
     SET_VALUE_SHAPE,
     false,
     path,
-    contextLabel
+    contextLabel,
   );
 }
 
@@ -1106,123 +1143,129 @@ function validateSetValueExpression(
  * index `i` is appended here so error codes/paths/messages stay identical.
  */
 function validateApplyEffect(
-  effect: any,
+  effect: unknown,
   i: number,
   pathPrefix: string,
   labelPrefix: string,
   checkForEachField: boolean,
-  relationByName: Map<string, any>,
+  relationByName: Map<string, unknown>,
   ruleRelationName: unknown,
   relationNames: Set<string>,
   policyState: PolicyValidationState,
-  diagnostics: ValidationDiagnostic[]
+  diagnostics: ValidationDiagnostic[],
 ): void {
   const itemPath = `${pathPrefix}[${i}]`;
   const itemLabel = `${labelPrefix}[${i}]`;
+  const effectSpec = isPlainObject(effect) ? effect : {};
   // Chunk 7: `for_each_field` is expanded at parse-time (see
   // parser.ts:expandForEachField). If it survived to validation, the parser
   // was bypassed — defense-in-depth diagnostic (apply block only).
-  if (checkForEachField && effect && Object.prototype.hasOwnProperty.call(effect, "for_each_field")) {
+  if (checkForEachField && Object.hasOwn(effectSpec, "for_each_field")) {
     diagnostics.push(
       makeDiagnostic(
         "E_FOR_EACH_FIELD_UNEXPANDED",
         `${itemLabel} still has 'for_each_field'; expected parse-time expansion`,
-        `${itemPath}.for_each_field`
-      )
+        `${itemPath}.for_each_field`,
+      ),
     );
   }
-  const hasValue = effect && Object.prototype.hasOwnProperty.call(effect, "value");
-  const hasDispatch = effect && Object.prototype.hasOwnProperty.call(effect, "dispatch");
+  const hasValue = Object.hasOwn(effectSpec, "value");
+  const hasDispatch = Object.hasOwn(effectSpec, "dispatch");
   if (hasValue && hasDispatch) {
     diagnostics.push(
       makeDiagnostic(
         "E_DISPATCH_AND_VALUE",
         `${itemLabel} cannot specify both value and dispatch`,
-        itemPath
-      )
+        itemPath,
+      ),
     );
   }
   if (hasDispatch) {
-    const criticalContext = isCriticalScalarField(effect?.field);
+    const criticalContext = isCriticalScalarField(effectSpec.field);
     validateDispatchSpec(
-      effect?.dispatch,
+      effectSpec.dispatch,
       relationByName,
       ruleRelationName,
       relationNames,
       policyState,
       criticalContext,
-      effect?.op === "set" ? "set" : "numeric",
+      effectSpec.op === "set" ? "set" : "numeric",
       diagnostics,
       `${itemPath}.dispatch`,
-      `${itemLabel} dispatch`
+      `${itemLabel} dispatch`,
     );
   } else if (hasValue) {
-    const criticalContext = isCriticalScalarField(effect?.field);
-    const valueMode = effect?.op === "set" ? "set" : "numeric";
+    const criticalContext = isCriticalScalarField(effectSpec.field);
+    const valueMode = effectSpec.op === "set" ? "set" : "numeric";
     if (
       valueMode === "numeric" &&
-      effect?.value != null &&
-      typeof effect.value !== "string" &&
-      typeof effect.value !== "number"
+      effectSpec.value != null &&
+      typeof effectSpec.value !== "string" &&
+      typeof effectSpec.value !== "number"
     ) {
       diagnostics.push(
         makeDiagnostic(
           "E_RULE_EXPRESSION_INVALID",
           `${itemLabel} has non-string/non-number value expression`,
-          `${itemPath}.value`
-        )
+          `${itemPath}.value`,
+        ),
       );
     }
-    if (valueMode === "numeric" && typeof effect?.value === "number" && policyState.policyTree && criticalContext) {
-      if (!isAllowedInlinePolicyLiteral(String(effect.value))) {
+    if (
+      valueMode === "numeric" &&
+      typeof effectSpec.value === "number" &&
+      policyState.policyTree &&
+      criticalContext
+    ) {
+      if (!isAllowedInlinePolicyLiteral(String(effectSpec.value))) {
         diagnostics.push(
           makeDiagnostic(
             "E_POLICY_LITERAL_CRITICAL",
             `${itemLabel} value uses inline critical numeric literal '${String(
-              effect.value
+              effectSpec.value,
             )}'; use params.policy.*`,
-            `${itemPath}.value`
-          )
+            `${itemPath}.value`,
+          ),
         );
       }
     }
     if (valueMode === "set") {
       validateSetValueExpression(
-        effect?.value,
+        effectSpec.value,
         relationByName,
         ruleRelationName,
         relationNames,
         policyState,
         diagnostics,
         `${itemPath}.value`,
-        `${itemLabel} value`
+        `${itemLabel} value`,
       );
-    } else if (typeof effect?.value === "string" && effect.value.length > 0) {
-      const syntaxError = validateExpressionSyntax(effect.value, { relationNames });
+    } else if (typeof effectSpec.value === "string" && effectSpec.value.length > 0) {
+      const syntaxError = validateExpressionSyntax(effectSpec.value, { relationNames });
       if (syntaxError) {
         diagnostics.push(
           makeDiagnostic(
             "E_CEL_INVALID",
             `${itemLabel} has invalid CEL value expression: ${syntaxError}`,
-            `${itemPath}.value`
-          )
+            `${itemPath}.value`,
+          ),
         );
       } else {
         validateDeclaredTypeFieldUsage(
-          effect.value,
+          effectSpec.value,
           relationByName,
           ruleRelationName,
           diagnostics,
           `${itemPath}.value`,
-          `${itemLabel} value`
+          `${itemLabel} value`,
         );
         validatePolicyReferencesAndLiterals(
-          effect.value,
+          effectSpec.value,
           `${itemPath}.value`,
           `${itemLabel} value`,
           diagnostics,
           policyState,
-          criticalContext
+          criticalContext,
         );
       }
     }
@@ -1231,13 +1274,13 @@ function validateApplyEffect(
 
 function validateTemplateDispatchExpressions(
   value: unknown,
-  relationByName: Map<string, any>,
+  relationByName: Map<string, unknown>,
   relationName: unknown,
   relationNames: Set<string>,
   policyState: PolicyValidationState,
   diagnostics: ValidationDiagnostic[],
   path: string,
-  contextLabel: string
+  contextLabel: string,
 ): void {
   validateValueShape(
     value,
@@ -1245,19 +1288,19 @@ function validateTemplateDispatchExpressions(
     TEMPLATE_DISPATCH_WALK_SHAPE,
     false,
     path,
-    contextLabel
+    contextLabel,
   );
 }
 
 function validateTemplateNumericExpression(
   value: unknown,
-  relationByName: Map<string, any>,
+  relationByName: Map<string, unknown>,
   relationName: unknown,
   relationNames: Set<string>,
   policyState: PolicyValidationState,
   diagnostics: ValidationDiagnostic[],
   path: string,
-  contextLabel: string
+  contextLabel: string,
 ): void {
   validateValueShape(
     value,
@@ -1265,22 +1308,22 @@ function validateTemplateNumericExpression(
     TEMPLATE_NUMERIC_SHAPE,
     false,
     path,
-    contextLabel
+    contextLabel,
   );
 }
 
 function validateControlWindowTemplate(
   value: unknown,
-  relationByName: Map<string, any>,
+  relationByName: Map<string, unknown>,
   relationName: unknown,
   relationNames: Set<string>,
   policyState: PolicyValidationState,
   diagnostics: ValidationDiagnostic[],
   path: string,
-  contextLabel: string
+  contextLabel: string,
 ): void {
   if (value == null) return;
-  if (isPlainObject(value) && Object.prototype.hasOwnProperty.call(value, "dispatch")) {
+  if (isPlainObject(value) && Object.hasOwn(value, "dispatch")) {
     validateDispatchSpec(
       value.dispatch,
       relationByName,
@@ -1291,7 +1334,7 @@ function validateControlWindowTemplate(
       "set",
       diagnostics,
       `${path}.dispatch`,
-      contextLabel
+      contextLabel,
     );
     return;
   }
@@ -1302,8 +1345,8 @@ function validateControlWindowTemplate(
         makeDiagnostic(
           "E_CEL_INVALID",
           `${contextLabel} has invalid CEL expression: ${syntaxError}`,
-          path
-        )
+          path,
+        ),
       );
       return;
     }
@@ -1315,8 +1358,8 @@ function validateControlWindowTemplate(
       makeDiagnostic(
         "E_CONTROL_WINDOW_SCHEMA",
         `${contextLabel} must be an array of control window specs`,
-        path
-      )
+        path,
+      ),
     );
     return;
   }
@@ -1327,11 +1370,7 @@ function validateControlWindowTemplate(
     const entryLabel = `${contextLabel}[${i}]`;
     if (!isPlainObject(entry)) {
       diagnostics.push(
-        makeDiagnostic(
-          "E_CONTROL_WINDOW_SCHEMA",
-          `${entryLabel} must be an object`,
-          entryPath
-        )
+        makeDiagnostic("E_CONTROL_WINDOW_SCHEMA", `${entryLabel} must be an object`, entryPath),
       );
       continue;
     }
@@ -1342,8 +1381,8 @@ function validateControlWindowTemplate(
           makeDiagnostic(
             "E_CONTROL_WINDOW_SCHEMA",
             `${entryLabel}.target must be a string expression`,
-            `${entryPath}.target`
-          )
+            `${entryPath}.target`,
+          ),
         );
       } else if (!["current", "next", "prev"].includes(entry.target)) {
         const syntaxError = validateExpressionSyntax(entry.target, { relationNames });
@@ -1352,8 +1391,8 @@ function validateControlWindowTemplate(
             makeDiagnostic(
               "E_CEL_INVALID",
               `${entryLabel}.target has invalid CEL expression: ${syntaxError}`,
-              `${entryPath}.target`
-            )
+              `${entryPath}.target`,
+            ),
           );
         }
       }
@@ -1367,7 +1406,7 @@ function validateControlWindowTemplate(
       policyState,
       diagnostics,
       `${entryPath}.start_ms`,
-      `${entryLabel}.start_ms`
+      `${entryLabel}.start_ms`,
     );
     validateTemplateNumericExpression(
       entry.end_ms,
@@ -1377,7 +1416,7 @@ function validateControlWindowTemplate(
       policyState,
       diagnostics,
       `${entryPath}.end_ms`,
-      `${entryLabel}.end_ms`
+      `${entryLabel}.end_ms`,
     );
     validateTemplateNumericExpression(
       entry.start_ratio,
@@ -1387,7 +1426,7 @@ function validateControlWindowTemplate(
       policyState,
       diagnostics,
       `${entryPath}.start_ratio`,
-      `${entryLabel}.start_ratio`
+      `${entryLabel}.start_ratio`,
     );
     validateTemplateNumericExpression(
       entry.end_ratio,
@@ -1397,7 +1436,7 @@ function validateControlWindowTemplate(
       policyState,
       diagnostics,
       `${entryPath}.end_ratio`,
-      `${entryLabel}.end_ratio`
+      `${entryLabel}.end_ratio`,
     );
     validateTemplateNumericExpression(
       entry.prefix_ms,
@@ -1407,7 +1446,7 @@ function validateControlWindowTemplate(
       policyState,
       diagnostics,
       `${entryPath}.prefix_ms`,
-      `${entryLabel}.prefix_ms`
+      `${entryLabel}.prefix_ms`,
     );
     validateTemplateNumericExpression(
       entry.suffix_ms,
@@ -1417,7 +1456,7 @@ function validateControlWindowTemplate(
       policyState,
       diagnostics,
       `${entryPath}.suffix_ms`,
-      `${entryLabel}.suffix_ms`
+      `${entryLabel}.suffix_ms`,
     );
 
     const fieldsSpec = entry.fields;
@@ -1428,15 +1467,15 @@ function validateControlWindowTemplate(
         `${entryPath}.fields`,
         `${entryLabel}.fields`,
         false,
-        false
+        false,
       );
     } else if (!isPlainObject(fieldsSpec)) {
       diagnostics.push(
         makeDiagnostic(
           "E_CONTROL_WINDOW_SCHEMA",
           `${entryLabel}.fields must be an object`,
-          `${entryPath}.fields`
-        )
+          `${entryPath}.fields`,
+        ),
       );
     } else {
       validateTemplateDispatchExpressions(
@@ -1447,7 +1486,7 @@ function validateControlWindowTemplate(
         policyState,
         diagnostics,
         `${entryPath}.fields`,
-        `${entryLabel}.fields`
+        `${entryLabel}.fields`,
       );
       for (const [fieldName, fieldSpec] of Object.entries(fieldsSpec)) {
         if (!isPlainObject(fieldSpec)) {
@@ -1459,7 +1498,7 @@ function validateControlWindowTemplate(
             policyState,
             diagnostics,
             `${entryPath}.fields.${fieldName}`,
-            `${entryLabel}.fields.${fieldName}`
+            `${entryLabel}.fields.${fieldName}`,
           );
           continue;
         }
@@ -1470,8 +1509,8 @@ function validateControlWindowTemplate(
             makeDiagnostic(
               "E_CONTROL_WINDOW_SCHEMA",
               `${entryLabel}.fields.${fieldName}.op must be a string expression`,
-              `${entryPath}.fields.${fieldName}.op`
-            )
+              `${entryPath}.fields.${fieldName}.op`,
+            ),
           );
         } else if (!["set", "add", "mul", "max", "min", "unset"].includes(opSpec)) {
           const syntaxError = validateExpressionSyntax(opSpec, { relationNames });
@@ -1480,13 +1519,13 @@ function validateControlWindowTemplate(
               makeDiagnostic(
                 "E_CEL_INVALID",
                 `${entryLabel}.fields.${fieldName}.op has invalid CEL expression: ${syntaxError}`,
-                `${entryPath}.fields.${fieldName}.op`
-              )
+                `${entryPath}.fields.${fieldName}.op`,
+              ),
             );
           }
         }
 
-        if (Object.prototype.hasOwnProperty.call(fieldSpec, "value")) {
+        if (Object.hasOwn(fieldSpec, "value")) {
           validateTemplateNumericExpression(
             fieldSpec.value,
             relationByName,
@@ -1495,15 +1534,15 @@ function validateControlWindowTemplate(
             policyState,
             diagnostics,
             `${entryPath}.fields.${fieldName}.value`,
-            `${entryLabel}.fields.${fieldName}.value`
+            `${entryLabel}.fields.${fieldName}.value`,
           );
         } else if (opSpec !== "unset") {
           diagnostics.push(
             makeDiagnostic(
               "E_CONTROL_WINDOW_SCHEMA",
               `${entryLabel}.fields.${fieldName}.value is required unless op is unset`,
-              `${entryPath}.fields.${fieldName}.value`
-            )
+              `${entryPath}.fields.${fieldName}.value`,
+            ),
           );
         }
       }
@@ -1514,8 +1553,8 @@ function validateControlWindowTemplate(
         makeDiagnostic(
           "E_CONTROL_WINDOW_SCHEMA",
           `${entryLabel}.params is no longer supported; use .fields`,
-          `${entryPath}.params`
-        )
+          `${entryPath}.params`,
+        ),
       );
     }
 
@@ -1525,8 +1564,8 @@ function validateControlWindowTemplate(
           makeDiagnostic(
             "E_RULE_EXPRESSION_INVALID",
             `${entryLabel}.tag must be a string expression`,
-            `${entryPath}.tag`
-          )
+            `${entryPath}.tag`,
+          ),
         );
       } else {
         const syntaxError = validateExpressionSyntax(entry.tag, { relationNames });
@@ -1535,8 +1574,8 @@ function validateControlWindowTemplate(
             makeDiagnostic(
               "E_CEL_INVALID",
               `${entryLabel}.tag has invalid CEL expression: ${syntaxError}`,
-              `${entryPath}.tag`
-            )
+              `${entryPath}.tag`,
+            ),
           );
         }
       }
@@ -1546,10 +1585,10 @@ function validateControlWindowTemplate(
 
 function validateRules(
   spec: PlainObject,
-  relationByName: Map<string, any>,
+  relationByName: Map<string, unknown>,
   predicates: PlainObject,
   policyState: PolicyValidationState,
-  diagnostics: ValidationDiagnostic[]
+  diagnostics: ValidationDiagnostic[],
 ): void {
   const relationNames = new Set(relationByName.keys());
   const patterns = isPlainObject(spec.patterns) ? spec.patterns : {};
@@ -1558,18 +1597,20 @@ function validateRules(
   for (const [name, rule] of Object.entries(rules)) {
     if (!isPlainObject(rule)) {
       diagnostics.push(
-        makeDiagnostic("E_RULE_SCHEMA", `Rule '${name}' must be an object`, `rules.${name}`)
+        makeDiagnostic("E_RULE_SCHEMA", `Rule '${name}' must be an object`, `rules.${name}`),
       );
       continue;
     }
     const r = rule as PlainObject;
 
-    const hasSelect = isPlainObject(r.select);
-    const hasMatch = typeof r.match === "string" && r.match.length > 0;
+    const select = isPlainObject(r.select) ? r.select : null;
+    const matchName = typeof r.match === "string" && r.match.length > 0 ? r.match : null;
+    const hasSelect = select !== null;
+    const hasMatch = matchName !== null;
     const hasCustomOp = typeof r.op === "string" && r.op.length > 0;
-    const matchPattern = hasMatch ? patterns[r.match] : null;
+    const matchPattern = matchName ? patterns[matchName] : null;
     const ruleRelationName = hasSelect
-      ? r.select.relation
+      ? select.relation
       : isPlainObject(matchPattern)
         ? matchPattern.relation
         : null;
@@ -1578,8 +1619,8 @@ function validateRules(
         makeDiagnostic(
           "E_RULE_SHAPE",
           `Rule '${name}' must define exactly one of select or match`,
-          `rules.${name}`
-        )
+          `rules.${name}`,
+        ),
       );
     }
     if (hasCustomOp && !ALLOWED_CUSTOM_RULE_OPS.has(String(r.op))) {
@@ -1587,42 +1628,42 @@ function validateRules(
         makeDiagnostic(
           "E_RULE_OP_UNKNOWN",
           `Rule '${name}' uses unsupported custom op '${String(r.op)}'`,
-          `rules.${name}.op`
-        )
+          `rules.${name}.op`,
+        ),
       );
     }
 
-    if (hasSelect) {
-      const relation = r.select.relation;
+    if (select) {
+      const relation = typeof select.relation === "string" ? select.relation : "";
       if (!relationByName.has(relation)) {
         diagnostics.push(
           makeDiagnostic(
             "E_RULE_RELATION_UNKNOWN",
             `Rule '${name}' references unknown select relation '${relation}'`,
-            `rules.${name}.select.relation`
-          )
+            `rules.${name}.select.relation`,
+          ),
         );
       }
       validateConditionSpec(
-        r.select.where,
+        select.where,
         relationByName,
-        r.select.relation,
+        select.relation,
         relationNames,
         predicates,
         diagnostics,
         `rules.${name}.select.where`,
         `Rule '${name}' select.where`,
-        { expandPredicateBodies: true, policyState }
+        { expandPredicateBodies: true, policyState },
       );
     }
 
-    if (hasMatch && !Object.prototype.hasOwnProperty.call(patterns, r.match)) {
+    if (matchName && !Object.hasOwn(patterns, matchName)) {
       diagnostics.push(
         makeDiagnostic(
           "E_RULE_PATTERN_UNKNOWN",
-          `Rule '${name}' references unknown pattern '${r.match}'`,
-          `rules.${name}.match`
-        )
+          `Rule '${name}' references unknown pattern '${matchName}'`,
+          `rules.${name}.match`,
+        ),
       );
     }
 
@@ -1635,7 +1676,7 @@ function validateRules(
       diagnostics,
       `rules.${name}.constraint`,
       `Rule '${name}' constraint`,
-      { expandPredicateBodies: true, policyState }
+      { expandPredicateBodies: true, policyState },
     );
 
     if (r.define && typeof r.define === "object" && !Array.isArray(r.define)) {
@@ -1645,8 +1686,8 @@ function validateRules(
             makeDiagnostic(
               "E_RULE_EXPRESSION_INVALID",
               `Rule '${name}' define.${defineKey} must be a string expression`,
-              `rules.${name}.define.${defineKey}`
-            )
+              `rules.${name}.define.${defineKey}`,
+            ),
           );
           continue;
         }
@@ -1656,8 +1697,8 @@ function validateRules(
             makeDiagnostic(
               "E_CEL_INVALID",
               `Rule '${name}' has invalid CEL define.${defineKey} expression: ${syntaxError}`,
-              `rules.${name}.define.${defineKey}`
-            )
+              `rules.${name}.define.${defineKey}`,
+            ),
           );
         } else {
           validateDeclaredTypeFieldUsage(
@@ -1666,14 +1707,14 @@ function validateRules(
             ruleRelationName,
             diagnostics,
             `rules.${name}.define.${defineKey}`,
-            `Rule '${name}' define.${defineKey}`
+            `Rule '${name}' define.${defineKey}`,
           );
           validatePolicyReferencesAndLiterals(
             defineExpr,
             `rules.${name}.define.${defineKey}`,
             `Rule '${name}' define.${defineKey}`,
             diagnostics,
-            policyState
+            policyState,
           );
         }
       }
@@ -1691,7 +1732,7 @@ function validateRules(
           ruleRelationName,
           relationNames,
           policyState,
-          diagnostics
+          diagnostics,
         );
       }
     }
@@ -1702,49 +1743,47 @@ function validateRules(
           makeDiagnostic(
             "E_CONTOUR_SELECT_REQUIRED",
             `Rule '${name}' contour requires a select rule shape`,
-            `rules.${name}.contour`
-          )
+            `rules.${name}.contour`,
+          ),
         );
       }
 
-      if (
-        Object.prototype.hasOwnProperty.call(r.contour, "domain") &&
-        r.contour.domain !== "phrase"
-      ) {
+      if (Object.hasOwn(r.contour, "domain") && r.contour.domain !== "phrase") {
         diagnostics.push(
           makeDiagnostic(
             "E_CONTOUR_DOMAIN_INVALID",
             `Rule '${name}' contour.domain must be 'phrase'`,
-            `rules.${name}.contour.domain`
-          )
+            `rules.${name}.contour.domain`,
+          ),
         );
       }
 
-      if (Object.prototype.hasOwnProperty.call(r.contour, "reset_break_index")) {
+      if (Object.hasOwn(r.contour, "reset_break_index")) {
         const breakIndex = Number(r.contour.reset_break_index);
         if (!Number.isFinite(breakIndex) || breakIndex < 1) {
           diagnostics.push(
             makeDiagnostic(
               "E_CONTOUR_RESET_BREAK_INVALID",
               `Rule '${name}' contour.reset_break_index must be a finite number >= 1`,
-              `rules.${name}.contour.reset_break_index`
-            )
+              `rules.${name}.contour.reset_break_index`,
+            ),
           );
         }
       }
 
-      if (Object.prototype.hasOwnProperty.call(r.contour, "reset_where")) {
+      if (Object.hasOwn(r.contour, "reset_where")) {
         const resetWhere = r.contour.reset_where;
-        const syntaxError = typeof resetWhere === "string"
-          ? validateExpressionSyntax(resetWhere, { relationNames })
-          : "reset_where must be a CEL expression string";
+        const syntaxError =
+          typeof resetWhere === "string"
+            ? validateExpressionSyntax(resetWhere, { relationNames })
+            : "reset_where must be a CEL expression string";
         if (syntaxError) {
           diagnostics.push(
             makeDiagnostic(
               "E_CEL_INVALID",
               `Rule '${name}' contour.reset_where has invalid CEL expression: ${syntaxError}`,
-              `rules.${name}.contour.reset_where`
-            )
+              `rules.${name}.contour.reset_where`,
+            ),
           );
         }
       }
@@ -1754,8 +1793,8 @@ function validateRules(
           makeDiagnostic(
             "E_CONTOUR_APPLY_REQUIRED",
             `Rule '${name}' contour.apply must be a non-empty array`,
-            `rules.${name}.contour.apply`
-          )
+            `rules.${name}.contour.apply`,
+          ),
         );
       } else {
         for (let i = 0; i < r.contour.apply.length; i += 1) {
@@ -1769,7 +1808,7 @@ function validateRules(
             ruleRelationName,
             relationNames,
             policyState,
-            diagnostics
+            diagnostics,
           );
         }
       }
@@ -1781,49 +1820,47 @@ function validateRules(
           makeDiagnostic(
             "E_SCAN_SELECT_REQUIRED",
             `Rule '${name}' scan requires a select rule shape`,
-            `rules.${name}.scan`
-          )
+            `rules.${name}.scan`,
+          ),
         );
       }
 
-      if (
-        Object.prototype.hasOwnProperty.call(r.scan, "domain") &&
-        r.scan.domain !== "phrase"
-      ) {
+      if (Object.hasOwn(r.scan, "domain") && r.scan.domain !== "phrase") {
         diagnostics.push(
           makeDiagnostic(
             "E_SCAN_DOMAIN_INVALID",
             `Rule '${name}' scan.domain must be 'phrase'`,
-            `rules.${name}.scan.domain`
-          )
+            `rules.${name}.scan.domain`,
+          ),
         );
       }
 
-      if (Object.prototype.hasOwnProperty.call(r.scan, "reset_break_index")) {
+      if (Object.hasOwn(r.scan, "reset_break_index")) {
         const breakIndex = Number(r.scan.reset_break_index);
         if (!Number.isFinite(breakIndex) || breakIndex < 1) {
           diagnostics.push(
             makeDiagnostic(
               "E_SCAN_RESET_BREAK_INVALID",
               `Rule '${name}' scan.reset_break_index must be a finite number >= 1`,
-              `rules.${name}.scan.reset_break_index`
-            )
+              `rules.${name}.scan.reset_break_index`,
+            ),
           );
         }
       }
 
-      if (Object.prototype.hasOwnProperty.call(r.scan, "reset_where")) {
+      if (Object.hasOwn(r.scan, "reset_where")) {
         const resetWhere = r.scan.reset_where;
-        const syntaxError = typeof resetWhere === "string"
-          ? validateExpressionSyntax(resetWhere, { relationNames })
-          : "reset_where must be a CEL expression string";
+        const syntaxError =
+          typeof resetWhere === "string"
+            ? validateExpressionSyntax(resetWhere, { relationNames })
+            : "reset_where must be a CEL expression string";
         if (syntaxError) {
           diagnostics.push(
             makeDiagnostic(
               "E_CEL_INVALID",
               `Rule '${name}' scan.reset_where has invalid CEL expression: ${syntaxError}`,
-              `rules.${name}.scan.reset_where`
-            )
+              `rules.${name}.scan.reset_where`,
+            ),
           );
         }
       }
@@ -1839,10 +1876,10 @@ function validateRules(
           policyState,
           diagnostics,
           `rules.${name}.splice.insert[${i}]`,
-          `Rule '${name}' splice.insert[${i}]`
+          `Rule '${name}' splice.insert[${i}]`,
         );
         const insertSpec = r.splice.insert[i];
-        if (isPlainObject(insertSpec) && Object.prototype.hasOwnProperty.call(insertSpec, "control_windows")) {
+        if (isPlainObject(insertSpec) && Object.hasOwn(insertSpec, "control_windows")) {
           validateControlWindowTemplate(
             insertSpec.control_windows,
             relationByName,
@@ -1851,7 +1888,7 @@ function validateRules(
             policyState,
             diagnostics,
             `rules.${name}.splice.insert[${i}].control_windows`,
-            `Rule '${name}' splice.insert[${i}].control_windows`
+            `Rule '${name}' splice.insert[${i}].control_windows`,
           );
         }
       }
@@ -1878,8 +1915,8 @@ function validateRules(
             makeDiagnostic(
               "E_RULE_EXPRESSION_INVALID",
               `Rule '${name}' insert_points[${i}] must be an object`,
-              `rules.${name}.insert_points[${i}]`
-            )
+              `rules.${name}.insert_points[${i}]`,
+            ),
           );
         }
       }
@@ -1912,8 +1949,8 @@ function validateRules(
           makeDiagnostic(
             "E_RULE_EXPRESSION_INVALID",
             `${pointLabel} has non-string value expression`,
-            `${pointPath}.value`
-          )
+            `${pointPath}.value`,
+          ),
         );
       }
       if (typeof valueExpr === "string" && valueExpr.includes("next_point(")) {
@@ -1921,8 +1958,8 @@ function validateRules(
           makeDiagnostic(
             "E_POINT_FWD_REF",
             `${pointLabel} uses next_point forward reference in point value`,
-            `${pointPath}.value`
-          )
+            `${pointPath}.value`,
+          ),
         );
       }
       if (typeof valueExpr === "string" && valueExpr.length > 0) {
@@ -1932,8 +1969,8 @@ function validateRules(
             makeDiagnostic(
               "E_CEL_INVALID",
               `${pointLabel} has invalid CEL value expression: ${syntaxError}`,
-              `${pointPath}.value`
-            )
+              `${pointPath}.value`,
+            ),
           );
         } else {
           validateDeclaredTypeFieldUsage(
@@ -1942,7 +1979,7 @@ function validateRules(
             ruleRelationName,
             diagnostics,
             `${pointPath}.value`,
-            `${pointLabel}.value`
+            `${pointLabel}.value`,
           );
           validatePolicyReferencesAndLiterals(
             valueExpr,
@@ -1950,8 +1987,7 @@ function validateRules(
             `${pointLabel}.value`,
             diagnostics,
             policyState,
-            typeof pointSpec.relation === "string" &&
-              pointSpec.relation.toLowerCase() === "f0"
+            typeof pointSpec.relation === "string" && pointSpec.relation.toLowerCase() === "f0",
           );
         }
       }
@@ -1963,8 +1999,8 @@ function validateRules(
           makeDiagnostic(
             "E_RULE_EXPRESSION_INVALID",
             `${pointLabel} has non-string when expression`,
-            `${pointPath}.when`
-          )
+            `${pointPath}.when`,
+          ),
         );
       }
       if (typeof whenExpr === "string" && whenExpr.length > 0) {
@@ -1974,8 +2010,8 @@ function validateRules(
             makeDiagnostic(
               "E_CEL_INVALID",
               `${pointLabel} has invalid CEL when expression: ${whenSyntaxError}`,
-              `${pointPath}.when`
-            )
+              `${pointPath}.when`,
+            ),
           );
         }
       }
@@ -1994,8 +2030,8 @@ const stringSetsSchema = S.record({
         makeDiagnostic(
           "E_STRING_SET_INVALID",
           `string_sets name must be a non-empty string (got '${String(name)}')`,
-          keyPath
-        )
+          keyPath,
+        ),
       );
       return false;
     }
@@ -2010,42 +2046,49 @@ const stringSetsSchema = S.record({
             makeDiagnostic(
               "E_STRING_SET_INVALID",
               `string_sets['${name}'][${i}] must be a string (got ${typeof v})`,
-              p
-            )
+              p,
+            ),
           );
         }
       },
     }),
 });
 
-function validateStringSets(
-  spec: PlainObject,
-  diagnostics: ValidationDiagnostic[]
-): void {
-  if (!Object.prototype.hasOwnProperty.call(spec, "string_sets")) return;
+function validateStringSets(spec: PlainObject, diagnostics: ValidationDiagnostic[]): void {
+  if (!Object.hasOwn(spec, "string_sets")) return;
   stringSetsSchema(spec.string_sets, "string_sets", diagnostics);
 }
 
 function hasCitationArray(value: unknown): boolean {
-  return Array.isArray(value) &&
-    value.some((entry) => typeof entry === "string" && entry.trim().length > 0);
+  return (
+    Array.isArray(value) &&
+    value.some((entry) => typeof entry === "string" && entry.trim().length > 0)
+  );
 }
 
 function validateCitedNumber(
   value: unknown,
   diagnostics: ValidationDiagnostic[],
   path: string,
-  label: string
+  label: string,
 ): void {
   if (!isPlainObject(value)) {
     diagnostics.push(
-      makeDiagnostic("E_LOWERING_SPEC_NUMBER", `${label} must be a { value, citations } object`, path)
+      makeDiagnostic(
+        "E_LOWERING_SPEC_NUMBER",
+        `${label} must be a { value, citations } object`,
+        path,
+      ),
     );
     return;
   }
   if (typeof value.value !== "number" || !Number.isFinite(value.value)) {
     diagnostics.push(
-      makeDiagnostic("E_LOWERING_SPEC_NUMBER", `${label}.value must be a finite number`, `${path}.value`)
+      makeDiagnostic(
+        "E_LOWERING_SPEC_NUMBER",
+        `${label}.value must be a finite number`,
+        `${path}.value`,
+      ),
     );
   }
   if (!hasCitationArray(value.citations)) {
@@ -2053,8 +2096,8 @@ function validateCitedNumber(
       makeDiagnostic(
         "E_LOWERING_SPEC_CITATION",
         `${label}.citations must contain at least one citation`,
-        `${path}.citations`
-      )
+        `${path}.citations`,
+      ),
     );
   }
 }
@@ -2063,11 +2106,15 @@ function validateStringArray(
   value: unknown,
   diagnostics: ValidationDiagnostic[],
   path: string,
-  label: string
+  label: string,
 ): void {
-  if (!Array.isArray(value) || value.length === 0 || value.some((entry) => typeof entry !== "string" || entry.length === 0)) {
+  if (
+    !Array.isArray(value) ||
+    value.length === 0 ||
+    value.some((entry) => typeof entry !== "string" || entry.length === 0)
+  ) {
     diagnostics.push(
-      makeDiagnostic("E_LOWERING_SPEC_ARRAY", `${label} must be a non-empty string array`, path)
+      makeDiagnostic("E_LOWERING_SPEC_ARRAY", `${label} must be a non-empty string array`, path),
     );
   }
 }
@@ -2125,9 +2172,10 @@ const locusTableSchema = S.optional(
             sink.push(makeDiagnostic(LS_REQ, `${keyPath} key must be "1", "2", or "3"`, keyPath));
           }
         },
-        value: () => S.record({ code: LS_REQ, notObject: mustBeObject, value: () => locusEntrySchema }),
+        value: () =>
+          S.record({ code: LS_REQ, notObject: mustBeObject, value: () => locusEntrySchema }),
       }),
-  })
+  }),
 );
 
 /**
@@ -2140,7 +2188,7 @@ const locusTableSchema = S.optional(
 function validateLocusTable(
   table: unknown,
   base: string,
-  diagnostics: ValidationDiagnostic[]
+  diagnostics: ValidationDiagnostic[],
 ): void {
   locusTableSchema(table, base, diagnostics);
 }
@@ -2165,9 +2213,11 @@ const obstruentPlaceSchema = S.optional(
       S.object({
         code: LS_REQ,
         notObject: mustBeObject,
-        fields: [{ key: "palatal_or_dental", optional: true, schema: S.boolean(LS_REQ, mustBeBoolean) }],
+        fields: [
+          { key: "palatal_or_dental", optional: true, schema: S.boolean(LS_REQ, mustBeBoolean) },
+        ],
       }),
-  })
+  }),
 );
 const f2BackSchema = S.optional(
   S.record({
@@ -2183,7 +2233,7 @@ const f2BackSchema = S.optional(
           schema: S.boolean(LS_REQ, mustBeBoolean),
         })),
       }),
-  })
+  }),
 );
 const vowelCategorySchema = S.optional(
   S.record({
@@ -2199,7 +2249,7 @@ const vowelCategorySchema = S.optional(
           schema: S.enumOf([1, 2, 3], LS_REQ, (p) => `${p} must be 1, 2, or 3`),
         })),
       }),
-  })
+  }),
 );
 
 function validateLocusTables(
@@ -2211,7 +2261,7 @@ function validateLocusTables(
     roundedSonorantConsonant?: unknown;
     f2Back?: unknown;
   },
-  diagnostics: ValidationDiagnostic[]
+  diagnostics: ValidationDiagnostic[],
 ): void {
   validateLocusTable(loci, "output.lowering.transitions.loci", diagnostics);
   validateLocusTable(lociFemale, "output.lowering.transitions.loci_female", diagnostics);
@@ -2223,7 +2273,7 @@ function validateLocusTables(
       roundedSonorantConsonant,
       diagnostics,
       "output.lowering.transitions.rounded_sonorant_consonant",
-      "output.lowering.transitions.rounded_sonorant_consonant"
+      "output.lowering.transitions.rounded_sonorant_consonant",
     );
   }
   f2BackSchema(f2Back, "output.lowering.transitions.f2_back", diagnostics);
@@ -2244,7 +2294,7 @@ function validateLoweringSpec(
       return;
     }
     diagnostics.push(
-      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "Spec must declare output.lowering", "output")
+      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "Spec must declare output.lowering", "output"),
     );
     return;
   }
@@ -2254,13 +2304,21 @@ function validateLoweringSpec(
       return;
     }
     diagnostics.push(
-      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "Spec must declare output.lowering", "output.lowering")
+      makeDiagnostic(
+        "E_LOWERING_SPEC_REQUIRED",
+        "Spec must declare output.lowering",
+        "output.lowering",
+      ),
     );
     return;
   }
   if (typeof lowering.id !== "string" || lowering.id.length === 0) {
     diagnostics.push(
-      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.id is required", "output.lowering.id")
+      makeDiagnostic(
+        "E_LOWERING_SPEC_REQUIRED",
+        "output.lowering.id is required",
+        "output.lowering.id",
+      ),
     );
   }
   validateStringArray(
@@ -2273,18 +2331,46 @@ function validateLoweringSpec(
   const timeline = lowering.timeline;
   if (!isPlainObject(timeline)) {
     diagnostics.push(
-      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.timeline must be an object", "output.lowering.timeline")
+      makeDiagnostic(
+        "E_LOWERING_SPEC_REQUIRED",
+        "output.lowering.timeline must be an object",
+        "output.lowering.timeline",
+      ),
     );
   } else {
-    validateCitedNumber(timeline.initial_silence_ms, diagnostics, "output.lowering.timeline.initial_silence_ms", "output.lowering.timeline.initial_silence_ms");
-    validateCitedNumber(timeline.final_silence_ms, diagnostics, "output.lowering.timeline.final_silence_ms", "output.lowering.timeline.final_silence_ms");
+    validateCitedNumber(
+      timeline.initial_silence_ms,
+      diagnostics,
+      "output.lowering.timeline.initial_silence_ms",
+      "output.lowering.timeline.initial_silence_ms",
+    );
+    validateCitedNumber(
+      timeline.final_silence_ms,
+      diagnostics,
+      "output.lowering.timeline.final_silence_ms",
+      "output.lowering.timeline.final_silence_ms",
+    );
     if (!isPlainObject(timeline.duration_floors)) {
       diagnostics.push(
-        makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.timeline.duration_floors must be an object", "output.lowering.timeline.duration_floors")
+        makeDiagnostic(
+          "E_LOWERING_SPEC_REQUIRED",
+          "output.lowering.timeline.duration_floors must be an object",
+          "output.lowering.timeline.duration_floors",
+        ),
       );
     } else {
-      validateCitedNumber(timeline.duration_floors.stop_release_ms, diagnostics, "output.lowering.timeline.duration_floors.stop_release_ms", "output.lowering.timeline.duration_floors.stop_release_ms");
-      validateCitedNumber(timeline.duration_floors.default_ms, diagnostics, "output.lowering.timeline.duration_floors.default_ms", "output.lowering.timeline.duration_floors.default_ms");
+      validateCitedNumber(
+        timeline.duration_floors.stop_release_ms,
+        diagnostics,
+        "output.lowering.timeline.duration_floors.stop_release_ms",
+        "output.lowering.timeline.duration_floors.stop_release_ms",
+      );
+      validateCitedNumber(
+        timeline.duration_floors.default_ms,
+        diagnostics,
+        "output.lowering.timeline.duration_floors.default_ms",
+        "output.lowering.timeline.duration_floors.default_ms",
+      );
     }
     validateEventPointPolicy(timeline.event_points, diagnostics);
   }
@@ -2292,22 +2378,52 @@ function validateLoweringSpec(
   const transitions = lowering.transitions;
   if (!isPlainObject(transitions)) {
     diagnostics.push(
-      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.transitions must be an object", "output.lowering.transitions")
+      makeDiagnostic(
+        "E_LOWERING_SPEC_REQUIRED",
+        "output.lowering.transitions must be an object",
+        "output.lowering.transitions",
+      ),
     );
   } else {
-    validateCitedNumber(transitions.default_transition_ms, diagnostics, "output.lowering.transitions.default_transition_ms", "output.lowering.transitions.default_transition_ms");
+    validateCitedNumber(
+      transitions.default_transition_ms,
+      diagnostics,
+      "output.lowering.transitions.default_transition_ms",
+      "output.lowering.transitions.default_transition_ms",
+    );
     if (!isPlainObject(transitions.blend)) {
       diagnostics.push(
-        makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.transitions.blend must be an object", "output.lowering.transitions.blend")
+        makeDiagnostic(
+          "E_LOWERING_SPEC_REQUIRED",
+          "output.lowering.transitions.blend must be an object",
+          "output.lowering.transitions.blend",
+        ),
       );
     } else {
-      validateCitedNumber(transitions.blend.factor, diagnostics, "output.lowering.transitions.blend.factor", "output.lowering.transitions.blend.factor");
-      validateStringArray(transitions.blend.keys, diagnostics, "output.lowering.transitions.blend.keys", "output.lowering.transitions.blend.keys");
-      validateStringArray(transitions.blend.smooth_types, diagnostics, "output.lowering.transitions.blend.smooth_types", "output.lowering.transitions.blend.smooth_types");
+      validateCitedNumber(
+        transitions.blend.factor,
+        diagnostics,
+        "output.lowering.transitions.blend.factor",
+        "output.lowering.transitions.blend.factor",
+      );
+      validateStringArray(
+        transitions.blend.keys,
+        diagnostics,
+        "output.lowering.transitions.blend.keys",
+        "output.lowering.transitions.blend.keys",
+      );
+      validateStringArray(
+        transitions.blend.smooth_types,
+        diagnostics,
+        "output.lowering.transitions.blend.smooth_types",
+        "output.lowering.transitions.blend.smooth_types",
+      );
       if (transitions.blend.step_keys_by_phoneme !== undefined) {
         const base = "output.lowering.transitions.blend.step_keys_by_phoneme";
         if (!isPlainObject(transitions.blend.step_keys_by_phoneme)) {
-          diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base));
+          diagnostics.push(
+            makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base),
+          );
         } else {
           for (const [phoneme, keys] of Object.entries(transitions.blend.step_keys_by_phoneme)) {
             validateStringArray(keys, diagnostics, `${base}.${phoneme}`, `${base}.${phoneme}`);
@@ -2340,18 +2456,22 @@ function validateLoweringSpec(
     if (transitions.sonorant_f2 !== undefined) {
       const policy = transitions.sonorant_f2;
       if (!isPlainObject(policy)) {
-        diagnostics.push(makeDiagnostic(
-          "E_LOWERING_SPEC_REQUIRED",
-          "output.lowering.transitions.sonorant_f2 must be an object",
-          "output.lowering.transitions.sonorant_f2",
-        ));
+        diagnostics.push(
+          makeDiagnostic(
+            "E_LOWERING_SPEC_REQUIRED",
+            "output.lowering.transitions.sonorant_f2 must be an object",
+            "output.lowering.transitions.sonorant_f2",
+          ),
+        );
       } else {
         if (typeof policy.key !== "string" || policy.key.length === 0) {
-          diagnostics.push(makeDiagnostic(
-            "E_LOWERING_SPEC_REQUIRED",
-            "output.lowering.transitions.sonorant_f2.key is required",
-            "output.lowering.transitions.sonorant_f2.key",
-          ));
+          diagnostics.push(
+            makeDiagnostic(
+              "E_LOWERING_SPEC_REQUIRED",
+              "output.lowering.transitions.sonorant_f2.key is required",
+              "output.lowering.transitions.sonorant_f2.key",
+            ),
+          );
         }
         validateCitedNumber(
           policy.span_ms,
@@ -2366,33 +2486,39 @@ function validateLoweringSpec(
           "output.lowering.transitions.sonorant_f2.neighbor_weight",
         );
         if (
-          isPlainObject(policy.span_ms)
-          && typeof policy.span_ms.value === "number"
-          && policy.span_ms.value <= 0
+          isPlainObject(policy.span_ms) &&
+          typeof policy.span_ms.value === "number" &&
+          policy.span_ms.value <= 0
         ) {
-          diagnostics.push(makeDiagnostic(
-            "E_LOWERING_SPEC_NUMBER",
-            "output.lowering.transitions.sonorant_f2.span_ms.value must be positive",
-            "output.lowering.transitions.sonorant_f2.span_ms.value",
-          ));
+          diagnostics.push(
+            makeDiagnostic(
+              "E_LOWERING_SPEC_NUMBER",
+              "output.lowering.transitions.sonorant_f2.span_ms.value must be positive",
+              "output.lowering.transitions.sonorant_f2.span_ms.value",
+            ),
+          );
         }
         if (
-          isPlainObject(policy.neighbor_weight)
-          && typeof policy.neighbor_weight.value === "number"
-          && (policy.neighbor_weight.value < 0 || policy.neighbor_weight.value > 1)
+          isPlainObject(policy.neighbor_weight) &&
+          typeof policy.neighbor_weight.value === "number" &&
+          (policy.neighbor_weight.value < 0 || policy.neighbor_weight.value > 1)
         ) {
-          diagnostics.push(makeDiagnostic(
-            "E_LOWERING_SPEC_NUMBER",
-            "output.lowering.transitions.sonorant_f2.neighbor_weight.value must be within [0,1]",
-            "output.lowering.transitions.sonorant_f2.neighbor_weight.value",
-          ));
+          diagnostics.push(
+            makeDiagnostic(
+              "E_LOWERING_SPEC_NUMBER",
+              "output.lowering.transitions.sonorant_f2.neighbor_weight.value must be within [0,1]",
+              "output.lowering.transitions.sonorant_f2.neighbor_weight.value",
+            ),
+          );
         }
         if (typeof policy.current_type !== "string" || policy.current_type.length === 0) {
-          diagnostics.push(makeDiagnostic(
-            "E_LOWERING_SPEC_REQUIRED",
-            "output.lowering.transitions.sonorant_f2.current_type is required",
-            "output.lowering.transitions.sonorant_f2.current_type",
-          ));
+          diagnostics.push(
+            makeDiagnostic(
+              "E_LOWERING_SPEC_REQUIRED",
+              "output.lowering.transitions.sonorant_f2.current_type is required",
+              "output.lowering.transitions.sonorant_f2.current_type",
+            ),
+          );
         }
         validateStringArray(
           policy.neighbor_types,
@@ -2402,11 +2528,13 @@ function validateLoweringSpec(
         );
         for (const direction of ["forward", "backward"] as const) {
           if (typeof policy[direction] !== "boolean") {
-            diagnostics.push(makeDiagnostic(
-              "E_LOWERING_SPEC_BOOLEAN",
-              `output.lowering.transitions.sonorant_f2.${direction} must be boolean`,
-              `output.lowering.transitions.sonorant_f2.${direction}`,
-            ));
+            diagnostics.push(
+              makeDiagnostic(
+                "E_LOWERING_SPEC_BOOLEAN",
+                `output.lowering.transitions.sonorant_f2.${direction} must be boolean`,
+                `output.lowering.transitions.sonorant_f2.${direction}`,
+              ),
+            );
           }
         }
       }
@@ -2416,7 +2544,11 @@ function validateLoweringSpec(
   const f0 = lowering.f0;
   if (!isPlainObject(f0)) {
     diagnostics.push(
-      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.f0 must be an object", "output.lowering.f0")
+      makeDiagnostic(
+        "E_LOWERING_SPEC_REQUIRED",
+        "output.lowering.f0 must be an object",
+        "output.lowering.f0",
+      ),
     );
   } else {
     const rendererType = isPlainObject(f0.renderer) ? f0.renderer.type : undefined;
@@ -2425,32 +2557,62 @@ function validateLoweringSpec(
         makeDiagnostic(
           "E_LOWERING_SPEC_RENDERER",
           "output.lowering.f0.renderer.type must be point_interpolation or layered_additive",
-          "output.lowering.f0.renderer.type"
-        )
+          "output.lowering.f0.renderer.type",
+        ),
       );
     }
-    if (rendererType === "layered_additive" && (typeof f0.layered_model_ref !== "string" || f0.layered_model_ref.length === 0)) {
+    if (
+      rendererType === "layered_additive" &&
+      (typeof f0.layered_model_ref !== "string" || f0.layered_model_ref.length === 0)
+    ) {
       diagnostics.push(
-        makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.f0.layered_model_ref is required for layered_additive", "output.lowering.f0.layered_model_ref")
+        makeDiagnostic(
+          "E_LOWERING_SPEC_REQUIRED",
+          "output.lowering.f0.layered_model_ref is required for layered_additive",
+          "output.lowering.f0.layered_model_ref",
+        ),
       );
     }
     if (!isPlainObject(f0.output_clamp)) {
       diagnostics.push(
-        makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.f0.output_clamp must be an object", "output.lowering.f0.output_clamp")
+        makeDiagnostic(
+          "E_LOWERING_SPEC_REQUIRED",
+          "output.lowering.f0.output_clamp must be an object",
+          "output.lowering.f0.output_clamp",
+        ),
       );
     } else {
-      validateCitedNumber(f0.output_clamp.min_hz, diagnostics, "output.lowering.f0.output_clamp.min_hz", "output.lowering.f0.output_clamp.min_hz");
-      validateCitedNumber(f0.output_clamp.max_hz, diagnostics, "output.lowering.f0.output_clamp.max_hz", "output.lowering.f0.output_clamp.max_hz");
+      validateCitedNumber(
+        f0.output_clamp.min_hz,
+        diagnostics,
+        "output.lowering.f0.output_clamp.min_hz",
+        "output.lowering.f0.output_clamp.min_hz",
+      );
+      validateCitedNumber(
+        f0.output_clamp.max_hz,
+        diagnostics,
+        "output.lowering.f0.output_clamp.max_hz",
+        "output.lowering.f0.output_clamp.max_hz",
+      );
     }
   }
 
   const overlays = lowering.overlays;
   if (!isPlainObject(overlays)) {
     diagnostics.push(
-      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.overlays must be an object", "output.lowering.overlays")
+      makeDiagnostic(
+        "E_LOWERING_SPEC_REQUIRED",
+        "output.lowering.overlays must be an object",
+        "output.lowering.overlays",
+      ),
     );
   } else {
-    validateStringArray(overlays.operation_order, diagnostics, "output.lowering.overlays.operation_order", "output.lowering.overlays.operation_order");
+    validateStringArray(
+      overlays.operation_order,
+      diagnostics,
+      "output.lowering.overlays.operation_order",
+      "output.lowering.overlays.operation_order",
+    );
   }
 }
 
@@ -2468,7 +2630,10 @@ const syllabificationSchema = S.object({
   fields: [
     {
       key: "nuclei",
-      schema: S.nonEmptyString(SYLL_INVALID, "syllabification.nuclei must be a non-empty string of ascky chars"),
+      schema: S.nonEmptyString(
+        SYLL_INVALID,
+        "syllabification.nuclei must be a non-empty string of ascky chars",
+      ),
     },
     ...(["onset_clusters", "affixes"] as const).map((key) => ({
       key,
@@ -2478,7 +2643,11 @@ const syllabificationSchema = S.object({
         element: (i: number) => (v: unknown, p: string, sink: S.Sink) => {
           if (typeof v !== "string") {
             sink.push(
-              makeDiagnostic(SYLL_INVALID, `syllabification.${key}[${i}] must be a string (got ${typeof v})`, p)
+              makeDiagnostic(
+                SYLL_INVALID,
+                `syllabification.${key}[${i}] must be a string (got ${typeof v})`,
+                p,
+              ),
             );
           }
         },
@@ -2488,7 +2657,8 @@ const syllabificationSchema = S.object({
       key: "ascky",
       schema: S.object({
         code: SYLL_INVALID,
-        notObject: "syllabification.ascky must be an object mapping ARPABET symbol to a single ascky char",
+        notObject:
+          "syllabification.ascky must be an object mapping ARPABET symbol to a single ascky char",
         fields: [],
         refine: (obj, path, sink) => {
           for (const [k, v] of Object.entries(obj)) {
@@ -2497,8 +2667,8 @@ const syllabificationSchema = S.object({
                 makeDiagnostic(
                   SYLL_INVALID,
                   `syllabification.ascky['${k}'] must be a single character (got '${String(v)}')`,
-                  `${path}.${k}`
-                )
+                  `${path}.${k}`,
+                ),
               );
             }
           }
@@ -2508,11 +2678,8 @@ const syllabificationSchema = S.object({
   ],
 });
 
-function validateSyllabification(
-  spec: PlainObject,
-  diagnostics: ValidationDiagnostic[]
-): void {
-  if (!Object.prototype.hasOwnProperty.call(spec, "syllabification")) return;
+function validateSyllabification(spec: PlainObject, diagnostics: ValidationDiagnostic[]): void {
+  if (!Object.hasOwn(spec, "syllabification")) return;
   syllabificationSchema(spec.syllabification, "syllabification", diagnostics);
 }
 
@@ -2526,7 +2693,11 @@ const mapsSchema = S.record({
   keyCheck: (name, keyPath, sink) => {
     if (typeof name !== "string" || name.length === 0) {
       sink.push(
-        makeDiagnostic("E_MAP_INVALID", `maps name must be a non-empty string (got '${String(name)}')`, keyPath)
+        makeDiagnostic(
+          "E_MAP_INVALID",
+          `maps name must be a non-empty string (got '${String(name)}')`,
+          keyPath,
+        ),
       );
       return false;
     }
@@ -2538,7 +2709,11 @@ const mapsSchema = S.record({
       keyCheck: (k, kPath, sink) => {
         if (typeof k !== "string" || k.length === 0) {
           sink.push(
-            makeDiagnostic("E_MAP_INVALID", `maps['${name}'] keys must be non-empty strings (got '${String(k)}')`, kPath)
+            makeDiagnostic(
+              "E_MAP_INVALID",
+              `maps['${name}'] keys must be non-empty strings (got '${String(k)}')`,
+              kPath,
+            ),
           );
           return false;
         }
@@ -2546,18 +2721,19 @@ const mapsSchema = S.record({
       value: (k) => (v, p, sink) => {
         if (typeof v !== "string") {
           sink.push(
-            makeDiagnostic("E_MAP_INVALID", `maps['${name}']['${k}'] must be a string (got ${typeof v})`, p)
+            makeDiagnostic(
+              "E_MAP_INVALID",
+              `maps['${name}']['${k}'] must be a string (got ${typeof v})`,
+              p,
+            ),
           );
         }
       },
     }),
 });
 
-function validateMaps(
-  spec: PlainObject,
-  diagnostics: ValidationDiagnostic[]
-): void {
-  if (!Object.prototype.hasOwnProperty.call(spec, "maps")) return;
+function validateMaps(spec: PlainObject, diagnostics: ValidationDiagnostic[]): void {
+  if (!Object.hasOwn(spec, "maps")) return;
   mapsSchema(spec.maps, "maps", diagnostics);
 }
 
@@ -2566,6 +2742,8 @@ export function validateDslSpec(
   options: ValidateDslSpecOptions = {},
 ): ValidationDiagnostic[] {
   const diagnostics: ValidationDiagnostic[] = [];
+  const phases = Array.isArray(spec.phases) ? (spec.phases as PhaseSpec[]) : [];
+  const rules = isPlainObject(spec.rules) ? spec.rules : {};
   const phaseByName = new Map();
   const phaseNames = [];
   const policyState = analyzePolicyState(spec.parameters);
@@ -2580,17 +2758,17 @@ export function validateDslSpec(
   validateRules(spec, relationByName, predicates, policyState, diagnostics);
   const scalarFields = collectScalarFields(spec);
 
-  for (let i = 0; i < spec.phases.length; i += 1) {
-    const phase = spec.phases[i];
+  for (let i = 0; i < phases.length; i += 1) {
+    const phase = phases[i];
     if (!phase.name) {
       diagnostics.push(
-        makeDiagnostic("E_PHASE_NAME_MISSING", "Phase is missing name", `phases[${i}].name`)
+        makeDiagnostic("E_PHASE_NAME_MISSING", "Phase is missing name", `phases[${i}].name`),
       );
       continue;
     }
     if (phaseByName.has(phase.name)) {
       diagnostics.push(
-        makeDiagnostic("E_PHASE_NAME_DUP", `Duplicate phase '${phase.name}'`, `phases[${i}].name`)
+        makeDiagnostic("E_PHASE_NAME_DUP", `Duplicate phase '${phase.name}'`, `phases[${i}].name`),
       );
       continue;
     }
@@ -2598,41 +2776,41 @@ export function validateDslSpec(
     phaseNames.push(phase.name);
   }
 
-  for (let i = 0; i < spec.phases.length; i += 1) {
-    const phase = spec.phases[i];
+  for (let i = 0; i < phases.length; i += 1) {
+    const phase = phases[i];
     for (const dep of phase.after) {
       if (!phaseByName.has(dep)) {
         diagnostics.push(
           makeDiagnostic(
             "E_PHASE_ORDER_VIOLATION",
             `Phase '${phase.name}' depends on unknown phase '${dep}'`,
-            `phases[${i}].after`
-          )
+            `phases[${i}].after`,
+          ),
         );
       }
     }
 
     for (const ruleName of phase.rules) {
-      if (!Object.prototype.hasOwnProperty.call(spec.rules, ruleName)) {
+      if (!Object.hasOwn(rules, ruleName)) {
         diagnostics.push(
           makeDiagnostic(
             "E_RULE_UNKNOWN",
             `Phase '${phase.name}' references unknown rule '${ruleName}'`,
-            `phases[${i}].rules`
-          )
+            `phases[${i}].rules`,
+          ),
         );
       }
     }
 
     for (const pointRelation of phase.resolve_points) {
       const relation = relationByName.get(pointRelation);
-      if (!relation || relation.type !== "point") {
+      if (!isPlainObject(relation) || relation.type !== "point") {
         diagnostics.push(
           makeDiagnostic(
             "E_PHASE_RESOLVE_POINT_RELATION_INVALID",
             `Phase '${phase.name}' resolves unknown/non-point relation '${pointRelation}'`,
-            `phases[${i}].resolve_points`
-          )
+            `phases[${i}].resolve_points`,
+          ),
         );
       }
     }
@@ -2643,15 +2821,15 @@ export function validateDslSpec(
           makeDiagnostic(
             "E_PHASE_RESOLVE_SCALAR_UNKNOWN",
             `Phase '${phase.name}' resolves unknown scalar '${scalarField}'`,
-            `phases[${i}].resolve_scalars`
-          )
+            `phases[${i}].resolve_scalars`,
+          ),
         );
       }
     }
   }
 
   const phaseIndex = new Map(phaseNames.map((name, index) => [name, index]));
-  for (const phase of spec.phases) {
+  for (const phase of phases) {
     for (const dep of phase.after) {
       if (!phaseIndex.has(dep) || !phaseIndex.has(phase.name)) continue;
       if (phaseIndex.get(dep)! >= phaseIndex.get(phase.name)!) {
@@ -2659,8 +2837,8 @@ export function validateDslSpec(
           makeDiagnostic(
             "E_PHASE_ORDER_VIOLATION",
             `Phase '${phase.name}' must come after '${dep}'`,
-            `phases.${phase.name}.after`
-          )
+            `phases.${phase.name}.after`,
+          ),
         );
       }
     }
@@ -2672,8 +2850,8 @@ export function validateDslSpec(
         "W_POLICY_PARAM_UNCITED",
         `Policy parameter 'params.policy.${leafPath}' is missing citation metadata`,
         `parameters.policy.${leafPath}`,
-        "warning"
-      )
+        "warning",
+      ),
     );
   }
 
@@ -2684,8 +2862,8 @@ export function validateDslSpec(
         "W_POLICY_PARAM_UNUSED",
         `Policy parameter 'params.policy.${leafPath}' is declared but unused`,
         `parameters.policy.${leafPath}`,
-        "warning"
-      )
+        "warning",
+      ),
     );
   }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import type { Item } from "../src/declarative-frontend/hrg";
+import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 /**
  * Pass 3 (assign_accent) — declarative port of the prosodic-annotator

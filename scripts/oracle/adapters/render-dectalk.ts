@@ -1,11 +1,11 @@
 #!/usr/bin/env node
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import type { OracleAdapterInput, OracleArtifact } from "../types";
 import { parseDectalkTraceFile } from "../dectalk-trace";
 import { parseDectalkUsPhonemeLog } from "../symbolic";
+import type { OracleAdapterInput, OracleArtifact } from "../types";
 
 type ParsedArgs = OracleAdapterInput & {
   exePath?: string;
@@ -102,9 +102,7 @@ export async function renderDectalk(
     throw new Error("DECTALK_SAY_EXE is not set and no --exe path was provided");
   }
   const workDir =
-    input.workDir ??
-    process.env.DECTALK_WORKDIR ??
-    path.dirname(path.resolve(exePath));
+    input.workDir ?? process.env.DECTALK_WORKDIR ?? path.dirname(path.resolve(exePath));
 
   fs.mkdirSync(input.outDir, { recursive: true });
   const wavPath = path.join(input.outDir, "oracle.wav");
@@ -141,11 +139,7 @@ export async function renderDectalk(
   let phonemeCommand: string[] | undefined;
   try {
     phonemeCommand = [exePath, "-lp", phonemeLogPath, phonemeText];
-    const phonemeResult = await runCommand(
-      exePath,
-      ["-lp", phonemeLogPath, phonemeText],
-      workDir,
-    );
+    const phonemeResult = await runCommand(exePath, ["-lp", phonemeLogPath, phonemeText], workDir);
     fs.writeFileSync(phonemeStdoutPath, phonemeResult.stdout, "utf8");
     fs.writeFileSync(phonemeStderrPath, phonemeResult.stderr, "utf8");
     if (phonemeResult.exitCode !== 0) {
@@ -238,8 +232,7 @@ async function main(): Promise<number> {
 }
 
 const isMain =
-  process.argv[1] != null &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  process.argv[1] != null && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isMain) {
   main().then((code) => process.exit(code));

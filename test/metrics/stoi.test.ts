@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
+import { createDiagnostics } from "../../src/diagnostics";
 import {
+  hanningWindow,
+  overlapAndAdd,
+  removeSilentFrames,
+  resampleOct,
+  stft,
   stoi,
   thirdOctaveBandMatrix,
-  hanningWindow,
-  stft,
-  removeSilentFrames,
-  overlapAndAdd,
-  resampleOct,
 } from "../../src/metrics/stoi";
-import { createDiagnostics } from "../../src/diagnostics";
 
 // ── Helper: generate a tone signal ─────────────────────────────────────────
 
@@ -164,7 +164,7 @@ describe("removeSilentFrames", () => {
   it("keeps everything for a fully active signal", () => {
     const x = generateTone(440, 10000, 1.0, 0.5);
     const y = new Float64Array(x);
-    const [xOut, yOut] = removeSilentFrames(x, y, 40, 256, 128);
+    const [xOut, _yOut] = removeSilentFrames(x, y, 40, 256, 128);
     // Should keep most/all frames
     expect(xOut.length).toBeGreaterThan(x.length * 0.5);
   });

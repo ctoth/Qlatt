@@ -1,4 +1,4 @@
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+import { computeRmsPeak, initWasmModule, resolveWasmUrl, WasmBuffer, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./lf-source.wasm");
 class LfSourceProcessor extends AudioWorkletProcessor {
     disposed = false;
@@ -19,14 +19,50 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     _reportCountdown;
     static get parameterDescriptors() {
         return [
-            { name: "f0", defaultValue: 110, minValue: 0, maxValue: 500, automationRate: "a-rate" },
-            { name: "rd", defaultValue: 1.0, minValue: 0.3, maxValue: 2.7, automationRate: "a-rate" },
-            { name: "lfMode", defaultValue: 0, minValue: 0, maxValue: 2, automationRate: "k-rate" },
+            {
+                name: "f0",
+                defaultValue: 110,
+                minValue: 0,
+                maxValue: 500,
+                automationRate: "a-rate",
+            },
+            {
+                name: "rd",
+                defaultValue: 1.0,
+                minValue: 0.3,
+                maxValue: 2.7,
+                automationRate: "a-rate",
+            },
+            {
+                name: "lfMode",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 2,
+                automationRate: "k-rate",
+            },
             { name: "oq", defaultValue: 0, minValue: 0, maxValue: 99, automationRate: "a-rate" }, // Klatt 1990: OQ percentage. 0 = derive from Rd
             { name: "tl", defaultValue: 0, minValue: 0, maxValue: 41, automationRate: "a-rate" }, // Klatt 1990: dB at 3 kHz. 0 = derive from Rd
-            { name: "flutter", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" }, // Klatt & Klatt 1990 Eq. 1 scale
-            { name: "jitter", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" }, // Normalized 0-100, maps to Fraj 2011 b=[0, 4.5]
-            { name: "di", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" }, // Gobl & Ni Chasaide 2003: diplophonia index
+            {
+                name: "flutter",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 100,
+                automationRate: "k-rate",
+            }, // Klatt & Klatt 1990 Eq. 1 scale
+            {
+                name: "jitter",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 100,
+                automationRate: "k-rate",
+            }, // Normalized 0-100, maps to Fraj 2011 b=[0, 4.5]
+            {
+                name: "di",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 100,
+                automationRate: "k-rate",
+            }, // Gobl & Ni Chasaide 2003: diplophonia index
         ];
     }
     constructor(options) {
@@ -80,7 +116,13 @@ class LfSourceProcessor extends AudioWorkletProcessor {
         }
         const outputChannel = output[0];
         const blockSize = outputChannel.length;
-        if (!this.ready || !this.wasm || !this.outputBuffer || !this.f0Buffer || !this.rdBuffer || !this.oqBuffer || !this.tlBuffer) {
+        if (!this.ready ||
+            !this.wasm ||
+            !this.outputBuffer ||
+            !this.f0Buffer ||
+            !this.rdBuffer ||
+            !this.oqBuffer ||
+            !this.tlBuffer) {
             outputChannel.fill(0);
             return true;
         }

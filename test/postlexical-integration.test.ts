@@ -28,9 +28,7 @@ describe("postlexical integration via textToKlattTrack", () => {
       const track = textToKlattTrack("the apple", 110);
 
       // After reduction, the track should contain IH (not AH) for "the"
-      const theFrames = track.filter(
-        (frame) => frame.word === "the" && frame.phoneme !== "DH"
-      );
+      const theFrames = track.filter((frame) => frame.word === "the" && frame.phoneme !== "DH");
       const vowelPhonemes = [...new Set(theFrames.map((f) => f.phoneme))];
 
       // IH should appear (the reduced vowel)
@@ -44,9 +42,7 @@ describe("postlexical integration via textToKlattTrack", () => {
       // the_prevocalic_reduction should NOT apply; AH stays.
       const track = textToKlattTrack("the dog", 110);
 
-      const theFrames = track.filter(
-        (frame) => frame.word === "the" && frame.phoneme !== "DH"
-      );
+      const theFrames = track.filter((frame) => frame.word === "the" && frame.phoneme !== "DH");
       const vowelPhonemes = [...new Set(theFrames.map((f) => f.phoneme))];
 
       // AH should remain (no reduction)

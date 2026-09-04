@@ -5,18 +5,18 @@
  * Citation: Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5
  */
 
-import type { DictLookup, PronunciationResult } from './types';
-import type { StressHint } from './stress';
-import { loadYamlDocumentSync } from '../yaml-loader';
-import { loadPhonotacticsSync } from './syllabify';
+import { loadYamlDocumentSync } from "../yaml-loader";
+import type { StressHint } from "./stress";
+import { loadPhonotacticsSync } from "./syllabify";
+import type { DictLookup, PronunciationResult } from "./types";
 
 // --- Affix data types ---
 
 interface SuffixEntry {
   affix: string;
-  pronunciation: string[] | 'contextual';
-  stress_type?: 'forcing' | 'non_affecting';
-  stress_target?: 'penult' | 'antepenult' | 'final';
+  pronunciation: string[] | "contextual";
+  stress_type?: "forcing" | "non_affecting";
+  stress_target?: "penult" | "antepenult" | "final";
   min_root: number;
   try_silent_e?: boolean;
 }
@@ -63,8 +63,8 @@ function getVoicingClasses() {
  * Get the last phoneme from a pronunciation array, stripping stress digits.
  */
 function lastPhoneme(phonemes: string[]): string {
-  if (phonemes.length === 0) return '';
-  return phonemes[phonemes.length - 1].replace(/\d$/, '');
+  if (phonemes.length === 0) return "";
+  return phonemes[phonemes.length - 1].replace(/\d$/, "");
 }
 
 /**
@@ -74,9 +74,9 @@ function lastPhoneme(phonemes: string[]): string {
 function edPronunciation(rootPhonemes: string[]): string[] {
   const last = lastPhoneme(rootPhonemes);
   const vc = getVoicingClasses();
-  if (vc.tdFinals.has(last)) return ['IH0', 'D'];
-  if (vc.voicelessFinals.has(last)) return ['T'];
-  return ['D'];
+  if (vc.tdFinals.has(last)) return ["IH0", "D"];
+  if (vc.voicelessFinals.has(last)) return ["T"];
+  return ["D"];
 }
 
 /**
@@ -86,9 +86,9 @@ function edPronunciation(rootPhonemes: string[]): string[] {
 function sPronunciation(rootPhonemes: string[]): string[] {
   const last = lastPhoneme(rootPhonemes);
   const vc = getVoicingClasses();
-  if (vc.sibilantFinals.has(last)) return ['IH0', 'Z'];
-  if (vc.voicelessConsonants.has(last)) return ['S'];
-  return ['Z'];
+  if (vc.sibilantFinals.has(last)) return ["IH0", "Z"];
+  if (vc.voicelessConsonants.has(last)) return ["S"];
+  return ["Z"];
 }
 
 /**
@@ -113,7 +113,7 @@ function tryRootLookup(
 
   // Try restoring silent e: "hop" -> "hope", "lov" -> "love"
   if (trySilentE) {
-    const withE = root + 'e';
+    const withE = root + "e";
     const result = dictLookup(withE);
     if (result) return { rootWord: withE, phonemes: result };
   }
@@ -121,15 +121,12 @@ function tryRootLookup(
   return null;
 }
 
-function resolveSuffixPhonemes(
-  suffix: SuffixEntry,
-  rootPhonemes: string[],
-): string[] | null {
-  if (suffix.pronunciation === 'contextual') {
-    if (suffix.affix === 'ed') {
+function resolveSuffixPhonemes(suffix: SuffixEntry, rootPhonemes: string[]): string[] | null {
+  if (suffix.pronunciation === "contextual") {
+    if (suffix.affix === "ed") {
       return edPronunciation(rootPhonemes);
     }
-    if (suffix.affix === 's') {
+    if (suffix.affix === "s") {
       return sPronunciation(rootPhonemes);
     }
     return null;
@@ -172,7 +169,7 @@ function trySuffixDecomposition(
 export function decomposeWord(
   word: string,
   dictLookup: DictLookup,
-  morphologyPath: string = '/rules/frontends/qlatt-english/morphology.yaml',
+  morphologyPath: string = "/rules/frontends/qlatt-english/morphology.yaml",
 ): PronunciationResult | null {
   if (!word || word.length < 4) return null;
 
@@ -184,7 +181,7 @@ export function decomposeWord(
   if (suffixOnly) {
     return {
       phonemes: suffixOnly.phonemes,
-      source: 'morphology',
+      source: "morphology",
       word: lowerWord,
       rootWord: suffixOnly.rootWord,
     };
@@ -201,7 +198,7 @@ export function decomposeWord(
     if (remainderPhonemes) {
       return {
         phonemes: [...prefix.pronunciation, ...remainderPhonemes],
-        source: 'morphology',
+        source: "morphology",
         word: lowerWord,
         rootWord: remainder,
       };
@@ -214,7 +211,7 @@ export function decomposeWord(
 
     return {
       phonemes: [...prefix.pronunciation, ...suffixInRemainder.phonemes],
-      source: 'morphology',
+      source: "morphology",
       word: lowerWord,
       rootWord: suffixInRemainder.rootWord,
     };
@@ -228,7 +225,10 @@ export function decomposeWord(
  *
  * Citation: Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5
  */
-export function getStressHintForWord(word: string, morphologyPath: string = '/rules/frontends/qlatt-english/morphology.yaml'): StressHint | undefined {
+export function getStressHintForWord(
+  word: string,
+  morphologyPath: string = "/rules/frontends/qlatt-english/morphology.yaml",
+): StressHint | undefined {
   if (!word || word.length < 4) return undefined;
 
   const lowerWord = word.toLowerCase();
@@ -240,15 +240,15 @@ export function getStressHintForWord(word: string, morphologyPath: string = '/ru
     const root = lowerWord.slice(0, lowerWord.length - suffix.affix.length);
     if (root.length < suffix.min_root) continue;
 
-    if (suffix.stress_type === 'forcing' && suffix.stress_target) {
+    if (suffix.stress_type === "forcing" && suffix.stress_target) {
       return {
-        stressType: 'forcing',
+        stressType: "forcing",
         stressTarget: suffix.stress_target,
       };
     }
 
-    if (suffix.stress_type === 'non_affecting') {
-      return { stressType: 'non_affecting' };
+    if (suffix.stress_type === "non_affecting") {
+      return { stressType: "non_affecting" };
     }
 
     return undefined;

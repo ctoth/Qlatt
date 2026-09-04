@@ -1,29 +1,28 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { describe, it, expect } from 'vitest';
-import { parseYamlString } from '../../src/yaml-loader';
-
-import { createCelEvaluator } from '../../src/semantics/cel-evaluator';
-import { createTopologicalEvaluator } from '../../src/semantics/topological-evaluator';
-import type {
-  ParamValue,
-  SemanticsDocument,
-  RealizationRule,
-  EvaluationContext,
-} from '../../src/semantics/types';
-import type { BaconGraph, ParamValueSpec } from '../../src/klatt-runtime';
+import fs from "node:fs";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
 import {
+  builtinAbs,
+  builtinExp,
+  builtinLog,
+  builtinSqrt,
   dbToLinear,
   dbToLinearKlsyn,
-  proximity,
-  min,
   max,
+  min,
   pow,
-  builtinSqrt,
-  builtinExp,
-  builtinAbs,
-  builtinLog,
-} from '../../src/builtin-functions';
+  proximity,
+} from "../../src/builtin-functions";
+import type { BaconGraph, ParamValueSpec } from "../../src/klatt-runtime";
+import { createCelEvaluator } from "../../src/semantics/cel-evaluator";
+import { createTopologicalEvaluator } from "../../src/semantics/topological-evaluator";
+import type {
+  EvaluationContext,
+  ParamValue,
+  RealizationRule,
+  SemanticsDocument,
+} from "../../src/semantics/types";
+import { parseYamlString } from "../../src/yaml-loader";
 
 type ApproxSpec = number | { value: number; tol?: number };
 
@@ -93,18 +92,18 @@ interface YamlGraphSuite {
 
 function readYamlFile<T>(filePath: string): T {
   const absPath = path.resolve(process.cwd(), filePath);
-  const text = fs.readFileSync(absPath, 'utf8');
+  const text = fs.readFileSync(absPath, "utf8");
   return parseYamlString<T>(text, filePath);
 }
 
 function resolveNumber(value: ParamValue | undefined, fallback: number): number {
-  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
 function getParamDefaults(semantics: SemanticsDocument): Record<string, number> {
   const defaults: Record<string, number> = {};
   for (const [name, def] of Object.entries(semantics.params ?? {})) {
-    if (typeof def.default === 'number' && Number.isFinite(def.default)) {
+    if (typeof def.default === "number" && Number.isFinite(def.default)) {
       defaults[name] = def.default;
     }
   }
@@ -119,11 +118,11 @@ interface SchedulingInfo {
 }
 
 function getSchedulingInfo(semantics: SemanticsDocument): SchedulingInfo {
-  const defaultRamp = semantics.defaultScheduling === 'ramp';
+  const defaultRamp = semantics.defaultScheduling === "ramp";
   const stepParams = new Set<string>();
   const rampParams = new Set<string>();
   for (const [name, rule] of Object.entries(semantics.realize ?? {})) {
-    if (typeof rule === 'object' && rule !== null && (rule as RealizationRule).expr) {
+    if (typeof rule === "object" && rule !== null && (rule as RealizationRule).expr) {
       if ((rule as { step?: boolean }).step === true) {
         stepParams.add(name);
       } else if ((rule as { ramp?: boolean }).ramp === true) {
@@ -163,8 +162,8 @@ function buildBindingTargets(graph: BaconGraph): Map<string, MockAudioParam[]> {
 }
 
 function getBindName(spec: ParamValueSpec | undefined): string | null {
-  if (!spec || typeof spec !== 'object') return null;
-  if ('bind' in spec && typeof spec.bind === 'string') {
+  if (!spec || typeof spec !== "object") return null;
+  if ("bind" in spec && typeof spec.bind === "string") {
     return spec.bind;
   }
   return null;
@@ -172,7 +171,7 @@ function getBindName(spec: ParamValueSpec | undefined): string | null {
 
 class MockAudioParam {
   readonly id: string;
-  readonly events: Array<{ type: 'set' | 'ramp'; time: number; value: number }> = [];
+  readonly events: Array<{ type: "set" | "ramp"; time: number; value: number }> = [];
   value = 0;
 
   constructor(id: string) {
@@ -181,12 +180,12 @@ class MockAudioParam {
 
   setValueAtTime(value: number, time: number): void {
     this.value = value;
-    this.events.push({ type: 'set', time, value });
+    this.events.push({ type: "set", time, value });
   }
 
   linearRampToValueAtTime(value: number, time: number): void {
     this.value = value;
-    this.events.push({ type: 'ramp', time, value });
+    this.events.push({ type: "ramp", time, value });
   }
 }
 
@@ -205,7 +204,7 @@ interface EvaluatedFrame {
 }
 
 function requireNumericArg(fnName: string, index: number, value: ParamValue): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
     throw new Error(`${fnName} expected finite numeric argument at index ${index}`);
   }
   return value;
@@ -213,52 +212,55 @@ function requireNumericArg(fnName: string, index: number, value: ParamValue): nu
 
 function createSemanticsHarness(
   semantics: SemanticsDocument,
-  suiteSampleRate: number | undefined
+  suiteSampleRate: number | undefined,
 ): {
-  evaluate(inputs: Record<string, number> | undefined, testSampleRate?: number): Record<string, ParamValue>;
+  evaluate(
+    inputs: Record<string, number> | undefined,
+    testSampleRate?: number,
+  ): Record<string, ParamValue>;
   evalExpr(expr: string, values: Record<string, ParamValue>): ParamValue;
   scheduling: SchedulingInfo;
 } {
   const celEvaluator = createCelEvaluator();
-  celEvaluator.registerFunction('dbToLinear', (...args: ParamValue[]): ParamValue => {
-    const db = requireNumericArg('dbToLinear', 0, args[0]);
+  celEvaluator.registerFunction("dbToLinear", (...args: ParamValue[]): ParamValue => {
+    const db = requireNumericArg("dbToLinear", 0, args[0]);
     return dbToLinear(db);
   });
-  celEvaluator.registerFunction('dbToLinearKlsyn', (...args: ParamValue[]): ParamValue => {
-    const db = requireNumericArg('dbToLinearKlsyn', 0, args[0]);
+  celEvaluator.registerFunction("dbToLinearKlsyn", (...args: ParamValue[]): ParamValue => {
+    const db = requireNumericArg("dbToLinearKlsyn", 0, args[0]);
     return dbToLinearKlsyn(db);
   });
-  celEvaluator.registerFunction('min', (...args: ParamValue[]): ParamValue => {
-    const values = args.map((arg, index) => requireNumericArg('min', index, arg));
+  celEvaluator.registerFunction("min", (...args: ParamValue[]): ParamValue => {
+    const values = args.map((arg, index) => requireNumericArg("min", index, arg));
     return min(...values);
   });
-  celEvaluator.registerFunction('max', (...args: ParamValue[]): ParamValue => {
-    const values = args.map((arg, index) => requireNumericArg('max', index, arg));
+  celEvaluator.registerFunction("max", (...args: ParamValue[]): ParamValue => {
+    const values = args.map((arg, index) => requireNumericArg("max", index, arg));
     return max(...values);
   });
-  celEvaluator.registerFunction('pow', (...args: ParamValue[]): ParamValue => {
-    const x = requireNumericArg('pow', 0, args[0]);
-    const y = requireNumericArg('pow', 1, args[1]);
+  celEvaluator.registerFunction("pow", (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg("pow", 0, args[0]);
+    const y = requireNumericArg("pow", 1, args[1]);
     return pow(x, y);
   });
-  celEvaluator.registerFunction('proximity', (...args: ParamValue[]): ParamValue => {
-    const delta = requireNumericArg('proximity', 0, args[0]);
+  celEvaluator.registerFunction("proximity", (...args: ParamValue[]): ParamValue => {
+    const delta = requireNumericArg("proximity", 0, args[0]);
     return proximity(delta);
   });
-  celEvaluator.registerFunction('sqrt', (...args: ParamValue[]): ParamValue => {
-    const x = requireNumericArg('sqrt', 0, args[0]);
+  celEvaluator.registerFunction("sqrt", (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg("sqrt", 0, args[0]);
     return builtinSqrt(x);
   });
-  celEvaluator.registerFunction('exp', (...args: ParamValue[]): ParamValue => {
-    const x = requireNumericArg('exp', 0, args[0]);
+  celEvaluator.registerFunction("exp", (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg("exp", 0, args[0]);
     return builtinExp(x);
   });
-  celEvaluator.registerFunction('abs', (...args: ParamValue[]): ParamValue => {
-    const x = requireNumericArg('abs', 0, args[0]);
+  celEvaluator.registerFunction("abs", (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg("abs", 0, args[0]);
     return builtinAbs(x);
   });
-  celEvaluator.registerFunction('log', (...args: ParamValue[]): ParamValue => {
-    const x = requireNumericArg('log', 0, args[0]);
+  celEvaluator.registerFunction("log", (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg("log", 0, args[0]);
     return builtinLog(x);
   });
 
@@ -276,7 +278,10 @@ function createSemanticsHarness(
     return 48000;
   }
 
-  function buildContext(inputs: Record<string, number>, sampleRate: number): Record<string, number> {
+  function buildContext(
+    inputs: Record<string, number>,
+    sampleRate: number,
+  ): Record<string, number> {
     const ctx: Record<string, number> = {
       ...defaults,
       ...inputs,
@@ -297,7 +302,7 @@ function createSemanticsHarness(
 
   function evaluate(
     inputs: Record<string, number> | undefined,
-    testSampleRate?: number
+    testSampleRate?: number,
   ): Record<string, ParamValue> {
     const safeInputs = inputs ?? {};
     const sampleRate = resolveSampleRate(safeInputs, testSampleRate);
@@ -306,7 +311,7 @@ function createSemanticsHarness(
     const result = topoEvaluator.evaluate(semantics, context);
 
     if (result.errors.length > 0) {
-      const message = result.errors.map((e) => `${e.name}: ${e.error}`).join(', ');
+      const message = result.errors.map((e) => `${e.name}: ${e.error}`).join(", ");
       throw new Error(`Semantics evaluation errors: ${message}`);
     }
 
@@ -322,8 +327,11 @@ function createSemanticsHarness(
 
 function evaluateTrack(
   track: TrackFrameSpec[],
-  evaluate: (inputs: Record<string, number> | undefined, testSampleRate?: number) => Record<string, ParamValue>,
-  testSampleRate?: number
+  evaluate: (
+    inputs: Record<string, number> | undefined,
+    testSampleRate?: number,
+  ) => Record<string, ParamValue>,
+  testSampleRate?: number,
 ): EvaluatedFrame[] {
   return track.map((frame) => ({
     time: frame.time,
@@ -335,7 +343,7 @@ function evaluateTrack(
 
 function pickSnapshotFrame(frames: EvaluatedFrame[], snapshot: SnapshotSpec): EvaluatedFrame {
   if (frames.length === 0) {
-    throw new Error('Snapshot requested but track is empty');
+    throw new Error("Snapshot requested but track is empty");
   }
 
   if (Number.isInteger(snapshot.index)) {
@@ -346,7 +354,7 @@ function pickSnapshotFrame(frames: EvaluatedFrame[], snapshot: SnapshotSpec): Ev
     return frames[idx];
   }
 
-  if (typeof snapshot.time === 'number' && Number.isFinite(snapshot.time)) {
+  if (typeof snapshot.time === "number" && Number.isFinite(snapshot.time)) {
     let chosen = frames[0];
     for (const frame of frames) {
       if (frame.time <= snapshot.time) {
@@ -364,14 +372,14 @@ function pickSnapshotFrame(frames: EvaluatedFrame[], snapshot: SnapshotSpec): Ev
 function assertAllExpr(
   evalExpr: (expr: string, values: Record<string, ParamValue>) => ParamValue,
   frames: EvaluatedFrame[],
-  exprs: string[]
+  exprs: string[],
 ): void {
   for (const frame of frames) {
     for (const expr of exprs) {
       const result = evalExpr(expr, frame.realized);
-      if (typeof result === 'boolean') {
+      if (typeof result === "boolean") {
         expect(result).toBe(true);
-      } else if (typeof result === 'number') {
+      } else if (typeof result === "number") {
         expect(result).not.toBe(0);
       } else {
         expect(result).toBeTruthy();
@@ -380,7 +388,10 @@ function assertAllExpr(
   }
 }
 
-function computeRanges(frames: EvaluatedFrame[], keys: string[]): Record<string, { min: number; max: number }> {
+function computeRanges(
+  frames: EvaluatedFrame[],
+  keys: string[],
+): Record<string, { min: number; max: number }> {
   const ranges: Record<string, { min: number; max: number }> = {};
 
   for (const key of keys) {
@@ -389,7 +400,7 @@ function computeRanges(frames: EvaluatedFrame[], keys: string[]): Record<string,
 
     for (const frame of frames) {
       const value = frame.realized[key];
-      if (typeof value !== 'number' || !Number.isFinite(value)) continue;
+      if (typeof value !== "number" || !Number.isFinite(value)) continue;
       minValue = Math.min(minValue, value);
       maxValue = Math.max(maxValue, value);
     }
@@ -407,16 +418,16 @@ function computeRanges(frames: EvaluatedFrame[], keys: string[]): Record<string,
 function assertRanges(
   ranges: Record<string, { min: number; max: number }>,
   assertRange: Record<string, RangeAssertSpec>,
-  defaultTol: number
+  defaultTol: number,
 ): void {
   for (const [key, spec] of Object.entries(assertRange)) {
     const range = ranges[key];
     expect(range).toBeDefined();
 
-    if (typeof spec.min === 'number') {
+    if (typeof spec.min === "number") {
       expect(range.min + defaultTol).toBeGreaterThanOrEqual(spec.min);
     }
-    if (typeof spec.max === 'number') {
+    if (typeof spec.max === "number") {
       expect(range.max - defaultTol).toBeLessThanOrEqual(spec.max);
     }
   }
@@ -424,10 +435,13 @@ function assertRanges(
 
 function compileSchedule(
   frames: FrameSpec[],
-  evaluate: (inputs: Record<string, number> | undefined, testSampleRate?: number) => Record<string, ParamValue>,
+  evaluate: (
+    inputs: Record<string, number> | undefined,
+    testSampleRate?: number,
+  ) => Record<string, ParamValue>,
   bindingTargets: Map<string, MockAudioParam[]>,
   scheduling: SchedulingInfo,
-  testSampleRate?: number
+  testSampleRate?: number,
 ): ScheduleEntry[] {
   const entries: ScheduleEntry[] = [];
 
@@ -438,9 +452,12 @@ function compileSchedule(
 
   // Categorize bindings: source (realized/passthrough) + scheduling (ramp/step).
   // Mirrors the interpreter's categorization logic.
-  const bindingCategories = new Map<string, { source: 'realized' | 'passthrough'; ramp: boolean }>();
+  const bindingCategories = new Map<
+    string,
+    { source: "realized" | "passthrough"; ramp: boolean }
+  >();
   for (const name of bindingTargets.keys()) {
-    const source = realizedKeys.has(name) ? 'realized' as const : 'passthrough' as const;
+    const source = realizedKeys.has(name) ? ("realized" as const) : ("passthrough" as const);
     const useRamp = shouldRamp(name, scheduling);
     bindingCategories.set(name, { source, ramp: useRamp });
   }
@@ -451,10 +468,8 @@ function compileSchedule(
     const realized = evaluate(frame.params, testSampleRate);
 
     for (const [bind, cat] of bindingCategories) {
-      const value = cat.source === 'realized'
-        ? realized[bind]
-        : frame.params[bind];
-      if (typeof value === 'number' && Number.isFinite(value)) {
+      const value = cat.source === "realized" ? realized[bind] : frame.params[bind];
+      if (typeof value === "number" && Number.isFinite(value)) {
         entries.push({ bind, time: t, value, ramp: cat.ramp && i > 0 });
       }
     }
@@ -465,7 +480,7 @@ function compileSchedule(
 
 function executeSchedule(
   entries: ScheduleEntry[],
-  bindingTargets: Map<string, MockAudioParam[]>
+  bindingTargets: Map<string, MockAudioParam[]>,
 ): void {
   for (const entry of entries) {
     const targets = bindingTargets.get(entry.bind) ?? [];
@@ -479,13 +494,13 @@ function executeSchedule(
 function assertApprox(
   values: Record<string, ParamValue>,
   approx: Record<string, ApproxSpec>,
-  defaultTol: number
+  defaultTol: number,
 ): void {
   for (const [name, spec] of Object.entries(approx)) {
     const actual = values[name];
-    expect(typeof actual).toBe('number');
-    const expected = typeof spec === 'number' ? spec : spec.value;
-    const tol = typeof spec === 'number' ? defaultTol : (spec.tol ?? defaultTol);
+    expect(typeof actual).toBe("number");
+    const expected = typeof spec === "number" ? spec : spec.value;
+    const tol = typeof spec === "number" ? defaultTol : (spec.tol ?? defaultTol);
     expect(Math.abs((actual as number) - expected)).toBeLessThanOrEqual(tol);
   }
 }
@@ -493,13 +508,13 @@ function assertApprox(
 function assertExpr(
   evalExpr: (expr: string, values: Record<string, ParamValue>) => ParamValue,
   values: Record<string, ParamValue>,
-  exprs: string[]
+  exprs: string[],
 ): void {
   for (const expr of exprs) {
     const result = evalExpr(expr, values);
-    if (typeof result === 'boolean') {
+    if (typeof result === "boolean") {
       expect(result).toBe(true);
-    } else if (typeof result === 'number') {
+    } else if (typeof result === "number") {
       expect(result).not.toBe(0);
     } else {
       expect(result).toBeTruthy();
@@ -512,14 +527,16 @@ function hasSchedulePoint(
   bind: string,
   ramp: boolean,
   time: number,
-  tol: number
+  tol: number,
 ): boolean {
-  return entries.some(
-    (e) => e.bind === bind && e.ramp === ramp && Math.abs(e.time - time) <= tol
-  );
+  return entries.some((e) => e.bind === bind && e.ramp === ramp && Math.abs(e.time - time) <= tol);
 }
 
-function assertSchedule(entries: ScheduleEntry[], spec: ScheduleAssertSpec, defaultTol: number): void {
+function assertSchedule(
+  entries: ScheduleEntry[],
+  spec: ScheduleAssertSpec,
+  defaultTol: number,
+): void {
   for (const point of spec.rampAt ?? []) {
     const tol = point.tol ?? defaultTol;
     expect(hasSchedulePoint(entries, point.bind, true, point.time, tol)).toBe(true);
@@ -552,7 +569,7 @@ export function defineYamlGraphSuite(yamlPath: string): void {
             evaluate,
             bindingTargets,
             scheduling,
-            testSpec.sampleRate
+            testSpec.sampleRate,
           );
           executeSchedule(entries, bindingTargets);
 

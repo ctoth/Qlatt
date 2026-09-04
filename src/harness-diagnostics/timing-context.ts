@@ -64,8 +64,7 @@ export function resolveTimingSnapshot(
   const event = eventIndex >= 0 ? track[eventIndex] : null;
 
   // Window: from -PRE_START_TOLERANCE before first event to trackEnd + POST_END_WINDOW
-  const inWindow =
-    relTime >= -PRE_START_TOLERANCE && relTime <= trackEnd + POST_END_WINDOW;
+  const inWindow = relTime >= -PRE_START_TOLERANCE && relTime <= trackEnd + POST_END_WINDOW;
 
   // Guard zone: within guardMs of any event boundary
   const guardSec = guardMs / 1000;

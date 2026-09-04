@@ -27,9 +27,9 @@ export interface CreateDiagnosticsOptions {
   maxEntries?: number;
 }
 
-export function createDiagnostics(
-  { maxEntries = 200 }: CreateDiagnosticsOptions = {},
-): Diagnostics {
+export function createDiagnostics({
+  maxEntries = 200,
+}: CreateDiagnosticsOptions = {}): Diagnostics {
   const entries: DiagnosticEntry[] = [];
   const listeners = new Set<DiagnosticsListener>();
 

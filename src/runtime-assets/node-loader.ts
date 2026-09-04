@@ -11,8 +11,7 @@ function readUtf8File(filePath: string): string {
 }
 
 function inlineWasmUtils(moduleSource: string, wasmUtilsSource: string): string {
-  const importPattern =
-    /^import\s*\{[^}]+\}\s*from\s*["']\.\/wasm-utils\.js["'];?\s*$/m;
+  const importPattern = /^import\s*\{[^}]+\}\s*from\s*["']\.\/wasm-utils\.js["'];?\s*$/m;
   let transformed = moduleSource;
   if (importPattern.test(transformed)) {
     transformed = transformed.replace(importPattern, `${wasmUtilsSource}\n`);
@@ -26,15 +25,15 @@ function inlineWasmUtils(moduleSource: string, wasmUtilsSource: string): string 
     [
       "const __qlattCtor = $2;",
       "const __qlattOrigProcess = __qlattCtor.prototype.process;",
-      "if (typeof __qlattOrigProcess === \"function\") {",
+      'if (typeof __qlattOrigProcess === "function") {',
       "  __qlattCtor.prototype.process = function (...args) {",
       "    try {",
       "      return __qlattOrigProcess.apply(this, args);",
       "    } catch (error) {",
       "      try {",
       "        this.port.postMessage({",
-      "          type: \"__qlatt_process_error__\",",
-      "          node: this.nodeId || \"unknown\",",
+      '          type: "__qlatt_process_error__",',
+      '          node: this.nodeId || "unknown",',
       "          error: error instanceof Error ? (error.stack || error.message) : String(error),",
       "        });",
       "      } catch {}",
@@ -58,7 +57,9 @@ export async function createNodeRuntimeAssetLoader(
 
   const server = http.createServer((req, res) => {
     try {
-      const pathname = req.url ? decodeURIComponent(new URL(req.url, "http://127.0.0.1").pathname) : "/";
+      const pathname = req.url
+        ? decodeURIComponent(new URL(req.url, "http://127.0.0.1").pathname)
+        : "/";
       const moduleName = pathname.replace(/^\/+/, "");
       if (!moduleName) {
         res.statusCode = 404;

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { createDiagnostics } from "../src/diagnostics";
-import { createProvenanceCollector } from "../src/provenance";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
+import { createProvenanceCollector } from "../src/provenance";
 import { createConfiguredEvaluator } from "../src/semantics/evaluator-factory";
+import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 type ParsedArgs = {
   phrase: string;
@@ -18,7 +18,7 @@ function parseArgv(argv: string[]): ParsedArgs {
       ? argv[phraseFlagIndex + 1]
       : argv.join(" ").trim();
   if (!phrase) {
-    throw new Error("Missing phrase. Use --phrase \"...\".");
+    throw new Error('Missing phrase. Use --phrase "...".');
   }
   return { phrase };
 }
@@ -51,7 +51,9 @@ async function main(argv: string[]): Promise<number> {
     };
   });
 
-  const decisions = provenance.getDecisions().filter((decision) => decision.type.startsWith("nasal_"));
+  const decisions = provenance
+    .getDecisions()
+    .filter((decision) => decision.type.startsWith("nasal_"));
   const output = {
     phrase: args.phrase,
     frames,
@@ -72,8 +74,10 @@ const isMain =
   process.argv[1] != null && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isMain) {
-  main(process.argv.slice(2)).then((code) => process.exit(code)).catch((error) => {
-    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
-    process.exit(1);
-  });
+  main(process.argv.slice(2))
+    .then((code) => process.exit(code))
+    .catch((error) => {
+      process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+      process.exit(1);
+    });
 }

@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { selectRenderBackend } from "./rendering/select-backend.ts";
-import { writeWav } from "../src/rendering/write-wav.ts";
 import type { RenderRequest } from "../src/rendering/types.ts";
+import { writeWav } from "../src/rendering/write-wav.ts";
+import { selectRenderBackend } from "./rendering/select-backend.ts";
 
 const args = new Map<string, string>();
 for (let i = 2; i < process.argv.length; i += 1) {
@@ -17,9 +17,7 @@ const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), "..");
 
 const phrase = args.get("phrase") ?? "hello world";
-const baseF0 = args.has("base-f0")
-  ? Number(args.get("base-f0"))
-  : undefined;
+const baseF0 = args.has("base-f0") ? Number(args.get("base-f0")) : undefined;
 const frontendId = args.get("frontend-id") ?? "qlatt-english";
 const experimentId = args.get("experiment-id") ?? "klatt80-baseline";
 const engine = args.get("engine") ?? "runtime";
@@ -44,8 +42,7 @@ const persistJson = writeGolden || args.has("out-json");
 const persistWav = writeGolden || args.has("out-wav");
 const compareGolden = !writeGolden && (args.get("compare-golden") ?? "1") !== "0";
 const allowBrowserRender =
-  (args.get("allow-browser") ?? "0") === "1" ||
-  process.env.QLATT_ALLOW_BROWSER_RENDER === "1";
+  (args.get("allow-browser") ?? "0") === "1" || process.env.QLATT_ALLOW_BROWSER_RENDER === "1";
 const renderHost = (args.get("host") ?? "auto") as "auto" | "node" | "browser";
 
 function rmsError(actual: ArrayLike<number>, expected: ArrayLike<number>): number {
@@ -134,11 +131,7 @@ if (!persistWav || !compareGolden) {
   // Allow tiny floating-point non-determinism in offline rendering.
   const maxAllowed = 1e-6;
   const rmsAllowed = 1e-7;
-  if (
-    deltas.lengthMismatch !== 0 ||
-    deltas.maxDelta > maxAllowed ||
-    deltas.rmsError > rmsAllowed
-  ) {
+  if (deltas.lengthMismatch !== 0 || deltas.maxDelta > maxAllowed || deltas.rmsError > rmsAllowed) {
     process.exitCode = 1;
   }
 }

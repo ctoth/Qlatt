@@ -27,26 +27,17 @@
  * preset is rejected.
  */
 
-import type {
-  DimensionalVector,
-  SpeakerSex,
-  VoiceQualityDelta,
-} from "./direction-track";
+import type { DimensionalVector, SpeakerSex, VoiceQualityDelta } from "./direction-track";
 import {
+  materializeVoiceQualityDelta,
   NEUTRAL_DIMENSIONS,
   NEUTRAL_VQ,
-  materializeVoiceQualityDelta,
   scaleDimensions,
   scaleVoiceQualityDelta,
 } from "./direction-track";
 
 /** High-level grouping of presets (affects the layer-application order downstream). */
-export type AffectGroup =
-  | "emotion"
-  | "epistemic"
-  | "pragmatic"
-  | "speech_act"
-  | "clinical";
+export type AffectGroup = "emotion" | "epistemic" | "pragmatic" | "speech_act" | "clinical";
 
 /** The canonical preset names an author may write. */
 export type AffectCategory = string;
@@ -269,14 +260,26 @@ const EPISTEMIC_PRESETS: AffectPreset[] = [
     name: "confident",
     group: "epistemic",
     dimensions: { valence: 0.2, arousal: 0.1, dominance: 0.6 },
-    vq: { rdDelta: 0.0, f0VarianceScale: 1.1, durationScale: 1.05, intensityBoost: 1, pauseScale: 0.85 },
+    vq: {
+      rdDelta: 0.0,
+      f0VarianceScale: 1.1,
+      durationScale: 1.05,
+      intensityBoost: 1,
+      pauseScale: 0.85,
+    },
     citations: ["Goupil_2021", "Jiang_2017"],
   },
   {
     name: "doubtful",
     group: "epistemic",
     dimensions: { valence: -0.1, arousal: 0.0, dominance: -0.5 },
-    vq: { rdDelta: +0.1, f0VarianceScale: 0.9, durationScale: 0.95, intensityBoost: -1, pauseScale: 1.2 },
+    vq: {
+      rdDelta: +0.1,
+      f0VarianceScale: 0.9,
+      durationScale: 0.95,
+      intensityBoost: -1,
+      pauseScale: 1.2,
+    },
     citations: ["Goupil_2021", "Jiang_2017"],
   },
   {
@@ -334,28 +337,53 @@ const PRAGMATIC_PRESETS: AffectPreset[] = [
     name: "rude",
     group: "pragmatic",
     dimensions: { valence: -0.5, arousal: -0.1, dominance: 0.7 },
-    vq: { rdDelta: -0.15, f0Scale: 0.9, f0VarianceScale: 0.85, durationScale: 1.15, pauseScale: 1.1 },
+    vq: {
+      rdDelta: -0.15,
+      f0Scale: 0.9,
+      f0VarianceScale: 0.85,
+      durationScale: 1.15,
+      pauseScale: 1.1,
+    },
     citations: ["Caballero_2018"],
   },
   {
     name: "dismissive",
     group: "pragmatic",
     dimensions: { valence: -0.4, arousal: -0.3, dominance: 0.5 },
-    vq: { rdDelta: -0.1, f0Scale: 0.95, f0VarianceScale: 0.8, durationScale: 1.1, intensityBoost: -1, pauseScale: 1.0 },
+    vq: {
+      rdDelta: -0.1,
+      f0Scale: 0.95,
+      f0VarianceScale: 0.8,
+      durationScale: 1.1,
+      intensityBoost: -1,
+      pauseScale: 1.0,
+    },
     citations: ["Caballero_2018"],
   },
   {
     name: "curt",
     group: "pragmatic",
     dimensions: { valence: -0.4, arousal: 0.1, dominance: 0.5 },
-    vq: { rdDelta: -0.2, f0Scale: 0.92, f0VarianceScale: 0.75, durationScale: 0.9, pauseScale: 0.8 },
+    vq: {
+      rdDelta: -0.2,
+      f0Scale: 0.92,
+      f0VarianceScale: 0.75,
+      durationScale: 0.9,
+      pauseScale: 0.8,
+    },
     citations: ["Caballero_2018"],
   },
   {
     name: "insincere",
     group: "pragmatic",
     dimensions: { valence: 0.1, arousal: -0.2, dominance: 0.0 },
-    vq: { rdDelta: 0.0, f0Scale: 0.96, f0VarianceScale: 0.85, durationScale: 1.27, pauseScale: 1.0 },
+    vq: {
+      rdDelta: 0.0,
+      f0Scale: 0.96,
+      f0VarianceScale: 0.85,
+      durationScale: 1.27,
+      pauseScale: 1.0,
+    },
     citations: ["Fish_2017"],
     note: "Primary marker is slow rate (Fish_2017 η²=.22); initial F0 drop + amplitude crescendo are position-dependent.",
   },
@@ -545,7 +573,9 @@ export function resolveAffectPreset(name: string, sex?: SpeakerSex): AffectPrese
 
   const preset = AFFECT_PRESETS.get(name);
   if (!preset) {
-    throw new Error(`Unknown affect preset '${name}'. Known: ${listAffectPresetNames().join(", ")}`);
+    throw new Error(
+      `Unknown affect preset '${name}'. Known: ${listAffectPresetNames().join(", ")}`,
+    );
   }
   return preset;
 }

@@ -16,16 +16,22 @@
 // expected bouval for both, then read the actual rendered F2 at the boundary.
 //
 // Run: npx tsx scripts/dt13-female-locus-probe.ts
-import { textToKlattTrackDetailed } from "../src/tts-frontend";
+
+import { type LowerOptions, readLowerOptions } from "../src/declarative-frontend/hrg/lowering";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import type { KlattFrame } from "../src/tts-frontend-types";
 
-type LocusEntry = { locus_hz: number; prcnt: number; durtran_ms: number };
+type LocusTable = NonNullable<LowerOptions["transitions"]["loci"]>;
+type LocusEntry = LocusTable[string][string][string];
 
-const spec = loadBundledRulepackSpec("dectalk-english") as any;
-const transitions = spec.output.lowering.transitions;
-const lociMale = transitions.loci as Record<string, Record<string, Record<string, LocusEntry>>>;
-const lociFemale = transitions.loci_female as Record<string, Record<string, Record<string, LocusEntry>>>;
+const spec = loadBundledRulepackSpec("dectalk-english");
+const transitions = readLowerOptions(spec.output.lowering).transitions;
+if (!transitions.loci || !transitions.loci_female) {
+  throw new Error("DECtalk lowering policy must define male and female locus tables");
+}
+const lociMale = transitions.loci;
+const lociFemale = transitions.loci_female;
 
 // Each probe word: a CV word; `obst` is the leading obstruent phoneme; `sontyx`
 // is the vowel category (front-unrounded vowels -> "1") used to index the loci.
@@ -44,11 +50,15 @@ function g(f: KlattFrame, k: string): number | null {
 
 // First voiced (F2-bearing) frame whose phoneme is a vowel (not the obstruent /
 // its release): the forward-edge boundary value of the vowel.
-function firstVowelF2(track: KlattFrame[], obst: string): { time: number; f2: number; ph: string } | null {
+function firstVowelF2(
+  track: KlattFrame[],
+  obst: string,
+): { time: number; f2: number; ph: string } | null {
   for (const f of track) {
     const ph = (f.phoneme ?? "").toUpperCase();
     if (ph === "" || ph === "SIL") continue;
-    if (ph === obst || ph.startsWith(obst + "_") || ph.endsWith("_REL") || ph.endsWith("_CL")) continue;
+    if (ph === obst || ph.startsWith(obst + "_") || ph.endsWith("_REL") || ph.endsWith("_CL"))
+      continue;
     const f2 = g(f, "F2");
     if (f2 != null && f2 > 0) return { time: f.time, f2, ph };
   }
@@ -61,7 +71,8 @@ function steadyVowelF2(track: KlattFrame[], obst: string): number | null {
   for (const f of track) {
     const ph = (f.phoneme ?? "").toUpperCase();
     if (ph === "" || ph === "SIL") continue;
-    if (ph === obst || ph.startsWith(obst + "_") || ph.endsWith("_REL") || ph.endsWith("_CL")) continue;
+    if (ph === obst || ph.startsWith(obst + "_") || ph.endsWith("_REL") || ph.endsWith("_CL"))
+      continue;
     const f2 = g(f, "F2");
     if (f2 != null && f2 > 0) last = f2;
   }
@@ -98,7 +109,9 @@ for (const w of WORDS) {
 
   if (pStart && pSteady != null && mEntry) {
     const exp = Math.round(bouval(mEntry, pSteady));
-    console.log(`  PAUL  (male)  vowel ${pStart.ph} steadyF2=${Math.round(pSteady)} | boundary F2=${Math.round(pStart.f2)} (expected male bouval=${exp})`);
+    console.log(
+      `  PAUL  (male)  vowel ${pStart.ph} steadyF2=${Math.round(pSteady)} | boundary F2=${Math.round(pStart.f2)} (expected male bouval=${exp})`,
+    );
     if (Math.abs(pStart.f2 - exp) > 2) allOk = false;
   } else {
     console.log("  PAUL  (male)  — no vowel F2 frame found");
@@ -107,7 +120,9 @@ for (const w of WORDS) {
   if (bStart && bSteady != null && fEntry && mEntry) {
     const expF = Math.round(bouval(fEntry, bSteady));
     const expM = Math.round(bouval(mEntry, bSteady));
-    console.log(`  BETTY (female) vowel ${bStart.ph} steadyF2=${Math.round(bSteady)} | boundary F2=${Math.round(bStart.f2)} (expected FEMALE bouval=${expF}, male-would-be=${expM})`);
+    console.log(
+      `  BETTY (female) vowel ${bStart.ph} steadyF2=${Math.round(bSteady)} | boundary F2=${Math.round(bStart.f2)} (expected FEMALE bouval=${expF}, male-would-be=${expM})`,
+    );
     // Betty must match the FEMALE bouval, NOT the male one.
     if (Math.abs(bStart.f2 - expF) > 2) {
       console.log("  *** BETTY does not match FEMALE locus ***");
@@ -123,5 +138,7 @@ for (const w of WORDS) {
   }
 }
 
-console.log(`\nRESULT: ${allOk ? "OK — Paul uses male loci, Betty uses female loci (selected by sex)" : "FAIL — see *** lines above"}`);
+console.log(
+  `\nRESULT: ${allOk ? "OK — Paul uses male loci, Betty uses female loci (selected by sex)" : "FAIL — see *** lines above"}`,
+);
 process.exit(allOk ? 0 : 1);

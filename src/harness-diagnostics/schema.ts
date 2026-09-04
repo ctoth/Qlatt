@@ -1,10 +1,32 @@
 // Parse and validate diagnostics YAML config into DiagConfig.
 
 import yaml from "js-yaml";
-import type { DiagConfig, TapDef, CheckDef, PollConfig, DisplayConfig, DisplaySection } from "./types";
+import type {
+  CheckDef,
+  DiagConfig,
+  DisplayConfig,
+  DisplaySection,
+  PollConfig,
+  TapDef,
+} from "./types";
 
-const VALID_MEASURES = new Set(["rms", "peak", "fft_peak_freq", "band_energy", "band_share", "band_ratio_db", "zcr", "rms_ratio_db"]);
-const VALID_CHECK_TYPES = new Set(["tap_check", "param_range", "event_check", "across_plays", "track_analysis"]);
+const VALID_MEASURES = new Set([
+  "rms",
+  "peak",
+  "fft_peak_freq",
+  "band_energy",
+  "band_share",
+  "band_ratio_db",
+  "zcr",
+  "rms_ratio_db",
+]);
+const VALID_CHECK_TYPES = new Set([
+  "tap_check",
+  "param_range",
+  "event_check",
+  "across_plays",
+  "track_analysis",
+]);
 const VALID_SEVERITIES = new Set(["info", "warn", "error"]);
 const VALID_AGGREGATES = new Set(["last", "max", "min"]);
 

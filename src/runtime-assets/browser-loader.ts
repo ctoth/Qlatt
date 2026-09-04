@@ -5,9 +5,8 @@ function normalizeBasePath(basePath: string): string {
 }
 
 export function createBrowserRuntimeAssetLoader(
-  basePath: string = ((typeof import.meta !== "undefined" &&
-    (import.meta as unknown as { env?: { BASE_URL?: string } }).env?.BASE_URL) ||
-    "/") + "worklets/",
+  basePath: string = ((typeof import.meta !== "undefined" && import.meta.env.BASE_URL) || "/") +
+    "worklets/",
 ): RuntimeAssetLoader {
   const normalizedBase = normalizeBasePath(basePath.replace(/\\/g, "/"));
   return {

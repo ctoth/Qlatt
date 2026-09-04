@@ -1,4 +1,10 @@
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  computeRmsPeak,
+  initWasmModule,
+  resolveWasmUrl,
+  WasmBuffer,
+} from "./wasm-utils.js";
 
 interface SignalSwitchWasmExports {
   memory: WebAssembly.Memory;
@@ -11,7 +17,7 @@ interface SignalSwitchWasmExports {
     input1Ptr: number,
     selector: number,
     outputPtr: number,
-    blockSize: number
+    blockSize: number,
   ): void;
 }
 
@@ -107,7 +113,7 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
   process(
     inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const output = outputs[0];
@@ -117,7 +123,13 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
     const outputChannel = output[0];
     const blockSize = outputChannel.length;
 
-    if (!this.ready || !this.wasm || !this.input0Buffer || !this.input1Buffer || !this.outputBuffer) {
+    if (
+      !this.ready ||
+      !this.wasm ||
+      !this.input0Buffer ||
+      !this.input1Buffer ||
+      !this.outputBuffer
+    ) {
       outputChannel.fill(0);
       return true;
     }
@@ -158,7 +170,7 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
       this.input1Buffer.ptr,
       selector,
       this.outputBuffer.ptr,
-      blockSize
+      blockSize,
     );
 
     this.outputBuffer.refresh();
@@ -175,7 +187,7 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
     buffer: Float32Array,
     input0Buffer: Float32Array | null,
     input1Buffer: Float32Array | null,
-    selector: number
+    selector: number,
   ): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;

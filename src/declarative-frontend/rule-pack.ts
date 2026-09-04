@@ -1,10 +1,4 @@
 import {
-  DSL_ROOT_KEYS,
-  parseDslSpec,
-  type NormalizedDslSpec,
-} from "./parser";
-import { assertValidSpec } from "./validation";
-import {
   cloneValue,
   isPlainObject,
   loadYamlSource,
@@ -12,6 +6,8 @@ import {
   parseYamlString,
   resolveIncludePath,
 } from "../yaml-loader";
+import { DSL_ROOT_KEYS, type NormalizedDslSpec, parseDslSpec } from "./parser";
+import { assertValidSpec } from "./validation";
 
 type PlainObject = Record<string, unknown>;
 
@@ -77,11 +73,7 @@ export const DEFAULT_RULEPACK_PATH = BUNDLED_FRONTEND_RULEPACK_PATHS[DEFAULT_FRO
  * - topology: concat + dedup each sub-key (hierarchy, parallel, point)
  * - All other fields (version, parameters, output, etc.): root wins, child ignored
  */
-function mergeChildIntoRoot(
-  root: PlainObject,
-  child: PlainObject,
-  childPath: string,
-): PlainObject {
+function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: string): PlainObject {
   const merged = cloneValue(root);
   if (!isPlainObject(merged)) {
     throw new Error("E_RULEPACK_COMPILE: normalized root must remain an object");
@@ -148,7 +140,7 @@ function mergeChildIntoRoot(
     if (!DSL_ROOT_KEYS.has(key)) continue;
     if (!hasNonEmptyValue(value)) continue;
     throw new Error(
-      `E_UNMERGED_CHILD_ROOT_KEY: included file ${childPath} declares non-empty root key "${key}", but mergeChildIntoRoot does not merge that key`
+      `E_UNMERGED_CHILD_ROOT_KEY: included file ${childPath} declares non-empty root key "${key}", but mergeChildIntoRoot does not merge that key`,
     );
   }
 
@@ -362,16 +354,14 @@ export function listBundledFrontendIds(): string[] {
 
 export function resolveBundledRulepackPath(frontendId: string = DEFAULT_FRONTEND_ID): string {
   const specPath =
-    BUNDLED_FRONTEND_RULEPACK_PATHS[
-      frontendId as keyof typeof BUNDLED_FRONTEND_RULEPACK_PATHS
-    ];
+    BUNDLED_FRONTEND_RULEPACK_PATHS[frontendId as keyof typeof BUNDLED_FRONTEND_RULEPACK_PATHS];
   if (typeof specPath === "string" && specPath.length > 0) {
     return specPath;
   }
   const known = listBundledFrontendIds();
   throw new Error(
     `E_FRONTEND_ID_UNKNOWN: '${frontendId}' is not a bundled frontend` +
-      (known.length > 0 ? ` (known: ${known.join(", ")})` : "")
+      (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
   );
 }
 
@@ -396,7 +386,7 @@ export function loadRulepackSpecFromPath(
     const known = listBundledRulepackPaths();
     throw new Error(
       `E_RULESET_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : "")
+        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
     );
   }
 
@@ -418,7 +408,7 @@ export function loadRulepackSpecFromPath(
 }
 
 export async function preloadRulepackSpecFromPath(
-  specPath: string = DEFAULT_RULEPACK_PATH
+  specPath: string = DEFAULT_RULEPACK_PATH,
 ): Promise<CompiledRulepack> {
   const cached = BUNDLED_RULEPACK_CACHE.get(specPath);
   if (cached) return cached;
@@ -430,7 +420,7 @@ export async function preloadRulepackSpecFromPath(
     const known = listBundledRulepackPaths();
     throw new Error(
       `E_RULESET_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : "")
+        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
     );
   }
 
@@ -449,13 +439,13 @@ export async function preloadRulepackSpecFromPath(
 }
 
 export function loadBundledRulepackSpec(
-  frontendId: string = DEFAULT_FRONTEND_ID
+  frontendId: string = DEFAULT_FRONTEND_ID,
 ): CompiledRulepack {
   return loadRulepackSpecFromPath(resolveBundledRulepackPath(frontendId));
 }
 
 export async function preloadBundledRulepackSpec(
-  frontendId: string = DEFAULT_FRONTEND_ID
+  frontendId: string = DEFAULT_FRONTEND_ID,
 ): Promise<CompiledRulepack> {
   return preloadRulepackSpecFromPath(resolveBundledRulepackPath(frontendId));
 }

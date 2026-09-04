@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { describe, expect, it } from "vitest";
 import { runExportListeningManifest } from "../scripts/export-listening-ab-manifest";
 
 function runCli(args: string[]) {

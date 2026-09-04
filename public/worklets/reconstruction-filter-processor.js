@@ -7,7 +7,7 @@
  * output-stage filter declarative for experiments that intentionally render
  * higher-frequency fricative energy above the Klatt 1980 playback bandwidth.
  */
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+import { computeRmsPeak, initWasmModule, resolveWasmUrl, WasmBuffer, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./reconstruction-filter.wasm");
 class ReconstructionFilterProcessor extends AudioWorkletProcessor {
     disposed = false;

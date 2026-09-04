@@ -1,12 +1,12 @@
 import type { Item } from "./item";
 import type { HrgNode } from "./relation";
-import type { Utterance } from "./utterance";
 import type {
   FeatureValue,
   JournalOperation,
   TransactionJournalEntry,
   TransactionMetadata,
 } from "./types";
+import type { Utterance } from "./utterance";
 
 type StagedOperation =
   | { kind: "create_item"; item: Item }
@@ -33,8 +33,7 @@ type StagedOperation =
     }
   | { kind: "resolve_mark_time"; markId: string; timeMs: number };
 
-type PreparedOperation =
-  | { journal: JournalOperation; commit: () => readonly string[] };
+type PreparedOperation = { journal: JournalOperation; commit: () => readonly string[] };
 
 function freezeMetadata(metadata: TransactionMetadata): TransactionMetadata {
   if (!metadata.ruleId || !metadata.phase || !metadata.tag || !metadata.reason) {
@@ -161,11 +160,7 @@ export class HrgTransaction {
     return this;
   }
 
-  partitionAnchors(
-    items: readonly Item[],
-    leftMarkId: string,
-    rightMarkId: string,
-  ): this {
+  partitionAnchors(items: readonly Item[], leftMarkId: string, rightMarkId: string): this {
     this.assertOpen();
     this.operations.push({
       kind: "partition_anchors",
@@ -223,7 +218,8 @@ export class HrgTransaction {
       if (operation.kind === "associate" || operation.kind === "disassociate") {
         this.assertAvailableItem(operation.from);
         this.assertAvailableItem(operation.to);
-        if (!operation.name) throw new Error("E_HRG_ASSOCIATION_NAME: association name is required");
+        if (!operation.name)
+          throw new Error("E_HRG_ASSOCIATION_NAME: association name is required");
         const active = operation.kind === "associate";
         prepared.push({
           journal: Object.freeze({
@@ -232,16 +228,25 @@ export class HrgTransaction {
             fromItemId: operation.from.id,
             toItemId: operation.to.id,
           }),
-          commit: () => [this.utterance
-            ._writeAssociation(operation.from, operation.name, operation.to, active, input)
-            .decisionId],
+          commit: () => [
+            this.utterance._writeAssociation(
+              operation.from,
+              operation.name,
+              operation.to,
+              active,
+              input,
+            ).decisionId,
+          ],
         });
         continue;
       }
       if (operation.kind === "partition_anchors") {
         if (operation.items.length === 0) throw new Error("E_HRG_TEMPORAL_PARTITION_EMPTY");
         for (const item of operation.items) this.assertAvailableItem(item);
-        if (!this.utterance.axis.get(operation.leftMarkId) || !this.utterance.axis.get(operation.rightMarkId)) {
+        if (
+          !this.utterance.axis.get(operation.leftMarkId) ||
+          !this.utterance.axis.get(operation.rightMarkId)
+        ) {
           throw new Error("E_HRG_TEMPORAL_MARK_UNKNOWN");
         }
         if (this.utterance.axis.compare(operation.leftMarkId, operation.rightMarkId) >= 0) {
@@ -256,18 +261,22 @@ export class HrgTransaction {
             leftMarkId: operation.leftMarkId,
             rightMarkId: operation.rightMarkId,
           }),
-          commit: () => this.utterance._partitionAnchors(
-            operation.items,
-            operation.leftMarkId,
-            operation.rightMarkId,
-            input,
-          ),
+          commit: () =>
+            this.utterance._partitionAnchors(
+              operation.items,
+              operation.leftMarkId,
+              operation.rightMarkId,
+              input,
+            ),
         });
         continue;
       }
       if (operation.kind === "anchor_point") {
         this.assertAvailableItem(operation.item);
-        if (!this.utterance.axis.get(operation.leftMarkId) || !this.utterance.axis.get(operation.rightMarkId)) {
+        if (
+          !this.utterance.axis.get(operation.leftMarkId) ||
+          !this.utterance.axis.get(operation.rightMarkId)
+        ) {
           throw new Error("E_HRG_TEMPORAL_MARK_UNKNOWN");
         }
         if (this.utterance.axis.compare(operation.leftMarkId, operation.rightMarkId) > 0) {
@@ -288,14 +297,16 @@ export class HrgTransaction {
             ratio: operation.ratio,
             ...(operation.offsetMs != null ? { offsetMs: operation.offsetMs } : {}),
           }),
-          commit: () => [this.utterance.anchorPoint(
-            operation.item,
-            operation.leftMarkId,
-            operation.rightMarkId,
-            operation.ratio,
-            input,
-            operation.offsetMs,
-          ).decisionId],
+          commit: () => [
+            this.utterance.anchorPoint(
+              operation.item,
+              operation.leftMarkId,
+              operation.rightMarkId,
+              operation.ratio,
+              input,
+              operation.offsetMs,
+            ).decisionId,
+          ],
         });
         continue;
       }
@@ -310,11 +321,9 @@ export class HrgTransaction {
             markId: operation.markId,
             timeMs: operation.timeMs,
           }),
-          commit: () => [this.utterance.resolveMarkTime(
-            operation.markId,
-            operation.timeMs,
-            input,
-          ).decisionId],
+          commit: () => [
+            this.utterance.resolveMarkTime(operation.markId, operation.timeMs, input).decisionId,
+          ],
         });
         continue;
       }
@@ -366,9 +375,14 @@ export class HrgTransaction {
       plannedMembership.add(membershipKey);
 
       if (operation.kind === "append") {
-        if (relation.kind !== "list") throw new Error("E_HRG_RELATION_KIND: append requires a list relation");
+        if (relation.kind !== "list")
+          throw new Error("E_HRG_RELATION_KIND: append requires a list relation");
         prepared.push({
-          journal: Object.freeze({ kind: "append", relationName: operation.relationName, itemId: operation.item.id }),
+          journal: Object.freeze({
+            kind: "append",
+            relationName: operation.relationName,
+            itemId: operation.item.id,
+          }),
           commit: () => [relation.append(operation.item, input).write.decisionId],
         });
         continue;
@@ -393,16 +407,22 @@ export class HrgTransaction {
           }),
           commit: () => {
             const previousNode = relation.node(operation.previous);
-            if (!previousNode) throw new Error("E_HRG_PREVIOUS_RELATION: staged previous was not committed first");
+            if (!previousNode)
+              throw new Error("E_HRG_PREVIOUS_RELATION: staged previous was not committed first");
             return [relation.insertAfter(previousNode, operation.item, input).write.decisionId];
           },
         });
         continue;
       }
       if (operation.kind === "add_root") {
-        if (relation.kind !== "tree") throw new Error("E_HRG_RELATION_KIND: addRoot requires a tree relation");
+        if (relation.kind !== "tree")
+          throw new Error("E_HRG_RELATION_KIND: addRoot requires a tree relation");
         prepared.push({
-          journal: Object.freeze({ kind: "add_root", relationName: operation.relationName, itemId: operation.item.id }),
+          journal: Object.freeze({
+            kind: "add_root",
+            relationName: operation.relationName,
+            itemId: operation.item.id,
+          }),
           commit: () => [relation.addRoot(operation.item, input).write.decisionId],
         });
         continue;
@@ -425,7 +445,8 @@ export class HrgTransaction {
         }),
         commit: () => {
           const parentNode: HrgNode | undefined = relation.node(operation.parent);
-          if (!parentNode) throw new Error("E_HRG_PARENT_RELATION: staged parent was not committed first");
+          if (!parentNode)
+            throw new Error("E_HRG_PARENT_RELATION: staged parent was not committed first");
           return [relation.addDaughter(parentNode, operation.item, input).write.decisionId];
         },
       });

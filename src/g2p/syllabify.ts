@@ -9,7 +9,7 @@
  *           Selkirk (1982), The Syllable.
  */
 
-import { loadYamlDocumentSync } from '../yaml-loader';
+import { loadYamlDocumentSync } from "../yaml-loader";
 
 // ── Phonotactics data from YAML ─────────────────────────────────────────
 
@@ -27,7 +27,7 @@ interface PhonotacticsData {
 const phonotacticsCache = new Map<string, PhonotacticsData>();
 
 export function loadPhonotacticsSync(
-  path: string = '/rules/frontends/qlatt-english/phonotactics.yaml',
+  path: string = "/rules/frontends/qlatt-english/phonotactics.yaml",
 ): PhonotacticsData {
   const cached = phonotacticsCache.get(path);
   if (cached) return cached;
@@ -53,7 +53,7 @@ export function isVowel(phoneme: string): boolean {
 function isLegalOnset(consonants: string[]): boolean {
   if (consonants.length <= 1) return true;
   const data = loadPhonotacticsSync();
-  const key = consonants.join('');
+  const key = consonants.join("");
   return new Set(data.legal_onsets).has(key);
 }
 
@@ -95,8 +95,8 @@ export function syllabify(phonemes: string[]): string[][] {
   const splitPoints: number[] = [];
 
   for (let vi = 0; vi < vowelPositions.length - 1; vi++) {
-    const vEnd = vowelPositions[vi];       // position of vowel i
-    const vNext = vowelPositions[vi + 1];  // position of vowel i+1
+    const vEnd = vowelPositions[vi]; // position of vowel i
+    const vNext = vowelPositions[vi + 1]; // position of vowel i+1
 
     // Consonants between the two vowels: phonemes[vEnd+1 .. vNext-1]
     const consonantStart = vEnd + 1;

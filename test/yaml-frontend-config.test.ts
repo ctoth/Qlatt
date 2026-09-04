@@ -4,12 +4,40 @@
  * the frontend runtime requirements.
  */
 import { describe, expect, it } from "vitest";
+import { readLowerOptions } from "../src/declarative-frontend/hrg/lowering";
 import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
+import { isPlainObject } from "../src/yaml-loader";
 
-const spec = QLATT_ENGLISH_RULEPACK as Record<string, any>;
+interface TranscriptionFixture {
+  diagnostic_symbols: Record<string, string[]>;
+  punctuation_tokens: string[];
+}
+
+function readTranscriptionFixture(value: unknown): TranscriptionFixture {
+  if (!isPlainObject(value) || !isPlainObject(value.diagnostic_symbols)) {
+    throw new Error("bundled transcription config must define diagnostic_symbols");
+  }
+  const diagnosticSymbols: Record<string, string[]> = {};
+  for (const [symbol, phones] of Object.entries(value.diagnostic_symbols)) {
+    if (!Array.isArray(phones) || !phones.every((phone) => typeof phone === "string")) {
+      throw new Error(`diagnostic_symbols.${symbol} must be string[]`);
+    }
+    diagnosticSymbols[symbol] = phones;
+  }
+  if (
+    !Array.isArray(value.punctuation_tokens) ||
+    !value.punctuation_tokens.every((token) => typeof token === "string")
+  ) {
+    throw new Error("bundled transcription punctuation_tokens must be string[]");
+  }
+  return {
+    diagnostic_symbols: diagnosticSymbols,
+    punctuation_tokens: value.punctuation_tokens,
+  };
+}
 
 describe("YAML frontend config — output section", () => {
-  const output = spec.output.lowering;
+  const output = readLowerOptions(QLATT_ENGLISH_RULEPACK.output.lowering);
 
   it("lowering output section exists", () => {
     expect(output).toBeDefined();
@@ -65,13 +93,14 @@ describe("YAML frontend config — output section", () => {
   });
 
   it("transitions.blend.factor has citations", () => {
-    expect(Array.isArray(output.transitions.blend.factor.citations)).toBe(true);
-    expect(output.transitions.blend.factor.citations.length).toBeGreaterThan(0);
+    const citations = output.transitions.blend.factor.citations;
+    expect(Array.isArray(citations)).toBe(true);
+    expect(citations?.length ?? 0).toBeGreaterThan(0);
   });
 });
 
 describe("YAML frontend config — transcription section", () => {
-  const transcription = spec.transcription;
+  const transcription = readTranscriptionFixture(QLATT_ENGLISH_RULEPACK.transcription);
 
   it("transcription section exists", () => {
     expect(transcription).toBeDefined();
@@ -83,12 +112,30 @@ describe("YAML frontend config — transcription section", () => {
     expect(typeof symbols).toBe("object");
 
     const expectedEntries: Record<string, string[]> = {
-      b: ["B"], ch: ["CH"], d: ["D"], dh: ["DH"],
-      f: ["F"], g: ["G"], hh: ["HH"], jh: ["JH"],
-      k: ["K"], l: ["L"], m: ["M"], n: ["N"],
-      ng: ["NG"], p: ["P"], r: ["R"], s: ["S"],
-      sh: ["SH"], t: ["T"], th: ["TH"], v: ["V"],
-      w: ["W"], y: ["Y"], z: ["Z"], zh: ["ZH"],
+      b: ["B"],
+      ch: ["CH"],
+      d: ["D"],
+      dh: ["DH"],
+      f: ["F"],
+      g: ["G"],
+      hh: ["HH"],
+      jh: ["JH"],
+      k: ["K"],
+      l: ["L"],
+      m: ["M"],
+      n: ["N"],
+      ng: ["NG"],
+      p: ["P"],
+      r: ["R"],
+      s: ["S"],
+      sh: ["SH"],
+      t: ["T"],
+      th: ["TH"],
+      v: ["V"],
+      w: ["W"],
+      y: ["Y"],
+      z: ["Z"],
+      zh: ["ZH"],
     };
 
     for (const [key, value] of Object.entries(expectedEntries)) {
@@ -99,7 +146,7 @@ describe("YAML frontend config — transcription section", () => {
 
   it("punctuation_tokens has all 6 marks", () => {
     expect(transcription.punctuation_tokens).toEqual(
-      expect.arrayContaining([",", ".", "?", "!", ";", ":"])
+      expect.arrayContaining([",", ".", "?", "!", ";", ":"]),
     );
     expect(transcription.punctuation_tokens).toHaveLength(6);
   });

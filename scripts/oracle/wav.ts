@@ -222,10 +222,7 @@ export function alignByLag(
     const length = Math.min(reference.length, candidate.length - lagSamples);
     return {
       reference: reference.slice(0, Math.max(0, length)),
-      candidate: candidate.slice(
-        lagSamples,
-        Math.max(lagSamples, lagSamples + length),
-      ),
+      candidate: candidate.slice(lagSamples, Math.max(lagSamples, lagSamples + length)),
     };
   }
 

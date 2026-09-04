@@ -1,10 +1,5 @@
 import { replayJournal } from "./replay";
-import type {
-  FeatureValue,
-  FeatureWrite,
-  PhaseCheckpoint,
-  RuleAttempt,
-} from "./types";
+import type { FeatureValue, FeatureWrite, PhaseCheckpoint, RuleAttempt } from "./types";
 import type { Utterance } from "./utterance";
 
 export interface FieldExplanation {
@@ -42,9 +37,9 @@ function findCheckpoint(
   phase: string,
   boundary: PhaseCheckpoint["boundary"],
 ): PhaseCheckpoint {
-  const checkpoint = utterance.checkpoints().find(
-    (candidate) => candidate.phase === phase && candidate.boundary === boundary,
-  );
+  const checkpoint = utterance
+    .checkpoints()
+    .find((candidate) => candidate.phase === phase && candidate.boundary === boundary);
   if (!checkpoint) {
     throw new Error(`E_HRG_TOOLING_CHECKPOINT: no ${boundary} checkpoint for phase '${phase}'`);
   }
@@ -76,13 +71,15 @@ export function whyNotRule(
   ruleName: string,
   itemId: string,
 ): WhyNotRuleResult {
-  const attempts = utterance.ruleAttempts().filter(
-    (attempt) => attempt.rule === ruleName && attempt.itemIds.includes(itemId),
-  );
+  const attempts = utterance
+    .ruleAttempts()
+    .filter((attempt) => attempt.rule === ruleName && attempt.itemIds.includes(itemId));
   return Object.freeze({
     status: attempts.some((attempt) => attempt.status === "fired")
       ? "fired"
-      : attempts.length > 0 ? "not_fired" : "no_attempt",
+      : attempts.length > 0
+        ? "not_fired"
+        : "no_attempt",
     rule: ruleName,
     itemId,
     attempts: Object.freeze(attempts),

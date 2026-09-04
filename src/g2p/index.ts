@@ -16,10 +16,10 @@
  * Citation: Hunnicutt (1976), Phonological Rules for a Text-to-Speech System.
  */
 
-import type { DictLookup, PronunciationResult } from './types';
-import { decomposeWord, getStressHintForWord } from './morphology';
-import { applyLtsRules } from './lts-engine';
-import { assignStress } from './stress';
+import { applyLtsRules } from "./lts-engine";
+import { decomposeWord, getStressHintForWord } from "./morphology";
+import { assignStress } from "./stress";
+import type { DictLookup, PronunciationResult } from "./types";
 
 /**
  * Pronounce a single word using the multi-layer G2P pipeline.
@@ -32,12 +32,12 @@ export function pronounce(
   word: string,
   dictLookup: DictLookup,
   options: { ltsPath?: string; morphologyPath?: string } = {
-    ltsPath: '/rules/frontends/qlatt-english/lts-rules.yaml',
-    morphologyPath: '/rules/frontends/qlatt-english/morphology.yaml',
+    ltsPath: "/rules/frontends/qlatt-english/lts-rules.yaml",
+    morphologyPath: "/rules/frontends/qlatt-english/morphology.yaml",
   },
 ): PronunciationResult {
   if (!word || word.trim().length === 0) {
-    return { phonemes: [], source: 'lts-rules', word: word || '' };
+    return { phonemes: [], source: "lts-rules", word: word || "" };
   }
 
   const lowerWord = word.toLowerCase();
@@ -45,7 +45,7 @@ export function pronounce(
   // 1. Try direct dictionary lookup
   const dictResult = dictLookup(lowerWord);
   if (dictResult) {
-    return { phonemes: dictResult, source: 'dictionary', word: lowerWord };
+    return { phonemes: dictResult, source: "dictionary", word: lowerWord };
   }
 
   // 2. Handle possessive 's: strip it and retry dict
@@ -54,8 +54,8 @@ export function pronounce(
     const baseResult = dictLookup(base);
     if (baseResult) {
       return {
-        phonemes: [...baseResult, 'Z'],
-        source: 'dictionary',
+        phonemes: [...baseResult, "Z"],
+        source: "dictionary",
         word: lowerWord,
         rootWord: base,
       };
@@ -71,11 +71,11 @@ export function pronounce(
   // 4. Fall back to Elovitz LTS rules + Hunnicutt stress assignment
   if (!options.ltsPath) {
     throw new Error(
-      `E_LTS_PATH_MISSING: word '${word}' not in dictionary and no ltsPath configured`
+      `E_LTS_PATH_MISSING: word '${word}' not in dictionary and no ltsPath configured`,
     );
   }
   const ltsPhonemes = applyLtsRules(lowerWord, options.ltsPath);
   const stressHint = getStressHintForWord(lowerWord, options.morphologyPath);
   const stressedPhonemes = assignStress(ltsPhonemes, stressHint);
-  return { phonemes: stressedPhonemes, source: 'lts-rules', word: lowerWord };
+  return { phonemes: stressedPhonemes, source: "lts-rules", word: lowerWord };
 }

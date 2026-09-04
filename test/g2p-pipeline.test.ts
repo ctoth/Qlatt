@@ -69,12 +69,12 @@ describe("pronounce() pipeline order", () => {
     expect(result.phonemes).toEqual(["R", "AH1", "N", "IH0", "NG"]);
   });
 
-  it("handles possessive 's via dict + Z", () => {
-    const dict = makeDict({ cat: ["K", "AE1", "T"] });
-    const result = pronounce("cat's", dict);
+  it("uses the plural allomorph for possessive 's after a sibilant", () => {
+    const dict = makeDict({ fox: ["F", "AA1", "K", "S"] });
+    const result = pronounce("fox's", dict);
     expect(result.source).toBe("dictionary");
-    expect(result.phonemes).toEqual(["K", "AE1", "T", "Z"]);
-    expect(result.rootWord).toBe("cat");
+    expect(result.phonemes).toEqual(["F", "AA1", "K", "S", "IH0", "Z"]);
+    expect(result.rootWord).toBe("fox");
   });
 });
 

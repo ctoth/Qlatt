@@ -34,6 +34,7 @@ This is enforced through three interlocking systems:
 - When you add a rule application: include a `tag:` that describes the linguistic motivation.
 - When validating `params.*` CEL paths, distinguish bundled rulepacks that declare a static `parameters:` schema from programmatic rules whose params are supplied by the execution call. Capture whether `parameters` was declared before parsing or normalization can synthesize an empty object, and pass that fact explicitly into validation. Enforce nested-path membership only when the static schema exists; always validate the `params` root identifier.
 - When strengthening CEL validation, preserve specialized validator diagnostics by running function, relation, and cursor-surface checks before the generic unknown-variable check. Predicate-body expansion must inherit the caller's declared variables and item-variable set. Every strict-validation test fixture must declare each item feature its expressions read and supply all required rule metadata, including citations and per-effect vocabulary tags. Rerun `test/declarative-frontend-schema.test.ts` after changing that environment.
+- When expanding phoneme-literal validation to a new CEL syntax, rerun bundled single-parse tests in a fresh Vitest process so the rulepack cache cannot hide new diagnostics. If a rule intentionally names a symbol normalized before inventory lookup, declare it in that frontend inventory's `normalization_aliases`; do not weaken validation globally.
 - When you add a new pipeline stage: integrate with `ProvenanceCollector` — emit decision records for every non-trivial choice.
 - When you modify semantics.yaml realize rules: comment the formula source. `# Fant 1960 Table 2.34-1` is the minimum.
 - When you write Rust DSP code: cite the paper in a doc comment at the top of the module. See `crates/aerodynamic-model/src/lib.rs` for the pattern.
@@ -62,6 +63,8 @@ Do not rely on long shell or Node one-liners for non-trivial repo analysis, migr
 - If a throwaway script is only needed temporarily, still make it a normal file first; delete it afterward if it should not stay in the repo.
 
 ## Build Commands
+
+Before the full `npm test` gate, verify the candidate checkout has the WASM files imported by `test/klsyn88.test.ts` under `target/wasm32-unknown-unknown/release`. If any are absent, run the platform build command below once before testing; a missing WASM file is an unmet prerequisite, not a product failure.
 
 ```bash
 # Build WASM modules (required first)

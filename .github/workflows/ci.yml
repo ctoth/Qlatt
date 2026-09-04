@@ -32,6 +32,17 @@ jobs:
 
       - run: npm run typecheck
 
+      - run: rustup target add wasm32-unknown-unknown
+
+      - run: sudo apt-get update && sudo apt-get install --yes libasound2-dev
+
+      - name: Build node-web-audio-api for the runner
+        run: |
+          printf '\n[workspace]\n' >> node_modules/node-web-audio-api/Cargo.toml
+          npm --prefix node_modules/node-web-audio-api run build:only
+
+      - run: bash build.sh
+
       - run: npm test
 
       - run: npm run build

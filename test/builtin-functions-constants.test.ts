@@ -2,9 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const YAML_LOADER_MODULE = "../src/yaml-loader";
 
-function mockAmpConstants(
-  overrides: Record<string, unknown> = {},
-): Record<string, unknown> {
+function mockAmpConstants(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     constants: {
       ndbCor: [10, 5],
@@ -36,9 +34,7 @@ describe("declarative Klatt conversion constants", () => {
       loadYamlDocumentSync: () => mockAmpConstants(),
     }));
 
-    const { dbToLinear, dbToLinearKlsyn, proximity } = await import(
-      "../src/builtin-functions"
-    );
+    const { dbToLinear, dbToLinearKlsyn, proximity } = await import("../src/builtin-functions");
 
     expect(dbToLinear(-10)).toBe(0);
     expect(dbToLinear(3)).toBe(2);
@@ -54,8 +50,6 @@ describe("declarative Klatt conversion constants", () => {
       loadYamlDocumentSync: () => mockAmpConstants({ ndbCor: [10] }),
     }));
 
-    await expect(import("../src/builtin-functions")).rejects.toThrow(
-      "E_KLATT_AMP_TABLE_LENGTH",
-    );
+    await expect(import("../src/builtin-functions")).rejects.toThrow("E_KLATT_AMP_TABLE_LENGTH");
   });
 });

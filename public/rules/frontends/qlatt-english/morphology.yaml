@@ -4,102 +4,185 @@ citations:
   - Allen, Hunnicutt & Klatt 1987 Ch.4-5
 suffixes:
   # Ordered longest-first for matching priority
-  - affix: "ation"
-    pronunciation: [EY1, SH, AH0, N]
+  - spelling: "ation"
+    condition_class: always
+    output_phonemes: [EY1, SH, AH0, N]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     stress_type: forcing
     stress_target: penult
     min_root: 3
-  - affix: "tion"
-    pronunciation: [SH, AH0, N]
+  - spelling: "tion"
+    condition_class: always
+    output_phonemes: [SH, AH0, N]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     stress_type: forcing
     stress_target: penult
     min_root: 3
-  - affix: "sion"
-    pronunciation: [ZH, AH0, N]
+  - spelling: "sion"
+    condition_class: always
+    output_phonemes: [ZH, AH0, N]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     stress_type: forcing
     stress_target: penult
     min_root: 3
-  - affix: "ness"
-    pronunciation: [N, AH0, S]
+  - spelling: "ness"
+    condition_class: always
+    output_phonemes: [N, AH0, S]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     stress_type: non_affecting
     min_root: 3
-  - affix: "ment"
-    pronunciation: [M, AH0, N, T]
+  - spelling: "ment"
+    condition_class: always
+    output_phonemes: [M, AH0, N, T]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     stress_type: non_affecting
     min_root: 3
-  - affix: "able"
-    pronunciation: [AH0, B, AH0, L]
+  - spelling: "able"
+    condition_class: always
+    output_phonemes: [AH0, B, AH0, L]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     stress_type: non_affecting
     min_root: 3
-  - affix: "ible"
-    pronunciation: [AH0, B, AH0, L]
+  - spelling: "ible"
+    condition_class: always
+    output_phonemes: [AH0, B, AH0, L]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     stress_type: non_affecting
     min_root: 3
-  - affix: "ful"
-    pronunciation: [F, AH0, L]
+  - spelling: "ful"
+    condition_class: always
+    output_phonemes: [F, AH0, L]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     stress_type: non_affecting
     min_root: 3
-  - affix: "less"
-    pronunciation: [L, AH0, S]
+  - spelling: "less"
+    condition_class: always
+    output_phonemes: [L, AH0, S]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     stress_type: non_affecting
     min_root: 3
-  - affix: "ing"
-    pronunciation: [IH0, NG]
+  - spelling: "ing"
+    condition_class: always
+    output_phonemes: [IH0, NG]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     stress_type: non_affecting
     min_root: 3
     try_silent_e: true
-  - affix: "er"
-    pronunciation: [ER0]
+  - spelling: "er"
+    condition_class: always
+    output_phonemes: [ER0]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     stress_type: non_affecting
     min_root: 3
     try_silent_e: true
-  - affix: "est"
-    pronunciation: [AH0, S, T]
+  - spelling: "est"
+    condition_class: always
+    output_phonemes: [AH0, S, T]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     stress_type: non_affecting
     min_root: 3
     try_silent_e: true
-  - affix: "ed"
-    pronunciation: contextual  # depends on final consonant voicing
+  - spelling: "ed"
+    condition_class: td_finals
+    output_phonemes: [IH0, D]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.5"]
     stress_type: non_affecting
     min_root: 3
     try_silent_e: true
-  - affix: "ly"
-    pronunciation: [L, IY0]
+  - spelling: "ed"
+    condition_class: voiceless_finals
+    output_phonemes: [T]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.5"]
     stress_type: non_affecting
     min_root: 3
-  - affix: "es"
-    pronunciation: [IH0, Z]
+    try_silent_e: true
+  - spelling: "ed"
+    condition_class: default
+    output_phonemes: [D]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.5"]
     stress_type: non_affecting
     min_root: 3
-  - affix: "s"
-    pronunciation: contextual  # Z after voiced, S after voiceless
+    try_silent_e: true
+  - spelling: "ly"
+    condition_class: always
+    output_phonemes: [L, IY0]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
+    stress_type: non_affecting
+    min_root: 3
+  - spelling: "es"
+    condition_class: always
+    output_phonemes: [IH0, Z]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.5"]
+    stress_type: non_affecting
+    min_root: 3
+  - spelling: "s"
+    condition_class: sibilant_finals
+    output_phonemes: [IH0, Z]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.5"]
+    stress_type: non_affecting
+    min_root: 3
+  - spelling: "s"
+    condition_class: voiceless_consonants
+    output_phonemes: [S]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.5"]
+    stress_type: non_affecting
+    min_root: 3
+  - spelling: "s"
+    condition_class: default
+    output_phonemes: [Z]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.5"]
     stress_type: non_affecting
     min_root: 3
 
 prefixes:
-  - affix: "un"
-    pronunciation: [AH0, N]
+  - spelling: "un"
+    condition_class: always
+    output_phonemes: [AH0, N]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     min_remainder: 3
-  - affix: "re"
-    pronunciation: [R, IY0]
+  - spelling: "re"
+    condition_class: always
+    output_phonemes: [R, IY0]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     min_remainder: 3
-  - affix: "dis"
-    pronunciation: [D, IH0, S]
+  - spelling: "dis"
+    condition_class: always
+    output_phonemes: [D, IH0, S]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     min_remainder: 3
-  - affix: "mis"
-    pronunciation: [M, IH0, S]
+  - spelling: "mis"
+    condition_class: always
+    output_phonemes: [M, IH0, S]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     min_remainder: 3
-  - affix: "pre"
-    pronunciation: [P, R, IY0]
+  - spelling: "pre"
+    condition_class: always
+    output_phonemes: [P, R, IY0]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     min_remainder: 3
-  - affix: "over"
-    pronunciation: [OW1, V, ER0]
+  - spelling: "over"
+    condition_class: always
+    output_phonemes: [OW1, V, ER0]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     min_remainder: 3
-  - affix: "out"
-    pronunciation: [AW1, T]
+  - spelling: "out"
+    condition_class: always
+    output_phonemes: [AW1, T]
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]
     min_remainder: 3
 
-ed_pronunciation:
-  voiceless_finals: [CH, F, K, P, S, SH, TH]  # -> T
-  after_t_or_d: true  # -> IH0 D
-  # everything else -> D
+clitics:
+  - spelling: "'s"
+    allomorph_spelling: "s"
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.5"]
+
+heuristics:
+  minimum_word_length:
+    value: 4
+    estimate: avoids over-decomposing short function words
+  consonant_undoubling_minimum_root_length:
+    value: 4
+    estimate: avoids collapsing short doubled-letter roots
+  silent_e_letter:
+    value: "e"
+    citations: ["Allen, Hunnicutt & Klatt 1987 Ch.4-5"]

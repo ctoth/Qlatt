@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { decomposeWord, getStressHintForWord } from '../src/g2p/morphology';
 import type { DictLookup } from '../src/g2p/types';
+import { loadYamlDocumentSync } from '../src/yaml-loader';
 
 const QLATT_MORPHOLOGY_PATH = "/rules/frontends/qlatt-english/morphology.yaml";
 
@@ -188,5 +189,59 @@ describe('getStressHintForWord', () => {
 
   it('returns undefined when no configured suffix matches', () => {
     expect(getStressHintForWord('blorf', QLATT_MORPHOLOGY_PATH)).toBeUndefined();
+  });
+});
+
+describe('morphology YAML contract', () => {
+  interface AffixConfig {
+    spelling: string;
+    condition_class: string;
+    output_phonemes: string[];
+    citations: string[];
+  }
+
+  interface MorphologyConfig {
+    suffixes: AffixConfig[];
+    prefixes: AffixConfig[];
+    clitics: Array<{
+      spelling: string;
+      allomorph_spelling: string;
+      citations: string[];
+    }>;
+    heuristics: Record<string, { value: unknown; citations?: string[]; estimate?: string }>;
+  }
+
+  const data = loadYamlDocumentSync<MorphologyConfig>(QLATT_MORPHOLOGY_PATH);
+
+  it('declares spelling, condition, output, and citations for every affix', () => {
+    for (const affix of [...data.suffixes, ...data.prefixes]) {
+      expect(affix.spelling).toEqual(expect.any(String));
+      expect(affix.condition_class).toEqual(expect.any(String));
+      expect(affix.output_phonemes).toEqual(expect.any(Array));
+      expect(affix.citations).toEqual(expect.arrayContaining([expect.any(String)]));
+    }
+    expect(data.suffixes.find((suffix) => suffix.spelling === 'ed')?.citations).toContain(
+      'Allen, Hunnicutt & Klatt 1987 Ch.5',
+    );
+    expect(data).not.toHaveProperty('ed_pronunciation');
+  });
+
+  it('references the plural allomorph from the possessive clitic', () => {
+    const possessive = data.clitics.find((clitic) => clitic.spelling === "'s");
+    expect(possessive).toEqual(expect.objectContaining({
+      allomorph_spelling: 's',
+      citations: expect.arrayContaining([expect.any(String)]),
+    }));
+    expect(
+      data.suffixes.some((suffix) => suffix.spelling === possessive?.allomorph_spelling),
+    ).toBe(true);
+  });
+
+  it('labels every configured heuristic with a citation or estimate', () => {
+    for (const heuristic of Object.values(data.heuristics)) {
+      expect(
+        (heuristic.citations?.length ?? 0) > 0 || Boolean(heuristic.estimate),
+      ).toBe(true);
+    }
   });
 });

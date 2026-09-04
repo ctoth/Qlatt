@@ -7,7 +7,7 @@
  *
  * Layer priority:
  *   1. Dictionary lookup (highest accuracy)
- *   2. Possessive 's handling (dict base + Z)
+ *   2. Configured clitic handling (dict base + shared suffix allomorph)
  *   3. Morphological decomposition (affix stripping + dict root)
  *   4. Elovitz LTS rules + Hunnicutt stress (fallback)
  *
@@ -17,7 +17,7 @@
  */
 
 import type { DictLookup, PronunciationResult } from './types';
-import { decomposeWord, getStressHintForWord } from './morphology';
+import { decomposeClitic, decomposeWord, getStressHintForWord } from './morphology';
 import { applyLtsRules } from './lts-engine';
 import { assignStress } from './stress';
 
@@ -48,18 +48,10 @@ export function pronounce(
     return { phonemes: dictResult, source: 'dictionary', word: lowerWord };
   }
 
-  // 2. Handle possessive 's: strip it and retry dict
-  if (lowerWord.endsWith("'s")) {
-    const base = lowerWord.slice(0, -2);
-    const baseResult = dictLookup(base);
-    if (baseResult) {
-      return {
-        phonemes: [...baseResult, 'Z'],
-        source: 'dictionary',
-        word: lowerWord,
-        rootWord: base,
-      };
-    }
+  // 2. Apply configured clitics using their shared suffix allomorph rules
+  const cliticResult = decomposeClitic(lowerWord, dictLookup, options.morphologyPath);
+  if (cliticResult) {
+    return cliticResult;
   }
 
   // 3. Try morphological decomposition (affix stripping + dict root)

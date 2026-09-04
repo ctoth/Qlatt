@@ -20,6 +20,50 @@ describe("source contour", () => {
     expect(spec.voice_quality_presets.falsetto.f0_scale).toBe(1.5);
   });
 
+  it("loads and resolves the quality names declared by fixture YAML", () => {
+    const spec = loadSourceContourSync("/test/fixtures/source-contour-open-presets.yaml");
+
+    expect(spec.default_voice_quality).toBe("harsh");
+    expect(Object.keys(spec.voice_quality_presets)).toEqual(["harsh"]);
+
+    const resolved = resolveSourceContour({
+      spec,
+      speaker: {
+        base_f0_hz: 110,
+        formant_scale: 1.0,
+        rd_default: 0.7,
+        spectral_tilt_offset_db: 0,
+      },
+      baseF0Hz: 110,
+    });
+
+    expect(resolved.presetName).toBe("harsh");
+    expect(resolved.voiceQualityOverrides?.rd).toBe(0.4);
+  });
+
+  it("projects the modal YAML values into track frames", () => {
+    const spec = loadSourceContourSync();
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    try {
+      const { track } = textToKlattTrackDetailed("hello", 110, 30, {
+        speaker: { rd_default: 1.3 },
+      });
+      const frames = track.filter((frame) => frame.phoneme && frame.phoneme !== "SIL");
+
+      expect(frames.length).toBeGreaterThan(0);
+      for (const frame of frames) {
+        expect(frame.params.Rd).toBe(spec.voice_quality_presets.modal.rd);
+        expect(frame.params.OQ).toBe(spec.voice_quality_presets.modal.oq);
+        expect(frame.params.TL).toBe(spec.voice_quality_presets.modal.tl);
+        expect(frame.params.flutter).toBe(spec.voice_quality_presets.modal.flutter);
+        expect(frame.params.jitter).toBe(spec.voice_quality_presets.modal.jitter);
+      }
+    } finally {
+      warnSpy.mockRestore();
+    }
+  });
+
   it("resolves the current LF baseline and falsetto preset behavior", () => {
     const spec = loadSourceContourSync();
 
@@ -37,7 +81,14 @@ describe("source contour", () => {
     expect(modal.baseline.source_mode).toBe(1);
     expect(modal.baseline.rd).toBe(0.7);
     expect(modal.baseline.rd_ref).toBe(0.7);
-    expect(modal.voiceQualityOverrides).toBeUndefined();
+    expect(modal.voiceQualityOverrides).toEqual({
+      rd: spec.voice_quality_presets.modal.rd,
+      oq: spec.voice_quality_presets.modal.oq,
+      tl: spec.voice_quality_presets.modal.tl,
+      ah_offset_db: spec.voice_quality_presets.modal.ah_offset_db,
+      flutter: spec.voice_quality_presets.modal.flutter,
+      jitter: spec.voice_quality_presets.modal.jitter,
+    });
     expect(modal.effectiveBaseF0Hz).toBe(110);
 
     const falsetto = resolveSourceContour({

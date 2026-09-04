@@ -71,6 +71,9 @@ Windows or Unix WASM build below once and verify the produced paths first.
 pwsh -File build.ps1          # Windows
 ./build.sh                     # Unix
 
+# Full Vitest suite (requires the WASM build above in this exact checkout)
+npm test
+
 # Run dev server
 npm run dev                    # Vite server at http://localhost:8000
 

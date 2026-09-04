@@ -142,6 +142,16 @@ describe("explain phrase cli", () => {
     expect(payload.summary.uncitedCount).toBe(0);
   });
 
+  it("prints rulepack warnings and fails them under --strict", async () => {
+    const normal = await runCli(["--phrase", "hello", "--format", "json"]);
+    expect(normal.code).toBe(0);
+    expect(normal.stderr).toContain("rulepack warning W_");
+
+    const strict = await runCli(["--phrase", "hello", "--format", "json", "--strict"]);
+    expect(strict.code).toBe(2);
+    expect(strict.stderr).toContain("strict failed: rulepack validation emitted");
+  });
+
   it("renders citations without object coercion artifacts", async () => {
     const result = await runCli([
       "--phrase",

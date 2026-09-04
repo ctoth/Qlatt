@@ -243,6 +243,7 @@ export const DSL_ROOT_KEYS = new Set([
   "relations",
   "topology",
   "predicates",
+  "tags",
   // Chunk 3: pipeline-level reusable string-set and string-keyed map blocks.
   "string_sets",
   "maps",
@@ -468,6 +469,7 @@ export function parseDslSpec(source: unknown) {
         normalizeConditionSpec(predicateSpec),
       ])
     ),
+    tags: cloneObject(raw.tags),
     // Chunk 3: carry pipeline-level string_sets / maps blocks through to the
     // runtime. Shape is validated downstream by validation.ts
     // (validateStringSets / validateMaps).

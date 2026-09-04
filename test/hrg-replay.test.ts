@@ -35,8 +35,8 @@ describe("HRG checkpoints and deterministic replay", () => {
     const metadata = { source: "inventory" };
     const create = utterance.beginTransaction(META);
     const segment = create.createItem("segment", "s1");
-    create.set(segment, "phoneme", "AA");
-    create.set(segment, "metadata", metadata);
+    create.set(segment, "phoneme", "AA", "phoneme_target");
+    create.set(segment, "metadata", metadata, "metadata_source");
     create.append("Segment", segment);
     create.commit();
     const structural = utterance.checkpoint("structural");
@@ -58,6 +58,8 @@ describe("HRG checkpoints and deterministic replay", () => {
     const replayed = replayJournal(SCHEMA, utterance.journal());
     expect(replayed.graphDigest()).toBe(utterance.graphDigest());
     expect(replayed.getItem("s1")?.get("metadata")).toEqual({ source: "inventory" });
+    expect(replayed.getItem("s1")?.latestWrite("phoneme")?.tag).toBe("phoneme_target");
+    expect(replayed.getItem("s1")?.latestWrite("metadata")?.tag).toBe("metadata_source");
     expect(replayed.journal()).toEqual(utterance.journal());
 
     const structuralReplay = replayJournal(

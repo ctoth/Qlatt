@@ -268,7 +268,13 @@ describe("declarative frontend schema coverage", () => {
 
   it("rejects next3/prev3 cursor fields and points users to ahead/behind helpers", () => {
     const spec = parseDslSpec({
-      relations: { phone: { type: "base", scalars: { duration: {} } } },
+      relations: {
+        phone: {
+          type: "base",
+          features: { phoneme: [] },
+          scalars: { duration: {} },
+        },
+      },
       rules: {
         bad_depth: {
           select: { relation: "phone", where: "next3 != null" },
@@ -501,7 +507,16 @@ rules:
 
   it("accepts structural condition maps with predicate references", () => {
     const spec = parseDslSpec({
-      relations: { phone: { type: "base", features: { type: ["vowel", "stop"] } } },
+      relations: {
+        phone: {
+          type: "base",
+          features: {
+            phoneme: [],
+            punctuationSymbol: [],
+            type: ["vowel", "stop"],
+          },
+        },
+      },
       predicates: {
         is_stop: { expr: "current.type == 'stop'" },
         in_question: {
@@ -520,6 +535,7 @@ rules:
             },
           },
           constraint: { predicate: "is_stop" },
+          citations: ["schema fixture"],
         },
       },
       phases: [{ name: "duration", rules: ["good"] }],

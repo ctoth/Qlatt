@@ -11,6 +11,10 @@ import {
   type PhaseCheckpoint,
   type WhyNotRuleResult,
 } from "../src/declarative-frontend/hrg";
+import {
+  getRulepackValidationDiagnostics,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import {
   applyRange,
@@ -25,6 +29,7 @@ type ExplainFormat = "text" | "json";
 type ParsedArgs = {
   phrase: string;
   format: ExplainFormat;
+  strict: boolean;
   strictCitations: boolean;
   stages: Set<ProvenanceStage> | null;
   subjectFilter: string | null;
@@ -164,6 +169,7 @@ function parseArgv(argv: string[]): ParsedArgs {
   return {
     phrase,
     format,
+    strict: flags.get("strict") === "true",
     strictCitations: flags.get("strict-citations") === "true",
     stages,
     subjectFilter: flags.get("subject") ?? null,
@@ -332,6 +338,17 @@ function buildPayload(
 export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Promise<number> {
   try {
     const args = parseArgv(argv);
+
+    const rulepack = loadBundledRulepackSpec(args.frontendId);
+    const warnings = getRulepackValidationDiagnostics(rulepack)
+      .filter((diagnostic) => diagnostic.severity === "warning");
+    for (const warning of warnings) {
+      io.stderr(`rulepack warning ${warning.code} at ${warning.path}: ${warning.message}\n`);
+    }
+    if (args.strict && warnings.length > 0) {
+      io.stderr(`strict failed: rulepack validation emitted ${warnings.length} warning(s)\n`);
+      return 2;
+    }
 
     const provenance = createProvenanceCollector();
     const detailed = textToKlattTrackDetailed(args.phrase, args.baseF0, args.transitionMs, {

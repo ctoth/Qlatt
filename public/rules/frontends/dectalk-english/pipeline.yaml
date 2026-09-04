@@ -216,10 +216,128 @@ syllabification:
     AR: "R"
     OR: "R"
     UR: "R"
+tags:
+  boundary: adjusts a segment at a prosodic boundary
+  clause_final: lengthens a phrase-final segment
+  cluster: adjusts a consonant in a cluster
+  coarticulation: blends neighboring articulatory targets
+  consonant_position: adjusts duration by consonant position
+  consonant_stress: adjusts a consonant beside a stressed vowel
+  duration_floor: enforces a segment-duration floor
+  emphasis: strengthens an emphasized segment
+  emphasis_syllabic: strengthens the syllabic portion of an emphasized word
+  fallback_primary_stress: assigns primary stress when none is present
+  fricative_spectrum: shapes a fricative-noise spectrum
+  function_word_th: reduces the function-word pronunciation of th
+  medial_syllable: adjusts a word-medial syllable
+  nasal_bandwidth: widens formant bandwidth beside a nasal
+  non_final: shortens a non-final segment
+  nt_cluster: adjusts an alveolar stop in an nt cluster
+  phrase_initial: adjusts a phrase-initial segment
+  polysyllabic: adjusts duration in a polysyllabic word
+  post_plosive: adjusts a segment following a plosive
+  pre_df_flap: adjusts a vowel before an eligible flap
+  pre_ng: adjusts a vowel before a velar nasal
+  pre_voiced: adjusts a segment before a voiced consonant
+  pre_voiceless: adjusts a segment before a voiceless consonant
+  rate: scales timing for speaking rate
+  segmental_context: adjusts a target from its neighboring segments
+  short_phrase: adjusts a segment in a short phrase
+  silence_boundary: shapes source parameters at silence
+  source_contour: shapes phrase-level source parameters
+  source_routing: selects the voiced or noise source route
+  stress: adjusts a stressed or unstressed segment
+  syllabification: records syllable structure for downstream rules
+  the_iy: selects the full-vowel pronunciation of the
+  two_vowel: adjusts a word containing two vowels
+  unstressed: reduces an unstressed segment
+  unstressed_floor: enforces the duration floor of an unstressed segment
+  word_final_obstruent: adjusts a word-final obstruent
+  word_initial_stressed: adjusts a stressed word-initial segment
 relations:
   Segment:
     type: base
     features:
+      A1: []
+      A2: []
+      A3: []
+      A4: []
+      A5: []
+      A6: []
+      A7: []
+      A8: []
+      A9: []
+      A10: []
+      AB: []
+      AV: []
+      B1: []
+      B2: []
+      B3: []
+      EePhraseDb: []
+      F1: []
+      F2: []
+      F3: []
+      RdPhraseOffset: []
+      SW: []
+      TL: []
+      breakIndex: []
+      control_windows: []
+      inherentDuration: []
+      minimumDuration: []
+      stress: []
+      syllable_index: []
+      syllable_position_in_word: []
+      syllable_role: []
+      alveolar: []
+      bilabial: []
+      boundary: []
+      dac: []
+      fricative_min_ms: []
+      inventorySW: []
+      next_boundary: []
+      phoneme: []
+      postalveolar: []
+      punctuationSymbol: []
+      syllable: []
+      velar: []
+      voiced: []
+      voiceless: []
+      weak: []
+      word: []
+      AF: []
+      AH: []
+      AN: []
+      AVS: []
+      B4: []
+      B5: []
+      B6: []
+      BGP: []
+      BGS: []
+      BGZ: []
+      BNP: []
+      BNZ: []
+      breathiness: []
+      dummy_vowel: []
+      F0: []
+      F4: []
+      F5: []
+      F6: []
+      FGP: []
+      FGZ: []
+      flutter: []
+      FNP: []
+      FNZ: []
+      GO: []
+      is_stop_base: []
+      jitter: []
+      lfMode: []
+      low: []
+      NFC: []
+      OQ: []
+      Rd: []
+      RdRef: []
+      sourceMode: []
+      trajectory: []
       type: [vowel, stop_closure, stop_release, stop_aspiration, fricative, affricate, silence, liquid, nasal, glide, flap]
     scalars:
       # DECtalk ph_defs.h defines NF640MS=100 frames; terminal nfperiod=94

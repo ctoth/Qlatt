@@ -25,6 +25,11 @@ citations:
 - Hanson et al. 2001
 - Klatt 1980
 - Jongman 1989
+# Allen et al. 1987 normalization symbols consumed before target materialization.
+normalization_aliases:
+  AX: SIL
+  NX: SIL
+  WH: SIL
 base_params:
   F1: 500
   F2: 1500

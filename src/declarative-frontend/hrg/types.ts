@@ -133,7 +133,13 @@ export interface TransactionMetadata {
 
 export type JournalOperation =
   | { readonly kind: "create_item"; readonly itemId: string; readonly itemType: string }
-  | { readonly kind: "set_feature"; readonly itemId: string; readonly key: string; readonly value: FeatureValue }
+  | {
+      readonly kind: "set_feature";
+      readonly itemId: string;
+      readonly key: string;
+      readonly value: FeatureValue;
+      readonly tag?: string;
+    }
   | { readonly kind: "append"; readonly relationName: string; readonly itemId: string }
   | {
       readonly kind: "insert_after";

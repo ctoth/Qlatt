@@ -10,7 +10,7 @@ import type {
 
 type StagedOperation =
   | { kind: "create_item"; item: Item }
-  | { kind: "set_feature"; item: Item; key: string; value: unknown }
+  | { kind: "set_feature"; item: Item; key: string; value: unknown; tag?: string }
   | { kind: "append"; relationName: string; item: Item }
   | { kind: "insert_after"; relationName: string; previous: Item; item: Item }
   | { kind: "add_root"; relationName: string; item: Item }
@@ -113,9 +113,9 @@ export class HrgTransaction {
     );
   }
 
-  set(item: Item, key: string, value: unknown): this {
+  set(item: Item, key: string, value: unknown, tag?: string): this {
     this.assertOpen();
-    this.operations.push({ kind: "set_feature", item, key, value });
+    this.operations.push({ kind: "set_feature", item, key, value, ...(tag ? { tag } : {}) });
     return this;
   }
 
@@ -194,7 +194,7 @@ export class HrgTransaction {
     return this;
   }
 
-  private writeInput(): {
+  private writeInput(tag: string = this.metadata.tag): {
     reason: string;
     ruleId: string;
     tag: string;
@@ -206,7 +206,7 @@ export class HrgTransaction {
     return {
       reason: this.metadata.reason,
       ruleId: this.metadata.ruleId,
-      tag: this.metadata.tag,
+      tag,
       citations: this.metadata.citations,
       parents: [...this.reads],
       stage: this.metadata.stage,
@@ -347,10 +347,15 @@ export class HrgTransaction {
           itemId: operation.item.id,
           key: operation.key,
           value,
+          ...(operation.tag ? { tag: operation.tag } : {}),
         });
         prepared.push({
           journal,
-          commit: () => [operation.item.set(operation.key, value, input).decisionId],
+          commit: () => [operation.item.set(
+            operation.key,
+            value,
+            operation.tag ? this.writeInput(operation.tag) : input,
+          ).decisionId],
         });
         continue;
       }

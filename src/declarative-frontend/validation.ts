@@ -2,8 +2,8 @@ import { validateExpressionSyntax } from "./cel-expressions";
 import { cloneValue, isPlainObject } from "../yaml-loader";
 import * as S from "./struct-schema";
 
-type DiagnosticSeverity = "error" | "warning";
-type ValidationDiagnostic = {
+export type DiagnosticSeverity = "error" | "warning";
+export type ValidationDiagnostic = {
   code: string;
   message: string;
   path: string;
@@ -11,6 +11,49 @@ type ValidationDiagnostic = {
 };
 type PlainObject = Record<string, any>;
 const ALLOWED_CUSTOM_RULE_OPS = new Set(["noop"]);
+const ALLOWED_RULE_KINDS = new Set(["scalar", "point", "postlexical", "structural", "f0_layer"]);
+const ALLOWED_RULE_FIELDS = new Set([
+  "apply",
+  "associate",
+  "citation",
+  "citations",
+  "constraint",
+  "contour",
+  "define",
+  "delete",
+  "disassociate",
+  "insert",
+  "insert_f0_layer",
+  "insert_point",
+  "insert_points",
+  "kind",
+  "match",
+  "op",
+  "scan",
+  "select",
+  "splice",
+  "suppress",
+]);
+const ALLOWED_SELECT_FIELDS = new Set(["relation", "where"]);
+const ALLOWED_APPLY_FIELDS = new Set(["dispatch", "field", "op", "tag", "target", "value"]);
+const CORE_CEL_VARIABLES = new Set([
+  "contour",
+  "current",
+  "current_index",
+  "maps",
+  "next",
+  "params",
+  "phrase",
+  "prev",
+  "sets",
+]);
+const CORE_ITEM_VARIABLES = new Set(["current", "prev", "next"]);
+const PHONEME_COMPARE_PATTERN = /\b[A-Za-z_][A-Za-z0-9_]*\.phoneme\s*(?:==|!=)\s*(['"])([^'"]+)\1/g;
+const PHONEME_MEMBERSHIP_PATTERN = /\b[A-Za-z_][A-Za-z0-9_]*\.phoneme\s+in\s+\[([^\]]*)\]/g;
+const STRING_LITERAL_PATTERN = /'([^']+)'|"([^"]+)"/g;
+const TARGET_PHONEME_PATTERN = /\btarget\s*\(\s*(['"])([^'"]+)\1\s*\)/g;
+const ITEM_FIELD_PATTERN = /\b([A-Za-z_][A-Za-z0-9_]*)\.\??([A-Za-z_][A-Za-z0-9_]*)/g;
+const PARAMETER_PATH_PATTERN = /\bparams((?:\.[A-Za-z_][A-Za-z0-9_]*)+)/g;
 
 function makeDiagnostic(
   code: string,
@@ -276,11 +319,189 @@ function validateTopology(
   }
 }
 
+function validateTagVocabulary(
+  spec: PlainObject,
+  required: boolean,
+  diagnostics: ValidationDiagnostic[],
+): Set<string> {
+  const entries = isPlainObject(spec.tags) ? Object.entries(spec.tags) : [];
+  if (required && entries.length === 0) {
+    diagnostics.push(makeDiagnostic(
+      "E_TAGS_REQUIRED",
+      "Rulepack must declare a non-empty tags vocabulary",
+      "tags",
+    ));
+  }
+  const names = new Set<string>();
+  for (const [name, meaning] of entries) {
+    names.add(name);
+    if (typeof meaning !== "string" || meaning.trim().length === 0 || /[\r\n]/.test(meaning)) {
+      diagnostics.push(makeDiagnostic(
+        "E_TAG_MEANING_INVALID",
+        `Tag '${name}' must have a one-line meaning`,
+        `tags.${name}`,
+      ));
+    }
+  }
+  return names;
+}
+
+function validateConditionIdentifiers(
+  condition: unknown,
+  variables: Iterable<string>,
+  relationNames: Iterable<string>,
+  diagnostics: ValidationDiagnostic[],
+  path: string,
+): void {
+  if (typeof condition === "string") {
+    const syntaxError = validateExpressionSyntax(condition, { relationNames, variables });
+    if (syntaxError) {
+      diagnostics.push(makeDiagnostic(
+        "E_CEL_INVALID",
+        `CEL expression has invalid identifiers: ${syntaxError}`,
+        path,
+      ));
+    }
+    return;
+  }
+  if (!isPlainObject(condition)) return;
+  if (Object.prototype.hasOwnProperty.call(condition, "expr")) {
+    validateConditionIdentifiers(condition.expr, variables, relationNames, diagnostics, `${path}.expr`);
+  }
+  if (Array.isArray(condition.all)) {
+    condition.all.forEach((entry: unknown, index: number) =>
+      validateConditionIdentifiers(entry, variables, relationNames, diagnostics, `${path}.all[${index}]`));
+  }
+  if (Array.isArray(condition.any)) {
+    condition.any.forEach((entry: unknown, index: number) =>
+      validateConditionIdentifiers(entry, variables, relationNames, diagnostics, `${path}.any[${index}]`));
+  }
+  if (Object.prototype.hasOwnProperty.call(condition, "not")) {
+    validateConditionIdentifiers(condition.not, variables, relationNames, diagnostics, `${path}.not`);
+  }
+}
+
+function relationDeclaredFields(relationByName: Map<string, any>, relationName: unknown): Set<string> {
+  if (typeof relationName !== "string") return new Set();
+  const relation = relationByName.get(relationName);
+  if (!isPlainObject(relation)) return new Set();
+  return new Set([
+    ...Object.keys(isPlainObject(relation.features) ? relation.features : {}),
+    ...Object.keys(isPlainObject(relation.scalars) ? relation.scalars : {}),
+  ]);
+}
+
+function parameterPathExists(parameters: unknown, path: string): boolean {
+  if (!isPlainObject(parameters)) return false;
+  let cursor: unknown = parameters;
+  for (const segment of path.split(".")) {
+    if (!isPlainObject(cursor) || !Object.prototype.hasOwnProperty.call(cursor, segment)) {
+      return false;
+    }
+    cursor = cursor[segment];
+  }
+  return true;
+}
+
+function validateExpressionReferences(
+  expression: string,
+  relationByName: Map<string, any>,
+  relationName: unknown,
+  itemVariables: Iterable<string>,
+  parameters: unknown,
+  diagnostics: ValidationDiagnostic[],
+  path: string,
+): void {
+  const declaredFields = relationDeclaredFields(relationByName, relationName);
+  const itemVariableNames = new Set(itemVariables);
+  const reportedFields = new Set<string>();
+  ITEM_FIELD_PATTERN.lastIndex = 0;
+  for (const match of expression.matchAll(ITEM_FIELD_PATTERN)) {
+    const variable = match[1];
+    const field = match[2];
+    if (!variable || !field || !itemVariableNames.has(variable)) continue;
+    if (field === "id" || field === "itemType" || declaredFields.has(field)) continue;
+    if (reportedFields.has(field)) continue;
+    diagnostics.push(makeDiagnostic(
+      "E_RULE_FEATURE_UNKNOWN",
+      `Expression reads undeclared feature '${field}' on relation '${String(relationName)}'`,
+      path,
+    ));
+    reportedFields.add(field);
+  }
+
+  if (!isPlainObject(parameters)) return;
+  const reportedParameters = new Set<string>();
+  PARAMETER_PATH_PATTERN.lastIndex = 0;
+  for (const match of expression.matchAll(PARAMETER_PATH_PATTERN)) {
+    const parameterPath = (match[1] ?? "").replace(/^\./, "");
+    if (!parameterPath || parameterPath.startsWith("sets.") || parameterPath.startsWith("maps.")) {
+      continue;
+    }
+    if (parameterPathExists(parameters, parameterPath) || reportedParameters.has(parameterPath)) continue;
+    diagnostics.push(makeDiagnostic(
+      "E_PARAM_UNKNOWN",
+      `Expression references unknown parameter 'params.${parameterPath}'`,
+      path,
+    ));
+    reportedParameters.add(parameterPath);
+  }
+}
+
+function validatePhonemeLiterals(
+  value: unknown,
+  path: string,
+  inventoryPhonemes: Set<string> | null,
+  diagnostics: ValidationDiagnostic[],
+): void {
+  if (!inventoryPhonemes) return;
+  if (typeof value === "string") {
+    for (const pattern of [PHONEME_COMPARE_PATTERN, TARGET_PHONEME_PATTERN]) {
+      pattern.lastIndex = 0;
+      for (const match of value.matchAll(pattern)) {
+        const phoneme = match[2];
+        if (phoneme && !inventoryPhonemes.has(phoneme)) {
+          diagnostics.push(makeDiagnostic(
+            "E_PHONEME_UNKNOWN",
+            `Expression references unknown phoneme '${phoneme}'`,
+            path,
+          ));
+        }
+      }
+    }
+    PHONEME_MEMBERSHIP_PATTERN.lastIndex = 0;
+    for (const membership of value.matchAll(PHONEME_MEMBERSHIP_PATTERN)) {
+      STRING_LITERAL_PATTERN.lastIndex = 0;
+      for (const literal of (membership[1] ?? "").matchAll(STRING_LITERAL_PATTERN)) {
+        const phoneme = literal[1] ?? literal[2];
+        if (phoneme && !inventoryPhonemes.has(phoneme)) {
+          diagnostics.push(makeDiagnostic(
+            "E_PHONEME_UNKNOWN",
+            `Expression references unknown phoneme '${phoneme}'`,
+            path,
+          ));
+        }
+      }
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((entry, index) =>
+      validatePhonemeLiterals(entry, `${path}[${index}]`, inventoryPhonemes, diagnostics));
+    return;
+  }
+  if (!isPlainObject(value)) return;
+  for (const [key, entry] of Object.entries(value)) {
+    validatePhonemeLiterals(entry, `${path}.${key}`, inventoryPhonemes, diagnostics);
+  }
+}
+
 function validatePatterns(
   spec: PlainObject,
   relationByName: Map<string, any>,
   predicates: PlainObject,
   policyState: PolicyValidationState,
+  parameters: unknown,
   diagnostics: ValidationDiagnostic[]
 ): void {
   const relationNames = new Set(relationByName.keys());
@@ -295,6 +516,17 @@ function validatePatterns(
         )
       );
       continue;
+    }
+
+    for (const option of ["scope", "cross_boundary", "max_lookahead"] as const) {
+      const value = pattern[option];
+      if (value !== null && value !== false && value !== "" && value !== undefined) {
+        diagnostics.push(makeDiagnostic(
+          "E_PATTERN_OPTION_UNSUPPORTED",
+          `Pattern '${name}' uses unsupported option '${option}'`,
+          `patterns.${name}.${option}`,
+        ));
+      }
     }
 
     if (!pattern.relation || !relationByName.has(pattern.relation as string)) {
@@ -318,10 +550,14 @@ function validatePatterns(
       continue;
     }
 
-    const captures = new Set();
+    const captures = new Set<string>();
     for (let i = 0; i < pattern.sequence.length; i += 1) {
       const step = pattern.sequence[i];
-      if (!isPlainObject(step) || !step.capture) {
+      if (
+        !isPlainObject(step) ||
+        typeof step.capture !== "string" ||
+        step.capture.length === 0
+      ) {
         diagnostics.push(
           makeDiagnostic(
             "E_PATTERN_STEP_INVALID",
@@ -330,6 +566,16 @@ function validatePatterns(
           )
         );
         continue;
+      }
+      for (const option of ["optional", "repeat"] as const) {
+        const value = step[option];
+        if (value !== null && value !== false && value !== undefined) {
+          diagnostics.push(makeDiagnostic(
+            "E_PATTERN_OPTION_UNSUPPORTED",
+            `Pattern '${name}' step ${i} uses unsupported option '${option}'`,
+            `patterns.${name}.sequence[${i}].${option}`,
+          ));
+        }
       }
       if (captures.has(step.capture)) {
         diagnostics.push(
@@ -351,7 +597,13 @@ function validatePatterns(
         diagnostics,
         `patterns.${name}.sequence[${i}].where`,
         `Pattern '${name}' step ${i} where`,
-        { expandPredicateBodies: true, policyState }
+        {
+          expandPredicateBodies: true,
+          policyState,
+          variables: new Set([...CORE_CEL_VARIABLES, ...captures]),
+          itemVariables: new Set([...CORE_ITEM_VARIABLES, ...captures]),
+          parameters,
+        }
       );
     }
 
@@ -365,7 +617,13 @@ function validatePatterns(
         diagnostics,
         `patterns.${name}.constraint`,
         `Pattern '${name}' constraint`,
-        { expandPredicateBodies: true, policyState }
+        {
+          expandPredicateBodies: true,
+          policyState,
+          variables: new Set([...CORE_CEL_VARIABLES, ...captures]),
+          itemVariables: new Set([...CORE_ITEM_VARIABLES, ...captures]),
+          parameters,
+        }
       );
     }
   }
@@ -421,6 +679,9 @@ type ConditionValidationOptions = {
   graphOwner?: string | null;
   policyState?: PolicyValidationState;
   criticalContext?: boolean;
+  variables?: Iterable<string>;
+  itemVariables?: Iterable<string>;
+  parameters?: unknown;
 };
 
 function notePredicateEdge(
@@ -450,7 +711,10 @@ function validateConditionSpec(
 
   const validateExpressionWithContext = (expression: string, expressionPath: string): void => {
     if (expression.length === 0) return;
-    const syntaxError = validateExpressionSyntax(expression, { relationNames });
+    const syntaxError = validateExpressionSyntax(expression, {
+      relationNames,
+      variables: options.variables,
+    });
     if (syntaxError) {
       diagnostics.push(
         makeDiagnostic(
@@ -461,6 +725,15 @@ function validateConditionSpec(
       );
       return;
     }
+    validateExpressionReferences(
+      expression,
+      relationByName,
+      relationName,
+      options.itemVariables ?? [],
+      options.parameters,
+      diagnostics,
+      expressionPath,
+    );
     if (typeof relationName === "string" && relationName.length > 0) {
       validateDeclaredTypeFieldUsage(
         expression,
@@ -569,6 +842,9 @@ function validateConditionSpec(
           expansionStack: nextStack,
           policyState: options.policyState,
           criticalContext: options.criticalContext,
+          variables: options.variables,
+          itemVariables: options.itemVariables,
+          parameters: options.parameters,
         }
       );
     }
@@ -675,6 +951,7 @@ function validatePredicates(
   spec: PlainObject,
   relationByName: Map<string, any>,
   policyState: PolicyValidationState,
+  parameters: unknown,
   diagnostics: ValidationDiagnostic[]
 ): PlainObject {
   const predicates = isPlainObject(spec.predicates) ? spec.predicates : {};
@@ -699,6 +976,8 @@ function validatePredicates(
         predicateGraph: graph,
         graphOwner: name,
         policyState,
+        variables: CORE_CEL_VARIABLES,
+        parameters,
       }
     );
   }
@@ -1549,11 +1828,162 @@ function validateRules(
   relationByName: Map<string, any>,
   predicates: PlainObject,
   policyState: PolicyValidationState,
+  tagVocabulary: Set<string>,
+  inventoryPhonemes: Set<string> | null,
+  parameters: unknown,
   diagnostics: ValidationDiagnostic[]
 ): void {
   const relationNames = new Set(relationByName.keys());
   const patterns = isPlainObject(spec.patterns) ? spec.patterns : {};
   const rules = isPlainObject(spec.rules) ? spec.rules : {};
+
+  const validateEffectSchema = (
+    effect: unknown,
+    index: number,
+    pathPrefix: string,
+    relationName: unknown,
+  ): void => {
+    const path = `${pathPrefix}[${index}]`;
+    if (!isPlainObject(effect)) {
+      diagnostics.push(makeDiagnostic("E_RULE_APPLY_SCHEMA", "Apply entry must be an object", path));
+      return;
+    }
+    for (const key of Object.keys(effect)) {
+      if (!ALLOWED_APPLY_FIELDS.has(key)) {
+        diagnostics.push(makeDiagnostic(
+          "E_RULE_APPLY_FIELD_UNKNOWN",
+          `Apply entry uses unknown field '${key}'`,
+          `${path}.${key}`,
+        ));
+      }
+    }
+    if (typeof effect.field !== "string" || effect.field.length === 0) {
+      diagnostics.push(makeDiagnostic(
+        "E_RULE_APPLY_FIELD_REQUIRED",
+        "Apply entry requires field",
+        `${path}.field`,
+      ));
+    } else {
+      const root = effect.field.split(".")[0];
+      const declaredFields = relationDeclaredFields(relationByName, relationName);
+      if (declaredFields.size > 0 && !declaredFields.has(root)) {
+        diagnostics.push(makeDiagnostic(
+          "E_RULE_FEATURE_UNKNOWN",
+          `Apply entry writes undeclared feature '${root}' on relation '${String(relationName)}'`,
+          `${path}.field`,
+        ));
+      }
+    }
+    if (typeof effect.tag !== "string" || effect.tag.length === 0) {
+      diagnostics.push(makeDiagnostic("E_RULE_TAG_REQUIRED", "Apply entry requires tag", `${path}.tag`));
+    } else if (tagVocabulary.size > 0 && !tagVocabulary.has(effect.tag)) {
+      diagnostics.push(makeDiagnostic(
+        "E_RULE_TAG_UNKNOWN",
+        `Apply entry uses undeclared tag '${effect.tag}'`,
+        `${path}.tag`,
+      ));
+    }
+  };
+
+  const validateExpressionValueIdentifiers = (
+    value: unknown,
+    path: string,
+    variables: Iterable<string>,
+    relationName: unknown,
+    itemVariables: Iterable<string>,
+  ): void => {
+    if (typeof value === "string") {
+      const syntaxError = validateExpressionSyntax(value, { relationNames, variables });
+      if (syntaxError) {
+        diagnostics.push(makeDiagnostic(
+          "E_CEL_INVALID",
+          `CEL expression has invalid identifiers: ${syntaxError}`,
+          path,
+        ));
+        return;
+      }
+      validateExpressionReferences(
+        value,
+        relationByName,
+        relationName,
+        itemVariables,
+        parameters,
+        diagnostics,
+        path,
+      );
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((entry, index) =>
+        validateExpressionValueIdentifiers(
+          entry,
+          `${path}[${index}]`,
+          variables,
+          relationName,
+          itemVariables,
+        ));
+      return;
+    }
+    if (!isPlainObject(value)) return;
+    for (const [key, entry] of Object.entries(value)) {
+      validateExpressionValueIdentifiers(
+        entry,
+        `${path}.${key}`,
+        variables,
+        relationName,
+        itemVariables,
+      );
+    }
+  };
+
+  const validateEffectIdentifiers = (
+    effect: unknown,
+    index: number,
+    pathPrefix: string,
+    variables: Iterable<string>,
+    relationName: unknown,
+    itemVariables: Iterable<string>,
+  ): void => {
+    if (!isPlainObject(effect)) return;
+    const path = `${pathPrefix}[${index}]`;
+    if (Object.prototype.hasOwnProperty.call(effect, "value")) {
+      validateExpressionValueIdentifiers(
+        effect.value,
+        `${path}.value`,
+        variables,
+        relationName,
+        itemVariables,
+      );
+    }
+    if (!Array.isArray(effect.dispatch)) return;
+    effect.dispatch.forEach((branch: unknown, branchIndex: number) => {
+      if (!isPlainObject(branch)) return;
+      if (Object.prototype.hasOwnProperty.call(branch, "when")) {
+        validateConditionSpec(
+          branch.when,
+          relationByName,
+          relationName,
+          relationNames,
+          predicates,
+          diagnostics,
+          `${path}.dispatch[${branchIndex}].when`,
+          "Dispatch branch when",
+          { variables, itemVariables, parameters },
+        );
+      }
+      for (const key of ["value", "default"] as const) {
+        if (Object.prototype.hasOwnProperty.call(branch, key)) {
+          validateExpressionValueIdentifiers(
+            branch[key],
+            `${path}.dispatch[${branchIndex}].${key}`,
+            variables,
+            relationName,
+            itemVariables,
+          );
+        }
+      }
+    });
+  };
 
   for (const [name, rule] of Object.entries(rules)) {
     if (!isPlainObject(rule)) {
@@ -1564,6 +1994,30 @@ function validateRules(
     }
     const r = rule as PlainObject;
 
+    for (const key of Object.keys(r)) {
+      if (!ALLOWED_RULE_FIELDS.has(key)) {
+        diagnostics.push(makeDiagnostic(
+          "E_RULE_FIELD_UNKNOWN",
+          `Rule '${name}' uses unknown field '${key}'`,
+          `rules.${name}.${key}`,
+        ));
+      }
+    }
+    if (r.kind != null && !ALLOWED_RULE_KINDS.has(String(r.kind))) {
+      diagnostics.push(makeDiagnostic(
+        "E_RULE_KIND_UNKNOWN",
+        `Rule '${name}' uses unknown kind '${String(r.kind)}'`,
+        `rules.${name}.kind`,
+      ));
+    }
+    if (!Array.isArray(r.citations) || r.citations.length === 0) {
+      diagnostics.push(makeDiagnostic(
+        "E_RULE_CITATIONS_REQUIRED",
+        `Rule '${name}' requires citations`,
+        `rules.${name}.citations`,
+      ));
+    }
+
     const hasSelect = isPlainObject(r.select);
     const hasMatch = typeof r.match === "string" && r.match.length > 0;
     const hasCustomOp = typeof r.op === "string" && r.op.length > 0;
@@ -1573,6 +2027,19 @@ function validateRules(
       : isPlainObject(matchPattern)
         ? matchPattern.relation
         : null;
+    const ruleVariables = new Set(CORE_CEL_VARIABLES);
+    const ruleItemVariables = new Set(CORE_ITEM_VARIABLES);
+    if (isPlainObject(matchPattern) && Array.isArray(matchPattern.sequence)) {
+      for (const step of matchPattern.sequence) {
+        if (isPlainObject(step) && typeof step.capture === "string") {
+          ruleVariables.add(step.capture);
+          ruleItemVariables.add(step.capture);
+        }
+      }
+    }
+    if (isPlainObject(r.define)) {
+      for (const defineName of Object.keys(r.define)) ruleVariables.add(defineName);
+    }
     if ((hasSelect && hasMatch) || (!hasSelect && !hasMatch && !hasCustomOp)) {
       diagnostics.push(
         makeDiagnostic(
@@ -1594,6 +2061,15 @@ function validateRules(
 
     if (hasSelect) {
       const relation = r.select.relation;
+      for (const key of Object.keys(r.select)) {
+        if (!ALLOWED_SELECT_FIELDS.has(key)) {
+          diagnostics.push(makeDiagnostic(
+            "E_RULE_SELECT_FIELD_UNKNOWN",
+            `Rule '${name}' select uses unknown field '${key}'`,
+            `rules.${name}.select.${key}`,
+          ));
+        }
+      }
       if (!relationByName.has(relation)) {
         diagnostics.push(
           makeDiagnostic(
@@ -1603,6 +2079,13 @@ function validateRules(
           )
         );
       }
+      validateConditionIdentifiers(
+        r.select.where,
+        CORE_CEL_VARIABLES,
+        relationNames,
+        diagnostics,
+        `rules.${name}.select.where`,
+      );
       validateConditionSpec(
         r.select.where,
         relationByName,
@@ -1612,7 +2095,13 @@ function validateRules(
         diagnostics,
         `rules.${name}.select.where`,
         `Rule '${name}' select.where`,
-        { expandPredicateBodies: true, policyState }
+        {
+          expandPredicateBodies: true,
+          policyState,
+          variables: CORE_CEL_VARIABLES,
+          itemVariables: CORE_ITEM_VARIABLES,
+          parameters,
+        }
       );
     }
 
@@ -1626,6 +2115,13 @@ function validateRules(
       );
     }
 
+    validateConditionIdentifiers(
+      r.constraint,
+      ruleVariables,
+      relationNames,
+      diagnostics,
+      `rules.${name}.constraint`,
+    );
     validateConditionSpec(
       r.constraint,
       relationByName,
@@ -1635,7 +2131,13 @@ function validateRules(
       diagnostics,
       `rules.${name}.constraint`,
       `Rule '${name}' constraint`,
-      { expandPredicateBodies: true, policyState }
+      {
+        expandPredicateBodies: true,
+        policyState,
+        variables: ruleVariables,
+        itemVariables: ruleItemVariables,
+        parameters,
+      }
     );
 
     if (r.define && typeof r.define === "object" && !Array.isArray(r.define)) {
@@ -1650,7 +2152,10 @@ function validateRules(
           );
           continue;
         }
-        const syntaxError = validateExpressionSyntax(defineExpr, { relationNames });
+        const syntaxError = validateExpressionSyntax(defineExpr, {
+          relationNames,
+          variables: ruleVariables,
+        });
         if (syntaxError) {
           diagnostics.push(
             makeDiagnostic(
@@ -1660,6 +2165,15 @@ function validateRules(
             )
           );
         } else {
+          validateExpressionReferences(
+            defineExpr,
+            relationByName,
+            ruleRelationName,
+            ruleItemVariables,
+            parameters,
+            diagnostics,
+            `rules.${name}.define.${defineKey}`,
+          );
           validateDeclaredTypeFieldUsage(
             defineExpr,
             relationByName,
@@ -1681,6 +2195,15 @@ function validateRules(
 
     if (Array.isArray(r.apply)) {
       for (let i = 0; i < r.apply.length; i += 1) {
+        validateEffectSchema(r.apply[i], i, `rules.${name}.apply`, ruleRelationName);
+        validateEffectIdentifiers(
+          r.apply[i],
+          i,
+          `rules.${name}.apply`,
+          ruleVariables,
+          ruleRelationName,
+          ruleItemVariables,
+        );
         validateApplyEffect(
           r.apply[i],
           i,
@@ -1736,7 +2259,7 @@ function validateRules(
       if (Object.prototype.hasOwnProperty.call(r.contour, "reset_where")) {
         const resetWhere = r.contour.reset_where;
         const syntaxError = typeof resetWhere === "string"
-          ? validateExpressionSyntax(resetWhere, { relationNames })
+          ? validateExpressionSyntax(resetWhere, { relationNames, variables: ruleVariables })
           : "reset_where must be a CEL expression string";
         if (syntaxError) {
           diagnostics.push(
@@ -1745,6 +2268,16 @@ function validateRules(
               `Rule '${name}' contour.reset_where has invalid CEL expression: ${syntaxError}`,
               `rules.${name}.contour.reset_where`
             )
+          );
+        } else if (typeof resetWhere === "string") {
+          validateExpressionReferences(
+            resetWhere,
+            relationByName,
+            ruleRelationName,
+            ruleItemVariables,
+            parameters,
+            diagnostics,
+            `rules.${name}.contour.reset_where`,
           );
         }
       }
@@ -1759,6 +2292,20 @@ function validateRules(
         );
       } else {
         for (let i = 0; i < r.contour.apply.length; i += 1) {
+          validateEffectSchema(
+            r.contour.apply[i],
+            i,
+            `rules.${name}.contour.apply`,
+            ruleRelationName,
+          );
+          validateEffectIdentifiers(
+            r.contour.apply[i],
+            i,
+            `rules.${name}.contour.apply`,
+            ruleVariables,
+            ruleRelationName,
+            ruleItemVariables,
+          );
           validateApplyEffect(
             r.contour.apply[i],
             i,
@@ -1815,7 +2362,7 @@ function validateRules(
       if (Object.prototype.hasOwnProperty.call(r.scan, "reset_where")) {
         const resetWhere = r.scan.reset_where;
         const syntaxError = typeof resetWhere === "string"
-          ? validateExpressionSyntax(resetWhere, { relationNames })
+          ? validateExpressionSyntax(resetWhere, { relationNames, variables: ruleVariables })
           : "reset_where must be a CEL expression string";
         if (syntaxError) {
           diagnostics.push(
@@ -1824,6 +2371,16 @@ function validateRules(
               `Rule '${name}' scan.reset_where has invalid CEL expression: ${syntaxError}`,
               `rules.${name}.scan.reset_where`
             )
+          );
+        } else if (typeof resetWhere === "string") {
+          validateExpressionReferences(
+            resetWhere,
+            relationByName,
+            ruleRelationName,
+            ruleItemVariables,
+            parameters,
+            diagnostics,
+            `rules.${name}.scan.reset_where`,
           );
         }
       }
@@ -1906,6 +2463,19 @@ function validateRules(
     }
 
     for (const { spec: pointSpec, path: pointPath, label: pointLabel } of pointInsertSpecs) {
+      if (typeof pointSpec.relation !== "string" || !relationByName.has(pointSpec.relation)) {
+        diagnostics.push(makeDiagnostic(
+          "E_POINT_RELATION_UNKNOWN",
+          `${pointLabel} references unknown point relation '${String(pointSpec.relation)}'`,
+          `${pointPath}.relation`,
+        ));
+      } else if (relationByName.get(pointSpec.relation)?.type !== "point") {
+        diagnostics.push(makeDiagnostic(
+          "E_POINT_RELATION_UNKNOWN",
+          `${pointLabel} relation '${pointSpec.relation}' is not a point relation`,
+          `${pointPath}.relation`,
+        ));
+      }
       const valueExpr = pointSpec.value;
       if (valueExpr != null && typeof valueExpr !== "string") {
         diagnostics.push(
@@ -1926,7 +2496,10 @@ function validateRules(
         );
       }
       if (typeof valueExpr === "string" && valueExpr.length > 0) {
-        const syntaxError = validateExpressionSyntax(valueExpr, { relationNames });
+        const syntaxError = validateExpressionSyntax(valueExpr, {
+          relationNames,
+          variables: ruleVariables,
+        });
         if (syntaxError) {
           diagnostics.push(
             makeDiagnostic(
@@ -1936,6 +2509,15 @@ function validateRules(
             )
           );
         } else {
+          validateExpressionReferences(
+            valueExpr,
+            relationByName,
+            ruleRelationName,
+            ruleItemVariables,
+            parameters,
+            diagnostics,
+            `${pointPath}.value`,
+          );
           validateDeclaredTypeFieldUsage(
             valueExpr,
             relationByName,
@@ -1968,7 +2550,10 @@ function validateRules(
         );
       }
       if (typeof whenExpr === "string" && whenExpr.length > 0) {
-        const whenSyntaxError = validateExpressionSyntax(whenExpr, { relationNames });
+        const whenSyntaxError = validateExpressionSyntax(whenExpr, {
+          relationNames,
+          variables: ruleVariables,
+        });
         if (whenSyntaxError) {
           diagnostics.push(
             makeDiagnostic(
@@ -1977,9 +2562,20 @@ function validateRules(
               `${pointPath}.when`
             )
           );
+        } else {
+          validateExpressionReferences(
+            whenExpr,
+            relationByName,
+            ruleRelationName,
+            ruleItemVariables,
+            parameters,
+            diagnostics,
+            `${pointPath}.when`,
+          );
         }
       }
     }
+    validatePhonemeLiterals(r, `rules.${name}`, inventoryPhonemes, diagnostics);
   }
 }
 
@@ -2231,7 +2827,10 @@ function validateLocusTables(
 }
 
 export type ValidateDslSpecOptions = {
+  inventoryPhonemes?: Iterable<string>;
+  parameterSchemaDeclared?: boolean;
   requireLoweringSpec?: boolean;
+  requireTagVocabulary?: boolean;
 };
 
 function validateLoweringSpec(
@@ -2569,15 +3168,44 @@ export function validateDslSpec(
   const phaseByName = new Map();
   const phaseNames = [];
   const policyState = analyzePolicyState(spec.parameters);
+  const referenceParameters = options.parameterSchemaDeclared === false
+    ? undefined
+    : spec.parameters;
   const relationByName = validateRelations(spec, diagnostics);
   validateTopology(spec, relationByName, diagnostics);
-  const predicates = validatePredicates(spec, relationByName, policyState, diagnostics);
+  const predicates = validatePredicates(
+    spec,
+    relationByName,
+    policyState,
+    referenceParameters,
+    diagnostics,
+  );
   validateStringSets(spec, diagnostics);
   validateLoweringSpec(spec, diagnostics, options);
   validateMaps(spec, diagnostics);
   validateSyllabification(spec, diagnostics);
-  validatePatterns(spec, relationByName, predicates, policyState, diagnostics);
-  validateRules(spec, relationByName, predicates, policyState, diagnostics);
+  validatePatterns(
+    spec,
+    relationByName,
+    predicates,
+    policyState,
+    referenceParameters,
+    diagnostics,
+  );
+  const tagVocabulary = validateTagVocabulary(spec, options.requireTagVocabulary === true, diagnostics);
+  const inventoryPhonemes = options.inventoryPhonemes
+    ? new Set(options.inventoryPhonemes)
+    : null;
+  validateRules(
+    spec,
+    relationByName,
+    predicates,
+    policyState,
+    tagVocabulary,
+    inventoryPhonemes,
+    referenceParameters,
+    diagnostics,
+  );
   const scalarFields = collectScalarFields(spec);
 
   for (let i = 0; i < spec.phases.length; i += 1) {
@@ -2663,6 +3291,55 @@ export function validateDslSpec(
           )
         );
       }
+    }
+  }
+
+  const scheduledRules = new Set<string>();
+  const rules = isPlainObject(spec.rules) ? spec.rules : {};
+  for (let phaseIndexValue = 0; phaseIndexValue < spec.phases.length; phaseIndexValue += 1) {
+    const phase = spec.phases[phaseIndexValue];
+    const writes = new Map<string, string>();
+    for (const ruleName of phase.rules) {
+      scheduledRules.add(ruleName);
+      const rule = rules[ruleName];
+      if (!isPlainObject(rule)) continue;
+      const pattern = typeof rule.match === "string" ? spec.patterns?.[rule.match] : null;
+      const relation = isPlainObject(rule.select)
+        ? rule.select.relation
+        : isPlainObject(pattern)
+          ? pattern.relation
+          : "";
+      const effects = [
+        ...(Array.isArray(rule.apply) ? rule.apply : []),
+        ...(isPlainObject(rule.contour) && Array.isArray(rule.contour.apply) ? rule.contour.apply : []),
+      ];
+      for (const effect of effects) {
+        if (!isPlainObject(effect) || typeof effect.field !== "string") continue;
+        const target = typeof effect.target === "string" ? effect.target : "current";
+        const rootField = effect.field.split(".")[0];
+        const key = `${String(relation)}\u0000${target}\u0000${rootField}`;
+        const previousRule = writes.get(key);
+        if (previousRule && previousRule !== ruleName) {
+          diagnostics.push(makeDiagnostic(
+            "W_PHASE_WRITE_CONFLICT",
+            `Phase '${phase.name}' rules '${previousRule}' and '${ruleName}' both write '${rootField}'`,
+            `phases[${phaseIndexValue}].rules`,
+            "warning",
+          ));
+        } else {
+          writes.set(key, ruleName);
+        }
+      }
+    }
+  }
+  for (const ruleName of Object.keys(rules)) {
+    if (!scheduledRules.has(ruleName)) {
+      diagnostics.push(makeDiagnostic(
+        "W_RULE_DEAD",
+        `Rule '${ruleName}' is not listed in any phase`,
+        `rules.${ruleName}`,
+        "warning",
+      ));
     }
   }
 

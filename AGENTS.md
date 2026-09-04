@@ -71,6 +71,9 @@ Before the full `npm test` gate, verify the candidate checkout has the WASM file
 pwsh -File build.ps1          # Windows
 ./build.sh                     # Unix
 
+# Full Vitest suite (requires the WASM build above in this exact checkout)
+npm test
+
 # Run dev server
 npm run dev                    # Vite server at http://localhost:8000
 
@@ -310,3 +313,10 @@ Triggered when AF or AH rises by ≥49 dB between frames.
 `SW=0` routes through cascade formant chain (vowels).
 `SW=1` enables parallel branch (fricatives, stops).
 Critical: Branch gains must use `setValueAtTime`, not ramp, for instantaneous switching.
+
+### Provenance Number Assertions
+
+Before asserting an exact provenance substring that contains a formatted number,
+inspect the production formatter and use its actual precision in the expected
+text. Keep separate numeric assertions on the underlying value so presentation
+coverage cannot substitute for behavior coverage.

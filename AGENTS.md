@@ -31,6 +31,7 @@ This is enforced through three interlocking systems:
 
 **What this means for you as an agent:**
 - When you write a new rule: include `citations:` with the paper reference. No citation = do not commit.
+- In flow-style YAML citation arrays, quote every citation containing a comma so one source cannot parse as multiple list items; prefer block-style citation lists when editing several entries.
 - When you add a rule application: include a `tag:` that describes the linguistic motivation.
 - When you add a new pipeline stage: integrate with `ProvenanceCollector` — emit decision records for every non-trivial choice.
 - When you modify semantics.yaml realize rules: comment the formula source. `# Fant 1960 Table 2.34-1` is the minimum.

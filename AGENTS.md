@@ -66,6 +66,9 @@ Do not rely on long shell or Node one-liners for non-trivial repo analysis, migr
 pwsh -File build.ps1          # Windows
 ./build.sh                     # Unix
 
+# Full Vitest suite (requires the WASM build above in this exact checkout)
+npm test
+
 # Run dev server
 npm run dev                    # Vite server at http://localhost:8000
 

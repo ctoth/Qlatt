@@ -215,6 +215,63 @@ describe("input contract — anchor resolution + span precedence", () => {
 });
 
 describe("input contract — directions emit cited DecisionRecords (HRG-compatible)", () => {
+  it("routes pitch semitones to mean F0", () => {
+    const input: DirectionInput = {
+      score: { text: "hello" },
+      directionTrack: {
+        version: "1",
+        spans: [{ id: "pitch", anchor: { unit: "word", start: 0 }, pitch: { semitones: 12 } }],
+      },
+    };
+
+    const pitch = parseDirectionInput(input).directions.find((d) => d.kind === "pitch")!;
+
+    expect(pitch.delta?.f0Scale).toBeCloseTo(2, 6);
+    expect(pitch.delta?.f0VarianceScale).toBe(1);
+    expect(pitch.deltaFields).toEqual(["f0Scale"]);
+    expect(pitch.decision.reason).toContain("+12 st (F0×2)");
+  });
+
+  it("routes pitch rangeScale to F0 excursion", () => {
+    const input: DirectionInput = {
+      score: { text: "hello" },
+      directionTrack: {
+        version: "1",
+        spans: [{ id: "pitch", anchor: { unit: "word", start: 0 }, pitch: { rangeScale: 1.5 } }],
+      },
+    };
+
+    const pitch = parseDirectionInput(input).directions.find((d) => d.kind === "pitch")!;
+
+    expect(pitch.delta?.f0Scale).toBe(1);
+    expect(pitch.delta?.f0VarianceScale).toBe(1.5);
+    expect(pitch.deltaFields).toEqual(["f0VarianceScale"]);
+    expect(pitch.decision.reason).toContain("range×1.5");
+  });
+
+  it("combines pitch semitones and rangeScale on their independent channels", () => {
+    const input: DirectionInput = {
+      score: { text: "hello" },
+      directionTrack: {
+        version: "1",
+        spans: [
+          {
+            id: "pitch",
+            anchor: { unit: "word", start: 0 },
+            pitch: { semitones: -12, rangeScale: 0.75 },
+          },
+        ],
+      },
+    };
+
+    const pitch = parseDirectionInput(input).directions.find((d) => d.kind === "pitch")!;
+
+    expect(pitch.delta?.f0Scale).toBeCloseTo(0.5, 6);
+    expect(pitch.delta?.f0VarianceScale).toBe(0.75);
+    expect(pitch.deltaFields).toEqual(["f0Scale", "f0VarianceScale"]);
+    expect(pitch.decision.reason).toContain("-12 st (F0×0.50) range×0.75");
+  });
+
   it("a global affect lowers to a DecisionRecord with citations + the Affect relation", () => {
     const input: DirectionInput = {
       score: { text: "I am fine" },

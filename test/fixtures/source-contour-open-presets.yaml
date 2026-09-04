@@ -1,0 +1,21 @@
+version: v1
+citations:
+  - Test fixture
+
+baseline:
+  source_mode: 1
+  citations:
+    - Test fixture
+
+default_voice_quality: harsh
+voice_quality_presets:
+  harsh:
+    rd: 0.4
+    oq: 0.3
+    tl: 2
+    ah_offset_db: 1
+    flutter: 3
+    jitter: 4
+    f0_scale: 1.1
+    citations:
+      - Test fixture

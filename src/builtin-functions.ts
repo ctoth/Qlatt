@@ -20,6 +20,13 @@ interface KlattAmpsDocument {
     ndbCor?: unknown;
     ndbScale?: unknown;
     klsynAmpTable?: unknown;
+    ndbCorBinHz?: unknown;
+    ndbCorMinHz?: unknown;
+    ndbCorMaxHz?: unknown;
+    klsynAmpScale?: unknown;
+    dbFloorDb?: unknown;
+    dbCeilingDb?: unknown;
+    dbPerDoubling?: unknown;
   };
 }
 
@@ -60,10 +67,26 @@ function requireNumberMap(
   return out;
 }
 
+function requireNumber(value: unknown, label: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(
+      `E_KLATT_AMP_CONSTANT_INVALID: '${label}' is not a finite number in ${KLATT_AMPS_YAML_PATH}`,
+    );
+  }
+  return value;
+}
+
 function loadKlattAmpTables(): {
   ndbCor: number[];
   ndbScale: Record<string, number>;
   klsynAmpTable: number[];
+  ndbCorBinHz: number;
+  ndbCorMinHz: number;
+  ndbCorMaxHz: number;
+  klsynAmpScale: number;
+  dbFloorDb: number;
+  dbCeilingDb: number;
+  dbPerDoubling: number;
 } {
   const doc = loadYamlDocumentSync<KlattAmpsDocument>(KLATT_AMPS_YAML_PATH);
   const constants = doc.constants;
@@ -72,12 +95,52 @@ function loadKlattAmpTables(): {
       `E_KLATT_AMP_TABLE_MISSING: 'constants' block missing in ${KLATT_AMPS_YAML_PATH}`,
     );
   }
+  const ndbCor = requireNumberArray(constants.ndbCor, "constants.ndbCor");
+  const ndbCorBinHz = requireNumber(
+    constants.ndbCorBinHz,
+    "constants.ndbCorBinHz",
+  );
+  const ndbCorMinHz = requireNumber(
+    constants.ndbCorMinHz,
+    "constants.ndbCorMinHz",
+  );
+  const ndbCorMaxHz = requireNumber(
+    constants.ndbCorMaxHz,
+    "constants.ndbCorMaxHz",
+  );
+  const expectedNdbCorLength =
+    (ndbCorMaxHz - ndbCorMinHz) / ndbCorBinHz;
+  if (
+    !Number.isInteger(expectedNdbCorLength) ||
+    ndbCor.length !== expectedNdbCorLength
+  ) {
+    throw new Error(
+      `E_KLATT_AMP_TABLE_LENGTH: 'constants.ndbCor' has ${ndbCor.length} entries; ` +
+        `[${ndbCorMinHz}, ${ndbCorMaxHz}) Hz at ${ndbCorBinHz} Hz per bin requires ${expectedNdbCorLength}`,
+    );
+  }
   return {
-    ndbCor: requireNumberArray(constants.ndbCor, "constants.ndbCor"),
+    ndbCor,
     ndbScale: requireNumberMap(constants.ndbScale, "constants.ndbScale"),
     klsynAmpTable: requireNumberArray(
       constants.klsynAmpTable,
       "constants.klsynAmpTable",
+    ),
+    ndbCorBinHz,
+    ndbCorMinHz,
+    ndbCorMaxHz,
+    klsynAmpScale: requireNumber(
+      constants.klsynAmpScale,
+      "constants.klsynAmpScale",
+    ),
+    dbFloorDb: requireNumber(constants.dbFloorDb, "constants.dbFloorDb"),
+    dbCeilingDb: requireNumber(
+      constants.dbCeilingDb,
+      "constants.dbCeilingDb",
+    ),
+    dbPerDoubling: requireNumber(
+      constants.dbPerDoubling,
+      "constants.dbPerDoubling",
     ),
   };
 }
@@ -110,8 +173,12 @@ export const klsynAmpTable: number[] = klattAmpTables.klsynAmpTable;
  * Uses 6 dB per doubling (power ratio)
  */
 export function dbToLinear(db: number): number {
-  if (!Number.isFinite(db) || db <= -72) return 0;
-  return Math.pow(2, Math.min(96, db) / 6);
+  if (!Number.isFinite(db) || db <= klattAmpTables.dbFloorDb) return 0;
+  return Math.pow(
+    2,
+    Math.min(klattAmpTables.dbCeilingDb, db) /
+      klattAmpTables.dbPerDoubling,
+  );
 }
 
 /**
@@ -120,7 +187,7 @@ export function dbToLinear(db: number): number {
 export function dbToLinearKlsyn(db: number): number {
   if (!Number.isFinite(db) || db < 0) return 0;
   const index = Math.max(0, Math.min(Math.floor(db), klsynAmpTable.length - 1));
-  return klsynAmpTable[index] * 0.001;
+  return klsynAmpTable[index] * klattAmpTables.klsynAmpScale;
 }
 
 /**
@@ -128,8 +195,16 @@ export function dbToLinearKlsyn(db: number): number {
  * Compensates for spectral tilt when formants are close together
  */
 export function proximity(delta: number): number {
-  if (!Number.isFinite(delta) || delta < 50 || delta >= 550) return 0;
-  const index = Math.floor(delta / 50) - 1;
+  if (
+    !Number.isFinite(delta) ||
+    delta < klattAmpTables.ndbCorMinHz ||
+    delta >= klattAmpTables.ndbCorMaxHz
+  ) {
+    return 0;
+  }
+  const index = Math.floor(
+    (delta - klattAmpTables.ndbCorMinHz) / klattAmpTables.ndbCorBinHz,
+  );
   return ndbCor[Math.max(0, Math.min(index, ndbCor.length - 1))];
 }
 

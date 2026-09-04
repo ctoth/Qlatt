@@ -1177,7 +1177,7 @@ describe("dectalk-english end-to-end", () => {
     expect(dummyVowels[0].get("F1")).toBe(460);
     expect(dummyVowels[0].get("F2")).toBe(1680);
     expect(dummyVowels[0].get("F3")).toBe(2520);
-    expect(dummyVowels[0].get("TL")).toBe(10);
+    expect(dummyVowels[0].get("TL")).toBe(0);
     expect(dummyVowels[0].get("control_windows")).toContainEqual({
       start_ms: 0,
       target: "current",

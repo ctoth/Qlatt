@@ -18,6 +18,7 @@ baseline:
     - Fant 1997 Table 1
     - Klatt & Klatt 1990
 
+default_voice_quality: modal
 voice_quality_presets:
   modal:
     rd: 0.7

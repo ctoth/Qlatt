@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+    inputs:
+      upload-pages:
+        description: Upload the production build for the Pages deployment job
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm audit --omit=dev
+
+      - run: npm run check
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+      - run: npm run build
+
+      - if: inputs.upload-pages
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist

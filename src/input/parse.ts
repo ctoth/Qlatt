@@ -495,8 +495,7 @@ function lowerSpan(
   }
 
   if (span.pitch) {
-    const f0Scale =
-      span.pitch.semitones === undefined ? 1 : 2 ** (span.pitch.semitones / 12);
+    const f0Scale = span.pitch.semitones === undefined ? 1 : 2 ** (span.pitch.semitones / 12);
     const f0VarianceScale = span.pitch.rangeScale ?? 1;
     const delta = materializeVoiceQualityDelta({
       f0Scale,

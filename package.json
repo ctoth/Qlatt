@@ -74,12 +74,12 @@
     "@biomejs/biome": "2.5.12",
     "@types/js-yaml": "^4.0.9",
     "husky": "9.1.7",
-    "lint-staged": "16.4.0",
-    "playwright-core": "^1.58.2",
+    "lint-staged": "17.4.1",
+    "playwright-core": "^1.62.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.1",
-    "vitest": "^4.1.0"
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
   },
   "overrides": {
     "rollup": "^4.59.0"

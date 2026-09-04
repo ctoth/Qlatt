@@ -14,7 +14,7 @@ This is an *explainable* synthesizer. Every decision the system makes — which 
 
 This is enforced through three interlocking systems:
 
-**Provenance** (`src/provenance.ts`, `src/tts-frontend-provenance.ts`):
+**Provenance** (`src/provenance.ts`):
 - `ProvenanceCollector` records a `DecisionRecord` for every pipeline decision
 - Each record has: `stage`, `type`, `subject`, `reason`, `citations[]`, `parents[]`
 - Records form a DAG: inventory selection → rule match → rule rewrite, linked by parent IDs
@@ -111,8 +111,18 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 | `--why <id>` | Show ancestry chain for a decision (e.g., `--why d000045`) |
 | `--base-f0 <Hz>` | Fundamental frequency (default: 110) |
 | `--transition-ms <ms>` | Formant transition duration (default: 30) |
-| `--strict-citations` | Exit code 2 if any decisions lack citations |
+| `--strict-citations` | Exit code 2 if any decisions in the output window lack citations (respects --stage, --subject, --range filters) |
 | `--out <file>` | Write output to file instead of stdout |
+| `--item <id>` | Filter by item ID (required with `--field` or `--why-not`) |
+| `--field <key>` | Show field history for an item |
+| `--why-not <rule>` | Show why a specific rule did not fire |
+| `--field-phase <phase>` | Phase for field replay |
+| `--field-boundary <where>` | Boundary for field display (default: `after`) |
+| `--phase-views` | Include phase boundary checkpoints in output |
+| `--verify-replay` | Enable replay verification |
+| `--tooling-only` | Show only tooling decisions |
+| `--frontend <id>` | Frontend rulepack ID (default: `qlatt-english`) |
+| `--speaker <name>` | Speaker profile for synthesis |
 
 ## Testing Audio in Chrome
 

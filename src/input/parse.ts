@@ -486,16 +486,26 @@ function lowerSpan(
   }
 
   if (span.pitch) {
+    const f0Scale =
+      span.pitch.semitones === undefined ? 1 : 2 ** (span.pitch.semitones / 12);
+    const f0VarianceScale = span.pitch.rangeScale ?? 1;
     const delta = materializeVoiceQualityDelta({
-      f0Scale: span.pitch.rangeScale ?? 1,
+      f0Scale,
+      f0VarianceScale,
     });
+    const deltaFields = [
+      ...(span.pitch.semitones !== undefined ? ["f0Scale"] : []),
+      ...(span.pitch.rangeScale !== undefined ? ["f0VarianceScale"] : []),
+    ];
     const decision = provenance.add({
       stage: "frontend",
       type: "pitch",
       subject,
       reason:
         `Local pitch` +
-        (span.pitch.semitones !== undefined ? ` ${signed(span.pitch.semitones)} st` : "") +
+        (span.pitch.semitones !== undefined
+          ? ` ${signed(span.pitch.semitones)} st (F0×${fmt(f0Scale)})`
+          : "") +
         (span.pitch.rangeScale !== undefined ? ` range×${fmt(span.pitch.rangeScale)}` : "") +
         ` on ${subject}`,
       citations: ["Pierrehumbert_1980"],
@@ -507,7 +517,7 @@ function lowerSpan(
       scope: range,
       hrgRelation: "Intonation",
       delta,
-      deltaFields: ["f0Scale"],
+      deltaFields,
       citations: decision.citations,
       decision,
     });

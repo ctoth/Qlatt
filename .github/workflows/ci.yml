@@ -34,6 +34,11 @@ jobs:
 
       - run: rustup target add wasm32-unknown-unknown
 
+      - name: Build node-web-audio-api for the runner
+        run: |
+          printf '\n[workspace]\n' >> node_modules/node-web-audio-api/Cargo.toml
+          npm --prefix node_modules/node-web-audio-api run build:only
+
       - run: bash build.sh
 
       - run: npm test

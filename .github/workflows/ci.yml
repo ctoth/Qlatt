@@ -32,6 +32,10 @@ jobs:
 
       - run: npm run typecheck
 
+      - run: rustup target add wasm32-unknown-unknown
+
+      - run: ./build.sh
+
       - run: npm test
 
       - run: npm run build

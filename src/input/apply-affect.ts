@@ -20,25 +20,18 @@
  *                        effectiveRd = clamp(Rd + RdPhraseOffset, 0.3, 2.7).
  *                        Positive = breathier (lower HNR); negative = pressed.
  *   f0Scale            -> params.F0 (MUL), clamped > 0.
- *   durationScale      -> frame.time (MUL) — a uniform global tempo dilation of
- *                        the whole assembled timeline (>1 = slower). Applied
- *                        post-assembly because the track is already a flat list
- *                        of absolute event times; scaling every time uniformly
- *                        stretches segments, F0 anchors and control windows
- *                        together. pauseScale is folded into this global tempo
- *                        (a separate per-pause expansion would require
- *                        pre-assembly segment surgery — out of scope here).
+ *   durationScale      -> each speech-frame interval (MUL; >1 = slower).
+ *   pauseScale         -> each SIL-frame interval (additional MUL), matching
+ *                        HRG lowering's durationScale * pauseScale composition.
  *   f1/f2/f3Delta      -> params.F1/F2/F3 (ADD Hz), clamped > 0.
  *   fbw1/2/3Scale      -> params.B1/B2/B3 (MUL), clamped to a 20 Hz floor.
  *   spectralTiltBoost  -> params.TL (ADD dB; positive = darker/softer).
  *   ahBoost            -> params.AH (ADD dB; aspiration / breathiness).
  *   intensityBoost     -> params.GO (ADD dB; overall gain).
  *
- * f0VarianceScale and jitterScale are not realized here: F0
- * excursion is baked into the assembled contour (re-scaling variance needs the
- * pre-contour F0 anchors), and jitter is a per-frame source param the beauty
- * inventory does not vary by token. They are documented as deferred so
- * the mapping stays honest rather than silently dropping them.
+ * f0VarianceScale rescales voiced F0 values around their voiced mean before
+ * f0Scale is applied, matching HRG lowering. jitterScale remains deferred:
+ * jitter is a per-frame source param the beauty inventory does not vary by token.
  *
  * Citations: Rutledge_1995, Murray_1993, Fant_1997 (Rd channel), plus whatever
  * the compiled affect carried (Scherer_1986, Gobl_2003, France_2000, …).
@@ -119,14 +112,38 @@ export function applyAffectToTrack(
   // Tempo dilation must be strictly positive (a non-positive scale would
   // collapse the timeline); clamp defensively.
   const durationScale = vq.durationScale > 0 ? vq.durationScale : 1;
+  const pauseScale = vq.pauseScale > 0 ? vq.pauseScale : 1;
   const f0Scale = vq.f0Scale > 0 ? vq.f0Scale : 1;
+  const voicedF0Values = track
+    .filter((frame) => (
+      frame.phoneme !== "SIL"
+      && ((frame.params.AV ?? 0) > 0 || (frame.params.AVS ?? 0) > 0)
+      && typeof frame.params.F0 === "number"
+      && Number.isFinite(frame.params.F0)
+      && frame.params.F0 > 0
+    ))
+    .map((frame) => frame.params.F0);
+  const f0VarianceCenter = voicedF0Values.length > 0
+    ? voicedF0Values.reduce((sum, value) => sum + value, 0) / voicedF0Values.length
+    : undefined;
+  const timingIdentity = durationScale === 1 && pauseScale === 1;
+  let inputCursor = 0;
+  let outputCursor = 0;
 
-  const out: KlattFrame[] = track.map((frame) => {
+  const out: KlattFrame[] = track.map((frame, index) => {
     const params: Record<string, number> = { ...frame.params };
 
-    // --- F0 (mean-F0 multiplier), clamped > 0 -----------------------------
-    if (f0Scale !== 1 && typeof params.F0 === "number" && Number.isFinite(params.F0)) {
-      params.F0 = Math.max(0.001, params.F0 * f0Scale);
+    // --- F0 variance around the voiced mean, then mean-F0 multiplier -------
+    if (typeof params.F0 === "number" && Number.isFinite(params.F0) && params.F0 > 0) {
+      const voiced = frame.phoneme !== "SIL"
+        && ((params.AV ?? 0) > 0 || (params.AVS ?? 0) > 0);
+      if (voiced && f0VarianceCenter !== undefined && vq.f0VarianceScale !== 1) {
+        params.F0 = Math.max(
+          0.001,
+          f0VarianceCenter + (params.F0 - f0VarianceCenter) * vq.f0VarianceScale,
+        );
+      }
+      if (f0Scale !== 1) params.F0 = Math.max(0.001, params.F0 * f0Scale);
     }
 
     // --- Rd channel (breathy/pressed) via RdPhraseOffset ------------------
@@ -158,8 +175,17 @@ export function applyAffectToTrack(
     addDb(params, "AH", vq.ahBoost);
     addDb(params, "GO", vq.intensityBoost);
 
-    // --- Global tempo dilation (frame timing) -----------------------------
-    const time = durationScale === 1 ? frame.time : frame.time * durationScale;
+    // --- Segment-aware timeline dilation ----------------------------------
+    let time = frame.time;
+    if (!timingIdentity) {
+      const intervalOwner = index === 0 ? frame : track[index - 1];
+      const intervalScale = intervalOwner.phoneme === "SIL"
+        ? durationScale * pauseScale
+        : durationScale;
+      outputCursor += (frame.time - inputCursor) * intervalScale;
+      inputCursor = frame.time;
+      time = outputCursor;
+    }
 
     return { ...frame, time, params };
   });

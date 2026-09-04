@@ -19,6 +19,14 @@
     "dsp"
   ],
   "scripts": {
+    "prepare": "husky",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint --diagnostic-level=warn .",
+    "lint:fix": "biome lint --write .",
+    "check": "biome check --diagnostic-level=warn .",
+    "check:fix": "biome check --write .",
+    "lint-staged": "lint-staged",
     "predev": "npm run build:worklets",
     "dev": "vite",
     "prebuild": "npm run build:worklets",
@@ -30,6 +38,7 @@
     "typecheck:audio": "tsc -p tsconfig.audio.json --noEmit",
     "typecheck:golden": "tsc -p tsconfig.golden.json --noEmit",
     "typecheck:scripts": "tsc -p tsconfig.scripts.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "build:dict": "node --loader ts-node/esm --experimental-specifier-resolution=node scripts/build-cmudict.ts",
     "audit:dict-miss": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/scan-dictionary-misses.ts",
     "audit:phonology-outliers": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/find-phonology-outliers.ts",
@@ -62,7 +71,10 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.12",
     "@types/js-yaml": "^4.0.9",
+    "husky": "9.1.7",
+    "lint-staged": "16.4.0",
     "playwright-core": "^1.58.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
@@ -71,5 +83,8 @@
   },
   "overrides": {
     "rollup": "^4.59.0"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs,ts,tsx,json,jsonc,css,html}": "biome check --write --no-errors-on-unmatched"
   }
 }

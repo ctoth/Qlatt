@@ -57,6 +57,43 @@ describe("applyAffectToTrack", () => {
     expect(track).toEqual(before);
   });
 
+  it("anxious lengthens pauses without changing vowel durations", () => {
+    const params = (av: number): Record<string, number> => ({ F0: 150, AV: av });
+    const track: KlattFrame[] = [
+      { time: 0, phoneme: "AH", word: "a", params: params(60) },
+      { time: 0.2, phoneme: "SIL", word: "a", params: params(0) },
+      { time: 0.5, phoneme: "IY", word: "bee", params: params(60) },
+      { time: 0.7, phoneme: "SIL", word: "bee", params: params(0) },
+    ];
+    const anxious = compileAffect("anxious", 1);
+
+    const { track: out } = applyAffectToTrack(track, anxious);
+
+    expect(anxious.vq.durationScale).toBe(1);
+    expect(out[1].time - out[0].time).toBeCloseTo(0.2, 9);
+    expect(out[2].time - out[1].time).toBeCloseTo(0.3 * anxious.vq.pauseScale, 9);
+    expect(out[3].time - out[2].time).toBeCloseTo(0.2, 9);
+  });
+
+  it("scales voiced F0 excursion around its mean before applying the F0 scale", () => {
+    const track = sampleTrack();
+    track[0].params.F0 = 100;
+    track[1].params.F0 = 200;
+    const angry = compileAffect("angry", 1);
+
+    const { track: out } = applyAffectToTrack(track, angry);
+
+    const mean = 150;
+    expect(out[0].params.F0).toBeCloseTo(
+      (mean + (100 - mean) * angry.vq.f0VarianceScale) * angry.vq.f0Scale,
+      9,
+    );
+    expect(out[1].params.F0).toBeCloseTo(
+      (mean + (200 - mean) * angry.vq.f0VarianceScale) * angry.vq.f0Scale,
+      9,
+    );
+  });
+
   it("tender: breathier (raises Rd channel), slower, quieter", () => {
     const track = sampleTrack();
     const tender = compileAffect("tender", 1);

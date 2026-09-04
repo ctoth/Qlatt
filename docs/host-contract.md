@@ -93,17 +93,28 @@ document:
 documents are limited to arithmetic, comparisons, ternaries, member access,
 and registered function calls — a port must support at least that subset.
 
-**Required builtins** (normative source: `src/builtin-functions.ts`):
+**Required builtins** (reference implementation: `src/builtin-functions.ts`):
 
-- `dbToLinear(db)`: `0` if `db <= -72`, else `2^(min(db, 96) / 6)` — Klatt's
-  6 dB-per-doubling convention (Klatt 1980).
-- `dbToLinearKlsyn(db)`: klsyn88 `amptable` lookup × 0.001.
-- `proximity(delta)`: `ndbCor` table lookup for formant-proximity amplitude
-  correction; `0` outside `[50, 550)` Hz.
+The conversion domains are data, not host defaults. Before registering these
+builtins, load `ndbCor`, `ndbCorBinHz`, `ndbCorMinHz`, `ndbCorMaxHz`,
+`klsynAmpTable`, `klsynAmpScale`, `dbFloorDb`, `dbCeilingDb`, and
+`dbPerDoubling` from the owning semantics document. The shared reference values
+are in `klatt80-baseline/semantics.yaml`; standalone semantics documents that
+carry the tables carry the same domain constants. Reject the document unless
+`ndbCor.length == (ndbCorMaxHz - ndbCorMinHz) / ndbCorBinHz` and that quotient
+is an integer.
+
+- `dbToLinear(db)`: `0` if `db <= dbFloorDb`, else
+  `2^(min(db, dbCeilingDb) / dbPerDoubling)` (Klatt 1980 PARCOE.FOR).
+- `dbToLinearKlsyn(db)`: `klsynAmpTable[floor(db)] * klsynAmpScale`, with the
+  existing table-bound clamping (klsyn88 `parwvt.h`).
+- `proximity(delta)`: `ndbCor[floor((delta - ndbCorMinHz) / ndbCorBinHz)]`;
+  return `0` outside `[ndbCorMinHz, ndbCorMaxHz)` (Klatt 1980 PARCOE.FOR
+  `NDBCOR`).
 - `resonatorGainDb(...)` and the other exports of `builtin-functions.ts` as
   referenced by the semantics documents in use.
 - The `ndbScale` constant table (source amplitude offsets incl. G0
-  compensation) is data carried in `builtin-functions.ts` and referenced by
+  compensation) is carried in the owning semantics document and referenced by
   semantics expressions.
 
 ## 5. Automation model

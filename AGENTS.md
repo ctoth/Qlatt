@@ -62,6 +62,8 @@ Do not rely on long shell or Node one-liners for non-trivial repo analysis, migr
 
 ## Build Commands
 
+Before running the full `npm test` suite in a fresh worktree, verify that its WASM fixtures exist under that worktree's `target/wasm32-unknown-unknown/release/`. If any are absent, run the documented platform build first and verify the required files before launching the suite; a missing-WASM test result is only prerequisite evidence.
+
 ```bash
 # Build WASM modules (required first)
 pwsh -File build.ps1          # Windows

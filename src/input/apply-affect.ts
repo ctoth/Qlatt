@@ -112,17 +112,19 @@ export function applyAffectToTrack(
   const pauseScale = vq.pauseScale > 0 ? vq.pauseScale : 1;
   const f0Scale = vq.f0Scale > 0 ? vq.f0Scale : 1;
   const voicedF0Values = track
-    .filter((frame) => (
-      frame.phoneme !== "SIL"
-      && ((frame.params.AV ?? 0) > 0 || (frame.params.AVS ?? 0) > 0)
-      && typeof frame.params.F0 === "number"
-      && Number.isFinite(frame.params.F0)
-      && frame.params.F0 > 0
-    ))
+    .filter(
+      (frame) =>
+        frame.phoneme !== "SIL" &&
+        ((frame.params.AV ?? 0) > 0 || (frame.params.AVS ?? 0) > 0) &&
+        typeof frame.params.F0 === "number" &&
+        Number.isFinite(frame.params.F0) &&
+        frame.params.F0 > 0,
+    )
     .map((frame) => frame.params.F0);
-  const f0VarianceCenter = voicedF0Values.length > 0
-    ? voicedF0Values.reduce((sum, value) => sum + value, 0) / voicedF0Values.length
-    : undefined;
+  const f0VarianceCenter =
+    voicedF0Values.length > 0
+      ? voicedF0Values.reduce((sum, value) => sum + value, 0) / voicedF0Values.length
+      : undefined;
   const timingIdentity = durationScale === 1 && pauseScale === 1;
   let inputCursor = 0;
   let outputCursor = 0;
@@ -132,8 +134,7 @@ export function applyAffectToTrack(
 
     // --- F0 variance around the voiced mean, then mean-F0 multiplier -------
     if (typeof params.F0 === "number" && Number.isFinite(params.F0) && params.F0 > 0) {
-      const voiced = frame.phoneme !== "SIL"
-        && ((params.AV ?? 0) > 0 || (params.AVS ?? 0) > 0);
+      const voiced = frame.phoneme !== "SIL" && ((params.AV ?? 0) > 0 || (params.AVS ?? 0) > 0);
       if (voiced && f0VarianceCenter !== undefined && vq.f0VarianceScale !== 1) {
         params.F0 = Math.max(
           0.001,
@@ -175,9 +176,8 @@ export function applyAffectToTrack(
     let time = frame.time;
     if (!timingIdentity) {
       const intervalOwner = index === 0 ? frame : track[index - 1];
-      const intervalScale = intervalOwner.phoneme === "SIL"
-        ? durationScale * pauseScale
-        : durationScale;
+      const intervalScale =
+        intervalOwner.phoneme === "SIL" ? durationScale * pauseScale : durationScale;
       outputCursor += (frame.time - inputCursor) * intervalScale;
       inputCursor = frame.time;
       time = outputCursor;

@@ -9,7 +9,7 @@
  * > "A step function, PLSTEP, is included in order to simulate plosive bursts...
  * > The generator is triggered on by a sudden increase in AF or AH of 49 dB or more."
  */
-import { initWasmModule, WasmBuffer, resolveWasmUrl } from "./wasm-utils.js";
+import { initWasmModule, resolveWasmUrl, WasmBuffer, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./edge-detector.wasm");
 class EdgeDetectorProcessor extends AudioWorkletProcessor {
     disposed = false;

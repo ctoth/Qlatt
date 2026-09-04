@@ -16,7 +16,14 @@
  *   output[6] = open quotient ratio (0-1)
  *   output[7] = spectral tilt proxy (dB/oct)
  */
-import { initWasmModule, WasmBuffer, resolveWasmUrl, BaseProcessorOptions, UNINITIALIZED_ALLOC, fillParamBuffer } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  fillParamBuffer,
+  initWasmModule,
+  resolveWasmUrl,
+  UNINITIALIZED_ALLOC,
+  WasmBuffer,
+} from "./wasm-utils.js";
 
 interface AerodynamicModelWasmExports {
   memory: WebAssembly.Memory;
@@ -47,7 +54,7 @@ interface AerodynamicModelWasmExports {
     fnzPtr: number,
     oqPtr: number,
     tlPtr: number,
-    blockSize: number
+    blockSize: number,
   ): void;
   aerodynamic_model_reset?: (state: number) => void;
 }
@@ -77,12 +84,48 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "enable", defaultValue: 0.0, minValue: 0, maxValue: 1, automationRate: "k-rate" as const },
-      { name: "ag", defaultValue: 0.05, minValue: 0, maxValue: 0.4, automationRate: "k-rate" as const },
-      { name: "ac", defaultValue: 0.4, minValue: 0, maxValue: 0.4, automationRate: "k-rate" as const },
-      { name: "an", defaultValue: 0.0, minValue: 0, maxValue: 1.0, automationRate: "k-rate" as const },
-      { name: "st", defaultValue: 0.0, minValue: -10, maxValue: 0, automationRate: "k-rate" as const },
-      { name: "pm", defaultValue: 0.0, minValue: -0.5, maxValue: 0.2, automationRate: "k-rate" as const },
+      {
+        name: "enable",
+        defaultValue: 0.0,
+        minValue: 0,
+        maxValue: 1,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "ag",
+        defaultValue: 0.05,
+        minValue: 0,
+        maxValue: 0.4,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "ac",
+        defaultValue: 0.4,
+        minValue: 0,
+        maxValue: 0.4,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "an",
+        defaultValue: 0.0,
+        minValue: 0,
+        maxValue: 1.0,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "st",
+        defaultValue: 0.0,
+        minValue: -10,
+        maxValue: 0,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "pm",
+        defaultValue: 0.0,
+        minValue: -0.5,
+        maxValue: 0.2,
+        automationRate: "k-rate" as const,
+      },
       { name: "ps", defaultValue: 8, minValue: 0, maxValue: 30, automationRate: "k-rate" as const },
     ];
   }
@@ -154,7 +197,7 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
   process(
     _inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const voicingOut = outputs[0];
@@ -167,14 +210,22 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
     const tlOut = outputs[7];
 
     if (
-      !voicingOut || !voicingOut[0] ||
-      !aspirationOut || !aspirationOut[0] ||
-      !fricationOut || !fricationOut[0] ||
-      !b1Out || !b1Out[0] ||
-      !fnpOut || !fnpOut[0] ||
-      !fnzOut || !fnzOut[0] ||
-      !oqOut || !oqOut[0] ||
-      !tlOut || !tlOut[0]
+      !voicingOut ||
+      !voicingOut[0] ||
+      !aspirationOut ||
+      !aspirationOut[0] ||
+      !fricationOut ||
+      !fricationOut[0] ||
+      !b1Out ||
+      !b1Out[0] ||
+      !fnpOut ||
+      !fnpOut[0] ||
+      !fnzOut ||
+      !fnzOut[0] ||
+      !oqOut ||
+      !oqOut[0] ||
+      !tlOut ||
+      !tlOut[0]
     ) {
       return true;
     }
@@ -282,7 +333,7 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
       this.fnzBuffer.ptr,
       this.oqBuffer.ptr,
       this.tlBuffer.ptr,
-      blockSize
+      blockSize,
     );
 
     this.voicingBuffer.refresh();
@@ -301,7 +352,16 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
     const fnzView = this.fnzBuffer.view;
     const oqView = this.oqBuffer.view;
     const tlView = this.tlBuffer.view;
-    if (!voicingView || !aspirationView || !fricationView || !b1View || !fnpView || !fnzView || !oqView || !tlView) {
+    if (
+      !voicingView ||
+      !aspirationView ||
+      !fricationView ||
+      !b1View ||
+      !fnpView ||
+      !fnzView ||
+      !oqView ||
+      !tlView
+    ) {
       voicingChannel.fill(0);
       aspirationChannel.fill(0);
       fricationChannel.fill(0);

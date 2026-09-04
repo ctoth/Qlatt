@@ -12,14 +12,20 @@
 
 import { loadYamlDocumentSync } from "./yaml-loader";
 
-const KLATT_AMPS_YAML_PATH =
-  "/experiments/klatt80-baseline/semantics.yaml";
+const KLATT_AMPS_YAML_PATH = "/experiments/klatt80-baseline/semantics.yaml";
 
 interface KlattAmpsDocument {
   constants?: {
     ndbCor?: unknown;
     ndbScale?: unknown;
     klsynAmpTable?: unknown;
+    ndbCorBinHz?: unknown;
+    ndbCorMinHz?: unknown;
+    ndbCorMaxHz?: unknown;
+    klsynAmpScale?: unknown;
+    dbFloorDb?: unknown;
+    dbCeilingDb?: unknown;
+    dbPerDoubling?: unknown;
   };
 }
 
@@ -39,10 +45,7 @@ function requireNumberArray(value: unknown, label: string): number[] {
   });
 }
 
-function requireNumberMap(
-  value: unknown,
-  label: string,
-): Record<string, number> {
+function requireNumberMap(value: unknown, label: string): Record<string, number> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error(
       `E_KLATT_AMP_TABLE_MISSING: '${label}' is not a map in ${KLATT_AMPS_YAML_PATH}`,
@@ -60,10 +63,26 @@ function requireNumberMap(
   return out;
 }
 
+function requireNumber(value: unknown, label: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(
+      `E_KLATT_AMP_CONSTANT_INVALID: '${label}' is not a finite number in ${KLATT_AMPS_YAML_PATH}`,
+    );
+  }
+  return value;
+}
+
 function loadKlattAmpTables(): {
   ndbCor: number[];
   ndbScale: Record<string, number>;
   klsynAmpTable: number[];
+  ndbCorBinHz: number;
+  ndbCorMinHz: number;
+  ndbCorMaxHz: number;
+  klsynAmpScale: number;
+  dbFloorDb: number;
+  dbCeilingDb: number;
+  dbPerDoubling: number;
 } {
   const doc = loadYamlDocumentSync<KlattAmpsDocument>(KLATT_AMPS_YAML_PATH);
   const constants = doc.constants;
@@ -72,13 +91,28 @@ function loadKlattAmpTables(): {
       `E_KLATT_AMP_TABLE_MISSING: 'constants' block missing in ${KLATT_AMPS_YAML_PATH}`,
     );
   }
+  const ndbCor = requireNumberArray(constants.ndbCor, "constants.ndbCor");
+  const ndbCorBinHz = requireNumber(constants.ndbCorBinHz, "constants.ndbCorBinHz");
+  const ndbCorMinHz = requireNumber(constants.ndbCorMinHz, "constants.ndbCorMinHz");
+  const ndbCorMaxHz = requireNumber(constants.ndbCorMaxHz, "constants.ndbCorMaxHz");
+  const expectedNdbCorLength = (ndbCorMaxHz - ndbCorMinHz) / ndbCorBinHz;
+  if (!Number.isInteger(expectedNdbCorLength) || ndbCor.length !== expectedNdbCorLength) {
+    throw new Error(
+      `E_KLATT_AMP_TABLE_LENGTH: 'constants.ndbCor' has ${ndbCor.length} entries; ` +
+        `[${ndbCorMinHz}, ${ndbCorMaxHz}) Hz at ${ndbCorBinHz} Hz per bin requires ${expectedNdbCorLength}`,
+    );
+  }
   return {
-    ndbCor: requireNumberArray(constants.ndbCor, "constants.ndbCor"),
+    ndbCor,
     ndbScale: requireNumberMap(constants.ndbScale, "constants.ndbScale"),
-    klsynAmpTable: requireNumberArray(
-      constants.klsynAmpTable,
-      "constants.klsynAmpTable",
-    ),
+    klsynAmpTable: requireNumberArray(constants.klsynAmpTable, "constants.klsynAmpTable"),
+    ndbCorBinHz,
+    ndbCorMinHz,
+    ndbCorMaxHz,
+    klsynAmpScale: requireNumber(constants.klsynAmpScale, "constants.klsynAmpScale"),
+    dbFloorDb: requireNumber(constants.dbFloorDb, "constants.dbFloorDb"),
+    dbCeilingDb: requireNumber(constants.dbCeilingDb, "constants.dbCeilingDb"),
+    dbPerDoubling: requireNumber(constants.dbPerDoubling, "constants.dbPerDoubling"),
   };
 }
 
@@ -110,8 +144,8 @@ export const klsynAmpTable: number[] = klattAmpTables.klsynAmpTable;
  * Uses 6 dB per doubling (power ratio)
  */
 export function dbToLinear(db: number): number {
-  if (!Number.isFinite(db) || db <= -72) return 0;
-  return Math.pow(2, Math.min(96, db) / 6);
+  if (!Number.isFinite(db) || db <= klattAmpTables.dbFloorDb) return 0;
+  return 2 ** (Math.min(klattAmpTables.dbCeilingDb, db) / klattAmpTables.dbPerDoubling);
 }
 
 /**
@@ -120,7 +154,7 @@ export function dbToLinear(db: number): number {
 export function dbToLinearKlsyn(db: number): number {
   if (!Number.isFinite(db) || db < 0) return 0;
   const index = Math.max(0, Math.min(Math.floor(db), klsynAmpTable.length - 1));
-  return klsynAmpTable[index] * 0.001;
+  return klsynAmpTable[index] * klattAmpTables.klsynAmpScale;
 }
 
 /**
@@ -128,8 +162,14 @@ export function dbToLinearKlsyn(db: number): number {
  * Compensates for spectral tilt when formants are close together
  */
 export function proximity(delta: number): number {
-  if (!Number.isFinite(delta) || delta < 50 || delta >= 550) return 0;
-  const index = Math.floor(delta / 50) - 1;
+  if (
+    !Number.isFinite(delta) ||
+    delta < klattAmpTables.ndbCorMinHz ||
+    delta >= klattAmpTables.ndbCorMaxHz
+  ) {
+    return 0;
+  }
+  const index = Math.floor((delta - klattAmpTables.ndbCorMinHz) / klattAmpTables.ndbCorBinHz);
   return ndbCor[Math.max(0, Math.min(index, ndbCor.length - 1))];
 }
 
@@ -144,16 +184,19 @@ export function proximity(delta: number): number {
  * @returns magnitude in dB
  */
 export function resonatorMagnitudeDb(
-  evalFreq: number, poleFreq: number, poleBW: number, sampleRate: number
+  evalFreq: number,
+  poleFreq: number,
+  poleBW: number,
+  sampleRate: number,
 ): number {
   // Digital resonator pole: r * exp(±j*theta) where
   //   theta = 2*pi*poleFreq/sampleRate
   //   r = exp(-pi*poleBW/sampleRate)
-  const theta = 2 * Math.PI * poleFreq / sampleRate;
-  const r = Math.exp(-Math.PI * poleBW / sampleRate);
+  const theta = (2 * Math.PI * poleFreq) / sampleRate;
+  const r = Math.exp((-Math.PI * poleBW) / sampleRate);
   // Evaluate H(z) = 1/((1 - r*e^jtheta * z^-1)(1 - r*e^-jtheta * z^-1))
   // at z = e^(j*2*pi*evalFreq/sampleRate)
-  const w = 2 * Math.PI * evalFreq / sampleRate;
+  const w = (2 * Math.PI * evalFreq) / sampleRate;
   // Compute distances from e^jw to each pole on the unit circle
   const cosW = Math.cos(w);
   const sinW = Math.sin(w);
@@ -178,7 +221,15 @@ export const max = Math.max;
 export const pow = Math.pow;
 
 // Math builtins for bandwidth decomposition formulas (Fant 1960)
-export function builtinSqrt(x: number): number { return Math.sqrt(x); }
-export function builtinExp(x: number): number { return Math.exp(x); }
-export function builtinAbs(x: number): number { return Math.abs(x); }
-export function builtinLog(x: number): number { return Math.log(x); }
+export function builtinSqrt(x: number): number {
+  return Math.sqrt(x);
+}
+export function builtinExp(x: number): number {
+  return Math.exp(x);
+}
+export function builtinAbs(x: number): number {
+  return Math.abs(x);
+}
+export function builtinLog(x: number): number {
+  return Math.log(x);
+}

@@ -20,8 +20,7 @@ export function clearSpectrogram() {
 
 export function startSpectrogram(track) {
   if (!state.specState.analyser || !state.specCtx || !state.specCanvas) return;
-  const duration =
-    track && track.length ? track[track.length - 1].time : 0.5;
+  const duration = track && track.length ? track[track.length - 1].time : 0.5;
   state.specState.running = true;
   const bins = new Uint8Array(state.specState.analyser.frequencyBinCount);
   const draw = () => {
@@ -41,7 +40,10 @@ export function startSpectrogram(track) {
   };
   if (state.specState.rafId) cancelAnimationFrame(state.specState.rafId);
   state.specState.rafId = requestAnimationFrame(draw);
-  setTimeout(() => {
-    state.specState.running = false;
-  }, Math.max(0, duration * 1000 + 200));
+  setTimeout(
+    () => {
+      state.specState.running = false;
+    },
+    Math.max(0, duration * 1000 + 200),
+  );
 }

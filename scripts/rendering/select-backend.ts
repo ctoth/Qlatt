@@ -3,11 +3,7 @@ import { browserRuntimeBackend } from "./backends/browser-runtime.ts";
 import { nodeRuntimeBackend } from "./backends/node-runtime.ts";
 import { trackOnlyBackend } from "./backends/track-only.ts";
 
-const BACKENDS: RenderBackend[] = [
-  trackOnlyBackend,
-  nodeRuntimeBackend,
-  browserRuntimeBackend,
-];
+const BACKENDS: RenderBackend[] = [trackOnlyBackend, nodeRuntimeBackend, browserRuntimeBackend];
 
 export function selectRenderBackend(request: RenderRequest): RenderBackend {
   if (request.renderHost === "browser" && !request.allowBrowserRender) {

@@ -1,11 +1,22 @@
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  computeRmsPeak,
+  initWasmModule,
+  resolveWasmUrl,
+  WasmBuffer,
+} from "./wasm-utils.js";
 
 interface ResonatorWasmExports {
   memory: WebAssembly.Memory;
   alloc_f32(len: number): number;
   dealloc_f32(ptr: number, len: number): void;
   resonator_new(): number;
-  resonator_set_params(state: number, frequency: number, bandwidth: number, sampleRate: number): void;
+  resonator_set_params(
+    state: number,
+    frequency: number,
+    bandwidth: number,
+    sampleRate: number,
+  ): void;
   resonator_set_gain(state: number, gain: number): void;
   resonator_process(state: number, inputPtr: number, outputPtr: number, blockSize: number): void;
 }
@@ -54,9 +65,27 @@ class ResonatorProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "frequency", defaultValue: 500, minValue: 0, maxValue: 20000, automationRate: "k-rate" as const },
-      { name: "bandwidth", defaultValue: 60, minValue: 0, maxValue: 10000, automationRate: "k-rate" as const },
-      { name: "gain", defaultValue: 1, minValue: 0, maxValue: 4, automationRate: "k-rate" as const },
+      {
+        name: "frequency",
+        defaultValue: 500,
+        minValue: 0,
+        maxValue: 20000,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "bandwidth",
+        defaultValue: 60,
+        minValue: 0,
+        maxValue: 10000,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "gain",
+        defaultValue: 1,
+        minValue: 0,
+        maxValue: 4,
+        automationRate: "k-rate" as const,
+      },
     ];
   }
 
@@ -103,7 +132,7 @@ class ResonatorProcessor extends AudioWorkletProcessor {
   process(
     inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const output = outputs[0];
@@ -162,7 +191,7 @@ class ResonatorProcessor extends AudioWorkletProcessor {
         this.state,
         this.inputBuffer.ptr,
         this.outputBuffer.ptr,
-        blockSize
+        blockSize,
       );
     }
 
@@ -179,7 +208,7 @@ class ResonatorProcessor extends AudioWorkletProcessor {
   _reportMetrics(
     buffer: Float32Array,
     inputBuffer?: Float32Array | null,
-    params?: ResonatorMetricsParams
+    params?: ResonatorMetricsParams,
   ): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;

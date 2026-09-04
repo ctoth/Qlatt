@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
+import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { isPlainObject } from "../src/yaml-loader";
 
 const SCHEMA = {
@@ -86,20 +86,23 @@ function addSegment(
 }
 
 function productionTransitionParams(): Record<string, number> {
-  const parsed: unknown = JSON.parse(readFileSync(
-    new URL("./fixtures/hrg-convergence-baseline/qlatt-english-fricatives.json", import.meta.url),
-    "utf8",
-  ));
+  const parsed: unknown = JSON.parse(
+    readFileSync(
+      new URL("./fixtures/hrg-convergence-baseline/qlatt-english-fricatives.json", import.meta.url),
+      "utf8",
+    ),
+  );
   if (!isPlainObject(parsed) || !isPlainObject(parsed.oldProduction)) {
     throw new Error("production fixture missing");
   }
   const frames = parsed.oldProduction.sourceFrames;
   if (!Array.isArray(frames)) throw new Error("production frames missing");
   const frame = frames.find(
-    (candidate) => isPlainObject(candidate)
-      && candidate.phoneme === "EH"
-      && typeof candidate.time === "number"
-      && Math.abs(candidate.time - 0.535) <= 1e-9,
+    (candidate) =>
+      isPlainObject(candidate) &&
+      candidate.phoneme === "EH" &&
+      typeof candidate.time === "number" &&
+      Math.abs(candidate.time - 0.535) <= 1e-9,
   );
   if (!isPlainObject(frame) || !isPlainObject(frame.params)) {
     throw new Error("captured EH midpoint event missing");
@@ -112,20 +115,23 @@ function productionTransitionParams(): Record<string, number> {
 }
 
 function dectalkProductionParams(phoneme: string, time: number): Record<string, number> {
-  const parsed: unknown = JSON.parse(readFileSync(
-    new URL("./fixtures/hrg-convergence-baseline/dectalk-english-stops.json", import.meta.url),
-    "utf8",
-  ));
+  const parsed: unknown = JSON.parse(
+    readFileSync(
+      new URL("./fixtures/hrg-convergence-baseline/dectalk-english-stops.json", import.meta.url),
+      "utf8",
+    ),
+  );
   if (!isPlainObject(parsed) || !isPlainObject(parsed.oldProduction)) {
     throw new Error("DECtalk production fixture missing");
   }
   const frames = parsed.oldProduction.sourceFrames;
   if (!Array.isArray(frames)) throw new Error("DECtalk production frames missing");
   const frame = frames.find(
-    (candidate) => isPlainObject(candidate)
-      && candidate.phoneme === phoneme
-      && typeof candidate.time === "number"
-      && Math.abs(candidate.time - time) <= 1e-9,
+    (candidate) =>
+      isPlainObject(candidate) &&
+      candidate.phoneme === phoneme &&
+      typeof candidate.time === "number" &&
+      Math.abs(candidate.time - time) <= 1e-9,
   );
   if (!isPlainObject(frame) || !isPlainObject(frame.params)) {
     throw new Error("captured DECtalk universal midpoint event missing");
@@ -142,10 +148,20 @@ describe("HRG lowering midpoint transitions", () => {
     const utterance = new Utterance(SCHEMA);
     const build = utterance.beginTransaction(META);
     const eh = addSegment(build, "seg_3", "EH", "vowel", 155, {
-      F1: 580, F2: 1799, F3: 2605, B1: 70, B2: 90, B3: 130,
+      F1: 580,
+      F2: 1799,
+      F3: 2605,
+      B1: 70,
+      B2: 90,
+      B3: 130,
     });
     const l = addSegment(build, "seg_4", "L", "liquid", 65, {
-      F1: 310, F2: 900, F3: 2400, B1: 50, B2: 100, B3: 200,
+      F1: 310,
+      F2: 900,
+      F3: 2400,
+      B1: 50,
+      B2: 100,
+      B3: 200,
     });
     build.partitionAnchors([eh, l], utterance.axis.start.id, utterance.axis.end.id);
     build.commit();
@@ -178,10 +194,20 @@ describe("HRG lowering midpoint transitions", () => {
     const utterance = new Utterance(SCHEMA);
     const build = utterance.beginTransaction(META);
     const closure = addSegment(build, "seg_0", "P", "stop_closure", 83, {
-      F1: 350, F2: 1051, F3: 2150, B1: 200, B2: 180, B3: 180,
+      F1: 350,
+      F2: 1051,
+      F3: 2150,
+      B1: 200,
+      B2: 180,
+      B3: 180,
     });
     const release = addSegment(build, "seg_1", "P_REL", "stop_release", 7, {
-      F1: 400, F2: 1100, F3: 2150, B1: 300, B2: 150, B3: 220,
+      F1: 400,
+      F2: 1100,
+      F3: 2150,
+      B1: 300,
+      B2: 150,
+      B3: 220,
     });
     build.partitionAnchors([closure, release], utterance.axis.start.id, utterance.axis.end.id);
     build.commit();
@@ -231,10 +257,20 @@ describe("HRG lowering midpoint transitions", () => {
     const utterance = new Utterance(SCHEMA);
     const build = utterance.beginTransaction(META);
     const vowel = addSegment(build, "seg_2", "AE", "vowel", 154, {
-      F1: 680, F2: 1600, F3: 2430, B1: 130, B2: 90, B3: 290,
+      F1: 680,
+      F2: 1600,
+      F3: 2430,
+      B1: 130,
+      B2: 90,
+      B3: 290,
     });
     const closure = addSegment(build, "seg_3", "T", "stop_closure", 65, {
-      F1: 350, F2: 1700, F3: 2600, B1: 200, B2: 150, B3: 240,
+      F1: 350,
+      F2: 1700,
+      F3: 2600,
+      B1: 200,
+      B2: 150,
+      B3: 240,
     });
     build.partitionAnchors([vowel, closure], utterance.axis.start.id, utterance.axis.end.id);
     build.commit();
@@ -271,7 +307,8 @@ describe("HRG lowering midpoint transitions", () => {
     const lowered = lowerToFrames(utterance, policy);
     for (const time of [0.2632, 0.2932]) {
       const frame = lowered.frames.find(
-        (candidate) => candidate.segmentId === closure.id && Math.abs(candidate.time - time) <= 1e-9,
+        (candidate) =>
+          candidate.segmentId === closure.id && Math.abs(candidate.time - time) <= 1e-9,
       );
       const production = dectalkProductionParams("T", time);
       expect(frame, `frame ${time}`).toBeDefined();
@@ -285,13 +322,28 @@ describe("HRG lowering midpoint transitions", () => {
     const utterance = new Utterance(SCHEMA);
     const build = utterance.beginTransaction(META);
     const ey = addSegment(build, "seg_0", "EY", "vowel", 100, {
-      F1: 500, F2: 1800, F3: 2500, B1: 80, B2: 100, B3: 200,
+      F1: 500,
+      F2: 1800,
+      F3: 2500,
+      B1: 80,
+      B2: 100,
+      B3: 200,
     });
     const n = addSegment(build, "seg_1", "N", "nasal", 100, {
-      F1: 300, F2: 1300, F3: 2600, B1: 90, B2: 200, B3: 1600,
+      F1: 300,
+      F2: 1300,
+      F3: 2600,
+      B1: 90,
+      B2: 200,
+      B3: 1600,
     });
     const ih = addSegment(build, "seg_2", "IH", "vowel", 100, {
-      F1: 400, F2: 1900, F3: 2550, B1: 70, B2: 90, B3: 190,
+      F1: 400,
+      F2: 1900,
+      F3: 2550,
+      B1: 70,
+      B2: 90,
+      B3: 190,
     });
     build.partitionAnchors([ey, n, ih], utterance.axis.start.id, utterance.axis.end.id);
     build.commit();
@@ -324,7 +376,10 @@ describe("HRG lowering midpoint transitions", () => {
     } as const satisfies LowerOptions;
 
     const lowered = lowerToFrames(utterance, policy);
-    const paramsAt = (segmentId: string, time: number): Readonly<Record<string, number>> | undefined =>
+    const paramsAt = (
+      segmentId: string,
+      time: number,
+    ): Readonly<Record<string, number>> | undefined =>
       lowered.frames.find(
         (frame) => frame.segmentId === segmentId && Math.abs(frame.time - time) <= 1e-9,
       )?.params;

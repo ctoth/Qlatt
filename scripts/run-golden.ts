@@ -23,7 +23,7 @@ for (const script of scripts) {
     ],
     {
       stdio: "inherit",
-    }
+    },
   );
   if (result.status !== 0) {
     failed = true;

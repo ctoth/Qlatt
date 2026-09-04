@@ -76,8 +76,9 @@ const vowelsRaw = sy1.match(/us_syl_vowels\[\]\s*=\s*"([^"]*)"/)?.[1] ?? "";
 const sylVowels = vowelsRaw.split("");
 
 // --- 5. us_syl_cons (legal onset clusters, longest-first) ---
-const consBody = sy1.match(/us_syl_cons\[\]\s*=\s*\{([\s\S]*?)\};/)?.[1]
-  ?? sy1.match(/us_syl_cons\b[\s\S]*?\{([\s\S]*?)\};/)?.[1];
+const consBody =
+  sy1.match(/us_syl_cons\[\]\s*=\s*\{([\s\S]*?)\};/)?.[1] ??
+  sy1.match(/us_syl_cons\b[\s\S]*?\{([\s\S]*?)\};/)?.[1];
 if (!consBody) throw new Error("could not find us_syl_cons[]");
 const onsetClusters = [...consBody.matchAll(/"([^"]*)"/g)].map((m) => m[1]);
 
@@ -103,8 +104,13 @@ for (const v of sylVowels) referenced.add(v);
 for (const cl of onsetClusters) for (const ch of cl) if (ch !== " ") referenced.add(ch);
 for (const af of affixes) for (const ch of af) if (ch !== " ") referenced.add(ch);
 const unmapped = [...referenced].filter((ch) => !asckyToArpabet.has(ch));
-console.log("\nascky chars referenced by tables with NO ARPABET preimage in port:", JSON.stringify(unmapped));
-console.log("(these are DECtalk phones the port does not emit -- vowels like @,a,c,| ; consonants like C,J,G,L,N already mapped?)");
+console.log(
+  "\nascky chars referenced by tables with NO ARPABET preimage in port:",
+  JSON.stringify(unmapped),
+);
+console.log(
+  "(these are DECtalk phones the port does not emit -- vowels like @,a,c,| ; consonants like C,J,G,L,N already mapped?)",
+);
 
 // Emit a YAML-ready block
 console.log("\n=== YAML block (syllabification:) ===");
@@ -112,7 +118,7 @@ const yamlArpabet = Object.entries(arpabetToAscky)
   .map(([k, v]) => `    ${k}: "${v}"`)
   .join("\n");
 console.log("syllabification:");
-console.log("  nuclei: \"" + sylVowels.join("") + "\"");
+console.log('  nuclei: "' + sylVowels.join("") + '"');
 console.log("  onset_clusters:");
 for (const cl of onsetClusters) console.log(`    - "${cl}"`);
 console.log("  affixes:");

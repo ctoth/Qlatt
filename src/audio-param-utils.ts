@@ -22,26 +22,31 @@ export function getAudioParam(node: AudioNode, paramName: string): AudioParam | 
   const anyNode = node as unknown as Record<string, unknown>;
 
   // Handle GainNode
-  if (paramName === 'gain' && anyNode.gain) {
+  if (paramName === "gain" && anyNode.gain) {
     return anyNode.gain as AudioParam;
   }
 
   // Handle ConstantSourceNode
-  if (paramName === 'offset' && anyNode.offset) {
+  if (paramName === "offset" && anyNode.offset) {
     return anyNode.offset as AudioParam;
   }
 
   // Handle AudioWorkletNode parameters
-  if (anyNode.parameters && typeof (anyNode.parameters as Record<string, unknown>).get === 'function') {
-    const param = (anyNode.parameters as { get: (name: string) => AudioParam | undefined }).get(paramName);
+  if (
+    anyNode.parameters &&
+    typeof (anyNode.parameters as Record<string, unknown>).get === "function"
+  ) {
+    const param = (anyNode.parameters as { get: (name: string) => AudioParam | undefined }).get(
+      paramName,
+    );
     if (param) return param;
   }
 
   // Handle native nodes with named AudioParam properties (e.g., DynamicsCompressorNode
   // exposes threshold, knee, ratio, attack, release as AudioParam properties)
-  if (anyNode[paramName] && typeof anyNode[paramName] === 'object') {
+  if (anyNode[paramName] && typeof anyNode[paramName] === "object") {
     const candidate = anyNode[paramName] as Record<string, unknown>;
-    if ('value' in candidate && typeof candidate.value === 'number') {
+    if ("value" in candidate && typeof candidate.value === "number") {
       return anyNode[paramName] as AudioParam;
     }
   }
@@ -75,13 +80,13 @@ export function applyParamValue(
 
   const paramRecord = param as unknown as Record<string, unknown>;
 
-  if (typeof paramRecord.setValueAtTime === 'function') {
+  if (typeof paramRecord.setValueAtTime === "function") {
     // Resolve time lazily: only access node.context.currentTime when actually needed
     const nodeRecord = node as unknown as Record<string, unknown>;
     const ctx = nodeRecord.context as { currentTime: number } | undefined;
     const resolvedTime = time ?? ctx?.currentTime ?? 0;
     (paramRecord.setValueAtTime as (v: number, t: number) => void)(value, resolvedTime);
-  } else if ('value' in paramRecord) {
+  } else if ("value" in paramRecord) {
     (param as unknown as { value: number }).value = value;
   }
 

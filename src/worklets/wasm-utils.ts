@@ -46,7 +46,11 @@ export const UNINITIALIZED_ALLOC: WasmAllocExports = {
   dealloc_f32: () => {},
 };
 
-export function fillParamBuffer(buffer: WasmBuffer, values: Float32Array, blockSize: number): number {
+export function fillParamBuffer(
+  buffer: WasmBuffer,
+  values: Float32Array,
+  blockSize: number,
+): number {
   const len = values.length > 1 ? blockSize : 1;
   buffer.ensure(len);
   if (!buffer.view) {
@@ -63,7 +67,7 @@ export function fillParamBuffer(buffer: WasmBuffer, values: Float32Array, blockS
 export async function initWasmModule(
   url: string | URL | null,
   imports: WebAssembly.Imports = {},
-  wasmBytes: WasmBytes = null
+  wasmBytes: WasmBytes = null,
 ) {
   const cacheKey = url == null ? null : String(url);
   if (cacheKey) {
@@ -85,9 +89,8 @@ export async function initWasmModule(
       throw new Error("WASM URL is required when wasmBytes is not provided");
     }
     // Cache-bust WASM URLs so rebuilt modules load immediately in dev.
-    const bustUrl = typeof url === "string"
-      ? url + (url.includes("?") ? "&" : "?") + "v=" + Date.now()
-      : url;
+    const bustUrl =
+      typeof url === "string" ? url + (url.includes("?") ? "&" : "?") + "v=" + Date.now() : url;
     const response = await fetch(bustUrl);
     if (WebAssembly.instantiateStreaming) {
       try {
@@ -127,7 +130,7 @@ export async function initWasmModule(
  */
 export function initWasmModuleSync(
   bytes: ArrayBuffer | ArrayBufferView,
-  imports: WebAssembly.Imports = {}
+  imports: WebAssembly.Imports = {},
 ): WebAssembly.Instance {
   // WebAssembly.Module accepts any BufferSource. Pass an ArrayBufferView
   // through unchanged so its byteOffset/byteLength are honored — a caller that

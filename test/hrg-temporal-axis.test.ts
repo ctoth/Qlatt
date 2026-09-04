@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { Utterance } from "../src/declarative-frontend/hrg";
 
 const SCHEMA = {
   itemTypes: {
@@ -57,7 +57,11 @@ describe("Utterance-owned temporal axis", () => {
     point.set("value", 140, INPUT);
     utterance.relation("F0Point").append(point, INPUT);
 
-    const middle = utterance.createMarkBetween(utterance.axis.start.id, utterance.axis.end.id, INPUT);
+    const middle = utterance.createMarkBetween(
+      utterance.axis.start.id,
+      utterance.axis.end.id,
+      INPUT,
+    );
     utterance.anchorPoint(point, utterance.axis.start.id, middle.id, 0.25, INPUT);
     const startTime = utterance.resolveMarkTime(utterance.axis.start.id, 0, INPUT);
     const firstMiddleTime = utterance.resolveMarkTime(middle.id, 100, INPUT);

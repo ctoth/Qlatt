@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  resolveTimingSnapshot,
-  TimingSnapshot,
-} from "../../src/harness-diagnostics/timing-context";
+import { resolveTimingSnapshot } from "../../src/harness-diagnostics/timing-context";
 import type { TrackEvent } from "../../src/harness-diagnostics/types";
 
 function makeTrack(times: number[]): TrackEvent[] {

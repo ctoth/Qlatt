@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import { type LowerOptions, readLowerOptions } from "../src/declarative-frontend/hrg/lowering";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { validateDslSpec } from "../src/declarative-frontend/validation";
 
-function outputOf(frontendId: string): Record<string, any> {
+function outputOf(frontendId: string): { lowering: LowerOptions } {
   const spec = loadBundledRulepackSpec(frontendId);
-  return (spec as Record<string, any>).output;
+  return { lowering: readLowerOptions(spec.output.lowering) };
 }
 
 describe("track lowering output config", () => {
@@ -27,6 +28,9 @@ describe("track lowering output config", () => {
 
   it("loads qlatt point-interpolation F0 lowering policy", () => {
     const lowering = outputOf("qlatt-english").lowering;
+    if (!lowering.f0 || !lowering.overlays) {
+      throw new Error("qlatt lowering must define F0 and overlay policies");
+    }
 
     expect(lowering.f0.renderer.type).toBe("point_interpolation");
     expect(lowering.f0.output_clamp.min_hz.value).toBe(0);
@@ -35,6 +39,9 @@ describe("track lowering output config", () => {
 
   it("loads dectalk layered F0 lowering policy", () => {
     const lowering = outputOf("dectalk-english").lowering;
+    if (!lowering.f0) {
+      throw new Error("dectalk lowering must define an F0 policy");
+    }
 
     expect(lowering.id).toBe("dectalk-english-track-lowering");
     expect(lowering.f0.renderer.type).toBe("layered_additive");
@@ -104,6 +111,8 @@ describe("track lowering output config", () => {
 
     const diagnostics = validateDslSpec(spec);
 
-    expect(diagnostics.some((diagnostic) => diagnostic.code === "E_LOWERING_SPEC_CITATION")).toBe(true);
+    expect(diagnostics.some((diagnostic) => diagnostic.code === "E_LOWERING_SPEC_CITATION")).toBe(
+      true,
+    );
   });
 });

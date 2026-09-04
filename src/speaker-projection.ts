@@ -22,7 +22,16 @@ import type { VoiceQualityOverrides } from "./source-contour";
 
 /** Named formant frequency keys (replaces the baked-in `for (formant=1..10)` loop). */
 export const SPEAKER_FORMANT_KEYS = [
-  "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10",
+  "F1",
+  "F2",
+  "F3",
+  "F4",
+  "F5",
+  "F6",
+  "F7",
+  "F8",
+  "F9",
+  "F10",
 ] as const;
 
 export interface SpeakerProjectionBaseline {
@@ -60,7 +69,12 @@ export const SPEAKER_PROJECTION_TABLE: readonly SpeakerProjectionRow[] = [
   { field: "Rd", op: "override_or_baseline", overrideKey: "rd", baselineKey: "rd" },
   { field: "RdRef", op: "baseline_const", baselineKey: "rd_ref" },
   { field: "OQ", op: "override_if_set", overrideKey: "oq" },
-  { field: "TL", op: "override_or_current_plus_baseline", overrideKey: "tl", baselineKey: "spectral_tilt_offset_db" },
+  {
+    field: "TL",
+    op: "override_or_current_plus_baseline",
+    overrideKey: "tl",
+    baselineKey: "spectral_tilt_offset_db",
+  },
   { field: "AH", op: "current_plus_override_if_set", overrideKey: "ah_offset_db" },
   { field: "flutter", op: "override_if_set", overrideKey: "flutter" },
   { field: "jitter", op: "override_if_set", overrideKey: "jitter" },
@@ -98,7 +112,10 @@ export function projectSpeakerFields(
       case "override_or_current_plus_baseline": {
         const current = target.get(row.field);
         if (typeof current === "number") {
-          target.set(row.field, overrides?.[row.overrideKey] ?? current + baseline[row.baselineKey]);
+          target.set(
+            row.field,
+            overrides?.[row.overrideKey] ?? current + baseline[row.baselineKey],
+          );
         }
         break;
       }

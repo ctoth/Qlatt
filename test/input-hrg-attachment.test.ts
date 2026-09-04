@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Utterance, whyFeature } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { Utterance, whyFeature } from "../src/declarative-frontend/hrg";
 import {
   attachDirectionsToUtterance,
   DIRECTION_ITEM_SCHEMA,
@@ -61,7 +61,9 @@ describe("Direction Track attachment to static HRG fixtures", () => {
 
     const affect = utterance.relation("Affect").listItems()[0];
     expect(affect.get("delta")).toMatchObject({ durationScale: expect.any(Number) });
-    expect(affect.get("delta_fields")).toEqual(expect.arrayContaining(["durationScale", "rdDelta"]));
+    expect(affect.get("delta_fields")).toEqual(
+      expect.arrayContaining(["durationScale", "rdDelta"]),
+    );
     expect(Object.isFrozen(affect.get("delta"))).toBe(true);
   });
 });

@@ -59,11 +59,11 @@ export type MeasureKind =
 export type CheckAggregate = "last" | "max" | "min";
 
 export type CheckType =
-  | "tap_check"        // default: measure a tap and assert
-  | "param_range"      // track min/max of a named param across utterance
-  | "event_check"      // check properties of events (e.g., PLSTEP)
-  | "across_plays"     // accumulate across N plays, then assert
-  | "track_analysis";  // evaluate assertions on track parameters directly
+  | "tap_check" // default: measure a tap and assert
+  | "param_range" // track min/max of a named param across utterance
+  | "event_check" // check properties of events (e.g., PLSTEP)
+  | "across_plays" // accumulate across N plays, then assert
+  | "track_analysis"; // evaluate assertions on track parameters directly
 
 export type Severity = "info" | "warn" | "error";
 
@@ -213,4 +213,18 @@ export interface TrackEvent {
   time: number;
   phoneme?: string;
   params?: Record<string, number | bigint | undefined>;
+}
+
+export interface ConnectableAudioNode {
+  connect(destination: AudioNode): unknown;
+  disconnect?(): void;
+}
+
+export interface RuntimeNodeResolver {
+  getNode(id: string): ConnectableAudioNode | null;
+}
+
+export interface PlayHistoryEntry {
+  phrase?: string;
+  time?: string | number;
 }

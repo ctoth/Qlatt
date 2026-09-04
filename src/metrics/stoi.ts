@@ -64,9 +64,7 @@ export function stoi(
   const diag = options.diagnostics;
 
   if (clean.length !== degraded.length) {
-    diag?.error(
-      `STOI: signal length mismatch: clean=${clean.length}, degraded=${degraded.length}`,
-    );
+    diag?.error(`STOI: signal length mismatch: clean=${clean.length}, degraded=${degraded.length}`);
     throw new Error(
       `clean and degraded must have the same length, got ${clean.length} and ${degraded.length}`,
     );
@@ -85,9 +83,7 @@ export function stoi(
   // 2. Remove silent frames (Taal 2011 Section III-A)
   const beforeLen = x.length;
   [x, y] = removeSilentFrames(x, y, DYN_RANGE, N_FRAME, N_FRAME >> 1);
-  diag?.info(
-    `STOI: silence removal — ${beforeLen} → ${x.length} samples`,
-  );
+  diag?.info(`STOI: silence removal — ${beforeLen} → ${x.length} samples`);
 
   // 3. STFT — 256-sample Hann, hop=128, 512-point FFT
   // pystoi transposes to (freq, time), then we apply OBM
@@ -199,7 +195,7 @@ export function thirdOctaveBandMatrix(): Float64Array[] {
 
   const obm: Float64Array[] = [];
   for (let band = 0; band < NUMBAND; band++) {
-    const cf = MINFREQ * 2 ** (band / 3);
+    const _cf = MINFREQ * 2 ** (band / 3);
     const freqLow = MINFREQ * 2 ** ((2 * band - 1) / 6);
     const freqHigh = MINFREQ * 2 ** ((2 * band + 1) / 6);
 
@@ -299,10 +295,7 @@ export function stft(
  *
  * X_j(m) = sqrt( Σ_k OBM[j,k] * |X(k,m)|^2 )  — Taal 2011 Eq. 1
  */
-function applyObm(
-  obm: Float64Array[],
-  powerSpectra: Float64Array[],
-): Float64Array[] {
+function applyObm(obm: Float64Array[], powerSpectra: Float64Array[]): Float64Array[] {
   const T = powerSpectra.length;
   const result: Float64Array[] = [];
   for (let j = 0; j < NUMBAND; j++) {
@@ -327,10 +320,7 @@ function applyObm(
  * Output: S segments, each a flat Float64Array of size NUMBAND*N
  *         laid out as [band0_frame0..band0_frameN-1, band1_frame0..., ...]
  */
-function extractSegments(
-  tob: Float64Array[],
-  segLen: number,
-): Float64Array[] {
+function extractSegments(tob: Float64Array[], segLen: number): Float64Array[] {
   const T = tob[0].length;
   const S = T - segLen + 1;
   const segments: Float64Array[] = [];
@@ -353,10 +343,7 @@ function extractSegments(
  *
  * Citation: Jensen & Taal 2016 Section III-B / pystoi utils.row_col_normalize().
  */
-function rowColNormalize(
-  segments: Float64Array[],
-  S: number,
-): Float64Array[] {
+function rowColNormalize(segments: Float64Array[], S: number): Float64Array[] {
   const result: Float64Array[] = [];
   for (let s = 0; s < S; s++) {
     // Work on a copy; layout: (NUMBAND rows, N cols), row-major
@@ -464,10 +451,7 @@ export function removeSilentFrames(
  * Simple overlap-and-add reconstruction from windowed frames.
  * Citation: pystoi utils._overlap_and_add() (simplified loop version).
  */
-export function overlapAndAdd(
-  frames: Float64Array[],
-  hop: number,
-): Float64Array {
+export function overlapAndAdd(frames: Float64Array[], hop: number): Float64Array {
   if (frames.length === 0) return new Float64Array(0);
   const frameLen = frames[0].length;
   const outLen = (frames.length - 1) * hop + frameLen;
@@ -487,11 +471,7 @@ export function overlapAndAdd(
  *
  * Citation: pystoi utils.resample_oct() + _resample_window_oct().
  */
-export function resampleOct(
-  x: Float64Array,
-  p: number,
-  q: number,
-): Float64Array {
+export function resampleOct(x: Float64Array, p: number, q: number): Float64Array {
   const h = resampleWindowOct(p, q);
   // Normalize filter
   let hSum = 0;
@@ -534,8 +514,7 @@ function resampleWindowOct(p: number, q: number): Float64Array {
   // Kaiser window parameter
   let beta: number;
   if (rejectionDb >= 21 && rejectionDb <= 50) {
-    beta =
-      0.5842 * (rejectionDb - 21) ** 0.4 + 0.07886 * (rejectionDb - 21);
+    beta = 0.5842 * (rejectionDb - 21) ** 0.4 + 0.07886 * (rejectionDb - 21);
   } else if (rejectionDb > 50) {
     beta = 0.1102 * (rejectionDb - 8.7);
   } else {
@@ -587,12 +566,7 @@ function gcd(a: number, b: number): number {
  * Polyphase FIR resampling: upsample by p, filter, downsample by q.
  * Simplified implementation matching scipy.signal.resample_poly behavior.
  */
-function resamplePoly(
-  x: Float64Array,
-  p: number,
-  q: number,
-  filter: Float64Array,
-): Float64Array {
+function resamplePoly(x: Float64Array, p: number, q: number, filter: Float64Array): Float64Array {
   const g = gcd(p, q);
   p = Math.round(p / g);
   q = Math.round(q / g);

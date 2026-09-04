@@ -7,11 +7,21 @@
  * - openQuotient: Fraction of period that glottis is open
  * - asymmetry: klsyn88-style asymmetry percent (0..100, 50=symmetric)
  */
-import { initWasmModule, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  computeRmsPeak,
+  initWasmModule,
+  resolveWasmUrl,
+} from "./wasm-utils.js";
 
 interface TriangularSourceWasmExports {
   triangular_source_new(sampleRate: number): number;
-  triangular_source_process(state: number, f0: number, openQuotient: number, asymmetry: number): number;
+  triangular_source_process(
+    state: number,
+    f0: number,
+    openQuotient: number,
+    asymmetry: number,
+  ): number;
   triangular_source_reset?: (state: number) => void;
 }
 
@@ -44,7 +54,13 @@ class TriangularSourceProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "f0", defaultValue: 100, minValue: 20, maxValue: 500, automationRate: "a-rate" as const },
+      {
+        name: "f0",
+        defaultValue: 100,
+        minValue: 20,
+        maxValue: 500,
+        automationRate: "a-rate" as const,
+      },
       {
         name: "openQuotient",
         defaultValue: 0.5,
@@ -52,7 +68,13 @@ class TriangularSourceProcessor extends AudioWorkletProcessor {
         maxValue: 0.99,
         automationRate: "a-rate" as const,
       },
-      { name: "asymmetry", defaultValue: 50, minValue: 0, maxValue: 100, automationRate: "a-rate" as const },
+      {
+        name: "asymmetry",
+        defaultValue: 50,
+        minValue: 0,
+        maxValue: 100,
+        automationRate: "a-rate" as const,
+      },
     ];
   }
 
@@ -99,7 +121,7 @@ class TriangularSourceProcessor extends AudioWorkletProcessor {
   process(
     _inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const output = outputs[0];
@@ -138,12 +160,7 @@ class TriangularSourceProcessor extends AudioWorkletProcessor {
       const oqVal = oqValues.length > 1 ? (oqValues[i] ?? firstOq) : firstOq;
       const asymVal = asymValues.length > 1 ? (asymValues[i] ?? firstAsym) : firstAsym;
 
-      outputChannel[i] = this.wasm.triangular_source_process(
-        this.state,
-        f0Val,
-        oqVal,
-        asymVal
-      );
+      outputChannel[i] = this.wasm.triangular_source_process(this.state, f0Val, oqVal, asymVal);
     }
 
     this._reportMetrics(outputChannel);

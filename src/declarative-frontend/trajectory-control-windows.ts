@@ -21,7 +21,7 @@ function parseTrajectoryPoints(raw: unknown): TrajectoryPoint[] {
     if (!isPlainObject(item)) continue;
     const pointValue = toFiniteNumber(item.value);
     if (pointValue == null) continue;
-    const pointTime = item.time == null ? null : toFiniteNumber(item.time) ?? null;
+    const pointTime = item.time == null ? null : (toFiniteNumber(item.time) ?? null);
     points.push({
       value: pointValue,
       time: pointTime != null && pointTime >= 0 ? pointTime : null,
@@ -74,8 +74,12 @@ function fieldsEqual(
 ): boolean {
   const leftKeys = Object.keys(left);
   const rightKeys = Object.keys(right);
-  return leftKeys.length === rightKeys.length && leftKeys.every(
-    (key) => key in right && left[key].op === right[key].op && left[key].value === right[key].value,
+  return (
+    leftKeys.length === rightKeys.length &&
+    leftKeys.every(
+      (key) =>
+        key in right && left[key].op === right[key].op && left[key].value === right[key].value,
+    )
   );
 }
 
@@ -99,10 +103,14 @@ export function trajectoryControlWindows(
     .map(([fieldName, value]) => [fieldName, parseTrajectoryPoints(value)] as const)
     .filter(([, points]) => points.length > 0);
   if (parsed.length === 0) return [];
-  const maxRawTime = parsed.reduce((max, [, points]) => points.reduce(
-    (candidate, point) => point.time == null ? candidate : Math.max(candidate, point.time),
-    max,
-  ), 0);
+  const maxRawTime = parsed.reduce(
+    (max, [, points]) =>
+      points.reduce(
+        (candidate, point) => (point.time == null ? candidate : Math.max(candidate, point.time)),
+        max,
+      ),
+    0,
+  );
   const scale = maxRawTime > 0 ? durationMs / maxRawTime : 1;
   const segmentsByField = new Map<string, TrajectorySegment[]>();
   const boundaries = new Set<number>([0, durationMs]);

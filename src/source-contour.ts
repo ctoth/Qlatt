@@ -3,13 +3,7 @@ import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
 export const DEFAULT_SOURCE_CONTOUR_PATH = "/rules/policy/source-contour.yaml";
 
-export type SourceContourVoiceQuality =
-  | "modal"
-  | "breathy"
-  | "pressed"
-  | "creaky"
-  | "whispery"
-  | "falsetto";
+export type SourceContourVoiceQuality = string;
 
 export interface VoiceQualityOverrides {
   rd?: number;
@@ -38,7 +32,8 @@ export interface SourceContourSpec {
     source_mode: number;
     citations: string[];
   };
-  voice_quality_presets: Record<SourceContourVoiceQuality, SourceContourPreset>;
+  default_voice_quality: SourceContourVoiceQuality;
+  voice_quality_presets: Record<string, SourceContourPreset>;
 }
 
 export interface ResolveSourceContourOptions {
@@ -111,6 +106,25 @@ function parseSourceContourDocument(value: unknown): SourceContourSpec {
     throw new Error("E_SOURCE_CONTOUR_SCHEMA: 'voice_quality_presets' must be an object");
   }
   const presets = value.voice_quality_presets;
+  const presetEntries = Object.entries(presets);
+  if (presetEntries.length === 0) {
+    throw new Error("E_SOURCE_CONTOUR_SCHEMA: 'voice_quality_presets' must not be empty");
+  }
+  const voiceQualityPresets = Object.fromEntries(
+    presetEntries.map(([name, preset]) => {
+      const presetName = expectNonEmptyString(name, "voice_quality_presets key");
+      return [presetName, parsePreset(preset, `voice_quality_presets.${presetName}`)];
+    }),
+  );
+  const defaultVoiceQuality = expectNonEmptyString(
+    value.default_voice_quality,
+    "default_voice_quality",
+  );
+  if (!Object.prototype.hasOwnProperty.call(voiceQualityPresets, defaultVoiceQuality)) {
+    throw new Error(
+      `E_SOURCE_CONTOUR_SCHEMA: default voice quality '${defaultVoiceQuality}' is not declared`,
+    );
+  }
   return {
     version: expectNonEmptyString(value.version, "version"),
     citations: expectStringArray(value.citations ?? [], "citations"),
@@ -118,14 +132,8 @@ function parseSourceContourDocument(value: unknown): SourceContourSpec {
       source_mode: expectFiniteNumber(value.baseline.source_mode, "baseline.source_mode"),
       citations: expectStringArray(value.baseline.citations ?? [], "baseline.citations"),
     },
-    voice_quality_presets: {
-      modal: parsePreset(presets.modal, "voice_quality_presets.modal"),
-      breathy: parsePreset(presets.breathy, "voice_quality_presets.breathy"),
-      pressed: parsePreset(presets.pressed, "voice_quality_presets.pressed"),
-      creaky: parsePreset(presets.creaky, "voice_quality_presets.creaky"),
-      whispery: parsePreset(presets.whispery, "voice_quality_presets.whispery"),
-      falsetto: parsePreset(presets.falsetto, "voice_quality_presets.falsetto"),
-    },
+    default_voice_quality: defaultVoiceQuality,
+    voice_quality_presets: voiceQualityPresets,
   };
 }
 
@@ -142,12 +150,13 @@ export function loadSourceContourSync(
   return spec;
 }
 
-export function resolveSourceContour(
-  options: ResolveSourceContourOptions,
-): ResolvedSourceContour {
+export function resolveSourceContour(options: ResolveSourceContourOptions): ResolvedSourceContour {
   const spec = options.spec ?? loadSourceContourSync();
-  const presetName = options.requestedQuality ?? "modal";
+  const presetName = options.requestedQuality ?? spec.default_voice_quality;
   const preset = spec.voice_quality_presets[presetName];
+  if (!preset) {
+    throw new Error(`E_SOURCE_CONTOUR_PRESET_UNKNOWN: '${presetName}' is not declared`);
+  }
   const baseline = {
     source_mode: spec.baseline.source_mode,
     rd: options.speaker.rd_default,
@@ -158,9 +167,7 @@ export function resolveSourceContour(
   const result: ResolvedSourceContour = {
     baseline,
     effectiveBaseF0Hz:
-      preset.f0_scale !== 1.0
-        ? Math.round(options.baseF0Hz * preset.f0_scale)
-        : options.baseF0Hz,
+      preset.f0_scale !== 1.0 ? Math.round(options.baseF0Hz * preset.f0_scale) : options.baseF0Hz,
     presetName,
     citations: [
       DEFAULT_SOURCE_CONTOUR_PATH,
@@ -168,18 +175,15 @@ export function resolveSourceContour(
       ...spec.baseline.citations,
       ...preset.citations,
     ].filter((value, index, all) => all.indexOf(value) === index),
-  };
-
-  if (presetName !== "modal") {
-    result.voiceQualityOverrides = {
+    voiceQualityOverrides: {
       rd: preset.rd,
       oq: preset.oq,
       tl: preset.tl,
       ah_offset_db: preset.ah_offset_db,
       flutter: preset.flutter,
       jitter: preset.jitter,
-    };
-  }
+    },
+  };
 
   return result;
 }

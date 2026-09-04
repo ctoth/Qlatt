@@ -40,12 +40,19 @@ interface Exports {
   lf_source_set_mode(state: number, mode: number): void;
   lf_source_process(
     state: number,
-    f0Ptr: number, f0Len: number,
-    rdPtr: number, rdLen: number,
-    oqPtr: number, oqLen: number,
-    tlPtr: number, tlLen: number,
-    flutter: number, jitter: number, di: number,
-    outPtr: number, len: number,
+    f0Ptr: number,
+    f0Len: number,
+    rdPtr: number,
+    rdLen: number,
+    oqPtr: number,
+    oqLen: number,
+    tlPtr: number,
+    tlLen: number,
+    flutter: number,
+    jitter: number,
+    di: number,
+    outPtr: number,
+    len: number,
   ): void;
 }
 
@@ -89,7 +96,8 @@ function render(ex: Exports, oq: number, sq: number, numSamples: number): Float3
 
 /** Magnitude of the DFT at an exact frequency (Goertzel-style). */
 function dftMag(sig: Float32Array, fsHz: number, freqHz: number): number {
-  let re = 0, im = 0;
+  let re = 0,
+    im = 0;
   for (let n = 0; n < sig.length; n++) {
     const phase = (-2 * Math.PI * freqHz * n) / fsHz;
     re += sig[n] * Math.cos(phase);
@@ -108,8 +116,8 @@ interface Spectrum {
   rms: number;
   h1: number;
   h2: number;
-  h1h2Db: number;   // 20*log10(H1/H2): + = fundamental-dominant (softer source)
-  tiltDb: number;   // low-band(1-5 harm) over high-band(11-20 harm), dB: higher = steeper rolloff
+  h1h2Db: number; // 20*log10(H1/H2): + = fundamental-dominant (softer source)
+  tiltDb: number; // low-band(1-5 harm) over high-band(11-20 harm), dB: higher = steeper rolloff
 }
 
 function analyze(sig: Float32Array): Spectrum {
@@ -117,7 +125,8 @@ function analyze(sig: Float32Array): Spectrum {
   const trimmed = sig.subarray(Math.round(0.1 * SAMPLE_RATE));
   const h: number[] = [];
   for (let k = 1; k <= 20; k++) h[k] = dftMag(trimmed, SAMPLE_RATE, k * F0_HZ);
-  let low = 0, high = 0;
+  let low = 0,
+    high = 0;
   for (let k = 1; k <= 5; k++) low += h[k] * h[k];
   for (let k = 11; k <= 20; k++) high += h[k] * h[k];
   const tiltDb = 10 * Math.log10(low / Math.max(high, 1e-12));
@@ -131,8 +140,10 @@ function analyze(sig: Float32Array): Spectrum {
 }
 
 function fmt(s: Spectrum): string {
-  return `rms=${s.rms.toFixed(4)} H1=${s.h1.toFixed(4)} H2=${s.h2.toFixed(4)} ` +
-    `H1-H2=${s.h1h2Db.toFixed(2)}dB tilt(low/high)=${s.tiltDb.toFixed(2)}dB`;
+  return (
+    `rms=${s.rms.toFixed(4)} H1=${s.h1.toFixed(4)} H2=${s.h2.toFixed(4)} ` +
+    `H1-H2=${s.h1h2Db.toFixed(2)}dB tilt(low/high)=${s.tiltDb.toFixed(2)}dB`
+  );
 }
 
 function main(): void {
@@ -140,7 +151,7 @@ function main(): void {
   const N = Math.round(DURATION_S * SAMPLE_RATE);
 
   // SQ sweep at fixed OQ=50.
-  const sqLow = analyze(render(ex, 50, 120, N));  // SQ=120 -> Rd=2.70 (softer)
+  const sqLow = analyze(render(ex, 50, 120, N)); // SQ=120 -> Rd=2.70 (softer)
   const sqHigh = analyze(render(ex, 50, 300, N)); // SQ=300 -> Rd=0.93 (more modal)
   // OQ sweep at fixed SQ=200.
   const oqLow = analyze(render(ex, 30, 200, N));
@@ -148,7 +159,9 @@ function main(): void {
 
   console.log("=== LF SOURCE (SS=3) signature verification ===");
   console.log(`params: F0=${F0_HZ} Hz, LFLM mode, ${DURATION_S}s @ ${SAMPLE_RATE} Hz`);
-  console.log(`SQ->Rd: 120->${rdFromSq(120).toFixed(3)}  200->${rdFromSq(200).toFixed(3)}  300->${rdFromSq(300).toFixed(3)}`);
+  console.log(
+    `SQ->Rd: 120->${rdFromSq(120).toFixed(3)}  200->${rdFromSq(200).toFixed(3)}  300->${rdFromSq(300).toFixed(3)}`,
+  );
   console.log("");
   console.log("SQ sweep (OQ=50 fixed):");
   console.log(`  SQ=120 (Rd=2.70): ${fmt(sqLow)}`);

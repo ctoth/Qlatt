@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { Utterance } from "../src/declarative-frontend/hrg";
 import type {
   FeatureSchema,
   HrgSchema,
   ItemTypeSchema,
   RelationSchema,
 } from "../src/declarative-frontend/hrg";
+import { Utterance } from "../src/declarative-frontend/hrg";
 
 const SCHEMA = {
   itemTypes: {
@@ -67,7 +67,11 @@ describe("HRG schema enforcement", () => {
     const stored = segment.get("metadata");
     expect(stored).toEqual({ source: "inventory", weights: [0.25, 0.75] });
     expect(Object.isFrozen(stored)).toBe(true);
-    expect(Object.isFrozen(stored && typeof stored === "object" ? stored.weights : null)).toBe(true);
+    const storedWeights =
+      stored && typeof stored === "object" && !Array.isArray(stored) && "weights" in stored
+        ? stored.weights
+        : null;
+    expect(Object.isFrozen(storedWeights)).toBe(true);
   });
 
   it("enforces declared relation membership and topology before attachment", () => {
@@ -76,7 +80,9 @@ describe("HRG schema enforcement", () => {
     const point = utterance.createItem("point");
 
     expect(() => utterance.relation("Unknown")).toThrowError(/E_HRG_RELATION_UNDECLARED/);
-    expect(() => utterance.relation("Segment").append(point, WRITE)).toThrowError(/E_HRG_RELATION_ITEM_TYPE/);
+    expect(() => utterance.relation("Segment").append(point, WRITE)).toThrowError(
+      /E_HRG_RELATION_ITEM_TYPE/,
+    );
     expect(point.node("Segment")).toBeUndefined();
     expect(utterance.relation("Segment").append(segment, WRITE).item).toBe(segment);
   });
@@ -101,6 +107,8 @@ describe("HRG schema enforcement", () => {
     segmentItemTypes.push("point");
 
     expect(() => segment.set("mystery", 1, WRITE)).toThrowError(/E_HRG_FEATURE_UNDECLARED/);
-    expect(() => utterance.relation("Segment").append(point, WRITE)).toThrowError(/E_HRG_RELATION_ITEM_TYPE/);
+    expect(() => utterance.relation("Segment").append(point, WRITE)).toThrowError(
+      /E_HRG_RELATION_ITEM_TYPE/,
+    );
   });
 });

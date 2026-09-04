@@ -12,8 +12,9 @@
  * - In the browser: call `setF0FilterWasmBytes(bytes)` once during app init
  *   (after a one-time async fetch) before the first synthesis call.
  */
-import { initWasmModuleSync } from "./worklets/wasm-utils";
+
 import { isNodeRuntime, readBinaryFromFsSync } from "./path-utils";
+import { initWasmModuleSync } from "./worklets/wasm-utils";
 
 export interface F0FilterExports {
   memory: WebAssembly.Memory;
@@ -30,7 +31,7 @@ export interface F0FilterExports {
     profilesPtr: number,
     nProfiles: number,
     outPtr: number,
-    numFrames: number
+    numFrames: number,
   ): number;
 }
 
@@ -83,9 +84,7 @@ function loadBytesFromNode(): ArrayBuffer {
   // is a build artifact copied to public/worklets by build.ps1 / build.sh.
   const bytes = readBinaryFromFsSync("/public/worklets/f0-filters.wasm");
   if (!bytes) {
-    throw new Error(
-      "f0-filters.wasm not found under public/worklets. Run build.ps1 / build.sh."
-    );
+    throw new Error("f0-filters.wasm not found under public/worklets. Run build.ps1 / build.sh.");
   }
   return bytes;
 }
@@ -103,7 +102,7 @@ export function getF0FilterExports(): F0FilterExports {
       bytes = loadBytesFromNode();
     } else {
       throw new Error(
-        "f0-filters WASM not loaded. Call setF0FilterWasmBytes(bytes) during app init."
+        "f0-filters WASM not loaded. Call setF0FilterWasmBytes(bytes) during app init.",
       );
     }
     cachedInstance = initWasmModuleSync(bytes);

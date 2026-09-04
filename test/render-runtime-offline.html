@@ -8,11 +8,11 @@
   <body>
     <script type="module">
       import { loadExperimentConfig } from "../src/experiments/load-experiment-config.ts";
-      import { createKlattRuntime } from "../src/klatt-runtime.ts";
+      import { preloadF0Filters } from "../src/f0-filters-loader.ts";
       import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
+      import { createKlattRuntime } from "../src/klatt-runtime.ts";
       import { summarizeTrack } from "../src/rendering/track-summary.ts";
       import { textToKlattTrackDetailed } from "../src/tts-frontend.ts";
-      import { preloadF0Filters } from "../src/f0-filters-loader.ts";
 
       const F0_FILTERS_WASM_URL = `${import.meta.env.BASE_URL}worklets/f0-filters.wasm`;
 

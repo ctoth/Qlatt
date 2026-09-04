@@ -1,19 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { createProvenanceCollector } from "../src/provenance";
+import type { HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
 import {
-  Utterance,
+  decisionChain,
   evalPath,
-  pathNode,
-  pathFeature,
+  frameIndexAt,
   isNavOp,
   lowerToFrames,
-  frameIndexAt,
+  pathFeature,
+  pathNode,
+  Utterance,
   whyFeature,
   whyParamAt,
-  decisionChain,
 } from "../src/declarative-frontend/hrg";
 import type { Item } from "../src/declarative-frontend/hrg/item";
-import type { HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
 
 const CITE = ["Taylor 2001 HRG"];
 const RELATION_INPUT = { reason: "fixture relation construction", citations: CITE };
@@ -234,7 +233,18 @@ describe("HRG path navigation", () => {
   });
 
   it("isNavOp distinguishes operators from feature names", () => {
-    for (const op of ["n", "p", "nn", "pp", "parent", "first", "last", "daughter1", "daughtern", "R:Word"]) {
+    for (const op of [
+      "n",
+      "p",
+      "nn",
+      "pp",
+      "parent",
+      "first",
+      "last",
+      "daughter1",
+      "daughtern",
+      "R:Word",
+    ]) {
       expect(isNavOp(op)).toBe(true);
     }
     for (const name of ["phoneme", "pos", "F1", "text"]) {
@@ -255,7 +265,10 @@ describe("HRG write-stamping and provenance chain", () => {
   it("a first write records a feature_write DecisionRecord with citations", () => {
     const u = new Utterance(TEST_SCHEMA);
     const seg = u.createItem("segment");
-    const write = seg.set("F1", 500, { reason: "AE F1 target", citations: ["Peterson & Barney 1952"] });
+    const write = seg.set("F1", 500, {
+      reason: "AE F1 target",
+      citations: ["Peterson & Barney 1952"],
+    });
     expect(write.version).toBe(0);
     const decisions = u.provenance.getDecisions();
     const record = decisions.find((d) => d.id === write.decisionId)!;
@@ -291,7 +304,11 @@ describe("HRG write-stamping and provenance chain", () => {
   it("read-set parents thread a derivation chain (pos -> accent -> F0)", () => {
     const u = new Utterance(TEST_SCHEMA);
     const word = u.createItem("word");
-    const posWrite = word.set("pos", "NN", { reason: "POS tag", stage: "transcribe", citations: ["MITalk"] });
+    const posWrite = word.set("pos", "NN", {
+      reason: "POS tag",
+      stage: "transcribe",
+      citations: ["MITalk"],
+    });
 
     const syl = u.createItem("syllable");
     const accentWrite = syl.set("accented", true, {
@@ -316,7 +333,9 @@ describe("HRG write-stamping and provenance chain", () => {
     expect(ids).toContain(posWrite.decisionId);
     // The citations of every step are recoverable from the chain.
     const allCitations = chain.flatMap((d) => d.citations);
-    expect(allCitations).toEqual(expect.arrayContaining(["Taylor 2000", "O'Shaughnessy 1976", "MITalk"]));
+    expect(allCitations).toEqual(
+      expect.arrayContaining(["Taylor 2000", "O'Shaughnessy 1976", "MITalk"]),
+    );
   });
 });
 
@@ -343,7 +362,6 @@ describe("HRG lowering to Klatt frames", () => {
     expect(track.frames[aeIndex].phoneme).toBe("AE");
     expect(track.frames[aeIndex].params.F1).toBe(660);
   });
-
 });
 
 describe("HRG end-to-end: build -> lower -> trace why", () => {

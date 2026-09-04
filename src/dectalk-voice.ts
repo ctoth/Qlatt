@@ -8,8 +8,9 @@
 // branches and NO hardcoded voice values here — every voice is just a file.
 //
 // Citation: DECtalk 4.63 ph_vset.c (speaker-dependent parameter tables).
-import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
+
 import type { SpeakerProfileOverride } from "./speaker-profile";
+import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
 /** One declarative per-voice gain offset binding: the voice-YAML gain field
  *  `gain` is applied as a Paul-relative additive dB offset onto the per-frame

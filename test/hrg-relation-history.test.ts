@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Utterance, whyRelationMembership } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { Utterance, whyRelationMembership } from "../src/declarative-frontend/hrg";
 
 const SCHEMA = {
   itemTypes: {

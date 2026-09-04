@@ -7,7 +7,10 @@ import fs from "node:fs";
 const profilePath = process.argv[2];
 if (!profilePath) {
   // Find the latest .cpuprofile file
-  const files = fs.readdirSync(".").filter(f => f.endsWith(".cpuprofile")).sort();
+  const files = fs
+    .readdirSync(".")
+    .filter((f) => f.endsWith(".cpuprofile"))
+    .sort();
   if (files.length === 0) {
     console.error("No .cpuprofile files found");
     process.exit(1);
@@ -36,7 +39,7 @@ function analyzeProfile(filePath: string) {
   }>;
 
   // Build node map
-  const nodeMap = new Map<number, typeof nodes[0]>();
+  const nodeMap = new Map<number, (typeof nodes)[0]>();
   for (const node of nodes) {
     nodeMap.set(node.id, node);
   }
@@ -53,7 +56,10 @@ function analyzeProfile(filePath: string) {
   }
 
   // Aggregate by function name + URL
-  const funcTimes = new Map<string, { name: string; url: string; line: number; selfTime: number; hitCount: number }>();
+  const funcTimes = new Map<
+    string,
+    { name: string; url: string; line: number; selfTime: number; hitCount: number }
+  >();
 
   for (const [nodeId, selfTime] of selfTimeByNode) {
     const node = nodeMap.get(nodeId);
@@ -84,7 +90,9 @@ function analyzeProfile(filePath: string) {
 
   // Print top 30 functions
   console.log("Top 30 functions by self time:\n");
-  console.log(`${"Rank".padStart(4)}  ${"Self (ms)".padStart(10)}  ${"Self %".padStart(7)}  ${"Cumul %".padStart(8)}  Function`);
+  console.log(
+    `${"Rank".padStart(4)}  ${"Self (ms)".padStart(10)}  ${"Self %".padStart(7)}  ${"Cumul %".padStart(8)}  Function`,
+  );
   console.log("-".repeat(100));
 
   let cumulPct = 0;
@@ -102,7 +110,7 @@ function analyzeProfile(filePath: string) {
     if (nodeIdx >= 0) shortUrl = shortUrl.slice(nodeIdx);
 
     console.log(
-      `${String(i + 1).padStart(4)}  ${selfMs.toFixed(1).padStart(10)}  ${selfPct.toFixed(1).padStart(6)}%  ${cumulPct.toFixed(1).padStart(7)}%  ${f.name} (${shortUrl}:${f.line + 1})`
+      `${String(i + 1).padStart(4)}  ${selfMs.toFixed(1).padStart(10)}  ${selfPct.toFixed(1).padStart(6)}%  ${cumulPct.toFixed(1).padStart(7)}%  ${f.name} (${shortUrl}:${f.line + 1})`,
     );
   }
 

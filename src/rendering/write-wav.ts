@@ -10,11 +10,7 @@ export function toInt16(samples: ArrayLike<number>): Int16Array {
   return out;
 }
 
-export function writeWav(
-  filePath: string,
-  samples: ArrayLike<number>,
-  sampleRate: number,
-): void {
+export function writeWav(filePath: string, samples: ArrayLike<number>, sampleRate: number): void {
   const pcm = toInt16(samples);
   const byteRate = sampleRate * 2;
   const blockAlign = 2;

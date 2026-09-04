@@ -1,4 +1,4 @@
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+import { computeRmsPeak, initWasmModule, resolveWasmUrl, WasmBuffer, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./antiresonator.wasm");
 class AntiResonatorProcessor extends AudioWorkletProcessor {
     disposed = false;
@@ -19,9 +19,27 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
     explosionRmsThreshold;
     static get parameterDescriptors() {
         return [
-            { name: "frequency", defaultValue: 500, minValue: 0, maxValue: 20000, automationRate: "k-rate" },
-            { name: "bandwidth", defaultValue: 60, minValue: 0, maxValue: 10000, automationRate: "k-rate" },
-            { name: "gain", defaultValue: 1, minValue: 0, maxValue: 4, automationRate: "k-rate" },
+            {
+                name: "frequency",
+                defaultValue: 500,
+                minValue: 0,
+                maxValue: 20000,
+                automationRate: "k-rate",
+            },
+            {
+                name: "bandwidth",
+                defaultValue: 60,
+                minValue: 0,
+                maxValue: 10000,
+                automationRate: "k-rate",
+            },
+            {
+                name: "gain",
+                defaultValue: 1,
+                minValue: 0,
+                maxValue: 4,
+                automationRate: "k-rate",
+            },
         ];
     }
     constructor(options) {
@@ -151,7 +169,11 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
                 this.port.postMessage({
                     type: "explosion",
                     node: this.nodeId,
-                    outRms, inRms, freq, bw, gain,
+                    outRms,
+                    inRms,
+                    freq,
+                    bw,
+                    gain,
                     threshold: this.explosionRmsThreshold,
                     bypassAtZero: this.bypassAtZero,
                     sampleRate,

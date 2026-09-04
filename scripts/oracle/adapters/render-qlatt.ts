@@ -1,7 +1,7 @@
 #!/usr/bin/env node
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import type { OracleAdapterInput, OracleArtifact } from "../types";
 
@@ -40,9 +40,7 @@ function parseArgv(argv: string[]): ParsedArgs {
     sampleRate: flags.get("sample-rate") ? Number(flags.get("sample-rate")) : undefined,
     baseF0: flags.get("base-f0") ? Number(flags.get("base-f0")) : undefined,
     frontendId: flags.get("frontend-id"),
-    transitionMs: flags.get("transition-ms")
-      ? Number(flags.get("transition-ms"))
-      : undefined,
+    transitionMs: flags.get("transition-ms") ? Number(flags.get("transition-ms")) : undefined,
   };
 }
 
@@ -85,12 +83,7 @@ function normalizeQlattRate(input: OracleAdapterInput): number {
 export async function renderQlatt(input: OracleAdapterInput): Promise<OracleArtifact> {
   fs.mkdirSync(input.outDir, { recursive: true });
 
-  const repoRoot = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "..",
-    "..",
-    "..",
-  );
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
   const wavPath = path.join(input.outDir, "qlatt.wav");
   const renderPayloadPath = path.join(input.outDir, "qlatt.json");
   const metadataPath = path.join(input.outDir, "qlatt.artifact.json");
@@ -145,9 +138,7 @@ export async function renderQlatt(input: OracleAdapterInput): Promise<OracleArti
 
   const notes: string[] = [];
   if (Number.isFinite(input.rate) && qlattRate !== input.rate) {
-    notes.push(
-      `Mapped DECtalk rate ${input.rate} WPM to Qlatt normalized rate ${qlattRate}.`,
-    );
+    notes.push(`Mapped DECtalk rate ${input.rate} WPM to Qlatt normalized rate ${qlattRate}.`);
   }
   if (!fs.existsSync(wavPath)) {
     notes.push("Qlatt WAV was not produced.");
@@ -202,8 +193,7 @@ async function main(): Promise<number> {
 }
 
 const isMain =
-  process.argv[1] != null &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  process.argv[1] != null && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isMain) {
   main().then((code) => process.exit(code));

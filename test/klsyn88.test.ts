@@ -3,19 +3,52 @@
  * Tests the new primitives added for klsyn88 support
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
+import { beforeAll, describe, expect, it } from "vitest";
+
+type WasmNumericFunction = (...args: number[]) => number;
+type Klsyn88FunctionName =
+  | "fujisaki_resonator_free"
+  | "fujisaki_resonator_new"
+  | "fujisaki_resonator_process"
+  | "fujisaki_resonator_set_params"
+  | "impulsive_source_free"
+  | "impulsive_source_new"
+  | "impulsive_source_process"
+  | "oversampled_glottal_source_free"
+  | "oversampled_glottal_source_new"
+  | "oversampled_glottal_source_process"
+  | "pitch_sync_resonator_free"
+  | "pitch_sync_resonator_new"
+  | "pitch_sync_resonator_process"
+  | "square_source_free"
+  | "square_source_new"
+  | "square_source_process"
+  | "tilt_filter_free"
+  | "tilt_filter_new"
+  | "tilt_filter_process"
+  | "tilt_filter_set_tilt"
+  | "triangular_source_free"
+  | "triangular_source_new"
+  | "triangular_source_process";
+type Klsyn88Exports = WebAssembly.Exports &
+  Record<Klsyn88FunctionName, WasmNumericFunction> & {
+    memory: WebAssembly.Memory;
+    alloc_f32: (length: number) => number;
+    dealloc_f32: (ptr: number, length: number) => number;
+  };
+type Klsyn88Instance = WebAssembly.Instance & { exports: Klsyn88Exports };
 
 // Helper to load WASM module in Node
-async function loadWasmModule(crateName: string): Promise<WebAssembly.Instance> {
+async function loadWasmModule(crateName: string): Promise<Klsyn88Instance> {
   const wasmPath = path.join(
     __dirname,
-    '..',
-    'target',
-    'wasm32-unknown-unknown',
-    'release',
-    `${crateName.replace(/-/g, '_')}.wasm`
+    "..",
+    "target",
+    "wasm32-unknown-unknown",
+    "release",
+    `${crateName.replace(/-/g, "_")}.wasm`,
   );
 
   if (!fs.existsSync(wasmPath)) {
@@ -25,38 +58,38 @@ async function loadWasmModule(crateName: string): Promise<WebAssembly.Instance> 
   const wasmBuffer = fs.readFileSync(wasmPath);
   const wasmModule = await WebAssembly.compile(wasmBuffer);
   const instance = await WebAssembly.instantiate(wasmModule, {});
-  return instance;
+  return instance as Klsyn88Instance;
 }
 
-function allocF32(exports: any, length: number) {
+function allocF32(exports: Klsyn88Exports, length: number) {
   const ptr = exports.alloc_f32(length);
-  if (!ptr) throw new Error('alloc_f32 returned null');
+  if (!ptr) throw new Error("alloc_f32 returned null");
   const view = new Float32Array((exports.memory as WebAssembly.Memory).buffer, ptr, length);
   return { ptr, view };
 }
 
-function deallocF32(exports: any, ptr: number, length: number) {
+function deallocF32(exports: Klsyn88Exports, ptr: number, length: number) {
   exports.dealloc_f32(ptr, length);
 }
 
-describe('klsyn88 Primitives', () => {
-  describe('oversampled-glottal-source', () => {
-    let wasm: WebAssembly.Instance;
+describe("klsyn88 Primitives", () => {
+  describe("oversampled-glottal-source", () => {
+    let wasm: Klsyn88Instance;
 
     beforeAll(async () => {
-      wasm = await loadWasmModule('oversampled-glottal-source');
+      wasm = await loadWasmModule("oversampled-glottal-source");
     });
 
-    it('should create and free source without crash', () => {
-      const exports = wasm.exports as any;
+    it("should create and free source without crash", () => {
+      const exports = wasm.exports;
       const ptr = exports.oversampled_glottal_source_new(11025);
       expect(ptr).toBeGreaterThan(0);
       exports.oversampled_glottal_source_free(ptr);
     });
 
-    it('should output klsyn88-scale amplitudes', () => {
+    it("should output klsyn88-scale amplitudes", () => {
       // Measure raw glottal source output to understand signal levels
-      const exports = wasm.exports as any;
+      const exports = wasm.exports;
       const state = exports.oversampled_glottal_source_new(11025);
 
       const blockSize = 512;
@@ -88,10 +121,31 @@ describe('klsyn88 Primitives', () => {
 
       exports.oversampled_glottal_source_process(
         state,
-        f0.ptr, 1, av.ptr, 1, aturb.ptr, 1, tilt.ptr, 1,
-        oq.ptr, 1, skew.ptr, 1, asym.ptr, 1, source.ptr, 1, seed.ptr, 1,
-        flutter.ptr, 1, diplophonia.ptr, 1,
-        voice.ptr, noise.ptr, blockSize
+        f0.ptr,
+        1,
+        av.ptr,
+        1,
+        aturb.ptr,
+        1,
+        tilt.ptr,
+        1,
+        oq.ptr,
+        1,
+        skew.ptr,
+        1,
+        asym.ptr,
+        1,
+        source.ptr,
+        1,
+        seed.ptr,
+        1,
+        flutter.ptr,
+        1,
+        diplophonia.ptr,
+        1,
+        voice.ptr,
+        noise.ptr,
+        blockSize,
       );
 
       let voicePeak = 0;
@@ -103,40 +157,42 @@ describe('klsyn88 Primitives', () => {
 
       // klsyn88 amptable: dbToLinearKlsyn(dB) = amptable[dB] * 0.001
       const klsynAmpTable = [
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 6, 7, 8, 9, 10, 11, 13,
-        14, 16, 18, 20, 22, 25, 28, 32, 35, 40,
-        45, 51, 57, 64, 71, 80, 90, 101, 114, 128,
-        142, 159, 179, 202, 227, 256, 284, 318, 359, 405,
-        455, 512, 568, 638, 719, 811, 911, 1024, 1137, 1276,
-        1438, 1622, 1823, 2048, 2273, 2552, 2875, 3244, 3645, 4096,
-        4547, 5104, 5751, 6488, 7291, 8192, 9093, 10207, 11502, 12976,
-        14582, 16384, 18350, 20644, 23429, 26214, 29491, 32767
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 8, 9, 10, 11, 13, 14, 16, 18, 20, 22, 25, 28,
+        32, 35, 40, 45, 51, 57, 64, 71, 80, 90, 101, 114, 128, 142, 159, 179, 202, 227, 256, 284,
+        318, 359, 405, 455, 512, 568, 638, 719, 811, 911, 1024, 1137, 1276, 1438, 1622, 1823, 2048,
+        2273, 2552, 2875, 3244, 3645, 4096, 4547, 5104, 5751, 6488, 7291, 8192, 9093, 10207, 11502,
+        12976, 14582, 16384, 18350, 20644, 23429, 26214, 29491, 32767,
       ];
 
       // Simulate signal chain gains
       const AV = 60;
       const GO = 57;
       const avDb = Math.max(AV - 7, 0); // = 53
-      const gain0Db = (GO - 3) <= 0 ? 57 : (GO - 3); // = 54
+      const gain0Db = GO - 3 <= 0 ? 57 : GO - 3; // = 54
 
       const voiceGain = klsynAmpTable[avDb] * 0.001; // = 0.638
       const gain0Linear = klsynAmpTable[gain0Db] * 0.001; // = 0.719
       const gain0LinearWithFix = gain0Linear / 32768; // = 2.19e-5
 
-      console.log('=== klsyn88 Signal Level Analysis ===');
+      console.log("=== klsyn88 Signal Level Analysis ===");
       console.log(`Raw glottal voice peak: ${voicePeak.toFixed(1)}`);
       console.log(`Raw glottal noise peak: ${noisePeak.toFixed(1)}`);
       console.log(`voiceGain (AV=${AV}): ${voiceGain.toFixed(4)}`);
       console.log(`gain0Linear (GO=${GO}): ${gain0Linear.toFixed(4)}`);
       console.log(`gain0Linear with /32768 fix: ${gain0LinearWithFix.toExponential(3)}`);
-      console.log('--- Signal chain estimates (ignoring resonator gain) ---');
+      console.log("--- Signal chain estimates (ignoring resonator gain) ---");
       console.log(`After voiceGain: ${(voicePeak * voiceGain).toFixed(1)}`);
       console.log(`After gain0 (no fix): ${(voicePeak * voiceGain * gain0Linear).toFixed(1)}`);
-      console.log(`After gain0 (with fix): ${(voicePeak * voiceGain * gain0LinearWithFix).toFixed(4)}`);
-      console.log('--- For WebAudio [-1,1] output ---');
-      console.log(`Resonator gain needed to clip (no fix): ${(1 / (voicePeak * voiceGain * gain0Linear)).toFixed(4)}`);
-      console.log(`Resonator gain needed to clip (with fix): ${(1 / (voicePeak * voiceGain * gain0LinearWithFix)).toFixed(1)}`);
+      console.log(
+        `After gain0 (with fix): ${(voicePeak * voiceGain * gain0LinearWithFix).toFixed(4)}`,
+      );
+      console.log("--- For WebAudio [-1,1] output ---");
+      console.log(
+        `Resonator gain needed to clip (no fix): ${(1 / (voicePeak * voiceGain * gain0Linear)).toFixed(4)}`,
+      );
+      console.log(
+        `Resonator gain needed to clip (with fix): ${(1 / (voicePeak * voiceGain * gain0LinearWithFix)).toFixed(1)}`,
+      );
 
       deallocF32(exports, f0.ptr, 1);
       deallocF32(exports, av.ptr, 1);
@@ -168,8 +224,8 @@ describe('klsyn88 Primitives', () => {
       expect(voicePeak).toBeLessThan(50000);
     });
 
-    it('should generate voice and noise outputs', () => {
-      const exports = wasm.exports as any;
+    it("should generate voice and noise outputs", () => {
+      const exports = wasm.exports;
       const state = exports.oversampled_glottal_source_new(11025);
 
       const blockSize = 128;
@@ -225,7 +281,7 @@ describe('klsyn88 Primitives', () => {
         1,
         voice.ptr,
         noise.ptr,
-        blockSize
+        blockSize,
       );
 
       let voiceNonZero = false;
@@ -254,8 +310,8 @@ describe('klsyn88 Primitives', () => {
       expect(noiseNonZero).toBe(true);
     });
 
-    it('should resume voice after an initial unvoiced span', () => {
-      const exports = wasm.exports as any;
+    it("should resume voice after an initial unvoiced span", () => {
+      const exports = wasm.exports;
       const state = exports.oversampled_glottal_source_new(22050);
 
       const blockSize = 128;
@@ -288,10 +344,31 @@ describe('klsyn88 Primitives', () => {
         f0.view[0] = 0;
         exports.oversampled_glottal_source_process(
           state,
-          f0.ptr, 1, av.ptr, 1, aturb.ptr, 1, tilt.ptr, 1,
-          oq.ptr, 1, skew.ptr, 1, asym.ptr, 1, source.ptr, 1, seed.ptr, 1,
-          flutter.ptr, 1, diplophonia.ptr, 1,
-          voice.ptr, noise.ptr, blockSize
+          f0.ptr,
+          1,
+          av.ptr,
+          1,
+          aturb.ptr,
+          1,
+          tilt.ptr,
+          1,
+          oq.ptr,
+          1,
+          skew.ptr,
+          1,
+          asym.ptr,
+          1,
+          source.ptr,
+          1,
+          seed.ptr,
+          1,
+          flutter.ptr,
+          1,
+          diplophonia.ptr,
+          1,
+          voice.ptr,
+          noise.ptr,
+          blockSize,
         );
       }
 
@@ -301,10 +378,31 @@ describe('klsyn88 Primitives', () => {
       for (let block = 0; block < 40; block += 1) {
         exports.oversampled_glottal_source_process(
           state,
-          f0.ptr, 1, av.ptr, 1, aturb.ptr, 1, tilt.ptr, 1,
-          oq.ptr, 1, skew.ptr, 1, asym.ptr, 1, source.ptr, 1, seed.ptr, 1,
-          flutter.ptr, 1, diplophonia.ptr, 1,
-          voice.ptr, noise.ptr, blockSize
+          f0.ptr,
+          1,
+          av.ptr,
+          1,
+          aturb.ptr,
+          1,
+          tilt.ptr,
+          1,
+          oq.ptr,
+          1,
+          skew.ptr,
+          1,
+          asym.ptr,
+          1,
+          source.ptr,
+          1,
+          seed.ptr,
+          1,
+          flutter.ptr,
+          1,
+          diplophonia.ptr,
+          1,
+          voice.ptr,
+          noise.ptr,
+          blockSize,
         );
         for (let i = 0; i < blockSize; i++) {
           voicedPeak = Math.max(voicedPeak, Math.abs(voice.view[i]));
@@ -329,8 +427,8 @@ describe('klsyn88 Primitives', () => {
       expect(voicedPeak).toBeGreaterThan(100);
     });
 
-    it('should generate voice with DECtalk KLGLOTT runtime parameters', () => {
-      const exports = wasm.exports as any;
+    it("should generate voice with DECtalk KLGLOTT runtime parameters", () => {
+      const exports = wasm.exports;
       const state = exports.oversampled_glottal_source_new(22050);
 
       const blockSize = 128;
@@ -362,10 +460,31 @@ describe('klsyn88 Primitives', () => {
 
       exports.oversampled_glottal_source_process(
         state,
-        f0.ptr, 1, av.ptr, 1, aturb.ptr, 1, tilt.ptr, 1,
-        oq.ptr, 1, skew.ptr, 1, asym.ptr, 1, source.ptr, 1, seed.ptr, 1,
-        flutter.ptr, 1, diplophonia.ptr, 1,
-        voice.ptr, noise.ptr, blockSize
+        f0.ptr,
+        1,
+        av.ptr,
+        1,
+        aturb.ptr,
+        1,
+        tilt.ptr,
+        1,
+        oq.ptr,
+        1,
+        skew.ptr,
+        1,
+        asym.ptr,
+        1,
+        source.ptr,
+        1,
+        seed.ptr,
+        1,
+        flutter.ptr,
+        1,
+        diplophonia.ptr,
+        1,
+        voice.ptr,
+        noise.ptr,
+        blockSize,
       );
 
       let voicePeak = 0;
@@ -391,7 +510,7 @@ describe('klsyn88 Primitives', () => {
       expect(voicePeak).toBeGreaterThan(100);
     });
 
-    it('should keep aggregate voice RMS consistent across device sample rates', () => {
+    it("should keep aggregate voice RMS consistent across device sample rates", () => {
       // Regression test for the fixed-virtual-rate/decimation fix: before the
       // fix, `nopen` (glottal open-phase duty cycle) was clamped to a raw
       // 4x-tick count (263/40) calibrated for klsyn88's implicit ~10kHz
@@ -405,7 +524,7 @@ describe('klsyn88 Primitives', () => {
       // of the sample rates a real WebAudio context can use, and checks that
       // aggregate voice RMS does not collapse at the higher rates relative
       // to 22050Hz.
-      const exports = wasm.exports as any;
+      const exports = wasm.exports;
       const blockSize = 128;
       const numBlocks = 200; // ~1.16s @ 22050Hz, ~0.58s @ 44100Hz, ~0.53s @ 48000Hz
 
@@ -443,10 +562,31 @@ describe('klsyn88 Primitives', () => {
         for (let block = 0; block < numBlocks; block += 1) {
           exports.oversampled_glottal_source_process(
             state,
-            f0.ptr, 1, av.ptr, 1, aturb.ptr, 1, tilt.ptr, 1,
-            oq.ptr, 1, skew.ptr, 1, asym.ptr, 1, source.ptr, 1, seed.ptr, 1,
-            flutter.ptr, 1, diplophonia.ptr, 1,
-            voice.ptr, noise.ptr, blockSize
+            f0.ptr,
+            1,
+            av.ptr,
+            1,
+            aturb.ptr,
+            1,
+            tilt.ptr,
+            1,
+            oq.ptr,
+            1,
+            skew.ptr,
+            1,
+            asym.ptr,
+            1,
+            source.ptr,
+            1,
+            seed.ptr,
+            1,
+            flutter.ptr,
+            1,
+            diplophonia.ptr,
+            1,
+            voice.ptr,
+            noise.ptr,
+            blockSize,
           );
           for (let i = 0; i < blockSize; i++) {
             sumSquares += voice.view[i] * voice.view[i];
@@ -476,10 +616,14 @@ describe('klsyn88 Primitives', () => {
       const rms44100 = aggregateVoiceRms(44100);
       const rms48000 = aggregateVoiceRms(48000);
 
-      console.log('=== Aggregate voice RMS across device sample rates ===');
+      console.log("=== Aggregate voice RMS across device sample rates ===");
       console.log(`22050Hz: ${rms22050.toFixed(2)}`);
-      console.log(`44100Hz: ${rms44100.toFixed(2)} (ratio vs 22050: ${(rms44100 / rms22050).toFixed(3)})`);
-      console.log(`48000Hz: ${rms48000.toFixed(2)} (ratio vs 22050: ${(rms48000 / rms22050).toFixed(3)})`);
+      console.log(
+        `44100Hz: ${rms44100.toFixed(2)} (ratio vs 22050: ${(rms44100 / rms22050).toFixed(3)})`,
+      );
+      console.log(
+        `48000Hz: ${rms48000.toFixed(2)} (ratio vs 22050: ${(rms48000 / rms22050).toFixed(3)})`,
+      );
 
       // All three rates are driven by the same virtual-rate physics after the
       // fix, so aggregate RMS should be close across rates (allow ~1.4dB of
@@ -492,22 +636,22 @@ describe('klsyn88 Primitives', () => {
     });
   });
 
-  describe('triangular-source', () => {
-    let wasm: WebAssembly.Instance;
+  describe("triangular-source", () => {
+    let wasm: Klsyn88Instance;
 
     beforeAll(async () => {
-      wasm = await loadWasmModule('triangular-source');
+      wasm = await loadWasmModule("triangular-source");
     });
 
-    it('should create and free source without crash', () => {
-      const exports = wasm.exports as any;
+    it("should create and free source without crash", () => {
+      const exports = wasm.exports;
       const ptr = exports.triangular_source_new(11025);
       expect(ptr).toBeGreaterThan(0);
       exports.triangular_source_free(ptr);
     });
 
-    it('should generate non-zero output', () => {
-      const exports = wasm.exports as any;
+    it("should generate non-zero output", () => {
+      const exports = wasm.exports;
       const ptr = exports.triangular_source_new(11025);
 
       let hasNonZero = false;
@@ -523,8 +667,8 @@ describe('klsyn88 Primitives', () => {
       expect(hasNonZero).toBe(true);
     });
 
-    it('should produce periodic output', () => {
-      const exports = wasm.exports as any;
+    it("should produce periodic output", () => {
+      const exports = wasm.exports;
       const sampleRate = 11025;
       const f0 = 100; // 100 Hz
       const periodSamples = Math.floor(sampleRate / f0);
@@ -551,22 +695,22 @@ describe('klsyn88 Primitives', () => {
     });
   });
 
-  describe('impulsive-source', () => {
-    let wasm: WebAssembly.Instance;
+  describe("impulsive-source", () => {
+    let wasm: Klsyn88Instance;
 
     beforeAll(async () => {
-      wasm = await loadWasmModule('impulsive-source');
+      wasm = await loadWasmModule("impulsive-source");
     });
 
-    it('should create and free source without crash', () => {
-      const exports = wasm.exports as any;
+    it("should create and free source without crash", () => {
+      const exports = wasm.exports;
       const ptr = exports.impulsive_source_new(11025);
       expect(ptr).toBeGreaterThan(0);
       exports.impulsive_source_free(ptr);
     });
 
-    it('should generate non-zero output', () => {
-      const exports = wasm.exports as any;
+    it("should generate non-zero output", () => {
+      const exports = wasm.exports;
       const ptr = exports.impulsive_source_new(11025);
 
       let hasNonZero = false;
@@ -584,22 +728,22 @@ describe('klsyn88 Primitives', () => {
     });
   });
 
-  describe('square-source', () => {
-    let wasm: WebAssembly.Instance;
+  describe("square-source", () => {
+    let wasm: Klsyn88Instance;
 
     beforeAll(async () => {
-      wasm = await loadWasmModule('square-source');
+      wasm = await loadWasmModule("square-source");
     });
 
-    it('should create and free source without crash', () => {
-      const exports = wasm.exports as any;
+    it("should create and free source without crash", () => {
+      const exports = wasm.exports;
       const ptr = exports.square_source_new(11025);
       expect(ptr).toBeGreaterThan(0);
       exports.square_source_free(ptr);
     });
 
-    it('should produce bipolar output (-1 or 1)', () => {
-      const exports = wasm.exports as any;
+    it("should produce bipolar output (-1 or 1)", () => {
+      const exports = wasm.exports;
       const ptr = exports.square_source_new(11025);
 
       const values = new Set<number>();
@@ -618,22 +762,22 @@ describe('klsyn88 Primitives', () => {
     });
   });
 
-  describe('tilt-filter', () => {
-    let wasm: WebAssembly.Instance;
+  describe("tilt-filter", () => {
+    let wasm: Klsyn88Instance;
 
     beforeAll(async () => {
-      wasm = await loadWasmModule('tilt-filter');
+      wasm = await loadWasmModule("tilt-filter");
     });
 
-    it('should create and free filter without crash', () => {
-      const exports = wasm.exports as any;
+    it("should create and free filter without crash", () => {
+      const exports = wasm.exports;
       const ptr = exports.tilt_filter_new();
       expect(ptr).toBeGreaterThan(0);
       exports.tilt_filter_free(ptr);
     });
 
-    it('should pass through with tilt=0', () => {
-      const exports = wasm.exports as any;
+    it("should pass through with tilt=0", () => {
+      const exports = wasm.exports;
       const ptr = exports.tilt_filter_new();
       exports.tilt_filter_set_tilt(ptr, 0);
 
@@ -645,8 +789,8 @@ describe('klsyn88 Primitives', () => {
       expect(output).toBeCloseTo(input, 3);
     });
 
-    it('should attenuate with high tilt', () => {
-      const exports = wasm.exports as any;
+    it("should attenuate with high tilt", () => {
+      const exports = wasm.exports;
       const ptr = exports.tilt_filter_new();
       exports.tilt_filter_set_tilt(ptr, 30); // High tilt
 
@@ -665,38 +809,34 @@ describe('klsyn88 Primitives', () => {
     });
   });
 
-  describe('pitch-sync-mod', () => {
-    let wasm: WebAssembly.Instance;
+  describe("pitch-sync-mod", () => {
+    let wasm: Klsyn88Instance;
 
     beforeAll(async () => {
-      wasm = await loadWasmModule('pitch-sync-mod');
+      wasm = await loadWasmModule("pitch-sync-mod");
     });
 
-    it('should create and free resonator without crash', () => {
-      const exports = wasm.exports as any;
+    it("should create and free resonator without crash", () => {
+      const exports = wasm.exports;
       const ptr = exports.pitch_sync_resonator_new(11025);
       expect(ptr).toBeGreaterThan(0);
       exports.pitch_sync_resonator_free(ptr);
     });
 
-    it('should filter input signal', () => {
-      const exports = wasm.exports as any;
+    it("should filter input signal", () => {
+      const exports = wasm.exports;
       const ptr = exports.pitch_sync_resonator_new(11025);
 
       // Send impulse through resonator
       let hasOutput = false;
 
       // First sample (impulse)
-      let sample = exports.pitch_sync_resonator_process(
-        ptr, 1.0, 100, 50, 500, 80, 0, 0, 0, 2
-      );
+      let sample = exports.pitch_sync_resonator_process(ptr, 1.0, 100, 50, 500, 80, 0, 0, 0, 2);
       if (Math.abs(sample) > 0.001) hasOutput = true;
 
       // Subsequent samples (zeros in)
       for (let i = 0; i < 100; i++) {
-        sample = exports.pitch_sync_resonator_process(
-          ptr, 0.0, 100, 50, 500, 80, 0, 0, 0, 2
-        );
+        sample = exports.pitch_sync_resonator_process(ptr, 0.0, 100, 50, 500, 80, 0, 0, 0, 2);
         if (Math.abs(sample) > 0.001) hasOutput = true;
       }
 
@@ -704,17 +844,17 @@ describe('klsyn88 Primitives', () => {
       expect(hasOutput).toBe(true);
     });
 
-    it('should respond to delta parameters under sustained excitation', () => {
-      const exports = wasm.exports as any;
+    it("should respond to delta parameters under sustained excitation", () => {
+      const exports = wasm.exports;
       const sampleRate = 11025;
 
       // Without delta
       const ptr1 = exports.pitch_sync_resonator_new(sampleRate);
       const samples1: number[] = [];
       for (let i = 0; i < 200; i++) {
-        samples1.push(exports.pitch_sync_resonator_process(
-          ptr1, 1.0, 100, 50, 500, 80, 0, 0, 0, 2
-        ));
+        samples1.push(
+          exports.pitch_sync_resonator_process(ptr1, 1.0, 100, 50, 500, 80, 0, 0, 0, 2),
+        );
       }
       exports.pitch_sync_resonator_free(ptr1);
 
@@ -722,9 +862,20 @@ describe('klsyn88 Primitives', () => {
       const ptr2 = exports.pitch_sync_resonator_new(sampleRate);
       const samples2: number[] = [];
       for (let i = 0; i < 200; i++) {
-        samples2.push(exports.pitch_sync_resonator_process(
-          ptr2, 1.0, 100, 50, 500, 80, 100, 50, 0, 2 // dF1=100, dB1=50
-        ));
+        samples2.push(
+          exports.pitch_sync_resonator_process(
+            ptr2,
+            1.0,
+            100,
+            50,
+            500,
+            80,
+            100,
+            50,
+            0,
+            2, // dF1=100, dB1=50
+          ),
+        );
       }
       exports.pitch_sync_resonator_free(ptr2);
 
@@ -742,22 +893,22 @@ describe('klsyn88 Primitives', () => {
     });
   });
 
-  describe('fujisaki-resonator', () => {
-    let wasm: WebAssembly.Instance;
+  describe("fujisaki-resonator", () => {
+    let wasm: Klsyn88Instance;
 
     beforeAll(async () => {
-      wasm = await loadWasmModule('fujisaki-resonator');
+      wasm = await loadWasmModule("fujisaki-resonator");
     });
 
-    it('should create and free resonator without crash', () => {
-      const exports = wasm.exports as any;
+    it("should create and free resonator without crash", () => {
+      const exports = wasm.exports;
       const ptr = exports.fujisaki_resonator_new();
       expect(ptr).toBeGreaterThan(0);
       exports.fujisaki_resonator_free(ptr);
     });
 
-    it('should filter input signal', () => {
-      const exports = wasm.exports as any;
+    it("should filter input signal", () => {
+      const exports = wasm.exports;
       const ptr = exports.fujisaki_resonator_new();
 
       const blockSize = 64;

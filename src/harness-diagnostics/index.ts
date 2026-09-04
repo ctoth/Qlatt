@@ -1,34 +1,42 @@
 // Engine facade — wires TapManager, PollLoop, and AcrossPlaysAccumulator
 // into a single DiagnosticsEngine interface.
 
-import type { DiagConfig, DiagnosticsEngine, RunInfo, CheckResult } from "./types";
-import type { DisplayState } from "./display-formatter";
-import { TapManager } from "./tap-manager";
-import { PollLoop } from "./poll-loop";
+import type { PlstepEvent, TelemetryDatum } from "../track-analysis";
 import { AcrossPlaysAccumulator } from "./across-plays";
-import { updateParamRange, evaluateTrackAnalysis } from "./check-evaluator";
-import type { TrackAnalysisCheckDef } from "./types";
+import { evaluateTrackAnalysis, updateParamRange } from "./check-evaluator";
+import type { DisplayState } from "./display-formatter";
+import { PollLoop } from "./poll-loop";
+import { TapManager } from "./tap-manager";
+import type {
+  CheckResult,
+  DiagConfig,
+  DiagnosticsEngine,
+  PlayHistoryEntry,
+  RunInfo,
+  RuntimeNodeResolver,
+  TrackAnalysisCheckDef,
+} from "./types";
 
 /** External state provider — lets the harness pass live references into the engine. */
 export interface ExternalState {
-  telemetry: Map<string, any>;
-  telemetryMax: Map<string, any>;
-  plstepEvents: any[];
+  telemetry: Map<string, TelemetryDatum>;
+  telemetryMax: Map<string, TelemetryDatum>;
+  plstepEvents: PlstepEvent[];
   plstepTotalCount: number | (() => number);
-  playHistory: any[];
+  playHistory: PlayHistoryEntry[];
   sessionId: number;
   sliderParams: Record<string, number>;
 }
 
 function readPlstepTotalCount(externalState?: ExternalState): number {
   const count = externalState?.plstepTotalCount;
-  return typeof count === "function" ? count() : count ?? 0;
+  return typeof count === "function" ? count() : (count ?? 0);
 }
 
 export function createDiagnosticsEngine(
   config: DiagConfig,
   audioContext: AudioContext,
-  runtime: any,
+  runtime: RuntimeNodeResolver,
   externalState?: ExternalState,
 ): DiagnosticsEngine {
   const subscribers: Set<(output: string) => void> = new Set();

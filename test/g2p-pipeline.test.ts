@@ -254,7 +254,7 @@ describe("pronounce() accuracy benchmark", () => {
   ];
 
   let correct = 0;
-  let total = benchmarkWords.length;
+  const total = benchmarkWords.length;
 
   for (const { word, expectedBase } of benchmarkWords) {
     it(`LTS for "${word}"`, () => {
@@ -264,9 +264,7 @@ describe("pronounce() accuracy benchmark", () => {
       if (matches) correct++;
       // Log but don't fail
       if (!matches) {
-        console.log(
-          `  [benchmark] "${word}": expected [${expectedBase}] got [${actualBase}]`
-        );
+        console.log(`  [benchmark] "${word}": expected [${expectedBase}] got [${actualBase}]`);
       }
       // Each case must at least produce a pronunciation; the suite-level test
       // below owns the benchmark accuracy threshold.
@@ -276,7 +274,7 @@ describe("pronounce() accuracy benchmark", () => {
 
   it("reports accuracy", () => {
     console.log(
-      `\n  [G2P Accuracy Benchmark] ${correct}/${total} words matched CMU reference (${((correct / total) * 100).toFixed(1)}%)`
+      `\n  [G2P Accuracy Benchmark] ${correct}/${total} words matched CMU reference (${((correct / total) * 100).toFixed(1)}%)`,
     );
     expect(correct / total).toBeGreaterThanOrEqual(0.9);
   });

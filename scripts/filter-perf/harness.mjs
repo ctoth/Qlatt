@@ -93,8 +93,7 @@ function allocF32(wasm, length) {
 }
 
 function allocF64(wasm, valuesOrLength) {
-  const values =
-    typeof valuesOrLength === "number" ? null : Float64Array.from(valuesOrLength);
+  const values = typeof valuesOrLength === "number" ? null : Float64Array.from(valuesOrLength);
   const length = values?.length ?? valuesOrLength;
   const allocationLength = length * 2;
   const ptr = wasm.alloc_f32(allocationLength);
@@ -464,33 +463,53 @@ async function makeRunner(directory, filter, cacheSetters = false) {
   const wasm = await instantiate(directory, filter);
   switch (filter) {
     case "resonator":
-      return simpleIirRunner(wasm, "resonator", [
-        { params: [500, 80, SAMPLE_RATE], gain: 0.75 },
-        { params: [500, 80, SAMPLE_RATE], gain: 0.75 },
-        { params: [2_500, 160, SAMPLE_RATE], gain: -1.25 },
-        { params: [-1, 80, SAMPLE_RATE], gain: 1 },
-      ], cacheSetters);
+      return simpleIirRunner(
+        wasm,
+        "resonator",
+        [
+          { params: [500, 80, SAMPLE_RATE], gain: 0.75 },
+          { params: [500, 80, SAMPLE_RATE], gain: 0.75 },
+          { params: [2_500, 160, SAMPLE_RATE], gain: -1.25 },
+          { params: [-1, 80, SAMPLE_RATE], gain: 1 },
+        ],
+        cacheSetters,
+      );
     case "antiresonator":
-      return simpleIirRunner(wasm, "antiresonator", [
-        { params: [300, 90, SAMPLE_RATE], gain: 0.75 },
-        { params: [300, 90, SAMPLE_RATE], gain: 0.75 },
-        { params: [2_500, 160, SAMPLE_RATE], gain: -1.25 },
-        { params: [0, 80, SAMPLE_RATE], gain: 1 },
-      ], cacheSetters);
+      return simpleIirRunner(
+        wasm,
+        "antiresonator",
+        [
+          { params: [300, 90, SAMPLE_RATE], gain: 0.75 },
+          { params: [300, 90, SAMPLE_RATE], gain: 0.75 },
+          { params: [2_500, 160, SAMPLE_RATE], gain: -1.25 },
+          { params: [0, 80, SAMPLE_RATE], gain: 1 },
+        ],
+        cacheSetters,
+      );
     case "biquad-notch":
-      return simpleIirRunner(wasm, "biquad_notch", [
-        { params: [480, 100, SAMPLE_RATE], gain: 0.75 },
-        { params: [480, 100, SAMPLE_RATE], gain: 0.75 },
-        { params: [2_500, 160, SAMPLE_RATE], gain: -1.25 },
-        { params: [0, 80, SAMPLE_RATE], gain: 1 },
-      ], cacheSetters);
+      return simpleIirRunner(
+        wasm,
+        "biquad_notch",
+        [
+          { params: [480, 100, SAMPLE_RATE], gain: 0.75 },
+          { params: [480, 100, SAMPLE_RATE], gain: 0.75 },
+          { params: [2_500, 160, SAMPLE_RATE], gain: -1.25 },
+          { params: [0, 80, SAMPLE_RATE], gain: 1 },
+        ],
+        cacheSetters,
+      );
     case "fujisaki-resonator":
-      return simpleIirRunner(wasm, "fujisaki_resonator", [
-        { params: [700, 80, SAMPLE_RATE], gain: 1 },
-        { params: [700, 80, SAMPLE_RATE], gain: 1 },
-        { params: [300, 90, SAMPLE_RATE], gain: 1 },
-        { params: [900, 110, SAMPLE_RATE], gain: 1 },
-      ], cacheSetters);
+      return simpleIirRunner(
+        wasm,
+        "fujisaki_resonator",
+        [
+          { params: [700, 80, SAMPLE_RATE], gain: 1 },
+          { params: [700, 80, SAMPLE_RATE], gain: 1 },
+          { params: [300, 90, SAMPLE_RATE], gain: 1 },
+          { params: [900, 110, SAMPLE_RATE], gain: 1 },
+        ],
+        cacheSetters,
+      );
     case "tilt-filter":
       return tiltRunner(wasm);
     case "pitch-sync-mod":

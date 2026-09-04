@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { initWasmModule, WasmBuffer, type WasmAllocExports } from "../src/worklets/wasm-utils";
+import { initWasmModule, type WasmAllocExports, WasmBuffer } from "../src/worklets/wasm-utils";
 
 const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), "..");
@@ -28,7 +28,7 @@ interface LfSourceExports extends WasmAllocExports {
     jitter: number,
     di: number,
     outPtr: number,
-    len: number
+    len: number,
   ): void;
 }
 
@@ -78,7 +78,7 @@ wasm.lf_source_process(
   0, // jitter
   0, // di
   outputBuffer.ptr,
-  length
+  length,
 );
 
 outputBuffer.refresh();
@@ -106,8 +106,8 @@ console.log(
       rmsError,
     },
     null,
-    2
-  )
+    2,
+  ),
 );
 
 const maxAllowed = 1e-5;

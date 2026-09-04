@@ -7,7 +7,7 @@
  * - openQuotient: Fraction of period that glottis is open
  * - asymmetry: klsyn88-style asymmetry percent (0..100, 50=symmetric)
  */
-import { initWasmModule, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+import { computeRmsPeak, initWasmModule, resolveWasmUrl, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./triangular-source.wasm");
 class TriangularSourceProcessor extends AudioWorkletProcessor {
     disposed = false;
@@ -23,7 +23,13 @@ class TriangularSourceProcessor extends AudioWorkletProcessor {
     _reportCountdown;
     static get parameterDescriptors() {
         return [
-            { name: "f0", defaultValue: 100, minValue: 20, maxValue: 500, automationRate: "a-rate" },
+            {
+                name: "f0",
+                defaultValue: 100,
+                minValue: 20,
+                maxValue: 500,
+                automationRate: "a-rate",
+            },
             {
                 name: "openQuotient",
                 defaultValue: 0.5,
@@ -31,7 +37,13 @@ class TriangularSourceProcessor extends AudioWorkletProcessor {
                 maxValue: 0.99,
                 automationRate: "a-rate",
             },
-            { name: "asymmetry", defaultValue: 50, minValue: 0, maxValue: 100, automationRate: "a-rate" },
+            {
+                name: "asymmetry",
+                defaultValue: 50,
+                minValue: 0,
+                maxValue: 100,
+                automationRate: "a-rate",
+            },
         ];
     }
     constructor(options) {

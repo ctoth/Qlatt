@@ -33,7 +33,9 @@ function compareSubtree(name: string, a: unknown, b: unknown): void {
     const vb = lb.get(key);
     if (va !== vb) diffs.push(`  ${key}: english=${va ?? "<absent>"} | beauty=${vb ?? "<absent>"}`);
   }
-  console.log(`=== ${name}: ${diffs.length} differing leaves (english total=${la.size}, beauty total=${lb.size}) ===`);
+  console.log(
+    `=== ${name}: ${diffs.length} differing leaves (english total=${la.size}, beauty total=${lb.size}) ===`,
+  );
   for (const d of diffs) console.log(d);
 }
 

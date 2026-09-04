@@ -11,7 +11,9 @@ for (let i = 2; i < process.argv.length; i += 1) {
 
 const inputPath = args.get("input") ? path.resolve(args.get("input")) : null;
 if (!inputPath) {
-  console.error("Usage: node scripts/analyze-render.mjs --input render.json [--out-json report.json]");
+  console.error(
+    "Usage: node scripts/analyze-render.mjs --input render.json [--out-json report.json]",
+  );
   process.exit(1);
 }
 
@@ -152,32 +154,27 @@ function bandMetrics(slice, sr) {
     bandShare,
     highShareAbove3000: totalPower > 0 ? highBandPower / totalPower : 0,
     hissShareAbove6000: totalPower > 0 ? hissBandPower / totalPower : 0,
-    highToSpeechRatioDb: speechBandPower > 0 && highBandPower > 0
-      ? 10 * Math.log10(highBandPower / speechBandPower)
-      : null,
-    hissToSpeechRatioDb: speechBandPower > 0 && hissBandPower > 0
-      ? 10 * Math.log10(hissBandPower / speechBandPower)
-      : null,
+    highToSpeechRatioDb:
+      speechBandPower > 0 && highBandPower > 0
+        ? 10 * Math.log10(highBandPower / speechBandPower)
+        : null,
+    hissToSpeechRatioDb:
+      speechBandPower > 0 && hissBandPower > 0
+        ? 10 * Math.log10(hissBandPower / speechBandPower)
+        : null,
   };
 }
 
 function sliceForTime(startSec, endSec) {
-  return samples.slice(
-    clampIndex(startSec * sampleRate),
-    clampIndex(endSec * sampleRate),
-  );
+  return samples.slice(clampIndex(startSec * sampleRate), clampIndex(endSec * sampleRate));
 }
 
 function amplitudeRatioDb(numerator, denominator) {
-  return numerator > 0 && denominator > 0
-    ? 20 * Math.log10(numerator / denominator)
-    : null;
+  return numerator > 0 && denominator > 0 ? 20 * Math.log10(numerator / denominator) : null;
 }
 
 function energyRatioDb(numerator, denominator) {
-  return numerator > 0 && denominator > 0
-    ? 10 * Math.log10(numerator / denominator)
-    : null;
+  return numerator > 0 && denominator > 0 ? 10 * Math.log10(numerator / denominator) : null;
 }
 
 function classifyFrame(frame) {
@@ -188,7 +185,8 @@ function classifyFrame(frame) {
 }
 
 function segmentMetrics() {
-  if (track.length === 0) return { byClass: {}, loudestFrames: [], releaseFrames: [], releaseSummary: null };
+  if (track.length === 0)
+    return { byClass: {}, loudestFrames: [], releaseFrames: [], releaseSummary: null };
   const byClassSamples = new Map();
   const releaseSamples = [];
   const frames = [];
@@ -269,7 +267,10 @@ if (segments.releaseSummary) {
     peakToActivePeakDb: amplitudeRatioDb(segments.releaseSummary.peak, activeMetrics.peak),
     energyToActiveDb: energyRatioDb(segments.releaseSummary.energy, activeMetrics.energy),
     rmsToVoicedDb: amplitudeRatioDb(segments.releaseSummary.rms, segments.byClass.voiced?.rms ?? 0),
-    rmsToUnvoicedDb: amplitudeRatioDb(segments.releaseSummary.rms, segments.byClass.unvoiced?.rms ?? 0),
+    rmsToUnvoicedDb: amplitudeRatioDb(
+      segments.releaseSummary.rms,
+      segments.byClass.unvoiced?.rms ?? 0,
+    ),
   };
 }
 
@@ -300,24 +301,30 @@ if (outJson) {
   fs.writeFileSync(outJson, JSON.stringify(report, null, 2));
 }
 
-console.log(JSON.stringify({
-  input: report.input,
-  phrase: report.phrase,
-  experimentId: report.experimentId,
-  frontendId: report.frontendId,
-  durationSec: report.durationSec,
-  activeRms: report.active.rms,
-  activePeak: report.active.peak,
-  activeCrestDb: report.active.crestDb,
-  activeHissShareAbove6000: report.active.spectral?.hissShareAbove6000,
-  activeHighShareAbove3000: report.active.spectral?.highShareAbove3000,
-  activeCentroidHz: report.active.spectral?.spectralCentroidHz,
-  activeFlatness: report.active.spectral?.spectralFlatness,
-  activeHighToSpeechRatioDb: report.active.spectral?.highToSpeechRatioDb,
-  activeHissToSpeechRatioDb: report.active.spectral?.hissToSpeechRatioDb,
-  releaseSummary: report.segments.releaseSummary,
-  releaseFrames: report.segments.releaseFrames,
-  clippedShare: report.full.clippedShare,
-  loudestFrames: report.segments.loudestFrames.slice(0, 5),
-  outJson,
-}, null, 2));
+console.log(
+  JSON.stringify(
+    {
+      input: report.input,
+      phrase: report.phrase,
+      experimentId: report.experimentId,
+      frontendId: report.frontendId,
+      durationSec: report.durationSec,
+      activeRms: report.active.rms,
+      activePeak: report.active.peak,
+      activeCrestDb: report.active.crestDb,
+      activeHissShareAbove6000: report.active.spectral?.hissShareAbove6000,
+      activeHighShareAbove3000: report.active.spectral?.highShareAbove3000,
+      activeCentroidHz: report.active.spectral?.spectralCentroidHz,
+      activeFlatness: report.active.spectral?.spectralFlatness,
+      activeHighToSpeechRatioDb: report.active.spectral?.highToSpeechRatioDb,
+      activeHissToSpeechRatioDb: report.active.spectral?.hissToSpeechRatioDb,
+      releaseSummary: report.segments.releaseSummary,
+      releaseFrames: report.segments.releaseFrames,
+      clippedShare: report.full.clippedShare,
+      loudestFrames: report.segments.loudestFrames.slice(0, 5),
+      outJson,
+    },
+    null,
+    2,
+  ),
+);

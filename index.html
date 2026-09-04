@@ -21,8 +21,8 @@
           <div class="sub">LF source → diff → cascade resonators</div>
         </div>
         <div class="row">
-          <button id="startBtn">Start Audio</button>
-          <button id="stopBtn">Stop Audio</button>
+          <button id="startBtn" type="button">Start Audio</button>
+          <button id="stopBtn" type="button">Stop Audio</button>
         </div>
       </header>
 
@@ -35,7 +35,7 @@
           <label for="rate">Rate</label>
           <input id="rate" type="range" min="0.5" max="5.0" step="0.05" value="1.0" style="width: 120px;" />
           <span id="rateValue">1.0x</span>
-          <button id="speakBtn">Speak</button>
+          <button id="speakBtn" type="button">Speak</button>
         </div>
         <div style="margin-bottom: 16px;">
           <label>
@@ -63,8 +63,8 @@
       <section class="panel" style="margin-top: 18px;">
         <div class="row" style="margin-bottom: 10px;">
           <strong>Diagnostics</strong>
-          <button id="copyDiagBtn">Copy diagnostics</button>
-          <button id="clearDiagBtn">Clear</button>
+          <button id="copyDiagBtn" type="button">Copy diagnostics</button>
+          <button id="clearDiagBtn" type="button">Clear</button>
           <label style="margin-left: 12px;"><input type="checkbox" id="diagEngineToggle" /> Engine diagnostics</label>
         </div>
         <textarea id="diagnostics" rows="8" style="width: 100%; font-family: Consolas, 'Courier New', monospace;" readonly></textarea>
@@ -72,7 +72,7 @@
       <section class="panel spectrogram" style="margin-top: 18px;">
         <div class="row" style="margin-bottom: 10px;">
           <strong>Spectrogram</strong>
-          <button id="clearSpecBtn">Clear</button>
+          <button id="clearSpecBtn" type="button">Clear</button>
         </div>
         <canvas id="spectrogram" width="900" height="240"></canvas>
       </section>

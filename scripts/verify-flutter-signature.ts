@@ -33,17 +33,28 @@ interface Exports {
   oversampled_glottal_source_new(sampleRate: number): number;
   oversampled_glottal_source_process(
     state: number,
-    f0Ptr: number, f0Len: number,
-    avPtr: number, avLen: number,
-    aturbPtr: number, aturbLen: number,
-    tiltPtr: number, tiltLen: number,
-    oqPtr: number, oqLen: number,
-    skewPtr: number, skewLen: number,
-    asymPtr: number, asymLen: number,
-    sourcePtr: number, sourceLen: number,
-    seedPtr: number, seedLen: number,
-    flutterPtr: number, flutterLen: number,
-    voicePtr: number, noisePtr: number,
+    f0Ptr: number,
+    f0Len: number,
+    avPtr: number,
+    avLen: number,
+    aturbPtr: number,
+    aturbLen: number,
+    tiltPtr: number,
+    tiltLen: number,
+    oqPtr: number,
+    oqLen: number,
+    skewPtr: number,
+    skewLen: number,
+    asymPtr: number,
+    asymLen: number,
+    sourcePtr: number,
+    sourceLen: number,
+    seedPtr: number,
+    seedLen: number,
+    flutterPtr: number,
+    flutterLen: number,
+    voicePtr: number,
+    noisePtr: number,
     blockSize: number,
   ): void;
 }
@@ -86,9 +97,29 @@ function render(ex: Exports, flutter: number, numSamples: number): Float32Array 
     const n = Math.min(block, numSamples - written);
     ex.oversampled_glottal_source_process(
       state,
-      f0, 1, av, 1, aturb, 1, tilt, 1, oq, 1, skew, 1, asym, 1,
-      source, 1, seed, 1, fl, 1,
-      voicePtr, noisePtr, n,
+      f0,
+      1,
+      av,
+      1,
+      aturb,
+      1,
+      tilt,
+      1,
+      oq,
+      1,
+      skew,
+      1,
+      asym,
+      1,
+      source,
+      1,
+      seed,
+      1,
+      fl,
+      1,
+      voicePtr,
+      noisePtr,
+      n,
     );
     // memory.buffer may have grown; build a fresh view each block.
     const view = new Float32Array(ex.memory.buffer, voicePtr, n);
@@ -203,24 +234,35 @@ function main(): void {
   const minTargetMag = Math.min(...fTarget.map((t) => t.mag));
 
   console.log("=== FLUTTER (FL) signature verification ===");
-  console.log(`source params: F0=${F0_HZ} Hz, AV=${AV_DB} dB, source=2 (natural), ${DURATION_S}s @ ${SAMPLE_RATE} Hz`);
-  console.log(`contour frame rate: ${fsContour.toFixed(2)} Hz, frames: control=${cTrack.f0.length} flutter=${fTrack.f0.length}`);
+  console.log(
+    `source params: F0=${F0_HZ} Hz, AV=${AV_DB} dB, source=2 (natural), ${DURATION_S}s @ ${SAMPLE_RATE} Hz`,
+  );
+  console.log(
+    `contour frame rate: ${fsContour.toFixed(2)} Hz, frames: control=${cTrack.f0.length} flutter=${fTrack.f0.length}`,
+  );
   console.log("");
   console.log("F0 contour stats (Hz):");
-  console.log(`  FL=0  (control): mean=${cStat.mean.toFixed(2)} min=${cStat.min.toFixed(2)} max=${cStat.max.toFixed(2)} ptp=${cStat.ptp.toFixed(3)}`);
-  console.log(`  FL=50          : mean=${fStat.mean.toFixed(2)} min=${fStat.min.toFixed(2)} max=${fStat.max.toFixed(2)} ptp=${fStat.ptp.toFixed(3)}`);
+  console.log(
+    `  FL=0  (control): mean=${cStat.mean.toFixed(2)} min=${cStat.min.toFixed(2)} max=${cStat.max.toFixed(2)} ptp=${cStat.ptp.toFixed(3)}`,
+  );
+  console.log(
+    `  FL=50          : mean=${fStat.mean.toFixed(2)} min=${fStat.min.toFixed(2)} max=${fStat.max.toFixed(2)} ptp=${fStat.ptp.toFixed(3)}`,
+  );
   console.log("");
   console.log("FL=50 F0-contour DFT magnitude at flutter target freqs (Hz -> mag):");
   for (const t of fTarget) console.log(`  ${t.hz.toFixed(1).padStart(5)} Hz : ${t.mag.toFixed(4)}`);
   console.log("FL=50 F0-contour DFT magnitude at off-target control freqs:");
-  for (const c of fControl) console.log(`  ${c.hz.toFixed(1).padStart(5)} Hz : ${c.mag.toFixed(4)}`);
+  for (const c of fControl)
+    console.log(`  ${c.hz.toFixed(1).padStart(5)} Hz : ${c.mag.toFixed(4)}`);
   console.log("FL=0 F0-contour DFT magnitude at the same target freqs (should be ~0):");
   for (const t of cTarget) console.log(`  ${t.hz.toFixed(1).padStart(5)} Hz : ${t.mag.toFixed(4)}`);
   console.log("");
 
   // Expected ptp upper bound from eq. 1: (FL/50)*(F0/100)*[3 sines in [-3,3]] -> +-3.6 Hz.
   const expectedAmp = (50 / 50) * (F0_HZ / 100) * 3; // max single-side amplitude
-  console.log(`eq.1 max |Δf0| bound at FL=50,F0=120: ${expectedAmp.toFixed(2)} Hz (ptp up to ${(2 * expectedAmp).toFixed(2)} Hz)`);
+  console.log(
+    `eq.1 max |Δf0| bound at FL=50,F0=120: ${expectedAmp.toFixed(2)} Hz (ptp up to ${(2 * expectedAmp).toFixed(2)} Hz)`,
+  );
 
   // Assertions.
   const checks: Array<[string, boolean]> = [
@@ -228,7 +270,10 @@ function main(): void {
     ["FL=50 shows several-Hz wander (ptp > 2 Hz)", fStat.ptp > 2.0],
     ["FL=50 wander within eq.1 bound (ptp < 9 Hz)", fStat.ptp < 9.0],
     ["all 3 flutter freqs dominate every control bin", minTargetMag > maxControlMag],
-    ["FL=0 has no energy at flutter freqs (< 0.1 Hz)", Math.max(...cTarget.map((t) => t.mag)) < 0.1],
+    [
+      "FL=0 has no energy at flutter freqs (< 0.1 Hz)",
+      Math.max(...cTarget.map((t) => t.mag)) < 0.1,
+    ],
   ];
 
   let allPass = true;

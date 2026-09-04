@@ -1,4 +1,4 @@
-import { computeRmsPeak, BaseProcessorOptions } from "./wasm-utils.js";
+import { type BaseProcessorOptions, computeRmsPeak } from "./wasm-utils.js";
 
 interface DifferentiatorMetricsMessage {
   type: "metrics";
@@ -45,7 +45,7 @@ class DifferentiatorProcessor extends AudioWorkletProcessor {
   process(
     inputs: Float32Array[][],
     outputs: Float32Array[][],
-    _parameters: Record<string, Float32Array>
+    _parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const input = inputs[0];

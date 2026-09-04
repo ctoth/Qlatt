@@ -1,5 +1,34 @@
 import { describe, expect, it } from "vitest";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  type CompiledRulepack,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
+
+interface PolicyLeaf {
+  value: number;
+}
+
+interface F0Policy {
+  range_hz: PolicyLeaf;
+  female_base_hz: PolicyLeaf;
+  sag_depth_fraction: PolicyLeaf;
+  question_rise_fraction: PolicyLeaf;
+  downstep_k: unknown;
+}
+
+type RulepackFixture = CompiledRulepack & {
+  parameters: {
+    policy: Record<string, unknown> & { f0: F0Policy };
+  };
+  rules: Record<string, unknown>;
+  output: {
+    lowering: {
+      id: string;
+      columns: string[];
+      timeline: unknown;
+    };
+  };
+};
 
 /**
  * Phase 5.1: cross-frontend `extends`.
@@ -14,8 +43,8 @@ import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
  *      over the base (f0 pitch-range delta, output columns/id, inventory_path).
  */
 describe("declarative frontend extends (qlatt-beauty ← qlatt-english)", () => {
-  const beauty = loadBundledRulepackSpec("qlatt-beauty") as Record<string, any>;
-  const english = loadBundledRulepackSpec("qlatt-english") as Record<string, any>;
+  const beauty = loadBundledRulepackSpec("qlatt-beauty") as RulepackFixture;
+  const english = loadBundledRulepackSpec("qlatt-english") as RulepackFixture;
 
   // ---- BASE RESOLUTION ----
 

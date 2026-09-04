@@ -7,6 +7,13 @@ function ruleOp(rule: unknown): unknown {
   return (rule as { op?: unknown }).op;
 }
 
+function ruleSelectRelation(rule: unknown): unknown {
+  if (!rule || typeof rule !== "object" || !("select" in rule)) return undefined;
+  const select = rule.select;
+  if (!select || typeof select !== "object" || !("relation" in select)) return undefined;
+  return select.relation;
+}
+
 describe("declarative frontend rulepack shape", () => {
   it("expresses duration heuristics as declarative select/apply rules", () => {
     const stress = QLATT_ENGLISH_RULEPACK.rules.stress_duration;
@@ -17,9 +24,9 @@ describe("declarative frontend rulepack shape", () => {
     expect(ruleOp(short)).toBeFalsy();
     expect(ruleOp(boundary)).toBeFalsy();
 
-    expect(stress?.select?.relation).toBe("Segment");
-    expect(short?.select?.relation).toBe("Segment");
-    expect(boundary?.select?.relation).toBe("Segment");
+    expect(ruleSelectRelation(stress)).toBe("Segment");
+    expect(ruleSelectRelation(short)).toBe("Segment");
+    expect(ruleSelectRelation(boundary)).toBe("Segment");
 
     expect(Array.isArray(stress?.apply)).toBe(true);
     expect(Array.isArray(short?.apply)).toBe(true);
@@ -28,7 +35,7 @@ describe("declarative frontend rulepack shape", () => {
 
   it("contains no imperative rule.op handlers", () => {
     const opRules = Object.entries(QLATT_ENGLISH_RULEPACK.rules).filter(
-      ([, rule]) => ruleOp(rule) != null
+      ([, rule]) => ruleOp(rule) != null,
     );
     expect(opRules).toHaveLength(0);
   });

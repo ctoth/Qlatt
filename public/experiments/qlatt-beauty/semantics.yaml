@@ -499,14 +499,23 @@ constants:
     AN: -58
     AB: -84
 
+  # Klatt 1980 PARCOE.FOR GETAMP conversion domain and 6 dB-per-doubling rule.
+  dbFloorDb: -72
+  dbCeilingDb: 96
+  dbPerDoubling: 6
+
   # Proximity correction lookup (for close formants)
   # Klatt 1980 PARCOE.FOR NDBCOR table — proximity-based amplitude correction
   # for cascade-formant interactions when adjacent formants are close in Hz.
+  ndbCorBinHz: 50
+  ndbCorMinHz: 50
+  ndbCorMaxHz: 550
   ndbCor: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
 
   # klsyn88 amptable (parwvt.h): DBtoLIN(dB) = amptable[dB] * 0.001
-  # Source: klsyn88 (Klatt synthesizer, Nim reimplementation) parwvt.h
+  # Source: klsyn88 parwvt.h.
   # Used by dbToLinearKlsyn() for the klsyn-style amplitude conversion path.
+  klsynAmpScale: 0.001
   klsynAmpTable:
     [0, 0, 0, 0, 0,
      0, 0, 0, 0, 0,

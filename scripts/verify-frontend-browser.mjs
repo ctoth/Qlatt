@@ -1,8 +1,8 @@
 import { chromium } from "playwright-core";
 
 const url = process.env.QLATT_BROWSER_URL ?? "http://127.0.0.1:8000/";
-const executablePath = process.env.CHROME_PATH
-  ?? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const executablePath =
+  process.env.CHROME_PATH ?? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const cases = [
   { frontend: "qlatt-english", experiment: "klatt80-baseline", phrase: "hello world." },
   { frontend: "dectalk-english", experiment: "dectalk-english", phrase: "hello world." },
@@ -12,10 +12,12 @@ async function waitForRun(page, phrase, priorSessionId) {
   await page.waitForFunction(
     async ({ expectedPhrase, priorSession }) => {
       const { state } = await import("/test/harness/state.js");
-      return state.lastRun?.phrase === expectedPhrase
-        && state.lastRun.sessionId > priorSession
-        && Array.isArray(state.lastRun.track)
-        && state.lastRun.track.length > 0;
+      return (
+        state.lastRun?.phrase === expectedPhrase &&
+        state.lastRun.sessionId > priorSession &&
+        Array.isArray(state.lastRun.track) &&
+        state.lastRun.track.length > 0
+      );
     },
     { expectedPhrase: phrase, priorSession: priorSessionId },
     { timeout: 30_000 },
@@ -28,9 +30,9 @@ async function waitForRun(page, phrase, priorSessionId) {
     const direct = textToKlattTrackDetailed(state.lastRun.phrase, state.lastRun.baseF0, 30, {
       frontendId: frontend,
     });
-    const inventoryDecision = direct.utterance.provenance.getDecisions().find(
-      (decision) => decision.type === "inventory_selected",
-    );
+    const inventoryDecision = direct.utterance.provenance
+      .getDecisions()
+      .find((decision) => decision.type === "inventory_selected");
     return {
       frontend,
       experiment: document.querySelector("#experimentSelect")?.value,
@@ -38,9 +40,11 @@ async function waitForRun(page, phrase, priorSessionId) {
       directFrames: direct.track.length,
       inventorySubject: inventoryDecision?.subject,
       durationSeconds: track.at(-1)?.time ?? 0,
-      finite: track.every((frame) =>
-        Number.isFinite(frame.time)
-        && Object.values(frame.params).every((value) => Number.isFinite(value))),
+      finite: track.every(
+        (frame) =>
+          Number.isFinite(frame.time) &&
+          Object.values(frame.params).every((value) => Number.isFinite(value)),
+      ),
     };
   });
 }
@@ -56,9 +60,12 @@ try {
 
   for (const testCase of cases) {
     const page = await browser.newPage();
-    page.on("pageerror", (error) => failures.push(`${testCase.frontend} pageerror: ${error.message}`));
+    page.on("pageerror", (error) =>
+      failures.push(`${testCase.frontend} pageerror: ${error.message}`),
+    );
     page.on("console", (message) => {
-      if (message.type() === "error") failures.push(`${testCase.frontend} console: ${message.text()}`);
+      if (message.type() === "error")
+        failures.push(`${testCase.frontend} console: ${message.text()}`);
     });
     await page.goto(url, { waitUntil: "networkidle" });
     await page.selectOption("#frontendSelect", testCase.frontend);
@@ -84,17 +91,19 @@ try {
     await page.click("#speakBtn");
     const run = await waitForRun(page, testCase.phrase, priorSessionId);
     if (
-      run.frontend !== testCase.frontend
-      || run.experiment !== testCase.experiment
-      || run.directFrames !== run.frames
-      || run.inventorySubject !== `inventory:${testCase.frontend}`
-      || !run.finite
-      || run.frames === 0
-      || run.durationSeconds <= 0
+      run.frontend !== testCase.frontend ||
+      run.experiment !== testCase.experiment ||
+      run.directFrames !== run.frames ||
+      run.inventorySubject !== `inventory:${testCase.frontend}` ||
+      !run.finite ||
+      run.frames === 0 ||
+      run.durationSeconds <= 0
     ) {
       failures.push(`${testCase.frontend}: invalid scheduled track ${JSON.stringify(run)}`);
     }
-    process.stdout.write(`${run.frontend}/${run.experiment}: ${run.frames} frames, ${run.durationSeconds.toFixed(3)}s, finite=${run.finite}, ${run.inventorySubject}\n`);
+    process.stdout.write(
+      `${run.frontend}/${run.experiment}: ${run.frames} frames, ${run.durationSeconds.toFixed(3)}s, finite=${run.finite}, ${run.inventorySubject}\n`,
+    );
     await page.close();
   }
 

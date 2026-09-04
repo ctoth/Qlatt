@@ -12,26 +12,26 @@
  * Full mode: FULL_AUDIT=1 env var processes all ~135k words.
  */
 
-import { describe, expect, it, vi, beforeAll } from "vitest";
+import { beforeAll, describe, it, vi } from "vitest";
 import { textToKlattTrack } from "../src/tts-frontend";
 import {
   DIPHTHONG_BASES,
   DIPHTHONG_COMPONENTS,
+  expectNoViolationsOrReport,
+  extractSegments,
+  type Frame,
   GLIDE_PHONEMES,
+  isAuditReportOnlyMode,
   LIQUID_PHONEMES,
+  loadCmuDictionary,
   NASAL_PHONEMES,
   REDUCED_VOWELS,
   RHOTIC_VOWELS,
-  STOP_BASES,
-  extractSegments,
-  expectNoViolationsOrReport,
-  isAuditReportOnlyMode,
-  loadCmuDictionary,
-  selectAuditWords,
-  summarizeNumbers,
-  stripStress,
-  type Frame,
   type Segment,
+  STOP_BASES,
+  selectAuditWords,
+  stripStress,
+  summarizeNumbers,
 } from "./utils/cmudict-audit";
 
 // -- Types ------------------------------------------------------------------
@@ -109,7 +109,7 @@ function segmentAverageParam(segment: Segment, key: string): number {
 
 // -- Helpers ----------------------------------------------------------------
 
-const CLOSURE_SUFFIXES = ["_CL"];
+const _CLOSURE_SUFFIXES = ["_CL"];
 
 // -- Test Suite -------------------------------------------------------------
 
@@ -135,10 +135,12 @@ describe("full dictionary audit", () => {
       }
 
       console.log(
-        `\n[audit] Mode: ${isFullAudit ? "FULL" : "subset"}, ${auditWords.length} words selected`
+        `\n[audit] Mode: ${isFullAudit ? "FULL" : "subset"}, ${auditWords.length} words selected`,
       );
       if (isAuditReportOnlyMode()) {
-        console.log("[audit] Report-only mode enabled: violations will be logged but not fail tests");
+        console.log(
+          "[audit] Report-only mode enabled: violations will be logged but not fail tests",
+        );
       }
 
       // Suppress console warnings during bulk processing
@@ -169,20 +171,17 @@ describe("full dictionary audit", () => {
           currentWordForWarnings = null;
           processed++;
           if (processed % 500 === 0) {
-            console.log(
-              `  processed ${processed}/${auditWords.length}...`
-            );
+            console.log(`  processed ${processed}/${auditWords.length}...`);
           }
         }
         console.log(
-          `[audit] Processing complete: ${trackCache.size} tracks cached` +
-            ` (${errors} errors)\n`
+          `[audit] Processing complete: ${trackCache.size} tracks cached` + ` (${errors} errors)\n`,
         );
       } finally {
         warnSpy.mockRestore();
       }
     },
-    600_000 // 10 minute timeout
+    600_000, // 10 minute timeout
   );
 
   // -- Block 1: Diphthong Expansion -----------------------------------------
@@ -199,9 +198,7 @@ describe("full dictionary audit", () => {
 
         // Check if this word contains any diphthong
         const phones = arpabet.split(" ");
-        const diphsInWord = phones
-          .map((p) => stripStress(p))
-          .filter((p) => DIPHTHONG_BASES.has(p));
+        const diphsInWord = phones.map((p) => stripStress(p)).filter((p) => DIPHTHONG_BASES.has(p));
         if (diphsInWord.length === 0) continue;
 
         diphthongWordsCount++;
@@ -211,13 +208,10 @@ describe("full dictionary audit", () => {
         for (const diph of diphsInWord) {
           // A violation = any segment whose base phoneme matches a diphthong
           // (meaning it was NOT expanded into components)
-          const hasUnexpanded = segPhonemes.some(
-            (sp) => stripStress(sp) === diph
-          );
+          const hasUnexpanded = segPhonemes.some((sp) => stripStress(sp) === diph);
 
           if (hasUnexpanded) {
-            countByDiphthong[diph] =
-              (countByDiphthong[diph] || 0) + 1;
+            countByDiphthong[diph] = (countByDiphthong[diph] || 0) + 1;
             violations.push({
               word,
               arpabet,
@@ -232,15 +226,11 @@ describe("full dictionary audit", () => {
       const affectedWords = new Set(violations.map((v) => v.word)).size;
       console.log(
         `\ndiphthong expansion: ${affectedWords} words affected` +
-          ` (of ${diphthongWordsCount} diphthong words tested)`
+          ` (of ${diphthongWordsCount} diphthong words tested)`,
       );
-      for (const [diph, count] of Object.entries(
-        countByDiphthong
-      ).sort()) {
+      for (const [diph, count] of Object.entries(countByDiphthong).sort()) {
         const [c1, c2] = DIPHTHONG_COMPONENTS[diph];
-        console.log(
-          `  ${diph}: ${count} violations (expected -> [${c1},${c2}])`
-        );
+        console.log(`  ${diph}: ${count} violations (expected -> [${c1},${c2}])`);
       }
       if (violations.length > 0) {
         console.log(`  First 20 violations:`);
@@ -248,7 +238,7 @@ describe("full dictionary audit", () => {
           const [c1, c2] = DIPHTHONG_COMPONENTS[v.diphthong];
           console.log(
             `    ${v.word} (${v.diphthong}): segments=[${v.segmentPhonemes.join(",")}]` +
-              ` -- ${v.diphthong} not expanded to [${c1},${c2}]`
+              ` -- ${v.diphthong} not expanded to [${c1},${c2}]`,
           );
         }
       }
@@ -256,7 +246,7 @@ describe("full dictionary audit", () => {
       expectNoViolationsOrReport(
         violations,
         `${violations.length} diphthong expansion violations in ${affectedWords} words` +
-          ` (first: ${violations[0]?.word ?? "none"})`
+          ` (first: ${violations[0]?.word ?? "none"})`,
       );
     });
   });
@@ -282,10 +272,7 @@ describe("full dictionary audit", () => {
 
         // Find last non-SIL segment
         let lastNonSilIdx = segPhonemes.length - 1;
-        while (
-          lastNonSilIdx >= 0 &&
-          segPhonemes[lastNonSilIdx] === "SIL"
-        ) {
+        while (lastNonSilIdx >= 0 && segPhonemes[lastNonSilIdx] === "SIL") {
           lastNonSilIdx--;
         }
 
@@ -297,15 +284,10 @@ describe("full dictionary audit", () => {
         if (lastNonSil.endsWith("_CL")) {
           const hasRelease = segPhonemes
             .slice(lastNonSilIdx + 1)
-            .some(
-              (p) => p.endsWith("_REL") || p.endsWith("_ASP")
-            );
+            .some((p) => p.endsWith("_REL") || p.endsWith("_ASP"));
 
           if (!hasRelease) {
-            const contextStart = Math.max(
-              0,
-              lastNonSilIdx - 2
-            );
+            const contextStart = Math.max(0, lastNonSilIdx - 2);
             violations.push({
               word,
               arpabet,
@@ -318,21 +300,19 @@ describe("full dictionary audit", () => {
       // Log informative output
       console.log(
         `\nword-final stop release: ${violations.length} violations` +
-          ` (of ${stopFinalWordsCount} stop-final words tested)`
+          ` (of ${stopFinalWordsCount} stop-final words tested)`,
       );
       if (violations.length > 0) {
         console.log(`  First 20 violations:`);
         for (const v of violations.slice(0, 20)) {
-          console.log(
-            `    ${v.word} (${v.arpabet}): last segments=[${v.lastSegments.join(",")}]`
-          );
+          console.log(`    ${v.word} (${v.arpabet}): last segments=[${v.lastSegments.join(",")}]`);
         }
       }
 
       expectNoViolationsOrReport(
         violations,
         `${violations.length} stop-final words missing release` +
-          ` (first: ${violations[0]?.word ?? "none"})`
+          ` (first: ${violations[0]?.word ?? "none"})`,
       );
     });
   });
@@ -373,21 +353,20 @@ describe("full dictionary audit", () => {
       const affectedWords = new Set(violations.map((v) => v.word)).size;
       console.log(
         `\nvoicing bleed: ${violations.length} SIL frames with AV>0` +
-          ` in ${affectedWords} words (of ${wordsChecked} words checked)`
+          ` in ${affectedWords} words (of ${wordsChecked} words checked)`,
       );
       if (violations.length > 0) {
         console.log(`  First 20 violations:`);
         for (const v of violations.slice(0, 20)) {
           console.log(
-            `    ${v.word}: SIL frame at t=${v.silFrameTime.toFixed(3)}s has AV=${v.avValue}`
+            `    ${v.word}: SIL frame at t=${v.silFrameTime.toFixed(3)}s has AV=${v.avValue}`,
           );
         }
       }
 
       expectNoViolationsOrReport(
         violations,
-        `${violations.length} trailing SIL frames with AV>0` +
-          ` in ${affectedWords} words`
+        `${violations.length} trailing SIL frames with AV>0` + ` in ${affectedWords} words`,
       );
     });
   });
@@ -404,7 +383,7 @@ describe("full dictionary audit", () => {
       const affectedWords = new Set(materializationWarnings.map((entry) => entry.word)).size;
       console.log(
         `\ninventory materialization warnings: ${materializationWarnings.length} entries` +
-          ` across ${affectedWords} words`
+          ` across ${affectedWords} words`,
       );
       for (const [phoneme, count] of Object.entries(warningsByPhone).sort((a, b) => b[1] - a[1])) {
         console.log(`  ${phoneme}: ${count}`);
@@ -419,7 +398,7 @@ describe("full dictionary audit", () => {
       expectNoViolationsOrReport(
         materializationWarnings,
         `${materializationWarnings.length} inventory materialization warnings` +
-          ` in ${affectedWords} words (first: ${materializationWarnings[0]?.word ?? "none"})`
+          ` in ${affectedWords} words (first: ${materializationWarnings[0]?.word ?? "none"})`,
       );
     });
   });
@@ -435,7 +414,7 @@ describe("full dictionary audit", () => {
       // synthesis behavior, not direct copied measurements.
       const targetPhones = ["TH", "DH", "S", "Z", "F", "V", "SH", "ZH", "HH"];
       const byPhone = new Map<string, EnvelopeObservation[]>(
-        targetPhones.map((phone) => [phone, []])
+        targetPhones.map((phone) => [phone, []]),
       );
 
       const maxInSegment = (segment: Segment, key: string): number =>
@@ -478,7 +457,13 @@ describe("full dictionary audit", () => {
           });
         }
       };
-      const assertMin = (phone: string, metric: string, observed: number, min: number, sampleCount: number) => {
+      const assertMin = (
+        phone: string,
+        metric: string,
+        observed: number,
+        min: number,
+        sampleCount: number,
+      ) => {
         if (observed < min) {
           violations.push({
             phoneme: phone,
@@ -489,7 +474,13 @@ describe("full dictionary audit", () => {
           });
         }
       };
-      const assertMax = (phone: string, metric: string, observed: number, max: number, sampleCount: number) => {
+      const assertMax = (
+        phone: string,
+        metric: string,
+        observed: number,
+        max: number,
+        sampleCount: number,
+      ) => {
         if (observed > max) {
           violations.push({
             phoneme: phone,
@@ -592,7 +583,7 @@ describe("full dictionary audit", () => {
           `  ${phone}: count=${summary.count} ` +
             `AF[p10/p50/p90]=${summary.AF.p10.toFixed(1)}/${summary.AF.p50.toFixed(1)}/${summary.AF.p90.toFixed(1)} ` +
             `AV[p10/p50/p90]=${summary.AV.p10.toFixed(1)}/${summary.AV.p50.toFixed(1)}/${summary.AV.p90.toFixed(1)} ` +
-            `SW[p10/p50/p90]=${summary.SW.p10.toFixed(1)}/${summary.SW.p50.toFixed(1)}/${summary.SW.p90.toFixed(1)}`
+            `SW[p10/p50/p90]=${summary.SW.p10.toFixed(1)}/${summary.SW.p50.toFixed(1)}/${summary.SW.p90.toFixed(1)}`,
         );
       }
 
@@ -601,7 +592,7 @@ describe("full dictionary audit", () => {
         for (const violation of violations.slice(0, 20)) {
           console.log(
             `    ${violation.phoneme}.${violation.metric}: observed=${violation.observed.toFixed(2)} ` +
-              `expected ${violation.expected} (n=${violation.sampleCount})`
+              `expected ${violation.expected} (n=${violation.sampleCount})`,
           );
         }
       }
@@ -609,7 +600,7 @@ describe("full dictionary audit", () => {
       expectNoViolationsOrReport(
         violations,
         `${violations.length} phoneme envelope violations` +
-          ` (first: ${violations[0]?.phoneme ?? "none"}.${violations[0]?.metric ?? ""})`
+          ` (first: ${violations[0]?.phoneme ?? "none"}.${violations[0]?.metric ?? ""})`,
       );
     });
   });
@@ -624,7 +615,7 @@ describe("full dictionary audit", () => {
       // These are implementation guardrails for anti-collapse behavior.
       const targetPhones = ["TH", "DH", "S", "Z", "F"];
       const byPhone = new Map<string, EnvelopeObservation[]>(
-        targetPhones.map((phone) => [phone, []])
+        targetPhones.map((phone) => [phone, []]),
       );
 
       const maxInSegment = (segment: Segment, key: string): number =>
@@ -691,7 +682,7 @@ describe("full dictionary audit", () => {
         stronger: number,
         weaker: number,
         minGap: number,
-        sampleCount: number
+        sampleCount: number,
       ) => {
         const observedGap = stronger - weaker;
         if (observedGap < minGap) {
@@ -710,7 +701,7 @@ describe("full dictionary audit", () => {
         first: number,
         second: number,
         minGap: number,
-        sampleCount: number
+        sampleCount: number,
       ) => {
         const observedGap = Math.abs(first - second);
         if (observedGap < minGap) {
@@ -757,14 +748,14 @@ describe("full dictionary audit", () => {
         console.log(
           `  ${phone}: count=${summary.count} ` +
             `AF[p50]=${summary.AF.p50.toFixed(1)} ` +
-            `A6[p50]=${summary.A6.p50.toFixed(1)}`
+            `A6[p50]=${summary.A6.p50.toFixed(1)}`,
         );
       }
       console.log(
-        `  TH vs S: AF.gap=${(s.AF.p50 - th.AF.p50).toFixed(1)} A6.gap=${(s.A6.p50 - th.A6.p50).toFixed(1)}`
+        `  TH vs S: AF.gap=${(s.AF.p50 - th.AF.p50).toFixed(1)} A6.gap=${(s.A6.p50 - th.A6.p50).toFixed(1)}`,
       );
       console.log(
-        `  DH vs Z: AF.gap=${(z.AF.p50 - dh.AF.p50).toFixed(1)} A6.gap=${(z.A6.p50 - dh.A6.p50).toFixed(1)}`
+        `  DH vs Z: AF.gap=${(z.AF.p50 - dh.AF.p50).toFixed(1)} A6.gap=${(z.A6.p50 - dh.A6.p50).toFixed(1)}`,
       );
       console.log(`  F vs TH: |AF.gap|=${Math.abs(f.AF.p50 - th.AF.p50).toFixed(1)}`);
 
@@ -773,7 +764,7 @@ describe("full dictionary audit", () => {
         for (const violation of violations.slice(0, 20)) {
           console.log(
             `    ${violation.pair}.${violation.metric}: observed=${violation.observed.toFixed(2)} ` +
-              `expected ${violation.expected} (n=${violation.sampleCount})`
+              `expected ${violation.expected} (n=${violation.sampleCount})`,
           );
         }
       }
@@ -781,7 +772,7 @@ describe("full dictionary audit", () => {
       expectNoViolationsOrReport(
         violations,
         `${violations.length} phoneme contrast violations` +
-          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`
+          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`,
       );
     });
   });
@@ -807,7 +798,7 @@ describe("full dictionary audit", () => {
         phones.map((phone) => [
           phone,
           { closurePrev: [], onsetDelta: [], duration: [], AF: [], A5: [] },
-        ])
+        ]),
       );
 
       const maxInSegment = (segment: Segment, key: string): number =>
@@ -868,7 +859,13 @@ describe("full dictionary audit", () => {
       }
 
       const violations: ContrastViolation[] = [];
-      const assertMin = (pair: string, metric: string, observed: number, min: number, sampleCount: number) => {
+      const assertMin = (
+        pair: string,
+        metric: string,
+        observed: number,
+        min: number,
+        sampleCount: number,
+      ) => {
         if (observed < min) {
           violations.push({
             pair,
@@ -879,7 +876,13 @@ describe("full dictionary audit", () => {
           });
         }
       };
-      const assertMax = (pair: string, metric: string, observed: number, max: number, sampleCount: number) => {
+      const assertMax = (
+        pair: string,
+        metric: string,
+        observed: number,
+        max: number,
+        sampleCount: number,
+      ) => {
         if (observed > max) {
           violations.push({
             pair,
@@ -914,8 +917,20 @@ describe("full dictionary audit", () => {
       // JH and ZH now share /sh/ spectral shape per Klatt 1980 Table III;
       // differentiation comes from closure presence and duration, not A5.
       assertMin("CH vs SH", "A5.p50 gap", ch.A5.p50 - sh.A5.p50, 6, Math.min(ch.count, sh.count));
-      assertMin("CH vs SH", "duration p50 gap", sh.duration.p50 - ch.duration.p50, 15, Math.min(ch.count, sh.count));
-      assertMin("JH vs ZH", "duration p50 gap", zh.duration.p50 - jh.duration.p50, 10, Math.min(jh.count, zh.count));
+      assertMin(
+        "CH vs SH",
+        "duration p50 gap",
+        sh.duration.p50 - ch.duration.p50,
+        15,
+        Math.min(ch.count, sh.count),
+      );
+      assertMin(
+        "JH vs ZH",
+        "duration p50 gap",
+        zh.duration.p50 - jh.duration.p50,
+        10,
+        Math.min(jh.count, zh.count),
+      );
 
       console.log("\naffricate differentiation:");
       for (const phone of phones) {
@@ -923,7 +938,7 @@ describe("full dictionary audit", () => {
         console.log(
           `  ${phone}: count=${item.count} closureRate=${item.closureRate.toFixed(2)} ` +
             `dur.p50=${item.duration.p50.toFixed(1)} AF.p50=${item.AF.p50.toFixed(1)} ` +
-            `A5.p50=${item.A5.p50.toFixed(1)} onsetDelta.p50=${item.onsetDelta.p50.toFixed(1)}`
+            `A5.p50=${item.A5.p50.toFixed(1)} onsetDelta.p50=${item.onsetDelta.p50.toFixed(1)}`,
         );
       }
 
@@ -932,7 +947,7 @@ describe("full dictionary audit", () => {
         for (const violation of violations.slice(0, 20)) {
           console.log(
             `    ${violation.pair}.${violation.metric}: observed=${violation.observed.toFixed(2)} ` +
-              `expected ${violation.expected} (n=${violation.sampleCount})`
+              `expected ${violation.expected} (n=${violation.sampleCount})`,
           );
         }
       }
@@ -940,7 +955,7 @@ describe("full dictionary audit", () => {
       expectNoViolationsOrReport(
         violations,
         `${violations.length} affricate differentiation violations` +
-          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`
+          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`,
       );
     });
   });
@@ -956,7 +971,7 @@ describe("full dictionary audit", () => {
       // one robust control dimension to avoid inventory collapse.
       const obstruentPhones = ["F", "V", "TH", "DH", "S", "Z", "SH", "ZH", "HH", "CH", "JH"];
       const byPhone = new Map<string, EnvelopeObservation[]>(
-        obstruentPhones.map((phone) => [phone, []])
+        obstruentPhones.map((phone) => [phone, []]),
       );
 
       const maxInSegment = (segment: Segment, key: string): number =>
@@ -1059,7 +1074,7 @@ describe("full dictionary audit", () => {
             a6Gap / 4,
             a3Gap / 4,
             abGap / 4,
-            durGap / 8
+            durGap / 8,
           );
 
           pairScores.push({
@@ -1089,7 +1104,7 @@ describe("full dictionary audit", () => {
         console.log(
           `  ${phone}: count=${summary.count} dur.p50=${summary.duration.p50.toFixed(1)}ms ` +
             `AF.p50=${summary.AF.p50.toFixed(1)} AV.p50=${summary.AV.p50.toFixed(1)} ` +
-            `A3.p50=${summary.A3.p50.toFixed(1)} A5.p50=${summary.A5.p50.toFixed(1)}`
+            `A3.p50=${summary.A3.p50.toFixed(1)} A5.p50=${summary.A5.p50.toFixed(1)}`,
         );
       }
       const weakestPairs = [...pairScores].sort((a, b) => a.separation - b.separation).slice(0, 15);
@@ -1103,7 +1118,7 @@ describe("full dictionary audit", () => {
         for (const violation of violations.slice(0, 20)) {
           console.log(
             `    ${violation.pair}.${violation.metric}: observed=${violation.observed.toFixed(2)} ` +
-              `expected ${violation.expected} (n=${violation.sampleCount})`
+              `expected ${violation.expected} (n=${violation.sampleCount})`,
           );
         }
       }
@@ -1111,7 +1126,7 @@ describe("full dictionary audit", () => {
       expectNoViolationsOrReport(
         violations,
         `${violations.length} obstruent separation violations` +
-          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`
+          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`,
       );
     });
   });
@@ -1247,15 +1262,15 @@ describe("full dictionary audit", () => {
 
       console.log(
         `\nrhotic integrity: ER0 n=${er0Summary.F1.count}, ER1 n=${er1Summary.F1.count}, ` +
-          `tail coverage=${(tailCoverage * 100).toFixed(1)}%`
+          `tail coverage=${(tailCoverage * 100).toFixed(1)}%`,
       );
       console.log(
         `  ER0: F1.p50=${er0Summary.F1.p50.toFixed(1)} F2.p50=${er0Summary.F2.p50.toFixed(1)} ` +
-          `F3.p50=${er0Summary.F3.p50.toFixed(1)}`
+          `F3.p50=${er0Summary.F3.p50.toFixed(1)}`,
       );
       console.log(
         `  ER1: F1.p50=${er1Summary.F1.p50.toFixed(1)} F2.p50=${er1Summary.F2.p50.toFixed(1)} ` +
-          `F3.p50=${er1Summary.F3.p50.toFixed(1)}`
+          `F3.p50=${er1Summary.F3.p50.toFixed(1)}`,
       );
       console.log(`  R tail: F3.p50=${tailSummary.p50.toFixed(1)} n=${tailSummary.count}`);
 
@@ -1264,7 +1279,7 @@ describe("full dictionary audit", () => {
         for (const violation of violations.slice(0, 10)) {
           console.log(
             `    ${violation.pair}.${violation.metric}: observed=${violation.observed.toFixed(2)} ` +
-              `expected ${violation.expected} (n=${violation.sampleCount})`
+              `expected ${violation.expected} (n=${violation.sampleCount})`,
           );
         }
       }
@@ -1272,7 +1287,7 @@ describe("full dictionary audit", () => {
       expectNoViolationsOrReport(
         violations,
         `${violations.length} rhotic integrity violations` +
-          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`
+          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`,
       );
     });
   });
@@ -1305,7 +1320,7 @@ describe("full dictionary audit", () => {
         const targetPhone = exactReduced[0];
         const targetBase = stripStress(targetPhone);
         const segments = (segmentCache.get(word) ?? []).filter(
-          (segment) => stripStress(segment.phoneme) === targetBase
+          (segment) => stripStress(segment.phoneme) === targetBase,
         );
         if (segments.length !== 1) continue;
 
@@ -1396,7 +1411,7 @@ describe("full dictionary audit", () => {
         const stats = summary.get(phone)!;
         console.log(
           `  ${phone}: count=${stats.count} F1.p50=${stats.F1.p50.toFixed(1)} ` +
-            `F2.p50=${stats.F2.p50.toFixed(1)} F3.p50=${stats.F3.p50.toFixed(1)}`
+            `F2.p50=${stats.F2.p50.toFixed(1)} F3.p50=${stats.F3.p50.toFixed(1)}`,
         );
       }
 
@@ -1405,7 +1420,7 @@ describe("full dictionary audit", () => {
         for (const violation of violations.slice(0, 10)) {
           console.log(
             `    ${violation.pair}.${violation.metric}: observed=${violation.observed.toFixed(2)} ` +
-              `expected ${violation.expected} (n=${violation.sampleCount})`
+              `expected ${violation.expected} (n=${violation.sampleCount})`,
           );
         }
       }
@@ -1413,7 +1428,7 @@ describe("full dictionary audit", () => {
       expectNoViolationsOrReport(
         violations,
         `${violations.length} reduced-vowel separation violations` +
-          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`
+          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`,
       );
     });
   });
@@ -1433,11 +1448,7 @@ describe("full dictionary audit", () => {
           // Skip SIL segments
           if (seg.phoneme === "SIL") continue;
           // Skip stop releases and aspirations
-          if (
-            seg.phoneme.endsWith("_REL") ||
-            seg.phoneme.endsWith("_ASP")
-          )
-            continue;
+          if (seg.phoneme.endsWith("_REL") || seg.phoneme.endsWith("_ASP")) continue;
 
           const base = stripStress(seg.phoneme);
           let minimumMs: number | null = null;
@@ -1459,8 +1470,7 @@ describe("full dictionary audit", () => {
               violations.push({
                 word,
                 phoneme: seg.phoneme,
-                durationMs:
-                  Math.round(seg.durationMs * 100) / 100,
+                durationMs: Math.round(seg.durationMs * 100) / 100,
                 minimumMs,
               });
             }
@@ -1483,7 +1493,7 @@ describe("full dictionary audit", () => {
 
       console.log(
         `\nsegment duration floors: ${violations.length} violations` +
-          ` in ${affectedWords} words (${segmentsChecked} segments checked)`
+          ` in ${affectedWords} words (${segmentsChecked} segments checked)`,
       );
       for (const [cls, count] of Object.entries(byClass).sort()) {
         console.log(`  ${cls}: ${count} violations`);
@@ -1492,7 +1502,7 @@ describe("full dictionary audit", () => {
         console.log(`  First 20 violations:`);
         for (const v of violations.slice(0, 20)) {
           console.log(
-            `    ${v.word}: ${v.phoneme} = ${v.durationMs}ms (minimum: ${v.minimumMs}ms)`
+            `    ${v.word}: ${v.phoneme} = ${v.durationMs}ms (minimum: ${v.minimumMs}ms)`,
           );
         }
       }
@@ -1500,7 +1510,7 @@ describe("full dictionary audit", () => {
       expectNoViolationsOrReport(
         violations,
         `${violations.length} duration floor violations in ${affectedWords} words` +
-          ` (first: ${violations[0]?.word ?? "none"}: ${violations[0]?.phoneme ?? ""} = ${violations[0]?.durationMs ?? ""}ms)`
+          ` (first: ${violations[0]?.word ?? "none"}: ${violations[0]?.phoneme ?? ""} = ${violations[0]?.durationMs ?? ""}ms)`,
       );
     });
   });

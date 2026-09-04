@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import { describe, expect, it } from "vitest";
 import { parseDiagConfig } from "../../src/harness-diagnostics/schema";
 
 const MINIMAL_CONFIG = `
@@ -95,27 +95,32 @@ display:
   });
 
   it("throws on missing taps", () => {
-    expect(() => parseDiagConfig(`
+    expect(() =>
+      parseDiagConfig(`
 poll:
   interval_ms: 20
 checks: {}
 display:
   sections: []
-`)).toThrow("taps");
+`),
+    ).toThrow("taps");
   });
 
   it("throws on missing poll", () => {
-    expect(() => parseDiagConfig(`
+    expect(() =>
+      parseDiagConfig(`
 taps:
   t: { node: x }
 checks: {}
 display:
   sections: []
-`)).toThrow("poll");
+`),
+    ).toThrow("poll");
   });
 
   it("throws on missing check severity", () => {
-    expect(() => parseDiagConfig(`
+    expect(() =>
+      parseDiagConfig(`
 taps:
   t: { node: x }
 poll:
@@ -127,11 +132,13 @@ checks:
     message: test
 display:
   sections: []
-`)).toThrow("severity");
+`),
+    ).toThrow("severity");
   });
 
   it("throws on missing check message", () => {
-    expect(() => parseDiagConfig(`
+    expect(() =>
+      parseDiagConfig(`
 taps:
   t: { node: x }
 poll:
@@ -143,11 +150,13 @@ checks:
     severity: warn
 display:
   sections: []
-`)).toThrow("message");
+`),
+    ).toThrow("message");
   });
 
   it("throws on missing check assert", () => {
-    expect(() => parseDiagConfig(`
+    expect(() =>
+      parseDiagConfig(`
 taps:
   t: { node: x }
 poll:
@@ -159,11 +168,13 @@ checks:
     message: test
 display:
   sections: []
-`)).toThrow("assert");
+`),
+    ).toThrow("assert");
   });
 
   it("throws on unknown measure", () => {
-    expect(() => parseDiagConfig(`
+    expect(() =>
+      parseDiagConfig(`
 taps:
   t: { node: x }
 poll:
@@ -176,11 +187,13 @@ checks:
     message: test
 display:
   sections: []
-`)).toThrow("unknown measure");
+`),
+    ).toThrow("unknown measure");
   });
 
   it("throws on unknown check type", () => {
-    expect(() => parseDiagConfig(`
+    expect(() =>
+      parseDiagConfig(`
 taps:
   t: { node: x }
 poll:
@@ -193,7 +206,8 @@ checks:
     message: test
 display:
   sections: []
-`)).toThrow("unknown type");
+`),
+    ).toThrow("unknown type");
   });
 
   it("parses check with when clause", () => {
@@ -349,7 +363,8 @@ display:
   });
 
   it("throws on tap without node", () => {
-    expect(() => parseDiagConfig(`
+    expect(() =>
+      parseDiagConfig(`
 taps:
   t: { fftSize: 2048 }
 poll:
@@ -357,7 +372,8 @@ poll:
 checks: {}
 display:
   sections: []
-`)).toThrow("node");
+`),
+    ).toThrow("node");
   });
 
   it("parses event_check type", () => {
@@ -428,7 +444,8 @@ display:
   });
 
   it("throws on track_analysis without select", () => {
-    expect(() => parseDiagConfig(`
+    expect(() =>
+      parseDiagConfig(`
 taps:
   t: { node: x }
 poll:
@@ -442,11 +459,13 @@ checks:
     message: test
 display:
   sections: []
-`)).toThrow("select");
+`),
+    ).toThrow("select");
   });
 
   it("throws on track_analysis without compute or assert_any_of", () => {
-    expect(() => parseDiagConfig(`
+    expect(() =>
+      parseDiagConfig(`
 taps:
   t: { node: x }
 poll:
@@ -460,7 +479,8 @@ checks:
     message: test
 display:
   sections: []
-`)).toThrow("compute");
+`),
+    ).toThrow("compute");
   });
 
   it("parses fft_peak_freq with measure_params", () => {

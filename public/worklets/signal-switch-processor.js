@@ -1,4 +1,4 @@
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+import { computeRmsPeak, initWasmModule, resolveWasmUrl, WasmBuffer, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./signal-switch.wasm");
 /**
  * Signal Switch AudioWorklet Processor
@@ -76,7 +76,11 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
         }
         const outputChannel = output[0];
         const blockSize = outputChannel.length;
-        if (!this.ready || !this.wasm || !this.input0Buffer || !this.input1Buffer || !this.outputBuffer) {
+        if (!this.ready ||
+            !this.wasm ||
+            !this.input0Buffer ||
+            !this.input1Buffer ||
+            !this.outputBuffer) {
             outputChannel.fill(0);
             return true;
         }

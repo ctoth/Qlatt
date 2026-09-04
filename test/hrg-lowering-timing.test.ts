@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
+import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
@@ -69,14 +69,16 @@ function loadSegmentType(frontendId: string, phoneme: string): string {
 }
 
 function loadBaseline(fileName: string, frontendId: string): TimingBaseline {
-  const parsed: unknown = JSON.parse(readFileSync(
-    new URL(`./fixtures/hrg-convergence-baseline/${fileName}`, import.meta.url),
-    "utf8",
-  ));
+  const parsed: unknown = JSON.parse(
+    readFileSync(
+      new URL(`./fixtures/hrg-convergence-baseline/${fileName}`, import.meta.url),
+      "utf8",
+    ),
+  );
   if (
-    !isPlainObject(parsed)
-    || !isPlainObject(parsed.reconstructedGraph)
-    || !isPlainObject(parsed.oldProduction)
+    !isPlainObject(parsed) ||
+    !isPlainObject(parsed.reconstructedGraph) ||
+    !isPlainObject(parsed.oldProduction)
   ) {
     throw new Error("baseline graph/production output missing");
   }
@@ -114,11 +116,11 @@ function citedNumber(value: unknown, path: string): { value: number } {
 
 function eventPoints(value: unknown): LowerOptions["timeline"]["event_points"] {
   if (
-    !isPlainObject(value)
-    || typeof value.include_segment_start !== "boolean"
-    || typeof value.include_control_boundaries !== "boolean"
-    || typeof value.include_f0_anchors !== "boolean"
-    || typeof value.include_transition_steady_time !== "boolean"
+    !isPlainObject(value) ||
+    typeof value.include_segment_start !== "boolean" ||
+    typeof value.include_control_boundaries !== "boolean" ||
+    typeof value.include_f0_anchors !== "boolean" ||
+    typeof value.include_transition_steady_time !== "boolean"
   ) {
     throw new Error("compiled lowering event-point policy missing");
   }
@@ -132,12 +134,12 @@ function eventPoints(value: unknown): LowerOptions["timeline"]["event_points"] {
 
 function transitions(value: unknown): LowerOptions["transitions"] {
   if (
-    !isPlainObject(value)
-    || !isPlainObject(value.blend)
-    || !Array.isArray(value.blend.keys)
-    || value.blend.keys.some((entry) => typeof entry !== "string")
-    || !Array.isArray(value.blend.smooth_types)
-    || value.blend.smooth_types.some((entry) => typeof entry !== "string")
+    !isPlainObject(value) ||
+    !isPlainObject(value.blend) ||
+    !Array.isArray(value.blend.keys) ||
+    value.blend.keys.some((entry) => typeof entry !== "string") ||
+    !Array.isArray(value.blend.smooth_types) ||
+    value.blend.smooth_types.some((entry) => typeof entry !== "string")
   ) {
     throw new Error("compiled lowering transition policy missing");
   }
@@ -158,7 +160,10 @@ function loadTimingPolicy(frontendId: string): LowerOptions {
     throw new Error("compiled lowering policy missing");
   }
   const lowering = spec.output.lowering;
-  if (!Array.isArray(lowering.columns) || lowering.columns.some((value) => typeof value !== "string")) {
+  if (
+    !Array.isArray(lowering.columns) ||
+    lowering.columns.some((value) => typeof value !== "string")
+  ) {
     throw new Error("compiled lowering columns missing");
   }
   if (!isPlainObject(lowering.timeline) || !isPlainObject(lowering.timeline.duration_floors)) {
@@ -269,10 +274,13 @@ describe("HRG lowering production event timing", () => {
     const lowered = lowerToFrames(utterance, policy);
 
     for (const expectedFrame of expected) {
-      expect(lowered.frames.some(
-        (frame) => frame.phoneme === expectedFrame.phoneme
-          && Math.abs(frame.time - expectedFrame.time) <= 1e-9,
-      )).toBe(true);
+      expect(
+        lowered.frames.some(
+          (frame) =>
+            frame.phoneme === expectedFrame.phoneme &&
+            Math.abs(frame.time - expectedFrame.time) <= 1e-9,
+        ),
+      ).toBe(true);
     }
     expect(lowered.totalMs).toBeCloseTo(expected[expected.length - 1].time * 1000, 6);
   });
@@ -287,9 +295,11 @@ describe("HRG lowering production event timing", () => {
     expect(() => lowerToFrames(utterance, loadTimingPolicy("qlatt-english"))).toThrowError(
       /E_HRG_LOWER_DURATION_REQUIRED/,
     );
-    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
-      code: "HRG_LOWER_DURATION_REQUIRED",
-    }));
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "HRG_LOWER_DURATION_REQUIRED",
+      }),
+    );
   });
 
   it("rejects unresolved interval timing with a diagnostic", () => {
@@ -303,9 +313,11 @@ describe("HRG lowering production event timing", () => {
     expect(() => lowerToFrames(utterance, loadTimingPolicy("qlatt-english"))).toThrowError(
       /E_HRG_LOWER_TIME_REQUIRED/,
     );
-    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
-      code: "HRG_LOWER_TIME_REQUIRED",
-    }));
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "HRG_LOWER_TIME_REQUIRED",
+      }),
+    );
   });
 
   it("rejects duration-floor and resolved-interval disagreement", () => {
@@ -327,9 +339,11 @@ describe("HRG lowering production event timing", () => {
     expect(() => lowerToFrames(utterance, loadTimingPolicy("qlatt-english"))).toThrowError(
       /E_HRG_LOWER_TIMING_MISMATCH/,
     );
-    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
-      code: "HRG_LOWER_TIMING_MISMATCH",
-    }));
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "HRG_LOWER_TIMING_MISMATCH",
+      }),
+    );
   });
 
   it("reports a selected duration floor instead of applying it silently", () => {
@@ -350,10 +364,12 @@ describe("HRG lowering production event timing", () => {
 
     lowerToFrames(utterance, loadTimingPolicy("qlatt-english"));
 
-    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
-      code: "HRG_LOWER_DURATION_FLOORED",
-      data: expect.objectContaining({ itemId: "floored", requestedMs: 10, effectiveMs: 20 }),
-    }));
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "HRG_LOWER_DURATION_FLOORED",
+        data: expect.objectContaining({ itemId: "floored", requestedMs: 10, effectiveMs: 20 }),
+      }),
+    );
   });
 
   it("rejects an invalid selected lowering policy with a diagnostic", () => {
@@ -368,9 +384,11 @@ describe("HRG lowering production event timing", () => {
     };
 
     expect(() => lowerToFrames(utterance, policy)).toThrowError(/E_HRG_LOWER_POLICY_NUMBER/);
-    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
-      code: "HRG_LOWER_POLICY_REJECTED",
-      data: expect.objectContaining({ path: "transitions.blend.factor.value", value: 2 }),
-    }));
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "HRG_LOWER_POLICY_REJECTED",
+        data: expect.objectContaining({ path: "transitions.blend.factor.value", value: 2 }),
+      }),
+    );
   });
 });

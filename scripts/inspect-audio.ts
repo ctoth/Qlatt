@@ -82,7 +82,7 @@ function fft(re: Float64Array, im: Float64Array): void {
 function spectralHighFraction(
   samples: number[],
   sampleRate: number,
-  cutoffHz: number
+  cutoffHz: number,
 ): { aboveAbs: number; fraction: number } {
   if (samples.length < 2) return { aboveAbs: 0, fraction: 0 };
   let n = 1;

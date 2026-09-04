@@ -8,14 +8,15 @@
  * and that render_f0 returns the documented RENDER_ERR_* codes on malformed
  * descriptors instead of trapping.
  */
-import { describe, expect, it } from "vitest";
+
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
 import {
   getF0FilterExports,
-  setF0FilterWasmBytes,
   isF0FilterLoaded,
   RENDER_OK,
+  setF0FilterWasmBytes,
 } from "../src/f0-filters-loader";
 
 // Status codes mirrored from crates/f0-filters/src/lib.rs.
@@ -33,10 +34,7 @@ function wasmBytes(): ArrayBuffer {
 }
 
 /** Write an f64 array into wasm memory; returns its pointer. */
-function writeF64(
-  exports: ReturnType<typeof getF0FilterExports>,
-  values: number[]
-): number {
+function writeF64(exports: ReturnType<typeof getF0FilterExports>, values: number[]): number {
   if (values.length === 0) return 0;
   const ptr = exports.alloc_f64(values.length);
   new Float64Array(exports.memory.buffer, ptr, values.length).set(values);
@@ -67,9 +65,7 @@ describe("f0-filters-loader", () => {
   it("render_f0 returns RENDER_OK and renders on valid minimal input", () => {
     const exports = getF0FilterExports();
     // one-pole pass-through, no scale, wide clamp, frame_period 0.005.
-    const scalars = [
-      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0,
-    ];
+    const scalars = [0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0];
     const layers = [1, 0, 4, 0.01, 0.9, 0, 1]; // persistent, cmd_start 0, count 1
     const cmds = [0, 100, 0, 0, 0];
     const numFrames = 11;
@@ -89,7 +85,7 @@ describe("f0-filters-loader", () => {
       0,
       0,
       outPtr,
-      numFrames
+      numFrames,
     );
     expect(status).toBe(RENDER_OK);
     const out = new Float64Array(exports.memory.buffer, outPtr, numFrames);
@@ -114,9 +110,7 @@ describe("f0-filters-loader", () => {
 
   it("render_f0 returns RENDER_ERR_OUT when out pointer is null", () => {
     const exports = getF0FilterExports();
-    const scalars = [
-      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0,
-    ];
+    const scalars = [0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0];
     const scalarsPtr = writeF64(exports, scalars);
     const status = exports.render_f0(scalarsPtr, scalars.length, 0, 0, 0, 0, 0, 0, 0, 4);
     expect(status).toBe(RENDER_ERR_OUT);
@@ -125,9 +119,7 @@ describe("f0-filters-loader", () => {
 
   it("render_f0 returns RENDER_ERR_BUFFER when a nonzero count has a null pointer", () => {
     const exports = getF0FilterExports();
-    const scalars = [
-      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0,
-    ];
+    const scalars = [0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0];
     const scalarsPtr = writeF64(exports, scalars);
     const outPtr = exports.alloc_f64(4);
     // n_layers = 1 but layers pointer is 0 (null).
@@ -139,9 +131,7 @@ describe("f0-filters-loader", () => {
 
   it("render_f0 returns RENDER_ERR_CMD_RANGE when a layer overruns the commands buffer", () => {
     const exports = getF0FilterExports();
-    const scalars = [
-      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0,
-    ];
+    const scalars = [0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0];
     const layers = [1, 0, 4, 0.01, 0.9, 0, 5]; // cmd_count 5 but only 1 command
     const cmds = [0, 100, 0, 0, 0];
     const scalarsPtr = writeF64(exports, scalars);
@@ -160,7 +150,7 @@ describe("f0-filters-loader", () => {
       0,
       0,
       outPtr,
-      4
+      4,
     );
     expect(status).toBe(RENDER_ERR_CMD_RANGE);
     const out = new Float64Array(exports.memory.buffer, outPtr, 4);
@@ -173,9 +163,7 @@ describe("f0-filters-loader", () => {
 
   it("render_f0 returns RENDER_ERR_PROFILE_RANGE when a command overruns the profile pool", () => {
     const exports = getF0FilterExports();
-    const scalars = [
-      0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0,
-    ];
+    const scalars = [0.005, 0.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4096, 0.1, -1e9, 1e9, 0];
     const layers = [0, 0, 4, 0.01, 0.9, 0, 1]; // profile layer
     const cmds = [0, 0, 0, 0, 4]; // profile_start 0, profile_count 4
     const profiles = [10, 20]; // only 2 points
@@ -194,7 +182,7 @@ describe("f0-filters-loader", () => {
       profilesPtr,
       2,
       outPtr,
-      4
+      4,
     );
     expect(status).toBe(RENDER_ERR_PROFILE_RANGE);
     exports.dealloc_f64(scalarsPtr, scalars.length);

@@ -5,20 +5,20 @@
  * Citation: Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5
  */
 
-import type { DictLookup, PronunciationResult } from './types';
-import type { StressHint } from './stress';
-import { loadYamlDocumentSync } from '../yaml-loader';
-import { loadPhonotacticsSync } from './syllabify';
+import { loadYamlDocumentSync } from "../yaml-loader";
+import type { StressHint } from "./stress";
+import { loadPhonotacticsSync } from "./syllabify";
+import type { DictLookup, PronunciationResult } from "./types";
 
 // --- Affix data types ---
 
 type ContextualConditionClass =
-  | 'voiceless_finals'
-  | 'td_finals'
-  | 'sibilant_finals'
-  | 'voiceless_consonants';
+  | "voiceless_finals"
+  | "td_finals"
+  | "sibilant_finals"
+  | "voiceless_consonants";
 
-type ConditionClass = 'always' | 'default' | ContextualConditionClass;
+type ConditionClass = "always" | "default" | ContextualConditionClass;
 
 interface AffixEntry {
   spelling: string;
@@ -28,8 +28,8 @@ interface AffixEntry {
 }
 
 interface SuffixEntry extends AffixEntry {
-  stress_type?: 'forcing' | 'non_affecting';
-  stress_target?: 'penult' | 'antepenult' | 'final';
+  stress_type?: "forcing" | "non_affecting";
+  stress_target?: "penult" | "antepenult" | "final";
   min_root: number;
   try_silent_e?: boolean;
 }
@@ -89,8 +89,8 @@ function getVoicingClasses(): Record<ContextualConditionClass, Set<string>> {
  * Get the last phoneme from a pronunciation array, stripping stress digits.
  */
 function lastPhoneme(phonemes: string[]): string {
-  if (phonemes.length === 0) return '';
-  return phonemes[phonemes.length - 1].replace(/\d$/, '');
+  if (phonemes.length === 0) return "";
+  return phonemes[phonemes.length - 1].replace(/\d$/, "");
 }
 
 function resolveAffixPhonemes(
@@ -104,8 +104,8 @@ function resolveAffixPhonemes(
 
   for (const entry of entries) {
     if (entry.spelling !== spelling) continue;
-    if (entry.condition_class === 'always') return entry.output_phonemes;
-    if (entry.condition_class === 'default') {
+    if (entry.condition_class === "always") return entry.output_phonemes;
+    if (entry.condition_class === "default") {
       fallback = entry.output_phonemes;
       continue;
     }
@@ -125,7 +125,7 @@ function tryRootLookup(
   root: string,
   trySilentE: boolean,
   dictLookup: DictLookup,
-  heuristics: MorphologyData['heuristics'],
+  heuristics: MorphologyData["heuristics"],
 ): { rootWord: string; phonemes: string[] } | null {
   // Direct lookup
   const direct = dictLookup(root);
@@ -133,8 +133,8 @@ function tryRootLookup(
 
   // Try undoubled consonant: "plann" -> "plan"
   if (
-    root.length >= heuristics.consonant_undoubling_minimum_root_length.value
-    && root[root.length - 1] === root[root.length - 2]
+    root.length >= heuristics.consonant_undoubling_minimum_root_length.value &&
+    root[root.length - 1] === root[root.length - 2]
   ) {
     const undoubled = root.slice(0, -1);
     const result = dictLookup(undoubled);
@@ -166,19 +166,10 @@ function trySuffixDecomposition(
     const root = surfaceWord.slice(0, surfaceWord.length - suffix.spelling.length);
     if (root.length < suffix.min_root) continue;
 
-    const lookup = tryRootLookup(
-      root,
-      suffix.try_silent_e ?? false,
-      dictLookup,
-      data.heuristics,
-    );
+    const lookup = tryRootLookup(root, suffix.try_silent_e ?? false, dictLookup, data.heuristics);
     if (!lookup) continue;
 
-    const suffixPhonemes = resolveAffixPhonemes(
-      data.suffixes,
-      suffix.spelling,
-      lookup.phonemes,
-    );
+    const suffixPhonemes = resolveAffixPhonemes(data.suffixes, suffix.spelling, lookup.phonemes);
     if (!suffixPhonemes) continue;
 
     return {
@@ -194,7 +185,7 @@ function trySuffixDecomposition(
 export function decomposeClitic(
   word: string,
   dictLookup: DictLookup,
-  morphologyPath: string = '/rules/frontends/qlatt-english/morphology.yaml',
+  morphologyPath: string = "/rules/frontends/qlatt-english/morphology.yaml",
 ): PronunciationResult | null {
   if (!word) return null;
 
@@ -216,7 +207,7 @@ export function decomposeClitic(
 
     return {
       phonemes: [...basePhonemes, ...cliticPhonemes],
-      source: 'dictionary',
+      source: "dictionary",
       word: lowerWord,
       rootWord: base,
     };
@@ -234,7 +225,7 @@ export function decomposeClitic(
 export function decomposeWord(
   word: string,
   dictLookup: DictLookup,
-  morphologyPath: string = '/rules/frontends/qlatt-english/morphology.yaml',
+  morphologyPath: string = "/rules/frontends/qlatt-english/morphology.yaml",
 ): PronunciationResult | null {
   if (!word) return null;
 
@@ -247,7 +238,7 @@ export function decomposeWord(
   if (suffixOnly) {
     return {
       phonemes: suffixOnly.phonemes,
-      source: 'morphology',
+      source: "morphology",
       word: lowerWord,
       rootWord: suffixOnly.rootWord,
     };
@@ -264,7 +255,7 @@ export function decomposeWord(
     if (remainderPhonemes) {
       return {
         phonemes: [...prefix.output_phonemes, ...remainderPhonemes],
-        source: 'morphology',
+        source: "morphology",
         word: lowerWord,
         rootWord: remainder,
       };
@@ -277,7 +268,7 @@ export function decomposeWord(
 
     return {
       phonemes: [...prefix.output_phonemes, ...suffixInRemainder.phonemes],
-      source: 'morphology',
+      source: "morphology",
       word: lowerWord,
       rootWord: suffixInRemainder.rootWord,
     };
@@ -291,7 +282,10 @@ export function decomposeWord(
  *
  * Citation: Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5
  */
-export function getStressHintForWord(word: string, morphologyPath: string = '/rules/frontends/qlatt-english/morphology.yaml'): StressHint | undefined {
+export function getStressHintForWord(
+  word: string,
+  morphologyPath: string = "/rules/frontends/qlatt-english/morphology.yaml",
+): StressHint | undefined {
   if (!word) return undefined;
 
   const lowerWord = word.toLowerCase();
@@ -304,15 +298,15 @@ export function getStressHintForWord(word: string, morphologyPath: string = '/ru
     const root = lowerWord.slice(0, lowerWord.length - suffix.spelling.length);
     if (root.length < suffix.min_root) continue;
 
-    if (suffix.stress_type === 'forcing' && suffix.stress_target) {
+    if (suffix.stress_type === "forcing" && suffix.stress_target) {
       return {
-        stressType: 'forcing',
+        stressType: "forcing",
         stressTarget: suffix.stress_target,
       };
     }
 
-    if (suffix.stress_type === 'non_affecting') {
-      return { stressType: 'non_affecting' };
+    if (suffix.stress_type === "non_affecting") {
+      return { stressType: "non_affecting" };
     }
 
     return undefined;

@@ -3,7 +3,7 @@
  * Wraps the tilt-filter WASM primitive
  * One-pole lowpass for spectral tilt control
  */
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+import { computeRmsPeak, initWasmModule, resolveWasmUrl, WasmBuffer, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./tilt-filter.wasm");
 class TiltFilterProcessor extends AudioWorkletProcessor {
     disposed = false;
@@ -19,7 +19,13 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
     _reportCountdown;
     static get parameterDescriptors() {
         return [
-            { name: "tilt", defaultValue: 0, minValue: 0, maxValue: 34, automationRate: "k-rate" },
+            {
+                name: "tilt",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 34,
+                automationRate: "k-rate",
+            },
         ];
     }
     constructor(options) {

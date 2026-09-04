@@ -6,7 +6,7 @@
  * Replaces the native DynamicsCompressorNode binding: no lookahead pre-delay,
  * no automatic makeup gain. See crates/dynamics-compressor/src/lib.rs.
  */
-import { initWasmModule, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+import { computeRmsPeak, initWasmModule, resolveWasmUrl, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./dynamics-compressor.wasm");
 class DynamicsCompressorProcessor extends AudioWorkletProcessor {
     disposed = false;
@@ -23,12 +23,48 @@ class DynamicsCompressorProcessor extends AudioWorkletProcessor {
     lastParams;
     static get parameterDescriptors() {
         return [
-            { name: "threshold", defaultValue: -24, minValue: -100, maxValue: 0, automationRate: "k-rate" },
-            { name: "knee", defaultValue: 12, minValue: 0, maxValue: 40, automationRate: "k-rate" },
-            { name: "ratio", defaultValue: 12, minValue: 1, maxValue: 20, automationRate: "k-rate" },
-            { name: "attack", defaultValue: 0.003, minValue: 0, maxValue: 1, automationRate: "k-rate" },
-            { name: "release", defaultValue: 0.1, minValue: 0, maxValue: 1, automationRate: "k-rate" },
-            { name: "makeup", defaultValue: 0, minValue: 0, maxValue: 24, automationRate: "k-rate" },
+            {
+                name: "threshold",
+                defaultValue: -24,
+                minValue: -100,
+                maxValue: 0,
+                automationRate: "k-rate",
+            },
+            {
+                name: "knee",
+                defaultValue: 12,
+                minValue: 0,
+                maxValue: 40,
+                automationRate: "k-rate",
+            },
+            {
+                name: "ratio",
+                defaultValue: 12,
+                minValue: 1,
+                maxValue: 20,
+                automationRate: "k-rate",
+            },
+            {
+                name: "attack",
+                defaultValue: 0.003,
+                minValue: 0,
+                maxValue: 1,
+                automationRate: "k-rate",
+            },
+            {
+                name: "release",
+                defaultValue: 0.1,
+                minValue: 0,
+                maxValue: 1,
+                automationRate: "k-rate",
+            },
+            {
+                name: "makeup",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 24,
+                automationRate: "k-rate",
+            },
         ];
     }
     constructor(options) {
@@ -104,8 +140,12 @@ class DynamicsCompressorProcessor extends AudioWorkletProcessor {
         const makeup = parameters.makeup?.[0] ?? 0;
         const lp = this.lastParams;
         if (!lp ||
-            lp[0] !== threshold || lp[1] !== knee || lp[2] !== ratio ||
-            lp[3] !== attack || lp[4] !== release || lp[5] !== makeup) {
+            lp[0] !== threshold ||
+            lp[1] !== knee ||
+            lp[2] !== ratio ||
+            lp[3] !== attack ||
+            lp[4] !== release ||
+            lp[5] !== makeup) {
             this.wasm.dynamics_compressor_set_params(this.state, threshold, knee, ratio, attack, release, makeup);
             this.lastParams = [threshold, knee, ratio, attack, release, makeup];
         }

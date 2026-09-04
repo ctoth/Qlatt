@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
-import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
+import type { FeatureSchema, HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
+import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-frontend/hrg";
 import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
@@ -60,27 +60,34 @@ function inventoryType(inventoryPath: string, phoneme: string): string {
   return target.type;
 }
 
-function readFixture(frontendId: string, fileName: string): {
+function readFixture(
+  frontendId: string,
+  fileName: string,
+): {
   policy: LowerOptions;
   productionFrames: ProductionFrame[];
   segments: BaselineSegment[];
 } {
-  const parsed: unknown = JSON.parse(readFileSync(
-    new URL(`./fixtures/hrg-convergence-baseline/${fileName}`, import.meta.url),
-    "utf8",
-  ));
+  const parsed: unknown = JSON.parse(
+    readFileSync(
+      new URL(`./fixtures/hrg-convergence-baseline/${fileName}`, import.meta.url),
+      "utf8",
+    ),
+  );
   const spec = loadBundledRulepackSpec(frontendId);
   if (
-    !isPlainObject(parsed)
-    || !isPlainObject(parsed.reconstructedGraph)
-    || !Array.isArray(parsed.reconstructedGraph.items)
-    || !isPlainObject(parsed.oldProduction)
-    || !Array.isArray(parsed.oldProduction.sourceFrames)
-    || typeof spec.inventory_path !== "string"
+    !isPlainObject(parsed) ||
+    !isPlainObject(parsed.reconstructedGraph) ||
+    !Array.isArray(parsed.reconstructedGraph.items) ||
+    !isPlainObject(parsed.oldProduction) ||
+    !Array.isArray(parsed.oldProduction.sourceFrames) ||
+    typeof spec.inventory_path !== "string" ||
+    !isPlainObject(spec.output)
   ) {
     throw new Error("transition matrix fixture/spec invalid");
   }
-  const policy: LowerOptions = spec.output.lowering;
+  const policy = readLowerOptions(spec.output.lowering);
+  const inventoryPath = spec.inventory_path;
   const segments = parsed.reconstructedGraph.items.flatMap((item): BaselineSegment[] => {
     if (!isPlainObject(item) || item.type !== "segment" || typeof item.id !== "string") return [];
     const phoneme = latestFeature(item, "phoneme");
@@ -94,13 +101,15 @@ function readFixture(frontendId: string, fileName: string): {
       if (typeof value !== "number") throw new Error(`baseline '${column}' invalid`);
       params[column] = value;
     }
-    return [{
-      duration,
-      id: item.id,
-      params,
-      phoneme,
-      type: inventoryType(spec.inventory_path, phoneme),
-    }];
+    return [
+      {
+        duration,
+        id: item.id,
+        params,
+        phoneme,
+        type: inventoryType(inventoryPath, phoneme),
+      },
+    ];
   });
   const productionFrames = parsed.oldProduction.sourceFrames.map((frame): ProductionFrame => {
     if (!isPlainObject(frame) || typeof frame.time !== "number" || !isPlainObject(frame.params)) {
@@ -176,8 +185,8 @@ describe("HRG lowering complete transition matrix", () => {
 
     for (const frame of transitionFrames) {
       const production = baseline.productionFrames.find(
-        (candidate) => candidate.phoneme === frame.phoneme
-          && Math.abs(candidate.time - frame.time) <= 1e-9,
+        (candidate) =>
+          candidate.phoneme === frame.phoneme && Math.abs(candidate.time - frame.time) <= 1e-9,
       );
       if (!production) {
         throw new Error(

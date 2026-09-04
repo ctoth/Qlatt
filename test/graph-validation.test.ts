@@ -7,10 +7,10 @@
  * Also tests connectToDestination strict validation: graph.outputs must be
  * defined and reference an existing node, no fallback guessing.
  */
-import { describe, it, expect } from 'vitest';
-import { createKlattRuntime } from '../src/klatt-runtime';
-import type { BaconGraph, Registry } from '../src/klatt-runtime';
-import type { SemanticsDocument } from '../src/semantics/types';
+import { describe, expect, it } from "vitest";
+import type { BaconGraph, Registry } from "../src/klatt-runtime";
+import { createKlattRuntime } from "../src/klatt-runtime";
+import type { SemanticsDocument } from "../src/semantics/types";
 
 // ---------------------------------------------------------------------------
 // Minimal mocks — validation fires before any AudioContext/worklet methods
@@ -55,30 +55,31 @@ function createFullMockAudioContext(): AudioContext {
 const minimalRegistry: Registry = {
   primitives: {
     gain: {
-      native: 'GainNode',
-      params: { gain: { type: 'a-rate', default: 1 } },
+      native: "GainNode",
+      params: { gain: { type: "a-rate", default: 1 } },
     },
   },
 };
 
 const minimalSemantics: SemanticsDocument = {
+  name: "test",
   params: {},
-  realize: [],
+  realize: {},
 };
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('graph param spec validation', () => {
+describe("graph param spec validation", () => {
   it('rejects { expr: "..." } param spec with a clear error', async () => {
     const graph: BaconGraph = {
-      bacon: '1.0',
+      bacon: "1.0",
       nodes: {
         myGain: {
-          type: 'gain',
+          type: "gain",
           params: {
-            gain: { expr: 'someExpression' },
+            gain: { expr: "someExpression" },
           },
         },
       },
@@ -96,12 +97,12 @@ describe('graph param spec validation', () => {
 
   it('accepts { bind: "..." } param spec without error', async () => {
     const graph: BaconGraph = {
-      bacon: '1.0',
+      bacon: "1.0",
       nodes: {
         myGain: {
-          type: 'gain',
+          type: "gain",
           params: {
-            gain: { bind: 'voiceGain' },
+            gain: { bind: "voiceGain" },
           },
         },
       },
@@ -124,12 +125,12 @@ describe('graph param spec validation', () => {
     }
   });
 
-  it('accepts literal number param spec without error', async () => {
+  it("accepts literal number param spec without error", async () => {
     const graph: BaconGraph = {
-      bacon: '1.0',
+      bacon: "1.0",
       nodes: {
         myGain: {
-          type: 'gain',
+          type: "gain",
           params: {
             gain: 0.5,
           },
@@ -156,8 +157,8 @@ describe('graph param spec validation', () => {
 // connectToDestination strict validation tests
 // ---------------------------------------------------------------------------
 
-describe('connectToDestination', () => {
-  it('connects the named output node when graph.outputs is defined', async () => {
+describe("connectToDestination", () => {
+  it("connects the named output node when graph.outputs is defined", async () => {
     let connectedTo: unknown = null;
     const ctx = createFullMockAudioContext();
     // Patch createGain to track connect calls
@@ -172,11 +173,11 @@ describe('connectToDestination', () => {
     };
 
     const graph: BaconGraph = {
-      bacon: '1.0',
+      bacon: "1.0",
       nodes: {
-        outputGain: { type: 'gain' },
+        outputGain: { type: "gain" },
       },
-      outputs: ['outputGain'],
+      outputs: ["outputGain"],
     };
 
     const runtime = await createKlattRuntime({
@@ -190,12 +191,12 @@ describe('connectToDestination', () => {
     expect(connectedTo).toBe(ctx.destination);
   });
 
-  it('throws when graph.outputs is missing', async () => {
+  it("throws when graph.outputs is missing", async () => {
     const ctx = createFullMockAudioContext();
     const graph: BaconGraph = {
-      bacon: '1.0',
+      bacon: "1.0",
       nodes: {
-        outputGain: { type: 'gain' },
+        outputGain: { type: "gain" },
       },
       // no outputs field
     };
@@ -210,12 +211,12 @@ describe('connectToDestination', () => {
     expect(() => runtime.connectToDestination()).toThrow(/missing.*outputs/i);
   });
 
-  it('throws when graph.outputs is empty', async () => {
+  it("throws when graph.outputs is empty", async () => {
     const ctx = createFullMockAudioContext();
     const graph: BaconGraph = {
-      bacon: '1.0',
+      bacon: "1.0",
       nodes: {
-        outputGain: { type: 'gain' },
+        outputGain: { type: "gain" },
       },
       outputs: [],
     };
@@ -230,14 +231,14 @@ describe('connectToDestination', () => {
     expect(() => runtime.connectToDestination()).toThrow(/missing.*outputs/i);
   });
 
-  it('throws when graph.outputs references a non-existent node', async () => {
+  it("throws when graph.outputs references a non-existent node", async () => {
     const ctx = createFullMockAudioContext();
     const graph: BaconGraph = {
-      bacon: '1.0',
+      bacon: "1.0",
       nodes: {
-        outputGain: { type: 'gain' },
+        outputGain: { type: "gain" },
       },
-      outputs: ['nonExistentNode'],
+      outputs: ["nonExistentNode"],
     };
 
     const runtime = await createKlattRuntime({

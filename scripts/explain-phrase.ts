@@ -4,21 +4,21 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   explainFeature,
-  replayJournal,
-  replayPhaseView,
-  whyNotRule,
   type FieldExplanation,
   type PhaseCheckpoint,
+  replayJournal,
+  replayPhaseView,
   type WhyNotRuleResult,
+  whyNotRule,
 } from "../src/declarative-frontend/hrg";
-import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import {
   applyRange,
   createProvenanceCollector,
-  parseRangeSpec,
   type DecisionRecord,
   type ProvenanceStage,
+  parseRangeSpec,
 } from "../src/provenance";
+import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 type ExplainFormat = "text" | "json";
 
@@ -121,7 +121,7 @@ function parseArgv(argv: string[]): ParsedArgs {
 
   const phrase = flags.get("phrase") ?? positional.join(" ").trim();
   if (!phrase) {
-    throw new Error("Missing phrase. Use --phrase \"...\".");
+    throw new Error('Missing phrase. Use --phrase "...".');
   }
 
   const format = (flags.get("format") ?? "text").toLowerCase();
@@ -147,7 +147,7 @@ function parseArgv(argv: string[]): ParsedArgs {
         stageRaw
           .split(",")
           .map((value) => value.trim())
-          .filter(Boolean) as ProvenanceStage[]
+          .filter(Boolean) as ProvenanceStage[],
       )
     : null;
   const fieldBoundary = flags.get("field-boundary") ?? "after";
@@ -250,7 +250,10 @@ function formatBreakdown(counts: Record<string, number>): string {
   return entries.map(([name, count]) => `${name}=${count}`).join(", ");
 }
 
-function selectCompactDecisions(decisions: DecisionRecord[]): { displayed: DecisionRecord[]; truncated: number } {
+function selectCompactDecisions(decisions: DecisionRecord[]): {
+  displayed: DecisionRecord[];
+  truncated: number;
+} {
   const prioritized = decisions.filter((decision) => COMPACT_PRIORITY_TYPES.has(decision.type));
   const base = prioritized.length > 0 ? prioritized : decisions.slice(0, 20);
   const limit = 40;
@@ -263,14 +266,14 @@ function selectCompactDecisions(decisions: DecisionRecord[]): { displayed: Decis
 
 function renderText(payload: ExplainPayload, verbose: boolean): string {
   const lines: string[] = [];
-  const compact = verbose ? { displayed: payload.decisions, truncated: 0 } : selectCompactDecisions(payload.decisions);
+  const compact = verbose
+    ? { displayed: payload.decisions, truncated: 0 }
+    : selectCompactDecisions(payload.decisions);
 
   for (const decision of compact.displayed) {
-    const citations = decision.citations.length > 0
-      ? decision.citations.join("; ")
-      : "<none>";
+    const citations = decision.citations.length > 0 ? decision.citations.join("; ") : "<none>";
     lines.push(
-      `#${decision.seq} [${decision.stage}] [${decision.type}] ${decision.subject} ${decision.reason} | citations: ${citations}`
+      `#${decision.seq} [${decision.stage}] [${decision.type}] ${decision.subject} ${decision.reason} | citations: ${citations}`,
     );
   }
 
@@ -280,7 +283,7 @@ function renderText(payload: ExplainPayload, verbose: boolean): string {
 
   lines.push("");
   lines.push(
-    `summary decisions=${payload.summary.decisionCount} uncited=${payload.summary.uncitedCount} total=${payload.totalDecisionCount}`
+    `summary decisions=${payload.summary.decisionCount} uncited=${payload.summary.uncitedCount} total=${payload.totalDecisionCount}`,
   );
   if (payload.rangeApplied) {
     lines.push(`range ${payload.rangeApplied} matched=${payload.rangeMatchedCount}`);
@@ -297,8 +300,8 @@ function renderText(payload: ExplainPayload, verbose: boolean): string {
   }
   if (payload.tooling.field) {
     lines.push(
-      `field ${payload.tooling.field.itemId}.${payload.tooling.field.key}`
-      + ` versions=${payload.tooling.field.history.length}`,
+      `field ${payload.tooling.field.itemId}.${payload.tooling.field.key}` +
+        ` versions=${payload.tooling.field.history.length}`,
     );
   }
   if (payload.tooling.whyNot) lines.push(`why-not ${JSON.stringify(payload.tooling.whyNot)}`);
@@ -380,7 +383,9 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       }
 
       if (args.subjectFilter) {
-        decisions = decisions.filter((decision) => isSubjectMatch(decision.subject, args.subjectFilter as string));
+        decisions = decisions.filter((decision) =>
+          isSubjectMatch(decision.subject, args.subjectFilter as string),
+        );
         subjectApplied = args.subjectFilter;
       }
 
@@ -413,9 +418,10 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       },
     );
 
-    const rendered = args.format === "json"
-      ? JSON.stringify(args.toolingOnly ? payload.tooling : payload, null, 2)
-      : renderText(payload, args.verbose);
+    const rendered =
+      args.format === "json"
+        ? JSON.stringify(args.toolingOnly ? payload.tooling : payload, null, 2)
+        : renderText(payload, args.verbose);
 
     if (args.outPath) {
       fs.mkdirSync(path.dirname(args.outPath), { recursive: true });
@@ -427,8 +433,8 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
     if (args.strictCitations && payload.summary.uncitedCount > 0) {
       io.stderr(
         `strict-citations failed: ${payload.summary.uncitedCount} uncited decisions in output window` +
-        ` | by-stage: ${formatBreakdown(payload.summary.uncitedByStage)}` +
-        ` | by-type: ${formatBreakdown(payload.summary.uncitedByType)}\n`
+          ` | by-stage: ${formatBreakdown(payload.summary.uncitedByStage)}` +
+          ` | by-type: ${formatBreakdown(payload.summary.uncitedByType)}\n`,
       );
       return 2;
     }

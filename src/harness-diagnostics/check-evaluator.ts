@@ -1,19 +1,19 @@
 // Check evaluator — evaluates a CheckDef against measurement values and timing context.
 // Produces a CheckResult for each poll tick.
 
+import type { TimingSnapshot } from "./timing-context";
 import type {
   CheckDef,
   CheckResult,
   CheckStatus,
-  Severity,
-  WhenClause,
   CollectedEvent,
   ParamRangeAccum,
+  Severity,
+  TrackAnalysisCheckDef,
   TrackEvent,
   TrackSelectClause,
-  TrackAnalysisCheckDef,
+  WhenClause,
 } from "./types";
-import type { TimingSnapshot } from "./timing-context";
 
 /** Internal state for a single check across poll ticks. */
 export interface CheckState {
@@ -50,10 +50,7 @@ export function createCheckState(): CheckState {
 }
 
 /** Check if a WhenClause matches the current timing snapshot. */
-export function matchesWhen(
-  when: WhenClause | undefined,
-  snapshot: TimingSnapshot,
-): boolean {
+export function matchesWhen(when: WhenClause | undefined, snapshot: TimingSnapshot): boolean {
   if (when === undefined) return true;
   if (snapshot.event === null) return false;
 
@@ -155,20 +152,19 @@ function evaluateEventCheck(
 
   const values = matching
     .map((event) => event[field])
-    .filter((value): value is number | string => (
-      (typeof value === "number" && Number.isFinite(value)) ||
-      typeof value === "string"
-    ));
+    .filter(
+      (value): value is number | string =>
+        (typeof value === "number" && Number.isFinite(value)) || typeof value === "string",
+    );
   if (values.length === 0) {
     return { ...base, status: "pending" };
   }
 
   const distinctValues = new Set(
-    values.map((value) => typeof value === "number" ? value.toFixed(6) : value),
+    values.map((value) => (typeof value === "number" ? value.toFixed(6) : value)),
   );
   const distinctCount = distinctValues.size;
-  const failed =
-    def.assert.distinct_min !== undefined && distinctCount < def.assert.distinct_min;
+  const failed = def.assert.distinct_min !== undefined && distinctCount < def.assert.distinct_min;
 
   if (failed) {
     return {
@@ -223,7 +219,7 @@ function evaluateAcrossPlays(
 }
 
 function evaluateParamRange(
-  name: string,
+  _name: string,
   def: CheckDef,
   state: CheckState,
   base: Omit<CheckResult, "status" | "value">,
@@ -261,7 +257,7 @@ function evaluateParamRange(
 }
 
 function evaluateTapCheck(
-  name: string,
+  _name: string,
   def: CheckDef,
   measurements: Map<string, number>,
   snapshot: TimingSnapshot,
@@ -297,14 +293,12 @@ function evaluateTapCheck(
   }
 
   if (def.aggregate === "max") {
-    state.aggregateValue = state.aggregateValue === null
-      ? value
-      : Math.max(state.aggregateValue, value);
+    state.aggregateValue =
+      state.aggregateValue === null ? value : Math.max(state.aggregateValue, value);
     value = state.aggregateValue;
   } else if (def.aggregate === "min") {
-    state.aggregateValue = state.aggregateValue === null
-      ? value
-      : Math.min(state.aggregateValue, value);
+    state.aggregateValue =
+      state.aggregateValue === null ? value : Math.min(state.aggregateValue, value);
     value = state.aggregateValue;
   }
 
@@ -341,10 +335,7 @@ function evaluateTapCheck(
   return { ...base, status: "pass", value };
 }
 
-function checkAssert(
-  value: number,
-  assert: CheckDef["assert"],
-): boolean {
+function checkAssert(value: number, assert: CheckDef["assert"]): boolean {
   if (assert.min !== undefined && value < assert.min) return true;
   if (assert.max !== undefined && value > assert.max) return true;
   return false;
@@ -362,10 +353,7 @@ function severityToStatus(severity: Severity): CheckStatus {
 }
 
 /** Check if a track frame matches a TrackSelectClause. */
-export function matchesTrackSelect(
-  frame: TrackEvent,
-  select: TrackSelectClause,
-): boolean {
+export function matchesTrackSelect(frame: TrackEvent, select: TrackSelectClause): boolean {
   const params = frame.params ?? {};
 
   for (const [key, condition] of Object.entries(select)) {
@@ -462,9 +450,10 @@ export function evaluateTrackAnalysis(
   }
 
   // Find worst value (minimum for min assertions, maximum for max assertions)
-  const worstValue = def.assert.min !== undefined
-    ? Math.min(...failures.map((f) => f.value))
-    : Math.max(...failures.map((f) => f.value));
+  const worstValue =
+    def.assert.min !== undefined
+      ? Math.min(...failures.map((f) => f.value))
+      : Math.max(...failures.map((f) => f.value));
 
   const status = severityToStatus(def.severity);
 
@@ -479,21 +468,14 @@ export function evaluateTrackAnalysis(
 }
 
 /** Check if a value passes an assertion (inverse of checkAssert). */
-function assertValuePasses(
-  value: number,
-  assert: { min?: number; max?: number },
-): boolean {
+function assertValuePasses(value: number, assert: { min?: number; max?: number }): boolean {
   if (assert.min !== undefined && value < assert.min) return false;
   if (assert.max !== undefined && value > assert.max) return false;
   return true;
 }
 
 /** Update param_range accumulator with current track event params. */
-export function updateParamRange(
-  state: CheckState,
-  paramName: string,
-  track: TrackEvent[],
-): void {
+export function updateParamRange(state: CheckState, paramName: string, track: TrackEvent[]): void {
   for (const event of track) {
     const val = event.params?.[paramName];
     if (typeof val !== "number") continue;

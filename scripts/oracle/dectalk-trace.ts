@@ -109,14 +109,10 @@ export function summarizeDectalkTrace(frames: DectalkTraceFrame[]): DectalkTrace
     .map((frame) => frame.f0prime / 10)
     .filter((value) => value > 0 && Number.isFinite(value));
 
-  const f0MinHz =
-    voicedF0.length > 0 ? Math.min(...voicedF0) : null;
-  const f0MaxHz =
-    voicedF0.length > 0 ? Math.max(...voicedF0) : null;
+  const f0MinHz = voicedF0.length > 0 ? Math.min(...voicedF0) : null;
+  const f0MaxHz = voicedF0.length > 0 ? Math.max(...voicedF0) : null;
   const f0MeanHz =
-    voicedF0.length > 0
-      ? voicedF0.reduce((sum, value) => sum + value, 0) / voicedF0.length
-      : null;
+    voicedF0.length > 0 ? voicedF0.reduce((sum, value) => sum + value, 0) / voicedF0.length : null;
 
   const durationFrames = frames.length;
   const durationSamples = durationFrames * DECTALK_SAMPLES_PER_FRAME;
@@ -127,8 +123,7 @@ export function summarizeDectalkTrace(frames: DectalkTraceFrame[]): DectalkTrace
     durationFrames,
     durationSamples,
     durationSec,
-    nominalControlDurationSec:
-      durationFrames * DECTALK_NOMINAL_CONTROL_FRAME_PERIOD_SEC,
+    nominalControlDurationSec: durationFrames * DECTALK_NOMINAL_CONTROL_FRAME_PERIOD_SEC,
     voicedFrameCount: voicedFrames.length,
     voicedRatio: frames.length > 0 ? voicedFrames.length / frames.length : 0,
     f0MinHz,

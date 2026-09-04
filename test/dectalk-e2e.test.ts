@@ -6,7 +6,7 @@
  * when using the dectalk-english frontend.
  */
 
-import { describe, expect, it, vi, afterAll } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 import { textToKlattTrack, textToKlattTrackDetailed } from "../src/tts-frontend";
 import type { KlattFrame } from "../src/tts-frontend-types";
 
@@ -93,14 +93,12 @@ describe("dectalk-english end-to-end", () => {
       speaker: "paul",
     });
     const tiltCommands = result.utterance.relation("Tilt").listItems();
-    const hatRiseCommands = tiltCommands
-      .filter((item) => item.get("tag") === "f0_hat_rise");
-    const hatFallCommands = tiltCommands
-      .filter((item) => item.get("tag") === "f0_hat_fall");
-    const boundaryResetCommands = tiltCommands
-      .filter((item) => item.get("tag") === "f0_boundary_reset");
-    const stressCommands = tiltCommands
-      .filter((item) => item.get("layer") === "stress");
+    const hatRiseCommands = tiltCommands.filter((item) => item.get("tag") === "f0_hat_rise");
+    const hatFallCommands = tiltCommands.filter((item) => item.get("tag") === "f0_hat_fall");
+    const boundaryResetCommands = tiltCommands.filter(
+      (item) => item.get("tag") === "f0_boundary_reset",
+    );
+    const stressCommands = tiltCommands.filter((item) => item.get("layer") === "stress");
 
     expect(hatRiseCommands.map((item) => item.get("value"))).toEqual([190]);
     expect(hatFallCommands).toHaveLength(0);
@@ -121,12 +119,14 @@ describe("dectalk-english end-to-end", () => {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const baseline = result.utterance.relation("PhraseCommand").listItems()
+    const baseline = result.utterance
+      .relation("PhraseCommand")
+      .listItems()
       .find((item) => item.get("layer") === "baseline");
 
     expect(baseline?.get("profile_points")).toEqual([
-      1160, 1150, 1140, 1152, 1132, 1140, 1130, 1124, 1110,
-      1100, 1080, 1060, 1040, 1020, 980, 960, 950,
+      1160, 1150, 1140, 1152, 1132, 1140, 1130, 1124, 1110, 1100, 1080, 1060, 1040, 1020, 980, 960,
+      950,
     ]);
   });
 
@@ -135,7 +135,9 @@ describe("dectalk-english end-to-end", () => {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const segmentalCommands = result.utterance.relation("Tilt").listItems()
+    const segmentalCommands = result.utterance
+      .relation("Tilt")
+      .listItems()
       .filter((item) => item.get("layer") === "segmental")
       .map((item) => ({
         value: item.get("value"),
@@ -165,10 +167,8 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f0Hz10).toEqual([
-      1361, 1379, 1395, 1403, 1404, 1400, 1394,
-      1385, 1371, 1358, 1343, 1328, 1313, 1297,
-      1282, 1269, 1254, 1242, 1229, 1219, 1207,
-      1197, 1187, 1179, 1171, 1164, 1157, 1149,
+      1361, 1379, 1395, 1403, 1404, 1400, 1394, 1385, 1371, 1358, 1343, 1328, 1313, 1297, 1282,
+      1269, 1254, 1242, 1229, 1219, 1207, 1197, 1187, 1179, 1171, 1164, 1157, 1149,
     ]);
   });
 
@@ -184,27 +184,14 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f0Hz10).toEqual([
-      973, 979, 982, 985, 978, 979, 990,
-      1005, 1025, 1049, 1074, 1102, 1128,
-      1155, 1183, 1209, 1236, 1261, 1286,
-      1308, 1330, 1349, 1367, 1384, 1397,
-      1403, 1403, 1397, 1388, 1374, 1360,
-      1343, 1325, 1305, 1286, 1267, 1248,
-      1226, 1206, 1186, 1166, 1148, 1129,
-      1114, 1097, 1081, 1067, 1055, 1044,
-      1043, 1041, 1038, 1037, 1034, 1032,
-      1031, 1028, 1026, 1024, 1021, 1019,
-      1018, 1015, 1015, 1012, 1011, 1008,
-      1006, 1004, 1000, 998, 997, 995,
-      993, 992, 992, 991, 990, 990, 989,
-      989, 989, 989, 990, 991, 992, 993,
-      993, 992, 992, 991, 991, 989, 989,
-      988, 987, 986, 984, 982, 981, 979,
-      977, 975, 974, 973, 973, 972, 973,
-      973, 974, 975, 976, 978, 979, 982,
-      985, 987, 990, 992, 994, 995, 997,
-      998, 998, 999, 999, 998, 998, 997,
-      996, 994, 992, 990, 988, 987, 985,
+      973, 979, 982, 985, 978, 979, 990, 1005, 1025, 1049, 1074, 1102, 1128, 1155, 1183, 1209, 1236,
+      1261, 1286, 1308, 1330, 1349, 1367, 1384, 1397, 1403, 1403, 1397, 1388, 1374, 1360, 1343,
+      1325, 1305, 1286, 1267, 1248, 1226, 1206, 1186, 1166, 1148, 1129, 1114, 1097, 1081, 1067,
+      1055, 1044, 1043, 1041, 1038, 1037, 1034, 1032, 1031, 1028, 1026, 1024, 1021, 1019, 1018,
+      1015, 1015, 1012, 1011, 1008, 1006, 1004, 1000, 998, 997, 995, 993, 992, 992, 991, 990, 990,
+      989, 989, 989, 989, 990, 991, 992, 993, 993, 992, 992, 991, 991, 989, 989, 988, 987, 986, 984,
+      982, 981, 979, 977, 975, 974, 973, 973, 972, 973, 973, 974, 975, 976, 978, 979, 982, 985, 987,
+      990, 992, 994, 995, 997, 998, 998, 999, 999, 998, 998, 997, 996, 994, 992, 990, 988, 987, 985,
       984, 983, 982,
     ]);
   });
@@ -220,25 +207,13 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f1).toEqual([
-      289, 289, 289, 289, 295, 297, 299,
-      301, 301, 301, 301, 301, 323, 346,
-      368, 390, 412, 435, 457, 479, 501,
-      524, 526, 528, 530, 533, 535, 537,
-      539, 542, 544, 546, 548, 548, 548,
-      548, 548, 548, 548, 548, 548, 548,
-      548, 548, 548, 548, 547, 547, 547,
-      547, 548, 548, 548, 548, 549, 549,
-      549, 549, 550, 550, 550, 550, 551,
-      551, 551, 551, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552, 552,
-      552, 552, 552, 552, 552, 552, 552,
+      289, 289, 289, 289, 295, 297, 299, 301, 301, 301, 301, 301, 323, 346, 368, 390, 412, 435, 457,
+      479, 501, 524, 526, 528, 530, 533, 535, 537, 539, 542, 544, 546, 548, 548, 548, 548, 548, 548,
+      548, 548, 548, 548, 548, 548, 548, 548, 547, 547, 547, 547, 548, 548, 548, 548, 549, 549, 549,
+      549, 550, 550, 550, 550, 551, 551, 551, 551, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552,
+      552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552, 552,
       552, 552, 552, 552, 552, 552,
     ]);
   });
@@ -254,16 +229,72 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f2).toEqual([
-      1500, 1500, 1500, 1500, 1493, 1492, 1491,
-      1490, 1489, 1488, 1467, 1446, 1425, 1404,
-      1384, 1371, 1358, 1345, 1333, 1320, 1307,
-      1294, 1280, 1278, 1276, 1274, 1272, 1270,
-      1268, 1266, 1264, 1262, 1260, 1260, 1260,
-      1260, 1260, 1260, 1260, 1260, 1260, 1260,
-      1260, 1260, 1260, 1260, 1259, 1261, 1263,
-      1265, 1268, 1270, 1272, 1274, 1276, 1278,
-      1280, 1282, 1285, 1287, 1289, 1291, 1293,
-      1295, 1297, 1299,
+      1500,
+      1500,
+      1500,
+      1500,
+      1493,
+      1492,
+      1491,
+      1490,
+      1489,
+      1488,
+      1467,
+      1446,
+      1425,
+      1404,
+      1384,
+      1371,
+      1358,
+      1345,
+      1333,
+      1320,
+      1307,
+      1294,
+      1280,
+      1278,
+      1276,
+      1274,
+      1272,
+      1270,
+      1268,
+      1266,
+      1264,
+      1262,
+      1260,
+      1260,
+      1260,
+      1260,
+      1260,
+      1260,
+      1260,
+      1260,
+      1260,
+      1260,
+      1260,
+      1260,
+      1260,
+      1260,
+      1259,
+      1261,
+      1263,
+      1265,
+      1268,
+      1270,
+      1272,
+      1274,
+      1276,
+      1278,
+      1280,
+      1282,
+      1285,
+      1287,
+      1289,
+      1291,
+      1293,
+      1295,
+      1297,
+      1299,
       ...Array(73).fill(1302),
     ]);
   });
@@ -279,13 +310,52 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f3).toEqual([
-      2562, 2562, 2562, 2562, 2561, 2562, 2562,
-      2562, 2562, 2563, 2592, 2621, 2650, 2679,
-      2709, 2695, 2681, 2667, 2653, 2639, 2625,
-      2611, 2598, 2598, 2598, 2599, 2599, 2599,
-      2599, 2600, 2600, 2600, 2600, 2600, 2600,
-      2600, 2600, 2600, 2600, 2600, 2600, 2600,
-      2600, 2600, 2600, 2600,
+      2562,
+      2562,
+      2562,
+      2562,
+      2561,
+      2562,
+      2562,
+      2562,
+      2562,
+      2563,
+      2592,
+      2621,
+      2650,
+      2679,
+      2709,
+      2695,
+      2681,
+      2667,
+      2653,
+      2639,
+      2625,
+      2611,
+      2598,
+      2598,
+      2598,
+      2599,
+      2599,
+      2599,
+      2599,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
+      2600,
       ...Array(93).fill(2602),
     ]);
   });
@@ -301,14 +371,48 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(b1).toEqual([
-      200, 200, 200, 200, 200, 187, 175,
-      162, 150, 136, 123, 109, 96, 95,
-      94, 93, 93, 92, 91,
+      200,
+      200,
+      200,
+      200,
+      200,
+      187,
+      175,
+      162,
+      150,
+      136,
+      123,
+      109,
+      96,
+      95,
+      94,
+      93,
+      93,
+      92,
+      91,
       ...Array(20).fill(90),
-      102, 115, 127, 140, 152, 165, 177,
-      190, 177, 165, 152, 140, 127, 115, 102,
+      102,
+      115,
+      127,
+      140,
+      152,
+      165,
+      177,
+      190,
+      177,
+      165,
+      152,
+      140,
+      127,
+      115,
+      102,
       ...Array(79).fill(90),
-      102, 115, 127, 140, 152, 165,
+      102,
+      115,
+      127,
+      140,
+      152,
+      165,
     ]);
   });
 
@@ -322,14 +426,49 @@ describe("dectalk-english end-to-end", () => {
       return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B2;
     });
     const expected = [
-      170, 170, 170, 170, 170, 163, 157,
-      151, 145, 135, 125, 116, 106, 103,
-      99, 96, 93, 89, 86, 83,
+      170,
+      170,
+      170,
+      170,
+      170,
+      163,
+      157,
+      151,
+      145,
+      135,
+      125,
+      116,
+      106,
+      103,
+      99,
+      96,
+      93,
+      89,
+      86,
+      83,
       ...Array(19).fill(80),
-      86, 92, 98, 105, 111, 117, 123,
-      130, 123, 117, 111, 105, 98, 92, 86,
+      86,
+      92,
+      98,
+      105,
+      111,
+      117,
+      123,
+      130,
+      123,
+      117,
+      111,
+      105,
+      98,
+      92,
+      86,
       ...Array(79).fill(80),
-      86, 92, 98, 105, 111, 117,
+      86,
+      92,
+      98,
+      105,
+      111,
+      117,
     ];
 
     expect(expected).toHaveLength(139);
@@ -347,7 +486,16 @@ describe("dectalk-english end-to-end", () => {
     });
     const expected = [
       ...Array(10).fill(170),
-      171, 172, 173, 173, 174, 175, 176, 177, 178, 179,
+      171,
+      172,
+      173,
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
       ...Array(119).fill(180),
     ];
 
@@ -365,10 +513,36 @@ describe("dectalk-english end-to-end", () => {
       return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.AV;
     });
     const expected = [
-      0, 0, 0,
-      34, 37, 39, 42, 45, 47, 50, 54, 55, 56, 57, 58, 59, 60, 61,
+      0,
+      0,
+      0,
+      34,
+      37,
+      39,
+      42,
+      45,
+      47,
+      50,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
       ...Array(16).fill(62),
-      61, 60, 60, 59, 58, 58, 57, 57, 56, 55, 55,
+      61,
+      60,
+      60,
+      59,
+      58,
+      58,
+      57,
+      57,
+      56,
+      55,
+      55,
       ...Array(94).fill(0),
     ];
 
@@ -387,8 +561,38 @@ describe("dectalk-english end-to-end", () => {
     });
     const expected = [
       ...Array(27).fill(0),
-      2, 5, 7, 10, 12, 15, 17, 20, 22, 25, 27, 30, 32, 35, 37, 40,
-      42, 45, 47, 45, 42, 38, 35, 31, 28, 24, 21, 17, 14, 10, 7, 3,
+      2,
+      5,
+      7,
+      10,
+      12,
+      15,
+      17,
+      20,
+      22,
+      25,
+      27,
+      30,
+      32,
+      35,
+      37,
+      40,
+      42,
+      45,
+      47,
+      45,
+      42,
+      38,
+      35,
+      31,
+      28,
+      24,
+      21,
+      17,
+      14,
+      10,
+      7,
+      3,
       ...Array(80).fill(0),
     ];
 
@@ -406,9 +610,19 @@ describe("dectalk-english end-to-end", () => {
       return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.A6;
     });
     const expected = [
-      0, 9, 18, 27,
+      0,
+      9,
+      18,
+      27,
       ...Array(7).fill(0),
-      46, 41, 37, 32, 26, 19, 13, 6,
+      46,
+      41,
+      37,
+      32,
+      26,
+      19,
+      13,
+      6,
       ...Array(120).fill(0),
     ];
 
@@ -426,8 +640,25 @@ describe("dectalk-english end-to-end", () => {
       return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.AB;
     });
     const expected = [
-      0, 9, 18, 27, 36, 38, 40, 42, 44, 46, 46, 46, 41,
-      37, 32, 26, 19, 13, 6,
+      0,
+      9,
+      18,
+      27,
+      36,
+      38,
+      40,
+      42,
+      44,
+      46,
+      46,
+      46,
+      41,
+      37,
+      32,
+      26,
+      19,
+      13,
+      6,
       ...Array(120).fill(0),
     ];
 
@@ -449,10 +680,15 @@ describe("dectalk-english end-to-end", () => {
   });
 
   it("matches DECtalk's contextual N B3 targets in rain and in", () => {
-    const result = textToKlattTrackDetailed("The rain in Spain stays mainly in the plain.", 110, 30, {
-      frontendId: "dectalk-english",
-      speaker: "paul",
-    });
+    const result = textToKlattTrackDetailed(
+      "The rain in Spain stays mainly in the plain.",
+      110,
+      30,
+      {
+        frontendId: "dectalk-english",
+        speaker: "paul",
+      },
+    );
     const b3 = Array.from({ length: 9 }, (_, offset) => {
       const time = (62 + offset) * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B3;
@@ -480,18 +716,22 @@ describe("dectalk-english end-to-end", () => {
       .filter((frame) => frame.time <= 4 * DECTALK_PACKET_PERIOD_SEC + 1e-9)
       .at(-1);
     const initialRelease = result.track.find((frame) => frame.phoneme === "K_REL");
-    if (!initialK || !firstKPacket || !initialRelease) throw new Error("initial K carriers missing");
-    const closureDurationMs = result.utterance.relation("Segment").listItems()
+    if (!initialK || !firstKPacket || !initialRelease)
+      throw new Error("initial K carriers missing");
+    const closureDurationMs = result.utterance
+      .relation("Segment")
+      .listItems()
       .find((item) => item.get("active") !== false && item.get("phoneme") === "K")
       ?.get("duration");
     if (typeof closureDurationMs !== "number") throw new Error("initial K duration missing");
     const nativeFrameMs = 6.4;
-    const expectedReleaseStart = firstKPacket.params.F3
-      + (2287.5 - firstKPacket.params.F3)
-        * ((closureDurationMs - nativeFrameMs) / closureDurationMs);
+    const expectedReleaseStart =
+      firstKPacket.params.F3 +
+      (2287.5 - firstKPacket.params.F3) * ((closureDurationMs - nativeFrameMs) / closureDurationMs);
     const releaseBoundary = result.track.find(
-      (frame) => frame.phoneme === "K_REL"
-        && Math.abs(frame.time - initialRelease.time - nativeFrameMs / 1000) <= 1e-9,
+      (frame) =>
+        frame.phoneme === "K_REL" &&
+        Math.abs(frame.time - initialRelease.time - nativeFrameMs / 1000) <= 1e-9,
     );
 
     expect(initialSilence).toEqual([2702, 2702, 2702, 2702]);
@@ -506,7 +746,9 @@ describe("dectalk-english end-to-end", () => {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const ey = result.utterance.relation("Segment").listItems()
+    const ey = result.utterance
+      .relation("Segment")
+      .listItems()
       .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
     const durationWrites = ey?.writes("duration") ?? [];
     const rule14Index = durationWrites.findIndex(
@@ -525,7 +767,9 @@ describe("dectalk-english end-to-end", () => {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const ey = result.utterance.relation("Segment").listItems()
+    const ey = result.utterance
+      .relation("Segment")
+      .listItems()
       .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
     const durationWrites = ey?.writes("duration") ?? [];
     const rule2Index = durationWrites.findIndex(
@@ -544,10 +788,13 @@ describe("dectalk-english end-to-end", () => {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const segments = result.utterance.relation("Segment").listItems()
+    const segments = result.utterance
+      .relation("Segment")
+      .listItems()
       .filter((item) => item.get("active") !== false);
-    const initialK = segments.find((item, index) =>
-      item.get("phoneme") === "K" && segments[index + 1]?.get("phoneme") === "K_REL"
+    const initialK = segments.find(
+      (item, index) =>
+        item.get("phoneme") === "K" && segments[index + 1]?.get("phoneme") === "K_REL",
     );
     const ey = segments.find((item) => item.get("phoneme") === "EY");
 
@@ -566,8 +813,7 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(b1).toEqual([
-      300, 300, 300, 300, 300, 287, 275, 262,
-      250, 237, 225, 212, 200, 200, 200, 200,
+      300, 300, 300, 300, 300, 287, 275, 262, 250, 237, 225, 212, 200, 200, 200, 200,
     ]);
   });
 
@@ -582,8 +828,7 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(b3).toEqual([
-      280, 280, 280, 280, 280, 280, 280, 280,
-      280, 280, 280, 280, 280, 280, 280, 280,
+      280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280,
     ]);
   });
 
@@ -598,18 +843,45 @@ describe("dectalk-english end-to-end", () => {
     });
     const expected = [
       ...Array(5).fill(210),
-      203, 197, 191, 185, 178, 172, 166,
+      203,
+      197,
+      191,
+      185,
+      178,
+      172,
+      166,
       ...Array(7).fill(160),
-      150, 140,
+      150,
+      140,
       ...Array(9).fill(170),
       ...Array(23).fill(100),
-      104, 109, 114, 119, 124, 130, 140, 150,
+      104,
+      109,
+      114,
+      119,
+      124,
+      130,
+      140,
+      150,
       ...Array(9).fill(160),
-      150, 140,
+      150,
+      140,
       ...Array(6).fill(170),
-      150, 143, 137, 131, 125, 118, 112, 106,
+      150,
+      143,
+      137,
+      131,
+      125,
+      118,
+      112,
+      106,
       ...Array(79).fill(100),
-      106, 112, 118, 125, 131, 137,
+      106,
+      112,
+      118,
+      125,
+      131,
+      137,
     ];
 
     expect(expected).toHaveLength(171);
@@ -625,11 +897,7 @@ describe("dectalk-english end-to-end", () => {
       const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.AV;
     });
-    const expected = [
-      ...Array(29).fill(0),
-      ...Array(28).fill(65),
-      ...Array(114).fill(0),
-    ];
+    const expected = [...Array(29).fill(0), ...Array(28).fill(65), ...Array(114).fill(0)];
 
     expect(expected).toHaveLength(171);
     expect(av).toEqual(expected);
@@ -649,7 +917,19 @@ describe("dectalk-english end-to-end", () => {
       ...Array(9).fill(48),
       ...Array(42).fill(0),
       ...Array(6).fill(39),
-      45, 42, 38, 35, 31, 28, 24, 21, 17, 14, 10, 7, 3,
+      45,
+      42,
+      38,
+      35,
+      31,
+      28,
+      24,
+      21,
+      17,
+      14,
+      10,
+      7,
+      3,
       ...Array(80).fill(0),
     ];
 
@@ -681,9 +961,21 @@ describe("dectalk-english end-to-end", () => {
     });
     const expected = [
       ...Array(17).fill(0),
-      50, 50, 49, 48, 36, 24, 12,
+      50,
+      50,
+      49,
+      48,
+      36,
+      24,
+      12,
       ...Array(44).fill(0),
-      47, 47, 46, 45, 33, 22, 11,
+      47,
+      47,
+      46,
+      45,
+      33,
+      22,
+      11,
       ...Array(96).fill(0),
     ];
 
@@ -702,9 +994,21 @@ describe("dectalk-english end-to-end", () => {
     });
     const expected = [
       ...Array(17).fill(0),
-      36, 36, 35, 34, 22, 15, 7,
+      36,
+      36,
+      35,
+      34,
+      22,
+      15,
+      7,
       ...Array(44).fill(0),
-      33, 33, 32, 31, 19, 13, 6,
+      33,
+      33,
+      32,
+      31,
+      19,
+      13,
+      6,
       ...Array(96).fill(0),
     ];
 
@@ -736,8 +1040,7 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f1).toEqual([
-      279, 279, 279, 279, 283, 288, 292, 296,
-      301, 305, 309, 314, 318, 323, 327, 331,
+      279, 279, 279, 279, 283, 288, 292, 296, 301, 305, 309, 314, 318, 323, 327, 331,
     ]);
   });
 
@@ -791,9 +1094,8 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f2).toEqual([
-      2091, 2091, 2091, 2091, 2078, 2069, 2060,
-      2051, 2041, 2032, 2023, 2014, 2005, 1996,
-      1987, 1978, 1969, 1960, 1951, 1942, 1933,
+      2091, 2091, 2091, 2091, 2078, 2069, 2060, 2051, 2041, 2032, 2023, 2014, 2005, 1996, 1987,
+      1978, 1969, 1960, 1951, 1942, 1933,
     ]);
   });
 
@@ -808,9 +1110,8 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f3).toEqual([
-      2702, 2702, 2702, 2702, 2694, 2669, 2645,
-      2620, 2595, 2571, 2546, 2522, 2497, 2472,
-      2448, 2423, 2398, 2374, 2349, 2325, 2300,
+      2702, 2702, 2702, 2702, 2694, 2669, 2645, 2620, 2595, 2571, 2546, 2522, 2497, 2472, 2448,
+      2423, 2398, 2374, 2349, 2325, 2300,
     ]);
   });
 
@@ -825,10 +1126,8 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f1).toEqual([
-      357, 377, 397, 417, 434, 451, 468, 486, 483, 481,
-      478, 476, 473, 471, 468, 466, 463, 461, 458, 457,
-      456, 455, 454, 453, 452, 451, 450, 449, 448, 447,
-      446, 430, 414, 398, 383, 367, 351,
+      357, 377, 397, 417, 434, 451, 468, 486, 483, 481, 478, 476, 473, 471, 468, 466, 463, 461, 458,
+      457, 456, 455, 454, 453, 452, 451, 450, 449, 448, 447, 446, 430, 414, 398, 383, 367, 351,
     ]);
   });
 
@@ -843,9 +1142,8 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f3).toEqual([
-      2276, 2301, 2325, 2350, 2378, 2406, 2434, 2462, 2465, 2469,
-      2472, 2476, 2479, 2483, 2486, 2490, 2493, 2497, 2500, 2504,
-      2507, 2511, 2514, 2518, 2521, 2525, 2528, 2532, 2535, 2539,
+      2276, 2301, 2325, 2350, 2378, 2406, 2434, 2462, 2465, 2469, 2472, 2476, 2479, 2483, 2486,
+      2490, 2493, 2497, 2500, 2504, 2507, 2511, 2514, 2518, 2521, 2525, 2528, 2532, 2535, 2539,
       2539, 2519, 2500, 2480, 2461, 2441, 2422,
     ]);
   });
@@ -861,10 +1159,8 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(b1).toEqual([
-      320, 320, 320, 320, 320, 320, 320, 320, 320,
-      70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70,
-      70, 70, 70, 70, 70, 70, 70, 70, 70, 70,
-      77, 85, 93, 101, 108, 116, 124,
+      320, 320, 320, 320, 320, 320, 320, 320, 320, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70,
+      70, 70, 70, 70, 70, 70, 70, 70, 70, 77, 85, 93, 101, 108, 116, 124,
     ]);
   });
 
@@ -879,11 +1175,8 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(b3).toEqual([
-      239, 233, 226, 219, 213, 206,
-      200, 200, 200, 200, 200, 200, 200, 200, 200, 200,
-      200, 200, 200, 200, 200, 200, 200, 200, 200, 200,
-      200, 200, 200, 200, 200, 200,
-      206, 213, 219, 226, 233,
+      239, 233, 226, 219, 213, 206, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200,
+      200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 206, 213, 219, 226, 233,
     ]);
   });
 
@@ -911,8 +1204,7 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f2).toEqual([
-      1993, 1988, 1983, 1978, 1974, 1969, 1964,
-      1959, 1955, 1950, 1945, 1940, 1936, 1931,
+      1993, 1988, 1983, 1978, 1974, 1969, 1964, 1959, 1955, 1950, 1945, 1940, 1936, 1931,
     ]);
   });
 
@@ -927,10 +1219,7 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f3).toEqual([
-      2404, 2404, 2404, 2404,
-      2403, 2403, 2403, 2403,
-      2402, 2402, 2402, 2402,
-      2401, 2401, 2401,
+      2404, 2404, 2404, 2404, 2403, 2403, 2403, 2403, 2402, 2402, 2402, 2402, 2401, 2401, 2401,
     ]);
   });
 
@@ -944,11 +1233,7 @@ describe("dectalk-english end-to-end", () => {
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
     });
 
-    expect(b1).toEqual([
-      134, 156, 178,
-      200, 200, 200, 200, 200, 200, 200, 200, 200,
-      176, 153, 310,
-    ]);
+    expect(b1).toEqual([134, 156, 178, 200, 200, 200, 200, 200, 200, 200, 200, 200, 176, 153, 310]);
   });
 
   it("matches DECtalk's native B3 cells through cake's final K", () => {
@@ -961,11 +1246,7 @@ describe("dectalk-english end-to-end", () => {
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
     });
 
-    expect(b3).toEqual([
-      239, 253, 266,
-      280, 280, 280, 280, 280, 280, 280, 280, 280,
-      266, 253, 239,
-    ]);
+    expect(b3).toEqual([239, 253, 266, 280, 280, 280, 280, 280, 280, 280, 280, 280, 266, 253, 239]);
   });
 
   it("matches DECtalk's native F1 cells through cake's dummy IX carrier", () => {
@@ -1031,8 +1312,7 @@ describe("dectalk-english end-to-end", () => {
     });
 
     expect(f1).toEqual([
-      ...[459, 460, 461, 462, 463, 464, 465, 466, 467, 468]
-        .flatMap((value) => [value, value]),
+      ...[459, 460, 461, 462, 463, 464, 465, 466, 467, 468].flatMap((value) => [value, value]),
       ...Array(73).fill(469),
     ]);
   });
@@ -1055,12 +1335,15 @@ describe("dectalk-english end-to-end", () => {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const terminalSilence = result.utterance.relation("Segment").listItems()
-      .find((item) =>
-        item.get("active") !== false
-        && item.get("phoneme") === "SIL"
-        && item.get("dummy_vowel") !== true
-        && item.get("punctuationSymbol") === "."
+    const terminalSilence = result.utterance
+      .relation("Segment")
+      .listItems()
+      .find(
+        (item) =>
+          item.get("active") !== false &&
+          item.get("phoneme") === "SIL" &&
+          item.get("dummy_vowel") !== true &&
+          item.get("punctuationSymbol") === ".",
       );
     const f2 = Array.from({ length: 19 }, (_, index) => {
       const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
@@ -1069,8 +1352,8 @@ describe("dectalk-english end-to-end", () => {
 
     expect(terminalSilence).toBeDefined();
     expect(f2).toEqual([
-      1677, 1677, 1676, 1676, 1676, 1675, 1675, 1674, 1674, 1674,
-      1673, 1673, 1673, 1672, 1672, 1671, 1671, 1671, 1670,
+      1677, 1677, 1676, 1676, 1676, 1675, 1675, 1674, 1674, 1674, 1673, 1673, 1673, 1672, 1672,
+      1671, 1671, 1671, 1670,
     ]);
   });
 
@@ -1079,22 +1362,15 @@ describe("dectalk-english end-to-end", () => {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const sampleFrames = [
-      ...Array.from({ length: 21 }, (_, index) => 78 + index),
-      170,
-    ];
+    const sampleFrames = [...Array.from({ length: 21 }, (_, index) => 78 + index), 170];
     const f3 = sampleFrames.map((frameIndex) => {
       const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
     });
 
     expect(f3).toEqual([
-      2522, 2522, 2522, 2522,
-      2523, 2523, 2523, 2523,
-      2524, 2524, 2524, 2524,
-      2525, 2525, 2525, 2525,
-      2526, 2526, 2526, 2526,
-      2527, 2527,
+      2522, 2522, 2522, 2522, 2523, 2523, 2523, 2523, 2524, 2524, 2524, 2524, 2525, 2525, 2525,
+      2525, 2526, 2526, 2526, 2526, 2527, 2527,
     ]);
   });
 
@@ -1129,27 +1405,27 @@ describe("dectalk-english end-to-end", () => {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const ey = result.utterance.relation("Segment").listItems()
+    const ey = result.utterance
+      .relation("Segment")
+      .listItems()
       .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
     const windows = ey?.get("control_windows");
-    const nativeF2 = [21, 29, 35, 50].map((frameIndex) =>
-      frameIndex * DECTALK_PACKET_PERIOD_SEC
-    ).map((time) =>
-      result.track.findLast((frame) => frame.time <= time + 1e-9)?.params.F2
-    );
-    const tailF2 = [51, 52, 53, 54, 55, 56, 57].map((frameIndex) =>
-      frameIndex * DECTALK_PACKET_PERIOD_SEC
-    ).map((time) =>
-      result.track.findLast((frame) => frame.time <= time + 1e-9)?.params.F2
-    );
+    const nativeF2 = [21, 29, 35, 50]
+      .map((frameIndex) => frameIndex * DECTALK_PACKET_PERIOD_SEC)
+      .map((time) => result.track.findLast((frame) => frame.time <= time + 1e-9)?.params.F2);
+    const tailF2 = [51, 52, 53, 54, 55, 56, 57]
+      .map((frameIndex) => frameIndex * DECTALK_PACKET_PERIOD_SEC)
+      .map((time) => result.track.findLast((frame) => frame.time <= time + 1e-9)?.params.F2);
 
     expect(Array.isArray(windows)).toBe(true);
-    expect(windows).toContainEqual(expect.objectContaining({
-      start_ms: 236.6,
-      end_ms: 237,
-      fields: expect.objectContaining({ F2: 1994 }),
-      tag: "dectalk_trace_exact",
-    }));
+    expect(windows).toContainEqual(
+      expect.objectContaining({
+        start_ms: 236.6,
+        end_ms: 237,
+        fields: expect.objectContaining({ F2: 1994 }),
+        tag: "dectalk_trace_exact",
+      }),
+    );
     expect(nativeF2).toEqual([1926, 1777, 1858, 2006]);
     expect(tailF2).toEqual([2006, 2006, 2003, 2001, 1998, 1996, 1994]);
   });
@@ -1159,9 +1435,13 @@ describe("dectalk-english end-to-end", () => {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const dummyVowels = result.utterance.relation("Segment").listItems()
+    const dummyVowels = result.utterance
+      .relation("Segment")
+      .listItems()
       .filter((item) => item.get("active") !== false && item.get("dummy_vowel") === true);
-    const finalStop = result.utterance.relation("Segment").listItems()
+    const finalStop = result.utterance
+      .relation("Segment")
+      .listItems()
       .findLast((item) => item.get("active") !== false && item.get("phoneme") === "K");
 
     expect(dummyVowels).toHaveLength(1);
@@ -1177,7 +1457,7 @@ describe("dectalk-english end-to-end", () => {
     expect(dummyVowels[0].get("F1")).toBe(460);
     expect(dummyVowels[0].get("F2")).toBe(1680);
     expect(dummyVowels[0].get("F3")).toBe(2520);
-    expect(dummyVowels[0].get("TL")).toBe(10);
+    expect(dummyVowels[0].get("TL")).toBe(0);
     expect(dummyVowels[0].get("control_windows")).toContainEqual({
       start_ms: 0,
       target: "current",
@@ -1191,7 +1471,9 @@ describe("dectalk-english end-to-end", () => {
     const result = textToKlattTrackDetailed("Safe zones feel fuzzy.", 110, 30, {
       frontendId: "dectalk-english",
     });
-    const activeSegments = result.utterance.relation("Segment").listItems()
+    const activeSegments = result.utterance
+      .relation("Segment")
+      .listItems()
       .filter((item) => item.get("active") !== false);
 
     expect(activeSegments.length).toBeGreaterThan(0);
@@ -1224,7 +1506,9 @@ describe("dectalk-english end-to-end", () => {
         for (const frame of track) {
           expect(frame.params && typeof frame.params === "object").toBe(true);
           for (const [key, val] of Object.entries(frame.params)) {
-            expect(Number.isFinite(val), `${key} is not finite in frame at t=${frame.time}`).toBe(true);
+            expect(Number.isFinite(val), `${key} is not finite in frame at t=${frame.time}`).toBe(
+              true,
+            );
           }
         }
       });
@@ -1297,11 +1581,13 @@ describe("dectalk-english end-to-end", () => {
 
     // Log the summary table
     console.log("\n=== DECtalk E2E Quality Summary ===");
-    console.log("| Phrase | Frames | Duration(ms) | F0 min-max (Hz) | F1 min-max (Hz) | Segments |");
+    console.log(
+      "| Phrase | Frames | Duration(ms) | F0 min-max (Hz) | F1 min-max (Hz) | Segments |",
+    );
     console.log("|--------|--------|-------------|-----------------|-----------------|----------|");
     for (const r of results) {
       console.log(
-        `| ${r.phrase.substring(0, 30).padEnd(30)} | ${String(r.frames).padStart(6)} | ${String(r.durationMs).padStart(11)} | ${String(r.f0Min).padStart(6)}-${String(r.f0Max).padEnd(6)} | ${String(r.f1Min).padStart(6)}-${String(r.f1Max).padEnd(6)} | ${String(r.segments).padStart(8)} |`
+        `| ${r.phrase.substring(0, 30).padEnd(30)} | ${String(r.frames).padStart(6)} | ${String(r.durationMs).padStart(11)} | ${String(r.f0Min).padStart(6)}-${String(r.f0Max).padEnd(6)} | ${String(r.f1Min).padStart(6)}-${String(r.f1Max).padEnd(6)} | ${String(r.segments).padStart(8)} |`,
       );
     }
 

@@ -7,10 +7,7 @@ afterAll(() => warnSpy.mockRestore());
 
 function voicedPhonemeFrames(track: KlattFrame[]): KlattFrame[] {
   return track.filter(
-    (frame) =>
-      frame.phoneme != null &&
-      frame.phoneme !== "SIL" &&
-      Number(frame.params?.F0) > 0,
+    (frame) => frame.phoneme != null && frame.phoneme !== "SIL" && Number(frame.params?.F0) > 0,
   );
 }
 
@@ -54,7 +51,7 @@ describe("Fant 1997 phrase contour", () => {
     const phrase = "hello world.";
     const qlatt = voicedPhonemeFrames(textToKlattTrack(phrase));
     const dectalk = voicedPhonemeFrames(
-      textToKlattTrack(phrase, 110, 30, { frontendId: "dectalk-english" })
+      textToKlattTrack(phrase, 110, 30, { frontendId: "dectalk-english" }),
     );
     expect(qlatt.length).toBeGreaterThan(0);
     expect(dectalk.length).toBeGreaterThan(0);
@@ -92,6 +89,8 @@ describe("Fant 1997 phrase contour", () => {
     const secondPhraseStart = worldFrames[0];
 
     expect(secondPhraseStart.params.EePhraseDb).toBeGreaterThan(firstPhraseEnd.params.EePhraseDb);
-    expect(secondPhraseStart.params.RdPhraseOffset).toBeLessThan(firstPhraseEnd.params.RdPhraseOffset);
+    expect(secondPhraseStart.params.RdPhraseOffset).toBeLessThan(
+      firstPhraseEnd.params.RdPhraseOffset,
+    );
   });
 });

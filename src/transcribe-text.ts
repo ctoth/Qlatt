@@ -11,17 +11,18 @@
  * - Provenance tracking for pronunciation decisions
  */
 
-import {
-  DEFAULT_CMU_DICTIONARY_PATH,
-  preloadCmuDictionaryFromPath,
-} from "./cmu-dictionary-loader";
-import { QLATT_ENGLISH_RULEPACK, type CompiledRulepack } from "./declarative-frontend/rule-pack";
-import { runGraphRuleEngine } from "./declarative-frontend/hrg/rule-engine";
-import { Utterance } from "./declarative-frontend/hrg";
+import { DEFAULT_CMU_DICTIONARY_PATH, preloadCmuDictionaryFromPath } from "./cmu-dictionary-loader";
 import type { HrgSchema } from "./declarative-frontend/hrg";
+import { Utterance } from "./declarative-frontend/hrg";
+import { runGraphRuleEngine } from "./declarative-frontend/hrg/rule-engine";
+import { type CompiledRulepack, QLATT_ENGLISH_RULEPACK } from "./declarative-frontend/rule-pack";
 import { pronounce } from "./g2p";
 import type { DictLookup, PronunciationResult } from "./g2p/types";
-import type { TranscriptionConfig, TranscriptionToken, TranscriptionOptions } from "./tts-frontend-types";
+import type {
+  TranscriptionConfig,
+  TranscriptionOptions,
+  TranscriptionToken,
+} from "./tts-frontend-types";
 
 // ---------------------------------------------------------------------------
 // Citation constants for provenance tracking
@@ -78,7 +79,7 @@ type RequiredTranscriptionTables = {
 // ---------------------------------------------------------------------------
 
 const CMU_DICT_MAP: Record<string, string | undefined> = await preloadCmuDictionaryFromPath(
-  DEFAULT_CMU_DICTIONARY_PATH
+  DEFAULT_CMU_DICTIONARY_PATH,
 );
 
 /**
@@ -144,13 +145,17 @@ export function shouldUseDiagnosticSymbolMode(words: string[]): boolean {
   );
   return (
     nonPunctuation.length > 0 &&
-    nonPunctuation.every((word) => getDiagnosticSymbolPronunciationWithTables(word, tables) !== null)
+    nonPunctuation.every(
+      (word) => getDiagnosticSymbolPronunciationWithTables(word, tables) !== null,
+    )
   );
 }
 
 function requireStringArray(value: unknown, path: string): string[] {
   if (!Array.isArray(value) || value.length === 0) {
-    throw new Error(`E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.${path} must be a non-empty string array`);
+    throw new Error(
+      `E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.${path} must be a non-empty string array`,
+    );
   }
   return value.map((entry, index) => {
     if (typeof entry !== "string" || entry.length === 0) {
@@ -163,8 +168,15 @@ function requireStringArray(value: unknown, path: string): string[] {
 }
 
 function requirePronunciationMap(value: unknown, path: string): Record<string, string[]> {
-  if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).length === 0) {
-    throw new Error(`E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.${path} must be a non-empty map`);
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    Object.keys(value).length === 0
+  ) {
+    throw new Error(
+      `E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.${path} must be a non-empty map`,
+    );
   }
 
   return Object.fromEntries(
@@ -179,7 +191,9 @@ function getSpecTranscriptionConfig(specSource: unknown): TranscriptionConfig | 
   return (specSource as { transcription?: TranscriptionConfig })?.transcription;
 }
 
-function requireTranscriptionTables(config: TranscriptionConfig | undefined): RequiredTranscriptionTables {
+function requireTranscriptionTables(
+  config: TranscriptionConfig | undefined,
+): RequiredTranscriptionTables {
   if (!config || typeof config !== "object") {
     throw new Error("E_TRANSCRIPTION_CONFIG_REQUIRED: transcription config is required");
   }
@@ -194,10 +208,7 @@ function getDefaultTranscriptionTables(): RequiredTranscriptionTables {
   return requireTranscriptionTables(getSpecTranscriptionConfig(QLATT_ENGLISH_RULEPACK));
 }
 
-function isPunctuationTokenWithTables(
-  word: string,
-  tables: RequiredTranscriptionTables,
-): boolean {
+function isPunctuationTokenWithTables(word: string, tables: RequiredTranscriptionTables): boolean {
   return tables.punctuationTokens.has(word);
 }
 
@@ -240,7 +251,9 @@ function rewriteOrthographyTokens(
   input.commit();
   runGraphRuleEngine(utterance, compiledSpec, { phases: ["orthography"] });
 
-  return utterance.relation("Token").listItems()
+  return utterance
+    .relation("Token")
+    .listItems()
     .filter((token) => token.get("active") !== false)
     .map((token) => {
       const word = token.get("word");
@@ -258,8 +271,9 @@ function rewriteOrthographyTokens(
         ...(typeof pronunciationKey === "string" && pronunciationKey.length > 0
           ? { pronunciationKey }
           : {}),
-        parentDecisionId: token.latestWrite("pronunciationKey")?.decisionId
-          ?? token.latestWrite("word")?.decisionId,
+        parentDecisionId:
+          token.latestWrite("pronunciationKey")?.decisionId ??
+          token.latestWrite("word")?.decisionId,
       };
     });
 }
@@ -280,7 +294,10 @@ function rewriteOrthographyTokens(
  * @param options - Optional provenance collector for decision tracking
  * @returns Flat array of TranscriptionToken objects
  */
-export function transcribeText(text: string, options: TranscriptionOptions = {}): TranscriptionToken[] {
+export function transcribeText(
+  text: string,
+  options: TranscriptionOptions = {},
+): TranscriptionToken[] {
   const provenance = options.provenance ?? null;
   // Resolve the backing dictionary map for this call: a per-frontend map (from
   // `dictionary_path`) when supplied, else the global CMU default. Both the
@@ -298,7 +315,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
   const cfg = options.transcriptionConfig ?? getSpecTranscriptionConfig(compiledSpec);
   const transcriptionTables = requireTranscriptionTables(cfg);
 
-  const isEffectivePunctuation = (word: string): boolean =>
+  const _isEffectivePunctuation = (word: string): boolean =>
     isPunctuationTokenWithTables(word, transcriptionTables);
   const getEffectiveSymbol = (word: string): string[] | null => {
     return getDiagnosticSymbolPronunciationWithTables(word, transcriptionTables);
@@ -321,7 +338,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
     nonPunctuation.length > 0 &&
     nonPunctuation.every((w) => !w.pronunciationKey && getEffectiveSymbol(w.word) !== null);
 
-  for (let index = 0; index < orthographyWords.length;) {
+  for (let index = 0; index < orthographyWords.length; ) {
     const inputToken = orthographyWords[index];
     const word = inputToken?.word ?? "";
     if (!word) {
@@ -342,12 +359,16 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
     } else {
       let sourceWord = word;
       let consumedWords = 1;
-      let parentDecisionId = inputToken.parentDecisionId;
+      const parentDecisionId = inputToken.parentDecisionId;
 
       // Recover CMUdict compounds after normalization splits tokens.
       // Citation anchor: CMUdict orthography includes hyphenated and apostrophe-linked compounds.
       const maxCompoundSpan = 4;
-      for (let span = Math.min(maxCompoundSpan, orthographyWords.length - index); span >= 2; span -= 1) {
+      for (
+        let span = Math.min(maxCompoundSpan, orthographyWords.length - index);
+        span >= 2;
+        span -= 1
+      ) {
         const parts = orthographyWords.slice(index, index + span);
         if (
           parts.some(
@@ -369,7 +390,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
 
       const letterPronunciation =
         typeof inputToken.pronunciationKey === "string"
-          ? transcriptionTables.letterNames[inputToken.pronunciationKey] ?? null
+          ? (transcriptionTables.letterNames[inputToken.pronunciationKey] ?? null)
           : null;
       const symbolPronunciation =
         letterPronunciation == null && useSymbolMode ? getEffectiveSymbol(sourceWord) : null;
@@ -384,12 +405,12 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
               word: sourceWord.toLowerCase(),
             }
           : symbolPronunciation == null
-          ? pronounce(sourceWord, effectiveDictLookup, { ltsPath, morphologyPath })
-          : {
-              phonemes: symbolPronunciation,
-              source: "unknown",
-              word: sourceWord.toLowerCase(),
-            };
+            ? pronounce(sourceWord, effectiveDictLookup, { ltsPath, morphologyPath })
+            : {
+                phonemes: symbolPronunciation,
+                source: "unknown",
+                word: sourceWord.toLowerCase(),
+              };
 
       // Select provenance citation based on which layer handled the word
       let decisionType: string;
@@ -403,20 +424,20 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
         decisionType = "symbol_pronunciation_selected";
         reason = `Used diagnostic symbol pronunciation for '${sourceWord}'`;
         citations = [SYMBOL_PRONUNCIATION_CITATION];
-      } else if (pronResult.source === 'dictionary') {
+      } else if (pronResult.source === "dictionary") {
         decisionType = "dictionary_pronunciation_selected";
         reason = `Used CMU dictionary pronunciation for '${sourceWord}'`;
         citations = [CMU_DICTIONARY_CITATION];
-      } else if (pronResult.source === 'morphology') {
+      } else if (pronResult.source === "morphology") {
         decisionType = "morphology_pronunciation_selected";
-        reason = `Morphological decomposition for '${sourceWord}' (root: ${pronResult.rootWord ?? '?'})`;
+        reason = `Morphological decomposition for '${sourceWord}' (root: ${pronResult.rootWord ?? "?"})`;
         citations = [MORPHOLOGY_PRONUNCIATION_CITATION];
       } else {
         decisionType = "fallback_pronunciation_selected";
         reason = `Word '${sourceWord}' not in dictionary; used Elovitz LTS + Hunnicutt stress`;
         citations = [FALLBACK_PRONUNCIATION_CITATION];
         console.warn(
-          `[TTS Frontend] Word "${sourceWord}" not found in dictionary. Using G2P pipeline (${pronResult.source}).`
+          `[TTS Frontend] Word "${sourceWord}" not found in dictionary. Using G2P pipeline (${pronResult.source}).`,
         );
       }
 
@@ -454,7 +475,9 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
           }
         }
       } else {
-        console.warn(`[TTS Frontend] Word "${sourceWord}" produced no phonemes. Representing as SIL.`);
+        console.warn(
+          `[TTS Frontend] Word "${sourceWord}" produced no phonemes. Representing as SIL.`,
+        );
         flatPhonemeList.push({
           phoneme: "SIL",
           stress: null,

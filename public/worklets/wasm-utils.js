@@ -56,9 +56,7 @@ export async function initWasmModule(url, imports = {}, wasmBytes = null) {
             throw new Error("WASM URL is required when wasmBytes is not provided");
         }
         // Cache-bust WASM URLs so rebuilt modules load immediately in dev.
-        const bustUrl = typeof url === "string"
-            ? url + (url.includes("?") ? "&" : "?") + "v=" + Date.now()
-            : url;
+        const bustUrl = typeof url === "string" ? url + (url.includes("?") ? "&" : "?") + "v=" + Date.now() : url;
         const response = await fetch(bustUrl);
         if (WebAssembly.instantiateStreaming) {
             try {

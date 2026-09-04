@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { loadYamlSourceSync } from "../src/yaml-loader";
+import { createProvenanceCollector } from "../src/provenance";
 import {
   DEFAULT_SPEAKER_PROFILE_PATH,
   loadSpeakerProfileSync,
   resolveSpeakerProfile,
 } from "../src/speaker-profile";
-import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import { loadYamlSourceSync } from "../src/yaml-loader";
 
 describe("speaker profile schema", () => {
   it("declares the canonical speaker profile document", () => {
@@ -67,7 +67,9 @@ describe("speaker profile schema", () => {
       warnSpy.mockRestore();
     }
 
-    const decision = provenance.getDecisions().find((entry) => entry.type === "speaker_profile_selected");
+    const decision = provenance
+      .getDecisions()
+      .find((entry) => entry.type === "speaker_profile_selected");
     expect(decision).toBeDefined();
     expect(decision?.stage).toBe("frontend");
     expect(decision?.citations).toContain(DEFAULT_SPEAKER_PROFILE_PATH);

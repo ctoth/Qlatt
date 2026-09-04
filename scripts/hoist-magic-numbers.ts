@@ -7,16 +7,16 @@
  * Usage: npx tsx scripts/hoist-magic-numbers.ts
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const ROOT = path.resolve(__dirname, '..');
-const RULES_DIR = path.join(ROOT, 'public', 'rules');
-const FRONTEND_YAML = path.join(RULES_DIR, 'frontend.yaml');
+const ROOT = path.resolve(__dirname, "..");
+const RULES_DIR = path.join(ROOT, "public", "rules");
+const FRONTEND_YAML = path.join(RULES_DIR, "frontend.yaml");
 
 // ---------------------------------------------------------------------------
 // 1. Define all replacements as { file, find, replace } tuples
@@ -30,57 +30,57 @@ interface Replacement {
   all?: boolean;
 }
 
-const rulesDir = path.join(RULES_DIR, 'rules');
+const rulesDir = path.join(RULES_DIR, "rules");
 
 const replacements: Replacement[] = [
   // === postlexical.yaml - t_flapping ===
   {
-    file: path.join(rulesDir, 'postlexical.yaml'),
+    file: path.join(rulesDir, "postlexical.yaml"),
     find: 'duration: "30"',
     replace: 'duration: "params.policy.duration.flap_duration_ms"',
   },
   {
-    file: path.join(rulesDir, 'postlexical.yaml'),
+    file: path.join(rulesDir, "postlexical.yaml"),
     find: 'inherentDuration: "30"',
     replace: 'inherentDuration: "params.policy.duration.flap_duration_ms"',
   },
 
   // === structural.yaml - expand_diphthongs ===
   {
-    file: path.join(rulesDir, 'structural.yaml'),
-    find: 'comp1_duration: total_dur * 0.6',
-    replace: 'comp1_duration: total_dur * params.policy.duration.diphthong_nucleus_share',
+    file: path.join(rulesDir, "structural.yaml"),
+    find: "comp1_duration: total_dur * 0.6",
+    replace: "comp1_duration: total_dur * params.policy.duration.diphthong_nucleus_share",
   },
   {
-    file: path.join(rulesDir, 'structural.yaml'),
-    find: 'comp2_duration: total_dur * 0.4',
-    replace: 'comp2_duration: total_dur * (1 - params.policy.duration.diphthong_nucleus_share)',
+    file: path.join(rulesDir, "structural.yaml"),
+    find: "comp2_duration: total_dur * 0.4",
+    replace: "comp2_duration: total_dur * (1 - params.policy.duration.diphthong_nucleus_share)",
   },
 
   // === structural.yaml - 8 occurrences of "- 10" in weak release expressions ===
   // These appear in 4 rules. We replace all occurrences.
   {
-    file: path.join(rulesDir, 'structural.yaml'),
-    find: 'rel_target.params.AF - 10',
-    replace: 'rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db',
+    file: path.join(rulesDir, "structural.yaml"),
+    find: "rel_target.params.AF - 10",
+    replace: "rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db",
     all: true,
   },
   {
-    file: path.join(rulesDir, 'structural.yaml'),
-    find: 'rel_target.params.AH - 10',
-    replace: 'rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db',
+    file: path.join(rulesDir, "structural.yaml"),
+    find: "rel_target.params.AH - 10",
+    replace: "rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db",
     all: true,
   },
   {
-    file: path.join(rulesDir, 'structural.yaml'),
-    find: 'asp_target.params.AF - 10',
-    replace: 'asp_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db',
+    file: path.join(rulesDir, "structural.yaml"),
+    find: "asp_target.params.AF - 10",
+    replace: "asp_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db",
     all: true,
   },
   {
-    file: path.join(rulesDir, 'structural.yaml'),
-    find: 'asp_target.params.AH - 10',
-    replace: 'asp_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db',
+    file: path.join(rulesDir, "structural.yaml"),
+    find: "asp_target.params.AH - 10",
+    replace: "asp_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db",
     all: true,
   },
 
@@ -100,58 +100,58 @@ const replacements: Replacement[] = [
 
   // k_context_cl_f2 dispatch: back vowel -> 1200, front vowel -> 1900, default -> 1500
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `        value: 1200`,
     replace: `        value: params.policy.formant.velar_f2_locus_back`,
   },
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `        value: 1900`,
     replace: `        value: params.policy.formant.velar_f2_locus_front`,
   },
   // "default: 1500" in k_context_cl_f2
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `      - default: 1500`,
     replace: `      - default: params.policy.formant.velar_f2_locus`,
   },
 
   // k_context_rel_copy: "prev.params.F2 : 1500"
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `prev.params.F2 : 1500"`,
     replace: `prev.params.F2 : params.policy.formant.velar_f2_locus"`,
   },
 
   // bilabial_f2_locus: value: 1350 (front), value: 1100 (back)
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `        value: 1350`,
     replace: `        value: params.policy.formant.bilabial_f2_locus_front`,
   },
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `        value: 1100`,
     replace: `        value: params.policy.formant.bilabial_f2_locus_back`,
   },
 
   // nasal_antiformant_by_place: "current.params.FNZ : 480"
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `current.params.FNZ : 480"`,
     replace: `current.params.FNZ : params.policy.formant.nasal_fnz_default"`,
   },
 
   // nasal_place_assimilation: "current.params.FNZ : 1700" -> ref existing nasal_fnz_n
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `current.params.FNZ : 1700"`,
     replace: `current.params.FNZ : params.policy.formant.nasal_fnz_n"`,
   },
 
   // nasal_place_assimilation: "current.params.F2 : 1400" (2 occurrences)
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `current.params.F2 : 1400"`,
     replace: `current.params.F2 : params.policy.formant.nasal_n_f2_default"`,
     all: true,
@@ -159,21 +159,21 @@ const replacements: Replacement[] = [
 
   // dark_l_allophony: "current.params.F2 : 1050"
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `current.params.F2 : 1050"`,
     replace: `current.params.F2 : params.policy.formant.light_l_f2"`,
   },
 
   // dark_l_allophony: "current.params.F3 : 2600"
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `current.params.F3 : 2600"`,
     replace: `current.params.F3 : params.policy.formant.light_l_f3"`,
   },
 
   // f1_stop_onset: "default: 280" -> must match the right one (indented)
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `      - default: 280`,
     replace: `      - default: params.policy.formant.f1_release_default`,
   },
@@ -196,31 +196,31 @@ const replacements: Replacement[] = [
 
   // === vcv_coarticulation: 3 occurrences of "1500" ===
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `prev_f2: "has(prev.?params.F2) ? prev.params.F2 : 1500"`,
     replace: `prev_f2: "has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.default_f2_fallback"`,
   },
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `next_f2: "has_flanking ? (has(next_vowel.?params.F2) ? next_vowel.params.F2 : 1500) : 1500"`,
     replace: `next_f2: "has_flanking ? (has(next_vowel.?params.F2) ? next_vowel.params.F2 : params.policy.formant.default_f2_fallback) : params.policy.formant.default_f2_fallback"`,
   },
   {
-    file: path.join(rulesDir, 'formant.yaml'),
+    file: path.join(rulesDir, "formant.yaml"),
     find: `cur_f2: "has(current.?params.F2) ? current.params.F2 : 1500"`,
     replace: `cur_f2: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.default_f2_fallback"`,
   },
 
   // === prosody.yaml - f0_stress_peak ===
   {
-    file: path.join(rulesDir, 'prosody.yaml'),
+    file: path.join(rulesDir, "prosody.yaml"),
     find: `at: at_ratio(current, 0.45)`,
     replace: `at: at_ratio(current, params.policy.f0.stress_peak_position)`,
   },
 
   // === prosody.yaml - f0_question_rise_onset ===
   {
-    file: path.join(rulesDir, 'prosody.yaml'),
+    file: path.join(rulesDir, "prosody.yaml"),
     find: `at: at_ratio(last_stress, 0.8)`,
     replace: `at: at_ratio(last_stress, params.policy.f0.question_rise_onset_position)`,
   },
@@ -238,29 +238,29 @@ function replaceBurstValues(content: string): string {
   // Map of formant -> place -> { oldValue, paramRef }
   const burstMap: Record<string, Record<string, { old: number; ref: string }>> = {
     A2: {
-      bilabial:  { old: 50, ref: 'params.policy.formant.burst_a2_bilabial' },
-      alveolar:  { old: 40, ref: 'params.policy.formant.burst_a2_alveolar' },
-      velar:     { old: 45, ref: 'params.policy.formant.burst_a2_velar' },
+      bilabial: { old: 50, ref: "params.policy.formant.burst_a2_bilabial" },
+      alveolar: { old: 40, ref: "params.policy.formant.burst_a2_alveolar" },
+      velar: { old: 45, ref: "params.policy.formant.burst_a2_velar" },
     },
     A3: {
-      bilabial:  { old: 40, ref: 'params.policy.formant.burst_a3_bilabial' },
-      alveolar:  { old: 50, ref: 'params.policy.formant.burst_a3_alveolar' },
-      velar:     { old: 50, ref: 'params.policy.formant.burst_a3_velar' },
+      bilabial: { old: 40, ref: "params.policy.formant.burst_a3_bilabial" },
+      alveolar: { old: 50, ref: "params.policy.formant.burst_a3_alveolar" },
+      velar: { old: 50, ref: "params.policy.formant.burst_a3_velar" },
     },
     A4: {
-      bilabial:  { old: 35, ref: 'params.policy.formant.burst_a4_bilabial' },
-      alveolar:  { old: 50, ref: 'params.policy.formant.burst_a4_alveolar' },
-      velar:     { old: 55, ref: 'params.policy.formant.burst_a4_velar' },
+      bilabial: { old: 35, ref: "params.policy.formant.burst_a4_bilabial" },
+      alveolar: { old: 50, ref: "params.policy.formant.burst_a4_alveolar" },
+      velar: { old: 55, ref: "params.policy.formant.burst_a4_velar" },
     },
     A5: {
-      bilabial:  { old: 45, ref: 'params.policy.formant.burst_a5_bilabial' },
-      alveolar:  { old: 45, ref: 'params.policy.formant.burst_a5_alveolar' },
-      velar:     { old: 40, ref: 'params.policy.formant.burst_a5_velar' },
+      bilabial: { old: 45, ref: "params.policy.formant.burst_a5_bilabial" },
+      alveolar: { old: 45, ref: "params.policy.formant.burst_a5_alveolar" },
+      velar: { old: 40, ref: "params.policy.formant.burst_a5_velar" },
     },
     A6: {
-      bilabial:  { old: 30, ref: 'params.policy.formant.burst_a6_bilabial' },
-      alveolar:  { old: 50, ref: 'params.policy.formant.burst_a6_alveolar' },
-      velar:     { old: 35, ref: 'params.policy.formant.burst_a6_velar' },
+      bilabial: { old: 30, ref: "params.policy.formant.burst_a6_bilabial" },
+      alveolar: { old: 50, ref: "params.policy.formant.burst_a6_alveolar" },
+      velar: { old: 35, ref: "params.policy.formant.burst_a6_velar" },
     },
   };
 
@@ -277,7 +277,7 @@ function replaceBurstValues(content: string): string {
     }
 
     // Find the extent of this field block (until next "- field:" or "- default:")
-    const nextFieldIdx = content.indexOf('- field:', fieldIdx + fieldMarker.length);
+    const nextFieldIdx = content.indexOf("- field:", fieldIdx + fieldMarker.length);
     const blockEnd = nextFieldIdx !== -1 ? nextFieldIdx : content.length;
     let block = content.slice(fieldIdx, blockEnd);
 
@@ -285,9 +285,7 @@ function replaceBurstValues(content: string): string {
     for (const [place, { old, ref }] of Object.entries(places)) {
       // Pattern: after "current.<place> == true\n" ... "value: <old>"
       // We look for the "when: has(current.<place>)..." line followed by "value: <old>"
-      const placePattern = new RegExp(
-        `(when:.*current\\.${place}.*\\n\\s+value: )${old}`,
-      );
+      const placePattern = new RegExp(`(when:.*current\\.${place}.*\\n\\s+value: )${old}`);
       const match = block.match(placePattern);
       if (match) {
         block = block.replace(placePattern, `$1${ref}`);
@@ -456,32 +454,31 @@ const NEW_FORMANT_PARAMS_YAML = `      velar_f2_locus:
 // ---------------------------------------------------------------------------
 
 function main() {
-  console.log('=== Hoisting CEL magic numbers to parameters.policy ===\n');
+  console.log("=== Hoisting CEL magic numbers to parameters.policy ===\n");
 
   // --- Step A: Add new parameters to frontend.yaml ---
-  let frontendContent = fs.readFileSync(FRONTEND_YAML, 'utf-8');
+  let frontendContent = fs.readFileSync(FRONTEND_YAML, "utf-8");
 
   // Insert new duration params after the last existing duration param (stop_unreleasing_min_ms block)
-  const durationInsertMarker = '          - Crystal & House 1988\n          - Miller 1998';
+  const durationInsertMarker = "          - Crystal & House 1988\n          - Miller 1998";
   if (!frontendContent.includes(durationInsertMarker)) {
-    console.error('ERROR: Cannot find duration insert marker in frontend.yaml');
+    console.error("ERROR: Cannot find duration insert marker in frontend.yaml");
     process.exit(1);
   }
   frontendContent = frontendContent.replace(
     durationInsertMarker,
-    durationInsertMarker + '\n' + NEW_PARAMS_YAML,
+    durationInsertMarker + "\n" + NEW_PARAMS_YAML,
   );
 
   // Insert new f0 params after the last existing f0 param (question_last_stress_lookback_tokens block)
-  const f0InsertMarker =
-    `          - "Engineering estimate: lookback window for placing pre-boundary question-rise onset"`;
+  const f0InsertMarker = `          - "Engineering estimate: lookback window for placing pre-boundary question-rise onset"`;
   if (!frontendContent.includes(f0InsertMarker)) {
-    console.error('ERROR: Cannot find f0 insert marker in frontend.yaml');
+    console.error("ERROR: Cannot find f0 insert marker in frontend.yaml");
     process.exit(1);
   }
   frontendContent = frontendContent.replace(
     f0InsertMarker,
-    f0InsertMarker + '\n' + NEW_F0_PARAMS_YAML,
+    f0InsertMarker + "\n" + NEW_F0_PARAMS_YAML,
   );
 
   // Insert new formant params after the last existing formant param (vcv_coarticulation_rate block)
@@ -489,16 +486,18 @@ function main() {
           - Ohman 1966
 output:`;
   if (!frontendContent.includes(formantInsertMarker)) {
-    console.error('ERROR: Cannot find formant insert marker in frontend.yaml');
+    console.error("ERROR: Cannot find formant insert marker in frontend.yaml");
     process.exit(1);
   }
   frontendContent = frontendContent.replace(
     formantInsertMarker,
     `        citations:
-          - Ohman 1966\n` + NEW_FORMANT_PARAMS_YAML + '\noutput:',
+          - Ohman 1966\n` +
+      NEW_FORMANT_PARAMS_YAML +
+      "\noutput:",
   );
 
-  fs.writeFileSync(FRONTEND_YAML, frontendContent, 'utf-8');
+  fs.writeFileSync(FRONTEND_YAML, frontendContent, "utf-8");
   console.log(`Updated: ${FRONTEND_YAML}`);
 
   // --- Step B: Apply all string replacements to rule files ---
@@ -511,7 +510,7 @@ output:`;
   }
 
   for (const [filePath, reps] of byFile) {
-    let content = fs.readFileSync(filePath, 'utf-8');
+    let content = fs.readFileSync(filePath, "utf-8");
 
     for (const r of reps) {
       if (r.all) {
@@ -521,7 +520,9 @@ output:`;
           continue;
         }
         content = content.split(r.find).join(r.replace);
-        console.log(`  Replaced ${count}x: "${r.find}" -> "${r.replace}" in ${path.basename(filePath)}`);
+        console.log(
+          `  Replaced ${count}x: "${r.find}" -> "${r.replace}" in ${path.basename(filePath)}`,
+        );
       } else {
         if (!content.includes(r.find)) {
           console.warn(`WARNING: Pattern not found in ${path.basename(filePath)}: "${r.find}"`);
@@ -532,18 +533,18 @@ output:`;
       }
     }
 
-    fs.writeFileSync(filePath, content, 'utf-8');
+    fs.writeFileSync(filePath, content, "utf-8");
     console.log(`Updated: ${filePath}`);
   }
 
   // --- Step C: Apply burst_spectral_template replacements to formant.yaml ---
-  const formantPath = path.join(rulesDir, 'formant.yaml');
-  let formantContent = fs.readFileSync(formantPath, 'utf-8');
+  const formantPath = path.join(rulesDir, "formant.yaml");
+  let formantContent = fs.readFileSync(formantPath, "utf-8");
   formantContent = replaceBurstValues(formantContent);
-  fs.writeFileSync(formantPath, formantContent, 'utf-8');
+  fs.writeFileSync(formantPath, formantContent, "utf-8");
   console.log(`Updated burst_spectral_template values in: ${formantPath}`);
 
-  console.log('\n=== Done. Run tests to verify. ===');
+  console.log("\n=== Done. Run tests to verify. ===");
 }
 
 main();

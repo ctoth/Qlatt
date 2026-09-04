@@ -49,7 +49,13 @@ for (const p of phrases) {
 const stmt = contour("you are home.");
 const ques = contour("are you home?");
 console.log("\nHEADLINE:");
-console.log(`  statement "you are home."  -> ${stmt.direction} (preTerminal ${stmt.preTerminal} -> final ${stmt.finalMean})`);
-console.log(`  question  "are you home?"  -> ${ques.direction} (preTerminal ${ques.preTerminal} -> final ${ques.finalMean})`);
-console.log(`  differ at end? statement final ${stmt.finalMean} Hz vs question final ${ques.finalMean} Hz` +
-  ` (delta ${+(ques.finalMean - stmt.finalMean).toFixed(0)} Hz)`);
+console.log(
+  `  statement "you are home."  -> ${stmt.direction} (preTerminal ${stmt.preTerminal} -> final ${stmt.finalMean})`,
+);
+console.log(
+  `  question  "are you home?"  -> ${ques.direction} (preTerminal ${ques.preTerminal} -> final ${ques.finalMean})`,
+);
+console.log(
+  `  differ at end? statement final ${stmt.finalMean} Hz vs question final ${ques.finalMean} Hz` +
+    ` (delta ${+(ques.finalMean - stmt.finalMean).toFixed(0)} Hz)`,
+);

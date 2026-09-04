@@ -8,9 +8,9 @@
  * if a builtin is added to one path but not the other.
  */
 
-import { createCelEvaluator, type CelEvaluator } from './cel-evaluator';
-import { registerNumericBuiltins } from './register-builtins';
-import { createTopologicalEvaluator, type TopologicalEvaluator } from './topological-evaluator';
+import { type CelEvaluator, createCelEvaluator } from "./cel-evaluator";
+import { registerNumericBuiltins } from "./register-builtins";
+import { createTopologicalEvaluator, type TopologicalEvaluator } from "./topological-evaluator";
 
 export interface ConfiguredEvaluator {
   celEvaluator: CelEvaluator;

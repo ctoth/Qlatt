@@ -88,5 +88,7 @@ for (const input of Object.keys(qlattExpect)) {
   if (status === "FAIL") console.log(`         expected ${JSON.stringify(expected)}`);
 }
 
-console.log(`\n${failures === 0 ? "ALL PROBE ASSERTIONS PASSED" : `${failures} PROBE ASSERTION(S) FAILED`}`);
+console.log(
+  `\n${failures === 0 ? "ALL PROBE ASSERTIONS PASSED" : `${failures} PROBE ASSERTION(S) FAILED`}`,
+);
 process.exit(failures === 0 ? 0 : 1);

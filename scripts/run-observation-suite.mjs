@@ -38,11 +38,13 @@ function repeatedOrList(name, fallback) {
 }
 
 function slug(value) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80) || "phrase";
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80) || "phrase"
+  );
 }
 
 function run(command, commandArgs) {
@@ -53,11 +55,11 @@ function run(command, commandArgs) {
   });
   if (result.status !== 0) {
     const rendered = [command, ...commandArgs].join(" ");
-    throw new Error([
-      `Command failed (${result.status}): ${rendered}`,
-      result.stdout,
-      result.stderr,
-    ].filter(Boolean).join("\n"));
+    throw new Error(
+      [`Command failed (${result.status}): ${rendered}`, result.stdout, result.stderr]
+        .filter(Boolean)
+        .join("\n"),
+    );
   }
   return {
     stdout: result.stdout,
@@ -120,7 +122,9 @@ const baseF0 = args.get("base-f0") ?? "110";
 const waitMs = args.get("wait-ms") ?? "3500";
 const url = args.get("url") ?? "";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-const outDir = path.resolve(args.get("out-dir") ?? path.join("test", "tmp", "observation-suite", timestamp));
+const outDir = path.resolve(
+  args.get("out-dir") ?? path.join("test", "tmp", "observation-suite", timestamp),
+);
 
 fs.mkdirSync(outDir, { recursive: true });
 
@@ -215,8 +219,14 @@ for (const experimentId of experiments) {
 
 const summaryJson = path.join(outDir, "summary.json");
 fs.writeFileSync(summaryJson, JSON.stringify(summary, null, 2));
-console.log(JSON.stringify({
-  outDir,
-  summaryJson,
-  resultCount: summary.results.length,
-}, null, 2));
+console.log(
+  JSON.stringify(
+    {
+      outDir,
+      summaryJson,
+      resultCount: summary.results.length,
+    },
+    null,
+    2,
+  ),
+);

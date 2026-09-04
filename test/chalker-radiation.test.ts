@@ -7,7 +7,7 @@
  *
  * Citation: Chalker & Mackerras 1985, IEEE Trans. ASSP-33(6), pp. 1606-1609.
  */
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 const C2_WEIGHT = 1 / 24;
 
@@ -47,11 +47,7 @@ function simpleDiff(input: number[], sr: number): number[] {
 }
 
 /** Generate a sine wave at a given frequency and sample rate. */
-function sineWave(
-  freq: number,
-  sr: number,
-  samples: number
-): number[] {
+function sineWave(freq: number, sr: number, samples: number): number[] {
   const out: number[] = [];
   for (let i = 0; i < samples; i++) {
     out.push(Math.sin((2 * Math.PI * freq * i) / sr));
@@ -98,10 +94,7 @@ describe("Chalker 1985 two-term radiation filter", () => {
       // c1 scales linearly
       expect(c44k.c1).toBeCloseTo(44100 / 10000, 6);
       // c2 scales quadratically
-      expect(c44k.c2).toBeCloseTo(
-        -C2_WEIGHT * (44100 / 10000) ** 2,
-        6
-      );
+      expect(c44k.c2).toBeCloseTo(-C2_WEIGHT * (44100 / 10000) ** 2, 6);
       // Verify c2 is larger in magnitude at higher SR
       expect(Math.abs(c44k.c2)).toBeGreaterThan(Math.abs(c10k.c2));
     });

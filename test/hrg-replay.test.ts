@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { replayJournal, Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { replayJournal, Utterance } from "../src/declarative-frontend/hrg";
 import { createProvenanceCollector } from "../src/provenance";
 
 const SCHEMA = {
@@ -92,8 +92,9 @@ describe("HRG checkpoints and deterministic replay", () => {
     const replayedTo = replayed.getItem("to");
     if (!replayedFrom || !replayedTo) throw new Error("missing replayed association items");
     expect(replayed.graphDigest()).toBe(utterance.graphDigest());
-    expect(replayed.associationWrites(replayedFrom, "cv", replayedTo).map((write) => write.active))
-      .toEqual([true, false]);
+    expect(
+      replayed.associationWrites(replayedFrom, "cv", replayedTo).map((write) => write.active),
+    ).toEqual([true, false]);
   });
 
   it("preserves original decision ids when non-graph decisions precede transactions", () => {
@@ -112,11 +113,7 @@ describe("HRG checkpoints and deterministic replay", () => {
     create.append("Segment", segment);
     create.commit();
 
-    const replayed = replayJournal(
-      SCHEMA,
-      utterance.journal(),
-      provenance.getDecisions(),
-    );
+    const replayed = replayJournal(SCHEMA, utterance.journal(), provenance.getDecisions());
     expect(replayed.graphDigest()).toBe(utterance.graphDigest());
     expect(replayed.getItem("s1")?.latestWrite("phoneme")?.decisionId).toBe(
       utterance.getItem("s1")?.latestWrite("phoneme")?.decisionId,

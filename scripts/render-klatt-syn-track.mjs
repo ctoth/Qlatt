@@ -31,10 +31,9 @@ const sampleRate = Number(args.get("sample-rate") ?? payload.sampleRate ?? 10000
 const lastDuration = Number(args.get("last-duration") ?? 0.005);
 const glottalType = (args.get("glottal") ?? "natural").toLowerCase();
 const disableAgc = (args.get("no-agc") ?? "0") === "1";
-const klattRoot =
-  args.get("klatt-syn-root") ?? path.join(os.homedir(), "src", "klatt-syn");
+const klattRoot = args.get("klatt-syn-root") ?? path.join(os.homedir(), "src", "klatt-syn");
 const outJson = path.resolve(
-  args.get("out-json") ?? path.join(repoRoot, "test", "golden", "klatt-syn-track.json")
+  args.get("out-json") ?? path.join(repoRoot, "test", "golden", "klatt-syn-track.json"),
 );
 
 const klattModuleUrl = pathToFileURL(path.join(klattRoot, "dist", "Klatt.js")).href;
@@ -80,12 +79,12 @@ for (let i = 0; i < track.length; i += 1) {
     ? Math.max(0.001, next.time - event.time)
     : lastDuration;
   const p = event.params;
-  const fricDbAdjusted = (p.SW === 1) ? Math.max(p.AF ?? -70, p.AH ?? -70) : (p.AF ?? -70);
-  const voiceLin = Math.pow(10, ((p.AV ?? -70) + ndbScale.AV) / 20);
-  const avsLin = Math.pow(10, ((p.AVS ?? -70) + ndbScale.AVS) / 20) * 10;
-  const aspLin = Math.pow(10, ((p.AH ?? -70) + ndbScale.AH) / 20);
-  const fricLin = Math.pow(10, ((fricDbAdjusted ?? -70) + ndbScale.AF) / 20);
-  const bypassLin = Math.pow(10, ((p.AB ?? -70) + ndbScale.AB) / 20);
+  const fricDbAdjusted = p.SW === 1 ? Math.max(p.AF ?? -70, p.AH ?? -70) : (p.AF ?? -70);
+  const voiceLin = 10 ** (((p.AV ?? -70) + ndbScale.AV) / 20);
+  const avsLin = 10 ** (((p.AVS ?? -70) + ndbScale.AVS) / 20) * 10;
+  const aspLin = 10 ** (((p.AH ?? -70) + ndbScale.AH) / 20);
+  const fricLin = 10 ** (((fricDbAdjusted ?? -70) + ndbScale.AF) / 20);
+  const bypassLin = 10 ** (((p.AB ?? -70) + ndbScale.AB) / 20);
 
   const oralFormantFreq = [
     p.F1 ?? demoFrameParms.oralFormantFreq[0],

@@ -13,13 +13,13 @@
  *           Allen, Hunnicutt & Klatt (1987), From Text to Speech: The MITalk System.
  */
 
-import { isVowel, syllabify } from './syllabify';
+import { isVowel, syllabify } from "./syllabify";
 
 // ── Types ───────────────────────────────────────────────────────────────
 
 export interface StressHint {
-  stressType?: 'forcing' | 'non_affecting';
-  stressTarget?: 'penult' | 'antepenult' | 'final';
+  stressType?: "forcing" | "non_affecting";
+  stressTarget?: "penult" | "antepenult" | "final";
 }
 
 // ── Stress Assignment ───────────────────────────────────────────────────
@@ -53,16 +53,16 @@ export function assignStress(phonemes: string[], hint?: StressHint): string[] {
   const numVowelSyllables = vowelSyllableIndices.length;
   let stressedSyllableIndex: number;
 
-  if (hint?.stressType === 'forcing' && hint.stressTarget) {
+  if (hint?.stressType === "forcing" && hint.stressTarget) {
     // Suffix-forced stress placement
     switch (hint.stressTarget) {
-      case 'final':
+      case "final":
         stressedSyllableIndex = vowelSyllableIndices[numVowelSyllables - 1];
         break;
-      case 'penult':
+      case "penult":
         stressedSyllableIndex = vowelSyllableIndices[Math.max(0, numVowelSyllables - 2)];
         break;
-      case 'antepenult':
+      case "antepenult":
         stressedSyllableIndex = vowelSyllableIndices[Math.max(0, numVowelSyllables - 3)];
         break;
     }
@@ -84,7 +84,7 @@ export function assignStress(phonemes: string[], hint?: StressHint): string[] {
   for (let si = 0; si < syllables.length; si++) {
     for (const phoneme of syllables[si]) {
       if (isVowel(phoneme)) {
-        result.push(phoneme + (si === stressedSyllableIndex ? '1' : '0'));
+        result.push(phoneme + (si === stressedSyllableIndex ? "1" : "0"));
       } else {
         result.push(phoneme);
       }

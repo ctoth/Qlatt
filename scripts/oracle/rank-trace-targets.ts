@@ -88,22 +88,18 @@ function parseArgs(argv: string[]): Args {
     summaryPath: path.resolve(summaryPath),
     param: flags.get("param") ?? null,
     bucket,
-    maxPhaseDelta: flags.has("max-phase-delta")
-      ? numberFlag(flags, "max-phase-delta")
-      : null,
-    minCompared: flags.has("min-compared")
-      ? integerFlag(flags, "min-compared")
-      : 1,
+    maxPhaseDelta: flags.has("max-phase-delta") ? numberFlag(flags, "max-phase-delta") : null,
+    minCompared: flags.has("min-compared") ? integerFlag(flags, "min-compared") : 1,
     limit: flags.has("limit") ? integerFlag(flags, "limit") : 20,
   };
 }
 
 function bucketFlag(raw: string): BucketName {
   if (
-    raw === "sameSegment"
-    || raw === "phaseAlignedSameSegment"
-    || raw === "differentSegment"
-    || raw === "unknownSegment"
+    raw === "sameSegment" ||
+    raw === "phaseAlignedSameSegment" ||
+    raw === "differentSegment" ||
+    raw === "unknownSegment"
   ) {
     return raw;
   }

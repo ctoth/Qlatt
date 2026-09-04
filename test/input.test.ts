@@ -3,25 +3,25 @@ import { describe, expect, it } from "vitest";
 import {
   AFFECT_PRESETS,
   compileAffect,
+  isClinicalSexRequired,
   neutralAffect,
   resolveAffectPreset,
-  isClinicalSexRequired,
 } from "../src/input/affect";
+import type { DirectionInput, DirectionTrack } from "../src/input/direction-track";
 import {
   NEUTRAL_DIMENSIONS,
   NEUTRAL_VQ,
   parseDirectionTrack,
   serializeDirectionTrack,
 } from "../src/input/direction-track";
-import type { DirectionTrack, DirectionInput } from "../src/input/direction-track";
-import {
-  parseDirectionInput,
-  tokenizeScore,
-  resolveAnchor,
-  effectiveSpanFieldAt,
-  spansAt,
-} from "../src/input/parse";
 import { parseInline } from "../src/input/inline";
+import {
+  effectiveSpanFieldAt,
+  parseDirectionInput,
+  resolveAnchor,
+  spansAt,
+  tokenizeScore,
+} from "../src/input/parse";
 
 describe("input contract — Direction Track schema", () => {
   it("round-trips a fully-populated Direction Track through JSON", () => {
@@ -178,14 +178,23 @@ describe("input contract — anchor resolution + span precedence", () => {
     const resolved = tokenizeScore(score);
     const range = resolveAnchor({ unit: "word", start: 2, end: 3 }, resolved);
     expect(range).toEqual({ startToken: 2, endToken: 3 });
-    expect(resolved.tokens.slice(range.startToken, range.endToken + 1)).toEqual(["very", "careful"]);
+    expect(resolved.tokens.slice(range.startToken, range.endToken + 1)).toEqual([
+      "very",
+      "careful",
+    ]);
   });
 
   it("resolves a phrase anchor to the phrase's token span", () => {
     const resolved = tokenizeScore("hello there, friend");
     // phrase 0 = tokens 0..1 ("hello there,"), phrase 1 = token 2 ("friend")
-    expect(resolveAnchor({ unit: "phrase", start: 0 }, resolved)).toEqual({ startToken: 0, endToken: 1 });
-    expect(resolveAnchor({ unit: "phrase", start: 1 }, resolved)).toEqual({ startToken: 2, endToken: 2 });
+    expect(resolveAnchor({ unit: "phrase", start: 0 }, resolved)).toEqual({
+      startToken: 0,
+      endToken: 1,
+    });
+    expect(resolveAnchor({ unit: "phrase", start: 1 }, resolved)).toEqual({
+      startToken: 2,
+      endToken: 2,
+    });
   });
 
   it("resolves overlapping spans by precedence (higher wins; ties → later-declared)", () => {
@@ -215,6 +224,63 @@ describe("input contract — anchor resolution + span precedence", () => {
 });
 
 describe("input contract — directions emit cited DecisionRecords (HRG-compatible)", () => {
+  it("routes pitch semitones to mean F0", () => {
+    const input: DirectionInput = {
+      score: { text: "hello" },
+      directionTrack: {
+        version: "1",
+        spans: [{ id: "pitch", anchor: { unit: "word", start: 0 }, pitch: { semitones: 12 } }],
+      },
+    };
+
+    const pitch = parseDirectionInput(input).directions.find((d) => d.kind === "pitch")!;
+
+    expect(pitch.delta?.f0Scale).toBeCloseTo(2, 6);
+    expect(pitch.delta?.f0VarianceScale).toBe(1);
+    expect(pitch.deltaFields).toEqual(["f0Scale"]);
+    expect(pitch.decision.reason).toContain("+12 st (F0×2)");
+  });
+
+  it("routes pitch rangeScale to F0 excursion", () => {
+    const input: DirectionInput = {
+      score: { text: "hello" },
+      directionTrack: {
+        version: "1",
+        spans: [{ id: "pitch", anchor: { unit: "word", start: 0 }, pitch: { rangeScale: 1.5 } }],
+      },
+    };
+
+    const pitch = parseDirectionInput(input).directions.find((d) => d.kind === "pitch")!;
+
+    expect(pitch.delta?.f0Scale).toBe(1);
+    expect(pitch.delta?.f0VarianceScale).toBe(1.5);
+    expect(pitch.deltaFields).toEqual(["f0VarianceScale"]);
+    expect(pitch.decision.reason).toContain("range×1.5");
+  });
+
+  it("combines pitch semitones and rangeScale on their independent channels", () => {
+    const input: DirectionInput = {
+      score: { text: "hello" },
+      directionTrack: {
+        version: "1",
+        spans: [
+          {
+            id: "pitch",
+            anchor: { unit: "word", start: 0 },
+            pitch: { semitones: -12, rangeScale: 0.75 },
+          },
+        ],
+      },
+    };
+
+    const pitch = parseDirectionInput(input).directions.find((d) => d.kind === "pitch")!;
+
+    expect(pitch.delta?.f0Scale).toBeCloseTo(0.5, 6);
+    expect(pitch.delta?.f0VarianceScale).toBe(0.75);
+    expect(pitch.deltaFields).toEqual(["f0Scale", "f0VarianceScale"]);
+    expect(pitch.decision.reason).toContain("-12 st (F0×0.50) range×0.75");
+  });
+
   it("a global affect lowers to a DecisionRecord with citations + the Affect relation", () => {
     const input: DirectionInput = {
       score: { text: "I am fine" },
@@ -250,7 +316,11 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
         version: "1",
         global: { affect: { preset: "sad" } },
         spans: [
-          { id: "shout", anchor: { unit: "word", start: 1 }, affect: { preset: "angry", degree: 0.7 } },
+          {
+            id: "shout",
+            anchor: { unit: "word", start: 1 },
+            affect: { preset: "angry", degree: 0.7 },
+          },
         ],
       },
     };
@@ -290,7 +360,9 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
       score: { text: "well okay then" },
       directionTrack: {
         version: "1",
-        spans: [{ id: "g", anchor: { unit: "word", start: 0 }, gesture: { name: "sigh", degree: 0.5 } }],
+        spans: [
+          { id: "g", anchor: { unit: "word", start: 0 }, gesture: { name: "sigh", degree: 0.5 } },
+        ],
       },
     };
     const result = parseDirectionInput(input);

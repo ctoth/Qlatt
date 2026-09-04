@@ -19,7 +19,7 @@
 //      voice dropdown there and passes no `speaker`).
 //
 // Run: node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/ui-voice-wire-check.ts
-import { textToKlattTrackDetailed, textToKlattTrack } from "../src/tts-frontend";
+import { textToKlattTrack, textToKlattTrackDetailed } from "../src/tts-frontend";
 
 const PHRASE = "hello there, how are you?";
 
@@ -32,9 +32,7 @@ function uiOptions(frontendId: string, speaker: string | null) {
 }
 
 function f0Signature(track: { params?: Record<string, number> }[]): string {
-  const f0s = track
-    .map((f) => f.params?.F0 ?? 0)
-    .filter((v) => v > 0);
+  const f0s = track.map((f) => f.params?.F0 ?? 0).filter((v) => v > 0);
   const min = f0s.length ? Math.min(...f0s) : 0;
   const max = f0s.length ? Math.max(...f0s) : 0;
   return `${min.toFixed(1)}-${max.toFixed(1)}`;
@@ -112,12 +110,7 @@ assert(
 
 // 3. qlatt-english with no speaker renders (UI hides dropdown there).
 console.log("\n[3] qlatt-english no speaker renders");
-const qlatt = textToKlattTrack(
-  PHRASE,
-  110,
-  30,
-  uiOptions("qlatt-english", null) as never,
-);
+const qlatt = textToKlattTrack(PHRASE, 110, 30, uiOptions("qlatt-english", null) as never);
 assert(qlatt.length > 0, `qlatt-english renders ${qlatt.length} frames`);
 
 console.log(`\n${failures === 0 ? "ALL CHECKS PASSED" : `${failures} CHECK(S) FAILED`}`);

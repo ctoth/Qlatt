@@ -9,7 +9,7 @@ import path from "node:path";
  * - Converts backslashes to forward slashes
  */
 export function normalizePath(rawPath: string): string {
-  const base = (typeof import.meta !== 'undefined' && (import.meta as any).env?.BASE_URL) || "/";
+  const base = (typeof import.meta !== "undefined" && import.meta.env.BASE_URL) || "/";
   let normalized = rawPath.trim().replace(/\\/g, "/");
   if (normalized.startsWith("/public/")) {
     normalized = normalized.slice("/public".length);

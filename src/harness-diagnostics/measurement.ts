@@ -95,7 +95,7 @@ export function readBandEnergy(
 
   let energy = 0;
   for (let i = lowBin; i <= highBin; i++) {
-    energy += Math.pow(10, buf[i] / 10);
+    energy += 10 ** (buf[i] / 10);
   }
   return energy;
 }
@@ -123,7 +123,7 @@ export function readBandShare(
   let bandEnergy = 0;
   let totalEnergy = 0;
   for (let i = 0; i < binCount; i += 1) {
-    const energy = Math.pow(10, buf[i] / 10);
+    const energy = 10 ** (buf[i] / 10);
     totalEnergy += energy;
     if (i >= lowBin && i <= highBin) {
       bandEnergy += energy;

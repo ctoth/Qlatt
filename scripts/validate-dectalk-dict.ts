@@ -26,15 +26,38 @@ const root = path.resolve(__dirname, "..");
 
 const DICT_PATH = path.join(root, "public", "dectalk-dictionary.json");
 const INVENTORY_PATH = path.join(
-  root, "public", "rules", "frontends", "dectalk-english", "inventory.yaml",
+  root,
+  "public",
+  "rules",
+  "frontends",
+  "dectalk-english",
+  "inventory.yaml",
 );
 const SRC_PATH = "C:\\Users\\Q\\src\\dectalk\\463\\dapi\\src\\dic\\Dic_us.txt";
 
 // Vowel symbol roots in the inventory (stress-bearing). Used to check that
 // vowels carry a digit and consonants do not.
 const VOWEL_ROOTS = new Set([
-  "IY", "IH", "EY", "EH", "AE", "AA", "AY", "AW", "AH", "AO", "OW", "OY",
-  "UH", "UW", "AX", "ER", "IR", "AR", "OR", "UR",
+  "IY",
+  "IH",
+  "EY",
+  "EH",
+  "AE",
+  "AA",
+  "AY",
+  "AW",
+  "AH",
+  "AO",
+  "OW",
+  "OY",
+  "UH",
+  "UW",
+  "AX",
+  "ER",
+  "IR",
+  "AR",
+  "OR",
+  "UR",
 ]);
 
 /** Extract phoneme symbol keys from the inventory YAML (2-space-indented keys
@@ -56,7 +79,7 @@ function loadDict(): Record<string, string> {
   return JSON.parse(fs.readFileSync(DICT_PATH, "utf8"));
 }
 
-function isVowelSymbol(sym: string): boolean {
+function _isVowelSymbol(sym: string): boolean {
   const m = /^([A-Z]+)([0-9])$/.exec(sym);
   if (m && VOWEL_ROOTS.has(m[1])) return true;
   return false;
@@ -115,7 +138,10 @@ function main(): void {
     console.log("PASS: zero unknown symbols (all emitted symbols are inventory keys).");
   } else {
     hardFail = true;
-    const pct = ((Array.from(unknownSymbols.values()).reduce((a, b) => a + b, 0) / totalSymbols) * 100).toFixed(3);
+    const pct = (
+      (Array.from(unknownSymbols.values()).reduce((a, b) => a + b, 0) / totalSymbols) *
+      100
+    ).toFixed(3);
     console.log(`FAIL: ${unknownSymbols.size} distinct unknown symbols (${pct}% of all symbols):`);
     for (const [sym, n] of [...unknownSymbols.entries()].sort((a, b) => b[1] - a[1])) {
       console.log(`  ${sym}: ${n}`);
@@ -136,9 +162,21 @@ function main(): void {
   // --- Check 3: side-by-side round-trip on hand-picked words ---------------
   console.log("--- Check 3: round-trip side-by-side (DECtalk raw -> ARPABET) ---");
   const samples = [
-    "judicial", "hello", "world", "the", "a", "read", "nuclear",
-    "colonel", "through", "knight", "february", "you", "computer",
-    "question", "yacht",
+    "judicial",
+    "hello",
+    "world",
+    "the",
+    "a",
+    "read",
+    "nuclear",
+    "colonel",
+    "through",
+    "knight",
+    "february",
+    "you",
+    "computer",
+    "question",
+    "yacht",
   ];
   // pull the raw DECtalk phoneme field (first/highest row) for each sample
   const srcRaw = new Map<string, string>();
@@ -156,7 +194,9 @@ function main(): void {
     const recomputed = raw !== undefined ? convertPhonemeField(raw) : "(no source row)";
     console.log(`  ${w.padEnd(14)} raw=${(raw ?? "(none)").padEnd(18)} -> ${recomputed}`);
     if (raw !== undefined && recomputed !== out && out !== "(not in dict)") {
-      console.log(`     NOTE: dict value differs (homograph collapse picked a higher-priority row): dict=${out}`);
+      console.log(
+        `     NOTE: dict value differs (homograph collapse picked a higher-priority row): dict=${out}`,
+      );
     }
   }
   console.log("");
@@ -175,7 +215,9 @@ function main(): void {
     if (seen.has(w)) multi.add(w);
     seen.add(w);
   }
-  console.log(`Source rows: ${rows}; unique words: ${seen.size}; words with >1 row collapsed: ${multi.size}`);
+  console.log(
+    `Source rows: ${rows}; unique words: ${seen.size}; words with >1 row collapsed: ${multi.size}`,
+  );
   console.log("Policy: keep highest-priority row; tie -> first encountered (v1 flat single-pron).");
   console.log("");
 

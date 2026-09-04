@@ -1,6 +1,6 @@
-import type { ProvenanceCollector } from "./provenance";
-import type { CompiledRulepack } from "./declarative-frontend/rule-pack";
 import type { Utterance } from "./declarative-frontend/hrg";
+import type { CompiledRulepack } from "./declarative-frontend/rule-pack";
+import type { ProvenanceCollector } from "./provenance";
 
 /** One phoneme selected by transcription before inventory materialization. */
 export interface TranscriptionToken {
@@ -36,6 +36,8 @@ export interface KlattFrame {
   time: number;
   phoneme?: string;
   word?: string;
+  segmentId?: string;
+  provenance?: Record<string, string>;
   params: Record<string, number>;
   [key: string]: unknown;
 }

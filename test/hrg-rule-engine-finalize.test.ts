@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { replayJournal, Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { replayJournal, Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
@@ -38,7 +38,10 @@ function fixture(): Utterance {
   const transaction = utterance.beginTransaction(META);
   const first = transaction.createItem("segment", "first");
   const second = transaction.createItem("segment", "second");
-  for (const [item, duration] of [[first, 100], [second, 50]] as const) {
+  for (const [item, duration] of [
+    [first, 100],
+    [second, 50],
+  ] as const) {
     transaction.set(item, "duration", duration);
     transaction.set(item, "active", true);
     transaction.append("Segment", item);
@@ -65,7 +68,13 @@ describe("graph-native phase finalization", () => {
       },
       phases: [
         { name: "prosody", rules: ["midpoint"] },
-        { name: "finalize", after: ["prosody"], rules: [], compute_times: true, resolve_points: ["F0Point"] },
+        {
+          name: "finalize",
+          after: ["prosody"],
+          rules: [],
+          compute_times: true,
+          resolve_points: ["F0Point"],
+        },
       ],
     });
 
@@ -82,17 +91,20 @@ describe("graph-native phase finalization", () => {
     expect(utterance.axis.getMarkTime(secondAnchor.rightMarkId)).toBe(150);
     const point = utterance.relation("F0Point").listItems()[0];
     expect(utterance.resolveAnchorTime(point)).toBe(50);
-    expect(utterance.checkpoints().map((checkpoint) => [checkpoint.phase, checkpoint.boundary])).toEqual([
+    expect(
+      utterance.checkpoints().map((checkpoint) => [checkpoint.phase, checkpoint.boundary]),
+    ).toEqual([
       ["prosody", "before"],
       ["prosody", "after"],
       ["finalize", "before"],
       ["finalize", "after"],
     ]);
-    expect(utterance.journal().at(-1)?.operations.map((operation) => operation.kind)).toEqual([
-      "resolve_mark_time",
-      "resolve_mark_time",
-      "resolve_mark_time",
-    ]);
+    expect(
+      utterance
+        .journal()
+        .at(-1)
+        ?.operations.map((operation) => operation.kind),
+    ).toEqual(["resolve_mark_time", "resolve_mark_time", "resolve_mark_time"]);
     expect(replayJournal(SCHEMA, utterance.journal()).graphDigest()).toBe(utterance.graphDigest());
   });
 

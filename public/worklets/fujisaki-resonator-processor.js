@@ -1,4 +1,4 @@
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+import { computeRmsPeak, initWasmModule, resolveWasmUrl, WasmBuffer, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./fujisaki-resonator.wasm");
 class FujisakiResonatorProcessor extends AudioWorkletProcessor {
     disposed = false;
@@ -16,8 +16,20 @@ class FujisakiResonatorProcessor extends AudioWorkletProcessor {
     lastBandwidth;
     static get parameterDescriptors() {
         return [
-            { name: "frequency", defaultValue: 500, minValue: 0, maxValue: 20000, automationRate: "k-rate" },
-            { name: "bandwidth", defaultValue: 60, minValue: 0, maxValue: 10000, automationRate: "k-rate" },
+            {
+                name: "frequency",
+                defaultValue: 500,
+                minValue: 0,
+                maxValue: 20000,
+                automationRate: "k-rate",
+            },
+            {
+                name: "bandwidth",
+                defaultValue: 60,
+                minValue: 0,
+                maxValue: 10000,
+                automationRate: "k-rate",
+            },
         ];
     }
     constructor(options) {

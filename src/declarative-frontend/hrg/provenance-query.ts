@@ -12,8 +12,8 @@
  */
 import type { DecisionRecord, ProvenanceCollector } from "../../provenance";
 import type { Item } from "./item";
-import type { Utterance } from "./utterance";
 import { frameIndexAt, type LoweredTrack } from "./lowering";
+import type { Utterance } from "./utterance";
 
 /**
  * Breadth-first walk of the decision DAG from `startId`, following `parents`.

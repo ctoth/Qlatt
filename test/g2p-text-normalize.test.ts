@@ -41,14 +41,14 @@ describe("numberToWords", () => {
   it("converts millions", () => {
     expect(numberToWords(1000000)).toBe("one million");
     expect(numberToWords(1234567)).toBe(
-      "one million two hundred thirty four thousand five hundred sixty seven"
+      "one million two hundred thirty four thousand five hundred sixty seven",
     );
   });
 
   it("converts hundreds of millions", () => {
     expect(numberToWords(100000000)).toBe("one hundred million");
     expect(numberToWords(999999999)).toBe(
-      "nine hundred ninety nine million nine hundred ninety nine thousand nine hundred ninety nine"
+      "nine hundred ninety nine million nine hundred ninety nine thousand nine hundred ninety nine",
     );
   });
 });
@@ -65,7 +65,7 @@ describe("normalizeText", () => {
 
     it("converts large numbers", () => {
       expect(normalizeText("I counted 1234")).toBe(
-        "i counted one thousand two hundred thirty four"
+        "i counted one thousand two hundred thirty four",
       );
     });
 
@@ -84,7 +84,7 @@ describe("normalizeText", () => {
     it("converts decimal numbers", () => {
       expect(normalizeText("pi is 3.14")).toBe("pi is three point one four");
       expect(normalizeText("value 1,234.56")).toBe(
-        "value one thousand two hundred thirty four point five six"
+        "value one thousand two hundred thirty four point five six",
       );
     });
   });
@@ -107,7 +107,7 @@ describe("normalizeText", () => {
 
     it("converts comma-grouped dollar amounts", () => {
       expect(normalizeText("$1,234.56")).toBe(
-        "one thousand two hundred thirty four dollars and fifty six cents"
+        "one thousand two hundred thirty four dollars and fifty six cents",
       );
     });
   });
@@ -124,12 +124,14 @@ describe("normalizeText", () => {
     });
 
     it("converts slash dates", () => {
-      expect(normalizeText("on 12/25/2024")).toBe("on december twenty fifth two thousand twenty four");
+      expect(normalizeText("on 12/25/2024")).toBe(
+        "on december twenty fifth two thousand twenty four",
+      );
     });
 
     it("converts iso dates", () => {
       expect(normalizeText("deadline 2026-02-27")).toBe(
-        "deadline february twenty seventh two thousand twenty six"
+        "deadline february twenty seventh two thousand twenty six",
       );
     });
   });

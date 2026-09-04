@@ -1,12 +1,12 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
 type FollowingClass =
-  | 'front_vowel'
-  | 'back_unrounded_vowel'
-  | 'back_rounded_vowel'
-  | 'obstruent'
-  | 'legacy_unused';
+  | "front_vowel"
+  | "back_unrounded_vowel"
+  | "back_rounded_vowel"
+  | "obstruent"
+  | "legacy_unused";
 
 type AmpProfile = {
   A2: number;
@@ -26,30 +26,76 @@ type PhonemeAmpEntry = {
 };
 
 const US_PHONEME_NAMES = [
-  'SIL',
-  'IY', 'IH', 'EY', 'EH', 'AE',
-  'AA', 'AY', 'AW', 'AH', 'AO',
-  'OW', 'OY', 'UH', 'UW', 'RR',
-  'YU', 'AX', 'IX', 'IR', 'ER',
-  'AR', 'OR', 'UR', 'W', 'Y',
-  'R', 'LL', 'HX', 'RX', 'LX',
-  'M', 'N', 'NX', 'EL', 'DZ',
-  'EN', 'F', 'V', 'TH', 'DH',
-  'S', 'Z', 'SH', 'ZH', 'P',
-  'B', 'T', 'D', 'K', 'G',
-  'DX', 'TX', 'Q', 'CH', 'JH',
-  'DF', 'TZ', 'CZ',
+  "SIL",
+  "IY",
+  "IH",
+  "EY",
+  "EH",
+  "AE",
+  "AA",
+  "AY",
+  "AW",
+  "AH",
+  "AO",
+  "OW",
+  "OY",
+  "UH",
+  "UW",
+  "RR",
+  "YU",
+  "AX",
+  "IX",
+  "IR",
+  "ER",
+  "AR",
+  "OR",
+  "UR",
+  "W",
+  "Y",
+  "R",
+  "LL",
+  "HX",
+  "RX",
+  "LX",
+  "M",
+  "N",
+  "NX",
+  "EL",
+  "DZ",
+  "EN",
+  "F",
+  "V",
+  "TH",
+  "DH",
+  "S",
+  "Z",
+  "SH",
+  "ZH",
+  "P",
+  "B",
+  "T",
+  "D",
+  "K",
+  "G",
+  "DX",
+  "TX",
+  "Q",
+  "CH",
+  "JH",
+  "DF",
+  "TZ",
+  "CZ",
 ] as const;
 
 const FOLLOWING_CLASSES: FollowingClass[] = [
-  'front_vowel',
-  'back_unrounded_vowel',
-  'back_rounded_vowel',
-  'obstruent',
-  'legacy_unused',
+  "front_vowel",
+  "back_unrounded_vowel",
+  "back_rounded_vowel",
+  "obstruent",
+  "legacy_unused",
 ] as const;
 
-const AMP_FIELDS = ['A2', 'A3', 'A4', 'A5', 'A6', 'AB'] as const;
+const AMP_FIELDS = ["A2", "A3", "A4", "A5", "A6", "AB"] as const;
 
 function parseShortArray(source: string, arrayName: string): number[] {
   const pattern = new RegExp(
@@ -63,16 +109,16 @@ function parseShortArray(source: string, arrayName: string): number[] {
 }
 
 function readRomFile(srcDir: string): string {
-  const romPath = path.join(srcDir, 'PH', 'p_us_rom.h');
-  return fs.readFileSync(romPath, 'latin1');
+  const romPath = path.join(srcDir, "PH", "p_us_rom.h");
+  return fs.readFileSync(romPath, "latin1");
 }
 
 function extractObstruentAmps(srcDir: string): Record<string, PhonemeAmpEntry> {
   const source = readRomFile(srcDir);
-  const ptram = parseShortArray(source, 'us_ptram');
-  const begtyp = parseShortArray(source, 'us_begtyp');
-  const endtyp = parseShortArray(source, 'us_endtyp');
-  const malamp = parseShortArray(source, 'us_malamp');
+  const ptram = parseShortArray(source, "us_ptram");
+  const begtyp = parseShortArray(source, "us_begtyp");
+  const endtyp = parseShortArray(source, "us_endtyp");
+  const malamp = parseShortArray(source, "us_malamp");
 
   if (ptram.length !== US_PHONEME_NAMES.length) {
     throw new Error(`Expected ${US_PHONEME_NAMES.length} us_ptram entries, got ${ptram.length}`);
@@ -118,7 +164,9 @@ function extractObstruentAmps(srcDir: string): Record<string, PhonemeAmpEntry> {
 function main(): void {
   const srcDir = process.argv[2];
   if (!srcDir) {
-    console.error('Usage: node --loader ts-node/esm --experimental-specifier-resolution=node scripts/extract-dectalk-obstruent-amps.ts <dapi/src dir> [phoneme...]');
+    console.error(
+      "Usage: node --loader ts-node/esm --experimental-specifier-resolution=node scripts/extract-dectalk-obstruent-amps.ts <dapi/src dir> [phoneme...]",
+    );
     process.exit(1);
   }
 

@@ -2,7 +2,7 @@
  * Impulsive glottal source AudioWorklet processor
  * Wraps the impulsive-source WASM primitive
  */
-import { initWasmModule, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+import { computeRmsPeak, initWasmModule, resolveWasmUrl, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./impulsive-source.wasm");
 class ImpulsiveSourceProcessor extends AudioWorkletProcessor {
     disposed = false;
@@ -15,7 +15,13 @@ class ImpulsiveSourceProcessor extends AudioWorkletProcessor {
     _reportCountdown;
     static get parameterDescriptors() {
         return [
-            { name: "f0", defaultValue: 100, minValue: 20, maxValue: 500, automationRate: "a-rate" },
+            {
+                name: "f0",
+                defaultValue: 100,
+                minValue: 20,
+                maxValue: 500,
+                automationRate: "a-rate",
+            },
             {
                 name: "openQuotient",
                 defaultValue: 0.5,

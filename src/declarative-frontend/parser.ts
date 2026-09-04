@@ -1,6 +1,6 @@
-import { parseYamlString, isPlainObject, cloneValue } from "../yaml-loader";
+import { cloneValue, isPlainObject, parseYamlString } from "../yaml-loader";
 
-type PlainObject = Record<string, any>;
+type PlainObject = Record<string, unknown>;
 
 type NormalizedPhase = {
   name: string;
@@ -80,7 +80,7 @@ function substituteFieldPlaceholders(value: unknown, fieldName: string): unknown
       Object.entries(value).map(([key, entry]) => [
         key,
         substituteFieldPlaceholders(entry, fieldName),
-      ])
+      ]),
     );
   }
   return value;
@@ -89,20 +89,20 @@ function substituteFieldPlaceholders(value: unknown, fieldName: string): unknown
 function expandForEachField(entries: unknown[]): PlainObject[] {
   const out: PlainObject[] = [];
   for (const entry of entries) {
-    if (!isPlainObject(entry) || !Object.prototype.hasOwnProperty.call(entry, "for_each_field")) {
+    if (!isPlainObject(entry) || !Object.hasOwn(entry, "for_each_field")) {
       out.push(cloneObject(entry));
       continue;
     }
     const fields = (entry as PlainObject).for_each_field;
     if (!Array.isArray(fields) || fields.length === 0) {
       throw new Error(
-        `E_FOR_EACH_FIELD_INVALID: 'for_each_field' must be a non-empty array of field names, got ${JSON.stringify(fields)}`
+        `E_FOR_EACH_FIELD_INVALID: 'for_each_field' must be a non-empty array of field names, got ${JSON.stringify(fields)}`,
       );
     }
     for (const f of fields) {
       if (typeof f !== "string" || f.length === 0) {
         throw new Error(
-          `E_FOR_EACH_FIELD_INVALID: 'for_each_field' entries must be non-empty strings, got ${JSON.stringify(f)}`
+          `E_FOR_EACH_FIELD_INVALID: 'for_each_field' entries must be non-empty strings, got ${JSON.stringify(f)}`,
         );
       }
     }
@@ -153,14 +153,14 @@ function substituteBindings(value: unknown, bindings: Record<string, string>): u
   }
   if (isPlainObject(value)) {
     return Object.fromEntries(
-      Object.entries(value).map(([key, entry]) => [key, substituteBindings(entry, bindings)])
+      Object.entries(value).map(([key, entry]) => [key, substituteBindings(entry, bindings)]),
     );
   }
   return value;
 }
 
 function isForeachDirective(entry: unknown): boolean {
-  return isPlainObject(entry) && Object.prototype.hasOwnProperty.call(entry, "foreach");
+  return isPlainObject(entry) && Object.hasOwn(entry, "foreach");
 }
 
 function expandForeachArray(entries: unknown[]): unknown[] {
@@ -174,7 +174,7 @@ function expandForeachArray(entries: unknown[]): unknown[] {
     for (const key of Object.keys(directive)) {
       if (key !== "foreach" && key !== "template") {
         throw new Error(
-          `E_FOREACH_INVALID: a 'foreach' directive may only contain 'foreach' and 'template', got extra key '${key}'`
+          `E_FOREACH_INVALID: a 'foreach' directive may only contain 'foreach' and 'template', got extra key '${key}'`,
         );
       }
     }
@@ -182,25 +182,29 @@ function expandForeachArray(entries: unknown[]): unknown[] {
     const template = directive.template;
     if (!Array.isArray(items) || items.length === 0) {
       throw new Error(
-        `E_FOREACH_INVALID: 'foreach' must be a non-empty array of binding maps, got ${JSON.stringify(items)}`
+        `E_FOREACH_INVALID: 'foreach' must be a non-empty array of binding maps, got ${JSON.stringify(items)}`,
       );
     }
     if (!isPlainObject(template)) {
       throw new Error(
-        `E_FOREACH_INVALID: 'foreach' requires an object 'template', got ${JSON.stringify(template)}`
+        `E_FOREACH_INVALID: 'foreach' requires an object 'template', got ${JSON.stringify(template)}`,
       );
     }
     for (const item of items) {
       if (!isPlainObject(item)) {
         throw new Error(
-          `E_FOREACH_INVALID: 'foreach' items must be binding maps, got ${JSON.stringify(item)}`
+          `E_FOREACH_INVALID: 'foreach' items must be binding maps, got ${JSON.stringify(item)}`,
         );
       }
       const bindings: Record<string, string> = {};
       for (const [key, binding] of Object.entries(item)) {
-        if (typeof binding !== "string" && typeof binding !== "number" && typeof binding !== "boolean") {
+        if (
+          typeof binding !== "string" &&
+          typeof binding !== "number" &&
+          typeof binding !== "boolean"
+        ) {
           throw new Error(
-            `E_FOREACH_INVALID: 'foreach' binding '${key}' must be a scalar (string/number/boolean), got ${JSON.stringify(binding)}`
+            `E_FOREACH_INVALID: 'foreach' binding '${key}' must be a scalar (string/number/boolean), got ${JSON.stringify(binding)}`,
           );
         }
         bindings[key] = String(binding);
@@ -220,7 +224,7 @@ function expandForeachValue(value: unknown): unknown {
   }
   if (isPlainObject(value)) {
     return Object.fromEntries(
-      Object.entries(value).map(([key, entry]) => [key, expandForeachValue(entry)])
+      Object.entries(value).map(([key, entry]) => [key, expandForeachValue(entry)]),
     );
   }
   return value;
@@ -263,28 +267,28 @@ function normalizeConditionSpec(value: unknown): unknown {
   if (!isPlainObject(value)) return cloneValue(value);
 
   const normalized: PlainObject = {};
-  if (Object.prototype.hasOwnProperty.call(value, "expr")) {
+  if (Object.hasOwn(value, "expr")) {
     normalized.expr = asString(value.expr, null);
   }
-  if (Object.prototype.hasOwnProperty.call(value, "predicate")) {
+  if (Object.hasOwn(value, "predicate")) {
     normalized.predicate = asString(value.predicate, null);
   }
-  if (Object.prototype.hasOwnProperty.call(value, "all")) {
+  if (Object.hasOwn(value, "all")) {
     normalized.all = Array.isArray(value.all)
       ? value.all.map((entry: unknown) => normalizeConditionSpec(entry))
       : cloneValue(value.all);
   }
-  if (Object.prototype.hasOwnProperty.call(value, "any")) {
+  if (Object.hasOwn(value, "any")) {
     normalized.any = Array.isArray(value.any)
       ? value.any.map((entry: unknown) => normalizeConditionSpec(entry))
       : cloneValue(value.any);
   }
-  if (Object.prototype.hasOwnProperty.call(value, "not")) {
+  if (Object.hasOwn(value, "not")) {
     normalized.not = normalizeConditionSpec(value.not);
   }
 
   for (const [key, entry] of Object.entries(value)) {
-    if (Object.prototype.hasOwnProperty.call(normalized, key)) continue;
+    if (Object.hasOwn(normalized, key)) continue;
     normalized[key] = cloneValue(entry);
   }
 
@@ -350,20 +354,19 @@ function normalizeRule(ruleInput: unknown): PlainObject {
   // engine and validation never see the directive itself. Structure-preserving
   // when no directive is present.
   const rule = expandForeachValue(ruleInput) as PlainObject;
-  const define =
-    isPlainObject(rule.define)
-      ? Object.fromEntries(
-          Object.entries(rule.define)
-            .filter(([name]) => typeof name === "string" && name.length > 0)
-            .map(([name, expr]) => [name, asString(expr, null)])
-        )
-      : {};
+  const define = isPlainObject(rule.define)
+    ? Object.fromEntries(
+        Object.entries(rule.define)
+          .filter(([name]) => typeof name === "string" && name.length > 0)
+          .map(([name, expr]) => [name, asString(expr, null)]),
+      )
+    : {};
   return {
     ...rule,
     citations: Array.isArray(rule.citations)
       ? rule.citations
-        .map((c: any) => normalizeCitationEntry(c))
-        .filter((entry): entry is string => typeof entry === "string" && entry.length > 0)
+          .map((c: unknown) => normalizeCitationEntry(c))
+          .filter((entry): entry is string => typeof entry === "string" && entry.length > 0)
       : typeof rule.citation === "string"
         ? [rule.citation.trim()].filter(Boolean)
         : [],
@@ -390,9 +393,10 @@ function normalizeRule(ruleInput: unknown): PlainObject {
     insert_points: Array.isArray(rule.insert_points)
       ? rule.insert_points.map((entry) => cloneObject(entry))
       : [],
-    insert_f0_layer: isPlainObject(rule.insert) && asString(rule.kind, null) === "f0_layer"
-      ? cloneObject(rule.insert)
-      : null,
+    insert_f0_layer:
+      isPlainObject(rule.insert) && asString(rule.kind, null) === "f0_layer"
+        ? cloneObject(rule.insert)
+        : null,
     suppress: Boolean(rule.suppress),
     delete: Boolean(rule.delete),
     associate: Array.isArray(rule.associate)
@@ -414,10 +418,8 @@ export function parseDslSpec(source: unknown) {
   if (!isPlainObject(raw)) {
     throw new Error("DSL spec must be an object or YAML object document");
   }
-  if (Object.prototype.hasOwnProperty.call(raw, "streams")) {
-    throw new Error(
-      "E_LEGACY_STREAMS: 'streams' is no longer accepted; declare 'relations'",
-    );
+  if (Object.hasOwn(raw, "streams")) {
+    throw new Error("E_LEGACY_STREAMS: 'streams' is no longer accepted; declare 'relations'");
   }
 
   const phases = Array.isArray(raw.phases) ? raw.phases : [];
@@ -428,13 +430,13 @@ export function parseDslSpec(source: unknown) {
   const parameters = isPlainObject(raw.parameters) ? raw.parameters : {};
   const topology = isPlainObject(raw.topology) ? raw.topology : {};
   const interpolation = isPlainObject(raw.interpolation) ? raw.interpolation : {};
-  const hasStringSets = Object.prototype.hasOwnProperty.call(raw, "string_sets");
-  const hasMaps = Object.prototype.hasOwnProperty.call(raw, "maps");
-  const hasSyllabification = Object.prototype.hasOwnProperty.call(raw, "syllabification");
+  const hasStringSets = Object.hasOwn(raw, "string_sets");
+  const hasMaps = Object.hasOwn(raw, "maps");
+  const hasSyllabification = Object.hasOwn(raw, "syllabification");
   const extraRootFields = Object.fromEntries(
     Object.entries(raw)
       .filter(([key]) => !DSL_ROOT_KEYS.has(key))
-      .map(([key, value]) => [key, cloneValue(value)])
+      .map(([key, value]) => [key, cloneValue(value)]),
   );
 
   return {
@@ -448,14 +450,14 @@ export function parseDslSpec(source: unknown) {
     source_contour_path: asString(raw.source_contour_path, null),
     normalization: cloneObject(raw.normalization),
     speakers: cloneObject(raw.speakers),
-    ...(Object.prototype.hasOwnProperty.call(raw, "skip_dictionary")
+    ...(Object.hasOwn(raw, "skip_dictionary")
       ? { skip_dictionary: Boolean(raw.skip_dictionary) }
       : {}),
     f0_model: isPlainObject(raw.f0_model) ? raw.f0_model : null,
     parameters,
     input_contract: cloneObject(raw.input_contract),
     relations: Object.fromEntries(
-      Object.entries(relations).map(([name, relation]) => [name, normalizeRelation(relation)])
+      Object.entries(relations).map(([name, relation]) => [name, normalizeRelation(relation)]),
     ),
     topology: {
       hierarchy: asStringArray(topology.hierarchy),
@@ -466,7 +468,7 @@ export function parseDslSpec(source: unknown) {
       Object.entries(predicates).map(([name, predicateSpec]) => [
         name,
         normalizeConditionSpec(predicateSpec),
-      ])
+      ]),
     ),
     // Chunk 3: carry pipeline-level string_sets / maps blocks through to the
     // runtime. Shape is validated downstream by validation.ts
@@ -478,11 +480,11 @@ export function parseDslSpec(source: unknown) {
     // parsed into normalized tables by engine.ts (parseSyllabificationTables).
     ...(hasSyllabification ? { syllabification: cloneValue(raw.syllabification) } : {}),
     patterns: Object.fromEntries(
-      Object.entries(patterns).map(([name, pattern]) => [name, normalizePattern(pattern)])
+      Object.entries(patterns).map(([name, pattern]) => [name, normalizePattern(pattern)]),
     ),
     phases: phases.map((phase) => normalizePhase(phase)),
     rules: Object.fromEntries(
-      Object.entries(rules).map(([name, rule]) => [name, normalizeRule(rule)])
+      Object.entries(rules).map(([name, rule]) => [name, normalizeRule(rule)]),
     ),
     interpolation: {
       scalars: cloneObject(interpolation.scalars),

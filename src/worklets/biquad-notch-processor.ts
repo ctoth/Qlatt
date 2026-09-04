@@ -2,14 +2,25 @@
 // Numerically stable replacement for Klatt FIR antiresonator at high sample rates.
 // Reference: Bristow-Johnson, "Audio EQ Cookbook" (2005)
 
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  computeRmsPeak,
+  initWasmModule,
+  resolveWasmUrl,
+  WasmBuffer,
+} from "./wasm-utils.js";
 
 interface BiquadNotchWasmExports {
   memory: WebAssembly.Memory;
   alloc_f32(len: number): number;
   dealloc_f32(ptr: number, len: number): void;
   biquad_notch_new(): number;
-  biquad_notch_set_params(state: number, frequency: number, bandwidth: number, sampleRate: number): void;
+  biquad_notch_set_params(
+    state: number,
+    frequency: number,
+    bandwidth: number,
+    sampleRate: number,
+  ): void;
   biquad_notch_set_gain(state: number, gain: number): void;
   biquad_notch_process(state: number, inputPtr: number, outputPtr: number, blockSize: number): void;
 }
@@ -58,9 +69,27 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "frequency", defaultValue: 500, minValue: 0, maxValue: 20000, automationRate: "k-rate" as const },
-      { name: "bandwidth", defaultValue: 60, minValue: 0, maxValue: 10000, automationRate: "k-rate" as const },
-      { name: "gain", defaultValue: 1, minValue: 0, maxValue: 4, automationRate: "k-rate" as const },
+      {
+        name: "frequency",
+        defaultValue: 500,
+        minValue: 0,
+        maxValue: 20000,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "bandwidth",
+        defaultValue: 60,
+        minValue: 0,
+        maxValue: 10000,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "gain",
+        defaultValue: 1,
+        minValue: 0,
+        maxValue: 4,
+        automationRate: "k-rate" as const,
+      },
     ];
   }
 
@@ -107,7 +136,7 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
   process(
     inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const output = outputs[0];
@@ -127,7 +156,8 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
     const freq = parameters.frequency?.[0] ?? 500;
     const bw = parameters.bandwidth?.[0] ?? 60;
     const gain = parameters.gain?.[0] ?? 1;
-    const bypass = this.bypassAtZero && (!Number.isFinite(freq) || !Number.isFinite(bw) || freq <= 0 || bw <= 0);
+    const bypass =
+      this.bypassAtZero && (!Number.isFinite(freq) || !Number.isFinite(bw) || freq <= 0 || bw <= 0);
 
     if (bypass) {
       if (inputChannel) {
@@ -171,7 +201,7 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
       this.state,
       this.inputBuffer.ptr,
       this.outputBuffer.ptr,
-      blockSize
+      blockSize,
     );
 
     this.outputBuffer.refresh();
@@ -188,7 +218,7 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
   _reportMetrics(
     buffer: Float32Array,
     inputBuffer?: Float32Array | null,
-    params?: BiquadNotchMetricsParams
+    params?: BiquadNotchMetricsParams,
   ): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;

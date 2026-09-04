@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { createDiagnostics } from "../src/diagnostics";
-import { Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { Utterance } from "../src/declarative-frontend/hrg";
+import { createDiagnostics } from "../src/diagnostics";
 
 const SCHEMA = {
   itemTypes: {

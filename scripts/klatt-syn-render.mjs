@@ -17,8 +17,7 @@ const defaultOut = path.join(repoRoot, "test", "golden", "klatt_syn_frame.json")
 const sampleRate = Number(args.get("sample-rate") ?? 22050);
 const duration = Number(args.get("duration") ?? 0.1);
 const glottalType = (args.get("glottal") ?? "natural").toLowerCase();
-const klattRoot =
-  args.get("klatt-syn-root") ?? path.join(os.homedir(), "src", "klatt-syn");
+const klattRoot = args.get("klatt-syn-root") ?? path.join(os.homedir(), "src", "klatt-syn");
 
 const klattModuleUrl = pathToFileURL(path.join(klattRoot, "dist", "Klatt.js")).href;
 const demoModuleUrl = pathToFileURL(path.join(klattRoot, "dist", "DemoParms.js")).href;

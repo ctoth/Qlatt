@@ -1,4 +1,4 @@
-import yaml from "js-yaml";
+import { load as loadYaml } from "js-yaml";
 import { isNodeRuntime, normalizePath, readFileFromFsSync } from "./path-utils";
 
 type PlainObject = Record<string, unknown>;
@@ -13,7 +13,7 @@ function readYamlSourceFromUrlSync(specPath: string): string | null {
 }
 
 function parseYaml<T = unknown>(source: string, label: string): T {
-  const parsed = yaml.load(source);
+  const parsed = loadYaml(source);
   if (parsed === null || parsed === undefined) {
     throw new Error(`E_YAML_SCHEMA: '${label}' resolved to empty document`);
   }

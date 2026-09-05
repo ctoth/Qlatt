@@ -136,7 +136,7 @@ describe("graph-native predicate navigation", () => {
         Word: { type: "span", features: { text: [] } },
         Segment: {
           type: "base",
-          features: { phoneme: [], type: ["stop", "vowel"] },
+          features: { phoneme: [], syllable: [], type: ["stop", "vowel"] },
           scalars: { duration: {} },
         },
         SylStructure: { type: "span" },

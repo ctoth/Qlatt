@@ -822,10 +822,11 @@ function updateNestedValue(
   item: Item,
   field: string,
   value: unknown,
+  tag: string,
 ): void {
   const [root, ...path] = field.split(".");
   if (path.length === 0) {
-    transaction.set(item, root, value);
+    transaction.set(item, root, value, tag);
     return;
   }
   const existing = transaction.read(item, root);
@@ -837,7 +838,7 @@ function updateNestedValue(
       [key]: index === path.length - 1 ? value : update(record[key], index + 1),
     });
   };
-  transaction.set(item, root, update(existing, 0));
+  transaction.set(item, root, update(existing, 0), tag);
 }
 
 function applyEffects(
@@ -853,6 +854,9 @@ function applyEffects(
   if (!Array.isArray(effects)) return;
   for (const effect of effects) {
     if (!isPlainObject(effect) || typeof effect.field !== "string") continue;
+    if (typeof effect.tag !== "string" || effect.tag.length === 0) {
+      throw new Error("E_EFFECT_TAG_REQUIRED: apply effect requires a tag");
+    }
     const targetName = typeof effect.target === "string" ? effect.target : defaultTarget;
     const item = resolveTarget(targetName);
     if (!item) throw new Error(`E_EFFECT_TARGET_UNKNOWN: unknown effect target '${targetName}'`);
@@ -952,7 +956,7 @@ function applyEffects(
       }
       resolved = roundValue(numericResolved);
     }
-    updateNestedValue(transaction, item, effect.field, resolved);
+    updateNestedValue(transaction, item, effect.field, resolved, effect.tag);
   }
 }
 

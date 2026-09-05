@@ -6,8 +6,13 @@ import {
   parseYamlString,
   resolveIncludePath,
 } from "../yaml-loader";
+import {
+  type InventorySpec,
+  loadInventorySpecFromPath,
+  preloadInventorySpecFromPath,
+} from "./inventory";
 import { DSL_ROOT_KEYS, type NormalizedDslSpec, parseDslSpec } from "./parser";
-import { assertValidSpec } from "./validation";
+import { assertValidSpec, type ValidationDiagnostic } from "./validation";
 
 type PlainObject = Record<string, unknown>;
 
@@ -33,6 +38,7 @@ const MERGED_CHILD_ROOT_KEYS = new Set([
   "relations",
   "string_sets",
   "maps",
+  "tags",
   "syllabification",
   "phases",
   "topology",
@@ -68,7 +74,7 @@ export const DEFAULT_RULEPACK_PATH = BUNDLED_FRONTEND_RULEPACK_PATHS[DEFAULT_FRO
  * Merge a child spec into the root spec, mutating root in-place.
  *
  * Merge semantics:
- * - rules, predicates, patterns, relations: merge by key, error on duplicate
+ * - rules, predicates, patterns, relations, tags: merge by key, error on duplicate
  * - phases: concat (root first, then child)
  * - topology: concat + dedup each sub-key (hierarchy, parallel, point)
  * - All other fields (version, parameters, output, etc.): root wins, child ignored
@@ -89,6 +95,7 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
     "relations",
     "string_sets",
     "maps",
+    "tags",
   ] as const) {
     const childDict = (child[key] ?? {}) as Record<string, unknown>;
     for (const [k, v] of Object.entries(childDict)) {
@@ -340,10 +347,41 @@ async function resolveIncludesAsync(
 export type CompiledRulepack = Readonly<NormalizedDslSpec>;
 
 const BUNDLED_RULEPACK_CACHE = new Map<string, CompiledRulepack>();
+const RULEPACK_DIAGNOSTICS = new WeakMap<object, readonly ValidationDiagnostic[]>();
+
+function validationInventoryPhonemes(inventory: InventorySpec | null): string[] | undefined {
+  if (!inventory) return undefined;
+  const symbols = new Set(Object.keys(inventory.normalization_aliases ?? {}));
+  for (const phoneme of Object.keys(inventory.phoneme_targets)) {
+    symbols.add(phoneme);
+    symbols.add(phoneme.replace(/[01]$/, ""));
+  }
+  return [...symbols];
+}
+
+function recordDiagnostics(spec: CompiledRulepack, diagnostics: ValidationDiagnostic[]): void {
+  RULEPACK_DIAGNOSTICS.set(
+    spec,
+    Object.freeze(diagnostics.map((diagnostic) => Object.freeze({ ...diagnostic }))),
+  );
+}
+
+export function getRulepackValidationDiagnostics(
+  spec: CompiledRulepack,
+): readonly ValidationDiagnostic[] {
+  return RULEPACK_DIAGNOSTICS.get(spec) ?? Object.freeze([]);
+}
 
 export function compileRuleEngineSpec(source: unknown): CompiledRulepack {
+  const parameterSchemaDeclared = isPlainObject(source) && Object.hasOwn(source, "parameters");
   const spec = parseDslSpec(source);
-  assertValidSpec(spec);
+  const inventory =
+    typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
+  const diagnostics = assertValidSpec(spec, {
+    inventoryPhonemes: validationInventoryPhonemes(inventory),
+    parameterSchemaDeclared,
+  });
+  recordDiagnostics(spec, diagnostics);
   freezeRecursively(spec);
   return spec;
 }
@@ -401,7 +439,14 @@ export function loadRulepackSpecFromPath(
   );
   const merged = resolveIncludesSync(rootDoc, specPath, undefined, fallback);
   const spec = parseDslSpec(merged);
-  assertValidSpec(spec, { requireLoweringSpec: true });
+  const inventory =
+    typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
+  const diagnostics = assertValidSpec(spec, {
+    inventoryPhonemes: validationInventoryPhonemes(inventory),
+    requireLoweringSpec: true,
+    requireTagVocabulary: true,
+  });
+  recordDiagnostics(spec, diagnostics);
   freezeRecursively(spec);
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;
@@ -432,7 +477,16 @@ export async function preloadRulepackSpecFromPath(
   );
   const merged = await resolveIncludesAsync(rootDoc, specPath, undefined, fallback);
   const spec = parseDslSpec(merged);
-  assertValidSpec(spec, { requireLoweringSpec: true });
+  const inventory =
+    typeof spec.inventory_path === "string"
+      ? await preloadInventorySpecFromPath(spec.inventory_path)
+      : null;
+  const diagnostics = assertValidSpec(spec, {
+    inventoryPhonemes: validationInventoryPhonemes(inventory),
+    requireLoweringSpec: true,
+    requireTagVocabulary: true,
+  });
+  recordDiagnostics(spec, diagnostics);
   freezeRecursively(spec);
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;

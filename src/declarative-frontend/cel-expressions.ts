@@ -4,6 +4,7 @@ type CompiledCelExpression = (context?: Record<string, unknown>) => unknown;
 
 export type ExpressionValidationOptions = {
   relationNames?: Iterable<string>;
+  variables?: Iterable<string>;
 };
 
 const expressionCache = new Map<string, CompiledCelExpression>();
@@ -145,6 +146,8 @@ const DEFAULT_ALLOWED_FUNCTIONS = new Set(CEL_FUNCTION_CATALOG.map(({ name }) =>
 
 const FUNCTION_CALL_PATTERN = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
 const RELATION_HELPER_PATTERN = /\b(total|prev_point)\s*\(\s*(['"])([^'"]+)\2\s*\)/g;
+const PATH_HELPER_PATTERN = /\bpath\s*\(\s*[^,]+,\s*(['"])([^'"]+)\1\s*\)/g;
+const PATH_RELATION_SEGMENT_PATTERN = /(?:^|\.)R:([A-Za-z_][A-Za-z0-9_]*)/g;
 const CURSOR_DEPTH_PATTERN = /\b(prev|next)(\d+)\b/g;
 
 /**
@@ -154,9 +157,10 @@ const CURSOR_DEPTH_PATTERN = /\b(prev|next)(\d+)\b/g;
  */
 function createCelEnvironment(
   functions: Readonly<Record<string, unknown>> | null = null,
+  unlistedVariablesAreDyn = true,
 ): Environment {
   const env = new Environment({
-    unlistedVariablesAreDyn: true,
+    unlistedVariablesAreDyn,
     homogeneousAggregateLiterals: false,
     enableOptionalTypes: true,
   });
@@ -276,6 +280,15 @@ function validateRelationHelpers(expression: string, relationNames: Set<string>)
       return `Unknown relation '${relationName}' in ${match[1]}()`;
     }
   }
+  for (const match of expression.matchAll(PATH_HELPER_PATTERN)) {
+    const path = match[2] ?? "";
+    for (const segment of path.matchAll(PATH_RELATION_SEGMENT_PATTERN)) {
+      const relationName = segment[1];
+      if (relationName && !relationNames.has(relationName)) {
+        return `Unknown relation '${relationName}' in path()`;
+      }
+    }
+  }
   return null;
 }
 
@@ -309,6 +322,25 @@ export function validateExpressionSyntax(
     const relationNames = new Set([...options.relationNames]);
     const relationError = validateRelationHelpers(expression, relationNames);
     if (relationError) return relationError;
+  }
+
+  if (options.variables) {
+    try {
+      const env = createCelEnvironment(null, false);
+      for (const variable of options.variables) {
+        env.registerVariable(variable, "dyn");
+      }
+      const checked = env.check(expression);
+      if (!checked.valid) {
+        const message =
+          checked.error instanceof Error
+            ? checked.error.message
+            : String(checked.error ?? "CEL type check failed");
+        if (message.includes("Unknown variable")) throw new Error(message);
+      }
+    } catch (error) {
+      return error instanceof Error ? error.message : String(error);
+    }
   }
 
   return null;

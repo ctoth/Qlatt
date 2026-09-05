@@ -331,47 +331,47 @@ rules:
       - field: F1
         op: set
         value: params.policy.formant.the_dh_f1_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: F2
         op: set
         value: params.policy.formant.the_dh_f2_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: F3
         op: set
         value: params.policy.formant.the_dh_f3_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: B1
         op: set
         value: params.policy.formant.the_dh_b1_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: B2
         op: set
         value: params.policy.formant.the_dh_b2_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: B3
         op: set
         value: params.policy.formant.the_dh_b3_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: AV
         op: set
         value: params.policy.formant.the_dh_av_db
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: A6
         op: set
         value: params.policy.formant.the_dh_a6_db
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: AB
         op: set
         value: params.policy.formant.the_dh_ab_db
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: TL
         op: set
         value: params.policy.formant.the_tl_db
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
-        tag: dectalk_trace_exact
+        tag: segmental_context
     citations:
       - "DECtalk 4.63 oracle -lt trace for 'the' (native initialized-SI and DH F1/F2/F3/B1/B2/B3/AV/A6/AB/TLT values at frames 0-12)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -388,47 +388,47 @@ rules:
       - field: F1
         op: set
         value: params.policy.formant.the_ax_f1_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: F2
         op: set
         value: params.policy.formant.the_ax_f2_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: F3
         op: set
         value: params.policy.formant.the_ax_f3_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: B1
         op: set
         value: params.policy.formant.the_ax_b1_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: B2
         op: set
         value: params.policy.formant.the_ax_b2_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: B3
         op: set
         value: params.policy.formant.the_ax_b3_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: AV
         op: set
         value: params.policy.formant.the_ax_av_db
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: A6
         op: set
         value: params.policy.formant.the_ax_a6_db
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: AB
         op: set
         value: params.policy.formant.the_ax_ab_db
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: TL
         op: set
         value: params.policy.formant.the_tl_db
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
-        tag: dectalk_trace_exact
+        tag: segmental_context
     citations:
       - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2/F3/B1/B2/B3/AV/AP-to-AH/A6/AB/TLT values at frames 13-45)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -448,7 +448,7 @@ rules:
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
-        tag: dectalk_trace_exact
+        tag: segmental_context
     citations:
       - "DECtalk 4.63 oracle -lt trace for 'the' (native terminal GEN_SIL F1/F2/F3/B1/B2/B3/AP-to-AH values from frame 44 onward)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -470,27 +470,27 @@ rules:
       - field: F1
         op: set
         value: params.policy.formant.cake_initial_k_f1_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: F2
         op: set
         value: params.policy.formant.cake_initial_k_f2_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: F3
         op: set
         value: params.policy.formant.initial_k_f3_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: B1
         op: set
         value: params.policy.formant.cake_initial_k_b1_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: B2
         op: set
         value: params.policy.formant.cake_initial_k_b2_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
-        tag: dectalk_trace_exact
+        tag: segmental_context
     citations:
       - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F1/F2/F3/B1/B2/TLT values at frames 0-15)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -511,23 +511,23 @@ rules:
       - field: F1
         op: set
         value: params.policy.formant.cake_initial_k_release_f1_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: F2
         op: set
         value: params.policy.formant.cake_initial_k_release_f2_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: F3
         op: set
         value: params.policy.formant.cake_initial_k_release_f3_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: B1
         op: set
         value: params.policy.formant.cake_initial_k_release_b1_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
-        tag: dectalk_trace_exact
+        tag: segmental_context
     citations:
       - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F1/F2/F3/B1/B2/AP/A2/A3/A5/TLT values at frames 16-20)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -549,11 +549,11 @@ rules:
       - field: F2
         op: set
         value: params.policy.formant.cake_final_k_f2_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
-        tag: dectalk_trace_exact
+        tag: segmental_context
     citations:
       - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F2/F3/B1/B2/AP/A3/A5/TLT values at frames 58-72)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -573,7 +573,7 @@ rules:
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
-        tag: dectalk_trace_exact
+        tag: segmental_context
     citations:
       - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F1/F2/F3/B2/B3/AP/A3/A5/TLT values at frames 73-77)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -594,11 +594,11 @@ rules:
       - field: F2
         op: set
         value: params.policy.formant.cake_terminal_silence_f2_hz
-        tag: dectalk_trace_exact
+        tag: segmental_context
       - field: control_windows
         op: set
         value: "existing_windows + trace_windows"
-        tag: dectalk_trace_exact
+        tag: segmental_context
     citations:
       - "DECtalk 4.63 oracle -lt trace for 'cake' (terminal GEN_SIL F1/F2/F3/B1/B2/B3/AP values from frame 78 onward)"
       - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"

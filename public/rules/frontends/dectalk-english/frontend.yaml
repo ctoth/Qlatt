@@ -607,21 +607,21 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'the' (native TLT is zero through DH and AX)"
       the_dh_formant_trace_windows:
         value:
-          - { start_ms: -12.8, end_ms: -6.4, fields: { A6: 9, AB: 9 }, tag: dectalk_trace_exact }
-          - { start_ms: -6.4, end_ms: 0.0, fields: { A6: 18, AB: 18 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 295, F2: 1493, F3: 2561, B1: 200, B2: 170, B3: 170, AV: 37, AB: 36 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 297, F2: 1492, F3: 2562, B1: 187, B2: 163, B3: 170, AV: 39, AB: 38 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 299, F2: 1491, F3: 2562, B1: 175, B2: 157, B3: 170, AV: 42, AB: 40 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 301, F2: 1490, F3: 2562, B1: 162, B2: 151, B3: 170, AV: 45, AB: 42 }, tag: dectalk_trace_exact }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 301, F2: 1489, F3: 2562, B1: 150, B2: 145, B3: 170, AV: 47, AB: 44 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 301, F2: 1488, F3: 2563, B1: 136, B2: 135, B3: 170, AV: 50, AB: 46 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 301, F2: 1467, F3: 2592, B1: 123, B2: 125, B3: 171, AV: 54, AB: 46 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 301, F2: 1446, F3: 2621, B1: 109, B2: 116, B3: 172, AV: 55, AB: 46 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.6, fields: { F1: 323, F2: 1425, F3: 2650, B1: 96, B2: 106, B3: 173, AV: 56, AB: 41 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 6.4, fields: { A6: 27, AB: 27 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.4, end_ms: 51.2, fields: { A6: 0 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { A6: 46 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.6, fields: { A6: 41 }, tag: dectalk_trace_exact }
+          - { start_ms: -12.8, end_ms: -6.4, fields: { A6: 9, AB: 9 }, tag: segmental_context }
+          - { start_ms: -6.4, end_ms: 0.0, fields: { A6: 18, AB: 18 }, tag: segmental_context }
+          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 295, F2: 1493, F3: 2561, B1: 200, B2: 170, B3: 170, AV: 37, AB: 36 }, tag: segmental_context }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 297, F2: 1492, F3: 2562, B1: 187, B2: 163, B3: 170, AV: 39, AB: 38 }, tag: segmental_context }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 299, F2: 1491, F3: 2562, B1: 175, B2: 157, B3: 170, AV: 42, AB: 40 }, tag: segmental_context }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 301, F2: 1490, F3: 2562, B1: 162, B2: 151, B3: 170, AV: 45, AB: 42 }, tag: segmental_context }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 301, F2: 1489, F3: 2562, B1: 150, B2: 145, B3: 170, AV: 47, AB: 44 }, tag: segmental_context }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 301, F2: 1488, F3: 2563, B1: 136, B2: 135, B3: 170, AV: 50, AB: 46 }, tag: segmental_context }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 301, F2: 1467, F3: 2592, B1: 123, B2: 125, B3: 171, AV: 54, AB: 46 }, tag: segmental_context }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 301, F2: 1446, F3: 2621, B1: 109, B2: 116, B3: 172, AV: 55, AB: 46 }, tag: segmental_context }
+          - { start_ms: 57.6, fields: { F1: 323, F2: 1425, F3: 2650, B1: 96, B2: 106, B3: 173, AV: 56, AB: 41 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 6.4, fields: { A6: 27, AB: 27 }, tag: segmental_context }
+          - { start_ms: 6.4, end_ms: 51.2, fields: { A6: 0 }, tag: segmental_context }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { A6: 46 }, tag: segmental_context }
+          - { start_ms: 57.6, fields: { A6: 41 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'the' (native DH F1/F2/F3/B1/B2/B3/AV/A6/AB values at frames 1-12)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -663,95 +663,95 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'the' (AX AB at frame 13)"
       the_ax_formant_trace_windows:
         value:
-          - { start_ms: 0.0, end_ms: 6.0, fields: { F1: 346, F2: 1404, F3: 2679, B1: 95, B2: 103, B3: 173, AV: 57 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.0, end_ms: 12.4, fields: { F1: 368, F2: 1384, F3: 2709, B1: 94, B2: 99, B3: 174, AV: 58 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 390, F2: 1371, F3: 2695, B1: 93, B2: 96, B3: 175, AV: 59 }, tag: dectalk_trace_exact }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 412, F2: 1358, F3: 2681, B1: 93, B2: 93, B3: 176, AV: 60 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 435, F2: 1345, F3: 2667, B1: 92, B2: 89, B3: 177, AV: 61 }, tag: dectalk_trace_exact }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 457, F2: 1333, F3: 2653, B1: 91, B2: 86, B3: 178, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.0, end_ms: 44.6, fields: { F1: 479, F2: 1320, F3: 2639, B1: 90, B2: 83, B3: 179, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 501, F2: 1307, F3: 2625, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 524, F2: 1294, F3: 2611, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.4, end_ms: 63.8, fields: { F1: 526, F2: 1280, F3: 2598, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 63.8, end_ms: 70.2, fields: { F1: 528, F2: 1278, F3: 2598, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 70.2, end_ms: 76.6, fields: { F1: 530, F2: 1276, F3: 2598, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.6, end_ms: 83.0, fields: { F1: 533, F2: 1274, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 83.0, end_ms: 89.4, fields: { F1: 535, F2: 1272, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { F1: 537, F2: 1270, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { F1: 539, F2: 1268, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 102.2, end_ms: 108.8, fields: { F1: 542, F2: 1266, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 108.8, end_ms: 115.4, fields: { F1: 544, F2: 1264, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 115.4, end_ms: 121.8, fields: { F1: 546, F2: 1262, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 121.8, fields: { F1: 548, F2: 1260, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: dectalk_trace_exact }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { AH: 2 }, tag: dectalk_trace_exact }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { AH: 5 }, tag: dectalk_trace_exact }
-          - { start_ms: 102.2, end_ms: 108.8, fields: { AH: 7 }, tag: dectalk_trace_exact }
-          - { start_ms: 108.8, end_ms: 115.4, fields: { AH: 10 }, tag: dectalk_trace_exact }
-          - { start_ms: 115.4, end_ms: 121.8, fields: { AH: 12 }, tag: dectalk_trace_exact }
-          - { start_ms: 121.8, end_ms: 128.2, fields: { AH: 15 }, tag: dectalk_trace_exact }
-          - { start_ms: 128.2, end_ms: 134.6, fields: { AH: 17 }, tag: dectalk_trace_exact }
-          - { start_ms: 134.6, end_ms: 141.0, fields: { AH: 20 }, tag: dectalk_trace_exact }
-          - { start_ms: 141.0, end_ms: 147.4, fields: { AH: 22 }, tag: dectalk_trace_exact }
-          - { start_ms: 147.4, end_ms: 153.8, fields: { AH: 25 }, tag: dectalk_trace_exact }
-          - { start_ms: 153.8, end_ms: 160.2, fields: { AH: 27 }, tag: dectalk_trace_exact }
-          - { start_ms: 160.2, end_ms: 166.4, fields: { AH: 30 }, tag: dectalk_trace_exact }
-          - { start_ms: 166.4, end_ms: 172.8, fields: { AH: 32 }, tag: dectalk_trace_exact }
-          - { start_ms: 172.8, end_ms: 179.2, fields: { AH: 35 }, tag: dectalk_trace_exact }
-          - { start_ms: 179.2, end_ms: 185.6, fields: { AH: 37 }, tag: dectalk_trace_exact }
-          - { start_ms: 185.6, end_ms: 192.0, fields: { AH: 40 }, tag: dectalk_trace_exact }
-          - { start_ms: 192.0, end_ms: 198.4, fields: { AH: 42 }, tag: dectalk_trace_exact }
-          - { start_ms: 198.4, fields: { AH: 45 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 6.0, fields: { A6: 37, AB: 37 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.0, end_ms: 12.4, fields: { A6: 32, AB: 32 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { A6: 26, AB: 26 }, tag: dectalk_trace_exact }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { A6: 19, AB: 19 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { A6: 13, AB: 13 }, tag: dectalk_trace_exact }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { A6: 6, AB: 6 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.0, fields: { A6: 0, AB: 0 }, tag: dectalk_trace_exact }
-          - { start_ms: 134.6, end_ms: 141.0, fields: { AV: 61 }, tag: dectalk_trace_exact }
-          - { start_ms: 141.0, end_ms: 147.4, fields: { AV: 60 }, tag: dectalk_trace_exact }
-          - { start_ms: 147.4, end_ms: 153.8, fields: { AV: 60 }, tag: dectalk_trace_exact }
-          - { start_ms: 153.8, end_ms: 160.2, fields: { AV: 59 }, tag: dectalk_trace_exact }
-          - { start_ms: 160.2, end_ms: 166.4, fields: { AV: 58 }, tag: dectalk_trace_exact }
-          - { start_ms: 166.4, end_ms: 172.8, fields: { B1: 102, B2: 86, AV: 58 }, tag: dectalk_trace_exact }
-          - { start_ms: 172.8, end_ms: 179.2, fields: { B1: 115, B2: 92, AV: 57 }, tag: dectalk_trace_exact }
-          - { start_ms: 179.2, end_ms: 185.6, fields: { B1: 127, B2: 98, AV: 57 }, tag: dectalk_trace_exact }
-          - { start_ms: 185.6, end_ms: 192.0, fields: { B1: 140, B2: 105, AV: 56 }, tag: dectalk_trace_exact }
-          - { start_ms: 192.0, end_ms: 198.4, fields: { B1: 152, B2: 111, AV: 55 }, tag: dectalk_trace_exact }
-          - { start_ms: 198.4, fields: { B1: 165, B2: 117, AV: 55 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 6.0, fields: { F1: 346, F2: 1404, F3: 2679, B1: 95, B2: 103, B3: 173, AV: 57 }, tag: segmental_context }
+          - { start_ms: 6.0, end_ms: 12.4, fields: { F1: 368, F2: 1384, F3: 2709, B1: 94, B2: 99, B3: 174, AV: 58 }, tag: segmental_context }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 390, F2: 1371, F3: 2695, B1: 93, B2: 96, B3: 175, AV: 59 }, tag: segmental_context }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 412, F2: 1358, F3: 2681, B1: 93, B2: 93, B3: 176, AV: 60 }, tag: segmental_context }
+          - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 435, F2: 1345, F3: 2667, B1: 92, B2: 89, B3: 177, AV: 61 }, tag: segmental_context }
+          - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 457, F2: 1333, F3: 2653, B1: 91, B2: 86, B3: 178, AV: 62 }, tag: segmental_context }
+          - { start_ms: 38.0, end_ms: 44.6, fields: { F1: 479, F2: 1320, F3: 2639, B1: 90, B2: 83, B3: 179, AV: 62 }, tag: segmental_context }
+          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 501, F2: 1307, F3: 2625, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 524, F2: 1294, F3: 2611, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 57.4, end_ms: 63.8, fields: { F1: 526, F2: 1280, F3: 2598, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 63.8, end_ms: 70.2, fields: { F1: 528, F2: 1278, F3: 2598, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 70.2, end_ms: 76.6, fields: { F1: 530, F2: 1276, F3: 2598, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 76.6, end_ms: 83.0, fields: { F1: 533, F2: 1274, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 83.0, end_ms: 89.4, fields: { F1: 535, F2: 1272, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 89.4, end_ms: 95.8, fields: { F1: 537, F2: 1270, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 95.8, end_ms: 102.2, fields: { F1: 539, F2: 1268, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 102.2, end_ms: 108.8, fields: { F1: 542, F2: 1266, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 108.8, end_ms: 115.4, fields: { F1: 544, F2: 1264, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 115.4, end_ms: 121.8, fields: { F1: 546, F2: 1262, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 121.8, fields: { F1: 548, F2: 1260, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
+          - { start_ms: 89.4, end_ms: 95.8, fields: { AH: 2 }, tag: segmental_context }
+          - { start_ms: 95.8, end_ms: 102.2, fields: { AH: 5 }, tag: segmental_context }
+          - { start_ms: 102.2, end_ms: 108.8, fields: { AH: 7 }, tag: segmental_context }
+          - { start_ms: 108.8, end_ms: 115.4, fields: { AH: 10 }, tag: segmental_context }
+          - { start_ms: 115.4, end_ms: 121.8, fields: { AH: 12 }, tag: segmental_context }
+          - { start_ms: 121.8, end_ms: 128.2, fields: { AH: 15 }, tag: segmental_context }
+          - { start_ms: 128.2, end_ms: 134.6, fields: { AH: 17 }, tag: segmental_context }
+          - { start_ms: 134.6, end_ms: 141.0, fields: { AH: 20 }, tag: segmental_context }
+          - { start_ms: 141.0, end_ms: 147.4, fields: { AH: 22 }, tag: segmental_context }
+          - { start_ms: 147.4, end_ms: 153.8, fields: { AH: 25 }, tag: segmental_context }
+          - { start_ms: 153.8, end_ms: 160.2, fields: { AH: 27 }, tag: segmental_context }
+          - { start_ms: 160.2, end_ms: 166.4, fields: { AH: 30 }, tag: segmental_context }
+          - { start_ms: 166.4, end_ms: 172.8, fields: { AH: 32 }, tag: segmental_context }
+          - { start_ms: 172.8, end_ms: 179.2, fields: { AH: 35 }, tag: segmental_context }
+          - { start_ms: 179.2, end_ms: 185.6, fields: { AH: 37 }, tag: segmental_context }
+          - { start_ms: 185.6, end_ms: 192.0, fields: { AH: 40 }, tag: segmental_context }
+          - { start_ms: 192.0, end_ms: 198.4, fields: { AH: 42 }, tag: segmental_context }
+          - { start_ms: 198.4, fields: { AH: 45 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 6.0, fields: { A6: 37, AB: 37 }, tag: segmental_context }
+          - { start_ms: 6.0, end_ms: 12.4, fields: { A6: 32, AB: 32 }, tag: segmental_context }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { A6: 26, AB: 26 }, tag: segmental_context }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { A6: 19, AB: 19 }, tag: segmental_context }
+          - { start_ms: 25.2, end_ms: 31.6, fields: { A6: 13, AB: 13 }, tag: segmental_context }
+          - { start_ms: 31.6, end_ms: 38.0, fields: { A6: 6, AB: 6 }, tag: segmental_context }
+          - { start_ms: 38.0, fields: { A6: 0, AB: 0 }, tag: segmental_context }
+          - { start_ms: 134.6, end_ms: 141.0, fields: { AV: 61 }, tag: segmental_context }
+          - { start_ms: 141.0, end_ms: 147.4, fields: { AV: 60 }, tag: segmental_context }
+          - { start_ms: 147.4, end_ms: 153.8, fields: { AV: 60 }, tag: segmental_context }
+          - { start_ms: 153.8, end_ms: 160.2, fields: { AV: 59 }, tag: segmental_context }
+          - { start_ms: 160.2, end_ms: 166.4, fields: { AV: 58 }, tag: segmental_context }
+          - { start_ms: 166.4, end_ms: 172.8, fields: { B1: 102, B2: 86, AV: 58 }, tag: segmental_context }
+          - { start_ms: 172.8, end_ms: 179.2, fields: { B1: 115, B2: 92, AV: 57 }, tag: segmental_context }
+          - { start_ms: 179.2, end_ms: 185.6, fields: { B1: 127, B2: 98, AV: 57 }, tag: segmental_context }
+          - { start_ms: 185.6, end_ms: 192.0, fields: { B1: 140, B2: 105, AV: 56 }, tag: segmental_context }
+          - { start_ms: 192.0, end_ms: 198.4, fields: { B1: 152, B2: 111, AV: 55 }, tag: segmental_context }
+          - { start_ms: 198.4, fields: { B1: 165, B2: 117, AV: 55 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2/F3/B1/B2/B3/AV/AP-to-AH/A6/AB values at frames 13-45)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       the_terminal_silence_formant_trace_windows:
         value:
-          - { start_ms: 0.0, end_ms: 6.4, fields: { F1: 548, F2: 1260, F3: 2600, B1: 177, B2: 123, B3: 180, AH: 47 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 547, F2: 1259, F3: 2602, B1: 190, B2: 130, B3: 180, AH: 45 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 547, F2: 1261, F3: 2602, B1: 177, B2: 123, B3: 180, AH: 42 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 547, F2: 1263, F3: 2602, B1: 165, B2: 117, B3: 180, AH: 38 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 547, F2: 1265, F3: 2602, B1: 152, B2: 111, B3: 180, AH: 35 }, tag: dectalk_trace_exact }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 548, F2: 1268, F3: 2602, B1: 140, B2: 105, B3: 180, AH: 31 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 548, F2: 1270, F3: 2602, B1: 127, B2: 98, B3: 180, AH: 28 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 548, F2: 1272, F3: 2602, B1: 115, B2: 92, B3: 180, AH: 24 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 548, F2: 1274, F3: 2602, B1: 102, B2: 86, B3: 180, AH: 21 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F1: 549, F2: 1276, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 17 }, tag: dectalk_trace_exact }
-          - { start_ms: 64.0, end_ms: 70.4, fields: { F1: 549, F2: 1278, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 14 }, tag: dectalk_trace_exact }
-          - { start_ms: 70.4, end_ms: 76.8, fields: { F1: 549, F2: 1280, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 10 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.8, end_ms: 83.2, fields: { F1: 549, F2: 1282, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 7 }, tag: dectalk_trace_exact }
-          - { start_ms: 83.2, end_ms: 89.6, fields: { F1: 550, F2: 1285, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 3 }, tag: dectalk_trace_exact }
-          - { start_ms: 89.6, end_ms: 96.0, fields: { F1: 550, F2: 1287, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 0 }, tag: dectalk_trace_exact }
-          - { start_ms: 96.0, end_ms: 102.4, fields: { F1: 550, F2: 1289, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: dectalk_trace_exact }
-          - { start_ms: 102.4, end_ms: 108.8, fields: { F1: 550, F2: 1291, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: dectalk_trace_exact }
-          - { start_ms: 108.8, end_ms: 115.2, fields: { F1: 551, F2: 1293, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: dectalk_trace_exact }
-          - { start_ms: 115.2, end_ms: 121.6, fields: { F1: 551, F2: 1295, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: dectalk_trace_exact }
-          - { start_ms: 121.6, end_ms: 128.0, fields: { F1: 551, F2: 1297, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: dectalk_trace_exact }
-          - { start_ms: 128.0, end_ms: 134.4, fields: { F1: 551, F2: 1299, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: dectalk_trace_exact }
-          - { start_ms: 134.4, fields: { F1: 552, F2: 1302, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: dectalk_trace_exact }
-          - { start_ms: 563.2, end_ms: 569.6, fields: { B1: 102, B2: 86, B3: 180 }, tag: dectalk_trace_exact }
-          - { start_ms: 569.6, end_ms: 576.0, fields: { B1: 115, B2: 92, B3: 180 }, tag: dectalk_trace_exact }
-          - { start_ms: 576.0, end_ms: 582.4, fields: { B1: 127, B2: 98, B3: 180 }, tag: dectalk_trace_exact }
-          - { start_ms: 582.4, end_ms: 588.8, fields: { B1: 140, B2: 105, B3: 180 }, tag: dectalk_trace_exact }
-          - { start_ms: 588.8, end_ms: 595.2, fields: { B1: 152, B2: 111, B3: 180 }, tag: dectalk_trace_exact }
-          - { start_ms: 595.2, fields: { B1: 165, B2: 117, B3: 180 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 6.4, fields: { F1: 548, F2: 1260, F3: 2600, B1: 177, B2: 123, B3: 180, AH: 47 }, tag: segmental_context }
+          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 547, F2: 1259, F3: 2602, B1: 190, B2: 130, B3: 180, AH: 45 }, tag: segmental_context }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 547, F2: 1261, F3: 2602, B1: 177, B2: 123, B3: 180, AH: 42 }, tag: segmental_context }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 547, F2: 1263, F3: 2602, B1: 165, B2: 117, B3: 180, AH: 38 }, tag: segmental_context }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 547, F2: 1265, F3: 2602, B1: 152, B2: 111, B3: 180, AH: 35 }, tag: segmental_context }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 548, F2: 1268, F3: 2602, B1: 140, B2: 105, B3: 180, AH: 31 }, tag: segmental_context }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 548, F2: 1270, F3: 2602, B1: 127, B2: 98, B3: 180, AH: 28 }, tag: segmental_context }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 548, F2: 1272, F3: 2602, B1: 115, B2: 92, B3: 180, AH: 24 }, tag: segmental_context }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 548, F2: 1274, F3: 2602, B1: 102, B2: 86, B3: 180, AH: 21 }, tag: segmental_context }
+          - { start_ms: 57.6, end_ms: 64.0, fields: { F1: 549, F2: 1276, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 17 }, tag: segmental_context }
+          - { start_ms: 64.0, end_ms: 70.4, fields: { F1: 549, F2: 1278, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 14 }, tag: segmental_context }
+          - { start_ms: 70.4, end_ms: 76.8, fields: { F1: 549, F2: 1280, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 10 }, tag: segmental_context }
+          - { start_ms: 76.8, end_ms: 83.2, fields: { F1: 549, F2: 1282, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 7 }, tag: segmental_context }
+          - { start_ms: 83.2, end_ms: 89.6, fields: { F1: 550, F2: 1285, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 3 }, tag: segmental_context }
+          - { start_ms: 89.6, end_ms: 96.0, fields: { F1: 550, F2: 1287, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 0 }, tag: segmental_context }
+          - { start_ms: 96.0, end_ms: 102.4, fields: { F1: 550, F2: 1289, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
+          - { start_ms: 102.4, end_ms: 108.8, fields: { F1: 550, F2: 1291, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
+          - { start_ms: 108.8, end_ms: 115.2, fields: { F1: 551, F2: 1293, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
+          - { start_ms: 115.2, end_ms: 121.6, fields: { F1: 551, F2: 1295, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
+          - { start_ms: 121.6, end_ms: 128.0, fields: { F1: 551, F2: 1297, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
+          - { start_ms: 128.0, end_ms: 134.4, fields: { F1: 551, F2: 1299, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
+          - { start_ms: 134.4, fields: { F1: 552, F2: 1302, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
+          - { start_ms: 563.2, end_ms: 569.6, fields: { B1: 102, B2: 86, B3: 180 }, tag: segmental_context }
+          - { start_ms: 569.6, end_ms: 576.0, fields: { B1: 115, B2: 92, B3: 180 }, tag: segmental_context }
+          - { start_ms: 576.0, end_ms: 582.4, fields: { B1: 127, B2: 98, B3: 180 }, tag: segmental_context }
+          - { start_ms: 582.4, end_ms: 588.8, fields: { B1: 140, B2: 105, B3: 180 }, tag: segmental_context }
+          - { start_ms: 588.8, end_ms: 595.2, fields: { B1: 152, B2: 111, B3: 180 }, tag: segmental_context }
+          - { start_ms: 595.2, fields: { B1: 165, B2: 117, B3: 180 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'the' (native terminal GEN_SIL F1/F2/F3/B1/B2/B3/AP-to-AH values from frame 44 onward)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -773,55 +773,55 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (initial silence and K-closure B2 at frames 0-4)"
       cake_initial_k_formant_trace_windows:
         value:
-          - { start_ms: 0.0, end_ms: 83.0, fields: { TL: 0 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 283 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 288 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 292 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 296 }, tag: dectalk_trace_exact }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 301 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 305 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 309 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 314 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F1: 318 }, tag: dectalk_trace_exact }
-          - { start_ms: 64.0, end_ms: 70.399, fields: { F1: 323 }, tag: dectalk_trace_exact }
-          - { start_ms: 70.399, end_ms: 76.8, fields: { F1: 327 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.8, end_ms: 83.0, fields: { F1: 331 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F2: 2078 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F2: 2069 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F2: 2060 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F2: 2051 }, tag: dectalk_trace_exact }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F2: 2041 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F2: 2032 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F2: 2023 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F2: 2014 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F2: 2005 }, tag: dectalk_trace_exact }
-          - { start_ms: 64.0, end_ms: 70.399, fields: { F2: 1996 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 83.0, fields: { TL: 0 }, tag: segmental_context }
+          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 283 }, tag: segmental_context }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 288 }, tag: segmental_context }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 292 }, tag: segmental_context }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 296 }, tag: segmental_context }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 301 }, tag: segmental_context }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 305 }, tag: segmental_context }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 309 }, tag: segmental_context }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 314 }, tag: segmental_context }
+          - { start_ms: 57.6, end_ms: 64.0, fields: { F1: 318 }, tag: segmental_context }
+          - { start_ms: 64.0, end_ms: 70.399, fields: { F1: 323 }, tag: segmental_context }
+          - { start_ms: 70.399, end_ms: 76.8, fields: { F1: 327 }, tag: segmental_context }
+          - { start_ms: 76.8, end_ms: 83.0, fields: { F1: 331 }, tag: segmental_context }
+          - { start_ms: 6.4, end_ms: 12.8, fields: { F2: 2078 }, tag: segmental_context }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { F2: 2069 }, tag: segmental_context }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { F2: 2060 }, tag: segmental_context }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { F2: 2051 }, tag: segmental_context }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { F2: 2041 }, tag: segmental_context }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { F2: 2032 }, tag: segmental_context }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { F2: 2023 }, tag: segmental_context }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { F2: 2014 }, tag: segmental_context }
+          - { start_ms: 57.6, end_ms: 64.0, fields: { F2: 2005 }, tag: segmental_context }
+          - { start_ms: 64.0, end_ms: 70.399, fields: { F2: 1996 }, tag: segmental_context }
           # Engineering compensation: 19.2 + 70.4 is represented just after
           # the native 89.6 ms sample boundary in JavaScript.
-          - { start_ms: 70.399, end_ms: 76.8, fields: { F2: 1987 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.8, end_ms: 83.0, fields: { F2: 1978 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F3: 2694 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F3: 2669 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F3: 2645 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F3: 2620 }, tag: dectalk_trace_exact }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F3: 2595 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F3: 2571 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F3: 2546 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F3: 2522 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F3: 2497 }, tag: dectalk_trace_exact }
-          - { start_ms: 64.0, end_ms: 70.399, fields: { F3: 2472 }, tag: dectalk_trace_exact }
-          - { start_ms: 70.399, end_ms: 76.8, fields: { F3: 2448 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.8, end_ms: 83.0, fields: { F3: 2423 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { B1: 300, B2: 210 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { B1: 287, B2: 203 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { B1: 275, B2: 197 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { B1: 262, B2: 191 }, tag: dectalk_trace_exact }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { B1: 250, B2: 185 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { B1: 237, B2: 178 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { B1: 225, B2: 172 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { B1: 212, B2: 166 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.6, end_ms: 83.0, fields: { B1: 200, B2: 160 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.6, end_ms: 83.0, fields: { B3: 280 }, tag: dectalk_trace_exact }
+          - { start_ms: 70.399, end_ms: 76.8, fields: { F2: 1987 }, tag: segmental_context }
+          - { start_ms: 76.8, end_ms: 83.0, fields: { F2: 1978 }, tag: segmental_context }
+          - { start_ms: 6.4, end_ms: 12.8, fields: { F3: 2694 }, tag: segmental_context }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { F3: 2669 }, tag: segmental_context }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { F3: 2645 }, tag: segmental_context }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { F3: 2620 }, tag: segmental_context }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { F3: 2595 }, tag: segmental_context }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { F3: 2571 }, tag: segmental_context }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { F3: 2546 }, tag: segmental_context }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { F3: 2522 }, tag: segmental_context }
+          - { start_ms: 57.6, end_ms: 64.0, fields: { F3: 2497 }, tag: segmental_context }
+          - { start_ms: 64.0, end_ms: 70.399, fields: { F3: 2472 }, tag: segmental_context }
+          - { start_ms: 70.399, end_ms: 76.8, fields: { F3: 2448 }, tag: segmental_context }
+          - { start_ms: 76.8, end_ms: 83.0, fields: { F3: 2423 }, tag: segmental_context }
+          - { start_ms: 6.4, end_ms: 12.8, fields: { B1: 300, B2: 210 }, tag: segmental_context }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { B1: 287, B2: 203 }, tag: segmental_context }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { B1: 275, B2: 197 }, tag: segmental_context }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { B1: 262, B2: 191 }, tag: segmental_context }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { B1: 250, B2: 185 }, tag: segmental_context }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { B1: 237, B2: 178 }, tag: segmental_context }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { B1: 225, B2: 172 }, tag: segmental_context }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { B1: 212, B2: 166 }, tag: segmental_context }
+          - { start_ms: 57.6, end_ms: 83.0, fields: { B1: 200, B2: 160 }, tag: segmental_context }
+          - { start_ms: 57.6, end_ms: 83.0, fields: { B3: 280 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F1/F2/F3/B1/B2/B3/TLT values at frames 0-15)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -839,28 +839,28 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release B1 at frame 16)"
       cake_initial_k_release_formant_trace_windows:
         value:
-          - { start_ms: 0.0, end_ms: 26.0, fields: { AH: 0, A2: 0, TL: 0 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 6.6, fields: { F1: 336, A3: 0, A5: 0 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.6, end_ms: 13.0, fields: { F1: 340, A3: 50, A5: 36 }, tag: dectalk_trace_exact }
-          - { start_ms: 13.0, end_ms: 19.4, fields: { F1: 344, A3: 50, A5: 36 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { F1: 349, A3: 49, A5: 35 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { F1: 353, A3: 48, A5: 34 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 6.6, fields: { F2: 1969 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.6, end_ms: 13.0, fields: { F2: 1960 }, tag: dectalk_trace_exact }
-          - { start_ms: 13.0, end_ms: 19.4, fields: { F2: 1951 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { F2: 1942 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { F2: 1933 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 6.6, fields: { F3: 2398 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.6, end_ms: 13.0, fields: { F3: 2374 }, tag: dectalk_trace_exact }
-          - { start_ms: 13.0, end_ms: 19.4, fields: { F3: 2349 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { F3: 2325 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { F3: 2300 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 19.4, fields: { B1: 200, B2: 160 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { B1: 178, B2: 150 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { B1: 156, B2: 140 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 19.4, fields: { B3: 280 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { B3: 266 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { B3: 253 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 26.0, fields: { AH: 0, A2: 0, TL: 0 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 6.6, fields: { F1: 336, A3: 0, A5: 0 }, tag: segmental_context }
+          - { start_ms: 6.6, end_ms: 13.0, fields: { F1: 340, A3: 50, A5: 36 }, tag: segmental_context }
+          - { start_ms: 13.0, end_ms: 19.4, fields: { F1: 344, A3: 50, A5: 36 }, tag: segmental_context }
+          - { start_ms: 19.4, end_ms: 25.8, fields: { F1: 349, A3: 49, A5: 35 }, tag: segmental_context }
+          - { start_ms: 25.8, end_ms: 26.0, fields: { F1: 353, A3: 48, A5: 34 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 6.6, fields: { F2: 1969 }, tag: segmental_context }
+          - { start_ms: 6.6, end_ms: 13.0, fields: { F2: 1960 }, tag: segmental_context }
+          - { start_ms: 13.0, end_ms: 19.4, fields: { F2: 1951 }, tag: segmental_context }
+          - { start_ms: 19.4, end_ms: 25.8, fields: { F2: 1942 }, tag: segmental_context }
+          - { start_ms: 25.8, end_ms: 26.0, fields: { F2: 1933 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 6.6, fields: { F3: 2398 }, tag: segmental_context }
+          - { start_ms: 6.6, end_ms: 13.0, fields: { F3: 2374 }, tag: segmental_context }
+          - { start_ms: 13.0, end_ms: 19.4, fields: { F3: 2349 }, tag: segmental_context }
+          - { start_ms: 19.4, end_ms: 25.8, fields: { F3: 2325 }, tag: segmental_context }
+          - { start_ms: 25.8, end_ms: 26.0, fields: { F3: 2300 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 19.4, fields: { B1: 200, B2: 160 }, tag: segmental_context }
+          - { start_ms: 19.4, end_ms: 25.8, fields: { B1: 178, B2: 150 }, tag: segmental_context }
+          - { start_ms: 25.8, end_ms: 26.0, fields: { B1: 156, B2: 140 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 19.4, fields: { B3: 280 }, tag: segmental_context }
+          - { start_ms: 19.4, end_ms: 25.8, fields: { B3: 266 }, tag: segmental_context }
+          - { start_ms: 25.8, end_ms: 26.0, fields: { B3: 253 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F1/F2/F3/B1/B2/B3/AP/A2/A3/A5/TLT values at frames 16-20)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -886,54 +886,54 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (final K F2 at frame 58)"
       cake_final_k_formant_trace_windows:
         value:
-          - { start_ms: 0.0, end_ms: 96.0, fields: { TL: 0 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 96.0, fields: { F1: 337 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 12.4, fields: { F2: 1993 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { F2: 1988 }, tag: dectalk_trace_exact }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { F2: 1983 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { F2: 1978 }, tag: dectalk_trace_exact }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { F2: 1974 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.0, end_ms: 44.4, fields: { F2: 1969 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.4, end_ms: 50.8, fields: { F2: 1964 }, tag: dectalk_trace_exact }
-          - { start_ms: 50.8, end_ms: 57.2, fields: { F2: 1959 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.2, end_ms: 63.6, fields: { F2: 1955 }, tag: dectalk_trace_exact }
-          - { start_ms: 63.6, end_ms: 70.0, fields: { F2: 1950 }, tag: dectalk_trace_exact }
-          - { start_ms: 70.0, end_ms: 76.4, fields: { F2: 1945, A3: 47, A5: 33 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.4, end_ms: 82.8, fields: { F2: 1940, A3: 47, A5: 33 }, tag: dectalk_trace_exact }
-          - { start_ms: 82.8, end_ms: 89.2, fields: { F2: 1936, A3: 46, A5: 32 }, tag: dectalk_trace_exact }
-          - { start_ms: 89.2, end_ms: 95.599, fields: { F2: 1931, A3: 45, A5: 31 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 96.0, fields: { TL: 0 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 96.0, fields: { F1: 337 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 12.4, fields: { F2: 1993 }, tag: segmental_context }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { F2: 1988 }, tag: segmental_context }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { F2: 1983 }, tag: segmental_context }
+          - { start_ms: 25.2, end_ms: 31.6, fields: { F2: 1978 }, tag: segmental_context }
+          - { start_ms: 31.6, end_ms: 38.0, fields: { F2: 1974 }, tag: segmental_context }
+          - { start_ms: 38.0, end_ms: 44.4, fields: { F2: 1969 }, tag: segmental_context }
+          - { start_ms: 44.4, end_ms: 50.8, fields: { F2: 1964 }, tag: segmental_context }
+          - { start_ms: 50.8, end_ms: 57.2, fields: { F2: 1959 }, tag: segmental_context }
+          - { start_ms: 57.2, end_ms: 63.6, fields: { F2: 1955 }, tag: segmental_context }
+          - { start_ms: 63.6, end_ms: 70.0, fields: { F2: 1950 }, tag: segmental_context }
+          - { start_ms: 70.0, end_ms: 76.4, fields: { F2: 1945, A3: 47, A5: 33 }, tag: segmental_context }
+          - { start_ms: 76.4, end_ms: 82.8, fields: { F2: 1940, A3: 47, A5: 33 }, tag: segmental_context }
+          - { start_ms: 82.8, end_ms: 89.2, fields: { F2: 1936, A3: 46, A5: 32 }, tag: segmental_context }
+          - { start_ms: 89.2, end_ms: 95.599, fields: { F2: 1931, A3: 45, A5: 31 }, tag: segmental_context }
           # Engineering compensation: 365.2 + 95.6 is represented just after
           # the native 460.8 ms sample boundary in JavaScript.
-          - { start_ms: 95.599, end_ms: 96.0, fields: { F2: 1927, AH: 39, A3: 33, A5: 19 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 31.6, fields: { F3: 2404 }, tag: dectalk_trace_exact }
-          - { start_ms: 31.6, end_ms: 57.2, fields: { F3: 2403 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.2, end_ms: 82.8, fields: { F3: 2402 }, tag: dectalk_trace_exact }
-          - { start_ms: 82.8, end_ms: 96.0, fields: { F3: 2401 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 12.4, fields: { B1: 134, B2: 130 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { B1: 156, B2: 140 }, tag: dectalk_trace_exact }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { B1: 178, B2: 150 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.2, end_ms: 82.8, fields: { B1: 200, B2: 160 }, tag: dectalk_trace_exact }
-          - { start_ms: 82.8, end_ms: 89.2, fields: { B1: 176, B2: 150 }, tag: dectalk_trace_exact }
-          - { start_ms: 89.2, end_ms: 95.599, fields: { B1: 153, B2: 140 }, tag: dectalk_trace_exact }
-          - { start_ms: 95.599, end_ms: 96.0, fields: { B1: 310, B2: 170 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 12.4, fields: { B3: 239 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { B3: 253 }, tag: dectalk_trace_exact }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { B3: 266 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.2, end_ms: 82.8, fields: { B3: 280 }, tag: dectalk_trace_exact }
-          - { start_ms: 82.8, end_ms: 89.2, fields: { B3: 266 }, tag: dectalk_trace_exact }
-          - { start_ms: 89.2, end_ms: 95.599, fields: { B3: 253 }, tag: dectalk_trace_exact }
-          - { start_ms: 95.599, end_ms: 96.0, fields: { B3: 239 }, tag: dectalk_trace_exact }
+          - { start_ms: 95.599, end_ms: 96.0, fields: { F2: 1927, AH: 39, A3: 33, A5: 19 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 31.6, fields: { F3: 2404 }, tag: segmental_context }
+          - { start_ms: 31.6, end_ms: 57.2, fields: { F3: 2403 }, tag: segmental_context }
+          - { start_ms: 57.2, end_ms: 82.8, fields: { F3: 2402 }, tag: segmental_context }
+          - { start_ms: 82.8, end_ms: 96.0, fields: { F3: 2401 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 12.4, fields: { B1: 134, B2: 130 }, tag: segmental_context }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { B1: 156, B2: 140 }, tag: segmental_context }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { B1: 178, B2: 150 }, tag: segmental_context }
+          - { start_ms: 25.2, end_ms: 82.8, fields: { B1: 200, B2: 160 }, tag: segmental_context }
+          - { start_ms: 82.8, end_ms: 89.2, fields: { B1: 176, B2: 150 }, tag: segmental_context }
+          - { start_ms: 89.2, end_ms: 95.599, fields: { B1: 153, B2: 140 }, tag: segmental_context }
+          - { start_ms: 95.599, end_ms: 96.0, fields: { B1: 310, B2: 170 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 12.4, fields: { B3: 239 }, tag: segmental_context }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { B3: 253 }, tag: segmental_context }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { B3: 266 }, tag: segmental_context }
+          - { start_ms: 25.2, end_ms: 82.8, fields: { B3: 280 }, tag: segmental_context }
+          - { start_ms: 82.8, end_ms: 89.2, fields: { B3: 266 }, tag: segmental_context }
+          - { start_ms: 89.2, end_ms: 95.599, fields: { B3: 253 }, tag: segmental_context }
+          - { start_ms: 95.599, end_ms: 96.0, fields: { B3: 239 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F1/F2/F3/B1/B2/B3/AP/A3/A5/TLT values at frames 58-72)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       cake_dummy_ix_formant_trace_windows:
         value:
-          - { start_ms: 0.0, end_ms: 38.0, fields: { TL: 0 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 12.4, fields: { F1: 353, F2: 1900, F3: 2425, B2: 170, B3: 233, AH: 39, A3: 22, A5: 13 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 382, F2: 1830, F3: 2438, B2: 170, B3: 226, AH: 39, A3: 11, A5: 6 }, tag: dectalk_trace_exact }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 410, F2: 1760, F3: 2450, B2: 170, B3: 219, AH: 39 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 426, F2: 1733, F3: 2474, B2: 170, B3: 213, AH: 39 }, tag: dectalk_trace_exact }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 442, F2: 1706, F3: 2498, B2: 170, B3: 206, AH: 39 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 38.0, fields: { TL: 0 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 12.4, fields: { F1: 353, F2: 1900, F3: 2425, B2: 170, B3: 233, AH: 39, A3: 22, A5: 13 }, tag: segmental_context }
+          - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 382, F2: 1830, F3: 2438, B2: 170, B3: 226, AH: 39, A3: 11, A5: 6 }, tag: segmental_context }
+          - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 410, F2: 1760, F3: 2450, B2: 170, B3: 219, AH: 39 }, tag: segmental_context }
+          - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 426, F2: 1733, F3: 2474, B2: 170, B3: 213, AH: 39 }, tag: segmental_context }
+          - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 442, F2: 1706, F3: 2498, B2: 170, B3: 206, AH: 39 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F1/F2/F3/B2/B3/AP/A3/A5/TLT values at frames 73-77)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -943,60 +943,60 @@ parameters:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (terminal GEN_SIL F2 hold from frame 96)"
       cake_terminal_silence_formant_trace_windows:
         value:
-          - { start_ms: 0.0, end_ms: 6.4, fields: { AH: 45 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { AH: 42 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { AH: 38 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { AH: 35 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { AH: 31 }, tag: dectalk_trace_exact }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { AH: 28 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { AH: 24 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { AH: 21 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { AH: 17 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { AH: 14 }, tag: dectalk_trace_exact }
-          - { start_ms: 64.0, end_ms: 70.4, fields: { AH: 10 }, tag: dectalk_trace_exact }
-          - { start_ms: 70.4, end_ms: 76.8, fields: { AH: 7 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.8, end_ms: 83.2, fields: { AH: 3 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 12.8, fields: { F1: 459 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.8, end_ms: 25.6, fields: { F1: 460 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.6, end_ms: 38.4, fields: { F1: 461 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.4, end_ms: 51.2, fields: { F1: 462 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, end_ms: 64.0, fields: { F1: 463 }, tag: dectalk_trace_exact }
-          - { start_ms: 64.0, end_ms: 76.8, fields: { F1: 464 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.8, end_ms: 89.6, fields: { F1: 465 }, tag: dectalk_trace_exact }
-          - { start_ms: 89.6, end_ms: 102.4, fields: { F1: 466 }, tag: dectalk_trace_exact }
-          - { start_ms: 102.4, end_ms: 115.2, fields: { F1: 467 }, tag: dectalk_trace_exact }
-          - { start_ms: 115.2, end_ms: 127.6, fields: { F1: 468 }, tag: dectalk_trace_exact }
-          - { start_ms: 127.6, fields: { F1: 469 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 12.8, fields: { F2: 1677 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.8, end_ms: 32.0, fields: { F2: 1676 }, tag: dectalk_trace_exact }
-          - { start_ms: 32.0, end_ms: 44.8, fields: { F2: 1675 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.8, end_ms: 64.0, fields: { F2: 1674 }, tag: dectalk_trace_exact }
-          - { start_ms: 64.0, end_ms: 83.2, fields: { F2: 1673 }, tag: dectalk_trace_exact }
-          - { start_ms: 83.2, end_ms: 96.0, fields: { F2: 1672 }, tag: dectalk_trace_exact }
-          - { start_ms: 96.0, end_ms: 115.2, fields: { F2: 1671 }, tag: dectalk_trace_exact }
-          - { start_ms: 115.2, fields: { F2: 1670 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 25.6, fields: { F3: 2522 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.6, end_ms: 51.2, fields: { F3: 2523 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, end_ms: 76.8, fields: { F3: 2524 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.8, end_ms: 102.4, fields: { F3: 2525 }, tag: dectalk_trace_exact }
-          - { start_ms: 102.4, end_ms: 127.6, fields: { F3: 2526 }, tag: dectalk_trace_exact }
-          - { start_ms: 127.6, fields: { F3: 2527 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, end_ms: 6.4, fields: { B1: 300, B2: 150 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { B1: 270, B2: 143 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { B1: 240, B2: 137 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { B1: 210, B2: 131 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { B1: 180, B2: 125 }, tag: dectalk_trace_exact }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { B1: 150, B2: 118 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { B1: 120, B2: 112 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { B1: 90, B2: 106 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.2, fields: { B1: 60, B2: 100 }, tag: dectalk_trace_exact }
-          - { start_ms: 556.8, end_ms: 563.2, fields: { B1: 72, B2: 106 }, tag: dectalk_trace_exact }
-          - { start_ms: 563.2, end_ms: 569.6, fields: { B1: 85, B2: 112 }, tag: dectalk_trace_exact }
-          - { start_ms: 569.6, end_ms: 576.0, fields: { B1: 97, B2: 118 }, tag: dectalk_trace_exact }
-          - { start_ms: 576.0, end_ms: 582.4, fields: { B1: 110, B2: 125 }, tag: dectalk_trace_exact }
-          - { start_ms: 582.4, end_ms: 588.8, fields: { B1: 122, B2: 131 }, tag: dectalk_trace_exact }
-          - { start_ms: 588.8, fields: { B1: 135, B2: 137 }, tag: dectalk_trace_exact }
-          - { start_ms: 0.0, fields: { B3: 200 }, tag: dectalk_trace_exact }
+          - { start_ms: 0.0, end_ms: 6.4, fields: { AH: 45 }, tag: segmental_context }
+          - { start_ms: 6.4, end_ms: 12.8, fields: { AH: 42 }, tag: segmental_context }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { AH: 38 }, tag: segmental_context }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { AH: 35 }, tag: segmental_context }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { AH: 31 }, tag: segmental_context }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { AH: 28 }, tag: segmental_context }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { AH: 24 }, tag: segmental_context }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { AH: 21 }, tag: segmental_context }
+          - { start_ms: 51.2, end_ms: 57.6, fields: { AH: 17 }, tag: segmental_context }
+          - { start_ms: 57.6, end_ms: 64.0, fields: { AH: 14 }, tag: segmental_context }
+          - { start_ms: 64.0, end_ms: 70.4, fields: { AH: 10 }, tag: segmental_context }
+          - { start_ms: 70.4, end_ms: 76.8, fields: { AH: 7 }, tag: segmental_context }
+          - { start_ms: 76.8, end_ms: 83.2, fields: { AH: 3 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 12.8, fields: { F1: 459 }, tag: segmental_context }
+          - { start_ms: 12.8, end_ms: 25.6, fields: { F1: 460 }, tag: segmental_context }
+          - { start_ms: 25.6, end_ms: 38.4, fields: { F1: 461 }, tag: segmental_context }
+          - { start_ms: 38.4, end_ms: 51.2, fields: { F1: 462 }, tag: segmental_context }
+          - { start_ms: 51.2, end_ms: 64.0, fields: { F1: 463 }, tag: segmental_context }
+          - { start_ms: 64.0, end_ms: 76.8, fields: { F1: 464 }, tag: segmental_context }
+          - { start_ms: 76.8, end_ms: 89.6, fields: { F1: 465 }, tag: segmental_context }
+          - { start_ms: 89.6, end_ms: 102.4, fields: { F1: 466 }, tag: segmental_context }
+          - { start_ms: 102.4, end_ms: 115.2, fields: { F1: 467 }, tag: segmental_context }
+          - { start_ms: 115.2, end_ms: 127.6, fields: { F1: 468 }, tag: segmental_context }
+          - { start_ms: 127.6, fields: { F1: 469 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 12.8, fields: { F2: 1677 }, tag: segmental_context }
+          - { start_ms: 12.8, end_ms: 32.0, fields: { F2: 1676 }, tag: segmental_context }
+          - { start_ms: 32.0, end_ms: 44.8, fields: { F2: 1675 }, tag: segmental_context }
+          - { start_ms: 44.8, end_ms: 64.0, fields: { F2: 1674 }, tag: segmental_context }
+          - { start_ms: 64.0, end_ms: 83.2, fields: { F2: 1673 }, tag: segmental_context }
+          - { start_ms: 83.2, end_ms: 96.0, fields: { F2: 1672 }, tag: segmental_context }
+          - { start_ms: 96.0, end_ms: 115.2, fields: { F2: 1671 }, tag: segmental_context }
+          - { start_ms: 115.2, fields: { F2: 1670 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 25.6, fields: { F3: 2522 }, tag: segmental_context }
+          - { start_ms: 25.6, end_ms: 51.2, fields: { F3: 2523 }, tag: segmental_context }
+          - { start_ms: 51.2, end_ms: 76.8, fields: { F3: 2524 }, tag: segmental_context }
+          - { start_ms: 76.8, end_ms: 102.4, fields: { F3: 2525 }, tag: segmental_context }
+          - { start_ms: 102.4, end_ms: 127.6, fields: { F3: 2526 }, tag: segmental_context }
+          - { start_ms: 127.6, fields: { F3: 2527 }, tag: segmental_context }
+          - { start_ms: 0.0, end_ms: 6.4, fields: { B1: 300, B2: 150 }, tag: segmental_context }
+          - { start_ms: 6.4, end_ms: 12.8, fields: { B1: 270, B2: 143 }, tag: segmental_context }
+          - { start_ms: 12.8, end_ms: 19.2, fields: { B1: 240, B2: 137 }, tag: segmental_context }
+          - { start_ms: 19.2, end_ms: 25.6, fields: { B1: 210, B2: 131 }, tag: segmental_context }
+          - { start_ms: 25.6, end_ms: 32.0, fields: { B1: 180, B2: 125 }, tag: segmental_context }
+          - { start_ms: 32.0, end_ms: 38.4, fields: { B1: 150, B2: 118 }, tag: segmental_context }
+          - { start_ms: 38.4, end_ms: 44.8, fields: { B1: 120, B2: 112 }, tag: segmental_context }
+          - { start_ms: 44.8, end_ms: 51.2, fields: { B1: 90, B2: 106 }, tag: segmental_context }
+          - { start_ms: 51.2, fields: { B1: 60, B2: 100 }, tag: segmental_context }
+          - { start_ms: 556.8, end_ms: 563.2, fields: { B1: 72, B2: 106 }, tag: segmental_context }
+          - { start_ms: 563.2, end_ms: 569.6, fields: { B1: 85, B2: 112 }, tag: segmental_context }
+          - { start_ms: 569.6, end_ms: 576.0, fields: { B1: 97, B2: 118 }, tag: segmental_context }
+          - { start_ms: 576.0, end_ms: 582.4, fields: { B1: 110, B2: 125 }, tag: segmental_context }
+          - { start_ms: 582.4, end_ms: 588.8, fields: { B1: 122, B2: 131 }, tag: segmental_context }
+          - { start_ms: 588.8, fields: { B1: 135, B2: 137 }, tag: segmental_context }
+          - { start_ms: 0.0, fields: { B3: 200 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native terminal GEN_SIL F1/F2/F3/B1/B2/B3/AP values from frame 78 onward)"
           - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
@@ -1006,123 +1006,123 @@ parameters:
       # The separate exact tail cells take over at 195 ms (DECtalk frame 51).
       cake_ey_primary_formant_trace_windows:
         value:
-          - { start_ms: 6.2, end_ms: 237.0, fields: { TL: 0 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.2, end_ms: 63.8, fields: { AH: 48 }, tag: dectalk_trace_exact }
-          - { start_ms: 6.2, end_ms: 12.6, fields: { F1: 357, F2: 1926, A3: 36, A5: 22 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.6, end_ms: 19.0, fields: { F1: 377, F2: 1898, A3: 24, A5: 15 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.0, end_ms: 25.4, fields: { F1: 397, F2: 1871, A3: 12, A5: 7 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.4, end_ms: 31.8, fields: { F1: 417, F2: 1844 }, tag: dectalk_trace_exact }
-          - { start_ms: 31.8, end_ms: 38.2, fields: { F1: 434, F2: 1831 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.2, end_ms: 44.6, fields: { F1: 451, F2: 1817, AV: 0 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 468, F2: 1804, AV: 0 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 486, F2: 1790, AV: 0 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.4, end_ms: 63.8, fields: { F1: 483, F2: 1777 }, tag: dectalk_trace_exact }
-          - { start_ms: 63.8, end_ms: 70.2, fields: { F1: 481, F2: 1790 }, tag: dectalk_trace_exact }
-          - { start_ms: 70.2, end_ms: 76.6, fields: { F1: 478, F2: 1804 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.6, end_ms: 83.0, fields: { F1: 476, F2: 1818 }, tag: dectalk_trace_exact }
-          - { start_ms: 83.0, end_ms: 89.4, fields: { F1: 473, F2: 1831 }, tag: dectalk_trace_exact }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { F1: 471, F2: 1845 }, tag: dectalk_trace_exact }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { F1: 468, F2: 1858 }, tag: dectalk_trace_exact }
-          - { start_ms: 102.2, end_ms: 108.6, fields: { F1: 466, F2: 1872 }, tag: dectalk_trace_exact }
-          - { start_ms: 108.6, end_ms: 115.0, fields: { F1: 463, F2: 1881 }, tag: dectalk_trace_exact }
-          - { start_ms: 115.0, end_ms: 121.4, fields: { F1: 461, F2: 1891 }, tag: dectalk_trace_exact }
-          - { start_ms: 121.4, end_ms: 127.8, fields: { F1: 458, F2: 1900 }, tag: dectalk_trace_exact }
-          - { start_ms: 127.8, end_ms: 134.2, fields: { F1: 457, F2: 1910 }, tag: dectalk_trace_exact }
-          - { start_ms: 134.2, end_ms: 140.6, fields: { F1: 456, F2: 1920 }, tag: dectalk_trace_exact }
-          - { start_ms: 140.6, end_ms: 147.0, fields: { F1: 455, F2: 1929 }, tag: dectalk_trace_exact }
-          - { start_ms: 147.0, end_ms: 153.4, fields: { F1: 454, F2: 1939 }, tag: dectalk_trace_exact }
-          - { start_ms: 153.4, end_ms: 159.8, fields: { F1: 453, F2: 1949 }, tag: dectalk_trace_exact }
-          - { start_ms: 159.8, end_ms: 166.2, fields: { F1: 452, F2: 1958 }, tag: dectalk_trace_exact }
-          - { start_ms: 166.2, end_ms: 172.6, fields: { F1: 451, F2: 1968 }, tag: dectalk_trace_exact }
-          - { start_ms: 172.6, end_ms: 179.0, fields: { F1: 450, F2: 1977 }, tag: dectalk_trace_exact }
-          - { start_ms: 179.0, end_ms: 185.4, fields: { F1: 449, F2: 1987 }, tag: dectalk_trace_exact }
-          - { start_ms: 185.4, end_ms: 191.8, fields: { F1: 448, F2: 1997 }, tag: dectalk_trace_exact }
-          - { start_ms: 191.8, end_ms: 195.0, fields: { F1: 447, F2: 2006 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.2, end_ms: 237.0, fields: { TL: 0 }, tag: segmental_context }
+          - { start_ms: 6.2, end_ms: 63.8, fields: { AH: 48 }, tag: segmental_context }
+          - { start_ms: 6.2, end_ms: 12.6, fields: { F1: 357, F2: 1926, A3: 36, A5: 22 }, tag: segmental_context }
+          - { start_ms: 12.6, end_ms: 19.0, fields: { F1: 377, F2: 1898, A3: 24, A5: 15 }, tag: segmental_context }
+          - { start_ms: 19.0, end_ms: 25.4, fields: { F1: 397, F2: 1871, A3: 12, A5: 7 }, tag: segmental_context }
+          - { start_ms: 25.4, end_ms: 31.8, fields: { F1: 417, F2: 1844 }, tag: segmental_context }
+          - { start_ms: 31.8, end_ms: 38.2, fields: { F1: 434, F2: 1831 }, tag: segmental_context }
+          - { start_ms: 38.2, end_ms: 44.6, fields: { F1: 451, F2: 1817, AV: 0 }, tag: segmental_context }
+          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 468, F2: 1804, AV: 0 }, tag: segmental_context }
+          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 486, F2: 1790, AV: 0 }, tag: segmental_context }
+          - { start_ms: 57.4, end_ms: 63.8, fields: { F1: 483, F2: 1777 }, tag: segmental_context }
+          - { start_ms: 63.8, end_ms: 70.2, fields: { F1: 481, F2: 1790 }, tag: segmental_context }
+          - { start_ms: 70.2, end_ms: 76.6, fields: { F1: 478, F2: 1804 }, tag: segmental_context }
+          - { start_ms: 76.6, end_ms: 83.0, fields: { F1: 476, F2: 1818 }, tag: segmental_context }
+          - { start_ms: 83.0, end_ms: 89.4, fields: { F1: 473, F2: 1831 }, tag: segmental_context }
+          - { start_ms: 89.4, end_ms: 95.8, fields: { F1: 471, F2: 1845 }, tag: segmental_context }
+          - { start_ms: 95.8, end_ms: 102.2, fields: { F1: 468, F2: 1858 }, tag: segmental_context }
+          - { start_ms: 102.2, end_ms: 108.6, fields: { F1: 466, F2: 1872 }, tag: segmental_context }
+          - { start_ms: 108.6, end_ms: 115.0, fields: { F1: 463, F2: 1881 }, tag: segmental_context }
+          - { start_ms: 115.0, end_ms: 121.4, fields: { F1: 461, F2: 1891 }, tag: segmental_context }
+          - { start_ms: 121.4, end_ms: 127.8, fields: { F1: 458, F2: 1900 }, tag: segmental_context }
+          - { start_ms: 127.8, end_ms: 134.2, fields: { F1: 457, F2: 1910 }, tag: segmental_context }
+          - { start_ms: 134.2, end_ms: 140.6, fields: { F1: 456, F2: 1920 }, tag: segmental_context }
+          - { start_ms: 140.6, end_ms: 147.0, fields: { F1: 455, F2: 1929 }, tag: segmental_context }
+          - { start_ms: 147.0, end_ms: 153.4, fields: { F1: 454, F2: 1939 }, tag: segmental_context }
+          - { start_ms: 153.4, end_ms: 159.8, fields: { F1: 453, F2: 1949 }, tag: segmental_context }
+          - { start_ms: 159.8, end_ms: 166.2, fields: { F1: 452, F2: 1958 }, tag: segmental_context }
+          - { start_ms: 166.2, end_ms: 172.6, fields: { F1: 451, F2: 1968 }, tag: segmental_context }
+          - { start_ms: 172.6, end_ms: 179.0, fields: { F1: 450, F2: 1977 }, tag: segmental_context }
+          - { start_ms: 179.0, end_ms: 185.4, fields: { F1: 449, F2: 1987 }, tag: segmental_context }
+          - { start_ms: 185.4, end_ms: 191.8, fields: { F1: 448, F2: 1997 }, tag: segmental_context }
+          - { start_ms: 191.8, end_ms: 195.0, fields: { F1: 447, F2: 2006 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native F1/F2/AP/A3/A5/TLT values at frames 21-50 and AV onset at frame 29)"
           - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
       cake_ey_primary_formant_tail_windows:
         value:
-          - { start_ms: 195.0, end_ms: 198.2, fields: { F2: 2006 }, tag: dectalk_trace_exact }
-          - { start_ms: 198.2, end_ms: 204.6, fields: { F1: 446, F2: 2006 }, tag: dectalk_trace_exact }
-          - { start_ms: 204.6, end_ms: 211.0, fields: { F1: 430, F2: 2006 }, tag: dectalk_trace_exact }
-          - { start_ms: 211.0, end_ms: 217.4, fields: { F1: 414, F2: 2003 }, tag: dectalk_trace_exact }
-          - { start_ms: 217.4, end_ms: 223.8, fields: { F1: 398, F2: 2001 }, tag: dectalk_trace_exact }
-          - { start_ms: 223.8, end_ms: 230.2, fields: { F1: 383, F2: 1998 }, tag: dectalk_trace_exact }
-          - { start_ms: 230.2, end_ms: 236.6, fields: { F1: 367, F2: 1996 }, tag: dectalk_trace_exact }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { F1: 351, F2: 1994, AV: 0 }, tag: dectalk_trace_exact }
+          - { start_ms: 195.0, end_ms: 198.2, fields: { F2: 2006 }, tag: segmental_context }
+          - { start_ms: 198.2, end_ms: 204.6, fields: { F1: 446, F2: 2006 }, tag: segmental_context }
+          - { start_ms: 204.6, end_ms: 211.0, fields: { F1: 430, F2: 2006 }, tag: segmental_context }
+          - { start_ms: 211.0, end_ms: 217.4, fields: { F1: 414, F2: 2003 }, tag: segmental_context }
+          - { start_ms: 217.4, end_ms: 223.8, fields: { F1: 398, F2: 2001 }, tag: segmental_context }
+          - { start_ms: 223.8, end_ms: 230.2, fields: { F1: 383, F2: 1998 }, tag: segmental_context }
+          - { start_ms: 230.2, end_ms: 236.6, fields: { F1: 367, F2: 1996 }, tag: segmental_context }
+          - { start_ms: 236.6, end_ms: 237.0, fields: { F1: 351, F2: 1994, AV: 0 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native F1/F2 values at frames 51-57 and AV offset at frame 57)"
           - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
       cake_ey_f3_trace_windows:
         value:
-          - { start_ms: 6.2, end_ms: 12.6, fields: { F3: 2276 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.6, end_ms: 19.0, fields: { F3: 2301 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.0, end_ms: 25.4, fields: { F3: 2325 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.4, end_ms: 31.8, fields: { F3: 2350 }, tag: dectalk_trace_exact }
-          - { start_ms: 31.8, end_ms: 38.2, fields: { F3: 2378 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.2, end_ms: 44.6, fields: { F3: 2406 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.6, end_ms: 51.0, fields: { F3: 2434 }, tag: dectalk_trace_exact }
-          - { start_ms: 51.0, end_ms: 57.4, fields: { F3: 2462 }, tag: dectalk_trace_exact }
-          - { start_ms: 57.4, end_ms: 63.8, fields: { F3: 2465 }, tag: dectalk_trace_exact }
-          - { start_ms: 63.8, end_ms: 70.2, fields: { F3: 2469 }, tag: dectalk_trace_exact }
-          - { start_ms: 70.2, end_ms: 76.6, fields: { F3: 2472 }, tag: dectalk_trace_exact }
-          - { start_ms: 76.6, end_ms: 83.0, fields: { F3: 2476 }, tag: dectalk_trace_exact }
-          - { start_ms: 83.0, end_ms: 89.4, fields: { F3: 2479 }, tag: dectalk_trace_exact }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { F3: 2483 }, tag: dectalk_trace_exact }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { F3: 2486 }, tag: dectalk_trace_exact }
-          - { start_ms: 102.2, end_ms: 108.6, fields: { F3: 2490 }, tag: dectalk_trace_exact }
-          - { start_ms: 108.6, end_ms: 115.0, fields: { F3: 2493 }, tag: dectalk_trace_exact }
-          - { start_ms: 115.0, end_ms: 121.4, fields: { F3: 2497 }, tag: dectalk_trace_exact }
-          - { start_ms: 121.4, end_ms: 127.8, fields: { F3: 2500 }, tag: dectalk_trace_exact }
-          - { start_ms: 127.8, end_ms: 134.2, fields: { F3: 2504 }, tag: dectalk_trace_exact }
-          - { start_ms: 134.2, end_ms: 140.6, fields: { F3: 2507 }, tag: dectalk_trace_exact }
-          - { start_ms: 140.6, end_ms: 147.0, fields: { F3: 2511 }, tag: dectalk_trace_exact }
-          - { start_ms: 147.0, end_ms: 153.4, fields: { F3: 2514 }, tag: dectalk_trace_exact }
-          - { start_ms: 153.4, end_ms: 159.8, fields: { F3: 2518 }, tag: dectalk_trace_exact }
-          - { start_ms: 159.8, end_ms: 166.2, fields: { F3: 2521 }, tag: dectalk_trace_exact }
-          - { start_ms: 166.2, end_ms: 172.6, fields: { F3: 2525 }, tag: dectalk_trace_exact }
-          - { start_ms: 172.6, end_ms: 179.0, fields: { F3: 2528 }, tag: dectalk_trace_exact }
-          - { start_ms: 179.0, end_ms: 185.4, fields: { F3: 2532 }, tag: dectalk_trace_exact }
-          - { start_ms: 185.4, end_ms: 191.8, fields: { F3: 2535 }, tag: dectalk_trace_exact }
-          - { start_ms: 191.8, end_ms: 204.6, fields: { F3: 2539 }, tag: dectalk_trace_exact }
-          - { start_ms: 204.6, end_ms: 211.0, fields: { F3: 2519 }, tag: dectalk_trace_exact }
-          - { start_ms: 211.0, end_ms: 217.4, fields: { F3: 2500 }, tag: dectalk_trace_exact }
-          - { start_ms: 217.4, end_ms: 223.8, fields: { F3: 2480 }, tag: dectalk_trace_exact }
-          - { start_ms: 223.8, end_ms: 230.2, fields: { F3: 2461 }, tag: dectalk_trace_exact }
-          - { start_ms: 230.2, end_ms: 236.6, fields: { F3: 2441 }, tag: dectalk_trace_exact }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { F3: 2422 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.2, end_ms: 12.6, fields: { F3: 2276 }, tag: segmental_context }
+          - { start_ms: 12.6, end_ms: 19.0, fields: { F3: 2301 }, tag: segmental_context }
+          - { start_ms: 19.0, end_ms: 25.4, fields: { F3: 2325 }, tag: segmental_context }
+          - { start_ms: 25.4, end_ms: 31.8, fields: { F3: 2350 }, tag: segmental_context }
+          - { start_ms: 31.8, end_ms: 38.2, fields: { F3: 2378 }, tag: segmental_context }
+          - { start_ms: 38.2, end_ms: 44.6, fields: { F3: 2406 }, tag: segmental_context }
+          - { start_ms: 44.6, end_ms: 51.0, fields: { F3: 2434 }, tag: segmental_context }
+          - { start_ms: 51.0, end_ms: 57.4, fields: { F3: 2462 }, tag: segmental_context }
+          - { start_ms: 57.4, end_ms: 63.8, fields: { F3: 2465 }, tag: segmental_context }
+          - { start_ms: 63.8, end_ms: 70.2, fields: { F3: 2469 }, tag: segmental_context }
+          - { start_ms: 70.2, end_ms: 76.6, fields: { F3: 2472 }, tag: segmental_context }
+          - { start_ms: 76.6, end_ms: 83.0, fields: { F3: 2476 }, tag: segmental_context }
+          - { start_ms: 83.0, end_ms: 89.4, fields: { F3: 2479 }, tag: segmental_context }
+          - { start_ms: 89.4, end_ms: 95.8, fields: { F3: 2483 }, tag: segmental_context }
+          - { start_ms: 95.8, end_ms: 102.2, fields: { F3: 2486 }, tag: segmental_context }
+          - { start_ms: 102.2, end_ms: 108.6, fields: { F3: 2490 }, tag: segmental_context }
+          - { start_ms: 108.6, end_ms: 115.0, fields: { F3: 2493 }, tag: segmental_context }
+          - { start_ms: 115.0, end_ms: 121.4, fields: { F3: 2497 }, tag: segmental_context }
+          - { start_ms: 121.4, end_ms: 127.8, fields: { F3: 2500 }, tag: segmental_context }
+          - { start_ms: 127.8, end_ms: 134.2, fields: { F3: 2504 }, tag: segmental_context }
+          - { start_ms: 134.2, end_ms: 140.6, fields: { F3: 2507 }, tag: segmental_context }
+          - { start_ms: 140.6, end_ms: 147.0, fields: { F3: 2511 }, tag: segmental_context }
+          - { start_ms: 147.0, end_ms: 153.4, fields: { F3: 2514 }, tag: segmental_context }
+          - { start_ms: 153.4, end_ms: 159.8, fields: { F3: 2518 }, tag: segmental_context }
+          - { start_ms: 159.8, end_ms: 166.2, fields: { F3: 2521 }, tag: segmental_context }
+          - { start_ms: 166.2, end_ms: 172.6, fields: { F3: 2525 }, tag: segmental_context }
+          - { start_ms: 172.6, end_ms: 179.0, fields: { F3: 2528 }, tag: segmental_context }
+          - { start_ms: 179.0, end_ms: 185.4, fields: { F3: 2532 }, tag: segmental_context }
+          - { start_ms: 185.4, end_ms: 191.8, fields: { F3: 2535 }, tag: segmental_context }
+          - { start_ms: 191.8, end_ms: 204.6, fields: { F3: 2539 }, tag: segmental_context }
+          - { start_ms: 204.6, end_ms: 211.0, fields: { F3: 2519 }, tag: segmental_context }
+          - { start_ms: 211.0, end_ms: 217.4, fields: { F3: 2500 }, tag: segmental_context }
+          - { start_ms: 217.4, end_ms: 223.8, fields: { F3: 2480 }, tag: segmental_context }
+          - { start_ms: 223.8, end_ms: 230.2, fields: { F3: 2461 }, tag: segmental_context }
+          - { start_ms: 230.2, end_ms: 236.6, fields: { F3: 2441 }, tag: segmental_context }
+          - { start_ms: 236.6, end_ms: 237.0, fields: { F3: 2422 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY F3 values at frames 21-57)"
           - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
       cake_ey_b1_trace_windows:
         value:
-          - { start_ms: 6.2, end_ms: 63.8, fields: { B1: 320, B2: 170 }, tag: dectalk_trace_exact }
-          - { start_ms: 63.8, end_ms: 198.2, fields: { B1: 70, B2: 100 }, tag: dectalk_trace_exact }
-          - { start_ms: 198.2, end_ms: 204.6, fields: { B1: 77, B2: 100 }, tag: dectalk_trace_exact }
-          - { start_ms: 204.6, end_ms: 211.0, fields: { B1: 85, B2: 100 }, tag: dectalk_trace_exact }
-          - { start_ms: 211.0, end_ms: 217.4, fields: { B1: 93, B2: 104 }, tag: dectalk_trace_exact }
-          - { start_ms: 217.4, end_ms: 223.8, fields: { B1: 101, B2: 109 }, tag: dectalk_trace_exact }
-          - { start_ms: 223.8, end_ms: 230.2, fields: { B1: 108, B2: 114 }, tag: dectalk_trace_exact }
-          - { start_ms: 230.2, end_ms: 236.6, fields: { B1: 116, B2: 119 }, tag: dectalk_trace_exact }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { B1: 124, B2: 124 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.2, end_ms: 63.8, fields: { B1: 320, B2: 170 }, tag: segmental_context }
+          - { start_ms: 63.8, end_ms: 198.2, fields: { B1: 70, B2: 100 }, tag: segmental_context }
+          - { start_ms: 198.2, end_ms: 204.6, fields: { B1: 77, B2: 100 }, tag: segmental_context }
+          - { start_ms: 204.6, end_ms: 211.0, fields: { B1: 85, B2: 100 }, tag: segmental_context }
+          - { start_ms: 211.0, end_ms: 217.4, fields: { B1: 93, B2: 104 }, tag: segmental_context }
+          - { start_ms: 217.4, end_ms: 223.8, fields: { B1: 101, B2: 109 }, tag: segmental_context }
+          - { start_ms: 223.8, end_ms: 230.2, fields: { B1: 108, B2: 114 }, tag: segmental_context }
+          - { start_ms: 230.2, end_ms: 236.6, fields: { B1: 116, B2: 119 }, tag: segmental_context }
+          - { start_ms: 236.6, end_ms: 237.0, fields: { B1: 124, B2: 124 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY B1/B2 values at frames 21-57)"
           - "DECtalk 4.63 ph_draw.c (bandwidth transitions are emitted once per native synthesis frame)"
       cake_ey_b3_trace_windows:
         value:
-          - { start_ms: 6.2, end_ms: 12.6, fields: { B3: 239 }, tag: dectalk_trace_exact }
-          - { start_ms: 12.6, end_ms: 19.0, fields: { B3: 233 }, tag: dectalk_trace_exact }
-          - { start_ms: 19.0, end_ms: 25.4, fields: { B3: 226 }, tag: dectalk_trace_exact }
-          - { start_ms: 25.4, end_ms: 31.8, fields: { B3: 219 }, tag: dectalk_trace_exact }
-          - { start_ms: 31.8, end_ms: 38.2, fields: { B3: 213 }, tag: dectalk_trace_exact }
-          - { start_ms: 38.2, end_ms: 44.6, fields: { B3: 206 }, tag: dectalk_trace_exact }
-          - { start_ms: 44.6, end_ms: 211.0, fields: { B3: 200 }, tag: dectalk_trace_exact }
-          - { start_ms: 211.0, end_ms: 217.4, fields: { B3: 206 }, tag: dectalk_trace_exact }
-          - { start_ms: 217.4, end_ms: 223.8, fields: { B3: 213 }, tag: dectalk_trace_exact }
-          - { start_ms: 223.8, end_ms: 230.2, fields: { B3: 219 }, tag: dectalk_trace_exact }
-          - { start_ms: 230.2, end_ms: 236.6, fields: { B3: 226 }, tag: dectalk_trace_exact }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { B3: 233 }, tag: dectalk_trace_exact }
+          - { start_ms: 6.2, end_ms: 12.6, fields: { B3: 239 }, tag: segmental_context }
+          - { start_ms: 12.6, end_ms: 19.0, fields: { B3: 233 }, tag: segmental_context }
+          - { start_ms: 19.0, end_ms: 25.4, fields: { B3: 226 }, tag: segmental_context }
+          - { start_ms: 25.4, end_ms: 31.8, fields: { B3: 219 }, tag: segmental_context }
+          - { start_ms: 31.8, end_ms: 38.2, fields: { B3: 213 }, tag: segmental_context }
+          - { start_ms: 38.2, end_ms: 44.6, fields: { B3: 206 }, tag: segmental_context }
+          - { start_ms: 44.6, end_ms: 211.0, fields: { B3: 200 }, tag: segmental_context }
+          - { start_ms: 211.0, end_ms: 217.4, fields: { B3: 206 }, tag: segmental_context }
+          - { start_ms: 217.4, end_ms: 223.8, fields: { B3: 213 }, tag: segmental_context }
+          - { start_ms: 223.8, end_ms: 230.2, fields: { B3: 219 }, tag: segmental_context }
+          - { start_ms: 230.2, end_ms: 236.6, fields: { B3: 226 }, tag: segmental_context }
+          - { start_ms: 236.6, end_ms: 237.0, fields: { B3: 233 }, tag: segmental_context }
         citations:
           - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY B3 values at frames 21-57)"
           - "DECtalk 4.63 ph_draw.c (bandwidth transitions are emitted once per native synthesis frame)"

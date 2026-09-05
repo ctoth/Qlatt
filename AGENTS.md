@@ -31,7 +31,11 @@ This is enforced through three interlocking systems:
 
 **What this means for you as an agent:**
 - When you write a new rule: include `citations:` with the paper reference. No citation = do not commit.
+- In flow-style YAML citation arrays, quote every citation containing a comma so one source cannot parse as multiple list items; prefer block-style citation lists when editing several entries.
 - When you add a rule application: include a `tag:` that describes the linguistic motivation.
+- When validating `params.*` CEL paths, distinguish bundled rulepacks that declare a static `parameters:` schema from programmatic rules whose params are supplied by the execution call. Capture whether `parameters` was declared before parsing or normalization can synthesize an empty object, and pass that fact explicitly into validation. Enforce nested-path membership only when the static schema exists; always validate the `params` root identifier.
+- When strengthening CEL validation, preserve specialized validator diagnostics by running function, relation, and cursor-surface checks before the generic unknown-variable check. Predicate-body expansion must inherit the caller's declared variables and item-variable set. Every strict-validation test fixture must declare each item feature its expressions read and supply all required rule metadata, including citations and per-effect vocabulary tags. Rerun `test/declarative-frontend-schema.test.ts` after changing that environment.
+- When expanding phoneme-literal validation to a new CEL syntax, rerun bundled single-parse tests in a fresh Vitest process so the rulepack cache cannot hide new diagnostics. If a rule intentionally names a symbol normalized after initial materialization, declare it in that frontend inventory's `normalization_aliases` and map it to an explicit placeholder target that preserves the pre-normalization behavior; the cited normalize rule still owns conversion to the final phone. Do not silently move normalization earlier by mapping straight to the final target, and do not weaken validation globally.
 - When you add a new pipeline stage: integrate with `ProvenanceCollector` — emit decision records for every non-trivial choice.
 - When you modify semantics.yaml realize rules: comment the formula source. `# Fant 1960 Table 2.34-1` is the minimum.
 - When you write Rust DSP code: cite the paper in a doc comment at the top of the module. See `crates/aerodynamic-model/src/lib.rs` for the pattern.
@@ -61,10 +65,7 @@ Do not rely on long shell or Node one-liners for non-trivial repo analysis, migr
 
 ## Build Commands
 
-In a fresh worktree, do not launch the unfiltered `npm test` suite until the
-WASM files imported by `test/klsyn88.test.ts` exist under
-`target/wasm32-unknown-unknown/release/`. If they are absent, run the documented
-Windows or Unix WASM build below once and verify the produced paths first.
+Before the full `npm test` gate, verify the candidate checkout has the WASM files imported by `test/klsyn88.test.ts` under `target/wasm32-unknown-unknown/release`. If any are absent, run the platform build command below once before testing; a missing WASM file is an unmet prerequisite, not a product failure.
 
 ```bash
 # Build WASM modules (required first)

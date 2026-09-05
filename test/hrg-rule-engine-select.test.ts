@@ -73,7 +73,7 @@ describe("graph-native rule engine select/scalar execution", () => {
           define: { scaled: "current.duration * params.scale" },
           apply: [
             { field: "duration", op: "set", value: "scaled", tag: "duration" },
-            { field: "energy", op: "add", value: "3", tag: "duration" },
+            { field: "energy", op: "add", value: "3", tag: "energy" },
           ],
           citations: ["Klatt 1976"],
         },
@@ -94,6 +94,8 @@ describe("graph-native rule engine select/scalar execution", () => {
     expect(vowel?.latestWrite("duration")?.parents).toEqual(
       expect.arrayContaining(expectedParents),
     );
+    expect(vowel?.latestWrite("duration")?.tag).toBe("duration");
+    expect(vowel?.latestWrite("energy")?.tag).toBe("energy");
   });
 
   it("rejects an invalid later effect without committing an earlier effect", () => {

@@ -56,11 +56,20 @@ describe("materializePhonemeTarget – stress-aware lookup", () => {
     expect(result.duration).toBe(pcl.dur);
   });
 
-  it("returns SIL fallback for unknown phoneme", () => {
-    const result = materializePhonemeTarget("NONEXISTENT", { inventorySpec: INVENTORY });
-    expect(result.phoneme).toBe("NONEXISTENT");
+  it("rejects an unknown phoneme instead of materializing SIL", () => {
+    expect(() =>
+      materializePhonemeTarget("NONEXISTENT", { inventorySpec: INVENTORY }),
+    ).toThrowError(/E_INVENTORY_PHONEME_UNKNOWN.*NONEXISTENT/);
+  });
+
+  it("materializes normalization aliases through their declared inventory target", () => {
+    const result = materializePhonemeTarget("AX", { stress: 1, inventorySpec: INVENTORY });
+    const silence = PHONEME_TARGETS.SIL as Record<string, unknown>;
+
+    expect(result.phoneme).toBe("AX");
+    expect(result.params.F1).toBe(BASE_PARAMS.F1);
+    expect(result.duration).toBe(silence.dur);
     expect(result.type).toBe("silence");
-    expect(result.duration).toBe(100); // SIL dur
   });
 
   it("returns S params regardless of stress option", () => {

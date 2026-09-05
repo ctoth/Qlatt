@@ -138,6 +138,7 @@ export type JournalOperation =
       readonly itemId: string;
       readonly key: string;
       readonly value: FeatureValue;
+      readonly tag?: string;
     }
   | { readonly kind: "append"; readonly relationName: string; readonly itemId: string }
   | {

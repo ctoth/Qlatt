@@ -293,7 +293,13 @@ describe("phrase-domain scan primitive", () => {
       relations: {
         Segment: {
           type: "base" as const,
-          features: { phoneme: [], breakIndex: [], carrier: [true, false], active: [true, false] },
+          features: {
+            phoneme: [],
+            punctuationSymbol: [],
+            breakIndex: [],
+            carrier: [true, false],
+            active: [true, false],
+          },
           scalars: { idx: {}, cnt: {} },
         },
       },

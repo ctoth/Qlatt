@@ -8,6 +8,7 @@ import {
 
 export type InventorySpec = {
   base_params: Record<string, number>;
+  normalization_aliases?: Readonly<Record<string, string>>;
   phoneme_targets: Record<string, Record<string, unknown>>;
 };
 
@@ -92,15 +93,40 @@ function normalizePhonemeTargets(node: unknown): Record<string, Record<string, u
   return output;
 }
 
+function normalizeNormalizationAliases(
+  node: unknown,
+  targets: Record<string, Record<string, unknown>>,
+): Readonly<Record<string, string>> {
+  if (node == null) return Object.freeze({});
+  if (!isPlainObject(node)) {
+    throw new Error("E_INVENTORY_SCHEMA: 'normalization_aliases' must map aliases to targets");
+  }
+  const aliases: Record<string, string> = {};
+  for (const [alias, target] of Object.entries(node)) {
+    if (alias.length === 0 || typeof target !== "string" || target.length === 0) {
+      throw new Error(`E_INVENTORY_SCHEMA: normalization_aliases.${alias} must name a target`);
+    }
+    if (!targets[target] && !targets[`${target}0`] && !targets[`${target}1`]) {
+      throw new Error(
+        `E_INVENTORY_SCHEMA: normalization_aliases.${alias} references unknown target '${target}'`,
+      );
+    }
+    aliases[alias] = target;
+  }
+  return Object.freeze(aliases);
+}
+
 function parseInventorySpec(source: string): InventorySpec {
   const raw = parseYamlString(source, "inventory spec");
   if (!isPlainObject(raw)) {
     throw new Error("E_INVENTORY_SCHEMA: inventory spec must be a YAML object document");
   }
 
+  const phonemeTargets = normalizePhonemeTargets(raw.phoneme_targets);
   return {
     base_params: normalizeBaseParams(raw.base_params),
-    phoneme_targets: normalizePhonemeTargets(raw.phoneme_targets),
+    normalization_aliases: normalizeNormalizationAliases(raw.normalization_aliases, phonemeTargets),
+    phoneme_targets: phonemeTargets,
   };
 }
 
@@ -182,53 +208,53 @@ export function materializePhonemeTarget(
 ) {
   const effectiveTargets = options.inventorySpec.phoneme_targets;
   const effectiveBase = options.inventorySpec.base_params;
-  const baseKey = typeof phoneme === "string" && phoneme.length > 0 ? phoneme : "SIL";
+  if (typeof phoneme !== "string" || phoneme.length === 0) {
+    throw new Error(`E_INVENTORY_PHONEME_UNKNOWN: '${String(phoneme)}'`);
+  }
+  const lookupKey = options.inventorySpec.normalization_aliases?.[phoneme] ?? phoneme;
 
-  // Resolve the actual lookup key, applying stress-aware vowel resolution when
-  // an options bag with a stress value is provided.
-  let resolvedKey = baseKey;
+  // Aliases borrow a declared target's acoustics without renaming the normalized
+  // phoneme. This preserves rule-visible identity while making fallback explicit.
+  let resolvedKey = phoneme;
   let target: Record<string, unknown> | undefined;
 
   if (options && "stress" in options) {
     // Determine whether the base phoneme is a vowel by probing stressed variants
     // (vowels only exist in inventory as e.g. AH1/AH0, never bare AH).
     const probeTarget =
-      effectiveTargets[baseKey + "1"] ||
-      effectiveTargets[baseKey + "0"] ||
-      effectiveTargets[baseKey];
+      effectiveTargets[lookupKey + "1"] ||
+      effectiveTargets[lookupKey + "0"] ||
+      effectiveTargets[lookupKey];
     const isVowel = (probeTarget as Record<string, unknown> | undefined)?.type === "vowel";
 
     if (isVowel) {
       const stressMarker = options.stress === 1 ? "1" : "0";
       const fallbackMarker = stressMarker === "1" ? "0" : "1";
-      target = effectiveTargets[baseKey + stressMarker] as Record<string, unknown> | undefined;
+      target = effectiveTargets[lookupKey + stressMarker] as Record<string, unknown> | undefined;
       if (target) {
-        resolvedKey = baseKey + stressMarker;
+        resolvedKey = phoneme === lookupKey ? lookupKey + stressMarker : phoneme;
       } else {
-        target = effectiveTargets[baseKey + fallbackMarker] as Record<string, unknown> | undefined;
+        target = effectiveTargets[lookupKey + fallbackMarker] as
+          | Record<string, unknown>
+          | undefined;
         if (target) {
-          resolvedKey = baseKey + fallbackMarker;
+          resolvedKey = phoneme === lookupKey ? lookupKey + fallbackMarker : phoneme;
         }
       }
     } else {
       // Consonant: try with suffixes then bare key (matches original frontend logic)
       target =
-        (effectiveTargets[baseKey + "1"] as Record<string, unknown> | undefined) ||
-        (effectiveTargets[baseKey + "0"] as Record<string, unknown> | undefined) ||
-        (effectiveTargets[baseKey] as Record<string, unknown> | undefined);
-      if (target) {
-        // resolvedKey stays baseKey for consonants (they don't rename)
-        resolvedKey = baseKey;
-      }
+        (effectiveTargets[lookupKey + "1"] as Record<string, unknown> | undefined) ||
+        (effectiveTargets[lookupKey + "0"] as Record<string, unknown> | undefined) ||
+        (effectiveTargets[lookupKey] as Record<string, unknown> | undefined);
     }
   } else {
     // No options: direct lookup (backward-compatible path)
-    target = effectiveTargets[resolvedKey] as Record<string, unknown> | undefined;
+    target = effectiveTargets[lookupKey] as Record<string, unknown> | undefined;
   }
 
-  // Final fallback to SIL
   if (!target) {
-    target = (effectiveTargets.SIL || {}) as Record<string, unknown>;
+    throw new Error(`E_INVENTORY_PHONEME_UNKNOWN: '${phoneme}'`);
   }
 
   const targetDuration = typeof target.dur === "number" ? target.dur : undefined;

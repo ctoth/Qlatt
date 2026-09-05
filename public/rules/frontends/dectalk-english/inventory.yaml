@@ -6,6 +6,11 @@ citations:
 - DECtalk 4.63 p_us_rom.h us_maltar[]/us_mindur[] (US_RR retroflex /r/ target: schwa+r fusion and R-before-syllabic)
 - Fant 1997
 - Jongman 1989
+# Allen et al. 1987 normalization symbols consumed before target materialization.
+normalization_aliases:
+  EM: M
+  NX: SIL
+  WH: SIL
 base_params:
   F1: 500
   F2: 1500

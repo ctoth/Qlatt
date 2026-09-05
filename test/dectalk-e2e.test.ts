@@ -1423,7 +1423,7 @@ describe("dectalk-english end-to-end", () => {
         start_ms: 236.6,
         end_ms: 237,
         fields: expect.objectContaining({ F2: 1994 }),
-        tag: "dectalk_trace_exact",
+        tag: "segmental_context",
       }),
     );
     expect(nativeF2).toEqual([1926, 1777, 1858, 2006]);

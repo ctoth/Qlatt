@@ -470,7 +470,7 @@ nodes:
       threshold: -24    # dB — compress above ~0.063 amplitude
       knee: 12          # dB — soft transition
       ratio: 12         # aggressive compression above threshold
-      attack: 0.003     # 3 ms — fast enough for transients
+      attack: 0         # engineering estimate — clamp release transients without lowering steady speech
       release: 0.1      # 100 ms — faster than default 250 ms for speech
       # engineering estimate — restores loudness parity with the former
       # DynamicsCompressorNode's automatic makeup stage (measured 2026-07-22:

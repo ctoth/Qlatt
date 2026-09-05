@@ -146,7 +146,7 @@ describe("graph-native tooling", () => {
       relations: {
         Segment: {
           type: "base",
-          features: { eligible: [true, false], active: [true, false] },
+          features: { eligible: [true, false], active: [true, false], missing: [] },
           scalars: { duration: {} },
         },
       },

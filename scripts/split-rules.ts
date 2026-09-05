@@ -9,7 +9,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import yaml from "js-yaml";
+import { dump as dumpYaml, load as loadYaml } from "js-yaml";
 
 const RULES_DIR = path.resolve("public/rules");
 const FRONTEND_YAML = path.join(RULES_DIR, "frontend.yaml");
@@ -98,7 +98,7 @@ function normalizeCitations(rule: Record<string, unknown>): void {
 function main(): void {
   // 1. Read and parse frontend.yaml
   const rawYaml = fs.readFileSync(FRONTEND_YAML, "utf-8");
-  const doc = yaml.load(rawYaml) as Record<string, unknown>;
+  const doc = loadYaml(rawYaml) as Record<string, unknown>;
 
   if (!doc || typeof doc !== "object") {
     throw new Error("frontend.yaml did not parse to an object");
@@ -181,10 +181,10 @@ function main(): void {
     }
 
     const fileDoc = { rules: rulesForFile };
-    const yamlStr = yaml.dump(fileDoc, {
+    const yamlStr = dumpYaml(fileDoc, {
       lineWidth: 120,
       noRefs: true,
-      quotingType: '"',
+      quoteStyle: "double",
       forceQuotes: false,
       sortKeys: false,
       flowLevel: -1,
@@ -236,10 +236,10 @@ function main(): void {
     }
   }
 
-  const frontendYaml = yaml.dump(orderedDoc, {
+  const frontendYaml = dumpYaml(orderedDoc, {
     lineWidth: 120,
     noRefs: true,
-    quotingType: '"',
+    quoteStyle: "double",
     forceQuotes: false,
     sortKeys: false,
     flowLevel: -1,

@@ -14,13 +14,13 @@
 //
 // Usage: node scripts/gen-dectalk-place-coartic-yaml.mjs [us_place_coartic.yaml] [frontend.yaml]
 import { readFileSync } from "node:fs";
-import yaml from "js-yaml";
+import { load as loadYaml } from "js-yaml";
 
 const src = process.argv[2] ?? "C:/Users/Q/src/dectalk/463/output/us_place_coartic.yaml";
 const frontendPath = process.argv[3] ?? "public/rules/frontends/dectalk-english/frontend.yaml";
 
-const data = yaml.load(readFileSync(src, "utf8"));
-const frontend = yaml.load(readFileSync(frontendPath, "utf8"));
+const data = loadYaml(readFileSync(src, "utf8"));
+const frontend = loadYaml(readFileSync(frontendPath, "utf8"));
 const lociObstruents = new Set(Object.keys(frontend.output.lowering.transitions.loci ?? {}));
 
 const indent = "      "; // 6 spaces: under transitions: (4)

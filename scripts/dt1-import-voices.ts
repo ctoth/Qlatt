@@ -15,7 +15,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import yaml from "js-yaml";
+import { dump as dumpYaml, load as loadYaml } from "js-yaml";
 
 const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), "..");
@@ -45,7 +45,7 @@ fs.mkdirSync(OUT_DIR, { recursive: true });
 
 for (const voice of VOICES) {
   const srcPath = path.join(SOURCE_DIR, `${voice}.yaml`);
-  const raw = yaml.load(fs.readFileSync(srcPath, "utf8")) as Record<string, unknown>;
+  const raw = loadYaml(fs.readFileSync(srcPath, "utf8")) as Record<string, unknown>;
 
   const f0LpFilter = Number(raw.f0_lp_filter);
   const alpha = f0LpFilter / F0_LP_DIVISOR;
@@ -73,7 +73,7 @@ for (const voice of VOICES) {
     `  - "DECtalk 4.63 ph_vset.c (speaker-dependent parameter set)"\n` +
     `  - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"\n`;
 
-  const body = yaml.dump(out, { lineWidth: 120, sortKeys: false });
+  const body = dumpYaml(out, { lineWidth: 120, sortKeys: false });
   const outPath = path.join(OUT_DIR, `${voice}.yaml`);
   fs.writeFileSync(outPath, header + body, "utf8");
   console.log(`wrote ${path.relative(repoRoot, outPath)}`);

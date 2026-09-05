@@ -294,16 +294,108 @@ maps:
     D_CL: D_REL
     N: ""
     Y: ""
+tags:
+  accent: assigns an intonational accent
+  accent_type: selects the accent category
+  aspiration_frication: carries source noise across a segment boundary
+  boundary: adjusts a segment at a prosodic boundary
+  boundary_tone: assigns a phrase-final boundary tone
+  branch_switch: selects the cascade or parallel synthesis branch
+  burst_spectrum: shapes a stop-release burst spectrum
+  cluster: adjusts a consonant in a cluster
+  cluster_position: records a consonant position within its cluster
+  coarticulation: blends neighboring articulatory targets
+  consonant_medial: adjusts a word-medial consonant
+  consonant_position: adjusts duration by consonant position
+  consonant_stress: adjusts a consonant beside a stressed vowel
+  coronal_fronting: fronts a vowel beside a coronal consonant
+  d_deletion: deletes an eligible alveolar voiced stop
+  downstep_index: records accent order for downstep
+  duration_cap: caps an overlong segment
+  duration_floor: enforces a segment-duration floor
+  fricative_duration_floor: enforces a fricative-duration floor
+  initial_boundary_tone: assigns a phrase-initial boundary tone
+  lateral_allophony: selects a context-sensitive lateral target
+  nasal_coupling: adjusts oral-nasal acoustic coupling
+  nasal_murmur: adjusts nasal-murmur strength
+  nasal_place: assigns or assimilates nasal place
+  nasal_window: schedules anticipatory or carryover nasalization
+  nuclear_accent: marks the nuclear accent
+  orthography: maps written tokens to pronunciation keys
+  pause_duration: assigns punctuation-pause duration
+  pause_rate: scales a pause for speaking rate
+  phrase_accent: assigns a phrase accent
+  place_locus: applies a consonantal formant locus
+  polysyllabic: adjusts duration in a polysyllabic word
+  rate_undershoot: reduces articulatory excursion at high rate
+  rhoticity: lowers F3 for rhotic articulation
+  s_cluster_aspiration: reduces aspiration after s
+  segmental_context: adjusts a segment from neighboring segments
+  source_contour: shapes phrase-level source parameters
+  speech_rate: scales segment duration for speaking rate
+  stop_release_duration: assigns stop-release timing
+  stop_release_formant: shapes formants at stop release
+  stop_unrelease: suppresses an unreleased stop burst
+  stress: adjusts a stressed or unstressed segment
+  syllable_count: records syllable count for duration rules
+  t_deletion: deletes an eligible alveolar voiceless stop
+  transition: assigns a formant-transition duration
+  vowel_reduction: centralizes an unstressed vowel
+  weak_coda_devoicing: attenuates voicing in a weak coda
+  weak_release_spectrum: attenuates a weak stop-release spectrum
+  word_class: records function-word or content-word status
+  word_initial: adjusts a word-initial segment
 relations:
   Token:
     type: parallel
     features:
+      pronunciationKey: []
+      word: []
       tokenType:
         - word
         - punctuation
   Segment:
     type: base
     features:
+      A1: []
+      A2: []
+      A3: []
+      A4: []
+      A5: []
+      A6: []
+      A7: []
+      A8: []
+      A9: []
+      A10: []
+      AF: []
+      AH: []
+      AV: []
+      AVS: []
+      EePhraseDb: []
+      F1: []
+      F2: []
+      F3: []
+      RdPhraseOffset: []
+      SW: []
+      TL: []
+      accentIndexInPhrase: []
+      accentType: []
+      boundaryTone: []
+      breakIndex: []
+      cluster_position: []
+      control_windows: []
+      inherentDuration: []
+      initialBoundaryTone: []
+      isAccentCarrier: []
+      isAccented: []
+      isContentWord: []
+      isFunctionWord: []
+      isNuclearAccent: []
+      nasalCoupling: []
+      nasalMurmurStrength: []
+      nasalPlaceIndex: []
+      phraseAccent: []
+      transition_ms: []
       type:
         - vowel
         - stop
@@ -316,6 +408,24 @@ relations:
         - liquid
         - nasal
         - glide
+      word_syllable_count: []
+      alveolar: []
+      bilabial: []
+      boundary: []
+      dac: []
+      fricative_min_ms: []
+      inventorySW: []
+      next_boundary: []
+      phoneme: []
+      postalveolar: []
+      punctuationSymbol: []
+      stress: []
+      syllable: []
+      velar: []
+      voiced: []
+      voiceless: []
+      weak: []
+      word: []
     scalars:
       duration:
         unit: ms

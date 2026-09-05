@@ -96,7 +96,12 @@ export function replayJournal(
           break;
         }
         case "set_feature":
-          transaction.set(requireItem(operation.itemId), operation.key, operation.value);
+          transaction.set(
+            requireItem(operation.itemId),
+            operation.key,
+            operation.value,
+            operation.tag,
+          );
           break;
         case "append":
           transaction.append(operation.relationName, requireItem(operation.itemId));

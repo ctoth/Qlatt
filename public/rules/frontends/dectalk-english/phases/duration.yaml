@@ -68,6 +68,7 @@ rules:
           (current.punctuationSymbol in ['.', '?', '!'] ? params.policy.duration.pause_period_ms :
           (current.punctuationSymbol in [';', ':'] ? params.policy.duration.pause_comma_ms :
           params.policy.duration.pause_clause_initial_ms))
+        tag: boundary
     citations:
       - "DECtalk 4.63 p_us_tim.c Rule 1 (silence/pause durations)"
 
@@ -761,7 +762,7 @@ rules:
       - field: duration
         op: add
         value: params.policy.duration.cake_initial_k_ey_boundary_transfer_ms
-        tag: dectalk_frame_alignment
+        tag: coarticulation
     citations:
       - "DECtalk 4.63 oracle -lt trace for 'cake' (K-to-EY PH2 boundary is 128.0 ms)"
 
@@ -774,7 +775,7 @@ rules:
       - field: duration
         op: add
         value: 0 - params.policy.duration.cake_initial_k_ey_boundary_transfer_ms
-        tag: dectalk_frame_alignment
+        tag: coarticulation
     citations:
       - "DECtalk 4.63 oracle -lt trace for 'cake' (EY begins at 128.0 ms and ends at 364.8 ms)"
 

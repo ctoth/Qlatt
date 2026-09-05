@@ -360,11 +360,13 @@ export class HrgTransaction {
         });
         prepared.push({
           journal,
-          commit: () => [operation.item.set(
-            operation.key,
-            value,
-            operation.tag ? this.writeInput(operation.tag) : input,
-          ).decisionId],
+          commit: () => [
+            operation.item.set(
+              operation.key,
+              value,
+              operation.tag ? this.writeInput(operation.tag) : input,
+            ).decisionId,
+          ],
         });
         continue;
       }

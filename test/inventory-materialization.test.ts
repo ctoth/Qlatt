@@ -58,7 +58,7 @@ describe("materializePhonemeTarget – stress-aware lookup", () => {
 
   it("rejects an unknown phoneme instead of materializing SIL", () => {
     expect(() =>
-      materializePhonemeTarget("NONEXISTENT", { inventorySpec: INVENTORY })
+      materializePhonemeTarget("NONEXISTENT", { inventorySpec: INVENTORY }),
     ).toThrowError(/E_INVENTORY_PHONEME_UNKNOWN.*NONEXISTENT/);
   });
 

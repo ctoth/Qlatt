@@ -234,7 +234,9 @@ export function materializePhonemeTarget(
       if (target) {
         resolvedKey = phoneme === lookupKey ? lookupKey + stressMarker : phoneme;
       } else {
-        target = effectiveTargets[lookupKey + fallbackMarker] as Record<string, unknown> | undefined;
+        target = effectiveTargets[lookupKey + fallbackMarker] as
+          | Record<string, unknown>
+          | undefined;
         if (target) {
           resolvedKey = phoneme === lookupKey ? lookupKey + fallbackMarker : phoneme;
         }

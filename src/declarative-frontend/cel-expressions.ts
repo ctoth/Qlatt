@@ -332,9 +332,10 @@ export function validateExpressionSyntax(
       }
       const checked = env.check(expression);
       if (!checked.valid) {
-        const message = checked.error instanceof Error
-          ? checked.error.message
-          : String(checked.error ?? "CEL type check failed");
+        const message =
+          checked.error instanceof Error
+            ? checked.error.message
+            : String(checked.error ?? "CEL type check failed");
         if (message.includes("Unknown variable")) throw new Error(message);
       }
     } catch (error) {

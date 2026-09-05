@@ -47,18 +47,31 @@ describe("rulepack load-time validation gaps", () => {
         }),
         unknown_kind: scalarRule({ kind: "scaler" }),
       },
-      phases: [{
-        name: "duration",
-        rules: ["misspelled_apply", "misspelled_select", "missing_field", "unknown_kind"],
-      }],
+      phases: [
+        {
+          name: "duration",
+          rules: ["misspelled_apply", "misspelled_select", "missing_field", "unknown_kind"],
+        },
+      ],
     });
 
-    expect(diagnostics).toEqual(expect.arrayContaining([
-      expect.objectContaining({ code: "E_RULE_FIELD_UNKNOWN", path: "rules.misspelled_apply.aply" }),
-      expect.objectContaining({ code: "E_RULE_SELECT_FIELD_UNKNOWN", path: "rules.misspelled_select.select.wher" }),
-      expect.objectContaining({ code: "E_RULE_APPLY_FIELD_REQUIRED", path: "rules.missing_field.apply[0].field" }),
-      expect.objectContaining({ code: "E_RULE_KIND_UNKNOWN", path: "rules.unknown_kind.kind" }),
-    ]));
+    expect(diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "E_RULE_FIELD_UNKNOWN",
+          path: "rules.misspelled_apply.aply",
+        }),
+        expect.objectContaining({
+          code: "E_RULE_SELECT_FIELD_UNKNOWN",
+          path: "rules.misspelled_select.select.wher",
+        }),
+        expect.objectContaining({
+          code: "E_RULE_APPLY_FIELD_REQUIRED",
+          path: "rules.missing_field.apply[0].field",
+        }),
+        expect.objectContaining({ code: "E_RULE_KIND_UNKNOWN", path: "rules.unknown_kind.kind" }),
+      ]),
+    );
   });
 
   it("requires citations and vocabulary-backed tags on every apply entry", () => {
@@ -75,11 +88,22 @@ describe("rulepack load-time validation gaps", () => {
       phases: [{ name: "duration", rules: ["uncited", "untagged", "unknown_tag"] }],
     });
 
-    expect(diagnostics).toEqual(expect.arrayContaining([
-      expect.objectContaining({ code: "E_RULE_CITATIONS_REQUIRED", path: "rules.uncited.citations" }),
-      expect.objectContaining({ code: "E_RULE_TAG_REQUIRED", path: "rules.untagged.apply[0].tag" }),
-      expect.objectContaining({ code: "E_RULE_TAG_UNKNOWN", path: "rules.unknown_tag.apply[0].tag" }),
-    ]));
+    expect(diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "E_RULE_CITATIONS_REQUIRED",
+          path: "rules.uncited.citations",
+        }),
+        expect.objectContaining({
+          code: "E_RULE_TAG_REQUIRED",
+          path: "rules.untagged.apply[0].tag",
+        }),
+        expect.objectContaining({
+          code: "E_RULE_TAG_UNKNOWN",
+          path: "rules.unknown_tag.apply[0].tag",
+        }),
+      ]),
+    );
   });
 
   it("validates fields, point relations, relation paths, and implemented pattern options", () => {
@@ -106,18 +130,34 @@ describe("rulepack load-time validation gaps", () => {
           select: { relation: "Segment", where: "path(current, 'R:Missing') != null" },
         }),
       },
-      phases: [{
-        name: "duration",
-        rules: ["unknown_feature", "unknown_point_relation", "unknown_path_relation"],
-      }],
+      phases: [
+        {
+          name: "duration",
+          rules: ["unknown_feature", "unknown_point_relation", "unknown_path_relation"],
+        },
+      ],
     });
 
-    expect(diagnostics).toEqual(expect.arrayContaining([
-      expect.objectContaining({ code: "E_RULE_FEATURE_UNKNOWN", path: "rules.unknown_feature.apply[0].field" }),
-      expect.objectContaining({ code: "E_POINT_RELATION_UNKNOWN", path: "rules.unknown_point_relation.insert_point.relation" }),
-      expect.objectContaining({ code: "E_CEL_INVALID", path: "rules.unknown_path_relation.select.where" }),
-      expect.objectContaining({ code: "E_PATTERN_OPTION_UNSUPPORTED", path: "patterns.unsupported.sequence[0].optional" }),
-    ]));
+    expect(diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "E_RULE_FEATURE_UNKNOWN",
+          path: "rules.unknown_feature.apply[0].field",
+        }),
+        expect.objectContaining({
+          code: "E_POINT_RELATION_UNKNOWN",
+          path: "rules.unknown_point_relation.insert_point.relation",
+        }),
+        expect.objectContaining({
+          code: "E_CEL_INVALID",
+          path: "rules.unknown_path_relation.select.where",
+        }),
+        expect.objectContaining({
+          code: "E_PATTERN_OPTION_UNSUPPORTED",
+          path: "patterns.unsupported.sequence[0].optional",
+        }),
+      ]),
+    );
   });
 
   it("rejects unknown CEL identifiers and phoneme literals", () => {
@@ -147,29 +187,54 @@ describe("rulepack load-time validation gaps", () => {
           apply: [{ field: "energy", op: "set", value: "target('AEE').F1", tag: "energy" }],
         }),
       },
-      phases: [{
-        name: "duration",
-        rules: [
-          "unknown_identifier",
-          "unknown_value_identifier",
-          "unknown_feature_read",
-          "unknown_parameter_path",
-          "unknown_literal",
-          "unknown_membership_literal",
-          "unknown_target",
-        ],
-      }],
+      phases: [
+        {
+          name: "duration",
+          rules: [
+            "unknown_identifier",
+            "unknown_value_identifier",
+            "unknown_feature_read",
+            "unknown_parameter_path",
+            "unknown_literal",
+            "unknown_membership_literal",
+            "unknown_target",
+          ],
+        },
+      ],
     });
 
-    expect(diagnostics).toEqual(expect.arrayContaining([
-      expect.objectContaining({ code: "E_CEL_INVALID", path: "rules.unknown_identifier.select.where" }),
-      expect.objectContaining({ code: "E_CEL_INVALID", path: "rules.unknown_value_identifier.apply[0].value" }),
-      expect.objectContaining({ code: "E_RULE_FEATURE_UNKNOWN", path: "rules.unknown_feature_read.select.where" }),
-      expect.objectContaining({ code: "E_PARAM_UNKNOWN", path: "rules.unknown_parameter_path.apply[0].value" }),
-      expect.objectContaining({ code: "E_PHONEME_UNKNOWN", path: "rules.unknown_literal.select.where" }),
-      expect.objectContaining({ code: "E_PHONEME_UNKNOWN", path: "rules.unknown_membership_literal.select.where" }),
-      expect.objectContaining({ code: "E_PHONEME_UNKNOWN", path: "rules.unknown_target.apply[0].value" }),
-    ]));
+    expect(diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "E_CEL_INVALID",
+          path: "rules.unknown_identifier.select.where",
+        }),
+        expect.objectContaining({
+          code: "E_CEL_INVALID",
+          path: "rules.unknown_value_identifier.apply[0].value",
+        }),
+        expect.objectContaining({
+          code: "E_RULE_FEATURE_UNKNOWN",
+          path: "rules.unknown_feature_read.select.where",
+        }),
+        expect.objectContaining({
+          code: "E_PARAM_UNKNOWN",
+          path: "rules.unknown_parameter_path.apply[0].value",
+        }),
+        expect.objectContaining({
+          code: "E_PHONEME_UNKNOWN",
+          path: "rules.unknown_literal.select.where",
+        }),
+        expect.objectContaining({
+          code: "E_PHONEME_UNKNOWN",
+          path: "rules.unknown_membership_literal.select.where",
+        }),
+        expect.objectContaining({
+          code: "E_PHONEME_UNKNOWN",
+          path: "rules.unknown_target.apply[0].value",
+        }),
+      ]),
+    );
   });
 
   it("warns about dead rules and same-phase writes to the same field", () => {
@@ -184,9 +249,15 @@ describe("rulepack load-time validation gaps", () => {
       phases: [{ name: "duration", rules: ["first", "second"] }],
     });
 
-    expect(diagnostics).toEqual(expect.arrayContaining([
-      expect.objectContaining({ code: "W_RULE_DEAD", path: "rules.dead", severity: "warning" }),
-      expect.objectContaining({ code: "W_PHASE_WRITE_CONFLICT", path: "phases[0].rules", severity: "warning" }),
-    ]));
+    expect(diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "W_RULE_DEAD", path: "rules.dead", severity: "warning" }),
+        expect.objectContaining({
+          code: "W_PHASE_WRITE_CONFLICT",
+          path: "phases[0].rules",
+          severity: "warning",
+        }),
+      ]),
+    );
   });
 });

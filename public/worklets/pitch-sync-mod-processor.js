@@ -3,7 +3,7 @@
  * Wraps the pitch-sync-mod WASM primitive
  * F1/B1 modulation synchronized to glottal cycle
  */
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+import { computeRmsPeak, initWasmModule, resolveWasmUrl, WasmBuffer, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./pitch-sync-mod.wasm");
 class PitchSyncModProcessor extends AudioWorkletProcessor {
     disposed = false;
@@ -23,7 +23,13 @@ class PitchSyncModProcessor extends AudioWorkletProcessor {
     _reportCountdown;
     static get parameterDescriptors() {
         return [
-            { name: "f0", defaultValue: 100, minValue: 20, maxValue: 500, automationRate: "a-rate" },
+            {
+                name: "f0",
+                defaultValue: 100,
+                minValue: 20,
+                maxValue: 500,
+                automationRate: "a-rate",
+            },
             {
                 name: "openQuotient",
                 defaultValue: 50,
@@ -31,12 +37,48 @@ class PitchSyncModProcessor extends AudioWorkletProcessor {
                 maxValue: 100,
                 automationRate: "k-rate",
             },
-            { name: "f1", defaultValue: 500, minValue: 100, maxValue: 1500, automationRate: "a-rate" },
-            { name: "b1", defaultValue: 80, minValue: 30, maxValue: 500, automationRate: "a-rate" },
-            { name: "dF1", defaultValue: 0, minValue: 0, maxValue: 500, automationRate: "a-rate" },
-            { name: "dB1", defaultValue: 0, minValue: 0, maxValue: 500, automationRate: "a-rate" },
-            { name: "skew", defaultValue: 0, minValue: 0, maxValue: 200, automationRate: "k-rate" },
-            { name: "source", defaultValue: 2, minValue: 1, maxValue: 4, automationRate: "k-rate" },
+            {
+                name: "f1",
+                defaultValue: 500,
+                minValue: 100,
+                maxValue: 1500,
+                automationRate: "a-rate",
+            },
+            {
+                name: "b1",
+                defaultValue: 80,
+                minValue: 30,
+                maxValue: 500,
+                automationRate: "a-rate",
+            },
+            {
+                name: "dF1",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 500,
+                automationRate: "a-rate",
+            },
+            {
+                name: "dB1",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 500,
+                automationRate: "a-rate",
+            },
+            {
+                name: "skew",
+                defaultValue: 0,
+                minValue: 0,
+                maxValue: 200,
+                automationRate: "k-rate",
+            },
+            {
+                name: "source",
+                defaultValue: 2,
+                minValue: 1,
+                maxValue: 4,
+                automationRate: "k-rate",
+            },
         ];
     }
     constructor(options) {

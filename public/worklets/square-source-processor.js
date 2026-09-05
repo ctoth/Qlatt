@@ -2,7 +2,7 @@
  * Square glottal source AudioWorklet processor
  * Wraps the square-source WASM primitive
  */
-import { initWasmModule, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+import { computeRmsPeak, initWasmModule, resolveWasmUrl, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./square-source.wasm");
 class SquareSourceProcessor extends AudioWorkletProcessor {
     disposed = false;
@@ -15,7 +15,13 @@ class SquareSourceProcessor extends AudioWorkletProcessor {
     _reportCountdown;
     static get parameterDescriptors() {
         return [
-            { name: "f0", defaultValue: 100, minValue: 20, maxValue: 500, automationRate: "a-rate" },
+            {
+                name: "f0",
+                defaultValue: 100,
+                minValue: 20,
+                maxValue: 500,
+                automationRate: "a-rate",
+            },
             {
                 name: "openQuotient",
                 defaultValue: 0.5,

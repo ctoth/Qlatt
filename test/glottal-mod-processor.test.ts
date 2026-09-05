@@ -7,7 +7,7 @@
  *
  * Citations: Klatt 1980 COEWAV.FOR lines 116-122, Gobl 1988, Fant 1997 Table 1
  */
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Inline simulation of the GlottalModProcessor envelope logic
@@ -18,7 +18,7 @@ function generateGlottalModEnvelope(
   f0: number,
   oq: number,
   sampleRate: number,
-  numSamples: number
+  numSamples: number,
 ): Float32Array {
   const out = new Float32Array(numSamples);
   const period = sampleRate / f0;
@@ -36,7 +36,7 @@ function generateGlottalModEnvelope(
       const openDuration = oq * period;
       if (phase < openDuration) {
         // Open phase: sinusoidal envelope
-        out[i] = 0.5 + 0.5 * Math.sin(Math.PI * phase / openDuration);
+        out[i] = 0.5 + 0.5 * Math.sin((Math.PI * phase) / openDuration);
       } else {
         // Closed phase: half amplitude
         out[i] = 0.5;

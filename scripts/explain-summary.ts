@@ -56,7 +56,10 @@ function parseArgs(argv: string[]): { inputPath: string; topN: number } {
   return { inputPath, topN: Math.floor(topN) };
 }
 
-function topEntries(record: Record<string, number> | undefined, topN: number): Array<[string, number]> {
+function topEntries(
+  record: Record<string, number> | undefined,
+  topN: number,
+): Array<[string, number]> {
   if (!record || typeof record !== "object") return [];
   return Object.entries(record)
     .sort((a, b) => b[1] - a[1])

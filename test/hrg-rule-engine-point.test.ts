@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { replayJournal, Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { replayJournal, Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
@@ -38,16 +38,15 @@ function fixture(): Utterance {
   const transaction = utterance.beginTransaction(META);
   const first = transaction.createItem("segment", "first");
   const second = transaction.createItem("segment", "second");
-  for (const [item, phoneme] of [[first, "AA"], [second, "IY"]] as const) {
+  for (const [item, phoneme] of [
+    [first, "AA"],
+    [second, "IY"],
+  ] as const) {
     transaction.set(item, "phoneme", phoneme);
     transaction.set(item, "active", true);
     transaction.append("Segment", item);
   }
-  transaction.partitionAnchors(
-    [first, second],
-    utterance.axis.start.id,
-    utterance.axis.end.id,
-  );
+  transaction.partitionAnchors([first, second], utterance.axis.start.id, utterance.axis.end.id);
   transaction.commit();
   return utterance;
 }
@@ -65,9 +64,20 @@ describe("graph-native point action execution", () => {
         first_points: {
           select: { relation: "Segment", where: "current.id == 'first'" },
           insert_points: [
-            { relation: "F0Point", at: "midpoint(current)", value: "params.base + current_index", tag: "mid" },
+            {
+              relation: "F0Point",
+              at: "midpoint(current)",
+              value: "params.base + current_index",
+              tag: "mid",
+            },
             { relation: "F0Point", at: "at_ratio(current, 0.25)", value: "120", tag: "ratio" },
-            { relation: "F0Point", when: "false", at: "midpoint(current)", value: "999", tag: "guarded" },
+            {
+              relation: "F0Point",
+              when: "false",
+              at: "midpoint(current)",
+              value: "999",
+              tag: "guarded",
+            },
           ],
           citations: ["O'Shaughnessy 1976"],
         },
@@ -93,15 +103,21 @@ describe("graph-native point action execution", () => {
       [120, "ratio"],
       [90, "tail"],
     ]);
-    expect(utterance.temporalAnchor(points[0])).toEqual(expect.objectContaining({ kind: "point", ratio: 0.5 }));
-    expect(utterance.temporalAnchor(points[1])).toEqual(expect.objectContaining({ kind: "point", ratio: 0.25 }));
+    expect(utterance.temporalAnchor(points[0])).toEqual(
+      expect.objectContaining({ kind: "point", ratio: 0.5 }),
+    );
+    expect(utterance.temporalAnchor(points[1])).toEqual(
+      expect.objectContaining({ kind: "point", ratio: 0.25 }),
+    );
     const tail = utterance.temporalAnchor(points[2]);
-    expect(tail).toEqual(expect.objectContaining({
-      kind: "point",
-      leftMarkId: utterance.axis.end.id,
-      rightMarkId: utterance.axis.end.id,
-      ratio: 0,
-    }));
+    expect(tail).toEqual(
+      expect.objectContaining({
+        kind: "point",
+        leftMarkId: utterance.axis.end.id,
+        rightMarkId: utterance.axis.end.id,
+        ratio: 0,
+      }),
+    );
     expect(replayJournal(SCHEMA, utterance.journal()).graphDigest()).toBe(utterance.graphDigest());
   });
 });

@@ -1,4 +1,4 @@
-import { normalizePath, isNodeRuntime, readFileFromFsSync } from "./path-utils";
+import { isNodeRuntime, normalizePath, readFileFromFsSync } from "./path-utils";
 
 function readDictionarySourceFromUrlSync(specPath: string): string | null {
   if (typeof XMLHttpRequest !== "function") return null;
@@ -48,7 +48,7 @@ export function listBundledCmuDictionaryPaths(): string[] {
 }
 
 export async function preloadCmuDictionaryFromPath(
-  specPath: string = DEFAULT_CMU_DICTIONARY_PATH
+  specPath: string = DEFAULT_CMU_DICTIONARY_PATH,
 ): Promise<CmuDictionary> {
   const cached = DICTIONARY_CACHE.get(specPath);
   if (cached) return cached;
@@ -83,7 +83,7 @@ export async function preloadCmuDictionaryFromPath(
   const known = listBundledCmuDictionaryPaths();
   throw new Error(
     `E_CMU_DICT_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-      (known.length > 0 ? ` (known: ${known.join(", ")})` : "")
+      (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
   );
 }
 
@@ -123,6 +123,6 @@ export function loadCmuDictionaryFromPathSync(specPath: string): CmuDictionary {
   const known = listBundledCmuDictionaryPaths();
   throw new Error(
     `E_CMU_DICT_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-      (known.length > 0 ? ` (known: ${known.join(", ")})` : "")
+      (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
   );
 }

@@ -66,26 +66,22 @@ export function countPrimaryStressVowels(phonemes: string[]): number {
 export function getTrackFramesForWordPhoneme(
   track: KlattFrame[],
   word: string,
-  phoneme: string
+  phoneme: string,
 ): KlattFrame[] {
-  return track.filter(
-    (frame) => frame.word === word && frame.phoneme === phoneme
-  );
+  return track.filter((frame) => frame.word === word && frame.phoneme === phoneme);
 }
 
 export function averageTrackParam(
   frames: Array<{ params?: Record<string, number> }>,
-  key: string
+  key: string,
 ): number {
   if (frames.length === 0) return 0;
-  return (
-    frames.reduce((sum, frame) => sum + Number(frame.params?.[key] ?? 0), 0) / frames.length
-  );
+  return frames.reduce((sum, frame) => sum + Number(frame.params?.[key] ?? 0), 0) / frames.length;
 }
 
 export function maxTrackParam(
   frames: Array<{ params?: Record<string, number> }>,
-  key: string
+  key: string,
 ): number {
   if (frames.length === 0) return 0;
   return Math.max(...frames.map((frame) => Number(frame.params?.[key] ?? 0)));

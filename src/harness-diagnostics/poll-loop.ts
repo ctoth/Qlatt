@@ -1,15 +1,21 @@
 // Poll loop — single setInterval that reads all taps, evaluates checks,
 // formats output, and delivers results via callback.
 
-import type { DiagConfig, CheckResult, RunInfo, MeasureParams } from "./types";
-import type { DisplayState } from "./display-formatter";
-import type { TapManager } from "./tap-manager";
 import type { AcrossPlaysAccumulator } from "./across-plays";
-import { resolveTimingSnapshot } from "./timing-context";
-import { evaluateCheck, createCheckState, type CheckState } from "./check-evaluator";
-import { readRms, readPeak, readFftPeakFreq, readBandEnergy, readBandShare, readBandRatioDb } from "./measurement";
+import { type CheckState, createCheckState, evaluateCheck } from "./check-evaluator";
+import type { DisplayState } from "./display-formatter";
 import { formatDisplay } from "./display-formatter";
-import type { ParamRangeAccum } from "./types";
+import {
+  readBandEnergy,
+  readBandRatioDb,
+  readBandShare,
+  readFftPeakFreq,
+  readPeak,
+  readRms,
+} from "./measurement";
+import type { TapManager } from "./tap-manager";
+import { resolveTimingSnapshot } from "./timing-context";
+import type { CheckResult, DiagConfig, MeasureParams, ParamRangeAccum, RunInfo } from "./types";
 
 export interface PollLoopOptions {
   config: DiagConfig;
@@ -33,7 +39,17 @@ export class PollLoop {
   private acrossPlays: AcrossPlaysAccumulator;
   private acrossPlaySamples: Map<string, number> = new Map();
   private meterValues: Map<string, { rms: number; peak: number }> = new Map();
-  private meterMax: Map<string, { rms: number; peak: number; rmsTime?: number; peakTime?: number; rmsPhoneme?: string; peakPhoneme?: string }> = new Map();
+  private meterMax: Map<
+    string,
+    {
+      rms: number;
+      peak: number;
+      rmsTime?: number;
+      peakTime?: number;
+      rmsPhoneme?: string;
+      peakPhoneme?: string;
+    }
+  > = new Map();
   private getRunInfo: () => RunInfo | null;
   private getRunStartTime: () => number;
   private getAudioTime: () => number;
@@ -110,12 +126,7 @@ export class PollLoop {
     const externalDisplayState = this.getDisplayState();
 
     // Get timing snapshot
-    const snapshot = resolveTimingSnapshot(
-      now,
-      runStartTime,
-      track,
-      this.config.poll.guard_ms,
-    );
+    const snapshot = resolveTimingSnapshot(now, runStartTime, track, this.config.poll.guard_ms);
 
     // Read measurements from taps
     const measurements = new Map<string, number>();
@@ -190,20 +201,11 @@ export class PollLoop {
         }
       }
 
-      const result = evaluateCheck(
-        checkName,
-        checkDef,
-        measurements,
-        snapshot,
-        state,
-        now,
-        {
-          events: externalDisplayState.plstepEvents,
-          acrossPlayResult: checkDef.type === "across_plays"
-            ? this.acrossPlays.getResult(checkName)
-            : null,
-        },
-      );
+      const result = evaluateCheck(checkName, checkDef, measurements, snapshot, state, now, {
+        events: externalDisplayState.plstepEvents,
+        acrossPlayResult:
+          checkDef.type === "across_plays" ? this.acrossPlays.getResult(checkName) : null,
+      });
       results.set(checkName, result);
     }
 

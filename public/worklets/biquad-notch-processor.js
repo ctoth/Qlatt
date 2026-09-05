@@ -1,7 +1,7 @@
 // Biquad notch (band-reject) filter worklet processor.
 // Numerically stable replacement for Klatt FIR antiresonator at high sample rates.
 // Reference: Bristow-Johnson, "Audio EQ Cookbook" (2005)
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+import { computeRmsPeak, initWasmModule, resolveWasmUrl, WasmBuffer, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./biquad-notch.wasm");
 class BiquadNotchProcessor extends AudioWorkletProcessor {
     disposed = false;
@@ -20,9 +20,27 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
     lastGain;
     static get parameterDescriptors() {
         return [
-            { name: "frequency", defaultValue: 500, minValue: 0, maxValue: 20000, automationRate: "k-rate" },
-            { name: "bandwidth", defaultValue: 60, minValue: 0, maxValue: 10000, automationRate: "k-rate" },
-            { name: "gain", defaultValue: 1, minValue: 0, maxValue: 4, automationRate: "k-rate" },
+            {
+                name: "frequency",
+                defaultValue: 500,
+                minValue: 0,
+                maxValue: 20000,
+                automationRate: "k-rate",
+            },
+            {
+                name: "bandwidth",
+                defaultValue: 60,
+                minValue: 0,
+                maxValue: 10000,
+                automationRate: "k-rate",
+            },
+            {
+                name: "gain",
+                defaultValue: 1,
+                minValue: 0,
+                maxValue: 4,
+                automationRate: "k-rate",
+            },
         ];
     }
     constructor(options) {

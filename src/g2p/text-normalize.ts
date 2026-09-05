@@ -46,6 +46,7 @@ interface RegexRule {
 interface PipelineStep {
   name: string;
   type: "builtin" | "regex_replace" | "table_replace";
+  citations?: string[];
   handler?: string;
   pattern?: string;
   flags?: string;
@@ -226,7 +227,7 @@ function ORDINAL_ONES(): Record<number, string> {
 function ORDINAL_TENS(): Record<number, string> {
   return activeTables().ordinal_tens;
 }
-function ABBREVIATIONS(): Record<string, string> {
+function _ABBREVIATIONS(): Record<string, string> {
   return activeTables().abbreviations;
 }
 function DIGIT_WORDS(): Record<string, string> {
@@ -279,14 +280,14 @@ function convertChunk(n: number, policy: NumberPolicy): string {
 
   if (n < 1000) {
     const remainder = n % 100;
-    const compoundWord =
-      remainder !== 0 ? policy.hundreds_remainder_compound_word : undefined;
+    const compoundWord = remainder !== 0 ? policy.hundreds_remainder_compound_word : undefined;
     const hundredsWord = compoundWord ?? "hundred";
     const joiner =
-      compoundWord != null ? " " :
-      policy.hundreds_remainder_joiner != null
-        ? ` ${policy.hundreds_remainder_joiner} `
-        : " ";
+      compoundWord != null
+        ? " "
+        : policy.hundreds_remainder_joiner != null
+          ? ` ${policy.hundreds_remainder_joiner} `
+          : " ";
     return (
       ONES()[Math.floor(n / 100)] +
       ` ${hundredsWord}` +
@@ -346,9 +347,13 @@ function convertOrdinal(n: number): string {
 
   // Two-digit with remainder (21st, 32nd, etc.)
   if (n < 100) {
-    const tensDigit = Math.floor(n / 10) * 10;
+    const _tensDigit = Math.floor(n / 10) * 10;
     const onesDigit = n % 10;
-    return TENS()[Math.floor(n / 10)] + " " + (ORDINAL_ONES()[onesDigit] ?? numberToWords(onesDigit) + "th");
+    return (
+      TENS()[Math.floor(n / 10)] +
+      " " +
+      (ORDINAL_ONES()[onesDigit] ?? numberToWords(onesDigit) + "th")
+    );
   }
 
   // For numbers >= 100, use cardinal for the prefix and ordinal for the last part
@@ -642,14 +647,14 @@ const BUILTIN_HANDLERS: Record<
   dateToWords: (result, step) => {
     const re = new RegExp(step.pattern!, step.flags);
     return result.replace(re, (_m: string, month: string, day: string, year: string) =>
-      dateToWords(month, day, year)
+      dateToWords(month, day, year),
     );
   },
 
   isoDateToWords: (result, step) => {
     const re = new RegExp(step.pattern!, step.flags);
     return result.replace(re, (_m: string, year: string, month: string, day: string) =>
-      isoDateToWords(year, month, day)
+      isoDateToWords(year, month, day),
     );
   },
 
@@ -657,8 +662,14 @@ const BUILTIN_HANDLERS: Record<
     const re = new RegExp(step.pattern!, step.flags);
     // replace() passes (match, g1, g2, [g3], offset, string) — for 2-group
     // regexes the 4th arg is `offset` (a number), not a capture group.
-    return result.replace(re, (_m: string, hour: string, minute: string, meridiemOrOffset?: string | number) =>
-      timeToWords(hour, minute, typeof meridiemOrOffset === "string" ? meridiemOrOffset : undefined)
+    return result.replace(
+      re,
+      (_m: string, hour: string, minute: string, meridiemOrOffset?: string | number) =>
+        timeToWords(
+          hour,
+          minute,
+          typeof meridiemOrOffset === "string" ? meridiemOrOffset : undefined,
+        ),
     );
   },
 
@@ -666,15 +677,13 @@ const BUILTIN_HANDLERS: Record<
     const re = new RegExp(step.pattern!, step.flags);
     // The cents group is optional — when absent, replace() passes offset (number) instead.
     return result.replace(re, (_m: string, dollars: string, centsOrOffset?: string | number) =>
-      currencyToWords(dollars, typeof centsOrOffset === "string" ? centsOrOffset : undefined)
+      currencyToWords(dollars, typeof centsOrOffset === "string" ? centsOrOffset : undefined),
     );
   },
 
   decimalToWords: (result, step) => {
     const re = new RegExp(step.pattern!, step.flags);
-    return result.replace(re, (_m: string, lhs: string, rhs: string) =>
-      decimalToWords(lhs, rhs)
-    );
+    return result.replace(re, (_m: string, lhs: string, rhs: string) => decimalToWords(lhs, rhs));
   },
 
   ordinalToWordsInline: (result, step) => {
@@ -714,7 +723,12 @@ const BUILTIN_HANDLERS: Record<
     const policy = step.fraction_policy ?? {};
     return result.replace(
       re,
-      (match: string, numerator: string, denominator: string, percentOrOffset?: string | number) => {
+      (
+        match: string,
+        numerator: string,
+        denominator: string,
+        percentOrOffset?: string | number,
+      ) => {
         if (!isFraction(numerator, denominator, policy)) return match;
         const percent = percentOrOffset === "%";
         return readFraction(numerator, denominator, percent, policy);
@@ -733,7 +747,9 @@ const BUILTIN_HANDLERS: Record<
       `^(?:${policy.preserved_character_pattern})$`,
       policy.preserved_character_flags,
     );
-    const punctuationTokens = [...context.punctuationTokens].sort((left, right) => right.length - left.length);
+    const punctuationTokens = [...context.punctuationTokens].sort(
+      (left, right) => right.length - left.length,
+    );
     let text = "";
 
     for (let index = 0; index < result.length; ) {
@@ -776,11 +792,7 @@ const BUILTIN_HANDLERS: Record<
 };
 
 const REGEX_REPLACE_HANDLERS: Record<string, (match: string) => string> = {
-  expandInitialism: (match) =>
-    match
-      .replace(/\./g, "")
-      .split("")
-      .join(" "),
+  expandInitialism: (match) => match.replace(/\./g, "").split("").join(" "),
 };
 
 export function validateNormalizationPipelineConfig(
@@ -794,7 +806,9 @@ export function validateNormalizationPipelineConfig(
   for (const step of pipeline.steps) {
     if (step.type === "builtin") {
       if (!step.handler || !BUILTIN_HANDLERS[step.handler]) {
-        throw new Error(`E_NORMALIZE_CONFIG: builtin step '${step.name}' references unknown handler`);
+        throw new Error(
+          `E_NORMALIZE_CONFIG: builtin step '${step.name}' references unknown handler`,
+        );
       }
       if (step.handler === "punctuationCleanup") {
         const policy = step.punctuation_policy;
@@ -828,7 +842,9 @@ export function validateNormalizationPipelineConfig(
 
     if (step.type === "table_replace") {
       if (!step.table || !(step.table in tables)) {
-        throw new Error(`E_NORMALIZE_CONFIG: table_replace step '${step.name}' references missing table`);
+        throw new Error(
+          `E_NORMALIZE_CONFIG: table_replace step '${step.name}' references missing table`,
+        );
       }
       continue;
     }
@@ -836,7 +852,9 @@ export function validateNormalizationPipelineConfig(
     if (step.type === "regex_replace") {
       for (const rule of step.rules ?? []) {
         if (rule.handler && !REGEX_REPLACE_HANDLERS[rule.handler]) {
-          throw new Error(`E_NORMALIZE_CONFIG: regex_replace step '${step.name}' references unknown handler`);
+          throw new Error(
+            `E_NORMALIZE_CONFIG: regex_replace step '${step.name}' references unknown handler`,
+          );
         }
         if (!rule.handler && typeof rule.replacement !== "string") {
           throw new Error(
@@ -868,7 +886,9 @@ function executeRegexReplace(result: string, step: PipelineStep): string {
       continue;
     }
     if (typeof rule.replacement !== "string") {
-      throw new Error(`E_NORMALIZE: regex_replace rule in step '${step.name}' must define replacement or handler`);
+      throw new Error(
+        `E_NORMALIZE: regex_replace rule in step '${step.name}' must define replacement or handler`,
+      );
     }
     const re = new RegExp(rule.pattern, rule.flags);
     text = text.replace(re, rule.replacement);
@@ -886,9 +906,13 @@ function executeTableReplace(result: string, step: PipelineStep): string {
   }
 
   const tables = activeTables();
-  const table = (tables as unknown as Record<string, unknown>)[tableName] as Record<string, string> | undefined;
+  const table = (tables as unknown as Record<string, unknown>)[tableName] as
+    | Record<string, string>
+    | undefined;
   if (!table) {
-    throw new Error(`E_NORMALIZE_CONFIG: table_replace step '${step.name}' references missing table '${tableName}'`);
+    throw new Error(
+      `E_NORMALIZE_CONFIG: table_replace step '${step.name}' references missing table '${tableName}'`,
+    );
   }
 
   let text = result;

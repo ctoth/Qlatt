@@ -81,5 +81,7 @@ for (const input of inputs) {
   }
 }
 
-console.log(`\n${failures === 0 ? "ALL PROBE ASSERTIONS PASSED" : `${failures} PROBE ASSERTION(S) FAILED`}`);
+console.log(
+  `\n${failures === 0 ? "ALL PROBE ASSERTIONS PASSED" : `${failures} PROBE ASSERTION(S) FAILED`}`,
+);
 process.exit(failures === 0 ? 0 : 1);

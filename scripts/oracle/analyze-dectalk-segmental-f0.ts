@@ -42,19 +42,19 @@ function finiteNumber(value: unknown): number | null {
 function parsePhraseDir(argv: readonly string[]): string {
   const flagIndex = argv.indexOf("--phrase-dir");
   const supplied = flagIndex >= 0 ? argv[flagIndex + 1] : undefined;
-  return path.resolve(supplied ?? path.join(
-    "test",
-    "oracle-output",
-    "dectalk-stress-step-ramp",
-    "dectalk-us-v1",
-    "g2p-cake",
-  ));
+  return path.resolve(
+    supplied ??
+      path.join("test", "oracle-output", "dectalk-stress-step-ramp", "dectalk-us-v1", "g2p-cake"),
+  );
 }
 
 function loadTrack(filePath: string): TrackEvent[] {
   const parsed = JSON.parse(fs.readFileSync(filePath, "utf8")) as Record<string, unknown>;
-  if (!Array.isArray(parsed.track)) throw new Error(`Qlatt payload has no track array: ${filePath}`);
-  return parsed.track.filter((event): event is TrackEvent => event != null && typeof event === "object");
+  if (!Array.isArray(parsed.track))
+    throw new Error(`Qlatt payload has no track array: ${filePath}`);
+  return parsed.track.filter(
+    (event): event is TrackEvent => event != null && typeof event === "object",
+  );
 }
 
 function eventAt(track: readonly TrackEvent[], timeSec: number): TrackEvent | null {
@@ -89,10 +89,7 @@ function renderSegmentalContribution(frameCount: number): {
   const transitions: string[] = [];
 
   for (let frame = 0; frame < frameCount; frame += 1) {
-    if (
-      allophoneIndex + 1 < CAKE_ALLOPHONES.length
-      && nframs >= segmentDuration + extraDuration
-    ) {
+    if (allophoneIndex + 1 < CAKE_ALLOPHONES.length && nframs >= segmentDuration + extraDuration) {
       if (allophoneIndex >= 0) nframs -= segmentDuration;
       allophoneIndex += 1;
       const current = CAKE_ALLOPHONES[allophoneIndex]!;
@@ -116,13 +113,13 @@ function renderSegmentalContribution(frameCount: number): {
     }
 
     slowTarget = q14Multiply(slowTarget, SEGMENT_TARGET_DECAY);
-    const first = q14Multiply(SEGMENT_FILTER << F0_SHIFT, slowTarget)
-      + q14Multiply(Q14_ONE - SEGMENT_FILTER, firstPoleState);
+    const first =
+      q14Multiply(SEGMENT_FILTER << F0_SHIFT, slowTarget) +
+      q14Multiply(Q14_ONE - SEGMENT_FILTER, firstPoleState);
     firstPoleState = first;
-    const second = q14Multiply(
-      SEGMENT_FILTER,
-      first + (fastTarget << F0_SHIFT),
-    ) + q14Multiply(Q14_ONE - SEGMENT_FILTER, secondPoleState);
+    const second =
+      q14Multiply(SEGMENT_FILTER, first + (fastTarget << F0_SHIFT)) +
+      q14Multiply(Q14_ONE - SEGMENT_FILTER, secondPoleState);
     secondPoleState = second;
     internal.push(second >> F0_SHIFT);
     nframs += 1;
@@ -151,9 +148,14 @@ function main(): void {
     const qlattF0 = finiteNumber(event?.params?.F0);
     const qlattAv = finiteNumber(event?.params?.AV);
     if (
-      oracleF0 == null || oracleAv == null || oracleAv <= 0
-      || qlattF0 == null || qlattAv == null || qlattAv <= 0
-    ) continue;
+      oracleF0 == null ||
+      oracleAv == null ||
+      oracleAv <= 0 ||
+      qlattF0 == null ||
+      qlattAv == null ||
+      qlattAv <= 0
+    )
+      continue;
 
     const oracleHz = oracleF0 / 10;
     const baselineError = Math.abs(qlattF0 - oracleHz);
@@ -168,28 +170,34 @@ function main(): void {
 
   const contributionHzAt = (frame: number): number =>
     (segmental.internal[frame] ?? 0) * speakerDeltaScale;
-  process.stdout.write(`${JSON.stringify({
-    phraseDir,
-    arithmetic: {
-      mlsh1Shift: 14,
-      segmentFilterQ14: SEGMENT_FILTER,
-      slowTargetDecayQ14: SEGMENT_TARGET_DECAY,
-      speakerDeltaScale,
-    },
-    transitions: segmental.transitions,
-    contributionHz: {
-      frame28: contributionHzAt(28),
-      frame40: contributionHzAt(40),
-      frame62: contributionHzAt(62),
-    },
-    alignedVoiced: {
-      compared,
-      baselineMeanAbsHz: compared > 0 ? baselineSum / compared : null,
-      adjustedMeanAbsHz: compared > 0 ? adjustedSum / compared : null,
-      baselineMaxAbsHz: baselineMax,
-      adjustedMaxAbsHz: adjustedMax,
-    },
-  }, null, 2)}\n`);
+  process.stdout.write(
+    `${JSON.stringify(
+      {
+        phraseDir,
+        arithmetic: {
+          mlsh1Shift: 14,
+          segmentFilterQ14: SEGMENT_FILTER,
+          slowTargetDecayQ14: SEGMENT_TARGET_DECAY,
+          speakerDeltaScale,
+        },
+        transitions: segmental.transitions,
+        contributionHz: {
+          frame28: contributionHzAt(28),
+          frame40: contributionHzAt(40),
+          frame62: contributionHzAt(62),
+        },
+        alignedVoiced: {
+          compared,
+          baselineMeanAbsHz: compared > 0 ? baselineSum / compared : null,
+          adjustedMeanAbsHz: compared > 0 ? adjustedSum / compared : null,
+          baselineMaxAbsHz: baselineMax,
+          adjustedMaxAbsHz: adjustedMax,
+        },
+      },
+      null,
+      2,
+    )}\n`,
+  );
 }
 
 main();

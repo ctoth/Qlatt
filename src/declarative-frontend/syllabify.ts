@@ -49,9 +49,7 @@ export type SyllableAnnotation = {
  * a no-op.  Throws on a malformed (present-but-wrong-shape) block so config
  * errors surface loudly.
  */
-export function parseSyllabificationTables(
-  raw: unknown,
-): SyllabificationTables | null {
+export function parseSyllabificationTables(raw: unknown): SyllabificationTables | null {
   if (raw == null) return null;
   if (typeof raw !== "object" || Array.isArray(raw)) {
     throw new Error("E_SYLLABIFICATION_INVALID: syllabification must be an object");
@@ -153,6 +151,7 @@ export function syllabifyWord(
   const roles: SyllableRole[] = new Array(sounded.length);
   // syllable boundary BEFORE sounded[i] (true => sounded[i] starts a new syll)
   const startsSyllable: boolean[] = new Array(sounded.length).fill(false);
+  let syllableOf: number[] = new Array(sounded.length).fill(0);
 
   if (nucleusCount === 0) {
     // Degenerate: one syllable, no nucleus.  Mark all coda-ish as onset (they
@@ -187,9 +186,7 @@ export function syllabifyWord(
     const soundedAscky = sounded.map((p) => p.ascky);
     if (tables.affixes.length > 0) {
       // affixes pre-split into ascky-char arrays, longest first
-      const affixChars = tables.affixes
-        .map((a) => a.split(""))
-        .sort((x, y) => y.length - x.length);
+      const affixChars = tables.affixes.map((a) => a.split("")).sort((x, y) => y.length - x.length);
       let tailEnd = sounded.length; // exclusive end of the remaining word tail
       // Don't strip into the first syllable: keep at least one nucleus + its
       // onset before the earliest affix (an affix cannot be the whole word).
@@ -204,7 +201,10 @@ export function syllabifyWord(
           // must not consume the last remaining nucleus run.
           let match = true;
           for (let j = 0; j < len; j++) {
-            if (soundedAscky[from + j] !== af[j]) { match = false; break; }
+            if (soundedAscky[from + j] !== af[j]) {
+              match = false;
+              break;
+            }
           }
           if (!match) continue;
           const affixHasNucleus = af.some((c) => isNucleus(c));
@@ -212,7 +212,10 @@ export function syllabifyWord(
           // Ensure at least one nucleus remains before the affix start.
           let nucleusBefore = false;
           for (let j = 0; j < from; j++) {
-            if (isNucleus(soundedAscky[j])) { nucleusBefore = true; break; }
+            if (isNucleus(soundedAscky[j])) {
+              nucleusBefore = true;
+              break;
+            }
           }
           if (!nucleusBefore) continue;
           forcedBoundary.add(from);
@@ -251,9 +254,15 @@ export function syllabifyWord(
           if (o.edgeOnly && from !== clusterStart) continue; // edge-only: only if it consumes the whole inter-vocalic run
           let match = true;
           for (let j = 0; j < len; j++) {
-            if (sounded[from + j].ascky !== o.chars[j]) { match = false; break; }
+            if (sounded[from + j].ascky !== o.chars[j]) {
+              match = false;
+              break;
+            }
           }
-          if (match) { onsetLen = len; break; }
+          if (match) {
+            onsetLen = len;
+            break;
+          }
         }
         // No table cluster matched: a single consonant is still a legal onset of
         // the following syllable if there is at least one consonant; take 1
@@ -293,7 +302,7 @@ export function syllabifyWord(
     // boundaries.  Leading consonants before the first nucleus belong to
     // syllable 0.
     let syl = 0;
-    const syllableOf: number[] = new Array(sounded.length);
+    syllableOf = new Array(sounded.length);
     for (let i = 0; i < sounded.length; i++) {
       if (startsSyllable[i]) syl++;
       syllableOf[i] = syl;
@@ -315,13 +324,8 @@ export function syllabifyWord(
       else if (nucI != null && i < nucI) roles[i] = "onset";
       else roles[i] = "coda";
     }
-    // Stash syllableOf for the final annotation step.
-    (sounded as any)._syllableOf = syllableOf;
   }
 
-  // Compute syllableOf for the degenerate (no-nucleus) case: all syllable 0.
-  const syllableOf: number[] =
-    (sounded as any)._syllableOf ?? new Array(sounded.length).fill(0);
   const syllableCount = Math.max(1, (syllableOf[syllableOf.length - 1] ?? 0) + 1);
 
   const positionFor = (idx: number): SyllableAnnotation["positionInWord"] => {
@@ -353,11 +357,17 @@ export function syllabifyWord(
     // search backward
     let donor: SyllableAnnotation | null = null;
     for (let j = i - 1; j >= 0; j--) {
-      if (result[j] != null) { donor = result[j]; break; }
+      if (result[j] != null) {
+        donor = result[j];
+        break;
+      }
     }
     if (donor == null) {
       for (let j = i + 1; j < n; j++) {
-        if (result[j] != null) { donor = result[j]; break; }
+        if (result[j] != null) {
+          donor = result[j];
+          break;
+        }
       }
     }
     if (donor == null) {

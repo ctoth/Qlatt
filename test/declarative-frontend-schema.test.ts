@@ -98,14 +98,18 @@ describe("declarative frontend schema coverage", () => {
       interpolation: { points: { f0: { method: "monotone_cubic" } } },
       output: loweringOutput,
     });
+    const interpolation = spec.interpolation as unknown as {
+      points: { f0: { method: string } };
+    };
+    const output = spec.output as { lowering: typeof loweringOutput.lowering };
 
     expect(spec.relations.phone.type).toBe("base");
     expect(spec.relations.syllable.spans).toBe("phone");
     expect(spec.topology.hierarchy).toEqual(["syllable", "phone"]);
     expect(spec.patterns.cv.sequence).toHaveLength(2);
-    expect(spec.interpolation.points.f0.method).toBe("monotone_cubic");
-    expect(spec.output.lowering.id).toBe("test-track-lowering");
-    expect(spec.output.lowering.columns).toEqual(["F0", "F1", "F2"]);
+    expect(interpolation.points.f0.method).toBe("monotone_cubic");
+    expect(output.lowering.id).toBe("test-track-lowering");
+    expect(output.lowering.columns).toEqual(["F0", "F1", "F2"]);
   });
 
   it("requires the complete track lowering output spec", () => {
@@ -137,10 +141,12 @@ describe("declarative frontend schema coverage", () => {
       },
     });
 
-    expect(validateDslSpec(spec)).toContainEqual(expect.objectContaining({
-      code: "E_LOWERING_SPEC_NUMBER",
-      path: "output.lowering.transitions.sonorant_f2.neighbor_weight.value",
-    }));
+    expect(validateDslSpec(spec)).toContainEqual(
+      expect.objectContaining({
+        code: "E_LOWERING_SPEC_NUMBER",
+        path: "output.lowering.transitions.sonorant_f2.neighbor_weight.value",
+      }),
+    );
   });
 
   it("allows engine-only specs to omit track lowering output by default", () => {
@@ -472,14 +478,12 @@ describe("declarative frontend schema coverage", () => {
 
     const diagnostics = validateDslSpec(spec);
     expect(
-      diagnostics.some(
-        (d) => d.path === "rules.good_set.apply[0].value" && d.severity === "error"
-      )
+      diagnostics.some((d) => d.path === "rules.good_set.apply[0].value" && d.severity === "error"),
     ).toBe(false);
     expect(
       diagnostics.some(
-        (d) => d.path === "rules.bad_add.apply[0].value" && d.code === "E_RULE_EXPRESSION_INVALID"
-      )
+        (d) => d.path === "rules.bad_add.apply[0].value" && d.code === "E_RULE_EXPRESSION_INVALID",
+      ),
     ).toBe(true);
   });
 
@@ -659,7 +663,9 @@ rules:
       rules: {
         bad_path: {
           select: { relation: "phone", where: "true" },
-          apply: [{ field: "duration", op: "mul", value: "params.policy.duration.missing", tag: "x" }],
+          apply: [
+            { field: "duration", op: "mul", value: "params.policy.duration.missing", tag: "x" },
+          ],
         },
         bad_literal: {
           select: { relation: "phone", where: "true" },
@@ -707,7 +713,9 @@ rules:
       phases: [{ name: "duration", rules: ["use_policy"] }],
     });
 
-    const warnings = validateDslSpec(spec).filter((d) => d.severity === "warning").map((d) => d.code);
+    const warnings = validateDslSpec(spec)
+      .filter((d) => d.severity === "warning")
+      .map((d) => d.code);
     expect(warnings.includes("W_POLICY_PARAM_UNCITED")).toBe(true);
     expect(warnings.includes("W_POLICY_PARAM_UNUSED")).toBe(true);
   });

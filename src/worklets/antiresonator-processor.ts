@@ -1,13 +1,29 @@
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  computeRmsPeak,
+  initWasmModule,
+  resolveWasmUrl,
+  WasmBuffer,
+} from "./wasm-utils.js";
 
 interface AntiResonatorWasmExports {
   memory: WebAssembly.Memory;
   alloc_f32(len: number): number;
   dealloc_f32(ptr: number, len: number): void;
   antiresonator_new(): number;
-  antiresonator_set_params(state: number, frequency: number, bandwidth: number, sampleRate: number): void;
+  antiresonator_set_params(
+    state: number,
+    frequency: number,
+    bandwidth: number,
+    sampleRate: number,
+  ): void;
   antiresonator_set_gain(state: number, gain: number): void;
-  antiresonator_process(state: number, inputPtr: number, outputPtr: number, blockSize: number): void;
+  antiresonator_process(
+    state: number,
+    inputPtr: number,
+    outputPtr: number,
+    blockSize: number,
+  ): void;
 }
 
 interface AntiResonatorProcessorOptions extends BaseProcessorOptions {
@@ -57,9 +73,27 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "frequency", defaultValue: 500, minValue: 0, maxValue: 20000, automationRate: "k-rate" as const },
-      { name: "bandwidth", defaultValue: 60, minValue: 0, maxValue: 10000, automationRate: "k-rate" as const },
-      { name: "gain", defaultValue: 1, minValue: 0, maxValue: 4, automationRate: "k-rate" as const },
+      {
+        name: "frequency",
+        defaultValue: 500,
+        minValue: 0,
+        maxValue: 20000,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "bandwidth",
+        defaultValue: 60,
+        minValue: 0,
+        maxValue: 10000,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "gain",
+        defaultValue: 1,
+        minValue: 0,
+        maxValue: 4,
+        automationRate: "k-rate" as const,
+      },
     ];
   }
 
@@ -114,7 +148,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
   process(
     inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const output = outputs[0];
@@ -134,7 +168,8 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
     const freq = parameters.frequency?.[0] ?? 500;
     const bw = parameters.bandwidth?.[0] ?? 60;
     const gain = parameters.gain?.[0] ?? 1;
-    const bypass = this.bypassAtZero && (!Number.isFinite(freq) || !Number.isFinite(bw) || freq <= 0 || bw <= 0);
+    const bypass =
+      this.bypassAtZero && (!Number.isFinite(freq) || !Number.isFinite(bw) || freq <= 0 || bw <= 0);
 
     if (bypass) {
       if (inputChannel) {
@@ -178,7 +213,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
       this.state,
       this.inputBuffer.ptr,
       this.outputBuffer.ptr,
-      blockSize
+      blockSize,
     );
 
     this.outputBuffer.refresh();
@@ -205,12 +240,16 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
         }
         const inRms = Math.sqrt(inSum / (inputChannel?.length || 1));
         console.error(
-          `[ANTIRESONATOR EXPLOSION] node=${this.nodeId} outRms=${outRms.toFixed(1)} inRms=${inRms.toFixed(4)} freq=${freq} bw=${bw} gain=${gain} bypassAtZero=${this.bypassAtZero} sampleRate=${sampleRate}`
+          `[ANTIRESONATOR EXPLOSION] node=${this.nodeId} outRms=${outRms.toFixed(1)} inRms=${inRms.toFixed(4)} freq=${freq} bw=${bw} gain=${gain} bypassAtZero=${this.bypassAtZero} sampleRate=${sampleRate}`,
         );
         this.port.postMessage({
           type: "explosion",
           node: this.nodeId,
-          outRms, inRms, freq, bw, gain,
+          outRms,
+          inRms,
+          freq,
+          bw,
+          gain,
           threshold: this.explosionRmsThreshold,
           bypassAtZero: this.bypassAtZero,
           sampleRate,
@@ -225,7 +264,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
   _reportMetrics(
     buffer: Float32Array,
     inputBuffer?: Float32Array | null,
-    params?: AntiResonatorMetricsParams
+    params?: AntiResonatorMetricsParams,
   ): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;

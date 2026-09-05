@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
@@ -121,8 +121,9 @@ describe("graph-native pattern and association execution", () => {
       [1, false],
     ]);
     expect(history[1].parents).toContain(history[0].decisionId);
-    expect(utterance.journal().flatMap((entry) => entry.operations.map((operation) => operation.kind)))
-      .toEqual(["associate", "set_feature", "disassociate"]);
+    expect(
+      utterance.journal().flatMap((entry) => entry.operations.map((operation) => operation.kind)),
+    ).toEqual(["associate", "set_feature", "disassociate"]);
   });
 
   it("suppresses every capture without erasing item identity or topology", () => {
@@ -143,11 +144,12 @@ describe("graph-native pattern and association execution", () => {
     expect(utterance.getItem("stop")?.get("active")).toBe(false);
     expect(utterance.getItem("vowel")?.get("active")).toBe(false);
     expect(utterance.getItem("fricative")?.get("active")).toBe(true);
-    expect(utterance.relation("Segment").listItems().map((item) => item.id)).toEqual([
-      "stop",
-      "vowel",
-      "fricative",
-    ]);
+    expect(
+      utterance
+        .relation("Segment")
+        .listItems()
+        .map((item) => item.id),
+    ).toEqual(["stop", "vowel", "fricative"]);
   });
 
   it("rejects an association and invalid feature write without partial mutation", () => {

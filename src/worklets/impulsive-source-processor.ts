@@ -2,7 +2,12 @@
  * Impulsive glottal source AudioWorklet processor
  * Wraps the impulsive-source WASM primitive
  */
-import { initWasmModule, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  computeRmsPeak,
+  initWasmModule,
+  resolveWasmUrl,
+} from "./wasm-utils.js";
 
 interface ImpulsiveSourceWasmExports {
   impulsive_source_new(sampleRate: number): number;
@@ -40,7 +45,13 @@ class ImpulsiveSourceProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "f0", defaultValue: 100, minValue: 20, maxValue: 500, automationRate: "a-rate" as const },
+      {
+        name: "f0",
+        defaultValue: 100,
+        minValue: 20,
+        maxValue: 500,
+        automationRate: "a-rate" as const,
+      },
       {
         name: "openQuotient",
         defaultValue: 0.5,
@@ -91,7 +102,7 @@ class ImpulsiveSourceProcessor extends AudioWorkletProcessor {
   process(
     _inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const output = outputs[0];
@@ -115,11 +126,7 @@ class ImpulsiveSourceProcessor extends AudioWorkletProcessor {
       const f0Val = f0.length > 1 ? (f0[i] ?? firstF0) : firstF0;
       const oqVal = oq.length > 1 ? (oq[i] ?? firstOq) : firstOq;
 
-      outputChannel[i] = this.wasm.impulsive_source_process(
-        this.state,
-        f0Val,
-        oqVal
-      );
+      outputChannel[i] = this.wasm.impulsive_source_process(this.state, f0Val, oqVal);
     }
 
     this._reportMetrics(outputChannel, { f0: firstF0, oq: firstOq });

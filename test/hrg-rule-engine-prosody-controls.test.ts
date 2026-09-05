@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { replayJournal, Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { replayJournal, Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
@@ -133,10 +133,12 @@ describe("graph-native prosody-control execution", () => {
     runGraphRuleEngine(utterance, spec);
 
     const tilt = utterance.relation("Tilt").listItems()[0];
-    expect(utterance.temporalAnchor(tilt)).toEqual(expect.objectContaining({
-      offsetMs: -20,
-      ratio: 0,
-    }));
+    expect(utterance.temporalAnchor(tilt)).toEqual(
+      expect.objectContaining({
+        offsetMs: -20,
+        ratio: 0,
+      }),
+    );
     expect(utterance.resolveAnchorTime(tilt)).toBe(80);
     const replayed = replayJournal(SCHEMA, utterance.journal());
     expect(replayed.resolveAnchorTime(replayed.relation("Tilt").listItems()[0])).toBe(80);
@@ -144,20 +146,22 @@ describe("graph-native prosody-control execution", () => {
   });
 
   it("rejects a legacy or missing control relation during compilation", () => {
-    expect(() => compileRuleEngineSpec({
-      relations: {
-        Segment: { type: "base", features: { phoneme: [] } },
-        PhraseCommand: { type: "point", value_type: "number" },
-      },
-      rules: {
-        invalid: {
-          kind: "f0_layer",
-          select: { relation: "Segment", where: "true" },
-          insert: { layer: "baseline", at: "at_sync(current.sync_left)", value: 0, tag: "f0" },
-          citations: ["Klatt 1982"],
+    expect(() =>
+      compileRuleEngineSpec({
+        relations: {
+          Segment: { type: "base", features: { phoneme: [] } },
+          PhraseCommand: { type: "point", value_type: "number" },
         },
-      },
-      phases: [{ name: "prosody", rules: ["invalid"] }],
-    })).toThrowError(/E_F0_CONTROL_RELATION_INVALID/);
+        rules: {
+          invalid: {
+            kind: "f0_layer",
+            select: { relation: "Segment", where: "true" },
+            insert: { layer: "baseline", at: "at_sync(current.sync_left)", value: 0, tag: "f0" },
+            citations: ["Klatt 1982"],
+          },
+        },
+        phases: [{ name: "prosody", rules: ["invalid"] }],
+      }),
+    ).toThrowError(/E_F0_CONTROL_RELATION_INVALID/);
   });
 });

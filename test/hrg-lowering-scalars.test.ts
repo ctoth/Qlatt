@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
+import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
@@ -18,12 +18,31 @@ const META = {
 // F0, affect/voice-quality, or speaker/source lowering families. Each asserted
 // cell is still read from the captured production event, never from the graph.
 const BASE_SCALAR_COLUMNS = [
-  "F6", "B6",
-  "FNZ", "FNP", "BNP", "BNZ", "AN",
-  "nasalPlaceIndex", "nasalMurmurStrength",
-  "nasalPoleBaseHz", "nasalPoleBwHz", "nasalZeroBwHz", "nasalPlaceBwHz",
-  "nasalPlaceMFnzHz", "nasalPlaceNFnzHz", "nasalPlaceNgFnzHz", "nasalB1AdditionHz",
-  "A2", "A3", "FGP", "BGP", "FGZ", "BGZ", "BGS", "NFC",
+  "F6",
+  "B6",
+  "FNZ",
+  "FNP",
+  "BNP",
+  "BNZ",
+  "AN",
+  "nasalPlaceIndex",
+  "nasalMurmurStrength",
+  "nasalPoleBaseHz",
+  "nasalPoleBwHz",
+  "nasalZeroBwHz",
+  "nasalPlaceBwHz",
+  "nasalPlaceMFnzHz",
+  "nasalPlaceNFnzHz",
+  "nasalPlaceNgFnzHz",
+  "nasalB1AdditionHz",
+  "A2",
+  "A3",
+  "FGP",
+  "BGP",
+  "FGZ",
+  "BGZ",
+  "BGS",
+  "NFC",
 ] as const;
 
 type ScalarBaselineSegment = {
@@ -65,11 +84,11 @@ function citedNumber(value: unknown, path: string): { value: number } {
 
 function eventPoints(value: unknown): LowerOptions["timeline"]["event_points"] {
   if (
-    !isPlainObject(value)
-    || typeof value.include_segment_start !== "boolean"
-    || typeof value.include_control_boundaries !== "boolean"
-    || typeof value.include_f0_anchors !== "boolean"
-    || typeof value.include_transition_steady_time !== "boolean"
+    !isPlainObject(value) ||
+    typeof value.include_segment_start !== "boolean" ||
+    typeof value.include_control_boundaries !== "boolean" ||
+    typeof value.include_f0_anchors !== "boolean" ||
+    typeof value.include_transition_steady_time !== "boolean"
   ) {
     throw new Error("compiled lowering event-point policy missing");
   }
@@ -83,12 +102,12 @@ function eventPoints(value: unknown): LowerOptions["timeline"]["event_points"] {
 
 function transitions(value: unknown): LowerOptions["transitions"] {
   if (
-    !isPlainObject(value)
-    || !isPlainObject(value.blend)
-    || !Array.isArray(value.blend.keys)
-    || value.blend.keys.some((entry) => typeof entry !== "string")
-    || !Array.isArray(value.blend.smooth_types)
-    || value.blend.smooth_types.some((entry) => typeof entry !== "string")
+    !isPlainObject(value) ||
+    !isPlainObject(value.blend) ||
+    !Array.isArray(value.blend.keys) ||
+    value.blend.keys.some((entry) => typeof entry !== "string") ||
+    !Array.isArray(value.blend.smooth_types) ||
+    value.blend.smooth_types.some((entry) => typeof entry !== "string")
   ) {
     throw new Error("compiled lowering transition policy missing");
   }
@@ -109,19 +128,19 @@ function loadPolicyAndInventory(frontendId: string): {
 } {
   const spec: unknown = loadBundledRulepackSpec(frontendId);
   if (
-    !isPlainObject(spec)
-    || typeof spec.inventory_path !== "string"
-    || !isPlainObject(spec.output)
-    || !isPlainObject(spec.output.lowering)
+    !isPlainObject(spec) ||
+    typeof spec.inventory_path !== "string" ||
+    !isPlainObject(spec.output) ||
+    !isPlainObject(spec.output.lowering)
   ) {
     throw new Error("compiled frontend lowering/inventory policy missing");
   }
   const lowering = spec.output.lowering;
   if (
-    !Array.isArray(lowering.columns)
-    || lowering.columns.some((value) => typeof value !== "string")
-    || !isPlainObject(lowering.timeline)
-    || !isPlainObject(lowering.timeline.duration_floors)
+    !Array.isArray(lowering.columns) ||
+    lowering.columns.some((value) => typeof value !== "string") ||
+    !isPlainObject(lowering.timeline) ||
+    !isPlainObject(lowering.timeline.duration_floors)
   ) {
     throw new Error("compiled lowering columns/timeline missing");
   }
@@ -159,16 +178,18 @@ function inventoryType(inventoryPath: string, phoneme: string): string {
 }
 
 function loadScalarBaseline(fileName: string, frontendId: string): ScalarBaseline {
-  const parsed: unknown = JSON.parse(readFileSync(
-    new URL(`./fixtures/hrg-convergence-baseline/${fileName}`, import.meta.url),
-    "utf8",
-  ));
+  const parsed: unknown = JSON.parse(
+    readFileSync(
+      new URL(`./fixtures/hrg-convergence-baseline/${fileName}`, import.meta.url),
+      "utf8",
+    ),
+  );
   if (
-    !isPlainObject(parsed)
-    || !isPlainObject(parsed.reconstructedGraph)
-    || !Array.isArray(parsed.reconstructedGraph.items)
-    || !isPlainObject(parsed.oldProduction)
-    || !Array.isArray(parsed.oldProduction.sourceFrames)
+    !isPlainObject(parsed) ||
+    !isPlainObject(parsed.reconstructedGraph) ||
+    !Array.isArray(parsed.reconstructedGraph.items) ||
+    !isPlainObject(parsed.oldProduction) ||
+    !Array.isArray(parsed.oldProduction.sourceFrames)
   ) {
     throw new Error("baseline graph/production frames missing");
   }
@@ -186,13 +207,15 @@ function loadScalarBaseline(fileName: string, frontendId: string): ScalarBaselin
       if (typeof value !== "number") throw new Error(`baseline Segment '${column}' invalid`);
       params[column] = value;
     }
-    return [{
-      duration,
-      id: item.id,
-      params,
-      phoneme,
-      type: inventoryType(inventoryPath, phoneme),
-    }];
+    return [
+      {
+        duration,
+        id: item.id,
+        params,
+        phoneme,
+        type: inventoryType(inventoryPath, phoneme),
+      },
+    ];
   });
   const productionFrames = parsed.oldProduction.sourceFrames.map((frame): ProductionFrame => {
     if (!isPlainObject(frame) || typeof frame.time !== "number" || !isPlainObject(frame.params)) {
@@ -307,23 +330,28 @@ describe("HRG lowering scalar histories", () => {
     const baseline = loadScalarBaseline(fileName, frontendId);
     const utterance = buildBaselineUtterance(baseline);
     const lowered = lowerToFrames(utterance, baseline.policy);
-    const ownedColumns = BASE_SCALAR_COLUMNS.filter((column) => baseline.policy.columns.includes(column));
+    const ownedColumns = BASE_SCALAR_COLUMNS.filter((column) =>
+      baseline.policy.columns.includes(column),
+    );
     expect(ownedColumns.length).toBeGreaterThan(10);
 
     let cursorMs = baseline.policy.timeline.initial_silence_ms.value;
     for (const segment of baseline.segments) {
       const frame = lowered.frames.find(
-        (candidate) => candidate.segmentId === segment.id
-          && Math.abs(candidate.time * 1000 - cursorMs) <= 1e-6,
+        (candidate) =>
+          candidate.segmentId === segment.id && Math.abs(candidate.time * 1000 - cursorMs) <= 1e-6,
       );
       if (!frame?.phoneme) throw new Error(`lowered boundary frame missing for '${segment.id}'`);
       const production = baseline.productionFrames.find(
-        (candidate) => candidate.phoneme === frame.phoneme
-          && Math.abs(candidate.time - frame.time) <= 1e-9,
+        (candidate) =>
+          candidate.phoneme === frame.phoneme && Math.abs(candidate.time - frame.time) <= 1e-9,
       );
-      if (!production) throw new Error(`production boundary frame missing for '${frame.segmentId}'`);
+      if (!production)
+        throw new Error(`production boundary frame missing for '${frame.segmentId}'`);
       for (const column of ownedColumns) {
-        expect(frame.params[column], `${frame.segmentId}.${column}`).toBe(production.params[column]);
+        expect(frame.params[column], `${frame.segmentId}.${column}`).toBe(
+          production.params[column],
+        );
       }
       cursorMs += effectiveDuration(segment, baseline.policy);
     }
@@ -332,48 +360,57 @@ describe("HRG lowering scalar histories", () => {
   it.each([
     ["qlatt-English", "qlatt-english", "qlatt-english-fricatives.json"],
     ["DECtalk English", "dectalk-english", "dectalk-english-stops.json"],
-  ])("projects selected %s silence/source params at both track edges", (_label, frontendId, fileName) => {
-    const baseline = loadScalarBaseline(fileName, frontendId);
-    const utterance = buildBaselineUtterance(baseline);
-    const resourceDecision = utterance.provenance.add({
-      stage: "frontend",
-      type: "selected_silence_resource",
-      subject: `frontend:${frontendId}:SIL`,
-      reason: "selected frontend SIL inventory and source policy",
-      citations: ["Klatt 1980"],
-    });
-    const productionInitial = baseline.productionFrames[0];
-    const productionFinal = baseline.productionFrames.at(-1);
-    if (!productionInitial || !productionFinal) throw new Error("production silence frames missing");
+  ])(
+    "projects selected %s silence/source params at both track edges",
+    (_label, frontendId, fileName) => {
+      const baseline = loadScalarBaseline(fileName, frontendId);
+      const utterance = buildBaselineUtterance(baseline);
+      const resourceDecision = utterance.provenance.add({
+        stage: "frontend",
+        type: "selected_silence_resource",
+        subject: `frontend:${frontendId}:SIL`,
+        reason: "selected frontend SIL inventory and source policy",
+        citations: ["Klatt 1980"],
+      });
+      const productionInitial = baseline.productionFrames[0];
+      const productionFinal = baseline.productionFrames.at(-1);
+      if (!productionInitial || !productionFinal)
+        throw new Error("production silence frames missing");
 
-    const initialParams = { ...productionInitial.params };
-    for (const key of baseline.policy.transitions.blend.keys) {
-      initialParams[key] = productionFinal.params[key];
-    }
-    const lowered = lowerToFrames(utterance, baseline.policy, {
-      silence: {
-        initialParams,
-        finalParams: productionFinal.params,
-        decisionId: resourceDecision.id,
-      },
-    });
-    const initial = lowered.frames[0];
-    const final = lowered.frames.at(-1);
-    if (!initial || !final) throw new Error("lowered silence frames missing");
-    for (const column of baseline.policy.columns) {
-      expect(initial.params[column], `initial.${column}`).toBe(productionInitial.params[column]);
-      expect(final.params[column], `final.${column}`).toBe(productionFinal.params[column]);
-    }
-    const knownDecisions = new Set(utterance.provenance.getDecisions().map((decision) => decision.id));
-    lowered.frames.forEach((frame, frameIndex) => {
-      expect(frame.provenance).toBe(lowered.provenanceByFrame[frameIndex]);
-      for (const key of Object.keys(frame.params)) {
-        const decisionId = frame.provenance?.[key];
-        expect(decisionId, `${frontendId}[${frameIndex}].${key} provenance`).toBeTypeOf("string");
-        expect(knownDecisions.has(decisionId ?? ""), `${frontendId}[${frameIndex}].${key} decision`).toBe(true);
+      const initialParams = { ...productionInitial.params };
+      for (const key of baseline.policy.transitions.blend.keys) {
+        initialParams[key] = productionFinal.params[key];
       }
-    });
-  });
+      const lowered = lowerToFrames(utterance, baseline.policy, {
+        silence: {
+          initialParams,
+          finalParams: productionFinal.params,
+          decisionId: resourceDecision.id,
+        },
+      });
+      const initial = lowered.frames[0];
+      const final = lowered.frames.at(-1);
+      if (!initial || !final) throw new Error("lowered silence frames missing");
+      for (const column of baseline.policy.columns) {
+        expect(initial.params[column], `initial.${column}`).toBe(productionInitial.params[column]);
+        expect(final.params[column], `final.${column}`).toBe(productionFinal.params[column]);
+      }
+      const knownDecisions = new Set(
+        utterance.provenance.getDecisions().map((decision) => decision.id),
+      );
+      lowered.frames.forEach((frame, frameIndex) => {
+        expect(frame.provenance).toBe(lowered.provenanceByFrame[frameIndex]);
+        for (const key of Object.keys(frame.params)) {
+          const decisionId = frame.provenance?.[key];
+          expect(decisionId, `${frontendId}[${frameIndex}].${key} provenance`).toBeTypeOf("string");
+          expect(
+            knownDecisions.has(decisionId ?? ""),
+            `${frontendId}[${frameIndex}].${key} decision`,
+          ).toBe(true);
+        }
+      });
+    },
+  );
 
   it("uses the latest stamped value and decision from a feature write history", () => {
     const utterance = new Utterance(schemaFor(["F1"]));
@@ -397,7 +434,7 @@ describe("HRG lowering scalar histories", () => {
 
     expect(segment.writes("F1")).toHaveLength(2);
     expect(segmentFrame?.params.F1).toBe(700);
-    expect(segmentFrame?.provenance.F1).toBe(latest.decisionId);
+    expect(segmentFrame?.provenance?.F1).toBe(latest.decisionId);
     const segmentIndex = lowered.frames.findIndex((frame) => frame.segmentId === "history");
     expect(lowered.provenanceByFrame[segmentIndex].F1).toBe(latest.decisionId);
   });
@@ -418,9 +455,11 @@ describe("HRG lowering scalar histories", () => {
     expect(() => lowerToFrames(utterance, loweringOptions(["F1", "F2"]))).toThrowError(
       /E_HRG_LOWER_COLUMN_REQUIRED/,
     );
-    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
-      code: "HRG_LOWER_COLUMN_REQUIRED",
-      data: expect.objectContaining({ itemId: "missing-column", key: "F2" }),
-    }));
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "HRG_LOWER_COLUMN_REQUIRED",
+        data: expect.objectContaining({ itemId: "missing-column", key: "F2" }),
+      }),
+    );
   });
 });

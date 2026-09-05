@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { textToKlattTrack, textToKlattTrackDetailed, type KlattFrame } from "../src/tts-frontend";
 import type { Item } from "../src/declarative-frontend/hrg";
+import { textToKlattTrack, textToKlattTrackDetailed } from "../src/tts-frontend";
+import type { KlattFrame } from "../src/tts-frontend-types";
 
 function averageParam(frames: KlattFrame[], key: string): number {
   if (frames.length === 0) return 0;
-  return (
-    frames.reduce((sum, frame) => sum + Number(frame.params?.[key] ?? 0), 0) / frames.length
-  );
+  return frames.reduce((sum, frame) => sum + Number(frame.params?.[key] ?? 0), 0) / frames.length;
 }
 
 function rhoticFrames(track: KlattFrame[], word: string): KlattFrame[] {
@@ -102,7 +101,9 @@ describe("tts frontend rhotic vowels", () => {
 
   it("avoids over-crowding ER0 in compound words", () => {
     const result = textToKlattTrackDetailed("authorship commercebancorp", 110);
-    const segments = result.utterance.relation("Segment").listItems()
+    const segments = result.utterance
+      .relation("Segment")
+      .listItems()
       .filter((item) => item.get("active") !== false && item.get("phoneme") === "ER");
     const authorshipEr = segments.filter((item) => item.get("word") === "authorship");
     const commerceEr = segments.filter((item) => item.get("word") === "commercebancorp");
@@ -123,7 +124,9 @@ describe("tts frontend rhotic vowels", () => {
   it("keeps coda rhotic tails shorter than the ER nucleus in repeated unstressed words", () => {
     const result = textToKlattTrackDetailed("other brother other brother", 110);
 
-    const segments = result.utterance.relation("Segment").listItems()
+    const segments = result.utterance
+      .relation("Segment")
+      .listItems()
       .filter((item) => item.get("active") !== false);
     const otherPairs = rhoticCodaPairs(segments, "other");
     const brotherPairs = rhoticCodaPairs(segments, "brother");

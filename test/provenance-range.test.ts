@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { textToKlattTrack } from "../src/tts-frontend";
 import { applyRange, createProvenanceCollector, parseRangeSpec } from "../src/provenance";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 describe("provenance range filters", () => {
   it("collects explain decisions from text pipeline", () => {
@@ -10,7 +10,9 @@ describe("provenance range filters", () => {
 
     expect(track.length).toBeGreaterThan(0);
     expect(decisions.length).toBeGreaterThan(0);
-    expect(decisions.some((decision) => decision.type === "dictionary_pronunciation_selected")).toBe(true);
+    expect(
+      decisions.some((decision) => decision.type === "dictionary_pronunciation_selected"),
+    ).toBe(true);
     expect(decisions.some((decision) => decision.type === "feature_overwrite")).toBe(true);
   });
 

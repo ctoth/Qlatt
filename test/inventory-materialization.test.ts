@@ -1,14 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-  materializePhonemeTarget,
   loadInventorySpecFromPath,
-  fillDefaultParams,
+  materializePhonemeTarget,
 } from "../src/declarative-frontend/inventory";
 
 // Load inventory from the qlatt-english frontend (no globals).
-const INVENTORY = loadInventorySpecFromPath(
-  "/rules/frontends/qlatt-english/inventory.yaml"
-);
+const INVENTORY = loadInventorySpecFromPath("/rules/frontends/qlatt-english/inventory.yaml");
 const PHONEME_TARGETS = INVENTORY.phoneme_targets;
 const BASE_PARAMS = INVENTORY.base_params;
 
@@ -110,7 +107,7 @@ describe("materializePhonemeTarget – stress-aware lookup", () => {
 
   it("has all params as finite numbers", () => {
     const result = materializePhonemeTarget("AH", { stress: 1, inventorySpec: INVENTORY });
-    for (const [key, value] of Object.entries(result.params)) {
+    for (const [_key, value] of Object.entries(result.params)) {
       expect(Number.isFinite(value)).toBe(true);
     }
     // Verify param keys match BASE_PARAMS

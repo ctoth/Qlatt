@@ -35,23 +35,20 @@
  *   --print-citations          Print the affect's citations
  */
 
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  AudioWorkletNode as NodeAudioWorkletNode,
-  OfflineAudioContext,
-} from "node-web-audio-api";
-import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
-import { createKlattRuntime } from "../src/klatt-runtime.ts";
-import { textToKlattTrackDetailed } from "../src/tts-frontend.ts";
+import { AudioWorkletNode as NodeAudioWorkletNode, OfflineAudioContext } from "node-web-audio-api";
 import { createDiagnostics } from "../src/diagnostics.ts";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config.ts";
-import { writeWav } from "../src/rendering/write-wav.ts";
-import { createNodeRuntimeAssetLoader } from "../src/runtime-assets/node-loader.ts";
 import { compileAffect, neutralAffect } from "../src/input/affect.ts";
 import { applyAffectToTrack } from "../src/input/apply-affect.ts";
 import type { SpeakerSex } from "../src/input/direction-track.ts";
-import { createHash } from "node:crypto";
+import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
+import { createKlattRuntime } from "../src/klatt-runtime.ts";
+import { writeWav } from "../src/rendering/write-wav.ts";
+import { createNodeRuntimeAssetLoader } from "../src/runtime-assets/node-loader.ts";
+import { textToKlattTrackDetailed } from "../src/tts-frontend.ts";
 
 const args = new Map<string, string>();
 for (let i = 2; i < process.argv.length; i += 1) {
@@ -69,8 +66,7 @@ const phrase = args.get("phrase") ?? "hello world";
 const affectName = args.get("affect") ?? "neutral";
 const degree = args.has("degree") ? Number(args.get("degree")) : 1;
 const sexArg = args.get("sex");
-const sex: SpeakerSex | undefined =
-  sexArg === "male" || sexArg === "female" ? sexArg : undefined;
+const sex: SpeakerSex | undefined = sexArg === "male" || sexArg === "female" ? sexArg : undefined;
 const frontendId = args.get("frontend-id") ?? "qlatt-beauty";
 const experimentId = args.get("experiment-id") ?? "qlatt-beauty";
 const baseF0 = args.has("base-f0") ? Number(args.get("base-f0")) : undefined;
@@ -81,9 +77,7 @@ const leadTime = Number(args.get("lead-time") ?? 0.05);
 const tailTime = Number(args.get("tail-time") ?? 0.2);
 const noiseSeed = Number(args.get("noise-seed") ?? 20260214);
 const printCitations = args.has("print-citations");
-const outWav = args.has("out-wav")
-  ? path.resolve(args.get("out-wav") as string)
-  : null;
+const outWav = args.has("out-wav") ? path.resolve(args.get("out-wav") as string) : null;
 
 function deriveNodeNoiseSeed(baseSeed: number, nodeId: string): number {
   const seedBytes = createHash("sha256")
@@ -141,14 +135,11 @@ async function main(): Promise<void> {
   }
 
   // 4. Render the affected track to WAV via the offline node runtime.
-  const totalTime =
-    (track.length ? track[track.length - 1].time : 0) + leadTime + tailTime;
+  const totalTime = (track.length ? track[track.length - 1].time : 0) + leadTime + tailTime;
   const length = Math.max(1, Math.ceil(totalTime * sampleRate));
   const ctx = new OfflineAudioContext(1, length, sampleRate);
   const config = await loadExperimentConfig(experimentId);
-  const assetLoader = await createNodeRuntimeAssetLoader(
-    path.join(repoRoot, "public", "worklets"),
-  );
+  const assetLoader = await createNodeRuntimeAssetLoader(path.join(repoRoot, "public", "worklets"));
   try {
     const workletProcessorOptionsByNodeId = buildWorkletProcessorOptionsByNodeId(
       config.graph as { nodes: Record<string, { type: string }> },
@@ -181,7 +172,9 @@ async function main(): Promise<void> {
         const a = Math.abs(channel[i]);
         if (a > peak) peak = a;
       }
-      console.log(`  wrote ${outWav} (${length} samples @ ${sampleRate} Hz, peak ${peak.toFixed(4)})`);
+      console.log(
+        `  wrote ${outWav} (${length} samples @ ${sampleRate} Hz, peak ${peak.toFixed(4)})`,
+      );
     } finally {
       runtime.disconnect();
     }
@@ -191,6 +184,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((error) => {
-  console.error(error instanceof Error ? error.stack ?? error.message : String(error));
+  console.error(error instanceof Error ? (error.stack ?? error.message) : String(error));
   process.exit(1);
 });

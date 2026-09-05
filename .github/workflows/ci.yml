@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+    inputs:
+      upload-pages:
+        description: Upload the production build for the Pages deployment job
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm audit --omit=dev
+
+      - run: npm run check
+
+      - run: npm run typecheck
+
+      - run: rustup target add wasm32-unknown-unknown
+
+      - run: sudo apt-get update && sudo apt-get install --yes libasound2-dev
+
+      - name: Build node-web-audio-api for the runner
+        run: |
+          printf '\n[workspace]\n' >> node_modules/node-web-audio-api/Cargo.toml
+          npm --prefix node_modules/node-web-audio-api run build:only
+
+      - run: bash build.sh
+
+      - run: npm test
+
+      - run: npm run build
+
+      - if: inputs.upload-pages
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist

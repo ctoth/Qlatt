@@ -1,8 +1,8 @@
+import { once } from "node:events";
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { once } from "node:events";
 import { chromium } from "playwright-core";
 
 const args = new Map();
@@ -22,7 +22,7 @@ const sampleRate = Number(args.get("sample-rate") ?? 10000);
 const leadTime = Number(args.get("lead-time") ?? 0);
 const tailTime = Number(args.get("tail-time") ?? 0);
 const outJson = path.resolve(
-  args.get("out-json") ?? path.join(repoRoot, "test", "golden", "track.json")
+  args.get("out-json") ?? path.join(repoRoot, "test", "golden", "track.json"),
 );
 
 function resolveChromePath() {
@@ -92,17 +92,20 @@ await page.goto(`http://localhost:${port}/test/render-offline.html`, {
   waitUntil: "networkidle",
 });
 
-const payload = await page.evaluate(async (opts) => {
-  const result = await window.renderOffline(opts);
-  return result;
-}, {
-  phrase,
-  baseF0,
-  sampleRate,
-  leadTime,
-  tailTime,
-  includeTrack: true,
-});
+const payload = await page.evaluate(
+  async (opts) => {
+    const result = await window.renderOffline(opts);
+    return result;
+  },
+  {
+    phrase,
+    baseF0,
+    sampleRate,
+    leadTime,
+    tailTime,
+    includeTrack: true,
+  },
+);
 
 await browser.close();
 server.close();

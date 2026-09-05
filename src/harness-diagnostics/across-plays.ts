@@ -60,8 +60,7 @@ function computeCV(values: number[]): number {
     return values.every((v) => v === 0) ? 0 : Infinity;
   }
 
-  const variance =
-    values.reduce((s, v) => s + (v - mean) ** 2, 0) / n;
+  const variance = values.reduce((s, v) => s + (v - mean) ** 2, 0) / n;
   const stddev = Math.sqrt(variance);
   return stddev / Math.abs(mean);
 }

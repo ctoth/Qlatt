@@ -13,8 +13,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { stoi, type StoiResult } from "../src/metrics/stoi";
 import { createDiagnostics } from "../src/diagnostics";
+import { stoi } from "../src/metrics/stoi";
 
 type OutputFormat = "text" | "json";
 
@@ -168,10 +168,7 @@ function readWav(filePath: string): WavData {
 
 // ── Main CLI ────────────────────────────────────────────────────────────────
 
-export async function runStoiCli(
-  argv: string[],
-  io: CliIo = defaultIo(),
-): Promise<number> {
+export async function runStoiCli(argv: string[], io: CliIo = defaultIo()): Promise<number> {
   try {
     const args = parseArgv(argv);
     const diag = createDiagnostics();
@@ -250,8 +247,7 @@ export async function runStoiCli(
 }
 
 const isMain =
-  process.argv[1] != null &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  process.argv[1] != null && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isMain) {
   runStoiCli(process.argv.slice(2)).then((code) => {

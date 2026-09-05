@@ -25,17 +25,32 @@ let _celEvalTimeMs = 0;
 let _celTimingEnabled = false;
 
 /** Total number of CEL evaluations since last reset. */
-export function getCelEvalCount(): number { return _celEvalCount; }
+export function getCelEvalCount(): number {
+  return _celEvalCount;
+}
 /** Number of expression-cache hits since last reset. */
-export function getCelCacheHitCount(): number { return _celCacheHitCount; }
+export function getCelCacheHitCount(): number {
+  return _celCacheHitCount;
+}
 /** Number of expression-cache misses since last reset. */
-export function getCelCacheMissCount(): number { return _celCacheMissCount; }
+export function getCelCacheMissCount(): number {
+  return _celCacheMissCount;
+}
 /** Accumulated CEL evaluation wall-clock time in ms (only when timing enabled). */
-export function getCelEvalTimeMs(): number { return _celEvalTimeMs; }
+export function getCelEvalTimeMs(): number {
+  return _celEvalTimeMs;
+}
 /** Enable/disable per-evaluation timing (adds performance.now() overhead). */
-export function setCelTimingEnabled(enabled: boolean): void { _celTimingEnabled = enabled; }
+export function setCelTimingEnabled(enabled: boolean): void {
+  _celTimingEnabled = enabled;
+}
 /** Reset all CEL profiling counters to zero. */
-export function resetCelCounters(): void { _celEvalCount = 0; _celCacheHitCount = 0; _celCacheMissCount = 0; _celEvalTimeMs = 0; }
+export function resetCelCounters(): void {
+  _celEvalCount = 0;
+  _celCacheHitCount = 0;
+  _celCacheMissCount = 0;
+  _celEvalTimeMs = 0;
+}
 
 type CelFunctionCatalogEntry = {
   name: string;
@@ -176,7 +191,7 @@ function createCelEnvironment(
   // String(x) are functionally identical to the CEL builtins.
   // Context-free ("pure") catalog functions: fixed implementation on every env.
   env.registerFunction("isTrue(dyn, dyn): dyn", (obj: unknown, field: unknown) =>
-    isTrueValue(obj, field)
+    isTrueValue(obj, field),
   );
   env.registerFunction("lower(dyn): dyn", (value: unknown) => lowerValue(value));
 
@@ -187,7 +202,8 @@ function createCelEnvironment(
       const signature = `${name}(${args}): dyn`;
       env.registerFunction(signature, (...args: unknown[]) => {
         const fn = functions?.[name];
-        if (!isCallable(fn)) throw new Error(`CEL function '${name}' not available in current context`);
+        if (!isCallable(fn))
+          throw new Error(`CEL function '${name}' not available in current context`);
         return fn(...args);
       });
     }
@@ -230,7 +246,10 @@ function compileExpression(expression: string): CompiledCelExpression {
   }
 
   let compiled = expressionCache.get(expression);
-  if (compiled) { _celCacheHitCount++; return compiled; }
+  if (compiled) {
+    _celCacheHitCount++;
+    return compiled;
+  }
 
   try {
     compiled = celEnv.parse(expression);
@@ -244,10 +263,7 @@ function compileExpression(expression: string): CompiledCelExpression {
   return compiled;
 }
 
-function validateFunctionSurface(
-  expression: string,
-  allowedFunctions: Set<string>
-): string | null {
+function validateFunctionSurface(expression: string, allowedFunctions: Set<string>): string | null {
   for (const match of expression.matchAll(FUNCTION_CALL_PATTERN)) {
     const fn = match[1];
     if (!fn || allowedFunctions.has(fn)) continue;
@@ -288,7 +304,7 @@ function validateCursorDepth(expression: string): string | null {
 
 export function validateExpressionSyntax(
   expression: string,
-  options: ExpressionValidationOptions = {}
+  options: ExpressionValidationOptions = {},
 ): string | null {
   try {
     compileExpression(expression);
@@ -332,13 +348,14 @@ export function validateExpressionSyntax(
 export function evaluateExpression(
   expression: string,
   context: unknown,
-  functions: Record<string, unknown> | null = null
+  functions: Record<string, unknown> | null = null,
 ): unknown {
   _celEvalCount++;
   const syntaxCompiled = compileExpression(expression);
-  const compiled = functions && typeof functions === "object"
-    ? compileBoundExpression(expression, functions)
-    : syntaxCompiled;
+  const compiled =
+    functions && typeof functions === "object"
+      ? compileBoundExpression(expression, functions)
+      : syntaxCompiled;
 
   if (_celTimingEnabled) {
     const t0 = performance.now();

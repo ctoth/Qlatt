@@ -30,8 +30,20 @@ class GlottalModProcessor extends AudioWorkletProcessor {
     _reportCountdown;
     static get parameterDescriptors() {
         return [
-            { name: "f0", defaultValue: 110, minValue: 0, maxValue: 500, automationRate: "a-rate" },
-            { name: "oq", defaultValue: 0.5, minValue: 0.1, maxValue: 1.0, automationRate: "k-rate" },
+            {
+                name: "f0",
+                defaultValue: 110,
+                minValue: 0,
+                maxValue: 500,
+                automationRate: "a-rate",
+            },
+            {
+                name: "oq",
+                defaultValue: 0.5,
+                minValue: 0.1,
+                maxValue: 1.0,
+                automationRate: "k-rate",
+            },
         ];
     }
     constructor(options) {
@@ -78,7 +90,9 @@ class GlottalModProcessor extends AudioWorkletProcessor {
         const oq = Math.min(1.0, Math.max(0.1, oqValues[0] ?? 0.5));
         for (let i = 0; i < blockSize; i += 1) {
             const f0 = hasF0
-                ? (f0Values.length > 1 ? (f0Values[i] ?? f0Values[0] ?? 0) : (f0Values[0] ?? 0))
+                ? f0Values.length > 1
+                    ? (f0Values[i] ?? f0Values[0] ?? 0)
+                    : (f0Values[0] ?? 0)
                 : 0;
             if (!f0 || f0 <= 0) {
                 out[i] = 0.5;
@@ -93,7 +107,7 @@ class GlottalModProcessor extends AudioWorkletProcessor {
                 const openDuration = oq * period;
                 if (this.phase < openDuration) {
                     // Open phase: sinusoidal modulation peaking at 1.0
-                    out[i] = 0.5 + 0.5 * Math.sin(Math.PI * this.phase / openDuration);
+                    out[i] = 0.5 + 0.5 * Math.sin((Math.PI * this.phase) / openDuration);
                 }
                 else {
                     // Closed phase: constant half-amplitude

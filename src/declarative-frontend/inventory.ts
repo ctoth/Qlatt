@@ -86,7 +86,7 @@ function normalizePhonemeTargets(node: unknown): Record<string, Record<string, u
     output[phoneme] = cloneValue(target) as Record<string, unknown>;
   }
 
-  if (!Object.prototype.hasOwnProperty.call(output, "SIL")) {
+  if (!Object.hasOwn(output, "SIL")) {
     throw new Error("E_INVENTORY_SCHEMA: phoneme_targets.SIL is required");
   }
 
@@ -141,7 +141,7 @@ export function loadInventorySpecFromPath(specPath: string): InventorySpec {
     const known = listBundledInventoryPaths();
     throw new Error(
       `E_INVENTORY_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : "")
+        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
     );
   }
 
@@ -150,9 +150,7 @@ export function loadInventorySpecFromPath(specPath: string): InventorySpec {
   return spec;
 }
 
-export async function preloadInventorySpecFromPath(
-  specPath: string,
-): Promise<InventorySpec> {
+export async function preloadInventorySpecFromPath(specPath: string): Promise<InventorySpec> {
   const cached = BUNDLED_INVENTORY_CACHE.get(specPath);
   if (cached) return cached;
 
@@ -163,7 +161,7 @@ export async function preloadInventorySpecFromPath(
     const known = listBundledInventoryPaths();
     throw new Error(
       `E_INVENTORY_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : "")
+        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
     );
   }
 
@@ -183,12 +181,12 @@ export function fillDefaultParams(
   if (target) {
     // Override defaults with valid numeric values from the target.
     for (const [key, value] of Object.entries(target)) {
-      if (!Object.prototype.hasOwnProperty.call(effectiveBase, key)) continue;
+      if (!Object.hasOwn(effectiveBase, key)) continue;
       if (typeof value === "number" && Number.isFinite(value)) {
         filled[key] = value;
       } else {
         console.warn(
-          `[fillDefaultParams] Invalid value '${String(value)}' for key '${key}' in target. Using default: ${filled[key]}`
+          `[fillDefaultParams] Invalid value '${String(value)}' for key '${key}' in target. Using default: ${filled[key]}`,
         );
       }
     }
@@ -287,9 +285,12 @@ export function materializePhonemeTarget(
     }
     if (typeof value === "boolean") {
       payload[entryKey] = value;
-    } else if (typeof value === "number" && !Object.prototype.hasOwnProperty.call(effectiveBase, entryKey)) {
+    } else if (typeof value === "number" && !Object.hasOwn(effectiveBase, entryKey)) {
       payload[entryKey] = value;
-    } else if ((Array.isArray(value) || isPlainObject(value)) && !Object.prototype.hasOwnProperty.call(effectiveBase, entryKey)) {
+    } else if (
+      (Array.isArray(value) || isPlainObject(value)) &&
+      !Object.hasOwn(effectiveBase, entryKey)
+    ) {
       payload[entryKey] = cloneValue(value);
     }
   }
@@ -305,9 +306,7 @@ export function materializePhonemeTarget(
  * Load inventory and resource paths from a parsed frontend.yaml spec.
  * Every resource path originates in the spec — no hardcoded defaults.
  */
-export function loadFrontendResources(
-  spec: unknown,
-): FrontendResources {
+export function loadFrontendResources(spec: unknown): FrontendResources {
   if (!isPlainObject(spec)) {
     throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
   }

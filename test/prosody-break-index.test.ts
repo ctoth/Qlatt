@@ -1,13 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
-import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import type { Item } from "../src/declarative-frontend/hrg";
+import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 /**
  * Break-index tier — declarative port of the prosodic-annotator
  * assignBreakIndices + applyLongPhraseBreaking passes (Phase 5.3).
  */
 function activeSegments(result: ReturnType<typeof textToKlattTrackDetailed>): Item[] {
-  return result.utterance.relation("Segment").listItems().filter((s) => s.get("active") !== false);
+  return result.utterance
+    .relation("Segment")
+    .listItems()
+    .filter((s) => s.get("active") !== false);
 }
 
 describe("prosody: declarative break-index assignment", () => {
@@ -15,7 +18,9 @@ describe("prosody: declarative break-index assignment", () => {
 
   it("assigns breakIndex=4 on terminal-punctuation SILs and 3 on clause SILs", () => {
     const result = textToKlattTrackDetailed("Gag, gang.", 110);
-    const sils = activeSegments(result).filter((s) => s.get("phoneme") === "SIL" && s.get("punctuationSymbol") != null);
+    const sils = activeSegments(result).filter(
+      (s) => s.get("phoneme") === "SIL" && s.get("punctuationSymbol") != null,
+    );
     const comma = sils.find((s) => s.get("punctuationSymbol") === ",");
     const period = sils.find((s) => s.get("punctuationSymbol") === ".");
     expect(comma?.get("breakIndex")).toBe(3);
@@ -24,7 +29,9 @@ describe("prosody: declarative break-index assignment", () => {
 
   it("marks the last phone of each word run with breakIndex=1", () => {
     const result = textToKlattTrackDetailed("big cat.", 110);
-    const bigLast = activeSegments(result).filter((s) => s.get("word") === "big").at(-1);
+    const bigLast = activeSegments(result)
+      .filter((s) => s.get("word") === "big")
+      .at(-1);
     expect(bigLast?.get("breakIndex")).toBe(1);
   });
 

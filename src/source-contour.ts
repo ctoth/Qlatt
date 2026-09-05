@@ -150,9 +150,7 @@ export function loadSourceContourSync(
   return spec;
 }
 
-export function resolveSourceContour(
-  options: ResolveSourceContourOptions,
-): ResolvedSourceContour {
+export function resolveSourceContour(options: ResolveSourceContourOptions): ResolvedSourceContour {
   const spec = options.spec ?? loadSourceContourSync();
   const presetName = options.requestedQuality ?? spec.default_voice_quality;
   const preset = spec.voice_quality_presets[presetName];
@@ -169,9 +167,7 @@ export function resolveSourceContour(
   const result: ResolvedSourceContour = {
     baseline,
     effectiveBaseF0Hz:
-      preset.f0_scale !== 1.0
-        ? Math.round(options.baseF0Hz * preset.f0_scale)
-        : options.baseF0Hz,
+      preset.f0_scale !== 1.0 ? Math.round(options.baseF0Hz * preset.f0_scale) : options.baseF0Hz,
     presetName,
     citations: [
       DEFAULT_SOURCE_CONTOUR_PATH,

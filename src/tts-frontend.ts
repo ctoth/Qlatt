@@ -1,46 +1,50 @@
 import { loadCmuDictionaryFromPathSync } from "./cmu-dictionary-loader";
 import {
-  loadFrontendResources,
-  materializePhonemeTarget,
-  type InventorySpec,
-} from "./declarative-frontend/inventory";
-import { loadBundledRulepackSpec, type CompiledRulepack } from "./declarative-frontend/rule-pack";
-import {
-  lowerToFrames,
-  readLowerOptions,
-  Utterance,
   type FeatureSchema,
   type HrgSchema,
   type LayeredF0ModelConfig,
+  lowerToFrames,
+  readLowerOptions,
+  Utterance,
 } from "./declarative-frontend/hrg";
 import {
   GraphRuleEvaluationOwner,
   runGraphRuleEngine,
 } from "./declarative-frontend/hrg/rule-engine";
-import { normalizeText } from "./g2p/text-normalize";
-import { createProvenanceCollector, type ProvenanceCollector } from "./provenance";
-import { transcribeText } from "./transcribe-text";
-import type { Diagnostics } from "./diagnostics";
-import type { KlattFrame, TranscriptionConfig, TranscriptionToken } from "./tts-frontend-types";
 import {
-  DEFAULT_SPEAKER_PROFILE_PATH,
-  collectSpeakerProfileCitations,
-  loadSpeakerProfileSync,
-  resolveSpeakerProfile,
-  type ResolvedSpeakerProfile,
-  type SpeakerProfileOverride,
-} from "./speaker-profile";
-import { getVoiceRegistry, resolveVoice, type ResolvedVoice } from "./dectalk-voice";
+  type InventorySpec,
+  loadFrontendResources,
+  materializePhonemeTarget,
+} from "./declarative-frontend/inventory";
+import { type CompiledRulepack, loadBundledRulepackSpec } from "./declarative-frontend/rule-pack";
+import { parseSyllabificationTables, syllabifyWord } from "./declarative-frontend/syllabify";
+import { getVoiceRegistry, type ResolvedVoice, resolveVoice } from "./dectalk-voice";
+import type { Diagnostics } from "./diagnostics";
+import { normalizeText } from "./g2p/text-normalize";
+import type { DirectionTrack } from "./input/direction-track";
+import {
+  attachDirectionsToUtterance,
+  DIRECTION_ITEM_SCHEMA,
+  parseDirectionInput,
+} from "./input/parse";
+import { createProvenanceCollector, type ProvenanceCollector } from "./provenance";
 import {
   DEFAULT_SOURCE_CONTOUR_PATH,
   loadSourceContourSync,
   resolveSourceContour,
   type SourceContourVoiceQuality,
 } from "./source-contour";
+import {
+  collectSpeakerProfileCitations,
+  DEFAULT_SPEAKER_PROFILE_PATH,
+  loadSpeakerProfileSync,
+  type ResolvedSpeakerProfile,
+  resolveSpeakerProfile,
+  type SpeakerProfileOverride,
+} from "./speaker-profile";
 import { projectSpeakerFields } from "./speaker-projection";
-import { DIRECTION_ITEM_SCHEMA, attachDirectionsToUtterance, parseDirectionInput } from "./input/parse";
-import type { DirectionTrack } from "./input/direction-track";
-import { parseSyllabificationTables, syllabifyWord } from "./declarative-frontend/syllabify";
+import { transcribeText } from "./transcribe-text";
+import type { KlattFrame, TranscriptionConfig, TranscriptionToken } from "./tts-frontend-types";
 import { isPlainObject } from "./yaml-loader";
 
 export type VoiceQuality = SourceContourVoiceQuality;
@@ -101,8 +105,15 @@ const CONTROL_WINDOW_SCHEMA: FeatureSchema = {
     tag: { kind: "string" },
   },
   optional: [
-    "target", "start_ms", "end_ms", "start_ratio", "end_ratio",
-    "prefix_ms", "suffix_ms", "fields", "tag",
+    "target",
+    "start_ms",
+    "end_ms",
+    "start_ratio",
+    "end_ratio",
+    "prefix_ms",
+    "suffix_ms",
+    "fields",
+    "tag",
   ],
 };
 
@@ -112,8 +123,11 @@ function schemaForValue(value: unknown): FeatureSchema | null {
   if (typeof value === "number") return Number.isFinite(value) ? { kind: "number" } : null;
   if (typeof value === "boolean") return { kind: "boolean" };
   if (Array.isArray(value)) {
-    const variants = value.map(schemaForValue).filter((entry): entry is FeatureSchema => entry !== null);
-    const items = variants.length === 0 ? { kind: "string" } satisfies FeatureSchema : mergeSchemas(variants);
+    const variants = value
+      .map(schemaForValue)
+      .filter((entry): entry is FeatureSchema => entry !== null);
+    const items =
+      variants.length === 0 ? ({ kind: "string" } satisfies FeatureSchema) : mergeSchemas(variants);
     return { kind: "array", items };
   }
   if (!isPlainObject(value)) return null;
@@ -138,15 +152,18 @@ function mergeSchemas(schemas: readonly FeatureSchema[]): FeatureSchema {
     const fields: Record<string, FeatureSchema> = {};
     const optional: string[] = [];
     for (const key of keys) {
-      const observed = objects.flatMap((schema) => schema.fields[key] ? [schema.fields[key]] : []);
+      const observed = objects.flatMap((schema) =>
+        schema.fields[key] ? [schema.fields[key]] : [],
+      );
       fields[key] = mergeSchemas(observed);
-      if (observed.length !== objects.length || objects.some((schema) => schema.optional?.includes(key))) {
+      if (
+        observed.length !== objects.length ||
+        objects.some((schema) => schema.optional?.includes(key))
+      ) {
         optional.push(key);
       }
     }
-    return optional.length > 0
-      ? { kind: "object", fields, optional }
-      : { kind: "object", fields };
+    return optional.length > 0 ? { kind: "object", fields, optional } : { kind: "object", fields };
   }
   const unique = new Map<string, FeatureSchema>();
   for (const schema of schemas) unique.set(JSON.stringify(schema), schema);
@@ -195,9 +212,8 @@ function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
     for (const [key, value] of Object.entries(target)) {
       if (key === "dur" || key === "SW" || key === "type") continue;
       const observed = schemaForValue(value);
-      const schema = observed?.kind === "boolean"
-        ? mergeSchemas([observed, { kind: "null" }])
-        : observed;
+      const schema =
+        observed?.kind === "boolean" ? mergeSchemas([observed, { kind: "null" }]) : observed;
       if (!schema) continue;
       segmentFeatures[key] = segmentFeatures[key]
         ? mergeSchemas([segmentFeatures[key], schema])
@@ -226,7 +242,9 @@ function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
       word: { features: { text: { kind: "string" }, tokenIndex: { kind: "number" } } },
       syllable: {
         features: {
-          index: { kind: "number" }, stress: NUMBER_OR_NULL, positionInWord: { kind: "string" },
+          index: { kind: "number" },
+          stress: NUMBER_OR_NULL,
+          positionInWord: { kind: "string" },
         },
       },
       segment: { features: segmentFeatures },
@@ -257,17 +275,29 @@ function getTranscriptionConfig(spec: CompiledRulepack): TranscriptionConfig | u
   const value = spec.transcription;
   if (!isPlainObject(value)) return undefined;
   const diagnosticSymbols = isPlainObject(value.diagnostic_symbols)
-    ? Object.fromEntries(Object.entries(value.diagnostic_symbols).filter((entry): entry is [string, string[]] =>
-      Array.isArray(entry[1]) && entry[1].every((item) => typeof item === "string")))
+    ? Object.fromEntries(
+        Object.entries(value.diagnostic_symbols).filter(
+          (entry): entry is [string, string[]] =>
+            Array.isArray(entry[1]) && entry[1].every((item) => typeof item === "string"),
+        ),
+      )
     : undefined;
   const letterNames = isPlainObject(value.letter_names)
-    ? Object.fromEntries(Object.entries(value.letter_names).filter((entry): entry is [string, string[]] =>
-      Array.isArray(entry[1]) && entry[1].every((item) => typeof item === "string")))
+    ? Object.fromEntries(
+        Object.entries(value.letter_names).filter(
+          (entry): entry is [string, string[]] =>
+            Array.isArray(entry[1]) && entry[1].every((item) => typeof item === "string"),
+        ),
+      )
     : undefined;
   const punctuationTokens = Array.isArray(value.punctuation_tokens)
     ? value.punctuation_tokens.filter((item): item is string => typeof item === "string")
     : undefined;
-  return { diagnostic_symbols: diagnosticSymbols, letter_names: letterNames, punctuation_tokens: punctuationTokens };
+  return {
+    diagnostic_symbols: diagnosticSymbols,
+    letter_names: letterNames,
+    punctuation_tokens: punctuationTokens,
+  };
 }
 
 function readPolicyNumber(entry: unknown): number | undefined {
@@ -279,7 +309,8 @@ function readPolicyNumber(entry: unknown): number | undefined {
 
 function requirePolicyNumber(entry: unknown, path: string): number {
   const value = readPolicyNumber(entry);
-  if (value === undefined) throw new Error(`E_POLICY_REQUIRED: parameters.policy.${path} must be finite`);
+  if (value === undefined)
+    throw new Error(`E_POLICY_REQUIRED: parameters.policy.${path} must be finite`);
   return value;
 }
 
@@ -291,22 +322,28 @@ function recordOrEmpty(value: unknown): Record<string, unknown> {
   return isPlainObject(value) ? value : {};
 }
 
-function mergedPolicy(spec: CompiledRulepack, additions: Record<string, unknown>): Record<string, unknown> {
+function mergedPolicy(
+  spec: CompiledRulepack,
+  additions: Record<string, unknown>,
+): Record<string, unknown> {
   const base = policyRecord(spec);
   const output: Record<string, unknown> = { ...base };
   for (const [key, value] of Object.entries(additions)) {
-    output[key] = isPlainObject(base[key]) && isPlainObject(value) ? { ...base[key], ...value } : value;
+    output[key] =
+      isPlainObject(base[key]) && isPlainObject(value) ? { ...base[key], ...value } : value;
   }
   return { policy: output };
 }
 
 function isLayeredF0Model(value: unknown): value is LayeredF0ModelConfig {
-  return isPlainObject(value)
-    && value.type === "layered_additive"
-    && typeof value.frame_period_sec === "number"
-    && isPlainObject(value.filter)
-    && isPlainObject(value.layers)
-    && isPlainObject(value.output_clamp);
+  return (
+    isPlainObject(value) &&
+    value.type === "layered_additive" &&
+    typeof value.frame_period_sec === "number" &&
+    isPlainObject(value.filter) &&
+    isPlainObject(value.layers) &&
+    isPlainObject(value.output_clamp)
+  );
 }
 
 function createStructure(
@@ -316,7 +353,10 @@ function createStructure(
   spec: CompiledRulepack,
 ): void {
   const tables = parseSyllabificationTables(spec.syllabification);
-  const byToken = new Map<string, Array<{ token: TranscriptionToken; segment: typeof segments[number] }>>();
+  const byToken = new Map<
+    string,
+    Array<{ token: TranscriptionToken; segment: (typeof segments)[number] }>
+  >();
   transcribed.forEach((token, index) => {
     if (token.isPunctuation) return;
     const segment = segments[index];
@@ -341,14 +381,31 @@ function createStructure(
     transaction.append("Word", word);
     transaction.addRoot("SylStructure", word);
     const annotations = tables
-      ? syllabifyWord(group.map((entry) => entry.token.phoneme), tables)
-      : group.map((entry, index, all) => {
-          const nuclei = all.map((candidate, candidateIndex) =>
-            utterance.getItem(`segment_${candidateIndex.toString()}`)?.get("type") === "vowel" ? candidateIndex : -1)
+      ? syllabifyWord(
+          group.map((entry) => entry.token.phoneme),
+          tables,
+        )
+      : group.map((_entry, index, all) => {
+          const nuclei = all
+            .map((_candidate, candidateIndex) =>
+              utterance.getItem(`segment_${candidateIndex.toString()}`)?.get("type") === "vowel"
+                ? candidateIndex
+                : -1,
+            )
             .filter((candidateIndex) => candidateIndex >= 0);
-          const syllableIndex = Math.max(0, nuclei.findIndex((nucleus, nucleusIndex) =>
-            index <= (nuclei[nucleusIndex + 1] ?? Number.POSITIVE_INFINITY) - 1));
-          return { syllableIndex, role: "onset", positionInWord: nuclei.length <= 1 ? "only" : "medial", syllableCount: Math.max(1, nuclei.length) };
+          const syllableIndex = Math.max(
+            0,
+            nuclei.findIndex(
+              (_nucleus, nucleusIndex) =>
+                index <= (nuclei[nucleusIndex + 1] ?? Number.POSITIVE_INFINITY) - 1,
+            ),
+          );
+          return {
+            syllableIndex,
+            role: "onset",
+            positionInWord: nuclei.length <= 1 ? "only" : "medial",
+            syllableCount: Math.max(1, nuclei.length),
+          };
         });
     const syllables = new Map<number, ReturnType<typeof transaction.createItem>>();
     for (let index = 0; index < group.length; index += 1) {
@@ -356,7 +413,10 @@ function createStructure(
       const syllableIndex = annotation?.syllableIndex ?? 0;
       let syllable = syllables.get(syllableIndex);
       if (!syllable) {
-        syllable = transaction.createItem("syllable", `${word.id}:syllable_${syllableIndex.toString()}`);
+        syllable = transaction.createItem(
+          "syllable",
+          `${word.id}:syllable_${syllableIndex.toString()}`,
+        );
         transaction.set(syllable, "index", syllableIndex);
         transaction.set(syllable, "stress", null);
         transaction.set(syllable, "positionInWord", annotation?.positionInWord ?? "only");
@@ -366,7 +426,11 @@ function createStructure(
       }
       if (group[index].token.stress === 1) transaction.set(syllable, "stress", 1);
       transaction.addDaughter("SylStructure", syllable, group[index].segment);
-      transaction.associate("source_token", group[index].segment, utterance.getItem(tokenId) ?? word);
+      transaction.associate(
+        "source_token",
+        group[index].segment,
+        utterance.getItem(tokenId) ?? word,
+      );
     }
     wordIndex += 1;
   }
@@ -387,7 +451,11 @@ function buildTextToKlattTrackDetailed(
   const lowering = readLowerOptions(spec.output.lowering);
   const resources = loadFrontendResources(spec);
   const provenance = options.provenance ?? createProvenanceCollector();
-  const utterance = new Utterance(buildUtteranceSchema(resources.inventory), provenance, options.diagnostics ?? undefined);
+  const utterance = new Utterance(
+    buildUtteranceSchema(resources.inventory),
+    provenance,
+    options.diagnostics ?? undefined,
+  );
   for (const relationName of Object.keys(buildUtteranceSchema(resources.inventory).relations)) {
     utterance.relation(relationName);
   }
@@ -407,7 +475,8 @@ function buildTextToKlattTrackDetailed(
   let selectedVoice: ResolvedVoice | null = null;
   let speakerOverride: SpeakerProfileOverride | undefined;
   if (typeof options.speaker === "string") {
-    if (!registry) throw new Error(`E_VOICE_REGISTRY_MISSING: frontend '${frontendId}' has no voice registry`);
+    if (!registry)
+      throw new Error(`E_VOICE_REGISTRY_MISSING: frontend '${frontendId}' has no voice registry`);
     selectedVoice = resolveVoice(registry, options.speaker);
     speakerOverride = selectedVoice.override;
   } else if (options.speaker) {
@@ -419,7 +488,11 @@ function buildTextToKlattTrackDetailed(
 
   const speakerProfilePath = spec.speaker_profile_path ?? DEFAULT_SPEAKER_PROFILE_PATH;
   const speakerProfile = loadSpeakerProfileSync(speakerProfilePath);
-  const resolvedSpeaker = resolveSpeakerProfile({ baseF0, speakerOverride, profileSpec: speakerProfile });
+  const resolvedSpeaker = resolveSpeakerProfile({
+    baseF0,
+    speakerOverride,
+    profileSpec: speakerProfile,
+  });
   const speakerDecision = provenance.add({
     stage: "frontend",
     type: "speaker_profile_selected",
@@ -447,8 +520,14 @@ function buildTextToKlattTrackDetailed(
   const transcriptionConfig = getTranscriptionConfig(spec);
   const normalization = isPlainObject(spec.normalization)
     ? {
-        tablesPath: typeof spec.normalization.tables_path === "string" ? spec.normalization.tables_path : undefined,
-        pipelinePath: typeof spec.normalization.pipeline_path === "string" ? spec.normalization.pipeline_path : undefined,
+        tablesPath:
+          typeof spec.normalization.tables_path === "string"
+            ? spec.normalization.tables_path
+            : undefined,
+        pipelinePath:
+          typeof spec.normalization.pipeline_path === "string"
+            ? spec.normalization.pipeline_path
+            : undefined,
         punctuationTokens: transcriptionConfig?.punctuation_tokens,
       }
     : { punctuationTokens: transcriptionConfig?.punctuation_tokens };
@@ -491,7 +570,7 @@ function buildTextToKlattTrackDetailed(
     construct.set(item, "stress", token.stress);
     construct.set(item, "word", token.word);
     construct.set(item, "sourceTokenId", token.sourceTokenId);
-    construct.set(item, "punctuationSymbol", token.isPunctuation ? token.symbol ?? null : null);
+    construct.set(item, "punctuationSymbol", token.isPunctuation ? (token.symbol ?? null) : null);
     construct.set(item, "active", true);
     for (const [key, value] of Object.entries(materialized)) {
       if (key === "phoneme" || key === "params") continue;
@@ -510,9 +589,10 @@ function buildTextToKlattTrackDetailed(
   const requestedRate = options.rate ?? 1;
   const durationPolicy = recordOrEmpty(policyRecord(spec).duration);
   const referenceRate = readPolicyNumber(durationPolicy.rate_reference);
-  const rate = Math.max(0.5, Math.min(2, referenceRate && referenceRate > 0
-    ? requestedRate / referenceRate
-    : requestedRate));
+  const rate = Math.max(
+    0.5,
+    Math.min(2, referenceRate && referenceRate > 0 ? requestedRate / referenceRate : requestedRate),
+  );
   const speakerPolicy = { speaker: resolvedSpeaker };
   const graphInventory = { spec: resources.inventory, decisionId: inventoryDecision.id };
   const captureTooling = options.captureTooling === true;
@@ -548,9 +628,15 @@ function buildTextToKlattTrackDetailed(
   }
 
   const ratePolicy = recordOrEmpty(policyRecord(spec).rate);
-  const undershoot = requirePolicyNumber(ratePolicy.undershoot_coefficient, "rate.undershoot_coefficient");
+  const undershoot = requirePolicyNumber(
+    ratePolicy.undershoot_coefficient,
+    "rate.undershoot_coefficient",
+  );
   const f0Exponent = requirePolicyNumber(ratePolicy.f0_range_exponent, "rate.f0_range_exponent");
-  const transitionExponent = requirePolicyNumber(ratePolicy.transition_scale_exponent, "rate.transition_scale_exponent");
+  const transitionExponent = requirePolicyNumber(
+    ratePolicy.transition_scale_exponent,
+    "rate.transition_scale_exponent",
+  );
   const formantRate = Math.max(0, (rate - 1) * undershoot);
   // Duration floors are projected by the `duration_floor_*` scalar rules at the
   // end of the duration phase (traced, cited). The floor magnitudes live in the
@@ -576,12 +662,15 @@ function buildTextToKlattTrackDetailed(
   runGraphRuleEngine(utterance, spec, {
     evaluationOwner,
     phases: ["formant"],
-    parameters: mergedPolicy(spec, { ...speakerPolicy, formant: { rate_undershoot_factor: formantRate } }),
+    parameters: mergedPolicy(spec, {
+      ...speakerPolicy,
+      formant: { rate_undershoot_factor: formantRate },
+    }),
     inventory: graphInventory,
     captureTooling,
   });
   const f0Policy = recordOrEmpty(policyRecord(spec).f0);
-  const f0Range = Math.pow(rate, -f0Exponent);
+  const f0Range = rate ** -f0Exponent;
   runGraphRuleEngine(utterance, spec, {
     evaluationOwner,
     phases: ["prosody", "finalize"],
@@ -590,7 +679,8 @@ function buildTextToKlattTrackDetailed(
       f0: {
         base_hz: source.effectiveBaseF0Hz,
         continuation_rise_hz: (readPolicyNumber(f0Policy.continuation_rise_hz) ?? 8) * f0Range,
-        continuation_minor_rise_hz: (readPolicyNumber(f0Policy.continuation_minor_rise_hz) ?? 5) * f0Range,
+        continuation_minor_rise_hz:
+          (readPolicyNumber(f0Policy.continuation_minor_rise_hz) ?? 5) * f0Range,
       },
     }),
     inventory: graphInventory,
@@ -603,7 +693,10 @@ function buildTextToKlattTrackDetailed(
     phase: "frontend",
     tag: "speaker",
     reason: "Project selected speaker and source policy onto final Segment targets",
-    citations: [...source.citations, ...collectSpeakerProfileCitations(speakerProfile, speakerProfilePath)],
+    citations: [
+      ...source.citations,
+      ...collectSpeakerProfileCitations(speakerProfile, speakerProfilePath),
+    ],
     stage: "frontend",
   });
   speakerStamp.dependOn(speakerDecision.id).dependOn(sourceDecision.id);
@@ -629,14 +722,19 @@ function buildTextToKlattTrackDetailed(
     if (selectedVoice && registry) {
       for (const field of registry.speakerFrameParams) {
         const value = selectedVoice.params[field];
-        if (typeof value === "number" && Number.isFinite(value)) speakerStamp.set(item, field, value);
+        if (typeof value === "number" && Number.isFinite(value))
+          speakerStamp.set(item, field, value);
       }
       if (referenceVoice) {
         for (const mapping of registry.speakerGainOffsets) {
           const selected = selectedVoice.params[mapping.gain];
           const reference = referenceVoice.params[mapping.gain];
           const current = item.get(mapping.param);
-          if (typeof selected === "number" && typeof reference === "number" && typeof current === "number") {
+          if (
+            typeof selected === "number" &&
+            typeof reference === "number" &&
+            typeof current === "number"
+          ) {
             speakerStamp.set(item, mapping.param, current + selected - reference);
           }
         }
@@ -666,7 +764,7 @@ function buildTextToKlattTrackDetailed(
     citations: [resources.inventoryPath],
     parents: [inventoryDecision.id],
   });
-  const scaledTransition = transitionMs * Math.pow(rate, -transitionExponent);
+  const scaledTransition = transitionMs * rate ** -transitionExponent;
   const lowerOptions = {
     ...lowering,
     transitions: {

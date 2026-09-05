@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
+import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { isPlainObject } from "../src/yaml-loader";
 
 const SCHEMA = {
@@ -96,20 +96,23 @@ function addSegment(
 }
 
 function productionParams(time: number): Record<string, number> {
-  const parsed: unknown = JSON.parse(readFileSync(
-    new URL("./fixtures/hrg-convergence-baseline/dectalk-english-stops.json", import.meta.url),
-    "utf8",
-  ));
+  const parsed: unknown = JSON.parse(
+    readFileSync(
+      new URL("./fixtures/hrg-convergence-baseline/dectalk-english-stops.json", import.meta.url),
+      "utf8",
+    ),
+  );
   if (!isPlainObject(parsed) || !isPlainObject(parsed.oldProduction)) {
     throw new Error("production fixture missing");
   }
   const frames = parsed.oldProduction.sourceFrames;
   if (!Array.isArray(frames)) throw new Error("production frames missing");
   const frame = frames.find(
-    (candidate) => isPlainObject(candidate)
-      && candidate.phoneme === "AE"
-      && typeof candidate.time === "number"
-      && Math.abs(candidate.time - time) <= 1e-9,
+    (candidate) =>
+      isPlainObject(candidate) &&
+      candidate.phoneme === "AE" &&
+      typeof candidate.time === "number" &&
+      Math.abs(candidate.time - time) <= 1e-9,
   );
   if (!isPlainObject(frame) || !isPlainObject(frame.params)) {
     throw new Error(`captured AE locus event missing at ${time}`);
@@ -126,18 +129,30 @@ describe("HRG lowering locus transitions", () => {
     const utterance = new Utterance(SCHEMA);
     const build = utterance.beginTransaction(META);
     const closure = addSegment(build, "seg_0", "P", "stop_closure", 83, {
-      F1: 350, F2: 1051, F3: 2150,
+      F1: 350,
+      F2: 1051,
+      F3: 2150,
     });
     const release = addSegment(build, "seg_1", "P_REL", "stop_release", 7, {
-      F1: 400, F2: 1100, F3: 2150,
+      F1: 400,
+      F2: 1100,
+      F3: 2150,
     });
     const vowel = addSegment(build, "seg_2", "AE", "vowel", 154, {
-      F1: 680, F2: 1600, F3: 2430,
+      F1: 680,
+      F2: 1600,
+      F3: 2430,
     });
     const nextClosure = addSegment(build, "seg_3", "T", "stop_closure", 65, {
-      F1: 350, F2: 1051, F3: 2150,
+      F1: 350,
+      F2: 1051,
+      F3: 2150,
     });
-    build.partitionAnchors([closure, release, vowel, nextClosure], utterance.axis.start.id, utterance.axis.end.id);
+    build.partitionAnchors(
+      [closure, release, vowel, nextClosure],
+      utterance.axis.start.id,
+      utterance.axis.end.id,
+    );
     build.commit();
     const timing = utterance.beginTransaction({ ...META, ruleId: "timing", tag: "timing" });
     const closureAnchor = utterance.intervalAnchor(closure);
@@ -194,10 +209,14 @@ describe("HRG lowering locus transitions", () => {
     const utterance = new Utterance(SCHEMA);
     const build = utterance.beginTransaction(META);
     const closure = addSegment(build, "adjust_p", "P", "stop_closure", 83, {
-      F1: 350, F2: 1051, F3: 2150,
+      F1: 350,
+      F2: 1051,
+      F3: 2150,
     });
     const glide = addSegment(build, "adjust_w", "W", "glide", 100, {
-      F1: 300, F2: 2000, F3: 3000,
+      F1: 300,
+      F2: 2000,
+      F3: 3000,
     });
     build.partitionAnchors([closure, glide], utterance.axis.start.id, utterance.axis.end.id);
     build.commit();
@@ -239,10 +258,14 @@ describe("HRG lowering locus transitions", () => {
     const utterance = new Utterance(SCHEMA);
     const build = utterance.beginTransaction(META);
     const closure = addSegment(build, "female_p", "P", "stop_closure", 83, {
-      F1: 350, F2: 1051, F3: 2150,
+      F1: 350,
+      F2: 1051,
+      F3: 2150,
     });
     const vowel = addSegment(build, "female_ae", "AE", "vowel", 100, {
-      F1: 680, F2: 1600, F3: 2430,
+      F1: 680,
+      F2: 1600,
+      F3: 2430,
     });
     build.partitionAnchors([closure, vowel], utterance.axis.start.id, utterance.axis.end.id);
     build.commit();
@@ -273,8 +296,12 @@ describe("HRG lowering locus transitions", () => {
 
     const male = lowerToFrames(utterance, policy);
     const female = lowerToFrames(utterance, policy, { speakerSex: "female" });
-    const maleBoundary = male.frames.find((frame) => frame.segmentId === vowel.id && frame.time === 0.083);
-    const femaleBoundary = female.frames.find((frame) => frame.segmentId === vowel.id && frame.time === 0.083);
+    const maleBoundary = male.frames.find(
+      (frame) => frame.segmentId === vowel.id && frame.time === 0.083,
+    );
+    const femaleBoundary = female.frames.find(
+      (frame) => frame.segmentId === vowel.id && frame.time === 0.083,
+    );
 
     expect(maleBoundary?.params.F1).toBe(531.5);
     expect(femaleBoundary?.params.F1).toBe(540);

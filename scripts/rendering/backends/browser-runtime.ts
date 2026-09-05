@@ -2,11 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright-core";
 import { createServer as createViteServer } from "vite";
-import type {
-  RenderBackend,
-  RenderPayload,
-  RenderRequest,
-} from "../../../src/rendering/types.ts";
+import type { RenderBackend, RenderPayload, RenderRequest } from "../../../src/rendering/types.ts";
 
 function resolveChromePath(): string | null {
   if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
@@ -112,8 +108,7 @@ export const browserRuntimeBackend: RenderBackend = {
         process.stderr.write(`[browser:${msg.type()}] ${text}\n`);
       });
       page.on("pageerror", (error) => {
-        const text =
-          error instanceof Error ? error.stack ?? error.message : String(error);
+        const text = error instanceof Error ? (error.stack ?? error.message) : String(error);
         process.stderr.write(`[browser:pageerror] ${text}\n`);
       });
       const offlinePage =
@@ -125,21 +120,24 @@ export const browserRuntimeBackend: RenderBackend = {
         waitUntil: "load",
       });
       process.stderr.write("[browser:driver] page loaded\n");
-      await page.waitForFunction(() => {
-        const runtimeWindow = window as unknown as Window & {
-          offlineRenderDriver?: {
-            startRender?: unknown;
-            getStatus?: unknown;
-            consumeResult?: unknown;
+      await page.waitForFunction(
+        () => {
+          const runtimeWindow = window as unknown as Window & {
+            offlineRenderDriver?: {
+              startRender?: unknown;
+              getStatus?: unknown;
+              consumeResult?: unknown;
+            };
           };
-        };
-        return (
-          runtimeWindow.offlineRenderDriver != null &&
-          typeof runtimeWindow.offlineRenderDriver.startRender === "function" &&
-          typeof runtimeWindow.offlineRenderDriver.getStatus === "function" &&
-          typeof runtimeWindow.offlineRenderDriver.consumeResult === "function"
-        );
-      }, { timeout: 120000 });
+          return (
+            runtimeWindow.offlineRenderDriver != null &&
+            typeof runtimeWindow.offlineRenderDriver.startRender === "function" &&
+            typeof runtimeWindow.offlineRenderDriver.getStatus === "function" &&
+            typeof runtimeWindow.offlineRenderDriver.consumeResult === "function"
+          );
+        },
+        { timeout: 120000 },
+      );
       process.stderr.write("[browser:driver] driver ready\n");
 
       const renderOptions = {

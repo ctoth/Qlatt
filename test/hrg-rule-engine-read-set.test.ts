@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
@@ -20,7 +20,10 @@ const INPUT = { reason: "fixture", citations: ["Taylor, Black & Caley 2001"] };
 
 function fixture(): Utterance {
   const utterance = new Utterance(SCHEMA);
-  for (const [id, flag] of [["first", true], ["second", false]] as const) {
+  for (const [id, flag] of [
+    ["first", true],
+    ["second", false],
+  ] as const) {
     const item = utterance.createItem("segment", id);
     item.set("flag", flag, INPUT);
     item.set("duration", 10, INPUT);
@@ -36,7 +39,9 @@ describe("graph-native CEL read-set tracking", () => {
     const second = utterance.getItem("second");
     if (!first || !second) throw new Error("missing fixture Items");
     const spec = compileRuleEngineSpec({
-      relations: { Segment: { type: "base", scalars: { duration: {} }, features: { flag: [true, false] } } },
+      relations: {
+        Segment: { type: "base", scalars: { duration: {} }, features: { flag: [true, false] } },
+      },
       rules: {
         short_circuit: {
           select: {
@@ -65,7 +70,9 @@ describe("graph-native CEL read-set tracking", () => {
     const second = utterance.getItem("second");
     if (!first || !second) throw new Error("missing fixture Items");
     const spec = compileRuleEngineSpec({
-      relations: { Segment: { type: "base", scalars: { duration: {} }, features: { flag: [true, false] } } },
+      relations: {
+        Segment: { type: "base", scalars: { duration: {} }, features: { flag: [true, false] } },
+      },
       rules: {
         navigate: {
           select: {
@@ -82,11 +89,13 @@ describe("graph-native CEL read-set tracking", () => {
     runGraphRuleEngine(utterance, spec);
 
     const parents = second.latestWrite("duration")?.parents ?? [];
-    expect(parents).toEqual(expect.arrayContaining([
-      first.latestWrite("flag")?.decisionId,
-      second.latestWrite("flag")?.decisionId,
-      utterance.relation("Segment").node(first)?.write.decisionId,
-      utterance.relation("Segment").node(second)?.write.decisionId,
-    ]));
+    expect(parents).toEqual(
+      expect.arrayContaining([
+        first.latestWrite("flag")?.decisionId,
+        second.latestWrite("flag")?.decisionId,
+        utterance.relation("Segment").node(first)?.write.decisionId,
+        utterance.relation("Segment").node(second)?.write.decisionId,
+      ]),
+    );
   });
 });

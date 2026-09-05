@@ -114,25 +114,19 @@ export function loadSpeakerProfileSync(
   return spec;
 }
 
-export function resolveSpeakerProfile(options: ResolveSpeakerProfileOptions): ResolvedSpeakerProfile {
+export function resolveSpeakerProfile(
+  options: ResolveSpeakerProfileOptions,
+): ResolvedSpeakerProfile {
   const profileSpec = options.profileSpec ?? loadSpeakerProfileSync();
   const override = options.speakerOverride;
   const defaults = profileSpec.default_profile;
 
   return {
-    base_f0_hz:
-      finite(override?.base_f0_hz) ??
-      finite(options.baseF0) ??
-      defaults.base_f0_hz.value,
-    formant_scale:
-      finite(override?.formant_scale) ??
-      defaults.formant_scale.value,
-    rd_default:
-      finite(override?.rd_default) ??
-      defaults.rd_default.value,
+    base_f0_hz: finite(override?.base_f0_hz) ?? finite(options.baseF0) ?? defaults.base_f0_hz.value,
+    formant_scale: finite(override?.formant_scale) ?? defaults.formant_scale.value,
+    rd_default: finite(override?.rd_default) ?? defaults.rd_default.value,
     spectral_tilt_offset_db:
-      finite(override?.spectral_tilt_offset_db) ??
-      defaults.spectral_tilt_offset_db.value,
+      finite(override?.spectral_tilt_offset_db) ?? defaults.spectral_tilt_offset_db.value,
   };
 }
 

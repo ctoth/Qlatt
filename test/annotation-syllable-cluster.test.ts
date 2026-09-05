@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { textToKlattTrack, textToKlattTrackDetailed } from "../src/tts-frontend";
 import type { Item } from "../src/declarative-frontend/hrg";
+import { textToKlattTrack, textToKlattTrackDetailed } from "../src/tts-frontend";
 
 function activeSegments(result: ReturnType<typeof textToKlattTrackDetailed>): Item[] {
-  return result.utterance.relation("Segment").listItems()
+  return result.utterance
+    .relation("Segment")
+    .listItems()
     .filter((item) => item.get("active") !== false);
 }
 
@@ -36,7 +38,7 @@ describe("annotation phase: syllable count and cluster position", () => {
     // should apply (word_syllable_count > 1). Verify the output phonemes
     // include the expected vowels.
     const vowelPhones = activeSegments(result).filter(
-      (item) => item.get("phoneme") === "EH" || item.get("phoneme") === "IH"
+      (item) => item.get("phoneme") === "EH" || item.get("phoneme") === "IH",
     );
     expect(vowelPhones.length).toBeGreaterThanOrEqual(2);
   });
@@ -45,9 +47,7 @@ describe("annotation phase: syllable count and cluster position", () => {
     const result = textToKlattTrackDetailed("cat", 120);
     expect(result.track.length).toBeGreaterThan(2);
     // Single vowel — polysyllabic shortening should NOT fire.
-    const vowelPhones = activeSegments(result).filter(
-      (item) => item.get("phoneme") === "AE"
-    );
+    const vowelPhones = activeSegments(result).filter((item) => item.get("phoneme") === "AE");
     expect(vowelPhones.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -76,7 +76,10 @@ describe("annotation phase: syllable count and cluster position", () => {
     const consonantPhonemes = activeSegments(result)
       .filter((item) => item.get("word") === "splendid" && item.get("phoneme") !== "SIL")
       .map((item) => item.get("phoneme"))
-      .filter((phoneme): phoneme is string => typeof phoneme === "string" && !["EH", "IH"].includes(phoneme));
+      .filter(
+        (phoneme): phoneme is string =>
+          typeof phoneme === "string" && !["EH", "IH"].includes(phoneme),
+      );
     // Should include S, P, L, N, D (some may be expanded to closures/releases)
     expect(consonantPhonemes.length).toBeGreaterThan(0);
   });

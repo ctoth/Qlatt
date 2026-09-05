@@ -5,12 +5,12 @@
  * a registry.yaml file rather than being hardcoded.
  */
 
-import { createConfiguredEvaluator } from './semantics/evaluator-factory';
-import { applyParamValue } from './audio-param-utils';
-import { expandFormantBanks } from './formant-bank';
-import type { SemanticsDocument, EvaluationContext, ParamValue } from './semantics/types';
-import { createBrowserRuntimeAssetLoader } from './runtime-assets/browser-loader';
-import type { RuntimeAssetLoader } from './runtime-assets/types';
+import { applyParamValue } from "./audio-param-utils";
+import { expandFormantBanks } from "./formant-bank";
+import { createBrowserRuntimeAssetLoader } from "./runtime-assets/browser-loader";
+import type { RuntimeAssetLoader } from "./runtime-assets/types";
+import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
+import type { EvaluationContext, ParamValue, SemanticsDocument } from "./semantics/types";
 
 // =============================================================================
 // Registry Types
@@ -19,35 +19,44 @@ import type { RuntimeAssetLoader } from './runtime-assets/types';
 export interface RegistryPrimitive {
   description?: string;
   // Bacon format: use native/worklet/wasm to determine category
-  native?: string;    // e.g., "GainNode" - maps to webaudio
-  worklet?: string;   // e.g., "resonator-processor.js"
-  wasm?: string;      // e.g., "resonator.wasm" - if present with worklet, it's wasm-worklet
+  native?: string; // e.g., "GainNode" - maps to webaudio
+  worklet?: string; // e.g., "resonator-processor.js"
+  wasm?: string; // e.g., "resonator.wasm" - if present with worklet, it's wasm-worklet
   // Legacy format support
-  category?: 'webaudio' | 'wasm-worklet' | 'js-worklet';
-  params?: Record<string, {
-    type: string;
-    default?: number;
-    unit?: string;
-    description?: string;
-  }>;
+  category?: "webaudio" | "wasm-worklet" | "js-worklet";
+  params?: Record<
+    string,
+    {
+      type: string;
+      default?: number;
+      unit?: string;
+      description?: string;
+    }
+  >;
   // Legacy alias
-  parameters?: Record<string, {
-    type: string;
-    default?: number;
-    unit?: string;
-    description?: string;
-  }>;
-  options?: Record<string, {
-    type: string;
-    default?: boolean | number | string;
-    description?: string;
-  }>;
+  parameters?: Record<
+    string,
+    {
+      type: string;
+      default?: number;
+      unit?: string;
+      description?: string;
+    }
+  >;
+  options?: Record<
+    string,
+    {
+      type: string;
+      default?: boolean | number | string;
+      description?: string;
+    }
+  >;
   inputs?: number;
   outputs?: number;
 }
 
 export interface Registry {
-  bacon?: string;   // Bacon format version
+  bacon?: string; // Bacon format version
   version?: string; // Legacy format version
   primitives: Record<string, RegistryPrimitive>;
 }
@@ -55,20 +64,22 @@ export interface Registry {
 /**
  * Infer category from bacon-style fields
  */
-function getPrimitiveCategory(primitive: RegistryPrimitive): 'webaudio' | 'wasm-worklet' | 'js-worklet' | null {
+function getPrimitiveCategory(
+  primitive: RegistryPrimitive,
+): "webaudio" | "wasm-worklet" | "js-worklet" | null {
   // Explicit category takes precedence (legacy support)
   if (primitive.category) {
     return primitive.category;
   }
   // Bacon format: infer from fields
   if (primitive.native) {
-    return 'webaudio';
+    return "webaudio";
   }
   if (primitive.worklet && primitive.wasm) {
-    return 'wasm-worklet';
+    return "wasm-worklet";
   }
   if (primitive.worklet) {
-    return 'js-worklet';
+    return "js-worklet";
   }
   return null;
 }
@@ -109,12 +120,12 @@ function getWasmModules(registry: Registry): string[] {
 export async function loadWasmModules(
   registry: Registry,
   assetLoader: RuntimeAssetLoader,
-  log: (msg: string) => void = () => {}
+  log: (msg: string) => void = () => {},
 ): Promise<Record<string, ArrayBuffer>> {
   const wasmFiles = getWasmModules(registry);
 
   if (wasmFiles.length === 0) {
-    log('No WASM modules to load');
+    log("No WASM modules to load");
     return {};
   }
 
@@ -123,10 +134,10 @@ export async function loadWasmModules(
   const modules: Record<string, ArrayBuffer> = {};
   await Promise.all(
     wasmFiles.map(async (file) => {
-      const key = file.replace('.wasm', '');
+      const key = file.replace(".wasm", "");
       modules[key] = await assetLoader.loadWasmModule(file);
       log(`  Loaded ${file} (${modules[key].byteLength} bytes)`);
-    })
+    }),
   );
 
   return modules;
@@ -144,12 +155,12 @@ export async function registerWorklets(
   ctx: AudioContext,
   registry: Registry,
   assetLoader: RuntimeAssetLoader,
-  log: (msg: string) => void = () => {}
+  log: (msg: string) => void = () => {},
 ): Promise<void> {
   const worklets = getWorkletModules(registry);
 
   if (worklets.length === 0) {
-    log('No worklet modules to register');
+    log("No worklet modules to register");
     return;
   }
 
@@ -163,26 +174,28 @@ export async function registerWorklets(
         await ctx.audioWorklet.addModule(moduleUrl);
       } catch (error) {
         throw new Error(
-          `Unable to register worklet module '${file}' from '${moduleUrl}': ${formatError(error)}`
+          `Unable to register worklet module '${file}' from '${moduleUrl}': ${formatError(error)}`,
         );
       }
       log(`  Registered ${file}`);
-    })
+    }),
   );
 }
 
-type AudioWorkletNodeConstructor = {
+export type AudioWorkletNodeConstructor = {
   new (
     context: BaseAudioContext,
     name: string,
     options?: AudioWorkletNodeOptions,
   ): AudioWorkletNode;
   prototype: AudioWorkletNode;
-} & Function;
+};
+
+type InstanceConstructor = abstract new (...args: never[]) => object;
 
 export function isAudioWorkletNode(
-  node: AudioNode,
-  audioWorkletNodeCtor: AudioWorkletNodeConstructor | undefined,
+  node: object,
+  audioWorkletNodeCtor: InstanceConstructor | undefined,
 ): node is AudioWorkletNode {
   return audioWorkletNodeCtor !== undefined && node instanceof audioWorkletNodeCtor;
 }
@@ -194,7 +207,7 @@ async function awaitWorkletReady(
   nodes: Map<string, AudioNode>,
   audioWorkletNodeCtor: AudioWorkletNodeConstructor | undefined,
   timeoutMs = 2000,
-  log: (msg: string) => void = () => {}
+  log: (msg: string) => void = () => {},
 ): Promise<void> {
   const workletNodes: Array<[string, AudioWorkletNode]> = [];
   for (const [id, node] of nodes.entries()) {
@@ -204,7 +217,7 @@ async function awaitWorkletReady(
   }
 
   if (workletNodes.length === 0) {
-    log('No worklet nodes to await');
+    log("No worklet nodes to await");
     return;
   }
 
@@ -221,17 +234,17 @@ async function awaitWorkletReady(
         log(`  Error: ${message}`);
         return message;
       }
-    })
+    }),
   );
 
   const failed = failures.filter((message): message is string => message !== null);
   if (failed.length > 0) {
     for (const [, node] of workletNodes) {
-      node.port.postMessage({ type: 'dispose' });
+      node.port.postMessage({ type: "dispose" });
       node.port.close();
       node.disconnect();
     }
-    throw new Error(`Failed to initialize ${failed.length} worklet(s): ${failed.join('; ')}`);
+    throw new Error(`Failed to initialize ${failed.length} worklet(s): ${failed.join("; ")}`);
   }
 }
 
@@ -243,28 +256,28 @@ async function awaitWorkletReady(
 export function waitForNodeReady(
   node: AudioWorkletNode,
   timeoutMs: number,
-  log: (msg: string) => void = () => {}
+  log: (msg: string) => void = () => {},
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     let done = false;
     const handler = (event: MessageEvent) => {
-      if (event.data?.type === '__qlatt_process_error__') {
+      if (event.data?.type === "__qlatt_process_error__") {
         log(
-          `  Process error from ${event.data?.node ?? 'unknown'}: ${event.data?.error ?? 'unknown error'}`,
+          `  Process error from ${event.data?.node ?? "unknown"}: ${event.data?.error ?? "unknown error"}`,
         );
         return;
       }
-      if (event.data?.type !== 'ready') return;
+      if (event.data?.type !== "ready") return;
       done = true;
-      node.port.removeEventListener('message', handler);
+      node.port.removeEventListener("message", handler);
       resolve();
     };
-    node.port.addEventListener('message', handler);
+    node.port.addEventListener("message", handler);
     node.port.start();
-    node.port.postMessage({ type: 'ping' });
+    node.port.postMessage({ type: "ping" });
     setTimeout(() => {
       if (!done) {
-        node.port.removeEventListener('message', handler);
+        node.port.removeEventListener("message", handler);
         reject(new Error(`Worklet timed out waiting for ready after ${timeoutMs}ms`));
       }
     }, timeoutMs);
@@ -301,15 +314,15 @@ export type BaconConnection = [string, string] | { from: PortRef; to: PortRef };
  * Extract node ID from a port reference
  */
 function getNodeId(ref: PortRef): string {
-  return typeof ref === 'string' ? ref : ref.node;
+  return typeof ref === "string" ? ref : ref.node;
 }
 
 /**
  * Extract port index from a port reference (undefined means default port)
  */
 function getPortIndex(ref: PortRef): number | undefined {
-  if (typeof ref === 'string') return undefined;
-  if (typeof ref.port === 'number') return ref.port;
+  if (typeof ref === "string") return undefined;
+  if (typeof ref.port === "number") return ref.port;
   return undefined;
 }
 
@@ -318,14 +331,14 @@ export interface KlattRuntimeOptions {
   audioContext: AudioContext;
   semantics: SemanticsDocument;
   graph: BaconGraph;
-  registry: Registry;                         // Registry defining primitives (required)
-  workletBasePath?: string;                   // Base path for worklet JS files, defaults to '/worklets/'
-  assetLoader?: RuntimeAssetLoader;           // Host-specific worklet and WASM loader
+  registry: Registry; // Registry defining primitives (required)
+  workletBasePath?: string; // Base path for worklet JS files, defaults to '/worklets/'
+  assetLoader?: RuntimeAssetLoader; // Host-specific worklet and WASM loader
   audioWorkletNodeCtor?: AudioWorkletNodeConstructor; // Host-specific AudioWorkletNode constructor
   workletProcessorOptionsByNodeId?: Record<string, Record<string, unknown>>; // Generic per-node worklet processor option overrides
-  wasmModules?: Record<string, ArrayBuffer>;  // Pre-loaded WASM modules (optional)
-  logger?: (msg: string) => void;             // Optional logging callback
-  telemetry?: boolean;                        // Enable worklet debug metrics (default: false)
+  wasmModules?: Record<string, ArrayBuffer>; // Pre-loaded WASM modules (optional)
+  logger?: (msg: string) => void; // Optional logging callback
+  telemetry?: boolean; // Enable worklet debug metrics (default: false)
   telemetryHandler?: (data: unknown) => void; // Callback for worklet telemetry messages
 }
 
@@ -373,9 +386,11 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     semantics,
     graph,
     registry,
-    workletBasePath = ((typeof import.meta !== 'undefined' && (import.meta as any).env?.BASE_URL) || "/") + 'worklets/',
+    workletBasePath = `${
+      (typeof import.meta !== "undefined" && import.meta.env.BASE_URL) || "/"
+    }worklets/`,
     assetLoader = createBrowserRuntimeAssetLoader(workletBasePath),
-    audioWorkletNodeCtor = typeof AudioWorkletNode !== 'undefined' ? AudioWorkletNode : undefined,
+    audioWorkletNodeCtor = typeof AudioWorkletNode !== "undefined" ? AudioWorkletNode : undefined,
     workletProcessorOptionsByNodeId = {},
     logger = () => {},
     telemetry = false,
@@ -383,7 +398,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   } = options;
 
   if (!registry) {
-    throw new Error('Registry is required for createKlattRuntime');
+    throw new Error("Registry is required for createKlattRuntime");
   }
 
   // Validate graph param specs — reject { expr: "..." } at load time
@@ -391,11 +406,11 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
     if (!nodeDef.params) continue;
     for (const [paramName, paramSpec] of Object.entries(nodeDef.params)) {
-      if (typeof paramSpec === 'object' && paramSpec !== null && 'expr' in paramSpec) {
+      if (typeof paramSpec === "object" && paramSpec !== null && "expr" in paramSpec) {
         throw new Error(
           `Inline expressions ({ expr: ... }) are not supported in graph param specs. ` +
-          `Use a realize rule in semantics.yaml instead. ` +
-          `Found on node '${nodeId}', param '${paramName}'`
+            `Use a realize rule in semantics.yaml instead. ` +
+            `Found on node '${nodeId}', param '${paramName}'`,
         );
       }
     }
@@ -408,14 +423,14 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   // Create prefixed logger
   const log = (msg: string) => logger(`[klatt-runtime] ${msg}`);
 
-  log('Initializing Klatt runtime');
+  log("Initializing Klatt runtime");
   log(`Graph has ${Object.keys(graph.nodes).length} nodes`);
   log(`Registry has ${Object.keys(registry.primitives).length} primitives`);
 
   // Determine which WASM modules are needed based on graph nodes and registry
-  const needsWasm = Object.values(graph.nodes).some(n => {
+  const needsWasm = Object.values(graph.nodes).some((n) => {
     const primitive = registry.primitives[n.type];
-    return primitive && getPrimitiveCategory(primitive) === 'wasm-worklet' && primitive.wasm;
+    return primitive && getPrimitiveCategory(primitive) === "wasm-worklet" && primitive.wasm;
   });
 
   // Load WASM if not provided and needed
@@ -425,7 +440,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   }
 
   // Determine which worklets are needed based on graph nodes and registry
-  const needsWorklets = Object.values(graph.nodes).some(n => {
+  const needsWorklets = Object.values(graph.nodes).some((n) => {
     const primitive = registry.primitives[n.type];
     return primitive?.worklet !== undefined;
   });
@@ -433,7 +448,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   // Register worklets if needed
   if (needsWorklets) {
     if (!audioWorkletNodeCtor) {
-      throw new Error('AudioWorkletNode constructor is required when the graph uses worklets');
+      throw new Error("AudioWorkletNode constructor is required when the graph uses worklets");
     }
     await registerWorklets(audioContext, registry, assetLoader, log);
   }
@@ -491,7 +506,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
   // Create audio nodes from graph
   function createNodes(): void {
-    log('Creating audio nodes');
+    log("Creating audio nodes");
     const orderedNodes = Object.entries(graph.nodes).sort(([, left], [, right]) => {
       const leftPrimitive = registry.primitives[left.type];
       const rightPrimitive = registry.primitives[right.type];
@@ -531,7 +546,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
       for (const [paramName, paramSpec] of Object.entries(nodeDef.params)) {
         // Check if this binding references a failed realize rule
-        if (typeof paramSpec === 'object' && paramSpec !== null && 'bind' in paramSpec) {
+        if (typeof paramSpec === "object" && paramSpec !== null && "bind" in paramSpec) {
           const bindName = (paramSpec as { bind: string }).bind;
           if (lastEvaluationErrorNames.has(bindName)) {
             affectedBindings.push(bindName);
@@ -539,7 +554,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
         }
 
         const value = resolveParamValue(paramSpec, realizedValues, currentInputs);
-        if (typeof value === 'number') {
+        if (typeof value === "number") {
           applyParamValue(node, paramName, value);
         }
       }
@@ -548,18 +563,20 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     // Log a single summary line for bindings affected by failed realize rules
     if (affectedBindings.length > 0) {
       const unique = [...new Set(affectedBindings)];
-      log(`Semantics fallthrough for: ${unique.join(', ')} (realize rule failed, using raw input values)`);
+      log(
+        `Semantics fallthrough for: ${unique.join(", ")} (realize rule failed, using raw input values)`,
+      );
     }
   }
 
   // Wire up connections
   function connectNodes(): void {
     if (!graph.connections) {
-      log('No connections to wire');
+      log("No connections to wire");
       return;
     }
 
-    log('Connecting audio graph');
+    log("Connecting audio graph");
     for (const conn of graph.connections) {
       // Extract from/to refs
       const [fromRef, toRef]: [PortRef, PortRef] = Array.isArray(conn)
@@ -577,14 +594,18 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
       // Check if target specifies an AudioParam connection
       // — Stevens & Bickley (1991): aerodynamic model outputs connect to
       //   gain/bandwidth AudioParams additively (WebAudio additive semantics)
-      const toParamName = typeof toRef === 'object' && toRef !== null ? toRef.param : undefined;
+      const toParamName = typeof toRef === "object" && toRef !== null ? toRef.param : undefined;
 
       if (toParamName) {
         // AudioParam connection: audioNode.connect(audioParam)
         if (!fromNode) {
-          log(`  Warning: Could not connect ${fromId} -> ${toId}.${toParamName} (missing source node)`);
+          log(
+            `  Warning: Could not connect ${fromId} -> ${toId}.${toParamName} (missing source node)`,
+          );
         } else if (!toNode) {
-          log(`  Warning: Could not connect ${fromId} -> ${toId}.${toParamName} (missing target node)`);
+          log(
+            `  Warning: Could not connect ${fromId} -> ${toId}.${toParamName} (missing target node)`,
+          );
         } else {
           const fromIndex = fromPort ?? 0;
 
@@ -603,9 +624,9 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
             // AudioParam global (same reason as audio-param-utils.ts).
             const audioParam = (toNode as unknown as Record<string, unknown>)[toParamName];
             if (
-              typeof audioParam === 'object' &&
+              typeof audioParam === "object" &&
               audioParam !== null &&
-              typeof (audioParam as { setValueAtTime?: unknown }).setValueAtTime === 'function'
+              typeof (audioParam as { setValueAtTime?: unknown }).setValueAtTime === "function"
             ) {
               fromNode.connect(audioParam as AudioParam, fromIndex);
               log(`  Connected ${fromId}[${fromIndex}] -> ${toId}.${toParamName} (AudioParam)`);
@@ -636,7 +657,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
     if (!nodeDef.params) continue;
     for (const [paramName, paramSpec] of Object.entries(nodeDef.params)) {
-      if (typeof paramSpec === 'object' && paramSpec !== null && 'bind' in paramSpec) {
+      if (typeof paramSpec === "object" && paramSpec !== null && "bind" in paramSpec) {
         const bindName = (paramSpec as { bind: string }).bind;
         const existing = bindingMap.get(bindName) ?? [];
         existing.push({ nodeId, paramName, bindName });
@@ -646,10 +667,10 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   }
 
   // Initialize
-  log('Evaluating semantics');
+  log("Evaluating semantics");
   evaluate();
   createNodes();
-  log(`Created nodes: ${Array.from(nodes.keys()).join(', ')}`);
+  log(`Created nodes: ${Array.from(nodes.keys()).join(", ")}`);
   log(`Built ${bindingMap.size} unique bindings`);
   connectNodes();
   log(`Total connections: ${graph.connections?.length ?? 0}`);
@@ -657,7 +678,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   // Wait for worklets to be ready before applying values
   await awaitWorkletReady(nodes, audioWorkletNodeCtor, 2000, log);
 
-  log('Applying realized values to nodes');
+  log("Applying realized values to nodes");
   applyValues();
 
   // Attach telemetry port listeners if handler provided
@@ -666,15 +687,15 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     for (const [, node] of nodes) {
       if (!isAudioWorkletNode(node, audioWorkletNodeCtor)) continue;
 
-      node.port.addEventListener('message', (event: MessageEvent) => {
+      node.port.addEventListener("message", (event: MessageEvent) => {
         const data = event.data;
-        if (data && typeof data === 'object') {
+        if (data && typeof data === "object") {
           telemetryHandler(data);
         }
       });
 
       // Ensure port is started
-      if (typeof node.port.start === 'function') {
+      if (typeof node.port.start === "function") {
         try {
           node.port.start();
         } catch {
@@ -686,7 +707,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     log(`Attached telemetry listeners to ${attached} worklet nodes`);
   }
 
-  log('Klatt runtime initialized successfully');
+  log("Klatt runtime initialized successfully");
 
   return {
     getRealizedValues(): Record<string, ParamValue> {
@@ -694,7 +715,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     },
 
     setInputs(inputs: Record<string, ParamValue>): void {
-      log(`Setting inputs: ${Object.keys(inputs).join(', ')}`);
+      log(`Setting inputs: ${Object.keys(inputs).join(", ")}`);
       Object.assign(currentInputs, inputs);
       evaluate();
       applyValues();
@@ -718,10 +739,12 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
         throw new Error('Graph definition missing "outputs" field — cannot connect to destination');
       }
       const outputRef = graph.outputs[0];
-      const nodeId = typeof outputRef === 'string' ? outputRef : outputRef.node;
+      const nodeId = typeof outputRef === "string" ? outputRef : outputRef.node;
       const outputNode = nodes.get(nodeId);
       if (!outputNode) {
-        throw new Error(`Output node "${nodeId}" specified in graph.outputs not found in created nodes`);
+        throw new Error(
+          `Output node "${nodeId}" specified in graph.outputs not found in created nodes`,
+        );
       }
       log(`Connecting ${nodeId} to destination`);
       outputNode.connect(audioContext.destination);
@@ -730,7 +753,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     disconnect(): void {
       for (const node of nodes.values()) {
         if (isAudioWorkletNode(node, audioWorkletNodeCtor)) {
-          node.port.postMessage({ type: 'dispose' });
+          node.port.postMessage({ type: "dispose" });
           node.port.close();
         }
         node.disconnect();
@@ -754,7 +777,7 @@ function createAudioNode(
   audioWorkletNodeCtor: AudioWorkletNodeConstructor | undefined,
   processorOptionOverrides: Record<string, unknown> | undefined,
   log: (msg: string) => void,
-  telemetry: boolean
+  telemetry: boolean,
 ): AudioNode | null {
   const primitive = registry.primitives[type];
 
@@ -770,10 +793,10 @@ function createAudioNode(
   const nodeOptions = nodeDef.options ?? {};
 
   switch (category) {
-    case 'webaudio':
+    case "webaudio":
       return createNativeNode(ctx, type, log);
 
-    case 'wasm-worklet':
+    case "wasm-worklet":
       return createWasmWorkletNode(
         ctx,
         id,
@@ -786,7 +809,7 @@ function createAudioNode(
         telemetry,
       );
 
-    case 'js-worklet':
+    case "js-worklet":
       return createJsWorkletNode(
         ctx,
         id,
@@ -808,17 +831,17 @@ function createAudioNode(
 function createNativeNode(
   ctx: AudioContext,
   type: string,
-  log: (msg: string) => void
+  log: (msg: string) => void,
 ): AudioNode | null {
   switch (type) {
-    case 'gain':
+    case "gain":
       return ctx.createGain();
-    case 'constant-source': {
+    case "constant-source": {
       const cs = ctx.createConstantSource();
       cs.start();
       return cs;
     }
-    case 'dynamics-compressor':
+    case "dynamics-compressor":
       return ctx.createDynamicsCompressor();
     default:
       log(`Warning: Unknown native node type '${type}'`);
@@ -836,16 +859,16 @@ function createWasmWorkletNode(
   audioWorkletNodeCtor: AudioWorkletNodeConstructor | undefined,
   processorOptionOverrides: Record<string, unknown> | undefined,
   log: (msg: string) => void,
-  telemetry: boolean
+  telemetry: boolean,
 ): AudioWorkletNode | null {
-  const processorName = primitive.worklet!.replace('.js', '');
-  const wasmKey = primitive.wasm!.replace('.wasm', '');
+  const processorName = primitive.worklet!.replace(".js", "");
+  const wasmKey = primitive.wasm!.replace(".wasm", "");
   const wasmBytes = wasmModules?.[wasmKey];
   const outputCount = primitive.outputs ?? 1;
 
   if (!wasmBytes) {
     log(`Error: WASM module '${wasmKey}' not loaded for node '${id}'`);
-    return null;  // Don't create broken node
+    return null; // Don't create broken node
   }
 
   if (!audioWorkletNodeCtor) {
@@ -859,9 +882,9 @@ function createWasmWorkletNode(
     processorOptions: {
       wasmBytes,
       nodeId: id,
-      debug: telemetry,      // Enable metrics emission when telemetry requested
-      reportInterval: 40,    // Match legacy synth interval
-      ...nodeOptions,        // Pass node options to processor
+      debug: telemetry, // Enable metrics emission when telemetry requested
+      reportInterval: 40, // Match legacy synth interval
+      ...nodeOptions, // Pass node options to processor
       ...processorOptionOverrides,
     },
   });
@@ -878,9 +901,9 @@ function createJsWorkletNode(
   audioWorkletNodeCtor: AudioWorkletNodeConstructor | undefined,
   processorOptionOverrides: Record<string, unknown> | undefined,
   log: (msg: string) => void,
-  telemetry: boolean
+  telemetry: boolean,
 ): AudioWorkletNode {
-  const processorName = primitive.worklet!.replace('.js', '');
+  const processorName = primitive.worklet!.replace(".js", "");
   const outputCount = primitive.outputs ?? 1;
 
   if (!audioWorkletNodeCtor) {
@@ -893,9 +916,9 @@ function createJsWorkletNode(
     outputChannelCount: Array.from({ length: outputCount }, () => 1),
     processorOptions: {
       nodeId: id,
-      debug: telemetry,      // Enable metrics emission when telemetry requested
-      reportInterval: 40,    // Match legacy synth interval
-      ...nodeOptions,        // Pass node options to processor
+      debug: telemetry, // Enable metrics emission when telemetry requested
+      reportInterval: 40, // Match legacy synth interval
+      ...nodeOptions, // Pass node options to processor
       ...processorOptionOverrides,
     },
   });
@@ -910,7 +933,7 @@ function logAudioWorkletIdentity(
 ): void {
   try {
     const internalSymbol = Object.getOwnPropertySymbols(node).find(
-      (entry) => entry.description === 'node-web-audio-api:napi-obj',
+      (entry) => entry.description === "node-web-audio-api:napi-obj",
     );
     if (!internalSymbol) return;
     const raw = (node as unknown as Record<symbol, unknown>)[internalSymbol] as
@@ -928,13 +951,13 @@ function logAudioWorkletIdentity(
 function resolveParamValue(
   spec: ParamValueSpec,
   realized: Record<string, ParamValue>,
-  inputs: Record<string, ParamValue>
+  inputs: Record<string, ParamValue>,
 ): ParamValue | undefined {
-  if (typeof spec === 'number' || typeof spec === 'string' || typeof spec === 'boolean') {
+  if (typeof spec === "number" || typeof spec === "string" || typeof spec === "boolean") {
     return spec;
   }
 
-  if ('bind' in spec) {
+  if ("bind" in spec) {
     // Look up in realized values first, then inputs
     return realized[spec.bind] ?? inputs[spec.bind];
   }

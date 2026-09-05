@@ -1,11 +1,11 @@
 // test/test-harness.js — Entry point: imports modules, wires DOM events, runs init
 
-import { state } from "./harness/state.js";
-import { renderControls, bindControls, applyUrlParams } from "./harness/controls.js";
-import { loadExperimentManifest, onExperimentChange } from "./harness/experiment.js";
-import { attachSpectrogram, clearSpectrogram } from "./harness/spectrogram.js";
+import { applyUrlParams, bindControls, renderControls } from "./harness/controls.js";
 import { updateDiagnostics } from "./harness/diagnostics.js";
+import { loadExperimentManifest, onExperimentChange } from "./harness/experiment.js";
 import { refreshSpeakerOptions } from "./harness/speaker.js";
+import { attachSpectrogram, clearSpectrogram } from "./harness/spectrogram.js";
+import { state } from "./harness/state.js";
 
 let runtimeModulePromise = null;
 
@@ -53,9 +53,7 @@ function pairExperimentToFrontend() {
   const experimentSelect = document.getElementById("experimentSelect");
   if (!frontendSelect || !experimentSelect) return;
   const frontendId = frontendSelect.value;
-  const hasMatch = Array.from(experimentSelect.options).some(
-    (o) => o.value === frontendId,
-  );
+  const hasMatch = Array.from(experimentSelect.options).some((o) => o.value === frontendId);
   if (hasMatch && experimentSelect.value !== frontendId) {
     experimentSelect.value = frontendId;
     experimentSelect.dispatchEvent(new Event("change"));

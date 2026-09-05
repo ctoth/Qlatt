@@ -16,7 +16,7 @@
  *   output[6] = open quotient ratio (0-1)
  *   output[7] = spectral tilt proxy (dB/oct)
  */
-import { initWasmModule, WasmBuffer, resolveWasmUrl, UNINITIALIZED_ALLOC, fillParamBuffer } from "./wasm-utils.js";
+import { fillParamBuffer, initWasmModule, resolveWasmUrl, UNINITIALIZED_ALLOC, WasmBuffer, } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./aerodynamic-model.wasm");
 class AerodynamicModelProcessor extends AudioWorkletProcessor {
     disposed = false;
@@ -35,12 +35,48 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
     paramBuffers;
     static get parameterDescriptors() {
         return [
-            { name: "enable", defaultValue: 0.0, minValue: 0, maxValue: 1, automationRate: "k-rate" },
-            { name: "ag", defaultValue: 0.05, minValue: 0, maxValue: 0.4, automationRate: "k-rate" },
-            { name: "ac", defaultValue: 0.4, minValue: 0, maxValue: 0.4, automationRate: "k-rate" },
-            { name: "an", defaultValue: 0.0, minValue: 0, maxValue: 1.0, automationRate: "k-rate" },
-            { name: "st", defaultValue: 0.0, minValue: -10, maxValue: 0, automationRate: "k-rate" },
-            { name: "pm", defaultValue: 0.0, minValue: -0.5, maxValue: 0.2, automationRate: "k-rate" },
+            {
+                name: "enable",
+                defaultValue: 0.0,
+                minValue: 0,
+                maxValue: 1,
+                automationRate: "k-rate",
+            },
+            {
+                name: "ag",
+                defaultValue: 0.05,
+                minValue: 0,
+                maxValue: 0.4,
+                automationRate: "k-rate",
+            },
+            {
+                name: "ac",
+                defaultValue: 0.4,
+                minValue: 0,
+                maxValue: 0.4,
+                automationRate: "k-rate",
+            },
+            {
+                name: "an",
+                defaultValue: 0.0,
+                minValue: 0,
+                maxValue: 1.0,
+                automationRate: "k-rate",
+            },
+            {
+                name: "st",
+                defaultValue: 0.0,
+                minValue: -10,
+                maxValue: 0,
+                automationRate: "k-rate",
+            },
+            {
+                name: "pm",
+                defaultValue: 0.0,
+                minValue: -0.5,
+                maxValue: 0.2,
+                automationRate: "k-rate",
+            },
             { name: "ps", defaultValue: 8, minValue: 0, maxValue: 30, automationRate: "k-rate" },
         ];
     }
@@ -115,14 +151,22 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
         const fnzOut = outputs[5];
         const oqOut = outputs[6];
         const tlOut = outputs[7];
-        if (!voicingOut || !voicingOut[0] ||
-            !aspirationOut || !aspirationOut[0] ||
-            !fricationOut || !fricationOut[0] ||
-            !b1Out || !b1Out[0] ||
-            !fnpOut || !fnpOut[0] ||
-            !fnzOut || !fnzOut[0] ||
-            !oqOut || !oqOut[0] ||
-            !tlOut || !tlOut[0]) {
+        if (!voicingOut ||
+            !voicingOut[0] ||
+            !aspirationOut ||
+            !aspirationOut[0] ||
+            !fricationOut ||
+            !fricationOut[0] ||
+            !b1Out ||
+            !b1Out[0] ||
+            !fnpOut ||
+            !fnpOut[0] ||
+            !fnzOut ||
+            !fnzOut[0] ||
+            !oqOut ||
+            !oqOut[0] ||
+            !tlOut ||
+            !tlOut[0]) {
             return true;
         }
         const voicingChannel = voicingOut[0];
@@ -211,7 +255,14 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
         const fnzView = this.fnzBuffer.view;
         const oqView = this.oqBuffer.view;
         const tlView = this.tlBuffer.view;
-        if (!voicingView || !aspirationView || !fricationView || !b1View || !fnpView || !fnzView || !oqView || !tlView) {
+        if (!voicingView ||
+            !aspirationView ||
+            !fricationView ||
+            !b1View ||
+            !fnpView ||
+            !fnzView ||
+            !oqView ||
+            !tlView) {
             voicingChannel.fill(0);
             aspirationChannel.fill(0);
             fricationChannel.fill(0);

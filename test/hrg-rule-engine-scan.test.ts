@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
@@ -66,12 +66,7 @@ const RELATION_SPEC = {
   },
 };
 
-type Row = readonly [
-  id: string,
-  phoneme: string,
-  breakIndex: number,
-  carrier: boolean,
-];
+type Row = readonly [id: string, phoneme: string, breakIndex: number, carrier: boolean];
 
 function buildUtterance(rows: readonly Row[]): Utterance {
   const utterance = new Utterance(SCHEMA);

@@ -1,21 +1,18 @@
 // test/harness/runtime.js — Runtime lifecycle: init, start, stop, speak
 
-import { state } from "./state.js";
+import { preloadF0Filters } from "../../src/f0-filters-loader.ts";
+import { createDiagnosticsEngine } from "../../src/harness-diagnostics/index.ts";
+import { parseDiagConfig } from "../../src/harness-diagnostics/schema.ts";
+import { createKlattInterpreter } from "../../src/klatt-interpreter.ts";
+import { createKlattRuntime } from "../../src/klatt-runtime.ts";
+import { summarizeParallel, summarizeTrack } from "../../src/track-analysis.ts";
+import { textToKlattTrack } from "../../src/tts-frontend";
+import { updateDiagnostics } from "./diagnostics.js";
 import { loadNewRuntimeConfig } from "./experiment.js";
 import { getSelectedSpeaker } from "./speaker.js";
-import { handleTelemetry } from "./telemetry.js";
 import { startSpectrogram } from "./spectrogram.js";
-import { updateDiagnostics } from "./diagnostics.js";
-import { createKlattRuntime } from "../../src/klatt-runtime.ts";
-import { createKlattInterpreter } from "../../src/klatt-interpreter.ts";
-import { textToKlattTrack } from "../../src/tts-frontend";
-import { preloadF0Filters } from "../../src/f0-filters-loader.ts";
-import {
-  summarizeTrack,
-  summarizeParallel,
-} from "../../src/track-analysis.ts";
-import { parseDiagConfig } from "../../src/harness-diagnostics/schema.ts";
-import { createDiagnosticsEngine } from "../../src/harness-diagnostics/index.ts";
+import { state } from "./state.js";
+import { handleTelemetry } from "./telemetry.js";
 
 export async function start() {
   await state.ctx.resume();
@@ -72,8 +69,8 @@ export async function initializeNewRuntime() {
         registry: state.newRuntimeRegistry,
         workletBasePath: state.WORKLET_BASE_PATH,
         logger: (msg) => console.log(msg),
-        telemetry: true,  // Enable worklet debug metrics
-        telemetryHandler: (data) => handleTelemetry(data),  // Route to shared handler
+        telemetry: true, // Enable worklet debug metrics
+        telemetryHandler: (data) => handleTelemetry(data), // Route to shared handler
       });
       state.newRuntime.connectToDestination();
       state.status.textContent = "Status: new runtime initialized";
@@ -84,20 +81,15 @@ export async function initializeNewRuntime() {
         const configResp = await fetch(`${import.meta.env.BASE_URL}diagnostics/default.yaml`);
         const configYaml = await configResp.text();
         state.diagConfig = parseDiagConfig(configYaml);
-        state.diagEngine = createDiagnosticsEngine(
-          state.diagConfig,
-          state.ctx,
-          state.newRuntime,
-          {
-            telemetry: state.telemetry,
-            telemetryMax: state.telemetryMax,
-            plstepEvents: state.plstepEvents,
-            plstepTotalCount: () => state.plstepTotalCount,
-            playHistory: state.playHistory,
-            sessionId: state.sessionId,
-            sliderParams: {},
-          },
-        );
+        state.diagEngine = createDiagnosticsEngine(state.diagConfig, state.ctx, state.newRuntime, {
+          telemetry: state.telemetry,
+          telemetryMax: state.telemetryMax,
+          plstepEvents: state.plstepEvents,
+          plstepTotalCount: () => state.plstepTotalCount,
+          playHistory: state.playHistory,
+          sessionId: state.sessionId,
+          sliderParams: {},
+        });
         state.diagEngine.subscribe((output) => {
           if (state.useEngineOutput) {
             state.lastDiagnostics = output;
@@ -203,9 +195,7 @@ export async function speakWithNewRuntime(track) {
   const parallelSummary = summarizeParallel(track);
   console.log("[QLATT] Parallel summary", parallelSummary);
   if (parallelSummary.parallelEvents > 0 && parallelSummary.swOn === 0) {
-    console.warn(
-      "[QLATT] Parallel params present, but SW=0 (cascade-only path)."
-    );
+    console.warn("[QLATT] Parallel params present, but SW=0 (cascade-only path).");
   }
   console.log("[QLATT] First events", track.slice(0, 6));
 
@@ -216,28 +206,31 @@ export async function speakWithNewRuntime(track) {
   updateDiagnostics();
 
   // Auto-copy diagnostics to clipboard after audio finishes (matching speak())
-  setTimeout(() => {
-    updateDiagnostics();
-    if (state.diagEngine) state.diagEngine.onPlayEnd();
-    navigator.clipboard.writeText(state.diagnosticsEl.value).catch(() => {});
-    // Record play history for warmup tracking
-    const outputMax =
-      state.telemetryMax.get("post-output-lp") ??
-      state.telemetryMax.get("outputGain") ??
-      state.telemetryMax.get("masterGain") ??
-      null;
-    if (outputMax) {
-      state.playHistory.push({
-        sessionId: currentSessionId,
-        phrase,
-        maxRms: outputMax.rms ?? 0,
-        maxPeak: outputMax.peak ?? 0,
-        timestamp: Date.now(),
-      });
-      // Keep only last N plays
-      while (state.playHistory.length > state.MAX_PLAY_HISTORY) {
-        state.playHistory.shift();
+  setTimeout(
+    () => {
+      updateDiagnostics();
+      if (state.diagEngine) state.diagEngine.onPlayEnd();
+      navigator.clipboard.writeText(state.diagnosticsEl.value).catch(() => {});
+      // Record play history for warmup tracking
+      const outputMax =
+        state.telemetryMax.get("post-output-lp") ??
+        state.telemetryMax.get("outputGain") ??
+        state.telemetryMax.get("masterGain") ??
+        null;
+      if (outputMax) {
+        state.playHistory.push({
+          sessionId: currentSessionId,
+          phrase,
+          maxRms: outputMax.rms ?? 0,
+          maxPeak: outputMax.peak ?? 0,
+          timestamp: Date.now(),
+        });
+        // Keep only last N plays
+        while (state.playHistory.length > state.MAX_PLAY_HISTORY) {
+          state.playHistory.shift();
+        }
       }
-    }
-  }, Math.max(0, trackDuration * 1000 + 300));
+    },
+    Math.max(0, trackDuration * 1000 + 300),
+  );
 }

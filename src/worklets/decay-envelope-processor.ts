@@ -1,4 +1,10 @@
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  computeRmsPeak,
+  initWasmModule,
+  resolveWasmUrl,
+  WasmBuffer,
+} from "./wasm-utils.js";
 
 interface DecayEnvelopeWasmExports {
   memory: WebAssembly.Memory;
@@ -17,7 +23,7 @@ interface DecayEnvelopeWasmExports {
     decayPtr: number,
     decayLen: number,
     outputPtr: number,
-    blockSize: number
+    blockSize: number,
   ): void;
 }
 
@@ -80,7 +86,7 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
       },
       {
         name: "decay",
-        defaultValue: 0,  // 0 means auto-calculate from sample rate
+        defaultValue: 0, // 0 means auto-calculate from sample rate
         minValue: 0,
         maxValue: 1,
         automationRate: "k-rate",
@@ -145,7 +151,7 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
   process(
     inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const output = outputs[0];
@@ -170,7 +176,7 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
     // Trigger can come from audio input OR parameter
     // Audio input takes precedence if connected
     const inputChannel = inputs[0]?.[0];
-    let trigger;
+    let trigger: Float32Array;
     let audioTriggerDetected = false;
     if (inputChannel && inputChannel.length > 0) {
       // Use audio input as trigger (from edge-detector)
@@ -233,7 +239,7 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
       this.decayBuffer.ptr,
       1,
       this.outputBuffer.ptr,
-      blockSize
+      blockSize,
     );
 
     // Copy output
@@ -260,7 +266,7 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
       trigger: number;
       amplitude: number;
       audioTriggerDetected: boolean;
-    }
+    },
   ): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;

@@ -1,21 +1,14 @@
 import { createHash } from "node:crypto";
 import path from "node:path";
-import {
-  AudioWorkletNode as NodeAudioWorkletNode,
-  OfflineAudioContext,
-} from "node-web-audio-api";
-import { createKlattInterpreter } from "../../../src/klatt-interpreter.ts";
-import { createKlattRuntime } from "../../../src/klatt-runtime.ts";
-import { textToKlattTrackDetailed } from "../../../src/tts-frontend.ts";
+import { AudioWorkletNode as NodeAudioWorkletNode, OfflineAudioContext } from "node-web-audio-api";
 import { createDiagnostics } from "../../../src/diagnostics.ts";
 import { loadExperimentConfig } from "../../../src/experiments/load-experiment-config.ts";
+import { createKlattInterpreter } from "../../../src/klatt-interpreter.ts";
+import { createKlattRuntime } from "../../../src/klatt-runtime.ts";
 import { summarizeTrack } from "../../../src/rendering/track-summary.ts";
-import type {
-  RenderBackend,
-  RenderPayload,
-  RenderRequest,
-} from "../../../src/rendering/types.ts";
+import type { RenderBackend, RenderPayload, RenderRequest } from "../../../src/rendering/types.ts";
 import { createNodeRuntimeAssetLoader } from "../../../src/runtime-assets/node-loader.ts";
+import { textToKlattTrackDetailed } from "../../../src/tts-frontend.ts";
 
 function deriveNodeNoiseSeed(baseSeed: number, nodeId: string): number {
   const seedBytes = createHash("sha256")
@@ -63,9 +56,7 @@ export const nodeRuntimeBackend: RenderBackend = {
     );
     const track = frontend.track;
     const totalTime =
-      (track.length ? track[track.length - 1].time : 0) +
-      request.leadTime +
-      request.tailTime;
+      (track.length ? track[track.length - 1].time : 0) + request.leadTime + request.tailTime;
     const length = Math.max(1, Math.ceil(totalTime * request.sampleRate));
 
     const ctx = new OfflineAudioContext(1, length, request.sampleRate);
@@ -85,8 +76,7 @@ export const nodeRuntimeBackend: RenderBackend = {
         semantics: config.semantics,
         registry: config.registry,
         assetLoader,
-        audioWorkletNodeCtor:
-          NodeAudioWorkletNode as unknown as typeof AudioWorkletNode,
+        audioWorkletNodeCtor: NodeAudioWorkletNode as unknown as typeof AudioWorkletNode,
         workletProcessorOptionsByNodeId,
         ...(debugLogging
           ? {

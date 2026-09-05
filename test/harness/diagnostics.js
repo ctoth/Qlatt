@@ -31,9 +31,7 @@ export function getRunContext(now = state.ctx.currentTime) {
     ? state.lastRun.track[state.lastRun.track.length - 1].time
     : 0;
   const inWindow = relTime >= -0.1 && relTime <= trackEnd + 0.5;
-  const event = inWindow
-    ? findEventAtTime(state.lastRun.track, Math.max(0, relTime))
-    : null;
+  const event = inWindow ? findEventAtTime(state.lastRun.track, Math.max(0, relTime)) : null;
   return { relTime, event, inWindow, trackEnd };
 }
 

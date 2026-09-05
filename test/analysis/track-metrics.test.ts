@@ -5,8 +5,16 @@ describe("summarizeTrackMetrics", () => {
   it("computes voiced, silence, and unvoiced segment metrics", () => {
     const metrics = summarizeTrackMetrics([
       { time: 0.0, phoneme: "SIL", params: { AV: 0, AVS: 0, F0: 0 } },
-      { time: 0.1, phoneme: "AA", params: { AV: 60, AVS: -70, F0: 100, F1: 700, F2: 1200, B1: 100, AH: 0 } },
-      { time: 0.2, phoneme: "AA", params: { AV: 60, AVS: -70, F0: 110, F1: 700, F2: 1200, B1: 100, AH: 1 } },
+      {
+        time: 0.1,
+        phoneme: "AA",
+        params: { AV: 60, AVS: -70, F0: 100, F1: 700, F2: 1200, B1: 100, AH: 0 },
+      },
+      {
+        time: 0.2,
+        phoneme: "AA",
+        params: { AV: 60, AVS: -70, F0: 110, F1: 700, F2: 1200, B1: 100, AH: 1 },
+      },
       { time: 0.3, phoneme: "S", params: { AV: 0, AVS: -70, F0: 0 } },
       { time: 0.4, phoneme: "SIL", params: { AV: 0, AVS: -70, F0: 0 } },
     ]);

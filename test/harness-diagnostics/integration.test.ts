@@ -1,12 +1,16 @@
-import { describe, expect, it, vi } from "vitest";
-import { TapManager } from "../../src/harness-diagnostics/tap-manager";
-import { PollLoop } from "../../src/harness-diagnostics/poll-loop";
-import { createDiagnosticsEngine } from "../../src/harness-diagnostics/index";
-import { parseDiagConfig } from "../../src/harness-diagnostics/schema";
-import { AcrossPlaysAccumulator } from "../../src/harness-diagnostics/across-plays";
-import type { RunInfo, TrackEvent } from "../../src/harness-diagnostics/types";
 import fs from "node:fs";
 import path from "node:path";
+import { describe, expect, it, vi } from "vitest";
+import { AcrossPlaysAccumulator } from "../../src/harness-diagnostics/across-plays";
+import { createDiagnosticsEngine } from "../../src/harness-diagnostics/index";
+import { PollLoop } from "../../src/harness-diagnostics/poll-loop";
+import { parseDiagConfig } from "../../src/harness-diagnostics/schema";
+import { TapManager } from "../../src/harness-diagnostics/tap-manager";
+import type {
+  CheckResult,
+  ConnectableAudioNode,
+  TrackEvent,
+} from "../../src/harness-diagnostics/types";
 
 function mockAudioContext() {
   return {
@@ -33,12 +37,14 @@ function mockAudioContext() {
 }
 
 function mockRuntime(nodeNames: string[]) {
-  const nodes = new Map<string, any>();
+  const nodes = new Map<string, ConnectableAudioNode>();
   for (const name of nodeNames) {
     nodes.set(name, { connect() {}, disconnect() {} });
   }
   return {
-    getNode(id: string) { return nodes.get(id) ?? null; },
+    getNode(id: string) {
+      return nodes.get(id) ?? null;
+    },
   };
 }
 
@@ -66,7 +72,7 @@ describe("TapManager", () => {
       audioContext: ctx,
       runtime,
       taps: {
-        "out": { node: ["missing", "found"] },
+        out: { node: ["missing", "found"] },
       },
     });
     tm.connect();
@@ -80,7 +86,7 @@ describe("TapManager", () => {
       audioContext: ctx,
       runtime,
       taps: {
-        "out": { node: "nonexistent" },
+        out: { node: "nonexistent" },
       },
     });
     tm.connect();
@@ -136,8 +142,8 @@ display:
     tapManager.connect();
 
     const acrossPlays = new AcrossPlaysAccumulator();
-    let receivedResults: Map<string, any> | null = null;
-    let receivedOutput = "";
+    let receivedResults: Map<string, CheckResult> | null = null;
+    let _receivedOutput = "";
 
     const track: TrackEvent[] = [
       { time: 0, phoneme: "HH", params: { F0: 110, AV: 60, SW: 0 } },
@@ -174,7 +180,7 @@ display:
       }),
       onResults: (results, output) => {
         receivedResults = results;
-        receivedOutput = output;
+        _receivedOutput = output;
       },
     });
 
@@ -237,7 +243,9 @@ display:
           sliderParams: {},
           sampleRate: 48000,
         }),
-        onResults: () => { callCount++; },
+        onResults: () => {
+          callCount++;
+        },
       });
 
       pollLoop.start();
@@ -284,7 +292,7 @@ display:
     tapManager.connect();
 
     const acrossPlays = new AcrossPlaysAccumulator();
-    let receivedResults: Map<string, any> = new Map();
+    let receivedResults: Map<string, CheckResult> = new Map();
 
     const track: TrackEvent[] = [
       { time: 0, phoneme: "HH", params: { F0: 110, AV: 60, SW: 0 } },
@@ -369,7 +377,7 @@ display:
       taps: config.taps,
     });
     const acrossPlays = new AcrossPlaysAccumulator();
-    let receivedResults: Map<string, any> = new Map();
+    let receivedResults: Map<string, CheckResult> = new Map();
     const track: TrackEvent[] = [
       { time: 0, phoneme: "AH", params: { F0: 110, AV: 60 } },
       { time: 0.5, phoneme: "AH", params: { F0: 178, AV: 60 } },
@@ -413,6 +421,7 @@ display:
 
     const result = receivedResults.get("f0_range");
     expect(result).toBeDefined();
+    if (!result) throw new Error("f0_range result missing");
     expect(result.status).toBe("pass");
     expect(result.value).toBe(90);
   });
@@ -442,9 +451,9 @@ display:
 
     const engine = createDiagnosticsEngine(config, ctx, runtime);
 
-    let subscriberCalled = false;
-    const unsub = engine.subscribe((output) => {
-      subscriberCalled = true;
+    let _subscriberCalled = false;
+    const unsub = engine.subscribe((_output) => {
+      _subscriberCalled = true;
     });
 
     engine.start();
@@ -452,9 +461,7 @@ display:
     engine.onPlayStart({
       phrase: "hello",
       baseF0: 110,
-      track: [
-        { time: 0, phoneme: "HH", params: { F0: 110, AV: 60, SW: 0 } },
-      ],
+      track: [{ time: 0, phoneme: "HH", params: { F0: 110, AV: 60, SW: 0 } }],
       sessionId: 1,
       startTime: 0,
     });

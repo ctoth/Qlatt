@@ -18,7 +18,6 @@ function probe(label: string, frontendId: string, speaker?: string) {
         resolved_formant_scale: rs.formant_scale,
         speakerParams_f0_minimum: sp.f0_minimum,
         speakerParams_f0_scale_factor: sp.f0_scale_factor,
-        voiceSex: d.voiceSex,
       },
       null,
       0,

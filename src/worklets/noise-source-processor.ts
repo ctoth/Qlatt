@@ -1,4 +1,4 @@
-import { computeRmsPeak, BaseProcessorOptions } from "./wasm-utils.js";
+import { type BaseProcessorOptions, computeRmsPeak } from "./wasm-utils.js";
 
 interface NoiseProcessorOptions extends Omit<BaseProcessorOptions, "processorOptions"> {
   processorOptions?: Omit<NonNullable<BaseProcessorOptions["processorOptions"]>, "wasmBytes"> & {
@@ -36,8 +36,20 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "gain", defaultValue: 0, minValue: 0, maxValue: 1, automationRate: "a-rate" as const },
-      { name: "cutoff", defaultValue: 1000, minValue: 50, maxValue: 20000, automationRate: "k-rate" as const },
+      {
+        name: "gain",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 1,
+        automationRate: "a-rate" as const,
+      },
+      {
+        name: "cutoff",
+        defaultValue: 1000,
+        minValue: 50,
+        maxValue: 20000,
+        automationRate: "k-rate" as const,
+      },
     ];
   }
 
@@ -51,7 +63,7 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     const hasSeed = Number.isFinite(requestedSeed);
     this._useSeededNoise = hasSeed;
     if (hasSeed) {
-      const normalized = (Math.trunc(Number(requestedSeed)) >>> 0) || 1;
+      const normalized = Math.trunc(Number(requestedSeed)) >>> 0 || 1;
       this._prngState = normalized;
     } else {
       this._prngState = 0;
@@ -88,14 +100,14 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
 
   _updateFilter(cutoff: number): void {
     const clamped = Math.max(1, Math.min(cutoff, sampleRate * 0.45));
-    this.alpha = Math.exp(-2 * Math.PI * clamped / sampleRate);
+    this.alpha = Math.exp((-2 * Math.PI * clamped) / sampleRate);
     this._lastCutoff = clamped;
   }
 
   process(
     inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const output = outputs[0];
@@ -117,7 +129,8 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     let gainSum = 0;
     let gainPeak = 0;
     for (let i = 0; i < blockSize; i += 1) {
-      const gain = gainValues.length > 1 ? (gainValues[i] ?? gainValues[0] ?? 0) : (gainValues[0] ?? 0);
+      const gain =
+        gainValues.length > 1 ? (gainValues[i] ?? gainValues[0] ?? 0) : (gainValues[0] ?? 0);
       const mod = modChannel ? modChannel[i] : 1;
       gainSum += gain;
       if (gain > gainPeak) gainPeak = gain;

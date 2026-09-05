@@ -7,23 +7,24 @@
  * Citations: design/beauty-synthesis/11-sota-frontend-architecture.md §4-5
  * (write-stamping fuses HRG with the provenance DAG); src/provenance.ts schema.
  */
+
+import { createDiagnostics, type Diagnostics } from "../../diagnostics";
 import {
   createProvenanceCollector,
   type DecisionRecord,
   type ProvenanceCollector,
   type ProvenanceStage,
 } from "../../provenance";
-import { createDiagnostics, type Diagnostics } from "../../diagnostics";
 import { Item } from "./item";
 import { Relation } from "./relation";
 import { TemporalAxis, type TemporalMark } from "./temporal-axis";
 import { HrgTransaction } from "./transaction";
 import type {
   AssociationWrite,
+  FeatureSchema,
   FeatureValue,
   FeatureWrite,
   FeatureWriteInput,
-  FeatureSchema,
   HrgSchema,
   MarkTimeWrite,
   PhaseCheckpoint,
@@ -59,8 +60,10 @@ function cloneFeatureSchema(schema: FeatureSchema): FeatureSchema {
         fields[name] = cloneFeatureSchema(fieldSchema);
       }
       const optional = schema.optional ? Object.freeze([...schema.optional]) : undefined;
-      if (optional?.some((name) => !Object.prototype.hasOwnProperty.call(fields, name))) {
-        throw new Error("E_HRG_SCHEMA_OPTIONAL_FIELD: optional fields must be declared object fields");
+      if (optional?.some((name) => !Object.hasOwn(fields, name))) {
+        throw new Error(
+          "E_HRG_SCHEMA_OPTIONAL_FIELD: optional fields must be declared object fields",
+        );
       }
       return Object.freeze({
         kind: "object",
@@ -99,7 +102,7 @@ function compileHrgSchema(input: HrgSchema): HrgSchema {
     }
     const allowed = Object.freeze([...new Set(relationSchema.itemTypes)]);
     for (const itemType of allowed) {
-      if (!Object.prototype.hasOwnProperty.call(itemTypes, itemType)) {
+      if (!Object.hasOwn(itemTypes, itemType)) {
         throw new Error(
           `E_HRG_SCHEMA_RELATION_ITEM_TYPE: relation '${relationName}' references undeclared item type '${itemType}'`,
         );
@@ -130,11 +133,7 @@ export class Utterance {
   private readonly phaseCheckpoints: PhaseCheckpoint[] = [];
   private readonly ruleAttemptHistory: RuleAttempt[] = [];
 
-  constructor(
-    schema: HrgSchema,
-    provenance?: ProvenanceCollector,
-    diagnostics?: Diagnostics,
-  ) {
+  constructor(schema: HrgSchema, provenance?: ProvenanceCollector, diagnostics?: Diagnostics) {
     this.provenance = provenance ?? createProvenanceCollector();
     this.diagnostics = diagnostics ?? createDiagnostics();
     this.schema = compileHrgSchema(schema);
@@ -334,7 +333,9 @@ export class Utterance {
   associationWrites(from: Item, name: string, to: Item): readonly AssociationWrite[] {
     this._assertOwnedItem(from);
     this._assertOwnedItem(to);
-    return Object.freeze([...(this.associationHistoryByEdge.get(this.associationKey(from, name, to)) ?? [])]);
+    return Object.freeze([
+      ...(this.associationHistoryByEdge.get(this.associationKey(from, name, to)) ?? []),
+    ]);
   }
 
   latestAssociationWrites(from: Item, name: string): readonly AssociationWrite[] {
@@ -452,10 +453,13 @@ export class Utterance {
         id: item.id,
         type: item.type,
         creationDecisionId: item.creationDecisionId(),
-        features: item.featureKeys().sort().map((key) => ({
-          key,
-          writes: item.writes(key),
-        })),
+        features: item
+          .featureKeys()
+          .sort()
+          .map((key) => ({
+            key,
+            writes: item.writes(key),
+          })),
       }));
     const relations = Object.keys(this.schema.relations)
       .sort()
@@ -489,10 +493,7 @@ export class Utterance {
     return `hrg-${(hash >>> 0).toString(16).padStart(8, "0")}`;
   }
 
-  checkpoint(
-    phase: string,
-    boundary: "before" | "after" = "after",
-  ): PhaseCheckpoint {
+  checkpoint(phase: string, boundary: "before" | "after" = "after"): PhaseCheckpoint {
     if (!phase) throw new Error("E_HRG_CHECKPOINT_PHASE: phase is required");
     const checkpoint = Object.freeze({
       phase,
@@ -580,7 +581,8 @@ export class Utterance {
     const boundaryIds = new Set(ranges.flatMap((range) => [range.leftId, range.rightId]));
     for (const markId of boundaryIds) {
       const mark = this.axis.get(markId);
-      if (!mark || mark.creationDecisionId || mark === this.axis.start || mark === this.axis.end) continue;
+      if (!mark || mark.creationDecisionId || mark === this.axis.start || mark === this.axis.end)
+        continue;
       const decision = this.provenance.add({
         stage: input.stage ?? "rules",
         type: "temporal_mark_insert",
@@ -596,7 +598,9 @@ export class Utterance {
     for (let index = 0; index < items.length; index += 1) {
       const range = ranges[index];
       if (!range) throw new Error("E_HRG_TEMPORAL_PARTITION_RANGE");
-      decisionIds.push(this.anchorInterval(items[index], range.leftId, range.rightId, input).decisionId);
+      decisionIds.push(
+        this.anchorInterval(items[index], range.leftId, range.rightId, input).decisionId,
+      );
     }
     return Object.freeze(decisionIds);
   }

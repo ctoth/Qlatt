@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
-import { textToKlattTrack } from "../src/tts-frontend";
+import { describe, expect, it, vi } from "vitest";
 import { summarizeTrackMetrics } from "../src/analysis/track-metrics";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 type Corpus = {
   name: string;
@@ -41,7 +41,7 @@ function loadCorpus(): Corpus {
 
 function loadGolden(): GoldenSummary {
   return JSON.parse(
-    readFileSync("test/golden/declarative-corpus-summary.json", "utf8")
+    readFileSync("test/golden/declarative-corpus-summary.json", "utf8"),
   ) as GoldenSummary;
 }
 

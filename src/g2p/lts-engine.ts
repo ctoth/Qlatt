@@ -19,7 +19,7 @@
  * Citation: Elovitz, Johnson, McHugh & Shore (1976). NRL Report 7948.
  */
 
-import { loadYamlDocumentSync } from '../yaml-loader';
+import { loadYamlDocumentSync } from "../yaml-loader";
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -65,12 +65,12 @@ function loadRules(rulesPath: string): { data: LtsRulesData; contextCache: Map<s
  */
 function compileContextPattern(
   pattern: string,
-  anchor: 'left' | 'right',
+  anchor: "left" | "right",
   symbols: Record<string, string>,
   cache: Map<string, RegExp>,
   rawRegex: boolean = false,
 ): RegExp {
-  const cacheKey = `${anchor}:${rawRegex ? 'R:' : ''}${pattern}`;
+  const cacheKey = `${anchor}:${rawRegex ? "R:" : ""}${pattern}`;
   const hit = cache.get(cacheKey);
   if (hit) return hit;
 
@@ -84,7 +84,7 @@ function compileContextPattern(
     }
   } else {
     // Classic mode: process character-by-character, escaping non-symbol chars.
-    regex = '';
+    regex = "";
     for (const ch of pattern) {
       if (ch in symbols) {
         regex += symbols[ch];
@@ -97,14 +97,14 @@ function compileContextPattern(
 
   // Left context: pattern must match at the END of the left substring
   // Right context: pattern must match at the START of the right substring
-  const anchored = anchor === 'left' ? `${regex}$` : `^${regex}`;
+  const anchored = anchor === "left" ? `${regex}$` : `^${regex}`;
   const compiled = new RegExp(anchored);
   cache.set(cacheKey, compiled);
   return compiled;
 }
 
 function escapeRegex(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 // ── Rule matching ──────────────────────────────────────────────────────
@@ -115,9 +115,9 @@ function escapeRegex(s: string): string {
  * everything else (space, punctuation) uses "PUNCT".
  */
 function getCategoryForChar(ch: string): string {
-  if (ch >= 'A' && ch <= 'Z') return ch;
-  if (ch >= '0' && ch <= '9') return 'NUMBER';
-  return 'PUNCT';
+  if (ch >= "A" && ch <= "Z") return ch;
+  if (ch >= "0" && ch <= "9") return "NUMBER";
+  return "PUNCT";
 }
 
 /**
@@ -142,14 +142,14 @@ function tryRule(
   // 2. Check left context
   if (left.length > 0) {
     const leftStr = input.substring(0, pos);
-    const leftRe = compileContextPattern(left, 'left', symbols, cache, rawRegex);
+    const leftRe = compileContextPattern(left, "left", symbols, cache, rawRegex);
     if (!leftRe.test(leftStr)) return 0;
   }
 
   // 3. Check right context
   if (right.length > 0) {
     const rightStr = input.substring(pos + letters.length);
-    const rightRe = compileContextPattern(right, 'right', symbols, cache, rawRegex);
+    const rightRe = compileContextPattern(right, "right", symbols, cache, rawRegex);
     if (!rightRe.test(rightStr)) return 0;
   }
 
@@ -165,7 +165,10 @@ function tryRule(
  *               Case-insensitive.
  * @returns Array of Qlatt ARPAbet phoneme strings (no stress digits).
  */
-export function applyLtsRules(word: string, rulesPath: string = '/rules/frontends/qlatt-english/lts-rules.yaml'): string[] {
+export function applyLtsRules(
+  word: string,
+  rulesPath: string = "/rules/frontends/qlatt-english/lts-rules.yaml",
+): string[] {
   if (!word || word.length === 0) return [];
 
   const loaded = loadRules(rulesPath);
@@ -173,7 +176,7 @@ export function applyLtsRules(word: string, rulesPath: string = '/rules/frontend
   const rawRegex = raw_regex === true;
 
   // Pad with spaces (word boundary markers)
-  const input = ' ' + word.toUpperCase() + ' ';
+  const input = " " + word.toUpperCase() + " ";
   const elovitzPhonemes: string[] = [];
 
   let pos = 0;
@@ -208,6 +211,6 @@ export function applyLtsRules(word: string, rulesPath: string = '/rules/frontend
   // Filter prosodic markers (not real phonemes).
   // Symbol remapping (AX->AH, NX->NG, WH->W) is now handled by
   // the normalize rule phase in public/rules/frontends/qlatt-english/phases/normalize.yaml.
-  const PROSODIC_MARKERS = new Set(['< >', '<,>', '<.>', '<?>', '<->']);
-  return elovitzPhonemes.filter(p => !PROSODIC_MARKERS.has(p));
+  const PROSODIC_MARKERS = new Set(["< >", "<,>", "<.>", "<?>", "<->"]);
+  return elovitzPhonemes.filter((p) => !PROSODIC_MARKERS.has(p));
 }

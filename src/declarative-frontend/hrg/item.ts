@@ -13,8 +13,9 @@
  * Citations: Taylor, Black & Caley 2001 (item = feature bundle, shared across
  * relations); design/beauty-synthesis/11-sota-frontend-architecture.md §2c.
  */
-import type { HrgNode } from "./relation";
+
 import { isPlainObject } from "../../yaml-loader";
+import type { HrgNode } from "./relation";
 import type {
   FeatureSchema,
   FeatureValue,
@@ -75,7 +76,7 @@ function validateFeatureValue(
       const optional = new Set(schema.optional ?? []);
       const output: Record<string, FeatureValue> = {};
       for (const [field, fieldSchema] of Object.entries(schema.fields)) {
-        if (!Object.prototype.hasOwnProperty.call(value, field)) {
+        if (!Object.hasOwn(value, field)) {
           if (optional.has(field)) continue;
           featureValueError(itemType, key, `${path}.${field}`, "present");
         }
@@ -88,7 +89,7 @@ function validateFeatureValue(
         );
       }
       for (const [field, entry] of Object.entries(value)) {
-        if (Object.prototype.hasOwnProperty.call(schema.fields, field)) continue;
+        if (Object.hasOwn(schema.fields, field)) continue;
         if (!schema.additional) {
           featureValueError(itemType, key, `${path}.${field}`, "a declared field");
         }

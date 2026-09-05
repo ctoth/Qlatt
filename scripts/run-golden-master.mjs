@@ -1,7 +1,7 @@
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { spawnSync } from "node:child_process";
 
 const args = new Map();
 for (let i = 2; i < process.argv.length; i += 1) {
@@ -19,7 +19,7 @@ const phrasesPath = args.get("phrases")
   ? path.resolve(args.get("phrases"))
   : path.join(repoRoot, "test", "phrase-sets", "linguistic.json");
 const outDir = path.resolve(
-  args.get("out-dir") ?? path.join(repoRoot, "test", "golden", "linguistic-master")
+  args.get("out-dir") ?? path.join(repoRoot, "test", "golden", "linguistic-master"),
 );
 const baseF0 = Number(args.get("base-f0") ?? 110);
 const sampleRate = Number(args.get("sample-rate") ?? 10000);
@@ -38,9 +38,7 @@ if (!fs.existsSync(phrasesPath)) {
 }
 
 const phrasePayload = JSON.parse(fs.readFileSync(phrasesPath, "utf8"));
-const phrases = Array.isArray(phrasePayload)
-  ? phrasePayload
-  : phrasePayload.phrases ?? [];
+const phrases = Array.isArray(phrasePayload) ? phrasePayload : (phrasePayload.phrases ?? []);
 if (!phrases.length) {
   console.error("No phrases found in list.");
   process.exit(1);
@@ -169,25 +167,32 @@ for (const phrase of phrases) {
 }
 
 const summaryPath = path.join(outDir, "summary.json");
-fs.writeFileSync(summaryPath, JSON.stringify({
-  config: {
-    phrasesPath: path.relative(repoRoot, phrasesPath),
-    baseF0,
-    sampleRate,
-    normalize,
-    maxShift,
-    qlatt: {
-      sourceMode: qlattSourceMode,
-      agc: qlattAgc,
-      leadTime: qlattLeadTime,
-      tailTime: qlattTailTime,
+fs.writeFileSync(
+  summaryPath,
+  JSON.stringify(
+    {
+      config: {
+        phrasesPath: path.relative(repoRoot, phrasesPath),
+        baseF0,
+        sampleRate,
+        normalize,
+        maxShift,
+        qlatt: {
+          sourceMode: qlattSourceMode,
+          agc: qlattAgc,
+          leadTime: qlattLeadTime,
+          tailTime: qlattTailTime,
+        },
+        klatt: {
+          glottal: klattGlottal,
+          noAgc: klattNoAgc,
+        },
+      },
+      results: summary,
     },
-    klatt: {
-      glottal: klattGlottal,
-      noAgc: klattNoAgc,
-    },
-  },
-  results: summary,
-}, null, 2));
+    null,
+    2,
+  ),
+);
 
 console.log(`Summary written to ${summaryPath}`);

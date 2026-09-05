@@ -1,7 +1,7 @@
 // test/harness/experiment.js — Experiment manifest loading and config management
 
-import { state } from "./state.js";
 import { loadYamlDocument, loadYamlDocumentOrNull } from "../../src/yaml-loader.ts";
+import { state } from "./state.js";
 
 export function getSelectedExperiment() {
   const select = document.getElementById("experimentSelect");
@@ -27,7 +27,10 @@ export async function loadExperimentManifest() {
     if (state.experimentManifest.experiments.length > 0) {
       select.value = state.experimentManifest.experiments[0].id;
     }
-    console.log("[QLATT] Experiment manifest loaded:", state.experimentManifest.experiments.map(e => e.id));
+    console.log(
+      "[QLATT] Experiment manifest loaded:",
+      state.experimentManifest.experiments.map((e) => e.id),
+    );
   } catch (err) {
     console.error("[QLATT] Failed to load experiment manifest:", err);
     // Fallback to hardcoded default
@@ -90,7 +93,7 @@ function mergeSemantics(parent, child) {
 function deepMerge(target, source) {
   const result = { ...target };
   for (const key of Object.keys(source)) {
-    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+    if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key])) {
       result[key] = deepMerge(result[key] || {}, source[key]);
     } else {
       result[key] = source[key];
@@ -102,13 +105,18 @@ function deepMerge(target, source) {
 export async function loadNewRuntimeConfig() {
   const experimentId = getSelectedExperiment();
   // Check if already loaded for current experiment
-  if (state.newRuntimeGraph && state.newRuntimeSemantics && state.newRuntimeRegistry && state.currentExperimentId === experimentId) {
+  if (
+    state.newRuntimeGraph &&
+    state.newRuntimeSemantics &&
+    state.newRuntimeRegistry &&
+    state.currentExperimentId === experimentId
+  ) {
     return; // Already loaded for this experiment
   }
   state.status.textContent = `Status: loading ${experimentId} config...`;
   try {
     // Find this experiment's manifest entry
-    const manifest = state.experimentManifest?.experiments?.find(e => e.id === experimentId);
+    const manifest = state.experimentManifest?.experiments?.find((e) => e.id === experimentId);
     const basePath = `./experiments/${experimentId}`;
 
     // Load child configs (some may be absent for inheriting experiments)
@@ -130,7 +138,7 @@ export async function loadNewRuntimeConfig() {
       // Merge: child overrides parent
       state.newRuntimeRegistry = mergeRegistry(parentRegistry, childRegistry);
       state.newRuntimeSemantics = mergeSemantics(parentSemantics, childSemantics);
-      state.newRuntimeGraph = childGraph || parentGraph;  // graph: full replacement or inherit
+      state.newRuntimeGraph = childGraph || parentGraph; // graph: full replacement or inherit
     } else {
       state.newRuntimeGraph = childGraph;
       state.newRuntimeSemantics = childSemantics;

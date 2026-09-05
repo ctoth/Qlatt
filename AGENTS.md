@@ -31,6 +31,7 @@ This is enforced through three interlocking systems:
 
 **What this means for you as an agent:**
 - When you write a new rule: include `citations:` with the paper reference. No citation = do not commit.
+- In flow-style YAML citation arrays, quote every citation containing a comma so one source cannot parse as multiple list items; prefer block-style citation lists when editing several entries.
 - When you add a rule application: include a `tag:` that describes the linguistic motivation.
 - When validating `params.*` CEL paths, distinguish bundled rulepacks that declare a static `parameters:` schema from programmatic rules whose params are supplied by the execution call. Capture whether `parameters` was declared before parsing or normalization can synthesize an empty object, and pass that fact explicitly into validation. Enforce nested-path membership only when the static schema exists; always validate the `params` root identifier.
 - When strengthening CEL validation, preserve specialized validator diagnostics by running function, relation, and cursor-surface checks before the generic unknown-variable check. Predicate-body expansion must inherit the caller's declared variables and item-variable set. Every strict-validation test fixture must declare each item feature its expressions read and supply all required rule metadata, including citations and per-effect vocabulary tags. Rerun `test/declarative-frontend-schema.test.ts` after changing that environment.

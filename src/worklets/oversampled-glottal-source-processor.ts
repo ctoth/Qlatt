@@ -4,7 +4,15 @@
  *   output[0] = voice waveform (post-tilt + breathiness)
  *   output[1] = modulated noise (for aspiration/frication)
  */
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions, UNINITIALIZED_ALLOC, fillParamBuffer } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  computeRmsPeak,
+  fillParamBuffer,
+  initWasmModule,
+  resolveWasmUrl,
+  UNINITIALIZED_ALLOC,
+  WasmBuffer,
+} from "./wasm-utils.js";
 
 interface OversampledGlottalSourceWasmExports {
   memory: WebAssembly.Memory;
@@ -37,7 +45,7 @@ interface OversampledGlottalSourceWasmExports {
     diplophoniaLen: number,
     voicePtr: number,
     noisePtr: number,
-    blockSize: number
+    blockSize: number,
   ): void;
   oversampled_glottal_source_reset?: (state: number) => void;
 }
@@ -88,10 +96,34 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "f0", defaultValue: 100, minValue: 0, maxValue: 500, automationRate: "a-rate" as const },
-      { name: "av", defaultValue: 60, minValue: 0, maxValue: 80, automationRate: "k-rate" as const },
-      { name: "aturb", defaultValue: 0, minValue: 0, maxValue: 80, automationRate: "k-rate" as const },
-      { name: "tilt", defaultValue: 0, minValue: 0, maxValue: 34, automationRate: "k-rate" as const },
+      {
+        name: "f0",
+        defaultValue: 100,
+        minValue: 0,
+        maxValue: 500,
+        automationRate: "a-rate" as const,
+      },
+      {
+        name: "av",
+        defaultValue: 60,
+        minValue: 0,
+        maxValue: 80,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "aturb",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 80,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "tilt",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 34,
+        automationRate: "k-rate" as const,
+      },
       {
         name: "openQuotient",
         defaultValue: 50,
@@ -99,14 +131,50 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
         maxValue: 100,
         automationRate: "k-rate" as const,
       },
-      { name: "skew", defaultValue: 0, minValue: 0, maxValue: 200, automationRate: "k-rate" as const },
-      { name: "asymmetry", defaultValue: 50, minValue: 0, maxValue: 100, automationRate: "k-rate" as const },
-      { name: "source", defaultValue: 2, minValue: 1, maxValue: 4, automationRate: "k-rate" as const },
-      { name: "seed", defaultValue: 1, minValue: 1, maxValue: 2147483647, automationRate: "k-rate" as const },
+      {
+        name: "skew",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 200,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "asymmetry",
+        defaultValue: 50,
+        minValue: 0,
+        maxValue: 100,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "source",
+        defaultValue: 2,
+        minValue: 1,
+        maxValue: 4,
+        automationRate: "k-rate" as const,
+      },
+      {
+        name: "seed",
+        defaultValue: 1,
+        minValue: 1,
+        maxValue: 2147483647,
+        automationRate: "k-rate" as const,
+      },
       // Klatt & Klatt 1990 eq. 1 F0 flutter (percent). Default 0 = no-op.
-      { name: "flutter", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" as const },
+      {
+        name: "flutter",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 100,
+        automationRate: "k-rate" as const,
+      },
       // Klatt & Klatt 1990 §3 diplophonia (percent). Default 0 = no-op.
-      { name: "diplophonia", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" as const },
+      {
+        name: "diplophonia",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 100,
+        automationRate: "k-rate" as const,
+      },
     ];
   }
 
@@ -172,7 +240,7 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
   process(
     _inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const voiceOut = outputs[0];
@@ -214,7 +282,11 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
     const sourceLen = fillParamBuffer(this.paramBuffers.source, sourceValues, blockSize);
     const seedLen = fillParamBuffer(this.paramBuffers.seed, seedValues, blockSize);
     const flutterLen = fillParamBuffer(this.paramBuffers.flutter, flutterValues, blockSize);
-    const diplophoniaLen = fillParamBuffer(this.paramBuffers.diplophonia, diplophoniaValues, blockSize);
+    const diplophoniaLen = fillParamBuffer(
+      this.paramBuffers.diplophonia,
+      diplophoniaValues,
+      blockSize,
+    );
 
     this.voiceBuffer.ensure(blockSize);
     this.noiseBuffer.ensure(blockSize);
@@ -250,7 +322,7 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
       diplophoniaLen,
       this.voiceBuffer.ptr,
       this.noiseBuffer.ptr,
-      blockSize
+      blockSize,
     );
 
     this.voiceBuffer.refresh();
@@ -275,7 +347,7 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
   _reportMetrics(
     voice: Float32Array,
     noise: Float32Array,
-    params: { f0: number; av: number; source: number; tilt: number }
+    params: { f0: number; av: number; source: number; tilt: number },
   ): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;

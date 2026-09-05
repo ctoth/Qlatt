@@ -3,8 +3,8 @@
  * Uses @marcbachmann/cel-js for expression parsing and evaluation.
  */
 
-import { Environment } from '@marcbachmann/cel-js';
-import type { CelExpression, EvaluationContext, ParamValue } from './types';
+import { Environment } from "@marcbachmann/cel-js";
+import type { CelExpression, EvaluationContext, ParamValue } from "./types";
 
 export interface CelEvaluator {
   evaluate(expr: CelExpression, context: EvaluationContext): ParamValue;
@@ -43,9 +43,9 @@ export function createCelEvaluator(): CelEvaluator {
   env.registerOperator("double == int", (a: number, b: bigint) => a === Number(b));
 
   // Cache compiled expressions for reuse
-  const exprCache = new Map<string, (ctx?: Record<string, any>) => any>();
+  const exprCache = new Map<string, (ctx?: Record<string, unknown>) => unknown>();
 
-  function compileExpr(expr: string): (ctx?: Record<string, any>) => any {
+  function compileExpr(expr: string): (ctx?: Record<string, unknown>) => unknown {
     let cached = exprCache.get(expr);
     if (cached) return cached;
 
@@ -73,15 +73,24 @@ export function createCelEvaluator(): CelEvaluator {
       // CEL builtins "double", "string", "int", "uint", "bool", "bytes"
       // cannot be overridden. Skip silently — the CEL builtins perform
       // equivalent type casts.
-      const CEL_BUILTINS = new Set(["double", "string", "int", "uint", "bool", "bytes", "type", "dyn"]);
+      const CEL_BUILTINS = new Set([
+        "double",
+        "string",
+        "int",
+        "uint",
+        "bool",
+        "bytes",
+        "type",
+        "dyn",
+      ]);
       if (CEL_BUILTINS.has(name)) return;
 
       // Register with dyn signature so it accepts any argument types.
       // Variadic functions (rest args) have .length === 0 — register
       // overloads for arities 1 and 2 so both max(x) and max(x, y) work.
-      const coerceAndCall = (...evalArgs: any[]) => {
+      const coerceAndCall = (...evalArgs: unknown[]) => {
         const coercedArgs = evalArgs.map((a: unknown) =>
-          typeof a === "bigint" ? Number(a) : a
+          typeof a === "bigint" ? Number(a) : a,
         ) as ParamValue[];
         return fn(...coercedArgs);
       };
@@ -96,6 +105,6 @@ export function createCelEvaluator(): CelEvaluator {
         env.registerFunction(`${name}(dyn): dyn`, coerceAndCall);
         env.registerFunction(`${name}(dyn, dyn): dyn`, coerceAndCall);
       }
-    }
+    },
   };
 }

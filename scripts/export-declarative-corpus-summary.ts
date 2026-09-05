@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { textToKlattTrack } from "../src/tts-frontend";
 import { summarizeTrackMetrics } from "../src/analysis/track-metrics";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 const corpusPath = "test/phrase-sets/linguistic.json";
 const outPath = "test/golden/declarative-corpus-summary.json";
@@ -33,8 +33,8 @@ writeFileSync(
       summaries,
     },
     null,
-    2
-  )
+    2,
+  ),
 );
 
 console.log(`Wrote ${outPath}`);

@@ -9,7 +9,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import yaml from "js-yaml";
+import { dump as dumpYaml, load as loadYaml } from "js-yaml";
 
 const RULES_DIR = path.resolve("public/rules");
 const FRONTEND_YAML = path.join(RULES_DIR, "frontend.yaml");
@@ -75,12 +75,10 @@ function splitCitation(raw: string): string[] {
  * Normalize a rule object: convert citation (string) -> citations (array).
  * Mutates the object in place.
  */
-function normalizeCitations(rule: Record<string, any>): void {
+function normalizeCitations(rule: Record<string, unknown>): void {
   if (Array.isArray(rule.citations)) {
     // Already in array format, clean up
-    rule.citations = rule.citations
-      .map((c: any) => String(c).trim())
-      .filter(Boolean);
+    rule.citations = rule.citations.map((c: unknown) => String(c).trim()).filter(Boolean);
     delete rule.citation;
     return;
   }
@@ -100,13 +98,13 @@ function normalizeCitations(rule: Record<string, any>): void {
 function main(): void {
   // 1. Read and parse frontend.yaml
   const rawYaml = fs.readFileSync(FRONTEND_YAML, "utf-8");
-  const doc = yaml.load(rawYaml) as Record<string, any>;
+  const doc = loadYaml(rawYaml) as Record<string, unknown>;
 
   if (!doc || typeof doc !== "object") {
     throw new Error("frontend.yaml did not parse to an object");
   }
 
-  const allRules = doc.rules as Record<string, any> | undefined;
+  const allRules = doc.rules as Record<string, unknown> | undefined;
   if (!allRules || typeof allRules !== "object") {
     throw new Error("No 'rules:' block found in frontend.yaml");
   }
@@ -167,8 +165,8 @@ function main(): void {
   // 5. Write each rule file
   const summary: { file: string; count: number }[] = [];
 
-  for (const [key, config] of Object.entries(fileMap)) {
-    const rulesForFile: Record<string, any> = {};
+  for (const [_key, config] of Object.entries(fileMap)) {
+    const rulesForFile: Record<string, unknown> = {};
 
     for (const ruleName of config.ruleNames) {
       const rule = allRules[ruleName];
@@ -183,10 +181,10 @@ function main(): void {
     }
 
     const fileDoc = { rules: rulesForFile };
-    const yamlStr = yaml.dump(fileDoc, {
+    const yamlStr = dumpYaml(fileDoc, {
       lineWidth: 120,
       noRefs: true,
-      quotingType: '"',
+      quoteStyle: "double",
       forceQuotes: false,
       sortKeys: false,
       flowLevel: -1,
@@ -214,7 +212,7 @@ function main(): void {
 
   // Write the rewritten frontend.yaml
   // We need to preserve the top-level key order: version, parameters, predicates, relations, phases, include, output, transcription
-  const orderedDoc: Record<string, any> = {};
+  const orderedDoc: Record<string, unknown> = {};
   const keyOrder = [
     "version",
     "parameters",
@@ -238,10 +236,10 @@ function main(): void {
     }
   }
 
-  const frontendYaml = yaml.dump(orderedDoc, {
+  const frontendYaml = dumpYaml(orderedDoc, {
     lineWidth: 120,
     noRefs: true,
-    quotingType: '"',
+    quoteStyle: "double",
     forceQuotes: false,
     sortKeys: false,
     flowLevel: -1,
@@ -257,7 +255,9 @@ function main(): void {
     totalRules += count;
   }
   console.log(`\n  Total: ${totalRules} rules`);
-  console.log(`  Unassigned: ${unassigned.length}${unassigned.length > 0 ? ` — ${unassigned.join(", ")}` : ""}`);
+  console.log(
+    `  Unassigned: ${unassigned.length}${unassigned.length > 0 ? ` — ${unassigned.join(", ")}` : ""}`,
+  );
   console.log(`\n  Frontend YAML rewritten with include: [${includeList.join(", ")}]`);
   console.log(`\n  Output directory: ${OUTPUT_DIR}`);
   console.log("\nDone.\n");

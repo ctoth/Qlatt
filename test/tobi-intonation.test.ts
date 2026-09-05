@@ -1,5 +1,6 @@
-import { describe, expect, it, vi, afterAll } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 import { textToKlattTrack } from "../src/tts-frontend";
+import type { KlattFrame } from "../src/tts-frontend-types";
 
 /**
  * Integration tests for the ToBI intonation model.
@@ -18,15 +19,15 @@ const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 afterAll(() => warnSpy.mockRestore());
 
 // Helper: extract F0 values from voiced frames
-function getVoicedF0(track: Array<Record<string, any>>): number[] {
+function getVoicedF0(track: readonly KlattFrame[]): number[] {
   return track
     .filter((frame) => Number(frame.params?.F0) > 0)
     .map((frame) => Number(frame.params.F0));
 }
 
 // Helper: get F0 at word boundaries by finding frames near specific time positions
-function getMaxF0InRange(
-  track: Array<Record<string, any>>,
+function _getMaxF0InRange(
+  track: readonly KlattFrame[],
   startFraction: number,
   endFraction: number,
 ): number {

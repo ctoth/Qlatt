@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
+import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-frontend/hrg";
 import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
@@ -75,24 +75,27 @@ function readFixture(): {
   productionFrames: ProductionFrame[];
   segments: BaselineSegment[];
 } {
-  const parsed: unknown = JSON.parse(readFileSync(
-    new URL("./fixtures/hrg-convergence-baseline/qlatt-english-fricatives.json", import.meta.url),
-    "utf8",
-  ));
+  const parsed: unknown = JSON.parse(
+    readFileSync(
+      new URL("./fixtures/hrg-convergence-baseline/qlatt-english-fricatives.json", import.meta.url),
+      "utf8",
+    ),
+  );
   const spec = loadBundledRulepackSpec("qlatt-english");
   if (
-    !isPlainObject(parsed)
-    || !isPlainObject(parsed.reconstructedGraph)
-    || !Array.isArray(parsed.reconstructedGraph.items)
-    || !isPlainObject(parsed.oldProduction)
-    || !isPlainObject(parsed.oldProduction.controlScore)
-    || !Array.isArray(parsed.oldProduction.controlScore.f0_points)
-    || !Array.isArray(parsed.oldProduction.sourceFrames)
-    || typeof spec.inventory_path !== "string"
+    !isPlainObject(parsed) ||
+    !isPlainObject(parsed.reconstructedGraph) ||
+    !Array.isArray(parsed.reconstructedGraph.items) ||
+    !isPlainObject(parsed.oldProduction) ||
+    !isPlainObject(parsed.oldProduction.controlScore) ||
+    !Array.isArray(parsed.oldProduction.controlScore.f0_points) ||
+    !Array.isArray(parsed.oldProduction.sourceFrames) ||
+    typeof spec.inventory_path !== "string" ||
+    !isPlainObject(spec.output)
   ) {
     throw new Error("point-contour fixture/spec invalid");
   }
-  const policy: LowerOptions = spec.output.lowering;
+  const policy = readLowerOptions(spec.output.lowering);
   const inventory = loadInventorySpecFromPath(spec.inventory_path).phoneme_targets;
   const segments = parsed.reconstructedGraph.items.flatMap((item): BaselineSegment[] => {
     if (!isPlainObject(item) || item.type !== "segment" || typeof item.id !== "string") return [];
@@ -102,7 +105,8 @@ function readFixture(): {
       throw new Error("baseline Segment invalid");
     }
     const target = inventory[phoneme] ?? inventory[`${phoneme}0`] ?? inventory[`${phoneme}1`];
-    if (!target || typeof target.type !== "string") throw new Error(`inventory type missing for ${phoneme}`);
+    if (!target || typeof target.type !== "string")
+      throw new Error(`inventory type missing for ${phoneme}`);
     const params: Record<string, number> = {};
     for (const column of policy.columns) {
       const value = latestFeature(item, column);
@@ -113,12 +117,12 @@ function readFixture(): {
   });
   const points = parsed.oldProduction.controlScore.f0_points.map((point): BaselinePoint => {
     if (
-      !isPlainObject(point)
-      || typeof point.id !== "string"
-      || !isPlainObject(point.timing)
-      || point.timing.kind !== "absolute"
-      || typeof point.timing.time_ms !== "number"
-      || typeof point.value_hz !== "number"
+      !isPlainObject(point) ||
+      typeof point.id !== "string" ||
+      !isPlainObject(point.timing) ||
+      point.timing.kind !== "absolute" ||
+      typeof point.timing.time_ms !== "number" ||
+      typeof point.value_hz !== "number"
     ) {
       throw new Error("baseline F0 point invalid");
     }
@@ -189,9 +193,10 @@ function buildUtterance(
 
   const prosody = utterance.beginTransaction(META);
   for (const point of points) {
-    const span = spans.find((candidate) => (
-      point.timeMs >= candidate.startMs - 1e-6 && point.timeMs <= candidate.endMs + 1e-6
-    ));
+    const span = spans.find(
+      (candidate) =>
+        point.timeMs >= candidate.startMs - 1e-6 && point.timeMs <= candidate.endMs + 1e-6,
+    );
     if (!span) throw new Error(`F0 point ${point.id} lies outside the temporal axis`);
     const anchor = utterance.intervalAnchor(span.item);
     if (!anchor) throw new Error("fixture point span missing");
@@ -199,9 +204,8 @@ function buildUtterance(
     prosody.set(pointItem, "value", point.valueHz);
     if (point.tag) prosody.set(pointItem, "tag", point.tag);
     prosody.append("F0Point", pointItem);
-    const ratio = span.endMs === span.startMs
-      ? 0
-      : (point.timeMs - span.startMs) / (span.endMs - span.startMs);
+    const ratio =
+      span.endMs === span.startMs ? 0 : (point.timeMs - span.startMs) / (span.endMs - span.startMs);
     prosody.anchorPoint(pointItem, anchor.leftMarkId, anchor.rightMarkId, ratio);
   }
   prosody.commit();
@@ -217,24 +221,37 @@ describe("HRG lowering explicit F0 points", () => {
 
     expect(segmentFrames.some((frame) => Math.abs(frame.time - 0.44975) <= 1e-9)).toBe(true);
     expect(segmentFrames.some((frame) => Math.abs(frame.time - 0.38) <= 1e-9)).toBe(false);
-    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
-      code: "F0_POINT_COINCIDENT_OVERRIDE",
-      data: expect.objectContaining({ droppedHz: 122, keptHz: 190, timeMs: 380 }),
-    }));
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "F0_POINT_COINCIDENT_OVERRIDE",
+        data: expect.objectContaining({ droppedHz: 122, keptHz: 190, timeMs: 380 }),
+      }),
+    );
     for (const frame of segmentFrames) {
       const production = baseline.productionFrames.find(
-        (candidate) => candidate.phoneme === frame.phoneme
-          && Math.abs(candidate.time - frame.time) <= 1e-9,
+        (candidate) =>
+          candidate.phoneme === frame.phoneme && Math.abs(candidate.time - frame.time) <= 1e-9,
       );
-      if (!production) throw new Error(`production event missing for ${frame.phoneme ?? ""}@${frame.time}`);
-      expect(frame.params.F0, `${frame.segmentId}@${frame.time}.F0`).toBeCloseTo(production.params.F0, 9);
+      if (!production)
+        throw new Error(`production event missing for ${frame.phoneme ?? ""}@${frame.time}`);
+      expect(frame.params.F0, `${frame.segmentId}@${frame.time}.F0`).toBeCloseTo(
+        production.params.F0,
+        9,
+      );
     }
-    const knownDecisions = new Set(utterance.provenance.getDecisions().map((decision) => decision.id));
+    const knownDecisions = new Set(
+      utterance.provenance.getDecisions().map((decision) => decision.id),
+    );
     for (const frame of segmentFrames) {
       for (const key of Object.keys(frame.params)) {
         const decisionId = frame.provenance?.[key];
-        expect(decisionId, `${frame.segmentId}@${frame.time}.${key} provenance`).toBeTypeOf("string");
-        expect(knownDecisions.has(decisionId ?? ""), `${frame.segmentId}@${frame.time}.${key} decision`).toBe(true);
+        expect(decisionId, `${frame.segmentId}@${frame.time}.${key} provenance`).toBeTypeOf(
+          "string",
+        );
+        expect(
+          knownDecisions.has(decisionId ?? ""),
+          `${frame.segmentId}@${frame.time}.${key} decision`,
+        ).toBe(true);
       }
     }
   });
@@ -246,9 +263,13 @@ describe("HRG lowering explicit F0 points", () => {
     point.set("value", 200, META);
     utterance.relation("F0Point").append(point, META);
 
-    expect(() => lowerToFrames(utterance, baseline.policy)).toThrowError(/E_HRG_LOWER_F0_POINT_REQUIRED/);
-    expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
-      code: "HRG_LOWER_F0_POINT_REQUIRED",
-    }));
+    expect(() => lowerToFrames(utterance, baseline.policy)).toThrowError(
+      /E_HRG_LOWER_F0_POINT_REQUIRED/,
+    );
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "HRG_LOWER_F0_POINT_REQUIRED",
+      }),
+    );
   });
 });

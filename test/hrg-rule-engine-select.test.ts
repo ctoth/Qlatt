@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
+import type { HrgSchema } from "../src/declarative-frontend/hrg";
+import { Utterance } from "../src/declarative-frontend/hrg";
 import {
   GraphRuleEvaluationOwner,
   runGraphRuleEngine,
 } from "../src/declarative-frontend/hrg/rule-engine";
-import { Utterance } from "../src/declarative-frontend/hrg";
-import type { HrgSchema } from "../src/declarative-frontend/hrg";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 const SCHEMA = {
@@ -150,7 +150,10 @@ describe("graph-native rule engine select/scalar execution", () => {
     const second = fixture();
 
     runGraphRuleEngine(first.utterance, spec, { parameters: { scale: 2 }, evaluationOwner: owner });
-    runGraphRuleEngine(second.utterance, spec, { parameters: { scale: 3 }, evaluationOwner: owner });
+    runGraphRuleEngine(second.utterance, spec, {
+      parameters: { scale: 3 },
+      evaluationOwner: owner,
+    });
 
     expect(first.utterance.getItem(first.vowelId)?.get("duration")).toBe(200);
     expect(second.utterance.getItem(second.vowelId)?.get("duration")).toBe(300);

@@ -7,7 +7,13 @@
  * output-stage filter declarative for experiments that intentionally render
  * higher-frequency fricative energy above the Klatt 1980 playback bandwidth.
  */
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  computeRmsPeak,
+  initWasmModule,
+  resolveWasmUrl,
+  WasmBuffer,
+} from "./wasm-utils.js";
 
 interface ReconstructionFilterWasmExports {
   memory: WebAssembly.Memory;
@@ -15,7 +21,12 @@ interface ReconstructionFilterWasmExports {
   dealloc_f32(ptr: number, len: number): void;
   reconstruction_filter_new(sampleRate: number): number;
   reconstruction_filter_reset?: (state: number) => void;
-  reconstruction_filter_process(state: number, inputPtr: number, outputPtr: number, blockSize: number): void;
+  reconstruction_filter_process(
+    state: number,
+    inputPtr: number,
+    outputPtr: number,
+    blockSize: number,
+  ): void;
 }
 
 interface ReconstructionFilterProcessorOptions extends BaseProcessorOptions {
@@ -93,7 +104,7 @@ class ReconstructionFilterProcessor extends AudioWorkletProcessor {
   process(
     inputs: Float32Array[][],
     outputs: Float32Array[][],
-    _parameters: Record<string, Float32Array>
+    _parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const output = outputs[0];
@@ -136,7 +147,7 @@ class ReconstructionFilterProcessor extends AudioWorkletProcessor {
         this.state,
         this.inputBuffer.ptr,
         this.outputBuffer.ptr,
-        blockSize
+        blockSize,
       );
 
       this.outputBuffer.refresh();

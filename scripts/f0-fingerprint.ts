@@ -55,7 +55,7 @@ function f64hex(x: number): string {
 const lines: string[] = [];
 for (const cfg of CONFIGS) {
   for (const phrase of PHRASES) {
-    let track;
+    let track: ReturnType<typeof textToKlattTrack>;
     try {
       track = textToKlattTrack(phrase, cfg.baseF0, cfg.transitionMs, {
         frontendId: "dectalk-english",

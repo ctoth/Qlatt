@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { Utterance } from "../src/declarative-frontend/hrg";
 import type { HrgSchema } from "../src/declarative-frontend/hrg";
-import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
+import { Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import {
   explainFeature,
   replayPhaseView,
   whyNotRule,
 } from "../src/declarative-frontend/hrg/tooling";
+import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 
 const SCHEMA = {
   itemTypes: {
@@ -86,9 +86,10 @@ describe("graph-native tooling", () => {
     const beforeTarget = replayPhaseView(utterance, "target", "before");
     expect(beforeTarget.getItem("s1")?.get("eligible")).toBe(true);
     expect(beforeTarget.graphDigest()).toBe(
-      utterance.checkpoints().find(
-        (checkpoint) => checkpoint.phase === "target" && checkpoint.boundary === "before",
-      )?.digest,
+      utterance
+        .checkpoints()
+        .find((checkpoint) => checkpoint.phase === "target" && checkpoint.boundary === "before")
+        ?.digest,
     );
 
     const explanation = explainFeature(utterance, "s1", "eligible");
@@ -111,18 +112,22 @@ describe("graph-native tooling", () => {
     expect(attempt.phase).toBe("target");
     expect(attempt.evidence.kind).toBe("expression");
     expect(attempt.evidence.matched).toBe(false);
-    expect(attempt.evidence).toEqual(expect.objectContaining({
-      expression: "current.eligible == false",
-      value: false,
-    }));
+    expect(attempt.evidence).toEqual(
+      expect.objectContaining({
+        expression: "current.eligible == false",
+        value: false,
+      }),
+    );
   });
 
   it("distinguishes fired, pattern-step, constraint, and missing-target outcomes", () => {
-    const { utterance, spec } = fixture();
-    expect(whyNotRule(utterance, "enable", "s1")).toEqual(expect.objectContaining({
-      status: "fired",
-      rule: "enable",
-    }));
+    const { utterance } = fixture();
+    expect(whyNotRule(utterance, "enable", "s1")).toEqual(
+      expect.objectContaining({
+        status: "fired",
+        rule: "enable",
+      }),
+    );
 
     const initial = new Utterance(SCHEMA);
     const create = initial.beginTransaction({
@@ -186,36 +191,51 @@ describe("graph-native tooling", () => {
           citations: ["Klatt 1976"],
         },
       },
-      phases: [{
-        name: "target",
-        rules: ["missing_pair", "blocked", "short_circuit", "missing_effect_target"],
-      }],
+      phases: [
+        {
+          name: "target",
+          rules: ["missing_pair", "blocked", "short_circuit", "missing_effect_target"],
+        },
+      ],
     });
     expect(() => runGraphRuleEngine(initial, evidenceSpec)).toThrowError(/E_EFFECT_TARGET_UNKNOWN/);
 
     const pair = whyNotRule(initial, "missing_pair", "s1");
     expect(pair.status).toBe("not_fired");
-    expect(pair.attempts).toContainEqual(expect.objectContaining({
-      status: "pattern_step_failed", stepIndex: 1, capture: "second",
-    }));
+    expect(pair.attempts).toContainEqual(
+      expect.objectContaining({
+        status: "pattern_step_failed",
+        stepIndex: 1,
+        capture: "second",
+      }),
+    );
     const blocked = whyNotRule(initial, "blocked", "s1");
-    expect(blocked.attempts).toContainEqual(expect.objectContaining({
-      status: "constraint_failed", source: "rule",
-    }));
+    expect(blocked.attempts).toContainEqual(
+      expect.objectContaining({
+        status: "constraint_failed",
+        source: "rule",
+      }),
+    );
     const missingTarget = whyNotRule(initial, "missing_effect_target", "s1");
-    expect(missingTarget.attempts).toContainEqual(expect.objectContaining({
-      status: "missing_target", target: "ghost",
-    }));
+    expect(missingTarget.attempts).toContainEqual(
+      expect.objectContaining({
+        status: "missing_target",
+        target: "ghost",
+      }),
+    );
     const shortCircuit = whyNotRule(initial, "short_circuit", "s1");
     expect(shortCircuit.status).toBe("not_fired");
     const shortCircuitAttempt = shortCircuit.attempts[0];
     expect(shortCircuitAttempt.status).toBe("select_where_failed");
-    if (shortCircuitAttempt.status !== "select_where_failed") throw new Error("expected select failure");
-    expect(shortCircuitAttempt.evidence).toEqual(expect.objectContaining({
-      kind: "all",
-      matched: false,
-      total: 2,
-    }));
+    if (shortCircuitAttempt.status !== "select_where_failed")
+      throw new Error("expected select failure");
+    expect(shortCircuitAttempt.evidence).toEqual(
+      expect.objectContaining({
+        kind: "all",
+        matched: false,
+        total: 2,
+      }),
+    );
     if (shortCircuitAttempt.evidence.kind !== "all") throw new Error("expected all evidence");
     expect(shortCircuitAttempt.evidence.evaluated).toHaveLength(1);
   });
@@ -255,9 +275,12 @@ describe("graph-native tooling", () => {
     expect(() => runGraphRuleEngine(utterance, spec)).toThrowError(/E_HRG_FEATURE_VALUE/);
     const result = whyNotRule(utterance, "invalid_duration", "s1");
     expect(result.status).toBe("not_fired");
-    expect(result.attempts).toContainEqual(expect.objectContaining({
-      status: "transaction_rejected", rule: "invalid_duration",
-    }));
+    expect(result.attempts).toContainEqual(
+      expect.objectContaining({
+        status: "transaction_rejected",
+        rule: "invalid_duration",
+      }),
+    );
   });
 
   it("records why-not after earlier rules in the same phase have committed", () => {
@@ -303,11 +326,14 @@ describe("graph-native tooling", () => {
     const result = whyNotRule(utterance, "later_requires_false", "s1");
     expect(result.status).toBe("not_fired");
     expect(result.attempts).toHaveLength(1);
-    expect(result.attempts[0]).toEqual(expect.objectContaining({
-      status: "select_where_failed",
-      journalLength: 2,
-    }));
-    if (result.attempts[0].status !== "select_where_failed") throw new Error("expected select failure");
+    expect(result.attempts[0]).toEqual(
+      expect.objectContaining({
+        status: "select_where_failed",
+        journalLength: 2,
+      }),
+    );
+    if (result.attempts[0].status !== "select_where_failed")
+      throw new Error("expected select failure");
     expect(result.attempts[0].evidence).toEqual(expect.objectContaining({ value: false }));
   });
 });

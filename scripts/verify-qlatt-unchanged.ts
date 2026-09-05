@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createProvenanceCollector } from "../src/provenance";
 /**
  * Proves qlatt-english still uses the GLOBAL CMU dictionary (no leak of the
  * dectalk per-frontend dict). CMU "hello" = HH AH0 L OW1 (schwa first vowel);
@@ -9,7 +10,6 @@
  * Read-only.
  */
 import { textToKlattTrack } from "../src/tts-frontend";
-import { createProvenanceCollector } from "../src/provenance";
 
 const words = process.argv.slice(2).length > 0 ? process.argv.slice(2) : ["hello", "nuclear"];
 

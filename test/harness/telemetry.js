@@ -1,18 +1,17 @@
 // test/harness/telemetry.js — Telemetry handling, meters, spike tracking
 
+import { getRunContext, updateDiagnostics } from "./diagnostics.js";
 import { state } from "./state.js";
-import { updateDiagnostics, getRunContext } from "./diagnostics.js";
 
 export function handleTelemetry(data) {
   // Handle PLSTEP burst events specially
-  if (data?.type === 'plstep') {
+  if (data?.type === "plstep") {
     // P1: Calculate proper scheduled relative time using runStartTime
     // data.time is the absolute scheduled time from the interpreter
     // Proper relative time = scheduled time - session start time
-    const scheduledRelTime = Number.isFinite(data.time) && state.runStartTime > 0
-      ? data.time - state.runStartTime
-      : null;
-    const { relTime, event, inWindow, trackEnd } = getRunContext();
+    const scheduledRelTime =
+      Number.isFinite(data.time) && state.runStartTime > 0 ? data.time - state.runStartTime : null;
+    const { relTime, event, inWindow } = getRunContext();
     // P1: Session isolation - only accept events with valid timing
     // Allow events during window OR if we're just starting (cold start)
     if (inWindow || !state.lastRun) {
@@ -25,7 +24,7 @@ export function handleTelemetry(data) {
         amplitudeDb: data.amplitudeDb,
         trigger: data.trigger,
         delta: data.delta,
-        phoneme: data.phoneme ?? event?.phoneme ?? '',
+        phoneme: data.phoneme ?? event?.phoneme ?? "",
         sessionId: state.lastRun?.sessionId ?? state.sessionId, // P1: Track session
       });
       // Keep only last 50 PLSTEP events
@@ -35,8 +34,10 @@ export function handleTelemetry(data) {
     return;
   }
   // Handle explosion reports from antiresonator instrumentation
-  if (data?.type === 'explosion') {
-    console.error(`[EXPLOSION REPORT] node=${data.node} outRms=${data.outRms?.toFixed(1)} inRms=${data.inRms?.toFixed(4)} freq=${data.freq} bw=${data.bw} gain=${data.gain} bypassAtZero=${data.bypassAtZero} sampleRate=${data.sampleRate}`);
+  if (data?.type === "explosion") {
+    console.error(
+      `[EXPLOSION REPORT] node=${data.node} outRms=${data.outRms?.toFixed(1)} inRms=${data.inRms?.toFixed(4)} freq=${data.freq} bw=${data.bw} gain=${data.gain} bypassAtZero=${data.bypassAtZero} sampleRate=${data.sampleRate}`,
+    );
     return;
   }
   if (!data?.node) return;
@@ -62,20 +63,12 @@ export function handleTelemetry(data) {
   });
   const prev = state.telemetryMax.get(data.node) || { rms: 0, peak: 0 };
   const nextMax = { ...prev };
-  if (
-    inWindow &&
-    Number.isFinite(rms) &&
-    rms > (prev.rms ?? 0)
-  ) {
+  if (inWindow && Number.isFinite(rms) && rms > (prev.rms ?? 0)) {
     nextMax.rms = rms;
     nextMax.rmsTime = relTime;
     nextMax.rmsPhoneme = event?.phoneme ?? "";
   }
-  if (
-    inWindow &&
-    Number.isFinite(peak) &&
-    peak > (prev.peak ?? 0)
-  ) {
+  if (inWindow && Number.isFinite(peak) && peak > (prev.peak ?? 0)) {
     nextMax.peak = peak;
     nextMax.peakTime = relTime;
     nextMax.peakPhoneme = event?.phoneme ?? "";
@@ -104,4 +97,3 @@ export function handleTelemetry(data) {
     updateDiagnostics();
   }, 250);
 }
-

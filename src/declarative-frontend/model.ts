@@ -24,7 +24,7 @@ export function normalizeTokenStatus(status: unknown): TokenStatusValue {
 
   if (typeof status === "string") {
     const key = status.toUpperCase();
-    if (Object.prototype.hasOwnProperty.call(STRING_TO_STATUS, key)) {
+    if (Object.hasOwn(STRING_TO_STATUS, key)) {
       return STRING_TO_STATUS[key as keyof typeof STRING_TO_STATUS];
     }
   }

@@ -1,7 +1,7 @@
 import { chromium } from "playwright-core";
 
-const CHROME_PATH = process.env.CHROME_PATH ||
-  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const CHROME_PATH =
+  process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));

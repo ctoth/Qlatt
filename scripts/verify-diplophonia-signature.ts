@@ -45,18 +45,30 @@ interface Exports {
   oversampled_glottal_source_new(sampleRate: number): number;
   oversampled_glottal_source_process(
     state: number,
-    f0Ptr: number, f0Len: number,
-    avPtr: number, avLen: number,
-    aturbPtr: number, aturbLen: number,
-    tiltPtr: number, tiltLen: number,
-    oqPtr: number, oqLen: number,
-    skewPtr: number, skewLen: number,
-    asymPtr: number, asymLen: number,
-    sourcePtr: number, sourceLen: number,
-    seedPtr: number, seedLen: number,
-    flutterPtr: number, flutterLen: number,
-    diplophoniaPtr: number, diplophoniaLen: number,
-    voicePtr: number, noisePtr: number,
+    f0Ptr: number,
+    f0Len: number,
+    avPtr: number,
+    avLen: number,
+    aturbPtr: number,
+    aturbLen: number,
+    tiltPtr: number,
+    tiltLen: number,
+    oqPtr: number,
+    oqLen: number,
+    skewPtr: number,
+    skewLen: number,
+    asymPtr: number,
+    asymLen: number,
+    sourcePtr: number,
+    sourceLen: number,
+    seedPtr: number,
+    seedLen: number,
+    flutterPtr: number,
+    flutterLen: number,
+    diplophoniaPtr: number,
+    diplophoniaLen: number,
+    voicePtr: number,
+    noisePtr: number,
     blockSize: number,
   ): void;
 }
@@ -100,9 +112,31 @@ function render(ex: Exports, diplophonia: number, numSamples: number): Float32Ar
     const n = Math.min(block, numSamples - written);
     ex.oversampled_glottal_source_process(
       state,
-      f0, 1, av, 1, aturb, 1, tilt, 1, oq, 1, skew, 1, asym, 1,
-      source, 1, seed, 1, fl, 1, di, 1,
-      voicePtr, noisePtr, n,
+      f0,
+      1,
+      av,
+      1,
+      aturb,
+      1,
+      tilt,
+      1,
+      oq,
+      1,
+      skew,
+      1,
+      asym,
+      1,
+      source,
+      1,
+      seed,
+      1,
+      fl,
+      1,
+      di,
+      1,
+      voicePtr,
+      noisePtr,
+      n,
     );
     // memory.buffer may have grown; build a fresh view each block.
     const view = new Float32Array(ex.memory.buffer, voicePtr, n);
@@ -205,8 +239,10 @@ function main(): void {
   // --- Time domain: alternating per-period peak amplitudes ---
   const cPeaks = perPeriodPeaks(cSig, T0, 12);
   const dPeaks = perPeriodPeaks(dSig, T0, 12);
-  const meanEven = (a: number[]) => a.filter((_, i) => i % 2 === 0).reduce((s, v) => s + v, 0) / Math.ceil(a.length / 2);
-  const meanOdd = (a: number[]) => a.filter((_, i) => i % 2 === 1).reduce((s, v) => s + v, 0) / Math.floor(a.length / 2);
+  const meanEven = (a: number[]) =>
+    a.filter((_, i) => i % 2 === 0).reduce((s, v) => s + v, 0) / Math.ceil(a.length / 2);
+  const meanOdd = (a: number[]) =>
+    a.filter((_, i) => i % 2 === 1).reduce((s, v) => s + v, 0) / Math.floor(a.length / 2);
   const cAltRatio = meanOdd(cPeaks) / meanEven(cPeaks);
   const dAltRatio = meanOdd(dPeaks) / meanEven(dPeaks);
 
@@ -218,21 +254,33 @@ function main(): void {
   const dFund = dftMag(dSig, SAMPLE_RATE, F0_HZ);
 
   console.log("=== DIPLOPHONIA (DI) signature verification ===");
-  console.log(`source params: F0=${F0_HZ} Hz, AV=${AV_DB} dB, OQ=${OQ}%, source=2 (natural), ${DURATION_S}s @ ${SAMPLE_RATE} Hz`);
+  console.log(
+    `source params: F0=${F0_HZ} Hz, AV=${AV_DB} dB, OQ=${OQ}%, source=2 (natural), ${DURATION_S}s @ ${SAMPLE_RATE} Hz`,
+  );
   console.log(`T0 = ${T0.toFixed(2)} samples (lag1=${lag1}, lag2=${lag2})`);
   console.log("");
   console.log("Period-doubling autocorrelation (normalized, peak near lag):");
-  console.log(`  DI=0  : r(1 period)=${cR1.toFixed(4)}  r(2 periods)=${cR2.toFixed(4)}  r2/r1=${(cR2 / cR1).toFixed(4)}`);
-  console.log(`  DI=50 : r(1 period)=${dR1.toFixed(4)}  r(2 periods)=${dR2.toFixed(4)}  r2/r1=${(dR2 / dR1).toFixed(4)}`);
+  console.log(
+    `  DI=0  : r(1 period)=${cR1.toFixed(4)}  r(2 periods)=${cR2.toFixed(4)}  r2/r1=${(cR2 / cR1).toFixed(4)}`,
+  );
+  console.log(
+    `  DI=50 : r(1 period)=${dR1.toFixed(4)}  r(2 periods)=${dR2.toFixed(4)}  r2/r1=${(dR2 / dR1).toFixed(4)}`,
+  );
   console.log("");
   console.log("Per-period peak |amplitude| (first 12 periods):");
   console.log(`  DI=0  : ${cPeaks.map((v) => v.toFixed(3)).join(", ")}`);
   console.log(`  DI=50 : ${dPeaks.map((v) => v.toFixed(3)).join(", ")}`);
-  console.log(`  odd/even peak ratio  DI=0=${cAltRatio.toFixed(3)}  DI=50=${dAltRatio.toFixed(3)} (DI=50 expected ~0.5 from amp=1-DI/100)`);
+  console.log(
+    `  odd/even peak ratio  DI=0=${cAltRatio.toFixed(3)}  DI=50=${dAltRatio.toFixed(3)} (DI=50 expected ~0.5 from amp=1-DI/100)`,
+  );
   console.log("");
   console.log("Spectrum DFT magnitude:");
-  console.log(`  DI=0  : @F0/2(${fHalf}Hz)=${cHalf.toFixed(2)}  @F0(${F0_HZ}Hz)=${cFund.toFixed(2)}  ratio(half/fund)=${(cHalf / cFund).toFixed(4)}`);
-  console.log(`  DI=50 : @F0/2(${fHalf}Hz)=${dHalf.toFixed(2)}  @F0(${F0_HZ}Hz)=${dFund.toFixed(2)}  ratio(half/fund)=${(dHalf / dFund).toFixed(4)}`);
+  console.log(
+    `  DI=0  : @F0/2(${fHalf}Hz)=${cHalf.toFixed(2)}  @F0(${F0_HZ}Hz)=${cFund.toFixed(2)}  ratio(half/fund)=${(cHalf / cFund).toFixed(4)}`,
+  );
+  console.log(
+    `  DI=50 : @F0/2(${fHalf}Hz)=${dHalf.toFixed(2)}  @F0(${F0_HZ}Hz)=${dFund.toFixed(2)}  ratio(half/fund)=${(dHalf / dFund).toFixed(4)}`,
+  );
   console.log("");
 
   // Assertions.

@@ -48,7 +48,7 @@ interface NormalizationPipeline {
 
 describe("text normalization YAML tables", () => {
   const tables = loadYamlDocumentSync<NormalizationTables>(
-    "/rules/frontends/qlatt-english/normalization-tables.yaml"
+    "/rules/frontends/qlatt-english/normalization-tables.yaml",
   );
 
   it("loads abbreviations with 30+ entries", () => {
@@ -99,10 +99,10 @@ describe("text normalization YAML tables", () => {
 
 describe("text normalization YAML pipeline", () => {
   const tables = loadYamlDocumentSync<NormalizationTables>(
-    "/rules/frontends/qlatt-english/normalization-tables.yaml"
+    "/rules/frontends/qlatt-english/normalization-tables.yaml",
   );
   const pipeline = loadYamlDocumentSync<NormalizationPipeline>(
-    "/rules/frontends/qlatt-english/normalization-pipeline.yaml"
+    "/rules/frontends/qlatt-english/normalization-pipeline.yaml",
   );
 
   it("defines steps in correct order", () => {
@@ -135,7 +135,9 @@ describe("text normalization YAML pipeline", () => {
   it("every step has a valid type", () => {
     const validTypes = new Set(["builtin", "regex_replace", "table_replace"]);
     for (const step of pipeline.steps) {
-      expect(validTypes.has(step.type), `step ${step.name} has invalid type '${step.type}'`).toBe(true);
+      expect(validTypes.has(step.type), `step ${step.name} has invalid type '${step.type}'`).toBe(
+        true,
+      );
     }
   });
 
@@ -174,7 +176,9 @@ describe("text normalization YAML pipeline", () => {
     expect(normalized).toBe("hello ~ world");
 
     const tokens = transcribeText(normalized, { transcriptionConfig: transcription });
-    expect(tokens.filter((token) => token.isPunctuation).map((token) => token.symbol)).toEqual(["~"]);
+    expect(tokens.filter((token) => token.isPunctuation).map((token) => token.symbol)).toEqual([
+      "~",
+    ]);
   });
 
   it("rejects table_replace steps that reference missing tables", () => {
@@ -191,7 +195,7 @@ describe("text normalization YAML pipeline", () => {
           ],
         },
         tables,
-      )
+      ),
     ).toThrow("E_NORMALIZE_CONFIG");
   });
 });
@@ -199,7 +203,7 @@ describe("text normalization YAML pipeline", () => {
 describe("normalizeText parity after declarativization", () => {
   it("handles mixed semiotic classes", () => {
     expect(normalizeText("Dr. Smith ordered 3 items on 12/25/2024 for $42.50")).toBe(
-      "doctor smith ordered three items on december twenty fifth two thousand twenty four for forty two dollars and fifty cents"
+      "doctor smith ordered three items on december twenty fifth two thousand twenty four for forty two dollars and fifty cents",
     );
   });
 

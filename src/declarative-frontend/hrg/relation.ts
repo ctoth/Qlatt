@@ -11,12 +11,7 @@
  * SylStructure tree). See design/beauty-synthesis/11-sota-frontend-architecture.md §2c.
  */
 import type { Item } from "./item";
-import type {
-  RelationKind,
-  RelationStamper,
-  RelationWrite,
-  RelationWriteInput,
-} from "./types";
+import type { RelationKind, RelationStamper, RelationWrite, RelationWriteInput } from "./types";
 
 /** Relation-specific topology for one item in one relation. */
 export class HrgNode {
@@ -96,7 +91,9 @@ export class Relation {
   /** Append an item to a flat list relation. */
   append(item: Item, input: RelationWriteInput): HrgNode {
     if (this.kind !== "list") {
-      throw new Error(`E_HRG_RELATION_KIND: append requires a 'list' relation, '${this.name}' is '${this.kind}'`);
+      throw new Error(
+        `E_HRG_RELATION_KIND: append requires a 'list' relation, '${this.name}' is '${this.kind}'`,
+      );
     }
     this._validateAttach(item);
     const previous = this.tail?.item ?? null;
@@ -111,7 +108,9 @@ export class Relation {
   /** Insert an item immediately after an existing node in a flat list relation. */
   insertAfter(previous: HrgNode, item: Item, input: RelationWriteInput): HrgNode {
     if (this.kind !== "list") {
-      throw new Error(`E_HRG_RELATION_KIND: insertAfter requires a 'list' relation, '${this.name}' is '${this.kind}'`);
+      throw new Error(
+        `E_HRG_RELATION_KIND: insertAfter requires a 'list' relation, '${this.name}' is '${this.kind}'`,
+      );
     }
     if (previous.relation !== this) {
       throw new Error(`E_HRG_PREVIOUS_RELATION: previous node is not in relation '${this.name}'`);
@@ -131,7 +130,9 @@ export class Relation {
   /** Add a top-level (root) item to a tree relation. */
   addRoot(item: Item, input: RelationWriteInput): HrgNode {
     if (this.kind !== "tree") {
-      throw new Error(`E_HRG_RELATION_KIND: addRoot requires a 'tree' relation, '${this.name}' is '${this.kind}'`);
+      throw new Error(
+        `E_HRG_RELATION_KIND: addRoot requires a 'tree' relation, '${this.name}' is '${this.kind}'`,
+      );
     }
     this._validateAttach(item);
     // In a tree relation only addRoot mutates head/tail (addDaughter never
@@ -149,7 +150,9 @@ export class Relation {
   /** Add `item` as the last daughter of `parent` in a tree relation. */
   addDaughter(parent: HrgNode, item: Item, input: RelationWriteInput): HrgNode {
     if (this.kind !== "tree") {
-      throw new Error(`E_HRG_RELATION_KIND: addDaughter requires a 'tree' relation, '${this.name}' is '${this.kind}'`);
+      throw new Error(
+        `E_HRG_RELATION_KIND: addDaughter requires a 'tree' relation, '${this.name}' is '${this.kind}'`,
+      );
     }
     if (parent.relation !== this) {
       throw new Error(`E_HRG_PARENT_RELATION: parent node is not in relation '${this.name}'`);

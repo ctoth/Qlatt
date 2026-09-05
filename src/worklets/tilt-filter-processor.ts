@@ -3,7 +3,13 @@
  * Wraps the tilt-filter WASM primitive
  * One-pole lowpass for spectral tilt control
  */
-import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
+import {
+  type BaseProcessorOptions,
+  computeRmsPeak,
+  initWasmModule,
+  resolveWasmUrl,
+  WasmBuffer,
+} from "./wasm-utils.js";
 
 interface TiltFilterWasmExports {
   memory: WebAssembly.Memory;
@@ -47,7 +53,13 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "tilt", defaultValue: 0, minValue: 0, maxValue: 34, automationRate: "k-rate" as const },
+      {
+        name: "tilt",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 34,
+        automationRate: "k-rate" as const,
+      },
     ];
   }
 
@@ -96,7 +108,7 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
   process(
     inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
     const input = inputs[0];

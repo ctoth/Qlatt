@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { describe, expect, it } from "vitest";
 import { runStrictCitationsCheck } from "../scripts/check-strict-citations";
 
 function runCli(args: string[]) {

@@ -1,34 +1,28 @@
 import { describe, expect, it } from "vitest";
 import {
-  readRms,
-  readPeak,
-  readFftPeakFreq,
   readBandEnergy,
-  readBandShare,
   readBandRatioDb,
+  readBandShare,
+  readFftPeakFreq,
+  readPeak,
+  readRms,
 } from "../../src/harness-diagnostics/measurement";
 
 /**
  * Mock AnalyserNode with known buffers for deterministic testing.
  * Only implements the subset of AnalyserNode used by measurement functions.
  */
-function mockAnalyser(
-  timeDomain: number[],
-  frequencyData?: number[],
-  fftSize?: number,
-) {
+function mockAnalyser(timeDomain: number[], frequencyData?: number[], fftSize?: number) {
   const fft = fftSize ?? timeDomain.length;
   return {
     fftSize: fft,
     frequencyBinCount: fft / 2,
     getFloatTimeDomainData(buf: Float32Array) {
-      for (let i = 0; i < buf.length && i < timeDomain.length; i++)
-        buf[i] = timeDomain[i];
+      for (let i = 0; i < buf.length && i < timeDomain.length; i++) buf[i] = timeDomain[i];
     },
     getFloatFrequencyData(buf: Float32Array) {
       if (!frequencyData) return;
-      for (let i = 0; i < buf.length && i < frequencyData.length; i++)
-        buf[i] = frequencyData[i];
+      for (let i = 0; i < buf.length && i < frequencyData.length; i++) buf[i] = frequencyData[i];
     },
   } as unknown as AnalyserNode;
 }
@@ -98,7 +92,7 @@ describe("readFftPeakFreq", () => {
     const sampleRate = 48000;
     const fftSize = 2048;
     const binCount = fftSize / 2;
-    const binWidth = sampleRate / fftSize; // 23.4375 Hz
+    const _binWidth = sampleRate / fftSize; // 23.4375 Hz
 
     // Put a global peak at bin 10 (~234 Hz) and a secondary peak at bin 200 (~4687 Hz)
     const freqData = new Array(binCount).fill(-100);
@@ -132,7 +126,7 @@ describe("readBandEnergy", () => {
     const sampleRate = 48000;
     const fftSize = 2048;
     const binCount = fftSize / 2;
-    const binWidth = sampleRate / fftSize; // 23.4375 Hz
+    const _binWidth = sampleRate / fftSize; // 23.4375 Hz
 
     // Put -10 dB in bins 40-49 (covering ~937–1171 Hz), -100 dB elsewhere
     const freqData = new Array(binCount).fill(-100);
@@ -201,10 +195,7 @@ describe("readBandShare", () => {
 
     const analyser = mockAnalyser([0], freqData, fftSize);
     const binWidth = sampleRate / fftSize;
-    const result = readBandShare(analyser, sampleRate, [
-      100 * binWidth,
-      110 * binWidth,
-    ]);
+    const result = readBandShare(analyser, sampleRate, [100 * binWidth, 110 * binWidth]);
 
     expect(result).toBeGreaterThan(0.45);
     expect(result).toBeLessThan(0.55);

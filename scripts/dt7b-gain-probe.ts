@@ -31,10 +31,7 @@ const FIELDS = ["AV", "AVS", "AH", "AF", "A1", "A2", "A3", "A4", "A5"] as const;
 // First voiced vowel frame (AV > 0) — the gain dB params live here.
 function firstVowelFrame(frames: KlattFrame[]): KlattFrame | undefined {
   return frames.find(
-    (f) =>
-      typeof f.params?.AV === "number" &&
-      f.params.AV > 0 &&
-      typeof f.params?.F4 === "number",
+    (f) => typeof f.params?.AV === "number" && f.params.AV > 0 && typeof f.params?.F4 === "number",
   );
 }
 

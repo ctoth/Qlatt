@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { loadYamlDocumentSync } from "../src/yaml-loader";
 import { evaluateExpression } from "../src/declarative-frontend/cel-expressions";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 /**
  * Phase 5.3 Stage 2: function-word membership is now declared once, in

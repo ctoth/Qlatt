@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest";
-import { textToKlattTrack } from "../src/tts-frontend";
+import { describe, expect, it } from "vitest";
 import { normalizeText } from "../src/g2p/text-normalize";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 describe("contraction probe", () => {
   it("handles curly/smart apostrophes same as ASCII", () => {
     const pairs = [
-      ["it's",  "it\u2019s"],   // RIGHT SINGLE QUOTATION MARK
+      ["it's", "it\u2019s"], // RIGHT SINGLE QUOTATION MARK
       ["don't", "don\u2019t"],
       ["can't", "can\u2019t"],
       ["she's", "she\u2019s"],
@@ -20,8 +20,14 @@ describe("contraction probe", () => {
 
       const tAscii = textToKlattTrack(ascii, 110, 30);
       const tCurly = textToKlattTrack(curly, 110, 30);
-      const pAscii = tAscii.map(e => e.phoneme).filter(Boolean).join(" ");
-      const pCurly = tCurly.map(e => e.phoneme).filter(Boolean).join(" ");
+      const pAscii = tAscii
+        .map((e) => e.phoneme)
+        .filter(Boolean)
+        .join(" ");
+      const pCurly = tCurly
+        .map((e) => e.phoneme)
+        .filter(Boolean)
+        .join(" ");
       expect(pCurly).toBe(pAscii);
     }
   }, 30_000);

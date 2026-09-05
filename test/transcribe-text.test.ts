@@ -1,11 +1,10 @@
 import { afterAll, describe, expect, it, vi } from "vitest";
 import {
-  transcribeText,
-  isPunctuationToken,
   getDiagnosticSymbolPronunciation,
+  isPunctuationToken,
   shouldUseDiagnosticSymbolMode,
+  transcribeText,
 } from "../src/transcribe-text";
-import type { TranscriptionToken } from "../src/tts-frontend-types";
 
 describe("transcribe-text", () => {
   const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -55,7 +54,7 @@ describe("transcribe-text", () => {
             letter_names: {},
             punctuation_tokens: [],
           },
-        })
+        }),
       ).toThrow("E_TRANSCRIPTION_CONFIG_REQUIRED");
     });
 
@@ -96,7 +95,7 @@ describe("transcribe-text", () => {
       expect(result.length).toBeGreaterThan(0);
       expect(new Set(result.map((t) => t.word))).toEqual(new Set(["adl-tabatabai"]));
       const missWarnings = warnSpy.mock.calls.filter((args) =>
-        String(args[0]).includes('not found in dictionary')
+        String(args[0]).includes("not found in dictionary"),
       );
       expect(missWarnings).toHaveLength(0);
     });
@@ -107,7 +106,7 @@ describe("transcribe-text", () => {
       expect(result.length).toBeGreaterThan(0);
       expect(new Set(result.map((t) => t.word))).toEqual(new Set(["kebab-n-kurry"]));
       const missWarnings = warnSpy.mock.calls.filter((args) =>
-        String(args[0]).includes('not found in dictionary')
+        String(args[0]).includes("not found in dictionary"),
       );
       expect(missWarnings).toHaveLength(0);
     });
@@ -118,7 +117,7 @@ describe("transcribe-text", () => {
       expect(result.length).toBeGreaterThan(0);
       expect(new Set(result.map((t) => t.word))).toEqual(new Set(["trente-et-quarante"]));
       const missWarnings = warnSpy.mock.calls.filter((args) =>
-        String(args[0]).includes('not found in dictionary')
+        String(args[0]).includes("not found in dictionary"),
       );
       expect(missWarnings).toHaveLength(0);
     });
@@ -129,7 +128,7 @@ describe("transcribe-text", () => {
       expect(result.length).toBeGreaterThan(0);
       expect(new Set(result.map((t) => t.word))).toEqual(new Set(["rock'n'roll"]));
       const missWarnings = warnSpy.mock.calls.filter((args) =>
-        String(args[0]).includes('not found in dictionary')
+        String(args[0]).includes("not found in dictionary"),
       );
       expect(missWarnings).toHaveLength(0);
     });
@@ -139,7 +138,7 @@ describe("transcribe-text", () => {
       const result = transcribeText("cuse");
       expect(result.length).toBeGreaterThan(0);
       const missWarnings = warnSpy.mock.calls.filter((args) =>
-        String(args[0]).includes('Word \"cuse\" not found in dictionary')
+        String(args[0]).includes('Word "cuse" not found in dictionary'),
       );
       expect(missWarnings).toHaveLength(0);
     });
@@ -149,7 +148,7 @@ describe("transcribe-text", () => {
       const result = transcribeText("comin");
       expect(result.length).toBeGreaterThan(0);
       const missWarnings = warnSpy.mock.calls.filter((args) =>
-        String(args[0]).includes('Word \"comin\" not found in dictionary')
+        String(args[0]).includes('Word "comin" not found in dictionary'),
       );
       expect(missWarnings).toHaveLength(0);
     });
@@ -159,7 +158,7 @@ describe("transcribe-text", () => {
       const result = transcribeText("cr");
       expect(result.length).toBeGreaterThan(0);
       const missWarnings = warnSpy.mock.calls.filter((args) =>
-        String(args[0]).includes('Word \"cr\" not found in dictionary')
+        String(args[0]).includes('Word "cr" not found in dictionary'),
       );
       expect(missWarnings).toHaveLength(0);
     });
@@ -169,7 +168,7 @@ describe("transcribe-text", () => {
       const result = transcribeText("s'");
       expect(result.length).toBeGreaterThan(0);
       const missWarnings = warnSpy.mock.calls.filter((args) =>
-        String(args[0]).includes('Word \"s\'\" not found in dictionary')
+        String(args[0]).includes('Word "s\'" not found in dictionary'),
       );
       expect(missWarnings).toHaveLength(0);
     });

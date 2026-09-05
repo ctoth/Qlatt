@@ -1,5 +1,17 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
+import { isPlainObject } from "../src/yaml-loader";
+
+function readDispatch(value: unknown): unknown {
+  if (!isPlainObject(value) || !isPlainObject(value.r) || !Array.isArray(value.r.apply)) {
+    throw new Error("parsed fixture must contain rules.r.apply");
+  }
+  const firstEffect = value.r.apply[0];
+  if (!isPlainObject(firstEffect) || !("dispatch" in firstEffect)) {
+    throw new Error("parsed fixture must contain rules.r.apply[0].dispatch");
+  }
+  return firstEffect.dispatch;
+}
 
 /**
  * Phase 5.2 sub-task A: the `foreach:` rule-template primitive.
@@ -46,20 +58,26 @@ describe("foreach template expansion", () => {
       },
     });
 
-    const dispatch = (spec.rules as any).r.apply[0].dispatch;
+    const dispatch = readDispatch(spec.rules);
     expect(dispatch).toEqual([
-      { when: "place == 'velar' && back_vowel", value: "params.policy.place_loci.velar.locus_back" },
-      { when: "place == 'velar' && front_vowel", value: "params.policy.place_loci.velar.locus_front" },
-      { when: "place == 'bilabial' && front_vowel", value: "params.policy.place_loci.bilabial.locus_front" },
+      {
+        when: "place == 'velar' && back_vowel",
+        value: "params.policy.place_loci.velar.locus_back",
+      },
+      {
+        when: "place == 'velar' && front_vowel",
+        value: "params.policy.place_loci.velar.locus_front",
+      },
+      {
+        when: "place == 'bilabial' && front_vowel",
+        value: "params.policy.place_loci.bilabial.locus_front",
+      },
       { default: "0" },
     ]);
   });
 
   it("leaves rules without a foreach directive untouched", () => {
-    const dispatch = [
-      { when: "a", value: "1" },
-      { default: "2" },
-    ];
+    const dispatch = [{ when: "a", value: "1" }, { default: "2" }];
     const spec = parseDslSpec({
       version: "v1",
       rules: {
@@ -71,7 +89,7 @@ describe("foreach template expansion", () => {
         },
       },
     });
-    expect((spec.rules as any).r.apply[0].dispatch).toEqual(dispatch);
+    expect(readDispatch(spec.rules)).toEqual(dispatch);
   });
 
   it("throws on a malformed foreach (empty list)", () => {
@@ -80,11 +98,13 @@ describe("foreach template expansion", () => {
         version: "v1",
         rules: {
           r: {
-            apply: [{ field: "F2", op: "set", dispatch: [{ foreach: [], template: { when: "x" } }] }],
+            apply: [
+              { field: "F2", op: "set", dispatch: [{ foreach: [], template: { when: "x" } }] },
+            ],
             citations: ["x"],
           },
         },
-      })
+      }),
     ).toThrow(/E_FOREACH_INVALID/);
   });
 
@@ -98,7 +118,7 @@ describe("foreach template expansion", () => {
             citations: ["x"],
           },
         },
-      })
+      }),
     ).toThrow(/E_FOREACH_INVALID/);
   });
 });

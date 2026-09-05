@@ -19,8 +19,11 @@
  *    span→Segment alignment needs.
  */
 
-import type { ProvenanceCollector, DecisionRecord } from "../provenance";
+import type { Item, ItemTypeSchema, Utterance } from "../declarative-frontend/hrg";
+import type { DecisionRecord, ProvenanceCollector } from "../provenance";
 import { createProvenanceCollector } from "../provenance";
+import type { CompiledAffect } from "./affect";
+import { compileAffect } from "./affect";
 import type {
   AffectSpec,
   AnchorRange,
@@ -32,13 +35,9 @@ import type {
 } from "./direction-track";
 import {
   GESTURE_LIBRARY,
-  NEUTRAL_VQ,
   materializeVoiceQualityDelta,
   scaleVoiceQualityDelta,
 } from "./direction-track";
-import type { CompiledAffect } from "./affect";
-import { compileAffect } from "./affect";
-import type { Item, ItemTypeSchema, Utterance } from "../declarative-frontend/hrg";
 
 /** The kind of resolved direction (drives the tag + downstream HRG relation). */
 export type DirectionKind =
@@ -270,7 +269,10 @@ const EMPHASIS_CITATION = "Pierrehumbert_1980";
 const BREAK_CITATION = "Crystal_House_1988";
 
 /** Parse + lower a DirectionInput into typed directions and provenance. */
-export function parseDirectionInput(input: DirectionInput, options: ParseOptions = {}): ParseResult {
+export function parseDirectionInput(
+  input: DirectionInput,
+  options: ParseOptions = {},
+): ParseResult {
   const provenance = options.provenance ?? createProvenanceCollector();
   const score = tokenizeScore(input.score.text);
   const directions: Direction[] = [];
@@ -284,7 +286,8 @@ export function parseDirectionInput(input: DirectionInput, options: ParseOptions
       stage: "frontend",
       type: "voice_identity",
       subject: "utterance",
-      reason: `Voice identity${global.voice.name ? ` '${global.voice.name}'` : ""}` +
+      reason:
+        `Voice identity${global.voice.name ? ` '${global.voice.name}'` : ""}` +
         `${global.voice.sex ? ` (${global.voice.sex})` : ""}` +
         `${global.voice.baseF0Hz ? ` baseF0=${global.voice.baseF0Hz}Hz` : ""}`,
       citations: ["Cahn_1990"],
@@ -305,7 +308,14 @@ export function parseDirectionInput(input: DirectionInput, options: ParseOptions
   // 2. Global affect (the (c) base case). Absent ⇒ neutral ⇒ nothing emitted.
   let globalAffectDecisionId: string | undefined;
   if (global?.affect) {
-    const dir = lowerAffect(provenance, global.affect, "global_affect", "utterance", sex, undefined);
+    const dir = lowerAffect(
+      provenance,
+      global.affect,
+      "global_affect",
+      "utterance",
+      sex,
+      undefined,
+    );
     dir.precedence = 0;
     dir.declarationOrder = -1;
     directions.push(dir);
@@ -330,10 +340,7 @@ export function parseDirectionInput(input: DirectionInput, options: ParseOptions
 }
 
 /** Attach already-resolved Direction Track records to a static schema-bound HRG. */
-export function attachDirectionsToUtterance(
-  parsed: ParseResult,
-  utterance: Utterance,
-): Item[] {
+export function attachDirectionsToUtterance(parsed: ParseResult, utterance: Utterance): Item[] {
   if (utterance.provenance !== parsed.provenance) {
     throw new Error(
       "E_DIRECTION_HRG_PROVENANCE: attachment requires the ParseResult provenance collector",
@@ -439,7 +446,9 @@ function lowerSpan(
   const subject = tokenSubject(range);
 
   if (span.affect) {
-    out.push(lowerAffect(provenance, span.affect, "local_affect", range, sex, globalAffectDecisionId));
+    out.push(
+      lowerAffect(provenance, span.affect, "local_affect", range, sex, globalAffectDecisionId),
+    );
   }
 
   if (span.emphasis) {
@@ -486,8 +495,7 @@ function lowerSpan(
   }
 
   if (span.pitch) {
-    const f0Scale =
-      span.pitch.semitones === undefined ? 1 : 2 ** (span.pitch.semitones / 12);
+    const f0Scale = span.pitch.semitones === undefined ? 1 : 2 ** (span.pitch.semitones / 12);
     const f0VarianceScale = span.pitch.rangeScale ?? 1;
     const delta = materializeVoiceQualityDelta({
       f0Scale,

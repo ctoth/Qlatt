@@ -2,9 +2,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  type DectalkTraceFrame,
   dectalkFrameStartSec,
   parseDectalkTraceFile,
-  type DectalkTraceFrame,
 } from "./dectalk-trace";
 
 type Args = {
@@ -16,14 +16,17 @@ type Args = {
 };
 
 type CompareJson = {
-  params?: Record<string, {
-    compared: number;
-    meanAbs: number;
-    maxAbs: number;
-    maxFrame: number | null;
-    oracleAtMax: number | null;
-    qlattAtMax: number | null;
-  }>;
+  params?: Record<
+    string,
+    {
+      compared: number;
+      meanAbs: number;
+      maxAbs: number;
+      maxFrame: number | null;
+      oracleAtMax: number | null;
+      qlattAtMax: number | null;
+    }
+  >;
   oraclePhoneGroups?: Array<{
     phoneIndex: number;
     firstFrame: number;
@@ -74,7 +77,9 @@ function parseArgs(argv: string[]): Args {
   const runRoot = flags.get("run-root");
   const phraseId = flags.get("phrase-id");
   if (!runRoot || !phraseId) {
-    throw new Error("Usage: summarize-phrase-window --run-root dir --phrase-id id [--param name] [--start-sec n] [--end-sec n]");
+    throw new Error(
+      "Usage: summarize-phrase-window --run-root dir --phrase-id id [--param name] [--start-sec n] [--end-sec n]",
+    );
   }
 
   return {
@@ -122,7 +127,10 @@ function main(): void {
   const qlattParam = args.param === "AP" ? "AH" : args.param === "TLT" ? "TL" : args.param;
   const phraseRoot = path.join(args.runRoot, args.phraseId);
   const comparePath = path.join(args.runRoot, `${args.phraseId}-trace-compare.json`);
-  const parentComparePath = path.join(path.dirname(args.runRoot), `${args.phraseId}-trace-compare.json`);
+  const parentComparePath = path.join(
+    path.dirname(args.runRoot),
+    `${args.phraseId}-trace-compare.json`,
+  );
   const nestedComparePath = path.join(phraseRoot, "compare.json");
   const oracleTracePath = path.join(phraseRoot, "oracle", "oracle.trace.jsonl");
   const qlattPayloadPath = path.join(phraseRoot, "qlatt", "qlatt.json");
@@ -171,7 +179,9 @@ function main(): void {
   console.log("\nQlatt track runs:");
   for (const run of compare.qlattTrackRuns ?? []) {
     if (run.endSec < args.startSec || run.startSec > args.endSec) continue;
-    const events = qlattWindow.filter(({ timeSec }) => timeSec != null && timeSec >= run.startSec && timeSec <= run.endSec);
+    const events = qlattWindow.filter(
+      ({ timeSec }) => timeSec != null && timeSec >= run.startSec && timeSec <= run.endSec,
+    );
     const paramValues = events
       .map(({ event }) => finiteNumber(event.params?.[qlattParam]))
       .filter((value): value is number => value != null);
@@ -182,16 +192,17 @@ function main(): void {
 
   console.log("\nFrame window:");
   for (const { frame, frameIndex, timeSec } of oracleWindow) {
-    const qlattEvent = qlattWindow.reduce<{ eventIndex: number; value: number | null } | null>((best, candidate) => {
-      if (
-        candidate.timeSec == null
-        || candidate.timeSec > timeSec + EVENT_TIME_EPSILON_SEC
-      ) return best;
-      return {
-        eventIndex: candidate.eventIndex,
-        value: finiteNumber(candidate.event.params?.[qlattParam]),
-      };
-    }, null);
+    const qlattEvent = qlattWindow.reduce<{ eventIndex: number; value: number | null } | null>(
+      (best, candidate) => {
+        if (candidate.timeSec == null || candidate.timeSec > timeSec + EVENT_TIME_EPSILON_SEC)
+          return best;
+        return {
+          eventIndex: candidate.eventIndex,
+          value: finiteNumber(candidate.event.params?.[qlattParam]),
+        };
+      },
+      null,
+    );
     const oracleValue = oracleParameterValue(frame, args.param);
     const qlattValue = qlattEvent?.value ?? null;
     const delta = oracleValue != null && qlattValue != null ? qlattValue - oracleValue : null;

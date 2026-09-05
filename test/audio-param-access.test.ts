@@ -8,8 +8,8 @@
  *
  * Also covers applyParamValue (setValueAtTime preference, .value fallback).
  */
-import { describe, it, expect, vi } from 'vitest';
-import { getAudioParam, applyParamValue } from '../src/audio-param-utils';
+import { describe, expect, it, vi } from "vitest";
+import { applyParamValue, getAudioParam } from "../src/audio-param-utils";
 
 // ---------------------------------------------------------------------------
 // Mock helpers
@@ -60,41 +60,41 @@ function mockWorkletNode(paramEntries: [string, ReturnType<typeof mockAudioParam
 // getAudioParam tests
 // ---------------------------------------------------------------------------
 
-describe('getAudioParam', () => {
-  it('finds gain on GainNode-like object', () => {
+describe("getAudioParam", () => {
+  it("finds gain on GainNode-like object", () => {
     const node = mockGainNode();
-    const param = getAudioParam(node as unknown as AudioNode, 'gain');
+    const param = getAudioParam(node as unknown as AudioNode, "gain");
     expect(param).toBe(node.gain);
   });
 
-  it('finds offset on ConstantSourceNode-like object', () => {
+  it("finds offset on ConstantSourceNode-like object", () => {
     const node = mockConstantSourceNode();
-    const param = getAudioParam(node as unknown as AudioNode, 'offset');
+    const param = getAudioParam(node as unknown as AudioNode, "offset");
     expect(param).toBe(node.offset);
   });
 
-  it('finds named param on AudioWorkletNode-like object via parameters.get', () => {
+  it("finds named param on AudioWorkletNode-like object via parameters.get", () => {
     const freqParam = mockAudioParam(440);
-    const node = mockWorkletNode([['frequency', freqParam]]);
-    const param = getAudioParam(node as unknown as AudioNode, 'frequency');
+    const node = mockWorkletNode([["frequency", freqParam]]);
+    const param = getAudioParam(node as unknown as AudioNode, "frequency");
     expect(param).toBe(freqParam);
   });
 
-  it('returns null for unknown param name on GainNode', () => {
+  it("returns null for unknown param name on GainNode", () => {
     const node = mockGainNode();
-    const param = getAudioParam(node as unknown as AudioNode, 'frequency');
+    const param = getAudioParam(node as unknown as AudioNode, "frequency");
     expect(param).toBeNull();
   });
 
-  it('returns null for unknown param name on WorkletNode', () => {
-    const node = mockWorkletNode([['frequency', mockAudioParam()]]);
-    const param = getAudioParam(node as unknown as AudioNode, 'nonexistent');
+  it("returns null for unknown param name on WorkletNode", () => {
+    const node = mockWorkletNode([["frequency", mockAudioParam()]]);
+    const param = getAudioParam(node as unknown as AudioNode, "nonexistent");
     expect(param).toBeNull();
   });
 
-  it('returns null for plain object with no recognized AudioParam properties', () => {
+  it("returns null for plain object with no recognized AudioParam properties", () => {
     const node = { context: { currentTime: 0 }, connect() {}, disconnect() {} };
-    const param = getAudioParam(node as unknown as AudioNode, 'gain');
+    const param = getAudioParam(node as unknown as AudioNode, "gain");
     expect(param).toBeNull();
   });
 });
@@ -103,47 +103,46 @@ describe('getAudioParam', () => {
 // applyParamValue tests
 // ---------------------------------------------------------------------------
 
-describe('applyParamValue', () => {
-  it('sets value via setValueAtTime when available', () => {
+describe("applyParamValue", () => {
+  it("sets value via setValueAtTime when available", () => {
     const node = mockGainNode();
-    const result = applyParamValue(node as unknown as AudioNode, 'gain', 0.5, 1.0);
+    const result = applyParamValue(node as unknown as AudioNode, "gain", 0.5, 1.0);
     expect(result).toBe(true);
     expect(node.gain.setValueAtTime).toHaveBeenCalledWith(0.5, 1.0);
   });
 
-  it('uses node.context.currentTime when time is not provided', () => {
+  it("uses node.context.currentTime when time is not provided", () => {
     const node = mockGainNode();
     (node.context as { currentTime: number }).currentTime = 2.5;
-    const result = applyParamValue(node as unknown as AudioNode, 'gain', 0.8);
+    const result = applyParamValue(node as unknown as AudioNode, "gain", 0.8);
     expect(result).toBe(true);
     expect(node.gain.setValueAtTime).toHaveBeenCalledWith(0.8, 2.5);
   });
 
-  it('falls back to .value assignment when setValueAtTime unavailable', () => {
-    const param = { value: 0 };  // no setValueAtTime
+  it("falls back to .value assignment when setValueAtTime unavailable", () => {
+    const param = { value: 0 }; // no setValueAtTime
     const node = {
       gain: param,
       context: { currentTime: 0 },
       connect() {},
       disconnect() {},
     };
-    const result = applyParamValue(node as unknown as AudioNode, 'gain', 0.7);
+    const result = applyParamValue(node as unknown as AudioNode, "gain", 0.7);
     expect(result).toBe(true);
     expect(param.value).toBe(0.7);
   });
 
-  it('returns false when param is not found', () => {
+  it("returns false when param is not found", () => {
     const node = { context: { currentTime: 0 }, connect() {}, disconnect() {} };
-    const result = applyParamValue(node as unknown as AudioNode, 'gain', 1.0);
+    const result = applyParamValue(node as unknown as AudioNode, "gain", 1.0);
     expect(result).toBe(false);
   });
 
-  it('works with AudioWorkletNode-like parameters', () => {
+  it("works with AudioWorkletNode-like parameters", () => {
     const freqParam = mockAudioParam(440);
-    const node = mockWorkletNode([['frequency', freqParam]]);
-    const result = applyParamValue(node as unknown as AudioNode, 'frequency', 880, 3.0);
+    const node = mockWorkletNode([["frequency", freqParam]]);
+    const result = applyParamValue(node as unknown as AudioNode, "frequency", 880, 3.0);
     expect(result).toBe(true);
     expect(freqParam.setValueAtTime).toHaveBeenCalledWith(880, 3.0);
   });
-
 });

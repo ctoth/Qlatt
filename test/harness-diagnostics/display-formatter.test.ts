@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  type DisplayState,
   formatDisplay,
   formatSection,
-  DisplayState,
 } from "../../src/harness-diagnostics/display-formatter";
 import type {
   CheckResult,
@@ -46,7 +46,10 @@ describe("display-formatter", () => {
   // 1. check_results section: pass shows [OK]
   it("check_results section: pass shows [OK]", () => {
     const results = new Map<string, CheckResult>();
-    results.set("volume_ok", makeCheckResult({ name: "volume_ok", status: "pass", message: "Volume in range" }));
+    results.set(
+      "volume_ok",
+      makeCheckResult({ name: "volume_ok", status: "pass", message: "Volume in range" }),
+    );
     const state = makeState({ checkResults: results });
     const lines = formatSection(checkSection, state);
     const text = lines.join("\n");
@@ -58,7 +61,10 @@ describe("display-formatter", () => {
   // 2. check_results section: warn shows [!!]
   it("check_results section: warn shows [!!] with value", () => {
     const results = new Map<string, CheckResult>();
-    results.set("drift", makeCheckResult({ name: "drift", status: "warn", message: "Drift detected", value: 0.005 }));
+    results.set(
+      "drift",
+      makeCheckResult({ name: "drift", status: "warn", message: "Drift detected", value: 0.005 }),
+    );
     const state = makeState({ checkResults: results });
     const lines = formatSection(checkSection, state);
     const text = lines.join("\n");
@@ -87,7 +93,10 @@ describe("display-formatter", () => {
   // 3. check_results section: fail shows [FAIL]
   it("check_results section: fail shows [FAIL]", () => {
     const results = new Map<string, CheckResult>();
-    results.set("silence", makeCheckResult({ name: "silence", status: "fail", message: "No output" }));
+    results.set(
+      "silence",
+      makeCheckResult({ name: "silence", status: "fail", message: "No output" }),
+    );
     const state = makeState({ checkResults: results });
     const lines = formatSection(checkSection, state);
     expect(lines.join("\n")).toContain("[FAIL]");
@@ -129,7 +138,10 @@ describe("display-formatter", () => {
   // 4. check_results section: skip shows [SKIP]
   it("check_results section: skip shows [SKIP]", () => {
     const results = new Map<string, CheckResult>();
-    results.set("optional", makeCheckResult({ name: "optional", status: "skip", message: "Skipped" }));
+    results.set(
+      "optional",
+      makeCheckResult({ name: "optional", status: "skip", message: "Skipped" }),
+    );
     const state = makeState({ checkResults: results });
     const lines = formatSection(checkSection, state);
     expect(lines.join("\n")).toContain("[SKIP]");
@@ -138,7 +150,10 @@ describe("display-formatter", () => {
   // 5. check_results section: pending shows [...]
   it("check_results section: pending shows [...]", () => {
     const results = new Map<string, CheckResult>();
-    results.set("waiting", makeCheckResult({ name: "waiting", status: "pending", message: "Waiting" }));
+    results.set(
+      "waiting",
+      makeCheckResult({ name: "waiting", status: "pending", message: "Waiting" }),
+    );
     const state = makeState({ checkResults: results });
     const lines = formatSection(checkSection, state);
     expect(lines.join("\n")).toContain("[...]");
@@ -169,7 +184,7 @@ describe("display-formatter", () => {
     const section: DisplaySection = { id: "events", source: "track_events", range: [0, 2] };
     const lines = formatSection(section, state);
     // Filter out header/separator lines — event lines contain phoneme names
-    const eventLines = lines.filter(l => track.some(e => e.phoneme && l.includes(e.phoneme!)));
+    const eventLines = lines.filter((l) => track.some((e) => e.phoneme && l.includes(e.phoneme!)));
     expect(eventLines).toHaveLength(2);
   });
 
@@ -186,7 +201,7 @@ describe("display-formatter", () => {
     const state = makeState({ run });
     const section: DisplaySection = { id: "events", source: "track_events", range: [-2, null] };
     const lines = formatSection(section, state);
-    const eventLines = lines.filter(l => track.some(e => e.phoneme && l.includes(e.phoneme!)));
+    const eventLines = lines.filter((l) => track.some((e) => e.phoneme && l.includes(e.phoneme!)));
     expect(eventLines).toHaveLength(2);
   });
 
@@ -286,8 +301,16 @@ describe("display-formatter", () => {
       sessionId: 1,
       startTime: 0,
       track: [
-        { time: 0, phoneme: "AH", params: { F1: 500, F2: 1500, F3: 2500, B1: 100, B2: 100, B3: 100 } },
-        { time: 0.1, phoneme: "IY", params: { F1: 310, F2: 2322, F3: 3000, B1: 60, B2: 90, B3: 120 } },
+        {
+          time: 0,
+          phoneme: "AH",
+          params: { F1: 500, F2: 1500, F3: 2500, B1: 100, B2: 100, B3: 100 },
+        },
+        {
+          time: 0.1,
+          phoneme: "IY",
+          params: { F1: 310, F2: 2322, F3: 3000, B1: 60, B2: 90, B3: 120 },
+        },
       ],
     };
     const section: DisplaySection = { id: "formants", source: "formant_tracking" };
@@ -325,7 +348,10 @@ describe("display-formatter", () => {
       ],
     };
     const section: DisplaySection = { id: "gains", source: "gain_derivation" };
-    const text = formatSection(section, makeState({ run, sliderParams: { parallelGainScale: 1, masterGain: 1 } })).join("\n");
+    const text = formatSection(
+      section,
+      makeState({ run, sliderParams: { parallelGainScale: 1, masterGain: 1 } }),
+    ).join("\n");
     expect(text).toContain("fricGain:");
     expect(text).toContain("parallelScale=1.000");
   });

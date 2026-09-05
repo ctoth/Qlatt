@@ -12,21 +12,21 @@
  * 5. PLSTEP burst transients for plosive releases
  */
 
-import { createConfiguredEvaluator } from './semantics/evaluator-factory';
-import type { SemanticsDocument, ParamValue, EvaluationContext } from './semantics/types';
-import type { KlattRuntime, BindingSpec } from './klatt-runtime';
-import { dbToLinear } from './builtin-functions';
-import { getAudioParam } from './audio-param-utils';
+import { getAudioParam } from "./audio-param-utils";
+import { dbToLinear } from "./builtin-functions";
+import type { BindingSpec, KlattRuntime } from "./klatt-runtime";
+import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
+import type { EvaluationContext, ParamValue, SemanticsDocument } from "./semantics/types";
 
 // =============================================================================
 // Types
 // =============================================================================
 
 export interface KlattFrame {
-  time: number;                          // Seconds from utterance start
-  phoneme?: string;                      // Optional label (e.g., "AH1", "P_REL")
-  word?: string;                         // Optional source word
-  params: Record<string, number>;        // Klatt parameters
+  time: number; // Seconds from utterance start
+  phoneme?: string; // Optional label (e.g., "AH1", "P_REL")
+  word?: string; // Optional source word
+  params: Record<string, number>; // Klatt parameters
 }
 
 export interface KlattTrack {
@@ -54,7 +54,7 @@ type ResolvedBindingList = ResolvedBinding[];
 type CategorizedBinding = {
   name: string;
   param: AudioParam;
-  source: 'realized' | 'passthrough';
+  source: "realized" | "passthrough";
   ramp: boolean;
 };
 
@@ -63,7 +63,7 @@ type ScheduleEntry = {
   time: number;
   param: AudioParam;
   value: number;
-  ramp: boolean;  // true = linearRampToValueAtTime, false = setValueAtTime
+  ramp: boolean; // true = linearRampToValueAtTime, false = setValueAtTime
 };
 
 export interface KlattInterpreterOptions {
@@ -123,32 +123,22 @@ export function buildStaticContext(
   for (const [name, value] of paramDefaults) {
     ctx[name] = value;
   }
-  ctx['sampleRate'] = sampleRate;
+  ctx["sampleRate"] = sampleRate;
   return ctx;
 }
 
-function requireFiniteConstant(
-  constants: Record<string, unknown>,
-  name: string,
-): number {
+function requireFiniteConstant(constants: Record<string, unknown>, name: string): number {
   const value = constants[name];
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    throw new Error(
-      `E_SEMANTICS_CONSTANT_REQUIRED: constants.${name} must be a finite number`,
-    );
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`E_SEMANTICS_CONSTANT_REQUIRED: constants.${name} must be a finite number`);
   }
   return value;
 }
 
-function requireFiniteRealizedValue(
-  values: Record<string, ParamValue>,
-  name: string,
-): number {
+function requireFiniteRealizedValue(values: Record<string, ParamValue>, name: string): number {
   const value = values[name];
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    throw new Error(
-      `E_SEMANTICS_VALUE_REQUIRED: realized ${name} must be a finite number`,
-    );
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`E_SEMANTICS_VALUE_REQUIRED: realized ${name} must be a finite number`);
   }
   return value;
 }
@@ -185,13 +175,7 @@ export function buildFrameContext(
 // =============================================================================
 
 export function createKlattInterpreter(options: KlattInterpreterOptions): KlattInterpreter {
-  const {
-    audioContext,
-    runtime,
-    semantics,
-    logger = () => {},
-    telemetryHandler,
-  } = options;
+  const { audioContext, runtime, semantics, logger = () => {}, telemetryHandler } = options;
 
   const log = (msg: string) => logger(`[klatt-interpreter] ${msg}`);
 
@@ -205,7 +189,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   const paramDefaults = new Map<string, number>();
   if (semantics.params) {
     for (const [name, def] of Object.entries(semantics.params)) {
-      if (typeof def === 'object' && def !== null && 'default' in def) {
+      if (typeof def === "object" && def !== null && "default" in def) {
         paramDefaults.set(name, def.default as number);
       }
     }
@@ -224,7 +208,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   // Default scheduling mode from semantics document.
   // 'ramp' = Klatt 1980 inter-frame linear interpolation (linearRampToValueAtTime).
   // 'step' = legacy behavior (setValueAtTime).
-  const defaultRamp = semantics.defaultScheduling === 'ramp';
+  const defaultRamp = semantics.defaultScheduling === "ramp";
 
   // Build per-rule scheduling overrides from semantics realize rules.
   // step: true forces setValueAtTime (binary switches).
@@ -233,7 +217,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   const rampParams = new Set<string>();
   if (semantics.realize) {
     for (const [name, rule] of Object.entries(semantics.realize)) {
-      if (typeof rule === 'object' && rule !== null) {
+      if (typeof rule === "object" && rule !== null) {
         if ((rule as { step?: boolean }).step === true) {
           stepParams.add(name);
         } else if ((rule as { ramp?: boolean }).ramp === true) {
@@ -272,20 +256,23 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   let stepCount = 0;
 
   for (const [name, bindingList] of bindings) {
-    const source: CategorizedBinding['source'] = realizedNames.has(name) ? 'realized' : 'passthrough';
+    const source: CategorizedBinding["source"] = realizedNames.has(name)
+      ? "realized"
+      : "passthrough";
     // step: true on a rule wins over everything, then ramp: true, then the document default
-    const useRamp = stepParams.has(name) ? false
-      : rampParams.has(name) ? true
-      : defaultRamp;
+    const useRamp = stepParams.has(name) ? false : rampParams.has(name) ? true : defaultRamp;
 
-    if (useRamp) rampCount++; else stepCount++;
+    if (useRamp) rampCount++;
+    else stepCount++;
 
     for (const binding of bindingList) {
       allBindings.push({ name, param: binding.param, source, ramp: useRamp });
     }
   }
 
-  log(`Built ${bindings.size} unique bindings (${allBindings.length} total targets), ${rampCount} ramp, ${stepCount} step (default: ${defaultRamp ? 'ramp' : 'step'})`);
+  log(
+    `Built ${bindings.size} unique bindings (${allBindings.length} total targets), ${rampCount} ramp, ${stepCount} step (default: ${defaultRamp ? "ramp" : "step"})`,
+  );
 
   // Track duration for getTrackDuration()
   let trackDuration = 0;
@@ -339,7 +326,9 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
         param.cancelScheduledValues(now);
         param.setValueAtTime(param.value, now);
       } catch (e) {
-        log(`Warning: cancelScheduledValues failed for param: ${e instanceof Error ? e.message : e}`);
+        log(
+          `Warning: cancelScheduledValues failed for param: ${e instanceof Error ? e.message : e}`,
+        );
       }
     }
     scheduledParams.clear();
@@ -360,8 +349,8 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     let prevAF = 0;
     // PLSTEP constants are declared in semantics.yaml so runtime, graph, and
     // telemetry share the same Klatt 1980 PARCOE.FOR values.
-    const PLSTEP_THRESHOLD = requireFiniteConstant(constants, 'plstepThreshold');
-    const PLSTEP_BURST_OFFSET_DB = requireFiniteConstant(constants, 'plstepBurstOffsetDb');
+    const PLSTEP_THRESHOLD = requireFiniteConstant(constants, "plstepThreshold");
+    const PLSTEP_BURST_OFFSET_DB = requireFiniteConstant(constants, "plstepBurstOffsetDb");
 
     for (let i = 0; i < track.length; i++) {
       const frame = track[i];
@@ -379,17 +368,17 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
         const deltaAF = currentAF - prevAF;
 
         if (deltaAF >= PLSTEP_THRESHOLD) {
-          const trigger = 'AF';
+          const trigger = "AF";
           const delta = deltaAF;
-          const goDb = requireFiniteRealizedValue(realized, 'GO');
-          const burstDb = goDb - PLSTEP_BURST_OFFSET_DB;  // Klatt80 PLSTEP amplitude formula
+          const goDb = requireFiniteRealizedValue(realized, "GO");
+          const burstDb = goDb - PLSTEP_BURST_OFFSET_DB; // Klatt80 PLSTEP amplitude formula
           const burstAmplitude = dbToLinear(burstDb);
 
-          const burstPhoneme = frame.phoneme ?? '';
+          const burstPhoneme = frame.phoneme ?? "";
 
           telemetryHandler({
-            type: 'plstep',
-            nodeId: 'plstep',
+            type: "plstep",
+            nodeId: "plstep",
             time: t,
             amplitudeLinear: burstAmplitude,
             amplitudeDb: burstDb,
@@ -405,10 +394,9 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
       // Schedule all bindings: read from realized or frame.params, ramp or step.
       for (const binding of allBindings) {
-        const value = binding.source === 'realized'
-          ? realized[binding.name]
-          : frame.params[binding.name];
-        if (typeof value === 'number') {
+        const value =
+          binding.source === "realized" ? realized[binding.name] : frame.params[binding.name];
+        if (typeof value === "number") {
           // Ramp bindings: setValueAtTime at frame 0, linearRamp thereafter.
           // Frame 0 must use setValueAtTime to establish the automation anchor.
           schedule.push({
@@ -444,7 +432,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
    */
   function scheduleTrack(track: KlattFrame[], startTime: number): void {
     if (!track || track.length === 0) {
-      log('Empty track, nothing to schedule');
+      log("Empty track, nothing to schedule");
       return;
     }
 

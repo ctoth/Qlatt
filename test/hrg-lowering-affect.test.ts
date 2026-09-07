@@ -122,6 +122,7 @@ const POLICY: LowerOptions = {
     },
   },
   transitions: {
+    min_transition_edge_ms: { value: 20, citations: ["engineering estimate: fixture"] },
     default_transition_ms: { value: 0 },
     blend: { factor: { value: 0.5 }, keys: [], smooth_types: [] },
   },

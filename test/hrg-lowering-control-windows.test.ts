@@ -66,6 +66,7 @@ const SCHEMA = {
 const POLICY = {
   columns: ["AH", "B1", "B2"],
   transitions: {
+    min_transition_edge_ms: { value: 20, citations: ["engineering estimate: fixture"] },
     default_transition_ms: { value: 0 },
     blend: {
       factor: { value: 0 },
@@ -270,6 +271,7 @@ describe("HRG lowering control windows", () => {
     const policy: LowerOptions = {
       ...POLICY,
       transitions: {
+        min_transition_edge_ms: { value: 20, citations: ["engineering estimate: fixture"] },
         default_transition_ms: { value: 30 },
         blend: {
           factor: { value: 0.5 },

@@ -39,6 +39,7 @@ const POLICY = {
   },
   transitions: {
     native_frame_ms: { value: 6.4 },
+    min_transition_edge_ms: { value: 20, citations: ["engineering estimate: fixture"] },
     default_transition_ms: { value: 30 },
     blend: {
       factor: { value: 0.5 },

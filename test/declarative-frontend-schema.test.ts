@@ -22,6 +22,7 @@ const loweringOutput = {
       },
     },
     transitions: {
+      min_transition_edge_ms: { value: 20, citations: ["engineering estimate: fixture"] },
       default_transition_ms: { value: 30, citations: ["test"] },
       blend: {
         factor: { value: 0.35, citations: ["test"] },

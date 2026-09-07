@@ -317,6 +317,11 @@ Critical: Branch gains must use `setValueAtTime`, not ramp, for instantaneous sw
 
 ### Provenance Number Assertions
 
+Before asserting absolute frame times in HRG lowering tests, include the selected
+policy's initial-silence offset in the expected time. Run an unchanged-policy
+control case alongside a configured-policy regression so a fixture timing error
+cannot masquerade as evidence that the policy is ignored.
+
 Before asserting an exact provenance substring that contains a formatted number,
 inspect the production formatter and use its actual precision in the expected
 text. Keep separate numeric assertions on the underlying value so presentation

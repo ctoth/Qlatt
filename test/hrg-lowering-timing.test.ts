@@ -144,6 +144,7 @@ function transitions(value: unknown): LowerOptions["transitions"] {
     throw new Error("compiled lowering transition policy missing");
   }
   return {
+    min_transition_edge_ms: citedNumber(value.min_transition_edge_ms, "min_transition_edge_ms"),
     default_transition_ms: citedNumber(value.default_transition_ms, "default_transition_ms"),
     blend: {
       factor: citedNumber(value.blend.factor, "blend.factor"),

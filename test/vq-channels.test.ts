@@ -55,7 +55,7 @@ citations:
         score: { text: "red" },
         directionTrack: {
           version: "1",
-          spans: [{ anchor: { unit: "word", start: 0 }, voiceQuality: vq }],
+          spans: [{ id: "extension", anchor: { unit: "word", start: 0 }, voiceQuality: vq }],
         },
       });
       expect(parsed.directions[0].delta?.testChannel).toBe(delta);

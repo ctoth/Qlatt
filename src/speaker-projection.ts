@@ -20,20 +20,6 @@ import type { VoiceQualityOverrides } from "./source-contour";
  * - Gobl 2003, Burkhardt 2009 (voice-quality overrides: OQ/TL/AH/flutter/jitter)
  */
 
-/** Named formant frequency keys (replaces the baked-in `for (formant=1..10)` loop). */
-export const SPEAKER_FORMANT_KEYS = [
-  "F1",
-  "F2",
-  "F3",
-  "F4",
-  "F5",
-  "F6",
-  "F7",
-  "F8",
-  "F9",
-  "F10",
-] as const;
-
 export interface SpeakerProjectionBaseline {
   source_mode: number;
   rd: number;
@@ -95,6 +81,7 @@ export function projectSpeakerFields(
   baseline: SpeakerProjectionBaseline,
   overrides: VoiceQualityOverrides | undefined,
   formantScale: number,
+  formantKeys: readonly string[],
 ): void {
   for (const row of SPEAKER_PROJECTION_TABLE) {
     switch (row.op) {
@@ -129,9 +116,9 @@ export function projectSpeakerFields(
       }
     }
   }
-  // Formant frequency scaling: declared key list replaces the baked-in 1..10 loop.
+  // Scale only the formant frequencies declared by the active inventory.
   if (formantScale !== 1) {
-    for (const key of SPEAKER_FORMANT_KEYS) {
+    for (const key of formantKeys) {
       const value = target.get(key);
       if (typeof value === "number" && value > 0) target.set(key, value * formantScale);
     }

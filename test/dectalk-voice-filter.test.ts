@@ -18,6 +18,39 @@ function parseVoice(text: string): Record<string, unknown> {
 // ph_defs.h defines FRAC_ONE=16384 and mlsh1(x,y)=(x*y)>>14.
 // frac4mul's Q12 scale belongs to the separate speaker pitch-range transform.
 describe("DECtalk Q14 pitch-filter coefficients", () => {
+  it("binds the filter to the selected speaker's runtime coefficient", async () => {
+    const { textToKlattTrackDetailed } = await import("../src/tts-frontend");
+    const frontend = parseVoice(
+      readFileSync("public/rules/frontends/dectalk-english/frontend.yaml", "utf8"),
+    );
+    const model = frontend.f0_model;
+    if (!model || typeof model !== "object" || !("filter" in model)) {
+      throw new Error("Missing layered F0 filter");
+    }
+    const filter = model.filter;
+    if (!filter || typeof filter !== "object" || !("alpha_param" in filter)) {
+      throw new Error("Missing speaker coefficient binding");
+    }
+    const alphaPath = filter.alpha_param;
+    if (typeof alphaPath !== "string") throw new Error("Invalid coefficient path");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const result = textToKlattTrackDetailed("hello.", undefined, 30, {
+        frontendId: "dectalk-english",
+        speaker: "betty",
+      });
+      expect(result.speakerParams?.f0_lp_filter_alpha).toBe(2175 / 16384);
+      let bound: unknown = result.speakerParams;
+      for (const key of alphaPath.split(".")) {
+        bound =
+          bound && typeof bound === "object" ? (bound as Record<string, unknown>)[key] : undefined;
+      }
+      expect(bound).toBe(2175 / 16384);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
   it.each(voices)("uses the native filter scale for %s", (name) => {
     const voice = parseVoice(readFileSync(join(speakerDir, name), "utf8"));
     expect(typeof voice.f0_lp_filter).toBe("number");

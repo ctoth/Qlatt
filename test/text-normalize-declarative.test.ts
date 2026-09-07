@@ -181,6 +181,42 @@ describe("text normalization YAML pipeline", () => {
     ]);
   });
 
+  it("rejects pattern-required builtin steps without a string pattern", () => {
+    expect(() =>
+      validateNormalizationPipelineConfig(
+        {
+          steps: [
+            {
+              name: "missing_pattern",
+              type: "builtin",
+              handler: "dateToWords",
+              citations: ["test"],
+            },
+          ],
+        },
+        tables,
+      ),
+    ).toThrow("E_NORMALIZE_CONFIG");
+  });
+
+  it("accepts a patternless lowercase builtin step", () => {
+    expect(() =>
+      validateNormalizationPipelineConfig(
+        {
+          steps: [
+            {
+              name: "lowercase",
+              type: "builtin",
+              handler: "lowercase",
+              citations: ["test"],
+            },
+          ],
+        },
+        tables,
+      ),
+    ).not.toThrow();
+  });
+
   it("rejects table_replace steps that reference missing tables", () => {
     expect(() =>
       validateNormalizationPipelineConfig(

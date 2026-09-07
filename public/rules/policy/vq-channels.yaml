@@ -1,0 +1,20 @@
+# Relative-to-neutral channels: Rutledge 1995 style vectors, Murray 1993 HAMLET.
+# Special projections retain their existing F0, timing, and effective-Rd algorithms.
+# Floors are engineering estimates preserving the existing projection bounds.
+channels:
+  - { channel: rdDelta, algebra: add, unit: Rd, neutral: 0, backend_param: RdPhraseOffset, projection: special, citations: [Fant_1997] }
+  - { channel: f0Scale, algebra: mul, unit: ratio, neutral: 1, backend_param: F0, projection: special, citations: [Rutledge_1995] }
+  - { channel: f0VarianceScale, algebra: mul, unit: ratio, neutral: 1, backend_param: F0, projection: special, citations: [Rutledge_1995] }
+  - { channel: durationScale, algebra: mul, unit: ratio, neutral: 1, backend_param: duration, projection: special, citations: [Rutledge_1995] }
+  - { channel: intensityBoost, algebra: add, unit: dB, neutral: 0, backend_param: GO, citations: [Murray_1993] }
+  - { channel: ahBoost, algebra: add, unit: dB, neutral: 0, backend_param: AH, citations: [Klatt_1990] }
+  - { channel: spectralTiltBoost, algebra: add, unit: dB, neutral: 0, backend_param: TL, citations: [Rutledge_1995] }
+  - { channel: pauseScale, algebra: mul, unit: ratio, neutral: 1, backend_param: duration, projection: special, citations: [Laukka_2008] }
+  - { channel: f1Delta, algebra: add, unit: Hz, neutral: 0, backend_param: F1, floor: 1, citations: [France_2000, "engineering estimate: 1 Hz floor"] }
+  - { channel: f2Delta, algebra: add, unit: Hz, neutral: 0, backend_param: F2, floor: 1, citations: [France_2000, "engineering estimate: 1 Hz floor"] }
+  - { channel: f3Delta, algebra: add, unit: Hz, neutral: 0, backend_param: F3, floor: 1, citations: [France_2000, "engineering estimate: 1 Hz floor"] }
+  - { channel: fbw1Scale, algebra: mul, unit: ratio, neutral: 1, backend_param: B1, floor: 20, citations: [France_2000, "engineering estimate: 20 Hz floor"] }
+  - { channel: fbw2Scale, algebra: mul, unit: ratio, neutral: 1, backend_param: B2, floor: 20, citations: [France_2000, "engineering estimate: 20 Hz floor"] }
+  - { channel: fbw3Scale, algebra: mul, unit: ratio, neutral: 1, backend_param: B3, floor: 20, citations: [France_2000, "engineering estimate: 20 Hz floor"] }
+  # The assembled-track path historically defers jitter; HRG projects it.
+  - { channel: jitterScale, algebra: mul, unit: ratio, neutral: 1, backend_param: jitter, floor: 0, apply_track: false, citations: [Kaczmarek-Majer_2024] }

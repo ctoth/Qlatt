@@ -3059,6 +3059,25 @@ function validateLoweringSpec(
     );
   } else {
     validateCitedNumber(
+      transitions.min_transition_edge_ms,
+      diagnostics,
+      "output.lowering.transitions.min_transition_edge_ms",
+      "output.lowering.transitions.min_transition_edge_ms",
+    );
+    if (
+      isPlainObject(transitions.min_transition_edge_ms) &&
+      typeof transitions.min_transition_edge_ms.value === "number" &&
+      transitions.min_transition_edge_ms.value <= 0
+    ) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_LOWERING_SPEC_NUMBER",
+          "output.lowering.transitions.min_transition_edge_ms.value must be positive",
+          "output.lowering.transitions.min_transition_edge_ms.value",
+        ),
+      );
+    }
+    validateCitedNumber(
       transitions.default_transition_ms,
       diagnostics,
       "output.lowering.transitions.default_transition_ms",

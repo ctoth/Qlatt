@@ -899,6 +899,10 @@ output:
         include_f0_anchors: true
         include_transition_steady_time: true
     transitions:
+      min_transition_edge_ms:
+        value: 20
+        citations:
+          - "Engineering estimate: preserve the 20 ms minimum offset inside each segment for transition edges"
       default_transition_ms:
         value: 30
         citations:

@@ -19,6 +19,7 @@ const RELATION_INPUT = { reason: "fixture relation construction", citations: CIT
 const TEST_LOWERING = {
   columns: ["F0", "F1"],
   transitions: {
+    min_transition_edge_ms: { value: 20, citations: ["engineering estimate: fixture"] },
     default_transition_ms: { value: 0 },
     blend: {
       factor: { value: 0 },

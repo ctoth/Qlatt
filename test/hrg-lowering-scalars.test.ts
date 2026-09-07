@@ -112,6 +112,7 @@ function transitions(value: unknown): LowerOptions["transitions"] {
     throw new Error("compiled lowering transition policy missing");
   }
   return {
+    min_transition_edge_ms: citedNumber(value.min_transition_edge_ms, "min_transition_edge_ms"),
     default_transition_ms: citedNumber(value.default_transition_ms, "default_transition_ms"),
     blend: {
       factor: citedNumber(value.blend.factor, "blend.factor"),
@@ -267,6 +268,7 @@ function loweringOptions(columns: readonly string[]): LowerOptions {
   return {
     columns,
     transitions: {
+      min_transition_edge_ms: { value: 20, citations: ["engineering estimate: fixture"] },
       default_transition_ms: { value: 0 },
       blend: {
         factor: { value: 0 },

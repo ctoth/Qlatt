@@ -21,16 +21,6 @@ import { applyScalarOp } from "./scalar-op";
 import type { FeatureValue } from "./types";
 import type { Utterance } from "./utterance";
 
-/**
- * Minimum offset (ms) between a segment boundary and the start/end of a formant
- * transition ramp: transition edges are clamped this far inside the segment so
- * a ramp never collapses onto the boundary instant (which would produce a
- * zero-width or boundary-coincident automation event). Klatt (1980) CV formant
- * transitions run ~40-60 ms; 20 ms is a conservative floor below that band.
- * engineering estimate — no single paper fixes this guard value.
- */
-const MIN_TRANSITION_EDGE_MS = 20;
-
 type LocusEntry = {
   locus_hz: number;
   prcnt: number;
@@ -113,6 +103,7 @@ export interface LowerOptions {
   };
   transitions: {
     native_frame_ms?: CitedNumber;
+    min_transition_edge_ms: CitedNumber;
     default_transition_ms: CitedNumber;
     blend: {
       factor: CitedNumber;
@@ -218,6 +209,10 @@ function isLowerOptions(value: unknown): value is LowerOptions {
     isPlainObject(timeline.final_silence_ms) &&
     isPlainObject(timeline.duration_floors) &&
     isPlainObject(timeline.event_points) &&
+    isPlainObject(transitions.min_transition_edge_ms) &&
+    typeof transitions.min_transition_edge_ms.value === "number" &&
+    Number.isFinite(transitions.min_transition_edge_ms.value) &&
+    transitions.min_transition_edge_ms.value > 0 &&
     isPlainObject(transitions.default_transition_ms) &&
     isPlainObject(transitions.blend)
   );
@@ -862,6 +857,7 @@ export function lowerToFrames(
     "timeline.duration_floors.default_ms.value",
     utterance,
   );
+  const minTransitionEdgeMs = options.transitions.min_transition_edge_ms.value;
   const defaultTransitionMs = requirePolicyNumber(
     options.transitions.default_transition_ms.value,
     "transitions.default_transition_ms.value",
@@ -987,7 +983,7 @@ export function lowerToFrames(
    * A "leading" edge (segment head) runs the window [0, min(spanMs, dur - EDGE)]
    * and is dropped unless that end is positive; a "trailing" edge (segment tail)
    * runs [max(EDGE, dur - spanMs), dur] and is dropped unless that start falls
-   * before the segment end. EDGE is MIN_TRANSITION_EDGE_MS (20 ms, > 0), so the
+   * before the segment end. EDGE is the validated positive policy value, so the
    * historic dead `startMs <= 0` sub-guard is not reproduced. `build` receives
    * the resolved window and returns the transition body (choosing its own
    * fields / linearFields / omitted endMs) or null to skip the append.
@@ -1000,13 +996,13 @@ export function lowerToFrames(
     build: (window: { startMs: number; endMs: number }) => ResolvedSegmentTransition | null,
   ): void => {
     if (edge === "leading") {
-      const endMs = Math.min(spanMs, durationMs - MIN_TRANSITION_EDGE_MS);
+      const endMs = Math.min(spanMs, durationMs - minTransitionEdgeMs);
       if (endMs <= 0) return;
       const transition = build({ startMs: 0, endMs });
       if (transition) appendTransition(item, transition);
       return;
     }
-    const startMs = Math.max(MIN_TRANSITION_EDGE_MS, durationMs - spanMs);
+    const startMs = Math.max(minTransitionEdgeMs, durationMs - spanMs);
     if (startMs >= durationMs) return;
     const transition = build({ startMs, endMs: durationMs });
     if (transition) appendTransition(item, transition);

@@ -243,20 +243,16 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
     parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
-    const voiceOut = outputs[0];
-    const noiseOut = outputs[1];
-
-    if (!voiceOut || !voiceOut[0] || !noiseOut || !noiseOut[0]) {
-      return true;
-    }
-
-    const voiceChannel = voiceOut[0];
-    const noiseChannel = noiseOut[0];
-    const blockSize = voiceChannel.length;
+    const voiceChannel = outputs[0]?.[0];
+    const noiseChannel = outputs[1]?.[0];
+    const blockSize = voiceChannel?.length ?? noiseChannel?.length ?? 0;
+    // DECtalk consumes only the voice port. Disconnected ports must not stop
+    // the shared oscillator and noise state from advancing for connected ports.
+    if (blockSize === 0) return true;
 
     if (!this.ready || !this.wasm || !this.voiceBuffer || !this.noiseBuffer) {
-      voiceChannel.fill(0);
-      noiseChannel.fill(0);
+      voiceChannel?.fill(0);
+      noiseChannel?.fill(0);
       return true;
     }
 
@@ -291,8 +287,8 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
     this.voiceBuffer.ensure(blockSize);
     this.noiseBuffer.ensure(blockSize);
     if (!this.voiceBuffer.view || !this.noiseBuffer.view) {
-      voiceChannel.fill(0);
-      noiseChannel.fill(0);
+      voiceChannel?.fill(0);
+      noiseChannel?.fill(0);
       return true;
     }
 
@@ -328,14 +324,14 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
     this.voiceBuffer.refresh();
     this.noiseBuffer.refresh();
     if (!this.voiceBuffer.view || !this.noiseBuffer.view) {
-      voiceChannel.fill(0);
-      noiseChannel.fill(0);
+      voiceChannel?.fill(0);
+      noiseChannel?.fill(0);
       return true;
     }
-    voiceChannel.set(this.voiceBuffer.view);
-    noiseChannel.set(this.noiseBuffer.view);
+    voiceChannel?.set(this.voiceBuffer.view);
+    noiseChannel?.set(this.noiseBuffer.view);
 
-    this._reportMetrics(voiceChannel, noiseChannel, {
+    this._reportMetrics(this.voiceBuffer.view, this.noiseBuffer.view, {
       f0: f0Values[0] ?? 0,
       av: avValues[0] ?? 0,
       source: sourceValues[0] ?? 0,

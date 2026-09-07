@@ -634,6 +634,27 @@ function isoDateToWords(yearRaw: string, monthRaw: string, dayRaw: string): stri
 // Builtin step handlers (registered by name for YAML pipeline dispatch)
 // ---------------------------------------------------------------------------
 
+const PATTERN_REQUIRED_BUILTIN_HANDLERS = new Set([
+  "dateToWords",
+  "isoDateToWords",
+  "timeToWords",
+  "currencyToWords",
+  "decimalToWords",
+  "ordinalToWordsInline",
+  "numberToWordsInline",
+  "readYearInline",
+  "readFractionInline",
+]);
+
+function requireBuiltinPattern(step: PipelineStep): string {
+  if (typeof step.pattern !== "string") {
+    throw new Error(
+      `E_NORMALIZE_CONFIG: builtin step '${step.name}' handler '${step.handler}' must define a string pattern`,
+    );
+  }
+  return step.pattern;
+}
+
 /**
  * Map of handler name → function for builtin pipeline steps.
  * The YAML pipeline references these by name in the `handler` field.
@@ -645,21 +666,21 @@ const BUILTIN_HANDLERS: Record<
   lowercase: (result) => result.toLowerCase(),
 
   dateToWords: (result, step) => {
-    const re = new RegExp(step.pattern!, step.flags);
+    const re = new RegExp(requireBuiltinPattern(step), step.flags);
     return result.replace(re, (_m: string, month: string, day: string, year: string) =>
       dateToWords(month, day, year),
     );
   },
 
   isoDateToWords: (result, step) => {
-    const re = new RegExp(step.pattern!, step.flags);
+    const re = new RegExp(requireBuiltinPattern(step), step.flags);
     return result.replace(re, (_m: string, year: string, month: string, day: string) =>
       isoDateToWords(year, month, day),
     );
   },
 
   timeToWords: (result, step) => {
-    const re = new RegExp(step.pattern!, step.flags);
+    const re = new RegExp(requireBuiltinPattern(step), step.flags);
     // replace() passes (match, g1, g2, [g3], offset, string) — for 2-group
     // regexes the 4th arg is `offset` (a number), not a capture group.
     return result.replace(
@@ -674,7 +695,7 @@ const BUILTIN_HANDLERS: Record<
   },
 
   currencyToWords: (result, step) => {
-    const re = new RegExp(step.pattern!, step.flags);
+    const re = new RegExp(requireBuiltinPattern(step), step.flags);
     // The cents group is optional — when absent, replace() passes offset (number) instead.
     return result.replace(re, (_m: string, dollars: string, centsOrOffset?: string | number) =>
       currencyToWords(dollars, typeof centsOrOffset === "string" ? centsOrOffset : undefined),
@@ -682,19 +703,19 @@ const BUILTIN_HANDLERS: Record<
   },
 
   decimalToWords: (result, step) => {
-    const re = new RegExp(step.pattern!, step.flags);
+    const re = new RegExp(requireBuiltinPattern(step), step.flags);
     return result.replace(re, (_m: string, lhs: string, rhs: string) => decimalToWords(lhs, rhs));
   },
 
   ordinalToWordsInline: (result, step) => {
-    const re = new RegExp(step.pattern!, step.flags);
+    const re = new RegExp(requireBuiltinPattern(step), step.flags);
     return result.replace(re, (_match: string, digits: string) => {
       return convertOrdinal(parseInt(digits, 10));
     });
   },
 
   numberToWordsInline: (result, step) => {
-    const re = new RegExp(step.pattern!, step.flags);
+    const re = new RegExp(requireBuiltinPattern(step), step.flags);
     return result.replace(re, (_match: string, digits: string) => {
       return numberToWords(parseInt(digits, 10), step.number_policy);
     });
@@ -706,7 +727,7 @@ const BUILTIN_HANDLERS: Record<
   // Entirely data-driven: the predicate parameters and the digit tables come
   // from config, so this handler carries no per-frontend logic.
   readYearInline: (result, step) => {
-    const re = new RegExp(step.pattern!, step.flags);
+    const re = new RegExp(requireBuiltinPattern(step), step.flags);
     const policy = step.year_policy ?? {};
     return result.replace(re, (match: string, digits: string) => {
       return isYear(digits, policy) ? readYear(digits) : match;
@@ -719,7 +740,7 @@ const BUILTIN_HANDLERS: Record<
   // data-driven: special-denominator words, the percent word, and the predicate
   // bound come from `fraction_policy`, so this handler carries no per-frontend logic.
   readFractionInline: (result, step) => {
-    const re = new RegExp(step.pattern!, step.flags);
+    const re = new RegExp(requireBuiltinPattern(step), step.flags);
     const policy = step.fraction_policy ?? {};
     return result.replace(
       re,
@@ -808,6 +829,11 @@ export function validateNormalizationPipelineConfig(
       if (!step.handler || !BUILTIN_HANDLERS[step.handler]) {
         throw new Error(
           `E_NORMALIZE_CONFIG: builtin step '${step.name}' references unknown handler`,
+        );
+      }
+      if (PATTERN_REQUIRED_BUILTIN_HANDLERS.has(step.handler) && typeof step.pattern !== "string") {
+        throw new Error(
+          `E_NORMALIZE_CONFIG: builtin step '${step.name}' handler '${step.handler}' must define a string pattern`,
         );
       }
       if (step.handler === "punctuationCleanup") {

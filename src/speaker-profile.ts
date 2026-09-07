@@ -5,6 +5,8 @@ export const DEFAULT_SPEAKER_PROFILE_PATH = "/rules/policy/speaker-profile.yaml"
 export interface SpeakerProfileFieldSpec {
   value: number;
   citations: string[];
+  /** Ordered runtime source paths; value is the fallback when none is finite. */
+  sources: string[];
 }
 
 export interface SpeakerProfileSpec {
@@ -35,6 +37,7 @@ export interface SpeakerProfileOverride {
 export interface ResolveSpeakerProfileOptions {
   baseF0?: number;
   speakerOverride?: SpeakerProfileOverride;
+  voiceProfile?: SpeakerProfileOverride;
   profileSpec?: SpeakerProfileSpec;
 }
 
@@ -69,6 +72,7 @@ function parseFieldSpec(value: unknown, label: string): SpeakerProfileFieldSpec 
   return {
     value: expectFiniteNumber(value.value, `${label}.value`),
     citations: expectStringArray(value.citations ?? [], `${label}.citations`),
+    sources: expectStringArray(value.sources, `${label}.sources`),
   };
 }
 
@@ -96,8 +100,18 @@ function parseSpeakerProfileDocument(value: unknown): SpeakerProfileSpec {
   };
 }
 
-function finite(value: number | undefined): number | undefined {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+function resolveProfileField(
+  field: SpeakerProfileFieldSpec,
+  sources: Readonly<Record<string, unknown>>,
+): number {
+  for (const path of field.sources) {
+    let value: unknown = sources;
+    for (const key of path.split(".")) {
+      value = isPlainObject(value) ? value[key] : undefined;
+    }
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+  }
+  return field.value;
 }
 
 export function loadSpeakerProfileSync(
@@ -118,15 +132,18 @@ export function resolveSpeakerProfile(
   options: ResolveSpeakerProfileOptions,
 ): ResolvedSpeakerProfile {
   const profileSpec = options.profileSpec ?? loadSpeakerProfileSync();
-  const override = options.speakerOverride;
   const defaults = profileSpec.default_profile;
+  const sources = {
+    request: options.speakerOverride,
+    voice: options.voiceProfile,
+    baseF0: options.baseF0,
+  };
 
   return {
-    base_f0_hz: finite(override?.base_f0_hz) ?? finite(options.baseF0) ?? defaults.base_f0_hz.value,
-    formant_scale: finite(override?.formant_scale) ?? defaults.formant_scale.value,
-    rd_default: finite(override?.rd_default) ?? defaults.rd_default.value,
-    spectral_tilt_offset_db:
-      finite(override?.spectral_tilt_offset_db) ?? defaults.spectral_tilt_offset_db.value,
+    base_f0_hz: resolveProfileField(defaults.base_f0_hz, sources),
+    formant_scale: resolveProfileField(defaults.formant_scale, sources),
+    rd_default: resolveProfileField(defaults.rd_default, sources),
+    spectral_tilt_offset_db: resolveProfileField(defaults.spectral_tilt_offset_db, sources),
   };
 }
 

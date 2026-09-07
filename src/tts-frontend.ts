@@ -476,25 +476,24 @@ function buildTextToKlattTrackDetailed(
   }
 
   const registry = getVoiceRegistry(spec);
-  let selectedVoice: ResolvedVoice | null = null;
-  let speakerOverride: SpeakerProfileOverride | undefined;
-  if (typeof options.speaker === "string") {
-    if (!registry)
-      throw new Error(`E_VOICE_REGISTRY_MISSING: frontend '${frontendId}' has no voice registry`);
-    selectedVoice = resolveVoice(registry, options.speaker);
-    speakerOverride = selectedVoice.override;
-  } else if (options.speaker) {
-    speakerOverride = options.speaker;
-  } else if (registry) {
-    selectedVoice = resolveVoice(registry, registry.default);
-    speakerOverride = selectedVoice.override;
+  if (typeof options.speaker === "string" && !registry) {
+    throw new Error(`E_VOICE_REGISTRY_MISSING: frontend '${frontendId}' has no voice registry`);
   }
+  const selectedVoice: ResolvedVoice | null = registry
+    ? resolveVoice(
+        registry,
+        typeof options.speaker === "string" ? options.speaker : registry.default,
+      )
+    : null;
+  const speakerOverride: SpeakerProfileOverride | undefined =
+    typeof options.speaker === "object" ? options.speaker : undefined;
 
   const speakerProfilePath = spec.speaker_profile_path ?? DEFAULT_SPEAKER_PROFILE_PATH;
   const speakerProfile = loadSpeakerProfileSync(speakerProfilePath);
   const resolvedSpeaker = resolveSpeakerProfile({
     baseF0,
     speakerOverride,
+    voiceProfile: selectedVoice?.override,
     profileSpec: speakerProfile,
   });
   const speakerDecision = provenance.add({

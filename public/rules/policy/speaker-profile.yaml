@@ -12,20 +12,26 @@ citations:
   - Fant 1997 Table 1
   - Klatt & Klatt 1990
 
+# Composition policy: use the first finite runtime source, then the field value.
+# Requests inherit the selected frontend voice; omitted values retain that voice.
 default_profile:
   base_f0_hz:
+    sources: [request.base_f0_hz, baseF0, voice.base_f0_hz]
     value: 110
     citations:
       - O'Shaughnessy 1976
   formant_scale:
+    sources: [request.formant_scale, voice.formant_scale]
     value: 1.0
     citations:
       - Kent & Vorperian 2018
   rd_default:
+    sources: [request.rd_default, voice.rd_default]
     value: 0.7
     citations:
       - Fant 1997 Table 1
   spectral_tilt_offset_db:
+    sources: [request.spectral_tilt_offset_db, voice.spectral_tilt_offset_db]
     value: 0
     citations:
       - Klatt & Klatt 1990

@@ -9,6 +9,28 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { loadYamlSourceSync } from "../src/yaml-loader";
 
 describe("speaker profile schema", () => {
+  it("uses the field's declared source order to compose a voice and request", () => {
+    const spec = loadSpeakerProfileSync();
+    const options = {
+      profileSpec: spec,
+      voiceProfile: { formant_scale: 1.17 },
+      speakerOverride: { formant_scale: 1.1 },
+    };
+    expect(resolveSpeakerProfile(options).formant_scale).toBe(1.1);
+
+    const voiceFirst = {
+      ...spec,
+      default_profile: {
+        ...spec.default_profile,
+        formant_scale: {
+          ...spec.default_profile.formant_scale,
+          sources: ["voice.formant_scale", "request.formant_scale"],
+        },
+      },
+    };
+    expect(resolveSpeakerProfile({ ...options, profileSpec: voiceFirst }).formant_scale).toBe(1.17);
+  });
+
   it("declares the canonical speaker profile document", () => {
     const source = loadYamlSourceSync(DEFAULT_SPEAKER_PROFILE_PATH);
     const spec = loadSpeakerProfileSync();

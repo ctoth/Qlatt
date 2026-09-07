@@ -4,7 +4,7 @@
 //
 // Each output file carries:
 //   - all converted DECtalk voice params (verbatim values)
-//   - a derived f0_lp_filter_alpha = f0_lp_filter / 4096 (DECtalk frac4mul
+//   - a derived f0_lp_filter_alpha = f0_lp_filter / 16384 (DECtalk signed Q14
 //     coefficient, Ph_drwt02.c) so the consumed F0-filter field is present
 //   - a file-level `citations:` list documenting the DECtalk 4.63 source
 //
@@ -36,10 +36,10 @@ const VOICES = [
   "chris",
 ];
 
-// DECtalk Ph_drwt02.c F0 low-pass filter coefficient: alpha = f0_lp_filter / 4096
-// (frac4mul divisor). Present in the legacy inline Paul block; derived here for
-// every voice so the consumed field is self-contained per voice.
-const F0_LP_DIVISOR = 4096;
+// DECtalk Ph_drwt02.c F0 low-pass filter coefficient: alpha = f0_lp_filter / 16384
+// Ph_drwt02.c filters with mlsh1, whose product is shifted by 14 (ph_defs.h).
+// The Q12 frac4mul divisor applies to pitch-range scaling, not this filter.
+const F0_LP_DIVISOR = 16384;
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
 
@@ -64,7 +64,7 @@ for (const voice of VOICES) {
     `# Imported by scripts/dt1-import-voices.ts from the canonical converted\n` +
     `# source (dectalk/463 ph_vset.c / Ph_drwt02.c voice parameter set).\n` +
     `# f0_lp_filter_alpha is derived: f0_lp_filter / ${F0_LP_DIVISOR}\n` +
-    `# (DECtalk 4.63 Ph_drwt02.c frac4mul coefficient).\n` +
+    `# (DECtalk 4.63 Ph_drwt02.c signed Q14 coefficient).\n` +
     `#\n` +
     `# F4-F8, per-voice gains (GF/GH/GV/GN/G1-G4/LO), and glottal params\n` +
     `# (AGO/AGVO/AGUO/UNVOW/CHINK, smoothness/breathiness/richness/...) are\n` +

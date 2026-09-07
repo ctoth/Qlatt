@@ -135,7 +135,7 @@ f0_model:
     type: lowpass_2pole_coefficient
     # DECtalk 4.63 Ph_drwt02.c filter_commands() cascades two first-order poles
     # using the speaker's native F0 smoothing coefficient, normalized to [0, 1].
-    alpha_param: policy.speaker.f0_lp_filter_alpha.value
+    alpha_param: f0_lp_filter_alpha
     default_alpha: 0.128173828125
   layers:
     baseline:

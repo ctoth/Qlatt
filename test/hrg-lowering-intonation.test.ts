@@ -295,7 +295,10 @@ describe("HRG lowering layered intonation", () => {
       (f0, index) => f0 - (initialVoicedF0(baselineOnly.frames)[index] ?? f0),
     );
     expect(deltas[0]).toBeGreaterThan(0);
-    expect(deltas[0]).toBeLessThan(1);
+    // Captured speaker coefficient: DECtalk signed-Q14 8400/16384.
+    // Its first sampled response is 5.2 Hz; the old sub-Hz bound assumed default alpha.
+    expect(baseline.speakerParams.f0_lp_filter_alpha).toBe(8400 / 16384);
+    expect(deltas[0]).toBeCloseTo(5.2);
     expect(deltas.at(-1)).toBeGreaterThan(deltas[0] ?? 0);
   });
 

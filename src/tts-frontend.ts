@@ -450,6 +450,10 @@ function buildTextToKlattTrackDetailed(
   const spec = loadBundledRulepackSpec(frontendId);
   const lowering = readLowerOptions(spec.output.lowering);
   const resources = loadFrontendResources(spec);
+  // The active inventory declares the synthesizer parameters available to this frontend.
+  const speakerFormantKeys = Object.keys(resources.inventory.base_params).filter((key) =>
+    /^F[1-9]\d*$/.test(key),
+  );
   const provenance = options.provenance ?? createProvenanceCollector();
   const utterance = new Utterance(
     buildUtteranceSchema(resources.inventory),
@@ -703,8 +707,7 @@ function buildTextToKlattTrackDetailed(
   for (const item of utterance.relation("Segment").listItems()) {
     if (item.get("active") === false) continue;
     // Project the resolved source/speaker policy via the declarative projection
-    // table (src/speaker-projection.ts) — kills the hardcoded field list and the
-    // baked-in 1..10 formant count while preserving byte-identical values.
+    // table, using the formant frequencies declared by the active inventory.
     projectSpeakerFields(
       {
         get: (field) => item.get(field),
@@ -718,6 +721,7 @@ function buildTextToKlattTrackDetailed(
       },
       source.voiceQualityOverrides,
       resolvedSpeaker.formant_scale,
+      speakerFormantKeys,
     );
     if (selectedVoice && registry) {
       for (const field of registry.speakerFrameParams) {

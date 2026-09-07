@@ -973,9 +973,10 @@ function main(): number {
 }
 
 try {
-  process.exit(main());
+  // Let pending pipe writes drain before Node exits; reports can exceed the pipe buffer.
+  process.exitCode = main();
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   process.stderr.write(`${message}\n`);
-  process.exit(1);
+  process.exitCode = 1;
 }

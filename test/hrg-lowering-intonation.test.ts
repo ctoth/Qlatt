@@ -157,7 +157,13 @@ function readFixture(): {
     f0Model: spec.f0_model as unknown as LayeredF0ModelConfig,
     policy,
     segments,
-    speakerParams: parsed.oldProduction.speakerParams,
+    speakerParams: {
+      ...parsed.oldProduction.speakerParams,
+      // The historical capture predates the ph_defs.h Q14 conversion fix.
+      f0_lp_filter_alpha: Number(parsed.oldProduction.speakerParams.f0_lp_filter) / 16384,
+      // The captured native profile is also the unmodified voice reference.
+      voice: parsed.oldProduction.speakerParams,
+    },
   };
 }
 

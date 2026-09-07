@@ -754,7 +754,11 @@ function buildTextToKlattTrackDetailed(
       const number = readPolicyNumber(value);
       if (number !== undefined) speakerParams[key] = number;
     }
-    if (selectedVoice) Object.assign(speakerParams, selectedVoice.params);
+    if (selectedVoice) {
+      Object.assign(speakerParams, selectedVoice.params);
+      // Preserve the declared voice as a reference distinct from the requested profile.
+      speakerParams.voice = selectedVoice.params;
+    }
     speakerParams.base_f0_hz = resolvedSpeaker.base_f0_hz;
   }
 

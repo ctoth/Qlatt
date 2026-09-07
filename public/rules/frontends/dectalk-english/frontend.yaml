@@ -179,6 +179,11 @@ f0_model:
   # The minimum_param and range_param fields reference parameters.policy.speaker.
   # Citation: DECtalk 4.63 Ph_drwt02.c (speaker-dependent F0 scaling)
   speaker_scale:
+    # DECtalk 4.63 ph_vset.c: AP changes f0minimum linearly in both
+    # ordinary and Frank branches. Retain the declared voice as the reference.
+    pitch_offset:
+      target_param: base_f0_hz
+      reference_param: voice.base_f0_hz
     minimum_param: f0_minimum
     range_param: f0_scale_factor
     # Fixed reference pitch in the active male renderer.

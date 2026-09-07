@@ -55,6 +55,11 @@ type SpeakerScaleConfig = {
   pivot: number;
   divisor: number;
   output_scale: number;
+  /** Shift the scaled output by a declared target-minus-reference pitch in Hz. */
+  pitch_offset?: {
+    target_param: string;
+    reference_param: string;
+  };
 };
 
 export type LayeredF0ModelConfig = {
@@ -609,7 +614,6 @@ function renderLayeredF0(
     ? (optionalSpeakerNumber(speakerParams, model.filter.alpha_param) ?? alpha)
     : alpha;
   const scale = model.speaker_scale;
-  const f0Minimum = scale ? resolveSpeakerNumber(speakerParams, scale.minimum_param) : 0;
   const f0ScaleFactor = scale ? resolveSpeakerNumber(speakerParams, scale.range_param) : 1;
   const scalePivot = scale ? requireFiniteNumber(scale.pivot, "f0_model.speaker_scale.pivot") : 0;
   const divisor = scale
@@ -618,6 +622,13 @@ function renderLayeredF0(
   const outputScale = scale
     ? requirePositiveNumber(scale.output_scale, "f0_model.speaker_scale.output_scale")
     : 1;
+  const pitchOffsetHz = scale?.pitch_offset
+    ? resolveSpeakerNumber(speakerParams, scale.pitch_offset.target_param) -
+      resolveSpeakerNumber(speakerParams, scale.pitch_offset.reference_param)
+    : 0;
+  const f0Minimum = scale
+    ? resolveSpeakerNumber(speakerParams, scale.minimum_param) + pitchOffsetHz / outputScale
+    : 0;
   const minHz = requireFiniteNumber(model.output_clamp?.min_hz, "f0_model.output_clamp.min_hz");
   const maxHz = requireFiniteNumber(model.output_clamp?.max_hz, "f0_model.output_clamp.max_hz");
 

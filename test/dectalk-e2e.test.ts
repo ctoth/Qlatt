@@ -156,7 +156,7 @@ describe("dectalk-english end-to-end", () => {
   });
 
   it("matches DECtalk's native voiced F0 cells through cake's EY", () => {
-    const result = textToKlattTrackDetailed("cake.", 110, 30, {
+    const result = textToKlattTrackDetailed("cake.", undefined, 30, {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
@@ -173,7 +173,7 @@ describe("dectalk-english end-to-end", () => {
   });
 
   it("matches every native F0 cell through the's complete trace", () => {
-    const result = textToKlattTrackDetailed("the.", 110, 30, {
+    const result = textToKlattTrackDetailed("the.", undefined, 30, {
       frontendId: "dectalk-english",
       speaker: "paul",
     });

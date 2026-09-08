@@ -28,9 +28,22 @@ export interface RealizationRule {
   step?: boolean;
 }
 
+/** Declarative frame-delta policy for PLSTEP telemetry. */
+export interface PlstepPolicy {
+  /** Frame parameters observed independently for burst telemetry. */
+  triggers: string[];
+  initialValue: number;
+  missingValue: number;
+  /** Compare each signed frame delta with constants.plstepThreshold. */
+  comparison: "gte" | "gt";
+  citations: string[];
+}
+
 /** Semantics document structure */
 export interface SemanticsDocument {
   name: string;
+  /** Optional burst telemetry policy; audio bursts remain graph-owned. */
+  plstep?: PlstepPolicy;
   /** Default scheduling mode for all bindings.
    *  'ramp' = linearRampToValueAtTime (Klatt 1980 inter-frame interpolation).
    *  'step' = setValueAtTime (legacy default).

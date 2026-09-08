@@ -299,137 +299,67 @@ params:
     unit: Hz
 
   # Declarative nasal subsystem controls
-  nasalCoupling:
-    description: "Velopharyngeal coupling ratio d = An / (An + Aoral)"
+  # Maeda 1993: velopharyngeal port sweep, 0 to 2.5 cm2.
+  nasalCouplingArea:
+    diagnoseRange: true
+    description: "Velopharyngeal port area (Maeda 1993)"
     type: float
     default: 0
-    range: [0, 1]
+    range: [0, 2.5]
+    unit: cm2
 
   nasalPlaceIndex:
-    description: "0=none, 1=/m/, 2=/n/, 3=/ng/"
+    description: "Recasens 1983 Table II place selection: 0=none, 1=/m/, 2=/n/, 3=/ng/"
     type: integer
     default: 0
     range: [0, 3]
 
   nasalMurmurStrength:
-    description: "Continuous murmur prominence control"
+    description: "Murmur prominence (Fujimura 1962); engineering normalized control"
     type: float
     default: 0
     range: [0, 1]
 
-  nasalPoleBaseHz:
-    description: "Core nasal pole frequency"
-    type: float
-    default: 250
-    unit: Hz
-
-  nasalVowelPoleTargetHz:
-    description: "Optional explicit vowel-nasalization pole endpoint. 0 = derive from F1 using Hawkins & Stevens 1985 Fig. 5 endpoint ranges."
-    type: float
-    default: 0
-    unit: Hz
-
-  nasalVowelZeroTargetHz:
-    description: "Optional explicit vowel-nasalization zero endpoint. 0 = derive as midpoint between F1 and the nasal pole endpoint per Hawkins & Stevens 1985."
-    type: float
-    default: 0
-    unit: Hz
-
-  nasalHighVowelPoleTargetHz:
-    description: "High-vowel nasal pole endpoint from Hawkins & Stevens 1985 Fig. 5 approximate [i,u] range."
-    type: float
-    default: 800
-    unit: Hz
-
-  nasalMidVowelPoleTargetHz:
-    description: "Mid-vowel nasal pole endpoint from Hawkins & Stevens 1985 Fig. 5 approximate [e,o] range."
-    type: float
-    default: 725
-    unit: Hz
-
-  nasalLowVowelPoleTargetHz:
-    description: "Low-vowel nasal pole endpoint from Hawkins & Stevens 1985 Fig. 5 approximate [a] value."
-    type: float
-    default: 800
-    unit: Hz
-
-  nasalMidVowelF1MinHz:
-    description: "F1 threshold for mid-vowel nasal endpoint selection; engineering bin boundary over Hawkins & Stevens 1985 Table I vowels."
-    type: float
-    default: 350
-    unit: Hz
-
-  nasalLowVowelF1MinHz:
-    description: "F1 threshold for low-vowel nasal endpoint selection; engineering bin boundary over Hawkins & Stevens 1985 Table I vowels."
-    type: float
-    default: 600
-    unit: Hz
-
   nasalPoleBwHz:
-    description: "Core nasal pole bandwidth"
+    description: "Klatt 1980 Table I nasal bandwidth; engineering extension to both pairs"
     type: float
     default: 100
     unit: Hz
 
   nasalZeroBwHz:
-    description: "Core nasal zero bandwidth"
+    description: "Klatt 1980 Table I nasal zero bandwidth"
     type: float
     default: 100
     unit: Hz
 
   nasalPlaceBwHz:
-    description: "Place antiformant bandwidth"
+    description: "Klatt 1980 Table I bandwidth; engineering extension to place zero"
     type: float
     default: 100
     unit: Hz
 
   nasalPlaceMFnzHz:
-    description: "Bilabial murmur antiformant frequency"
+    description: "Fujimura 1962 bilabial antiformant estimate; Recasens Table II has no /m/ NZ"
     type: float
     default: 1000
     unit: Hz
 
   nasalPlaceNFnzHz:
-    description: "Alveolar murmur antiformant frequency"
+    description: "Recasens 1983 Table II single-speaker alveolar NZ"
     type: float
-    default: 1700
+    default: 1780
     unit: Hz
 
   nasalPlaceNgFnzHz:
-    description: "Velar murmur antiformant frequency"
+    description: "Recasens 1983 Table II single-speaker velar NZ"
     type: float
-    default: 3000
+    default: 3700
     unit: Hz
 
   nasalB1AdditionHz:
-    description: "Secondary B1 widening cue added by nasal coupling"
+    description: "Chen 1997 secondary vowel B1 widening; engineering 107 Hz increment"
     type: float
     default: 107
-    unit: Hz
-
-  # Deprecated raw nasal parameters kept temporarily for compatibility.
-  FNZ:
-    description: "Deprecated raw nasal zero frequency"
-    type: float
-    default: 0
-    unit: Hz
-
-  BNZ:
-    description: "Deprecated raw nasal zero bandwidth"
-    type: float
-    default: 0
-    unit: Hz
-
-  FNP:
-    description: "Deprecated raw nasal pole frequency"
-    type: float
-    default: 0
-    unit: Hz
-
-  BNP:
-    description: "Deprecated raw nasal pole bandwidth"
-    type: float
-    default: 0
     unit: Hz
 
   # Output gain parameters
@@ -644,70 +574,74 @@ realize:
     description: "Reference LF return phase ratio from RdRef (Fant 1997 Eq. A1)."
 
   nasalCouplingClamped:
-    expr: "min(1.0, max(0.0, nasalCoupling))"
-    deps: [nasalCoupling]
-    description: "Clamp velopharyngeal coupling to [0,1]."
-
-  nasalLegacyParamUsed:
-    expr: "(FNP > 0 || FNZ > 0 || BNP > 0 || BNZ > 0) ? 1 : 0"
-    deps: [FNP, FNZ, BNP, BNZ]
-    description: "Detect deprecated raw nasal parameter usage during migration."
-
-  nasalVowelDerivedPoleTargetHz:
-    expr: "F1 >= nasalLowVowelF1MinHz ? nasalLowVowelPoleTargetHz : (F1 >= nasalMidVowelF1MinHz ? nasalMidVowelPoleTargetHz : nasalHighVowelPoleTargetHz)"
-    deps: [F1, nasalLowVowelF1MinHz, nasalLowVowelPoleTargetHz, nasalMidVowelF1MinHz, nasalMidVowelPoleTargetHz, nasalHighVowelPoleTargetHz]
-    description: "Vowel-dependent nasal pole endpoint derived from F1 bins over Hawkins & Stevens 1985 Fig. 5."
-
-  nasalCoreFnpTarget:
-    expr: "nasalVowelPoleTargetHz > 0 ? nasalVowelPoleTargetHz : nasalVowelDerivedPoleTargetHz"
-    deps: [nasalVowelPoleTargetHz, nasalVowelDerivedPoleTargetHz]
-    description: "Active nasal pole endpoint for vowel nasalization."
+    # Maeda 1993 area sweep; Feng & Castelli 1996 complementary area ratio.
+    expr: "min(1.0, max(0.0, nasalCouplingArea / 2.5))"
+    deps: [nasalCouplingArea]
+    description: "Area ratio over the Maeda 1993 port sweep."
 
   nasalCoreFnp:
-    expr: "nasalLegacyParamUsed == 1 && FNP > 0 ? FNP : nasalPoleBaseHz + (nasalCoreFnpTarget - nasalPoleBaseHz) * nasalCouplingClamped"
-    deps: [nasalLegacyParamUsed, FNP, nasalPoleBaseHz, nasalCoreFnpTarget, nasalCouplingClamped]
-    description: "Core nasal pole frequency moving from the Klatt 1980 oral-cancellation baseline to the Hawkins & Stevens 1985 vowel endpoint."
+    # Feng & Castelli 1996: sqrt(F_Helm^2 + F_wall^2), F_Helm=c/(2*pi)*sqrt(S/(V*L)).
+    # Maeda 1993 V=13*6=78 cm3; Feng S=0.6 cm2, L=3 cm, F_wall=200 Hz.
+    # Engineering hybrid geometry, c=35000 cm/s. S is nostril area, NOT port area.
+    expr: "sqrt(pow(35000.0 / (2.0 * 3.141592653589793), 2.0) * 0.6 / (78.0 * 3.0) + pow(200.0, 2.0))"
+    description: "Wall-corrected low nasal target from Feng & Castelli 1996."
 
   nasalCoreBnp:
-    expr: "nasalLegacyParamUsed == 1 && BNP > 0 ? BNP : nasalPoleBwHz"
-    deps: [nasalLegacyParamUsed, BNP, nasalPoleBwHz]
+    # Klatt 1980 Table I bandwidth.
+    expr: "nasalPoleBwHz"
+    deps: [nasalPoleBwHz]
     description: "Core nasal pole bandwidth. Klatt 1980 Table I baseline."
 
   nasalCoreBnz:
-    expr: "nasalLegacyParamUsed == 1 && BNZ > 0 ? BNZ : nasalZeroBwHz"
-    deps: [nasalLegacyParamUsed, BNZ, nasalZeroBwHz]
+    # Klatt 1980 Table I bandwidth.
+    expr: "nasalZeroBwHz"
+    deps: [nasalZeroBwHz]
     description: "Core nasal zero bandwidth. Klatt 1980 Table I baseline."
 
-  nasalCoreFnzTarget:
-    expr: "nasalVowelZeroTargetHz > 0 ? nasalVowelZeroTargetHz : (F1 > 0 ? (nasalCoreFnpTarget + F1) / 2.0 : nasalCoreFnpTarget)"
-    deps: [nasalVowelZeroTargetHz, F1, nasalCoreFnpTarget]
-    description: "Hawkins & Stevens 1985: vowel nasalization endpoint zero sits midway between the nasal pole endpoint and F1."
-
   nasalCoreFnz:
-    expr: "nasalLegacyParamUsed == 1 && FNZ > 0 ? FNZ : nasalPoleBaseHz + (nasalCoreFnzTarget - nasalPoleBaseHz) * nasalCouplingClamped"
-    deps: [nasalLegacyParamUsed, FNZ, nasalPoleBaseHz, nasalCoreFnzTarget, nasalCouplingClamped]
-    description: "Core nasal zero frequency moving from oral cancellation to the Hawkins & Stevens 1985 vowel endpoint."
+    # Maeda 1993 Fig.1 C_n1=368 Hz. Engineering interpolation from cancellation;
+    # this reduced ladder is not the paper's full transmission-line solution.
+    expr: "nasalCoreFnp + (368.0 - nasalCoreFnp) * nasalCouplingClamped"
+    deps: [nasalCoreFnp, nasalCouplingClamped]
+    description: "Low zero separates from the low pole as the port opens."
+
+  nasalSecondPoleBound:
+    # Feng & Castelli 1996: stable second pharyngonasal target near 1000 Hz.
+    expr: "nasalRuntimeActive > 0 ? 1000.0 : 0.0"
+    deps: [nasalRuntimeActive]
+    step: true
+
+  nasalSecondZeroBound:
+    # Maeda 1993 Fig.1 C_n2=1803 Hz; engineering linear area interpolation.
+    expr: "nasalRuntimeActive > 0 ? 1000.0 + (1803.0 - 1000.0) * nasalCouplingClamped : 0.0"
+    deps: [nasalRuntimeActive, nasalCouplingClamped]
+    step: true
 
   nasalPlaceFnz:
+    # Recasens 1983 Table II NZ; /m/ fallback from Fujimura 1962.
     expr: "nasalPlaceIndex == 1 ? nasalPlaceMFnzHz : (nasalPlaceIndex == 2 ? nasalPlaceNFnzHz : (nasalPlaceIndex == 3 ? nasalPlaceNgFnzHz : 0.0))"
     deps: [nasalPlaceIndex, nasalPlaceMFnzHz, nasalPlaceNFnzHz, nasalPlaceNgFnzHz]
     description: "Fujimura 1962 place-specific oral-cavity antiformant selection."
 
   nasalPlaceBnz:
+    # Recasens 1983: oral-cavity zero belongs to the murmur configuration.
     expr: "nasalPlaceIndex > 0 && nasalMurmurStrength > 0 ? nasalPlaceBwHz : 0.0"
     deps: [nasalPlaceIndex, nasalMurmurStrength, nasalPlaceBwHz]
     description: "Enable the place antiformant only during nasal murmur."
 
   nasalSecondaryCueScale:
-    expr: "pow(nasalCouplingClamped, 2.0)"
-    deps: [nasalCouplingClamped]
+    # Chen 1997 vowel cue; engineering quadratic taper, excluded from murmurs.
+    expr: "nasalMurmurStrength > 0 ? 0.0 : pow(nasalCouplingClamped, 2.0)"
+    deps: [nasalCouplingClamped, nasalMurmurStrength]
     description: "Secondary vowel nasalization cues track coupling with a conservative nonlinear taper."
 
   nasalRuntimeActive:
-    expr: "(nasalCouplingClamped > 0 || nasalMurmurStrengthClamped > 0) ? 1.0 : 0.0"
-    deps: [nasalCouplingClamped, nasalMurmurStrengthClamped]
+    # Recasens 1983 Table II: murmur poles are supplied by F1-F4, not doubled
+    # by the vowel side branch. Maeda 1993: closed port has only oral poles.
+    expr: "nasalCouplingClamped > 0 && nasalMurmurStrength <= 0 ? 1.0 : 0.0"
+    deps: [nasalCouplingClamped, nasalMurmurStrength]
     step: true
-    description: "Enable the nasal tract only when declarative coupling or murmur is active."
+    description: "Vowel side branch; murmur uses the measured cascade targets."
 
   nasalCoreFnpBound:
     expr: "nasalRuntimeActive > 0 ? nasalCoreFnp : 0.0"

@@ -92,6 +92,24 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
         errors: [],
       };
 
+      // Opt-in range observations keep the policy and its clamp formula in YAML.
+      // Do not rewrite inputs here: realization provenance must see the input.
+      for (const [name, def] of Object.entries(semantics.params ?? {})) {
+        const value = result.values[name];
+        if (
+          def.diagnoseRange &&
+          def.range &&
+          typeof value === "number" &&
+          (!Number.isFinite(value) || value < def.range[0] || value > def.range[1])
+        ) {
+          context.diagnostics?.warn(
+            `Parameter ${name} is outside its declared range`,
+            { name, value, range: def.range },
+            "W_SEMANTICS_PARAM_RANGE",
+          );
+        }
+      }
+
       if (!semantics.realize) {
         return result;
       }

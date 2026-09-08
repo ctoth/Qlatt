@@ -1034,4 +1034,23 @@ The main caveats for reuse: no nasal tract, place features are deliberately not 
 - Flanagan, J.L. & Ishizaka, K. (1977), "Acoustic characterization and computer simulation of the air volume displaced by the vibrating vocal cords". The source of the claim that the incompressible shrinking-tube effect is negligible for cord vibration.
 - Press, W.H. et al. (1989), Numerical Recipes in Pascal, and Mitchell, A.R. (1969), Computational Methods in Partial Differential Equations. The numerical references for the Lax-Wendroff scheme.
 
+## Collection Cross-References
+
+### Already in Collection
+- [Ishizaka & Flanagan (1972) — Synthesis of Voiced Sounds From a Two-Mass Model of the Vocal Cords](../Ishizaka_1972_TwoMassModelVocalCords/notes.md) - the direct predecessor and explicit target of this paper's eleven-point comparison in chapter 7 (pressure-vs-flow computation, vena contracta treatment, fixed 0.1/0.6 damping factors, turbulence resistance placement).
+
+### New Leads (Not Yet in Collection)
+- Sondhi & Resnick (1983) - "The inverse problem for the vocal tract" - source of the lip radiation boundary condition (Eq. 20) and the integration-along-characteristics technique.
+- Flanagan & Landgraf (1968) - "Self-oscillating source for vocal-tract synthesizers" - origin of the relative-tension parameter k_rel and the one-mass self-oscillating source concept generalized here.
+- Mermelstein (1973) - "Articulatory model for the study of speech production" - the better articulator-position-to-area-function mapping this paper deliberately does not attempt.
+- Van den Berg, Zantema & Doornenbal (1957) - source of the 10 m/s critical velocity and the 0.875 turbulence-loss ratio validating this paper's Eq. 21.
+- Flanagan & Ishizaka (1977) - "Acoustic characterization and computer simulation of the air volume displaced by the vibrating vocal cords" - source of the claim that the incompressible shrinking-tube effect is negligible for cord vibration.
+
+### Cited By (in Collection)
+- (none found - no collection paper's citations.md or notes.md currently references Boersma 1991)
+
+### Conceptual Links (not citation-based)
+- [Titze (2008) — Nonlinear Source-Filter Coupling in Phonation](../Titze_2008_NonlinearSource-filterCouplingPhonation/notes.md) - both papers reject the assumption that source and filter can be treated as independent stages: Titze derives the acoustic-loading conditions under which vocal-tract impedance perturbs fold vibration, while Boersma's whole-apparatus wall-vibration model produces the same source-filter interaction (and aerodynamic devoicing, aspiration) as an emergent consequence of solving lungs-to-lips physics together rather than as an imposed correction term.
+- [Badin (1989) — Fricative Production Modelling: Aerodynamic and Acoustic Data](../Badin_1989_FricativeProductionModelling/notes.md) - both address frication from first-principles aerodynamics rather than a fixed noise-source rule; Badin's measured aerodynamic/acoustic fricative data is exactly the kind of empirical target Boersma's turbulence-noise and constriction-flow equations would need to be validated against.
+
 

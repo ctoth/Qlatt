@@ -1,0 +1,4 @@
+---
+tags: [emotional-speech, formant-synthesis, prosody-rules, voice-quality, evaluation]
+---
+Surveys a decade of emotional speech synthesis, grouping systems by synthesis technique (formant, diphone concatenation, unit selection) and showing that technique choice determines which emotion-relevant parameters are controllable at all. Tabulates one fully numeric prosody and voice-quality rule set per emotion for joy, sadness, anger, fear, surprise and boredom, each with its forced-choice recognition rate against chance, and criticises the field's default forced-choice evaluation as a discrimination task that says nothing about naturalness. Directly relevant here because it argues formant synthesis is the technique that actually exposes the voice-source and vocal-tract parameters emotion needs, and supplies six implementable rule sets with published accuracy targets.

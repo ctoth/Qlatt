@@ -1,7 +1,9 @@
 {
-  "cite_key": "ITU-T_1996_MOS_P800",
+  "cite_key": "itut1996p800",
   "title": "Methods for subjective determination of transmission quality",
-  "authors": ["ITU-T"],
+  "authors": [
+    "ITU-T"
+  ],
   "year": "1996",
   "arxiv_id": null,
   "doi": null,

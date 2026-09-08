@@ -666,6 +666,37 @@ This is the canonical source-model reference for any glottal-source implementati
 - **Fant 1964** (ref. 21) - vocal-tract wall vibration and the transmission cutoff frequency, needed to explain the human pitch-jump offsets.
 - **Flanagan, Coker, Rabiner, Schafer & Umeda 1970** (ref. 22) - "Synthetic Voices for Computers", the text-synthesis application target.
 
+## Collection Cross-References
+
+### Already in Collection
+- (none - none of this paper's own key citations (Flanagan & Landgraf 1968, van den Berg et al. 1957, Ishizaka & Kaneko 1968, Flanagan's 1972 textbook, Hixon Mead & Klatt 1971) are present in the collection under their own directories)
+
+### New Leads (Not Yet in Collection)
+- Flanagan & Landgraf (1968) - "Self-Oscillating Source for Vocal-Tract Synthesizers" - the one-mass self-oscillating source model this paper supersedes; every criticism in this paper's Section II is aimed at it.
+- van den Berg, Zantema & Doornenbal (1957) - "On the Air Resistance and the Bernoulli Effect of the Human Larynx" - the plaster-cast larynx flow measurements supplying the 0.37 inlet contraction loss factor this paper adopts.
+- Ishizaka & Kaneko (1968) - "On Equivalent Mechanical Constants of the Vocal Cords" - static tensile stress vs. displacement measurements, source of the nonlinear collision-spring form and the eta_k = 50-100 range.
+- Flanagan (1972) - *Speech Analysis, Synthesis and Perception*, 2nd ed. - source of the tract transmission-line element values and the radiation-load approximation needed to implement the tract half of this system.
+- Hixon, Mead & Klatt (1971) - "Influence of Forced Transglottal Pressure Changes on Vocal Fundamental Frequency" - the human transglottal-pressure-to-F0 measurements validating this paper's 2.5 Hz/cm H2O slope.
+
+### Cited By (in Collection)
+This is a foundational, heavily-cited model; the following collection papers cite Ishizaka & Flanagan (1972) directly:
+- [Boersma (1991) — Articulatory Speech Synthesis From Lungs to Lips](../Boersma_1991_MultiMassSpeechSynthesis/notes.md) - cites for the pressure-recovery equation (its Eq. 21 matches this paper's Eq. 6 at v_crit = 0), the relative-tension formulation, and open-glottis damping factors.
+- [Cranen (1995) — Physiological Voice Source Modelling](../Cranen_1995_PhysiologicalVoiceSourceModelling/notes.md) - cites as the two-mass model basis for its aerodynamic equations.
+- [Herzel (1994) — Vocal Disorders and Nonlinear Dynamics](../Herzel_1994_VocalDisordersNonlinearDynamics/notes.md) - cites as the reference two-mass model for its bifurcation-type survey.
+- [Holmes (2001) — Speech Synthesis and Recognition](../Holmes_2001_SpeechSynthesisRecognition/notes.md) - cites as the foundational vocal-fold vibration model in its Section 2.7.1.
+- [Lucero (1993) — Dynamics of the Two-Mass Model of the Vocal Folds: Equilibria, Bifurcations, and Oscillation Region](../Lucero_1993_TwoMassModelBifurcations/notes.md) - performs the bifurcation analysis of this exact model.
+- [Lucero (1999) — Bifurcations of Voice Onset/Offset](../Lucero_1999_BifurcationsVoiceOnsetOffset/notes.md) - numerical simulation of this model to demonstrate oscillation hysteresis.
+- [Lucero (2005) — Vocal Fold Bifurcations](../Lucero_2005_VocalFoldBifurcations/notes.md) - analytical Lyapunov-number derivation for this model family.
+- [Rothenberg (1975) — A Three-Parameter Voice Source](../Rothenberg_1975_ThreeParameterVoiceSource/notes.md) - contrasts this "physiological approach" with its own behavioral three-parameter model.
+- [Steinecke & Herzel (1995) — Bifurcations in an Asymmetric Vocal-Fold Model](../Steinecke_Herzel_1995_BifurcationsAsymmetricVocalFold/notes.md) - reduces this model for asymmetric bifurcation analysis.
+- [Steinecke (1995) — Bifurcations in a Simplified Two-Mass Vocal Fold Model](../Steinecke_1995_BifurcationsVocalFold/notes.md) - simplifies this model to locate bifurcations in Ps/stiffness and Ps/asymmetry planes.
+- [Story (1995) — Body-Cover Vocal Fold Model](../Story_1995_BodyCoverVocalFoldModel/notes.md) - extends this two-mass model by adding a third "body" mass.
+- [Titze (1979) — Laryngeal Configurations for Phonation](../Titze_1979_LaryngealConfigurationsPhonation/notes.md) - applies this paper's glottal resistances and inductances per duct.
+- [Titze (2008) — Nonlinear Source-Filter Coupling in Phonation](../Titze_2008_NonlinearSource-filterCouplingPhonation/notes.md) - notes this model (unlike Flanagan & Landgraf's one-mass model) retains vocal-tract interaction via its second mode.
+
+### Conceptual Links (not citation-based)
+- (not surveyed beyond the citation network above - the ~30-paper citing set already documents this paper's engagement with the collection comprehensively; see Cited By)
+
 ## Figures of Interest (complete index)
 
 - **Fig. 1 (p.1236):** Schematic of the two-mass approximation. Trachea/lungs at `P_s`, contraction `l_c`, glottis depth `d = d1 + d2`, expansion `l_e`, vocal tract. Pressures `P_11, P_12, P_21, P_22, P_1`; springs `s1, s2`; resistances `r1, r2`; coupling spring `k_c`. Right panel is a cross section showing `A_g1 = (A_g0 + 2 l_g x_1)`.

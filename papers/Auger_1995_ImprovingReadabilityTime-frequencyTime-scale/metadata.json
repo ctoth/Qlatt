@@ -1,16 +1,23 @@
 {
-  "title": "Improving the readability of time-frequency and time-scale representations by the reassignment method",
+  "cite_key": "auger1995improving",
+  "title": "Improving the Readability of Time-Frequency and Time-Scale Representations by the Reassignment Method",
   "authors": [
-    "F. Auger",
-    "P. Flandrin"
+    "François Auger",
+    "Patrick Flandrin"
   ],
   "year": "1995",
+  "arxiv_id": null,
   "doi": "10.1109/78.382394",
+  "abstract": "In this paper, the use of the reassignment method, first applied 15 years ago by Kodera, Gendrin, and de Villedary to the spectrogram, is generalized to any bilinear time-frequency or time-scale distribution. This method creates a modified version of a representation by moving its values away from where they are computed, so as to produce a better localization of the signal components. We first propose a new formulation of this method, followed by a thorough theoretical study of its characteristics. Its practical use for a large variety of known time-frequency and time-scale distributions is then addressed. Finally, some experimental results are reported to demonstrate the performance of this method.",
   "url": "https://www.semanticscholar.org/paper/b616ce5724a64ee5364525c0d4f9a4cb346b8dd3",
   "pdf_url": "http://www.acousticslab.org/learnmoresra/files/augerflandrin1995ieee43.pdf",
-  "bibtex": "@Article{Auger1995ImprovingTR,\n author = {F. Auger and P. Flandrin},\n booktitle = {IEEE Transactions on Signal Processing},\n journal = {IEEE Trans. Signal Process.},\n pages = {1068-1089},\n title = {Improving the readability of time-frequency and time-scale representations by the reassignment method},\n volume = {43},\n year = {1995}\n}\n",
+  "document_type": "article",
   "venue": "IEEE Transactions on Signal Processing",
   "venue_type": "journal",
   "volume": "43",
-  "pages": "1068-1089"
+  "number": "5",
+  "pages": "1068-1089",
+  "month": "May",
+  "publisher": "IEEE",
+  "bibtex": "@Article{Auger1995ImprovingTR,\n author = {F. Auger and P. Flandrin},\n journal = {IEEE Trans. Signal Process.},\n number = {5},\n pages = {1068-1089},\n title = {Improving the Readability of Time-Frequency and Time-Scale Representations by the Reassignment Method},\n volume = {43},\n year = {1995},\n doi = {10.1109/78.382394}\n}\n"
 }

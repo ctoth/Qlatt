@@ -521,3 +521,8 @@ This is a directly implementable specification for adding source–filter intera
 - **Sondhi, M. M., and Schroeter, J. (1987).** "A hybrid time-frequency domain articulatory speech synthesizer," IEEE TASSP 35, 955–967. The transmission-line matrix method used for the reactance curves.
 - **Rothenberg, M., and Zahorian, S. (1977).** "Nonlinear inverse filtering technique for estimating the glottal-area waveform," JASA 61, 1063–1071. The basis for the inverse-filtering criticism.
 
+## Collection Cross-References
+
+### Conceptual Links (not citation-based)
+- [Boersma (1991) — Synthesis of Speech Sounds from a Multi-Mass Model of the Lungs, Vocal Tract, and Glottis](../Boersma_1991_MultiMassSpeechSynthesis/notes.md) - both papers reject the assumption that source and filter can be treated as independent stages: this paper derives the acoustic-loading conditions under which vocal-tract impedance perturbs fold vibration, while Boersma's whole-apparatus wall-vibration model produces the same source-filter interaction (and aerodynamic devoicing, aspiration) as an emergent consequence of solving lungs-to-lips physics together rather than as an imposed correction term.
+

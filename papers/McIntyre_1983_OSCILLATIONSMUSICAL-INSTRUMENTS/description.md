@@ -1,0 +1,4 @@
+---
+tags: [physical-modeling, time-domain-synthesis, nonlinear-oscillator, source-filter, waveguide]
+---
+McIntyre, Schumacher and Woodhouse present a minimal time-domain model of self-sustained musical oscillation in which a memoryless nonlinear excitation characteristic is solved each sample against a linear passive resonator represented by a short reflection function convolved with the outgoing travelling wave. A single three-equation set reproduces clarinet, violin and flute behaviour by changing only the nonlinear characteristic, the reflection function and a jet delay, and it explains bowed-string pitch flattening as a release-capture asymmetry invisible to frequency-domain reasoning. For this project the architecture maps directly onto glottal source-tract interaction, since the reed is a pressure-controlled valve that closes exactly as the vocal folds do, and the reflection function is the affordable route to genuine interaction in a formant synthesizer.

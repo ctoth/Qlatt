@@ -767,3 +767,8 @@ Caution: the scale asks for **basic audio quality relative to a reference**, whi
 - Hochberg, Y. (1988). A sharper Bonferroni procedure for multiple tests of significance. Biometrika 75(4), 800-802. [Attachment 4 reference 15 — the recommended multiple-comparison correction.]
 - Report ITU-R BS.2300 — the eGauge assessor-expertise method referenced for pre-screening.
 - Recommendation ITU-R BS.1116 — listening conditions (§§7-8) are incorporated by reference into MUSHRA.
+
+## Collection Cross-References
+
+### Conceptual Links (not citation-based)
+- [WORLD: A Vocoder-Based High-Quality Speech Synthesis System for Real-Time Applications](../Morise_2016_WORLDVocoder-BasedHigh-QualitySpeech/notes.md) - Morise's listening test is a direct application of this recommendation's MUSHRA methodology (hidden reference, anchor conditions, 0-100 scale); it is a concrete worked example of the GUI and trial structure (per-subject "Experiment N/20" runs, 95% CI reporting) this standard specifies.

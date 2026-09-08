@@ -1,7 +1,9 @@
 {
   "cite_key": "puckette1995formant",
   "title": "Formant-based audio synthesis using nonlinear distortion",
-  "authors": ["Miller Puckette"],
+  "authors": [
+    "Miller Puckette"
+  ],
   "year": "1995",
   "arxiv_id": null,
   "doi": null,

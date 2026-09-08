@@ -396,3 +396,29 @@ This is directly load-bearing for a formant/source-filter speech synthesizer:
 - **[26] M.V. Mathews, J.E. Miller, E.E. David, "Pitch synchronous analysis of voiced sounds," JASA vol.33, no.2, pp.179-185, 1961.** The original pitch-synchronous analysis idea CheapTrick builds on.
 - **[23] B.S. Atal, S.L. Hanauer, "Speech analysis and synthesis by linear prediction of the speech wave," JASA vol.50, no.2B, pp.637-655, 1971.** The LPC baseline criticized here.
 - **[3] H. Dudley, "Remaking speech," JASA vol.11, no.2, pp.169-177, 1939.** The original vocoder.
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found - none of this paper's citations are represented in the collection)
+
+### New Leads (Not Yet in Collection)
+- H. Kawahara, I. Masuda-Katsuse, A. Cheveigné (1999) - "Restructuring speech representations using a pitch-adaptive time-frequency smoothing and an instantaneous-frequency-based f0 extraction" - original STRAIGHT paper, the quality baseline this whole vocoder lineage is measured against
+- A. Cheveigné, H. Kawahara (2002) - "Yin, a fundamental frequency estimator for speech and music" - alternative F0 estimator DIO is benchmarked against for speed and accuracy
+- E. Moulines, F. Charpentier (1990) - "Pitch-synchronous waveform processing techniques for text-to-speech synthesis using diphones" - foundational pitch-synchronous overlap-add technique underlying WORLD's synthesis stage
+- B.S. Atal, S.L. Hanauer (1971) - "Speech analysis and synthesis by linear prediction of the speech wave" - LPC baseline this paper cites as unable to synthesize natural speech
+- H. Zen, K. Tokuda, A.W. Black (2009) - "Statistical parametric speech synthesis" - survey of the statistical-parametric synthesis field WORLD's vocoder is designed to serve
+- D.W. Griffin, J.S. Lim (1985) - "A new model-based speech analysis/synthesis" - early model-based analysis/synthesis system in the same lineage
+- R. McAulay, T.F. Quatieri (1986) - "Speech analysis/synthesis based on a sinusoidal representation" - alternative (sinusoidal) analysis/synthesis paradigm contrasting with WORLD's source-filter approach
+- H. Dudley (1939) - "Remaking speech" - the original vocoder concept this entire line of work descends from
+
+### Supersedes or Recontextualizes
+- (none - no genuine supersedes relationship with any collection paper)
+
+### Conceptual Links (not citation-based)
+- [Method for the subjective assessment of intermediate quality level of audio systems (Recommendation ITU-R BS.1534-3)](../ITU-R_2015_MUSHRA_BS1534/notes.md) - Morise's listening test is a direct application of the MUSHRA methodology this recommendation defines (hidden reference, anchor conditions, 0-100 scale); Morise's Table 3/Fig. 6 describe the concrete GUI and trial structure that implements the standard.
+- [CREPE: A Convolutional Representation for Pitch Estimation](../Kim_2018_CREPEConvolutionalRepresentationPitch/notes.md) - both papers target the same problem (fast, accurate F0/pitch estimation) with opposite strategies: DIO's transform-free zero-crossing/reliability approach optimizes for real-time speed on CPU, while CREPE trades that speed for CNN-based robustness to noise and octave errors - a direct speed/accuracy tradeoff comparison for any F0 front end.
+- [LPCNet: Improving Neural Speech Synthesis Through Linear Prediction](../Valin_2019_LPCNetImprovingNeuralSpeechSynthesis/notes.md) - both are real-time-oriented vocoders explicit about RTF as a design constraint; LPCNet substitutes a neural excitation model for WORLD's minimum-phase-impulse-plus-extracted-excitation synthesis, making them opposite answers (classical DSP vs. learned) to the same "high quality, real-time synthesis" problem WORLD states as its target.
+
+### Cited By (in Collection)
+- (none found)

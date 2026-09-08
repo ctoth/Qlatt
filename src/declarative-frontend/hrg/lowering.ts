@@ -22,6 +22,7 @@ import {
 } from "../../input/vq-channels";
 import type { KlattFrame } from "../../tts-frontend-types";
 import { isPlainObject } from "../../yaml-loader";
+import { buildHolmesTransitions, sampleHolmesCurve } from "./holmes-transitions";
 import type { Item } from "./item";
 import { applyScalarOp } from "./scalar-op";
 import type { FeatureValue } from "./types";
@@ -922,6 +923,21 @@ export function lowerToFrames(
   const paramKeys = options.columns.slice();
   const smoothTypes = new Set(options.transitions.blend.smooth_types);
   const transitionsByItem = new Map<Item, ResolvedSegmentTransition[]>();
+  const holmes = buildHolmesTransitions(timings, utterance);
+  const fallbackItems = new Set<Item>();
+  const transitionDuration = (item: Item, boundaryIndex: number): number => {
+    const explicit = finiteFeatureNumber(item.get("transition_ms"));
+    if (explicit != null) return explicit;
+    if (!holmes.covered.has(boundaryIndex) && !fallbackItems.has(item)) {
+      fallbackItems.add(item);
+      utterance.diagnostics.warn(
+        "No tabulated or explicit transition duration; using flat fallback",
+        { itemId: item.id, durationMs: defaultTransitionMs },
+        "HRG_LOWER_TRANSITION_FALLBACK",
+      );
+    }
+    return defaultTransitionMs;
+  };
   const appendTransition = (item: Item, transition: ResolvedSegmentTransition): void => {
     const existing = transitionsByItem.get(item);
     if (existing) existing.push(transition);
@@ -965,8 +981,7 @@ export function lowerToFrames(
     if (typeof currentType !== "string" || typeof nextType !== "string") return;
     const bothSmoothed = smoothTypes.has(currentType) && smoothTypes.has(nextType);
     if (!bothSmoothed && options.transitions.blend.smooth_all_boundaries !== true) return;
-    const itemTransitionMs = finiteFeatureNumber(timing.item.get("transition_ms"));
-    const transitionMs = itemTransitionMs ?? defaultTransitionMs;
+    const transitionMs = transitionDuration(timing.item, index);
     if (transitionMs <= 0) return;
     addLinearTransition(timing.item, timing.durationMs, "trailing", transitionMs, ({ startMs }) => {
       const currentPhoneme = timing.item.get(phonemeKey);
@@ -994,8 +1009,7 @@ export function lowerToFrames(
     timings.forEach((timing, index) => {
       const previous = timings[index - 1];
       if (!previous) return;
-      const itemTransitionMs = finiteFeatureNumber(timing.item.get("transition_ms"));
-      const transitionMs = itemTransitionMs ?? defaultTransitionMs;
+      const transitionMs = transitionDuration(timing.item, index - 1);
       addLinearTransition(timing.item, timing.durationMs, "leading", transitionMs, ({ endMs }) => {
         const currentPhoneme = timing.item.get(phonemeKey);
         const previousPhoneme = previous.item.get(phonemeKey);
@@ -2112,6 +2126,11 @@ export function lowerToFrames(
     if (item) {
       applyItemParams(params, provenance, item);
       applyItemTransitions(params, provenance, item, segmentOffsetMs);
+      for (const [key, curve] of holmes.curves.get(item) ?? []) {
+        if (!paramKeys.includes(key)) continue;
+        params[key] = sampleHolmesCurve(curve, segmentOffsetMs);
+        provenance[key] = curve.decisionId;
+      }
       applyControlWindows(params, provenance, item, segmentOffsetMs);
       applyItemF0Sample(params, provenance, item, timeMs);
       applyAffectProjection(params, provenance, item);
@@ -2196,6 +2215,11 @@ export function lowerToFrames(
       }
     }
     if (options.timeline.event_points.include_transition_steady_time) {
+      for (const curve of holmes.curves.get(timing.item)?.values() ?? []) {
+        for (const point of curve.points) {
+          if (point.time > 0 && point.time < timing.durationMs) offsets.add(point.time);
+        }
+      }
       for (const transition of transitionsByItem.get(timing.item) ?? []) {
         if (transition.startMs > 1e-6 && transition.startMs < timing.durationMs - 1e-6) {
           offsets.add(transition.startMs);

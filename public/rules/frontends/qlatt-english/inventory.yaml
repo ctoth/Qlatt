@@ -484,6 +484,14 @@ phoneme_targets:
     rhotic: true
     dac: 2  # Recasens 1997
   S:
+    # Holmes et al. 1964 Appendix 1; S mapped to S.
+    boundary_rank: 18
+    boundary_fixed: {F1: 170, F2: 950, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 320
     F2: 1390
     F3: 2530
@@ -508,6 +516,14 @@ phoneme_targets:
     alveolar: true
     dac: 2  # Recasens 1997
   Z:
+    # Holmes et al. 1964 Appendix 1; Z mapped to Z.
+    boundary_rank: 20
+    boundary_fixed: {F1: 170, F2: 950, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 240
     F2: 1390
     F3: 2530
@@ -532,6 +548,14 @@ phoneme_targets:
     alveolar: true
     dac: 2  # Recasens 1997
   SH:
+    # Holmes et al. 1964 Appendix 1; SH mapped to SH.
+    boundary_rank: 18
+    boundary_fixed: {F1: 170, F2: 1190, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 300
     F2: 1840
     F3: 2750
@@ -558,6 +582,14 @@ phoneme_targets:
     postalveolar: true
     dac: 3  # Recasens 1997
   ZH:
+    # Holmes et al. 1964 Appendix 1; ZH mapped to ZH.
+    boundary_rank: 20
+    boundary_fixed: {F1: 170, F2: 1190, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 260
     F2: 1800
     F3: 2820
@@ -584,6 +616,14 @@ phoneme_targets:
     postalveolar: true
     dac: 3  # Recasens 1997
   F:
+    # Holmes et al. 1964 Appendix 1; F mapped to F.
+    boundary_rank: 18
+    boundary_fixed: {F1: 170, F2: 350, F3: 980}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 340
     F2: 1100
     F3: 2080
@@ -608,6 +648,14 @@ phoneme_targets:
     labiodental: true
     dac: 1  # Recasens 1997
   V:
+    # Holmes et al. 1964 Appendix 1; V mapped to V.
+    boundary_rank: 20
+    boundary_fixed: {F1: 170, F2: 350, F3: 980}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 220
     F2: 1100
     F3: 2080
@@ -632,6 +680,14 @@ phoneme_targets:
     labiodental: true
     dac: 1  # Recasens 1997
   TH:
+    # Holmes et al. 1964 Appendix 1; TH mapped to TH.
+    boundary_rank: 18
+    boundary_fixed: {F1: 170, F2: 1190, F3: 2680}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 320
     F2: 1290
     F3: 2540
@@ -657,6 +713,14 @@ phoneme_targets:
     dental: true
     dac: 1  # Recasens 1997
   DH:
+    # Holmes et al. 1964 Appendix 1; DH mapped to DH.
+    boundary_rank: 20
+    boundary_fixed: {F1: 170, F2: 1190, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 270
     F2: 1290
     F3: 2540
@@ -682,6 +746,14 @@ phoneme_targets:
     dental: true
     dac: 1  # Recasens 1997
   HH:
+    # Holmes et al. 1964 Appendix 1; HH mapped to HH.
+    boundary_rank: 9
+    boundary_fixed: {F1: 0, F2: 0, F3: 0}
+    boundary_proportion: {F1: 1, F2: 1, F3: 1}
+    boundary_external_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_internal_ms: {F1: 70, F2: 70, F3: 70}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 500
     F2: 1500
     F3: 2500
@@ -701,6 +773,14 @@ phoneme_targets:
     glottal: true
     dac: 1  # Recasens 1997
   M:
+    # Holmes et al. 1964 Appendix 1; M mapped to M.
+    boundary_rank: 15
+    boundary_fixed: {F1: 110, F2: 350, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 250
     F2: 1100
     F3: 2500
@@ -717,6 +797,14 @@ phoneme_targets:
     nasal_place: m
     dac: 1  # Recasens 1997
   'N':
+    # Holmes et al. 1964 Appendix 1; N mapped to N.
+    boundary_rank: 15
+    boundary_fixed: {F1: 110, F2: 950, F3: 2680}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 250
     F2: 1400
     F3: 2600
@@ -733,6 +821,14 @@ phoneme_targets:
     nasal_place: n
     dac: 2  # Recasens 1997
   NG:
+    # Holmes et al. 1964 Appendix 1; NG mapped to NG.
+    boundary_rank: 15
+    boundary_fixed: {F1: 110, F2: 1550, F3: 1580}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 250
     F2: 1700
     F3: 2800
@@ -749,6 +845,14 @@ phoneme_targets:
     nasal_place: ng
     dac: 3  # Recasens 1997
   L:
+    # Holmes et al. 1964 Appendix 1; L mapped to L.
+    boundary_rank: 11
+    boundary_fixed: {F1: 230, F2: 710, F3: 1220}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 60, F2: 60, F3: 60}
+    boundary_internal_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 310
     F2: 1300
     F3: 2900
@@ -762,6 +866,14 @@ phoneme_targets:
     alveolar: true
     dac: 3  # Recasens 1997
   R:
+    # Holmes et al. 1964 Appendix 1; R mapped to R.
+    boundary_rank: 10
+    boundary_fixed: {F1: 0, F2: 590, F3: 740}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 50, F2: 50, F3: 50}
+    boundary_internal_ms: {F1: 50, F2: 50, F3: 50}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 310
     F2: 1060
     F3: 1700
@@ -775,6 +887,14 @@ phoneme_targets:
     rhotic: true
     dac: 3  # Recasens 1997
   W:
+    # Holmes et al. 1964 Appendix 1; W mapped to W.
+    boundary_rank: 10
+    boundary_fixed: {F1: 50, F2: 350, F3: 980}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 40, F2: 40, F3: 40}
+    boundary_internal_ms: {F1: 40, F2: 40, F3: 40}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 290
     F2: 610
     F3: 2150
@@ -789,6 +909,14 @@ phoneme_targets:
     labiovelar: true
     dac: 1  # Recasens 1997; Volenec 2015
   'Y':
+    # Holmes et al. 1964 Appendix 1; Y mapped to Y.
+    boundary_rank: 10
+    boundary_fixed: {F1: 110, F2: 1190, F3: 1460}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 40, F2: 40, F3: 40}
+    boundary_internal_ms: {F1: 40, F2: 40, F3: 40}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 260
     F2: 2070
     F3: 3020
@@ -804,30 +932,86 @@ phoneme_targets:
   # Plain stop bases are abstract symbols rewritten to closure/release targets
   # by the structural phase (Klatt 1980 stop model).
   P:
+    # Holmes et al. 1964 Appendix 1; P mapped to P.
+    boundary_rank: 23
+    boundary_fixed: {F1: 110, F2: 350, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 20, F2: 20, F3: 0}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     dur: 100
     type: silence
     is_stop_base: true
   T:
+    # Holmes et al. 1964 Appendix 1; T mapped to T.
+    boundary_rank: 23
+    boundary_fixed: {F1: 110, F2: 950, F3: 2680}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0}
+    boundary_external_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     dur: 100
     type: silence
     is_stop_base: true
   K:
+    # Holmes et al. 1964 Appendix 1; K mapped to K.
+    boundary_rank: 23
+    boundary_fixed: {F1: 110, F2: 1550, F3: 1580}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     dur: 100
     type: silence
     is_stop_base: true
   B:
+    # Holmes et al. 1964 Appendix 1; B mapped to B.
+    boundary_rank: 26
+    boundary_fixed: {F1: 110, F2: 350, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 20, F2: 20, F3: 0}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     dur: 100
     type: silence
     is_stop_base: true
   D:
+    # Holmes et al. 1964 Appendix 1; D mapped to D.
+    boundary_rank: 26
+    boundary_fixed: {F1: 110, F2: 950, F3: 2680}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0}
+    boundary_external_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     dur: 100
     type: silence
     is_stop_base: true
   G:
+    # Holmes et al. 1964 Appendix 1; G mapped to G.
+    boundary_rank: 26
+    boundary_fixed: {F1: 110, F2: 1550, F3: 1580}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     dur: 100
     type: silence
     is_stop_base: true
   P_CL:
+    # Holmes et al. 1964 Appendix 1; P mapped to P_CL.
+    boundary_rank: 23
+    boundary_fixed: {F1: 110, F2: 350, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 20, F2: 20, F3: 0}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 200
     F2: 800
     F3: 2400
@@ -842,6 +1026,14 @@ phoneme_targets:
     bilabial: true
     dac: 1  # Recasens 1997
   T_CL:
+    # Holmes et al. 1964 Appendix 1; T mapped to T_CL.
+    boundary_rank: 23
+    boundary_fixed: {F1: 110, F2: 950, F3: 2680}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0}
+    boundary_external_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 200
     F2: 1800
     F3: 2700
@@ -856,6 +1048,14 @@ phoneme_targets:
     alveolar: true
     dac: 2  # Recasens 1997
   K_CL:
+    # Holmes et al. 1964 Appendix 1; K mapped to K_CL.
+    boundary_rank: 23
+    boundary_fixed: {F1: 110, F2: 1550, F3: 1580}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 200
     F2: 1500
     F3: 2800
@@ -870,6 +1070,14 @@ phoneme_targets:
     velar: true
     dac: 3  # Recasens 1997
   B_CL:
+    # Holmes et al. 1964 Appendix 1; B mapped to B_CL.
+    boundary_rank: 26
+    boundary_fixed: {F1: 110, F2: 350, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 20, F2: 20, F3: 0}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 200
     F2: 800
     F3: 2400
@@ -885,6 +1093,14 @@ phoneme_targets:
     bilabial: true
     dac: 1  # Recasens 1997
   D_CL:
+    # Holmes et al. 1964 Appendix 1; D mapped to D_CL.
+    boundary_rank: 26
+    boundary_fixed: {F1: 110, F2: 950, F3: 2680}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0}
+    boundary_external_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 200
     F2: 1800
     F3: 2700
@@ -900,6 +1116,14 @@ phoneme_targets:
     alveolar: true
     dac: 2  # Recasens 1997
   G_CL:
+    # Holmes et al. 1964 Appendix 1; G mapped to G_CL.
+    boundary_rank: 26
+    boundary_fixed: {F1: 110, F2: 1550, F3: 1580}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 200
     F2: 1500
     F3: 2800
@@ -915,6 +1139,14 @@ phoneme_targets:
     velar: true
     dac: 3  # Recasens 1997
   P_REL:
+    # Holmes et al. 1964 Appendix 1; P mapped to P_REL.
+    boundary_rank: 29
+    boundary_fixed: {F1: 110, F2: 350, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_internal_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 400
     F2: 1100
     F3: 2150
@@ -936,6 +1168,14 @@ phoneme_targets:
     bilabial: true
     dac: 1  # Recasens 1997
   T_REL:
+    # Holmes et al. 1964 Appendix 1; T mapped to T_REL.
+    boundary_rank: 29
+    boundary_fixed: {F1: 110, F2: 950, F3: 2680}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0}
+    boundary_external_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_internal_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 400
     F2: 1600
     F3: 2600
@@ -961,6 +1201,14 @@ phoneme_targets:
     alveolar: true
     dac: 2  # Recasens 1997
   K_REL:
+    # Holmes et al. 1964 Appendix 1; K mapped to K_REL.
+    boundary_rank: 29
+    boundary_fixed: {F1: 110, F2: 1550, F3: 1580}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_internal_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 300
     F2: 1990
     F3: 2850
@@ -986,6 +1234,14 @@ phoneme_targets:
     velar: true
     dac: 3  # Recasens 1997
   B_REL:
+    # Holmes et al. 1964 Appendix 1; B mapped to B_REL.
+    boundary_rank: 29
+    boundary_fixed: {F1: 110, F2: 350, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_internal_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 200
     F2: 1100
     F3: 2150
@@ -1010,6 +1266,14 @@ phoneme_targets:
     bilabial: true
     dac: 1  # Recasens 1997
   D_REL:
+    # Holmes et al. 1964 Appendix 1; D mapped to D_REL.
+    boundary_rank: 29
+    boundary_fixed: {F1: 110, F2: 950, F3: 2680}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0}
+    boundary_external_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_internal_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 200
     F2: 1600
     F3: 2600
@@ -1037,6 +1301,14 @@ phoneme_targets:
     alveolar: true
     dac: 2  # Recasens 1997
   G_REL:
+    # Holmes et al. 1964 Appendix 1; G mapped to G_REL.
+    boundary_rank: 29
+    boundary_fixed: {F1: 110, F2: 1550, F3: 1580}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_internal_ms: {F1: 0, F2: 0, F3: 0}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 200
     F2: 1990
     F3: 2850
@@ -1064,6 +1336,14 @@ phoneme_targets:
     velar: true
     dac: 3  # Recasens 1997
   P_ASP:
+    # Holmes et al. 1964 Appendix 1; P mapped to P_ASP.
+    boundary_rank: 23
+    boundary_fixed: {F1: 110, F2: 350, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 20, F2: 20, F3: 0}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 400
     F2: 1100
     F3: 2150
@@ -1085,6 +1365,14 @@ phoneme_targets:
     bilabial: true
     dac: 1  # Recasens 1997
   T_ASP:
+    # Holmes et al. 1964 Appendix 1; T mapped to T_ASP.
+    boundary_rank: 23
+    boundary_fixed: {F1: 110, F2: 950, F3: 2680}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0}
+    boundary_external_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 0}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 400
     F2: 1600
     F3: 2600
@@ -1109,6 +1397,14 @@ phoneme_targets:
     alveolar: true
     dac: 2  # Recasens 1997
   K_ASP:
+    # Holmes et al. 1964 Appendix 1; K mapped to K_ASP.
+    boundary_rank: 23
+    boundary_fixed: {F1: 110, F2: 1550, F3: 1580}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0.5}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 300
     F2: 1990
     F3: 2850
@@ -1135,6 +1431,14 @@ phoneme_targets:
   # Affricate closure targets provide the stop-gap component preceding postalveolar frication.
   # Citation: Stevens 1998 Ch.8 (affricate stop closure + frication sequence).
   CH_CL:
+    # Holmes et al. 1964 Appendix 1; T mapped to CH_CL.
+    boundary_rank: 23
+    boundary_fixed: {F1: 110, F2: 950, F3: 2680}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0}
+    boundary_external_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 220
     F2: 1800
     F3: 2800
@@ -1152,6 +1456,14 @@ phoneme_targets:
     postalveolar: true
     dac: 3  # Recasens 1997
   JH_CL:
+    # Holmes et al. 1964 Appendix 1; D mapped to JH_CL.
+    boundary_rank: 26
+    boundary_fixed: {F1: 110, F2: 950, F3: 2680}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 0}
+    boundary_external_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 220
     F2: 1750
     F3: 2800
@@ -1169,6 +1481,14 @@ phoneme_targets:
     postalveolar: true
     dac: 3  # Recasens 1997
   CH:
+    # Holmes et al. 1964 Appendix 1; SH mapped to CH.
+    boundary_rank: 18
+    boundary_fixed: {F1: 170, F2: 1190, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 300
     F2: 1840
     F3: 2750
@@ -1203,6 +1523,14 @@ phoneme_targets:
     postalveolar: true
     dac: 3  # Recasens 1997
   JH:
+    # Holmes et al. 1964 Appendix 1; ZH mapped to JH.
+    boundary_rank: 20
+    boundary_fixed: {F1: 170, F2: 1190, F3: 0}
+    boundary_proportion: {F1: 0.5, F2: 0.5, F3: 1}
+    boundary_external_ms: {F1: 30, F2: 30, F3: 30}
+    boundary_internal_ms: {F1: 20, F2: 20, F3: 20}
+    boundary_citations:
+      - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 260
     F2: 1800
     F3: 2820

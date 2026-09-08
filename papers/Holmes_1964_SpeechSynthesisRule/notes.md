@@ -7,6 +7,74 @@ year: 1964
 
 ## Implementation Notes
 
+### Page-image verification for issue 70
+
+Read all 18 canonical page images (publisher cover plus printed pp.127–143).
+The corrections below supersede the older column descriptions and selected-value
+tables further down this extraction; those tables must not be used as numeric
+implementation inputs.
+
+Appendix 1 alternates steady-state frequencies (columns 7, 9, 11) with fixed
+boundary contributions (8, 10, 12). Column 13 is the proportion for F1/F2;
+column 14 is the proportion for F3. Columns 15/16 are external/internal formant
+transition durations, in 10 ms units, not separate F1/F2 and F3 durations.
+Amplitudes likewise alternate steady/fixed columns 17/18, 19/20, 21/22,
+23/24; column 25 supplies the amplitude proportion and 26/27 the external/
+internal amplitude durations. The displayed frequencies are Hz, not encoded
+1–31 control values. *(pp.128, 140–143)*
+
+For each formant, the dominant element supplies:
+
+$$
+B = F + p S_{adjacent}
+$$
+
+Here B and F are Hz, p is dimensionless, and S is the adjacent element's
+steady-state frequency in Hz. Higher rank dominates; a tie selects the earlier
+element. Interpolate on each side using the dominant element's internal and
+external durations. *(pp.132–133)*
+
+Verified consonant boundary inputs (F1/F2/F3 order; E/I in ms):
+
+| Element | Rank | Fixed contributions (Hz) | Proportions (-) | E/I (ms) | Page |
+|---|---:|---|---|---|---:|
+| P / PZ | 23 | 110, 350, 0 | .5, .5, 1 | 20, 20 | 141 |
+| B | 26 | 110, 350, 0 | .5, .5, 1 | 20, 20 | 141 |
+| T | 23 | 110, 950, 2680 | .5, .5, 0 | 20, 20 | 141 |
+| D | 26 | 110, 950, 2680 | .5, .5, 0 | 20, 20 | 141 |
+| K / KZ | 23 | 110, 1550, 1580 | .5, .5, .5 | 30, 30 | 141 |
+| G | 26 | 110, 1550, 1580 | .5, .5, .5 | 30, 30 | 141 |
+| M | 15 | 110, 350, 0 | .5, .5, 1 | 30, 0 | 141 |
+| N | 15 | 110, 950, 2680 | .5, .5, 0 | 30, 0 | 141 |
+| NG | 15 | 110, 1550, 1580 | .5, .5, .5 | 30, 0 | 141 |
+| F | 18 | 170, 350, 980 | .5, .5, .5 | 30, 20 | 141 |
+| TH | 18 | 170, 1190, 2680 | .5, .5, 0 | 30, 20 | 141 |
+| S / SH | 18 | 170, 950 / 1190, 0 | .5, .5, 1 | 30, 20 | 141 |
+| H | 9 | 0, 0, 0 | 1, 1, 1 | 0, 70 | 142 |
+| V | 20 | 170, 350, 980 | .5, .5, .5 | 30, 20 | 142 |
+| DH / Z / ZH | 20 | 170, 1190 / 950 / 1190, 0 | .5, .5, 1 | 30, 20 | 142 |
+| L | 11 | 230, 710, 1220 | .5, .5, .5 | 60, 0 | 142 |
+| R | 10 | 0, 590, 740 | .5, .5, .5 | 50, 50 | 142 |
+| W | 10 | 50, 350, 980 | .5, .5, .5 | 40, 40 | 142 |
+| Y | 10 | 110, 1190, 1460 | .5, .5, .5 | 40, 40 | 142 |
+
+The labial stop external F3 duration is zero (table footnote); TZ internal
+F3 duration is zero. BZ has zero duration, DZ internal duration is zero, and
+GZ internal duration is 20 ms. CH/J use T/D-like first elements, followed by
+SH/ZH-like elements; they are not single steady-state phonemes. *(pp.141–142)*
+
+The worked S→OO example gives F2 = 950 + .5×1000 = 1450 Hz, with 20 ms
+inside S and 30 ms inside OO. This is an independent numerical test oracle.
+When initial/final transitions fit, retain the intervening steady state;
+when their durations exactly fill the element, join them immediately. When
+they overlap, join intersecting paths at their intersection; if they never
+intersect, interpolate boundary-to-boundary for the entire element. *(pp.133–134)*
+
+Stops comprise closure, high-energy release, and diminished release. The
+**second** element dominates the first and third and specifies zero transition
+durations; it is not a zero-duration element (PY/TY/KY/BY/DY/GY are 10 ms).
+The zero-duration separator QQ instead belongs to voiced fricatives. *(pp.134–135, 141–142)*
+
 ### System Architecture
 
 - Parallel formant synthesizer controlled by computer programme

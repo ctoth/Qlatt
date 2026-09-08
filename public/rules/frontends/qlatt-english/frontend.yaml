@@ -31,6 +31,21 @@ parameters:
         citations:
           - Broad & Fertig 1970 (formant transition durations scale inversely with rate)
     duration:
+      nucleus_ay_ms:
+        value: 145
+        citations: ["Hertz & Huffman 1992 p.1173 section 2.3"]
+      nucleus_r_ms:
+        value: 160
+        citations: ["Hertz & Huffman 1992 p.1173 section 2.3"]
+      nucleus_voiced_multiplier:
+        value: 1.5
+        citations: ["Hertz & Huffman 1992 p.1173 section 2.3"]
+      nucleus_glide_cap_ms:
+        value: 200
+        citations: ["Hertz & Huffman 1992 p.1173 section 2.3"]
+      nucleus_three_phone_cap_ms:
+        value: 250
+        citations: ["Hertz & Huffman 1992 p.1173 section 2.3"]
       rate_scale:
         value: 1.0
         citations:

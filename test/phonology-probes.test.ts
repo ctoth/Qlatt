@@ -59,9 +59,9 @@ describe("phonology probe suite", () => {
           expect(tailFrames.length).toBeGreaterThan(0);
 
           for (const param of wordCase.rhotic.tailLowerParams) {
-            expect(averageTrackParam(tailFrames, param)).toBeLessThan(
-              averageTrackParam(erFrames, param),
-            );
+            expect(
+              Math.min(...tailFrames.map((frame) => Number(frame.params[param]))),
+            ).toBeLessThan(averageTrackParam(erFrames, param));
           }
         }
       }

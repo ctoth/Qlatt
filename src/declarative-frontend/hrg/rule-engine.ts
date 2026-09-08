@@ -1,6 +1,10 @@
 import { isPlainObject } from "../../yaml-loader";
 import { evaluateExpression } from "../cel-expressions";
-import { type InventorySpec, materializePhonemeTarget } from "../inventory";
+import {
+  type InventoryParameterFallback,
+  type InventorySpec,
+  materializePhonemeTarget,
+} from "../inventory";
 import type { CompiledRulepack } from "../rule-pack";
 import { trajectoryControlWindows } from "../trajectory-control-windows";
 import type { Item } from "./item";
@@ -23,6 +27,7 @@ export interface GraphRuleEngineOptions {
 export interface GraphInventoryResource {
   spec: InventorySpec;
   decisionId: string;
+  onInvalidParameter?: (fallback: InventoryParameterFallback) => void;
 }
 
 export interface GraphRuleEngineResult {
@@ -463,7 +468,11 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
             "E_HRG_INVENTORY_REQUIRED: target() requires the selected frontend inventory",
           );
         transaction.dependOn(inventory.decisionId);
-        const materialized = materializePhonemeTarget(phoneme, { inventorySpec: inventory.spec });
+        const materialized = materializePhonemeTarget(phoneme, {
+          inventorySpec: inventory.spec,
+          diagnostics: utterance.diagnostics,
+          onInvalidParameter: inventory.onInvalidParameter,
+        });
         return Object.freeze({ ...materialized, ...materialized.params });
       },
       assoc: association,

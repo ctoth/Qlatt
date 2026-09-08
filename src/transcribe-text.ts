@@ -15,6 +15,7 @@ import { DEFAULT_CMU_DICTIONARY_PATH, preloadCmuDictionaryFromPath } from "./cmu
 import type { HrgSchema } from "./declarative-frontend/hrg";
 import { Utterance } from "./declarative-frontend/hrg";
 import { runGraphRuleEngine } from "./declarative-frontend/hrg/rule-engine";
+import { loadFrontendResources } from "./declarative-frontend/inventory";
 import { type CompiledRulepack, QLATT_ENGLISH_RULEPACK } from "./declarative-frontend/rule-pack";
 import type { SourceTranscriptionInput } from "./declarative-frontend/source-recognition";
 import { pronounce } from "./g2p";
@@ -322,10 +323,11 @@ export function transcribeText(
   const effectiveDictLookup =
     options.dictLookup ??
     (options.dictionaryMap ? makeDictLookup(options.dictionaryMap) : cmuDictLookup);
-  const ltsPath = options.ltsPath;
-  const morphologyPath = options.morphologyPath;
-  const stressPolicyPath = options.stressPolicyPath;
   const compiledSpec = options.compiledSpec ?? QLATT_ENGLISH_RULEPACK;
+  const resources = loadFrontendResources(compiledSpec);
+  const ltsPath = options.ltsPath ?? resources.ltsPath;
+  const morphologyPath = options.morphologyPath ?? resources.morphologyPath;
+  const stressPolicyPath = options.stressPolicyPath ?? resources.stressPolicyPath;
   const cfg = options.transcriptionConfig ?? getSpecTranscriptionConfig(compiledSpec);
   const transcriptionTables = requireTranscriptionTables(cfg);
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { isVowel, syllabify } from "../src/g2p/syllabify";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
+import { isVowel, syllabify } from "./g2p-fixture";
 
 const PHONOTACTICS_PATH = "/rules/frontends/qlatt-english/phonotactics.yaml";
 

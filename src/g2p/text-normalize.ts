@@ -97,7 +97,7 @@ interface FractionPolicy {
 
 /**
  * Cardinal-number speaking policy, supplied as DATA by a frontend's
- * normalization pipeline step. The default keeps qlatt-english's historical
+ * normalization pipeline step. The default uses the historical
  * "one hundred one" style; DECtalk data can request the source-observed
  * "one hundred and one" joiner without adding a frontend branch here.
  */
@@ -132,50 +132,22 @@ interface NormalizationContext {
 // YAML loading (cached, following morphology.ts pattern)
 // ---------------------------------------------------------------------------
 
-const DEFAULT_TABLES_PATH = "/rules/frontends/qlatt-english/normalization-tables.yaml";
-const DEFAULT_PIPELINE_PATH = "/rules/frontends/qlatt-english/normalization-pipeline.yaml";
-const DEFAULT_FRONTEND_PATH = "/rules/frontends/qlatt-english/frontend.yaml";
-
 /**
  * Per-frontend normalization config. A frontend may declare its own tables and
  * pipeline YAML paths (generic data — no per-frontend branch in this module).
- * When omitted, the qlatt-english defaults are used, so any frontend that does
- * not opt in keeps byte-identical normalization behavior.
+ * All resources are supplied by the selected frontend.
  */
 export interface NormalizationConfig {
-  tablesPath?: string;
-  pipelinePath?: string;
+  tablesPath: string;
+  pipelinePath: string;
   /** Shared with transcription.punctuation_tokens from the selected frontend. */
-  punctuationTokens?: readonly string[];
+  punctuationTokens: readonly string[];
 }
 
-// Caches keyed by resolved YAML path so distinct frontends (e.g. qlatt-english
-// vs dectalk-english) never share a cache entry.
+// Caches keyed by resolved YAML path so distinct frontend assets stay separate.
 const tablesCacheByPath = new Map<string, NormalizationTables>();
 const pipelineCacheByPath = new Map<string, NormalizationPipeline>();
-let defaultPunctuationTokens: readonly string[] | undefined;
-
-function getDefaultPunctuationTokens(): readonly string[] {
-  if (!defaultPunctuationTokens) {
-    const frontend = loadYamlDocumentSync<{ transcription?: { punctuation_tokens?: unknown } }>(
-      DEFAULT_FRONTEND_PATH,
-    );
-    const tokens = frontend.transcription?.punctuation_tokens;
-    if (
-      !Array.isArray(tokens) ||
-      tokens.length === 0 ||
-      !tokens.every((token): token is string => typeof token === "string" && token.length > 0)
-    ) {
-      throw new Error(
-        "E_NORMALIZE_CONFIG: frontend transcription.punctuation_tokens must be a non-empty string array",
-      );
-    }
-    defaultPunctuationTokens = tokens;
-  }
-  return defaultPunctuationTokens;
-}
-
-function getTables(tablesPath: string = DEFAULT_TABLES_PATH): NormalizationTables {
+function getTables(tablesPath: string): NormalizationTables {
   let cached = tablesCacheByPath.get(tablesPath);
   if (!cached) {
     cached = loadYamlDocumentSync<NormalizationTables>(tablesPath);
@@ -184,16 +156,13 @@ function getTables(tablesPath: string = DEFAULT_TABLES_PATH): NormalizationTable
   return cached;
 }
 
-function getPipeline(
-  pipelinePath: string = DEFAULT_PIPELINE_PATH,
-  tablesPath: string = DEFAULT_TABLES_PATH,
-): NormalizationPipeline {
+function getPipeline(pipelinePath: string, tablesPath: string): NormalizationPipeline {
   let cached = pipelineCacheByPath.get(pipelinePath);
   if (!cached) {
     cached = loadYamlDocumentSync<NormalizationPipeline>(pipelinePath);
-    validateNormalizationPipelineConfig(cached, getTables(tablesPath));
     pipelineCacheByPath.set(pipelinePath, cached);
   }
+  validateNormalizationPipelineConfig(cached, getTables(tablesPath));
   return cached;
 }
 
@@ -203,12 +172,25 @@ function getPipeline(
 
 // The tables path active for the current normalizeText() invocation. Builtin
 // handlers (numberToWords, convertOrdinal, table_replace, ...) read tables via
-// the accessors below, which resolve against this path. Defaults to the
-// qlatt-english tables so any code calling the accessors outside a
-// normalizeText run keeps its historical behavior.
-let activeTablesPath: string = DEFAULT_TABLES_PATH;
+// the accessors below, which resolve against this path. Public entry points
+// establish an explicit resource scope and restore it even after an error.
+let activeTablesPath: string | undefined;
+
+function withTables<T>(tablesPath: string, run: () => T): T {
+  if (!tablesPath?.trim())
+    throw new Error("E_FRONTEND_CONFIG: normalization.tables_path is required");
+  const previous = activeTablesPath;
+  activeTablesPath = tablesPath;
+  try {
+    return run();
+  } finally {
+    activeTablesPath = previous;
+  }
+}
 
 function activeTables(): NormalizationTables {
+  if (!activeTablesPath)
+    throw new Error("E_FRONTEND_CONFIG: normalization.tables_path is required");
   return getTables(activeTablesPath);
 }
 
@@ -250,7 +232,11 @@ function MONTH_NAMES(): string[] {
  *   numberToWords(1234)    -> "one thousand two hundred thirty four"
  *   numberToWords(1000000) -> "one million"
  */
-export function numberToWords(num: number, policy: NumberPolicy = {}): string {
+export function numberToWords(num: number, tablesPath: string, policy: NumberPolicy = {}): string {
+  return withTables(tablesPath, () => cardinalToWords(num, policy));
+}
+
+function cardinalToWords(num: number, policy: NumberPolicy = {}): string {
   if (num === 0) return "zero";
   if (num < 0 || num > 999_999_999 || !Number.isFinite(num)) {
     return String(num);
@@ -325,14 +311,16 @@ function convertChunk(n: number, policy: NumberPolicy): string {
  *
  * Returns the original string unchanged if it's not an ordinal pattern.
  */
-export function ordinalToWords(s: string): string {
-  const match = s.match(/^(\d+)(?:st|nd|rd|th)$/i);
-  if (!match) return s;
+export function ordinalToWords(s: string, tablesPath: string): string {
+  return withTables(tablesPath, () => {
+    const match = s.match(/^(\d+)(?:st|nd|rd|th)$/i);
+    if (!match) return s;
 
-  const num = parseInt(match[1], 10);
-  if (num <= 0 || !Number.isFinite(num)) return s;
+    const num = parseInt(match[1], 10);
+    if (num <= 0 || !Number.isFinite(num)) return s;
 
-  return convertOrdinal(num);
+    return convertOrdinal(num);
+  });
 }
 
 /**
@@ -352,7 +340,7 @@ function convertOrdinal(n: number): string {
     return (
       TENS()[Math.floor(n / 10)] +
       " " +
-      (ORDINAL_ONES()[onesDigit] ?? numberToWords(onesDigit) + "th")
+      (ORDINAL_ONES()[onesDigit] ?? cardinalToWords(onesDigit) + "th")
     );
   }
 
@@ -368,7 +356,7 @@ function convertOrdinal(n: number): string {
   }
 
   // For larger numbers, use cardinal prefix + ordinal suffix
-  return numberToWords(n) + "th";
+  return cardinalToWords(n) + "th";
 }
 
 // ---------------------------------------------------------------------------
@@ -446,7 +434,11 @@ function read2Digits(pair: string): string {
  *   - CD == '00', B != '0' -> read AB as 2 digits + "hundred"  (1900 -> "nineteen hundred")
  *   - else                 -> read AB + read CD                (1984 -> "nineteen eighty four")
  */
-export function readYear(digits: string): string {
+export function readYear(digits: string, tablesPath: string): string {
+  return withTables(tablesPath, () => yearToWords(digits));
+}
+
+function yearToWords(digits: string): string {
   const a = digits[0];
   const b = digits[1];
   const cd = digits.slice(2);
@@ -511,11 +503,21 @@ export function readFraction(
   numerator: string,
   denominator: string,
   percent: boolean,
+  tablesPath: string,
+  policy: FractionPolicy = {},
+): string {
+  return withTables(tablesPath, () => fractionToWords(numerator, denominator, percent, policy));
+}
+
+function fractionToWords(
+  numerator: string,
+  denominator: string,
+  percent: boolean,
   policy: FractionPolicy = {},
 ): string {
   const numValue = parseInt(numerator, 10);
   const plural = numValue !== 1; // DECtalk pflag: TRUE unless numerator is exactly 1
-  const numWords = numberToWords(numValue);
+  const numWords = cardinalToWords(numValue);
 
   const special = policy.special_denominators?.[denominator];
   let denomWords: string;
@@ -533,7 +535,7 @@ export function readFraction(
 function decimalToWords(integerPartRaw: string, fractionalPartRaw: string): string {
   const integerPart = integerPartRaw.replace(/,/g, "");
   const integerValue = parseInt(integerPart, 10);
-  const lhs = Number.isFinite(integerValue) ? numberToWords(integerValue) : integerPartRaw;
+  const lhs = Number.isFinite(integerValue) ? cardinalToWords(integerValue) : integerPartRaw;
   const rhs = fractionalPartRaw
     .split("")
     .map((digit) => DIGIT_WORDS()[digit] ?? digit)
@@ -550,24 +552,24 @@ function currencyToWords(integerPartRaw: string, fractionalPartRaw?: string): st
 
   if (fractionalPartRaw == null) {
     const unit = dollars === 1 ? "dollar" : "dollars";
-    return `${numberToWords(dollars)} ${unit}`;
+    return `${cardinalToWords(dollars)} ${unit}`;
   }
 
   const centsValue = parseInt(fractionalPartRaw.padEnd(2, "0").slice(0, 2), 10);
   const cents = Number.isFinite(centsValue) ? centsValue : 0;
   if (dollars === 0) {
     const centUnit = cents === 1 ? "cent" : "cents";
-    return `${numberToWords(cents)} ${centUnit}`;
+    return `${cardinalToWords(cents)} ${centUnit}`;
   }
 
   if (cents === 0) {
     const unit = dollars === 1 ? "dollar" : "dollars";
-    return `${numberToWords(dollars)} ${unit}`;
+    return `${cardinalToWords(dollars)} ${unit}`;
   }
 
   const dollarUnit = dollars === 1 ? "dollar" : "dollars";
   const centUnit = cents === 1 ? "cent" : "cents";
-  return `${numberToWords(dollars)} ${dollarUnit} and ${numberToWords(cents)} ${centUnit}`;
+  return `${cardinalToWords(dollars)} ${dollarUnit} and ${cardinalToWords(cents)} ${centUnit}`;
 }
 
 function timeToWords(hourRaw: string, minuteRaw: string, meridiemRaw?: string): string {
@@ -598,10 +600,10 @@ function timeToWords(hourRaw: string, minuteRaw: string, meridiemRaw?: string): 
     minutes === 0
       ? "o'clock"
       : minutes < 10
-        ? `oh ${numberToWords(minutes)}`
-        : numberToWords(minutes);
+        ? `oh ${cardinalToWords(minutes)}`
+        : cardinalToWords(minutes);
   const meridiemWords = meridiem === "pm" ? "p m" : "a m";
-  return `${numberToWords(spokenHour)} ${minuteWords} ${meridiemWords}`;
+  return `${cardinalToWords(spokenHour)} ${minuteWords} ${meridiemWords}`;
 }
 
 function dateToWords(monthRaw: string, dayRaw: string, yearRaw: string): string {
@@ -614,7 +616,7 @@ function dateToWords(monthRaw: string, dayRaw: string, yearRaw: string): string 
   if (month < 1 || month > 12 || day < 1 || day > 31 || year < 0 || year > 999_999_999) {
     return `${monthRaw}/${dayRaw}/${yearRaw}`;
   }
-  return `${MONTH_NAMES()[month - 1]} ${convertOrdinal(day)} ${numberToWords(year)}`;
+  return `${MONTH_NAMES()[month - 1]} ${convertOrdinal(day)} ${cardinalToWords(year)}`;
 }
 
 function isoDateToWords(yearRaw: string, monthRaw: string, dayRaw: string): string {
@@ -627,7 +629,7 @@ function isoDateToWords(yearRaw: string, monthRaw: string, dayRaw: string): stri
   if (month < 1 || month > 12 || day < 1 || day > 31 || year < 0 || year > 999_999_999) {
     return `${yearRaw}-${monthRaw}-${dayRaw}`;
   }
-  return `${MONTH_NAMES()[month - 1]} ${convertOrdinal(day)} ${numberToWords(year)}`;
+  return `${MONTH_NAMES()[month - 1]} ${convertOrdinal(day)} ${cardinalToWords(year)}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -717,7 +719,7 @@ const BUILTIN_HANDLERS: Record<
   numberToWordsInline: (result, step) => {
     const re = new RegExp(requireBuiltinPattern(step), step.flags);
     return result.replace(re, (_match: string, digits: string) => {
-      return numberToWords(parseInt(digits, 10), step.number_policy);
+      return cardinalToWords(parseInt(digits, 10), step.number_policy);
     });
   },
 
@@ -730,7 +732,7 @@ const BUILTIN_HANDLERS: Record<
     const re = new RegExp(requireBuiltinPattern(step), step.flags);
     const policy = step.year_policy ?? {};
     return result.replace(re, (match: string, digits: string) => {
-      return isYear(digits, policy) ? readYear(digits) : match;
+      return isYear(digits, policy) ? yearToWords(digits) : match;
     });
   },
 
@@ -752,7 +754,7 @@ const BUILTIN_HANDLERS: Record<
       ) => {
         if (!isFraction(numerator, denominator, policy)) return match;
         const percent = percentOrOffset === "%";
-        return readFraction(numerator, denominator, percent, policy);
+        return fractionToWords(numerator, denominator, percent, policy);
       },
     );
   },
@@ -984,27 +986,21 @@ function executeStep(result: string, step: PipelineStep, context: NormalizationC
  *
  * Citation: Allen, Hunnicutt & Klatt 1987 Ch.3; Ebden & Sproat 2015
  */
-export function normalizeText(text: string, config: NormalizationConfig = {}): string {
+export function normalizeText(text: string, config: NormalizationConfig): string {
   if (!text) return "";
 
-  const tablesPath = config.tablesPath ?? DEFAULT_TABLES_PATH;
-  const pipelinePath = config.pipelinePath ?? DEFAULT_PIPELINE_PATH;
+  const { tablesPath, pipelinePath, punctuationTokens } = config;
 
   const pipeline = getPipeline(pipelinePath, tablesPath);
-  const punctuationTokens = config.punctuationTokens ?? getDefaultPunctuationTokens();
 
   // Builtin handlers resolve tables via the active path; set it for the
   // duration of this call and restore afterward (single-threaded JS — no
   // interleaving).
-  const previousTablesPath = activeTablesPath;
-  activeTablesPath = tablesPath;
-  try {
+  return withTables(tablesPath, () => {
     let result = text;
     for (const step of pipeline.steps) {
       result = executeStep(result, step, { punctuationTokens });
     }
     return result;
-  } finally {
-    activeTablesPath = previousTablesPath;
-  }
+  });
 }

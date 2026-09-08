@@ -51,6 +51,7 @@ interface ConfiguredValue<T> {
 }
 
 interface MorphologyData {
+  phonotactics_path: string;
   suffixes: SuffixEntry[];
   prefixes: PrefixEntry[];
   clitics: CliticEntry[];
@@ -75,8 +76,8 @@ function getMorphologyData(path: string): MorphologyData {
 
 // --- Condition classes for contextual allomorphs (loaded from phonotactics.yaml) ---
 
-function getVoicingClasses(): Record<ContextualConditionClass, Set<string>> {
-  const data = loadPhonotacticsSync();
+function getVoicingClasses(path: string): Record<ContextualConditionClass, Set<string>> {
+  const data = loadPhonotacticsSync(path);
   return {
     voiceless_finals: new Set(data.voicing_classes.voiceless_finals),
     td_finals: new Set(data.voicing_classes.td_finals),
@@ -97,9 +98,10 @@ function resolveAffixPhonemes(
   entries: AffixEntry[],
   spelling: string,
   rootPhonemes: string[],
+  phonotacticsPath: string,
 ): string[] | null {
   const last = lastPhoneme(rootPhonemes);
-  const conditionClasses = getVoicingClasses();
+  const conditionClasses = getVoicingClasses(phonotacticsPath);
   let fallback: string[] | null = null;
 
   for (const entry of entries) {
@@ -173,7 +175,12 @@ function trySuffixDecomposition(
     const lookup = direct ?? nested;
     if (!lookup) continue;
 
-    const suffixPhonemes = resolveAffixPhonemes(data.suffixes, suffix.spelling, lookup.phonemes);
+    const suffixPhonemes = resolveAffixPhonemes(
+      data.suffixes,
+      suffix.spelling,
+      lookup.phonemes,
+      data.phonotactics_path,
+    );
     if (!suffixPhonemes) continue;
 
     return {
@@ -210,7 +217,7 @@ function trySuffixDecomposition(
 export function decomposeClitic(
   word: string,
   dictLookup: DictLookup,
-  morphologyPath: string = "/rules/frontends/qlatt-english/morphology.yaml",
+  morphologyPath: string,
 ): PronunciationResult | null {
   if (!word) return null;
 
@@ -227,6 +234,7 @@ export function decomposeClitic(
       data.suffixes,
       clitic.allomorph_spelling,
       basePhonemes,
+      data.phonotactics_path,
     );
     if (!cliticPhonemes) continue;
 
@@ -250,7 +258,7 @@ export function decomposeClitic(
 export function decomposeWord(
   word: string,
   dictLookup: DictLookup,
-  morphologyPath: string = "/rules/frontends/qlatt-english/morphology.yaml",
+  morphologyPath: string,
 ): PronunciationResult | null {
   if (!word) return null;
 
@@ -345,10 +353,7 @@ export function decomposeWord(
  *
  * Citation: Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5
  */
-export function getStressHintForWord(
-  word: string,
-  morphologyPath: string = "/rules/frontends/qlatt-english/morphology.yaml",
-): StressHint | undefined {
+export function getStressHintForWord(word: string, morphologyPath: string): StressHint | undefined {
   if (!word) return undefined;
 
   const lowerWord = word.toLowerCase();

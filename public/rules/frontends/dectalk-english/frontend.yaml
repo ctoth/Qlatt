@@ -1,6 +1,8 @@
 version: v13-cel
 inventory_path: /rules/frontends/dectalk-english/inventory.yaml
 lts_path: /rules/frontends/dectalk-english/lts-rules.yaml
+# Engineering choice: explicitly retain the shared English morphology rules.
+morphology_path: /rules/frontends/qlatt-english/morphology.yaml
 # Engineering choice: shared English lexical policy for generated phones; dictionary stress wins.
 stress_policy_path: /rules/frontends/qlatt-english/stress-policy.yaml
 # DECtalk is dictionary-first with LTS fallback (DECtalk 4.63 ls_task.c:697:
@@ -13,11 +15,10 @@ dictionary_path: /dectalk-dictionary.json
 # while KLGLOTT88 mode 3 is blocked by silent worklet voice output.
 source_contour_path: /rules/frontends/dectalk-english/source-contour.yaml
 # Per-frontend text-normalization policy (DATA). Selects this frontend's own
-# normalization tables + pipeline instead of the shared qlatt-english defaults.
+# normalization tables + pipeline.
 # The dectalk pipeline adds a year-reading step ("1984" -> "nineteen eighty
 # four") that the shared pipeline omits; the predicate and speaking form are
-# declared as data in normalization-pipeline.yaml. A frontend that declares no
-# `normalization` block keeps the qlatt-english default normalization.
+# declared as data in normalization-pipeline.yaml. Both paths are required.
 # Citation: DECtalk 4.63 ls_util.c:598-622 (is_year), l_us_pr1.c:367-398.
 normalization:
   tables_path: /rules/frontends/dectalk-english/normalization-tables.yaml

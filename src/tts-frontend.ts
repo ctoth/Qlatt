@@ -30,7 +30,7 @@ import {
 import { parseSyllabificationTables, syllabifyWord } from "./declarative-frontend/syllabify";
 import { getVoiceRegistry, type ResolvedVoice, resolveVoice } from "./dectalk-voice";
 import type { Diagnostics } from "./diagnostics";
-import { normalizeText } from "./g2p/text-normalize";
+import { normalizeText as normalizeConfiguredText } from "./g2p/text-normalize";
 import type { DirectionTrack } from "./input/direction-track";
 import {
   attachDirectionsToUtterance,
@@ -473,7 +473,10 @@ function createStructure(
   sharedTransaction?.commit();
 }
 
-export { normalizeText } from "./g2p/text-normalize";
+export function normalizeText(text: string, frontendId = "qlatt-english"): string {
+  const resources = loadFrontendResources(loadBundledRulepackSpec(frontendId));
+  return normalizeConfiguredText(text, resources.normalization);
+}
 export { transcribeText } from "./transcribe-text";
 
 function buildTextToKlattTrackDetailed(
@@ -567,23 +570,10 @@ function buildTextToKlattTrackDetailed(
   });
 
   const transcriptionConfig = getTranscriptionConfig(spec);
-  const normalization = isPlainObject(spec.normalization)
-    ? {
-        tablesPath:
-          typeof spec.normalization.tables_path === "string"
-            ? spec.normalization.tables_path
-            : undefined,
-        pipelinePath:
-          typeof spec.normalization.pipeline_path === "string"
-            ? spec.normalization.pipeline_path
-            : undefined,
-        punctuationTokens: transcriptionConfig?.punctuation_tokens,
-      }
-    : { punctuationTokens: transcriptionConfig?.punctuation_tokens };
   if (sourceRecognition) recognizeText(inputText, utterance, spec);
   const normalized = sourceRecognition
     ? normalizeSourceItems(utterance, spec)
-    : normalizeText(inputText, normalization);
+    : normalizeConfiguredText(inputText, resources.normalization);
   const transcribed = transcribeText(normalized, {
     provenance,
     utterance,

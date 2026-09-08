@@ -32,15 +32,15 @@ export interface StressHint {
  * @param hint - Optional suffix-derived stress placement hint.
  * @returns New array with stress digits appended to vowel phonemes.
  */
-export function assignStress(phonemes: string[], hint?: StressHint): string[] {
+export function assignStress(phonemes: string[], policyPath: string, hint?: StressHint): string[] {
   return stressPronunciation(phonemes, {
-    policyPath: "/rules/frontends/qlatt-english/stress-policy.yaml",
+    policyPath,
     hint,
   }).phonemes;
 }
 
 export interface StressInput {
-  policyPath: string | undefined;
+  policyPath: string;
   wordId?: string;
   category?: LexicalCategory;
   domains?: StressDomain[];

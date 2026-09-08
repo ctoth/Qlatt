@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { normalizeText } from "../src/g2p/text-normalize";
 import { textToKlattTrack } from "../src/tts-frontend";
+import { normalizeText } from "./g2p-fixture";
 
 describe("contraction probe", () => {
   it("handles curly/smart apostrophes same as ASCII", () => {

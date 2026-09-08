@@ -1,7 +1,9 @@
 import { loadStressPolicy } from "../g2p/stress-policy";
+import type { NormalizationConfig } from "../g2p/text-normalize";
 import {
   cloneValue,
   isPlainObject,
+  loadYamlDocumentSync,
   loadYamlSource,
   loadYamlSourceSync,
   parseYamlString,
@@ -38,9 +40,10 @@ const DEFAULT_SEGMENT_DURATION_MS = 30;
 export type FrontendResources = {
   inventory: InventorySpec;
   inventoryPath: string;
-  ltsPath?: string;
-  morphologyPath?: string;
-  stressPolicyPath?: string;
+  ltsPath: string;
+  morphologyPath: string;
+  stressPolicyPath: string;
+  normalization: NormalizationConfig;
   /**
    * Optional per-frontend pronunciation dictionary path (JSON, flat
    * word -> "ARPABET ..." map). When set, this frontend does dictionary-first
@@ -51,6 +54,7 @@ export type FrontendResources = {
 };
 
 const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
+const FRONTEND_ASSET_CACHE = new Map<string, unknown>();
 
 export function listBundledInventoryPaths(): string[] {
   return [...BUNDLED_INVENTORY_CACHE.keys()].sort();
@@ -349,21 +353,55 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   if (typeof inventoryPath !== "string" || inventoryPath.length === 0) {
     throw new Error("E_FRONTEND_SPEC: inventory_path is required");
   }
-  const stressPolicyPath =
-    typeof spec.stress_policy_path === "string" ? spec.stress_policy_path : undefined;
+  const requireAsset = (value: unknown, name: string): string => {
+    if (typeof value !== "string" || !value.trim()) {
+      throw new Error(`E_FRONTEND_CONFIG: ${name} is required`);
+    }
+    try {
+      if (!FRONTEND_ASSET_CACHE.has(value)) {
+        FRONTEND_ASSET_CACHE.set(value, loadYamlDocumentSync(value));
+      }
+    } catch (cause) {
+      throw new Error(`E_FRONTEND_CONFIG: ${name} could not load '${value}'`, { cause });
+    }
+    return value;
+  };
+  const ltsPath = requireAsset(spec.lts_path, "lts_path");
+  const morphologyPath = requireAsset(spec.morphology_path, "morphology_path");
+  const morphology = FRONTEND_ASSET_CACHE.get(morphologyPath);
+  requireAsset(
+    isPlainObject(morphology) ? morphology.phonotactics_path : undefined,
+    "morphology.phonotactics_path",
+  );
+  const stressPolicyPath = requireAsset(spec.stress_policy_path, "stress_policy_path");
+  const stress = FRONTEND_ASSET_CACHE.get(stressPolicyPath);
+  requireAsset(
+    isPlainObject(stress) ? stress.phonotactics_path : undefined,
+    "stress_policy.phonotactics_path",
+  );
+  loadStressPolicy(stressPolicyPath);
+  const normalization = isPlainObject(spec.normalization) ? spec.normalization : {};
+  const tablesPath = requireAsset(normalization.tables_path, "normalization.tables_path");
+  const pipelinePath = requireAsset(normalization.pipeline_path, "normalization.pipeline_path");
+  const punctuationTokens = isPlainObject(spec.transcription)
+    ? spec.transcription.punctuation_tokens
+    : undefined;
   if (
-    typeof spec.lts_path === "string" ||
-    typeof spec.morphology_path === "string" ||
-    stressPolicyPath !== undefined
+    !Array.isArray(punctuationTokens) ||
+    !punctuationTokens.length ||
+    !punctuationTokens.every(
+      (token): token is string => typeof token === "string" && token.length > 0,
+    )
   ) {
-    loadStressPolicy(stressPolicyPath ?? "");
+    throw new Error("E_FRONTEND_CONFIG: transcription.punctuation_tokens is required");
   }
   return {
     inventory: loadInventorySpecFromPath(inventoryPath),
     inventoryPath,
-    ltsPath: typeof spec.lts_path === "string" ? spec.lts_path : undefined,
-    morphologyPath: typeof spec.morphology_path === "string" ? spec.morphology_path : undefined,
+    ltsPath,
+    morphologyPath,
     stressPolicyPath,
+    normalization: { tablesPath, pipelinePath, punctuationTokens },
     dictionaryPath: typeof spec.dictionary_path === "string" ? spec.dictionary_path : undefined,
   };
 }

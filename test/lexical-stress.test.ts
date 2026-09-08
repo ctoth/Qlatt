@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { assignStress } from "../src/g2p/stress";
+import { assignStress } from "./g2p-fixture";
 
 // Hayes (1982), pp. 244–246: parental retains a heavy stressed penult.
 it("uses rhyme weight rather than syllable count in parental", () => {

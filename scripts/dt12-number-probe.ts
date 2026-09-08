@@ -21,13 +21,16 @@
  * "three fourths" (NOT the colloquial "three quarters"). This probe asserts the
  * actual source behavior.
  */
+
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { normalizeText } from "../src/g2p/text-normalize";
 
 // dectalk-english declares its own normalization tables + pipeline (DATA).
-const DECTALK_CONFIG = {
-  tablesPath: "/rules/frontends/dectalk-english/normalization-tables.yaml",
-  pipelinePath: "/rules/frontends/dectalk-english/normalization-pipeline.yaml",
-};
+const DECTALK_CONFIG = loadFrontendResources(
+  loadBundledRulepackSpec("dectalk-english"),
+).normalization;
+const QLATT_CONFIG = loadFrontendResources(loadBundledRulepackSpec("qlatt-english")).normalization;
 
 // Expected dectalk-english output per DECtalk source (full normalized string).
 const dectalkExpect: Record<string, string> = {
@@ -80,7 +83,7 @@ for (const input of Object.keys(dectalkExpect)) {
 
 console.log("\n=== qlatt-english (default; NO fraction step — must not expand fractions) ===");
 for (const input of Object.keys(qlattExpect)) {
-  const out = normalizeText(input); // default = qlatt-english
+  const out = normalizeText(input, QLATT_CONFIG);
   const expected = qlattExpect[input];
   const status = out === expected ? "PASS" : "FAIL";
   if (status === "FAIL") failures++;

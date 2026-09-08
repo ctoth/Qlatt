@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { assignStress, stressPronunciation } from "../src/g2p/stress";
-import { isVowel, syllabify } from "../src/g2p/syllabify";
+import { stressPronunciation } from "../src/g2p/stress";
+import { assignStress, isVowel, syllabify } from "./g2p-fixture";
 
 // ── Block 1: Vowel/Consonant Classification ────────────────────────────
 

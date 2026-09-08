@@ -427,6 +427,14 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   log(`Graph has ${Object.keys(graph.nodes).length} nodes`);
   log(`Registry has ${Object.keys(registry.primitives).length} primitives`);
 
+  // Reject unsupported native bindings before loading assets or creating nodes.
+  for (const nodeDef of Object.values(graph.nodes)) {
+    const primitive = registry.primitives[nodeDef.type];
+    if (primitive && getPrimitiveCategory(primitive) === "webaudio") {
+      getNativeNodeConstructor(primitive.native, nodeDef.type, log);
+    }
+  }
+
   // Determine which WASM modules are needed based on graph nodes and registry
   const needsWasm = Object.values(graph.nodes).some((n) => {
     const primitive = registry.primitives[n.type];
@@ -794,7 +802,7 @@ function createAudioNode(
 
   switch (category) {
     case "webaudio":
-      return createNativeNode(ctx, type, log);
+      return getNativeNodeConstructor(primitive.native, type, log)(ctx);
 
     case "wasm-worklet":
       return createWasmWorkletNode(
@@ -827,27 +835,35 @@ function createAudioNode(
   }
 }
 
-// Helper: Create native WebAudio node
-function createNativeNode(
-  ctx: AudioContext,
+// Supported native bindings conform to docs/host-contract.md section 3.
+const NATIVE_NODE_CONSTRUCTORS = new Map<string, (ctx: AudioContext) => AudioNode>([
+  ["GainNode", (ctx) => ctx.createGain()],
+  [
+    "ConstantSourceNode",
+    (ctx) => {
+      const source = ctx.createConstantSource();
+      source.start();
+      return source;
+    },
+  ],
+]);
+
+function getNativeNodeConstructor(
+  native: string | undefined,
   type: string,
   log: (msg: string) => void,
-): AudioNode | null {
-  switch (type) {
-    case "gain":
-      return ctx.createGain();
-    case "constant-source": {
-      const cs = ctx.createConstantSource();
-      cs.start();
-      return cs;
-    }
-    case "dynamics-compressor":
-      return ctx.createDynamicsCompressor();
-    default:
-      log(`Warning: Unknown native node type '${type}'`);
-      return null;
+): (ctx: AudioContext) => AudioNode {
+  const construct = native === undefined ? undefined : NATIVE_NODE_CONSTRUCTORS.get(native);
+  if (!construct) {
+    const message = `Unsupported native binding '${native}' for primitive '${type}'`;
+    log(`Error: ${message}`);
+    throw new Error(message);
   }
+  return construct;
 }
+
+// Engineering estimate: emit telemetry every 40 render quanta to limit reporting overhead.
+const WORKLET_REPORT_INTERVAL = 40;
 
 // Helper: Create WASM-backed worklet node
 function createWasmWorkletNode(
@@ -883,7 +899,7 @@ function createWasmWorkletNode(
       wasmBytes,
       nodeId: id,
       debug: telemetry, // Enable metrics emission when telemetry requested
-      reportInterval: 40, // Match legacy synth interval
+      reportInterval: WORKLET_REPORT_INTERVAL,
       ...nodeOptions, // Pass node options to processor
       ...processorOptionOverrides,
     },
@@ -917,7 +933,7 @@ function createJsWorkletNode(
     processorOptions: {
       nodeId: id,
       debug: telemetry, // Enable metrics emission when telemetry requested
-      reportInterval: 40, // Match legacy synth interval
+      reportInterval: WORKLET_REPORT_INTERVAL,
       ...nodeOptions, // Pass node options to processor
       ...processorOptionOverrides,
     },

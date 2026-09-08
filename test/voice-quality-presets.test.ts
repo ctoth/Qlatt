@@ -140,9 +140,9 @@ describe("voice quality presets", () => {
   });
 
   describe("whispery preset", () => {
-    it("voiceQuality='whispery' sets TL=10, jitter=5, AH offset=30", () => {
+    it("voiceQuality='whispery' sets TL=10, jitter=1.125 percent CV, AH offset=30", () => {
       // Gobl 2003: whispery TL=22-30 (conservative 10 dB explicit override)
-      // Gobl 2003: whispery DI=5% (jitter approximation)
+      // Engineering migration of the legacy jitter control at 110 Hz / 44100 Hz.
       // Gobl 2003: whispery AH=45-55 (30 dB additive offset)
       const noPreset = generateTrack("hello");
       const whispery = generateTrack("hello", "whispery");
@@ -153,14 +153,14 @@ describe("voice quality presets", () => {
 
       for (let i = 0; i < whisperyFrames.length; i++) {
         expect(whisperyFrames[i].params.TL).toBe(10);
-        expect(whisperyFrames[i].params.jitter).toBe(5);
+        expect(whisperyFrames[i].params.jitter).toBe(1.125);
         expect(whisperyFrames[i].params.AH).toBeCloseTo(noFrames[i].params.AH + 30, 1);
       }
     });
   });
 
   describe("creaky preset", () => {
-    it("voiceQuality='creaky' sets Rd=0.8 and jitter=20", () => {
+    it("voiceQuality='creaky' sets Rd=0.8 and jitter=4.5 percent CV", () => {
       // Gobl 2003: creaky OQ similar to modal; jitter approximation for DI
       // Burkhardt 2009: DI=rate for creaky voice
       const track = generateTrack("hello", "creaky");
@@ -169,7 +169,7 @@ describe("voice quality presets", () => {
 
       for (const frame of frames) {
         expect(frame.params.Rd).toBe(0.8);
-        expect(frame.params.jitter).toBe(20);
+        expect(frame.params.jitter).toBe(4.5);
       }
     });
   });

@@ -38,6 +38,8 @@ nodes:
       tl: { bind: effectiveTiltDb }
       lfMode: { bind: lfModeVal }
       flutter: { bind: FL }
+      jitter: { bind: jitter }
+      shimmer: { bind: shimmer }
       di: { bind: DI }
 
   # Makeup gain: LF crate output (~1.0 normalized) -> klsyn88 voice scale.

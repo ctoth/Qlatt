@@ -1,3 +1,7 @@
+//! LF source (Fant 1997) with Schoentgen 2001 Model II microtremor;
+//! jitter magnitude follows Titze 1991 Eq. 10 and Wendahl 1963 relative F0.
+mod perturbation;
+use perturbation::Microtremor;
 use core::f32::consts::PI;
 
 #[derive(Clone, Copy)]
@@ -132,7 +136,10 @@ pub struct LfSource {
     tilt: LpPole,
     mode: LfMode,
     sample_count: u64,  // Cumulative sample counter (for flutter); u64 won't overflow for billions of years at 44100 Hz
-    rng_state: u32,     // xorshift32 PRNG state (for jitter)
+    jitter_noise: Microtremor,
+    shimmer_noise: Microtremor,
+    shimmer_percent: f32,
+    period_gain: f32,
     period_cycle_count: u64, // Cycle counter for diplophonia (Gobl & Ni Chasaide 2003)
 }
 
@@ -147,18 +154,12 @@ impl LfSource {
             tilt: LpPole::new(),
             mode: LfMode::Legacy,
             sample_count: 0,
-            rng_state: 0x12345678,
+            jitter_noise: Microtremor::new(sample_rate, 0x12345678),
+            shimmer_noise: Microtremor::new(sample_rate, 0x87654321),
+            shimmer_percent: 0.0,
+            period_gain: 1.0,
             period_cycle_count: 0,
         }
-    }
-
-    /// xorshift32 PRNG returning +1.0 or -1.0 with equal probability.
-    /// Used for per-period jitter perturbation (Fraj 2011).
-    fn rng_sign(&mut self) -> f32 {
-        self.rng_state ^= self.rng_state << 13;
-        self.rng_state ^= self.rng_state >> 17;
-        self.rng_state ^= self.rng_state << 5;
-        if self.rng_state & 1 == 0 { 1.0 } else { -1.0 }
     }
 
     fn set_mode(&mut self, mode: LfMode) {
@@ -295,7 +296,7 @@ impl LfSource {
         oq: &[f32],
         tl: &[f32],
         flutter: f32,   // k-rate: Klatt 1990 scale 0-100
-        jitter: f32,    // k-rate: normalized 0-100, maps to Fraj 2011 b=[0, 4.5]
+        jitter: f32,    // k-rate: F0 coefficient of variation in percent (0-10)
         di: f32,        // k-rate: diplophonia index 0-100 (Gobl & Ni Chasaide 2003)
         output: &mut [f32],
     ) {
@@ -308,6 +309,8 @@ impl LfSource {
         for i in 0..len {
             // Increment cumulative sample counter for flutter computation
             self.sample_count += 1;
+            self.jitter_noise.tick();
+            self.shimmer_noise.tick();
 
             if !self.voiced || self.pos_in_period >= self.period_len {
                 let f0_value = if f0_len == 0 {
@@ -343,19 +346,9 @@ impl LfSource {
                 // Klatt & Klatt 1990 Eq. 1
                 let f0_with_flutter = f0_value + Self::flutter_delta(flutter, f0_value, self.sample_count, self.sample_rate);
 
-                // Apply jitter: per-period F0 perturbation
-                // Fraj 2011 Eq. 1 (per-period approximation): accumulated random walk
-                // over N=Fs/f0 samples gives std dev = b*sqrt(N) = b*sqrt(Fs/f0)
-                // Converting to Hz: delta_f0 = b * xi * f0 * sqrt(f0/Fs)
-                // b = jitter_param / 100.0 * 4.5  (map 0-100 to Fraj b=[0, 4.5])
-                let f0_final = if jitter > 0.0 {
-                    let b = jitter / 100.0 * 4.5;  // Fraj 2011 Table 1 range
-                    let xi = self.rng_sign();
-                    let perturbation = b * xi * f0_with_flutter * (f0_with_flutter / self.sample_rate).sqrt();
-                    f0_with_flutter + perturbation
-                } else {
-                    f0_with_flutter
-                };
+                // Schoentgen 2001 Model II; relative magnitude, Titze 1991 Eq. 10.
+                let f0_final = f0_with_flutter * self.jitter_noise.factor(jitter);
+                self.period_gain = self.shimmer_noise.factor(self.shimmer_percent);
 
                 self.start_period(f0_final, rd_value, oq_value, tl_value);
                 self.period_cycle_count += 1;
@@ -377,7 +370,7 @@ impl LfSource {
                 sample *= 1.0 - clamp(di, 0.0, 100.0) / 100.0;
             }
 
-            output[i] = sample;
+            output[i] = sample * self.period_gain;
             self.pos_in_period += 1;
         }
     }
@@ -405,6 +398,14 @@ pub extern "C" fn lf_source_set_mode(ptr: *mut LfSource, mode: u32) {
     }
     unsafe {
         (*ptr).set_mode(LfMode::from_u32(mode));
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn lf_source_set_shimmer(ptr: *mut LfSource, percent: f32) {
+    if !ptr.is_null() {
+        // The host validates the declared 0-10 percent parameter range.
+        unsafe { (*ptr).shimmer_percent = percent; }
     }
 }
 
@@ -478,6 +479,33 @@ mod tests {
     use super::*;
 
     const SAMPLE_RATE: f32 = 44100.0;
+
+    #[test]
+    fn jitter_is_percent_cv_at_multiple_pitches_and_sample_rates() {
+        // Titze 1991 Eq. 10: CV = std(F0)/mean(F0); normal target 0.3%.
+        // Measure emitted cycle lengths, including the source's sample rounding.
+        for rate in [44100.0, 48000.0] {
+            for pitch in [100.0, 200.0] {
+                let mut source = LfSource::new(rate);
+                let mut frequencies = Vec::new();
+                for cycle in 0..12000 {
+                    let mut sample = [0.0];
+                    source.process(&[pitch], &[1.0], &[0.0], &[0.0], 0.0, 0.3, 0.0, &mut sample);
+                    if cycle > 100 {
+                        frequencies.push(rate as f64 / source.period_len as f64);
+                    }
+                    let mut rest = vec![0.0; source.period_len - 1];
+                    source.process(&[pitch], &[1.0], &[0.0], &[0.0], 0.0, 0.3, 0.0, &mut rest);
+                }
+                let mean = frequencies.iter().sum::<f64>() / frequencies.len() as f64;
+                let variance = frequencies.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / frequencies.len() as f64;
+                let cv = 100.0 * variance.sqrt() / mean;
+                assert!((cv - 0.3).abs() < 0.04, "rate={rate} F0={pitch}: CV={cv}%");
+                let covariance = frequencies.windows(2).map(|x| (x[0] - mean) * (x[1] - mean)).sum::<f64>() / (frequencies.len() - 1) as f64;
+                assert!(covariance / variance > 0.8, "microtremor must correlate adjacent cycles");
+            }
+        }
+    }
 
     #[test]
     fn determinism_check() {
@@ -623,7 +651,7 @@ mod tests {
 
     #[test]
     fn jitter_produces_f0_variation() {
-        // Process with jitter=50 — output should differ from jitter=0
+        // Process with jitter=5% CV — output should differ from jitter=0
         let num_samples = 4410;
 
         let mut src_jitter = LfSource::new(SAMPLE_RATE);
@@ -632,7 +660,7 @@ mod tests {
         let oq = [0.0_f32];
         let tl = [0.0_f32];
         let mut out_jitter = vec![0.0_f32; num_samples];
-        src_jitter.process(&f0, &rd, &oq, &tl, 0.0, 50.0, 0.0, &mut out_jitter);
+        src_jitter.process(&f0, &rd, &oq, &tl, 0.0, 5.0, 0.0, &mut out_jitter);
 
         let mut src_no_jitter = LfSource::new(SAMPLE_RATE);
         let mut out_no_jitter = vec![0.0_f32; num_samples];
@@ -645,7 +673,7 @@ mod tests {
                 break;
             }
         }
-        assert!(any_differ, "Jitter=50 should produce different output than jitter=0");
+        assert!(any_differ, "Jitter=5% should produce different output than jitter=0");
     }
 
     #[test]

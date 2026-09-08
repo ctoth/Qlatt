@@ -171,6 +171,7 @@ nodes:
       tl: { bind: TL }
       flutter: { bind: flutter }
       jitter: { bind: jitter }
+      shimmer: { bind: shimmer }
       di: { bind: DI }
 
   impulseSource:

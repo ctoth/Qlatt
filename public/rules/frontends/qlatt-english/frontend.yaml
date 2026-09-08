@@ -118,6 +118,26 @@ parameters:
         value: 20
         citations:
           - "Engineering estimate: minimum 20ms segment duration"
+      # Klatt 1975 Table I: prestressed word-initial English voiceless onsets.
+      vot_prestressed_ms:
+        p: { value: 47, citations: [Klatt 1975 Table I] }
+        t: { value: 65, citations: [Klatt 1975 Table I] }
+        k: { value: 70, citations: [Klatt 1975 Table I] }
+        pr: { value: 59, citations: [Klatt 1975 Table I] }
+        tr: { value: 93, citations: [Klatt 1975 Table I] }
+        kr: { value: 84, citations: [Klatt 1975 Table I] }
+        pl: { value: 61, citations: [Klatt 1975 Table I] }
+        kl: { value: 77, citations: [Klatt 1975 Table I] }
+        tw: { value: 102, citations: [Klatt 1975 Table I] }
+        kw: { value: 94, citations: [Klatt 1975 Table I] }
+        sp: { value: 12, citations: [Klatt 1975 Table I] }
+        st: { value: 23, citations: [Klatt 1975 Table I] }
+        sk: { value: 30, citations: [Klatt 1975 Table I] }
+        spr: { value: 18, citations: [Klatt 1975 Table I] }
+        str: { value: 37, citations: [Klatt 1975 Table I] }
+        skr: { value: 35, citations: [Klatt 1975 Table I] }
+        spl: { value: 16, citations: [Klatt 1975 Table I] }
+        skw: { value: 39, citations: [Klatt 1975 Table I] }
       vot_target_ms:
         initial:
           p:

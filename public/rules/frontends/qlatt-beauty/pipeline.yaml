@@ -235,6 +235,7 @@ relations:
       control_windows: []
       inherentDuration: []
       durationFloor: []
+      vot_from_table: [true, false]
       initialBoundaryTone: []
       isAccentCarrier: []
       isAccented: []

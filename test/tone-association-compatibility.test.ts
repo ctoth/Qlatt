@@ -10,6 +10,8 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // docs/chen-1970-duration-review.md; its four affected Qlatt hashes are refreshed.
 // Peterson Table I changes only the four Qlatt English controls; see
 // docs/peterson-1960-duration-review.md for their complete segment review.
+// Klatt Table I changes the two Qlatt "The cat sat." controls; see
+// docs/klatt-1975-duration-review.md for the release/aspiration changes.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

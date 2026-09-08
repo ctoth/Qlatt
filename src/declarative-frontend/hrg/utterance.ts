@@ -10,6 +10,7 @@
 
 import { createDiagnostics, type Diagnostics } from "../../diagnostics";
 import {
+  type AddDecisionInput,
   createProvenanceCollector,
   type DecisionRecord,
   type ProvenanceCollector,
@@ -37,7 +38,9 @@ import type {
   TemporalWriteInput,
   TransactionJournalEntry,
   TransactionMetadata,
+  TransactionRejection,
 } from "./types";
+import { UndoLog } from "./undo-log";
 
 function cloneFeatureSchema(schema: FeatureSchema): FeatureSchema {
   switch (schema.kind) {
@@ -83,6 +86,10 @@ function cloneFeatureSchema(schema: FeatureSchema): FeatureSchema {
   }
 }
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 function compileHrgSchema(input: HrgSchema): HrgSchema {
   const itemTypes: Record<string, { features: Readonly<Record<string, FeatureSchema>> }> = {};
   for (const [itemType, itemSchema] of Object.entries(input.itemTypes)) {
@@ -120,7 +127,12 @@ function compileHrgSchema(input: HrgSchema): HrgSchema {
 export class Utterance {
   readonly provenance: ProvenanceCollector;
   readonly diagnostics: Diagnostics;
-  readonly axis = new TemporalAxis();
+  /**
+   * Compensation log for transaction commits. Declared before `axis` because
+   * field initializers run in order and the axis records its inverses here.
+   */
+  private readonly undo = new UndoLog();
+  readonly axis = new TemporalAxis(this.undo);
   private readonly schema: HrgSchema;
   private readonly items = new Map<string, Item>();
   private readonly relations = new Map<string, Relation>();
@@ -129,6 +141,7 @@ export class Utterance {
   private readonly markTimeHistoryById = new Map<string, MarkTimeWrite[]>();
   private readonly associationHistoryByEdge = new Map<string, AssociationWrite[]>();
   private readonly transactionJournal: TransactionJournalEntry[] = [];
+  private readonly transactionRejections: TransactionRejection[] = [];
   private transactionCounter = 0;
   private readonly phaseCheckpoints: PhaseCheckpoint[] = [];
   private readonly ruleAttemptHistory: RuleAttempt[] = [];
@@ -137,6 +150,36 @@ export class Utterance {
     this.provenance = provenance ?? createProvenanceCollector();
     this.diagnostics = diagnostics ?? createDiagnostics();
     this.schema = compileHrgSchema(schema);
+  }
+
+  /**
+   * The only path into `provenance.add`: a decision recorded while a commit is
+   * being applied is retracted by rollback, and the collector's id sequence
+   * rewinds with it (see {@link ProvenanceCollector.truncate}).
+   */
+  private addDecision(input: AddDecisionInput): DecisionRecord {
+    const size = this.provenance.size;
+    // Register before calling the collector: it can record a decision and then
+    // throw. Replay sequence numbers also need not equal local decision counts.
+    this.undo.record(() => this.provenance.truncate(size));
+    return this.provenance.add(input);
+  }
+
+  /**
+   * Push a write onto an append-only history keyed in `histories`, recording
+   * the inverse (pop, and drop the key once empty) for rollback.
+   */
+  private pushHistory<T>(histories: Map<string, T[]>, key: string, write: T): void {
+    const history = histories.get(key) ?? [];
+    history.push(write);
+    histories.set(key, history);
+    this.undo.record(() => {
+      if (history[history.length - 1] !== write) {
+        throw new Error(`E_HRG_UNDO_MISMATCH: history '${key}' is not at the expected write`);
+      }
+      history.pop();
+      if (history.length === 0) histories.delete(key);
+    });
   }
 
   /**
@@ -155,7 +198,7 @@ export class Utterance {
     timestampMs?: number;
     parents: readonly string[];
   }): DecisionRecord {
-    return this.provenance.add({
+    return this.addDecision({
       stage: request.stage ?? "rules",
       type: request.type,
       subject: request.subject,
@@ -249,6 +292,7 @@ export class Utterance {
       timestampMs: decision.timestampMs,
     });
     item._push(write);
+    this.undo.record(() => item._popWrite(write));
     return write;
   };
 
@@ -325,8 +369,7 @@ export class Utterance {
         tag: input.tag,
       }),
     });
-    history.push(write);
-    this.associationHistoryByEdge.set(key, history);
+    this.pushHistory(this.associationHistoryByEdge, key, write);
     return write;
   }
 
@@ -386,7 +429,7 @@ export class Utterance {
     if (this.items.has(item.id)) {
       throw new Error(`E_HRG_DUPLICATE_ITEM: item id '${item.id}' already exists`);
     }
-    const decision = this.provenance.add({
+    const decision = this.addDecision({
       stage: input.stage ?? "rules",
       type: "item_create",
       subject: `item:${item.id}`,
@@ -397,6 +440,10 @@ export class Utterance {
     });
     item._setCreationDecision(decision.id);
     this.items.set(item.id, item);
+    this.undo.record(() => {
+      this.items.delete(item.id);
+      item._clearCreationDecision();
+    });
     return decision.id;
   }
 
@@ -421,6 +468,7 @@ export class Utterance {
       relationSchema.kind,
       new Set(relationSchema.itemTypes),
       this.stampRelation,
+      this.undo,
     );
     this.relations.set(name, created);
     return created;
@@ -442,8 +490,14 @@ export class Utterance {
     return new HrgTransaction(this, metadata);
   }
 
+  /** Committed operations for replay; rejected attempts are in {@link rejections}. */
   journal(): readonly TransactionJournalEntry[] {
     return Object.freeze([...this.transactionJournal]);
+  }
+
+  /** Rejection journal, linked to the committed journal by `journalLength`. */
+  rejections(): readonly TransactionRejection[] {
+    return Object.freeze([...this.transactionRejections]);
   }
 
   graphDigest(): string {
@@ -533,16 +587,71 @@ export class Utterance {
     this.transactionJournal.push(entry);
   }
 
+  /** A transaction failed validation in `prepare`; nothing was applied. */
   _recordTransactionRejection(metadata: TransactionMetadata, error: unknown): void {
+    const message = errorMessage(error);
+    this.transactionRejections.push(
+      Object.freeze({
+        stage: "prepare",
+        metadata,
+        message,
+        journalLength: this.transactionJournal.length,
+        undoneMutations: 0,
+      }),
+    );
     this.diagnostics.error(
       "Rejected HRG transaction before commit",
-      {
-        ruleId: metadata.ruleId,
-        phase: metadata.phase,
-        message: error instanceof Error ? error.message : String(error),
-      },
+      { ruleId: metadata.ruleId, phase: metadata.phase, message },
       "HRG_TRANSACTION_REJECTED",
     );
+  }
+
+  /**
+   * Run a prepared transaction's commit callbacks under undo capture. If any
+   * callback throws, every mutation applied so far is compensated in reverse
+   * order, the rejection is recorded, and the original error propagates. A
+   * failure *during* rollback leaves the graph inconsistent and is reported as
+   * `E_HRG_ROLLBACK_FAILED` (with the rollback error as `cause`).
+   */
+  _commitAtomically<T>(metadata: TransactionMetadata, apply: () => T): T {
+    this.undo.begin();
+    let result: T;
+    try {
+      result = apply();
+    } catch (error) {
+      const message = errorMessage(error);
+      let undoneMutations: number;
+      try {
+        undoneMutations = this.undo.rollback();
+      } catch (rollbackError) {
+        this.diagnostics.error(
+          "HRG transaction rollback failed; the utterance is inconsistent",
+          { ruleId: metadata.ruleId, phase: metadata.phase, message: errorMessage(rollbackError) },
+          "HRG_TRANSACTION_ROLLBACK_FAILED",
+        );
+        throw new Error(
+          `E_HRG_ROLLBACK_FAILED: ${errorMessage(rollbackError)} (while rolling back '${metadata.ruleId}' after: ${message})`,
+          { cause: rollbackError },
+        );
+      }
+      this.transactionRejections.push(
+        Object.freeze({
+          stage: "commit",
+          metadata,
+          message,
+          journalLength: this.transactionJournal.length,
+          undoneMutations,
+        }),
+      );
+      this.diagnostics.error(
+        "Rolled back HRG transaction after a commit callback threw",
+        { ruleId: metadata.ruleId, phase: metadata.phase, message, undoneMutations },
+        "HRG_TRANSACTION_ROLLED_BACK",
+      );
+      throw error;
+    }
+    this.undo.end();
+    return result;
   }
 
   createMarkBetween(
@@ -553,7 +662,7 @@ export class Utterance {
     if (this.axis.compare(leftMarkId, rightMarkId) >= 0) {
       throw new Error("E_HRG_TEMPORAL_ORDER: left mark must precede right mark");
     }
-    const decision = this.provenance.add({
+    const decision = this.addDecision({
       stage: input.stage ?? "rules",
       type: "temporal_mark_insert",
       subject: `axis:${leftMarkId}:${rightMarkId}`,
@@ -583,7 +692,7 @@ export class Utterance {
       const mark = this.axis.get(markId);
       if (!mark || mark.creationDecisionId || mark === this.axis.start || mark === this.axis.end)
         continue;
-      const decision = this.provenance.add({
+      const decision = this.addDecision({
         stage: input.stage ?? "rules",
         type: "temporal_mark_insert",
         subject: `axis:${markId}`,
@@ -593,6 +702,9 @@ export class Utterance {
         timestampMs: input.timestampMs,
       });
       mark.creationDecisionId = decision.id;
+      this.undo.record(() => {
+        mark.creationDecisionId = null;
+      });
       decisionIds.push(decision.id);
     }
     for (let index = 0; index < items.length; index += 1) {
@@ -652,8 +764,7 @@ export class Utterance {
       ...(offsetMs != null ? { offsetMs } : {}),
       ...this.stampedTail(history.length, decision),
     });
-    history.push(write);
-    this.anchorHistoryByItemId.set(item.id, history);
+    this.pushHistory(this.anchorHistoryByItemId, item.id, write);
     return write;
   }
 
@@ -712,8 +823,7 @@ export class Utterance {
       timeMs,
       ...this.stampedTail(history.length, decision),
     });
-    history.push(write);
-    this.markTimeHistoryById.set(markId, history);
+    this.pushHistory(this.markTimeHistoryById, markId, write);
     this.axis.setMarkTime(markId, timeMs);
     return write;
   }

@@ -188,6 +188,22 @@ export interface TransactionJournalEntry {
   readonly decisionIds: readonly string[];
 }
 
+/**
+ * A transaction that never reached the journal. `prepare` rejections failed
+ * validation before anything was applied; `commit` rejections had a callback
+ * throw mid-apply and were rolled back through the undo log, restoring the
+ * pre-transaction graph, axis, and provenance (`undoneMutations` counts the
+ * primitive inverses that ran).
+ */
+export interface TransactionRejection {
+  readonly stage: "prepare" | "commit";
+  readonly metadata: TransactionMetadata;
+  readonly message: string;
+  /** Committed-journal length when the transaction was rejected. */
+  readonly journalLength: number;
+  readonly undoneMutations: number;
+}
+
 export interface PhaseCheckpoint {
   readonly phase: string;
   readonly boundary: "before" | "after";

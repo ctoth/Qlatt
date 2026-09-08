@@ -461,6 +461,12 @@ export class HrgTransaction {
     return prepared;
   }
 
+  /**
+   * Validate every staged operation, then apply them atomically: a callback
+   * that throws mid-apply is compensated by the Utterance's undo log so the
+   * graph returns to its pre-transaction state (see `undo-log.ts`). Either
+   * way the transaction is closed afterwards.
+   */
   commit(): TransactionJournalEntry {
     this.assertOpen();
     let prepared: PreparedOperation[];
@@ -472,7 +478,10 @@ export class HrgTransaction {
       throw error;
     }
 
-    const decisionIds = prepared.flatMap((operation) => operation.commit());
+    this.closed = true;
+    const decisionIds = this.utterance._commitAtomically(this.metadata, () =>
+      prepared.flatMap((operation) => operation.commit()),
+    );
     const entry = Object.freeze({
       id: this.utterance._nextTransactionId(),
       metadata: this.metadata,
@@ -480,7 +489,6 @@ export class HrgTransaction {
       operations: Object.freeze(prepared.map((operation) => operation.journal)),
       decisionIds: Object.freeze(decisionIds),
     });
-    this.closed = true;
     this.utterance._recordTransaction(entry);
     return entry;
   }

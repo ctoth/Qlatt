@@ -196,6 +196,11 @@ export class Item {
     this.creationDecision = decisionId;
   }
 
+  /** Internal rollback inverse of {@link _setCreationDecision}. */
+  _clearCreationDecision(): void {
+    this.creationDecision = null;
+  }
+
   /** Internal: append a write to a feature's version stack. Use {@link set}. */
   _push(write: FeatureWrite): void {
     const stack = this.featureWrites.get(write.key);
@@ -204,5 +209,18 @@ export class Item {
     } else {
       this.featureWrites.set(write.key, [write]);
     }
+  }
+
+  /**
+   * Internal rollback inverse of {@link _push}: remove `write`, which must be
+   * the latest version of its feature (undo runs in reverse commit order).
+   */
+  _popWrite(write: FeatureWrite): void {
+    const stack = this.featureWrites.get(write.key);
+    if (!stack || stack[stack.length - 1] !== write) {
+      throw new Error(`E_HRG_UNDO_MISMATCH: '${this.id}.${write.key}' is not the latest write`);
+    }
+    stack.pop();
+    if (stack.length === 0) this.featureWrites.delete(write.key);
   }
 }

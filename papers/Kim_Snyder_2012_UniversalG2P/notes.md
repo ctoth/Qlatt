@@ -222,3 +222,8 @@ Where:
 - **Liljencrants, J. and Lindblom, B. (1972)** - Numerical simulation of vowel quality systems: Important for understanding the principle of maximal perceptual contrast referenced in the paper's phoneme inventory analysis.
 - **Lafferty, J.D., McCallum, A., and Pereira, F.C.N. (2001)** - Conditional random fields: Technical foundation for the undirected graphical model approach used in this paper for joint probabilistic inference.
 - **Spirtes, P., Glymour, C.N., and Scheines, R. (2000)** - Causation, prediction, and search: Provides the PC structure learning algorithm critical to automatically inducing graph topology for discovering relationships between grapheme-phoneme predictions.
+
+## Collection Cross-References
+
+### Conceptual Links (not citation-based)
+- [Joint-Sequence Models for Grapheme-to-Phoneme Conversion](../Bisani_2008_Joint-sequenceModelsGrapheme-to-phonemeConversion/notes.md) - a predecessor problem framing: Bisani & Ney fit one joint-sequence M-gram model per language from thousands of training pairs; this paper instead predicts G2P for languages with *no* training pairs at all by transferring phonotactic patterns learned across 107 other languages, trading Bisani's per-language statistical precision for cross-lingual generalization.

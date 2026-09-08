@@ -168,14 +168,17 @@ This paper is the direct methodological source (via Low, Grabe & Nolan 2000) for
 
 ### Cited By (in Collection)
 - [Rhythm in Read British English: Interdialect Variability](../Ferragne_Pellegrino_2004_RhythmReadBritishEnglish/notes.md) - cites this paper (as ref [3]) for its rPVIc/nPVIv formulas and PVI methodology, applying them to 14 British English dialects plus French. Independently confirms this paper's core structural finding: vocalic/vowel-duration variability (not consonant/intervocalic-duration variability) is what actually separates rhythm classes - Grabe & Low found this across 18 world languages, Ferragne & Pellegrino found the same asymmetry holds even within one language's dialects.
+- [Rhythm, Timing and the Timing of Rhythm](../Arvaniti_2009_RhythmTimingTimingRhythm/notes.md) - cites this as the origin of nPVI/rPVI and the 18-language dataset behind Arvaniti's recomputed correlations and rhythm-class score comparisons.
 
 ### Conceptual Links (not citation-based)
 - [Prosodic Typology: The Phonology of Intonation and Phrasing](../Jun_2005_ProsodicTypology/notes.md) - Moderate. Jun's prosodic typology classifies languages along a "Rhythmic/Prosodic Unit" dimension (mora-timed, syllable-timed, foot/stress-timed) as one axis of a broader cross-linguistic intonational-phonology framework; this paper's PVI-based durational-variability measurements can be read as an attempt to put quantitative acoustic flesh on exactly that typological dimension, though the two works differ sharply on whether the classification should be treated as categorical (Jun's typology) or gradient (this paper's explicit "weak categorical" conclusion).
 
 ### New Leads (Not Yet in Collection)
 - Low, E.L., Grabe, E., & Nolan, F. (2000) - "Quantitative characterizations of speech rhythm: syllable-timing in Singapore English," Language and Speech 43(4) - the direct predecessor this paper extends from 2 varieties to 18 languages; introduced the nPVI applied to vowel durations and the British/Singapore English comparison discussed extensively on p.9 and p.23. (Not independently retrievable for this collection as of this writing - paywalled with no open-access copy found.)
-- Ramus, F., Nespor, M., & Mehler, J. (1999) - "Correlates of linguistic rhythm in the speech signal," Cognition 73 - the competing %V/ΔC/ΔV rhythm-metric family, directly compared against this paper's PVI measures in Table 3.
 - Deterding, D. (1994) - "The rhythm of Singapore English" - source of the local-pair normalization procedure this paper adopts (endnote 5); an independent replication of the British/Singapore English durational-variability contrast.
+
+### Now in Collection (previously listed as leads)
+- [Correlates of linguistic rhythm in the speech signal](../Ramus_1999_CorrelatesLinguisticRhythmSpeech/notes.md) - the competing %V/ΔC/ΔV rhythm-metric family, directly compared against this paper's PVI measures in Table 3.
 
 ## Related Work Worth Reading
 - Low, E.L., Grabe, E., & Nolan, F. (2000) - "Quantitative characterizations of speech rhythm: syllable-timing in Singapore English," Language and Speech 43(4) - the direct predecessor this paper extends from 2 varieties to 18 languages; introduced the nPVI applied to vowel durations and the British/Singapore English comparison discussed extensively on p.9 and p.23. (Not independently retrievable for this collection as of this writing - paywalled with no open-access copy found.)

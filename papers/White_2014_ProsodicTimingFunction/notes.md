@@ -222,6 +222,7 @@ The functional framework offers:
 
 ### Conceptual Links (not citation-based)
 - [[Campbell_Isard_1991_SegmentDurationsSyllable]] — Campbell & Isard's syllable elasticity model with exponential weighting (0.75^(n-i)) for final lengthening complements White's reinterpretation of polysyllabic shortening as attenuated lengthening; both papers model duration variation as modulation of an underlying timing framework rather than independent segment-level rules. (Moderate)
+- [Rhythm, Timing and the Timing of Rhythm](../Arvaniti_2009_RhythmTimingTimingRhythm/notes.md) — Arvaniti argues speech rhythm is not literal isochrony but the perceptual effect of language-specific prominence and phrasing patterns, and calls for timing accounts grounded in communicative/prosodic function rather than rhythm-class metrics; White's reinterpretation of segmental timing (including polysyllabic shortening) as serving communicative and prosodic functions is precisely that kind of functional account applied at the segment level rather than the rhythm-class level. (Strong)
 
 ### Now in Collection (previously listed as leads)
 - [[Byrd_2003_ElasticPhraseBoundaryLengthening]] — Proposes pi-gesture clock-slowing mechanism for boundary-adjacent lengthening. Directly relevant to White's analysis of prosodic timing: the pi-gesture framework provides a dynamical mechanism for the boundary lengthening effects White describes as a "timing function."

@@ -1024,3 +1024,31 @@ Highest priority for this project:
 - **Ref. 40 — J. C. Schelleng, "The bowed string and the player," JASA 53, 26-41 (1973).** Maximum bow force; the `Y'/Y` measurements.
 - **Ref. 58 — M. E. McIntyre and R. T. Schumacher, "On the triangular waveforms observed in long organ flue pipes at resonance," to be submitted to JASA.** The promised derivation of the universal triangular limiting form. **Note: listed as "to be submitted" in 1983 — check whether it ever appeared.**
 
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none) — this paper's own reference list predates the vocal-fold modeling literature in this collection; none of its cited authors (Schumacher, Woodhouse, Benade, Fletcher, Coltman, Backus, Cremer, Schelleng, Rayleigh, Raman) appear in `papers/index.md`.
+
+### New Leads (Not Yet in Collection)
+- R. T. Schumacher (1981) - "Ab initio calculations of the oscillations of a clarinet," Acustica 48, 72-85 - the finite-reed-mass, integro-differential extension of this paper's model; the structural template for restoring mass to a memoryless glottal source.
+- M. E. McIntyre and J. Woodhouse (1979) - "On the fundamentals of bowed-string dynamics," Acustica 43, 93-108 - origin of the hysteresis rule this paper compresses; needed by any project implementing a nonlinear characteristic whose max slope exceeds the load-line slope.
+- J. W. Coltman (1976) - "Jet-drive mechanisms in edge tones and organ pipes," JASA 60, 725-733 - the experimental data this paper's flute simulations validate against.
+- J. Backus (1963) - "Small amplitude vibrations of the clarinet," JASA 35, 305-313 - supplies the measured asymmetric nonlinear characteristic this paper's cubic approximates.
+
+### Cited By (in Collection)
+- (none found)
+
+### Conceptual Links (not citation-based)
+
+**Self-sustained oscillation architecture (active nonlinear source + passive linear resonator, closed by feedback):**
+- [Synthesis of Voiced Sounds From a Two-Mass Model of the Vocal Cords](../Ishizaka_1972_TwoMassModelVocalCords/notes.md) - the two-mass vocal-fold model is the mass-restored version of exactly this paper's clarinet-reed architecture: a pressure-controlled valve whose flow characteristic falls to zero at closure, driving a passive tract resonator through feedback. This paper's finite-reed-mass extension (Refs. 11, 31, going from memoryless `F(q)` to an integro-differential system solvable by forward stepping) is the same generalization Ishizaka and Flanagan make in restoring inertia to the folds.
+- [Nonlinear source–filter coupling in phonation: Theory](../Titze_2008_NonlinearSource-filterCouplingPhonation/notes.md) - both papers give a closed-form treatment of the same structural fact: an active nonlinear element cannot be decoupled from the passive resonator it drives once the resonator's reflected wave reaches back to the source. This paper expresses that feedback through a general reflection function `r(t)` convolved with the outgoing wave; Titze expresses it through a single coupling parameter (glottal area over the parallel subglottal/supraglottal entry areas) that reduces to epilarynx area, giving the same source-filter-interaction phenomenon in a formant-synthesizer-friendly form.
+- [Dynamics of the two-mass model of the vocal folds: Equilibria, bifurcations, and oscillation region](../Lucero_1993_TwoMassModelBifurcations/notes.md) - direct engagement over the same theoretical device. This paper identifies the "negative resistance" of the nonlinear element (the positive-sloping part of `F(q)`, which lets `q` and `f` be positively correlated so that positive work `W` sustains oscillation) as the mechanism of self-sustained oscillation. Lucero explicitly tests and disproves the "negative-differential-resistance oscillation theory" for the two-mass vocal-fold model, showing its predicted weak-coupling region lies outside the true Hopf-bifurcation-bounded oscillation region - a genuine tension between the generic negative-resistance account this paper gives for reed/bow/jet oscillators and its inadequacy as a sufficient condition for vocal-fold oscillation specifically.
+
+**Mass restoration and body-cover structure:**
+- [Synthesis of Speech Sounds from a Multi-Mass Model of the Lungs, Vocal Tract, and Glottis](../Boersma_1991_MultiMassSpeechSynthesis/notes.md) - moderate connection: both models make the active source's mechanical inertia and the passive resonator's geometry emerge from solving coupled physics rather than imposing rules, but Boersma's whole-apparatus mass-spring chain is a much more general aerodynamic-mechanical solve than this paper's single-scalar-root-find-per-sample architecture.
+- [Story & Titze 1995 — Voice Simulation with a Body-Cover Model of the Vocal Folds](../Story_1995_BodyCoverVocalFoldModel/notes.md) - moderate connection: the body-cover model's layered mass-spring structure is a further step along the same mass-restoration path this paper's finite-reed-mass extension opens for reed instruments, though motivated by tissue mechanics rather than by a minimal computational model.
+- [Bifurcations and Limit Cycles in a Model for a Vocal Fold Oscillator](../Lucero_2005_VocalFoldBifurcations/notes.md) - moderate connection: Lucero's supercritical-vs-subcritical Hopf bifurcation analysis of onset hysteresis is a different formal mechanism from this paper's graphical three-intersection hysteresis rule, but both are accounts of why a self-sustained oscillator's onset and offset can differ from what a linearized instability criterion predicts.
+

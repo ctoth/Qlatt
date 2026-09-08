@@ -2,12 +2,14 @@
   "cite_key": "cahn1990generation",
   "title": "The Generation of Affect in Synthesized Speech",
   "authors": ["Janet E. Cahn"],
-  "year": 1990,
+  "year": "1990",
   "arxiv_id": null,
   "doi": null,
-  "abstract": null,
+  "abstract": "Synthesized speech need not be expressionless. By identifying the effects of emotion on speech and choosing an appropriate representation, the generation of affect is possible and can become computational. I describe a program - the Affect Editor - which implements an acoustical model of speech and generates synthesizer instructions to produce the desired affect. The authenticity of the affect is limited by synthesizer capabilities and by incomplete descriptions of the acoustical and perceptual phenomena. However, the results of an experiment show that this approach produces synthesized speech with recognizable, and, at times, natural, affect.",
   "url": "https://www.media.mit.edu/speech/papers/1990/cahn_AVIOSJ90_affect.pdf",
   "pdf_url": "https://www.media.mit.edu/speech/papers/1990/cahn_AVIOSJ90_affect.pdf",
   "venue": "Journal of the American Voice I/O Society",
-  "document_type": "article"
+  "document_type": "article",
+  "pages": 19,
+  "affiliation": "M.I.T. Media Technology Laboratory"
 }

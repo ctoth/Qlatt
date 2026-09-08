@@ -790,3 +790,6 @@ SIL and glottal segments have no inherent targets - inherit from context.
 ### Conceptual Links (lexical-stress collection update; not citation-based)
 - [On Stress and Linguistic Rhythm](../Liberman_1977_StressLinguisticRhythm/notes.md) - metrical treatment of cyclic stress, secondary prominence and destressing clarifies distinctions that MITalk must serialize as stress levels. The Liberman (1977) duration abstract in this book's bibliography is a different work.
 - [Extrametricality and English Stress](../Hayes_1982_ExtrametricalityEnglishStress/notes.md) - foot-based alternative to numerical cyclic stress rules; requires explicit morphology, phonological weight and lexical exceptions. Its internal structure is not MITalk's primary/secondary output alphabet.
+
+### Cited By (in Collection)
+- [The Architecture of the Festival Speech Synthesis System](../Taylor_1998_FestivalArchitecture/notes.md) - cites this paper as the string-rewriting archetype its heterogeneous-relation-graph formalism argues against, and names it the direct ancestor of Klatt-style formant synthesis

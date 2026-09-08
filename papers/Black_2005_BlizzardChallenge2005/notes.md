@@ -227,6 +227,26 @@ This paper is the canonical citation for **how to run a defensible listening-tes
 - **Taylor, Black & Caley (2001), "Heterogeneous relation graphs as a mechanism for representing linguistic information," Speech Communication 33:153–174** [11] — the Festival utterance structure used to distribute labels.
 - **Ostendorf, Price & Shattuck-Hufnagel (1995), Boston University Radio News Corpus** [5] — prosody corpus, criticized here as not phonetically balanced.
 
+## Collection Cross-References
+
+### Already in Collection
+- (none found - the specific papers cited here are not yet in the collection; see Conceptual Links for a close relative)
+
+### New Leads (Not Yet in Collection)
+- J. Kominek, A. Black (2003) - "The CMU ARCTIC speech databases for speech synthesis research" - the corpus design report for the common dataset the whole Challenge is built on, including the greedy diphone-coverage selection procedure
+- C. Bennett (2005) - "Large scale evaluation of corpus-based synthesizers: Results and lessons from the Blizzard Challenge 2005" - the companion results paper; all numeric outcomes and statistical treatment are deferred to it
+- C. Benoit, M. Grice, V. Hazan (1996) - "The SUS test: a method for the assessment of text-to-speech synthesis intelligibility using semantically unpredictable sentences" - source of the SUS methodology used for one of the two intelligibility genres
+- J. Logan, B. Greene, D. Pisoni (1989) - "Segmental intelligibility of synthetic speech produced by rule" - DRT/MRT applied to rule-based (formant) synthesis; the isolated-word tradition Blizzard's carrier-phrase design replaces
+- P. Taylor, A. Black, R. Caley (2001) - "Heterogeneous relation graphs as a mechanism for representing linguistic information" - formalizes the Festival Utterance structure used to distribute phonetic labels to Challenge participants
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [The Architecture of the Festival Speech Synthesis System](../Taylor_1998_FestivalArchitecture/notes.md) - same author group's earlier paper describing the heterogeneous-relation-graph utterance structure that Black 2005 explicitly uses to distribute phonetic labels to participants ("Labels delivered as a Festival Utterance structure"); the 2001 HRG paper this citation list references [11] is the direct descendant of the architecture described there.
+- [Methods for Subjective Determination of Transmission Quality (ITU-T Recommendation P.800)](../ITU-T_1996_MOS_P800/notes.md) - Black 2005's core naturalness metric is exactly the MOS (1-5) scale this recommendation defines and standardizes; useful for grounding what "MOS" formally commits to (rating procedure, scale anchors) beyond what Black 2005 states.
+- [Method for the subjective assessment of intermediate quality level of audio systems (Recommendation ITU-R BS.1534-3)](../ITU-R_2015_MUSHRA_BS1534/notes.md) - Black 2005 explicitly rejects a MUSHRA-style AB/ABX/DMOS design in favor of MOS because "that would have presented us with too many samples to find listeners for," making this recommendation the road not taken; the tradeoff each protocol makes between listener-pool size and scale resolution is a direct comparison point for anyone designing a synthesis evaluation.
+
 ## Quotes Worth Preserving
 - "Speech synthesis has not been as lucky in having a well-defined evaluation metric, nor has it had a well-funded centralized community that could be targeted to the same task." *(p.1)*
 - "Such tying of databases to particular systems made it hard to genuinely compare techniques since the quality of the original recorded voice itself contributed greatly to the resulting synthetic voice quality." *(p.1)*

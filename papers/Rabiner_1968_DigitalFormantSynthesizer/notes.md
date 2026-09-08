@@ -206,6 +206,9 @@ Where $f_s$ = sampling frequency
 - **Flanagan 1965** - Comprehensive speech analysis, synthesis and perception reference
 - **Gold & Rabiner (in press)** - Comparative analysis of digital versus analog formant synthesizer architectures
 
+### Conceptual Links (not citation-based)
+- [Formant-based audio synthesis using nonlinear distortion](../Puckette_1995_FormantBasedAudioSynthesisNonlinear/notes.md) - this recursive digital-resonator design is exactly the "subtractive synthesis" architecture Puckette's PAF paper argues against on three grounds: filtering does not superpose partial phases predictably, output amplitude is hard to predict with time-varying coefficients, and recursive-filter numerical accuracy is poor. PAF's phase-aligned, closed-form pulse generator is offered as an alternative with the same formant-shaping goal but no IIR coefficient-interpolation pathology.
+
 ---
 
 **See also:** Laine_1988_HigherPoleCorrection - corrects the claim that digital formant systems don't need higher pole correction; shows HPC is needed when effective vocal tract length varies across vowels (up to +/-20 dB error at 5 kHz for 5-pole systems)

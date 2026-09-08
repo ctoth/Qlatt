@@ -469,3 +469,6 @@ Qlatt's current linear phoneme representation could be enhanced with:
 ### Conceptual Links (not citation-based)
 - [[Goldsmith_1976_AutosegmentalPhonology]] -- Strong. Goldsmith's autosegmental phonology with multi-tier representations and association lines provides the theoretical foundation for Delta's synchronized streams. The Well-formedness Condition (association lines must not cross) formalizes the temporal alignment constraints that Hertz implements with sync marks.
 - [[Klatt_1976_SegmentalDuration]] -- Moderate. Klatt's duration rules operate at the segment level; Hertz's models show that sub-segmental decomposition (phone + transition) provides better duration prediction, particularly for the pre-voiced lengthening phenomenon.
+
+### Cited By (in Collection)
+- [The Architecture of the Festival Speech Synthesis System](../Taylor_1998_FestivalArchitecture/notes.md) - cites this paper as the canonical multi-level data structure (MLDS) system that Festival's intersecting-relations formalism is designed to replace; source of the edge-alignment "hole problem" and stream-proliferation drawbacks Festival's item/relation/node model solves

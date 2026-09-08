@@ -1,0 +1,22 @@
+{
+  "cite_key": "mcintyre1983oscillations",
+  "title": "On the oscillations of musical instruments",
+  "authors": [
+    "M. E. McIntyre",
+    "R. T. Schumacher",
+    "J. Woodhouse"
+  ],
+  "year": "1983",
+  "arxiv_id": null,
+  "doi": "10.1121/1.390157",
+  "abstract": "The time-domain description of musical and other nonlinear oscillators complements the more commonly used frequency-domain description, and is advantageous for some purposes. It is especially advantageous when studying large-amplitude oscillations, for which nonlinearity may be severe. It gives direct insight into the physical reasons for the variation of waveform as playing conditions vary, and into certain phenomena which may seem counter-intuitive from the frequency-domain viewpoint, such as the musically undesirable flattening in the pitch of a bowed string when the bow is pressed too hard onto the string. It is easy to set up efficient time-domain simulations on a small computer, a fact that has been surprisingly little exploited in musical acoustics. The simplest relevant model is described here. It demonstrates some of the basic nonlinear behavior of the clarinet, violin, and flute families with very little programming effort. Remarkably, a single set of model equations has relevance to all three cases, at a certain level of idealization, with appropriate choices of parameter values and of linear and nonlinear characteristics. For the flute family, this simplest model gives waveforms and phase relations closely resembling those observed at resonance in the organ-pipe experiments of Coltman [J. Acoust. Soc. Am. 60, 725-733 (1976)], including the triangular pressure and velocity waveforms. It can be shown (again using a time-domain approach) that the triangular waveform is a universal limiting form, independent of detailed acoustic loss mechanisms provided losses are small.",
+  "url": "https://doi.org/10.1121/1.390157",
+  "pdf_url": "https://www.damtp.cam.ac.uk/user/mem2/papers/MUS-ACOUST/mci-schu-woodh-jasa83.pdf",
+  "document_type": "article",
+  "venue": "Journal of the Acoustical Society of America",
+  "volume": "74",
+  "issue": "5",
+  "pages": "1325-1345",
+  "pacs": "43.10.Ln, 43.75.-z, 43.40.At",
+  "bibtex": "@Article{McIntyre1983Oscillations,\n author = {M. E. McIntyre and R. T. Schumacher and J. Woodhouse},\n journal = {Journal of the Acoustical Society of America},\n number = {5},\n pages = {1325-1345},\n title = {On the oscillations of musical instruments},\n volume = {74},\n year = {1983},\n doi = {10.1121/1.390157}\n}\n"
+}

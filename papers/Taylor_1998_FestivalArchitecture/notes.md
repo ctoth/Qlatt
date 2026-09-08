@@ -596,3 +596,25 @@ formant/source-filter TTS pipeline**, and it maps directly onto a front-end desi
   TTS system** [5] — the Alvey synthesizer, cited as a string-rewriting system.
 - **Boves (1991), Considerations in the design of a multi-lingual text-to-speech system**
   [4] — Polyglot; the multilinguality-driven architecture argument.
+
+## Collection Cross-References
+
+### Already in Collection
+- [From Text to Speech: The MITalk System](../Allen_1987_MITalk_TTS/notes.md) - cited [1] as the string-rewriting archetype this paper argues against, and the direct ancestor of Klatt-style formant synthesis
+- [The Delta Programming Language: An Integrated Approach to Non-Linear Phonology, Phonetics, and Speech Synthesis](../Hertz_1987_DeltaNonLinearPhonology/notes.md) - cited [6] as the canonical multi-level data structure (MLDS) system Festival's intersecting-relations formalism is designed to replace; source of the edge-alignment/hole problem this paper solves
+
+### New Leads (Not Yet in Collection)
+- A.W. Black, P. Taylor (1997) - "The Festival Speech Synthesis System: system documentation," HCRC/TR-83 - contains the low-level C++ implementation details (EST_Utterance, EST_Relation, EST_Item classes) this paper deliberately omits
+- A.W. Black, P.A. Taylor (1994) - "CHATR: A generic speech synthesis system" - the authors' own prior architecture, criticized here for C constructs so obscure that experienced programmers found the code unrecognizable
+- L. Boves (1991) - "Considerations in the design of a multi-lingual text-to-speech system" - Polyglot; the multilinguality-driven architecture argument cited as prior MLDS work
+- W.N. Campbell, S.D. Isard, A.I.C. Monaghan, J. Verhoven (1990) - "Duration, pitch and diphones in the CSTR TTS system" - the Alvey synthesizer, cited as a string-rewriting system
+- R. Sproat, J. Olive (1994) - "A modular architecture for multi-lingual text-to-speech" - the Bell Labs MLDS architecture, the main contemporary alternative to Festival's design
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Cited By (in Collection)
+- [Issues in Building General Letter to Sound Rules](../Black_1998_LTS_Rules/notes.md) - cites "Black, Taylor, and Caley, The Festival speech synthesis system, 1998" (the contemporaneous system-documentation citation for the same architecture this paper describes)
+
+### Conceptual Links (not citation-based)
+- [The Blizzard Challenge – 2005: Evaluating corpus-based speech synthesis on common datasets](../Black_2005_BlizzardChallenge2005/notes.md) - Black and Tokuda (same author group) distribute Challenge phonetic labels as a "Festival Utterance structure (heterogeneous relation graph)," using the exact item/relation formalism this paper describes as the direct mechanism for the common-dataset protocol.

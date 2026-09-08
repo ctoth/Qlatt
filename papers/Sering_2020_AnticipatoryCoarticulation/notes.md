@@ -167,8 +167,8 @@ For Klatt synthesis, implementing anticipatory coarticulation requires:
 
 ## Related Work Worth Reading
 
-- Öhman (1966) - Original coarticulation in VCV utterances
-- Birkholz (2013) - Modeling consonant-vowel coarticulation for articulatory synthesis
+- Öhman (1966) - Original coarticulation in VCV utterances → NOW IN COLLECTION: [Coarticulation in VCV Utterances: Spectrographic Measurements](../Ohman_1966_CoarticulationVCV/notes.md)
+- Birkholz (2013) - Modeling consonant-vowel coarticulation for articulatory synthesis → NOW IN COLLECTION: [Modeling Consonant-Vowel Coarticulation for Articulatory Speech Synthesis](../Birkholz_2013_ModelingConsonant-VowelCoarticulationArticulatory/notes.md)
 - Fougeron & Keating (1997) - Articulatory strengthening at prosodic boundaries
 - Tomaschek et al. (2018, 2020) - Lexical effects on articulation
 
@@ -194,7 +194,9 @@ Forward model updated after each resynthesis with:
 - (none found)
 
 ### New Leads (Not Yet in Collection)
-- [1] Öhman (1966)** - Foundational work on coarticulation in VCV utterances, provides the measurement methodology used in this paper.
-- [4] Birkholz (2013)** - Key reference on modeling consonant-vowel coarticulation in articulatory synthesis, directly relevant to understanding coarticulation mechanisms in synthesizers.
 - [11] Delattre (1951)** - Classic formant acoustics work relating tongue position to formant frequencies, foundational for interpreting formant shift results.
 - [8] Guenther (2016)** - Comprehensive reference on neural control of speech, provides theoretical grounding for understanding articulation and motor control.
+
+### Now in Collection (previously listed as leads)
+- [Coarticulation in VCV Utterances: Spectrographic Measurements](../Ohman_1966_CoarticulationVCV/notes.md) - foundational spectrographic measurement of VCV coarticulation timing; supplies the measurement methodology this paper uses.
+- [Modeling Consonant-Vowel Coarticulation for Articulatory Speech Synthesis](../Birkholz_2013_ModelingConsonant-VowelCoarticulationArticulatory/notes.md) - solves coarticulation for articulatory synthesis by varying the articulatory *target* itself via context-weighted interpolation between corner-vowel reference shapes, in contrast to this paper's gradient-based resynthesis approach to anticipatory coarticulation.

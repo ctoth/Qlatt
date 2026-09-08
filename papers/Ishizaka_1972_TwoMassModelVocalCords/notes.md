@@ -696,6 +696,7 @@ This is a foundational, heavily-cited model; the following collection papers cit
 
 ### Conceptual Links (not citation-based)
 - (not surveyed beyond the citation network above - the ~30-paper citing set already documents this paper's engagement with the collection comprehensively; see Cited By)
+- [On the oscillations of musical instruments](../McIntyre_1983_OscillationsMusicalInstruments/notes.md) - the two-mass vocal-fold model is the mass-restored version of McIntyre, Schumacher and Woodhouse's general clarinet-reed architecture: a pressure-controlled valve whose flow characteristic falls to zero at closure, driving a passive resonator through feedback. McIntyre et al.'s finite-reed-mass extension (going from a memoryless flow characteristic to an integro-differential system solvable by forward stepping) is the same generalization this paper makes in restoring inertia to the folds.
 
 ## Figures of Interest (complete index)
 

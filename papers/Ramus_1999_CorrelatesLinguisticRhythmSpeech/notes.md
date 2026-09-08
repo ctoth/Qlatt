@@ -326,3 +326,22 @@ For a formant/source-filter speech synthesizer, this paper is a specification fo
 - Levelt, C., & van de Vijver, R. (1998). Syllable types in cross-linguistic and developmental grammars. The five-class markedness typology.
 - Nespor, M. (1990). On the rhythm parameter in phonology. In *Logical issues in language acquisition*, 157-175. The Catalan/Polish intermediate-language argument.
 - Auer, P. (1993). *Is a rhythm-based typology possible?* KontRI Working Paper 21. Alternative five-class typology and critique of rhythm/syntax correlations.
+
+## Collection Cross-References
+
+### Already in Collection
+- (none of this paper's own cited references are separately in the collection - Nazzi/Bertoncini/Mehler, Dauer, Mehler et al., and Levelt & van de Vijver are not yet retrieved)
+
+### New Leads (Not Yet in Collection)
+- Ramus, F. & Mehler, J. (1999), JASA 105(1), 512-521 - the companion paper; source of the delexicalizing resynthesis recipe (all consonants to /s/, all vowels to /a/, F0 fixed at 230 Hz), a directly usable prosody-evaluation rig for a synthesizer.
+- Nazzi, T., Bertoncini, J. & Mehler, J. (1998), JEP:HPP 24(3), 756-766 - supplies the corpus this paper measures and the behavioral results the simulations reproduce.
+- Dauer, R.M. (1983), J. Phonetics 11, 51-62 - the phonological account of rhythm as a by-product of syllable structure and vowel reduction this paper turns into measurements.
+
+### Cited By (in Collection)
+- [Rhythm, Timing and the Timing of Rhythm](../Arvaniti_2009_RhythmTimingTimingRhythm/notes.md) - cites this as the origin of %V and deltaC and of the controlled corpus reproduced in its figure 1.
+- [Rhythm in Read British English: Interdialect Variability](../Ferragne_Pellegrino_2004_RhythmReadBritishEnglish/notes.md) - cites this for the competing %V/deltaC rhythm-metric family, which it argues against for within-language dialect comparison due to a syllabic-complexity confound.
+- [Durational Variability in Speech and the Rhythm Class Hypothesis](../Grabe_Low_2002_DurationalVariabilityRhythmClass/notes.md) - cites this for the competing %V/deltaC/deltaV rhythm-metric family, directly compared against its own PVI measures in Table 3.
+- (bibliography-only mention in [The Original ToBI System and the Evolution of the ToBI Framework](../Beckman_2005_ToBISystemEvolution/notes.md))
+
+### Conceptual Links (not citation-based)
+- (see Arvaniti_2009, Ferragne_Pellegrino_2004, and Grabe_Low_2002 above - these already capture the substantive relationships; no additional non-citation-based connections found)

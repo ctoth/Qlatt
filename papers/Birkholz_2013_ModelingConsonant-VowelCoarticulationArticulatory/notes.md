@@ -749,6 +749,24 @@ This is a full recipe for context-sensitive consonant targets in a source-filter
 
 ## Collection Cross-References
 
+### Already in Collection
+- [Articulatory Phonology: An Overview](../Browman_Goldstein_1992_ArticulatoryPhonologyOverview/notes.md) - cited for the gestural-timing account of coarticulation this paper's target-interpolation approach is positioned against.
+- [On the Quantal Nature of Speech](../Stevens_1989_QuantalNatureSpeech/notes.md) - cited in the background discussion of invariant vs. context-sensitive articulatory targets.
+- [Acoustic Phonetics - Expanded Notes](../Stevens_1998_AcousticPhonetics/notes.md) - cited as a general acoustic-phonetics reference.
+- [Review of Text-to-Speech Conversion for English](../Klatt_1987_TTS_Review/notes.md) - cited in the survey of speech synthesis approaches this paper's introduction situates articulatory synthesis against.
+
+### New Leads (Not Yet in Collection)
+- Öhman, S.E.G. (1967). "Numerical model of coarticulation," JASA 41, 310-320. Highest priority: the foundational superposition model with a context-independent coarticulation function; this paper positions its corner-vowel interpolation method as the alternative. (Distinct from Öhman's 1966 "Coarticulation in VCV Utterances" already in the collection.)
+- Lindblom, B. (1963). "Spectrographic study of vowel reduction," JASA 35, 1773-1781. The undershoot model justifying invariant vowel targets with only consonants getting context-sensitive targets - the load-bearing asymmetry of the whole approach.
+- Birkholz, Kröger, Neuschaefer-Rube (2011). "Model-based reproduction of articulatory trajectories for consonant-vowel sequences," IEEE TASLP 19, 1422-1433. Source of the critically damped sixth-order transition model with per-consonant time constants, directly reusable in a formant synthesizer's parameter trajectory generator.
+- Birkholz, Kröger, Neuschaefer-Rube (2010). "Articulatory synthesis and perception of plosive-vowel syllables with virtual consonant targets," Interspeech 2010, 1017-1020. The virtual-target concept (overshooting the reachable articulator position so release lands mid-transition).
+- Birkholz, Jackèl, Kröger (2007). "Simulation of losses due to turbulence in the time-varying vocal tract," IEEE TASLP 15, 1218-1226. The noise source model the paper repeatedly identifies as the single biggest limitation on plosive and fricative recognition.
+- Birkholz, P. (2005). *3D-Artikulatorische Sprachsynthese*, Logos Verlag Berlin. The complete vocal tract, area function, and acoustic tube model this paper only summarizes.
+- Mermelstein, P. (1973). "Articulatory model for the study of speech production," JASA 53, 1070-1082. Early articulatory model foundational to the tradition this paper works in.
+
+### Cited By (in Collection)
+- [Anticipatory Coarticulation in Predictive Articulatory Speech Modeling](../Sering_2020_AnticipatoryCoarticulation/notes.md) - cites this paper as a key reference on modeling consonant-vowel coarticulation in articulatory synthesis, directly relevant to understanding coarticulation mechanisms in synthesizers.
+
 ### Conceptual Links (not citation-based)
 - [Coker (1976) — A Model of Articulatory Dynamics and Control](../Coker_1976_ArticulatoryDynamicsControl/notes.md) - both solve coarticulation for articulatory synthesis but with opposite strategies: Coker keeps fixed per-phoneme targets and varies *when* each articulator moves toward them (a per-phoneme, per-articulator lead/lag "priority" timing mechanism), while this paper keeps timing simple and varies the *target itself* via context-weighted interpolation between corner-vowel reference shapes.
 

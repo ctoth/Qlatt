@@ -421,3 +421,6 @@ A3COR = A2COR * A2SKRT
 - [[Stevens_1991_HL_Parameters]] — HL parameters relate to Klatt synthesizer parameters
 - [[Fraj_2011_BreathyRoughVoices]] — uses Klatt synthesizer for breathy/rough voice synthesis
 - [[Ronanki_2013_SyllableProsodyHTS]] — references Klatt synthesizer
+
+### Conceptual Links (not citation-based)
+- [Principles for Designing Computer Music Controllers](../Cook_2001_PrinciplesDesigningComputerMusicControllers/notes.md) - Cook's central few-to-many control problem (a voice model with "well over 40 continuously controlled parameters" is "a truly difficult 'instrument' to control") is exactly the regime of this synthesizer's variable control set (F0, five formant frequencies, three bandwidths, and half a dozen amplitude parameters updated every 5ms). Cook's proposed mitigation - interpolate among named shape/vowel targets rather than exposing every parameter - is a concrete real-time control-layer design recommendation for this parameter set.

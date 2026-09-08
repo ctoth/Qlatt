@@ -306,3 +306,25 @@ This is a calibration and validation paper for any formant/source-filter synthes
 - **Bachorowski and Owren (1999), JASA 106:1054-1063** - acoustic correlates of talker sex; GPR versus VTL as sex classifiers.
 - **Titze (1989), JASA 85:1699-1707** - physiologic and acoustic differences between male and female voices; the 60% vocal-fold length figure.
 - **Huber, Stathopoulos, Curione, Ash, Johnson (1999), JASA 106:1532-1542** - formants of children, women, and men; the 32%/20% developmental formant shifts.
+
+## Collection Cross-References
+
+### Already in Collection
+- [Morphology and development of the human vocal tract: A study using magnetic resonance imaging](../Fitch_1999_VocalTractMorphology/notes.md) - source of the adult vocal-tract-length anchor and the length-versus-height curve used to name simulated speaker heights.
+- [Acoustic Theory of Speech Production](../Fant_1960_AcousticTheorySpeechProduction/notes.md) - the linear formant-frequency/vocal-tract-length scaling relation the whole spectral-envelope-ratio conversion rests on.
+- [Control Methods Used in a Study of the Vowels](../Peterson_Barney_1952_VowelControl/notes.md) - the classic vowel-formant database supplying the man/woman/boy/girl regions in pitch-by-tract-length space this paper's ellipses encode.
+- [Klatt & Klatt 1990 - Voice Quality Variations Analysis](../Klatt_1990_VoiceQualityVariations/notes.md) - not cited directly, but see Conceptual Links below.
+- [The role of f0 and formant frequencies in distinguishing the voices of men and women](../Hillenbrand_2009_RoleF0FormantFrequencies/notes.md) - Hillenbrand & Clark's larger-cohort (25+25 talker) resynthesis design was built to control for the single-talker-basis limitation of this STRAIGHT-based study.
+
+### New Leads (Not Yet in Collection)
+- Kawahara & Irino (2004) / Kawahara, Masuda-Kasuse & de Cheveigne (1999) - STRAIGHT, the pitch-adaptive analysis-resynthesis system used to independently manipulate glottal-pulse rate and vocal-tract length here.
+- Smith, Walters & Patterson (2007), JASA 122:3628-3639 - companion discrimination study establishing the ~6-10% vocal-tract-length just-noticeable difference used as an engineering constraint.
+- Bachorowski & Owren (1999) - acoustic correlates of talker sex and identity in running speech.
+- Whiteside (1998) - identification of speaker sex from synthesized vowels.
+
+### Cited By (in Collection)
+- [The role of f0 and formant frequencies in distinguishing the voices of men and women](../Hillenbrand_2009_RoleF0FormantFrequencies/notes.md) - cites this as a prior single-talker-basis resynthesis study that motivated Hillenbrand & Clark's larger-cohort design.
+- [Integrating Fundamental and Formant Frequencies in Women's Preferences for Men's Voices](../Feinberg_2011_IntegratingF0FormantPreferences/notes.md) - cites this as the perceptual foundation for treating F0 and formant/VTL cues as interacting rather than independent.
+
+### Conceptual Links (not citation-based)
+- [Investigating the Use of Formant Frequencies in Listener Judgments of Speaker Size](../Barreda_2015_FormantSpeakerSize/notes.md) - Barreda isolates formant-only (VTL) cues to speaker-size judgments; this paper shows VTL and glottal-pulse rate (F0) jointly and interactively determine perceived size, sex, and age - together they separate which portion of the size percept survives formant-only manipulation versus requiring the F0 x VTL interaction. (Strong)

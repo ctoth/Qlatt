@@ -548,3 +548,19 @@ This is the origin paper for the harmonic-plus-noise decomposition that underlie
 - **Harris, F. J. 1978.** "On the Use of Windows for Harmonic Analysis with the Discrete Fourier Transform." Proc. IEEE 66(1): 51-83. The window reference the paper defers to.
 - **Strawn, J. 1980.** "Approximation and Syntactic Analysis of Amplitude and Frequency Functions for Digital Sound Synthesis." CMJ 4(3): 3-24. Source for the line-segment approximation of envelopes.
 - **Markel, J. D., and A. H. Gray. 1976.** *Linear Prediction of Speech.* The LPC alternative that SMS argues against for residual modeling.
+
+## Collection Cross-References
+
+### Already in Collection
+- (none - all cited references (Allen, McAulay & Quatieri, Markel & Gray, Moorer, Portnoff, Rife & Boorstyn, Strawn, Serra's own 1989 dissertation, Smith & Serra's PARSHL) are absent from this collection)
+
+### New Leads (Not Yet in Collection)
+- Serra, X. 1989. "A System for Sound Analysis/Transformation/Synthesis Based on a Deterministic plus Stochastic Decomposition," Ph.D. diss., Stanford University. Highest priority: the full-length treatment behind this article, cited three times for material deliberately omitted here (extended analysis-window discussion, parabolic spectral interpolation detail, and time-domain rather than magnitude-domain subtraction of the deterministic component).
+- Smith, J. O., and X. Serra. 1987. "PARSHL: An Analysis/Synthesis Program for Nonharmonic Sounds based on a Sinusoidal Representation," Proc. ICMC 1987. The direct predecessor system and source of the peak-detection and peak-tracking machinery SMS inherits.
+- McAulay, R. J., and T. F. Quatieri. 1986. "Speech Analysis/Synthesis based on a Sinusoidal Representation," IEEE Trans. ASSP 34(4), 744-754. The parallel sinusoidal model developed for speech - the speech-domain counterpart to SMS and the paper's principal comparison target; essential reading for applying harmonic-plus-noise ideas to a voice synthesizer.
+- Allen, J. B. 1977. "Short-term Spectral Analysis, Synthesis, and Modification by the Discrete Fourier Transform," IEEE Trans. ASSP 25(3), 235-238. Supplies the short-time Fourier transform framework both PARSHL and McAulay-Quatieri were built on, plus the hop-size criterion SMS adopts.
+- Strawn, J. 1980. "Approximation and Syntactic Analysis of Amplitude and Frequency Functions for Digital Sound Synthesis," Computer Music Journal 4(3), 3-24. The source for the line-segment approximation of amplitude and frequency functions SMS uses to reduce deterministic breakpoints and fit the stochastic residual envelope.
+
+### Conceptual Links (not citation-based)
+- [Improving the Readability of Time-Frequency and Time-Scale Representations by the Reassignment Method](../Auger_1995_ImprovingReadabilityTime-frequencyTime-scale/notes.md) - (Strong) SMS's deterministic component tracks quasi-sinusoidal partials by parabolic peak interpolation of STFT frames to estimate each partial's instantaneous frequency; Auger and Flandrin's reassignment operators (ratio of two or three STFTs with modified windows) solve the same estimation problem with perfect localization for locally linear chirps, and could replace or refine SMS's peak-picking/interpolation stage for partial tracking.
+- [Voice Processing and Synthesis by Performance Sampling and Spectral Models](../Bonada_2008_VoiceSynthesisSpectralModels/notes.md) - (Strong) Bonada's dissertation, supervised by Xavier Serra, directly extends the deterministic-plus-stochastic SMS decomposition introduced here to singing voice synthesis (the EpR source-plus-resonance model and harmonic analysis framework both build on SMS's sinusoidal-plus-residual architecture); it is the direct lineage from this paper's general audio framework to a voice-specific spectral synthesizer.

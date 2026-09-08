@@ -440,3 +440,16 @@ This is a direct rules paper for a formant / source-filter synthesizer that need
   position the results support.
 - **Campbell (1992), "Synthesis Units for Natural English Speech"** — the author's own synthesis
   context for the unit-selection implication.
+
+## Collection Cross-References
+
+### Already in Collection
+- [Sluijter, van Heuven & Pacilly (1997) - Implementation Notes](../Sluijter_1996_SpectralBalanceStressCue/notes.md) - ref [10]/[11] in this paper's reference list; the direct target this paper replicates (accent effect confirmed, stress effect not confirmed) and extends toward an ERB-filterbank spectral-tilt measure. Note: the collection entry's frontmatter year (1996) reflects the directory name, but its content documents the 1997 JASA perception companion paper (101:503-513) that this paper's reference [11] cites; the collection does not separately hold the 1996 production paper (JASA 100:2471-2485, reference [10]).
+
+### New Leads (Not Yet in Collection)
+- Patterson, R.D. & Moore, B.C.J. (1986) - "Auditory filters and excitation patterns as representations of frequency resolution" - supplies the 128-channel ERB filterbank behind this paper's "ERB channel 60 and above" result.
+- Jackson, Ladefoged, Huffman & Antonanzas-Barroso (1985) - "Measures of spectral tilt" - definitional reference for H2-H1 and other spectral tilt measures; candidates for a replacement control parameter since this paper reports H2-H1 failing as a prominence correlate.
+- Bolinger, D. (1958) - "A theory of pitch accent in English" - the theoretical position this paper's results endorse: stress as structural marking of pitch-accent potential, distinct from accent itself.
+
+### Cited By (in Collection)
+- [Rhythm, Timing and the Timing of Rhythm](../Arvaniti_2009_RhythmTimingTimingRhythm/notes.md) - cites this paper directly (see its Collection Cross-References).

@@ -1,0 +1,4 @@
+---
+tags: [formant-synthesis, vocal-tract-acoustics, formant-bandwidth, source-filter, acoustic-theory]
+---
+Fant derives the effect of finite vocal tract wall impedance on formant frequencies and bandwidths, treating the problem at three levels of detail: a low frequency lumped approximation, a single tube with lumped wall shunt, and a fully distributed element network solved via Laurent's indirect frequency transformation. He obtains the wall-mass frequency correction F² = F_i² + F_W² with F_W of 150-200 Hz for males, decomposes bandwidth into wall, viscous friction, heat conduction, and radiation components with closed-form expressions for each, and fits empirical formulas predicting B1, B2, and B3 from the F-pattern alone to within about 1 dB. This is the primary source behind the formant bandwidth models used in formant and source-filter speech synthesizers, and supplies both the equations and validation tables of measured Swedish vowel bandwidths.

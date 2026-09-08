@@ -234,3 +234,6 @@ For `tts-frontend-rules.js`:
 - **[42] Williams & Stevens, 1972** - Classic study on acoustic factors in emotional expression (fundamental frequency and envelope amplitude)
 - **[30] Patterson & Ladd, 1999** - Pitch range modeling and linguistic dimensions of prosodic variation
 - **[14] Fujisaki, 1991** - Influential model for generating F0 contours with linguistic and paralinguistic functions
+
+### Conceptual Links (not citation-based)
+- [Emotional Speech Synthesis: A Review](../Schroder_2001_EmotionalSpeechSynthesisReview/notes.md) - (Moderate) later work by the same author whose 1998 PhD thesis (ref [10], already in the collection) supplies the review's boredom rule set (94% recognition, the highest in Table 1); extends the same prosody-emotion research program.

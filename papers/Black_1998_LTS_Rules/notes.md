@@ -252,6 +252,7 @@ For the JavaScript Klatt synthesizer:
 - [[Elovitz_1976_NRL_LTS]] — the NRL letter-to-sound rules that represent an earlier, hand-crafted approach to the same G2P problem this paper solves with CART trees
 - [[Allen_1987_MITalk_TTS]] — MITalk's G2P system used manually constructed rules; Black's CART approach automates this
 - [[Miller_1998_PronunciationModelingSpeechSynthesis]] — comprehensive review of pronunciation modeling including CART-based LTS rules
+- [The Architecture of the Festival Speech Synthesis System](../Taylor_1998_FestivalArchitecture/notes.md) - cited as "Black, Taylor, and Caley, The Festival speech synthesis system, 1998," the runtime system this paper's LTS rules are implemented within; describes the heterogeneous-relation-graph architecture that stores the CART trees and lexicon lookups as utterance-structure modules
 
 ### Cited By (in Collection)
 - [[Miller_1998_PronunciationModelingSpeechSynthesis]] — cites Black 1998 for CART-based letter-to-sound rules as alternative G2P approach
@@ -265,3 +266,4 @@ For the JavaScript Klatt synthesizer:
 ### Conceptual Links (not citation-based)
 - [[Elovitz_1976_NRL_LTS]] — Strong. Elovitz's hand-crafted NRL LTS rules represent the manual-engineering approach that Black's CART-based method replaces. Comparing the two approaches shows the accuracy/maintenance tradeoff: NRL rules are interpretable but brittle; CART trees are automatically generated from lexicons but opaque.
 - [[Hunnicutt_1976_PhonologicalRules]] — Moderate. Hunnicutt's phonological rules for MITalk address a related but distinct level of the G2P pipeline -- morphological and phonological transformations vs. Black's grapheme-to-phone mapping. Together they cover the full text-to-phoneme pipeline.
+- [Joint-Sequence Models for Grapheme-to-Phoneme Conversion](../Bisani_2008_Joint-sequenceModelsGrapheme-to-phonemeConversion/notes.md) - cites this paper as Pagel, Lenzo & Black (1998) in its taxonomy of decision-tree G2P methods (information gain recomputed at each node split, POS questions); Bisani's fully statistical joint-sequence M-gram model is a later, better-performing alternative to this paper's CART-tree approach for the same lexicon-compression/generalization problem.

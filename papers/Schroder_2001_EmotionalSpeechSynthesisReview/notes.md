@@ -370,3 +370,30 @@ This is a directly usable specification source for adding rule-based emotion con
 - **Cowie [2]**, "Describing the Emotional States Expressed in Speech", ISCA Workshop 2000, pp. 11-18 — the argument against modelling only extreme basic categories.
 - **Bates [26]**, "The Role of Emotion in Believable Agents", CACM 37, 1994, pp. 122-125 — the exaggeration principle.
 - **Scherer, Ladd & Silverman [28]**, "Vocal cues to speaker affect: Testing two models", JASA 76(5), 1984, pp. 1346-1356 — F0 contour and sentence-type interaction.
+
+## Collection Cross-References
+
+### Already in Collection
+- [Acoustic Profiles in Vocal Emotion Expression](../Banse_1996_VocalEmotionAcousticProfiles/notes.md) - cited as ref [25] for the acoustic-profile reference on vocal emotion and as the source (p.615) of the critique that forced-choice testing measures discrimination rather than identification.
+- [Vocal Cues to Speaker Affect: Testing Two Models](../Scherer_1984_VocalCuesSpeakerAffect/notes.md) - cited as ref [28] for the finding that F0 contour affects emotion perception in interaction with sentence type and other linguistic information, used to motivate the review's "linguistic interaction and language specificity" problem.
+- [Speech Variability and Emotion: Production and Perception](../Mozziconacci_1998_SpeechEmotionProsody/notes.md) - cited as ref [10] as the source of the Table 1 boredom rule set (94% recognition, the highest in the table) and the Dutch intonation-pattern grammar (patterns 3C, 5&A, 12) that this review does not itself define.
+
+### New Leads (Not Yet in Collection)
+- Cahn, J. E. (1990) - "The Generation of Affect in Synthesized Speech" (ref [4]) - source of the sadness and surprise rule sets and the -10..+10 abstract parameter scale; required to decode Table 1's Cahn-scale rows.
+- Murray, I. R., & Arnott, J. L. - "Implementation and testing of a system for producing emotion-by-rule in synthetic speech," Speech Communication 16, pp. 369-390 (ref [6]) - the HAMLET implementation paper and source of the anger rule set in absolute physical units; distinct from the Murray & Arnott 1993 review already in the collection (see Conceptual Links).
+- Kasuya, H., Maekawa, K., & Kiritani, S. (1999) - "Joint Estimation of Voice Source and Vocal Tract Parameters as Applied to the Study of Voice Source Dynamics" (ref [30]) - named as the route to making rule-based synthesis more natural-sounding, directly relevant to a source-filter engine's voice-quality modeling.
+- Cowie, R., Douglas-Cowie, E., Savvidou, S., McMahon, E., Sawey, M., & Schröder, M. (2000) - "FEELTRACE: An Instrument for Recording Perceived Emotion in Real Time" (ref [27]) - the dimensional taxonomy the review recommends for describing non-extreme emotional states.
+- Bates, J. (1994) - "The Role of Emotion in Believable Agents" (ref [26]) - source of the exaggeration principle (human-measured expression values may need amplification to be believable in synthesis).
+
+### Supersedes or Recontextualizes
+- (none - no genuine supersedes relationship with any collection paper)
+
+### Conceptual Links (not citation-based)
+- [Acoustic Correlates of Emotion Dimensions in View of Speech Synthesis](../Schroder_2001_AcousticCorrelatesEmotionDimensions/notes.md) - companion paper by the same author, published the same year: this review surveys discrete-category rule sets with measured recognition rates, while the companion supplies the continuous activation/evaluation/power dimensional mapping this review only gestures at via FEELTRACE [27]. The review explicitly recommends reading the two together (see Relevance to Project).
+- [Murray & Arnott 1993 - Toward the Simulation of Emotion in Synthetic Speech](../Murray_1993_SimulationEmotionSyntheticSpeech/notes.md) - (Strong) same author lineage as HAMLET (ref [6], not itself in the collection): Murray & Arnott's Table I of vocal-emotion parameter directions for five primary emotions is the parameter-direction consensus (anger/happiness/sadness/fear/disgust on rate, pitch, intensity, voice quality) that underlies the anger rule set this review tabulates from the separate 1995/1996 Speech Communication implementation paper.
+- [Rule-Based Voice Quality Variation with Formant Synthesis](../Burkhardt_2009_VoiceQualityFormantSynthesis/notes.md) - (Strong) direct continuation of Burkhardt's rule-based, perception-optimized approach (refs [8],[9], this review's joy and fear rule sets) into an explicit voice-quality parameter framework for formant synthesis - the follow-on work to the exact method this review highlights as its top implementation priority.
+- [A Database of German Emotional Speech](../Burkhardt_2005_GermanEmotionalSpeechDatabase/notes.md) - (Moderate) later corpus work by the same author (Burkhardt) whose PhD and workshop paper (refs [8],[9]) supply this review's joy/fear rule sets; EMO-DB became the standard training/evaluation corpus for the emotional-speech field this review surveys.
+- [Prosody and Emotions](../Mozziconacci_2002_ProsodyEmotions/notes.md) - (Moderate) later work by the same author (Mozziconacci) whose 1998 PhD thesis (ref [10]) supplies this review's boredom rule set; extends the same prosody-emotion research program.
+
+### Cited By (in Collection)
+- [Expression of Affect in Spontaneous Speech: Acoustic Correlates and Automatic Detection of Irritation and Resignation](../Laukka_2011_SpontaneousAffectIrritation/notes.md) - cites this review as the state-of-the-art survey of emotional speech synthesis at the time of writing.

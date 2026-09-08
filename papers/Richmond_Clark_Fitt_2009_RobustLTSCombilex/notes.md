@@ -187,12 +187,13 @@ Highly relevant complement to the founding Unisyn paper for a declarative TTS fr
 
 ### Already in Collection
 - [Synthesis of Regional English Using a Keyword Lexicon](../Fitt_Isard_1999_SynthesisRegionalEnglishKeywordLexicon/notes.md) - reference [3]; this paper explicitly frames Combilex as accent-independent "similar to UniSyn," contrasting UniSyn's academic-only license with Combilex's wide-ranging license options, and both use the same base-lexicon-plus-accent-derivation architecture.
+- [Issues in Building General Letter to Sound Rules](../Black_1998_LTS_Rules/notes.md) - references [11] and [6] (the same Black/Lenzo/Pagel author group's two 1998 papers are cited separately: "Issues in building general letter to sound rules" is the source of the epsilon-scattering automatic alignment baseline this paper compares against; "Letter-to-sound rules for accented lexicon compression" is the source of the OALD comparison figures)
 
 ### New Leads (Not Yet in Collection)
 - Fitt, S. and Richmond, K. (2006) - "Redundancy and productivity in the speech technology lexicon - can we do better?" (Interspeech 2006) - reference [4]; discusses the design rationale behind Combilex's advanced features in more depth than this paper covers.
-- Black, A., Lenzo, K., and Pagel, V. (1998) - "Issues in building general letter to sound rules" (3rd ESCA Workshop on Speech Synthesis) - reference [11]; source of the epsilon-scattering automatic alignment baseline method this paper compares against.
-- Pagel, V., Lenzo, K., and Black, A. (1998) - "Letter-to-sound rules for accented lexicon compression" (Proc. ICSLP) - reference [6]; source of the OALD comparison figures.
-- Bisani, M. and Ney, H. (2008) - "Joint-sequence models for grapheme-to-phoneme conversion" (Speech Communication) - reference [12]; named as a stronger candidate LTS method for future work with expert alignment.
+
+### Now in Collection (previously listed as leads)
+- [Joint-Sequence Models for Grapheme-to-Phoneme Conversion](../Bisani_2008_Joint-sequenceModelsGrapheme-to-phonemeConversion/notes.md) - reference [12], named here as a stronger candidate LTS method for future work with expert alignment. Bisani & Ney's statistical joint-sequence M-gram model (trained by discounted EM over graphone units) is a fully data-driven alternative to this paper's CART/epsilon-scattering approach to letter-to-sound rules; both address the same lexicon-compression/generalization tradeoff for unknown-word pronunciation.
 
 ### Cited By (in Collection)
 - (none found)

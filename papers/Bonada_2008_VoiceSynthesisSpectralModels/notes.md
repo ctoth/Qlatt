@@ -359,6 +359,7 @@ Where $A$ = phase excursion (~$\pi$), $W$ = formant bandwidth, $v$ = formant mov
 - [[Fant_1986_GlottalFlowModelsInteraction]]
 - [[Klatt_1980_CascadeParallelFormantSynthesizer]]
 - [[Sun_2006_VocalTractGlottalSource]]
+- [Improving the Readability of Time-Frequency and Time-Scale Representations by the Reassignment Method](../Auger_1995_ImprovingReadabilityTime-frequencyTime-scale/notes.md) - cited (ref [11], misspelled "Anger" in the reference list) as the reassignment method underlying the bandwidth-enhanced sinusoidal analysis this paper's spectral models build on (see also Fitz's 1999 PhD thesis, ref [43], which applies reassignment to bandwidth-enhanced sinusoidal modeling).
 - [[Yegnanarayana_1998_VocalTractExtraction]]
 
 ### New Leads (Not Yet in Collection)
@@ -366,5 +367,6 @@ Where $A$ = phase excursion (~$\pi$), $W$ = formant bandwidth, $v$ = formant mov
 - **Serra (1989)** - "A System for Sound Analysis-Transformation-Synthesis based on a Deterministic plus Stochastic Decomposition" - the SMS framework that Bonada extends for singing voice synthesis
 
 ### Conceptual Links (not citation-based)
+- [Spectral Modeling Synthesis: A Sound Analysis/Synthesis System Based on a Deterministic plus Stochastic Decomposition](../Serra_1990_SpectralModelingSynthesis/notes.md) - Strong. This dissertation, supervised by Xavier Serra, directly extends the deterministic-plus-stochastic SMS decomposition to singing voice synthesis: the EpR source-plus-resonance model and harmonic analysis framework both build on SMS's sinusoidal-plus-residual architecture, making this the direct lineage from SMS's general audio framework to a voice-specific spectral synthesizer.
 - [[Doval_2003_CALM_GlottalModel]] — Moderate. Bonada's EpR source curve (exponential decay with Gain, Slope, SlopeDepth parameters) provides a simplified spectral-domain representation of the voice source that parallels Doval's CALM model. CALM models the time-domain LF waveform; Bonada's EpR captures the same spectral tilt in frequency domain. Both separate source from tract for independent control.
 - [[Schwarz_Rodet_SpectralEnvelopeEstimation]] — Moderate. Both address spectral envelope estimation for voice synthesis; Schwarz uses discrete cepstrum while Bonada uses the EpR decomposition into source + resonances + residual. The approaches are complementary for different synthesis architectures.

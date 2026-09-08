@@ -1490,3 +1490,27 @@ historical:
   *(p.28)*
 - **Och, F. J., Ney, H. (2003)** — systematic comparison of statistical alignment models;
   the source of the "alignment handled intrinsically" claim. *(p.31)*
+
+## Collection Cross-References
+
+### Already in Collection
+- [Issues in Building General Letter to Sound Rules](../Black_1998_LTS_Rules/notes.md) - cited as Pagel, Lenzo, Black (1998), "Letter-to-sound rules for accented lexicon compression"; the decision-tree baseline with recomputed information gain and POS features referenced in the taxonomy of local-classification G2P methods
+
+### New Leads (Not Yet in Collection)
+- S. Deligne, F. Bimbot (1995, 1997) - the original multigram EM formulation and forward-backward inference of variable-length units, the direct ancestor of this paper's estimation algorithm
+- S.F. Chen (2003) - "Conditional and joint models for grapheme-to-phoneme conversion" - the closest competitor, nearly identical accuracy at higher computational cost
+- R. Kneser, H. Ney (1995) - "Improved backing-off for M-gram language modeling" - the smoothing method the discounted-evidence estimation adapts to fractional counts
+- L. Galescu, J.F. Allen (2001, 2002) - bidirectional joint n-gram grapheme/phoneme conversion, the comparison point for phoneme-to-grapheme results
+- T.J. Sejnowski, C.R. Rosenberg (1987) - "Parallel networks that learn to pronounce English text" (NETtalk) - the origin of data-driven G2P and source of the corpus used throughout this paper's experiments
+- M. Bisani, H. Ney (2004) - "Bootstrap estimates for confidence intervals in ASR performance evaluation" - the significance-testing method used for every reported confidence interval
+- F.J. Och, H. Ney (2003) - "A systematic comparison of various statistical alignment models" - source of the "alignment handled intrinsically" claim
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Cited By (in Collection)
+- [Robust LTS rules with the Combilex speech technology lexicon](../Richmond_Clark_Fitt_2009_RobustLTSCombilex/notes.md) - cites this paper (ref [12]) as a potentially superior LTS method for future exploration with expert alignment
+
+### Conceptual Links (not citation-based)
+- [NRL Letter-to-Sound Rules](../Elovitz_1976_NRL_LTS/notes.md) - direct methodological contrast: Elovitz's 329 hand-written context-sensitive rules (90% accuracy) versus this paper's fully data-driven joint-sequence M-gram model trained by discounted EM; the pair spans the full range from manual rule engineering to statistical estimation for the same G2P task.
+- [Universal Grapheme-to-Phoneme Prediction Over Latin Alphabets](../Kim_Snyder_2012_UniversalG2P/notes.md) - a later successor problem: where this paper fits one M-gram joint-sequence model per language from thousands of training pairs, Kim & Snyder predict G2P for languages with *no* training pairs at all by transferring phonotactic patterns learned across 107 other languages, trading this paper's per-language statistical precision for cross-lingual generalization.

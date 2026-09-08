@@ -303,3 +303,23 @@ For a formant / source-filter speech synthesizer that needs pitch tracking for a
 - **[26] Salamon, Gómez, Ellis & Richard, "Melody extraction from polyphonic music signals," IEEE SPM 2014** — defines RPA/RCA and the 50-cent convention.
 - **[27] Raffel et al., "mir_eval," ISMIR 2014** — the reference metric implementation used here.
 - **[30] Engel et al., "Neural audio synthesis of musical notes with WaveNet autoencoders" (NSynth), arXiv 2017** — proposed as a source of timbral diversity for augmentation.
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found - the specific papers cited here, e.g. Mauch & Dixon's pYIN, de Cheveigné & Kawahara's YIN, are not yet in the collection)
+
+### New Leads (Not Yet in Collection)
+- M. Mauch, S. Dixon (2014) - "pYIN: A fundamental frequency estimator using probabilistic threshold distributions" - the primary baseline, whose HMM-based temporal smoothing is exactly what CREPE omits
+- A. de Cheveigné, H. Kawahara (2002) - "YIN, a fundamental frequency estimator for speech and music" - the algorithm underneath pYIN, and the stated source of its brown-noise robustness
+- A. Camacho, J.G. Harris (2008) - "A sawtooth waveform inspired pitch estimator for speech and music" - SWIPE, the second baseline, explicitly designed for speech as well as music
+- D. Talkin (1995) - "A robust algorithm for pitch tracking (RAPT)" - the NCCF-based tracker still widely used in speech synthesis pipelines
+- P. Boersma (1993) - "Accurate short-term analysis of the fundamental frequency and the harmonics-to-noise ratio of a sampled sound" - the PRAAT autocorrelation method, the default pitch analysis in phonetics
+- R.M. Bittner, B. McFee, J. Salamon, P. Li, J.P. Bello (2017) - "Deep salience representations for f0 tracking in polyphonic music" - source of the Gaussian-blurred frequency-bin target CREPE reuses in Eq. 3
+- J. Salamon, R.M. Bittner, J. Bonada, J.J. Bosch Vicente, E. Gómez Gutiérrez, J.P. Bello (2017) - "An analysis/synthesis framework for automatic f0 annotation of multitrack datasets" - the method used to build the MDB-stem-synth evaluation set
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [WORLD: A Vocoder-Based High-Quality Speech Synthesis System for Real-Time Applications](../Morise_2016_WORLDVocoder-BasedHigh-QualitySpeech/notes.md) - both papers target fast, accurate F0/pitch estimation with opposite strategies: DIO's transform-free zero-crossing/reliability approach optimizes for real-time speed on CPU, while CREPE trades that speed for CNN-based robustness to noise and octave errors - a direct speed/accuracy tradeoff comparison for any F0 front end.

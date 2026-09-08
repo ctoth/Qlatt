@@ -129,6 +129,7 @@ This paper is the perceptual companion to Sluijter & van Heuven (1996), "Spectra
 ### Cited By (in Collection)
 - `Lienard_1999_VocalEffortVowelSpectral` — references Sluijter on spectral balance and vocal effort
 - `vanSon_1997_ConsonantReduction` — cites Sluijter on spectral balance as stress correlate
+- [Rhythm, Timing and the Timing of Rhythm](../Arvaniti_2009_RhythmTimingTimingRhythm/notes.md) — cites this for spectral tilt as the primary stress cue in Dutch, actionable for driving glottal source parameters from stress in a source-filter synthesizer
 
 ### New Leads
 - Fry 1955 — Duration and intensity as physical correlates of linguistic stress (classic study)

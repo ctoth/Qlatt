@@ -401,3 +401,24 @@ Qlatt is a formant/articulatory speech synthesis project whose glottal source mo
 - Guckenheimer, J., and Holmes, P. (1983). *Nonlinear Oscillations, Dynamical Systems, and Bifurcations of Vector Fields.* **The bifurcation-theory reference used throughout.**
 - Lucero, J. C. (1993). "The dynamics of the vocal fold oscillation," Ph.D. dissertation, Shizuoka University. **The author's fuller treatment.**
 - Ishizaka, K., Kaneko, T., and Matsumura, M. (1987). "Natural frequencies of the vocal folds and voice pitch," Rep. Tech. Comm. Speech Acoust. Soc. Jpn. SP86-119, 31-37. **The linearized Hopf analysis criticized here.**
+
+## Collection Cross-References
+
+### Already in Collection
+- [Ishizaka & Flanagan (1972) — Synthesis of Voiced Sounds From a Two-Mass Model of the Vocal Cords](../Ishizaka_1972_TwoMassModelVocalCords/notes.md) - the base two-mass model whose equations, notation, and Table I parameter values this paper adopts wholesale for its bifurcation analysis.
+
+### New Leads (Not Yet in Collection)
+- Titze (1988) - "The physics of small-amplitude oscillation of the vocal folds" - the main comparison target; source of the secondary equilibrium concept and the pressure-recovery assumption this paper extends to large amplitude.
+- Conrad & McQueen (1988) - "Two-mass model of the vocal folds: Negative differential resistance oscillation" - the theory this paper disproves.
+- Guckenheimer & Holmes (1983) - *Nonlinear Oscillations, Dynamical Systems, and Bifurcations of Vector Fields* - the bifurcation-theory apparatus (Hopf, saddle-node, transcritical) used throughout.
+- Ishizaka, Kaneko & Matsumura (1987) - "Natural frequencies of the vocal folds and voice pitch" - the linearized Hopf analysis this paper criticizes as overpredicting where phonation occurs.
+
+### Cited By (in Collection)
+- [Koenig — Laryngeal Factors](../Koenig_LaryngealFactors/notes.md) - cites this paper's bifurcation analysis in its reference list.
+- [Lucero (1999) — Bifurcations of Voice Onset/Offset](../Lucero_1999_BifurcationsVoiceOnsetOffset/notes.md) - the author's own follow-up, using numerical simulation of the same two-mass model to demonstrate onset/offset hysteresis building on this paper's oscillation-region limits.
+- [Steinecke (1995) — Bifurcations in a Simplified Two-Mass Vocal Fold Model](../Steinecke_1995_BifurcationsVocalFold/notes.md) - cites this paper's symmetric bifurcation-region analysis as the basis for its asymmetric extension.
+- [Steinecke & Herzel (1995) — Bifurcations in an Asymmetric Vocal-Fold Model](../Steinecke_Herzel_1995_BifurcationsAsymmetricVocalFold/notes.md) - cites this paper's equilibrium/bifurcation results for the symmetric case that its asymmetric analysis extends.
+
+### Conceptual Links (not citation-based)
+- [Lucero (2005) — Vocal Fold Bifurcations](../Lucero_2005_VocalFoldBifurcations/notes.md) - the same author's later analytical treatment, but of a different (simpler, one-mass mucosal-wave) model rather than an extension of this paper's two-mass analysis; both derive closed-form oscillation-onset conditions and compare against the linearized small-amplitude criterion, reaching the same broad warning that linearized onset criteria can mispredict where phonation actually starts.
+- [On the oscillations of musical instruments](../McIntyre_1983_OscillationsMusicalInstruments/notes.md) - direct engagement over the same theoretical device. McIntyre, Schumacher and Woodhouse identify the "negative resistance" of a nonlinear excitation element (the positive-sloping part of its flow characteristic, which lets pressure and flow be positively correlated so that positive work sustains oscillation) as the general mechanism of self-sustained oscillation in reed, bow, and jet instruments. This paper explicitly tests and disproves the analogous "negative-differential-resistance oscillation theory" for the two-mass vocal-fold model, showing its predicted weak-coupling region lies outside the true Hopf-bifurcation-bounded oscillation region - a genuine tension between the generic negative-resistance account of self-sustained oscillation and its inadequacy as a sufficient condition for vocal-fold oscillation specifically.

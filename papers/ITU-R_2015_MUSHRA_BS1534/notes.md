@@ -770,5 +770,19 @@ Caution: the scale asks for **basic audio quality relative to a reference**, whi
 
 ## Collection Cross-References
 
+### Already in Collection
+- [Methods for Subjective Determination of Transmission Quality (ITU-T Recommendation P.800)](../ITU-T_1996_MOS_P800/notes.md) - cited in the body text (with P.810, P.830) as the family of subjective speech-quality methods this Recommendation explicitly distinguishes MUSHRA from: P.800 is telephony-focused and lacks an absolute scale, a reference comparison, and small confidence intervals with a reasonable assessor count simultaneously.
+
+### New Leads (Not Yet in Collection)
+- (none - the reference lists are general statistics methodology texts outside the collection's speech-synthesis scope; see Key Citations for Follow-up above for the most relevant candidates if statistical-methodology papers are ever added)
+
+### Supersedes or Recontextualizes
+- (none - no genuine supersedes relationship with any collection paper)
+
 ### Conceptual Links (not citation-based)
 - [WORLD: A Vocoder-Based High-Quality Speech Synthesis System for Real-Time Applications](../Morise_2016_WORLDVocoder-BasedHigh-QualitySpeech/notes.md) - Morise's listening test is a direct application of this recommendation's MUSHRA methodology (hidden reference, anchor conditions, 0-100 scale); it is a concrete worked example of the GUI and trial structure (per-subject "Experiment N/20" runs, 95% CI reporting) this standard specifies.
+- [LPCNet: Improving Neural Speech Synthesis Through Linear Prediction](../Valin_2019_LPCNetImprovingNeuralSpeechSynthesis/notes.md) - LPCNet's listening test (ref [22]) is a direct application of this Recommendation's MUSHRA methodology, using a µ-law quantization-only condition as a de facto low anchor consistent with the mandatory-anchor requirement.
+- [The Blizzard Challenge – 2005: Evaluating corpus-based speech synthesis on common datasets](../Black_2005_BlizzardChallenge2005/notes.md) - Black and Tokuda explicitly rejected a MUSHRA-style AB/ABX/DMOS design in favor of plain MOS because it "would have presented us with too many samples to find listeners for"; a direct case study in the listener-pool-size-versus-scale-resolution tradeoff this Recommendation's design makes the other way.
+
+### Cited By (in Collection)
+- [LPCNet: Improving Neural Speech Synthesis Through Linear Prediction](../Valin_2019_LPCNetImprovingNeuralSpeechSynthesis/notes.md) - cites this Recommendation (ref [22]) as the listening-test methodology for its MUSHRA evaluation.

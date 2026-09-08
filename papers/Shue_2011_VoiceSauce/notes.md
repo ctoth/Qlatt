@@ -345,6 +345,33 @@ This is the de facto reference specification for the analysis side of a formant/
 - [ ] How is the "variable window equal to five pitch periods" handled in unvoiced or F0-undefined frames?
 - [ ] Exact numeric values behind Figure 2 are not tabulated; the effect-size table above is read off the chart and is approximate.
 
+## Collection Cross-References
+
+### Already in Collection
+- [Glottal Characteristics of Female Speakers: Acoustic Correlates](../Hanson_1997_GlottalCharacteristicsFemaleAcoustic/notes.md) - source of the H1*-H2*/H1*-A3* glottal-source correlates VoiceSauce implements.
+- [Hillenbrand, Cleveland, & Erickson (1994) — Implementation Notes](../Hillenbrand_1994_AcousticCorrelatesBreathyVoice/notes.md) - source of the CPP algorithm VoiceSauce implements (Hamming window, real cepstrum, peak search around the pitch quefrency, regression-line normalization).
+- [Age, Sex, and Vowel Dependencies of Acoustic Measures Related to the Voice Source](../Iseli_2007_VoiceSourceAgeSexVowel/notes.md) - source of the formant/bandwidth correction algorithm that turns H1, H2, A1-A3 into the corrected H1*, H2*, A1*-A3* measures; VoiceSauce implements this correction without printing the equations.
+
+### New Leads (Not Yet in Collection)
+- Esposito, C.M. 2010. "Variation in contrastive phonation in Santa Ana Del Valle Zapotec," JIPA 40, 181-198.
+- Gerratt, B.R., Kreiman, J. 2001. "Toward a taxonomy of nonmodal phonation," J. Phon. 29, 365-381. (Distinct from the "Measuring Vocal Quality with Speech Synthesis" Gerratt & Kreiman paper already in the collection.)
+- Harrington, J. 2010. *Phonetic Analysis of Speech Corpora*, Wiley-Blackwell.
+- Hawks, J.W., Miller, J.D. 1995. "A formant bandwidth estimation procedure for vowel synthesis," JASA 97, 1343-1344 - doubly relevant to a synthesizer project, which needs the same frequency-to-bandwidth mapping in the forward synthesis direction.
+- Kawahara, H., Masuda-Katsuse, I., de Cheveigne, A. 1999. "Restructuring speech representations using a pitch-adaptive time-frequency smoothing and an instantaneous-frequency based F0 extraction," Sp. Comm. 27, 187-207 (STRAIGHT).
+- de Krom, G. 1993. "A cepstrum-based technique for determining a harmonic-to-noise ratio in speech signals," JSHR 36, 254-266 - the cepstral liftering method behind VoiceSauce's three band-limited HNR measures.
+- Lee, C. 2009. "Identifying isolated, multispeaker Mandarin tones from brief acoustic input," JASA 125, 1125-1137.
+- Sun, X. 2002. "Pitch determination and voice quality analysis using subharmonic-to-harmonic ratio," Proc. ICASSP '02, 333-336 - relevant if the synthesizer models diplophonic or creaky phonation.
+- Vicenik, C. 2010. "An acoustic study of Georgian stop consonants," JIPA 40, 59-92.
+
+### Cited By (in Collection)
+- [Towards a More Nuanced View of Vocal Attractiveness](../Babel_2014_VocalAttractiveness/notes.md) - uses VoiceSauce for HNR (0-3.5 kHz) and spectral tilt (H1-H2, H1-A1, H1-A2, H1-A3) measurement.
+- [The Sound of Trustworthiness: Acoustic-based Modulation of Perceived Voice Personality](../Belin_2017_SoundOfTrustworthiness/notes.md) - cites VoiceSauce as the acoustic-parameter-extraction tool used.
+- [Keating, Garellek & Kreiman (2015) - Acoustic Properties of Different Kinds of Creaky Voice](../Keating_2015_CreakyVoiceAcoustics/notes.md) - uses VoiceSauce for voice quality analysis.
+- [Acoustic Similarity Among Female Voices](../Keating_2016_AcousticSimilarityFemaleVoices/notes.md) - uses VoiceSauce to extract 42 acoustic parameters every 5ms across ~588k data frames of vowel/approximant intervals.
+- [Validating a Psychoacoustic Model of Voice Quality](../Kreiman_2021_ValidatingVoiceQuality/notes.md) - validates the use of VoiceSauce for automatic acoustic parameter extraction.
+- [Are Attractive Female Voices Really Best Characterized by Feminine Fundamental and Formant Frequencies?](../Schild_2019_AttractiveVoiceFormantF0/notes.md) - uses VoiceSauce for spectral tilt, CPP, and energy measurement alongside Praat.
+- [Sweet Voice: The Role of Voice Quality in a Japanese Feminine Style](../Starr_2015_SweetVoiceJapaneseFeminine/notes.md) - uses VoiceSauce (CPP, HNR) alongside Praat (H1-H2, H1-A1, H1-A3) for acoustic analysis.
+
 ## Related Work Worth Reading
 - **Iseli, Shue, Alwan 2007 [8]** — "Age, sex, and vowel dependencies of acoustic measures related to the voice source," JASA 121, 2283-2295. The formant/bandwidth correction algorithm VS implements. Highest priority.
 - **Hanson 1997 [4]** — "Glottal characteristics of female speakers: Acoustic correlates," JASA 101, 466-481. Origin of H1*-H2* and H1*-A3*.

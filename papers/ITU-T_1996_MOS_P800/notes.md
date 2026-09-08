@@ -809,3 +809,20 @@ This is the reference protocol for any subjective evaluation of a speech synthes
 - **HOTH (D.F.), Room noise spectra at subscribers' telephone locations, JASA 12, 1941** — the source of Table A.1.
 - **COMBESCURE (P.) et al, ICASSP 82** — the origin of the DCR method.
 - **TUKEY (J.W.), The problem of multiple comparisons, 1953** — the HSD test prescribed for DCR analysis.
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found - this Recommendation's own references are entirely ITU/CCITT/ISO/IEC standards documents, none of which are research papers in this collection)
+
+### New Leads (Not Yet in Collection)
+- (none - the normative and bibliographic references are standards documents, not candidate papers for this collection)
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [The Blizzard Challenge – 2005: Evaluating corpus-based speech synthesis on common datasets](../Black_2005_BlizzardChallenge2005/notes.md) - Black and Tokuda's core naturalness metric is exactly the MOS (1-5) scale this recommendation defines and standardizes; useful for grounding what a bare "MOS" rating formally commits to (procedure, anchors, listening conditions) beyond what the Blizzard paper itself states.
+
+### Cited By (in Collection)
+- [Method for the subjective assessment of intermediate quality level of audio systems (Recommendation ITU-R BS.1534-3)](../ITU-R_2015_MUSHRA_BS1534/notes.md) - cites P.800 (with P.810, P.830) as the telephony-focused subjective method MUSHRA was designed to supersede for intermediate-quality assessment: P.800 lacks an absolute scale, a reference comparison, and small confidence intervals simultaneously with a reasonable assessor count.

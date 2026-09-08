@@ -529,3 +529,22 @@ Concretely:
 - **[11] Ohala, J. J., "The frequency code underlies the sound-symbolic use of
   voice pitch", in *Sound Symbolism*, 1994, p. 325-347** — the theoretical account
   of the power/F0 relation confirmed here.
+
+## Collection Cross-References
+
+### Already in Collection
+- [Acoustic Profiles in Vocal Emotion Expression](../Banse_1996_VocalEmotionAcousticProfiles/notes.md) - cited as ref [1]; this paper contradicts Banse & Scherer on the power/spectral-slope relation, so both are needed to adjudicate.
+- [Murray & Arnott 1993 - Implementation Notes](../Murray_1993_SimulationEmotionSyntheticSpeech/notes.md) - cited as ref [10], the canonical review of human vocal emotion correlates and the source of the per-emotion acoustic profiles this paper's rules are validated against.
+- [Hammarberg et al. 1980 - Perceptual and Acoustic Correlates of Abnormal Voice Qualities](../Hammarberg_1980_PerceptualAcousticCorrelatesVoice/notes.md) - cited as ref [9] for the three-spectral-band voice-quality measures this paper approximates, relevant to mapping emotion onto glottal source parameters.
+- [Emotional Speech Synthesis: A Review](../Schroder_2001_EmotionalSpeechSynthesisReview/notes.md) - companion paper by the same author (ref [14], "this volume"), published the same year at the same conference; that review surveys discrete-category rule sets with measured recognition rates, while this paper supplies the continuous activation/evaluation/power dimensional mapping the review only gestures at via FEELTRACE.
+
+### New Leads (Not Yet in Collection)
+- Cowie, R., Douglas-Cowie, E., Savvidou, S., McMahon, E., Sawey, M. & Schröder, M. (2000) - "FEELTRACE: An Instrument for Recording Perceived Emotion in Real Time" - the real-time dimensional annotation tool underlying this paper's activation/evaluation/power ratings.
+- Cowie, R., Sawey, M. & Douglas-Cowie, E. (1995) - "A new speech analysis system: ASSESS" - required to pin down the operational definitions of the nine acoustic variables in this paper's Tables 1 and 2.
+- Ohala, J.J. (1994) - "The frequency code underlies the sound-symbolic use of voice pitch" - theoretical grounding for the pitch/emotion-dimension mapping.
+
+### Cited By (in Collection)
+- [Emotional Speech Synthesis: A Review](../Schroder_2001_EmotionalSpeechSynthesisReview/notes.md) - the companion review already lists this paper in its own Conceptual Links (mutual cross-reference already in place).
+
+### Conceptual Links (not citation-based)
+- [Beyond Arousal: Valence and Potency/Control Cues in the Vocal Expression of Emotion](../Goudbeek_2010_ValencePotencyVocalEmotion/notes.md) - Strong. Goudbeek maps the same activation/evaluation(-power) dimensional space from the perception side, over a decade later; both find arousal/activation carried by prosodic parameters (pitch, tempo, intensity) while valence/evaluation needs additional spectral cues, converging from production (this paper) and perception (Goudbeek) on the same dimensional-emotion framework.

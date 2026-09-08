@@ -344,6 +344,7 @@ To apply: Take neutral baseline, add Z × SD for each parameter.
 - [[Weninger_2013_AcousticsEmotionAudio]] — references Banse's acoustic profiles in computational emotion recognition
 - [[Wiethoff_2008_CerebralEmotionalProsody]] — uses Banse's emotion categories and acoustic profiles as basis for neuroimaging study
 - [[ZeiPollermann_2002_AcousticPatternsEmotions]] — extends Banse's 14-emotion taxonomy with additional acoustic analysis
+- [Emotional Speech Synthesis: A Review](../Schroder_2001_EmotionalSpeechSynthesisReview/notes.md) - cites this paper (ref [25]) as the acoustic-profile reference for vocal emotion and as the source of the critique that forced-choice testing measures discrimination rather than identification.
 
 ### Conceptual Links (not citation-based)
 - [[Cumbers_2013_PerceptualCorrelatesVocalVariability]] — Validates that F0 SD (pitch sigma), which Banse uses as one of 29 emotion-discriminating parameters (SdF0, loading .42 on PC1), is the strongest acoustic correlate of perceived vocal variability (r = .927). This provides perceptual grounding: when Banse reports increased SdF0 for high-arousal emotions, Cumbers shows listeners reliably perceive that increased variability.

@@ -224,3 +224,4 @@ Formant estimation percent error |%| = (|F_hat - F|/F) * 100:
 ### Conceptual Links (not citation-based)
 - `Yegnanarayana_1998_VocalTractExtraction` — both address improved vocal tract estimation for voiced speech
 - `Ericsson_2020_FormantEstimationEvaluation` — both deal with formant estimation accuracy; DAP could improve results
+- [LPCNet: Improving Neural Speech Synthesis Through Linear Prediction](../Valin_2019_LPCNetImprovingNeuralSpeechSynthesis/notes.md) — LPCNet derives its LPC coefficients from a coarse 18-band Bark cepstrum via a PSD-then-autocorrelation-then-Levinson-Durbin chain, an accuracy penalty it argues the network compensates for but never measures; DAP's discrete Itakura-Saito criterion is a purpose-built alternative for fitting an all-pole filter directly to a sparse/discrete spectral representation, exactly LPCNet's situation.

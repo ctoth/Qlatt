@@ -510,6 +510,22 @@ For a formant/source-filter speech synthesizer, PAF is the principal **time-doma
 - [ ] Is the French patent still in force / relevant? (Filed as of 1995; almost certainly expired, worth confirming before shipping.)
 - [ ] How does the noise post-operator's delay-tap structure (z^-a, z^-b, z^-c in Fig. 6) get parameterized — the paper gives the topology but no delay values.
 
+## Collection Cross-References
+
+### Already in Collection
+- (none - all cited references (Chowning FM, LeBrun waveshaping, Templaars VOSIM, Rodet/Potard/Barriere CHANT-FOF, Moorer discrete summation formulae, Rabiner et al. FIR/IIR) are absent from this collection)
+
+### New Leads (Not Yet in Collection)
+- Rodet, X., Potard, Y., and Barriere, J.-B. 1984. "The CHANT project: from the synthesis of the singing voice to synthesis in general," Computer Music Journal 8/3, 15-31. Highest priority: the closest competitor and most directly voice-oriented technique (FOF); PAF is explicitly positioned against FOF's unbounded, parameter-dependent computational cost and unpredictable phase.
+- Moorer, J. A. 1976. "The synthesis of complex audio spectra by means of discrete summation formulae," JAES 24/8, 717-727. The mathematical ancestor of PAF's modulator, a closed-form summation of a geometric series of partials.
+- Templaars, S. 1977. "The VOSIM signal spectrum," Interface 6, 81-96. The other direct-specification formant technique this paper critiques as fixing amplitude/numerical problems but not phase-superposition.
+- LeBrun, M. 1979. "Digital waveshaping synthesis," JAES 27/4, 250-266. Source of the naive waveshaping formulation this paper shows to be numerically unusable, and the general framework Eq. 44's unexplored generalization lives in.
+- Rabiner, L. et al. 1974. "Some comparisons between FIR and IIR digital filters," Bell System Technical Journal 53, 305-331. The numerical-accuracy indictment of recursive filters underlying this paper's case against subtractive/filter-bank formant synthesis.
+
+### Conceptual Links (not citation-based)
+- [Digital-Formant Synthesizer for Speech-Synthesis Studies](../Rabiner_1968_DigitalFormantSynthesizer/notes.md) - this is exactly the recursive digital-resonator ("subtractive") formant synthesis architecture Puckette argues against on three grounds: filtering does not superpose partial phases predictably, output amplitude is hard to predict especially with time-varying coefficients, and recursive-filter numerical accuracy is poor. PAF's phase-aligned, closed-form pulse generator is offered as a drop-in alternative with pitch and formant fully decoupled and no IIR coefficient-interpolation pathology.
+- [Software for a Cascade/Parallel Formant Synthesizer](../Klatt_1980_CascadeParallelFormantSynthesizer/notes.md) - Klatt's synthesizer is the canonical cascade/parallel recursive-resonator design in this collection's own subject area; Puckette's numerical-accuracy and phase-superposition critique of "subtractive synthesis" applies directly to this architecture, and PAF represents the closed-form, phase-coherent alternative for the same formant-shaping goal.
+
 ## Related Work Worth Reading
 - Chowning, J. (1973), "The synthesis of complex audio spectra by means of frequency modulation," JAES 21/7, 526-534 — the FM baseline PAF is argued against.
 - LeBrun, M. (1979), "Digital waveshaping synthesis," JAES 27/4, 250-266 — source of the naive $p_1 s_1(x_1\cos)$ form and of waveshaping generally.

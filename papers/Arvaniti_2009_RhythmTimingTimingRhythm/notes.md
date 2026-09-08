@@ -358,3 +358,23 @@ To understand rhythm it is necessary to **decouple the quantification of timing 
 ## Provenance
 Read from `pngs/page-000.png` through `pngs/page-017.png` (18 rendered pages covering journal pages 46-63) via the paper-reader page-image lane. Steps 7 (reconcile), 8 (index.md) and 8.5 (ledger) intentionally deferred to the coordinating agent; `build_keymap.py` not run.
 
+
+## Collection Cross-References
+
+### Already in Collection
+- [Stress, Prominence, and Spectral Tilt](../Campbell_1997_StressProminenceSpectralTilt/notes.md) - cited directly.
+- [Linguistic Uses of Segmental Duration in English: Acoustic and Perceptual Evidence](../Klatt_1976_SegmentalDuration/notes.md) - cited as the review of the factors determining English segment duration; the canonical duration-rule source implying duration must be modeled as an explicit inventory rather than a single variability parameter.
+- [Correlates of linguistic rhythm in the speech signal](../Ramus_1999_CorrelatesLinguisticRhythmSpeech/notes.md) - cited as the origin of %V and deltaC and of the controlled corpus reproduced in figure 1.
+- [Sluijter, van Heuven & Pacilly (1997) - Implementation Notes](../Sluijter_1996_SpectralBalanceStressCue/notes.md) - cited for spectral tilt as the primary stress cue in Dutch, actionable for driving glottal source parameters from stress.
+- [Durational Variability in Speech and the Rhythm Class Hypothesis](../Grabe_Low_2002_DurationalVariabilityRhythmClass/notes.md) - cited as the origin of nPVI/rPVI and the 18-language dataset behind figure 2 and the recomputed rhythm-class correlations.
+
+### New Leads (Not Yet in Collection)
+- Dauer, R.M. (1983) - "Stress-timing and syllable-timing reanalyzed," J. Phonet. 11 - source of the interstress-interval means, speaking rates, and stressed/unstressed duration ratios this paper's positive proposal rests on.
+- Dilley, L.C. & McAuley, J.D. (2008) - "Distal prosodic context affects word segmentation and lexical processing," J. Mem. Lang. 59 - relevant to how a synthesizer's phrase-initial rhythm propagates into downstream parsing.
+
+### Cited By (in Collection)
+- (bibliography-only mention in [Communicative Function and Prosodic Form in Speech Timing](../White_2014_ProsodicTimingFunction/notes.md) - see Conceptual Links for the substantive relationship)
+
+### Conceptual Links (not citation-based)
+- [Rhythm in Read British English: Interdialect Variability](../Ferragne_Pellegrino_2004_RhythmReadBritishEnglish/notes.md) - Ferragne & Pellegrino's within-language finding (vocalic, not intervocalic, duration variability carries dialect-distinguishing rhythmic signal) is exactly the kind of fine-grained empirical result Arvaniti's critique of discrete rhythm-class metrics calls for. (Strong)
+- [Communicative Function and Prosodic Form in Speech Timing](../White_2014_ProsodicTimingFunction/notes.md) - White reinterprets segmental timing phenomena (including polysyllabic shortening) as serving communicative/prosodic function rather than following from a rhythm class; this is a segment-level instance of the functional, non-isochrony account of rhythm Arvaniti argues the field needs. (Strong)

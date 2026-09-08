@@ -272,6 +272,7 @@ This thesis is directly applicable to the Qlatt Klatt formant synthesizer:
 - [[Gobl_2003_VoiceQualityEmotion]] — cites this for the finding that prosody alone is insufficient for sadness, motivating their voice quality study
 - [[Goudbeek_2010_ValencePotencyVocalEmotion]] — cites Mozziconacci (2002) for prosodic contour analysis methodology
 - [[Larrouy-Maestri_2024_EmotionalProsody]] — cites this via Mozziconacci & Hermes (1999) for intonation pattern categorization of emotions
+- [Emotional Speech Synthesis: A Review](../Schroder_2001_EmotionalSpeechSynthesisReview/notes.md) - cites this thesis (ref [10]) as the source of the Table 1 boredom rule set (94% recognition, the highest in the table) and the Dutch intonation-pattern grammar.
 
 ### Conceptual Links (not citation-based)
 - [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Burkhardt provides Klatt parameter formulas for voice quality types (breathy, tense, harsh) that could implement the voice quality cues Mozziconacci identifies as essential for sadness and fear but does not parameterize. Together they cover the full prosody + voice quality space for emotional synthesis. (Strong)

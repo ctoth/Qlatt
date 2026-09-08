@@ -276,6 +276,7 @@ Key quantitative findings:
 - [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] — references Klatt's duration rules
 - [[Mozziconacci_1998_SpeechEmotionProsody]] — references duration model in emotion/prosody context
 - [[Miller_1998_PronunciationModelingSpeechSynthesis]] — references Klatt's duration model
+- [Rhythm, Timing and the Timing of Rhythm](../Arvaniti_2009_RhythmTimingTimingRhythm/notes.md) — cites this as the canonical review of the acoustic and perceptual factors determining English segment duration, implying duration must be modeled as this explicit rule inventory rather than a single variability parameter
 
 ### Now in Collection
 - **Peterson & Lehiste (1960)** — [[Peterson_1960_DurationSyllableNuclei]] — Duration of Syllabic Nuclei in English: Foundational vowel inherent duration measurements that underpin the 1976 model.

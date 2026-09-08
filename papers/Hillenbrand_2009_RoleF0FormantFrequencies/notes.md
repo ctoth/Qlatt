@@ -327,3 +327,22 @@ Secondarily, the within-vowel z-score formant normalization is a clean, cheap sp
 - **Assmann, Nearey & Dembling (2006)**, ICSLP, 889-892 — the "residual indicators of voice gender" finding this paper builds on.
 - **Traunmüller (1984, 1988)** and **Fant (1975)** — non-uniform vowel normalization and sex-conditioned formant variability; the correct treatment of the scaling non-uniformity flagged as a limitation.
 - **Titze (1989)**, JASA 85, 1699-1707 — physiologic and acoustic differences between male and female voices.
+
+## Collection Cross-References
+
+### Already in Collection
+- [Control Methods Used in a Study of the Vowels](../Peterson_Barney_1952_VowelControl/notes.md) - source of the 1.7041 f0 and 1.168 formant male-to-female scale factors used throughout the resynthesis.
+- [Acoustic Characteristics of American English Vowels](../Hillenbrand_1995_VowelAcoustics/notes.md) - the H95 database (1,116 /hVd/ tokens) underlying the discriminant analysis and Experiment 2 stimuli.
+- [Klatt & Klatt 1990 - Voice Quality Variations Analysis](../Klatt_1990_VoiceQualityVariations/notes.md) - canonical source for the residual (non-f0, non-formant) voice-quality cues - aspiration, F1 bandwidth, harmonic tilt - this paper's scaling experiments cannot explain.
+- [The interaction of glottal-pulse rate and vocal-tract length in judgements of speaker size, sex, and age](../Smith_2005_InteractionGlottal-pulseRateVocal-tract/notes.md) - directly compared prior synthesis study using STRAIGHT resynthesis and a single-talker basis; Hillenbrand & Clark's 25+25-talker design was built to control for the talker-variability limitation of this and similar studies.
+
+### New Leads (Not Yet in Collection)
+- Kawahara, Masuda-Kasuse & de Cheveigné (1999) - "Restructuring speech representations using pitch-adaptive time-frequency smoothing..." (STRAIGHT) - the competing analysis-resynthesis system used by the Smith/Patterson and Assmann studies this paper compares itself against.
+- Traunmuller (1984, 1988) - non-uniform, vowel-specific male-female formant scaling; the correct treatment of the uniform-scaling simplification this paper flags as its main methodological limitation.
+- Fant (1975) - "Non-uniform vowel normalization" - same limitation as Traunmuller above.
+
+### Cited By (in Collection)
+- (bibliography-only mentions in [Investigating the Use of Formant Frequencies in Listener Judgments of Speaker Size](../Barreda_2015_FormantSpeakerSize/notes.md), [Voice Analytics in the Wild: Validity and Predictive Accuracy of Common Audio-Recording Devices](../Busquet_2023_VoiceAnalyticsRecordingDevices/notes.md), and [The Motor Theory of Speech Perception Revised](../Liberman_Mattingly_1985_MotorTheory/notes.md) - none discuss this paper's specific findings in their notes)
+
+### Conceptual Links (not citation-based)
+- [Investigating the Use of Formant Frequencies in Listener Judgments of Speaker Size](../Barreda_2015_FormantSpeakerSize/notes.md) - Barreda tests whether listeners use formant frequencies (uniform vs. non-uniform scaling) for speaker-size judgments; Hillenbrand & Clark test the same uniform-scaling assumption for speaker-sex judgments using an equivalent resynthesis paradigm - the two papers jointly bound how far frequency-only scaling can carry perceived speaker attributes. (Strong)

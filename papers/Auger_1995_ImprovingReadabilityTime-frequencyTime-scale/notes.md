@@ -681,3 +681,21 @@ This is the canonical reference for **reassigned spectrograms**, and it is direc
 - **[13] H. I. Choi, W. J. Williams**, "Improved time-frequency representation of multicomponent signals using exponential kernels," *IEEE Trans. ASSP*, vol. 37, pp. 862-871, 1989. Kernel in Table I lines c/d.
 - **[26] R. G. Baraniuk, D. L. Jones**, "A radially Gaussian, signal dependent time-frequency representation," *Proc. ICASSP*, 1991, pp. 3181-3184. Signal-matched kernel design, which the authors say reassignment should follow rather than replace.
 - **[36] D. H. Friedman**, "Instantaneous frequency vs. time: An interpretation of the phase structure of speech," *Proc. ICASSP*, 1985, pp. 29.10.1-4. The one explicitly speech-oriented citation in the reference list.
+
+## Collection Cross-References
+
+### Already in Collection
+- (none - the reference list is pure signal-processing theory: Kodera/Gendrin/de Villedary, Rihaczek, Cohen, Rioul/Flandrin, Choi-Williams, Baraniuk/Jones, and Friedman are not represented in the collection)
+
+### New Leads (Not Yet in Collection)
+- (none pursued - see Key Citations for Follow-up above; these are general time-frequency theory references outside the collection's speech-synthesis scope, with the partial exception of Friedman (1985) on phase structure of speech)
+
+### Supersedes or Recontextualizes
+- (none - no genuine supersedes relationship with any collection paper)
+
+### Conceptual Links (not citation-based)
+- [Fine-grained statistical structure of speech](../Deloche_2020_StatisticalStructureSpeech/notes.md) - both papers are about the fundamental time/frequency resolution tradeoff (Gabor-Heisenberg) applied to speech: Deloche finds the *optimal fixed* time-frequency tradeoff per phoneme class (vowels/nasals time-localized, fricatives frequency-localized) via a Gabor dictionary's β exponent, while Auger and Flandrin's reassignment sidesteps that same tradeoff *after the fact* by concentrating a smoothed representation onto the signal's true instantaneous frequency law - a fixed-resolution optimum versus a post-hoc sharpening of any resolution choice.
+- [Spectral Modeling Synthesis: A Sound Analysis/Synthesis System Based on a Deterministic plus Stochastic Decomposition](../Serra_1990_SpectralModelingSynthesis/notes.md) - SMS's deterministic component tracks quasi-sinusoidal partials by parabolic peak interpolation of STFT frames to estimate each partial's instantaneous frequency; reassignment's ratio-of-STFTs operators (eqs. 26a/26b) solve exactly this estimation problem with **perfect** localization for locally linear chirps, and could replace or refine SMS's peak-picking/interpolation stage for partial tracking.
+
+### Cited By (in Collection)
+- [Voice Processing and Synthesis by Performance Sampling and Spectral Models](../Bonada_2008_VoiceSynthesisSpectralModels/notes.md) - cites this paper (ref [11], misspelled "Anger" in the reference list) as the reassignment method underlying the bandwidth-enhanced sinusoidal spectral models the synthesis system builds on.

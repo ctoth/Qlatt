@@ -523,6 +523,31 @@ This is a directly implementable specification for adding source–filter intera
 
 ## Collection Cross-References
 
+### Already in Collection
+- [Acoustic Theory of Speech Production](../Fant_1960_AcousticTheorySpeechProduction/notes.md) - foundational source-filter theory this paper's nonlinear coupling analysis extends.
+- [Glottal Flow: Models and Interaction](../Fant_1986_GlottalFlowModelsInteraction/notes.md) - earlier treatment of glottal flow / vocal-tract interaction this paper builds on.
+- [Story, Titze, Hoffman 1996 — Vocal Tract Area Functions from MRI](../Story_1996_VocalTractAreaFunctionsMRI/notes.md) - source of the MRI-derived area functions this paper flags as required for accurate epilarynx geometry, and therefore correct coupling strength.
+- [Klatt & Klatt 1990 - Voice Quality Variations Analysis](../Klatt_1990_VoiceQualityVariations/notes.md) - cited for analysis/synthesis/perception of voice quality variations among female and male talkers.
+- [Synthesis of Voiced Sounds From a Two-Mass Model of the Vocal Cords](../Ishizaka_1972_TwoMassModelVocalCords/notes.md) - the two-mass vocal fold model this paper cites; already notes (from the Ishizaka side) that the model retains vocal-tract interaction via its second mode, unlike Flanagan & Landgraf's one-mass model.
+- [Rosenberg 1971 - Effect of Glottal Pulse Shape on the Quality of Natural Vowels](../Rosenberg_1971_EffectGlottalPulseShape/notes.md) - cited for the effect of glottal pulse shape on synthesized vowel quality.
+
+### New Leads (Not Yet in Collection)
+- Titze, I. R., Riede, T., and Popolo, P. (2008). "Nonlinear source-filter coupling in phonation: Vocal exercises," JASA 123, 1902-1915. Highest priority: the companion human-subject paper supplying the empirical F0-jump magnitudes and the male/female instability asymmetry.
+- Titze, I. R. (1988). "The physics of small-amplitude oscillation of the vocal folds," JASA 83, 1536-1552. Supplies Eq. (9), the mean intraglottal driving pressure in terms of a2/a1, required to implement level-2 interaction.
+- Fletcher, N. H. (1993). "Autonomous vibration of simple pressure-controlled valves in gas flows," JASA 93, 2172-2180. Eqs. (19)-(20) are solved directly in this paper to predict oscillation frequency shifts and threshold pressures under reactive load.
+- Titze, I. R. (2006). *The Myoelastic-Aerodynamic Theory of Phonation.* Holds the fiber-gel tissue model, modified Bernoulli with flow separation and jet formulation, wave-reflection analog, and tissue-mode nomenclature this paper depends on throughout.
+- Rothenberg, M. (1981). "Acoustic interaction between the glottal source and the vocal tract," in *Vocal Fold Physiology*, ed. Stevens and Hinano, pp. 305-328. (Distinct from "An Interactive Model for the Voice Source," Bless & Abbs eds., already in the collection as Rothenberg 1981.)
+- Story, B. H. (1995). "Speech simulation with an enhanced wave-reflection model of the vocal tract," Ph.D. dissertation, University of Iowa. (Distinct from Story & Titze's 1995 body-cover-model paper already in the collection.)
+- Kelly, J. L., and Lochbaum, C. (1962). "Speech synthesis," Proc. 4th Intl. Congress on Acoustics, Paper G42.
+- Sondhi, M. M., and Schroeter, J. (1987). "A hybrid time-frequency domain articulatory speech synthesizer," IEEE Trans. Acoust., Speech, Signal Process. 35, 955-967.
+
+### Cited By (in Collection)
+- [Synthesis of Speech Sounds from a Multi-Mass Model of the Lungs, Vocal Tract, and Glottis](../Boersma_1991_MultiMassSpeechSynthesis/notes.md) - conceptual link (see below): both papers reject independent source/filter treatment.
+- [Synthesis of Voiced Sounds From a Two-Mass Model of the Vocal Cords](../Ishizaka_1972_TwoMassModelVocalCords/notes.md) - cites this paper's account of vocal-tract interaction via the two-mass model's second mode.
+- [Mechanics of Human Voice Production and Control](../Zhang_2016_MechanicsVoiceProductionControl/notes.md) - lists this paper in its reference list (bibliography only; no substantive discussion in its extracted notes).
+- [Cause-Effect Relationship Between Vocal Fold Physiology and Voice Production in a Three-Dimensional Phonation Model](../Zhang_2016_VocalFoldPhysiologyVoiceProduction/notes.md) - lists this paper in its reference list (bibliography only; no substantive discussion in its extracted notes).
+
 ### Conceptual Links (not citation-based)
 - [Boersma (1991) — Synthesis of Speech Sounds from a Multi-Mass Model of the Lungs, Vocal Tract, and Glottis](../Boersma_1991_MultiMassSpeechSynthesis/notes.md) - both papers reject the assumption that source and filter can be treated as independent stages: this paper derives the acoustic-loading conditions under which vocal-tract impedance perturbs fold vibration, while Boersma's whole-apparatus wall-vibration model produces the same source-filter interaction (and aerodynamic devoicing, aspiration) as an emergent consequence of solving lungs-to-lips physics together rather than as an imposed correction term.
+- [On the oscillations of musical instruments](../McIntyre_1983_OscillationsMusicalInstruments/notes.md) - both papers give a closed-form treatment of the same structural fact: an active nonlinear source cannot be decoupled from the passive resonator it drives once the resonator's reflected wave reaches back to the source. McIntyre, Schumacher and Woodhouse express that feedback through a general reflection function convolved with the outgoing wave; this paper expresses it through a single coupling parameter (glottal area over the parallel subglottal/supraglottal entry areas, reducing to epilarynx area) that gives the same source-filter-interaction phenomenon in a formant-synthesizer-friendly closed form.
 

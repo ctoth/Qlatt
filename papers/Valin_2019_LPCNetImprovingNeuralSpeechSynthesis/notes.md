@@ -392,7 +392,31 @@ This is the cleanest modern statement of the **source-filter contract** that a f
 - **[12] Juvela et al., "Speaker-independent raw waveform model for glottal excitation," Interspeech 2018.** The open-loop glottal-excitation approach LPCNet argues against; directly relevant to source modeling.
 - **[8] Atal and Hanauer, "Speech analysis and synthesis by linear prediction of the speech wave," JASA 50(2B):637-655, 1971.** Origin of LPC speech synthesis.
 - **[6] Jin et al., "FFTNet: A real-time speaker-dependent neural vocoder," ICASSP 2018.** Source of the temperature-sampling and noise-injection ideas LPCNet refines, and of the post-denoising suggestion.
-- **[22] ITU-R BS.1534-1 (MUSHRA).** The listening-test methodology.
+- **[22] ITU-R BS.1534-1 (MUSHRA).** The listening-test methodology. → NOW IN COLLECTION: [Method for the subjective assessment of intermediate quality level of audio systems (Recommendation ITU-R BS.1534-3)](../ITU-R_2015_MUSHRA_BS1534/notes.md)
+
+## Collection Cross-References
+
+### Already in Collection
+- (none - the specific papers cited here, e.g. Makhoul 1975, Atal & Hanauer 1971, are not yet in the collection; see Conceptual Links for a close relative)
+
+### New Leads (Not Yet in Collection)
+- J. Makhoul (1975) - "Linear prediction: A tutorial review" - the authority LPCNet cites for the claim that the vocal tract response is well modeled by a simple all-pole filter; foundational for the filter side of any source-filter synthesizer
+- N. Kalchbrenner et al. (2018) - "Efficient neural audio synthesis" (WaveRNN) - the direct baseline LPCNet modifies; source of the block-sparse GRU technique and coarse/fine 16-bit output split
+- B.S. Atal, J. Remde (1982) - "A new model of LPC excitation for producing natural-sounding speech at low bit rates" - origin of the analysis-by-synthesis idea LPCNet's noise-injection training scheme deliberately reproduces
+- M. Schroeder, B.S. Atal (1985) - "Code-excited linear prediction (CELP)" - the analysis-by-synthesis lineage LPCNet's in-loop noise injection imitates
+- L. Juvela et al. (2018) - "Speaker-independent raw waveform model for glottal excitation" - the open-loop glottal-excitation approach LPCNet explicitly argues against
+- B.S. Atal, S.L. Hanauer (1971) - "Speech analysis and synthesis by linear prediction of the speech wave" - origin of LPC speech synthesis
+- D. Griffin, J. Lim (1985) - "A new model-based speech analysis/synthesis system" - cited among the classical parametric vocoders whose excitation modeling LPCNet argues is severely limited
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Now in Collection (previously listed as leads)
+- [Method for the subjective assessment of intermediate quality level of audio systems (Recommendation ITU-R BS.1534-3)](../ITU-R_2015_MUSHRA_BS1534/notes.md) - The normative MUSHRA specification LPCNet's listening test implements (ref [22]): hidden reference, mandatory anchors, 0-100 scale. LPCNet's µ-law quantization-only condition functions as a de facto low anchor, consistent with the Recommendation's anchor requirement.
+
+### Conceptual Links (not citation-based)
+- [WORLD: A Vocoder-Based High-Quality Speech Synthesis System for Real-Time Applications](../Morise_2016_WORLDVocoder-BasedHigh-QualitySpeech/notes.md) - both are real-time-oriented vocoders explicit about RTF/complexity as a design constraint; LPCNet substitutes a neural excitation model for WORLD's minimum-phase-impulse-plus-extracted-excitation synthesis, making them opposite answers (learned vs. classical DSP) to the same "high quality, real-time synthesis" problem.
+- [Implementation Notes: El-Jaroudi & Makhoul 1991 — Discrete All-Pole Modeling](../ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling/notes.md) - LPCNet derives its LPC coefficients from a coarse 18-band Bark cepstrum via PSD-then-autocorrelation-then-Levinson-Durbin, accepting a resolution penalty it argues the network compensates for; DAP's discrete Itakura-Saito criterion is a purpose-built alternative for fitting an all-pole filter directly to a sparse/discrete spectral representation, which is exactly LPCNet's situation and a candidate fix for the very inaccuracy it flags as an open question.
 
 ---
 *Provenance: read from `pngs/page-000.png` … `page-004.png` (5 pages, arXiv:1810.11846v2). All 5 pages read directly.*

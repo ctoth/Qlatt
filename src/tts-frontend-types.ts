@@ -21,10 +21,12 @@ export type TranscriptionConfig = {
 };
 
 export type TranscriptionOptions = {
+  diagnostics?: import("./diagnostics").Diagnostics | null;
   provenance?: ProvenanceCollector | null;
   transcriptionConfig?: TranscriptionConfig;
   ltsPath?: string;
   morphologyPath?: string;
+  stressPolicyPath?: string;
   dictLookup?: (word: string) => string[] | null;
   dictionaryMap?: Record<string, string | undefined>;
   utterance?: Utterance;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assignStress } from "../src/g2p/stress";
+import { assignStress, stressPronunciation } from "../src/g2p/stress";
 import { isVowel, syllabify } from "../src/g2p/syllabify";
 
 // ── Block 1: Vowel/Consonant Classification ────────────────────────────
@@ -192,13 +192,13 @@ describe("stress assignment with hints", () => {
     ).toEqual(["AO0", "R", "G", "AE1", "N", "IH0", "K"]);
   });
 
-  it('"employee" with final-forcing hint -> EH0 M P L OY0 IY1', () => {
+  it('"employee" with final-forcing hint retains an earlier secondary foot', () => {
     expect(
       assignStress(["EH", "M", "P", "L", "OY", "IY"], {
         stressType: "forcing",
         stressTarget: "final",
       }),
-    ).toEqual(["EH0", "M", "P", "L", "OY0", "IY1"]);
+    ).toEqual(["EH2", "M", "P", "L", "OY0", "IY1"]);
   });
 
   it("antepenult-forcing hint works like default for 3-syllable word", () => {
@@ -214,42 +214,38 @@ describe("stress assignment with hints", () => {
 // ── Block 5: Additional Words ───────────────────────────────────────────
 
 describe("stress assignment — additional words", () => {
-  it('"computer" (3 syl, default antepenult) -> K AH1 M P Y UW0 T ER0', () => {
-    // Default antepenult stress: 1st syllable
+  it('"computer" uses its heavy penult (Hayes 1982, pp. 238–240)', () => {
+    // Surface AH cannot distinguish schwa from STRUT. The default quantity
+    // assumption retains this closed initial foot; evaluation reports the over-stress.
     expect(assignStress(["K", "AH", "M", "P", "Y", "UW", "T", "ER"])).toEqual([
       "K",
-      "AH1",
+      "AH2",
       "M",
       "P",
       "Y",
-      "UW0",
+      "UW1",
       "T",
       "ER0",
     ]);
   });
 
-  it('"understand" (3 syl, default antepenult) -> AH1 N D ER0 S T AE0 N D', () => {
-    expect(assignStress(["AH", "N", "D", "ER", "S", "T", "AE", "N", "D"])).toEqual([
-      "AH1",
-      "N",
-      "D",
-      "ER0",
-      "S",
-      "T",
-      "AE0",
-      "N",
-      "D",
-    ]);
+  it('"understand" with known verb category stresses its heavy final (Hayes 1982, p. 238)', () => {
+    expect(
+      stressPronunciation(["AH", "N", "D", "ER", "S", "T", "AE", "N", "D"], {
+        policyPath: "/rules/frontends/qlatt-english/stress-policy.yaml",
+        category: "verb",
+      }).phonemes,
+    ).toEqual(["AH2", "N", "D", "ER0", "S", "T", "AE1", "N", "D"]);
   });
 
-  it('"telephone" (3 syl, default antepenult) -> T EH1 L AH0 F OW0 N', () => {
+  it('"telephone" retains final secondary from LVS (Hayes 1982, pp. 239–240)', () => {
     expect(assignStress(["T", "EH", "L", "AH", "F", "OW", "N"])).toEqual([
       "T",
       "EH1",
       "L",
       "AH0",
       "F",
-      "OW0",
+      "OW2",
       "N",
     ]);
   });

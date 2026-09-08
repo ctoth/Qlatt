@@ -40,11 +40,12 @@ describe("materializePhonemeTarget – stress-aware lookup", () => {
     expect(result.duration).toBe(ah0.dur);
   });
 
-  it("falls back to stress-0 when stress is 2 (secondary)", () => {
+  it("uses the inventory's declared secondary-stress realization policy", () => {
     const result = materializePhonemeTarget("AH", { stress: 2, inventorySpec: INVENTORY });
-    const ah0 = PHONEME_TARGETS["AH0"] as Record<string, unknown>;
-    expect(result.phoneme).toBe("AH0");
-    expect(result.params.F1).toBe(ah0.F1);
+    const target = `AH${INVENTORY.secondary_stress_fallback?.target}`;
+    expect(INVENTORY.secondary_stress_fallback?.citations.length).toBeGreaterThan(0);
+    expect(result.phoneme).toBe(target);
+    expect(result.params.F1).toBe(PHONEME_TARGETS[target].F1);
   });
 
   it("returns stop_closure params for P_CL", () => {

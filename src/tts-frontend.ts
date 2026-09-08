@@ -425,7 +425,17 @@ function createStructure(
         transaction.addDaughter("SylStructure", word, syllable);
         syllables.set(syllableIndex, syllable);
       }
-      if (group[index].token.stress === 1) transaction.set(syllable, "stress", 1);
+      const lexicalStress = group[index].token.stress;
+      const previousStress = syllable.get("stress");
+      // Preserve 0/1/2 at the existing HRG boundary; primary outranks secondary,
+      // and consonants (null) cannot erase a nucleus's lexical prominence.
+      if (
+        lexicalStress === 1 ||
+        (previousStress !== 1 && lexicalStress === 2) ||
+        (previousStress == null && lexicalStress === 0)
+      ) {
+        transaction.set(syllable, "stress", lexicalStress);
+      }
       transaction.addDaughter("SylStructure", syllable, group[index].segment);
       transaction.associate(
         "source_token",
@@ -543,6 +553,8 @@ function buildTextToKlattTrackDetailed(
     transcriptionConfig,
     ltsPath: resources.ltsPath,
     morphologyPath: resources.morphologyPath,
+    stressPolicyPath: resources.stressPolicyPath,
+    diagnostics: options.diagnostics,
     dictionaryMap: dictionary,
     dictLookup: dictionary == null && spec.skip_dictionary ? () => null : undefined,
   });
@@ -570,6 +582,28 @@ function buildTextToKlattTrackDetailed(
       inventorySpec: resources.inventory,
     });
     const item = construct.createItem("segment", `segment_${index.toString()}`);
+    if (
+      token.stress === 2 &&
+      !resources.inventory.phoneme_targets[token.phoneme + "2"] &&
+      resources.inventory.secondary_stress_fallback
+    ) {
+      const fallback = resources.inventory.secondary_stress_fallback;
+      const reason = `Lexical secondary stress uses ${materialized.phoneme}; lexical prominence remains secondary`;
+      const decision = provenance.add({
+        stage: "transcribe",
+        type: "stress_inventory_projection",
+        subject: item.id,
+        reason,
+        citations: fallback.citations,
+        parents: [inventoryDecision.id, ...(token._pronDecisionId ? [token._pronDecisionId] : [])],
+      });
+      construct.dependOn(decision.id);
+      options.diagnostics?.info(
+        reason,
+        { segment: item.id, target: materialized.phoneme },
+        "STRESS_INVENTORY_FALLBACK",
+      );
+    }
     construct.set(item, "phoneme", token.phoneme);
     construct.set(item, "stress", token.stress);
     construct.set(item, "word", token.word);

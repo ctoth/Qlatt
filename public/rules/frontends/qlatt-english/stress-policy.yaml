@@ -1,0 +1,68 @@
+id: english-hayes-1982
+model: hayes-1982
+phonotactics_path: /rules/frontends/qlatt-english/phonotactics.yaml
+# ARPAbet does not encode all underlying distinctions required by Hayes (1982), p. 237.
+# This mapping is an engineering estimate; supplied underlying syllables take precedence.
+long_vowels: [AA, AO, ER, EY, IY, OW, UW, AY, AW, OY]
+# Engineering estimate for ambiguous surface happy/letter vowels, not a Hayes length law.
+short_final_vowels: [IY, ER]
+sonorants: [M, N, NG, L, R]
+default_category: noun
+assumption_citation: "Qlatt #37 engineering estimate: noun category and ARPAbet length mapping when lexical inputs are unavailable"
+functions:
+  heavy:
+    params: [long_vowel, coda_count]
+    body: long_vowel || coda_count > 0
+    citations: ["Hayes (1982), pp. 237–238"]
+cycle:
+  - id: final_consonant_extrametricality
+    operation: consonant_extrametricality
+    when: codaCount > 0
+    tag: stress_extrametricality
+    citations: ["Hayes (1982), p. 238, rule (24)"]
+  - id: final_long_vowel_stressing
+    operation: long_vowel_stressing
+    when: longVowel
+    tag: stress_weight
+    citations: ["Hayes (1982), p. 239, rule (30)"]
+  - id: final_rhyme_extrametricality
+    operation: rhyme_extrametricality
+    when: count > 1 && (category == 'noun' || adjectivalSuffix)
+    tag: stress_extrametricality
+    citations: ["Hayes (1982), pp. 240–241, rules (33), (36)"]
+  - id: english_stress_rule
+    operation: english_stress_rule
+    when: '!heavy(longVowel, codaCount)'
+    tag: stress_footing
+    citations: ["Hayes (1982), pp. 238, 244–245, rules (25), (45)"]
+  - id: strong_retraction
+    operation: strong_retraction
+    when: 'true'
+    tag: stress_secondary
+    citations: ["Hayes (1982), pp. 242–244, rule (43)"]
+word:
+  - id: prestress_destressing
+    operation: prestress_destressing
+    when: singleton && !longVowel && ((initial && codaCount == 0) || (!initial && open))
+    tag: stress_destressing
+    citations: ["Hayes (1982), p. 252, rule (63)"]
+  - id: sonorant_destressing
+    operation: sonorant_destressing
+    when: singleton && !initial && !longVowel && sonorantCoda
+    tag: stress_destressing
+    citations: ["Hayes (1982), pp. 253–254, rule (67)"]
+  - id: arab_destressing
+    operation: arab_destressing
+    when: singleton && !longVowel
+    tag: stress_destressing
+    citations: ["Hayes (1982), pp. 256–257, rules (75), (76)"]
+  - id: poststress_destressing
+    operation: poststress_destressing
+    when: '!singleton && open && precededBySingleton'
+    tag: stress_destressing
+    citations: ["Hayes (1982), pp. 258–259, rule (80)"]
+  - id: late_extrametricality
+    operation: late_extrametricality
+    when: (category != 'verb' || verbalSuffix) && count > 2
+    tag: stress_extrametricality
+    citations: ["Hayes (1982), pp. 272–274, rule (110)"]

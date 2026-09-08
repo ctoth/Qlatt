@@ -1,4 +1,8 @@
 version: v1
+secondary_stress_fallback:
+  target: 1
+  citations:
+    - "Qlatt #37 engineering estimate: reuse strong-vowel targets when secondary targets are unavailable; retain lexical secondary stress separately"
 citations:
   - Stevens 1971 Airflow and Turbulence Noise, Eqs. 5 and 8, Fig. 9
   - Badin & Fant 1989 Fricative Production Modelling, Eqs. 1-3 and section 1.4

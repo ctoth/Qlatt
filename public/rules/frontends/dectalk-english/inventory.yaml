@@ -1,4 +1,8 @@
 version: v1
+secondary_stress_fallback:
+  target: 1
+  citations:
+    - "Qlatt #37 engineering estimate: reuse strong-vowel targets for secondary stress while preserving lexical prominence"
 citations:
 - DECtalk 4.63 (extracted from dapi/src)
 - DECtalk 4.63 p_us_rom.h us_mindur[] (minimumDuration values)

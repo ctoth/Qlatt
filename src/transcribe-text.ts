@@ -30,7 +30,7 @@ import type {
 
 const CMU_DICTIONARY_CITATION = "CMU Pronouncing Dictionary";
 const FALLBACK_PRONUNCIATION_CITATION =
-  "G2P pipeline: Elovitz LTS (NRL 7948) + Hunnicutt stress (Allen, Hunnicutt & Klatt 1987)";
+  "G2P pipeline: Elovitz LTS (NRL 7948); Hayes (1982), pp. 237–274 (configured lexical stress)";
 const MORPHOLOGY_PRONUNCIATION_CITATION =
   "G2P pipeline: morphological decomposition (Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5)";
 const SYMBOL_PRONUNCIATION_CITATION =
@@ -311,6 +311,7 @@ export function transcribeText(
     (options.dictionaryMap ? makeDictLookup(options.dictionaryMap) : cmuDictLookup);
   const ltsPath = options.ltsPath;
   const morphologyPath = options.morphologyPath;
+  const stressPolicyPath = options.stressPolicyPath;
   const compiledSpec = options.compiledSpec ?? QLATT_ENGLISH_RULEPACK;
   const cfg = options.transcriptionConfig ?? getSpecTranscriptionConfig(compiledSpec);
   const transcriptionTables = requireTranscriptionTables(cfg);
@@ -405,7 +406,11 @@ export function transcribeText(
               word: sourceWord.toLowerCase(),
             }
           : symbolPronunciation == null
-            ? pronounce(sourceWord, effectiveDictLookup, { ltsPath, morphologyPath })
+            ? pronounce(sourceWord, effectiveDictLookup, {
+                ltsPath,
+                morphologyPath,
+                stressPolicyPath,
+              })
             : {
                 phonemes: symbolPronunciation,
                 source: "unknown",
@@ -434,7 +439,7 @@ export function transcribeText(
         citations = [MORPHOLOGY_PRONUNCIATION_CITATION];
       } else {
         decisionType = "fallback_pronunciation_selected";
-        reason = `Word '${sourceWord}' not in dictionary; used Elovitz LTS + Hunnicutt stress`;
+        reason = `Word '${sourceWord}' not in dictionary; used Elovitz LTS + configured lexical stress`;
         citations = [FALLBACK_PRONUNCIATION_CITATION];
         console.warn(
           `[TTS Frontend] Word "${sourceWord}" not found in dictionary. Using G2P pipeline (${pronResult.source}).`,
@@ -453,6 +458,35 @@ export function transcribeText(
             : undefined,
       });
 
+      let stressDecisionId = pronunciationDecision?.id;
+      if ("lexicalStress" in pronResult && pronResult.lexicalStress) {
+        const decisionIds = new Map<string, string>();
+        for (const step of pronResult.lexicalStress.decisions) {
+          const parents = step.parents
+            .map((id) => decisionIds.get(id))
+            .filter((id): id is string => id !== undefined);
+          if (pronunciationDecision) parents.push(pronunciationDecision.id);
+          const decision = provenance?.add({
+            stage: "transcribe",
+            type: step.tag,
+            subject: `${inputToken.tokenId}:stress:${step.domain}`,
+            reason: `${step.rule}: ${step.reason}; feet=${JSON.stringify(step.feet)}; excluded=${JSON.stringify(step.excludedOwners ?? step.excluded)}`,
+            citations: step.citations,
+            parents: [...new Set(parents)],
+          });
+          if (decision) {
+            decisionIds.set(step.id, decision.id);
+            stressDecisionId = decision.id;
+          }
+          if (step.tag === "stress_input_fallback")
+            options.diagnostics?.info(
+              step.reason,
+              { token: inputToken.tokenId, rule: step.rule },
+              "STRESS_INPUT_ASSUMPTION",
+            );
+        }
+      }
+
       if (pronResult.phonemes.length > 0) {
         for (const phoneWithStress of pronResult.phonemes) {
           const match = phoneWithStress.match(/^([A-Z]+)(\d)?$/);
@@ -462,7 +496,7 @@ export function transcribeText(
               stress: match[2] ? parseInt(match[2]) : null,
               sourceTokenId: inputToken.tokenId,
               word: sourceWord,
-              _pronDecisionId: pronunciationDecision?.id,
+              _pronDecisionId: stressDecisionId,
             });
           } else if (phoneWithStress === "SIL") {
             flatPhonemeList.push({
@@ -470,7 +504,7 @@ export function transcribeText(
               stress: null,
               sourceTokenId: inputToken.tokenId,
               word: sourceWord,
-              _pronDecisionId: pronunciationDecision?.id,
+              _pronDecisionId: stressDecisionId,
             });
           }
         }

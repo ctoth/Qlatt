@@ -16,7 +16,16 @@ import {
   loadFrontendResources,
   materializePhonemeTarget,
 } from "./declarative-frontend/inventory";
-import { type CompiledRulepack, loadBundledRulepackSpec } from "./declarative-frontend/rule-pack";
+import {
+  type CompiledRulepack,
+  loadBundledRulepackSpec,
+  loadRulepackSpecFromPath,
+} from "./declarative-frontend/rule-pack";
+import {
+  NORMALIZATION_SCHEMA,
+  normalizeSourceItems,
+  recognizeText,
+} from "./declarative-frontend/source-recognition";
 import { parseSyllabificationTables, syllabifyWord } from "./declarative-frontend/syllabify";
 import { getVoiceRegistry, type ResolvedVoice, resolveVoice } from "./dectalk-voice";
 import type { Diagnostics } from "./diagnostics";
@@ -52,6 +61,7 @@ export type VoiceQuality = SourceContourVoiceQuality;
 export type TextToKlattTrackOptions = {
   provenance?: ProvenanceCollector | null;
   frontendId?: string;
+  frontendPath?: string;
   rate?: number;
   speaker?: string | SpeakerProfileOverride;
   voiceQuality?: VoiceQuality;
@@ -171,7 +181,7 @@ function mergeSchemas(schemas: readonly FeatureSchema[]): FeatureSchema {
   return variants.length === 1 ? variants[0] : { kind: "union", variants };
 }
 
-function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
+function buildUtteranceSchema(inventory: InventorySpec, sourceRecognition = false): HrgSchema {
   const segmentFeatures: Record<string, FeatureSchema> = {
     phoneme: { kind: "string" },
     type: { kind: "string" },
@@ -231,6 +241,7 @@ function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
   } as const;
   return {
     itemTypes: {
+      ...(sourceRecognition ? NORMALIZATION_SCHEMA.itemTypes : {}),
       token: {
         features: {
           word: { kind: "string" },
@@ -238,6 +249,7 @@ function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
           punctuationSymbol: STRING_OR_NULL,
           pronunciationKey: STRING_OR_NULL,
           active: { kind: "boolean" },
+          ...(sourceRecognition ? { sourceNormalizationId: { kind: "string" } as const } : {}),
         },
       },
       word: { features: { text: { kind: "string" }, tokenIndex: { kind: "number" } } },
@@ -256,6 +268,7 @@ function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
       transition: { features: { active: { kind: "boolean" } } },
     },
     relations: {
+      ...(sourceRecognition ? NORMALIZATION_SCHEMA.relations : {}),
       Token: { kind: "list", itemTypes: ["token"] },
       Word: { kind: "list", itemTypes: ["word"] },
       Syllable: { kind: "list", itemTypes: ["syllable"] },
@@ -366,16 +379,24 @@ function createStructure(
     group.push({ token, segment });
     byToken.set(token.sourceTokenId, group);
   });
-  const transaction = utterance.beginTransaction({
-    ruleId: "linguistic_structure",
-    phase: "transcribe",
-    tag: "structure",
-    reason: "Create shared Word, Syllable, and Segment identity in SylStructure",
-    citations: ["Taylor, Black & Caley 2001", "DECtalk 4.63 ph_syl.c ph_syllab"],
-    stage: "transcribe",
-  });
+  const beginStructure = () =>
+    utterance.beginTransaction({
+      ruleId: "linguistic_structure",
+      phase: "transcribe",
+      tag: "structure",
+      reason: "Create shared Word, Syllable, and Segment identity in SylStructure",
+      citations: ["Taylor, Black & Caley 2001", "DECtalk 4.63 ph_syl.c ph_syllab"],
+      stage: "transcribe",
+    });
+  const sharedTransaction = Object.hasOwn(spec, "text_recognition") ? null : beginStructure();
   let wordIndex = 0;
   for (const [tokenId, group] of byToken) {
+    const transaction = sharedTransaction ?? beginStructure();
+    if (!sharedTransaction) {
+      for (const { token } of group) {
+        if (token._pronDecisionId) transaction.dependOn(token._pronDecisionId);
+      }
+    }
     const word = transaction.createItem("word", `word_${wordIndex.toString()}`);
     transaction.set(word, "text", group[0].token.word);
     transaction.set(word, "tokenIndex", wordIndex);
@@ -444,8 +465,9 @@ function createStructure(
       );
     }
     wordIndex += 1;
+    if (!sharedTransaction) transaction.commit();
   }
-  transaction.commit();
+  sharedTransaction?.commit();
 }
 
 export { normalizeText } from "./g2p/text-normalize";
@@ -458,7 +480,12 @@ function buildTextToKlattTrackDetailed(
   options: TextToKlattTrackOptions,
 ): TextToKlattTrackDetailedResult {
   const frontendId = options.frontendId ?? "qlatt-english";
-  const spec = loadBundledRulepackSpec(frontendId);
+  if (options.frontendPath && options.frontendId)
+    throw new Error("E_FRONTEND_SELECTION: select frontendPath or frontendId, not both");
+  const spec = options.frontendPath
+    ? loadRulepackSpecFromPath(options.frontendPath)
+    : loadBundledRulepackSpec(frontendId);
+  const sourceRecognition = Object.hasOwn(spec, "text_recognition");
   const lowering = readLowerOptions(spec.output.lowering);
   const resources = loadFrontendResources(spec);
   // The active inventory declares the synthesizer parameters available to this frontend.
@@ -467,11 +494,13 @@ function buildTextToKlattTrackDetailed(
   );
   const provenance = options.provenance ?? createProvenanceCollector();
   const utterance = new Utterance(
-    buildUtteranceSchema(resources.inventory),
+    buildUtteranceSchema(resources.inventory, sourceRecognition),
     provenance,
     options.diagnostics ?? undefined,
   );
-  for (const relationName of Object.keys(buildUtteranceSchema(resources.inventory).relations)) {
+  for (const relationName of Object.keys(
+    buildUtteranceSchema(resources.inventory, sourceRecognition).relations,
+  )) {
     utterance.relation(relationName);
   }
 
@@ -545,7 +574,10 @@ function buildTextToKlattTrackDetailed(
         punctuationTokens: transcriptionConfig?.punctuation_tokens,
       }
     : { punctuationTokens: transcriptionConfig?.punctuation_tokens };
-  const normalized = normalizeText(inputText, normalization);
+  if (sourceRecognition) recognizeText(inputText, utterance, spec);
+  const normalized = sourceRecognition
+    ? normalizeSourceItems(utterance, spec)
+    : normalizeText(inputText, normalization);
   const transcribed = transcribeText(normalized, {
     provenance,
     utterance,
@@ -659,7 +691,15 @@ function buildTextToKlattTrackDetailed(
 
   if (options.directionTrack) {
     const parsed = parseDirectionInput(
-      { score: { text: normalized }, directionTrack: options.directionTrack },
+      {
+        score: {
+          text:
+            typeof normalized === "string"
+              ? normalized
+              : normalized.map((entry) => entry.word).join(" "),
+        },
+        directionTrack: options.directionTrack,
+      },
       { provenance },
     );
     attachDirectionsToUtterance(parsed, utterance);

@@ -51,11 +51,23 @@ function createReplayProvenance(decisions: readonly DecisionRecord[]): {
         };
       },
       getDecisions(): DecisionRecord[] {
-        return consumed.map((decision) => ({
-          ...decision,
-          citations: [...decision.citations],
-          parents: decision.parents ? [...decision.parents] : undefined,
-        }));
+        // Recognition/pronunciation decisions can be external parents of journal
+        // writes. Keep their ancestor closure, without exposing later decisions.
+        const reachable = new Map(consumed.map((decision) => [decision.id, decision]));
+        const pending = [...consumed];
+        while (pending.length > 0) {
+          for (const id of pending.pop()!.parents ?? []) {
+            if (reachable.has(id)) continue;
+            const parent = byId.get(id);
+            if (parent) {
+              reachable.set(id, parent);
+              pending.push(parent);
+            }
+          }
+        }
+        return [...reachable.values()]
+          .sort((left, right) => left.seq - right.seq)
+          .map((decision) => structuredClone(decision));
       },
     },
     expect(decisionIds: readonly string[]): void {

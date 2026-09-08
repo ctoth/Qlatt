@@ -16,6 +16,7 @@ import type { HrgSchema } from "./declarative-frontend/hrg";
 import { Utterance } from "./declarative-frontend/hrg";
 import { runGraphRuleEngine } from "./declarative-frontend/hrg/rule-engine";
 import { type CompiledRulepack, QLATT_ENGLISH_RULEPACK } from "./declarative-frontend/rule-pack";
+import type { SourceTranscriptionInput } from "./declarative-frontend/source-recognition";
 import { pronounce } from "./g2p";
 import type { DictLookup, PronunciationResult } from "./g2p/types";
 import type {
@@ -222,33 +223,45 @@ function getDiagnosticSymbolPronunciationWithTables(
 }
 
 function rewriteOrthographyTokens(
-  words: string[],
+  words: readonly (string | SourceTranscriptionInput)[],
   provenance: TranscriptionOptions["provenance"],
   tables: RequiredTranscriptionTables,
   compiledSpec: CompiledRulepack,
   existingUtterance?: Utterance,
 ): OrthographyInputToken[] {
-  const entries = words.filter((word) => word.length > 0);
+  const entries = words.filter(
+    (entry) => (typeof entry === "string" ? entry : entry.word).length > 0,
+  );
   if (entries.length === 0) return [];
   const utterance = existingUtterance ?? new Utterance(TOKEN_SCHEMA, provenance ?? undefined);
-  const input = utterance.beginTransaction({
-    ruleId: "transcription_tokenize",
-    phase: "transcribe",
-    tag: "orthography",
-    reason: "Tokenized normalized text into canonical Token Items",
-    citations: ["Allen et al. 1987 Ch.2-3"],
-  });
-  entries.forEach((word, index) => {
+  const beginInput = () =>
+    utterance.beginTransaction({
+      ruleId: "transcription_tokenize",
+      phase: "transcribe",
+      tag: "orthography",
+      reason: "Tokenized normalized text into canonical Token Items",
+      citations: ["Allen et al. 1987 Ch.2-3"],
+    });
+  const sharedInput = typeof entries[0] === "string" ? beginInput() : null;
+  entries.forEach((entry, index) => {
+    const input = sharedInput ?? beginInput();
+    const word = typeof entry === "string" ? entry : entry.word;
     const punctuation = isPunctuationTokenWithTables(word, tables);
     const token = input.createItem("token", `token_${index.toString()}`);
+    if (typeof entry !== "string") {
+      input.read(entry.source, "normalizedText");
+      input.set(token, "sourceNormalizationId", entry.source.id);
+      input.associate("source_normalization", token, entry.source);
+    }
     input.set(token, "word", word);
     input.set(token, "tokenType", punctuation ? "punctuation" : "word");
     input.set(token, "punctuationSymbol", punctuation ? word : null);
     input.set(token, "pronunciationKey", null);
     input.set(token, "active", true);
     input.append("Token", token);
+    if (!sharedInput) input.commit();
   });
-  input.commit();
+  sharedInput?.commit();
   runGraphRuleEngine(utterance, compiledSpec, { phases: ["orthography"] });
 
   return utterance
@@ -290,15 +303,15 @@ function rewriteOrthographyTokens(
  * Diagnostic symbol mode (e.g. "/b/") bypasses G2P and maps directly to
  * ARPABET symbols.
  *
- * @param text - Normalized text (output of normalizeText())
+ * @param text - Normalized text or words owned by normalization Items in options.utterance
  * @param options - Optional provenance collector for decision tracking
  * @returns Flat array of TranscriptionToken objects
  */
 export function transcribeText(
-  text: string,
+  text: string | readonly SourceTranscriptionInput[],
   options: TranscriptionOptions = {},
 ): TranscriptionToken[] {
-  const provenance = options.provenance ?? null;
+  const provenance = options.provenance ?? options.utterance?.provenance ?? null;
   // Resolve the backing dictionary map for this call: a per-frontend map (from
   // `dictionary_path`) when supplied, else the global CMU default. Both the
   // lookup and compound-recovery probe must read the SAME map so a frontend's
@@ -323,7 +336,7 @@ export function transcribeText(
   };
 
   const orthographyWords = rewriteOrthographyTokens(
-    text.split(" "),
+    typeof text === "string" ? text.split(" ") : text,
     provenance,
     transcriptionTables,
     compiledSpec,

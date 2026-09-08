@@ -41,6 +41,7 @@ const MERGED_CHILD_ROOT_KEYS = new Set([
   "maps",
   "tags",
   "syllabification",
+  "text_recognition",
   "phases",
   "topology",
 ]);
@@ -120,6 +121,13 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
   }
 
   // Phases: concat (root first, then child in include order)
+  if (child.text_recognition !== undefined) {
+    if (merged.text_recognition !== undefined) {
+      throw new Error(`Duplicate text_recognition block in included file ${childPath}`);
+    }
+    merged.text_recognition = child.text_recognition;
+  }
+
   const childPhases = child.phases as unknown[];
   if (Array.isArray(childPhases) && childPhases.length > 0) {
     merged.phases = [...(Array.isArray(merged.phases) ? merged.phases : []), ...childPhases];

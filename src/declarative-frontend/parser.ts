@@ -241,6 +241,7 @@ export const DSL_ROOT_KEYS = new Set([
   "speaker_profile_path",
   "source_contour_path",
   "normalization",
+  "text_recognition",
   "speakers",
   "skip_dictionary",
   "f0_model",
@@ -450,6 +451,9 @@ export function parseDslSpec(source: unknown) {
     speaker_profile_path: asString(raw.speaker_profile_path, null),
     source_contour_path: asString(raw.source_contour_path, null),
     normalization: cloneObject(raw.normalization),
+    ...(Object.hasOwn(raw, "text_recognition")
+      ? { text_recognition: cloneValue(raw.text_recognition) }
+      : {}),
     speakers: cloneObject(raw.speakers),
     ...(Object.hasOwn(raw, "skip_dictionary")
       ? { skip_dictionary: Boolean(raw.skip_dictionary) }

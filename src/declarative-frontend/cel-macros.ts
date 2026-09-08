@@ -474,6 +474,29 @@ export function expandSpecCelMacros<T extends Record<string, unknown>>(
   if (macros.size === 0) return spec;
   const expanded: Record<string, unknown> = { ...spec };
   const sources = new Map<string, Set<string>>();
+  if (isPlainObject(spec.text_recognition)) {
+    const expandSpeaking = (value: unknown, path: string): unknown => {
+      if (!isPlainObject(value)) return value;
+      const entry = { ...value };
+      const citations = new Set<string>();
+      for (const key of ["when", "speak", "vocabulary_keys"]) {
+        if (typeof entry[key] === "string")
+          entry[key] = expandValue(entry[key], macros, `${path}.${key}`, citations);
+      }
+      if (Array.isArray(entry.citations))
+        entry.citations = [...new Set([...entry.citations, ...citations])];
+      return entry;
+    };
+    expanded.text_recognition = {
+      ...spec.text_recognition,
+      rules: Array.isArray(spec.text_recognition.rules)
+        ? spec.text_recognition.rules.map((rule, index) =>
+            expandSpeaking(rule, `text_recognition.rules[${index}]`),
+          )
+        : spec.text_recognition.rules,
+      unmatched: expandSpeaking(spec.text_recognition.unmatched, "text_recognition.unmatched"),
+    };
+  }
   for (const root of ["predicates", "patterns", "rules"]) {
     const entries = spec[root];
     if (!isPlainObject(entries)) continue;

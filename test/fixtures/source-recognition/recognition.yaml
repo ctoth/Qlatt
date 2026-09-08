@@ -1,0 +1,78 @@
+# Opt-in foundation fixture. Reader vocabulary migration belongs to later slices of #38.
+functions:
+  known_clock:
+    params: [item]
+    body: item.features.hour in maps.clock_words && item.features.minute in maps.clock_words && item.features.period in maps.period_words
+    citations: ["Issue #142: fixture eligibility stays in CEL"]
+maps:
+  clock_words: {"12": twelve, "30": thirty}
+  period_words: {am: a m, pm: p m}
+text_recognition:
+  unmatched:
+    speak: current.text
+    vocabulary_keys: '[]'
+    citations: ["Issue #142: preserve unmatched source for the selected normalization pipeline"]
+  rules:
+    - id: time
+      pattern: '\b(?<hour>\d{1,2}):(?<minute>\d{2}) (?<period>[ap]m)\b'
+      flags: u
+      class: time
+      captures: {hour: hour, minute: minute, period: period}
+      when: known_clock(current)
+      speak: maps.clock_words[current.features.hour] + ' ' + maps.clock_words[current.features.minute] + ' ' + maps.period_words[current.features.period]
+      vocabulary_keys: "['maps.clock_words.' + current.features.hour, 'maps.clock_words.' + current.features.minute, 'maps.period_words.' + current.features.period]"
+      citations: ["Issue #142: multi-token recognition fixture; clock speaking examples"]
+    - id: date
+      pattern: '\b(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})\b'
+      flags: u
+      class: date
+      captures: {year: year, month: month, day: day}
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ["Issue #142: date precedence fixture; reading remains in the selected pipeline"]
+    - id: fraction
+      pattern: '\b(?<numerator>\d+)/(?<denominator>\d+)\b'
+      flags: u
+      class: fraction
+      captures: {numerator: numerator, denominator: denominator}
+      when: 'captures.denominator != "0"'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ["Issue #142: fraction eligibility and overlap fixture"]
+    - id: currency
+      pattern: '\$(?<amount>\d+(?:\.\d+)?)'
+      flags: u
+      class: currency
+      captures: {amount: amount}
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ["Issue #142: currency before decimal and bare-number recognition"]
+    - id: decimal
+      pattern: '\b(?<whole>\d+)\.(?<fraction>\d+)\b'
+      flags: u
+      class: decimal
+      captures: {whole: whole, fraction: fraction}
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ["Issue #142: decimal before bare-number recognition"]
+    - id: number
+      pattern: '\b(?<digits>\d+)\b'
+      flags: u
+      class: number
+      captures: {digits: digits}
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ["Issue #142: bare-number recognition fallback"]
+    - id: word
+      pattern: "[\\p{L}]+(?:'[\\p{L}]*)?"
+      flags: u
+      class: word
+      captures: {}
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ["Issue #142: repeated-word source identity fixture"]

@@ -143,9 +143,7 @@ rules:
       where: >-
         current.phoneme != 'SIL'
         && (has(current.isAccented) ? current.isAccented != true : true)
-        && has(current.F1)
-        && ((has(current.AV) && current.AV > 0)
-            || (has(current.AVS) && current.AVS > 0))
+        && has_voiced_formants(current)
     define:
       prev_f0: prev_point('F0Point')
       base: params.policy.f0.base_hz
@@ -394,9 +392,7 @@ rules:
       relation: Segment
       where: >-
         current.phoneme != 'SIL'
-        && has(current.F1)
-        && ((has(current.AV) && current.AV > 0)
-            || (has(current.AVS) && current.AVS > 0))
+        && has_voiced_formants(current)
     contour:
       domain: phrase
       # Silverman et al. 1992 ToBI: BI=3 marks intermediate phrase boundaries.

@@ -1,0 +1,1123 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`prosody acoustic eligibility > qlatt-beauty preserves F0 targets, tags, and rule matches 1`] = `
+[
+  {
+    "matches": [
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_0:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_1:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_6:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_6:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_6:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_6:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_6:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_0.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_1.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_6.EePhraseDb",
+      },
+    ],
+    "points": [
+      {
+        "anchor": {
+          "leftMarkId": "START",
+          "ratio": 0,
+          "rightMarkId": "START",
+        },
+        "tag": "f0_baseline",
+        "value": 138,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_3zzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_3zzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 138,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_7zzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_7zzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 138,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_fzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_fzzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 126,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_rzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_rzzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 126,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_ynzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_ynzzzzzzzzzz",
+        },
+        "tag": "f0_phrase_low",
+        "value": 138,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "END",
+          "ratio": 0,
+          "rightMarkId": "END",
+        },
+        "tag": "f0_boundary_low",
+        "value": 138,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_enzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_enzzzzzzzzzz",
+        },
+        "tag": "f0_onset_perturbation",
+        "value": 149.04000000000002,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_nzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_nzzzzzzzzzzz",
+        },
+        "tag": "f0_onset_perturbation",
+        "value": 160.96320000000003,
+      },
+    ],
+    "text": "The cat sat.",
+  },
+  {
+    "matches": [
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_0:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_1:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_2:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_2:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_2:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_2:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_2:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_3:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_3:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_3:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_3:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_3:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_4:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_4:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_4:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_4:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_4:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_9:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_9:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_9:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_9:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_9:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_0.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_1.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_2.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_3.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_4.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_9.EePhraseDb",
+      },
+    ],
+    "points": [
+      {
+        "anchor": {
+          "leftMarkId": "START",
+          "ratio": 0,
+          "rightMarkId": "START",
+        },
+        "tag": "f0_baseline",
+        "value": 138,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "START",
+          "ratio": 0,
+          "rightMarkId": "START",
+        },
+        "tag": "f0_initial_boundary_high",
+        "value": 214,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_2zzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_2zzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 209.72,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_5zzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_5zzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 211.5256,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_8zzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_8zzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 207.295088,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_bzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_bzzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 203.14918623999998,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_ezzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_ezzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 199.08620251519997,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_kzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_kzzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 183.10447846489598,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_tzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_tzzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 185.44238889559804,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_yzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_yzzzzzzzzzzz",
+        },
+        "tag": "f0_phrase_high",
+        "value": 214,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "END",
+          "ratio": 0,
+          "rightMarkId": "END",
+        },
+        "tag": "f0_boundary_rise",
+        "value": 217.8,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_jzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_jzzzzzzzzzzz",
+        },
+        "tag": "f0_onset_perturbation",
+        "value": 233,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_qzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_qzzzzzzzzzzz",
+        },
+        "tag": "f0_onset_perturbation",
+        "value": 233,
+      },
+    ],
+    "text": "Will the cat sit?",
+  },
+]
+`;
+
+exports[`prosody acoustic eligibility > qlatt-english preserves F0 targets, tags, and rule matches 1`] = `
+[
+  {
+    "matches": [
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3.value",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3.tag",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "relation:F0Point:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3.temporal_anchor",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4.value",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4.tag",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "relation:F0Point:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4.temporal_anchor",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_6:tobi_accent:point:1",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_6:tobi_accent:point:1.value",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_6:tobi_accent:point:1.tag",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "relation:F0Point:segment_6:tobi_accent:point:1",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_6:tobi_accent:point:1.temporal_anchor",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_6:tobi_accent:point:2",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_6:tobi_accent:point:2.value",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_6:tobi_accent:point:2.tag",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "relation:F0Point:segment_6:tobi_accent:point:2",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_6:tobi_accent:point:2.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_0:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_1:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_0.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_0.RdPhraseOffset",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_1.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_1.RdPhraseOffset",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2.RdPhraseOffset",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_6.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_6.RdPhraseOffset",
+      },
+    ],
+    "points": [
+      {
+        "anchor": {
+          "leftMarkId": "START",
+          "ratio": 0,
+          "rightMarkId": "START",
+        },
+        "tag": "f0_baseline",
+        "value": 110,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_enzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_enzzzzzzzzzz",
+        },
+        "tag": "f0_l_leading",
+        "value": 122,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_enzzzzzzzzzz",
+          "ratio": 0.45,
+          "rightMarkId": "M_fzzzzzzzzzzz",
+        },
+        "tag": "f0_l_plus_h_star",
+        "value": 178,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_nzzzzzzzzzzz",
+          "ratio": 0.45,
+          "rightMarkId": "M_rzzzzzzzzzzz",
+        },
+        "tag": "f0_h_star_plus_l_peak",
+        "value": 178,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_rzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_rzzzzzzzzzzz",
+        },
+        "tag": "f0_h_star_plus_l_tail",
+        "value": 122,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_3zzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_3zzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 119.56,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_7zzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_7zzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 117.1688,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_ynzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_ynzzzzzzzzzz",
+        },
+        "tag": "f0_phrase_low",
+        "value": 110,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "END",
+          "ratio": 0,
+          "rightMarkId": "END",
+        },
+        "tag": "f0_boundary_low",
+        "value": 110,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_enzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_enzzzzzzzzzz",
+        },
+        "tag": "f0_onset_perturbation",
+        "value": 118.80000000000001,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_nzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_nzzzzzzzzzzz",
+        },
+        "tag": "f0_onset_perturbation",
+        "value": 128.30400000000003,
+      },
+    ],
+    "text": "The cat sat.",
+  },
+  {
+    "matches": [
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3.value",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3.tag",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "relation:F0Point:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3.temporal_anchor",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4.value",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4.tag",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "relation:F0Point:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4.temporal_anchor",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_9:tobi_accent:point:12",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_9:tobi_accent:point:12.value",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_9:tobi_accent:point:12.tag",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "relation:F0Point:segment_9:tobi_accent:point:12",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_9:tobi_accent:point:12.temporal_anchor",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_9:tobi_accent:point:13",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_9:tobi_accent:point:13.value",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_9:tobi_accent:point:13.tag",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "relation:F0Point:segment_9:tobi_accent:point:13",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_9:tobi_accent:point:13.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_0:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_0:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_1:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_1:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_2:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_2:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_2:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_2:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_2:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_3:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_3:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_3:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_3:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_3:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_4:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_4:tobi_unaccented_declination:point:0.value",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_4:tobi_unaccented_declination:point:0.tag",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "relation:F0Point:segment_4:tobi_unaccented_declination:point:0",
+      },
+      {
+        "reason": "tobi_unaccented_declination matched",
+        "subject": "item:segment_4:tobi_unaccented_declination:point:0.temporal_anchor",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_0.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_0.RdPhraseOffset",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_1.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_1.RdPhraseOffset",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_2.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_2.RdPhraseOffset",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_3.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_3.RdPhraseOffset",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_4.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_4.RdPhraseOffset",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2.RdPhraseOffset",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_9.EePhraseDb",
+      },
+      {
+        "reason": "connected_speech_source_contour matched",
+        "subject": "item:segment_9.RdPhraseOffset",
+      },
+    ],
+    "points": [
+      {
+        "anchor": {
+          "leftMarkId": "START",
+          "ratio": 0,
+          "rightMarkId": "START",
+        },
+        "tag": "f0_baseline",
+        "value": 110,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "START",
+          "ratio": 0,
+          "rightMarkId": "START",
+        },
+        "tag": "f0_initial_boundary_high",
+        "value": 174,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_jzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_jzzzzzzzzzzz",
+        },
+        "tag": "f0_l_leading",
+        "value": 122,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_jzzzzzzzzzzz",
+          "ratio": 0.45,
+          "rightMarkId": "M_kzzzzzzzzzzz",
+        },
+        "tag": "f0_l_plus_h_star",
+        "value": 178,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_qzzzzzzzzzzz",
+          "ratio": 0.45,
+          "rightMarkId": "M_tzzzzzzzzzzz",
+        },
+        "tag": "f0_l_star",
+        "value": 122,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_tzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_tzzzzzzzzzzz",
+        },
+        "tag": "f0_l_star_plus_h",
+        "value": 174,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_2zzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_2zzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 170.52,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_5zzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_5zzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 167.1096,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_8zzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_8zzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 163.767408,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_bzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_bzzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 160.49205984,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_ezzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_ezzzzzzzzzzz",
+        },
+        "tag": "f0_unaccented",
+        "value": 157.2822186432,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_yzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_yzzzzzzzzzzz",
+        },
+        "tag": "f0_phrase_high",
+        "value": 174,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "END",
+          "ratio": 0,
+          "rightMarkId": "END",
+        },
+        "tag": "f0_boundary_rise",
+        "value": 177.2,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_jzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_jzzzzzzzzzzz",
+        },
+        "tag": "f0_onset_perturbation",
+        "value": 190,
+      },
+      {
+        "anchor": {
+          "leftMarkId": "M_qzzzzzzzzzzz",
+          "ratio": 0,
+          "rightMarkId": "M_qzzzzzzzzzzz",
+        },
+        "tag": "f0_onset_perturbation",
+        "value": 190,
+      },
+    ],
+    "text": "Will the cat sit?",
+  },
+]
+`;

@@ -522,17 +522,18 @@ function buildTextToKlattTrackDetailed(
   if (typeof options.speaker === "string" && !registry) {
     throw new Error(`E_VOICE_REGISTRY_MISSING: frontend '${frontendId}' has no voice registry`);
   }
+  const speakerProfilePath = spec.speaker_profile_path ?? DEFAULT_SPEAKER_PROFILE_PATH;
+  const speakerProfile = loadSpeakerProfileSync(speakerProfilePath);
   const selectedVoice: ResolvedVoice | null = registry
     ? resolveVoice(
         registry,
         typeof options.speaker === "string" ? options.speaker : registry.default,
+        speakerProfile,
       )
     : null;
   const speakerOverride: SpeakerProfileOverride | undefined =
     typeof options.speaker === "object" ? options.speaker : undefined;
 
-  const speakerProfilePath = spec.speaker_profile_path ?? DEFAULT_SPEAKER_PROFILE_PATH;
-  const speakerProfile = loadSpeakerProfileSync(speakerProfilePath);
   const resolvedSpeaker = resolveSpeakerProfile({
     baseF0,
     speakerOverride,
@@ -543,7 +544,9 @@ function buildTextToKlattTrackDetailed(
     stage: "frontend",
     type: "speaker_profile_selected",
     subject: "speaker_profile",
-    reason: `Resolved speaker profile base_f0_hz=${resolvedSpeaker.base_f0_hz}, formant_scale=${resolvedSpeaker.formant_scale}, rd_default=${resolvedSpeaker.rd_default}, spectral_tilt_offset_db=${resolvedSpeaker.spectral_tilt_offset_db}`,
+    reason: `Resolved speaker profile ${Object.entries(resolvedSpeaker)
+      .map(([name, value]) => `${name}=${value}`)
+      .join(", ")}`,
     citations: collectSpeakerProfileCitations(speakerProfile, speakerProfilePath),
   });
 
@@ -768,7 +771,7 @@ function buildTextToKlattTrackDetailed(
     captureTooling,
   });
 
-  const referenceVoice = registry ? resolveVoice(registry, registry.default) : null;
+  const referenceVoice = registry ? resolveVoice(registry, registry.default, speakerProfile) : null;
   const speakerStamp = utterance.beginTransaction({
     ruleId: "speaker_source_projection",
     phase: "frontend",

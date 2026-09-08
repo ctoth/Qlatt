@@ -1,3 +1,5 @@
+import { UndoLog } from "./undo-log";
+
 const RANK_LEN = 12;
 const DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
 const BASE = 36n;
@@ -65,7 +67,12 @@ export class TemporalAxis {
   readonly start: TemporalMark;
   readonly end: TemporalMark;
 
-  constructor() {
+  /**
+   * @param undo Receives the inverse of every mutation while a transaction
+   *   commit is being applied, so a failed commit can restore the axis. A
+   *   standalone axis gets a private log that never captures.
+   */
+  constructor(private readonly undo: UndoLog = new UndoLog()) {
     this.start = this.addOrder(START_ORDER, null);
     this.end = this.addOrder(END_ORDER, null);
   }
@@ -84,8 +91,13 @@ export class TemporalAxis {
       suffix += 1;
     }
     const mark: TemporalMark = { id, order, time: null, creationDecisionId };
+    const key = orderKey(order);
     this.marks.set(id, mark);
-    this.idByOrder.set(orderKey(order), id);
+    this.idByOrder.set(key, id);
+    this.undo.record(() => {
+      this.marks.delete(id);
+      this.idByOrder.delete(key);
+    });
     return mark;
   }
 
@@ -108,6 +120,15 @@ export class TemporalAxis {
     const finite = [...this.marks.values()]
       .filter((mark) => mark.order.kind === "FINITE")
       .sort((left, right) => compareTemporalOrder(left.order, right.order));
+    // Re-ranking rewrites every finite mark, so the inverse is a full snapshot
+    // of the orders it replaces. Rebalances are rare (rank space exhaustion).
+    const previousOrders = finite.map((mark): [TemporalMark, TemporalOrder] => [mark, mark.order]);
+    const previousIdByOrder = new Map(this.idByOrder);
+    this.undo.record(() => {
+      for (const [mark, order] of previousOrders) mark.order = order;
+      this.idByOrder.clear();
+      for (const [key, id] of previousIdByOrder) this.idByOrder.set(key, id);
+    });
     this.idByOrder.clear();
     this.idByOrder.set("START", this.start.id);
     this.idByOrder.set("END", this.end.id);
@@ -186,7 +207,11 @@ export class TemporalAxis {
   setMarkTime(id: string | null | undefined, timeMs: number): boolean {
     const mark = this.getMarkById(id);
     if (!mark) return false;
+    const previousTime = mark.time;
     mark.time = Number.isFinite(timeMs) ? timeMs : null;
+    this.undo.record(() => {
+      mark.time = previousTime;
+    });
     return true;
   }
 

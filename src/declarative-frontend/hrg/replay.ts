@@ -26,6 +26,17 @@ function createReplayProvenance(decisions: readonly DecisionRecord[]): {
   let cursor = 0;
   return {
     collector: {
+      get size(): number {
+        return consumed.length;
+      },
+      truncate(length: number): void {
+        const released = consumed.length - length;
+        if (!Number.isInteger(length) || released < 0 || released > cursor) {
+          throw new Error(`E_HRG_REPLAY_TRUNCATE: cannot truncate to ${String(length)}`);
+        }
+        consumed.length = length;
+        cursor -= released;
+      },
       add(input: AddDecisionInput): DecisionRecord {
         const id = expectedIds[cursor];
         if (!id) throw new Error("E_HRG_REPLAY_DECISION_UNEXPECTED");

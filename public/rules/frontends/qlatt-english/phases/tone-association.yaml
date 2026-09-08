@@ -19,8 +19,7 @@ rules:
       relation: Segment
       where: >-
         isTrue(current, 'isAccented') && current.stress == 1
-        && has(current.F1)
-        && ((has(current.AV) && current.AV > 0) || (has(current.AVS) && current.AVS > 0))
+        && has_voiced_formants(current)
         && has(current.accentType) && current.accentType in maps.accent_melodies
     define:
       codes: "split(maps.accent_melodies[current.accentType], ' ')"

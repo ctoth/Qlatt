@@ -1396,7 +1396,7 @@ function applyPointActions(
       );
       let contained = allowedBearers.has(source.id);
       if (typeof spec.tone.within === "string") {
-        let node = utterance.relation(spec.tone.within).node(source);
+        let node: HrgNode | null | undefined = utterance.relation(spec.tone.within).node(source);
         while (node) {
           match.transaction.dependOn(node.write.decisionId);
           if (allowedBearers.has(node.item.id)) contained = true;

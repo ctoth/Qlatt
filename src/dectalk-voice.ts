@@ -4,12 +4,16 @@
 // (frontend.yaml `speakers:` block -> `dir` of per-voice YAML files). This
 // module contains ONLY generic infrastructure: it reads a voice name, loads
 // the corresponding YAML file, and exposes the raw parameter record plus the
-// four canonical speaker-profile override fields. There are NO per-voice
+// speaker-profile override fields declared by the profile policy. There are NO per-voice
 // branches and NO hardcoded voice values here — every voice is just a file.
 //
 // Citation: DECtalk 4.63 ph_vset.c (speaker-dependent parameter tables).
 
-import type { SpeakerProfileOverride } from "./speaker-profile";
+import {
+  loadSpeakerProfileSync,
+  type SpeakerProfileOverride,
+  type SpeakerProfileSpec,
+} from "./speaker-profile";
 import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
 /** One declarative per-voice gain offset binding: the voice-YAML gain field
@@ -49,13 +53,6 @@ export interface ResolvedVoice {
   /** Source citations declared in the voice YAML. */
   citations: string[];
 }
-
-const SPEAKER_PROFILE_FIELDS = [
-  "base_f0_hz",
-  "formant_scale",
-  "rd_default",
-  "spectral_tilt_offset_db",
-] as const;
 
 /**
  * Read the `speakers:` registry from a frontend spec, if present.
@@ -101,7 +98,11 @@ function toNumberRecord(doc: Record<string, unknown>): Record<string, number> {
  * Generic: loads `<registry.dir>/<voiceName>.yaml` and maps its numeric fields.
  * Throws E_VOICE_UNKNOWN if the name is not in the registry.
  */
-export function resolveVoice(registry: VoiceRegistry, voiceName: string): ResolvedVoice {
+export function resolveVoice(
+  registry: VoiceRegistry,
+  voiceName: string,
+  profileSpec: SpeakerProfileSpec = loadSpeakerProfileSync(),
+): ResolvedVoice {
   const name = voiceName.trim().toLowerCase();
   if (registry.voices.length > 0 && !registry.voices.includes(name)) {
     throw new Error(
@@ -119,7 +120,7 @@ export function resolveVoice(registry: VoiceRegistry, voiceName: string): Resolv
   const params = toNumberRecord(doc);
 
   const override: SpeakerProfileOverride = {};
-  for (const field of SPEAKER_PROFILE_FIELDS) {
+  for (const field of Object.keys(profileSpec.default_profile)) {
     const value = params[field];
     if (typeof value === "number" && Number.isFinite(value)) {
       override[field] = value;

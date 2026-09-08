@@ -29,6 +29,7 @@ describe("tone association in the production frontend", () => {
       phases: [
         {
           name: "associate_only",
+          compute_times: false,
           rules: ["associate_accent_tones"],
           after: [],
           resolve_points: [],
@@ -64,6 +65,7 @@ describe("tone association in the production frontend", () => {
         phases: [
           {
             name: "realize_only",
+            compute_times: false,
             rules: ["tobi_accent"],
             after: [],
             resolve_points: [],

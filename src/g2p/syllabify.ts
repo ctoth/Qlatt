@@ -26,9 +26,7 @@ interface PhonotacticsData {
 
 const phonotacticsCache = new Map<string, PhonotacticsData>();
 
-export function loadPhonotacticsSync(
-  path: string = "/rules/frontends/qlatt-english/phonotactics.yaml",
-): PhonotacticsData {
+export function loadPhonotacticsSync(path: string): PhonotacticsData {
   const cached = phonotacticsCache.get(path);
   if (cached) return cached;
   const data = loadYamlDocumentSync<PhonotacticsData>(path);
@@ -39,8 +37,8 @@ export function loadPhonotacticsSync(
 // ── Vowel set ───────────────────────────────────────────────────────────
 
 /** Returns true if the phoneme is a vowel (can bear stress). */
-export function isVowel(phoneme: string): boolean {
-  const data = loadPhonotacticsSync();
+export function isVowel(phoneme: string, phonotacticsPath: string): boolean {
+  const data = loadPhonotacticsSync(phonotacticsPath);
   return new Set(data.vowels).has(phoneme);
 }
 
@@ -50,7 +48,7 @@ export function isVowel(phoneme: string): boolean {
  * Check whether a sequence of consonant phonemes forms a legal onset.
  * A single consonant is always legal. An empty onset is always legal.
  */
-function isLegalOnset(consonants: string[], phonotacticsPath?: string): boolean {
+function isLegalOnset(consonants: string[], phonotacticsPath: string): boolean {
   if (consonants.length <= 1) return true;
   const data = loadPhonotacticsSync(phonotacticsPath);
   const key = consonants.join("");
@@ -65,7 +63,7 @@ function isLegalOnset(consonants: string[], phonotacticsPath?: string): boolean 
  * @param phonemes - Array of ARPAbet phonemes (no stress digits).
  * @returns Array of syllables, each syllable an array of phonemes.
  */
-export function syllabify(phonemes: string[], phonotacticsPath?: string): string[][] {
+export function syllabify(phonemes: string[], phonotacticsPath: string): string[][] {
   if (phonemes.length === 0) return [];
   const vowels = new Set(loadPhonotacticsSync(phonotacticsPath).vowels);
 

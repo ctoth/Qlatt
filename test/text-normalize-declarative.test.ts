@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { normalizeText, validateNormalizationPipelineConfig } from "../src/g2p/text-normalize";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import { validateNormalizationPipelineConfig } from "../src/g2p/text-normalize";
 import { transcribeText } from "../src/transcribe-text";
 import type { TranscriptionConfig } from "../src/tts-frontend-types";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
+import { normalizeText, resources } from "./g2p-fixture";
 
 interface NormalizationTables {
   ones: string[];
@@ -171,6 +174,7 @@ describe("text normalization YAML pipeline", () => {
     };
 
     const normalized = normalizeText("hello~world!", {
+      ...resources.normalization,
       punctuationTokens: transcription.punctuation_tokens,
     });
     expect(normalized).toBe("hello ~ world");
@@ -253,10 +257,9 @@ describe("normalizeText parity after declarativization", () => {
 });
 
 describe("dectalk-english normalization policy", () => {
-  const dectalkConfig = {
-    tablesPath: "/rules/frontends/dectalk-english/normalization-tables.yaml",
-    pipelinePath: "/rules/frontends/dectalk-english/normalization-pipeline.yaml",
-  };
+  const dectalkConfig = loadFrontendResources(
+    loadBundledRulepackSpec("dectalk-english"),
+  ).normalization;
 
   it("keeps default hundreds style but uses DECtalk's numeric hundreds compound", () => {
     expect(normalizeText("room 101.")).toBe("room one hundred one .");

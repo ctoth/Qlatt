@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeText, numberToWords } from "../src/g2p/text-normalize";
+import { normalizeText, numberToWords } from "./g2p-fixture";
 
 describe("numberToWords", () => {
   it("converts 0", () => {

@@ -165,10 +165,7 @@ function tryRule(
  *               Case-insensitive.
  * @returns Array of Qlatt ARPAbet phoneme strings (no stress digits).
  */
-export function applyLtsRules(
-  word: string,
-  rulesPath: string = "/rules/frontends/qlatt-english/lts-rules.yaml",
-): string[] {
+export function applyLtsRules(word: string, rulesPath: string): string[] {
   if (!word || word.length === 0) return [];
 
   const loaded = loadRules(rulesPath);
@@ -210,7 +207,7 @@ export function applyLtsRules(
 
   // Filter prosodic markers (not real phonemes).
   // Symbol remapping (AX->AH, NX->NG, WH->W) is now handled by
-  // the normalize rule phase in public/rules/frontends/qlatt-english/phases/normalize.yaml.
+  // the selected frontend's normalize rule phase.
   const PROSODIC_MARKERS = new Set(["< >", "<,>", "<.>", "<?>", "<->"]);
   return elovitzPhonemes.filter((p) => !PROSODIC_MARKERS.has(p));
 }

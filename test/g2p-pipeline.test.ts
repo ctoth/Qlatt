@@ -10,10 +10,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { pronounce } from "../src/g2p";
-import { applyLtsRules } from "../src/g2p/lts-engine";
-import { assignStress } from "../src/g2p/stress";
 import type { DictLookup } from "../src/g2p/types";
+import { applyLtsRules, assignStress, pronounce } from "./g2p-fixture";
 
 // --- Helper dict factories ---
 

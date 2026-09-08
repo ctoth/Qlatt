@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { pronounce } from "../src/g2p";
+import { pronounce } from "./g2p-fixture";
 
 it("routes generated morphology through lexical stress", () => {
   const result = pronounce("kindness", (word) => (word === "kind" ? ["K", "AY1", "N", "D"] : null));

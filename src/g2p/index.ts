@@ -32,11 +32,7 @@ import type { DictLookup, PronunciationResult } from "./types";
 export function pronounce(
   word: string,
   dictLookup: DictLookup,
-  options: { ltsPath?: string; morphologyPath?: string; stressPolicyPath?: string } = {
-    ltsPath: "/rules/frontends/qlatt-english/lts-rules.yaml",
-    morphologyPath: "/rules/frontends/qlatt-english/morphology.yaml",
-    stressPolicyPath: "/rules/frontends/qlatt-english/stress-policy.yaml",
-  },
+  options: { ltsPath: string; morphologyPath: string; stressPolicyPath: string },
 ): PronunciationResult {
   if (!word || word.trim().length === 0) {
     return { phonemes: [], source: "lts-rules", word: word || "" };

@@ -13,6 +13,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { applyLtsRules } from "../src/g2p/lts-engine";
 import { assignStress } from "../src/g2p/stress";
 
@@ -21,7 +23,7 @@ const rawDict = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, "../public/dectalk-dictionary.json"), "utf8"),
 ) as Record<string, string>;
 
-const LTS_PATH = "/rules/frontends/dectalk-english/lts-rules.yaml";
+const resources = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
 
 const words =
   process.argv.slice(2).length > 0
@@ -34,8 +36,8 @@ for (const word of words) {
   // either, so stress hint is undefined — matches pure-LTS fallback).
   let before: string;
   try {
-    const lts = applyLtsRules(lw, LTS_PATH);
-    before = assignStress(lts, undefined).join(" ");
+    const lts = applyLtsRules(lw, resources.ltsPath);
+    before = assignStress(lts, resources.stressPolicyPath).join(" ");
   } catch (e) {
     before = `(LTS error: ${(e as Error).message})`;
   }

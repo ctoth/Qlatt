@@ -6,10 +6,10 @@ import { loadStressPolicy } from "../src/g2p/stress-policy";
 it("rejects a generated-pronunciation frontend without a resolved stress policy", () => {
   expect(() =>
     loadFrontendResources({
-      inventory_path: "/rules/frontends/qlatt-english/inventory.yaml",
-      lts_path: "/rules/frontends/qlatt-english/lts-rules.yaml",
+      ...loadBundledRulepackSpec("qlatt-english"),
+      stress_policy_path: undefined,
     }),
-  ).toThrow(/E_STRESS_POLICY/);
+  ).toThrow(/E_FRONTEND_CONFIG.*stress_policy_path/);
 });
 it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
   "resolves the inherited stress resource for %s",

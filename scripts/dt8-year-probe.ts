@@ -8,13 +8,16 @@
  * Citation: DECtalk 4.63 ls_util.c:598-622 (is_year),
  *           l_us_pr1.c:367-398 (ls_proc_do_4_digits).
  */
+
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { normalizeText } from "../src/g2p/text-normalize";
 
 // dectalk-english declares its own normalization tables + pipeline (DATA).
-const DECTALK_CONFIG = {
-  tablesPath: "/rules/frontends/dectalk-english/normalization-tables.yaml",
-  pipelinePath: "/rules/frontends/dectalk-english/normalization-pipeline.yaml",
-};
+const DECTALK_CONFIG = loadFrontendResources(
+  loadBundledRulepackSpec("dectalk-english"),
+).normalization;
+const QLATT_CONFIG = loadFrontendResources(loadBundledRulepackSpec("qlatt-english")).normalization;
 
 const inputs = [
   "in 1984",
@@ -71,7 +74,7 @@ const qlattExpect: Record<string, string> = {
   "code 0100": "code one hundred",
 };
 for (const input of inputs) {
-  const out = normalizeText(input); // default = qlatt-english
+  const out = normalizeText(input, QLATT_CONFIG);
   const expected = qlattExpect[input];
   const status = expected === undefined ? "    " : out === expected ? "PASS" : "FAIL";
   if (status === "FAIL") failures++;

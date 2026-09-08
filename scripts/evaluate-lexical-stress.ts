@@ -4,10 +4,13 @@
  * Reference: bundled CMU dictionary. Baseline: e3e8b4cf src/g2p/stress.ts count/hint rule.
  */
 import { loadCmuDictionaryFromPathSync } from "../src/cmu-dictionary-loader";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { pronounce } from "../src/g2p";
 import { applyLtsRules } from "../src/g2p/lts-engine";
 import { getStressHintForWord } from "../src/g2p/morphology";
 import { type StressHint, stressPronunciation } from "../src/g2p/stress";
+import { loadStressPolicy } from "../src/g2p/stress-policy";
 import { loadPhonotacticsSync } from "../src/g2p/syllabify";
 
 // Chosen before the first evaluation run; no accuracy-based selection or removal.
@@ -28,9 +31,10 @@ export const evaluationWords = {
   long: ["locomotive", "encyclopedia", "aristocratic", "university", "cafeteria"],
 } as const;
 
-const policyPath = "/rules/frontends/qlatt-english/stress-policy.yaml";
-const ltsPath = "/rules/frontends/qlatt-english/lts-rules.yaml";
-const vowels = new Set(loadPhonotacticsSync().vowels);
+const resources = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+const policyPath = resources.stressPolicyPath;
+const ltsPath = resources.ltsPath;
+const vowels = new Set(loadPhonotacticsSync(loadStressPolicy(policyPath).phonotacticsPath).vowels);
 const stressPattern = (phones: string[]) =>
   phones
     .filter((phone) => /[012]$/.test(phone))
@@ -65,10 +69,10 @@ export function evaluateLexicalStress() {
         .map((key) => dictionary[key].split(/\s+/));
       if (!variants.length) throw new Error(`Missing frozen evaluation reference: ${word}`);
       const phones = variants[0].map((phone) => phone.replace(/[012]$/, ""));
-      const hint = getStressHintForWord(word);
+      const hint = getStressHintForWord(word, resources.morphologyPath);
       const reference = stressPronunciation(phones, { policyPath, wordId: word, hint });
       // No whole-word OR root dictionary access: both old and new use the same bare LTS phones.
-      const generated = pronounce(word, () => null);
+      const generated = pronounce(word, () => null, resources);
       if (generated.source !== "lts-rules")
         throw new Error(`Evaluation dictionary bypass failed: ${word}`);
       const lts = applyLtsRules(word, ltsPath);

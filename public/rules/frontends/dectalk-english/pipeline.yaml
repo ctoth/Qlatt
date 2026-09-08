@@ -1,4 +1,15 @@
 version: v1
+functions:
+  # Bundled condition inventory (#133): six duration bindings, two postlexical
+  # bindings, and structural in_s_cluster share this equality. Keep the
+  # permissive missing-word test in dectalk_fuse_vowel_r, cross-word/boundary
+  # tests, and Qlatt/beauty's existing named predicates separate.
+  dectalk_same_word:
+    params: [a, b]
+    body: has(a.word) && has(b.word) && a.word == b.word
+    description: Presence-guarded word equality; callers retain their item-null and navigation conditions.
+    citations:
+      - "Qlatt #133 engineering convention: same word requires both word fields to be present and equal"
 predicates:
   is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
   is_stressed_vowel: 'current.type == "vowel" && has(current.stress) && current.stress == 1'

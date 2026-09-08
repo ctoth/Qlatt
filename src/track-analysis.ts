@@ -1,7 +1,11 @@
 // Track analysis module for Qlatt TTS diagnostics
 // Extracted from test-harness.html for maintainability
 
-import { dbToLinear, ndbScale, proximity } from "./builtin-functions";
+import { expandFormantBanks } from "./formant-bank";
+import type { BaconGraph } from "./klatt-runtime";
+import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
+import type { ParamValue, SemanticsDocument } from "./semantics/types";
+import { loadYamlDocumentSync } from "./yaml-loader";
 
 type Range = { min: number; max: number };
 type TrackNumeric = number | bigint | undefined;
@@ -110,75 +114,25 @@ function getParam(params: TrackParams | undefined, key: string, fallback = 0): n
   return toFiniteNumber(params?.[key], fallback);
 }
 
-// Klatt 80 Table III expected values for stop releases
-export const KLATT80_EXPECTED: Record<string, StopReleaseExpected> = {
-  P_REL: {
-    AF: 55,
-    AH: 52,
-    AB: 63,
-    A2: 0,
-    A3: 0,
-    A4: 0,
-    A5: 0,
-    A6: 0,
-    dur: 5,
-    label: "[p] labial burst",
-  },
-  T_REL: {
-    AF: 58,
-    AH: 55,
-    AB: 0,
-    A2: 0,
-    A3: 30,
-    A4: 45,
-    A5: 57,
-    A6: 63,
-    dur: 15,
-    label: "[t] alveolar burst",
-  },
-  K_REL: {
-    AF: 55,
-    AH: 53,
-    AB: 0,
-    A2: 0,
-    A3: 53,
-    A4: 43,
-    A5: 45,
-    A6: 45,
-    dur: 25,
-    label: "[k] velar burst",
-  },
-  B_REL: { AF: 52, AV: 47, AB: 63, A1: 60, A2: 0, dur: 5, label: "[b] voiced labial" },
-  D_REL: {
-    AF: 50,
-    AV: 47,
-    AB: 0,
-    A1: 58,
-    A2: 0,
-    A3: 47,
-    A4: 60,
-    A5: 62,
-    A6: 60,
-    dur: 10,
-    label: "[d] voiced alveolar",
-  },
-  G_REL: {
-    AF: 50,
-    AV: 47,
-    AB: 0,
-    A1: 58,
-    A2: 0,
-    A3: 53,
-    A4: 43,
-    A5: 45,
-    A6: 45,
-    dur: 20,
-    label: "[g] voiced velar",
-  },
-  P_ASP: { AH: 52, AB: 63, dur: 53, label: "[p] aspiration" },
-  T_ASP: { AH: 55, A3: 30, A4: 45, A5: 57, A6: 63, dur: 56, label: "[t] aspiration" },
-  K_ASP: { AH: 53, A3: 53, A4: 43, A5: 45, A6: 45, dur: 48, label: "[k] aspiration" },
+type TrackReference = {
+  citations: string[];
+  targets: Record<string, StopReleaseExpected>;
+  conformance: Record<
+    | "durationToleranceMs"
+    | "amplitudeToleranceDb"
+    | "plstepWindowSeconds"
+    | "plstepAfGateDb"
+    | "maxVoicingIssues"
+    | "lowParallelScale"
+    | "lowParallelGain",
+    { value: number; basis: string }
+  >;
 };
+const reference = loadYamlDocumentSync<TrackReference>(
+  "/experiments/klatt80-baseline/reference/table-iii.yaml",
+);
+export const KLATT80_EXPECTED = reference.targets;
+const conformance = reference.conformance;
 
 // Analyze stop releases in track
 export function analyzeStopReleases(
@@ -207,7 +161,7 @@ export function analyzeStopReleases(
         : isFiniteNumber(candidate.relTime)
           ? candidate.relTime
           : toFiniteNumber(candidate.time) - runStartTime;
-      return Math.abs(plTime - event.time) < 0.02;
+      return Math.abs(plTime - event.time) < conformance.plstepWindowSeconds.value;
     });
 
     const release: StopReleaseAnalysis = {
@@ -238,23 +192,23 @@ export function analyzeStopReleases(
     };
 
     if (expected) {
-      if (Math.abs(duration - expected.dur) > 3) {
+      if (Math.abs(duration - expected.dur) > conformance.durationToleranceMs.value) {
         release.issues.push(`dur: ${duration.toFixed(0)}ms vs expected ${expected.dur}ms`);
       }
       const af = getParam(p, "AF");
       const ah = getParam(p, "AH");
       const a3 = getParam(p, "A3");
-      if (expected.AF && Math.abs(af - expected.AF) > 5) {
+      if (expected.AF && Math.abs(af - expected.AF) > conformance.amplitudeToleranceDb.value) {
         release.issues.push(`AF: ${af} vs expected ${expected.AF}`);
       }
-      if (expected.AH && Math.abs(ah - expected.AH) > 5) {
+      if (expected.AH && Math.abs(ah - expected.AH) > conformance.amplitudeToleranceDb.value) {
         release.issues.push(`AH: ${ah} vs expected ${expected.AH}`);
       }
-      if (expected.A3 && Math.abs(a3 - expected.A3) > 5) {
+      if (expected.A3 && Math.abs(a3 - expected.A3) > conformance.amplitudeToleranceDb.value) {
         release.issues.push(`A3: ${a3} vs expected ${expected.A3}`);
       }
     }
-    if ((p.AF ?? 0) > 40 && !plstepMatch) {
+    if ((p.AF ?? 0) > conformance.plstepAfGateDb.value && !plstepMatch) {
       release.issues.push("NO PLSTEP (AF should trigger burst)");
     }
     releases.push(release);
@@ -443,7 +397,7 @@ export function findVoicingIssues(
     AF: fallback?.AF ?? 0,
     AH: fallback?.AH ?? 0,
   };
-  for (let i = 0; i < track.length && issues.length < 6; i += 1) {
+  for (let i = 0; i < track.length && issues.length < conformance.maxVoicingIssues.value; i += 1) {
     const event = track[i];
     if (event?.params) {
       for (const key of Object.keys(state)) {
@@ -538,10 +492,26 @@ export function updateRange(range: Range | null, value: number): Range | null {
   return range;
 }
 
+let baselineSemantics: SemanticsDocument | undefined;
+
+function getBaselineSemantics(): SemanticsDocument {
+  if (!baselineSemantics) {
+    const semantics = loadYamlDocumentSync<SemanticsDocument>(
+      "/experiments/klatt80-baseline/semantics.yaml",
+    );
+    const graph = loadYamlDocumentSync<BaconGraph>("/experiments/klatt80-baseline/graph.yaml");
+    expandFormantBanks(graph, semantics);
+    baselineSemantics = semantics;
+  }
+  return baselineSemantics;
+}
+
+/** Report magnitudes from the selected experiment's expanded realization rules. */
 export function analyzeTrackGains(
   track: TrackEvent[],
   synthParams: Record<string, TrackNumeric>,
   sampleRate = 48000,
+  semantics: SemanticsDocument = getBaselineSemantics(),
 ): { ranges: TrackGainRanges; warnings: string[]; parallelScale: number } | null {
   if (!track || track.length === 0) return null;
   const ranges: TrackGainRanges = {
@@ -555,87 +525,69 @@ export function analyzeTrackGains(
     masterGain: null,
     mix: null,
   };
-  const parallelScale = toFiniteNumber(synthParams.parallelGainScale, 1.0);
-  const baseBoost = toFiniteNumber(synthParams.masterGain, 1.0);
-  const state = { ...(track[0]?.params ?? {}) };
-
-  for (const event of track) {
-    if (event?.params) Object.assign(state, event.params);
-    const f1 = toFiniteNumber(state.F1, toFiniteNumber(synthParams.F1));
-    const f2 = toFiniteNumber(state.F2, toFiniteNumber(synthParams.F2));
-    const f3 = toFiniteNumber(state.F3, toFiniteNumber(synthParams.F3));
-    const f4 = toFiniteNumber(state.F4, toFiniteNumber(synthParams.F4));
-    const f5 = toFiniteNumber(state.F5, toFiniteNumber(synthParams.F5));
-    const f6 = toFiniteNumber(state.F6, toFiniteNumber(synthParams.F6));
-    const delF1 = f1 > 0 ? f1 / 500 : 1,
-      delF2 = f2 > 0 ? f2 / 1500 : 1;
-    let a2Cor = delF1 * delF1;
-    const a2Skrt = delF2 * delF2;
-    const a3Cor = a2Cor * a2Skrt;
-    a2Cor = delF2 !== 0 ? a2Cor / delF2 : a2Cor;
-    const n12Cor = proximity(f2 - f1),
-      n23Cor = proximity(f3 - f2 - 50),
-      n34Cor = proximity(f4 - f3 - 150);
-    const sw = toFiniteNumber(state.SW);
-    const af = toFiniteNumber(state.AF, -70);
-    const ah = toFiniteNumber(state.AH, -70);
-    const mix = sw === 1 ? 1 : toFiniteNumber(synthParams.parallelMix);
-    const fricDbAdj = sw === 1 ? Math.max(af, ah) : af;
-
-    const go = toFiniteNumber(state.GO, 47);
-    ranges.voiceGain = updateRange(
-      ranges.voiceGain,
-      dbToLinear(go + toFiniteNumber(state.AV, -70) + ndbScale.AV),
-    );
-    ranges.aspGain = updateRange(ranges.aspGain, dbToLinear(go + ah + ndbScale.AH));
-    ranges.fricGain = updateRange(
-      ranges.fricGain,
-      dbToLinear(go + fricDbAdj + ndbScale.AF) * parallelScale,
-    );
-    ranges.parallelVoiceGain = updateRange(
-      ranges.parallelVoiceGain,
-      dbToLinear(go + toFiniteNumber(state.AVS, -70) + ndbScale.AVS) * 10,
-    );
-    ranges.parallelBypassGain = updateRange(
-      ranges.parallelBypassGain,
-      dbToLinear(toFiniteNumber(state.AB, -70) + ndbScale.AB) * parallelScale,
-    );
-    ranges.parallelNasalGain = updateRange(
-      ranges.parallelNasalGain,
-      dbToLinear(toFiniteNumber(state.AN, -70) + ndbScale.AN) * parallelScale,
-    );
-    ranges.masterGain = updateRange(ranges.masterGain, dbToLinear(go) * baseBoost);
-    ranges.mix = updateRange(ranges.mix, mix);
-
-    const parallelLinear = [
-      dbToLinear(toFiniteNumber(state.A1, -70) + n12Cor + ndbScale.A1),
-      dbToLinear(toFiniteNumber(state.A2, -70) + n12Cor * 2 + n23Cor + ndbScale.A2) * a2Cor,
-      dbToLinear(toFiniteNumber(state.A3, -70) + n23Cor * 2 + n34Cor + ndbScale.A3) * a3Cor,
-      dbToLinear(toFiniteNumber(state.A4, -70) + n34Cor * 2 + ndbScale.A4) * a3Cor,
-      dbToLinear(toFiniteNumber(state.A5, -70) + ndbScale.A5) * a3Cor,
-      dbToLinear(toFiniteNumber(state.A6, -70) + ndbScale.A6) * a3Cor,
-    ];
-    const freqs = [f1, f2, f3, f4, f5, f6];
-    for (let idx = 0; idx < parallelLinear.length; idx++) {
-      let value = parallelLinear[idx] * parallelScale;
-      if (idx >= 1 && freqs[idx] > 0) {
-        const diffGain = Math.sqrt(2 - 2 * Math.cos((2 * Math.PI * freqs[idx]) / sampleRate));
-        if (diffGain > 0) value /= diffGain;
-      }
-      ranges.parallelFormantGain = updateRange(ranges.parallelFormantGain, Math.abs(value));
-    }
+  const { topoEvaluator } = createConfiguredEvaluator();
+  const state: Record<string, ParamValue> = {};
+  for (const [name, definition] of Object.entries(semantics.params ?? {})) {
+    if (definition.default !== undefined) state[name] = definition.default;
   }
-
-  const warnings = [];
-  if (parallelScale > 0 && parallelScale < 0.05)
-    warnings.push(`parallelGainScale=${parallelScale.toFixed(3)} very low`);
+  const overlay = (params: Record<string, TrackNumeric>) => {
+    for (const [name, value] of Object.entries(params)) {
+      if (value !== undefined && Number.isFinite(Number(value))) state[name] = Number(value);
+    }
+  };
+  overlay(synthParams);
+  const warnings = new Set<string>();
+  let parallelScale = toFiniteNumber(state.parallelScale, 1);
+  const gainNames = {
+    voiceGain: "voiceGain",
+    aspGain: "aspGain",
+    fricGain: "fricGainScaled",
+    parallelVoiceGain: "avsGain",
+    parallelBypassGain: "abGainScaled",
+    parallelNasalGain: "anGainScaled",
+    masterGain: "masterGain",
+    mix: "parallelVoiceGain",
+  } as const;
+  const formantNames = Object.keys(semantics.realize ?? {}).filter((name) =>
+    /^a[0-9]+Linear$/.test(name),
+  );
+  for (const event of track) {
+    overlay(event.params ?? {});
+    // As in the interpreter, isolate nested constants from CEL collection-macro mutation.
+    const result = topoEvaluator.evaluate(semantics, {
+      params: { ...structuredClone(semantics.constants ?? {}), ...state, sampleRate } as Record<
+        string,
+        ParamValue
+      >,
+      constants: semantics.constants ?? {},
+    });
+    for (const error of result.errors) {
+      warnings.add(`Semantics error in ${error.name}: ${error.error}`);
+    }
+    const recordGain = (rangeName: keyof TrackGainRanges, name: string) => {
+      const value = result.values[name];
+      if (typeof value === "number" && Number.isFinite(value)) {
+        ranges[rangeName] = updateRange(ranges[rangeName], Math.abs(value));
+      } else {
+        warnings.add(`Gain value unavailable: ${name}`);
+      }
+    };
+    for (const [rangeName, name] of Object.entries(gainNames)) {
+      recordGain(rangeName as keyof typeof gainNames, name);
+    }
+    for (const name of formantNames) recordGain("parallelFormantGain", name);
+    if (formantNames.length === 0) warnings.add("No realized parallel formant gains");
+    parallelScale = toFiniteNumber(result.values.parallelScale, parallelScale);
+  }
+  if (parallelScale > 0 && parallelScale < conformance.lowParallelScale.value)
+    warnings.add(`parallelScale=${parallelScale.toFixed(3)} very low`);
   if (
     (ranges.mix?.max ?? 0) > 0 &&
-    (ranges.parallelVoiceGain?.max ?? 0) < 1e-3 &&
-    (ranges.fricGain?.max ?? 0) < 1e-3
+    (ranges.parallelVoiceGain?.max ?? 0) < conformance.lowParallelGain.value &&
+    (ranges.fricGain?.max ?? 0) < conformance.lowParallelGain.value
   )
-    warnings.push("Parallel gains < 1e-3");
-  return { ranges, warnings, parallelScale };
+    warnings.add(`Parallel gains < ${conformance.lowParallelGain.value}`);
+  return { ranges, warnings: [...warnings], parallelScale };
 }
 
 export function findTimingMismatches(track: TrackEvent[], telemetryMax: TelemetryLike): string[] {

@@ -89,6 +89,7 @@ export async function initializeNewRuntime() {
           playHistory: state.playHistory,
           sessionId: state.sessionId,
           sliderParams: {},
+          semantics: state.newRuntimeSemantics,
         });
         state.diagEngine.subscribe((output) => {
           if (state.useEngineOutput) {

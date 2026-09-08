@@ -1,6 +1,7 @@
 // Engine facade — wires TapManager, PollLoop, and AcrossPlaysAccumulator
 // into a single DiagnosticsEngine interface.
 
+import type { SemanticsDocument } from "../semantics/types";
 import type { PlstepEvent, TelemetryDatum } from "../track-analysis";
 import { AcrossPlaysAccumulator } from "./across-plays";
 import { evaluateTrackAnalysis, updateParamRange } from "./check-evaluator";
@@ -26,6 +27,7 @@ export interface ExternalState {
   playHistory: PlayHistoryEntry[];
   sessionId: number;
   sliderParams: Record<string, number>;
+  semantics?: SemanticsDocument;
 }
 
 function readPlstepTotalCount(externalState?: ExternalState): number {
@@ -81,6 +83,7 @@ export function createDiagnosticsEngine(
       playHistory: externalState?.playHistory ?? [],
       sessionId: currentRun?.sessionId ?? externalState?.sessionId ?? 0,
       sliderParams: externalState?.sliderParams ?? {},
+      semantics: externalState?.semantics,
       sampleRate: audioContext.sampleRate,
     }),
     onResults: (results, output) => {

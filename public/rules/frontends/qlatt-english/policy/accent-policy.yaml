@@ -18,3 +18,5 @@ accent_assignment:
   require_content_word: true
   required_stress: 1
   carrier_selection: first_primary_stress
+  # Engineering choice: author-supplied metrical stress takes priority (Qlatt #152).
+  metrical_stress_overrides_word_class: true

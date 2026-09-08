@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -22,8 +25,30 @@ import {
   spansAt,
   tokenizeScore,
 } from "../src/input/parse";
+import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 describe("input contract — Direction Track schema", () => {
+  it("round-trips syllable stress and rejects invalid indices and levels", () => {
+    const span = {
+      id: "meter",
+      anchor: { unit: "syllable", word: 1, start: 0 },
+      stress: { level: 1 },
+    };
+    expect(parseDirectionTrack({ version: "1", spans: [span] }).spans).toEqual([span]);
+    for (const level of [-1, 4, 1.5, "1", null]) {
+      expect(() =>
+        parseDirectionTrack({ version: "1", spans: [{ ...span, stress: { level } }] }),
+      ).toThrow(/stress/);
+    }
+    for (const word of [-1, 0.5, undefined]) {
+      expect(() =>
+        parseDirectionTrack({
+          version: "1",
+          spans: [{ ...span, anchor: { ...span.anchor, word } }],
+        }),
+      ).toThrow(/word/);
+    }
+  });
   it("round-trips a fully-populated Direction Track through JSON", () => {
     const track: DirectionTrack = {
       version: "1",
@@ -58,6 +83,216 @@ describe("input contract — Direction Track schema", () => {
   it("rejects a malformed Direction Track (bad version)", () => {
     expect(() => parseDirectionTrack({ version: "9" })).toThrow(/version/);
     expect(() => parseDirectionTrack({ version: "1", spans: "nope" })).toThrow(/spans/);
+  });
+});
+
+describe("input contract — authored syllable stress", () => {
+  for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
+    it(`promotes to and demotes I before annotation (${frontendId})`, () => {
+      const control = textToKlattTrackDetailed("I go to school.", 110, 30, {
+        frontendId,
+        directionTrack: {
+          version: "1",
+          spans: [
+            {
+              id: "strong-I",
+              anchor: { unit: "syllable", word: 0, start: 0 },
+              stress: { level: 1 },
+            },
+            {
+              id: "weak-to",
+              anchor: { unit: "syllable", word: 2, start: 0 },
+              stress: { level: 0 },
+            },
+          ],
+        },
+      });
+      const result = textToKlattTrackDetailed("I go to school.", 110, 30, {
+        frontendId,
+        directionTrack: {
+          version: "1",
+          spans: [
+            {
+              id: "strong-to",
+              anchor: { unit: "syllable", word: 2, start: 0 },
+              stress: { level: 1 },
+            },
+            { id: "weak-I", anchor: { unit: "syllable", word: 0, start: 0 }, stress: { level: 0 } },
+          ],
+        },
+      });
+      for (const [wordIndex, level, spanId] of [
+        [2, 1, "strong-to"],
+        [0, 0, "weak-I"],
+      ] as const) {
+        const word = result.utterance.relation("Word").listItems()[wordIndex];
+        const syllable = word.node("SylStructure")!.daughters[0].item;
+        expect(syllable.get("stress")).toBe(level);
+        const nucleus = syllable
+          .node("SylStructure")!
+          .daughters.map((n) => n.item)
+          .find((s) => s.get("type") === "vowel" && s.get("active") !== false)!;
+        expect(nucleus.get("stress")).toBe(level);
+        const write = nucleus.writes("stress").find((w) => w.tag === "metrical_stress")!;
+        expect(write).toBeDefined();
+        const decision = result.utterance.provenance
+          .getDecisions()
+          .find((d) => d.id === write.decisionId)!;
+        expect(decision.parents).toContain(spanId);
+        if (frontendId !== "dectalk-english")
+          expect(nucleus.get("isAccentCarrier")).toBe(level === 1);
+        else
+          expect(
+            result.utterance.provenance
+              .getDecisions()
+              .some(
+                (d) =>
+                  d.reason.includes("dectalk_stress_impulse") && d.subject.includes(nucleus.id),
+              ),
+          ).toBe(level === 1);
+        const controlNucleus = control.utterance.getItem(nucleus.id)!;
+        expect(controlNucleus.get("stress")).toBe(level === 1 ? 0 : 1);
+        if (frontendId !== "dectalk-english")
+          expect(controlNucleus.get("isAccentCarrier")).toBe(level !== 1);
+        else
+          expect(
+            control.utterance.provenance
+              .getDecisions()
+              .some(
+                (d) =>
+                  d.reason.includes("dectalk_stress_impulse") && d.subject.includes(nucleus.id),
+              ),
+          ).toBe(level !== 1);
+      }
+    });
+  }
+
+  it("preserves level 3 on a single DECtalk word and adds the cited 19 and 38 ms", () => {
+    const result = textToKlattTrackDetailed("you", 110, 30, {
+      frontendId: "dectalk-english",
+      directionTrack: {
+        version: "1",
+        spans: [{ id: "strong", anchor: { unit: "word", start: 0 }, stress: { level: 3 } }],
+      },
+    });
+    const nucleus = result.utterance
+      .relation("Segment")
+      .listItems()
+      .find((s) => s.get("type") === "vowel")!;
+    expect(nucleus.get("stress")).toBe(3);
+    const onset = result.utterance
+      .relation("Segment")
+      .listItems()
+      .find((s) => s.get("phoneme") === "Y")!;
+    expect(onset.get("stress")).toBe(3);
+    expect(onset.latestWrite("stress")?.tag).toBe("consonant_stress");
+    const writes = nucleus.writes("duration");
+    for (const [tag, delta] of [
+      ["emphasis", 19],
+      ["emphasis_syllabic", 38],
+    ] as const) {
+      const index = writes.findIndex((w) => w.tag === tag);
+      expect(index).toBeGreaterThan(0);
+      expect(Number(writes[index].value) - Number(writes[index - 1].value)).toBeCloseTo(delta);
+    }
+  });
+
+  it("honors the accent policy switch without discarding authored stress", () => {
+    const dir = mkdtempSync(join(tmpdir(), "qlatt-metrical-policy-"));
+    try {
+      const policyPath = join(dir, "accent.yaml").replace(/\\/g, "/");
+      const frontendPath = join(dir, "frontend.yaml").replace(/\\/g, "/");
+      writeFileSync(
+        policyPath,
+        "accent_assignment:\n  metrical_stress_overrides_word_class: false\n",
+      );
+      writeFileSync(frontendPath, `extends: qlatt-english\naccent_policy_path: ${policyPath}\n`);
+      const result = textToKlattTrackDetailed("to school", 110, 30, {
+        frontendPath,
+        directionTrack: {
+          version: "1",
+          spans: [
+            { id: "meter", anchor: { unit: "syllable", word: 0, start: 0 }, stress: { level: 1 } },
+          ],
+        },
+      });
+      const nucleus = result.utterance
+        .relation("Segment")
+        .listItems()
+        .find(
+          (s) => s.get("word") === "to" && s.get("type") === "vowel" && s.get("active") !== false,
+        )!;
+      expect(nucleus.get("stress")).toBe(1);
+      expect(nucleus.get("isAccentCarrier")).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("resolves inclusive syllable ranges and overlapping stress by precedence then declaration", () => {
+    const result = textToKlattTrackDetailed("banana", 110, 30, {
+      directionTrack: {
+        version: "1",
+        spans: [
+          {
+            id: "range",
+            anchor: { unit: "syllable", word: 0, start: 0, end: 1 },
+            precedence: 2,
+            stress: { level: 2 },
+          },
+          { id: "lower", anchor: { unit: "word", start: 0 }, stress: { level: 0 } },
+          {
+            id: "later",
+            anchor: { unit: "syllable", word: 0, start: 1 },
+            precedence: 2,
+            stress: { level: 1 },
+          },
+        ],
+      },
+    });
+    expect(
+      result.utterance
+        .relation("Syllable")
+        .listItems()
+        .map((s) => s.get("stress")),
+    ).toEqual([2, 1, 0]);
+  });
+
+  it("rejects a syllable that does not exist in the selected frontend", () => {
+    expect(() =>
+      textToKlattTrackDetailed("to", 110, 30, {
+        directionTrack: {
+          version: "1",
+          spans: [
+            { id: "bad", anchor: { unit: "syllable", word: 0, start: 1 }, stress: { level: 1 } },
+          ],
+        },
+      }),
+    ).toThrow(/E_DIRECTION_ANCHOR/);
+  });
+
+  it("keeps a syllable-anchored rate delta local to that syllable", () => {
+    const baseline = textToKlattTrackDetailed("banana", 110);
+    const directed = textToKlattTrackDetailed("banana", 110, 30, {
+      directionTrack: {
+        version: "1",
+        spans: [{ id: "slow", anchor: { unit: "syllable", word: 0, start: 1 }, rate: 0.5 }],
+      },
+    });
+    const durations = (result: typeof baseline) =>
+      result.utterance
+        .relation("Segment")
+        .listItems()
+        .filter((s) => s.get("active") !== false)
+        .map(
+          (s) => [s.node("SylStructure")?.parent?.item.get("index"), s.get("duration")] as const,
+        );
+    // Deltas are consumed in final lowering; the linguistic duration features stay identical.
+    expect(durations(directed)).toEqual(durations(baseline));
+    const addedSeconds = durations(baseline)
+      .filter(([index]) => index === 1)
+      .reduce((sum, [, duration]) => sum + Number(duration) / 1000, 0);
+    expect(directed.track.at(-1)!.time - baseline.track.at(-1)!.time).toBeCloseTo(addedSeconds, 6);
   });
 });
 

@@ -674,17 +674,6 @@ function buildTextToKlattTrackDetailed(
     inventory: graphInventory,
     captureTooling,
   });
-  // Prosodic structure (word class, accent, nuclear accent, accent types,
-  // phrase-edge tones, break indices) is now fully declarative: the `annotation`
-  // phase rules replace the former imperative annotateProsody() pass.
-  runGraphRuleEngine(utterance, spec, {
-    evaluationOwner,
-    phases: ["annotation"],
-    parameters: mergedPolicy(spec, speakerPolicy),
-    inventory: graphInventory,
-    captureTooling,
-  });
-
   if (options.directionTrack) {
     const parsed = parseDirectionInput(
       {
@@ -700,6 +689,15 @@ function buildTextToKlattTrackDetailed(
     );
     attachDirectionsToUtterance(parsed, utterance);
   }
+
+  // Authored stress must be visible to accent assignment and onset propagation.
+  runGraphRuleEngine(utterance, spec, {
+    evaluationOwner,
+    phases: ["annotation"],
+    parameters: mergedPolicy(spec, speakerPolicy),
+    inventory: graphInventory,
+    captureTooling,
+  });
 
   const ratePolicy = recordOrEmpty(policyRecord(spec).rate);
   const undershoot = requirePolicyNumber(

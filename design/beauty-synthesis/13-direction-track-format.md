@@ -17,7 +17,7 @@ Implemented in `src/input/`:
 | `inline.ts` | The DEMOTED optional inline shorthand — lifts `((preset@degree))` + `*emphasis*` into a Direction Track (never the source of truth). |
 | `index.ts` | Barrel. |
 
-Tests: `test/input.test.ts` (20 tests, all passing).
+Tests: `test/input.test.ts`.
 
 ---
 
@@ -70,6 +70,7 @@ interface DirectionSpan {
   anchor: AnchorRange;         // { unit: token|word|phrase, start, end? }
   precedence?: number;         // higher wins on overlap; ties → later-declared
   emphasis?: { level: reduced|none|moderate|strong };
+  stress?:   { level: 0|1|2|3 }; // absolute linguistic stress before annotation
   break?:    { strength: 0..4, timeMs? };
   pitch?:    { semitones?, rangeScale? };
   rate?:     number;           // speaking-rate ×; lowers to inverse durationScale
@@ -83,6 +84,22 @@ Spans carry **explicit precedence** so composition is *defined*, not vendor
 folklore. `effectiveSpanFieldAt(input, tokenIndex, field)` returns the
 winning value for a field at a token (highest precedence that *defines* the
 field; ties broken by later declaration).
+
+For a syllable, use `{ unit: "syllable", word: N, start: k, end?: k2 }`.
+Indices are zero-based; `end` is inclusive and defaults to `start`. Syllable
+indices address the selected frontend's syllabification of word N. Invalid
+syllable ranges are rejected. Delta modifiers on these anchors affect only the
+selected syllables during lowering.
+
+`stress` writes the syllable and its active vowel nucleus before annotation:
+0 is unstressed, 1 primary, 2 secondary, and 3 emphatic. Writes carry the
+`metrical_stress` provenance tag and the author span id as a parent. Existing
+onset rules propagate the value to consonants. The accent policy's
+`metrical_stress_overrides_word_class` permits an authored primary stress on a
+function word to carry accent. Beauty assigns accents only to authored words;
+DECtalk's stress impulses read the updated feature directly. DECtalk level 3
+adds 19 ms, plus 38 ms on vowels, through its cited Rule 8. These are linguistic
+feature overrides; word-level `emphasis` retains its existing meaning.
 
 ---
 

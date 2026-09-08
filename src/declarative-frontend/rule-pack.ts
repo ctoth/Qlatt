@@ -448,6 +448,13 @@ export function loadRulepackSpecFromPath(
     specPath,
   );
   const merged = resolveIncludesSync(rootDoc, specPath, undefined, fallback);
+  if (typeof merged.accent_policy_path === "string") {
+    attachAccentPolicy(
+      merged,
+      loadYamlSourceSync(merged.accent_policy_path),
+      merged.accent_policy_path,
+    );
+  }
   const spec = parseDslSpec(merged);
   const inventory =
     typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
@@ -460,6 +467,37 @@ export function loadRulepackSpecFromPath(
   freezeRecursively(spec);
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;
+}
+
+/** Load the cited accent policy into the static CEL parameter schema. */
+function attachAccentPolicy(spec: PlainObject, source: string, path: string): void {
+  const policy = parseRulepackDocument(source, path);
+  const assignment = policy.accent_assignment;
+  if (
+    !isPlainObject(assignment) ||
+    typeof assignment.metrical_stress_overrides_word_class !== "boolean"
+  ) {
+    throw new Error(
+      `E_ACCENT_POLICY: ${path} requires boolean metrical_stress_overrides_word_class`,
+    );
+  }
+  const parameters = isPlainObject(spec.parameters) ? spec.parameters : {};
+  const existing = isPlainObject(parameters.policy) ? parameters.policy : {};
+  spec.parameters = {
+    ...parameters,
+    policy: {
+      ...existing,
+      accent_assignment: {
+        metrical_stress_overrides_word_class: {
+          value: assignment.metrical_stress_overrides_word_class,
+          citations: [
+            ...(Array.isArray(policy.citations) ? policy.citations : []),
+            "Engineering choice: authored metrical stress overrides word class (Qlatt #152)",
+          ],
+        },
+      },
+    },
+  };
 }
 
 export async function preloadRulepackSpecFromPath(
@@ -486,6 +524,13 @@ export async function preloadRulepackSpecFromPath(
     specPath,
   );
   const merged = await resolveIncludesAsync(rootDoc, specPath, undefined, fallback);
+  if (typeof merged.accent_policy_path === "string") {
+    attachAccentPolicy(
+      merged,
+      await loadYamlSource(merged.accent_policy_path),
+      merged.accent_policy_path,
+    );
+  }
   const spec = parseDslSpec(merged);
   const inventory =
     typeof spec.inventory_path === "string"

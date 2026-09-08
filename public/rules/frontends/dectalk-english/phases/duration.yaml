@@ -25,7 +25,7 @@ rules:
         (prev_primary_or_boundary == null || prev_primary_or_boundary.phoneme == 'SIL')
         && (next_primary_or_boundary == null || next_primary_or_boundary.phoneme == 'SIL')
       primary_target: "target(current.phoneme + '1')"
-    constraint: "no_primary_in_clause && prior_vowel_in_word == null"
+    constraint: "no_primary_in_clause && prior_vowel_in_word == null && !word_has_metrical_stress()"
     apply:
       - field: stress
         op: set
@@ -365,19 +365,25 @@ rules:
       where: current.phoneme != 'SIL'
     define:
       is_emphasized: "has(current.stress) ? current.stress == 3 : false"
-      is_vowel: current.type == 'vowel'
     constraint: is_emphasized
     apply:
       - field: duration
         op: add
         value: params.policy.duration.emphasis_lengthening_ms
         tag: emphasis
+    citations:
+      - "DECtalk 4.63 p_us_tim.c Rule 8 (emphasis lengthening)"
+
+  # A separate transaction adds to the committed +19 ms (effect reads are snapshots).
+  dectalk_emphasis_syllabic_lengthening:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.type == 'vowel' && has(current.stress) && current.stress == 3"
+    apply:
       - field: duration
         op: add
-        dispatch:
-          - when: is_vowel
-            value: params.policy.duration.emphasis_syllabic_extra_ms
-          - default: 0
+        value: params.policy.duration.emphasis_syllabic_extra_ms
         tag: emphasis_syllabic
     citations:
       - "DECtalk 4.63 p_us_tim.c Rule 8 (emphasis lengthening)"

@@ -385,6 +385,7 @@ phases:
       - dectalk_non_initial_consonant_shortening
       - dectalk_unstressed_shortening
       - dectalk_emphasis_lengthening
+      - dectalk_emphasis_syllabic_lengthening
       - dectalk_postvocalic_voiceless_shortening
       - dectalk_postvocalic_voiced_lengthening
       # Rule 9 [nt] cluster nasal shortening (p_us_tim.c:628-639).

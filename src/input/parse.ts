@@ -36,6 +36,7 @@ import type {
 import {
   GESTURE_LIBRARY,
   materializeVoiceQualityDelta,
+  parseDirectionTrack,
   scaleVoiceQualityDelta,
 } from "./direction-track";
 import { VQ_FIELDS } from "./vq-channels";
@@ -46,6 +47,7 @@ export type DirectionKind =
   | "global_affect"
   | "local_affect"
   | "emphasis"
+  | "stress"
   | "break"
   | "pitch"
   | "rate"
@@ -64,7 +66,19 @@ export interface Direction {
   id: string;
   kind: DirectionKind;
   /** Provenance tag describing the kind of modification (feeds diagnostics). */
-  tag: "affect" | "voice_quality" | "emphasis" | "break" | "gesture" | "pitch" | "rate" | "voice";
+  tag:
+    | "affect"
+    | "voice_quality"
+    | "emphasis"
+    | "break"
+    | "gesture"
+    | "pitch"
+    | "rate"
+    | "voice"
+    | "metrical_stress";
+  anchor?: AnchorRange;
+  stress?: DirectionSpan["stress"];
+  spanId?: string;
   /** "utterance" for global state; a token range for local spans. */
   scope: "utterance" | TokenRange;
   /** The HRG relation this directive should later attach to (not wired now). */
@@ -123,6 +137,7 @@ export const DIRECTION_ITEM_SCHEMA = {
         "global_affect",
         "local_affect",
         "emphasis",
+        "stress",
         "break",
         "pitch",
         "rate",
@@ -132,7 +147,17 @@ export const DIRECTION_ITEM_SCHEMA = {
     },
     tag: {
       kind: "string",
-      values: ["affect", "voice_quality", "emphasis", "break", "gesture", "pitch", "rate", "voice"],
+      values: [
+        "affect",
+        "voice_quality",
+        "emphasis",
+        "break",
+        "gesture",
+        "pitch",
+        "rate",
+        "voice",
+        "metrical_stress",
+      ],
     },
     scope: {
       kind: "union",
@@ -152,6 +177,8 @@ export const DIRECTION_ITEM_SCHEMA = {
       ],
     },
     label: { kind: "string" },
+    stress: { kind: "number" },
+    syllable_ids: { kind: "array", items: { kind: "string" } },
     delta: { kind: "object", fields: DELTA_FIELDS },
     delta_fields: {
       kind: "array",
@@ -218,6 +245,12 @@ export function tokenizeScore(text: string): ResolvedScore {
 
 /** Resolve an anchor range into inclusive token indices against a score. */
 export function resolveAnchor(anchor: AnchorRange, score: ResolvedScore): TokenRange {
+  if (anchor.unit === "syllable") {
+    if (!Number.isInteger(anchor.word) || anchor.word < 0 || anchor.word >= score.tokens.length) {
+      throw new Error("E_DIRECTION_ANCHOR: syllable anchor word is outside the score");
+    }
+    return { startToken: anchor.word, endToken: anchor.word };
+  }
   const end = anchor.end ?? anchor.start;
   if (anchor.unit === "token" || anchor.unit === "word") {
     const startToken = clampIndex(anchor.start, score.tokens.length);
@@ -264,7 +297,8 @@ export function parseDirectionInput(
   const score = tokenizeScore(input.score.text);
   const directions: Direction[] = [];
 
-  const global = input.directionTrack.global;
+  const track = parseDirectionTrack(input.directionTrack);
+  const global = track.global;
   const sex = global?.voice?.sex;
 
   // 1. Voice identity (if any).
@@ -310,13 +344,15 @@ export function parseDirectionInput(
   }
 
   // 3. Local override spans, in declaration order.
-  const spans = input.directionTrack.spans ?? [];
+  const spans = track.spans ?? [];
   for (let declarationOrder = 0; declarationOrder < spans.length; declarationOrder += 1) {
     const span = spans[declarationOrder];
     if (!span) continue;
     const range = resolveAnchor(span.anchor, score);
     const lowered = lowerSpan(provenance, span, range, sex, globalAffectDecisionId);
     for (const direction of lowered) {
+      direction.anchor = span.anchor;
+      direction.spanId = span.id;
       direction.precedence = span.precedence ?? 0;
       direction.declarationOrder = declarationOrder;
     }
@@ -334,7 +370,17 @@ export function attachDirectionsToUtterance(parsed: ParseResult, utterance: Utte
     );
   }
   const attached: Item[] = [];
-  for (const direction of parsed.directions) {
+  // Apply lower precedence first, then later declarations win ties per field.
+  const directions = [...parsed.directions].sort(
+    (a, b) =>
+      (a.precedence ?? 0) - (b.precedence ?? 0) ||
+      (a.declarationOrder ?? -1) - (b.declarationOrder ?? -1),
+  );
+  for (const direction of directions) {
+    const syllables =
+      direction.stress || direction.anchor?.unit === "syllable"
+        ? resolveSyllables(direction, utterance)
+        : [];
     const transaction = utterance.beginTransaction({
       ruleId: `direction_attach:${direction.kind}`,
       phase: "input",
@@ -344,6 +390,7 @@ export function attachDirectionsToUtterance(parsed: ParseResult, utterance: Utte
       stage: "frontend",
     });
     transaction.dependOn(direction.decision.id);
+    if (direction.stress && direction.spanId) transaction.dependOn(direction.spanId);
     const item = transaction.createItem("direction", `direction_${direction.id}`);
     transaction.set(item, "kind", direction.kind);
     transaction.set(item, "tag", direction.tag);
@@ -359,6 +406,27 @@ export function attachDirectionsToUtterance(parsed: ParseResult, utterance: Utte
           },
     );
     transaction.set(item, "citations", direction.citations);
+    if (direction.anchor?.unit === "syllable") {
+      transaction.set(
+        item,
+        "syllable_ids",
+        syllables.map((syllable) => syllable.id),
+      );
+    }
+    if (direction.stress) {
+      transaction.set(item, "stress", direction.stress.level);
+      for (const syllable of syllables) {
+        transaction.set(syllable, "stress", direction.stress.level);
+        for (const node of syllable.node("SylStructure")?.daughters ?? []) {
+          if (
+            transaction.read(node.item, "type") === "vowel" &&
+            transaction.read(node.item, "active") !== false
+          ) {
+            transaction.set(node.item, "stress", direction.stress.level);
+          }
+        }
+      }
+    }
     if (direction.label != null) transaction.set(item, "label", direction.label);
     if (direction.delta) transaction.set(item, "delta", direction.delta);
     if (direction.deltaFields) transaction.set(item, "delta_fields", direction.deltaFields);
@@ -382,6 +450,33 @@ export function attachDirectionsToUtterance(parsed: ParseResult, utterance: Utte
     attached.push(item);
   }
   return attached;
+}
+
+/** Resolve only after the selected frontend has built its syllable Items. */
+function resolveSyllables(direction: Direction, utterance: Utterance): Item[] {
+  if (direction.scope === "utterance") return [];
+  const words = utterance.relation("Word").listItems();
+  const syllables = words
+    .slice(direction.scope.startToken, direction.scope.endToken + 1)
+    .flatMap((word) => (word.node("SylStructure")?.daughters ?? []).map((node) => node.item));
+  const anchor = direction.anchor;
+  if (anchor?.unit !== "syllable") return syllables;
+  const end = anchor.end ?? anchor.start;
+  if (
+    !Number.isInteger(anchor.start) ||
+    !Number.isInteger(end) ||
+    anchor.start < 0 ||
+    end < anchor.start ||
+    end >= syllables.length
+  ) {
+    utterance.diagnostics.error(
+      "Syllable anchor is outside the frontend's word syllables",
+      { anchor },
+      "DIRECTION_ANCHOR",
+    );
+    throw new Error("E_DIRECTION_ANCHOR: syllable range is outside the frontend's word syllables");
+  }
+  return syllables.slice(anchor.start, end + 1);
 }
 
 function lowerAffect(
@@ -439,6 +534,27 @@ function lowerSpan(
 ): Direction[] {
   const out: Direction[] = [];
   const subject = tokenSubject(range);
+
+  if (span.stress) {
+    const decision = provenance.add({
+      stage: "frontend",
+      type: "metrical_stress",
+      subject,
+      reason: `Authored stress ${span.stress.level} from span '${span.id}'`,
+      citations: ["Engineering choice: Direction Track metrical stress override (Qlatt #152)"],
+      parents: [span.id],
+    });
+    out.push({
+      id: decision.id,
+      kind: "stress",
+      tag: "metrical_stress",
+      scope: range,
+      hrgRelation: "Intonation",
+      stress: span.stress,
+      citations: decision.citations,
+      decision,
+    });
+  }
 
   if (span.affect) {
     out.push(

@@ -17,7 +17,8 @@
  *                        clobbered by the assembly-time voice-quality overlay;
  *                        `RdPhraseOffset` is the surviving additive channel and
  *                        reaches the LF source via the backend's
- *                        effectiveRd = clamp(Rd + RdPhraseOffset, 0.3, 2.7).
+ *                        effectiveRd = Rd + RdPhraseOffset, bounded by the
+ *                        declared effective_rd policy in vq-channels.yaml.
  *                        Positive = breathier (lower HNR); negative = pressed.
  *   f0Scale            -> params.F0 (MUL), clamped > 0.
  *   durationScale      -> each speech-frame interval (MUL; >1 = slower).
@@ -40,13 +41,8 @@
 import type { KlattFrame } from "../tts-frontend-types";
 import type { CompiledAffect } from "./affect";
 import { NEUTRAL_VQ, type VoiceQualityDelta } from "./direction-track";
+import { projectRd } from "./rd-policy";
 import { VQ_PARAM_CHANNELS } from "./vq-channels";
-
-/** Effective-Rd clamp bounds (Fant 1997 Rd range), mirrored from the backend. */
-const RD_MIN = 0.3;
-const RD_MAX = 2.7;
-/** The Rd value the beauty voice uses when a frame carries no explicit Rd. */
-const RD_FALLBACK = 0.7;
 
 /** Result of applying an affect: the new track plus the citations consumed. */
 export interface AffectApplication {
@@ -56,12 +52,6 @@ export interface AffectApplication {
 
 function isCompiledAffect(value: CompiledAffect | VoiceQualityDelta): value is CompiledAffect {
   return (value as CompiledAffect).vq !== undefined;
-}
-
-function clampNumber(value: number, lo: number, hi: number): number {
-  if (value < lo) return lo;
-  if (value > hi) return hi;
-  return value;
 }
 
 /**
@@ -121,17 +111,7 @@ export function applyAffectToTrack(
 
     // --- Rd channel (breathy/pressed) via RdPhraseOffset ------------------
     if (vq.rdDelta !== 0) {
-      const rdBase =
-        typeof params.Rd === "number" && Number.isFinite(params.Rd) ? params.Rd : RD_FALLBACK;
-      const prevOffset =
-        typeof params.RdPhraseOffset === "number" && Number.isFinite(params.RdPhraseOffset)
-          ? params.RdPhraseOffset
-          : 0;
-      // Clamp the EFFECTIVE Rd (what the backend will actually use) to the Fant
-      // range, then write back the offset that achieves it.
-      const desiredEffective = rdBase + prevOffset + vq.rdDelta;
-      const clampedEffective = clampNumber(desiredEffective, RD_MIN, RD_MAX);
-      params.RdPhraseOffset = clampedEffective - rdBase;
+      Object.assign(params, projectRd(params, vq.rdDelta));
     }
 
     for (const row of VQ_PARAM_CHANNELS) {

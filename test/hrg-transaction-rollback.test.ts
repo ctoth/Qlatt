@@ -47,18 +47,27 @@ const INJECTED = "E_TEST_INJECTED_COMMIT_FAILURE";
  * shares, so failing there lands mid-commit after earlier operations have
  * already been applied.
  */
-function faultyProvenance(): ProvenanceCollector & { failOn(subject: string): void } {
+function faultyProvenance(): ProvenanceCollector & {
+  failOn(subject: string, afterAdd?: boolean): void;
+} {
   const inner = createProvenanceCollector();
   let armed: string | null = null;
+  let failAfterAdd = false;
   return {
+    get size(): number {
+      return inner.size;
+    },
     add(input: AddDecisionInput): DecisionRecord {
+      if (input.subject === armed && !failAfterAdd) throw new Error(`${INJECTED}: ${armed}`);
+      const decision = inner.add(input);
       if (input.subject === armed) throw new Error(`${INJECTED}: ${armed}`);
-      return inner.add(input);
+      return decision;
     },
     getDecisions: () => inner.getDecisions(),
     truncate: (length: number) => inner.truncate(length),
-    failOn: (subject: string) => {
+    failOn: (subject: string, afterAdd = false) => {
       armed = subject;
+      failAfterAdd = afterAdd;
     },
   };
 }
@@ -139,64 +148,138 @@ describe("HRG transaction commit rollback", () => {
     ]);
   });
 
-  it("restores relation topology, associations, mark times, and temporal marks", () => {
+  it.each([false, true])(
+    "restores composite writes when provenance fails (after add: %s)",
+    (afterAdd) => {
+      const provenance = faultyProvenance();
+      const utterance = new Utterance(SCHEMA, provenance);
+      const s1 = utterance.createItem("segment", "s1");
+      const s2 = utterance.createItem("segment", "s2");
+      const syllable = utterance.createItem("syllable", "syl1");
+      s1.set("phoneme", "AA", INPUT);
+      s2.set("phoneme", "B", INPUT);
+      utterance.segments.append(s1, INPUT);
+      utterance.syllables.append(syllable, INPUT);
+      const root = utterance.sylStructure.addRoot(syllable, INPUT);
+      utterance.sylStructure.addDaughter(root, s1, INPUT);
+      utterance.resolveMarkTime(utterance.axis.start.id, 0, INPUT);
+      const before = snapshot(utterance);
+      const startTimeWrites = utterance.provenance
+        .getDecisions()
+        .filter((decision) => decision.subject === "axis:START.time_ms").length;
+      provenance.failOn("item:s2.temporal_anchor", afterAdd);
+
+      const transaction = utterance.beginTransaction(META);
+      transaction.append("Segment", s2);
+      transaction.addDaughter("SylStructure", syllable, s2);
+      transaction.associate("link", s1, s2);
+      transaction.resolveMarkTime(utterance.axis.start.id, 5);
+      // Partitioning creates a new mark and anchors s1 before the s2 anchor
+      // decision fails, so the rollback must also undo a partially applied
+      // composite operation.
+      transaction.partitionAnchors([s1, s2], utterance.axis.start.id, utterance.axis.end.id);
+
+      expect(() => transaction.commit()).toThrowError(new RegExp(INJECTED));
+
+      expect(utterance.graphDigest()).toBe(before.digest);
+      expect(utterance.provenance.getDecisions()).toEqual(before.decisions);
+      expect(utterance.journal()).toEqual(before.journal);
+      expect(utterance.segments.listItems().map((item) => item.id)).toEqual(before.segmentIds);
+      expect(utterance.segments.tail?.item).toBe(s1);
+      expect(utterance.segments.node(s2)).toBeUndefined();
+      expect(utterance.segments.writes()).toHaveLength(before.segmentWrites);
+      expect(utterance.segments.latestWrite(s2)).toBeUndefined();
+      expect(s2.nodes.size).toBe(0);
+      expect(root.daughters.map((node) => node.item.id)).toEqual(["s1"]);
+      expect(root.daughters[0]?.next).toBeNull();
+      expect(utterance.sylStructure.writes()).toHaveLength(before.treeWrites);
+      expect(utterance.associatedItems(s1, "link")).toEqual([]);
+      expect(utterance.associationWrites(s1, "link", s2)).toEqual([]);
+      expect(utterance.axis.getMarkTime(utterance.axis.start.id)).toBe(0);
+      expect(utterance.axis.marks.size).toBe(before.markCount);
+      expect(utterance.temporalAnchor(s1)).toBeUndefined();
+      expect(utterance.temporalAnchor(s2)).toBeUndefined();
+      expect(
+        utterance.provenance
+          .getDecisions()
+          .filter((decision) => decision.subject === "axis:START.time_ms"),
+      ).toHaveLength(startTimeWrites);
+      expect(utterance.rejections()).toEqual([
+        expect.objectContaining({ stage: "commit", message: expect.stringContaining(INJECTED) }),
+      ]);
+    },
+  );
+
+  it("restores existing versions and detaches created items before a subsequent successful commit", () => {
     const provenance = faultyProvenance();
     const utterance = new Utterance(SCHEMA, provenance);
-    const s1 = utterance.createItem("segment", "s1");
-    const s2 = utterance.createItem("segment", "s2");
-    const syllable = utterance.createItem("syllable", "syl1");
-    s1.set("phoneme", "AA", INPUT);
-    s2.set("phoneme", "B", INPUT);
-    utterance.segments.append(s1, INPUT);
-    utterance.syllables.append(syllable, INPUT);
-    const root = utterance.sylStructure.addRoot(syllable, INPUT);
-    utterance.sylStructure.addDaughter(root, s1, INPUT);
-    utterance.resolveMarkTime(utterance.axis.start.id, 0, INPUT);
+    const setup = utterance.beginTransaction(META);
+    const left = setup.createItem("segment", "left");
+    const right = setup.createItem("segment", "right");
+    const root = setup.createItem("syllable", "root");
+    setup.append("Segment", left).append("Segment", right);
+    setup.addRoot("SylStructure", root);
+    setup.set(left, "energy", 1).associate("link", left, right);
+    setup.anchorPoint(left, utterance.axis.start.id, utterance.axis.end.id, 0.25);
+    setup.commit();
+    const leftNode = utterance.segments.node(left);
+    const rightNode = utterance.segments.node(right);
+    const rootNode = utterance.sylStructure.node(root);
     const before = snapshot(utterance);
-    const startTimeWrites = utterance.provenance
-      .getDecisions()
-      .filter((decision) => decision.subject === "axis:START.time_ms").length;
-    provenance.failOn("item:s2.temporal_anchor");
+    provenance.failOn("item:right.energy");
 
     const transaction = utterance.beginTransaction(META);
-    transaction.append("Segment", s2);
-    transaction.addDaughter("SylStructure", syllable, s2);
-    transaction.associate("link", s1, s2);
-    transaction.resolveMarkTime(utterance.axis.start.id, 5);
-    // Partitioning creates a new mark and anchors s1 before the s2 anchor
-    // decision fails, so the rollback must also undo a partially applied
-    // composite operation.
-    transaction.partitionAnchors([s1, s2], utterance.axis.start.id, utterance.axis.end.id);
+    const middle = transaction.createItem("segment", "middle");
+    const newRoot = transaction.createItem("syllable", "new-root");
+    transaction.set(middle, "phoneme", "B");
+    transaction.insertAfter("Segment", left, middle);
+    transaction.addRoot("SylStructure", newRoot);
+    transaction.addDaughter("SylStructure", newRoot, middle);
+    transaction.set(left, "energy", 2).set(left, "energy", 3);
+    transaction.disassociate("link", left, right);
+    transaction.anchorPoint(left, utterance.axis.start.id, utterance.axis.end.id, 0.75);
+    transaction.resolveMarkTime(utterance.axis.end.id, 100);
+    transaction.set(right, "energy", 5);
 
     expect(() => transaction.commit()).toThrowError(new RegExp(INJECTED));
+    expect(snapshot(utterance)).toEqual(before);
+    expect(utterance.getItem("middle")).toBeUndefined();
+    expect(utterance.getItem("new-root")).toBeUndefined();
+    expect(middle.creationDecisionId()).toBeNull();
+    expect(middle.featureKeys()).toEqual([]);
+    expect(middle.nodes.size).toBe(0);
+    expect(newRoot.nodes.size).toBe(0);
+    expect(leftNode?.next).toBe(rightNode);
+    expect(rightNode?.prev).toBe(leftNode);
+    expect(utterance.sylStructure.head).toBe(rootNode);
+    expect(utterance.sylStructure.tail).toBe(rootNode);
+    expect(rootNode?.next).toBeNull();
+    expect(left.get("energy")).toBe(1);
+    expect(utterance.associatedItems(left, "link")).toEqual([right]);
+    expect(utterance.rejections()[0]?.journalLength).toBe(1);
 
-    expect(utterance.graphDigest()).toBe(before.digest);
-    expect(utterance.provenance.getDecisions()).toEqual(before.decisions);
-    expect(utterance.journal()).toEqual(before.journal);
-    expect(utterance.segments.listItems().map((item) => item.id)).toEqual(before.segmentIds);
-    expect(utterance.segments.tail?.item).toBe(s1);
-    expect(utterance.segments.node(s2)).toBeUndefined();
-    expect(utterance.segments.writes()).toHaveLength(before.segmentWrites);
-    expect(utterance.segments.latestWrite(s2)).toBeUndefined();
-    expect(s2.nodes.size).toBe(0);
-    expect(root.daughters.map((node) => node.item.id)).toEqual(["s1"]);
-    expect(root.daughters[0]?.next).toBeNull();
-    expect(utterance.sylStructure.writes()).toHaveLength(before.treeWrites);
-    expect(utterance.associatedItems(s1, "link")).toEqual([]);
-    expect(utterance.associationWrites(s1, "link", s2)).toEqual([]);
-    expect(utterance.axis.getMarkTime(utterance.axis.start.id)).toBe(0);
-    expect(utterance.axis.marks.size).toBe(before.markCount);
-    expect(utterance.temporalAnchor(s1)).toBeUndefined();
-    expect(utterance.temporalAnchor(s2)).toBeUndefined();
-    expect(
-      utterance.provenance
-        .getDecisions()
-        .filter((decision) => decision.subject === "axis:START.time_ms"),
-    ).toHaveLength(startTimeWrites);
-    expect(utterance.rejections()).toEqual([
-      expect.objectContaining({ stage: "commit", message: expect.stringContaining(INJECTED) }),
-    ]);
+    const next = utterance.beginTransaction(META);
+    const replacement = next.createItem("segment", "middle");
+    next.insertAfter("Segment", left, replacement);
+    expect(next.commit().id).toBe("tx_000001");
+    expect(utterance.segments.listItems()).toEqual([left, replacement, right]);
   });
+
+  it.each(["insert_after", "add_daughter"] as const)(
+    "rolls back the late %s self-reference check",
+    (kind) => {
+      const utterance = new Utterance(SCHEMA);
+      const before = snapshot(utterance);
+      const transaction = utterance.beginTransaction(META);
+      const item = transaction.createItem("segment", "self");
+      transaction.set(item, "energy", 1);
+      if (kind === "insert_after") transaction.insertAfter("Segment", item, item);
+      else transaction.addDaughter("SylStructure", item, item);
+      expect(() => transaction.commit()).toThrowError(/E_HRG_(PREVIOUS|PARENT)_RELATION/);
+      expect(snapshot(utterance)).toEqual(before);
+      expect(utterance.rejections()[0]?.stage).toBe("commit");
+    },
+  );
 
   it("rewinds decision ids so later writes continue the pre-commit sequence", () => {
     const provenance = faultyProvenance();

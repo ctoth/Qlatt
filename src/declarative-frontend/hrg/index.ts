@@ -64,5 +64,7 @@ export type {
   TemporalWriteInput,
   TransactionJournalEntry,
   TransactionMetadata,
+  TransactionRejection,
 } from "./types";
+export { UndoLog } from "./undo-log";
 export { Utterance } from "./utterance";

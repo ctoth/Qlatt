@@ -12,6 +12,7 @@
  */
 import type { Item } from "./item";
 import type { RelationKind, RelationStamper, RelationWrite, RelationWriteInput } from "./types";
+import type { UndoLog } from "./undo-log";
 
 /** Relation-specific topology for one item in one relation. */
 export class HrgNode {
@@ -50,11 +51,17 @@ export class Relation {
   private readonly writeHistory: RelationWrite[] = [];
   private readonly latestWriteByItemId = new Map<string, RelationWrite>();
 
+  /**
+   * @param undo The owning Utterance's undo log; every topology mutation
+   *   records its inverse there so a failed transaction commit can detach the
+   *   nodes it attached.
+   */
   constructor(
     readonly name: string,
     readonly kind: RelationKind,
     private readonly allowedItemTypes: ReadonlySet<string>,
     private readonly stamper: RelationStamper,
+    private readonly undo: UndoLog,
   ) {}
 
   itemTypes(): readonly string[] {
@@ -78,7 +85,31 @@ export class Relation {
     const node = new HrgNode(item, this, write);
     item.nodes.set(this.name, node);
     this.nodesById.set(item.id, node);
+    // The caller links the node right after attaching (nothing in between can
+    // throw), so one inverse covers membership and topology together.
+    this.undo.record(() => this.detach(node));
     return node;
+  }
+
+  /**
+   * Rollback inverse of {@link attach} plus the sibling/parent links the
+   * public mutators add. Undo runs in reverse commit order, so any daughters
+   * the node gained in the same transaction are already gone.
+   */
+  private detach(node: HrgNode): void {
+    if (node.prev) node.prev.next = node.next;
+    if (node.next) node.next.prev = node.prev;
+    if (this.head === node) this.head = node.next;
+    if (this.tail === node) this.tail = node.prev;
+    if (node.parent) {
+      const index = node.parent.daughters.indexOf(node);
+      if (index >= 0) node.parent.daughters.splice(index, 1);
+    }
+    node.prev = null;
+    node.next = null;
+    node.parent = null;
+    this.nodesById.delete(node.item.id);
+    node.item.nodes.delete(this.name);
   }
 
   private linkAfter(prev: HrgNode | null, node: HrgNode): void {
@@ -201,7 +232,18 @@ export class Relation {
 
   /** Internal: record a stamped relation write. */
   _pushWrite(write: RelationWrite): void {
+    const prior = this.latestWriteByItemId.get(write.itemId);
     this.writeHistory.push(write);
     this.latestWriteByItemId.set(write.itemId, write);
+    this.undo.record(() => {
+      if (this.writeHistory[this.writeHistory.length - 1] !== write) {
+        throw new Error(
+          `E_HRG_UNDO_MISMATCH: relation '${this.name}' write for '${write.itemId}' is not the latest`,
+        );
+      }
+      this.writeHistory.pop();
+      if (prior) this.latestWriteByItemId.set(write.itemId, prior);
+      else this.latestWriteByItemId.delete(write.itemId);
+    });
   }
 }

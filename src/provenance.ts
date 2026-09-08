@@ -44,6 +44,10 @@ export interface AddDecisionInput {
 export interface ProvenanceCollector {
   add(input: AddDecisionInput): DecisionRecord;
   getDecisions(): DecisionRecord[];
+  /** Number of locally recorded decisions, excluding external replay ancestors. */
+  readonly size: number;
+  /** Discard trailing local decisions and rewind their ID sequence for rollback. */
+  truncate(length: number): void;
 }
 
 function toDecisionId(seq: number): string {
@@ -63,6 +67,16 @@ export function createProvenanceCollector(): ProvenanceCollector {
   let seq = 0;
 
   return {
+    get size(): number {
+      return decisions.length;
+    },
+    truncate(length: number): void {
+      if (!Number.isInteger(length) || length < 0 || length > decisions.length) {
+        throw new Error(`E_PROVENANCE_TRUNCATE: invalid length ${String(length)}`);
+      }
+      decisions.length = length;
+      seq = length;
+    },
     add(input: AddDecisionInput): DecisionRecord {
       seq += 1;
       const decision: DecisionRecord = {

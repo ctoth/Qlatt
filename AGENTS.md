@@ -200,6 +200,10 @@ The interpreter:
 
 ### WASM Primitives (crates/)
 
+Declare each WASM worklet URL as a module-level `const wasmUrl = resolveWasmUrl(...)` and pass that binding to `initWasmModule`. The Node asset loader replaces this declaration when supplying WASM bytes; an inline constructor call bypasses that transformation. Verify new processors with the real Node rendering backend as well as direct WASM tests.
+
+When adding an AudioWorklet processor, declare `parameterDescriptors` with the explicit return type `AudioParamDescriptor[]`. An unannotated array can widen `automationRate` to `string` and violate the processor static contract. Compile the worklet with `npm run build:worklets` before registry-binding or audio-render validation.
+
 Rust DSP modules compiled to WASM:
 - `resonator` - Two-pole formant filter
 - `antiresonator` - Two-zero nasal filter

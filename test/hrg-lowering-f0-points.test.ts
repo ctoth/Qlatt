@@ -5,6 +5,7 @@ import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-f
 import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
+import { historicalLoweringColumns } from "./historical-lowering-columns";
 
 const META = {
   ruleId: "fixture",
@@ -95,7 +96,11 @@ function readFixture(): {
   ) {
     throw new Error("point-contour fixture/spec invalid");
   }
-  const policy = readLowerOptions(spec.output.lowering);
+  const currentPolicy = readLowerOptions(spec.output.lowering);
+  const policy = {
+    ...currentPolicy,
+    columns: historicalLoweringColumns(parsed, currentPolicy.columns),
+  };
   const inventory = loadInventorySpecFromPath(spec.inventory_path).phoneme_targets;
   const segments = parsed.reconstructedGraph.items.flatMap((item): BaselineSegment[] => {
     if (!isPlainObject(item) || item.type !== "segment" || typeof item.id !== "string") return [];

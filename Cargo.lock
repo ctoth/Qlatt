@@ -52,6 +52,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "frication-source"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
 name = "fujisaki-resonator"
 version = "0.1.0"
 dependencies = [

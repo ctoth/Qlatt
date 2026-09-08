@@ -27,7 +27,7 @@ function buildWorkletProcessorOptionsByNodeId(
   }
   const overrides: Record<string, Record<string, unknown>> = {};
   for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
-    if (nodeDef.type !== "noise-source") continue;
+    if (nodeDef.type !== "noise-source" && nodeDef.type !== "frication-source") continue;
     overrides[nodeId] = {
       seed: deriveNodeNoiseSeed(baseSeed, nodeId),
     };
@@ -54,7 +54,12 @@ export const nodeRuntimeBackend: RenderBackend = {
         diagnostics,
       },
     );
-    const track = frontend.track;
+    const track = request.nodeParameterOverrides
+      ? frontend.track.map((frame) => ({
+          ...frame,
+          params: { ...frame.params, ...request.nodeParameterOverrides },
+        }))
+      : frontend.track;
     const totalTime =
       (track.length ? track[track.length - 1].time : 0) + request.leadTime + request.tailTime;
     const length = Math.max(1, Math.ceil(totalTime * request.sampleRate));

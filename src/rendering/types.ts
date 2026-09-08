@@ -37,6 +37,8 @@ export interface RenderPayload {
 }
 
 export interface RenderRequest {
+  /** Node-backend measurement controls, applied explicitly to every frame. */
+  nodeParameterOverrides?: Record<string, number>;
   repoRoot: string;
   phrase: string;
   baseF0?: number;

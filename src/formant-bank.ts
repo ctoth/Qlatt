@@ -52,6 +52,11 @@ const connectionSchema = z.union([
 
 const formantSchema = z
   .strictObject({
+    /** Optional realized linear gain; keeps physical targets outside legacy PFE compensation. */
+    linearGainParam: z
+      .string()
+      .regex(/^[A-Za-z_][A-Za-z0-9_]*$/)
+      .optional(),
     index: z.number().int().positive(),
     freqRange: numericRangeSchema,
     freqDefault: finiteNumber,
@@ -101,11 +106,9 @@ const formantSchema = z
       return;
     }
 
-    const parallelOnlyFields: ReadonlyArray<"ndbScale" | "sign" | "bypassAtZero"> = [
-      "ndbScale",
-      "sign",
-      "bypassAtZero",
-    ];
+    const parallelOnlyFields: ReadonlyArray<
+      "ndbScale" | "sign" | "bypassAtZero" | "linearGainParam"
+    > = ["ndbScale", "sign", "bypassAtZero", "linearGainParam"];
     for (const field of parallelOnlyFields) {
       if (formant[field] !== undefined) {
         context.addIssue({
@@ -340,7 +343,7 @@ export function expandFormantBanks(graph: BaconGraph, semantics: SemanticsDocume
         const gainNode: BaconNode = {
           type: "gain",
           params: {
-            gain: { bind: `a${N}Linear` },
+            gain: { bind: f.linearGainParam ?? `a${N}Linear` },
           },
         };
         graph.nodes[`parallelF${N}Gain`] = gainNode;

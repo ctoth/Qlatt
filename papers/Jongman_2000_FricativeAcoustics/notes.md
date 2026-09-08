@@ -288,3 +288,22 @@ $$F2_{onset} = k \cdot F2_{mid} + c$$
 - [[Badin_1989_FricativeProductionModelling]] — Badin provides the aerodynamic production model (IOP exponents, obstacle effect) that explains *why* the spectral shapes Jongman documents exist; Jongman's spectral moment data for the full English fricative inventory can be predicted from Badin's source-filter framework (Strong)
 
 **See also:** Shadle_2023_FricativeSpectraHighFreq - Extends Jongman 2000 into the 7-15 kHz high-frequency range with recordings at 44.1 kHz, introducing HighLevelD as a superior measure to spectral moments for capturing fricative dynamics, and providing empirical data on non-sibilant spectral characteristics above 7 kHz
+
+## Issue #51: measurement protocol checked against the paper
+
+Primary-source page images were checked through the full article (pp. 1252-1263).
+Table I pools speakers, voiced/voiceless tokens, vowel contexts, and all four
+window locations. Its means are population references, not midpoint targets for
+an individual voiceless token or a single synthetic speaker.
+
+The recordings used 22 kHz sampling and an 11 kHz low-pass filter. The moment
+analysis uses 40 ms full Hamming windows: first, middle, and final frication,
+then a window spanning the final 20 ms of frication and first 20 ms of the vowel.
+The FFT analysis describes 98% preemphasis. The reported moments use linear
+frequency rather than Bark frequency (pp. 1255-1258).
+
+Qlatt's paired evaluation declares power weighting, a 4096-point zero-padded
+FFT, and excess kurtosis explicitly. These numerical implementation choices do
+not establish exact reproduction of the original analysis software. Compare
+both sources with the same analysis, report every moment, and retain the
+population/window pooling distinction when interpreting the distance score.

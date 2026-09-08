@@ -434,16 +434,34 @@ rules:
     kind: scalar
     select:
       relation: Segment
-      where: current.phoneme != 'SIL'
+      where: >-
+        current.phoneme != 'SIL' && current.type in
+        ['vowel', 'nasal', 'liquid', 'glide', 'flap', 'stop', 'stop_closure',
+        'stop_release', 'stop_aspiration', 'fricative', 'affricate']
     constraint: params.policy.duration.rate_scale != 1.0
+    define:
+      category: >-
+        current.type in ['nasal', 'liquid', 'glide'] ? 'sonorants' :
+        current.type in ['flap', 'stop', 'stop_closure', 'stop_release', 'stop_aspiration'] ? 'stops' :
+        current.type == 'fricative' ? 'fricatives' :
+        current.type == 'affricate' ? 'affricates' : 'vowels'
+      means: params.policy.duration.tempo_means_ms[category]
+      vowel_means: params.policy.duration.tempo_means_ms.vowels
+      # Crystal & House 1982 Table VI supplies paired FAST/SLOW means.
+      # Engineering interpolation: anchor numerical rate to the vowel ratio,
+      # then interpolate each category's observed ratio in log space. This is
+      # not an isolated-word-to-connected-speech conversion; rate=1 is neutral.
+      # Apply the resulting ratio to total duration, subject to the existing
+      # hard floors, rather than to only the Klatt-compressible interval.
+      elasticity: log(means.fast / means.slow) / log(vowel_means.fast / vowel_means.slow)
     apply:
       - field: duration
-        op: mul
-        value: 1.0 / params.policy.duration.rate_scale
+        op: set
+        value: current.duration * pow(params.policy.duration.rate_scale, -elasticity)
         tag: speech_rate
     citations:
-      - Klatt 1976
-      - Allen et al. 1987
+      - "Crystal & House 1982 Table VI (paired FAST/SLOW segment-category means)"
+      - "Engineering interpolation: vowel-ratio rate anchor and category-specific power law between tempo groups"
   pause_rate_scaling:
     kind: scalar
     select:

@@ -53,3 +53,14 @@ Hann-windowed power in 200–500 and 800–1200 Hz bands and normalized absolute
 spectral difference. This checks the rendered signal and port response, not
 perceptual superiority. The graph regression separately verifies the second
 pair's connections and bindings.
+
+The full-track tone-association snapshots added on master were also reviewed
+against master fd23a8af, where all twelve original hashes pass. The script
+`scripts/review-nasal-track-snapshots.mjs` captures tracks with `--capture <file>`
+from the base checkout, then compares them with `--compare <file>` from the
+candidate checkout. All twelve cases retain identical frame metadata and times.
+The four DECtalk payloads remain byte-identical. For Qlatt, the script verifies
+the exact area-column/default migration and permits only F1/F2/F3/F4/B1 changes
+in phrases containing nasals; the two nonnasal phrases retain every acoustic
+value after the vocabulary migration. The eight Qlatt hashes were updated only
+after this comparison passed.

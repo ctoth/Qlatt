@@ -8,18 +8,18 @@ exports[`tone association preserves the existing frontend tracks > dectalk-engli
 
 exports[`tone association preserves the existing frontend tracks > dectalk-english: sip sip. 1`] = `"fac13210258417848f231118afa2a65fe9a17ada4dc692e0695de4f1bf1113bd"`;
 
-exports[`tone association preserves the existing frontend tracks > qlatt-beauty: Did Bob buy a blue balloon? 1`] = `"295ce65d692d1a33f8114cea4475eb5a017c89155474bc0d72fb61dd997af473"`;
+exports[`tone association preserves the existing frontend tracks > qlatt-beauty: Did Bob buy a blue balloon? 1`] = `"fa372cafc243a9668feca25dc3cb2c909affba7a64171f242c42a3fcf5df3974"`;
 
-exports[`tone association preserves the existing frontend tracks > qlatt-beauty: Gag, gang; go! 1`] = `"916774a6cbb5512802a57813a8b8d9ab924add9a34d131712c0c4a073478d15c"`;
+exports[`tone association preserves the existing frontend tracks > qlatt-beauty: Gag, gang; go! 1`] = `"70e454d5731c8559cd2b2bcf46cd5dc2eee903ca7b299ce14bf4200aeda18b60"`;
 
-exports[`tone association preserves the existing frontend tracks > qlatt-beauty: The cat sat. 1`] = `"55e713aa56b1d7e3ba26c8a0f5b73fce1d1a1a4c21cf9c8cfab9aa036d2b446e"`;
+exports[`tone association preserves the existing frontend tracks > qlatt-beauty: The cat sat. 1`] = `"277dbe71b843327bf3bb62118919fe773f32aa6d7b3a325b896d24029a465136"`;
 
-exports[`tone association preserves the existing frontend tracks > qlatt-beauty: sip sip. 1`] = `"63b628ca763f494b89a0891f9ec4c97999119848622a162426d11564cf3cef0e"`;
+exports[`tone association preserves the existing frontend tracks > qlatt-beauty: sip sip. 1`] = `"16fb0caa44fee87593de102e339f6bd4f5f1078e97f067a7331794a7b99d92df"`;
 
-exports[`tone association preserves the existing frontend tracks > qlatt-english: Did Bob buy a blue balloon? 1`] = `"4695754d19fd8d952a0a2c63e6d6b49791f70f8326f36d3366216cd2522f8658"`;
+exports[`tone association preserves the existing frontend tracks > qlatt-english: Did Bob buy a blue balloon? 1`] = `"e23d604efe2ca4cf7b1dbf898544570600727b990aa2b1372bebf0458bd8ca24"`;
 
-exports[`tone association preserves the existing frontend tracks > qlatt-english: Gag, gang; go! 1`] = `"325532ecc51a4bd53f270392fec96f9391b4d892e77ea3c4dedea607a9da27fc"`;
+exports[`tone association preserves the existing frontend tracks > qlatt-english: Gag, gang; go! 1`] = `"1d7b911222f0e18962d7613da75655ce6c43b8e8649ba1e42b27e64fc2d37ea7"`;
 
-exports[`tone association preserves the existing frontend tracks > qlatt-english: The cat sat. 1`] = `"1c47320ac16017084c358d8a21291fa8927359cc3513aa903ed4abc33457bcd2"`;
+exports[`tone association preserves the existing frontend tracks > qlatt-english: The cat sat. 1`] = `"a2aa9e3c287d418d6613839f1e504c23c4c3b8e0ff390f8e93b326c36d04c1bd"`;
 
-exports[`tone association preserves the existing frontend tracks > qlatt-english: sip sip. 1`] = `"bf2fae25c79197782a3ee0102e0cd9c7027cc9d8d7dbdc27c9808a06400dfaa0"`;
+exports[`tone association preserves the existing frontend tracks > qlatt-english: sip sip. 1`] = `"2c8c4404c5ad21ff2979d703b19f242faf3db5e52aa5928947f0fc61c6f1ea3a"`;

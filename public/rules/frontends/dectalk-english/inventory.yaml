@@ -63,7 +63,7 @@ base_params:
   FGZ: 1500
   BGZ: 6000
   BGS: 200
-  NFC: 0
+  NFC: 8  # Match this experiment's documented eight-stage cascade; nf is now wired.
   GO: 47
 phoneme_targets:
   SIL:

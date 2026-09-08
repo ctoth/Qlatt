@@ -11,6 +11,12 @@ defaultScheduling: ramp
 
 # Input parameters - what the TTS frontend provides
 params:
+  # Klatt cascade-count control (nf); matches the frontend's five-stage default.
+  NFC:
+    type: int
+    range: [1, 10]
+    default: 5
+    description: "Number of active cascade formants; parallel branches remain independent."
   # Stevens 1971 Fig. 9: oral constriction area and volume flow.
   # Ac=0 means no aerodynamic target: retain the legacy AF/A1-A10 path.
   Ac:

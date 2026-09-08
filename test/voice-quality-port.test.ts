@@ -9,7 +9,13 @@ const experiments = ["klatt80-baseline", "qlatt-beauty"];
 // Captured before the port at 66b4c375, with the same seeded runtime request.
 const defaultHashes: Record<string, string> = {
   "klatt80-baseline": "ee8a64f62cdecd06e6acbee9bee4d0f95db0a08e14bd6700e6d7fa780cc68569",
-  "qlatt-beauty": "eb1487b1bea626fb560dc8a64c0058b076a896fc72ad7689528eea08f9677cf1",
+  // #53: beauty requests jitter=0.25, now percent CV (Schoentgen Model II).
+  "qlatt-beauty": "ba317188dbbc5842fd0e2599e24ff61c1b2af3cde7c84f22efdf453a9d7072d4",
+};
+// Captured with jitter explicitly disabled on unchanged #53 base 32c63af5.
+const zeroJitterHashes: Record<string, string> = {
+  "klatt80-baseline": "ee8a64f62cdecd06e6acbee9bee4d0f95db0a08e14bd6700e6d7fa780cc68569",
+  "qlatt-beauty": "5166a1079ff878146d9863a4f41b1b2c0dbb008a949073f0fc0b820701b80eed",
 };
 const frontend = (experiment: string) =>
   experiment === "qlatt-beauty" ? "qlatt-beauty" : "qlatt-english";
@@ -48,6 +54,11 @@ function hash(samples: number[]) {
 }
 
 describe.each(experiments)("%s Klatt 1990 voice quality", (experimentId) => {
+  it("preserves the pre-perturbation render with jitter disabled", async () => {
+    const output = await render(experimentId, { jitter: 0 });
+    expect(hash(output.samples)).toBe(zeroJitterHashes[experimentId]);
+  }, 30000);
+
   it("preserves the default render", async () => {
     const output = await render(experimentId);
     expect(hash(output.samples)).toBe(defaultHashes[experimentId]);

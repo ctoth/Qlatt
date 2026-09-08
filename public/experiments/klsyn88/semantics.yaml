@@ -16,6 +16,21 @@ plstep:
     - Klatt 1980 PARCOE.FOR
 
 params:
+  # LF-only controls: Titze 1991 Eq. 10 percent CV; Schoentgen 2001 Model II.
+  # 10% ceiling informed by Wendahl 1963 peak deviations (engineering range).
+  jitter:
+    description: "LF F0 coefficient of variation; 0 = none"
+    type: float
+    default: 0
+    range: [0, 10]
+    unit: "%"
+  # Independent amplitude analogy, not a measured shimmer range in those papers.
+  shimmer:
+    description: "LF amplitude coefficient of variation; engineering range"
+    type: float
+    default: 0
+    range: [0, 10]
+    unit: "%"
   F0:
     type: float
     range: [0, 500]

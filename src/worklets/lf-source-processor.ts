@@ -11,6 +11,7 @@ interface LfSourceWasmExports {
   alloc_f32(len: number): number;
   dealloc_f32(ptr: number, len: number): void;
   lf_source_new(sampleRate: number): number;
+  lf_source_set_shimmer(state: number, percent: number): void;
   lf_source_process(
     state: number,
     f0Ptr: number,
@@ -98,9 +99,16 @@ class LfSourceProcessor extends AudioWorkletProcessor {
         name: "jitter",
         defaultValue: 0,
         minValue: 0,
-        maxValue: 100,
+        maxValue: 10,
         automationRate: "k-rate" as const,
-      }, // Normalized 0-100, maps to Fraj 2011 b=[0, 4.5]
+      }, // Percent F0 CV: Titze 1991 Eq. 10; range informed by Wendahl 1963.
+      {
+        name: "shimmer",
+        defaultValue: 0,
+        minValue: 0,
+        maxValue: 10,
+        automationRate: "k-rate" as const,
+      }, // Percent amplitude CV; engineering analogy to Schoentgen 2001 Model II.
       {
         name: "di",
         defaultValue: 0,
@@ -189,6 +197,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     const tlValues = parameters.tl;
     const flutterValues = parameters.flutter;
     const jitterValues = parameters.jitter;
+    const shimmerValues = parameters.shimmer;
     const diValues = parameters.di;
     const f0Len = f0Values.length;
     const rdLen = rdValues.length;
@@ -221,6 +230,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     const flutter = flutterValues && flutterValues.length > 0 ? flutterValues[0] : 0;
     const jitter = jitterValues && jitterValues.length > 0 ? jitterValues[0] : 0;
     const di = diValues && diValues.length > 0 ? diValues[0] : 0;
+    this.wasm.lf_source_set_shimmer(this.state, shimmerValues?.[0] ?? 0);
 
     this.outputBuffer.ensure(blockSize);
     this.f0Buffer.ensure(f0Len);

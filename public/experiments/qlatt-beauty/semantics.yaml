@@ -239,10 +239,23 @@ params:
     range: [0, 100]
 
   jitter:
-    description: "F0 jitter amount (Fraj 2011, normalized 0-100). 0 = none"
+    # Titze 1991 Eq. 10: normal F0 CV ~0.2-0.3%; Wendahl 1963 Table I
+    # explores peak deviations through 10%. The 10% CV ceiling is an engineering
+    # range informed by that study, not an equivalence of peak deviation and CV.
+    description: "F0 coefficient of variation (Schoentgen 2001 Model II). 0 = none"
     type: float
     default: 0
-    range: [0, 100]
+    range: [0, 10]
+    unit: "%"
+
+  shimmer:
+    # Engineering analogy to Schoentgen 2001, independent amplitude noise.
+    # Wendahl 1963 did not measure shimmer; 0-10% is an engineering range.
+    description: "Cycle amplitude coefficient of variation. 0 = none"
+    type: float
+    default: 0
+    range: [0, 10]
+    unit: "%"
 
   DI:
     description: "Diplophonia index (Gobl & Ni Chasaide 2003). 0 = uniform, 100 = odd periods silent"

@@ -154,7 +154,11 @@ primitives:
       jitter:
         type: float
         default: 0
-        description: "F0 jitter (Fraj 2011, 0-100). 0 = none"
+        description: "F0 CV in percent (0-10; Schoentgen 2001, Titze 1991). 0 = none"
+      shimmer:
+        type: float
+        default: 0
+        description: "Amplitude CV in percent (0-10; engineering analogy to Schoentgen 2001). 0 = none"
       di:
         type: float
         default: 0

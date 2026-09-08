@@ -67,21 +67,28 @@ voice_quality_presets:
     tl: 0
     ah_offset_db: 0
     flutter: 0
-    jitter: 20
+    # Engineering migration of Fraj control 20 at F0=110 Hz, Fs=44100 Hz:
+    # CV% = control * 4.5 * sqrt(F0/Fs), rounded to 4.5%.
+    jitter: 4.5
     f0_scale: 1.0
     citations:
       - Gobl 2003
       - Burkhardt 2009
+      - Schoentgen 2001 Model II
+      - Titze 1991 Eq. 10
   whispery:
     rd: 2.0
     oq: 0
     tl: 10
     ah_offset_db: 30
     flutter: 0
-    jitter: 5
+    # Same reference conversion as creaky: Fraj control 5 -> 1.125% CV.
+    jitter: 1.125
     f0_scale: 1.0
     citations:
       - Gobl 2003
+      - Schoentgen 2001 Model II
+      - Titze 1991 Eq. 10
   falsetto:
     rd: 2.5
     oq: 0

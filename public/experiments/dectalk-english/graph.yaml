@@ -132,6 +132,7 @@ nodes:
       tl: { bind: TL }
       flutter: { bind: flutter }
       jitter: { bind: jitter }
+      shimmer: { bind: shimmer }
 
   impulseSource:
     type: impulse-train

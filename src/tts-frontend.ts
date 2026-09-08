@@ -560,6 +560,10 @@ function buildTextToKlattTrackDetailed(
     speaker: resolvedSpeaker,
     baseF0Hz: resolvedSpeaker.base_f0_hz,
   });
+  source.citations = [
+    sourcePath,
+    ...source.citations.filter((citation) => citation !== DEFAULT_SOURCE_CONTOUR_PATH),
+  ];
   const sourceDecision = provenance.add({
     stage: "frontend",
     type: "source_contour_selected",
@@ -776,10 +780,15 @@ function buildTextToKlattTrackDetailed(
     if (item.get("active") === false) continue;
     // Project the resolved source/speaker policy via the declarative projection
     // table, using the formant frequencies declared by the active inventory.
+    const projectedFields = new Map<string, number>();
     projectSpeakerFields(
+      source.projection,
       {
-        get: (field) => item.get(field),
-        set: (field, value) => speakerStamp.set(item, field, value),
+        get: (field) => projectedFields.get(field) ?? item.get(field),
+        set: (field, value) => {
+          projectedFields.set(field, value);
+          speakerStamp.set(item, field, value);
+        },
       },
       {
         source_mode: source.baseline.source_mode,

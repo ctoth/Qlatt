@@ -1,6 +1,7 @@
 import { readLowerOptions } from "../declarative-frontend/hrg/lowering";
 import { preloadBundledRulepackSpec } from "../declarative-frontend/rule-pack";
 import { expandFormantBanks } from "../formant-bank";
+import { loadSourceContour } from "../source-contour";
 import type { ExperimentConfig } from "./load-experiment-config";
 
 export interface VocabularyMismatch {
@@ -39,6 +40,16 @@ export async function assertFrontendVocabulary(
       `E_FRONTEND_VOCABULARY: frontend '${frontendId}'; ` +
         `undeclared columns: [${undeclaredColumns.join(", ")}]; ` +
         `missing required params: [${missingRequiredParams.join(", ")}]`,
+    );
+  }
+  const source = await loadSourceContour(spec.source_contour_path ?? undefined);
+  const projectionMismatch = checkVocabulary(
+    source.projection.map((row) => row.target_param),
+    experimentConfig,
+  );
+  if (projectionMismatch.undeclaredColumns.length) {
+    throw new Error(
+      `E_SOURCE_CONTOUR_TARGET: frontend '${frontendId}'; projection targets not declared by active experiment: [${projectionMismatch.undeclaredColumns.join(", ")}]`,
     );
   }
 }

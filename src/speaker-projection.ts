@@ -1,13 +1,7 @@
 import type { VoiceQualityOverrides } from "./source-contour";
 
 /**
- * Declarative speaker/source projection table (phase 4 item 3).
- *
- * The former imperative `speakerStamp` loop in tts-frontend.ts hardcoded, field
- * by field, how resolved source-contour + speaker policy is projected onto every
- * Segment's final frame targets. Those field/op/operand triples are policy data;
- * this module expresses them as a table interpreted by one generic driver,
- * removing the hardcoded field list and the baked-in 1..10 formant count.
+ * Engine operations for the projection rows declared by source-contour YAML.
  *
  * The row order and every guard (numeric-current checks, override-defined checks,
  * value>0 for formant scaling) are preserved exactly so the projected values are
@@ -29,49 +23,24 @@ export interface SpeakerProjectionBaseline {
 
 /**
  * A single projection row. `op` selects one of the five projection behaviours the
- * original loop performed; `field` is the target frame field and the key fields
- * name the operands read from the resolved baseline / voice-quality overrides.
+ * original loop performed. `field` names the source operand, `target_param` the
+ * frame destination; dual-source operations also declare a `baseline_field`.
  */
-export type SpeakerProjectionRow =
-  | { field: string; op: "baseline_const"; baselineKey: keyof SpeakerProjectionBaseline }
+export type SpeakerProjectionRow = { target_param: string; order: number } & (
+  | { field: keyof SpeakerProjectionBaseline; op: "baseline_const" }
   | {
       field: string;
       op: "override_or_baseline";
-      overrideKey: keyof VoiceQualityOverrides;
-      baselineKey: keyof SpeakerProjectionBaseline;
+      baseline_field: keyof SpeakerProjectionBaseline;
     }
-  | { field: string; op: "override_if_set"; overrideKey: keyof VoiceQualityOverrides }
+  | { field: string; op: "override_if_set" }
   | {
       field: string;
       op: "override_or_current_plus_baseline";
-      overrideKey: keyof VoiceQualityOverrides;
-      baselineKey: keyof SpeakerProjectionBaseline;
+      baseline_field: keyof SpeakerProjectionBaseline;
     }
-  | { field: string; op: "current_plus_override_if_set"; overrideKey: keyof VoiceQualityOverrides };
-
-/** Projection triples, in the exact order the original speakerStamp loop applied them. */
-export const SPEAKER_PROJECTION_TABLE: readonly SpeakerProjectionRow[] = [
-  { field: "sourceMode", op: "baseline_const", baselineKey: "source_mode" },
-  { field: "Rd", op: "override_or_baseline", overrideKey: "rd", baselineKey: "rd" },
-  { field: "RdRef", op: "baseline_const", baselineKey: "rd_ref" },
-  { field: "OQ", op: "override_if_set", overrideKey: "oq" },
-  {
-    field: "TL",
-    op: "override_or_current_plus_baseline",
-    overrideKey: "tl",
-    baselineKey: "spectral_tilt_offset_db",
-  },
-  { field: "AH", op: "current_plus_override_if_set", overrideKey: "ah_offset_db" },
-  { field: "flutter", op: "override_if_set", overrideKey: "flutter" },
-  { field: "jitter", op: "override_if_set", overrideKey: "jitter" },
-  // Klatt & Klatt 1990 Tables VII/XII; values and citations belong to the preset.
-  { field: "FTP", op: "override_if_set", overrideKey: "ftp" },
-  { field: "FTZ", op: "override_if_set", overrideKey: "ftz" },
-  { field: "BTP", op: "override_if_set", overrideKey: "btp" },
-  { field: "BTZ", op: "override_if_set", overrideKey: "btz" },
-  { field: "DF1", op: "override_if_set", overrideKey: "df1" },
-  { field: "DB1", op: "override_if_set", overrideKey: "db1" },
-];
+  | { field: string; op: "current_plus_override_if_set" }
+);
 
 /** Minimal read/write surface over a single Segment's frame targets. */
 export interface SpeakerProjectionTarget {
@@ -84,40 +53,41 @@ export interface SpeakerProjectionTarget {
  * Semantics and ordering match the original imperative loop exactly.
  */
 export function projectSpeakerFields(
+  projection: readonly SpeakerProjectionRow[],
   target: SpeakerProjectionTarget,
   baseline: SpeakerProjectionBaseline,
   overrides: VoiceQualityOverrides | undefined,
   formantScale: number,
   formantKeys: readonly string[],
 ): void {
-  for (const row of SPEAKER_PROJECTION_TABLE) {
+  for (const row of projection) {
     switch (row.op) {
       case "baseline_const":
-        target.set(row.field, baseline[row.baselineKey]);
+        target.set(row.target_param, baseline[row.field]);
         break;
       case "override_or_baseline":
-        target.set(row.field, overrides?.[row.overrideKey] ?? baseline[row.baselineKey]);
+        target.set(row.target_param, overrides?.[row.field] ?? baseline[row.baseline_field]);
         break;
       case "override_if_set": {
-        const value = overrides?.[row.overrideKey];
-        if (value !== undefined) target.set(row.field, value);
+        const value = overrides?.[row.field];
+        if (value !== undefined) target.set(row.target_param, value);
         break;
       }
       case "override_or_current_plus_baseline": {
-        const current = target.get(row.field);
+        const current = target.get(row.target_param);
         if (typeof current === "number") {
           target.set(
-            row.field,
-            overrides?.[row.overrideKey] ?? current + baseline[row.baselineKey],
+            row.target_param,
+            overrides?.[row.field] ?? current + baseline[row.baseline_field],
           );
         }
         break;
       }
       case "current_plus_override_if_set": {
-        const current = target.get(row.field);
-        const offset = overrides?.[row.overrideKey];
+        const current = target.get(row.target_param);
+        const offset = overrides?.[row.field];
         if (typeof current === "number" && offset !== undefined) {
-          target.set(row.field, current + offset);
+          target.set(row.target_param, current + offset);
         }
         break;
       }

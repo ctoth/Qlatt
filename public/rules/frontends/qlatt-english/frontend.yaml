@@ -69,6 +69,43 @@ parameters:
         value: 1.0
         citations:
           - Klatt 1976 §III (speech rate scaling)
+          - "Crystal & House 1982 Table VI (category-specific FAST/SLOW duration ratios)"
+      tempo_means_ms:
+        vowels:
+          fast:
+            value: 93.4
+            citations: ["Crystal & House 1982 Table VI (FAST vowels)"]
+          slow:
+            value: 111.6
+            citations: ["Crystal & House 1982 Table VI (SLOW vowels)"]
+        sonorants:
+          fast:
+            value: 66.4
+            citations: ["Crystal & House 1982 Table VI (FAST nonvocalic sonorants)"]
+          slow:
+            value: 81.0
+            citations: ["Crystal & House 1982 Table VI (SLOW nonvocalic sonorants)"]
+        stops:
+          fast:
+            value: 62.0
+            citations: ["Crystal & House 1982 Table VI (FAST stops)"]
+          slow:
+            value: 73.3
+            citations: ["Crystal & House 1982 Table VI (SLOW stops)"]
+        fricatives:
+          fast:
+            value: 64.4
+            citations: ["Crystal & House 1982 Table VI (FAST fricatives)"]
+          slow:
+            value: 75.6
+            citations: ["Crystal & House 1982 Table VI (SLOW fricatives)"]
+        affricates:
+          fast:
+            value: 102.2
+            citations: ["Crystal & House 1982 Table VI (FAST affricates)"]
+          slow:
+            value: 118.7
+            citations: ["Crystal & House 1982 Table VI (SLOW affricates)"]
       # Duration floors consumed by the duration_floor_* rules. The canonical
       # magnitudes live in output.lowering.timeline.duration_floors (also read by
       # lowerToFrames); tts-frontend injects those values here at runtime, so

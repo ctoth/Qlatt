@@ -5,15 +5,17 @@ import { createServer } from "vite";
 
 // Capture in each checkout, then compare the captures to review a table's
 // segment-level effects before regenerating the aggregate corpus golden.
-// node --experimental-strip-types scripts/review-duration-tables.ts capture <root> <output>
-// node --experimental-strip-types scripts/review-duration-tables.ts golden <root> <output>
+// node --experimental-strip-types scripts/review-duration-tables.ts capture <root> <output> [rate]
+// node --experimental-strip-types scripts/review-duration-tables.ts golden <root> <output> [rate]
 // node --experimental-strip-types scripts/review-duration-tables.ts compare <before> <after> <report>
 type Segment = { phoneme: string; duration: number };
-type Snapshot = { frontendId: string; phrase: string; segments: Segment[] }[];
+type Snapshot = { frontendId: string; phrase: string; rate: number; segments: Segment[] }[];
 
 const [mode, first, second, third] = process.argv.slice(2);
 assert(first && second, "Expected capture <root> <output> or compare <before> <after> <report>");
 if (mode === "capture" || mode === "golden") {
+  const rate = third === undefined ? 1 : Number(third);
+  assert(Number.isFinite(rate) && rate >= 0.5 && rate <= 2, "Rate must be within [0.5, 2]");
   const root = resolve(first);
   const output = resolve(second);
   const originalCwd = process.cwd();
@@ -48,7 +50,8 @@ if (mode === "capture" || mode === "golden") {
         ? cases.map(({ frontendId, phrase }) => ({
             frontendId,
             phrase,
-            segments: textToKlattTrackDetailed(phrase, corpus.baseF0, 30, { frontendId })
+            rate,
+            segments: textToKlattTrackDetailed(phrase, corpus.baseF0, 30, { frontendId, rate })
               .utterance.segments.listItems()
               .filter((item) => item.get("active") !== false)
               .map((item) => ({
@@ -63,9 +66,12 @@ if (mode === "capture" || mode === "golden") {
         : {
             corpus: corpus.name,
             baseF0: corpus.baseF0,
+            ...(rate === 1 ? {} : { rate }),
             summaries: corpus.phrases.map((phrase) => ({
               phrase,
-              ...summarizeTrackMetrics(textToKlattTrackDetailed(phrase, corpus.baseF0).track),
+              ...summarizeTrackMetrics(
+                textToKlattTrackDetailed(phrase, corpus.baseF0, 30, { rate }).track,
+              ),
             })),
           };
     writeFileSync(output, `${JSON.stringify(result, null, 2)}\n`);
@@ -82,6 +88,7 @@ if (mode === "capture" || mode === "golden") {
     const current = after[i];
     assert.equal(old.phrase, current.phrase, "Corpus order changed");
     assert.equal(old.frontendId, current.frontendId, "Frontend changed");
+    assert.equal(old.rate, current.rate, "Rate changed between captures");
     assert.deepEqual(
       old.segments.map((s) => s.phoneme),
       current.segments.map((s) => s.phoneme),
@@ -94,7 +101,7 @@ if (mode === "capture" || mode === "golden") {
     );
     if (old.frontendId === "dectalk-english")
       assert.deepEqual(current, old, "DECtalk control changed");
-    return `| ${old.frontendId} | ${old.phrase} | ${changes.join("; ") || "unchanged"} |`;
+    return `| ${old.frontendId} | ${old.rate} | ${old.phrase} | ${changes.join("; ") || "unchanged"} |`;
   });
   writeFileSync(
     third,
@@ -103,8 +110,8 @@ if (mode === "capture" || mode === "golden") {
       "",
       "Active Segment indices are zero-based. All changed segment durations are listed; phoneme sequences are unchanged.",
       "",
-      "| Frontend | Phrase | Duration changes |",
-      "| --- | --- | --- |",
+      "| Frontend | Rate | Phrase | Duration changes |",
+      "| --- | --- | --- | --- |",
       ...rows,
       "",
     ].join("\n"),

@@ -64,6 +64,13 @@ export const SPEAKER_PROJECTION_TABLE: readonly SpeakerProjectionRow[] = [
   { field: "AH", op: "current_plus_override_if_set", overrideKey: "ah_offset_db" },
   { field: "flutter", op: "override_if_set", overrideKey: "flutter" },
   { field: "jitter", op: "override_if_set", overrideKey: "jitter" },
+  // Klatt & Klatt 1990 Tables VII/XII; values and citations belong to the preset.
+  { field: "FTP", op: "override_if_set", overrideKey: "ftp" },
+  { field: "FTZ", op: "override_if_set", overrideKey: "ftz" },
+  { field: "BTP", op: "override_if_set", overrideKey: "btp" },
+  { field: "BTZ", op: "override_if_set", overrideKey: "btz" },
+  { field: "DF1", op: "override_if_set", overrideKey: "df1" },
+  { field: "DB1", op: "override_if_set", overrideKey: "db1" },
 ];
 
 /** Minimal read/write surface over a single Segment's frame targets. */

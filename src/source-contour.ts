@@ -12,9 +12,15 @@ export interface VoiceQualityOverrides {
   ah_offset_db?: number;
   flutter?: number;
   jitter?: number;
+  ftp?: number;
+  ftz?: number;
+  btp?: number;
+  btz?: number;
+  df1?: number;
+  db1?: number;
 }
 
-export interface SourceContourPreset {
+export interface SourceContourPreset extends VoiceQualityOverrides {
   rd: number;
   oq: number;
   tl: number;
@@ -92,6 +98,11 @@ function parsePreset(value: unknown, label: string): SourceContourPreset {
     jitter: expectFiniteNumber(value.jitter, `${label}.jitter`),
     f0_scale: expectFiniteNumber(value.f0_scale, `${label}.f0_scale`),
     citations: expectStringArray(value.citations ?? [], `${label}.citations`),
+    ...Object.fromEntries(
+      ["ftp", "ftz", "btp", "btz", "df1", "db1"]
+        .filter((key) => value[key] !== undefined)
+        .map((key) => [key, expectFiniteNumber(value[key], `${label}.${key}`)]),
+    ),
   };
 }
 
@@ -120,7 +131,7 @@ function parseSourceContourDocument(value: unknown): SourceContourSpec {
     value.default_voice_quality,
     "default_voice_quality",
   );
-  if (!Object.prototype.hasOwnProperty.call(voiceQualityPresets, defaultVoiceQuality)) {
+  if (!Object.hasOwn(voiceQualityPresets, defaultVoiceQuality)) {
     throw new Error(
       `E_SOURCE_CONTOUR_SCHEMA: default voice quality '${defaultVoiceQuality}' is not declared`,
     );
@@ -182,6 +193,12 @@ export function resolveSourceContour(options: ResolveSourceContourOptions): Reso
       ah_offset_db: preset.ah_offset_db,
       flutter: preset.flutter,
       jitter: preset.jitter,
+      ftp: preset.ftp,
+      ftz: preset.ftz,
+      btp: preset.btp,
+      btz: preset.btz,
+      df1: preset.df1,
+      db1: preset.db1,
     },
   };
 

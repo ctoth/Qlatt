@@ -41,6 +41,21 @@ const threeParallelFormants: PfeFormantSpec[] = [
 ];
 
 describe("generatePfeRules", () => {
+  it.each([
+    { index: 1, parallelSource: "src", sign: 1 as const },
+    { index: 1, parallelSource: "src", ndbScale: -58 },
+    { index: 1, parallelSource: "src", ndbScale: Number.NaN, sign: 1 as const },
+    { index: 1, parallelSource: "src", ndbScale: Number.POSITIVE_INFINITY, sign: 1 as const },
+  ])("rejects incomplete parallel amplitude data: %j", (formant) => {
+    expect(() => generatePfeRules([formant])).toThrow(/parallel.*ndbScale.*sign/);
+  });
+
+  it("rejects an invalid sign from an untyped caller", () => {
+    // Runtime callers need the same validation as typed callers.
+    const formant = JSON.parse('{"index":1,"parallelSource":"src","ndbScale":-58,"sign":0}');
+    expect(() => generatePfeRules([formant])).toThrow(/E_PFE_FORMANT/);
+  });
+
   it("produces one rule per formant with parallelSource: true", () => {
     const rules = generatePfeRules(sixFormants);
     // All 6 formants have parallelSource, so 6 rules

@@ -38,6 +38,9 @@ meta:
           bwDefault: 60
           ndbScale: -58
           sign: 1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelSourceGain
           bypassAtZero: true
         - index: 2
@@ -47,6 +50,9 @@ meta:
           bwDefault: 90
           ndbScale: -65
           sign: -1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelDiffSum
         - index: 3
           freqRange: [1500, 4000]
@@ -55,6 +61,9 @@ meta:
           bwDefault: 150
           ndbScale: -73
           sign: 1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelDiffSum
         - index: 4
           freqRange: [2500, 5000]
@@ -63,6 +72,9 @@ meta:
           bwDefault: 200
           ndbScale: -78
           sign: -1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelDiffSum
         - index: 5
           freqRange: [3500, 6000]
@@ -71,6 +83,9 @@ meta:
           bwDefault: 200
           ndbScale: -79
           sign: 1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelFricGain
         - index: 6
           freqRange: [4000, 7000]
@@ -79,6 +94,9 @@ meta:
           bwDefault: 500
           ndbScale: -80
           sign: -1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelFricGain
         # Cascade-only higher formants — Rabiner (1968) defaults
         # At 44.1 kHz sample rate, the z-transform pole repetition that provided

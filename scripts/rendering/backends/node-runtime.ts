@@ -76,6 +76,7 @@ export const nodeRuntimeBackend: RenderBackend = {
         request.noiseSeed,
       );
       const runtime = await createKlattRuntime({
+        diagnostics,
         audioContext: ctx as unknown as AudioContext,
         graph: config.graph,
         semantics: config.semantics,

@@ -232,7 +232,7 @@ rules:
       is_polysyllable: current.syllable_position_in_word != 'only'
       same_word_as_next: >-
         n == null ? false :
-        (has(n.word) && has(current.word) ? n.word == current.word : false)
+        dectalk_same_word(n, current)
       is_word_final_segment: "!same_word_as_next"
     constraint: "is_polysyllable && !is_word_final_segment"
     apply:
@@ -280,12 +280,12 @@ rules:
     define:
       same_word_as_prev: >-
         prev == null ? false :
-        (has(prev.word) && has(current.word) ? prev.word == current.word : false)
+        dectalk_same_word(prev, current)
       is_word_initial: "!same_word_as_prev"
       "n": next
       same_word_as_next: >-
         n == null ? false :
-        (has(n.word) && has(current.word) ? n.word == current.word : false)
+        dectalk_same_word(n, current)
       is_word_final: "!same_word_as_next"
       is_obstruent_non_plosive: >-
         current.type in ['fricative', 'affricate']
@@ -402,7 +402,7 @@ rules:
       next_is_affricate: "n == null ? false : n.type == 'affricate'"
       next_same_word: >-
         n == null ? false :
-        (has(n.word) && has(current.word) ? n.word == current.word : false)
+        dectalk_same_word(n, current)
       next_is_word_final: >-
         n == null ? false :
         (nn == null ? true :
@@ -562,7 +562,7 @@ rules:
       next_is_t: "n == null ? false : n.phoneme == 'T'"
       next_same_word: >-
         n == null ? false :
-        (has(n.word) && has(current.word) ? n.word == current.word : false)
+        dectalk_same_word(n, current)
       next_stress: "n == null ? 0 : (has(n.stress) ? n.stress : 0)"
       next_t_unstressed_internal: "next_is_t && next_same_word && next_stress != 1"
     constraint: next_t_unstressed_internal
@@ -641,7 +641,7 @@ rules:
       is_monosyllable: current.syllable_position_in_word == 'only'
       same_word_as_next: >-
         n == null ? false :
-        (has(n.word) && has(current.word) ? n.word == current.word : false)
+        dectalk_same_word(n, current)
       is_word_final_segment: "!same_word_as_next"
     constraint: "is_monosyllable && is_word_final_segment && stress_val != 1"
     apply:

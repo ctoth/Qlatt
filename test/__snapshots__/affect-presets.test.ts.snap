@@ -1,0 +1,3 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`declarative affect presets > preserves every preset's dimensions, channels, and citations at boundary and intermediate degrees 1`] = `"3e0e276d45966525e117e21056f3e873b552ca272dc1e9b3498871a296103171"`;

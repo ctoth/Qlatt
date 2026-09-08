@@ -1,0 +1,4 @@
+---
+tags: [intonation, dialect-variation, prosody, ivie-corpus, nuclear-accents, phonology, accent-location]
+---
+Gives complete per-pattern frequency tables (not just dominant patterns) for both full intonation-phrase and nuclear-accent-only tune inventories in Cambridge, Newcastle, and Belfast English across statements, wh-questions, polar questions, and echo questions, plus formal variation-score metrics quantifying intra- and inter-dialect divergence in both tune shape and accent location. Shows that nuclear accent location is nearly dialect-universal while nuclear accent shape is maximally dialect-specific, and that the "standard" Cambridge/Southern British dialect is no more internally uniform than the northern dialects. The most granular quantitative source in this collection for per-dialect nuclear-tune probability tables in a rule-based intonation model.

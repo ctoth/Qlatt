@@ -1,0 +1,4 @@
+---
+tags: [intonation, dialect-variation, prosody, ivie-corpus, nuclear-accents, phonology]
+---
+Reports findings from the IViE (Intonational Variation in English) project, showing that pitch-accent phonology, truncation-vs-compression phonetic realization, and stressed-syllable location all vary systematically by British Isles urban dialect, utterance type (statement/question), and speaker. Gives full quantitative nuclear-accent-type distribution tables for seven dialects (London, Cambridge, Bradford, Leeds, Newcastle, Belfast, Dublin) across declaratives, wh-questions, yes/no questions, and declarative questions, plus a dialect-specific truncation/compression map and Belfast's distinctive rise-plateau tune family. Directly relevant to parameterizing a rule-based per-accent English intonation model, particularly for Belfast's rising declaratives and graded-interrogativity rise selection.

@@ -133,7 +133,7 @@ This is the critical finding for synthesis: rate and stress are independently co
 - `Peterson_1960_DurationSyllableNuclei` — Peterson & Lehiste 1960, vowel duration data (cited)
 
 ### Cited By (in Collection)
-(No papers in collection currently cite Gay 1978.)
+- [Durational Variability in Speech and the Rhythm Class Hypothesis](../Grabe_Low_2002_DurationalVariabilityRhythmClass/notes.md) - cites this paper (endnote 6) for the finding that increased English speaking rate shortens both vocalic and consonantal syllable portions but mostly the vocalic portion, used as empirical justification for applying rate-normalization (nPVI) to vocalic intervals but not to intervocalic/consonantal intervals (raw rPVI) when measuring cross-language rhythmic durational variability.
 
 ### New Leads
 - Lindblom 1963 — spectrographic study of vowel reduction; Gay's data contradicts duration-only reduction explanation

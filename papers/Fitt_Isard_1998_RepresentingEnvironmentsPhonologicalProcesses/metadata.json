@@ -1,0 +1,11 @@
+{
+  "cite_key": "fitt1998representing",
+  "title": "Representing the Environments for Phonological Processes in an Accent-Independent Lexicon for Synthesis of English",
+  "authors": ["Susan Fitt", "Steve Isard"],
+  "year": "1998",
+  "arxiv_id": null,
+  "doi": "10.21437/ICSLP.1998-8",
+  "abstract": "This paper reports on work developing an accent-independent lexicon for use in synthesising speech in English. Lexica which use phonemic transcriptions are only suitable for one accent, and developing a lexicon for a new accent is a long and laborious process. Potential solutions to this problem include the use of conversion rules to generate lexica of regional pronunciations from standard accents [1] and encoding of regional variation by means of keywords [2]. The latter proposal forms the basis of the current work. However, even if we use a keyword system for lexical transcription there are a number of remaining theoretical and methodological problems if we are to synthesise and recognise accents to a high degree of accuracy; these problems are discussed in the following paper.",
+  "url": "https://www.isca-archive.org/icslp_1998/fitt98_icslp.html",
+  "pdf_url": "https://www.isca-archive.org/icslp_1998/fitt98_icslp.pdf"
+}

@@ -185,6 +185,7 @@ This study provides normative formant frequency data (F1-F3) for nine American E
 ## Collection Cross-References
 
 ### Already in Collection
+- [The Formants of Monophthong Vowels in Standard Southern British English Pronunciation](../Deterding_1997_FormantsMonophthongVowelsStandard/notes.md) — cited as a formant-frequency reference; Deterding provides connected-speech SSB/RP monophthong F1-F3 norms by sex, a British-English counterpart to Hao's cross-racial American-context formant dataset.
 - [[Peterson_Barney_1952_VowelControl]] — cited as the foundational vowel formant frequency reference; Hao's F1-F3 data for nine vowels extends this to cross-racial comparisons
 - [[Hillenbrand_1995_VowelAcoustics]] — cited as a key formant frequency reference with 45 men and 48 women; Hao's study uses the same /hVd/ context and provides a direct comparison dataset
 - [[Fant_1960_AcousticTheorySpeechProduction]] — cited for the acoustic theory linking vocal tract dimensions to formant frequencies, and for the non-uniform scaling of formant patterns across speakers of different vocal tract sizes

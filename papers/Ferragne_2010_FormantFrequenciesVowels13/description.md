@@ -1,0 +1,4 @@
+---
+tags: [vowel-formants, british-isles-accents, acoustic-phonetics, dialectology, lexical-sets]
+---
+This paper reports a semi-automatic formant-frequency analysis of male vowel systems in 13 accents of the British Isles (Accents of the British Isles corpus), presenting z-scored Bark F1/F2 plots per accent for 11 monophthongs and 5 closing diphthongs plus a summary table of median Hz formant values. Key findings include accent-specific lexical-set mergers and splits (FOOT-STRUCT, NURSE-SQUARE, FOOT-GOOSE, TRAP-START), diphthong trajectory differences (e.g. a PRICE-MOUTH starting-point "crossover" in Standard Southern English), and cases where duration rather than spectral quality is the primary phonemic cue. For a formant synthesizer needing per-accent vowel targets, it supplies a directly usable Hz table (Table 3) alongside qualitative descriptions of within-accent variability and diphthong shape that raw target tables alone would miss.

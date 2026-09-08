@@ -400,6 +400,8 @@ This thesis provides the foundation for the ToBI (Tones and Break Indices) annot
 - [[Beckman_2022_ToBISystem]] — the ToBI annotation system that operationalized Pierrehumbert's AM framework for prosodic labeling, with AM+ five-level extension
 - [[Ladd_2008_IntonationalPhonology]] — the mature theoretical exposition of Pierrehumbert's AM framework with cross-linguistic extensions
 - [[Goldsmith_1976_AutosegmentalPhonology]] — the autosegmental framework Pierrehumbert's theory builds upon
+- [[Grabe_Kochanski_Coleman_2005_IntonationNativeAccentVarieties]] — applies Pierrehumbert's H/L two-tone AM transcription to three British Isles dialects and decomposes accent behavior into two independently-variable dimensions Pierrehumbert's single-dialect account did not need to separate: nuclear accent LOCATION (found near-universal across dialects) versus nuclear accent SHAPE (found maximally dialect-specific, up to total non-overlap between Cambridge and Belfast).
+- [[Grabe_2004_IntonationalVariationUrbanDialects]] — applies and extends Pierrehumbert's AM tone framework to cross-dialect transcription (the IViE system), showing where the single-dialect AM inventory needs extension (e.g. a toneless `%` boundary) to remain comparable once dialects like Belfast and Glasgow with genuine rise-plateau-fall tunes are included.
 
 ### New Leads (Not Yet in Collection)
 - **Liberman, M.Y. (1975). The Intonational System of English.** — Foundational work on metrical grids and intonational representations that Pierrehumbert extends; essential for understanding the theoretical framework.

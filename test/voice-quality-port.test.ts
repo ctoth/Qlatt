@@ -9,14 +9,14 @@ const experiments = ["klatt80-baseline", "qlatt-beauty"];
 // Captured before the port at 66b4c375, with the same seeded runtime request.
 const defaultHashes: Record<string, string> = {
   // #64 Peterson Table I: reviewed hello-world duration changes; DSP unchanged.
-  "klatt80-baseline": "d538e1ef7250d062491a454b186b0bda014db6260505a364aad9f0ad58e89b56",
+  "klatt80-baseline": "7fbd3b989d710cd308cafd8dc4a76cdd78a509719780848e44e3442aa407f954",
   // #53: beauty requests jitter=0.25, now percent CV (Schoentgen Model II).
   "qlatt-beauty": "ba317188dbbc5842fd0e2599e24ff61c1b2af3cde7c84f22efdf453a9d7072d4",
 };
 // Captured with jitter explicitly disabled on unchanged #53 base 32c63af5.
 const zeroJitterHashes: Record<string, string> = {
   // #64: same neutral source, with the newly cited intrinsic vowel durations.
-  "klatt80-baseline": "d538e1ef7250d062491a454b186b0bda014db6260505a364aad9f0ad58e89b56",
+  "klatt80-baseline": "7fbd3b989d710cd308cafd8dc4a76cdd78a509719780848e44e3442aa407f954",
   "qlatt-beauty": "5166a1079ff878146d9863a4f41b1b2c0dbb008a949073f0fc0b820701b80eed",
 };
 const frontend = (experiment: string) =>

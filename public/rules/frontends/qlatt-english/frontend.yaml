@@ -182,11 +182,11 @@ parameters:
       stress_primary_multiplier:
         value: 1.3
         citations:
-          - Klatt 1976 §III.B
+          - "Engineering estimate: K=1.3 primary stress enhancement; Klatt 1976 Table II Rule 3 supplies stress context, not this value"
       stress_unstressed_multiplier:
         value: 0.8
         citations:
-          - Klatt 1976 §III.B
+          - "Engineering estimate: retained K=0.8, not Klatt 1976 Table II Rule 3's 0.4/0.55"
       punctuation_pause_comma_ms:
         value: 150
         citations:
@@ -205,23 +205,23 @@ parameters:
       vowel_shortening_end_multiplier:
         value: 1.2
         citations:
-          - Allen et al. 1987 Ch.9
+          - Allen et al. 1987 Ch.9 Rule 9 (open syllable, word-final, PRCNT1=120)
       vowel_shortening_voiced_fricative_multiplier:
         value: 1.6
         citations:
-          - Allen et al. 1987 Ch.9
+          - Allen et al. 1987 Ch.9 Rule 9 (voiced fricative, PRCNT1=160)
       vowel_shortening_voiced_fricative_medial_multiplier:
         value: 1.1
         citations:
-          - "Klatt 1979 (voicing effect reduced phrase-medially; ~1.1x vs ~1.6x phrase-finally)"
+          - "Engineering estimate: retained K=1.1 for the medial voiced-fricative context; differs from Allen et al. 1987 Ch.9 Rule 9's adjustment"
       vowel_shortening_voiced_stop_multiplier:
         value: 1.2
         citations:
-          - Allen et al. 1987 Ch.9
+          - Allen et al. 1987 Ch.9 Rule 9 (voiced plosive, PRCNT1=120)
       vowel_shortening_nasal_multiplier:
         value: 0.85
         citations:
-          - Allen et al. 1987 Ch.9
+          - Allen et al. 1987 Ch.9 Rule 9 (nasal, PRCNT1=85)
       vowel_before_voiceless_mean_ms:
         value: 146
         citations:
@@ -293,7 +293,7 @@ parameters:
       incompressibility_ratio_vowel:
         value: 0.42
         citations:
-          - "Klatt 1976 Eq. 1 (MINDUR = 0.42 * inherent duration as compressibility floor)"
+          - "Engineering fallback: retain class ratio 0.42 when no per-phone floor exists; Klatt 1976 Eq.1 supplies the formula, not a universal ratio"
       incompressibility_ratio_consonant:
         value: 0.6
         citations:
@@ -334,11 +334,11 @@ parameters:
       non_word_initial_consonant_multiplier:
         value: 0.7
         citations:
-          - Klatt 1976 Table III
+          - Klatt 1976 Table III Rule 1
       unstressed_consonant_multiplier:
         value: 0.8
         citations:
-          - Klatt 1976 Table III
+          - Klatt 1976 Table III Rule 2
       word_initial_lengthening_multiplier:
         value: 1.2
         citations:
@@ -367,7 +367,7 @@ parameters:
       word_medial_consonant_multiplier:
         value: 0.85
         citations:
-          - Klatt 1976 Table III
+          - "Engineering estimate: retained K=0.85; Klatt 1976 Table III Rule 3 uses 0.7"
       stop_unreleasing_min_ms:
         value: 5
         citations:
@@ -400,15 +400,17 @@ parameters:
       polysyllabic_shortening_factor:
         value: 0.78
         citations:
-          - Klatt 1976 Rule 4 (polysyllabic shortening)
+          - Klatt 1976 Table II Rule 4 (polysyllabic shortening)
       cluster_first_shortening:
         value: 0.88
         citations:
-          - Klatt 1973 (cluster shortening, first consonant)
+          - Klatt 1973 Table XIX-4 Rule 1 (two-element cluster, first consonant -12%)
+          - "Engineering adaptation: factor applied to compressible portion"
       cluster_subsequent_shortening:
         value: 0.78
         citations:
-          - Klatt 1973 (cluster shortening, subsequent consonants)
+          - Klatt 1973 Table XIX-4 Rule 1 (two-element cluster, second consonant -22%)
+          - "Engineering adaptation: factor applied to compressible portion and later cluster positions"
     f0:
       # --- Pitch Range Model (Pierrehumbert 1980, Ladd 2008) ---
       base_hz:

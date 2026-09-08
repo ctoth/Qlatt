@@ -12,6 +12,8 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // docs/peterson-1960-duration-review.md for their complete segment review.
 // Klatt Table I changes the two Qlatt "The cat sat." controls; see
 // docs/klatt-1975-duration-review.md for the release/aspiration changes.
+// #61 regenerates only qlatt-english snapshots for per-phone duration floors;
+// the exact base 1af37573 passes the old snapshots. See docs/per-phone-duration-floors.md.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

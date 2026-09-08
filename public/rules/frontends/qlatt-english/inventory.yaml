@@ -113,6 +113,67 @@ base_params:
   # its own GO=47 default (ndbScale -47). Omitting GO lets each experiment use
   # its own semantics default: klatt80-baseline=47 (byte-identical/golden-safe),
   # klsyn88=60 (published g0; Klatt&Klatt 1990 / KLSYN88 manual Table I).
+# Allen et al. 1987 Table 9-1, p.96. Explicit ARPABET-to-source mapping.
+# Ratios are scaled to Qlatt durations; component mappings are engineering adaptations.
+duration_models:
+  unstressed_scale: 0.5  # Allen et al. 1987 Ch.9 Rule 7; applied once, by lexical stress.
+  citations:
+    - "Allen et al. 1987 Table 9-1 p.96 (row named by source)"
+    - "Engineering adaptation: source MIN/INHERENT ratio scaled to Qlatt duration basis"
+  rows:
+    IY: {minimum_ms: 55, inherent_ms: 155, targets: ["IY1", "IY0"]}
+    IH: {minimum_ms: 40, inherent_ms: 135, targets: ["IH1", "IH0"]}
+    EY: {minimum_ms: 100, inherent_ms: 190, targets: ["EY1", "EY0"]}
+    EH: {minimum_ms: 70, inherent_ms: 150, targets: ["EH1", "EH0"]}
+    AE: {minimum_ms: 80, inherent_ms: 230, targets: ["AE1", "AE0"]}
+    AA: {minimum_ms: 100, inherent_ms: 240, targets: ["AA1", "AA0"]}
+    AO: {minimum_ms: 100, inherent_ms: 240, targets: ["AO1", "AO0"]}
+    OW: {minimum_ms: 80, inherent_ms: 220, targets: ["OW1", "OW0"]}
+    UH: {minimum_ms: 60, inherent_ms: 160, targets: ["UH1", "UH0"]}
+    UW: {minimum_ms: 70, inherent_ms: 210, targets: ["UW1", "UW0"]}
+    AH: {minimum_ms: 60, inherent_ms: 140, targets: ["AH1", "AH0"]}
+    ER: {minimum_ms: 80, inherent_ms: 180, targets: ["ER1", "ER0"]}
+    AY: {minimum_ms: 150, inherent_ms: 250, targets: ["AY1"]}
+    AW: {minimum_ms: 100, inherent_ms: 260, targets: ["AW1"]}
+    OY: {minimum_ms: 150, inherent_ms: 280, targets: ["OY1"]}
+    SS: {minimum_ms: 60, inherent_ms: 105, targets: ["S"]}
+    ZZ: {minimum_ms: 40, inherent_ms: 75, targets: ["Z"]}
+    SH: {minimum_ms: 80, inherent_ms: 105, targets: ["SH"]}
+    ZH: {minimum_ms: 40, inherent_ms: 70, targets: ["ZH"]}
+    FF: {minimum_ms: 80, inherent_ms: 100, targets: ["F"]}
+    VV: {minimum_ms: 40, inherent_ms: 60, targets: ["V"]}
+    TH: {minimum_ms: 60, inherent_ms: 90, targets: ["TH"]}
+    DH: {minimum_ms: 30, inherent_ms: 50, targets: ["DH"]}
+    HH: {minimum_ms: 20, inherent_ms: 80, targets: ["HH"]}
+    MM: {minimum_ms: 60, inherent_ms: 70, targets: ["M"]}
+    NN: {minimum_ms: 50, inherent_ms: 60, targets: ["N"]}
+    NG: {minimum_ms: 60, inherent_ms: 95, targets: ["NG"]}
+    LL: {minimum_ms: 40, inherent_ms: 80, targets: ["L"]}
+    RR: {minimum_ms: 30, inherent_ms: 80, targets: ["R"]}
+    WW: {minimum_ms: 60, inherent_ms: 80, targets: ["W"]}
+    YY: {minimum_ms: 40, inherent_ms: 80, targets: ["Y"]}
+    PP: {minimum_ms: 50, inherent_ms: 90, targets: ["P", "P_CL"]}
+    TT: {minimum_ms: 50, inherent_ms: 75, targets: ["T", "T_CL"]}
+    KK: {minimum_ms: 60, inherent_ms: 80, targets: ["K", "K_CL"]}
+    BB: {minimum_ms: 60, inherent_ms: 85, targets: ["B", "B_CL"]}
+    DD: {minimum_ms: 50, inherent_ms: 75, targets: ["D", "D_CL"]}
+    GG: {minimum_ms: 60, inherent_ms: 80, targets: ["G", "G_CL"]}
+    CH: {minimum_ms: 50, inherent_ms: 70, targets: ["CH", "CH_CL"]}
+    JJ: {minimum_ms: 50, inherent_ms: 70, targets: ["JH", "JH_CL"]}
+    DX: {minimum_ms: 20, inherent_ms: 20, targets: ["DX"]}
+    # Explicit exemptions; these are not entries in Table 9-1.
+    uncompressed:
+      minimum_ms: 0
+      inherent_ms: 1
+      targets: [SIL, P_REL, T_REL, K_REL, B_REL, D_REL, G_REL, P_ASP, T_ASP, K_ASP]
+      citations:
+        - "Engineering policy: silence and generated release/aspiration use explicit timing and timeline safety floors"
+    glottal_fallback:
+      minimum_ms: 0.6
+      inherent_ms: 1
+      targets: [GS]
+      citations:
+        - "Engineering estimate: retain the legacy consonant ratio for glottal stop, absent from the selected table"
 phoneme_targets:
   # Core monophthong steady-state targets use Hillenbrand et al. 1995 Table V
   # adult male averages for F1-F3. B1-B3 use Kent & Vorperian (2018) typical

@@ -34,15 +34,6 @@ export interface KlattTrack {
   frames: KlattFrame[];
 }
 
-interface ResolvedBinding {
-  param: AudioParam;
-  nodeId: string;
-  paramName: string;
-}
-
-// Multiple nodes can bind to the same semantic name (e.g., F0 -> lfSource.f0, impulseSource.f0)
-type ResolvedBindingList = ResolvedBinding[];
-
 /**
  * Categorized binding with two independent axes:
  * - source: where to read the value ('realized' from semantics eval, 'passthrough' from frame params)
@@ -56,18 +47,30 @@ type CategorizedBinding = {
   name: string;
   nodeId: string;
   paramName: string;
-  param: AudioParam;
   source: "realized" | "passthrough";
   ramp: boolean;
 };
 
-// Schedule entry for pre-compiled parameter automation
-type ScheduleEntry = {
+/** Serializable automation event; docs/host-contract.md section 5. */
+export type ScheduleEntry = {
   time: number;
-  param: AudioParam;
+  target: { nodeId: string; paramName: string };
   value: number;
-  ramp: boolean; // true = linearRampToValueAtTime, false = setValueAtTime
+  mode: "step" | "ramp";
 };
+
+export interface KlattScheduleCompilerOptions {
+  sampleRate: number;
+  semantics: SemanticsDocument;
+  bindingMap: ReadonlyMap<string, readonly BindingSpec[]>;
+  diagnostics?: Diagnostics;
+  logger?: (msg: string) => void;
+  telemetryHandler?: (event: TelemetryEvent) => void;
+}
+
+export interface KlattScheduleCompiler {
+  compileSchedule(track: KlattFrame[], startTime?: number): ScheduleEntry[];
+}
 
 export interface KlattInterpreterOptions {
   diagnostics?: Diagnostics;
@@ -178,14 +181,15 @@ export function buildFrameContext(
 // Interpreter Factory
 // =============================================================================
 
-export function createKlattInterpreter(options: KlattInterpreterOptions): KlattInterpreter {
+export function createKlattScheduleCompiler(
+  options: KlattScheduleCompilerOptions,
+): KlattScheduleCompiler {
   const {
-    audioContext,
-    runtime,
+    sampleRate,
     semantics,
     logger = () => {},
     telemetryHandler,
-    diagnostics = runtime.getDiagnostics?.() ?? createDiagnostics(),
+    diagnostics = createDiagnostics(),
   } = options;
 
   const log = (msg: string) => logger(`[klatt-interpreter] ${msg}`);
@@ -209,12 +213,11 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
   // Build static context once at init time (constants + defaults + sampleRate)
   // Contains only data values — functions are registered with the CEL evaluator separately
-  const staticContext = buildStaticContext(constants, paramDefaults, audioContext.sampleRate);
+  const staticContext = buildStaticContext(constants, paramDefaults, sampleRate);
   log(`Built staticContext with ${Object.keys(staticContext).length} entries`);
 
-  // Build binding map: semantics output name -> list of AudioParams
-  // Multiple nodes can bind to the same semantic name (e.g., F0 -> lfSource.f0, impulseSource.f0)
-  const bindings = new Map<string, ResolvedBindingList>();
+  // Semantic names can target multiple host parameters without resolving audio nodes.
+  const bindings = options.bindingMap;
 
   // Default scheduling mode from semantics document.
   // 'ramp' = Klatt 1980 inter-frame linear interpolation (linearRampToValueAtTime).
@@ -234,26 +237,6 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
         } else if ((rule as { ramp?: boolean }).ramp === true) {
           rampParams.add(name);
         }
-      }
-    }
-  }
-
-  // Build bindings: use provided bindingMap if available (from runtime), otherwise walk graph
-  // Either way, we need to resolve AudioParams from runtime nodes
-  const sourceBindingMap = options.bindingMap ?? runtime.getBindingMap();
-
-  for (const [bindName, bindingInfoList] of sourceBindingMap) {
-    for (const { nodeId, paramName } of bindingInfoList) {
-      const audioNode = runtime.getNode(nodeId);
-      if (!audioNode) {
-        log(`  Warning: No audio node for ${nodeId}`);
-        continue;
-      }
-      const param = getAudioParam(audioNode, paramName);
-      if (param) {
-        const existing = bindings.get(bindName) ?? [];
-        existing.push({ param, nodeId, paramName });
-        bindings.set(bindName, existing);
       }
     }
   }
@@ -285,12 +268,6 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     `Built ${bindings.size} unique bindings (${allBindings.length} total targets), ${rampCount} ramp, ${stepCount} step (default: ${defaultRamp ? "ramp" : "step"})`,
   );
 
-  // Track duration for getTrackDuration()
-  let trackDuration = 0;
-
-  // Store all scheduled params for cancellation
-  const scheduledParams = new Set<AudioParam>();
-
   /**
    * Build evaluation context from frame params
    * Uses buildFrameContext (structuredClone) to protect nested objects from mutation.
@@ -321,28 +298,11 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   // by edge-detector + decay-envelope chain in the audio graph.
 
   /**
-   * Cancel all scheduled parameter automation
-   */
-  function cancelScheduled(): void {
-    const now = audioContext.currentTime;
-    for (const param of scheduledParams) {
-      try {
-        param.cancelScheduledValues(now);
-        param.setValueAtTime(param.value, now);
-      } catch (e) {
-        log(
-          `Warning: cancelScheduledValues failed for param: ${e instanceof Error ? e.message : e}`,
-        );
-      }
-    }
-    scheduledParams.clear();
-  }
-
-  /**
    * Compile entire track into a flat schedule of parameter changes.
    * All semantics evaluation happens here - no logic in executeSchedule.
    */
-  function compileSchedule(track: KlattFrame[], baseTime: number): ScheduleEntry[] {
+  function compileSchedule(track: KlattFrame[], baseTime = 0): ScheduleEntry[] {
+    validateTrackTiming(track, baseTime, diagnostics);
     const schedule: ScheduleEntry[] = [];
     const report = createRealizationDiagnostics(diagnostics, "interpreter.compilation_omissions");
 
@@ -451,9 +411,9 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
           // Frame 0 must use setValueAtTime to establish the automation anchor.
           schedule.push({
             time: t,
-            param: binding.param,
+            target: { nodeId: binding.nodeId, paramName: binding.paramName },
             value,
-            ramp: binding.ramp && i > 0,
+            mode: binding.ramp && i > 0 ? "ramp" : "step",
           });
         }
       }
@@ -463,13 +423,98 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     return schedule;
   }
 
+  return { compileSchedule };
+}
+
+/** Reject invalid timing before any host cancels or writes automation. */
+function validateTrackTiming(
+  track: KlattFrame[],
+  startTime: number,
+  diagnostics: Diagnostics,
+): void {
+  let previousTime = 0;
+  for (let i = 0; i < track.length; i++) {
+    const time = track[i]?.time;
+    if (
+      !Number.isFinite(startTime) ||
+      startTime < 0 ||
+      typeof time !== "number" ||
+      !Number.isFinite(time) ||
+      time < previousTime ||
+      !Number.isFinite(startTime + time)
+    ) {
+      const message =
+        "Invalid track timing: finite, nonnegative, ordered frame times and start time required";
+      diagnostics.error(
+        message,
+        { frameIndex: i, time, startTime, outcome: "track rejected" },
+        "interpreter.invalid_timing",
+      );
+      throw new Error(message);
+    }
+    previousTime = time;
+  }
+}
+
+/** WebAudio adapter shared by the browser and Node rendering backends. */
+export function createKlattInterpreter(options: KlattInterpreterOptions): KlattInterpreter {
+  const { audioContext, runtime, logger = () => {} } = options;
+  const diagnostics = options.diagnostics ?? runtime.getDiagnostics?.() ?? createDiagnostics();
+  const log = (msg: string) => logger(`[klatt-interpreter] ${msg}`);
+  const bindings = new Map<string, BindingSpec[]>();
+  const params = new Map<string, Map<string, AudioParam>>();
+  for (const [name, targets] of options.bindingMap ?? runtime.getBindingMap()) {
+    for (const target of targets) {
+      const node = runtime.getNode(target.nodeId);
+      const param = node && getAudioParam(node, target.paramName);
+      if (!param) {
+        diagnostics.warn(
+          "Automation target is unavailable",
+          { ...target, outcome: "binding omitted" },
+          "interpreter.missing_target",
+        );
+        continue;
+      }
+      const list = bindings.get(name) ?? [];
+      list.push(target);
+      bindings.set(name, list);
+      const nodeParams = params.get(target.nodeId) ?? new Map<string, AudioParam>();
+      nodeParams.set(target.paramName, param);
+      params.set(target.nodeId, nodeParams);
+    }
+  }
+  const { compileSchedule } = createKlattScheduleCompiler({
+    ...options,
+    sampleRate: audioContext.sampleRate,
+    bindingMap: bindings,
+    diagnostics,
+  });
+  let trackDuration = 0;
+  const scheduledParams = new Set<AudioParam>();
+
+  function cancelScheduled(): void {
+    const now = audioContext.currentTime;
+    for (const param of scheduledParams) {
+      try {
+        param.cancelScheduledValues(now);
+        param.setValueAtTime(param.value, now);
+      } catch (e) {
+        log(
+          `Warning: cancelScheduledValues failed for param: ${e instanceof Error ? e.message : e}`,
+        );
+      }
+    }
+    scheduledParams.clear();
+  }
+
   /**
    * Execute a pre-compiled schedule.
    * Pure AudioParam writes, no evaluation logic.
    */
   function executeSchedule(schedule: ScheduleEntry[]): void {
-    for (const { time, param, value, ramp } of schedule) {
-      if (ramp) {
+    for (const { time, target, value, mode } of schedule) {
+      const param = params.get(target.nodeId)!.get(target.paramName)!;
+      if (mode === "ramp") {
         param.linearRampToValueAtTime(value, time);
       } else {
         param.setValueAtTime(value, time);
@@ -488,37 +533,11 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     }
 
     const baseTime = startTime;
-    // Every frame time is required, including markers without parameter writes.
-    // Reject invalid timing before cancelling or changing a previous schedule.
-    let previousTime = 0;
-    for (let i = 0; i < track.length; i++) {
-      const time = track[i]?.time;
-      if (
-        !Number.isFinite(baseTime) ||
-        baseTime < 0 ||
-        typeof time !== "number" ||
-        !Number.isFinite(time) ||
-        time < previousTime ||
-        !Number.isFinite(baseTime + time)
-      ) {
-        const message =
-          "Invalid track timing: finite, nonnegative, ordered frame times and start time required";
-        diagnostics.error(
-          message,
-          { frameIndex: i, time, startTime, outcome: "track rejected" },
-          "interpreter.invalid_timing",
-        );
-        throw new Error(message);
-      }
-      previousTime = time;
-    }
-
-    log(`Scheduling ${track.length} frames starting at ${baseTime.toFixed(3)}s`);
-
     // Compile entire schedule (all semantics evaluation happens here)
     const schedule = compileSchedule(track, baseTime);
+    log(`Scheduling ${track.length} frames starting at ${baseTime.toFixed(3)}s`);
     cancelScheduled();
-    trackDuration = previousTime;
+    trackDuration = track[track.length - 1].time;
 
     // Execute schedule (pure AudioParam writes, no logic)
     executeSchedule(schedule);

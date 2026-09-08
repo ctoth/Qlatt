@@ -2,6 +2,8 @@
 
 ## Klatt 1975 Table I
 
+The final comparison uses Peterson commit `b67810f9`, including the per-phone floors from #61. Both reports were regenerated; their listed VOT deltas are unchanged after that integration.
+
 The 18 voiceless rows replace place-only VOT targets for prestressed word-initial English onsets. VOT is the total release-plus-aspiration interval. The existing inventory proportions allocate that total between two segments; this allocation and the 5 ms segment floor are engineering choices, not additional measurements from the paper. Integer allocation preserves each measured total exactly.
 
 The existing /s/-cluster duration override now preserves a table-selected interval. The broad /t/-glottalization rule also preserves oral stops before prestressed /r, w/, so the measured /tr, tw, str/ rows can apply. `test/klatt-vot-table.test.ts` covers all rows, inherited Beauty behavior, cross-word /s/, and unchanged medial/unstressed controls. The latter controls were also run on the parent commit before publication.

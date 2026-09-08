@@ -6,14 +6,14 @@
  *   1. Diphthong expansion (diph components should appear as separate segments)
  *   2. Word-final stop release (stops at end of utterance should have release)
  *   3. Voicing bleed (SIL pad frames should have AV === 0)
- *   4. Segment duration floors (manner-class minimums)
+ *   4. Segment duration floors (source-derived per-phone/component minimums)
  *
  * Default: ~5k word subset ensuring phoneme coverage.
  * Full mode: FULL_AUDIT=1 env var processes all ~135k words.
  */
 
-import { beforeAll, describe, it, vi } from "vitest";
-import { textToKlattTrack } from "../src/tts-frontend";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import {
   DIPHTHONG_BASES,
   DIPHTHONG_COMPONENTS,
@@ -120,6 +120,10 @@ describe("full dictionary audit", () => {
   let auditWords: [string, string][] = [];
   const trackCache = new Map<string, Frame[]>();
   const segmentCache = new Map<string, Segment[]>();
+  const durationCache = new Map<
+    string,
+    { phoneme: string; durationMs: number; minimumMs: number }[]
+  >();
   const materializationWarnings: MaterializationWarning[] = [];
 
   beforeAll(
@@ -162,9 +166,24 @@ describe("full dictionary audit", () => {
         for (const [word] of auditWords) {
           try {
             currentWordForWarnings = word;
-            const track = textToKlattTrack(word) as Frame[];
+            const result = textToKlattTrackDetailed(word);
+            const track = result.track as Frame[];
             trackCache.set(word, track);
             segmentCache.set(word, extractSegments(track));
+            // Audit each HRG component separately; consecutive identical phones
+            // can merge in frame grouping and hide a too-short individual item.
+            durationCache.set(
+              word,
+              result.utterance
+                .relation("Segment")
+                .listItems()
+                .filter((item) => item.get("active") !== false)
+                .map((item) => ({
+                  phoneme: String(item.get("phoneme")),
+                  durationMs: Number(item.get("duration")),
+                  minimumMs: Math.round(Number(item.get("durationFloor"))),
+                })),
+            );
           } catch {
             errors++;
           }
@@ -1436,44 +1455,26 @@ describe("full dictionary audit", () => {
   // -- Block 11: Segment Duration Floors ------------------------------------
 
   describe("segment duration floors", () => {
-    it("segments should respect manner-class minimum durations", () => {
+    it("segments should respect their declared per-phone and component floors", () => {
       const violations: DurationFloorViolation[] = [];
       let segmentsChecked = 0;
 
-      for (const [word] of auditWords) {
-        const segments = segmentCache.get(word);
-        if (!segments) continue;
-
-        for (const seg of segments) {
-          // Skip SIL segments
-          if (seg.phoneme === "SIL") continue;
-          // Skip stop releases and aspirations
-          if (seg.phoneme.endsWith("_REL") || seg.phoneme.endsWith("_ASP")) continue;
-
-          const base = stripStress(seg.phoneme);
-          let minimumMs: number | null = null;
-
-          if (NASAL_PHONEMES.has(base)) {
-            minimumMs = 40;
-          } else if (seg.phoneme.endsWith("_CL")) {
-            minimumMs = 20;
-          } else if (LIQUID_PHONEMES.has(base)) {
-            minimumMs = 30;
-          } else if (GLIDE_PHONEMES.has(base)) {
-            minimumMs = 30;
-          }
-
-          if (minimumMs !== null) {
-            segmentsChecked++;
-            // Use a small epsilon for floating point comparison
-            if (seg.durationMs < minimumMs - 0.01) {
-              violations.push({
-                word,
-                phoneme: seg.phoneme,
-                durationMs: Math.round(seg.durationMs * 100) / 100,
-                minimumMs,
-              });
-            }
+      // Retain the audit's existing scope: successfully synthesized words.
+      // beforeAll counts synthesis errors separately (e.g. antwerp also fails
+      // on base 1af37573 in hertz_nucleus_timing's nullable voiced predicate).
+      for (const [word] of trackCache) {
+        const segments = durationCache.get(word);
+        expect(segments, `missing duration audit for ${word}`).toBeDefined();
+        for (const seg of segments ?? []) {
+          // Klatt resolution rounds each write to milliseconds. Whole-phone
+          // manner thresholds are not minima for allocated diphthong offglides.
+          segmentsChecked++;
+          if (
+            !Number.isFinite(seg.minimumMs) ||
+            !Number.isFinite(seg.durationMs) ||
+            seg.durationMs < seg.minimumMs
+          ) {
+            violations.push({ word, ...seg });
           }
         }
       }

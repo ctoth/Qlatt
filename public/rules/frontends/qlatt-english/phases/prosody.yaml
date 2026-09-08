@@ -1,5 +1,28 @@
 version: v2-pierrehumbert
 rules:
+  # Lienard 1999 motivates coupled effort; ToBI supplies accent carriers.
+  # Engineering estimate: modest accent boost plus phrase-local relaxation.
+  vocal_effort:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme != 'SIL' && has_voiced_formants(current)"
+    contour:
+      domain: phrase
+      reset_break_index: 3
+      apply:
+        - field: effort
+          op: set
+          value: >-
+            (has(current.isAccentCarrier) && current.isAccentCarrier == true
+              ? params.policy.effort.accent_db : 0.0)
+            - params.policy.effort.phrase_fall_db
+              * contour.elapsed_sec / max([contour.phrase_duration_sec, 0.001])
+          tag: source_contour
+    citations:
+      - Lienard & Di Benedetto 1999
+      - Silverman et al. 1992 (ToBI accent carriers and intermediate phrase boundaries)
+      - "Engineering estimate: accent and phrase effort interpolation; 1ms denominator guard"
   # ==========================================================================
   # Pierrehumbert-Style Intonation Model
   #

@@ -8,15 +8,15 @@ import { textToKlattTrack } from "../src/tts-frontend";
 const experiments = ["klatt80-baseline", "qlatt-beauty"];
 // Captured before the port at 66b4c375, with the same seeded runtime request.
 const defaultHashes: Record<string, string> = {
-  // #64 Peterson Table I: reviewed hello-world duration changes; DSP unchanged.
-  "klatt80-baseline": "7fbd3b989d710cd308cafd8dc4a76cdd78a509719780848e44e3442aa407f954",
+  // #54: cited accent/phrase effort; the zero-effort control below preserves #64.
+  "klatt80-baseline": "b6373778116939941c6b1d4b36dcd84c29ea91aadda67c0a0e0a1be2f1c39453",
   // #53: beauty requests jitter=0.25, now percent CV (Schoentgen Model II).
   "qlatt-beauty": "ba317188dbbc5842fd0e2599e24ff61c1b2af3cde7c84f22efdf453a9d7072d4",
 };
 // Captured with jitter explicitly disabled on unchanged #53 base 32c63af5.
 const zeroJitterHashes: Record<string, string> = {
-  // #64: same neutral source, with the newly cited intrinsic vowel durations.
-  "klatt80-baseline": "7fbd3b989d710cd308cafd8dc4a76cdd78a509719780848e44e3442aa407f954",
+  // #54: default effort contour, with jitter disabled.
+  "klatt80-baseline": "b6373778116939941c6b1d4b36dcd84c29ea91aadda67c0a0e0a1be2f1c39453",
   "qlatt-beauty": "5166a1079ff878146d9863a4f41b1b2c0dbb008a949073f0fc0b820701b80eed",
 };
 const frontend = (experiment: string) =>
@@ -56,6 +56,14 @@ function hash(samples: number[]) {
 }
 
 describe.each(experiments)("%s Klatt 1990 voice quality", (experimentId) => {
+  it("preserves the pre-effort audio at explicit zero effort", async () => {
+    const output = await render(experimentId, { effort: 0, jitter: 0 });
+    expect(hash(output.samples)).toBe(
+      experimentId === "klatt80-baseline"
+        ? "7fbd3b989d710cd308cafd8dc4a76cdd78a509719780848e44e3442aa407f954"
+        : zeroJitterHashes[experimentId],
+    );
+  }, 30000);
   it("matches the render baseline with jitter disabled", async () => {
     const output = await render(experimentId, { jitter: 0 });
     expect(hash(output.samples)).toBe(zeroJitterHashes[experimentId]);

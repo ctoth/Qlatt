@@ -27,7 +27,10 @@ describe("tone association preserves the existing frontend tracks", () => {
           // #56 adds neutral controls after these snapshots were captured.
           // Assert their defaults before removing them from the legacy hash;
           // retain the original snapshots to prove all earlier fields unchanged.
-          const { FTP, FTZ, BTP, BTZ, DF1, DB1, ...params } = frame.params;
+          // #54 adds effort; all pre-effort track controls must remain identical.
+          // Its contour, realization and scheduling have dedicated regressions.
+          const { FTP, FTZ, BTP, BTZ, DF1, DB1, effort, ...params } = frame.params;
+          if (frontendId === "qlatt-english") expect(Number.isFinite(effort)).toBe(true);
           expect({ FTP, FTZ, BTP, BTZ, DF1, DB1 }).toEqual({
             FTP: 2150,
             FTZ: 2150,

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createDiagnostics, type Diagnostics } from "../src/diagnostics";
 import { type BaconGraph, createKlattRuntime, type Registry } from "../src/klatt-runtime";
 import type { SemanticsDocument } from "../src/semantics/types";
 
@@ -52,16 +53,14 @@ const minimalRegistry: Registry = {
 
 describe("realize error routing", () => {
   let ctx: MockAudioContext;
-  let logMessages: string[];
-  let mockLogger: (msg: string) => void;
+  let diagnostics: Diagnostics;
 
   beforeEach(() => {
     ctx = new MockAudioContext();
-    logMessages = [];
-    mockLogger = (msg: string) => logMessages.push(msg);
+    diagnostics = createDiagnostics();
   });
 
-  it("routes evaluate() errors through the log callback", async () => {
+  it("routes unbound evaluate() errors through the caller diagnostics", async () => {
     // Semantics with a deliberately broken realize expression
     const semantics: SemanticsDocument = {
       name: "test-broken-realize",
@@ -88,27 +87,32 @@ describe("realize error routing", () => {
       semantics,
       graph,
       registry: minimalRegistry,
-      logger: mockLogger,
+      diagnostics,
     });
 
     warnSpy.mockRestore();
 
-    // The log callback should have received a message about the semantics error
-    const _errorLogs = logMessages.filter(
-      (msg) => msg.toLowerCase().includes("error") || msg.toLowerCase().includes("semantics"),
+    expect(diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "runtime.realization_failed",
+        data: expect.objectContaining({
+          affected: [
+            expect.objectContaining({
+              rule: "brokenValue",
+              error: expect.stringContaining("undefinedFn"),
+              last: expect.objectContaining({
+                outcome: "no bound write; evaluation value retained",
+              }),
+            }),
+          ],
+        }),
+      }),
     );
-    // At minimum, there should be a log message mentioning the evaluation error
-    const hasErrorRouted = logMessages.some(
-      (msg) => msg.includes("Semantics evaluation error") || msg.includes("brokenValue"),
-    );
-    expect(hasErrorRouted).toBe(true);
   });
 
-  it("logs when a graph binding references a failed realize rule", async () => {
+  it("reports a retained value when a graph binding references a failed realize rule", async () => {
     // The graph binds to 'derivedGain', which is a realize rule that fails.
-    // The runtime should log that this binding is affected by the failure,
-    // since the node is receiving the param-seeded fallback instead of the
-    // intended derived value.
+    // No derivedGain seed exists: the AudioParam remains unchanged.
     const semantics: SemanticsDocument = {
       name: "test-fallthrough",
       params: {
@@ -130,24 +134,39 @@ describe("realize error routing", () => {
     // Suppress console.warn noise
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    await createKlattRuntime({
+    const runtime = await createKlattRuntime({
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,
       registry: minimalRegistry,
-      logger: mockLogger,
+      diagnostics,
     });
 
     warnSpy.mockRestore();
 
-    // The logger should have received a fallthrough warning about derivedGain
-    const hasFallthroughWarning = logMessages.some(
-      (msg) => msg.includes("fallthrough") && msg.includes("derivedGain"),
+    expect((runtime.getNode("output") as GainNode).gain.value).toBe(1);
+    expect(runtime.getRealizedValues().derivedGain).toBeUndefined();
+    expect(diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "runtime.realization_failed",
+        data: expect.objectContaining({
+          affected: [
+            expect.objectContaining({
+              rule: "derivedGain",
+              nodeId: "output",
+              paramName: "gain",
+              last: expect.objectContaining({
+                appliedValue: 1,
+                outcome: "previous/default value retained",
+              }),
+            }),
+          ],
+        }),
+      }),
     );
-    expect(hasFallthroughWarning).toBe(true);
   });
 
-  it("logs fallthrough summary on setInputs when realize rule fails", async () => {
+  it("updates failure counts on setInputs when realize rule fails", async () => {
     const semantics: SemanticsDocument = {
       name: "test-setinputs-fallthrough",
       params: {
@@ -174,21 +193,23 @@ describe("realize error routing", () => {
       semantics,
       graph,
       registry: minimalRegistry,
-      logger: mockLogger,
+      diagnostics,
     });
-
-    // Clear log from init
-    logMessages.length = 0;
 
     // Now call setInputs — this triggers evaluate() + applyValues() again
     runtime.setInputs({ AV: 50 });
 
     warnSpy.mockRestore();
 
-    // Should log semantics error through the log callback during setInputs
-    const hasErrorLog = logMessages.some(
-      (msg) => msg.includes("Semantics evaluation error") || msg.includes("derivedAV"),
+    expect((runtime.getNode("output") as GainNode).gain.value).toBe(1);
+    expect(diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "runtime.realization_failed",
+        data: expect.objectContaining({
+          count: 2,
+          affected: [expect.objectContaining({ rule: "derivedAV", count: 2 })],
+        }),
+      }),
     );
-    expect(hasErrorLog).toBe(true);
   });
 });

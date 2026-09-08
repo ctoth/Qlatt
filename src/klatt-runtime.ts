@@ -11,6 +11,7 @@ import { expandFormantBanks } from "./formant-bank";
 import { createBrowserRuntimeAssetLoader } from "./runtime-assets/browser-loader";
 import type { RuntimeAssetLoader } from "./runtime-assets/types";
 import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
+import { createRealizationDiagnostics } from "./semantics/realization-diagnostics";
 import type { EvaluationContext, ParamValue, SemanticsDocument } from "./semantics/types";
 
 // =============================================================================
@@ -595,7 +596,8 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   let realizedValues: Record<string, ParamValue> = {};
 
   // Names of realize rules that errored in the last evaluation
-  let lastEvaluationErrorNames: Set<string> = new Set();
+  let lastEvaluationErrors = new Map<string, string>();
+  const realizationReport = createRealizationDiagnostics(diagnostics, "runtime.realization_failed");
 
   // Audio nodes created from graph
   const nodes = new Map<string, AudioNode>();
@@ -625,16 +627,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     const result = topoEvaluator.evaluate(semantics, context);
     realizedValues = result.values;
 
-    // Track which realize rules errored
-    lastEvaluationErrorNames = new Set<string>();
-
-    if (result.errors.length > 0) {
-      // Route errors through the runtime's log callback so callers can see them
-      for (const err of result.errors) {
-        lastEvaluationErrorNames.add(err.name);
-        log(`Semantics evaluation error: ${err.name}: ${err.error}`);
-      }
-    }
+    lastEvaluationErrors = new Map(result.errors.map((error) => [error.name, error.error]));
   }
 
   // Create audio nodes from graph
@@ -685,23 +678,13 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
   // Apply realized values to nodes
   function applyValues(): void {
-    // Detect bound params whose realize rules errored — these are using
-    // the param-seeded fallback value instead of the intended derived value
-    const affectedBindings: string[] = [];
+    const reportedRules = new Set<string>();
 
     for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
       const node = nodes.get(nodeId);
       if (!nodeDef.params) continue;
 
       for (const [paramName, paramSpec] of Object.entries(nodeDef.params)) {
-        // Check if this binding references a failed realize rule
-        if (typeof paramSpec === "object" && paramSpec !== null && "bind" in paramSpec) {
-          const bindName = (paramSpec as { bind: string }).bind;
-          if (lastEvaluationErrorNames.has(bindName)) {
-            affectedBindings.push(bindName);
-          }
-        }
-
         const value = resolveParamValue(paramSpec, realizedValues, currentInputs);
         const param = node ? getAudioParam(node, paramName) : null;
         const context = {
@@ -727,16 +710,38 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
             consequence: "AudioParam unchanged",
           });
         }
+        const error = context.bindName ? lastEvaluationErrors.get(context.bindName) : undefined;
+        if (error && context.bindName) {
+          reportedRules.add(context.bindName);
+          const applied = !!param && typeof value === "number" && Number.isFinite(value);
+          realizationReport.record(
+            { rule: context.bindName, nodeId, paramName, error },
+            {
+              requestedValue: value,
+              appliedValue: param?.value,
+              outcome: applied
+                ? "seeded/input value applied"
+                : param
+                  ? "previous/default value retained"
+                  : "write omitted",
+            },
+          );
+        }
       }
     }
 
-    // Log a single summary line for bindings affected by failed realize rules
-    if (affectedBindings.length > 0) {
-      const unique = [...new Set(affectedBindings)];
-      log(
-        `Semantics fallthrough for: ${unique.join(", ")} (realize rule failed, using raw input values)`,
-      );
+    for (const [rule, error] of lastEvaluationErrors) {
+      if (!reportedRules.has(rule)) {
+        realizationReport.record(
+          { rule, error },
+          {
+            requestedValue: realizedValues[rule],
+            outcome: "no bound write; evaluation value retained",
+          },
+        );
+      }
     }
+    realizationReport.flush();
   }
 
   // Wire up connections

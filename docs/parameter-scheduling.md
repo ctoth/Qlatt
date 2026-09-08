@@ -23,6 +23,33 @@ For graph topology and extension points, see `docs/synthesizer-architecture.md`.
 
 ## Track Structure
 
+All frame times and the playback start time must be finite and nonnegative;
+frame times must be nondecreasing. The final frame time is the track duration,
+including a final marker with no parameter writes. Invalid timing rejects the
+track with `interpreter.invalid_timing` before replacing existing automation.
+An empty track leaves the existing schedule and duration unchanged.
+
+A frame with missing, null, array, or non-object `params` is omitted with a
+warning; its valid time still contributes to duration. Missing passthrough keys
+are legitimate sparse frames: they request no write. A present invalid value,
+or a missing/nonnumeric/nonfinite realized binding, omits that write and warns.
+
+Failed realization retains the evaluator's seeded/input value, if any. Runtime
+initialization and input updates report `runtime.realization_failed`, recording
+the observed applied value or retained AudioParam value. Interpreter compilation
+reports `interpreter.compilation_omissions`, recording the fallback value queued
+for scheduling or an omitted write. Reports aggregate counts and first/latest
+observations per rule/target into one Diagnostics entry per runtime or track.
+Runtime counts update in the retained entry; subscribers receive the initial
+warning, and `getEntries()`/`format()` expose the accumulated observations.
+
+Missing AF is valid. PLSTEP telemetry uses `semantics.plstep.missingValue` for
+omitted trigger keys, including AF, and advances its per-trigger state according
+to that policy. This is telemetry only; physical bursts run in the graph's
+edge-detector/decay-envelope chain. An AF omission is not evidence of suppressed
+audio. Configured missing-trigger behavior is covered in
+`test/klatt-interpreter.test.ts`.
+
 Each frame in a track (from `src/klatt-interpreter.ts`):
 
 ```typescript

@@ -150,3 +150,6 @@ Key hypotheses supported:
 - `Crystal_1982_SegmentalDurationsConnectedSpeech` — Both use normalized duration measures for connected speech; Price et al. use z-score normalization identical in concept to what Crystal & House's gamma distribution parameters enable
 - `Pitrelli_1994_ToBILabellingReliability` — Price et al. introduced the 7-level break index precursor; Pitrelli validates the reliability of the resulting ToBI system
 - `Wightman_1992_SegmentalDurationsProsodic` — Companion study from same research group and corpus; Price establishes prosody-syntax mapping, Wightman provides the durational details
+
+### Already in Collection (lexical-stress collection update)
+- [On Stress and Linguistic Rhythm](../Liberman_1977_StressLinguisticRhythm/notes.md) - cited in this paper's bibliography. Supplies relational prominence and metrical grids; do not interpret prosodic disambiguation results as validation of its complete lexical stress derivation.

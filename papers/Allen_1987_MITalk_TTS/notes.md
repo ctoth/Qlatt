@@ -786,3 +786,7 @@ SIL and glottal segments have no inherent targets - inherit from context.
 ### Conceptual Links (not citation-based)
 - [[vanSanten_1997_ProsodicModeling]] — extends the prosodic modeling framework (duration + F0) that MITalk established, with more sophisticated statistical approaches to the same problems MITalk solved with hand-tuned rules (Strong)
 - [[Carlson_1975_RuleBasedTTS]] — the KTH synthesis-by-rule system developed in parallel with MITalk; both represent the state of the art in rule-based TTS but with different linguistic traditions (Swedish vs. American English) and different phonetic rule formalisms (Moderate)
+
+### Conceptual Links (lexical-stress collection update; not citation-based)
+- [On Stress and Linguistic Rhythm](../Liberman_1977_StressLinguisticRhythm/notes.md) - metrical treatment of cyclic stress, secondary prominence and destressing clarifies distinctions that MITalk must serialize as stress levels. The Liberman (1977) duration abstract in this book's bibliography is a different work.
+- [Extrametricality and English Stress](../Hayes_1982_ExtrametricalityEnglishStress/notes.md) - foot-based alternative to numerical cyclic stress rules; requires explicit morphology, phonological weight and lexical exceptions. Its internal structure is not MITalk's primary/secondary output alphabet.

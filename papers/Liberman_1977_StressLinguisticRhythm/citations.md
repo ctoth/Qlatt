@@ -1,0 +1,42 @@
+# References
+
+Transcribed from printed pp.335-336; years and publication status follow the paper.
+
+- Aronoff, M. H. (1976). Word Formation in Generative Grammar. MIT Press, Cambridge, Massachusetts.
+- Austin, T. R. (1976). A Non-cyclic Analysis of German Word Stress. Occasional Papers in Linguistics II, University of Massachusetts at Amherst, 105-116.
+- Bing, J. (1976). Is the Cycle Necessary in Phonology. Unpublished paper, University of Massachusetts, Amherst.
+- Brame, M. K. (1972). The Segmental Cycle. In M. K. Brame, ed., Contributions to Generative Phonology. University of Texas Press, 62-72.
+- Bresnan, J. (1972). Stress and Syntax: A Reply. Language 48, 326-342.
+- Chomsky, N. (1951). Morphophonemics of Modern Hebrew. Unpublished master's thesis, University of Pennsylvania.
+- Chomsky, N., and M. Halle (1968). The Sound Pattern of English. Harper and Row, New York.
+- Fischer-Jorgensen, E. (1948). Some Remarks on the Function of Stress with Special Reference to the Germanic Languages. Congr. Intern. Sc. Anthropol. et Ethnol., Comptes-Rendus, IIIe Session, Bruxelles 1948, 86-88.
+- Gimson, A. C. (1962). An Introduction to the Pronunciation of English. St. Martin's Press, New York.
+- Goldsmith, J. (1976). Autosegmental Phonology. Unpublished doctoral dissertation, MIT.
+- Jones, D. (1956). An Outline of English Phonetics. W. Heffer and Sons, Cambridge.
+- Kenyon, J. S., and T. A. Knott (1953). A Pronouncing Dictionary of American English. G. and C. Merriam, Springfield, Massachusetts.
+- Halle, M. (1973). Stress Rules in English: A New Version. Linguistic Inquiry 4, 451-464.
+- Halle, M., and S. J. Keyser (1971). English Stress: Its Form, its Growth, and its Role in Verse. Harper and Row, New York.
+- Kean, M. L. (1974). The Strict Cycle in Phonology. Linguistic Inquiry 5, 179-203.
+- Kahn, D. (1976). Syllable-Based Generalizations in English Phonology. Unpublished doctoral dissertation, MIT.
+- Kiparsky, P. (1966). Ueber den Deutschen Akzent. Studia Grammatica 7, Akademie-Verlag, Berlin.
+- Kiparsky, P. (1973). Elsewhere in Phonology. In S. R. Anderson and P. Kiparsky, eds., A Festschrift for Morris Halle. Holt, Rinehart, and Winston, New York.
+- Kiparsky, P. (1977). The Rhythmic Structure of English Verse. Linguistic Inquiry 8, 189-247.
+- Liberman, M. (1975). The Intonational System of English. Unpublished doctoral dissertation, MIT.
+- Liberman, M., and L. Streeter (1976). Use of Nonsense Syllable Mimicry in the Study of Prosodic Phenomena. Paper delivered at Acoustical Society of America meeting, San Diego, November 1976.
+- Marchand, H. (1969). The Categories and Types of Present-Day English Word-Formation. C. H. Beck'sche Verlagsbuchhandlung, Munchen.
+- Martin, J. (1972). Rhythmic (Hierarchical) versus Serial Structure in Speech and Other Behavior. Psychological Review 79, 487-509.
+- Mascaro, J. (1976). Catalan Phonology and the Phonological Cycle. Unpublished doctoral dissertation, MIT.
+- Nakatani, L., and J. Schaffer (1976). Hearing Words Without Words: Prosodic Cues for Word Perception. Paper delivered at Acoustical Society of America meeting, San Diego, November 1976.
+- Nanni, D. L. (1976). Vowel Destressing in English. Unpublished manuscript, University of Massachusetts, Amherst.
+- Oehrle, R. T. (1971). Some Remarks on the Role of Morphology in the Assignment of Stress. Mimeographed paper, MIT.
+- Prince, A. (1975). The Phonology and Morphology of Tiberian Hebrew. Unpublished doctoral dissertation, MIT.
+- Rischel, J. (1964). Stress, Juncture and Syllabification in Phonemic Description. Proceedings of IXth International Congress of Linguists, 1962, 85-93.
+- Rischel, J. (1972). Compound Stress in Danish without a Cycle. Annual Report of the Institute of Phonetics, University of Copenhagen (ARIPUC) 6, 211-228.
+- Ross, J. R. (1972). A Reanalysis of English Word Stress. In M. K. Brame, ed., Contributions to Generative Phonology. University of Texas Press, 229-323.
+- Schane, S. (1972). Noncyclic English Word Stress. Mimeographed paper, University of California at San Diego.
+- Siegel, D. (1974). Topics in English Morphology. Unpublished doctoral dissertation, MIT.
+- Steele, J. (1975). An Essay towards Establishing the Melody and Measure of Speech. Facsimile edition, Scolar Press (1969), Menston, England. [Year reproduced as printed in this bibliography.]
+- Trager, G. L., and H. L. Smith (1951). An Outline of English Structure (Studies in Linguistics, Occasional Papers 3). Battenburg Press, Norman, Oklahoma.
+- Vergnaud, J.-R. (1974). Problemes Formels en Phonologie Generative. These de 3e Cycle, Universite de Paris VII.
+- Vergnaud, J.-R. (1976). Formal Properties of Phonological Rules. Unpublished paper, C.N.R.S., Paris.
+- Zonneveld, W. (1976). Destressing in Halle's English Stress Rules. Linguistic Inquiry 7, 520-525.

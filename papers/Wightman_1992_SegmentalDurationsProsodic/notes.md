@@ -216,3 +216,6 @@ For a segment with baseline duration mu_p:
 - `Crystal_1982_SegmentalDurationsConnectedSpeech` — Both measure segmental durations in connected speech; Crystal & House provide baseline phone-level statistics, Wightman et al. show how these durations are modulated by prosodic boundary strength
 - `Hertz_1992_NucleusBasedTiming` — Both address how suprasegmental structure conditions duration; Wightman focuses on prosodic boundaries, Hertz on syllabic nucleus organization
 - `Price_1991_ProsodySyntacticDisambiguation` — Companion study from same research group and corpus; Price establishes prosody-syntax mapping, Wightman provides the durational details
+
+### Already in Collection (lexical-stress collection update)
+- [On Stress and Linguistic Rhythm](../Liberman_1977_StressLinguisticRhythm/notes.md) - cited in this paper's bibliography. Its metrical grid is an ordinal representation; the measured boundary-lengthening effects here remain separate phonetic evidence and must not be inferred from grid height alone.

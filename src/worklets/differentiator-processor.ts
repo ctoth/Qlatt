@@ -1,95 +1,19 @@
-import { type BaseProcessorOptions, computeRmsPeak } from "./wasm-utils.js";
+// Klatt (1980), COEWAV.FOR. DSP authority: crates/differentiator/src/lib.rs.
+import { WasmSampleProcessor } from "./sample-processor.js";
+import { computeRmsPeak } from "./wasm-utils.js";
 
-interface DifferentiatorMetricsMessage {
-  type: "metrics";
-  node: string;
-  rms: number;
-  peak: number;
-  inRms?: number;
-  inPeak?: number;
-}
-
-class DifferentiatorProcessor extends AudioWorkletProcessor {
-  private disposed = false;
-  prev: number[];
-  debug: boolean;
-  nodeId: string;
-  scale: number;
-  reportInterval: number;
-  _reportCountdown: number;
-
+class DifferentiatorProcessor extends WasmSampleProcessor {
   constructor(options?: unknown) {
-    super(options);
-    const opts = options as BaseProcessorOptions | undefined;
-    this.prev = [];
-    this.debug = Boolean(opts?.processorOptions?.debug);
-    this.nodeId = opts?.processorOptions?.nodeId || "diff";
-    // Klatt80 uses SR=10kHz; scale first-difference so UGLOT amplitude
-    // matches the 10kHz reference when running at higher sample rates.
-    this.scale = sampleRate / 10000;
-    this.reportInterval = opts?.processorOptions?.reportInterval || 50;
-    this._reportCountdown = this.reportInterval;
-    this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
-      if (event?.data?.type === "dispose") {
-        this.disposed = true;
-        this.port.close();
-        return;
-      }
-      if (event?.data?.type === "ping") {
-        this.port.postMessage({ type: "ready", node: this.nodeId });
-      }
-    };
-    this.port.postMessage({ type: "ready", node: this.nodeId });
+    super(options, "differentiator", "diff");
   }
-
-  process(
-    inputs: Float32Array[][],
-    outputs: Float32Array[][],
-    _parameters: Record<string, Float32Array>,
-  ): boolean {
-    if (this.disposed) return false;
-    const input = inputs[0];
-    const output = outputs[0];
-    if (!input || !output) {
-      return true;
+  protected render(input: Float32Array[], output: Float32Array[]): Record<string, number> {
+    for (let ch = 0; ch < output.length; ch++) {
+      const source = input[ch];
+      if (!source) continue;
+      for (let i = 0; i < output[ch].length; i++) output[ch][i] = this.sample(ch, source[i] ?? 0);
     }
-
-    for (let ch = 0; ch < output.length; ch += 1) {
-      const inCh = input[ch];
-      const outCh = output[ch];
-      if (!inCh || !outCh) continue;
-
-      let prev = this.prev[ch] || 0;
-      for (let i = 0; i < outCh.length; i += 1) {
-        const x = inCh[i] ?? 0;
-        outCh[i] = (x - prev) * this.scale;
-        prev = x;
-      }
-      this.prev[ch] = prev;
-    }
-    this._reportMetrics(output[0], input[0]);
-    return true;
-  }
-
-  _reportMetrics(buffer?: Float32Array, inputBuffer?: Float32Array): void {
-    if (!this.debug || !buffer) return;
-    this._reportCountdown -= 1;
-    if (this._reportCountdown > 0) return;
-    this._reportCountdown = this.reportInterval;
-    const { rms, peak } = computeRmsPeak(buffer);
-    const payload: DifferentiatorMetricsMessage = {
-      type: "metrics",
-      node: this.nodeId,
-      rms,
-      peak,
-    };
-    if (inputBuffer) {
-      const inMetrics = computeRmsPeak(inputBuffer);
-      payload.inRms = inMetrics.rms;
-      payload.inPeak = inMetrics.peak;
-    }
-    this.port.postMessage(payload);
+    const metrics = input[0] ? computeRmsPeak(input[0]) : null;
+    return metrics ? { inRms: metrics.rms, inPeak: metrics.peak } : {};
   }
 }
-
 registerProcessor("differentiator-processor", DifferentiatorProcessor);

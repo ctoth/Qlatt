@@ -24,7 +24,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "chalker-radiation"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
 name = "decay-envelope"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
+name = "differentiator"
 version = "0.1.0"
 dependencies = [
  "klatt-wasm-common",
@@ -66,6 +80,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "glottal-mod"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
+name = "impulse-train"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
 name = "impulsive-source"
 version = "0.1.0"
 dependencies = [
@@ -80,6 +108,17 @@ version = "0.1.0"
 name = "lf-source"
 version = "0.1.0"
 dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
+name = "noise-source"
+version = "0.1.0"
+dependencies = [
+ "chalker-radiation",
+ "differentiator",
+ "glottal-mod",
+ "impulse-train",
  "klatt-wasm-common",
 ]
 

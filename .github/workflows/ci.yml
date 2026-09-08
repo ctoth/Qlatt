@@ -47,6 +47,8 @@ jobs:
 
       - run: cargo test -p two-mass-source
 
+      - run: cargo test -p noise-source
+
       - run: npm test
 
       - run: npm run build

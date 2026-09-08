@@ -182,6 +182,7 @@ export class KlattSynth {
       numberOfOutputs: 1,
       outputChannelCount: [1],
       processorOptions: {
+        wasmBytes: wasm?.impulseTrain,
         debug: telemetry,
         nodeId: "impulse",
         reportInterval,
@@ -192,6 +193,7 @@ export class KlattSynth {
       numberOfOutputs: 1,
       outputChannelCount: [1],
       processorOptions: {
+        wasmBytes: wasm?.noiseSource,
         debug: telemetry,
         nodeId: "noise",
         seed: this._resolveNoiseSeed("noise"),
@@ -203,6 +205,7 @@ export class KlattSynth {
       numberOfOutputs: 1,
       outputChannelCount: [1],
       processorOptions: {
+        wasmBytes: wasm?.noiseSource,
         debug: telemetry,
         nodeId: "frication",
         seed: this._resolveNoiseSeed("frication"),
@@ -243,6 +246,7 @@ export class KlattSynth {
       numberOfOutputs: 1,
       outputChannelCount: [1],
       processorOptions: {
+        wasmBytes: wasm?.glottalMod,
         debug: telemetry,
         nodeId: "glottal-mod",
         reportInterval,
@@ -268,6 +272,7 @@ export class KlattSynth {
     });
     N.diff = new AudioWorkletNode(ctx, "differentiator-processor", {
       processorOptions: {
+        wasmBytes: wasm?.differentiator,
         debug: telemetry,
         nodeId: "diff",
         reportInterval,
@@ -277,6 +282,7 @@ export class KlattSynth {
     // Replaces simple first-difference with improved high-frequency accuracy.
     N.radiationDiff = new AudioWorkletNode(ctx, "chalker-radiation-processor", {
       processorOptions: {
+        wasmBytes: wasm?.chalkerRadiation,
         debug: telemetry,
         nodeId: "radiation-diff",
         reportInterval,
@@ -284,6 +290,7 @@ export class KlattSynth {
     });
     N.radiationDiffAvs = new AudioWorkletNode(ctx, "chalker-radiation-processor", {
       processorOptions: {
+        wasmBytes: wasm?.chalkerRadiation,
         debug: telemetry,
         nodeId: "radiation-diff-avs",
         reportInterval,
@@ -1199,12 +1206,35 @@ export class KlattSynth {
       const response = await fetch(bustUrl);
       return response.arrayBuffer();
     };
-    const [resonator, antiresonator, lfSource] = await Promise.all([
+    const [
+      resonator,
+      antiresonator,
+      lfSource,
+      impulseTrain,
+      noiseSource,
+      differentiator,
+      chalkerRadiation,
+      glottalMod,
+    ] = await Promise.all([
       load("resonator.wasm"),
       load("antiresonator.wasm"),
       load("lf-source.wasm"),
+      load("impulse-train.wasm"),
+      load("noise-source.wasm"),
+      load("differentiator.wasm"),
+      load("chalker-radiation.wasm"),
+      load("glottal-mod.wasm"),
     ]);
-    this.wasmBytes = { resonator, antiresonator, lfSource };
+    this.wasmBytes = {
+      resonator,
+      antiresonator,
+      lfSource,
+      impulseTrain,
+      noiseSource,
+      differentiator,
+      chalkerRadiation,
+      glottalMod,
+    };
   }
 
   setParam(name: string, value: number, atTime = this.ctx.currentTime): void {

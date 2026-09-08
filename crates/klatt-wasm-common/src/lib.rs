@@ -3,6 +3,49 @@
 //! These functions are required for the AudioWorklet WASM pattern where
 //! JavaScript needs to allocate/deallocate f32 buffers in WASM linear memory.
 
+/// Export the sample ABI used by the five small source/radiation primitives.
+/// A state owns one channel. Hosts provide a positive finite sample rate and an
+/// explicit u32 seed (ignored by non-noise primitives). Signal arguments and
+/// state use f64 to preserve the original JavaScript recurrences; the host
+/// rounds the returned sample to f32 at the output boundary.
+#[macro_export]
+macro_rules! export_sample_processor {
+    ($state:ty, $new:ident, $sample:ident, $free:ident) => {
+        #[no_mangle]
+        pub extern "C" fn $new(rate: f64, seed: u32) -> *mut $state {
+            if !rate.is_finite() || rate <= 0.0 {
+                return core::ptr::null_mut();
+            }
+            Box::into_raw(Box::new(<$state>::new(rate, seed)))
+        }
+
+        /// # Safety
+        /// State must be null or a live pointer returned by this crate's constructor.
+        #[no_mangle]
+        pub unsafe extern "C" fn $sample(
+            state: *mut $state,
+            input: f64,
+            a: f64,
+            b: f64,
+            c: f64,
+        ) -> f64 {
+            match state.as_mut() {
+                Some(state) => state.sample(input, a, b, c),
+                None => 0.0,
+            }
+        }
+
+        /// # Safety
+        /// State must be null or a live pointer returned by this crate's constructor.
+        #[no_mangle]
+        pub unsafe extern "C" fn $free(state: *mut $state) {
+            if !state.is_null() {
+                drop(Box::from_raw(state));
+            }
+        }
+    };
+}
+
 /// Match JavaScript's `sample || 0` numeric normalization without a data-dependent
 /// branch: NaNs and signed zero become positive zero; finite nonzero values and
 /// infinities retain their exact bits.

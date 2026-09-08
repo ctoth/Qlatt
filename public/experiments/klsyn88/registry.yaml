@@ -418,6 +418,7 @@ primitives:
   impulse-train:
     description: "Classic Klatt impulse train source - generates periodic impulses at F0"
     worklet: "impulse-train-processor.js"
+    wasm: "impulse-train.wasm"
     params:
       f0:
         type: float
@@ -438,6 +439,7 @@ primitives:
   noise-source:
     description: "Filtered noise generator for aspiration and frication"
     worklet: "noise-source-processor.js"
+    wasm: "noise-source.wasm"
     params:
       gain:
         type: float
@@ -454,6 +456,7 @@ primitives:
   differentiator:
     description: "First-difference filter for radiation characteristic - y[n] = x[n] - x[n-1]"
     worklet: "differentiator-processor.js"
+    wasm: "differentiator.wasm"
     params: {}
     inputs: 1
     outputs: 1
@@ -461,6 +464,7 @@ primitives:
   glottal-mod:
     description: "Amplitude modulation synchronized to glottal cycle - 50% duty cycle square wave"
     worklet: "glottal-mod-processor.js"
+    wasm: "glottal-mod.wasm"
     params:
       f0:
         type: float

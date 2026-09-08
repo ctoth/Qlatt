@@ -1,5 +1,6 @@
 import type { Diagnostics } from "../diagnostics";
 import { loadStressPolicy } from "../g2p/stress-policy";
+import type { AreaFunctionDerivation } from "../provenance";
 import {
   cloneValue,
   isPlainObject,
@@ -97,6 +98,7 @@ function normalizePhonemeTargets(node: unknown): Record<string, Record<string, u
       throw new Error(`E_INVENTORY_SCHEMA: phoneme_targets.${phoneme} must be an object`);
     }
     if (Object.hasOwn(target, "duration_model")) validateDurationModel(target.duration_model);
+    readAreaFunctionDerivation(target);
     output[phoneme] = cloneValue(target) as Record<string, unknown>;
   }
 
@@ -336,7 +338,42 @@ export type InventoryParameterFallback = {
   token?: string;
 };
 
+/** Metadata only: runtime consumes precomputed Hz and never runs the tube model. */
+function readAreaFunctionDerivation(
+  target: Record<string, unknown>,
+): AreaFunctionDerivation | undefined {
+  if (target.derived_from === undefined && target.area_function === undefined) return undefined;
+  const geometry = target.area_function;
+  const speaker = isPlainObject(geometry) ? geometry.speaker : undefined;
+  if (
+    target.derived_from !== "area_function" ||
+    !isPlainObject(geometry) ||
+    typeof geometry.source !== "string" ||
+    !geometry.source.trim() ||
+    typeof geometry.model !== "string" ||
+    !geometry.model.trim() ||
+    !isPlainObject(speaker) ||
+    !["tract_length_scale", "pharynx_scale", "mouth_scale"].every(
+      (key) =>
+        typeof speaker[key] === "number" && Number.isFinite(speaker[key]) && speaker[key] > 0,
+    ) ||
+    !Array.isArray(geometry.citations) ||
+    !geometry.citations.length ||
+    geometry.citations.some((c) => typeof c !== "string" || !c.trim())
+  )
+    throw new Error(
+      "E_INVENTORY_SCHEMA: derived_from area_function requires source, model, positive speaker scales and citations",
+    );
+  for (const key of ["F1", "F2", "F3", "F4", "B1", "B2", "B3", "B4"]) {
+    if (typeof target[key] !== "number" || !Number.isFinite(target[key]) || target[key] <= 0) {
+      throw new Error(`E_INVENTORY_SCHEMA: area_function requires precomputed positive ${key}`);
+    }
+  }
+  return cloneValue(geometry) as unknown as AreaFunctionDerivation;
+}
+
 export type InventorySelection = {
+  areaFunction?: AreaFunctionDerivation;
   defaultDurationMs?: number;
   inputPhone: string;
   stress: number | null;
@@ -475,7 +512,9 @@ export function materializePhonemeTarget(
     },
   });
   reportInventoryParameterFallbacks(options.diagnostics, affected);
+  const areaFunction = readAreaFunctionDerivation(target);
   options.onSelection?.({
+    ...(areaFunction ? { areaFunction } : {}),
     inputPhone: phoneme,
     stress: options.stress ?? null,
     lookupKey,
@@ -500,7 +539,7 @@ export function materializePhonemeTarget(
   };
 
   for (const [entryKey, value] of Object.entries(target)) {
-    if (entryKey === "dur") continue;
+    if (entryKey === "dur" || entryKey === "area_function") continue;
     if (entryKey === "SW") {
       payload.inventorySW = value;
       continue;

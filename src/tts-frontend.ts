@@ -649,10 +649,11 @@ function buildTextToKlattTrackDetailed(
           stage: "transcribe",
           type: "inventory_target_selected",
           subject: item.id,
-          reason: `Selected inventory target '${selection.selectedKey}' for '${selection.inputPhone}' with stress ${selection.stress ?? "unspecified"} from ${token.sourceTokenId}${selection.defaultDurationMs === undefined ? "" : `; applied declared default duration ${selection.defaultDurationMs} ms`}`,
+          reason: `Selected inventory target '${selection.selectedKey}' for '${selection.inputPhone}' with stress ${selection.stress ?? "unspecified"} from ${token.sourceTokenId}${selection.defaultDurationMs === undefined ? "" : `; applied declared default duration ${selection.defaultDurationMs} ms`}${selection.areaFunction ? `; derived from area function ${selection.areaFunction.source} using ${selection.areaFunction.model}, speaker ${JSON.stringify(selection.areaFunction.speaker)}` : ""}`,
           inventorySelection: { ...selection, sourceTokenId: token.sourceTokenId },
           citations: [
             resources.inventoryPath,
+            ...(selection.areaFunction?.citations ?? []),
             ...(selection.secondaryStressFallback
               ? (resources.inventory.secondary_stress_fallback?.citations ?? [])
               : []),

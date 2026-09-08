@@ -40,7 +40,15 @@ export interface VocabularyLookupEvidence {
   ruleId: string;
 }
 
+export interface AreaFunctionDerivation {
+  source: string;
+  model: string;
+  speaker: Record<string, number>;
+  citations: string[];
+}
+
 export interface InventorySelectionEvidence {
+  areaFunction?: AreaFunctionDerivation;
   inputPhone: string;
   stress: number | null;
   lookupKey: string;
@@ -121,7 +129,7 @@ export function createProvenanceCollector(): ProvenanceCollector {
         ...(input.recognition ? { recognition: structuredClone(input.recognition) } : {}),
         ...(input.vocabularyLookup ? { vocabularyLookup: { ...input.vocabularyLookup } } : {}),
         ...(input.inventorySelection
-          ? { inventorySelection: { ...input.inventorySelection } }
+          ? { inventorySelection: structuredClone(input.inventorySelection) }
           : {}),
       };
       decisions.push(decision);
@@ -138,7 +146,7 @@ export function createProvenanceCollector(): ProvenanceCollector {
           ? { vocabularyLookup: { ...decision.vocabularyLookup } }
           : {}),
         ...(decision.inventorySelection
-          ? { inventorySelection: { ...decision.inventorySelection } }
+          ? { inventorySelection: structuredClone(decision.inventorySelection) }
           : {}),
       }));
     },

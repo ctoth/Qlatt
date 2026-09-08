@@ -54,6 +54,9 @@ describe("speaker profile schema", () => {
       }),
     ).toEqual({
       base_f0_hz: 200,
+      tract_length_scale: 1,
+      pharynx_scale: 1,
+      mouth_scale: 1,
       formant_scale: 1.17,
       rd_default: 0.7,
       spectral_tilt_offset_db: 0,
@@ -67,6 +70,9 @@ describe("speaker profile schema", () => {
       }),
     ).toEqual({
       base_f0_hz: 150,
+      tract_length_scale: 1,
+      pharynx_scale: 1,
+      mouth_scale: 1,
       formant_scale: 1.0,
       rd_default: 0.7,
       spectral_tilt_offset_db: 0,

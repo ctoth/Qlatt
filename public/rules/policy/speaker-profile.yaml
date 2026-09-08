@@ -15,6 +15,24 @@ citations:
 # Composition policy: use the first finite runtime source, then the field value.
 # Requests inherit the selected frontend voice; omitted values retain that voice.
 default_profile:
+  # Offline area-function generation controls. Unity preserves the measured
+  # Story geometry; runtime does not reinterpret these as formant multipliers.
+  tract_length_scale:
+    sources: [request.tract_length_scale, voice.tract_length_scale]
+    value: 1
+    citations:
+      - Fitch & Giedd 1999 (tract length and regional morphology)
+      - "Nordstrom 1977 (1975 report), length-scaling experiment"
+  pharynx_scale:
+    sources: [request.pharynx_scale, voice.pharynx_scale]
+    value: 1
+    citations:
+      - "Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)"
+  mouth_scale:
+    sources: [request.mouth_scale, voice.mouth_scale]
+    value: 1
+    citations:
+      - "Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)"
   base_f0_hz:
     sources: [request.base_f0_hz, baseF0, voice.base_f0_hz]
     value: 110

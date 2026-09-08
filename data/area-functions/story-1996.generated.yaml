@@ -1,0 +1,457 @@
+phoneme_targets:
+  IY1:
+    derived_from: area_function
+    area_function:
+      source: data/area-functions/story-1996.yaml#IY
+      source_sha256: e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204
+      model: wave-reflection-fant-loss-v1
+      model_settings:
+        sound_speed_cm_s: 35000
+        attenuation_neper: 0.007
+        lip_end_correction: 0.8
+        citations:
+          - Story et al. 1996 Sec. III C (350 m/s)
+          - Fant 1960 Eq. A.34-23 (empirical attenuation)
+          - Fant 1960 lip radiation inductance (0.8r end correction)
+      speaker:
+        tract_length_scale: 1
+        pharynx_scale: 1
+        mouth_scale: 1
+      tract_length_cm: 16.666649999999994
+      pharynx_fraction: 0.4
+      citations:
+        - Story, Titze & Hoffman 1996 Table III, p. 547 (subject BS)
+        - Peterson & Barney 1952 Table II (adult male means; comparison only)
+        - Story et al. 1996 Sec. III C (350 m/s)
+        - Fant 1960 Eq. A.34-23 (empirical attenuation)
+        - Fant 1960 lip radiation inductance (0.8r end correction)
+        - >-
+          Engineering estimate: 40% pharynx; informed by Fitch & Giedd 1999 regional morphology, not measured
+          for subject BS
+        - Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)
+    F1: 216.34
+    B1: 188.77
+    F2: 2481.79
+    B2: 105.49
+    F3: 3151.96
+    B3: 164.27
+    F4: 3860.65
+    B4: 151.72
+  IH1:
+    derived_from: area_function
+    area_function:
+      source: data/area-functions/story-1996.yaml#IH
+      source_sha256: e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204
+      model: wave-reflection-fant-loss-v1
+      model_settings:
+        sound_speed_cm_s: 35000
+        attenuation_neper: 0.007
+        lip_end_correction: 0.8
+        citations:
+          - Story et al. 1996 Sec. III C (350 m/s)
+          - Fant 1960 Eq. A.34-23 (empirical attenuation)
+          - Fant 1960 lip radiation inductance (0.8r end correction)
+      speaker:
+        tract_length_scale: 1
+        pharynx_scale: 1
+        mouth_scale: 1
+      tract_length_cm: 16.666649999999994
+      pharynx_fraction: 0.4
+      citations:
+        - Story, Titze & Hoffman 1996 Table III, p. 547 (subject BS)
+        - Peterson & Barney 1952 Table II (adult male means; comparison only)
+        - Story et al. 1996 Sec. III C (350 m/s)
+        - Fant 1960 Eq. A.34-23 (empirical attenuation)
+        - Fant 1960 lip radiation inductance (0.8r end correction)
+        - >-
+          Engineering estimate: 40% pharynx; informed by Fitch & Giedd 1999 regional morphology, not measured
+          for subject BS
+        - Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)
+    F1: 461.14
+    B1: 105.9
+    F2: 2005.88
+    B2: 115.5
+    F3: 2561.37
+    B3: 136.84
+    F4: 3516.29
+    B4: 173.46
+  EH1:
+    derived_from: area_function
+    area_function:
+      source: data/area-functions/story-1996.yaml#EH
+      source_sha256: e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204
+      model: wave-reflection-fant-loss-v1
+      model_settings:
+        sound_speed_cm_s: 35000
+        attenuation_neper: 0.007
+        lip_end_correction: 0.8
+        citations:
+          - Story et al. 1996 Sec. III C (350 m/s)
+          - Fant 1960 Eq. A.34-23 (empirical attenuation)
+          - Fant 1960 lip radiation inductance (0.8r end correction)
+      speaker:
+        tract_length_scale: 1
+        pharynx_scale: 1
+        mouth_scale: 1
+      tract_length_cm: 15.872999999999992
+      pharynx_fraction: 0.4
+      citations:
+        - Story, Titze & Hoffman 1996 Table III, p. 547 (subject BS)
+        - Peterson & Barney 1952 Table II (adult male means; comparison only)
+        - Story et al. 1996 Sec. III C (350 m/s)
+        - Fant 1960 Eq. A.34-23 (empirical attenuation)
+        - Fant 1960 lip radiation inductance (0.8r end correction)
+        - >-
+          Engineering estimate: 40% pharynx; informed by Fitch & Giedd 1999 regional morphology, not measured
+          for subject BS
+        - Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)
+    F1: 615.65
+    B1: 103.82
+    F2: 1976.48
+    B2: 128.29
+    F3: 2555.61
+    B3: 162.43
+    F4: 3490.88
+    B4: 280.42
+  AE1:
+    derived_from: area_function
+    area_function:
+      source: data/area-functions/story-1996.yaml#AE
+      source_sha256: e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204
+      model: wave-reflection-fant-loss-v1
+      model_settings:
+        sound_speed_cm_s: 35000
+        attenuation_neper: 0.007
+        lip_end_correction: 0.8
+        citations:
+          - Story et al. 1996 Sec. III C (350 m/s)
+          - Fant 1960 Eq. A.34-23 (empirical attenuation)
+          - Fant 1960 lip radiation inductance (0.8r end correction)
+      speaker:
+        tract_length_scale: 1
+        pharynx_scale: 1
+        mouth_scale: 1
+      tract_length_cm: 16.666649999999994
+      pharynx_fraction: 0.4
+      citations:
+        - Story, Titze & Hoffman 1996 Table III, p. 547 (subject BS)
+        - Peterson & Barney 1952 Table II (adult male means; comparison only)
+        - Story et al. 1996 Sec. III C (350 m/s)
+        - Fant 1960 Eq. A.34-23 (empirical attenuation)
+        - Fant 1960 lip radiation inductance (0.8r end correction)
+        - >-
+          Engineering estimate: 40% pharynx; informed by Fitch & Giedd 1999 regional morphology, not measured
+          for subject BS
+        - Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)
+    F1: 701.21
+    B1: 81
+    F2: 1808.92
+    B2: 103.22
+    F3: 2514.46
+    B3: 144.98
+    F4: 3393.62
+    B4: 191.26
+  AH1:
+    derived_from: area_function
+    area_function:
+      source: data/area-functions/story-1996.yaml#AH
+      source_sha256: e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204
+      model: wave-reflection-fant-loss-v1
+      model_settings:
+        sound_speed_cm_s: 35000
+        attenuation_neper: 0.007
+        lip_end_correction: 0.8
+        citations:
+          - Story et al. 1996 Sec. III C (350 m/s)
+          - Fant 1960 Eq. A.34-23 (empirical attenuation)
+          - Fant 1960 lip radiation inductance (0.8r end correction)
+      speaker:
+        tract_length_scale: 1
+        pharynx_scale: 1
+        mouth_scale: 1
+      tract_length_cm: 17.460299999999993
+      pharynx_fraction: 0.4
+      citations:
+        - Story, Titze & Hoffman 1996 Table III, p. 547 (subject BS)
+        - Peterson & Barney 1952 Table II (adult male means; comparison only)
+        - Story et al. 1996 Sec. III C (350 m/s)
+        - Fant 1960 Eq. A.34-23 (empirical attenuation)
+        - Fant 1960 lip radiation inductance (0.8r end correction)
+        - >-
+          Engineering estimate: 40% pharynx; informed by Fitch & Giedd 1999 regional morphology, not measured
+          for subject BS
+        - Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)
+    F1: 661.89
+    B1: 106.86
+    F2: 1270.83
+    B2: 134.51
+    F3: 2565.49
+    B3: 148.2
+    F4: 3278.8
+    B4: 199.74
+  AA1:
+    derived_from: area_function
+    area_function:
+      source: data/area-functions/story-1996.yaml#AA
+      source_sha256: e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204
+      model: wave-reflection-fant-loss-v1
+      model_settings:
+        sound_speed_cm_s: 35000
+        attenuation_neper: 0.007
+        lip_end_correction: 0.8
+        citations:
+          - Story et al. 1996 Sec. III C (350 m/s)
+          - Fant 1960 Eq. A.34-23 (empirical attenuation)
+          - Fant 1960 lip radiation inductance (0.8r end correction)
+      speaker:
+        tract_length_scale: 1
+        pharynx_scale: 1
+        mouth_scale: 1
+      tract_length_cm: 17.460299999999993
+      pharynx_fraction: 0.4
+      citations:
+        - Story, Titze & Hoffman 1996 Table III, p. 547 (subject BS)
+        - Peterson & Barney 1952 Table II (adult male means; comparison only)
+        - Story et al. 1996 Sec. III C (350 m/s)
+        - Fant 1960 Eq. A.34-23 (empirical attenuation)
+        - Fant 1960 lip radiation inductance (0.8r end correction)
+        - >-
+          Engineering estimate: 40% pharynx; informed by Fitch & Giedd 1999 regional morphology, not measured
+          for subject BS
+        - Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)
+    F1: 774.4
+    B1: 147.69
+    F2: 1116.33
+    B2: 130.95
+    F3: 2753.68
+    B3: 104.88
+    F4: 3394.24
+    B4: 224.1
+  AO1:
+    derived_from: area_function
+    area_function:
+      source: data/area-functions/story-1996.yaml#AO
+      source_sha256: e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204
+      model: wave-reflection-fant-loss-v1
+      model_settings:
+        sound_speed_cm_s: 35000
+        attenuation_neper: 0.007
+        lip_end_correction: 0.8
+        citations:
+          - Story et al. 1996 Sec. III C (350 m/s)
+          - Fant 1960 Eq. A.34-23 (empirical attenuation)
+          - Fant 1960 lip radiation inductance (0.8r end correction)
+      speaker:
+        tract_length_scale: 1
+        pharynx_scale: 1
+        mouth_scale: 1
+      tract_length_cm: 17.460299999999993
+      pharynx_fraction: 0.4
+      citations:
+        - Story, Titze & Hoffman 1996 Table III, p. 547 (subject BS)
+        - Peterson & Barney 1952 Table II (adult male means; comparison only)
+        - Story et al. 1996 Sec. III C (350 m/s)
+        - Fant 1960 Eq. A.34-23 (empirical attenuation)
+        - Fant 1960 lip radiation inductance (0.8r end correction)
+        - >-
+          Engineering estimate: 40% pharynx; informed by Fitch & Giedd 1999 regional morphology, not measured
+          for subject BS
+        - Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)
+    F1: 595.05
+    B1: 118.14
+    F2: 1020.86
+    B2: 163.26
+    F3: 2224.44
+    B3: 287.94
+    F4: 2976.96
+    B4: 129.6
+  OW1:
+    derived_from: area_function
+    area_function:
+      source: data/area-functions/story-1996.yaml#OW
+      source_sha256: e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204
+      model: wave-reflection-fant-loss-v1
+      model_settings:
+        sound_speed_cm_s: 35000
+        attenuation_neper: 0.007
+        lip_end_correction: 0.8
+        citations:
+          - Story et al. 1996 Sec. III C (350 m/s)
+          - Fant 1960 Eq. A.34-23 (empirical attenuation)
+          - Fant 1960 lip radiation inductance (0.8r end correction)
+      speaker:
+        tract_length_scale: 1
+        pharynx_scale: 1
+        mouth_scale: 1
+      tract_length_cm: 17.460299999999993
+      pharynx_fraction: 0.4
+      citations:
+        - Story, Titze & Hoffman 1996 Table III, p. 547 (subject BS)
+        - Peterson & Barney 1952 Table II (adult male means; comparison only)
+        - Story et al. 1996 Sec. III C (350 m/s)
+        - Fant 1960 Eq. A.34-23 (empirical attenuation)
+        - Fant 1960 lip radiation inductance (0.8r end correction)
+        - >-
+          Engineering estimate: 40% pharynx; informed by Fitch & Giedd 1999 regional morphology, not measured
+          for subject BS
+        - Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)
+    F1: 353.42
+    B1: 185.05
+    F2: 840.28
+    B2: 147.68
+    F3: 2487.29
+    B3: 137.64
+    F4: 3750.1
+    B4: 144.53
+  UH1:
+    derived_from: area_function
+    area_function:
+      source: data/area-functions/story-1996.yaml#UH
+      source_sha256: e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204
+      model: wave-reflection-fant-loss-v1
+      model_settings:
+        sound_speed_cm_s: 35000
+        attenuation_neper: 0.007
+        lip_end_correction: 0.8
+        citations:
+          - Story et al. 1996 Sec. III C (350 m/s)
+          - Fant 1960 Eq. A.34-23 (empirical attenuation)
+          - Fant 1960 lip radiation inductance (0.8r end correction)
+      speaker:
+        tract_length_scale: 1
+        pharynx_scale: 1
+        mouth_scale: 1
+      tract_length_cm: 17.460299999999993
+      pharynx_fraction: 0.4
+      citations:
+        - Story, Titze & Hoffman 1996 Table III, p. 547 (subject BS)
+        - Peterson & Barney 1952 Table II (adult male means; comparison only)
+        - Story et al. 1996 Sec. III C (350 m/s)
+        - Fant 1960 Eq. A.34-23 (empirical attenuation)
+        - Fant 1960 lip radiation inductance (0.8r end correction)
+        - >-
+          Engineering estimate: 40% pharynx; informed by Fitch & Giedd 1999 regional morphology, not measured
+          for subject BS
+        - Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)
+    F1: 356.93
+    B1: 183.09
+    F2: 914.07
+    B2: 134.72
+    F3: 2706
+    B3: 128.32
+    F4: 3766.22
+    B4: 124.57
+  UW1:
+    derived_from: area_function
+    area_function:
+      source: data/area-functions/story-1996.yaml#UW
+      source_sha256: e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204
+      model: wave-reflection-fant-loss-v1
+      model_settings:
+        sound_speed_cm_s: 35000
+        attenuation_neper: 0.007
+        lip_end_correction: 0.8
+        citations:
+          - Story et al. 1996 Sec. III C (350 m/s)
+          - Fant 1960 Eq. A.34-23 (empirical attenuation)
+          - Fant 1960 lip radiation inductance (0.8r end correction)
+      speaker:
+        tract_length_scale: 1
+        pharynx_scale: 1
+        mouth_scale: 1
+      tract_length_cm: 18.253949999999993
+      pharynx_fraction: 0.4
+      citations:
+        - Story, Titze & Hoffman 1996 Table III, p. 547 (subject BS)
+        - Peterson & Barney 1952 Table II (adult male means; comparison only)
+        - Story et al. 1996 Sec. III C (350 m/s)
+        - Fant 1960 Eq. A.34-23 (empirical attenuation)
+        - Fant 1960 lip radiation inductance (0.8r end correction)
+        - >-
+          Engineering estimate: 40% pharynx; informed by Fitch & Giedd 1999 regional morphology, not measured
+          for subject BS
+        - Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)
+    F1: 250.41
+    B1: 155.08
+    F2: 1103.96
+    B2: 137.79
+    F3: 2446.41
+    B3: 97.06
+    F4: 3698.93
+    B4: 126.52
+  ER1:
+    derived_from: area_function
+    area_function:
+      source: data/area-functions/story-1996.yaml#ER
+      source_sha256: e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204
+      model: wave-reflection-fant-loss-v1
+      model_settings:
+        sound_speed_cm_s: 35000
+        attenuation_neper: 0.007
+        lip_end_correction: 0.8
+        citations:
+          - Story et al. 1996 Sec. III C (350 m/s)
+          - Fant 1960 Eq. A.34-23 (empirical attenuation)
+          - Fant 1960 lip radiation inductance (0.8r end correction)
+      speaker:
+        tract_length_scale: 1
+        pharynx_scale: 1
+        mouth_scale: 1
+      tract_length_cm: 17.460299999999993
+      pharynx_fraction: 0.4
+      citations:
+        - Story, Titze & Hoffman 1996 Table III, p. 547 (subject BS)
+        - Peterson & Barney 1952 Table II (adult male means; comparison only)
+        - Story et al. 1996 Sec. III C (350 m/s)
+        - Fant 1960 Eq. A.34-23 (empirical attenuation)
+        - Fant 1960 lip radiation inductance (0.8r end correction)
+        - >-
+          Engineering estimate: 40% pharynx; informed by Fitch & Giedd 1999 regional morphology, not measured
+          for subject BS
+        - Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)
+    F1: 496.06
+    B1: 125.48
+    F2: 1536.78
+    B2: 130.96
+    F3: 2253.75
+    B3: 111.21
+    F4: 2983.88
+    B4: 182.47
+  L:
+    derived_from: area_function
+    area_function:
+      source: data/area-functions/story-1996.yaml#L
+      source_sha256: e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204
+      model: wave-reflection-fant-loss-v1
+      model_settings:
+        sound_speed_cm_s: 35000
+        attenuation_neper: 0.007
+        lip_end_correction: 0.8
+        citations:
+          - Story et al. 1996 Sec. III C (350 m/s)
+          - Fant 1960 Eq. A.34-23 (empirical attenuation)
+          - Fant 1960 lip radiation inductance (0.8r end correction)
+      speaker:
+        tract_length_scale: 1
+        pharynx_scale: 1
+        mouth_scale: 1
+      tract_length_cm: 18.253949999999993
+      pharynx_fraction: 0.4
+      citations:
+        - Story, Titze & Hoffman 1996 Table III, p. 547 (subject BS)
+        - Peterson & Barney 1952 Table II (adult male means; comparison only)
+        - Story et al. 1996 Sec. III C (350 m/s)
+        - Fant 1960 Eq. A.34-23 (empirical attenuation)
+        - Fant 1960 lip radiation inductance (0.8r end correction)
+        - >-
+          Engineering estimate: 40% pharynx; informed by Fitch & Giedd 1999 regional morphology, not measured
+          for subject BS
+        - Nordstrom 1977 (1975 report), experiment 2 (regional length and area scaling)
+    F1: 435.09
+    B1: 98.94
+    F2: 1137.87
+    B2: 85.32
+    F3: 2556.11
+    B3: 82.74
+    F4: 3585.94
+    B4: 78.87

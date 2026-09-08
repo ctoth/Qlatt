@@ -1,6 +1,7 @@
 // Display formatter — takes check results, state, and display config sections,
 // and produces formatted text output. Each section is dispatched by its `source` type.
 
+import type { SemanticsDocument } from "../semantics/types";
 import type { PlstepEvent, TelemetryDatum } from "../track-analysis";
 import {
   analyzeTrackGains,
@@ -38,6 +39,7 @@ export interface DisplayState {
   playHistory: PlayHistoryEntry[];
   sessionId: number;
   sliderParams: Record<string, number>;
+  semantics?: SemanticsDocument;
   sampleRate: number;
 }
 
@@ -204,7 +206,12 @@ function formatMeterReadings(state: DisplayState): string[] {
 function formatGainDerivation(state: DisplayState): string[] {
   const track = state.run?.track;
   if (!track || track.length === 0) return ["(no track data)"];
-  const analysis = analyzeTrackGains(track, state.sliderParams, state.sampleRate || 48000);
+  const analysis = analyzeTrackGains(
+    track,
+    state.sliderParams,
+    state.sampleRate || 48000,
+    state.semantics,
+  );
   if (!analysis) return ["(no gain data)"];
   const { ranges, warnings, parallelScale } = analysis;
   return [

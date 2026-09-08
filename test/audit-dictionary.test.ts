@@ -1176,7 +1176,7 @@ describe("full dictionary audit", () => {
 
         if (nextSegment?.phoneme === "R") {
           wordsWithTail += 1;
-          tailF3.push(segmentAverageParam(nextSegment, "F3"));
+          tailF3.push(Math.min(...nextSegment.frames.map((frame) => Number(frame.params.F3))));
         }
       }
 

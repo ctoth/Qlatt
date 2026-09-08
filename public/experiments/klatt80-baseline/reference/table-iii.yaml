@@ -1,0 +1,35 @@
+# Reference targets, independent of the experiment's realization rules.
+citations:
+  - "Klatt 1980, Software for a cascade/parallel formant synthesizer, Table III"
+targets:
+  P_REL: { AF: 55, AH: 52, AB: 63, A2: 0, A3: 0, A4: 0, A5: 0, A6: 0, dur: 5, label: "[p] labial burst" }
+  T_REL: { AF: 58, AH: 55, AB: 0, A2: 0, A3: 30, A4: 45, A5: 57, A6: 63, dur: 15, label: "[t] alveolar burst" }
+  K_REL: { AF: 55, AH: 53, AB: 0, A2: 0, A3: 53, A4: 43, A5: 45, A6: 45, dur: 25, label: "[k] velar burst" }
+  B_REL: { AF: 52, AV: 47, AB: 63, A1: 60, A2: 0, dur: 5, label: "[b] voiced labial" }
+  D_REL: { AF: 50, AV: 47, AB: 0, A1: 58, A2: 0, A3: 47, A4: 60, A5: 62, A6: 60, dur: 10, label: "[d] voiced alveolar" }
+  G_REL: { AF: 50, AV: 47, AB: 0, A1: 58, A2: 0, A3: 53, A4: 43, A5: 45, A6: 45, dur: 20, label: "[g] voiced velar" }
+  P_ASP: { AH: 52, AB: 63, dur: 53, label: "[p] aspiration" }
+  T_ASP: { AH: 55, A3: 30, A4: 45, A5: 57, A6: 63, dur: 56, label: "[t] aspiration" }
+  K_ASP: { AH: 53, A3: 53, A4: 43, A5: 45, A6: 45, dur: 48, label: "[k] aspiration" }
+conformance:
+  durationToleranceMs:
+    value: 3
+    basis: "engineering estimate: retained diagnostic duration tolerance, not a Table III tolerance"
+  amplitudeToleranceDb:
+    value: 5
+    basis: "engineering estimate: retained AF, AH, and A3 diagnostic tolerance"
+  plstepWindowSeconds:
+    value: 0.02
+    basis: "engineering estimate: retained event-correlation window"
+  plstepAfGateDb:
+    value: 40
+    basis: "engineering estimate: retained high-AF missing-burst heuristic, not the engine trigger threshold"
+  maxVoicingIssues:
+    value: 6
+    basis: "engineering estimate: retained diagnostic display cap"
+  lowParallelScale:
+    value: 0.05
+    basis: "engineering estimate: retained low parallel-scale warning threshold"
+  lowParallelGain:
+    value: 0.001
+    basis: "engineering estimate: retained low parallel-gain warning threshold"

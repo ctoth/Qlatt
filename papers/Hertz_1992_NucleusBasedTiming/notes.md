@@ -7,6 +7,37 @@ year: 1992
 
 ## Key Concept: The Acoustic Nucleus
 
+### Page-image corrections for issue 70
+
+Read all four canonical page images, printed pp.1171–1174. The following
+corrects the older duration summary below and is the implementation authority.
+
+- The starting duration of **/a y/** is **145 ms**; a **two-phone nucleus
+  ending in /r/** is assigned **160 ms**. The original extraction reversed
+  these contexts. The paper does not assign 160 ms to every other two-phone
+  nucleus or to all monophthongs. *(p.1173, §2.3)*
+- Acoustic nuclei contain the vowel, non-nasal tautosyllabic sonorants, and
+  voiced portions of their edge transitions. /t/→/a/ aspiration in *tied*
+  is outside its nucleus; the corresponding voiced transition in *died*
+  is inside. /wild/ has three nucleus phones, /a y l/. *(p.1172)*
+- First assign transition durations and non-vowel phone durations, then
+  give the vowel the remaining nucleus duration. For *tied*: 145 − 90 − 10
+  − 15 = **30 ms** for /a/. *(p.1173)*
+- Before a tautosyllabic voiced consonant, use min(1.5×duration, cap),
+  **except before a tautosyllabic nasal–voiceless-stop sequence**. The cap
+  is **250 ms** for a three-phone nucleus and **200 ms** for vowel+glide
+  /ay, oy, aw/. No cap for every other nucleus type is supplied here.
+  *(p.1173, §2.3)*
+- This lengthening changes **phone durations only**; transition durations
+  remain fixed. The lengthened *tied* example is 75 + 90 + 20 + 15 =
+  **200 ms**. A subsequent aspiration rule reduces /a/ to **55 ms**,
+  giving 180 ms; 200 ms is the pre-aspiration nucleus target, not the
+  final duration of every *tied* utterance. *(p.1173)*
+- Treat the unstated durations and caps as missing data rather than
+  extending the paper's examples to unrelated nucleus structures.
+  The rules are based principally on one GA speaker and parameterized
+  for dialect; they are not universal English constants. *(pp.1172–1173)*
+
 The central innovation is the **acoustic nucleus** — a unit not recognized in conventional segment-based models.
 
 - The acoustic nucleus consists of the **vowel** of the syllable, any **non-nasal tautosyllabic sonorants**, and any **voiced portions of transitions** on either side

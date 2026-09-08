@@ -327,4 +327,8 @@ inspect the production formatter and use its actual precision in the expected
 text. Keep separate numeric assertions on the underlying value so presentation
 coverage cannot substitute for behavior coverage.
 
+Before adding a duration rule, place its timing constants and caps in the frontend's cited params.policy.duration schema rather than inline CEL literals. Verify every feature read against the Segment declarations, including durationFloor; a field available in the runtime schema is not automatically declared in the rulepack. Run the bundled schema validator before interpreting duration regressions.
+
+When a base frontend rule adds feature writes or relation navigation, inspect every extending frontend's relation declarations and add the same required declarations where the child replaces that schema. Run inherited rulepack validation and single-parse checks before treating the base frontend's schema pass as sufficient.
+
 When adding affect provenance records, preserve the input contract's direct local-affect-to-global-affect parent edge. Add the preset application record as another parent rather than replacing the existing parent; run test/input.test.ts to verify that direct-edge contract.

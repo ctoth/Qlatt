@@ -22,7 +22,11 @@ it("initializes the compiled frication source and reports readiness", async () =
   vi.stubGlobal("sampleRate", 22000);
   try {
     await import("../src/worklets/frication-source-processor.ts");
-    const wasmBytes = readFileSync("public/worklets/frication-source.wasm");
+    const moduleBytes = readFileSync("public/worklets/frication-source.wasm");
+    const storage = new Uint8Array(moduleBytes.byteLength + 16);
+    storage.fill(0xff);
+    storage.set(moduleBytes, 8);
+    const wasmBytes = storage.subarray(8, 8 + moduleBytes.byteLength);
     new construct!({ processorOptions: { wasmBytes, seed: 51, nodeId: "probe" } });
     expect(await ready).toEqual({ type: "ready", node: "probe" });
   } finally {

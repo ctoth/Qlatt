@@ -8,13 +8,15 @@ import { textToKlattTrack } from "../src/tts-frontend";
 const experiments = ["klatt80-baseline", "qlatt-beauty"];
 // Captured before the port at 66b4c375, with the same seeded runtime request.
 const defaultHashes: Record<string, string> = {
-  "klatt80-baseline": "ee8a64f62cdecd06e6acbee9bee4d0f95db0a08e14bd6700e6d7fa780cc68569",
+  // #64 Peterson Table I: reviewed hello-world duration changes; DSP unchanged.
+  "klatt80-baseline": "d538e1ef7250d062491a454b186b0bda014db6260505a364aad9f0ad58e89b56",
   // #53: beauty requests jitter=0.25, now percent CV (Schoentgen Model II).
   "qlatt-beauty": "ba317188dbbc5842fd0e2599e24ff61c1b2af3cde7c84f22efdf453a9d7072d4",
 };
 // Captured with jitter explicitly disabled on unchanged #53 base 32c63af5.
 const zeroJitterHashes: Record<string, string> = {
-  "klatt80-baseline": "ee8a64f62cdecd06e6acbee9bee4d0f95db0a08e14bd6700e6d7fa780cc68569",
+  // #64: same neutral source, with the newly cited intrinsic vowel durations.
+  "klatt80-baseline": "d538e1ef7250d062491a454b186b0bda014db6260505a364aad9f0ad58e89b56",
   "qlatt-beauty": "5166a1079ff878146d9863a4f41b1b2c0dbb008a949073f0fc0b820701b80eed",
 };
 const frontend = (experiment: string) =>
@@ -54,7 +56,7 @@ function hash(samples: number[]) {
 }
 
 describe.each(experiments)("%s Klatt 1990 voice quality", (experimentId) => {
-  it("preserves the pre-perturbation render with jitter disabled", async () => {
+  it("matches the render baseline with jitter disabled", async () => {
     const output = await render(experimentId, { jitter: 0 });
     expect(hash(output.samples)).toBe(zeroJitterHashes[experimentId]);
   }, 30000);

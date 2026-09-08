@@ -5,13 +5,13 @@ import { createServer } from "vite";
 
 // Capture in each checkout, then compare the captures to review a table's
 // segment-level effects before regenerating the aggregate corpus golden.
-// node --experimental-strip-types scripts/review-duration-tables.ts capture <root> <output> [rate]
+// node --experimental-strip-types scripts/review-duration-tables.ts capture <root> <output> [rate] [phrase]
 // node --experimental-strip-types scripts/review-duration-tables.ts golden <root> <output> [rate]
 // node --experimental-strip-types scripts/review-duration-tables.ts compare <before> <after> <report>
 type Segment = { phoneme: string; duration: number };
 type Snapshot = { frontendId: string; phrase: string; rate: number; segments: Segment[] }[];
 
-const [mode, first, second, third] = process.argv.slice(2);
+const [mode, first, second, third, phraseOnly] = process.argv.slice(2);
 assert(first && second, "Expected capture <root> <output> or compare <before> <after> <report>");
 if (mode === "capture" || mode === "golden") {
   const rate = third === undefined ? 1 : Number(third);
@@ -37,14 +37,19 @@ if (mode === "capture" || mode === "golden") {
       baseF0: number;
       phrases: string[];
     };
-    const cases = [
-      ...corpus.phrases.map((phrase) => ({ frontendId: "qlatt-english", phrase })),
-      ...["qlatt-english", "qlatt-beauty", "dectalk-english"].flatMap((frontendId) =>
-        ["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."].map(
-          (phrase) => ({ frontendId, phrase }),
-        ),
-      ),
-    ];
+    const cases = phraseOnly
+      ? ["qlatt-english", "qlatt-beauty", "dectalk-english"].map((frontendId) => ({
+          frontendId,
+          phrase: phraseOnly,
+        }))
+      : [
+          ...corpus.phrases.map((phrase) => ({ frontendId: "qlatt-english", phrase })),
+          ...["qlatt-english", "qlatt-beauty", "dectalk-english"].flatMap((frontendId) =>
+            ["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."].map(
+              (phrase) => ({ frontendId, phrase }),
+            ),
+          ),
+        ];
     const snapshot: Snapshot =
       mode === "capture"
         ? cases.map(({ frontendId, phrase }) => ({

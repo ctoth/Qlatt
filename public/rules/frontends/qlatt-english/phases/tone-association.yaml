@@ -1,0 +1,93 @@
+version: v1
+# One authoritative symbolic melody inventory. Entries encode symbol[*]:role;
+# the roles select phonetic recipes in prosody.yaml, which owns time and Hz.
+# Pierrehumbert 1980; Ladd 2008 Ch. 3. Goldsmith 1976 Ch. 3 supplies association.
+maps:
+  accent_melodies:
+    H*: "H*:f0_h_star"
+    H*+L: "H*:f0_h_star_plus_l_peak L:f0_h_star_plus_l_tail"
+    L+H*: "L:f0_l_leading H*:f0_l_plus_h_star"
+    H+!H*: "H:f0_h_leading H*:f0_h_plus_downstepped_h_star"
+    H*+H: "H*:f0_h_star_plus_h_peak H:f0_h_star_plus_h_tail"
+    H+L*: "H:f0_h_plus_l_star_lead L*:f0_h_plus_l_star"
+    L*: "L*:f0_l_star"
+    L*+H: "L*:f0_l_star H:f0_l_star_plus_h"
+rules:
+  associate_accent_tones:
+    kind: structural
+    select:
+      relation: Segment
+      where: >-
+        isTrue(current, 'isAccented') && current.stress == 1
+        && has_voiced_formants(current)
+        && has(current.accentType) && current.accentType in maps.accent_melodies
+    define:
+      codes: "split(maps.accent_melodies[current.accentType], ' ')"
+      melody: >-
+        codes.map(code, {'symbol': substring(split(code, ':')[0], 0, 1),
+          'starred': split(code, ':')[0].endsWith('*'), 'role': split(code, ':')[1]})
+    associate_tones:
+      relation: Tone
+      # Compatibility domain: the selected carrier's canonical syllable. This
+      # retains intra-syllabic leading/trailing alignment; it does not invent
+      # English tones on every intervening unaccented syllable.
+      domain: "concat(current.id, ':accent')"
+      units: "[current.syllable]"
+      tones: melody
+      anchors: "[{'tone': melody[0].starred ? 0 : 1, 'unit': 0}]"
+      mode: anchored
+      association: tone_bearer
+      source_association: tones
+      tag: tone_association
+    citations:
+      - Goldsmith 1976 Chapter 3 (star convention and well-formedness)
+      - Pierrehumbert 1980 (pitch accents)
+      - Ladd 2008 Chapter 3 (association versus phonetic alignment)
+
+  associate_initial_tone:
+    kind: structural
+    select:
+      relation: Segment
+      where: "has(current.initialBoundaryTone) && current.initialBoundaryTone == '%H'"
+    associate_tones:
+      relation: Tone
+      domain: "concat(current.id, ':initial')"
+      units: "[current]"
+      tones: "[{'symbol': 'H', 'starred': false, 'role': 'f0_initial_boundary_high'}]"
+      anchors: "[]"
+      mode: left_to_right
+      association: tone_bearer
+      source_association: tones
+      tag: tone_association
+    citations:
+      - Goldsmith 1976 Chapter 3 (ordered association)
+      - Pierrehumbert 1980 (initial boundary tone)
+
+  associate_edge_tones:
+    kind: structural
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'SIL' && has(current.phraseAccent)
+        && current.phraseAccent in ['H-', 'L-']
+        && has(current.boundaryTone) && current.boundaryTone in ['H%', 'L%']
+    associate_tones:
+      relation: Tone
+      # Preserve the existing punctuation-edge domain, including BI3's legacy
+      # boundary tone. BI1/BI2 add neither tones nor an IP/downstep reset.
+      domain: "concat(current.id, ':edge:', string(current.breakIndex))"
+      units: "[current]"
+      tones: >-
+        [{'symbol': substring(current.phraseAccent, 0, 1), 'starred': false,
+          'role': current.phraseAccent == 'H-' ? 'f0_phrase_high' : 'f0_phrase_low'},
+         {'symbol': substring(current.boundaryTone, 0, 1), 'starred': false,
+          'role': current.boundaryTone == 'H%' ? 'f0_boundary_rise' : 'f0_boundary_low'}]
+      anchors: "[]"
+      mode: left_to_right
+      association: tone_bearer
+      source_association: tones
+      tag: tone_association
+    citations:
+      - Goldsmith 1976 Chapter 3 (contour stacking)
+      - Pierrehumbert 1980 (phrase accents and boundary tones)
+      - Silverman et al. 1992 (break-index domains)

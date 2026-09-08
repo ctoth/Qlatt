@@ -7,6 +7,7 @@ import type { Item } from "./item";
 import { evalPath, isNavOp } from "./path";
 import type { HrgNode } from "./relation";
 import { applyScalarOp } from "./scalar-op";
+import { applyToneAssociation } from "./tone-association";
 import type { HrgTransaction } from "./transaction";
 import type { ConditionEvidence, FeatureValue, TransactionJournalEntry } from "./types";
 import type { Utterance } from "./utterance";
@@ -962,6 +963,8 @@ function applyEffects(
 
 function ruleTag(rule: Readonly<Record<string, unknown>>, ruleName: string): string {
   if (typeof rule.tag === "string" && rule.tag) return rule.tag;
+  if (isPlainObject(rule.associate_tones) && typeof rule.associate_tones.tag === "string")
+    return rule.associate_tones.tag;
   if (Array.isArray(rule.apply)) {
     const tagged = rule.apply.find(
       (effect) => isPlainObject(effect) && typeof effect.tag === "string",
@@ -1359,6 +1362,49 @@ function applyPointActions(
       continue;
     }
     if (spec.when != null && !conditionMatches(spec.when, context, predicates)) continue;
+    let realizedTone: Item | undefined;
+    if (isPlainObject(spec.tone)) {
+      const source = match.items[match.index];
+      const failTone = (message: string): never => {
+        utterance.diagnostics.error(
+          message,
+          { rule: match.ruleName, item: source.id, role: spec.tone },
+          "E_TONE_REALIZATION",
+        );
+        throw new Error(`E_TONE_REALIZATION: ${message}`);
+      };
+      const candidates: Item[] = [];
+      for (const link of utterance.latestAssociationWrites(source, String(spec.tone.association))) {
+        match.transaction.dependOn(link.decisionId);
+        if (!link.active) continue;
+        const candidate = utterance.getItem(link.toItemId);
+        if (candidate && match.transaction.read(candidate, "role") === spec.tone.role)
+          candidates.push(candidate);
+      }
+      if (candidates.length === 0) continue;
+      if (candidates.length !== 1) failTone("point recipe requires exactly one tone for its role");
+      realizedTone = candidates[0];
+      for (const field of realizedTone.featureKeys()) match.transaction.read(realizedTone, field);
+      const bearers = utterance.latestAssociationWrites(realizedTone, String(spec.tone.bearer));
+      for (const link of bearers) match.transaction.dependOn(link.decisionId);
+      if (!bearers.some((link) => link.active)) failTone("cannot realize an unassociated tone");
+      // Association constrains phonetic alignment: the selected source must be
+      // the bearer itself or a descendant in the declared structural relation.
+      // The actual alignment formula stays in the point rule.
+      const allowedBearers = new Set(
+        bearers.filter((link) => link.active).map((link) => link.toItemId),
+      );
+      let contained = allowedBearers.has(source.id);
+      if (typeof spec.tone.within === "string") {
+        let node: HrgNode | null | undefined = utterance.relation(spec.tone.within).node(source);
+        while (node) {
+          match.transaction.dependOn(node.write.decisionId);
+          if (allowedBearers.has(node.item.id)) contained = true;
+          node = node.parent;
+        }
+      }
+      if (!contained) failTone("point alignment source is outside its associated bearer");
+    }
     const relation = utterance.relation(relationName);
     const itemTypes = relation.itemTypes();
     if (itemTypes.length !== 1) {
@@ -1393,6 +1439,7 @@ function applyPointActions(
       }
     }
     match.transaction.append(relationName, point);
+    if (realizedTone) match.transaction.associate("realizes_tone", point, realizedTone);
     match.transaction.anchorPoint(
       point,
       anchorValue.leftMarkId,
@@ -1478,6 +1525,15 @@ function executeMatch(
     }
     applyAssociations(match.transaction, rule.associate, true, resolveTarget);
     applyAssociations(match.transaction, rule.disassociate, false, resolveTarget);
+    if (isPlainObject(rule.associate_tones)) {
+      applyToneAssociation(
+        utterance,
+        match.transaction,
+        match.items[match.index],
+        rule.associate_tones,
+        (expression) => evaluate(expression, context),
+      );
+    }
     applySplice(utterance, match, rule.splice, context);
     applyPointActions(utterance, match, rule, context, predicates);
     if (rule.suppress === true || rule.delete === true) {
@@ -1725,6 +1781,7 @@ function patternMatches(
 function isStructuralRule(rule: Readonly<Record<string, unknown>>): boolean {
   return (
     isPlainObject(rule.splice) ||
+    isPlainObject(rule.associate_tones) ||
     isPlainObject(rule.insert_point) ||
     (Array.isArray(rule.insert_points) && rule.insert_points.length > 0) ||
     isPlainObject(rule.insert_f0_layer) ||

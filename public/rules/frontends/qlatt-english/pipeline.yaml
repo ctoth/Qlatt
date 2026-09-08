@@ -295,6 +295,7 @@ maps:
     N: ""
     Y: ""
 tags:
+  tone_association: associates a selected melody with its declared bearer domain
   accent: assigns an intonational accent
   accent_type: selects the accent category
   aspiration_frication: carries source noise across a segment boundary
@@ -346,6 +347,12 @@ tags:
   word_class: records function-word or content-word status
   word_initial: adjusts a word-initial segment
 relations:
+  Syllable:
+    type: parallel
+    features: { index: [], stress: [], positionInWord: [] }
+  Tone:
+    type: parallel
+    features: { symbol: [], role: [], starred: [], domain: [], index: [] }
   SylStructure:
     type: span
   Token:
@@ -541,6 +548,9 @@ phases:
       - sw_default_assignment
   - name: prosody
     rules:
+      - associate_accent_tones
+      - associate_initial_tone
+      - associate_edge_tones
       - accent_index_in_phrase
       - tobi_baseline_init
       - tobi_initial_boundary_high

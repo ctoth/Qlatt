@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`tone association preserves the existing frontend tracks > dectalk-english: Did Bob buy a blue balloon? 1`] = `"44e0e8831a84ba2758f70da7da24c5445bf5a55670e66f6a04e04ec683db9799"`;
+
+exports[`tone association preserves the existing frontend tracks > dectalk-english: Gag, gang; go! 1`] = `"920b59e7612908f5d213d89fb43f803ccbad174eb6994008e1a5a3805b13d436"`;
+
+exports[`tone association preserves the existing frontend tracks > dectalk-english: The cat sat. 1`] = `"37a7be88ed150f5d02a63e445b61fbe11b181799a9f268c7e05e624248174805"`;
+
+exports[`tone association preserves the existing frontend tracks > dectalk-english: sip sip. 1`] = `"fac13210258417848f231118afa2a65fe9a17ada4dc692e0695de4f1bf1113bd"`;
+
+exports[`tone association preserves the existing frontend tracks > qlatt-beauty: Did Bob buy a blue balloon? 1`] = `"295ce65d692d1a33f8114cea4475eb5a017c89155474bc0d72fb61dd997af473"`;
+
+exports[`tone association preserves the existing frontend tracks > qlatt-beauty: Gag, gang; go! 1`] = `"916774a6cbb5512802a57813a8b8d9ab924add9a34d131712c0c4a073478d15c"`;
+
+exports[`tone association preserves the existing frontend tracks > qlatt-beauty: The cat sat. 1`] = `"55e713aa56b1d7e3ba26c8a0f5b73fce1d1a1a4c21cf9c8cfab9aa036d2b446e"`;
+
+exports[`tone association preserves the existing frontend tracks > qlatt-beauty: sip sip. 1`] = `"63b628ca763f494b89a0891f9ec4c97999119848622a162426d11564cf3cef0e"`;
+
+exports[`tone association preserves the existing frontend tracks > qlatt-english: Did Bob buy a blue balloon? 1`] = `"4695754d19fd8d952a0a2c63e6d6b49791f70f8326f36d3366216cd2522f8658"`;
+
+exports[`tone association preserves the existing frontend tracks > qlatt-english: Gag, gang; go! 1`] = `"325532ecc51a4bd53f270392fec96f9391b4d892e77ea3c4dedea607a9da27fc"`;
+
+exports[`tone association preserves the existing frontend tracks > qlatt-english: The cat sat. 1`] = `"1c47320ac16017084c358d8a21291fa8927359cc3513aa903ed4abc33457bcd2"`;
+
+exports[`tone association preserves the existing frontend tracks > qlatt-english: sip sip. 1`] = `"bf2fae25c79197782a3ee0102e0cd9c7027cc9d8d7dbdc27c9808a06400dfaa0"`;

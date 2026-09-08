@@ -503,6 +503,10 @@ exports[`prosody acoustic eligibility > qlatt-english preserves F0 targets, tags
       },
       {
         "reason": "tobi_accent matched",
+        "subject": "association:realizes_tone:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:associate_accent_tones:tone:0",
+      },
+      {
+        "reason": "tobi_accent matched",
         "subject": "item:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3.temporal_anchor",
       },
       {
@@ -520,6 +524,10 @@ exports[`prosody acoustic eligibility > qlatt-english preserves F0 targets, tags
       {
         "reason": "tobi_accent matched",
         "subject": "relation:F0Point:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "association:realizes_tone:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4:segment_2:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:associate_accent_tones:tone:1",
       },
       {
         "reason": "tobi_accent matched",
@@ -543,6 +551,10 @@ exports[`prosody acoustic eligibility > qlatt-english preserves F0 targets, tags
       },
       {
         "reason": "tobi_accent matched",
+        "subject": "association:realizes_tone:segment_6:tobi_accent:point:1:segment_6:associate_accent_tones:tone:0",
+      },
+      {
+        "reason": "tobi_accent matched",
         "subject": "item:segment_6:tobi_accent:point:1.temporal_anchor",
       },
       {
@@ -560,6 +572,10 @@ exports[`prosody acoustic eligibility > qlatt-english preserves F0 targets, tags
       {
         "reason": "tobi_accent matched",
         "subject": "relation:F0Point:segment_6:tobi_accent:point:2",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "association:realizes_tone:segment_6:tobi_accent:point:2:segment_6:associate_accent_tones:tone:1",
       },
       {
         "reason": "tobi_accent matched",
@@ -761,6 +777,10 @@ exports[`prosody acoustic eligibility > qlatt-english preserves F0 targets, tags
       },
       {
         "reason": "tobi_accent matched",
+        "subject": "association:realizes_tone:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:associate_accent_tones:tone:0",
+      },
+      {
+        "reason": "tobi_accent matched",
         "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:3.temporal_anchor",
       },
       {
@@ -781,7 +801,35 @@ exports[`prosody acoustic eligibility > qlatt-english preserves F0 targets, tags
       },
       {
         "reason": "tobi_accent matched",
+        "subject": "association:realizes_tone:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:associate_accent_tones:tone:1",
+      },
+      {
+        "reason": "tobi_accent matched",
         "subject": "item:segment_5:remap_stops_to_closures:0:insert_mapped_voiceless_release_and_aspiration:2:tobi_accent:point:4.temporal_anchor",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_9:tobi_accent:point:11",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_9:tobi_accent:point:11.value",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_9:tobi_accent:point:11.tag",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "relation:F0Point:segment_9:tobi_accent:point:11",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "association:realizes_tone:segment_9:tobi_accent:point:11:segment_9:associate_accent_tones:tone:0",
+      },
+      {
+        "reason": "tobi_accent matched",
+        "subject": "item:segment_9:tobi_accent:point:11.temporal_anchor",
       },
       {
         "reason": "tobi_accent matched",
@@ -801,27 +849,11 @@ exports[`prosody acoustic eligibility > qlatt-english preserves F0 targets, tags
       },
       {
         "reason": "tobi_accent matched",
+        "subject": "association:realizes_tone:segment_9:tobi_accent:point:12:segment_9:associate_accent_tones:tone:1",
+      },
+      {
+        "reason": "tobi_accent matched",
         "subject": "item:segment_9:tobi_accent:point:12.temporal_anchor",
-      },
-      {
-        "reason": "tobi_accent matched",
-        "subject": "item:segment_9:tobi_accent:point:13",
-      },
-      {
-        "reason": "tobi_accent matched",
-        "subject": "item:segment_9:tobi_accent:point:13.value",
-      },
-      {
-        "reason": "tobi_accent matched",
-        "subject": "item:segment_9:tobi_accent:point:13.tag",
-      },
-      {
-        "reason": "tobi_accent matched",
-        "subject": "relation:F0Point:segment_9:tobi_accent:point:13",
-      },
-      {
-        "reason": "tobi_accent matched",
-        "subject": "item:segment_9:tobi_accent:point:13.temporal_anchor",
       },
       {
         "reason": "tobi_unaccented_declination matched",

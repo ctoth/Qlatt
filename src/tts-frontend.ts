@@ -11,6 +11,7 @@ import {
   GraphRuleEvaluationOwner,
   runGraphRuleEngine,
 } from "./declarative-frontend/hrg/rule-engine";
+import { TONE_ITEM_SCHEMA } from "./declarative-frontend/hrg/tone-association";
 import {
   type InventorySpec,
   loadFrontendResources,
@@ -261,6 +262,7 @@ function buildUtteranceSchema(inventory: InventorySpec, sourceRecognition = fals
         },
       },
       segment: { features: segmentFeatures },
+      tone: TONE_ITEM_SCHEMA,
       f0Point: { features: pointFeatures },
       phraseCommand: { features: pointFeatures },
       tilt: { features: pointFeatures },
@@ -272,6 +274,7 @@ function buildUtteranceSchema(inventory: InventorySpec, sourceRecognition = fals
       Token: { kind: "list", itemTypes: ["token"] },
       Word: { kind: "list", itemTypes: ["word"] },
       Syllable: { kind: "list", itemTypes: ["syllable"] },
+      Tone: { kind: "list", itemTypes: ["tone"] },
       Segment: { kind: "list", itemTypes: ["segment"] },
       SylStructure: { kind: "tree", itemTypes: ["word", "syllable", "segment"] },
       Transition: { kind: "list", itemTypes: ["transition"] },

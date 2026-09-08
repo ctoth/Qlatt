@@ -17,6 +17,21 @@ function readDocument(path: string): Document {
   return load(readFileSync(`public/rules/frontends/${path}`, "utf8")) as Document;
 }
 
+// #67 moves acoustic accent eligibility to symbolic association. Point
+// realization consumes those links; its existing output snapshots stay below.
+function eligibilityRuleId(ruleId: string): string {
+  return ruleId === "tobi_accent" ? "associate_accent_tones" : ruleId;
+}
+
+function eligibilityDocument(frontend: string): Document {
+  return {
+    rules: {
+      ...readDocument(`${frontend}/phases/prosody.yaml`).rules,
+      ...readDocument("qlatt-english/phases/tone-association.yaml").rules,
+    },
+  };
+}
+
 const ACOUSTIC =
   "has(current.F1) && ((has(current.AV) && current.AV > 0) || (has(current.AVS) && current.AVS > 0))";
 const ORIGINAL: Record<string, Condition> = {
@@ -36,9 +51,9 @@ function expression(condition: Condition): string {
     : condition.all.map((part) => `(${expression(part)})`).join(" && ");
 }
 
-function outcome(predicate: string, current: Record<string, unknown>): unknown {
+function outcome(predicate: string, current: Record<string, unknown>, maps: unknown): unknown {
   try {
-    return evaluateExpression(predicate, { current });
+    return evaluateExpression(predicate, { current, maps });
   } catch (error) {
     // Explicit null amplitudes can differ from absent fields. Preserve errors too.
     return { error: (error instanceof Error ? error.message : String(error)).split("\n")[0] };
@@ -54,9 +69,9 @@ describe("prosody acoustic eligibility", () => {
     ).toBeUndefined();
     const macros = parseCelMacroBlock(base.functions);
     for (const frontend of ["qlatt-english", "qlatt-beauty"]) {
-      const raw = readDocument(`${frontend}/phases/prosody.yaml`);
+      const raw = eligibilityDocument(frontend);
       const compiled = loadBundledRulepackSpec(frontend);
-      for (const ruleId of Object.keys(ORIGINAL)) {
+      for (const ruleId of Object.keys(ORIGINAL).map(eligibilityRuleId)) {
         const caller = expression(raw.rules[ruleId].select.where);
         expect(caller).toContain("has_voiced_formants(current)");
         expect(expandCelMacros(caller, macros)).not.toContain("has_voiced_formants(");
@@ -81,7 +96,9 @@ describe("prosody acoustic eligibility", () => {
         ),
       ];
       for (const [ruleId, original] of Object.entries(ORIGINAL)) {
-        const candidate = expression((spec.rules[ruleId].select as { where: Condition }).where);
+        const candidate = expression(
+          (spec.rules[eligibilityRuleId(ruleId)].select as { where: Condition }).where,
+        );
         for (const F1 of [undefined, null, 0, 500]) {
           for (const AV of [undefined, null, -1, 0, 60]) {
             for (const AVS of [undefined, null, -1, 0, 60]) {
@@ -97,9 +114,9 @@ describe("prosody acoustic eligibility", () => {
                       ),
                     };
                     expect(
-                      outcome(candidate, current),
+                      outcome(candidate, current, spec.maps),
                       JSON.stringify({ ruleId, current }),
-                    ).toEqual(outcome(expression(original), current));
+                    ).toEqual(outcome(expression(original), current, spec.maps));
                   }
                 }
               }
@@ -125,10 +142,12 @@ describe("prosody acoustic eligibility", () => {
       const results = ["The cat sat.", "Will the cat sit?"].map((text) => {
         const provenance = createProvenanceCollector();
         const { utterance } = textToKlattTrackDetailed(text, 110, 30, { frontendId, provenance });
-        const raw = readDocument(`${frontendId}/phases/prosody.yaml`);
+        const raw = eligibilityDocument(frontendId);
         const macro = readDocument("qlatt-english/frontend.yaml").functions!.has_voiced_formants;
         for (const record of provenance.getDecisions()) {
-          const ruleId = Object.keys(ORIGINAL).find((id) => record.reason === `${id} matched`);
+          const ruleId = Object.keys(ORIGINAL)
+            .map(eligibilityRuleId)
+            .find((id) => record.reason === `${id} matched`);
           if (ruleId) {
             expect(record.citations).toEqual(expect.arrayContaining(macro.citations));
             expect(record.citations).toEqual(expect.arrayContaining(raw.rules[ruleId].citations));

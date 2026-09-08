@@ -1,0 +1,4 @@
+---
+tags: [speech-synthesis, source-filter, formants, f0, voice-quality, perception]
+---
+Uses a spectral-envelope source-filter resynthesizer to independently scale f0 (by 1.7041) and the whole spectral envelope (by 1.168) on sentences and /hVd/ syllables from 25 men and 25 women, then asks listeners to judge talker sex. Shifting both cues changes perceived sex only ~82% of the time, single-cue shifts are largely ineffective, and the two combine strongly under-additively, implying substantial residual voice-quality cues; a preliminary discriminant analysis shows f0 alone classifies sex at ~96% while formants need within-vowel normalization to reach ~92%. For a formant synthesizer project it supplies validated male-to-female scale factors, a quantified ceiling on what frequency scaling alone can achieve, and a concrete argument for exercising aspiration-noise and spectral-tilt parameters when building a female voice.

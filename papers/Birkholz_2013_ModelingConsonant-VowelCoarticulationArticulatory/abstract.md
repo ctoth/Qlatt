@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+A central challenge for articulatory speech synthesis is the simulation of realistic articulatory movements, which is critical for the generation of highly natural and intelligible speech. This includes modeling coarticulation, i.e., the context-dependent variation of the articulatory and acoustic realization of phonemes, especially of consonants. Here we propose a method to simulate the context-sensitive articulation of consonants in consonant-vowel syllables. To achieve this, the vocal tract target shape of a consonant in the context of a given vowel is derived as the weighted average of three measured and acoustically-optimized reference vocal tract shapes for that consonant in the context of the corner vowels /a/, /i/, and /u/. The weights are determined by mapping the target shape of the given context vowel into the vowel subspace spanned by the corner vowels. The model was applied for the synthesis of consonant-vowel syllables with the consonants /b/, /d/, /g/, /l/, /r/, /m/, /n/ in all combinations with the eight long German vowels. In a perception test, the mean recognition rate for the consonants in the isolated syllables was 82.4%. This demonstrates the potential of the approach for highly intelligible articulatory speech synthesis.
+
+---
+
+## Our Interpretation
+
+Articulatory synthesis needs a coarticulation model because recording articulatory data for every phoneme in every context is impractical. Birkholz solves this for consonant-vowel syllables by measuring each consonant's vocal tract shape in only three contexts, the corner vowels /a/, /i/, /u/, then deriving the shape for any other context vowel as a weighted average, where the weights come from projecting the context vowel's own articulatory target into the subspace spanned by the corner vowels via an SVD pseudo-inverse. Lip parameters are interpolated separately from tongue parameters, because vowels vary in rounding independently of tongue position. The interpolation scheme is frontend-neutral linear algebra over parameter vectors, so it transfers to a formant synthesizer that keeps per-phoneme target vectors, and the paper also supplies a complete measured German formant and voice-onset-time dataset, a formant error metric, and a transition model with per-consonant time constants.

@@ -1,0 +1,4 @@
+---
+tags: [speech-rhythm, prosody, duration-modeling, timing, phonology]
+---
+Introduces the %V, ΔV and ΔC rhythm metrics, computed from a bare consonant/vowel segmentation of the speech signal with no appeal to "syllable" or "stress", and measures them on 160 hand-segmented utterances across eight languages. The proportion of vocalic intervals and the variability of consonantal intervals reproduce the stress-timed / syllable-timed / mora-timed classes with a significant class effect, and a model driven by %V alone reproduces every published adult and newborn language-discrimination result including the negative ones. For a formant synthesizer the paper supplies a duration-plan objective function computable before rendering, per-language acceptance bands for timing, and the "all consonants to /s/, all vowels to /a/, F0 fixed at 230 Hz" resynthesis recipe for testing prosody in isolation from segmental quality.

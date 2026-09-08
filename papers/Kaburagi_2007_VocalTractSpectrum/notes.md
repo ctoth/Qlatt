@@ -213,10 +213,12 @@ This paper provides theoretical context for articulatory-based approaches to coa
 ### New Leads (Not Yet in Collection)
 - Broad and Clermont (1987) — "A methodology for modeling vowel formant contours in CVC context," JASA 81:155-165 — directly relevant to Qlatt's formant transition modeling in consonant contexts
 - Gay (1977) — "Articulatory movements in VCV sequences," JASA 62:185-193 — classic VCV coarticulation study
-- Coker (1976) — "A model of articulatory dynamics and control," Proc. IEEE 64:452-460 — early articulatory dynamics model
 
 ### Supersedes or Recontextualizes
 - (none)
+
+### Now in Collection (previously listed as leads)
+- [Coker (1976) — A Model of Articulatory Dynamics and Control](../Coker_1976_ArticulatoryDynamicsControl/notes.md) - previously listed as a New Lead and in "Related Work Worth Reading." Coker's system is a spatial articulatory model with a mode-oriented linear dynamics component and a per-phoneme, per-articulator lead/lag "priority" timing mechanism for coarticulation - an earlier, timing-offset-based alternative to Kaburagi's invariant-feature task-dimension approach.
 
 ### Conceptual Links (not citation-based)
 **Coarticulation modeling:**

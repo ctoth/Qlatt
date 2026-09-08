@@ -1,0 +1,14 @@
+{
+  "cite_key": "taylor1998festival",
+  "title": "The architecture of the Festival speech synthesis system",
+  "authors": ["Paul Taylor", "Alan W. Black", "Richard Caley"],
+  "year": "1998",
+  "arxiv_id": null,
+  "doi": null,
+  "abstract": "We describe a new formalism for storing linguistic data in a text to speech system. Linguistic entities such as words and phones are stored as feature structures in a general object called an linguistic item. Items are configurable at run time and via the feature structure can contain arbitrary information. Linguistic relations are used to store the relationship between items of the same linguistic type. Relations can take any graph structure but are commonly trees or lists. Utterance structures contain all the items and relations contained in a single utterance. We first describe the design goals when building a synthesis architecture, and then describe some problems with previous architectures. We then discuss our new formalism in general along with the implementation details and consequences of our approach.",
+  "url": "https://www.isca-archive.org/ssw_1998/taylor98_ssw.html",
+  "pdf_url": "https://www.isca-archive.org/ssw_1998/taylor98_ssw.pdf",
+  "venue": "Third ESCA/COCOSDA Workshop on Speech Synthesis (SSW3), Jenolan Caves, Australia",
+  "document_type": "article",
+  "pages": "5"
+}

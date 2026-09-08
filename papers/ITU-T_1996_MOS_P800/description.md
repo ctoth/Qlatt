@@ -1,0 +1,4 @@
+---
+tags: [subjective-evaluation, speech-quality, mos, listening-tests, standards]
+---
+ITU-T Recommendation P.800 is the normative protocol for subjective determination of speech transmission quality, defining the Absolute Category Rating listening test that produces the Mean Opinion Score along with the Degradation, Comparison, quantal-response detectability, and threshold methods. It fixes every condition the resulting numbers depend on: room volume and reverberation, the Hoth and vehicle noise spectra, active speech levels and calibration tones, sentence material and duration, listener eligibility and abstinence, session length, MNRU reference anchors, and the statistical treatment (means, confidence limits, ANOVA, Tukey HSD, ordinal statistics for CCR). For a speech synthesizer project it supplies the ready-made, citable protocol for measuring output quality repeatably instead of by ad hoc listening.

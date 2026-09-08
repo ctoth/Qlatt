@@ -1,0 +1,24 @@
+{
+  "cite_key": "arvaniti2009rhythm",
+  "title": "Rhythm, Timing and the Timing of Rhythm",
+  "authors": [
+    "Amalia Arvaniti"
+  ],
+  "year": "2009",
+  "arxiv_id": null,
+  "doi": "10.1159/000208930",
+  "abstract": "This article reviews the evidence for rhythmic categorization that has emerged on the basis of rhythm metrics, and argues that the metrics are unreliable predictors of rhythm which provide no more than a crude measure of timing. It is further argued that timing is distinct from rhythm and that equating them has led to circularity and a psychologically questionable conceptualization of rhythm in speech. It is thus proposed that research on rhythm be based on the same principles for all languages, something that does not apply to the widely accepted division of languages into stress- and syllable-timed. The hypothesis is advanced that these universal principles are grouping and prominence and evidence to support it is provided.",
+  "url": "https://doi.org/10.1159/000208930",
+  "pdf_url": "https://europepmc.org/articles/pmc2790788?pdf=render",
+  "document_type": "article",
+  "venue": "Phonetica: International Journal of Phonetic Science",
+  "venue_type": "journal",
+  "volume": "66",
+  "issue": "1-2",
+  "pages": "46-63",
+  "publisher": "S. Karger AG, Basel",
+  "affiliation": "Department of Linguistics, University of California, San Diego, La Jolla, Calif., USA",
+  "received": "2008-09-15",
+  "accepted": "2009-01-08",
+  "bibtex": "@Article{Arvaniti2009RhythmTA,\n author = {Amalia Arvaniti},\n journal = {Phonetica},\n pages = {46--63},\n title = {Rhythm, Timing and the Timing of Rhythm},\n volume = {66},\n number = {1-2},\n doi = {10.1159/000208930},\n year = {2009}\n}\n"
+}

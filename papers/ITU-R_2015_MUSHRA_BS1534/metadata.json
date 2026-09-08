@@ -1,0 +1,15 @@
+{
+  "cite_key": "itur2015mushra",
+  "title": "Method for the subjective assessment of intermediate quality level of audio systems (Recommendation ITU-R BS.1534-3)",
+  "authors": ["International Telecommunication Union, Radiocommunication Sector (ITU-R)"],
+  "year": "2015",
+  "arxiv_id": null,
+  "doi": null,
+  "abstract": "This Recommendation describes a method for the subjective assessment of intermediate audio quality. This method mirrors many aspects of Recommendation ITU-R BS.1116 and uses the same grading scale as is used for the evaluation of image quality (i.e. Recommendation ITU-R BT.500). The method, called \"MUlti Stimulus test with Hidden Reference and Anchor (MUSHRA)\", has been successfully tested. These tests have demonstrated that the MUSHRA method is suitable for evaluation of intermediate audio quality and gives accurate and reliable results.",
+  "url": "https://www.itu.int/rec/R-REC-BS.1534/en",
+  "pdf_url": "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1534-3-201510-I!!PDF-E.pdf",
+  "document_type": "report",
+  "publisher": "International Telecommunication Union",
+  "address": "Geneva",
+  "note": "BS Series: Broadcasting service (sound). Editions 2001-2003-2014-2015; editorial amendments March 2023."
+}

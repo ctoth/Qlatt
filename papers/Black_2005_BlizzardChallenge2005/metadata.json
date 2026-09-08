@@ -1,0 +1,14 @@
+{
+  "cite_key": "black2005blizzard",
+  "title": "The Blizzard Challenge - 2005: Evaluating corpus-based speech synthesis on common datasets",
+  "authors": ["Alan W. Black", "Keiichi Tokuda"],
+  "year": "2005",
+  "arxiv_id": null,
+  "doi": "10.21437/Interspeech.2005-72",
+  "abstract": "In order to better understand different speech synthesis techniques on a common dataset, we devised a challenge that will help us better compare research techniques in building corpus-based speech synthesizers. In 2004, we released the first two 1200-utterance single-speaker databases from the CMU ARCTIC speech databases, and challenged current groups working in speech synthesis around the world to build their best voices from these databases. In January of 2005, we released two further databases and a set of 50 utterance texts from each of five genres and asked the participants to synthesize these utterances. Their resulting synthesized utterances were then presented to three groups of listeners: speech experts, volunteers, and US English-speaking undergraduates. This paper summarizes the purpose, design, and whole process of the challenge.",
+  "url": "https://www.isca-archive.org/interspeech_2005/black05_interspeech.html",
+  "pdf_url": "https://www.isca-archive.org/interspeech_2005/black05_interspeech.pdf",
+  "venue": "Interspeech 2005, Lisbon",
+  "document_type": "article",
+  "pages": 4
+}

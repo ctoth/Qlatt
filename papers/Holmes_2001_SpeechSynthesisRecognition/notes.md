@@ -206,11 +206,13 @@ This book is directly relevant to Qlatt in several ways:
 - [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]] — cites this book as general reference for speech synthesis and recognition
 
 ### New Leads (Not Yet in Collection)
-- Ishizaka & Flanagan (1972) — "Synthesis of voiced sounds from a two-mass model of the vocal cords" — foundational vocal fold vibration model referenced in Section 2.7.1
 - Flanagan, Ishizaka & Shipley (1975) — "Synthesis of speech from a dynamic model of the vocal cords and vocal tract" — 20-section transmission line vocal tract model with distributed losses
 - Linggard (1985) — "Electronic Synthesis of Speech" — comprehensive review of early electronic synthesis methods
 - Olive, van Santen, Mobius & Shih (1998) — Bell Labs multilingual TTS approach — relevant for multi-language formant synthesis
 - Dutoit (1997) — "An Introduction to Text-to-speech Synthesis" — alternative TTS textbook with different perspective
+
+### Now in Collection (previously listed as leads)
+- [Ishizaka & Flanagan (1972) — Synthesis of Voiced Sounds From a Two-Mass Model of the Vocal Cords](../Ishizaka_1972_TwoMassModelVocalCords/notes.md) - the foundational vocal-fold vibration model referenced in this paper's Section 2.7.1; splits each cord into two coupled lateral mass-spring-damper oscillators driven by quasi-steady Bernoulli flow.
 
 ### Conceptual Links (not citation-based)
 **Formant synthesis architecture:**

@@ -235,6 +235,7 @@ The companion 1992 paper (already in collection as Browman_Goldstein_1992_Articu
 
 ### Conceptual Links (not citation-based)
 - [[Hertz_1991_StreamsPhonesTransitions]] — Hertz's "stable transition phenomenon" (formant transitions hold at ~65ms while steady states stretch) is exactly what AP predicts for a high-stiffness gesture superimposed on a lower-stiffness vocalic gesture. Different formalisms (multi-stream deltas vs. gestural scores), same empirical convergence on transitions as independent temporal units.
+- [Coker (1976) — A Model of Articulatory Dynamics and Control](../Coker_1976_ArticulatoryDynamicsControl/notes.md) - both papers explain coarticulation as a timing phenomenon between independently-scheduled articulator movements rather than a spatial-target phenomenon: Coker's per-phoneme lead/lag priority offsets and this paper's inter-gestural overlap in a gestural score are different formalisms (engineering timing correction vs. task-dynamics phonological primitive) converging on the same mechanism.
 
 ### Supersedes or Recontextualizes
 - This 1989 paper is the foundational version; the 1992 paper (already in collection) is the more accessible overview that extends it

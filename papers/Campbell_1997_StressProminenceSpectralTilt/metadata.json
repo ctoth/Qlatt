@@ -1,0 +1,14 @@
+{
+  "cite_key": "campbell1997stress",
+  "title": "Stress, Prominence, and Spectral Tilt",
+  "authors": ["Nick Campbell", "Mary Beckman"],
+  "year": "1997",
+  "arxiv_id": null,
+  "doi": null,
+  "abstract": "This paper examines spectral correlates of stress and accent in a corpus of sentences with varying focus, produced by four speakers of American English. Analyses of the spectrum at vowel centre show a clear effect on the spectral tilt - i.e. more energy at higher frequencies relative to energy nearer to the fundamental - when the vowel is in a nuclear-accented syllable. However, unlike in the Dutch corpus examined by Sluijter & van Heuven, there was no difference in spectral tilt between vowels in stressed versus unstressed syllables in the absence of the accompanying intonational prominence contrast. These results lend support to the hypothesis that syllables marking focal prominence are phonated in a more emphatic way than other syllables. That is, accented syllables may be louder and not simply intonationally prominent, but this effect does not distinguish an independent lexically specified level of 'primary stress' between the intonational prominence of accent and the basic rhythmic contrast between strong (full) and weak (reduced) syllables.",
+  "url": "https://www.isca-archive.org/int_1997/campbell97_int.html",
+  "pdf_url": "https://www.isca-archive.org/int_1997/campbell97_int.pdf",
+  "venue": "ESCA Workshop on Intonation: Theory, Models and Applications, Athens, Greece, September 1997",
+  "document_type": "article",
+  "pages": "67-70"
+}

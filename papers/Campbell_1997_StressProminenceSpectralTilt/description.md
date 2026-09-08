@@ -1,0 +1,4 @@
+---
+tags: [prosody, intonation, spectral-analysis, voice-quality, glottal-source]
+---
+Campbell and Beckman measure duration, mean F0, H2-H1 and 128-channel ERB spectra for 720 excised English vowels from four speakers, using a Baddle versus Badd-Ellis corpus that varies lexical stress independently of nuclear pitch accent. Accented vowels carry considerably more energy above ERB channel 60 than unaccented-but-stressed vowels, but stressed and unstressed vowels in the same intonational context are not distinguished at all, failing to replicate Sluijter and van Heuven's Dutch spectral-balance-for-stress result and showing H2-H1 to be unusable because low-tone creak captures it. For a source-filter synthesizer this specifies prominence as a source spectral-tilt change applied to nuclear-accented syllables only, and states directly that duration and F0 stretching alone cannot produce focal prominence.

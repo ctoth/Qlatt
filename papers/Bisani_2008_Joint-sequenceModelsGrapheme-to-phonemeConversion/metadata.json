@@ -1,0 +1,16 @@
+{
+  "title": "Joint-sequence models for grapheme-to-phoneme conversion",
+  "authors": [
+    "M. Bisani",
+    "H. Ney"
+  ],
+  "year": "2008",
+  "doi": "10.1016/j.specom.2008.01.002",
+  "url": "https://www.semanticscholar.org/paper/69e1c6703095c8a051aed71ff77b31d7f248a59e",
+  "pdf_url": "https://hal.science/hal-00499203/document",
+  "bibtex": "@Article{Bisani2008JointsequenceMF,\n author = {M. Bisani and H. Ney},\n booktitle = {Speech Communication},\n journal = {Speech Commun.},\n pages = {434-451},\n title = {Joint-sequence models for grapheme-to-phoneme conversion},\n volume = {50},\n year = {2008}\n}\n",
+  "venue": "Speech Communication",
+  "venue_type": "journal",
+  "volume": "50",
+  "pages": "434-451"
+}

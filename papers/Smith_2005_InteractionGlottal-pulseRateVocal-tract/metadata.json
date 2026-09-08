@@ -1,0 +1,24 @@
+{
+  "cite_key": "smith2005interaction",
+  "title": "The interaction of glottal-pulse rate and vocal-tract length in judgements of speaker size, sex, and age",
+  "authors": [
+    "David R. R. Smith",
+    "Roy D. Patterson"
+  ],
+  "year": "2005",
+  "arxiv_id": null,
+  "doi": "10.1121/1.2047107",
+  "abstract": "Glottal-pulse rate (GPR) and vocal-tract length (VTL) are related to the size, sex, and age of the speaker but it is not clear how the two factors combine to influence our perception of speaker size, sex, and age. This paper describes experiments designed to measure the effect of the interaction of GPR and VTL upon judgements of speaker size, sex, and age. Vowels were scaled to represent people with a wide range of GPRs and VTLs, including many well beyond the normal range of the population, and listeners were asked to judge the size and sex/age of the speaker. The judgements of speaker size show that VTL has a strong influence upon perceived speaker size. The results for the sex and age categorization (man, woman, boy, or girl) show that, for vowels with GPR and VTL values in the normal range, judgements of speaker sex and age are influenced about equally by GPR and VTL. For vowels with abnormal combinations of low GPRs and short VTLs, the VTL information appears to decide the sex/age judgement.",
+  "url": "https://www.semanticscholar.org/paper/03507b6c4d2de7dee76b377dcb1925086c7713de",
+  "pdf_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/2346770",
+  "bibtex": "@Article{Smith2005TheIO,\n author = {David R. R. Smith and Roy D. Patterson},\n journal = {The Journal of the Acoustical Society of America},\n pages = {3177--3186},\n title = {The interaction of glottal-pulse rate and vocal-tract length in judgements of speaker size, sex, and age},\n volume = {118},\n number = {5},\n doi = {10.1121/1.2047107},\n year = {2005}\n}\n",
+  "venue": "Journal of the Acoustical Society of America",
+  "venue_type": "journal",
+  "document_type": "article",
+  "volume": "118",
+  "number": "5",
+  "pages": "3177-3186",
+  "affiliation": "Centre for Neural Basis of Hearing, Department of Physiology, University of Cambridge, Downing Street, Cambridge CB2 3EG, United Kingdom",
+  "funding": "UK MRC (G9901257; G9900369); German Volkswagen Foundation (VWF 1/79 783)",
+  "pmcid": "PMC2346770"
+}

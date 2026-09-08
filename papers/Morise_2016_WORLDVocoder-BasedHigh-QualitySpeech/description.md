@@ -1,0 +1,4 @@
+---
+tags: [vocoder, speech-synthesis, f0-estimation, spectral-envelope, real-time]
+---
+WORLD is a vocoder-based analysis/synthesis system built from three analysis algorithms (DIO for F0, CheapTrick for the spectral envelope, PLATINUM for the excitation signal) plus a synthesis stage that reduces vocal cord vibration to a single convolution of a minimum-phase impulse response with the extracted excitation. In MUSHRA listening tests on consonant-bearing 4-mora words it beat both Legacy-STRAIGHT and TANDEM-STRAIGHT (all p < 0.0001) while running at a total real time factor of about 0.32 versus their 3.5 to 3.8, more than ten times faster. For a source-filter synthesizer project it supplies a reusable magnitude-to-minimum-phase impulse response recipe, a pitch-synchronous excitation placement algorithm, a cheap F0 reliability measure, and an explicit warning that minimum-phase excitation degrades low-F0 male voices where group delay manipulation does not.

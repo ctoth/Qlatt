@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+A theory of interaction between the source of sound in phonation and the vocal tract filter is developed. The degree of interaction is controlled by the cross-sectional area of the laryngeal vestibule (epilarynx tube), which raises the inertive reactance of the supraglottal vocal tract. Both subglottal and supraglottal reactances can enhance the driving pressures of the vocal folds and the glottal flow, thereby increasing the energy level at the source. The theory predicts that instabilities in vibration modes may occur when harmonics pass through formants during pitch or vowel changes. Unlike in most musical instruments (e.g., woodwinds and brasses), a stable harmonic source spectrum is not obtained by tuning harmonics to vocal tract resonances, but rather by placing harmonics into favorable reactance regions. This allows for positive reinforcement of the harmonics by supraglottal inertive reactance (and to a lesser degree by subglottal compliant reactance) without the risk of instability. The traditional linear source–filter theory is encumbered with possible inconsistencies in the glottal flow spectrum, which is shown to be influenced by interaction. In addition, the linear theory does not predict bifurcations in the dynamical behavior of vocal fold vibration due to acoustic loading by the vocal tract.
+
+---
+
+## Our Interpretation
+
+Linear source–filter theory treats the glottal source as independent of the vocal tract, which forbids the filter from creating new frequencies or changing source energy. Titze shows this fails whenever low harmonics approach the formants, and gives a closed-form glottal flow solution whose coupling parameter is the mean glottal area divided by the parallel combination of the subglottal and supraglottal entry areas, dominated in practice by the epilarynx tube area. Narrowing the epilarynx by an order of magnitude raises glottal efficiency roughly tenfold but triggers subharmonics and F0 jumps when harmonics traverse rapidly changing reactance near formants, which is directly relevant to giving a formant synthesizer a single physically motivated interaction control that produces flow-pulse skewing and spectral tilt as emergent behavior.

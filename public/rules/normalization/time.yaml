@@ -1,0 +1,44 @@
+# Ebden & Sproat 2015 time class; legacy Qlatt 12-hour rendering conventions.
+tags:
+  normalization_time: Clock convention and meridiem selection
+maps:
+  tn_time_policy:
+    clock: '12'
+    half_day: '12'
+    day: '24'
+    minute_limit: '60'
+    padding_threshold: '10'
+  tn_time_words:
+    round: "o'clock"
+    padding: oh
+    am: a m
+    pm: p m
+rules:
+  tn_time:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'time' && current.outputType in ['source', 'request']"
+    define:
+      hour: double(current.payload.hour)
+      minute: double(current.payload.minute)
+      half: double(maps.tn_time_policy.half_day)
+      period: "split(lower(get(current.payload, 'period', '')), '.').join('')"
+      clock24: "maps.tn_time_policy.clock == maps.tn_time_policy.day"
+      spokenHour: "clock24 ? hour : hour == 0.0 ? half : hour > half ? hour - half : hour"
+      periodKey: "period == '' ? (hour < half ? 'am' : 'pm') : period"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_time
+      output: >-
+        tn_number_request(spokenHour, 'hundred', false, '')
+        + (minute == 0.0 ? tn_words(vocabulary('tn_time_words', 'round'))
+          : (minute < double(maps.tn_time_policy.padding_threshold) ? tn_words(vocabulary('tn_time_words', 'padding')) : [])
+            + tn_number_request(minute, 'hundred', false, ''))
+        + (clock24 ? [] : tn_words(vocabulary('tn_time_words', periodKey)))
+    citations:
+      - "Ebden & Sproat 2015; time class"
+      - "Issue #146: preserve Qlatt explicit-meridiem conversion and infer missing period"
+phases:
+  - name: normalization_time
+    rules: [tn_time]

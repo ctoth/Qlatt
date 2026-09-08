@@ -1,9 +1,5 @@
 extends: qlatt-english
 include:
-  - /rules/normalization/lexical.yaml
-  - normalization-policy.yaml
-  - recognition.yaml
-  - /rules/normalization/numbers.yaml
   - pipeline.yaml
   - phases/orthography.yaml
   - phases/normalize.yaml
@@ -14,5 +10,13 @@ include:
   - phases/duration.yaml
   - phases/formant.yaml
   - phases/prosody.yaml
+  - expansion.yaml
 normalization:
-  phases: [normalization_lexical, normalization_fixture, normalization_number_requests, normalization_number_groups, normalization_terminal_words]
+  phases: [text_expansion]
+text_recognition:
+  rules: []
+  unmatched:
+    speak: current.text
+    vocabulary_keys: '[]'
+    citations:
+      - "Issue #143: original abbreviation source"

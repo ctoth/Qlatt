@@ -1,4 +1,16 @@
-# Opt-in foundation fixture. Reader vocabulary migration belongs to later slices of #38.
+# Source-recognition contract fixture, now using graph text expansion.
+rules:
+  source_fixture_time:
+    kind: structural
+    select: {relation: Normalization, where: "current.kind == 'time' && current.outputType == 'source'"}
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: "tn_words(current.spokenText)"
+    citations: ['Issue #142: retain fixture speech and source ancestry']
+phases:
+  - name: normalization_fixture
+    rules: [source_fixture_time]
 functions:
   known_clock:
     params: [item]

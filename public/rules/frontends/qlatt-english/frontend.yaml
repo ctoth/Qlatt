@@ -4,8 +4,7 @@ inventory_path: /rules/frontends/qlatt-english/inventory.yaml
 lts_path: /rules/frontends/qlatt-english/lts-rules.yaml
 morphology_path: /rules/frontends/qlatt-english/morphology.yaml
 normalization:
-  tables_path: /rules/frontends/qlatt-english/normalization-tables.yaml
-  pipeline_path: /rules/frontends/qlatt-english/normalization-pipeline.yaml
+  phases: [normalization_lexical, normalization_currency, normalization_time, normalization_date, normalization_decimal_fraction, normalization_number_requests, normalization_number_groups, normalization_terminal_words]
 stress_policy_path: /rules/frontends/qlatt-english/stress-policy.yaml
 speaker_profile_path: /rules/policy/speaker-profile.yaml
 source_contour_path: /rules/policy/source-contour.yaml
@@ -23,6 +22,8 @@ functions:
     citations:
       - "Engineering estimate: Qlatt acoustic F0 eligibility requires F1 presence and positive AV or AVS; extracted unchanged from prosody selectors (#135)"
 include:
+  - /rules/normalization/components.yaml
+  - normalization-policy.yaml
   - pipeline.yaml
   - phases/orthography.yaml
   - phases/normalize.yaml

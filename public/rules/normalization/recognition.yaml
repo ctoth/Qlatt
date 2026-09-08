@@ -1,0 +1,132 @@
+# Declared order is first accepted source span, then left-to-right. Patterns
+# retain legacy boundaries; eligibility and speaking are separate CEL rules.
+text_recognition:
+  rules:
+    - id: tn_abbreviation_source
+      table: tn_abbreviations
+      prefix: '\b'
+      suffix: '(?<tail>\w*)'
+      flags: i
+      class: abbreviation
+      captures: {key: key, tail: tail}
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['Allen, Hunnicutt & Klatt 1987; abbreviation prefix matching']
+    - id: tn_initialism_source
+      pattern: '\b(?:[a-z]\.){2,}[a-z]?\.?'
+      flags: i
+      class: initialism
+      captures: {}
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['Allen, Hunnicutt & Klatt 1987; initialism recognition']
+    - id: tn_slash_date_source
+      pattern: '\b(?<month>[0-1]?[0-9])/(?<day>[0-3]?[0-9])/(?<year>[0-9]{4})\b'
+      flags: ''
+      class: date
+      captures: {month: month, day: day, year: year}
+      when: 'double(captures.month) >= 1.0 && double(captures.month) <= 12.0 && double(captures.day) >= 1.0 && double(captures.day) <= 31.0'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['Ebden & Sproat 2015; legacy Qlatt month/day bounds, not calendar validation']
+    - id: tn_iso_date_source
+      pattern: '\b(?<year>[0-9]{4})-(?<month>[0-1][0-9])-(?<day>[0-3][0-9])\b'
+      flags: ''
+      class: date
+      captures: {month: month, day: day, year: year}
+      when: 'double(captures.month) >= 1.0 && double(captures.month) <= 12.0 && double(captures.day) >= 1.0 && double(captures.day) <= 31.0'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['Ebden & Sproat 2015; ISO date roles']
+    - id: tn_explicit_time_source
+      pattern: '\b(?<hour>[0-2]?[0-9]):(?<minute>[0-5][0-9])\s*(?<period>[ap]\.?m\.?)\b'
+      flags: i
+      class: time
+      captures: {hour: hour, minute: minute, period: period}
+      when: 'double(captures.hour) < double(maps.tn_time_policy.day) && double(captures.minute) < double(maps.tn_time_policy.minute_limit)'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['Ebden & Sproat 2015; explicit time recognition']
+    - id: tn_time_source
+      pattern: '\b(?<hour>[0-2]?[0-9]):(?<minute>[0-5][0-9])\b'
+      flags: ''
+      class: time
+      captures: {hour: hour, minute: minute}
+      when: 'double(captures.hour) < double(maps.tn_time_policy.day) && double(captures.minute) < double(maps.tn_time_policy.minute_limit)'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['Ebden & Sproat 2015; implicit period time recognition']
+    - id: tn_currency_source
+      pattern: '(?<currency>[$£€])(?<major>[0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)(?:\.(?<minor>[0-9]{1,2}))?(?<tail>[0-9]*)'
+      flags: ''
+      class: currency
+      captures: {currency: currency, major: major, minor: minor, tail: tail}
+      when: 'captures.currency in maps.tn_currencies'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['Issue #145: preserve original Qlatt currency grammar and partial-match suffix']
+    - id: tn_decimal_source
+      pattern: '\b(?<integer>[0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)\.(?<fractional>[0-9]+)\b'
+      flags: ''
+      class: decimal
+      captures: {integer: integer, fractional: fractional}
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['Allen, Hunnicutt & Klatt 1987; decimal recognition']
+    - id: tn_fraction_source
+      pattern: '\b(?<numerator>[0-9]{1,2})/(?<denominator>[0-9]{1,3})(?<percent>%?)'
+      flags: ''
+      class: fraction
+      captures: {numerator: numerator, denominator: denominator, percent: percent}
+      when: >-
+        maps.tn_recognition_policy.fractions == 'yes'
+        && !captures.numerator.startsWith('0') && !captures.denominator.startsWith('0')
+        && (size(captures.denominator) < 3 || captures.denominator == maps.tn_recognition_policy.fraction_exception)
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['DECtalk 4.63 l_us_pr1.c:980-1015; fraction eligibility']
+    - id: tn_ordinal_source
+      pattern: '\b(?<value>[0-9]+)(?:st|nd|rd|th)\b'
+      flags: i
+      class: ordinal
+      captures: {value: value}
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['Allen, Hunnicutt & Klatt 1987; ordinal recognition']
+    - id: tn_year_source
+      pattern: '\b(?<value>[0-9]{4})\b'
+      flags: ''
+      class: year
+      captures: {value: value}
+      when: >-
+        maps.tn_recognition_policy.years == 'yes'
+        && !captures.value.startsWith('0') && substring(captures.value, 1, 3) != '00'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['DECtalk 4.63 ls_util.c:598-622; bare-year eligibility']
+    - id: tn_cardinal_source
+      pattern: '\b(?<value>[0-9]+)\b'
+      flags: ''
+      class: cardinal
+      captures: {value: value}
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['Allen, Hunnicutt & Klatt 1987; cardinal recognition']
+    - id: tn_word_source
+      pattern: '\S+'
+      flags: u
+      class: word
+      captures: {}
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations: ['Issue #142: preserve distinct word source identity']
+  unmatched:
+    speak: current.text
+    vocabulary_keys: '[]'
+    citations: ['Issue #142: preserve unmatched source spans']

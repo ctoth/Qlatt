@@ -21,10 +21,7 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 const fixturePath = resolve("test/fixtures/source-recognition/frontend.yaml").replaceAll("\\", "/");
 const resources = {
-  normalization: {
-    tables_path: "/rules/frontends/qlatt-english/normalization-tables.yaml",
-    pipeline_path: "/rules/frontends/qlatt-english/normalization-pipeline.yaml",
-  },
+  normalization: {},
   transcription: { punctuation_tokens: [".", ",", "!", "?", ":", ";"] },
 };
 const unmatched = {
@@ -194,14 +191,7 @@ describe("source-backed recognition", () => {
   });
 
   it("uses the selected normalization resources when handing off source items", () => {
-    const spec = compileRuleEngineSpec({
-      ...resources,
-      normalization: {
-        tables_path: "/rules/frontends/dectalk-english/normalization-tables.yaml",
-        pipeline_path: "/rules/frontends/dectalk-english/normalization-pipeline.yaml",
-      },
-      text_recognition: { rules: [], unmatched },
-    });
+    const spec = loadBundledRulepackSpec("dectalk-english");
     const utterance = new Utterance(NORMALIZATION_SCHEMA);
     recognizeText("123", utterance, spec);
     expect(normalizeSourceItems(utterance, spec).map((entry) => entry.word)).toContain(
@@ -220,14 +210,18 @@ describe("source-backed recognition", () => {
     const tokens = result.utterance
       .relation("Token")
       .listItems()
-      .filter((entry) => entry.get("sourceNormalizationId") === item?.id);
+      .filter((entry) =>
+        whyFeature(result.utterance, entry, "word").some(
+          (decision) => decision.recognition?.ruleId === "time",
+        ),
+      );
     expect(tokens.map((entry) => entry.get("word"))).toEqual(["twelve", "thirty", "p", "m"]);
     expect(result.track.length).toBeGreaterThan(0);
     expect(
       tokens.every((entry) =>
-        entry
-          .latestWrite("word")
-          ?.parents.includes(item!.latestWrite("normalizedText")!.decisionId),
+        whyFeature(result.utterance, entry, "word").some(
+          (decision) => decision.id === item!.latestWrite("text")!.decisionId,
+        ),
       ),
     ).toBe(true);
   });

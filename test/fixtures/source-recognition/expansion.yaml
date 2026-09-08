@@ -1,0 +1,27 @@
+maps:
+  expansion_abbreviations:
+    dr.: doctor of medicine
+tags:
+  text_expansion: Source-backed text expansion
+relations:
+  Normalization:
+    type: span
+    features:
+      text: []
+      active: [true, false]
+      outputType: [source, terminal, request]
+rules:
+  expand_abbreviation_fixture:
+    kind: structural
+    select:
+      relation: Normalization
+      where: lower(current.text) in maps.expansion_abbreviations
+    expand_text:
+      allowed_types: [terminal]
+      tag: text_expansion
+      output: "split(vocabulary('expansion_abbreviations', lower(current.text)), ' ').map(word, {'type': 'terminal', 'text': word})"
+    citations:
+      - "Issue #143: included abbreviation component fixture"
+phases:
+  - name: text_expansion
+    rules: [expand_abbreviation_fixture]

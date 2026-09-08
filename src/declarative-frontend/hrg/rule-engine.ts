@@ -5,7 +5,7 @@ import {
   type InventorySpec,
   materializePhonemeTarget,
 } from "../inventory";
-import type { CompiledRulepack } from "../rule-pack";
+import { type CompiledRulepack, rulepackMapOrigins } from "../rule-pack";
 import { trajectoryControlWindows } from "../trajectory-control-windows";
 import type { Item } from "./item";
 import { evalPath, isNavOp } from "./path";
@@ -430,6 +430,7 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
     params,
     sets: params.sets,
     maps: params.maps,
+    transcription: params.transcription,
     ...bindingViews,
     ...extra,
   };
@@ -440,13 +441,68 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
       get: (target, property, receiver) => {
         if (typeof property === "string" && relationName) {
           const item = navigationItems[property];
-          const write = item ? utterance.relation(relationName).node(item)?.write : undefined;
+          // A text item's value has its own source ancestry. Its append write
+          // also depends on preceding source spans for list ordering; reading
+          // current text must not make those spans pronunciation ancestors.
+          // Explicit prev/next navigation still records that ordering evidence.
+          const write =
+            item && !(property === "current" && item.type === "normalization")
+              ? utterance.relation(relationName).node(item)?.write
+              : undefined;
           if (write) transaction.dependOn(write.decisionId);
         }
         return Reflect.get(target, property, receiver);
       },
     }),
     functions: {
+      vocabulary: (table, key) => {
+        const invalidLookup = (message: string): never => {
+          utterance.diagnostics.error(
+            message,
+            { table, key, ruleId: transaction.metadata.ruleId },
+            "E_VOCABULARY_LOOKUP",
+          );
+          throw new Error(`E_VOCABULARY_LOOKUP: ${message}`);
+        };
+        if (typeof table !== "string" || typeof key !== "string" || !isPlainObject(params.maps))
+          return invalidLookup("table and key must be strings and maps must exist");
+        const entries = params.maps[table];
+        if (
+          !isPlainObject(entries) ||
+          !Object.hasOwn(entries, key) ||
+          typeof entries[key] !== "string"
+        )
+          return invalidLookup(`missing ${table}[${key}]`);
+        const origins = isPlainObject(params.mapOrigins) ? params.mapOrigins[table] : undefined;
+        const resource =
+          isPlainObject(origins) && typeof origins[key] === "string"
+            ? origins[key]
+            : "<programmatic rulepack>";
+        const source = items[index];
+        const parents = source
+          ? source.featureKeys().flatMap((field) => {
+              const write = source.latestWrite(field);
+              return write ? [write.decisionId] : [];
+            })
+          : [];
+        const decision = utterance.provenance.add({
+          stage: "rules",
+          type: "normalization_vocabulary_lookup",
+          subject: source?.id ?? table,
+          reason: `${transaction.metadata.ruleId} read ${resource}: ${table}[${JSON.stringify(key)}]`,
+          citations: [...transaction.metadata.citations],
+          parents,
+          vocabularyLookup: {
+            resource,
+            table,
+            key,
+            value: entries[key],
+            ruleId: transaction.metadata.ruleId,
+          },
+        });
+        transaction.dependOn(decision.id);
+        return entries[key];
+      },
       ahead: (source, amount = 1) => offset(source, amount),
       behind: (source, amount = 1) => offset(source, -Number(amount)),
       total: (name) => relationItems(name).length,
@@ -1013,6 +1069,8 @@ function applyEffects(
 }
 
 function ruleTag(rule: Readonly<Record<string, unknown>>, ruleName: string): string {
+  if (isPlainObject(rule.expand_text) && typeof rule.expand_text.tag === "string")
+    return rule.expand_text.tag;
   if (typeof rule.tag === "string" && rule.tag) return rule.tag;
   if (isPlainObject(rule.associate_tones) && typeof rule.associate_tones.tag === "string")
     return rule.associate_tones.tag;
@@ -1243,6 +1301,69 @@ function applyAssociations(
     if (!from || !to) continue;
     if (active) transaction.associate(spec.assoc_name, from, to);
     else transaction.disassociate(spec.assoc_name, from, to);
+  }
+}
+
+/** Issue #143: bounded, ordered text replacement, independent of acoustic anchors. */
+function applyTextExpansion(
+  utterance: Utterance,
+  match: Match,
+  action: unknown,
+  context: EvaluationContext,
+): void {
+  if (!isPlainObject(action)) return;
+  const fail = (message: string): never => {
+    utterance.diagnostics.error(message, { rule: match.ruleName }, "E_TEXT_EXPANSION");
+    throw new Error(`E_TEXT_EXPANSION: ${message}`);
+  };
+  const output = evaluate(action.output, context);
+  if (!Array.isArray(output)) fail("output must be a list");
+  const records = output as unknown[];
+  const allowed = stringArray(action.allowed_types);
+  for (const record of records) {
+    if (!isPlainObject(record) || typeof record.type !== "string" || !allowed.includes(record.type))
+      fail("undeclared output type");
+    const entry = record as Record<string, unknown>;
+    if (entry.type === "terminal") {
+      if (
+        typeof entry.text !== "string" ||
+        !entry.text.length ||
+        /\s/.test(entry.text) ||
+        Object.keys(entry).some((key) => !["type", "text"].includes(key))
+      )
+        fail("terminal requires text only");
+    } else if (entry.type === "request") {
+      if (
+        typeof entry.kind !== "string" ||
+        !entry.kind.trim() ||
+        !isPlainObject(entry.payload) ||
+        Object.values(entry.payload).some((value) => typeof value !== "string") ||
+        Object.keys(entry).some((key) => !["type", "kind", "payload"].includes(key))
+      )
+        fail("request requires a nonempty kind and string payload fields");
+    } else fail("unsupported output type");
+  }
+  const source = match.items[match.index];
+  if (source.type !== "normalization") fail("source must be a normalization item");
+  const transaction = match.transaction;
+  transaction.set(source, "active", false, String(action.tag));
+  let previous = source;
+  for (const [index, raw] of records.entries()) {
+    const record = raw as Record<string, unknown>;
+    const item = transaction.createItem("normalization", `${source.id}:${match.ruleName}:${index}`);
+    for (const field of ["sourceStart", "sourceEnd", "sourceTextId"])
+      transaction.set(item, field, transaction.read(source, field));
+    transaction.read(source, "text");
+    transaction.read(source, "payload");
+    transaction.set(item, "active", true);
+    transaction.set(item, "outputType", record.type);
+    transaction.set(item, "kind", record.kind ?? "");
+    transaction.set(item, "payload", record.payload ?? {});
+    transaction.set(item, "text", record.text ?? "");
+    transaction.set(item, "normalizedText", record.text ?? "");
+    transaction.associate("normalization_source", item, source);
+    transaction.insertAfter(match.relationName, previous, item);
+    previous = item;
   }
 }
 
@@ -1588,6 +1709,7 @@ function executeMatch(
         (expression) => evaluate(expression, context),
       );
     }
+    applyTextExpansion(utterance, match, rule.expand_text, context);
     applySplice(utterance, match, rule.splice, context);
     applyPointActions(utterance, match, rule, context, predicates);
     if (rule.suppress === true || rule.delete === true) {
@@ -1839,6 +1961,7 @@ function patternMatches(
 function isStructuralRule(rule: Readonly<Record<string, unknown>>): boolean {
   return (
     isPlainObject(rule.splice) ||
+    isPlainObject(rule.expand_text) ||
     isPlainObject(rule.associate_tones) ||
     isPlainObject(rule.insert_point) ||
     (Array.isArray(rule.insert_points) && rule.insert_points.length > 0) ||
@@ -1927,6 +2050,8 @@ export function runGraphRuleEngine(
     ...mergeParameterRecords(specParameters, optionParameters),
     sets: spec.string_sets,
     maps: spec.maps,
+    mapOrigins: rulepackMapOrigins(spec),
+    transcription: spec.transcription,
   });
   const predicates = spec.predicates;
   const evaluationOwner = options.evaluationOwner ?? new GraphRuleEvaluationOwner();

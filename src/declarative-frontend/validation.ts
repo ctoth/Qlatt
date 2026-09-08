@@ -31,6 +31,7 @@ const ALLOWED_RULE_FIELDS = new Set([
   "define",
   "delete",
   "disassociate",
+  "expand_text",
   "insert",
   "insert_f0_layer",
   "insert_point",
@@ -55,6 +56,7 @@ const CORE_CEL_VARIABLES = new Set([
   "phrase",
   "prev",
   "sets",
+  "transcription",
 ]);
 const CORE_ITEM_VARIABLES = new Set(["current", "prev", "next"]);
 const PHONEME_COMPARE_PATTERN = /\b[A-Za-z_][A-Za-z0-9_]*\.phoneme\s*(?:==|!=)\s*(['"])([^'"]+)\1/g;
@@ -2580,6 +2582,48 @@ function validateRules(
             `rules.${name}.scan.reset_where`,
           );
         }
+      }
+    }
+
+    if (Object.hasOwn(r, "expand_text")) {
+      const action = r.expand_text;
+      const path = `rules.${name}.expand_text`;
+      if (
+        !isPlainObject(action) ||
+        Object.keys(action).some((key) => !["output", "allowed_types", "tag"].includes(key)) ||
+        !Array.isArray(action.allowed_types) ||
+        action.allowed_types.length === 0 ||
+        action.allowed_types.some((type) => type !== "terminal" && type !== "request") ||
+        typeof action.tag !== "string" ||
+        !action.tag.trim()
+      ) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_TEXT_EXPANSION_CONFIG",
+            "Expected output, explicit allowed_types and tag",
+            path,
+          ),
+        );
+      } else {
+        if (tagVocabulary.size > 0 && !tagVocabulary.has(action.tag as string))
+          diagnostics.push(
+            makeDiagnostic("E_TAG_UNKNOWN", `Unknown tag '${action.tag}'`, `${path}.tag`),
+          );
+        const error =
+          typeof action.output === "string"
+            ? validateExpressionSyntax(action.output, { relationNames, variables: ruleVariables })
+            : "output must be a CEL expression";
+        if (error) diagnostics.push(makeDiagnostic("E_CEL_INVALID", error, `${path}.output`));
+        else
+          validateExpressionReferences(
+            action.output as string,
+            relationByName,
+            ruleRelationName,
+            ruleItemVariables,
+            parameters,
+            diagnostics,
+            `${path}.output`,
+          );
       }
     }
 

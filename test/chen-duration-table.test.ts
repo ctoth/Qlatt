@@ -41,8 +41,11 @@ function vowelBeforeStop(voiced: boolean, duration = 100, floor?: number) {
     utterance,
     compileRuleEngineSpec({
       ...QLATT_ENGLISH_RULEPACK,
-      phases: [{ name: "duration", rules: ["vowel_shortening"] }],
+      phases: QLATT_ENGLISH_RULEPACK.phases.map((phase) =>
+        phase.name === "duration" ? { name: "duration", rules: ["vowel_shortening"] } : phase,
+      ),
     }),
+    { phases: ["duration"] },
   );
   return { duration: Number(vowel.get("duration")), utterance };
 }

@@ -1,0 +1,7 @@
+# DECtalk 4.63 ls_util.c:598-622 and l_us_pr1.c:422-440,980-1069.
+maps:
+  tn_recognition_policy:
+    years: 'yes'
+    fractions: 'yes'
+    hundreds: hundredand
+    fraction_exception: '100'

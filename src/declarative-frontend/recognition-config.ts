@@ -19,6 +19,16 @@ export type RecognitionConfig = {
   unmatched: SpeakingDeclaration;
 };
 
+const immutableConfigs = new WeakMap<object, RecognitionConfig>();
+
+function deeplyFrozen(value: unknown): boolean {
+  return (
+    value === null ||
+    typeof value !== "object" ||
+    (Object.isFrozen(value) && Object.values(value).every(deeplyFrozen))
+  );
+}
+
 function invalid(path: string, message: string): never {
   throw new Error(`E_RECOGNITION_CONFIG: ${path}: ${message}`);
 }
@@ -77,6 +87,8 @@ function captureNames(pattern: string): Set<string> {
 export function parseRecognitionConfig(
   spec: Record<string, unknown>,
 ): RecognitionConfig | undefined {
+  const cached = immutableConfigs.get(spec);
+  if (cached) return cached;
   if (!Object.hasOwn(spec, "text_recognition")) return undefined;
   const raw = object(spec.text_recognition, "text_recognition");
   for (const key of Object.keys(raw)) {
@@ -84,8 +96,17 @@ export function parseRecognitionConfig(
       invalid(`text_recognition.${key}`, "unknown declaration");
   }
   const normalization = object(spec.normalization, "normalization");
-  string(normalization.tables_path, "normalization.tables_path");
-  string(normalization.pipeline_path, "normalization.pipeline_path");
+  if (Object.hasOwn(normalization, "phases")) {
+    if (!Array.isArray(normalization.phases) || normalization.phases.length === 0)
+      invalid("normalization.phases", "requires ordered phase names");
+    const declared = new Set(
+      Array.isArray(spec.phases) ? spec.phases.map((phase) => object(phase, "phases").name) : [],
+    );
+    normalization.phases.forEach((phase, index) => {
+      string(phase, `normalization.phases[${index}]`);
+      if (!declared.has(phase)) invalid("normalization.phases", `unknown phase '${phase}'`);
+    });
+  }
   const transcription = object(spec.transcription, "transcription");
   if (
     !Array.isArray(transcription.punctuation_tokens) ||
@@ -106,6 +127,9 @@ export function parseRecognitionConfig(
         ![
           "id",
           "pattern",
+          "table",
+          "prefix",
+          "suffix",
           "flags",
           "class",
           "captures",
@@ -120,7 +144,20 @@ export function parseRecognitionConfig(
     const id = string(entry.id, `${path}.id`);
     if (ids.has(id)) invalid(path, `duplicate rule id '${id}'`);
     ids.add(id);
-    const pattern = string(entry.pattern, `${path}.pattern`);
+    let pattern: string;
+    if (Object.hasOwn(entry, "table")) {
+      if (Object.hasOwn(entry, "pattern")) invalid(path, "declare table or pattern, not both");
+      const tableName = string(entry.table, `${path}.table`);
+      const maps = object(spec.maps, "maps");
+      const table = object(maps[tableName], `maps.${tableName}`);
+      const keys = Object.keys(table);
+      if (!keys.length || keys.some((key) => !key.length))
+        invalid(path, "table needs nonempty literal keys");
+      if (typeof entry.prefix !== "string" || typeof entry.suffix !== "string")
+        invalid(path, "table matching needs explicit prefix and suffix");
+      const escaped = keys.map((key) => key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+      pattern = `${entry.prefix}(?<key>${escaped.join("|")})${entry.suffix}`;
+    } else pattern = string(entry.pattern, `${path}.pattern`);
     if (typeof entry.flags !== "string" || !/^[imsu]*$/.test(entry.flags))
       invalid(`${path}.flags`, "only explicit i, m, s, u flags are supported");
     try {
@@ -152,5 +189,23 @@ export function parseRecognitionConfig(
     if (!["speak", "vocabulary_keys", "citations"].includes(key))
       invalid(`text_recognition.unmatched.${key}`, "unknown declaration");
   }
-  return { rules, unmatched: speaking(fallback, "text_recognition.unmatched") };
+  const config = { rules, unmatched: speaking(fallback, "text_recognition.unmatched") };
+  // Loaded rulepacks are immutable. Mutable programmatic documents must still
+  // be validated on every call so edits cannot reuse stale recognition data.
+  if (
+    Object.isFrozen(spec) &&
+    [raw, normalization, transcription, spec.phases, spec.maps].every(deeplyFrozen)
+  ) {
+    for (const rule of rules) {
+      Object.freeze(rule.captures);
+      Object.freeze(rule.citations);
+      Object.freeze(rule);
+    }
+    Object.freeze(rules);
+    Object.freeze(config.unmatched.citations);
+    Object.freeze(config.unmatched);
+    Object.freeze(config);
+    immutableConfigs.set(spec, config);
+  }
+  return config;
 }

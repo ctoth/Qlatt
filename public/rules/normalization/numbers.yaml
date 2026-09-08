@@ -1,0 +1,191 @@
+# Allen, Hunnicutt & Klatt 1987, FORMAT; bounded triads preserve the existing
+# Qlatt 0..999999999 reader, including its >=1000 ordinal suffix behavior.
+tags:
+  normalization_number: Cardinal and ordinal reading composition
+relations:
+  Normalization:
+    type: parallel
+    features:
+      text: []
+      kind: []
+      payload: []
+      spokenText: []
+      active: [true, false]
+      outputType: [source, terminal, request]
+maps:
+  tn_number_policy:
+    maximum: '999999999'
+    group_base: '1000'
+    hundred_base: '100'
+    ten_base: '10'
+    million_base: '1000000'
+  tn_number_words:
+    '0': zero
+    '1': one
+    '2': two
+    '3': three
+    '4': four
+    '5': five
+    '6': six
+    '7': seven
+    '8': eight
+    '9': nine
+    '10': ten
+    '11': eleven
+    '12': twelve
+    '13': thirteen
+    '14': fourteen
+    '15': fifteen
+    '16': sixteen
+    '17': seventeen
+    '18': eighteen
+    '19': nineteen
+    '20': twenty
+    '30': thirty
+    '40': forty
+    '50': fifty
+    '60': sixty
+    '70': seventy
+    '80': eighty
+    '90': ninety
+    hundred: hundred
+    hundredand: hundredand
+    hundred_joiner: ''
+    thousand: thousand
+    million: million
+    ordinal_suffix: th
+  tn_ordinal_words:
+    '1': first
+    '2': second
+    '3': third
+    '4': fourth
+    '5': fifth
+    '6': sixth
+    '7': seventh
+    '8': eighth
+    '9': ninth
+    '10': tenth
+    '11': eleventh
+    '12': twelfth
+    '13': thirteenth
+    '14': fourteenth
+    '15': fifteenth
+    '16': sixteenth
+    '17': seventeenth
+    '18': eighteenth
+    '19': nineteenth
+    '20': twentieth
+    '30': thirtieth
+    '40': fortieth
+    '50': fiftieth
+    '60': sixtieth
+    '70': seventieth
+    '80': eightieth
+    '90': ninetieth
+    hundred: hundredth
+functions:
+  tn_words:
+    params: [text]
+    body: "tn_request('words', {'text': text})"
+    citations: ['Ebden & Sproat 2015; terminal verbalization']
+  tn_request:
+    params: [kind, payload]
+    body: "[{'type': 'request', 'kind': kind, 'payload': payload}]"
+    citations: ['Ebden & Sproat 2015; structured semiotic classes']
+  tn_number_request:
+    params: [value, hundreds, ordinal, suffix]
+    body: "tn_request(ordinal ? 'ordinal' : 'cardinal', {'value': string(value), 'hundreds': hundreds, 'suffix': suffix})"
+    citations: ['Issue #144: explicit nested number composition']
+  tn_group:
+    params: [value, hundreds, ordinal, suffix]
+    body: "tn_request('number_group', {'value': string(value), 'hundreds': hundreds, 'ordinal': ordinal ? 'yes' : 'no', 'suffix': suffix})"
+    citations: ['Allen, Hunnicutt & Klatt 1987; bounded triads']
+  tn_small:
+    params: [value, ordinal]
+    body: >-
+      ordinal && string(value) in maps.tn_ordinal_words
+        ? vocabulary('tn_ordinal_words', string(value))
+        : vocabulary('tn_number_words', string(value))
+    citations: ['Allen, Hunnicutt & Klatt 1987; FORMAT vocabulary']
+  tn_under_hundred:
+    params: [value, ordinal]
+    body: >-
+      string(value) in maps.tn_number_words
+        ? tn_small(value, ordinal)
+        : vocabulary('tn_number_words', string(floor(value / double(maps.tn_number_policy.ten_base)) * double(maps.tn_number_policy.ten_base)))
+          + ' ' + tn_small(mod(value, double(maps.tn_number_policy.ten_base)), ordinal)
+    citations: ['Allen, Hunnicutt & Klatt 1987; tens and units']
+rules:
+  tn_expand_number:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.outputType == 'request' && current.kind in ['cardinal', 'ordinal']"
+    define:
+      valid: "matches(current.payload.value, '^[0-9]+$') && double(current.payload.value) <= double(maps.tn_number_policy.maximum)"
+      n: "valid ? double(current.payload.value) : 0.0"
+      base: double(maps.tn_number_policy.group_base)
+      million: double(maps.tn_number_policy.million_base)
+      high: floor(n / million)
+      middle: floor(mod(n, million) / base)
+      low: mod(n, base)
+      ordinal: "current.kind == 'ordinal'"
+      hundreds: "current.payload.hundreds"
+      suffix: "(ordinal && (n >= base || n == 0.0) ? vocabulary('tn_number_words', 'ordinal_suffix') : '') + current.payload.suffix"
+    expand_text:
+      allowed_types: [request, terminal]
+      tag: normalization_number
+      output: >-
+        !valid ? tn_words(current.payload.value) :
+        (high > 0.0 ? tn_group(high, hundreds, false, '') + tn_words(vocabulary('tn_number_words', 'million') + (middle == 0.0 && low == 0.0 ? suffix : '')) : [])
+        + (middle > 0.0 ? tn_group(middle, hundreds, false, '') + tn_words(vocabulary('tn_number_words', 'thousand') + (low == 0.0 ? suffix : '')) : [])
+        + (low > 0.0 || n == 0.0 ? tn_group(low, hundreds, ordinal && n < base, suffix) : [])
+    citations:
+      - "Allen, Hunnicutt & Klatt 1987; triad decomposition"
+      - "Issue #144: retain Qlatt supported range and legacy ordinal scale edges"
+  tn_expand_number_group:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.outputType == 'request' && current.kind == 'number_group'"
+    define:
+      n: double(current.payload.value)
+      base: double(maps.tn_number_policy.hundred_base)
+      high: floor(n / base)
+      low: mod(n, base)
+      ordinal: "current.payload.ordinal == 'yes'"
+      suffix: current.payload.suffix
+      hundreds: "low > 0.0 ? current.payload.hundreds : 'hundred'"
+      prefix: >-
+        high > 0.0
+          ? vocabulary('tn_number_words', string(high)) + ' '
+            + vocabulary(ordinal && low == 0.0 ? 'tn_ordinal_words' : 'tn_number_words', hundreds)
+            + (low > 0.0 ? ' ' + vocabulary('tn_number_words', 'hundred_joiner') + ' ' : '')
+          : ''
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_number
+      output: "tn_words(prefix + (low > 0.0 || n == 0.0 ? tn_under_hundred(low, ordinal) : '') + suffix)"
+    citations:
+      - "Allen, Hunnicutt & Klatt 1987; FORMAT"
+      - "DECtalk 4.63 l_us_pr1.c:422-440; explicit hundredand selection"
+  tn_terminal_words:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.outputType == 'request' && current.kind == 'words'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_number
+      output: "split(current.payload.text, ' ').filter(word, word != '').map(word, {'type': 'terminal', 'text': word})"
+    citations:
+      - "Ebden & Sproat 2015; terminal verbalization"
+phases:
+  - name: normalization_number_requests
+    rules: [tn_expand_number]
+  - name: normalization_number_groups
+    after: [normalization_number_requests]
+    rules: [tn_expand_number_group]
+  - name: normalization_terminal_words
+    after: [normalization_number_groups]
+    rules: [tn_terminal_words]

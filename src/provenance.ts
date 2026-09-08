@@ -29,6 +29,15 @@ export interface DecisionRecord {
   timestampMs?: number;
   recognition?: RecognitionEvidence;
   inventorySelection?: InventorySelectionEvidence;
+  vocabularyLookup?: VocabularyLookupEvidence;
+}
+
+export interface VocabularyLookupEvidence {
+  resource: string;
+  table: string;
+  key: string;
+  value: string;
+  ruleId: string;
 }
 
 export interface InventorySelectionEvidence {
@@ -50,6 +59,7 @@ export interface AddDecisionInput {
   timestampMs?: number;
   recognition?: RecognitionEvidence;
   inventorySelection?: InventorySelectionEvidence;
+  vocabularyLookup?: VocabularyLookupEvidence;
 }
 
 export interface ProvenanceCollector {
@@ -109,6 +119,7 @@ export function createProvenanceCollector(): ProvenanceCollector {
           Array.isArray(input.parents) && input.parents.length > 0 ? [...input.parents] : undefined,
         timestampMs: Number.isFinite(input.timestampMs) ? Number(input.timestampMs) : undefined,
         ...(input.recognition ? { recognition: structuredClone(input.recognition) } : {}),
+        ...(input.vocabularyLookup ? { vocabularyLookup: { ...input.vocabularyLookup } } : {}),
         ...(input.inventorySelection
           ? { inventorySelection: { ...input.inventorySelection } }
           : {}),
@@ -123,6 +134,9 @@ export function createProvenanceCollector(): ProvenanceCollector {
         citations: [...decision.citations],
         parents: decision.parents ? [...decision.parents] : undefined,
         ...(decision.recognition ? { recognition: structuredClone(decision.recognition) } : {}),
+        ...(decision.vocabularyLookup
+          ? { vocabularyLookup: { ...decision.vocabularyLookup } }
+          : {}),
         ...(decision.inventorySelection
           ? { inventorySelection: { ...decision.inventorySelection } }
           : {}),

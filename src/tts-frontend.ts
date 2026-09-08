@@ -26,13 +26,13 @@ import {
 } from "./declarative-frontend/rule-pack";
 import {
   NORMALIZATION_SCHEMA,
+  normalizeGraphText,
   normalizeSourceItems,
   recognizeText,
 } from "./declarative-frontend/source-recognition";
 import { parseSyllabificationTables, syllabifyWord } from "./declarative-frontend/syllabify";
 import { getVoiceRegistry, type ResolvedVoice, resolveVoice } from "./dectalk-voice";
 import type { Diagnostics } from "./diagnostics";
-import { normalizeText as normalizeConfiguredText } from "./g2p/text-normalize";
 import type { DirectionTrack } from "./input/direction-track";
 import {
   attachDirectionsToUtterance,
@@ -184,7 +184,7 @@ function mergeSchemas(schemas: readonly FeatureSchema[]): FeatureSchema {
   return variants.length === 1 ? variants[0] : { kind: "union", variants };
 }
 
-function buildUtteranceSchema(inventory: InventorySpec, sourceRecognition = false): HrgSchema {
+function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
   const segmentFeatures: Record<string, FeatureSchema> = {
     phoneme: { kind: "string" },
     type: { kind: "string" },
@@ -245,7 +245,7 @@ function buildUtteranceSchema(inventory: InventorySpec, sourceRecognition = fals
   } as const;
   return {
     itemTypes: {
-      ...(sourceRecognition ? NORMALIZATION_SCHEMA.itemTypes : {}),
+      ...NORMALIZATION_SCHEMA.itemTypes,
       token: {
         features: {
           word: { kind: "string" },
@@ -253,7 +253,7 @@ function buildUtteranceSchema(inventory: InventorySpec, sourceRecognition = fals
           punctuationSymbol: STRING_OR_NULL,
           pronunciationKey: STRING_OR_NULL,
           active: { kind: "boolean" },
-          ...(sourceRecognition ? { sourceNormalizationId: { kind: "string" } as const } : {}),
+          sourceNormalizationId: { kind: "string" },
         },
       },
       word: { features: { text: { kind: "string" }, tokenIndex: { kind: "number" } } },
@@ -273,7 +273,7 @@ function buildUtteranceSchema(inventory: InventorySpec, sourceRecognition = fals
       transition: { features: { active: { kind: "boolean" } } },
     },
     relations: {
-      ...(sourceRecognition ? NORMALIZATION_SCHEMA.relations : {}),
+      ...NORMALIZATION_SCHEMA.relations,
       Token: { kind: "list", itemTypes: ["token"] },
       Word: { kind: "list", itemTypes: ["word"] },
       Syllable: { kind: "list", itemTypes: ["syllable"] },
@@ -477,8 +477,7 @@ function createStructure(
 }
 
 export function normalizeText(text: string, frontendId = "qlatt-english"): string {
-  const resources = loadFrontendResources(loadBundledRulepackSpec(frontendId));
-  return normalizeConfiguredText(text, resources.normalization);
+  return normalizeGraphText(text, loadBundledRulepackSpec(frontendId));
 }
 export { transcribeText } from "./transcribe-text";
 
@@ -494,7 +493,6 @@ function buildTextToKlattTrackDetailed(
   const spec = options.frontendPath
     ? loadRulepackSpecFromPath(options.frontendPath)
     : loadBundledRulepackSpec(frontendId);
-  const sourceRecognition = Object.hasOwn(spec, "text_recognition");
   const lowering = readLowerOptions(spec.output.lowering);
   const resources = loadFrontendResources(spec);
   // The active inventory declares the synthesizer parameters available to this frontend.
@@ -503,13 +501,11 @@ function buildTextToKlattTrackDetailed(
   );
   const provenance = options.provenance ?? createProvenanceCollector();
   const utterance = new Utterance(
-    buildUtteranceSchema(resources.inventory, sourceRecognition),
+    buildUtteranceSchema(resources.inventory),
     provenance,
     options.diagnostics ?? undefined,
   );
-  for (const relationName of Object.keys(
-    buildUtteranceSchema(resources.inventory, sourceRecognition).relations,
-  )) {
+  for (const relationName of Object.keys(buildUtteranceSchema(resources.inventory).relations)) {
     utterance.relation(relationName);
   }
 
@@ -577,10 +573,8 @@ function buildTextToKlattTrackDetailed(
   });
 
   const transcriptionConfig = getTranscriptionConfig(spec);
-  if (sourceRecognition) recognizeText(inputText, utterance, spec);
-  const normalized = sourceRecognition
-    ? normalizeSourceItems(utterance, spec)
-    : normalizeConfiguredText(inputText, resources.normalization);
+  recognizeText(inputText, utterance, spec);
+  const normalized = normalizeSourceItems(utterance, spec);
   const transcribed = transcribeText(normalized, {
     provenance,
     utterance,

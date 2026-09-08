@@ -159,3 +159,44 @@ export function builtinAbs(x: number): number {
 export function builtinLog(x: number): number {
   return Math.log(x);
 }
+
+// Rounding and modulo builtins shared by both CEL surfaces (#47). The
+// normative definitions a host must match live in docs/host-contract.md
+// section 4; keep this file and that section in step.
+
+/** `floor(x)`: the largest integer not greater than `x`. */
+export function builtinFloor(x: number): number {
+  return Math.floor(x);
+}
+
+/** `ceil(x)`: the smallest integer not less than `x`. */
+export function builtinCeil(x: number): number {
+  return Math.ceil(x);
+}
+
+/**
+ * `round(x)`: the nearest integer, with halves rounded away from zero
+ * (C99 `round()`, Fortran `NINT`; the convention of Klatt's FORTRAN sources).
+ * `Math.round` rounds halves toward +infinity, so the sign is handled
+ * explicitly; a zero result is normalized so `-0` never escapes.
+ */
+export function builtinRound(x: number): number {
+  const rounded = Math.sign(x) * Math.round(Math.abs(x));
+  return rounded === 0 ? 0 : rounded;
+}
+
+/**
+ * `mod(a, b)`: the floored modulo `a - b * floor(a / b)`, whose result takes
+ * the sign of the divisor (Knuth, The Art of Computer Programming vol. 1
+ * section 1.2.4). This is the modulo that clock arithmetic needs
+ * (`mod(-1, 12) == 11`), unlike the CEL `%` operator, which truncates toward
+ * zero like C. Correct the truncating remainder only when its sign differs
+ * from the divisor, preserving small positive remainders with large divisors.
+ * A zero divisor is an error, never a silent NaN.
+ */
+export function builtinMod(a: number, b: number): number {
+  if (b === 0) throw new Error("mod(a, b): zero divisor");
+  const remainder = a % b;
+  if (remainder === 0) return 0;
+  return Math.sign(remainder) === Math.sign(b) ? remainder : remainder + b;
+}

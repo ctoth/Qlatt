@@ -89,3 +89,58 @@ describe("registerNumericBuiltins", () => {
     expect(evaluator.evaluate("log(1.0)", { params: {}, constants: {} })).toBe(0);
   });
 });
+
+/**
+ * #47: rounding and modulo builtins on the semantics CEL surface, with the
+ * same normative definitions as the rule-engine catalog
+ * (docs/host-contract.md section 4).
+ */
+describe("registerNumericBuiltins rounding and modulo (#47)", () => {
+  const empty = { params: {}, constants: {} };
+
+  it("registers floor that rounds toward negative infinity", () => {
+    const evaluator = createCelEvaluator();
+    registerNumericBuiltins(evaluator);
+    expect(evaluator.evaluate("floor(3.7)", empty)).toBe(3);
+    expect(evaluator.evaluate("floor(-3.2)", empty)).toBe(-4);
+    expect(evaluator.evaluate("floor(3)", empty)).toBe(3);
+  });
+
+  it("registers ceil that rounds toward positive infinity", () => {
+    const evaluator = createCelEvaluator();
+    registerNumericBuiltins(evaluator);
+    expect(evaluator.evaluate("ceil(3.2)", empty)).toBe(4);
+    expect(evaluator.evaluate("ceil(-3.7)", empty)).toBe(-3);
+  });
+
+  it("registers round that rounds half away from zero", () => {
+    const evaluator = createCelEvaluator();
+    registerNumericBuiltins(evaluator);
+    expect(evaluator.evaluate("round(2.5)", empty)).toBe(3);
+    expect(evaluator.evaluate("round(-2.5)", empty)).toBe(-3);
+    expect(evaluator.evaluate("round(2.4)", empty)).toBe(2);
+  });
+
+  it("registers mod as the floored modulo", () => {
+    const evaluator = createCelEvaluator();
+    registerNumericBuiltins(evaluator);
+    expect(evaluator.evaluate("mod(7, 3)", empty)).toBe(1);
+    expect(evaluator.evaluate("mod(-7, 3)", empty)).toBe(2);
+    expect(evaluator.evaluate("mod(7.5, 2)", empty)).toBe(1.5);
+    expect(() => evaluator.evaluate("mod(7, 0)", empty)).toThrow(/mod.*zero/);
+  });
+
+  it("evaluates the % operator on two doubles", () => {
+    const evaluator = createCelEvaluator();
+    registerNumericBuiltins(evaluator);
+    expect(evaluator.evaluate("F0 % 2.0", { params: { F0: 7.5 }, constants: {} })).toBe(1.5);
+  });
+
+  it("derives a digit and a clock phase from frame params", () => {
+    const evaluator = createCelEvaluator();
+    registerNumericBuiltins(evaluator);
+    const context = { params: { n: 1234, phase: 23 }, constants: {} };
+    expect(evaluator.evaluate("mod(floor(n / 10), 10)", context)).toBe(3);
+    expect(evaluator.evaluate("mod(phase + 5, 12)", context)).toBe(4);
+  });
+});

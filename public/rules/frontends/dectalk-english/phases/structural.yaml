@@ -200,7 +200,7 @@ rules:
       next_is_front_vowel: "next_token.phoneme in ['IY', 'IH', 'IX', 'EY', 'EH', 'AE']"
       in_s_cluster: >-
         prev_token != null && prev_token.phoneme == 'S' &&
-        (has(prev_token.word) && has(current.word) ? prev_token.word == current.word : false)
+        dectalk_same_word(prev_token, current)
       rel_burst_duration: "has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration"
       profile_ref: >-
         next_token != null && next_token.phoneme != 'SIL' ? next_token :

@@ -116,7 +116,7 @@ rules:
       same_as_next: >-
         n != null && has(n.phoneme) && n.phoneme == current.phoneme
       same_word: >-
-        has(n.word) && has(current.word) && n.word == current.word
+        dectalk_same_word(n, current)
     constraint: "same_as_next && same_word"
     splice:
       type: replace_range
@@ -169,7 +169,7 @@ rules:
     define:
       n: next
       next_is_sh: "n != null && n.phoneme == 'SH'"
-      same_word: "n != null && has(n.word) && has(current.word) && n.word == current.word"
+      same_word: "n != null && dectalk_same_word(n, current)"
       assim_name: "current.phoneme == 'S' ? 'SH' : 'ZH'"
       at: "target(assim_name)"
     constraint: "next_is_sh && same_word"

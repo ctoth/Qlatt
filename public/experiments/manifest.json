@@ -7,6 +7,12 @@
       "path": "klatt80-baseline"
     },
     {
+      "id": "laine88",
+      "name": "Laine 1988 Higher-Pole Correction",
+      "extends": "klatt80-baseline",
+      "description": "Four-formant cascade with Laine's tract-length-controlled all-zero correction"
+    },
+    {
       "id": "klsyn88",
       "name": "klsyn88",
       "description": "Extended Klatt with multiple source types (impulsive, LF, triangular) and pitch-sync modulation",

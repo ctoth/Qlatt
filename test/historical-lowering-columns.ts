@@ -16,7 +16,10 @@ export function historicalLoweringColumns(
   if (!Array.isArray(captured) || captured.length === 0)
     throw new Error("Historical columns missing");
   return captured.map((column: unknown) => {
-    if (typeof column !== "string" || !currentColumns.includes(column)) {
+    // Issue 52 retires these production controls. Still project and assert every
+    // captured cell under its original name: historical evidence is immutable.
+    const retiredNasalColumn = column === "nasalCoupling" || column === "nasalPoleBaseHz";
+    if (typeof column !== "string" || (!currentColumns.includes(column) && !retiredNasalColumn)) {
       throw new Error("Historical column is absent from the current lowering contract");
     }
     return column;

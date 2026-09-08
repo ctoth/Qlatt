@@ -5,7 +5,8 @@
  * a registry.yaml file rather than being hardcoded.
  */
 
-import { applyParamValue } from "./audio-param-utils";
+import { applyParamValue, getAudioParam } from "./audio-param-utils";
+import { createDiagnostics, type Diagnostics } from "./diagnostics";
 import { expandFormantBanks } from "./formant-bank";
 import { createBrowserRuntimeAssetLoader } from "./runtime-assets/browser-loader";
 import type { RuntimeAssetLoader } from "./runtime-assets/types";
@@ -53,6 +54,7 @@ export interface RegistryPrimitive {
   >;
   inputs?: number;
   outputs?: number;
+  ports?: Record<string, { direction?: "in" | "out"; index?: number }>;
 }
 
 export interface Registry {
@@ -317,15 +319,6 @@ function getNodeId(ref: PortRef): string {
   return typeof ref === "string" ? ref : ref.node;
 }
 
-/**
- * Extract port index from a port reference (undefined means default port)
- */
-function getPortIndex(ref: PortRef): number | undefined {
-  if (typeof ref === "string") return undefined;
-  if (typeof ref.port === "number") return ref.port;
-  return undefined;
-}
-
 // Runtime options
 export interface KlattRuntimeOptions {
   audioContext: AudioContext;
@@ -340,6 +333,7 @@ export interface KlattRuntimeOptions {
   logger?: (msg: string) => void; // Optional logging callback
   telemetry?: boolean; // Enable worklet debug metrics (default: false)
   telemetryHandler?: (data: unknown) => void; // Callback for worklet telemetry messages
+  diagnostics?: Diagnostics;
 }
 
 // Binding information for interpreter use
@@ -351,6 +345,7 @@ export interface BindingSpec {
 
 // Runtime instance
 export interface KlattRuntime {
+  getDiagnostics(): Diagnostics;
   // Get current realized values
   getRealizedValues(): Record<string, ParamValue>;
 
@@ -395,7 +390,32 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     logger = () => {},
     telemetry = false,
     telemetryHandler,
+    diagnostics = createDiagnostics(),
   } = options;
+
+  function fail(code: string, message: string, data: Record<string, unknown>): never {
+    diagnostics.error(message, { ...data, consequence: "operation rejected" }, code);
+    throw new Error(message);
+  }
+
+  // A binding may fail on every frame. Report its first failure once per runtime,
+  // retaining the affected target and observed value without filling the buffer.
+  const reportedBindings = new Set<string>();
+  function warnBinding(
+    code: string,
+    nodeId: string,
+    paramName: string,
+    data: Record<string, unknown>,
+  ): void {
+    const key = JSON.stringify([code, nodeId, paramName]);
+    if (reportedBindings.has(key)) return;
+    reportedBindings.add(key);
+    diagnostics.warn(
+      `Parameter ${nodeId}.${paramName}: ${String(data.consequence)}`,
+      { ...data, affectedCount: 1 },
+      code,
+    );
+  }
 
   if (!registry) {
     throw new Error("Registry is required for createKlattRuntime");
@@ -420,6 +440,90 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   // Must happen before node/WASM detection, defaults init, and binding-map build.
   expandFormantBanks(graph, semantics);
 
+  for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
+    const primitive = registry.primitives[nodeDef.type];
+    if (!primitive) continue;
+    for (const field of ["inputs", "outputs"] as const) {
+      const count = primitive[field];
+      if (count !== undefined && (!Number.isInteger(count) || count < 0)) {
+        fail("runtime.invalid_count", `Invalid ${field} count for '${nodeId}'`, {
+          nodeId,
+          primitive: nodeDef.type,
+          field,
+          requestedValue: count,
+        });
+      }
+    }
+    const category = getPrimitiveCategory(primitive);
+    if (
+      (category === "js-worklet" || category === "wasm-worklet") &&
+      primitive.inputs === 0 &&
+      primitive.outputs === 0
+    ) {
+      fail("runtime.invalid_count", `Worklet '${nodeId}' must have inputs or outputs`, {
+        nodeId,
+        primitive: nodeDef.type,
+        inputs: 0,
+        outputs: 0,
+      });
+    }
+    if (
+      (category === "js-worklet" || category === "wasm-worklet") &&
+      (!primitive.worklet || (category === "wasm-worklet" && !primitive.wasm))
+    ) {
+      fail(
+        "runtime.invalid_primitive",
+        `Missing required worklet/WASM declaration for '${nodeId}'`,
+        {
+          nodeId,
+          primitive: nodeDef.type,
+          category,
+        },
+      );
+    }
+  }
+
+  // Bacon registry counts default to one; named ports require an explicit
+  // direction and index. See ../bacon/schemas/registry.schema.json.
+  function portIndex(ref: PortRef, direction: "in" | "out"): number {
+    const nodeId = getNodeId(ref);
+    const nodeDef = graph.nodes[nodeId];
+    const primitive = nodeDef && registry.primitives[nodeDef.type];
+    const requested = typeof ref === "string" ? undefined : ref.port;
+    const named = typeof requested === "string" ? primitive?.ports?.[requested] : undefined;
+    const index =
+      typeof requested === "string" ? named?.index : requested === undefined ? 0 : requested;
+    const count = primitive?.[direction === "in" ? "inputs" : "outputs"] ?? 1;
+    if (
+      index === undefined ||
+      !Number.isInteger(index) ||
+      index < 0 ||
+      (primitive && index >= count) ||
+      (typeof requested === "string" && named?.direction !== direction)
+    ) {
+      fail("runtime.invalid_port", `Invalid ${direction} port on '${nodeId}'`, {
+        nodeId,
+        primitive: nodeDef?.type,
+        direction,
+        requestedValue: requested,
+        count,
+      });
+    }
+    return index;
+  }
+  for (const connection of graph.connections ?? []) {
+    const [from, to] = Array.isArray(connection) ? connection : [connection.from, connection.to];
+    portIndex(from, "out");
+    if (typeof to === "string" || to.param === undefined) portIndex(to, "in");
+    else if (to.port !== undefined) {
+      fail("runtime.invalid_port", "AudioParam destination cannot also declare a port", {
+        from,
+        to,
+      });
+    }
+  }
+  for (const output of graph.outputs ?? []) portIndex(output, "out");
+
   // Create prefixed logger
   const log = (msg: string) => logger(`[klatt-runtime] ${msg}`);
 
@@ -428,10 +532,18 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   log(`Registry has ${Object.keys(registry.primitives).length} primitives`);
 
   // Reject unsupported native bindings before loading assets or creating nodes.
-  for (const nodeDef of Object.values(graph.nodes)) {
+  for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
     const primitive = registry.primitives[nodeDef.type];
     if (primitive && getPrimitiveCategory(primitive) === "webaudio") {
-      getNativeNodeConstructor(primitive.native, nodeDef.type, log);
+      try {
+        getNativeNodeConstructor(primitive.native, nodeDef.type, log);
+      } catch (error) {
+        fail("runtime.invalid_primitive", formatError(error), {
+          nodeId,
+          primitive: nodeDef.type,
+          native: primitive.native,
+        });
+      }
     }
   }
 
@@ -444,7 +556,19 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   // Load WASM if not provided and needed
   let wasmModules = options.wasmModules;
   if (!wasmModules && needsWasm) {
-    wasmModules = await loadWasmModules(registry, assetLoader, log);
+    try {
+      wasmModules = await loadWasmModules(registry, assetLoader, log);
+    } catch (error) {
+      fail("runtime.wasm_load_failed", `WASM loading failed: ${formatError(error)}`, {
+        nodes: Object.entries(graph.nodes)
+          .filter(([, node]) => registry.primitives[node.type]?.wasm)
+          .map(([nodeId, node]) => ({
+            nodeId,
+            primitive: node.type,
+            wasm: registry.primitives[node.type].wasm,
+          })),
+      });
+    }
   }
 
   // Determine which worklets are needed based on graph nodes and registry
@@ -537,6 +661,22 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
       );
       if (node) {
         nodes.set(id, node);
+      } else {
+        const primitive = registry.primitives[nodeDef.type];
+        diagnostics.warn(
+          `Node '${id}' omitted`,
+          {
+            nodeId: id,
+            primitive: nodeDef.type,
+            wasm: primitive?.wasm,
+            reason:
+              primitive?.wasm && !wasmModules?.[primitive.wasm.replace(".wasm", "")]
+                ? "WASM module not loaded"
+                : "unsupported primitive",
+            consequence: "node omitted",
+          },
+          "runtime.node_omitted",
+        );
       }
     }
     log(`Created ${nodes.size} nodes`);
@@ -550,7 +690,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
     for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
       const node = nodes.get(nodeId);
-      if (!node || !nodeDef.params) continue;
+      if (!nodeDef.params) continue;
 
       for (const [paramName, paramSpec] of Object.entries(nodeDef.params)) {
         // Check if this binding references a failed realize rule
@@ -562,8 +702,29 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
         }
 
         const value = resolveParamValue(paramSpec, realizedValues, currentInputs);
-        if (typeof value === "number") {
+        const param = node ? getAudioParam(node, paramName) : null;
+        const context = {
+          nodeId,
+          primitive: nodeDef.type,
+          paramName,
+          bindName:
+            typeof paramSpec === "object" && "bind" in paramSpec ? paramSpec.bind : undefined,
+          requestedValue: value,
+        };
+        if (!param) {
+          warnBinding("runtime.binding_target_missing", nodeId, paramName, {
+            ...context,
+            consequence: "parameter write omitted",
+            reason: node ? "AudioParam missing" : "node missing",
+          });
+        } else if (typeof value === "number" && Number.isFinite(value) && node) {
           applyParamValue(node, paramName, value);
+        } else {
+          warnBinding("runtime.binding_unresolved", nodeId, paramName, {
+            ...context,
+            appliedValue: Number.isFinite(param.value) ? param.value : undefined,
+            consequence: "AudioParam unchanged",
+          });
         }
       }
     }
@@ -593,8 +754,9 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
       const fromId = getNodeId(fromRef);
       const toId = getNodeId(toRef);
-      const fromPort = getPortIndex(fromRef);
-      const toPort = getPortIndex(toRef);
+      const fromPort = portIndex(fromRef, "out");
+      const toPort =
+        typeof toRef === "object" && toRef.param !== undefined ? 0 : portIndex(toRef, "in");
 
       const fromNode = nodes.get(fromId);
       const toNode = nodes.get(toId);
@@ -604,57 +766,47 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
       //   gain/bandwidth AudioParams additively (WebAudio additive semantics)
       const toParamName = typeof toRef === "object" && toRef !== null ? toRef.param : undefined;
 
-      if (toParamName) {
-        // AudioParam connection: audioNode.connect(audioParam)
-        if (!fromNode) {
-          log(
-            `  Warning: Could not connect ${fromId} -> ${toId}.${toParamName} (missing source node)`,
-          );
-        } else if (!toNode) {
-          log(
-            `  Warning: Could not connect ${fromId} -> ${toId}.${toParamName} (missing target node)`,
-          );
-        } else {
-          const fromIndex = fromPort ?? 0;
+      const targetParam =
+        toNode && toParamName !== undefined ? getAudioParam(toNode, toParamName) : null;
+      if (!fromNode || !toNode || (toParamName !== undefined && !targetParam)) {
+        diagnostics.warn(
+          `Connection ${fromId} -> ${toId} dropped`,
+          {
+            from: fromRef,
+            to: toRef,
+            fromPrimitive: graph.nodes[fromId]?.type,
+            toPrimitive: graph.nodes[toId]?.type,
+            fromPort,
+            toPort: toParamName === undefined ? toPort : undefined,
+            reason: !fromNode || !toNode ? "node missing" : "destination AudioParam missing",
+            consequence: "connection dropped",
+          },
+          "runtime.connection_dropped",
+        );
+        continue;
+      }
 
-          // AudioWorkletNode: use .parameters.get(paramName)
-          if (isAudioWorkletNode(toNode, audioWorkletNodeCtor)) {
-            const audioParam = toNode.parameters.get(toParamName);
-            if (audioParam) {
-              fromNode.connect(audioParam, fromIndex);
-              log(`  Connected ${fromId}[${fromIndex}] -> ${toId}.${toParamName} (AudioParam)`);
-            } else {
-              log(`  Warning: AudioParam '${toParamName}' not found on AudioWorkletNode '${toId}'`);
-            }
-          } else {
-            // Native nodes (GainNode, etc.): access as property. Duck-typed
-            // rather than `instanceof AudioParam` — Node hosts have no
-            // AudioParam global (same reason as audio-param-utils.ts).
-            const audioParam = (toNode as unknown as Record<string, unknown>)[toParamName];
-            if (
-              typeof audioParam === "object" &&
-              audioParam !== null &&
-              typeof (audioParam as { setValueAtTime?: unknown }).setValueAtTime === "function"
-            ) {
-              fromNode.connect(audioParam as AudioParam, fromIndex);
-              log(`  Connected ${fromId}[${fromIndex}] -> ${toId}.${toParamName} (AudioParam)`);
-            } else {
-              log(`  Warning: AudioParam '${toParamName}' not found on native node '${toId}'`);
-            }
-          }
-        }
-      } else if (fromNode && toNode) {
-        if (toPort !== undefined || fromPort !== undefined) {
-          const fromIndex = fromPort ?? 0;
-          const toIndex = toPort ?? 0;
-          fromNode.connect(toNode, fromIndex, toIndex);
-          log(`  Connected ${fromId}[${fromIndex}] -> ${toId}[${toIndex}]`);
+      try {
+        if (toParamName !== undefined && targetParam) {
+          fromNode.connect(targetParam, fromPort);
+          log(`  Connected ${fromId}[${fromPort}] -> ${toId}.${toParamName} (AudioParam)`);
         } else {
-          fromNode.connect(toNode);
-          log(`  Connected ${fromId} -> ${toId}`);
+          fromNode.connect(toNode, fromPort, toPort);
+          log(`  Connected ${fromId}[${fromPort}] -> ${toId}[${toPort}]`);
         }
-      } else {
-        log(`  Warning: Could not connect ${fromId} -> ${toId} (missing node)`);
+      } catch (error) {
+        fail(
+          "runtime.connection_failed",
+          `Connection ${fromId} -> ${toId} failed: ${formatError(error)}`,
+          {
+            from: fromRef,
+            to: toRef,
+            fromPrimitive: graph.nodes[fromId]?.type,
+            toPrimitive: graph.nodes[toId]?.type,
+            fromPort,
+            toPort,
+          },
+        );
       }
     }
   }
@@ -680,7 +832,18 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   createNodes();
   log(`Created nodes: ${Array.from(nodes.keys()).join(", ")}`);
   log(`Built ${bindingMap.size} unique bindings`);
-  connectNodes();
+  try {
+    connectNodes();
+  } catch (error) {
+    for (const node of nodes.values()) {
+      if (isAudioWorkletNode(node, audioWorkletNodeCtor)) {
+        node.port.postMessage({ type: "dispose" });
+        node.port.close();
+      }
+      node.disconnect();
+    }
+    throw error;
+  }
   log(`Total connections: ${graph.connections?.length ?? 0}`);
 
   // Wait for worklets to be ready before applying values
@@ -718,6 +881,9 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   log("Klatt runtime initialized successfully");
 
   return {
+    getDiagnostics(): Diagnostics {
+      return diagnostics;
+    },
     getRealizedValues(): Record<string, ParamValue> {
       return { ...realizedValues };
     },
@@ -744,18 +910,24 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     connectToDestination(): void {
       // Graph spec is authoritative — no fallback guessing
       if (!graph.outputs || graph.outputs.length === 0) {
-        throw new Error('Graph definition missing "outputs" field — cannot connect to destination');
+        fail(
+          "runtime.invalid_output",
+          'Graph definition missing "outputs" field — cannot connect to destination',
+          { outputs: graph.outputs },
+        );
       }
       const outputRef = graph.outputs[0];
       const nodeId = typeof outputRef === "string" ? outputRef : outputRef.node;
       const outputNode = nodes.get(nodeId);
       if (!outputNode) {
-        throw new Error(
+        fail(
+          "runtime.invalid_output",
           `Output node "${nodeId}" specified in graph.outputs not found in created nodes`,
+          { nodeId, primitive: graph.nodes[nodeId]?.type, output: outputRef },
         );
       }
       log(`Connecting ${nodeId} to destination`);
-      outputNode.connect(audioContext.destination);
+      outputNode.connect(audioContext.destination, portIndex(outputRef, "out"));
     },
 
     disconnect(): void {

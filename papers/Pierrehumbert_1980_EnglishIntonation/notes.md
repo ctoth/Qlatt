@@ -375,7 +375,7 @@ This thesis provides the foundation for the ToBI (Tones and Break Indices) annot
 
 ### Foundational
 - Liberman (1975) - "The Intonation System of English" - PhD MIT
-- Liberman & Prince (1977) - Metrical phonology
+- Liberman & Prince (1977) - Metrical phonology - NOW IN COLLECTION: [On Stress and Linguistic Rhythm](../Liberman_1977_StressLinguisticRhythm/notes.md)
 - Bolinger (1958) - Pitch accent theory
 
 ### Synthesis
@@ -415,3 +415,6 @@ This thesis provides the foundation for the ToBI (Tones and Break Indices) annot
 ---
 
 **See also:** Goldsmith_1976_AutosegmentalPhonology - the foundational work on autosegmental phonology that Pierrehumbert's AM theory directly builds upon; introduces the multi-tier representation, association lines, Well-formedness Condition, and accentual star convention that became the basis for ToBI.
+
+### Now in Collection (previously listed as leads)
+- [On Stress and Linguistic Rhythm](../Liberman_1977_StressLinguisticRhythm/notes.md) - defines local strong/weak prominence, designated terminal elements and grid projection. Its ordinal stress relations support intonational association but do not specify F0 values.

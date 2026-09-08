@@ -5,139 +5,65 @@
  * These are generic utilities used across different synthesizer implementations.
  * Other modules should import from this file.
  *
- * Klatt amplitude tables (ndbCor, ndbScale, klsynAmpTable) are loaded from
- * public/experiments/klatt80-baseline/semantics.yaml at module load time.
- * There is no TS-side fallback — a missing YAML constant is a build error.
+ * Klatt amplitude tables are defined here with their sources so importing these
+ * utilities requires no experiment configuration or I/O.
  */
 
-import { loadYamlDocumentSync } from "./yaml-loader";
-
-const KLATT_AMPS_YAML_PATH = "/experiments/klatt80-baseline/semantics.yaml";
-
-interface KlattAmpsDocument {
-  constants?: {
-    ndbCor?: unknown;
-    ndbScale?: unknown;
-    klsynAmpTable?: unknown;
-    ndbCorBinHz?: unknown;
-    ndbCorMinHz?: unknown;
-    ndbCorMaxHz?: unknown;
-    klsynAmpScale?: unknown;
-    dbFloorDb?: unknown;
-    dbCeilingDb?: unknown;
-    dbPerDoubling?: unknown;
-  };
-}
-
-function requireNumberArray(value: unknown, label: string): number[] {
-  if (!Array.isArray(value)) {
-    throw new Error(
-      `E_KLATT_AMP_TABLE_MISSING: '${label}' is not an array in ${KLATT_AMPS_YAML_PATH}`,
-    );
-  }
-  return value.map((entry, index) => {
-    if (typeof entry !== "number" || !Number.isFinite(entry)) {
-      throw new Error(
-        `E_KLATT_AMP_TABLE_INVALID: '${label}[${index}]' is not a finite number in ${KLATT_AMPS_YAML_PATH}`,
-      );
-    }
-    return entry;
-  });
-}
-
-function requireNumberMap(value: unknown, label: string): Record<string, number> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error(
-      `E_KLATT_AMP_TABLE_MISSING: '${label}' is not a map in ${KLATT_AMPS_YAML_PATH}`,
-    );
-  }
-  const out: Record<string, number> = {};
-  for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
-    if (typeof entry !== "number" || !Number.isFinite(entry)) {
-      throw new Error(
-        `E_KLATT_AMP_TABLE_INVALID: '${label}.${key}' is not a finite number in ${KLATT_AMPS_YAML_PATH}`,
-      );
-    }
-    out[key] = entry;
-  }
-  return out;
-}
-
-function requireNumber(value: unknown, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(
-      `E_KLATT_AMP_CONSTANT_INVALID: '${label}' is not a finite number in ${KLATT_AMPS_YAML_PATH}`,
-    );
-  }
-  return value;
-}
-
-function loadKlattAmpTables(): {
-  ndbCor: number[];
-  ndbScale: Record<string, number>;
-  klsynAmpTable: number[];
-  ndbCorBinHz: number;
-  ndbCorMinHz: number;
-  ndbCorMaxHz: number;
-  klsynAmpScale: number;
-  dbFloorDb: number;
-  dbCeilingDb: number;
-  dbPerDoubling: number;
-} {
-  const doc = loadYamlDocumentSync<KlattAmpsDocument>(KLATT_AMPS_YAML_PATH);
-  const constants = doc.constants;
-  if (!constants) {
-    throw new Error(
-      `E_KLATT_AMP_TABLE_MISSING: 'constants' block missing in ${KLATT_AMPS_YAML_PATH}`,
-    );
-  }
-  const ndbCor = requireNumberArray(constants.ndbCor, "constants.ndbCor");
-  const ndbCorBinHz = requireNumber(constants.ndbCorBinHz, "constants.ndbCorBinHz");
-  const ndbCorMinHz = requireNumber(constants.ndbCorMinHz, "constants.ndbCorMinHz");
-  const ndbCorMaxHz = requireNumber(constants.ndbCorMaxHz, "constants.ndbCorMaxHz");
-  const expectedNdbCorLength = (ndbCorMaxHz - ndbCorMinHz) / ndbCorBinHz;
-  if (!Number.isInteger(expectedNdbCorLength) || ndbCor.length !== expectedNdbCorLength) {
-    throw new Error(
-      `E_KLATT_AMP_TABLE_LENGTH: 'constants.ndbCor' has ${ndbCor.length} entries; ` +
-        `[${ndbCorMinHz}, ${ndbCorMaxHz}) Hz at ${ndbCorBinHz} Hz per bin requires ${expectedNdbCorLength}`,
-    );
-  }
-  return {
-    ndbCor,
-    ndbScale: requireNumberMap(constants.ndbScale, "constants.ndbScale"),
-    klsynAmpTable: requireNumberArray(constants.klsynAmpTable, "constants.klsynAmpTable"),
-    ndbCorBinHz,
-    ndbCorMinHz,
-    ndbCorMaxHz,
-    klsynAmpScale: requireNumber(constants.klsynAmpScale, "constants.klsynAmpScale"),
-    dbFloorDb: requireNumber(constants.dbFloorDb, "constants.dbFloorDb"),
-    dbCeilingDb: requireNumber(constants.dbCeilingDb, "constants.dbCeilingDb"),
-    dbPerDoubling: requireNumber(constants.dbPerDoubling, "constants.dbPerDoubling"),
-  };
-}
-
-const klattAmpTables = loadKlattAmpTables();
+const klattAmpTables = {
+  // Klatt 1980 PARCOE.FOR GETAMP: conversion domain and 6 dB per doubling.
+  dbFloorDb: -72,
+  dbCeilingDb: 96,
+  dbPerDoubling: 6,
+  // Klatt 1980 PARCOE.FOR NDBCOR: 50 Hz bins over [50, 550) Hz.
+  ndbCorBinHz: 50,
+  ndbCorMinHz: 50,
+  ndbCorMaxHz: 550,
+  // klsyn88 parwvt.h: DBtoLIN(dB) = amptable[dB] * 0.001.
+  klsynAmpScale: 0.001,
+};
 
 /**
  * ndbCor correction values for proximity calculation.
- * Loaded from semantics.yaml constants.ndbCor.
  * Source: Klatt 1980 PARCOE.FOR NDBCOR table.
  */
-export const ndbCor: number[] = klattAmpTables.ndbCor;
+export const ndbCor: number[] = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
 /**
  * ndbScale source amplitude scale factors keyed by Klatt parameter name.
- * Loaded from semantics.yaml constants.ndbScale.
- * Source: Klatt 1980 PARCOE.FOR NDBSCA (with G0 compensation offset).
+ * Source: Klatt 1980 PARCOE.FOR NDBSCA, with Qlatt's -47 dB G0 compensation.
+ * AH uses -87 before compensation (engineering estimate matching Qlatt's
+ * lower aspiration inputs); A7-A10 are engineering extensions of the table.
  */
-export const ndbScale: Record<string, number> = klattAmpTables.ndbScale;
+export const ndbScale: Record<string, number> = {
+  AV: -119,
+  AH: -134,
+  AF: -119,
+  AVS: -91,
+  A1: -58,
+  A2: -65,
+  A3: -73,
+  A4: -78,
+  A5: -79,
+  A6: -80,
+  A7: -81,
+  A8: -82,
+  A9: -83,
+  A10: -84,
+  AN: -58,
+  AB: -84,
+};
 
 /**
  * klsyn88 amplitude lookup table — DBtoLIN(dB) = klsynAmpTable[dB] * 0.001.
- * Loaded from semantics.yaml constants.klsynAmpTable.
  * Source: klsyn88 parwvt.h.
  */
-export const klsynAmpTable: number[] = klattAmpTables.klsynAmpTable;
+export const klsynAmpTable: number[] = [
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 8, 9, 10, 11, 13, 14, 16, 18, 20, 22, 25, 28, 32, 35,
+  40, 45, 51, 57, 64, 71, 80, 90, 101, 114, 128, 142, 159, 179, 202, 227, 256, 284, 318, 359, 405,
+  455, 512, 568, 638, 719, 811, 911, 1024, 1137, 1276, 1438, 1622, 1823, 2048, 2273, 2552, 2875,
+  3244, 3645, 4096, 4547, 5104, 5751, 6488, 7291, 8192, 9093, 10207, 11502, 12976, 14582, 16384,
+  18350, 20644, 23429, 26214, 29491, 32767,
+];
 
 /**
  * Convert dB to linear amplitude (Klatt convention)
@@ -232,4 +158,45 @@ export function builtinAbs(x: number): number {
 }
 export function builtinLog(x: number): number {
   return Math.log(x);
+}
+
+// Rounding and modulo builtins shared by both CEL surfaces (#47). The
+// normative definitions a host must match live in docs/host-contract.md
+// section 4; keep this file and that section in step.
+
+/** `floor(x)`: the largest integer not greater than `x`. */
+export function builtinFloor(x: number): number {
+  return Math.floor(x);
+}
+
+/** `ceil(x)`: the smallest integer not less than `x`. */
+export function builtinCeil(x: number): number {
+  return Math.ceil(x);
+}
+
+/**
+ * `round(x)`: the nearest integer, with halves rounded away from zero
+ * (C99 `round()`, Fortran `NINT`; the convention of Klatt's FORTRAN sources).
+ * `Math.round` rounds halves toward +infinity, so the sign is handled
+ * explicitly; a zero result is normalized so `-0` never escapes.
+ */
+export function builtinRound(x: number): number {
+  const rounded = Math.sign(x) * Math.round(Math.abs(x));
+  return rounded === 0 ? 0 : rounded;
+}
+
+/**
+ * `mod(a, b)`: the floored modulo `a - b * floor(a / b)`, whose result takes
+ * the sign of the divisor (Knuth, The Art of Computer Programming vol. 1
+ * section 1.2.4). This is the modulo that clock arithmetic needs
+ * (`mod(-1, 12) == 11`), unlike the CEL `%` operator, which truncates toward
+ * zero like C. Correct the truncating remainder only when its sign differs
+ * from the divisor, preserving small positive remainders with large divisors.
+ * A zero divisor is an error, never a silent NaN.
+ */
+export function builtinMod(a: number, b: number): number {
+  if (b === 0) throw new Error("mod(a, b): zero divisor");
+  const remainder = a % b;
+  if (remainder === 0) return 0;
+  return Math.sign(remainder) === Math.sign(b) ? remainder : remainder + b;
 }

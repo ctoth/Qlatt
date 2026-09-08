@@ -423,6 +423,9 @@ For Qlatt's TTS frontend, this book motivates:
 - [ ] What are the quantitative parameters for compression vs. truncation when tones must fit limited segmental material?
 
 ## Collection Cross-References
+### Already in Collection (metrical-stress source)
+- [On Stress and Linguistic Rhythm](../Liberman_1977_StressLinguisticRhythm/notes.md) - the pp.40-79 extraction cites its designated terminal element on printed p.56. Defines strong/weak relations and metrical grids; lexical prominence and pitch-accent association remain distinct levels.
+
 
 ### Already in Collection
 - [[Pierrehumbert_1980_EnglishIntonation]] — foundation of AM theory; Ladd's book is the mature theoretical exposition of Pierrehumbert's framework

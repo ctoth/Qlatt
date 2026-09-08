@@ -211,3 +211,9 @@ Final: m^ltinukli^letId (stress: 2-1-2)
 - Chomsky & Halle (1968) - Sound Pattern of English (theoretical foundation)
 - Klatt (1976) - Linguistic uses of segmental duration
 - Allen (1976) - MIT TTS system overview
+
+## Collection Cross-References
+
+### Conceptual Links (not citation-based)
+- [On Stress and Linguistic Rhythm](../Liberman_1977_StressLinguisticRhythm/notes.md) - cyclic morphology and syllable-sensitive stress address the same problem; LP adds metrical trees, retains binary stress across cycles, and derives relative prominence separately.
+- [Extrametricality and English Stress](../Hayes_1982_ExtrametricalityEnglishStress/notes.md) - later alternative using feet, peripheral extrametricality and ordered destressing. It preserves earlier feet except specified redraws, rather than providing a drop-in restatement of this TTS algorithm.

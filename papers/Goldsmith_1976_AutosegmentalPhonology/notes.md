@@ -236,3 +236,6 @@ This dissertation provides the **theoretical foundation** for implementing tone 
 ### Supersedes or Recontextualizes
 - This is the **foundational text** of autosegmental phonology; Pierrehumbert (1980) and Ladd (2008) build directly on it
 - The AM (Autosegmental-Metrical) framework in our ToBI and intonation papers is a direct descendant of this work
+
+### Cited By (lexical-stress collection update)
+- [On Stress and Linguistic Rhythm](../Liberman_1977_StressLinguisticRhythm/notes.md) - includes this dissertation in its bibliography. Metrical constituent trees and grids are distinct from autosegmental association tiers; both move beyond a single linear feature sequence.

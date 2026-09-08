@@ -32,6 +32,7 @@ function freezeRecursively(value: unknown): void {
 }
 
 const MERGED_CHILD_ROOT_KEYS = new Set([
+  "functions",
   "rules",
   "predicates",
   "patterns",
@@ -89,6 +90,7 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
   // blocks; merge them the same way as predicates so a child include can
   // declare them.
   for (const key of [
+    "functions",
     "rules",
     "predicates",
     "patterns",

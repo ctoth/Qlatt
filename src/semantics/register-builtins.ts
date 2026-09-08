@@ -7,8 +7,12 @@
 
 import {
   builtinAbs,
+  builtinCeil,
   builtinExp,
+  builtinFloor,
   builtinLog,
+  builtinMod,
+  builtinRound,
   builtinSqrt,
   dbToLinear,
   dbToLinearKlsyn,
@@ -103,5 +107,23 @@ export function registerNumericBuiltins(celEvaluator: CelEvaluator): void {
   celEvaluator.registerFunction("log", (...args: ParamValue[]): ParamValue => {
     const x = requireNumericArg("log", 0, args[0]);
     return builtinLog(x);
+  });
+
+  // Rounding and modulo (#47). Normative definitions: docs/host-contract.md
+  // section 4. The rule-engine catalog binds the same implementations.
+  celEvaluator.registerFunction("floor", (x: ParamValue): ParamValue => {
+    return builtinFloor(requireNumericArg("floor", 0, x));
+  });
+
+  celEvaluator.registerFunction("ceil", (x: ParamValue): ParamValue => {
+    return builtinCeil(requireNumericArg("ceil", 0, x));
+  });
+
+  celEvaluator.registerFunction("round", (x: ParamValue): ParamValue => {
+    return builtinRound(requireNumericArg("round", 0, x));
+  });
+
+  celEvaluator.registerFunction("mod", (a: ParamValue, b: ParamValue): ParamValue => {
+    return builtinMod(requireNumericArg("mod", 0, a), requireNumericArg("mod", 1, b));
   });
 }

@@ -345,6 +345,9 @@ export function transcribeText(
     options.utterance,
   );
   const flatPhonemeList: TranscriptionToken[] = [];
+  const dictionaryMisses: { word: string; token: string; applied: string }[] = [];
+  const emptyPronunciations: { word: string; token: string; applied: string; duration: number }[] =
+    [];
   const hasDirectDictionaryEntry = (token: string): boolean =>
     typeof effectiveDictMap[token.toLowerCase()] === "string";
 
@@ -456,9 +459,11 @@ export function transcribeText(
         decisionType = "fallback_pronunciation_selected";
         reason = `Word '${sourceWord}' not in dictionary; used Elovitz LTS + configured lexical stress`;
         citations = [FALLBACK_PRONUNCIATION_CITATION];
-        console.warn(
-          `[TTS Frontend] Word "${sourceWord}" not found in dictionary. Using G2P pipeline (${pronResult.source}).`,
-        );
+        dictionaryMisses.push({
+          word: sourceWord,
+          token: inputToken.tokenId,
+          applied: pronResult.source,
+        });
       }
 
       const pronunciationDecision = provenance?.add({
@@ -524,9 +529,12 @@ export function transcribeText(
           }
         }
       } else {
-        console.warn(
-          `[TTS Frontend] Word "${sourceWord}" produced no phonemes. Representing as SIL.`,
-        );
+        emptyPronunciations.push({
+          word: sourceWord,
+          token: inputToken.tokenId,
+          applied: "SIL",
+          duration: 50,
+        });
         flatPhonemeList.push({
           phoneme: "SIL",
           stress: null,
@@ -539,5 +547,17 @@ export function transcribeText(
       index += consumedWords;
     }
   }
+  if (dictionaryMisses.length)
+    options.diagnostics?.info(
+      "Dictionary misses handled by the configured G2P pipeline",
+      { count: dictionaryMisses.length, affected: dictionaryMisses },
+      "G2P_DICTIONARY_FALLBACK",
+    );
+  if (emptyPronunciations.length)
+    options.diagnostics?.warn(
+      "Empty pronunciations represented as silence",
+      { count: emptyPronunciations.length, affected: emptyPronunciations },
+      "EMPTY_PRONUNCIATION_SILENCE",
+    );
   return flatPhonemeList; // Return the flat list of phoneme objects
 }

@@ -1,0 +1,21 @@
+version: v1
+citations: [Test fixture]
+baseline:
+  source_mode: 1
+  citations: [Test fixture]
+default_voice_quality: custom
+voice_quality_presets:
+  custom:
+    rd: 0.7
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 0
+    jitter: 0
+    f0_scale: 1
+    extra_gain: 17
+    citations: [Test fixture]
+# Deliberately reversed: explicit order must set before adding.
+projection:
+  - {field: extra_gain, target_param: AV, op: current_plus_override_if_set, order: 20}
+  - {field: extra_gain, target_param: AV, op: override_if_set, order: 10}

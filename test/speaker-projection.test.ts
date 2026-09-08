@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { VoiceQualityOverrides } from "../src/source-contour";
-import {
-  projectSpeakerFields,
-  SPEAKER_PROJECTION_TABLE,
-  type SpeakerProjectionBaseline,
-} from "../src/speaker-projection";
+import { loadSourceContourSync, type VoiceQualityOverrides } from "../src/source-contour";
+import { projectSpeakerFields, type SpeakerProjectionBaseline } from "../src/speaker-projection";
 
 /**
  * Locks the declarative speaker/source projection table (phase 4 item 3) to the
@@ -20,6 +16,8 @@ const BASELINE: SpeakerProjectionBaseline = {
   spectral_tilt_offset_db: 3,
 };
 
+const projection = loadSourceContourSync().projection;
+
 function makeTarget(initial: Record<string, unknown> = {}) {
   const store = new Map<string, unknown>(Object.entries(initial));
   return {
@@ -32,31 +30,31 @@ function makeTarget(initial: Record<string, unknown> = {}) {
 describe("speaker projection table", () => {
   it("sets baseline constants (sourceMode, RdRef) unconditionally", () => {
     const t = makeTarget();
-    projectSpeakerFields(t, BASELINE, undefined, 1, []);
+    projectSpeakerFields(projection, t, BASELINE, undefined, 1, []);
     expect(t.store.get("sourceMode")).toBe(1);
     expect(t.store.get("RdRef")).toBe(0.65);
   });
 
   it("Rd falls back to baseline when no override, uses override when present", () => {
     const noOverride = makeTarget();
-    projectSpeakerFields(noOverride, BASELINE, undefined, 1, []);
+    projectSpeakerFields(projection, noOverride, BASELINE, undefined, 1, []);
     expect(noOverride.store.get("Rd")).toBe(0.7);
 
     const withOverride = makeTarget();
-    projectSpeakerFields(withOverride, BASELINE, { rd: 2.0 }, 1, []);
+    projectSpeakerFields(projection, withOverride, BASELINE, { rd: 2.0 }, 1, []);
     expect(withOverride.store.get("Rd")).toBe(2.0);
   });
 
   it("OQ/flutter/jitter are set only when the override is defined", () => {
     const bare = makeTarget();
-    projectSpeakerFields(bare, BASELINE, undefined, 1, []);
+    projectSpeakerFields(projection, bare, BASELINE, undefined, 1, []);
     expect(bare.store.has("OQ")).toBe(false);
     expect(bare.store.has("flutter")).toBe(false);
     expect(bare.store.has("jitter")).toBe(false);
 
     const overrides: VoiceQualityOverrides = { oq: 0, flutter: 50, jitter: 5 };
     const set = makeTarget();
-    projectSpeakerFields(set, BASELINE, overrides, 1, []);
+    projectSpeakerFields(projection, set, BASELINE, overrides, 1, []);
     expect(set.store.get("OQ")).toBe(0);
     expect(set.store.get("flutter")).toBe(50);
     expect(set.store.get("jitter")).toBe(5);
@@ -64,35 +62,35 @@ describe("speaker projection table", () => {
 
   it("TL uses override.tl when set, else current + tilt offset, and is skipped when current is non-numeric", () => {
     const fromCurrent = makeTarget({ TL: 10 });
-    projectSpeakerFields(fromCurrent, BASELINE, undefined, 1, []);
+    projectSpeakerFields(projection, fromCurrent, BASELINE, undefined, 1, []);
     expect(fromCurrent.store.get("TL")).toBe(13); // 10 + 3
 
     const fromOverride = makeTarget({ TL: 10 });
-    projectSpeakerFields(fromOverride, BASELINE, { tl: 22 }, 1, []);
+    projectSpeakerFields(projection, fromOverride, BASELINE, { tl: 22 }, 1, []);
     expect(fromOverride.store.get("TL")).toBe(22);
 
     const noCurrent = makeTarget();
-    projectSpeakerFields(noCurrent, BASELINE, { tl: 22 }, 1, []);
+    projectSpeakerFields(projection, noCurrent, BASELINE, { tl: 22 }, 1, []);
     expect(noCurrent.store.has("TL")).toBe(false);
   });
 
   it("AH is set only when current AH is numeric AND ah_offset_db is defined", () => {
     const applied = makeTarget({ AH: 40 });
-    projectSpeakerFields(applied, BASELINE, { ah_offset_db: 20 }, 1, []);
+    projectSpeakerFields(projection, applied, BASELINE, { ah_offset_db: 20 }, 1, []);
     expect(applied.store.get("AH")).toBe(60);
 
     const noOffset = makeTarget({ AH: 40 });
-    projectSpeakerFields(noOffset, BASELINE, undefined, 1, []);
+    projectSpeakerFields(projection, noOffset, BASELINE, undefined, 1, []);
     expect(noOffset.store.get("AH")).toBe(40); // untouched
 
     const noCurrent = makeTarget();
-    projectSpeakerFields(noCurrent, BASELINE, { ah_offset_db: 20 }, 1, []);
+    projectSpeakerFields(projection, noCurrent, BASELINE, { ah_offset_db: 20 }, 1, []);
     expect(noCurrent.store.has("AH")).toBe(false);
   });
 
   it("scales declared formants only when scale != 1 and value > 0", () => {
     const t = makeTarget({ F1: 500, F2: 1500, F3: 0, F4: -1 });
-    projectSpeakerFields(t, BASELINE, undefined, 1.2, ["F1", "F2", "F3", "F4"]);
+    projectSpeakerFields(projection, t, BASELINE, undefined, 1.2, ["F1", "F2", "F3", "F4"]);
     expect(t.store.get("F1")).toBeCloseTo(600, 6);
     expect(t.store.get("F2")).toBeCloseTo(1800, 6);
     expect(t.store.get("F3")).toBe(0); // value not > 0, untouched
@@ -101,13 +99,13 @@ describe("speaker projection table", () => {
 
   it("does not scale formants when scale == 1", () => {
     const t = makeTarget({ F1: 500 });
-    projectSpeakerFields(t, BASELINE, undefined, 1, ["F1"]);
+    projectSpeakerFields(projection, t, BASELINE, undefined, 1, ["F1"]);
     expect(t.store.get("F1")).toBe(500);
   });
 
   it("scales sparse declared keys beyond F10 and leaves undeclared targets alone", () => {
     const t = makeTarget({ F1: 500, F11: 11000, F12: "missing", F20: 20000 });
-    projectSpeakerFields(t, BASELINE, undefined, 1.2, ["F11", "F12", "F99"]);
+    projectSpeakerFields(projection, t, BASELINE, undefined, 1.2, ["F11", "F12", "F99"]);
     expect(t.store.get("F11")).toBeCloseTo(13200, 6);
     expect(t.store.get("F1")).toBe(500);
     expect(t.store.get("F20")).toBe(20000);
@@ -117,13 +115,13 @@ describe("speaker projection table", () => {
 
   it("leaves formants alone when no keys are declared", () => {
     const t = makeTarget({ F1: 500, F11: 11000 });
-    projectSpeakerFields(t, BASELINE, undefined, 1.2, []);
+    projectSpeakerFields(projection, t, BASELINE, undefined, 1.2, []);
     expect(t.store.get("F1")).toBe(500);
     expect(t.store.get("F11")).toBe(11000);
   });
 
   it("preserves the original row order followed by optional Klatt 1990 cues", () => {
-    expect(SPEAKER_PROJECTION_TABLE.map((row) => row.field)).toEqual([
+    expect(projection.map((row) => row.target_param)).toEqual([
       "sourceMode",
       "Rd",
       "RdRef",

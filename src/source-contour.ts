@@ -1,11 +1,13 @@
 import type { ResolvedSpeakerProfile } from "./speaker-profile";
-import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
+import type { SpeakerProjectionBaseline, SpeakerProjectionRow } from "./speaker-projection";
+import { isPlainObject, loadYamlDocument, loadYamlDocumentSync } from "./yaml-loader";
 
 export const DEFAULT_SOURCE_CONTOUR_PATH = "/rules/policy/source-contour.yaml";
 
 export type SourceContourVoiceQuality = string;
 
 export interface VoiceQualityOverrides {
+  [field: string]: number | undefined;
   rd?: number;
   oq?: number;
   tl?: number;
@@ -20,7 +22,8 @@ export interface VoiceQualityOverrides {
   db1?: number;
 }
 
-export interface SourceContourPreset extends VoiceQualityOverrides {
+export interface SourceContourPreset {
+  [field: string]: number | string[];
   rd: number;
   oq: number;
   tl: number;
@@ -32,6 +35,7 @@ export interface SourceContourPreset extends VoiceQualityOverrides {
 }
 
 export interface SourceContourSpec {
+  projection: readonly SpeakerProjectionRow[];
   version: string;
   citations: string[];
   baseline: {
@@ -50,6 +54,7 @@ export interface ResolveSourceContourOptions {
 }
 
 export interface ResolvedSourceContour {
+  projection: readonly SpeakerProjectionRow[];
   baseline: {
     source_mode: number;
     rd: number;
@@ -99,11 +104,79 @@ function parsePreset(value: unknown, label: string): SourceContourPreset {
     f0_scale: expectFiniteNumber(value.f0_scale, `${label}.f0_scale`),
     citations: expectStringArray(value.citations ?? [], `${label}.citations`),
     ...Object.fromEntries(
-      ["ftp", "ftz", "btp", "btz", "df1", "db1"]
-        .filter((key) => value[key] !== undefined)
-        .map((key) => [key, expectFiniteNumber(value[key], `${label}.${key}`)]),
+      Object.entries(value)
+        .filter(([key]) => key !== "citations")
+        .map(([key, entry]) => [key, expectFiniteNumber(entry, `${label}.${key}`)]),
     ),
   };
+}
+
+function baselineField(value: unknown, label: string): keyof SpeakerProjectionBaseline {
+  switch (value) {
+    case "source_mode":
+    case "rd":
+    case "rd_ref":
+    case "spectral_tilt_offset_db":
+      return value;
+    default:
+      throw new Error(
+        `E_SOURCE_CONTOUR_SCHEMA: '${label}' unknown baseline field '${String(value)}'`,
+      );
+  }
+}
+
+function parseProjection(
+  value: unknown,
+  presets: Record<string, SourceContourPreset>,
+): SpeakerProjectionRow[] {
+  if (!Array.isArray(value)) {
+    throw new Error("E_SOURCE_CONTOUR_SCHEMA: 'projection' must be an array");
+  }
+  const orders = new Set<number>();
+  const rows = value.map((entry, index): SpeakerProjectionRow => {
+    const label = `projection[${index}]`;
+    if (!isPlainObject(entry))
+      throw new Error(`E_SOURCE_CONTOUR_SCHEMA: '${label}' must be an object`);
+    const target_param = expectNonEmptyString(entry.target_param, `${label}.target_param`);
+    const order = expectFiniteNumber(entry.order, `${label}.order`);
+    if (orders.has(order))
+      throw new Error(`E_SOURCE_CONTOUR_SCHEMA: '${label}.order' must be unique`);
+    orders.add(order);
+    const common = { target_param, order };
+    const op = entry.op;
+    if (op === "baseline_const") {
+      return { ...common, op, field: baselineField(entry.field, `${label}.field`) };
+    }
+    if (
+      op !== "override_or_baseline" &&
+      op !== "override_if_set" &&
+      op !== "override_or_current_plus_baseline" &&
+      op !== "current_plus_override_if_set"
+    ) {
+      throw new Error(`E_SOURCE_CONTOUR_SCHEMA: '${label}.op' unknown op '${String(op)}'`);
+    }
+    const field = expectNonEmptyString(entry.field, `${label}.field`);
+    if (
+      field === "f0_scale" ||
+      !Object.values(presets).some(
+        (preset) => Object.hasOwn(preset, field) && typeof preset[field] === "number",
+      )
+    ) {
+      throw new Error(
+        `E_SOURCE_CONTOUR_SCHEMA: '${label}.field' unknown override field '${field}'`,
+      );
+    }
+    if (op === "override_or_baseline" || op === "override_or_current_plus_baseline") {
+      return {
+        ...common,
+        op,
+        field,
+        baseline_field: baselineField(entry.baseline_field, `${label}.baseline_field`),
+      };
+    }
+    return { ...common, op, field };
+  });
+  return rows.sort((a, b) => a.order - b.order);
 }
 
 function parseSourceContourDocument(value: unknown): SourceContourSpec {
@@ -137,6 +210,7 @@ function parseSourceContourDocument(value: unknown): SourceContourSpec {
     );
   }
   return {
+    projection: parseProjection(value.projection, voiceQualityPresets),
     version: expectNonEmptyString(value.version, "version"),
     citations: expectStringArray(value.citations ?? [], "citations"),
     baseline: {
@@ -146,6 +220,13 @@ function parseSourceContourDocument(value: unknown): SourceContourSpec {
     default_voice_quality: defaultVoiceQuality,
     voice_quality_presets: voiceQualityPresets,
   };
+}
+
+/** Load asynchronously when pairing a frontend with a browser experiment. */
+export async function loadSourceContour(
+  specPath: string = DEFAULT_SOURCE_CONTOUR_PATH,
+): Promise<SourceContourSpec> {
+  return parseSourceContourDocument(await loadYamlDocument(specPath));
 }
 
 export function loadSourceContourSync(
@@ -176,6 +257,7 @@ export function resolveSourceContour(options: ResolveSourceContourOptions): Reso
   };
 
   const result: ResolvedSourceContour = {
+    projection: spec.projection,
     baseline,
     effectiveBaseF0Hz:
       preset.f0_scale !== 1.0 ? Math.round(options.baseF0Hz * preset.f0_scale) : options.baseF0Hz,
@@ -186,20 +268,12 @@ export function resolveSourceContour(options: ResolveSourceContourOptions): Reso
       ...spec.baseline.citations,
       ...preset.citations,
     ].filter((value, index, all) => all.indexOf(value) === index),
-    voiceQualityOverrides: {
-      rd: preset.rd,
-      oq: preset.oq,
-      tl: preset.tl,
-      ah_offset_db: preset.ah_offset_db,
-      flutter: preset.flutter,
-      jitter: preset.jitter,
-      ftp: preset.ftp,
-      ftz: preset.ftz,
-      btp: preset.btp,
-      btz: preset.btz,
-      df1: preset.df1,
-      db1: preset.db1,
-    },
+    voiceQualityOverrides: Object.fromEntries(
+      Object.entries(preset).filter(
+        (entry): entry is [string, number] =>
+          entry[0] !== "f0_scale" && typeof entry[1] === "number",
+      ),
+    ),
   };
 
   return result;

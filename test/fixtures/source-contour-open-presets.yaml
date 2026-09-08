@@ -1,4 +1,16 @@
 version: v1
+
+# Projection order preserves the original speaker/source operations.
+# Sources: Fant 1997 Table 1; Gobl 2003; Klatt & Klatt 1990; Burkhardt 2009.
+projection:
+  - {field: source_mode, target_param: sourceMode, op: baseline_const, order: 1}
+  - {field: rd, target_param: Rd, op: override_or_baseline, baseline_field: rd, order: 2}
+  - {field: rd_ref, target_param: RdRef, op: baseline_const, order: 3}
+  - {field: oq, target_param: OQ, op: override_if_set, order: 4}
+  - {field: tl, target_param: TL, op: override_or_current_plus_baseline, baseline_field: spectral_tilt_offset_db, order: 5}
+  - {field: ah_offset_db, target_param: AH, op: current_plus_override_if_set, order: 6}
+  - {field: flutter, target_param: flutter, op: override_if_set, order: 7}
+  - {field: jitter, target_param: jitter, op: override_if_set, order: 8}
 citations:
   - Test fixture
 

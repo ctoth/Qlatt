@@ -433,10 +433,20 @@ mod tests {
     #[test]
     fn applies_fujisaki_compensation_on_downward_shift() {
         let mut r = PitchSyncResonator::new(11025.0);
-        let _ = r.process(1.0, 100.0, 50.0, 500.0, 80.0, 0.0, 0.0, 0.0, 2.0);
-        let y1_before = r.y1;
-        let _ = r.process(1.0, 100.0, 50.0, 300.0, 80.0, 0.0, 0.0, 0.0, 2.0);
-        assert!(r.y1.abs() <= y1_before.abs() + 1e-6);
+        r.set_r1(500, 80);
+        r.y1 = 1.0;
+        r.y2 = -0.5;
+
+        // klsyn88 parwv.c setR1 scales both history samples by new F1 / old F1.
+        // Inspect the coefficient update before process adds another input sample.
+        r.set_r1(300, 80);
+        assert_eq!(r.y1, 300.0 / 500.0);
+        assert_eq!(r.y2, -0.5 * (300.0 / 500.0));
+
+        // An upward shift must preserve the history.
+        r.set_r1(500, 80);
+        assert_eq!(r.y1, 300.0 / 500.0);
+        assert_eq!(r.y2, -0.5 * (300.0 / 500.0));
     }
 
     #[test]

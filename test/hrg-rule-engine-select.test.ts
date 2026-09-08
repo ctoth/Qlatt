@@ -197,5 +197,13 @@ describe("graph-native rule engine select/scalar execution", () => {
     });
 
     expect(stop.get("duration")).toBe(50);
+    expect(utterance.diagnostics.getEntries()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "W_DURATION_FLOOR_FALLBACK",
+          data: expect.objectContaining({ floor: 40 }),
+        }),
+      ]),
+    );
   });
 });

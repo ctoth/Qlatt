@@ -91,6 +91,7 @@ function normalizePhonemeTargets(node: unknown): Record<string, Record<string, u
     if (!isPlainObject(target)) {
       throw new Error(`E_INVENTORY_SCHEMA: phoneme_targets.${phoneme} must be an object`);
     }
+    if (Object.hasOwn(target, "duration_model")) validateDurationModel(target.duration_model);
     output[phoneme] = cloneValue(target) as Record<string, unknown>;
   }
 
@@ -99,6 +100,73 @@ function normalizePhonemeTargets(node: unknown): Record<string, Record<string, u
   }
 
   return output;
+}
+
+function validateDurationModel(model: unknown): void {
+  if (
+    !isPlainObject(model) ||
+    typeof model.minimum_ms !== "number" ||
+    !Number.isFinite(model.minimum_ms) ||
+    model.minimum_ms < 0 ||
+    typeof model.inherent_ms !== "number" ||
+    !Number.isFinite(model.inherent_ms) ||
+    model.inherent_ms <= 0 ||
+    model.minimum_ms > model.inherent_ms ||
+    typeof model.unstressed_scale !== "number" ||
+    !Number.isFinite(model.unstressed_scale) ||
+    model.unstressed_scale < 0 ||
+    model.unstressed_scale > 1 ||
+    typeof model.source !== "string" ||
+    !model.source.trim() ||
+    !Array.isArray(model.citations) ||
+    model.citations.length === 0 ||
+    model.citations.some((c) => typeof c !== "string" || !c.trim())
+  ) {
+    throw new Error(
+      "E_INVENTORY_DURATION: duration_model requires 0 <= minimum_ms <= inherent_ms, positive inherent_ms, unstressed_scale in [0,1], source and citations",
+    );
+  }
+}
+
+// Expand explicitly mapped source rows onto targets once at inventory loading.
+// No phone-name heuristics: aliases/stress fallback then select ordinary targets.
+function applyDurationModels(raw: unknown, targets: Record<string, Record<string, unknown>>): void {
+  if (raw === undefined) return;
+  if (!isPlainObject(raw) || !isPlainObject(raw.rows) || !Array.isArray(raw.citations)) {
+    throw new Error("E_INVENTORY_DURATION: duration_models requires rows and citations");
+  }
+  const assigned = new Set<string>();
+  for (const [source, row] of Object.entries(raw.rows)) {
+    if (!isPlainObject(row) || !Array.isArray(row.targets) || row.targets.length === 0) {
+      throw new Error(`E_INVENTORY_DURATION: row ${source} requires targets`);
+    }
+    if (Object.hasOwn(row, "citations") && !Array.isArray(row.citations)) {
+      throw new Error(`E_INVENTORY_DURATION: row ${source} citations must be an array`);
+    }
+    const model = {
+      source,
+      minimum_ms: row.minimum_ms,
+      inherent_ms: row.inherent_ms,
+      unstressed_scale: raw.unstressed_scale,
+      citations: [...raw.citations, ...(Array.isArray(row.citations) ? row.citations : [])],
+    };
+    validateDurationModel(model);
+    for (const name of row.targets) {
+      if (
+        typeof name !== "string" ||
+        !Object.hasOwn(targets, name) ||
+        assigned.has(name) ||
+        Object.hasOwn(targets[name], "duration_model")
+      ) {
+        throw new Error(`E_INVENTORY_DURATION: unknown or duplicate target ${String(name)}`);
+      }
+      assigned.add(name);
+      targets[name].duration_model = cloneValue(model);
+    }
+  }
+  for (const name of Object.keys(targets)) {
+    if (!assigned.has(name)) throw new Error(`E_INVENTORY_DURATION: no duration model for ${name}`);
+  }
 }
 
 function normalizeNormalizationAliases(
@@ -147,6 +215,7 @@ function parseInventorySpec(source: string): InventorySpec {
   }
 
   const phonemeTargets = normalizePhonemeTargets(raw.phoneme_targets);
+  applyDurationModels(raw.duration_models, phonemeTargets);
   return {
     base_params: normalizeBaseParams(raw.base_params),
     normalization_aliases: normalizeNormalizationAliases(raw.normalization_aliases, phonemeTargets),
@@ -343,6 +412,7 @@ export function materializePhonemeTarget(
   }
 
   const targetDuration = typeof target.dur === "number" ? target.dur : undefined;
+  if (Object.hasOwn(target, "duration_model")) validateDurationModel(target.duration_model);
 
   // Use the effective base params for filling defaults.
   const affected: InventoryParameterFallback[] = [];

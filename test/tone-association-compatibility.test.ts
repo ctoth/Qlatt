@@ -6,6 +6,8 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // association. These are compatibility controls, not acoustic quality claims.
 // Issue 52's nasal vocabulary/target update was field-reviewed against master;
 // see docs/nasal-side-branch.md and scripts/review-nasal-track-snapshots.mjs.
+// #61 regenerates only qlatt-english snapshots for per-phone duration floors;
+// the exact base 1af37573 passes the old snapshots. See docs/per-phone-duration-floors.md.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

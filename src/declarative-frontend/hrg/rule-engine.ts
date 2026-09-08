@@ -862,6 +862,8 @@ function updateNestedValue(
   transaction.set(item, root, update(existing, 0), tag);
 }
 
+type ScalarObservation = { code: string; message: string; data: Record<string, unknown> };
+
 function applyEffects(
   transaction: HrgTransaction,
   resolveTarget: (name: string) => Item | undefined,
@@ -871,6 +873,7 @@ function applyEffects(
   predicates: Readonly<Record<string, unknown>>,
   relationSpec: unknown,
   params: Readonly<Record<string, unknown>>,
+  observations: ScalarObservation[],
 ): void {
   if (!Array.isArray(effects)) return;
   for (const effect of effects) {
@@ -933,6 +936,19 @@ function applyEffects(
           );
         }
         floor = inherent * ratio;
+        observations.push({
+          code: "W_DURATION_FLOOR_FALLBACK",
+          message:
+            "Klatt duration used the class-ratio fallback because no per-phone floor was established",
+          data: {
+            item: item.id,
+            rule: transaction.metadata.ruleId,
+            ratioKey,
+            ratio,
+            inherent,
+            floor,
+          },
+        });
       }
       if (!Number.isFinite(floor)) {
         floor =
@@ -974,6 +990,21 @@ function applyEffects(
       }
       if (typeof maximum === "number" && Number.isFinite(maximum)) {
         numericResolved = Math.min(numericResolved, maximum);
+      }
+      if (root === "duration" && numericResolved !== resolved) {
+        observations.push({
+          code: "W_DURATION_CLAMP",
+          message: "Duration clamped to scalar bounds",
+          data: {
+            item: item.id,
+            rule: transaction.metadata.ruleId,
+            before: resolved,
+            after: numericResolved,
+            floor,
+            minimum,
+            maximum,
+          },
+        });
       }
       resolved = roundValue(numericResolved);
     }
@@ -1521,6 +1552,7 @@ function executeMatch(
     return;
   }
   try {
+    const observations: ScalarObservation[] = [];
     applyEffects(
       match.transaction,
       resolveTarget,
@@ -1530,6 +1562,7 @@ function executeMatch(
       predicates,
       relationSpec,
       params,
+      observations,
     );
     if (isPlainObject(rule.contour)) {
       applyEffects(
@@ -1541,6 +1574,7 @@ function executeMatch(
         predicates,
         relationSpec,
         params,
+        observations,
       );
     }
     applyAssociations(match.transaction, rule.associate, true, resolveTarget);
@@ -1562,6 +1596,10 @@ function executeMatch(
       }
     }
     const transaction = match.transaction.commit();
+    // Rejected atomic rule attempts must not report clamps that never committed.
+    for (const observation of observations) {
+      utterance.diagnostics.warn(observation.message, observation.data, observation.code);
+    }
     if (captureTooling)
       utterance._recordRuleAttempt({
         status: "fired",

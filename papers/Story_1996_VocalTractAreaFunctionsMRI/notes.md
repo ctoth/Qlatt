@@ -9,13 +9,13 @@ year: 1996
 
 ### Overview
 
-MRI-derived vocal tract area functions for 18 phoneme configurations (12 vowels, 3 nasals, 3 plosives) from one male subject (BS). Cross-sectional areas measured perpendicular to the airway centerline, from glottis to lips. This is the most comprehensive speaker-specific area function dataset available for a single subject.
+MRI-derived vocal tract area functions for 18 phoneme configurations (11 vowels, the lateral /l/, 3 nasals, 3 plosives) from one male subject (BS). Cross-sectional areas measured perpendicular to the airway centerline, from glottis to lips. This is a comprehensive speaker-specific area function dataset for a single subject.
 
 ### Key Data: Table III — Equal-Interval Area Functions
 
 Area functions discretized at 0.396825 cm intervals. Section 1 = glottal end, last section = mouth termination. "n.c." row = nasal coupling area (zero for all except nasals).
 
-**Vowels (cm^2 at each section):**
+**Vowels and lateral /l/ (cm^2 at each section):**
 
 | Sect | /i/ | /I/ | /E/ | /ae/ | /V/ | /a/ | /O/ | /o/ | /U/ | /u/ | /3r/ | /l/ |
 |------|-----|-----|-----|------|-----|-----|-----|-----|-----|-----|------|-----|
@@ -46,7 +46,7 @@ Area functions discretized at 0.396825 cm intervals. Section 1 = glottal end, la
 | 25 | 1.38 | 1.99 | 1.78 | 3.26 | 1.89 | 2.56 | 2.02 | 0.71 | 1.07 | 2.07 | 3.07 | 2.44 |
 | 26 | 1.05 | 1.90 | 1.81 | 3.29 | 2.17 | 2.78 | 2.50 | 0.46 | 1.39 | 1.52 | 3.11 | 2.54 |
 | 27 | 0.60 | 1.70 | 1.79 | 3.19 | 2.46 | 2.86 | 2.41 | 0.39 | 1.47 | 0.74 | 2.77 | 2.64 |
-| 28 | 0.35 | 1.44 | 1.50 | 3.23 | 2.65 | 3.02 | 2.62 | 0.32 | 0.79 | 0.23 | 2.67 | 2.67 |
+| 28 | 0.35 | 1.44 | 1.50 | 3.23 | 2.65 | 3.02 | 2.62 | 0.32 | 1.79 | 0.23 | 2.67 | 2.67 |
 | 29 | 0.32 | 1.45 | 1.37 | 3.23 | 3.13 | 3.75 | 3.29 | 0.57 | 2.34 | 0.15 | 2.47 | 3.16 |
 | 30 | 0.12 | 1.06 | 1.36 | 3.40 | 3.81 | 4.60 | 4.34 | 1.06 | 2.68 | 0.22 | 2.34 | 3.68 |
 | 31 | 0.10 | 0.87 | 1.43 | 3.78 | 4.30 | 5.09 | 4.78 | 1.38 | 3.36 | 0.22 | 2.25 | 4.30 |
@@ -63,8 +63,14 @@ Area functions discretized at 0.396825 cm intervals. Section 1 = glottal end, la
 | 42 | 1.58 | 1.18 | | 3.94 | 2.11 | 4.27 | 1.33 | 0.68 | 0.64 | 2.39 | 3.07 | 0.90 |
 | 43 | | | | | 1.98 | 4.69 | 1.19 | 0.39 | 0.15 | 1.10 | 2.25 | 3.92 |
 | 44 | | | | | 1.17 | 5.03 | 0.88 | 0.14 | 0.22 | 0.77 | 1.20 | 4.99 |
+| 45 | | | | | | | | | | 0.41 | | 4.57 |
+| 46 | | | | | | | | | | 0.86 | | 3.70 |
 | n.c. | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
 | VT len | 16.67 | 16.67 | 15.88 | 16.67 | 17.46 | 17.46 | 17.46 | 17.46 | 17.46 | 18.25 | 17.46 | 18.25 |
+
+Checked against the original Table III (p. 547): /u/ and /l/ have 46 sections,
+not 44; /U/ section 28 is 1.79 cm^2. Blank cells mark the end of a tract and
+must not be zero-padded. /l/ is the lateral configuration, not a twelfth vowel.
 
 **Nasals and plosives (cm^2):**
 
@@ -104,12 +110,12 @@ Area functions discretized at 0.396825 cm intervals. Section 1 = glottal end, la
 | 32 | 2.84 | 0.15 | 0.00 | 1.51 | 1.64 | 0.03 |
 | 33 | 3.51 | 0.22 | 0.00 | 1.76 | 1.39 | 0.48 |
 | 34 | 4.25 | 0.21 | 0.00 | 1.93 | 1.26 | 1.27 |
-| 35 | 4.79 | 0.00 | 0.00 | 1.98 | 0.87 | 2.28 |
-| 36 | 4.61 | 0.00 | 0.00 | 2.21 | 0.60 | 2.35 |
-| 37 | 4.07 | 0.00 | 0.00 | 2.35 | 0.10 | 2.40 |
-| 38 | 3.64 | 0.00 | 0.00 | 2.45 | 0.00 | 2.41 |
-| 39 | 2.84 | 0.00 | 0.00 | 2.37 | 0.00 | 4.21 |
-| 40 | 1.42 | 0.00 | 0.00 | 2.47 | 0.13 | 3.37 |
+| 35 | 4.79 | 0.00 | 2.18 | 1.98 | 0.87 | 2.28 |
+| 36 | 4.61 | 0.00 | 4.72 | 2.21 | 0.60 | 2.35 |
+| 37 | 4.07 | 0.00 | 6.86 | 2.35 | 0.10 | 2.40 |
+| 38 | 3.64 | 0.00 | 8.58 | 2.45 | 0.00 | 2.41 |
+| 39 | 2.84 | 0.00 | 8.76 | 2.37 | 0.00 | 4.21 |
+| 40 | 1.42 | 0.00 | 7.21 | 2.47 | 0.13 | 3.37 |
 | 41 | 0.29 | 1.59 | 4.92 | 1.75 | 0.18 | 2.46 |
 | 42 | 0.00 | 1.60 | 3.21 | 1.09 | 1.48 | 2.46 |
 | 43 | 0.00 | 1.69 | 2.17 | 0.70 | 1.60 | 2.14 |
@@ -119,8 +125,8 @@ Area functions discretized at 0.396825 cm intervals. Section 1 = glottal end, la
 
 ### Table IV — First Three Formants: Natural vs Simulated (Hz)
 
-| | i | I | E | ae | V | a | O | o | u | 3r | l |
-|---|---|---|---|---|---|---|---|---|---|---|---|
+| | i | I | E | ae | V | a | O | o | U | u | 3r | l |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | F1_N | 333 | 518 | 624 | 692 | 707 | 754 | 654 | 540 | 541 | 389 | 500 | 348 |
 | F2_N | 2332 | 2004 | 1853 | 1873 | 1161 | 1195 | 944 | 922 | 1045 | 987 | 1357 | 1250 |
 | F3_N | 2986 | 2605 | 2475 | 2463 | 2591 | 2685 | 2739 | 2584 | 2568 | 2299 | 2124 | 2785 |
@@ -132,7 +138,7 @@ Percentage errors (Delta) range from 0.2% to 43.6%, with most below 10%.
 
 ### Vocal Tract Lengths
 
-- Range: 15.88 cm (/E/) to 18.25 cm (/U/, /l/)
+- Range: 15.88 cm (/E/) to 18.25 cm (/u/, /l/); /U/ is 17.46 cm.
 - Most vowels: 16.67-17.46 cm
 - Subject BS: 29-year-old male, 5 ft 7 in, 145 lbs, head circumference 57 cm, neck 34 cm
 
@@ -144,7 +150,7 @@ Percentage errors (Delta) range from 0.2% to 43.6%, with most below 10%.
 
 ### Key Observations for Synthesis
 
-1. **Front vowels** (/i/, /I/, /E/, /ae/): Large front cavity, small back cavity. /i/ has peak area ~4.7 cm^2 in oral region, drops to ~0.2 cm^2 near lips.
+1. **Front vowels** (/i/, /I/, /E/, /ae/): For /i/, the large cavity is behind the oral constriction. Its peak area is ~4.7 cm^2 at section 17; the constriction reaches 0.10 cm^2 at section 31.
 
 2. **Back vowels** (/V/, /a/, /O/): Constricted pharyngeal region, widened oral cavity. /a/ achieves largest mouth opening (~6.5 cm^2).
 
@@ -152,7 +158,7 @@ Percentage errors (Delta) range from 0.2% to 43.6%, with most below 10%.
 
 4. **Piriform sinuses**: Widening at 2-3 cm above glottis for all vowels, merging with main tract at ~4-5 cm. Consistent across all vowels.
 
-5. **Constriction locations**: /i/ oral, /a/ pharyngeal, /u/ palatal. /3r/ (schwa) has smallest areas near glottis (~0.1 cm^2 at 2 cm).
+5. **Constriction locations**: /i/ oral, /a/ pharyngeal, /u/ palatal. /3r/ (rhotic vowel) has smallest areas near glottis (~0.1 cm^2 at 2 cm).
 
 6. **Plosive occlusions**: /p/ at lips (area drops to 0 at sections 44), /t/ closer to section 37-38, /k/ at sections 25-28.
 

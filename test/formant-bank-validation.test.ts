@@ -66,6 +66,39 @@ function makeSemantics(): SemanticsDocument {
 }
 
 describe("formant-bank source schema", () => {
+  it("routes the cascade onward from an authored return node", () => {
+    const bank = structuredClone(validBank);
+    const graph = makeGraph({
+      main: {
+        ...bank,
+        formants: [
+          { ...bank.formants[0], cascadeOutput: "return" },
+          { ...bank.formants[0], index: 2, cascadeOutput: "lastReturn" },
+        ],
+      },
+    });
+    graph.nodes.return = { type: "gain" };
+    graph.nodes.lastReturn = { type: "gain" };
+    expandFormantBanks(graph, makeSemantics());
+    expect(graph.connections).toContainEqual(["input", "cascadeF1"]);
+    expect(graph.connections).toContainEqual(["return", "cascadeF2"]);
+    expect(graph.connections).toContainEqual(["lastReturn", "cascadeOutput"]);
+    expect(graph.connections).not.toContainEqual(["cascadeF1", "cascadeF2"]);
+    expect(graph.connections).toContainEqual(["parallelF1Gain", "parallelOutput"]);
+  });
+
+  it("rejects an undeclared cascade return node before expansion", () => {
+    const graph = makeGraph({
+      main: {
+        ...validBank,
+        formants: [{ ...validBank.formants[0], cascadeOutput: "missing" }],
+      },
+    });
+    const original = structuredClone(graph);
+    expect(() => expandFormantBanks(graph, makeSemantics())).toThrow(/missing/);
+    expect(graph).toEqual(original);
+  });
+
   it("parses a strict, complete bank declaration", () => {
     const banks = parseFormantBanks({ main: validBank });
 

@@ -33,7 +33,15 @@ voice_quality_presets:
   breathy:
     rd: 2.0
     oq: 0
-    tl: 0
+    tl: 24  # Klatt & Klatt 1990 speaker LK breathy setting
+    # Table VII female second tracheal resonance medians; Table XII bandwidths.
+    ftp: 1650
+    ftz: 1800
+    btp: 180
+    btz: 180
+    # Engineering estimates within Table XII ranges: moderate open-phase changes.
+    df1: 50
+    db1: 200
     ah_offset_db: 20
     flutter: 0
     jitter: 0
@@ -42,6 +50,7 @@ voice_quality_presets:
       - Fant 1997 Table 1
       - Gobl 2003
       - Klatt & Klatt 1990
+      - Klatt & Klatt 1990 Table VII and Table XII
   pressed:
     rd: 0.5
     oq: 0

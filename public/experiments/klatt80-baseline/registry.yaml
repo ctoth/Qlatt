@@ -11,6 +11,30 @@
 bacon: "0.1"
 
 primitives:
+  # Klatt & Klatt 1990 / klsyn88 parwv.c: source tilt and open-phase F1/B1.
+  tilt-filter:
+    description: "klsyn88 one-pole source tilt (legacy table saturates at 34 dB)"
+    worklet: "tilt-filter-processor.js"
+    wasm: "tilt-filter.wasm"
+    params:
+      tilt: { type: float, unit: dB, default: 0 }
+    inputs: 1
+    outputs: 1
+  pitch-sync-mod:
+    description: "Klatt 1990 pitch-synchronous cascade F1/B1 resonator"
+    worklet: "pitch-sync-mod-processor.js"
+    wasm: "pitch-sync-mod.wasm"
+    params:
+      f0: { type: float, unit: Hz, default: 120 }
+      openQuotient: { type: float, unit: "%", default: 50 }
+      f1: { type: float, unit: Hz, default: 500 }
+      b1: { type: float, unit: Hz, default: 60 }
+      dF1: { type: float, unit: Hz, default: 0 }
+      dB1: { type: float, unit: Hz, default: 0 }
+      skew: { type: float, default: 0 }
+      source: { type: float, default: 2 }
+    inputs: 1
+    outputs: 1
   # ===========================================================================
   # WebAudio Native Nodes
   # ===========================================================================

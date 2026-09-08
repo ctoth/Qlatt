@@ -19,7 +19,20 @@ try {
       "sip sip.",
     ]) {
       const { track } = textToKlattTrackDetailed(phrase, 110, 30, { frontendId });
-      rows.push({ frontendId, phrase, track: track.map(({ provenance, ...frame }) => frame) });
+      rows.push({
+        frontendId,
+        phrase,
+        track: track.map(({ provenance, ...frame }) => {
+          // Match #56's compatibility projection; assert defaults before exclusion.
+          if (frontendId === "dectalk-english" || !("FTP" in frame.params)) return frame;
+          const { FTP, FTZ, BTP, BTZ, DF1, DB1, ...params } = frame.params;
+          assert.deepEqual(
+            { FTP, FTZ, BTP, BTZ, DF1, DB1 },
+            { FTP: 2150, FTZ: 2150, BTP: 180, BTZ: 180, DF1: 0, DB1: 0 },
+          );
+          return { ...frame, params };
+        }),
+      });
     }
   }
   if (mode === "--capture") {

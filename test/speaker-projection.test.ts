@@ -122,7 +122,7 @@ describe("speaker projection table", () => {
     expect(t.store.get("F11")).toBe(11000);
   });
 
-  it("table rows are ordered exactly as the original loop applied them", () => {
+  it("preserves the original row order followed by optional Klatt 1990 cues", () => {
     expect(SPEAKER_PROJECTION_TABLE.map((row) => row.field)).toEqual([
       "sourceMode",
       "Rd",
@@ -132,6 +132,12 @@ describe("speaker projection table", () => {
       "AH",
       "flutter",
       "jitter",
+      "FTP",
+      "FTZ",
+      "BTP",
+      "BTZ",
+      "DF1",
+      "DB1",
     ]);
   });
 });

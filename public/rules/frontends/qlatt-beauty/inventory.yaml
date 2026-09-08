@@ -11,6 +11,7 @@ secondary_stress_fallback:
   citations:
     - 'Qlatt #37 engineering estimate: reuse strong-vowel targets for secondary stress while preserving lexical prominence'
 citations:
+- Klatt & Klatt 1990 Table XII
 - Peterson & Barney 1952
 - Kent & Vorperian 2018
 - Hillenbrand et al. 1995
@@ -35,6 +36,13 @@ normalization_aliases:
   NX: SIL
   WH: SIL
 base_params:
+  # Klatt & Klatt 1990 Table XII: transparent tracheal pair, zero F1/B1 increments.
+  FTP: 2150
+  FTZ: 2150
+  BTP: 180
+  BTZ: 180
+  DF1: 0
+  DB1: 0
   F1: 500
   F2: 1500
   F3: 2500

@@ -1,0 +1,4 @@
+name: fixture voice
+oq_default: 0.6
+unrelated_param: 42
+citations: [fixture voice]

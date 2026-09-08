@@ -12,27 +12,12 @@ export interface SpeakerProfileFieldSpec {
 export interface SpeakerProfileSpec {
   version: string;
   citations: string[];
-  default_profile: {
-    base_f0_hz: SpeakerProfileFieldSpec;
-    formant_scale: SpeakerProfileFieldSpec;
-    rd_default: SpeakerProfileFieldSpec;
-    spectral_tilt_offset_db: SpeakerProfileFieldSpec;
-  };
+  default_profile: Record<string, SpeakerProfileFieldSpec>;
 }
 
-export interface ResolvedSpeakerProfile {
-  base_f0_hz: number;
-  formant_scale: number;
-  rd_default: number;
-  spectral_tilt_offset_db: number;
-}
+export type ResolvedSpeakerProfile = Record<string, number>;
 
-export interface SpeakerProfileOverride {
-  base_f0_hz?: number;
-  formant_scale?: number;
-  rd_default?: number;
-  spectral_tilt_offset_db?: number;
-}
+export type SpeakerProfileOverride = Partial<ResolvedSpeakerProfile>;
 
 export interface ResolveSpeakerProfileOptions {
   baseF0?: number;
@@ -88,15 +73,12 @@ function parseSpeakerProfileDocument(value: unknown): SpeakerProfileSpec {
   return {
     version: expectNonEmptyString(value.version, "version"),
     citations: expectStringArray(value.citations ?? [], "citations"),
-    default_profile: {
-      base_f0_hz: parseFieldSpec(defaultProfile.base_f0_hz, "default_profile.base_f0_hz"),
-      formant_scale: parseFieldSpec(defaultProfile.formant_scale, "default_profile.formant_scale"),
-      rd_default: parseFieldSpec(defaultProfile.rd_default, "default_profile.rd_default"),
-      spectral_tilt_offset_db: parseFieldSpec(
-        defaultProfile.spectral_tilt_offset_db,
-        "default_profile.spectral_tilt_offset_db",
-      ),
-    },
+    default_profile: Object.fromEntries(
+      Object.entries(defaultProfile).map(([name, field]) => [
+        name,
+        parseFieldSpec(field, `default_profile.${name}`),
+      ]),
+    ),
   };
 }
 
@@ -139,12 +121,9 @@ export function resolveSpeakerProfile(
     baseF0: options.baseF0,
   };
 
-  return {
-    base_f0_hz: resolveProfileField(defaults.base_f0_hz, sources),
-    formant_scale: resolveProfileField(defaults.formant_scale, sources),
-    rd_default: resolveProfileField(defaults.rd_default, sources),
-    spectral_tilt_offset_db: resolveProfileField(defaults.spectral_tilt_offset_db, sources),
-  };
+  return Object.fromEntries(
+    Object.entries(defaults).map(([name, field]) => [name, resolveProfileField(field, sources)]),
+  );
 }
 
 export function collectSpeakerProfileCitations(
@@ -154,9 +133,6 @@ export function collectSpeakerProfileCitations(
   return [
     specPath,
     ...spec.citations,
-    ...spec.default_profile.base_f0_hz.citations,
-    ...spec.default_profile.formant_scale.citations,
-    ...spec.default_profile.rd_default.citations,
-    ...spec.default_profile.spectral_tilt_offset_db.citations,
+    ...Object.values(spec.default_profile).flatMap((field) => field.citations),
   ].filter((value, index, all) => all.indexOf(value) === index);
 }

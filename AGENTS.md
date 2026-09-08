@@ -326,3 +326,5 @@ Before asserting an exact provenance substring that contains a formatted number,
 inspect the production formatter and use its actual precision in the expected
 text. Keep separate numeric assertions on the underlying value so presentation
 coverage cannot substitute for behavior coverage.
+
+When adding affect provenance records, preserve the input contract's direct local-affect-to-global-affect parent edge. Add the preset application record as another parent rather than replacing the existing parent; run test/input.test.ts to verify that direct-edge contract.

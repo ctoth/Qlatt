@@ -58,7 +58,7 @@ describe("applyAffectToTrack", () => {
   });
 
   it("anxious lengthens pauses without changing vowel durations", () => {
-    const params = (av: number): Record<string, number> => ({ F0: 150, AV: av });
+    const params = (av: number): Record<string, number> => ({ F0: 150, AV: av, Rd: 0.7 });
     const track: KlattFrame[] = [
       { time: 0, phoneme: "AH", word: "a", params: params(60) },
       { time: 0.2, phoneme: "SIL", word: "a", params: params(0) },

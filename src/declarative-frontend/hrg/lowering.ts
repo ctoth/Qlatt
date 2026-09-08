@@ -14,6 +14,7 @@
  */
 
 import { getF0FilterExports, RENDER_OK } from "../../f0-filters-loader";
+import { projectRd } from "../../input/rd-policy";
 import {
   VQ_FIELDS,
   VQ_MULTIPLICATIVE_FIELDS,
@@ -2051,28 +2052,17 @@ export function lowerToFrames(
           if (decision) provenance.F0 = decision;
         }
       }
-      if (affect.values.rdDelta !== 0 && typeof params.Rd === "number") {
-        const priorOffset = params.RdPhraseOffset ?? 0;
-        // Fant 1997 effective-Rd range.
-        const requestedEffective = params.Rd + priorOffset + affect.values.rdDelta;
-        const effective = Math.max(0.3, Math.min(2.7, requestedEffective));
-        params.RdPhraseOffset = effective - params.Rd;
+      if (affect.values.rdDelta !== 0) {
+        Object.assign(
+          params,
+          projectRd(params, affect.values.rdDelta, {
+            speakerParams: context.speakerParams,
+            diagnostics: utterance.diagnostics,
+            itemId: item.id,
+          }),
+        );
         const decision = affect.decisions.rdDelta;
         if (decision) provenance.RdPhraseOffset = decision;
-        if (effective !== requestedEffective) {
-          utterance.diagnostics.warn(
-            "Affect projection clamped effective Rd to the cited Fant range",
-            {
-              itemId: item.id,
-              key: "RdPhraseOffset",
-              requested: requestedEffective,
-              clamped: effective,
-              min: 0.3,
-              max: 2.7,
-            },
-            "HRG_LOWER_VALUE_CLAMPED",
-          );
-        }
       }
       // Project the pure {backendKey, affectField, mode, floor} affect rows via
       // the declarative table. 1 Hz formant and 20 Hz bandwidth floors are

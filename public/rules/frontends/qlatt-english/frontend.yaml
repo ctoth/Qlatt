@@ -165,10 +165,14 @@ parameters:
         value: 0.85
         citations:
           - Allen et al. 1987 Ch.9
-      vowel_shortening_voiceless_stop_multiplier:
-        value: 0.7
+      vowel_before_voiceless_mean_ms:
+        value: 146
         citations:
-          - Allen et al. 1987 Ch.9
+          - "Chen 1970 Table V p.138 (English vowel duration before voiceless consonants)"
+      vowel_before_voiced_mean_ms:
+        value: 238
+        citations:
+          - "Chen 1970 Table V p.138 (English vowel duration before voiced consonants)"
       # Break-index pre-boundary lengthening (replaces old punctuation-based proxy).
       # Citation: Wightman et al. 1992, Klatt 1976 §III.A, Crystal & House 1988
       # BI threshold values for categorization (ToBI break index tier is 0-4).

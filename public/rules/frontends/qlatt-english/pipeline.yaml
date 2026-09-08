@@ -404,6 +404,7 @@ relations:
       cluster_position: []
       control_windows: []
       inherentDuration: []
+      durationFloor: []
       initialBoundaryTone: []
       isAccentCarrier: []
       isAccented: []

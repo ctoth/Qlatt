@@ -43,6 +43,7 @@ export const nodeRuntimeBackend: RenderBackend = {
     return request.renderHost === "auto" || request.renderHost === "node";
   },
   async render(request: RenderRequest): Promise<RenderPayload> {
+    const config = await loadExperimentConfig(request.experimentId, request.frontendId);
     const diagnostics = createDiagnostics({ maxEntries: 1000 });
     const frontend = textToKlattTrackDetailed(
       request.phrase,
@@ -65,7 +66,6 @@ export const nodeRuntimeBackend: RenderBackend = {
     const length = Math.max(1, Math.ceil(totalTime * request.sampleRate));
 
     const ctx = new OfflineAudioContext(1, length, request.sampleRate);
-    const config = await loadExperimentConfig(request.experimentId);
     const assetLoader = await createNodeRuntimeAssetLoader(
       path.join(request.repoRoot, "public", "worklets"),
     );

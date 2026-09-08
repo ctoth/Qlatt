@@ -12,6 +12,7 @@ meta:
       cascade:
         input: np
         output: cascadeOutGain
+        countParam: NFC
       parallel:
         output: parallelSum
       formants:

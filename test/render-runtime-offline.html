@@ -29,6 +29,7 @@
         track,
         includeTrack = false,
       }) {
+        const config = await loadExperimentConfig(experimentId, Array.isArray(track) ? undefined : frontendId);
         // Layered-additive F0 frontends (e.g. dectalk-english) call a
         // synchronous WASM kernel; preload its bytes before the sync call.
         if (!Array.isArray(track)) {
@@ -47,7 +48,6 @@
         const length = Math.max(1, Math.ceil(totalTime * sampleRate));
 
         const ctx = new OfflineAudioContext(1, length, sampleRate);
-        const config = await loadExperimentConfig(experimentId);
         const runtime = await createKlattRuntime({
           audioContext: ctx,
           graph: config.graph,

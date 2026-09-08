@@ -1,3 +1,5 @@
+import type { BaconGraph } from "../../src/klatt-runtime";
+
 export interface HarnessDiagnosticsEngine {
   destroy(): void;
 }
@@ -10,4 +12,5 @@ export const state: {
   currentExperimentId: string | null;
   diagEngine: HarnessDiagnosticsEngine | null;
   newRuntime: HarnessRuntime | null;
+  newRuntimeGraph: BaconGraph | null;
 };

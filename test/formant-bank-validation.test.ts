@@ -176,6 +176,32 @@ describe("formant-bank expansion preflight", () => {
   });
 });
 
+describe("cascade count control", () => {
+  it("rejects an undeclared count parameter before changing either input", () => {
+    const graph = makeGraph({
+      main: { ...validBank, cascade: { ...validBank.cascade, countParam: "count" } },
+    });
+    const semantics = makeSemantics();
+    const before = structuredClone({ graph, semantics });
+    expect(() => expandFormantBanks(graph, semantics)).toThrow(/E_FORMANT_BANK_REFERENCE.*count/);
+    expect({ graph, semantics }).toEqual(before);
+  });
+
+  it("rejects a generated count-rule collision before mutation", () => {
+    const graph = makeGraph({
+      main: { ...validBank, cascade: { ...validBank.cascade, countParam: "count" } },
+    });
+    const semantics = makeSemantics();
+    semantics.params = { count: { type: "int", default: 1 } };
+    semantics.realize = { cascadeF1Frequency: "500" };
+    const before = structuredClone({ graph, semantics });
+    expect(() => expandFormantBanks(graph, semantics)).toThrow(
+      /E_FORMANT_BANK_COLLISION.*cascadeF1Frequency/,
+    );
+    expect({ graph, semantics }).toEqual(before);
+  });
+});
+
 describe("bundled formant-bank declarations", () => {
   for (const experimentId of ["klatt80-baseline", "dectalk-english", "stevens91", "qlatt-beauty"]) {
     it(`validates and expands ${experimentId}`, async () => {

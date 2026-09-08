@@ -122,7 +122,15 @@ const formantSchema = z
 
 const formantBankSchema = z
   .strictObject({
-    cascade: z.strictObject({ input: nonEmptyString, output: nonEmptyString }),
+    cascade: z.strictObject({
+      input: nonEmptyString,
+      output: nonEmptyString,
+      /** Authored integer input selecting the number of active cascade stages. */
+      countParam: z
+        .string()
+        .regex(/^[A-Za-z_][A-Za-z0-9_]*$/)
+        .optional(),
+    }),
     parallel: z.strictObject({ output: nonEmptyString }),
     formants: z.array(formantSchema).min(1),
     /**
@@ -215,6 +223,13 @@ function validateExpansionContract(
   const generatedNodes = new Set<string>();
 
   for (const [bankName, bank] of Object.entries(banks)) {
+    if (bank.cascade.countParam && !hasOwn(semantics.params, bank.cascade.countParam)) {
+      failContract(
+        "E_FORMANT_BANK_REFERENCE",
+        `meta.formantBanks.${bankName}.cascade.countParam`,
+        `parameter '${bank.cascade.countParam}' is not declared`,
+      );
+    }
     const requiredNodes = [bank.cascade.input, bank.cascade.output, bank.parallel.output];
     for (const formant of bank.formants) {
       requiredNodes.push(formant.parallelSource ?? "");
@@ -240,6 +255,17 @@ function validateExpansionContract(
             "E_FORMANT_BANK_COLLISION",
             `meta.formantBanks.${bankName}.formants`,
             `generated parameter '${paramName}' already exists`,
+          );
+        }
+      }
+
+      if (bank.cascade.countParam) {
+        const name = `cascadeF${formant.index}Frequency`;
+        if (hasOwn(semantics.realize, name) || hasOwn(semantics.params, name)) {
+          failContract(
+            "E_FORMANT_BANK_COLLISION",
+            `meta.formantBanks.${bankName}.cascade.countParam`,
+            `generated realization '${name}' already exists`,
           );
         }
       }
@@ -324,6 +350,20 @@ export function expandFormantBanks(graph: BaconGraph, semantics: SemanticsDocume
           bandwidth: { bind: `B${N}` },
         },
       };
+      if (bank.cascade.countParam) {
+        const count = bank.cascade.countParam;
+        const frequency = `cascadeF${N}Frequency`;
+        cascadeNode.params!.frequency = { bind: frequency };
+        cascadeNode.options = { bypassAtZero: true };
+        if (!semantics.realize) semantics.realize = {};
+        // Klatt's cascade-count control (nf): bypass stages above the count.
+        // The existing resonator bypass passes input through at frequency zero;
+        // parallel branches retain their own, ungated F{N} bindings.
+        semantics.realize[frequency] = {
+          expr: `${count} >= ${N} ? F${N} : 0`,
+          deps: [count, `F${N}`],
+        };
+      }
       graph.nodes[`cascadeF${N}`] = cascadeNode;
 
       // Parallel resonator + gain — only when parallelSource is specified

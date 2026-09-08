@@ -138,7 +138,7 @@ async function main(): Promise<void> {
   const totalTime = (track.length ? track[track.length - 1].time : 0) + leadTime + tailTime;
   const length = Math.max(1, Math.ceil(totalTime * sampleRate));
   const ctx = new OfflineAudioContext(1, length, sampleRate);
-  const config = await loadExperimentConfig(experimentId);
+  const config = await loadExperimentConfig(experimentId, frontendId);
   const assetLoader = await createNodeRuntimeAssetLoader(path.join(repoRoot, "public", "worklets"));
   try {
     const workletProcessorOptionsByNodeId = buildWorkletProcessorOptionsByNodeId(

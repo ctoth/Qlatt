@@ -55,13 +55,16 @@ export async function speak() {
 }
 
 export async function initializeNewRuntime() {
-  if (state.newRuntime) return state.newRuntime;
+  if (state.newRuntime) {
+    await loadNewRuntimeConfig();
+    return state.newRuntime;
+  }
   if (state.newRuntimeInitPromise) return state.newRuntimeInitPromise;
 
   state.newRuntimeInitPromise = (async () => {
-    await loadNewRuntimeConfig();
-    state.status.textContent = "Status: initializing new runtime...";
     try {
+      await loadNewRuntimeConfig();
+      state.status.textContent = "Status: initializing new runtime...";
       state.newRuntime = await createKlattRuntime({
         audioContext: state.ctx,
         graph: state.newRuntimeGraph,
@@ -105,7 +108,7 @@ export async function initializeNewRuntime() {
 
       return state.newRuntime;
     } catch (err) {
-      state.status.textContent = "Status: failed to initialize new runtime";
+      state.status.textContent = `Status: failed to initialize new runtime: ${err.message}`;
       console.error("[QLATT] Failed to initialize new runtime:", err);
       throw err;
     } finally {

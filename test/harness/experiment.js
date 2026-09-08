@@ -1,7 +1,27 @@
 // test/harness/experiment.js — Experiment manifest loading and config management
 
+import { assertFrontendVocabulary } from "../../src/experiments/frontend-vocabulary.ts";
 import { loadYamlDocument, loadYamlDocumentOrNull } from "../../src/yaml-loader.ts";
 import { state } from "./state.js";
+
+let validatedSemantics = null;
+let validatedFrontend = null;
+
+async function validateSelectedFrontend() {
+  const frontendId = document.getElementById("frontendSelect")?.value || "qlatt-english";
+  if (validatedSemantics === state.newRuntimeSemantics && validatedFrontend === frontendId) return;
+  try {
+    await assertFrontendVocabulary(frontendId, {
+      graph: state.newRuntimeGraph,
+      semantics: state.newRuntimeSemantics,
+    });
+    validatedSemantics = state.newRuntimeSemantics;
+    validatedFrontend = frontendId;
+  } catch (err) {
+    state.status.textContent = `Status: ${err.message}`;
+    throw err;
+  }
+}
 
 export function getSelectedExperiment() {
   const select = document.getElementById("experimentSelect");
@@ -111,6 +131,7 @@ export async function loadNewRuntimeConfig() {
     state.newRuntimeRegistry &&
     state.currentExperimentId === experimentId
   ) {
+    await validateSelectedFrontend();
     return; // Already loaded for this experiment
   }
   state.status.textContent = `Status: loading ${experimentId} config...`;
@@ -145,6 +166,7 @@ export async function loadNewRuntimeConfig() {
       state.newRuntimeRegistry = childRegistry;
     }
 
+    await validateSelectedFrontend();
     state.currentExperimentId = experimentId;
     state.status.textContent = `Status: ${experimentId} config loaded`;
     console.log("[QLATT] Runtime config loaded", {
@@ -155,7 +177,7 @@ export async function loadNewRuntimeConfig() {
       primitives: Object.keys(state.newRuntimeRegistry?.primitives ?? {}).length,
     });
   } catch (err) {
-    state.status.textContent = `Status: failed to load ${experimentId} config`;
+    state.status.textContent = `Status: failed to load ${experimentId} config: ${err.message}`;
     console.error("[QLATT] Failed to load runtime config:", err);
     throw err;
   }

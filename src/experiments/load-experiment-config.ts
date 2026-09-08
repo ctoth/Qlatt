@@ -2,6 +2,7 @@ import type { BaconGraph, Registry } from "../klatt-runtime";
 import { normalizePath, readFileFromFsSync } from "../path-utils";
 import type { SemanticsDocument } from "../semantics/types";
 import { loadYamlDocument, loadYamlDocumentOrNull } from "../yaml-loader";
+import { assertFrontendVocabulary } from "./frontend-vocabulary";
 
 type ExperimentManifestEntry = {
   id: string;
@@ -86,7 +87,16 @@ async function loadJsonDocument<T>(specPath: string): Promise<T> {
   throw new Error(`Unable to load JSON resource '${specPath}'`);
 }
 
-export async function loadExperimentConfig(experimentId: string): Promise<ExperimentConfig> {
+export async function loadExperimentConfig(
+  experimentId: string,
+  frontendId?: string,
+): Promise<ExperimentConfig> {
+  const config = await loadConfig(experimentId);
+  if (frontendId !== undefined) await assertFrontendVocabulary(frontendId, config);
+  return config;
+}
+
+async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
   const manifest = await loadJsonDocument<ExperimentManifest>("/experiments/manifest.json");
   const entry = manifest?.experiments?.find((candidate) => candidate.id === experimentId);
   const basePath = `/experiments/${experimentId}`;

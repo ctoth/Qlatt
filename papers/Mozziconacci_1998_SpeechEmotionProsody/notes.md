@@ -267,6 +267,9 @@ This thesis is directly applicable to the Qlatt Klatt formant synthesizer:
 - [[Klatt_1990_VoiceQualityVariations]] — relevant to the thesis's finding that sadness and fear require voice quality cues beyond prosody; Klatt & Klatt provide the source parameter framework (AH, OQ, TL) for implementing those cues
 - [[Fujisaki_InformationProsodyModeling]] — cited for the Fujisaki model of F0 generation; Mozziconacci's baseline declination approach is compatible with Fujisaki's phrase/accent components
 
+### Now in Collection (previously listed as leads)
+- [The Generation of Affect in Synthesized Speech](../Cahn_1990_AffectEditor/notes.md) — Cahn's DECtalk3 Affect Editor: a 17-parameter, -10..+10 scaled acoustical model of emotion mapped onto DECtalk3 settings, validated by a 53.5% exact / 78.7% adjusted six-way forced-choice recognition experiment against a 17% chance baseline. Directly comparable to Mozziconacci's own IPO-based prosody-rule approach as an earlier, DECtalk-specific parallel effort on the same problem.
+
 ### Cited By (in Collection)
 - [[Mozziconacci_2002_ProsodyEmotions]] — same author's follow-up; develops the pitch contour type vs. implementation distinction
 - [[Gobl_2003_VoiceQualityEmotion]] — cites this for the finding that prosody alone is insufficient for sadness, motivating their voice quality study
@@ -285,7 +288,7 @@ This thesis is directly applicable to the Qlatt Klatt formant synthesizer:
 
 From the thesis bibliography:
 
-- **Cahn, J.E. (1990)** - "Generating expression in synthesized speech" - DECtalk3 Affect Editor implementation
+- **Cahn, J.E. (1990)** - "Generating expression in synthesized speech" - DECtalk3 Affect Editor implementation → NOW IN COLLECTION (likely the same work, published in AVIOS 1990 under the title "The Generation of Affect in Synthesized Speech"; the technical-report title cited here matches Cahn's 1989 MIT thesis title more closely, so treat the identification as probable, not certain): [The Generation of Affect in Synthesized Speech](../Cahn_1990_AffectEditor/notes.md)
 - **Murray, I.R. & Arnott, J.L. (1993)** - "Toward the simulation of emotion in synthetic speech" - Review of emotional speech synthesis
 - **Williams, C.E. & Stevens, K.N. (1972)** - "Emotions and speech: some acoustical factors" - Classic study on emotion acoustics
 - **'t Hart, J., Collier, R. & Cohen, A. (1990)** - "A perceptual study of intonation" - Dutch IPO intonation grammar

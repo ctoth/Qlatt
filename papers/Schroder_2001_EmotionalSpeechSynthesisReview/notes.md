@@ -357,7 +357,7 @@ This is a directly usable specification source for adding rule-based emotion con
 - [ ] Which five acoustic parameters did Burkhardt vary in step 1 of his two-stage method? Not named here.
 - [ ] Fear's +150% F0 mean is far larger than any other tabulated shift; is this a percentage of the neutral F0 in Hz, and does it still only reach 52% recognition because the value is too extreme?
 - [ ] Does the emotion- and speaker-dependence of the prosody-versus-voice-quality contribution [16][17] have a published per-emotion breakdown?
-- [ ] Does "brilliance" in Cahn's system correspond to spectral tilt, high-frequency energy, or a DECtalk-specific composite parameter?
+- [ ] Does "brilliance" in Cahn's system correspond to spectral tilt, high-frequency energy, or a DECtalk-specific composite parameter? [Addressed by Cahn_1990_AffectEditor - Cahn defines brilliance directly as the ratio of low to high frequency energy, with a high value indicating strong high-frequency energy.]
 
 ## Related Work Worth Reading
 - **Burkhardt & Sendlmeier [9]**, "Verification of Acoustical Correlates of Emotional Speech using Formant-Synthesis", ISCA Workshop on Speech & Emotion 2000, pp. 151-156 — the source of the joy and fear rule sets and of the two-stage perceptual-optimisation method. Highest priority for a formant-synthesis project.
@@ -378,8 +378,10 @@ This is a directly usable specification source for adding rule-based emotion con
 - [Vocal Cues to Speaker Affect: Testing Two Models](../Scherer_1984_VocalCuesSpeakerAffect/notes.md) - cited as ref [28] for the finding that F0 contour affects emotion perception in interaction with sentence type and other linguistic information, used to motivate the review's "linguistic interaction and language specificity" problem.
 - [Speech Variability and Emotion: Production and Perception](../Mozziconacci_1998_SpeechEmotionProsody/notes.md) - cited as ref [10] as the source of the Table 1 boredom rule set (94% recognition, the highest in the table) and the Dutch intonation-pattern grammar (patterns 3C, 5&A, 12) that this review does not itself define.
 
+### Now in Collection (previously listed as leads)
+- [The Generation of Affect in Synthesized Speech](../Cahn_1990_AffectEditor/notes.md) - source of the sadness and surprise rule sets and the -10..+10 abstract parameter scale this review tabulates. Cahn's own paper states brilliance is "ratio of low to high frequency energy... a high value indicates strong high frequency energy" - answering this review's open question about what brilliance corresponds to (see Open Questions). It does not, however, give physical units or a transfer function from the -10..+10 scale to synthesizer parameters; that mapping lives only in Cahn's 1989 master's thesis, which remains outside the collection.
+
 ### New Leads (Not Yet in Collection)
-- Cahn, J. E. (1990) - "The Generation of Affect in Synthesized Speech" (ref [4]) - source of the sadness and surprise rule sets and the -10..+10 abstract parameter scale; required to decode Table 1's Cahn-scale rows.
 - Murray, I. R., & Arnott, J. L. - "Implementation and testing of a system for producing emotion-by-rule in synthetic speech," Speech Communication 16, pp. 369-390 (ref [6]) - the HAMLET implementation paper and source of the anger rule set in absolute physical units; distinct from the Murray & Arnott 1993 review already in the collection (see Conceptual Links).
 - Kasuya, H., Maekawa, K., & Kiritani, S. (1999) - "Joint Estimation of Voice Source and Vocal Tract Parameters as Applied to the Study of Voice Source Dynamics" (ref [30]) - named as the route to making rule-based synthesis more natural-sounding, directly relevant to a source-filter engine's voice-quality modeling.
 - Cowie, R., Douglas-Cowie, E., Savvidou, S., McMahon, E., Sawey, M., & Schröder, M. (2000) - "FEELTRACE: An Instrument for Recording Perceived Emotion in Real Time" (ref [27]) - the dimensional taxonomy the review recommends for describing non-extreme emotional states.

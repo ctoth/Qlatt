@@ -220,7 +220,7 @@ This paper provides a principled, data-driven characterization of how different 
 - Stilp CE, Lewicki MS (2013) — ICA applied to phonetic categories; predecessor study with β values for broad classes
 - Lewicki MS (2002) — Efficient coding of natural sounds; foundational ICA-on-speech study establishing Q₁₀/f_c power law
 - Erra RG, Gervain J (2016) — Cross-linguistic differences in efficient coding of speech
-- Fant G (1972) — Vocal tract wall effects, losses, and resonance bandwidths [Ref 32]
+- Fant G (1972) — Vocal tract wall effects, losses, and resonance bandwidths [Ref 32] → NOW IN COLLECTION: [Vocal Tract Wall Effects, Losses, and Resonance Bandwidths](../Fant_1972_VocalTractWallEffectsBandwidths/notes.md)
 - Stevens KN (1998) — Acoustic Phonetics [Ref 33]
 - Hanna et al. (2016) — Frequencies, bandwidths and magnitudes of vocal tract resonances measured through lips [Ref 28]
 
@@ -228,6 +228,9 @@ This paper provides a principled, data-driven characterization of how different 
 
 ### Already in Collection
 - [[Stevens_1998_AcousticPhonetics]] — cited as [33] for acoustic phonetic framework; Deloche's statistical results quantitatively validate Stevens' phoneme-level descriptions
+
+### Now in Collection (previously listed as leads)
+- [Vocal Tract Wall Effects, Losses, and Resonance Bandwidths](../Fant_1972_VocalTractWallEffectsBandwidths/notes.md) — cited as [32] for formant-bandwidth and lip-radiation theory. Derives closed-form wall/friction/heat-conduction/radiation bandwidth formulas from first principles; Deloche's independent statistical finding that vowel β is governed by formant bandwidth and lip radiation is a data-driven confirmation of the acoustic factors Fant's theory identifies as bandwidth-determining.
 
 ### Cited By (in Collection)
 - (none found)

@@ -161,6 +161,7 @@ For a Klatt synthesizer, the emotion effects map approximately to:
 
 ### Already in Collection
 - [[Gobl_2003_VoiceQualityEmotion]] — extends Murray & Arnott's voice quality dimension with systematic perceptual evaluation of six voice quality types (breathy, whispery, tense, creaky, harsh, modal) mapped to emotional categories
+- [The Generation of Affect in Synthesized Speech](../Cahn_1990_AffectEditor/notes.md) — the DECtalk-based Affect Editor prototype named in Section III alongside Murray et al. (1988); cited in the reference list as "Cahn, J.E. (1989). Generation of Affect in Synthesized Speech, Proceedings of AVIOS '89," almost certainly the conference version of the same AVIOS work published in the journal in 1990 (our collection copy).
 
 ### Cited By (in Collection)
 - [[Scherer_2001_VocalEmotionCrossCultural]] — cites as a review of emotion simulation in synthetic speech with parameter recommendations

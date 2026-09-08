@@ -202,7 +202,7 @@ For `tts-frontend-rules.js`:
 
 1. **'t Hart, Collier, Cohen (1990)** - "A perceptual study of intonation" - IPO model details
 2. **Mozziconacci (1998)** [28] - Ph.D. thesis with full parameter values
-3. **Cahn (1990)** [5] - "Generating expression in synthesized speech" - MIT implementation
+3. **Cahn (1990)** [5] - "Generating expression in synthesized speech" - MIT implementation → NOW IN COLLECTION (probable identification with the AVIOS 1990 paper "The Generation of Affect in Synthesized Speech"; the cited title matches Cahn's 1989 MIT thesis title more closely): [The Generation of Affect in Synthesized Speech](../Cahn_1990_AffectEditor/notes.md)
 4. **Williams & Stevens (1972)** [42] - "Emotions and speech: some acoustical factors" - acoustic correlates
 
 ### Methodology
@@ -228,6 +228,9 @@ For `tts-frontend-rules.js`:
 - [[Banse_1996_VocalEmotionAcousticProfiles]]
 - [[France_2000_SpeechDepressionSuicideAcoustics]]
 - [[Mozziconacci_1998_SpeechEmotionProsody]]
+
+### Now in Collection (previously listed as leads)
+- [The Generation of Affect in Synthesized Speech](../Cahn_1990_AffectEditor/notes.md) - Cahn's DECtalk3 Affect Editor, a 17-parameter -10..+10 scaled acoustical model of emotion validated at 53.5% exact / 78.7% adjusted six-way forced-choice recognition against a 17% chance baseline. An earlier, DECtalk-specific parallel to the IPO-based prosody rules this paper develops.
 
 ### New Leads (Not Yet in Collection)
 - **[24] Ladd et al., 1985** - Foundational work on F0 range and voice quality as independent carriers of speaker affect

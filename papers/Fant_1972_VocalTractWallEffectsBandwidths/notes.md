@@ -963,3 +963,46 @@ Two cautions for implementation. All values are **closed-glottis**; real phonati
 - **House, A.S. and Stevens, K.N. (1958): "Estimation of Formant Band Widths from Measurements of Transient Response of the Vocal Tract"** — independent corroboration of the bandwidth magnitudes.
 - **Ichikawa, A. and Nakata, K. (1971): "Vocal Tract Resonances with Losses"** — demonstrates the constriction-position dependence of radiation loss that Fant flags as the main source of B3 variability.
 - **Sondhi, M.M. and Gopinath, B. (1971): "Determination of the Shape of a Lossy Vocal Tract"** — uses the same class of frequency transformation.
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- [Acoustic Theory of Speech Production](../Fant_1960_AcousticTheorySpeechProduction/notes.md) - the indispensable companion cited throughout for the surface-loss treatment (pp. 32-33, 136, 303-311), the normalized friction expressions (p. 308), the radiation bandwidth expression, the complex matrix technique (pp. 37-41), and the double Helmholtz model of [u] (pp. 116, 121).
+
+### New Leads (Not Yet in Collection)
+- van den Berg, Jw. (1953, 1955A, 1955B) - the original wall-impedance and vocal cavity transmission papers; source of the closed-tract resonance concept this paper formalizes.
+- Dunn, H.K. (1961) - "Methods of Measuring Vowel Formant Bandwidths" - independent bandwidth measurement corroboration cited alongside House & Stevens (1958).
+- Fant, G. (1961) - "The Acoustics of Speech" - introduces the direct vocal-tract sweep-frequency measurement technique behind Fig. I-C-3.
+- Fant, G. (1962) - "Formant Bandwidth Data" - earlier STL-QPSR bandwidth data report.
+- Fant, G. and Lindqvist, J. (1968) - "Pressure and Gas Mixture Effects on Diver's Speech" - hyperbaric closed-tract resonance measurements ($F_W$ = 180-200 Hz).
+- Fant, G. and Sonesson, B. (1964) - "Speech at High Ambient Air-Pressure" - hyperbaric $F_W$ measurements and the alternative frequency-dependent-velocity-of-sound derivation.
+- Flanagan, J.L. (1965) - *Speech Analysis Synthesis and Perception* - criticized by Fant for reporting non-representative wall-effect frequency-shift values.
+- Fujimura, O. and Lindqvist, J. (1964A, 1964B, 1965, 1971) - sweep-tone vocal tract transfer measurements; the 1971 JASA paper is the primary empirical source for Figs. I-C-4 through I-C-6 and Tables I-C-II/III (male/female bandwidth data).
+- Ichikawa, A. and Nakata, K. (1971) - "Vocal Tract Resonances with Losses" - demonstrates the constriction-position dependence of radiation loss.
+- Laurent, T. (1964) - *Frequency Filter Methods* - source of the indirect frequency-transformation technique underlying the master bandwidth formula (Eqs. 24-37).
+- Sondhi, M.M. and Gopinath, B. (1971) - "Determination of the Shape of a Lossy Vocal Tract" - uses the same class of frequency transformation.
+
+### Supersedes or Recontextualizes
+- (none identified - this paper is a foundational derivation rather than a revision of an existing collection paper)
+
+### Conceptual Links (not citation-based)
+
+**Bandwidth measurement and modeling:**
+- [Kent & Vorperian 2018 - Static Measurements of Vowel Formant Frequencies and Bandwidths: A Review](../Kent_Vorperian_2018_VowelFormantBandwidths/notes.md) - (Strong) Kent & Vorperian's review reports the same male/female B1 asymmetry documented here (their B1 60-100 Hz female vs 50-80 Hz male, close to Fant's ~25% female excess from Fujimura & Lindqvist 1971) but flags bandwidth normative data as sparse and its causes unexplained; this paper supplies the mechanism (the wall-loss term $B_W(F_W/F)^2$, with thinner cavity walls or a smaller $A/S$ ratio in female tracts) and the frequency-dependent formulas that Kent & Vorperian's review lacks.
+- [Stevens & House 1961 - An Acoustical Theory of Vowel Production and Some of its Implications](../Stevens_House_1961_AcousticalTheoryVowelProduction/notes.md) - (Strong) Stevens & House assume a flat 100 Hz half-power bandwidth for all resonances as a simplifying constant; this paper's decomposition (Eq. 44) shows that assumption is only roughly valid in the mid-frequency range and breaks down at low F1 (wall-dominated, can exceed 150 Hz near $F_W$) and at high F3 (radiation-dominated, e.g. +190 Hz for [e]) - a mechanistic explanation for why a single flat bandwidth is a coarse simplification.
+- [Mannell 1998 — Formant Diphone Parameter Extraction — Implementation Notes](../Mannell_1998_FormantDiphoneExtraction/notes.md) - (Strong) Mannell's synthesizer uses a monotonically increasing linear bandwidth-vs-frequency estimate ($B_x = (80 + 120 F_x/5000)\,W$); the data here (Figs. I-C-3, I-C-4) show the true relationship is U-shaped - bandwidth is elevated at low F1 from wall losses, dips through the mid-range, then rises quadratically above 2000 Hz from radiation - so Mannell's linear rule misses the low-frequency wall-loss upturn that this paper's Eq. (45) captures.
+
+### Cited By (in Collection)
+- [Fine-grained statistical structure of speech](../Deloche_2020_StatisticalStructureSpeech/notes.md) - cites this paper (ref 32) for the formant-bandwidth/lip-radiation theory that Deloche's independent statistical vowel-β finding validates.
+- [Some Acoustic Features of Nasal and Nasalized Vowels: A Target for Vowel Nasalization](../Feng_1996_NasalVowelTarget/notes.md) - cites for the wall-resonance frequency ($F_W$ ~150-220 Hz) used to parameterize its nasal-vowel wall-effect term.
+- [Glottal Characteristics of Female Speakers](../Hanson_1995_GlottalCharacteristicsFemale/notes.md) - cites for vocal tract wall-loss bandwidth theory underlying its female voice source/spectral measurements.
+- [Glottal Characteristics of Male Speakers: Acoustic Correlates and Comparison with Female Data](../Hanson_1999_GlottalMaleSpeakers/notes.md) - cites for wall-loss bandwidth theory in its male/female comparison.
+- [Towards Models of Phonation](../Hanson_2001_ModelsPhonation/notes.md) - cites for vocal tract wall-loss bandwidth theory underlying its phonation modeling framework.
+- [A Quasiarticulatory Approach to Controlling Acoustic Source Parameters in a Klatt-Type Formant Synthesizer Using HLsyn](../Hanson_2002_HLsynSourceParameters/notes.md) - cites for wall-loss bandwidth theory alongside Fant (1960) vocal tract resonance theory.
+- [Glottal Airflow and Transglottal Air Pressure Measurements for Male and Female Speakers in Soft, Normal, and Loud Voice](../Holmberg_1988_GlottalAirflowPressure/notes.md) - cites for wall-loss bandwidth theory in its glottal source/tract interaction discussion.
+- [Stevens 1972/1989 — On the Quantal Nature of Speech](../Stevens_1972_QuantalNatureSpeech/notes.md) - cites for the "conventionally accepted" adult formant bandwidths (F1 ~50 Hz, F2 ~70 Hz) used in its coupled-resonator quantal analysis.
+- [On the Quantal Nature of Speech](../Stevens_1989_QuantalNatureSpeech/notes.md) - cites for the same conventional bandwidth figures as the 1972 version of the paper.
+- [Constraints among parameters simplify control of Klatt formant synthesizer](../Stevens_1991_HL_Parameters/notes.md) - cites for vocal tract bandwidth theory alongside Fant (1960) in deriving Klatt synthesizer parameter constraints.
+- [Acoustic Phonetics - Expanded Notes](../Stevens_1998_AcousticPhonetics/notes.md) - cites for the adult closed-tract resonance figure (150-200 Hz) and general vocal tract wall-loss modeling.

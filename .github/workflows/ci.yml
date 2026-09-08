@@ -14,6 +14,19 @@ permissions:
   contents: read
 
 jobs:
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Test the workspace with only the host target installed
+        run: |
+          installed_targets=$(rustup target list --installed)
+          if [[ "$installed_targets" == *wasm32-unknown-unknown* ]]; then
+            rustup target remove wasm32-unknown-unknown
+          fi
+          cargo test --workspace
+
   quality:
     runs-on: ubuntu-latest
     steps:
@@ -42,12 +55,6 @@ jobs:
           npm --prefix node_modules/node-web-audio-api run build:only
 
       - run: bash build.sh
-
-      - run: cargo test -p lf-source
-
-      - run: cargo test -p two-mass-source
-
-      - run: cargo test -p noise-source
 
       - run: npm test
 

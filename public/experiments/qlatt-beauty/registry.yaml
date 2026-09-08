@@ -294,6 +294,7 @@ primitives:
   impulse-train:
     description: "Classic Klatt impulse train source - generates periodic impulses at F0"
     worklet: "impulse-train-processor.js"
+    wasm: "impulse-train.wasm"
     params:
       f0:
         type: float
@@ -314,6 +315,7 @@ primitives:
   noise-source:
     description: "Filtered noise generator for aspiration and frication"
     worklet: "noise-source-processor.js"
+    wasm: "noise-source.wasm"
     params:
       gain:
         type: float
@@ -330,6 +332,7 @@ primitives:
   differentiator:
     description: "First-difference filter for radiation characteristic - y[n] = x[n] - x[n-1]"
     worklet: "differentiator-processor.js"
+    wasm: "differentiator.wasm"
     params: {}
     inputs: 1
     outputs: 1
@@ -337,6 +340,7 @@ primitives:
   chalker-radiation:
     description: "Chalker 1985 two-term radiation filter — y[n] = c1*(x[n]-x[n-1]) + c2*(x[n]-2*x[n-1]+x[n-2]). Reduces high-frequency impedance error from 13.4 ohms (Flanagan) to 1.22 ohms at 5 kHz."
     worklet: "chalker-radiation-processor.js"
+    wasm: "chalker-radiation.wasm"
     params: {}
     inputs: 1
     outputs: 1
@@ -344,6 +348,7 @@ primitives:
   glottal-mod:
     description: "Pulsatile aspiration modulation synchronized to glottal cycle - sinusoidal OQ envelope (Klatt 1980, Gobl 1988, Fant 1997 Table 1)"
     worklet: "glottal-mod-processor.js"
+    wasm: "glottal-mod.wasm"
     params:
       f0:
         type: float

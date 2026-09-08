@@ -1,5 +1,10 @@
 [workspace]
 members = [
+  "crates/impulse-train",
+  "crates/noise-source",
+  "crates/differentiator",
+  "crates/chalker-radiation",
+  "crates/glottal-mod",
   "crates/two-mass-source",
   "crates/frication-source",
   "crates/klatt-wasm-common",

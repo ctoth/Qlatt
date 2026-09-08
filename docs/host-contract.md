@@ -236,6 +236,50 @@ Node backend's actual parameter writes with the compiler's schedule.
 
 ## 6. Rendering model
 
+### Source and radiation sample ABI
+
+`impulse-train`, `noise-source`, `differentiator`, `chalker-radiation`, and
+`glottal-mod` are owned by their corresponding Rust crates. Browser and Node
+worklets invoke the same WASM exports. Native hosts may link the crates or load
+their WASM modules. Each module exposes the functions below, with `processor`
+replaced by its name using underscores (for example, `noise_source_new`).
+Distinct export names also allow native hosts to link all five crates together.
+
+- `processor_new(sample_rate: f64, seed: u32) -> state`: allocate one channel;
+  returns null for a nonpositive or nonfinite sample rate.
+- `processor_sample(state, input: f64, a: f64, b: f64, c: f64) -> f64`:
+  advance one sample using the arguments below.
+- `processor_free(state)`: release a live state (null is harmless). Reset by
+  freeing and recreating with the original rate and seed.
+
+| Primitive | input | a | b | c |
+| --- | --- | --- | --- | --- |
+| impulse-train | unused | f0 | gain | openPhaseRatio |
+| noise-source | modulation (1 if disconnected) | gain | cutoff | unused |
+| differentiator | signal | unused | unused | unused |
+| chalker-radiation | signal | unused | unused | unused |
+| glottal-mod | unused | f0 | oq | unused |
+
+Use zero for unused arguments. Signal arithmetic and recurrence state use f64
+to preserve the original JavaScript behavior; round each output to f32 before
+graph mixing. Filters require a separate state per channel. The three sources
+emit mono. `f0` and `gain` retain a-rate automation; `openPhaseRatio`, `cutoff`,
+and `oq` are sampled at block start. Impulse-train preserves its original
+period-triggered open-phase update and pauses its state when unvoiced.
+
+Noise takes an explicit seed in both hosts: the worklet accepts
+`processorOptions.seed`, truncates it to u32, and maps zero to one. If omitted,
+the worklet chooses one random seed at construction and passes it to Rust.
+Native callers supply u32 directly. The stream is the existing Qlatt LCG
+`state = (1664525 * state + 1013904223) mod 2^32`, mapped to `[-1, 1)` before
+the one-pole filter; reset repeats it. No per-sample host RNG is used. Existing
+render backends continue to derive per-node seeds from the render seed.
+
+The Chalker crate preserves Qlatt's discrete approximation, whose error is
+not established by the paper's aperture-dependent impedance measurements.
+
+### Block execution
+
 - Audio is processed in blocks; the reference hosts use the WebAudio render
   quantum of 128 samples.
 - Node parameters are k-rate: sampled once per block (the value in effect at

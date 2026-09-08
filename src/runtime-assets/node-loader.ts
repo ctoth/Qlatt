@@ -10,12 +10,26 @@ function readUtf8File(filePath: string): string {
   return fs.readFileSync(filePath, "utf8");
 }
 
-function inlineWasmUtils(moduleSource: string, wasmUtilsSource: string): string {
-  const importPattern = /^import\s*\{[^}]+\}\s*from\s*["']\.\/wasm-utils\.js["'];?\s*$/m;
-  let transformed = moduleSource;
-  if (importPattern.test(transformed)) {
-    transformed = transformed.replace(importPattern, `${wasmUtilsSource}\n`);
-  }
+function inlineWasmUtils(
+  moduleSource: string,
+  wasmUtilsSource: string,
+  sampleProcessorSource: string,
+): string {
+  // node-web-audio-api evaluates worklets from data URLs, so relative imports
+  // must be inlined, including the shared sample-ABI lifecycle adapter.
+  let transformed = moduleSource.replace(
+    /^import\s*\{[^}]+\}\s*from\s*["']\.\/sample-processor\.js["'];?\s*$/m,
+    () => sampleProcessorSource,
+  );
+  let includedUtils = false;
+  transformed = transformed.replace(
+    /^import\s*\{[^}]+\}\s*from\s*["']\.\/wasm-utils\.js["'];?\s*$/gm,
+    () => {
+      if (includedUtils) return "";
+      includedUtils = true;
+      return `${wasmUtilsSource}\n`;
+    },
+  );
   transformed = transformed.replace(
     /const\s+wasmUrl\s*=\s*resolveWasmUrl\([^;]+\);/g,
     "const wasmUrl = null;",
@@ -75,7 +89,11 @@ export async function createNodeRuntimeAssetLoader(
           res.end("Not found");
           return;
         }
-        source = inlineWasmUtils(readUtf8File(resolved), wasmUtilsSource);
+        const moduleSource = readUtf8File(resolved);
+        const sampleSource = moduleSource.includes('"./sample-processor.js"')
+          ? readUtf8File(path.resolve(normalizedDir, "sample-processor.js"))
+          : "";
+        source = inlineWasmUtils(moduleSource, wasmUtilsSource, sampleSource);
         transformedModules.set(moduleName, source);
       }
 

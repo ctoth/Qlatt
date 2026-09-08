@@ -213,6 +213,21 @@ This is a control-surface paper, not a synthesis paper, and it is directly on po
 - [ ] The SPASM "few-to-many" mapping strategy of Figure 4 is shown but not described algorithmically; the shape-space interpolation method must be recovered from [6] or [7].
 - [ ] No evaluation methodology is offered for any principle; each is asserted from case outcomes.
 
+## Collection Cross-References
+
+### Already in Collection
+- (none - all of Cook's cited references are self-citations to his own unpublished/CMJ/ICMC work, none of which are in this collection)
+
+### New Leads (Not Yet in Collection)
+- Cook (1991), "Identification of Control Parameters in an Articulatory Vocal Tract Model, With Applications to the Synthesis of Singing," Stanford PhD dissertation - the source of the few-to-many mapping problem this paper summarizes.
+- Cook (1992), "SPASM: a Real-Time Vocal Tract Physical Model Editor/Controller and Singer," Computer Music Journal 17:1 - the system behind the "well over 40 parameters" claim and Figures 3-4.
+- Cook (1993), "New Control Strategies for the Singer Articulatory Voice Synthesis System," Stockholm Music Acoustics Conference - direct treatment of the few-to-many mapping problem for voice.
+- Cook and Leider (2000), "SqueezeVox: A New Controller for Vocal Synthesis Models," ICMC - full accordion-based vocal control mapping this paper summarizes.
+- Cook (1992), "A Meta-Wind-Instrument Physical Model, and a Meta-Controller for Real Time Performance Control," ICMC - the HIRN/WhirlWind co-design case supplying the negative result on control bandwidth.
+
+### Conceptual Links (not citation-based)
+- [Software for a Cascade/Parallel Formant Synthesizer](../Klatt_1980_CascadeParallelFormantSynthesizer/notes.md) - Cook's central problem (a voice model with "well over 40 continuously controlled parameters" is "a truly difficult 'instrument' to control") is the exact regime of a Klatt-style synthesizer, whose variable control set alone runs to F0, five formant frequencies, three bandwidths, and half a dozen amplitude parameters updated every 5ms. Cook's mitigation - interpolate among named shape/vowel targets rather than exposing every parameter, per his "Few-to-Many Mappings" figure - is a concrete design recommendation for any real-time control layer built on top of this synthesizer's parameter set.
+
 ## Related Work Worth Reading
 - **[5] Cook, P.R., "Identification of Control Parameters in an Articulatory Vocal Tract Model, With Applications to the Synthesis of Singing," PhD Dissertation, Stanford, 1991.** The most directly relevant item: control-parameter identification for an articulatory model.
 - **[6] Cook, P.R., "SPASM: a Real-Time Vocal Tract Physical Model Editor/Controller and Singer: the Companion Software Synthesis System," Computer Music Journal 17:1, pp 30-44, 1992.** The system behind the "well over 40 parameters" claim and Figures 3-4.

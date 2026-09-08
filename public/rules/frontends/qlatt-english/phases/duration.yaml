@@ -1,5 +1,61 @@
 version: v1
 rules:
+  hertz_nucleus_timing:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.type == 'vowel' && next != null
+        && has(current.syllable) && current.syllable != null
+        && has(next.syllable) && next.syllable != null
+        && current.syllable.id == next.syllable.id
+        && ((current.phoneme in ['AA', 'AA0', 'AA1'] && next.phoneme == 'Y')
+          || (current.phoneme in ['ER', 'ER0', 'ER1'] && next.phoneme == 'R'))
+    define:
+      tail: next
+      after_tail: ahead(current, 2.0)
+      after_third: ahead(current, 3.0)
+      rhotic: tail.phoneme == 'R'
+      three_phone: >-
+        !rhotic && after_tail != null
+        && path(after_tail, 'R:SylStructure.parent') != null && path(after_tail, 'R:SylStructure.parent').id == current.syllable.id
+        && after_tail.type in ['liquid', 'glide']
+      coda: "three_phone ? after_third : after_tail"
+      after_coda: "three_phone ? ahead(current, 4.0) : after_third"
+      voiced_coda: >-
+        coda != null && path(coda, 'R:SylStructure.parent') != null
+        && path(coda, 'R:SylStructure.parent').id == current.syllable.id && has(coda.voiced) && coda.voiced
+      nasal_stop_exception: >-
+        voiced_coda && coda.type == 'nasal' && after_coda != null
+        && path(after_coda, 'R:SylStructure.parent') != null
+        && path(after_coda, 'R:SylStructure.parent').id == current.syllable.id
+        && after_coda.type in ['stop', 'stop_closure']
+        && has(after_coda.voiceless) && after_coda.voiceless
+      # Hertz & Huffman 1992 p.1173: AY 145 ms, two-phone /r/ nucleus 160 ms.
+      # Engineering adaptation: retain the already assigned third-phone duration
+      # when extending the AY starting budget; no three-phone base is tabulated.
+      base_ms: "(rhotic ? params.policy.duration.nucleus_r_ms : params.policy.duration.nucleus_ay_ms) + (three_phone ? after_tail.duration : 0)"
+      # p.1173 supplies 200/250 ms caps for vowel+glide/three-phone nuclei,
+      # but no cap for the two-phone /r/ class: do not invent one for that class.
+      budget_ms: >-
+        !rhotic && voiced_coda && !nasal_stop_exception
+        ? min([base_ms * params.policy.duration.nucleus_voiced_multiplier, three_phone ? params.policy.duration.nucleus_three_phone_cap_ms : params.policy.duration.nucleus_glide_cap_ms]) : base_ms
+      # Segments include their transitions. Subtracting the full non-vowel
+      # intervals reserves their fixed transition time before the vowel gets
+      # the remainder; lowering must not lengthen those transitions.
+      other_ms: "tail.duration + (three_phone ? after_tail.duration : 0)"
+    apply:
+      - field: nucleus_duration_ms
+        op: set
+        value: budget_ms
+        tag: transition
+      - field: duration
+        op: set
+        value: "max([params.policy.duration.default_floor_ms, budget_ms - other_ms])"
+        tag: transition
+    citations:
+      - "Hertz & Huffman 1992 pp.1172–1173, section 2.3"
+      - "Engineering adaptation: segment intervals include transitions; third-phone baseline retained from existing duration rules"
   non_word_initial_consonant_shortening:
     kind: scalar
     select:

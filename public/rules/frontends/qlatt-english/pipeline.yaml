@@ -346,6 +346,8 @@ tags:
   word_class: records function-word or content-word status
   word_initial: adjusts a word-initial segment
 relations:
+  SylStructure:
+    type: span
   Token:
     type: parallel
     features:
@@ -396,6 +398,7 @@ relations:
       nasalPlaceIndex: []
       phraseAccent: []
       transition_ms: []
+      nucleus_duration_ms: []
       type:
         - vowel
         - stop
@@ -501,6 +504,7 @@ phases:
       - stop_unreleasing
       - s_cluster_aspiration_reduction
       - aspiration_frication_carryover
+      - hertz_nucleus_timing
       - duration_floor_stop_release
       - duration_floor_default
     resolve_scalars:

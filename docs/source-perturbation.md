@@ -39,6 +39,10 @@ conversion because the old magnitude depended on F0 and device rate.
 The bundled creaky and whispery presets use 4.5% and 1.125%, engineering
 conversions of the old 20 and 5 controls at 110 Hz / 44100 Hz. This preserves
 their approximate reference magnitude, not their old uncorrelated waveform.
-Neutral defaults remain zero, so neutral audio goldens need no regeneration.
+The beauty inventory's 0.25 now means 0.25% CV, within Titze's normal neurologic
+range; its nonzero-jitter render hash is regenerated. The zero-jitter beauty
+control captured on base commit 32c63af5 remains unchanged, as do the baseline
+default render and standalone neutral LF golden. The DECtalk LF presets use
+the same reference conversion as the English presets.
 Tests measure emitted cycle CV at 100/200 Hz and 44100/48000 Hz, stationary
 filter CV and independence, and actual WASM shimmer routing.

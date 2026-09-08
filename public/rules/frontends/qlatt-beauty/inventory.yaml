@@ -68,7 +68,7 @@ base_params:
   OQ: 65
   TL: 10
   flutter: 25
-  jitter: 0.25
+  jitter: 0.25  # Percent F0 CV: Titze 1991 normal neurologic range 0.2-0.3%.
   # Fant 1997 connected-speech contour offsets (default neutral).
   EePhraseDb: 0
   RdPhraseOffset: 0

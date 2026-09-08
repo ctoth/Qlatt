@@ -60,6 +60,21 @@ it("declares percent CV controls from semantics through worklet", () => {
   }
 });
 
+it("keeps bundled nonzero jitter presets within the percent range", () => {
+  for (const file of [
+    "policy/source-contour.yaml",
+    "frontends/dectalk-english/source-contour.yaml",
+  ]) {
+    const policy = load(readFileSync(`public/rules/${file}`, "utf8")) as {
+      voice_quality_presets: Record<string, { jitter: number }>;
+    };
+    for (const preset of Object.values(policy.voice_quality_presets)) {
+      expect(preset.jitter).toBeGreaterThanOrEqual(0);
+      expect(preset.jitter).toBeLessThanOrEqual(10);
+    }
+  }
+});
+
 it("routes shimmer to WASM, preserves cycle timing, and is deterministic across block sizes", async () => {
   const wasmBytes = Uint8Array.from(readFileSync("public/worklets/lf-source.wasm")).buffer;
   async function render(shimmer: number, blockSize: number) {

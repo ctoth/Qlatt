@@ -40,12 +40,11 @@
 import type { KlattFrame } from "../tts-frontend-types";
 import type { CompiledAffect } from "./affect";
 import { NEUTRAL_VQ, type VoiceQualityDelta } from "./direction-track";
+import { VQ_PARAM_CHANNELS } from "./vq-channels";
 
 /** Effective-Rd clamp bounds (Fant 1997 Rd range), mirrored from the backend. */
 const RD_MIN = 0.3;
 const RD_MAX = 2.7;
-/** Formant-bandwidth floor in Hz (a resonator with B < 20 Hz rings unphysically). */
-const BW_FLOOR_HZ = 20;
 /** The Rd value the beauty voice uses when a frame carries no explicit Rd. */
 const RD_FALLBACK = 0.7;
 
@@ -63,30 +62,6 @@ function clampNumber(value: number, lo: number, hi: number): number {
   if (value < lo) return lo;
   if (value > hi) return hi;
   return value;
-}
-
-/** Add `delta` Hz to a positive formant param, keeping it > 0. */
-function addFormant(params: Record<string, number>, key: string, delta: number): void {
-  if (delta === 0) return;
-  const base = params[key];
-  if (typeof base !== "number" || !Number.isFinite(base)) return;
-  params[key] = Math.max(1, base + delta);
-}
-
-/** Scale a bandwidth param, keeping it above the physical floor. */
-function scaleBandwidth(params: Record<string, number>, key: string, scale: number): void {
-  if (scale === 1) return;
-  const base = params[key];
-  if (typeof base !== "number" || !Number.isFinite(base)) return;
-  params[key] = Math.max(BW_FLOOR_HZ, base * scale);
-}
-
-/** Add a dB offset to an additive level param if present. */
-function addDb(params: Record<string, number>, key: string, delta: number): void {
-  if (delta === 0) return;
-  const base = params[key];
-  if (typeof base !== "number" || !Number.isFinite(base)) return;
-  params[key] = base + delta;
 }
 
 /**
@@ -159,18 +134,14 @@ export function applyAffectToTrack(
       params.RdPhraseOffset = clampedEffective - rdBase;
     }
 
-    // --- Formants (additive Hz) and bandwidths (multiplicative) -----------
-    addFormant(params, "F1", vq.f1Delta);
-    addFormant(params, "F2", vq.f2Delta);
-    addFormant(params, "F3", vq.f3Delta);
-    scaleBandwidth(params, "B1", vq.fbw1Scale);
-    scaleBandwidth(params, "B2", vq.fbw2Scale);
-    scaleBandwidth(params, "B3", vq.fbw3Scale);
-
-    // --- Level / spectral params (additive dB) ----------------------------
-    addDb(params, "TL", vq.spectralTiltBoost);
-    addDb(params, "AH", vq.ahBoost);
-    addDb(params, "GO", vq.intensityBoost);
+    for (const row of VQ_PARAM_CHANNELS) {
+      if (!row.apply_track) continue;
+      const value = vq[row.channel] ?? row.neutral;
+      const base = params[row.backend_param];
+      if (value === row.neutral || typeof base !== "number" || !Number.isFinite(base)) continue;
+      const projected = row.algebra === "mul" ? base * value : base + value;
+      params[row.backend_param] = Math.max(row.floor ?? -Infinity, projected);
+    }
 
     // --- Segment-aware timeline dilation ----------------------------------
     let time = frame.time;

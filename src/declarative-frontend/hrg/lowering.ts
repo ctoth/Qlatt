@@ -14,6 +14,12 @@
  */
 
 import { getF0FilterExports, RENDER_OK } from "../../f0-filters-loader";
+import {
+  VQ_FIELDS,
+  VQ_MULTIPLICATIVE_FIELDS,
+  VQ_NEUTRAL,
+  VQ_PARAM_CHANNELS,
+} from "../../input/vq-channels";
 import type { KlattFrame } from "../../tts-frontend-types";
 import { isPlainObject } from "../../yaml-loader";
 import type { Item } from "./item";
@@ -251,23 +257,7 @@ type ResolvedF0Point = {
   valueHz: number;
 };
 
-const AFFECT_FIELDS = [
-  "rdDelta",
-  "f0Scale",
-  "f0VarianceScale",
-  "durationScale",
-  "intensityBoost",
-  "ahBoost",
-  "spectralTiltBoost",
-  "pauseScale",
-  "f1Delta",
-  "f2Delta",
-  "f3Delta",
-  "fbw1Scale",
-  "fbw2Scale",
-  "fbw3Scale",
-  "jitterScale",
-] as const;
+const AFFECT_FIELDS = VQ_FIELDS;
 
 type AffectField = (typeof AFFECT_FIELDS)[number];
 type AffectValues = Record<AffectField, number>;
@@ -286,67 +276,16 @@ type AffectDirective = {
   values: AffectValues;
 };
 
-const NEUTRAL_AFFECT: AffectValues = {
-  rdDelta: 0,
-  f0Scale: 1,
-  f0VarianceScale: 1,
-  durationScale: 1,
-  intensityBoost: 0,
-  ahBoost: 0,
-  spectralTiltBoost: 0,
-  pauseScale: 1,
-  f1Delta: 0,
-  f2Delta: 0,
-  f3Delta: 0,
-  fbw1Scale: 1,
-  fbw2Scale: 1,
-  fbw3Scale: 1,
-  jitterScale: 1,
-};
+const NEUTRAL_AFFECT: Readonly<AffectValues> = VQ_NEUTRAL;
 
-const MULTIPLICATIVE_AFFECT_FIELDS = new Set<AffectField>([
-  "f0Scale",
-  "f0VarianceScale",
-  "durationScale",
-  "pauseScale",
-  "fbw1Scale",
-  "fbw2Scale",
-  "fbw3Scale",
-  "jitterScale",
-]);
+const MULTIPLICATIVE_AFFECT_FIELDS = new Set(VQ_MULTIPLICATIVE_FIELDS);
 
-/**
- * Declarative affect projection table (phase 4 item 4).
- *
- * Ten of the fifteen affect fields project onto a backend param by a uniform rule:
- * additive delta, or multiplicative scale with a floor. Those rows are pure data
- * and are declared here; `applyAffectProjection` iterates the table via the shared
- * add/scale helpers. The remaining fields (f0Scale, f0VarianceScale, rdDelta) need
- * bespoke handling (variance centering, Rd effective-range clamp) and stay inline,
- * and durationScale/pauseScale are consumed earlier in the pipeline, not here.
- *
- * Citations:
- * - Fant 1997 Table 1 (Rd / bandwidth interaction; effective-Rd range handled inline)
- * - Klatt & Klatt 1990 (spectral tilt, aspiration)
- * - Gobl 2003, Burkhardt 2009 (affect->source parameter mapping)
- * - Engineering bounds: 20 Hz bandwidth floor, 1 Hz formant floor (applied inline).
- */
-type AffectProjectionRow =
-  | { backendKey: string; affectField: AffectField; mode: "add" }
-  | { backendKey: string; affectField: AffectField; mode: "scale"; floor: number };
-
-const AFFECT_PROJECTION_TABLE: readonly AffectProjectionRow[] = [
-  { backendKey: "F1", affectField: "f1Delta", mode: "add" },
-  { backendKey: "F2", affectField: "f2Delta", mode: "add" },
-  { backendKey: "F3", affectField: "f3Delta", mode: "add" },
-  { backendKey: "B1", affectField: "fbw1Scale", mode: "scale", floor: 20 },
-  { backendKey: "B2", affectField: "fbw2Scale", mode: "scale", floor: 20 },
-  { backendKey: "B3", affectField: "fbw3Scale", mode: "scale", floor: 20 },
-  { backendKey: "TL", affectField: "spectralTiltBoost", mode: "add" },
-  { backendKey: "AH", affectField: "ahBoost", mode: "add" },
-  { backendKey: "GO", affectField: "intensityBoost", mode: "add" },
-  { backendKey: "jitter", affectField: "jitterScale", mode: "scale", floor: 0 },
-];
+const AFFECT_PROJECTION_TABLE = VQ_PARAM_CHANNELS.map((row) => ({
+  backendKey: row.backend_param,
+  affectField: row.channel,
+  mode: row.algebra === "mul" ? "scale" : "add",
+  floor: row.floor ?? -Infinity,
+}));
 
 function isFeatureObject(
   value: FeatureValue | undefined,

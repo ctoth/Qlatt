@@ -5,6 +5,7 @@ import {
   compileRuleEngineSpec,
   QLATT_ENGLISH_RULEPACK,
 } from "../src/declarative-frontend/rule-pack";
+import { qlattInventoryResource } from "./utils/qlatt-english-inventory";
 
 function vowelBeforeStop(voiced: boolean, duration = 100, floor?: number) {
   const utterance = new Utterance({
@@ -45,7 +46,7 @@ function vowelBeforeStop(voiced: boolean, duration = 100, floor?: number) {
         phase.name === "duration" ? { name: "duration", rules: ["vowel_shortening"] } : phase,
       ),
     }),
-    { phases: ["duration"] },
+    { phases: ["duration"], inventory: qlattInventoryResource(utterance) },
   );
   return { duration: Number(vowel.get("duration")), utterance };
 }

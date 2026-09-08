@@ -166,6 +166,7 @@ export type LowerContext = {
   speakerParams?: Readonly<Record<string, unknown>>;
   speakerSex?: string;
   silence?: {
+    symbol: string;
     initialParams: Readonly<Record<string, number>>;
     finalParams: Readonly<Record<string, number>>;
     decisionId: string;
@@ -1983,7 +1984,7 @@ export function lowerToFrames(
     if (f0Points.length > 0 && paramKeys.includes("F0")) {
       const phoneme = item.get(phonemeKey);
       const voiced = (params.AV ?? 0) > 0 || (params.AVS ?? 0) > 0;
-      if (!layeredF0 && (phoneme === "SIL" || !voiced)) {
+      if (!layeredF0 && (phoneme === context.silence?.symbol || !voiced)) {
         params.F0 = 0;
       } else {
         const resolvedF0 = resolveF0AtTime(f0Points, timeMs, f0Sampling);
@@ -2189,7 +2190,7 @@ export function lowerToFrames(
     appendFrame(
       timeMs,
       undefined,
-      timeMs > 1e-6 ? "SIL" : undefined,
+      timeMs > 1e-6 ? context.silence?.symbol : undefined,
       timeMs - initialSilenceMs,
       timeMs <= 1e-6 || f0Point == null
         ? undefined
@@ -2248,7 +2249,7 @@ export function lowerToFrames(
     }
   }
   const finalResetMs = initialSilenceMs + segmentTotalMs;
-  appendFrame(finalResetMs, undefined, "SIL", 0, outputFinalResetMs, "final");
+  appendFrame(finalResetMs, undefined, context.silence?.symbol, 0, outputFinalResetMs, "final");
   const totalMs = finalResetMs + finalSilenceMs;
   if (layeredF0 && options.timeline.event_points.include_f0_anchors && paramKeys.includes("F0")) {
     for (const point of f0Points) {
@@ -2256,7 +2257,7 @@ export function lowerToFrames(
       appendFrame(
         point.timeMs,
         undefined,
-        "SIL",
+        context.silence?.symbol,
         0,
         outputFinalResetMs +
           ((point.outputTimeMs ?? point.timeMs) - finalResetMs) * globalPauseScale,
@@ -2264,7 +2265,8 @@ export function lowerToFrames(
       );
     }
   }
-  if (totalMs > finalResetMs) appendFrame(totalMs, undefined, "SIL", 0, outputTotalMs, "final");
+  if (totalMs > finalResetMs)
+    appendFrame(totalMs, undefined, context.silence?.symbol, 0, outputTotalMs, "final");
 
   return {
     frames,

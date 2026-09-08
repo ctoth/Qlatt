@@ -76,6 +76,7 @@ function numericAggregate(args: unknown[], mode: "min" | "max"): number {
 }
 
 type EvaluationContext = {
+  isNucleus: (type: unknown) => boolean;
   values: Record<string, unknown>;
   functions: Record<string, (...args: unknown[]) => unknown>;
   isItemView: (value: unknown) => boolean;
@@ -148,6 +149,22 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
   const recurse = (index: number, extra: Readonly<Record<string, unknown>>): EvaluationContext =>
     buildEvaluationContext({ ...recurseBase, index, extra });
   const views = new Map<Item, Readonly<Record<string, unknown>>>();
+  const silenceSymbol = (): string => {
+    if (!inventory)
+      throw new Error(
+        "E_HRG_INVENTORY_REQUIRED: phoneme navigation requires the selected inventory",
+      );
+    transaction.dependOn(inventory.decisionId);
+    return inventory.spec.silence_symbol;
+  };
+  const isNucleus = (type: unknown): boolean => {
+    if (!inventory)
+      throw new Error(
+        "E_HRG_INVENTORY_REQUIRED: nucleus classification requires the selected inventory",
+      );
+    transaction.dependOn(inventory.decisionId);
+    return inventory.spec.nucleus_types.includes(String(type));
+  };
   const itemByView = new WeakMap<object, Item>();
   const structureRelation = utterance.getRelation("SylStructure");
   const structureAncestor = (item: Item, type: string): Item | undefined => {
@@ -177,13 +194,13 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
   };
   const nextBoundary = (item: Item): Item | undefined => {
     const word = item.get("word");
-    if (typeof word !== "string" || item.get("phoneme") === "SIL") return undefined;
+    if (typeof word !== "string" || item.get("phoneme") === silenceSymbol()) return undefined;
     const start = items.indexOf(item);
     for (let candidateIndex = start + 1; candidateIndex < items.length; candidateIndex += 1) {
       const candidate = items[candidateIndex];
       const breakIndex = candidate.get("breakIndex");
       if (
-        candidate.get("phoneme") === "SIL" ||
+        candidate.get("phoneme") === silenceSymbol() ||
         candidate.get("punctuationSymbol") != null ||
         (typeof breakIndex === "number" && breakIndex >= 2)
       )
@@ -454,6 +471,7 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
         return Reflect.get(target, property, receiver);
       },
     }),
+    isNucleus,
     functions: {
       vocabulary: (table, key) => {
         const invalidLookup = (message: string): never => {
@@ -566,24 +584,28 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
       phone_count: () =>
         relationItems("Segment").filter((item) => {
           const phoneme = transaction.read(item, "phoneme");
-          return phoneme !== "SIL";
+          return phoneme !== silenceSymbol();
         }).length,
       clause_phone_count: () => {
         let left = index;
         let right = index;
-        while (left > 0 && transaction.read(items[left - 1], "phoneme") !== "SIL") left -= 1;
-        while (right + 1 < items.length && transaction.read(items[right + 1], "phoneme") !== "SIL")
+        while (left > 0 && transaction.read(items[left - 1], "phoneme") !== silenceSymbol())
+          left -= 1;
+        while (
+          right + 1 < items.length &&
+          transaction.read(items[right + 1], "phoneme") !== silenceSymbol()
+        )
           right += 1;
         let count = 0;
         for (let itemIndex = left; itemIndex <= right; itemIndex += 1) {
-          if (transaction.read(items[itemIndex], "phoneme") !== "SIL") count += 1;
+          if (transaction.read(items[itemIndex], "phoneme") !== silenceSymbol()) count += 1;
         }
         return count;
       },
       count_word_vowels: () => {
         const source = items[index];
         return source
-          ? wordSegments(source).filter((item) => transaction.read(item, "type") === "vowel").length
+          ? wordSegments(source).filter((item) => isNucleus(transaction.read(item, "type"))).length
           : 0;
       },
       cluster_position_in_word: () => {
@@ -591,10 +613,10 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
         if (!source) return 0;
         const segments = wordSegments(source);
         const sourceIndex = segments.indexOf(source);
-        if (sourceIndex < 0 || transaction.read(source, "type") === "vowel") return 0;
+        if (sourceIndex < 0 || isNucleus(transaction.read(source, "type"))) return 0;
         let position = 0;
         for (let itemIndex = sourceIndex - 1; itemIndex >= 0; itemIndex -= 1) {
-          if (transaction.read(segments[itemIndex], "type") === "vowel") break;
+          if (isNucleus(transaction.read(segments[itemIndex], "type"))) break;
           position += 1;
         }
         return position;
@@ -616,16 +638,16 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
       // ---------------------------------------------------------------------
       word_run_has_primary_stress: () => {
         const source = items[index];
-        if (!source || transaction.read(source, "phoneme") === "SIL") return false;
+        if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
         const word = transaction.read(source, "word");
         let hasPrimaryStress = false;
         for (let k = index; k >= 0; k -= 1) {
-          if (transaction.read(items[k], "phoneme") === "SIL") break;
+          if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
           if (transaction.read(items[k], "word") !== word) break;
           if (transaction.read(items[k], "stress") === 1) hasPrimaryStress = true;
         }
         for (let k = index + 1; k < items.length; k += 1) {
-          if (transaction.read(items[k], "phoneme") === "SIL") break;
+          if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
           if (transaction.read(items[k], "word") !== word) break;
           if (transaction.read(items[k], "stress") === 1) hasPrimaryStress = true;
         }
@@ -644,11 +666,11 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
       },
       is_first_primary_stress_in_word_run: () => {
         const source = items[index];
-        if (!source || transaction.read(source, "phoneme") === "SIL") return false;
+        if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
         if (transaction.read(source, "stress") !== 1) return false;
         const word = transaction.read(source, "word");
         for (let k = index - 1; k >= 0; k -= 1) {
-          if (transaction.read(items[k], "phoneme") === "SIL") break;
+          if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
           if (transaction.read(items[k], "word") !== word) break;
           if (transaction.read(items[k], "stress") === 1) return false;
         }
@@ -664,11 +686,11 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
       // so the run is not split by them. Citation: Silverman et al. 1992.
       is_last_in_word_run: () => {
         const source = items[index];
-        if (!source || transaction.read(source, "phoneme") === "SIL") return false;
+        if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
         const word = transaction.read(source, "word");
         const next = items[index + 1];
         if (!next) return true;
-        if (transaction.read(next, "phoneme") === "SIL") return true;
+        if (transaction.read(next, "phoneme") === silenceSymbol()) return true;
         return transaction.read(next, "word") !== word;
       },
       // Terminal punctuation of the current item's intonational phrase.
@@ -683,7 +705,7 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
       // boundary guard. Citations: Pierrehumbert 1980, Ladd 2008 Ch.3.
       phrase_terminal_punctuation: () => {
         for (let k = index; k < items.length; k += 1) {
-          if (transaction.read(items[k], "phoneme") === "SIL") {
+          if (transaction.read(items[k], "phoneme") === silenceSymbol()) {
             const punct = transaction.read(items[k], "punctuationSymbol");
             if (typeof punct === "string" && punct !== "") return punct;
           }
@@ -707,8 +729,8 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
           (item) => item.type.toLowerCase() === "segment",
         );
         const sourceIndex = segments.indexOf(source);
-        const nucleusIndex = segments.findIndex(
-          (item) => transaction.read(item, "type") === "vowel",
+        const nucleusIndex = segments.findIndex((item) =>
+          isNucleus(transaction.read(item, "type")),
         );
         if (sourceIndex < 0 || nucleusIndex < 0) return null;
         return sourceIndex < nucleusIndex
@@ -978,8 +1000,9 @@ function applyEffects(
           isPlainObject(params.policy) && isPlainObject(params.policy.duration)
             ? params.policy.duration
             : null;
-        const ratioKey =
-          type === "vowel" ? "incompressibility_ratio_vowel" : "incompressibility_ratio_consonant";
+        const ratioKey = context.isNucleus(type)
+          ? "incompressibility_ratio_vowel"
+          : "incompressibility_ratio_consonant";
         const ratio = policy?.[ratioKey];
         if (
           typeof inherent !== "number" ||

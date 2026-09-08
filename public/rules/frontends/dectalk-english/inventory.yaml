@@ -1,4 +1,10 @@
 version: v1
+# Engineering convention: CMU/ARPABET symbols and lexical stress suffixes.
+silence_symbol: SIL
+nucleus_types: [vowel]
+symbol_grammar: '[A-Z]+'
+stress_markers: {0: '0', 1: '1', 2: '2'}
+default_duration_ms: 30 # engineering estimate: duration for a target without dur
 secondary_stress_fallback:
   target: 1
   citations:
@@ -71,6 +77,7 @@ base_params:
   GO: 47
 phoneme_targets:
   SIL:
+    # DECtalk silence row; inherited base source params apply to omitted fields.
     TL: 0
     AV: 0
     dur: 305

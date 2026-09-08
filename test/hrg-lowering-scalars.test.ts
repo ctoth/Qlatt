@@ -390,6 +390,7 @@ describe("HRG lowering scalar histories", () => {
       }
       const lowered = lowerToFrames(utterance, baseline.policy, {
         silence: {
+          symbol: "SIL",
           initialParams,
           finalParams: productionFinal.params,
           decisionId: resourceDecision.id,

@@ -51,7 +51,7 @@ export function isVowel(phoneme: string, phonotacticsPath: string): boolean {
 function isLegalOnset(consonants: string[], phonotacticsPath: string): boolean {
   if (consonants.length <= 1) return true;
   const data = loadPhonotacticsSync(phonotacticsPath);
-  const key = consonants.join("");
+  const key = consonants.join(" ");
   return new Set(data.legal_onsets).has(key);
 }
 

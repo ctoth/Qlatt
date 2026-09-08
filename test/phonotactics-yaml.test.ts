@@ -20,7 +20,7 @@ interface PhonotacticsData {
 function isLegalOnset(consonants: string[]): boolean {
   if (consonants.length <= 1) return true;
   const data = loadYamlDocumentSync<PhonotacticsData>(PHONOTACTICS_PATH);
-  const key = consonants.join("");
+  const key = consonants.join(" ");
   return new Set(data.legal_onsets).has(key);
 }
 

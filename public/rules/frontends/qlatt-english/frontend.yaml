@@ -587,10 +587,6 @@ parameters:
         citations:
           - Ohman 1966
           - "Engineering estimate: conservative DAC weight to avoid over-compressing F2 after explicit consonant locus assignment"
-      nasal_n_f2_default:
-        value: 1400
-        citations:
-          - Allen et al. 1987 Ch.10 (nasal place assimilation F2 fallback)
       light_l_f2:
         value: 1300
         citations:
@@ -776,6 +772,10 @@ parameters:
         citations:
           - Peterson & Barney 1952 (midrange F3 default)
     nasal:
+      max_coupling_area_cm2:
+        value: 2.5
+        citations:
+          - Maeda 1993 (velopharyngeal port sweep 0 to 2.5 cm2)
       pole_base_hz:
         value: 250
         citations:
@@ -823,10 +823,10 @@ parameters:
           - Fujimura 1962
           - Stevens 1998 Ch.10
       anticipatory_peak:
-        value: 0.85
+        value: 2.125
         citations:
           - Hawkins & Stevens 1985
-          - "Engineering estimate: strong but not fully closed anticipatory coupling"
+          - "Engineering estimate: 0.85 of Maeda 1993 maximum 2.5 cm2 port area"
       anticipatory_stage_1_fraction:
         value: 0.33
         citations:
@@ -843,10 +843,10 @@ parameters:
           - Hawkins & Stevens 1985
           - "Engineering estimate: second anticipatory subwindow approaches full nasal coupling"
       carryover_peak:
-        value: 0.55
+        value: 1.375
         citations:
           - Hawkins & Stevens 1985
-          - "Engineering estimate: short post-nasal carryover is weaker than nasal murmur"
+          - "Engineering estimate: 0.55 of Maeda 1993 maximum 2.5 cm2 port area"
       carryover_stage_2_fraction:
         value: 0.5
         citations:
@@ -904,7 +904,7 @@ output:
   lowering:
     id: qlatt-english-track-lowering
     # Stable Klatt backend vocabulary captured by the production-frame oracle.
-    columns: [FTP, FTZ, BTP, BTZ, DF1, DB1, F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, AN, nasalCoupling, nasalPlaceIndex, nasalMurmurStrength, nasalPoleBaseHz, nasalPoleBwHz, nasalZeroBwHz, nasalPlaceBwHz, nasalPlaceMFnzHz, nasalPlaceNFnzHz, nasalPlaceNgFnzHz, nasalB1AdditionHz, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, Ac, Ug, fricPressureExponent, fricAreaExponent, fricFrontCavityCm, fricCavityQ, fricReferenceDb, fricParallelReferenceDb]
+    columns: [FTP, FTZ, BTP, BTZ, DF1, DB1, F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, AN, nasalCouplingArea, nasalPlaceIndex, nasalMurmurStrength, nasalPoleBwHz, nasalZeroBwHz, nasalPlaceBwHz, nasalPlaceMFnzHz, nasalPlaceNFnzHz, nasalPlaceNgFnzHz, nasalB1AdditionHz, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, Ac, Ug, fricPressureExponent, fricAreaExponent, fricFrontCavityCm, fricCavityQ, fricReferenceDb, fricParallelReferenceDb]
     timeline:
       initial_silence_ms:
         value: 30

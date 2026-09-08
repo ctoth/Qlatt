@@ -78,17 +78,16 @@ base_params:
   EePhraseDb: 0
   RdPhraseOffset: 0
   AN: 0
-  nasalCoupling: 0
-  nasalPlaceIndex: 0
-  nasalMurmurStrength: 0
-  nasalPoleBaseHz: 250
-  nasalPoleBwHz: 100
-  nasalZeroBwHz: 100
-  nasalPlaceBwHz: 100
-  nasalPlaceMFnzHz: 1000
-  nasalPlaceNFnzHz: 1700
-  nasalPlaceNgFnzHz: 6000  # Stevens 1998: /ng/ is all-pole; zero above audible range
-  nasalB1AdditionHz: 107
+  nasalCouplingArea: 0  # Maeda 1993: cm2, closed velopharyngeal port
+  nasalPlaceIndex: 0  # Recasens 1983 Table II place selector (0 = oral)
+  nasalMurmurStrength: 0  # Fujimura 1962; engineering normalized prominence
+  nasalPoleBwHz: 100  # Klatt 1980 Table I; extension to two pairs is an engineering estimate
+  nasalZeroBwHz: 100  # Klatt 1980 Table I
+  nasalPlaceBwHz: 100  # Klatt 1980 Table I; engineering extension to place zero
+  nasalPlaceMFnzHz: 1000  # Fujimura 1962 estimate; no /m/ NZ in Recasens Table II
+  nasalPlaceNFnzHz: 1780  # Recasens 1983 Table II, single-speaker NZ
+  nasalPlaceNgFnzHz: 3700  # Recasens 1983 Table II, single-speaker NZ
+  nasalB1AdditionHz: 107  # Chen 1997 secondary cue; engineering increment
   A1: 0
   A2: 0
   A3: 0
@@ -880,10 +879,13 @@ phoneme_targets:
     boundary_internal_ms: {F1: 0, F2: 0, F3: 0}
     boundary_citations:
       - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
-    F1: 250
-    F2: 1100
-    F3: 2500
-    B1: 300
+    # Recasens 1983 Table II single Catalan speaker: N1-N4 and N1 bandwidth.
+    # Engineering transfer to English; these are not population English means.
+    F1: 200
+    F2: 1120
+    F3: 1360
+    F4: 2100
+    B1: 160
     B2: 100
     B3: 150
     AV: 58
@@ -905,9 +907,11 @@ phoneme_targets:
     boundary_citations:
       - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     F1: 250
-    F2: 1400
-    F3: 2600
-    B1: 300
+    # Recasens 1983 Table II, same single-speaker series as M and NG.
+    F2: 850
+    F3: 1550
+    F4: 2025
+    B1: 180
     B2: 100
     B3: 150
     AV: 58
@@ -928,10 +932,12 @@ phoneme_targets:
     boundary_internal_ms: {F1: 0, F2: 0, F3: 0}
     boundary_citations:
       - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
-    F1: 250
-    F2: 1700
-    F3: 2800
-    B1: 300
+    # Recasens 1983 Table II, same single-speaker series as M and N.
+    F1: 350
+    F2: 1200
+    F3: 2030
+    F4: 2540
+    B1: 200
     B2: 100
     B3: 150
     AV: 58

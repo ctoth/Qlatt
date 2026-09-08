@@ -36,6 +36,7 @@ async function main(argv: string[]): Promise<number> {
 
   const frames = track.map((frame, index) => {
     const realized = topoEvaluator.evaluate(semantics, {
+      diagnostics,
       params: frame.params,
       constants: semantics.constants ?? {},
     }).values;
@@ -43,9 +44,10 @@ async function main(argv: string[]): Promise<number> {
       index,
       time: Number(frame.time.toFixed(4)),
       phoneme: frame.phoneme ?? null,
-      nasalCoupling: Number((frame.params.nasalCoupling ?? 0).toFixed(4)),
+      nasalCouplingArea: Number((frame.params.nasalCouplingArea ?? 0).toFixed(4)),
       nasalCoreFnz: realized.nasalCoreFnz ?? null,
-      nasalCoreFnzTarget: realized.nasalCoreFnzTarget ?? null,
+      nasalSecondPole: realized.nasalSecondPoleBound ?? null,
+      nasalSecondZero: realized.nasalSecondZeroBound ?? null,
       nasalPlaceFnz: realized.nasalPlaceFnz ?? null,
       nasalPlaceBnz: realized.nasalPlaceBnz ?? null,
     };

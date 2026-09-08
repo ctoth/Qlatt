@@ -13,6 +13,7 @@
  */
 
 import { getAudioParam } from "./audio-param-utils";
+import { createDiagnostics, type Diagnostics } from "./diagnostics";
 import type { BindingSpec, KlattRuntime } from "./klatt-runtime";
 import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
 import type { EvaluationContext, ParamValue, SemanticsDocument } from "./semantics/types";
@@ -66,6 +67,7 @@ type ScheduleEntry = {
 };
 
 export interface KlattInterpreterOptions {
+  diagnostics?: Diagnostics;
   audioContext: AudioContext;
   runtime: KlattRuntime;
   semantics: SemanticsDocument;
@@ -174,7 +176,14 @@ export function buildFrameContext(
 // =============================================================================
 
 export function createKlattInterpreter(options: KlattInterpreterOptions): KlattInterpreter {
-  const { audioContext, runtime, semantics, logger = () => {}, telemetryHandler } = options;
+  const {
+    audioContext,
+    runtime,
+    semantics,
+    logger = () => {},
+    telemetryHandler,
+    diagnostics = runtime.getDiagnostics?.() ?? createDiagnostics(),
+  } = options;
 
   const log = (msg: string) => logger(`[klatt-interpreter] ${msg}`);
 
@@ -298,6 +307,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     // Build EvaluationContext for topological evaluator
     // Functions are registered with CEL evaluator separately (lines 117-120)
     const context: EvaluationContext = {
+      diagnostics,
       params: flatContext as Record<string, ParamValue>,
       constants: semantics.constants ?? {},
     };

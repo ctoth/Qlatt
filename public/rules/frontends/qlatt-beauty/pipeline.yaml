@@ -215,6 +215,8 @@ relations:
       F1: []
       F2: []
       F3: []
+      F4: []
+      B1: []
       RdPhraseOffset: []
       SW: []
       TL: []
@@ -231,7 +233,7 @@ relations:
       isContentWord: []
       isFunctionWord: []
       isNuclearAccent: []
-      nasalCoupling: []
+      nasalCouplingArea: []
       nasalMurmurStrength: []
       nasalPlaceIndex: []
       phraseAccent: []
@@ -386,6 +388,7 @@ phases:
       - vowel_rate_undershoot
       - nasal_place_assignment
       - nasal_place_assimilation
+      - nasal_murmur_targets
       - nasal_windows
       - sw_explicit_override
       - sw_default_assignment

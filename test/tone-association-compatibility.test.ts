@@ -4,6 +4,8 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 // Capture the existing full track on the parent implementation before migrating
 // association. These are compatibility controls, not acoustic quality claims.
+// Issue 52's nasal vocabulary/target update was field-reviewed against master;
+// see docs/nasal-side-branch.md and scripts/review-nasal-track-snapshots.mjs.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

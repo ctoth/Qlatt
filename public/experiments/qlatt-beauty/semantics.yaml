@@ -300,11 +300,12 @@ params:
     unit: Hz
 
   # Declarative nasal subsystem controls
-  nasalCoupling:
-    description: "Velopharyngeal coupling ratio d = An / (An + Aoral)"
+  nasalCouplingArea:
+    diagnoseRange: true
+    description: "Maeda 1993 port area, cm2; converted to ratio for this experiment's solver"
     type: float
     default: 0
-    range: [0, 1]
+    range: [0, 2.5]
 
   nasalPlaceIndex:
     description: "0=none, 1=/m/, 2=/n/, 3=/ng/"
@@ -754,8 +755,9 @@ realize:
     description: "Reference LF return phase ratio from RdRef (Fant 1997 Eq. A1)."
 
   nasalCouplingClamped:
-    expr: "min(1.0, max(0.0, nasalCoupling))"
-    deps: [nasalCoupling]
+    # Shared frontend emits Maeda 1993 area; retain this experiment's ratio solver.
+    expr: "min(1.0, max(0.0, nasalCouplingArea / 2.5))"
+    deps: [nasalCouplingArea]
     description: "Clamp velopharyngeal coupling to [0,1]."
 
   nasalLegacyParamUsed:

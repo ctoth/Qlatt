@@ -26,6 +26,17 @@ function fixture() {
 }
 
 describe("runtime structural diagnostics", () => {
+  it("reports declared range observations through the runtime collector", async () => {
+    const { options, diagnostics } = fixture();
+    options.semantics.params = {
+      nasalCouplingArea: { default: 0, range: [0, 2.5], diagnoseRange: true },
+    };
+    const runtime = await createKlattRuntime(options);
+    runtime.setInputs({ nasalCouplingArea: 5 });
+    expect(diagnostics.getEntries()).toEqual([
+      expect.objectContaining({ code: "W_SEMANTICS_PARAM_RANGE" }),
+    ]);
+  });
   it("reports unsupported native bindings before construction", async () => {
     const { options, diagnostics, node } = fixture();
     options.registry.primitives.gain.native = "UnknownNode";

@@ -396,16 +396,32 @@ nodes:
   # NASAL RESONATORS
   # ---------------------------------------------------------------------------
 
-  # Nasal antiresonator (zero) — biquad notch filter
-  # Core oral/nasal cancellation pair. Oral speech keeps this active with
-  # FNZ = FNP rather than bypassing the tract section.
+  # Maeda 1993 / Feng & Castelli 1996 reduced two-pair vowel side branch.
+  # True inverse resonators permit pole-zero cancellation as area tends to zero.
+  # Both pairs bypass at zero area and during Table II murmur synthesis.
   nz:
-    type: biquad-notch
+    type: antiresonator
     options:
       bypassAtZero: true
     params:
       frequency: { bind: nasalCoreFnzBound }
       bandwidth: { bind: nasalCoreBnzBound }
+
+  nzSecond:
+    type: antiresonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: nasalSecondZeroBound }
+      bandwidth: { bind: nasalCoreBnzBound }
+
+  npSecond:
+    type: resonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: nasalSecondPoleBound }
+      bandwidth: { bind: nasalCoreBnpBound }
 
   # Place-specific oral cavity antiformant for nasal murmur.
   nzPlace:
@@ -431,8 +447,8 @@ nodes:
     options:
       bypassAtZero: true
     params:
-      frequency: { bind: nasalCoreFnpBound }
-      bandwidth: { bind: nasalCoreBnpBound }
+      frequency: { bind: F1 }  # Recasens 1983 Table II murmur N1
+      bandwidth: { bind: B1 }
 
   parallelNasalGain:
     type: gain
@@ -608,7 +624,9 @@ connections:
   # mathematically equivalent since cascaded filters commute.
   # ---------------------------------------------------------------------------
   - [mixer, nz]
-  - [nz, nzPlace]
+  - [nz, npSecond]
+  - [npSecond, nzSecond]
+  - [nzSecond, nzPlace]
   - [nzPlace, np]
   - [np, tz]
   - [tz, tp]

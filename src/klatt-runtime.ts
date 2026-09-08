@@ -612,6 +612,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   // Build evaluation context
   function buildContext(): EvaluationContext {
     return {
+      diagnostics,
       params: { ...currentInputs },
       constants: semantics.constants ?? {},
     };

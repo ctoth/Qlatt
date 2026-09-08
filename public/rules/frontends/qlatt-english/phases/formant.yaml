@@ -83,11 +83,13 @@ rules:
         op: set
         value: params.policy.nasal.murmur_strength
         tag: nasal_murmur
-      - field: nasalCoupling
+      - field: nasalCouplingArea
         op: set
-        value: 1
+        value: params.policy.nasal.max_coupling_area_cm2
         tag: nasal_coupling
     citations:
+      - Maeda 1993 (velopharyngeal port area)
+      - Recasens 1983 Table II (inventory murmur targets)
       - Fujimura 1962
       - Stevens 1998 (nasal consonant oral cavity zeros)
   nasal_place_assimilation:
@@ -111,19 +113,43 @@ rules:
             value: 3
           - default: 2
         tag: nasal_place
-      - field: F2
-        op: set
-        dispatch:
-          - when: next_bilabial
-            value: params.policy.formant.place_loci.bilabial.locus_default
-          - when: next_velar
-            value: "has(current.F2) ? current.F2 : params.policy.formant.nasal_n_f2_default"
-          - default: "has(current.F2) ? current.F2 : params.policy.formant.nasal_n_f2_default"
-        tag: nasal_place
     citations:
       - Allen et al. 1987
       - Fujimura 1962
       - Stevens 1998
+  nasal_murmur_targets:
+    kind: scalar
+    select:
+      relation: Segment
+      where: current.type == 'nasal'
+    define:
+      murmur_phone: "current.nasalPlaceIndex == 1 ? 'M' : (current.nasalPlaceIndex == 3 ? 'NG' : 'N')"
+    apply:
+      # Recasens 1983 separates steady murmur poles from vowel transitions.
+      # Select AFTER assimilation; do not leave N poles beneath an M/NG zero.
+      - field: F1
+        op: set
+        value: target(murmur_phone).F1
+        tag: nasal_murmur
+      - field: F2
+        op: set
+        value: target(murmur_phone).F2
+        tag: nasal_murmur
+      - field: F3
+        op: set
+        value: target(murmur_phone).F3
+        tag: nasal_murmur
+      - field: F4
+        op: set
+        value: target(murmur_phone).F4
+        tag: nasal_murmur
+      - field: B1
+        op: set
+        value: target(murmur_phone).B1
+        tag: nasal_murmur
+    citations:
+      - Recasens 1983 Table II (N1-N4 and N1 bandwidth from the selected inventory)
+      - "Engineering estimate: transfer Catalan single-speaker murmur targets to English"
   nasal_windows:
     kind: scalar
     select:
@@ -151,7 +177,7 @@ rules:
                 start_ms: anticipatory_start_ms
                 end_ms: anticipatory_stage_1_end_ms
                 fields:
-                  nasalCoupling:
+                  nasalCouplingArea:
                     op: "'set'"
                     value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_1_fraction"
                 tag: "'nasal_coupling'"
@@ -159,7 +185,7 @@ rules:
                 start_ms: anticipatory_stage_1_end_ms
                 end_ms: anticipatory_midpoint_ms
                 fields:
-                  nasalCoupling:
+                  nasalCouplingArea:
                     op: "'set'"
                     value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_midpoint_fraction"
                 tag: "'nasal_coupling'"
@@ -167,7 +193,7 @@ rules:
                 start_ms: anticipatory_midpoint_ms
                 end_ms: "prev != null ? prev.duration : 0"
                 fields:
-                  nasalCoupling:
+                  nasalCouplingArea:
                     op: "'set'"
                     value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_2_fraction"
                 tag: "'nasal_coupling'"
@@ -175,7 +201,7 @@ rules:
                 start_ms: 0
                 end_ms: carryover_stage_1_end_ms
                 fields:
-                  nasalCoupling:
+                  nasalCouplingArea:
                     op: "'set'"
                     value: params.policy.nasal.carryover_peak
                 tag: "'nasal_coupling'"
@@ -183,7 +209,7 @@ rules:
                 start_ms: carryover_stage_1_end_ms
                 end_ms: params.policy.nasal.vowel_decay_ms
                 fields:
-                  nasalCoupling:
+                  nasalCouplingArea:
                     op: "'set'"
                     value: "params.policy.nasal.carryover_peak * params.policy.nasal.carryover_stage_2_fraction"
                 tag: "'nasal_coupling'"
@@ -193,7 +219,7 @@ rules:
                 start_ms: anticipatory_start_ms
                 end_ms: anticipatory_stage_1_end_ms
                 fields:
-                  nasalCoupling:
+                  nasalCouplingArea:
                     op: "'set'"
                     value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_1_fraction"
                 tag: "'nasal_coupling'"
@@ -201,7 +227,7 @@ rules:
                 start_ms: anticipatory_stage_1_end_ms
                 end_ms: anticipatory_midpoint_ms
                 fields:
-                  nasalCoupling:
+                  nasalCouplingArea:
                     op: "'set'"
                     value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_midpoint_fraction"
                 tag: "'nasal_coupling'"
@@ -209,7 +235,7 @@ rules:
                 start_ms: anticipatory_midpoint_ms
                 end_ms: "prev != null ? prev.duration : 0"
                 fields:
-                  nasalCoupling:
+                  nasalCouplingArea:
                     op: "'set'"
                     value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_2_fraction"
                 tag: "'nasal_coupling'"
@@ -219,7 +245,7 @@ rules:
                 start_ms: 0
                 end_ms: carryover_stage_1_end_ms
                 fields:
-                  nasalCoupling:
+                  nasalCouplingArea:
                     op: "'set'"
                     value: params.policy.nasal.carryover_peak
                 tag: "'nasal_coupling'"
@@ -227,7 +253,7 @@ rules:
                 start_ms: carryover_stage_1_end_ms
                 end_ms: params.policy.nasal.vowel_decay_ms
                 fields:
-                  nasalCoupling:
+                  nasalCouplingArea:
                     op: "'set'"
                     value: "params.policy.nasal.carryover_peak * params.policy.nasal.carryover_stage_2_fraction"
                 tag: "'nasal_coupling'"
@@ -235,6 +261,7 @@ rules:
         tag: nasal_window
     citations:
       - Hawkins & Stevens 1985 (time-varying anticipatory and carryover nasalization)
+      - Maeda 1993 (coupling area in cm2; engineering scaling of the existing timing envelope)
       - Chen 1997 (nasalized vowel secondary cues)
       - Fujimura 1962
   dark_l_allophony:

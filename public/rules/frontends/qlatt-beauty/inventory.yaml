@@ -73,7 +73,7 @@ base_params:
   EePhraseDb: 0
   RdPhraseOffset: 0
   AN: 0
-  nasalCoupling: 0
+  nasalCouplingArea: 0  # Maeda 1993 port area, cm2
   nasalPlaceIndex: 0
   nasalMurmurStrength: 0
   nasalPoleBaseHz: 250

@@ -12,6 +12,24 @@
 # Source: DECtalk 4.63 dapi/src (ph_vdef.c, phinton.c, COEWAV.FOR)
 
 params:
+  # DECtalk's graph binds the Klatt 1980 raw nasal controls directly.
+  # These belong to this experiment, not the area-controlled baseline solver.
+  FNP:
+    type: float
+    default: 0
+    unit: Hz
+  FNZ:
+    type: float
+    default: 0
+    unit: Hz
+  BNP:
+    type: float
+    default: 0
+    unit: Hz
+  BNZ:
+    type: float
+    default: 0
+    unit: Hz
   # Preserve this experiment's documented eight-stage cascade.
   NFC:
     type: int

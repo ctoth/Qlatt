@@ -2,6 +2,8 @@
  * Qlatt Semantics Type Definitions
  */
 
+import type { Diagnostics } from "../diagnostics";
+
 /** CEL expression string */
 export type CelExpression = string;
 
@@ -10,6 +12,7 @@ export type ParamValue = number | string | boolean;
 
 /** Context for expression evaluation */
 export interface EvaluationContext {
+  diagnostics?: Diagnostics;
   params: Record<string, ParamValue>;
   constants: Record<string, ParamValue | Record<string, ParamValue>>;
   [key: string]: unknown;
@@ -58,6 +61,8 @@ export interface SemanticsDocument {
 
 /** Parameter definition */
 export interface ParamDefinition {
+  /** Report inputs outside range; realization rules still own the response. */
+  diagnoseRange?: boolean;
   type?: "float" | "int" | "bool";
   range?: [number, number];
   default?: ParamValue;

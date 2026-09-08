@@ -254,6 +254,14 @@ the static documents validate without knowledge of Qlatt's macros. Audio-rate
 connections into node parameters are first-class in the schema
 (`to: { node, param }`).
 
+## Frontend tone association
+
+The frontend host also implements the structural `associate_tones` action and
+optional point `tone` selector specified in [Declarative tone association](tone-association.md).
+These operate on HRG Items, associations and transaction provenance before
+lowering; a native frontend host must preserve their ordered mapping, atomic
+rejection, alignment validation and replay semantics.
+
 ## Known gaps (2026-07-22)
 
 - CEL dialect parity between `cel-js` and a native CEL implementation

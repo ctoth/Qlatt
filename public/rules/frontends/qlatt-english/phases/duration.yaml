@@ -187,6 +187,24 @@ rules:
       # Check if the segment after next is SIL or null (phrase-final position)
       a1: ahead(current, 2)
       is_phrase_final: "a1 == null ? true : (a1.phoneme == 'SIL')"
+      # Klatt 1976 Eq.1: multipliers operate on the compressible interval.
+      duration_floor: >-
+        has(current.durationFloor) ? current.durationFloor :
+        current.inherentDuration * params.policy.duration.incompressibility_ratio_vowel
+      voiced_stop_ms: >-
+        duration_floor + params.policy.duration.vowel_shortening_voiced_stop_multiplier
+        * (current.duration - duration_floor)
+      # Chen 1970 Table V p.138: English total vowel duration ratio 146/238.
+      # Engineering adaptation: calibrate the adjacent-stop branch to this
+      # aggregate ratio, retaining the existing voiced reference and hard floor.
+      # Invert Klatt Eq.1 so the ratio applies to total duration, not just its
+      # compressible portion; a vowel already at the floor stays there.
+      voiceless_stop_factor: >-
+        current.duration > duration_floor
+        ? (voiced_stop_ms * params.policy.duration.vowel_before_voiceless_mean_ms
+          / params.policy.duration.vowel_before_voiced_mean_ms - duration_floor)
+          / (current.duration - duration_floor)
+        : 1
     apply:
       - field: duration
         op: mul
@@ -206,12 +224,14 @@ rules:
           - when: "n == null ? false : n.type == 'nasal'"
             value: params.policy.duration.vowel_shortening_nasal_multiplier
           - when: "n == null ? false : (has(n.voiceless) && n.voiceless == true && n.type in ['stop', 'stop_closure'])"
-            value: params.policy.duration.vowel_shortening_voiceless_stop_multiplier
+            value: voiceless_stop_factor
           - default: 1
         tag: segmental_context
     citations:
-      - Allen et al. 1987 Ch.9 Rule 9 (postvocalic context percentages 120/160/120/85/70)
+      - Allen et al. 1987 Ch.9 Rule 9 (retained voiced and nasal context percentages)
       - "Engineering estimate: retained phrase-medial voiced-fricative K=1.1 rather than MITalk's 70 + 0.3*PRCNT1 adjustment"
+      - "Chen 1970 Table V p.138 (English voiceless/voiced vowel means 146/238 ms)"
+      - "Engineering adaptation: adjacent-stop ratio calibration preserves the voiced reference and Klatt incompressibility floor"
   accent_vowel_lengthening:
     kind: scalar
     select:

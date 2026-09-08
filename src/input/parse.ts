@@ -38,6 +38,7 @@ import {
   materializeVoiceQualityDelta,
   scaleVoiceQualityDelta,
 } from "./direction-track";
+import { VQ_FIELDS } from "./vq-channels";
 
 /** The kind of resolved direction (drives the tag + downstream HRG relation). */
 export type DirectionKind =
@@ -107,23 +108,9 @@ export interface ParseOptions {
   provenance?: ProvenanceCollector;
 }
 
-const DELTA_FIELDS = {
-  rdDelta: { kind: "number" },
-  f0Scale: { kind: "number" },
-  f0VarianceScale: { kind: "number" },
-  durationScale: { kind: "number" },
-  intensityBoost: { kind: "number" },
-  ahBoost: { kind: "number" },
-  spectralTiltBoost: { kind: "number" },
-  pauseScale: { kind: "number" },
-  f1Delta: { kind: "number" },
-  f2Delta: { kind: "number" },
-  f3Delta: { kind: "number" },
-  fbw1Scale: { kind: "number" },
-  fbw2Scale: { kind: "number" },
-  fbw3Scale: { kind: "number" },
-  jitterScale: { kind: "number" },
-} as const;
+const DELTA_FIELDS = Object.fromEntries(
+  VQ_FIELDS.map((field) => [field, { kind: "number" } as const]),
+);
 const ALL_DELTA_FIELDS = Object.freeze(Object.keys(DELTA_FIELDS));
 
 /** Item schema consumed by the HRG attachment stage for resolved directions. */

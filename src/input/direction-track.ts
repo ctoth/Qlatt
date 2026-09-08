@@ -31,6 +31,7 @@
  */
 
 import type { AffectCategory } from "./affect";
+import { VQ_MULTIPLICATIVE_FIELDS, VQ_NEUTRAL } from "./vq-channels";
 
 /** A leaf scalar modifier value. */
 export type DeltaValue = number;
@@ -43,6 +44,7 @@ export type DeltaValue = number;
  * projects/voice-quality-synthesis §2.4–2.10.
  */
 export interface VoiceQualityDelta {
+  [channel: string]: DeltaValue;
   /** Glottal source shape delta (Fant Rd). Negative = pressed, positive = breathy. */
   rdDelta: DeltaValue;
   /** Mean-F0 multiplier (Rutledge_1995 F0×norm column). */
@@ -72,23 +74,7 @@ export interface VoiceQualityDelta {
 }
 
 /** The neutral baseline: applying this to any render is a no-op (the (c) case). */
-export const NEUTRAL_VQ: Readonly<VoiceQualityDelta> = Object.freeze({
-  rdDelta: 0,
-  f0Scale: 1,
-  f0VarianceScale: 1,
-  durationScale: 1,
-  intensityBoost: 0,
-  ahBoost: 0,
-  spectralTiltBoost: 0,
-  pauseScale: 1,
-  f1Delta: 0,
-  f2Delta: 0,
-  f3Delta: 0,
-  fbw1Scale: 1,
-  fbw2Scale: 1,
-  fbw3Scale: 1,
-  jitterScale: 1,
-});
+export const NEUTRAL_VQ = VQ_NEUTRAL as Readonly<VoiceQualityDelta>;
 
 /**
  * Which fields are multiplicative (neutral = 1) vs additive (neutral = 0).
@@ -96,16 +82,7 @@ export const NEUTRAL_VQ: Readonly<VoiceQualityDelta> = Object.freeze({
  * neutral to the full preset (the Azure `styledegree` / Alexa `intensity`
  * continuous-degree pattern).
  */
-export const MULTIPLICATIVE_VQ_FIELDS: ReadonlyArray<keyof VoiceQualityDelta> = [
-  "f0Scale",
-  "f0VarianceScale",
-  "durationScale",
-  "pauseScale",
-  "fbw1Scale",
-  "fbw2Scale",
-  "fbw3Scale",
-  "jitterScale",
-];
+export const MULTIPLICATIVE_VQ_FIELDS = VQ_MULTIPLICATIVE_FIELDS;
 
 /** The dimensional substrate: valence × arousal × dominance, each in [-1, 1]. */
 export interface DimensionalVector {
@@ -302,7 +279,7 @@ export const GESTURE_LIBRARY: Readonly<Record<GestureName, GestureDefinition>> =
 
 /** True if `field` is a multiplicative (neutral = 1) VQ field. */
 export function isMultiplicativeField(field: keyof VoiceQualityDelta): boolean {
-  return MULTIPLICATIVE_VQ_FIELDS.includes(field);
+  return typeof field === "string" && MULTIPLICATIVE_VQ_FIELDS.includes(field);
 }
 
 /**
@@ -317,7 +294,7 @@ export function scaleVoiceQualityDelta(
   const d = clampUnit(degree);
   const out = { ...NEUTRAL_VQ } as VoiceQualityDelta;
   for (const key of Object.keys(NEUTRAL_VQ) as Array<keyof VoiceQualityDelta>) {
-    const value = delta[key];
+    const value = delta[key] ?? NEUTRAL_VQ[key];
     out[key] = nz(isMultiplicativeField(key) ? 1 + (value - 1) * d : value * d);
   }
   return out;
@@ -347,11 +324,12 @@ export function composeVoiceQualityDelta(
   base: VoiceQualityDelta,
   over: Partial<VoiceQualityDelta>,
 ): VoiceQualityDelta {
-  const out = { ...base };
+  const out = { ...NEUTRAL_VQ, ...base };
   for (const key of Object.keys(NEUTRAL_VQ) as Array<keyof VoiceQualityDelta>) {
     const o = over[key];
     if (o === undefined) continue;
-    out[key] = isMultiplicativeField(key) ? base[key] * o : base[key] + o;
+    const value = base[key] ?? NEUTRAL_VQ[key];
+    out[key] = isMultiplicativeField(key) ? value * o : value + o;
   }
   return out;
 }

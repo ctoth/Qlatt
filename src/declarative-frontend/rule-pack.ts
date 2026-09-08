@@ -403,7 +403,9 @@ function validationInventoryPhonemes(inventory: InventorySpec | null): string[] 
   const symbols = new Set(Object.keys(inventory.normalization_aliases ?? {}));
   for (const phoneme of Object.keys(inventory.phoneme_targets)) {
     symbols.add(phoneme);
-    symbols.add(phoneme.replace(/[01]$/, ""));
+    for (const marker of Object.values(inventory.stress_markers)) {
+      if (phoneme.endsWith(marker)) symbols.add(phoneme.slice(0, -marker.length));
+    }
   }
   return [...symbols];
 }

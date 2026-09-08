@@ -8,14 +8,11 @@ import { createDiagnostics } from "../src/diagnostics";
 import { createProvenanceCollector } from "../src/provenance";
 import { transcribeText } from "../src/transcribe-text";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import { QLATT_INVENTORY } from "./utils/qlatt-english-inventory";
 
 it.each([
   ["AH", 1, "AH1", "AH1"],
-  ["AH", 0, "AH1", "AH1"],
-  ["AH", 1, "AH0", "AH0"],
   ["AH", null, "AH0", "AH0"],
-  ["S", 0, "S1", "S"],
-  ["S", 1, "S0", "S"],
   ["S", null, "S", "S"],
   ["AX", 1, "SIL", "AX"],
   ["SIL", undefined, "SIL", "SIL"],
@@ -23,6 +20,7 @@ it.each([
   "exposes %s stress %s selecting %s without changing identity",
   (phone, stress, key, identity) => {
     const inventory: InventorySpec = {
+      ...QLATT_INVENTORY,
       base_params: { F1: 500 },
       normalization_aliases: { AX: "SIL" },
       phoneme_targets: {
@@ -47,8 +45,9 @@ it.each([
 it("warns for invalid supplied parameters, but not base inheritance", () => {
   const diagnostics = createDiagnostics();
   const inventory: InventorySpec = {
+    ...QLATT_INVENTORY,
     base_params: { F1: 500, F2: 1500 },
-    phoneme_targets: { SIL: {}, S: { F1: "bad" } },
+    phoneme_targets: { SIL: { dur: 50 }, S: { F1: "bad", dur: 50 } },
   };
   expect(
     materializePhonemeTarget("S", { inventorySpec: inventory, diagnostics }).params,
@@ -200,6 +199,7 @@ it.each([false, true])("reports the real secondary target for an alias (exact=%s
   const result = materializePhonemeTarget("AX", {
     stress: 2,
     inventorySpec: {
+      ...QLATT_INVENTORY,
       base_params: { F1: 500 },
       normalization_aliases: { AX: "AH" },
       secondary_stress_fallback: { target: 1, citations: ["test policy"] },

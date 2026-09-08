@@ -3,8 +3,11 @@ import {
   type InventorySpec,
   materializePhonemeTarget,
 } from "../src/declarative-frontend/inventory";
+import { QLATT_INVENTORY } from "./utils/qlatt-english-inventory";
 
 const inventory: InventorySpec = {
+  ...QLATT_INVENTORY,
+  secondary_stress_fallback: undefined,
   base_params: { F1: 500 },
   phoneme_targets: {
     AH0: { type: "vowel", F1: 300 },

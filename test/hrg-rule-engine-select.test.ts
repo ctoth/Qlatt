@@ -6,6 +6,7 @@ import {
   runGraphRuleEngine,
 } from "../src/declarative-frontend/hrg/rule-engine";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
+import { qlattInventoryResource } from "./utils/qlatt-english-inventory";
 
 const SCHEMA = {
   itemTypes: {
@@ -194,6 +195,7 @@ describe("graph-native rule engine select/scalar execution", () => {
           },
         },
       },
+      inventory: qlattInventoryResource(utterance),
     });
 
     expect(stop.get("duration")).toBe(50);

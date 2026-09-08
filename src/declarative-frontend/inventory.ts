@@ -11,6 +11,11 @@ import {
 import { parseRecognitionConfig } from "./recognition-config";
 
 export type InventorySpec = {
+  silence_symbol: string;
+  nucleus_types: readonly string[];
+  symbol_grammar: string;
+  stress_markers: Readonly<Record<number, string>>;
+  default_duration_ms: number;
   citations?: readonly string[];
   base_params: Record<string, number>;
   normalization_aliases?: Readonly<Record<string, string>>;
@@ -18,22 +23,22 @@ export type InventorySpec = {
   phoneme_targets: Record<string, Record<string, unknown>>;
 };
 
-/**
- * Source parameters that force silence when a segment has no inventory target.
- * Klatt (1980) expresses the source amplitudes AV/AF/AH in dB with 0 dB = off,
- * and F0 = 0 disables the voicing source. AVS is driven to its floor; the
- * -70 dB value is an engineering estimate (effectively -inf), not a tabulated
- * Klatt constant.
- */
-const SILENCE_PARAMS = Object.freeze({ AV: 0, AF: 0, AH: 0, AVS: -70, F0: 0 });
-
-/**
- * Fallback segment duration (ms) used when a phoneme target declares no `dur`.
- * Klatt (1976) reports inherent segment durations well above this; 30 ms is a
- * short non-zero floor so a duration-less target still yields an audible frame.
- * engineering estimate — not a tabulated Klatt value.
- */
-const DEFAULT_SEGMENT_DURATION_MS = 30;
+/** Decode the selected inventory's suffix convention, then validate its alphabet. */
+export function parseInventorySymbol(
+  symbol: string,
+  inventory: InventorySpec,
+): { phoneme: string; stress: number | null } | null {
+  if (symbol === inventory.silence_symbol) return { phoneme: symbol, stress: null };
+  const grammar = new RegExp(`^(?:${inventory.symbol_grammar})$`, "u");
+  for (const [stress, marker] of Object.entries(inventory.stress_markers).sort(
+    (a, b) => b[1].length - a[1].length,
+  )) {
+    if (!symbol.endsWith(marker)) continue;
+    const phoneme = symbol.slice(0, -marker.length);
+    if (grammar.test(phoneme)) return { phoneme, stress: Number(stress) };
+  }
+  return grammar.test(symbol) ? { phoneme: symbol, stress: null } : null;
+}
 
 /**
  * Resources loaded from a frontend.yaml spec.
@@ -93,10 +98,6 @@ function normalizePhonemeTargets(node: unknown): Record<string, Record<string, u
     }
     if (Object.hasOwn(target, "duration_model")) validateDurationModel(target.duration_model);
     output[phoneme] = cloneValue(target) as Record<string, unknown>;
-  }
-
-  if (!Object.hasOwn(output, "SIL")) {
-    throw new Error("E_INVENTORY_SCHEMA: phoneme_targets.SIL is required");
   }
 
   return output;
@@ -172,6 +173,7 @@ function applyDurationModels(raw: unknown, targets: Record<string, Record<string
 function normalizeNormalizationAliases(
   node: unknown,
   targets: Record<string, Record<string, unknown>>,
+  markers: Readonly<Record<number, string>>,
 ): Readonly<Record<string, string>> {
   if (node == null) return Object.freeze({});
   if (!isPlainObject(node)) {
@@ -182,7 +184,7 @@ function normalizeNormalizationAliases(
     if (alias.length === 0 || typeof target !== "string" || target.length === 0) {
       throw new Error(`E_INVENTORY_SCHEMA: normalization_aliases.${alias} must name a target`);
     }
-    if (!targets[target] && !targets[`${target}0`] && !targets[`${target}1`]) {
+    if (!targets[target] && !Object.values(markers).some((marker) => targets[target + marker])) {
       throw new Error(
         `E_INVENTORY_SCHEMA: normalization_aliases.${alias} references unknown target '${target}'`,
       );
@@ -208,13 +210,56 @@ function normalizeSecondaryFallback(raw: unknown): InventorySpec["secondary_stre
   return { target: raw.target, citations: [...raw.citations] };
 }
 
-function parseInventorySpec(source: string): InventorySpec {
+export function parseInventorySpec(source: string): InventorySpec {
   const raw = parseYamlString(source, "inventory spec");
   if (!isPlainObject(raw)) {
     throw new Error("E_INVENTORY_SCHEMA: inventory spec must be a YAML object document");
   }
 
   const phonemeTargets = normalizePhonemeTargets(raw.phoneme_targets);
+  if (
+    typeof raw.silence_symbol !== "string" ||
+    !raw.silence_symbol.trim() ||
+    !phonemeTargets[raw.silence_symbol]
+  )
+    throw new Error("E_INVENTORY_SCHEMA: silence_symbol must name a declared target");
+  if (
+    !Array.isArray(raw.nucleus_types) ||
+    !raw.nucleus_types.length ||
+    raw.nucleus_types.some((t) => typeof t !== "string" || !t.trim())
+  )
+    throw new Error("E_INVENTORY_SCHEMA: nucleus_types must contain non-empty type names");
+  if (typeof raw.symbol_grammar !== "string" || !raw.symbol_grammar.trim())
+    throw new Error("E_INVENTORY_SCHEMA: symbol_grammar is required");
+  try {
+    new RegExp(`^(?:${raw.symbol_grammar})$`, "u");
+  } catch {
+    throw new Error(
+      "E_INVENTORY_SCHEMA: symbol_grammar must be a valid Unicode regular expression",
+    );
+  }
+  const rawMarkers = raw.stress_markers;
+  if (
+    !isPlainObject(rawMarkers) ||
+    Object.keys(rawMarkers).length !== 3 ||
+    ![0, 1, 2].every(
+      (stress) => typeof rawMarkers[stress] === "string" && String(rawMarkers[stress]).length > 0,
+    ) ||
+    new Set(Object.values(rawMarkers)).size !== 3
+  )
+    throw new Error(
+      "E_INVENTORY_SCHEMA: stress_markers requires distinct non-empty suffixes for 0, 1, 2",
+    );
+  const markers = raw.stress_markers as Record<number, string>;
+  if (
+    typeof raw.default_duration_ms !== "number" ||
+    !Number.isFinite(raw.default_duration_ms) ||
+    raw.default_duration_ms <= 0
+  )
+    throw new Error("E_INVENTORY_SCHEMA: default_duration_ms must be positive and finite");
+  const silence = phonemeTargets[raw.silence_symbol];
+  if (typeof silence.dur !== "number" || !Number.isFinite(silence.dur) || silence.dur <= 0)
+    throw new Error("E_INVENTORY_SCHEMA: silence target requires a positive finite dur");
   const citations = raw.citations ?? [];
   if (
     !Array.isArray(citations) ||
@@ -224,9 +269,18 @@ function parseInventorySpec(source: string): InventorySpec {
   }
   applyDurationModels(raw.duration_models, phonemeTargets);
   return {
+    silence_symbol: raw.silence_symbol,
+    nucleus_types: [...raw.nucleus_types] as string[],
+    symbol_grammar: raw.symbol_grammar,
+    stress_markers: { ...markers },
+    default_duration_ms: raw.default_duration_ms,
     citations: [...citations],
     base_params: normalizeBaseParams(raw.base_params),
-    normalization_aliases: normalizeNormalizationAliases(raw.normalization_aliases, phonemeTargets),
+    normalization_aliases: normalizeNormalizationAliases(
+      raw.normalization_aliases,
+      phonemeTargets,
+      markers,
+    ),
     secondary_stress_fallback: normalizeSecondaryFallback(raw.secondary_stress_fallback),
     phoneme_targets: phonemeTargets,
   };
@@ -283,6 +337,7 @@ export type InventoryParameterFallback = {
 };
 
 export type InventorySelection = {
+  defaultDurationMs?: number;
   inputPhone: string;
   stress: number | null;
   lookupKey: string;
@@ -303,7 +358,7 @@ export function reportInventoryParameterFallbacks(
 }
 
 export function fillDefaultParams(
-  target: Record<string, unknown> | null | undefined,
+  target: Record<string, unknown>,
   baseParams: Record<string, number>,
   options: {
     diagnostics?: Diagnostics | null;
@@ -326,13 +381,6 @@ export function fillDefaultParams(
         else affected.push(fallback);
       }
     }
-  } else {
-    // If no target provided, ensure output is silent.
-    filled.AV = SILENCE_PARAMS.AV;
-    filled.AF = SILENCE_PARAMS.AF;
-    filled.AH = SILENCE_PARAMS.AH;
-    filled.AVS = SILENCE_PARAMS.AVS;
-    filled.F0 = SILENCE_PARAMS.F0;
   }
 
   reportInventoryParameterFallbacks(options.diagnostics, affected);
@@ -364,18 +412,17 @@ export function materializePhonemeTarget(
   let target: Record<string, unknown> | undefined;
 
   if (options && "stress" in options) {
-    // Determine whether the base phoneme is a vowel by probing stressed variants
-    // (vowels only exist in inventory as e.g. AH1/AH0, never bare AH).
+    const markers = options.inventorySpec.stress_markers;
     const probeTarget =
-      effectiveTargets[lookupKey + "2"] ||
-      effectiveTargets[lookupKey + "1"] ||
-      effectiveTargets[lookupKey + "0"] ||
-      effectiveTargets[lookupKey];
-    const isVowel = (probeTarget as Record<string, unknown> | undefined)?.type === "vowel";
+      Object.values(markers)
+        .map((marker) => effectiveTargets[lookupKey + marker])
+        .find(Boolean) || effectiveTargets[lookupKey];
+    const isNucleus = options.inventorySpec.nucleus_types.includes(String(probeTarget?.type));
 
-    if (isVowel) {
-      const stressMarker = options.stress === 2 ? "2" : options.stress === 1 ? "1" : "0";
-      const fallbackMarker = stressMarker === "1" ? "0" : "1";
+    if (isNucleus) {
+      const stressMarker = markers[options.stress ?? 0];
+      if (stressMarker === undefined)
+        throw new Error(`E_STRESS_TARGET: undeclared stress ${options.stress}`);
       target = effectiveTargets[lookupKey + stressMarker] as Record<string, unknown> | undefined;
       if (target) {
         selectedKey = lookupKey + stressMarker;
@@ -385,29 +432,19 @@ export function materializePhonemeTarget(
           options.inventorySpec.secondary_stress_fallback,
         );
         if (!fallback)
-          throw new Error(`E_STRESS_TARGET: ${lookupKey}2 requires a cited realization policy`);
-        target = effectiveTargets[lookupKey + fallback.target];
-        selectedKey = lookupKey + fallback.target;
-        secondaryStressFallback = true;
-        if (!target)
           throw new Error(
-            `E_STRESS_TARGET: declared target ${lookupKey}${fallback.target} is absent`,
+            `E_STRESS_TARGET: ${lookupKey}${stressMarker} requires a cited realization policy`,
           );
-        resolvedKey = phoneme === lookupKey ? lookupKey + fallback.target : phoneme;
+        target = effectiveTargets[lookupKey + markers[fallback.target]];
+        selectedKey = lookupKey + markers[fallback.target];
+        secondaryStressFallback = true;
+        if (!target) throw new Error(`E_STRESS_TARGET: declared target ${selectedKey} is absent`);
+        resolvedKey = phoneme === lookupKey ? selectedKey : phoneme;
       } else {
-        target = effectiveTargets[lookupKey + fallbackMarker] as
-          | Record<string, unknown>
-          | undefined;
-        if (target) {
-          selectedKey = lookupKey + fallbackMarker;
-          resolvedKey = phoneme === lookupKey ? lookupKey + fallbackMarker : phoneme;
-        }
+        throw new Error(`E_STRESS_TARGET: requested target ${lookupKey}${stressMarker} is absent`);
       }
     } else {
-      // Consonant: try with suffixes then bare key (matches original frontend logic)
-      selectedKey =
-        [lookupKey + "1", lookupKey + "0", lookupKey].find((key) => effectiveTargets[key]) ??
-        lookupKey;
+      // Stress suffixes select nucleus targets only.
       target = effectiveTargets[selectedKey];
     }
   } else {
@@ -420,6 +457,12 @@ export function materializePhonemeTarget(
   }
 
   const targetDuration = typeof target.dur === "number" ? target.dur : undefined;
+  if (targetDuration === undefined)
+    options.diagnostics?.warn(
+      "Inventory target uses the declared default duration",
+      { selectedKey, applied: options.inventorySpec.default_duration_ms },
+      "INVENTORY_DURATION_DEFAULT",
+    );
   if (Object.hasOwn(target, "duration_model")) validateDurationModel(target.duration_model);
 
   // Use the effective base params for filling defaults.
@@ -438,6 +481,9 @@ export function materializePhonemeTarget(
     lookupKey,
     selectedKey,
     secondaryStressFallback,
+    ...(targetDuration === undefined
+      ? { defaultDurationMs: options.inventorySpec.default_duration_ms }
+      : {}),
   });
 
   const payload: {
@@ -449,7 +495,7 @@ export function materializePhonemeTarget(
   } = {
     phoneme: resolvedKey,
     params: filledParams,
-    duration: targetDuration || DEFAULT_SEGMENT_DURATION_MS,
+    duration: targetDuration || options.inventorySpec.default_duration_ms,
     inherentDuration: targetDuration,
   };
 

@@ -3,6 +3,7 @@ import type { HrgSchema } from "../src/declarative-frontend/hrg";
 import { Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
+import { QLATT_INVENTORY, qlattInventoryResource } from "./utils/qlatt-english-inventory";
 
 const SCHEMA = {
   itemTypes: {
@@ -172,7 +173,7 @@ describe("graph-native predicate navigation", () => {
       phases: [{ name: "rules", rules: ["graph_queries"] }],
     });
 
-    runGraphRuleEngine(utterance, spec);
+    runGraphRuleEngine(utterance, spec, { inventory: qlattInventoryResource(utterance) });
 
     expect(utterance.getItem("er")?.get("duration")).toBe(253);
     expect(utterance.getItem("er")?.latestWrite("duration")?.parents).toContain(
@@ -217,6 +218,7 @@ describe("graph-native predicate navigation", () => {
       inventory: {
         decisionId: resource.id,
         spec: {
+          ...QLATT_INVENTORY,
           base_params: { F0: 0 },
           phoneme_targets: {
             REL: { type: "stop_release", dur: 20, F0: 0 },

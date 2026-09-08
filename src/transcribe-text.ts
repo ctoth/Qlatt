@@ -15,7 +15,7 @@ import { DEFAULT_CMU_DICTIONARY_PATH, preloadCmuDictionaryFromPath } from "./cmu
 import type { HrgSchema } from "./declarative-frontend/hrg";
 import { Utterance } from "./declarative-frontend/hrg";
 import { runGraphRuleEngine } from "./declarative-frontend/hrg/rule-engine";
-import { loadFrontendResources } from "./declarative-frontend/inventory";
+import { loadFrontendResources, parseInventorySymbol } from "./declarative-frontend/inventory";
 import { type CompiledRulepack, QLATT_ENGLISH_RULEPACK } from "./declarative-frontend/rule-pack";
 import type { SourceTranscriptionInput } from "./declarative-frontend/source-recognition";
 import { pronounce } from "./g2p";
@@ -367,7 +367,7 @@ export function transcribeText(
 
     if (inputToken.isPunctuation) {
       flatPhonemeList.push({
-        phoneme: "SIL",
+        phoneme: resources.inventory.silence_symbol,
         stress: null,
         sourceTokenId: inputToken.tokenId,
         isPunctuation: true,
@@ -509,22 +509,28 @@ export function transcribeText(
 
       if (pronResult.phonemes.length > 0) {
         for (const phoneWithStress of pronResult.phonemes) {
-          const match = phoneWithStress.match(/^([A-Z]+)(\d)?$/);
+          const match = parseInventorySymbol(phoneWithStress, resources.inventory);
           if (match) {
             flatPhonemeList.push({
-              phoneme: match[1],
-              stress: match[2] ? parseInt(match[2]) : null,
+              phoneme: match.phoneme,
+              stress: match.stress,
               sourceTokenId: inputToken.tokenId,
               word: sourceWord,
               _pronDecisionId: stressDecisionId,
             });
-          } else if (phoneWithStress === "SIL") {
-            flatPhonemeList.push({
-              phoneme: "SIL",
-              stress: null,
-              sourceTokenId: inputToken.tokenId,
-              word: sourceWord,
-              _pronDecisionId: stressDecisionId,
+          } else {
+            options.diagnostics?.warn(
+              "Pronunciation symbol rejected by inventory grammar",
+              { symbol: phoneWithStress, token: inputToken.tokenId },
+              "PHONEME_SYMBOL_REJECTED",
+            );
+            provenance?.add({
+              stage: "transcribe",
+              type: "phoneme_symbol_rejected",
+              subject: inputToken.tokenId,
+              reason: `Rejected '${phoneWithStress}' against inventory symbol_grammar '${resources.inventory.symbol_grammar}'`,
+              citations: [resources.inventoryPath],
+              parents: stressDecisionId ? [stressDecisionId] : [],
             });
           }
         }
@@ -532,11 +538,11 @@ export function transcribeText(
         emptyPronunciations.push({
           word: sourceWord,
           token: inputToken.tokenId,
-          applied: "SIL",
+          applied: resources.inventory.silence_symbol,
           duration: 50,
         });
         flatPhonemeList.push({
-          phoneme: "SIL",
+          phoneme: resources.inventory.silence_symbol,
           stress: null,
           sourceTokenId: inputToken.tokenId,
           duration: 50,

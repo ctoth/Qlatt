@@ -371,6 +371,7 @@ function createStructure(
   transcribed: readonly TranscriptionToken[],
   segments: readonly ReturnType<Utterance["allItems"]>[number][],
   spec: CompiledRulepack,
+  inventory: InventorySpec,
 ): void {
   const tables = parseSyllabificationTables(spec.syllabification);
   const byToken = new Map<
@@ -416,7 +417,9 @@ function createStructure(
       : group.map((_entry, index, all) => {
           const nuclei = all
             .map((_candidate, candidateIndex) =>
-              utterance.getItem(`segment_${candidateIndex.toString()}`)?.get("type") === "vowel"
+              inventory.nucleus_types.includes(
+                String(utterance.getItem(`segment_${candidateIndex.toString()}`)?.get("type")),
+              )
                 ? candidateIndex
                 : -1,
             )
@@ -612,6 +615,7 @@ function buildTextToKlattTrackDetailed(
     const materialized = materializePhonemeTarget(token.phoneme, {
       stress: token.stress,
       inventorySpec: resources.inventory,
+      diagnostics: utterance.diagnostics,
       onInvalidParameter: (fallback) =>
         invalidInventoryParameters.push({
           ...fallback,
@@ -645,7 +649,7 @@ function buildTextToKlattTrackDetailed(
           stage: "transcribe",
           type: "inventory_target_selected",
           subject: item.id,
-          reason: `Selected inventory target '${selection.selectedKey}' for '${selection.inputPhone}' with stress ${selection.stress ?? "unspecified"} from ${token.sourceTokenId}`,
+          reason: `Selected inventory target '${selection.selectedKey}' for '${selection.inputPhone}' with stress ${selection.stress ?? "unspecified"} from ${token.sourceTokenId}${selection.defaultDurationMs === undefined ? "" : `; applied declared default duration ${selection.defaultDurationMs} ms`}`,
           inventorySelection: { ...selection, sourceTokenId: token.sourceTokenId },
           citations: [
             resources.inventoryPath,
@@ -682,7 +686,7 @@ function buildTextToKlattTrackDetailed(
     construct.partitionAnchors(segments, utterance.axis.start.id, utterance.axis.end.id);
   }
   construct.commit();
-  createStructure(utterance, transcribed, segments, spec);
+  createStructure(utterance, transcribed, segments, spec, resources.inventory);
 
   const requestedRate = options.rate ?? 1;
   const durationPolicy = recordOrEmpty(policyRecord(spec).duration);
@@ -873,7 +877,7 @@ function buildTextToKlattTrackDetailed(
     speakerParams.base_f0_hz = resolvedSpeaker.base_f0_hz;
   }
 
-  const silence = materializePhonemeTarget("SIL", {
+  const silence = materializePhonemeTarget(resources.inventory.silence_symbol, {
     inventorySpec: resources.inventory,
     onInvalidParameter: graphInventory.onInvalidParameter,
   });
@@ -881,7 +885,7 @@ function buildTextToKlattTrackDetailed(
   const silenceDecision = provenance.add({
     stage: "frontend",
     type: "silence_resource_selected",
-    subject: `inventory:${frontendId}:SIL`,
+    subject: `inventory:${frontendId}:${resources.inventory.silence_symbol}`,
     reason: "Selected declared inventory silence target for lowering edges",
     citations: [resources.inventoryPath],
     parents: [inventoryDecision.id],
@@ -899,6 +903,7 @@ function buildTextToKlattTrackDetailed(
     speakerParams,
     speakerSex: selectedVoice?.sex,
     silence: {
+      symbol: resources.inventory.silence_symbol,
       initialParams: silence.params,
       finalParams: silence.params,
       decisionId: silenceDecision.id,

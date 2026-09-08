@@ -2,7 +2,10 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
-import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
+import {
+  loadInventorySpecFromPath,
+  materializePhonemeTarget,
+} from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 
@@ -272,7 +275,27 @@ describe("HRG lowering production event timing", () => {
     resolveTimes(utterance, segments, baseline.timings, policy);
 
     const expected = expectedBoundaryFrames(baseline, policy);
-    const lowered = lowerToFrames(utterance, policy);
+    const inventoryPath = loadBundledRulepackSpec(frontendId).inventory_path;
+    if (!inventoryPath) throw new Error("fixture inventory path missing");
+    const inventory = loadInventorySpecFromPath(inventoryPath);
+    const silence = materializePhonemeTarget(inventory.silence_symbol, {
+      inventorySpec: inventory,
+    });
+    const decision = utterance.provenance.add({
+      stage: "frontend",
+      type: "inventory_selected",
+      subject: frontendId,
+      reason: "Select silence fixture",
+      citations: ["Klatt 1980"],
+    });
+    const lowered = lowerToFrames(utterance, policy, {
+      silence: {
+        symbol: inventory.silence_symbol,
+        initialParams: silence.params,
+        finalParams: silence.params,
+        decisionId: decision.id,
+      },
+    });
 
     for (const expectedFrame of expected) {
       expect(

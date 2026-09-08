@@ -6,6 +6,12 @@
 # its acoustic targets are a stand-in so the pipeline renders and must be replaced.
 # =============================================================================
 version: v1
+# Engineering convention: CMU/ARPABET symbols and lexical stress suffixes.
+silence_symbol: SIL
+nucleus_types: [vowel]
+symbol_grammar: '[A-Z]+'
+stress_markers: {0: '0', 1: '1', 2: '2'}
+default_duration_ms: 30 # engineering estimate: duration for a target without dur
 secondary_stress_fallback:
   target: 1
   citations:
@@ -1316,6 +1322,8 @@ phoneme_targets:
     dac: 2  # Recasens 1997
     Rd: 1.5
   SIL:
+    # Klatt 1980 source-off amplitudes; AVS -70 is an engineering estimate.
+    # dur 100 ms is an engineering estimate for the default pause.
     F1: 500
     F2: 1500
     F3: 2500

@@ -156,6 +156,7 @@ describe("materializePhonemeTarget – stress-aware lookup", () => {
 
   it("preserves declarative array/object metadata from inventory entries", () => {
     const customInventory = {
+      ...INVENTORY,
       base_params: { F1: 500, AV: 0 },
       phoneme_targets: {
         SIL: { dur: 30, type: "silence" },

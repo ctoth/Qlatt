@@ -186,6 +186,7 @@ describe("per-phone incompressibility", () => {
       writeFileSync(
         path,
         JSON.stringify({
+          ...inventory,
           base_params: { F0: 0 },
           phoneme_targets: { SIL: { dur: 30, type: "silence" } },
           duration_models: {

@@ -5,7 +5,7 @@ citations:
   - Allen, Hunnicutt & Klatt 1987 Ch.5 (voicing classification)
   - Elovitz et al. 1976 (AX schwa)
 vowels: [AA, AE, AH, AO, AW, AX, AY, EH, ER, EY, IH, IY, OW, OY, UH, UW]
-legal_onsets: [PR, PL, TR, TW, KR, KL, KW, BR, BL, DR, GR, GL, FR, FL, THR, SHR, SK, SP, ST, SM, SN, SL, SW, SKR, SPR, STR, SPL, SKW]
+legal_onsets: ['P R', 'P L', 'T R', 'T W', 'K R', 'K L', 'K W', 'B R', 'B L', 'D R', 'G R', 'G L', 'F R', 'F L', 'TH R', 'SH R', 'S K', 'S P', 'S T', 'S M', 'S N', 'S L', 'S W', 'S K R', 'S P R', 'S T R', 'S P L', 'S K W']
 voicing_classes:
   voiceless_finals: [CH, F, K, P, S, SH, TH]
   td_finals: [T, D]

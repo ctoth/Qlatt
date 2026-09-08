@@ -7,6 +7,16 @@ export type ProvenanceStage =
   | "runtime"
   | "frontend";
 
+export interface RecognitionEvidence {
+  outcome: "accepted" | "ineligible" | "overlap" | "unmatched";
+  ruleId: string | null;
+  sourceItemId: string;
+  sourceStart: number;
+  sourceEnd: number;
+  captures: Record<string, { text: string | null; start: number | null; end: number | null }>;
+  vocabularyKeys: string[];
+}
+
 export interface DecisionRecord {
   id: string;
   seq: number;
@@ -17,6 +27,7 @@ export interface DecisionRecord {
   citations: string[];
   parents?: string[];
   timestampMs?: number;
+  recognition?: RecognitionEvidence;
 }
 
 export interface AddDecisionInput {
@@ -27,6 +38,7 @@ export interface AddDecisionInput {
   citations?: string[];
   parents?: string[];
   timestampMs?: number;
+  recognition?: RecognitionEvidence;
 }
 
 export interface ProvenanceCollector {
@@ -71,6 +83,7 @@ export function createProvenanceCollector(): ProvenanceCollector {
         parents:
           Array.isArray(input.parents) && input.parents.length > 0 ? [...input.parents] : undefined,
         timestampMs: Number.isFinite(input.timestampMs) ? Number(input.timestampMs) : undefined,
+        ...(input.recognition ? { recognition: structuredClone(input.recognition) } : {}),
       };
       decisions.push(decision);
       return decision;
@@ -81,6 +94,7 @@ export function createProvenanceCollector(): ProvenanceCollector {
         ...decision,
         citations: [...decision.citations],
         parents: decision.parents ? [...decision.parents] : undefined,
+        ...(decision.recognition ? { recognition: structuredClone(decision.recognition) } : {}),
       }));
     },
   };

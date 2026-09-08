@@ -1,5 +1,6 @@
 import { cloneValue, isPlainObject } from "../yaml-loader";
 import { validateExpressionSyntax } from "./cel-expressions";
+import { parseRecognitionConfig } from "./recognition-config";
 import * as S from "./struct-schema";
 
 export type DiagnosticSeverity = "error" | "warning";
@@ -3452,6 +3453,17 @@ export function validateDslSpec(
     diagnostics,
   );
   validateStringSets(spec, diagnostics);
+  try {
+    parseRecognitionConfig(spec);
+  } catch (error) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_RECOGNITION_CONFIG",
+        error instanceof Error ? error.message : String(error),
+        "text_recognition",
+      ),
+    );
+  }
   validateLoweringSpec(spec, diagnostics, options);
   validateMaps(spec, diagnostics);
   validateSyllabification(spec, diagnostics);

@@ -1,0 +1,15 @@
+extends: qlatt-english
+include:
+  - pipeline.yaml
+  - phases/orthography.yaml
+  - phases/normalize.yaml
+  - phases/postlexical.yaml
+  - phases/structural.yaml
+  - phases/annotation.yaml
+  - phases/duration.yaml
+  - phases/formant.yaml
+  - phases/prosody.yaml
+  - recognition.yaml
+normalization:
+  tables_path: /rules/frontends/qlatt-english/normalization-tables.yaml
+  pipeline_path: /rules/frontends/qlatt-english/normalization-pipeline.yaml

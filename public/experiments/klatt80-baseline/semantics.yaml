@@ -262,10 +262,10 @@ params:
     unit: "%"
 
   lfMode:
-    description: "LF model mode selection"
+    description: "Source shape (0=Legacy, 1=LFLM, 2=LFCALM mapped to LFLM, 3=Veldhuis 1998 R++, 4=Rosenberg 1971 C)"
     type: integer
     default: 0
-    range: [0, 2]
+    range: [0, 4]
 
   OQ:
     description: "Open quotient override in Klatt 1990 percentage. 0 = derive from Rd in LF crate"

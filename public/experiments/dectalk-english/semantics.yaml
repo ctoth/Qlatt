@@ -55,10 +55,10 @@ params:
     range: [0, 3]
 
   lfMode:
-    description: "LF model mode (0=disabled for DECtalk impulse/KLGLOTT88 source modes)"
+    description: "LF branch shape (0=Legacy, 1=LFLM, 2=LFCALM mapped to LFLM, 3=Veldhuis 1998 R++, 4=Rosenberg 1971 C); sourceMode selects the branch"
     type: integer
     default: 0
-    range: [0, 2]
+    range: [0, 4]
 
   # Per-voice breathiness (DECtalk BR). ph_vset.c:786 sets aturb = BR, i.e. the
   # voice's breathiness drives the KLGLOTT88 source's open-phase turbulence noise

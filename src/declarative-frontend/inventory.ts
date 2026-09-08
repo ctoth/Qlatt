@@ -1,3 +1,4 @@
+import type { Diagnostics } from "../diagnostics";
 import { loadStressPolicy } from "../g2p/stress-policy";
 import type { NormalizationConfig } from "../g2p/text-normalize";
 import {
@@ -195,12 +196,46 @@ export async function preloadInventorySpecFromPath(specPath: string): Promise<In
 }
 
 // --- Rule Functions ---
+export type InventoryParameterFallback = {
+  parameter: string;
+  supplied: unknown;
+  applied: number;
+  selectedKey?: string;
+  segment?: string;
+  token?: string;
+};
+
+export type InventorySelection = {
+  inputPhone: string;
+  stress: number | null;
+  lookupKey: string;
+  selectedKey: string;
+  secondaryStressFallback: boolean;
+};
+
+export function reportInventoryParameterFallbacks(
+  diagnostics: Diagnostics | null | undefined,
+  affected: InventoryParameterFallback[],
+): void {
+  if (affected.length)
+    diagnostics?.warn(
+      "Invalid supplied inventory parameters replaced with declared base defaults",
+      { count: affected.length, affected },
+      "INVENTORY_PARAMETER_FALLBACK",
+    );
+}
+
 export function fillDefaultParams(
   target: Record<string, unknown> | null | undefined,
   baseParams: Record<string, number>,
+  options: {
+    diagnostics?: Diagnostics | null;
+    onInvalidParameter?: (fallback: InventoryParameterFallback) => void;
+  } = {},
 ): Record<string, number> {
   const effectiveBase = baseParams;
   const filled: Record<string, number> = { ...effectiveBase };
+  const affected: InventoryParameterFallback[] = [];
 
   if (target) {
     // Override defaults with valid numeric values from the target.
@@ -209,9 +244,9 @@ export function fillDefaultParams(
       if (typeof value === "number" && Number.isFinite(value)) {
         filled[key] = value;
       } else {
-        console.warn(
-          `[fillDefaultParams] Invalid value '${String(value)}' for key '${key}' in target. Using default: ${filled[key]}`,
-        );
+        const fallback = { parameter: key, supplied: value, applied: filled[key] };
+        if (options.onInvalidParameter) options.onInvalidParameter(fallback);
+        else affected.push(fallback);
       }
     }
   } else {
@@ -223,12 +258,19 @@ export function fillDefaultParams(
     filled.F0 = SILENCE_PARAMS.F0;
   }
 
+  reportInventoryParameterFallbacks(options.diagnostics, affected);
   return filled;
 }
 
 export function materializePhonemeTarget(
   phoneme: unknown,
-  options: { stress?: number | null; inventorySpec: InventorySpec },
+  options: {
+    stress?: number | null;
+    inventorySpec: InventorySpec;
+    diagnostics?: Diagnostics | null;
+    onSelection?: (selection: InventorySelection) => void;
+    onInvalidParameter?: (fallback: InventoryParameterFallback) => void;
+  },
 ) {
   const effectiveTargets = options.inventorySpec.phoneme_targets;
   const effectiveBase = options.inventorySpec.base_params;
@@ -240,6 +282,8 @@ export function materializePhonemeTarget(
   // Aliases borrow a declared target's acoustics without renaming the normalized
   // phoneme. This preserves rule-visible identity while making fallback explicit.
   let resolvedKey = phoneme;
+  let selectedKey = lookupKey;
+  let secondaryStressFallback = false;
   let target: Record<string, unknown> | undefined;
 
   if (options && "stress" in options) {
@@ -257,6 +301,7 @@ export function materializePhonemeTarget(
       const fallbackMarker = stressMarker === "1" ? "0" : "1";
       target = effectiveTargets[lookupKey + stressMarker] as Record<string, unknown> | undefined;
       if (target) {
+        selectedKey = lookupKey + stressMarker;
         resolvedKey = phoneme === lookupKey ? lookupKey + stressMarker : phoneme;
       } else if (options.stress === 2) {
         const fallback = normalizeSecondaryFallback(
@@ -265,6 +310,8 @@ export function materializePhonemeTarget(
         if (!fallback)
           throw new Error(`E_STRESS_TARGET: ${lookupKey}2 requires a cited realization policy`);
         target = effectiveTargets[lookupKey + fallback.target];
+        selectedKey = lookupKey + fallback.target;
+        secondaryStressFallback = true;
         if (!target)
           throw new Error(
             `E_STRESS_TARGET: declared target ${lookupKey}${fallback.target} is absent`,
@@ -275,15 +322,16 @@ export function materializePhonemeTarget(
           | Record<string, unknown>
           | undefined;
         if (target) {
+          selectedKey = lookupKey + fallbackMarker;
           resolvedKey = phoneme === lookupKey ? lookupKey + fallbackMarker : phoneme;
         }
       }
     } else {
       // Consonant: try with suffixes then bare key (matches original frontend logic)
-      target =
-        (effectiveTargets[lookupKey + "1"] as Record<string, unknown> | undefined) ||
-        (effectiveTargets[lookupKey + "0"] as Record<string, unknown> | undefined) ||
-        (effectiveTargets[lookupKey] as Record<string, unknown> | undefined);
+      selectedKey =
+        [lookupKey + "1", lookupKey + "0", lookupKey].find((key) => effectiveTargets[key]) ??
+        lookupKey;
+      target = effectiveTargets[selectedKey];
     }
   } else {
     // No options: direct lookup (backward-compatible path)
@@ -297,7 +345,22 @@ export function materializePhonemeTarget(
   const targetDuration = typeof target.dur === "number" ? target.dur : undefined;
 
   // Use the effective base params for filling defaults.
-  const filledParams = fillDefaultParams(target, effectiveBase);
+  const affected: InventoryParameterFallback[] = [];
+  const filledParams = fillDefaultParams(target, effectiveBase, {
+    onInvalidParameter: (fallback) => {
+      const contextual = { ...fallback, selectedKey };
+      if (options.onInvalidParameter) options.onInvalidParameter(contextual);
+      else affected.push(contextual);
+    },
+  });
+  reportInventoryParameterFallbacks(options.diagnostics, affected);
+  options.onSelection?.({
+    inputPhone: phoneme,
+    stress: options.stress ?? null,
+    lookupKey,
+    selectedKey,
+    secondaryStressFallback,
+  });
 
   const payload: {
     phoneme: string;

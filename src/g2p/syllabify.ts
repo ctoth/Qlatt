@@ -50,9 +50,9 @@ export function isVowel(phoneme: string): boolean {
  * Check whether a sequence of consonant phonemes forms a legal onset.
  * A single consonant is always legal. An empty onset is always legal.
  */
-function isLegalOnset(consonants: string[]): boolean {
+function isLegalOnset(consonants: string[], phonotacticsPath?: string): boolean {
   if (consonants.length <= 1) return true;
-  const data = loadPhonotacticsSync();
+  const data = loadPhonotacticsSync(phonotacticsPath);
   const key = consonants.join("");
   return new Set(data.legal_onsets).has(key);
 }
@@ -65,13 +65,14 @@ function isLegalOnset(consonants: string[]): boolean {
  * @param phonemes - Array of ARPAbet phonemes (no stress digits).
  * @returns Array of syllables, each syllable an array of phonemes.
  */
-export function syllabify(phonemes: string[]): string[][] {
+export function syllabify(phonemes: string[], phonotacticsPath?: string): string[][] {
   if (phonemes.length === 0) return [];
+  const vowels = new Set(loadPhonotacticsSync(phonotacticsPath).vowels);
 
   // Find vowel positions
   const vowelPositions: number[] = [];
   for (let i = 0; i < phonemes.length; i++) {
-    if (isVowel(phonemes[i])) {
+    if (vowels.has(phonemes[i])) {
       vowelPositions.push(i);
     }
   }
@@ -114,7 +115,7 @@ export function syllabify(phonemes: string[]): string[][] {
       let onsetStart = consonantStart;
       while (onsetStart < consonantEnd) {
         const candidateOnset = phonemes.slice(onsetStart, consonantEnd);
-        if (isLegalOnset(candidateOnset)) {
+        if (isLegalOnset(candidateOnset, phonotacticsPath)) {
           break;
         }
         onsetStart++;

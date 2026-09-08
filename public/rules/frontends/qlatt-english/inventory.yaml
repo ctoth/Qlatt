@@ -1,4 +1,8 @@
 version: v1
+secondary_stress_fallback:
+  target: 1
+  citations:
+    - "Qlatt #37 engineering estimate: reuse strong-vowel targets when secondary targets are unavailable; retain lexical secondary stress separately"
 citations:
   - Peterson & Barney 1952
   - Kent & Vorperian 2018

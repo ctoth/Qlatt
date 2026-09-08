@@ -128,11 +128,15 @@ describe("pronounce() LTS pronunciation quality", () => {
       stressType: "forcing",
       stressTarget: "penult",
     });
-    const defaultStress = assignStress(ltsPhonemes);
 
     expect(result.source).toBe("lts-rules");
     expect(result.phonemes).toEqual(expectedWithHint);
-    expect(result.phonemes).not.toEqual(defaultStress);
+    // The productive weight rule may independently agree with the affix target.
+    expect(
+      result.lexicalStress?.decisions.some(
+        (decision) => decision.rule === "declared_affix_exception",
+      ),
+    ).toBe(true);
   });
 });
 

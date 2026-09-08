@@ -8,7 +8,7 @@
 import { loadYamlDocumentSync } from "../yaml-loader";
 import type { StressHint } from "./stress";
 import { loadPhonotacticsSync } from "./syllabify";
-import type { DictLookup, PronunciationResult } from "./types";
+import type { DictLookup, MorphologyCycle, PronunciationResult } from "./types";
 
 // --- Affix data types ---
 
@@ -155,10 +155,12 @@ function trySuffixDecomposition(
   surfaceWord: string,
   data: MorphologyData,
   dictLookup: DictLookup,
-): { rootWord: string; phonemes: string[] } | null {
+  morphologyPath: string,
+): { rootWord: string; phonemes: string[]; morphology: MorphologyCycle[] } | null {
   const seenSpellings = new Set<string>();
 
   for (const suffix of data.suffixes) {
+    if (!suffix.spelling) throw new Error("E_MORPHOLOGY: empty suffix spelling");
     if (seenSpellings.has(suffix.spelling)) continue;
     seenSpellings.add(suffix.spelling);
     if (!surfaceWord.endsWith(suffix.spelling)) continue;
@@ -166,15 +168,38 @@ function trySuffixDecomposition(
     const root = surfaceWord.slice(0, surfaceWord.length - suffix.spelling.length);
     if (root.length < suffix.min_root) continue;
 
-    const lookup = tryRootLookup(root, suffix.try_silent_e ?? false, dictLookup, data.heuristics);
+    const direct = tryRootLookup(root, suffix.try_silent_e ?? false, dictLookup, data.heuristics);
+    const nested = direct ? null : decomposeWord(root, dictLookup, morphologyPath);
+    const lookup = direct ?? nested;
     if (!lookup) continue;
 
     const suffixPhonemes = resolveAffixPhonemes(data.suffixes, suffix.spelling, lookup.phonemes);
     if (!suffixPhonemes) continue;
 
     return {
-      rootWord: lookup.rootWord,
+      rootWord: lookup.rootWord ?? root,
       phonemes: [...lookup.phonemes, ...suffixPhonemes],
+      morphology: [
+        ...(nested?.morphology ?? [
+          {
+            spelling: lookup.rootWord ?? root,
+            start: 0,
+            end: lookup.phonemes.length,
+            kind: "root" as const,
+            citations: ["CMU Pronouncing Dictionary"],
+          },
+        ]),
+        {
+          spelling: suffix.spelling,
+          start: 0,
+          end: lookup.phonemes.length + suffixPhonemes.length,
+          affixStart: lookup.phonemes.length,
+          kind: "suffix",
+          stressType: suffix.stress_type,
+          stressTarget: suffix.stress_target,
+          citations: [...suffix.citations],
+        },
+      ],
     };
   }
 
@@ -234,18 +259,20 @@ export function decomposeWord(
   if (word.length < data.heuristics.minimum_word_length.value) return null;
 
   // Try suffixes first (already ordered longest-first in YAML).
-  const suffixOnly = trySuffixDecomposition(lowerWord, data, dictLookup);
+  const suffixOnly = trySuffixDecomposition(lowerWord, data, dictLookup, morphologyPath);
   if (suffixOnly) {
     return {
       phonemes: suffixOnly.phonemes,
       source: "morphology",
       word: lowerWord,
       rootWord: suffixOnly.rootWord,
+      morphology: suffixOnly.morphology,
     };
   }
 
   // Try prefixes
   for (const prefix of data.prefixes) {
+    if (!prefix.spelling) throw new Error("E_MORPHOLOGY: empty prefix spelling");
     if (!lowerWord.startsWith(prefix.spelling)) continue;
 
     const remainder = lowerWord.slice(prefix.spelling.length);
@@ -258,12 +285,29 @@ export function decomposeWord(
         source: "morphology",
         word: lowerWord,
         rootWord: remainder,
+        morphology: [
+          {
+            spelling: remainder,
+            start: prefix.output_phonemes.length,
+            end: prefix.output_phonemes.length + remainderPhonemes.length,
+            kind: "root",
+            citations: ["CMU Pronouncing Dictionary"],
+          },
+          {
+            spelling: prefix.spelling,
+            start: 0,
+            end: prefix.output_phonemes.length + remainderPhonemes.length,
+            kind: "prefix",
+            stressType: "non_affecting",
+            citations: [...prefix.citations],
+          },
+        ],
       };
     }
 
     // Compound morphology: prefix + (suffix decomposition of remainder)
     // Example: "unkindness" = "un" + "kind" + "ness".
-    const suffixInRemainder = trySuffixDecomposition(remainder, data, dictLookup);
+    const suffixInRemainder = decomposeWord(remainder, dictLookup, morphologyPath);
     if (!suffixInRemainder) continue;
 
     return {
@@ -271,6 +315,25 @@ export function decomposeWord(
       source: "morphology",
       word: lowerWord,
       rootWord: suffixInRemainder.rootWord,
+      morphology: [
+        ...(suffixInRemainder.morphology ?? []).map((cycle) => ({
+          ...cycle,
+          start: cycle.start + prefix.output_phonemes.length,
+          end: cycle.end + prefix.output_phonemes.length,
+          affixStart:
+            cycle.affixStart === undefined
+              ? undefined
+              : cycle.affixStart + prefix.output_phonemes.length,
+        })),
+        {
+          spelling: prefix.spelling,
+          start: 0,
+          end: prefix.output_phonemes.length + suffixInRemainder.phonemes.length,
+          kind: "prefix",
+          stressType: "non_affecting",
+          citations: [...prefix.citations],
+        },
+      ],
     };
   }
 

@@ -2,23 +2,24 @@
  * G2P pipeline orchestration.
  *
  * Wires together dictionary lookup, morphological decomposition, and
- * Elovitz LTS rules + Hunnicutt stress assignment into a single
+ * Elovitz LTS rules + the frontend's cited lexical stress policy into a single
  * pronounce() function.
  *
  * Layer priority:
  *   1. Dictionary lookup (highest accuracy)
  *   2. Configured clitic handling (dict base + shared suffix allomorph)
  *   3. Morphological decomposition (affix stripping + dict root)
- *   4. Elovitz LTS rules + Hunnicutt stress (fallback)
+ *   4. Elovitz LTS rules (fallback); both generated paths share lexical stress
  *
  * Citation: Allen, Hunnicutt & Klatt (1987), From Text to Speech: The MITalk System.
  * Citation: Elovitz, Johnson, McHugh & Shore (1976). NRL Report 7948.
  * Citation: Hunnicutt (1976), Phonological Rules for a Text-to-Speech System.
+ * Citation: Hayes (1982), Extrametricality and English Stress, pp. 237–274.
  */
 
 import { applyLtsRules } from "./lts-engine";
 import { decomposeClitic, decomposeWord, getStressHintForWord } from "./morphology";
-import { assignStress } from "./stress";
+import { stressPronunciation } from "./stress";
 import type { DictLookup, PronunciationResult } from "./types";
 
 /**
@@ -31,9 +32,10 @@ import type { DictLookup, PronunciationResult } from "./types";
 export function pronounce(
   word: string,
   dictLookup: DictLookup,
-  options: { ltsPath?: string; morphologyPath?: string } = {
+  options: { ltsPath?: string; morphologyPath?: string; stressPolicyPath?: string } = {
     ltsPath: "/rules/frontends/qlatt-english/lts-rules.yaml",
     morphologyPath: "/rules/frontends/qlatt-english/morphology.yaml",
+    stressPolicyPath: "/rules/frontends/qlatt-english/stress-policy.yaml",
   },
 ): PronunciationResult {
   if (!word || word.trim().length === 0) {
@@ -55,19 +57,26 @@ export function pronounce(
   }
 
   // 3. Try morphological decomposition (affix stripping + dict root)
-  const morphResult = decomposeWord(lowerWord, dictLookup, options.morphologyPath);
-  if (morphResult) {
-    return morphResult;
+  let generated = decomposeWord(lowerWord, dictLookup, options.morphologyPath);
+  if (!generated) {
+    if (!options.ltsPath) {
+      throw new Error(
+        `E_LTS_PATH_MISSING: word '${word}' not in dictionary and no ltsPath configured`,
+      );
+    }
+    generated = {
+      phonemes: applyLtsRules(lowerWord, options.ltsPath),
+      source: "lts-rules",
+      word: lowerWord,
+    };
   }
-
-  // 4. Fall back to Elovitz LTS rules + Hunnicutt stress assignment
-  if (!options.ltsPath) {
-    throw new Error(
-      `E_LTS_PATH_MISSING: word '${word}' not in dictionary and no ltsPath configured`,
-    );
-  }
-  const ltsPhonemes = applyLtsRules(lowerWord, options.ltsPath);
+  // Both generated sources reach the same lexical stage before inventory materialization.
   const stressHint = getStressHintForWord(lowerWord, options.morphologyPath);
-  const stressedPhonemes = assignStress(ltsPhonemes, stressHint);
-  return { phonemes: stressedPhonemes, source: "lts-rules", word: lowerWord };
+  const lexicalStress = stressPronunciation(generated.phonemes, {
+    policyPath: options.stressPolicyPath,
+    wordId: lowerWord,
+    hint: stressHint,
+    morphology: generated.morphology,
+  });
+  return { ...generated, phonemes: lexicalStress.phonemes, lexicalStress };
 }

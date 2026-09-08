@@ -6,6 +6,10 @@
 # its acoustic targets are a stand-in so the pipeline renders and must be replaced.
 # =============================================================================
 version: v1
+secondary_stress_fallback:
+  target: 1
+  citations:
+    - 'Qlatt #37 engineering estimate: reuse strong-vowel targets for secondary stress while preserving lexical prominence'
 citations:
 - Peterson & Barney 1952
 - Kent & Vorperian 2018

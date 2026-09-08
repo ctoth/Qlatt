@@ -1,3 +1,4 @@
+import { loadStressPolicy } from "../g2p/stress-policy";
 import {
   cloneValue,
   isPlainObject,
@@ -9,6 +10,7 @@ import {
 export type InventorySpec = {
   base_params: Record<string, number>;
   normalization_aliases?: Readonly<Record<string, string>>;
+  secondary_stress_fallback?: { target: 0 | 1; citations: string[] };
   phoneme_targets: Record<string, Record<string, unknown>>;
 };
 
@@ -38,6 +40,7 @@ export type FrontendResources = {
   inventoryPath: string;
   ltsPath?: string;
   morphologyPath?: string;
+  stressPolicyPath?: string;
   /**
    * Optional per-frontend pronunciation dictionary path (JSON, flat
    * word -> "ARPABET ..." map). When set, this frontend does dictionary-first
@@ -116,6 +119,22 @@ function normalizeNormalizationAliases(
   return Object.freeze(aliases);
 }
 
+function normalizeSecondaryFallback(raw: unknown): InventorySpec["secondary_stress_fallback"] {
+  if (raw === undefined) return undefined;
+  if (
+    !isPlainObject(raw) ||
+    (raw.target !== 0 && raw.target !== 1) ||
+    !Array.isArray(raw.citations) ||
+    !raw.citations.length ||
+    raw.citations.some((citation) => typeof citation !== "string" || !citation.trim())
+  ) {
+    throw new Error(
+      "E_INVENTORY_SCHEMA: secondary_stress_fallback requires target 0/1 and citations",
+    );
+  }
+  return { target: raw.target, citations: [...raw.citations] };
+}
+
 function parseInventorySpec(source: string): InventorySpec {
   const raw = parseYamlString(source, "inventory spec");
   if (!isPlainObject(raw)) {
@@ -126,6 +145,7 @@ function parseInventorySpec(source: string): InventorySpec {
   return {
     base_params: normalizeBaseParams(raw.base_params),
     normalization_aliases: normalizeNormalizationAliases(raw.normalization_aliases, phonemeTargets),
+    secondary_stress_fallback: normalizeSecondaryFallback(raw.secondary_stress_fallback),
     phoneme_targets: phonemeTargets,
   };
 }
@@ -222,17 +242,30 @@ export function materializePhonemeTarget(
     // Determine whether the base phoneme is a vowel by probing stressed variants
     // (vowels only exist in inventory as e.g. AH1/AH0, never bare AH).
     const probeTarget =
+      effectiveTargets[lookupKey + "2"] ||
       effectiveTargets[lookupKey + "1"] ||
       effectiveTargets[lookupKey + "0"] ||
       effectiveTargets[lookupKey];
     const isVowel = (probeTarget as Record<string, unknown> | undefined)?.type === "vowel";
 
     if (isVowel) {
-      const stressMarker = options.stress === 1 ? "1" : "0";
+      const stressMarker = options.stress === 2 ? "2" : options.stress === 1 ? "1" : "0";
       const fallbackMarker = stressMarker === "1" ? "0" : "1";
       target = effectiveTargets[lookupKey + stressMarker] as Record<string, unknown> | undefined;
       if (target) {
         resolvedKey = phoneme === lookupKey ? lookupKey + stressMarker : phoneme;
+      } else if (options.stress === 2) {
+        const fallback = normalizeSecondaryFallback(
+          options.inventorySpec.secondary_stress_fallback,
+        );
+        if (!fallback)
+          throw new Error(`E_STRESS_TARGET: ${lookupKey}2 requires a cited realization policy`);
+        target = effectiveTargets[lookupKey + fallback.target];
+        if (!target)
+          throw new Error(
+            `E_STRESS_TARGET: declared target ${lookupKey}${fallback.target} is absent`,
+          );
+        resolvedKey = phoneme === lookupKey ? lookupKey + fallback.target : phoneme;
       } else {
         target = effectiveTargets[lookupKey + fallbackMarker] as
           | Record<string, unknown>
@@ -316,11 +349,21 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   if (typeof inventoryPath !== "string" || inventoryPath.length === 0) {
     throw new Error("E_FRONTEND_SPEC: inventory_path is required");
   }
+  const stressPolicyPath =
+    typeof spec.stress_policy_path === "string" ? spec.stress_policy_path : undefined;
+  if (
+    typeof spec.lts_path === "string" ||
+    typeof spec.morphology_path === "string" ||
+    stressPolicyPath !== undefined
+  ) {
+    loadStressPolicy(stressPolicyPath ?? "");
+  }
   return {
     inventory: loadInventorySpecFromPath(inventoryPath),
     inventoryPath,
     ltsPath: typeof spec.lts_path === "string" ? spec.lts_path : undefined,
     morphologyPath: typeof spec.morphology_path === "string" ? spec.morphology_path : undefined,
+    stressPolicyPath,
     dictionaryPath: typeof spec.dictionary_path === "string" ? spec.dictionary_path : undefined,
   };
 }

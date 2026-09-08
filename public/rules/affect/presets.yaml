@@ -1,0 +1,464 @@
+# Migrated verbatim from the cited affect library; annotations identify known estimates.
+degree:
+  # engineering estimate: legacy linear interpolation toward neutral, clamped at endpoints.
+  points: [[0, 0], [1, 1]]
+  citations: [] # engineering estimate; intentionally uncited in provenance
+variants:
+  manic: { male: manic_male, female: manic_female }
+  depressive: { male: depressive_male, female: depressive_female }
+presets:
+  - name: "neutral"
+    group: "emotion"
+    dimensions:
+      valence: 0
+      arousal: 0
+      dominance: 0
+    vq: {}
+    citations: ["Scherer_1986"]
+  - name: "angry"
+    group: "emotion"
+    dimensions:
+      valence: -0.8
+      arousal: 0.9
+      dominance: 0.6
+    vq:
+      rdDelta: -0.5
+      f0Scale: 1.3
+      f0VarianceScale: 1.5
+      durationScale: 0.85
+      intensityBoost: 6
+      pauseScale: 0.7
+      spectralTiltBoost: -3
+      f1Delta: -20
+      f2Delta: -15
+      f3Delta: -30
+      fbw1Scale: 0.9
+      fbw2Scale: 1.1
+      fbw3Scale: 1.1
+    citations: ["Cummings_1995","France_2000","Rutledge_1995","Murray_1993","Scherer_1986"]
+  - name: "loud"
+    group: "emotion"
+    dimensions:
+      valence: 0
+      arousal: 0.7
+      dominance: 0.7
+    vq:
+      rdDelta: -0.4
+      f0Scale: 1.1
+      durationScale: 0.95
+      intensityBoost: 8
+      pauseScale: 0.8
+      spectralTiltBoost: -3
+      f1Delta: -10
+      f2Delta: -10
+      f3Delta: -15
+      fbw1Scale: 0.95
+      fbw2Scale: 1.05
+      fbw3Scale: 1.05
+    citations: ["Cummings_1995","Rutledge_1995"]
+  - name: "soft"
+    group: "emotion"
+    dimensions:
+      valence: 0.4
+      arousal: -0.5
+      dominance: -0.4
+    vq:
+      rdDelta: 1.2
+      f0Scale: 0.95
+      f0VarianceScale: 0.7
+      durationScale: 1.1
+      intensityBoost: -6
+      ahBoost: 8
+      pauseScale: 1.1
+      spectralTiltBoost: 3
+      f1Delta: 20
+      f2Delta: 15
+      f3Delta: 30
+      fbw1Scale: 1.15
+      fbw2Scale: 0.95
+      fbw3Scale: 0.95
+    citations: ["Cummings_1995","Gobl_2003","Rutledge_1995"]
+  - name: "sad"
+    group: "emotion"
+    dimensions:
+      valence: -0.6
+      arousal: -0.5
+      dominance: -0.4
+    vq:
+      rdDelta: 0.3
+      f0Scale: 1
+      f0VarianceScale: 0.6
+      durationScale: 1.2
+      intensityBoost: -3
+      ahBoost: 4
+      pauseScale: 1.3
+      f1Delta: 50
+      f2Delta: 40
+      f3Delta: 80
+      fbw1Scale: 1.3
+      fbw2Scale: 0.85
+      fbw3Scale: 0.85
+    citations: ["France_2000","Murray_1993","Gobl_2003","Scherer_1986"]
+  - name: "happy"
+    engineeringEstimate: true
+    group: "emotion"
+    dimensions:
+      valence: 0.8
+      arousal: 0.6
+      dominance: 0.3
+    vq:
+      rdDelta: -0.2
+      f0Scale: 1.15
+      f0VarianceScale: 1.3
+      durationScale: 0.9
+      intensityBoost: 3
+      pauseScale: 0.85
+      f1Delta: -10 # engineering estimate
+      f2Delta: -10 # engineering estimate
+      f3Delta: -15 # engineering estimate
+      fbw1Scale: 0.95
+    citations: ["Murray_1993","Banse_1996","Scherer_2001"]
+    note: "Joy under-recognizes on F0 alone (Scherer_2001 42%); needs smiling-formant + upward contour cues."
+  - name: "anxious"
+    group: "emotion"
+    dimensions:
+      valence: -0.4
+      arousal: 0.5
+      dominance: -0.5
+    vq:
+      rdDelta: 0.1
+      f0Scale: 1.1
+      f0VarianceScale: 0.85
+      durationScale: 1
+      intensityBoost: 0
+      pauseScale: 1.4
+      spectralTiltBoost: -2
+    citations: ["Laukka_2008"]
+  - name: "fatigued"
+    group: "emotion"
+    dimensions:
+      valence: -0.3
+      arousal: -0.6
+      dominance: -0.3
+    vq:
+      rdDelta: 0.2
+      f0Scale: 1
+      f0VarianceScale: 1.3
+      durationScale: 1.15
+      ahBoost: 2
+      pauseScale: 1.3
+      spectralTiltBoost: 3
+    citations: ["Vogel_2010"]
+  - name: "tender"
+    engineeringEstimate: true
+    group: "emotion"
+    dimensions:
+      valence: 0.6 # engineering estimate
+      arousal: -0.4 # engineering estimate
+      dominance: -0.2 # engineering estimate
+    vq:
+      rdDelta: 1 # engineering estimate
+      f0Scale: 1.05 # engineering estimate
+      f0VarianceScale: 0.6 # engineering estimate
+      durationScale: 1.1 # engineering estimate
+      intensityBoost: -4 # engineering estimate
+      ahBoost: 6 # engineering estimate
+      pauseScale: 1.05 # engineering estimate
+      spectralTiltBoost: 3 # engineering estimate
+    citations: ["Gobl_2003","Murray_1993","Scherer_1986"]
+    note: "Engineering estimate (doc 03 §6): tenderness is not a Scherer category; composed, not cited as a unit."
+  - name: "confident"
+    group: "epistemic"
+    dimensions:
+      valence: 0.2
+      arousal: 0.1
+      dominance: 0.6
+    vq:
+      rdDelta: 0
+      f0VarianceScale: 1.1
+      durationScale: 1.05
+      intensityBoost: 1
+      pauseScale: 0.85
+    citations: ["Goupil_2021","Jiang_2017"]
+  - name: "doubtful"
+    group: "epistemic"
+    dimensions:
+      valence: -0.1
+      arousal: 0
+      dominance: -0.5
+    vq:
+      rdDelta: 0.1
+      f0VarianceScale: 0.9
+      durationScale: 0.95
+      intensityBoost: -1
+      pauseScale: 1.2
+    citations: ["Goupil_2021","Jiang_2017"]
+  - name: "competent"
+    group: "epistemic"
+    dimensions:
+      valence: 0.1
+      arousal: 0.1
+      dominance: 0.5
+    vq:
+      rdDelta: -0.1
+      durationScale: 1
+      intensityBoost: 2
+      pauseScale: 0.9
+    citations: ["Goupil_2021"]
+  - name: "hedging"
+    group: "epistemic"
+    dimensions:
+      valence: 0
+      arousal: 0
+      dominance: -0.3
+    vq:
+      rdDelta: 0
+      durationScale: 0.97
+      intensityBoost: 0
+      pauseScale: 1.1
+    citations: ["Goupil_2021"]
+  - name: "indirect_request"
+    group: "pragmatic"
+    dimensions:
+      valence: 0.1
+      arousal: 0.2
+      dominance: 0.2
+    vq:
+      rdDelta: 0
+      f0Scale: 1.08
+      durationScale: 1.1
+      intensityBoost: 0
+      pauseScale: 0.95
+    citations: ["Trott_2022"]
+  - name: "direct_request"
+    group: "pragmatic"
+    dimensions:
+      valence: 0
+      arousal: 0.3
+      dominance: 0.5
+    vq:
+      rdDelta: -0.1
+      durationScale: 0.95
+      intensityBoost: 2
+      pauseScale: 0.9
+    citations: ["Trott_2022"]
+  - name: "polite_question"
+    group: "pragmatic"
+    dimensions:
+      valence: 0.2
+      arousal: 0.1
+      dominance: -0.2
+    vq:
+      rdDelta: 0
+      durationScale: 1.08
+      intensityBoost: -1
+      pauseScale: 1
+    citations: ["Trott_2022"]
+  - name: "sarcastic"
+    group: "pragmatic"
+    dimensions:
+      valence: -0.3
+      arousal: -0.1
+      dominance: 0.3
+    vq:
+      rdDelta: 0
+      f0Scale: 0.92
+      f0VarianceScale: 0.8
+      durationScale: 1.15
+      pauseScale: 1.1
+    citations: ["Cheang_2008","Trott_2022"]
+  - name: "rude"
+    group: "pragmatic"
+    dimensions:
+      valence: -0.5
+      arousal: -0.1
+      dominance: 0.7
+    vq:
+      rdDelta: -0.15
+      f0Scale: 0.9
+      f0VarianceScale: 0.85
+      durationScale: 1.15
+      pauseScale: 1.1
+    citations: ["Caballero_2018"]
+  - name: "dismissive"
+    group: "pragmatic"
+    dimensions:
+      valence: -0.4
+      arousal: -0.3
+      dominance: 0.5
+    vq:
+      rdDelta: -0.1
+      f0Scale: 0.95
+      f0VarianceScale: 0.8
+      durationScale: 1.1
+      intensityBoost: -1
+      pauseScale: 1
+    citations: ["Caballero_2018"]
+  - name: "curt"
+    group: "pragmatic"
+    dimensions:
+      valence: -0.4
+      arousal: 0.1
+      dominance: 0.5
+    vq:
+      rdDelta: -0.2
+      f0Scale: 0.92
+      f0VarianceScale: 0.75
+      durationScale: 0.9
+      pauseScale: 0.8
+    citations: ["Caballero_2018"]
+  - name: "insincere"
+    engineeringEstimate: true
+    group: "pragmatic"
+    dimensions:
+      valence: 0.1 # engineering estimate
+      arousal: -0.2 # engineering estimate
+      dominance: 0 # engineering estimate
+    vq:
+      rdDelta: 0 # engineering estimate
+      f0Scale: 0.96 # engineering estimate
+      f0VarianceScale: 0.85 # engineering estimate
+      durationScale: 1.27 # engineering estimate
+      pauseScale: 1 # engineering estimate
+    citations: ["Fish_2017"]
+    note: "Primary marker is slow rate (Fish_2017 η²=.22); initial F0 drop + amplitude crescendo are position-dependent."
+  - name: "naming"
+    group: "speech_act"
+    dimensions:
+      valence: 0
+      arousal: -0.4
+      dominance: 0
+    vq:
+      f0Scale: 1
+      durationScale: 1
+      intensityBoost: 0
+      rdDelta: 0
+    citations: ["Hellbernd_2016"]
+  - name: "criticism"
+    group: "speech_act"
+    dimensions:
+      valence: -0.6
+      arousal: 0.7
+      dominance: 0.4
+    vq:
+      f0Scale: 1.73
+      durationScale: 1.32
+      intensityBoost: 8
+      rdDelta: -0.2
+    citations: ["Hellbernd_2016"]
+  - name: "speech_act_doubt"
+    group: "speech_act"
+    dimensions:
+      valence: 0
+      arousal: -0.2
+      dominance: -0.2
+    vq:
+      f0Scale: 1.42
+      durationScale: 1.42
+      intensityBoost: 0
+      rdDelta: 0.1
+    citations: ["Hellbernd_2016"]
+  - name: "suggestion"
+    group: "speech_act"
+    dimensions:
+      valence: 0.5
+      arousal: 0.3
+      dominance: 0.2
+    vq:
+      f0Scale: 1.55
+      durationScale: 0.94
+      intensityBoost: 6
+      rdDelta: 0
+    citations: ["Hellbernd_2016"]
+  - name: "warning"
+    group: "speech_act"
+    dimensions:
+      valence: -0.7
+      arousal: 0.9
+      dominance: 0.7
+    vq:
+      f0Scale: 2.01
+      durationScale: 1.26
+      intensityBoost: 15
+      rdDelta: -0.3
+    citations: ["Hellbernd_2016"]
+  - name: "wish"
+    group: "speech_act"
+    dimensions:
+      valence: 0.5
+      arousal: -0.3
+      dominance: -0.1
+    vq:
+      f0Scale: 1.11
+      durationScale: 1.42
+      intensityBoost: 2
+      rdDelta: 0.2
+    citations: ["Hellbernd_2016"]
+  - name: "manic_male"
+    group: "clinical"
+    dimensions:
+      valence: 0.3
+      arousal: 0.7
+      dominance: 0.6
+    vq:
+      intensityBoost: 6
+      f0Scale: 1.15
+      durationScale: 0.9
+      pauseScale: 0.7
+      rdDelta: -0.15
+      jitterScale: 1.15
+      f1Delta: 40
+      f2Delta: 40
+      fbw1Scale: 0.85
+      fbw2Scale: 0.9
+      spectralTiltBoost: -3
+    citations: ["Kaczmarek-Majer_2024"]
+  - name: "manic_female"
+    group: "clinical"
+    dimensions:
+      valence: 0.1
+      arousal: -0.3
+      dominance: -0.2
+    vq:
+      intensityBoost: -2
+      f0Scale: 0.97
+      durationScale: 1
+      pauseScale: 1
+      rdDelta: 0.1
+      jitterScale: 0.85
+      f1Delta: -20
+      f2Delta: -20
+      fbw1Scale: 1.15
+      fbw2Scale: 1.1
+      spectralTiltBoost: 2
+    citations: ["Kaczmarek-Majer_2024"]
+  - name: "depressive_male"
+    group: "clinical"
+    dimensions:
+      valence: -0.6
+      arousal: -0.4
+      dominance: -0.4
+    vq:
+      intensityBoost: -5
+      f0Scale: 1
+      durationScale: 1.05
+      pauseScale: 0.85
+      rdDelta: 0.2
+      jitterScale: 0.9
+      fbw1Scale: 1.25
+      fbw2Scale: 1.15
+      spectralTiltBoost: 2
+    citations: ["Kaczmarek-Majer_2024"]
+  - name: "depressive_female"
+    group: "clinical"
+    dimensions:
+      valence: -0.3
+      arousal: -0.1
+      dominance: -0.2
+    vq:
+      intensityBoost: 0
+      f0Scale: 1
+      durationScale: 1
+      pauseScale: 1.1
+      rdDelta: 0.1
+    citations: ["Kaczmarek-Majer_2024"]

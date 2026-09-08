@@ -25,6 +25,7 @@ meta:
           parallelSource: parallelSourceGain
           bypassAtZero: true
         - index: 2
+          linearGainParam: fricA2Linear
           freqRange: [500, 3000]
           freqDefault: 1500
           bwRange: [40, 1000]
@@ -33,6 +34,7 @@ meta:
           sign: -1
           parallelSource: parallelDiffSum
         - index: 3
+          linearGainParam: fricA3Linear
           freqRange: [1500, 4000]
           freqDefault: 2500
           bwRange: [40, 1000]
@@ -41,6 +43,7 @@ meta:
           sign: 1
           parallelSource: parallelDiffSum
         - index: 4
+          linearGainParam: fricA4Linear
           freqRange: [2500, 5000]
           freqDefault: 3500
           bwRange: [100, 1000]
@@ -49,6 +52,7 @@ meta:
           sign: -1
           parallelSource: parallelDiffSum
         - index: 5
+          linearGainParam: fricA5Linear
           freqRange: [3500, 6000]
           freqDefault: 4500
           bwRange: [100, 1000]
@@ -57,6 +61,7 @@ meta:
           sign: 1
           parallelSource: parallelFricGain
         - index: 6
+          linearGainParam: fricA6Linear
           freqRange: [4000, 7000]
           freqDefault: 5500
           bwRange: [100, 1000]
@@ -73,6 +78,7 @@ meta:
         # A7-A10 default to 0; frontend rules must supply non-zero values for audible parallel output.
         # Fant neutral model spacing (1000 Hz from F6), Rabiner (1968) Q-factor bandwidths.
         - index: 7
+          linearGainParam: fricA7Linear
           freqRange: [5000, 8000]
           freqDefault: 6500
           bwRange: [200, 2000]
@@ -82,6 +88,7 @@ meta:
           sign: 1
           # Rabiner (1968) Q=9; parallel source: frication only (same as F5-F6)
         - index: 8
+          linearGainParam: fricA8Linear
           freqRange: [6000, 9000]
           freqDefault: 7500
           bwRange: [400, 3000]
@@ -91,6 +98,7 @@ meta:
           sign: -1
           # Rabiner (1968) Q=6; parallel source: frication only (same as F5-F6)
         - index: 9
+          linearGainParam: fricA9Linear
           freqRange: [7000, 10000]
           freqDefault: 8500
           bwRange: [500, 5000]
@@ -100,6 +108,7 @@ meta:
           sign: 1
           # Rabiner (1968) Q=4; parallel source: frication only (same as F5-F6)
         - index: 10
+          linearGainParam: fricA10Linear
           freqRange: [8000, 12000]
           freqDefault: 9500
           bwRange: [1000, 8000]
@@ -144,8 +153,16 @@ nodes:
   fricationSource:
     type: noise-source
     params:
-      gain: 1.0
+      gain: { bind: fricLegacyMix }
       cutoff: { bind: fricationCutoff }
+
+  aerodynamicFricationSource:
+    type: frication-source
+    params:
+      area: { bind: fricSourceArea }
+      flow: { bind: Ug }
+      pressureExponent: { bind: fricPressureExponent }
+      areaExponent: { bind: fricAreaExponent }
 
   # Glottal modulation - pulsatile sinusoidal envelope shaped by OQ
   # (Klatt 1980, Gobl 1988, Fant 1997 Table 1)
@@ -486,6 +503,8 @@ nodes:
 # CONNECTIONS
 # =============================================================================
 connections:
+  - [glottalMod, aerodynamicFricationSource]
+  - [aerodynamicFricationSource, parallelFricGain]
   # ---------------------------------------------------------------------------
   # Source routing
   # ---------------------------------------------------------------------------

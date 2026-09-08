@@ -77,7 +77,9 @@ export async function initWasmModule(
 
   const instancePromise = (async () => {
     if (wasmBytes) {
-      const bytes = wasmBytes instanceof ArrayBuffer ? wasmBytes : wasmBytes.buffer;
+      const bytes = ArrayBuffer.isView(wasmBytes)
+        ? new Uint8Array(wasmBytes.buffer, wasmBytes.byteOffset, wasmBytes.byteLength).slice()
+        : wasmBytes;
       return await WebAssembly.instantiate(bytes, imports);
     }
 

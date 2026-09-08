@@ -5,6 +5,7 @@ import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
+import { historicalLoweringColumns } from "./historical-lowering-columns";
 
 const META = {
   ruleId: "fixture",
@@ -194,7 +195,11 @@ function loadScalarBaseline(fileName: string, frontendId: string): ScalarBaselin
   ) {
     throw new Error("baseline graph/production frames missing");
   }
-  const { inventoryPath, policy } = loadPolicyAndInventory(frontendId);
+  const { inventoryPath, policy: currentPolicy } = loadPolicyAndInventory(frontendId);
+  const policy = {
+    ...currentPolicy,
+    columns: historicalLoweringColumns(parsed, currentPolicy.columns),
+  };
   const segments = parsed.reconstructedGraph.items.flatMap((item): ScalarBaselineSegment[] => {
     if (!isPlainObject(item) || item.type !== "segment" || typeof item.id !== "string") return [];
     const phoneme = latestFeature(item, "phoneme");

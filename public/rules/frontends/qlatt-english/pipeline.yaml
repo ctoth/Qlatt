@@ -359,6 +359,14 @@ relations:
   Segment:
     type: base
     features:
+      Ac: []
+      Ug: []
+      fricPressureExponent: []
+      fricAreaExponent: []
+      fricFrontCavityCm: []
+      fricCavityQ: []
+      fricReferenceDb: []
+      fricParallelReferenceDb: []
       A1: []
       A2: []
       A3: []

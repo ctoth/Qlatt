@@ -1122,8 +1122,6 @@ function attachContourContexts(
  * - `index`         — 0-based position of the current match within its group
  * - `is_first`      — index === 0
  * - `is_last`       — index === count - 1 (e.g. "last accent carrier in phrase")
- * - `midpoint_index`— floor(count / 2) - 1 (the pre-midpoint member; -1 if count < 2)
- * - `is_midpoint`   — index === midpoint_index and midpoint_index >= 0
  *
  * `index` doubles as an index-within-phrase counter that resets at each phrase
  * boundary (via `reset_break_index`). Provenance: breakIndex reads on the match
@@ -1131,8 +1129,7 @@ function attachContourContexts(
  * boundary decisions that defined the grouping.
  *
  * Citations: Silverman et al. 1992 (break index tier), Ladd 2008 (nuclear accent
- * = last accent in phrase; constant-proportion downstep resets at IP boundary),
- * O'Shaughnessy 1976 (long-phrase midpoint break).
+ * = last accent in phrase; constant-proportion downstep resets at IP boundary).
  */
 function attachPhraseScanContexts(
   matches: Match[],
@@ -1144,7 +1141,6 @@ function attachPhraseScanContexts(
 
   for (const phrase of groups) {
     const count = phrase.length;
-    const midpointIndex = Math.floor(count / 2) - 1;
     for (let position = 0; position < phrase.length; position += 1) {
       const match = phrase[position];
       // Record breakIndex reads so writes derived from `phrase.*` depend on the
@@ -1157,8 +1153,6 @@ function attachPhraseScanContexts(
         index: position,
         is_first: position === 0,
         is_last: position === count - 1,
-        midpoint_index: midpointIndex,
-        is_midpoint: midpointIndex >= 0 && position === midpointIndex,
       });
     }
   }

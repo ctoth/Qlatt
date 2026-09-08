@@ -247,10 +247,10 @@ rules:
 
   # breakIndex=2 at the pre-midpoint content word of a long phrase (>=7 content
   # words, no internal punctuation). Selecting the last phone of each content
-  # word run and grouping by the punctuation-SIL phrase boundary, the scan's
-  # `midpoint_index` (floor(count/2)-1) is exactly the imperative pre-midpoint
-  # index; `is_midpoint` marks it. Other content-word ends are set to 0 so the
-  # word-boundary rule can raise them to 1.
+  # word run and grouping by the punctuation-SIL phrase boundary, the rule
+  # selects zero-based index floor(count/2)-1, preserving the pre-midpoint
+  # policy. Other content-word ends are set to 0 so the word-boundary rule
+  # can raise them to 1.
   # Citations: O'Shaughnessy 1976 (~1 break per 4 content words), Silverman 1992.
   assign_long_phrase_break:
     kind: scalar
@@ -267,7 +267,7 @@ rules:
     apply:
       - field: breakIndex
         op: set
-        value: "(phrase.count >= 7 && phrase.is_midpoint) ? 2 : 0"
+        value: "(phrase.count >= 7 && phrase.index == floor(phrase.count / 2) - 1) ? 2 : 0"
         tag: boundary
     citations:
       - O'Shaughnessy 1976

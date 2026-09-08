@@ -78,15 +78,16 @@ function asYamlPath(path: string): string {
 }
 
 describe("cel-macros: parse and expand", () => {
-  it("expands a call by substituting parenthesized arguments into the body", () => {
+  it("expands a call while preserving direct item-field access", () => {
     const macros = parseCelMacroBlock(FUNCTIONS);
-    expect(expandCelMacros("is_vowel(current)", macros)).toBe("((current).type == 'vowel')");
+    expect(expandCelMacros("is_vowel(current)", macros)).toBe("(current.type == 'vowel')");
   });
 
   it("expands nested macro bodies and nested call arguments", () => {
     const macros = parseCelMacroBlock(FUNCTIONS);
-    expect(expandCelMacros("scaled(a, 3)", macros)).toBe("(((a) / 2) * (3))");
-    expect(expandCelMacros("half(half(a))", macros)).toBe("(((a) / 2) / 2)");
+    expect(expandCelMacros("scaled(a, 3)", macros)).toBe("((a / 2) * 3)");
+    expect(expandCelMacros("half(half(a))", macros)).toBe("((a / 2) / 2)");
+    expect(expandCelMacros("half(a + b)", macros)).toBe("((a + b) / 2)");
   });
 
   it("leaves string literals, member calls, and unrelated identifiers alone", () => {
@@ -103,14 +104,14 @@ describe("cel-macros: parse and expand", () => {
       tagged: { params: ["item"], body: "item.item == 'item' && has(item.stress)" },
     });
     expect(expandCelMacros("tagged(current)", macros)).toBe(
-      "((current).item == 'item' && has((current).stress))",
+      "(current.item == 'item' && has(current.stress))",
     );
   });
 
   it("handles nested parentheses, brackets, and commas inside arguments", () => {
     const macros = parseCelMacroBlock(FUNCTIONS);
     expect(expandCelMacros("scaled(max(a, b), size([1, 2]))", macros)).toBe(
-      "(((max(a, b)) / 2) * (size([1, 2])))",
+      "((max(a, b) / 2) * size([1, 2]))",
     );
   });
 
@@ -192,8 +193,10 @@ describe("rulepack functions: block", () => {
       phases: [{ name: "duration", rules: ["scale_vowel"] }],
     });
 
-    expect(spec.rules.scale_vowel.select?.where).toBe("((current).type == 'vowel')");
-    expect(spec.rules.scale_vowel.define.boosted).toBe("(((current.duration) / 2) * (params.k))");
+    expect(spec.rules.scale_vowel.select).toMatchObject({ where: "(current.type == 'vowel')" });
+    expect(spec.rules.scale_vowel.define).toEqual({
+      boosted: "((current.duration / 2) * params.k)",
+    });
 
     runGraphRuleEngine(utterance, spec);
     expect(utterance.getItem(vowelId)?.get("duration")).toBe(150);
@@ -253,67 +256,35 @@ describe("rulepack functions: block", () => {
     try {
       const parentPath = join(dir, "frontend.yaml");
       const childPath = join(dir, "child.yaml");
-      writeFileSync(
-        parentPath,
-        [
-          "version: v1",
-          "include:",
-          "  - child.yaml",
-          "relations:",
-          "  Segment:",
-          "    type: base",
-          "    features:",
-          "      type: [vowel, stop]",
-          "    scalars:",
-          "      duration: {}",
-          "rules:",
-          "  lengthen_vowel:",
-          "    kind: scalar",
-          "    select:",
-          "      relation: Segment",
-          "      where: is_vowel(current)",
-          "    apply:",
-          "      - field: duration",
-          "        op: mul",
-          "        value: '1.5'",
-          "        tag: duration",
-          "    citations:",
-          "      - Klatt 1976",
-          "phases:",
-          "  - name: duration",
-          "    rules: [lengthen_vowel]",
-          "",
-        ].join("\n"),
-      );
-      writeFileSync(
-        childPath,
-        [
-          "version: v1",
-          "functions:",
-          "  is_vowel:",
-          "    params: [item]",
-          "    body: item.type == 'vowel'",
-          "",
-        ].join("\n"),
-      );
+      const duplicatePath = join(dir, "duplicate.yaml");
+      const base = loadRulepackSpecFromPath("/rules/frontends/qlatt-english/frontend.yaml");
+      const parent = {
+        version: "v1",
+        include: ["child.yaml"],
+        output: base.output,
+        tags: { duration: "Duration scaling" },
+        relations: RELATIONS,
+        rules: {
+          lengthen_vowel: {
+            kind: "scalar",
+            select: { relation: "Segment", where: "is_vowel(current)" },
+            apply: [{ field: "duration", op: "mul", value: "1.5", tag: "duration" }],
+            citations: ["Klatt 1976"],
+          },
+        },
+        phases: [{ name: "duration", rules: ["lengthen_vowel"] }],
+      };
+      writeFileSync(parentPath, JSON.stringify(parent));
+      writeFileSync(childPath, JSON.stringify({ functions: FUNCTIONS }));
 
       const spec = loadRulepackSpecFromPath(asYamlPath(parentPath));
-      expect(spec.rules.lengthen_vowel.select?.where).toBe("((current).type == 'vowel')");
+      expect(spec.rules.lengthen_vowel.select).toMatchObject({
+        where: "(current.type == 'vowel')",
+      });
 
-      writeFileSync(
-        parentPath,
-        [
-          "version: v1",
-          "include:",
-          "  - child.yaml",
-          "functions:",
-          "  is_vowel:",
-          "    params: [item]",
-          "    body: item.type == 'vowel'",
-          "",
-        ].join("\n"),
-      );
-      expect(() => loadRulepackSpecFromPath(asYamlPath(parentPath))).toThrowError(
+      // A distinct path exercises loading, rather than the immutable path cache.
+      writeFileSync(duplicatePath, JSON.stringify({ ...parent, functions: FUNCTIONS }));
+      expect(() => loadRulepackSpecFromPath(asYamlPath(duplicatePath))).toThrowError(
         /Duplicate functions "is_vowel"/,
       );
     } finally {

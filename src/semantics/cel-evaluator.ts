@@ -40,6 +40,10 @@ export function createCelEvaluator(): CelEvaluator {
   env.registerOperator("int / double", (a: bigint, b: number) => Number(a) / b);
   env.registerOperator("double % int", (a: number, b: bigint) => a % Number(b));
   env.registerOperator("int % double", (a: bigint, b: number) => Number(a) % b);
+  // The CEL spec defines `%` only on ints; context values are doubles, so the
+  // truncating remainder is extended to doubles (#47). Use `mod()` for the
+  // floored modulo that clock arithmetic needs.
+  env.registerOperator("double % double", (a: number, b: number) => a % b);
   env.registerOperator("double == int", (a: number, b: bigint) => a === Number(b));
 
   // Cache compiled expressions for reuse

@@ -75,6 +75,83 @@ spec-owned.
 
 ## 4. Semantics evaluation
 
+**Rounding and modulo (both CEL catalogs).** Arguments must be finite numbers;
+CEL integer literals are converted to the host's binary64 number representation.
+Wrong types and non-finite arguments are errors. Results are numbers.
+
+| Builtin | Normative definition |
+| --- | --- |
+| `floor(x)` | Largest integer less than or equal to `x`. |
+| `ceil(x)` | Smallest integer greater than or equal to `x`. |
+| `round(x)` | Nearest integer, with ties away from zero (C99 `round`, Fortran `NINT`): `round(-2.5) == -3`. Zero results are positive zero. |
+| `mod(a, b)` | Floored modulo, mathematically `a - b * floor(a / b)`. A nonzero result has the divisor's sign; a zero divisor is an error. Compute a truncating remainder first and add `b` only when the signs differ, to avoid losing a small remainder to rounding. Normalize zero to positive zero. |
+
+The `%` operator remains the truncating remainder, distinct from `mod`:
+`-1 % 12 == -1`, while `mod(-1, 12) == 11`. Both evaluators also accept
+double/double operands for `%`, in addition to integer and mixed operands.
+
+**String and optional-field builtins (rule-engine catalog).** String arguments
+use ECMAScript `String` conversion. String positions are UTF-16 code units.
+
+| Builtin | Normative definition |
+| --- | --- |
+| `split(s, separator)` | Split at every literal separator, retaining empty leading/trailing parts. An empty separator splits into UTF-16 code units. |
+| `substring(s, start[, end])` | ECMAScript `String.prototype.substring`: truncate finite numeric indices toward zero, clamp to `[0, length]`, default `end` to length, swap the indices if start exceeds end, and exclude the end position. |
+| `concat(a, b[, c[, d]])` | Accept two to four arguments. If all are lists, concatenate their elements by one level; otherwise concatenate their string conversions without a separator. |
+| `matches(s, pattern)` | True if any substring matches an ECMAScript regular expression with no flags. Use anchors for a whole-string match. Invalid patterns are errors; this is not a literal-substring operation or an RE2 contract. |
+| `get(obj, field, fallback)` | Convert `field` to a string and return the object's own property if it is present and neither null nor undefined. Otherwise return `fallback`, including for null and non-object receivers. Preserve `false`, `0`, and the empty string. Never return inherited properties. |
+
+Pass the optional field by name: `get(current, 'stress', 0)`. Arguments are
+evaluated normally, so `get(current.missing, 'stress', 0)` does not protect
+the earlier missing-field access. Nest `get` calls for optional parents.
+
+The rule catalog also permits native CEL list construction and receiver macros:
+`xs.map(x, expr)` transforms each element; `xs.map(x, predicate, expr)` transforms
+only matching elements; `xs.filter(x, predicate)` preserves matching elements;
+`all`, `exists`, and `exists_one` respectively test every, at least one, and
+exactly one element. `xs.join([separator])` joins string elements (default empty
+separator), and `s.startsWith(prefix)` / `s.endsWith(suffix)` test literal affixes.
+These retain the CEL evaluator's receiver syntax and lexical binding semantics.
+
+**Rulepack functions.** Declare named CEL expressions in a root or included
+rulepack. Includes merge function names and reject duplicates. Expansion happens
+after include/inheritance resolution and before normal rule validation:
+
+```yaml
+functions:
+  is_vowel:
+    params: [item]
+    body: item.type == 'vowel'
+    citations: [Peterson & Barney 1952]
+rules:
+  example:
+    # Other required rule fields omitted here.
+    select: { relation: Segment, where: 'is_vowel(current)' }
+```
+
+Each definition accepts `params` (default empty), required nonempty `body`,
+optional `citations`, and optional `description`. Names and parameters must be
+identifiers; parameter names must be unique. Catalog names cannot be shadowed.
+Bodies may call other functions and reference the ambient rule context. Cycles,
+wrong arities, malformed bodies, and unknown definition fields are errors.
+The declared block remains available for introspection.
+
+Expansion substitutes bare parameter identifiers, preserves string literals and
+member names, and parenthesizes compound arguments and expanded bodies. Direct
+item-field paths remain visible to existing schema validators. User-defined
+bodies cannot contain comprehension binders: textual substitution cannot safely
+rename their lexical variables. Use comprehensions at the call site instead.
+Macros may expand repeatedly evaluated arguments; they are expressions, not
+runtime function calls with evaluation-once guarantees.
+
+Only executable rule, predicate, and pattern surfaces are expanded. Literal
+parameter data, string sets, maps, and descriptive metadata remain unchanged.
+Called macros' citations, including nested macro dependencies and referenced
+predicates/patterns, are added to the calling rule's citations for provenance.
+Rules still require their own citations and application tags. A native host
+consuming the expanded, validated rulepack needs no runtime macro facility;
+a host loading raw YAML must perform equivalent expansion and validation.
+
 Per frame, the host derives realized parameter values from the semantics
 document:
 

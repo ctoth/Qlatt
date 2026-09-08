@@ -1,4 +1,5 @@
 import { Environment } from "@marcbachmann/cel-js";
+import { builtinCeil, builtinFloor, builtinMod, builtinRound } from "../builtin-functions";
 
 type CompiledCelExpression = (context?: Record<string, unknown>) => unknown;
 
@@ -95,10 +96,118 @@ function lowerValue(value: unknown): string {
   return (typeof value === "string" ? value : String(value)).toLowerCase();
 }
 
+/**
+ * Safe optional-field accessor for CEL rule expressions (#47).
+ *
+ * `get(obj, field, default)` returns `obj[field]` when `obj` is a non-null
+ * object holding a non-null value under `field`, and `default` otherwise. Like
+ * `isTrue`, the field is passed BY NAME so an absent field never reaches the
+ * cel-js member-access path that throws "No such key"; this makes the
+ * `has(obj.field) ? obj.field : default` guard idiom optional. A present
+ * falsy value (`0`, `false`, `""`) is returned as stored, never replaced.
+ */
+function getValue(obj: unknown, field: unknown, fallback: unknown): unknown {
+  if (obj == null || typeof obj !== "object") return fallback;
+  const key = typeof field === "string" ? field : String(field);
+  if (!Object.hasOwn(obj, key)) return fallback;
+  const value = (obj as Record<string, unknown>)[key];
+  return value === undefined || value === null ? fallback : value;
+}
+
+function stringValue(value: unknown): string {
+  return typeof value === "string" ? value : String(value);
+}
+
+/** Numeric argument coercion: CEL int literals arrive as BigInt. */
+function numberValue(value: unknown): number {
+  const numeric = typeof value === "bigint" ? Number(value) : value;
+  if (typeof numeric !== "number" || !Number.isFinite(numeric)) {
+    throw new Error("Expected finite numeric argument");
+  }
+  return numeric;
+}
+
+/** `split(s, sep)`: the list of substrings of `s` between occurrences of `sep`. */
+function splitValue(value: unknown, separator: unknown): string[] {
+  return stringValue(value).split(stringValue(separator));
+}
+
+/** `substring(s, start[, end])`: UTF-16 code-unit slice, end exclusive. */
+function substringValue(value: unknown, start: unknown, end?: unknown): string {
+  const text = stringValue(value);
+  return end === undefined
+    ? text.substring(numberValue(start))
+    : text.substring(numberValue(start), numberValue(end));
+}
+
+/**
+ * `concat(a, b, ...)`: when every argument is a list, their concatenation;
+ * otherwise the concatenation of each argument's string form.
+ */
+function concatValue(...values: unknown[]): unknown[] | string {
+  if (values.every((value) => Array.isArray(value))) return values.flat(1);
+  return values.map(stringValue).join("");
+}
+
+const regexCache = new Map<string, RegExp>();
+
+/** `matches(s, re)`: whether `s` contains a match of the regular expression `re`. */
+function matchesValue(value: unknown, pattern: unknown): boolean {
+  const source = stringValue(pattern);
+  let regex = regexCache.get(source);
+  if (!regex) {
+    regex = new RegExp(source);
+    regexCache.set(source, regex);
+  }
+  return regex.test(stringValue(value));
+}
+
+/**
+ * Context-free ("pure") catalog functions: one fixed implementation is
+ * registered on every environment, for each declared arity. Numeric bindings
+ * come from `src/builtin-functions.ts`, the single source of truth shared with
+ * the semantics evaluator; normative definitions are in
+ * docs/host-contract.md section 4.
+ */
+const PURE_FUNCTIONS: Readonly<Record<string, (...args: unknown[]) => unknown>> = {
+  isTrue: (obj, field) => isTrueValue(obj, field),
+  lower: (value) => lowerValue(value),
+  get: (obj, field, fallback) => getValue(obj, field, fallback),
+  floor: (value) => builtinFloor(numberValue(value)),
+  ceil: (value) => builtinCeil(numberValue(value)),
+  round: (value) => builtinRound(numberValue(value)),
+  mod: (a, b) => builtinMod(numberValue(a), numberValue(b)),
+  split: (value, separator) => splitValue(value, separator),
+  substring: (value, start, end) => substringValue(value, start, end),
+  concat: (...values) => concatValue(...values),
+  matches: (value, pattern) => matchesValue(value, pattern),
+};
+
 export const CEL_FUNCTION_CATALOG = [
   { name: "has", arities: [1], binding: "builtin" },
   { name: "isTrue", arities: [2], binding: "pure" },
   { name: "lower", arities: [1], binding: "pure" },
+  { name: "get", arities: [3], binding: "pure" },
+  { name: "floor", arities: [1], binding: "pure" },
+  { name: "ceil", arities: [1], binding: "pure" },
+  { name: "round", arities: [1], binding: "pure" },
+  { name: "mod", arities: [2], binding: "pure" },
+  { name: "split", arities: [2], binding: "pure" },
+  { name: "substring", arities: [2, 3], binding: "pure" },
+  { name: "concat", arities: [2, 3, 4], binding: "pure" },
+  { name: "matches", arities: [2], binding: "pure" },
+  // CEL standard receiver-style functions and comprehension macros that
+  // cel-js evaluates natively (`list.map(x, expr)`, `s.startsWith(p)`, ...).
+  // Listed so the function-surface validator accepts them; arities exclude
+  // the receiver.
+  { name: "map", arities: [2, 3], binding: "builtin" },
+  { name: "filter", arities: [2], binding: "builtin" },
+  { name: "all", arities: [2], binding: "builtin" },
+  { name: "exists", arities: [2], binding: "builtin" },
+  { name: "exists_one", arities: [2], binding: "builtin" },
+  { name: "join", arities: [0, 1], binding: "builtin" },
+  { name: "startsWith", arities: [1], binding: "builtin" },
+  { name: "endsWith", arities: [1], binding: "builtin" },
   { name: "size", arities: [1], binding: "builtin" },
   { name: "double", arities: [1], binding: "builtin" },
   { name: "string", arities: [1], binding: "builtin" },
@@ -142,7 +251,12 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "syllable_position_in_word", arities: [0], binding: "context" },
 ] as const satisfies readonly CelFunctionCatalogEntry[];
 
-const DEFAULT_ALLOWED_FUNCTIONS = new Set(CEL_FUNCTION_CATALOG.map(({ name }) => name));
+const DEFAULT_ALLOWED_FUNCTIONS = new Set<string>(CEL_FUNCTION_CATALOG.map(({ name }) => name));
+
+/** Whether `name` is a function on the rule-engine CEL surface. */
+export function isCatalogFunctionName(name: string): boolean {
+  return DEFAULT_ALLOWED_FUNCTIONS.has(name);
+}
 
 const FUNCTION_CALL_PATTERN = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
 const RELATION_HELPER_PATTERN = /\b(total|prev_point)\s*\(\s*(['"])([^'"]+)\2\s*\)/g;
@@ -180,26 +294,30 @@ function createCelEnvironment(
   env.registerOperator("int / double", (a: bigint, b: number) => Number(a) / b);
   env.registerOperator("double % int", (a: number, b: bigint) => a % Number(b));
   env.registerOperator("int % double", (a: bigint, b: number) => Number(a) % b);
+  // The CEL spec defines `%` only on ints; item features are doubles, so the
+  // truncating remainder is extended to doubles (#47). Use `mod()` for the
+  // floored modulo that clock arithmetic needs.
+  env.registerOperator("double % double", (a: number, b: number) => a % b);
   env.registerOperator("double == int", (a: number, b: bigint) => a === Number(b));
 
   // Register all known custom function signatures against this Environment's
   // immutable evaluation owner. Bound environments are cached by the explicit
   // function-registry object; no module-global dispatch participates.
   //
-  // "double" and "string" are CEL built-in type casts and must NOT be
-  // re-registered. Our codebase's double(x) => Number(x) and string(x) =>
-  // String(x) are functionally identical to the CEL builtins.
-  // Context-free ("pure") catalog functions: fixed implementation on every env.
-  env.registerFunction("isTrue(dyn, dyn): dyn", (obj: unknown, field: unknown) =>
-    isTrueValue(obj, field),
-  );
-  env.registerFunction("lower(dyn): dyn", (value: unknown) => lowerValue(value));
-
+  // "builtin" catalog entries (has, size, the type casts, the comprehension
+  // macros, the receiver-style string functions) are provided by cel-js and
+  // must NOT be re-registered; they are listed only for the validator.
   for (const { name, arities, binding } of CEL_FUNCTION_CATALOG) {
-    if (binding !== "context") continue;
+    if (binding === "builtin") continue;
     for (const arity of arities) {
       const args = Array.from({ length: arity }, () => "dyn").join(", ");
       const signature = `${name}(${args}): dyn`;
+      if (binding === "pure") {
+        const pure = PURE_FUNCTIONS[name];
+        if (!pure) throw new Error(`CEL catalog function '${name}' has no pure implementation`);
+        env.registerFunction(signature, pure);
+        continue;
+      }
       env.registerFunction(signature, (...args: unknown[]) => {
         const fn = functions?.[name];
         if (!isCallable(fn))
@@ -233,10 +351,25 @@ function compileBoundExpression(
 
 /**
  * Coerce @marcbachmann/cel-js results: BigInt (CEL int) → JS number.
- * The rest of the codebase expects plain JS numbers everywhere.
+ * The rest of the codebase expects plain JS numbers everywhere. Lists are
+ * coerced element-wise (a comprehension over int literals yields BigInts),
+ * but a list without any BigInt is returned as-is so item views and other
+ * identity-bearing values keep their identity. Maps are left untouched for
+ * the same reason.
  */
 function coerceResult(value: unknown): unknown {
   if (typeof value === "bigint") return Number(value);
+  if (Array.isArray(value)) {
+    let coerced: unknown[] | null = null;
+    for (let index = 0; index < value.length; index++) {
+      const element = value[index];
+      const converted = coerceResult(element);
+      if (converted === element) continue;
+      coerced ??= [...value];
+      coerced[index] = converted;
+    }
+    return coerced ?? value;
+  }
   return value;
 }
 

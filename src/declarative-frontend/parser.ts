@@ -1,4 +1,5 @@
 import { cloneValue, isPlainObject, parseYamlString } from "../yaml-loader";
+import { expandSpecCelMacros, parseCelMacroBlock } from "./cel-macros";
 
 type PlainObject = Record<string, unknown>;
 
@@ -410,15 +411,11 @@ function normalizeRule(ruleInput: unknown): PlainObject {
 }
 
 export function parseDslSpec(source: unknown) {
-  let raw = source;
-
-  if (typeof source === "string") {
-    raw = parseYamlString(source, "dsl spec");
-  }
-
-  if (!isPlainObject(raw)) {
+  const parsed = typeof source === "string" ? parseYamlString(source, "dsl spec") : source;
+  if (!isPlainObject(parsed)) {
     throw new Error("DSL spec must be an object or YAML object document");
   }
+  const raw = expandSpecCelMacros(parsed, parseCelMacroBlock(parsed.functions));
   if (Object.hasOwn(raw, "streams")) {
     throw new Error("E_LEGACY_STREAMS: 'streams' is no longer accepted; declare 'relations'");
   }
@@ -442,6 +439,7 @@ export function parseDslSpec(source: unknown) {
 
   return {
     ...extraRootFields,
+    functions: cloneObject(raw.functions),
     version: raw.version ?? null,
     inventory_path: asString(raw.inventory_path, null),
     lts_path: asString(raw.lts_path, null),

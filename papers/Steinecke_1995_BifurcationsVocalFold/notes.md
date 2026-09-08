@@ -18,11 +18,11 @@ Each vocal fold (left = l, right = r) is represented by two masses (lower m1, up
 ```
 dx1a/dt = v1a                                                    (11)
 dv1a/dt = (1/m1a) * (P1*l*d1 - r1a*v1a - k1a*x1a
-           - Theta(-a1)*c1a*(a1/2) - kca*(x1a - x2a))           (12)
+           - Theta(-a1)*c1a*(a1/(2*l)) - kca*(x1a - x2a))       (12)
 
 dx2a/dt = v2a                                                    (13)
 dv2a/dt = (1/m2a) * (-r2a*v2a - k2a*x2a
-           - Theta(-a2)*c2a*(a2/2) - kca*(x2a - x1a))           (14)
+           - Theta(-a2)*c2a*(a2/(2*l)) - kca*(x2a - x1a))       (14)
 ```
 
 State variables: x1a, v1a, x2a, v2a (displacement and velocity of lower/upper mass, each side).
@@ -40,7 +40,7 @@ a_min = min(a1l, a2l) + min(a1r, a2r)                           (5)
 ### Pressure equations (Bernoulli + jet assumption)
 
 ```
-P1 = Ps * [Theta(a_min) - a_min/a1] * Theta(a1)                (6)
+P1 = Ps * [1 - Theta(a_min) * (a_min/a1)^2] * Theta(a1)        (6)
 P2 = 0                                                          (7)
 U  = sqrt(2*Ps/rho) * a_min * Theta(a_min)     (volume flow)   (8)
 ```
@@ -52,6 +52,9 @@ Theta(x) = 0                  for x <= 0
 ```
 
 For Theta(a1), x0 = a01. For Theta(a_min), a_min is first clamped: a_min = max(0, a_min).
+Equation 10 replaces the minimum-area gate with this implicit closure; it does
+not multiply the clamped area by another tanh. The squared pressure ratio and
+collision denominator above were corrected against the page image. *(p.1876)*
 
 ### Forces on masses
 
@@ -87,7 +90,7 @@ All units: **centimeters, grams, milliseconds** (and combinations thereof).
 | Collision spring (upper) | c2 | 3*k2 = 0.024 | |
 | Lower rest area (total) | a01 | 0.05 cm^2 | |
 | Upper rest area (total) | a02 | 0.05 cm^2 | Rectangular rest shape |
-| Glottal length | l | 0.25 cm | (inferred from Eq. context) |
+| Glottal length | l | 1.4 cm | Inherited Ishizaka & Flanagan 1972, p.1250; omitted from this paper's standard list. Not d1. |
 | Lower thickness | d1 | 0.25 cm | |
 | Upper thickness | d2 | 0.05 cm | d2 = d1/5 |
 | Subglottal pressure | Ps | 0.008 g/(cm*ms^2) | ~8 cm H2O |
@@ -149,6 +152,10 @@ This changes the lower eigenfrequency without affecting the upper mass or coupli
 - Condition: dP1/dx1 > k1 (Eq. 27), equivalent to Ps > P_crit (Eq. 28)
 
 **Phonation threshold pressure** depends linearly on glottal rest area (consistent with Titze 1988).
+
+Fig. 5 brackets standard-parameter onset between `Ps=0.002` and `Ps=0.003`
+(approximately 0.0024), at `k1=0.08`, `r1=r2=0.02`. Eq. 24 is the threshold
+for the nontrivial equilibrium branch, not this Hopf threshold. *(pp.1877-1878)*
 
 ### 4.2 Superior nerve paralysis: Q-Ps plane (Fig. 7)
 

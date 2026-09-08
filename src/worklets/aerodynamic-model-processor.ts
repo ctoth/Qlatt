@@ -15,6 +15,7 @@
  *   output[5] = FNZ frequency (Hz)
  *   output[6] = open quotient ratio (0-1)
  *   output[7] = spectral tilt proxy (dB/oct)
+ *   output[8] = subglottal pressure input (cm H2O), independent of enable
  */
 import {
   type BaseProcessorOptions,
@@ -200,6 +201,16 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
     parameters: Record<string, Float32Array>,
   ): boolean {
     if (this.disposed) return false;
+    // Ps is an exogenous model input (Stevens 1998), not the inferred
+    // intraoral or transglottal pressure. Expose it for physical sources even
+    // when the optional HL-to-Klatt amplitude mapping is disabled.
+    const pressureChannel = outputs[8]?.[0];
+    if (pressureChannel) {
+      const pressure = parameters.ps;
+      for (let i = 0; i < pressureChannel.length; i++) {
+        pressureChannel[i] = pressure?.[pressure.length === 1 ? 0 : i] ?? 8;
+      }
+    }
     const voicingOut = outputs[0];
     const aspirationOut = outputs[1];
     const fricationOut = outputs[2];

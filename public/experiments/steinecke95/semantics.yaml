@@ -1,0 +1,50 @@
+# Steinecke & Herzel (1995), pp.1876-1880: physical source controls.
+params:
+  sourceMode:
+    type: integer
+    range: [0, 3]
+    default: 3
+    description: "0=impulse, 1=LF, 2=bypass, 3=two-mass vocal folds"
+  subglottalPressure:
+    type: float
+    range: [0, 30] # Engineering bound, shared with the aerodynamic worklet.
+    diagnoseRange: true
+    default: 8
+    unit: "cm H2O"
+  foldAsymmetry:
+    type: float
+    range: [0.4, 1]
+    diagnoseRange: true
+    default: 1
+    description: "Steinecke & Herzel Eq.38: right/left tension Q"
+
+realize:
+  # Engineering bounds for AudioParams; range diagnostics retain original input.
+  twoMassPressure:
+    expr: "min(30.0, max(0.0, subglottalPressure))"
+    deps: [subglottalPressure]
+  twoMassAsymmetry:
+    expr: "min(1.0, max(0.4, foldAsymmetry))"
+    deps: [foldAsymmetry]
+  # Eq.8 already supplies glottal flow. Bypass Klatt's glottal pulse-shaping
+  # resonators for the physical source; tract and radiation remain downstream.
+  twoMassSourceSwitch:
+    expr: "sourceMode == 3 ? 1.0 : 0.0"
+    deps: [sourceMode]
+    step: true
+  impulseSourceSwitch:
+    expr: "sourceMode == 0 || sourceMode == 2 ? 1.0 : 0.0"
+    deps: [sourceMode]
+    step: true
+  sourceBypassSwitch:
+    expr: "sourceMode >= 2 ? 1.0 : 0.0"
+    deps: [sourceMode]
+    step: true
+  sourceDirectSwitch:
+    expr: "sourceMode == 1 ? 1.0 : 0.0"
+    deps: [sourceMode]
+    step: true
+  sourceDiffSwitch:
+    expr: "sourceMode == 0 ? 1.0 : 0.0"
+    deps: [sourceMode]
+    step: true

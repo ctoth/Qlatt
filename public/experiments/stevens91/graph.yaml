@@ -83,7 +83,9 @@ meta:
         # Cascade-only higher formants — Rabiner (1968) defaults
         # At 44.1 kHz sample rate, the z-transform pole repetition that provided
         # automatic higher-pole correction at Klatt's 10 kHz is above audibility.
-        # Explicit resonators F7-F10 compensate for this.
+        # F7-F10 are the legacy approximation, not an explicit Laine HPC filter.
+        # Select laine88 for the four-formant worked all-zero correction;
+        # see docs/higher-pole-correction.md.
         # Refs: Rabiner (1968), Fant (1960) Eq. 1.3-4, Holmes (1983)
         - index: 7
           freqRange: [5000, 8000]

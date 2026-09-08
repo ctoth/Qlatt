@@ -1,0 +1,11 @@
+bacon: "0.1"
+name: laine88
+constants:
+  higherPoleCorrection: true
+realize:
+  # Laine 1988 Fig. 18 worked correction is for FOUR formants, not six or ten.
+  # Override frontend NFC as well as its default so the filter stays coherent.
+  NFC:
+    expr: "4"
+    deps: []
+    citations: [Laine 1988 Fig. 18]

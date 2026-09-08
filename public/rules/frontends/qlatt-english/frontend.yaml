@@ -5,6 +5,19 @@ morphology_path: /rules/frontends/qlatt-english/morphology.yaml
 stress_policy_path: /rules/frontends/qlatt-english/stress-policy.yaml
 speaker_profile_path: /rules/policy/speaker-profile.yaml
 source_contour_path: /rules/policy/source-contour.yaml
+functions:
+  has_voiced_formants:
+    params: [item]
+    # Acoustic eligibility only: accent/stress and SIL policy stay in callers.
+    # Unlike is_voiced, this checks amplitudes rather than a phonological flag.
+    # Textual expansion repeats item: pass a bound item, not a navigation call.
+    # Preserve has() semantics, including present-null F1 and amplitude errors.
+    body: >-
+      has(item.F1)
+      && ((has(item.AV) && item.AV > 0)
+          || (has(item.AVS) && item.AVS > 0))
+    citations:
+      - "Engineering estimate: Qlatt acoustic F0 eligibility requires F1 presence and positive AV or AVS; extracted unchanged from prosody selectors (#135)"
 include:
   - pipeline.yaml
   - phases/orthography.yaml

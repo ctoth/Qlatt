@@ -44,6 +44,37 @@ declination is NOT the primary cause of the quieting issue. Need to look elsewhe
 - No decline in AV through the phrase!
 
 ### Key Finding: AV is CONSTANT — GO is CONSTANT at 47
+**Resolved by #54 (vocal effort).** The original observation below describes
+the unmodulated input AV. The frontend now emits cited `effort` in dB from
+ToBI accent carriers and phrase position; semantics realizes `AV + effort`
+alongside F0, F1, parallel spectral balance, OQ and TL. GO remains the fixed
+calibration gain at 47. Existing Ee/Rd source contours remain separate.
+
+Reproduce the comparison on identical frames with:
+`node scripts/run-frontend-script.mjs scripts/report-vocal-effort.ts`
+The script emits every voiced segment; these are representative rows for
+"The quick brown fox jumps over the lazy dog." at 110 Hz:
+
+| Time (s) | Phone | Effort (dB) | AV before (effort=0) | AV after | GO |
+|---|---|---|---|---|---|
+| 0.102 | AH | -0.031 | 57.000 | 56.969 | 47 |
+| 0.354 | IH | 1.912 | 62.000 | 63.912 | 47 |
+| 0.671 | AE1 | 1.811 | 64.000 | 65.811 | 47 |
+| 1.097 | AA | 1.686 | 64.000 | 65.686 | 47 |
+| 2.494 | AH | -0.656 | 57.000 | 56.344 | 47 |
+| 2.618 | EH1 | 1.284 | 62.000 | 63.284 | 47 |
+| 2.984 | AO | 1.100 | 63.000 | 64.100 | 47 |
+
+These are realized control levels, not measured sound-pressure levels. Lienard
+& Di Benedetto (1999), Figs. 3–4, supplies the F0/F1 and formant-amplitude
+slopes. Parallel A1–A3 use residual slopes after the shared AVS increment.
+The OQ offsets interpolate Holmberg (1988) male soft/modal/loud observations;
+the accent magnitude, phrase fall, and mapping of A3–A1 balance to TL are
+explicit engineering estimates. This closes the missing AV covariation,
+without claiming to diagnose the original perceived fading or to reproduce
+measured vowel spectra exactly in the cascade branch.
+
+Original investigation:
 The "getting quieter" issue is NOT in the track data. It must be in:
 - The WebAudio runtime/interpreter scheduling
 - The semantics realize rules (voiceGain etc.)

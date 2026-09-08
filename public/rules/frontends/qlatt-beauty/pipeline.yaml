@@ -219,6 +219,7 @@ relations:
       AV: []
       AVS: []
       EePhraseDb: []
+      effort: []
       F1: []
       F2: []
       F3: []

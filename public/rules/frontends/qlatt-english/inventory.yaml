@@ -83,6 +83,7 @@ base_params:
   jitter: 0
   # Fant 1997 connected-speech contour offsets (default neutral).
   EePhraseDb: 0
+  effort: 0  # Lienard 1999: dB relative to modal voice
   RdPhraseOffset: 0
   AN: 0
   nasalCouplingArea: 0  # Maeda 1993: cm2, closed velopharyngeal port

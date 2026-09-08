@@ -396,6 +396,7 @@ relations:
       AV: []
       AVS: []
       EePhraseDb: []
+      effort: []
       F1: []
       F2: []
       F3: []
@@ -577,6 +578,7 @@ phases:
       - tobi_boundary_rise
       - tobi_register_reset
       - connected_speech_source_contour
+      - vocal_effort
       - f0_voiceless_onset_perturbation
       - f0_voiced_onset_perturbation
       - f0_continuation_rise

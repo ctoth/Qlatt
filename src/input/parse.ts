@@ -393,7 +393,12 @@ function lowerAffect(
   parentId: string | undefined,
 ): Direction {
   const degree = spec.degree ?? 1;
-  const compiled = compileAffect(spec.preset, degree, { sex });
+  const compiled = compileAffect(spec.preset, degree, {
+    sex,
+    provenance,
+    subject: scope === "utterance" ? "utterance" : tokenSubject(scope),
+    parents: parentId ? [parentId] : undefined,
+  });
   const subject = scope === "utterance" ? "utterance" : tokenSubject(scope);
   const decision = provenance.add({
     stage: "frontend",
@@ -405,7 +410,10 @@ function lowerAffect(
       `, Rd${signed(compiled.vq.rdDelta)}, F0×${fmt(compiled.vq.f0Scale)}` +
       (compiled.resolvedSex ? ` (sex=${compiled.resolvedSex})` : ""),
     citations: compiled.citations,
-    parents: parentId ? [parentId] : undefined,
+    parents: [
+      ...(parentId ? [parentId] : []),
+      ...(compiled.decision ? [compiled.decision.id] : []),
+    ],
   });
   return {
     id: decision.id,

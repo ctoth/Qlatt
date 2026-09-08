@@ -6,6 +6,13 @@ version: v1
 include:
   - phases/voice-quality.yaml
 predicates:
+  is_hertz_nucleus_vowel: >-
+    current.type == 'vowel' && next != null
+    && has(current.syllable) && current.syllable != null
+    && has(next.syllable) && next.syllable != null
+    && current.syllable.id == next.syllable.id
+    && ((current.phoneme in ['AA', 'AA0', 'AA1'] && next.phoneme == 'Y')
+      || (current.phoneme in ['ER', 'ER0', 'ER1'] && next.phoneme == 'R'))
   is_question_boundary: current.phoneme == 'SIL' && current.punctuationSymbol == '?'
   is_stressed_vowel: current.type == 'vowel' && has(current.stress) && current.stress == 1
   is_pausable_consonant: current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate']

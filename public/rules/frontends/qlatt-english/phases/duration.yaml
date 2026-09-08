@@ -1,5 +1,21 @@
 version: v1
 rules:
+  hertz_nucleus_floor:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_hertz_nucleus_vowel }
+    # Commit before the budget rule: atomic effects read pre-write feature state.
+    # The nucleus budget supersedes inventory duration; its remainder uses the
+    # timeline minimum, not the longer isolated-CNC incompressibility floor.
+    apply:
+      - field: durationFloor
+        op: set
+        value: params.policy.duration.default_floor_ms
+        tag: transition
+    citations:
+      - "Hertz & Huffman 1992 pp.1172–1173, section 2.3"
+      - "Engineering adaptation: nucleus-budget remainders retain the timeline minimum rather than the superseded inventory-based incompressibility floor"
   duration_floor_from_inventory:
     kind: scalar
     select:
@@ -25,13 +41,7 @@ rules:
     kind: scalar
     select:
       relation: Segment
-      where: >-
-        current.type == 'vowel' && next != null
-        && has(current.syllable) && current.syllable != null
-        && has(next.syllable) && next.syllable != null
-        && current.syllable.id == next.syllable.id
-        && ((current.phoneme in ['AA', 'AA0', 'AA1'] && next.phoneme == 'Y')
-          || (current.phoneme in ['ER', 'ER0', 'ER1'] && next.phoneme == 'R'))
+      where: { predicate: is_hertz_nucleus_vowel }
     define:
       tail: next
       after_tail: ahead(current, 2.0)

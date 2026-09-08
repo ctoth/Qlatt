@@ -598,14 +598,14 @@ function buildTextToKlattTrackDetailed(
     type: "inventory_selected",
     subject: `inventory:${frontendId}`,
     reason: `Selected frontend inventory '${resources.inventoryPath}'`,
-    citations: [resources.inventoryPath],
+    citations: [resources.inventoryPath, ...(resources.inventory.citations ?? [])],
   });
   const construct = utterance.beginTransaction({
     ruleId: "inventory_materialization",
     phase: "transcribe",
     tag: "inventory",
     reason: "Materialize transcribed phonemes as typed Segment Items",
-    citations: [resources.inventoryPath],
+    citations: [resources.inventoryPath, ...(resources.inventory.citations ?? [])],
     stage: "transcribe",
   });
   construct.dependOn(inventoryDecision.id);

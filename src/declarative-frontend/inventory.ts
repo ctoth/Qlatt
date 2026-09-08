@@ -11,6 +11,7 @@ import {
 } from "../yaml-loader";
 
 export type InventorySpec = {
+  citations?: readonly string[];
   base_params: Record<string, number>;
   normalization_aliases?: Readonly<Record<string, string>>;
   secondary_stress_fallback?: { target: 0 | 1; citations: string[] };
@@ -215,8 +216,16 @@ function parseInventorySpec(source: string): InventorySpec {
   }
 
   const phonemeTargets = normalizePhonemeTargets(raw.phoneme_targets);
+  const citations = raw.citations ?? [];
+  if (
+    !Array.isArray(citations) ||
+    citations.some((entry) => typeof entry !== "string" || !entry.trim())
+  ) {
+    throw new Error("E_INVENTORY_SCHEMA: citations must be non-empty strings");
+  }
   applyDurationModels(raw.duration_models, phonemeTargets);
   return {
+    citations: [...citations],
     base_params: normalizeBaseParams(raw.base_params),
     normalization_aliases: normalizeNormalizationAliases(raw.normalization_aliases, phonemeTargets),
     secondary_stress_fallback: normalizeSecondaryFallback(raw.secondary_stress_fallback),

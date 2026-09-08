@@ -42,9 +42,10 @@ Where:
 
 ### Glottal Area Definitions
 
-- `a_i = a_{0i} + d_i` — glottal area for each section (lower/upper)
-- `a_{0i}` = rest area of section i
-- `a_min = min(a_{0il} + x_{il}, a_{0ir} + x_{ir})` if areas positive; min of relevant sides
+- `a_i = a_il + a_ir`, with `a_ia = l(x_0ia + x_ia)` — total area and each side's contribution.
+- `a_0i = l(x_0il + x_0ir)` is total rest area; `d_i` is thickness, not displacement.
+- `a_min = max(0, min(a_1l, a_2l) + min(a_1r, a_2r))` (Eqs. 5, 10).
+- These definitions were checked against the original page image during issue #58 implementation. *(p.1876)*
 
 ### Aerodynamic Forces (Eq. 6)
 
@@ -55,7 +56,7 @@ P_1 = P_s [1 - Theta(a_min)(a_min/a_1)^2] * Theta(a_1)
 
 Volume flow velocity (Eq. 8):
 ```
-U = sqrt(2 * P_1 / rho) * a_min * Theta(a_1)
+U = sqrt(2 * P_s / rho) * a_min * Theta(a_min)
 ```
 
 Theta function approximation for numerical simulation (Eq. 9):
@@ -63,6 +64,8 @@ Theta function approximation for numerical simulation (Eq. 9):
 Theta(x) ~ tanh(50 * (x / x_0)) for x > 0, else 0
 ```
 where x_0 is a scale value for gradient of Theta.
+For area/collision gates use `x_0 = a_0i`. For the minimum-area gate, Eq. 10
+instead makes closure implicit by clamping `a_min` to zero. *(p.1876)*
 
 ## Standard Parameter Set (Table on p. 1876)
 
@@ -80,11 +83,15 @@ All units: centimeters, grams, milliseconds.
 | c_2l = c_2r | 3 * k_2 |
 | k_cl = k_cr = k_c | 0.025 |
 | a_01 | 0.05 |
-| a_02l = a_02r | 0.05 |
+| a_02 (total upper rest area) | 0.05 |
 | d_1 | 0.25 |
 | d_2 | 0.05 |
-| P_0 | 0.008 (~8 cm H2O) |
-| g (grid) | 0.00113 |
+| P_s | 0.008 (~8 cm H2O) |
+| rho (air density) | 0.00113 |
+
+The standard list does not state `l`. Use the inherited Ishizaka & Flanagan
+(1972) cord length, **1.4 cm** (p.1250), which reproduces Figs. 5, 8 and 9.
+Do not confuse lower thickness `d_1 = 0.25 cm` with glottal length.
 
 ## Symmetric Model Analysis (Section II)
 
@@ -94,12 +101,17 @@ The phonation onset is a Hopf bifurcation in the `P_s - k_1` plane:
 - `P_s` (subglottal pressure) is related to intensity
 - `k_1` (lower mass stiffness) is related to frequency
 
-### Critical Subglottal Pressure (Eq. 24)
+### Steady-State Critical Pressure (Eq. 24)
 
-For the onset of oscillation:
+For emergence of a nontrivial equilibrium (not the coupled model's Hopf onset):
 ```
 P_crit = (a_0 / (4 * l^2 * d_1)) * (k_1 * k_2 + k_c * (k_1 + k_2)) / k_2
 ```
+
+Equation 24 concerns equilibrium branches (p.1877). The **oscillation** onset
+with standard nonzero coupling is shown in Fig. 5: near `P_s = 0.0024` at
+`k_1 = 0.08`, `r_1 = r_2 = 0.02`; bracket it by 0.002 and 0.003 rather than
+treating Eq. 24 as a closed-form Hopf threshold. *(p.1878)*
 
 Key results:
 - Threshold pressure increases with damping constants

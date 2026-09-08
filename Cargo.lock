@@ -138,3 +138,10 @@ version = "0.1.0"
 dependencies = [
  "klatt-wasm-common",
 ]
+
+[[package]]
+name = "two-mass-source"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]

@@ -1,0 +1,62 @@
+# Steinecke & Herzel 1995 source; aerodynamic pressure supplied by Stevens model.
+# Other primitives are inherited from klatt80-baseline.
+#
+# Stevens & Bickley (1991) "Constraints among parameters simplify
+#   control of Klatt formant synthesizer" Journal of Phonetics 19, 161-174
+# Stevens (1998) "Acoustic Phonetics" MIT Press
+
+bacon: "0.1"
+
+primitives:
+  two-mass-source:
+    description: "Steinecke & Herzel 1995 self-oscillating vocal folds; pressure input in cm H2O, flow output in cm3/ms"
+    worklet: "two-mass-source-processor.js"
+    wasm: "two-mass-source.wasm"
+    params:
+      asymmetry: { type: float, default: 1, description: "Right/left tension Q (Eq.38)" }
+      enable: { type: float, default: 0, description: "Enable physical source" }
+    inputs: 1
+    outputs: 1
+  aerodynamic-model:
+    description: "Stevens (1991) HL-derived model - approximates AV/AH/AF/B1/FNP/FNZ/OQ/TL from HL controls"
+    worklet: "aerodynamic-model-processor.js"
+    wasm: "aerodynamic-model.wasm"
+    params:
+      enable:
+        type: float
+        default: 0
+        unit: "unitless"
+        description: "Enable aerodynamic outputs (0=off/compatibility, 1=on)"
+      ag:
+        type: float
+        default: 0.05
+        unit: "cm2"
+        description: "HL ag: glottal area (Table I: usually 0-0.4 cm2)"
+      ac:
+        type: float
+        default: 0.4
+        unit: "cm2"
+        description: "HL ac: narrowest oral constriction area (Table I: 0-0.4 cm2 for consonants)"
+      an:
+        type: float
+        default: 0.0
+        unit: "cm2"
+        description: "HL an: velopharyngeal port area (Table I: 0-1.0 cm2)"
+      st:
+        type: float
+        default: 0.0
+        unit: "dB"
+        description: "HL st: stridency correction (Table I: 0 to -10 dB)"
+      pm:
+        type: float
+        default: 0.0
+        unit: "fraction of Ps"
+        description: "HL pm: pressure manipulation term (Table I: usually -0.5 to +0.2 of Ps)"
+      ps:
+        type: float
+        default: 8
+        unit: "cm H2O"
+        description: "Subglottal pressure, also exposed at output 8"
+    inputs: 0
+    # Port 8 exposes the model's subglottal-pressure input, in cm H2O.
+    outputs: 9

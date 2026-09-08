@@ -314,6 +314,64 @@ These operate on HRG Items, associations and transaction provenance before
 lowering; a native frontend host must preserve their ordered mapping, atomic
 rejection, alignment validation and replay semantics.
 
+## Self-oscillating vocal-fold source
+
+The `steinecke95` experiment extends `klatt80-baseline` and defaults to
+`sourceMode: 3`. Modes 0–2 retain the inherited impulse/LF/bypass choices.
+An explicit track value takes precedence: `qlatt-english` emits mode 1, so
+override frame `sourceMode` to 3 when rendering that frontend (as demonstrated
+by `test/two-mass-render.test.ts`). Pressure and Q can likewise be supplied as
+frame parameters; setting the experiment alone does not rewrite frontend frames.
+Its explicit graph includes the baseline tract plus these connections:
+
+```text
+aeroModel output 8 (Ps, cm H2O) -> twoMassSource input 0
+twoMassSource (U, cm³/ms) -> twoMassGain -> sourceSum -> tract
+```
+
+`aerodynamic-model-processor` output 8 exposes its `ps` input, including when
+the HL amplitude approximation is disabled. The experiment declares nine
+outputs; existing eight-output nodes keep their original layout. This signal
+is **subglottal pressure**, not intraoral pressure, transglottal pressure, or an
+audio waveform. A disconnected two-mass input means zero pressure and zero flow.
+
+`two-mass-source` is a WASM-backed mono worklet with `enable` and `asymmetry`
+AudioParams (both k-rate). `subglottalPressure` defaults to 8 cm H2O and
+`foldAsymmetry` defaults to 1. The YAML bounds pressure to 0–30 cm H2O
+(engineering operating limit) and asymmetry to 0.4–1 (the studied Q domain),
+with range diagnostics. Invalid raw worklet controls silence affected samples,
+reset state, and emit an error message. Hosts must forward worklet errors to
+their diagnostic sink and handle the standard ready/ping/dispose protocol.
+
+The mechanical solver implements Steinecke & Herzel (1995), pp.1875–1876,
+Eqs.1–10, with right-fold mass/stiffness scaling from Eq.38 (p.1879). It uses
+the standard table in cm/g/ms and the inherited 1.4-cm length from
+[Ishizaka & Flanagan (1972), p.1250](../papers/Ishizaka_1972_TwoMassModelVocalCords/notes.md).
+The pressure conversion is 1 cm H2O = 0.000980665 g/(cm ms²). A bounded-step
+RK4 integrator (maximum 0.025 ms, engineering choice) advances continuous state
+across render blocks. Enabling the source or restoring positive pressure after
+zero reapplies the paper's initial perturbation to avoid an exact numerical
+equilibrium. Disabled sources reset and output zero.
+
+F0 emerges from the mechanical motion; the `F0`, `Rd`, jitter, and diplophonia
+controls do not set this source's period. Mode 3 disables both parametric source
+gates and bypasses their glottal pulse-shaping filters. The existing tract,
+voice-amplitude envelope, and radiation stages remain downstream. Flow is in
+cm³/ms without adaptive normalization; this is not an absolute SPL calibration.
+
+Native regressions check Fig.5's onset bracket (Ps=0.002 below, 0.003 above)
+and Figs.8–9's 1:1/2:2 regimes (Ps=0.0145, Q=0.6/0.57), using lower-fold
+maxima as in the paper. Eq.24 describes an equilibrium branch and must not be
+used as the coupled model's Hopf-onset formula. For the bifurcation examples,
+set `subglottalPressure` to approximately 14.786 cm H2O. Worklet and full-graph
+tests cover pressure routing, block continuity, silence, recovery, and disposal.
+
+This is the paper's simplified model: it excludes acoustic feedback from the
+tract, viscous glottal losses, cubic tissue springs, and a body-cover layer.
+It provides self-oscillation and asymmetry-driven period doubling; it does not
+implement Story's three-mass model or the bilateral tract of Ishizaka–Flanagan.
+See the [corrected Steinecke–Herzel notes](../papers/Steinecke_Herzel_1995_BifurcationsAsymmetricVocalFold/notes.md).
+
 ## Known gaps (2026-07-22)
 
 - CEL dialect parity between `cel-js` and a native CEL implementation

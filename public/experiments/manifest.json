@@ -7,6 +7,12 @@
       "path": "klatt80-baseline"
     },
     {
+      "id": "steinecke95",
+      "name": "Steinecke–Herzel Two-Mass Source",
+      "extends": "klatt80-baseline",
+      "description": "Pressure-driven vocal folds with left/right tension asymmetry and the Klatt formant tract"
+    },
+    {
       "id": "laine88",
       "name": "Laine 1988 Higher-Pole Correction",
       "extends": "klatt80-baseline",

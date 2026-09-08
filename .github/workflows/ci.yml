@@ -45,6 +45,8 @@ jobs:
 
       - run: cargo test -p lf-source
 
+      - run: cargo test -p two-mass-source
+
       - run: npm test
 
       - run: npm run build

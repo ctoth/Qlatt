@@ -549,3 +549,40 @@ Janet Cahn was at the time a doctoral student in the Speech Research Group at th
 
 ---
 *Provenance: read from `pngs/page-000.png` through `pngs/page-018.png` (19 pages, all read) via the paper-reader page-image lane. Figure 2's DECtalk panes were additionally verified at 9x magnification.*
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- [The Phonology and Phonetics of English Intonation](../Pierrehumbert_1980_EnglishIntonation/notes.md) - cited as the source of the two-tone, primarily local intonation description Cahn proposes to fix DECtalk's whole-utterance word-stress side effects.
+
+### New Leads (Not Yet in Collection)
+- Cahn, J. E. 1989. "Generating expression in synthesized speech." Master's thesis, MIT - the full account with the actual parameter-to-DECtalk3 transfer functions this paper only describes qualitatively. Highest-priority follow-up (see Open Questions).
+- Williams, C. E. and Stevens, K. N. 1969. "On determining the emotional state of pilots during flight: An exploratory study." Aerospace Medicine 40(12):1369-1372 - early field study on emotion and voice.
+- Williams, C. E. and Stevens, K. N. 1972. "Emotions and speech: Some acoustical correlates." JASA 52(4 Pt 2):1238-1250 - source of the tremor/jitter observation in fearful speech.
+- Williams, C. E. and Stevens, K. N. 1981. "Vocal correlates of emotional states." In *Speech Evaluation in Psychiatry* - source of the sympathetic/parasympathetic physiological account underlying the whole model.
+- Davitz, J. 1964. *The Communication of Emotional Meaning*, pp. 57-68, 105-154. McGraw-Hill - source of the confusion structure among acoustically/semantically similar emotions and the covariation of pitch range, rate, loudness, timbre, enunciation.
+- Fairbanks, G. 1940. "Recent experimental investigations of vocal pitch in speech." JASA 11:457-466 - early per-emotion F0 measurements.
+- Fairbanks, G. and Pronovost, W. 1939. "An experimental study of the pitch characteristics of the voice during the expression of emotions." Speech Monographs 6:87-104 - early per-emotion F0 measurements feeding Table 1.
+- Scherer, K. R. 1974. "Acoustic concomitants of emotional dimensions: Judging affects from synthesized tone sequences." In *Nonverbal Communication* - perceptual judgments from synthesized stimuli; the specific Scherer paper Cahn cites (distinct from the Scherer papers already in the collection - see Conceptual Links).
+- Dittmann, A. T. 1974. "The body movement-speech rhythm relationship as a cue to speech encoding." In *Nonverbal Communication* - source of the hesitation-pause-after-first-function-word observation.
+- Liberman, M. Y. and Pierrehumbert, J. B. 1981. "Intonational invariance under changes in pitch range and length." In *Language Sound Structure* - background for the two-tone intonation proposal.
+- Anderson, M., Pierrehumbert, J. B., and Liberman, M. Y. 1984. "Synthesis by rule of English intonation patterns." ICASSP, 2.8.1-2.8.4 - source of the *reference line* concept.
+
+### Conceptual Links (not citation-based)
+- [Murray & Arnott 1993 -- Implementation Notes](../Murray_1993_SimulationEmotionSyntheticSpeech/notes.md) - (Strong) the contemporaneous rival DECtalk-based affect-synthesis effort; Murray & Arnott's 1993 review names Murray et al. (1988) and Cahn (1988, 1989) side by side as the two DECtalk-based prototypes of the era, and both independently converge on pitch envelope and voice quality as the primary controllable correlates of emotion.
+- [Rule-Based Voice Quality Variation with Formant Synthesis](../Burkhardt_2009_VoiceQualityFormantSynthesis/notes.md) - (Strong) the technical successor this paper's own Relevance to Project section calls for: Cahn maps qualitative affect labels to DECtalk3 settings without physical units, while Burkhardt supplies physically-grounded Klatt formulas (open quotient, spectral tilt, formant bandwidths and amplitudes) for the phonation-type side of the same emotion-to-parameter problem.
+- [Synthesizing Styled Speech Using the Klatt Synthesizer](../Rutledge_1995_SynthesizingStyledSpeechKlatt/notes.md) - (Strong) the same rule-based emotion/style-to-synthesizer-parameter approach ported to the Klatt synthesizer five years later; Rutledge's finding that synthetic styled speech is identified as accurately as natural speech, with confusion patterns matching human listeners, directly echoes this paper's finding that recognition errors "followed the pattern of errors made in the identification of affect in human speech."
+- [Emotional Speech Synthesis: A Review](../Schroder_2001_EmotionalSpeechSynthesisReview/notes.md) - (Strong) this review tabulates this paper's own sadness (91% recognition) and surprise (44% recognition) rule sets directly from Table 1, and used them to motivate the review's broader survey of rule-based emotional speech synthesis.
+- [Acoustic Correlates of Emotion Dimensions in View of Speech Synthesis](../Schroder_2001_AcousticCorrelatesEmotionDimensions/notes.md) - (Moderate) a later paper by the same author as the review above, using a continuous activation/evaluation/power dimensional framework rather than this paper's discrete per-emotion parameter presets - a different representational choice for the same underlying problem of mapping affect onto synthesizer control.
+- [Scherer, Ladd, Silverman (1984) -- Vocal Cues to Speaker Affect: Testing Two Models](../Scherer_1984_VocalCuesSpeakerAffect/notes.md) - (Moderate) later work by Scherer, whose 1974 paper on synthesized-tone-sequence affect judgments this paper cites directly; part of the same research programme on acoustic correlates of vocal affect.
+- [Emotion Inferences from Vocal Expression Correlate Across Languages and Cultures](../Scherer_2001_VocalEmotionCrossCultural/notes.md) - (Moderate) same author's later cross-cultural extension of the vocal-affect-perception programme this paper draws its acoustic correlates from.
+- [Acoustic Correlates of Task Load and Stress](../Scherer_TaskLoadStressAcoustics/notes.md) - (Moderate) same author's work on a different affect-adjacent dimension (task load/stress rather than discrete emotion), using the same physiologically-grounded acoustic-correlate methodology this paper relies on.
+
+### Cited By (in Collection)
+- [Murray & Arnott 1993 -- Implementation Notes](../Murray_1993_SimulationEmotionSyntheticSpeech/notes.md) - names the DECtalk-based Cahn (1988, 1989) prototypes alongside Murray et al. (1988) as the two implemented emotion-synthesis systems of the era, both found to have sufficient parametric control but an intensity-control gap in TTS mode.
+- [The Role of Voice Quality in Communicating Emotion, Mood and Attitude](../Gobl_2003_VoiceQualityEmotion/notes.md) - cited directly in the reference list as "Cahn, J., 1990a. The generation of affect in synthesized speech. Journal of the American Voice I/O Society 8, 1-19," matching this collection copy precisely (Gobl's list separately cites a distinct "Cahn, J., 1990b" MIT technical report).
+- [Speech Variability and Emotion: Production and Perception](../Mozziconacci_1998_SpeechEmotionProsody/notes.md) - lists a "Cahn, J.E. (1990). Generating expression in synthesized speech" technical report among related work; probably the same underlying work, though the cited title matches Cahn's 1989 MIT thesis title more closely than this paper's own AVIOS journal title.
+- [Prosody and Emotions](../Mozziconacci_2002_ProsodyEmotions/notes.md) - lists the same "Cahn (1990) - Generating expression in synthesized speech" reference among core implementation references, with the same title/venue caveat as above.
+- [Emotional Speech Synthesis: A Review](../Schroder_2001_EmotionalSpeechSynthesisReview/notes.md) - extensively reproduces this paper's Table 1 sadness and surprise parameter settings and recognition rates, and uses this paper's brilliance definition to resolve one of its own open questions.

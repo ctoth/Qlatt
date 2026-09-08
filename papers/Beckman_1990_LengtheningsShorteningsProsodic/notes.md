@@ -118,6 +118,7 @@ The paper carefully argues that polysyllabic shortening (stressed syllable in *p
 - `Oller_1973_EffectPositionUtteranceDuration` — Oller 1973 cited on position-in-utterance duration effects
 - `Pierrehumbert_1980_EnglishIntonation` — Pierrehumbert 1980, English intonation phonology (ToBI foundation)
 - `Edwards_1988_ArticulatoryTimingProsodicInterpretation` — same research group on articulatory timing at prosodic boundaries
+- [Intonational Invariance under Changes in Pitch Range and Length](../Liberman_1984_IntonationalInvariance/notes.md) - cited in the bibliography; gives the F0-domain analog of this paper's duration-domain finding, since both papers isolate a phrase-boundary-specific effect (final F0 lowering vs. final segmental lengthening) from independently varying prosodic factors
 
 ### Cited By (in Collection)
 - `Wightman_1992_SegmentalDurationsProsodic` — directly extends Beckman & Edwards with quantitative boundary-lengthening data across ToBI break indices

@@ -174,6 +174,7 @@ This is the foundational reference for the prosodic annotation system that Qlatt
 - [[OShaughnessy_1976_F0_Prosody]] — Cited indirectly through the prosody modeling tradition; O'Shaughnessy's F0 rules are an implementation of the kind of contour generation this annotation system describes
 - [[Campbell_Isard_1991_SegmentDurationsSyllable]] — Cited for segment duration modeling (Campbell and Isard 1991)
 - [[Roach_1994_ProsodicTranscriptionConversion]] — Cited for conversion between prosodic transcription systems including ToBI (Roach 1994)
+- [Intonational Invariance under Changes in Pitch Range and Length](../Liberman_1984_IntonationalInvariance/notes.md) - cited in the bibliography; supplies the quantitative pitch-range/reference-line and downstep model that underlies ToBI's guidance on labeling downstep and pitch-range-normalized tone height
 
 ### New Leads (Not Yet in Collection)
 - Wightman, Shattuck-Hufnagel, Ostendorf and Price (1992) — "Segmental Durations in the Vicinity of Prosodic Phrase Boundaries" (JASA 91:1707-1717) — Quantitative duration measurements at prosodic boundaries, directly relevant to duration rules

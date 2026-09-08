@@ -270,6 +270,7 @@ type ResolvedAffect = {
 };
 
 type AffectDirective = {
+  syllableIds?: ReadonlySet<string>;
   declarationOrder: number;
   decisionId: string;
   fields: ReadonlySet<AffectField>;
@@ -1417,6 +1418,9 @@ export function lowerToFrames(
         fields,
         precedence,
         scope,
+        ...(Array.isArray(item.get("syllable_ids"))
+          ? { syllableIds: new Set(item.get("syllable_ids") as readonly string[]) }
+          : {}),
         values,
       },
     ];
@@ -1451,7 +1455,9 @@ export function lowerToFrames(
         directive.scope.kind === "token_range" &&
         tokenIndex != null &&
         tokenIndex >= directive.scope.startToken &&
-        tokenIndex <= directive.scope.endToken,
+        tokenIndex <= directive.scope.endToken &&
+        (!directive.syllableIds ||
+          directive.syllableIds.has(item.node("SylStructure")?.parent?.item.id ?? "")),
     );
     if (
       tokenIndex == null &&

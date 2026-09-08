@@ -96,7 +96,7 @@ rules:
       no_primary_in_clause: >-
         (prev_primary_or_boundary == null || prev_primary_or_boundary.phoneme == 'SIL')
         && (next_primary_or_boundary == null || next_primary_or_boundary.phoneme == 'SIL')
-    constraint: "no_primary_in_clause && prior_vowel_in_word == null"
+    constraint: "no_primary_in_clause && prior_vowel_in_word == null && !word_has_metrical_stress()"
     apply:
       - field: stress
         op: set

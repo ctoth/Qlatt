@@ -1,4 +1,5 @@
 version: v13-cel
+accent_policy_path: /rules/frontends/qlatt-english/policy/accent-policy.yaml
 inventory_path: /rules/frontends/qlatt-english/inventory.yaml
 lts_path: /rules/frontends/qlatt-english/lts-rules.yaml
 morphology_path: /rules/frontends/qlatt-english/morphology.yaml

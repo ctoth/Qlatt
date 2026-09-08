@@ -566,6 +566,17 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
         }
         return hasPrimaryStress;
       },
+      // Qlatt #152: authored metrical stress overrides word-class eligibility.
+      // Read the versioned stress provenance, keeping the rule's dependency DAG.
+      word_has_metrical_stress: () => {
+        const source = items[index];
+        return source
+          ? wordSegments(source).some((item) => {
+              transaction.read(item, "stress");
+              return item.latestWrite("stress")?.tag === "metrical_stress";
+            })
+          : false;
+      },
       is_first_primary_stress_in_word_run: () => {
         const source = items[index];
         if (!source || transaction.read(source, "phoneme") === "SIL") return false;

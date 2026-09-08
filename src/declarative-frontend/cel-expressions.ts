@@ -240,6 +240,7 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "count_word_vowels", arities: [0], binding: "context" },
   { name: "cluster_position_in_word", arities: [0], binding: "context" },
   { name: "word_run_has_primary_stress", arities: [0], binding: "context" },
+  { name: "word_has_metrical_stress", arities: [0], binding: "context" },
   { name: "is_first_primary_stress_in_word_run", arities: [0], binding: "context" },
   { name: "is_last_in_word_run", arities: [0], binding: "context" },
   { name: "phrase_terminal_punctuation", arities: [0], binding: "context" },

@@ -15,10 +15,11 @@
  *     performance gestures, with explicit span precedence so composition is
  *     *defined*, not vendor-folklore.
  *
- * Everything here is a *delta over a neutral baseline* (Rutledge 1995
+ * Acoustic modifiers are *deltas over a neutral baseline* (Rutledge 1995
  * multiplicative style-vectors; HAMLET/Murray 1993 rules as the final stage):
  * a direction is a modifier applied by cited rules, never an absolute acoustic
- * command. Each direction lowers (see parse.ts) into a provenance
+ * command. Authored stress instead writes a linguistic feature before annotation.
+ * Each direction lowers (see parse.ts) into a provenance
  * `DecisionRecord` so the surface stays engine-independent and explainable.
  *
  * Citations:
@@ -136,20 +137,28 @@ export interface GlobalState {
 }
 
 /** How a span is anchored to the clean score. */
-export type AnchorUnit = "token" | "word" | "phrase";
+export type AnchorUnit = "token" | "word" | "phrase" | "syllable";
 
 /**
  * An inclusive index range into the score, in `unit`s. `token` and `word` index
  * the whitespace-delimited word list; `phrase` indexes punctuation-delimited
  * phrases (resolved to a token range at parse time).
  */
-export interface AnchorRange {
-  unit: AnchorUnit;
-  /** Inclusive start index (0-based). */
-  start: number;
-  /** Inclusive end index (0-based). Defaults to `start` (single unit). */
-  end?: number;
-}
+export type AnchorRange =
+  | {
+      unit: Exclude<AnchorUnit, "syllable">;
+      /** Inclusive start index (0-based). */
+      start: number;
+      /** Inclusive end index (0-based). Defaults to `start` (single unit). */
+      end?: number;
+    }
+  | {
+      unit: "syllable";
+      /** Word index; start/end index the frontend's syllables within this word. */
+      word: number;
+      start: number;
+      end?: number;
+    };
 
 /** Emphasis directive (pitch-accent strength). Cited Pierrehumbert_1980. */
 export interface EmphasisDirective {
@@ -192,6 +201,8 @@ export interface DirectionSpan {
   /** Higher wins on overlap. Defaults to 0. */
   precedence?: number;
   emphasis?: EmphasisDirective;
+  /** Absolute metrical stress: unstressed, primary, secondary, or emphatic. */
+  stress?: { level: 0 | 1 | 2 | 3 };
   break?: BreakDirective;
   pitch?: PitchDelta;
   /** Local speaking-rate multiplier (>1 = faster; lowers to inverse durationScale). */
@@ -438,6 +449,16 @@ function parseSpan(input: unknown, index: number): DirectionSpan {
     span.precedence = requireFiniteNumber(obj.precedence, `spans[${index}].precedence`);
   }
   if (obj.emphasis !== undefined) span.emphasis = obj.emphasis as EmphasisDirective;
+  if (obj.stress !== undefined) {
+    const level =
+      typeof obj.stress === "object" && obj.stress !== null
+        ? (obj.stress as Record<string, unknown>).level
+        : undefined;
+    if (level !== 0 && level !== 1 && level !== 2 && level !== 3) {
+      throw new Error(`spans[${index}].stress.level must be 0|1|2|3`);
+    }
+    span.stress = { level };
+  }
   if (obj.break !== undefined) span.break = obj.break as BreakDirective;
   if (obj.pitch !== undefined) span.pitch = obj.pitch as PitchDelta;
   if (obj.rate !== undefined) span.rate = requireFiniteNumber(obj.rate, `spans[${index}].rate`);
@@ -453,13 +474,37 @@ function parseAnchor(input: unknown, index: number): AnchorRange {
     throw new Error(`spans[${index}].anchor must be an object`);
   }
   const obj = input as Record<string, unknown>;
-  if (obj.unit !== "token" && obj.unit !== "word" && obj.unit !== "phrase") {
-    throw new Error(`spans[${index}].anchor.unit must be token|word|phrase`);
+  if (
+    obj.unit !== "token" &&
+    obj.unit !== "word" &&
+    obj.unit !== "phrase" &&
+    obj.unit !== "syllable"
+  ) {
+    throw new Error(`spans[${index}].anchor.unit must be token|word|phrase|syllable`);
   }
   const start = requireFiniteNumber(obj.start, `spans[${index}].anchor.start`);
-  const anchor: AnchorRange = { unit: obj.unit, start };
+  const anchor: AnchorRange =
+    obj.unit === "syllable"
+      ? {
+          unit: obj.unit,
+          start,
+          word: requireFiniteNumber(obj.word, `spans[${index}].anchor.word`),
+        }
+      : { unit: obj.unit, start };
   if (obj.end !== undefined)
     anchor.end = requireFiniteNumber(obj.end, `spans[${index}].anchor.end`);
+  if (anchor.unit === "syllable") {
+    for (const [key, value] of [
+      ["word", anchor.word],
+      ["start", start],
+      ["end", anchor.end ?? start],
+    ] as const) {
+      if (!Number.isInteger(value) || value < 0)
+        throw new Error(`spans[${index}].anchor.${key} must be a non-negative integer`);
+    }
+    if ((anchor.end ?? start) < start)
+      throw new Error(`spans[${index}].anchor.end must be >= start`);
+  }
   return anchor;
 }
 

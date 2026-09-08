@@ -80,17 +80,41 @@ rules:
       - field: isAccented
         op: set
         value: >-
-          isTrue(current, 'isContentWord') && word_run_has_primary_stress()
+          (isTrue(current, 'isContentWord') ||
+            (params.policy.accent_assignment.metrical_stress_overrides_word_class && word_has_metrical_stress()))
+          && word_run_has_primary_stress()
         tag: accent
       - field: isAccentCarrier
         op: set
         value: >-
-          isTrue(current, 'isContentWord') && word_run_has_primary_stress()
+          (isTrue(current, 'isContentWord') ||
+            (params.policy.accent_assignment.metrical_stress_overrides_word_class && word_has_metrical_stress()))
+          && word_run_has_primary_stress()
             && is_first_primary_stress_in_word_run()
         tag: accent
     citations:
+      - "Engineering choice: authored metrical stress overrides word class (Qlatt #152)"
       - O'Shaughnessy 1976
       - Allen, Hunnicutt & Klatt 1987
+
+  # Beauty has no neutral accent assignment. Only authored words opt into it.
+  assign_metrical_accent:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme != 'SIL' && word_has_metrical_stress()"
+    apply:
+      - field: isAccented
+        op: set
+        value: "params.policy.accent_assignment.metrical_stress_overrides_word_class && word_run_has_primary_stress()"
+        tag: accent
+      - field: isAccentCarrier
+        op: set
+        value: "params.policy.accent_assignment.metrical_stress_overrides_word_class && is_first_primary_stress_in_word_run()"
+        tag: accent
+    citations:
+      - "Engineering choice: authored metrical stress overrides word class (Qlatt #152)"
+      - O'Shaughnessy 1976
 
   # Nuclear-accent identification (former prosodic-annotator identifyNuclearAccent
   # pass). The nuclear accent is the LAST accent carrier within the intonational

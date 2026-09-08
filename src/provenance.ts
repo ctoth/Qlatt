@@ -28,6 +28,16 @@ export interface DecisionRecord {
   parents?: string[];
   timestampMs?: number;
   recognition?: RecognitionEvidence;
+  inventorySelection?: InventorySelectionEvidence;
+}
+
+export interface InventorySelectionEvidence {
+  inputPhone: string;
+  stress: number | null;
+  lookupKey: string;
+  selectedKey: string;
+  secondaryStressFallback: boolean;
+  sourceTokenId: string;
 }
 
 export interface AddDecisionInput {
@@ -39,6 +49,7 @@ export interface AddDecisionInput {
   parents?: string[];
   timestampMs?: number;
   recognition?: RecognitionEvidence;
+  inventorySelection?: InventorySelectionEvidence;
 }
 
 export interface ProvenanceCollector {
@@ -98,6 +109,9 @@ export function createProvenanceCollector(): ProvenanceCollector {
           Array.isArray(input.parents) && input.parents.length > 0 ? [...input.parents] : undefined,
         timestampMs: Number.isFinite(input.timestampMs) ? Number(input.timestampMs) : undefined,
         ...(input.recognition ? { recognition: structuredClone(input.recognition) } : {}),
+        ...(input.inventorySelection
+          ? { inventorySelection: { ...input.inventorySelection } }
+          : {}),
       };
       decisions.push(decision);
       return decision;
@@ -109,6 +123,9 @@ export function createProvenanceCollector(): ProvenanceCollector {
         citations: [...decision.citations],
         parents: decision.parents ? [...decision.parents] : undefined,
         ...(decision.recognition ? { recognition: structuredClone(decision.recognition) } : {}),
+        ...(decision.inventorySelection
+          ? { inventorySelection: { ...decision.inventorySelection } }
+          : {}),
       }));
     },
   };
@@ -218,7 +235,18 @@ function resolveSequenceWindowFromStringBounds(
     startSeq = match?.seq;
   }
   if (end) {
+    // Selection decisions can precede a batched materialization transaction.
+    // End at the initial feature-write block when one exists, so an earlier
+    // selection record cannot cut the requested Item's actual writes out.
+    const hasItemWrites =
+      selector === "subject" &&
+      decisions.some(
+        (decision) =>
+          decision.subject.startsWith(`item:${end}.`) &&
+          (startSeq == null || decision.seq >= startSeq),
+      );
     const firstEndIndex = decisions.findIndex((decision) => {
+      if (hasItemWrites && !decision.subject.startsWith(`item:${end}.`)) return false;
       if (!matchesSelector(decision[selector], end)) return false;
       if (startSeq == null) return true;
       return decision.seq >= startSeq;

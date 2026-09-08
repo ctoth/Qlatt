@@ -10,6 +10,8 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // docs/chen-1970-duration-review.md; its four affected Qlatt hashes are refreshed.
 // Peterson Table I changes only the four Qlatt English controls; see
 // docs/peterson-1960-duration-review.md for their complete segment review.
+// #61 regenerates only qlatt-english snapshots for per-phone duration floors;
+// the exact base 1af37573 passes the old snapshots. See docs/per-phone-duration-floors.md.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

@@ -411,6 +411,7 @@ relations:
       cluster_position: []
       control_windows: []
       inherentDuration: []
+      duration_model: []
       durationFloor: []
       initialBoundaryTone: []
       isAccentCarrier: []
@@ -510,6 +511,7 @@ phases:
       - assign_word_boundary_break_index
   - name: duration
     rules:
+      - duration_floor_from_inventory
       - non_word_initial_consonant_shortening
       - word_medial_consonant_shortening
       - unstressed_consonant_shortening

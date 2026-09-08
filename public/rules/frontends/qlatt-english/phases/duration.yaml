@@ -16,6 +16,27 @@ rules:
     citations:
       - "Hertz & Huffman 1992 pp.1172–1173, section 2.3"
       - "Engineering adaptation: nucleus-budget remainders retain the timeline minimum rather than the superseded inventory-based incompressibility floor"
+  duration_floor_from_inventory:
+    kind: scalar
+    select:
+      relation: Segment
+      where: has(current.duration_model) && !has(current.durationFloor)
+    define:
+      model: current.duration_model
+      # Allen et al. 1987 Table 9-1 and Ch.9 Rule 7; see docs/per-phone-duration-floors.md.
+      # Engineering adaptation: scale source MIN/INHERENT to the allocated component.
+      basis: min([current.inherentDuration, current.duration])
+      stress_scale: "has(current.stress) && current.stress == 0 ? model.unstressed_scale : 1"
+    apply:
+      - field: durationFloor
+        op: set
+        value: basis * model.minimum_ms / model.inherent_ms * stress_scale
+        tag: duration_floor
+    citations:
+      - "Allen et al. 1987 Table 9-1 p.96 (selected row in current.duration_model.source)"
+      - "Allen et al. 1987 Ch.9 Rule 7 (unstressed MINDUR halved)"
+      - "Klatt 1976 Eq.1 (incompressible portion)"
+      - "Engineering adaptation: source ratio scaled to Qlatt component allocation"
   hertz_nucleus_timing:
     kind: scalar
     select:
@@ -80,7 +101,7 @@ rules:
         value: params.policy.duration.non_word_initial_consonant_multiplier
         tag: consonant_position
     citations:
-      - Klatt 1976
+      - Klatt 1976 Table III Rule 1 (K=0.7, non-word-initial consonant)
   word_medial_consonant_shortening:
     kind: scalar
     select:
@@ -96,7 +117,8 @@ rules:
         value: params.policy.duration.word_medial_consonant_multiplier
         tag: consonant_medial
     citations:
-      - Klatt 1976
+      - Klatt 1976 Table III Rule 3 (word-medial consonant context)
+      - "Engineering estimate: retained K=0.85 differs from the table's 0.7"
   unstressed_consonant_shortening:
     kind: scalar
     select:
@@ -111,7 +133,7 @@ rules:
         value: params.policy.duration.unstressed_consonant_multiplier
         tag: consonant_stress
     citations:
-      - Klatt 1976
+      - Klatt 1976 Table III Rule 2 (K=0.8, unstressed consonant)
   word_initial_lengthening:
     kind: scalar
     select:
@@ -163,7 +185,8 @@ rules:
           - default: 1.0
         tag: stress
     citations:
-      - Klatt 1976
+      - Klatt 1976 Table II Rule 3 (stress context)
+      - "Engineering estimate: retained primary/unstressed K=1.3/0.8; not Table II's 0.4/0.55"
   vowel_shortening:
     kind: scalar
     select:
@@ -215,9 +238,8 @@ rules:
           - default: 1
         tag: segmental_context
     citations:
-      - Klatt 1976
-      - Allen et al. 1987
-      - "Klatt 1979"
+      - Allen et al. 1987 Ch.9 Rule 9 (retained voiced and nasal context percentages)
+      - "Engineering estimate: retained phrase-medial voiced-fricative K=1.1 rather than MITalk's 70 + 0.3*PRCNT1 adjustment"
       - "Chen 1970 Table V p.138 (English voiceless/voiced vowel means 146/238 ms)"
       - "Engineering adaptation: adjacent-stop ratio calibration preserves the voiced reference and Klatt incompressibility floor"
   accent_vowel_lengthening:
@@ -250,7 +272,7 @@ rules:
         value: params.policy.duration.polysyllabic_shortening_factor
         tag: polysyllabic
     citations:
-      - Klatt 1976
+      - Klatt 1976 Table II Rule 4 (K=0.78, polysyllabic vowel)
   cluster_shortening:
     kind: scalar
     select:
@@ -264,7 +286,8 @@ rules:
           params.policy.duration.cluster_subsequent_shortening
         tag: cluster
     citations:
-      - Klatt 1973 (cluster shortening)
+      - Klatt 1973 Table XIX-4 Rule 1 (two-element cluster reductions 12%/22%)
+      - "Engineering adaptation: retained factors on compressible duration; source combines percentage changes additively and distinguishes three-element clusters"
   pre_boundary_lengthening:
     kind: scalar
     select:
@@ -319,7 +342,8 @@ rules:
         tag: boundary
     citations:
       - Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)
-      - Klatt 1976
+      - Klatt 1976 Table III Rule 4 (phrase-final non-plosive context)
+      - "Engineering estimate: break-index K values are retained adaptations, not the table's single K=1.6"
       - Crystal & House 1988
   fricative_minimum_duration:
     kind: scalar

@@ -1,3 +1,4 @@
+import type { Diagnostics } from "../diagnostics";
 import { loadStressPolicy } from "../g2p/stress-policy";
 import type { NormalizationConfig } from "../g2p/text-normalize";
 import {
@@ -91,6 +92,7 @@ function normalizePhonemeTargets(node: unknown): Record<string, Record<string, u
     if (!isPlainObject(target)) {
       throw new Error(`E_INVENTORY_SCHEMA: phoneme_targets.${phoneme} must be an object`);
     }
+    if (Object.hasOwn(target, "duration_model")) validateDurationModel(target.duration_model);
     output[phoneme] = cloneValue(target) as Record<string, unknown>;
   }
 
@@ -99,6 +101,73 @@ function normalizePhonemeTargets(node: unknown): Record<string, Record<string, u
   }
 
   return output;
+}
+
+function validateDurationModel(model: unknown): void {
+  if (
+    !isPlainObject(model) ||
+    typeof model.minimum_ms !== "number" ||
+    !Number.isFinite(model.minimum_ms) ||
+    model.minimum_ms < 0 ||
+    typeof model.inherent_ms !== "number" ||
+    !Number.isFinite(model.inherent_ms) ||
+    model.inherent_ms <= 0 ||
+    model.minimum_ms > model.inherent_ms ||
+    typeof model.unstressed_scale !== "number" ||
+    !Number.isFinite(model.unstressed_scale) ||
+    model.unstressed_scale < 0 ||
+    model.unstressed_scale > 1 ||
+    typeof model.source !== "string" ||
+    !model.source.trim() ||
+    !Array.isArray(model.citations) ||
+    model.citations.length === 0 ||
+    model.citations.some((c) => typeof c !== "string" || !c.trim())
+  ) {
+    throw new Error(
+      "E_INVENTORY_DURATION: duration_model requires 0 <= minimum_ms <= inherent_ms, positive inherent_ms, unstressed_scale in [0,1], source and citations",
+    );
+  }
+}
+
+// Expand explicitly mapped source rows onto targets once at inventory loading.
+// No phone-name heuristics: aliases/stress fallback then select ordinary targets.
+function applyDurationModels(raw: unknown, targets: Record<string, Record<string, unknown>>): void {
+  if (raw === undefined) return;
+  if (!isPlainObject(raw) || !isPlainObject(raw.rows) || !Array.isArray(raw.citations)) {
+    throw new Error("E_INVENTORY_DURATION: duration_models requires rows and citations");
+  }
+  const assigned = new Set<string>();
+  for (const [source, row] of Object.entries(raw.rows)) {
+    if (!isPlainObject(row) || !Array.isArray(row.targets) || row.targets.length === 0) {
+      throw new Error(`E_INVENTORY_DURATION: row ${source} requires targets`);
+    }
+    if (Object.hasOwn(row, "citations") && !Array.isArray(row.citations)) {
+      throw new Error(`E_INVENTORY_DURATION: row ${source} citations must be an array`);
+    }
+    const model = {
+      source,
+      minimum_ms: row.minimum_ms,
+      inherent_ms: row.inherent_ms,
+      unstressed_scale: raw.unstressed_scale,
+      citations: [...raw.citations, ...(Array.isArray(row.citations) ? row.citations : [])],
+    };
+    validateDurationModel(model);
+    for (const name of row.targets) {
+      if (
+        typeof name !== "string" ||
+        !Object.hasOwn(targets, name) ||
+        assigned.has(name) ||
+        Object.hasOwn(targets[name], "duration_model")
+      ) {
+        throw new Error(`E_INVENTORY_DURATION: unknown or duplicate target ${String(name)}`);
+      }
+      assigned.add(name);
+      targets[name].duration_model = cloneValue(model);
+    }
+  }
+  for (const name of Object.keys(targets)) {
+    if (!assigned.has(name)) throw new Error(`E_INVENTORY_DURATION: no duration model for ${name}`);
+  }
 }
 
 function normalizeNormalizationAliases(
@@ -154,6 +223,7 @@ function parseInventorySpec(source: string): InventorySpec {
   ) {
     throw new Error("E_INVENTORY_SCHEMA: citations must be non-empty strings");
   }
+  applyDurationModels(raw.duration_models, phonemeTargets);
   return {
     citations: [...citations],
     base_params: normalizeBaseParams(raw.base_params),
@@ -204,12 +274,46 @@ export async function preloadInventorySpecFromPath(specPath: string): Promise<In
 }
 
 // --- Rule Functions ---
+export type InventoryParameterFallback = {
+  parameter: string;
+  supplied: unknown;
+  applied: number;
+  selectedKey?: string;
+  segment?: string;
+  token?: string;
+};
+
+export type InventorySelection = {
+  inputPhone: string;
+  stress: number | null;
+  lookupKey: string;
+  selectedKey: string;
+  secondaryStressFallback: boolean;
+};
+
+export function reportInventoryParameterFallbacks(
+  diagnostics: Diagnostics | null | undefined,
+  affected: InventoryParameterFallback[],
+): void {
+  if (affected.length)
+    diagnostics?.warn(
+      "Invalid supplied inventory parameters replaced with declared base defaults",
+      { count: affected.length, affected },
+      "INVENTORY_PARAMETER_FALLBACK",
+    );
+}
+
 export function fillDefaultParams(
   target: Record<string, unknown> | null | undefined,
   baseParams: Record<string, number>,
+  options: {
+    diagnostics?: Diagnostics | null;
+    onInvalidParameter?: (fallback: InventoryParameterFallback) => void;
+  } = {},
 ): Record<string, number> {
   const effectiveBase = baseParams;
   const filled: Record<string, number> = { ...effectiveBase };
+  const affected: InventoryParameterFallback[] = [];
 
   if (target) {
     // Override defaults with valid numeric values from the target.
@@ -218,9 +322,9 @@ export function fillDefaultParams(
       if (typeof value === "number" && Number.isFinite(value)) {
         filled[key] = value;
       } else {
-        console.warn(
-          `[fillDefaultParams] Invalid value '${String(value)}' for key '${key}' in target. Using default: ${filled[key]}`,
-        );
+        const fallback = { parameter: key, supplied: value, applied: filled[key] };
+        if (options.onInvalidParameter) options.onInvalidParameter(fallback);
+        else affected.push(fallback);
       }
     }
   } else {
@@ -232,12 +336,19 @@ export function fillDefaultParams(
     filled.F0 = SILENCE_PARAMS.F0;
   }
 
+  reportInventoryParameterFallbacks(options.diagnostics, affected);
   return filled;
 }
 
 export function materializePhonemeTarget(
   phoneme: unknown,
-  options: { stress?: number | null; inventorySpec: InventorySpec },
+  options: {
+    stress?: number | null;
+    inventorySpec: InventorySpec;
+    diagnostics?: Diagnostics | null;
+    onSelection?: (selection: InventorySelection) => void;
+    onInvalidParameter?: (fallback: InventoryParameterFallback) => void;
+  },
 ) {
   const effectiveTargets = options.inventorySpec.phoneme_targets;
   const effectiveBase = options.inventorySpec.base_params;
@@ -249,6 +360,8 @@ export function materializePhonemeTarget(
   // Aliases borrow a declared target's acoustics without renaming the normalized
   // phoneme. This preserves rule-visible identity while making fallback explicit.
   let resolvedKey = phoneme;
+  let selectedKey = lookupKey;
+  let secondaryStressFallback = false;
   let target: Record<string, unknown> | undefined;
 
   if (options && "stress" in options) {
@@ -266,6 +379,7 @@ export function materializePhonemeTarget(
       const fallbackMarker = stressMarker === "1" ? "0" : "1";
       target = effectiveTargets[lookupKey + stressMarker] as Record<string, unknown> | undefined;
       if (target) {
+        selectedKey = lookupKey + stressMarker;
         resolvedKey = phoneme === lookupKey ? lookupKey + stressMarker : phoneme;
       } else if (options.stress === 2) {
         const fallback = normalizeSecondaryFallback(
@@ -274,6 +388,8 @@ export function materializePhonemeTarget(
         if (!fallback)
           throw new Error(`E_STRESS_TARGET: ${lookupKey}2 requires a cited realization policy`);
         target = effectiveTargets[lookupKey + fallback.target];
+        selectedKey = lookupKey + fallback.target;
+        secondaryStressFallback = true;
         if (!target)
           throw new Error(
             `E_STRESS_TARGET: declared target ${lookupKey}${fallback.target} is absent`,
@@ -284,15 +400,16 @@ export function materializePhonemeTarget(
           | Record<string, unknown>
           | undefined;
         if (target) {
+          selectedKey = lookupKey + fallbackMarker;
           resolvedKey = phoneme === lookupKey ? lookupKey + fallbackMarker : phoneme;
         }
       }
     } else {
       // Consonant: try with suffixes then bare key (matches original frontend logic)
-      target =
-        (effectiveTargets[lookupKey + "1"] as Record<string, unknown> | undefined) ||
-        (effectiveTargets[lookupKey + "0"] as Record<string, unknown> | undefined) ||
-        (effectiveTargets[lookupKey] as Record<string, unknown> | undefined);
+      selectedKey =
+        [lookupKey + "1", lookupKey + "0", lookupKey].find((key) => effectiveTargets[key]) ??
+        lookupKey;
+      target = effectiveTargets[selectedKey];
     }
   } else {
     // No options: direct lookup (backward-compatible path)
@@ -304,9 +421,25 @@ export function materializePhonemeTarget(
   }
 
   const targetDuration = typeof target.dur === "number" ? target.dur : undefined;
+  if (Object.hasOwn(target, "duration_model")) validateDurationModel(target.duration_model);
 
   // Use the effective base params for filling defaults.
-  const filledParams = fillDefaultParams(target, effectiveBase);
+  const affected: InventoryParameterFallback[] = [];
+  const filledParams = fillDefaultParams(target, effectiveBase, {
+    onInvalidParameter: (fallback) => {
+      const contextual = { ...fallback, selectedKey };
+      if (options.onInvalidParameter) options.onInvalidParameter(contextual);
+      else affected.push(contextual);
+    },
+  });
+  reportInventoryParameterFallbacks(options.diagnostics, affected);
+  options.onSelection?.({
+    inputPhone: phoneme,
+    stress: options.stress ?? null,
+    lookupKey,
+    selectedKey,
+    secondaryStressFallback,
+  });
 
   const payload: {
     phoneme: string;

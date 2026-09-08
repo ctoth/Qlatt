@@ -13,9 +13,11 @@ import {
 } from "./declarative-frontend/hrg/rule-engine";
 import { TONE_ITEM_SCHEMA } from "./declarative-frontend/hrg/tone-association";
 import {
+  type InventoryParameterFallback,
   type InventorySpec,
   loadFrontendResources,
   materializePhonemeTarget,
+  reportInventoryParameterFallbacks,
 } from "./declarative-frontend/inventory";
 import {
   type CompiledRulepack,
@@ -607,35 +609,60 @@ function buildTextToKlattTrackDetailed(
     stage: "transcribe",
   });
   construct.dependOn(inventoryDecision.id);
+  const invalidInventoryParameters: InventoryParameterFallback[] = [];
+  const secondaryProjections: { segment: string; target: string }[] = [];
   const segments = transcribed.map((token, index) => {
     if (token._pronDecisionId) construct.dependOn(token._pronDecisionId);
+    const item = construct.createItem("segment", `segment_${index.toString()}`);
     const materialized = materializePhonemeTarget(token.phoneme, {
       stress: token.stress,
       inventorySpec: resources.inventory,
+      onInvalidParameter: (fallback) =>
+        invalidInventoryParameters.push({
+          ...fallback,
+          segment: item.id,
+          token: token.sourceTokenId,
+        }),
+      onSelection: (selection) => {
+        const parents = [
+          inventoryDecision.id,
+          ...(token._pronDecisionId ? [token._pronDecisionId] : []),
+        ];
+        if (selection.secondaryStressFallback && resources.inventory.secondary_stress_fallback) {
+          const fallback = resources.inventory.secondary_stress_fallback;
+          const reason = `Lexical secondary stress uses ${selection.selectedKey}; lexical prominence remains secondary`;
+          const decision = provenance.add({
+            stage: "transcribe",
+            type: "stress_inventory_projection",
+            subject: item.id,
+            reason,
+            citations: fallback.citations,
+            parents: [
+              inventoryDecision.id,
+              ...(token._pronDecisionId ? [token._pronDecisionId] : []),
+            ],
+          });
+          construct.dependOn(decision.id);
+          parents.push(decision.id);
+          secondaryProjections.push({ segment: item.id, target: selection.selectedKey });
+        }
+        const decision = provenance.add({
+          stage: "transcribe",
+          type: "inventory_target_selected",
+          subject: item.id,
+          reason: `Selected inventory target '${selection.selectedKey}' for '${selection.inputPhone}' with stress ${selection.stress ?? "unspecified"} from ${token.sourceTokenId}`,
+          inventorySelection: { ...selection, sourceTokenId: token.sourceTokenId },
+          citations: [
+            resources.inventoryPath,
+            ...(selection.secondaryStressFallback
+              ? (resources.inventory.secondary_stress_fallback?.citations ?? [])
+              : []),
+          ],
+          parents,
+        });
+        construct.dependOn(decision.id);
+      },
     });
-    const item = construct.createItem("segment", `segment_${index.toString()}`);
-    if (
-      token.stress === 2 &&
-      !resources.inventory.phoneme_targets[token.phoneme + "2"] &&
-      resources.inventory.secondary_stress_fallback
-    ) {
-      const fallback = resources.inventory.secondary_stress_fallback;
-      const reason = `Lexical secondary stress uses ${materialized.phoneme}; lexical prominence remains secondary`;
-      const decision = provenance.add({
-        stage: "transcribe",
-        type: "stress_inventory_projection",
-        subject: item.id,
-        reason,
-        citations: fallback.citations,
-        parents: [inventoryDecision.id, ...(token._pronDecisionId ? [token._pronDecisionId] : [])],
-      });
-      construct.dependOn(decision.id);
-      options.diagnostics?.info(
-        reason,
-        { segment: item.id, target: materialized.phoneme },
-        "STRESS_INVENTORY_FALLBACK",
-      );
-    }
     construct.set(item, "phoneme", token.phoneme);
     construct.set(item, "stress", token.stress);
     construct.set(item, "word", token.word);
@@ -650,6 +677,12 @@ function buildTextToKlattTrackDetailed(
     construct.append("Segment", item);
     return item;
   });
+  if (secondaryProjections.length)
+    options.diagnostics?.info(
+      "Lexical secondary stress uses the cited inventory realization policy; lexical prominence remains secondary",
+      { count: secondaryProjections.length, affected: secondaryProjections },
+      "STRESS_INVENTORY_FALLBACK",
+    );
   if (segments.length > 0) {
     construct.partitionAnchors(segments, utterance.axis.start.id, utterance.axis.end.id);
   }
@@ -664,7 +697,12 @@ function buildTextToKlattTrackDetailed(
     Math.min(2, referenceRate && referenceRate > 0 ? requestedRate / referenceRate : requestedRate),
   );
   const speakerPolicy = { speaker: resolvedSpeaker };
-  const graphInventory = { spec: resources.inventory, decisionId: inventoryDecision.id };
+  const graphInventory = {
+    spec: resources.inventory,
+    decisionId: inventoryDecision.id,
+    onInvalidParameter: (fallback: InventoryParameterFallback) =>
+      invalidInventoryParameters.push(fallback),
+  };
   const captureTooling = options.captureTooling === true;
   let evaluationOwner = ruleEvaluationOwners.get(spec);
   if (!evaluationOwner) {
@@ -840,7 +878,11 @@ function buildTextToKlattTrackDetailed(
     speakerParams.base_f0_hz = resolvedSpeaker.base_f0_hz;
   }
 
-  const silence = materializePhonemeTarget("SIL", { inventorySpec: resources.inventory });
+  const silence = materializePhonemeTarget("SIL", {
+    inventorySpec: resources.inventory,
+    onInvalidParameter: graphInventory.onInvalidParameter,
+  });
+  reportInventoryParameterFallbacks(options.diagnostics, invalidInventoryParameters);
   const silenceDecision = provenance.add({
     stage: "frontend",
     type: "silence_resource_selected",

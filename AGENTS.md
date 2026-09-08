@@ -326,3 +326,5 @@ Before asserting an exact provenance substring that contains a formatted number,
 inspect the production formatter and use its actual precision in the expected
 text. Keep separate numeric assertions on the underlying value so presentation
 coverage cannot substitute for behavior coverage.
+
+Before adding a duration rule, place its timing constants and caps in the frontend's cited params.policy.duration schema rather than inline CEL literals. Verify every feature read against the Segment declarations, including durationFloor; a field available in the runtime schema is not automatically declared in the rulepack. Run the bundled schema validator before interpreting duration regressions.

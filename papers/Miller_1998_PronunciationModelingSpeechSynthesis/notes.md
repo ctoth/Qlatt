@@ -743,6 +743,7 @@ Including: orthographic word, lexical phone, postlexical phone, preceding/follow
 - [[Klatt_1990_VoiceQualityVariations]] — cited for KLSYN88 voice quality framework
 - [[OShaughnessy_1976_F0_Prosody]] — cited for the 0-14 word prominence scale used in neural network input encoding
 - [[Pierrehumbert_1980_EnglishIntonation]] — cited for ToBI pitch accent notation (H*, L*) used in boundary features
+- [Intonational Invariance under Changes in Pitch Range and Length](../Liberman_1984_IntonationalInvariance/notes.md) - cited in the bibliography; supplies the F0-generation background for the boundary/prominence features Miller's postlexical model consumes
 - [[Silverman_1992_ToBILabelingProsody]] — cited for ToBI transcription conventions used in corpus labeling
 - [[Beckman_2022_ToBISystem]] — ToBI conventions referenced for prosodic labeling tiers
 - [[Black_1998_LTS_Rules]] — cited for CART-based letter-to-sound rules as alternative G2P approach

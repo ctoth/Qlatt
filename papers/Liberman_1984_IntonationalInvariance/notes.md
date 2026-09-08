@@ -716,3 +716,54 @@ This chapter is the canonical quantitative source for an F0 scaling and declinat
 - **Pierrehumbert (1979)** - perceptual normalization for declination in prominence judgments.
 - **Clements & Ford (1979)**; **Prince & Liberman (1982)** - Kikuyu downstep and its simplification under a richer implementation theory.
 - **Collier (1974, 1975)**; **Atkinson (1973)** - subglottal pressure and F0.
+
+## Collection Cross-References
+
+### Already in Collection
+- [The Phonology and Phonetics of English Intonation](../Pierrehumbert_1980_EnglishIntonation/notes.md) - the H/L tonal grammar (starred tones, phrase accents, boundary tones) that this chapter's phonetic scaling model presupposes; Key Citation #1 in citations.md
+- [On Stress and Linguistic Rhythm](../Liberman_1977_StressLinguisticRhythm/notes.md) - Liberman & Prince's metrical theory, cited *(p.229)* alongside Liberman (1975) as prior work whose tonal inventory this chapter's downstep-based reanalysis simplifies
+
+### New Leads (Not Yet in Collection)
+- Anderson, S. (1978) - source of the constant-ratio treatment of African tone downstep that equation (5b) implements; Key Citation #3
+- Fujisaki, H. (1981); Fujisaki, Hirose & Ohta (1979); Fujisaki & Sudo (1971); Fujisaki & Nagashima (1969) - the command-response superposition model, the chapter's most seriously engaged competing F0-generation framework (Section 6.4.3); Key Citation #2 (distinct from `Fujisaki_InformationProsodyModeling`, a later ~2003-2005 talk by the same author covering the same model - see Conceptual Links below)
+- Thorsen, N. (1980a, 1980b) - Danish declination data, the strongest published challenge to purely local F0 rules; Key Citation #4
+- Pierrehumbert, J. & Liberman, M. (1982) - detailed statistical rebuttal of Cooper & Sorensen's preplanning claims; Key Citation #5
+- Cooper, W. & Sorensen (1981) - the Topline rule and preplanning claims this chapter argues against *(p.221)*
+- Bruce, G. (1977) - source of the phrase-accent construct, proposed for Swedish *(p.217)*
+- Welmers, W. (1973) - survey of African tone languages and downstep *(p.217)*
+- Clements, G.N. & Ford (1979); Prince, A. & Liberman, M. (1982) - Kikuyu downstep rules and their simplification under a richer implementation theory *(pp.229-230)*
+- Bolinger, D. (1958) - the degrees-of-freedom argument against multi-level tone systems, and the B pitch accent *(pp.163, 210, 217, 233 n.5)*
+- Maeda, S. (1976) - corpus evidence that low F0 values vary less than high ones *(p.181)*; PDF already retrieved (`papers/Maeda_1976_AmericanEnglishIntonation/`) but not yet read/reconciled
+- Kiparsky, P. (1982) - lexical phonology, quoted on the division of labor between lexical and postlexical rules *(pp.166, 231)*
+- Jackendoff, R. (1972) - source of the A and B configuration designations *(p.233 n.5)*
+- 't Hart, J. & Cohen, A. (1973); Lea, W. (1973, 1979) - the additive log-domain models critiqued in Section 6.4.2 for lacking a reference-line counterpart *(p.225)*
+- Liberman, M. (1975) - the four-way tonal contrast dissertation this chapter's two-tone reanalysis simplifies *(pp.229, 232 nn.1-2)*
+- Trager, G. & Smith, H.L. (1951); Pike, K. (1945) - the four-tone-level systems targeted by the degrees-of-freedom argument *(p.232 n.2)*
+- Collier, R. (1974, 1975); Atkinson (1973) - subglottal pressure/F0 data used to argue against a subglottal-pressure account of final lowering *(p.219)*
+- Ohala, J. (1974); Fourakis (1980) - physiological/dialect evidence in the Section 7 methodological argument about the phonology/phonetics division of labor *(pp.227-229)*
+
+### Supersedes or Recontextualizes
+- None identified within the collection. The chapter explicitly supersedes the authors' own earlier model (Liberman & Pierrehumbert 1979 / Pierrehumbert 1980's linearly-declining-baseline account), but that specific 1979 conference paper is not itself a separate collection entry - it is folded into `Pierrehumbert_1980_EnglishIntonation`, which remains the presupposed tonal grammar rather than the superseded phonetic model.
+
+### Cited By (in Collection)
+- [Intonational Phonology (2nd Edition)](../Ladd_2008_IntonationalPhonology/notes.md) - engages this chapter directly, confirming its declination findings and citing it in the TTS F0-synthesis discussion; previously listed as a "New Lead," now moved to "Now in Collection"
+- `Ladd_1985_IndependentFunctionIntonation` - cites this chapter as the basis for its F0-range scaling formula
+- `Beckman_1990_LengtheningsShorteningsProsodic` - bibliography citation
+- `Beckman_2005_ToBISystemEvolution` - bibliography citation
+- `Cahn_1990_AffectEditor` - bibliography citation (year misprinted there as 1981)
+- `Jun_2005_ProsodicTypology` - bibliography citation (appears twice in its reference list)
+- `Miller_1998_PronunciationModelingSpeechSynthesis` - bibliography citation
+- `Taylor_2000_TiltModelIntonation` - bibliography citation
+- `Wightman_1992_SegmentalDurationsProsodic` - bibliography citation
+
+Note: several other collection papers (`Edwards_1988_ArticulatoryTimingProsodicInterpretation`, `Hertz_1985_DeltaRuleSystem`, and passages in `Cahn_1990_AffectEditor`) cite a *different*, three-author 1984 paper - Anderson, M.D., Pierrehumbert, J.B. & Liberman, M.Y., "Synthesis by rule of English intonation patterns" (ICASSP) - which is not in this collection and should not be conflated with this chapter.
+
+### Conceptual Links (not citation-based)
+
+**F0 generation models:**
+- [Information, Prosody, and Modeling](../Fujisaki_InformationProsodyModeling/notes.md) - **Strong.** Presents the same command-response superposition F0 model (phrase + accent components via critically-damped second-order filters) that this chapter devotes three pages to critiquing on empirical grounds: no mechanism to raise the downstep asymptote with pitch range, and a spurious negative-going baseline tail that predicts (falsely, for English) that higher pitch range or phrase subdivision lowers the utterance-final F0. Same generation problem, opposing formalism and opposing empirical conclusions.
+
+**Categorical tone transcription vs. quantitative scaling:**
+- [TOBI: A Standard for Labeling English Prosody](../Silverman_1992_ToBILabelingProsody/notes.md) - **Moderate.** ToBI's downstep diacritic and pitch-range-normalized tone labeling operationalize, as a transcription convention, the same constant-ratio downstep and reference-line scaling this chapter derives empirically from F0 measurements.
+- [The ToBI Transcription System: Conventions, Strengths, and Challenges](../Beckman_2022_ToBISystem/notes.md) - **Moderate.** Same operationalization link as Silverman 1992, in the later/fuller AM+ specification.
+- [The Trouble with ToBI](../Ladd_2021_TroubleWithToBI/notes.md) - **Moderate.** Ladd's critique that ToBI's categorical pitch-accent distinctions (e.g. L+H\* vs H\*) obscure genuinely gradient variation echoes this chapter's own argument against four-tone-level descriptions: both papers argue that a fixed inventory of discrete categories has either too many or too few degrees of freedom relative to the continuously-variable quantitative reality underneath.

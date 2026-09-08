@@ -189,6 +189,7 @@ For a segment with baseline duration mu_p:
 - `Price_1991_ProsodySyntacticDisambiguation` — Companion paper using same corpus; prosody in syntactic disambiguation
 - `Allen_1987_MITalk_TTS` — Allen, Hunnicutt & Klatt 1987 MITalk system cited for TTS context
 - `Campbell_Isard_1991_SegmentDurationsSyllable` — Campbell 1991 syllable-based model cited
+- [Intonational Invariance under Changes in Pitch Range and Length](../Liberman_1984_IntonationalInvariance/notes.md) - cited in the bibliography; gives the F0-domain final-lowering effect that parallels this paper's finding of durational lengthening at prosodic phrase boundaries
 
 ### Cited By (in Collection)
 

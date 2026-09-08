@@ -300,6 +300,7 @@ Finding: In natural speech, ~79% of accents are H*, ~15% are L+H*. This uneven d
 
 ### Already in Collection
 - [[Pierrehumbert_1980_EnglishIntonation]]
+- [Intonational Invariance under Changes in Pitch Range and Length](../Liberman_1984_IntonationalInvariance/notes.md) - cited in the bibliography; gives the pitch-range/reference-line scaling and final-lowering model that Tilt's continuous amplitude/duration parameters are an alternative, non-categorical way of capturing
 
 ### New Leads (Not Yet in Collection)
 - **Ladd, D. R. (1996)** - Comprehensive review of intonational phonology covering declination, pitch range, and linguistic representations; directly relevant to Tilt's positioning within intonation theory.

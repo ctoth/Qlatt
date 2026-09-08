@@ -244,5 +244,8 @@ FujisakiModel:
 - **[5] Fujisaki, 1988** - Physiological basis paper. Critical for understanding why the model structure is the way it is (cricothyroid muscle mechanics).
 
 ### Conceptual Links (not citation-based)
+- [Intonational Invariance under Changes in Pitch Range and Length](../Liberman_1984_IntonationalInvariance/notes.md) - **Strong.** Liberman & Pierrehumbert's chapter devotes three pages (Section 6.4.3) to a detailed empirical critique of this same command-response superposition model, arguing it lacks any mechanism to raise the downstep asymptote with pitch range and that its negative-going baseline tail makes false predictions for English (higher pitch range or phrase subdivision should not lower the final F0, but the model implies they would). Same F0-generation problem, opposing formalism and opposing empirical conclusions.
+
+### Conceptual Links (not citation-based)
 - [[OShaughnessy_1976_F0_Prosody]] — O'Shaughnessy's practical F0 rules (word-class accent hierarchy, declination model at ~3.5 st/s) provide an implementation-oriented complement to Fujisaki's mathematically principled command-response framework; both address the same F0 generation problem from different angles (Strong)
 - [[Pierrehumbert_1980_EnglishIntonation]] — Pierrehumbert's AM framework and Fujisaki's superpositional model are the two dominant approaches to intonation modeling; Pierrehumbert uses sequential tone targets while Fujisaki uses superposed command responses (Strong)

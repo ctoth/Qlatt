@@ -6,6 +6,7 @@ include:
   - phases/postlexical.yaml
   - phases/structural.yaml
   - phases/annotation.yaml
+  - phases/tone-association.yaml
   - phases/duration.yaml
   - phases/formant.yaml
   - phases/prosody.yaml

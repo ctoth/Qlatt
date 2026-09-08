@@ -45,8 +45,17 @@ export function generatePfeRules(
     if (!f.parallelSource) continue;
 
     const idx = f.index;
-    const ndbScaleVal = f.ndbScale ?? 0;
-    const sign = f.sign ?? 1;
+    if (
+      f.ndbScale === undefined ||
+      !Number.isFinite(f.ndbScale) ||
+      (f.sign !== 1 && f.sign !== -1)
+    ) {
+      throw new Error(
+        `E_PFE_FORMANT: parallel formant ${idx} requires finite ndbScale and sign of 1 or -1`,
+      );
+    }
+    const ndbScaleVal = f.ndbScale;
+    const sign = f.sign;
 
     // Build the correction sum: resonatorMagnitudeDb(F{i}, F{j}, B{j}, sampleRate) for each j != i
     const correctionTerms: string[] = [];

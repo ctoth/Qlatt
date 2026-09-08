@@ -350,6 +350,18 @@ the static documents validate without knowledge of Qlatt's macros. Audio-rate
 connections into node parameters are first-class in the schema
 (`to: { node, param }`).
 
+Each `meta.formantBanks.*.formants[]` entry with `parallelSource` must declare
+`ampRange: [minimum, maximum]` and `ampDefault`, alongside `ndbScale` and `sign`.
+The range must be finite and ordered, and the finite default must fall inside
+it. Expansion copies these values into the generated `A{index}` parameter in
+dB. Cascade-only entries omit all parallel-only fields. Invalid declarations
+fail before graph or semantics mutation. Direct PFE code generation also
+rejects missing or invalid scale/sign coefficients instead of supplying them.
+
+Bundled graphs explicitly retain `[0, 80]` and `0` as engineering estimates
+preserving their previous amplitude controls. Authors may choose other cited
+ranges/defaults without changing the compiler.
+
 ## Frontend tone association
 
 The frontend host also implements the structural `associate_tones` action and

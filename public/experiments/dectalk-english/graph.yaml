@@ -28,6 +28,9 @@ meta:
           bwDefault: 60
           ndbScale: -58
           sign: 1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelSourceGain
           bypassAtZero: true
         - index: 2
@@ -37,6 +40,9 @@ meta:
           bwDefault: 90
           ndbScale: -65
           sign: -1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelDiffSum
         - index: 3
           freqRange: [1500, 4000]
@@ -45,6 +51,9 @@ meta:
           bwDefault: 150
           ndbScale: -73
           sign: 1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelDiffSum
         - index: 4
           freqRange: [2500, 5000]
@@ -53,6 +62,9 @@ meta:
           bwDefault: 200
           ndbScale: -78
           sign: -1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelDiffSum
         - index: 5
           freqRange: [3500, 6000]
@@ -61,6 +73,9 @@ meta:
           bwDefault: 200
           ndbScale: -79
           sign: 1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelFricGain
         - index: 6
           freqRange: [4000, 7000]
@@ -69,6 +84,9 @@ meta:
           bwDefault: 500
           ndbScale: -80
           sign: -1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelFricGain
         # F7-F8: Keep the first two high-formant slots for fricative coloration.
         # Engineering choice: the DECtalk experiment stays on the core eight-band
@@ -80,6 +98,9 @@ meta:
           freqDefault: 6500
           bwRange: [200, 2000]
           bwDefault: 722
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelFricGain
           ndbScale: -81
           sign: 1
@@ -89,6 +110,9 @@ meta:
           freqDefault: 7500
           bwRange: [400, 3000]
           bwDefault: 1250
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelFricGain
           ndbScale: -82
           sign: -1

@@ -64,6 +64,8 @@ const formantSchema = z
     freqDefault: finiteNumber,
     bwRange: numericRangeSchema,
     bwDefault: finiteNumber,
+    ampRange: numericRangeSchema.optional(),
+    ampDefault: finiteNumber.optional(),
     /** Lin 1995 / Klatt 1980 parallel-amplitude scale offset. */
     ndbScale: finiteNumber.optional(),
     /** Lin 1995 partial-fraction sign alternation. */
@@ -91,6 +93,26 @@ const formantSchema = z
     }
 
     if (formant.parallelSource !== undefined) {
+      for (const field of ["ampRange", "ampDefault"] as const) {
+        if (formant[field] === undefined) {
+          context.addIssue({
+            code: "custom",
+            path: [field],
+            message: `parallel formants require ${field}`,
+          });
+        }
+      }
+      if (
+        formant.ampRange &&
+        formant.ampDefault !== undefined &&
+        (formant.ampDefault < formant.ampRange[0] || formant.ampDefault > formant.ampRange[1])
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["ampDefault"],
+          message: "amplitude default must be inside ampRange",
+        });
+      }
       if (formant.ndbScale === undefined) {
         context.addIssue({
           code: "custom",
@@ -109,8 +131,8 @@ const formantSchema = z
     }
 
     const parallelOnlyFields: ReadonlyArray<
-      "ndbScale" | "sign" | "bypassAtZero" | "linearGainParam"
-    > = ["ndbScale", "sign", "bypassAtZero", "linearGainParam"];
+      "ndbScale" | "sign" | "bypassAtZero" | "linearGainParam" | "ampRange" | "ampDefault"
+    > = ["ndbScale", "sign", "bypassAtZero", "linearGainParam", "ampRange", "ampDefault"];
     for (const field of parallelOnlyFields) {
       if (formant[field] !== undefined) {
         context.addIssue({
@@ -455,8 +477,8 @@ export function expandFormantBanks(graph: BaconGraph, semantics: SemanticsDocume
       if (f.parallelSource) {
         semantics.params[`A${N}`] = {
           type: "float",
-          range: [0, 80],
-          default: 0,
+          range: f.ampRange,
+          default: f.ampDefault,
           unit: "dB",
         };
       }

@@ -24,6 +24,8 @@ const validBank = {
       freqDefault: 500,
       bwRange: [40, 1000],
       bwDefault: 60,
+      ampRange: [0, 80],
+      ampDefault: 0,
       ndbScale: -58,
       sign: 1,
       parallelSource: "parallelSource",
@@ -66,6 +68,98 @@ function makeSemantics(): SemanticsDocument {
 }
 
 describe("formant-bank source schema", () => {
+  it("uses authored amplitude ranges and defaults during expansion", () => {
+    const graph = makeGraph({
+      main: {
+        ...validBank,
+        formants: [{ ...validBank.formants[0], ampRange: [-10, 90], ampDefault: 12 }],
+      },
+    });
+    const semantics = makeSemantics();
+    expandFormantBanks(graph, semantics);
+    expect(semantics.params?.A1).toEqual({
+      type: "float",
+      range: [-10, 90],
+      default: 12,
+      unit: "dB",
+    });
+  });
+
+  it.each(["ampRange", "ampDefault"])("requires %s for parallel formants", (field) => {
+    const formant: Record<string, unknown> = {
+      ...validBank.formants[0],
+      ampRange: [0, 80],
+      ampDefault: 0,
+    };
+    delete formant[field];
+    const error = expectSchemaError({ main: { ...validBank, formants: [formant] } });
+    expect(error.issues).toContainEqual(
+      expect.objectContaining({
+        path: `meta.formantBanks.main.formants.0.${field}`,
+      }),
+    );
+  });
+
+  it("rejects amplitude defaults outside their declared range", () => {
+    const error = expectSchemaError({
+      main: {
+        ...validBank,
+        formants: [{ ...validBank.formants[0], ampRange: [0, 80], ampDefault: 81 }],
+      },
+    });
+    expect(error.issues).toContainEqual(
+      expect.objectContaining({
+        path: "meta.formantBanks.main.formants.0.ampDefault",
+      }),
+    );
+  });
+
+  it.each([
+    { ampRange: [80, 0] },
+    { ampRange: [0, Number.POSITIVE_INFINITY] },
+    { ampDefault: Number.NaN },
+  ])("rejects invalid amplitude data before mutation: %j", (fields) => {
+    const graph = makeGraph({
+      main: {
+        ...validBank,
+        formants: [{ ...validBank.formants[0], ...fields }],
+      },
+    });
+    const semantics = makeSemantics();
+    const before = structuredClone({ graph, semantics });
+    expect(() => expandFormantBanks(graph, semantics)).toThrow(FormantBankValidationError);
+    expect({ graph, semantics }).toEqual(before);
+  });
+
+  it("expands cascade-only formants without amplitude declarations", () => {
+    const {
+      parallelSource: _source,
+      ndbScale: _scale,
+      sign: _sign,
+      bypassAtZero: _bypass,
+      ampRange: _range,
+      ampDefault: _default,
+      ...formant
+    } = validBank.formants[0];
+    const graph = makeGraph({ main: { ...validBank, formants: [formant] } });
+    const semantics = makeSemantics();
+    expandFormantBanks(graph, semantics);
+    expect(semantics.params?.F1?.default).toBe(500);
+    expect(semantics.params?.A1).toBeUndefined();
+    expect(graph.nodes.parallelF1).toBeUndefined();
+  });
+
+  it.each(["ampRange", "ampDefault"])("rejects %s without a parallel source", (field) => {
+    const { parallelSource: _source, ...formant } = validBank.formants[0];
+    const error = expectSchemaError({ main: { ...validBank, formants: [formant] } });
+    expect(error.issues).toContainEqual(
+      expect.objectContaining({
+        path: `meta.formantBanks.main.formants.0.${field}`,
+        message: `${field} requires parallelSource`,
+      }),
+    );
+  });
+
   it("routes the cascade onward from an authored return node", () => {
     const bank = structuredClone(validBank);
     const graph = makeGraph({
@@ -236,7 +330,13 @@ describe("cascade count control", () => {
 });
 
 describe("bundled formant-bank declarations", () => {
-  for (const experimentId of ["klatt80-baseline", "dectalk-english", "stevens91", "qlatt-beauty"]) {
+  for (const experimentId of [
+    "klatt80-baseline",
+    "dectalk-english",
+    "stevens91",
+    "qlatt-beauty",
+    "steinecke95",
+  ]) {
     it(`validates and expands ${experimentId}`, async () => {
       const { graph, semantics } = await loadExperimentConfig(experimentId);
 

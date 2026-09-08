@@ -24,6 +24,9 @@ meta:
           bwDefault: 60
           ndbScale: -58
           sign: 1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelSourceGain
           bypassAtZero: true
         - index: 2
@@ -34,6 +37,9 @@ meta:
           bwDefault: 90
           ndbScale: -65
           sign: -1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelDiffSum
         - index: 3
           linearGainParam: fricA3Linear
@@ -43,6 +49,9 @@ meta:
           bwDefault: 150
           ndbScale: -73
           sign: 1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelDiffSum
         - index: 4
           linearGainParam: fricA4Linear
@@ -52,6 +61,9 @@ meta:
           bwDefault: 200
           ndbScale: -78
           sign: -1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelDiffSum
         - index: 5
           linearGainParam: fricA5Linear
@@ -61,6 +73,9 @@ meta:
           bwDefault: 200
           ndbScale: -79
           sign: 1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelFricGain
         - index: 6
           linearGainParam: fricA6Linear
@@ -70,6 +85,9 @@ meta:
           bwDefault: 500
           ndbScale: -80
           sign: -1
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelFricGain
         # F7-F10: Higher formants with both cascade and parallel routing.
         # Cascade: shapes voiced speech spectrum (though contribution is small due to cascade attenuation).
@@ -85,6 +103,9 @@ meta:
           freqDefault: 6500
           bwRange: [200, 2000]
           bwDefault: 722
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelFricGain
           ndbScale: -81
           sign: 1
@@ -95,6 +116,9 @@ meta:
           freqDefault: 7500
           bwRange: [400, 3000]
           bwDefault: 1250
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelFricGain
           ndbScale: -82
           sign: -1
@@ -105,6 +129,9 @@ meta:
           freqDefault: 8500
           bwRange: [500, 5000]
           bwDefault: 2125
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelFricGain
           ndbScale: -83
           sign: 1
@@ -115,6 +142,9 @@ meta:
           freqDefault: 9500
           bwRange: [1000, 8000]
           bwDefault: 4750
+          # Engineering estimate: preserve the legacy parallel amplitude control limits.
+          ampRange: [0, 80]
+          ampDefault: 0
           parallelSource: parallelFricGain
           ndbScale: -84
           sign: -1

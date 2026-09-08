@@ -287,6 +287,8 @@ describe("compiled formant-bank realization bindings", () => {
                 freqDefault: 500,
                 bwRange: [40, 1000],
                 bwDefault: 60,
+                ampRange: [0, 80],
+                ampDefault: 0,
                 ndbScale: -58,
                 sign: 1,
                 parallelSource: "parallelSource",

@@ -4,6 +4,7 @@ secondary_stress_fallback:
   citations:
     - "Qlatt #37 engineering estimate: reuse strong-vowel targets when secondary targets are unavailable; retain lexical secondary stress separately"
 citations:
+  - Klatt & Klatt 1990 Table XII
   - Stevens 1971 Airflow and Turbulence Noise, Eqs. 5 and 8, Fig. 9
   - Badin & Fant 1989 Fricative Production Modelling, Eqs. 1-3 and section 1.4
   - Shadle 1985 The Acoustics of Fricative Consonants, Tables 4.2-4.3
@@ -31,6 +32,13 @@ normalization_aliases:
   NX: SIL
   WH: SIL
 base_params:
+  # Klatt & Klatt 1990 Table XII: transparent tracheal pair, zero F1/B1 increments.
+  FTP: 2150
+  FTZ: 2150
+  BTP: 180
+  BTZ: 180
+  DF1: 0
+  DB1: 0
   # Zero area explicitly clears the aerodynamic target outside fricatives.
   Ac: 0
   Ug: 0

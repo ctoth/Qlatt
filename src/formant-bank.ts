@@ -58,6 +58,8 @@ const formantSchema = z
       .regex(/^[A-Za-z_][A-Za-z0-9_]*$/)
       .optional(),
     index: z.number().int().positive(),
+    /** Authored return node after an optional cascade branch (Klatt 1990 F1 modulation). */
+    cascadeOutput: nonEmptyString.optional(),
     freqRange: numericRangeSchema,
     freqDefault: finiteNumber,
     bwRange: numericRangeSchema,
@@ -233,6 +235,7 @@ function validateExpansionContract(
     const requiredNodes = [bank.cascade.input, bank.cascade.output, bank.parallel.output];
     for (const formant of bank.formants) {
       requiredNodes.push(formant.parallelSource ?? "");
+      requiredNodes.push(formant.cascadeOutput ?? "");
       const generatedForFormant = [`cascadeF${formant.index}`];
       if (formant.parallelSource !== undefined) {
         generatedForFormant.push(`parallelF${formant.index}`, `parallelF${formant.index}Gain`);
@@ -400,12 +403,15 @@ export function expandFormantBanks(graph: BaconGraph, semantics: SemanticsDocume
     graph.connections.push([bank.cascade.input, `cascadeF${first.index}`] as BaconConnection);
     for (let i = 0; i < sortedFormants.length - 1; i++) {
       graph.connections.push([
-        `cascadeF${sortedFormants[i].index}`,
+        sortedFormants[i].cascadeOutput ?? `cascadeF${sortedFormants[i].index}`,
         `cascadeF${sortedFormants[i + 1].index}`,
       ] as BaconConnection);
     }
     const last = sortedFormants[sortedFormants.length - 1];
-    graph.connections.push([`cascadeF${last.index}`, bank.cascade.output] as BaconConnection);
+    graph.connections.push([
+      last.cascadeOutput ?? `cascadeF${last.index}`,
+      bank.cascade.output,
+    ] as BaconConnection);
 
     // ------------------------------------------------------------------
     // 3. Generate parallel channel connections (only for formants with parallelSource)

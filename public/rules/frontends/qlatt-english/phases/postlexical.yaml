@@ -147,7 +147,10 @@ rules:
           - "next != null && (next.type == 'nasal' || next.type == 'liquid' || next.type == 'glide')"
           - predicate: next_same_word
     define:
+      after_sonorant: ahead(current, 2.0)
       gs_target: target("GS")
+    # Klatt 1975 Table I /tr, tw, str/ retain oral releases before stress.
+    constraint: "!(next.phoneme in ['R', 'W'] && after_sonorant != null && after_sonorant.type == 'vowel' && has(after_sonorant.stress) && after_sonorant.stress > 0 && has(after_sonorant.word) && has(current.word) && after_sonorant.word == current.word)"
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -164,6 +167,7 @@ rules:
           type: "\"stop_closure\""
     citations:
       - Miller 1998 (t-glottalization before sonorants)
+      - Klatt 1975 Table I (prestressed /tr, tw, str/ retain oral releases)
       - Allen et al. 1987
   d_flapping:
     kind: postlexical

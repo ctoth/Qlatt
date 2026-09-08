@@ -176,10 +176,23 @@ rules:
       rel_target: target(rel)
       asp_target: target(asp)
       place_key: maps.phoneme_release_place_map[current.phoneme]
-      vot_target: "word_initial ? params.policy.duration.vot_target_ms.initial[place_key] : params.policy.duration.vot_target_ms.noninitial[place_key]"
+      current_word: path(current, 'R:SylStructure.parent.parent')
+      prev_word: "prev_token == null ? null : path(prev_token, 'R:SylStructure.parent.parent')"
+      s_in_onset: "prev_token != null && prev_token.phoneme == 'S' && current_word != null && prev_word != null && prev_word.id == current_word.id"
+      before_s: behind(current, 2.0)
+      before_s_word: "before_s == null ? null : path(before_s, 'R:SylStructure.parent.parent')"
+      onset_initial: "current_word != null && (s_in_onset ? (before_s_word == null || before_s_word.id != current_word.id) : (prev_word == null || prev_word.id != current_word.id))"
+      sonorant: "next_token.phoneme in ['R', 'L', 'W']"
+      vowel_after: "next_token.type == 'vowel' ? next_token : (sonorant ? ahead(current, 2.0) : null)"
+      vowel_word: "vowel_after == null ? null : path(vowel_after, 'R:SylStructure.parent.parent')"
+      cluster_key: "(s_in_onset ? 's' : '') + place_key + (sonorant ? lower(next_token.phoneme) : '')"
+      table_context: "onset_initial && vowel_after != null && vowel_after.type == 'vowel' && has(vowel_after.stress) && vowel_after.stress > 0 && vowel_word != null && vowel_word.id == current_word.id && cluster_key in params.policy.duration.vot_prestressed_ms"
+      # Klatt 1975 Table I supplies the total; existing inventory shares are an
+      # engineering allocation between burst and aspiration, bounded by floors.
+      vot_target: "table_context ? params.policy.duration.vot_prestressed_ms[cluster_key] : (word_initial ? params.policy.duration.vot_target_ms.initial[place_key] : params.policy.duration.vot_target_ms.noninitial[place_key])"
       vot_sum: rel_target.duration + asp_target.duration
       rel_share: "vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share"
-      rel_duration_base: vot_target * rel_share
+      rel_duration_base: "table_context ? max([params.policy.duration.stop_release_floor_ms, min([vot_target - params.policy.duration.stop_release_floor_ms, round(vot_target * rel_share)])]) : vot_target * rel_share"
       asp_duration_base: vot_target - rel_duration_base
       weak_rel_params: "{'AF': max([0, rel_target.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.AH - params.policy.duration.weak_release_amplitude_reduction_db])}"
       weak_asp_params: "{'AF': max([0, asp_target.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, asp_target.AH - params.policy.duration.weak_release_amplitude_reduction_db])}"
@@ -201,6 +214,7 @@ rules:
             copy_fields: [stress, word]
             fields:
               weak: weak
+              vot_from_table: table_context
               durationFloor: 0
               target: rel_params
               duration: rel_duration
@@ -213,13 +227,19 @@ rules:
             copy_fields: [stress, word]
             fields:
               weak: weak
+              vot_from_table: table_context
               durationFloor: 0
               target: asp_params
               duration: asp_duration
               inherentDuration: asp_duration
               inventorySW: inventory_sw_asp
         - copy_from: next
-    citations: ["Lisker & Abramson 1964 (English sentence VOT defaults: initial /p/=28, /t/=39, /k/=43 ms; non-initial /p/=34, /t/=37, /k/=49 ms)", Stevens 1998, Allen et al. 1987]
+    citations:
+      - Klatt 1975 Table I (prestressed word-initial voiceless onset VOT)
+      - Cho & Ladefoged 1999 (place and language condition VOT; English values from Klatt)
+      - "Lisker & Abramson 1964 (other contexts: English sentence VOT defaults)"
+      - Stevens 1998
+      - Allen et al. 1987
   insert_mapped_voiceless_release_and_aspiration_final:
     kind: structural
     select: { relation: Segment, where: "current.phoneme in ['P_CL', 'T_CL', 'K_CL'] && next == null" }

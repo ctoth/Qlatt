@@ -194,6 +194,7 @@ function buildUtteranceSchema(inventory: InventorySpec, sourceRecognition = fals
     stress: NUMBER_OR_NULL,
     duration: { kind: "number" },
     durationFloor: { kind: "number" },
+    vot_from_table: { kind: "boolean" },
     inherentDuration: NUMBER_OR_NULL,
     active: { kind: "boolean" },
     inventorySW: { kind: "number" },

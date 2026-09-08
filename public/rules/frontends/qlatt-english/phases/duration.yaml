@@ -407,7 +407,7 @@ rules:
     apply:
       - field: duration
         op: set
-        value: params.policy.duration.s_cluster_aspiration_ms
+        value: "has(current.vot_from_table) && current.vot_from_table ? current.inherentDuration : params.policy.duration.s_cluster_aspiration_ms"
         tag: s_cluster_aspiration
       - field: AH
         op: add
@@ -415,6 +415,7 @@ rules:
         tag: s_cluster_aspiration
     citations:
       - Lisker & Abramson 1964 (s-cluster VOT)
+      - Klatt 1975 Table I (preserve measured burst-plus-aspiration total)
       - Zue 1976
   aspiration_frication_carryover:
     kind: scalar

@@ -236,6 +236,7 @@ relations:
       inherentDuration: []
       duration_model: []
       durationFloor: []
+      vot_from_table: [true, false]
       initialBoundaryTone: []
       isAccentCarrier: []
       isAccented: []

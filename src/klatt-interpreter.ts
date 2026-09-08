@@ -16,6 +16,7 @@ import { getAudioParam } from "./audio-param-utils";
 import { createDiagnostics, type Diagnostics } from "./diagnostics";
 import type { BindingSpec, KlattRuntime } from "./klatt-runtime";
 import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
+import { createRealizationDiagnostics } from "./semantics/realization-diagnostics";
 import type { EvaluationContext, ParamValue, SemanticsDocument } from "./semantics/types";
 
 // =============================================================================
@@ -53,6 +54,8 @@ type ResolvedBindingList = ResolvedBinding[];
  */
 type CategorizedBinding = {
   name: string;
+  nodeId: string;
+  paramName: string;
   param: AudioParam;
   source: "realized" | "passthrough";
   ramp: boolean;
@@ -274,7 +277,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     else stepCount++;
 
     for (const binding of bindingList) {
-      allBindings.push({ name, param: binding.param, source, ramp: useRamp });
+      allBindings.push({ name, ...binding, source, ramp: useRamp });
     }
   }
 
@@ -302,7 +305,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   /**
    * Evaluate semantics and return realized values
    */
-  function evaluateSemantics(params: Record<string, number>): Record<string, ParamValue> {
+  function evaluateSemantics(params: Record<string, number>) {
     const flatContext = buildContext(params);
     // Build EvaluationContext for topological evaluator
     // Functions are registered with CEL evaluator separately (lines 117-120)
@@ -311,15 +314,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       params: flatContext as Record<string, ParamValue>,
       constants: semantics.constants ?? {},
     };
-    const result = evaluator.evaluate(semantics, context);
-
-    if (result.errors.length > 0) {
-      for (const err of result.errors) {
-        log(`  Semantics error in ${err.name}: ${err.error}`);
-      }
-    }
-
-    return result.values;
+    return evaluator.evaluate(semantics, context);
   }
 
   // NOTE: PLSTEP burst detection/scheduling removed - now handled automatically
@@ -349,6 +344,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
    */
   function compileSchedule(track: KlattFrame[], baseTime: number): ScheduleEntry[] {
     const schedule: ScheduleEntry[] = [];
+    const report = createRealizationDiagnostics(diagnostics, "interpreter.compilation_omissions");
 
     // Telemetry policy is owned by semantics; the audio graph owns burst synthesis.
     const policy = semantics.plstep;
@@ -371,10 +367,35 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
     for (let i = 0; i < track.length; i++) {
       const frame = track[i];
-      if (!frame?.params) continue;
+      if (!frame?.params || typeof frame.params !== "object" || Array.isArray(frame.params)) {
+        report.record(
+          { error: "Frame params must be an object" },
+          {
+            frameIndex: i,
+            time: baseTime + frame!.time,
+            outcome: "frame omitted",
+          },
+        );
+        continue;
+      }
 
       const t = baseTime + frame.time;
-      const realized = evaluateSemantics(frame.params);
+      const result = evaluateSemantics(frame.params);
+      const realized = result.values;
+      const errors = new Map(result.errors.map((error) => [error.name, error.error]));
+      for (const error of result.errors) {
+        if (!bindings.has(error.name)) {
+          report.record(
+            { rule: error.name, error: error.error },
+            {
+              frameIndex: i,
+              time: t,
+              requestedValue: realized[error.name],
+              outcome: "no bound write; evaluation value retained",
+            },
+          );
+        }
+      }
 
       if (policy && threshold !== undefined) {
         for (const trigger of policy.triggers) {
@@ -403,7 +424,29 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       for (const binding of allBindings) {
         const value =
           binding.source === "realized" ? realized[binding.name] : frame.params[binding.name];
-        if (typeof value === "number") {
+        const valid = typeof value === "number" && Number.isFinite(value);
+        const error = errors.get(binding.name);
+        if (
+          error ||
+          (!valid && (binding.source === "realized" || Object.hasOwn(frame.params, binding.name)))
+        ) {
+          report.record(
+            {
+              rule: binding.name,
+              nodeId: binding.nodeId,
+              paramName: binding.paramName,
+              error: error ?? "Required binding value is missing or nonnumeric",
+            },
+            {
+              frameIndex: i,
+              time: t,
+              requestedValue: value,
+              appliedValue: valid ? value : undefined,
+              outcome: valid ? "seeded/input value scheduled" : "write omitted",
+            },
+          );
+        }
+        if (valid) {
           // Ramp bindings: setValueAtTime at frame 0, linearRamp thereafter.
           // Frame 0 must use setValueAtTime to establish the automation anchor.
           schedule.push({
@@ -416,6 +459,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       }
     }
 
+    report.flush();
     return schedule;
   }
 
@@ -443,16 +487,38 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       return;
     }
 
-    // Cancel any previous scheduling
-    cancelScheduled();
-
     const baseTime = startTime;
-    trackDuration = track[track.length - 1]?.time ?? 0;
+    // Every frame time is required, including markers without parameter writes.
+    // Reject invalid timing before cancelling or changing a previous schedule.
+    let previousTime = 0;
+    for (let i = 0; i < track.length; i++) {
+      const time = track[i]?.time;
+      if (
+        !Number.isFinite(baseTime) ||
+        baseTime < 0 ||
+        typeof time !== "number" ||
+        !Number.isFinite(time) ||
+        time < previousTime ||
+        !Number.isFinite(baseTime + time)
+      ) {
+        const message =
+          "Invalid track timing: finite, nonnegative, ordered frame times and start time required";
+        diagnostics.error(
+          message,
+          { frameIndex: i, time, startTime, outcome: "track rejected" },
+          "interpreter.invalid_timing",
+        );
+        throw new Error(message);
+      }
+      previousTime = time;
+    }
 
     log(`Scheduling ${track.length} frames starting at ${baseTime.toFixed(3)}s`);
 
     // Compile entire schedule (all semantics evaluation happens here)
     const schedule = compileSchedule(track, baseTime);
+    cancelScheduled();
+    trackDuration = previousTime;
 
     // Execute schedule (pure AudioParam writes, no logic)
     executeSchedule(schedule);

@@ -175,9 +175,11 @@ Where:
 - `Steinecke_1995_BifurcationsVocalFold` — cites Titze's vocal fold model as foundation
 
 ### New Leads
-- Ishizaka & Flanagan 1972 — Two-mass vocal cord model; aerodynamic equations used in glottal flow computation
 - Hirano 1975 — Body-cover theory of vocal fold structure; stress-strain data
 - Baer 1975 — Investigation of phonation using excised larynges
+
+### Now in Collection (previously listed as leads)
+- [Ishizaka & Flanagan (1972) — Synthesis of Voiced Sounds From a Two-Mass Model of the Vocal Cords](../Ishizaka_1972_TwoMassModelVocalCords/notes.md) - source of the two-mass vocal cord model and aerodynamic equations this paper applies per duct in its glottal flow computation.
 
 ### Conceptual Links (not citation-based)
 - `Titze_1989_MaleFemaleVoices` — Extends to male-female voice differences using body-cover framework

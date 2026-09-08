@@ -134,10 +134,12 @@ Used smoothed step commands (Liljencrants 1971). Key rules demonstrated on "He e
 - `Fant_1986_GlottalFlowModelsInteraction` — Source-tract interaction that this paper acknowledged but did not model
 
 ### New Leads
-- Ishizaka & Flanagan (1972) — Two-mass vocal cord model, the "physiological approach" alternative to this behavioral approach
 - Lindqvist (1972) — Descriptive model of laryngeal articulation, source of T parameter dimensions
 - Ladefoged (1973) — "Glottal stricture" dimension, similar to T parameter
 - Rothenberg (1973) — Inverse filtering technique used to derive reference glottal waveforms
+
+### Now in Collection (previously listed as leads)
+- [Ishizaka & Flanagan (1972) — Synthesis of Voiced Sounds From a Two-Mass Model of the Vocal Cords](../Ishizaka_1972_TwoMassModelVocalCords/notes.md) - the physically-parameterized "physiological approach" alternative to this paper's behavioral three-parameter voice source model.
 
 ### Supersedes or Recontextualizes
 - None

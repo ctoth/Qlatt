@@ -122,7 +122,9 @@ Where $V$ is flow velocity and $D$ is characteristic dimension of constriction.
 
 ### Source Spectrum Characteristics
 1. **Below cutoff**: Sound power proportional to $V^4$ (dipole in pipe)
-2. **Center frequency**: $f_c \approx 0.2 U/A^{1/2}$ (where $A \cong (\pi/4)D^2$)
+2. **Center frequency** (p. 1184, Sec. II.B.2): $f_c \approx 0.2 V/D \approx 0.2 U/A^{3/2}$, where $V=U/A$ is jet velocity, $U$ is volume flow, and $A \cong (\pi/4)D^2$. The paper rounds the geometry factor in the second approximation. With $U$ in cm³/s and $A$ in cm², the result is Hz. The previous extraction incorrectly gave the area exponent as 1/2. At $U=300$ cm³/s and $A=0.1$ cm², the paper's approximation gives about 1897 Hz, not 190 Hz.
+   - This is the broad peak of the equivalent **series pressure source**, Fig. 4(a). The radiated spectrum in Fig. 4(b) includes the radiation frequency-squared power factor and peaks near $V/D$ (p. 1185); do not treat these two peaks as interchangeable.
+   - At fixed pressure drop, the equivalent pressure-source amplitude is proportional to $\Delta P$ and approximately independent of area (p. 1184, subject to the geometry assumption in footnote 30, p. 1192). The **radiated** level law in Eq. 8 additionally includes radiation and tract filtering; applying both as independent gain factors would count those effects twice.
 3. **Typical center frequency**: 500-3000 Hz for speech
    - Aspiration: 500 Hz (lower end)
    - Frication: up to 3000 Hz (upper end)

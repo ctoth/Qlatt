@@ -277,6 +277,28 @@ primitives:
     inputs: 0
     outputs: 1
 
+  frication-source:
+    description: "Aerodynamic pressure-source noise (Stevens 1971; Badin and Fant 1989)"
+    worklet: "frication-source-processor.js"
+    wasm: "frication-source.wasm"
+    params:
+      area:
+        type: float
+        unit: cm2
+        default: 0
+      flow:
+        type: float
+        unit: cm3/s
+        default: 0
+      pressureExponent:
+        type: float
+        default: 1.3
+      areaExponent:
+        type: float
+        default: 0.3
+    inputs: 1
+    outputs: 1
+
   noise-source:
     description: "Filtered noise generator for aspiration and frication"
     worklet: "noise-source-processor.js"

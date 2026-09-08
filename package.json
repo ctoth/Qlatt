@@ -59,7 +59,8 @@
     "measure": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/measure/measure.ts",
     "filter-perf:build": "node scripts/filter-perf/build.mjs",
     "filter-perf": "node scripts/filter-perf/harness.mjs",
-    "lint:audio": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/lint-audio.ts"
+    "lint:audio": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/lint-audio.ts",
+    "measure:frication": "vitest run test/frication-render.test.ts"
   },
   "dependencies": {
     "@marcbachmann/cel-js": "^8.0.0",

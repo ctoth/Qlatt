@@ -215,6 +215,25 @@ The interpreter compiles the track into a flat schedule of events
 Binary switches (e.g. cascade/parallel branch gains) must be step —
 intermediate values are acoustically invalid (see `docs/parameter-scheduling.md`).
 
+The executable reference is `createKlattScheduleCompiler` in
+`src/klatt-interpreter.ts`. It needs semantics, a binding map, and a numeric
+sample rate; no audio context or runtime nodes are required:
+
+```typescript
+const compiler = createKlattScheduleCompiler({ semantics, bindingMap, sampleRate: 44100 });
+const schedule = compiler.compileSchedule(track, 0); // start time in seconds, default 0
+// { time, target: { nodeId, paramName }, value, mode: "step" | "ramp" }[]
+```
+
+Events retain frame and binding order, including multiple targets for one
+semantic name and equal-time events. The result is JSON-serializable. Compilation
+validates timing before evaluation and retains realization diagnostics and PLSTEP
+telemetry. An omitted `defaultScheduling` uses step mode. `createKlattInterpreter`
+resolves available WebAudio targets and executes this same compiler's events in
+both browser and Node hosts. Contract tests in `test/automation-schedule.test.ts`
+check modes and rendered values; `test/node-backend-schedule.test.ts` compares the
+Node backend's actual parameter writes with the compiler's schedule.
+
 ## 6. Rendering model
 
 - Audio is processed in blocks; the reference hosts use the WebAudio render

@@ -32,6 +32,12 @@ describe("provenance range filters", () => {
 
     const filtered = applyRange(decisions, parseRangeSpec("token:segment_1-segment_2"));
     expect(filtered.length).toBeGreaterThan(0);
+    expect(
+      filtered.some(
+        (decision) =>
+          decision.type === "inventory_target_selected" && decision.subject === "segment_2",
+      ),
+    ).toBe(true);
     expect(filtered.every((decision) => decision.seq >= filtered[0].seq)).toBe(true);
     expect(filtered.some((decision) => decision.subject.startsWith("item:segment_1."))).toBe(true);
     expect(filtered.some((decision) => decision.subject.startsWith("item:segment_2."))).toBe(true);

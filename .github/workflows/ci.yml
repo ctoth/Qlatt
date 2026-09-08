@@ -21,7 +21,10 @@ jobs:
 
       - name: Test the workspace with only the host target installed
         run: |
-          rustup target remove wasm32-unknown-unknown
+          installed_targets=$(rustup target list --installed)
+          if [[ "$installed_targets" == *wasm32-unknown-unknown* ]]; then
+            rustup target remove wasm32-unknown-unknown
+          fi
           cargo test --workspace
 
   quality:

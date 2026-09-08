@@ -136,7 +136,7 @@ primitives:
       lfMode:
         type: int
         default: 1
-        description: "LF model mode selection (0=Legacy, 1=LFLM, 2=LFCALM)"
+        description: "Source shape: 0=Legacy, 1=LFLM, 2=LFCALM mapped to LFLM, 3=Veldhuis 1998 R++, 4=Rosenberg 1971 C"
       oq:
         type: float
         unit: "%"

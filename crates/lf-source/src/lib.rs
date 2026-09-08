@@ -1,6 +1,10 @@
 //! LF source (Fant 1997) with Schoentgen 2001 Model II microtremor;
 //! jitter magnitude follows Titze 1991 Eq. 10 and Wendahl 1963 relative F0.
+//! Analytic alternatives: Veldhuis 1998 R++ and Rosenberg 1971 Fig. 3C.
 mod perturbation;
+mod shapes;
+#[cfg(test)]
+mod shapes_tests;
 use perturbation::Microtremor;
 use core::f32::consts::PI;
 
@@ -23,6 +27,8 @@ enum LfMode {
     Legacy = 0,
     LfLm = 1,
     LfCalm = 2,
+    Rpp = 3,
+    RosenbergC = 4,
 }
 
 impl LfMode {
@@ -30,6 +36,8 @@ impl LfMode {
         match value {
             1 => Self::LfLm,
             2 => Self::LfCalm,
+            3 => Self::Rpp,
+            4 => Self::RosenbergC,
             _ => Self::Legacy,
         }
     }
@@ -135,6 +143,9 @@ pub struct LfSource {
     glottal: Biquad,
     tilt: LpPole,
     mode: LfMode,
+    pulse: shapes::Pulse,
+    pulse_mode: LfMode,
+    shape_projected: bool,
     sample_count: u64,  // Cumulative sample counter (for flutter); u64 won't overflow for billions of years at 44100 Hz
     jitter_noise: Microtremor,
     shimmer_noise: Microtremor,
@@ -153,6 +164,9 @@ impl LfSource {
             glottal: Biquad::new(),
             tilt: LpPole::new(),
             mode: LfMode::Legacy,
+            pulse: shapes::Pulse::default(),
+            pulse_mode: LfMode::Legacy,
+            shape_projected: false,
             sample_count: 0,
             jitter_noise: Microtremor::new(sample_rate, 0x12345678),
             shimmer_noise: Microtremor::new(sample_rate, 0x87654321),
@@ -213,6 +227,44 @@ impl LfSource {
         // the opening/closing phase ratio (alpha_m).
         let alpha_m = 1.0 / (1.0 + rk);
         let ta = ra * t0;
+
+        if matches!(self.mode, LfMode::Rpp | LfMode::RosenbergC) {
+            // The host declares OQ <= 99%; Rd can derive a larger quotient.
+            // Engineering domain guard: reserve at least 1% for the return phase.
+            let te = if matches!(self.mode, LfMode::RosenbergC) && oq_override <= 0.0 {
+                0.56 // Rosenberg 1971 experiment I.
+            } else {
+                oq.min(0.99)
+            };
+            self.shape_projected |= oq > 0.99 && matches!(self.mode, LfMode::Rpp);
+            let return_ratio = if tl_override > 0.0 {
+                // Doval 2006 Eq. 18 and first-order attenuation at 3 kHz.
+                (10.0_f32.powf(tl_override / 10.0) - 1.0).sqrt() / (2.0 * PI * 3000.0 * t0)
+            } else {
+                ra
+            };
+            if !te.is_finite() || te <= 0.0 || !return_ratio.is_finite() {
+                self.voiced = false;
+                return;
+            }
+            self.pulse = if matches!(self.mode, LfMode::Rpp) {
+                let (pulse, projected) = shapes::Pulse::rpp(
+                    te as f64,
+                    (te * alpha_m) as f64,
+                    return_ratio as f64,
+                );
+                self.shape_projected |= projected;
+                pulse
+            } else {
+                shapes::Pulse::rosenberg(te as f64)
+            };
+            self.pulse_mode = self.mode;
+            self.period_len = (self.sample_rate / f0_clamped).round().max(1.0) as usize;
+            self.pos_in_period = 0;
+            self.voiced = true;
+            return;
+        }
+        self.pulse_mode = self.mode;
 
         if !oq.is_finite() || !alpha_m.is_finite() || !ta.is_finite() || oq <= 0.0 || ta <= 0.0 {
             self.voiced = false;
@@ -361,8 +413,12 @@ impl LfSource {
             }
 
             let impulse = if self.pos_in_period == 0 { 1.0 } else { 0.0 };
-            let mut sample = self.glottal.step(impulse);
-            sample = self.tilt.step(sample);
+            let phase = self.pos_in_period as f64 / self.period_len as f64;
+            let mut sample = match self.pulse_mode {
+                LfMode::Rpp => self.pulse.rpp_sample(phase),
+                LfMode::RosenbergC => self.pulse.rosenberg_sample(phase),
+                _ => self.tilt.step(self.glottal.step(impulse)),
+            };
 
             // Diplophonia: on odd cycles, reduce amplitude by DI/100
             // Gobl & Ni Chasaide 2003 Table 1: DI=0 uniform, DI=100 odd cycles silent
@@ -398,6 +454,16 @@ pub extern "C" fn lf_source_set_mode(ptr: *mut LfSource, mode: u32) {
     }
     unsafe {
         (*ptr).set_mode(LfMode::from_u32(mode));
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn lf_source_take_shape_projection(ptr: *mut LfSource) -> u32 {
+    if ptr.is_null() { return 0; }
+    unsafe {
+        let projected = (*ptr).shape_projected;
+        (*ptr).shape_projected = false;
+        projected as u32
     }
 }
 

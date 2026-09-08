@@ -60,7 +60,7 @@ describe("runtime structural diagnostics", () => {
       parameters = new Map();
       connect = vi.fn();
       disconnect = vi.fn();
-      handler?: (event: { data: { type: string } }) => void;
+      handler?: (event: { data: { type: string; message?: string; node?: string } }) => void;
       port = {
         addEventListener: (_: string, handler: Worklet["handler"]) => {
           this.handler = handler;
@@ -91,6 +91,17 @@ describe("runtime structural diagnostics", () => {
       }),
     );
     expect(diagnostics.getEntries()).toEqual([]);
+    const source = runtime.getNode("source") as unknown as Worklet;
+    source.handler?.({
+      data: { type: "source-domain-projection", node: "source", message: "R++ domain projected" },
+    });
+    expect(diagnostics.getEntries()).toEqual([
+      expect.objectContaining({
+        level: "warn",
+        code: "source-domain-projection",
+        message: "R++ domain projected",
+      }),
+    ]);
     runtime.disconnect();
   });
 

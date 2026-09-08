@@ -12,6 +12,7 @@ interface LfSourceWasmExports {
   dealloc_f32(ptr: number, len: number): void;
   lf_source_new(sampleRate: number): number;
   lf_source_set_shimmer(state: number, percent: number): void;
+  lf_source_take_shape_projection(state: number): number;
   lf_source_process(
     state: number,
     f0Ptr: number,
@@ -47,6 +48,7 @@ const wasmUrl = resolveWasmUrl("./lf-source.wasm");
 
 class LfSourceProcessor extends AudioWorkletProcessor {
   private disposed = false;
+  private reportedShapeProjection = false;
   wasm: LfSourceWasmExports | null;
   state: number;
   outputBuffer: WasmBuffer | null;
@@ -83,7 +85,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
         name: "lfMode",
         defaultValue: 0,
         minValue: 0,
-        maxValue: 2,
+        maxValue: 4, // 3=Veldhuis 1998 R++, 4=Rosenberg 1971 C
         automationRate: "k-rate" as const,
       },
       { name: "oq", defaultValue: 0, minValue: 0, maxValue: 99, automationRate: "a-rate" as const }, // Klatt 1990: OQ percentage. 0 = derive from Rd
@@ -264,6 +266,14 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     );
 
     this.outputBuffer.refresh();
+    if (this.wasm.lf_source_take_shape_projection(this.state) && !this.reportedShapeProjection) {
+      this.reportedShapeProjection = true;
+      this.port.postMessage({
+        type: "source-domain-projection",
+        node: this.nodeId,
+        message: "R++ timing projected to its valid domain (Veldhuis 1998 Eq. 13; Oq <= 0.99).",
+      });
+    }
     if (!this.outputBuffer.view) {
       outputChannel.fill(0);
       return true;

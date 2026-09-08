@@ -853,7 +853,18 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   log("Applying realized values to nodes");
   applyValues();
 
-  // Attach telemetry port listeners if handler provided
+  // Domain observations must reach diagnostics even when telemetry is disabled.
+  for (const [, node] of nodes) {
+    if (!isAudioWorkletNode(node, audioWorkletNodeCtor)) continue;
+    node.port.addEventListener("message", (event: MessageEvent) => {
+      if (event.data?.type === "source-domain-projection") {
+        diagnostics.warn(event.data.message, { node: event.data.node }, "source-domain-projection");
+      }
+    });
+    node.port.start();
+  }
+
+  // Attach telemetry port listeners if handler provided.
   if (telemetryHandler) {
     let attached = 0;
     for (const [, node] of nodes) {

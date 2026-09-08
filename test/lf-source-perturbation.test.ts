@@ -4,6 +4,7 @@ import { afterAll, beforeAll, expect, it, vi } from "vitest";
 
 interface Processor {
   ready: boolean;
+  port: { postMessage(message: unknown): void };
   process(
     inputs: Float32Array[][],
     outputs: Float32Array[][],
@@ -34,6 +35,48 @@ beforeAll(async () => {
   await import("../src/worklets/lf-source-processor");
 });
 afterAll(() => vi.unstubAllGlobals());
+
+it("exposes analytic source modes through the worklet and selectable experiments", () => {
+  expect(Source.parameterDescriptors.find((p) => p.name === "lfMode")?.maxValue).toBe(4);
+  for (const experiment of ["klatt80-baseline", "qlatt-beauty", "dectalk-english"]) {
+    const semantics = load(
+      readFileSync(`public/experiments/${experiment}/semantics.yaml`, "utf8"),
+    ) as {
+      params: Record<string, { range: number[] }>;
+    };
+    expect(semantics.params.lfMode.range).toEqual([0, 4]);
+  }
+});
+
+it("renders both analytic modes through WASM and reports R++ projection without debug telemetry", async () => {
+  const wasmBytes = Uint8Array.from(readFileSync("public/worklets/lf-source.wasm")).buffer;
+  const render = async (mode: number, rd: number) => {
+    const source = new Source({ processorOptions: { wasmBytes } });
+    await vi.waitFor(() => expect(source.ready).toBe(true));
+    const messages = vi.spyOn(source.port, "postMessage");
+    const output = new Float32Array(882);
+    const params = {
+      f0: new Float32Array([100]),
+      rd: new Float32Array([rd]),
+      lfMode: new Float32Array([mode]),
+    };
+    source.process([], [[output]], params);
+    expect(output.every(Number.isFinite)).toBe(true);
+    expect(output.some((x) => Math.abs(x) > 0.1)).toBe(true);
+    expect(output.slice(0, 441)).toEqual(output.slice(441));
+    source.process([], [[new Float32Array(882)]], params);
+    return { output, messages: messages.mock.calls.map(([message]) => message) };
+  };
+  const rpp = await render(3, 1);
+  const rosenberg = await render(4, 1);
+  expect(rpp.output).not.toEqual(rosenberg.output);
+  expect(rpp.messages).toEqual([]);
+  expect(rosenberg.messages).toEqual([]);
+  const projected = await render(3, 0.3);
+  expect(projected.messages).toEqual([
+    expect.objectContaining({ type: "source-domain-projection" }),
+  ]);
+});
 
 it("declares percent CV controls from semantics through worklet", () => {
   for (const name of ["jitter", "shimmer"]) {

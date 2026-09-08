@@ -1,6 +1,11 @@
 # Relative-to-neutral channels: Rutledge 1995 style vectors, Murray 1993 HAMLET.
 # Special projections retain their existing F0, timing, and effective-Rd algorithms.
 # Floors are engineering estimates preserving the existing projection bounds.
+effective_rd:
+  # Fant 1997: effective Rd domain for breathy/pressed voice projection.
+  min: 0.3
+  max: 2.7
+  citations: [Fant_1997]
 channels:
   - { channel: rdDelta, algebra: add, unit: Rd, neutral: 0, backend_param: RdPhraseOffset, projection: special, citations: [Fant_1997] }
   - { channel: f0Scale, algebra: mul, unit: ratio, neutral: 1, backend_param: F0, projection: special, citations: [Rutledge_1995] }

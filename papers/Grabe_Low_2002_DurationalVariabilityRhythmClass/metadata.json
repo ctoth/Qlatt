@@ -1,0 +1,17 @@
+{
+  "cite_key": "grabe2002durational",
+  "title": "Durational Variability in Speech and the Rhythm Class Hypothesis",
+  "authors": ["Esther Grabe", "Ee Ling Low"],
+  "year": "2002",
+  "arxiv_id": null,
+  "doi": null,
+  "abstract": "In this paper, we provide evidence for rhythmic classifications of speech from duration measurements. Our investigation differs from previous studies in two ways. Firstly, we do not relate speech rhythm to phonological units such as interstress intervals or syllable durations. Instead, we calculate durational variability in successive acoustic-phonetic intervals using Pairwise Variability Indices. Secondly, we compare measurements from languages traditionally classified as stress-, syllable- or mora-timed with measurements from hitherto unclassified languages. The values obtained agree with the classification of English, Dutch and German as stress-timed and French and Spanish as syllable-timed: durational variability is greater in stress-timed languages than in syllable-timed languages. Values from Japanese, a mora-timed language, are similar to those from syllable-timed languages. But previously unclassified languages do not fit into any of the three classes. Instead, their values overlap with the margins of the stress-timed and the syllable-timed group.",
+  "url": "https://www.phon.ox.ac.uk/files/people/grabe/Grabe_Low.doc",
+  "pdf_url": null,
+  "document_type": "book_chapter",
+  "container_title": "Papers in Laboratory Phonology 7",
+  "chapter": null,
+  "pages": "515-546",
+  "publisher": "Mouton de Gruyter",
+  "address": "Berlin"
+}

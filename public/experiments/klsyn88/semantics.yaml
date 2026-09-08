@@ -4,6 +4,17 @@
 bacon: "0.1"
 name: klsyn88
 
+# Interpreter burst telemetry policy (audio triggering remains in graph.yaml).
+# Klatt 1980 PARCOE.FOR: frication onset, NNAF - NAFLAS >= 49.
+# Preserve the host convention: initial and omitted parameters mean off (0 dB).
+plstep:
+  triggers: [AF]
+  initialValue: 0
+  missingValue: 0
+  comparison: gte
+  citations:
+    - Klatt 1980 PARCOE.FOR
+
 params:
   F0:
     type: float
@@ -723,6 +734,17 @@ realize:
   cascadeF8Bw:
     expr: "NFCASC >= 8 ? B8 : 0"
     deps: [NFCASC, B8]
+
+  # Klatt 1980 PARCOE.FOR amplitude convention retained for host telemetry.
+  # klsyn88 synthesizes its own bursts; these values are not audio bindings.
+  plstepAmplitudeDb:
+    expr: "GO - plstepBurstOffsetDb"
+    deps: [GO, plstepBurstOffsetDb]
+
+  # Klatt 1980 PARCOE.FOR GETAMP conversion.
+  plstepAmplitude:
+    expr: "dbToLinear(plstepAmplitudeDb)"
+    deps: [plstepAmplitudeDb]
 
   # PLSTEP constants are consumed by the shared interpreter telemetry path.
   # Keep them declarative here so experiment configs do not rely on hidden

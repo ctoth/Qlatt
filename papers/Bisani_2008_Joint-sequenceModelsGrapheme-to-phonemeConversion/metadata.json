@@ -1,0 +1,23 @@
+{
+  "cite_key": "bisani2008joint",
+  "title": "Joint-Sequence Models for Grapheme-to-Phoneme Conversion",
+  "authors": [
+    "Maximilian Bisani",
+    "Hermann Ney"
+  ],
+  "year": "2008",
+  "arxiv_id": null,
+  "doi": "10.1016/j.specom.2008.01.002",
+  "abstract": "Grapheme-to-phoneme conversion is the task of finding the pronunciation of a word given its written form. It has important applications in text-to-speech and speech recognition. Joint-sequence models are a simple and theoretically stringent probabilistic framework that is applicable to this problem. This article provides a self-contained and detailed description of this method. We present a novel estimation algorithm and demonstrate high accuracy on a variety of databases. Moreover we study the impact of the maximum approximation in training and transcription, the interaction of model size parameters, n-best list generation, confidence measures, and phoneme-to-grapheme conversion. Our software implementation of the method proposed in this work is available under an Open Source license.",
+  "url": "https://hal.science/hal-00499203v1",
+  "pdf_url": "https://hal.science/hal-00499203/document",
+  "document_type": "article",
+  "venue": "Speech Communication",
+  "venue_type": "journal",
+  "volume": "50",
+  "number": "5",
+  "pages": "434-451",
+  "affiliation": "Lehrstuhl für Informatik VI, RWTH Aachen University, Ahornstraße 55, D-52056 Aachen, Germany",
+  "hal_id": "hal-00499203",
+  "bibtex": "@Article{Bisani2008JointSequenceModels,\n author = {Maximilian Bisani and Hermann Ney},\n journal = {Speech Communication},\n volume = {50},\n number = {5},\n pages = {434--451},\n title = {Joint-Sequence Models for Grapheme-to-Phoneme Conversion},\n doi = {10.1016/j.specom.2008.01.002},\n year = {2008}\n}\n"
+}

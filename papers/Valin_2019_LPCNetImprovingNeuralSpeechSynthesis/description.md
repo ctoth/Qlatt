@@ -1,0 +1,4 @@
+---
+tags: [speech-synthesis, source-filter, neural-vocoder, linear-prediction, tts]
+---
+LPCNet is a WaveRNN variant that hands vocal-tract modeling to a classical 16th-order all-pole linear predictor derived from an 18-band Bark cepstrum, so a small sparse two-GRU network only has to generate the spectrally flat excitation, sample by sample at 16 kHz. It reaches significantly higher MUSHRA quality than an equally sized WaveRNN at every network size tested, runs under 2.8 GFLOPS, and synthesizes in real time on a single Apple A8 core or 20% of a 2.4 GHz Broadwell core. For a formant/source-filter synthesizer it is the cleanest modern statement of the source-filter contract, supplying a reusable cepstrum-to-LPC chain, an in-loop excitation-domain synthesis structure, a pre-emphasis noise-shaping trick worth 16 dB at Nyquist, and a per-sample complexity budget formula.

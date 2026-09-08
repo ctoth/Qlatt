@@ -1,0 +1,29 @@
+{
+  "cite_key": "ramus1999correlates",
+  "title": "Correlates of linguistic rhythm in the speech signal",
+  "authors": [
+    "Franck Ramus",
+    "Marina Nespor",
+    "Jacques Mehler"
+  ],
+  "year": "1999",
+  "arxiv_id": null,
+  "doi": "10.1016/S0010-0277(99)00058-X",
+  "abstract": "Spoken languages have been classified by linguists according to their rhythmic properties, and psycholinguists have relied on this classification to account for infants' capacity to discriminate languages. Although researchers have measured many speech signal properties, they have failed to identify reliable acoustic characteristics for language classes. This paper presents instrumental measurements based on a consonant/vowel segmentation for eight languages. The measurements suggest that intuitive rhythm types reflect specific phonological properties, which in turn are signaled by the acoustic/phonetic properties of speech. The data support the notion of rhythm classes and also allow the simulation of infant language discrimination, consistent with the hypothesis that newborns rely on a coarse segmentation of speech. A hypothesis is proposed regarding the role of rhythm perception in language acquisition.",
+  "url": "https://www.semanticscholar.org/paper/5f5b70d70449c60173ac136b67274bcedc60cde2",
+  "pdf_url": "http://cogprints.org/218/3/rhythm98.pdf",
+  "document_type": "article",
+  "venue": "Cognition",
+  "venue_type": "journal",
+  "volume": "73",
+  "issue": "3",
+  "pages": "265-292",
+  "keywords": [
+    "speech rhythm",
+    "syllable structure",
+    "language discrimination",
+    "language acquisition",
+    "phonological bootstrapping"
+  ],
+  "bibtex": "@Article{Ramus1999CorrelatesOL,\n author = {Franck Ramus and Marina Nespor and Jacques Mehler},\n journal = {Cognition},\n volume = {73},\n number = {3},\n pages = {265--292},\n title = {Correlates of linguistic rhythm in the speech signal},\n doi = {10.1016/S0010-0277(99)00058-X},\n year = {1999}\n}\n"
+}

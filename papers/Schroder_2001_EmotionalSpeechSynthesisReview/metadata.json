@@ -1,0 +1,14 @@
+{
+  "cite_key": "schroder2001emotional",
+  "title": "Emotional Speech Synthesis: A Review",
+  "authors": ["Marc Schröder"],
+  "year": "2001",
+  "arxiv_id": null,
+  "doi": "10.21437/Eurospeech.2001-150",
+  "abstract": "Attempts to add emotion effects to synthesised speech have existed for more than a decade now. Several prototypes and fully operational systems have been built based on different synthesis techniques, and quite a number of smaller studies have been conducted. This paper aims to give an overview of what has been done in this field, pointing out the inherent properties of the various synthesis techniques used, summarising the prosody rules employed, and taking a look at the evaluation paradigms. Finally, an attempt is made to discuss interesting directions for future development.",
+  "url": "https://www.isca-archive.org/eurospeech_2001/schroder01b_eurospeech.html",
+  "pdf_url": "https://www.isca-archive.org/eurospeech_2001/schroder01b_eurospeech.pdf",
+  "venue": "Eurospeech 2001, Aalborg",
+  "document_type": "article",
+  "pages": "4"
+}

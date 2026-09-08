@@ -1,0 +1,16 @@
+{
+  "cite_key": "coker1976articulatory",
+  "title": "A Model of Articulatory Dynamics and Control",
+  "authors": ["Cecil H. Coker"],
+  "year": "1976",
+  "arxiv_id": null,
+  "doi": null,
+  "abstract": "A model of human articulation is described whose spatial and dynamic characteristics closely match those of natural speech. The model includes a controller that embodies enough articulatory \"motor skill\" to produce, from discrete phonetic strings, properly timed sequences of articulatory movements. Together with programs for dictionary searching and rules for duration and other phonetic variables, the model can produce reasonably acceptable synthetic speech from ordinary English text.",
+  "url": null,
+  "pdf_url": null,
+  "document_type": "article",
+  "venue": "Proceedings of the IEEE",
+  "volume": "64",
+  "number": "4",
+  "pages": "452-460"
+}

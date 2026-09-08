@@ -1,0 +1,4 @@
+---
+tags: [vowel-formants, american-english-dialects, acoustic-phonetics, chain-shifts, sociolinguistics]
+---
+This paper reports acoustic measures of duration and F1/F2 formant frequencies for 11 American English vowels produced by 48 talkers spanning six US dialect regions (New England, Mid-Atlantic, North, Midland, South, West). It confirms the Northern Cities Chain Shift among Northern talkers, the Southern Vowel Shift among Southern talkers, and the low back vowel merger among New England, Midland, and Western talkers, while also documenting substantial within-region variability and a Lobanov z-score normalization artifact. For a formant synthesizer, it supplies statistically validated per-region, per-sex vowel shift patterns tied to well-known named sound changes, directly usable as parameterized deviations from a baseline American English vowel system.

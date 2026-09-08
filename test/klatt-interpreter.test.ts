@@ -10,6 +10,7 @@
  */
 import { describe, expect, it, vi } from "vitest";
 import { dbToLinear } from "../src/builtin-functions";
+import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
 import { expandFormantBanks } from "../src/formant-bank";
 import {
   createKlattInterpreter,
@@ -75,6 +76,13 @@ function mockAudioContext(): AudioContext {
 function minimalSemantics(): SemanticsDocument {
   return {
     name: "test",
+    plstep: {
+      triggers: ["AF"],
+      initialValue: 0,
+      missingValue: 0,
+      comparison: "gte",
+      citations: ["Klatt 1980 PARCOE.FOR"],
+    },
     params: {
       AF: { default: 0, range: [0, 80] },
       AH: { default: 0, range: [0, 80] },
@@ -84,6 +92,8 @@ function minimalSemantics(): SemanticsDocument {
       ...PLSTEP_CONSTANTS,
     },
     realize: {
+      plstepAmplitudeDb: { expr: "GO - plstepBurstOffsetDb" },
+      plstepAmplitude: { expr: "dbToLinear(plstepAmplitudeDb)", deps: ["plstepAmplitudeDb"] },
       // AF and AH passthrough as-is (identity expressions)
       AF: { expr: "AF", ramp: true },
       AH: { expr: "AH", ramp: true },
@@ -351,6 +361,150 @@ describe("compiled formant-bank realization bindings", () => {
 });
 
 describe("PLSTEP state tracking", () => {
+  it.each([
+    "klatt80-baseline",
+    "qlatt-beauty",
+    "klsyn88",
+    "stevens91",
+    "dectalk-english",
+    "test-inherit",
+  ])(
+    "preserves the bundled %s policy and amplitude through experiment loading",
+    async (experimentId) => {
+      const { semantics } = await loadExperimentConfig(experimentId);
+      const events: TelemetryEvent[] = [];
+      const interpreter = createKlattInterpreter({
+        audioContext: mockAudioContext(),
+        runtime: mockRuntime(),
+        semantics,
+        telemetryHandler: (event) => events.push(event),
+      });
+      interpreter.scheduleTrack(
+        [
+          { time: 0, params: { AH: 60, GO: 47 } },
+          { time: 0.01, params: { AF: 48, GO: 47 } },
+          { time: 0.02, params: { GO: 47 } },
+          { time: 0.03, params: { AF: 49, GO: 47 } },
+          { time: 0.04, params: { AF: 0, GO: 53 } },
+          { time: 0.05, params: { AF: 60, GO: 53 } },
+        ],
+        1,
+      );
+      expect(events).toEqual([
+        expect.objectContaining({
+          trigger: "AF",
+          delta: 49,
+          time: 1.03,
+          amplitudeLinear: dbToLinear(-28),
+          amplitudeDb: -28,
+          citations: ["Klatt 1980 PARCOE.FOR"],
+        }),
+        expect.objectContaining({
+          trigger: "AF",
+          delta: 60,
+          time: 1.05,
+          amplitudeLinear: dbToLinear(-22),
+          amplitudeDb: -22,
+        }),
+      ]);
+    },
+  );
+
+  it("does not emit burst telemetry without a declared policy", () => {
+    const semantics = minimalSemantics();
+    delete semantics.plstep;
+    const telemetryHandler = vi.fn();
+    const interpreter = createKlattInterpreter({
+      audioContext: mockAudioContext(),
+      runtime: mockRuntime(),
+      semantics,
+      telemetryHandler,
+    });
+    interpreter.scheduleTrack([{ time: 0, params: { AF: 60 } }], 0);
+    expect(telemetryHandler).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { comparison: "invalid" },
+    { initialValue: NaN },
+    { missingValue: Infinity },
+    { triggers: ["AF", "AF"] },
+    { triggers: [""] },
+    { citations: [] },
+  ])("rejects malformed burst policy %j", (override) => {
+    const semantics = minimalSemantics();
+    Object.assign(semantics.plstep!, override);
+    const interpreter = createKlattInterpreter({
+      audioContext: mockAudioContext(),
+      runtime: mockRuntime(),
+      semantics,
+    });
+    expect(() => interpreter.scheduleTrack([{ time: 0, params: {} }], 0)).toThrow(
+      "E_SEMANTICS_PLSTEP_POLICY",
+    );
+  });
+
+  it("reads realized amplitudes even when they differ from the legacy GO formula", () => {
+    const semantics = minimalSemantics();
+    semantics.realize!.plstepAmplitude = { expr: "0.25" };
+    semantics.realize!.plstepAmplitudeDb = { expr: "-12" };
+    const events: TelemetryEvent[] = [];
+    const interpreter = createKlattInterpreter({
+      audioContext: mockAudioContext(),
+      runtime: mockRuntime(),
+      semantics,
+      telemetryHandler: (event) => events.push(event),
+    });
+    interpreter.scheduleTrack([{ time: 0, params: { AF: 60 } }], 2);
+    expect(events).toEqual([
+      expect.objectContaining({ amplitudeLinear: 0.25, amplitudeDb: -12, time: 2 }),
+    ]);
+  });
+
+  it.each(["gte", "gt"] as const)(
+    "uses configured triggers, independent state, and %s comparison",
+    (comparison) => {
+      const semantics = minimalSemantics();
+      semantics.plstep = {
+        ...semantics.plstep!,
+        triggers: ["AH", "AF"],
+        initialValue: 10,
+        missingValue: 5,
+        comparison,
+      };
+      const events: TelemetryEvent[] = [];
+      const interpreter = createKlattInterpreter({
+        audioContext: mockAudioContext(),
+        runtime: mockRuntime(),
+        semantics,
+        telemetryHandler: (event) => events.push(event),
+      });
+      const track: KlattFrame[] = [
+        { time: 0, params: { AH: 59, AF: 60 } },
+        { time: 0.01, params: {} },
+        { time: 0.02, params: { AH: 54, AF: 55 } },
+      ];
+      interpreter.scheduleTrack(track, 0);
+      expect(events.map(({ trigger, delta }) => ({ trigger, delta }))).toEqual(
+        comparison === "gte"
+          ? [
+              { trigger: "AH", delta: 49 },
+              { trigger: "AF", delta: 50 },
+              { trigger: "AH", delta: 49 },
+              { trigger: "AF", delta: 50 },
+            ]
+          : [
+              { trigger: "AF", delta: 50 },
+              { trigger: "AF", delta: 50 },
+            ],
+      );
+      const firstEvents = [...events];
+      events.length = 0;
+      interpreter.scheduleTrack(track, 0);
+      expect(events).toEqual(firstEvents);
+    },
+  );
+
   it("requires PLSTEP constants from semantics", () => {
     const interpreter = createKlattInterpreter({
       audioContext: mockAudioContext(),
@@ -358,32 +512,29 @@ describe("PLSTEP state tracking", () => {
       semantics: {
         ...minimalSemantics(),
         constants: {
-          plstepThreshold: 49,
+          plstepBurstOffsetDb: 75,
         },
       },
     });
 
     expect(() => interpreter.scheduleTrack([{ time: 0.0, params: { AF: 60 } }], 0)).toThrow(
-      "E_SEMANTICS_CONSTANT_REQUIRED: constants.plstepBurstOffsetDb",
+      "E_SEMANTICS_CONSTANT_REQUIRED: constants.plstepThreshold",
     );
   });
 
-  it("requires realized GO for PLSTEP telemetry amplitude", () => {
+  it("requires realized plstepAmplitude for PLSTEP telemetry", () => {
     const interpreter = createKlattInterpreter({
       audioContext: mockAudioContext(),
       runtime: mockRuntime(),
       semantics: {
         ...minimalSemantics(),
-        params: {
-          AF: { default: 0, range: [0, 80] },
-          AH: { default: 0, range: [0, 80] },
-        },
+        realize: {},
       },
       telemetryHandler: () => {},
     });
 
     expect(() => interpreter.scheduleTrack([{ time: 0.0, params: { AF: 60 } }], 0)).toThrow(
-      "E_SEMANTICS_VALUE_REQUIRED: realized GO must be a finite number",
+      "E_SEMANTICS_VALUE_REQUIRED: realized plstepAmplitude must be a finite number",
     );
   });
 

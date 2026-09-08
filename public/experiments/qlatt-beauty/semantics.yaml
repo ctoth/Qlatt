@@ -4,6 +4,17 @@
 bacon: "0.1"
 name: klatt80
 
+# Interpreter burst telemetry policy (audio triggering remains in graph.yaml).
+# Klatt 1980 PARCOE.FOR: frication onset, NNAF - NAFLAS >= 49.
+# Preserve the host convention: initial and omitted parameters mean off (0 dB).
+plstep:
+  triggers: [AF]
+  initialValue: 0
+  missingValue: 0
+  comparison: gte
+  citations:
+    - Klatt 1980 PARCOE.FOR
+
 # Klatt 1980: all parameters are linearly interpolated between update frames
 # at the 5 ms update rate.  WebAudio's linearRampToValueAtTime implements this.
 # Binary switches (cascade/parallel, source mode) override with step: true.
@@ -923,9 +934,15 @@ realize:
   # From Klatt 80 PARCOE.FOR: PLSTEP = GETAMP(G0 - 28)
   # But we use G0 - 75 to get the linear amplitude (accounting for ndbScale offset)
   # The -75 = -28 + -47 (the G0 offset in GETAMP is -47 from dbToLinear threshold)
-  plstepAmplitude:
-    expr: "dbToLinear(GO - plstepBurstOffsetDb)"
+  plstepAmplitudeDb:
+    expr: "GO - plstepBurstOffsetDb"
     deps: [GO, plstepBurstOffsetDb]
+    description: "PLSTEP burst amplitude in dB from Klatt 1980 PARCOE.FOR"
+
+  # Klatt 1980 PARCOE.FOR GETAMP conversion, shared by graph and telemetry.
+  plstepAmplitude:
+    expr: "dbToLinear(plstepAmplitudeDb)"
+    deps: [plstepAmplitudeDb]
     description: "PLSTEP burst amplitude from Klatt 80 PARCOE.FOR"
 
   # ===========================================================================

@@ -1,0 +1,15 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+The time-domain description of musical and other nonlinear oscillators complements the more commonly used frequency-domain description, and is advantageous for some purposes. It is especially advantageous when studying large-amplitude oscillations, for which nonlinearity may be severe. It gives direct insight into the physical reasons for the variation of waveform as playing conditions vary, and into certain phenomena which may seem counter-intuitive from the frequency-domain viewpoint, such as the musically undesirable flattening in the pitch of a bowed string when the bow is pressed too hard onto the string. It is easy to set up efficient time-domain simulations on a small computer, a fact that has been surprisingly little exploited in musical acoustics. The simplest relevant model is described here. It demonstrates some of the basic nonlinear behavior of the clarinet, violin, and flute families with very little programming effort. Remarkably, a single set of model equations has relevance to all three cases, at a certain level of idealization, with appropriate choices of parameter values and of linear and nonlinear characteristics. For the flute family, this simplest model gives waveforms and phase relations closely resembling those observed at resonance in the organ-pipe experiments of Coltman [J. Acoust. Soc. Am. 60, 725-733 (1976)], including the triangular pressure and velocity waveforms. It can be shown (again using a time-domain approach) that the triangular waveform is a universal limiting form, independent of detailed acoustic loss mechanisms provided losses are small.
+
+PACS numbers: 43.10.Ln, 43.75.-z, 43.40.At
+
+---
+
+## Our Interpretation
+
+The paper attacks the mismatch between the normal-mode framework physicists reach for by instinct and the strongly nonlinear reality of reeds, bows, and air jets, where mode analysis becomes mathematically intractable and computationally prohibitive for transients. Its answer is a three-equation time-domain model: a memoryless nonlinear characteristic `f = F(q)` solved simultaneously each sample with a travelling-wave load line, where the resonator's entire memory is carried by a short reflection function `r(t)` convolved with the outgoing wave. Changing only `F(q)`, `r(t)`, and a jet delay `τ` turns the same program into a clarinet, a violin, or a flute, and it explains bowed-string pitch flattening as an asymmetry between release and capture rather than a compromise between modes.
+
+For a source-filter speech synthesizer the relevance is structural. The reed is a pressure-controlled valve that closes, exactly as the glottis is, and the paper's `F(q)` with its slope discontinuity at closure is the glottal flow characteristic in disguise. The reflection function is the affordable way to give a synthesizer genuine source-tract interaction, and the paper's own route from a memoryless valve to an integro-differential system with finite reed mass is the same route that leads from a one-mass to a two-mass vocal-fold model.

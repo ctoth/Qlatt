@@ -1,0 +1,4 @@
+---
+tags: [emotion, prosody, speech-synthesis, voice-quality, f0]
+---
+Correlates perceptual activation/evaluation/power ratings of the Belfast Naturalistic Emotion Database against ASSESS acoustic measurements over roughly 5500 inter-pause stretches, then fits quadratic regressions predicting nine synthesizer-settable acoustic variables from the three emotion coordinates. The result is a complete published coefficient table, separate for female and male speech, giving F0 median and range, tune and pause duration, F0 rise and fall steepness, intensity median and range, and spectral slope as closed-form functions of emotion position, plus emotion-category coordinates for neutral, sad, angry, afraid and happy. For a formant or source-filter synthesizer this is a drop-in rule set that turns emotion into a continuous three-float control vector rather than a set of discrete presets, with spectral slope providing the hook into glottal source tilt.

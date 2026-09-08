@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { type BaconGraph, createKlattRuntime, type Registry } from "../../src/klatt-runtime";
 import type { SemanticsDocument } from "../../src/semantics/types";
 
@@ -51,6 +51,59 @@ describe("Klatt Runtime", () => {
   beforeEach(() => {
     ctx = new MockAudioContext();
   });
+
+  it.each([
+    ["renamed-gain", "GainNode", "createGain"],
+    ["renamed-source", "ConstantSourceNode", "createConstantSource"],
+    ["gain", "ConstantSourceNode", "createConstantSource"],
+  ] as const)("constructs %s from its %s binding", async (type, native, method) => {
+    const create = vi.spyOn(ctx, method);
+    const start = vi.fn();
+    vi.spyOn(ctx, "createConstantSource").mockReturnValue({
+      offset: { value: 1 },
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+      start,
+    });
+    const runtime = await createKlattRuntime({
+      audioContext: ctx as unknown as AudioContext,
+      semantics: { name: "test", params: {} },
+      graph: { bacon: "0.1", nodes: { output: { type } } },
+      registry: { primitives: { [type]: { native } } },
+    });
+    expect(create).toHaveBeenCalledOnce();
+    expect(runtime.getNode("output")).toBe(create.mock.results[0].value);
+    if (native === "ConstantSourceNode") expect(start).toHaveBeenCalledOnce();
+  });
+
+  it.each(["UnknownNode", "DynamicsCompressorNode", "toString", "", undefined])(
+    "rejects native binding %s before creating graph nodes",
+    async (native) => {
+      const create = vi.spyOn(ctx, "createGain");
+      const logger = vi.fn();
+      await expect(
+        createKlattRuntime({
+          audioContext: ctx as unknown as AudioContext,
+          semantics: { name: "test", params: {} },
+          graph: {
+            bacon: "0.1",
+            nodes: { first: { type: "gain" }, bad: { type: "broken-primitive" } },
+          },
+          registry: {
+            primitives: {
+              ...minimalRegistry.primitives,
+              "broken-primitive": { category: "webaudio", native },
+            },
+          },
+          logger,
+        }),
+      ).rejects.toThrow(/native binding.*broken-primitive/);
+      expect(logger).toHaveBeenCalledWith(
+        expect.stringMatching(/Error:.*native binding.*broken-primitive/),
+      );
+      expect(create).not.toHaveBeenCalled();
+    },
+  );
 
   it("creates runtime with minimal graph", async () => {
     const semantics: SemanticsDocument = {

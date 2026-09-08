@@ -105,6 +105,7 @@ This maps naturally onto Klatt synthesizer parameters:
 ### Already in Collection
 
 - `Pierrehumbert_1980_EnglishIntonation` — Pierrehumbert 1981 "Synthesizing Intonation" is cited; the intonation framework underlies the contour type dimension
+- [Intonational Invariance under Changes in Pitch Range and Length](../Liberman_1984_IntonationalInvariance/notes.md) - cited as the basis for the paper's F0 range formula; supplies the reference-line/pitch-range scaling machinery that this paper treats as one of three independently controllable prosodic dimensions (alongside contour type and voice quality)
 
 ### Cited By (in Collection)
 

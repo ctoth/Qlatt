@@ -190,6 +190,7 @@ Linguistic Space
 - [[Klatt_1976_SegmentalDuration]]
 - [[Klatt_1987_TTS_Review]]
 - [[Stevens_1991_HL_Parameters]]
+- [Tree-Based Modelling for Speech Synthesis](../Riley_1990_TreeBasedModellingSpeechSynthesis/notes.md) - cited in the reference list as Riley 1992 (the fuller chapter version of this workshop paper); the competing CART-tree approach to the same duration-prediction problem.
 
 ### New Leads (Not Yet in Collection)
 - **[12] van Santen (1992)** - Detailed study of contextual effects on vowel duration. Full-length version of this ACL paper with expanded results and analysis.

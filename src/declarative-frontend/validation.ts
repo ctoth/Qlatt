@@ -23,6 +23,7 @@ const ALLOWED_RULE_KINDS = new Set(["scalar", "point", "postlexical", "structura
 const ALLOWED_RULE_FIELDS = new Set([
   "apply",
   "associate",
+  "associate_tones",
   "citation",
   "citations",
   "constraint",
@@ -2148,6 +2149,96 @@ function validateRules(
     if (isPlainObject(r.define)) {
       for (const defineName of Object.keys(r.define)) ruleVariables.add(defineName);
     }
+    if (r.associate_tones != null) {
+      const action = r.associate_tones;
+      const path = `rules.${name}.associate_tones`;
+      const fields = new Set([
+        "relation",
+        "domain",
+        "units",
+        "tones",
+        "anchors",
+        "mode",
+        "association",
+        "source_association",
+        "tag",
+      ]);
+      if (!isPlainObject(action)) {
+        diagnostics.push(
+          makeDiagnostic("E_TONE_SCHEMA", "associate_tones requires an object", path),
+        );
+      } else {
+        for (const field of Object.keys(action)) {
+          if (!fields.has(field))
+            diagnostics.push(
+              makeDiagnostic(
+                "E_TONE_SCHEMA",
+                `Unknown tone action field '${field}'`,
+                `${path}.${field}`,
+              ),
+            );
+        }
+        for (const field of fields) {
+          if (typeof action[field] !== "string" || !action[field])
+            diagnostics.push(
+              makeDiagnostic(
+                "E_TONE_SCHEMA",
+                `Tone action requires '${field}'`,
+                `${path}.${field}`,
+              ),
+            );
+        }
+        if (action.mode !== "anchored" && action.mode !== "left_to_right")
+          diagnostics.push(
+            makeDiagnostic("E_TONE_SCHEMA", "Unknown tone association mode", `${path}.mode`),
+          );
+        const toneRelation =
+          typeof action.relation === "string" ? relationByName.get(action.relation) : undefined;
+        if (!isPlainObject(toneRelation) || toneRelation.type !== "parallel") {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_TONE_SCHEMA",
+              "Tone relation must be a declared parallel relation",
+              `${path}.relation`,
+            ),
+          );
+        } else {
+          const features = isPlainObject(toneRelation.features) ? toneRelation.features : {};
+          for (const feature of ["symbol", "role", "starred", "domain", "index"]) {
+            if (!Object.hasOwn(features, feature))
+              diagnostics.push(
+                makeDiagnostic(
+                  "E_TONE_SCHEMA",
+                  `Tone relation must declare '${feature}'`,
+                  `${path}.relation`,
+                ),
+              );
+          }
+        }
+        if (
+          typeof action.tag === "string" &&
+          tagVocabulary.size > 0 &&
+          !tagVocabulary.has(action.tag)
+        )
+          diagnostics.push(
+            makeDiagnostic(
+              "E_RULE_TAG_UNKNOWN",
+              "Tone association tag must be declared",
+              `${path}.tag`,
+            ),
+          );
+        for (const field of ["domain", "units", "tones", "anchors"]) {
+          if (typeof action[field] === "string")
+            validateExpressionValueIdentifiers(
+              action[field],
+              `${path}.${field}`,
+              ruleVariables,
+              ruleRelationName,
+              ruleItemVariables,
+            );
+        }
+      }
+    }
     if ((hasSelect && hasMatch) || (!hasSelect && !hasMatch && !hasCustomOp)) {
       diagnostics.push(
         makeDiagnostic(
@@ -2569,6 +2660,35 @@ function validateRules(
     }
 
     for (const { spec: pointSpec, path: pointPath, label: pointLabel } of pointInsertSpecs) {
+      if (Object.hasOwn(pointSpec, "tone")) {
+        const tone = pointSpec.tone;
+        const fields = ["association", "role", "bearer"];
+        if (
+          !isPlainObject(tone) ||
+          fields.some((field) => typeof tone[field] !== "string" || !tone[field]) ||
+          Object.keys(tone).some((field) => ![...fields, "within"].includes(field))
+        ) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_TONE_SCHEMA",
+              "Point tone selector requires association, role, bearer and optional within relation",
+              `${pointPath}.tone`,
+            ),
+          );
+        }
+        if (
+          isPlainObject(tone) &&
+          Object.hasOwn(tone, "within") &&
+          (typeof tone.within !== "string" || !relationByName.has(tone.within))
+        )
+          diagnostics.push(
+            makeDiagnostic(
+              "E_TONE_SCHEMA",
+              "Point tone within relation must be declared",
+              `${pointPath}.tone.within`,
+            ),
+          );
+      }
       const pointRelation =
         typeof pointSpec.relation === "string" ? relationByName.get(pointSpec.relation) : undefined;
       if (typeof pointSpec.relation !== "string" || !relationByName.has(pointSpec.relation)) {

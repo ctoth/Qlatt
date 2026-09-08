@@ -76,13 +76,14 @@ rules:
       value: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
       tag: f0_initial_boundary_high
+      tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_initial_boundary_high }
     citations:
       - "Ladd 2008"
       - "Pierrehumbert 1980"
 
   # --------------------------------------------------------------------------
-  # ToBI pitch accents (collapsed 8 rules -> 1). Each point self-selects via a
-  # per-point when: guard on current.accentType. Inline insertion (no by_point)
+  # ToBI pitch accents. Each point selects its symbolic tone by realization role
+  # and validates alignment within the associated syllable. Inline insertion (no by_point)
   # lets the leading-H accents (H+!H*, H+L*) read the previous accent's peak via
   # prev_point('F0Point').
   #
@@ -95,14 +96,7 @@ rules:
     kind: point
     select:
       relation: Segment
-      where:
-        all:
-          - &where_voiced_accent_stressed_vowel >-
-              has(current.isAccented) && current.isAccented == true && current.stress == 1
-              && has_voiced_formants(current)
-          - >-
-              has(current.accentType) && current.accentType in
-              ['H*', 'H*+L', 'L+H*', 'H+!H*', 'H*+H', 'H+L*', 'L*', 'L*+H']
+      where: "assoc(current, 'tones').exists(t, t.starred)"
     define:
       accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
       # Nuclear suppression applies only to the H*/H*+L families; all others
@@ -122,20 +116,19 @@ rules:
       lead_hz: >-
         prev_f0 == null ? high_floor_hz : max([prev_f0.value, high_floor_hz])
     insert_points:
-      - { relation: F0Point, when: "current.accentType == 'H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star }
-      - { relation: F0Point, when: "current.accentType == 'H*+L'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_l_peak }
-      - { relation: F0Point, when: "current.accentType == 'H*+L'", at: "at_sync(current.sync_right)", value: low_hz, tag: f0_h_star_plus_l_tail }
-      - { relation: F0Point, when: "current.accentType == 'L+H*'", at: "at_sync(current.sync_left)", value: low_hz, tag: f0_l_leading }
-      - { relation: F0Point, when: "current.accentType == 'L+H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_l_plus_h_star }
-      - { relation: F0Point, when: "current.accentType == 'H+!H*'", at: "at_sync(current.sync_left)", value: lead_hz, tag: f0_h_leading }
-      - { relation: F0Point, when: "current.accentType == 'H+!H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_plus_downstepped_h_star }
-      - { relation: F0Point, when: "current.accentType == 'H*+H'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_h_peak }
-      - { relation: F0Point, when: "current.accentType == 'H*+H'", at: "at_sync(current.sync_right)", value: "max([target_hz, high_floor_hz])", tag: f0_h_star_plus_h_tail }
-      - { relation: F0Point, when: "current.accentType == 'H+L*'", at: "at_sync(current.sync_left)", value: lead_hz, tag: f0_h_plus_l_star_lead }
-      - { relation: F0Point, when: "current.accentType == 'H+L*'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_h_plus_l_star }
-      - { relation: F0Point, when: "current.accentType == 'L*'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_l_star }
-      - { relation: F0Point, when: "current.accentType == 'L*+H'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_l_star }
-      - { relation: F0Point, when: "current.accentType == 'L*+H'", at: "at_sync(current.sync_right)", value: high_floor_hz, tag: f0_l_star_plus_h }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_star }, at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_star_plus_l_peak }, at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_l_peak }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_star_plus_l_tail }, at: "at_sync(current.sync_right)", value: low_hz, tag: f0_h_star_plus_l_tail }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_l_leading }, at: "at_sync(current.sync_left)", value: low_hz, tag: f0_l_leading }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_l_plus_h_star }, at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_l_plus_h_star }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_leading }, at: "at_sync(current.sync_left)", value: lead_hz, tag: f0_h_leading }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_plus_downstepped_h_star }, at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_plus_downstepped_h_star }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_star_plus_h_peak }, at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_h_peak }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_star_plus_h_tail }, at: "at_sync(current.sync_right)", value: "max([target_hz, high_floor_hz])", tag: f0_h_star_plus_h_tail }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_plus_l_star_lead }, at: "at_sync(current.sync_left)", value: lead_hz, tag: f0_h_plus_l_star_lead }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_plus_l_star }, at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_h_plus_l_star }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_l_star }, at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_l_star }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_l_star_plus_h }, at: "at_sync(current.sync_right)", value: high_floor_hz, tag: f0_l_star_plus_h }
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"
@@ -187,6 +180,7 @@ rules:
       at: at_sync(current.sync_left)
       value: target_hz
       tag: f0_phrase_high
+      tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_phrase_high }
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"
@@ -207,6 +201,7 @@ rules:
       value: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
       tag: f0_phrase_low
+      tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_phrase_low }
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"
@@ -228,6 +223,7 @@ rules:
       value: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
       tag: f0_boundary_low
+      tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_boundary_low }
     citations:
       - "Pierrehumbert 1980"
       - Ladd 2008
@@ -261,6 +257,7 @@ rules:
       at: at_sync(current.sync_right)
       value: target_hz
       tag: f0_boundary_rise
+      tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_boundary_rise }
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"

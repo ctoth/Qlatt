@@ -140,6 +140,7 @@ year: 1984
 - [[Banse_1996_VocalEmotionAcousticProfiles]] — cites Scherer et al. 1984 for vocal cues to affect
 - [[Goudbeek_2010_ValencePotencyVocalEmotion]] — cites for vocal affect testing methodology
 - [[Murray_1993_SimulationEmotionSyntheticSpeech]] — cites Scherer 1984 for emotion component process approach
+- [Emotional Speech Synthesis: A Review](../Schroder_2001_EmotionalSpeechSynthesisReview/notes.md) - cites this paper (ref [28]) for the finding that F0 contour affects emotion perception in interaction with sentence type and other linguistic information.
 
 ### New Leads (Not Yet in Collection)
 - Laver (1980) — *The Phonetic Description of Voice Quality* — framework for voice quality parameters relevant to affect

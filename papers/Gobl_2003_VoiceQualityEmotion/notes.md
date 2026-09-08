@@ -222,6 +222,7 @@ Where:
 ## Collection Cross-References
 
 ### Already in Collection
+- [The Generation of Affect in Synthesized Speech](../Cahn_1990_AffectEditor/notes.md) — cited in the reference list as "Cahn, J., 1990a. The generation of affect in synthesized speech. Journal of the American Voice I/O Society 8, 1-19", exactly matching this collection's copy (Gobl's own reference list distinguishes this from a separate "Cahn, J., 1990b" MIT technical report).
 - [[Carlson_1975_RuleBasedTTS]]
 - [[Childers_Lee_1991_VoiceQualityFactors]]
 - [[Cummings_1995_GlottalExcitationEmotionalSpeech]]

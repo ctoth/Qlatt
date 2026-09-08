@@ -1,0 +1,14 @@
+{
+  "cite_key": "boersma1991multimass",
+  "title": "Synthesis of Speech Sounds from a Multi-Mass Model of the Lungs, Vocal Tract, and Glottis",
+  "authors": ["Paul Boersma"],
+  "year": "1991",
+  "arxiv_id": null,
+  "doi": null,
+  "abstract": "Like some existing vocal-tract models, this synthesizer views the vocal apparatus as a sequence of straight tubes. The walls of all these tubes, however, are modelled as coupled mass-spring systems, which in most models is privileged to the vocal cords. This, together with the ability to continuously vary the lengths of the tubes, leads to a principled treatment of the problems of source-filter interaction, which makes our model especially suitable for the generation of speech signals that include consonants. The model is restricted to the last step in articulatory synthesis: from a list of time-target pairs for every articulator and a table with speaker characteristics, find the resulting acoustic signal. Among the examples that we show are various brands of voicing contrasts and their articulatory correlates.",
+  "url": null,
+  "pdf_url": null,
+  "venue": "Institute of Phonetic Sciences, University of Amsterdam, Proceedings 15",
+  "pages": "79-108",
+  "document_type": "article"
+}

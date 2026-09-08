@@ -117,9 +117,12 @@ For Qlatt's voice preset system, this paper establishes that F0 and formant freq
 
 ### New Leads (Not Yet in Collection)
 - Feinberg et al. (2005) — "Manipulations of fundamental and formant frequencies influence the attractiveness of human male voices" — original F0+formant manipulation method, precursor to this study
-- Smith et al. (2005, 2007) — F0 × VTL interaction effects on size/sex/age perception — perceptual foundation for attractiveness interaction
+- Smith, Walters & Patterson (2007) — companion discrimination study (JASA 122:3628-3639) establishing the vocal-tract-length just-noticeable difference; not yet in collection
 - Puts (2005) — Menstrual cycle modulates voice pitch preferences — individual differences context
 - Candolin (2003) — Theoretical framework: cue amplification vs backup signaling — key for interpreting interaction results
+
+### Now in Collection (previously listed as leads)
+- [The interaction of glottal-pulse rate and vocal-tract length in judgements of speaker size, sex, and age](../Smith_2005_InteractionGlottal-pulseRateVocal-tract/notes.md) — Smith & Patterson's STRAIGHT-resynthesis study establishing that glottal-pulse rate and vocal-tract length jointly determine perceived speaker size, sex, and age, with size judgments tracking VTL and sex judgments tracking an interaction of both cues — the perceptual foundation this paper's F0 × formant attractiveness interaction builds on
 
 ### Cited By (in Collection)
 - [[Belin_2017_SoundOfTrustworthiness]] — cites this for F0 × formant interaction in voice attractiveness
@@ -130,7 +133,7 @@ For Qlatt's voice preset system, this paper establishes that F0 and formant freq
 ## Related Work Worth Reading
 - Feinberg et al. 2005 — Original manipulation method for F0 + formants; establishes preferences
 - Fitch & Giedd 1999 — VTL measurement via MRI; height explains >70% of VTL variance
-- Smith et al. 2005, 2007 — F0 × VTL interactions in size/sex/age perception (not attractiveness)
+- Smith et al. 2005, 2007 — F0 × VTL interactions in size/sex/age perception (not attractiveness) → NOW IN COLLECTION (2005): [The interaction of glottal-pulse rate and vocal-tract length in judgements of speaker size, sex, and age](../Smith_2005_InteractionGlottal-pulseRateVocal-tract/notes.md)
 - Charlton et al. 2008 — F0 × formant interaction in red deer (no interaction found, unlike humans)
 - Candolin 2003 — Theoretical framework for cue amplification vs backup signaling
 - Puts 2005 — Menstrual cycle modulation of voice pitch preferences

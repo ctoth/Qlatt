@@ -1,0 +1,14 @@
+{
+  "cite_key": "shue2011voicesauce",
+  "title": "VoiceSauce: A program for voice analysis",
+  "authors": ["Yen-Liang Shue", "Patricia Keating", "Chad Vicenik", "Kristine Yu"],
+  "year": "2011",
+  "arxiv_id": null,
+  "doi": null,
+  "abstract": "VoiceSauce is a new application, implemented in Matlab, which provides automated voice measurements over audio recordings. VoiceSauce computes many voice measures, including those using corrections for formant frequencies and bandwidths. It outputs values as text or for Emu database, and incorporates output from a separate program for automatic analysis of electroglottographic signals. VoiceSauce is available online for free download.",
+  "url": "https://www.internationalphoneticassociation.org/icphs-proceedings/ICPhS2011/OnlineProceedings/RegularSession/Shue/Shue.pdf",
+  "pdf_url": "https://www.internationalphoneticassociation.org/icphs-proceedings/ICPhS2011/OnlineProceedings/RegularSession/Shue/Shue.pdf",
+  "venue": "Proceedings of the 17th International Congress of Phonetic Sciences (ICPhS XVII), Hong Kong",
+  "document_type": "article",
+  "pages": "1846-1849"
+}

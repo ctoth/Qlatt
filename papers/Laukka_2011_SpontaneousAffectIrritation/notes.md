@@ -223,6 +223,7 @@ Provides empirically grounded acoustic targets for synthesizing mild, realistic 
 - [[Burkhardt_2005_GermanEmotionalSpeechDatabase]] — cited for EmoDB call-center emotion detection work
 - [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — cited for voice source spectral correlates
 - [[Scherer_2001_VocalEmotionCrossCultural]] — same research group, cross-cultural vocal emotion
+- [Emotional Speech Synthesis: A Review](../Schroder_2001_EmotionalSpeechSynthesisReview/notes.md) - cited as the state-of-the-art survey of emotional speech synthesis at the time of writing.
 
 ### New Leads (Not Yet in Collection)
 - Juslin & Laukka (2003) — "Communication of emotions in vocal expression and music performance" — comprehensive review, frequently cited throughout

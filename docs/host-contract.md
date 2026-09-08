@@ -246,6 +246,39 @@ tolerances used by `render-phrase.ts` golden comparison, then pass
 
 ## Validation
 
+### Runtime structural failures
+
+`createKlattRuntime` accepts the existing `Diagnostics` collector; callers can
+also read the runtime-owned collector through `getDiagnostics()`. The Node
+render host includes these events in its diagnostic report.
+
+- Unknown primitive types/categories or unavailable preloaded WASM omit the node with
+  `runtime.node_omitted`. Missing connection endpoints or destination AudioParams
+  drop the edge with `runtime.connection_dropped`. These existing recoverable
+  paths continue with warnings identifying both endpoints and primitive types.
+- A missing parameter target warns with `runtime.binding_target_missing`.
+  Unresolved, nonnumeric, or nonfinite parameter values warn with
+  `runtime.binding_unresolved` and leave the AudioParam unchanged. Reports carry
+  the requested value and the observed retained value when available; a registry
+  default is not evidence of a worklet's current value. Each failure code/target
+  pair reports once per runtime, including its affected count, so repeated input
+  updates cannot fill the diagnostic buffer. Later valid updates still apply.
+- Invalid supplied counts or ports, unsupported native bindings, missing required worklet/WASM declarations,
+  failed WASM loading, and WebAudio connection exceptions emit errors and reject
+  construction. Connection exceptions dispose the constructed graph. Missing
+  graph outputs or an omitted output node reject `connectToDestination` with
+  `runtime.invalid_output`.
+- Registry input/output counts may be omitted (default one); supplied counts
+  must be nonnegative integers and worklets cannot have both counts zero.
+  Omitted ports select port zero. Named ports require a matching registry port
+  with a direction and integer index within the declared count. AudioParam
+  destinations cannot also specify an input port. Worklet outputs retain the
+  existing one-channel-per-output convention. Explicit graph output ports are
+  honored when connecting to the destination.
+
+Failed CEL realization reporting is separate from these structural diagnostics.
+Normal default selection and its provenance are unchanged.
+
 All five experiment graphs pass `bacon check` against their declared registry
 layers (`meta.primitives` is a list merged in order, later entries winning per
 primitive). Qlatt extension data (`formantBanks`, including its
@@ -253,6 +286,14 @@ primitive). Qlatt extension data (`formantBanks`, including its
 the static documents validate without knowledge of Qlatt's macros. Audio-rate
 connections into node parameters are first-class in the schema
 (`to: { node, param }`).
+
+## Frontend tone association
+
+The frontend host also implements the structural `associate_tones` action and
+optional point `tone` selector specified in [Declarative tone association](tone-association.md).
+These operate on HRG Items, associations and transaction provenance before
+lowering; a native frontend host must preserve their ordered mapping, atomic
+rejection, alignment validation and replay semantics.
 
 ## Known gaps (2026-07-22)
 

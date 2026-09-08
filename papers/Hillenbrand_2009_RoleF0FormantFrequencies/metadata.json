@@ -1,0 +1,20 @@
+{
+  "cite_key": "hillenbrand2009role",
+  "title": "The role of f0 and formant frequencies in distinguishing the voices of men and women",
+  "authors": [
+    "James M. Hillenbrand",
+    "Michael J. Clark"
+  ],
+  "year": "2009",
+  "arxiv_id": null,
+  "doi": "10.3758/APP.71.5.1150",
+  "abstract": "The purpose of the present study was to determine the contributions of fundamental frequency (f0) and formants in cuing the distinction between men's and women's voices. A source-filter synthesizer was used to create four versions of 25 sentences spoken by men: (1) unmodified synthesis, (2) f0 only shifted up toward values typical of women, (3) formants only shifted up toward values typical of women, and (4) both f0 and formants shifted up. Identical methods were used to generate four corresponding versions of 25 sentences spoken by women, but with downward shifts. Listening tests showed that (1) shifting both f0 and formants was usually effective (~82%) in changing the perceived sex of the utterance, and (2) shifting either f0 or formants alone was usually ineffective in changing the perceived sex. Both f0 and formants are apparently needed to specify speaker sex, though even together these cues are not entirely effective. Results also suggested that f0 is somewhat more important than formants. A second experiment used the same methods, but isolated /hVd/ syllables were used as test signals. Results were broadly similar, with the important exception that, on average, the syllables were more likely to shift perceived talker sex with shifts in f0 and/or formants.",
+  "url": "https://doi.org/10.3758/APP.71.5.1150",
+  "pdf_url": "https://link.springer.com/content/pdf/10.3758/APP.71.5.1150.pdf",
+  "venue": "Attention, Perception, & Psychophysics",
+  "volume": "71",
+  "issue": "5",
+  "pages": "1150-1166",
+  "document_type": "article",
+  "bibtex": "@Article{Hillenbrand2009TheRO,\n author = {J. M. Hillenbrand and M. J. Clark},\n journal = {Attention, Perception, & Psychophysics},\n pages = {1150-1166},\n title = {The role of f0 and formant frequencies in distinguishing the voices of men and women},\n volume = {71},\n number = {5},\n doi = {10.3758/APP.71.5.1150},\n year = {2009}\n}\n"
+}

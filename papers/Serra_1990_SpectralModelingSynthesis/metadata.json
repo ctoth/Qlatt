@@ -1,0 +1,18 @@
+{
+  "cite_key": "serra1990spectral",
+  "title": "Spectral Modeling Synthesis: A Sound Analysis/Synthesis System Based on a Deterministic plus Stochastic Decomposition",
+  "authors": ["Xavier Serra", "Julius Smith III"],
+  "year": "1990",
+  "arxiv_id": null,
+  "doi": "10.2307/3680788",
+  "abstract": "When generating musical sound on a digital computer, it is important to have a good model whose parameters provide a rich source of meaningful sound transformations. Three basic model types are used widely today for musical sound generation: instrument models, spectrum models, and abstract models. Instrument models attempt to parameterize a sound at its source, such as a violin, clarinet, or vocal tract. Spectrum models attempt to parameterize a sound at the basilar membrane of the ear, discarding whatever information the ear seems to discard in the spectrum. Abstract models, such as FM, attempt to provide musically useful parameters in an abstract formula. This paper addresses the second category of synthesis technique: spectrum modeling. It describes a technique called spectral modeling synthesis (SMS), that models time-varying spectra as (1) a collection of sinusoids controlled through time by piecewise linear amplitude and frequency envelopes (the deterministic part), and (2) a time-varying filtered noise component (the stochastic part). The analysis procedure first extracts the sinusoidal trajectories by tracking peaks in a sequence of short-time Fourier transforms. These peaks are then removed by spectral subtraction. The remaining \"noise floor\" is then modeled as white noise through a time-varying filter. A piecewise linear approximation to the upper spectral envelope of the noise is computed for each successive spectrum, and the stochastic part is synthesized by means of the overlap-add technique. The SMS technique has proved to give general, high quality transformations for a wide variety of musical signals.",
+  "url": "https://www.semanticscholar.org/paper/11f17c4e16927cb5a41fad4ce4e751743659de64",
+  "pdf_url": "https://repositori.upf.edu/bitstreams/de5b327a-f37b-43fd-a77e-c3ddfb920f8a/download",
+  "bibtex": "@Article{Serra1990SpectralMS,\n author = {Xavier Serra and Julius Smith III},\n journal = {Computer Music Journal},\n number = {4},\n pages = {12-24},\n title = {Spectral Modeling Synthesis: A Sound Analysis/Synthesis System Based on a Deterministic plus Stochastic Decomposition},\n volume = {14},\n year = {1990}\n}\n",
+  "venue": "Computer Music Journal",
+  "venue_type": "journal",
+  "volume": "14",
+  "number": "4",
+  "pages": "12-24",
+  "document_type": "article"
+}

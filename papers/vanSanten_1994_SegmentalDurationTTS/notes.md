@@ -229,7 +229,7 @@ This paper is directly applicable to Qlatt's duration assignment system. The key
 - Crystal & House (1988a,b,c) - Segmental durations in connected speech signals
 - Klatt (1976) - Linguistic uses of segmental duration in English (the baseline rules)
 - Allen et al. (1987) - From Text to Speech: The MITalk System (the system this improves upon)
-- Riley (1992) - Tree-based modeling for speech synthesis (CART approach compared against)
+- Riley (1992) - Tree-based modeling for speech synthesis (CART approach compared against) → NOW IN COLLECTION: [Tree-Based Modelling for Speech Synthesis](../Riley_1990_TreeBasedModellingSpeechSynthesis/notes.md)
 
 ## Collection Cross-References
 
@@ -241,6 +241,9 @@ This paper is directly applicable to Qlatt's duration assignment system. The key
 - **vanSanten_1997_ProsodicModeling** - Later paper discussing obstacles to prosodic quality including duration
 - [[Crystal_House_1988_StopConsonantDuration]] - Referenced for connected speech duration data
 - [[Hertz_1991_StreamsPhonesTransitions]] - Referenced for alternative duration modeling via phone-and-transition segmentation
+
+### Now in Collection (previously listed as leads)
+- [Tree-Based Modelling for Speech Synthesis](../Riley_1990_TreeBasedModellingSpeechSynthesis/notes.md) - the CART regression-tree approach to segmental duration this paper compares itself against. Riley's tree gets 23 ms residual SD vs. >35 ms for Klatt-style hand rules on his own data, but this paper's sums-of-products model reaches 0.93 correlation and is preferred 73% of the time over the older MITalk rules in listening tests - the two papers use different architectures (tree vs. hand-structured multiplicative model) on different corpora, so the numbers are not directly comparable, but both report the same qualitative result: a data-driven approach beats hand-derived multiplicative duration rules on the same underlying problem.
 
 ### New Leads (Not Yet in Collection)
 - Umeda (1977) - "Consonant duration in American English" - JASA 61, 846-858 -- comprehensive consonant duration data

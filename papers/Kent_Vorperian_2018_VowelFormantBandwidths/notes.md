@@ -271,3 +271,10 @@ Includes normative ranges where available.
 - [ ] Consider f0-dependent bandwidth adjustments for high-pitched voices
 - [ ] Implement formant transition durations of 50-100ms
 - [ ] Add derived metrics (VSA, FCR) for synthesis quality assessment
+
+---
+
+## Collection Cross-References
+
+### Conceptual Links (not citation-based)
+- [Vocal Tract Wall Effects, Losses, and Resonance Bandwidths](../Fant_1972_VocalTractWallEffectsBandwidths/notes.md) - (Strong) Fant reports the same male/female B1 asymmetry as this review (his ~25% female excess vs this review's B1 60-100 Hz female / 50-80 Hz male) and supplies the mechanism this review's Table 5 lacks: a wall-loss bandwidth term $B_W(F_W/F)^2$ driven by thinner cavity walls or a smaller area-to-perimeter ratio in female vocal tracts, addressing the "limited normative data for bandwidths" gap noted above.

@@ -1,0 +1,16 @@
+{
+  "cite_key": "riley1990tree",
+  "title": "Tree-based modelling for speech synthesis",
+  "authors": ["Michael D. Riley"],
+  "year": "1990",
+  "arxiv_id": null,
+  "doi": null,
+  "abstract": "Two applications of statistically-generated decision trees to problems in speech synthesis are described: (1) End of sentence detection: A decision tree is generated to decide when a period in text corresponds to the end of a declarative sentence (and not an abbreviation). The result is 99.8% correct classification on the Brown corpus. (2) Segment duration modelling in speech synthesis: 1500 utterances from a single speaker were used to a build a decision tree that predicts segment durations based on features such as lexical position, stress, and phonetic context. The result is prediction with residuals with a 23 millisecond standard deviation and synthesis that compares favorably with current hand-generated duration rules.",
+  "url": "https://www.isca-archive.org/ssw_1990/riley90_ssw.html",
+  "pdf_url": "https://www.isca-archive.org/ssw_1990/riley90_ssw.pdf",
+  "venue": "ESCA Workshop on Speech Synthesis, Autrans, France, 1990",
+  "document_type": "article",
+  "pages": "229-232",
+  "affiliation": "AT&T Bell Laboratories, Murray Hill, NJ",
+  "note": "Precursor of Riley 1992 'Tree-based modelling of segmental durations' (Talking Machines, Elsevier), which was not retrievable."
+}

@@ -154,6 +154,7 @@ No empirical results - this is a survey paper. Key observations:
 - [[Klatt_1976_SegmentalDuration]]
 - [[Klatt_1987_TTS_Review]]
 - [[Klatt_1990_VoiceQualityVariations]]
+- [Tree-Based Modelling for Speech Synthesis](../Riley_1990_TreeBasedModellingSpeechSynthesis/notes.md) - listed in the reference list (ref. 62) among contemporaneous ESCA 1990 workshop papers.
 - [[Liberman_Mattingly_1985_MotorTheory]]
 - [[Shadle_1985_FricativeAcoustics]]
 - [[Stevens_1971_AirflowTurbulenceNoise]]

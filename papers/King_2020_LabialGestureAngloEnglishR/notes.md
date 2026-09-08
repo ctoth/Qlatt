@@ -192,6 +192,7 @@ Is tongue tip up?
 ## Collection Cross-References
 
 ### Already in Collection
+- [Formant frequencies of vowels in 13 accents of the British Isles](../Ferragne_2010_FormantFrequenciesVowels13/notes.md) - cited for background acoustic-phonetic description of British Isles accent variation; co-authored by Ferragne, whose later work with King on Anglo-English /r/ (this paper) builds on the same ABI-corpus acoustic-measurement tradition.
 - [[EspyWilson_2000_AcousticModelingAmericanR]] — foundational work on acoustic modeling of American English /r/; MRI-derived vocal tract dimensions and sublingual space contribution to F3 lowering
 - [[Fant_1960_AcousticTheorySpeechProduction]]
 - [[Harrington_2011_HighBackVowelFronting]]

@@ -1,0 +1,4 @@
+---
+tags: [evaluation, listening-test, subjective-assessment, standards, audio-quality]
+---
+ITU-R Recommendation BS.1534-3 specifies MUSHRA, the MUlti Stimulus test with Hidden Reference and Anchor, a double-blind multi-stimulus listening test for audio systems of intermediate quality graded on a 0-100 continuous quality scale. It fixes the mandatory 3.5 kHz and 7 kHz low-pass anchors and their filter mask, the assessor pre- and post-screening exclusion thresholds, stimulus length and fade/loop mechanics, listening-level calibration at 78 dBA, and both the normative 10 000-iteration permutation bootstrap and the informative repeated-measures ANOVA analysis paths. It is the reference protocol for any subjective evaluation of synthesized speech quality against a natural reference, and its user-interface, anchor, screening, and reporting requirements are directly implementable in a listening-test harness.

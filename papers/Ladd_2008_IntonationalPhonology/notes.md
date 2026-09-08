@@ -433,16 +433,20 @@ For Qlatt's TTS frontend, this book motivates:
 - [[OShaughnessy_1976_F0_Prosody]] — practical F0 generation rules; Ladd's framework supersedes but the implementation concerns remain relevant
 - [[Taylor_2000_TiltModelIntonation]] — Tilt model's continuous accent parameters as phonetic realization under Ladd's categorical AM system
 - [[Fujisaki_InformationProsodyModeling]] — Fujisaki's F0 model (block diagram shown in Fig 1.3); Ladd contrasts the IPO/Fujisaki superpositional approach with the AM sequential approach
+- [[Grabe_Kochanski_Coleman_2005_IntonationNativeAccentVarieties]] — uses Ladd's (1996) argument that repeated prenuclear accents reflect one underlying choice (collapsed into a single pattern class when counting IViE data); its finding that even the most frequent per-dialect nuclear-tune pattern rarely exceeds 50-80% of tokens is a concrete quantitative instance of the categorical-transcription-obscures-gradience critique central to Ladd's later work.
+- [[Grabe_2004_IntonationalVariationUrbanDialects]] — Ladd's book cites Grabe's IViE work (Grabe 1998, Grabe et al. 2000, Grabe 2003) as evidence for cross-dialect intonational variation; Grabe's 2004 chapter is the fullest synthesis of that same IViE research program, with quantitative nuclear-accent-distribution tables across seven British Isles dialects and the `%`-boundary device for transcribing Belfast/Glasgow rise-plateau families that Ladd (1996:145ff) had flagged as a ToBI transcription problem.
 
 ### New Leads (Not Yet in Collection)
 - Anderson, Pierrehumbert, and Liberman (1984) — "Synthesis by rule of English intonation patterns" — direct TTS F0 synthesis
-- Liberman and Pierrehumbert (1984) — Intonational invariance under pitch range changes
 - Gussenhoven (2004) — "The Phonology of Tone and Intonation" — comprehensive AM with three-tone system
 - Arvaniti, Ladd, and Mennen (1998) — Segmental anchoring experimental evidence
 - Pierrehumbert and Hirschberg (1990) — Compositional semantics of intonation
 - Prevost and Steedman (1994) — "Specifying intonation from context for speech synthesis"
 - 't Hart, Collier, and Cohen (1990) — "A perceptual study of intonation" (IPO approach)
 - Monaghan (1991/1992) — "Intonation in a text to speech conversion system"
+
+### Now in Collection (previously listed as leads)
+- [Intonational Invariance under Changes in Pitch Range and Length](../Liberman_1984_IntonationalInvariance/notes.md) - gives the quantitative pitch-range-scaling model (reference line, downstep as constant-ratio decay, final lowering as a separate multiplicative constant) that operationalizes the F0 scaling this chapter's AM tonal grammar leaves phonetically unspecified.
 
 ### Supersedes or Recontextualizes
 - [[Pierrehumbert_1980_EnglishIntonation]]: Ladd's 2008 treatment refines and extends the original 1980 framework — the 7-accent inventory is reduced to 5 in MAE_ToBI, alignment is treated more carefully, and cross-linguistic validation is provided. The original remains essential for the formal finite-state grammar and implementation rules.
@@ -459,7 +463,7 @@ For Qlatt's TTS frontend, this book motivates:
 
 **Not in collection, worth acquiring:**
 - Anderson, Pierrehumbert, and Liberman (1984) -- "Synthesis by rule of English intonation patterns" -- direct TTS F0 synthesis implementation
-- Liberman and Pierrehumbert (1984) -- Intonational invariance under changes in pitch range and length
+- Liberman and Pierrehumbert (1984) -- Intonational invariance under changes in pitch range and length → NOW IN COLLECTION: [Intonational Invariance under Changes in Pitch Range and Length](../Liberman_1984_IntonationalInvariance/notes.md)
 - Gussenhoven (2004) -- "The Phonology of Tone and Intonation" -- comprehensive AM treatment with three-tone system
 - Silverman and Pierrehumbert (1990) -- Alignment effects of prosodic context on prenuclear peaks
 - Arvaniti, Ladd, and Mennen (1998) -- Segmental anchoring experimental evidence

@@ -161,6 +161,7 @@ For a Klatt synthesizer, the emotion effects map approximately to:
 
 ### Already in Collection
 - [[Gobl_2003_VoiceQualityEmotion]] — extends Murray & Arnott's voice quality dimension with systematic perceptual evaluation of six voice quality types (breathy, whispery, tense, creaky, harsh, modal) mapped to emotional categories
+- [The Generation of Affect in Synthesized Speech](../Cahn_1990_AffectEditor/notes.md) — the DECtalk-based Affect Editor prototype named in Section III alongside Murray et al. (1988); cited in the reference list as "Cahn, J.E. (1989). Generation of Affect in Synthesized Speech, Proceedings of AVIOS '89," almost certainly the conference version of the same AVIOS work published in the journal in 1990 (our collection copy).
 
 ### Cited By (in Collection)
 - [[Scherer_2001_VocalEmotionCrossCultural]] — cites as a review of emotion simulation in synthetic speech with parameter recommendations
@@ -177,3 +178,4 @@ For a Klatt synthesizer, the emotion effects map approximately to:
 - [[Banse_1996_VocalEmotionAcousticProfiles]] — Murray provides a qualitative synthesis of emotion-acoustic mappings from decades of studies; Banse provides systematic quantitative measurements of 29 acoustic parameters across 14 emotions, offering the empirical precision Murray's review lacked
 - [[Cummings_1995_GlottalExcitationEmotionalSpeech]] — Murray identifies voice quality as critical for secondary emotions but lacks glottal source data; Cummings provides the complementary glottal source measurements (closing slope, opening slope, durations) for emotional speech styles
 - [[Belyk_2014_AcousticValenceEmotion]] — challenges Murray's simple emotion-to-parameter mappings by showing valence encoding depends on emotion family (motivational vs. moral vs. aesthetic), each with distinct pitch/loudness patterns
+- [Emotional Speech Synthesis: A Review](../Schroder_2001_EmotionalSpeechSynthesisReview/notes.md) - (Strong) this review tabulates an anger rule set from the separate Murray & Arnott Speech Communication implementation paper (ref [6], not itself in the collection); this paper's Table I of vocal-emotion parameter directions for five primary emotions is the parameter-direction consensus underlying that rule set.

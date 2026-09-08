@@ -250,7 +250,9 @@ The four-component area derivative model (Eq. 13) with opening/closing correctio
 
 ### New Leads
 - Titze 1984 — baseline parameterization that this paper extends (Q_a, Q_s, Q_p)
-- Ishizaka & Flanagan 1972 — two-mass model basis for aerodynamic equations
+
+### Now in Collection (previously listed as leads)
+- [Ishizaka & Flanagan (1972) — Synthesis of Voiced Sounds From a Two-Mass Model of the Vocal Cords](../Ishizaka_1972_TwoMassModelVocalCords/notes.md) - the canonical two-mass vocal-fold model whose aerodynamic (Bernoulli-flow) equations and difference-equation formulation underlie the physiological source model this paper reviews.
 
 ### Conceptual Links (not citation-based)
 - `Holmberg_1995_AerodynamicEGGAcousticFemaleVoice` — female voice aerodynamic data directly relevant to the parallel chink model

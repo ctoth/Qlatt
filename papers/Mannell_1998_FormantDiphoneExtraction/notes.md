@@ -114,5 +114,6 @@ Target synthesiser: SHLRC Parallel Formant Synthesiser "MU-TALK" (Clark et al. 1
 
 ### Conceptual Links (not citation-based)
 - `Kent_Vorperian_2018_VowelFormantBandwidths` — both provide bandwidth estimation approaches; Kent & Vorperian provide age/sex-dependent data, Mannell provides a frequency-dependent formula
+- [Vocal Tract Wall Effects, Losses, and Resonance Bandwidths](../Fant_1972_VocalTractWallEffectsBandwidths/notes.md) - (Strong) this paper's linear bandwidth-vs-frequency estimate `Bx = (80 + 120*Fx/5000)*W` is monotonically increasing, but Fant's measured data (Figs. I-C-3, I-C-4) show a U-shaped relationship - bandwidth elevated at low F1 from wall losses, dipping through the mid-range, then rising quadratically above 2000 Hz from radiation - so the linear rule misses the low-frequency wall-loss upturn Fant's Eq. (45) captures.
 - `Ericsson_2020_FormantEstimationEvaluation` — both address formant tracking accuracy
 - `Conkie_1997_OptimalCouplingDiphones` — both address diphone synthesis unit construction

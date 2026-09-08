@@ -1,0 +1,18 @@
+{
+  "cite_key": "kim2018crepe",
+  "title": "CREPE: A Convolutional Representation for Pitch Estimation",
+  "authors": [
+    "Jong Wook Kim",
+    "Justin Salamon",
+    "Peter Li",
+    "Juan Pablo Bello"
+  ],
+  "year": "2018",
+  "arxiv_id": "1802.06182",
+  "doi": null,
+  "abstract": "The task of estimating the fundamental frequency of a monophonic sound recording, also known as pitch tracking, is fundamental to audio processing with multiple applications in speech processing and music information retrieval. To date, the best performing techniques, such as the pYIN algorithm, are based on a combination of DSP pipelines and heuristics. While such techniques perform very well on average, there remain many cases in which they fail to correctly estimate the pitch. In this paper, we propose a data-driven pitch tracking algorithm, CREPE, which is based on a deep convolutional neural network that operates directly on the time-domain waveform. We show that the proposed model produces state-of-the-art results, performing equally or better than pYIN. Furthermore, we evaluate the model's generalizability in terms of noise robustness. A pre-trained version of CREPE is made freely available as an open-source Python module for easy application.",
+  "url": "https://arxiv.org/abs/1802.06182",
+  "pdf_url": "https://arxiv.org/pdf/1802.06182",
+  "venue": "ICASSP 2018",
+  "document_type": "article"
+}

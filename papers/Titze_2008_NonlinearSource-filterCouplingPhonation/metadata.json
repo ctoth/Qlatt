@@ -1,0 +1,21 @@
+{
+  "cite_key": "titze2008nonlinear",
+  "title": "Nonlinear source-filter coupling in phonation: Theory",
+  "authors": ["Ingo R. Titze"],
+  "year": "2008",
+  "arxiv_id": null,
+  "doi": "10.1121/1.2832337",
+  "abstract": "A theory of interaction between the source of sound in phonation and the vocal tract filter is developed. The degree of interaction is controlled by the cross-sectional area of the laryngeal vestibule (epilarynx tube), which raises the inertive reactance of the supraglottal vocal tract. Both subglottal and supraglottal reactances can enhance the driving pressures of the vocal folds and the glottal flow, thereby increasing the energy level at the source. The theory predicts that instabilities in vibration modes may occur when harmonics pass through formants during pitch or vowel changes. Unlike in most musical instruments (e.g., woodwinds and brasses), a stable harmonic source spectrum is not obtained by tuning harmonics to vocal tract resonances, but rather by placing harmonics into favorable reactance regions. This allows for positive reinforcement of the harmonics by supraglottal inertive reactance (and to a lesser degree by subglottal compliant reactance) without the risk of instability. The traditional linear source-filter theory is encumbered with possible inconsistencies in the glottal flow spectrum, which is shown to be influenced by interaction. In addition, the linear theory does not predict bifurcations in the dynamical behavior of vocal fold vibration due to acoustic loading by the vocal tract.",
+  "url": "https://doi.org/10.1121/1.2832337",
+  "pdf_url": "https://europepmc.org/articles/pmc2811547?pdf=render",
+  "document_type": "article",
+  "venue": "The Journal of the Acoustical Society of America",
+  "venue_type": "journal",
+  "volume": "123",
+  "issue": "5",
+  "pages": "2733-2749",
+  "pacs": "43.70.Bk, 43.75.Rs",
+  "affiliation": "Department of Speech Pathology and Audiology, The University of Iowa, Iowa City, Iowa 52242 and National Center for Voice and Speech, The Denver Center for the Performing Arts, Denver, Colorado 80204",
+  "funding": "National Institute on Deafness and Other Communication Disorders, Grant No. 5 R01 DC004224 08",
+  "bibtex": "@Article{Titze2008NonlinearSC,\n author = {Ingo R. Titze},\n journal = {The Journal of the Acoustical Society of America},\n title = {Nonlinear source-filter coupling in phonation: Theory},\n volume = {123},\n number = {5},\n pages = {2733--2749},\n year = {2008},\n doi = {10.1121/1.2832337}\n}\n"
+}

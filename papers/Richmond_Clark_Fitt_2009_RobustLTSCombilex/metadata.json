@@ -1,0 +1,11 @@
+{
+  "cite_key": "richmond2009robust",
+  "title": "Robust LTS rules with the Combilex speech technology lexicon",
+  "authors": ["Korin Richmond", "Robert A. J. Clark", "Sue Fitt"],
+  "year": "2009",
+  "arxiv_id": null,
+  "doi": "10.21437/Interspeech.2009-405",
+  "abstract": "Combilex is a high quality pronunciation lexicon, aimed at speech technology applications, that has recently been released by CSTR. Combilex benefits from several advanced features. This paper evaluates one of these: the explicit alignment of phones to graphemes in a word. This alignment can help to rapidly develop robust and accurate letter-to-sound (LTS) rules, without needing to rely on automatic alignment methods. To evaluate this, we used Festival's LTS module, comparing its standard automatic alignment with Combilex's explicit alignment. Our results show using Combilex's alignment improves LTS accuracy: 86.50% words correct as opposed to 84.49%, with our most general form of lexicon. In addition, building LTS models is greatly accelerated, as the need to list allowed alignments is removed. Finally, loose comparison with other studies indicates Combilex is a superior quality lexicon in terms of consistency and size.",
+  "url": "https://www.isca-archive.org/interspeech_2009/richmond09_interspeech.html",
+  "pdf_url": "https://www.isca-archive.org/interspeech_2009/richmond09_interspeech.pdf"
+}

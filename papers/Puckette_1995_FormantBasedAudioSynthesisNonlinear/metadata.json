@@ -1,0 +1,18 @@
+{
+  "cite_key": "puckette1995formant",
+  "title": "Formant-based audio synthesis using nonlinear distortion",
+  "authors": [
+    "Miller Puckette"
+  ],
+  "year": "1995",
+  "arxiv_id": null,
+  "doi": null,
+  "abstract": "An audio synthesis technique (\"Phase Aligned Formant synthesis\") is presented which is aimed at real-time musical applications. A desired sound is specified in terms of one or several time-varying formants, each with specified center frequencies, bandwidths, and amplitudes. The sound produced may be periodic or noisy. The relative merits of other known real-time techniques for synthesizing sounds with desired formants are also discussed. As an example, a spoken word is analyzed and resynthesized.",
+  "url": "https://msp.ucsd.edu/Publications/jaes95.ps",
+  "pdf_url": null,
+  "venue": "Journal of the Audio Engineering Society",
+  "volume": "43",
+  "issue": "1",
+  "pages": "40-47",
+  "document_type": "article"
+}

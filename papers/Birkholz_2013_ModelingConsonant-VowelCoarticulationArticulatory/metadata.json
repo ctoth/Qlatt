@@ -1,0 +1,21 @@
+{
+  "cite_key": "birkholz2013modeling",
+  "title": "Modeling Consonant-Vowel Coarticulation for Articulatory Speech Synthesis",
+  "authors": [
+    "Peter Birkholz"
+  ],
+  "year": "2013",
+  "arxiv_id": null,
+  "doi": "10.1371/journal.pone.0060603",
+  "abstract": "A central challenge for articulatory speech synthesis is the simulation of realistic articulatory movements, which is critical for the generation of highly natural and intelligible speech. This includes modeling coarticulation, i.e., the context-dependent variation of the articulatory and acoustic realization of phonemes, especially of consonants. Here we propose a method to simulate the context-sensitive articulation of consonants in consonant-vowel syllables. To achieve this, the vocal tract target shape of a consonant in the context of a given vowel is derived as the weighted average of three measured and acoustically-optimized reference vocal tract shapes for that consonant in the context of the corner vowels /a/, /i/, and /u/. The weights are determined by mapping the target shape of the given context vowel into the vowel subspace spanned by the corner vowels. The model was applied for the synthesis of consonant-vowel syllables with the consonants /b/, /d/, /g/, /l/, /r/, /m/, /n/ in all combinations with the eight long German vowels. In a perception test, the mean recognition rate for the consonants in the isolated syllables was 82.4%. This demonstrates the potential of the approach for highly intelligible articulatory speech synthesis.",
+  "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0060603",
+  "pdf_url": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0060603&type=printable",
+  "bibtex": "@Article{birkholz2013modeling,\n author = {Peter Birkholz},\n journal = {PLoS ONE},\n title = {Modeling Consonant-Vowel Coarticulation for Articulatory Speech Synthesis},\n volume = {8},\n number = {4},\n pages = {e60603},\n year = {2013},\n doi = {10.1371/journal.pone.0060603}\n}\n",
+  "venue": "PLoS ONE",
+  "venue_type": "journal",
+  "volume": "8",
+  "number": "4",
+  "pages": "e60603",
+  "document_type": "article",
+  "affiliation": "Department of Phoniatrics, Pedaudiology, and Communication Disorders, University Hospital Aachen and RWTH Aachen University, Aachen, Germany"
+}

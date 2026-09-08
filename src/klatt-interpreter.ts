@@ -13,7 +13,6 @@
  */
 
 import { getAudioParam } from "./audio-param-utils";
-import { dbToLinear } from "./builtin-functions";
 import { createDiagnostics, type Diagnostics } from "./diagnostics";
 import type { BindingSpec, KlattRuntime } from "./klatt-runtime";
 import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
@@ -183,7 +182,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     semantics,
     logger = () => {},
     telemetryHandler,
-    diagnostics = createDiagnostics(),
+    diagnostics = runtime.getDiagnostics?.() ?? createDiagnostics(),
   } = options;
 
   const log = (msg: string) => logger(`[klatt-interpreter] ${msg}`);
@@ -351,16 +350,24 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   function compileSchedule(track: KlattFrame[], baseTime: number): ScheduleEntry[] {
     const schedule: ScheduleEntry[] = [];
 
-    // PLSTEP detection state — initial 0 means "off/silent".
-    // Missing AF in a frame means "not set" = silent (0 dB), not -70 dB.
-    // Using -70 caused spurious 70 dB deltas when frames omitted AF.
-    // Only AF (frication) triggers PLSTEP — AH (aspiration) is gradual glottal
-    // noise, not a burst transient (Klatt 1980 PARCOE.FOR).
-    let prevAF = 0;
-    // PLSTEP constants are declared in semantics.yaml so runtime, graph, and
-    // telemetry share the same Klatt 1980 PARCOE.FOR values.
-    const PLSTEP_THRESHOLD = requireFiniteConstant(constants, "plstepThreshold");
-    const PLSTEP_BURST_OFFSET_DB = requireFiniteConstant(constants, "plstepBurstOffsetDb");
+    // Telemetry policy is owned by semantics; the audio graph owns burst synthesis.
+    const policy = semantics.plstep;
+    if (
+      policy &&
+      (!Array.isArray(policy.triggers) ||
+        policy.triggers.some((name) => typeof name !== "string" || !name.trim()) ||
+        new Set(policy.triggers).size !== policy.triggers.length ||
+        !Number.isFinite(policy.initialValue) ||
+        !Number.isFinite(policy.missingValue) ||
+        !["gte", "gt"].includes(policy.comparison) ||
+        !Array.isArray(policy.citations) ||
+        policy.citations.length === 0 ||
+        policy.citations.some((citation) => typeof citation !== "string" || !citation.trim()))
+    ) {
+      throw new Error("E_SEMANTICS_PLSTEP_POLICY: invalid semantics.plstep policy");
+    }
+    const threshold = policy ? requireFiniteConstant(constants, "plstepThreshold") : undefined;
+    const previous = new Map(policy?.triggers.map((name) => [name, policy.initialValue]));
 
     for (let i = 0; i < track.length; i++) {
       const frame = track[i];
@@ -369,38 +376,28 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       const t = baseTime + frame.time;
       const realized = evaluateSemantics(frame.params);
 
-      // PLSTEP detection: track AF state unconditionally, emit telemetry if handler present.
-      // Only AF (supraglottal frication) triggers PLSTEP — aspiration (AH) is gradual
-      // glottal noise onset, not a burst transient (Klatt 1980 PARCOE.FOR).
-      const currentAF = frame.params.AF ?? 0;
-
-      if (telemetryHandler) {
-        const deltaAF = currentAF - prevAF;
-
-        if (deltaAF >= PLSTEP_THRESHOLD) {
-          const trigger = "AF";
-          const delta = deltaAF;
-          const goDb = requireFiniteRealizedValue(realized, "GO");
-          const burstDb = goDb - PLSTEP_BURST_OFFSET_DB; // Klatt80 PLSTEP amplitude formula
-          const burstAmplitude = dbToLinear(burstDb);
-
-          const burstPhoneme = frame.phoneme ?? "";
-
-          telemetryHandler({
-            type: "plstep",
-            nodeId: "plstep",
-            time: t,
-            amplitudeLinear: burstAmplitude,
-            amplitudeDb: burstDb,
-            trigger,
-            delta,
-            phoneme: burstPhoneme,
-          });
+      if (policy && threshold !== undefined) {
+        for (const trigger of policy.triggers) {
+          const current = frame.params[trigger] ?? policy.missingValue;
+          const delta = current - previous.get(trigger)!;
+          // State advances even when telemetry is disabled and resets for each track.
+          previous.set(trigger, current);
+          const triggered = policy.comparison === "gte" ? delta >= threshold : delta > threshold;
+          if (telemetryHandler && triggered) {
+            telemetryHandler({
+              type: "plstep",
+              nodeId: "plstep",
+              time: t,
+              amplitudeLinear: requireFiniteRealizedValue(realized, "plstepAmplitude"),
+              amplitudeDb: requireFiniteRealizedValue(realized, "plstepAmplitudeDb"),
+              trigger,
+              delta,
+              phoneme: frame.phoneme ?? "",
+              citations: policy.citations,
+            });
+          }
         }
       }
-
-      // Always update state — delta tracking must not depend on telemetry being enabled
-      prevAF = currentAF;
 
       // Schedule all bindings: read from realized or frame.params, ramp or step.
       for (const binding of allBindings) {

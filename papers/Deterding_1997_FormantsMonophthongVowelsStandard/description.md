@@ -1,0 +1,4 @@
+---
+tags: [vowel-formants, standard-southern-british, acoustic-phonetics, connected-speech, marsec-corpus]
+---
+This paper reports F1/F2/F3 formant measurements for the 11 monophthong vowels of Standard Southern British English, taken from natural connected speech (BBC broadcasts in the MARSEC corpus) for 5 male and 5 female speakers. Its key finding is that connected-speech vowels are significantly less peripheral (more centralized in the vowel space) than earlier citation-word measurements by the same author, at least for male speakers. For a formant synthesizer, it supplies a compact, directly usable per-sex Hz formant table for RP-like English vowels grounded in natural speech rather than artificial isolated-word elicitation, plus a quantified centralization effect to guide how citation-word-derived targets should be adjusted for continuous speech.

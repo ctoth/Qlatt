@@ -1,0 +1,4 @@
+---
+tags: [pitch-estimation, f0-tracking, neural-networks, signal-analysis, evaluation]
+---
+CREPE is a six-layer 1-D convolutional network that reads a 1024-sample raw waveform frame at 16 kHz and outputs a 360-bin sigmoid activation over a 20-cent pitch grid from C1 to B7, decoded to an f0 estimate by a weighted average over the bins. It beats pYIN and SWIPE on raw pitch accuracy across both a timbrally homogeneous and a heterogeneous synthesized dataset, with the margin widening to over eight percentage points at a strict 10-cent tolerance, and it is more noise-robust for pub, white, and pink noise though not for brown noise. For a source-filter speech synthesizer it supplies the highest-precision available f0 extractor for analysis and a reusable pattern for representing frequency as a Gaussian-blurred distribution over log-frequency bins, with the caveat that it was trained entirely on music and provides no voicing decision.

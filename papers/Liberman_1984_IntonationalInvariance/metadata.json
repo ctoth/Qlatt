@@ -1,0 +1,19 @@
+{
+  "cite_key": "liberman1984intonational",
+  "title": "Intonational Invariance under Changes in Pitch Range and Length",
+  "authors": ["Mark Liberman", "Janet Pierrehumbert"],
+  "year": "1984",
+  "arxiv_id": null,
+  "doi": null,
+  "abstract": "Chapter 10 of Language Sound Structure. Two speech production experiments varying overall pitch range, phrase order, and list length establish that a speaker's lowest F0 values are nearly invariant while peaks scale freely, that phrase-final pitch accents undergo a separate multiplicative lowering, and that downstep is a constant-ratio decay above a reference line that rises with pitch range. The resulting model of F0 implementation computes each target from the immediately preceding one, requires no whole-phrase preplanning, and reinterprets the phenomena collectively called declination as the joint result of local downstep, final lowering, and pitch-range choice. Fitted per-speaker constants and comparisons against additive log models, Fujisaki's command-response model, and configurational rise-fall theories are reported.",
+  "url": "https://sail.usc.edu/~lgoldste/ArtPhon/Papers/LP2.pdf",
+  "pdf_url": "https://sail.usc.edu/~lgoldste/ArtPhon/Papers/LP2.pdf",
+  "venue": "Language Sound Structure",
+  "container_title": "Language Sound Structure: Studies in Phonology Presented to Morris Halle by His Teacher and Students",
+  "editors": ["Mark Aronoff", "Richard T. Oehrle"],
+  "publisher": "MIT Press",
+  "address": "Cambridge, MA",
+  "chapter": "10",
+  "pages": "157-233",
+  "document_type": "book_chapter"
+}

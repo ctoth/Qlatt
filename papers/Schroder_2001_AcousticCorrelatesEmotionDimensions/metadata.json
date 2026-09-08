@@ -1,0 +1,14 @@
+{
+  "cite_key": "schroder2001acoustic",
+  "title": "Acoustic Correlates of Emotion Dimensions in View of Speech Synthesis",
+  "authors": ["Marc Schröder", "Roddy Cowie", "Ellen Douglas-Cowie", "Machiel Westerdijk", "Stan Gielen"],
+  "year": "2001",
+  "arxiv_id": null,
+  "doi": "10.21437/Eurospeech.2001-34",
+  "abstract": "In a database of emotional speech, dimensional descriptions of emotional states have been correlated with acoustic variables. Many stable correlations have been found. The predictions made by linear regression widely agree with the literature. The numerical form of the description and the choice of acoustic variables studied are particularly well suited for future implementation in a speech synthesis system, possibly allowing for the expression of gradual emotional states.",
+  "url": "https://www.isca-archive.org/eurospeech_2001/schroder01b_eurospeech.html",
+  "pdf_url": null,
+  "venue": "Eurospeech 2001, Aalborg",
+  "document_type": "article",
+  "note": "RETRIEVAL MISMATCH: this directory is named for Schröder (2001) 'Emotional Speech Synthesis: A Review' (DOI 10.21437/Eurospeech.2001-150), but paper.pdf is the companion paper 'Acoustic Correlates of Emotion Dimensions in View of Speech Synthesis' (DOI 10.21437/Eurospeech.2001-34). Metadata corrected to match the stored PDF. The review paper has not been retrieved; it is cited as reference [14] of this paper. Directory rename and keymap/ledger handling left to the foreman."
+}

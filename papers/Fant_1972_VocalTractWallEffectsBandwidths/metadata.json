@@ -1,0 +1,19 @@
+{
+  "cite_key": "fant1972vocal",
+  "title": "Vocal Tract Wall Effects, Losses, and Resonance Bandwidths",
+  "authors": ["Gunnar Fant"],
+  "year": "1972",
+  "arxiv_id": null,
+  "doi": null,
+  "abstract": "The finite impedance of the vocal tract cavity walls accounts for a shift in formant frequencies and additional losses compared to the idealized hard wall conditions. These effects are treated by: 1) low frequency approximation, 2) single tube tract and lumped element representation of the wall shunt, 3) generalized distributed element treatment of mass loading and losses. The superposition of sound radiated from the walls and from the mouth is calculated for case 2) above. Data on resonance bandwidths are reviewed and simplified formulas are derived for estimating formant bandwidth contributions from: a) radiation, b) classical friction and heat conduction losses, c) dissipation within the cavity walls. The relative importance of these factors in various classes of vocal tract configurations and with respect to different resonances is discussed. Formulas have also been derived for predicting resonance bandwidths from the set of resonance frequencies.",
+  "url": "https://web.archive.org/web/20220307213948/https://www.speech.kth.se/prod/publications/files/qpsr/1972/1972_13_2-3_028-052.pdf",
+  "pdf_url": "https://www.speech.kth.se/prod/publications/files/qpsr/1972/1972_13_2-3_028-052.pdf",
+  "venue": "STL-QPSR 13(2-3)",
+  "container_title": "Speech Transmission Laboratory Quarterly Progress and Status Report",
+  "volume": "13",
+  "issue": "2-3",
+  "pages": "28-52",
+  "publisher": "KTH Royal Institute of Technology",
+  "address": "Stockholm",
+  "document_type": "report"
+}

@@ -1,0 +1,21 @@
+{
+  "cite_key": "morise2016world",
+  "title": "WORLD: A Vocoder-Based High-Quality Speech Synthesis System for Real-Time Applications",
+  "authors": [
+    "Masanori Morise",
+    "Fumiya Yokomori",
+    "Kenji Ozawa"
+  ],
+  "year": "2016",
+  "arxiv_id": null,
+  "doi": "10.1587/transinf.2015EDP7457",
+  "abstract": "A vocoder-based speech synthesis system, named WORLD, was developed in an effort to improve the sound quality of real-time applications using speech. Speech analysis, manipulation, and synthesis on the basis of vocoders are used in various kinds of speech research. Although several high-quality speech synthesis systems have been developed, real-time processing has been difficult with them because of their high computational costs. This new speech synthesis system has not only sound quality but also quick processing. It consists of three analysis algorithms and one synthesis algorithm proposed in our previous research. The effectiveness of the system was evaluated by comparing its output with against natural speech including consonants. Its processing speed was also compared with those of conventional systems. The results showed that WORLD was superior to the other systems in terms of both sound quality and processing speed. In particular, it was over ten times faster than the conventional systems, and the real time factor (RTF) indicated that it was fast enough for real-time processing.",
+  "url": "https://www.jstage.jst.go.jp/article/transinf/E99.D/7/E99.D_2015EDP7457/_article",
+  "pdf_url": "https://www.jstage.jst.go.jp/article/transinf/E99.D/7/E99.D_2015EDP7457/_pdf",
+  "bibtex": "@Article{Morise2016WORLDAV,\n author = {Masanori Morise and Fumiya Yokomori and Kenji Ozawa},\n journal = {IEICE Transactions on Information and Systems},\n pages = {1877-1884},\n number = {7},\n title = {WORLD: A Vocoder-Based High-Quality Speech Synthesis System for Real-Time Applications},\n volume = {E99-D},\n doi = {10.1587/transinf.2015EDP7457},\n year = {2016}\n}\n",
+  "venue": "IEICE Trans. Inf. Syst.",
+  "volume": "E99-D",
+  "number": "7",
+  "pages": "1877-1884",
+  "document_type": "article"
+}

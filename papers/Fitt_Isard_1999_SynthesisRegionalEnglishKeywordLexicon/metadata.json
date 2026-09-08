@@ -1,0 +1,11 @@
+{
+  "cite_key": "fitt1999synthesis",
+  "title": "Synthesis of Regional English Using a Keyword Lexicon",
+  "authors": ["Susan Fitt", "Stephen Isard"],
+  "year": "1999",
+  "arxiv_id": null,
+  "doi": "10.21437/Eurospeech.1999-213",
+  "abstract": "We discuss the use of an accent-independent keyword lexicon to synthesise speakers with different regional accents. The paper describes the system architecture and the transcription system used in the lexicon, and then focuses on the construction of word-lists for recording speakers. We illustrate by mentioning some of the features of Scottish and Irish English, which we are currently synthesising, and describe how these are captured by keyword synthesis.",
+  "url": "https://www.isca-archive.org/eurospeech_1999/fitt99_eurospeech.html",
+  "pdf_url": "https://www.isca-archive.org/eurospeech_1999/fitt99_eurospeech.pdf"
+}

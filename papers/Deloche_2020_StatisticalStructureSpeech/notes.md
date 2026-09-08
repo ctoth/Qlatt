@@ -220,7 +220,7 @@ This paper provides a principled, data-driven characterization of how different 
 - Stilp CE, Lewicki MS (2013) — ICA applied to phonetic categories; predecessor study with β values for broad classes
 - Lewicki MS (2002) — Efficient coding of natural sounds; foundational ICA-on-speech study establishing Q₁₀/f_c power law
 - Erra RG, Gervain J (2016) — Cross-linguistic differences in efficient coding of speech
-- Fant G (1972) — Vocal tract wall effects, losses, and resonance bandwidths [Ref 32]
+- Fant G (1972) — Vocal tract wall effects, losses, and resonance bandwidths [Ref 32] → NOW IN COLLECTION: [Vocal Tract Wall Effects, Losses, and Resonance Bandwidths](../Fant_1972_VocalTractWallEffectsBandwidths/notes.md)
 - Stevens KN (1998) — Acoustic Phonetics [Ref 33]
 - Hanna et al. (2016) — Frequencies, bandwidths and magnitudes of vocal tract resonances measured through lips [Ref 28]
 
@@ -228,6 +228,9 @@ This paper provides a principled, data-driven characterization of how different 
 
 ### Already in Collection
 - [[Stevens_1998_AcousticPhonetics]] — cited as [33] for acoustic phonetic framework; Deloche's statistical results quantitatively validate Stevens' phoneme-level descriptions
+
+### Now in Collection (previously listed as leads)
+- [Vocal Tract Wall Effects, Losses, and Resonance Bandwidths](../Fant_1972_VocalTractWallEffectsBandwidths/notes.md) — cited as [32] for formant-bandwidth and lip-radiation theory. Derives closed-form wall/friction/heat-conduction/radiation bandwidth formulas from first principles; Deloche's independent statistical finding that vowel β is governed by formant bandwidth and lip radiation is a data-driven confirmation of the acoustic factors Fant's theory identifies as bandwidth-determining.
 
 ### Cited By (in Collection)
 - (none found)
@@ -243,3 +246,4 @@ This paper provides a principled, data-driven characterization of how different 
 - [[Jongman_2000_FricativeAcoustics]] — (Strong) Jongman provides detailed acoustic characterization of English fricatives; Deloche's statistical analysis independently confirms the sibilant vs non-sibilant spectral structure distinction (sibilants β > 1, non-sibilants lower β)
 - [[Shadle_1985_FricativeAcoustics]] — (Moderate) Shadle's fricative acoustic theory explains why sibilants have sharper spectral structure; Deloche's β values quantify this distinction in terms of optimal time-frequency representation
 - [[Badin_1989_FricativeProductionModelling]] — (Moderate) Badin models fricative production with source-filter approach; Deloche's biphasic stop/affricate finding (burst = time-localized, opening = frequency-localized like fricatives) validates the distinct source mechanisms
+- [Improving the Readability of Time-Frequency and Time-Scale Representations by the Reassignment Method](../Auger_1995_ImprovingReadabilityTime-frequencyTime-scale/notes.md) - (Strong) both papers address the Gabor-Heisenberg time/frequency resolution tradeoff for speech: Deloche finds the optimal *fixed* tradeoff per phoneme class via a Gabor dictionary's β exponent, while Auger and Flandrin's reassignment method sharpens *any* fixed-resolution representation after the fact by concentrating it onto the signal's true instantaneous frequency law - a static-optimum approach and a post-hoc-sharpening approach to the same underlying constraint.

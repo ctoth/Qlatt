@@ -13,7 +13,7 @@ import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
  *  - phrase-domain selection with index / count / is_first / is_last
  *  - "last item matching a predicate in phrase" (nuclear accent)
  *  - index-within-phrase with boundary reset (accent index / downstep)
- *  - phrase length / midpoint (long-phrase break insertion)
+ *  - generic scan metadata without break-selection policy
  *  - provenance: writes derived from `phrase.*` depend on the breakIndex decisions
  *    that defined the grouping.
  */
@@ -30,8 +30,6 @@ const SCHEMA = {
         cnt: { kind: "number" },
         first: { kind: "boolean" },
         last: { kind: "boolean" },
-        mid: { kind: "number" },
-        isMid: { kind: "boolean" },
         nuclear: { kind: "boolean" },
         active: { kind: "boolean" },
         punctuationSymbol: { kind: "string" },
@@ -58,11 +56,10 @@ const RELATION_SPEC = {
       carrier: [true, false],
       first: [true, false],
       last: [true, false],
-      isMid: [true, false],
       nuclear: [true, false],
       active: [true, false],
     },
-    scalars: { duration: {}, idx: {}, cnt: {}, mid: {} },
+    scalars: { duration: {}, idx: {}, cnt: {} },
   },
 };
 
@@ -196,67 +193,30 @@ describe("phrase-domain scan primitive", () => {
     expect(utterance.getItem("d")?.get("idx")).toBe(1);
   });
 
-  it("identifies the pre-midpoint member of a long phrase", () => {
+  it.each([1, 7])("exposes only generic scan metadata for a phrase of %i items", (count) => {
     const rows: Row[] = [];
-    for (let i = 0; i < 7; i += 1) rows.push([`w${i}`, "AA", 0, true] as const);
+    for (let i = 0; i < count; i += 1) rows.push([`w${i}`, "AA", 0, true] as const);
     const utterance = buildUtterance(rows);
     const spec = compileRuleEngineSpec({
       relations: RELATION_SPEC,
       rules: {
-        long_phrase_break: {
+        scan_metadata: {
           select: { relation: "Segment", where: "current.carrier == true" },
           scan: { domain: "phrase", reset_break_index: 3 },
-          apply: [
-            { field: "mid", op: "set", value: "phrase.midpoint_index", tag: "prosody" },
-            { field: "isMid", op: "set", value: "phrase.is_midpoint", tag: "prosody" },
-            {
-              field: "cnt",
-              op: "set",
-              value: "phrase.count >= 7 && phrase.is_midpoint ? 2 : 0",
-              tag: "prosody",
-            },
-          ],
-          citations: ["O'Shaughnessy 1976"],
+          apply: [{ field: "cnt", op: "set", value: "size(phrase)", tag: "prosody" }],
+          citations: ["Ladd 2008"],
         },
       },
-      phases: [{ name: "prosody", rules: ["long_phrase_break"] }],
+      phases: [{ name: "prosody", rules: ["scan_metadata"] }],
     });
 
     runGraphRuleEngine(utterance, spec);
 
-    // count 7 -> midpoint_index = floor(7/2) - 1 = 2  (matches resolveLongPhraseBreak).
-    for (let i = 0; i < 7; i += 1) {
-      expect(utterance.getItem(`w${i}`)?.get("mid")).toBe(2);
+    // The generic scan supplies count, index, is_first and is_last only.
+    // Break-selection arithmetic belongs to the rule policy.
+    for (let i = 0; i < count; i += 1) {
+      expect(utterance.getItem(`w${i}`)?.get("cnt")).toBe(4);
     }
-    expect(utterance.getItem("w2")?.get("isMid")).toBe(true);
-    expect(utterance.getItem("w2")?.get("cnt")).toBe(2);
-    expect(utterance.getItem("w0")?.get("isMid")).toBe(false);
-    expect(utterance.getItem("w6")?.get("isMid")).toBe(false);
-    expect(utterance.getItem("w6")?.get("cnt")).toBe(0);
-  });
-
-  it("has no midpoint for a singleton phrase (midpoint_index = -1)", () => {
-    const utterance = buildUtterance([["only", "AA", 0, true]]);
-    const spec = compileRuleEngineSpec({
-      relations: RELATION_SPEC,
-      rules: {
-        solo: {
-          select: { relation: "Segment", where: "current.carrier == true" },
-          scan: { domain: "phrase", reset_break_index: 3 },
-          apply: [
-            { field: "mid", op: "set", value: "phrase.midpoint_index", tag: "prosody" },
-            { field: "isMid", op: "set", value: "phrase.is_midpoint", tag: "prosody" },
-          ],
-          citations: ["O'Shaughnessy 1976"],
-        },
-      },
-      phases: [{ name: "prosody", rules: ["solo"] }],
-    });
-
-    runGraphRuleEngine(utterance, spec);
-
-    expect(utterance.getItem("only")?.get("mid")).toBe(-1);
-    expect(utterance.getItem("only")?.get("isMid")).toBe(false);
   });
 
   it("groups on a reset_where predicate (punctuation SIL), mirroring identifyPhrases", () => {

@@ -372,6 +372,57 @@ It provides self-oscillation and asymmetry-driven period doubling; it does not
 implement Story's three-mass model or the bilateral tract of Ishizaka–Flanagan.
 See the [corrected Steinecke–Herzel notes](../papers/Steinecke_Herzel_1995_BifurcationsAsymmetricVocalFold/notes.md).
 
+## Text normalization actions and CEL operations
+
+Text normalization uses the existing HRG rule engine. `text_recognition.rules`
+is ordered: each recognizer scans the original string left to right, accepting
+nonoverlapping spans not claimed by earlier recognizers. An ineligible candidate
+leaves its input available to subsequent recognizers. Offsets are half-open
+UTF-16 code-unit positions, independent of acoustic anchors. Named regex captures
+are strings or null; `captures` declares their destination feature names.
+Unmatched text, including whitespace, remains in the source graph.
+
+A recognizer can declare `table`, `prefix`, and `suffix` instead of `pattern`.
+The host escapes every table key as a literal and constructs a named `key`
+capture in table insertion order. Prefix, suffix, case flags, and capture bindings
+remain explicit data. Empty matches are rejected; this is not longest matching.
+
+`expand_text: {output: <CEL>, allowed_types: [...], tag: <vocabulary tag>}`
+replaces the selected normalization item with ordered records:
+
+- `{type: 'terminal', text: <nonempty word without whitespace>}`
+- `{type: 'request', kind: <nonempty string>, payload: <string-valued map>}`
+
+The host validates the entire list before staging writes. An empty list is valid.
+The source item remains with `active: false`; new items inherit source coordinates
+and have a `normalization_source` association. IDs are
+`<source-id>:<rule-id>:<output-index>`. Creation, suppression, insertion and feature
+writes use the existing transaction journal and replay. They require no temporal
+anchors. Matches are collected once per rule; later rules consume produced
+requests. `normalization.phases` selects the bounded phase sequence. No recursive
+expansion or fixed-point scheduling occurs. Unresolved requests at transcription
+handoff are errors. Each terminal item becomes one canonical Token.
+
+The CEL context exposes the selected `transcription` declaration, so lexical
+normalization and transcription share `transcription.punctuation_tokens`.
+Reading a current normalization item's features tracks its source value writes;
+explicit neighbor navigation also tracks list-order writes. Merely reading its
+text does not import preceding spans as pronunciation ancestors.
+
+The following operations are part of the host surface for the native CEL audit:
+
+| Operation | Normative behavior |
+|---|---|
+| `vocabulary(table, key)` | Both arguments are strings. Reads the exact string-valued entry from the selected rulepack's `maps`; missing entries are errors. Emits `normalization_vocabulary_lookup` with loader-derived resource, table, key, value, rule ID, citations and source parents; the writing transaction depends on this decision. Programmatic specs identify the resource as `<programmatic rulepack>`. Ordinary `maps` access does not claim this evidence. |
+| `regexReplace(text, pattern, replacement, flags)` | ECMAScript `String.replace(new RegExp(pattern, flags), replacement)`, including capture replacement syntax and explicit global/case flags. Invalid regexes throw. |
+| `regexSplit(text, pattern)` | ECMAScript `String.split(new RegExp(pattern))`, including captured delimiters. |
+| `literalPattern(strings)` | Requires a nonempty list of nonempty strings. Escapes regex metacharacters in each string and joins alternatives with `\|`, preserving list order. |
+
+Examples exercised by the fixtures: `regexReplace('a:B a:c', '(a):([a-z])',
+'$2-$1', 'gi')` yields `B-a c-a`; literal table keys `a+b.` and `x[0]` match
+those exact spellings. See [normalization components](text-normalization.md) for
+the reader composition and retained legacy edge behavior.
+
 ## Known gaps (2026-07-22)
 
 - CEL dialect parity between `cel-js` and a native CEL implementation

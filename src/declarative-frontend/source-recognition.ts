@@ -1,7 +1,7 @@
-import { normalizeText } from "../g2p/text-normalize";
 import type { RecognitionEvidence } from "../provenance";
 import { evaluateExpression } from "./cel-expressions";
-import type { HrgSchema, Item, Utterance } from "./hrg";
+import { type HrgSchema, type Item, Utterance } from "./hrg";
+import { runGraphRuleEngine } from "./hrg/rule-engine";
 import { parseRecognitionConfig, type SpeakingDeclaration } from "./recognition-config";
 import type { CompiledRulepack } from "./rule-pack";
 
@@ -11,6 +11,10 @@ export const NORMALIZATION_SCHEMA = {
     sourceText: { features: { text: { kind: "string" } } },
     normalization: {
       features: {
+        active: { kind: "boolean" },
+        outputType: { kind: "string", values: ["source", "terminal", "request"] },
+        kind: { kind: "string" },
+        payload: { kind: "object", fields: {}, additional: { kind: "string" } },
         text: { kind: "string" },
         sourceStart: { kind: "number" },
         sourceEnd: { kind: "number" },
@@ -221,6 +225,14 @@ export function recognizeText(text: string, utterance: Utterance, spec: Compiled
     transaction.dependOn(decisionIds.get(candidate)!);
     transaction.read(source, "text");
     const item = transaction.createItem("normalization", `normalization_${index}`);
+    transaction.set(item, "active", true);
+    transaction.set(item, "outputType", "source");
+    transaction.set(item, "kind", candidate.class ?? "");
+    transaction.set(
+      item,
+      "payload",
+      Object.fromEntries(Object.entries(candidate.features).filter((entry) => entry[1] !== null)),
+    );
     transaction.set(item, "text", text.slice(evidence.sourceStart, evidence.sourceEnd));
     transaction.set(item, "sourceStart", evidence.sourceStart);
     transaction.set(item, "sourceEnd", evidence.sourceEnd);
@@ -236,35 +248,41 @@ export function recognizeText(text: string, utterance: Utterance, spec: Compiled
   }
 }
 
-/** Interim handoff: reuse selected readers; each emitted word retains its source item. */
+/** Execute the selected bounded phases and hand off terminal words exactly once. */
 export function normalizeSourceItems(
   utterance: Utterance,
   spec: CompiledRulepack,
 ): SourceTranscriptionInput[] {
   if (!parseRecognitionConfig(spec))
     throw new Error("E_RECOGNITION_CONFIG: text_recognition is required");
-  const config = {
-    tablesPath: spec.normalization.tables_path as string,
-    pipelinePath: spec.normalization.pipeline_path as string,
-    punctuationTokens: spec.transcription.punctuation_tokens as string[],
-  };
-  const entries: SourceTranscriptionInput[] = [];
-  for (const source of utterance.relation("Normalization").listItems()) {
-    const transaction = utterance.beginTransaction({
-      ruleId: "source_normalization_handoff",
-      phase: "recognition",
-      tag: "normalization",
-      reason: "Applied the selected frontend normalization resources to source-backed speech",
-      citations: [config.tablesPath, config.pipelinePath],
-      stage: "transcribe",
-    });
-    const spokenText = transaction.read(source, "spokenText");
-    if (typeof spokenText !== "string")
-      throw new Error(`E_RECOGNITION_RESULT: '${source.id}' has no spokenText`);
-    const normalizedText = normalizeText(spokenText, config);
-    transaction.set(source, "normalizedText", normalizedText);
-    transaction.commit();
-    for (const word of normalizedText.split(" ").filter(Boolean)) entries.push({ word, source });
+  if (Array.isArray(spec.normalization.phases)) {
+    runGraphRuleEngine(utterance, spec, { phases: spec.normalization.phases as string[] });
+    return utterance
+      .relation("Normalization")
+      .listItems()
+      .filter((item) => item.get("active") !== false)
+      .flatMap((source) => {
+        if (source.get("outputType") !== "terminal") {
+          utterance.diagnostics.error(
+            "Unresolved normalization request",
+            { item: source.id, kind: source.get("kind") },
+            "E_NORMALIZATION_UNRESOLVED",
+          );
+          throw new Error(`E_NORMALIZATION_UNRESOLVED: ${source.id} (${source.get("kind")})`);
+        }
+        const word = source.get("normalizedText");
+        if (typeof word !== "string") throw new Error(`E_NORMALIZATION_TERMINAL: ${source.id}`);
+        return word.length ? [{ word, source }] : [];
+      });
   }
-  return entries;
+  throw new Error("E_NORMALIZATION_CONFIG: normalization.phases is required");
+}
+
+/** Public text-only projection of the same graph path used by transcription. */
+export function normalizeGraphText(text: string, spec: CompiledRulepack): string {
+  const utterance = new Utterance(NORMALIZATION_SCHEMA);
+  recognizeText(text, utterance, spec);
+  return normalizeSourceItems(utterance, spec)
+    .map((entry) => entry.word)
+    .join(" ");
 }

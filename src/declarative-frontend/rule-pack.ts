@@ -16,12 +16,36 @@ import { assertValidSpec, type ValidationDiagnostic } from "./validation";
 
 type PlainObject = Record<string, unknown>;
 
+type MapOrigins = Record<string, Record<string, string>>;
+const MAP_ORIGINS = new WeakMap<object, MapOrigins>();
+
+/** Loader-derived resource identity, never authored vocabulary evidence. */
+export function rulepackMapOrigins(
+  spec: CompiledRulepack,
+): Readonly<Record<string, Readonly<Record<string, string>>>> {
+  return MAP_ORIGINS.get(spec) ?? {};
+}
+
 /** Parse a rulepack YAML source into a raw object document (no DSL normalization). */
 function parseRulepackDocument(source: string, label: string): PlainObject {
   const document = parseYamlString(source, label);
   if (!isPlainObject(document)) {
     throw new Error(`E_RULEPACK_DOCUMENT: ${label} must be a YAML object document`);
   }
+  MAP_ORIGINS.set(
+    document,
+    Object.fromEntries(
+      Object.entries(isPlainObject(document.maps) ? document.maps : {}).map(([name, entries]) => [
+        name,
+        Object.fromEntries(
+          Object.keys(isPlainObject(entries) ? entries : {}).map((key) => [
+            key,
+            label.replace(/^(included|base) rulepack /, ""),
+          ]),
+        ),
+      ]),
+    ),
+  );
   return document;
 }
 
@@ -86,6 +110,7 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
   if (!isPlainObject(merged)) {
     throw new Error("E_RULEPACK_COMPILE: normalized root must remain an object");
   }
+  MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(root), ...MAP_ORIGINS.get(child) });
   // Merge keyed dictionaries (error on duplicate).
   // Chunk 3: `string_sets` and `maps` are pipeline-level reusable literal-data
   // blocks; merge them the same way as predicates so a child include can
@@ -287,6 +312,13 @@ function resolveExtendsSync(
   const baseSource = loadYamlSourceSync(basePath);
   const baseDoc = parseRulepackDocument(baseSource, `base rulepack ${basePath}`);
   const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
+  MAP_ORIGINS.set(
+    merged,
+    deepMergeChildWins(
+      MAP_ORIGINS.get(baseDoc) ?? {},
+      MAP_ORIGINS.get(rootDoc) ?? {},
+    ) as MapOrigins,
+  );
   delete merged.extends;
   return {
     doc: merged,
@@ -307,6 +339,13 @@ async function resolveExtendsAsync(
   const baseSource = await loadYamlSource(basePath);
   const baseDoc = parseRulepackDocument(baseSource, `base rulepack ${basePath}`);
   const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
+  MAP_ORIGINS.set(
+    merged,
+    deepMergeChildWins(
+      MAP_ORIGINS.get(baseDoc) ?? {},
+      MAP_ORIGINS.get(rootDoc) ?? {},
+    ) as MapOrigins,
+  );
   delete merged.extends;
   return {
     doc: merged,
@@ -456,6 +495,8 @@ export function loadRulepackSpecFromPath(
     );
   }
   const spec = parseDslSpec(merged);
+  MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
+  freezeRecursively(MAP_ORIGINS.get(spec));
   const inventory =
     typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
   const diagnostics = assertValidSpec(spec, {
@@ -532,6 +573,8 @@ export async function preloadRulepackSpecFromPath(
     );
   }
   const spec = parseDslSpec(merged);
+  MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
+  freezeRecursively(MAP_ORIGINS.get(spec));
   const inventory =
     typeof spec.inventory_path === "string"
       ? await preloadInventorySpecFromPath(spec.inventory_path)

@@ -1,0 +1,52 @@
+# Allen, Hunnicutt & Klatt 1987 FORMAT decimals; DECtalk 4.63
+# l_us_pr1.c:1034-1069 fractions (only denominator 2 is irregular).
+tags:
+  normalization_fraction: Decimal digit and fraction denominator selection
+maps:
+  tn_decimal_policy:
+    grouping: ','
+    separator: point
+  tn_fraction_words:
+    2.one: half
+    2.many: halves
+    plural_suffix: s
+    percent: percent
+rules:
+  tn_decimal:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'decimal' && current.outputType in ['source', 'request']"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_fraction
+      output: >-
+        tn_number_request(double(split(current.payload.integer, maps.tn_decimal_policy.grouping).join('')), 'hundred', false, '')
+        + tn_words(vocabulary('tn_decimal_policy', 'separator'))
+        + tn_words(split(current.payload.fractional, '').map(digit, vocabulary('tn_number_words', digit)).join(' '))
+    citations:
+      - "Allen, Hunnicutt & Klatt 1987; FORMAT decimal digit spelling"
+  tn_fraction:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'fraction' && current.outputType in ['source', 'request']"
+    define:
+      numerator: double(current.payload.numerator)
+      denominator: double(current.payload.denominator)
+      plural: "numerator != 1.0"
+      irregular: "string(denominator) + (plural ? '.many' : '.one')"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_fraction
+      output: >-
+        tn_number_request(numerator, 'hundred', false, '')
+        + (irregular in maps.tn_fraction_words
+            ? tn_words(vocabulary('tn_fraction_words', irregular))
+            : tn_number_request(denominator, 'hundred', true, plural ? vocabulary('tn_fraction_words', 'plural_suffix') : ''))
+        + (get(current.payload, 'percent', '') != '' ? tn_words(vocabulary('tn_fraction_words', 'percent')) : [])
+    citations:
+      - "DECtalk 4.63 l_us_pr1.c:1034-1069; fraction denominator and percent"
+phases:
+  - name: normalization_decimal_fraction
+    rules: [tn_decimal, tn_fraction]

@@ -1,0 +1,108 @@
+# Allen, Hunnicutt & Klatt 1987 FORMAT. The quote/apostrophe and punctuation
+# patterns preserve the completed Qlatt #16 contract; all matching is declared.
+tags:
+  normalization_lexical: Orthographic normalization and terminal word separation
+maps:
+  tn_abbreviations:
+    dr.: doctor
+    mr.: mister
+    mrs.: missus
+    ms.: miss
+    st.: saint
+    ave.: avenue
+    blvd.: boulevard
+    rd.: road
+    sr.: senior
+    jr.: junior
+    prof.: professor
+    gen.: general
+    sgt.: sergeant
+    cpl.: corporal
+    pvt.: private
+    capt.: captain
+    lt.: lieutenant
+    col.: colonel
+    govt.: government
+    dept.: department
+    univ.: university
+    assn.: association
+    bros.: brothers
+    inc.: incorporated
+    corp.: corporation
+    co.: company
+    no.: number
+    approx.: approximately
+    vs.: versus
+    etc.: etcetera
+  tn_lexical_policy:
+    apostrophe_quotes: '[\u2018\u2019\u201A\u2032]'
+    double_quotes: '[\u201C\u201D\u201E]'
+    ellipsis: '\u2026'
+    lexical_apostrophe: "(?<=[a-z])'(?=[a-z]|[^a-z]|$)"
+    unlisted: "[^\\w\\s'\uE000]"
+    whitespace: '\s+'
+functions:
+  tn_clean_text:
+    params: [text]
+    body: >-
+      regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(
+        lower(text), maps.tn_lexical_policy.apostrophe_quotes, "'", 'g'),
+        maps.tn_lexical_policy.double_quotes, '"', 'g'),
+        maps.tn_lexical_policy.ellipsis, '...', 'g'),
+        maps.tn_lexical_policy.lexical_apostrophe, '\uE000', 'g'),
+        "'", ' ', 'g'),
+        '\uE000', "'", 'g')
+    citations: ['Issue #16: lexical apostrophe and punctuation contract']
+rules:
+  tn_abbreviation:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'abbreviation' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: "tn_words(vocabulary('tn_abbreviations', lower(current.payload.key)) + lower(current.payload.tail))"
+    citations:
+      - "Allen, Hunnicutt & Klatt 1987; abbreviation expansion"
+  tn_initialism:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'initialism' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: "tn_words(split(lower(current.text), '.').filter(letter, letter != '').join(' '))"
+    citations:
+      - "Allen, Hunnicutt & Klatt 1987; initialisms"
+  tn_bare_number_request:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind in ['cardinal', 'ordinal'] && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: "tn_number_request(double(current.payload.value), current.kind == 'ordinal' ? 'hundred' : maps.tn_recognition_policy.hundreds, current.kind == 'ordinal', '')"
+    citations:
+      - "Issue #144: explicit bare-number convention"
+  tn_unmatched_words:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.outputType == 'source' && current.kind in ['', 'word']"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: >-
+        regexSplit(tn_clean_text(current.text), '(' + literalPattern(transcription.punctuation_tokens) + ')')
+          .map(part, {'type': 'request', 'kind': 'words', 'payload': {'text':
+            part in transcription.punctuation_tokens ? part
+              : regexReplace(regexReplace(part, maps.tn_lexical_policy.unlisted, ' ', 'g'), maps.tn_lexical_policy.whitespace, ' ', 'g')}})
+    citations:
+      - "Issue #16: declared punctuation cleanup"
+      - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
+phases:
+  - name: normalization_lexical
+    rules: [tn_abbreviation, tn_initialism, tn_bare_number_request, tn_unmatched_words]

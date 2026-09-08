@@ -1,6 +1,5 @@
 import type { Diagnostics } from "../diagnostics";
 import { loadStressPolicy } from "../g2p/stress-policy";
-import type { NormalizationConfig } from "../g2p/text-normalize";
 import {
   cloneValue,
   isPlainObject,
@@ -9,6 +8,7 @@ import {
   loadYamlSourceSync,
   parseYamlString,
 } from "../yaml-loader";
+import { parseRecognitionConfig } from "./recognition-config";
 
 export type InventorySpec = {
   citations?: readonly string[];
@@ -45,7 +45,6 @@ export type FrontendResources = {
   ltsPath: string;
   morphologyPath: string;
   stressPolicyPath: string;
-  normalization: NormalizationConfig;
   /**
    * Optional per-frontend pronunciation dictionary path (JSON, flat
    * word -> "ARPABET ..." map). When set, this frontend does dictionary-first
@@ -523,8 +522,10 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   );
   loadStressPolicy(stressPolicyPath);
   const normalization = isPlainObject(spec.normalization) ? spec.normalization : {};
-  const tablesPath = requireAsset(normalization.tables_path, "normalization.tables_path");
-  const pipelinePath = requireAsset(normalization.pipeline_path, "normalization.pipeline_path");
+  if (!Array.isArray(normalization.phases) || !normalization.phases.length)
+    throw new Error("E_FRONTEND_CONFIG: normalization.phases is required");
+  if (!parseRecognitionConfig(spec))
+    throw new Error("E_FRONTEND_CONFIG: text_recognition is required");
   const punctuationTokens = isPlainObject(spec.transcription)
     ? spec.transcription.punctuation_tokens
     : undefined;
@@ -543,7 +544,6 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     ltsPath,
     morphologyPath,
     stressPolicyPath,
-    normalization: { tablesPath, pipelinePath, punctuationTokens },
     dictionaryPath: typeof spec.dictionary_path === "string" ? spec.dictionary_path : undefined,
   };
 }

@@ -1,0 +1,227 @@
+[
+  {
+    "frontend": "qlatt-english",
+    "input": "",
+    "expected": ""
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "Hello, world!",
+    "expected": "hello , world !"
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "can't John's dogs'",
+    "expected": "can't john's dogs'"
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "Dr. Smith, MR. Jones and Mrs. Doe.",
+    "expected": "doctor smith , mister jones and missus doe ."
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "xdr. dr.foo dr.. Dr. DR.",
+    "expected": "xdr . doctorfoo doctor . doctor doctor"
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "U.S.A. U.S. e.g. A.B.C",
+    "expected": "u s a u s e g a b c"
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "“Hello”—‘world’…",
+    "expected": "hello world' . . ."
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "foo/bar foo-bar foo_bar 😀 café",
+    "expected": "foo bar foo bar foo_bar caf"
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "0 13 20 42 100 123 1000 1001 1000000 999999999 1000000000",
+    "expected": "zero thirteen twenty forty two one hundred one hundred twenty three one thousand one thousand one one million nine hundred ninety nine million nine hundred ninety nine thousand nine hundred ninety nine 1000000000"
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "0th 1st 20th 21st 100th 121st 1000th 1001st",
+    "expected": "zeroth first twentieth twenty first one hundredth one hundred twenty first one thousandth one thousand oneth"
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "$1 $2 $0 $0.00 $0.01 $1.00 $1.01 $2.1 $1234 $1,234.56 $999999999 $1000000000",
+    "expected": "one dollar two dollars zero dollars zero cents one cent one dollar one dollar and one cent two dollars and ten cents one hundred twenty three dollars4 one thousand two hundred thirty four dollars and fifty six cents nine hundred ninety nine dollars999999 one hundred dollars0000000"
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "00:00 12:00 23:05 1:05 pm 13:30 a.m. 12:30 p.m. 24:00 12:60 1:5",
+    "expected": "twelve o'clock a m twelve o'clock p m eleven oh five p m one oh five p m one thirty p m a m twelve thirty p m p m twenty four : zero twelve : sixty one : five"
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "1/2/2020 2020-01-02 13/2/2020 2020-02-31 2020-00-01",
+    "expected": "january second two thousand twenty january second two thousand twenty thirteen two two thousand twenty february thirty first two thousand twenty two thousand twenty zero one"
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "1900 1905 1984 2000 2005 0100",
+    "expected": "one thousand nine hundred one thousand nine hundred five one thousand nine hundred eighty four two thousand two thousand five one hundred"
+  },
+  {
+    "frontend": "qlatt-english",
+    "input": "0.05 1,234.05 1234.56 1/2 2/2 3/4 1/100 1/101 01/2 1/02 3/4%",
+    "expected": "zero point zero five one thousand two hundred thirty four point zero five one thousand two hundred thirty four point five six one two two two three four one one hundred one one hundred one one two one two three four"
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "",
+    "expected": ""
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "Hello, world!",
+    "expected": "hello , world !"
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "can't John's dogs'",
+    "expected": "can't john's dogs'"
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "Dr. Smith, MR. Jones and Mrs. Doe.",
+    "expected": "doctor smith , mister jones and missus doe ."
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "xdr. dr.foo dr.. Dr. DR.",
+    "expected": "xdr . doctorfoo doctor . doctor doctor"
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "U.S.A. U.S. e.g. A.B.C",
+    "expected": "u s a u s e g a b c"
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "“Hello”—‘world’…",
+    "expected": "hello world' . . ."
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "foo/bar foo-bar foo_bar 😀 café",
+    "expected": "foo bar foo bar foo_bar caf"
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "0 13 20 42 100 123 1000 1001 1000000 999999999 1000000000",
+    "expected": "zero thirteen twenty forty two one hundred one hundredand twenty three one thousand one thousand one one million nine hundredand ninety nine million nine hundredand ninety nine thousand nine hundredand ninety nine 1000000000"
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "0th 1st 20th 21st 100th 121st 1000th 1001st",
+    "expected": "zeroth first twentieth twenty first one hundredth one hundred twenty first one thousandth one thousand oneth"
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "$1 $2 $0 $0.00 $0.01 $1.00 $1.01 $2.1 $1234 $1,234.56 $999999999 $1000000000",
+    "expected": "one dollar two dollars zero dollars zero cents one cent one dollar one dollar and one cent two dollars and ten cents one hundred twenty three dollars4 one thousand two hundred thirty four dollars and fifty six cents nine hundred ninety nine dollars999999 one hundred dollars0000000"
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "00:00 12:00 23:05 1:05 pm 13:30 a.m. 12:30 p.m. 24:00 12:60 1:5",
+    "expected": "twelve o'clock a m twelve o'clock p m eleven oh five p m one oh five p m one thirty p m a m twelve thirty p m p m twenty four : zero twelve : sixty one : five"
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "1/2/2020 2020-01-02 13/2/2020 2020-02-31 2020-00-01",
+    "expected": "january second two thousand twenty january second two thousand twenty thirteen halves twenty twenty february thirty first two thousand twenty twenty twenty zero one"
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "1900 1905 1984 2000 2005 0100",
+    "expected": "nineteen hundred nineteen zero five nineteen eighty four two thousand two thousand five one hundred"
+  },
+  {
+    "frontend": "dectalk-english",
+    "input": "0.05 1,234.05 1234.56 1/2 2/2 3/4 1/100 1/101 01/2 1/02 3/4%",
+    "expected": "zero point zero five one thousand two hundred thirty four point zero five one thousand two hundred thirty four point five six one half two halves three fourths one one hundredth one one hundredand one one two one two three fourths percent"
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "",
+    "expected": ""
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "Hello, world!",
+    "expected": "hello , world !"
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "can't John's dogs'",
+    "expected": "can't john's dogs'"
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "Dr. Smith, MR. Jones and Mrs. Doe.",
+    "expected": "doctor smith , mister jones and missus doe ."
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "xdr. dr.foo dr.. Dr. DR.",
+    "expected": "xdr . doctorfoo doctor . doctor doctor"
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "U.S.A. U.S. e.g. A.B.C",
+    "expected": "u s a u s e g a b c"
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "“Hello”—‘world’…",
+    "expected": "hello world' . . ."
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "foo/bar foo-bar foo_bar 😀 café",
+    "expected": "foo bar foo bar foo_bar caf"
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "0 13 20 42 100 123 1000 1001 1000000 999999999 1000000000",
+    "expected": "zero thirteen twenty forty two one hundred one hundred twenty three one thousand one thousand one one million nine hundred ninety nine million nine hundred ninety nine thousand nine hundred ninety nine 1000000000"
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "0th 1st 20th 21st 100th 121st 1000th 1001st",
+    "expected": "zeroth first twentieth twenty first one hundredth one hundred twenty first one thousandth one thousand oneth"
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "$1 $2 $0 $0.00 $0.01 $1.00 $1.01 $2.1 $1234 $1,234.56 $999999999 $1000000000",
+    "expected": "one dollar two dollars zero dollars zero cents one cent one dollar one dollar and one cent two dollars and ten cents one hundred twenty three dollars4 one thousand two hundred thirty four dollars and fifty six cents nine hundred ninety nine dollars999999 one hundred dollars0000000"
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "00:00 12:00 23:05 1:05 pm 13:30 a.m. 12:30 p.m. 24:00 12:60 1:5",
+    "expected": "twelve o'clock a m twelve o'clock p m eleven oh five p m one oh five p m one thirty p m a m twelve thirty p m p m twenty four : zero twelve : sixty one : five"
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "1/2/2020 2020-01-02 13/2/2020 2020-02-31 2020-00-01",
+    "expected": "january second two thousand twenty january second two thousand twenty thirteen two two thousand twenty february thirty first two thousand twenty two thousand twenty zero one"
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "1900 1905 1984 2000 2005 0100",
+    "expected": "one thousand nine hundred one thousand nine hundred five one thousand nine hundred eighty four two thousand two thousand five one hundred"
+  },
+  {
+    "frontend": "qlatt-beauty",
+    "input": "0.05 1,234.05 1234.56 1/2 2/2 3/4 1/100 1/101 01/2 1/02 3/4%",
+    "expected": "zero point zero five one thousand two hundred thirty four point zero five one thousand two hundred thirty four point five six one two two two three four one one hundred one one hundred one one two one two three four"
+  }
+]

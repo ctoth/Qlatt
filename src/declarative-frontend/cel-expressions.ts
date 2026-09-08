@@ -181,6 +181,21 @@ const PURE_FUNCTIONS: Readonly<Record<string, (...args: unknown[]) => unknown>> 
   substring: (value, start, end) => substringValue(value, start, end),
   concat: (...values) => concatValue(...values),
   matches: (value, pattern) => matchesValue(value, pattern),
+  regexReplace: (value, pattern, replacement, flags) =>
+    stringValue(value).replace(
+      new RegExp(stringValue(pattern), stringValue(flags)),
+      stringValue(replacement),
+    ),
+  regexSplit: (value, pattern) => stringValue(value).split(new RegExp(stringValue(pattern))),
+  literalPattern: (values) => {
+    if (
+      !Array.isArray(values) ||
+      !values.length ||
+      values.some((value) => typeof value !== "string" || !value.length)
+    )
+      throw new Error("literalPattern requires nonempty literal strings");
+    return values.map((value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+  },
 };
 
 export const CEL_FUNCTION_CATALOG = [
@@ -196,6 +211,9 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "substring", arities: [2, 3], binding: "pure" },
   { name: "concat", arities: [2, 3, 4], binding: "pure" },
   { name: "matches", arities: [2], binding: "pure" },
+  { name: "regexReplace", arities: [4], binding: "pure" },
+  { name: "regexSplit", arities: [2], binding: "pure" },
+  { name: "literalPattern", arities: [1], binding: "pure" },
   // CEL standard receiver-style functions and comprehension macros that
   // cel-js evaluates natively (`list.map(x, expr)`, `s.startsWith(p)`, ...).
   // Listed so the function-surface validator accepts them; arities exclude
@@ -220,6 +238,7 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "behind", arities: [1, 2], binding: "context" },
   { name: "total", arities: [1], binding: "context" },
   { name: "target", arities: [1], binding: "context" },
+  { name: "vocabulary", arities: [2], binding: "context" },
   { name: "assoc", arities: [2], binding: "context" },
   { name: "max", arities: [1, 2, 3, 4], binding: "context" },
   { name: "min", arities: [1, 2, 3, 4], binding: "context" },

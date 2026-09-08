@@ -1,0 +1,47 @@
+# Allen, Hunnicutt & Klatt 1987 FORMAT; Ebden & Sproat 2015 money class.
+tags:
+  normalization_currency: Currency unit and precision selection
+maps:
+  tn_currencies:
+    '$': dollar
+  tn_currency_units:
+    dollar.one: dollar
+    dollar.many: dollars
+    dollar.minor_one: cent
+    dollar.minor_many: cents
+  tn_currency_policy:
+    precision: '2'
+    padding: '00'
+    joiner: and
+    grouping: ','
+rules:
+  tn_currency:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'currency' && current.outputType in ['source', 'request']"
+    define:
+      currency: "vocabulary('tn_currencies', current.payload.currency)"
+      major: "double(split(current.payload.major, maps.tn_currency_policy.grouping).join(''))"
+      minorText: "get(current.payload, 'minor', '')"
+      minor: "double(substring(minorText + maps.tn_currency_policy.padding, 0, double(maps.tn_currency_policy.precision)))"
+      majorWords: "vocabulary('tn_currency_units', currency + (major == 1.0 ? '.one' : '.many'))"
+      minorWords: "vocabulary('tn_currency_units', currency + (minor == 1.0 ? '.minor_one' : '.minor_many'))"
+      tail: "get(current.payload, 'tail', '')"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_currency
+      output: >-
+        minorText == '' || (major != 0.0 && minor == 0.0)
+          ? tn_number_request(major, 'hundred', false, '') + tn_words(majorWords + tail)
+          : major == 0.0
+            ? tn_number_request(minor, 'hundred', false, '') + tn_words(minorWords + tail)
+            : tn_number_request(major, 'hundred', false, '')
+              + tn_words(majorWords + ' ' + vocabulary('tn_currency_policy', 'joiner'))
+              + tn_number_request(minor, 'hundred', false, '') + tn_words(minorWords + tail)
+    citations:
+      - "Allen, Hunnicutt & Klatt 1987; FORMAT money reading"
+      - "Ebden & Sproat 2015; money class composition"
+phases:
+  - name: normalization_currency
+    rules: [tn_currency]

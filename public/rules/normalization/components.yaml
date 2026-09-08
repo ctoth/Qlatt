@@ -1,0 +1,8 @@
+include:
+  - lexical.yaml
+  - currency.yaml
+  - time.yaml
+  - date.yaml
+  - decimal-fraction.yaml
+  - numbers.yaml
+  - recognition.yaml

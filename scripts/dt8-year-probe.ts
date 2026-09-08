@@ -9,15 +9,12 @@
  *           l_us_pr1.c:367-398 (ls_proc_do_4_digits).
  */
 
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
-import { normalizeText } from "../src/g2p/text-normalize";
+import { normalizeGraphText as normalizeText } from "../src/declarative-frontend/source-recognition";
 
 // dectalk-english declares its own normalization tables + pipeline (DATA).
-const DECTALK_CONFIG = loadFrontendResources(
-  loadBundledRulepackSpec("dectalk-english"),
-).normalization;
-const QLATT_CONFIG = loadFrontendResources(loadBundledRulepackSpec("qlatt-english")).normalization;
+const DECTALK_CONFIG = loadBundledRulepackSpec("dectalk-english");
+const QLATT_CONFIG = loadBundledRulepackSpec("qlatt-english");
 
 const inputs = [
   "in 1984",

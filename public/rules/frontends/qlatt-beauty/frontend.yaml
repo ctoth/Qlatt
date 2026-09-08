@@ -24,6 +24,8 @@
 extends: qlatt-english
 inventory_path: /rules/frontends/qlatt-beauty/inventory.yaml
 include:
+  - /rules/normalization/components.yaml
+  - normalization-policy.yaml
   - pipeline.yaml
   - phases/orthography.yaml
   - phases/normalize.yaml

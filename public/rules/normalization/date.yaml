@@ -1,0 +1,75 @@
+# Ebden & Sproat 2015 date class. Year speaking follows DECtalk 4.63
+# l_us_pr1.c:297-398; eligibility is separately declared by recognition.
+tags:
+  normalization_date: Date order and year reading selection
+maps:
+  tn_months:
+    '1': january
+    '2': february
+    '3': march
+    '4': april
+    '5': may
+    '6': june
+    '7': july
+    '8': august
+    '9': september
+    '10': october
+    '11': november
+    '12': december
+  tn_date_policy:
+    first: month
+    second: day
+    third: year
+    day_kind: ordinal
+    year_kind: cardinal
+  tn_year_policy:
+    half_length: '2'
+    zero: '0'
+    round_half: '00'
+rules:
+  tn_date:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'date' && current.outputType in ['source', 'request']"
+    define:
+      parts: >-
+        {'month': tn_words(vocabulary('tn_months', string(double(current.payload.month)))),
+         'day': tn_request(maps.tn_date_policy.day_kind, {'value': string(double(current.payload.day)), 'hundreds': 'hundred', 'suffix': ''}),
+         'year': tn_request(maps.tn_date_policy.year_kind, {'value': current.payload.year, 'hundreds': 'hundred', 'suffix': ''})}
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_date
+      output: "parts[maps.tn_date_policy.first] + parts[maps.tn_date_policy.second] + parts[maps.tn_date_policy.third]"
+    citations:
+      - "Ebden & Sproat 2015; date field reordering"
+      - "Issue #147: cardinal date years remain independent of bare-year eligibility"
+  tn_year:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'year' && current.outputType in ['source', 'request']"
+    define:
+      value: current.payload.value
+      left: substring(value, 0, double(maps.tn_year_policy.half_length))
+      right: substring(value, double(maps.tn_year_policy.half_length))
+      round: "right == maps.tn_year_policy.round_half"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_date
+      output: >-
+        value.startsWith(maps.tn_year_policy.zero)
+          ? tn_words(split(value, '').map(digit, vocabulary('tn_number_words', digit)).join(' '))
+          : round
+            ? (left.endsWith(maps.tn_year_policy.zero)
+                ? tn_number_request(double(substring(left, 0, 1)), 'hundred', false, '') + tn_words(vocabulary('tn_number_words', 'thousand'))
+                : tn_number_request(double(left), 'hundred', false, '') + tn_words(vocabulary('tn_number_words', 'hundred')))
+            : tn_number_request(double(left), 'hundred', false, '')
+              + (right.startsWith(maps.tn_year_policy.zero)
+                  ? tn_words(split(right, '').map(digit, vocabulary('tn_number_words', digit)).join(' '))
+                  : tn_number_request(double(right), 'hundred', false, ''))
+    citations:
+      - "DECtalk 4.63 l_us_pr1.c:297-398; two-digit halves and round year forms"
+phases:
+  - name: normalization_date
+    rules: [tn_date, tn_year]

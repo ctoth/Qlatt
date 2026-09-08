@@ -1,0 +1,6 @@
+maps:
+  tn_recognition_policy:
+    years: 'no'
+    fractions: 'no'
+    hundreds: hundred
+    fraction_exception: '100'

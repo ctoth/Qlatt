@@ -8,7 +8,9 @@ import {
 
 const spec = compileRuleEngineSpec({
   ...QLATT_ENGLISH_RULEPACK,
-  phases: [{ name: "duration", rules: ["speech_rate_scaling"] }],
+  phases: QLATT_ENGLISH_RULEPACK.phases.map((phase) =>
+    phase.name === "duration" ? { name: "duration", rules: ["speech_rate_scaling"] } : phase,
+  ),
 });
 
 function scale(type: string, duration: number, rate: number, floor = 0) {
@@ -36,6 +38,7 @@ function scale(type: string, duration: number, rate: number, floor = 0) {
     item.set(key, value, meta);
   utterance.segments.append(item, meta);
   runGraphRuleEngine(utterance, spec, {
+    phases: ["duration"],
     parameters: { policy: { duration: { rate_scale: rate } } },
   });
   return { duration: Number(item.get("duration")), utterance };

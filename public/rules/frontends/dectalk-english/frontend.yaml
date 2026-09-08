@@ -14,16 +14,14 @@ dictionary_path: /dectalk-dictionary.json
 # (source_mode: 1) cannot override it. The default remains the impulse fallback
 # while KLGLOTT88 mode 3 is blocked by silent worklet voice output.
 source_contour_path: /rules/frontends/dectalk-english/source-contour.yaml
-# Per-frontend text-normalization policy (DATA). Selects this frontend's own
-# normalization tables + pipeline.
-# The dectalk pipeline adds a year-reading step ("1984" -> "nineteen eighty
-# four") that the shared pipeline omits; the predicate and speaking form are
-# declared as data in normalization-pipeline.yaml. Both paths are required.
+# Included text rules select DECtalk bare-year/fraction recognition and the
+# explicit hundredand convention through normalization-policy.yaml.
 # Citation: DECtalk 4.63 ls_util.c:598-622 (is_year), l_us_pr1.c:367-398.
 normalization:
-  tables_path: /rules/frontends/dectalk-english/normalization-tables.yaml
-  pipeline_path: /rules/frontends/dectalk-english/normalization-pipeline.yaml
+  phases: [normalization_lexical, normalization_currency, normalization_time, normalization_date, normalization_decimal_fraction, normalization_number_requests, normalization_number_groups, normalization_terminal_words]
 include:
+  - /rules/normalization/components.yaml
+  - normalization-policy.yaml
   - pipeline.yaml
   - phases/postlexical.yaml
   - phases/structural.yaml

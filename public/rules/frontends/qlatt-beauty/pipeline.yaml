@@ -177,6 +177,8 @@ tags:
   voice_quality_phrase: shapes voice quality across a phrase
   voice_quality_stress: adjusts voice quality on a stressed segment
 relations:
+  SylStructure:
+    type: span
   Token:
     type: parallel
     features:
@@ -227,6 +229,7 @@ relations:
       nasalPlaceIndex: []
       phraseAccent: []
       transition_ms: []
+      nucleus_duration_ms: []
       type:
         - vowel
         - stop

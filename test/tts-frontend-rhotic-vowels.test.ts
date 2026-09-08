@@ -92,11 +92,13 @@ describe("tts frontend rhotic vowels", () => {
     expect(motherR.length).toBeGreaterThan(0);
     expect(heardR.length).toBeGreaterThan(0);
 
-    // Espy-Wilson 2000: the salient /r/ cue is a very low F3. If we realize a
-    // rhotic tail explicitly, its F3 should sit below the preceding ER target.
-    expect(averageParam(otherR, "F3")).toBeLessThan(averageParam(otherEr, "F3"));
-    expect(averageParam(motherR, "F3")).toBeLessThan(averageParam(motherEr, "F3"));
-    expect(averageParam(heardR, "F3")).toBeLessThan(averageParam(heardEr, "F3"));
+    // Espy-Wilson 2000: the /r/ constriction must attain a lower F3.
+    // Holmes transitions also include the following boundary; averaging sparse
+    // control points confounds that exit transition with the constriction.
+    const lowestF3 = (frames: KlattFrame[]) => Math.min(...frames.map((frame) => frame.params.F3));
+    expect(lowestF3(otherR)).toBeLessThan(lowestF3(otherEr));
+    expect(lowestF3(motherR)).toBeLessThan(lowestF3(motherEr));
+    expect(lowestF3(heardR)).toBeLessThan(lowestF3(heardEr));
   });
 
   it("avoids over-crowding ER0 in compound words", () => {

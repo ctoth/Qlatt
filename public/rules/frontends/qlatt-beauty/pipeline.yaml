@@ -288,6 +288,15 @@ relations:
         resolution: klatt
         max: 500
         floor_field: durationFloor
+        floor_fallback:
+          # Klatt 1976 Eq.1; class-ratio estimates are inherited from qlatt-english.
+          value: >-
+            current.inherentDuration * (current.type == 'vowel'
+              ? params.policy.duration.incompressibility_ratio_vowel
+              : params.policy.duration.incompressibility_ratio_consonant)
+          citations:
+            - "Klatt 1976 Eq.1 (incompressible portion)"
+            - "Engineering estimate: class ratios from params.policy.duration when no per-phone floor exists"
   F0Point:
     type: point
     value_type: number

@@ -47,6 +47,29 @@ the old engine already had class floors. The comparison report evaluates the
 current exact base instead. This change does not claim general prosodic quality
 improvement, replace the timing model, or retune K coefficients.
 
+## Scalar policy contract (#206)
+
+Scalar rounding follows the relation's `unit: ms` declaration. A scalar named
+`duration` with no unit or another unit retains fractional values; another scalar
+declared in milliseconds receives the same per-write rounding as bundled duration.
+
+The qlatt-english and qlatt-beauty duration scalar declarations include a
+`floor_fallback` object with a CEL `value` and required `citations`. The resolver
+uses the declared `floor_field` first, including an explicit zero. If that field
+has no finite value, the existing CEL evaluator computes the fallback. This also
+handles postlexical duration writes before the inventory floor rule runs.
+DECtalk continues to establish its own `minimumDuration` field. The resolver no
+longer chooses linguistic classes or policy keys. A missing declared floor with
+no fallback raises `E_SCALAR_FLOOR_REQUIRED`.
+
+Fallback CEL references and citations are validated with the rulepack. Evaluating
+a fallback adds its citations and tracked item reads to the transaction's
+provenance. The effective floor is not cached into the per-phone field, so later
+inventory processing retains ownership of that field. A successful fallback
+emits `W_DURATION_FLOOR_FALLBACK` (or `W_SCALAR_FLOOR_FALLBACK` for other scalars)
+with the requested effect value, applied result, field, item, rule and effective
+floor. Rejected transactions emit no fallback warning.
+
 ## Corpus comparison
 
 The control is commit `1af37573`, captured in a separate checkout with unchanged

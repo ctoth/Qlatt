@@ -54,13 +54,25 @@ export class HrgTransaction {
   private readonly stagedItems = new Set<Item>();
   private closed = false;
 
-  readonly metadata: TransactionMetadata;
+  private currentMetadata: TransactionMetadata;
+
+  get metadata(): TransactionMetadata {
+    return this.currentMetadata;
+  }
 
   constructor(
     private readonly utterance: Utterance,
     metadata: TransactionMetadata,
   ) {
-    this.metadata = freezeMetadata(metadata);
+    this.currentMetadata = freezeMetadata(metadata);
+  }
+
+  cite(citations: readonly string[]): void {
+    this.assertOpen();
+    this.currentMetadata = freezeMetadata({
+      ...this.metadata,
+      citations: [...new Set([...this.metadata.citations, ...citations])],
+    });
   }
 
   private assertOpen(): void {

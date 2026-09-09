@@ -481,22 +481,28 @@ rules:
       where: >-
         current.type == 'vowel' && has(current.F1) && has(current.F1)
     constraint: params.policy.formant.rate_undershoot_factor > 0
+    # `weight` is the fraction of the distance to the neutral (schwa) target
+    # that is undershot. It is an interpolation weight, so 1 is full undershoot
+    # and values above 1 would overshoot past schwa, which the model does not
+    # describe (Moon & Lindblom 1994: displacement approaches the target
+    # asymptotically). The linear rate-to-weight map itself is the engineering
+    # estimate in rate.undershoot_coefficient; the saturating form is #68.
+    define:
+      weight: min([params.policy.formant.rate_undershoot_factor, 1.0])
     apply:
       - field: F1
         op: set
         value: >-
-          current.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.F1) *
-          params.policy.formant.rate_undershoot_factor
+          current.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.F1) * weight
         tag: rate_undershoot
       - field: F2
         op: set
         value: >-
-          current.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.F2) *
-          params.policy.formant.rate_undershoot_factor
+          current.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.F2) * weight
         tag: rate_undershoot
     citations:
       - Lindblom 1963 (articulatory undershoot — vowels centralize toward schwa at fast rates)
-      - Moon & Lindblom 1994 (rate-dependent formant undershoot)
+      - Moon & Lindblom 1994 (rate-dependent formant undershoot; approach to the target is asymptotic, so the weight is bounded at 1)
   schwa_coronal_fronting:
     kind: scalar
     select:

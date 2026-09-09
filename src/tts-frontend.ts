@@ -690,12 +690,17 @@ function buildTextToKlattTrackDetailed(
   createStructure(utterance, transcribed, segments, spec, resources.inventory);
 
   const requestedRate = options.rate ?? 1;
+  if (!Number.isFinite(requestedRate) || requestedRate <= 0) {
+    throw new Error(
+      `E_RATE_INVALID: rate must be a finite number greater than zero, got ${String(requestedRate)}`,
+    );
+  }
   const durationPolicy = recordOrEmpty(policyRecord(spec).duration);
   const referenceRate = readPolicyNumber(durationPolicy.rate_reference);
-  const rate = Math.max(
-    0.5,
-    Math.min(2, referenceRate && referenceRate > 0 ? requestedRate / referenceRate : requestedRate),
-  );
+  // No ceiling and no floor: the requested rate is the rate. Duration floors
+  // (Klatt 1976 incompressible portion, projected by the duration_floor_* rules)
+  // are the only limit on compression, and they are cited per phone.
+  const rate = referenceRate && referenceRate > 0 ? requestedRate / referenceRate : requestedRate;
   const speakerPolicy = { speaker: resolvedSpeaker };
   const graphInventory = {
     spec: resources.inventory,

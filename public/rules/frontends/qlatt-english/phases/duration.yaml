@@ -467,8 +467,11 @@ rules:
       elasticity: log(means.fast / means.slow) / log(vowel_means.fast / vowel_means.slow)
     apply:
       - field: duration
-        op: set
-        value: current.duration * pow(params.policy.duration.rate_scale, -elasticity)
+        op: mul
+        # Plain multiplication of total duration, not the Klatt incompressible
+        # interval (see the comment above; #218).
+        resolution: standard
+        value: pow(params.policy.duration.rate_scale, -elasticity)
         tag: speech_rate
     citations:
       - "Crystal & House 1982 Table VI (paired FAST/SLOW segment-category means)"
@@ -493,11 +496,8 @@ rules:
       where: current.phoneme != 'SIL' && has(current.inherentDuration)
     apply:
       - field: duration
-        op: set
-        value: >-
-          current.duration > current.inherentDuration * params.policy.duration.max_duration_ratio
-          ? current.inherentDuration * params.policy.duration.max_duration_ratio
-          : current.duration
+        op: min
+        value: current.inherentDuration * params.policy.duration.max_duration_ratio
         tag: duration_cap
     citations:
       - Klatt 1976

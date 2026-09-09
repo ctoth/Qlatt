@@ -974,12 +974,19 @@ function applyEffects(
       !effect.field.includes(".") && isPlainObject(scalarConfigs[root])
         ? scalarConfigs[root]
         : null;
+    // A `mul` effect may override the field's declared resolution (#218): a
+    // rate law cited to scale total duration (Crystal & House 1982) must not
+    // be forced through the Klatt 1976 incompressible-floor formula.
+    // The override changes only the multiplication formula; the declared
+    // resolution still owns the floor computation and the floor clamp below.
     const resolution =
       scalarConfig && typeof scalarConfig.resolution === "string"
         ? scalarConfig.resolution.toLowerCase()
         : scalarConfig
           ? "standard"
           : null;
+    const mulResolution =
+      typeof effect.resolution === "string" ? effect.resolution.toLowerCase() : resolution;
     const round = scalarConfig?.unit === "ms";
     const roundValue = (value: number): number => (round ? Math.round(value) : value);
     let floor = Number.NEGATIVE_INFINITY;
@@ -1028,7 +1035,7 @@ function applyEffects(
         break;
       case "mul":
         resolved =
-          resolution === "klatt"
+          mulResolution === "klatt"
             ? roundValue(Number(incoming) * (Number(current ?? 0) - floor) + floor)
             : roundValue(applyScalarOp("mul", Number(current ?? 0), Number(incoming)));
         break;

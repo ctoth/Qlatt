@@ -1,0 +1,4 @@
+---
+tags: [provenance, semirings, data-lineage, relational-algebra, probabilistic-databases]
+---
+Provides a unified algebraic framework for data provenance based on commutative semirings, showing that annotating relational tuples with elements of a semiring K and evaluating positive relational algebra using semiring operations yields provenance polynomials N[X] as the most general provenance model, from which lineage, why-provenance, bag semantics, and Boolean semantics all arise as homomorphic images. The framework extends to Datalog via omega-continuous semirings and formal power series, and subsumes incomplete and probabilistic databases as special cases. Directly relevant to propstore's provenance tracking architecture, providing the algebraic foundation for tracking how source claims combine through derivation chains while preserving the non-commitment principle through the universal polynomial representation.

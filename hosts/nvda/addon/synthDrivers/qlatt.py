@@ -5,14 +5,15 @@
 # markers; this driver plays the PCM through nvwave and raises NVDA's index
 # notifications as playback passes each IndexCommand.
 #
-# Configuration lives in the NVDA config under [qlatt]:
-#   repo   = C:\path\to\Qlatt        (checkout containing scripts/speak-server.ts)
-#   node   = node                    (node executable; must be on PATH if bare)
-#   frontend = qlatt-english         (default voice)
+# Configuration is a JSON file next to this driver, qlatt.json:
+#   {"repo": "C:\\path\\to\\Qlatt", "node": "node", "frontend": "qlatt-english"}
+# NVDA rewrites nvda.ini from memory on exit and drops sections no loaded
+# module has declared, so a sidecar file is the reliable place for these paths.
+# Values in nvda.ini under [qlatt] override the sidecar when present.
 #
-# Status: written against the NVDA 2024 synthDriverHandler API and verified
-# against the server with hosts/nvda/test_protocol.py. It has not yet been
-# loaded inside a running NVDA; see hosts/nvda/README.md.
+# Status: written against the NVDA 2025.3 synthDriverHandler and nvwave APIs
+# (source read at release-2025.3) and verified against the server with
+# hosts/nvda/test_protocol.py. Live-NVDA status is in hosts/nvda/README.md.
 
 import base64
 import json
@@ -41,6 +42,32 @@ CONFIG_SPEC = {
 
 BASE_F0_HZ = 110.0
 SAMPLE_RATE = 22050
+
+# Register the section at import so check() can read it before any instance exists.
+config.conf.spec["qlatt"] = CONFIG_SPEC
+
+SIDECAR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "qlatt.json")
+
+
+def load_settings():
+    """Sidecar JSON first, then non-empty nvda.ini [qlatt] values on top."""
+    settings = {"repo": "", "node": "node", "frontend": "qlatt-english"}
+    try:
+        with open(SIDECAR, "r", encoding="utf-8") as handle:
+            settings.update({k: v for k, v in json.load(handle).items() if isinstance(v, str)})
+    except FileNotFoundError:
+        pass
+    except Exception:
+        log.error("qlatt: could not read %s", SIDECAR, exc_info=True)
+    try:
+        section = config.conf["qlatt"]
+        for key in settings:
+            value = section.get(key, "")
+            if isinstance(value, str) and value:
+                settings[key] = value
+    except Exception:
+        pass
+    return settings
 
 
 class QlattServer:
@@ -120,28 +147,28 @@ class SynthDriver(SynthDriver):
 
     @classmethod
     def check(cls):
-        section = config.conf.get("qlatt") or {}
-        repo = section.get("repo", "")
-        return bool(repo) and os.path.isfile(os.path.join(repo, "scripts", "speak-server.ts"))
+        # getSynthList only logs a failed check at debugWarning, so say why at info.
+        settings = load_settings()
+        script = os.path.join(settings["repo"], "scripts", "speak-server.ts")
+        if not os.path.isfile(script):
+            log.info("qlatt: speak server not found at %s (configure %s)", script, SIDECAR)
+            return False
+        return True
 
     def __init__(self):
         super().__init__()
-        config.conf.spec["qlatt"] = CONFIG_SPEC
-        section = config.conf["qlatt"]
-        self._voice = section["frontend"]
+        settings = load_settings()
+        self._voice = settings["frontend"]
         self._rate = 50
         self._pitch = 50
-        self._server = QlattServer(section["node"], section["repo"])
+        self._server = QlattServer(settings["node"], settings["repo"])
         hello = self._server.request("hello")[-1]
         self._voices = OrderedDict(
             (frontend, VoiceInfo(frontend, frontend)) for frontend in hello.get("frontends", [self._voice])
         )
-        self._player = nvwave.WavePlayer(
-            channels=1,
-            samplesPerSec=SAMPLE_RATE,
-            bitsPerSample=16,
-            outputDevice=config.conf["audio"]["outputDevice"],
-        )
+        # NVDA 2025.3 nvwave.WavePlayer(channels, samplesPerSec, bitsPerSample,
+        # outputDevice=DEFAULT_DEVICE_KEY, wantDucking=True, purpose=SPEECH).
+        self._player = nvwave.WavePlayer(channels=1, samplesPerSec=SAMPLE_RATE, bitsPerSample=16)
         self._lock = threading.Lock()
         self._cancelled = threading.Event()
         self._thread = None

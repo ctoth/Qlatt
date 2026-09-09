@@ -1,13 +1,13 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
-import { expectFrameSource } from "./utils/frame-provenance";
 import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 import { historicalLoweringColumns } from "./historical-lowering-columns";
+import { expectFrameSource } from "./utils/frame-provenance";
 
 const META = {
   ruleId: "fixture",

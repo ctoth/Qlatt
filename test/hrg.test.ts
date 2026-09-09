@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import type { HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
 import {
   decisionChain,
@@ -13,6 +12,7 @@ import {
   whyFeature,
   whyParamAt,
 } from "../src/declarative-frontend/hrg";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import type { Item } from "../src/declarative-frontend/hrg/item";
 
 const CITE = ["Taylor 2001 HRG"];

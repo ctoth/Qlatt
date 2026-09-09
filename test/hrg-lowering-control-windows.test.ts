@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
-import { expectFrameSource } from "./utils/frame-provenance";
 import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import { isPlainObject } from "../src/yaml-loader";
+import { expectFrameSource } from "./utils/frame-provenance";
 
 const CONTROL_FIELD_SCHEMA = {
   kind: "object",

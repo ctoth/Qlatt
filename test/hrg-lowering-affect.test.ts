@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
-import { decisionChain } from "../src/declarative-frontend/hrg/provenance-query";
-import { expectFrameSource } from "./utils/frame-provenance";
 import type { FeatureSchema, HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
+import { decisionChain } from "../src/declarative-frontend/hrg/provenance-query";
 import { compileAffect } from "../src/input/affect";
 import {
   attachDirectionsToUtterance,
   DIRECTION_ITEM_SCHEMA,
   parseDirectionInput,
 } from "../src/input/parse";
+import { expectFrameSource } from "./utils/frame-provenance";
 
 const META = {
   ruleId: "fixture",

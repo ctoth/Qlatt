@@ -2,12 +2,26 @@ import { getCelEvalCount, resetCelCounters } from "../src/declarative-frontend/c
 import { preloadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import type { KlattFrame } from "../src/tts-frontend-types";
 
 export const frontends = ["qlatt-english", "qlatt-beauty", "dectalk-english"];
 
+interface Measurement {
+  frontendId: string;
+  captureTooling: boolean;
+  tracks: Omit<KlattFrame, "provenance">[][];
+  medianMs: number;
+  passes: {
+    latencyMs: number;
+    decisions: number;
+    journalEntries: number;
+    celEvaluations: number;
+  }[];
+}
+
 // Engineering benchmark protocol from #243: one warm-up, five measured passes.
 export async function measureFrames(phrases: string[]) {
-  const results = [];
+  const results: Measurement[] = [];
   for (const frontendId of frontends) {
     await preloadBundledRulepackSpec(frontendId);
     for (const captureTooling of [false, true]) {

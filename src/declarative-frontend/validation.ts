@@ -296,6 +296,20 @@ function validateRelations(
         ),
       );
     }
+    const fields = relationDeclaredFields(relationByName, name);
+    const scalars = isPlainObject(relation.scalars) ? relation.scalars : {};
+    for (const [field, scalar] of Object.entries(scalars)) {
+      if (!isPlainObject(scalar) || scalar.floor_field === undefined) continue;
+      if (typeof scalar.floor_field !== "string" || !fields.has(scalar.floor_field)) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_SCALAR_FLOOR_FIELD_UNKNOWN",
+            `Scalar '${field}' references undeclared floor field '${scalar.floor_field}' on relation '${name}'`,
+            `${path}.scalars.${field}.floor_field`,
+          ),
+        );
+      }
+    }
   }
 
   return relationByName;
@@ -333,6 +347,57 @@ function validateTopology(
         );
       }
       seen.add(relation);
+    }
+  }
+}
+
+function validateScalarFallbacks(
+  relationByName: Map<string, unknown>,
+  predicates: PlainObject,
+  policyState: PolicyValidationState,
+  parameters: unknown,
+  diagnostics: ValidationDiagnostic[],
+): void {
+  const relationNames = new Set(relationByName.keys());
+  for (const [name, relation] of relationByName) {
+    if (!isPlainObject(relation) || !isPlainObject(relation.scalars)) continue;
+    for (const [field, scalar] of Object.entries(relation.scalars)) {
+      if (!isPlainObject(scalar) || scalar.floor_fallback === undefined) continue;
+      const fallback = scalar.floor_fallback;
+      const path = `relations.${name}.scalars.${field}.floor_fallback`;
+      if (
+        !isPlainObject(fallback) ||
+        typeof fallback.value !== "string" ||
+        fallback.value.trim().length === 0 ||
+        !Array.isArray(fallback.citations) ||
+        fallback.citations.length === 0 ||
+        fallback.citations.some((citation) => typeof citation !== "string" || !citation.trim())
+      ) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_SCALAR_FALLBACK_SCHEMA",
+            "Scalar fallback requires a CEL value and non-empty citations",
+            path,
+          ),
+        );
+        continue;
+      }
+      validateConditionSpec(
+        fallback.value,
+        relationByName,
+        name,
+        relationNames,
+        predicates,
+        diagnostics,
+        `${path}.value`,
+        `Scalar '${field}' fallback`,
+        {
+          policyState,
+          parameters,
+          criticalContext: true,
+          itemVariables: ["current", "prev", "next"],
+        },
+      );
     }
   }
 }
@@ -3612,6 +3677,13 @@ export function validateDslSpec(
   const predicates = validatePredicates(
     spec,
     relationByName,
+    policyState,
+    referenceParameters,
+    diagnostics,
+  );
+  validateScalarFallbacks(
+    relationByName,
+    predicates,
     policyState,
     referenceParameters,
     diagnostics,

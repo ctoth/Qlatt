@@ -5,7 +5,10 @@ import {
   GraphRuleEvaluationOwner,
   runGraphRuleEngine,
 } from "../src/declarative-frontend/hrg/rule-engine";
-import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  compileRuleEngineSpec,
+  QLATT_ENGLISH_RULEPACK,
+} from "../src/declarative-frontend/rule-pack";
 import { qlattInventoryResource } from "./utils/qlatt-english-inventory";
 
 const SCHEMA = {
@@ -46,6 +49,33 @@ function fixture(): { utterance: Utterance; vowelId: string; stopId: string } {
 }
 
 describe("graph-native rule engine select/scalar execution", () => {
+  it.each([
+    ["duration", {}, 2.5],
+    ["duration", { unit: "s" }, 2.5],
+    ["duration", { unit: "ms" }, 3],
+    ["energy", { unit: "ms" }, 3],
+    ["energy", {}, 2.5],
+  ])("resolves %s using declared metadata %j", (field, metadata, expected) => {
+    for (const op of ["set", "add", "mul", "min", "max"]) {
+      const { utterance, vowelId } = fixture();
+      utterance.getItem(vowelId)?.set(field, op === "min" ? 3 : 2, INPUT);
+      const value = op === "add" ? "0.5" : op === "mul" ? "1.25" : "2.5";
+      const spec = compileRuleEngineSpec({
+        relations: { Segment: { type: "base", scalars: { [field]: metadata } } },
+        rules: {
+          set_value: {
+            kind: "scalar",
+            select: { relation: "Segment", where: "true" },
+            apply: [{ field, op, value, tag: "fixture" }],
+            citations: ["Engineering estimate: scalar fixture"],
+          },
+        },
+        phases: [{ name: "test", rules: ["set_value"] }],
+      });
+      runGraphRuleEngine(utterance, spec);
+      expect(utterance.getItem(vowelId)?.get(field), op).toBe(expected);
+    }
+  });
   it("evaluates tracked CEL reads and commits one atomic scalar transaction", () => {
     const { utterance, vowelId, stopId } = fixture();
     const originalVowel = utterance.getItem(vowelId);
@@ -166,12 +196,14 @@ describe("graph-native rule engine select/scalar execution", () => {
     if (!stop) throw new Error("missing stop fixture");
     stop.set("inherentDuration", 100, INPUT);
     const spec = compileRuleEngineSpec({
+      parameters: { ...QLATT_ENGLISH_RULEPACK.parameters, scale: 0.25 },
       relations: {
         Segment: {
           type: "base",
-          features: { type: ["vowel", "stop"], inherentDuration: [] },
+          features: { type: ["vowel", "stop"], inherentDuration: [], durationFloor: [] },
           scalars: {
-            duration: { unit: "ms", resolution: "klatt", max: 500, floor_field: "durationFloor" },
+            duration: (QLATT_ENGLISH_RULEPACK.relations.Segment.scalars as Record<string, unknown>)
+              .duration,
           },
         },
       },
@@ -179,7 +211,7 @@ describe("graph-native rule engine select/scalar execution", () => {
         shorten_stop: {
           kind: "scalar",
           select: { relation: "Segment", where: "current.type == 'stop'" },
-          apply: [{ field: "duration", op: "mul", value: "0.25", tag: "duration" }],
+          apply: [{ field: "duration", op: "mul", value: "params.scale", tag: "duration" }],
           citations: ["Klatt 1976"],
         },
       },

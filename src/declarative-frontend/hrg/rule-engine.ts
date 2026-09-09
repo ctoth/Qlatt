@@ -76,7 +76,6 @@ function numericAggregate(args: unknown[], mode: "min" | "max"): number {
 }
 
 type EvaluationContext = {
-  isNucleus: (type: unknown) => boolean;
   values: Record<string, unknown>;
   functions: Record<string, (...args: unknown[]) => unknown>;
   isItemView: (value: unknown) => boolean;
@@ -471,7 +470,6 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
         return Reflect.get(target, property, receiver);
       },
     }),
-    isNucleus,
     functions: {
       vocabulary: (table, key) => {
         const invalidLookup = (message: string): never => {
@@ -950,7 +948,7 @@ function applyEffects(
   context: EvaluationContext,
   predicates: Readonly<Record<string, unknown>>,
   relationSpec: unknown,
-  params: Readonly<Record<string, unknown>>,
+  scalarContext: (item: Item) => EvaluationContext,
   observations: ScalarObservation[],
 ): void {
   if (!Array.isArray(effects)) return;
@@ -982,9 +980,10 @@ function applyEffects(
         : scalarConfig
           ? "standard"
           : null;
-    const round = root === "duration" || scalarConfig?.unit === "ms";
+    const round = scalarConfig?.unit === "ms";
     const roundValue = (value: number): number => (round ? Math.round(value) : value);
     let floor = Number.NEGATIVE_INFINITY;
+    let fallbackObservation: ScalarObservation | undefined;
     if (resolution === "klatt" && scalarConfig) {
       if (typeof scalarConfig.floor === "number" && Number.isFinite(scalarConfig.floor)) {
         floor = scalarConfig.floor;
@@ -993,41 +992,27 @@ function applyEffects(
         if (typeof declaredFloor === "number" && Number.isFinite(declaredFloor))
           floor = declaredFloor;
       }
-      if (!Number.isFinite(floor) && root === "duration") {
-        const inherent = transaction.read(item, "inherentDuration");
-        const type = transaction.read(item, "type");
-        const policy =
-          isPlainObject(params.policy) && isPlainObject(params.policy.duration)
-            ? params.policy.duration
-            : null;
-        const ratioKey = context.isNucleus(type)
-          ? "incompressibility_ratio_vowel"
-          : "incompressibility_ratio_consonant";
-        const ratio = policy?.[ratioKey];
-        if (
-          typeof inherent !== "number" ||
-          !Number.isFinite(inherent) ||
-          typeof ratio !== "number" ||
-          !Number.isFinite(ratio)
-        ) {
+      if (!Number.isFinite(floor) && isPlainObject(scalarConfig.floor_fallback)) {
+        const fallback = scalarConfig.floor_fallback;
+        const value = evaluateStructured(fallback.value, scalarContext(item));
+        if (typeof value !== "number" || !Number.isFinite(value)) {
           throw new Error(
-            `E_DURATION_POLICY_REQUIRED: params.policy.duration.${ratioKey} and inherentDuration are required for Klatt duration resolution`,
+            `E_SCALAR_FLOOR_REQUIRED: '${root}' fallback must produce a finite floor`,
           );
         }
-        floor = inherent * ratio;
-        observations.push({
-          code: "W_DURATION_FLOOR_FALLBACK",
+        floor = value;
+        transaction.cite(fallback.citations as string[]);
+        fallbackObservation = {
+          code: root === "duration" ? "W_DURATION_FLOOR_FALLBACK" : "W_SCALAR_FLOOR_FALLBACK",
           message:
-            "Klatt duration used the class-ratio fallback because no per-phone floor was established",
-          data: {
-            item: item.id,
-            rule: transaction.metadata.ruleId,
-            ratioKey,
-            ratio,
-            inherent,
-            floor,
-          },
-        });
+            "Scalar used the declared CEL fallback because no per-item floor was established",
+          data: { item: item.id, rule: transaction.metadata.ruleId, field: root, floor },
+        };
+      }
+      if (!Number.isFinite(floor) && typeof scalarConfig.floor_field === "string") {
+        throw new Error(
+          `E_SCALAR_FLOOR_REQUIRED: '${root}' requires a finite '${scalarConfig.floor_field}' or declared fallback`,
+        );
       }
       if (!Number.isFinite(floor)) {
         floor =
@@ -1086,6 +1071,11 @@ function applyEffects(
         });
       }
       resolved = roundValue(numericResolved);
+    }
+    if (fallbackObservation) {
+      fallbackObservation.data.requested = incoming;
+      fallbackObservation.data.applied = resolved;
+      observations.push(fallbackObservation);
     }
     updateNestedValue(transaction, item, effect.field, resolved, effect.tag);
   }
@@ -1705,7 +1695,7 @@ function executeMatch(
       context,
       predicates,
       relationSpec,
-      params,
+      (item) => buildEvaluationContext({ ...contextBase, index: match.items.indexOf(item) }),
       observations,
     );
     if (isPlainObject(rule.contour)) {
@@ -1717,7 +1707,7 @@ function executeMatch(
         context,
         predicates,
         relationSpec,
-        params,
+        (item) => buildEvaluationContext({ ...contextBase, index: match.items.indexOf(item) }),
         observations,
       );
     }

@@ -45,7 +45,15 @@ const ALLOWED_RULE_FIELDS = new Set([
   "suppress",
 ]);
 const ALLOWED_SELECT_FIELDS = new Set(["relation", "where"]);
-const ALLOWED_APPLY_FIELDS = new Set(["dispatch", "field", "op", "tag", "target", "value"]);
+const ALLOWED_APPLY_FIELDS = new Set([
+  "dispatch",
+  "field",
+  "op",
+  "resolution",
+  "tag",
+  "target",
+  "value",
+]);
 const CORE_CEL_VARIABLES = new Set([
   "contour",
   "current",
@@ -1561,6 +1569,32 @@ function validateApplyEffect(
         `${itemPath}.for_each_field`,
       ),
     );
+  }
+  // #218: a per-effect `resolution` selects plain multiplication on a scalar
+  // declared `resolution: klatt` (or vice versa). Only `mul` distinguishes the
+  // two resolutions, so the key is meaningless, and rejected, on any other op.
+  if (Object.hasOwn(effectSpec, "resolution")) {
+    const resolutionSpec = effectSpec.resolution;
+    if (
+      typeof resolutionSpec !== "string" ||
+      !["standard", "klatt"].includes(resolutionSpec.toLowerCase())
+    ) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_EFFECT_RESOLUTION_INVALID",
+          `${itemLabel} resolution must be 'standard' or 'klatt'`,
+          `${itemPath}.resolution`,
+        ),
+      );
+    } else if (effectSpec.op !== "mul") {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_EFFECT_RESOLUTION_OP",
+          `${itemLabel} resolution applies only to op 'mul'`,
+          `${itemPath}.resolution`,
+        ),
+      );
+    }
   }
   const hasValue = Object.hasOwn(effectSpec, "value");
   const hasDispatch = Object.hasOwn(effectSpec, "dispatch");

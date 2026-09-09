@@ -383,7 +383,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     graph,
     registry,
     workletBasePath = `${
-      (typeof import.meta !== "undefined" && import.meta.env.BASE_URL) || "/"
+      (typeof import.meta !== "undefined" && import.meta.env?.BASE_URL) || "/"
     }worklets/`,
     assetLoader = createBrowserRuntimeAssetLoader(workletBasePath),
     audioWorkletNodeCtor = typeof AudioWorkletNode !== "undefined" ? AudioWorkletNode : undefined,

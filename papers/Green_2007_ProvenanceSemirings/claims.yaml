@@ -1,0 +1,185 @@
+source:
+  paper: Green_2007_ProvenanceSemirings
+  extraction_model: "claude-opus-4-6"
+  extraction_date: "2026-03-23"
+
+claims:
+  - id: claim1
+    type: observation
+    statement: "Relational algebra calculations for incomplete databases, probabilistic databases, bag semantics, and why-provenance are all particular cases of the same general algebraic calculations involving commutative semirings."
+    concepts:
+      - provenance_semiring
+      - k_relation
+      - why_provenance
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 0
+      section: "Abstract"
+      quote_fragment: "particular cases of the same general algebraic calculations involving semirings"
+
+  - id: claim2
+    type: observation
+    statement: "Provenance polynomials N[X] form the most informative provenance model: every other provenance semiring (lineage, why-provenance, bag semantics, Boolean) is a homomorphic image of N[X]."
+    concepts:
+      - provenance_polynomial
+      - provenance_semiring
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 3
+      section: "4. Polynomials for Provenance"
+      quote_fragment: "the most informative of all the semirings"
+    notes: "N[X] is the free commutative semiring over variable set X. Computing in N[X] and then applying a homomorphism gives the same result as computing directly in any target semiring."
+
+  - id: claim3
+    type: mechanism
+    statement: "Positive relational algebra operations on K-relations correspond to semiring operations: union maps to addition, join maps to multiplication, projection maps to summation over fibers, and selection maps to conditional zeroing."
+    concepts:
+      - k_relation
+      - provenance_semiring
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 2
+      section: "3. Positive Relational Algebra"
+      quote_fragment: "union is addition, join is multiplication"
+
+  - id: claim4
+    type: equation
+    expression: "(R_1 \\cup R_2)(t) = R_1(t) + R_2(t)"
+    sympy: "R1_t + R2_t"
+    variables:
+      - symbol: "R_1(t)"
+        concept: "k_relation"
+        role: "independent"
+      - symbol: "R_2(t)"
+        concept: "k_relation"
+        role: "independent"
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 2
+      section: "3. Positive Relational Algebra"
+    notes: "Union of K-relations is pointwise semiring addition."
+
+  - id: claim5
+    type: equation
+    expression: "(R_1 \\bowtie R_2)(t_1, t_2) = R_1(t_1) \\cdot R_2(t_2)"
+    sympy: "R1_t1 * R2_t2"
+    variables:
+      - symbol: "R_1(t_1)"
+        concept: "k_relation"
+        role: "independent"
+      - symbol: "R_2(t_2)"
+        concept: "k_relation"
+        role: "independent"
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 2
+      section: "3. Positive Relational Algebra"
+    notes: "Join of K-relations is pointwise semiring multiplication."
+
+  - id: claim6
+    type: mechanism
+    statement: "The semiring homomorphism property ensures that evaluating a query in the universal provenance polynomial N[X] and then applying a homomorphism h to a target semiring K yields the same result as evaluating the query directly in K."
+    concepts:
+      - provenance_polynomial
+      - provenance_semiring
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 3
+      section: "3. Positive Relational Algebra"
+      quote_fragment: "Proposition 3.5"
+    notes: "This is the key compositionality result. It means you can compute provenance once in N[X] and project to any coarser notion on demand."
+
+  - id: claim7
+    type: observation
+    statement: "The positive relational algebra identities (associativity, commutativity, distributivity of join over union, idempotence of union) hold for K-relations over any commutative semiring K."
+    concepts:
+      - k_relation
+      - provenance_semiring
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 2
+      section: "3. Positive Relational Algebra"
+      quote_fragment: "Proposition 3.4"
+
+  - id: claim8
+    type: mechanism
+    statement: "Extending provenance to recursive Datalog queries requires omega-continuous semirings, where every ascending omega-chain has a least upper bound preserved by the semiring operations, enabling well-defined fixpoint semantics."
+    concepts:
+      - omega_continuous_semiring
+      - provenance_semiring
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 5
+      section: "6. Formal Power Series for Datalog"
+      quote_fragment: "omega-continuous semiring"
+    notes: "The fixpoint R^(omega) = lub_i R^(i) exists and is unique in omega-continuous semirings."
+
+  - id: claim9
+    type: observation
+    statement: "Formal power series N_inf[[X]] with coefficients in N_inf (naturals extended with infinity) provide the omega-continuous semiring needed for computing provenance of Datalog queries."
+    concepts:
+      - omega_continuous_semiring
+      - provenance_polynomial
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 6
+      section: "6. Formal Power Series for Datalog"
+      quote_fragment: "formal power series"
+
+  - id: claim10
+    type: comparison
+    statement: "Unlike lineage (Cui/Widom) and why-provenance (Buneman et al.) which were defined independently as separate provenance notions, provenance polynomials N[X] unify all these notions as homomorphic images of a single algebraic structure."
+    concepts:
+      - provenance_polynomial
+      - why_provenance
+      - claim_lineage
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 3
+      section: "4. Polynomials for Provenance"
+    notes: "Lineage is the image under the homomorphism to Boolean semiring with set union; why-provenance is the image to the semiring of sets of sets."
+
+  - id: claim11
+    type: observation
+    statement: "Incomplete databases (Imielinski-Lipski conditional tables) and probabilistic databases are special cases of K-relations where K is chosen as the semiring of conditions or the semiring of probabilities respectively."
+    concepts:
+      - k_relation
+      - provenance_semiring
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 7
+      section: "8. Incomplete / Probabilistic Databases"
+
+  - id: claim12
+    type: limitation
+    statement: "The semiring framework covers only positive relational algebra and does not handle negation or set difference, which require different algebraic treatment."
+    concepts:
+      - provenance_semiring
+      - k_relation
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 0
+      section: "1. Introduction"
+      quote_fragment: "positive relational algebra"
+    notes: "The authors explicitly scope to positive algebra throughout. Negation would require semiring-like structures with subtraction (rings), which breaks many of the nice algebraic properties."
+
+  - id: claim13
+    type: limitation
+    statement: "Practical efficiency of provenance polynomial computation is not evaluated experimentally; the paper provides only algorithmic descriptions without performance benchmarks."
+    concepts:
+      - provenance_polynomial
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 9
+      section: "10. Conclusion and Further Work"
+
+  - id: claim14
+    type: observation
+    statement: "Query containment for conjunctive queries on K-relations over a distributive lattice K can be decided by checking containment for each valuation of the annotation variables."
+    concepts:
+      - k_relation
+      - provenance_semiring
+    provenance:
+      paper: Green_2007_ProvenanceSemirings
+      page: 8
+      section: "9. Query Containment"

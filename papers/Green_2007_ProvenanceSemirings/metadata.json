@@ -1,0 +1,14 @@
+{
+  "title": "Provenance semirings",
+  "authors": [
+    "Todd J. Green",
+    "Gregory Karvounarakis",
+    "V. Tannen"
+  ],
+  "year": "2007",
+  "arxiv_id": null,
+  "doi": "10.1145/1265530.1265535",
+  "abstract": "We show that relational algebra calculations for incomplete databases, probabilistic databases, bag semantics and why-provenance are particular cases of the same general algebraic calculations involving semirings. This further suggests looking for an abstract semiring of provenance that unifies all of the above and that reflects directly how data is used in a calculation.",
+  "url": "https://www.semanticscholar.org/paper/b9b7686b465e4c9a080781ed32d11e5112766f48",
+  "pdf_url": ""
+}

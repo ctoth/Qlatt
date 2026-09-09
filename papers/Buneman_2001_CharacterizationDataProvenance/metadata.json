@@ -1,0 +1,14 @@
+{
+  "title": "Why and Where: A Characterization of Data Provenance",
+  "authors": [
+    "Peter Buneman",
+    "Sanjeev Khanna",
+    "Wang-Chiew Tan"
+  ],
+  "year": "2001",
+  "arxiv_id": null,
+  "doi": "10.1007/3-540-44503-X_20",
+  "abstract": "With the proliferation of database views and curated databases, the issue of data provenance \u2013 where a piece of data came from and the process by which it arrived in the database \u2013 is becoming increasingly important, especially in scientific databases where understanding provenance is crucial to the accuracy and currency of data. In this paper we describe an approach to computing provenance when the data of interest has been created by a database query. We adopt a syntactic approach and present results for a general data model that applies to relational databases as well as to hierarchical data such as XML. A novel aspect of our work is a distinction between \"why\" provenance (refers to the source data that had some influence on the existence of the data) and \"where\" provenance (refers to the location(s) in the source databases from which the data was extracted).",
+  "url": "https://doi.org/10.1007/3-540-44503-X_20",
+  "pdf_url": null
+}

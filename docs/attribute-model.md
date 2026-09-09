@@ -80,8 +80,8 @@ provenance calls. This document brings the frontend to the backend's model.
    collector builds by hand today. Accumulating nothing gives the value. This
    is the smallest form of Green, Karvounarakis & Tannen 2007: the same
    evaluation, parameterized. Where-provenance in the sense of Buneman,
-   Khanna & Tan 2001, which YAML span a number was copied from, is carried
-   through every compile step as a span, because it does not survive
+   Khanna & Tan 2001, which YAML document span a number was copied from, is carried
+   through every compile step as a document span, because it does not survive
    rewriting otherwise.
 
 9. **TypeScript is the compiler, the native engine is data-driven.** The
@@ -162,7 +162,7 @@ dectalk-english's count is inflated by neighbour `stress` reads, where
 ## Sequencing
 
 1. `rulepack compile`: a TypeScript command that emits the checked rulepack
-   with macros expanded, spans preserved, and decisions 5 and 7 enforced.
+   with macros expanded, document spans preserved, and decisions 5 and 7 enforced.
 2. Frame items and a frame phase; lowering sub-steps become rules; the
    DECtalk controller clock moves to dectalk-english.
 3. Folds declared per field; `set` writers that are folds in disguise

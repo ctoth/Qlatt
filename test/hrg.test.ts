@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import type { HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
 import {
   decisionChain,
@@ -43,7 +44,7 @@ const TEST_LOWERING = {
   },
   durationKey: "dur_ms",
 } as const satisfies LowerOptions;
-const TEST_SCHEMA = {
+const TEST_SCHEMA = withFrameSchema({
   itemTypes: {
     word: {
       features: {
@@ -71,7 +72,7 @@ const TEST_SCHEMA = {
     Segment: { kind: "list", itemTypes: ["segment"] },
     SylStructure: { kind: "tree", itemTypes: ["word", "syllable", "segment"] },
   },
-} as const satisfies HrgSchema;
+} as const satisfies HrgSchema);
 
 /**
  * Build a small "the cat" utterance:
@@ -396,7 +397,8 @@ describe("HRG end-to-end: build -> lower -> trace why", () => {
     // Ask the lowered track: "why is F0 140 here?"
     const chain = whyParamAt(track, "F0", 0.25);
     const reasons = chain.map((d) => d.reason);
-    expect(reasons[0]).toBe("H* accent peak on nuclear vowel");
+    expect(reasons[0]).toContain("frame_copy:");
+    expect(reasons).toContain("H* accent peak on nuclear vowel");
     expect(reasons).toContain("content_word_accent matched (POS=noun)");
     expect(reasons).toContain("POS tag");
     // The chain reaches the owning word's POS decision (catPos).

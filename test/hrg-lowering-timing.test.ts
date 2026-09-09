@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import type { HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import {
@@ -9,7 +10,7 @@ import {
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 
-const SCHEMA = {
+const SCHEMA = withFrameSchema({
   itemTypes: {
     segment: {
       features: {
@@ -21,7 +22,7 @@ const SCHEMA = {
     },
   },
   relations: { Segment: { kind: "list", itemTypes: ["segment"] } },
-} as const satisfies HrgSchema;
+} as const satisfies HrgSchema);
 
 const META = {
   ruleId: "fixture",

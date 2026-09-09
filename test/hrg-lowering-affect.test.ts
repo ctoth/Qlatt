@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
+import { decisionChain } from "../src/declarative-frontend/hrg/provenance-query";
+import { expectFrameSource } from "./utils/frame-provenance";
 import type { FeatureSchema, HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { compileAffect } from "../src/input/affect";
@@ -68,7 +71,7 @@ function varianceFixture(): Utterance {
       global: { affect: { preset: "angry", degree: 1 } },
     },
   });
-  const utterance = new Utterance(schema(), parsed.provenance);
+  const utterance = new Utterance(withFrameSchema(schema()), parsed.provenance);
   attachDirectionsToUtterance(parsed, utterance);
 
   const build = utterance.beginTransaction(META);
@@ -173,7 +176,7 @@ function fixture(): Utterance {
       ],
     },
   });
-  const utterance = new Utterance(schema(), parsed.provenance);
+  const utterance = new Utterance(withFrameSchema(schema()), parsed.provenance);
   attachDirectionsToUtterance(parsed, utterance);
 
   const build = utterance.beginTransaction(META);
@@ -224,11 +227,30 @@ describe("HRG lowering Affect projection", () => {
     expect(lowered.totalMs).toBeCloseTo(200 * angry.durationScale, 9);
     expect(first.params.GO).toBeCloseTo(47 + angry.intensityBoost, 9);
     expect(second.params.GO).toBeCloseTo(47 + angry.intensityBoost - 2, 9);
+    const gainChain = decisionChain(utterance.provenance, second.provenance!.GO);
+    expect(gainChain.some((record) => record.reason.includes("frame_copy:"))).toBe(true);
+    expect(gainChain.map((record) => record.id)).toContain(
+      utterance.getItem("segment-1")!.latestWrite("GO")!.decisionId,
+    );
+    expect(gainChain.map((record) => record.id)).toContain(
+      utterance.relation("Affect").listItems()[0].latestWrite("delta")!.decisionId,
+    );
+    expect(gainChain.map((record) => record.id)).not.toContain(
+      utterance.getItem("segment-0")!.latestWrite("F1")!.decisionId,
+    );
+    const secondFrame = utterance
+      .relation("Frames")
+      .listItems()
+      .find((frame) => utterance.associatedItems(frame, "segment")[0]?.id === "segment-1")!;
+    expect(utterance.resolveAnchorTime(secondFrame)).toBe(100);
+    expect(secondFrame.get("outputTimeMs")).toBeCloseTo(100 * angry.durationScale, 9);
     expect(first.params.F0).toBeCloseTo(150 * angry.f0Scale, 9);
     expect(second.params.F0).toBeCloseTo(150 * angry.f0Scale * 0.5, 9);
     expect(first.params.Rd + first.params.RdPhraseOffset).toBeCloseTo(0.3, 9);
     expect(first.params.jitter).toBeCloseTo(4 * angry.jitterScale, 9);
-    expect(lowered.provenanceByFrame[lowered.frames.indexOf(second)].GO).toBe(
+    expectFrameSource(
+      utterance,
+      lowered.provenanceByFrame[lowered.frames.indexOf(second)].GO,
       utterance.relation("Affect").listItems().at(-1)?.latestWrite("delta")?.decisionId,
     );
     expect(utterance.diagnostics.getEntries()).toContainEqual(
@@ -262,8 +284,16 @@ describe("HRG lowering Affect projection", () => {
       .relation("Affect")
       .listItems()[0]
       ?.latestWrite("delta")?.decisionId;
-    expect(lowered.provenanceByFrame[lowered.frames.indexOf(first)].F0).toBe(varianceDecision);
-    expect(lowered.provenanceByFrame[lowered.frames.indexOf(second)].F0).toBe(varianceDecision);
+    expectFrameSource(
+      utterance,
+      lowered.provenanceByFrame[lowered.frames.indexOf(first)].F0,
+      varianceDecision,
+    );
+    expectFrameSource(
+      utterance,
+      lowered.provenanceByFrame[lowered.frames.indexOf(second)].F0,
+      varianceDecision,
+    );
   });
 
   it("rejects a negative F0-variance scale with a diagnostic", () => {

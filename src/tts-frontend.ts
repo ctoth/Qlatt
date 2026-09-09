@@ -7,6 +7,7 @@ import {
   readLowerOptions,
   Utterance,
 } from "./declarative-frontend/hrg";
+import { withFrameSchema } from "./declarative-frontend/hrg/frame";
 import {
   GraphRuleEvaluationOwner,
   runGraphRuleEngine,
@@ -504,7 +505,7 @@ function buildTextToKlattTrackDetailed(
   );
   const provenance = options.provenance ?? createProvenanceCollector();
   const utterance = new Utterance(
-    buildUtteranceSchema(resources.inventory),
+    withFrameSchema(buildUtteranceSchema(resources.inventory), lowering.columns),
     provenance,
     options.diagnostics ?? undefined,
   );
@@ -905,6 +906,7 @@ function buildTextToKlattTrackDetailed(
     },
   };
   const lowered = lowerToFrames(utterance, lowerOptions, {
+    speakerDecisionId: speakerDecision.id,
     f0Model: isLayeredF0Model(spec.f0_model) ? spec.f0_model : undefined,
     speakerParams,
     speakerSex: selectedVoice?.sex,

@@ -216,6 +216,13 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
       const featureView = transaction.view(item);
       result = new Proxy(featureView, {
         get: (target, property, receiver) => {
+          if (property === "segment" && item.type === "frame") {
+            const links = utterance.latestAssociationWrites(item, "segment");
+            for (const link of links) transaction.dependOn(link.decisionId);
+            const active = links.filter((link) => link.active);
+            if (active.length > 1) throw new Error(`E_FRAME_SEGMENT_CARDINALITY: ${item.id}`);
+            return view(active[0] ? utterance.getItem(active[0].toItemId) : undefined);
+          }
           if (property === "sync_left" || property === "sync_right") {
             const anchor = utterance.temporalAnchor(item);
             if (!anchor) return null;
@@ -243,6 +250,7 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
           return Reflect.get(target, property, receiver);
         },
         has: (target, property) =>
+          (property === "segment" && item.type === "frame") ||
           property === "sync_left" ||
           property === "sync_right" ||
           (property === "syllable" && structureAncestor(item, "syllable") != null) ||

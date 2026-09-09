@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-frontend/hrg";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { validateDslSpec } from "../src/declarative-frontend/validation";
@@ -67,7 +68,7 @@ describe("declarative transition edge policy", () => {
         sonorant_f2: undefined,
       },
     };
-    const utterance = new Utterance({
+    const utterance = new Utterance(withFrameSchema({
       itemTypes: {
         segment: {
           features: {
@@ -80,7 +81,7 @@ describe("declarative transition edge policy", () => {
         },
       },
       relations: { Segment: { kind: "list", itemTypes: ["segment"] } },
-    });
+    }));
     const metadata = {
       ruleId: "fixture",
       phase: "input",

@@ -7,6 +7,9 @@ checkout and streams 16-bit PCM back through nvwave.
 ## Layout
 
 - `addon/manifest.ini`, `addon/synthDrivers/qlatt.py`: the NVDA add-on.
+  While developing, copy `qlatt.py` and a `qlatt.json` into
+  `%APPDATA%\nvda\scratchpad\synthDrivers` (Developer Scratchpad enabled in
+  Advanced settings); NVDA picks the driver up without a restart.
 - `test_protocol.py`: a Python harness that exercises the same protocol the
   driver uses, without NVDA, and writes a WAV. Run it first.
 - The server itself is `scripts/speak-server.ts` in the repo root; its protocol
@@ -22,23 +25,30 @@ checkout and streams 16-bit PCM back through nvwave.
 3. Zip the contents of `addon/` as `qlatt.nvda-addon` and install it from
    NVDA's add-on store (Install from external source), or copy `addon/` to
    `%APPDATA%\nvda\addons\qlatt` and restart NVDA.
-4. Add to `%APPDATA%\nvda\nvda.ini`:
+4. Put a `qlatt.json` next to the driver (in the add-on's `synthDrivers`
+   folder, or in `scratchpad\synthDrivers` when developing); see
+   `qlatt.example.json`:
 
-   ```ini
-   [qlatt]
-   repo = C:\Users\Q\code\Qlatt
-   node = node
-   frontend = qlatt-english
+   ```json
+   {"repo": "C:\\Users\\Q\\code\\Qlatt", "node": "node", "frontend": "qlatt-english"}
    ```
+
+   Do not rely on a `[qlatt]` section in `nvda.ini`: NVDA rewrites that file
+   from memory on exit and drops sections no loaded module has declared, so
+   a hand-added section disappears on the next restart. Values there override
+   the sidecar only if present.
 
 5. Select "Qlatt" in NVDA's synthesizer dialog. Voices are the bundled
    frontends (`qlatt-english`, `qlatt-beauty`, `dectalk-english`).
 
 ## Status and known limits
 
-- The driver targets the 2024 `synthDriverHandler` API and has been checked
-  against the server with `test_protocol.py`. It has not yet been loaded inside
-  a running NVDA; the first live test may need small fixes to the nvwave calls.
+- Loaded and speaking inside NVDA 2025.3.2 on 2026-09-09 from the scratchpad.
+  Written against the `synthDriverHandler` and `nvwave` sources at
+  release-2025.3. Two things were wrong on the first try and are fixed: a
+  hand-added `[qlatt]` section in `nvda.ini` is discarded by NVDA on exit
+  (hence the sidecar), and `getSynthList` reports a failed `check()` only at
+  debug level (hence `check()` logs at info).
 - Each text chunk is rendered whole before playback starts, so latency is the
   full render time of the chunk. The server renders through the offline
   WebAudio graph, which is roughly real time. Streaming is the next step and is

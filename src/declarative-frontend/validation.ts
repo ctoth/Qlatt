@@ -546,6 +546,7 @@ function validateExpressionReferences(
     const variable = match[1];
     const field = match[2];
     if (!variable || !field || !itemVariableNames.has(variable)) continue;
+    if (relationName === "Frames" && field === "segment") continue;
     if (field === "id" || field === "itemType" || declaredFields.has(field)) continue;
     if (reportedFields.has(field)) continue;
     diagnostics.push(
@@ -558,6 +559,21 @@ function validateExpressionReferences(
     reportedFields.add(field);
   }
 
+  if (relationName === "Frames") {
+    const segmentFields = relationDeclaredFields(relationByName, "Segment");
+    for (const match of expression.matchAll(/\b([A-Za-z_]\w*)\.segment\.([A-Za-z_]\w*)/g)) {
+      if (!itemVariableNames.has(match[1])) continue;
+      const field = match[2];
+      if (field === "id" || field === "itemType" || segmentFields.has(field)) continue;
+      diagnostics.push(
+        makeDiagnostic(
+          "E_RULE_FEATURE_UNKNOWN",
+          `Expression reads undeclared feature '${field}' on relation 'Segment'`,
+          path,
+        ),
+      );
+    }
+  }
   if (!isPlainObject(parameters)) return;
   const reportedParameters = new Set<string>();
   PARAMETER_PATH_PATTERN.lastIndex = 0;

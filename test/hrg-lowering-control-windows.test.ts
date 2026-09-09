@@ -2,7 +2,9 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import { isPlainObject } from "../src/yaml-loader";
+import { expectFrameSource } from "./utils/frame-provenance";
 
 const CONTROL_FIELD_SCHEMA = {
   kind: "object",
@@ -42,7 +44,7 @@ const CONTROL_WINDOW_SCHEMA = {
   ],
 } as const satisfies FeatureSchema;
 
-const SCHEMA = {
+const SCHEMA = withFrameSchema({
   itemTypes: {
     segment: {
       features: {
@@ -61,7 +63,7 @@ const SCHEMA = {
     },
   },
   relations: { Segment: { kind: "list", itemTypes: ["segment"] } },
-} as const satisfies HrgSchema;
+} as const satisfies HrgSchema);
 
 const POLICY = {
   columns: ["AH", "B1", "B2"],
@@ -225,8 +227,10 @@ describe("HRG lowering control windows", () => {
     for (const column of POLICY.columns) {
       expect(start?.params[column], `start.${column}`).toBe(productionStart[column]);
       expect(end?.params[column], `end.${column}`).toBe(productionEnd[column]);
-      expect(start?.provenance?.[column], `start.${column}.provenance`).toBe(windowDecisionId);
-      expect(end?.provenance?.[column], `end.${column}.provenance`).toBe(
+      expectFrameSource(utterance, start?.provenance?.[column], windowDecisionId);
+      expectFrameSource(
+        utterance,
+        end?.provenance?.[column],
         vowel.latestWrite(column)?.decisionId,
       );
     }
@@ -389,9 +393,9 @@ describe("HRG lowering control windows", () => {
     );
 
     expect(releaseSuffixStart?.params.B1).toBe(999);
-    expect(releaseSuffixStart?.provenance?.B1).toBe(windows.decisionId);
+    expectFrameSource(utterance, releaseSuffixStart?.provenance?.B1, windows.decisionId);
     expect(ratioStart?.params.AH).toBe(12);
-    expect(ratioStart?.provenance?.AH).toBe(windows.decisionId);
+    expectFrameSource(utterance, ratioStart?.provenance?.AH, windows.decisionId);
     expect(ratioEnd?.params.AH).toBe(0);
     expect(release.get("B1")).toBe(300);
     expect(vowel.get("AH")).toBe(0);
@@ -425,9 +429,9 @@ describe("HRG lowering control windows", () => {
     const segmentStart = lowered.frames.find((frame) => Math.abs(frame.time - 0.0192) <= 1e-9);
 
     expect(firstPreRoll?.params.AH).toBe(9);
-    expect(firstPreRoll?.provenance?.AH).toBe(windows.decisionId);
+    expectFrameSource(utterance, firstPreRoll?.provenance?.AH, windows.decisionId);
     expect(secondPreRoll?.params.AH).toBe(18);
-    expect(secondPreRoll?.provenance?.AH).toBe(windows.decisionId);
+    expectFrameSource(utterance, secondPreRoll?.provenance?.AH, windows.decisionId);
     expect(segmentStart?.params.AH).toBe(0);
   });
 });

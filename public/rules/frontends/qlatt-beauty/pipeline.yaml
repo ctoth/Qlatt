@@ -4,6 +4,7 @@ version: v1
 # recursively by the rule-pack loader, so registering the phase file here keeps
 # all VQ wiring inside pipeline.yaml + phases/voice-quality.yaml.
 include:
+  - ../../frame-schema.yaml
   - phases/voice-quality.yaml
 predicates:
   is_hertz_nucleus_vowel: >-

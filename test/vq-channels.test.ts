@@ -1,5 +1,6 @@
 import { load } from "js-yaml";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 
 afterEach(() => {
   vi.doUnmock("../src/yaml-loader");
@@ -64,7 +65,7 @@ citations:
           .TEST,
       ).toBe(expected);
       const utterance = new Utterance(
-        {
+        withFrameSchema({
           itemTypes: {
             direction: parser.DIRECTION_ITEM_SCHEMA,
             segment: {
@@ -84,7 +85,7 @@ citations:
             Word: { kind: "list", itemTypes: ["word"] },
             SylStructure: { kind: "tree", itemTypes: ["word", "segment"] },
           },
-        },
+        }),
         parsed.provenance,
       );
       parser.attachDirectionsToUtterance(parsed, utterance);

@@ -571,6 +571,10 @@ phases:
       - nasal_windows
       - sw_explicit_override
       - sw_default_assignment
+      # Per-class formant transition durations (Stevens & House 1956, Hertz
+      # 1991). Reads only current.type; lowering consumes transition_ms.
+      # Restored by #219 after being orphaned when phases were introduced.
+      - transition_override
   - name: prosody
     rules:
       - associate_accent_tones
@@ -588,6 +592,9 @@ phases:
       - tobi_register_reset
       - connected_speech_source_contour
       - vocal_effort
+      # Spectral tilt as a stress cue (Sluijter & van Heuven 1996). Restored
+      # by #219 after being orphaned when phases were introduced.
+      - stress_spectral_tilt
       - f0_voiceless_onset_perturbation
       - f0_voiced_onset_perturbation
       - f0_continuation_rise

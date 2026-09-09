@@ -496,6 +496,13 @@ parameters:
         citations:
           - Fant 1997
           - "Engineering estimate: 1 dB effort relaxation over each intermediate phrase"
+      # Stressed vowels carry more energy above 500 Hz. Applied as a TL
+      # (spectral tilt) reduction on stressed vowels by stress_spectral_tilt.
+      stress_tilt_reduction_db:
+        value: 6
+        citations:
+          - "Sluijter & van Heuven 1996 (stressed vowels show 3-9 dB more energy above 500 Hz)"
+          - "Engineering estimate: midpoint of the cited range, applied as a TL reduction"
     source_contour:
       # Fant 1997 Fig. 10 contour shape, with conservative magnitude scaling for qlatt.
       ee_onset_rise_sec:

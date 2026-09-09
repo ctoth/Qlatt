@@ -9,14 +9,14 @@ const experiments = ["klatt80-baseline", "qlatt-beauty"];
 // Captured before the port at 66b4c375, with the same seeded runtime request.
 const defaultHashes: Record<string, string> = {
   // #54: cited accent/phrase effort; the zero-effort control below preserves #64.
-  "klatt80-baseline": "b6373778116939941c6b1d4b36dcd84c29ea91aadda67c0a0e0a1be2f1c39453",
+  "klatt80-baseline": "e5ff0f3fe5ef974cc7c2445706fcc4b5a36f0432343778ddde865271da5d109a",
   // #53: beauty requests jitter=0.25, now percent CV (Schoentgen Model II).
   "qlatt-beauty": "ba317188dbbc5842fd0e2599e24ff61c1b2af3cde7c84f22efdf453a9d7072d4",
 };
 // Captured with jitter explicitly disabled on unchanged #53 base 32c63af5.
 const zeroJitterHashes: Record<string, string> = {
   // #54: default effort contour, with jitter disabled.
-  "klatt80-baseline": "b6373778116939941c6b1d4b36dcd84c29ea91aadda67c0a0e0a1be2f1c39453",
+  "klatt80-baseline": "e5ff0f3fe5ef974cc7c2445706fcc4b5a36f0432343778ddde865271da5d109a",
   "qlatt-beauty": "5166a1079ff878146d9863a4f41b1b2c0dbb008a949073f0fc0b820701b80eed",
 };
 const frontend = (experiment: string) =>
@@ -60,7 +60,7 @@ describe.each(experiments)("%s Klatt 1990 voice quality", (experimentId) => {
     const output = await render(experimentId, { effort: 0, jitter: 0 });
     expect(hash(output.samples)).toBe(
       experimentId === "klatt80-baseline"
-        ? "7fbd3b989d710cd308cafd8dc4a76cdd78a509719780848e44e3442aa407f954"
+        ? "22f83e98339c5a08bce2efb5131cce43bd833bf68f460be463ae20d43336fed7"
         : zeroJitterHashes[experimentId],
     );
   }, 30000);

@@ -18,6 +18,14 @@ type PlainObject = Record<string, unknown>;
 
 type MapOrigins = Record<string, Record<string, string>>;
 const MAP_ORIGINS = new WeakMap<object, MapOrigins>();
+/** Rule name -> resource path of the file whose `rules:` block declares it (#219). */
+type RuleOrigins = Readonly<Record<string, string>>;
+const RULE_ORIGINS = new WeakMap<object, RuleOrigins>();
+
+/** Loader-derived rule origins: which rulepack file declared each rule. */
+export function rulepackRuleOrigins(spec: CompiledRulepack): RuleOrigins {
+  return RULE_ORIGINS.get(spec) ?? {};
+}
 
 /** Loader-derived resource identity, never authored vocabulary evidence. */
 export function rulepackMapOrigins(
@@ -43,6 +51,16 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
             label.replace(/^(included|base) rulepack /, ""),
           ]),
         ),
+      ]),
+    ),
+  );
+  const origin = label.replace(/^(included|base) rulepack /, "");
+  RULE_ORIGINS.set(
+    document,
+    Object.fromEntries(
+      Object.keys(isPlainObject(document.rules) ? document.rules : {}).map((name) => [
+        name,
+        origin,
       ]),
     ),
   );
@@ -111,6 +129,7 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
     throw new Error("E_RULEPACK_COMPILE: normalized root must remain an object");
   }
   MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(root), ...MAP_ORIGINS.get(child) });
+  RULE_ORIGINS.set(merged, { ...RULE_ORIGINS.get(root), ...RULE_ORIGINS.get(child) });
   // Merge keyed dictionaries (error on duplicate).
   // Chunk 3: `string_sets` and `maps` are pipeline-level reusable literal-data
   // blocks; merge them the same way as predicates so a child include can
@@ -319,6 +338,7 @@ function resolveExtendsSync(
       MAP_ORIGINS.get(rootDoc) ?? {},
     ) as MapOrigins,
   );
+  RULE_ORIGINS.set(merged, { ...RULE_ORIGINS.get(baseDoc), ...RULE_ORIGINS.get(rootDoc) });
   delete merged.extends;
   return {
     doc: merged,
@@ -346,6 +366,7 @@ async function resolveExtendsAsync(
       MAP_ORIGINS.get(rootDoc) ?? {},
     ) as MapOrigins,
   );
+  RULE_ORIGINS.set(merged, { ...RULE_ORIGINS.get(baseDoc), ...RULE_ORIGINS.get(rootDoc) });
   delete merged.extends;
   return {
     doc: merged,
@@ -499,6 +520,7 @@ export function loadRulepackSpecFromPath(
   const spec = parseDslSpec(merged);
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
+  RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
   const inventory =
     typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
   const diagnostics = assertValidSpec(spec, {
@@ -577,6 +599,7 @@ export async function preloadRulepackSpecFromPath(
   const spec = parseDslSpec(merged);
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
+  RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
   const inventory =
     typeof spec.inventory_path === "string"
       ? await preloadInventorySpecFromPath(spec.inventory_path)
@@ -596,6 +619,72 @@ export function loadBundledRulepackSpec(
   frontendId: string = DEFAULT_FRONTEND_ID,
 ): CompiledRulepack {
   return loadRulepackSpecFromPath(resolveBundledRulepackPath(frontendId));
+}
+
+export type UnphasedRule = Readonly<{
+  /** Rule name. */
+  rule: string;
+  /** Resource path of the file that declares it, or "unknown" for ad hoc specs. */
+  origin: string;
+  /** Frontends whose compiled spec contains the rule. None of them phases it. */
+  definedIn: readonly string[];
+}>;
+
+/**
+ * Rules that no frontend runs (#219). A rule is unphased when every compiled
+ * spec that contains it lists it in no phase. A rule declared by a base
+ * frontend and phased only by an extending frontend is not unphased, because
+ * the extending frontend's compiled spec contains and phases it.
+ */
+export function unphasedRules(specs: ReadonlyMap<string, CompiledRulepack>): UnphasedRule[] {
+  const definedIn = new Map<string, string[]>();
+  const phased = new Set<string>();
+  const origins = new Map<string, string>();
+  for (const [frontendId, spec] of specs) {
+    const rules = isPlainObject(spec.rules) ? spec.rules : {};
+    const ruleOrigins = rulepackRuleOrigins(spec);
+    for (const name of Object.keys(rules)) {
+      const list = definedIn.get(name) ?? [];
+      list.push(frontendId);
+      definedIn.set(name, list);
+      if (!origins.has(name) && typeof ruleOrigins[name] === "string") {
+        origins.set(name, ruleOrigins[name]);
+      }
+    }
+    const phases = Array.isArray(spec.phases) ? spec.phases : [];
+    for (const phase of phases) {
+      if (!isPlainObject(phase) || !Array.isArray(phase.rules)) continue;
+      for (const name of phase.rules) if (typeof name === "string") phased.add(name);
+    }
+  }
+  return [...definedIn]
+    .filter(([name]) => !phased.has(name))
+    .map(([rule, frontends]) => ({
+      rule,
+      origin: origins.get(rule) ?? "unknown",
+      definedIn: Object.freeze(frontends.slice()),
+    }))
+    .sort((a, b) => a.rule.localeCompare(b.rule));
+}
+
+/** `unphasedRules` over every bundled frontend. */
+export function findUnphasedBundledRules(): UnphasedRule[] {
+  return unphasedRules(
+    new Map(listBundledFrontendIds().map((id) => [id, loadBundledRulepackSpec(id)])),
+  );
+}
+
+/** Throw `E_RULE_UNPHASED` naming every rule that no bundled frontend runs. */
+export function assertBundledRulesPhased(): void {
+  const dead = findUnphasedBundledRules();
+  if (dead.length === 0) return;
+  const detail = dead
+    .map(
+      (entry) =>
+        `${entry.rule} (declared in ${entry.origin}; compiled into ${entry.definedIn.join(", ")})`,
+    )
+    .join("; ");
+  throw new Error(`E_RULE_UNPHASED: rules listed in no phase of any bundled frontend: ${detail}`);
 }
 
 export async function preloadBundledRulepackSpec(

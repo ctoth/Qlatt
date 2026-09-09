@@ -501,6 +501,9 @@ phases:
       - dectalk_hat_rise
       - dectalk_question_dip
       - dectalk_question_rise
+      # Reset the question_glide layer at the '?' boundary SIL so the +rise
+      # does not persist into a following clause. Restored by #219.
+      - dectalk_question_glide_reset
       - dectalk_comma_rise1
       - dectalk_comma_rise2
       - dectalk_stress_impulse

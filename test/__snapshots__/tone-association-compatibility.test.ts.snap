@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`tone association preserves the existing frontend tracks > dectalk-english: Did Bob buy a blue balloon? 1`] = `"44e0e8831a84ba2758f70da7da24c5445bf5a55670e66f6a04e04ec683db9799"`;
+exports[`tone association preserves the existing frontend tracks > dectalk-english: Did Bob buy a blue balloon? 1`] = `"184e3d0d42968301d0cccda6933f32c1dd4be694e34803a0cbaf5b190ebc8044"`;
 
 exports[`tone association preserves the existing frontend tracks > dectalk-english: Gag, gang; go! 1`] = `"920b59e7612908f5d213d89fb43f803ccbad174eb6994008e1a5a3805b13d436"`;
 
@@ -16,9 +16,9 @@ exports[`tone association preserves the existing frontend tracks > qlatt-beauty:
 
 exports[`tone association preserves the existing frontend tracks > qlatt-beauty: sip sip. 1`] = `"be592c574966540572e1df2e026288f38d08166271ebd6b628b91e34cecd6ef3"`;
 
-exports[`tone association preserves the existing frontend tracks > qlatt-english: Did Bob buy a blue balloon? 1`] = `"3ac58e892f8380f2b3771da157760f0daf1863a67fda19540ce02311c2bf5a19"`;
+exports[`tone association preserves the existing frontend tracks > qlatt-english: Did Bob buy a blue balloon? 1`] = `"c463059194b1264e23f862026b75a6f457355b078baa70826c278d07b97e9f14"`;
 
-exports[`tone association preserves the existing frontend tracks > qlatt-english: Gag, gang; go! 1`] = `"4f0dd2889e4726c415474a3028fd385fe25f92f144097b697222c9e1a4685b59"`;
+exports[`tone association preserves the existing frontend tracks > qlatt-english: Gag, gang; go! 1`] = `"65bc6a93b966d3c7a708307d899d5b612fefe988a6fb04a20447519348fa27fb"`;
 
 exports[`tone association preserves the existing frontend tracks > qlatt-english: The cat sat. 1`] = `"5c4f24bef33eae3fc326bbc23918ead3f722de6d1469c7843c0deeafd9314c8e"`;
 

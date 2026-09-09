@@ -484,7 +484,7 @@ rules:
     apply:
       - field: TL
         op: add
-        value: "-6"
+        value: "-(params.policy.effort.stress_tilt_reduction_db)"
         tag: stress
     citations:
-      - "Sluijter & van Heuven 1996"
+      - "Sluijter & van Heuven 1996 (spectral balance above 500 Hz is the second-strongest stress cue after duration)"

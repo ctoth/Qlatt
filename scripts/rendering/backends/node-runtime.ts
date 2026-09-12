@@ -36,6 +36,10 @@ function buildWorkletProcessorOptionsByNodeId(
 /** The caller owns disposal when retaining assets across renders. */
 export function createNodeRuntimeBackend({
   keepWarm = false,
+  onTimings,
+}: {
+  keepWarm?: boolean;
+  onTimings?: (request: RenderRequest, timings: Record<string, number>) => void;
 } = {}): RenderBackend & { dispose(): Promise<void> } {
   const resources = keepWarm ? createNodeRenderResources() : undefined;
   return {
@@ -49,8 +53,20 @@ export function createNodeRuntimeBackend({
       return request.renderHost === "auto" || request.renderHost === "node";
     },
     async render(request: RenderRequest): Promise<RenderPayload> {
-      const { config, assetLoader } = await (resources?.get(request) ??
+      const timings: Record<string, number> = {};
+      let stageStart = onTimings ? performance.now() : 0;
+      const mark = (stage: string) => {
+        if (!onTimings) return;
+        const now = performance.now();
+        timings[stage] = now - stageStart;
+        stageStart = now;
+      };
+      const { config: preparedConfig, assetLoader } = await (resources?.get(request) ??
         loadNodeRenderResources(request));
+      // Runtime formant-bank expansion writes graph nodes and realize rules.
+      // Keep those writes local to this request, never in the cached template.
+      const config = structuredClone(preparedConfig);
+      mark("assetsConfig");
       try {
         const diagnostics = createDiagnostics({ maxEntries: 1000 });
         const frontend = textToKlattTrackDetailed(
@@ -74,6 +90,7 @@ export function createNodeRuntimeBackend({
         const length = Math.max(1, Math.ceil(totalTime * request.sampleRate));
 
         const ctx = new OfflineAudioContext(1, length, request.sampleRate);
+        mark("frontendAndContext");
         const debugLogging = process.env.QLATT_RENDER_DEBUG === "1";
         const workletProcessorOptionsByNodeId = buildWorkletProcessorOptionsByNodeId(
           config.graph as { nodes: Record<string, { type: string }> },
@@ -88,6 +105,13 @@ export function createNodeRuntimeBackend({
           assetLoader,
           audioWorkletNodeCtor: NodeAudioWorkletNode as unknown as typeof AudioWorkletNode,
           workletProcessorOptionsByNodeId,
+          ...(onTimings
+            ? {
+                onTiming: (stage: string, ms: number) => {
+                  timings[`runtime.${stage}`] = ms;
+                },
+              }
+            : {}),
           ...(debugLogging
             ? {
                 logger: (msg: string) => {
@@ -97,6 +121,7 @@ export function createNodeRuntimeBackend({
             : {}),
         });
         runtime.connectToDestination();
+        mark("runtimeTotal");
         try {
           const interpreter = createKlattInterpreter({
             audioContext: ctx as unknown as AudioContext,
@@ -105,8 +130,10 @@ export function createNodeRuntimeBackend({
             bindingMap: runtime.getBindingMap(),
           });
           interpreter.scheduleTrack(track, request.leadTime);
+          mark("scheduling");
 
           const buffer = await ctx.startRendering();
+          mark("rendering");
           const channel = new Float32Array(buffer.length);
           buffer.copyFromChannel(channel, 0);
           let rms = 0;
@@ -141,6 +168,8 @@ export function createNodeRuntimeBackend({
           if (request.includeTrack) {
             payload.track = track;
           }
+          mark("payload");
+          onTimings?.(request, timings);
           return payload;
         } finally {
           runtime.disconnect();

@@ -54,6 +54,22 @@ describe("server-owned render resources", () => {
     expect(dispose).toHaveBeenCalledTimes(5);
   });
 
+  it("prevents nested mutations from changing later requests", async () => {
+    const resources = createNodeRenderResources();
+    try {
+      const first = await resources.get(request);
+      expect(() => {
+        first.config.graph.nodes.injected = { type: "gain" };
+      }).toThrow(TypeError);
+      expect(() => {
+        first.config.semantics.name = "changed";
+      }).toThrow(TypeError);
+      expect((await resources.get(request)).config.graph.nodes).toEqual({});
+    } finally {
+      await resources.dispose();
+    }
+  });
+
   it("retries failed initialization and disposes pending successful loads", async () => {
     const resources = createNodeRenderResources();
     vi.mocked(createNodeRuntimeAssetLoader).mockRejectedValueOnce(new Error("load failed"));
@@ -63,5 +79,24 @@ describe("server-owned render resources", () => {
     await pending;
     expect(createNodeRuntimeAssetLoader).toHaveBeenCalledTimes(2);
     expect(dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it("invalidates the configuration snapshot when its owner is replaced", async () => {
+    const resources = createNodeRenderResources();
+    const first = await resources.get(request);
+    vi.mocked(loadExperimentConfig).mockResolvedValue({
+      graph: { bacon: "0.1", nodes: {}, connections: [] },
+      semantics: { name: "updated" },
+      registry: { primitives: {} },
+    });
+    expect(await resources.get(request)).toBe(first);
+    await resources.dispose();
+    const replacement = createNodeRenderResources();
+    try {
+      expect((await replacement.get(request)).config.semantics.name).toBe("updated");
+      expect(loadExperimentConfig).toHaveBeenCalledTimes(2);
+    } finally {
+      await replacement.dispose();
+    }
   });
 });

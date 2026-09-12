@@ -8,8 +8,17 @@ type ResourceRequest = Pick<
   "repoRoot" | "experimentId" | "frontendId" | "sampleRate"
 >;
 
+// Configuration is plain YAML/JSON data. Freeze the complete object graph before
+// sharing it; request-specific runtime state must never be stored in this data.
+function freezeConfiguration(value: unknown): void {
+  if (value === null || typeof value !== "object" || Object.isFrozen(value)) return;
+  Object.freeze(value);
+  for (const child of Object.values(value)) freezeConfiguration(child);
+}
+
 export async function loadNodeRenderResources(request: ResourceRequest) {
   const config = await loadExperimentConfig(request.experimentId, request.frontendId);
+  freezeConfiguration(config);
   const assetLoader = await createNodeRuntimeAssetLoader(
     path.join(request.repoRoot, "public", "worklets"),
   );

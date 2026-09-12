@@ -135,7 +135,18 @@ async function speak(
 }
 
 async function main(): Promise<void> {
-  const backend = createNodeRuntimeBackend({ keepWarm: true });
+  const backend = createNodeRuntimeBackend({
+    keepWarm: true,
+    ...(process.env.QLATT_RENDER_TIMINGS === "1"
+      ? {
+          onTimings: (request: RenderRequest, timings: Record<string, number>) => {
+            process.stderr.write(
+              `QLATT_TIMINGS ${JSON.stringify({ phrase: request.phrase, timings })}\n`,
+            );
+          },
+        }
+      : {}),
+  });
   const lines = readline.createInterface({
     input: process.stdin,
     crlfDelay: Number.POSITIVE_INFINITY,

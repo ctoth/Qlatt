@@ -335,6 +335,7 @@ export interface KlattRuntimeOptions {
   telemetry?: boolean; // Enable worklet debug metrics (default: false)
   telemetryHandler?: (data: unknown) => void; // Callback for worklet telemetry messages
   diagnostics?: Diagnostics;
+  onTiming?: (stage: string, milliseconds: number) => void;
 }
 
 // Binding information for interpreter use
@@ -377,6 +378,13 @@ export interface KlattRuntime {
  * Create a Klatt runtime instance (async to support worklet loading)
  */
 export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<KlattRuntime> {
+  let stageStart = options.onTiming ? performance.now() : 0;
+  const mark = (stage: string) => {
+    if (!options.onTiming) return;
+    const now = performance.now();
+    options.onTiming(stage, now - stageStart);
+    stageStart = now;
+  };
   const {
     audioContext,
     semantics,
@@ -555,6 +563,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   });
 
   // Load WASM if not provided and needed
+  mark("validation");
   let wasmModules = options.wasmModules;
   if (!wasmModules && needsWasm) {
     try {
@@ -573,6 +582,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   }
 
   // Determine which worklets are needed based on graph nodes and registry
+  mark("wasmAssets");
   const needsWorklets = Object.values(graph.nodes).some((n) => {
     const primitive = registry.primitives[n.type];
     return primitive?.worklet !== undefined;
@@ -587,6 +597,8 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   }
 
   // Create CEL + topological evaluator pair with all standard builtins
+  // Includes the host's worker startup; addModule owns that lifecycle.
+  mark("workletRegistration");
   const { topoEvaluator } = createConfiguredEvaluator();
 
   // Current input values
@@ -833,9 +845,12 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   }
 
   // Initialize
+  mark("evaluatorAndBindings");
   log("Evaluating semantics");
   evaluate();
+  mark("initialSemantics");
   createNodes();
+  mark("nodeCreation");
   log(`Created nodes: ${Array.from(nodes.keys()).join(", ")}`);
   log(`Built ${bindingMap.size} unique bindings`);
   try {
@@ -851,12 +866,15 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     throw error;
   }
   log(`Total connections: ${graph.connections?.length ?? 0}`);
+  mark("connections");
 
   // Wait for worklets to be ready before applying values
   await awaitWorkletReady(nodes, audioWorkletNodeCtor, 2000, log);
+  mark("processorReady");
 
   log("Applying realized values to nodes");
   applyValues();
+  mark("applyValues");
 
   // Domain observations must reach diagnostics even when telemetry is disabled.
   for (const [, node] of nodes) {

@@ -89,8 +89,25 @@ describe("speak-server protocol", () => {
       for (let i = 0; i < pcm.length; i += 2) peak = Math.max(peak, Math.abs(pcm.readInt16LE(i)));
       expect(peak).toBeGreaterThan(1000);
 
+      const [other] = await send({
+        id: 4,
+        op: "speak",
+        text: "Fish.",
+        sampleRate: 16000,
+        baseF0: 160,
+        rate: 1.2,
+      });
+      expect(other.event).toBe("audio");
+      expect(other.sampleRate).toBe(16000);
+      expect(other.pcm).not.toBe(audio.pcm);
+
       const [error] = await send({ id: 3, op: "speak", text: "x", frontendId: "no-such-frontend" });
       expect(error.event).toBe("error");
+      const [replay] = await send({ id: 5, op: "speak", text: "Hello world." });
+      expect(replay.event).toBe("audio");
+      expect(replay.pcm).toBe(audio.pcm);
+      expect(replay.markers).toEqual(audio.markers);
+      expect(replay.sampleRate).toBe(audio.sampleRate);
     });
   }, 120_000);
 });

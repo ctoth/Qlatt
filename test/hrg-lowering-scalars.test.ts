@@ -2,10 +2,12 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
+import { withFrameSchema } from "../src/declarative-frontend/hrg/frame";
 import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 import { historicalLoweringColumns } from "./historical-lowering-columns";
+import { expectFrameSource } from "./utils/frame-provenance";
 
 const META = {
   ruleId: "fixture",
@@ -299,7 +301,7 @@ function loweringOptions(columns: readonly string[]): LowerOptions {
 }
 
 function buildBaselineUtterance(baseline: ScalarBaseline): Utterance {
-  const utterance = new Utterance(schemaFor(baseline.policy.columns));
+  const utterance = new Utterance(withFrameSchema(schemaFor(baseline.policy.columns)));
   const build = utterance.beginTransaction(META);
   const items = baseline.segments.map((entry) => {
     const segment = build.createItem("segment", entry.id);
@@ -421,7 +423,7 @@ describe("HRG lowering scalar histories", () => {
   );
 
   it("uses the latest stamped value and decision from a feature write history", () => {
-    const utterance = new Utterance(schemaFor(["F1"]));
+    const utterance = new Utterance(withFrameSchema(schemaFor(["F1"])));
     const build = utterance.beginTransaction(META);
     const segment = build.createItem("segment", "history");
     build.set(segment, "phoneme", "AA");
@@ -442,13 +444,13 @@ describe("HRG lowering scalar histories", () => {
 
     expect(segment.writes("F1")).toHaveLength(2);
     expect(segmentFrame?.params.F1).toBe(700);
-    expect(segmentFrame?.provenance?.F1).toBe(latest.decisionId);
+    expectFrameSource(utterance, segmentFrame?.provenance?.F1, latest.decisionId);
     const segmentIndex = lowered.frames.findIndex((frame) => frame.segmentId === "history");
-    expect(lowered.provenanceByFrame[segmentIndex].F1).toBe(latest.decisionId);
+    expect(lowered.provenanceByFrame[segmentIndex].F1).toBe(segmentFrame?.provenance?.F1);
   });
 
   it("rejects a missing declared backend column with a diagnostic", () => {
-    const utterance = new Utterance(schemaFor(["F1", "F2"]));
+    const utterance = new Utterance(withFrameSchema(schemaFor(["F1", "F2"])));
     const build = utterance.beginTransaction(META);
     const segment = build.createItem("segment", "missing-column");
     build.set(segment, "phoneme", "AA");

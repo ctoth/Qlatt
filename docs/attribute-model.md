@@ -28,7 +28,9 @@ provenance calls. This document brings the frontend to the backend's model.
    or duplication of information."
 
 2. **Clocks are relations on the temporal axis.** Word, syllable, and segment
-   are event clocks. Frame is a periodic clock at the lowering interval.
+   are event clocks. Frame is the existing sparse automation-event clock:
+   segment starts, transition knots, control boundaries, F0 anchors and silence
+   edges, preserving distinct equal-time rows (#228/#243).
    Sample is a periodic clock at the audio rate. The existing temporal-axis
    marks are the sync marks of Hertz 1985. Lowering is the segment relation
    resampled onto the frame clock with the Holmes kernel. The interpreter's

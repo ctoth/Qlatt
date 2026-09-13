@@ -1,4 +1,6 @@
 version: v1
+include:
+  - ../../frame-schema.yaml
 functions:
   # Bundled condition inventory (#133): six duration bindings, two postlexical
   # bindings, and structural in_s_cluster share this equality. Keep the

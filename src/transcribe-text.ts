@@ -516,8 +516,9 @@ export function transcribeText(
               stress: match.stress,
               sourceTokenId: inputToken.tokenId,
               word: sourceWord,
+              // The rules that read a word's classes are the phonetic stage's.
               ...("formClasses" in pronResult && pronResult.formClasses
-                ? { formClasses: pronResult.formClasses }
+                ? { formClasses: pronResult.receivedFormClasses ?? pronResult.formClasses }
                 : {}),
               ...("phraseStart" in pronResult && pronResult.phraseStart
                 ? { phraseStart: pronResult.phraseStart }

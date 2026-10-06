@@ -48,6 +48,18 @@
     { "id": "hat-beautiful", "text": "It was beautiful.", "group": "hat-pattern", "tags": ["delayed-fall"], "expectedFocus": ["duration"] },
     { "id": "hat-two-phrases", "text": "The big dog barked and the small cat ran away.", "group": "hat-pattern", "tags": ["two-phrases"], "expectedFocus": ["duration"] },
     { "id": "hat-old-man-young-boy", "text": "The old man told the young boy a long story.", "group": "hat-pattern", "tags": ["two-phrases"], "expectedFocus": ["duration"] },
-    { "id": "hat-did-the-old-man", "text": "Did the old man tell the young boy?", "group": "hat-pattern", "tags": ["question"], "expectedFocus": ["duration"] }
+    { "id": "hat-did-the-old-man", "text": "Did the old man tell the young boy?", "group": "hat-pattern", "tags": ["question"], "expectedFocus": ["duration"] },
+    { "id": "that-what-is-it", "text": "What is it?", "group": "class-transfer", "tags": ["that-bit"], "expectedFocus": ["duration"] },
+    { "id": "that-where-is-it", "text": "Where is it?", "group": "class-transfer", "tags": ["promotion"], "expectedFocus": ["duration"] },
+    { "id": "that-that-is-it", "text": "That is it.", "group": "class-transfer", "tags": ["that-bit"], "expectedFocus": ["duration"] },
+    { "id": "that-this-is-it", "text": "This is it.", "group": "class-transfer", "tags": ["promotion"], "expectedFocus": ["duration"] },
+    { "id": "that-it-is-that", "text": "It is that.", "group": "class-transfer", "tags": ["that-bit"], "expectedFocus": ["duration"] },
+    { "id": "pp-bread-and-went-home", "text": "Bread and went home.", "group": "prepositional-phrase", "tags": ["pp", "vp"], "expectedFocus": ["duration"] },
+    { "id": "pp-go-to-go", "text": "Go to go.", "group": "prepositional-phrase", "tags": ["pp", "vp"], "expectedFocus": ["duration"] },
+    { "id": "pp-to-and-from", "text": "I went to and from it.", "group": "prepositional-phrase", "tags": ["pp", "dropped", "raised"], "expectedFocus": ["duration"] },
+    { "id": "pp-it-is-for", "text": "It is for.", "group": "prepositional-phrase", "tags": ["pp", "dropped"], "expectedFocus": ["duration"] },
+    { "id": "vp-they-receive-it", "text": "They receive it.", "group": "verb-phrase", "tags": ["vp", "rewritten-phone"], "expectedFocus": ["duration"] },
+    { "id": "r-around", "text": "Around.", "group": "r", "tags": ["fusion-gate"], "expectedFocus": ["duration"] },
+    { "id": "r-every-hundred", "text": "Every hundred.", "group": "r", "tags": ["prevocalic-r"], "expectedFocus": ["duration"] }
   ]
 }

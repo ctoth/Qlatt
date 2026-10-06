@@ -240,6 +240,9 @@ const specialWordFormClasses: Record<string, number> = {
   and: formClassMask(["conj", "verb", "func"]),
   for: formClassMask(["adv", "prep", "neg"]),
 };
+// Each of those entries begins with PPSTART: the word starts a prepositional
+// phrase (LTS/l_us_con.c:1190-1193).
+const specialWordPhraseStarts: Record<string, "pp"> = { to: "pp", and: "pp", for: "pp" };
 
 // The frontend's spelling of each allophone code (INCLUDE/l_all_ph.h order).
 // Four names differ from DECtalk's (as in scripts/build-dectalk-dict.ts).
@@ -276,6 +279,7 @@ fs.writeFileSync(
     formClassNames,
     wordFormClasses,
     specialWordFormClasses,
+    specialWordPhraseStarts,
     words,
     bytes,
   })}\n`,

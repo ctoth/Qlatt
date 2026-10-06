@@ -26,6 +26,8 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
   wordFormClasses?: Readonly<Record<string, number>>;
   /** Words whose form class is fixed whatever the dictionary says. */
   specialWordFormClasses?: Readonly<Record<string, number>>;
+  /** The phrase each of those words starts. */
+  specialWordPhraseStarts?: Readonly<Record<string, "pp">>;
 }
 
 /** The names of the bits set in a form class word, lowest bit first. */
@@ -35,6 +37,21 @@ export function formClassNamesOf(mask: number, table: LtsTableDocument): string[
     if (name !== null && Math.floor(mask / 2 ** bit) % 2 === 1) names.push(name);
   });
   return names;
+}
+
+/**
+ * A form class word as DECtalk's phonetic stage receives it. The text stage
+ * sends the word as two 16-bit halves; the phonetic stage reads them into a
+ * `short` buffer and adds them, `(buf[1] << 16) + buf[2]`
+ * (PH/ph_task.c:219, 600), so a low half with bit 15 set is added as a
+ * negative number and the high half arrives one less. Bit 15 is FC_THAT:
+ * "that", "what" and "which" lose `func` and gain `verb` among others, and
+ * count as verbs in the helper-verb rule.
+ */
+export function receivedFormClassWord(mask: number): number {
+  const low = mask % 0x10000;
+  const high = Math.floor(mask / 0x10000);
+  return low < 0x8000 ? mask : ((high + 0xffff) % 0x10000) * 0x10000 + low;
 }
 
 /**

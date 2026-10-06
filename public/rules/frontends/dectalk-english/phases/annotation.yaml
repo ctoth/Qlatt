@@ -173,6 +173,11 @@ rules:
       - field: rime_boundary
         op: set
         dispatch:
+          # The last phone before "to", "and" or "for" has the word boundary
+          # and the phrase start's boundary together, which is the comma value
+          # (dectalk_phrase_start_follows).
+          - when: "isTrue(current, 'phrase_start_follows')"
+            value: "'comma'"
           # A word that starts a verb phrase is entered with VPSTART in place
           # of the word boundary (LTS/ls_dict.c:777-778).
           - when: >-
@@ -250,7 +255,9 @@ rules:
       declarative: "clause_end != null && clause_end.punctuationSymbol == '.'"
       phones_left: "2.0 + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
       syllabics_after: "count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_syllabic')"
-      primaries_in_clause: "count_ahead_pred(current, 1000, 'is_clause_silence', 'is_primary_syllabic')"
+      # remaining_stresses_til(FCBNEXT): up to the clause's end or a phrase
+      # start that carries the comma value.
+      primaries_in_clause: "count_ahead_pred(current, 1000, 'is_clause_or_phrase_start', 'is_primary_syllabic')"
       primaries_in_phrase: >-
         dectalk_boundary(current) >= params.policy.timing.boundary.vp ? 0.0
         : count_ahead_pred(current, 1000, 'is_past_phrase_boundary', 'is_primary_syllabic')

@@ -66,6 +66,8 @@
     clippy::comparison_chain
 )]
 
+pub mod hlsyn;
+mod hlsyn_tables;
 mod tables;
 
 use core::cell::Cell;

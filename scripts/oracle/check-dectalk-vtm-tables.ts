@@ -17,13 +17,40 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 /** Rust constant, the C array it transcribes, and the file that array is in. */
-const TABLES: { rust: string; c: string; file: string }[] = [
-  { rust: "B0", c: "B0", file: "dapi/src/VTM/vtmtable.h" },
-  { rust: "AMPTABLE", c: "amptable", file: "dapi/src/VTM/vtmtable.h" },
-  { rust: "COSINE_TABLE", c: "cosine_table", file: "dapi/src/VTM/vtmtable.h" },
-  { rust: "RADIUS_TABLE", c: "radius_table", file: "dapi/src/VTM/vtmtable.h" },
-  { rust: "NTILTF", c: "ntiltf", file: "dapi/src/VTM/vtm3.c" },
-  { rust: "INT_VOLUME_TABLE", c: "int_volume_table", file: "dapi/src/VTM/vtm3.c" },
+const TABLES: { rust: string; rustFile: string; c: string; file: string }[] = [
+  { rust: "B0", rustFile: "tables.rs", c: "B0", file: "dapi/src/VTM/vtmtable.h" },
+  { rust: "AMPTABLE", rustFile: "tables.rs", c: "amptable", file: "dapi/src/VTM/vtmtable.h" },
+  {
+    rust: "COSINE_TABLE",
+    rustFile: "tables.rs",
+    c: "cosine_table",
+    file: "dapi/src/VTM/vtmtable.h",
+  },
+  {
+    rust: "RADIUS_TABLE",
+    rustFile: "tables.rs",
+    c: "radius_table",
+    file: "dapi/src/VTM/vtmtable.h",
+  },
+  { rust: "NTILTF", rustFile: "tables.rs", c: "ntiltf", file: "dapi/src/VTM/vtm3.c" },
+  {
+    rust: "INT_VOLUME_TABLE",
+    rustFile: "tables.rs",
+    c: "int_volume_table",
+    file: "dapi/src/VTM/vtm3.c",
+  },
+  {
+    rust: "SQRTTABLE",
+    rustFile: "hlsyn_tables.rs",
+    c: "sqrttable",
+    file: "dapi/src/hlsyn/sqrttable.c",
+  },
+  {
+    rust: "LOG10TABLE",
+    rustFile: "hlsyn_tables.rs",
+    c: "log10table",
+    file: "dapi/src/hlsyn/log10table.c",
+  },
 ];
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -35,36 +62,40 @@ const flag = (name: string): string | undefined => {
 const sourceRoot = path.resolve(
   flag("source-root") ?? process.env.DECTALK_SOURCE_ROOT ?? "C:/Users/Q/src/dectalk/463",
 );
-const rustSource = fs.readFileSync(
-  path.join(repoRoot, "crates", "dectalk-vtm", "src", "tables.rs"),
-  "utf8",
-);
+const rustDir = path.join(repoRoot, "crates", "dectalk-vtm", "src");
 
-const integers = (body: string): number[] => (body.match(/-?\d+/g) ?? []).map(Number);
+// Integers, and decimal literals (the C ones carry an `f` suffix). The float
+// tables are compared as the single-precision value each literal rounds to.
+const numbers = (body: string): number[] =>
+  (body.match(/-?\d+(?:\.\d+)?/g) ?? []).map((text) =>
+    text.includes(".") ? Math.fround(Number(text)) : Number(text),
+  );
 
 function cArray(file: string, name: string): number[] {
   // latin1: the DECtalk sources carry non-UTF-8 bytes in their comments.
   const source = fs
     .readFileSync(path.join(sourceRoot, file), "latin1")
     .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/\/\/.*$/gm, "");
+    .replace(/\/\/.*$/gm, "")
+    .replace(/^#if 0[\s\S]*?^#endif.*$/gm, "");
   const match = new RegExp(`\\b${name}\\s*\\[[^\\]]*\\]\\s*=\\s*\\{([^}]*)\\}`).exec(source);
   if (!match) throw new Error(`E_VTM_TABLES: ${name} not found in ${file}`);
-  return integers(match[1]);
+  return numbers(match[1]);
 }
 
-function rustArray(name: string): number[] {
-  const match = new RegExp(`pub const ${name}: \\[i(?:16|32); \\d+\\] = \\[([^\\]]*)\\];`).exec(
-    rustSource,
-  );
-  if (!match) throw new Error(`E_VTM_TABLES: ${name} not found in tables.rs`);
-  return integers(match[1]);
+function rustArray(rustFile: string, name: string): number[] {
+  const rustSource = fs.readFileSync(path.join(rustDir, rustFile), "utf8");
+  const match = new RegExp(
+    `pub const ${name}: \\[(?:i16|i32|f32); \\d+\\] = \\[([^\\]]*)\\];`,
+  ).exec(rustSource);
+  if (!match) throw new Error(`E_VTM_TABLES: ${name} not found in ${rustFile}`);
+  return numbers(match[1]);
 }
 
 let differences = 0;
 for (const table of TABLES) {
   const expected = cArray(table.file, table.c);
-  const actual = rustArray(table.rust);
+  const actual = rustArray(table.rustFile, table.rust);
   const mismatches: string[] = [];
   if (expected.length !== actual.length) {
     mismatches.push(`length ${actual.length}, source has ${expected.length}`);

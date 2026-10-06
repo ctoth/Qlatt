@@ -45,17 +45,22 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { OracleCorpusDocument } from "./types";
 
-type Phrase = { id: string; text: string };
+/**
+ * `hl` selects the hlsyn fixture `<id>.hl.txt`: "compact" keeps the S, H, P and
+ * L lines; "full" adds X and T (the HLFrame and HLState as float bits), which
+ * let the Rust test check the port's internal state bit for bit.
+ */
+type Phrase = { id: string; text: string; hl?: "compact" | "full" };
 
 /** The fixtures kept in the repository: id and the exact text given to say.exe. */
 const CHECKED_IN: Phrase[] = [
-  { id: "paul-cat", text: "[:np] [:ra 180] cat." },
+  { id: "paul-cat", text: "[:np] [:ra 180] cat.", hl: "compact" },
   { id: "paul-judge", text: "[:np] [:ra 180] judge." },
-  { id: "paul-moon", text: "[:np] [:ra 180] moon." },
-  { id: "betty-she", text: "[:nb] [:ra 180] she." },
+  { id: "paul-moon", text: "[:np] [:ra 180] moon.", hl: "compact" },
+  { id: "betty-she", text: "[:nb] [:ra 180] she.", hl: "compact" },
   { id: "wendy-hello", text: "[:nw] [:ra 180] hello." },
   // A second speaker definition packet arrives in the middle of the audio.
-  { id: "paul-harry-switch", text: "[:np] [:ra 180] one. [:nh] two." },
+  { id: "paul-harry-switch", text: "[:np] [:ra 180] one. [:nh] two.", hl: "compact" },
   // vol_att other than 100 (CMD/cm_copt.c:1652-1654).
   { id: "paul-volume-att", text: "[:np] [:ra 180] [:volume att 60] cat." },
 ];
@@ -63,6 +68,31 @@ const CHECKED_IN: Phrase[] = [
 /** Words per event line after the tag and its two leading numbers. */
 const SPDEF_PARS = 51; // INCLUDE/cmd.h:209 (SPDEF) + 1
 const VOICE_PARS = 45; // PH/ph_defs.h:382
+/**
+ * Frame words that hold uninitialised memory: PH does not write them and they
+ * differ from run to run. Nothing after the trace point reads them
+ * (speech_waveform_generator reads words 0-17, 20, 21, 24, 35; vtmiont.c's
+ * hlsyn block reads 1, 2, 9, 11, 12, 15-17, 22, 25-32, 36, 37; OutputData reads
+ * 17-19), so the exporter writes them as 0 to keep fixtures reproducible.
+ * Word 34 (OUT_BNP) is uninitialised in the PH packet and set from the
+ * low-level frame before the generator runs.
+ */
+const UNREAD_FRAME_WORDS: Record<string, number[]> = {
+  P: [23, 33, 34, 38, 39, 40, 41, 42, 43, 44],
+  F: [23, 33, 38, 39, 40, 41, 42, 43, 44],
+  // Speaker definition: SPD_CHIP (PH/ph_defs.h:693-720) has 24 words and its
+  // word 20 is `notused`; the packet's remaining 27 words are never set.
+  S: [20, ...Array.from({ length: 27 }, (_, index) => 24 + index)],
+};
+
+function maskUnreadWords(line: string): string {
+  const fields = line.split(" ");
+  for (const index of UNREAD_FRAME_WORDS[fields[0]] ?? []) fields[3 + index] = "0";
+  return fields.join(" ");
+}
+
+/** The hlsyn records: PH packet, HLSpeaker, HLFrame, previous HLFrame, previous HLState, LLFrame, HLState. */
+const HL_WORDS: Record<string, number> = { P: 45, H: 174, X: 15, O: 15, Q: 17, L: 48, T: 17 };
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const argv = process.argv.slice(2);
@@ -105,6 +135,7 @@ function phrasesAndOutDir(): { phrases: Phrase[]; outDir: string } {
     phrases: corpus.entries.map((entry) => ({
       id: entry.id,
       text: `[:np] [:ra ${Math.round(rate)}] ${entry.text}`,
+      hl: "full" as const,
     })),
     outDir: path.resolve(outDirFlag),
   };
@@ -164,6 +195,7 @@ function exportPhrase(phrase: Phrase, outDir: string, tmpDir: string): string {
   }
 
   const events: string[] = [];
+  const hlEvents: string[] = [];
   const traceSamples: number[] = [];
   let frames = 0;
   let speakers = 0;
@@ -177,18 +209,25 @@ function exportPhrase(phrase: Phrase, outDir: string, tmpDir: string): string {
         throw new Error(`E_VTM_FIXTURE: ${phrase.id}: S line has ${words.length} words`);
       }
       speakers += 1;
-      events.push(line);
+      events.push(maskUnreadWords(line));
+      hlEvents.push(maskUnreadWords(line));
     } else if (tag === "F") {
       if (words.length !== VOICE_PARS) {
         throw new Error(`E_VTM_FIXTURE: ${phrase.id}: F line has ${words.length} words`);
       }
       frames += 1;
-      events.push(line);
+      events.push(maskUnreadWords(line));
     } else if (tag === "W") {
       if (fields[1] !== "0") {
         throw new Error(`E_VTM_FIXTURE: ${phrase.id}: bDoTuning was set; the port assumes FALSE`);
       }
       for (const word of words) traceSamples.push(Number(word));
+    } else if (tag in HL_WORDS) {
+      if (words.length !== HL_WORDS[tag]) {
+        throw new Error(`E_VTM_FIXTURE: ${phrase.id}: ${tag} line has ${words.length} words`);
+      }
+      if (tag === "P" || tag === "H" || tag === "L") hlEvents.push(maskUnreadWords(line));
+      else if (phrase.hl === "full" && (tag === "X" || tag === "T")) hlEvents.push(line);
     } else {
       throw new Error(`E_VTM_FIXTURE: ${phrase.id}: unknown trace line ${JSON.stringify(line)}`);
     }
@@ -218,6 +257,27 @@ function exportPhrase(phrase: Phrase, outDir: string, tmpDir: string): string {
     `${[...header, ...events].join("\n")}\n`,
   );
   fs.writeFileSync(path.join(outDir, `${phrase.id}.wav`), stockBytes);
+
+  const hlPath = path.join(outDir, `${phrase.id}.hl.txt`);
+  if (phrase.hl) {
+    const hlHeader = [
+      "# DECtalk 4.63 hlsyn input and output, written by scripts/oracle/export-dectalk-vtm-fixture.ts",
+      `# say.exe text: ${phrase.text}`,
+      "# S <uiSampleRate> <uiSampleRateChange> <51 speaker definition words>",
+      "# H <sizeof> 0 <174 words: HLSpeaker float bits, in effect from the next frame>",
+      "# P <lang_curr> 0 <45 PH packet words, before hlsyn>",
+      "# L 0 0 <48 LLFrame words, right after HLSynthesizeLLFrame>",
+      ...(phrase.hl === "full"
+        ? [
+            "# X <sizeof> 0 <15 words: HLFrame built from the packet (float bits; word 1 is place)>",
+            "# T 0 0 <17 words: HLState after the call (float bits; word 2 is loc)>",
+          ]
+        : []),
+    ];
+    fs.writeFileSync(hlPath, `${[...hlHeader, ...hlEvents].join("\n")}\n`);
+  } else {
+    fs.rmSync(hlPath, { force: true });
+  }
   return `${phrase.id}: speakers=${speakers} frames=${frames} samples=${samples.length}`;
 }
 

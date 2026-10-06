@@ -51,6 +51,80 @@ static void qvtm_words(const char *tag, const short *p, int n, int a, int b)
 	fprintf(fp, "\n");
 	fclose(fp);
 }
+
+/* QVTM trace: n 32-bit words at p, printed as unsigned decimals (float bits). */
+static void qvtm_bits(const char *tag, const void *p, int n, int a, int b)
+{
+	const char *path = getenv("QVTM_TRACE");
+	const unsigned int *w = (const unsigned int *)p;
+	FILE *fp;
+	int i;
+	if (path == NULL || path[0] == 0)
+		return;
+	fp = fopen(path, "a");
+	if (fp == NULL)
+		return;
+	fprintf(fp, "%s %d %d", tag, a, b);
+	for (i = 0; i < n; i++)
+		fprintf(fp, " %u", w[i]);
+	fprintf(fp, "\n");
+	fclose(fp);
+}
+
+/* QVTM trace: HLState as 17 words; loc is a short followed by padding, so it
+   is widened instead of dumped raw. */
+static void qvtm_state(const char *tag, const HLState *s)
+{
+	unsigned int w[17];
+	memcpy(&w[0], &s->acl, 4);
+	memcpy(&w[1], &s->acd, 4);
+	w[2] = (unsigned int)(int)s->loc;
+	memcpy(&w[3], &s->acx, 4);
+	memcpy(&w[4], &s->agx, 4);
+	memcpy(&w[5], &s->Pm, 4);
+	memcpy(&w[6], &s->Pcw, 4);
+	memcpy(&w[7], &s->Ug, 4);
+	memcpy(&w[8], &s->Uacx, 4);
+	memcpy(&w[9], &s->Un, 4);
+	memcpy(&w[10], &s->Uw, 4);
+	memcpy(&w[11], &s->f1c, 4);
+	memcpy(&w[12], &s->f1x, 4);
+	memcpy(&w[13], &s->b1x, 4);
+	memcpy(&w[14], &s->Cw, 4);
+	memcpy(&w[15], &s->Cg, 4);
+	memcpy(&w[16], &s->agf, 4);
+	qvtm_bits(tag, w, 17, 0, 0);
+}
+```
+
+As the first statement of the `#ifdef HLSYN` block that fills `pVtm_t->frame`
+(before `pVtm_t->frame.ag = ...`, line 660):
+
+```c
+		  qvtm_words("P", (const short *)&(pVtm_t->parambuff[1]), VOICE_PARS, (int)pKsd_t->lang_curr, 0);
+```
+
+Around the `HLSynthesizeLLFrame(...)` call (lines 715-716), a block before and
+two lines after, ahead of `pVtm_t->oldstate = pVtm_t->state;`:
+
+```c
+		  {
+			  static HLSpeaker qvtm_last_speaker;
+			  static int qvtm_have_speaker = 0;
+			  if (!qvtm_have_speaker || memcmp(&qvtm_last_speaker, &pVtm_t->speakerDef.speaker, sizeof(HLSpeaker)) != 0)
+			  {
+				  qvtm_last_speaker = pVtm_t->speakerDef.speaker;
+				  qvtm_have_speaker = 1;
+				  qvtm_bits("H", &pVtm_t->speakerDef.speaker, (int)(sizeof(HLSpeaker) / 4), (int)sizeof(HLSpeaker), 0);
+			  }
+			  qvtm_bits("X", &pVtm_t->frame, (int)(sizeof(HLFrame) / 4), (int)sizeof(HLFrame), 0);
+			  qvtm_bits("O", &pVtm_t->oldframe, (int)(sizeof(HLFrame) / 4), 0, 0);
+			  qvtm_state("Q", &pVtm_t->oldstate);
+		  }
+		  HLSynthesizeLLFrame(&pVtm_t->frame, &pVtm_t->oldframe, &pVtm_t->speakerDef.speaker,
+			&pVtm_t->state, &pVtm_t->oldstate, &pVtm_t->llframe);
+		  qvtm_words("L", (const short *)&pVtm_t->llframe, (int)(sizeof(LLFrame) / 2), 0, 0);
+		  qvtm_state("T", &pVtm_t->state);
 ```
 
 Around `     speech_waveform_generator(phTTS);` (line 1351, the call inside
@@ -76,6 +150,37 @@ Before `	  read_speaker_definition(phTTS);` (line 1638, in
 | `S <uiSampleRate> <uiSampleRateChange> <51 words>` | A speaker definition packet, as `read_speaker_definition` reads it (`SPD_CHIP`, `PH/ph_defs.h:693-720`). `InitializeVTM` has just run (line 1619). |
 | `F <vol_att> <uiSampleRate> <45 words>` | A voice frame as `speech_waveform_generator` reads it; word order is `OUT_*` in `PH/ph_defs.h:559-604`. |
 | `W <bDoTuning> 0 <samples>` | The frame's samples in `iwave` after the call. |
+| `P <lang_curr> 0 <45 words>` | The PH packet as the VTM receives it, before hlsyn. |
+| `H <sizeof> 0 <174 words>` | `HLSpeaker` (`PH/hlsynapi.h:147-281`) as float bits, printed before a frame whenever it differs from the last one printed. It includes the per-voice values `changeSpeakerValues` writes. |
+| `X <sizeof> 0 <15 words>` | The `HLFrame` built from the packet (float bits; word 1 is the integer `place`). |
+| `O 0 0 <15 words>` | The previous `HLFrame`. |
+| `Q 0 0 <17 words>` | The previous `HLState` (float bits; word 2 is `loc`). |
+| `L 0 0 <48 words>` | The `LLFrame` right after `HLSynthesizeLLFrame`, before `vtmiont.c:796-1219` edits it. |
+| `T 0 0 <17 words>` | The `HLState` after the call. |
+
+Per frame the order is `P`, [`H`], `X`, `O`, `Q`, `L`, `T`, `F`, `W`.
+
+Some words of `S`, `P` and `F` are uninitialised memory that changes from run
+to run and that nothing after the trace point reads. The exporter writes them
+as 0 so that fixtures are reproducible; the list and its justification are at
+`UNREAD_FRAME_WORDS` in `export-dectalk-vtm-fixture.ts`.
+
+## How the compiled float code differs from the C text
+
+The hlsyn objects are SSE single-precision code, but a `float` function result
+comes back in the x87 register, and in about 35 places the compiler keeps
+computing there (at the x87's 53-bit precision) before storing a `float`.
+`DT_f_sqrt`'s `sqrttable[pos/100]*10.0f` and `DT_f_log10`'s `log10table[pos]+1`
+are returned without being rounded to `float`. The port reproduces each of
+these sequences; they were read from
+
+```bat
+dumpbin /disasm <stock>\dapi\build\dtstatic\us\release\link\<name>.obj
+```
+
+for `acxf1c`, `brent`, `circuit`, `hlframe`, `nasalf1x`, `log10table` and
+`sqrttable`. The `T` records are what showed the difference: the port's state
+matched bit for bit until the first frame that took the unrounded path.
 
 ## Build
 

@@ -38,6 +38,42 @@ version: v1
 # ---------------------------------------------------------------------------
 rules:
   # -------------------------------------------------------------------------
+  # WH-QUESTIONS END LIKE STATEMENTS (LTS/ls_task.c).
+  #
+  # ls_task_set_what_state (1566-1625) looks the first word of each clause up
+  # in whdic; when it is there, the clause's question mark is sent on as a
+  # period (1196-1208, "Changing question mark to period!"). Everything
+  # downstream then sees a statement: the boundary type on the final rime, the
+  # pause, and the intonation.
+  # -------------------------------------------------------------------------
+  dectalk_wh_question_period:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) == '?'"
+    define:
+      # The previous clause's punctuation silence, or the utterance's first Segment.
+      clause_edge: >-
+        look_back_where(current, 5000,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || behind(candidate, 1) == null')
+      first_phone: >-
+        clause_edge == null ? null
+        : (clause_edge.phoneme == 'SIL' && get(clause_edge, 'punctuationSymbol', null) != null
+            ? ahead(clause_edge, 1) : clause_edge)
+    constraint: >-
+      first_phone != null && has(first_phone.word)
+      && lower(first_phone.word) in params.policy.structure.wh_words
+    apply:
+      - field: punctuationSymbol
+        op: set
+        value: "'.'"
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:1566-1625 ls_task_set_what_state (first word of the clause in whdic)"
+      - "DECtalk 4.63 LTS/ls_task.c:1196-1208 (a question mark after a wh-clause is sent as PERIOD)"
+      - "DECtalk 4.63 LTS/l_us_con.c:1215-1226 whdic"
+
+  # -------------------------------------------------------------------------
   # PHONE STRUCTURE WORD (ph_sort.c phsort(), run by DECtalk before phalloph()).
   #
   # DECtalk gives every phone a structure word that its allophone and duration

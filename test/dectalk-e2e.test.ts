@@ -543,6 +543,56 @@ describe("dectalk-english dictionary-first (dt-2b)", () => {
 });
 
 // ---------------------------------------------------------------------------
+// A clause that begins with a wh-word is a question DECtalk ends like a
+// statement: LTS/ls_task.c sends its "?" on as a period.
+// ---------------------------------------------------------------------------
+describe("dectalk-english wh-questions", () => {
+  function finalPunctuation(phrase: string): { symbol: unknown; rime: unknown[] } {
+    const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    const live = utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false);
+    return {
+      symbol: live
+        .findLast((item) => item.get("punctuationSymbol") != null)
+        ?.get("punctuationSymbol"),
+      rime: [...new Set(live.map((item) => item.get("rime_boundary")).filter((b) => b != null))],
+    };
+  }
+
+  it.each(["Where are they going?", "How are you today?", "What is it?"])(
+    "ends %j with a period-type boundary",
+    (phrase) => {
+      const { symbol, rime } = finalPunctuation(phrase);
+      expect(symbol).toBe(".");
+      expect(rime).toContain("period");
+      expect(rime).not.toContain("question");
+    },
+  );
+
+  it.each(["Can we go?", "Is it where we go?"])("keeps %j a question", (phrase) => {
+    const { symbol, rime } = finalPunctuation(phrase);
+    expect(symbol).toBe("?");
+    expect(rime).toContain("question");
+  });
+
+  it("decides each clause by its own first word", () => {
+    const { utterance } = textToKlattTrackDetailed("Can we go? Where?", 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    const symbols = utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false && item.get("punctuationSymbol") != null)
+      .map((item) => item.get("punctuationSymbol"));
+    expect(symbols).toEqual(["?", "."]);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // One output clock. DECtalk's controller counts nominal 6.4-ms frames
 // (ph_claus.c) and the VTM emits each as a 71-sample packet at 11,025 Hz
 // (VTM/vtmiont.c), so every frame of a clause, segment starts and F0 ticks

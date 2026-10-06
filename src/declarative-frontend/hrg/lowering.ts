@@ -256,7 +256,6 @@ type ResolvedSegmentTransition = {
 type ResolvedF0Point = {
   decisionId: string;
   timeMs: number;
-  outputTimeMs?: number;
   valueHz: number;
 };
 
@@ -545,12 +544,8 @@ function renderLayeredF0(
   model: LayeredF0ModelConfig,
   totalDurationSec: number,
   speakerParams?: Readonly<Record<string, unknown>>,
-): Array<{ time: number; outputTime: number; f0: number }> {
+): Array<{ time: number; f0: number }> {
   const framePeriod = requirePositiveNumber(model.frame_period_sec, "f0_model.frame_period_sec");
-  const outputFramePeriod =
-    model.output_frame_period_sec == null
-      ? framePeriod
-      : requirePositiveNumber(model.output_frame_period_sec, "f0_model.output_frame_period_sec");
   const frameCount = Math.ceil(totalDurationSec / framePeriod) + 1;
   const alpha = requireFiniteNumber(model.filter.default_alpha, "f0_model.filter.default_alpha");
   const resolvedAlpha = model.filter.alpha_param
@@ -744,7 +739,6 @@ function renderLayeredF0(
     const values = new Float64Array(new Float64Array(exports.memory.buffer, outputPtr, frameCount));
     return Array.from(values, (f0, index) => ({
       time: index * framePeriod,
-      outputTime: index * outputFramePeriod,
       f0,
     }));
   } finally {
@@ -1501,9 +1495,27 @@ export function lowerToFrames(
     );
     throw new Error("E_HRG_LOWER_AFFECT_TIME: global duration/pause scale must be positive");
   }
+  // One output clock for every frame. A backend whose controller counts
+  // nominal frames but emits each as a packet of a different real length
+  // declares both periods; all control times, segment starts and F0 ticks
+  // alike, are stretched by their ratio. Projecting only the ticks would let a
+  // tick near a segment's end land after the next segment's start.
+  // Citation: DECtalk 4.63 ph_claus.c (6.4 ms controller frames) and
+  // VTM/vtmiont.c (71-sample packets at 11,025 Hz).
+  const frameClockModel =
+    context.f0Model?.type === "layered_additive" ? context.f0Model : undefined;
+  const outputClockRatio =
+    frameClockModel?.output_frame_period_sec == null
+      ? 1
+      : requirePositiveNumber(
+          frameClockModel.output_frame_period_sec,
+          "f0_model.output_frame_period_sec",
+        ) / requirePositiveNumber(frameClockModel.frame_period_sec, "f0_model.frame_period_sec");
+  const edgeOutputScale = globalPauseScale * outputClockRatio;
   const leadingAxisMs = timings[0]?.startMs ?? 0;
   let outputCursorMs =
-    initialSilenceMs * globalPauseScale + leadingAxisMs * globalAffect.values.durationScale;
+    initialSilenceMs * edgeOutputScale +
+    leadingAxisMs * globalAffect.values.durationScale * outputClockRatio;
   for (const timing of timings) {
     const affect = affectByItem.get(timing.item) ?? globalAffect;
     const segmentScale =
@@ -1519,11 +1531,12 @@ export function lowerToFrames(
         `E_HRG_LOWER_AFFECT_TIME: Segment '${timing.item.id}' scale must be positive`,
       );
     }
-    outputTimingByItem.set(timing.item, { startMs: outputCursorMs, scale: segmentScale });
-    outputCursorMs += timing.durationMs * segmentScale;
+    const outputScale = segmentScale * outputClockRatio;
+    outputTimingByItem.set(timing.item, { startMs: outputCursorMs, scale: outputScale });
+    outputCursorMs += timing.durationMs * outputScale;
   }
   const outputFinalResetMs = outputCursorMs;
-  const outputTotalMs = outputFinalResetMs + finalSilenceMs * globalPauseScale;
+  const outputTotalMs = outputFinalResetMs + finalSilenceMs * edgeOutputScale;
 
   const pointItems = utterance.getRelation("F0Point")?.listItems() ?? [];
   const f0PointsByTime = new Map<number, ResolvedF0Point>();
@@ -1706,7 +1719,7 @@ export function lowerToFrames(
         };
       }
     }
-    let rendered: Array<{ time: number; outputTime: number; f0: number }>;
+    let rendered: Array<{ time: number; f0: number }>;
     try {
       rendered = renderLayeredF0(
         commands,
@@ -1751,7 +1764,6 @@ export function lowerToFrames(
       return {
         decisionId: producer.decisionId,
         timeMs: point.time * 1000,
-        outputTimeMs: point.outputTime * 1000,
         valueHz: point.f0,
       };
     });
@@ -2186,15 +2198,12 @@ export function lowerToFrames(
     }
   }
   for (const timeMs of [...initialEventTimes].sort((left, right) => left - right)) {
-    const f0Point = f0Points.find((point) => Math.abs(point.timeMs - timeMs) <= 1e-6);
     appendFrame(
       timeMs,
       undefined,
       timeMs > 1e-6 ? context.silence?.symbol : undefined,
       timeMs - initialSilenceMs,
-      timeMs <= 1e-6 || f0Point == null
-        ? undefined
-        : (f0Point.outputTimeMs ?? f0Point.timeMs) * globalPauseScale,
+      timeMs * edgeOutputScale,
       "initial",
     );
   }
@@ -2244,8 +2253,7 @@ export function lowerToFrames(
     }
     for (const offsetMs of [...offsets].sort((left, right) => left - right)) {
       const controlTimeMs = initialSilenceMs + timing.startMs + offsetMs;
-      const f0Point = f0Points.find((point) => Math.abs(point.timeMs - controlTimeMs) <= 1e-6);
-      appendFrame(controlTimeMs, timing.item, undefined, offsetMs, f0Point?.outputTimeMs);
+      appendFrame(controlTimeMs, timing.item, undefined, offsetMs);
     }
   }
   const finalResetMs = initialSilenceMs + segmentTotalMs;
@@ -2259,8 +2267,7 @@ export function lowerToFrames(
         undefined,
         context.silence?.symbol,
         0,
-        outputFinalResetMs +
-          ((point.outputTimeMs ?? point.timeMs) - finalResetMs) * globalPauseScale,
+        outputFinalResetMs + (point.timeMs - finalResetMs) * edgeOutputScale,
         "final",
       );
     }

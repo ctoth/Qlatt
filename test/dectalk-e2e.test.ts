@@ -162,7 +162,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f0Hz10 = Array.from({ length: 28 }, (_, frameIndex) => {
       const time = (29 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      const f0 = result.track.filter((frame) => frame.time <= time).at(-1)?.params.F0;
+      const f0 = result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F0;
       return Math.round((f0 ?? Number.NaN) * 10);
     });
 
@@ -728,10 +728,11 @@ describe("dectalk-english end-to-end", () => {
     const expectedReleaseStart =
       firstKPacket.params.F3 +
       (2287.5 - firstKPacket.params.F3) * ((closureDurationMs - nativeFrameMs) / closureDurationMs);
+    // One controller frame into the release is one packet later in output time.
     const releaseBoundary = result.track.find(
       (frame) =>
         frame.phoneme === "K_REL" &&
-        Math.abs(frame.time - initialRelease.time - nativeFrameMs / 1000) <= 1e-9,
+        Math.abs(frame.time - initialRelease.time - DECTALK_PACKET_PERIOD_SEC) <= 1e-9,
     );
 
     expect(initialSilence).toEqual([2702, 2702, 2702, 2702]);
@@ -809,7 +810,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b1 = Array.from({ length: 16 }, (_, frameIndex) => {
       const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B1;
     });
 
     expect(b1).toEqual([
@@ -824,7 +825,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b3 = Array.from({ length: 16 }, (_, frameIndex) => {
       const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B3;
     });
 
     expect(b3).toEqual([
@@ -839,7 +840,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b2 = Array.from({ length: 171 }, (_, frameIndex) => {
       const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B2;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B2;
     });
     const expected = [
       ...Array(5).fill(210),
@@ -1036,7 +1037,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f1 = Array.from({ length: 16 }, (_, frameIndex) => {
       const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F1;
     });
 
     expect(f1).toEqual([
@@ -1051,7 +1052,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b1 = Array.from({ length: 5 }, (_, releaseFrameIndex) => {
       const time = (releaseFrameIndex + 16) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B1;
     });
 
     expect(b1).toEqual([200, 200, 200, 178, 156]);
@@ -1064,7 +1065,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b3 = Array.from({ length: 5 }, (_, releaseFrameIndex) => {
       const time = (releaseFrameIndex + 16) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B3;
     });
 
     expect(b3).toEqual([280, 280, 280, 266, 253]);
@@ -1077,7 +1078,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f1 = Array.from({ length: 5 }, (_, releaseFrameIndex) => {
       const time = (releaseFrameIndex + 16) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F1;
     });
 
     expect(f1).toEqual([336, 340, 344, 349, 353]);
@@ -1090,7 +1091,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f2 = Array.from({ length: 21 }, (_, frameIndex) => {
       const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F2;
     });
 
     expect(f2).toEqual([
@@ -1106,7 +1107,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f3 = Array.from({ length: 21 }, (_, frameIndex) => {
       const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F3;
     });
 
     expect(f3).toEqual([
@@ -1122,7 +1123,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f1 = Array.from({ length: 37 }, (_, frameIndex) => {
       const time = (21 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F1;
     });
 
     expect(f1).toEqual([
@@ -1138,7 +1139,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f3 = Array.from({ length: 37 }, (_, frameIndex) => {
       const time = (21 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F3;
     });
 
     expect(f3).toEqual([
@@ -1155,7 +1156,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b1 = Array.from({ length: 37 }, (_, frameIndex) => {
       const time = (21 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B1;
     });
 
     expect(b1).toEqual([
@@ -1171,7 +1172,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b3 = Array.from({ length: 37 }, (_, frameIndex) => {
       const time = (21 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B3;
     });
 
     expect(b3).toEqual([
@@ -1187,7 +1188,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f1 = Array.from({ length: 14 }, (_, index) => {
       const time = (58 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F1;
     });
 
     expect(f1).toEqual(Array(14).fill(337));
@@ -1200,7 +1201,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f2 = Array.from({ length: 14 }, (_, index) => {
       const time = (58 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F2;
     });
 
     expect(f2).toEqual([
@@ -1215,7 +1216,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f3 = Array.from({ length: 15 }, (_, frameIndex) => {
       const time = (58 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F3;
     });
 
     expect(f3).toEqual([
@@ -1230,7 +1231,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b1 = Array.from({ length: 15 }, (_, frameIndex) => {
       const time = (58 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B1;
     });
 
     expect(b1).toEqual([134, 156, 178, 200, 200, 200, 200, 200, 200, 200, 200, 200, 176, 153, 310]);
@@ -1243,7 +1244,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b3 = Array.from({ length: 15 }, (_, frameIndex) => {
       const time = (58 + frameIndex) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B3;
     });
 
     expect(b3).toEqual([239, 253, 266, 280, 280, 280, 280, 280, 280, 280, 280, 280, 266, 253, 239]);
@@ -1256,7 +1257,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f1 = Array.from({ length: 6 }, (_, index) => {
       const time = (72 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F1;
     });
 
     expect(f1).toEqual([337, 353, 382, 410, 426, 442]);
@@ -1269,7 +1270,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f2 = Array.from({ length: 6 }, (_, index) => {
       const time = (72 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F2;
     });
 
     expect(f2).toEqual([1927, 1900, 1830, 1760, 1733, 1706]);
@@ -1282,7 +1283,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f3 = Array.from({ length: 6 }, (_, index) => {
       const time = (72 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F3;
     });
 
     expect(f3).toEqual([2401, 2425, 2438, 2450, 2474, 2498]);
@@ -1295,7 +1296,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b3 = Array.from({ length: 6 }, (_, index) => {
       const time = (72 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B3;
     });
 
     expect(b3).toEqual([239, 233, 226, 219, 213, 206]);
@@ -1308,7 +1309,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const f1 = Array.from({ length: 93 }, (_, index) => {
       const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F1;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F1;
     });
 
     expect(f1).toEqual([
@@ -1324,7 +1325,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b3 = Array.from({ length: 93 }, (_, index) => {
       const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B3;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B3;
     });
 
     expect(b3).toEqual(Array(93).fill(200));
@@ -1347,7 +1348,7 @@ describe("dectalk-english end-to-end", () => {
       );
     const f2 = Array.from({ length: 19 }, (_, index) => {
       const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F2;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F2;
     });
 
     expect(terminalSilence).toBeDefined();
@@ -1365,7 +1366,7 @@ describe("dectalk-english end-to-end", () => {
     const sampleFrames = [...Array.from({ length: 21 }, (_, index) => 78 + index), 170];
     const f3 = sampleFrames.map((frameIndex) => {
       const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.F3;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F3;
     });
 
     expect(f3).toEqual([
@@ -1381,7 +1382,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b1 = Array.from({ length: 9 }, (_, index) => {
       const time = (78 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B1;
     });
 
     expect(b1).toEqual([300, 270, 240, 210, 180, 150, 120, 90, 60]);
@@ -1394,7 +1395,7 @@ describe("dectalk-english end-to-end", () => {
     });
     const b1 = Array.from({ length: 6 }, (_, index) => {
       const time = (165 + index) * DECTALK_PACKET_PERIOD_SEC;
-      return result.track.filter((frame) => frame.time <= time).at(-1)?.params.B1;
+      return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.B1;
     });
 
     expect(b1).toEqual([72, 85, 97, 110, 122, 135]);
@@ -1640,5 +1641,58 @@ describe("dectalk-english dictionary-first (dt-2b)", () => {
     expect(phs).toContain("ER");
     expect(phs).toContain("IY");
     expect(phs[0]).toBe("N");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// One output clock. DECtalk's controller counts nominal 6.4-ms frames
+// (ph_claus.c) and the VTM emits each as a 71-sample packet at 11,025 Hz
+// (VTM/vtmiont.c), so every frame of a clause, segment starts and F0 ticks
+// alike, sits on the same packet clock. A frame of a segment that has already
+// been left means two frames were projected by different clocks.
+// ---------------------------------------------------------------------------
+describe("dectalk-english output clock", () => {
+  function framesOfLeftSegments(track: KlattFrame[]): string[] {
+    const ordinals = new Map<string, number>();
+    const violations: string[] = [];
+    let latest = -1;
+    let seenSegment = false;
+    for (const frame of track) {
+      if (frame.segmentId) seenSegment = true;
+      // Frames without a Segment are the synthesized silence edges: the
+      // initial edge before the first Segment, the final edge after the last.
+      const key = frame.segmentId ?? (seenSegment ? "edge:final" : "edge:initial");
+      if (!ordinals.has(key)) ordinals.set(key, ordinals.size);
+      const ordinal = ordinals.get(key) as number;
+      if (ordinal < latest) {
+        violations.push(`${(frame.time * 1000).toFixed(4)} ms ${frame.phoneme ?? "?"} (${key})`);
+      } else {
+        latest = ordinal;
+      }
+    }
+    return violations;
+  }
+
+  it.each(["moon.", "Hello world.", "The rain in Spain stays mainly in the plain."])(
+    "never emits a frame of a segment that has already ended: %s",
+    (phrase) => {
+      const track = textToKlattTrack(phrase, undefined, 30, { frontendId: "dectalk-english" });
+      expect(framesOfLeftSegments(track)).toEqual([]);
+    },
+  );
+
+  it("places segment starts on the packet clock, not the nominal controller clock", () => {
+    const { track } = textToKlattTrackDetailed("moon.", undefined, 30, {
+      frontendId: "dectalk-english",
+    });
+    const starts = new Map<string, number>();
+    for (const frame of track) {
+      if (frame.segmentId && !starts.has(frame.segmentId)) starts.set(frame.segmentId, frame.time);
+    }
+    const [mStart, uwStart] = [...starts.values()];
+    // Control: M starts after 3 frames of initial silence.
+    expect(mStart).toBeCloseTo(3 * DECTALK_PACKET_PERIOD_SEC, 9);
+    // The last M tick (controller frame 15) must precede the UW start.
+    expect(uwStart).toBeGreaterThan(15 * DECTALK_PACKET_PERIOD_SEC);
   });
 });

@@ -243,6 +243,7 @@ tags:
   consonant_position: adjusts duration by consonant position
   consonant_stress: adjusts a consonant beside a stressed vowel
   word_initial_consonant: marks a consonant before its word's first syllabic
+  rime_boundary: records the type of the boundary that follows a final rime
   postvocalic_lateral: selects the postvocalic allophone of a lateral
   duration_floor: enforces a segment-duration floor
   emphasis: strengthens an emphasized segment
@@ -327,6 +328,7 @@ relations:
       weak: []
       word: []
       word_initial_consonant: []
+      rime_boundary: [word, comma, period, question, exclaim]
       AF: []
       AH: []
       AN: []
@@ -490,6 +492,7 @@ phases:
       # again so an onset follows its syllabic's authored level. DECtalk has
       # the marks in its input before phsort(), so it needs no second pass.
       - dectalk_consonant_stress
+      - dectalk_rime_boundary
   - name: formant
     rules:
       - dectalk_sw_explicit_override

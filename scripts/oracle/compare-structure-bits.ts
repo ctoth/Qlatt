@@ -36,7 +36,33 @@ const US_NAMES = [
 ]; // biome-ignore format: ten per row, as in the header
 const PORT_TO_DECTALK: Readonly<Record<string, string>> = { HH: "HX", NG: "NX", L: "LL" };
 
-type Phone = { name: string; stress: number; winitc: boolean };
+type Phone = { name: string; stress: number; winitc: boolean; syl: string; bound: string };
+
+// FBOUNDARY (0740) values, ph_defs.h:249-262, in the port's rime_boundary terms.
+const DECTALK_BOUNDARY = new Map<number, string>([
+  [0, ""],
+  [0o40, "syllable"],
+  [0o100, "morpheme"],
+  [0o140, "word"],
+  [0o200, "pp"],
+  [0o240, "vp"],
+  [0o300, "relative"],
+  [0o340, "comma"],
+  [0o400, "period"],
+  [0o440, "question"],
+  [0o500, "exclaim"],
+]);
+
+// FTYPESYL (030): only a syllabic carries it (ph_sort2.c init_med_final).
+const DECTALK_SYLLABLE = ["mono", "first", "medial", "final"];
+// The port's syllable_position_in_word values, in DECtalk's terms.
+const PORT_SYLLABLE: Readonly<Record<string, string>> = {
+  only: "mono",
+  initial: "first",
+  first: "first",
+  medial: "medial",
+  final: "final",
+};
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const verbose = process.argv.includes("--verbose");
@@ -60,17 +86,23 @@ function qlattClauses(text: string, transitionMs: number): Phone[][] {
     if (previous && phoneme.startsWith(`${previous}_`)) continue;
     previous = phoneme;
     const stress = item.get("stress");
+    const syllabic = item.get("type") === "vowel" || ["EL", "EM", "EN"].includes(phoneme);
+    const position = String(item.get("syllable_position_in_word") ?? "");
     clauses[clauses.length - 1].push({
       name: PORT_TO_DECTALK[phoneme] ?? phoneme,
       stress: typeof stress === "number" ? stress : 0,
       winitc: item.get("word_initial_consonant") === true,
+      syl: syllabic ? (PORT_SYLLABLE[position] ?? `?${position}`) : "mono",
+      bound: String(item.get("rime_boundary") ?? ""),
     });
   }
   return clauses.filter((clause) => clause.length > 0);
 }
 
 const show = (phone: Phone): string =>
-  `${phone.name}${phone.stress > 0 ? phone.stress : ""}${phone.winitc ? "^" : ""}`;
+  `${phone.name}${phone.stress > 0 ? phone.stress : ""}${phone.winitc ? "^" : ""}` +
+  (phone.syl === "mono" ? "" : `/${phone.syl}`) +
+  (phone.bound === "" ? "" : `-${phone.bound}`);
 
 let clausesCompared = 0;
 let clausesSkipped = 0;
@@ -78,6 +110,8 @@ let clausesEqual = 0;
 let phones = 0;
 let stressEqual = 0;
 let winitcEqual = 0;
+let syllableEqual = 0;
+let boundaryEqual = 0;
 for (const file of ["dectalk-us-v1.json", "dectalk-us-heldout-v1.json"]) {
   const corpus = JSON.parse(
     fs.readFileSync(path.join(repoRoot, "test", "oracle-corpora", file), "utf8"),
@@ -104,6 +138,10 @@ for (const file of ["dectalk-us-v1.json", "dectalk-us-heldout-v1.json"]) {
                 name: US_NAMES[allophone.ph as number] ?? `#${allophone.ph}`,
                 stress: allophone.struc & 0o3,
                 winitc: (allophone.struc & 0o4) !== 0,
+                syl: DECTALK_SYLLABLE[(allophone.struc & 0o30) >> 3],
+                bound:
+                  DECTALK_BOUNDARY.get(allophone.struc & 0o740) ??
+                  `0${(allophone.struc & 0o740).toString(8)}`,
               },
             ]
           : [],
@@ -132,6 +170,10 @@ for (const file of ["dectalk-us-v1.json", "dectalk-us-heldout-v1.json"]) {
         else equal = false;
         if (phone.winitc === ours[i].winitc) winitcEqual += 1;
         else equal = false;
+        if (phone.syl === ours[i].syl) syllableEqual += 1;
+        else equal = false;
+        if (phone.bound === ours[i].bound) boundaryEqual += 1;
+        else equal = false;
       });
       if (equal) {
         clausesEqual += 1;
@@ -151,5 +193,7 @@ console.log(
     phones,
     stressEqual,
     winitcEqual,
+    syllableEqual,
+    boundaryEqual,
   }),
 );

@@ -79,3 +79,62 @@ rules:
     citations:
       - DECtalk 4.63 ph_syl.c ph_syllab (word-position from syllable index + count)
 
+  # ---------------------------------------------------------------------------
+  # FBOUNDARY: the type of the next boundary, on the phones of a final rime.
+  #
+  # get_next_bound_type (ph_sort2.c:203-222) scans forward from a phone to the
+  # next boundary symbol and gives the phone that boundary's type from
+  # bounftab (ph_romi.c:174-205), unless it meets a syllabic first. So only
+  # the last syllabic before a boundary and the consonants after it carry one.
+  # phsort() calls it for every phone once the clause has had a syllabic
+  # (in_rhyme, ph_sort.c:1356,1395).
+  #
+  # Boundaries modelled here: a following word (FWBNEXT) and the clause-final
+  # punctuation (FCBNEXT comma, FPERNEXT period, FQUENEXT question mark,
+  # FEXCLNEXT exclamation mark). DECtalk's phrase-start symbols (PPSTART,
+  # VPSTART) and in-word morpheme and syllable boundaries are not.
+  # ---------------------------------------------------------------------------
+  dectalk_rime_boundary:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme != 'SIL' && has(current.word) && current.word != ''"
+    define:
+      # in_rhyme: the clause has had a syllabic at or before this phone.
+      prior_syllabic_or_clause_start: >-
+        look_back_where(current, 100,
+          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]')
+      in_rhyme: >-
+        current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']
+        || (prior_syllabic_or_clause_start != null && prior_syllabic_or_clause_start.phoneme != 'SIL')
+      # Where the forward scan stops: a punctuation silence, the first phone of
+      # another word, or a syllabic of this word. (The dummy vowel after a
+      # final stop is a silence of the same word; the scan passes over it.)
+      boundary_item: >-
+        look_ahead_where(current, 100,
+          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || (candidate.phoneme != "SIL" && (!(has(candidate.word) && has(source.word) && candidate.word == source.word) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]))')
+      syllabic_first: >-
+        boundary_item != null && boundary_item.phoneme != 'SIL'
+        && has(boundary_item.word) && boundary_item.word == current.word
+      mark: >-
+        boundary_item != null && boundary_item.phoneme == 'SIL'
+        ? boundary_item.punctuationSymbol : ''
+    constraint: "in_rhyme && !syllabic_first"
+    apply:
+      - field: rime_boundary
+        op: set
+        dispatch:
+          - when: "boundary_item != null && boundary_item.phoneme != 'SIL'"
+            value: "'word'"
+          - when: "mark == '?'"
+            value: "'question'"
+          - when: "mark == '!'"
+            value: "'exclaim'"
+          - when: "mark in [',', ';', ':']"
+            value: "'comma'"
+          - default: "'period'"
+        tag: rime_boundary
+    citations:
+      - "DECtalk 4.63 ph_sort2.c:203-222 get_next_bound_type"
+      - "DECtalk 4.63 ph_romi.c:174-205 bounftab (boundary symbol to FBOUNDARY value)"
+

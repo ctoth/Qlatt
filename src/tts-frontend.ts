@@ -220,6 +220,7 @@ function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
     nucleus_duration_ms: { kind: "number" },
     dummy_vowel: { kind: "boolean" },
     word_initial_consonant: { kind: "boolean" },
+    rime_boundary: { kind: "string" },
     weak: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
     glottal: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
   };

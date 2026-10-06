@@ -81,9 +81,19 @@ functions:
     body: >-
       item == null || path(item, 'R:SylStructure.parent.parent') == null ? ''
       : get(path(item, 'R:SylStructure.parent.parent'), 'phrase_start', '')
-    description: The phrase a Segment's word starts ('vp'), or ''.
+    description: The phrase a Segment's word starts ('vp' or 'pp'), or ''.
     citations:
       - "DECtalk 4.63 LTS/ls_dict.c:774-778 (PPSTART and VPSTART ahead of a dictionary entry)"
+  dectalk_phrase_state:
+    params: [item]
+    body: >-
+      item == null || path(item, 'R:SylStructure.parent.parent') == null ? ''
+      : get(path(item, 'R:SylStructure.parent.parent'), 'phrase_start_state', '')
+    description: >-
+      What became of the prepositional-phrase start of a Segment's word: 'pp'
+      kept, 'word' dropped; '' for any other word.
+    citations:
+      - "DECtalk 4.63 ph_sort.c:1055-1070"
   dectalk_word_start:
     params: [item]
     body: >-
@@ -135,6 +145,16 @@ predicates:
     (current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null)
     || (behind(current, 1) != null
         && get(behind(current, 1), "rime_boundary", "") in ["vp", "comma", "period", "question", "exclaim"])
+    || (dectalk_word_start(current) && dectalk_phrase_state(current) != ""
+        && dectalk_phrase_state(current) != "word")
+  # Where remaining_stresses_til(FCBNEXT) stops: the clause's final silence, or
+  # the first Segment of a word whose phrase start left the comma value on the
+  # phone before it. The word start is tested, not that phone's boundary:
+  # DECtalk's scan runs before its rules delete or fuse the phone.
+  is_clause_or_phrase_start: >-
+    (current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null)
+    || (dectalk_word_start(current) && dectalk_phrase_state(current) != ""
+        && dectalk_phrase_state(current) != "word")
   is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
   is_stressed_vowel: 'current.type == "vowel" && has(current.stress) && current.stress == 1'
   is_stressed_vowel_or_boundary: >-
@@ -463,6 +483,11 @@ relations:
       clause_verb_branch_count: { kind: number }
       # A vowel the helper-verb promotion gave secondary stress.
       helper_verb_promoted: { kind: boolean }
+      # The last phone before a word that keeps a phrase start (ph_sort.c:1487-1496).
+      phrase_start_follows: { kind: boolean }
+      # An obstruent whose identical neighbour before it was deleted
+      # (ph_aloph.c:558-562); DECtalk's "two phones back" still counts that one.
+      after_deleted_geminate: { kind: boolean }
       word_initial_consonant: { kind: boolean }
       rime_boundary: { kind: string, values: [word, vp, comma, period, question, exclaim] }
       # FHAT_BEGINS and FHAT_ENDS of a syllabic, and the state DECtalk's walk
@@ -528,6 +553,15 @@ relations:
   # says of the word: form_classes and phrase_start.
   SylStructure:
     type: span
+  Word:
+    type: parallel
+    features:
+      text: []
+      form_classes: []
+      phrase_start: [vp, pp]
+      # What the phone sort makes of a prepositional-phrase start: kept or
+      # dropped (ph_sort.c:1055-1070).
+      phrase_start_state: [pp, word]
   F0Point:
     type: point
     value_type: number
@@ -613,6 +647,12 @@ phases:
       # A wh-question's "?" becomes "." before anything reads the punctuation.
       - dectalk_wh_question_period
       - dectalk_sentence_initial_auxiliary
+      # ph_sort.c:1055-1110, ahead of the stress rules: a dropped
+      # prepositional-phrase start gives its word primary stress.
+      - dectalk_pp_start_state
+      - dectalk_pp_dropped_stress
+      - dectalk_pp_dropped_unreduce
+      - dectalk_phrase_start_follows
       # ph_sort.c structure-word fields that the allophone rules below read.
       - dectalk_breath_group_primary_stress
       - dectalk_exclamation_emphasis
@@ -627,6 +667,7 @@ phases:
       - dectalk_palatalize_t
       - dectalk_palatalize_d
       - dectalk_glottalize_t
+      - dectalk_to_before_vowel
       - dectalk_flap_t
       - dectalk_flap_d
       - dectalk_fuse_vowel_r

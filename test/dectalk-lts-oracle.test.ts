@@ -17,6 +17,7 @@ import { describe, expect, it } from "vitest";
 import { dectalkAllophoneName, parsePhonemeLog } from "../scripts/oracle/allophones";
 import { pronounce } from "../src/g2p";
 import { applyLtsRules, type LtsTable } from "../src/g2p/table-lts";
+import { receivedFormClassWord } from "../src/g2p/table-lts-pronounce";
 import { stripSuffixes } from "../src/g2p/table-suffix";
 
 const repoRoot = path.resolve(__dirname, "..");
@@ -137,7 +138,31 @@ describe("table letter-to-sound, by stage", () => {
     expect(starts("went")).toBe("vp");
     expect(starts("tested")).toBeUndefined();
     expect(starts("is")).toBeUndefined();
-    expect(starts("and")).toBeUndefined();
+  });
+
+  it("marks the mini-dictionary words as prepositional-phrase starts", () => {
+    // The log prints "(" before them: "^ ( t uh", "^ ( aen d", "^ ( f rr".
+    const starts = (word: string): unknown => pronounce(word, lookup, options).phraseStart;
+    expect(starts("to")).toBe("pp");
+    expect(starts("and")).toBe("pp");
+    expect(starts("for")).toBe("pp");
+    expect(starts("from")).toBeUndefined();
+  });
+
+  it("gives the class word as DECtalk's phonetic stage receives it", () => {
+    // PH/ph_task.c:600 adds a sign-extended low half: with bit 15 (that) set
+    // the high half arrives one less.
+    expect(receivedFormClassWord(0x00800000)).toBe(0x00800000);
+    expect(receivedFormClassWord(0x00808000)).toBe(0x007f8000);
+    expect(receivedFormClassWord(0x00008000)).toBe(0xffff8000);
+    // "what" (adj adv pron that func) loses func and counts as a verb;
+    // "where" (no that bit) arrives as it is.
+    const what = pronounce("what", lookup, options);
+    expect(what.formClasses).toEqual(["adj", "adv", "pron", "that", "func"]);
+    expect(what.receivedFormClasses).toContain("verb");
+    expect(what.receivedFormClasses).not.toContain("func");
+    const where = pronounce("where", lookup, options);
+    expect(where.receivedFormClasses).toEqual(where.formClasses);
   });
 });
 

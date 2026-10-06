@@ -15,8 +15,14 @@ export interface PronunciationResult {
    * know. Absent when the frontend has no form class data.
    */
   formClasses?: string[];
+  /**
+   * The form classes as the frontend's phonetic rules receive them, where
+   * that differs from what the lexicon holds (table-lts-pronounce.ts
+   * receivedFormClassWord).
+   */
+  receivedFormClasses?: string[];
   /** The phrase the word starts, when the frontend's lexicon marks one. */
-  phraseStart?: "vp";
+  phraseStart?: "vp" | "pp";
 }
 
 /** Boundaries are phone offsets in the final pronunciation, end exclusive. */

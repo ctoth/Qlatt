@@ -111,6 +111,135 @@ rules:
       - "DECtalk 4.63 LTS/ls_task.c:4672-4728 ls_task_lookup_first_verbs (first word after a sentence end)"
 
   # -------------------------------------------------------------------------
+  # PREPOSITIONAL-PHRASE STARTS (ph_sort.c:1055-1110).
+  #
+  # "to", "and" and "for" come from DECtalk's mini dictionary with PPSTART in
+  # front (LTS/l_us_con.c:1190-1193). Its phone sort drops the start of one
+  # that ends its clause ("Clause-final function word (preceded by [(]) should
+  # be stressed"): the boundary before it is a plain word boundary, its vowel
+  # is unreduced ("for" F RR -> F OR, "to" T UH -> T UW) and it takes primary
+  # stress.
+  #
+  # The same code also drops a start whose next word starts a prepositional
+  # phrase, and raises that one to a verb-phrase start. It tests the symbol
+  # right after the word boundary for PPSTART (:1066-1067), and these three
+  # words have SPECIALWORD there, ahead of their PPSTART, so the test never
+  # holds between them: in "I went to and from it." DECtalk keeps both starts
+  # and "to" stays unstressed.
+  #
+  # The first rule writes on each such Word what became of its start: 'pp'
+  # kept, 'word' dropped.
+  # -------------------------------------------------------------------------
+  dectalk_pp_start_state:
+    kind: scalar
+    select:
+      relation: Word
+      where: "get(current, 'phrase_start', '') == 'pp'"
+    define:
+      # The Segment after the Word's last one: the punctuation silence for a
+      # clause's last word, nothing for the utterance's last word.
+      after_this: "path(current, 'R:SylStructure.daughtern.daughtern.R:Segment.n')"
+      clause_final: "after_this == null || after_this.phoneme == 'SIL'"
+    apply:
+      - field: phrase_start_state
+        op: set
+        value: "clause_final ? 'word' : 'pp'"
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 ph_sort.c:1055-1070 (a PPSTART whose word is followed by a clause boundary becomes a word boundary)"
+      - "DECtalk 4.63 LTS/l_us_con.c:1187-1195 sdic (for, and, to with SPECIALWORD and PPSTART)"
+
+  # A word whose start was dropped takes primary stress on its first vowel:
+  # a leading secondary stress is promoted, otherwise a primary stress is
+  # inserted and moved to the first vowel (ph_sort.c:1095-1104).
+  dectalk_pp_dropped_stress:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.type == 'vowel' && dectalk_phrase_state(current) == 'word'"
+    define:
+      prior_vowel_in_word: >-
+        find_within_word(current,
+          "current.type == 'vowel'",
+          "behind")
+    constraint: "prior_vowel_in_word == null"
+    apply:
+      - field: stress
+        op: set
+        value: 1
+        tag: stress
+    citations:
+      - "DECtalk 4.63 ph_sort.c:1095-1104 (promote the initial secondary stress, or find a vowel to stress)"
+      - "DECtalk 4.63 ph_sort.c:1055 (clause-final function word preceded by [(] should be stressed)"
+
+  # ... and its vowel is unreduced: "for" F RR -> F OR, "to" T UH -> T UW
+  # (ph_sort.c:1076-1084).
+  dectalk_pp_dropped_unreduce:
+    kind: postlexical
+    select:
+      relation: Segment
+      where: "current.phoneme in ['RR', 'UH'] && dectalk_phrase_state(current) == 'word'"
+    define:
+      p: prev
+      after_word_initial: "p != null && dectalk_word_start(p) && !dectalk_word_start(current)"
+      full_name: >-
+        after_word_initial && p.phoneme == 'F' && current.phoneme == 'RR' ? 'OR'
+        : (after_word_initial && p.phoneme == 'T' && current.phoneme == 'UH' ? 'UW' : '')
+      full: "full_name == '' ? null : target(full_name + '1')"
+    constraint: "full != null"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          # What a phone keeps when a rule rewrites it in place: DECtalk's
+          # allophone rules change the phone and leave its structure word
+          # (ph_aloph.c writes allophons[] and copies sentstruc[] across).
+          # Every in-place rewrite below copies this one list.
+          copy_fields: &structure_word
+            - stress
+            - word
+            - word_initial_consonant
+            - helper_verb_promoted
+            - phrase_start_follows
+          phoneme: full_name
+          type: full.type
+          target: full
+          duration: full.duration
+          inherentDuration: full.inherentDuration
+          minimumDuration: "has(full.minimumDuration) ? full.minimumDuration : full.duration"
+          voiced: "has(full.voiced) ? full.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_sort.c:1076-1084 (unreduce the vowel in \"for, to, into\": F RR -> F OR, T UH -> T UW)"
+
+  # The last phone before a word that keeps its phrase start carries the
+  # start's boundary on top of the word boundary: DECtalk adds FPPNEXT to the
+  # phone it has just put out (ph_sort.c:1487-1490). The two together are the
+  # comma value. The mark is the phone's: it goes when
+  # a later rule deletes the phone (the first of two /t/ in "want to") or fuses
+  # it into its vowel ("store and"), and stays when one rewrites it in place
+  # (the flap of "bread and").
+  dectalk_phrase_start_follows:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme != 'SIL' && has(current.word) && current.word != ''"
+    define:
+      n: next
+      state: "n == null || n.phoneme == 'SIL' ? '' : dectalk_phrase_state(n)"
+    constraint: >-
+      n != null && n.phoneme != 'SIL' && dectalk_word_start(n) && state == 'pp'
+    apply:
+      - field: phrase_start_follows
+        op: set
+        value: "true"
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 ph_sort.c:1487-1490 (PPSTART adds FPPNEXT to the current output phone)"
+      - "DECtalk 4.63 ph_defs.h:249-262 (FWBNEXT 0140 with FPPNEXT 0200 is FCBNEXT 0340)"
+
+  # -------------------------------------------------------------------------
   # PHONE STRUCTURE WORD (ph_sort.c phsort(), run by DECtalk before phalloph()).
   #
   # DECtalk gives every phone a structure word that its allophone and duration
@@ -383,10 +512,7 @@ rules:
       range_right: current.sync_right
       insert:
         - copy_from: current
-          copy_fields:
-            - stress
-            - word
-            - word_initial_consonant
+          copy_fields: *structure_word
           phoneme: "'AX'"
           type: ax.type
           target: ax
@@ -444,6 +570,9 @@ rules:
       range_right: n.sync_right
       insert:
         - copy_from: next
+          # DECtalk's later rules index its input phones, where the deleted
+          # one still stands ahead of this one.
+          after_deleted_geminate: "true"
     citations:
       - "DECtalk 4.63 ph_aloph.c:558-562 (A1: delete an obstruent identical to the following phoneme; geminate reduction)"
       - "DECtalk 4.63 ph_defs.h (FOBST obstruent feature = stops + fricatives + affricates)"
@@ -487,10 +616,7 @@ rules:
       range_right: current.sync_right
       insert:
         - copy_from: current
-          copy_fields:
-            - stress
-            - word
-            - word_initial_consonant
+          copy_fields: *structure_word
           phoneme: assim_name
           type: at.type
           target: at
@@ -537,10 +663,7 @@ rules:
       range_right: current.sync_right
       insert:
         - copy_from: current
-          copy_fields:
-            - stress
-            - word
-            - word_initial_consonant
+          copy_fields: *structure_word
           phoneme: "'DF'"
           type: df.type
           target: df
@@ -588,10 +711,7 @@ rules:
       range_right: current.sync_right
       insert:
         - copy_from: current
-          copy_fields:
-            - stress
-            - word
-            - word_initial_consonant
+          copy_fields: *structure_word
           phoneme: "'DX'"
           type: dx.type
           target: dx
@@ -633,10 +753,7 @@ rules:
       range_right: current.sync_right
       insert:
         - copy_from: current
-          copy_fields:
-            - stress
-            - word
-            - word_initial_consonant
+          copy_fields: *structure_word
           phoneme: "'CH'"
           type: ch.type
           target: ch
@@ -665,10 +782,7 @@ rules:
       range_right: current.sync_right
       insert:
         - copy_from: current
-          copy_fields:
-            - stress
-            - word
-            - word_initial_consonant
+          copy_fields: *structure_word
           phoneme: "'JH'"
           type: jh.type
           target: jh
@@ -684,14 +798,25 @@ rules:
   # GLOTTALIZATION (ph_aloph.c:912-927).  An unreleased /t/ in a glottalizing
   # context becomes a glottalized /t/ (TX) when preceded by a sonorant, or a
   # plain /d/ otherwise.  Source trigger:
-  #   if (curr == USP_T && (place_feature(phonemes[n-2]) & FLABIAL) IS_MINUS)
+  #   if (curr == USP_T && (phone_feature(phonemes[n-2]) & FLABIAL) IS_MINUS)
   #     if ( next == USP_LL || next == USP_DH
   #          || ( ((curr_instruc & FBOUNDARY) >= FMBNEXT)
   #               && ((feature(next) & FSON2) || next == USP_HX) )
   #          || next == USP_EN )
   #        { curr = USP_D;  if (feature(last_outph) & FSON1) curr = USP_TX;  goto endrul3; }
-  # Feature membership (ph_defs.h): FLABIAL = {P,B,M,F,V}; FSON2 = {W,Y,R,L,YU,
-  # M,N,NG,EL,EN}; FSON1 = vowels/glides/liquids/nasals (this port's `type`).
+  #
+  # THE GATE IS NOT ABOUT LABIALS. FLABIAL (0000001, ph_defs.h:339) is a bit of
+  # the place table, but the line reads phone_feature(), the general feature
+  # table, where 0000001 is FSYLL (ph_defs.h:316). So the /t/ rules apply when
+  # the phone two back is not syllabic. DECtalk's debug build agrees: T stays
+  # in "went home" (EH two back) and is glottalized in "stop it now" (P two
+  # back) and "bought the" (B two back).
+  #
+  # "Two back" counts DECtalk's input phones: a /t/ that survived geminate
+  # deletion still has the deleted one in front of it there.
+  #
+  # Feature membership (ph_defs.h): FSON2 = {W,Y,R,L,YU,M,N,NG,EM,EN}; FSON1 =
+  # vowels/glides/liquids/nasals (this port's `type`).
   # Port symbol mapping: USP_LL -> the port's plain lateral L (the port does not
   # distinguish DECtalk's lexical /LL/); USP_HX -> HH; USP_EN -> EN.  The /t/->TX
   # vs /t/->D choice is selected at runtime by glot_target.  `goto endrul3` makes
@@ -707,14 +832,14 @@ rules:
     define:
       p: prev
       n: next
-      b2: "behind(current, 2)"
-      prev2_not_labial: >-
-        b2 == null || !(b2.phoneme in ['P', 'B', 'M', 'F', 'V'])
+      b2: "isTrue(current, 'after_deleted_geminate') ? behind(current, 1) : behind(current, 2)"
+      two_back_not_syllabic: >-
+        b2 == null || !(b2.type == 'vowel' || b2.phoneme in ['EL', 'EM', 'EN'])
       next_word_boundary: >-
         n == null ? true :
         (has(n.word) && has(current.word) ? n.word != current.word : true)
       next_son2: >-
-        n != null && (n.phoneme in ['W', 'Y', 'R', 'L', 'M', 'N', 'NG', 'EL', 'EN'])
+        n != null && (n.phoneme in ['W', 'Y', 'R', 'L', 'YU', 'M', 'N', 'NG', 'EM', 'EN'])
       glottalizing_context: >-
         n != null && (
           n.phoneme == 'L' ||
@@ -726,17 +851,14 @@ rules:
         p != null && (p.type in ['vowel', 'glide', 'liquid', 'nasal'])
       glot_target: "prev_son1 ? 'TX' : 'D'"
       gt: "target(glot_target)"
-    constraint: "prev2_not_labial && glottalizing_context"
+    constraint: "two_back_not_syllabic && glottalizing_context"
     splice:
       type: replace_range
       range_left: current.sync_left
       range_right: current.sync_right
       insert:
         - copy_from: current
-          copy_fields:
-            - stress
-            - word
-            - word_initial_consonant
+          copy_fields: *structure_word
           phoneme: glot_target
           type: gt.type
           target: gt
@@ -748,6 +870,46 @@ rules:
       - "DECtalk 4.63 ph_aloph.c:912-927 (glottalize /t/ -> TX when preceded by a sonorant, else -> D, in a glottalizing context)"
       - "DECtalk 4.63 ph_defs.h (FLABIAL/FSON1/FSON2 feature definitions used by the trigger)"
       - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_TX glottalized-/t/ target)"
+
+  # "Unreduce the O in 'to' if following segment is a vowel" (ph_aloph.c:928-937,
+  # in the same /t/ block, after the glottalization above has had its turn):
+  # an unstressed /t/ followed by UH, with a syllabic or a silence after that,
+  # has UW for the UH. "I went to and from it." is T UW.
+  dectalk_to_before_vowel:
+    kind: postlexical
+    select:
+      relation: Segment
+      where: current.phoneme == 'UH'
+    define:
+      p: prev
+      n: next
+      # The /t/ block's gate (see dectalk_glottalize_t): the phone two before
+      # the /t/, in DECtalk's input, is not syllabic.
+      b3: "isTrue(p, 'after_deleted_geminate') ? behind(current, 2) : behind(current, 3)"
+      two_back_not_syllabic: >-
+        b3 == null || !(b3.type == 'vowel' || b3.phoneme in ['EL', 'EM', 'EN'])
+      after_unstressed_t: "p != null && p.phoneme == 'T' && get(p, 'stress', 0) == 0"
+      before_syllabic_or_silence: >-
+        n == null || n.phoneme == 'SIL' || n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN']
+      uw: "target('UW0')"
+    constraint: "two_back_not_syllabic && after_unstressed_t && before_syllabic_or_silence"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields: *structure_word
+          phoneme: "'UW'"
+          type: uw.type
+          target: uw
+          duration: uw.duration
+          inherentDuration: uw.inherentDuration
+          minimumDuration: "has(uw.minimumDuration) ? uw.minimumDuration : uw.duration"
+          voiced: "has(uw.voiced) ? uw.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:928-937 (T, then UH, unstressed, before a syllabic or silence: UH -> UW)"
+      - "DECtalk 4.63 ph_aloph.c:912 with ph_defs.h:316,339 (the /t/ rules apply when the phone two back is not syllabic)"
 
   # -------------------------------------------------------------------------
   # DENTALIZATION (ph_aloph.c:1066-1082 Rule 4).  An unstressed /dh/ becomes a
@@ -847,10 +1009,7 @@ rules:
       range_right: current.sync_right
       insert:
         - copy_from: current
-          copy_fields:
-            - stress
-            - word
-            - word_initial_consonant
+          copy_fields: *structure_word
           phoneme: "'DZ'"
           type: dz.type
           target: dz
@@ -992,10 +1151,7 @@ rules:
       range_right: current.sync_right
       insert:
         - copy_from: current
-          copy_fields:
-            - stress
-            - word
-            - word_initial_consonant
+          copy_fields: *structure_word
           phoneme: allophone
           type: at.type
           target: at

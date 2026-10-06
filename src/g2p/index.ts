@@ -26,6 +26,7 @@ import {
   isLtsTableDocument,
   type LtsTableDocument,
   pronounceWithLtsTable,
+  receivedFormClassWord,
   startsVerbPhrase,
 } from "./table-lts-pronounce";
 import { stripSuffixes } from "./table-suffix";
@@ -69,22 +70,27 @@ export function pronounce(
   // word it does not know. A fixed class wins over the dictionary's
   // (DECtalk 4.63 LTS/ls_task.c:1062-1078), and a class set by a suffix rule
   // stays (LTS/ls_dict.c:749-750).
-  const classed = (mask: number): { formClasses?: string[] } =>
-    table?.formClassNames
-      ? {
-          formClasses: formClassNamesOf(table.specialWordFormClasses?.[lowerWord] ?? mask, table),
-        }
-      : {};
+  const classed = (mask: number): { formClasses?: string[]; receivedFormClasses?: string[] } => {
+    if (!table?.formClassNames) return {};
+    const word = table.specialWordFormClasses?.[lowerWord] ?? mask;
+    return {
+      formClasses: formClassNamesOf(word, table),
+      receivedFormClasses: formClassNamesOf(receivedFormClassWord(word), table),
+    };
+  };
   // The phrase a word starts is read from the dictionary entry that was
   // reached, a suffixed word's root included; the fixed-class words come from
   // DECtalk's mini dictionary and never reach it.
-  const phrased = (entry: string | null): { phraseStart?: "vp" } =>
-    table?.wordFormClasses &&
-    entry !== null &&
-    table.specialWordFormClasses?.[lowerWord] === undefined &&
-    startsVerbPhrase(table.wordFormClasses[entry] ?? 0, table)
+  const phrased = (entry: string | null): { phraseStart?: "vp" | "pp" } => {
+    const fixed = table?.specialWordPhraseStarts?.[lowerWord];
+    if (fixed) return { phraseStart: fixed };
+    return table?.wordFormClasses &&
+      entry !== null &&
+      table.specialWordFormClasses?.[lowerWord] === undefined &&
+      startsVerbPhrase(table.wordFormClasses[entry] ?? 0, table)
       ? { phraseStart: "vp" }
       : {};
+  };
 
   // 1. Try direct dictionary lookup
   const dictResult = dictLookup(lowerWord);

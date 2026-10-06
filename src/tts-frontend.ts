@@ -295,7 +295,10 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
           text: { kind: "string" },
           tokenIndex: { kind: "number" },
           form_classes: { kind: "array", items: { kind: "string" } },
-          phrase_start: { kind: "string", values: ["vp"] },
+          phrase_start: { kind: "string", values: ["vp", "pp"] },
+          // What a frontend's rules make of a prepositional-phrase start in
+          // its context (kept or dropped).
+          phrase_start_state: { kind: "string", values: ["pp", "word"] },
         },
       },
       syllable: {

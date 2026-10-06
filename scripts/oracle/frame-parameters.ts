@@ -14,7 +14,11 @@
 // CLAUSE's allophone array (ph_claus.c:400, 440): it restarts at every clause
 // and counts allophones after the allophone rules, so it cannot index the
 // utterance-wide phoneme log.
-import type { DectalkTraceFrame } from "./dectalk-trace";
+import {
+  DECTALK_NATIVE_SAMPLE_RATE_HZ,
+  DECTALK_SAMPLES_PER_FRAME,
+  type DectalkTraceFrame,
+} from "./dectalk-trace";
 
 export type TrackEvent = {
   time?: number;
@@ -270,6 +274,71 @@ export function eventIndexAt(track: readonly TrackEvent[], timeSec: number): num
     break;
   }
   return selected;
+}
+
+export type ParameterComparison = {
+  compared: number;
+  mismatched: number;
+  sumAbs: number;
+  maxAbs: number;
+  firstMismatch: { packet: number; dectalk: number; qlatt: number } | null;
+};
+
+export type TrackComparison = {
+  packets: number;
+  /** Packets whose Segment label is not DECtalk's controller phone. */
+  segmentLabelsDiffer: number;
+  parameters: Record<string, ParameterComparison>;
+};
+
+/**
+ * DECtalk emits integers (F0 in tenths of a hertz); the track carries floats.
+ * A packet matches when the track's value is within half of DECtalk's unit,
+ * that is, when it rounds to the integer DECtalk sent.
+ */
+export function parameterTolerance(parameter: FrameParameter): number {
+  return parameter.label === "F0" ? 0.05 : 0.5;
+}
+
+/** Compare a track with DECtalk's packets, each packet at its own start time. */
+export function compareTrackToFrames(
+  frames: readonly DectalkTraceFrame[],
+  track: readonly TrackEvent[],
+): TrackComparison {
+  const parameters: Record<string, ParameterComparison> = Object.fromEntries(
+    FRAME_PARAMETERS.map((parameter) => [
+      parameter.label,
+      { compared: 0, mismatched: 0, sumAbs: 0, maxAbs: 0, firstMismatch: null },
+    ]),
+  );
+  let segmentLabelsDiffer = 0;
+  let cursor = -1;
+  for (let index = 0; index < frames.length; index += 1) {
+    const frame = frames[index] as DectalkTraceFrame;
+    const timeSec = (frame.frame * DECTALK_SAMPLES_PER_FRAME) / DECTALK_NATIVE_SAMPLE_RATE_HZ;
+    while (cursor + 1 < track.length) {
+      const nextTime = finiteNumber(track[cursor + 1]?.time);
+      if (nextTime == null || nextTime > timeSec + 1e-9) break;
+      cursor += 1;
+    }
+    const event = cursor >= 0 ? track[cursor] : undefined;
+    if (sameSegmentLabel(frames, index, event?.phoneme) === false) segmentLabelsDiffer += 1;
+    for (const parameter of FRAME_PARAMETERS) {
+      const dectalk = parameter.oracleValue(frame);
+      const qlatt = qlattValue(event, parameter.qlatt);
+      if (dectalk == null || qlatt == null) continue;
+      const summary = parameters[parameter.label] as ParameterComparison;
+      const abs = Math.abs(qlatt - dectalk);
+      summary.compared += 1;
+      summary.sumAbs += abs;
+      if (abs > summary.maxAbs) summary.maxAbs = abs;
+      if (abs > parameterTolerance(parameter) + 1e-9) {
+        summary.mismatched += 1;
+        summary.firstMismatch ??= { packet: frame.frame, dectalk, qlatt };
+      }
+    }
+  }
+  return { packets: frames.length, segmentLabelsDiffer, parameters };
 }
 
 export function qlattValue(event: TrackEvent | null | undefined, key: string): number | null {

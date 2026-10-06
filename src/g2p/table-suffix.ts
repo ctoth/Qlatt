@@ -61,6 +61,8 @@ export interface SuffixResult {
    * tags a class; 0 when there is none.
    */
   formClass: number;
+  /** The spelling of the dictionary root that was found, or null. */
+  root: string | null;
 }
 
 /**
@@ -74,9 +76,10 @@ export function stripSuffixes(
   tables: SuffixTables,
 ): SuffixResult {
   // ls_dict.c:451: only words of more than two letters.
-  if (word.length <= 2) return { phonemes: null, formClass: 0 };
+  if (word.length <= 2) return { phonemes: null, formClass: 0, root: null };
   // fc_struct[fc_index]: the word's form class as the search goes.
   let formClass = 0;
+  let rootSpelling: string | null = null;
   const table = tables.suffixTable;
   const u32 = (at: number): number =>
     (table[at] | (table[at + 1] << 8) | (table[at + 2] << 16) | (table[at + 3] << 24)) >>> 0;
@@ -167,6 +170,7 @@ export function stripSuffixes(
               formClass = u32(si + 4);
               const root = lookup(comp.join(""));
               found = root ? [...root] : null;
+              if (root) rootSpelling = comp.join("");
             }
             if (found) {
               appendPronunciation(sp, found);
@@ -185,5 +189,5 @@ export function stripSuffixes(
   };
 
   const phonemes = suffixFind(comp.length - 1);
-  return { phonemes, formClass };
+  return { phonemes, formClass, root: phonemes ? rootSpelling : null };
 }

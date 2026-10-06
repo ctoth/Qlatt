@@ -15,6 +15,8 @@ export interface PronunciationResult {
    * know. Absent when the frontend has no form class data.
    */
   formClasses?: string[];
+  /** The phrase the word starts, when the frontend's lexicon marks one. */
+  phraseStart?: "vp";
 }
 
 /** Boundaries are phone offsets in the final pronunciation, end exclusive. */

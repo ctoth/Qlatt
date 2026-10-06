@@ -519,6 +519,9 @@ export function transcribeText(
               ...("formClasses" in pronResult && pronResult.formClasses
                 ? { formClasses: pronResult.formClasses }
                 : {}),
+              ...("phraseStart" in pronResult && pronResult.phraseStart
+                ? { phraseStart: pronResult.phraseStart }
+                : {}),
               _pronDecisionId: stressDecisionId,
             });
           } else {

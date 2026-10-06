@@ -37,6 +37,20 @@ export function formClassNamesOf(mask: number, table: LtsTableDocument): string[
   return names;
 }
 
+/**
+ * Whether a dictionary entry with this form class word starts a verb phrase:
+ * DECtalk sends VPSTART ahead of an entry whose class is exactly `verb`, or
+ * holds both `verb` and `character` (LTS/ls_dict.c:777-778, with VPHRASE =
+ * FC_VERB|FC_CHARACTER from LTS/ls_defs.h:710).
+ */
+export function startsVerbPhrase(mask: number, table: LtsTableDocument): boolean {
+  const names = formClassNamesOf(mask, table);
+  return (
+    (names.length === 1 && names[0] === "verb") ||
+    (names.includes("verb") && names.includes("character"))
+  );
+}
+
 export function isLtsTableDocument(value: unknown): value is LtsTableDocument {
   return (
     typeof value === "object" &&

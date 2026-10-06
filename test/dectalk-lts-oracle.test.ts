@@ -120,7 +120,24 @@ describe("table letter-to-sound, by stage", () => {
       "Z",
     ]);
     expect(stripSuffixes("cats", find, table).phonemes).toEqual(["K", "AE1", "T", "S"]);
-    expect(stripSuffixes("dogs", find, table)).toEqual({ phonemes: null, formClass: 0 });
+    expect(stripSuffixes("cats", find, table).root).toBe("cat");
+    expect(stripSuffixes("dogs", find, table)).toEqual({
+      phonemes: null,
+      formClass: 0,
+      root: null,
+    });
+  });
+
+  it("marks the words DECtalk enters with a verb-phrase start", () => {
+    // DECtalk's phoneme log prints ")" before the word: "hx` iy) g ' owz",
+    // "dhey) w ` ehn t"; none before "tested" (test is noun and verb) or "is".
+    const starts = (word: string): unknown => pronounce(word, lookup, options).phraseStart;
+    expect(starts("go")).toBe("vp");
+    expect(starts("goes")).toBe("vp");
+    expect(starts("went")).toBe("vp");
+    expect(starts("tested")).toBeUndefined();
+    expect(starts("is")).toBeUndefined();
+    expect(starts("and")).toBeUndefined();
   });
 });
 

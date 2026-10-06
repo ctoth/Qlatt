@@ -47,7 +47,10 @@ const isPlainObject = (value: unknown): value is PlainObject =>
 // ---------------------------------------------------------------------------
 // 1. frontend.yaml policy keys
 // ---------------------------------------------------------------------------
-const REPLAY_KEY = /^ {6}((?:cake|the)_[a-z0-9_]+):/;
+// The families the deleted replay rules read. `the_iy_prevocalic_lengthening`
+// is a real duration rule's parameter and must not match.
+const REPLAY_KEY =
+  /^ {6}(cake_[a-z0-9_]*|the_dh_[a-z0-9_]*|the_ax_[a-z0-9_]*|the_tl_db|the_terminal_silence_[a-z0-9_]*):/;
 const frontendPath = path.join(frontendDir, "frontend.yaml");
 const frontendBefore = fs.readFileSync(frontendPath, "utf8");
 const frontendEol = frontendBefore.includes("\r\n") ? "\r\n" : "\n";
@@ -96,7 +99,22 @@ assert.deepEqual(
   [...removedKeys].sort(),
   "a removed key name also exists at another level",
 );
-assert.ok(!/^\s*(?:cake|the)_[a-z0-9_]+:/m.test(frontendAfter), "a replay key is left");
+// No remaining rule, function or phase list may still name a removed key.
+const stillReferenced: string[] = [];
+const ruleFiles = [
+  path.join(frontendDir, "pipeline.yaml"),
+  ...fs
+    .readdirSync(path.join(frontendDir, "phases"))
+    .filter((name) => name.endsWith(".yaml"))
+    .map((name) => path.join(frontendDir, "phases", name)),
+];
+for (const file of ruleFiles) {
+  const text = fs.readFileSync(file, "utf8");
+  for (const key of removedKeys) {
+    if (new RegExp(`\\.${key}\\b`).test(text)) stillReferenced.push(`${path.basename(file)}: ${key}`);
+  }
+}
+assert.deepEqual(stillReferenced, [], "a removed policy key is still referenced by a rule");
 
 // ---------------------------------------------------------------------------
 // 2. lts-rules.yaml whole-word entries

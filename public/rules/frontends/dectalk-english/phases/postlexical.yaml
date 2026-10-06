@@ -795,7 +795,8 @@ rules:
       next_word_boundary: >-
         n == null ? true :
         (has(n.word) && has(current.word) ? n.word != current.word : true)
-      next_has_stress_marker: "n != null && has(n.stress) && n.stress > 0"
+      # `stress` may be present and null; get() reads that as 0.
+      next_has_stress_marker: "n != null && get(n, 'stress', 0) > 0"
     constraint: "next_syllabic && !next_word_boundary && !next_has_stress_marker"
     splice:
       type: replace_range

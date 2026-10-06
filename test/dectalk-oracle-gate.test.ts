@@ -15,7 +15,9 @@
  *
  * KNOWN_GAPS is a ratchet, not an allow-list: each listed phrase must still
  * fail, so fixing one forces its removal here. A phrase may never be added to
- * make a regression pass.
+ * make a regression in a rule pass. The one legitimate way in is the removal
+ * of a hardcoded exception that was making the phrase pass for the wrong
+ * reason; the entry then names the general rule that is missing.
  */
 
 import fs from "node:fs";
@@ -32,10 +34,15 @@ const repoRoot = path.resolve(__dirname, "..");
 const CORPUS_FILES = ["dectalk-us-v1.json", "dectalk-us-heldout-v1.json"];
 
 const KNOWN_GAPS: Readonly<Record<string, string>> = {
-  "glide-young-yard": "E_INVENTORY_PHONEME_UNKNOWN: 'LL' (lts-rules.yaml whole-word YELLED entry)",
-  "stops-pat-tapped": "phoneme sequence differs from DECtalk's by one token",
-  "held-cape": "phoneme sequence differs from DECtalk's",
-  "held-coke": "phoneme sequence differs from DECtalk's",
+  "stops-pat-tapped": "the /t t/ across 'Pat tapped' is not merged into one stop",
+  "held-cape": "silent e: 'cape' gives AE, DECtalk EY",
+  "held-coke": "silent e: 'coke' gives AA, DECtalk OW",
+  // The next four passed only through whole-word letter-to-sound entries
+  // copied from DECtalk's log for these exact phrases. Those entries are gone.
+  "stops-big-dog": "'-ed' after voiceless /k/: 'barked' ends in D, DECtalk T",
+  "fric-safe-zone": "silent e before plural '-s': 'zones' gives AA N EH Z, DECtalk OW N Z",
+  "liquid-red-lorry": "plural '-ies': 'lorries' ends in R Z, DECtalk IY Z",
+  "glide-young-yard": "'-s' after voiceless /k/ ('yaks' Z, DECtalk S); doubled 'll' in 'yelled'",
 };
 
 function loadCorpus(fileName: string): { corpus: OracleCorpusDocument; fixture: PhonemeFixture } {

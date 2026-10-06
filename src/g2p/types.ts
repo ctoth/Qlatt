@@ -42,6 +42,11 @@ export interface PronunciationResult {
    */
   rulesBlockedAt?: number[];
   /**
+   * Indices into `phonemes` of the phones after which the lexicon marks a
+   * morpheme boundary or the joint of a compound.
+   */
+  boundaryAfterAt?: number[];
+  /**
    * The words the token is spoken as, when it is more than one; `phonemes`
    * is then all of them in order.
    */

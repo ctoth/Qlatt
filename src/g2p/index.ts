@@ -102,6 +102,7 @@ export function pronounce(
       isHomograph: choice !== null,
       formClass: other ? other.formClass : (table?.wordFormClasses?.[entry] ?? 0),
       rulesBlockedAt: other ? other.rulesBlockedAt : table?.wordRuleBlocks?.[entry],
+      boundaryAfter: other ? other.boundaryAfter : table?.wordBoundaries?.[entry],
     };
   };
   // The phrase a word starts is read from the dictionary entry that was
@@ -117,10 +118,19 @@ export function pronounce(
       ? { phraseStart: "vp" }
       : {};
   };
-  // The dictionary's `~` marks, of the entry that was reached: a suffixed
-  // word keeps its root's phones in front, so the indices hold.
-  const blocked = (indices: readonly number[] | undefined): { rulesBlockedAt?: number[] } =>
-    indices && indices.length > 0 ? { rulesBlockedAt: [...indices] } : {};
+  // The dictionary's `~`, `*` and `#` marks, of the entry that was reached: a
+  // suffixed word keeps its root's phones in front, so the indices hold.
+  const marked = (entry: {
+    rulesBlockedAt?: readonly number[];
+    boundaryAfter?: readonly number[];
+  }): { rulesBlockedAt?: number[]; boundaryAfterAt?: number[] } => ({
+    ...(entry.rulesBlockedAt && entry.rulesBlockedAt.length > 0
+      ? { rulesBlockedAt: [...entry.rulesBlockedAt] }
+      : {}),
+    ...(entry.boundaryAfter && entry.boundaryAfter.length > 0
+      ? { boundaryAfterAt: [...entry.boundaryAfter] }
+      : {}),
+  });
 
   // A table with number phone lists speaks an all-digit word itself, ahead of
   // any lookup, as several words; the whole number has the one form class
@@ -168,7 +178,7 @@ export function pronounce(
       word: lowerWord,
       ...classed(entry.formClass),
       ...phrased(entry.formClass),
-      ...blocked(entry.rulesBlockedAt),
+      ...marked(entry),
     };
   }
 
@@ -208,7 +218,7 @@ export function pronounce(
         word: lowerWord,
         ...classed(wordClass),
         ...phrased(entry.formClass),
-        ...blocked(entry.rulesBlockedAt),
+        ...marked(entry),
       };
     }
     return {

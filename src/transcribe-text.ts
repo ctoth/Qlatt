@@ -616,6 +616,11 @@ export function transcribeText(
               pronResult.rulesBlockedAt?.includes(phoneIndex)
                 ? { rulesBlocked: true }
                 : {}),
+              ...(spokenParts.length === 1 &&
+              "boundaryAfterAt" in pronResult &&
+              pronResult.boundaryAfterAt?.includes(phoneIndex)
+                ? { morphemeBoundaryAfter: true }
+                : {}),
               _pronDecisionId: stressDecisionId,
             });
           } else {

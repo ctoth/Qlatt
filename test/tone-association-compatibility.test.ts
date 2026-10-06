@@ -38,6 +38,15 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // four dectalk-english snapshots: every duration changes. They are checked
 // against DECtalk's recorded frame counts by
 // scripts/oracle/compare-duration-frames.ts, not here.
+// Keeping the DECtalk dictionary's secondary stress, and raising the last
+// primary stress before "!" to emphasis, regenerate dectalk-english "Did Bob
+// buy a blue balloon?" and "Gag, gang; go!".
+// The syllabifier now knows this frontend's /l/ (it was keyed LL, so "bl" was
+// never an onset), which regenerates dectalk-english "Did Bob buy a blue
+// balloon?" again.
+// The dictionary's RR and IX vowels are no longer folded into ER and IH, which
+// regenerates dectalk-english "The cat sat." ("Saturday") and "Did Bob buy a
+// blue balloon?".
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

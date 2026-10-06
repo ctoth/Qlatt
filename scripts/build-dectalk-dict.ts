@@ -31,11 +31,13 @@
  * (e.g. rr->ER, ax->AX, hx->HH, ll->L, nx->NG, ix->IH, yu->Y+UW).
  *
  * Stress: `'` = primary stress, backtick = secondary stress; both immediately
- * precede the stressed vowel. The DECtalk-target inventory only defines stress
- * digits 0 and 1 (IY0/IY1; there is no IY2), so BOTH primary and secondary map
- * to stress digit 1 (stressed), and unmarked vowels to 0. This collapse keeps
- * every emitted symbol inside the inventory; CMU-style "2" is intentionally not
- * produced. See notes/chunk-dt2a-coder.md.
+ * precede the stressed vowel. Primary becomes stress digit 1, secondary digit
+ * 2, an unmarked vowel 0. The inventory has no targets named with a 2; its
+ * `secondary_stress_fallback` gives a secondary vowel the strong target while
+ * the Segment keeps stress 2, which DECtalk's duration and F0 rules read
+ * (FSTRESS_2, ph_defs.h). 3,591 of Dic_us.txt's 13,682 lines carry a secondary
+ * stress, and some words have nothing stronger ("about" is xb`Wt, "make" m`ek,
+ * "many" m`Eni).
  *
  * Boundary/control chars (`~` block-rules, `#` hyphen/compound, `*` morpheme
  * boundary, ` ` word boundary) produce no phoneme and are skipped.
@@ -279,9 +281,10 @@ const VOWEL_RAW = new Set([
 // digit; the digit is appended by mapToken. `yu` is the only multi-symbol
 // expansion (Y glide + UW vowel, "you"/"cute").
 const FIXUP_VOWEL: Record<string, string> = {
-  rr: "ER", // r-colored vowel -> ER (inventory has no RR)
-  ax: "AX", // reduced schwa -> AX (DECtalk US_DF code 17; gets stress 0)
-  ix: "IH", // reduced barred-i -> IH (inventory has no IX; gets stress 0)
+  // rr and ix are inventory phones (RR, IX) and need no fixup. They were once
+  // folded into ER and IH, which are different DECtalk allophones (US_ER is
+  // the fused vowel of "air"; US_IH is the full vowel of "bit").
+  ax: "AX", // reduced schwa -> AX (DECtalk US_AX code 17)
   // yu handled specially in mapToken (splits to Y + UW)
 };
 const FIXUP_CONS: Record<string, string> = {
@@ -324,9 +327,9 @@ export function convertPhonemeField(field: string): string {
       continue;
     } // primary stress
     if (c === "`") {
-      stress = "1";
+      stress = "2";
       continue;
-    } // secondary stress (collapsed to 1)
+    } // secondary stress
     if (c === "~" || c === "#" || c === "*" || c === " ") continue; // boundaries
     // Glottal stop (q / US_Q): a juncture marker between abutting vowels (the
     // sole occurrence is "minutiae" = mIn'uSi q`i). The dectalk-english Klatt

@@ -1511,6 +1511,12 @@ function applySplice(
     );
     const copySourceName = typeof template.copy_from === "string" ? template.copy_from : null;
     const copySource = copySourceName ? resolveTarget(copySourceName) : undefined;
+    if (copySourceName && !copySource) {
+      // A `define` name is an expression value, not an Item a template can copy.
+      throw new Error(
+        `E_HRG_SPLICE_COPY_SOURCE: rule '${transaction.metadata.ruleId}' copy_from '${copySourceName}' is not current, next, prev or a pattern capture`,
+      );
+    }
     if (copySource) {
       const copyFields =
         Array.isArray(template.copy_fields) && Object.hasOwn(template, "target")

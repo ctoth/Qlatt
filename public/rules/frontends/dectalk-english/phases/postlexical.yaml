@@ -98,6 +98,31 @@ rules:
       - "DECtalk 4.63 ph_sort.c:1181-1189 (every breath group must have at least one 1-stress)"
       - "DECtalk 4.63 ph_sort2.c:129-181 find_syll_to_stress (first syllabic of the last word)"
 
+  # "Exclamation point raises last stress of sentence to emphasis"
+  # (ph_sort.c:1205-1209): raise_last_stress walks back from the '!' and turns
+  # the first primary stress it meets into emphasis. It runs after the
+  # breath-group rule above, in the same pass.
+  dectalk_exclamation_emphasis:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.type == 'vowel' && get(current, 'stress', 0) == 1"
+    define:
+      next_primary_or_boundary: >-
+        look_ahead_where(current, 1000,
+          '(candidate.type == "vowel" && get(candidate, "stress", 0) == 1) || (candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null)')
+    constraint: >-
+      next_primary_or_boundary != null && next_primary_or_boundary.phoneme == 'SIL'
+      && next_primary_or_boundary.punctuationSymbol == '!'
+    apply:
+      - field: stress
+        op: set
+        value: 3
+        tag: emphasis
+    citations:
+      - "DECtalk 4.63 ph_sort.c:1205-1209 (exclamation point raises last stress of sentence to emphasis)"
+      - "DECtalk 4.63 ph_sort.c:1817-1829 raise_last_stress"
+
   dectalk_word_initial_consonant:
     kind: scalar
     select:
@@ -186,6 +211,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'AX'"
           type: ax.type
           target: ax
@@ -200,11 +226,11 @@ rules:
 
   # -------------------------------------------------------------------------
   # GEMINATE OBSTRUENT DELETION (ph_aloph.c:558-562, A1).  When an obstruent is
-  # immediately followed by an identical phoneme, the first copy is deleted.  In
-  # DECtalk's `phonemes[]` relation, word-boundary markers sit between ordinary
-  # words, so cross-word pairs such as "Pat tapped" are not adjacent and must not
-  # collapse.  Within a lexical word, an adjacent doubled obstruent is realized as
-  # a single longer-than-normal obstruent ("bookkeeper" K K -> K).  Source:
+  # immediately followed by an identical phoneme, the first copy is deleted.
+  # phonemes[] holds phones only (boundaries are bits of the structure word), so
+  # the pair may straddle a word boundary: DECtalk says "Pat tapped" with one
+  # [t] (P AE T AE P T in its record), as it says "bookkeeper" with one [k].
+  # Source:
   #   if (phonemes[n] == phonemes[n+1]
   #       && (phone_feature(phonemes[n]) & FOBST))
   #       dodelete = TRUE;
@@ -219,14 +245,12 @@ rules:
   # the FIRST postlexical rule, mirroring its position before the FBLOCK skip at
   # ph_aloph.c:563).
   #
-  # Mechanism: DECtalk's `dodelete` removes the FIRST copy, leaving the second to
-  # carry the (now longer) segment.  A bare `delete: true` on a base-relation token
-  # would leave a time gap and trip the engine's contiguity check
-  # (E_BASE_NOT_CONTIGUOUS), so we express the deletion as a structural splice over
-  # the [current, next] range that re-inserts a single copy of the SECOND
-  # (surviving) obstruent spanning the whole range -- removing the first copy while
-  # keeping the relation contiguous.  This is the same delete-via-replace_range
-  # mechanism the vowel+R fusion and syllabic-n rules use.
+  # Mechanism: DECtalk's `dodelete` removes the FIRST copy; the second survives
+  # with its own structure word (its word, its stress, its word-initial bit).
+  # A bare `delete: true` on a base-relation token would leave a time gap and
+  # trip the engine's contiguity check (E_BASE_NOT_CONTIGUOUS), so the deletion
+  # is a splice over the [current, next] range that re-inserts a whole copy of
+  # the second obstruent.
   # -------------------------------------------------------------------------
   dectalk_geminate_delete:
     kind: postlexical
@@ -238,25 +262,13 @@ rules:
       n: next
       same_as_next: >-
         n != null && has(n.phoneme) && n.phoneme == current.phoneme
-      same_word: >-
-        dectalk_same_word(n, current)
-    constraint: "same_as_next && same_word"
+    constraint: same_as_next
     splice:
       type: replace_range
       range_left: current.sync_left
       range_right: n.sync_right
       insert:
-        - copy_from: current
-          copy_fields:
-            - phoneme
-            - type
-            - stress
-            - word
-            - inherentDuration
-            - minimumDuration
-            - voiced
-            - trajectory
-          duration: "current.duration + n.duration"
+        - copy_from: next
     citations:
       - "DECtalk 4.63 ph_aloph.c:558-562 (A1: delete an obstruent identical to the following phoneme; geminate reduction)"
       - "DECtalk 4.63 ph_defs.h (FOBST obstruent feature = stops + fricatives + affricates)"
@@ -264,10 +276,9 @@ rules:
   # -------------------------------------------------------------------------
   # CORONAL SIBILANT ASSIMILATION (ph_aloph.c:715-722, A4).  An /s/ or /z/ that
   # is immediately followed by /SH/ assimilates to the postalveolar place of the
-  # following sibilant: S -> SH, Z -> ZH.  As with A1 geminate deletion,
-  # DECtalk's word-boundary markers prevent ordinary cross-word pairs such as
-  # "these shoes" from being adjacent in `phonemes[]`; within a lexical word, the
-  # source is a pure next-phoneme test:
+  # following sibilant: S -> SH, Z -> ZH.  As with A1 geminate deletion, the
+  # pair may straddle a word boundary: DECtalk says "These shoes shine." as
+  # DH IY ZH SH UW ZH SH AY N.  The source is a pure next-phoneme test:
   #   if (phonemes[n+1] == USP_SH) {
   #     if (curr_inph == USP_S)  curr_outph = USP_SH;
   #     if (curr_inph == USP_Z)  curr_outph = USP_ZH;
@@ -292,10 +303,9 @@ rules:
     define:
       n: next
       next_is_sh: "n != null && n.phoneme == 'SH'"
-      same_word: "n != null && dectalk_same_word(n, current)"
       assim_name: "current.phoneme == 'S' ? 'SH' : 'ZH'"
       at: "target(assim_name)"
-    constraint: "next_is_sh && same_word"
+    constraint: next_is_sh
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -305,6 +315,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: assim_name
           type: at.type
           target: at
@@ -354,6 +365,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'DF'"
           type: df.type
           target: df
@@ -404,6 +416,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'DX'"
           type: dx.type
           target: dx
@@ -448,6 +461,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'CH'"
           type: ch.type
           target: ch
@@ -479,6 +493,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'JH'"
           type: jh.type
           target: jh
@@ -546,6 +561,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: glot_target
           type: gt.type
           target: gt
@@ -623,7 +639,7 @@ rules:
       range_left: current.sync_left
       range_right: n.sync_right
       insert:
-        - copy_from: n
+        - copy_from: next
           copy_fields:
             - word
           phoneme: "'EN'"
@@ -659,6 +675,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'DZ'"
           type: dz.type
           target: dz
@@ -739,13 +756,11 @@ rules:
       range_left: p.sync_left
       range_right: current.sync_right
       insert:
-        - copy_from: p
+        - copy_from: prev
           copy_fields:
             - stress
             - word
           phoneme: fused_name
-          # The fused vowel keeps the stress of the vowel it replaces.
-          stress: "get(p, 'stress', 0)"
           type: fv.type
           target: fv
           duration: fv.duration
@@ -810,6 +825,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'RR'"
           type: rr.type
           target: rr
@@ -821,3 +837,52 @@ rules:
       - "DECtalk 4.63 ph_aloph.c:636-648 (A5: /R/ before a syllabic, not across a word boundary, -> RR)"
       - "DECtalk 4.63 p_us_rom.h us_maltar/us_mindur (US_RR retroflex /r/ target)"
       - "DECtalk 4.63 oracle -lt/-lp trace for 'Red lorries roll along.' (word-initial stressed R remains US_R: r ' eh, r ' ow)"
+
+  # -------------------------------------------------------------------------
+  # POSTVOCALIC /l/ AND /r/ (ph_aloph.c:821-870, "Rule 2: Postvocalic
+  # allophones of /R/ and /LL/ are special").
+  #
+  #   if ((curr_instruc & (FSTRESS | FWINITC)) IS_MINUS && n > 0
+  #       && (phone_feature(phonemes[n - 1]) & FVOWEL) IS_PLUS)
+  #     LL -> LX;  R -> RX (unless it fuses with the vowel, handled above)
+  #
+  # The phone carries no stress, is not a word-initial consonant, and the
+  # phoneme before it is a vowel (FVOWEL, so not syllabic l or n).
+  #
+  # It runs after the fusion rule, which removes an /r/ that fuses, and before
+  # the prevocalic R -> RR rule: in the C that rule (A5) writes RR first and
+  # this one then overwrites it, so RX wins for an /r/ between two vowels that
+  # does not fuse.
+  # -------------------------------------------------------------------------
+  dectalk_postvocalic_liquid:
+    kind: postlexical
+    select:
+      relation: Segment
+      where: "current.phoneme in ['L', 'R']"
+    define:
+      p: prev
+      allophone: "current.phoneme == 'L' ? 'LX' : 'RX'"
+      at: target(allophone)
+    constraint: >-
+      get(current, 'stress', 0) == 0 && !isTrue(current, 'word_initial_consonant')
+      && p != null && p.type == 'vowel'
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+            - word_initial_consonant
+          phoneme: allophone
+          type: at.type
+          target: at
+          duration: at.duration
+          inherentDuration: at.inherentDuration
+          minimumDuration: "has(at.minimumDuration) ? at.minimumDuration : at.duration"
+          voiced: "has(at.voiced) ? at.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:821-870 (Rule 2: postvocalic allophones of /R/ and /LL/)"
+      - "DECtalk 4.63 p_us_rom.h us_maltar, us_inhdr, us_mindur (US_LX, US_RX targets)"

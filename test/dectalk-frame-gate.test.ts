@@ -44,9 +44,11 @@ const repoRoot = path.resolve(__dirname, "..");
 const TIMING_REASON =
   "the phrase's allophones or their durations are not DECtalk's (KNOWN_GAPS in dectalk-oracle-gate.test.ts)";
 const F0_REASON =
-  "prosody.yaml issues a citation-form approximation of Ph_inton2.c's commands; not ported: " +
-  "the per-clause restart and baseline choice of Ph_drwt02.c:1652-1810, and phinton's exit " +
-  "from its loop at Ph_inton2.c:809-819";
+  "not ported: the glottalization dip before a word-initial vowel (Ph_drwt02.c:2264-2275, " +
+  "4040-4130); Rule 4's question gestures as Ph_inton2.c:1251-1263 issues them, and the " +
+  "question, exclamation and comma baselines (Ph_drwt02.c:1657-1700); the restart of every " +
+  "F0 state at each clause (Ph_drwt02.c:1652-1810). prosody.yaml still issues comma rises, " +
+  "which the live routine never does in English (Ph_inton2.c:1251, 1272)";
 const FORMANT_REASON =
   "lowering blends Segment targets; DECtalk draws each parameter from ph_setar.c and p_us_st1.c " +
   "targets with ph_draw.c:343-460's forward and backward smoothing, then delays it one frame " +

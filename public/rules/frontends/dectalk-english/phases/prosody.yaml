@@ -116,61 +116,57 @@ rules:
       - "Klatt 1982 (baseline declination component)"
 
   # --------------------------------------------------------------------------
-  # Rule 2: Hat Rise (STEP into hat layer)
+  # Rule 1 (Ph_inton2.c:809-908): the hat rise, a STEP at the syllabic that
+  # carries FHAT_BEGINS, unless phinton's walk has stopped at or before it
+  # (annotation.yaml, dectalk_intonation_stops).
   #
-  # Fires at the first stressed vowel in each phrase.  Detection: current is
-  # a primary-stressed vowel AND looking backward, the nearest stressed vowel
-  # or SIL is either SIL or not found (meaning no prior stressed vowel in
-  # this phrase).
+  #   hatsize = size_hat_rise, +15 past the tenth allophone, +70 on the first
+  #             or second allophone (820-833);
+  #   delay   = -2 frames, or half the previous allophone's frames when that
+  #             allophone is FSON1 and is past the second (849-861). The
+  #             routine keeps `gesture_ref` from an earlier rise of the clause
+  #             when the previous allophone is not FSON1; that carry-over is
+  #             not ported.
   #
-  # Source: Ph_inton2.c Rule 1 (citation-mode FHAT_BEGINS -> STEP command).
-  # ph_aloph.c (FHAT_BEGINS placed on first stressed syllabic in phrase).
-  #
-  # Citations:
-  #   - DECtalk 4.63 ph_inton1.c Rule 1 (hat rise generation)
-  #   - DECtalk 4.63 ph_aloph.c (FHAT_BEGINS placement)
-  #   - Klatt 1982 (hat-pattern: rise at first accent)
+  # A command's time is its allophone's start, less the six frames the routine
+  # starts its clock at (cumdur = -6, :488), plus the delay.
   # --------------------------------------------------------------------------
   dectalk_hat_rise:
     kind: f0_layer
     select:
       relation: Segment
-      where: >-
-        current.type == "vowel"
-        && has(current.stress) && current.stress == 1
+      where: { predicate: is_dectalk_syllabic }
     define:
-      # Look backward for the nearest token that is either a stressed vowel
-      # or a SIL boundary.  If the result is SIL or null, current is the
-      # first stressed vowel in the phrase (hat begins).
-      nearest_back: >-
-        look_back_where(current, 100, '(candidate.type == "vowel" && has(candidate.stress) && candidate.stress == 1) || candidate.phoneme == "SIL"')
-      is_hat_begins: >-
-        nearest_back == null || nearest_back.phoneme == "SIL"
-      nearest_forward: >-
-        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
-      is_hat_ends: >-
-        nearest_forward == null || nearest_forward.phoneme == "SIL"
-      prior_vowel_or_boundary: >-
-        look_back_where(current, 100, 'candidate.type == "vowel" || candidate.phoneme == "SIL"')
-      is_first_syllable: >-
-        prior_vowel_or_boundary == null || prior_vowel_or_boundary.phoneme == "SIL"
-      rise_offset_ms: >-
-        is_hat_ends ? -params.policy.f0.hat_rise_same_vowel_early_offset_ms : 0
+      stopped_at: >-
+        look_back_where(current, 1000,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")')
+      reached: >-
+        !isTrue(current, 'intonation_stops') && (stopped_at == null || stopped_at.phoneme == 'SIL')
+      position: "1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
+      la: dectalk_prev(current)
+      gesture_ref: "la != null && dectalk_has(la, 'son1') ? position - 1.0 : 0.0"
+      delay_frames: >-
+        gesture_ref <= params.policy.f0.hat_rise_early_through_allophone
+        ? -params.policy.f0.hat_rise_early_frames
+        : floor(get(la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
       rise_hz: >-
         params.policy.f0.hat_rise_hz
-        + (is_first_syllable ? params.policy.f0.hat_first_syllable_bonus_hz : 0)
-    constraint: is_hat_begins
+        + (position > params.policy.f0.hat_late_after_allophone ? params.policy.f0.hat_late_bonus_hz : 0.0)
+        + (position <= params.policy.f0.hat_first_syllable_through_allophone ? params.policy.f0.hat_first_syllable_bonus_hz : 0.0)
+    constraint: "reached && isTrue(current, 'hat_begins')"
     insert:
       relation: Tilt
       layer: hat
-      at: at_offset(current.sync_left, rise_offset_ms)
+      at: >-
+        at_offset(current.sync_left,
+          (delay_frames - params.policy.f0.command_clock_lead_frames) * params.policy.f0.segmental.frame_ms)
       value: rise_hz
-      # The citation-mode generator emits a STEP. The hat layer is persistent;
-      # duration_frames preserves the source descriptor length for diagnostics.
+      # A STEP has no length of its own; this is the descriptor's.
       duration_frames: params.policy.f0.hat_rise_glide_frames
       tag: f0_hat_rise
     citations:
-      - "DECtalk 4.63 Ph_inton2.c Rule 1 (citation-mode FHAT_BEGINS STEP, Paul HR*10 plus first-syllable 70)"
+      - "DECtalk 4.63 Ph_inton2.c:809-908 Rule 1 (STEP of size_hat_rise, +15 when nphon > 10, +70 when nphon <= 2; delay -2 or allodurs[gesture_ref] >> 1)"
+      - "DECtalk 4.63 Ph_inton2.c:488, 1771-1791 (cumdur starts at -6; make_f0_command)"
       - "Klatt 1982 (hat rise at first accent in phrase)"
 
   # --------------------------------------------------------------------------
@@ -372,65 +368,82 @@ rules:
       - "DECtalk 4.63 ph_inton1.c:1364 (comma gesture timing delayf0 -= NF20MS)"
 
   # --------------------------------------------------------------------------
-  # Rule 4: Stress Impulse (sustained step-plus-ramp into stress layer)
+  # Rule 2 (Ph_inton2.c:924-1062): a stress IMPULSE on every stressed
+  # syllabic the walk reaches, primary, secondary or emphatic.
   #
-  # Fires at every primary-stressed vowel.  Inserts an impulse whose magnitude
-  # is stress_level_primary + a phrase-position component. Citation-mode
-  # Ph_inton2.c leaves its one-word reduction commented out and subtracts 50
-  # for the final stress: 81 + 160 - 50 = 191.
+  #   size  = us_f0_mstress_level[stress] + us_f0_mphrase_position[nrises_sofar]
+  #           (935-942); a quarter of that in a clause that ends in "?" (955-958);
+  #           50 less, and never below 30, on the syllabic where the hat ends or
+  #           before a period (963-972); then times scale_str_rise / 32 (992-999).
+  #   delay = a quarter of the syllabic's frames (961); -3 frames in the
+  #           hat-end or period case; 1 frame under emphasis (976-979).
+  #   nrises_sofar counts the clause's stress impulses so far; at 7 it goes
+  #           back to 1 (1059-1062).
   #
-  # The impulse lasts stress_impulse_duration_frames (20 frames = 128ms at
-  # DECtalk's 6.4ms controller cadence) using the US non-reading IMPULSE
-  # step-plus-ramp in Ph_drwt02.c.
-  #
-  # Simplification: DECtalk tracks nrises_sofar to index into
-  # f0_mphrase_position[], which requires stateful counting.  We use a fixed
-  # average of the first 4 entries: (140+90+60+40)/4 = 82.5 Hz*10.
-  #
-  # Source: Ph_inton2.c Rule 2 (citation-mode stress impulse at FSTRESS_1);
-  # Ph_drwt02.c IMPULSE case (sustained step-plus-ramp).
-  #
-  # Citations:
-  #   - DECtalk 4.63 Ph_inton2.c Rule 2 (citation-mode stress impulse)
-  #   - Klatt 1982 (stress component: impulse at stressed syllables)
+  # make_f0_command never lets a command precede the one before it
+  # (1771-1774): on a syllabic that also carries the hat rise the impulse
+  # cannot start before the rise.
   # --------------------------------------------------------------------------
   dectalk_stress_impulse:
     kind: f0_layer
     select:
       relation: Segment
-      where: >-
-        current.type == "vowel"
-        && has(current.stress) && current.stress == 1
+      where: { predicate: is_dectalk_syllabic }
     define:
-      # Impulse magnitude = stress level + phrase position component.
-      # Scaled by scale_str_rise / 32 (Paul: 32/32 = 1.0).
-      stress_component: >-
-        params.policy.f0.stress_level_primary_hz
-      position_component: >-
-        params.policy.f0.stress_phrase_position_hz
-      scale_factor: >-
-        params.policy.speaker.scale_str_rise / 32.0
-      nearest_forward: >-
-        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
-      is_final_stress: >-
-        nearest_forward == null || nearest_forward.phoneme == "SIL"
-      stress_offset_ms: >-
-        is_final_stress ? -params.policy.f0.stress_final_early_offset_ms : 0
+      stopped_at: >-
+        look_back_where(current, 1000,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")')
+      reached: >-
+        !isTrue(current, 'intonation_stops') && (stopped_at == null || stopped_at.phoneme == 'SIL')
+      stress_now: "get(current, 'stress', 0)"
+      clause_end: >-
+        look_ahead_where(current, 1000,
+          'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
+      question: "clause_end != null && clause_end.punctuationSymbol == '?'"
+      rises: "count_back_pred(current, 1000, 'is_clause_silence', 'is_stressed_syllabic')"
+      rise_index: >-
+        rises < params.policy.f0.stress_max_rises ? rises
+        : 1.0 + mod(rises - params.policy.f0.stress_max_rises, params.policy.f0.stress_max_rises - 1.0)
+      raw_hz: >-
+        params.policy.f0.stress_level[stress_now]
+        + params.policy.f0.stress_phrase_position[rise_index]
+      question_hz: "question ? floor(raw_hz / params.policy.f0.stress_question_divisor) : raw_hz"
+      final: "isTrue(current, 'hat_ends') || get(current, 'rime_boundary', '') == 'period'"
+      reduced_hz: "question_hz - params.policy.f0.stress_final_reduction_hz"
+      final_hz: >-
+        !final ? question_hz
+        : (reduced_hz < 0.0 ? params.policy.f0.stress_final_floor_hz : reduced_hz)
       impulse_hz: >-
-        word_count() == 1
-        ? params.policy.f0.stress_single_word_final_primary_hz * scale_factor
-        : (stress_component + position_component) * scale_factor
+        floor(params.policy.speaker.scale_str_rise * final_hz / params.policy.f0.stress_scale_divisor)
+      own_delay: >-
+        stress_now == params.policy.f0.stress_emphasis_level ? params.policy.f0.stress_emphasis_delay_frames
+        : (final ? -params.policy.f0.stress_final_early_frames
+           : floor(get(current, 'timing_frames', 0.0) / params.policy.f0.stress_delay_divisor))
+      # The hat rise issued just before it on the same syllabic (Rule 1).
+      position: "1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
+      la: dectalk_prev(current)
+      gesture_ref: "la != null && dectalk_has(la, 'son1') ? position - 1.0 : 0.0"
+      hat_delay: >-
+        gesture_ref <= params.policy.f0.hat_rise_early_through_allophone
+        ? -params.policy.f0.hat_rise_early_frames
+        : floor(get(la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
+      delay_frames: >-
+        isTrue(current, 'hat_begins') ? max([own_delay, hat_delay]) : own_delay
+    constraint: "reached && stress_now > 0"
     insert:
       relation: Tilt
       layer: stress
-      at: at_offset(current.sync_left, stress_offset_ms)
+      at: >-
+        at_offset(current.sync_left,
+          (delay_frames - params.policy.f0.command_clock_lead_frames) * params.policy.f0.segmental.frame_ms)
       value: impulse_hz
       duration_frames: params.policy.f0.stress_impulse_duration_frames
       tag: f0_stress_impulse
     citations:
-      - "DECtalk 4.63 Ph_inton2.c Rule 2 (citation-mode first primary stress 81+160, final reduction 50, command 191)"
-      - "DECtalk 4.63 Ph_drwt02.c US non-reading IMPULSE case (duration-controlled step-plus-ramp tarimp)"
-      - "Klatt 1982 (stress-component F0 impulse)"
+      - "DECtalk 4.63 Ph_inton2.c:924-1062 Rule 2 (stress impulse: us_f0_mstress_level + us_f0_mphrase_position[nrises_sofar], length 20)"
+      - "DECtalk 4.63 Ph_inton2.c:311, 327 (the two US tables)"
+      - "DECtalk 4.63 Ph_inton2.c:1771-1791 make_f0_command (a command is never earlier than the one before)"
+      - "DECtalk 4.63 Ph_drwt02.c:1908-1957 US non-reading IMPULSE (step plus ramp)"
 
   # --------------------------------------------------------------------------
   # Segmental F0 (Ph_drwt02.c pht0draw, 2080-2150).
@@ -468,27 +481,39 @@ rules:
       - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (SI target) and :2080-2150 pht0draw"
       - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause of 4 or 5 frames)"
 
+  # The baseline's clock is tcumdur, which phinton adds up one allophone at a
+  # time at the foot of its loop (Ph_inton2.c:1659-1671). Where the walk stops
+  # early (809-819) the allophones from the stopping syllabic on are never
+  # added: pht0draw still steps through them, but the baseline runs over the
+  # shorter span. Those get the second rule's tag, which lowering leaves out
+  # of the baseline's duration.
   dectalk_segmental_f0_phone:
     kind: f0_layer
-    select:
+    select: &segmental_phone_select
       relation: Segment
       where: >-
         current.phoneme != 'SIL'
         && !(current.type in ['stop_release', 'stop_aspiration'])
-    define:
+    define: &segmental_phone_define
       n1: next
       n2: "ahead(current, 2)"
       piece1: "n1 != null && n1.type in ['stop_release', 'stop_aspiration']"
       piece2: "piece1 && n2 != null && n2.type in ['stop_release', 'stop_aspiration']"
       allophone_ms: >-
         current.duration + (piece1 ? n1.duration : 0) + (piece2 ? n2.duration : 0)
+      stopped_at: >-
+        look_back_where(current, 1000,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")')
+      counted: >-
+        !isTrue(current, 'intonation_stops') && (stopped_at == null || stopped_at.phoneme == 'SIL')
+    constraint: counted
     insert:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
       value: "get(params.policy.f0.segmental.targets, current.phoneme, 0)"
       duration_frames: "round(allophone_ms / params.policy.f0.segmental.frame_ms)"
-      profile_points:
+      profile_points: &segmental_phone_flags
         - "isTrue(current, 'voiced') ? 0 : 1"
         - "current.type == 'stop_closure' ? 1 : 0"
         - "get(current, 'stress', 0) > 0 ? 1 : 0"
@@ -496,6 +521,24 @@ rules:
     citations:
       - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (incremental F0 target per phone)"
       - "DECtalk 4.63 Ph_drwt02.c:2080-2150 pht0draw (allodurs[] frames; FVOICD, FPLOSV and FSTRESS tests)"
+
+  dectalk_segmental_f0_phone_after_intonation_stop:
+    kind: f0_layer
+    select: *segmental_phone_select
+    define: *segmental_phone_define
+    constraint: "!counted"
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: "get(params.policy.f0.segmental.targets, current.phoneme, 0)"
+      duration_frames: "round(allophone_ms / params.policy.f0.segmental.frame_ms)"
+      profile_points: *segmental_phone_flags
+      tag: f0_segmental_uncounted_phone
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (incremental F0 target per phone)"
+      - "DECtalk 4.63 Ph_drwt02.c:2080-2150 pht0draw (allodurs[] frames; FVOICD, FPLOSV and FSTRESS tests)"
+      - "DECtalk 4.63 Ph_inton2.c:809-819, 1659-1671 (tcumdur is not added to once the loop is left)"
 
   dectalk_segmental_f0_dummy_vowel:
     kind: f0_layer

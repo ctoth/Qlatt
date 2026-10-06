@@ -54,6 +54,10 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // opening frames; the [g] before the comma is released into IX) and "sip sip."
 // (the dummy vowel is six frames, 38.4 ms, with aspiration at 39 dB). Both are
 // checked against DECtalk's packets by test/dectalk-frame-gate.test.ts.
+// The hat rise and stress impulses as Ph_inton2.c issues them (a stress
+// impulse on every stressed syllabic, sized by its place among the clause's
+// stresses) regenerate all four dectalk-english snapshots: only F0 changes.
+// The frame gate checks F0 packet by packet on 190 corpus phrases.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

@@ -539,6 +539,40 @@ parameters:
       # Ph_inton2.c adds 70 when the stressed nucleus is in the first syllable.
       hat_rise_hz: 120
       hat_first_syllable_bonus_hz: 70
+      # Ph_inton2.c:830: the 70 is added when `nphon <= 2`.
+      hat_first_syllable_through_allophone: 2
+      # Ph_inton2.c:822-828: 15 more when `nphon > 10`.
+      hat_late_after_allophone: 10
+      hat_late_bonus_hz: 15
+      # Ph_inton2.c:854-861: the rise is 2 frames early when gesture_ref <= 2.
+      hat_rise_early_through_allophone: 2
+      hat_rise_early_frames: 2
+      # Ph_inton2.c:860: otherwise allodurs[gesture_ref] >> 1.
+      hat_rise_delay_divisor: 2
+      # Ph_inton2.c:961: a stress impulse starts allodurs[nphon] >> 2 into the vowel.
+      stress_delay_divisor: 4
+      # Ph_inton2.c:955-958: targf0 >>= 2 in a clause that ends in "?".
+      stress_question_divisor: 4
+      # Ph_inton2.c:992-999: muldv(scale_str_rise, targf0, 32).
+      stress_scale_divisor: 32
+      # ph_defs.h FEMPHASIS: stress level 3.
+      stress_emphasis_level: 3
+      # Ph_inton2.c:488: phinton starts its command clock at cumdur = -6.
+      command_clock_lead_frames: 6
+      # Ph_inton2.c:311, 327: us_f0_mphrase_position and us_f0_mstress_level,
+      # the stress impulse's two terms, by stresses so far in the clause and
+      # by stress level (none, primary, secondary, emphasis).
+      stress_phrase_position: [160, 80, 60, 40, 30, 20, 20, 5]
+      stress_level: [1, 81, 61, 261]
+      # Ph_inton2.c:585, 1059-1062: MAX_NRISES; the count goes back to 1 there.
+      stress_max_rises: 7
+      # Ph_inton2.c:960-973: the clause's last stress, or a syllabic before a
+      # period, starts NF20MS (3 frames) early and is 50 lower, never below 30.
+      stress_final_early_frames: 3
+      stress_final_reduction_hz: 50
+      stress_final_floor_hz: 30
+      # Ph_inton2.c:976-979: emphasis starts NF7MS (1 frame) into the vowel.
+      stress_emphasis_delay_frames: 1
       # Ph_inton2.c:815: phinton() leaves its allophone loop at a syllabic that
       # begins and ends the hat when `nphon > 4`.
       intonation_stop_after_allophone: 4
@@ -558,11 +592,6 @@ parameters:
       # DECtalk 4.63 ph_inton1.c Rule 3:
       # if sonorants follow the nucleus, delay the fall by 90 ms instead.
       hat_fall_following_sonorant_delay_ms: 90
-      # The citation-mode command clock begins at -6 frames, then applies the
-      # first-syllable hat's -2-frame delay: -8 native 6.4 ms frames total.
-      # The immediately following final-stress command clamps to that timestamp.
-      hat_rise_same_vowel_early_offset_ms: 51.2
-      stress_final_early_offset_ms: 51.2
       # Non-final clause boundary fall (internal Hz*10).
       # Source: ph_inton1.c F0_NON_FINAL_FALL = 150.
       non_final_fall_hz: 150
@@ -603,18 +632,8 @@ parameters:
       # allodurs[nphon]; ~24 control frames at the 6.4 ms cadence for a ~150 ms
       # final vowel). # engineering span estimate (final-vowel-length proxy)
       question_rise_glide_frames: 24
-      # Citation-mode US stress magnitudes (internal Hz*10 units).
-      # Source: Ph_inton2.c us_f0_mstress_level[] and
-      # us_f0_mphrase_position[].
-      stress_level_primary_hz: 81
-      stress_level_secondary_hz: 61
-      stress_level_emphasis_hz: 261
-      # First primary stress: 81 + 160; phrase-final reduction: -50.
-      # The single-word reduction in Ph_inton2.c is commented out.
-      stress_single_word_final_primary_hz: 191
-      stress_phrase_position_hz: 160
       # Stress impulse duration in native DECtalk control frames.
-      # Source: ph_inton1.c make_f0_command(... IMPULSE, ..., 20, ...).
+      # Source: Ph_inton2.c:1056 make_f0_command(IMPULSE, 2, targf0, delayf0, 20, ...).
       stress_impulse_duration_frames: 20
       segmental:
         # us_f0msegtars[]: incremental segmental F0 target per phone, internal

@@ -8,5 +8,5 @@
   "held-kick": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A5"],
   "held-a": ["F0","F1","F2","F3","B1","B2","AV","AP"],
   "held-they": ["F1","F2","F3","B1","B2","B3","AV","AP","A6","AB"],
-  "held-cake-phrase": ["F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5","A6","AB"]
+  "held-cake-phrase": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5","A6","AB"]
 }

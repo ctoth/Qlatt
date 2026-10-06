@@ -591,9 +591,15 @@ function renderLayeredF0(
       (commandsByLayer.get(name) ?? []).reduce(
         // Ph_inton2.c's tcumdur excludes the final GEN_SIL even though
         // pht0draw() consumes that allophone in the segmental controller.
+        // It also excludes every allophone from the one at which phinton
+        // leaves its loop early (Ph_inton2.c:809-819, 1659-1671); the rules
+        // tag those commands.
         (layerTotal, command) =>
           layerTotal +
-          (command.tag === "f0_segmental_terminal_silence" ? 0 : (command.durationFrames ?? 0)),
+          (command.tag === "f0_segmental_terminal_silence" ||
+          command.tag === "f0_segmental_uncounted_phone"
+            ? 0
+            : (command.durationFrames ?? 0)),
         0,
       )
     );

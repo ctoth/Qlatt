@@ -198,6 +198,11 @@ predicates:
   # FSYLL: a vowel or a syllabic consonant.
   is_dectalk_syllabic: >-
     current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"]
+  # A syllabic with any FSTRESS bit: primary, secondary or emphasis
+  # (Ph_inton2.c:926, the stress impulse's test).
+  is_stressed_syllabic: >-
+    (current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"])
+    && get(current, "stress", 0) > 0
   # A syllabic with FSTRESS_1: primary stress or emphasis.
   is_primary_syllabic: >-
     (current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"])
@@ -851,6 +856,7 @@ phases:
       # One command per DECtalk allophone, in clause order (pht0draw).
       - dectalk_segmental_f0_initial_silence
       - dectalk_segmental_f0_phone
+      - dectalk_segmental_f0_phone_after_intonation_stop
       - dectalk_segmental_f0_dummy_vowel
       - dectalk_segmental_f0_final_silence
       - dectalk_connected_speech_source_contour

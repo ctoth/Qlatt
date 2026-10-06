@@ -203,6 +203,25 @@ f0_model:
     max_hz: 500
 parameters:
   policy:
+    # Data for the phone structure word DECtalk builds before its allophone and
+    # duration rules (ph_sort.c phsort()).
+    structure:
+      # us_phcluster(first, second): legal two-consonant onsets. `s_onset` marks
+      # the clusters that may also take a leading /s/ (CLUSTER_TRYS). Keys are
+      # this port's phone names (LL is spelled L here).
+      onset_clusters:
+        P: { L: s_onset, R: s_onset }
+        B: { L: cluster, R: cluster }
+        F: { R: s_onset, L: cluster }
+        T: { R: s_onset, W: cluster }
+        D: { R: cluster, W: cluster }
+        TH: { R: cluster, W: cluster }
+        K: { R: s_onset, L: s_onset, W: s_onset }
+        G: { R: cluster, L: cluster, W: cluster }
+        S: { W: cluster, L: cluster, P: cluster, T: cluster, K: cluster, M: cluster, N: cluster, F: cluster }
+        SH: { W: cluster, L: cluster, P: cluster, T: cluster, R: cluster, M: cluster, N: cluster }
+      citations:
+        - "DECtalk 4.63 p_us_sr1.c:175-228 us_phcluster (CLUSTER and CLUSTER_TRYS onset pairs)"
     rate:
       undershoot_coefficient:
         value: 0.3

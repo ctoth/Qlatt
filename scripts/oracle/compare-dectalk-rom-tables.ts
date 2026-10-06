@@ -73,6 +73,11 @@ const inhdr = readTable(rom, "us_inhdr");
 const mindur = readTable(rom, "us_mindur");
 const burdr = readTable(rom, "us_burdr");
 const f0segtars = readTable(rom, "us_f0segtars");
+// us_maltar is laid out as consecutive blocks of one value per phoneme
+// (scripts/extract-dectalk-diphthong-trajectories.ts): block b, phoneme p is
+// maltar[b * phonemeCount + p]. A value below -1 points into us_maldip.
+const maltar = readTable(rom, "us_maltar");
+const MALTAR_BLOCKS = ["F1", "F2", "F3", "B1", "B2", "B3"];
 
 const inventoryDoc = yaml.load(
   fs.readFileSync(
@@ -147,4 +152,28 @@ if (asJson) {
     );
   }
   console.log(JSON.stringify({ phonemes: rows.length, inInventory: compared, matched }));
+
+  // Male formant targets beside the inventory's.
+  console.log(`\nidx\tDECtalk\t${MALTAR_BLOCKS.join("\t")}\tours\t${MALTAR_BLOCKS.join("\t")}`);
+  for (const row of rows) {
+    const rom = MALTAR_BLOCKS.map((_, block) => maltar[block * rows.length + row.index]);
+    const ours = row.oursKey == null ? undefined : targets[row.oursKey];
+    const mine = MALTAR_BLOCKS.map((key) => (ours ? (numberOrNull(ours[key]) ?? "-") : "-"));
+    console.log([row.index, row.dectalk, ...rom, row.oursKey ?? "-", ...mine].join("\t"));
+  }
+
+  // Whatever follows the six formant blocks, unlabelled: one column per block.
+  const blockCount = maltar.length / rows.length;
+  console.log(
+    `\nus_maltar: ${maltar.length} values = ${blockCount} blocks of ${rows.length}; blocks 6+:`,
+  );
+  if (Number.isInteger(blockCount)) {
+    for (const row of rows) {
+      const rest: number[] = [];
+      for (let block = MALTAR_BLOCKS.length; block < blockCount; block += 1) {
+        rest.push(maltar[block * rows.length + row.index]);
+      }
+      console.log([row.index, row.dectalk, ...rest].join("\t"));
+    }
+  }
 }

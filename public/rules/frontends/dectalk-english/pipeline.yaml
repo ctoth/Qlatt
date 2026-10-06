@@ -10,6 +10,14 @@ functions:
     description: Presence-guarded word equality; callers retain their item-null and navigation conditions.
     citations:
       - "Qlatt #133 engineering convention: same word requires both word fields to be present and equal"
+  # us_phcluster(first, second) as data: 'cluster', 's_onset' (CLUSTER_TRYS) or
+  # 'none'. Arguments are phone names.
+  dectalk_onset_cluster:
+    params: [first, second]
+    body: "get(get(params.policy.structure.onset_clusters, first, null), second, 'none')"
+    description: Kind of two-consonant onset, from the frontend's onset cluster table.
+    citations:
+      - "DECtalk 4.63 p_us_sr1.c:175-228 us_phcluster"
 predicates:
   is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
   is_stressed_vowel: 'current.type == "vowel" && has(current.stress) && current.stress == 1'
@@ -234,6 +242,8 @@ tags:
   coarticulation: blends neighboring articulatory targets
   consonant_position: adjusts duration by consonant position
   consonant_stress: adjusts a consonant beside a stressed vowel
+  word_initial_consonant: marks a consonant before its word's first syllabic
+  postvocalic_lateral: selects the postvocalic allophone of a lateral
   duration_floor: enforces a segment-duration floor
   emphasis: strengthens an emphasized segment
   emphasis_syllabic: strengthens the syllabic portion of an emphasized word
@@ -316,6 +326,7 @@ relations:
       voiceless: []
       weak: []
       word: []
+      word_initial_consonant: []
       AF: []
       AH: []
       AN: []
@@ -438,6 +449,10 @@ phases:
     #     glottalization and flapping; it sits just before the dental /dh/ rule
     #     (L1066), which stays LAST because it likewise reads last_outph.
     rules:
+      # ph_sort.c structure-word fields that the allophone rules below read.
+      - dectalk_breath_group_primary_stress
+      - dectalk_word_initial_consonant
+      - dectalk_consonant_stress
       - dectalk_reduce_article_a
       - dectalk_geminate_delete
       - dectalk_assimilate_sibilant_sh
@@ -473,8 +488,6 @@ phases:
       - syllable_index_annotation
       - syllable_role_annotation
       - syllable_position_annotation
-      - dectalk_single_word_fallback_primary_stress
-      - dectalk_onset_y_stress
   - name: formant
     rules:
       - dectalk_sw_explicit_override

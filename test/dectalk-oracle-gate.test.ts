@@ -36,7 +36,6 @@ const KNOWN_GAPS: Readonly<Record<string, string>> = {
   "stops-pat-tapped": "phoneme sequence differs from DECtalk's by one token",
   "held-cape": "phoneme sequence differs from DECtalk's",
   "held-coke": "phoneme sequence differs from DECtalk's",
-  "held-a": "phoneme sequence differs from DECtalk's",
 };
 
 function loadCorpus(fileName: string): { corpus: OracleCorpusDocument; fixture: PhonemeFixture } {

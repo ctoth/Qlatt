@@ -568,6 +568,7 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
         return view(candidate);
       },
       look_back_where: (source, maxSteps, expression) => scan(source, maxSteps, expression, -1),
+      look_ahead_where: (source, maxSteps, expression) => scan(source, maxSteps, expression, 1),
       look_back_pred: (source, maxSteps, predicateName) =>
         typeof predicateName === "string"
           ? scan(source, maxSteps, { predicate: predicateName }, -1)

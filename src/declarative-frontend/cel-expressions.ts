@@ -250,6 +250,7 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "contains", arities: [2], binding: "context" },
   { name: "merge", arities: [2], binding: "context" },
   { name: "look_back_where", arities: [3], binding: "context" },
+  { name: "look_ahead_where", arities: [3], binding: "context" },
   { name: "look_back_pred", arities: [3], binding: "context" },
   { name: "look_ahead_pred", arities: [3], binding: "context" },
   { name: "find_within_word", arities: [2, 3], binding: "context" },

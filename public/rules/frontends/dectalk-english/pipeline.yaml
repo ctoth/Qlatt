@@ -425,7 +425,9 @@ relations:
       # A vowel the helper-verb promotion gave secondary stress.
       helper_verb_promoted: { kind: boolean }
       word_initial_consonant: { kind: boolean }
-      rime_boundary: { kind: string, values: [word, comma, period, question, exclaim] }
+      # The phrase a word starts, on each of its Segments (from the lexicon).
+      phrase_start: []
+      rime_boundary: { kind: string, values: [word, vp, comma, period, question, exclaim] }
       # State of DECtalk's duration routine for one allophone (p_us_tim.c), in
       # its own units: frames, and a percentage where 128 is 100%.
       clause_position: { kind: number }

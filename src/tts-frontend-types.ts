@@ -9,6 +9,8 @@ export interface TranscriptionToken {
   word: string;
   /** The word's form classes, when the frontend's lexicon records them. */
   formClasses?: readonly string[];
+  /** The phrase the word starts, when the frontend's lexicon marks one. */
+  phraseStart?: "vp";
   isPunctuation?: boolean;
   symbol?: string;
   duration?: number;

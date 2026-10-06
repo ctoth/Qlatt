@@ -692,6 +692,42 @@ describe("dectalk-english helper-verb promotion", () => {
 });
 
 // ---------------------------------------------------------------------------
+// The last rime before a word that starts a verb phrase carries FVPNEXT, not
+// FWBNEXT (LTS/ls_dict.c:777-778, ph_sort2.c get_next_bound_type). Boundary
+// value per phone from DECtalk's debug build: 160 is the verb-phrase value,
+// 96 a word boundary.
+// ---------------------------------------------------------------------------
+describe("dectalk-english verb-phrase boundaries", () => {
+  function boundaries(phrase: string): string[] {
+    const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    return utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false && item.get("rime_boundary") !== undefined)
+      .map((item) => `${String(item.get("phoneme"))}:${String(item.get("rime_boundary"))}`);
+  }
+
+  it("marks the rime before a verb", () => {
+    // "Can we go?": ae 96, n 96, iy 160, ow question.
+    expect(boundaries("Can we go?")).toEqual(["AE:word", "N:word", "IY:vp", "OW:question"]);
+    // "They went home.": ey 160.
+    expect(boundaries("They went home.")[0]).toBe("EY:vp");
+  });
+
+  it("reads a suffixed verb's root", () => {
+    // "He goes home.": iy 160 ("go" is a verb, "goes" is not in the dictionary).
+    expect(boundaries("He goes home.")[0]).toBe("IY:vp");
+  });
+
+  it("leaves a word boundary before a word that is also a noun", () => {
+    // "We tested it.": iy 96.
+    expect(boundaries("We tested it.")[0]).toBe("IY:word");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // One output clock. DECtalk's controller counts nominal 6.4-ms frames
 // (ph_claus.c) and the VTM emits each as a 71-sample packet at 11,025 Hz
 // (VTM/vtmiont.c), so every frame of a clause, segment starts and F0 ticks

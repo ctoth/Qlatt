@@ -26,6 +26,7 @@ import {
   isLtsTableDocument,
   type LtsTableDocument,
   pronounceWithLtsTable,
+  startsVerbPhrase,
 } from "./table-lts-pronounce";
 import { stripSuffixes } from "./table-suffix";
 import type { DictLookup, PronunciationResult } from "./types";
@@ -74,6 +75,16 @@ export function pronounce(
           formClasses: formClassNamesOf(table.specialWordFormClasses?.[lowerWord] ?? mask, table),
         }
       : {};
+  // The phrase a word starts is read from the dictionary entry that was
+  // reached, a suffixed word's root included; the fixed-class words come from
+  // DECtalk's mini dictionary and never reach it.
+  const phrased = (entry: string | null): { phraseStart?: "vp" } =>
+    table?.wordFormClasses &&
+    entry !== null &&
+    table.specialWordFormClasses?.[lowerWord] === undefined &&
+    startsVerbPhrase(table.wordFormClasses[entry] ?? 0, table)
+      ? { phraseStart: "vp" }
+      : {};
 
   // 1. Try direct dictionary lookup
   const dictResult = dictLookup(lowerWord);
@@ -83,6 +94,7 @@ export function pronounce(
       source: "dictionary",
       word: lowerWord,
       ...classed(table?.wordFormClasses?.[lowerWord] ?? 0),
+      ...phrased(lowerWord),
     };
   }
 
@@ -95,13 +107,14 @@ export function pronounce(
     const stripped =
       suffixIndex && suffixTable
         ? stripSuffixes(lowerWord, dictLookup, { ...table, suffixIndex, suffixTable })
-        : { phonemes: null, formClass: 0 };
+        : { phonemes: null, formClass: 0, root: null };
     if (stripped.phonemes) {
       return {
         phonemes: stripped.phonemes,
         source: "morphology",
         word: lowerWord,
         ...classed(stripped.formClass),
+        ...phrased(stripped.root),
       };
     }
     return {

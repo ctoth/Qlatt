@@ -1051,9 +1051,11 @@ phoneme_targets:
   # of the RR diphthong: F1 450->390, F2/F3 steady 1320/1540) and us_mindur[]
   # (inherent 180 / minimum 90).  RR is the vowel produced by AX+R fusion ("letter",
   # "actor" -> ...RR) and by the A5 R-before-syllabic rewrite; it is a syllabic
-  # rhotic, hence type: vowel + rhotic: true (like ER/AR/...).  No stress variant:
-  # AX is the reduced schwa and RR inherits its unstressed quality.
-  RR:
+  # rhotic, hence type: vowel + rhotic: true (like ER/AR/...).
+  # DECtalk has one US_RR target whatever the stress; it is also the vowel of
+  # "church" and "world" in the dictionary, where it is stressed. RR0 and RR1
+  # name that same target for a dictionary vowel with a stress digit.
+  RR: &dectalk_rr
     TL: 3
     F1: 390
     F2: 1320
@@ -1067,6 +1069,8 @@ phoneme_targets:
     type: vowel
     voiced: true
     rhotic: true
+  RR0: *dectalk_rr
+  RR1: *dectalk_rr
   L:
     TL: 3
     F1: 400

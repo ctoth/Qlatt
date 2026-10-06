@@ -226,11 +226,11 @@ rules:
 
   # -------------------------------------------------------------------------
   # GEMINATE OBSTRUENT DELETION (ph_aloph.c:558-562, A1).  When an obstruent is
-  # immediately followed by an identical phoneme, the first copy is deleted.  In
-  # DECtalk's `phonemes[]` relation, word-boundary markers sit between ordinary
-  # words, so cross-word pairs such as "Pat tapped" are not adjacent and must not
-  # collapse.  Within a lexical word, an adjacent doubled obstruent is realized as
-  # a single longer-than-normal obstruent ("bookkeeper" K K -> K).  Source:
+  # immediately followed by an identical phoneme, the first copy is deleted.
+  # phonemes[] holds phones only (boundaries are bits of the structure word), so
+  # the pair may straddle a word boundary: DECtalk says "Pat tapped" with one
+  # [t] (P AE T AE P T in its record), as it says "bookkeeper" with one [k].
+  # Source:
   #   if (phonemes[n] == phonemes[n+1]
   #       && (phone_feature(phonemes[n]) & FOBST))
   #       dodelete = TRUE;
@@ -245,14 +245,12 @@ rules:
   # the FIRST postlexical rule, mirroring its position before the FBLOCK skip at
   # ph_aloph.c:563).
   #
-  # Mechanism: DECtalk's `dodelete` removes the FIRST copy, leaving the second to
-  # carry the (now longer) segment.  A bare `delete: true` on a base-relation token
-  # would leave a time gap and trip the engine's contiguity check
-  # (E_BASE_NOT_CONTIGUOUS), so we express the deletion as a structural splice over
-  # the [current, next] range that re-inserts a single copy of the SECOND
-  # (surviving) obstruent spanning the whole range -- removing the first copy while
-  # keeping the relation contiguous.  This is the same delete-via-replace_range
-  # mechanism the vowel+R fusion and syllabic-n rules use.
+  # Mechanism: DECtalk's `dodelete` removes the FIRST copy; the second survives
+  # with its own structure word (its word, its stress, its word-initial bit).
+  # A bare `delete: true` on a base-relation token would leave a time gap and
+  # trip the engine's contiguity check (E_BASE_NOT_CONTIGUOUS), so the deletion
+  # is a splice over the [current, next] range that re-inserts a whole copy of
+  # the second obstruent.
   # -------------------------------------------------------------------------
   dectalk_geminate_delete:
     kind: postlexical
@@ -264,25 +262,13 @@ rules:
       n: next
       same_as_next: >-
         n != null && has(n.phoneme) && n.phoneme == current.phoneme
-      same_word: >-
-        dectalk_same_word(n, current)
-    constraint: "same_as_next && same_word"
+    constraint: same_as_next
     splice:
       type: replace_range
       range_left: current.sync_left
       range_right: n.sync_right
       insert:
-        - copy_from: current
-          copy_fields:
-            - phoneme
-            - type
-            - stress
-            - word
-            - inherentDuration
-            - minimumDuration
-            - voiced
-            - trajectory
-          duration: "current.duration + n.duration"
+        - copy_from: next
     citations:
       - "DECtalk 4.63 ph_aloph.c:558-562 (A1: delete an obstruent identical to the following phoneme; geminate reduction)"
       - "DECtalk 4.63 ph_defs.h (FOBST obstruent feature = stops + fricatives + affricates)"
@@ -290,10 +276,9 @@ rules:
   # -------------------------------------------------------------------------
   # CORONAL SIBILANT ASSIMILATION (ph_aloph.c:715-722, A4).  An /s/ or /z/ that
   # is immediately followed by /SH/ assimilates to the postalveolar place of the
-  # following sibilant: S -> SH, Z -> ZH.  As with A1 geminate deletion,
-  # DECtalk's word-boundary markers prevent ordinary cross-word pairs such as
-  # "these shoes" from being adjacent in `phonemes[]`; within a lexical word, the
-  # source is a pure next-phoneme test:
+  # following sibilant: S -> SH, Z -> ZH.  As with A1 geminate deletion, the
+  # pair may straddle a word boundary: DECtalk says "These shoes shine." as
+  # DH IY ZH SH UW ZH SH AY N.  The source is a pure next-phoneme test:
   #   if (phonemes[n+1] == USP_SH) {
   #     if (curr_inph == USP_S)  curr_outph = USP_SH;
   #     if (curr_inph == USP_Z)  curr_outph = USP_ZH;
@@ -318,10 +303,9 @@ rules:
     define:
       n: next
       next_is_sh: "n != null && n.phoneme == 'SH'"
-      same_word: "n != null && dectalk_same_word(n, current)"
       assim_name: "current.phoneme == 'S' ? 'SH' : 'ZH'"
       at: "target(assim_name)"
-    constraint: "next_is_sh && same_word"
+    constraint: next_is_sh
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -655,7 +639,7 @@ rules:
       range_left: current.sync_left
       range_right: n.sync_right
       insert:
-        - copy_from: n
+        - copy_from: next
           copy_fields:
             - word
           phoneme: "'EN'"
@@ -772,14 +756,11 @@ rules:
       range_left: p.sync_left
       range_right: current.sync_right
       insert:
-        - copy_from: p
+        - copy_from: prev
           copy_fields:
             - stress
             - word
-            - word_initial_consonant
           phoneme: fused_name
-          # The fused vowel keeps the stress of the vowel it replaces.
-          stress: "get(p, 'stress', 0)"
           type: fv.type
           target: fv
           duration: fv.duration

@@ -729,7 +729,8 @@ rules:
       - "DECtalk 4.63 p_us_tim.c:858-867 Rule 23 (before DF: N35PRCNT)"
 
   # 871-877.
-  dectalk_timing_retroflex_minimum:
+  # Numbered 23 because it sits between Rules 23 and 24 in the source.
+  dectalk_timing_23_retroflex_minimum:
     kind: scalar
     select:
       relation: Segment

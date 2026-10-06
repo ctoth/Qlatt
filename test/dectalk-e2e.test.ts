@@ -501,19 +501,19 @@ describe("dectalk-english dictionary-first (dt-2b)", () => {
       .filter((p) => p !== "SIL");
   }
 
-  it("uses the dictionary pronunciation for 'colonel' (K ER N EL), not the LTS spelling-out", () => {
+  it("uses the dictionary pronunciation for 'colonel' (K RR N EL), not the LTS spelling-out", () => {
     const phs = contentPhonemes("colonel.");
-    // Dictionary: K ER1 N EL. The old LTS path produced K AA L AA N EH L —
-    // it contained no ER at all and doubled AA. Assert the dict signature.
-    expect(phs).toContain("ER");
+    // Dictionary: k'Rnl, DECtalk's RR vowel. The old LTS path produced
+    // K AA L AA N EH L, with no r-colored vowel and a doubled AA.
+    expect(phs).toContain("RR");
     expect(phs.filter((p) => p === "AA").length).toBe(0);
     expect(phs[0]).toBe("K");
   });
 
-  it("uses the dictionary pronunciation for 'nuclear' (N UW K L IY ER), avoiding the LTS 'nucular' shape", () => {
+  it("uses the dictionary pronunciation for 'nuclear' (N UW K L IY RR), avoiding the LTS 'nucular' shape", () => {
     const phs = contentPhonemes("nuclear.");
-    // Dictionary: N UW1 K L IY0 ER0 — ends in ER, has IY before it.
-    expect(phs).toContain("ER");
+    // The dictionary entry ends in DECtalk's RR vowel, with IY before it.
+    expect(phs).toContain("RR");
     expect(phs).toContain("IY");
     expect(phs[0]).toBe("N");
   });

@@ -281,9 +281,10 @@ const VOWEL_RAW = new Set([
 // digit; the digit is appended by mapToken. `yu` is the only multi-symbol
 // expansion (Y glide + UW vowel, "you"/"cute").
 const FIXUP_VOWEL: Record<string, string> = {
-  rr: "ER", // r-colored vowel -> ER (inventory has no RR)
-  ax: "AX", // reduced schwa -> AX (DECtalk US_DF code 17; gets stress 0)
-  ix: "IH", // reduced barred-i -> IH (inventory has no IX; gets stress 0)
+  // rr and ix are inventory phones (RR, IX) and need no fixup. They were once
+  // folded into ER and IH, which are different DECtalk allophones (US_ER is
+  // the fused vowel of "air"; US_IH is the full vowel of "bit").
+  ax: "AX", // reduced schwa -> AX (DECtalk US_AX code 17)
   // yu handled specially in mapToken (splits to Y + UW)
 };
 const FIXUP_CONS: Record<string, string> = {

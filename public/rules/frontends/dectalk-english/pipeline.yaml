@@ -491,7 +491,7 @@ phases:
       - dectalk_timing_20_unstressed_final_iy
       - dectalk_timing_21_plosive_between_obstruents
       - dectalk_timing_23_before_df
-      - dectalk_timing_retroflex_minimum
+      - dectalk_timing_23_retroflex_minimum
       - dectalk_timing_24_before_velar_nasal
       - dectalk_timing_frames
       - dectalk_allophone_duration

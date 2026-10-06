@@ -26,6 +26,11 @@ rules:
   # Rule 1 (p_us_tim.c:225-277). The pause at a clause boundary. The values are
   # DECtalk's own at the corpus speaking rate (nfcomma and nfperiod scaled by
   # sprat1), in frames.
+  #
+  # DECtalk times one clause at a time, and each clause is silence, phones,
+  # silence: after a clause's closing pause comes the next clause's opening
+  # pause (229-232). One silence Segment stands here for both, so a pause that
+  # another clause follows also holds that clause's opening frames.
   dectalk_pause_duration:
     kind: scalar
     select:
@@ -35,12 +40,36 @@ rules:
       - field: duration
         op: set
         value: >-
-          (current.punctuationSymbol in [',', ';', ':']
+          ((current.punctuationSymbol in [',', ';', ':']
             ? params.policy.timing.pause_frames.comma
-            : params.policy.timing.pause_frames.period) * params.policy.timing.frame_ms
+            : params.policy.timing.pause_frames.period)
+           + (next != null ? dectalk_clause_initial_pause_frames(next) : 0.0))
+          * params.policy.timing.frame_ms
         tag: boundary
     citations:
       - "DECtalk 4.63 p_us_tim.c:225-277 Rule 1 (pause durations depend on syntax)"
+      - "DECtalk 4.63 p_us_tim.c:229-232 (clause-initial pause of 4 or 5 frames)"
+
+  # The pause that opens the utterance, as the synthesizer hears it: the first
+  # clause's opening pause less the one frame DECtalk never sends. Computed in
+  # tenths of a millisecond (64 a frame) so that three frames are exactly the
+  # 19.2 ms the lowering policy names.
+  dectalk_utterance_initial_pause:
+    kind: scalar
+    select:
+      relation: Segment
+      where: prev == null && current.phoneme != 'SIL'
+    apply:
+      - field: utterance_initial_silence_ms
+        op: set
+        value: >-
+          (dectalk_clause_initial_pause_frames(current)
+           - params.policy.timing.unemitted_initial_frames)
+          * (params.policy.timing.frame_ms * 10.0) / 10.0
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:229-232 (clause-initial pause of 4 or 5 frames)"
+      - "DECtalk 4.63 ph_claus.c:759-766 (send_pars writes no packet on its first call)"
 
   # p_us_tim.c:209-218. Inherent and minimum duration in frames, and the start
   # of the state. clause_position is nphon (the clause's first silence is 0);

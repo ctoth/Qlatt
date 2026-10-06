@@ -344,3 +344,61 @@ rules:
       - "DECtalk 4.63 ph_defs.h:151-154 (DECLARATIVE is a clause that ends with a period)"
       - "DECtalk 4.63 ph_aloph.c:563-567 (a phone with FBLOCK skips to :1528, past the hat pattern)"
 
+  # ---------------------------------------------------------------------------
+  # Where DECtalk's intonation routine stops (Ph_inton2.c:809-819).
+  #
+  # phinton() walks the clause's allophones once. At a syllabic on which the
+  # hat both begins and ends, past the clause's fourth allophone, it runs
+  #     if (pDph_t->had_hatend & (nphon > 4)) { ...; break; }
+  # and that `break` leaves the walk itself: no allophone from this syllabic on
+  # gets an F0 command, the baseline's clock (tcumdur) stops counting, and
+  # Rule 9 at the foot of the loop (1683-1722) never releases the clause's
+  # final plosive into a dummy vowel. "We will wait." and "This is a test."
+  # end in [t] with no dummy vowel for this reason; "a cat." has one.
+  #
+  # nphon counts allophones from the clause-initial silence at 0.
+  # ---------------------------------------------------------------------------
+  dectalk_intonation_stops:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        has(current.word) && current.word != ''
+        && (current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'])
+    define:
+      position: "1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
+    apply:
+      - field: intonation_stops
+        op: set
+        value: >-
+          isTrue(current, 'hat_begins') && isTrue(current, 'hat_ends')
+          && position > params.policy.f0.intonation_stop_after_allophone
+        tag: hat_pattern
+    citations:
+      - "DECtalk 4.63 Ph_inton2.c:809-819 (break out of the allophone loop when the hat begins and ends on one syllabic and nphon > 4)"
+
+  # Rule 9 is not reached once the walk has stopped: take back the dummy vowel
+  # the structural rules gave the clause's final plosive.
+  dectalk_drop_dummy_vowel_after_intonation_stop:
+    kind: structural
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null
+        && prev != null && prev.phoneme == 'SIL' && isTrue(prev, 'dummy_vowel')
+    define:
+      dummy: prev
+      stopped_at: >-
+        look_back_where(current, 1000,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")')
+    constraint: "stopped_at != null && stopped_at.phoneme != 'SIL'"
+    splice:
+      type: replace_range
+      range_left: dummy.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+    citations:
+      - "DECtalk 4.63 Ph_inton2.c:809-819 (the loop is left before Rule 9)"
+      - "DECtalk 4.63 Ph_inton2.c:1683-1722 Rule 9 (dummy vowel, at the foot of the loop)"
+

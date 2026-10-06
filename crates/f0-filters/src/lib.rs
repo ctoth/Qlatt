@@ -334,6 +334,12 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
                         }
                         LAYER_IMPULSE => {
                             let step_plus_ramp = layer.decay_mode == DECAY_STEP_PLUS_RAMP;
+                            if step_plus_ramp {
+                                // Ph_drwt02.c:1908-1957 keeps one impulse: an
+                                // IMPULSE command overwrites tarimp, delimp and
+                                // nimp, ending whatever impulse was running.
+                                active_impulses[li].clear();
+                            }
                             active_impulses[li].push(ActiveImpulse {
                                 value: if step_plus_ramp {
                                     cmd.value * 2.0

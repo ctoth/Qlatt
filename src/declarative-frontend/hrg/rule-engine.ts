@@ -1630,7 +1630,15 @@ function applyPointActions(
         match.transaction.set(point, "duration_frames", evaluate(spec.duration_frames, context));
       }
       if (Array.isArray(spec.profile_points)) {
-        match.transaction.set(point, "profile_points", spec.profile_points);
+        // An entry is a number or, like `value` and `duration_frames`, an
+        // expression over the matched item.
+        match.transaction.set(
+          point,
+          "profile_points",
+          spec.profile_points.map((entry) =>
+            typeof entry === "string" ? evaluate(entry, context) : entry,
+          ),
+        );
       }
     }
     match.transaction.append(relationName, point);

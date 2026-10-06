@@ -473,33 +473,37 @@ parameters:
       # Source: ph_inton1.c make_f0_command(... IMPULSE, ..., 20, ...).
       stress_impulse_duration_frames: 20
       segmental:
-        # Active US male allophone targets, internal Hz*10.
-        # Source: Ph_drwt02.c us_f0msegtars[] (SI=50, EY=50, K=0, IX=70).
-        initial_silence_target: 50
-        ey_target: 50
-        k_target: 0
-        ix_target: 70
-        # Exact p_us_tim.c controller output for the active K-EY-K word family.
-        # Source: DECtalk 4.63 -lt controller/allophone trace for `cake.`.
+        # us_f0msegtars[]: incremental segmental F0 target per phone, internal
+        # Hz*10, for the phones whose entry is not 0. A phone not listed here
+        # has target 0. Keys are this port's phone names (SI is SIL).
+        targets:
+          SIL: 50
+          IY: 140
+          IH: 80
+          EY: 50
+          EH: 30
+          AH: 20
+          OW: 30
+          OY: 60
+          UH: 80
+          UW: 140
+          RR: 50
+          YU: 140
+          AX: 30
+          IX: 70
+          IR: 110
+          W: 100
+          Y: 140
+          Z: -200
+        # Rule 1 gives the clause-initial pause 4 frames before a voiced phone,
+        # an obstruent or a plosive (and 5 otherwise).
         initial_silence_frames: 4
-        initial_k_frames: 17
-        ey_frames: 37
-        final_k_frames: 14
-        dummy_ix_frames: 6
-        terminal_silence_frames: 94
-        # Exact p_us_tim.c controller output for the active DH-AX word family.
-        # Source: DECtalk 4.63 -lt controller/allophone trace for `the.`.
-        dh_target: 0
-        ax_target: 30
-        the_initial_silence_frames: 4
-        the_dh_frames: 10
-        the_ax_frames: 32
-        the_terminal_silence_frames: 94
+        # The controller counts durations in these frames.
+        frame_ms: 6.4
         citations:
-          - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw"
-          - "DECtalk 4.63 p_us_tim.c controller durations"
-          - "DECtalk 4.63 -lt oracle trace for cake."
-          - "DECtalk 4.63 -lt oracle trace for the."
+          - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars"
+          - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause)"
+          - "DECtalk 4.63 ph_claus.c (6.4 ms controller frames)"
       citations:
         - "DECtalk 4.63 ph_inton1.c (hat-pattern F0 model)"
         - "DECtalk 4.63 Ph_drwt02.c (baseline profiles, speaker scaling)"

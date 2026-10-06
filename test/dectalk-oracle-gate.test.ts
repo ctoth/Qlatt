@@ -34,7 +34,6 @@ const fixture = JSON.parse(
 ) as { entries: Record<string, { text: string; phonemeLog: string }> };
 
 const KNOWN_GAPS: Readonly<Record<string, string>> = {
-  "glide-young-yard": "E_INVENTORY_PHONEME_UNKNOWN: 'LL' (lts-rules.yaml whole-word YELLED entry)",
   "stops-pat-tapped": "phoneme sequence differs from DECtalk's by one token",
 };
 

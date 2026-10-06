@@ -186,14 +186,12 @@ if (suffixIndex.length !== 27) {
 }
 
 // The frontend's spelling of each allophone code (INCLUDE/l_all_ph.h order).
-// Four names differ from DECtalk's (as in scripts/build-dectalk-dict.ts), and
-// YU, which the inventory does not have yet, is written as Y + UW.
+// Four names differ from DECtalk's (as in scripts/build-dectalk-dict.ts).
 const FRONTEND_SYMBOLS: Readonly<Record<string, string[]>> = {
   HX: ["HH"],
   NX: ["NG"],
   LL: ["L"],
   Q: ["GS"],
-  YU: ["Y", "UW"],
 };
 const allophoneNames: string[] = ["SIL"];
 for (const [name, code] of SYMBOLS) {

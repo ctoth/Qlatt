@@ -278,14 +278,13 @@ const VOWEL_RAW = new Set([
 // --- FIXUP: raw lowercase ARPABET -> Qlatt inventory symbol(s) ----------------
 // Reconciles DECtalk's raw output to the exact key set in
 // dectalk-english/inventory.yaml. Vowels here are returned WITHOUT the stress
-// digit; the digit is appended by mapToken. `yu` is the only multi-symbol
-// expansion (Y glide + UW vowel, "you"/"cute").
+// digit; the digit is appended by mapToken.
 const FIXUP_VOWEL: Record<string, string> = {
-  // rr and ix are inventory phones (RR, IX) and need no fixup. They were once
-  // folded into ER and IH, which are different DECtalk allophones (US_ER is
-  // the fused vowel of "air"; US_IH is the full vowel of "bit").
+  // rr, ix and yu are inventory phones (RR, IX, YU) and need no fixup. rr and
+  // ix were once folded into ER and IH, which are different DECtalk allophones
+  // (US_ER is the fused vowel of "air"; US_IH is the full vowel of "bit"), and
+  // yu was split into Y + UW.
   ax: "AX", // reduced schwa -> AX (DECtalk US_AX code 17)
-  // yu handled specially in mapToken (splits to Y + UW)
 };
 const FIXUP_CONS: Record<string, string> = {
   yx: "Y", // Y glide (dict char 'y') -> inventory Y
@@ -301,11 +300,9 @@ const FIXUP_CONS: Record<string, string> = {
 
 /**
  * Map one raw ARPABET token + its stress digit to inventory symbol(s).
- * Returns an array because `yu` expands to two symbols.
  */
 function mapToken(raw: string, stress: string): string[] {
   if (VOWEL_RAW.has(raw)) {
-    if (raw === "yu") return ["Y", `UW${stress}`];
     const fixed = FIXUP_VOWEL[raw];
     if (fixed) return [`${fixed}${stress}`];
     return [`${raw.toUpperCase()}${stress}`];

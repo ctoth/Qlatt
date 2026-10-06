@@ -42,10 +42,6 @@ const repoRoot = path.resolve(__dirname, "..");
 const CORPUS_FILES = ["dectalk-us-v1.json", "dectalk-us-heldout-v1.json"];
 
 const KNOWN_GAPS: Readonly<Record<string, string>> = {
-  "prosody-how-are-you": "'you' is DECtalk's one allophone YU; here Y UW",
-  "function-for-you": "'you' is DECtalk's one allophone YU; here Y UW",
-  "punct-question": "'you' is DECtalk's one allophone YU; here Y UW",
-  "fric-vision": "'usual' has YU; the reduced vowel of 'vision' is IX in DECtalk, IH here",
   "g2p-yellow": "the dictionary marks 'yellow' to skip allophone rules (LL stays); here LX",
   "numbers-room-101": "'hundred': DECtalk keeps R and flaps the final D; here RR and D",
 };

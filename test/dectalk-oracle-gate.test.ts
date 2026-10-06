@@ -8,7 +8,10 @@
  *      timed for the phrase (fixtures: test/fixtures/dectalk-oracle/
  *      <corpus>.durations.json, regenerate with
  *      scripts/oracle/export-duration-fixture.ts),
- *   3. no frame belongs to a Segment that has already ended.
+ *   3. each allophone has DECtalk's structure word (stress, word-initial
+ *      consonant, syllable type, boundary, hat rise and fall) and DECtalk's
+ *      duration in frames (scripts/oracle/structure.ts),
+ *   4. no frame belongs to a Segment that has already ended.
  *
  * The comparison is at the allophone level because that is what the frontend's
  * Segments are. DECtalk's phoneme log is written before its allophone rules,
@@ -18,6 +21,11 @@
  * dectalk-us-v1 is the corpus the rules were developed against.
  * dectalk-us-heldout-v1 holds neighbours of its words that no rule was fitted
  * to; a rule that only works for the first corpus shows up as a gap here.
+ * dectalk-us-clause-v1 holds sentences for the clause-level rules (helper
+ * verbs, phrase starts, the hat pattern); nothing was fitted to it either.
+ *
+ * A new entry in a corpus goes into KNOWN_GAPS, with what is missing, when the
+ * frontend does not yet match DECtalk on it.
  *
  * KNOWN_GAPS is a ratchet, not an allow-list: each listed phrase must still
  * fail, so fixing one forces its removal here. A phrase may never be added to
@@ -29,21 +37,51 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { qlattAllophoneClauses, recordedAllophoneClauses } from "../scripts/oracle/allophones";
+import {
+  DECTALK_CORPUS_FILES,
+  qlattAllophoneClauses,
+  recordedAllophoneClauses,
+} from "../scripts/oracle/allophones";
+import {
+  qlattStructureClauses,
+  type RecordedAllophone,
+  recordedStructureClauses,
+  showStructurePhone,
+} from "../scripts/oracle/structure";
 import type { OracleCorpusDocument } from "../scripts/oracle/types";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import type { KlattFrame } from "../src/tts-frontend-types";
 
 type AllophoneFixture = {
-  entries: Record<string, { text: string; clauses: Array<Array<{ kind: string; ph?: number }>> }>;
+  entries: Record<string, { text: string; clauses: RecordedAllophone[][] }>;
 };
 
 const repoRoot = path.resolve(__dirname, "..");
-const CORPUS_FILES = ["dectalk-us-v1.json", "dectalk-us-heldout-v1.json"];
 
 const KNOWN_GAPS: Readonly<Record<string, string>> = {
   "g2p-yellow": "the dictionary marks 'yellow' to skip allophone rules (LL stays); here LX",
   "numbers-room-101": "'hundred': DECtalk keeps R and flaps the final D; here RR and D",
+  // dectalk-us-clause-v1. Allophones:
+  "vp-they-went-home": "DECtalk keeps the T of 'went' before /h/; here TX",
+  "pp-walked-to-the-store": "DECtalk keeps the T of 'went' before /h/; here TX",
+  "pp-what-is-it-for": "clause-final 'for' is unreduced to F OR (ph_sort.c:1076); here F RR",
+  "hat-stop-it-now": "DECtalk glottalizes the T of 'it' before /n/; here T",
+  "hat-president": "DECtalk has D for the final T of 'president' before a vowel; here T",
+  "hat-tickets-for-everybody":
+    "DECtalk glottalizes the T of 'bought' before 'the' and keeps R in 'everybody'; here T and RR",
+  "hat-two-phrases": "DECtalk breaks the clause before 'and' and says it EH N D; here one clause",
+  "hat-old-man-young-boy": "'the' before a vowel is DH IY in DECtalk; here DH AX",
+  "hat-did-the-old-man": "'the' before a vowel is DZ IY in DECtalk; here DZ AX",
+  // dectalk-us-clause-v1. Structure and duration, with DECtalk's allophones:
+  "carry-be-late":
+    "after 'Be late,' DECtalk does not carry the helper-verb promotion; here it does (unexplained)",
+  "vp-i-want-to-go":
+    "the prepositional-phrase start before 'to' is not ported: the hat pattern falls late",
+  "pp-go-to-the-store":
+    "the prepositional-phrase start before 'to' is not ported: boundary, hat pattern and duration",
+  "pp-bread-and-butter": "the prepositional-phrase start before 'and' is not ported: boundary",
+  "pp-this-is-for-you":
+    "the prepositional-phrase start before 'for' is not ported: boundary, hat pattern and duration",
 };
 
 function loadCorpus(fileName: string): { corpus: OracleCorpusDocument; fixture: AllophoneFixture } {
@@ -104,9 +142,13 @@ function checkPhrase(
   expect(track.length).toBeGreaterThan(0);
   expect(framesOfLeftSegments(track)).toEqual([]);
   expect(qlattAllophoneClauses(utterance)).toEqual(recordedAllophoneClauses(oracle));
+  // With the same allophones: the same structure word and the same duration.
+  expect(qlattStructureClauses(utterance).map((clause) => clause.map(showStructurePhone))).toEqual(
+    recordedStructureClauses(oracle.clauses).map((clause) => clause.map(showStructurePhone)),
+  );
 }
 
-const loaded = CORPUS_FILES.map(loadCorpus);
+const loaded = DECTALK_CORPUS_FILES.map(loadCorpus);
 
 describe("DECtalk oracle gate", () => {
   it("lists only corpus entries as known gaps", () => {

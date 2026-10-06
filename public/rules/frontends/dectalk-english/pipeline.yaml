@@ -97,6 +97,19 @@ predicates:
         || get(behind(current, 1), "sourceTokenId", "") != current.sourceTokenId)
     && ("verb" in current.form_classes || "ed" in current.form_classes)
     && !("noun" in current.form_classes) && !("adj" in current.form_classes)
+  # FSYLL: a vowel or a syllabic consonant.
+  is_dectalk_syllabic: >-
+    current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"]
+  # A syllabic with FSTRESS_1: primary stress or emphasis.
+  is_primary_syllabic: >-
+    (current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"])
+    && (get(current, "stress", 0) == 1 || get(current, "stress", 0) == 3)
+  # The Segment after one whose boundary is a verb phrase or stronger, or the
+  # clause's final silence: where remaining_stresses_til(FVPNEXT) stops.
+  is_past_phrase_boundary: >-
+    (current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null)
+    || (behind(current, 1) != null
+        && get(behind(current, 1), "rime_boundary", "") in ["vp", "comma", "period", "question", "exclaim"])
   is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
   is_stressed_vowel: 'current.type == "vowel" && has(current.stress) && current.stress == 1'
   is_stressed_vowel_or_boundary: >-
@@ -325,6 +338,7 @@ tags:
   consonant_stress: adjusts a consonant beside a stressed vowel
   word_initial_consonant: marks a consonant before its word's first syllabic
   rime_boundary: records the type of the boundary that follows a final rime
+  hat_pattern: marks where the pitch rises onto the hat pattern and falls off it
   postvocalic_lateral: selects the postvocalic allophone of a lateral
   duration_floor: enforces a segment-duration floor
   emphasis: strengthens an emphasized segment
@@ -359,6 +373,7 @@ tags:
   word_initial_stressed: adjusts a stressed word-initial segment
   timing_setup: starts an allophone's duration state from its inherent values
   schwa_by_flap: lengthens a reduced vowel beside a flap or h
+  hat_fall: lengthens a stressed vowel where the pitch falls off the hat pattern
   adjacent_nasals: lengthens a nasal after a different nasal
   retroflex_minimum: keeps a retroflex vowel above its minimum length
   allophone_duration: sets a segment's duration from its allophone's frame count
@@ -430,6 +445,14 @@ relations:
       # The phrase a word starts, on each of its Segments (from the lexicon).
       phrase_start: []
       rime_boundary: { kind: string, values: [word, vp, comma, period, question, exclaim] }
+      # FHAT_BEGINS and FHAT_ENDS of a syllabic, and the state DECtalk's walk
+      # leaves after it (ph_aloph.c:1396-1525).
+      hat_begins: { kind: boolean }
+      hat_ends: { kind: boolean }
+      hat_top: { kind: boolean }
+      hat_locked: { kind: boolean }
+      hat_stresses: { kind: number }
+      hat_delay: { kind: number }
       # State of DECtalk's duration routine for one allophone (p_us_tim.c), in
       # its own units: frames, and a percentage where 128 is 100%.
       clause_position: { kind: number }
@@ -512,6 +535,7 @@ phases:
       - dectalk_timing_7_unstressed_syllabic
       - dectalk_timing_7_schwa_by_flap
       - dectalk_timing_7_unstressed_consonant
+      - dectalk_timing_7_hat_fall
       - dectalk_timing_8_emphasis
       - dectalk_timing_9_postvocalic_context
       - dectalk_timing_10_syllabic_before_syllabic
@@ -619,6 +643,8 @@ phases:
       # the marks in its input before phsort(), so it needs no second pass.
       - dectalk_consonant_stress
       - dectalk_rime_boundary
+      # Reads the stress and boundary of every phone of the clause.
+      - dectalk_hat_pattern
   - name: formant
     rules:
       - dectalk_sw_explicit_override

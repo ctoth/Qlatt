@@ -10,6 +10,30 @@
 
 import type { Utterance } from "../../src/declarative-frontend/hrg";
 
+/**
+ * The oracle corpora under test/oracle-corpora that have a DECtalk duration
+ * record. dectalk-us-v1 is the corpus the rules were developed against,
+ * dectalk-us-heldout-v1 neighbours of its words, dectalk-us-clause-v1
+ * sentences that exercise the clause-level rules (helper verbs, phrase
+ * starts, the hat pattern).
+ */
+export const DECTALK_CORPUS_FILES: readonly string[] = [
+  "dectalk-us-v1.json",
+  "dectalk-us-heldout-v1.json",
+  "dectalk-us-clause-v1.json",
+];
+
+/** The corpus files a comparison script covers: all, or the one named by `--corpus <id>`. */
+export function selectedCorpusFiles(argv: readonly string[]): readonly string[] {
+  const index = argv.indexOf("--corpus");
+  if (index < 0) return DECTALK_CORPUS_FILES;
+  const file = `${argv[index + 1]}.json`;
+  if (!DECTALK_CORPUS_FILES.includes(file)) {
+    throw new Error(`E_CORPUS_UNKNOWN: '${argv[index + 1]}'`);
+  }
+  return [file];
+}
+
 // DECtalk 4.63 INCLUDE/l_all_ph.h, `#define US_<NAME> <index>`.
 export const US_ALLOPHONE_NAMES = [
   "SIL", "IY", "IH", "EY", "EH", "AE", "AA", "AY", "AW", "AH",

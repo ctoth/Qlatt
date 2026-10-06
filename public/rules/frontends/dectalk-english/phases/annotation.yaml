@@ -194,3 +194,118 @@ rules:
       - "DECtalk 4.63 ph_romi.c:174-205 bounftab (boundary symbol to FBOUNDARY value)"
       - "DECtalk 4.63 LTS/ls_dict.c:777-778 (VPSTART before a dictionary entry of class verb, or verb and character)"
 
+  # ---------------------------------------------------------------------------
+  # HAT PATTERN: where the pitch rises onto the "hat" and where it falls off
+  # (FHAT_BEGINS, FHAT_ENDS; ph_aloph.c:1396-1525 and :597-606).
+  #
+  # DECtalk walks the clause once with four pieces of state, all reset at the
+  # start of a clause: whether the pitch is on top of the hat, a lock set by an
+  # emphasized syllable, the number of stresses since the last fall, and a
+  # pending delayed fall with its countdown. Each syllabic is processed after
+  # the one before it, so this rule runs over the syllabics in order and keeps
+  # that state on each one (hat_top, hat_locked, hat_stresses, hat_delay) for
+  # the next to read.
+  #
+  # For a syllabic:
+  #   1. A pending delayed fall counts down; it lands here when the count
+  #      reaches 0, or reaches 1 with fewer than 4 phones left (:597-606).
+  #   2. If the syllabic has any stress and the lock is off:
+  #      a. the pitch rises here if it is not on top;
+  #      b. emphasis sets the lock and falls at once;
+  #      c. with no primary stress left before the clause ends (or a delayed
+  #         fall pending), a declarative clause falls here, unless more than 6
+  #         phones and at least 2 syllabics remain, in which case the fall is
+  #         delayed and counts those syllabics down;
+  #      d. with two or more stresses since the last fall, none left before
+  #         the next verb phrase and more than one left in the clause, it
+  #         falls here.
+  #
+  # "Phones left" is DECtalk's nphonetot - n: the phones after this one, the
+  # clause's final silence, and one more.
+  #
+  # Not ported: promote_last_2 (:1470-1474), which turns the clause's last
+  # secondary stress into a primary one when the falling syllabic stands
+  # before a verb phrase.
+  # ---------------------------------------------------------------------------
+  dectalk_hat_pattern:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        has(current.word) && current.word != ''
+        && (current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'])
+    define:
+      # The syllabic processed before this one, or the silence that starts the clause.
+      before: >-
+        look_back_where(current, 1000,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || get(candidate, "hat_top", null) != null')
+      fresh: "before == null || before.phoneme == 'SIL'"
+      top_in: "fresh ? false : get(before, 'hat_top', false)"
+      locked_in: "fresh ? false : get(before, 'hat_locked', false)"
+      stresses_in: "fresh ? 0.0 : get(before, 'hat_stresses', 0.0)"
+      delay_in: "fresh ? -1.0 : get(before, 'hat_delay', -1.0)"
+      clause_end: >-
+        look_ahead_where(current, 1000,
+          'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
+      declarative: "clause_end != null && clause_end.punctuationSymbol == '.'"
+      phones_left: "2.0 + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
+      syllabics_after: "count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_syllabic')"
+      primaries_in_clause: "count_ahead_pred(current, 1000, 'is_clause_silence', 'is_primary_syllabic')"
+      primaries_in_phrase: >-
+        dectalk_boundary(current) >= params.policy.timing.boundary.vp ? 0.0
+        : count_ahead_pred(current, 1000, 'is_past_phrase_boundary', 'is_primary_syllabic')
+      stress_now: "get(current, 'stress', 0)"
+      stressed: "stress_now == 1 || stress_now == 2 || stress_now == 3"
+      # 1. The delayed fall.
+      countdown: "delay_in >= 0.0 ? delay_in - 1.0 : -1.0"
+      delayed_fall: >-
+        delay_in >= 0.0 && (countdown == 0.0 || (countdown == 1.0 && phones_left < 4.0))
+      top_1: "delayed_fall ? false : top_in"
+      stresses_1: "delayed_fall ? 0.0 : stresses_in"
+      delay_1: "delay_in >= 0.0 && !delayed_fall ? countdown : -1.0"
+      # 2. The stressed syllabic.
+      active: "stressed && !locked_in"
+      rises: "active && !top_1"
+      stresses_2: "active ? stresses_1 + 1.0 : stresses_1"
+      emphasis_fall: "active && stress_now == 3"
+      last_stress: "active && (primaries_in_clause == 0.0 || delay_1 >= 0.0)"
+      delays: "last_stress && declarative && phones_left > 6.0 && syllabics_after >= 2.0"
+      last_fall: "last_stress && declarative && !delays"
+      stresses_3: "emphasis_fall || last_fall ? 0.0 : stresses_2"
+      phrase_fall: >-
+        active && stresses_3 > 1.0 && primaries_in_phrase == 0.0 && primaries_in_clause > 1.0
+      falls: "delayed_fall || emphasis_fall || last_fall || phrase_fall"
+      top_out: "active ? !(emphasis_fall || last_fall || phrase_fall) : top_1"
+    apply:
+      - field: hat_begins
+        op: set
+        value: rises
+        tag: hat_pattern
+      - field: hat_ends
+        op: set
+        value: falls
+        tag: hat_pattern
+      - field: hat_top
+        op: set
+        value: top_out
+        tag: hat_pattern
+      - field: hat_locked
+        op: set
+        value: "locked_in || emphasis_fall"
+        tag: hat_pattern
+      - field: hat_stresses
+        op: set
+        value: "phrase_fall ? 0.0 : stresses_3"
+        tag: hat_pattern
+      - field: hat_delay
+        op: set
+        value: >-
+          active ? (last_stress && declarative ? (delays ? syllabics_after : -1.0) : delay_1)
+          : delay_1
+        tag: hat_pattern
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:1396-1525 (hat rise on the first stress, fall on emphasis, on the last stress of a declarative clause, and between two phrases of two stresses)"
+      - "DECtalk 4.63 ph_aloph.c:597-606 (the delayed fall)"
+      - "DECtalk 4.63 ph_aloph.c:1646-1668 remaining_stresses_til"
+      - "DECtalk 4.63 ph_defs.h:151-154 (DECLARATIVE is a clause that ends with a period)"
+

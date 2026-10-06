@@ -244,6 +244,55 @@ const specialWordFormClasses: Record<string, number> = {
 // phrase (LTS/l_us_con.c:1190-1193).
 const specialWordPhraseStarts: Record<string, "pp"> = { to: "pp", and: "pp", for: "pp" };
 
+// The phone lists DECtalk speaks numbers from (LTS/l_us_con.c:640-900,
+// 1000-1035), used by LTS/l_us_pr1.c without a dictionary lookup. A list
+// holds phone codes and the control symbols of INCLUDE/l_com_ph.h (stress
+// marks, word boundary, verb-phrase start); its terminating SIL is dropped.
+for (const [name, code] of [
+  ["S2", 102],
+  ["S1", 103],
+  ["SEMPH", 104],
+  ["SBOUND", 108],
+  ["MBOUND", 109],
+  ["HYPHEN", 110],
+  ["WBOUND", 111],
+  ["PPSTART", 112],
+  ["VPSTART", 113],
+  ["COMMA", 115],
+] as const) {
+  SYMBOLS.set(name, code);
+}
+const constantsSource = read("l_us_con.c");
+const phoneList = (name: string): number[] => {
+  const list = symbolic(arrayBody(constantsSource, name));
+  if (list.at(-1) !== 0) throw new Error(`E_PHONE_LIST_END: ${name} does not end with SIL`);
+  return list.slice(0, -1);
+};
+/** A table of ten lists, e.g. `punits[] = { p0, p1, ... }`. */
+const phoneListTable = (name: string): number[][] => {
+  const names = arrayBody(constantsSource, name)
+    .split(",")
+    .map((cell) => cell.trim())
+    .filter((cell) => cell.length > 0);
+  if (names.length !== 10) throw new Error(`E_PHONE_LIST_TABLE: ${name} has ${names.length}`);
+  return names.map(phoneList);
+};
+const numberPhones = {
+  units: phoneListTable("punits"),
+  // "Allow for unstressed digits before hundred, thousand etc." (:733-734).
+  unstressedUnits: phoneListTable("upunits"),
+  teens: phoneListTable("pteens"),
+  tens: phoneListTable("ptens"),
+  ordinals: phoneListTable("pordin"),
+  hundred: phoneList("phundred"),
+  thousand: phoneList("pthousand"),
+  million: phoneList("pmillion"),
+  billion: phoneList("pbillion"),
+  trillion: phoneList("ptrillion"),
+  quadrillion: phoneList("pquadrillion"),
+  and: phoneList("pand"),
+};
+
 // The frontend's spelling of each allophone code (INCLUDE/l_all_ph.h order).
 // Four names differ from DECtalk's (as in scripts/build-dectalk-dict.ts).
 const FRONTEND_SYMBOLS: Readonly<Record<string, string[]>> = {
@@ -280,6 +329,7 @@ fs.writeFileSync(
     wordFormClasses,
     specialWordFormClasses,
     specialWordPhraseStarts,
+    numberPhones,
     words,
     bytes,
   })}\n`,

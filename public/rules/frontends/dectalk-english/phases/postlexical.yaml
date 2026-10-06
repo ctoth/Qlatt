@@ -248,9 +248,9 @@ rules:
     select:
       relation: Segment
       where: >-
-        current.type == 'vowel' && has(current.form_classes) && has(current.sourceTokenId)
-        && ('verb' in current.form_classes || 'ed' in current.form_classes)
-        && !('noun' in current.form_classes) && !('adj' in current.form_classes)
+        current.type == 'vowel'
+        && (dectalk_has_class(current, 'verb') || dectalk_has_class(current, 'ed'))
+        && !dectalk_has_class(current, 'noun') && !dectalk_has_class(current, 'adj')
     define:
       clause_end: >-
         look_ahead_where(current, 1000,
@@ -259,9 +259,7 @@ rules:
         find_within_word(current,
           "current.type == 'vowel'",
           "behind")
-      at_word_start: >-
-        behind(current, 1) == null
-        || get(behind(current, 1), 'sourceTokenId', '') != current.sourceTokenId
+      at_word_start: dectalk_word_start(current)
       # Words of the verb branch that begin before this vowel in its clause;
       # this vowel's own word is one of them unless the vowel begins it.
       branch_words_before: "count_back_pred(current, 1000, 'is_clause_silence', 'is_verb_branch_word_start')"

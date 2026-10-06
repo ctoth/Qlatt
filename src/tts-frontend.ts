@@ -214,8 +214,6 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
     phoneme: { kind: "string" },
     type: { kind: "string" },
     word: { kind: "string" },
-    form_classes: { kind: "array", items: { kind: "string" } },
-    phrase_start: { kind: "string", values: ["vp"] },
     sourceTokenId: { kind: "string" },
     punctuationSymbol: STRING_OR_NULL,
     stress: NUMBER_OR_NULL,
@@ -292,7 +290,14 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
           sourceNormalizationId: { kind: "string" },
         },
       },
-      word: { features: { text: { kind: "string" }, tokenIndex: { kind: "number" } } },
+      word: {
+        features: {
+          text: { kind: "string" },
+          tokenIndex: { kind: "number" },
+          form_classes: { kind: "array", items: { kind: "string" } },
+          phrase_start: { kind: "string", values: ["vp"] },
+        },
+      },
       syllable: {
         features: {
           index: { kind: "number" },
@@ -443,6 +448,11 @@ function createStructure(
     const word = transaction.createItem("word", `word_${wordIndex.toString()}`);
     transaction.set(word, "text", group[0].token.word);
     transaction.set(word, "tokenIndex", wordIndex);
+    // What the lexicon says of the word belongs to the Word: its Segments are
+    // replaced by allophone rules, the Word is not.
+    const { formClasses, phraseStart } = group[0].token;
+    if (formClasses) transaction.set(word, "form_classes", [...formClasses]);
+    if (phraseStart) transaction.set(word, "phrase_start", phraseStart);
     transaction.append("Word", word);
     transaction.addRoot("SylStructure", word);
     const annotations = tables
@@ -699,8 +709,6 @@ function buildTextToKlattTrackDetailed(
     construct.set(item, "phoneme", token.phoneme);
     construct.set(item, "stress", token.stress);
     construct.set(item, "word", token.word);
-    if (token.formClasses) construct.set(item, "form_classes", [...token.formClasses]);
-    if (token.phraseStart) construct.set(item, "phrase_start", token.phraseStart);
     construct.set(item, "sourceTokenId", token.sourceTokenId);
     construct.set(item, "punctuationSymbol", token.isPunctuation ? (token.symbol ?? null) : null);
     construct.set(item, "active", true);

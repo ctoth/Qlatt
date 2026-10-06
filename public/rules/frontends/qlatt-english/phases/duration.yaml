@@ -55,13 +55,13 @@ rules:
       after_coda: "three_phone ? ahead(current, 4.0) : after_third"
       voiced_coda: >-
         coda != null && path(coda, 'R:SylStructure.parent') != null
-        && path(coda, 'R:SylStructure.parent').id == current.syllable.id && has(coda.voiced) && coda.voiced
+        && path(coda, 'R:SylStructure.parent').id == current.syllable.id && isTrue(coda, 'voiced')
       nasal_stop_exception: >-
         voiced_coda && coda.type == 'nasal' && after_coda != null
         && path(after_coda, 'R:SylStructure.parent') != null
         && path(after_coda, 'R:SylStructure.parent').id == current.syllable.id
         && after_coda.type in ['stop', 'stop_closure']
-        && has(after_coda.voiceless) && after_coda.voiceless
+        && isTrue(after_coda, 'voiceless')
       # Hertz & Huffman 1992 p.1173: AY 145 ms, two-phone /r/ nucleus 160 ms.
       # Engineering adaptation: retain the already assigned third-phone duration
       # when extending the AY starting budget; no three-phone base is tabulated.

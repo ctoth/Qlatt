@@ -5462,7 +5462,7 @@ rules_by_letter:
   - left: ' '
     letters: YELLED
     right: ' '
-    phonemes: [Y, EH1, LL, D]
+    phonemes: [Y, EH1, L, D]
   # DECtalk 4.63 parity: preserve the high back glide-vowel sequence in the exact function word.
   - left: ' '
     letters: YOU

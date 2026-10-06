@@ -52,18 +52,31 @@ const S1 = 103;
 /** INCLUDE/ls_feat.tab: the letters with CFEAT_vowel. */
 const isVowelLetter = (char: string): boolean => "aeiouy".includes(char);
 
+export interface SuffixResult {
+  /** Dictionary root plus suffixes, or null when no rule leads to a dictionary word. */
+  phonemes: string[] | null;
+  /**
+   * The form class word the search leaves on the word (INCLUDE/fc_def.tab
+   * bits): the class of the rule that found the root, or of a rule that only
+   * tags a class; 0 when there is none.
+   */
+  formClass: number;
+}
+
 /**
- * The pronunciation of `word` as a dictionary root plus suffixes, or null when
- * no rule leads to a dictionary word. `lookup` returns the dictionary's
- * phonemes for a spelling, in the frontend's symbols.
+ * The pronunciation of `word` as a dictionary root plus suffixes, and the form
+ * class the suffix gives it. `lookup` returns the dictionary's phonemes for a
+ * spelling, in the frontend's symbols.
  */
 export function stripSuffixes(
   word: string,
   lookup: (spelling: string) => readonly string[] | null,
   tables: SuffixTables,
-): string[] | null {
+): SuffixResult {
   // ls_dict.c:451: only words of more than two letters.
-  if (word.length <= 2) return null;
+  if (word.length <= 2) return { phonemes: null, formClass: 0 };
+  // fc_struct[fc_index]: the word's form class as the search goes.
+  let formClass = 0;
   const table = tables.suffixTable;
   const u32 = (at: number): number =>
     (table[at] | (table[at + 1] << 8) | (table[at + 2] << 16) | (table[at + 3] << 24)) >>> 0;
@@ -122,8 +135,11 @@ export function stripSuffixes(
         bp -= 1;
         sp += 1;
       }
-      // A rule that only tags a form class ends the search.
-      if (table[sp] === SF_FC) return null;
+      // A rule that only tags a form class ends the search (ls_suff.c:174-182).
+      if (table[sp] === SF_FC) {
+        formClass = u32(si + 4);
+        return null;
+      }
       if (table[sp++] === SF_STRIP) {
         const saved = [...comp];
         const sbp = bp;
@@ -145,6 +161,10 @@ export function stripSuffixes(
               // terminator's own position.
               found = suffixFind(np);
             } else {
+              // The rule's class goes on the word before the root is looked
+              // up; the dictionary leaves a class that is already set
+              // (ls_suff.c:245-249, ls_dict.c:749-750).
+              formClass = u32(si + 4);
               const root = lookup(comp.join(""));
               found = root ? [...root] : null;
             }
@@ -152,6 +172,8 @@ export function stripSuffixes(
               appendPronunciation(sp, found);
               return found;
             }
+            // ls_suff.c:299-307.
+            formClass = 0;
             comp = [...saved];
           }
           bp = sbp;
@@ -162,5 +184,6 @@ export function stripSuffixes(
     return null;
   };
 
-  return suffixFind(comp.length - 1);
+  const phonemes = suffixFind(comp.length - 1);
+  return { phonemes, formClass };
 }

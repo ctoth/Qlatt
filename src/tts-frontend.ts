@@ -214,6 +214,7 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
     phoneme: { kind: "string" },
     type: { kind: "string" },
     word: { kind: "string" },
+    form_classes: { kind: "array", items: { kind: "string" } },
     sourceTokenId: { kind: "string" },
     punctuationSymbol: STRING_OR_NULL,
     stress: NUMBER_OR_NULL,
@@ -697,6 +698,7 @@ function buildTextToKlattTrackDetailed(
     construct.set(item, "phoneme", token.phoneme);
     construct.set(item, "stress", token.stress);
     construct.set(item, "word", token.word);
+    if (token.formClasses) construct.set(item, "form_classes", [...token.formClasses]);
     construct.set(item, "sourceTokenId", token.sourceTokenId);
     construct.set(item, "punctuationSymbol", token.isPunctuation ? (token.symbol ?? null) : null);
     construct.set(item, "active", true);

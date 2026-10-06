@@ -26,6 +26,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { selectDictionaryRows } from "./build-dectalk-dict";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);
@@ -185,6 +186,61 @@ if (suffixIndex.length !== 27) {
   throw new Error(`E_SUFFIX_INDEX_LENGTH: expected 27 entries, read ${suffixIndex.length}`);
 }
 
+// Form classes. INCLUDE/fc_def.tab names each bit of a form class word; the
+// name here is the define's name in lower case without "FC_". DECtalk's form
+// log prints its own strings (LTS/ls_suff.c form_class_strings), which differ
+// for a few bits ("char" for character, "intr" for inter, "who" for whow).
+const formClassNames: (string | null)[] = Array.from({ length: 32 }, () => null);
+const formClassSource = fs.readFileSync(
+  path.join(dectalkRoot, "dapi", "src", "INCLUDE", "fc_def.tab"),
+  "utf8",
+);
+for (const match of formClassSource.matchAll(/^#define\s+FC_([A-Z]+)\s+0x([0-9a-fA-F]{8})L/gm)) {
+  const bit = Math.log2(Number.parseInt(match[2], 16));
+  if (!Number.isInteger(bit)) throw new Error(`E_FORM_CLASS_BIT: FC_${match[1]}`);
+  formClassNames[bit] = match[1].toLowerCase();
+}
+const formClassMask = (names: readonly string[]): number =>
+  names.reduce((mask, name) => {
+    const bit = formClassNames.indexOf(name);
+    if (bit < 0) throw new Error(`E_FORM_CLASS_NAME: '${name}'`);
+    return mask + 2 ** bit;
+  }, 0);
+
+// Each dictionary word's form class word, from the fourth field of
+// dic/Dic_us.txt (one character per bit, bit 0 first). The row kept for a
+// homograph is the one the pronunciation dictionary keeps
+// (scripts/build-dectalk-dict.ts); DECtalk's choice by context
+// (LTS/ls_homo.c) is not reproduced.
+const dictionaryText = fs.readFileSync(
+  path.join(dectalkRoot, "dapi", "src", "dic", "Dic_us.txt"),
+  "utf8",
+);
+const NAME_BIT = formClassNames.indexOf("name");
+const wordFormClasses: Record<string, number> = {};
+for (const [word, row] of [...selectDictionaryRows(dictionaryText).best].sort(([a], [b]) =>
+  a < b ? -1 : a > b ? 1 : 0,
+)) {
+  let mask = 0;
+  [...row.formClass].forEach((char, bit) => {
+    // The text marks 3,997 words as names (bit 28); the dictionary
+    // say.exe loads reports none of them with it (98 of 98 sampled words in
+    // test/fixtures/dectalk-oracle/dectalk-us-form-classes-v1.json). Where
+    // the bit is dropped was not found in the source; the running program is
+    // followed.
+    if (char === "1" && bit !== NAME_BIT) mask += 2 ** bit;
+  });
+  if (mask !== 0) wordFormClasses[word] = mask;
+}
+// The words of the mini dictionary sdic[] (LTS/l_us_con.c:1187-1195) take a
+// form class written into the lookup itself, by first letter
+// (LTS/ls_task.c:1062-1078), whatever the main dictionary says.
+const specialWordFormClasses: Record<string, number> = {
+  to: formClassMask(["to", "prep", "func"]),
+  and: formClassMask(["conj", "verb", "func"]),
+  for: formClassMask(["adv", "prep", "neg"]),
+};
+
 // The frontend's spelling of each allophone code (INCLUDE/l_all_ph.h order).
 // Four names differ from DECtalk's (as in scripts/build-dectalk-dict.ts).
 const FRONTEND_SYMBOLS: Readonly<Record<string, string[]>> = {
@@ -217,6 +273,9 @@ fs.writeFileSync(
     prefixes,
     suffixIndex,
     suffixTable,
+    formClassNames,
+    wordFormClasses,
+    specialWordFormClasses,
     words,
     bytes,
   })}\n`,

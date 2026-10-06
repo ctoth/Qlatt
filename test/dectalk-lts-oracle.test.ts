@@ -41,6 +41,12 @@ const KNOWN_GAPS: Readonly<Record<string, string>> = {
   mrs: "DECtalk reads the abbreviation letter by letter (EH M AA R EH S)",
 };
 
+/** Words whose form classes differ from DECtalk's; the same ratchet. */
+const FORM_CLASS_GAPS: Readonly<Record<string, string>> = {
+  are: "first in a sentence, as the fixture says it, it takes the class of LTS/ls_task.c verbs[]",
+  fbi: "DECtalk reports no class for the upper-case dictionary entry FBI",
+};
+
 /** `["K", "EY1", "P"]` as DECtalk names with the stress digit kept. */
 const ours = (word: string): string[] =>
   pronounce(word, lookup, options).phonemes.map((phoneme) => {
@@ -104,9 +110,57 @@ describe("table letter-to-sound, by stage", () => {
     const find = (word: string): string[] | null => roots[word] ?? null;
     // After a sibilant: IX Z. "i" back to "y", then Z after a vowel. S after
     // a voiceless consonant.
-    expect(stripSuffixes("nurses", find, table)).toEqual(["N", "RR1", "S", "IX0", "Z"]);
-    expect(stripSuffixes("replies", find, table)).toEqual(["R", "IH0", "P", "L", "AY1", "Z"]);
-    expect(stripSuffixes("cats", find, table)).toEqual(["K", "AE1", "T", "S"]);
-    expect(stripSuffixes("dogs", find, table)).toBeNull();
+    expect(stripSuffixes("nurses", find, table).phonemes).toEqual(["N", "RR1", "S", "IX0", "Z"]);
+    expect(stripSuffixes("replies", find, table).phonemes).toEqual([
+      "R",
+      "IH0",
+      "P",
+      "L",
+      "AY1",
+      "Z",
+    ]);
+    expect(stripSuffixes("cats", find, table).phonemes).toEqual(["K", "AE1", "T", "S"]);
+    expect(stripSuffixes("dogs", find, table)).toEqual({ phonemes: null, formClass: 0 });
+  });
+});
+
+describe("DECtalk form class oracle", () => {
+  // DECtalk's form log for one word at a time
+  // (scripts/oracle/export-form-class-fixture.ts): the bit numbers of the
+  // word's form class, "" when DECtalk does not know the word.
+  const recorded = readJson<{ entries: Record<string, string> }>(
+    "test",
+    "fixtures",
+    "dectalk-oracle",
+    "dectalk-us-form-classes-v1.json",
+  ).entries;
+  const names = readJson<{ formClassNames: (string | null)[] }>(
+    "public",
+    "rules",
+    "frontends",
+    "dectalk-english",
+    "lts-table.json",
+  ).formClassNames;
+  const bitsOf = (word: string): string =>
+    (pronounce(word, lookup, options).formClasses ?? ["absent"])
+      .map((name) => names.indexOf(name).toString())
+      .join(" ");
+
+  it("lists only oracle words as known gaps", () => {
+    expect(Object.keys(FORM_CLASS_GAPS).filter((word) => !(word in recorded))).toEqual([]);
+  });
+
+  it("gives every other oracle word DECtalk's form classes", () => {
+    const wrong: string[] = [];
+    for (const [word, bits] of Object.entries(recorded)) {
+      if (word in FORM_CLASS_GAPS) continue;
+      const mine = bitsOf(word);
+      if (mine !== bits) wrong.push(`${word}: DECtalk [${bits}] | frontend [${mine}]`);
+    }
+    expect(wrong).toEqual([]);
+  });
+
+  it.each(Object.entries(FORM_CLASS_GAPS))("%s is still a known gap (%s)", (word) => {
+    expect(bitsOf(word)).not.toBe(recorded[word]);
   });
 });

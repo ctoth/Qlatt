@@ -74,6 +74,29 @@ predicates:
     !(current.type in ["stop_release", "stop_aspiration"]) && current.phoneme != "SIL"
   is_clause_silence: >-
     current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null
+  # ph_task.c:611-614: the first Segment of a word DECtalk counts as a verb.
+  is_verb_count_word_start: >-
+    has(current.form_classes) && has(current.sourceTokenId)
+    && (behind(current, 1) == null
+        || get(behind(current, 1), "sourceTokenId", "") != current.sourceTokenId)
+    && ("verb" in current.form_classes || "ed" in current.form_classes
+        || "be" in current.form_classes || "ing" in current.form_classes)
+  # ph_task.c:624: a counted verb that is also a function word.
+  is_function_verb_word_start: >-
+    has(current.form_classes) && has(current.sourceTokenId)
+    && (behind(current, 1) == null
+        || get(behind(current, 1), "sourceTokenId", "") != current.sourceTokenId)
+    && ("verb" in current.form_classes || "ed" in current.form_classes
+        || "be" in current.form_classes || "ing" in current.form_classes)
+    && "func" in current.form_classes
+  # ph_sort.c:1272-1284: a word reaches the verb branch only if it is neither a
+  # noun nor an adjective.
+  is_verb_branch_word_start: >-
+    has(current.form_classes) && has(current.sourceTokenId)
+    && (behind(current, 1) == null
+        || get(behind(current, 1), "sourceTokenId", "") != current.sourceTokenId)
+    && ("verb" in current.form_classes || "ed" in current.form_classes)
+    && !("noun" in current.form_classes) && !("adj" in current.form_classes)
   is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
   is_stressed_vowel: 'current.type == "vowel" && has(current.stress) && current.stress == 1'
   is_stressed_vowel_or_boundary: >-
@@ -390,6 +413,17 @@ relations:
       voiceless: []
       weak: []
       word: []
+      sourceTokenId: []
+      # The word's form classes from DECtalk's dictionary and suffix rules.
+      form_classes: []
+      # On a clause's final silence: how many of its words DECtalk counts as
+      # verbs, how many of those are function words, and how many reach the
+      # verb branch of its phone sort (ph_task.c:611-626, ph_sort.c:1272-1284).
+      clause_verb_count: { kind: number }
+      clause_function_verb_count: { kind: number }
+      clause_verb_branch_count: { kind: number }
+      # A vowel the helper-verb promotion gave secondary stress.
+      helper_verb_promoted: { kind: boolean }
       word_initial_consonant: { kind: boolean }
       rime_boundary: { kind: string, values: [word, comma, period, question, exclaim] }
       # State of DECtalk's duration routine for one allophone (p_us_tim.c), in
@@ -534,6 +568,9 @@ phases:
       # ph_sort.c structure-word fields that the allophone rules below read.
       - dectalk_breath_group_primary_stress
       - dectalk_exclamation_emphasis
+      # After both: DECtalk's promotion adds to whatever stress the vowel has.
+      - dectalk_clause_verb_summary
+      - dectalk_helper_verb_promotion
       - dectalk_word_initial_consonant
       - dectalk_consonant_stress
       - dectalk_reduce_article_a

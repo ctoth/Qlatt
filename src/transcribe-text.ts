@@ -516,6 +516,9 @@ export function transcribeText(
               stress: match.stress,
               sourceTokenId: inputToken.tokenId,
               word: sourceWord,
+              ...("formClasses" in pronResult && pronResult.formClasses
+                ? { formClasses: pronResult.formClasses }
+                : {}),
               _pronDecisionId: stressDecisionId,
             });
           } else {

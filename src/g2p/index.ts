@@ -22,6 +22,7 @@ import { applyLtsRules } from "./lts-engine";
 import { decomposeClitic, decomposeWord, getStressHintForWord } from "./morphology";
 import { stressPronunciation } from "./stress";
 import {
+  formClassNamesOf,
   isLtsTableDocument,
   type LtsTableDocument,
   pronounceWithLtsTable,
@@ -62,28 +63,52 @@ export function pronounce(
 
   const lowerWord = word.toLowerCase();
 
+  const table = options.ltsPath ? ltsTableAt(options.ltsPath) : null;
+  // A table that records form classes gives every word a list, empty for a
+  // word it does not know. A fixed class wins over the dictionary's
+  // (DECtalk 4.63 LTS/ls_task.c:1062-1078), and a class set by a suffix rule
+  // stays (LTS/ls_dict.c:749-750).
+  const classed = (mask: number): { formClasses?: string[] } =>
+    table?.formClassNames
+      ? {
+          formClasses: formClassNamesOf(table.specialWordFormClasses?.[lowerWord] ?? mask, table),
+        }
+      : {};
+
   // 1. Try direct dictionary lookup
   const dictResult = dictLookup(lowerWord);
   if (dictResult) {
-    return { phonemes: dictResult, source: "dictionary", word: lowerWord };
+    return {
+      phonemes: dictResult,
+      source: "dictionary",
+      word: lowerWord,
+      ...classed(table?.wordFormClasses?.[lowerWord] ?? 0),
+    };
   }
 
   // A frontend whose letter-to-sound file is a compiled table follows that
   // table's own order: suffix stripping against the dictionary, then the
   // rules. The stress comes from the dictionary root or from the table's
   // passes; neither the shared morphology nor the stress policy runs.
-  const table = options.ltsPath ? ltsTableAt(options.ltsPath) : null;
   if (table) {
     const { suffixIndex, suffixTable } = table;
     const stripped =
       suffixIndex && suffixTable
         ? stripSuffixes(lowerWord, dictLookup, { ...table, suffixIndex, suffixTable })
-        : null;
-    if (stripped) return { phonemes: stripped, source: "morphology", word: lowerWord };
+        : { phonemes: null, formClass: 0 };
+    if (stripped.phonemes) {
+      return {
+        phonemes: stripped.phonemes,
+        source: "morphology",
+        word: lowerWord,
+        ...classed(stripped.formClass),
+      };
+    }
     return {
       phonemes: pronounceWithLtsTable(lowerWord, table),
       source: "lts-rules",
       word: lowerWord,
+      ...classed(stripped.formClass),
     };
   }
 

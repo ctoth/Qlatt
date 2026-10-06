@@ -599,36 +599,95 @@ describe("dectalk-english wh-questions", () => {
 
 // ---------------------------------------------------------------------------
 // "are", "had", "is", "was", "were" and "will" take secondary stress as the
-// first word of a sentence (LTS/ls_task.c verbs[]). DECtalk's phoneme log:
-// "Is it here?" is ` ihz iht hx' iyrr; "It is here." has ihz unstressed;
-// "Will it rain." is w ` ihlx iht r ' eyn.
+// first word of a sentence (LTS/ls_task.c verbs[]). The sentences here have a
+// second verb, so the helper-verb promotion below stays out of it. Stress per
+// phone from DECtalk's debug build (p_us_tim.c state prints):
+// "Was it raining?" w 2, ah 2; "It was raining." and "Well, was it raining?"
+// have "was" at 0; "Will it rain." w 2, ih 2.
 // ---------------------------------------------------------------------------
-describe("dectalk-english sentence-initial auxiliaries", () => {
-  function vowelStress(phrase: string): Array<[unknown, unknown]> {
-    const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
-      frontendId: "dectalk-english",
-    });
-    return utterance
-      .relation("Segment")
-      .listItems()
-      .filter((item) => item.get("active") !== false && item.get("type") === "vowel")
-      .map((item) => [item.get("word"), item.get("stress")]);
-  }
+function dectalkVowelStress(phrase: string): Array<[unknown, unknown]> {
+  const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
+    frontendId: "dectalk-english",
+  });
+  return utterance
+    .relation("Segment")
+    .listItems()
+    .filter((item) => item.get("active") !== false && item.get("type") === "vowel")
+    .map((item) => [item.get("word"), item.get("stress")]);
+}
 
+describe("dectalk-english sentence-initial auxiliaries", () => {
   it("gives the auxiliary secondary stress at the start of a sentence", () => {
-    expect(vowelStress("Is it here?")[0]).toEqual(["is", 2]);
-    expect(vowelStress("Will it rain.")[0]).toEqual(["will", 2]);
+    expect(dectalkVowelStress("Was it raining?")[0]).toEqual(["was", 2]);
+    expect(dectalkVowelStress("Will it rain.")[0]).toEqual(["will", 2]);
   });
 
   it("leaves it unstressed elsewhere, also after a comma", () => {
-    expect(vowelStress("It is here.")[1]).toEqual(["is", 0]);
-    expect(vowelStress("Well, is it here?")[1]).toEqual(["is", 0]);
+    expect(dectalkVowelStress("It was raining.")[1]).toEqual(["was", 0]);
+    expect(dectalkVowelStress("Well, was it raining?")[1]).toEqual(["was", 0]);
   });
 
   it("counts a new sentence, not a new clause", () => {
-    const stresses = vowelStress("Where are they? Is it here?");
-    expect(stresses.find(([word]) => word === "is")).toEqual(["is", 2]);
+    const stresses = dectalkVowelStress("Where are they going? Was it raining?");
+    expect(stresses.find(([word]) => word === "was")).toEqual(["was", 2]);
     expect(stresses.find(([word]) => word === "are")).toEqual(["are", 0]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A function-word verb that is its clause's only verb is the verb, not a
+// helper, and takes secondary stress (ph_task.c:598-626, ph_sort.c:1272-1302).
+// Each expectation is the stress DECtalk's debug build prints for that vowel.
+// ---------------------------------------------------------------------------
+describe("dectalk-english helper-verb promotion", () => {
+  const stressOf = (phrase: string, word: string, nth = 0): unknown =>
+    dectalkVowelStress(phrase).filter(([spoken]) => spoken === word)[nth]?.[1];
+
+  it("gives a clause's only verb secondary stress when it is a function word", () => {
+    expect(stressOf("It is here.", "is")).toBe(2);
+    expect(stressOf("How are you today?", "are")).toBe(2);
+    expect(stressOf("I have it.", "have")).toBe(2);
+    expect(stressOf("Silver, and gold.", "and")).toBe(2);
+  });
+
+  it("leaves it alone when the clause has another verb", () => {
+    expect(stressOf("This is a test.", "is")).toBe(0);
+    expect(stressOf("Where are they going?", "are")).toBe(0);
+    expect(stressOf("You may go.", "may")).toBe(0);
+  });
+
+  it("skips a verb that is also a noun or an adjective", () => {
+    // "can" and "up" are nouns too; "can" gets the clause's primary stress.
+    expect(stressOf("He can.", "can")).toBe(1);
+    expect(stressOf("Up there.", "up")).toBe(0);
+  });
+
+  it("adds to the stress the vowel has", () => {
+    expect(stressOf("They do.", "do")).toBe(3);
+    expect(stressOf("It is.", "is")).toBe(3);
+  });
+
+  it("keeps the consonant before a promoted vowel at secondary stress", () => {
+    const { utterance } = textToKlattTrackDetailed("They do.", 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    const d = utterance
+      .relation("Segment")
+      .listItems()
+      .find((item) => item.get("active") !== false && item.get("phoneme") === "D");
+    expect(d?.get("stress")).toBe(2);
+  });
+
+  it("carries an unused promotion into the following clauses", () => {
+    expect(stressOf("They went.", "went")).toBe(1);
+    expect(stressOf("He can. They went.", "went")).toBe(3);
+    expect(stressOf("He can. So. They went.", "went")).toBe(3);
+    expect(stressOf("To be, they went.", "went")).toBe(3);
+    // Used by "rained" (class ed, from the suffix rule).
+    expect(stressOf("He can. It rained. They went.", "rained")).toBe(3);
+    expect(stressOf("He can. It rained. They went.", "went")).toBe(1);
+    expect(stressOf("They went, he can, they went.", "went", 0)).toBe(1);
+    expect(stressOf("They went, he can, they went.", "went", 1)).toBe(3);
   });
 });
 

@@ -342,10 +342,15 @@ export function convertPhonemeField(field: string): string {
   return out.join(" ");
 }
 
-interface Row {
+export interface Row {
   word: string;
   pos: string;
   phonemes: string;
+  /**
+   * The form class field: one character per bit of the entry's form class
+   * word, bit 0 first ("1" set), in the order of INCLUDE/fc_def.tab.
+   */
+  formClass: string;
   priority: number;
 }
 
@@ -356,23 +361,25 @@ function parseLine(line: string): Row | null {
   const word = f[0];
   const pos = f[1];
   const phonemes = f[2];
+  const formClass = f[3];
   const priority = Number.parseInt(f[4], 10);
   if (!word || !phonemes) return null;
-  return { word, pos, phonemes, priority: Number.isNaN(priority) ? 0 : priority };
+  return { word, pos, phonemes, formClass, priority: Number.isNaN(priority) ? 0 : priority };
 }
 
-function main(): void {
-  const srcPath = process.argv[2] ?? DEFAULT_SRC;
-  const text = fs.readFileSync(srcPath, "utf8");
-  const lines = text.split(/\r?\n/);
-
-  // Collapse homographs: keep highest-priority row; tie -> first encountered.
+/**
+ * The one row kept for each lower-cased word of a `Dic_us.txt` text: the
+ * highest-priority row, the first encountered on a tie.
+ */
+export function selectDictionaryRows(text: string): {
+  best: Map<string, Row>;
+  totalRows: number;
+  multiRowWords: Set<string>;
+} {
   const best = new Map<string, Row>();
   let totalRows = 0;
-  let collapsedWords = 0;
   const multiRowWords = new Set<string>();
-
-  for (const line of lines) {
+  for (const line of text.split(/\r?\n/)) {
     const row = parseLine(line);
     if (!row) continue;
     totalRows++;
@@ -386,7 +393,16 @@ function main(): void {
       // tie or lower: keep existing (first encountered)
     }
   }
-  collapsedWords = multiRowWords.size;
+  return { best, totalRows, multiRowWords };
+}
+
+function main(): void {
+  const srcPath = process.argv[2] ?? DEFAULT_SRC;
+  const text = fs.readFileSync(srcPath, "utf8");
+
+  // Collapse homographs: keep highest-priority row; tie -> first encountered.
+  const { best, totalRows, multiRowWords } = selectDictionaryRows(text);
+  const collapsedWords = multiRowWords.size;
 
   const dict: Record<string, string> = {};
   for (const [key, row] of best) {

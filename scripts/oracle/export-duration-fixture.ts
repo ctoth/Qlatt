@@ -15,10 +15,12 @@
  * prints go to stdout, which the phoneme-log capture reads.
  *
  * Output lines consumed, per allophone, in order:
- *   durxx = dpause durxx=<frames>                      (silence; no rules run)
  *   QD phone n=.. ph=.. struc=.. bou=.. stress=.. fea=.. nallotot=.. durinh=.. durmin=..
  *   QD after=<rule> prcnt=.. deldur=.. durmin=..       (state after that rule)
- *   durxx = durxx + deldur durxx=<frames>              (final duration)
+ *   QD final n=.. code=.. struc=.. durxx=<frames>      (final duration)
+ * A silence prints only the `QD final` line: Rule 1 sets its pause and skips
+ * the rest. `QD final` comes after the /h/ cap (p_us_tim.c:936-940), which
+ * DECtalk's own MSDBG5 print precedes, so it is the value the synthesizer uses.
  *
  * `prcnt` is the multiplicative term in 1/128 units, `deldur` the additive
  * term in frames, `durinh`/`durmin` the inherent and minimum durations in
@@ -42,7 +44,7 @@ import type { OracleCorpusDocument } from "./types";
 
 type RuleState = { prcnt: number; deldur: number; durmin: number };
 type Allophone =
-  | { kind: "silence"; frames: number }
+  | { kind: "silence"; struc: number; frames: number }
   | {
       kind: "phone";
       n: number;
@@ -83,13 +85,17 @@ const numbers = (line: string): Record<string, number> =>
     [...line.matchAll(/([A-Za-z]+)=(-?\d+)/g)].map((match) => [match[1], Number(match[2])]),
   );
 
-function parse(stdout: string, id: string): Allophone[] {
-  const allophones: Allophone[] = [];
+/**
+ * DECtalk times one clause at a time: allophone numbering restarts at 0 for
+ * each clause, and every cross-allophone reference in the rules (previous,
+ * next, next-but-one, clause length) stays inside the clause.
+ */
+function parse(stdout: string, id: string): Allophone[][] {
+  const clauses: Allophone[][] = [];
+  let allophones: Allophone[] = [];
   let open: Extract<Allophone, { kind: "phone" }> | undefined;
   for (const line of stdout.split(/\r?\n/)) {
-    if (line.startsWith("durxx = dpause")) {
-      allophones.push({ kind: "silence", frames: numbers(line).durxx });
-    } else if (line.startsWith("QD phone")) {
+    if (line.startsWith("QD phone")) {
       const value = numbers(line);
       open = {
         kind: "phone",
@@ -113,26 +119,36 @@ function parse(stdout: string, id: string): Allophone[] {
         deldur: value.deldur,
         durmin: value.durmin,
       };
-    } else if (line.startsWith("durxx = durxx + deldur")) {
-      if (!open) throw new Error(`E_DURATION_TRACE: ${id}: final line before a phone line`);
-      open.frames = numbers(line).durxx;
-      allophones.push(open);
-      open = undefined;
-    } else if (/^durxx = (NF15MS|mstofr)/.test(line)) {
-      // Early exits (p_us_tim.c:193-205 user duration, :713-717 [s]/[th]+[sh]).
-      if (!open) throw new Error(`E_DURATION_TRACE: ${id}: early exit before a phone line`);
-      open.frames = numbers(line).durxx;
-      allophones.push(open);
-      open = undefined;
+    } else if (line.startsWith("QD final")) {
+      // Printed at break3 for every allophone, after the HX cap (936-940) and
+      // on the early exits (193-205 user duration, 713-717 [s]/[th]+[sh]).
+      const value = numbers(line);
+      if (value.n === 0 && allophones.length > 0) {
+        clauses.push(allophones);
+        allophones = [];
+      }
+      if (value.n !== allophones.length) {
+        throw new Error(`E_DURATION_TRACE: ${id}: allophone ${value.n} out of order`);
+      }
+      if (open) {
+        open.frames = value.durxx;
+        allophones.push(open);
+        open = undefined;
+      } else {
+        // Rule 1 (silence) skips the phone line. allofeats[] is 32 bits wide;
+        // the rules read it through a 16-bit `short`.
+        allophones.push({ kind: "silence", struc: (value.struc << 16) >> 16, frames: value.durxx });
+      }
     }
   }
   if (open) throw new Error(`E_DURATION_TRACE: ${id}: phone ${open.n} has no final duration`);
-  if (allophones.length === 0) throw new Error(`E_DURATION_TRACE: ${id}: no duration output`);
-  return allophones;
+  if (allophones.length > 0) clauses.push(allophones);
+  if (clauses.length === 0) throw new Error(`E_DURATION_TRACE: ${id}: no duration output`);
+  return clauses;
 }
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "dectalk-durations-"));
-const entries: Record<string, { text: string; allophones: Allophone[] }> = {};
+const entries: Record<string, { text: string; clauses: Allophone[][] }> = {};
 try {
   for (const entry of corpus.entries) {
     const rate = entry.rate ?? corpus.defaults?.rate ?? 180;
@@ -141,14 +157,14 @@ try {
       ["-w", path.join(tempDir, "out.wav"), `[:np] [:ra ${rate}] ${entry.text}`],
       { cwd: workDir, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
     );
-    entries[entry.id] = { text: entry.text, allophones: parse(stdout, entry.id) };
+    entries[entry.id] = { text: entry.text, clauses: parse(stdout, entry.id) };
   }
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }
 
 const fixture = {
-  schemaVersion: "v1",
+  schemaVersion: "v2",
   corpusId: corpus.corpusId,
   engine: "DECtalk 4.63 say.exe, p_us_tim.c built with /DMSDBG5 and QD state prints",
   entries,

@@ -50,7 +50,7 @@ const fixture = JSON.parse(
     "utf8",
   ),
 ) as {
-  entries: Record<string, { allophones: Array<Record<string, unknown>> }>;
+  entries: Record<string, { clauses: Array<Array<Record<string, unknown>>> }>;
 };
 
 const SYLLABLE = ["mono", "first", "medial", "final"];
@@ -97,12 +97,14 @@ const QLATT_COLUMNS = [
 console.log(`# ${entry.id}: "${entry.text}"`);
 console.log("## DECtalk");
 console.log(DECTALK_COLUMNS.join("\t"));
-for (const allophone of fixture.entries[id].allophones) {
+// Clauses are timed separately; allophone numbers restart in each.
+for (const allophone of fixture.entries[id].clauses.flat()) {
+  const struc = Number(allophone.struc);
   if (allophone.kind === "silence") {
-    console.log(`-\tSIL\t\t\t\t\t\t\t\t\t\t\t${allophone.frames}`);
+    const boundary = BOUNDARY.get(struc & 0o740) ?? `0${(struc & 0o740).toString(8)}`;
+    console.log(`-\tSIL\t\t\t\t${boundary}\t\t\t\t\t\t\t${allophone.frames}`);
     continue;
   }
-  const struc = Number(allophone.struc);
   const after = (allophone.after as Record<string, Record<string, number>>)["24"] ?? {};
   console.log(
     [

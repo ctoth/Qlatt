@@ -3,7 +3,7 @@
 `scripts/oracle/export-duration-fixture.ts` records DECtalk 4.63's duration
 computation rule by rule. It needs a `say.exe` whose `p_us_tim.c` prints its
 state. This file says how to produce that build. No DECtalk source is kept in
-this repository; the instrumentation is eleven `printf` lines you add to a
+this repository; the instrumentation is twelve `printf` lines you add to a
 copy.
 
 ## Rules
@@ -37,7 +37,7 @@ copy.
 `/DMSDBG5` switches on DECtalk's own prints of the final duration terms
 (`p_us_tim.c:897-930`).
 
-## The eleven added lines
+## The twelve added lines
 
 All go in the copy's `dapi/src/PH/p_us_tim.c`, inside the per-phone loop of the
 duration routine, each on its own line immediately **before** the comment or
@@ -67,6 +67,18 @@ printf("QD after=N prcnt=%d deldur=%d durmin=%d\n", prcnt, deldur, durmin);
 | 13 | `/* Rule 14: Increase sonor dur if preceding plosive is aspirated */` | 757 |
 | 16 | `/* Rule 17: More lengthening of segments if in a short phrase */` | 788 |
 | 24 | `pDphsettar->strucstressprev = strucstresscur;` | 891 |
+
+And one line after `pDph_t->allodurs[nphon] = pDphsettar->durxx;` (line 943, just
+below the `break3:` label), which every allophone reaches, silences and early
+exits included:
+
+```c
+printf("QD final n=%d code=%d struc=%d durxx=%d\n", nphon, pDph_t->allophons[nphon], pDph_t->allofeats[nphon], pDphsettar->durxx);
+```
+
+Use this line, not DECtalk's own `durxx = durxx + deldur` print, for the final
+duration: the cap on /h/ (lines 936-940) comes after DECtalk's print. `n`
+restarts at 0 for each clause, because the routine runs once per clause.
 
 `after=N` is the state once rule `N` and every rule before it has run. Rules 4
 and 5 share `after=5`; rules 10 to 13 share `after=13`; rules 14 to 16 share

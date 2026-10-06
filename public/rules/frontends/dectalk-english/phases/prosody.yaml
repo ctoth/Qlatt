@@ -461,12 +461,12 @@ rules:
       layer: segmental
       at: at_sync(current.sync_left)
       value: params.policy.f0.segmental.targets.SIL
-      duration_frames: params.policy.f0.segmental.initial_silence_frames
+      duration_frames: dectalk_clause_initial_pause_frames(current)
       profile_points: [1, 0, 0]
       tag: f0_segmental_initial_silence
     citations:
       - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (SI target) and :2080-2150 pht0draw"
-      - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause of 4 frames)"
+      - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause of 4 or 5 frames)"
 
   dectalk_segmental_f0_phone:
     kind: f0_layer
@@ -506,12 +506,12 @@ rules:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.targets.IX
+      value: "get(params.policy.f0.segmental.targets, get(current, 'dummy_phone', 'IX'), 0)"
       duration_frames: "round(current.duration / params.policy.f0.segmental.frame_ms)"
       profile_points: [0, 0, 0]
       tag: f0_segmental_dummy_vowel
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (IX target) and :2080-2150 pht0draw"
+      - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (IX and AX targets) and :2080-2150 pht0draw"
 
   dectalk_segmental_f0_final_silence:
     kind: f0_layer
@@ -523,7 +523,11 @@ rules:
       layer: segmental
       at: at_sync(current.sync_left)
       value: params.policy.f0.segmental.targets.SIL
-      duration_frames: "round(current.duration / params.policy.f0.segmental.frame_ms)"
+      # The Segment also holds the next clause's opening pause
+      # (dectalk_pause_duration); that pause has its own command above.
+      duration_frames: >-
+        round(current.duration / params.policy.f0.segmental.frame_ms)
+        - (next != null ? dectalk_clause_initial_pause_frames(next) : 0.0)
       profile_points: [1, 0, 0]
       tag: f0_segmental_terminal_silence
     citations:

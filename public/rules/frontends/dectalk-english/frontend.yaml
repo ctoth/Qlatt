@@ -327,7 +327,16 @@ parameters:
       # Rule 1 pause lengths in frames, as DECtalk records them at this rate:
       # 16 after a comma, 94 after a period, question mark or exclamation mark
       # (nfcomma and nfperiod scaled by sprat1, p_us_tim.c:240-268).
-      pause_frames: { comma: 16, period: 94 }
+      # Every clause also opens with a pause: 4 frames before a phone that is
+      # voiced, an obstruent or a plosive, 5 before any other (in US English
+      # /h/ and the glottal stop), p_us_tim.c:229-232.
+      pause_frames: { comma: 16, period: 94, clause_initial: 4, clause_initial_other: 5 }
+      # p_us_rom.h us_begtyp: the phones whose beginning type is 1 (front).
+      # Ph_inton2.c:1701-1706 releases a plosive into IX after one of these.
+      front_onset_phones: [IY, IH, EY, EH, AE, YU, IX, IR, ER, Y, TZ]
+      # send_pars() writes no packet on its first call (ph_claus.c:759-766), so
+      # the utterance's first controller frame is never heard.
+      unemitted_initial_frames: 1
       # p_us_tim.c:468 caps HX at 11 frames; 871-877 floors RR at 13.
       hx_max_frames: 11
       rr_minimum_frames: 13
@@ -404,9 +413,12 @@ parameters:
       # amplitudes by 3 dB and aspiration by 6 dB.
       dummy_vowel_burst_reduction_db: 3
       dummy_vowel_aspiration_reduction_db: 6
-      # DECtalk 4.63 ph_inton1.c Rule 9 inserts SCHWA2/IX for NF40MS
-      # after a burst plosive before silence; ph_defs.h defines NF40MS=6 frames.
-      dummy_vowel_duration_ms: 38
+      # DECtalk 4.63 Ph_inton2.c:1683-1722 Rule 9 inserts a schwa for NF40MS
+      # after a burst plosive before silence; ph_defs.h:440 defines NF40MS as
+      # 6 frames of 6.4 ms.
+      dummy_vowel_duration_ms: 38.4
+      # DECtalk 4.63 p_us_st1.c:172-176: a dummy vowel's AV target is 12 dB lower.
+      dummy_vowel_voicing_reduction_db: 12
       # DECtalk 4.63 p_us_st1.c us_gettar() assigns TL=10 to FDUMMY_VOWEL.
       dummy_vowel_tilt_db: 10
       # DECtalk 4.63 p_us_st1.c: open-glottis interval widens B1/B2 by +250/+70 Hz.
@@ -527,6 +539,9 @@ parameters:
       # Ph_inton2.c adds 70 when the stressed nucleus is in the first syllable.
       hat_rise_hz: 120
       hat_first_syllable_bonus_hz: 70
+      # Ph_inton2.c:815: phinton() leaves its allophone loop at a syllabic that
+      # begins and ends the hat when `nphon > 4`.
+      intonation_stop_after_allophone: 4
       # Retained for the classic reading-mode/reset paths below.
       short_phrase_hat_word_limit: 3
       short_phrase_hat_divisor: 4
@@ -624,14 +639,11 @@ parameters:
           W: 100
           Y: 140
           Z: -200
-        # Rule 1 gives the clause-initial pause 4 frames before a voiced phone,
-        # an obstruent or a plosive (and 5 otherwise).
-        initial_silence_frames: 4
-        # The controller counts durations in these frames.
+        # The controller counts durations in these frames. The clause-initial
+        # pause's frames are timing.pause_frames.clause_initial(_other).
         frame_ms: 6.4
         citations:
           - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars"
-          - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause)"
           - "DECtalk 4.63 ph_claus.c (6.4 ms controller frames)"
       citations:
         - "DECtalk 4.63 ph_inton1.c (hat-pattern F0 model)"
@@ -832,6 +844,10 @@ output:
         value: 19.2
         citations:
           - "DECtalk 4.63 -lt oracle trace: clause-initial GEN_SIL before voiced obstruent spans 3 synthesis frames at 6.4ms"
+      # The duration rules compute the opening pause from the first phone
+      # (dectalk_utterance_initial_pause); the value above stands only when no
+      # Segment carries one.
+      initial_silence_key: utterance_initial_silence_ms
       final_silence_ms:
         value: 0
         citations:

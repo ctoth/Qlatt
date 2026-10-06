@@ -3281,6 +3281,19 @@ function validateLoweringSpec(
       "output.lowering.timeline.initial_silence_ms",
       "output.lowering.timeline.initial_silence_ms",
     );
+    if (
+      timeline.initial_silence_key !== undefined &&
+      (typeof timeline.initial_silence_key !== "string" ||
+        timeline.initial_silence_key.length === 0)
+    ) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_LOWERING_SPEC_REQUIRED",
+          "output.lowering.timeline.initial_silence_key must be a non-empty Segment feature name",
+          "output.lowering.timeline.initial_silence_key",
+        ),
+      );
+    }
     validateCitedNumber(
       timeline.final_silence_ms,
       diagnostics,

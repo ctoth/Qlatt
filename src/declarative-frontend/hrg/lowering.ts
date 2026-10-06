@@ -102,6 +102,12 @@ export interface LowerOptions {
   /** Selected frontend timing policy. No bundled fallback is permitted. */
   timeline: {
     initial_silence_ms: CitedNumber;
+    /**
+     * Segment feature holding a rule-computed initial silence in ms. When the
+     * utterance's first active Segment carries a stamped number under this
+     * key it replaces `initial_silence_ms`.
+     */
+    initial_silence_key?: string;
     final_silence_ms: CitedNumber;
     duration_floors: {
       stop_release_ms: CitedNumber;
@@ -785,11 +791,35 @@ export function lowerToFrames(
   const durationKey = options.durationKey ?? "duration";
   const phonemeKey = options.phonemeKey ?? "phoneme";
   const typeKey = options.typeKey ?? "type";
-  const initialSilenceMs = requirePolicyNumber(
+  const policyInitialSilenceMs = requirePolicyNumber(
     options.timeline.initial_silence_ms.value,
     "timeline.initial_silence_ms.value",
     utterance,
   );
+  const initialSilenceKey = options.timeline.initial_silence_key;
+  const firstActiveSegment = utterance.segments
+    .listItems()
+    .find((item) => item.get("active") !== false);
+  const ruledInitialSilenceMs =
+    initialSilenceKey != null && firstActiveSegment?.latestWrite(initialSilenceKey)
+      ? firstActiveSegment.get(initialSilenceKey)
+      : undefined;
+  const initialSilenceMs =
+    typeof ruledInitialSilenceMs === "number"
+      ? requirePolicyNumber(ruledInitialSilenceMs, `Segment.${initialSilenceKey}`, utterance)
+      : policyInitialSilenceMs;
+  if (initialSilenceMs !== policyInitialSilenceMs) {
+    utterance.diagnostics.info(
+      "Initial silence taken from the first Segment instead of the lowering policy",
+      {
+        itemId: firstActiveSegment?.id,
+        key: initialSilenceKey,
+        ruledMs: initialSilenceMs,
+        policyMs: policyInitialSilenceMs,
+      },
+      "HRG_LOWER_INITIAL_SILENCE_RULED",
+    );
+  }
   const finalSilenceMs = requirePolicyNumber(
     options.timeline.final_silence_ms.value,
     "timeline.final_silence_ms.value",

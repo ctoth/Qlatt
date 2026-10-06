@@ -49,6 +49,11 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // blue balloon?".
 // "balloon" is not in DECtalk's dictionary; it is now pronounced by DECtalk's
 // compiled letter-to-sound tables, which regenerates that snapshot once more.
+// DECtalk's clause-initial pauses and its dummy vowel regenerate dectalk-english
+// "Gag, gang; go!" (each pause after a clause holds the next clause's four
+// opening frames; the [g] before the comma is released into IX) and "sip sip."
+// (the dummy vowel is six frames, 38.4 ms, with aspiration at 39 dB). Both are
+// checked against DECtalk's packets by test/dectalk-frame-gate.test.ts.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

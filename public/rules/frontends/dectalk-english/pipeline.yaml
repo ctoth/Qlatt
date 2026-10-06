@@ -34,6 +34,16 @@ functions:
     description: Whether DECtalk's feature word for the Segment's allophone has the named bit.
     citations:
       - "DECtalk 4.63 p_us_rom.h us_featb; ph_romi.c:214-225 phone_feature"
+  # Rule 1's pause at the head of a clause, from the clause's first phone.
+  dectalk_clause_initial_pause_frames:
+    params: [item]
+    body: >-
+      dectalk_has(item, 'voiced') || dectalk_has(item, 'obstruent') || dectalk_has(item, 'plosive')
+        ? params.policy.timing.pause_frames.clause_initial
+        : params.policy.timing.pause_frames.clause_initial_other
+    description: Frames of the pause DECtalk puts before a clause whose first phone is the given Segment.
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:229-232 (dpause = 4 when the next phone is FVOICD, FOBST or FPLOSV, else 5)"
   # A phone as the duration routine sees it when looking AHEAD from an earlier
   # phone. The routine turns the /t/ of [nt] into [d] while it times the /n/
   # (p_us_tim.c:627-638), so the vowel and the /n/ before it still saw a /t/.
@@ -567,6 +577,9 @@ relations:
       hat_locked: { kind: boolean }
       hat_stresses: { kind: number }
       hat_delay: { kind: number }
+      # The syllabic at which DECtalk's intonation routine leaves its loop
+      # (Ph_inton2.c:809-819).
+      intonation_stops: { kind: boolean }
       # State of DECtalk's duration routine for one allophone (p_us_tim.c), in
       # its own units: frames, and a percentage where 128 is 100%.
       clause_position: { kind: number }
@@ -578,6 +591,10 @@ relations:
       timing_factor: { kind: number }
       timing_fixed_frames: { kind: number }
       timing_frames: { kind: number }
+      # On the utterance's first Segment: the opening pause as the synthesizer
+      # hears it (p_us_tim.c:229-232 less ph_claus.c:759-766). Lowering reads
+      # it through output.lowering.timeline.initial_silence_key.
+      utterance_initial_silence_ms: { kind: number }
       AF: []
       AH: []
       AN: []
@@ -592,6 +609,8 @@ relations:
       BNZ: []
       breathiness: []
       dummy_vowel: []
+      # Which schwa DECtalk's Rule 9 releases the plosive into (Ph_inton2.c:1701-1706).
+      dummy_phone: { kind: string, values: [IX, AX] }
       F0: []
       F4: []
       F5: []
@@ -659,6 +678,7 @@ phases:
       # p_us_tim.c, one rule per branch, in source order. Every rule reads and
       # writes the allophone's timing_* state; only the last two write duration.
       - dectalk_pause_duration
+      - dectalk_utterance_initial_pause
       - dectalk_timing_setup
       - dectalk_timing_dictionary_duration
       - dectalk_timing_2_clause_final_rime
@@ -777,6 +797,7 @@ phases:
       - dectalk_insert_voiceless_stop_release_into_silence
       - dectalk_insert_voiceless_stop_release_and_aspiration
       - dectalk_insert_voiceless_stop_release_and_aspiration_final
+      - dectalk_insert_voiced_stop_dummy_vowel
       - dectalk_insert_voiced_stop_release
       - dectalk_insert_voiced_stop_release_final
       - dectalk_weaken_interdental_frication
@@ -801,6 +822,8 @@ phases:
       - dectalk_rime_boundary
       # Reads the stress and boundary of every phone of the clause.
       - dectalk_hat_pattern
+      - dectalk_intonation_stops
+      - dectalk_drop_dummy_vowel_after_intonation_stop
   - name: formant
     rules:
       - dectalk_sw_explicit_override

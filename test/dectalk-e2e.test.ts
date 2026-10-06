@@ -329,7 +329,9 @@ describe("dectalk-english end-to-end", () => {
       tag: "stop_burst",
     });
     expect(dummyVowels[0].get("phoneme")).toBe("SIL");
-    expect(dummyVowels[0].get("duration")).toBe(38);
+    // NF40MS is six controller frames of 6.4 ms (ph_defs.h:440).
+    expect(dummyVowels[0].get("duration")).toBe(38.4);
+    expect(dummyVowels[0].get("dummy_phone")).toBe("IX");
     expect(dummyVowels[0].get("F1")).toBe(460);
     expect(dummyVowels[0].get("F2")).toBe(1680);
     expect(dummyVowels[0].get("F3")).toBe(2520);
@@ -337,10 +339,89 @@ describe("dectalk-english end-to-end", () => {
     expect(dummyVowels[0].get("control_windows")).toContainEqual({
       start_ms: 0,
       target: "current",
-      end_ms: 38,
-      fields: { AV: 0, AH: 42, B1: 310, B2: 170 },
+      end_ms: 38.4,
+      // 48 dB before a front beginning, 3 less in an unstressed coda, 6 less
+      // in a dummy vowel (p_us_st1.c:1367-1387, 1422-1426); DECtalk's packets
+      // for "cake." carry AP = 39 here.
+      fields: { AV: 0, AH: 39, B1: 310, B2: 170 },
       tag: "stop_aspiration",
     });
+  });
+
+  /** Packet at which each active Segment's first frame falls, with its phoneme. */
+  function segmentStarts(text: string): Array<[string, number]> {
+    const { track } = textToKlattTrackDetailed(text, undefined, 30, {
+      frontendId: "dectalk-english",
+    });
+    const starts: Array<[string, number]> = [];
+    let previous: string | undefined;
+    for (const frame of track) {
+      if (!frame.segmentId || frame.segmentId === previous) continue;
+      previous = frame.segmentId;
+      starts.push([frame.phoneme ?? "?", Math.round(frame.time / DECTALK_PACKET_PERIOD_SEC)]);
+    }
+    return starts;
+  }
+
+  it("opens the utterance with DECtalk's pause: 3 packets before a voiced phone, 4 before /h/", () => {
+    // p_us_tim.c:229-232 gives 4 frames, or 5 when the next phone is neither
+    // voiced, obstruent nor plosive; the first frame is never sent
+    // (ph_claus.c:759-766). DECtalk's packets: "a cat." [ax] at 3,
+    // "Hello world." [hx] at 4.
+    expect(segmentStarts("a cat.")[0]).toEqual(["AX", 3]);
+    expect(segmentStarts("Hello world.")[0]).toEqual(["HH", 4]);
+  });
+
+  it("gives every later clause its opening pause after the previous clause's closing one", () => {
+    // DECtalk's packets for "Yes, we can.": [s] ends at 66, [w] starts at 86:
+    // 16 frames for the comma and 4 that open the second clause.
+    const starts = segmentStarts("Yes, we can.");
+    expect(starts.slice(2, 5)).toEqual([
+      ["S", 38],
+      ["SIL", 66],
+      ["W", 86],
+    ]);
+  });
+
+  it("releases a voiced plosive before a pause into DECtalk's dummy vowel", () => {
+    // Ph_inton2.c:1683-1722. "Red, green, blue, and gold.": IX after [eh d],
+    // AX after [lx d]; DECtalk's packets put them at 55-60 and 359-364.
+    const result = textToKlattTrackDetailed("Red, green, blue, and gold.", undefined, 30, {
+      frontendId: "dectalk-english",
+    });
+    const dummies = result.utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false && item.get("dummy_vowel") === true);
+    expect(dummies.map((item) => item.get("dummy_phone"))).toEqual(["IX", "AX"]);
+    expect(dummies.map((item) => item.get("duration"))).toEqual([38.4, 38.4]);
+    const starts = segmentStarts("Red, green, blue, and gold.");
+    expect(starts.filter(([phoneme]) => phoneme === "SIL")).toEqual([
+      ["SIL", 55],
+      ["SIL", 61],
+      ["SIL", 146],
+      ["SIL", 225],
+      ["SIL", 359],
+      ["SIL", 365],
+    ]);
+  });
+
+  it("gives no dummy vowel where DECtalk's intonation routine has left its loop", () => {
+    // Ph_inton2.c:809-819 breaks out of the allophone loop at a syllabic that
+    // begins and ends the hat past the fourth allophone, before Rule 9 can
+    // run: "We will wait." ends [t] then silence at packet 92, 186 packets in
+    // all. "a cat." (the syllabic is the third allophone) keeps its dummy.
+    const dummyCount = (text: string): number =>
+      textToKlattTrackDetailed(text, undefined, 30, { frontendId: "dectalk-english" })
+        .utterance.relation("Segment")
+        .listItems()
+        .filter((item) => item.get("active") !== false && item.get("dummy_vowel") === true).length;
+    expect(dummyCount("We will wait.")).toBe(0);
+    expect(dummyCount("a cat.")).toBe(1);
+    expect(segmentStarts("We will wait.").slice(-2)).toEqual([
+      ["T", 81],
+      ["SIL", 92],
+    ]);
   });
 
   it("preserves required segment features when reducing a same-word geminate", () => {

@@ -77,12 +77,19 @@ rules:
       weak: "true"
       next_token: next
       rel_target: target(rel)
-      ix_target: "target('IX0')"
+      # Ph_inton2.c:1701-1706: the dummy vowel is IX after a phone whose
+      # beginning type is front (us_begtyp == 1), AX otherwise. The second test
+      # there, phone_feature(phocur) & FALVEL, reads the manner word with a
+      # place mask (FALVEL = FSON1 = 010) and is never true of a plosive.
+      dummy_phone: "dectalk_name(prev) in params.policy.timing.front_onset_phones ? 'IX' : 'AX'"
+      ix_target: "target(dummy_phone + '0')"
       dummy_duration: params.policy.duration.dummy_vowel_duration_ms
       rel_burst_duration: "has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration"
-      # DECtalk 4.63 p_us_st1.c us_gettar() selects the burst-amplitude row
-      # from the following dummy IX, whose beginning type is front vowel.
-      rel_profile: "rel_target.stopReleaseProfiles.front_vowel"
+      # DECtalk 4.63 p_us_st1.c:231-237 us_gettar() selects the burst-amplitude
+      # row from the beginning type of the following phone, the dummy vowel.
+      rel_profile: >-
+        dummy_phone == 'IX' ? rel_target.stopReleaseProfiles.front_vowel
+        : rel_target.stopReleaseProfiles.back_unrounded_vowel
       rel_duration: "min([current.duration, rel_burst_duration])"
       open_glottis_b1: "ix_target.B1 + params.policy.duration.open_glottis_b1_widen_hz"
       open_glottis_b2: "ix_target.B2 + params.policy.duration.open_glottis_b2_widen_hz"
@@ -98,7 +105,10 @@ rules:
         'SW': 1}
       asp_window_params: >-
         {'AV': 0,
-        'AH': params.policy.duration.voiceless_vot_aspiration_front_db - params.policy.duration.dummy_vowel_aspiration_reduction_db,
+        'AH': (dummy_phone == 'IX' ? params.policy.duration.voiceless_vot_aspiration_front_db
+               : params.policy.duration.voiceless_vot_aspiration_nonfront_db)
+              - (get(current, 'stress', 0) > 0 ? 0 : params.policy.duration.voiceless_vot_aspiration_unstressed_reduction_db)
+              - params.policy.duration.dummy_vowel_aspiration_reduction_db,
         'B1': open_glottis_b1, 'B2': open_glottis_b2}
     splice:
       type: replace_range
@@ -134,6 +144,7 @@ rules:
           word: "has(current.word) ? current.word : null"
           weak: weak
           dummy_vowel: true
+          dummy_phone: dummy_phone
           target: carrier_params
           duration: dummy_duration
           inherentDuration: dummy_duration
@@ -150,8 +161,48 @@ rules:
       - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
       - "DECtalk 4.63 p_us_st1.c Special Rule 2 (a dummy vowel releases a final voiceless plosive into silence)"
       - "DECtalk 4.63 p_us_st1.c (dummy-vowel release reduces burst by 3 dB, aspiration by 6 dB, and widens B1/B2 during the open-glottis interval)"
-      - "DECtalk 4.63 p_us_rom.h (US_IX target values)"
-      - "Engineering representation: keep the acoustically IX dummy non-syllabic so fixed Rule 9 duration survives later vowel rules"
+      - "DECtalk 4.63 Ph_inton2.c:1683-1722 Rule 9 (SCHWA2/IX after a front-beginning phone, SCHWA1/AX otherwise, NF40MS)"
+      - "DECtalk 4.63 p_us_st1.c:1367-1387 (aspiration 48 dB before a front beginning, 50 otherwise, 3 less when unstressed)"
+      - "DECtalk 4.63 p_us_rom.h (US_IX and US_AX target values, us_begtyp)"
+      - "Engineering representation: keep the dummy vowel non-syllabic so fixed Rule 9 duration survives later vowel rules"
+
+  # Rule 9 releases a voiced plosive into the same dummy vowel. It is voiced
+  # throughout, 12 dB below the vowel's own level.
+  dectalk_insert_voiced_stop_dummy_vowel:
+    kind: structural
+    select:
+      relation: Segment
+      where: current.phoneme in ['B', 'D', 'G'] && next != null && next.phoneme == 'SIL'
+    define:
+      next_token: next
+      dummy_phone: "dectalk_name(prev) in params.policy.timing.front_onset_phones ? 'IX' : 'AX'"
+      dummy_target: "target(dummy_phone + '0')"
+      dummy_duration: params.policy.duration.dummy_vowel_duration_ms
+      carrier_params: >-
+        merge(dummy_target, {'AV': dummy_target.AV - params.policy.duration.dummy_vowel_voicing_reduction_db,
+        'TL': params.policy.duration.dummy_vowel_tilt_db, 'SW': 0})
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: next_token.sync_right
+      insert:
+        - copy_from: current
+        - phoneme: "'SIL'"
+          stress: "has(current.stress) ? current.stress : null"
+          word: "has(current.word) ? current.word : null"
+          dummy_vowel: true
+          dummy_phone: dummy_phone
+          target: carrier_params
+          duration: dummy_duration
+          inherentDuration: dummy_duration
+          minimumDuration: 0
+          type: "'silence'"
+        - copy_from: next
+    citations:
+      - "DECtalk 4.63 Ph_inton2.c:1683-1722 Rule 9 (a schwa releases [p,t,k,b,d,g] into silence; NF40MS)"
+      - "DECtalk 4.63 p_us_st1.c:172-176 (dummy vowel has 12 dB less voicing)"
+      - "DECtalk 4.63 p_us_rom.h (US_IX and US_AX target values, us_begtyp)"
+      - "Engineering representation: keep the dummy vowel non-syllabic so fixed Rule 9 duration survives later vowel rules"
 
   dectalk_insert_voiceless_stop_release_and_aspiration:
     kind: structural

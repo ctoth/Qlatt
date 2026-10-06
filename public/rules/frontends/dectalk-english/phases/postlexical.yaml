@@ -595,11 +595,18 @@ rules:
       stress3: "syl3 ? (get(n3, 'helper_verb_promoted', false) ? 2 : get(n3, 'stress', 0)) : 0"
       pair12: "in1 && !syl1 ? dectalk_onset_cluster(current.phoneme, n1.phoneme) : 'none'"
       pair23: "in2 && !syl1 && !syl2 ? dectalk_onset_cluster(n1.phoneme, n2.phoneme) : 'none'"
+      # A morpheme boundary or compound joint between the consonant and the
+      # syllabic is a symbol of its own in DECtalk's scan: it counts as a
+      # member of the would-be cluster and is no legal one, so the consonant
+      # takes nothing ("with|out": the TH is unstressed before AW2).
+      mark0: "isTrue(current, 'morpheme_boundary_after')"
+      mark1: "mark0 || (in1 && !syl1 && isTrue(n1, 'morpheme_boundary_after'))"
+      mark2: "mark1 || (in2 && !syl1 && !syl2 && isTrue(n2, 'morpheme_boundary_after'))"
       inherited: >-
-        stress1 > 0 ? stress1 :
-        (!syl1 && stress2 > 0 && pair12 != 'none' ? stress2 :
+        stress1 > 0 ? (mark0 ? 0 : stress1) :
+        (!syl1 && stress2 > 0 && pair12 != 'none' ? (mark1 ? 0 : stress2) :
         (!syl1 && !syl2 && stress3 > 0 && pair23 == 's_onset' && current.phoneme == 'S'
-          ? stress3 : 0))
+          ? (mark2 ? 0 : stress3) : 0))
     constraint: inherited > 0
     apply:
       - field: stress
@@ -608,6 +615,7 @@ rules:
         tag: consonant_stress
     citations:
       - "DECtalk 4.63 p_us_sr1.c:73-140 get_stress_of_conson (consonant takes the stress of the syllabic its onset leads into)"
+      - "DECtalk 4.63 p_us_sr1.c:83-105 (the scan counts every symbol up to the stress mark, a boundary symbol included, and us_phcluster rejects it)"
       - "DECtalk 4.63 p_us_sr1.c:175-228 us_phcluster (legal onset pairs)"
 
   # The article "a" arrives as AX from the lexicon stage, where DECtalk decides
@@ -1397,6 +1405,11 @@ rules:
           # The phone is named without a stress digit, like every other vowel;
           # the digit only selects the inventory target.
           phoneme: fused_base
+          # A boundary mark after the /r/ ("air|plane") is the next boundary
+          # of the vowel too: DECtalk's scan from the vowel passes over the
+          # /r/ to it (ph_sort2.c:203-227).
+          morpheme_boundary_after: >-
+            isTrue(p, 'morpheme_boundary_after') || isTrue(current, 'morpheme_boundary_after')
           type: fv.type
           target: fv
           duration: fv.duration

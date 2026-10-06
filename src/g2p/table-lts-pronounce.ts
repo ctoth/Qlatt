@@ -31,6 +31,11 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
    * are blocked (the dictionary's `~` before the phone).
    */
   wordRuleBlocks?: Readonly<Record<string, readonly number[]>>;
+  /**
+   * For a dictionary word, the indices of the phones after which a morpheme
+   * boundary or a compound's joint stands (the dictionary's `*` and `#`).
+   */
+  wordBoundaries?: Readonly<Record<string, readonly number[]>>;
   /** The secondary entry of each word with two entries (table-homograph.ts). */
   homographs?: Readonly<Record<string, HomographEntry>>;
   /** The rules that choose between a word's two entries, in order. */

@@ -59,6 +59,9 @@ type AllophoneFixture = {
 const repoRoot = path.resolve(__dirname, "..");
 
 const KNOWN_GAPS: Readonly<Record<string, string>> = {
+  // dectalk-us-clause-v1. DECtalk's record itself:
+  "mark-anything":
+    "DECtalk's duration routine gives the EH and N of 'anything' fixed durations through its user-duration branch (p_us_tim.c:192) and the record has no rule state for them; why is not traced",
   // dectalk-us-clause-v1. Structure and duration, with DECtalk's allophones:
   "carry-be-late":
     "after 'Be late,' DECtalk does not carry the helper-verb promotion; here it does (unexplained)",

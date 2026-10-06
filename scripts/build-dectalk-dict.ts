@@ -325,13 +325,20 @@ export function convertPhonemeField(field: string): string {
  * `~` stands before. `~` is BLOCK_RULES (INCLUDE/phonlist.h:191): DECtalk
  * gives the next phone FBLOCK and skips its allophone rules for that phone
  * (PH/ph_sort.c:1611-1612, PH/ph_aloph.c:563-567).
+ *
+ * `boundaryAfter` holds the indices of the phones that a `*` (MBOUND, a
+ * morpheme boundary) or a `#` (HYPHEN, the joint of a compound) stands after
+ * (INCLUDE/phonlist.h). Both give the rime before them the morpheme boundary
+ * type (PH/ph_romi.c bounftab).
  */
 export function convertPhonemeFieldDetailed(field: string): {
   phones: string[];
   rulesBlocked: number[];
+  boundaryAfter: number[];
 } {
   const out: string[] = [];
   const rulesBlocked: number[] = [];
+  const boundaryAfter: number[] = [];
   let stress = "0";
   let blockNext = false;
   for (const c of field) {
@@ -347,7 +354,13 @@ export function convertPhonemeFieldDetailed(field: string): {
       blockNext = true;
       continue;
     }
-    if (c === "#" || c === "*" || c === " ") continue; // boundaries
+    if (c === "#" || c === "*") {
+      if (out.length > 0 && !boundaryAfter.includes(out.length - 1)) {
+        boundaryAfter.push(out.length - 1);
+      }
+      continue;
+    }
+    if (c === " ") continue; // a word boundary inside an entry
     // Glottal stop (q / US_Q): a juncture marker between abutting vowels (the
     // sole occurrence is "minutiae" = mIn'uSi q`i). The dectalk-english Klatt
     // inventory has no discrete glottal-stop segment, and CMU likewise omits it
@@ -365,7 +378,7 @@ export function convertPhonemeFieldDetailed(field: string): {
     // that carries a stress digit.
     if (tokens.some((tok) => /[0-9]$/.test(tok))) stress = "0";
   }
-  return { phones: out, rulesBlocked };
+  return { phones: out, rulesBlocked, boundaryAfter };
 }
 
 export interface Row {

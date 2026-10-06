@@ -242,24 +242,30 @@ const wordFormClasses: Record<string, number> = {};
 // the word's phones as public/dectalk-dictionary.json has them) of the phones
 // whose allophone rules DECtalk blocks.
 const wordRuleBlocks: Record<string, number[]> = {};
+// For each dictionary word with a `*` (morpheme boundary) or `#` (compound
+// joint) in its phoneme field, the indices of the phones the mark stands
+// after.
+const wordBoundaries: Record<string, number[]> = {};
 for (const [word, row] of byWord(dictionaryRows.best)) {
-  const { rulesBlocked } = convertPhonemeFieldDetailed(row.phonemes);
+  const { rulesBlocked, boundaryAfter } = convertPhonemeFieldDetailed(row.phonemes);
   if (rulesBlocked.length > 0) wordRuleBlocks[word] = rulesBlocked;
+  if (boundaryAfter.length > 0) wordBoundaries[word] = boundaryAfter;
   const mask = rowFormClass(row.formClass, row.pos);
   if (mask !== 0) wordFormClasses[word] = mask;
 }
 // The secondary entry of each homograph: its phones as the pronunciation
-// dictionary spells them, its class word and its `~` marks.
+// dictionary spells them, its class word and its `~`, `*` and `#` marks.
 const homographs: Record<
   string,
-  { phonemes: string[]; formClass: number; rulesBlockedAt?: number[] }
+  { phonemes: string[]; formClass: number; rulesBlockedAt?: number[]; boundaryAfter?: number[] }
 > = {};
 for (const [word, row] of byWord(dictionaryRows.secondary)) {
-  const { phones, rulesBlocked } = convertPhonemeFieldDetailed(row.phonemes);
+  const { phones, rulesBlocked, boundaryAfter } = convertPhonemeFieldDetailed(row.phonemes);
   homographs[word] = {
     phonemes: phones,
     formClass: rowFormClass(row.formClass, row.pos),
     ...(rulesBlocked.length > 0 ? { rulesBlockedAt: rulesBlocked } : {}),
+    ...(boundaryAfter.length > 0 ? { boundaryAfter } : {}),
   };
 }
 // The rules that choose between the two (LTS/ls_homo.h homo_table): four
@@ -386,6 +392,7 @@ fs.writeFileSync(
     formClassNames,
     wordFormClasses,
     wordRuleBlocks,
+    wordBoundaries,
     homographs,
     homographRules,
     specialWordFormClasses,

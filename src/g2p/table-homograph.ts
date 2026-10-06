@@ -27,6 +27,8 @@ export interface HomographEntry {
   formClass: number;
   /** Indices of the phones whose allophone rules are blocked. */
   rulesBlockedAt?: readonly number[];
+  /** Indices of the phones a morpheme boundary or compound joint stands after. */
+  boundaryAfter?: readonly number[];
 }
 
 /** Where a word stands among the words up to the next punctuation mark. */

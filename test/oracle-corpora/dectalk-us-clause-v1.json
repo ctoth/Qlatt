@@ -103,6 +103,12 @@
     { "id": "article-before-comma", "text": "He saw a, cat.", "group": "article", "tags": ["against-punctuation", "comma"], "expectedFocus": ["duration"] },
     { "id": "article-inside", "text": "It is a cat.", "group": "article", "tags": ["apart"], "expectedFocus": ["duration"] },
     { "id": "article-first", "text": "A cat is here.", "group": "article", "tags": ["apart", "first-word"], "expectedFocus": ["duration"] },
-    { "id": "article-question", "text": "Did Bob buy a blue balloon?", "group": "article", "tags": ["apart", "question"], "expectedFocus": ["duration"] }
+    { "id": "article-question", "text": "Did Bob buy a blue balloon?", "group": "article", "tags": ["apart", "question"], "expectedFocus": ["duration"] },
+    { "id": "mark-airplane", "text": "The airplane is here.", "group": "dictionary-marks", "tags": ["morpheme"], "expectedFocus": ["duration"] },
+    { "id": "mark-anything", "text": "Anything is good.", "group": "dictionary-marks", "tags": ["compound"], "expectedFocus": ["duration"] },
+    { "id": "mark-without", "text": "They went without it.", "group": "dictionary-marks", "tags": ["compound"], "expectedFocus": ["duration"] },
+    { "id": "mark-something", "text": "Something stopped outside.", "group": "dictionary-marks", "tags": ["compound", "homograph"], "expectedFocus": ["duration"] },
+    { "id": "mark-stopover", "text": "It was a stopover.", "group": "dictionary-marks", "tags": ["compound"], "expectedFocus": ["duration"] },
+    { "id": "mark-otherwise", "text": "Otherwise we stay.", "group": "dictionary-marks", "tags": ["compound"], "expectedFocus": ["duration"] }
   ]
 }

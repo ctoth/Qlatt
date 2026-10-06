@@ -175,6 +175,15 @@ describe("table letter-to-sound, by stage", () => {
     expect(blocked("bladders")).toEqual([3]);
     expect(blocked("hello")).toBeUndefined();
   });
+
+  it("reports the phones the dictionary marks a boundary after", () => {
+    // Dic_us.txt: airplane 'Er*pl`en (morpheme boundary), without wIT#`Wt
+    // (the joint of a compound).
+    const marks = (word: string): unknown => pronounce(word, lookup, options).boundaryAfterAt;
+    expect(marks("airplane")).toEqual([1]);
+    expect(marks("without")).toEqual([2]);
+    expect(marks("hello")).toBeUndefined();
+  });
 });
 
 describe("DECtalk form class oracle", () => {

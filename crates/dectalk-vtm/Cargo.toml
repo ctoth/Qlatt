@@ -1,0 +1,14 @@
+[package]
+name = "dectalk-vtm"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Pure-Rust tan and log10 for the hlsyn port, so that every target computes
+# them with the same code instead of its own C library. The `arch` feature
+# (per-target intrinsics for other functions) is switched off for the same
+# reason.
+libm = { version = "0.2.16", default-features = false }

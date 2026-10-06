@@ -662,6 +662,9 @@ phases:
       - dectalk_word_initial_consonant
       - dectalk_consonant_stress
       - dectalk_reduce_article_a
+      # Rule 1a reads the input /dh/, before the dental rule at the end
+      # rewrites it.
+      - dectalk_the_before_vowel
       - dectalk_geminate_delete
       - dectalk_assimilate_sibilant_sh
       - dectalk_palatalize_t

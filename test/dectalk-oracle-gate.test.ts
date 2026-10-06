@@ -65,8 +65,6 @@ const KNOWN_GAPS: Readonly<Record<string, string>> = {
   // dectalk-us-clause-v1. Allophones:
   "hat-president": "DECtalk has D for the final T of 'president' before a vowel; here T",
   "hat-two-phrases": "DECtalk breaks the clause before 'and' and says it EH N D; here one clause",
-  "hat-old-man-young-boy": "'the' before a vowel is DH IY in DECtalk; here DH AX",
-  "hat-did-the-old-man": "'the' before a vowel is DZ IY in DECtalk; here DZ AX",
   // dectalk-us-clause-v1. Structure and duration, with DECtalk's allophones:
   "carry-be-late":
     "after 'Be late,' DECtalk does not carry the helper-verb promotion; here it does (unexplained)",

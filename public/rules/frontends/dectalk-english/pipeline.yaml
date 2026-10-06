@@ -530,6 +530,7 @@ phases:
     rules:
       # A wh-question's "?" becomes "." before anything reads the punctuation.
       - dectalk_wh_question_period
+      - dectalk_sentence_initial_auxiliary
       # ph_sort.c structure-word fields that the allophone rules below read.
       - dectalk_breath_group_primary_stress
       - dectalk_exclamation_emphasis

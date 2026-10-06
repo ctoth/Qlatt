@@ -269,7 +269,9 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
   const offset = (value: unknown, amount: unknown): Readonly<Record<string, unknown>> | null => {
     const source = resolveItem(value);
     const sourceIndex = source ? items.indexOf(source) : -1;
-    const distance = typeof amount === "number" ? Math.trunc(amount) : 1;
+    // A CEL integer literal arrives as a bigint, a double as a number.
+    const distance =
+      typeof amount === "number" || typeof amount === "bigint" ? Math.trunc(Number(amount)) : 1;
     const target = sourceIndex >= 0 ? items[sourceIndex + distance] : undefined;
     if (target && relationName) {
       const write = utterance.relation(relationName).node(target)?.write;

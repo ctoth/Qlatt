@@ -517,6 +517,11 @@ relations:
       # The phone before a morpheme boundary inside its word (MBOUND, e.g.
       # "nine|teen" in DECtalk's number lists).
       morpheme_boundary_after: { kind: boolean }
+      # FBLOCK: the dictionary marks the phone (`~` before it) and DECtalk skips
+      # every allophone rule in that phone's turn, and the hat pattern
+      # (ph_sort.c:1611-1612, ph_aloph.c:563-567). The geminate deletion comes
+      # before the skip and still applies.
+      rules_blocked: { kind: boolean }
       rime_boundary: { kind: string, values: [morpheme, word, vp, comma, period, question, exclaim] }
       # FHAT_BEGINS and FHAT_ENDS of a syllabic, and the state DECtalk's walk
       # leaves after it (ph_aloph.c:1396-1525).

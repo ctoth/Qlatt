@@ -25,6 +25,11 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
   formClassNames?: readonly (string | null)[];
   /** Each dictionary word's form class word. */
   wordFormClasses?: Readonly<Record<string, number>>;
+  /**
+   * For a dictionary word, the indices of the phones whose allophone rules
+   * are blocked (the dictionary's `~` before the phone).
+   */
+  wordRuleBlocks?: Readonly<Record<string, readonly number[]>>;
   /** Words whose form class is fixed whatever the dictionary says. */
   specialWordFormClasses?: Readonly<Record<string, number>>;
   /** The phrase each of those words starts. */

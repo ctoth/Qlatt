@@ -35,6 +35,11 @@ export interface PronunciationResult {
   /** The phrase the word starts, when the frontend's lexicon marks one. */
   phraseStart?: "vp" | "pp";
   /**
+   * Indices into `phonemes` of the phones the lexicon exempts from the
+   * frontend's allophone rules.
+   */
+  rulesBlockedAt?: number[];
+  /**
    * The words the token is spoken as, when it is more than one; `phonemes`
    * is then all of them in order.
    */

@@ -312,12 +312,27 @@ function mapToken(raw: string, stress: string): string[] {
 }
 
 /**
- * Convert one DECtalk phoneme field to a space-joined ARPABET string.
- * Returns null if the field yields no phonemes.
+ * Convert one DECtalk phoneme field to a space-joined ARPABET string, empty
+ * if the field yields no phonemes.
  */
 export function convertPhonemeField(field: string): string {
+  return convertPhonemeFieldDetailed(field).phones.join(" ");
+}
+
+/**
+ * The phones of a DECtalk phoneme field, and the indices of the phones that a
+ * `~` stands before. `~` is BLOCK_RULES (INCLUDE/phonlist.h:191): DECtalk
+ * gives the next phone FBLOCK and skips its allophone rules for that phone
+ * (PH/ph_sort.c:1611-1612, PH/ph_aloph.c:563-567).
+ */
+export function convertPhonemeFieldDetailed(field: string): {
+  phones: string[];
+  rulesBlocked: number[];
+} {
   const out: string[] = [];
+  const rulesBlocked: number[] = [];
   let stress = "0";
+  let blockNext = false;
   for (const c of field) {
     if (c === "'") {
       stress = "1";
@@ -327,7 +342,11 @@ export function convertPhonemeField(field: string): string {
       stress = "2";
       continue;
     } // secondary stress
-    if (c === "~" || c === "#" || c === "*" || c === " ") continue; // boundaries
+    if (c === "~") {
+      blockNext = true;
+      continue;
+    }
+    if (c === "#" || c === "*" || c === " ") continue; // boundaries
     // Glottal stop (q / US_Q): a juncture marker between abutting vowels (the
     // sole occurrence is "minutiae" = mIn'uSi q`i). The dectalk-english Klatt
     // inventory has no discrete glottal-stop segment, and CMU likewise omits it
@@ -336,10 +355,12 @@ export function convertPhonemeField(field: string): string {
     if (c === "q") continue;
     const raw = CHAR_RAW_ARPA[c];
     if (raw === undefined) continue; // unknown char: skip (validator reports these)
+    if (blockNext) rulesBlocked.push(out.length);
+    blockNext = false;
     for (const tok of mapToken(raw, stress)) out.push(tok);
     stress = "0"; // stress is consumed by the next phoneme only
   }
-  return out.join(" ");
+  return { phones: out, rulesBlocked };
 }
 
 export interface Row {

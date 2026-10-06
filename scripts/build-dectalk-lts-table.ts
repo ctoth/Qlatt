@@ -26,7 +26,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { selectDictionaryRows } from "./build-dectalk-dict";
+import { convertPhonemeFieldDetailed, selectDictionaryRows } from "./build-dectalk-dict";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);
@@ -218,9 +218,15 @@ const dictionaryText = fs.readFileSync(
 );
 const NAME_BIT = formClassNames.indexOf("name");
 const wordFormClasses: Record<string, number> = {};
+// For each dictionary word with a `~` in its phoneme field, the indices (in
+// the word's phones as public/dectalk-dictionary.json has them) of the phones
+// whose allophone rules DECtalk blocks.
+const wordRuleBlocks: Record<string, number[]> = {};
 for (const [word, row] of [...selectDictionaryRows(dictionaryText).best].sort(([a], [b]) =>
   a < b ? -1 : a > b ? 1 : 0,
 )) {
+  const { rulesBlocked } = convertPhonemeFieldDetailed(row.phonemes);
+  if (rulesBlocked.length > 0) wordRuleBlocks[word] = rulesBlocked;
   let mask = 0;
   [...row.formClass].forEach((char, bit) => {
     // The text marks 3,997 words as names (bit 28); the dictionary
@@ -327,6 +333,7 @@ fs.writeFileSync(
     suffixTable,
     formClassNames,
     wordFormClasses,
+    wordRuleBlocks,
     specialWordFormClasses,
     specialWordPhraseStarts,
     numberPhones,

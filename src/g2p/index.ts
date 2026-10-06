@@ -26,6 +26,7 @@ import {
   type LtsTableDocument,
   pronounceWithLtsTable,
 } from "./table-lts-pronounce";
+import { stripSuffixes } from "./table-suffix";
 import type { DictLookup, PronunciationResult } from "./types";
 
 // A letter-to-sound file is either a rule list (lts-engine.ts) or a compiled
@@ -67,6 +68,25 @@ export function pronounce(
     return { phonemes: dictResult, source: "dictionary", word: lowerWord };
   }
 
+  // A frontend whose letter-to-sound file is a compiled table follows that
+  // table's own order: suffix stripping against the dictionary, then the
+  // rules. The stress comes from the dictionary root or from the table's
+  // passes; neither the shared morphology nor the stress policy runs.
+  const table = options.ltsPath ? ltsTableAt(options.ltsPath) : null;
+  if (table) {
+    const { suffixIndex, suffixTable } = table;
+    const stripped =
+      suffixIndex && suffixTable
+        ? stripSuffixes(lowerWord, dictLookup, { ...table, suffixIndex, suffixTable })
+        : null;
+    if (stripped) return { phonemes: stripped, source: "morphology", word: lowerWord };
+    return {
+      phonemes: pronounceWithLtsTable(lowerWord, table),
+      source: "lts-rules",
+      word: lowerWord,
+    };
+  }
+
   // 2. Apply configured clitics using their shared suffix allomorph rules
   const cliticResult = decomposeClitic(lowerWord, dictLookup, options.morphologyPath);
   if (cliticResult) {
@@ -80,15 +100,6 @@ export function pronounce(
       throw new Error(
         `E_LTS_PATH_MISSING: word '${word}' not in dictionary and no ltsPath configured`,
       );
-    }
-    const table = ltsTableAt(options.ltsPath);
-    if (table) {
-      // The table's passes place the stress themselves; no stress policy runs.
-      return {
-        phonemes: pronounceWithLtsTable(lowerWord, table),
-        source: "lts-rules",
-        word: lowerWord,
-      };
     }
     generated = {
       phonemes: applyLtsRules(lowerWord, options.ltsPath),

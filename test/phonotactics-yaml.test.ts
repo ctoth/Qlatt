@@ -25,9 +25,15 @@ function isLegalOnset(consonants: string[]): boolean {
 }
 
 describe("phonotactics.yaml", () => {
-  it("loads and contains exactly 16 vowels", () => {
+  it("lists the sixteen qlatt-english vowels, then the seven only dectalk-english has", () => {
     const data = loadYamlDocumentSync<PhonotacticsData>(PHONOTACTICS_PATH);
-    expect(data.vowels).toHaveLength(16);
+    // dectalk-english shares this file through the morphology and stress
+    // policy; a root whose only vowel is RR ("nurse") must count as a syllable.
+    expect(data.vowels).toEqual([
+      ...["AA", "AE", "AH", "AO", "AW", "AX", "AY", "EH"],
+      ...["ER", "EY", "IH", "IY", "OW", "OY", "UH", "UW"],
+      ...["RR", "IX", "IR", "AR", "OR", "UR", "YU"],
+    ]);
   });
 
   it("contains exactly 28 legal onset clusters", () => {

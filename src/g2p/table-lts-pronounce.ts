@@ -17,6 +17,9 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
   phonemeSymbols: readonly (readonly string[])[];
   /** Phoneme codes that carry a stress digit. */
   stressBearing: readonly number[];
+  /** Suffix stripping rules (table-suffix.ts); absent when the table has none. */
+  suffixIndex?: readonly number[];
+  suffixTable?: readonly number[];
 }
 
 export function isLtsTableDocument(value: unknown): value is LtsTableDocument {

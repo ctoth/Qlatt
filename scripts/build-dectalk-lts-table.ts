@@ -175,6 +175,16 @@ const prefixes = symbolic(
   arrayBody(read(which === "acna" ? "l_ac_con.c" : "l_us_con.c"), "preftab"),
 );
 
+// The suffix stripping rules (LTS/l_us_suf.c, the little-endian build's
+// table): an index by the word's last letter and the rule byte code that
+// LTS/ls_suff.c interprets.
+const suffixSource = read("l_us_suf.c");
+const suffixIndex = numbers(arrayBody(suffixSource, "suffix_index"));
+const suffixTable = numbers(arrayBody(suffixSource, "suffix_table"));
+if (suffixIndex.length !== 27) {
+  throw new Error(`E_SUFFIX_INDEX_LENGTH: expected 27 entries, read ${suffixIndex.length}`);
+}
+
 // The frontend's spelling of each allophone code (INCLUDE/l_all_ph.h order).
 // Four names differ from DECtalk's (as in scripts/build-dectalk-dict.ts), and
 // YU, which the inventory does not have yet, is written as Y + UW.
@@ -207,6 +217,8 @@ fs.writeFileSync(
     graphemeFeatures,
     phonemeFeatures,
     prefixes,
+    suffixIndex,
+    suffixTable,
     words,
     bytes,
   })}\n`,

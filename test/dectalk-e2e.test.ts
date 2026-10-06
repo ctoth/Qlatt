@@ -518,11 +518,12 @@ describe("dectalk-english dictionary-first (dt-2b)", () => {
     expect(phs[0]).toBe("N");
   });
 
-  // An inflected word whose dictionary root has RR as its only vowel goes
-  // through the shared morphology and stress policy, which must count RR as a
-  // syllable nucleus. These threw E_STRESS_DOMAIN when it did not.
+  // An inflected word whose dictionary root has RR as its only vowel. These
+  // threw E_STRESS_DOMAIN while the frontend sent them through the shared
+  // morphology and stress policy, whose vowel list had no RR. DECtalk's own
+  // suffix rules handle them now (the IX of "nurses" is theirs).
   it.each([
-    ["nurses.", ["N", "RR", "S", "IH", "Z"]],
+    ["nurses.", ["N", "RR", "S", "IX", "Z"]],
     ["girls.", ["G", "G_REL", "RR", "LX", "Z"]],
     ["worked.", ["W", "RR", "K", "T"]],
   ])("says %s from a dictionary root whose only vowel is RR", (phrase, expected) => {

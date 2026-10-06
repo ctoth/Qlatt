@@ -252,3 +252,67 @@ fn hlsyn_reproduces_extra_fixture_directory_exactly() {
     };
     replay_directory(Path::new(&dir));
 }
+
+/// `InitializeHLSynthesizer` must give DECtalk's `HLSpeaker` bit for bit in
+/// every field except the ones DECtalk's per-voice code
+/// (`initDefaultSpeakerValues` and `changeSpeakerValues`,
+/// `VTM/vtmiont.c:2899-3460`, not ported) assigns: B1m-B5m, B2F-B5F, B6F, F5,
+/// F6, OQm, TLm, acd_f1Break, f1HiShift, agm and f1Max.
+#[test]
+fn initialize_matches_dectalk_speaker_outside_the_per_voice_fields() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("fixtures");
+    let mut speakers_checked = 0;
+    for path in hl_fixtures(&dir) {
+        let text = fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
+        let mut is_male = None;
+        for (index, line) in text.lines().enumerate() {
+            let fields: Vec<&str> = line.split_ascii_whitespace().collect();
+            match fields.first() {
+                Some(&"S") => {
+                    let spdef: [i16; SPDEF_PARS] = numbers(&fields[3..], &path, index + 1);
+                    is_male = Some(spdef[SPD_SEX] != 0);
+                }
+                Some(&"H") => {
+                    let bits: [u32; HLSPEAKER_WORDS] = numbers(&fields[3..], &path, index + 1);
+                    let dectalk = HLSpeaker::from_words(&bits);
+                    let mut hl = HlSynth::new();
+                    hl.InitializeHLSynthesizer(is_male.expect("S before H"));
+                    let mut ours = hl.speaker;
+                    ours.B1m = dectalk.B1m;
+                    ours.B2m = dectalk.B2m;
+                    ours.B3m = dectalk.B3m;
+                    ours.B4m = dectalk.B4m;
+                    ours.B5m = dectalk.B5m;
+                    ours.B2F = dectalk.B2F;
+                    ours.B3F = dectalk.B3F;
+                    ours.B4F = dectalk.B4F;
+                    ours.B5F = dectalk.B5F;
+                    ours.B6F = dectalk.B6F;
+                    ours.F5 = dectalk.F5;
+                    ours.F6 = dectalk.F6;
+                    ours.OQm = dectalk.OQm;
+                    ours.TLm = dectalk.TLm;
+                    ours.acd_f1Break = dectalk.acd_f1Break;
+                    ours.f1HiShift = dectalk.f1HiShift;
+                    ours.agm = dectalk.agm;
+                    ours.f1Max = dectalk.f1Max;
+                    assert_eq!(
+                        ours.to_words(),
+                        bits,
+                        "{}:{}: speaker constants differ from DECtalk's",
+                        path.display(),
+                        index + 1
+                    );
+                    speakers_checked += 1;
+                }
+                _ => {}
+            }
+        }
+    }
+    assert!(
+        speakers_checked >= 4,
+        "only {speakers_checked} speakers checked"
+    );
+}

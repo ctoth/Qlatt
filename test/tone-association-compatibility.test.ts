@@ -34,6 +34,10 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // position and syllable role of expanded stops) and dectalk-english "The cat
 // sat." (a word-initial phone re-emitted by a splice now sits in its own word).
 // See docs/splice-tree-golden-review.md.
+// The transcription of DECtalk's duration rules (p_us_tim.c) regenerates the
+// four dectalk-english snapshots: every duration changes. They are checked
+// against DECtalk's recorded frame counts by
+// scripts/oracle/compare-duration-frames.ts, not here.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

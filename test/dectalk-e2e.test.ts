@@ -258,16 +258,17 @@ describe("dectalk-english end-to-end", () => {
       .relation("Segment")
       .listItems()
       .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
-    const durationWrites = ey?.writes("duration") ?? [];
-    const rule14Index = durationWrites.findIndex(
-      (write) => write.reason === "dectalk_post_plosive_sonorant_lengthening matched",
+    const addedWrites = ey?.writes("timing_added_frames") ?? [];
+    const rule14Index = addedWrites.findIndex(
+      (write) => write.ruleId === "dectalk_timing_14_sonorant_after_voiceless_plosive",
     );
 
     expect(ey).toBeDefined();
     expect(rule14Index).toBeGreaterThan(0);
+    // NF20MS: three frames.
     expect(
-      Number(durationWrites[rule14Index].value) - Number(durationWrites[rule14Index - 1].value),
-    ).toBe(19);
+      Number(addedWrites[rule14Index].value) - Number(addedWrites[rule14Index - 1].value),
+    ).toBe(3);
   });
 
   it("applies DECtalk Rule 2 to the final-rime vowel before a coda stop", () => {
@@ -279,16 +280,15 @@ describe("dectalk-english end-to-end", () => {
       .relation("Segment")
       .listItems()
       .find((item) => item.get("active") !== false && item.get("phoneme") === "EY");
-    const durationWrites = ey?.writes("duration") ?? [];
-    const rule2Index = durationWrites.findIndex(
-      (write) => write.reason === "dectalk_clause_final_lengthening matched",
+    const addedWrites = ey?.writes("timing_added_frames") ?? [];
+    const rule2 = addedWrites.find(
+      (write) => write.ruleId === "dectalk_timing_2_clause_final_rime",
     );
 
     expect(ey).toBeDefined();
-    expect(rule2Index).toBeGreaterThan(0);
-    expect(
-      Number(durationWrites[rule2Index].value) - Number(durationWrites[rule2Index - 1].value),
-    ).toBe(38);
+    // NF40MS (6), plus NF30MS (5) less half the clause's five allophones (2)
+    // for a stressed syllabic in a clause of fewer than ten.
+    expect(rule2?.value).toBe(9);
   });
 
   it("matches every native TLT cell through cake's complete trace", () => {
@@ -319,7 +319,9 @@ describe("dectalk-english end-to-end", () => {
       .findLast((item) => item.get("active") !== false && item.get("phoneme") === "K");
 
     expect(dummyVowels).toHaveLength(1);
-    expect(finalStop?.get("duration")).toBe(96);
+    // DECtalk times the final [k] of "cake." at 14 frames.
+    expect(finalStop?.get("timing_frames")).toBe(14);
+    expect(finalStop?.get("duration")).toBeCloseTo(14 * 6.4, 9);
     expect(finalStop?.get("control_windows")).toContainEqual({
       suffix_ms: 26,
       target: "current",

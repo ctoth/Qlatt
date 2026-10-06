@@ -154,7 +154,7 @@ function loadPolicyAndInventory(frontendId: string): {
       timeline: {
         initial_silence_ms: citedNumber(lowering.timeline.initial_silence_ms, "initial_silence_ms"),
         final_silence_ms: citedNumber(lowering.timeline.final_silence_ms, "final_silence_ms"),
-        duration_floors: {
+        duration_floors: capturedFloors(frontendId, {
           stop_release_ms: citedNumber(
             lowering.timeline.duration_floors.stop_release_ms,
             "duration_floors.stop_release_ms",
@@ -163,10 +163,30 @@ function loadPolicyAndInventory(frontendId: string): {
             lowering.timeline.duration_floors.default_ms,
             "duration_floors.default_ms",
           ),
-        },
+        }),
         event_points: eventPoints(lowering.timeline.event_points),
       },
     },
+  };
+}
+
+// The DECtalk baseline was captured while dectalk-english floored a stop
+// release at 7 ms and every other Segment at 30 ms. That frontend has no
+// lowering floor now (its duration rules give DECtalk's frame counts), so the
+// capture is replayed under the floors it was made with.
+const CAPTURED_DECTALK_FLOORS = { stop_release_ms: 7, default_ms: 30 };
+
+function capturedFloors<
+  T extends { stop_release_ms: { value: number }; default_ms: { value: number } },
+>(frontendId: string, current: T): T {
+  if (frontendId !== "dectalk-english") return current;
+  return {
+    ...current,
+    stop_release_ms: {
+      ...current.stop_release_ms,
+      value: CAPTURED_DECTALK_FLOORS.stop_release_ms,
+    },
+    default_ms: { ...current.default_ms, value: CAPTURED_DECTALK_FLOORS.default_ms },
   };
 }
 

@@ -744,6 +744,8 @@ rules:
             - stress
             - word
           phoneme: fused_name
+          # The fused vowel keeps the stress of the vowel it replaces.
+          stress: "get(p, 'stress', 0)"
           type: fv.type
           target: fv
           duration: fv.duration

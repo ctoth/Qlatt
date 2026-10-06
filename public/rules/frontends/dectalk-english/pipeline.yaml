@@ -18,7 +18,62 @@ functions:
     description: Kind of two-consonant onset, from the frontend's onset cluster table.
     citations:
       - "DECtalk 4.63 p_us_sr1.c:175-228 us_phcluster"
+  # --- Accessors for the duration rules (p_us_tim.c) -----------------------
+  # An absent neighbour is the silence that bounds every DECtalk clause.
+  dectalk_name:
+    params: [item]
+    body: >-
+      item == null ? 'SIL'
+      : regexReplace(get(params.policy.timing.port_names, item.phoneme, item.phoneme), '[0-9]$', '', '')
+    description: DECtalk's allophone name for a Segment (port spelling and stress digit removed).
+    citations:
+      - "DECtalk 4.63 l_all_ph.h US_<name> allophone codes"
+  dectalk_has:
+    params: [item, feature]
+    body: "feature in get(params.policy.timing.features, dectalk_name(item), [])"
+    description: Whether DECtalk's feature word for the Segment's allophone has the named bit.
+    citations:
+      - "DECtalk 4.63 p_us_rom.h us_featb; ph_romi.c:214-225 phone_feature"
+  dectalk_boundary:
+    params: [item]
+    body: "item == null ? 0.0 : get(params.policy.timing.boundary, get(item, 'rime_boundary', ''), 0.0)"
+    description: FBOUNDARY value of a Segment's structure word; 0 when it has none.
+    citations:
+      - "DECtalk 4.63 ph_defs.h:249-262 FBOUNDARY"
+  dectalk_stress:
+    params: [item]
+    body: "item == null ? 0.0 : get(item, 'stress', 0.0)"
+    description: FSTRESS value of a Segment's structure word.
+    citations:
+      - "DECtalk 4.63 ph_defs.h:219-226 FSTRESS"
+  dectalk_next:
+    params: [item]
+    body: "item == null ? null : look_ahead_pred(item, 8, 'is_dectalk_allophone')"
+    description: The next DECtalk allophone (a stop's release pieces and the dummy vowel are skipped).
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:195-199 (phonex, strucnex, feanex)"
+  dectalk_prev:
+    params: [item]
+    body: "item == null ? null : look_back_pred(item, 8, 'is_dectalk_allophone')"
+    description: The previous DECtalk allophone.
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:184-188 (pholas, struclas, fealas)"
+  dectalk_mlsh1:
+    params: [x, y]
+    body: "floor(x * y / 16384.0)"
+    description: Product of two numbers where one is a fraction of 16384, rounded down.
+    citations:
+      - "DECtalk 4.63 ph_defs.h:794 mlsh1(x,y) = (S16)(((S32)x * (S32)y) >> 14)"
 predicates:
+  # A Segment that stands for one DECtalk allophone: every phone, a stop by its
+  # closure, and the silence at a clause boundary.
+  is_dectalk_allophone: >-
+    !(current.type in ["stop_release", "stop_aspiration"])
+    && (current.phoneme != "SIL" || get(current, "punctuationSymbol", null) != null)
+  is_dectalk_phone: >-
+    !(current.type in ["stop_release", "stop_aspiration"]) && current.phoneme != "SIL"
+  is_clause_silence: >-
+    current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null
   is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
   is_stressed_vowel: 'current.type == "vowel" && has(current.stress) && current.stress == 1'
   is_stressed_vowel_or_boundary: >-
@@ -276,6 +331,11 @@ tags:
   unstressed_floor: enforces the duration floor of an unstressed segment
   word_final_obstruent: adjusts a word-final obstruent
   word_initial_stressed: adjusts a stressed word-initial segment
+  timing_setup: starts an allophone's duration state from its inherent values
+  schwa_by_flap: lengthens a reduced vowel beside a flap or h
+  adjacent_nasals: lengthens a nasal after a different nasal
+  retroflex_minimum: keeps a retroflex vowel above its minimum length
+  allophone_duration: sets a segment's duration from its allophone's frame count
 relations:
   Segment:
     type: base
@@ -329,6 +389,17 @@ relations:
       word: []
       word_initial_consonant: { kind: boolean }
       rime_boundary: { kind: string, values: [word, comma, period, question, exclaim] }
+      # State of DECtalk's duration routine for one allophone (p_us_tim.c), in
+      # its own units: frames, and a percentage where 128 is 100%.
+      clause_position: { kind: number }
+      clause_length: { kind: number }
+      timing_inherent_frames: { kind: number }
+      timing_minimum_frames: { kind: number }
+      timing_percent: { kind: number }
+      timing_added_frames: { kind: number }
+      timing_factor: { kind: number }
+      timing_fixed_frames: { kind: number }
+      timing_frames: { kind: number }
       AF: []
       AH: []
       AN: []
@@ -365,9 +436,10 @@ relations:
       trajectory: []
       type: [vowel, stop_closure, stop_release, stop_aspiration, fricative, affricate, silence, liquid, nasal, glide, flap]
     scalars:
-      # DECtalk ph_defs.h defines NF640MS=100 frames; terminal nfperiod=94
-      # frames must survive scalar validation for punctuation pauses.
-      duration: { unit: ms, quantum: 1, resolution: klatt, max: 640, floor_field: minimumDuration }
+      # A duration is a whole number of DECtalk frames times the frame period,
+      # set once per allophone by dectalk_allophone_duration; nothing rounds or
+      # floors it afterwards. ph_defs.h NF640MS = 100 frames is the longest.
+      duration: { unit: ms, max: 640 }
   F0Point:
     type: point
     value_type: number
@@ -383,42 +455,46 @@ relations:
 phases:
   - name: duration
     rules:
-      - dectalk_single_word_fallback_primary_retarget
+      # p_us_tim.c, one rule per branch, in source order. Every rule reads and
+      # writes the allophone's timing_* state; only the last two write duration.
       - dectalk_pause_duration
-      - dectalk_clause_final_lengthening
-      # Rule 7 durmin adjustment must precede duration multipliers because the
-      # Qlatt scalar resolver captures minimumDuration as the duration floor.
-      - dectalk_unstressed_nonobstruent_floor_adjustment
-      - dectalk_non_final_shortening
-      # Rule 4 splits into a monosyllable stress branch and a polysyllable
-      # non-word-final branch (DECtalk p_us_tim.c:355-373 vs :374-394), keyed on
-      # the real syllable_position_in_word() annotation; Rule 5 follows.
-      - dectalk_monosyllable_stress_shortening
-      - dectalk_polysyllable_nonfinal_shortening
-      - dectalk_polysyllabic_shortening
-      - dectalk_non_initial_consonant_shortening
-      - dectalk_unstressed_shortening
-      - dectalk_emphasis_lengthening
-      - dectalk_emphasis_syllabic_lengthening
-      - dectalk_postvocalic_voiceless_shortening
-      - dectalk_postvocalic_voiced_lengthening
-      # Rule 9 [nt] cluster nasal shortening (p_us_tim.c:628-639).
-      - dectalk_nt_cluster_nasal_shortening
-      - dectalk_consonant_cluster_shortening
-      - dectalk_post_plosive_sonorant_lengthening
-      - dectalk_phrase_initial_vowel_lengthening
-      # Added numbered rules 10/11/19/20/23/24 (p_us_tim.c:647-889), in source
-      # order, keyed on syllable annotations and flap/NG allophones.
-      - dectalk_two_vowel_first_lengthening
-      - dectalk_word_initial_stressed_vowel_lengthening
-      - dectalk_function_word_final_th_shortening
-      - dectalk_the_iy_prevocalic_lengthening
-      - dectalk_pre_df_flap_shortening
-      - dectalk_pre_ng_shortening
-      - dectalk_short_phrase_duration_bonus
+      - dectalk_timing_setup
+      - dectalk_timing_2_clause_final_rime
+      - dectalk_timing_3_non_phrase_final_syllabic
+      - dectalk_timing_3_adjacent_nasals
+      - dectalk_timing_4_monosyllable_stress
+      - dectalk_timing_4_polysyllable_non_word_final
+      - dectalk_timing_5_polysyllable
+      - dectalk_timing_6_word_final_fricative
+      - dectalk_timing_6_non_word_initial_consonant
+      - dectalk_timing_7_unstressed_minimum
+      - dectalk_timing_7_unstressed_syllabic
+      - dectalk_timing_7_schwa_by_flap
+      - dectalk_timing_7_unstressed_consonant
+      - dectalk_timing_8_emphasis
+      - dectalk_timing_9_postvocalic_context
+      - dectalk_timing_10_syllabic_before_syllabic
+      - dectalk_timing_11_first_syllable_primary
+      - dectalk_timing_12_syllabic_before_lx
+      - dectalk_timing_13_cluster_first
+      - dectalk_timing_13_before_sh
+      - dectalk_timing_13_cluster_second
+      - dectalk_timing_14_sonorant_after_voiceless_plosive
+      - dectalk_timing_15_vowel_after_silence
+      - dectalk_timing_16_vowel_after_glide
+      - dectalk_timing_17_short_clause
+      - dectalk_timing_18_glide_after_obstruent
+      - dectalk_timing_19_unstressed_final_th
+      - dectalk_timing_20_unstressed_final_iy
+      - dectalk_timing_21_plosive_between_obstruents
+      - dectalk_timing_23_before_df
+      - dectalk_timing_retroflex_minimum
+      - dectalk_timing_24_before_velar_nasal
+      - dectalk_timing_frames
+      - dectalk_allophone_duration
+      - dectalk_stop_closure_duration
+      - dectalk_stop_release_duration
       - dectalk_rate_scaling
-      - duration_floor_stop_release
-      - duration_floor_default
     resolve_scalars: [duration]
   - name: postlexical
     # Order encodes DECtalk ph_aloph.c source precedence (each /t,d/ rule has goto

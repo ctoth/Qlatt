@@ -678,7 +678,15 @@ rules:
       p: prev
       n: next
       df: "target('DF')"
-      phrase_ok: "word_count() >= 3"
+      # number_words >= 3 (ph_aloph.c:958). DECtalk counts the word-boundary
+      # symbols of the clause (ph_sort.c:1464), and a word entered with a
+      # verb-phrase start has none: "It is better." flaps, "They went better."
+      # and "It is, much better." do not.
+      counted_words: >-
+        count_back_pred(current, 1000, 'is_clause_silence', 'is_counted_word_start')
+        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_counted_word_start')
+        + (dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp' ? 1.0 : 0.0)
+      phrase_ok: "counted_words >= 3.0"
       current_unstressed: "get(current, 'stress', 0) == 0"
       prev_son1: >-
         p != null && (p.type in ['vowel', 'glide', 'liquid', 'nasal']) &&
@@ -726,7 +734,15 @@ rules:
       p: prev
       n: next
       dx: "target('DX')"
-      phrase_ok: "word_count() >= 3"
+      # number_words >= 3 (ph_aloph.c:958). DECtalk counts the word-boundary
+      # symbols of the clause (ph_sort.c:1464), and a word entered with a
+      # verb-phrase start has none: "It is better." flaps, "They went better."
+      # and "It is, much better." do not.
+      counted_words: >-
+        count_back_pred(current, 1000, 'is_clause_silence', 'is_counted_word_start')
+        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_counted_word_start')
+        + (dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp' ? 1.0 : 0.0)
+      phrase_ok: "counted_words >= 3.0"
       current_unstressed: "get(current, 'stress', 0) == 0"
       prev_son1: >-
         p != null && (p.type in ['vowel', 'glide', 'liquid', 'nasal']) &&
@@ -1061,6 +1077,63 @@ rules:
     citations:
       - "DECtalk 4.63 ph_aloph.c:1066-1082 (Rule 4: unstressed /dh/ -> DZ after /t,tx,d/)"
       - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_DZ dentalized-stop target)"
+
+  # -------------------------------------------------------------------------
+  # /t/ AFTER /n/ BECOMES [d] (p_us_tim.c:627-638). This one is in DECtalk's
+  # duration routine, in the /n/'s turn of Rule 9: when the /n/ and the /t/
+  # after it are both unstressed and not word-initial, and the phone after the
+  # /t/ is a syllabic that is not in a medial or final syllable, the /t/ is
+  # changed to [d] ("Change to [d] after durs"). "The president arrived" has
+  # N D AX.
+  #
+  # The /n/ and the vowel before it were timed against a /t/; the [d] itself
+  # and what follows are timed against a [d]. The mark lets the duration rules
+  # tell the two apart (dectalk_ahead_name). This rule runs last, on the /t/
+  # that the allophone rules left.
+  # -------------------------------------------------------------------------
+  dectalk_nt_voicing:
+    kind: postlexical
+    select:
+      relation: Segment
+      where: current.phoneme == 'T'
+    define:
+      p: prev
+      n: next
+      d: "target('D')"
+      unstressed_medial: >-
+        get(current, 'stress', 0) == 0 && !isTrue(current, 'word_initial_consonant')
+      after_such_n: >-
+        p != null && p.phoneme == 'N' && get(p, 'stress', 0) == 0
+        && !isTrue(p, 'word_initial_consonant')
+      next_syllabic: >-
+        n != null && (n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN'])
+      # (allofeats & FMEDIALSYL) IS_MINUS: the bit is set for a medial and for
+      # a final syllable, so the syllabic is the first or only one of its word.
+      earlier_syllabic_in_its_word: >-
+        !next_syllabic ? null
+        : find_within_word(n,
+            "current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']",
+            "behind")
+    constraint: >-
+      unstressed_medial && after_such_n && next_syllabic && earlier_syllabic_in_its_word == null
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields: *structure_word
+          phoneme: "'D'"
+          type: d.type
+          target: d
+          duration: d.duration
+          inherentDuration: d.inherentDuration
+          minimumDuration: "has(d.minimumDuration) ? d.minimumDuration : d.duration"
+          voiced: "has(d.voiced) ? d.voiced : true"
+          voiced_from_t: "true"
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:627-638 (Rule 9: [nt] postvocalic cluster; the /t/ becomes [d] before an early syllabic)"
+      - "DECtalk 4.63 ph_defs.h (FMEDIALSYL 020 within FTYPESYL 030)"
 
   # -------------------------------------------------------------------------
   # POSTVOCALIC VOWEL+R FUSION (ph_aloph.c:835-872, "Rule 2" A13).  A postvocalic

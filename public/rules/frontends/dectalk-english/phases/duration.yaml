@@ -98,7 +98,7 @@ rules:
       nx: dectalk_next(current)
       la: dectalk_prev(current)
       nx2: dectalk_next(nx)
-      nx_name: dectalk_name(nx)
+      nx_name: dectalk_ahead_name(nx)
       la_name: dectalk_name(la)
       syllabic: dectalk_has(current, 'syllabic')
       stress: dectalk_stress(current)
@@ -133,7 +133,7 @@ rules:
       # --- Rule 9 ---
       sonorant_before_obstruent: >-
         name in ['RX', 'LX', 'M', 'N', 'NX'] && stress == 0.0 && !winitc
-        && dectalk_has(nx, 'obstruent')
+        && dectalk_ahead_has(nx,'obstruent')
       # Line 539 reads phone_feature(pDph_t, nphon+1): the allophone's POSITION
       # in the clause used as if it were an allophone code. This is the feature
       # of the allophone whose code equals clause_position + 1.
@@ -142,30 +142,30 @@ rules:
       percent_in: "position_reads_syllabic ? dectalk_mlsh1(prcnt, F.p70) : prcnt"
       # The next allophone belongs to this syllable's rime.
       next_in_rime: >-
-        !dectalk_has(nx, 'syllabic') && dectalk_stress(nx) == 0.0
+        !dectalk_ahead_has(nx,'syllabic') && dectalk_stress(nx) == 0.0
         && !isTrue(nx, 'word_initial_consonant')
       # A sonorant consonant with an obstruent after it: look at the obstruent.
       through_sonorant: >-
         next_in_rime && nx_name in ['RX', 'LX', 'M', 'N', 'NX']
-        && dectalk_has(nx2, 'obstruent') && dectalk_stress(nx2) == 0.0
+        && dectalk_ahead_has(nx2,'obstruent') && dectalk_stress(nx2) == 0.0
         && !isTrue(nx2, 'word_initial_consonant')
       posvoc: "through_sonorant ? nx2 : nx"
-      posvoc_name: dectalk_name(posvoc)
+      posvoc_name: dectalk_ahead_name(posvoc)
       has_posvoc: next_in_rime && posvoc_name != 'SIL'
-      before_voiceless: "has_posvoc && !dectalk_has(posvoc, 'voiced')"
+      before_voiceless: "has_posvoc && !dectalk_ahead_has(posvoc,'voiced')"
       before_voiced_obstruent: >-
-        has_posvoc && dectalk_has(posvoc, 'voiced') && dectalk_has(posvoc, 'obstruent')
+        has_posvoc && dectalk_ahead_has(posvoc,'voiced') && dectalk_ahead_has(posvoc,'obstruent')
         && name != 'EN'
       before_nasal: >-
-        has_posvoc && dectalk_has(posvoc, 'voiced') && !before_voiced_obstruent
-        && dectalk_has(posvoc, 'nasal')
+        has_posvoc && dectalk_ahead_has(posvoc,'voiced') && !before_voiced_obstruent
+        && dectalk_ahead_has(posvoc,'nasal')
       factor_by_context: >-
         before_voiceless
-          ? (dectalk_has(posvoc, 'plosive') || posvoc_name == 'CH' ? F.p70 : F.p80)
+          ? (dectalk_ahead_has(posvoc,'plosive') || posvoc_name == 'CH' ? F.p70 : F.p80)
           : (before_voiced_obstruent ? F.p120 : (before_nasal ? F.p85 : F.one))
       added_by_context: >-
         before_voiceless ? deldur - floor(deldur / 2.0)
-        : (before_voiced_obstruent && !dectalk_has(posvoc, 'plosive') && posvoc_name != 'DX' && syllabic
+        : (before_voiced_obstruent && !dectalk_ahead_has(posvoc,'plosive') && posvoc_name != 'DX' && syllabic
             ? deldur + NF.ms25 : deldur)
       factor_non_final: >-
         bou < B.vp || through_sonorant ? F.half + floor(factor_by_context / 2.0) : factor_by_context
@@ -176,18 +176,18 @@ rules:
         name == 'N' && nx_name == 'T' && dectalk_stress(nx) == 0.0
         && !isTrue(nx, 'word_initial_consonant')
       t_before_early_syllabic: >-
-        dectalk_has(nx2, 'syllabic')
+        dectalk_ahead_has(nx2,'syllabic')
         && get(nx2, 'syllable_type', 'only') in ['only', 'first']
       factor_9: >-
         n_before_t ? (t_before_early_syllabic ? F.p70 : F.p10) : factor_non_final
       # --- Rule 13, first consonant. The multiplier starts as whatever Rule 9
       # left (timing_factor); the C reuses the variable without resetting it.
       carried: "get(current, 'timing_factor', F.one)"
-      not_two_plosives: "!dectalk_has(nx, 'plosive') || !dectalk_has(current, 'plosive')"
+      not_two_plosives: "!dectalk_ahead_has(nx,'plosive') || !dectalk_has(current, 'plosive')"
       nasal_before_word: "dectalk_has(current, 'nasal') && isTrue(nx, 'word_initial_consonant')"
       s_or_th: "name in ['S', 'TH']"
       factor_13_first: >-
-        s_or_th && dectalk_has(nx, 'plosive') ? F.half
+        s_or_th && dectalk_ahead_has(nx,'plosive') ? F.half
         : (nasal_before_word ? F.p150 : (not_two_plosives ? F.p70 : carried))
       before_sh: "s_or_th && nx_name == 'SH'"
       # --- Rule 13, second consonant ---
@@ -206,7 +206,7 @@ rules:
         dectalk_has(current, 'plosive') ? 0.0
         : (dectalk_has(current, 'voiced') && dectalk_has(current, 'obstruent') ? NF.ms20 : NF.ms40)
       before_voiceless_obstruent: >-
-        name in ['RX', 'LX'] && dectalk_has(nx, 'obstruent') && !dectalk_has(nx, 'voiced')
+        name in ['RX', 'LX'] && dectalk_ahead_has(nx,'obstruent') && !dectalk_ahead_has(nx,'voiced')
       shaped: "before_voiceless_obstruent ? NF.ms15 : base"
       short_clause: "length < 10.0 && syllabic && stress != 0.0"
       lengthened: "short_clause ? shaped + NF.ms30 - floor(length / 2.0) : shaped"
@@ -214,7 +214,7 @@ rules:
     apply:
       - field: timing_added_frames
         op: set
-        value: "dectalk_has(nx, 'son1') ? lengthened - NF.ms20 : lengthened"
+        value: "dectalk_ahead_has(nx,'son1') ? lengthened - NF.ms20 : lengthened"
         tag: clause_final
     citations:
       - "DECtalk 4.63 p_us_tim.c:281-314 Rule 2 (lengthening of segments in clause-final rime)"
@@ -480,7 +480,7 @@ rules:
       relation: Segment
       where: { predicate: is_dectalk_phone }
     define: *timing
-    constraint: "syllabic && dectalk_has(nx, 'syllabic')"
+    constraint: "syllabic && dectalk_ahead_has(nx,'syllabic')"
     apply:
       - field: timing_added_frames
         op: set
@@ -537,7 +537,7 @@ rules:
       where: { predicate: is_dectalk_phone }
     define: *timing
     constraint: >-
-      !syllabic && dectalk_has(current, 'consonant') && dectalk_has(nx, 'consonant')
+      !syllabic && dectalk_has(current, 'consonant') && dectalk_ahead_has(nx,'consonant')
       && bou < B.word
     apply:
       - field: timing_minimum_frames
@@ -561,7 +561,7 @@ rules:
       where: { predicate: is_dectalk_phone }
     define: *timing
     constraint: >-
-      !syllabic && dectalk_has(current, 'consonant') && dectalk_has(nx, 'consonant')
+      !syllabic && dectalk_has(current, 'consonant') && dectalk_ahead_has(nx,'consonant')
       && bou < B.word && name in ['S', 'TH'] && nx_name == 'SH'
     apply:
       - field: timing_fixed_frames
@@ -720,7 +720,7 @@ rules:
     define: *timing
     constraint: >-
       open && dectalk_has(current, 'plosive') && dectalk_has(la, 'plosive')
-      && dectalk_has(nx, 'obstruent') && bou > B.morpheme
+      && dectalk_ahead_has(nx,'obstruent') && bou > B.morpheme
     apply:
       - field: timing_minimum_frames
         op: set

@@ -69,6 +69,7 @@
 pub mod hlsyn;
 mod hlsyn_tables;
 mod tables;
+pub mod vtmio;
 
 use core::cell::Cell;
 

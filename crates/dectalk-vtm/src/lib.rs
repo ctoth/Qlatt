@@ -49,7 +49,10 @@
 //!
 //! Where the C indexes a table out of bounds (a dB word outside 0..=87, a
 //! frequency at or above 4962 Hz in `d2pole_cf123`, an open phase under 40
-//! samples), it reads whatever memory follows. This port panics instead.
+//! samples) it reads whatever memory is there, and `setzeroabc` can divide by
+//! zero. This port does not imitate that: the read yields 0, the call finishes
+//! and returns the first such fault as a [`VtmError`]. The samples and the
+//! state left behind by a faulted call are not DECtalk's.
 
 #![allow(non_snake_case)]
 // Kept in the shape of the C source so the two can be compared line by line.
@@ -64,6 +67,8 @@
 )]
 
 mod tables;
+
+use core::cell::Cell;
 
 use tables::{AMPTABLE, B0, COSINE_TABLE, INT_VOLUME_TABLE, NTILTF, RADIUS_TABLE};
 
@@ -138,6 +143,52 @@ pub enum SampleRateChange {
     /// `NO_SAMPLE_RATE_CHANGE`: the 10 kHz the tables were built for.
     NoChange,
 }
+
+/// An input that makes the C read a table out of bounds or divide by zero.
+/// Each variant carries the offending index.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum VtmError {
+    /// `amptable[index]` with `index` outside 0..=87: a dB word of the frame
+    /// or speaker definition, or `GF + afgain + 8 - 55` (`vtm3.c:819`).
+    AmplitudeIndex(i32),
+    /// `cosine_table[index]` with `index` outside 0..=625 (frequency >> 3
+    /// after sample-rate scaling).
+    CosineIndex(i32),
+    /// `radius_table[index]` with `index` outside 0..=624 (bandwidth >> 3
+    /// after sample-rate scaling).
+    RadiusIndex(i32),
+    /// `B0[index]` with `index` outside 0..=223 (`nopen - 40`, `vtm3.c:1207`).
+    OpenPhaseIndex(i32),
+    /// `setzeroabc` divides by `acoef == 0` (`vtm3.c:2569-2571`).
+    NasalZeroDivide,
+}
+
+impl VtmError {
+    /// A stable negative code for the C ABI.
+    pub fn code(self) -> i32 {
+        match self {
+            VtmError::AmplitudeIndex(_) => -2,
+            VtmError::CosineIndex(_) => -3,
+            VtmError::RadiusIndex(_) => -4,
+            VtmError::OpenPhaseIndex(_) => -5,
+            VtmError::NasalZeroDivide => -6,
+        }
+    }
+}
+
+impl core::fmt::Display for VtmError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            VtmError::AmplitudeIndex(index) => write!(f, "amptable[{index}] is out of bounds"),
+            VtmError::CosineIndex(index) => write!(f, "cosine_table[{index}] is out of bounds"),
+            VtmError::RadiusIndex(index) => write!(f, "radius_table[{index}] is out of bounds"),
+            VtmError::OpenPhaseIndex(index) => write!(f, "B0[{index}] is out of bounds"),
+            VtmError::NasalZeroDivide => write!(f, "setzeroabc divides by zero"),
+        }
+    }
+}
+
+impl std::error::Error for VtmError {}
 
 /// `PH/ph_defs.h:798`: `(((S32)(x)*(S32)(y))>>12)`.
 #[inline]
@@ -335,6 +386,10 @@ pub struct Vtm {
     randomx: i16,
     ldspdef: i32,
     rampdown: i16,
+
+    /// Not DECtalk state: the first out-of-range table read of the current
+    /// call, reported when the call returns.
+    fault: Cell<Option<VtmError>>,
 }
 
 impl Default for Vtm {
@@ -450,6 +505,7 @@ impl Vtm {
             randomx: 0,
             ldspdef: 0,
             rampdown: 0,
+            fault: Cell::new(None),
         };
         // vtmiont.c:515.
         vtm.DTSetSampleRate(PC_SAMPLE_RATE);
@@ -490,9 +546,17 @@ impl Vtm {
 
     /// Handles one speaker definition packet the way `VTM/vtmiont.c:1616-1638`
     /// does: `InitializeVTM`, then `read_speaker_definition`.
-    pub fn load_speaker_definition(&mut self, spdeftochip: &[i16; SPDEF_PARS]) {
+    pub fn load_speaker_definition(
+        &mut self,
+        spdeftochip: &[i16; SPDEF_PARS],
+    ) -> Result<(), VtmError> {
+        self.fault.set(None);
         self.InitializeVTM();
         self.read_speaker_definition(spdeftochip);
+        match self.fault.take() {
+            Some(error) => Err(error),
+            None => Ok(()),
+        }
     }
 
     /// `InitializeVTM`, `VTM/vtm3.c:2251-2311`.
@@ -687,15 +751,15 @@ impl Vtm {
 
         // vtm3.c:2149-2158: gains of the cascade resonators.
         let a5gain = spdeftochip[SPD_R5CA]; /*  9  */
-        self.R5ca = i32::from(amptable(a5gain));
+        self.R5ca = i32::from(self.amptable(a5gain));
         let a4gain = spdeftochip[SPD_R4CA]; /*  10 */
-        self.R4ca = i32::from(amptable(a4gain));
+        self.R4ca = i32::from(self.amptable(a4gain));
         let a3gain = spdeftochip[SPD_R3CA]; /*  11 */
-        self.r3cg = amptable(a3gain);
+        self.r3cg = self.amptable(a3gain);
         let a2gain = spdeftochip[SPD_R2CA]; /*  12 */
-        self.r2cg = amptable(a2gain);
+        self.r2cg = self.amptable(a2gain);
         let a1gain = spdeftochip[SPD_R1CA]; /*  13 */
-        self.r1cg = amptable(a1gain);
+        self.r1cg = self.amptable(a1gain);
 
         // vtm3.c:2165-2166: open phase of the glottal period.
         self.k1 = spdeftochip[SPD_NOPEN1]; /* 14 */
@@ -704,7 +768,7 @@ impl Vtm {
         // vtm3.c:2172-2176: breathiness coefficient.
         self.Aturb = spdeftochip[SPD_ATURB]; /*  16 */
         if self.Aturb != 0 {
-            self.Aturb = amptable(self.Aturb);
+            self.Aturb = self.amptable(self.Aturb);
         } else {
             self.Aturb = 0;
         }
@@ -714,11 +778,11 @@ impl Vtm {
 
         // vtm3.c:2211-2212: overall gain of voicing source.
         let avg = spdeftochip[SPD_AZGAIN]; /*  21 */
-        self.avgain = amptable(avg);
+        self.avgain = self.amptable(avg);
 
         // vtm3.c:2218-2222: overall gain of aspiration source.
         let apg = spdeftochip[SPD_APGAIN]; /*  22 */
-        self.APgain = amptable(apg);
+        self.APgain = self.amptable(apg);
     }
 
     /// The sample-rate scaling of frequency and bandwidth shared by the three
@@ -743,11 +807,11 @@ impl Vtm {
         let (frequency, bandwidth) = self.scale_frequency_and_bandwidth(frequency, bandwidth);
 
         /*  calculate radius = exp( -pi * T * bandwidth ). */
-        let radius = radius_table(i32::from(bandwidth) >> 3);
+        let radius = self.radius_table(i32::from(bandwidth) >> 3);
         /*  bcoef = radius * 2 * cos( 2* pi * T * frequency ) */
         let bcoef = frac4mul(
             i32::from(radius),
-            i32::from(cosine_table(i32::from(frequency) >> 3)),
+            i32::from(self.cosine_table(i32::from(frequency) >> 3)),
         ) as i16;
         /*  Let ccoef = - r^2 */
         let ccoef = (-frac4mul(i32::from(radius), i32::from(radius))) as i16;
@@ -770,10 +834,10 @@ impl Vtm {
             bandwidth = (self.uiSampleRate >> 2) as i16;
         }
 
-        let radius = radius_table(i32::from(bandwidth) >> 3);
+        let radius = self.radius_table(i32::from(bandwidth) >> 3);
         let bcoef = frac4mul(
             i32::from(radius),
-            i32::from(cosine_table(i32::from(frequency) >> 3)),
+            i32::from(self.cosine_table(i32::from(frequency) >> 3)),
         ) as i16;
         let ccoef = (-frac4mul(i32::from(radius), i32::from(radius))) as i16;
         let temp: i32 = 4096 - i32::from(bcoef) - i32::from(ccoef);
@@ -786,10 +850,10 @@ impl Vtm {
     fn d2pole_pf(&self, frequency: i16, bandwidth: i16, gain: i16) -> (i16, i16, i16) {
         let (frequency, bandwidth) = self.scale_frequency_and_bandwidth(frequency, bandwidth);
 
-        let radius = radius_table(i32::from(bandwidth) >> 3);
+        let radius = self.radius_table(i32::from(bandwidth) >> 3);
         let bcoef = frac4mul(
             i32::from(radius),
-            i32::from(cosine_table(i32::from(frequency) >> 3)),
+            i32::from(self.cosine_table(i32::from(frequency) >> 3)),
         ) as i16;
         let ccoef = (-frac4mul(i32::from(radius), i32::from(radius))) as i16;
         let temp: i32 = 4096 - i32::from(bcoef) - i32::from(ccoef);
@@ -802,12 +866,15 @@ impl Vtm {
     ///
     /// `frame` is the 45-word voice frame as `VTM/vtmiont.c:1351` passes it
     /// (after hlsyn). `ksd_vol_att` is `pKsd_t->vol_att`, the volume setting
-    /// (100 is unity). Returns the frame's samples.
+    /// (100 is unity). Returns the frame's samples, or the first fault (see
+    /// [`VtmError`]).
     pub fn speech_waveform_generator(
         &mut self,
         frame: &[i16; VOICE_PARS],
         ksd_vol_att: i32,
-    ) -> &[i16] {
+    ) -> Result<&[i16], VtmError> {
+        self.fault.set(None);
+
         // vtm3.c:597. The C reads the frame in place and writes to it below.
         self.variabpars = *frame;
 
@@ -883,13 +950,13 @@ impl Vtm {
         }
 
         // vtm3.c:732-738: convert dB to linear.
-        let mut APlin: i16 = amptable(APinDB);
-        let mut r2pg: i16 = amptable(A2inDB);
-        let mut r3pg: i16 = amptable(A3inDB);
-        let mut r4pa: i16 = amptable(A4inDB);
-        let mut r5pa: i16 = amptable(A5inDB);
-        let mut r6pa: i16 = amptable(A6inDB);
-        let mut ABlin: i16 = amptable(ABinDB);
+        let mut APlin: i16 = self.amptable(APinDB);
+        let mut r2pg: i16 = self.amptable(A2inDB);
+        let mut r3pg: i16 = self.amptable(A3inDB);
+        let mut r4pa: i16 = self.amptable(A4inDB);
+        let mut r5pa: i16 = self.amptable(A5inDB);
+        let mut r6pa: i16 = self.amptable(A6inDB);
+        let mut ABlin: i16 = self.amptable(ABinDB);
 
         // vtm3.c:755-760.
         let ampsum: i16 = (i32::from(A2inDB)
@@ -937,7 +1004,7 @@ impl Vtm {
         }
 
         // vtm3.c:831-836: scale the frication amplitudes by spdef GF.
-        let afc = i32::from(amptable(self.AFcgain));
+        let afc = i32::from(self.amptable(self.AFcgain));
         r2pg = frac1mul(i32::from(r2pg), afc) as i16;
         r3pg = frac1mul(i32::from(r3pg), afc) as i16;
         r4pa = frac1mul(i32::from(r4pa), afc) as i16;
@@ -1040,7 +1107,7 @@ impl Vtm {
                     self.nper = 0;
 
                     /*  'avlin' moved to 'avlind' after half period. */
-                    self.avlin = amptable(AVinDB);
+                    self.avlin = self.amptable(AVinDB);
 
                     // vtm3.c:1069-1075.
                     self.T0 = T0inS4;
@@ -1111,7 +1178,7 @@ impl Vtm {
                     // vtm3.c:1207-1220: reset a & b, which determine shape of
                     // glottal waveform. Let a = (b * nopen) / 3 without doing
                     // the divide.
-                    self.b = b0(i32::from(self.nopen) - 40);
+                    self.b = self.b0(i32::from(self.nopen) - 40);
                     let mut temp: i16 = (i32::from(self.b) + 1) as i16; //Yes the plus one is necessary
 
                     if self.nopen > 95 {
@@ -1155,7 +1222,7 @@ impl Vtm {
                     // vtm3.c:1355-1359 (HLSYN): nasal zero.
                     if self.lastFZinHZ != FZinHZ {
                         let (sacoef, sbcoef, sccoef) =
-                            setzeroabc(i32::from(FZinHZ), i32::from(BZinHZ), 500);
+                            self.setzeroabc(i32::from(FZinHZ), i32::from(BZinHZ), 500);
                         self.rnza = sacoef;
                         self.rnzb = sbcoef;
                         self.rnzc = sccoef;
@@ -1405,56 +1472,389 @@ impl Vtm {
             self.iwave[ns] = out as i16;
         }
 
-        &self.iwave[..self.uiNumberOfSamplesPerFrame]
+        match self.fault.take() {
+            Some(error) => Err(error),
+            None => Ok(&self.iwave[..self.uiNumberOfSamplesPerFrame]),
+        }
+    }
+
+    /// Records the first out-of-range table read of a call; see [`VtmError`].
+    #[inline]
+    fn record_fault(&self, error: VtmError) {
+        if self.fault.get().is_none() {
+            self.fault.set(Some(error));
+        }
+    }
+
+    /// `amptable[db]`, `VTM/vtmtable.h:216-227`.
+    #[inline]
+    fn amptable(&self, db: i16) -> i16 {
+        match usize::try_from(db).ok().and_then(|i| AMPTABLE.get(i)) {
+            Some(value) => *value,
+            None => {
+                self.record_fault(VtmError::AmplitudeIndex(i32::from(db)));
+                0
+            }
+        }
+    }
+
+    /// `cosine_table[index]`, `VTM/vtmtable.h:244-371`.
+    #[inline]
+    fn cosine_table(&self, index: i32) -> i16 {
+        match usize::try_from(index)
+            .ok()
+            .and_then(|i| COSINE_TABLE.get(i))
+        {
+            Some(value) => *value,
+            None => {
+                self.record_fault(VtmError::CosineIndex(index));
+                0
+            }
+        }
+    }
+
+    /// `radius_table[index]`, `VTM/vtmtable.h:381-508`.
+    #[inline]
+    fn radius_table(&self, index: i32) -> i16 {
+        match usize::try_from(index)
+            .ok()
+            .and_then(|i| RADIUS_TABLE.get(i))
+        {
+            Some(value) => *value,
+            None => {
+                self.record_fault(VtmError::RadiusIndex(index));
+                0
+            }
+        }
+    }
+
+    /// `B0[index]`, `VTM/vtmtable.h:88-134`.
+    #[inline]
+    fn b0(&self, index: i32) -> i16 {
+        match usize::try_from(index).ok().and_then(|i| B0.get(i)) {
+            Some(value) => *value,
+            None => {
+                self.record_fault(VtmError::OpenPhaseIndex(index));
+                0
+            }
+        }
+    }
+
+    /// `setzeroabc`, `VTM/vtm3.c:2537-2577`. Returns `(*sacoef, *sbcoef,
+    /// *sccoef)`.
+    fn setzeroabc(&self, f: i32, bw: i32, rnzg: i32) -> (i32, i16, i16) {
+        /*    First compute ordinary resonator coefficients */
+        /*    Let r  =  exp(-pi bw t) */
+        let r: i16 = self.radius_table(bw >> 3);
+
+        /* Let c  =  -r**2 */
+        let ccoef: i16 = (-frac4mul(i32::from(r), i32::from(r))) as i16;
+
+        /* Let b = r * 2*cos(2 pi f t) */
+        let bcoef: i16 = frac4mul(i32::from(r), i32::from(self.cosine_table(f >> 3))) as i16;
+
+        /* Let a = 1.0 - b - c */
+        let acoef: i16 = (4096 - i32::from(bcoef) - i32::from(ccoef)) as i16;
+
+        /* Now convert to antiresonator coefficients (a'=1/a, b'=-b/a,
+        c'=-c/a) */
+        let acoef = i32::from(acoef);
+        if acoef == 0 {
+            // The C divides by zero here.
+            self.record_fault(VtmError::NasalZeroDivide);
+            return (0, 0, 0);
+        }
+        let sacoef: i32 = (4096 * rnzg) / acoef;
+        let sbcoef: i16 = (-((i32::from(bcoef) * rnzg) / acoef)) as i16;
+        let sccoef: i16 = (-((i32::from(ccoef) * rnzg) / acoef)) as i16;
+
+        (sacoef, sbcoef, sccoef)
     }
 }
 
-/// `amptable[db]`, `VTM/vtmtable.h:216-227`.
-#[inline]
-fn amptable(db: i16) -> i16 {
-    AMPTABLE[usize::try_from(db).expect("dB word below 0 indexes amptable out of bounds")]
+// FFI exports. The model is frame based and works on 16-bit words, so the host
+// writes a packet into WASM memory, makes one call per speaker definition or
+// voice frame, and reads 16-bit samples back.
+
+/// Returned by the FFI calls for a null pointer or a buffer of the wrong
+/// length. Model faults return [`VtmError::code`].
+pub const DECTALK_VTM_BAD_ARGUMENT: i32 = -1;
+
+#[no_mangle]
+pub extern "C" fn dectalk_vtm_new() -> *mut Vtm {
+    Box::into_raw(Box::new(Vtm::new()))
 }
 
-/// `cosine_table[index]`, `VTM/vtmtable.h:244-371`.
-#[inline]
-fn cosine_table(index: i32) -> i16 {
-    COSINE_TABLE
-        [usize::try_from(index).expect("negative frequency indexes cosine_table out of bounds")]
+/// # Safety
+/// `ptr` must be null or a live pointer returned by `dectalk_vtm_new`.
+#[no_mangle]
+pub unsafe extern "C" fn dectalk_vtm_free(ptr: *mut Vtm) {
+    if !ptr.is_null() {
+        drop(Box::from_raw(ptr));
+    }
 }
 
-/// `radius_table[index]`, `VTM/vtmtable.h:381-508`.
-#[inline]
-fn radius_table(index: i32) -> i16 {
-    RADIUS_TABLE
-        [usize::try_from(index).expect("negative bandwidth indexes radius_table out of bounds")]
+/// Samples each `dectalk_vtm_generate_frame` call writes, or 0 for null.
+///
+/// # Safety
+/// `ptr` must be null or a live pointer returned by `dectalk_vtm_new`.
+#[no_mangle]
+pub unsafe extern "C" fn dectalk_vtm_samples_per_frame(ptr: *const Vtm) -> u32 {
+    match ptr.as_ref() {
+        Some(vtm) => vtm.samples_per_frame() as u32,
+        None => 0,
+    }
 }
 
-/// `B0[index]`, `VTM/vtmtable.h:88-134`.
-#[inline]
-fn b0(index: i32) -> i16 {
-    B0[usize::try_from(index).expect("open phase under 40 samples indexes B0 out of bounds")]
+/// Output sample rate in Hz, or 0 for null.
+///
+/// # Safety
+/// `ptr` must be null or a live pointer returned by `dectalk_vtm_new`.
+#[no_mangle]
+pub unsafe extern "C" fn dectalk_vtm_sample_rate(ptr: *const Vtm) -> u32 {
+    match ptr.as_ref() {
+        Some(vtm) => vtm.sample_rate(),
+        None => 0,
+    }
 }
 
-/// `setzeroabc`, `VTM/vtm3.c:2537-2577`. Returns `(*sacoef, *sbcoef, *sccoef)`.
-fn setzeroabc(f: i32, bw: i32, rnzg: i32) -> (i32, i16, i16) {
-    /*    First compute ordinary resonator coefficients */
-    /*    Let r  =  exp(-pi bw t) */
-    let r: i16 = radius_table(bw >> 3);
+/// Loads a speaker definition packet of exactly `SPDEF_PARS` words. Returns 0,
+/// `DECTALK_VTM_BAD_ARGUMENT`, or a `VtmError` code.
+///
+/// # Safety
+/// `ptr` must be null or a live pointer returned by `dectalk_vtm_new`;
+/// `words` must be null or valid for reading `words_len` 16-bit words.
+#[no_mangle]
+pub unsafe extern "C" fn dectalk_vtm_load_speaker_definition(
+    ptr: *mut Vtm,
+    words: *const i16,
+    words_len: usize,
+) -> i32 {
+    let Some(vtm) = ptr.as_mut() else {
+        return DECTALK_VTM_BAD_ARGUMENT;
+    };
+    if words.is_null() || words_len != SPDEF_PARS {
+        return DECTALK_VTM_BAD_ARGUMENT;
+    }
+    let mut spdef = [0i16; SPDEF_PARS];
+    spdef.copy_from_slice(core::slice::from_raw_parts(words, SPDEF_PARS));
+    match vtm.load_speaker_definition(&spdef) {
+        Ok(()) => 0,
+        Err(error) => error.code(),
+    }
+}
 
-    /* Let c  =  -r**2 */
-    let ccoef: i16 = (-frac4mul(i32::from(r), i32::from(r))) as i16;
+/// Generates one frame from exactly `VOICE_PARS` frame words into `out`, which
+/// must hold at least `dectalk_vtm_samples_per_frame` samples. Returns the
+/// number of samples written, `DECTALK_VTM_BAD_ARGUMENT`, or a `VtmError`
+/// code (nothing is written then).
+///
+/// # Safety
+/// `ptr` must be null or a live pointer returned by `dectalk_vtm_new`;
+/// `frame` must be null or valid for reading `frame_len` 16-bit words; `out`
+/// must be null or valid for writing `out_len` 16-bit samples.
+#[no_mangle]
+pub unsafe extern "C" fn dectalk_vtm_generate_frame(
+    ptr: *mut Vtm,
+    frame: *const i16,
+    frame_len: usize,
+    vol_att: i32,
+    out: *mut i16,
+    out_len: usize,
+) -> i32 {
+    let Some(vtm) = ptr.as_mut() else {
+        return DECTALK_VTM_BAD_ARGUMENT;
+    };
+    if frame.is_null()
+        || frame_len != VOICE_PARS
+        || out.is_null()
+        || out_len < vtm.samples_per_frame()
+    {
+        return DECTALK_VTM_BAD_ARGUMENT;
+    }
+    let mut words = [0i16; VOICE_PARS];
+    words.copy_from_slice(core::slice::from_raw_parts(frame, VOICE_PARS));
+    match vtm.speech_waveform_generator(&words, vol_att) {
+        Ok(samples) => {
+            core::slice::from_raw_parts_mut(out, samples.len()).copy_from_slice(samples);
+            samples.len() as i32
+        }
+        Err(error) => error.code(),
+    }
+}
 
-    /* Let b = r * 2*cos(2 pi f t) */
-    let bcoef: i16 = frac4mul(i32::from(r), i32::from(cosine_table(f >> 3))) as i16;
+/// Allocates a zeroed buffer of `len` 16-bit words in WASM linear memory, for
+/// packets and samples. Free it with `dectalk_vtm_dealloc_i16` and the same
+/// `len`.
+#[no_mangle]
+pub extern "C" fn dectalk_vtm_alloc_i16(len: usize) -> *mut i16 {
+    if len == 0 {
+        return core::ptr::null_mut();
+    }
+    let mut buf = vec![0i16; len];
+    let ptr = buf.as_mut_ptr();
+    core::mem::forget(buf);
+    ptr
+}
 
-    /* Let a = 1.0 - b - c */
-    let acoef: i16 = (4096 - i32::from(bcoef) - i32::from(ccoef)) as i16;
+/// # Safety
+/// `ptr` must be null or a pointer returned by `dectalk_vtm_alloc_i16` called
+/// with the same `len`, not yet freed.
+#[no_mangle]
+pub unsafe extern "C" fn dectalk_vtm_dealloc_i16(ptr: *mut i16, len: usize) {
+    if ptr.is_null() {
+        return;
+    }
+    let _ = Vec::from_raw_parts(ptr, 0, len);
+}
 
-    /* Now convert to antiresonator coefficients (a'=1/a, b'=-b/a, c'=-c/a) */
-    let acoef = i32::from(acoef);
-    let sacoef: i32 = (4096 * rnzg) / acoef;
-    let sbcoef: i16 = (-((i32::from(bcoef) * rnzg) / acoef)) as i16;
-    let sccoef: i16 = (-((i32::from(ccoef) * rnzg) / acoef)) as i16;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    (sacoef, sbcoef, sccoef)
+    /// The speaker definition packet DECtalk 4.63 sends for Perfect Paul at
+    /// 11025 Hz: first 24 words of the `S` line of
+    /// `tests/fixtures/paul-cat.frames.txt`. The words after `SPD_CHIP` are
+    /// not read.
+    fn paul_spdef() -> [i16; SPDEF_PARS] {
+        let mut spdef = [0i16; SPDEF_PARS];
+        spdef[..24].copy_from_slice(&[
+            3503, 260, 6000, 6000, 3550, 4850, 0, 87, 66, 58, 59, 76, 9800, 0, 0, 4100, 64, 87, 65,
+            64, 292, 0, 0, 1,
+        ]);
+        spdef
+    }
+
+    /// A silent frame: frame 0 of `tests/fixtures/paul-cat.frames.txt`.
+    fn silent_frame() -> [i16; VOICE_PARS] {
+        [
+            0, 346, 0, 0, 0, 0, 0, 0, 41, 500, 0, 2091, 2702, 500, 545, 210, 280, 256, 4, 305, 500,
+            0, 3500, 0, 0, 1410, 1000, 0, 1000, 200, 50, 0, 0, 6736, 200, 0, 0, 0, 293, 0, 0,
+            -32608, 293, 19, 0,
+        ]
+    }
+
+    #[test]
+    fn starts_at_11025_hz_with_71_samples_a_frame() {
+        let vtm = Vtm::new();
+        assert_eq!(vtm.sample_rate(), 11025);
+        assert_eq!(vtm.samples_per_frame(), 71);
+    }
+
+    #[test]
+    fn mulaw_rate_gives_51_samples_a_frame() {
+        let mut vtm = Vtm::new();
+        vtm.DTSetSampleRate(MULAW_SAMPLE_RATE);
+        assert_eq!(vtm.sample_rate(), 8000);
+        assert_eq!(vtm.samples_per_frame(), 51);
+    }
+
+    #[test]
+    fn amplitude_word_above_the_table_is_a_fault_not_a_panic() {
+        let mut vtm = Vtm::new();
+        vtm.load_speaker_definition(&paul_spdef()).unwrap();
+        // The frame after a speaker definition has its amplitudes zeroed
+        // (vtm3.c:625-638), so fault on the one after.
+        vtm.speech_waveform_generator(&silent_frame(), 100).unwrap();
+        let mut frame = silent_frame();
+        frame[OUT_A2] = 88;
+        assert_eq!(
+            vtm.speech_waveform_generator(&frame, 100).err(),
+            Some(VtmError::AmplitudeIndex(88))
+        );
+        // The fault does not stick to the next call.
+        assert!(vtm.speech_waveform_generator(&silent_frame(), 100).is_ok());
+    }
+
+    #[test]
+    fn speaker_gain_below_the_table_is_a_fault() {
+        let mut vtm = Vtm::new();
+        let mut spdef = paul_spdef();
+        spdef[SPD_AZGAIN] = -1;
+        assert_eq!(
+            vtm.load_speaker_definition(&spdef),
+            Err(VtmError::AmplitudeIndex(-1))
+        );
+    }
+
+    #[test]
+    fn pitch_period_too_short_for_b0_is_a_fault() {
+        let mut vtm = Vtm::new();
+        vtm.load_speaker_definition(&paul_spdef()).unwrap();
+        let mut frame = silent_frame();
+        // T0 = 40 scales to 44 quarter-samples; 3/4 of that is 33, under the 40
+        // that B0 starts at (vtm3.c:1177-1178, 1207).
+        frame[OUT_T0] = 40;
+        assert_eq!(
+            vtm.speech_waveform_generator(&frame, 100).err(),
+            Some(VtmError::OpenPhaseIndex(-7))
+        );
+    }
+
+    #[test]
+    fn ffi_generates_the_same_samples_as_the_rust_api() {
+        let spdef = paul_spdef();
+        let frame = silent_frame();
+
+        let mut reference = Vtm::new();
+        reference.load_speaker_definition(&spdef).unwrap();
+        let expected = reference
+            .speech_waveform_generator(&frame, 100)
+            .unwrap()
+            .to_vec();
+
+        unsafe {
+            let vtm = dectalk_vtm_new();
+            let n = dectalk_vtm_samples_per_frame(vtm) as usize;
+            assert_eq!(n, 71);
+            assert_eq!(dectalk_vtm_sample_rate(vtm), 11025);
+            assert_eq!(
+                dectalk_vtm_load_speaker_definition(vtm, spdef.as_ptr(), spdef.len()),
+                0
+            );
+
+            let out = dectalk_vtm_alloc_i16(n);
+            assert_eq!(
+                dectalk_vtm_generate_frame(vtm, frame.as_ptr(), frame.len(), 100, out, n),
+                n as i32
+            );
+            assert_eq!(core::slice::from_raw_parts(out, n), &expected[..]);
+
+            // Wrong lengths and null pointers are refused.
+            assert_eq!(
+                dectalk_vtm_generate_frame(vtm, frame.as_ptr(), frame.len() - 1, 100, out, n),
+                DECTALK_VTM_BAD_ARGUMENT
+            );
+            assert_eq!(
+                dectalk_vtm_generate_frame(vtm, frame.as_ptr(), frame.len(), 100, out, n - 1),
+                DECTALK_VTM_BAD_ARGUMENT
+            );
+            assert_eq!(
+                dectalk_vtm_load_speaker_definition(vtm, core::ptr::null(), spdef.len()),
+                DECTALK_VTM_BAD_ARGUMENT
+            );
+            assert_eq!(
+                dectalk_vtm_generate_frame(
+                    core::ptr::null_mut(),
+                    frame.as_ptr(),
+                    frame.len(),
+                    100,
+                    out,
+                    n
+                ),
+                DECTALK_VTM_BAD_ARGUMENT
+            );
+
+            // A model fault comes back as its code.
+            let mut bad = frame;
+            bad[OUT_A2] = 88;
+            assert_eq!(
+                dectalk_vtm_generate_frame(vtm, bad.as_ptr(), bad.len(), 100, out, n),
+                VtmError::AmplitudeIndex(88).code()
+            );
+
+            dectalk_vtm_dealloc_i16(out, n);
+            dectalk_vtm_free(vtm);
+        }
+    }
 }

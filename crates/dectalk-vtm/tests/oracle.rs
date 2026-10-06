@@ -149,7 +149,8 @@ fn render(events: &[Event]) -> (Vec<i16>, u32) {
                     vtm.sample_rate(),
                     "speaker packet sample rate"
                 );
-                vtm.load_speaker_definition(words);
+                vtm.load_speaker_definition(words)
+                    .expect("speaker definition within the model's tables");
             }
             Event::Frame {
                 vol_att,
@@ -157,7 +158,10 @@ fn render(events: &[Event]) -> (Vec<i16>, u32) {
                 words,
             } => {
                 assert_eq!(*sample_rate, vtm.sample_rate(), "frame sample rate");
-                rendered.extend_from_slice(vtm.speech_waveform_generator(words, *vol_att));
+                rendered.extend_from_slice(
+                    vtm.speech_waveform_generator(words, *vol_att)
+                        .expect("frame within the model's tables"),
+                );
             }
         }
     }

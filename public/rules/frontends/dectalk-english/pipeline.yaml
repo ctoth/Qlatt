@@ -59,6 +59,15 @@ functions:
     description: FBOUNDARY value of a Segment's structure word; 0 when it has none.
     citations:
       - "DECtalk 4.63 ph_defs.h:249-262 FBOUNDARY"
+  # A phone as the duration dictionary's keys spell it: its DECtalk name, with
+  # an apostrophe in front when it is a vowel with primary stress.
+  dectalk_dictionary_token:
+    params: [item]
+    body: >-
+      (item.type == 'vowel' && get(item, 'stress', 0) == 1 ? "'" : "") + dectalk_name(item)
+    description: The spelling of a phone in a duration dictionary key.
+    citations:
+      - "DECtalk 4.63 PH/ph_sort.c:192-215 durdic (S1 before the stressed vowel of a pattern)"
   dectalk_stress:
     params: [item]
     body: "item == null ? 0.0 : get(item, 'stress', 0.0)"
@@ -151,6 +160,10 @@ predicates:
     !(current.type in ["stop_release", "stop_aspiration"]) && current.phoneme != "SIL"
   is_clause_silence: >-
     current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null
+  # Phones that stand for two of DECtalk's input phones: a vowel fused with
+  # its /r/, and the survivor of a deleted geminate.
+  is_fused_vowel: isTrue(current, "fused_with_r")
+  is_geminate_survivor: isTrue(current, "after_deleted_geminate")
   # ph_task.c:611-614: the first Segment of a word DECtalk counts as a verb.
   is_verb_count_word_start: >-
     dectalk_word_start(current)
@@ -534,6 +547,12 @@ relations:
       # The phone before a morpheme boundary inside its word (MBOUND, e.g.
       # "nine|teen" in DECtalk's number lists).
       morpheme_boundary_after: { kind: boolean }
+      # A duration the duration dictionary gives the phone (ph_sort.c:192-215),
+      # in ms; the duration rules are not applied to it.
+      dictionary_duration_ms: { kind: number }
+      # The vowel has absorbed the /r/ after it (ph_aloph.c:835-872); it was
+      # two phones when DECtalk's rules looked ahead at it.
+      fused_with_r: { kind: boolean }
       # FBLOCK: the dictionary marks the phone (`~` before it) and DECtalk skips
       # every allophone rule in that phone's turn, and the hat pattern
       # (ph_sort.c:1611-1612, ph_aloph.c:563-567). The geminate deletion comes
@@ -641,6 +660,7 @@ phases:
       # writes the allophone's timing_* state; only the last two write duration.
       - dectalk_pause_duration
       - dectalk_timing_setup
+      - dectalk_timing_dictionary_duration
       - dectalk_timing_2_clause_final_rime
       - dectalk_timing_3_non_phrase_final_syllabic
       - dectalk_timing_3_adjacent_nasals
@@ -712,6 +732,9 @@ phases:
       - dectalk_break_marker
       - dectalk_clause_break
       - dectalk_clause_break_comma
+      # ph_sort.c:1313-1329: looked up on the symbols as they come in, before
+      # any rule below changes a phone or its stress.
+      - dectalk_duration_dictionary
       # ph_sort.c:1055-1110, ahead of the stress rules: a dropped
       # prepositional-phrase start gives its word primary stress.
       - dectalk_pp_start_state

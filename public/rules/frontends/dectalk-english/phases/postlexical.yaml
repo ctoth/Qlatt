@@ -210,6 +210,69 @@ rules:
       - "DECtalk 4.63 LTS/ls_util.c:824-853 (a COMMA is written to the phonetic stage before the word)"
 
   # -------------------------------------------------------------------------
+  # THE DURATION DICTIONARY (ph_sort.c:192-215 durdic, :1313-1329, :1916-1945).
+  #
+  # At every symbol the phone sort compares the symbols from there on with a
+  # short table of patterns, each a word boundary and the first phones of a
+  # word with its primary stress mark. Where one matches, its durations are
+  # stored for those phones as durations given from outside, and the duration
+  # routine uses them instead of its rules (duration.yaml,
+  # dectalk_timing_dictionary_duration). "Anything", "end" and "enter" begin
+  # with a stressed EH and N: 80 and 70 ms.
+  #
+  # A pattern is a prefix: whatever follows in the word does not matter. It
+  # begins with the word boundary symbol, so a word entered with a phrase
+  # start in its place (a verb, "to", "and", "for") does not match.
+  #
+  # This rule reads the word's first four phones and writes the duration on
+  # the phone it is for. It runs before any rule changes a phone or a stress.
+  # -------------------------------------------------------------------------
+  dectalk_duration_dictionary:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme != 'SIL' && has(current.word) && current.word != ''"
+    define:
+      # The word's first phone, and how far along current is (up to the 4th).
+      b1: "behind(current, 1)"
+      b2: "behind(current, 2)"
+      b3: "behind(current, 3)"
+      at0: dectalk_word_start(current)
+      at1: "!at0 && b1 != null && dectalk_word_start(b1)"
+      at2: "!at0 && !at1 && b2 != null && dectalk_word_start(b2)"
+      at3: "!at0 && !at1 && !at2 && b3 != null && dectalk_word_start(b3)"
+      first: "at0 ? current : (at1 ? b1 : (at2 ? b2 : (at3 ? b3 : null)))"
+      w1: "first == null ? null : ahead(first, 1)"
+      w2: "first == null ? null : ahead(first, 2)"
+      w3: "first == null ? null : ahead(first, 3)"
+      in1: "w1 != null && w1.phoneme != 'SIL' && !dectalk_word_start(w1)"
+      in2: "in1 && w2 != null && w2.phoneme != 'SIL' && !dectalk_word_start(w2)"
+      in3: "in2 && w3 != null && w3.phoneme != 'SIL' && !dectalk_word_start(w3)"
+      key2: "in1 ? dectalk_dictionary_token(first) + ' ' + dectalk_dictionary_token(w1) : ''"
+      key3: "in2 ? key2 + ' ' + dectalk_dictionary_token(w2) : ''"
+      key4: "in3 ? key3 + ' ' + dectalk_dictionary_token(w3) : ''"
+      table: params.policy.timing.duration_dictionary
+      row: >-
+        get(table, key2, null) != null ? get(table, key2, null)
+        : (get(table, key3, null) != null ? get(table, key3, null) : get(table, key4, null))
+      ms: >-
+        row == null ? 0
+        : (at0 ? get(row, 'p0', 0) : (at1 ? get(row, 'p1', 0)
+          : (at2 ? get(row, 'p2', 0) : get(row, 'p3', 0))))
+      # WBOUND in front: the word starts no phrase.
+      plain_start: "first != null && dectalk_phrase_start(first) == ''"
+    constraint: "plain_start && ms > 0"
+    apply:
+      - field: dictionary_duration_ms
+        op: set
+        value: ms
+        tag: timing_setup
+    citations:
+      - "DECtalk 4.63 PH/ph_sort.c:192-215 durdic (the US rows)"
+      - "DECtalk 4.63 PH/ph_sort.c:1313-1329 (looked up at every symbol; the durations go to user_durs)"
+      - "DECtalk 4.63 PH/ph_sort.c:1916-1945 durlookup (a pattern matches as a prefix)"
+
+  # -------------------------------------------------------------------------
   # PREPOSITIONAL-PHRASE STARTS (ph_sort.c:1055-1110).
   #
   # "to", "and" and "for" come from DECtalk's mini dictionary with PPSTART in
@@ -303,6 +366,7 @@ rules:
             - helper_verb_promoted
             - phrase_start_follows
             - morpheme_boundary_after
+            - dictionary_duration_ms
           phoneme: full_name
           type: full.type
           target: full
@@ -1411,6 +1475,7 @@ rules:
           # /r/ to it (ph_sort2.c:203-227).
           morpheme_boundary_after: >-
             isTrue(p, 'morpheme_boundary_after') || isTrue(current, 'morpheme_boundary_after')
+          fused_with_r: "true"
           type: fv.type
           target: fv
           duration: fv.duration

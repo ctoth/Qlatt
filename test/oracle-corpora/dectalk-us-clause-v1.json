@@ -129,6 +129,15 @@
     { "id": "fresh-17", "text": "What time does the meeting start?", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
     { "id": "fresh-18", "text": "She gave him a book about birds.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
     { "id": "fresh-19", "text": "Winter is colder than summer.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
-    { "id": "fresh-20", "text": "Thank you very much for your help.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] }
+    { "id": "fresh-20", "text": "Thank you very much for your help.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "dur-never", "text": "They never came back.", "group": "duration-dictionary", "tags": ["n-eh-v"], "expectedFocus": ["duration"] },
+    { "id": "dur-lot", "text": "A lot of people came.", "group": "duration-dictionary", "tags": ["ll-aa-t"], "expectedFocus": ["duration"] },
+    { "id": "dur-end", "text": "The end is near.", "group": "duration-dictionary", "tags": ["eh-n"], "expectedFocus": ["duration"] },
+    { "id": "dur-energy", "text": "It takes energy.", "group": "duration-dictionary", "tags": ["eh-n", "prefix"], "expectedFocus": ["duration"] },
+    { "id": "dur-product", "text": "The product is new.", "group": "duration-dictionary", "tags": ["p-r-aa-d"], "expectedFocus": ["duration"] },
+    { "id": "dur-middle", "text": "In the middle of it.", "group": "duration-dictionary", "tags": ["m-ih-d"], "expectedFocus": ["duration"] },
+    { "id": "dur-enter-verb", "text": "They enter the room.", "group": "duration-dictionary", "tags": ["eh-n", "verb-phrase-start", "no-match"], "expectedFocus": ["duration"] },
+    { "id": "dur-add-verb", "text": "They add the numbers.", "group": "duration-dictionary", "tags": ["ae-d", "verb-phrase-start", "no-match"], "expectedFocus": ["duration"] },
+    { "id": "dur-any", "text": "Is there any left?", "group": "duration-dictionary", "tags": ["eh-n", "secondary-stress", "no-match"], "expectedFocus": ["duration"] }
   ]
 }

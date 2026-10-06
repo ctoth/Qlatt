@@ -331,6 +331,24 @@ parameters:
       # p_us_tim.c:468 caps HX at 11 frames; 871-877 floors RR at 13.
       hx_max_frames: 11
       rr_minimum_frames: 13
+      # ph_sort.c:192-215 durdic, the US rows: durations in ms given to the
+      # first phones of a word that begins with the phones of the key (a
+      # prefix; "'EH N" covers "end", "enter", "anything"). The apostrophe
+      # stands before the vowel with primary stress, where the table has S1.
+      # p0..p3 are the word's first four phones; 0 gives none. The row for
+      # LL 'AA T also has 60 on the stress symbol itself, which no phone
+      # receives.
+      duration_dictionary:
+        "M 'IH D": { p0: 0, p1: 85, p2: 0, p3: 0 }
+        "LL 'AA T": { p0: 0, p1: 160, p2: 0, p3: 0 }
+        "S 'IH T": { p0: 0, p1: 65, p2: 0, p3: 0 }
+        "'EH N": { p0: 80, p1: 70, p2: 0, p3: 0 }
+        "'AE D": { p0: 110, p1: 0, p2: 0, p3: 0 }
+        "W 'AO N": { p0: 0, p1: 130, p2: 0, p3: 0 }
+        "W 'AH N S": { p0: 0, p1: 80, p2: 0, p3: 0 }
+        "N 'EH V": { p0: 0, p1: 90, p2: 0, p3: 0 }
+        "'IY V EN": { p0: 142, p1: 0, p2: 0, p3: 0 }
+        "P R 'AA D": { p0: 0, p1: 0, p2: 140, p3: 0 }
       # One synthesis frame as the frontend's clock counts it (frame_period_sec).
       frame_ms: 6.4
       citations:

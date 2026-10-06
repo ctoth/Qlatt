@@ -19,6 +19,7 @@
  * Usage:
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
  *     scripts/oracle/compare-duration-frames.ts [--verbose] [--id <phraseId>]
+ *     [--corpus <corpusId>]
  *
  * A measurement tool: exit code 0.
  */
@@ -27,6 +28,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { textToKlattTrackDetailed } from "../../src/tts-frontend.ts";
+import { selectedCorpusFiles } from "./allophones";
 import type { OracleCorpusDocument } from "./types";
 
 // DECtalk 4.63 INCLUDE/l_all_ph.h, `#define US_<NAME> <index>`.
@@ -120,7 +122,7 @@ let framesEqual = 0;
 let statesEqual = 0;
 let absoluteError = 0;
 const firstDivergence = new Map<string, number>();
-for (const file of ["dectalk-us-v1.json", "dectalk-us-heldout-v1.json"]) {
+for (const file of selectedCorpusFiles(process.argv)) {
   const corpus = JSON.parse(
     fs.readFileSync(path.join(repoRoot, "test", "oracle-corpora", file), "utf8"),
   ) as OracleCorpusDocument;

@@ -8,13 +8,16 @@
  *
  *   stress   DECtalk struc & FSTRESS (03)  vs  Segment `stress` (absent = 0)
  *   winitc   DECtalk struc & FWINITC (04)  vs  Segment `word_initial_consonant`
+ *   syl      DECtalk struc & FTYPESYL (030) vs Segment `syllable_type`
+ *   bound    DECtalk struc & FBOUNDARY (0740) vs Segment `rime_boundary`
+ *   hat      DECtalk struc & FHAT_BEGINS / FHAT_ENDS vs `hat_begins` / `hat_ends`
  *
  * Clauses with a different allophone sequence are skipped and counted; fix
  * those with scripts/oracle/compare-allophones.ts first.
  *
  * Usage:
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
- *     scripts/oracle/compare-structure-bits.ts [--verbose]
+ *     scripts/oracle/compare-structure-bits.ts [--verbose] [--corpus <corpusId>]
  *
  * A measurement tool: exit code 0.
  */
@@ -23,6 +26,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { textToKlattTrackDetailed } from "../../src/tts-frontend.ts";
+import { selectedCorpusFiles } from "./allophones";
 import type { OracleCorpusDocument } from "./types";
 
 // DECtalk 4.63 INCLUDE/l_all_ph.h, `#define US_<NAME> <index>`.
@@ -36,7 +40,18 @@ const US_NAMES = [
 ]; // biome-ignore format: ten per row, as in the header
 const PORT_TO_DECTALK: Readonly<Record<string, string>> = { HH: "HX", NG: "NX", L: "LL" };
 
-type Phone = { name: string; stress: number; winitc: boolean; syl: string; bound: string };
+type Phone = {
+  name: string;
+  stress: number;
+  winitc: boolean;
+  syl: string;
+  bound: string;
+  /** "<" where the hat pattern rises (FHAT_BEGINS), ">" where it falls (FHAT_ENDS). */
+  hat: string;
+};
+
+// ph_defs.h: FHAT_BEGINS 01000, FHAT_ENDS 02000.
+const hatOf = (begins: boolean, ends: boolean): string => `${begins ? "<" : ""}${ends ? ">" : ""}`;
 
 // FBOUNDARY (0740) values, ph_defs.h:249-262, in the port's rime_boundary terms.
 const DECTALK_BOUNDARY = new Map<number, string>([
@@ -93,6 +108,7 @@ function qlattClauses(text: string, transitionMs: number): Phone[][] {
       winitc: item.get("word_initial_consonant") === true,
       syl: syllabic ? (PORT_SYLLABLE[position] ?? `?${position}`) : "mono",
       bound: String(item.get("rime_boundary") ?? ""),
+      hat: hatOf(item.get("hat_begins") === true, item.get("hat_ends") === true),
     });
   }
   return clauses.filter((clause) => clause.length > 0);
@@ -101,8 +117,10 @@ function qlattClauses(text: string, transitionMs: number): Phone[][] {
 const show = (phone: Phone): string =>
   `${phone.name}${phone.stress > 0 ? phone.stress : ""}${phone.winitc ? "^" : ""}` +
   (phone.syl === "mono" ? "" : `/${phone.syl}`) +
-  (phone.bound === "" ? "" : `-${phone.bound}`);
+  (phone.bound === "" ? "" : `-${phone.bound}`) +
+  phone.hat;
 
+let hatEqual = 0;
 let clausesCompared = 0;
 let clausesSkipped = 0;
 let clausesEqual = 0;
@@ -111,7 +129,7 @@ let stressEqual = 0;
 let winitcEqual = 0;
 let syllableEqual = 0;
 let boundaryEqual = 0;
-for (const file of ["dectalk-us-v1.json", "dectalk-us-heldout-v1.json"]) {
+for (const file of selectedCorpusFiles(process.argv)) {
   const corpus = JSON.parse(
     fs.readFileSync(path.join(repoRoot, "test", "oracle-corpora", file), "utf8"),
   ) as OracleCorpusDocument;
@@ -141,6 +159,7 @@ for (const file of ["dectalk-us-v1.json", "dectalk-us-heldout-v1.json"]) {
                 bound:
                   DECTALK_BOUNDARY.get(allophone.struc & 0o740) ??
                   `0${(allophone.struc & 0o740).toString(8)}`,
+                hat: hatOf((allophone.struc & 0o1000) !== 0, (allophone.struc & 0o2000) !== 0),
               },
             ]
           : [],
@@ -173,6 +192,8 @@ for (const file of ["dectalk-us-v1.json", "dectalk-us-heldout-v1.json"]) {
         else equal = false;
         if (phone.bound === ours[i].bound) boundaryEqual += 1;
         else equal = false;
+        if (phone.hat === ours[i].hat) hatEqual += 1;
+        else equal = false;
       });
       if (equal) {
         clausesEqual += 1;
@@ -194,5 +215,6 @@ console.log(
     winitcEqual,
     syllableEqual,
     boundaryEqual,
+    hatEqual,
   }),
 );

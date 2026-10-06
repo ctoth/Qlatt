@@ -18,7 +18,7 @@
  *
  * Usage:
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
- *     scripts/oracle/compare-allophones.ts [--verbose]
+ *     scripts/oracle/compare-allophones.ts [--verbose] [--corpus <corpusId>]
  *
  * A measurement tool: exit code 0.
  */
@@ -27,6 +27,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { textToKlattTrackDetailed } from "../../src/tts-frontend.ts";
+import { selectedCorpusFiles } from "./allophones";
 import type { OracleCorpusDocument } from "./types";
 
 // DECtalk 4.63 INCLUDE/l_all_ph.h, `#define US_<NAME> <index>`.
@@ -75,7 +76,7 @@ let clausesTotal = 0;
 let clausesEqual = 0;
 let errors = 0;
 const substitutions = new Map<string, number>();
-for (const file of ["dectalk-us-v1.json", "dectalk-us-heldout-v1.json"]) {
+for (const file of selectedCorpusFiles(process.argv)) {
   const corpus = JSON.parse(
     fs.readFileSync(path.join(repoRoot, "test", "oracle-corpora", file), "utf8"),
   ) as OracleCorpusDocument;

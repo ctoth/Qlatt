@@ -401,6 +401,27 @@ rules:
     citations:
       - "DECtalk 4.63 p_us_tim.c:482-495 Rule 7 (unstressed consonant: glides and liquids halved, others N70PRCNT)"
 
+  # Rule 7 (497-508), the branch for primary stress: "penultimate lengthening
+  # of stressed syllabic if hat fall f0 gesture". The syllabic where the hat
+  # pattern falls is lengthened when a word or prepositional-phrase boundary
+  # follows its rime, that is, when it ends a word that does not end the phrase.
+  dectalk_timing_7_hat_fall:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: >-
+      primary && syllabic && isTrue(current, 'hat_ends')
+      && bou < B.vp && bou > B.morpheme
+    apply:
+      - field: timing_added_frames
+        op: set
+        value: deldur + NF.ms25
+        tag: hat_fall
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:497-508 Rule 7 (stressed syllabic with FHAT_ENDS before a boundary above FMBNEXT and below FVPNEXT: +NF25MS)"
+
   # Rule 8 (510-525): emphasis. The C carries a switch from phone to phone:
   # an emphasised phone sets it, a word-initial consonant or a syllabic without
   # emphasis clears it. Here that is the nearest earlier phone that sets or

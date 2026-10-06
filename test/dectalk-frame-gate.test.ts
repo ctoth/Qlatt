@@ -32,6 +32,10 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { DECTALK_CORPUS_FILES } from "../scripts/oracle/allophones";
 import {
+  decodeFrameFixtureAreaColumn,
+  FRAME_FIXTURE_AREA_COLUMNS,
+} from "../scripts/oracle/frame-fixture";
+import {
   comparePhraseFrames,
   FRAME_GAP_NAMES,
   loadFrameFixture,
@@ -97,6 +101,22 @@ describe("DECtalk frame gate", () => {
 
       it("has DECtalk's packets for every corpus entry and no strays", () => {
         expect(Object.keys(fixture.entries).sort()).toEqual([...ids].sort());
+      });
+
+      // AG, AL, AN, ABLADE, PS, CNK, DC, UE, F4, ATB and PLACE are what
+      // DECtalk's synthesizer builds voicing and noise from. The frontend
+      // does not emit them yet, so nothing is compared: this only keeps the
+      // oracle for that port complete.
+      it("has the synthesizer's area words for every packet", () => {
+        for (const id of ids) {
+          const recorded = fixture.entries[id];
+          if (!recorded) continue;
+          for (const column of FRAME_FIXTURE_AREA_COLUMNS) {
+            expect(decodeFrameFixtureAreaColumn(recorded, column), `${id} ${column}`).toHaveLength(
+              recorded.packets,
+            );
+          }
+        }
       });
 
       it("lists gaps only for corpus entries, by known names that have a reason", () => {

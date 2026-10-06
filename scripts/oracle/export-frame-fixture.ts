@@ -20,9 +20,18 @@
  * from area parameters the trace does not carry (VTM/vtmiont.c:660-683,
  * 1198-1199, 1300-1319).
  *
+ * Those area parameters (AG, AL, AN, ABLADE, PS, CNK, DC, UE, with F4, ATB
+ * and PLACE) are recorded too, as oracle-only columns, from the `P` record
+ * that the instrumented copy of the tree writes to the file named by
+ * QVTM_TRACE: the whole packet as the VTM receives it. So say.exe here must
+ * be that copy's (built as scripts/oracle/dectalk-debug/vtm-trace.md on
+ * branch dsp/dectalk-vtm describes; its audio is byte-identical to the stock
+ * build's and it keeps `-lt`). Every word both traces carry is checked to be
+ * equal on every packet.
+ *
  * Usage:
- *   DECTALK_SAY_EXE=<463>/samples/SAY/build/us/static/say.exe \
- *   DECTALK_WORKDIR=<463>/dapi/src/dic \
+ *   DECTALK_SAY_EXE=<copy>/samples/SAY/build/us/static/say.exe \
+ *   DECTALK_WORKDIR=<copy>/dapi/src/dic \
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
  *     scripts/oracle/export-frame-fixture.ts [--corpus <corpusId>] [--out <file>]
  * Without --corpus it writes the fixture of every corpus in DECTALK_CORPUS_FILES.
@@ -37,6 +46,7 @@ import { selectedCorpusFiles } from "./allophones";
 import { parseDectalkTraceFile } from "./dectalk-trace";
 import {
   encodeFrameFixtureEntry,
+  FRAME_FIXTURE_AREA_COLUMNS,
   FRAME_FIXTURE_COLUMNS,
   type FrameFixture,
   type FrameFixtureEntry,
@@ -88,6 +98,7 @@ try {
       const rate = entry.rate ?? corpus.defaults?.rate ?? 180;
       // The trace is appended to; every phrase gets a file of its own.
       const tracePath = path.join(tempDir, `${entry.id}.trace.jsonl`);
+      const packetPath = path.join(tempDir, `${entry.id}.qvtm.txt`);
       execFileSync(
         exePath,
         [
@@ -97,7 +108,12 @@ try {
           tracePath,
           `${voice} [:ra ${rate}] ${entry.text}`,
         ],
-        { cwd: workDir, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
+        {
+          cwd: workDir,
+          encoding: "utf8",
+          maxBuffer: 64 * 1024 * 1024,
+          env: { ...process.env, QVTM_TRACE: packetPath },
+        },
       );
       const { frames } = parseDectalkTraceFile(tracePath);
       if (frames.length === 0) throw new Error(`E_FRAME_FIXTURE_EMPTY: ${entry.id}: no packets`);
@@ -106,13 +122,29 @@ try {
           throw new Error(`E_FRAME_FIXTURE_ORDER: ${entry.id}: packet ${frame.frame} at ${index}`);
         }
       });
-      entries[entry.id] = encodeFrameFixtureEntry(entry.text, frames);
+      if (!fs.existsSync(packetPath)) {
+        throw new Error(
+          `E_FRAME_FIXTURE_NO_P: ${entry.id}: say.exe wrote no QVTM_TRACE file; DECTALK_SAY_EXE must be the instrumented copy`,
+        );
+      }
+      // `P <lang> 0 <45 words>`: the packet as the VTM receives it.
+      const packetWords = fs
+        .readFileSync(packetPath, "utf8")
+        .split(/\r?\n/u)
+        .filter((line) => line.startsWith("P "))
+        .map((line) => line.trim().split(/\s+/u).slice(3).map(Number));
+      try {
+        entries[entry.id] = encodeFrameFixtureEntry(entry.text, frames, packetWords);
+      } catch (error) {
+        throw new Error(`${entry.id}: ${error instanceof Error ? error.message : String(error)}`);
+      }
     }
     const fixture: FrameFixture = {
-      schemaVersion: "v1",
+      schemaVersion: "v2",
       corpusId: corpus.corpusId,
-      engine: "DECtalk 4.63 say.exe -lt (ph_claus.c:695-744 packet trace)",
-      columns: FRAME_FIXTURE_COLUMNS,
+      engine:
+        "DECtalk 4.63 say.exe: -lt packet trace (ph_claus.c:695-744) and the P record of the QVTM_TRACE copy",
+      columns: [...FRAME_FIXTURE_COLUMNS, ...FRAME_FIXTURE_AREA_COLUMNS],
       entries,
     };
     const outPath = path.resolve(

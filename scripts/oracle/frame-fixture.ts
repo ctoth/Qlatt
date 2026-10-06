@@ -30,17 +30,66 @@ export const FRAME_FIXTURE_COLUMNS = [
 
 export type FrameFixtureColumn = (typeof FRAME_FIXTURE_COLUMNS)[number];
 
+/**
+ * The packet words DECtalk's synthesizer builds voicing and noise from in
+ * this build (HLSYN): VTM/vtmiont.c:660-678 reads exactly these, with T0 and
+ * F1-F3, into the HLFrame it hands HLSynthesizeLLFrame. Each is a pair of
+ * name and index in the packet (OUT_* in PH/ph_defs.h:559-604). The `-lt`
+ * trace does not print them; they come from the `P` record of the shared
+ * instrumented copy (scripts/oracle/dectalk-debug/vtm-trace.md on branch
+ * dsp/dectalk-vtm). The frontend emits none of them yet, so the gate does
+ * not compare them: they are here as the oracle for that port.
+ */
+export const FRAME_FIXTURE_AREA_WORDS = [
+  ["F4", 22],
+  ["AG", 25],
+  ["AL", 26],
+  ["AN", 27],
+  ["ABLADE", 28],
+  ["PS", 29],
+  ["CNK", 30],
+  ["DC", 31],
+  ["UE", 32],
+  ["ATB", 36],
+  ["PLACE", 37],
+] as const;
+
+export type FrameFixtureAreaColumn = (typeof FRAME_FIXTURE_AREA_WORDS)[number][0];
+
+export const FRAME_FIXTURE_AREA_COLUMNS: readonly FrameFixtureAreaColumn[] =
+  FRAME_FIXTURE_AREA_WORDS.map(([name]) => name);
+
+/** `-lt` fields that are also packet words, with their index, for cross-checking. */
+export const FRAME_FIXTURE_SHARED_WORDS: ReadonlyArray<readonly [FrameFixtureColumn, number]> = [
+  ["AP", 0],
+  ["F1", 1],
+  ["A2", 2],
+  ["A3", 3],
+  ["A4", 4],
+  ["A5", 5],
+  ["A6", 6],
+  ["AB", 7],
+  ["TLT", 8],
+  ["AV", 10],
+  ["F2", 11],
+  ["F3", 12],
+  ["B1", 14],
+  ["B2", 15],
+  ["B3", 16],
+  ["PH", 17],
+];
+
 export type FrameFixtureEntry = {
   text: string;
   packets: number;
-  runs: Record<FrameFixtureColumn, number[]>;
+  runs: Record<FrameFixtureColumn | FrameFixtureAreaColumn, number[]>;
 };
 
 export type FrameFixture = {
-  schemaVersion: "v1";
+  schemaVersion: "v2";
   corpusId: string;
   engine: string;
-  columns: readonly FrameFixtureColumn[];
+  columns: readonly (FrameFixtureColumn | FrameFixtureAreaColumn)[];
   entries: Record<string, FrameFixtureEntry>;
 };
 
@@ -72,20 +121,58 @@ export function decodeRuns(runs: readonly number[]): number[] {
   return values;
 }
 
+/**
+ * `packetWords[i]` is packet i as the synthesizer receives it (the `P`
+ * record's 45 words). Every word the `-lt` trace also prints must agree.
+ */
 export function encodeFrameFixtureEntry(
   text: string,
   frames: readonly DectalkTraceFrame[],
+  packetWords: readonly (readonly number[])[],
 ): FrameFixtureEntry {
+  if (packetWords.length !== frames.length) {
+    throw new Error(
+      `E_FRAME_FIXTURE_PACKETS: ${frames.length} -lt packets but ${packetWords.length} P records`,
+    );
+  }
+  frames.forEach((frame, index) => {
+    for (const [column, word] of FRAME_FIXTURE_SHARED_WORDS) {
+      if (columnValue(frame, column) !== packetWords[index]?.[word]) {
+        throw new Error(
+          `E_FRAME_FIXTURE_DISAGREE: packet ${index} ${column}: -lt ${columnValue(frame, column)}, P ${String(packetWords[index]?.[word])}`,
+        );
+      }
+    }
+  });
   return {
     text,
     packets: frames.length,
-    runs: Object.fromEntries(
-      FRAME_FIXTURE_COLUMNS.map((column) => [
+    runs: Object.fromEntries([
+      ...FRAME_FIXTURE_COLUMNS.map((column) => [
         column,
         encodeRuns(frames.map((frame) => columnValue(frame, column))),
       ]),
-    ) as Record<FrameFixtureColumn, number[]>,
+      ...FRAME_FIXTURE_AREA_WORDS.map(([column, word]) => [
+        column,
+        // Packet words are C shorts; UE and DC can be negative.
+        encodeRuns(packetWords.map((words) => ((words[word] as number) << 16) >> 16)),
+      ]),
+    ]) as FrameFixtureEntry["runs"],
   };
+}
+
+/** One oracle-only column of an entry, a value a packet. */
+export function decodeFrameFixtureAreaColumn(
+  entry: FrameFixtureEntry,
+  column: FrameFixtureAreaColumn,
+): number[] {
+  const values = decodeRuns(entry.runs[column]);
+  if (values.length !== entry.packets) {
+    throw new Error(
+      `E_FRAME_FIXTURE: column ${column} has ${values.length} packets, entry says ${entry.packets}`,
+    );
+  }
+  return values;
 }
 
 /** The packets of one entry. Fields the fixture does not keep (DU, PH2, T0) read 0. */

@@ -31,52 +31,17 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { textToKlattTrackDetailed } from "../../src/tts-frontend.ts";
-import { dectalkAllophoneName, US_ALLOPHONE_NAMES } from "./allophones.ts";
+import {
+  dectalkAllophoneName,
+  type LoggedPhone as Phone,
+  parsePhonemeLog as parseLog,
+  US_VOWEL_NAMES as VOWELS,
+} from "./allophones.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const argv = process.argv.slice(2);
 const verbose = argv.includes("--verbose");
 const onlyWord = argv.includes("--word") ? argv[argv.indexOf("--word") + 1] : undefined;
-
-// The log's spelling of each allophone: lower case, with Y written `yx`.
-const LOG_SYMBOLS = new Map(
-  US_ALLOPHONE_NAMES.filter((name) => name !== "SIL").map((name) => [
-    name === "Y" ? "yx" : name.toLowerCase(),
-    name,
-  ]),
-);
-const VOWELS = new Set(US_ALLOPHONE_NAMES.slice(1, 24));
-// Morpheme, compound and syllable marks, and the phrase symbols DECtalk
-// prints before some words (`)` starts a verb phrase, `(` a prepositional one).
-const SKIPPED = new Set('*#-~=()>/\\+^&"_');
-
-type Phone = { name: string; stress: number | null };
-
-function parseLog(log: string): Phone[] {
-  const phones: Phone[] = [];
-  let pending = 0;
-  for (let i = 0; i < log.length; ) {
-    const char = log[i];
-    if (/\s/.test(char) || SKIPPED.has(char)) {
-      i += 1;
-    } else if (char === "'") {
-      pending = 1;
-      i += 1;
-    } else if (char === "`") {
-      pending = 2;
-      i += 1;
-    } else {
-      const two = LOG_SYMBOLS.get(log.slice(i, i + 2));
-      const name = two ?? LOG_SYMBOLS.get(char);
-      if (!name) throw new Error(`E_LOG_SYMBOL: '${log.slice(i, i + 2)}' in '${log}'`);
-      const vowel = VOWELS.has(name);
-      phones.push({ name, stress: vowel ? pending : null });
-      if (vowel) pending = 0;
-      i += two ? 2 : 1;
-    }
-  }
-  return phones;
-}
 
 function frontendPhones(word: string): Phone[] {
   const { utterance } = textToKlattTrackDetailed(`${word},`, undefined, 30, {

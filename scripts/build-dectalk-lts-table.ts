@@ -107,6 +107,58 @@ function featureWords(body: string): number[] {
     );
 }
 
+// Symbols the prefix and phoneme-feature tables are written in.
+const SYMBOLS = new Map<string, number>([
+  // LTS/ls_defs.h:497-505, phoneme feature bits.
+  ["PCONS", 0x0001],
+  ["PVOC", 0x0002],
+  ["PBOTH", 0x0004],
+  ["PVOICE", 0x0008],
+  ["PSIB", 0x0010],
+  ["POBS", 0x0020],
+  ["PTD", 0x0040],
+  ["PBACK", 0x0080],
+  ["PLONG", 0x0100],
+  // LTS/ls_acna.h:60-63 and ls_defs.h:616-619, prefix flags.
+  ["PCONT", 0x10],
+  ["PRCON", 0x20],
+  ["PRVOC", 0x40],
+  ["P2SYL", 0x80],
+  // LTS/ls_acna.h:69-76, language groups.
+  ["NAME_ENGLISH", 0],
+  ["NAME_FRENCH", 1],
+  ["NAME_GERMANIC", 2],
+  ["NAME_IRISH", 3],
+  ["NAME_ITALIAN", 4],
+  ["NAME_JAPANESE", 5],
+  ["NAME_SLAVIC", 6],
+  ["NAME_SPANISH", 7],
+]);
+const phonemeHeader = fs.readFileSync(
+  path.join(dectalkRoot, "dapi", "src", "INCLUDE", "l_all_ph.h"),
+  "utf8",
+);
+for (const match of phonemeHeader.matchAll(/#define\s+(US_[A-Z]+)\s+(\d+)\b/g)) {
+  SYMBOLS.set(match[1], Number(match[2]));
+}
+SYMBOLS.set("SIL", 0);
+
+/** Cells that are sums of symbols and numbers, e.g. `4+PCONT+P2SYL` or `US_AX`. */
+function symbolic(body: string): number[] {
+  return body
+    .split(",")
+    .map((cell) => cell.trim())
+    .filter((cell) => cell.length > 0)
+    .map((cell) =>
+      cell.split("+").reduce((sum, term) => {
+        const name = term.trim();
+        const value = /^(0x[0-9a-fA-F]+|\d+)$/.test(name) ? Number(name) : SYMBOLS.get(name);
+        if (value === undefined) throw new Error(`E_TABLE_SYMBOL: '${name}'`);
+        return sum + value;
+      }, 0),
+    );
+}
+
 const tableFile = which === "acna" ? "lsa_rta.c" : "l_us_rta.c";
 const tableSource = read(tableFile);
 const words = numbers(arrayBody(tableSource, which === "acna" ? "acna_lswtab" : "lswtab"));
@@ -115,6 +167,13 @@ const graphemeFeatures = featureWords(arrayBody(read("l_us_con.c"), "feats"));
 if (graphemeFeatures.length !== 31) {
   throw new Error(`E_FEATS_LENGTH: expected 31 grapheme codes, read ${graphemeFeatures.length}`);
 }
+// pfeat[] (LTS/l_us_con.c:1102), indexed by phoneme code, and the stress
+// prefix table preftab[]: LTS/l_ac_con.c:107 in the ACNA build (each entry
+// starts with a language tag, 0xff for any), LTS/l_us_con.c:1232 otherwise.
+const phonemeFeatures = symbolic(arrayBody(read("l_us_con.c"), "pfeat"));
+const prefixes = symbolic(
+  arrayBody(read(which === "acna" ? "l_ac_con.c" : "l_us_con.c"), "preftab"),
+);
 
 fs.writeFileSync(
   outPath,
@@ -125,6 +184,8 @@ fs.writeFileSync(
     // LTS/ls_rule.h LSBUMP: words per rule record.
     recordWords: which === "acna" ? 5 : 4,
     graphemeFeatures,
+    phonemeFeatures,
+    prefixes,
     words,
     bytes,
   })}\n`,

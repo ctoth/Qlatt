@@ -728,6 +728,46 @@ describe("dectalk-english verb-phrase boundaries", () => {
 });
 
 // ---------------------------------------------------------------------------
+// FTYPESYL counts the syllabics of the word (ph_sort2.c init_med_final), not
+// the syllabifier's syllables. DECtalk's record (dectalk-us-v1.durations.json):
+// "Vision is usual." has YU first, UW medial, EL final; "Red lorries..." has
+// OR first, IY final.
+// ---------------------------------------------------------------------------
+describe("dectalk-english syllable type", () => {
+  function syllableTypes(phrase: string, word: string): string[] {
+    const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    return utterance
+      .relation("Segment")
+      .listItems()
+      .filter(
+        (item) =>
+          item.get("active") !== false &&
+          item.get("word") === word &&
+          item.get("syllable_type") !== undefined,
+      )
+      .map((item) => `${String(item.get("phoneme"))}:${String(item.get("syllable_type"))}`);
+  }
+
+  it("counts /yu/ and a syllabic consonant as syllabics", () => {
+    expect(syllableTypes("Vision is usual.", "usual")).toEqual([
+      "YU:first",
+      "UW:medial",
+      "EL:final",
+    ]);
+  });
+
+  it("puts a vowel fused with /r/ where the vowel was", () => {
+    expect(syllableTypes("Red lorries.", "lorries")).toEqual(["OR:first", "IY:final"]);
+  });
+
+  it("gives a monosyllable no position", () => {
+    expect(syllableTypes("Red lorries.", "red")).toEqual(["EH:only"]);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // One output clock. DECtalk's controller counts nominal 6.4-ms frames
 // (ph_claus.c) and the VTM emits each as a 71-sample packet at 11,025 Hz
 // (VTM/vtmiont.c), so every frame of a clause, segment starts and F0 ticks

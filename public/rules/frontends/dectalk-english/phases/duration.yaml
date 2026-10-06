@@ -107,7 +107,7 @@ rules:
       bou: dectalk_boundary(current)
       winitc: isTrue(current, 'word_initial_consonant')
       # Only a syllabic carries FTYPESYL; every other phone reads as FMONOSYL.
-      typesyl: "syllabic ? get(current, 'syllable_position_in_word', 'only') : 'only'"
+      typesyl: "syllabic ? get(current, 'syllable_type', 'only') : 'only'"
       F: params.policy.timing.fraction
       NF: params.policy.timing.frames
       B: params.policy.timing.boundary
@@ -177,7 +177,7 @@ rules:
         && !isTrue(nx, 'word_initial_consonant')
       t_before_early_syllabic: >-
         dectalk_has(nx2, 'syllabic')
-        && get(nx2, 'syllable_position_in_word', 'only') in ['only', 'initial', 'first']
+        && get(nx2, 'syllable_type', 'only') in ['only', 'first']
       factor_9: >-
         n_before_t ? (t_before_early_syllabic ? F.p70 : F.p10) : factor_non_final
       # --- Rule 13, first consonant. The multiplier starts as whatever Rule 9
@@ -476,7 +476,7 @@ rules:
       where: { predicate: is_dectalk_phone }
     define: *timing
     constraint: >-
-      syllabic && typesyl in ['initial', 'first'] && primary
+      syllabic && typesyl == 'first' && primary
       && !isTrue(la, 'word_initial_consonant')
     apply:
       - field: timing_added_frames

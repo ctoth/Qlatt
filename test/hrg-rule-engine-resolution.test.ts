@@ -40,7 +40,9 @@ function specWith(effect: Record<string, unknown>) {
       Segment: {
         type: "base",
         features: { durationFloor: [] },
-        scalars: { duration: { unit: "ms", resolution: "klatt", floor_field: "durationFloor" } },
+        scalars: {
+          duration: { unit: "ms", quantum: 1, resolution: "klatt", floor_field: "durationFloor" },
+        },
       },
     },
     rules: {

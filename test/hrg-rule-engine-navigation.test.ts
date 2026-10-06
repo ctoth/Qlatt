@@ -154,6 +154,66 @@ describe("graph-native predicate navigation", () => {
     expect(utterance.getItem("p")?.get("duration")).toBe(11111);
   });
 
+  it("counts the Items a predicate holds for, up to a stopping predicate", () => {
+    const utterance = new Utterance(SCHEMA);
+    for (const [id, phoneme, stress] of [
+      ["sil0", "SIL", 0],
+      ["a", "AA", 1],
+      ["p", "P", 0],
+      ["b", "IY", 1],
+      ["k", "K", 0],
+      ["c", "UW", 0],
+      ["sil1", "SIL", 0],
+      ["d", "EH", 1],
+    ] as const) {
+      const item = utterance.createItem("segment", id);
+      item.set("phoneme", phoneme, INPUT);
+      item.set("stress", stress, INPUT);
+      item.set("duration", 0, INPUT);
+      utterance.relation("Segment").append(item, INPUT);
+    }
+    const spec = compileRuleEngineSpec({
+      predicates: {
+        is_silence: "current.phoneme == 'SIL'",
+        is_stressed: "current.stress == 1",
+      },
+      relations: {
+        Segment: {
+          type: "base",
+          features: { phoneme: [], stress: [] },
+          scalars: { duration: {} },
+        },
+      },
+      rules: {
+        count: {
+          select: { relation: "Segment", where: "current.phoneme == 'K'" },
+          define: {
+            // Stressed Items before K within the clause: AA and IY.
+            before: "count_back_pred(current, 100, 'is_silence', 'is_stressed')",
+            // After K the clause ends at the silence, so EH is not reached.
+            after: "count_ahead_pred(current, 100, 'is_silence', 'is_stressed')",
+            // A step limit stops the walk before AA.
+            limited: "count_back_pred(current, 2, 'is_silence', 'is_stressed')",
+          },
+          apply: [
+            {
+              field: "duration",
+              op: "add",
+              value: "before * 100 + after * 10 + limited",
+              tag: "navigation",
+            },
+          ],
+          citations: ["Taylor, Black & Caley 2001"],
+        },
+      },
+      phases: [{ name: "rules", rules: ["count"] }],
+    });
+
+    runGraphRuleEngine(utterance, spec);
+
+    expect(utterance.getItem("k")?.get("duration")).toBe(201);
+  });
+
   it("derives word, syllable, role, position, and span queries from shared tree identity", () => {
     const utterance = new Utterance(TREE_SCHEMA);
     const transaction = utterance.beginTransaction({

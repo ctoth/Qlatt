@@ -433,216 +433,101 @@ rules:
       - "Klatt 1982 (stress-component F0 impulse)"
 
   # --------------------------------------------------------------------------
-  # Active US male segmental F0 for the first exact word target, `cake`.
+  # Segmental F0 (Ph_drwt02.c pht0draw, 2080-2150).
   #
-  # DECtalk feeds an ordered controller-allophone stream into a separately
-  # filtered segmental path. These five declarative commands preserve the exact
-  # SI/K/EY/K/IX controller identity and duration for that word; the DSP layer
-  # owns the fixed-point state machine and timing delays.
-  # profile_points encodes [voiceless, plosive, stressed] source flags.
+  # DECtalk steps through the clause's allophones (allophons[], allodurs[]) and
+  # feeds each one's incremental target, us_f0msegtars[phone], into a separately
+  # filtered segmental path. One command is inserted here per DECtalk allophone,
+  # in order:
+  #   - the clause-initial silence,
+  #   - every phone (a stop's closure, release and aspiration are one allophone),
+  #   - the dummy vowel DECtalk appends after a clause-final stop,
+  #   - the clause-final silence.
+  # Each command carries the target, the allophone's duration in controller
+  # frames, and the three tests pht0draw makes on the phone:
+  #   profile_points = [voiceless (FVOICD minus), plosive (FPLOSV), stressed
+  #   (allofeats & FSTRESS)]. The last two are read only for a voiceless phone.
+  # The f0-filters kernel owns the fixed-point filter and its delays.
   # --------------------------------------------------------------------------
-  dectalk_segmental_k_ey_k_initial_silence:
+  dectalk_segmental_f0_initial_silence:
     kind: f0_layer
     select:
       relation: Segment
       where: >-
-        current.phoneme == 'SIL'
-        && current.word == 'cake'
-        && has(current.dummy_vowel) && current.dummy_vowel == true
-        && behind(current, 4) != null && behind(current, 4).phoneme == 'K'
+        current.phoneme != 'SIL'
+        && (prev == null || (prev.phoneme == 'SIL' && has(prev.punctuationSymbol)))
     insert:
       relation: Tilt
       layer: segmental
-      at: at_sync(behind(current, 4).sync_left)
-      value: params.policy.f0.segmental.initial_silence_target
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.segmental.targets.SIL
       duration_frames: params.policy.f0.segmental.initial_silence_frames
       profile_points: [1, 0, 0]
       tag: f0_segmental_initial_silence
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (SI target and unvoiced fast path)"
-      - "DECtalk 4.63 -lt oracle controller trace for cake. (SI duration 4 frames)"
+      - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (SI target) and :2080-2150 pht0draw"
+      - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause of 4 frames)"
 
-  dectalk_segmental_k_ey_k_initial_stop:
+  dectalk_segmental_f0_phone:
     kind: f0_layer
     select:
       relation: Segment
       where: >-
-        current.phoneme == 'K'
-        && current.word == 'cake'
-        && next != null && next.phoneme == 'K_REL'
+        current.phoneme != 'SIL'
+        && !(current.type in ['stop_release', 'stop_aspiration'])
+    define:
+      n1: next
+      n2: "ahead(current, 2)"
+      piece1: "n1 != null && n1.type in ['stop_release', 'stop_aspiration']"
+      piece2: "piece1 && n2 != null && n2.type in ['stop_release', 'stop_aspiration']"
+      allophone_ms: >-
+        current.duration + (piece1 ? n1.duration : 0) + (piece2 ? n2.duration : 0)
     insert:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.k_target
-      duration_frames: params.policy.f0.segmental.initial_k_frames
-      profile_points: [1, 1, 1]
-      tag: f0_segmental_initial_k
+      value: "get(params.policy.f0.segmental.targets, current.phoneme, 0)"
+      duration_frames: "round(allophone_ms / params.policy.f0.segmental.frame_ms)"
+      profile_points:
+        - "isTrue(current, 'voiced') ? 0 : 1"
+        - "current.type == 'stop_closure' ? 1 : 0"
+        - "get(current, 'stress', 0) > 0 ? 1 : 0"
+      tag: f0_segmental_phone
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (voiceless stressed plosive fast path)"
-      - "DECtalk 4.63 -lt oracle controller trace for cake. (initial K duration 17 frames)"
+      - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (incremental F0 target per phone)"
+      - "DECtalk 4.63 Ph_drwt02.c:2080-2150 pht0draw (allodurs[] frames; FVOICD, FPLOSV and FSTRESS tests)"
 
-  dectalk_segmental_k_ey_k_vowel:
+  dectalk_segmental_f0_dummy_vowel:
     kind: f0_layer
     select:
       relation: Segment
-      where: >-
-        current.phoneme == 'EY'
-        && current.word == 'cake'
-        && has(current.stress) && current.stress == 1
+      where: "current.phoneme == 'SIL' && isTrue(current, 'dummy_vowel')"
     insert:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.ey_target
-      duration_frames: params.policy.f0.segmental.ey_frames
-      profile_points: [0, 0, 1]
-      tag: f0_segmental_ey
-    citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (EY target and voiced slow path)"
-      - "DECtalk 4.63 -lt oracle controller trace for cake. (EY duration 37 frames)"
-
-  dectalk_segmental_k_ey_k_final_stop:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'K'
-        && current.word == 'cake'
-        && next != null && next.phoneme == 'SIL'
-        && has(next.dummy_vowel) && next.dummy_vowel == true
-    insert:
-      relation: Tilt
-      layer: segmental
-      at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.k_target
-      duration_frames: params.policy.f0.segmental.final_k_frames
-      profile_points: [1, 1, 0]
-      tag: f0_segmental_final_k
-    citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (voiceless unstressed plosive fast path)"
-      - "DECtalk 4.63 -lt oracle controller trace for cake. (final K duration 14 frames)"
-
-  dectalk_segmental_k_ey_k_dummy_ix:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'SIL'
-        && current.word == 'cake'
-        && has(current.dummy_vowel) && current.dummy_vowel == true
-    insert:
-      relation: Tilt
-      layer: segmental
-      at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.ix_target
-      duration_frames: params.policy.f0.segmental.dummy_ix_frames
+      value: params.policy.f0.segmental.targets.IX
+      duration_frames: "round(current.duration / params.policy.f0.segmental.frame_ms)"
       profile_points: [0, 0, 0]
-      tag: f0_segmental_dummy_ix
+      tag: f0_segmental_dummy_vowel
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (IX target and voiced slow path)"
-      - "DECtalk 4.63 -lt oracle controller trace for cake. (dummy IX duration 6 frames)"
+      - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (IX target) and :2080-2150 pht0draw"
 
-  dectalk_segmental_k_ey_k_terminal_silence:
+  dectalk_segmental_f0_final_silence:
     kind: f0_layer
     select:
       relation: Segment
-      where: >-
-        current.phoneme == 'SIL'
-        && has(current.punctuationSymbol) && current.punctuationSymbol == '.'
-        && prev != null && prev.word == 'cake'
-        && has(prev.dummy_vowel) && prev.dummy_vowel == true
+      where: "current.phoneme == 'SIL' && has(current.punctuationSymbol)"
     insert:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.initial_silence_target
-      duration_frames: params.policy.f0.segmental.terminal_silence_frames
+      value: params.policy.f0.segmental.targets.SIL
+      duration_frames: "round(current.duration / params.policy.f0.segmental.frame_ms)"
       profile_points: [1, 0, 0]
       tag: f0_segmental_terminal_silence
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (terminal GEN_SIL target 50 and voiceless fast path)"
-      - "DECtalk 4.63 -lt oracle controller trace for cake. (terminal GEN_SIL duration 94 frames)"
-
-  # Active US male segmental F0 controller stream for the exact `the` target.
-  # The first two commands are coincident on the speech clock: initialized SI
-  # establishes the filter state before pht0draw() advances to DH.
-  dectalk_segmental_dh_ax_initial_silence:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'DH'
-        && current.word == 'the'
-        && next != null && next.phoneme == 'AX'
-    insert:
-      relation: Tilt
-      layer: segmental
-      at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.initial_silence_target
-      duration_frames: params.policy.f0.segmental.the_initial_silence_frames
-      profile_points: [1, 0, 0]
-      tag: f0_segmental_initial_silence
-    citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (SI target 50 and initialized segmental filter state)"
-      - "DECtalk 4.63 -lt oracle controller trace for the. (SI duration 4 frames)"
-
-  dectalk_segmental_dh_ax_initial_consonant:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'DH'
-        && current.word == 'the'
-        && next != null && next.phoneme == 'AX'
-    insert:
-      relation: Tilt
-      layer: segmental
-      at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.dh_target
-      duration_frames: params.policy.f0.segmental.the_dh_frames
-      profile_points: [0, 0, 0]
-      tag: f0_segmental_dh
-    citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (US DH target 0 and voiced slow path)"
-      - "DECtalk 4.63 -lt oracle controller trace for the. (DH duration 10 frames)"
-
-  dectalk_segmental_dh_ax_vowel:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: current.phoneme == 'AX' && current.word == 'the'
-    insert:
-      relation: Tilt
-      layer: segmental
-      at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.ax_target
-      duration_frames: params.policy.f0.segmental.the_ax_frames
-      profile_points: [0, 0, 1]
-      tag: f0_segmental_ax
-    citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (US AX target 30 and voiced slow path)"
-      - "DECtalk 4.63 -lt oracle controller trace for the. (AX duration 32 frames)"
-
-  dectalk_segmental_dh_ax_terminal_silence:
-    kind: f0_layer
-    select:
-      relation: Segment
-      where: >-
-        current.phoneme == 'SIL'
-        && has(current.punctuationSymbol) && current.punctuationSymbol == '.'
-        && prev != null && prev.word == 'the'
-    insert:
-      relation: Tilt
-      layer: segmental
-      at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.initial_silence_target
-      duration_frames: params.policy.f0.segmental.the_terminal_silence_frames
-      profile_points: [1, 0, 0]
-      tag: f0_segmental_terminal_silence
-    citations:
-      - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw (terminal GEN_SIL target 50 and voiceless fast path)"
-      - "DECtalk 4.63 -lt oracle controller trace for the. (terminal GEN_SIL duration 94 frames)"
+      - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (SI target) and :2080-2150 pht0draw"
 
   # --------------------------------------------------------------------------
   # Rule 6: Connected-speech source contour (Fant 1997)

@@ -342,6 +342,47 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
     }
     return null;
   };
+  /**
+   * Walk from the source (exclusive) until `stopPredicate` holds or the
+   * relation ends, at most `maxSteps` items, and count the items on the way
+   * for which `countPredicate` holds. The stopping item is not counted.
+   */
+  const countScan = (
+    sourceValue: unknown,
+    maxStepsValue: unknown,
+    stopPredicate: unknown,
+    countPredicate: unknown,
+    direction: -1 | 1,
+  ): number => {
+    const source = resolveItem(sourceValue);
+    const maxSteps = Math.trunc(Number(maxStepsValue));
+    const sourceIndex = source ? items.indexOf(source) : -1;
+    if (
+      sourceIndex < 0 ||
+      !Number.isFinite(maxSteps) ||
+      typeof stopPredicate !== "string" ||
+      typeof countPredicate !== "string"
+    )
+      return 0;
+    let count = 0;
+    for (let offsetIndex = 1; offsetIndex <= maxSteps; offsetIndex += 1) {
+      const candidateIndex = sourceIndex + direction * offsetIndex;
+      const candidate = items[candidateIndex];
+      if (!candidate) break;
+      if (relationName) {
+        const write = utterance.relation(relationName).node(candidate)?.write;
+        if (write) transaction.dependOn(write.decisionId);
+      }
+      const candidateContext = recurse(candidateIndex, {
+        source: view(source),
+        candidate: view(candidate),
+        scan_offset: direction * offsetIndex,
+      });
+      if (conditionMatches({ predicate: stopPredicate }, candidateContext, predicates)) break;
+      if (conditionMatches({ predicate: countPredicate }, candidateContext, predicates)) count += 1;
+    }
+    return count;
+  };
   const relationItems = (nameValue: unknown): Item[] => {
     if (typeof nameValue !== "string") return [];
     const relation = utterance.getRelation(nameValue);
@@ -568,6 +609,7 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
         return view(candidate);
       },
       look_back_where: (source, maxSteps, expression) => scan(source, maxSteps, expression, -1),
+      look_ahead_where: (source, maxSteps, expression) => scan(source, maxSteps, expression, 1),
       look_back_pred: (source, maxSteps, predicateName) =>
         typeof predicateName === "string"
           ? scan(source, maxSteps, { predicate: predicateName }, -1)
@@ -576,6 +618,10 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
         typeof predicateName === "string"
           ? scan(source, maxSteps, { predicate: predicateName }, 1)
           : null,
+      count_back_pred: (source, maxSteps, stopPredicate, countPredicate) =>
+        countScan(source, maxSteps, stopPredicate, countPredicate, -1),
+      count_ahead_pred: (source, maxSteps, stopPredicate, countPredicate) =>
+        countScan(source, maxSteps, stopPredicate, countPredicate, 1),
       find_within_word: findWithinWord,
       path: navigatePath,
       span_ms: spanMs,
@@ -989,8 +1035,14 @@ function applyEffects(
           : null;
     const mulResolution =
       typeof effect.resolution === "string" ? effect.resolution.toLowerCase() : resolution;
-    const round = scalarConfig?.unit === "ms";
-    const roundValue = (value: number): number => (round ? Math.round(value) : value);
+    // A scalar that declares `quantum` keeps every resolved value on a
+    // multiple of it; one that does not keeps the value its rules computed.
+    const quantum =
+      typeof scalarConfig?.quantum === "number" && scalarConfig.quantum > 0
+        ? scalarConfig.quantum
+        : null;
+    const roundValue = (value: number): number =>
+      quantum === null ? value : Math.round(value / quantum) * quantum;
     let floor = Number.NEGATIVE_INFINITY;
     let fallbackObservation: ScalarObservation | undefined;
     if (resolution === "klatt" && scalarConfig) {
@@ -1643,7 +1695,15 @@ function applyPointActions(
         match.transaction.set(point, "duration_frames", evaluate(spec.duration_frames, context));
       }
       if (Array.isArray(spec.profile_points)) {
-        match.transaction.set(point, "profile_points", spec.profile_points);
+        // An entry is a number or, like `value` and `duration_frames`, an
+        // expression over the matched item.
+        match.transaction.set(
+          point,
+          "profile_points",
+          spec.profile_points.map((entry) =>
+            typeof entry === "string" ? evaluate(entry, context) : entry,
+          ),
+        );
       }
     }
     match.transaction.append(relationName, point);

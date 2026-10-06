@@ -1,801 +1,821 @@
 version: v1
+# DECtalk 4.63's US duration rules, p_us_tim.c:157-941, one rule here per
+# branch of the C, in source order.
+#
+# The C keeps four numbers per allophone and this file keeps the same four on
+# the Segment that stands for the allophone (a stop is its closure):
+#
+#   timing_percent          prcnt   multiplier, 128 = 100%
+#   timing_added_frames     deldur  frames added after the multiplier
+#   timing_minimum_frames   durmin  the part the multiplier cannot shorten
+#   timing_inherent_frames  durinh  from the ROM, never changed
+#
+# and the result is ((prcnt * (durinh - durmin)) >> 7) + durmin + deldur frames.
+# A fraction NxxPRCNT is a number out of 16384 and mlsh1 multiplies by one,
+# rounding down; a right shift is a floor. Nothing here is in milliseconds
+# until the last two rules.
+#
+# The reading of the C that these rules transcribe is
+# scripts/oracle/replay-dectalk-durations.ts, which reproduces every
+# intermediate state DECtalk records for the oracle corpora.
+# scripts/oracle/compare-durations.ts compares this file's result with DECtalk.
+#
+# Not ported: the FHAT_ENDS branch of Rule 7 (p_us_tim.c:497-508), which needs
+# the hat pattern from the intonation rules.
 rules:
-  # ---------------------------------------------------------------------------
-  # Fallback primary stress retargeting
-  # DECtalk promotes the first vowel of a one-word phrase to primary stress when
-  # no lexical primary stress is present.  The stress mark must be applied before
-  # duration resolution so the primary-stress inventory target contributes its
-  # inherent/minimum durations and acoustic params.
-  # ---------------------------------------------------------------------------
-  dectalk_single_word_fallback_primary_retarget:
-    kind: scalar
-    select:
-      relation: Segment
-      where: "current.type == 'vowel' && word_count() == 1"
-    define:
-      prev_primary_or_boundary: >-
-        look_back_where(current, 100,
-          '(candidate.type == "vowel" && has(candidate.stress) && candidate.stress == 1) || candidate.phoneme == "SIL"')
-      next_primary_or_boundary: "look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')"
-      prior_vowel_in_word: >-
-        find_within_word(current,
-          "current.type == 'vowel'",
-          "behind")
-      no_primary_in_clause: >-
-        (prev_primary_or_boundary == null || prev_primary_or_boundary.phoneme == 'SIL')
-        && (next_primary_or_boundary == null || next_primary_or_boundary.phoneme == 'SIL')
-      primary_target: "target(current.phoneme + '1')"
-    constraint: "no_primary_in_clause && prior_vowel_in_word == null && !word_has_metrical_stress()"
-    apply:
-      - field: stress
-        op: set
-        value: 1
-        tag: fallback_primary_stress
-      - for_each_field: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO]
-        field: "{field}"
-        op: set
-        value: "primary_target.{field}"
-        tag: fallback_primary_stress
-      - field: duration
-        op: set
-        value: primary_target.duration
-        tag: fallback_primary_stress
-      - field: inherentDuration
-        op: set
-        value: primary_target.inherentDuration
-        tag: fallback_primary_stress
-      - field: minimumDuration
-        op: set
-        value: primary_target.minimumDuration
-        tag: fallback_primary_stress
-    citations:
-      - "DECtalk 4.63 ph_sort2.c find_syll_to_stress (no primary stress: stress first vowel of last word)"
-
-  # ---------------------------------------------------------------------------
-  # Rule 1: Silence / Pause durations
-  # DECtalk sets pause length based on punctuation type.
-  # ---------------------------------------------------------------------------
+  # Rule 1 (p_us_tim.c:225-277). The pause at a clause boundary. The values are
+  # DECtalk's own at the corpus speaking rate (nfcomma and nfperiod scaled by
+  # sprat1), in frames.
   dectalk_pause_duration:
     kind: scalar
     select:
       relation: Segment
-      where: current.phoneme == 'SIL' && has(current.punctuationSymbol)
+      where: { predicate: is_clause_silence }
     apply:
       - field: duration
         op: set
         value: >-
-          current.punctuationSymbol == ',' ? params.policy.duration.pause_comma_ms :
-          (current.punctuationSymbol in ['.', '?', '!'] ? params.policy.duration.pause_period_ms :
-          (current.punctuationSymbol in [';', ':'] ? params.policy.duration.pause_comma_ms :
-          params.policy.duration.pause_clause_initial_ms))
+          (current.punctuationSymbol in [',', ';', ':']
+            ? params.policy.timing.pause_frames.comma
+            : params.policy.timing.pause_frames.period) * params.policy.timing.frame_ms
         tag: boundary
     citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 1 (silence/pause durations)"
+      - "DECtalk 4.63 p_us_tim.c:225-277 Rule 1 (pause durations depend on syntax)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 2: Clause-final lengthening
-  # Sonorants and vowels at phrase boundaries get additive lengthening.
-  # Voiced obstruents get less. Plosives get none.
-  # ---------------------------------------------------------------------------
-  dectalk_clause_final_lengthening:
+  # p_us_tim.c:209-218. Inherent and minimum duration in frames, and the start
+  # of the state. clause_position is nphon (the clause's first silence is 0);
+  # clause_length is nallotot, which counts both silences.
+  dectalk_timing_setup:
     kind: scalar
     select:
       relation: Segment
-      where: current.phoneme != 'SIL' && !(current.type in ['stop_release', 'stop_aspiration'])
+      where: { predicate: is_dectalk_phone }
     define:
-      next_syllabic_or_boundary: >-
-        look_ahead_pred(current, 100, 'is_syllabic_or_boundary')
-      at_boundary: >-
-        next_syllabic_or_boundary == null
-        || next_syllabic_or_boundary.phoneme == 'SIL'
-      is_obstruent: >-
-        current.type in ['fricative', 'stop_closure', 'affricate']
-      is_plosive: current.type == 'stop_closure'
-      is_voiced_obstruent: >-
-        is_obstruent && isTrue(current, 'voiced')
-    constraint: at_boundary
+      name: dectalk_name(current)
+      position: "1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
+      following: "count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
     apply:
-      - field: duration
-        op: add
-        dispatch:
-          - when: is_plosive
-            value: 0
-          - when: is_voiced_obstruent
-            value: params.policy.duration.clause_final_voiced_obstruent_ms
-          - default: params.policy.duration.clause_final_lengthening_ms
+      - field: timing_inherent_frames
+        op: set
+        value: "floor((get(params.policy.timing.inherent_ms, name, 0.0) * 10.0 + 50.0) / 64.0)"
+        tag: timing_setup
+      - field: timing_minimum_frames
+        op: set
+        value: "floor((get(params.policy.timing.minimum_ms, name, 0.0) * 10.0 + 50.0) / 64.0)"
+        tag: timing_setup
+      - field: timing_percent
+        op: set
+        value: "128.0"
+        tag: timing_setup
+      - field: timing_added_frames
+        op: set
+        value: "0.0"
+        tag: timing_setup
+      - field: timing_factor
+        op: set
+        value: params.policy.timing.fraction.one
+        tag: timing_setup
+      - field: clause_position
+        op: set
+        value: position
+        tag: timing_setup
+      - field: clause_length
+        op: set
+        value: position + following + 2.0
+        tag: timing_setup
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:209-218 (durinh, durmin in frames; deldur 0; prcnt 128)"
+      - "DECtalk 4.63 p_us_rom.h us_inhdr, us_mindur"
+
+  # Rule 2 (281-314): lengthening in the clause-final rime.
+  dectalk_timing_2_clause_final_rime:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: &timing
+      name: dectalk_name(current)
+      nx: dectalk_next(current)
+      la: dectalk_prev(current)
+      nx2: dectalk_next(nx)
+      nx_name: dectalk_name(nx)
+      la_name: dectalk_name(la)
+      syllabic: dectalk_has(current, 'syllabic')
+      stress: dectalk_stress(current)
+      # FSTRESS_1 is the low bit: primary stress (1) and emphasis (3).
+      primary: "stress == 1.0 || stress == 3.0"
+      bou: dectalk_boundary(current)
+      winitc: isTrue(current, 'word_initial_consonant')
+      # Only a syllabic carries FTYPESYL; every other phone reads as FMONOSYL.
+      typesyl: "syllabic ? get(current, 'syllable_position_in_word', 'only') : 'only'"
+      F: params.policy.timing.fraction
+      NF: params.policy.timing.frames
+      B: params.policy.timing.boundary
+      prcnt: "get(current, 'timing_percent', 128.0)"
+      deldur: "get(current, 'timing_added_frames', 0.0)"
+      durmin: "get(current, 'timing_minimum_frames', 0.0)"
+      durinh: "get(current, 'timing_inherent_frames', 0.0)"
+      length: "get(current, 'clause_length', 0.0)"
+      # False once Rule 13 has fixed the duration (its `goto` past the rest).
+      open: "get(current, 'timing_fixed_frames', null) == null"
+      # --- Rule 3 ---
+      fast: params.policy.timing.speaking_rate_wpm > 160.0
+      # --- Rule 6 ---
+      final_fricative: >-
+        dectalk_has(current, 'obstruent') && !dectalk_has(current, 'plosive') && bou >= B.word
+      # --- Rule 8: the nearest earlier phone that sets or clears emphasis ---
+      decided_by: >-
+        look_back_where(current, 100,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || get(candidate, "stress", 0.0) == 3.0 || isTrue(candidate, "word_initial_consonant") || candidate.type == "vowel" || candidate.phoneme in ["EL", "EN"]')
+      emphasised: >-
+        stress == 3.0
+        || (!winitc && !syllabic && decided_by != null && dectalk_stress(decided_by) == 3.0)
+      # --- Rule 9 ---
+      sonorant_before_obstruent: >-
+        name in ['RX', 'LX', 'M', 'N', 'NX'] && stress == 0.0 && !winitc
+        && dectalk_has(nx, 'obstruent')
+      # Line 539 reads phone_feature(pDph_t, nphon+1): the allophone's POSITION
+      # in the clause used as if it were an allophone code. This is the feature
+      # of the allophone whose code equals clause_position + 1.
+      code_at_position: "get(current, 'clause_position', 0.0) + 1.0"
+      position_reads_syllabic: code_at_position in params.policy.timing.syllabic_codes
+      percent_in: "position_reads_syllabic ? dectalk_mlsh1(prcnt, F.p70) : prcnt"
+      # The next allophone belongs to this syllable's rime.
+      next_in_rime: >-
+        !dectalk_has(nx, 'syllabic') && dectalk_stress(nx) == 0.0
+        && !isTrue(nx, 'word_initial_consonant')
+      # A sonorant consonant with an obstruent after it: look at the obstruent.
+      through_sonorant: >-
+        next_in_rime && nx_name in ['RX', 'LX', 'M', 'N', 'NX']
+        && dectalk_has(nx2, 'obstruent') && dectalk_stress(nx2) == 0.0
+        && !isTrue(nx2, 'word_initial_consonant')
+      posvoc: "through_sonorant ? nx2 : nx"
+      posvoc_name: dectalk_name(posvoc)
+      has_posvoc: next_in_rime && posvoc_name != 'SIL'
+      before_voiceless: "has_posvoc && !dectalk_has(posvoc, 'voiced')"
+      before_voiced_obstruent: >-
+        has_posvoc && dectalk_has(posvoc, 'voiced') && dectalk_has(posvoc, 'obstruent')
+        && name != 'EN'
+      before_nasal: >-
+        has_posvoc && dectalk_has(posvoc, 'voiced') && !before_voiced_obstruent
+        && dectalk_has(posvoc, 'nasal')
+      factor_by_context: >-
+        before_voiceless
+          ? (dectalk_has(posvoc, 'plosive') || posvoc_name == 'CH' ? F.p70 : F.p80)
+          : (before_voiced_obstruent ? F.p120 : (before_nasal ? F.p85 : F.one))
+      added_by_context: >-
+        before_voiceless ? deldur - floor(deldur / 2.0)
+        : (before_voiced_obstruent && !dectalk_has(posvoc, 'plosive') && posvoc_name != 'DX' && syllabic
+            ? deldur + NF.ms25 : deldur)
+      factor_non_final: >-
+        bou < B.vp || through_sonorant ? F.half + floor(factor_by_context / 2.0) : factor_by_context
+      # [n] before [t] in the same syllable. The "not medial" test of the C is a
+      # single bit (FMEDIALSYL) that the final-syllable value also has, so it
+      # holds for the syllabic of a monosyllable or of a first syllable.
+      n_before_t: >-
+        name == 'N' && nx_name == 'T' && dectalk_stress(nx) == 0.0
+        && !isTrue(nx, 'word_initial_consonant')
+      t_before_early_syllabic: >-
+        dectalk_has(nx2, 'syllabic')
+        && get(nx2, 'syllable_position_in_word', 'only') in ['only', 'initial', 'first']
+      factor_9: >-
+        n_before_t ? (t_before_early_syllabic ? F.p70 : F.p10) : factor_non_final
+      # --- Rule 13, first consonant. The multiplier starts as whatever Rule 9
+      # left (timing_factor); the C reuses the variable without resetting it.
+      carried: "get(current, 'timing_factor', F.one)"
+      not_two_plosives: "!dectalk_has(nx, 'plosive') || !dectalk_has(current, 'plosive')"
+      nasal_before_word: "dectalk_has(current, 'nasal') && isTrue(nx, 'word_initial_consonant')"
+      s_or_th: "name in ['S', 'TH']"
+      factor_13_first: >-
+        s_or_th && dectalk_has(nx, 'plosive') ? F.half
+        : (nasal_before_word ? F.p150 : (not_two_plosives ? F.p70 : carried))
+      before_sh: "s_or_th && nx_name == 'SH'"
+      # --- Rule 13, second consonant ---
+      plosive: dectalk_has(current, 'plosive')
+      factor_13_second: >-
+        plosive && dectalk_has(la, 'nasal') && stress == 0.0 ? F.p10
+        : (plosive && la_name == 'S' ? F.p60 : F.p70)
+      # --- Final duration ---
+      computed: "floor(prcnt * (durinh - durmin) / 128.0) + durmin + deldur"
+      positive: "computed < 0.0 ? 1.0 : computed"
+      capped: >-
+        name == 'HX' && positive > params.policy.timing.hx_max_frames
+          ? params.policy.timing.hx_max_frames : positive
+      # --- Rule 2 ---
+      base: >-
+        dectalk_has(current, 'plosive') ? 0.0
+        : (dectalk_has(current, 'voiced') && dectalk_has(current, 'obstruent') ? NF.ms20 : NF.ms40)
+      before_voiceless_obstruent: >-
+        name in ['RX', 'LX'] && dectalk_has(nx, 'obstruent') && !dectalk_has(nx, 'voiced')
+      shaped: "before_voiceless_obstruent ? NF.ms15 : base"
+      short_clause: "length < 10.0 && syllabic && stress != 0.0"
+      lengthened: "short_clause ? shaped + NF.ms30 - floor(length / 2.0) : shaped"
+    constraint: bou >= B.comma
+    apply:
+      - field: timing_added_frames
+        op: set
+        value: "dectalk_has(nx, 'son1') ? lengthened - NF.ms20 : lengthened"
         tag: clause_final
     citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 2 (clause-final lengthening)"
-      - "DECtalk 4.63 ph_defs.h NF40MS=38ms sonorant, NF20MS=19ms voiced obstruent"
+      - "DECtalk 4.63 p_us_tim.c:281-314 Rule 2 (lengthening of segments in clause-final rime)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 3: Non-phrase-final syllabic shortening
-  # Vowels not at a phrase boundary are shortened by 0.70.
-  # DECtalk traces for monosyllables such as "dog." do not apply this shortening
-  # to the only vowel before a word-final consonant when that word is phrase-final;
-  # Rule 4's monosyllable branch is the controlling stress-duration rule there.
-  # In multiword traces, the only vowel of a non-final monosyllabic word is still
-  # shortened by Rule 3.
-  # ---------------------------------------------------------------------------
-  dectalk_non_final_shortening:
+  # Rule 3 (316-330): a syllabic that is not phrase-final.
+  dectalk_timing_3_non_phrase_final_syllabic:
     kind: scalar
     select:
       relation: Segment
-      where: current.type == 'vowel'
-    define:
-      "n": next
-      a1: "ahead(current, 1)"
-      # These five were written as ahead(current, 2..6), but ahead() ignored an
-      # integer distance until the engine fix, so this rule has only ever seen
-      # the next phone, and its conditions were fitted to DECtalk traces in
-      # that state. They are pinned to that distance so the engine fix does not
-      # move DECtalk durations; the literal p_us_tim.c port replaces this rule.
-      a2: "ahead(current, 1)"
-      a3: "ahead(current, 1)"
-      a4: "ahead(current, 1)"
-      a5: "ahead(current, 1)"
-      a6: "ahead(current, 1)"
-      at_boundary: "n == null ? true : n.phoneme == 'SIL'"
-      syll_pos: "syllable_position_in_word()"
-      same_current_word: "has(current.word)"
-      later_word_before_boundary: >-
-        same_current_word && (
-        (a1 != null && a1.phoneme != 'SIL' && has(a1.word) && a1.word != current.word) ||
-        (a2 != null && a2.phoneme != 'SIL' && has(a2.word) && a2.word != current.word) ||
-        (a3 != null && a3.phoneme != 'SIL' && has(a3.word) && a3.word != current.word) ||
-        (a4 != null && a4.phoneme != 'SIL' && has(a4.word) && a4.word != current.word) ||
-        (a5 != null && a5.phoneme != 'SIL' && has(a5.word) && a5.word != current.word) ||
-        (a6 != null && a6.phoneme != 'SIL' && has(a6.word) && a6.word != current.word))
-    constraint: "!at_boundary && (syll_pos != 'only' || later_word_before_boundary)"
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "syllabic && ((bou < B.vp && fast) || bou < B.pp)"
     apply:
-      - field: duration
-        op: mul
-        dispatch:
-          - when: has(current.low) && current.low == true
-            value: params.policy.duration.non_final_low_vowel_shortening
-          - default: params.policy.duration.non_final_shortening
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(F.p70, prcnt)
         tag: non_final
     citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 3 (non-phrase-final shortening, N70PRCNT)"
-      - "DECtalk 4.63 -lt oracle trace for 'dog.' (only vowel is not Rule-3 shortened before final /g/)"
-      - "DECtalk 4.63 -lt oracle trace for 'Thin thieves thought that they thrilled.' (only vowels in non-final monosyllabic words are Rule-3 shortened)"
-      - "DECtalk 4.63 -lt oracle trace for 'Thin thieves thought that they thrilled.' (non-final low vowels /AO AE/ shorten more strongly)"
+      - "DECtalk 4.63 p_us_tim.c:316-330 Rule 3 (shortening of non-phrase-final syllabics)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 7 durmin adjustment: unstressed non-obstruents reduce their minimum
-  # duration before DECtalk's final durxx = prcnt*(durinh-durmin)+durmin formula.
-  # This must run before duration scalar multipliers capture the Qlatt floor.
-  # ---------------------------------------------------------------------------
-  dectalk_unstressed_nonobstruent_floor_adjustment:
+  # Rule 3, second part (332-338): a nasal after a different nasal.
+  dectalk_timing_3_adjacent_nasals:
     kind: scalar
     select:
       relation: Segment
-      where: "current.phoneme != 'SIL' && has(current.minimumDuration) && has(current.inherentDuration)"
-    define:
-      stress_val: "has(current.stress) ? current.stress : 0"
-      is_obstruent: "current.type in ['fricative', 'stop_closure', 'affricate']"
-      compressible: current.minimumDuration < current.inherentDuration
-    constraint: "!is_obstruent && compressible && stress_val != 1"
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "dectalk_has(current, 'nasal') && dectalk_has(la, 'nasal') && name != la_name"
     apply:
-      - field: minimumDuration
+      - field: timing_added_frames
         op: set
-        dispatch:
-          - when: stress_val == params.policy.duration.stress_secondary_level
-            value: max([params.policy.duration.unstressed_min_duration_floor_ms, current.minimumDuration * params.policy.duration.unstressed_secondary_min_duration_factor])
-          - default: max([params.policy.duration.unstressed_min_duration_floor_ms, current.minimumDuration * params.policy.duration.unstressed_no_stress_min_duration_factor])
-        tag: unstressed_floor
+        value: deldur + NF.ms30
+        tag: adjacent_nasals
     citations:
-      - "DECtalk 4.63 p_us_tim.c:432-447 Rule 7 (unstressed non-obstruent durmin adjustment)"
+      - "DECtalk 4.63 p_us_tim.c:332-338 (lengthen a nasal after a different nasal)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 4 (monosyllable branch): stress-based shortening of MONOSYLLABLE vowels.
-  # DECtalk p_us_tim.c:355-373 -- the Rule-4 stress shortening applies ONLY to
-  # monosyllabic words ((FTYPESYL)==FMONOSYL == syllable_position_in_word()=='only').
-  # Primary-stressed monosyllable: no change (the N90PRCNT arg is dead code, the
-  # mlsh1 runs only inside the FSTRESS_1 IS_MINUS block).  Secondary: x0.85.
-  # Unstressed: x0.70.  Polysyllable vowels are handled by Rule 4 (non-monosyllable
-  # branch) + Rule 5 below, not here.
-  # ---------------------------------------------------------------------------
-  dectalk_monosyllable_stress_shortening:
+  # Rule 4 (349-373): the syllabic of a monosyllable without primary stress.
+  # A primary-stressed one is left alone: the C loads N90PRCNT and never uses it.
+  dectalk_timing_4_monosyllable_stress:
     kind: scalar
     select:
       relation: Segment
-      where: current.type == 'vowel' && has(current.syllable_position_in_word)
-    define:
-      stress_val: "has(current.stress) ? current.stress : 0"
-      is_monosyllable: current.syllable_position_in_word == 'only'
-    constraint: "is_monosyllable && stress_val != 1"
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "syllabic && typesyl == 'only' && !primary"
     apply:
-      - field: duration
-        op: mul
-        dispatch:
-          - when: stress_val == params.policy.duration.stress_secondary_level
-            value: params.policy.duration.monosyllable_secondary_shortening
-          - default: params.policy.duration.monosyllable_unstressed_shortening
+      - field: timing_percent
+        op: set
+        value: "dectalk_mlsh1(stress == 0.0 ? F.p70 : F.p85, prcnt)"
         tag: stress
     citations:
-      - "DECtalk 4.63 p_us_tim.c:355-373 Rule 4 (monosyllable stress shortening)"
-      - "DECtalk 4.63 ph_sort2.c:69-111 init_med_final (FMONOSYL classification)"
-      - "DECtalk 4.63 ph_defs.h N85PRCNT=0.85 secondary, N70PRCNT=0.70 unstressed"
+      - "DECtalk 4.63 p_us_tim.c:349-373 Rule 4 (monosyllable: secondary N85PRCNT, unstressed N70PRCNT)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 4 (non-monosyllable branch): shorten polysyllable vowels that are NOT
-  # the final segment before a word boundary.
-  # DECtalk p_us_tim.c:374-394 -- non-FMONOSYL && (strucbou < FWBNEXT), i.e. the
-  # vowel is in a polysyllabic word and is not the last segment of that word.
-  # All of FFIRSTSYL/FMEDIALSYL/FFINALSYL map to N85PRCNT (0.85) in this build.
-  # "Not the last segment of the word" is expressed via same-word-as-next (the
-  # port's Rule 6 uses the same is_word_final test).
-  # ---------------------------------------------------------------------------
-  dectalk_polysyllable_nonfinal_shortening:
+  # Rule 4 (374-394): a syllabic of a polysyllable that does not end its word.
+  dectalk_timing_4_polysyllable_non_word_final:
     kind: scalar
     select:
       relation: Segment
-      where: current.type == 'vowel' && has(current.syllable_position_in_word)
-    define:
-      "n": next
-      is_polysyllable: current.syllable_position_in_word != 'only'
-      same_word_as_next: >-
-        n == null ? false :
-        dectalk_same_word(n, current)
-      is_word_final_segment: "!same_word_as_next"
-    constraint: "is_polysyllable && !is_word_final_segment"
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "syllabic && typesyl != 'only' && bou < B.word"
     apply:
-      - field: duration
-        op: mul
-        value: params.policy.duration.polysyllable_nonfinal_shortening
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(F.p85, prcnt)
         tag: medial_syllable
     citations:
-      - "DECtalk 4.63 p_us_tim.c:374-394 Rule 4 (non-monosyllable, non-word-final shortening, N85PRCNT)"
-      - "DECtalk 4.63 ph_sort2.c:69-111 init_med_final (FFIRSTSYL/FMEDIALSYL/FFINALSYL classification)"
+      - "DECtalk 4.63 p_us_tim.c:374-394 Rule 4 (polysyllable, boundary below FWBNEXT: N85PRCNT)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 5: Polysyllabic word shortening (vowels in multi-syllable words *= 0.80).
-  # DECtalk p_us_tim.c:398-406 -- (FTYPESYL) != FMONOSYL, i.e. the word has more
-  # than one syllable.  Uses the real syllabification (syllable_position_in_word()
-  # != 'only') instead of the previous look_back_where(...) vowel-in-same-word
-  # approximation.
-  # ---------------------------------------------------------------------------
-  dectalk_polysyllabic_shortening:
+  # Rule 5 (396-406): every syllabic of a polysyllable.
+  dectalk_timing_5_polysyllable:
     kind: scalar
     select:
       relation: Segment
-      where: current.type == 'vowel' && has(current.syllable_position_in_word)
-    constraint: current.syllable_position_in_word != 'only'
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "syllabic && typesyl != 'only'"
     apply:
-      - field: duration
-        op: mul
-        value: params.policy.duration.polysyllabic_shortening
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(prcnt, F.p80)
         tag: polysyllabic
     citations:
-      - "DECtalk 4.63 p_us_tim.c:398-406 Rule 5 (polysyllabic shortening, N80PRCNT)"
-      - "DECtalk 4.63 ph_sort2.c:69-111 init_med_final (FMONOSYL classification)"
+      - "DECtalk 4.63 p_us_tim.c:396-406 Rule 5 (polysyllabic shortening, N80PRCNT)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 6: Non-word-initial consonant shortening
-  # Consonants that are not word-initial are shortened.
-  # Word-final obstruents (non-plosive) get additive lengthening instead.
-  # ---------------------------------------------------------------------------
-  dectalk_non_initial_consonant_shortening:
+  # Rule 6 (408-427): a consonant that is not word-initial. A fricative or
+  # affricate that ends its word is lengthened instead of shortened.
+  dectalk_timing_6_word_final_fricative:
     kind: scalar
     select:
       relation: Segment
-      where: >-
-        current.type in ['fricative', 'stop_closure', 'affricate', 'nasal', 'liquid', 'glide']
-    define:
-      same_word_as_prev: >-
-        prev == null ? false :
-        dectalk_same_word(prev, current)
-      is_word_initial: "!same_word_as_prev"
-      "n": next
-      same_word_as_next: >-
-        n == null ? false :
-        dectalk_same_word(n, current)
-      is_word_final: "!same_word_as_next"
-      is_obstruent_non_plosive: >-
-        current.type in ['fricative', 'affricate']
-      is_word_final_voiceless_fricative: >-
-        is_word_final && current.type == 'fricative'
-        && isTrue(current, 'voiceless')
-    constraint: "!is_word_initial"
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "!syllabic && !winitc && final_fricative"
     apply:
-      - field: duration
-        op: mul
-        dispatch:
-          - when: is_word_final && is_obstruent_non_plosive
-            value: 1.0
-          - default: params.policy.duration.non_initial_consonant_shortening
-        tag: consonant_position
-      - field: duration
-        op: add
-        dispatch:
-          - when: is_word_final_voiceless_fricative
-            value: params.policy.duration.word_final_voiceless_fricative_lengthening_ms
-          - when: is_word_final && is_obstruent_non_plosive
-            value: params.policy.duration.word_final_obstruent_lengthening_ms
-          - default: 0
+      - field: timing_added_frames
+        op: set
+        value: deldur + NF.ms20
         tag: word_final_obstruent
     citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 6 (non-word-initial consonant shortening)"
-      - "DECtalk 4.63 -lt oracle trace for 'this.' (word-final voiceless fricative /s/ needs trace-derived extra lengthening)"
+      - "DECtalk 4.63 p_us_tim.c:408-420 Rule 6 (word-final non-plosive obstruent: +NF20MS)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 7: Unstressed segment shortening
-  # Non-primary-stressed segments get additional shortening.
-  # DECtalk p_us_tim.c:429-495.  For an unstressed SYLLABIC segment in a word-
-  # MEDIAL syllable ((FTYPESYL)==FMEDIALSYL, L452-456) the multiplier is prcnt>>1
-  # (== x0.5); a non-medial unstressed syllabic gets N70PRCNT (x0.70, L459-463).
-  # Glides (w/y/r/l, L479-483) get prcnt>>1 (x0.5); other consonants N70PRCNT.
-  # The durmin (minimum-duration) halving for unstressed non-obstruents
-  # (L432-447) is a separate floor adjustment; see dectalk_unstressed_floor_*.
-  # ---------------------------------------------------------------------------
-  dectalk_unstressed_shortening:
+  dectalk_timing_6_non_word_initial_consonant:
     kind: scalar
     select:
       relation: Segment
-      where: current.phoneme != 'SIL'
-    define:
-      stress_val: "has(current.stress) ? current.stress : 0"
-      is_primary: stress_val == 1
-      is_vowel: current.type == 'vowel'
-      is_glide: current.type == 'glide'
-      is_medial_syllabic: >-
-        is_vowel && has(current.syllable_position_in_word)
-        && current.syllable_position_in_word == 'medial'
-    constraint: "!is_primary"
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "!syllabic && !winitc && !final_fricative"
     apply:
-      - field: duration
-        op: mul
-        dispatch:
-          - when: is_medial_syllabic
-            value: params.policy.duration.unstressed_medial_syllabic_shortening
-          - when: is_vowel
-            value: params.policy.duration.unstressed_syllabic_shortening
-          - when: is_glide
-            value: params.policy.duration.unstressed_glide_shortening
-          - default: params.policy.duration.unstressed_consonant_shortening
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(prcnt, F.p85)
+        tag: consonant_position
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:421-427 Rule 6 (non-word-initial consonant: N85PRCNT)"
+
+  # Rule 7 (429-447): a non-obstruent without primary stress may shrink further.
+  dectalk_timing_7_unstressed_minimum:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "!primary && durmin < durinh && !dectalk_has(current, 'obstruent')"
+    apply:
+      - field: timing_minimum_frames
+        op: set
+        value: >-
+          max([3.0, stress == 0.0 ? floor(durmin / 2.0) : durmin - floor(durmin / 4.0)])
+        tag: unstressed_floor
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:432-447 Rule 7 (durmin halved when unstressed, less a quarter when secondary; at least 3 frames)"
+
+  # Rule 7 (449-470): a syllabic without primary stress.
+  dectalk_timing_7_unstressed_syllabic:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "!primary && syllabic"
+    apply:
+      - field: timing_percent
+        op: set
+        value: "typesyl == 'medial' ? floor(prcnt / 2.0) : dectalk_mlsh1(prcnt, F.p70)"
         tag: unstressed
     citations:
-      - "DECtalk 4.63 p_us_tim.c:429-495 Rule 7 (unstressed shortening; medial syllabic prcnt>>1)"
-      - "DECtalk 4.63 ph_sort2.c:69-111 init_med_final (FMEDIALSYL classification)"
+      - "DECtalk 4.63 p_us_tim.c:449-470 Rule 7 (unstressed syllabic: halved word-medially, else N70PRCNT)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 8: Emphasis lengthening
-  # Emphasized segments get +19ms; vowels get an additional +38ms.
-  # ---------------------------------------------------------------------------
-  dectalk_emphasis_lengthening:
+  # Rule 7 (472-480): a reduced vowel beside a flap, or before h.
+  dectalk_timing_7_schwa_by_flap:
     kind: scalar
     select:
       relation: Segment
-      where: current.phoneme != 'SIL'
-    define:
-      is_emphasized: "has(current.stress) ? current.stress == 3 : false"
-    constraint: is_emphasized
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: >-
+      !primary && syllabic && name in ['AX', 'IX']
+      && (la_name == 'DX' || nx_name == 'DX' || nx_name == 'HX')
     apply:
-      - field: duration
-        op: add
-        value: params.policy.duration.emphasis_lengthening_ms
+      - field: timing_added_frames
+        op: set
+        value: deldur + NF.ms25
+        tag: schwa_by_flap
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:472-480 Rule 7 (schwa next to a flap or before /h/: +NF25MS)"
+
+  # Rule 7 (482-495): a consonant without primary stress. W, Y, R and LL are
+  # the allophone codes US_W..US_LL of the C's range test.
+  dectalk_timing_7_unstressed_consonant:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "!primary && !syllabic"
+    apply:
+      - field: timing_percent
+        op: set
+        value: >-
+          name in ['W', 'Y', 'R', 'LL'] ? floor(prcnt / 2.0) : dectalk_mlsh1(prcnt, F.p70)
+        tag: unstressed
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:482-495 Rule 7 (unstressed consonant: glides and liquids halved, others N70PRCNT)"
+
+  # Rule 8 (510-525): emphasis. The C carries a switch from phone to phone:
+  # an emphasised phone sets it, a word-initial consonant or a syllabic without
+  # emphasis clears it. Here that is the nearest earlier phone that sets or
+  # clears it.
+  dectalk_timing_8_emphasis:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: emphasised
+    apply:
+      - field: timing_added_frames
+        op: set
+        value: "deldur + NF.ms20 + (syllabic ? NF.ms40 : 0.0)"
         tag: emphasis
     citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 8 (emphasis lengthening)"
+      - "DECtalk 4.63 p_us_tim.c:510-525 Rule 8 (emphasis: +NF20MS, and +NF40MS more on a syllabic)"
 
-  # A separate transaction adds to the committed +19 ms (effect reads are snapshots).
-  dectalk_emphasis_syllabic_lengthening:
+  # Rule 9 (527-645): what follows a syllabic (or a sonorant consonant before
+  # an obstruent) in its own syllable.
+  #
+  # Line 539 reads phone_feature(pDph_t, nphon+1): the allophone's POSITION in
+  # the clause used as if it were an allophone code. `position_reads_syllabic`
+  # reproduces that: it is the feature of the allophone whose code equals
+  # clause_position + 1.
+  dectalk_timing_9_postvocalic_context:
     kind: scalar
     select:
       relation: Segment
-      where: "current.type == 'vowel' && has(current.stress) && current.stress == 3"
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: syllabic || sonorant_before_obstruent
     apply:
-      - field: duration
-        op: add
-        value: params.policy.duration.emphasis_syllabic_extra_ms
-        tag: emphasis_syllabic
+      - field: timing_factor
+        op: set
+        value: factor_9
+        tag: segmental_context
+      - field: timing_added_frames
+        op: set
+        value: added_by_context
+        tag: segmental_context
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(factor_9, percent_in)
+        tag: segmental_context
     citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 8 (emphasis lengthening)"
+      - "DECtalk 4.63 p_us_tim.c:527-645 Rule 9 (postvocalic context of vowels)"
+      - "DECtalk 4.63 p_us_tim.c:539 (phone_feature(pDph_t, nphon+1) reads the feature of the allophone code nphon+1)"
+      - "DECtalk 4.63 p_us_tim.c:628-639 ([n] before [t]: N10PRCNT, N70PRCNT when the [t] will flap)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 9a: Postvocalic voiceless consonant shortening
-  # Vowels before voiceless consonants are shortened.
-  # ---------------------------------------------------------------------------
-  dectalk_postvocalic_voiceless_shortening:
+  # Rule 10 (647-653): a syllabic directly before another syllabic.
+  dectalk_timing_10_syllabic_before_syllabic:
     kind: scalar
     select:
       relation: Segment
-      where: current.type == 'vowel'
-    define:
-      "n": next
-      # Written as ahead(current, 2); pinned to the distance it has always
-      # effectively used (see dectalk_non_final_shortening above).
-      nn: "ahead(current, 1)"
-      syll_pos: "syllable_position_in_word()"
-      next_voiceless: >-
-        n == null ? false : isTrue(n, 'voiceless')
-      next_is_fricative: "n == null ? false : n.type == 'fricative'"
-      next_is_plosive: "n == null ? false : n.type == 'stop_closure'"
-      next_is_affricate: "n == null ? false : n.type == 'affricate'"
-      next_same_word: >-
-        n == null ? false :
-        dectalk_same_word(n, current)
-      next_is_word_final: >-
-        n == null ? false :
-        (nn == null ? true :
-        (has(nn.word) && has(n.word) ? nn.word != n.word : true))
-      skip_monosyllable_final_fricative: >-
-        next_is_fricative && syll_pos == 'only' && next_same_word && next_is_word_final
-    constraint: next_voiceless
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "syllabic && dectalk_has(nx, 'syllabic')"
     apply:
-      - field: duration
-        op: mul
-        dispatch:
-          - when: next_is_fricative && !skip_monosyllable_final_fricative
-            value: params.policy.duration.pre_voiceless_fricative_shortening
-          - when: next_is_plosive || next_is_affricate
-            value: params.policy.duration.pre_voiceless_plosive_shortening
-          - default: 1.0
-        tag: pre_voiceless
-    citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 9 (postvocalic voiceless shortening)"
-      - "DECtalk 4.63 -lt oracle trace for 'church.' (rhotic vowel shortens before voiceless affricate /ch/)"
-      - "DECtalk 4.63 -lt oracle trace for 'this.' (only vowel is not shortened before word-final /s/)"
-
-  # ---------------------------------------------------------------------------
-  # Rule 9b: Postvocalic voiced obstruent lengthening / pre-nasal shortening
-  # ---------------------------------------------------------------------------
-  dectalk_postvocalic_voiced_lengthening:
-    kind: scalar
-    select:
-      relation: Segment
-      where: current.type == 'vowel'
-    define:
-      "n": next
-      next_voiced: >-
-        n == null ? false : isTrue(n, 'voiced')
-      next_is_obstruent: >-
-        n == null ? false :
-        n.type in ['fricative', 'stop_closure', 'affricate']
-      next_is_nasal: "n == null ? false : n.type == 'nasal'"
-    constraint: "next_voiced && (next_is_obstruent || next_is_nasal)"
-    apply:
-      - field: duration
-        op: mul
-        dispatch:
-          - when: next_is_obstruent
-            value: params.policy.duration.pre_voiced_obstruent_lengthening
-          - when: next_is_nasal
-            value: params.policy.duration.pre_nasal_shortening
-          - default: 1.0
-        tag: pre_voiced
-    citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 9 (voiced obstruent lengthening, pre-nasal shortening)"
-
-  # ---------------------------------------------------------------------------
-  # Rule 13: Consonant cluster shortening
-  # Consonants adjacent to other consonants are shortened.
-  # ---------------------------------------------------------------------------
-  dectalk_consonant_cluster_shortening:
-    kind: scalar
-    select:
-      relation: Segment
-      where: >-
-        current.type in ['fricative', 'stop_closure', 'affricate', 'nasal', 'liquid', 'glide']
-    define:
-      "n": next
-      "p": prev
-      prev_is_consonant: >-
-        p == null ? false :
-        p.type in ['fricative', 'stop_closure', 'affricate', 'nasal', 'liquid', 'glide']
-      next_is_consonant: >-
-        n == null ? false :
-        n.type in ['fricative', 'stop_closure', 'affricate', 'nasal', 'liquid', 'glide']
-      in_cluster: prev_is_consonant || next_is_consonant
-    constraint: in_cluster
-    apply:
-      - field: duration
-        op: mul
-        value: params.policy.duration.cluster_shortening
-        tag: cluster
-    citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 13 (consonant cluster shortening, N70PRCNT)"
-
-  # ---------------------------------------------------------------------------
-  # Rule 14: lengthen a sonorant after a voiceless plosive.
-  # DECtalk evaluates this on its unsplit allophone sequence.  The declarative
-  # structural phase has already split a stop into closure/release carriers, so
-  # look through those carriers to the preceding stop closure.
-  # ---------------------------------------------------------------------------
-  dectalk_post_plosive_sonorant_lengthening:
-    kind: scalar
-    select:
-      relation: Segment
-      where: current.type in ['vowel', 'glide', 'liquid', 'nasal']
-    define:
-      "p": prev
-      p2: "behind(current, 2)"
-      p3: "behind(current, 3)"
-      p_is_voiceless_stop: >-
-        p != null && p.type == 'stop_closure'
-        && has(p.voiceless) && p.voiceless == true
-      p2_is_voiceless_stop_through_release: >-
-        p != null && p.type in ['stop_release', 'stop_aspiration']
-        && p2 != null && p2.type == 'stop_closure'
-        && has(p2.voiceless) && p2.voiceless == true
-      p3_is_voiceless_stop_through_release: >-
-        p != null && p.type in ['stop_release', 'stop_aspiration']
-        && p2 != null && p2.type in ['stop_release', 'stop_aspiration']
-        && p3 != null && p3.type == 'stop_closure'
-        && has(p3.voiceless) && p3.voiceless == true
-    constraint: >-
-      p_is_voiceless_stop || p2_is_voiceless_stop_through_release
-      || p3_is_voiceless_stop_through_release
-    apply:
-      - field: duration
-        op: add
-        value: params.policy.duration.post_voiceless_plosive_lengthening_ms
-        tag: post_plosive
-    citations:
-      - "DECtalk 4.63 p_us_tim.c:757-766 Rule 14 (sonorant after voiceless plosive, +NF20MS)"
-      - "DECtalk 4.63 ph_defs.h NF20MS=3 controller frames (19 ms in the frontend duration policy)"
-
-  # ---------------------------------------------------------------------------
-  # Rule 15: Phrase-initial vowel after silence
-  # ---------------------------------------------------------------------------
-  dectalk_phrase_initial_vowel_lengthening:
-    kind: scalar
-    select:
-      relation: Segment
-      where: current.type == 'vowel'
-    define:
-      "p": prev
-      prev_is_silence: "p == null ? true : p.phoneme == 'SIL'"
-    constraint: prev_is_silence
-    apply:
-      - field: duration
-        op: add
-        value: params.policy.duration.phrase_initial_vowel_lengthening_ms
-        tag: phrase_initial
-    citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 15 (phrase-initial vowel after silence)"
-
-  # ---------------------------------------------------------------------------
-  # Rule 9 ([nt] cluster sub-case): shorten a word-internal /n/ before a
-  # non-word-initial unstressed /t/ ("winter", "twenty").
-  # DECtalk p_us_tim.c:628-639 -- when phocur==N and phonex==T and the /t/ is
-  # neither word-initial nor stressed, the /n/ multiplier becomes N10PRCNT (0.10).
-  # The companion allophonic rewrite of the /t/ to /d/ (L635) is a phoneme
-  # rewrite handled in the postlexical phase, not here; only the durational
-  # shortening of the /n/ is modelled.
-  # ---------------------------------------------------------------------------
-  dectalk_nt_cluster_nasal_shortening:
-    kind: scalar
-    select:
-      relation: Segment
-      where: current.phoneme == 'N'
-    define:
-      "n": next
-      next_is_t: "n == null ? false : n.phoneme == 'T'"
-      next_same_word: >-
-        n == null ? false :
-        dectalk_same_word(n, current)
-      next_stress: "n == null ? 0 : (has(n.stress) ? n.stress : 0)"
-      next_t_unstressed_internal: "next_is_t && next_same_word && next_stress != 1"
-    constraint: next_t_unstressed_internal
-    apply:
-      - field: duration
-        op: mul
-        value: params.policy.duration.nt_cluster_nasal_shortening
-        tag: nt_cluster
-    citations:
-      - "DECtalk 4.63 p_us_tim.c:628-639 Rule 9 ([nt] cluster /n/ shortening, N10PRCNT)"
-
-  # ---------------------------------------------------------------------------
-  # Rule 10: lengthen the first vowel of a two-vowel sequence (hiatus).
-  # DECtalk p_us_tim.c:647-655 -- a syllabic followed by another syllabic gets
-  # +NF30MS.
-  # ---------------------------------------------------------------------------
-  dectalk_two_vowel_first_lengthening:
-    kind: scalar
-    select:
-      relation: Segment
-      where: current.type == 'vowel'
-    define:
-      "n": next
-      next_is_vowel: "n == null ? false : n.type == 'vowel'"
-    constraint: next_is_vowel
-    apply:
-      - field: duration
-        op: add
-        value: params.policy.duration.two_vowel_first_lengthening_ms
+      - field: timing_added_frames
+        op: set
+        value: deldur + NF.ms30
         tag: two_vowel
     citations:
-      - "DECtalk 4.63 p_us_tim.c:647-655 Rule 10 (first vowel of two-vowel sequence, NF30MS)"
+      - "DECtalk 4.63 p_us_tim.c:647-653 Rule 10 (first of two syllabics: +NF30MS)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 11: lengthen a word-initial stressed vowel of a polysyllabic word.
-  # DECtalk p_us_tim.c:657-664 -- (FTYPESYL)==FFIRSTSYL && FSTRESS_1 &&
-  # (struclas & FWINITC) IS_MINUS, i.e. the first-syllable primary-stressed vowel
-  # whose preceding segment is NOT this word's initial consonant -> the vowel is
-  # word-initial (vowel-initial polysyllable, e.g. "apple", "easy") -> +NF25MS.
-  # ---------------------------------------------------------------------------
-  dectalk_word_initial_stressed_vowel_lengthening:
+  # Rule 11 (655-661): a primary-stressed first syllable with no initial consonant.
+  dectalk_timing_11_first_syllable_primary:
     kind: scalar
     select:
       relation: Segment
-      where: current.type == 'vowel' && has(current.syllable_position_in_word)
-    define:
-      "p": prev
-      stress_val: "has(current.stress) ? current.stress : 0"
-      is_first_syllable: current.syllable_position_in_word == 'first'
-      is_word_initial_segment: >-
-        p == null ? true :
-        (has(p.word) && has(current.word) ? p.word != current.word : true)
-    constraint: "is_first_syllable && stress_val == 1 && is_word_initial_segment"
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: >-
+      syllabic && typesyl in ['initial', 'first'] && primary
+      && !isTrue(la, 'word_initial_consonant')
     apply:
-      - field: duration
-        op: add
-        value: params.policy.duration.word_initial_stressed_vowel_lengthening_ms
+      - field: timing_added_frames
+        op: set
+        value: deldur + NF.ms25
         tag: word_initial_stressed
     citations:
-      - "DECtalk 4.63 p_us_tim.c:657-664 Rule 11 (word-initial stressed vowel of polysyllable, NF25MS)"
-      - "DECtalk 4.63 ph_sort2.c:69-111 init_med_final (FFIRSTSYL classification)"
+      - "DECtalk 4.63 p_us_tim.c:655-661 Rule 11 (word-initial stressed vowel of a polysyllable: +NF25MS)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 19: shorten a function-word-final unstressed monosyllable /th/ (e.g.
-  # "with").  DECtalk p_us_tim.c:819-826 -- phocur==TH && (FTYPESYL)==FMONOSYL &&
-  # (strucbou >= FWBNEXT, word-final) && unstressed -> N60PRCNT.
-  # ---------------------------------------------------------------------------
-  dectalk_function_word_final_th_shortening:
+  # Rule 12 (663-674): a syllabic before postvocalic l.
+  dectalk_timing_12_syllabic_before_lx:
     kind: scalar
     select:
       relation: Segment
-      where: current.phoneme == 'TH' && has(current.syllable_position_in_word)
-    define:
-      "n": next
-      stress_val: "has(current.stress) ? current.stress : 0"
-      is_monosyllable: current.syllable_position_in_word == 'only'
-      same_word_as_next: >-
-        n == null ? false :
-        dectalk_same_word(n, current)
-      is_word_final_segment: "!same_word_as_next"
-    constraint: "is_monosyllable && is_word_final_segment && stress_val != 1"
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "syllabic && nx_name == 'LX'"
     apply:
-      - field: duration
-        op: mul
-        value: params.policy.duration.function_word_final_th_shortening
-        tag: function_word_th
+      - field: timing_added_frames
+        op: set
+        value: deldur - NF.ms20
+        tag: postvocalic_lateral
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(F.p70, prcnt)
+        tag: postvocalic_lateral
     citations:
-      - "DECtalk 4.63 p_us_tim.c:819-826 Rule 19 (function-word-final TH, N60PRCNT)"
+      - "DECtalk 4.63 p_us_tim.c:663-674 Rule 12 (syllabic before LX: -NF20MS and N70PRCNT)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 20: lengthen the unstressed monosyllable IY of "the/me/he" before a
-  # vowel.  DECtalk p_us_tim.c:828-836 -- phocur==IY && (FTYPESYL)==FMONOSYL &&
-  # unstressed && (strucbou > FMBNEXT, a following word boundary) -> N150PRCNT.
-  # The "before a vowel" is the word boundary placing another word after this
-  # monosyllable; modelled as the IY being the word-final segment with a vowel
-  # starting the next word.
-  # ---------------------------------------------------------------------------
-  dectalk_the_iy_prevocalic_lengthening:
+  # Rule 13 (677-718): the first consonant of a cluster inside a word. The
+  # multiplier starts as whatever Rule 9 left (timing_factor); the C reuses
+  # the variable without resetting it.
+  dectalk_timing_13_cluster_first:
     kind: scalar
     select:
       relation: Segment
-      where: current.phoneme == 'IY' && has(current.syllable_position_in_word)
-    define:
-      "n": next
-      stress_val: "has(current.stress) ? current.stress : 0"
-      is_monosyllable: current.syllable_position_in_word == 'only'
-      next_other_word_vowel: >-
-        n == null ? false :
-        (has(n.word) && has(current.word) ? (n.word != current.word && n.type == 'vowel') : false)
-    constraint: "is_monosyllable && stress_val != 1 && next_other_word_vowel"
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: >-
+      !syllabic && dectalk_has(current, 'consonant') && dectalk_has(nx, 'consonant')
+      && bou < B.word
     apply:
-      - field: duration
-        op: mul
-        value: params.policy.duration.the_iy_prevocalic_lengthening
-        tag: the_iy
+      - field: timing_minimum_frames
+        op: set
+        value: "nasal_before_word ? durmin : durmin - floor(durmin / 4.0)"
+        tag: cluster
+      - field: timing_percent
+        op: set
+        # Before [sh] the multiplier is not applied (dectalk_timing_13_before_sh).
+        value: "before_sh ? prcnt : dectalk_mlsh1(factor_13_first, prcnt)"
+        tag: cluster
     citations:
-      - "DECtalk 4.63 p_us_tim.c:828-836 Rule 20 (the/me/he IY before vowel, N150PRCNT)"
+      - "DECtalk 4.63 p_us_tim.c:677-718 Rule 13 (consonant cluster, first member)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 23: shorten a vowel before a /t/-flap DF ("writing" vs "riding").
-  # DECtalk p_us_tim.c:859-868 -- phonex==DF -> N35PRCNT.  DF is produced by the
-  # postlexical flapping rules (chunk dt-9); it is a distinct flap allophone.
-  # ---------------------------------------------------------------------------
-  dectalk_pre_df_flap_shortening:
+  # Rule 13 (713-717): [s] or [th] before [sh] inside a word takes a fixed
+  # NF15MS, and the C jumps past every later rule.
+  dectalk_timing_13_before_sh:
     kind: scalar
     select:
       relation: Segment
-      where: current.type == 'vowel'
-    define:
-      "n": next
-      next_is_df: "n == null ? false : n.phoneme == 'DF'"
-    constraint: next_is_df
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: >-
+      !syllabic && dectalk_has(current, 'consonant') && dectalk_has(nx, 'consonant')
+      && bou < B.word && name in ['S', 'TH'] && nx_name == 'SH'
     apply:
-      - field: duration
-        op: mul
-        value: params.policy.duration.pre_df_flap_shortening
-        tag: pre_df_flap
+      - field: timing_fixed_frames
+        op: set
+        value: NF.ms15
+        tag: cluster
     citations:
-      - "DECtalk 4.63 p_us_tim.c:859-868 Rule 23 (vowel before DF flap, N35PRCNT)"
+      - "DECtalk 4.63 p_us_tim.c:713-717 ([s] or [th] before [sh]: NF15MS, skip the remaining rules)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 24: shorten a segment before NG ("ing" too long).
-  # DECtalk p_us_tim.c:882-889 -- allophons[nphon+1]==NX (port NG) -> N60PRCNT.
-  # ---------------------------------------------------------------------------
-  dectalk_pre_ng_shortening:
+  # Rule 13 (720-755): the second consonant of a cluster.
+  dectalk_timing_13_cluster_second:
     kind: scalar
     select:
       relation: Segment
-      where: current.phoneme != 'SIL'
-    define:
-      "n": next
-      next_is_ng: "n == null ? false : n.phoneme == 'NG'"
-    constraint: next_is_ng
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: >-
+      open && !syllabic && dectalk_has(current, 'consonant') && dectalk_has(la, 'consonant')
+      && dectalk_boundary(la) < B.vp
     apply:
-      - field: duration
-        op: mul
-        value: params.policy.duration.pre_ng_shortening
-        tag: pre_ng
+      - field: timing_minimum_frames
+        op: set
+        value: durmin - floor(durmin / 4.0)
+        tag: cluster
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(factor_13_second, prcnt)
+        tag: cluster
     citations:
-      - "DECtalk 4.63 p_us_tim.c:882-889 Rule 24 (segment before NG, N60PRCNT)"
+      - "DECtalk 4.63 p_us_tim.c:720-755 Rule 13 (consonant cluster, second member: N70PRCNT, N60PRCNT after [s], 1638 for an unstressed plosive after a nasal)"
 
-  # ---------------------------------------------------------------------------
-  # Rule 17: Short-utterance duration bonus
-  # DECtalk p_us_tim.c:790-805 adds 30 to prcnt when the current timing clause's
-  # nallotot < 10 and the segment has a compressible duration range.  Comma
-  # pauses split timing clauses, so a list like "Red, green, blue..." must be
-  # evaluated per comma-delimited clause rather than over the whole utterance.
-  # The declarative duration model applies the equivalent fraction of
-  # (durinh - durmin) as an additive bonus.
-  # ---------------------------------------------------------------------------
-  dectalk_short_phrase_duration_bonus:
+  # Rule 14 (757-765).
+  dectalk_timing_14_sonorant_after_voiceless_plosive:
     kind: scalar
     select:
       relation: Segment
-      where: current.phoneme != 'SIL' && has(current.inherentDuration) && has(current.minimumDuration)
-    define:
-      compressible_range_ms: current.inherentDuration - current.minimumDuration
-      short_utterance: clause_phone_count() < 10
-    constraint: short_utterance && compressible_range_ms > 0
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: >-
+      open && dectalk_has(current, 'son1') && !dectalk_has(la, 'voiced')
+      && dectalk_has(la, 'plosive')
     apply:
-      - field: duration
-        op: add
-        value: (params.policy.duration.short_phrase_prcnt_bonus / params.policy.duration.prcnt_denominator) * compressible_range_ms
+      - field: timing_added_frames
+        op: set
+        value: deldur + NF.ms20
+        tag: post_plosive
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:757-765 Rule 14 (sonorant after a voiceless plosive: +NF20MS for aspiration)"
+
+  # Rule 15 (767-774).
+  dectalk_timing_15_vowel_after_silence:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "open && dectalk_has(current, 'vowel') && la_name == 'SIL'"
+    apply:
+      - field: timing_added_frames
+        op: set
+        value: deldur + NF.ms20
+        tag: phrase_initial
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:767-774 Rule 15 (vowel after silence: +NF20MS)"
+
+  # Rule 16 (776-786).
+  dectalk_timing_16_vowel_after_glide:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: >-
+      open && dectalk_has(current, 'vowel') && dectalk_has(la, 'son2')
+      && !dectalk_has(la, 'nasal') && deldur == 0.0
+    apply:
+      - field: timing_added_frames
+        op: set
+        value: NF.ms20
+        tag: segmental_context
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:776-786 Rule 16 (vowel after a glide or liquid, when nothing was added yet: NF20MS)"
+
+  # Rule 17 (788-802).
+  dectalk_timing_17_short_clause:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "open && length < 10.0 && durinh != durmin"
+    apply:
+      - field: timing_percent
+        op: set
+        value: prcnt + 30.0
         tag: short_phrase
     citations:
-      - "DECtalk 4.63 p_us_tim.c:790-805 Rule 17 (short-utterance prcnt += 30)"
-      - "DECtalk 4.63 oracle -lt/-lp trace for 'Red, green, blue, and gold.' (comma-delimited clauses receive short-clause timing)"
+      - "DECtalk 4.63 p_us_tim.c:788-802 Rule 17 (clause of fewer than 10 allophones: prcnt += 30)"
 
-  dectalk_cake_initial_k_boundary_alignment:
+  # Rule 18 (804-815).
+  dectalk_timing_18_glide_after_obstruent:
     kind: scalar
     select:
       relation: Segment
-      where: >-
-        current.phoneme == 'K' && current.word == 'cake' &&
-        next != null && next.phoneme == 'K_REL'
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: >-
+      open && dectalk_has(current, 'sonorant_consonant') && dectalk_has(la, 'obstruent')
     apply:
-      - field: duration
-        op: add
-        value: params.policy.duration.cake_initial_k_ey_boundary_transfer_ms
-        tag: coarticulation
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(prcnt, F.p70)
+        tag: cluster
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (K-to-EY PH2 boundary is 128.0 ms)"
+      - "DECtalk 4.63 p_us_tim.c:804-815 Rule 18 (liquid or glide after an obstruent: N70PRCNT)"
 
-  dectalk_cake_ey_boundary_alignment:
+  # Rule 19 (817-825).
+  dectalk_timing_19_unstressed_final_th:
     kind: scalar
     select:
       relation: Segment
-      where: current.phoneme == 'EY' && current.word == 'cake'
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "open && name == 'TH' && typesyl == 'only' && bou >= B.word && stress == 0.0"
+    apply:
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(prcnt, F.p60)
+        tag: function_word_th
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:817-825 Rule 19 (unstressed word-final [th]: N60PRCNT)"
+
+  # Rule 20 (827-835).
+  dectalk_timing_20_unstressed_final_iy:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: >-
+      open && name == 'IY' && bou > B.morpheme && stress == 0.0 && typesyl == 'only'
+    apply:
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(prcnt, F.p150)
+        tag: the_iy
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:827-835 Rule 20 (unstressed word-final [iy] of a monosyllable: N150PRCNT)"
+
+  # Rule 21 (837-856).
+  dectalk_timing_21_plosive_between_obstruents:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: >-
+      open && dectalk_has(current, 'plosive') && dectalk_has(la, 'plosive')
+      && dectalk_has(nx, 'obstruent') && bou > B.morpheme
+    apply:
+      - field: timing_minimum_frames
+        op: set
+        value: floor(durmin / 2.0)
+        tag: cluster
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(prcnt, F.p25)
+        tag: cluster
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:837-856 Rule 21 (plosive after a plosive and before an obstruent: durmin halved, N25PRCNT)"
+
+  # Rule 23 (858-867).
+  dectalk_timing_23_before_df:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "open && nx_name == 'DF'"
+    apply:
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(prcnt, F.p35)
+        tag: pre_df_flap
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:858-867 Rule 23 (before DF: N35PRCNT)"
+
+  # 871-877.
+  dectalk_timing_retroflex_minimum:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "open && name == 'RR' && durmin <= params.policy.timing.rr_minimum_frames"
+    apply:
+      - field: timing_minimum_frames
+        op: set
+        value: params.policy.timing.rr_minimum_frames
+        tag: retroflex_minimum
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:871-877 (RR minimum duration of 13 frames)"
+
+  # Rule 24 (879-889).
+  dectalk_timing_24_before_velar_nasal:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    constraint: "open && nx_name == 'NX'"
+    apply:
+      - field: timing_percent
+        op: set
+        value: dectalk_mlsh1(prcnt, F.p60)
+        tag: pre_ng
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:879-889 Rule 24 (before NX: N60PRCNT)"
+
+  # 895-941: the duration in frames. A negative result becomes 1 (the C tests
+  # `< 0`, so 0 passes through), and HX is capped.
+  dectalk_timing_frames:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define: *timing
+    apply:
+      - field: timing_frames
+        op: set
+        value: "open ? capped : current.timing_fixed_frames"
+        tag: allophone_duration
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:895-941 (durxx = ((prcnt * (durinh - durmin)) >> 7) + durmin + deldur)"
+
+  # A phone lasts its allophone's frames. A stop's closure is handled below.
+  dectalk_allophone_duration:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
     apply:
       - field: duration
-        op: add
-        value: 0 - params.policy.duration.cake_initial_k_ey_boundary_transfer_ms
-        tag: coarticulation
+        op: set
+        value: current.timing_frames * params.policy.timing.frame_ms
+        tag: allophone_duration
     citations:
-      - "DECtalk 4.63 oracle -lt trace for 'cake' (EY begins at 128.0 ms and ends at 364.8 ms)"
+      - "DECtalk 4.63 p_us_tim.c:940 (allodurs[nphon] = durxx)"
+      - "DECtalk 4.63 ph_defs.h NSAMP_FRAME = 71 samples at 11025 Hz (one frame)"
 
-  # ---------------------------------------------------------------------------
-  # Rate scaling
-  # All non-silence durations are scaled by 1/rate_scale.
-  # ---------------------------------------------------------------------------
+  # This port draws a stop as a closure and a release. The release keeps the
+  # length the stop rules gave it, and the closure takes the rest of the
+  # allophone, so the two together last DECtalk's frame count. A release
+  # longer than the allophone leaves the closure one frame.
+  dectalk_stop_closure_duration:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.type == 'stop_closure' && next != null && next.type == 'stop_release'"
+    define:
+      total: current.timing_frames * params.policy.timing.frame_ms
+      closure: "max([params.policy.timing.frame_ms, total - next.duration])"
+    apply:
+      - field: duration
+        op: set
+        value: closure
+        tag: allophone_duration
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:940 (one duration per stop allophone; the burst is drawn inside it)"
+      - "Engineering estimate: a release longer than its allophone leaves the closure one frame"
+
+  # The frontend API's `rate` option is a multiplier on speaking rate, not
+  # DECtalk's words-per-minute setting. DECtalk's own rate scaling
+  # (p_us_tim.c:910-925, sprat1 and sprat2, inactive at 180 wpm) is not ported;
+  # this divides every speech duration by the multiplier instead.
   dectalk_rate_scaling:
     kind: scalar
     select:
@@ -808,35 +828,23 @@ rules:
         value: 1.0 / params.policy.duration.rate_scale
         tag: rate
     citations:
-      - "DECtalk 4.63 ph_timng.c (speaking rate calibration)"
-  # Hard duration floors, projected as the final duration-phase step (replaces the
-  # former imperative `durationFloorTransaction` loop in tts-frontend.ts). Floor
-  # magnitudes are supplied as duration policy from the frontend's
-  # output.lowering.timeline.duration_floors block, preserving a single source of
-  # truth. `op: max` reproduces "if duration < floor, set floor" exactly.
-  duration_floor_stop_release:
+      - "Qlatt frontend API: options.rate is a speaking-rate multiplier applied to segment durations"
+      - "Engineering estimate: uniform scaling stands in for DECtalk 4.63 p_us_tim.c:910-925 (sprat2 on the multiplied part, sprat1 on the added part)"
+
+  # The release gives up whatever the one-frame closure above could not.
+  dectalk_stop_release_duration:
     kind: scalar
     select:
       relation: Segment
-      where: current.type in ['stop_release', 'stop_aspiration']
-    constraint: has(current.duration)
+      where: "current.type == 'stop_release' && prev != null && prev.type == 'stop_closure'"
+    define:
+      total: prev.timing_frames * params.policy.timing.frame_ms
+    constraint: current.duration > total - params.policy.timing.frame_ms
     apply:
       - field: duration
-        op: max
-        value: params.policy.duration.stop_release_floor_ms
-        tag: duration_floor
+        op: set
+        value: "max([0.0, total - params.policy.timing.frame_ms])"
+        tag: allophone_duration
     citations:
-      - "DECtalk 4.63 ph_defs.h: NF7MS = 1 synthesis frame; frtoms(1) is approximately 7ms at NSAMP_FRAME=71"
-  duration_floor_default:
-    kind: scalar
-    select:
-      relation: Segment
-      where: current.type != 'stop_release' && current.type != 'stop_aspiration'
-    constraint: has(current.duration)
-    apply:
-      - field: duration
-        op: max
-        value: params.policy.duration.default_floor_ms
-        tag: duration_floor
-    citations:
-      - "DECtalk 4.63 ph_defs.h: NF30MS = 5 synthesis frames; named 30ms floor preserves legacy frontend default"
+      - "DECtalk 4.63 p_us_tim.c:940 (one duration per stop allophone; the burst is drawn inside it)"
+      - "Engineering estimate: a release longer than its allophone leaves the closure one frame"

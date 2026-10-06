@@ -167,7 +167,7 @@ describe("input contract — authored syllable stress", () => {
     });
   }
 
-  it("preserves level 3 on a single DECtalk word and adds the cited 19 and 38 ms", () => {
+  it("preserves level 3 on a single DECtalk word and adds the cited three and six frames", () => {
     const result = textToKlattTrackDetailed("you", 110, 30, {
       frontendId: "dectalk-english",
       directionTrack: {
@@ -186,14 +186,17 @@ describe("input contract — authored syllable stress", () => {
       .find((s) => s.get("phoneme") === "Y")!;
     expect(onset.get("stress")).toBe(3);
     expect(onset.latestWrite("stress")?.tag).toBe("consonant_stress");
-    const writes = nucleus.writes("duration");
-    for (const [tag, delta] of [
-      ["emphasis", 19],
-      ["emphasis_syllabic", 38],
+    // p_us_tim.c Rule 8: NF20MS (3 frames) for emphasis and NF40MS (6) more on
+    // a syllabic. The onset consonant gets the 3 alone.
+    for (const [item, frames] of [
+      [nucleus, 9],
+      [onset, 3],
     ] as const) {
-      const index = writes.findIndex((w) => w.tag === tag);
+      const writes = item.writes("timing_added_frames");
+      const index = writes.findIndex((w) => w.ruleId === "dectalk_timing_8_emphasis");
       expect(index).toBeGreaterThan(0);
-      expect(Number(writes[index].value) - Number(writes[index - 1].value)).toBeCloseTo(delta);
+      expect(writes[index].tag).toBe("emphasis");
+      expect(Number(writes[index].value) - Number(writes[index - 1].value)).toBe(frames);
     }
   });
 

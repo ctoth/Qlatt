@@ -26,8 +26,11 @@ describe("bundled DECtalk same-word callers", () => {
     }
   }
 
-  it("deduplicates all nine equivalent conditions and retains macro citations", () => {
-    expect(callers).toHaveLength(9);
+  // Nine callers until the duration phase became a transcription of
+  // p_us_tim.c, which reads DECtalk's structure word and never compares words;
+  // the three left are in the postlexical and structural phases.
+  it("deduplicates all three equivalent conditions and retains macro citations", () => {
+    expect(callers).toHaveLength(3);
     for (const { rule } of callers) expect(spec.rules[rule].citations).toContain(citation);
   });
 

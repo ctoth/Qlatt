@@ -203,6 +203,129 @@ f0_model:
     max_hz: 500
 parameters:
   policy:
+    # Data for the phone structure word DECtalk builds before its allophone and
+    # duration rules (ph_sort.c phsort()).
+    structure:
+      # us_phcluster(first, second): legal two-consonant onsets. `s_onset` marks
+      # the clusters that may also take a leading /s/ (CLUSTER_TRYS). Keys are
+      # this port's phone names (LL is spelled L here).
+      onset_clusters:
+        P: { L: s_onset, R: s_onset }
+        B: { L: cluster, R: cluster }
+        F: { R: s_onset, L: cluster }
+        T: { R: s_onset, W: cluster }
+        D: { R: cluster, W: cluster }
+        TH: { R: cluster, W: cluster }
+        K: { R: s_onset, L: s_onset, W: s_onset }
+        G: { R: cluster, L: cluster, W: cluster }
+        S: { W: cluster, L: cluster, P: cluster, T: cluster, K: cluster, M: cluster, N: cluster, F: cluster }
+        SH: { W: cluster, L: cluster, P: cluster, T: cluster, R: cluster, M: cluster, N: cluster }
+      citations:
+        - "DECtalk 4.63 p_us_sr1.c:175-228 us_phcluster (CLUSTER and CLUSTER_TRYS onset pairs)"
+    # Data for DECtalk's duration rules (p_us_tim.c), transcribed from its ROM
+    # and headers. scripts/oracle/compare-dectalk-rom-tables.ts checks every
+    # table here against the DECtalk source tree.
+    timing:
+      # l_all_ph.h US_<name>: allophone names in code order. Code 0 is silence.
+      phonemes: [SIL, IY, IH, EY, EH, AE, AA, AY, AW, AH, AO, OW, OY, UH, UW, RR, YU, AX, IX, IR, ER, AR, OR, UR, W, Y, R, LL, HX, RX, LX, M, N, NX, EL, DZ, EN, F, V, TH, DH, S, Z, SH, ZH, P, B, T, D, K, G, DX, TX, Q, CH, JH, DF, TZ, CZ]
+      # This port's phone names that differ from DECtalk's.
+      port_names: { HH: HX, NG: NX, L: LL, GS: Q }
+      # p_us_rom.h us_inhdr: inherent duration, ms.
+      inherent_ms: { SIL: 305, IY: 170, IH: 130, EY: 200, EH: 120, AE: 230, AA: 240, AY: 235, AW: 260, AH: 160, AO: 240, OW: 220, OY: 220, UH: 170, UW: 195, RR: 180, YU: 230, AX: 160, IX: 160, IR: 230, ER: 250, AR: 250, OR: 250, UR: 230, W: 60, Y: 75, R: 75, LL: 70, HX: 80, RX: 120, LX: 100, M: 80, N: 80, NX: 120, EL: 160, DZ: 60, EN: 150, F: 100, V: 100, TH: 85, DH: 60, S: 125, Z: 120, SH: 125, ZH: 120, P: 95, B: 80, T: 85, D: 80, K: 99, G: 70, DX: 30, TX: 70, Q: 100, CH: 160, JH: 100, DF: 30, TZ: 100, CZ: 120 }
+      # p_us_rom.h us_mindur: minimum duration, ms.
+      minimum_ms: { SIL: 7, IY: 80, IH: 80, EY: 140, EH: 80, AE: 80, AA: 90, AY: 110, AW: 110, AH: 70, AO: 100, OW: 90, OY: 110, UH: 60, UW: 70, RR: 90, YU: 100, AX: 60, IX: 60, IR: 120, ER: 120, AR: 120, OR: 120, UR: 120, W: 15, Y: 30, R: 30, LL: 40, HX: 60, RX: 70, LX: 70, M: 60, N: 50, NX: 80, EL: 110, DZ: 35, EN: 100, F: 60, V: 70, TH: 50, DH: 35, S: 65, Z: 70, SH: 60, ZH: 70, P: 70, B: 50, T: 50, D: 40, K: 55, G: 30, DX: 30, TX: 50, Q: 70, CH: 100, JH: 75, DF: 20, TZ: 60, CZ: 60 }
+      # p_us_rom.h us_featb, one name per bit (ph_defs.h:315-333): FSYLL
+      # syllabic, FVOICD voiced, FVOWEL vowel, FSON1 son1, FSONOR sonorant,
+      # FOBST obstruent, FPLOSV plosive, FNASAL nasal, FCONSON consonant,
+      # FSONCON sonorant_consonant, FSON2 son2, FBURST burst, FSTOP stop.
+      # W carries FOBST in the ROM; that is DECtalk's value, not a slip here.
+      features:
+        SIL: [sonorant]
+        IY: [syllabic, voiced, vowel, son1, sonorant]
+        IH: [syllabic, voiced, vowel, son1, sonorant]
+        EY: [syllabic, voiced, vowel, son1, sonorant]
+        EH: [syllabic, voiced, vowel, son1, sonorant]
+        AE: [syllabic, voiced, vowel, son1, sonorant]
+        AA: [syllabic, voiced, vowel, son1, sonorant]
+        AY: [syllabic, voiced, vowel, son1, sonorant]
+        AW: [syllabic, voiced, vowel, son1, sonorant]
+        AH: [syllabic, voiced, vowel, son1, sonorant]
+        AO: [syllabic, voiced, vowel, son1, sonorant]
+        OW: [syllabic, voiced, vowel, son1, sonorant]
+        OY: [syllabic, voiced, vowel, son1, sonorant]
+        UH: [syllabic, voiced, vowel, son1, sonorant]
+        UW: [syllabic, voiced, vowel, son1, sonorant]
+        RR: [syllabic, voiced, vowel, son1, sonorant]
+        YU: [syllabic, voiced, vowel, son1, sonorant, son2]
+        AX: [syllabic, voiced, vowel, son1, sonorant]
+        IX: [syllabic, voiced, vowel, son1, sonorant]
+        IR: [syllabic, voiced, vowel, son1, sonorant]
+        ER: [syllabic, voiced, vowel, son1, sonorant]
+        AR: [syllabic, voiced, vowel, son1, sonorant]
+        OR: [syllabic, voiced, vowel, son1, sonorant]
+        UR: [syllabic, voiced, vowel, son1, sonorant]
+        W: [voiced, son1, sonorant, obstruent, consonant, sonorant_consonant, son2]
+        Y: [voiced, son1, sonorant, consonant, sonorant_consonant, son2]
+        R: [voiced, son1, sonorant, consonant, sonorant_consonant, son2]
+        LL: [voiced, son1, sonorant, consonant, sonorant_consonant, son2]
+        HX: [sonorant, consonant]
+        RX: [voiced, son1, sonorant, consonant, sonorant_consonant]
+        LX: [voiced, son1, sonorant, consonant, sonorant_consonant]
+        M: [voiced, son1, sonorant, nasal, consonant, son2, stop]
+        N: [voiced, son1, sonorant, nasal, consonant, son2, stop]
+        NX: [voiced, son1, sonorant, nasal, consonant, son2, stop]
+        EL: [syllabic, voiced, son1, sonorant]
+        DZ: [voiced, obstruent, plosive, consonant, burst, stop]
+        EN: [syllabic, voiced, son1, sonorant, nasal, son2, stop]
+        F: [obstruent, consonant]
+        V: [voiced, obstruent, consonant]
+        TH: [obstruent, consonant]
+        DH: [voiced, obstruent, consonant]
+        S: [obstruent, consonant]
+        Z: [voiced, obstruent, consonant]
+        SH: [obstruent, consonant]
+        ZH: [voiced, obstruent, consonant]
+        P: [obstruent, plosive, consonant, burst, stop]
+        B: [voiced, obstruent, plosive, consonant, burst, stop]
+        T: [obstruent, plosive, consonant, burst, stop]
+        D: [voiced, obstruent, plosive, consonant, burst, stop]
+        K: [obstruent, plosive, consonant, burst, stop]
+        G: [voiced, obstruent, plosive, consonant, burst, stop]
+        DX: [voiced, obstruent, consonant, stop]
+        TX: [voiced, obstruent, plosive, consonant, burst, stop]
+        Q: []
+        CH: [obstruent, consonant, burst, stop]
+        JH: [voiced, obstruent, consonant, burst, stop]
+        DF: [voiced, obstruent, consonant, stop]
+        TZ: [obstruent, consonant]
+        CZ: [obstruent, consonant]
+      # The allophone codes whose feature word has FSYLL, read off `phonemes`
+      # and `features` above: IY..UR (1-23), EL (34) and EN (36). Rule 9 tests
+      # a clause position against this set (p_us_tim.c:539).
+      syllabic_codes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 34, 36]
+      # ph_defs.h:249-262 FBOUNDARY values, keyed by this port's rime_boundary.
+      boundary: { syllable: 32, morpheme: 64, word: 96, pp: 128, vp: 160, relative: 192, comma: 224, period: 256, question: 288, exclaim: 320 }
+      # ph_defs.h:435-449 NFxxMS: a duration in whole frames.
+      frames: { ms15: 2, ms20: 3, ms25: 4, ms30: 5, ms40: 6 }
+      # ph_defs.h:465-506 NxxPRCNT: fractions of 16384. N90PRCNT has the
+      # N85PRCNT value in the header (ph_defs.h:488); it is kept.
+      fraction: { one: 16384, half: 8192, p10: 1638, p25: 4096, p35: 5734, p60: 9831, p70: 11469, p80: 13108, p85: 13927, p90: 13927, p120: 19661, p150: 24576 }
+      # p_us_tim.c:319 compares the speaking rate with 160 words per minute.
+      # The oracle corpus is rendered at [:ra 180].
+      speaking_rate_wpm: 180
+      # Rule 1 pause lengths in frames, as DECtalk records them at this rate:
+      # 16 after a comma, 94 after a period, question mark or exclamation mark
+      # (nfcomma and nfperiod scaled by sprat1, p_us_tim.c:240-268).
+      pause_frames: { comma: 16, period: 94 }
+      # p_us_tim.c:468 caps HX at 11 frames; 871-877 floors RR at 13.
+      hx_max_frames: 11
+      rr_minimum_frames: 13
+      # One synthesis frame as the frontend's clock counts it (frame_period_sec).
+      frame_ms: 6.4
+      citations:
+        - "DECtalk 4.63 p_us_rom.h us_inhdr, us_mindur, us_featb"
+        - "DECtalk 4.63 l_all_ph.h US_<name> allophone codes"
+        - "DECtalk 4.63 ph_defs.h:249-262, 315-333, 435-449, 465-506"
     rate:
       undershoot_coefficient:
         value: 0.3
@@ -336,10 +459,6 @@ parameters:
       # as the equivalent fraction of the compressible duration range.
       short_phrase_prcnt_bonus: 30
       prcnt_denominator: 128
-      # DECtalk 4.63 -lt trace for "cake" changes PH2 from K to EY at
-      # 128.0 ms; Qlatt's integer-ms segment ledger reaches that boundary at
-      # 123.2 ms. Transfer the unit-rounded 5 ms from EY to the initial K.
-      cake_initial_k_ey_boundary_transfer_ms: 5
       # Rule 9 [nt] cluster (p_us_tim.c:628-639): word-internal /n/ before a
       # non-word-initial unstressed /t/ shortened to N10PRCNT.  The companion
       # N->D rewrite (L635) is allophonic and lives in the postlexical phase, not
@@ -454,33 +573,37 @@ parameters:
       # Source: ph_inton1.c make_f0_command(... IMPULSE, ..., 20, ...).
       stress_impulse_duration_frames: 20
       segmental:
-        # Active US male allophone targets, internal Hz*10.
-        # Source: Ph_drwt02.c us_f0msegtars[] (SI=50, EY=50, K=0, IX=70).
-        initial_silence_target: 50
-        ey_target: 50
-        k_target: 0
-        ix_target: 70
-        # Exact p_us_tim.c controller output for the active K-EY-K word family.
-        # Source: DECtalk 4.63 -lt controller/allophone trace for `cake.`.
+        # us_f0msegtars[]: incremental segmental F0 target per phone, internal
+        # Hz*10, for the phones whose entry is not 0. A phone not listed here
+        # has target 0. Keys are this port's phone names (SI is SIL).
+        targets:
+          SIL: 50
+          IY: 140
+          IH: 80
+          EY: 50
+          EH: 30
+          AH: 20
+          OW: 30
+          OY: 60
+          UH: 80
+          UW: 140
+          RR: 50
+          YU: 140
+          AX: 30
+          IX: 70
+          IR: 110
+          W: 100
+          Y: 140
+          Z: -200
+        # Rule 1 gives the clause-initial pause 4 frames before a voiced phone,
+        # an obstruent or a plosive (and 5 otherwise).
         initial_silence_frames: 4
-        initial_k_frames: 17
-        ey_frames: 37
-        final_k_frames: 14
-        dummy_ix_frames: 6
-        terminal_silence_frames: 94
-        # Exact p_us_tim.c controller output for the active DH-AX word family.
-        # Source: DECtalk 4.63 -lt controller/allophone trace for `the.`.
-        dh_target: 0
-        ax_target: 30
-        the_initial_silence_frames: 4
-        the_dh_frames: 10
-        the_ax_frames: 32
-        the_terminal_silence_frames: 94
+        # The controller counts durations in these frames.
+        frame_ms: 6.4
         citations:
-          - "DECtalk 4.63 Ph_drwt02.c us_f0msegtars and pht0draw"
-          - "DECtalk 4.63 p_us_tim.c controller durations"
-          - "DECtalk 4.63 -lt oracle trace for cake."
-          - "DECtalk 4.63 -lt oracle trace for the."
+          - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars"
+          - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause)"
+          - "DECtalk 4.63 ph_claus.c (6.4 ms controller frames)"
       citations:
         - "DECtalk 4.63 ph_inton1.c (hat-pattern F0 model)"
         - "DECtalk 4.63 Ph_drwt02.c (baseline profiles, speaker scaling)"
@@ -573,305 +696,6 @@ parameters:
         citations:
           - "DECtalk 4.63 p_us_rom.h us_maleloc/us_femloc (alveolar stop F2 locus region)"
           - "DECtalk 4.63 oracle -lt trace for 'boat bought' (OW->T F2 tail reaches the alveolar locus)"
-      the_dh_f1_hz:
-        value: 289
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH F1 at frames 0-3)"
-      the_dh_f2_hz:
-        value: 1500
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH F2 at frames 0-3)"
-      the_dh_f3_hz:
-        value: 2562
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH F3 at frames 0-3)"
-      the_dh_b1_hz:
-        value: 200
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH B1 at frames 0-4)"
-      the_dh_b2_hz:
-        value: 170
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH B2 at frames 0-4)"
-      the_dh_b3_hz:
-        value: 170
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (initialized SI and DH B3 at frames 0-9)"
-      the_dh_av_db:
-        value: 34
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (DH AV onset at frame 3)"
-      the_dh_a6_db:
-        value: 27
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (DH A6 transition at frame 3)"
-      the_dh_ab_db:
-        value: 27
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (DH AB transition at frame 3)"
-      the_tl_db:
-        value: 0
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native TLT is zero through DH and AX)"
-      the_dh_formant_trace_windows:
-        value:
-          - { start_ms: -12.8, end_ms: -6.4, fields: { A6: 9, AB: 9 }, tag: segmental_context }
-          - { start_ms: -6.4, end_ms: 0.0, fields: { A6: 18, AB: 18 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 295, F2: 1493, F3: 2561, B1: 200, B2: 170, B3: 170, AV: 37, AB: 36 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 297, F2: 1492, F3: 2562, B1: 187, B2: 163, B3: 170, AV: 39, AB: 38 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 299, F2: 1491, F3: 2562, B1: 175, B2: 157, B3: 170, AV: 42, AB: 40 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 301, F2: 1490, F3: 2562, B1: 162, B2: 151, B3: 170, AV: 45, AB: 42 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 301, F2: 1489, F3: 2562, B1: 150, B2: 145, B3: 170, AV: 47, AB: 44 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 301, F2: 1488, F3: 2563, B1: 136, B2: 135, B3: 170, AV: 50, AB: 46 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 301, F2: 1467, F3: 2592, B1: 123, B2: 125, B3: 171, AV: 54, AB: 46 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 301, F2: 1446, F3: 2621, B1: 109, B2: 116, B3: 172, AV: 55, AB: 46 }, tag: segmental_context }
-          - { start_ms: 57.6, fields: { F1: 323, F2: 1425, F3: 2650, B1: 96, B2: 106, B3: 173, AV: 56, AB: 41 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 6.4, fields: { A6: 27, AB: 27 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 51.2, fields: { A6: 0 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { A6: 46 }, tag: segmental_context }
-          - { start_ms: 57.6, fields: { A6: 41 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native DH F1/F2/F3/B1/B2/B3/AV/A6/AB values at frames 1-12)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      the_ax_f1_hz:
-        value: 346
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX F1 at frame 13)"
-      the_ax_f2_hz:
-        value: 1404
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX F2 at frame 13)"
-      the_ax_f3_hz:
-        value: 2679
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX F3 at frame 13)"
-      the_ax_b1_hz:
-        value: 95
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX B1 at frame 13)"
-      the_ax_b2_hz:
-        value: 103
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX B2 at frame 13)"
-      the_ax_b3_hz:
-        value: 173
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX B3 at frame 13)"
-      the_ax_av_db:
-        value: 57
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX AV at frame 13)"
-      the_ax_a6_db:
-        value: 37
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX A6 at frame 13)"
-      the_ax_ab_db:
-        value: 37
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (AX AB at frame 13)"
-      the_ax_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 6.0, fields: { F1: 346, F2: 1404, F3: 2679, B1: 95, B2: 103, B3: 173, AV: 57 }, tag: segmental_context }
-          - { start_ms: 6.0, end_ms: 12.4, fields: { F1: 368, F2: 1384, F3: 2709, B1: 94, B2: 99, B3: 174, AV: 58 }, tag: segmental_context }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 390, F2: 1371, F3: 2695, B1: 93, B2: 96, B3: 175, AV: 59 }, tag: segmental_context }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 412, F2: 1358, F3: 2681, B1: 93, B2: 93, B3: 176, AV: 60 }, tag: segmental_context }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 435, F2: 1345, F3: 2667, B1: 92, B2: 89, B3: 177, AV: 61 }, tag: segmental_context }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 457, F2: 1333, F3: 2653, B1: 91, B2: 86, B3: 178, AV: 62 }, tag: segmental_context }
-          - { start_ms: 38.0, end_ms: 44.6, fields: { F1: 479, F2: 1320, F3: 2639, B1: 90, B2: 83, B3: 179, AV: 62 }, tag: segmental_context }
-          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 501, F2: 1307, F3: 2625, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 524, F2: 1294, F3: 2611, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 57.4, end_ms: 63.8, fields: { F1: 526, F2: 1280, F3: 2598, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 63.8, end_ms: 70.2, fields: { F1: 528, F2: 1278, F3: 2598, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 70.2, end_ms: 76.6, fields: { F1: 530, F2: 1276, F3: 2598, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 76.6, end_ms: 83.0, fields: { F1: 533, F2: 1274, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 83.0, end_ms: 89.4, fields: { F1: 535, F2: 1272, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { F1: 537, F2: 1270, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { F1: 539, F2: 1268, F3: 2599, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 102.2, end_ms: 108.8, fields: { F1: 542, F2: 1266, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 108.8, end_ms: 115.4, fields: { F1: 544, F2: 1264, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 115.4, end_ms: 121.8, fields: { F1: 546, F2: 1262, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 121.8, fields: { F1: 548, F2: 1260, F3: 2600, B1: 90, B2: 80, B3: 180, AV: 62 }, tag: segmental_context }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { AH: 2 }, tag: segmental_context }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { AH: 5 }, tag: segmental_context }
-          - { start_ms: 102.2, end_ms: 108.8, fields: { AH: 7 }, tag: segmental_context }
-          - { start_ms: 108.8, end_ms: 115.4, fields: { AH: 10 }, tag: segmental_context }
-          - { start_ms: 115.4, end_ms: 121.8, fields: { AH: 12 }, tag: segmental_context }
-          - { start_ms: 121.8, end_ms: 128.2, fields: { AH: 15 }, tag: segmental_context }
-          - { start_ms: 128.2, end_ms: 134.6, fields: { AH: 17 }, tag: segmental_context }
-          - { start_ms: 134.6, end_ms: 141.0, fields: { AH: 20 }, tag: segmental_context }
-          - { start_ms: 141.0, end_ms: 147.4, fields: { AH: 22 }, tag: segmental_context }
-          - { start_ms: 147.4, end_ms: 153.8, fields: { AH: 25 }, tag: segmental_context }
-          - { start_ms: 153.8, end_ms: 160.2, fields: { AH: 27 }, tag: segmental_context }
-          - { start_ms: 160.2, end_ms: 166.4, fields: { AH: 30 }, tag: segmental_context }
-          - { start_ms: 166.4, end_ms: 172.8, fields: { AH: 32 }, tag: segmental_context }
-          - { start_ms: 172.8, end_ms: 179.2, fields: { AH: 35 }, tag: segmental_context }
-          - { start_ms: 179.2, end_ms: 185.6, fields: { AH: 37 }, tag: segmental_context }
-          - { start_ms: 185.6, end_ms: 192.0, fields: { AH: 40 }, tag: segmental_context }
-          - { start_ms: 192.0, end_ms: 198.4, fields: { AH: 42 }, tag: segmental_context }
-          - { start_ms: 198.4, fields: { AH: 45 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 6.0, fields: { A6: 37, AB: 37 }, tag: segmental_context }
-          - { start_ms: 6.0, end_ms: 12.4, fields: { A6: 32, AB: 32 }, tag: segmental_context }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { A6: 26, AB: 26 }, tag: segmental_context }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { A6: 19, AB: 19 }, tag: segmental_context }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { A6: 13, AB: 13 }, tag: segmental_context }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { A6: 6, AB: 6 }, tag: segmental_context }
-          - { start_ms: 38.0, fields: { A6: 0, AB: 0 }, tag: segmental_context }
-          - { start_ms: 134.6, end_ms: 141.0, fields: { AV: 61 }, tag: segmental_context }
-          - { start_ms: 141.0, end_ms: 147.4, fields: { AV: 60 }, tag: segmental_context }
-          - { start_ms: 147.4, end_ms: 153.8, fields: { AV: 60 }, tag: segmental_context }
-          - { start_ms: 153.8, end_ms: 160.2, fields: { AV: 59 }, tag: segmental_context }
-          - { start_ms: 160.2, end_ms: 166.4, fields: { AV: 58 }, tag: segmental_context }
-          - { start_ms: 166.4, end_ms: 172.8, fields: { B1: 102, B2: 86, AV: 58 }, tag: segmental_context }
-          - { start_ms: 172.8, end_ms: 179.2, fields: { B1: 115, B2: 92, AV: 57 }, tag: segmental_context }
-          - { start_ms: 179.2, end_ms: 185.6, fields: { B1: 127, B2: 98, AV: 57 }, tag: segmental_context }
-          - { start_ms: 185.6, end_ms: 192.0, fields: { B1: 140, B2: 105, AV: 56 }, tag: segmental_context }
-          - { start_ms: 192.0, end_ms: 198.4, fields: { B1: 152, B2: 111, AV: 55 }, tag: segmental_context }
-          - { start_ms: 198.4, fields: { B1: 165, B2: 117, AV: 55 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native AX F1/F2/F3/B1/B2/B3/AV/AP-to-AH/A6/AB values at frames 13-45)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      the_terminal_silence_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 6.4, fields: { F1: 548, F2: 1260, F3: 2600, B1: 177, B2: 123, B3: 180, AH: 47 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 547, F2: 1259, F3: 2602, B1: 190, B2: 130, B3: 180, AH: 45 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 547, F2: 1261, F3: 2602, B1: 177, B2: 123, B3: 180, AH: 42 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 547, F2: 1263, F3: 2602, B1: 165, B2: 117, B3: 180, AH: 38 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 547, F2: 1265, F3: 2602, B1: 152, B2: 111, B3: 180, AH: 35 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 548, F2: 1268, F3: 2602, B1: 140, B2: 105, B3: 180, AH: 31 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 548, F2: 1270, F3: 2602, B1: 127, B2: 98, B3: 180, AH: 28 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 548, F2: 1272, F3: 2602, B1: 115, B2: 92, B3: 180, AH: 24 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 548, F2: 1274, F3: 2602, B1: 102, B2: 86, B3: 180, AH: 21 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F1: 549, F2: 1276, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 17 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 70.4, fields: { F1: 549, F2: 1278, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 14 }, tag: segmental_context }
-          - { start_ms: 70.4, end_ms: 76.8, fields: { F1: 549, F2: 1280, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 10 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 83.2, fields: { F1: 549, F2: 1282, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 7 }, tag: segmental_context }
-          - { start_ms: 83.2, end_ms: 89.6, fields: { F1: 550, F2: 1285, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 3 }, tag: segmental_context }
-          - { start_ms: 89.6, end_ms: 96.0, fields: { F1: 550, F2: 1287, F3: 2602, B1: 90, B2: 80, B3: 180, AH: 0 }, tag: segmental_context }
-          - { start_ms: 96.0, end_ms: 102.4, fields: { F1: 550, F2: 1289, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 102.4, end_ms: 108.8, fields: { F1: 550, F2: 1291, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 108.8, end_ms: 115.2, fields: { F1: 551, F2: 1293, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 115.2, end_ms: 121.6, fields: { F1: 551, F2: 1295, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 121.6, end_ms: 128.0, fields: { F1: 551, F2: 1297, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 128.0, end_ms: 134.4, fields: { F1: 551, F2: 1299, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 134.4, fields: { F1: 552, F2: 1302, F3: 2602, B1: 90, B2: 80, B3: 180 }, tag: segmental_context }
-          - { start_ms: 563.2, end_ms: 569.6, fields: { B1: 102, B2: 86, B3: 180 }, tag: segmental_context }
-          - { start_ms: 569.6, end_ms: 576.0, fields: { B1: 115, B2: 92, B3: 180 }, tag: segmental_context }
-          - { start_ms: 576.0, end_ms: 582.4, fields: { B1: 127, B2: 98, B3: 180 }, tag: segmental_context }
-          - { start_ms: 582.4, end_ms: 588.8, fields: { B1: 140, B2: 105, B3: 180 }, tag: segmental_context }
-          - { start_ms: 588.8, end_ms: 595.2, fields: { B1: 152, B2: 111, B3: 180 }, tag: segmental_context }
-          - { start_ms: 595.2, fields: { B1: 165, B2: 117, B3: 180 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'the' (native terminal GEN_SIL F1/F2/F3/B1/B2/B3/AP-to-AH values from frame 44 onward)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      cake_initial_k_f1_hz:
-        value: 279
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K F1 frames 0-3)"
-      cake_initial_k_f2_hz:
-        value: 2091
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K F2 frames 0-3)"
-      cake_initial_k_b1_hz:
-        value: 300
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial silence and K-closure B1 at frames 0-4)"
-      cake_initial_k_b2_hz:
-        value: 210
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial silence and K-closure B2 at frames 0-4)"
-      cake_initial_k_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 83.0, fields: { TL: 0 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F1: 283 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F1: 288 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F1: 292 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F1: 296 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F1: 301 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F1: 305 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F1: 309 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F1: 314 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F1: 318 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 70.399, fields: { F1: 323 }, tag: segmental_context }
-          - { start_ms: 70.399, end_ms: 76.8, fields: { F1: 327 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 83.0, fields: { F1: 331 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F2: 2078 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F2: 2069 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F2: 2060 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F2: 2051 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F2: 2041 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F2: 2032 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F2: 2023 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F2: 2014 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F2: 2005 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 70.399, fields: { F2: 1996 }, tag: segmental_context }
-          # Engineering compensation: 19.2 + 70.4 is represented just after
-          # the native 89.6 ms sample boundary in JavaScript.
-          - { start_ms: 70.399, end_ms: 76.8, fields: { F2: 1987 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 83.0, fields: { F2: 1978 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { F3: 2694 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { F3: 2669 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { F3: 2645 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { F3: 2620 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { F3: 2595 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { F3: 2571 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { F3: 2546 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { F3: 2522 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { F3: 2497 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 70.399, fields: { F3: 2472 }, tag: segmental_context }
-          - { start_ms: 70.399, end_ms: 76.8, fields: { F3: 2448 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 83.0, fields: { F3: 2423 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { B1: 300, B2: 210 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { B1: 287, B2: 203 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { B1: 275, B2: 197 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { B1: 262, B2: 191 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { B1: 250, B2: 185 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { B1: 237, B2: 178 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { B1: 225, B2: 172 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { B1: 212, B2: 166 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 83.0, fields: { B1: 200, B2: 160 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 83.0, fields: { B3: 280 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-silence/initial-K F1/F2/F3/B1/B2/B3/TLT values at frames 0-15)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      cake_initial_k_release_f1_hz:
-        value: 336
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release F1 at frame 16)"
-      cake_initial_k_release_f2_hz:
-        value: 1969
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release F2 at frame 16)"
-      cake_initial_k_release_b1_hz:
-        value: 200
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release B1 at frame 16)"
-      cake_initial_k_release_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 26.0, fields: { AH: 0, A2: 0, TL: 0 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 6.6, fields: { F1: 336, A3: 0, A5: 0 }, tag: segmental_context }
-          - { start_ms: 6.6, end_ms: 13.0, fields: { F1: 340, A3: 50, A5: 36 }, tag: segmental_context }
-          - { start_ms: 13.0, end_ms: 19.4, fields: { F1: 344, A3: 50, A5: 36 }, tag: segmental_context }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { F1: 349, A3: 49, A5: 35 }, tag: segmental_context }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { F1: 353, A3: 48, A5: 34 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 6.6, fields: { F2: 1969 }, tag: segmental_context }
-          - { start_ms: 6.6, end_ms: 13.0, fields: { F2: 1960 }, tag: segmental_context }
-          - { start_ms: 13.0, end_ms: 19.4, fields: { F2: 1951 }, tag: segmental_context }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { F2: 1942 }, tag: segmental_context }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { F2: 1933 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 6.6, fields: { F3: 2398 }, tag: segmental_context }
-          - { start_ms: 6.6, end_ms: 13.0, fields: { F3: 2374 }, tag: segmental_context }
-          - { start_ms: 13.0, end_ms: 19.4, fields: { F3: 2349 }, tag: segmental_context }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { F3: 2325 }, tag: segmental_context }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { F3: 2300 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 19.4, fields: { B1: 200, B2: 160 }, tag: segmental_context }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { B1: 178, B2: 150 }, tag: segmental_context }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { B1: 156, B2: 140 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 19.4, fields: { B3: 280 }, tag: segmental_context }
-          - { start_ms: 19.4, end_ms: 25.8, fields: { B3: 266 }, tag: segmental_context }
-          - { start_ms: 25.8, end_ms: 26.0, fields: { B3: 253 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native initial-K release F1/F2/F3/B1/B2/B3/AP/A2/A3/A5/TLT values at frames 16-20)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
       initial_k_f3_hz:
         value: 2690
         citations:
@@ -884,256 +708,6 @@ parameters:
           - "DECtalk 4.63 oracle -lt traces for 'cake.' and 'Can you hear me?' (four initial GEN_SIL packets hold F3=2702)"
           - "DECtalk 4.63 ph_defs.h: one native controller frame is nominally 6.4ms"
           - "DECtalk 4.63 p_us_st1.c:493-504 (initial GEN_SIL forward boundary)"
-      cake_initial_k_release_f3_hz:
-        value: 2398
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (initial K release F3 at frame 16)"
-      cake_final_k_f2_hz:
-        value: 1993
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (final K F2 at frame 58)"
-      cake_final_k_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 96.0, fields: { TL: 0 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 96.0, fields: { F1: 337 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 12.4, fields: { F2: 1993 }, tag: segmental_context }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { F2: 1988 }, tag: segmental_context }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { F2: 1983 }, tag: segmental_context }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { F2: 1978 }, tag: segmental_context }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { F2: 1974 }, tag: segmental_context }
-          - { start_ms: 38.0, end_ms: 44.4, fields: { F2: 1969 }, tag: segmental_context }
-          - { start_ms: 44.4, end_ms: 50.8, fields: { F2: 1964 }, tag: segmental_context }
-          - { start_ms: 50.8, end_ms: 57.2, fields: { F2: 1959 }, tag: segmental_context }
-          - { start_ms: 57.2, end_ms: 63.6, fields: { F2: 1955 }, tag: segmental_context }
-          - { start_ms: 63.6, end_ms: 70.0, fields: { F2: 1950 }, tag: segmental_context }
-          - { start_ms: 70.0, end_ms: 76.4, fields: { F2: 1945, A3: 47, A5: 33 }, tag: segmental_context }
-          - { start_ms: 76.4, end_ms: 82.8, fields: { F2: 1940, A3: 47, A5: 33 }, tag: segmental_context }
-          - { start_ms: 82.8, end_ms: 89.2, fields: { F2: 1936, A3: 46, A5: 32 }, tag: segmental_context }
-          - { start_ms: 89.2, end_ms: 95.599, fields: { F2: 1931, A3: 45, A5: 31 }, tag: segmental_context }
-          # Engineering compensation: 365.2 + 95.6 is represented just after
-          # the native 460.8 ms sample boundary in JavaScript.
-          - { start_ms: 95.599, end_ms: 96.0, fields: { F2: 1927, AH: 39, A3: 33, A5: 19 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 31.6, fields: { F3: 2404 }, tag: segmental_context }
-          - { start_ms: 31.6, end_ms: 57.2, fields: { F3: 2403 }, tag: segmental_context }
-          - { start_ms: 57.2, end_ms: 82.8, fields: { F3: 2402 }, tag: segmental_context }
-          - { start_ms: 82.8, end_ms: 96.0, fields: { F3: 2401 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 12.4, fields: { B1: 134, B2: 130 }, tag: segmental_context }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { B1: 156, B2: 140 }, tag: segmental_context }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { B1: 178, B2: 150 }, tag: segmental_context }
-          - { start_ms: 25.2, end_ms: 82.8, fields: { B1: 200, B2: 160 }, tag: segmental_context }
-          - { start_ms: 82.8, end_ms: 89.2, fields: { B1: 176, B2: 150 }, tag: segmental_context }
-          - { start_ms: 89.2, end_ms: 95.599, fields: { B1: 153, B2: 140 }, tag: segmental_context }
-          - { start_ms: 95.599, end_ms: 96.0, fields: { B1: 310, B2: 170 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 12.4, fields: { B3: 239 }, tag: segmental_context }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { B3: 253 }, tag: segmental_context }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { B3: 266 }, tag: segmental_context }
-          - { start_ms: 25.2, end_ms: 82.8, fields: { B3: 280 }, tag: segmental_context }
-          - { start_ms: 82.8, end_ms: 89.2, fields: { B3: 266 }, tag: segmental_context }
-          - { start_ms: 89.2, end_ms: 95.599, fields: { B3: 253 }, tag: segmental_context }
-          - { start_ms: 95.599, end_ms: 96.0, fields: { B3: 239 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native final-K F1/F2/F3/B1/B2/B3/AP/A3/A5/TLT values at frames 58-72)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      cake_dummy_ix_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 38.0, fields: { TL: 0 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 12.4, fields: { F1: 353, F2: 1900, F3: 2425, B2: 170, B3: 233, AH: 39, A3: 22, A5: 13 }, tag: segmental_context }
-          - { start_ms: 12.4, end_ms: 18.8, fields: { F1: 382, F2: 1830, F3: 2438, B2: 170, B3: 226, AH: 39, A3: 11, A5: 6 }, tag: segmental_context }
-          - { start_ms: 18.8, end_ms: 25.2, fields: { F1: 410, F2: 1760, F3: 2450, B2: 170, B3: 219, AH: 39 }, tag: segmental_context }
-          - { start_ms: 25.2, end_ms: 31.6, fields: { F1: 426, F2: 1733, F3: 2474, B2: 170, B3: 213, AH: 39 }, tag: segmental_context }
-          - { start_ms: 31.6, end_ms: 38.0, fields: { F1: 442, F2: 1706, F3: 2498, B2: 170, B3: 206, AH: 39 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native dummy-IX F1/F2/F3/B2/B3/AP/A3/A5/TLT values at frames 73-77)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      cake_terminal_silence_f2_hz:
-        value: 1670
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (terminal GEN_SIL F2 hold from frame 96)"
-      cake_terminal_silence_formant_trace_windows:
-        value:
-          - { start_ms: 0.0, end_ms: 6.4, fields: { AH: 45 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { AH: 42 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { AH: 38 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { AH: 35 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { AH: 31 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { AH: 28 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { AH: 24 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { AH: 21 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 57.6, fields: { AH: 17 }, tag: segmental_context }
-          - { start_ms: 57.6, end_ms: 64.0, fields: { AH: 14 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 70.4, fields: { AH: 10 }, tag: segmental_context }
-          - { start_ms: 70.4, end_ms: 76.8, fields: { AH: 7 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 83.2, fields: { AH: 3 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 12.8, fields: { F1: 459 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 25.6, fields: { F1: 460 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 38.4, fields: { F1: 461 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 51.2, fields: { F1: 462 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 64.0, fields: { F1: 463 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 76.8, fields: { F1: 464 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 89.6, fields: { F1: 465 }, tag: segmental_context }
-          - { start_ms: 89.6, end_ms: 102.4, fields: { F1: 466 }, tag: segmental_context }
-          - { start_ms: 102.4, end_ms: 115.2, fields: { F1: 467 }, tag: segmental_context }
-          - { start_ms: 115.2, end_ms: 127.6, fields: { F1: 468 }, tag: segmental_context }
-          - { start_ms: 127.6, fields: { F1: 469 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 12.8, fields: { F2: 1677 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 32.0, fields: { F2: 1676 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 44.8, fields: { F2: 1675 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 64.0, fields: { F2: 1674 }, tag: segmental_context }
-          - { start_ms: 64.0, end_ms: 83.2, fields: { F2: 1673 }, tag: segmental_context }
-          - { start_ms: 83.2, end_ms: 96.0, fields: { F2: 1672 }, tag: segmental_context }
-          - { start_ms: 96.0, end_ms: 115.2, fields: { F2: 1671 }, tag: segmental_context }
-          - { start_ms: 115.2, fields: { F2: 1670 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 25.6, fields: { F3: 2522 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 51.2, fields: { F3: 2523 }, tag: segmental_context }
-          - { start_ms: 51.2, end_ms: 76.8, fields: { F3: 2524 }, tag: segmental_context }
-          - { start_ms: 76.8, end_ms: 102.4, fields: { F3: 2525 }, tag: segmental_context }
-          - { start_ms: 102.4, end_ms: 127.6, fields: { F3: 2526 }, tag: segmental_context }
-          - { start_ms: 127.6, fields: { F3: 2527 }, tag: segmental_context }
-          - { start_ms: 0.0, end_ms: 6.4, fields: { B1: 300, B2: 150 }, tag: segmental_context }
-          - { start_ms: 6.4, end_ms: 12.8, fields: { B1: 270, B2: 143 }, tag: segmental_context }
-          - { start_ms: 12.8, end_ms: 19.2, fields: { B1: 240, B2: 137 }, tag: segmental_context }
-          - { start_ms: 19.2, end_ms: 25.6, fields: { B1: 210, B2: 131 }, tag: segmental_context }
-          - { start_ms: 25.6, end_ms: 32.0, fields: { B1: 180, B2: 125 }, tag: segmental_context }
-          - { start_ms: 32.0, end_ms: 38.4, fields: { B1: 150, B2: 118 }, tag: segmental_context }
-          - { start_ms: 38.4, end_ms: 44.8, fields: { B1: 120, B2: 112 }, tag: segmental_context }
-          - { start_ms: 44.8, end_ms: 51.2, fields: { B1: 90, B2: 106 }, tag: segmental_context }
-          - { start_ms: 51.2, fields: { B1: 60, B2: 100 }, tag: segmental_context }
-          - { start_ms: 556.8, end_ms: 563.2, fields: { B1: 72, B2: 106 }, tag: segmental_context }
-          - { start_ms: 563.2, end_ms: 569.6, fields: { B1: 85, B2: 112 }, tag: segmental_context }
-          - { start_ms: 569.6, end_ms: 576.0, fields: { B1: 97, B2: 118 }, tag: segmental_context }
-          - { start_ms: 576.0, end_ms: 582.4, fields: { B1: 110, B2: 125 }, tag: segmental_context }
-          - { start_ms: 582.4, end_ms: 588.8, fields: { B1: 122, B2: 131 }, tag: segmental_context }
-          - { start_ms: 588.8, fields: { B1: 135, B2: 137 }, tag: segmental_context }
-          - { start_ms: 0.0, fields: { B3: 200 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native terminal GEN_SIL F1/F2/F3/B1/B2/B3/AP values from frame 78 onward)"
-          - "DECtalk 4.63 ph_draw.c (formant transitions are emitted once per native synthesis frame)"
-      # Exact native 6.4 ms F2 cells for cake's EY after the K-to-EY boundary.
-      # Offsets are relative to Qlatt's unit-rounded 128.2 ms EY onset; the
-      # first 6.2 ms offset therefore lands on DECtalk frame 21 at 134.4 ms.
-      # The separate exact tail cells take over at 195 ms (DECtalk frame 51).
-      cake_ey_primary_formant_trace_windows:
-        value:
-          - { start_ms: 6.2, end_ms: 237.0, fields: { TL: 0 }, tag: segmental_context }
-          - { start_ms: 6.2, end_ms: 63.8, fields: { AH: 48 }, tag: segmental_context }
-          - { start_ms: 6.2, end_ms: 12.6, fields: { F1: 357, F2: 1926, A3: 36, A5: 22 }, tag: segmental_context }
-          - { start_ms: 12.6, end_ms: 19.0, fields: { F1: 377, F2: 1898, A3: 24, A5: 15 }, tag: segmental_context }
-          - { start_ms: 19.0, end_ms: 25.4, fields: { F1: 397, F2: 1871, A3: 12, A5: 7 }, tag: segmental_context }
-          - { start_ms: 25.4, end_ms: 31.8, fields: { F1: 417, F2: 1844 }, tag: segmental_context }
-          - { start_ms: 31.8, end_ms: 38.2, fields: { F1: 434, F2: 1831 }, tag: segmental_context }
-          - { start_ms: 38.2, end_ms: 44.6, fields: { F1: 451, F2: 1817, AV: 0 }, tag: segmental_context }
-          - { start_ms: 44.6, end_ms: 51.0, fields: { F1: 468, F2: 1804, AV: 0 }, tag: segmental_context }
-          - { start_ms: 51.0, end_ms: 57.4, fields: { F1: 486, F2: 1790, AV: 0 }, tag: segmental_context }
-          - { start_ms: 57.4, end_ms: 63.8, fields: { F1: 483, F2: 1777 }, tag: segmental_context }
-          - { start_ms: 63.8, end_ms: 70.2, fields: { F1: 481, F2: 1790 }, tag: segmental_context }
-          - { start_ms: 70.2, end_ms: 76.6, fields: { F1: 478, F2: 1804 }, tag: segmental_context }
-          - { start_ms: 76.6, end_ms: 83.0, fields: { F1: 476, F2: 1818 }, tag: segmental_context }
-          - { start_ms: 83.0, end_ms: 89.4, fields: { F1: 473, F2: 1831 }, tag: segmental_context }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { F1: 471, F2: 1845 }, tag: segmental_context }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { F1: 468, F2: 1858 }, tag: segmental_context }
-          - { start_ms: 102.2, end_ms: 108.6, fields: { F1: 466, F2: 1872 }, tag: segmental_context }
-          - { start_ms: 108.6, end_ms: 115.0, fields: { F1: 463, F2: 1881 }, tag: segmental_context }
-          - { start_ms: 115.0, end_ms: 121.4, fields: { F1: 461, F2: 1891 }, tag: segmental_context }
-          - { start_ms: 121.4, end_ms: 127.8, fields: { F1: 458, F2: 1900 }, tag: segmental_context }
-          - { start_ms: 127.8, end_ms: 134.2, fields: { F1: 457, F2: 1910 }, tag: segmental_context }
-          - { start_ms: 134.2, end_ms: 140.6, fields: { F1: 456, F2: 1920 }, tag: segmental_context }
-          - { start_ms: 140.6, end_ms: 147.0, fields: { F1: 455, F2: 1929 }, tag: segmental_context }
-          - { start_ms: 147.0, end_ms: 153.4, fields: { F1: 454, F2: 1939 }, tag: segmental_context }
-          - { start_ms: 153.4, end_ms: 159.8, fields: { F1: 453, F2: 1949 }, tag: segmental_context }
-          - { start_ms: 159.8, end_ms: 166.2, fields: { F1: 452, F2: 1958 }, tag: segmental_context }
-          - { start_ms: 166.2, end_ms: 172.6, fields: { F1: 451, F2: 1968 }, tag: segmental_context }
-          - { start_ms: 172.6, end_ms: 179.0, fields: { F1: 450, F2: 1977 }, tag: segmental_context }
-          - { start_ms: 179.0, end_ms: 185.4, fields: { F1: 449, F2: 1987 }, tag: segmental_context }
-          - { start_ms: 185.4, end_ms: 191.8, fields: { F1: 448, F2: 1997 }, tag: segmental_context }
-          - { start_ms: 191.8, end_ms: 195.0, fields: { F1: 447, F2: 2006 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native F1/F2/AP/A3/A5/TLT values at frames 21-50 and AV onset at frame 29)"
-          - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
-      cake_ey_primary_formant_tail_windows:
-        value:
-          - { start_ms: 195.0, end_ms: 198.2, fields: { F2: 2006 }, tag: segmental_context }
-          - { start_ms: 198.2, end_ms: 204.6, fields: { F1: 446, F2: 2006 }, tag: segmental_context }
-          - { start_ms: 204.6, end_ms: 211.0, fields: { F1: 430, F2: 2006 }, tag: segmental_context }
-          - { start_ms: 211.0, end_ms: 217.4, fields: { F1: 414, F2: 2003 }, tag: segmental_context }
-          - { start_ms: 217.4, end_ms: 223.8, fields: { F1: 398, F2: 2001 }, tag: segmental_context }
-          - { start_ms: 223.8, end_ms: 230.2, fields: { F1: 383, F2: 1998 }, tag: segmental_context }
-          - { start_ms: 230.2, end_ms: 236.6, fields: { F1: 367, F2: 1996 }, tag: segmental_context }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { F1: 351, F2: 1994, AV: 0 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native F1/F2 values at frames 51-57 and AV offset at frame 57)"
-          - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
-      cake_ey_f3_trace_windows:
-        value:
-          - { start_ms: 6.2, end_ms: 12.6, fields: { F3: 2276 }, tag: segmental_context }
-          - { start_ms: 12.6, end_ms: 19.0, fields: { F3: 2301 }, tag: segmental_context }
-          - { start_ms: 19.0, end_ms: 25.4, fields: { F3: 2325 }, tag: segmental_context }
-          - { start_ms: 25.4, end_ms: 31.8, fields: { F3: 2350 }, tag: segmental_context }
-          - { start_ms: 31.8, end_ms: 38.2, fields: { F3: 2378 }, tag: segmental_context }
-          - { start_ms: 38.2, end_ms: 44.6, fields: { F3: 2406 }, tag: segmental_context }
-          - { start_ms: 44.6, end_ms: 51.0, fields: { F3: 2434 }, tag: segmental_context }
-          - { start_ms: 51.0, end_ms: 57.4, fields: { F3: 2462 }, tag: segmental_context }
-          - { start_ms: 57.4, end_ms: 63.8, fields: { F3: 2465 }, tag: segmental_context }
-          - { start_ms: 63.8, end_ms: 70.2, fields: { F3: 2469 }, tag: segmental_context }
-          - { start_ms: 70.2, end_ms: 76.6, fields: { F3: 2472 }, tag: segmental_context }
-          - { start_ms: 76.6, end_ms: 83.0, fields: { F3: 2476 }, tag: segmental_context }
-          - { start_ms: 83.0, end_ms: 89.4, fields: { F3: 2479 }, tag: segmental_context }
-          - { start_ms: 89.4, end_ms: 95.8, fields: { F3: 2483 }, tag: segmental_context }
-          - { start_ms: 95.8, end_ms: 102.2, fields: { F3: 2486 }, tag: segmental_context }
-          - { start_ms: 102.2, end_ms: 108.6, fields: { F3: 2490 }, tag: segmental_context }
-          - { start_ms: 108.6, end_ms: 115.0, fields: { F3: 2493 }, tag: segmental_context }
-          - { start_ms: 115.0, end_ms: 121.4, fields: { F3: 2497 }, tag: segmental_context }
-          - { start_ms: 121.4, end_ms: 127.8, fields: { F3: 2500 }, tag: segmental_context }
-          - { start_ms: 127.8, end_ms: 134.2, fields: { F3: 2504 }, tag: segmental_context }
-          - { start_ms: 134.2, end_ms: 140.6, fields: { F3: 2507 }, tag: segmental_context }
-          - { start_ms: 140.6, end_ms: 147.0, fields: { F3: 2511 }, tag: segmental_context }
-          - { start_ms: 147.0, end_ms: 153.4, fields: { F3: 2514 }, tag: segmental_context }
-          - { start_ms: 153.4, end_ms: 159.8, fields: { F3: 2518 }, tag: segmental_context }
-          - { start_ms: 159.8, end_ms: 166.2, fields: { F3: 2521 }, tag: segmental_context }
-          - { start_ms: 166.2, end_ms: 172.6, fields: { F3: 2525 }, tag: segmental_context }
-          - { start_ms: 172.6, end_ms: 179.0, fields: { F3: 2528 }, tag: segmental_context }
-          - { start_ms: 179.0, end_ms: 185.4, fields: { F3: 2532 }, tag: segmental_context }
-          - { start_ms: 185.4, end_ms: 191.8, fields: { F3: 2535 }, tag: segmental_context }
-          - { start_ms: 191.8, end_ms: 204.6, fields: { F3: 2539 }, tag: segmental_context }
-          - { start_ms: 204.6, end_ms: 211.0, fields: { F3: 2519 }, tag: segmental_context }
-          - { start_ms: 211.0, end_ms: 217.4, fields: { F3: 2500 }, tag: segmental_context }
-          - { start_ms: 217.4, end_ms: 223.8, fields: { F3: 2480 }, tag: segmental_context }
-          - { start_ms: 223.8, end_ms: 230.2, fields: { F3: 2461 }, tag: segmental_context }
-          - { start_ms: 230.2, end_ms: 236.6, fields: { F3: 2441 }, tag: segmental_context }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { F3: 2422 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY F3 values at frames 21-57)"
-          - "DECtalk 4.63 ph_draw.c (piecewise-linear dipcum and decaying ftran are summed once per native synthesis frame)"
-      cake_ey_b1_trace_windows:
-        value:
-          - { start_ms: 6.2, end_ms: 63.8, fields: { B1: 320, B2: 170 }, tag: segmental_context }
-          - { start_ms: 63.8, end_ms: 198.2, fields: { B1: 70, B2: 100 }, tag: segmental_context }
-          - { start_ms: 198.2, end_ms: 204.6, fields: { B1: 77, B2: 100 }, tag: segmental_context }
-          - { start_ms: 204.6, end_ms: 211.0, fields: { B1: 85, B2: 100 }, tag: segmental_context }
-          - { start_ms: 211.0, end_ms: 217.4, fields: { B1: 93, B2: 104 }, tag: segmental_context }
-          - { start_ms: 217.4, end_ms: 223.8, fields: { B1: 101, B2: 109 }, tag: segmental_context }
-          - { start_ms: 223.8, end_ms: 230.2, fields: { B1: 108, B2: 114 }, tag: segmental_context }
-          - { start_ms: 230.2, end_ms: 236.6, fields: { B1: 116, B2: 119 }, tag: segmental_context }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { B1: 124, B2: 124 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY B1/B2 values at frames 21-57)"
-          - "DECtalk 4.63 ph_draw.c (bandwidth transitions are emitted once per native synthesis frame)"
-      cake_ey_b3_trace_windows:
-        value:
-          - { start_ms: 6.2, end_ms: 12.6, fields: { B3: 239 }, tag: segmental_context }
-          - { start_ms: 12.6, end_ms: 19.0, fields: { B3: 233 }, tag: segmental_context }
-          - { start_ms: 19.0, end_ms: 25.4, fields: { B3: 226 }, tag: segmental_context }
-          - { start_ms: 25.4, end_ms: 31.8, fields: { B3: 219 }, tag: segmental_context }
-          - { start_ms: 31.8, end_ms: 38.2, fields: { B3: 213 }, tag: segmental_context }
-          - { start_ms: 38.2, end_ms: 44.6, fields: { B3: 206 }, tag: segmental_context }
-          - { start_ms: 44.6, end_ms: 211.0, fields: { B3: 200 }, tag: segmental_context }
-          - { start_ms: 211.0, end_ms: 217.4, fields: { B3: 206 }, tag: segmental_context }
-          - { start_ms: 217.4, end_ms: 223.8, fields: { B3: 213 }, tag: segmental_context }
-          - { start_ms: 223.8, end_ms: 230.2, fields: { B3: 219 }, tag: segmental_context }
-          - { start_ms: 230.2, end_ms: 236.6, fields: { B3: 226 }, tag: segmental_context }
-          - { start_ms: 236.6, end_ms: 237.0, fields: { B3: 233 }, tag: segmental_context }
-        citations:
-          - "DECtalk 4.63 oracle -lt trace for 'cake' (native EY B3 values at frames 21-57)"
-          - "DECtalk 4.63 ph_draw.c (bandwidth transitions are emitted once per native synthesis frame)"
       special_coartic:
         # us_place & FALVEL alveolars (p_us_st1.c:373/381; ph_defs.h:342).
         alveolar:
@@ -1234,14 +808,16 @@ output:
         citations:
           - "DECtalk 4.63 p_us_tim.c: terminal punctuation silence is emitted as GEN_SIL duration"
       duration_floors:
+        # The duration rules already give every allophone DECtalk's frame
+        # count; lowering adds no floor of its own.
         stop_release_ms:
-          value: 7
+          value: 0
           citations:
-            - "DECtalk 4.63 ph_defs.h: NF7MS = 1 synthesis frame; frtoms(1) is approximately 7ms at NSAMP_FRAME=71"
+            - "DECtalk 4.63 p_us_tim.c:895-941 (the duration rules set the final frame count; nothing floors it afterwards)"
         default_ms:
-          value: 30
+          value: 0
           citations:
-            - "DECtalk 4.63 ph_defs.h: NF30MS = 5 synthesis frames; named 30ms floor preserves legacy frontend default"
+            - "DECtalk 4.63 p_us_tim.c:895-941 (the duration rules set the final frame count; nothing floors it afterwards)"
       event_points:
         include_segment_start: true
         include_control_boundaries: true

@@ -604,11 +604,6 @@ rules_by_letter:
     right: ''
     phonemes: [AE1]
   B:
-  # DECtalk 4.63 -lp oracle for "The big dog barked." emits b'aar k t.
-  - left: ' '
-    letters: BARKED
-    right: ' '
-    phonemes: [B, AR0, K, T]
   - left: ''
     letters: BOROUGH
     right: ' '
@@ -3133,11 +3128,6 @@ rules_by_letter:
     right: ''
     phonemes: [K]
   L:
-  # DECtalk 4.63 -lp oracle for "Red lorries roll along." emits ll'aor iyz.
-  - left: ' '
-    letters: LORRIES
-    right: ' '
-    phonemes: [L, OR1, IY0, Z]
   - left: ''
     letters: LATERAL
     right: ' '
@@ -5453,16 +5443,6 @@ rules_by_letter:
     right: ''
     phonemes: [K, S]
   Y:
-  # DECtalk 4.63 -lp oracle for "Young yaks yelled." emits yx'aek s.
-  - left: ' '
-    letters: YAKS
-    right: ' '
-    phonemes: [Y, AE1, K, S]
-  # DECtalk 4.63 -lp oracle for "Young yaks yelled." emits yx'ehlld.
-  - left: ' '
-    letters: YELLED
-    right: ' '
-    phonemes: [Y, EH1, L, D]
   # DECtalk 4.63 parity: preserve the high back glide-vowel sequence in the exact function word.
   - left: ' '
     letters: YOU
@@ -5521,11 +5501,6 @@ rules_by_letter:
     right: ''
     phonemes: [IH1]
   Z:
-  # DECtalk 4.63 -lp oracle for "Safe zones feel fuzzy." emits z'own z.
-  - left: ' '
-    letters: ZONES
-    right: ' '
-    phonemes: [Z, OW1, N, Z]
   - left: ' '
     letters: ZOO
     right: '[AEIOU]'

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-heldout-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "held-take", "text": "take.", "group": "heldout", "tags": ["minimal-pair", "cake"], "expectedFocus": ["trace"] },
+    { "id": "held-bake", "text": "bake.", "group": "heldout", "tags": ["minimal-pair", "cake"], "expectedFocus": ["trace"] },
+    { "id": "held-lake", "text": "lake.", "group": "heldout", "tags": ["minimal-pair", "cake"], "expectedFocus": ["trace"] },
+    { "id": "held-cape", "text": "cape.", "group": "heldout", "tags": ["minimal-pair", "cake"], "expectedFocus": ["trace"] },
+    { "id": "held-kate", "text": "kate.", "group": "heldout", "tags": ["minimal-pair", "cake"], "expectedFocus": ["trace"] },
+    { "id": "held-coke", "text": "coke.", "group": "heldout", "tags": ["minimal-pair", "cake"], "expectedFocus": ["trace"] },
+    { "id": "held-kick", "text": "kick.", "group": "heldout", "tags": ["minimal-pair", "cake"], "expectedFocus": ["trace"] },
+    { "id": "held-a", "text": "a.", "group": "heldout", "tags": ["minimal-pair", "the"], "expectedFocus": ["trace"] },
+    { "id": "held-they", "text": "they.", "group": "heldout", "tags": ["minimal-pair", "the"], "expectedFocus": ["trace"] },
+    { "id": "held-cake-phrase", "text": "The cake is good.", "group": "heldout", "tags": ["in-context", "cake", "the"], "expectedFocus": ["trace"] }
+  ]
+}

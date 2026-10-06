@@ -460,6 +460,8 @@ relations:
     scalars:
       duration:
         unit: ms
+        # Durations are kept on whole milliseconds after every rule.
+        quantum: 1
         resolution: klatt
         max: 500
         floor_field: durationFloor

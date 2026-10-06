@@ -38,6 +38,129 @@ version: v1
 # ---------------------------------------------------------------------------
 rules:
   # -------------------------------------------------------------------------
+  # PHONE STRUCTURE WORD (ph_sort.c phsort(), run by DECtalk before phalloph()).
+  #
+  # DECtalk gives every phone a structure word that its allophone and duration
+  # rules test. Two of its fields belong to consonants and are computed here,
+  # ahead of every allophone rule that reads them:
+  #
+  #   FWINITC  word-initial consonant: every consonant before the word's first
+  #            syllabic. ph_sort.c:1383-1389 sets it while word_init_sw is still
+  #            TRUE, and the first syllabic clears word_init_sw (:1352).
+  #   FSTRESS  a consonant takes the stress of the stressed syllabic it leads
+  #            into, per get_stress_of_conson (p_us_sr1.c:73-140): the scan
+  #            runs forward to the stress mark that precedes the syllabic and
+  #            stops at any syllabic or boundary symbol first. With m = number
+  #            of phones from the consonant to the mark:
+  #              m == 1  the consonant is stressed
+  #              m == 2  only if us_phcluster(consonant, next) is a cluster
+  #              m == 3  only if us_phcluster(second, third) is CLUSTER_TRYS
+  #                      and the consonant is /s/
+  #              m  > 3  never
+  #
+  # Qlatt keeps a stress mark on its syllabic (`.stress`) and word boundaries
+  # as word membership, so "stops at a boundary" is "same word".
+  #
+  # Before either, phsort() guarantees a primary stress: "Every breath group
+  # must have at least one 1-stress" (ph_sort.c:1181-1189). When a clause has
+  # none, find_syll_to_stress (ph_sort2.c:129-181) stresses the first syllabic
+  # of the clause's LAST word. Consonant stress then follows from it.
+  # -------------------------------------------------------------------------
+  dectalk_breath_group_primary_stress:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.type == 'vowel' && has(current.word) && current.word != ''"
+    define:
+      prev_primary_or_boundary: >-
+        look_back_where(current, 100,
+          '(candidate.type == "vowel" && has(candidate.stress) && candidate.stress == 1) || candidate.phoneme == "SIL"')
+      next_primary_or_boundary: "look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')"
+      prior_vowel_in_word: >-
+        find_within_word(current,
+          "current.type == 'vowel'",
+          "behind")
+      no_primary_in_clause: >-
+        (prev_primary_or_boundary == null || prev_primary_or_boundary.phoneme == 'SIL')
+        && (next_primary_or_boundary == null || next_primary_or_boundary.phoneme == 'SIL')
+      after_word: >-
+        look_ahead_where(current, 100,
+          'candidate.phoneme == "SIL" || !(has(candidate.word) && has(source.word) && candidate.word == source.word)')
+      in_last_word: "after_word == null || after_word.phoneme == 'SIL'"
+      already_primary: "has(current.stress) && current.stress == 1"
+    constraint: "!already_primary && no_primary_in_clause && in_last_word && prior_vowel_in_word == null"
+    apply:
+      - field: stress
+        op: set
+        value: 1
+        tag: fallback_primary_stress
+    citations:
+      - "DECtalk 4.63 ph_sort.c:1181-1189 (every breath group must have at least one 1-stress)"
+      - "DECtalk 4.63 ph_sort2.c:129-181 find_syll_to_stress (first syllabic of the last word)"
+
+  dectalk_word_initial_consonant:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme != 'SIL' && current.type != 'vowel'
+        && !(current.phoneme in ['EL', 'EM', 'EN'])
+        && has(current.word) && current.word != ''
+    define:
+      prior_syllabic_in_word: >-
+        find_within_word(current,
+          "current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']",
+          "behind")
+    constraint: prior_syllabic_in_word == null
+    apply:
+      - field: word_initial_consonant
+        op: set
+        value: true
+        tag: word_initial_consonant
+    citations:
+      - "DECtalk 4.63 ph_sort.c:1352,1383-1389 (FWINITC on phones before the word's first syllabic)"
+
+  dectalk_consonant_stress:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme != 'SIL' && current.type != 'vowel'
+        && !(current.phoneme in ['EL', 'EM', 'EN'])
+        && has(current.word) && current.word != ''
+    define:
+      n1: next
+      n2: "ahead(current, 2)"
+      n3: "ahead(current, 3)"
+      # Each phone is in the word of the one before it, starting from current.
+      in1: "n1 != null && dectalk_same_word(current, n1)"
+      in2: "in1 && n2 != null && dectalk_same_word(n1, n2)"
+      in3: "in2 && n3 != null && dectalk_same_word(n2, n3)"
+      syl1: "in1 && (n1.type == 'vowel' || n1.phoneme in ['EL', 'EM', 'EN'])"
+      syl2: "in2 && (n2.type == 'vowel' || n2.phoneme in ['EL', 'EM', 'EN'])"
+      syl3: "in3 && (n3.type == 'vowel' || n3.phoneme in ['EL', 'EM', 'EN'])"
+      # `stress` may be present and null; get() reads that as 0.
+      stress1: "syl1 ? get(n1, 'stress', 0) : 0"
+      stress2: "syl2 ? get(n2, 'stress', 0) : 0"
+      stress3: "syl3 ? get(n3, 'stress', 0) : 0"
+      pair12: "in1 && !syl1 ? dectalk_onset_cluster(current.phoneme, n1.phoneme) : 'none'"
+      pair23: "in2 && !syl1 && !syl2 ? dectalk_onset_cluster(n1.phoneme, n2.phoneme) : 'none'"
+      inherited: >-
+        stress1 > 0 ? stress1 :
+        (!syl1 && stress2 > 0 && pair12 != 'none' ? stress2 :
+        (!syl1 && !syl2 && stress3 > 0 && pair23 == 's_onset' && current.phoneme == 'S'
+          ? stress3 : 0))
+    constraint: inherited > 0
+    apply:
+      - field: stress
+        op: set
+        value: inherited
+        tag: consonant_stress
+    citations:
+      - "DECtalk 4.63 p_us_sr1.c:73-140 get_stress_of_conson (consonant takes the stress of the syllabic its onset leads into)"
+      - "DECtalk 4.63 p_us_sr1.c:175-228 us_phcluster (legal onset pairs)"
+
+  # -------------------------------------------------------------------------
   # INDEFINITE ARTICLE REDUCTION ("a" EY0 -> AX0).  The DECtalk dictionary keeps
   # the article's lexical form as /e/ (Dic_us.txt: a,N,e...), but the runtime
   # phoneme log for neutral "a cat." emits AX ("^ ax k ' aet .").  Model that as
@@ -621,6 +744,8 @@ rules:
             - stress
             - word
           phoneme: fused_name
+          # The fused vowel keeps the stress of the vowel it replaces.
+          stress: "get(p, 'stress', 0)"
           type: fv.type
           target: fv
           duration: fv.duration
@@ -673,7 +798,8 @@ rules:
       next_word_boundary: >-
         n == null ? true :
         (has(n.word) && has(current.word) ? n.word != current.word : true)
-      next_has_stress_marker: "n != null && has(n.stress) && n.stress > 0"
+      # `stress` may be present and null; get() reads that as 0.
+      next_has_stress_marker: "n != null && get(n, 'stress', 0) > 0"
     constraint: "next_syllabic && !next_word_boundary && !next_has_stress_marker"
     splice:
       type: replace_range

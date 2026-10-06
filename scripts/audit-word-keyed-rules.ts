@@ -136,18 +136,23 @@ if (fs.existsSync(frontendPath)) {
 // LTS: whole-word entries justified by an oracle phrase in the preceding comment.
 const ltsPath = path.join(frontendDir, "lts-rules.yaml");
 if (fs.existsSync(ltsPath)) {
+  // Found by structure, not by comment wording: an entry of two or more
+  // letters whose left and right contexts are both a word boundary spells one
+  // whole word. The comment above it, if any, is shown so a reader can tell a
+  // rule converted from DECtalk's table from one added by hand.
   const lines = fs.readFileSync(ltsPath, "utf8").split("\n");
-  for (let i = 0; i < lines.length; i += 1) {
-    if (!/^\s*#.*oracle for\s+["']/.test(lines[i])) continue;
-    const block = lines.slice(i + 1, i + 6).join("\n");
-    const letters = /letters:\s*(\S+)/.exec(block)?.[1] ?? "?";
-    const wholeWord = /left:\s*' '/.test(block) && /right:\s*' '/.test(block);
+  for (let i = 0; i + 2 < lines.length; i += 1) {
+    if (!/^\s*-\s*left:\s*' '\s*$/.test(lines[i])) continue;
+    const letters = /^\s*letters:\s*(\S+)\s*$/.exec(lines[i + 1])?.[1];
+    if (!letters || letters.length < 2) continue;
+    if (!/^\s*right:\s*' '\s*$/.test(lines[i + 2])) continue;
+    const comment = /^\s*#/.test(lines[i - 1] ?? "") ? lines[i - 1].trim() : "(no comment)";
     findings.push({
       file: "lts-rules.yaml",
       line: i + 1,
       rule: letters,
       kind: "lts_whole_word",
-      detail: `${wholeWord ? "whole word" : "context rule"}: ${lines[i].trim()}`,
+      detail: comment,
     });
   }
 }

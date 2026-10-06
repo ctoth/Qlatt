@@ -384,7 +384,7 @@ async function main(): Promise<number> {
           "\n",
       );
     }
-    const failures = (summary.summary as { failures: number }).failures;
+    const failures = reports.filter((report) => report.verdict.status === "fail").length;
     return failures > 0 || errors.length > 0 || reports.length === 0 ? 1 : 0;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

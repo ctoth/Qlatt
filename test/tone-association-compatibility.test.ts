@@ -23,6 +23,12 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // release) and qlatt-beauty "Did Bob buy a blue balloon?" and "Gag, gang; go!"
 // (boundary-tone shaping now reaches a vowel two or three segments before the
 // boundary). dectalk-english is unchanged. See docs/ahead-distance-golden-review.md.
+// The DECtalk structure-word rules regenerate the four dectalk-english
+// snapshots, and these are real changes of content, not only of timing: onset
+// consonants now carry their syllabic's stress, every breath group gets a
+// primary stress, the segmental F0 path runs for every phrase, and the
+// word-keyed replay rules are gone. They are checked against DECtalk itself by
+// scripts/oracle/compare-structure-bits.ts and the oracle scoreboard, not here.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

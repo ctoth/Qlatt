@@ -485,6 +485,11 @@ phases:
       - syllable_index_annotation
       - syllable_role_annotation
       - syllable_position_annotation
+      # Authored stress directions (for example emphasis on a word) are applied
+      # by the frontend driver after the postlexical phase. Run consonant stress
+      # again so an onset follows its syllabic's authored level. DECtalk has
+      # the marks in its input before phsort(), so it needs no second pass.
+      - dectalk_consonant_stress
   - name: formant
     rules:
       - dectalk_sw_explicit_override

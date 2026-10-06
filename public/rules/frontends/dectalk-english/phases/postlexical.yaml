@@ -132,9 +132,10 @@ rules:
       n1: next
       n2: "ahead(current, 2)"
       n3: "ahead(current, 3)"
-      in1: "n1 != null && dectalk_same_word(n1, current)"
-      in2: "in1 && n2 != null && dectalk_same_word(n2, current)"
-      in3: "in2 && n3 != null && dectalk_same_word(n3, current)"
+      # Each phone is in the word of the one before it, starting from current.
+      in1: "n1 != null && dectalk_same_word(current, n1)"
+      in2: "in1 && n2 != null && dectalk_same_word(n1, n2)"
+      in3: "in2 && n3 != null && dectalk_same_word(n2, n3)"
       syl1: "in1 && (n1.type == 'vowel' || n1.phoneme in ['EL', 'EM', 'EN'])"
       syl2: "in2 && (n2.type == 'vowel' || n2.phoneme in ['EL', 'EM', 'EN'])"
       syl3: "in3 && (n3.type == 'vowel' || n3.phoneme in ['EL', 'EM', 'EN'])"

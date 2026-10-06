@@ -990,8 +990,14 @@ function applyEffects(
           : null;
     const mulResolution =
       typeof effect.resolution === "string" ? effect.resolution.toLowerCase() : resolution;
-    const round = scalarConfig?.unit === "ms";
-    const roundValue = (value: number): number => (round ? Math.round(value) : value);
+    // A scalar that declares `quantum` keeps every resolved value on a
+    // multiple of it; one that does not keeps the value its rules computed.
+    const quantum =
+      typeof scalarConfig?.quantum === "number" && scalarConfig.quantum > 0
+        ? scalarConfig.quantum
+        : null;
+    const roundValue = (value: number): number =>
+      quantum === null ? value : Math.round(value / quantum) * quantum;
     let floor = Number.NEGATIVE_INFINITY;
     let fallbackObservation: ScalarObservation | undefined;
     if (resolution === "klatt" && scalarConfig) {

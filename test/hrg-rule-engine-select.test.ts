@@ -52,8 +52,9 @@ describe("graph-native rule engine select/scalar execution", () => {
   it.each([
     ["duration", {}, 2.5],
     ["duration", { unit: "s" }, 2.5],
-    ["duration", { unit: "ms" }, 3],
-    ["energy", { unit: "ms" }, 3],
+    ["duration", { unit: "ms" }, 2.5],
+    ["duration", { unit: "ms", quantum: 1 }, 3],
+    ["energy", { quantum: 1 }, 3],
     ["energy", {}, 2.5],
   ])("resolves %s using declared metadata %j", (field, metadata, expected) => {
     for (const op of ["set", "add", "mul", "min", "max"]) {

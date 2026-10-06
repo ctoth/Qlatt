@@ -367,7 +367,7 @@ relations:
     scalars:
       # DECtalk ph_defs.h defines NF640MS=100 frames; terminal nfperiod=94
       # frames must survive scalar validation for punctuation pauses.
-      duration: { unit: ms, resolution: klatt, max: 640, floor_field: minimumDuration }
+      duration: { unit: ms, quantum: 1, resolution: klatt, max: 640, floor_field: minimumDuration }
   F0Point:
     type: point
     value_type: number

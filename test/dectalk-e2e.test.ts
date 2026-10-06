@@ -517,6 +517,28 @@ describe("dectalk-english dictionary-first (dt-2b)", () => {
     expect(phs).toContain("IY");
     expect(phs[0]).toBe("N");
   });
+
+  // An inflected word whose dictionary root has RR as its only vowel goes
+  // through the shared morphology and stress policy, which must count RR as a
+  // syllable nucleus. These threw E_STRESS_DOMAIN when it did not.
+  it.each([
+    ["nurses.", ["N", "RR", "S", "IH", "Z"]],
+    ["girls.", ["G", "G_REL", "RR", "LX", "Z"]],
+    ["worked.", ["W", "RR", "K", "T"]],
+  ])("says %s from a dictionary root whose only vowel is RR", (phrase, expected) => {
+    expect(contentPhonemes(phrase)).toEqual(expected);
+  });
+
+  // Words with no dictionary root are pronounced by DECtalk's own compiled
+  // letter-to-sound tables (scripts/oracle/compare-lts.ts measures all 417
+  // oracle words); these are the ones the oracle gate used to list as gaps.
+  it.each([
+    ["cape.", ["K", "K_REL", "EY", "P"]],
+    ["zones.", ["Z", "OW", "N", "Z"]],
+    ["barked.", ["B", "B_REL", "AR", "K", "T"]],
+  ])("says %s by table letter-to-sound", (phrase, expected) => {
+    expect(contentPhonemes(phrase)).toEqual(expected);
+  });
 });
 
 // ---------------------------------------------------------------------------

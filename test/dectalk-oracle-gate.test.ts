@@ -42,14 +42,6 @@ const repoRoot = path.resolve(__dirname, "..");
 const CORPUS_FILES = ["dectalk-us-v1.json", "dectalk-us-heldout-v1.json"];
 
 const KNOWN_GAPS: Readonly<Record<string, string>> = {
-  // Letter-to-sound and morphology.
-  "held-cape": "silent e: 'cape' gives AE, DECtalk EY",
-  "held-coke": "silent e: 'coke' gives AA, DECtalk OW",
-  "stops-big-dog": "'-ed' after voiceless /k/: 'barked' ends in D, DECtalk T",
-  "fric-safe-zone": "silent e before plural '-s': 'zones' gives AA N EH Z, DECtalk OW N Z",
-  "liquid-red-lorry": "plural '-ies': 'lorries' ends in RX Z, DECtalk IY Z",
-  "glide-young-yard": "'-s' after voiceless /k/ ('yaks' Z, DECtalk S); doubled 'll' in 'yelled'",
-  // Allophones the comparison with DECtalk's phoneme log could not see.
   "prosody-how-are-you": "'you' is DECtalk's one allophone YU; here Y UW",
   "function-for-you": "'you' is DECtalk's one allophone YU; here Y UW",
   "punct-question": "'you' is DECtalk's one allophone YU; here Y UW",

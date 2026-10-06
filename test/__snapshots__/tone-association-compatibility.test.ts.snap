@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`tone association preserves the existing frontend tracks > dectalk-english: Did Bob buy a blue balloon? 1`] = `"b50cb8d9659b82b894390ce53430a3ca726b11a189325ae73f3ebe10a03fdce8"`;
+exports[`tone association preserves the existing frontend tracks > dectalk-english: Did Bob buy a blue balloon? 1`] = `"ffe06ee86fa783adbc3d71fc631b03a4b638520cea8b1a7aa6e798f70f572aa8"`;
 
 exports[`tone association preserves the existing frontend tracks > dectalk-english: Gag, gang; go! 1`] = `"1eeabccaeb1b8d26b5dcde9efe664745afdd6a36989150ddb0ad3b7f1616d8f9"`;
 

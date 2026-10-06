@@ -175,11 +175,32 @@ const prefixes = symbolic(
   arrayBody(read(which === "acna" ? "l_ac_con.c" : "l_us_con.c"), "preftab"),
 );
 
+// The frontend's spelling of each allophone code (INCLUDE/l_all_ph.h order).
+// Four names differ from DECtalk's (as in scripts/build-dectalk-dict.ts), and
+// YU, which the inventory does not have yet, is written as Y + UW.
+const FRONTEND_SYMBOLS: Readonly<Record<string, string[]>> = {
+  HX: ["HH"],
+  NX: ["NG"],
+  LL: ["L"],
+  Q: ["GS"],
+  YU: ["Y", "UW"],
+};
+const allophoneNames: string[] = ["SIL"];
+for (const [name, code] of SYMBOLS) {
+  if (name.startsWith("US_") && code < 59) allophoneNames[code] = name.slice(3);
+}
+const phonemeSymbols = allophoneNames.map((name) => FRONTEND_SYMBOLS[name] ?? [name]);
+// The vowels IY..UR (codes 1-23) carry a stress digit in the frontend.
+const stressBearing = Array.from({ length: 23 }, (_unused, index) => index + 1);
+
 fs.writeFileSync(
   outPath,
   `${JSON.stringify({
     schemaVersion: "v1",
+    format: "lts-table",
     source: `DECtalk 4.63 dapi/src/LTS/${tableFile} (compiled rule tables), LTS/l_us_con.c feats[]`,
+    phonemeSymbols,
+    stressBearing,
     languageTagged: which === "acna",
     // LTS/ls_rule.h LSBUMP: words per rule record.
     recordWords: which === "acna" ? 5 : 4,

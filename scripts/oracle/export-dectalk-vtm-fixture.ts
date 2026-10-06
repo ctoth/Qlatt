@@ -55,14 +55,17 @@ type Phrase = { id: string; text: string; hl?: "compact" | "full" };
 /** The fixtures kept in the repository: id and the exact text given to say.exe. */
 const CHECKED_IN: Phrase[] = [
   { id: "paul-cat", text: "[:np] [:ra 180] cat.", hl: "compact" },
-  { id: "paul-judge", text: "[:np] [:ra 180] judge." },
+  { id: "paul-judge", text: "[:np] [:ra 180] judge.", hl: "compact" },
   { id: "paul-moon", text: "[:np] [:ra 180] moon.", hl: "compact" },
   { id: "betty-she", text: "[:nb] [:ra 180] she.", hl: "compact" },
-  { id: "wendy-hello", text: "[:nw] [:ra 180] hello." },
+  { id: "wendy-hello", text: "[:nw] [:ra 180] hello.", hl: "compact" },
   // A second speaker definition packet arrives in the middle of the audio.
   { id: "paul-harry-switch", text: "[:np] [:ra 180] one. [:nh] two.", hl: "compact" },
   // vol_att other than 100 (CMD/cm_copt.c:1652-1654).
-  { id: "paul-volume-att", text: "[:np] [:ra 180] [:volume att 60] cat." },
+  { id: "paul-volume-att", text: "[:np] [:ra 180] [:volume att 60] cat.", hl: "compact" },
+  // Nonzero t0jit in the speaker definition (PH/ph_vset.c:763, voice
+  // parameter LA).
+  { id: "paul-jitter", text: "[:np] [:ra 180] [:dv la 30] moon.", hl: "compact" },
 ];
 
 /** Words per event line after the tag and its two leading numbers. */

@@ -71,6 +71,15 @@
     { "id": "flap-it-is-much-better", "text": "It is, much better.", "group": "flap-count", "tags": ["no-flap", "comma"], "expectedFocus": ["duration"] },
     { "id": "flap-yes-it-is-better", "text": "Yes, it is better.", "group": "flap-count", "tags": ["flap", "comma"], "expectedFocus": ["duration"] },
     { "id": "flap-it-went-to-better", "text": "It went to better.", "group": "flap-count", "tags": ["flap", "pp"], "expectedFocus": ["duration"] },
-    { "id": "the-answer-in-the-oven", "text": "Is the answer in the oven?", "group": "the", "tags": ["the-iy"], "expectedFocus": ["duration"] }
+    { "id": "the-answer-in-the-oven", "text": "Is the answer in the oven?", "group": "the", "tags": ["the-iy"], "expectedFocus": ["duration"] },
+    { "id": "num-21-dogs", "text": "21 dogs.", "group": "numbers", "tags": ["digits"], "expectedFocus": ["duration"] },
+    { "id": "num-twenty-one-dogs", "text": "Twenty one dogs.", "group": "numbers", "tags": ["typed-words"], "expectedFocus": ["duration"] },
+    { "id": "num-room-one-hundred-and-one", "text": "Room one hundred and one.", "group": "numbers", "tags": ["typed-words", "pp"], "expectedFocus": ["duration"] },
+    { "id": "num-in-1984", "text": "In 1984.", "group": "numbers", "tags": ["digits", "year"], "expectedFocus": ["duration"] },
+    { "id": "num-2005-men", "text": "2005 men.", "group": "numbers", "tags": ["digits", "and"], "expectedFocus": ["duration"] },
+    { "id": "num-1500000", "text": "1500000.", "group": "numbers", "tags": ["digits", "vp"], "expectedFocus": ["duration"] },
+    { "id": "num-we-have-7", "text": "We have 7.", "group": "numbers", "tags": ["digits"], "expectedFocus": ["duration"] },
+    { "id": "num-007", "text": "007.", "group": "numbers", "tags": ["digits", "leading-zero"], "expectedFocus": ["duration"] },
+    { "id": "num-1234567", "text": "1234567.", "group": "numbers", "tags": ["digits", "pauses"], "expectedFocus": ["duration"] }
   ]
 }

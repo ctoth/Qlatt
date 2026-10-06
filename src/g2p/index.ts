@@ -29,6 +29,7 @@ import {
   receivedFormClassWord,
   startsVerbPhrase,
 } from "./table-lts-pronounce";
+import { numberWords, speakDigits } from "./table-number";
 import { stripSuffixes } from "./table-suffix";
 import type { DictLookup, PronunciationResult } from "./types";
 
@@ -91,6 +92,23 @@ export function pronounce(
       ? { phraseStart: "vp" }
       : {};
   };
+
+  // A table with number phone lists speaks an all-digit word itself, ahead of
+  // any lookup, as several words; the whole number has the one form class
+  // `adj` (DECtalk 4.63 LTS/ls_task.c:3776-3806).
+  if (table?.numberPhones && /^[0-9]+$/.test(lowerWord)) {
+    const symbols = speakDigits(lowerWord, table.numberPhones);
+    if (symbols) {
+      const parts = numberWords(symbols, table);
+      return {
+        phonemes: parts.flatMap((part) => part.phonemes),
+        source: "number",
+        word: lowerWord,
+        parts,
+        ...(table.formClassNames ? { formClasses: ["adj"] } : {}),
+      };
+    }
+  }
 
   // 1. Try direct dictionary lookup
   const dictResult = dictLookup(lowerWord);

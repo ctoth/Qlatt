@@ -203,6 +203,7 @@ rules:
             - word_initial_consonant
             - helper_verb_promoted
             - phrase_start_follows
+            - morpheme_boundary_after
           phoneme: full_name
           type: full.type
           target: full

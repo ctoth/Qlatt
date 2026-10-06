@@ -257,3 +257,70 @@ export function speakYear(text: string, lists: NumberPhones): number[] {
 export function speakDigits(text: string, lists: NumberPhones): number[] | null {
   return isYear(text) ? speakYear(text, lists) : speakNumber(text, lists);
 }
+
+/** One word of a spoken number, in a frontend's phone symbols. */
+export interface NumberWord {
+  /** Phones with a stress digit on each stress-bearing one. */
+  phonemes: string[];
+  /** The word is entered with a verb-phrase start in place of a word boundary. */
+  phraseStart?: "vp";
+  /** A pause stands before the word. */
+  pauseBefore?: boolean;
+  /**
+   * Indices of the phones after which a morpheme boundary stands ("nine|teen").
+   * DECtalk's structure word records it on the rime before it.
+   */
+  morphemeAfter?: number[];
+}
+
+/**
+ * The words of a symbol stream as the phonetic stage stores it: cut at each
+ * word boundary, verb-phrase start and pause, the phones written in the
+ * frontend's symbols (`phonemeSymbols`, by phone code) with the stress mark
+ * that precedes a stress-bearing phone as its digit. A morpheme boundary
+ * inside a word is kept as the index of the phone before it.
+ */
+export function numberWords(
+  symbols: readonly number[],
+  table: {
+    phonemeSymbols: readonly (readonly string[])[];
+    stressBearing: readonly number[];
+  },
+): NumberWord[] {
+  const stressBearing = new Set(table.stressBearing);
+  const words: NumberWord[] = [];
+  let current: NumberWord = { phonemes: [] };
+  let pending = 0;
+  const close = (next: NumberWord): void => {
+    if (current.phonemes.length > 0) words.push(current);
+    // A marker with no phones before it passes its effect on.
+    else if (current.pauseBefore) next.pauseBefore = true;
+    current = next;
+    pending = 0;
+  };
+  for (const symbol of storeSyntacticMarkers(symbols)) {
+    if (symbol === NUMBER_WBOUND) close({ phonemes: [] });
+    else if (symbol === NUMBER_VPSTART) close({ phonemes: [], phraseStart: "vp" });
+    else if (symbol === NUMBER_COMMA) close({ phonemes: [], pauseBefore: true });
+    else if (symbol === NUMBER_S1) pending = 1;
+    else if (symbol === NUMBER_S2) pending = 2;
+    else if (symbol === NUMBER_MBOUND) {
+      if (current.phonemes.length > 0) {
+        current.morphemeAfter = [...(current.morphemeAfter ?? []), current.phonemes.length - 1];
+      }
+    } else {
+      const names = table.phonemeSymbols[symbol];
+      if (!names) {
+        throw new Error(`E_NUMBER_SYMBOL: symbol ${symbol.toString()} has no phone`);
+      }
+      if (stressBearing.has(symbol)) {
+        current.phonemes.push(...names.slice(0, -1), `${names[names.length - 1]}${pending}`);
+        pending = 0;
+      } else {
+        current.phonemes.push(...names);
+      }
+    }
+  }
+  if (current.phonemes.length > 0) words.push(current);
+  return words;
+}

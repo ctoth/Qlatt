@@ -39,6 +39,8 @@ const SYMBOL_PRONUNCIATION_CITATION =
   "Diagnostic symbol mode: direct ARPABET symbol-to-phoneme mapping for explicit segment-list utterances";
 const LETTER_NAME_PRONUNCIATION_CITATION =
   "Allen et al. 1987 Ch.2-3 (symbol strings pronounced as LETTER-* morphs)";
+const NUMBER_PRONUNCIATION_CITATION =
+  "DECtalk 4.63 LTS/l_us_pr1.c (ls_proc_do_number, ls_proc_do_4_digits) with the phone lists of LTS/l_us_con.c";
 
 const TOKEN_SCHEMA = {
   itemTypes: {
@@ -447,6 +449,10 @@ export function transcribeText(
         decisionType = "symbol_pronunciation_selected";
         reason = `Used diagnostic symbol pronunciation for '${sourceWord}'`;
         citations = [SYMBOL_PRONUNCIATION_CITATION];
+      } else if (pronResult.source === "number") {
+        decisionType = "number_pronunciation_selected";
+        reason = `Spoke the digits '${sourceWord}' as ${(pronResult.parts ?? []).length.toString()} words from the frontend's number phone lists`;
+        citations = [NUMBER_PRONUNCIATION_CITATION];
       } else if (pronResult.source === "dictionary") {
         decisionType = "dictionary_pronunciation_selected";
         reason = `Used CMU dictionary pronunciation for '${sourceWord}'`;
@@ -507,22 +513,69 @@ export function transcribeText(
         }
       }
 
+      // A token spoken as several words (a number in digits) gives each word
+      // its own identity, so that each becomes a Word: `<token>:<n>` and
+      // `<digits>#<n>`. A pause between two of them is a comma's silence.
+      const spokenParts: Array<{
+        phonemes: readonly string[];
+        tokenId: string;
+        word: string;
+        phraseStart?: "vp" | "pp";
+        pauseBefore?: boolean;
+        morphemeAfter?: readonly number[];
+      }> =
+        "parts" in pronResult && pronResult.parts && pronResult.parts.length > 0
+          ? pronResult.parts.map((part, partIndex) => ({
+              phonemes: part.phonemes,
+              tokenId: `${inputToken.tokenId}:${partIndex.toString()}`,
+              word: `${sourceWord}#${(partIndex + 1).toString()}`,
+              ...(part.phraseStart ? { phraseStart: part.phraseStart } : {}),
+              ...(part.pauseBefore ? { pauseBefore: true } : {}),
+              ...(part.morphemeAfter ? { morphemeAfter: part.morphemeAfter } : {}),
+            }))
+          : [
+              {
+                phonemes: pronResult.phonemes,
+                tokenId: inputToken.tokenId,
+                word: sourceWord,
+                ...("phraseStart" in pronResult && pronResult.phraseStart
+                  ? { phraseStart: pronResult.phraseStart }
+                  : {}),
+              },
+            ];
       if (pronResult.phonemes.length > 0) {
-        for (const phoneWithStress of pronResult.phonemes) {
+        const spokenPhones = spokenParts.flatMap((part) =>
+          part.phonemes.map((phoneWithStress, phoneIndex) => ({
+            part,
+            phoneIndex,
+            phoneWithStress,
+          })),
+        );
+        for (const { part, phoneIndex, phoneWithStress } of spokenPhones) {
+          if (phoneIndex === 0 && part.pauseBefore) {
+            flatPhonemeList.push({
+              phoneme: resources.inventory.silence_symbol,
+              stress: null,
+              sourceTokenId: `${part.tokenId}:pause`,
+              isPunctuation: true,
+              symbol: ",",
+              word: ",",
+              _pronDecisionId: stressDecisionId,
+            });
+          }
           const match = parseInventorySymbol(phoneWithStress, resources.inventory);
           if (match) {
             flatPhonemeList.push({
               phoneme: match.phoneme,
               stress: match.stress,
-              sourceTokenId: inputToken.tokenId,
-              word: sourceWord,
+              sourceTokenId: part.tokenId,
+              word: part.word,
               // The rules that read a word's classes are the phonetic stage's.
               ...("formClasses" in pronResult && pronResult.formClasses
                 ? { formClasses: pronResult.receivedFormClasses ?? pronResult.formClasses }
                 : {}),
-              ...("phraseStart" in pronResult && pronResult.phraseStart
-                ? { phraseStart: pronResult.phraseStart }
-                : {}),
+              ...(part.phraseStart ? { phraseStart: part.phraseStart } : {}),
+              ...(part.morphemeAfter?.includes(phoneIndex) ? { morphemeBoundaryAfter: true } : {}),
               _pronDecisionId: stressDecisionId,
             });
           } else {

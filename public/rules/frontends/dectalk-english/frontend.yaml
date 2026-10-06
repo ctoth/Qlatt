@@ -16,9 +16,10 @@ dictionary_path: /dectalk-dictionary.json
 # (source_mode: 1) cannot override it. The default remains the impulse fallback
 # while KLGLOTT88 mode 3 is blocked by silent worklet voice output.
 source_contour_path: /rules/frontends/dectalk-english/source-contour.yaml
-# Included text rules select DECtalk bare-year/fraction recognition and the
-# explicit hundredand convention through normalization-policy.yaml.
-# Citation: DECtalk 4.63 ls_util.c:598-622 (is_year), l_us_pr1.c:367-398.
+# Included text rules select DECtalk bare-year/fraction recognition through
+# normalization-policy.yaml, and leave a bare number or year as digits: the
+# lexicon speaks those from DECtalk's number phone lists (src/g2p/table-number.ts).
+# Citation: DECtalk 4.63 ls_util.c:598-622 (is_year), l_us_pr1.c:297-785.
 normalization:
   phases: [normalization_lexical, normalization_currency, normalization_time, normalization_date, normalization_decimal_fraction, normalization_number_requests, normalization_number_groups, normalization_terminal_words]
 include:

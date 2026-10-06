@@ -19,6 +19,7 @@ import { numberLogTokens, numberSymbolTokens } from "../scripts/oracle/number-lo
 import {
   isYear,
   type NumberPhones,
+  numberWords,
   speakDigits,
   speakNumber,
   storeSyntacticMarkers,
@@ -34,13 +35,12 @@ const fixture = readJson<{ entries: Record<string, string> }>(
   "dectalk-oracle",
   "dectalk-us-numbers-v1.phonemes.json",
 );
-const lists = readJson<{ numberPhones: NumberPhones }>(
-  "public",
-  "rules",
-  "frontends",
-  "dectalk-english",
-  "lts-table.json",
-).numberPhones;
+const table = readJson<{
+  numberPhones: NumberPhones;
+  phonemeSymbols: string[][];
+  stressBearing: number[];
+}>("public", "rules", "frontends", "dectalk-english", "lts-table.json");
+const lists = table.numberPhones;
 
 const KNOWN_GAPS: Readonly<Record<string, string>> = {};
 
@@ -95,5 +95,32 @@ describe("DECtalk number oracle", () => {
   it("is not a number when the text holds anything but digits and separators", () => {
     expect(speakNumber("12a", lists)).toBeNull();
     expect(speakNumber("", lists)).toBeNull();
+  });
+
+  it("cuts a spoken number into words with their boundaries", () => {
+    const words = (text: string) => numberWords(speakDigits(text, lists) ?? [], table);
+    // 101: one | hundred | ) and | one.
+    expect(words("101")).toEqual([
+      { phonemes: ["W", "AH0", "N"] },
+      { phonemes: ["HH", "AH1", "N", "D", "R", "AX0", "D"] },
+      { phonemes: ["EH0", "N", "D"], phraseStart: "vp" },
+      { phonemes: ["W", "AH1", "N"] },
+    ]);
+    // 1,234,567 pauses after "million" and after "thousand".
+    expect(
+      words("1,234,567")
+        .map((word, index) => (word.pauseBefore ? index : -1))
+        .filter((index) => index >= 0),
+    ).toHaveLength(2);
+    // 19: nine|teen, the boundary after the N.
+    expect(words("19")).toEqual([
+      { phonemes: ["N", "AY1", "N", "T", "IY1", "N"], morphemeAfter: [2] },
+    ]);
+  });
+
+  it("has a phone for every symbol of every oracle number", () => {
+    for (const text of Object.keys(fixture.entries)) {
+      expect(() => numberWords(speakDigits(text, lists) ?? [], table)).not.toThrow();
+    }
   });
 });

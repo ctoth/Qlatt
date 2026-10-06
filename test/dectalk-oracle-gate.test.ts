@@ -60,8 +60,6 @@ const repoRoot = path.resolve(__dirname, "..");
 
 const KNOWN_GAPS: Readonly<Record<string, string>> = {
   "g2p-yellow": "the dictionary marks 'yellow' to skip allophone rules (LL stays); here LX",
-  "numbers-room-101":
-    "'hundred and': DECtalk has AX and a flapped D in 'hundred', and EH in 'and'; here IX, D, AE",
   // dectalk-us-clause-v1. Allophones:
   "hat-two-phrases": "DECtalk breaks the clause before 'and' and says it EH N D; here one clause",
   // dectalk-us-clause-v1. Structure and duration, with DECtalk's allophones:

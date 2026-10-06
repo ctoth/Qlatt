@@ -557,6 +557,7 @@ export function transcribeText(
               phoneme: resources.inventory.silence_symbol,
               stress: null,
               sourceTokenId: `${part.tokenId}:pause`,
+              continuesWrittenWord: true,
               isPunctuation: true,
               symbol: ",",
               word: ",",
@@ -572,8 +573,12 @@ export function transcribeText(
               word: part.word,
               // The rules that read a word's classes are the phonetic stage's.
               ...("formClasses" in pronResult && pronResult.formClasses
-                ? { formClasses: pronResult.receivedFormClasses ?? pronResult.formClasses }
+                ? {
+                    formClasses: pronResult.receivedFormClasses ?? pronResult.formClasses,
+                    textFormClasses: pronResult.formClasses,
+                  }
                 : {}),
+              ...(part !== spokenParts[0] ? { continuesWrittenWord: true } : {}),
               ...(part.phraseStart ? { phraseStart: part.phraseStart } : {}),
               ...(part.morphemeAfter?.includes(phoneIndex) ? { morphemeBoundaryAfter: true } : {}),
               // Indices of a one-word result are indices into its phones.

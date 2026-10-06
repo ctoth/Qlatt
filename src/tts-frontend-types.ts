@@ -9,6 +9,10 @@ export interface TranscriptionToken {
   word: string;
   /** The word's form classes, when the frontend's lexicon records them. */
   formClasses?: readonly string[];
+  /** The classes as the text stage has them, before they are handed on. */
+  textFormClasses?: readonly string[];
+  /** A later word of one written word (a number spoken as several words). */
+  continuesWrittenWord?: boolean;
   /** The phrase the word starts, when the frontend's lexicon marks one. */
   phraseStart?: "vp" | "pp";
   /** A morpheme boundary stands after this phone, inside its word. */

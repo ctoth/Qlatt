@@ -89,12 +89,29 @@ functions:
     params: [item, name]
     body: >-
       item != null && path(item, 'R:SylStructure.parent.parent') != null
+      && !isTrue(path(item, 'R:SylStructure.parent.parent'), 'clause_break_before')
       && name in get(path(item, 'R:SylStructure.parent.parent'), 'form_classes', [])
-    description: Whether a Segment's word has a form class.
+    description: >-
+      Whether a Segment's word has a form class. A word with a clause break
+      before it has none: its class was sent ahead of the break's comma.
     citations:
       - "Taylor, Black & Caley 2001 (heterogeneous relation graphs: a Segment's Word through SylStructure)"
       - "DECtalk 4.63 INCLUDE/fc_def.tab (form class bits)"
       - "DECtalk 4.63 PH/ph_task.c:590-600 (wordclass of each symbol is its word's class)"
+      - "DECtalk 4.63 LTS/ls_util.c:808-853 (WORD_CLASS is written, then the break's COMMA)"
+      - "DECtalk 4.63 PH/ph_task.c:931 (speak_now clears the held class when a clause is spoken)"
+  # The class of a word with a clause break before it, asked of the Segment
+  # after the break's silence: it arrives in the clause that the break ends.
+  dectalk_late_class:
+    params: [item, name]
+    body: >-
+      item != null && path(item, 'R:SylStructure.parent.parent') != null
+      && isTrue(path(item, 'R:SylStructure.parent.parent'), 'clause_break_before')
+      && name in get(path(item, 'R:SylStructure.parent.parent'), 'form_classes', [])
+    description: Whether the word that follows a clause break has a form class.
+    citations:
+      - "DECtalk 4.63 LTS/ls_util.c:808-853 (WORD_CLASS is written, then the break's COMMA)"
+      - "DECtalk 4.63 PH/ph_task.c:598-626 (the class is counted when it arrives)"
   dectalk_phrase_start:
     params: [item]
     body: >-
@@ -591,6 +608,16 @@ relations:
     features:
       text: []
       form_classes: []
+      # The classes as DECtalk's text stage has them (form_classes are what
+      # its phonetic stage receives), and the word's place among the words up
+      # to the next punctuation mark.
+      text_form_classes: []
+      clause_word_index: []
+      clause_word_count: []
+      # LTS/ls_task.c:5129-5229: a word that may carry a clause break, and one
+      # that does.
+      break_marker: [true, false]
+      clause_break_before: [true, false]
       phrase_start: [vp, pp]
       # What the phone sort makes of a prepositional-phrase start: kept or
       # dropped (ph_sort.c:1055-1070).
@@ -680,6 +707,11 @@ phases:
       # A wh-question's "?" becomes "." before anything reads the punctuation.
       - dectalk_wh_question_period
       - dectalk_sentence_initial_auxiliary
+      # The text stage's clause breaks: a comma the phonetic stage then reads
+      # like a written one.
+      - dectalk_break_marker
+      - dectalk_clause_break
+      - dectalk_clause_break_comma
       # ph_sort.c:1055-1110, ahead of the stress rules: a dropped
       # prepositional-phrase start gives its word primary stress.
       - dectalk_pp_start_state
@@ -698,6 +730,10 @@ phases:
       # Rule 1a reads the input /dh/, before the dental rule at the end
       # rewrites it.
       - dectalk_the_before_vowel
+      # Rule 1c counts the clause's phones as they come in, before a rule
+      # below deletes one.
+      - dectalk_clause_initial_and
+      - dectalk_at_reduced
       - dectalk_geminate_delete
       - dectalk_assimilate_sibilant_sh
       - dectalk_palatalize_t

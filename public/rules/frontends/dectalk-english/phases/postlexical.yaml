@@ -111,6 +111,104 @@ rules:
       - "DECtalk 4.63 LTS/ls_task.c:4672-4728 ls_task_lookup_first_verbs (first word after a sentence end)"
 
   # -------------------------------------------------------------------------
+  # CLAUSE BREAKS BEFORE CONJUNCTIONS AND PREPOSITIONS (LTS/ls_task.c
+  # ls_task_parse_sentence, LTS/ls_util.c:824-853).
+  #
+  # Before it speaks the words up to a punctuation mark, DECtalk's text stage
+  # looks each of them up and marks the conjunctions, the prepositions that are
+  # neither particles nor "to", and the words of class "that" (:5129-5153). A
+  # marked word then gets a break (:5190-5229) unless it is within three words
+  # of the marked word before it (or of the start), or the next word is marked
+  # too. The two kinds of break the code tells apart, required and optional,
+  # are sent the same way: a comma before the word, when more than two words
+  # follow it (ls_util.c:827, `length > fc_index + 3`; length counts one more
+  # than the words, for the space that ends the text).
+  #
+  # "The big dog barked and the small cat ran away." is spoken as "The big dog
+  # barked, and the small cat ran away."; "The dog and the cat ran." (third
+  # word) and "The big dog barked and ran." (one word follows) are not broken.
+  #
+  # Not ported: the marks for quotes, parentheses and a dash (:5082-5127), and
+  # the multi-word conjunctions and verb particles of LTS/proverbs.h
+  # (:5116-5120, :5174-5189).
+  # -------------------------------------------------------------------------
+  dectalk_break_marker:
+    kind: scalar
+    select:
+      relation: Word
+      where: >-
+        'conj' in get(current, 'text_form_classes', [])
+        || 'that' in get(current, 'text_form_classes', [])
+        || ('prep' in get(current, 'text_form_classes', [])
+            && !('part' in get(current, 'text_form_classes', []))
+            && !('to' in get(current, 'text_form_classes', [])))
+    apply:
+      - field: break_marker
+        op: set
+        value: "true"
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:5129-5153 (PRO_CONJ, PRO_PREP for a preposition that is neither a particle nor 'to', PRO_THAT)"
+
+  dectalk_clause_break:
+    kind: scalar
+    select:
+      relation: Word
+      where: "isTrue(current, 'break_marker')"
+    define:
+      place: "get(current, 'clause_word_index', 0)"
+      # The marked word before this one. An earlier clause's words have places
+      # that are not smaller.
+      marked_before: >-
+        look_back_where(current, 500,
+          'isTrue(candidate, "break_marker") || get(candidate, "clause_word_index", 0) >= get(source, "clause_word_index", 0)')
+      last_marker: >-
+        marked_before != null && get(marked_before, 'clause_word_index', 0) < place
+          ? get(marked_before, 'clause_word_index', 0) : 0
+      n: next
+      next_marked: "n != null && isTrue(n, 'break_marker')"
+    constraint: >-
+      place - last_marker > 3 && !next_marked
+      && get(current, 'clause_word_count', 0) + 1 > place + 3
+    apply:
+      - field: clause_break_before
+        op: set
+        value: "true"
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:5190-5229 (no break within three words of the last marker or when the next word is marked; otherwise a required or an optional break)"
+      - "DECtalk 4.63 LTS/ls_task.c:4843-4856 find_next_marker"
+      - "DECtalk 4.63 LTS/ls_util.c:824-853 (either break is sent as a COMMA before the word when length > fc_index + 3)"
+
+  # The comma itself: a punctuation silence in front of the word's first
+  # phone. It belongs to no word.
+  dectalk_clause_break_comma:
+    kind: postlexical
+    select:
+      relation: Segment
+      where: "current.phoneme != 'SIL' && dectalk_word_start(current)"
+    define:
+      silence: "target('SIL')"
+    constraint: >-
+      isTrue(path(current, 'R:SylStructure.parent.parent'), 'clause_break_before')
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - outside_structure: true
+          phoneme: "'SIL'"
+          type: silence.type
+          target: silence
+          word: "','"
+          punctuationSymbol: "','"
+          stress: "null"
+          duration: silence.duration
+        - copy_from: current
+    citations:
+      - "DECtalk 4.63 LTS/ls_util.c:824-853 (a COMMA is written to the phonetic stage before the word)"
+
+  # -------------------------------------------------------------------------
   # PREPOSITIONAL-PHRASE STARTS (ph_sort.c:1055-1110).
   #
   # "to", "and" and "for" come from DECtalk's mini dictionary with PPSTART in
@@ -355,23 +453,45 @@ rules:
     select:
       relation: Segment
       where: "current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null"
+    define:
+      # The word after a clause break: its class arrived before the break's
+      # comma, in this clause, and is counted here. The comma is a symbol of
+      # this clause and carries that class, so the phone sort also takes the
+      # word through its verb branch: it uses the flag up, with no vowel to
+      # stress ("... cat, and they remain here today." has no promotion).
+      n: next
+      late_verb: >-
+        dectalk_late_class(n, 'verb') || dectalk_late_class(n, 'ed')
+        || dectalk_late_class(n, 'be') || dectalk_late_class(n, 'ing')
+      late_function_verb: "late_verb && dectalk_late_class(n, 'func')"
+      late_verb_branch: >-
+        (dectalk_late_class(n, 'verb') || dectalk_late_class(n, 'ed'))
+        && !dectalk_late_class(n, 'noun') && !dectalk_late_class(n, 'adj')
     apply:
       - field: clause_verb_count
         op: set
-        value: "count_back_pred(current, 1000, 'is_clause_silence', 'is_verb_count_word_start')"
+        value: >-
+          count_back_pred(current, 1000, 'is_clause_silence', 'is_verb_count_word_start')
+          + (late_verb ? 1.0 : 0.0)
         tag: stress
       - field: clause_function_verb_count
         op: set
-        value: "count_back_pred(current, 1000, 'is_clause_silence', 'is_function_verb_word_start')"
+        value: >-
+          count_back_pred(current, 1000, 'is_clause_silence', 'is_function_verb_word_start')
+          + (late_function_verb ? 1.0 : 0.0)
         tag: stress
       - field: clause_verb_branch_count
         op: set
-        value: "count_back_pred(current, 1000, 'is_clause_silence', 'is_verb_branch_word_start')"
+        value: >-
+          count_back_pred(current, 1000, 'is_clause_silence', 'is_verb_branch_word_start')
+          + (late_verb_branch ? 1.0 : 0.0)
         tag: stress
     citations:
       - "DECtalk 4.63 ph_task.c:611-626 (number_verbs counts words of class VERB, ED, BE or ING; FUNC sets promote_helper_verb)"
       - "DECtalk 4.63 ph_sort.c:1272-1284 (NOUN, then ADJ, then VERB or ED)"
       - "DECtalk 4.63 ph_claus.c:405 (number_verbs is cleared when a clause has been spoken)"
+      - "DECtalk 4.63 LTS/ls_util.c:808-853 (a word's WORD_CLASS is written before the COMMA of a break in front of it)"
+      - "DECtalk 4.63 ph_task.c:590 with ph_sort.c:1245-1302 (every symbol has the held class; the sort tests each one)"
 
   dectalk_helper_verb_promotion:
     kind: scalar
@@ -566,6 +686,97 @@ rules:
           voiced: "has(iy.voiced) ? iy.voiced : true"
     citations:
       - "DECtalk 4.63 ph_aloph.c:735-748 (Rule 1a: AX with a boundary, after a word-initial DH, before a syllabic -> IY)"
+
+  # Rule 1c (ph_aloph.c:765-781): AE N D right after a silence has EH for its
+  # AE, when the AE and the D are unstressed or the clause is not being cited.
+  # A clause is cited when it has fewer than ten entries, its two silences
+  # included (:486-501; citation mode is DECtalk's default, cm_util.c:156):
+  # "Silver, and gold." keeps the AE of its promoted "and" (nine entries), the
+  # second clause of "The big dog barked, and the small cat ran away." has EH.
+  #
+  # Not ported: at a speaking rate under 100 words a minute every clause is
+  # cited (:500-501).
+  dectalk_clause_initial_and:
+    kind: postlexical
+    select:
+      relation: Segment
+      where: "current.phoneme == 'AE'"
+    define:
+      p: prev
+      n: next
+      d: "ahead(current, 2)"
+      eh: "target('EH0')"
+      after_silence: "p == null || p.phoneme == 'SIL'"
+      spells_and: "n != null && n.phoneme == 'N' && d != null && d.phoneme == 'D'"
+      unstressed: "get(current, 'stress', 0) == 0 && get(d, 'stress', 0) == 0"
+      # nphonetot counts the clause's phones and its two silences.
+      cited: "clause_phone_count() + 2 < 10"
+    constraint: "after_silence && spells_and && (unstressed || !cited)"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields: *structure_word
+          phoneme: "'EH'"
+          type: eh.type
+          target: eh
+          duration: eh.duration
+          inherentDuration: eh.inherentDuration
+          minimumDuration: "has(eh.minimumDuration) ? eh.minimumDuration : eh.duration"
+          voiced: "has(eh.voiced) ? eh.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:765-781 (Rule 1c: after a silence, AE N D -> EH N D when AE and D are unstressed or !Cite_It)"
+      - "DECtalk 4.63 ph_aloph.c:486-501 (docitation = nphonetot < 10; Cite_It = MODE_CITATION && docitation)"
+
+  # The rule the source also labels 1c (ph_aloph.c:801-814): an AE before T
+  # becomes EH in a clause that is not cited, when the AE and the phone before
+  # it both carry a plain word boundary. The AE then begins its word (the
+  # phone before it ends one, or is the clause's first silence before a plain
+  # word) and is in its last rime, with a plain word after it: the word "at".
+  # "barked, at the small cat ..." has EH T.
+  #
+  # Here the last rime is taken as AE T alone; a longer one (AE T S) is not
+  # covered.
+  dectalk_at_reduced:
+    kind: postlexical
+    select:
+      relation: Segment
+      where: "current.phoneme == 'AE' && dectalk_word_start(current)"
+    define:
+      n: next
+      after: "ahead(current, 2)"
+      eh: "target('EH0')"
+      # The boundary in front of the word is a word boundary: the word starts
+      # no phrase.
+      plain_before: >-
+        dectalk_phrase_start(current) != 'vp' && dectalk_phrase_state(current) != 'pp'
+      before_final_t: >-
+        n != null && n.phoneme == 'T' && dectalk_same_word(current, n)
+        && after != null && after.phoneme != 'SIL' && dectalk_word_start(after)
+      plain_after: >-
+        dectalk_phrase_start(after) != 'vp' && dectalk_phrase_state(after) != 'pp'
+      cited: "clause_phone_count() + 2 < 10"
+    constraint: "plain_before && before_final_t && plain_after && !cited"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields: *structure_word
+          phoneme: "'EH'"
+          type: eh.type
+          target: eh
+          duration: eh.duration
+          inherentDuration: eh.inherentDuration
+          minimumDuration: "has(eh.minimumDuration) ? eh.minimumDuration : eh.duration"
+          voiced: "has(eh.voiced) ? eh.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:801-814 (AE before T, FWBNEXT on the AE and on the phone before it, !Cite_It: AE -> EH)"
+      - "DECtalk 4.63 ph_aloph.c:486-501 (docitation = nphonetot < 10; Cite_It = MODE_CITATION && docitation)"
+      - "DECtalk 4.63 ph_defs.h:250-261 (FBOUNDARY values; FWBNEXT 0140 is the plain word boundary)"
 
   # -------------------------------------------------------------------------
   # GEMINATE OBSTRUENT DELETION (ph_aloph.c:558-562, A1).  When an obstruent is

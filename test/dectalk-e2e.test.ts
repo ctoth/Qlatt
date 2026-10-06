@@ -781,6 +781,104 @@ describe("dectalk-english /r/", () => {
 });
 
 // ---------------------------------------------------------------------------
+// DECtalk's text stage puts a comma before a conjunction or a preposition
+// that is far enough from the last one and from the end (LTS/ls_task.c
+// :5129-5229, ls_util.c:824-853). Its phoneme log for "The big dog barked and
+// the small cat ran away." has the comma before "and"; none for "The dog and
+// the cat ran." or "The big dog barked and ran.".
+// ---------------------------------------------------------------------------
+describe("dectalk-english clause breaks", () => {
+  const detailed = (phrase: string) =>
+    textToKlattTrackDetailed(phrase, 110, 30, { frontendId: "dectalk-english" }).utterance;
+  const active = (phrase: string) =>
+    detailed(phrase)
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false);
+  const commas = (phrase: string): number =>
+    active(phrase).filter((item) => item.get("punctuationSymbol") === ",").length;
+  const phonesOf = (phrase: string, word: string): string[] =>
+    active(phrase)
+      .filter((item) => item.get("word") === word && !String(item.get("phoneme")).endsWith("_REL"))
+      .map((item) => String(item.get("phoneme")));
+
+  it("puts a comma before a conjunction with words enough on both sides", () => {
+    expect(commas("The big dog barked and the small cat ran away.")).toBe(1);
+    expect(commas("The dog and the cat ran.")).toBe(0);
+    expect(commas("The big dog barked and ran.")).toBe(0);
+  });
+
+  it("breaks before a preposition, and not again within three words", () => {
+    const words = active("The big dog barked at the small cat in the box.");
+    const comma = words.findIndex((item) => item.get("punctuationSymbol") === ",");
+    expect(words[comma + 1]?.get("word")).toBe("at");
+    expect(commas("The big dog barked at the small cat in the box.")).toBe(1);
+  });
+
+  it("makes the comma a silence that belongs to no word", () => {
+    const utterance = detailed("The big dog barked and the small cat ran away.");
+    const segments = utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false);
+    const comma = segments.find((item) => item.get("punctuationSymbol") === ",");
+    expect(comma?.get("phoneme")).toBe("SIL");
+    expect(comma && utterance.relation("SylStructure").node(comma)).toBeUndefined();
+    // The word after it still owns its phones.
+    const first = segments[segments.indexOf(comma as (typeof segments)[number]) + 1];
+    expect(utterance.relation("SylStructure").node(first)?.parent?.parent?.item.get("text")).toBe(
+      "and",
+    );
+  });
+
+  it("counts a number in digits as one written word", () => {
+    const places = detailed("The 25 and the small cat ran away.")
+      .relation("Word")
+      .listItems()
+      .map((word) => word.get("clause_word_index"));
+    expect(places).toEqual([1, 2, 2, 3, 4, 5, 6, 7, 8]);
+    expect(commas("The 25 and the small cat ran away.")).toBe(0);
+  });
+
+  it("starts the count again after a written comma", () => {
+    expect(commas("Yes, the big dog barked and the small cat ran away.")).toBe(2);
+  });
+
+  // ph_aloph.c:765-781 and :486-501. DECtalk's debug build: EH N D after the
+  // break above; AE N D, with the promoted AE, in "Silver, and gold.".
+  it("says a clause-initial 'and' with EH unless the clause is short and the vowel stressed", () => {
+    expect(phonesOf("The big dog barked and the small cat ran away.", "and")).toEqual([
+      "EH",
+      "N",
+      "D",
+    ]);
+    expect(phonesOf("Silver, and gold.", "and")).toEqual(["AE", "N", "D"]);
+  });
+
+  // ph_aloph.c:801-814. DECtalk's debug build: "Look at me." (nine entries
+  // with its two silences) ae tx; "Look at them." (ten) eh tx.
+  it("says 'at' with EH in a clause of ten entries or more", () => {
+    expect(phonesOf("Look at me.", "at")).toEqual(["AE", "TX"]);
+    expect(phonesOf("Look at them.", "at")).toEqual(["EH", "TX"]);
+  });
+
+  // The class of the word after a break reaches DECtalk's phonetic stage
+  // before the comma (ls_util.c:808-853), and the comma carries it through
+  // the phone sort (ph_sort.c:1271-1302). DECtalk's debug build: "and" is
+  // unstressed in its own clause, and in "The big small cat and they remain
+  // here today." the first vowel of "remain" is unstressed too: the flag that
+  // the class of "and" set is used up at the comma.
+  it("counts the class of the word after a break in the clause before it", () => {
+    const stress = (phrase: string, word: string): unknown =>
+      active(phrase)
+        .find((item) => item.get("word") === word && item.get("type") === "vowel")
+        ?.get("stress");
+    expect(stress("The big dog barked and the small cat ran away.", "and")).toBe(0);
+    expect(stress("The big small cat and they remain here today.", "remain")).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // FTYPESYL counts the syllabics of the word (ph_sort2.c init_med_final), not
 // the syllabifier's syllables. DECtalk's record (dectalk-us-v1.durations.json):
 // "Vision is usual." has YU first, UW medial, EL final; "Red lorries..." has

@@ -1,22 +1,24 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { dectalkFrameStartSec, parseDectalkTraceFile } from "./dectalk-trace";
 import {
-  type DectalkTraceFrame,
-  dectalkFrameStartSec,
-  parseDectalkTraceFile,
-} from "./dectalk-trace";
+  eventIndexAt,
+  FRAME_PARAMETERS,
+  type FrameParameter,
+  finiteNumber,
+  normalizeQlattPhone,
+  oracleSourceClockPhoneCode,
+  phoneCodeToQlatt,
+  qlattValue,
+  sameSegmentLabel,
+  type TrackEvent,
+} from "./frame-parameters";
 
 type Args = {
   runRoot: string;
   outPath?: string;
   maxPhaseDelta: number | null;
-};
-
-type TrackEvent = {
-  time?: number;
-  phoneme?: string;
-  params?: Record<string, unknown>;
 };
 
 type TrackSelection = {
@@ -90,169 +92,6 @@ type PhraseSummary = {
   ranked: Array<{ param: string } & ParamSummary>;
 };
 
-const US_PHONE = 1 << 8;
-const USP_W = US_PHONE + 24;
-const USP_R = US_PHONE + 26;
-const USP_LL = US_PHONE + 27;
-const USP_HX = US_PHONE + 28;
-const USP_CZ = US_PHONE + 58;
-
-const PHONE_BY_CODE: Record<number, string> = {
-  0: "SIL",
-  1: "IY",
-  2: "IH",
-  3: "EY",
-  4: "EH",
-  5: "AE",
-  6: "AA",
-  7: "AY",
-  8: "AW",
-  9: "AH",
-  10: "AO",
-  11: "OW",
-  12: "OY",
-  13: "UH",
-  14: "UW",
-  15: "ER",
-  16: "YU",
-  17: "AH",
-  18: "IH",
-  19: "IR",
-  20: "ER",
-  21: "AR",
-  22: "OR",
-  23: "UR",
-  24: "W",
-  25: "Y",
-  26: "R",
-  27: "L",
-  28: "HH",
-  29: "R",
-  30: "L",
-  31: "M",
-  32: "N",
-  33: "NG",
-  34: "EL",
-  35: "DH",
-  36: "EN",
-  37: "F",
-  38: "V",
-  39: "TH",
-  40: "DH",
-  41: "S",
-  42: "Z",
-  43: "SH",
-  44: "ZH",
-  45: "P",
-  46: "B",
-  47: "T",
-  48: "D",
-  49: "K",
-  50: "G",
-  51: "DX",
-  52: "T",
-  53: "Q",
-  54: "CH",
-  55: "JH",
-  56: "DF",
-  57: "TZ",
-  58: "CZ",
-};
-
-const ORACLE_TOKEN_TO_QLATT: Record<string, string> = {
-  _: "SIL",
-  iy: "IY",
-  ih: "IH",
-  ey: "EY",
-  eh: "EH",
-  ae: "AE",
-  aa: "AA",
-  ay: "AY",
-  aw: "AW",
-  ah: "AH",
-  ao: "AO",
-  ow: "OW",
-  oy: "OY",
-  uh: "UH",
-  uw: "UW",
-  rr: "ER",
-  er: "ER",
-  ax: "AH",
-  ix: "IH",
-  ir: "IR",
-  ar: "AR",
-  or: "OR",
-  ur: "UR",
-  w: "W",
-  yx: "Y",
-  r: "R",
-  ll: "L",
-  hx: "HH",
-  rx: "R",
-  lx: "L",
-  m: "M",
-  n: "N",
-  nx: "NG",
-  el: "EL",
-  dz: "DH",
-  en: "EN",
-  f: "F",
-  v: "V",
-  th: "TH",
-  dh: "DH",
-  s: "S",
-  z: "Z",
-  sh: "SH",
-  zh: "ZH",
-  p: "P",
-  b: "B",
-  t: "T",
-  d: "D",
-  k: "K",
-  g: "G",
-  dx: "DX",
-  tx: "T",
-  q: "Q",
-  ch: "CH",
-  jh: "JH",
-  df: "DF",
-  tz: "TZ",
-  cz: "CZ",
-  ".": "SIL",
-  "?": "SIL",
-  "!": "SIL",
-  ",": "SIL",
-};
-
-const PARAM_MAP: Array<{
-  label: string;
-  oracle?: keyof DectalkTraceFrame["out"];
-  oracleValue?: (frame: DectalkTraceFrame) => number | null;
-  qlatt: string;
-  qlattScale?: number;
-}> = [
-  {
-    label: "F0",
-    oracleValue: (frame) => (finiteNumber(frame.f0prime) == null ? null : frame.f0prime / 10),
-    qlatt: "F0",
-  },
-  { label: "F1", oracle: "F1", qlatt: "F1" },
-  { label: "F2", oracle: "F2", qlatt: "F2" },
-  { label: "F3", oracle: "F3", qlatt: "F3" },
-  { label: "B1", oracle: "B1", qlatt: "B1" },
-  { label: "B2", oracle: "B2", qlatt: "B2" },
-  { label: "B3", oracle: "B3", qlatt: "B3" },
-  { label: "AV", oracle: "AV", qlatt: "AV" },
-  { label: "AP", oracle: "AP", qlatt: "AH" },
-  { label: "A2", oracleValue: dectalkA2Db, qlatt: "A2" },
-  { label: "A3", oracle: "A3", qlatt: "A3" },
-  { label: "A4", oracle: "A4", qlatt: "A4" },
-  { label: "A5", oracle: "A5", qlatt: "A5" },
-  { label: "A6", oracle: "A6", qlatt: "A6" },
-  { label: "AB", oracle: "AB", qlatt: "AB" },
-  { label: "TLT", oracle: "TLT", qlatt: "TL" },
-];
-
 function parseArgs(argv: string[]): Args {
   const flags = new Map<string, string>();
   for (let index = 0; index < argv.length; index += 1) {
@@ -284,70 +123,6 @@ function parseArgs(argv: string[]): Args {
     outPath: flags.get("out") ? path.resolve(flags.get("out") as string) : undefined,
     maxPhaseDelta,
   };
-}
-
-function finiteNumber(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
-}
-
-function phoneCodeToQlatt(value: unknown): string | null {
-  const numeric = finiteNumber(value);
-  if (numeric == null) return null;
-  const code = numeric >= US_PHONE ? numeric - US_PHONE : numeric;
-  return PHONE_BY_CODE[code] ?? null;
-}
-
-function oracleTokenToQlatt(token: unknown): string | null {
-  if (typeof token !== "string") return null;
-  const trimmed = token.trim().toLowerCase();
-  if (!trimmed) return null;
-  return ORACLE_TOKEN_TO_QLATT[trimmed] ?? null;
-}
-
-function normalizeQlattPhone(phoneme: unknown): string | null {
-  if (typeof phoneme !== "string") return null;
-  const trimmed = phoneme
-    .trim()
-    .toUpperCase()
-    .replace(/[0-2]$/u, "");
-  if (!trimmed) return null;
-  if (trimmed.endsWith("_REL") || trimmed.endsWith("_ASP")) {
-    return trimmed.slice(0, trimmed.lastIndexOf("_"));
-  }
-  if (trimmed === "LL" || trimmed === "LX") return "L";
-  if (trimmed === "RR") return "ER";
-  if (trimmed === "AX") return "AH";
-  if (trimmed === "IX") return "IH";
-  if (trimmed === "HH") return "HH";
-  return trimmed;
-}
-
-function loadOracleComparisonTokens(phraseDir: string): string[] {
-  const artifactPath = path.join(phraseDir, "oracle", "oracle.json");
-  if (!fs.existsSync(artifactPath)) return [];
-  const parsed = JSON.parse(fs.readFileSync(artifactPath, "utf8")) as Record<string, unknown>;
-  const symbolic = parsed.symbolic;
-  if (!symbolic || typeof symbolic !== "object") return [];
-  const comparisonTokens = (symbolic as { comparisonTokens?: unknown }).comparisonTokens;
-  if (!Array.isArray(comparisonTokens)) return [];
-  return comparisonTokens
-    .map((token) => (typeof token === "string" ? token : ""))
-    .filter((token) => token.length > 0);
-}
-
-function oracleSourcePhoneForFrame(
-  frame: DectalkTraceFrame,
-  comparisonTokens: string[],
-): string | null {
-  const tokenIndex = frame.phoneIndex - 1;
-  const tokenPhone =
-    tokenIndex >= 0 && tokenIndex < comparisonTokens.length
-      ? oracleTokenToQlatt(comparisonTokens[tokenIndex])
-      : null;
-  if (tokenPhone != null) return tokenPhone;
-  if (frame.phoneIndex <= 0) return "SIL";
-  if (frame.phoneIndex > comparisonTokens.length + 1) return "SIL";
-  return phoneCodeToQlatt(frame.out.PH);
 }
 
 function emptyBucket(): ParamBucketSummary {
@@ -412,63 +187,6 @@ function accumulateBucket(
   return nextSum;
 }
 
-function dectalkA2Db(frame: DectalkTraceFrame): number | null {
-  const raw = finiteNumber(frame.out.A2);
-  if (raw == null) return null;
-
-  const phone = finiteNumber(frame.out.PH);
-  if (raw === 4000) {
-    if (phone === USP_R || phone === USP_LL) return 45;
-    if (phone === USP_W) return 50;
-    return 0;
-  }
-
-  // DECtalk 4.63 VTM/vtmiont.c HLSYN decodes OUT_A2 sentinels into NA2F dB.
-  let decoded: number | null;
-  switch (raw) {
-    case 1000:
-      decoded = 30;
-      break;
-    case 1100:
-      decoded = 40;
-      break;
-    case 1200:
-    case 1300:
-      decoded = 0;
-      break;
-    case 2000: {
-      const f2 = finiteNumber(frame.out.F2);
-      decoded = f2 == null ? null : f2 > 1700 ? 0 : 3;
-      break;
-    }
-    case 3000: {
-      const f3 = finiteNumber(frame.out.F3);
-      if (f3 == null) {
-        decoded = null;
-      } else if (f3 > 2600) {
-        decoded = 0;
-      } else if (f3 !== 2400) {
-        decoded = 10;
-      } else {
-        decoded = null;
-      }
-      break;
-    }
-    case 3100:
-    case 3200:
-    case 3300:
-      decoded = 10;
-      break;
-    default:
-      decoded = raw < 1000 ? raw : null;
-      break;
-  }
-
-  if (phone === USP_HX) return 30;
-  if (phone === USP_CZ) return 50;
-  return decoded;
-}
-
 function loadTrack(filePath: string): TrackEvent[] {
   const parsed = JSON.parse(fs.readFileSync(filePath, "utf8")) as Record<string, unknown>;
   const track = parsed.track;
@@ -479,28 +197,12 @@ function loadTrack(filePath: string): TrackEvent[] {
 }
 
 function eventSelectionAt(track: TrackEvent[], timeSec: number): TrackSelection | null {
-  let selected: TrackSelection | null = null;
-  for (let index = 0; index < track.length; index += 1) {
-    const event = track[index]!;
-    const eventTime = finiteNumber(event.time);
-    if (eventTime == null) continue;
-    if (eventTime <= timeSec + 1e-9) {
-      selected = { event, index };
-      continue;
-    }
-    break;
-  }
-  return selected;
+  const index = eventIndexAt(track, timeSec);
+  return index < 0 ? null : { event: track[index]!, index };
 }
 
 function eventAt(track: TrackEvent[], timeSec: number): TrackEvent | null {
   return eventSelectionAt(track, timeSec)?.event ?? null;
-}
-
-function qlattValue(event: TrackEvent | null, key: string, scale = 1): number | null {
-  if (!event?.params || typeof event.params !== "object") return null;
-  const value = finiteNumber(event.params[key]);
-  return value == null ? null : value * scale;
 }
 
 function clampUnit(value: number): number {
@@ -577,13 +279,10 @@ function qlattSegmentPhaseAt(
 function summarizeParam(
   oracleFrames: ReturnType<typeof parseDectalkTraceFile>["frames"],
   track: TrackEvent[],
-  oracleComparisonTokens: string[],
-  oracleKey: keyof DectalkTraceFrame["out"] | undefined,
-  oracleValueForFrame: ((frame: DectalkTraceFrame) => number | null) | undefined,
-  qlattKey: string,
-  qlattScale = 1,
+  parameter: FrameParameter,
   maxPhaseDelta: number | null = null,
 ): ParamSummary {
+  const qlattKey = parameter.qlatt;
   let compared = 0;
   let sumAbs = 0;
   let maxAbs = 0;
@@ -612,13 +311,11 @@ function summarizeParam(
 
   for (let frameIndex = 0; frameIndex < oracleFrames.length; frameIndex += 1) {
     const oracleFrame = oracleFrames[frameIndex]!;
-    const oracleValue =
-      oracleValueForFrame?.(oracleFrame) ??
-      (oracleKey == null ? null : finiteNumber(oracleFrame.out[oracleKey]));
+    const oracleValue = parameter.oracleValue(oracleFrame);
     const frameTimeSec = dectalkFrameStartSec(oracleFrame.frame);
     const selection = eventSelectionAt(track, frameTimeSec);
     const event = selection?.event ?? null;
-    const qlatt = qlattValue(event, qlattKey, qlattScale);
+    const qlatt = qlattValue(event, qlattKey);
     if (oracleValue == null || qlatt == null) continue;
     if (qlattKey === "F0") {
       const oracleAv = finiteNumber(oracleFrame.out.AV);
@@ -630,11 +327,14 @@ function summarizeParam(
     }
 
     const abs = Math.abs(qlatt - oracleValue);
-    const oraclePhone = oracleSourcePhoneForFrame(oracleFrame, oracleComparisonTokens);
+    // Segment labels are compared on the controller (AV/TLT/T0) clock, where
+    // Qlatt's Segment boundaries sit; see frame-parameters.ts.
+    const oraclePhone = phoneCodeToQlatt(oracleSourceClockPhoneCode(oracleFrames, frameIndex));
     const oracleOutputPhone = phoneCodeToQlatt(oracleFrame.out.PH);
     const qlattPhone = normalizeQlattPhone(event?.phoneme);
-    const knownSegmentPhones = oraclePhone != null && qlattPhone != null;
-    const segmentMatch = knownSegmentPhones && oraclePhone === qlattPhone;
+    const sameLabel = sameSegmentLabel(oracleFrames, frameIndex, event?.phoneme);
+    const knownSegmentPhones = sameLabel != null;
+    const segmentMatch = sameLabel === true;
     const oraclePhase = oracleSegmentPhaseAt(oracleFrames, frameIndex);
     const qlattPhase = qlattSegmentPhaseAt(track, selection, frameTimeSec);
     compared += 1;
@@ -755,21 +455,16 @@ function summarizeParam(
 function summarizeAlignment(
   oracleFrames: ReturnType<typeof parseDectalkTraceFile>["frames"],
   track: TrackEvent[],
-  oracleComparisonTokens: string[],
 ): PhraseSummary["alignment"] {
   let sameSegment = 0;
   let differentSegment = 0;
   let unknown = 0;
   for (let frameIndex = 0; frameIndex < oracleFrames.length; frameIndex += 1) {
-    const oraclePhone = oracleSourcePhoneForFrame(
-      oracleFrames[frameIndex]!,
-      oracleComparisonTokens,
-    );
     const event = eventAt(track, dectalkFrameStartSec(oracleFrames[frameIndex]!.frame));
-    const qlattPhone = normalizeQlattPhone(event?.phoneme);
-    if (oraclePhone == null || qlattPhone == null) {
+    const sameLabel = sameSegmentLabel(oracleFrames, frameIndex, event?.phoneme);
+    if (sameLabel == null) {
       unknown += 1;
-    } else if (oraclePhone === qlattPhone) {
+    } else if (sameLabel) {
       sameSegment += 1;
     } else {
       differentSegment += 1;
@@ -802,22 +497,12 @@ function summarizePhrase(phraseDir: string, maxPhaseDelta: number | null): Phras
   const qlattPayload = path.join(phraseDir, "qlatt", "qlatt.json");
   const oracle = parseDectalkTraceFile(oracleTrace);
   const track = loadTrack(qlattPayload);
-  const oracleComparisonTokens = loadOracleComparisonTokens(phraseDir);
   const lastTrackTime = finiteNumber(track[track.length - 1]?.time) ?? 0;
 
   const params = Object.fromEntries(
-    PARAM_MAP.map((entry) => [
+    FRAME_PARAMETERS.map((entry) => [
       entry.label,
-      summarizeParam(
-        oracle.frames,
-        track,
-        oracleComparisonTokens,
-        entry.oracle,
-        entry.oracleValue,
-        entry.qlatt,
-        entry.qlattScale ?? 1,
-        maxPhaseDelta,
-      ),
+      summarizeParam(oracle.frames, track, entry, maxPhaseDelta),
     ]),
   ) as Record<string, ParamSummary>;
 
@@ -831,14 +516,14 @@ function summarizePhrase(phraseDir: string, maxPhaseDelta: number | null): Phras
     qlattDurationSec: lastTrackTime,
     oracleDurationSec: Number(oracle.summary.durationSec ?? 0),
     durationDeltaSec: lastTrackTime - Number(oracle.summary.durationSec ?? 0),
-    alignment: summarizeAlignment(oracle.frames, track, oracleComparisonTokens),
+    alignment: summarizeAlignment(oracle.frames, track),
     params,
     ranked,
   };
 }
 
 function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
-  const byParam = PARAM_MAP.map(({ label }) => {
+  const byParam = FRAME_PARAMETERS.map(({ label }) => {
     let compared = 0;
     let weightedAbs = 0;
     let sameCompared = 0;

@@ -3,6 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { stoi } from "../../src/metrics/stoi";
+import { dectalkFrameStartSec } from "./dectalk-trace";
+import { eventIndexAt, qlattValue, type TrackEvent } from "./frame-parameters";
 import { buildSymbolicComparison } from "./symbolic";
 import type { AudioComparisonReport, AudioNormalizationConfig, OracleArtifact } from "./types";
 import {
@@ -140,6 +142,34 @@ function summarizeQlattTrackInternal(track: unknown): Record<string, number> | n
   };
 }
 
+/**
+ * Qlatt's F0 range measured the way summarizeDectalkTrace measures DECtalk's:
+ * one sample a packet, voiced packets (AV > 0) only. The payload's
+ * `trackSummary.f0Min` is the minimum over every event with F0 > 0, and this
+ * frontend carries F0 through unvoiced phones and pauses as DECtalk's
+ * controller does, so that figure includes pitch nobody hears ("she.": 94.5 Hz
+ * in the final pause against 114.9 Hz in the vowel).
+ */
+function summarizeQlattVoicedF0(
+  track: unknown,
+  packetCount: number | null,
+): { f0Min: number; f0Max: number; f0Mean: number } | null {
+  if (!Array.isArray(track) || packetCount == null) return null;
+  const events = track as TrackEvent[];
+  const voicedF0: number[] = [];
+  for (let packet = 0; packet < packetCount; packet += 1) {
+    const event = events[eventIndexAt(events, dectalkFrameStartSec(packet))];
+    const f0 = qlattValue(event, "F0");
+    if ((qlattValue(event, "AV") ?? 0) > 0 && f0 != null && f0 > 0) voicedF0.push(f0);
+  }
+  if (voicedF0.length === 0) return null;
+  return {
+    f0Min: Math.min(...voicedF0),
+    f0Max: Math.max(...voicedF0),
+    f0Mean: voicedF0.reduce((sum, value) => sum + value, 0) / voicedF0.length,
+  };
+}
+
 function buildVerdict(report: AudioComparisonReport): AudioComparisonReport["verdict"] {
   const reasons: string[] = [];
   const stoiValue = report.metrics.intelligibility.stoi;
@@ -262,9 +292,13 @@ export function compareAudioFiles(args: CompareAudioArgs): AudioComparisonReport
   const oracleTraceF0MaxHz = readMetricNumber(oracleTrace, "f0MaxHz");
   const oracleTraceF0MeanHz = readMetricNumber(oracleTrace, "f0MeanHz");
   const qlattTrackDurationSec = readMetricNumber(qlattTrackSummary, "totalTime");
-  const qlattTrackF0MinHz = readMetricNumber(qlattTrackSummary, "f0Min");
-  const qlattTrackF0MaxHz = readMetricNumber(qlattTrackSummary, "f0Max");
-  const qlattTrackF0MeanHz = readMetricNumber(qlattTrackSummary, "f0Mean");
+  const qlattVoicedF0 = summarizeQlattVoicedF0(
+    qlattPayload?.track,
+    readMetricNumber(oracleTrace, "frameCount"),
+  );
+  const qlattTrackF0MinHz = qlattVoicedF0?.f0Min ?? null;
+  const qlattTrackF0MaxHz = qlattVoicedF0?.f0Max ?? null;
+  const qlattTrackF0MeanHz = qlattVoicedF0?.f0Mean ?? null;
   const qlattTrackVoicedRatioFromSummary = readMetricNumber(qlattTrackSummary, "voicedRatio");
   const qlattTrackVoicedEvents = readMetricNumber(qlattTrackSummary, "voicedEvents");
   const qlattTrackEvents = readMetricNumber(qlattTrackSummary, "events");

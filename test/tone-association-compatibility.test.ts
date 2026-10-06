@@ -18,6 +18,11 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // every frame keeps its fields, and only frame times and order change (segment
 // starts move onto the 71/11025 s packet clock with the F0 ticks). Checked by
 // hashing each track with times removed and frames sorted, before and after.
+// The ahead(item, n) distance fix regenerates three snapshots: qlatt-english
+// "Did Bob buy a blue balloon?" (place locus now finds the vowel after a stop's
+// release) and qlatt-beauty "Did Bob buy a blue balloon?" and "Gag, gang; go!"
+// (boundary-tone shaping now reaches a vowel two or three segments before the
+// boundary). dectalk-english is unchanged. See docs/ahead-distance-golden-review.md.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

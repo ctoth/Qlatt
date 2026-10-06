@@ -101,6 +101,59 @@ describe("graph-native predicate navigation", () => {
     );
   });
 
+  it("moves ahead and behind by a literal integer distance", () => {
+    // A CEL integer literal reaches a navigation function as a bigint.
+    const utterance = new Utterance(SCHEMA);
+    for (const [id, phoneme] of [
+      ["p", "P"],
+      ["eh", "EH"],
+      ["ih", "IH"],
+      ["k", "K"],
+    ] as const) {
+      const item = utterance.createItem("segment", id);
+      item.set("phoneme", phoneme, INPUT);
+      item.set("stress", 0, INPUT);
+      item.set("duration", 0, INPUT);
+      utterance.relation("Segment").append(item, INPUT);
+    }
+    const spec = compileRuleEngineSpec({
+      relations: {
+        Segment: {
+          type: "base",
+          features: { phoneme: [], stress: [] },
+          scalars: { duration: {} },
+        },
+      },
+      rules: {
+        reach: {
+          select: { relation: "Segment", where: "current.phoneme == 'P'" },
+          define: {
+            one: "ahead(current, 1)",
+            two: "ahead(current, 2)",
+            three: "ahead(current, 3)",
+            past_end: "ahead(current, 4)",
+            back: "behind(ahead(current, 3), 2)",
+          },
+          apply: [
+            {
+              field: "duration",
+              op: "add",
+              value:
+                "(one.phoneme == 'EH' ? 1 : 0) + (two.phoneme == 'IH' ? 10 : 0) + (three.phoneme == 'K' ? 100 : 0) + (past_end == null ? 1000 : 0) + (back.phoneme == 'EH' ? 10000 : 0)",
+              tag: "navigation",
+            },
+          ],
+          citations: ["Taylor, Black & Caley 2001"],
+        },
+      },
+      phases: [{ name: "rules", rules: ["reach"] }],
+    });
+
+    runGraphRuleEngine(utterance, spec);
+
+    expect(utterance.getItem("p")?.get("duration")).toBe(11111);
+  });
+
   it("derives word, syllable, role, position, and span queries from shared tree identity", () => {
     const utterance = new Utterance(TREE_SCHEMA);
     const transaction = utterance.beginTransaction({

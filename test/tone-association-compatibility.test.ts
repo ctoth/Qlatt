@@ -29,6 +29,11 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // primary stress, the segmental F0 path runs for every phrase, and the
 // word-keyed replay rules are gone. They are checked against DECtalk itself by
 // scripts/oracle/compare-structure-bits.ts and the oracle scoreboard, not here.
+// The splice tree-placement fix regenerates the "Did Bob buy a blue balloon?"
+// and "Gag, gang; go!" snapshots in qlatt-english and qlatt-beauty (cluster
+// position and syllable role of expanded stops) and dectalk-english "The cat
+// sat." (a word-initial phone re-emitted by a splice now sits in its own word).
+// See docs/splice-tree-golden-review.md.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

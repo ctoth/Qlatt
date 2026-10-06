@@ -178,8 +178,17 @@ export class Relation {
     return node;
   }
 
-  /** Add `item` as the last daughter of `parent` in a tree relation. */
-  addDaughter(parent: HrgNode, item: Item, input: RelationWriteInput): HrgNode {
+  /**
+   * Add `item` as a daughter of `parent` in a tree relation: last when `after`
+   * is omitted, first when it is null, otherwise immediately after that
+   * daughter.
+   */
+  addDaughter(
+    parent: HrgNode,
+    item: Item,
+    input: RelationWriteInput,
+    after?: HrgNode | null,
+  ): HrgNode {
     if (this.kind !== "tree") {
       throw new Error(
         `E_HRG_RELATION_KIND: addDaughter requires a 'tree' relation, '${this.name}' is '${this.kind}'`,
@@ -188,13 +197,32 @@ export class Relation {
     if (parent.relation !== this) {
       throw new Error(`E_HRG_PARENT_RELATION: parent node is not in relation '${this.name}'`);
     }
+    if (after && after.parent !== parent) {
+      throw new Error(
+        `E_HRG_PREVIOUS_RELATION: '${after.item.id}' is not a daughter of '${parent.item.id}'`,
+      );
+    }
     this._validateAttach(item);
-    const previous = parent.daughters[parent.daughters.length - 1]?.item ?? null;
-    const write = this.stamper(this, "add_daughter", item, parent.item, previous, input);
+    const previousNode =
+      after === undefined ? (parent.daughters[parent.daughters.length - 1] ?? null) : after;
+    const index = previousNode ? parent.daughters.indexOf(previousNode) + 1 : 0;
+    const nextNode = parent.daughters[index] ?? null;
+    const write = this.stamper(
+      this,
+      "add_daughter",
+      item,
+      parent.item,
+      previousNode?.item ?? null,
+      input,
+    );
     const node = this.attach(item, write);
     node.parent = parent;
-    this.linkAfter(parent.daughters[parent.daughters.length - 1] ?? null, node);
-    parent.daughters.push(node);
+    this.linkAfter(previousNode, node);
+    if (nextNode) {
+      node.next = nextNode;
+      nextNode.prev = node;
+    }
+    parent.daughters.splice(index, 0, node);
     return node;
   }
 

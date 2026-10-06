@@ -143,10 +143,23 @@ Before `	  read_speaker_definition(phTTS);` (line 1638, in
 	  qvtm_words("S", (const short *)&(pVtm_t->parambuff[1]), SPDEF_PARS, (int)pKsd_t->uiSampleRate, (int)pVtm_t->uiSampleRateChange);
 ```
 
+After `changeSpeakerValues(phTTS, &pVtm_t->speakerDef, pKsd_t->last_voice );`
+(line 1645, in `case SPC_type_speaker:`):
+
+```c
+  {
+	  short qvtm_voice[2];
+	  qvtm_voice[0] = pVtm_t->NOM_Open_Quo;
+	  qvtm_voice[1] = pVtm_t->Tiltm;
+	  qvtm_words("V", qvtm_voice, 2, (int)pKsd_t->last_voice, 0);
+  }
+```
+
 ## Trace lines
 
 | Line | Meaning |
 |---|---|
+| `V <last_voice> 0 <NOM_Open_Quo> <Tiltm>` | Follows each `S`: the three values `changeSpeakerValues` reads from memory shared with PH. |
 | `S <uiSampleRate> <uiSampleRateChange> <51 words>` | A speaker definition packet, as `read_speaker_definition` reads it (`SPD_CHIP`, `PH/ph_defs.h:693-720`). `InitializeVTM` has just run (line 1619). |
 | `F <vol_att> <uiSampleRate> <45 words>` | A voice frame as `speech_waveform_generator` reads it; word order is `OUT_*` in `PH/ph_defs.h:559-604`. |
 | `W <bDoTuning> 0 <samples>` | The frame's samples in `iwave` after the call. |

@@ -36,12 +36,11 @@
 //! changes no output word, and the `log10` path above 100 never influences
 //! one.
 //!
-//! # Left out
+//! # In the `vtmio` module, not here
 //!
 //! - `changeSpeakerValues` and `initDefaultSpeakerValues`
 //!   (`VTM/vtmiont.c:2899-3460`), which overwrite some [`HLSpeaker`] fields per
-//!   voice after [`HlSynth::InitializeHLSynthesizer`]. Callers set those
-//!   fields through [`HlSynth::speaker`].
+//!   voice after [`HlSynth::InitializeHLSynthesizer`].
 //! - The frication and phoneme overrides `vtmiont.c:796-1219` applies to the
 //!   low-level frame after `HLSynthesizeLLFrame` returns.
 

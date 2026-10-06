@@ -181,7 +181,8 @@ fn replay(path: &Path) -> Outcome {
                 // The port keeps its own state; it is never resynchronised to
                 // DECtalk's, so a difference here carries into later frames.
             }
-            "F" | "W" | "O" | "Q" => {}
+            // V belongs to the speaker setup, which tests/vtmio_oracle.rs checks.
+            "F" | "W" | "O" | "Q" | "V" => {}
             other => panic!("{}:{}: unknown event {other:?}", path.display(), line_no),
         }
     }
@@ -256,7 +257,7 @@ fn hlsyn_reproduces_extra_fixture_directory_exactly() {
 /// `InitializeHLSynthesizer` must give DECtalk's `HLSpeaker` bit for bit in
 /// every field except the ones DECtalk's per-voice code
 /// (`initDefaultSpeakerValues` and `changeSpeakerValues`,
-/// `VTM/vtmiont.c:2899-3460`, not ported) assigns: B1m-B5m, B2F-B5F, B6F, F5,
+/// `VTM/vtmiont.c:2899-3460`, ported in `vtmio`) assigns: B1m-B5m, B2F-B5F, B6F, F5,
 /// F6, OQm, TLm, acd_f1Break, f1HiShift, agm and f1Max.
 #[test]
 fn initialize_matches_dectalk_speaker_outside_the_per_voice_fields() {

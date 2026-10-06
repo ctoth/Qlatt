@@ -132,13 +132,26 @@ PH when a voice is selected (`PH/ph_vset.c:432`):
 `B1m`, `B2m`, `B3m`, `B4m`, `B5m`, `B2F`, `B3F`, `B4F`, `B5F`, `B6F`, `F5`,
 `F6`, `OQm`, `TLm`, `acd_f1Break`, `f1HiShift`, `agm`, `f1Max`.
 
-Two of these come from PH's voice definition: `OQm` is `NOM_Open_Quo`
-(`curspdef[SPD_OQ]`, `ph_vset.c:591`, 672) and `TLm` is `Tiltm`
-(`curspdef[SPD_SM] * 20 / 100`, `ph_vset.c:689`; `curspdef[SPD_SM] - 40` in
-the Frank block, line 605). The rest are constants per
-voice in `changeSpeakerValues`. That function is not ported: the crate's
-tests take the whole `HLSpeaker` from the `H` trace record, and a caller of the
-crate has to supply these 18 values itself.
+Which block of constants applies is chosen by the voice number
+`pKsd_t->last_voice` (0 Paul, 1 Betty, 2 Harry, 3 Frank, 4 Dennis, 5 Kit,
+6 Ursula, 7 Rita, 8 Wendy, 9 Chris; `PH/hlsynapi.h:456-468`). Two fields come
+from PH's voice definition through memory PH shares with the VTM thread:
+`OQm` is `NOM_Open_Quo` (`curspdef[SPD_OQ]`, `ph_vset.c:591`, 672) and `TLm`
+is `Tiltm` (`curspdef[SPD_SM] * 20 / 100`, `ph_vset.c:689`;
+`curspdef[SPD_SM] - 40` in the Frank block, line 605). `setspdef` writes both
+just before it sends the speaker packet.
+
+So besides the packet, a speaker change needs three numbers from PH:
+
+| Value | Meaning | Observed for the built-in voices |
+|---|---|---|
+| `last_voice` | Voice number, selects the constants | 0-8 |
+| `NOM_Open_Quo` | Becomes `OQm`, the modal open quotient in percent | 0 for all nine |
+| `Tiltm` | Becomes `TLm`, the modal spectral tilt in dB | Paul 0, Betty 12, Harry 12, Frank 20, Dennis 12, Kit 10, Ursula 12, Rita 8, Wendy 2 |
+
+The trace record `V` carries them. `vtmio::VtmIo::speaker_packet` takes them
+and reproduces DECtalk's `HLSpeaker` bit for bit for all nine voices
+(`tests/fixtures/all-voices.speakers.txt`).
 
 ## Other state the VTM thread reads
 

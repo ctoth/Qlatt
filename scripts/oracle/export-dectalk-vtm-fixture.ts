@@ -50,7 +50,7 @@ import type { OracleCorpusDocument } from "./types";
  * L lines; "full" adds X and T (the HLFrame and HLState as float bits), which
  * let the Rust test check the port's internal state bit for bit.
  */
-type Phrase = { id: string; text: string; hl?: "compact" | "full" };
+type Phrase = { id: string; text: string; hl?: "compact" | "full"; speakersOnly?: boolean };
 
 /** The fixtures kept in the repository: id and the exact text given to say.exe. */
 const CHECKED_IN: Phrase[] = [
@@ -66,7 +66,21 @@ const CHECKED_IN: Phrase[] = [
   // Nonzero t0jit in the speaker definition (PH/ph_vset.c:763, voice
   // parameter LA).
   { id: "paul-jitter", text: "[:np] [:ra 180] [:dv la 30] moon.", hl: "compact" },
+  // Every built-in voice in turn. Only the speaker setup lines are kept
+  // (`<id>.speakers.txt`): the audio of nine sentences would be too large.
+  {
+    id: "all-voices",
+    text: "[:np] one. [:nb] two. [:nh] three. [:nf] four. [:nd] five. [:nk] six. [:nu] seven. [:nr] eight. [:nw] nine.",
+    speakersOnly: true,
+  },
 ];
+
+/** The same nine-voice utterance with all its frames; a `--corpus` export includes it. */
+const ALL_VOICES_FULL: Phrase = {
+  id: "all-voices",
+  text: CHECKED_IN[CHECKED_IN.length - 1].text,
+  hl: "full",
+};
 
 /** Words per event line after the tag and its two leading numbers. */
 const SPDEF_PARS = 51; // INCLUDE/cmd.h:209 (SPDEF) + 1
@@ -95,7 +109,17 @@ function maskUnreadWords(line: string): string {
 }
 
 /** The hlsyn records: PH packet, HLSpeaker, HLFrame, previous HLFrame, previous HLState, LLFrame, HLState. */
-const HL_WORDS: Record<string, number> = { P: 45, H: 174, X: 15, O: 15, Q: 17, L: 48, T: 17 };
+const HL_WORDS: Record<string, number> = {
+  P: 45,
+  H: 174,
+  X: 15,
+  O: 15,
+  Q: 17,
+  L: 48,
+  T: 17,
+  // The values changeSpeakerValues reads from shared memory for this speaker.
+  V: 2,
+};
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const argv = process.argv.slice(2);
@@ -135,11 +159,14 @@ function phrasesAndOutDir(): { phrases: Phrase[]; outDir: string } {
   const rate = corpus.defaults?.rate;
   if (rate == null) throw new Error(`E_VTM_FIXTURE: ${corpusFlag} has no defaults.rate`);
   return {
-    phrases: corpus.entries.map((entry) => ({
-      id: entry.id,
-      text: `[:np] [:ra ${Math.round(rate)}] ${entry.text}`,
-      hl: "full" as const,
-    })),
+    phrases: [
+      ...corpus.entries.map((entry) => ({
+        id: entry.id,
+        text: `[:np] [:ra ${Math.round(rate)}] ${entry.text}`,
+        hl: "full" as const,
+      })),
+      ALL_VOICES_FULL,
+    ],
     outDir: path.resolve(outDirFlag),
   };
 }
@@ -229,8 +256,9 @@ function exportPhrase(phrase: Phrase, outDir: string, tmpDir: string): string {
       if (words.length !== HL_WORDS[tag]) {
         throw new Error(`E_VTM_FIXTURE: ${phrase.id}: ${tag} line has ${words.length} words`);
       }
-      if (tag === "P" || tag === "H" || tag === "L") hlEvents.push(maskUnreadWords(line));
-      else if (phrase.hl === "full" && (tag === "X" || tag === "T")) hlEvents.push(line);
+      if (tag === "P" || tag === "H" || tag === "L" || tag === "V") {
+        hlEvents.push(maskUnreadWords(line));
+      } else if (phrase.hl === "full" && (tag === "X" || tag === "T")) hlEvents.push(line);
     } else {
       throw new Error(`E_VTM_FIXTURE: ${phrase.id}: unknown trace line ${JSON.stringify(line)}`);
     }
@@ -247,6 +275,22 @@ function exportPhrase(phrase: Phrase, outDir: string, tmpDir: string): string {
     throw new Error(
       `E_VTM_FIXTURE: ${phrase.id}: trace and WAV differ at sample ${firstDifference}`,
     );
+  }
+
+  if (phrase.speakersOnly) {
+    const speakerLines = hlEvents.filter((line) => /^[SVH] /.test(line));
+    const speakerHeader = [
+      "# DECtalk 4.63 speaker setup per voice, written by scripts/oracle/export-dectalk-vtm-fixture.ts",
+      `# say.exe text: ${phrase.text}`,
+      "# S <uiSampleRate> <uiSampleRateChange> <51 speaker definition words>",
+      "# V <last_voice> 0 <NOM_Open_Quo> <Tiltm>",
+      "# H <sizeof> 0 <174 words: HLSpeaker float bits, in effect from the next frame>",
+    ];
+    fs.writeFileSync(
+      path.join(outDir, `${phrase.id}.speakers.txt`),
+      `${[...speakerHeader, ...speakerLines].join("\n")}\n`,
+    );
+    return `${phrase.id}: speakers=${speakers} (speaker setup only)`;
   }
 
   const header = [
@@ -267,6 +311,7 @@ function exportPhrase(phrase: Phrase, outDir: string, tmpDir: string): string {
       "# DECtalk 4.63 hlsyn input and output, written by scripts/oracle/export-dectalk-vtm-fixture.ts",
       `# say.exe text: ${phrase.text}`,
       "# S <uiSampleRate> <uiSampleRateChange> <51 speaker definition words>",
+      "# V <last_voice> 0 <NOM_Open_Quo> <Tiltm>",
       "# H <sizeof> 0 <174 words: HLSpeaker float bits, in effect from the next frame>",
       "# P <lang_curr> 0 <45 PH packet words, before hlsyn>",
       "# L 0 0 <48 LLFrame words, right after HLSynthesizeLLFrame>",

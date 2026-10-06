@@ -8,17 +8,25 @@
 //! - the samples generated from the port's own frames, against the stock
 //!   `say.exe` WAV (`<id>.wav`).
 //!
-//! Input comes from `<id>.hl.txt`: `S` (speaker definition packet), `H`
-//! (`HLSpeaker` float bits, standing in for DECtalk's per-voice setup, which is
-//! not ported) and `P` (PH packet, with the language in its first number).
+//! Input comes from `<id>.hl.txt`: `S` (speaker definition packet), `V` (the
+//! voice number and the two values DECtalk's speaker setup reads from memory
+//! shared with PH) and `P` (PH packet, with the language in its first number).
+//! The `H` lines (DECtalk's `HLSpeaker` as float bits) are not input: the
+//! port's own speaker setup is compared with them, all 174 words.
+//!
+//! `<id>.speakers.txt` files hold only `S`, `V` and `H` lines; the checked-in
+//! `all-voices.speakers.txt` covers the nine built-in voices.
 //! Fixtures are written by `scripts/oracle/export-dectalk-vtm-fixture.ts`.
 //!
 //! Set `DECTALK_VTM_FIXTURE_DIR` to also replay another directory.
 
+// NOM_Open_Quo and Tiltm keep DECtalk's names.
+#![allow(non_snake_case)]
+
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use dectalk_vtm::hlsyn::{HLSpeaker, HLSPEAKER_WORDS};
+use dectalk_vtm::hlsyn::HLSPEAKER_WORDS;
 use dectalk_vtm::vtmio::VtmIo;
 use dectalk_vtm::{Vtm, SPDEF_PARS, VOICE_PARS};
 
@@ -88,6 +96,8 @@ fn wav_samples(path: &Path) -> Vec<i16> {
 
 struct Outcome {
     id: String,
+    speakers: usize,
+    speaker_mismatches: usize,
     frames: usize,
     exact_frames: usize,
     first_frame_mismatch: Option<String>,
@@ -112,6 +122,9 @@ fn replay(hl_path: &Path) -> Outcome {
     let mut vtm = Vtm::new();
     let mut rendered: Vec<i16> = Vec::new();
     let mut pending: Option<(i32, [i16; VOICE_PARS])> = None;
+    let mut pending_spdef: Option<[i16; SPDEF_PARS]> = None;
+    let mut speakers = 0usize;
+    let mut speaker_mismatches = 0usize;
     let mut frame_index = 0usize;
     let mut exact_frames = 0usize;
     let mut first_frame_mismatch = None;
@@ -160,14 +173,30 @@ fn replay(hl_path: &Path) -> Outcome {
             "S" => {
                 run(&mut io, &mut vtm, &mut pending, &mut rendered);
                 let spdef: [i16; SPDEF_PARS] = numbers(words, hl_path, line_no);
-                // vtmiont.c:1616-1645.
+                // vtmiont.c:1616-1638.
                 vtm.load_speaker_definition(&spdef)
                     .expect("speaker definition within the model's tables");
-                io.speaker_packet(&spdef);
+                pending_spdef = Some(spdef);
+            }
+            "V" => {
+                // vtmiont.c:1641-1645, with the shared values of this V line.
+                let spdef = pending_spdef
+                    .take()
+                    .unwrap_or_else(|| panic!("{}:{}: V without S", hl_path.display(), line_no));
+                let last_voice: i32 = fields[1]
+                    .parse()
+                    .unwrap_or_else(|e| panic!("{}:{}: {e}", hl_path.display(), line_no));
+                let [NOM_Open_Quo, Tiltm]: [i16; 2] = numbers(words, hl_path, line_no);
+                io.speaker_packet(&spdef, last_voice, NOM_Open_Quo, Tiltm);
             }
             "H" => {
+                // DECtalk's HLSpeaker for the frame about to run: the port's
+                // own speaker setup must already equal it.
                 let bits: [u32; HLSPEAKER_WORDS] = numbers(words, hl_path, line_no);
-                io.hl.speaker = HLSpeaker::from_words(&bits);
+                speakers += 1;
+                if io.hl.speaker.to_words() != bits {
+                    speaker_mismatches += 1;
+                }
             }
             "P" => {
                 run(&mut io, &mut vtm, &mut pending, &mut rendered);
@@ -197,6 +226,8 @@ fn replay(hl_path: &Path) -> Outcome {
 
     Outcome {
         id,
+        speakers,
+        speaker_mismatches,
         frames: frame_index,
         exact_frames,
         first_frame_mismatch,
@@ -230,8 +261,10 @@ fn replay_directory(dir: &Path) {
     for path in &fixtures {
         let outcome = replay(path);
         println!(
-            "{}: frames={} exact_frames={} first_frame_mismatch={} samples={} oracle_samples={} exact_samples={} max_abs_sample_diff={} first_sample_mismatch={}",
+            "{}: speakers={} speaker_mismatches={} frames={} exact_frames={} first_frame_mismatch={} samples={} oracle_samples={} exact_samples={} max_abs_sample_diff={} first_sample_mismatch={}",
             outcome.id,
+            outcome.speakers,
+            outcome.speaker_mismatches,
             outcome.frames,
             outcome.exact_frames,
             outcome.first_frame_mismatch.as_deref().unwrap_or("none"),
@@ -244,6 +277,8 @@ fn replay_directory(dir: &Path) {
                 .map_or_else(|| "none".to_string(), |i| i.to_string()),
         );
         if outcome.frames == 0
+            || outcome.speakers == 0
+            || outcome.speaker_mismatches != 0
             || outcome.exact_frames != outcome.frames
             || outcome.samples != outcome.oracle_samples
             || outcome.exact_samples != outcome.samples
@@ -273,4 +308,55 @@ fn ph_packets_reproduce_extra_fixture_directory_exactly() {
         return;
     };
     replay_directory(Path::new(&dir));
+}
+
+/// The speaker setup of `vtmiont.c:1641-1645` for every built-in voice:
+/// from the speaker definition packet and the `V` values, the port must
+/// produce DECtalk's `HLSpeaker`, all 174 words, bit for bit.
+#[test]
+fn speaker_setup_matches_dectalk_for_every_built_in_voice() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("fixtures")
+        .join("all-voices.speakers.txt");
+    let text = fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
+
+    let mut io = VtmIo::new();
+    let mut pending_spdef: Option<[i16; SPDEF_PARS]> = None;
+    let mut last_voice = -1;
+    let mut voices_checked = Vec::new();
+    for (index, line) in text.lines().enumerate() {
+        let line_no = index + 1;
+        let fields: Vec<&str> = line.split_ascii_whitespace().collect();
+        if fields.is_empty() || fields[0].starts_with('#') {
+            continue;
+        }
+        let words = &fields[3..];
+        match fields[0] {
+            "S" => pending_spdef = Some(numbers(words, &path, line_no)),
+            "V" => {
+                let spdef = pending_spdef.take().expect("S before V");
+                last_voice = fields[1].parse().expect("voice number");
+                let [NOM_Open_Quo, Tiltm]: [i16; 2] = numbers(words, &path, line_no);
+                io.speaker_packet(&spdef, last_voice, NOM_Open_Quo, Tiltm);
+            }
+            "H" => {
+                let bits: [u32; HLSPEAKER_WORDS] = numbers(words, &path, line_no);
+                let ours = io.hl.speaker.to_words();
+                let differing: Vec<usize> = (0..HLSPEAKER_WORDS)
+                    .filter(|&i| ours[i] != bits[i])
+                    .collect();
+                assert!(
+                    differing.is_empty(),
+                    "{}:{}: voice {last_voice}: HLSpeaker words {differing:?} differ from DECtalk's",
+                    path.display(),
+                    line_no
+                );
+                voices_checked.push(last_voice);
+            }
+            other => panic!("{}:{}: unknown event {other:?}", path.display(), line_no),
+        }
+    }
+    // Paul, Betty, Harry, Frank, Dennis, Kit, Ursula, Rita, Wendy.
+    assert_eq!(voices_checked, vec![0, 1, 2, 3, 4, 5, 6, 7, 8]);
 }

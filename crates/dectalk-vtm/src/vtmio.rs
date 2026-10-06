@@ -14,19 +14,32 @@
 //! PH puts in the packet's `OUT_A2` word (1000, 1100, ..., 4000) and on
 //! phoneme codes in `OUT_PH`.
 //!
+//! # Speaker setup
+//!
+//! For each speaker definition packet DECtalk runs
+//! `initDefaultSpeakerValues`, `InitializeHLSynthesizer` and
+//! `changeSpeakerValues` (`vtmiont.c:1641-1645`). The last one reads three
+//! values that are not in the packet but in memory PH shares with the VTM
+//! thread: the voice number `pKsd_t->last_voice`, and `NOM_Open_Quo` and
+//! `Tiltm`, which PH's `setspdef` derives from the voice definition
+//! (`PH/ph_vset.c:591`, 605, 672, 689) just before it sends the packet.
+//! [`VtmIo::speaker_packet`] takes them as arguments.
+//!
 //! # Left out
 //!
-//! `initDefaultSpeakerValues` and `changeSpeakerValues`
-//! (`vtmiont.c:2899-3460`), which DECtalk runs around
-//! `InitializeHLSynthesizer` for each speaker definition packet
-//! (lines 1641-1645). After [`VtmIo::speaker_packet`] the caller must set the
-//! per-voice fields of [`VtmIo::hl`]`.speaker` itself.
+//! The values those two functions store for PH's own use (`STRESS_STEP`,
+//! `UNSTRESS_PRESSURE`, `STRESS_PRESSURE`, `NOM_Sub_Pressure`,
+//! `NOM_Fricative_Opening`, `NOM_Glot_Stop_Area`, `VOT_speed`,
+//! `EndOfPhrase_Spread`): nothing in the VTM thread reads them. The
+//! `EPSON_ARM7`, `KEN`, `GERMAN`, `DIANE`, `SUEB`, `why` and `TOMBUCHLER`
+//! variants are not compiled into the stock binary; `OLD_VOICES` is
+//! (`PH/ph_defs.h:121`).
 
 #![allow(non_snake_case, non_upper_case_globals)]
 // Kept in the shape of the C source so the two can be compared line by line.
 #![allow(clippy::collapsible_else_if, clippy::if_same_then_else)]
 
-use crate::hlsyn::{HlSynth, LLFrame, OUT_SEX};
+use crate::hlsyn::{HLSpeaker, HlSynth, LLFrame, OUT_SEX};
 use crate::{
     OUT_A2, OUT_A3, OUT_A4, OUT_A5, OUT_A6, OUT_AB, OUT_AP, OUT_AV, OUT_B1, OUT_B2, OUT_B3, OUT_DP,
     OUT_F1, OUT_F2, OUT_F3, OUT_FNP, OUT_FZ, OUT_GF, OUT_PH, OUT_T0, OUT_TLT, SPDEF_PARS,
@@ -53,6 +66,211 @@ const UKP_HX: i32 = (0x02 << 8) | 28;
 const GRP_H: i32 = (0x03 << 8) | 29;
 const FP_R: i32 = (0x06 << 8) | 19;
 
+// `currentSpeaker`, `PH/hlsynapi.h:456-468`.
+pub const Paul: i32 = 0;
+pub const Betty: i32 = 1;
+pub const Harry: i32 = 2;
+pub const Frank: i32 = 3;
+pub const Dennis: i32 = 4;
+pub const Kit: i32 = 5;
+pub const Ursula: i32 = 6;
+pub const Rita: i32 = 7;
+pub const Wendy: i32 = 8;
+pub const Chris: i32 = 9;
+
+/// `initDefaultSpeakerValues`, `vtmiont.c:3430-3460`, the `HLSpeaker` part.
+/// DECtalk calls it before `InitializeHLSynthesizer`, which then assigns
+/// every one of these fields again.
+pub fn initDefaultSpeakerValues(speaker: &mut HLSpeaker, NOM_Open_Quo: i16, Tiltm: i16) {
+    speaker.OQm = f32::from(NOM_Open_Quo);
+    speaker.B1m = 110.0;
+    speaker.B2m = 110.0;
+    speaker.B3m = 140.0;
+    speaker.B4m = 230.0;
+    speaker.B5m = 340.0;
+    speaker.B2F = 250.0;
+    speaker.B3F = 320.0;
+    speaker.B4F = 260.0;
+    speaker.B5F = 260.0;
+    speaker.TLm = f32::from(Tiltm);
+    speaker.F5 = 4500.0;
+    speaker.F6 = 4700.0;
+    speaker.B6F = 500.0;
+}
+
+/// `changeSpeakerValues`, `vtmiont.c:2899-3427`, the `HLSpeaker` part of the
+/// branch compiled for Windows (the `#else` of `EPSON_ARM7`). `SpeakerName`
+/// is a `currentSpeaker` value; any other number takes the `default` case.
+pub fn changeSpeakerValues(
+    speaker: &mut HLSpeaker,
+    SpeakerName: i32,
+    NOM_Open_Quo: i16,
+    Tiltm: i16,
+) {
+    let NOM_Open_Quo = f32::from(NOM_Open_Quo);
+    let Tiltm = f32::from(Tiltm);
+    match SpeakerName {
+        Paul => {
+            // vtmiont.c:2976-3001 (the `#else` of KEN).
+            speaker.OQm = NOM_Open_Quo;
+            speaker.B1m = 90.0;
+            speaker.B2m = 90.0;
+            speaker.B3m = 130.0;
+            speaker.B4m = 180.0;
+            speaker.B5m = 200.0;
+            speaker.B2F = 250.0;
+            speaker.B3F = 320.0;
+            speaker.B4F = 260.0;
+            speaker.B5F = 270.0;
+            speaker.TLm = Tiltm;
+            speaker.F5 = 4500.0;
+            speaker.F6 = 4800.0;
+            speaker.B6F = 600.0;
+
+            speaker.f1HiShift = 1180.0;
+            speaker.acd_f1Break = 600.0;
+        }
+        Betty => {
+            // vtmiont.c:3103-3128 (OLD_VOICES).
+            speaker.OQm = NOM_Open_Quo;
+            speaker.B1m = 120.0;
+            speaker.B2m = 150.0;
+            speaker.B3m = 200.0;
+            speaker.B4m = 250.0;
+            speaker.B5m = 350.0;
+            speaker.B2F = 250.0;
+            speaker.B3F = 220.0;
+            speaker.B4F = 360.0;
+            speaker.B5F = 500.0;
+            speaker.TLm = Tiltm;
+            speaker.F6 = 4900.0;
+            speaker.B6F = 600.0;
+
+            speaker.f1HiShift = 1180.0;
+            speaker.acd_f1Break = 650.0;
+        }
+        Harry => {
+            // vtmiont.c:3135-3143.
+            speaker.OQm = NOM_Open_Quo;
+            speaker.B1m = 100.0;
+            speaker.B2m = 120.0;
+            speaker.B3m = 130.0;
+            speaker.TLm = Tiltm;
+            speaker.F5 = 4400.0;
+            speaker.F6 = 4990.0;
+            speaker.B6F = 1200.0;
+        }
+        Kit => {
+            // vtmiont.c:3159-3187.
+            speaker.OQm = NOM_Open_Quo;
+            speaker.B1m = 95.0;
+            speaker.B2m = 130.0;
+            speaker.B3m = 160.0;
+            speaker.B4m = 180.0;
+            speaker.B5m = 200.0;
+            speaker.B2F = 250.0;
+            speaker.B3F = 320.0;
+            speaker.B4F = 260.0;
+            speaker.B5F = 270.0;
+            speaker.TLm = Tiltm;
+            speaker.F5 = 4700.0;
+            speaker.F6 = 4800.0;
+            speaker.B6F = 1200.0;
+
+            speaker.acd_f1Break = 950.0;
+            speaker.f1HiShift = 1180.0;
+        }
+        Rita => {
+            // vtmiont.c:3195-3215.
+            speaker.OQm = NOM_Open_Quo;
+            speaker.B1m = 100.0;
+            speaker.B2m = 120.0;
+            speaker.B3m = 100.0;
+            speaker.F5 = 4800.0;
+            speaker.F6 = 4800.0;
+            speaker.B6F = 1200.0;
+            speaker.TLm = Tiltm;
+
+            speaker.f1HiShift = 1180.0;
+            speaker.acd_f1Break = 650.0;
+        }
+        Frank => {
+            // vtmiont.c:3224-3232.
+            speaker.OQm = NOM_Open_Quo;
+            speaker.B1m = 120.0;
+            speaker.B2m = 110.0;
+            speaker.B3m = 150.0;
+            speaker.TLm = Tiltm;
+            speaker.F5 = 4400.0;
+            speaker.F6 = 4800.0;
+            speaker.B6F = 1200.0;
+        }
+        Ursula => {
+            // vtmiont.c:3253-3264.
+            speaker.OQm = NOM_Open_Quo;
+            speaker.B1m = 120.0;
+            speaker.B2m = 130.0;
+            speaker.B2F = 250.0;
+            speaker.B3F = 220.0;
+            speaker.B4F = 250.0;
+            speaker.B5F = 200.0;
+            speaker.TLm = Tiltm;
+            speaker.F5 = 4650.0;
+            speaker.F6 = 4800.0;
+            speaker.B6F = 1200.0;
+        }
+        Wendy => {
+            // vtmiont.c:3306-3317 (after the `why` block).
+            speaker.OQm = NOM_Open_Quo;
+            speaker.B1m = 120.0;
+            speaker.B2m = 130.0;
+            speaker.B2F = 250.0;
+            speaker.B3F = 220.0;
+            speaker.B4F = 250.0;
+            speaker.B5F = 200.0;
+            speaker.TLm = Tiltm;
+            speaker.F5 = 4850.0;
+            speaker.F6 = 4800.0;
+            speaker.B6F = 1200.0;
+        }
+        Chris | Dennis => {
+            // vtmiont.c:3332-3347 (Chris) and 3362-3377 (Dennis), which
+            // assign the same values.
+            speaker.OQm = NOM_Open_Quo;
+            speaker.B1m = 70.0;
+            speaker.B2m = 90.0;
+            speaker.B3m = 130.0;
+            speaker.B4m = 180.0;
+            speaker.B5m = 200.0;
+            speaker.B2F = 250.0;
+            speaker.B3F = 320.0;
+            speaker.B4F = 260.0;
+            speaker.B5F = 270.0;
+            speaker.TLm = Tiltm;
+            speaker.F5 = 4500.0;
+            speaker.F6 = 4800.0;
+            speaker.B6F = 600.0;
+        }
+        _ => {
+            // vtmiont.c:3395-3409.
+            speaker.OQm = NOM_Open_Quo;
+            speaker.B1m = 80.0;
+            speaker.B2m = 90.0;
+            speaker.B3m = 150.0;
+            speaker.B4m = 230.0;
+            speaker.B5m = 340.0;
+            speaker.B2F = 250.0;
+            speaker.B3F = 320.0;
+            speaker.B4F = 400.0;
+            speaker.B5F = 400.0;
+            speaker.TLm = Tiltm;
+            speaker.F5 = 4500.0;
+            speaker.F6 = 4800.0;
+            speaker.B6F = 1200.0;
+        }
+    }
+}
+
 /// The state `vtmiont.c` keeps between voice packets for hlsyn and for the
 /// overrides: `VTM/vtminst.h:597-610`.
 #[derive(Clone, Debug, Default)]
@@ -77,11 +295,20 @@ impl VtmIo {
     }
 
     /// The hlsyn part of handling a speaker definition packet,
-    /// `vtmiont.c:1641-1645`: `InitializeHLSynthesizer` with the packet's
+    /// `vtmiont.c:1641-1645`. `InitializeHLSynthesizer` gets the packet's
     /// `sex` word (word `OUT_SEX` of the buffer the packet was read into).
-    /// The per-voice speaker values are not set; see the module documentation.
-    pub fn speaker_packet(&mut self, spdef: &[i16; SPDEF_PARS]) {
+    /// `last_voice`, `NOM_Open_Quo` and `Tiltm` are the shared values described
+    /// in the module documentation.
+    pub fn speaker_packet(
+        &mut self,
+        spdef: &[i16; SPDEF_PARS],
+        last_voice: i32,
+        NOM_Open_Quo: i16,
+        Tiltm: i16,
+    ) {
+        initDefaultSpeakerValues(&mut self.hl.speaker, NOM_Open_Quo, Tiltm);
         self.hl.InitializeHLSynthesizer(spdef[OUT_SEX] != 0);
+        changeSpeakerValues(&mut self.hl.speaker, last_voice, NOM_Open_Quo, Tiltm);
     }
 
     /// One voice packet, `vtmiont.c:656-1319`. `parambuff` is the PH packet;

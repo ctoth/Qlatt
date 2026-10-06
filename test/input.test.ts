@@ -168,22 +168,22 @@ describe("input contract — authored syllable stress", () => {
   }
 
   it("preserves level 3 on a single DECtalk word and adds the cited three and six frames", () => {
-    const result = textToKlattTrackDetailed("you", 110, 30, {
+    // "we" is an onset consonant and a vowel. ("you" is DECtalk's single
+    // allophone YU and has no onset.)
+    const result = textToKlattTrackDetailed("we", 110, 30, {
       frontendId: "dectalk-english",
       directionTrack: {
         version: "1",
         spans: [{ id: "strong", anchor: { unit: "word", start: 0 }, stress: { level: 3 } }],
       },
     });
-    const nucleus = result.utterance
+    const live = result.utterance
       .relation("Segment")
       .listItems()
-      .find((s) => s.get("type") === "vowel")!;
+      .filter((s) => s.get("active") !== false);
+    const nucleus = live.find((s) => s.get("type") === "vowel")!;
     expect(nucleus.get("stress")).toBe(3);
-    const onset = result.utterance
-      .relation("Segment")
-      .listItems()
-      .find((s) => s.get("phoneme") === "Y")!;
+    const onset = live.find((s) => s.get("phoneme") === "W")!;
     expect(onset.get("stress")).toBe(3);
     expect(onset.latestWrite("stress")?.tag).toBe("consonant_stress");
     // p_us_tim.c Rule 8: NF20MS (3 frames) for emphasis and NF40MS (6) more on
@@ -198,6 +198,23 @@ describe("input contract — authored syllable stress", () => {
       expect(writes[index].tag).toBe("emphasis");
       expect(Number(writes[index].value) - Number(writes[index - 1].value)).toBe(frames);
     }
+  });
+
+  it("carries level 3 onto the live Segment of a vowel that a later rule re-emits", () => {
+    // "you" is one allophone, YU, with a formant trajectory: the structural
+    // phase replaces it with a copy carrying the trajectory windows.
+    const result = textToKlattTrackDetailed("you", 110, 30, {
+      frontendId: "dectalk-english",
+      directionTrack: {
+        version: "1",
+        spans: [{ id: "strong", anchor: { unit: "word", start: 0 }, stress: { level: 3 } }],
+      },
+    });
+    const live = result.utterance
+      .relation("Segment")
+      .listItems()
+      .filter((s) => s.get("active") !== false && s.get("type") === "vowel");
+    expect(live.map((s) => [s.get("phoneme"), s.get("stress")])).toEqual([["YU", 3]]);
   });
 
   it("honors the accent policy switch without discarding authored stress", () => {

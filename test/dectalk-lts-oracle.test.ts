@@ -37,17 +37,7 @@ const options = {
   stressPolicyPath: "/rules/frontends/qlatt-english/stress-policy.yaml",
 };
 
-const YU = "DECtalk's one allophone YU is written Y UW (the inventory has no YU target)";
 const KNOWN_GAPS: Readonly<Record<string, string>> = {
-  bucy: YU,
-  fukowoka: YU,
-  gurit: YU,
-  kimura: YU,
-  maturities: YU,
-  queues: YU,
-  reviewing: YU,
-  tsurumi: YU,
-  unions: YU,
   mrs: "DECtalk reads the abbreviation letter by letter (EH M AA R EH S)",
 };
 

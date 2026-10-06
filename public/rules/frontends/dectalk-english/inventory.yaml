@@ -850,6 +850,67 @@ phoneme_targets:
     hi: true
     back: true
     is_back_rounded: true
+  # DECtalk's single allophone for "you" (US_YU, code 16): a glide from a high
+  # front start into a high back vowel. Trajectories from p_us_rom.h
+  # us_maltar / us_maldip (scripts/extract-dectalk-diphthong-trajectories.ts
+  # prints them); the static values are each trajectory's first target, B1 and
+  # AV from us_maltar; durations from us_inhdr / us_mindur. DECtalk has one YU
+  # target whatever the stress, so YU0 and YU1 name the same one.
+  # engineering estimate: TL copied from UW; the place flags describe where the
+  # glide ends.
+  YU1: &dectalk_yu
+    TL: 3
+    F1: 270
+    F2: 2000
+    F3: 2600
+    B1: 70
+    B2: 150
+    B3: 250
+    AV: 65
+    dur: 230
+    minimumDuration: 100
+    type: vowel
+    voiced: true
+    hi: true
+    back: true
+    is_back_rounded: true
+    trajectory:
+      F1:
+      - value: 270
+        time: 45
+      - value: 360
+        time: 150
+      - value: 360
+        time: null
+      F2:
+      - value: 2000
+        time: 45
+      - value: 1050
+        time: 150
+      - value: 1000
+        time: null
+      F3:
+      - value: 2600
+        time: 45
+      - value: 2250
+        time: 95
+      - value: 2200
+        time: null
+      B2:
+      - value: 150
+        time: 45
+      - value: 70
+        time: 150
+      - value: 70
+        time: null
+      B3:
+      - value: 250
+        time: 45
+      - value: 130
+        time: 100
+      - value: 130
+        time: null
+  YU0: *dectalk_yu
   ER1:
     TL: 3
     F1: 490

@@ -1,0 +1,207 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-v1",
+  "engine": "DECtalk 4.63 say.exe -lp",
+  "entries": {
+    "g2p-the": {
+      "text": "the.",
+      "phonemeLog": "dhax."
+    },
+    "g2p-she": {
+      "text": "she.",
+      "phonemeLog": "shiy."
+    },
+    "g2p-dog": {
+      "text": "dog.",
+      "phonemeLog": "d ' aog ."
+    },
+    "g2p-this": {
+      "text": "this.",
+      "phonemeLog": "dhihs ."
+    },
+    "g2p-church": {
+      "text": "church.",
+      "phonemeLog": "ch' rrch."
+    },
+    "g2p-about": {
+      "text": "about.",
+      "phonemeLog": "axb ` awt ."
+    },
+    "stops-pat-tapped": {
+      "text": "Pat tapped a pot.",
+      "phonemeLog": "p ' aet   t ' aep t   ^ ax  p ' aat ."
+    },
+    "fric-thin-thieves": {
+      "text": "Thin thieves thought that they thrilled.",
+      "phonemeLog": "th' ihn   th' iyv z   th' aot   dhaet   dhey  thr ' ihlld ."
+    },
+    "prosody-hello-world": {
+      "text": "Hello world.",
+      "phonemeLog": "hxehll' ow  w ' rrlld ."
+    },
+    "prosody-how-are-you": {
+      "text": "How are you today?",
+      "phonemeLog": "hxaw  aar   yu  t uwd ' ey."
+    },
+    "g2p-cat": {
+      "text": "cat.",
+      "phonemeLog": "k ' aet ."
+    },
+    "g2p-cake": {
+      "text": "cake.",
+      "phonemeLog": "k ' eyk ."
+    },
+    "g2p-moon": {
+      "text": "moon.",
+      "phonemeLog": "m ' uwn ."
+    },
+    "g2p-fish": {
+      "text": "fish.",
+      "phonemeLog": "f ' ihsh."
+    },
+    "g2p-thought": {
+      "text": "thought.",
+      "phonemeLog": "th' aot ."
+    },
+    "g2p-measure": {
+      "text": "measure.",
+      "phonemeLog": "m ' ehzhrr."
+    },
+    "g2p-yellow": {
+      "text": "yellow.",
+      "phonemeLog": "yx' eh~ llow."
+    },
+    "g2p-queen": {
+      "text": "queen.",
+      "phonemeLog": "k w ' iyn ."
+    },
+    "g2p-judge": {
+      "text": "judge.",
+      "phonemeLog": "jh' ahjh."
+    },
+    "g2p-phone": {
+      "text": "phone.",
+      "phonemeLog": "f ' own ."
+    },
+    "function-a-cat": {
+      "text": "a cat.",
+      "phonemeLog": "^ ax  k ' aet ."
+    },
+    "function-an-apple": {
+      "text": "an apple.",
+      "phonemeLog": "aen   ' aep el."
+    },
+    "function-to-school": {
+      "text": "to school.",
+      "phonemeLog": "^ ( t uh  s k ' uwll."
+    },
+    "function-of-it": {
+      "text": "of it.",
+      "phonemeLog": "axv   iht ."
+    },
+    "function-for-you": {
+      "text": "for you.",
+      "phonemeLog": "^ ( f rr  yu."
+    },
+    "function-can-we": {
+      "text": "can we go?",
+      "phonemeLog": "k aen   w iy) g ' ow?"
+    },
+    "numbers-one-two-three": {
+      "text": "one two three.",
+      "phonemeLog": "w ahn   t ' uw  thr ' iy."
+    },
+    "numbers-room-101": {
+      "text": "room 101.",
+      "phonemeLog": "r ' uwm   w ahn   hx' ahn d r axd ) ehn d   w ' ahn ."
+    },
+    "numbers-12-dogs": {
+      "text": "12 dogs.",
+      "phonemeLog": "t w ' ehllv   d ' aog z ."
+    },
+    "punct-comma": {
+      "text": "Yes, we can.",
+      "phonemeLog": "yx' ehs , w iy  k aen ."
+    },
+    "punct-question": {
+      "text": "Can you hear me?",
+      "phonemeLog": "k aen   yu) hx' iyr   m iy?"
+    },
+    "punct-exclaim": {
+      "text": "Stop now!",
+      "phonemeLog": "s t ' aop   n ` aw!"
+    },
+    "stops-big-dog": {
+      "text": "The big dog barked.",
+      "phonemeLog": "dhax  b ' ihg   d ' aog   b ' aar k t ."
+    },
+    "stops-take-two": {
+      "text": "Take two tickets.",
+      "phonemeLog": "t ' eyk   t ' uw  t ' ihk iht s ."
+    },
+    "stops-give-back": {
+      "text": "Give back the bag.",
+      "phonemeLog": ") g ihv   b ' aek   dhax  b ' aeg ."
+    },
+    "fric-safe-zone": {
+      "text": "Safe zones feel fuzzy.",
+      "phonemeLog": "s ' eyf   z ' own z   f ' iyll  f ' ahz iy."
+    },
+    "fric-these-shoes": {
+      "text": "These shoes shine.",
+      "phonemeLog": "dhiyz   sh' uwz   sh' ayn ."
+    },
+    "fric-vision": {
+      "text": "Vision is usual.",
+      "phonemeLog": "v ' ihzhixn   ihz   ' yuzhuwel."
+    },
+    "nasal-many-men": {
+      "text": "Many men make money.",
+      "phonemeLog": "m ` ehn iy  m ' ehn   m ` eyk   m ' ahn iy."
+    },
+    "nasal-sing-song": {
+      "text": "Sing a long song.",
+      "phonemeLog": "s ' ihnx  ^ ax  ll' aonx  s ' aonx."
+    },
+    "liquid-red-lorry": {
+      "text": "Red lorries roll along.",
+      "phonemeLog": "r ' ehd   ll' aor iyz   r ' owll  axll` aonx."
+    },
+    "liquid-clear-light": {
+      "text": "Clear light glowed.",
+      "phonemeLog": "k ll' iyr   ll' ayt   g ll' owd ."
+    },
+    "glide-we-will": {
+      "text": "We will wait.",
+      "phonemeLog": "w iy  w ihll  w ' eyt ."
+    },
+    "glide-young-yard": {
+      "text": "Young yaks yelled.",
+      "phonemeLog": "yx' ahnx  yx' aek s   yx' ehlld ."
+    },
+    "prosody-short-decl": {
+      "text": "This is a test.",
+      "phonemeLog": "dhihs   ihz   ^ ax  t ' ehs t ."
+    },
+    "prosody-list": {
+      "text": "Red, green, blue, and gold.",
+      "phonemeLog": "r ' ehd , g r ' iyn , b ll` uw, ^ ( aen d   g ' owlld ."
+    },
+    "prosody-wh-question": {
+      "text": "Where are they going?",
+      "phonemeLog": "w ehr   aar   dhey  g ` owixnx."
+    },
+    "vowels-beat-bit": {
+      "text": "Beat bit bait bet bat.",
+      "phonemeLog": "b ' iyt   b ' iht   b ' eyt   b ' eht   b ' aet ."
+    },
+    "vowels-boat-bought": {
+      "text": "Boat boot bought but bite.",
+      "phonemeLog": "b ' owt   b ' uwt   b ' aot   b aht   b ' ayt ."
+    },
+    "mixed-rain-spain": {
+      "text": "The rain in Spain stays mainly in the plain.",
+      "phonemeLog": "dhax  r ' eyn   ihn   s p ' eyn   s t ' eyz   m ' eyn lliy  ihn   dhax  p ll' eyn ."
+    }
+  }
+}

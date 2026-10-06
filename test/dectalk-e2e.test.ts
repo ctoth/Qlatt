@@ -543,6 +543,96 @@ describe("dectalk-english dictionary-first (dt-2b)", () => {
 });
 
 // ---------------------------------------------------------------------------
+// A clause that begins with a wh-word is a question DECtalk ends like a
+// statement: LTS/ls_task.c sends its "?" on as a period.
+// ---------------------------------------------------------------------------
+describe("dectalk-english wh-questions", () => {
+  function finalPunctuation(phrase: string): { symbol: unknown; rime: unknown[] } {
+    const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    const live = utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false);
+    return {
+      symbol: live
+        .findLast((item) => item.get("punctuationSymbol") != null)
+        ?.get("punctuationSymbol"),
+      rime: [...new Set(live.map((item) => item.get("rime_boundary")).filter((b) => b != null))],
+    };
+  }
+
+  it.each(["Where are they going?", "How are you today?", "What is it?"])(
+    "ends %j with a period-type boundary",
+    (phrase) => {
+      const { symbol, rime } = finalPunctuation(phrase);
+      expect(symbol).toBe(".");
+      expect(rime).toContain("period");
+      expect(rime).not.toContain("question");
+    },
+  );
+
+  // The first word is the one after a sentence end; a comma does not start
+  // a new one, so "well" decides the last of these.
+  it.each(["Can we go?", "Is it where we go?", "Well, where are they?"])(
+    "keeps %j a question",
+    (phrase) => {
+      const { symbol, rime } = finalPunctuation(phrase);
+      expect(symbol).toBe("?");
+      expect(rime).toContain("question");
+    },
+  );
+
+  it("decides each clause by its own first word", () => {
+    const { utterance } = textToKlattTrackDetailed("Can we go? Where?", 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    const symbols = utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false && item.get("punctuationSymbol") != null)
+      .map((item) => item.get("punctuationSymbol"));
+    expect(symbols).toEqual(["?", "."]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// "are", "had", "is", "was", "were" and "will" take secondary stress as the
+// first word of a sentence (LTS/ls_task.c verbs[]). DECtalk's phoneme log:
+// "Is it here?" is ` ihz iht hx' iyrr; "It is here." has ihz unstressed;
+// "Will it rain." is w ` ihlx iht r ' eyn.
+// ---------------------------------------------------------------------------
+describe("dectalk-english sentence-initial auxiliaries", () => {
+  function vowelStress(phrase: string): Array<[unknown, unknown]> {
+    const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    return utterance
+      .relation("Segment")
+      .listItems()
+      .filter((item) => item.get("active") !== false && item.get("type") === "vowel")
+      .map((item) => [item.get("word"), item.get("stress")]);
+  }
+
+  it("gives the auxiliary secondary stress at the start of a sentence", () => {
+    expect(vowelStress("Is it here?")[0]).toEqual(["is", 2]);
+    expect(vowelStress("Will it rain.")[0]).toEqual(["will", 2]);
+  });
+
+  it("leaves it unstressed elsewhere, also after a comma", () => {
+    expect(vowelStress("It is here.")[1]).toEqual(["is", 0]);
+    expect(vowelStress("Well, is it here?")[1]).toEqual(["is", 0]);
+  });
+
+  it("counts a new sentence, not a new clause", () => {
+    const stresses = vowelStress("Where are they? Is it here?");
+    expect(stresses.find(([word]) => word === "is")).toEqual(["is", 2]);
+    expect(stresses.find(([word]) => word === "are")).toEqual(["are", 0]);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // One output clock. DECtalk's controller counts nominal 6.4-ms frames
 // (ph_claus.c) and the VTM emits each as a 71-sample packet at 11,025 Hz
 // (VTM/vtmiont.c), so every frame of a clause, segment starts and F0 ticks

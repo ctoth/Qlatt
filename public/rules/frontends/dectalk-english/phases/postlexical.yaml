@@ -38,6 +38,79 @@ version: v1
 # ---------------------------------------------------------------------------
 rules:
   # -------------------------------------------------------------------------
+  # WH-QUESTIONS END LIKE STATEMENTS (LTS/ls_task.c).
+  #
+  # ls_task_set_what_state (1566-1625) looks the first word after a sentence
+  # end up in whdic; when it is there, the next question mark is sent on as a
+  # period (1196-1208, "Changing question mark to period!"). Everything
+  # downstream then sees a statement: the boundary type on the final rime, the
+  # pause, and the intonation.
+  #
+  # The state is reset at ".", "?" and "!" only (ls_task.c:1160, 1195, 1220,
+  # 1236), not at a comma: in "Well, where are they?" the first word is
+  # "well" and the question mark stays.
+  # -------------------------------------------------------------------------
+  dectalk_wh_question_period:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) == '?'"
+    define:
+      # The previous sentence's final silence, or the utterance's first Segment.
+      sentence_edge: >-
+        look_back_where(current, 5000,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) in [".", "?", "!"]) || behind(candidate, 1) == null')
+      first_phone: >-
+        sentence_edge == null ? null
+        : (sentence_edge.phoneme == 'SIL' ? ahead(sentence_edge, 1) : sentence_edge)
+    constraint: >-
+      first_phone != null && has(first_phone.word)
+      && lower(first_phone.word) in params.policy.structure.wh_words
+    apply:
+      - field: punctuationSymbol
+        op: set
+        value: "'.'"
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:1566-1625 ls_task_set_what_state (first word of the clause in whdic)"
+      - "DECtalk 4.63 LTS/ls_task.c:1196-1208 (a question mark after a wh-clause is sent as PERIOD)"
+      - "DECtalk 4.63 LTS/l_us_con.c:1215-1226 whdic"
+
+  # -------------------------------------------------------------------------
+  # AN AUXILIARY THAT BEGINS A SENTENCE (LTS/ls_task.c:4636-4645, 4672-4728).
+  #
+  # ls_task_lookup_first_verbs is called for the same first word: "are",
+  # "had", "is", "was", "were" and "will" are then sent with secondary stress
+  # on their vowel instead of their unstressed dictionary form ("Is it here?").
+  #
+  # Not ported: the table also gives "had" the vowel EH there, where the
+  # dictionary has AE.
+  # -------------------------------------------------------------------------
+  dectalk_sentence_initial_auxiliary:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.type == 'vowel' && has(current.word)
+        && lower(current.word) in params.policy.structure.sentence_initial_auxiliaries
+    define:
+      # The nearest earlier Segment that is a sentence end or belongs to another word.
+      before_word: >-
+        look_back_where(current, 5000,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) in [".", "?", "!"]) || !(has(candidate.word) && has(source.word) && candidate.word == source.word)')
+    constraint: >-
+      before_word == null
+      || (before_word.phoneme == 'SIL' && get(before_word, 'punctuationSymbol', null) in ['.', '?', '!'])
+    apply:
+      - field: stress
+        op: set
+        value: 2
+        tag: stress
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:4636-4645 verbs[] (are, had, is, was, were, will with S2)"
+      - "DECtalk 4.63 LTS/ls_task.c:4672-4728 ls_task_lookup_first_verbs (first word after a sentence end)"
+
+  # -------------------------------------------------------------------------
   # PHONE STRUCTURE WORD (ph_sort.c phsort(), run by DECtalk before phalloph()).
   #
   # DECtalk gives every phone a structure word that its allophone and duration

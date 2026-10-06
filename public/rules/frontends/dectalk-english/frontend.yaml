@@ -222,11 +222,19 @@ parameters:
         G: { R: cluster, L: cluster, W: cluster }
         S: { W: cluster, L: cluster, P: cluster, T: cluster, K: cluster, M: cluster, N: cluster, F: cluster }
         SH: { W: cluster, L: cluster, P: cluster, T: cluster, R: cluster, M: cluster, N: cluster }
+      # whdic: a clause that begins with one of these is a wh-question, and
+      # DECtalk sends its question mark on as a period.
+      wh_words: [what, when, where, why, who, how, which, whose, whom]
+      # verbs[]: these take secondary stress as the first word of a sentence.
+      sentence_initial_auxiliaries: [are, had, is, was, were, will]
       citations:
         - "DECtalk 4.63 p_us_sr1.c:175-228 us_phcluster (CLUSTER and CLUSTER_TRYS onset pairs)"
-    # Data for DECtalk's duration rules (p_us_tim.c), transcribed from its ROM
-    # and headers. scripts/oracle/compare-dectalk-rom-tables.ts checks every
-    # table here against the DECtalk source tree.
+        - "DECtalk 4.63 LTS/l_us_con.c:1215-1226 whdic"
+        - "DECtalk 4.63 LTS/ls_task.c:4636-4645 verbs[]"
+    # Data for DECtalk's duration rules (p_us_tim.c), transcribed by hand from
+    # its ROM and headers. scripts/oracle/check-dectalk-timing-policy.ts checks
+    # phonemes, inherent_ms, minimum_ms, features and syllabic_codes against the
+    # DECtalk source tree.
     timing:
       # l_all_ph.h US_<name>: allophone names in code order. Code 0 is silence.
       phonemes: [SIL, IY, IH, EY, EH, AE, AA, AY, AW, AH, AO, OW, OY, UH, UW, RR, YU, AX, IX, IR, ER, AR, OR, UR, W, Y, R, LL, HX, RX, LX, M, N, NX, EL, DZ, EN, F, V, TH, DH, S, Z, SH, ZH, P, B, T, D, K, G, DX, TX, Q, CH, JH, DF, TZ, CZ]

@@ -21,6 +21,7 @@ import { loadYamlDocumentSync } from "../yaml-loader";
 import { applyLtsRules } from "./lts-engine";
 import { decomposeClitic, decomposeWord, getStressHintForWord } from "./morphology";
 import { stressPronunciation } from "./stress";
+import { type ClauseContext, chooseHomograph, loneWordContext } from "./table-homograph";
 import {
   formClassNamesOf,
   isLtsTableDocument,
@@ -58,7 +59,13 @@ function ltsTableAt(path: string): LtsTableDocument | null {
 export function pronounce(
   word: string,
   dictLookup: DictLookup,
-  options: { ltsPath: string; morphologyPath: string; stressPolicyPath: string },
+  options: {
+    ltsPath: string;
+    morphologyPath: string;
+    stressPolicyPath: string;
+    /** The word's place among its neighbours; a word alone when absent. */
+    context?: ClauseContext;
+  },
 ): PronunciationResult {
   if (!word || word.trim().length === 0) {
     return { phonemes: [], source: "lts-rules", word: word || "" };
@@ -67,37 +74,53 @@ export function pronounce(
   const lowerWord = word.toLowerCase();
 
   const table = options.ltsPath ? ltsTableAt(options.ltsPath) : null;
+  const context = options.context ?? loneWordContext();
   // A table that records form classes gives every word a list, empty for a
   // word it does not know. A fixed class wins over the dictionary's
   // (DECtalk 4.63 LTS/ls_task.c:1062-1078), and a class set by a suffix rule
   // stays (LTS/ls_dict.c:749-750).
-  const classed = (mask: number): { formClasses?: string[]; receivedFormClasses?: string[] } => {
+  const classed = (
+    mask: number,
+  ): { formClasses?: string[]; formClassWord?: number; receivedFormClasses?: string[] } => {
     if (!table?.formClassNames) return {};
     const word = table.specialWordFormClasses?.[lowerWord] ?? mask;
     return {
       formClasses: formClassNamesOf(word, table),
+      formClassWord: word,
       receivedFormClasses: formClassNamesOf(receivedFormClassWord(word), table),
+    };
+  };
+  // A dictionary word, or the root of a suffixed one, as it is spoken here:
+  // of a word with two entries, the one its neighbours select
+  // (table-homograph.ts). `classSoFar` is the suffix's class for a root.
+  const entryOf = (entry: string, classSoFar: number) => {
+    const choice = table ? chooseHomograph(table, entry, classSoFar, context) : null;
+    const other = choice?.secondary ? table?.homographs?.[entry] : undefined;
+    return {
+      other,
+      bySuffixRule: choice?.bySuffixRule === true,
+      isHomograph: choice !== null,
+      formClass: other ? other.formClass : (table?.wordFormClasses?.[entry] ?? 0),
+      rulesBlockedAt: other ? other.rulesBlockedAt : table?.wordRuleBlocks?.[entry],
     };
   };
   // The phrase a word starts is read from the dictionary entry that was
   // reached, a suffixed word's root included; the fixed-class words come from
   // DECtalk's mini dictionary and never reach it.
-  const phrased = (entry: string | null): { phraseStart?: "vp" | "pp" } => {
+  const phrased = (entryClass: number | null): { phraseStart?: "vp" | "pp" } => {
     const fixed = table?.specialWordPhraseStarts?.[lowerWord];
     if (fixed) return { phraseStart: fixed };
     return table?.wordFormClasses &&
-      entry !== null &&
+      entryClass !== null &&
       table.specialWordFormClasses?.[lowerWord] === undefined &&
-      startsVerbPhrase(table.wordFormClasses[entry] ?? 0, table)
+      startsVerbPhrase(entryClass, table)
       ? { phraseStart: "vp" }
       : {};
   };
-  // The dictionary's `~` marks, by the entry that was reached: a suffixed
+  // The dictionary's `~` marks, of the entry that was reached: a suffixed
   // word keeps its root's phones in front, so the indices hold.
-  const blocked = (entry: string | null): { rulesBlockedAt?: number[] } => {
-    const indices = entry === null ? undefined : table?.wordRuleBlocks?.[entry];
-    return indices && indices.length > 0 ? { rulesBlockedAt: [...indices] } : {};
-  };
+  const blocked = (indices: readonly number[] | undefined): { rulesBlockedAt?: number[] } =>
+    indices && indices.length > 0 ? { rulesBlockedAt: [...indices] } : {};
 
   // A table with number phone lists speaks an all-digit word itself, ahead of
   // any lookup, as several words; the whole number has the one form class
@@ -111,7 +134,9 @@ export function pronounce(
         source: "number",
         word: lowerWord,
         parts,
-        ...(table.formClassNames ? { formClasses: ["adj"] } : {}),
+        ...(table.formClassNames
+          ? { formClasses: ["adj"], formClassWord: 2 ** table.formClassNames.indexOf("adj") }
+          : {}),
       };
     }
   }
@@ -119,13 +144,14 @@ export function pronounce(
   // 1. Try direct dictionary lookup
   const dictResult = dictLookup(lowerWord);
   if (dictResult) {
+    const entry = entryOf(lowerWord, 0);
     return {
-      phonemes: dictResult,
+      phonemes: entry.other ? [...entry.other.phonemes] : dictResult,
       source: "dictionary",
       word: lowerWord,
-      ...classed(table?.wordFormClasses?.[lowerWord] ?? 0),
-      ...phrased(lowerWord),
-      ...blocked(lowerWord),
+      ...classed(entry.formClass),
+      ...phrased(entry.formClass),
+      ...blocked(entry.rulesBlockedAt),
     };
   }
 
@@ -135,18 +161,37 @@ export function pronounce(
   // passes; neither the shared morphology nor the stress policy runs.
   if (table) {
     const { suffixIndex, suffixTable } = table;
-    const stripped =
+    const strip = (lookup: DictLookup) =>
       suffixIndex && suffixTable
-        ? stripSuffixes(lowerWord, dictLookup, { ...table, suffixIndex, suffixTable })
+        ? stripSuffixes(lowerWord, lookup, { ...table, suffixIndex, suffixTable })
         : { phonemes: null, formClass: 0, root: null };
-    if (stripped.phonemes) {
+    let stripped = strip(dictLookup);
+    if (stripped.phonemes && stripped.root !== null) {
+      const root = stripped.root;
+      const entry = entryOf(root, stripped.formClass);
+      // The root's other entry: the same search, with that entry's phones.
+      const other = entry.other;
+      if (other) {
+        stripped = strip((candidate) =>
+          candidate === root ? [...other.phonemes] : dictLookup(candidate),
+        );
+      }
+      // The suffix's class stays on the word and a homograph root adds its
+      // mark; a rule that read the suffix's class gives the word the chosen
+      // entry's class instead (LTS/ls_dict.c:749-755, ls_homo.c:529-538).
+      const homographBit = 2 ** (table.formClassNames ?? []).indexOf("homograph");
+      const wordClass = entry.bySuffixRule
+        ? entry.formClass
+        : entry.isHomograph && Math.floor(stripped.formClass / homographBit) % 2 === 0
+          ? stripped.formClass + homographBit
+          : stripped.formClass;
       return {
-        phonemes: stripped.phonemes,
+        phonemes: stripped.phonemes ?? [],
         source: "morphology",
         word: lowerWord,
-        ...classed(stripped.formClass),
-        ...phrased(stripped.root),
-        ...blocked(stripped.root),
+        ...classed(wordClass),
+        ...phrased(entry.formClass),
+        ...blocked(entry.rulesBlockedAt),
       };
     }
     return {
@@ -186,4 +231,40 @@ export function pronounce(
     morphology: generated.morphology,
   });
   return { ...generated, phonemes: lexicalStress.phonemes, lexicalStress };
+}
+
+/**
+ * Pronounce the words that stand between two punctuation marks, each in the
+ * context of the others.
+ *
+ * The words are read twice, as DECtalk 4.63 reads them (LTS/ls_task.c
+ * :383-401): the first reading finds each word's classes, the second speaks
+ * the words. A word with two dictionary entries is chosen by the classes of
+ * the words before it, and the first word also by whether a verb follows
+ * (table-homograph.ts).
+ */
+export function pronounceClause(
+  words: readonly string[],
+  dictLookup: DictLookup,
+  options: { ltsPath: string; morphologyPath: string; stressPolicyPath: string },
+): PronunciationResult[] {
+  const table = options.ltsPath ? ltsTableAt(options.ltsPath) : null;
+  // Without words of two entries no word depends on another.
+  if (!table?.homographs) return words.map((word) => pronounce(word, dictLookup, options));
+  const verbBit = table?.formClassNames ? table.formClassNames.indexOf("verb") : -1;
+  const isVerb = (classWord: number): boolean =>
+    verbBit >= 0 && Math.floor(classWord / 2 ** verbBit) % 2 === 1;
+  const read = (laterVerbAt: ((index: number) => boolean) | null): PronunciationResult[] => {
+    const before: number[] = [];
+    return words.map((word, index) => {
+      const result = pronounce(word, dictLookup, {
+        ...options,
+        context: { before, laterVerb: laterVerbAt ? laterVerbAt(index) : null },
+      });
+      before.push(result.formClassWord ?? 0);
+      return result;
+    });
+  };
+  const firstClasses = read(null).map((result) => result.formClassWord ?? 0);
+  return read((index) => firstClasses.slice(index + 1).some(isVerb));
 }

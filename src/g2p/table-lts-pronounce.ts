@@ -8,6 +8,7 @@
  * DECtalk 4.63's source tree.
  */
 
+import type { HomographEntry } from "./table-homograph";
 import { applyLtsRules, type LtsTable } from "./table-lts";
 import { adjustLts, type LtsAdjustTables } from "./table-lts-adjust";
 import type { NumberPhones } from "./table-number";
@@ -30,6 +31,10 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
    * are blocked (the dictionary's `~` before the phone).
    */
   wordRuleBlocks?: Readonly<Record<string, readonly number[]>>;
+  /** The secondary entry of each word with two entries (table-homograph.ts). */
+  homographs?: Readonly<Record<string, HomographEntry>>;
+  /** The rules that choose between a word's two entries, in order. */
+  homographRules?: readonly (readonly number[])[];
   /** Words whose form class is fixed whatever the dictionary says. */
   specialWordFormClasses?: Readonly<Record<string, number>>;
   /** The phrase each of those words starts. */

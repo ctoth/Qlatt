@@ -42,10 +42,11 @@
  * Boundary/control chars (`~` block-rules, `#` hyphen/compound, `*` morpheme
  * boundary, ` ` word boundary) produce no phoneme and are skipped.
  *
- * Homographs: a word may appear in multiple `word,POS,...` rows. v1 policy:
- * keep the HIGHEST-priority row (field 5); on a priority tie keep the FIRST row
- * encountered. The output is a flat single-pronunciation map. POS-conditioned
- * pronunciation selection is explicitly a v2 concern and is NOT built here.
+ * Homographs: 254 words have two rows, marked `P` (primary) and `S`
+ * (secondary) in the second field. The output is a flat map with the primary
+ * row's pronunciation; the secondary rows go into the frontend's table
+ * (scripts/build-dectalk-lts-table.ts), and src/g2p/table-homograph.ts
+ * chooses between the two by context, as LTS/ls_homo.c does.
  */
 
 import fs from "node:fs";
@@ -357,8 +358,12 @@ export function convertPhonemeFieldDetailed(field: string): {
     if (raw === undefined) continue; // unknown char: skip (validator reports these)
     if (blockNext) rulesBlocked.push(out.length);
     blockNext = false;
-    for (const tok of mapToken(raw, stress)) out.push(tok);
-    stress = "0"; // stress is consumed by the next phoneme only
+    const tokens = mapToken(raw, stress);
+    for (const tok of tokens) out.push(tok);
+    // A stress mark stands before its syllable and may have the onset between
+    // it and the vowel ("overrun" is `ovR#~'r^n): it waits for the next phone
+    // that carries a stress digit.
+    if (tokens.some((tok) => /[0-9]$/.test(tok))) stress = "0";
   }
   return { phones: out, rulesBlocked };
 }
@@ -389,15 +394,27 @@ function parseLine(line: string): Row | null {
 }
 
 /**
- * The one row kept for each lower-cased word of a `Dic_us.txt` text: the
- * highest-priority row, the first encountered on a tie.
+ * The rows of a `Dic_us.txt` text by lower-cased word.
+ *
+ * The second field says whether the word has two entries: `P` the primary
+ * one, `S` the secondary, `N` neither (dic/dic_comm.c:485-501). `best` holds
+ * the primary of such a pair and `secondary` the other; DECtalk chooses
+ * between them by context (LTS/ls_homo.c, src/g2p/table-homograph.ts).
+ *
+ * The fifth field is not a preference between rows: the dictionary compiler
+ * leaves out rows above a size limit given on its command line
+ * (dic/dic_comm.c:646-664). Between two `N` rows that differ only in case
+ * ("Baton", "baton") the higher number is kept, the first on a tie; DECtalk's
+ * own choice there has not been traced.
  */
 export function selectDictionaryRows(text: string): {
   best: Map<string, Row>;
+  secondary: Map<string, Row>;
   totalRows: number;
   multiRowWords: Set<string>;
 } {
   const best = new Map<string, Row>();
+  const secondary = new Map<string, Row>();
   let totalRows = 0;
   const multiRowWords = new Set<string>();
   for (const line of text.split(/\r?\n/)) {
@@ -408,20 +425,31 @@ export function selectDictionaryRows(text: string): {
     const existing = best.get(key);
     if (existing === undefined) {
       best.set(key, row);
-    } else {
-      multiRowWords.add(key);
-      if (row.priority > existing.priority) best.set(key, row);
-      // tie or lower: keep existing (first encountered)
+      continue;
+    }
+    multiRowWords.add(key);
+    if (row.pos === "S" && existing.pos === "P") {
+      secondary.set(key, row);
+    } else if (row.pos === "P" && existing.pos === "S") {
+      secondary.set(key, existing);
+      best.set(key, row);
+    } else if (row.priority > existing.priority) {
+      best.set(key, row);
     }
   }
-  return { best, totalRows, multiRowWords };
+  for (const [key, row] of best) {
+    if ((row.pos === "P" || row.pos === "S") && !secondary.has(key)) {
+      throw new Error(`E_HOMOGRAPH_UNPAIRED: '${key}' has a ${row.pos} row and no partner`);
+    }
+  }
+  return { best, secondary, totalRows, multiRowWords };
 }
 
 function main(): void {
   const srcPath = process.argv[2] ?? DEFAULT_SRC;
   const text = fs.readFileSync(srcPath, "utf8");
 
-  // Collapse homographs: keep highest-priority row; tie -> first encountered.
+  // One row per word: a homograph's primary row.
   const { best, totalRows, multiRowWords } = selectDictionaryRows(text);
   const collapsedWords = multiRowWords.size;
 
@@ -441,7 +469,7 @@ function main(): void {
   fs.writeFileSync(OUT_PATH, payload, "utf8");
 
   console.log(`Source rows parsed:        ${totalRows}`);
-  console.log(`Words with multiple rows:  ${collapsedWords} (collapsed to highest-priority)`);
+  console.log(`Words with multiple rows:  ${collapsedWords} (one kept; see selectDictionaryRows)`);
   console.log(`Dictionary entries written: ${Object.keys(sorted).length}`);
   console.log(`Output: ${OUT_PATH}`);
 }

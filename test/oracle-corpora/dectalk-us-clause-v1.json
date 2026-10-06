@@ -98,6 +98,11 @@
     { "id": "homograph-in-the-house", "text": "The big dog barked at the small cat in the house.", "group": "homograph", "tags": ["noun", "after-article"], "expectedFocus": ["duration"] },
     { "id": "homograph-to-house", "text": "They want to house the cat.", "group": "homograph", "tags": ["verb", "after-to"], "expectedFocus": ["duration"] },
     { "id": "homograph-read-first", "text": "Read the book.", "group": "homograph", "tags": ["first-word", "verb-phrase"], "expectedFocus": ["duration"] },
-    { "id": "homograph-present", "text": "They present the present.", "group": "homograph", "tags": ["verb", "noun"], "expectedFocus": ["duration"] }
+    { "id": "homograph-present", "text": "They present the present.", "group": "homograph", "tags": ["verb", "noun"], "expectedFocus": ["duration"] },
+    { "id": "article-final", "text": "He saw a.", "group": "article", "tags": ["against-punctuation"], "expectedFocus": ["duration"] },
+    { "id": "article-before-comma", "text": "He saw a, cat.", "group": "article", "tags": ["against-punctuation", "comma"], "expectedFocus": ["duration"] },
+    { "id": "article-inside", "text": "It is a cat.", "group": "article", "tags": ["apart"], "expectedFocus": ["duration"] },
+    { "id": "article-first", "text": "A cat is here.", "group": "article", "tags": ["apart", "first-word"], "expectedFocus": ["duration"] },
+    { "id": "article-question", "text": "Did Bob buy a blue balloon?", "group": "article", "tags": ["apart", "question"], "expectedFocus": ["duration"] }
   ]
 }

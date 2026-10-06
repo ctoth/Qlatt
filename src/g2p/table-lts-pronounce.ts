@@ -39,6 +39,20 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
   specialWordFormClasses?: Readonly<Record<string, number>>;
   /** The phrase each of those words starts. */
   specialWordPhraseStarts?: Readonly<Record<string, "pp">>;
+  /**
+   * Words spoken one way apart from punctuation and another way against a
+   * punctuation mark (the article "a"). `apart` has its own form class word;
+   * `against` keeps the dictionary's.
+   */
+  wordsByPunctuation?: Readonly<
+    Record<
+      string,
+      {
+        apart: { phonemes: readonly string[]; formClass: number };
+        against: { phonemes: readonly string[] };
+      }
+    >
+  >;
   /** The phone lists numbers are spoken from (table-number.ts). */
   numberPhones?: NumberPhones;
 }

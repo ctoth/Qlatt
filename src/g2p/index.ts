@@ -141,12 +141,29 @@ export function pronounce(
     }
   }
 
+  // A word the table speaks by where it stands: one form apart from
+  // punctuation, with its own class, and another against a punctuation mark
+  // ("a box." and "box a."; DECtalk 4.63 LTS/ls_task.c:2647-2673).
+  const placed = table?.wordsByPunctuation?.[lowerWord];
+  if (placed && !context.atPunctuation) {
+    return {
+      phonemes: [...placed.apart.phonemes],
+      source: "dictionary",
+      word: lowerWord,
+      ...classed(placed.apart.formClass),
+    };
+  }
+
   // 1. Try direct dictionary lookup
   const dictResult = dictLookup(lowerWord);
   if (dictResult) {
     const entry = entryOf(lowerWord, 0);
     return {
-      phonemes: entry.other ? [...entry.other.phonemes] : dictResult,
+      phonemes: placed
+        ? [...placed.against.phonemes]
+        : entry.other
+          ? [...entry.other.phonemes]
+          : dictResult,
       source: "dictionary",
       word: lowerWord,
       ...classed(entry.formClass),
@@ -259,7 +276,11 @@ export function pronounceClause(
     return words.map((word, index) => {
       const result = pronounce(word, dictLookup, {
         ...options,
-        context: { before, laterVerb: laterVerbAt ? laterVerbAt(index) : null },
+        context: {
+          before,
+          laterVerb: laterVerbAt ? laterVerbAt(index) : null,
+          atPunctuation: index === words.length - 1,
+        },
       });
       before.push(result.formClassWord ?? 0);
       return result;

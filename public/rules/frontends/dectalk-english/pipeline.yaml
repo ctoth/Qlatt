@@ -396,6 +396,8 @@ relations:
       stress: []
       syllable_index: []
       syllable_position_in_word: []
+      # FTYPESYL of a syllabic (ph_sort2.c init_med_final).
+      syllable_type: { kind: string, values: [only, first, medial, final] }
       syllable_role: []
       alveolar: []
       bilabial: []
@@ -610,6 +612,7 @@ phases:
       - syllable_index_annotation
       - syllable_role_annotation
       - syllable_position_annotation
+      - dectalk_syllable_type
       # Authored stress directions (for example emphasis on a word) are applied
       # by the frontend driver after the postlexical phase. Run consonant stress
       # again so an onset follows its syllabic's authored level. DECtalk has

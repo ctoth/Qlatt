@@ -55,10 +55,9 @@ const DECTALK_BOUNDARY = new Map<number, string>([
 
 // FTYPESYL (030): only a syllabic carries it (ph_sort2.c init_med_final).
 const DECTALK_SYLLABLE = ["mono", "first", "medial", "final"];
-// The port's syllable_position_in_word values, in DECtalk's terms.
+// The port's syllable_type values, in DECtalk's terms.
 const PORT_SYLLABLE: Readonly<Record<string, string>> = {
   only: "mono",
-  initial: "first",
   first: "first",
   medial: "medial",
   final: "final",
@@ -87,7 +86,7 @@ function qlattClauses(text: string, transitionMs: number): Phone[][] {
     previous = phoneme;
     const stress = item.get("stress");
     const syllabic = item.get("type") === "vowel" || ["EL", "EM", "EN"].includes(phoneme);
-    const position = String(item.get("syllable_position_in_word") ?? "");
+    const position = String(item.get("syllable_type") ?? "");
     clauses[clauses.length - 1].push({
       name: PORT_TO_DECTALK[phoneme] ?? phoneme,
       stress: typeof stress === "number" ? stress : 0,

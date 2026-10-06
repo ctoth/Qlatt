@@ -80,6 +80,53 @@ rules:
       - DECtalk 4.63 ph_syl.c ph_syllab (word-position from syllable index + count)
 
   # ---------------------------------------------------------------------------
+  # FTYPESYL: where a syllabic stands among the syllabics of its word.
+  #
+  # DECtalk's structure word does not take this from its syllabifier. For each
+  # syllabic, init_med_final (ph_sort2.c:60-110, called at ph_sort.c:1358)
+  # looks for another syllabic earlier in the word and for one later, before
+  # the next word boundary or stronger:
+  #   one earlier, none later  -> final
+  #   one earlier, one later   -> medial
+  #   none earlier, one later  -> first
+  #   neither                  -> monosyllable (no feature)
+  # So "usual" (YU ZH UW EL) is first, medial, final although /yu/ is not a
+  # nucleus in the syllabifier's table, and the fused vowel of "lorries" is
+  # first.
+  # ---------------------------------------------------------------------------
+  dectalk_syllable_type:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        has(current.word) && current.word != ''
+        && (current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'])
+    define:
+      earlier: >-
+        find_within_word(current,
+          "current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']",
+          "behind")
+      later: >-
+        find_within_word(current,
+          "current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']",
+          "ahead")
+    apply:
+      - field: syllable_type
+        op: set
+        dispatch:
+          - when: "earlier != null && later != null"
+            value: "'medial'"
+          - when: "earlier != null"
+            value: "'final'"
+          - when: "later != null"
+            value: "'first'"
+          - default: "'only'"
+        tag: syllabification
+    citations:
+      - "DECtalk 4.63 ph_sort2.c:60-110 init_med_final (FTYPESYL from the syllabics before and after in the word)"
+      - "DECtalk 4.63 ph_sort.c:1358 (called for each syllabic)"
+
+  # ---------------------------------------------------------------------------
   # FBOUNDARY: the type of the next boundary, on the phones of a final rime.
   #
   # get_next_bound_type (ph_sort2.c:203-222) scans forward from a phone to the

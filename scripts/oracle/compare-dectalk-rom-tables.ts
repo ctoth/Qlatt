@@ -39,12 +39,13 @@ const dectalkRoot = path.resolve(
 const asJson = argv.includes("--json");
 
 function readTable(source: string, name: string): number[] {
-  const match = new RegExp(`const\\s+short\\s+${name}\\s*\\[\\]\\s*=\\s*\\{([^}]*)\\}`).exec(source);
+  const pattern = new RegExp(`const\\s+short\\s+${name}\\s*\\[\\]\\s*=\\s*\\{([^}]*)\\}`);
+  const match = pattern.exec(source);
   if (!match) throw new Error(`E_ROM_TABLE_MISSING: ${name}`);
-  return match[1]
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    // The initializer is wrapped in `#ifdef PHEDIT2 ... #else ... #endif`.
-    .replace(/^\s*#.*$/gm, "")
+  // Drop comments, and the `#ifdef PHEDIT2 ... #else ... #endif` lines that
+  // wrap the initializer.
+  const body = match[1].replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*#.*$/gm, "");
+  return body
     .split(",")
     .map((cell) => cell.trim())
     .filter((cell) => cell.length > 0)
@@ -60,7 +61,9 @@ const phonemeHeader = fs.readFileSync(
   "utf8",
 );
 const namesByIndex = new Map<number, string>();
-for (const match of phonemeHeader.matchAll(/^#define\s+US_([A-Z0-9_$]+)\s+(\d+)\s*(?:\/\*.*)?$/gm)) {
+for (const match of phonemeHeader.matchAll(
+  /^#define\s+US_([A-Z0-9_$]+)\s+(\d+)\s*(?:\/\*.*)?$/gm,
+)) {
   const index = Number(match[2]);
   if (!namesByIndex.has(index)) namesByIndex.set(index, match[1]);
 }
@@ -77,10 +80,12 @@ const inventoryDoc = yaml.load(
     "utf8",
   ),
 ) as Record<string, unknown>;
-const targets = ((inventoryDoc.targets ?? inventoryDoc.phonemes ?? inventoryDoc) as Record<
-  string,
-  Record<string, unknown>
->) ?? {};
+// The inventory's target table is the top-level map that holds phoneme entries.
+const targets = (Object.values(inventoryDoc).find(
+  (value) => value != null && typeof value === "object" && "EY1" in (value as object),
+) ?? {}) as Record<string, Record<string, unknown>>;
+// DECtalk names that the port spells differently (postlexical.yaml symbol mapping).
+const PORT_NAMES: Readonly<Record<string, string>> = { HX: "HH", NX: "NG", LL: "L" };
 
 const toFrames = (ms: number): number => (ms * 10 + 50) >> 6;
 const numberOrNull = (value: unknown): number | null =>
@@ -89,8 +94,9 @@ const numberOrNull = (value: unknown): number | null =>
 const rows = inhdr.map((inherentMs, index) => {
   const name = namesByIndex.get(index) ?? `#${index}`;
   // The port names stressed vowels with a stress digit; compare the primary.
-  const ours = targets[name] ?? targets[`${name}1`];
-  const oursKey = targets[name] ? name : targets[`${name}1`] ? `${name}1` : null;
+  const portName = PORT_NAMES[name] ?? name;
+  const oursKey = targets[portName] ? portName : targets[`${portName}1`] ? `${portName}1` : null;
+  const ours = oursKey == null ? undefined : targets[oursKey];
   return {
     index,
     dectalk: name,

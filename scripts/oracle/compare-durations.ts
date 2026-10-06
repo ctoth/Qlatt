@@ -30,7 +30,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { textToKlattTrackDetailed } from "../../src/tts-frontend.ts";
-import { DECTALK_NOMINAL_CONTROL_FRAME_PERIOD_SEC, parseDectalkTraceFile } from "./dectalk-trace.ts";
+import {
+  DECTALK_NOMINAL_CONTROL_FRAME_PERIOD_SEC,
+  parseDectalkTraceFile,
+} from "./dectalk-trace.ts";
 import type { OracleCorpusDocument } from "./types";
 
 type Allophone = { label: string; frames: number };

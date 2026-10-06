@@ -526,6 +526,47 @@ rules:
       - "DECtalk 4.63 US_DF code 17 (AX0 unstressed schwa target; explicit AX0 inventory lookup avoids SIL fallback)"
 
   # -------------------------------------------------------------------------
+  # "Rule 1a: The word 'the' should be /dh iy/ before a syllabic"
+  # (ph_aloph.c:735-748). The source does not look at the word: a schwa that
+  # ends its word, follows a word-initial /dh/ and stands before a syllabic
+  # becomes IY. "The old man" is DH IY OW LX D.
+  # -------------------------------------------------------------------------
+  dectalk_the_before_vowel:
+    kind: postlexical
+    select:
+      relation: Segment
+      where: "current.phoneme == 'AX'"
+    define:
+      p: prev
+      n: next
+      iy: "target('IY0')"
+      after_word_initial_dh: >-
+        p != null && p.phoneme == 'DH' && isTrue(p, 'word_initial_consonant')
+      # (curr_instruc & FBOUNDARY) IS_PLUS: the schwa is the last phone of its word.
+      word_final: >-
+        n != null && n.phoneme != 'SIL'
+        && has(n.word) && has(current.word) && n.word != current.word
+      before_syllabic: >-
+        n != null && (n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN'])
+    constraint: "after_word_initial_dh && word_final && before_syllabic"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields: *structure_word
+          phoneme: "'IY'"
+          type: iy.type
+          target: iy
+          duration: iy.duration
+          inherentDuration: iy.inherentDuration
+          minimumDuration: "has(iy.minimumDuration) ? iy.minimumDuration : iy.duration"
+          voiced: "has(iy.voiced) ? iy.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:735-748 (Rule 1a: AX with a boundary, after a word-initial DH, before a syllabic -> IY)"
+
+  # -------------------------------------------------------------------------
   # GEMINATE OBSTRUENT DELETION (ph_aloph.c:558-562, A1).  When an obstruent is
   # immediately followed by an identical phoneme, the first copy is deleted.
   # phonemes[] holds phones only (boundaries are bits of the structure word), so

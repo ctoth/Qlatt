@@ -770,6 +770,14 @@ describe("dectalk-english /r/", () => {
   it("still fuses a vowel with an unstressed /r/", () => {
     expect(phones("story.")).toEqual(["S", "T", "OR", "IY"]);
   });
+
+  // "Rule 1a: The word 'the' should be /dh iy/ before a syllabic"
+  // (ph_aloph.c:735-748). DECtalk's debug build: "The old man." dh iy ow lx d
+  // m ae n. Its record for "The cake is good." starts dh ax k.
+  it("says the schwa of 'the' as IY before a vowel", () => {
+    expect(phones("The old man.").slice(0, 3)).toEqual(["DH", "IY", "OW"]);
+    expect(phones("The cake is good.").slice(0, 3)).toEqual(["DH", "AX", "K"]);
+  });
 });
 
 // ---------------------------------------------------------------------------

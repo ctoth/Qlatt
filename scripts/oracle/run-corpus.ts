@@ -274,10 +274,16 @@ async function main(): Promise<number> {
     const selectedEntries = selectEntries(corpus.entries, args.phraseIds, args.limit);
 
     const reports: AudioComparisonReport[] = [];
+    const errors: Array<{ phraseId: string; message: string }> = [];
     for (const baseEntry of selectedEntries) {
       const entry = mergeDefaults(corpus.defaults, baseEntry);
       const entryDir = path.join(runRoot, entry.id);
       fs.mkdirSync(entryDir, { recursive: true });
+      // A result file left by an earlier run into the same directory would be
+      // read as this run's outcome.
+      for (const stale of ["error.txt", "compare.json"]) {
+        fs.rmSync(path.join(entryDir, stale), { force: true });
+      }
 
       try {
         const oracleOutDir = path.join(entryDir, "oracle");
@@ -330,6 +336,7 @@ async function main(): Promise<number> {
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         fs.writeFileSync(path.join(entryDir, "error.txt"), `${message}\n`, "utf8");
+        errors.push({ phraseId: entry.id, message });
         if (!args.continueOnError) {
           throw error;
         }
@@ -344,7 +351,12 @@ async function main(): Promise<number> {
       ...(args.limit != null ? { limit: args.limit } : {}),
       ...(args.phraseIds != null ? { phraseIds: args.phraseIds } : {}),
       generatedAt: new Date().toISOString(),
-      summary: summarizeReports(reports),
+      summary: {
+        ...summarizeReports(reports),
+        selectedCount: selectedEntries.length,
+        errorCount: errors.length,
+      },
+      errors,
       reports: reports.map((report) => ({
         phraseId: report.phraseId,
         verdict: report.verdict.status,
@@ -363,7 +375,17 @@ async function main(): Promise<number> {
     const summaryPath = path.join(runRoot, "summary.json");
     fs.writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
     process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
-    return (summary.summary as { failures: number }).failures > 0 ? 1 : 0;
+    // --continue-on-error keeps the run going; it does not make an entry that
+    // produced no report count as success.
+    if (errors.length > 0) {
+      process.stderr.write(
+        `${errors.length} of ${selectedEntries.length} entries produced no report:\n` +
+          errors.map((error) => `  ${error.phraseId}: ${error.message}`).join("\n") +
+          "\n",
+      );
+    }
+    const failures = (summary.summary as { failures: number }).failures;
+    return failures > 0 || errors.length > 0 || reports.length === 0 ? 1 : 0;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     process.stderr.write(`${message}\n`);

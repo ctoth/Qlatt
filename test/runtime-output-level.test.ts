@@ -26,15 +26,25 @@ function makeRequest(phrase: string): RenderRequest {
   };
 }
 
+// The klatt80-baseline output stage (masterGain, outputCompressor, outputGain)
+// sets the final peak. Measured 2026-10-05 on both phrases below: 0.127 and
+// 0.130 (about -18 dBFS), which is 18 dB under full scale.
+// engineering estimate: a +/-3 dB band around that measurement, so the test
+// fails on clipping, on a collapse toward silence, and on an unreviewed change
+// to the output stage. Re-measure and move the band when the stage is retuned.
+const PEAK_FLOOR = 0.09;
+const PEAK_CEILING = 0.18;
+
 describe("runtime output level", () => {
-  it("keeps hello world near full scale without clipping the final render", {
+  it("renders hello world inside the measured output peak band", {
     timeout: 30000,
   }, async () => {
     const payload = await nodeRuntimeBackend.render(makeRequest("hello world"));
-    expect(payload.metrics.peak).toBeLessThanOrEqual(1.05);
+    expect(payload.metrics.peak).toBeGreaterThanOrEqual(PEAK_FLOOR);
+    expect(payload.metrics.peak).toBeLessThanOrEqual(PEAK_CEILING);
   });
 
-  it("keeps a fricative-heavy phrase near full scale without clipping the final render", {
+  it("renders a fricative-heavy phrase inside the measured output peak band", {
     timeout: 30000,
   }, async () => {
     const payload = await nodeRuntimeBackend.render(
@@ -42,6 +52,7 @@ describe("runtime output level", () => {
         "Holy shit! How well is this shit functioning now? Filter fat frogs from fragrant flats.",
       ),
     );
-    expect(payload.metrics.peak).toBeLessThanOrEqual(1.05);
+    expect(payload.metrics.peak).toBeGreaterThanOrEqual(PEAK_FLOOR);
+    expect(payload.metrics.peak).toBeLessThanOrEqual(PEAK_CEILING);
   });
 });

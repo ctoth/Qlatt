@@ -196,6 +196,106 @@ rules:
       - "DECtalk 4.63 ph_sort.c:1205-1209 (exclamation point raises last stress of sentence to emphasis)"
       - "DECtalk 4.63 ph_sort.c:1817-1829 raise_last_stress"
 
+  # -------------------------------------------------------------------------
+  # A HELPER VERB THAT IS THE ONLY VERB (ph_task.c:598-626, ph_sort.c:1272-1302).
+  #
+  # "Helper verbs that are marked as functors and unstressed ... need to be
+  # handled differently if they're the only verb in the phrase in which case
+  # they are the verb and not a helper" (ph_task.c:602-608).
+  #
+  # As each word's form class arrives, DECtalk counts the words that are verb,
+  # ed, be or ing. The second one in a clause clears a flag; the first sets it
+  # if the word is also a function word. Its phone sort then gives secondary
+  # stress to the first vowel of the first word that reaches its verb branch
+  # (verb or ed, and neither noun nor adj, which are tested first) and clears
+  # the flag.
+  #
+  # The count starts again at each clause; the flag does not. A flag that no
+  # word used stays set for the following clauses: after "He can." ("can" is
+  # also a noun), "They went." has emphasis on "went".
+  #
+  # The stress is added to the vowel's own: none becomes secondary, primary
+  # becomes emphasis (DECtalk's stress field holds both bits).
+  #
+  # Two rules: the first writes each clause's three counts on its final
+  # silence, the second reads its own clause's counts and, for the carried
+  # flag, the nearest earlier clause that settled it.
+  dectalk_clause_verb_summary:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null"
+    apply:
+      - field: clause_verb_count
+        op: set
+        value: "count_back_pred(current, 1000, 'is_clause_silence', 'is_verb_count_word_start')"
+        tag: stress
+      - field: clause_function_verb_count
+        op: set
+        value: "count_back_pred(current, 1000, 'is_clause_silence', 'is_function_verb_word_start')"
+        tag: stress
+      - field: clause_verb_branch_count
+        op: set
+        value: "count_back_pred(current, 1000, 'is_clause_silence', 'is_verb_branch_word_start')"
+        tag: stress
+    citations:
+      - "DECtalk 4.63 ph_task.c:611-626 (number_verbs counts words of class VERB, ED, BE or ING; FUNC sets promote_helper_verb)"
+      - "DECtalk 4.63 ph_sort.c:1272-1284 (NOUN, then ADJ, then VERB or ED)"
+      - "DECtalk 4.63 ph_claus.c:405 (number_verbs is cleared when a clause has been spoken)"
+
+  dectalk_helper_verb_promotion:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.type == 'vowel' && has(current.form_classes) && has(current.sourceTokenId)
+        && ('verb' in current.form_classes || 'ed' in current.form_classes)
+        && !('noun' in current.form_classes) && !('adj' in current.form_classes)
+    define:
+      clause_end: >-
+        look_ahead_where(current, 1000,
+          'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
+      prior_vowel_in_word: >-
+        find_within_word(current,
+          "current.type == 'vowel'",
+          "behind")
+      at_word_start: >-
+        behind(current, 1) == null
+        || get(behind(current, 1), 'sourceTokenId', '') != current.sourceTokenId
+      # Words of the verb branch that begin before this vowel in its clause;
+      # this vowel's own word is one of them unless the vowel begins it.
+      branch_words_before: "count_back_pred(current, 1000, 'is_clause_silence', 'is_verb_branch_word_start')"
+      in_first_branch_word: "branch_words_before == (at_word_start ? 0.0 : 1.0)"
+      verbs: "clause_end == null ? 0.0 : get(clause_end, 'clause_verb_count', 0.0)"
+      function_verbs: "clause_end == null ? 0.0 : get(clause_end, 'clause_function_verb_count', 0.0)"
+      # The nearest earlier clause that left the flag in a known state: it had
+      # two verbs (cleared), a single function verb (set), or a word of the
+      # verb branch (cleared, whether or not it was used).
+      settling_clause: >-
+        look_back_where(current, 5000,
+          'candidate.phoneme == "SIL" && (get(candidate, "clause_verb_count", 0.0) > 1.0 || get(candidate, "clause_function_verb_count", 0.0) >= 1.0 || get(candidate, "clause_verb_branch_count", 0.0) > 0.0)')
+      carried: >-
+        settling_clause != null
+        && get(settling_clause, 'clause_verb_count', 0.0) == 1.0
+        && get(settling_clause, 'clause_function_verb_count', 0.0) == 1.0
+        && get(settling_clause, 'clause_verb_branch_count', 0.0) == 0.0
+      flag: "verbs > 1.0 ? false : (verbs == 1.0 && function_verbs == 1.0 ? true : carried)"
+      stress_now: "get(current, 'stress', 0)"
+    constraint: "clause_end != null && prior_vowel_in_word == null && in_first_branch_word && flag"
+    apply:
+      - field: stress
+        op: set
+        value: "stress_now == 1 || stress_now == 3 ? 3.0 : 2.0"
+        tag: stress
+      - field: helper_verb_promoted
+        op: set
+        value: "true"
+        tag: stress
+    citations:
+      - "DECtalk 4.63 ph_task.c:598-626 (promote_helper_verb: a function-word verb that is the clause's only verb)"
+      - "DECtalk 4.63 ph_sort.c:1283-1302 (S2 before the first vowel of the first VERB or ED word, flag cleared)"
+      - "DECtalk 4.63 ph_defs.h:219-225 (FSTRESS_1 01, FSTRESS_2 02, both = FEMPHASIS)"
+
   dectalk_word_initial_consonant:
     kind: scalar
     select:
@@ -237,10 +337,14 @@ rules:
       syl1: "in1 && (n1.type == 'vowel' || n1.phoneme in ['EL', 'EM', 'EN'])"
       syl2: "in2 && (n2.type == 'vowel' || n2.phoneme in ['EL', 'EM', 'EN'])"
       syl3: "in3 && (n3.type == 'vowel' || n3.phoneme in ['EL', 'EM', 'EN'])"
-      # `stress` may be present and null; get() reads that as 0.
-      stress1: "syl1 ? get(n1, 'stress', 0) : 0"
-      stress2: "syl2 ? get(n2, 'stress', 0) : 0"
-      stress3: "syl3 ? get(n3, 'stress', 0) : 0"
+      # `stress` may be present and null; get() reads that as 0. Before a
+      # vowel the helper-verb promotion reached, DECtalk's consonant has
+      # secondary stress even where the vowel ends with emphasis (its debug
+      # build on "They do.", "They have.", "He can. They went.": consonant 2,
+      # vowel 3; an exclamation's emphasis gives the consonant 3).
+      stress1: "syl1 ? (get(n1, 'helper_verb_promoted', false) ? 2 : get(n1, 'stress', 0)) : 0"
+      stress2: "syl2 ? (get(n2, 'helper_verb_promoted', false) ? 2 : get(n2, 'stress', 0)) : 0"
+      stress3: "syl3 ? (get(n3, 'helper_verb_promoted', false) ? 2 : get(n3, 'stress', 0)) : 0"
       pair12: "in1 && !syl1 ? dectalk_onset_cluster(current.phoneme, n1.phoneme) : 'none'"
       pair23: "in2 && !syl1 && !syl2 ? dectalk_onset_cluster(n1.phoneme, n2.phoneme) : 'none'"
       inherited: >-

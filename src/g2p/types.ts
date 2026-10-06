@@ -9,6 +9,12 @@ export interface PronunciationResult {
   rootWord?: string; // if morphology found a root
   lexicalStress?: LexicalStressResult;
   morphology?: MorphologyCycle[];
+  /**
+   * The word's form classes (part-of-speech names such as "verb", "func"),
+   * when the frontend's lexicon records them; empty for a word it does not
+   * know. Absent when the frontend has no form class data.
+   */
+  formClasses?: string[];
 }
 
 /** Boundaries are phone offsets in the final pronunciation, end exclusive. */

@@ -7,6 +7,8 @@ export interface TranscriptionToken {
   phoneme: string;
   stress: number | null;
   word: string;
+  /** The word's form classes, when the frontend's lexicon records them. */
+  formClasses?: readonly string[];
   isPunctuation?: boolean;
   symbol?: string;
   duration?: number;

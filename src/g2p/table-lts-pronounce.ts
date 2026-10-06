@@ -20,6 +20,21 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
   /** Suffix stripping rules (table-suffix.ts); absent when the table has none. */
   suffixIndex?: readonly number[];
   suffixTable?: readonly number[];
+  /** The name of each bit of a form class word, bit 0 first; null for an unused bit. */
+  formClassNames?: readonly (string | null)[];
+  /** Each dictionary word's form class word. */
+  wordFormClasses?: Readonly<Record<string, number>>;
+  /** Words whose form class is fixed whatever the dictionary says. */
+  specialWordFormClasses?: Readonly<Record<string, number>>;
+}
+
+/** The names of the bits set in a form class word, lowest bit first. */
+export function formClassNamesOf(mask: number, table: LtsTableDocument): string[] {
+  const names: string[] = [];
+  (table.formClassNames ?? []).forEach((name, bit) => {
+    if (name !== null && Math.floor(mask / 2 ** bit) % 2 === 1) names.push(name);
+  });
+  return names;
 }
 
 export function isLtsTableDocument(value: unknown): value is LtsTableDocument {

@@ -14,7 +14,14 @@ type StagedOperation =
   | { kind: "append"; relationName: string; item: Item }
   | { kind: "insert_after"; relationName: string; previous: Item; item: Item }
   | { kind: "add_root"; relationName: string; item: Item }
-  | { kind: "add_daughter"; relationName: string; parent: Item; item: Item }
+  | {
+      kind: "add_daughter";
+      relationName: string;
+      parent: Item;
+      item: Item;
+      /** Omitted: last daughter. Null: first. Otherwise: right after it. */
+      after?: Item | null;
+    }
   | { kind: "associate"; name: string; from: Item; to: Item }
   | { kind: "disassociate"; name: string; from: Item; to: Item }
   | {
@@ -154,9 +161,19 @@ export class HrgTransaction {
     return this;
   }
 
-  addDaughter(relationName: string, parent: Item, item: Item): this {
+  /**
+   * Stage `item` as a daughter of `parent`: last when `after` is omitted,
+   * first when it is null, otherwise immediately after that daughter.
+   */
+  addDaughter(relationName: string, parent: Item, item: Item, after?: Item | null): this {
     this.assertOpen();
-    this.operations.push({ kind: "add_daughter", relationName, parent, item });
+    this.operations.push({
+      kind: "add_daughter",
+      relationName,
+      parent,
+      item,
+      ...(after === undefined ? {} : { after }),
+    });
     return this;
   }
 
@@ -455,18 +472,34 @@ export class HrgTransaction {
           `E_HRG_PARENT_RELATION: parent item '${operation.parent.id}' is not in relation '${operation.relationName}'`,
         );
       }
+      const after = operation.after;
+      if (after) {
+        this.assertAvailableItem(after);
+        const afterKey = `${operation.relationName}\u0000${after.id}`;
+        if (!relation.node(after) && !plannedMembership.has(afterKey)) {
+          throw new Error(
+            `E_HRG_PREVIOUS_RELATION: previous item '${after.id}' is not in relation '${operation.relationName}'`,
+          );
+        }
+      }
       prepared.push({
         journal: Object.freeze({
           kind: "add_daughter",
           relationName: operation.relationName,
           parentItemId: operation.parent.id,
           itemId: operation.item.id,
+          ...(after === undefined ? {} : { previousItemId: after?.id ?? null }),
         }),
         commit: () => {
           const parentNode: HrgNode | undefined = relation.node(operation.parent);
           if (!parentNode)
             throw new Error("E_HRG_PARENT_RELATION: staged parent was not committed first");
-          return [relation.addDaughter(parentNode, operation.item, input).write.decisionId];
+          const afterNode = after ? relation.node(after) : after;
+          if (after && !afterNode)
+            throw new Error("E_HRG_PREVIOUS_RELATION: staged previous was not committed first");
+          return [
+            relation.addDaughter(parentNode, operation.item, input, afterNode).write.decisionId,
+          ];
         },
       });
     }

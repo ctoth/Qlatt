@@ -1447,6 +1447,7 @@ function applySplice(
   );
   let previous = orderedSuppressed[orderedSuppressed.length - 1] ?? source;
   const inserted: Item[] = [];
+  const lastPlacedFor = new Map<Item, Item>();
   for (let index = 0; index < splice.insert.length; index += 1) {
     const rawTemplate = splice.insert[index];
     if (!isPlainObject(rawTemplate)) continue;
@@ -1500,9 +1501,22 @@ function applySplice(
       if (value !== undefined) transaction.set(item, field, value);
     }
     transaction.insertAfter(match.relationName, previous, item);
-    const structure = utterance.getRelation("SylStructure");
-    const structuralParent = structure?.node(source)?.parent?.item;
-    if (structuralParent) transaction.addDaughter("SylStructure", structuralParent, item);
+    // A whole copy of another Item is that Item re-emitted, so it takes that
+    // Item's place in the tree (its own syllable and word, or none for a
+    // punctuation silence). Anything else is a new piece of the source.
+    const owner = copySource && targetExpression === null ? copySource : source;
+    const ownerNode = utterance.getRelation("SylStructure")?.node(owner);
+    if (ownerNode?.parent) {
+      const siblings = ownerNode.parent.daughters;
+      const ownerFollowsInsertion =
+        !suppressed.includes(owner) &&
+        match.items.indexOf(owner) > match.items.indexOf(orderedSuppressed.at(-1) ?? source);
+      const after =
+        lastPlacedFor.get(owner) ??
+        (ownerFollowsInsertion ? (siblings[siblings.indexOf(ownerNode) - 1]?.item ?? null) : owner);
+      transaction.addDaughter("SylStructure", ownerNode.parent.item, item, after);
+      lastPlacedFor.set(owner, item);
+    }
     inserted.push(item);
     previous = item;
   }

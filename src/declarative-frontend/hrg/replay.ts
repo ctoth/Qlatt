@@ -144,6 +144,9 @@ export function replayJournal(
             operation.relationName,
             requireItem(operation.parentItemId),
             requireItem(operation.itemId),
+            operation.previousItemId == null
+              ? operation.previousItemId
+              : requireItem(operation.previousItemId),
           );
           break;
         case "associate":

@@ -7,17 +7,21 @@ import { textToKlattTrack } from "../src/tts-frontend";
 
 const experiments = ["klatt80-baseline", "qlatt-beauty"];
 // Captured before the port at 66b4c375, with the same seeded runtime request.
+// All five hashes were recaptured for the splice tree-placement fix, which
+// changes the "hello world" frontend track under every render here (syllable
+// roles and cluster positions of expanded stops); the DSP is untouched. See
+// docs/splice-tree-golden-review.md.
 const defaultHashes: Record<string, string> = {
   // #54: cited accent/phrase effort; the zero-effort control below preserves #64.
-  "klatt80-baseline": "e5ff0f3fe5ef974cc7c2445706fcc4b5a36f0432343778ddde865271da5d109a",
+  "klatt80-baseline": "18537d5a2ac6e32b00a72452981057f009930c59317cf94014dad0a774b72eb6",
   // #53: beauty requests jitter=0.25, now percent CV (Schoentgen Model II).
-  "qlatt-beauty": "ba317188dbbc5842fd0e2599e24ff61c1b2af3cde7c84f22efdf453a9d7072d4",
+  "qlatt-beauty": "c038e7026e193607cc29f5aaf9f63e1d29f0497c01cc327bd3a5b405e85f57f5",
 };
 // Captured with jitter explicitly disabled on unchanged #53 base 32c63af5.
 const zeroJitterHashes: Record<string, string> = {
   // #54: default effort contour, with jitter disabled.
-  "klatt80-baseline": "e5ff0f3fe5ef974cc7c2445706fcc4b5a36f0432343778ddde865271da5d109a",
-  "qlatt-beauty": "5166a1079ff878146d9863a4f41b1b2c0dbb008a949073f0fc0b820701b80eed",
+  "klatt80-baseline": "18537d5a2ac6e32b00a72452981057f009930c59317cf94014dad0a774b72eb6",
+  "qlatt-beauty": "c5759ff8bef0a80aebb52106a4234609901076653fa2c5672f844538949163fb",
 };
 const frontend = (experiment: string) =>
   experiment === "qlatt-beauty" ? "qlatt-beauty" : "qlatt-english";
@@ -60,7 +64,7 @@ describe.each(experiments)("%s Klatt 1990 voice quality", (experimentId) => {
     const output = await render(experimentId, { effort: 0, jitter: 0 });
     expect(hash(output.samples)).toBe(
       experimentId === "klatt80-baseline"
-        ? "22f83e98339c5a08bce2efb5131cce43bd833bf68f460be463ae20d43336fed7"
+        ? "d61d47a6ade9523f1f7c4aba66691098ab05a9d0844dc3b5d3d1e71bb5cd3d6f"
         : zeroJitterHashes[experimentId],
     );
   }, 30000);

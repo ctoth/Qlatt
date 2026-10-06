@@ -23,6 +23,11 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // release) and qlatt-beauty "Did Bob buy a blue balloon?" and "Gag, gang; go!"
 // (boundary-tone shaping now reaches a vowel two or three segments before the
 // boundary). dectalk-english is unchanged. See docs/ahead-distance-golden-review.md.
+// The splice tree-placement fix regenerates five snapshots: "Did Bob buy a blue
+// balloon?" and "Gag, gang; go!" in qlatt-english and qlatt-beauty (cluster
+// position and syllable role of expanded stops) and dectalk-english "The cat
+// sat." (a word-initial phone re-emitted by a splice now sits in its own word).
+// See docs/splice-tree-golden-review.md.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

@@ -735,6 +735,44 @@ describe("dectalk-english verb-phrase boundaries", () => {
 });
 
 // ---------------------------------------------------------------------------
+// /r/ before a vowel stays R in US English (the R -> RR rule of ph_aloph.c is
+// for the German phone), and a vowel fuses with a following /r/ only when the
+// /r/ has no stress of any level (ph_aloph.c:823). Phone codes from DECtalk's
+// debug build: "every." eh v r iy; "hundred." hx ah n d r ih d;
+// "around." ax r aw n d; "story." s t or iy.
+// ---------------------------------------------------------------------------
+describe("dectalk-english /r/", () => {
+  function phones(phrase: string): string[] {
+    const { utterance } = textToKlattTrackDetailed(phrase, 110, 30, {
+      frontendId: "dectalk-english",
+    });
+    return utterance
+      .relation("Segment")
+      .listItems()
+      .filter(
+        (item) =>
+          item.get("active") !== false &&
+          item.get("phoneme") !== "SIL" &&
+          !String(item.get("phoneme")).endsWith("_REL"),
+      )
+      .map((item) => String(item.get("phoneme")));
+  }
+
+  it("keeps R before an unstressed vowel", () => {
+    expect(phones("every.")).toEqual(["EH", "V", "R", "IY"]);
+    expect(phones("hundred.").slice(0, 6)).toEqual(["HH", "AH", "N", "D", "R", "IH"]);
+  });
+
+  it("does not fuse a vowel with an /r/ that has secondary stress", () => {
+    expect(phones("around.")).toEqual(["AX", "R", "AW", "N", "D"]);
+  });
+
+  it("still fuses a vowel with an unstressed /r/", () => {
+    expect(phones("story.")).toEqual(["S", "T", "OR", "IY"]);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // FTYPESYL counts the syllabics of the word (ph_sort2.c init_med_final), not
 // the syllabifier's syllables. DECtalk's record (dectalk-us-v1.durations.json):
 // "Vision is usual." has YU first, UW medial, EL final; "Red lorries..." has

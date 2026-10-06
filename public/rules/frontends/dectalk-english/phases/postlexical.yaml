@@ -512,7 +512,7 @@ rules:
       n: next
       df: "target('DF')"
       phrase_ok: "word_count() >= 3"
-      current_unstressed: "!has(current.stress) || current.stress != 1"
+      current_unstressed: "get(current, 'stress', 0) == 0"
       prev_son1: >-
         p != null && (p.type in ['vowel', 'glide', 'liquid', 'nasal']) &&
         !(p.phoneme in ['M', 'N', 'NG'])
@@ -563,7 +563,7 @@ rules:
       n: next
       dx: "target('DX')"
       phrase_ok: "word_count() >= 3"
-      current_unstressed: "!has(current.stress) || current.stress != 1"
+      current_unstressed: "get(current, 'stress', 0) == 0"
       prev_son1: >-
         p != null && (p.type in ['vowel', 'glide', 'liquid', 'nasal']) &&
         !(p.phoneme in ['M', 'N', 'NG'])
@@ -804,7 +804,7 @@ rules:
       n: next
       en: "target('EN')"
       prev_is_tx: "p != null && p.phoneme == 'TX'"
-      current_unstressed: "!has(current.stress) || current.stress != 1"
+      current_unstressed: "get(current, 'stress', 0) == 0"
       current_not_uw: "current.phoneme != 'UW'"
       next_is_nasal: "n != null && (n.type == 'nasal' || n.phoneme in ['M', 'N', 'NG'])"
     constraint: >-
@@ -837,7 +837,7 @@ rules:
     define:
       p: prev
       dz: "target('DZ')"
-      current_unstressed: "!has(current.stress) || current.stress != 1"
+      current_unstressed: "get(current, 'stress', 0) == 0"
       prev_is_stop: >-
         p != null && (p.phoneme in ['T', 'TX', 'D'])
     constraint: "current_unstressed && prev_is_stop"
@@ -878,7 +878,7 @@ rules:
   # The gate (L823-824): (curr FSTRESS|FWINITC) IS_MINUS  &&  prev FVOWEL+.
   #   FSTRESS IS_MINUS  -> the /R/ is unstressed (a liquid carrying no main stress).
   #   FWINITC IS_MINUS  -> the /R/ is NOT a word-initial consonant (so "red", "real"
-  #                        word-initial /R/ never fuses; they are handled by A5).
+  #                        word-initial /R/ never fuses).
   #   prev FVOWEL+      -> the preceding phone is a vowel (postvocalic).
   # Note A12 (L832: curr_outph = USP_RX) sets RX FIRST, but for every vowel in the
   # fusion map A13 then deletes the /R/, so RX never survives for a real vowel and
@@ -904,7 +904,10 @@ rules:
       where: current.phoneme == 'R'
     define:
       p: prev
-      current_unstressed: "!has(current.stress) || current.stress != 1"
+      # (curr_instruc & FSTRESS) IS_MINUS: no stress of any level. An /r/ that
+      # leads into a secondary-stressed vowel has secondary stress and does not
+      # fuse ("around" is AX R AW).
+      current_unstressed: "get(current, 'stress', 0) == 0"
       r_not_word_initial: >-
         p != null &&
         (!has(p.word) || !has(current.word) ? true : p.word == current.word)
@@ -950,71 +953,11 @@ rules:
       - "DECtalk 4.63 p_us_rom.h us_maltar/us_mindur (IR/ER/AR/OR/UR/RR rhotic-vowel targets)"
 
   # -------------------------------------------------------------------------
-  # PREVOCALIC R -> RR (ph_aloph.c:636-648, "Rule 2" A5).  A /R/ before a syllabic
-  # (and not across a word boundary to the right) is realized with the retroflex
-  # RR target ("real" R IY L -> RR IY L, word-internal onset /r/).  Source (in the
-  # `switch (curr_inph) case GRP_R` block, runs before the postvocalic block):
-  #   if ((phone_feature(next) & FSYLL) IS_PLUS)
-  #     if ((sentstruc[n] & FWBNEXT) IS_MINUS)  curr_outph = GRP_RR;
-  # There is NO stress / word-initial gate here -- it fires on any prevocalic /R/.
+  # NO PREVOCALIC R -> RR. ph_aloph.c:636-648 turns an /r/ before a syllabic
+  # into RR, but its `case GRP_R` is the German phone (p_all_ph.h:204,
+  # (PFGR<<PSFONT)|GR_R); a US /r/ is USP_R and never matches. DECtalk's debug
+  # build keeps R (26) in "receive", "every", "around", "paragraph", "hundred".
   #
-  # ORDERING vs fusion: in the source A5 sets curr_outph=RR but the later A13 block
-  # re-reads curr_inph==USP_R and, when the /R/ is ALSO postvocalic (a vowel before
-  # it), deletes the /R/ and fuses -- so fusion wins for an inter-vocalic /R/
-  # ("story" OW R IY -> OR IY, not RR).  We honor this by running fusion FIRST: if
-  # fusion fired, the /R/ token is gone and this rule has nothing to match.  This
-  # rule therefore only catches a prevocalic /R/ whose preceding context is NOT a
-  # fusable vowel.
-  #
-  # DECtalk's source test looks only at the immediate next input phone.  In the
-  # trace relation, stressed nuclei keep their stress mark between /R/ and the
-  # vowel (for example `r ' eh` in "Red" and `r ' ow` in "roll"), so A5 does not
-  # see FSYLL and leaves the phone as US_R.  Qlatt stores that stress mark on the
-  # vowel token, so we must treat a stressed next vowel as the same blocker.
-  #
-  # Mechanism: an in-place rename is insufficient (the engine does not re-
-  # materialize params on a bare phoneme rename), so a structural splice over the
-  # single /R/ token swaps in the RR target's acoustics, matching the fusion and
-  # flapping rules' approach.
-  # -------------------------------------------------------------------------
-  dectalk_prevocalic_r_rr:
-    kind: postlexical
-    select:
-      relation: Segment
-      where: current.phoneme == 'R'
-    define:
-      n: next
-      rr: "target('RR')"
-      next_syllabic: >-
-        n != null && (n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN'])
-      next_word_boundary: >-
-        n == null ? true :
-        (has(n.word) && has(current.word) ? n.word != current.word : true)
-      # `stress` may be present and null; get() reads that as 0.
-      next_has_stress_marker: "n != null && get(n, 'stress', 0) > 0"
-    constraint: "next_syllabic && !next_word_boundary && !next_has_stress_marker"
-    splice:
-      type: replace_range
-      range_left: current.sync_left
-      range_right: current.sync_right
-      insert:
-        - copy_from: current
-          copy_fields:
-            - stress
-            - word
-            - word_initial_consonant
-          phoneme: "'RR'"
-          type: rr.type
-          target: rr
-          duration: rr.duration
-          inherentDuration: rr.inherentDuration
-          minimumDuration: "has(rr.minimumDuration) ? rr.minimumDuration : rr.duration"
-          voiced: "has(rr.voiced) ? rr.voiced : true"
-    citations:
-      - "DECtalk 4.63 ph_aloph.c:636-648 (A5: /R/ before a syllabic, not across a word boundary, -> RR)"
-      - "DECtalk 4.63 p_us_rom.h us_maltar/us_mindur (US_RR retroflex /r/ target)"
-      - "DECtalk 4.63 oracle -lt/-lp trace for 'Red lorries roll along.' (word-initial stressed R remains US_R: r ' eh, r ' ow)"
-
   # -------------------------------------------------------------------------
   # POSTVOCALIC /l/ AND /r/ (ph_aloph.c:821-870, "Rule 2: Postvocalic
   # allophones of /R/ and /LL/ are special").

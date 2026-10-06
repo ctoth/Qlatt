@@ -184,7 +184,32 @@ function mergeSchemas(schemas: readonly FeatureSchema[]): FeatureSchema {
   return variants.length === 1 ? variants[0] : { kind: "union", variants };
 }
 
-function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
+/**
+ * A Segment feature the rulepack declares with a type:
+ * `name: { kind: number | string | boolean, nullable?: true, values?: [...] }`.
+ * A feature declared as a bare list is a name only and gets no schema here.
+ */
+function declaredFeatureSchema(declaration: unknown): FeatureSchema | undefined {
+  if (!isPlainObject(declaration)) return undefined;
+  let schema: FeatureSchema;
+  if (declaration.kind === "number") schema = { kind: "number" };
+  else if (declaration.kind === "boolean") schema = { kind: "boolean" };
+  else if (declaration.kind === "string") {
+    const values = Array.isArray(declaration.values)
+      ? declaration.values.filter((value): value is string => typeof value === "string")
+      : undefined;
+    schema = values && values.length > 0 ? { kind: "string", values } : { kind: "string" };
+  } else {
+    throw new Error(
+      `E_FEATURE_KIND_UNKNOWN: Segment feature kind '${String(declaration.kind)}' is not number, string or boolean`,
+    );
+  }
+  return declaration.nullable === true
+    ? { kind: "union", variants: [schema, { kind: "null" }] }
+    : schema;
+}
+
+function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack): HrgSchema {
   const segmentFeatures: Record<string, FeatureSchema> = {
     phoneme: { kind: "string" },
     type: { kind: "string" },
@@ -219,11 +244,18 @@ function buildUtteranceSchema(inventory: InventorySpec): HrgSchema {
     transition_ms: { kind: "number" },
     nucleus_duration_ms: { kind: "number" },
     dummy_vowel: { kind: "boolean" },
-    word_initial_consonant: { kind: "boolean" },
-    rime_boundary: { kind: "string" },
     weak: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
     glottal: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
   };
+  const segmentRelation = spec.relations.Segment;
+  const declared =
+    isPlainObject(segmentRelation) && isPlainObject(segmentRelation.features)
+      ? segmentRelation.features
+      : {};
+  for (const [key, declaration] of Object.entries(declared)) {
+    const schema = declaredFeatureSchema(declaration);
+    if (schema) segmentFeatures[key] = schema;
+  }
   for (const key of Object.keys(inventory.base_params)) segmentFeatures[key] = { kind: "number" };
   for (const target of Object.values(inventory.phoneme_targets)) {
     for (const [key, value] of Object.entries(target)) {
@@ -505,12 +537,9 @@ function buildTextToKlattTrackDetailed(
     /^F[1-9]\d*$/.test(key),
   );
   const provenance = options.provenance ?? createProvenanceCollector();
-  const utterance = new Utterance(
-    buildUtteranceSchema(resources.inventory),
-    provenance,
-    options.diagnostics ?? undefined,
-  );
-  for (const relationName of Object.keys(buildUtteranceSchema(resources.inventory).relations)) {
+  const utteranceSchema = buildUtteranceSchema(resources.inventory, spec);
+  const utterance = new Utterance(utteranceSchema, provenance, options.diagnostics ?? undefined);
+  for (const relationName of Object.keys(utteranceSchema.relations)) {
     utterance.relation(relationName);
   }
 

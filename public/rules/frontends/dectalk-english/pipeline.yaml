@@ -327,8 +327,8 @@ relations:
       voiceless: []
       weak: []
       word: []
-      word_initial_consonant: []
-      rime_boundary: [word, comma, period, question, exclaim]
+      word_initial_consonant: { kind: boolean }
+      rime_boundary: { kind: string, values: [word, comma, period, question, exclaim] }
       AF: []
       AH: []
       AN: []

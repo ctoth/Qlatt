@@ -120,9 +120,10 @@ rules:
   # marked word then gets a break (:5190-5229) unless it is within three words
   # of the marked word before it (or of the start), or the next word is marked
   # too. The two kinds of break the code tells apart, required and optional,
-  # are sent the same way: a comma before the word, when more than two words
-  # follow it (ls_util.c:827, `length > fc_index + 3`; length counts one more
-  # than the words, for the space that ends the text).
+  # are sent the same way: a comma before the word, when more than three words
+  # follow it (ls_util.c:827, `length > fc_index + 3`, length being the number
+  # of words; DECtalk breaks "Do you know where the station is today?" and not
+  # "Do you know where the station is?").
   #
   # "The big dog barked and the small cat ran away." is spoken as "The big dog
   # barked, and the small cat ran away."; "The dog and the cat ran." (third
@@ -169,7 +170,7 @@ rules:
       next_marked: "n != null && isTrue(n, 'break_marker')"
     constraint: >-
       place - last_marker > 3 && !next_marked
-      && get(current, 'clause_word_count', 0) + 1 > place + 3
+      && get(current, 'clause_word_count', 0) > place + 3
     apply:
       - field: clause_break_before
         op: set

@@ -191,12 +191,16 @@ describe("source-backed recognition", () => {
   });
 
   it("uses the selected normalization resources when handing off source items", () => {
-    const spec = loadBundledRulepackSpec("dectalk-english");
-    const utterance = new Utterance(NORMALIZATION_SCHEMA);
-    recognizeText("123", utterance, spec);
-    expect(normalizeSourceItems(utterance, spec).map((entry) => entry.word)).toContain(
-      "hundredand",
-    );
+    // dectalk-english keeps a bare number as digits (its lexicon speaks them);
+    // qlatt-english writes it out.
+    const words = (frontend: string): string[] => {
+      const spec = loadBundledRulepackSpec(frontend);
+      const utterance = new Utterance(NORMALIZATION_SCHEMA);
+      recognizeText("123", utterance, spec);
+      return normalizeSourceItems(utterance, spec).map((entry) => entry.word);
+    };
+    expect(words("dectalk-english")).toEqual(["123"]);
+    expect(words("qlatt-english")).toContain("hundred");
   });
 
   it("runs the opt-in fixture through one Utterance and traces Token ancestry to the multi-token source", () => {

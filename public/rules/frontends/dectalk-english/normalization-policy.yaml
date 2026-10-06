@@ -3,5 +3,9 @@ maps:
   tn_recognition_policy:
     years: 'yes'
     fractions: 'yes'
-    hundreds: hundredand
+    # Numbers inside dates and money, which the text rules still write out.
+    hundreds: hundred
+    # A bare number or year stays digits: DECtalk speaks it from its own phone
+    # lists (LTS/l_us_pr1.c), not from the words in its dictionary.
+    bare_numbers: digits
     fraction_exception: '100'

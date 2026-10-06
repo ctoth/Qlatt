@@ -1,6 +1,17 @@
 import type { LexicalStressResult } from "./lexical-stress-types";
 
-export type PronunciationSource = "dictionary" | "morphology" | "lts-rules" | "unknown";
+export type PronunciationSource = "dictionary" | "morphology" | "lts-rules" | "number" | "unknown";
+
+/** One spoken word of a token that is spoken as several (a number in digits). */
+export interface PronunciationPart {
+  phonemes: string[];
+  /** The phrase this word starts. */
+  phraseStart?: "vp";
+  /** A pause (a comma's) stands before this word. */
+  pauseBefore?: boolean;
+  /** Indices of the phones after which a morpheme boundary stands. */
+  morphemeAfter?: number[];
+}
 
 export interface PronunciationResult {
   phonemes: string[];
@@ -23,6 +34,11 @@ export interface PronunciationResult {
   receivedFormClasses?: string[];
   /** The phrase the word starts, when the frontend's lexicon marks one. */
   phraseStart?: "vp" | "pp";
+  /**
+   * The words the token is spoken as, when it is more than one; `phonemes`
+   * is then all of them in order.
+   */
+  parts?: PronunciationPart[];
 }
 
 /** Boundaries are phone offsets in the final pronunciation, end exclusive. */

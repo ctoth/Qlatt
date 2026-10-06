@@ -136,12 +136,13 @@ rules:
   # phsort() calls it for every phone once the clause has had a syllabic
   # (in_rhyme, ph_sort.c:1356,1395).
   #
-  # Boundaries modelled here: a following word (FWBNEXT), a following word
-  # that starts a verb phrase (FVPNEXT) and the clause-final punctuation
-  # (FCBNEXT comma, FPERNEXT period, FQUENEXT question mark, FEXCLNEXT
-  # exclamation mark). The prepositional-phrase start (PPSTART, before "to",
-  # "and", "for"), the verb-phrase starts DECtalk puts inside numbers, and
-  # in-word morpheme and syllable boundaries are not.
+  # Boundaries modelled here: a morpheme boundary inside a number word
+  # (FMBNEXT), a following word (FWBNEXT), a following word that starts a verb
+  # phrase (FVPNEXT), the word boundary together with a prepositional-phrase
+  # start (the comma value) and the clause-final punctuation (FCBNEXT comma,
+  # FPERNEXT period, FQUENEXT question mark, FEXCLNEXT exclamation mark).
+  # Not modelled: syllable boundaries, and morpheme boundaries of words that
+  # are not number words.
   # ---------------------------------------------------------------------------
   dectalk_rime_boundary:
     kind: scalar
@@ -168,11 +169,25 @@ rules:
       mark: >-
         boundary_item != null && boundary_item.phoneme == 'SIL'
         ? boundary_item.punctuationSymbol : ''
-    constraint: "in_rhyme && !syllabic_first"
+      # A morpheme boundary inside the word ("nine|teen") is a boundary symbol
+      # too: the scan stops at it when no syllabic comes first. The phone
+      # before the boundary carries the mark.
+      marked_ahead: >-
+        look_ahead_where(current, 100,
+          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || !(has(candidate.word) && has(source.word) && candidate.word == source.word) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"] || isTrue(candidate, "morpheme_boundary_after")')
+      before_morpheme: >-
+        isTrue(current, 'morpheme_boundary_after')
+        || (marked_ahead != null && marked_ahead.phoneme != 'SIL'
+            && has(marked_ahead.word) && marked_ahead.word == current.word
+            && !(marked_ahead.type == 'vowel' || marked_ahead.phoneme in ['EL', 'EM', 'EN'])
+            && isTrue(marked_ahead, 'morpheme_boundary_after'))
+    constraint: "in_rhyme && (before_morpheme || !syllabic_first)"
     apply:
       - field: rime_boundary
         op: set
         dispatch:
+          - when: before_morpheme
+            value: "'morpheme'"
           # The last phone before "to", "and" or "for" has the word boundary
           # and the phrase start's boundary together, which is the comma value
           # (dectalk_phrase_start_follows).

@@ -11,6 +11,8 @@ export interface TranscriptionToken {
   formClasses?: readonly string[];
   /** The phrase the word starts, when the frontend's lexicon marks one. */
   phraseStart?: "vp" | "pp";
+  /** A morpheme boundary stands after this phone, inside its word. */
+  morphemeBoundaryAfter?: boolean;
   isPunctuation?: boolean;
   symbol?: string;
   duration?: number;

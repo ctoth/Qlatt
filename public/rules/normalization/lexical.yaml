@@ -81,12 +81,19 @@ rules:
     select:
       relation: Normalization
       where: "current.kind in ['cardinal', 'ordinal'] && current.outputType == 'source'"
+    # A frontend whose lexicon speaks digits itself keeps a bare cardinal as
+    # one terminal (tn_recognition_policy.bare_numbers: digits), so the number
+    # is not confused with the same words typed out.
     expand_text:
-      allowed_types: [request]
+      allowed_types: [request, terminal]
       tag: normalization_lexical
-      output: "tn_number_request(double(current.payload.value), current.kind == 'ordinal' ? 'hundred' : maps.tn_recognition_policy.hundreds, current.kind == 'ordinal', '')"
+      output: >-
+        maps.tn_recognition_policy.bare_numbers == 'digits' && current.kind == 'cardinal'
+          ? [{'type': 'terminal', 'text': current.payload.value}]
+          : tn_number_request(double(current.payload.value), current.kind == 'ordinal' ? 'hundred' : maps.tn_recognition_policy.hundreds, current.kind == 'ordinal', '')
     citations:
       - "Issue #144: explicit bare-number convention"
+      - "DECtalk 4.63 LTS/ls_task.c:3776-3806 (an all-digit word is spoken by the number routines, not looked up)"
   tn_unmatched_words:
     kind: structural
     select:

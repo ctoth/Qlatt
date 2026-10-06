@@ -514,7 +514,10 @@ relations:
       # A [d] that the duration routine made from the /t/ of [nt] (p_us_tim.c:627-638).
       voiced_from_t: { kind: boolean }
       word_initial_consonant: { kind: boolean }
-      rime_boundary: { kind: string, values: [word, vp, comma, period, question, exclaim] }
+      # The phone before a morpheme boundary inside its word (MBOUND, e.g.
+      # "nine|teen" in DECtalk's number lists).
+      morpheme_boundary_after: { kind: boolean }
+      rime_boundary: { kind: string, values: [morpheme, word, vp, comma, period, question, exclaim] }
       # FHAT_BEGINS and FHAT_ENDS of a syllabic, and the state DECtalk's walk
       # leaves after it (ph_aloph.c:1396-1525).
       hat_begins: { kind: boolean }

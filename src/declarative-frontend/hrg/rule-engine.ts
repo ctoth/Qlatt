@@ -342,6 +342,47 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
     }
     return null;
   };
+  /**
+   * Walk from the source (exclusive) until `stopPredicate` holds or the
+   * relation ends, at most `maxSteps` items, and count the items on the way
+   * for which `countPredicate` holds. The stopping item is not counted.
+   */
+  const countScan = (
+    sourceValue: unknown,
+    maxStepsValue: unknown,
+    stopPredicate: unknown,
+    countPredicate: unknown,
+    direction: -1 | 1,
+  ): number => {
+    const source = resolveItem(sourceValue);
+    const maxSteps = Math.trunc(Number(maxStepsValue));
+    const sourceIndex = source ? items.indexOf(source) : -1;
+    if (
+      sourceIndex < 0 ||
+      !Number.isFinite(maxSteps) ||
+      typeof stopPredicate !== "string" ||
+      typeof countPredicate !== "string"
+    )
+      return 0;
+    let count = 0;
+    for (let offsetIndex = 1; offsetIndex <= maxSteps; offsetIndex += 1) {
+      const candidateIndex = sourceIndex + direction * offsetIndex;
+      const candidate = items[candidateIndex];
+      if (!candidate) break;
+      if (relationName) {
+        const write = utterance.relation(relationName).node(candidate)?.write;
+        if (write) transaction.dependOn(write.decisionId);
+      }
+      const candidateContext = recurse(candidateIndex, {
+        source: view(source),
+        candidate: view(candidate),
+        scan_offset: direction * offsetIndex,
+      });
+      if (conditionMatches({ predicate: stopPredicate }, candidateContext, predicates)) break;
+      if (conditionMatches({ predicate: countPredicate }, candidateContext, predicates)) count += 1;
+    }
+    return count;
+  };
   const relationItems = (nameValue: unknown): Item[] => {
     if (typeof nameValue !== "string") return [];
     const relation = utterance.getRelation(nameValue);
@@ -577,6 +618,10 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
         typeof predicateName === "string"
           ? scan(source, maxSteps, { predicate: predicateName }, 1)
           : null,
+      count_back_pred: (source, maxSteps, stopPredicate, countPredicate) =>
+        countScan(source, maxSteps, stopPredicate, countPredicate, -1),
+      count_ahead_pred: (source, maxSteps, stopPredicate, countPredicate) =>
+        countScan(source, maxSteps, stopPredicate, countPredicate, 1),
       find_within_word: findWithinWord,
       path: navigatePath,
       span_ms: spanMs,

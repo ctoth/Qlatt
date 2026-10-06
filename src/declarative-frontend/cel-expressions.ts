@@ -253,6 +253,8 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "look_ahead_where", arities: [3], binding: "context" },
   { name: "look_back_pred", arities: [3], binding: "context" },
   { name: "look_ahead_pred", arities: [3], binding: "context" },
+  { name: "count_back_pred", arities: [4], binding: "context" },
+  { name: "count_ahead_pred", arities: [4], binding: "context" },
   { name: "find_within_word", arities: [2, 3], binding: "context" },
   { name: "path", arities: [2], binding: "context" },
   { name: "span_ms", arities: [2], binding: "context" },

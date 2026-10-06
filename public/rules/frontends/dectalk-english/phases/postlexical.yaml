@@ -211,6 +211,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'AX'"
           type: ax.type
           target: ax
@@ -330,6 +331,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: assim_name
           type: at.type
           target: at
@@ -379,6 +381,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'DF'"
           type: df.type
           target: df
@@ -429,6 +432,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'DX'"
           type: dx.type
           target: dx
@@ -473,6 +477,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'CH'"
           type: ch.type
           target: ch
@@ -504,6 +509,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'JH'"
           type: jh.type
           target: jh
@@ -571,6 +577,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: glot_target
           type: gt.type
           target: gt
@@ -684,6 +691,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'DZ'"
           type: dz.type
           target: dz
@@ -768,6 +776,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: fused_name
           # The fused vowel keeps the stress of the vowel it replaces.
           stress: "get(p, 'stress', 0)"
@@ -835,6 +844,7 @@ rules:
           copy_fields:
             - stress
             - word
+            - word_initial_consonant
           phoneme: "'RR'"
           type: rr.type
           target: rr
@@ -846,3 +856,52 @@ rules:
       - "DECtalk 4.63 ph_aloph.c:636-648 (A5: /R/ before a syllabic, not across a word boundary, -> RR)"
       - "DECtalk 4.63 p_us_rom.h us_maltar/us_mindur (US_RR retroflex /r/ target)"
       - "DECtalk 4.63 oracle -lt/-lp trace for 'Red lorries roll along.' (word-initial stressed R remains US_R: r ' eh, r ' ow)"
+
+  # -------------------------------------------------------------------------
+  # POSTVOCALIC /l/ AND /r/ (ph_aloph.c:821-870, "Rule 2: Postvocalic
+  # allophones of /R/ and /LL/ are special").
+  #
+  #   if ((curr_instruc & (FSTRESS | FWINITC)) IS_MINUS && n > 0
+  #       && (phone_feature(phonemes[n - 1]) & FVOWEL) IS_PLUS)
+  #     LL -> LX;  R -> RX (unless it fuses with the vowel, handled above)
+  #
+  # The phone carries no stress, is not a word-initial consonant, and the
+  # phoneme before it is a vowel (FVOWEL, so not syllabic l or n).
+  #
+  # It runs after the fusion rule, which removes an /r/ that fuses, and before
+  # the prevocalic R -> RR rule: in the C that rule (A5) writes RR first and
+  # this one then overwrites it, so RX wins for an /r/ between two vowels that
+  # does not fuse.
+  # -------------------------------------------------------------------------
+  dectalk_postvocalic_liquid:
+    kind: postlexical
+    select:
+      relation: Segment
+      where: "current.phoneme in ['L', 'R']"
+    define:
+      p: prev
+      allophone: "current.phoneme == 'L' ? 'LX' : 'RX'"
+      at: target(allophone)
+    constraint: >-
+      get(current, 'stress', 0) == 0 && !isTrue(current, 'word_initial_consonant')
+      && p != null && p.type == 'vowel'
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+            - word_initial_consonant
+          phoneme: allophone
+          type: at.type
+          target: at
+          duration: at.duration
+          inherentDuration: at.inherentDuration
+          minimumDuration: "has(at.minimumDuration) ? at.minimumDuration : at.duration"
+          voiced: "has(at.voiced) ? at.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:821-870 (Rule 2: postvocalic allophones of /R/ and /LL/)"
+      - "DECtalk 4.63 p_us_rom.h us_maltar, us_inhdr, us_mindur (US_LX, US_RX targets)"

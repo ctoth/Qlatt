@@ -41,6 +41,9 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // Keeping the DECtalk dictionary's secondary stress, and raising the last
 // primary stress before "!" to emphasis, regenerate dectalk-english "Did Bob
 // buy a blue balloon?" and "Gag, gang; go!".
+// The syllabifier now knows this frontend's /l/ (it was keyed LL, so "bl" was
+// never an onset), which regenerates dectalk-english "Did Bob buy a blue
+// balloon?" again.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

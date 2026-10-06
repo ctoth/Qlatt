@@ -259,7 +259,10 @@ syllabification:
     W: "w"
     Y: "y"
     R: "r"
-    LL: "l"
+    # This port spells US_LL as L. LX and RX are the postvocalic allophones.
+    L: "l"
+    LX: "l"
+    RX: "r"
     HH: "h"
     M: "m"
     N: "n"
@@ -539,6 +542,7 @@ phases:
       - dectalk_flap_t
       - dectalk_flap_d
       - dectalk_fuse_vowel_r
+      - dectalk_postvocalic_liquid
       - dectalk_prevocalic_r_rr
       - dectalk_syllabic_n_after_tx
       - dectalk_dental_dh

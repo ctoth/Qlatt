@@ -185,6 +185,10 @@ const QLATT_TO_DECTALK_TOKEN: Record<string, string> = {
   R: "r",
   L: "ll",
   LL: "ll",
+  // DECtalk's phoneme log is written before its allophone rules, so the
+  // postvocalic allophones appear there as the phonemes they come from.
+  LX: "ll",
+  RX: "r",
   HH: "hx",
   M: "m",
   N: "n",

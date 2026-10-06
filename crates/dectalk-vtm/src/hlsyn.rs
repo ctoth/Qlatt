@@ -27,9 +27,14 @@
 //! the x86 truncating conversion including its out-of-range result.
 //!
 //! `SusceptanceSum` calls the C library's `tan`, and `DT_f_sqrt`/`DT_f_log10`
-//! call `sqrt`/`log10` outside their tables. `sqrt` is correctly rounded
-//! everywhere; `tan` and `log10` come from the platform's math library, so
-//! agreement with DECtalk in those paths depends on that library.
+//! call `sqrt`/`log10` outside their tables. DECtalk links Microsoft's
+//! `__libm_sse2_tan_precise` and `__libm_sse2_log10_precise`. The port uses
+//! the `libm` crate's `tan` and `log10` instead of the platform's, so every
+//! target runs the same code; `sqrt` is correctly rounded everywhere. Those
+//! two functions need not agree with Microsoft's to the last bit. On the
+//! traced corpus the results are exact, a relative change of 1e-7 in `tan`
+//! changes no output word, and the `log10` path above 100 never influences
+//! one.
 //!
 //! # Left out
 //!
@@ -202,7 +207,7 @@ fn DTsqrt(input: f32) -> f64 {
 /// not rounded to `float`; the other paths return a `float` value.
 fn DTlog10(input: f32) -> f64 {
     if input > 100.0 {
-        return f64::from(f64::from(input).log10() as f32);
+        return f64::from(libm::log10(f64::from(input)) as f32);
     }
 
     if input > 10.0 {
@@ -2150,9 +2155,10 @@ fn SusceptanceSum(FNPGuess: f32, FNPvars: &FNPVars) -> f32 {
     let Bn: f32 = -FNPvars.K2 / (FNPGuess - FNPvars.r#fn);
 
     let BpPlusBm: f32 = (f64::from(FNPvars.K1)
-        * (f64::from(PI) / 2.0f64 * f64::from(FNPGuess - FNPvars.f1c)
-            / f64::from(FNPvars.fp - FNPvars.f1c))
-        .tan()) as f32;
+        * libm::tan(
+            f64::from(PI) / 2.0f64 * f64::from(FNPGuess - FNPvars.f1c)
+                / f64::from(FNPvars.fp - FNPvars.f1c),
+        )) as f32;
 
     Bn + BpPlusBm
 }

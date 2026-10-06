@@ -164,6 +164,17 @@ describe("table letter-to-sound, by stage", () => {
     const where = pronounce("where", lookup, options);
     expect(where.receivedFormClasses).toEqual(where.formClasses);
   });
+
+  it("reports the phones the dictionary exempts from allophone rules", () => {
+    // Dic_us.txt: yellow y'E~lo, bladder bl'@~dR; "~" blocks the next phone.
+    const blocked = (word: string): unknown => pronounce(word, lookup, options).rulesBlockedAt;
+    expect(blocked("yellow")).toEqual([2]);
+    expect(blocked("bladder")).toEqual([3]);
+    // A suffixed word keeps its root's marks: "bladders" is bladder + Z.
+    expect(pronounce("bladders", lookup, options).source).toBe("morphology");
+    expect(blocked("bladders")).toEqual([3]);
+    expect(blocked("hello")).toBeUndefined();
+  });
 });
 
 describe("DECtalk form class oracle", () => {

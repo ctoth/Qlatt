@@ -13,6 +13,8 @@ export interface TranscriptionToken {
   phraseStart?: "vp" | "pp";
   /** A morpheme boundary stands after this phone, inside its word. */
   morphemeBoundaryAfter?: boolean;
+  /** The lexicon exempts this phone from the frontend's allophone rules. */
+  rulesBlocked?: boolean;
   isPunctuation?: boolean;
   symbol?: string;
   duration?: number;

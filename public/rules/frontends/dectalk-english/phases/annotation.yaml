@@ -278,15 +278,20 @@ rules:
         : count_ahead_pred(current, 1000, 'is_past_phrase_boundary', 'is_primary_syllabic')
       stress_now: "get(current, 'stress', 0)"
       stressed: "stress_now == 1 || stress_now == 2 || stress_now == 3"
+      # A phone the dictionary exempts from allophone rules (FBLOCK) jumps over
+      # all of this in DECtalk (ph_aloph.c:563-567 to the label at :1528): no
+      # countdown, no rise, no fall; the state passes through it unchanged.
+      blocked: "isTrue(current, 'rules_blocked')"
       # 1. The delayed fall.
       countdown: "delay_in >= 0.0 ? delay_in - 1.0 : -1.0"
       delayed_fall: >-
-        delay_in >= 0.0 && (countdown == 0.0 || (countdown == 1.0 && phones_left < 4.0))
+        !blocked && delay_in >= 0.0
+        && (countdown == 0.0 || (countdown == 1.0 && phones_left < 4.0))
       top_1: "delayed_fall ? false : top_in"
       stresses_1: "delayed_fall ? 0.0 : stresses_in"
-      delay_1: "delay_in >= 0.0 && !delayed_fall ? countdown : -1.0"
+      delay_1: "blocked ? delay_in : (delay_in >= 0.0 && !delayed_fall ? countdown : -1.0)"
       # 2. The stressed syllabic.
-      active: "stressed && !locked_in"
+      active: "stressed && !locked_in && !blocked"
       rises: "active && !top_1"
       stresses_2: "active ? stresses_1 + 1.0 : stresses_1"
       emphasis_fall: "active && stress_now == 3"
@@ -330,4 +335,5 @@ rules:
       - "DECtalk 4.63 ph_aloph.c:597-606 (the delayed fall)"
       - "DECtalk 4.63 ph_aloph.c:1646-1668 remaining_stresses_til"
       - "DECtalk 4.63 ph_defs.h:151-154 (DECLARATIVE is a clause that ends with a period)"
+      - "DECtalk 4.63 ph_aloph.c:563-567 (a phone with FBLOCK skips to :1528, past the hat pattern)"
 

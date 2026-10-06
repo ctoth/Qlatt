@@ -576,6 +576,12 @@ export function transcribeText(
                 : {}),
               ...(part.phraseStart ? { phraseStart: part.phraseStart } : {}),
               ...(part.morphemeAfter?.includes(phoneIndex) ? { morphemeBoundaryAfter: true } : {}),
+              // Indices of a one-word result are indices into its phones.
+              ...(spokenParts.length === 1 &&
+              "rulesBlockedAt" in pronResult &&
+              pronResult.rulesBlockedAt?.includes(phoneIndex)
+                ? { rulesBlocked: true }
+                : {}),
               _pronDecisionId: stressDecisionId,
             });
           } else {

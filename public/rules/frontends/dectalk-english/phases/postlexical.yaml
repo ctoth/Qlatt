@@ -536,7 +536,7 @@ rules:
     kind: postlexical
     select:
       relation: Segment
-      where: "current.phoneme == 'AX'"
+      where: "current.phoneme == 'AX' && !isTrue(current, 'rules_blocked')"
     define:
       p: prev
       n: next
@@ -645,7 +645,7 @@ rules:
     kind: postlexical
     select:
       relation: Segment
-      where: current.phoneme in ['S', 'Z']
+      where: "current.phoneme in ['S', 'Z'] && !isTrue(current, 'rules_blocked')"
     define:
       n: next
       next_is_sh: "n != null && n.phoneme == 'SH'"
@@ -674,7 +674,7 @@ rules:
     kind: postlexical
     select:
       relation: Segment
-      where: current.phoneme == 'T'
+      where: "current.phoneme == 'T' && !isTrue(current, 'rules_blocked')"
     define:
       p: prev
       n: next
@@ -730,7 +730,7 @@ rules:
     kind: postlexical
     select:
       relation: Segment
-      where: current.phoneme == 'D'
+      where: "current.phoneme == 'D' && !isTrue(current, 'rules_blocked')"
     define:
       p: prev
       n: next
@@ -798,7 +798,7 @@ rules:
     kind: postlexical
     select:
       relation: Segment
-      where: current.phoneme == 'T'
+      where: "current.phoneme == 'T' && !isTrue(current, 'rules_blocked')"
     define:
       n: next
       ch: "target('CH')"
@@ -827,7 +827,7 @@ rules:
     kind: postlexical
     select:
       relation: Segment
-      where: current.phoneme == 'D'
+      where: "current.phoneme == 'D' && !isTrue(current, 'rules_blocked')"
     define:
       n: next
       jh: "target('JH')"
@@ -886,7 +886,7 @@ rules:
     kind: postlexical
     select:
       relation: Segment
-      where: current.phoneme == 'T'
+      where: "current.phoneme == 'T' && !isTrue(current, 'rules_blocked')"
     define:
       p: prev
       n: next
@@ -950,7 +950,10 @@ rules:
       before_syllabic_or_silence: >-
         n == null || n.phoneme == 'SIL' || n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN']
       uw: "target('UW0')"
-    constraint: "two_back_not_syllabic && after_unstressed_t && before_syllabic_or_silence"
+    # The rule belongs to the /t/'s turn: a blocked /t/ skips it.
+    constraint: >-
+      two_back_not_syllabic && after_unstressed_t && before_syllabic_or_silence
+      && !isTrue(p, 'rules_blocked')
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -1018,7 +1021,7 @@ rules:
     kind: postlexical
     select:
       relation: Segment
-      where: current.type == 'vowel'
+      where: "current.type == 'vowel' && !isTrue(current, 'rules_blocked')"
     define:
       p: prev
       n: next
@@ -1053,7 +1056,7 @@ rules:
     kind: postlexical
     select:
       relation: Segment
-      where: current.phoneme == 'DH'
+      where: "current.phoneme == 'DH' && !isTrue(current, 'rules_blocked')"
     define:
       p: prev
       dz: "target('DZ')"
@@ -1175,7 +1178,7 @@ rules:
     kind: postlexical
     select:
       relation: Segment
-      where: current.phoneme == 'R'
+      where: "current.phoneme == 'R' && !isTrue(current, 'rules_blocked')"
     define:
       p: prev
       # (curr_instruc & FSTRESS) IS_MINUS: no stress of any level. An /r/ that
@@ -1252,7 +1255,7 @@ rules:
     kind: postlexical
     select:
       relation: Segment
-      where: "current.phoneme in ['L', 'R']"
+      where: "current.phoneme in ['L', 'R'] && !isTrue(current, 'rules_blocked')"
     define:
       p: prev
       allophone: "current.phoneme == 'L' ? 'LX' : 'RX'"

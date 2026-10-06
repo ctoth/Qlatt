@@ -92,6 +92,12 @@ export function pronounce(
       ? { phraseStart: "vp" }
       : {};
   };
+  // The dictionary's `~` marks, by the entry that was reached: a suffixed
+  // word keeps its root's phones in front, so the indices hold.
+  const blocked = (entry: string | null): { rulesBlockedAt?: number[] } => {
+    const indices = entry === null ? undefined : table?.wordRuleBlocks?.[entry];
+    return indices && indices.length > 0 ? { rulesBlockedAt: [...indices] } : {};
+  };
 
   // A table with number phone lists speaks an all-digit word itself, ahead of
   // any lookup, as several words; the whole number has the one form class
@@ -119,6 +125,7 @@ export function pronounce(
       word: lowerWord,
       ...classed(table?.wordFormClasses?.[lowerWord] ?? 0),
       ...phrased(lowerWord),
+      ...blocked(lowerWord),
     };
   }
 
@@ -139,6 +146,7 @@ export function pronounce(
         word: lowerWord,
         ...classed(stripped.formClass),
         ...phrased(stripped.root),
+        ...blocked(stripped.root),
       };
     }
     return {

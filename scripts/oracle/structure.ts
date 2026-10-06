@@ -64,7 +64,7 @@ export function recordedStructureClauses(
 ): StructurePhone[][] {
   return clauses.map((clause) =>
     clause.flatMap((allophone) =>
-      allophone.kind === "phone"
+      allophone.kind === "phone" || allophone.kind === "fixed"
         ? [
             {
               name: US_ALLOPHONE_NAMES[allophone.ph as number] ?? `#${String(allophone.ph)}`,

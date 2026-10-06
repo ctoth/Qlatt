@@ -19,7 +19,8 @@
  *   QD after=<rule> prcnt=.. deldur=.. durmin=..       (state after that rule)
  *   QD final n=.. code=.. struc=.. durxx=<frames>      (final duration)
  * A silence prints only the `QD final` line: Rule 1 sets its pause and skips
- * the rest. `QD final` comes after the /h/ cap (p_us_tim.c:936-940), which
+ * the rest. So does a phone whose duration comes from outside the rules
+ * (recorded as kind "fixed"). `QD final` comes after the /h/ cap (p_us_tim.c:936-940), which
  * DECtalk's own MSDBG5 print precedes, so it is the value the synthesizer uses.
  *
  * `prcnt` is the multiplicative term in 1/128 units, `deldur` the additive
@@ -45,6 +46,7 @@ import type { OracleCorpusDocument } from "./types";
 type RuleState = { prcnt: number; deldur: number; durmin: number };
 type Allophone =
   | { kind: "silence"; struc: number; frames: number }
+  | { kind: "fixed"; ph: number; struc: number; frames: number }
   | {
       kind: "phone";
       n: number;
@@ -134,10 +136,20 @@ function parse(stdout: string, id: string): Allophone[][] {
         open.frames = value.durxx;
         allophones.push(open);
         open = undefined;
-      } else {
+      } else if ((value.code & 0xff) === 0) {
         // Rule 1 (silence) skips the phone line. allofeats[] is 32 bits wide;
         // the rules read it through a 16-bit `short`.
         allophones.push({ kind: "silence", struc: (value.struc << 16) >> 16, frames: value.durxx });
+      } else {
+        // A phone with a duration given from outside the rules (193-205): the
+        // duration dictionary of ph_sort.c:192-215 sets one on the first
+        // phones of some words. It has no rule state.
+        allophones.push({
+          kind: "fixed",
+          ph: value.code & 0xff,
+          struc: (value.struc << 16) >> 16,
+          frames: value.durxx,
+        });
       }
     }
   }

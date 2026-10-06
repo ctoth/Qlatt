@@ -87,7 +87,7 @@ export function recordedAllophoneClauses(entry: {
 }): string[][] {
   return entry.clauses.map((clause) =>
     clause.flatMap((allophone) =>
-      allophone.kind === "phone"
+      allophone.kind === "phone" || allophone.kind === "fixed"
         ? [US_ALLOPHONE_NAMES[allophone.ph as number] ?? `#${String(allophone.ph)}`]
         : [],
     ),

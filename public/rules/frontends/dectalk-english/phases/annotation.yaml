@@ -268,7 +268,14 @@ rules:
         look_ahead_where(current, 1000,
           'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
       declarative: "clause_end != null && clause_end.punctuationSymbol == '.'"
-      phones_left: "2.0 + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
+      # nphonetot - n counts the phones as they came in: a vowel that has
+      # since absorbed its /r/ (this one or a later one) was two phones, and
+      # so was a geminate that has lost its first half.
+      phones_left: >-
+        2.0 + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')
+        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_fused_vowel')
+        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_geminate_survivor')
+        + (isTrue(current, 'fused_with_r') ? 1.0 : 0.0)
       syllabics_after: "count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_syllabic')"
       # remaining_stresses_til(FCBNEXT): up to the clause's end or a phrase
       # start that carries the comma value.

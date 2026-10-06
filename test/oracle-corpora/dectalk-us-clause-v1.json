@@ -94,6 +94,10 @@
     { "id": "break-after-comma", "text": "Yes, the big dog barked and the small cat ran away.", "group": "clause-break", "tags": ["conjunction", "written-comma"], "expectedFocus": ["duration"] },
     { "id": "break-none-number", "text": "The 25 and the small cat ran away.", "group": "clause-break", "tags": ["conjunction", "digits", "no-break"], "expectedFocus": ["duration"] },
     { "id": "cite-look-at-me", "text": "Look at me.", "group": "citation", "tags": ["at", "nine-entries"], "expectedFocus": ["duration"] },
-    { "id": "cite-look-at-them", "text": "Look at them.", "group": "citation", "tags": ["at", "ten-entries"], "expectedFocus": ["duration"] }
+    { "id": "cite-look-at-them", "text": "Look at them.", "group": "citation", "tags": ["at", "ten-entries"], "expectedFocus": ["duration"] },
+    { "id": "homograph-in-the-house", "text": "The big dog barked at the small cat in the house.", "group": "homograph", "tags": ["noun", "after-article"], "expectedFocus": ["duration"] },
+    { "id": "homograph-to-house", "text": "They want to house the cat.", "group": "homograph", "tags": ["verb", "after-to"], "expectedFocus": ["duration"] },
+    { "id": "homograph-read-first", "text": "Read the book.", "group": "homograph", "tags": ["first-word", "verb-phrase"], "expectedFocus": ["duration"] },
+    { "id": "homograph-present", "text": "They present the present.", "group": "homograph", "tags": ["verb", "noun"], "expectedFocus": ["duration"] }
   ]
 }

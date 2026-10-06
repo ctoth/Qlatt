@@ -208,36 +208,77 @@ const formClassMask = (names: readonly string[]): number =>
   }, 0);
 
 // Each dictionary word's form class word, from the fourth field of
-// dic/Dic_us.txt (one character per bit, bit 0 first). The row kept for a
-// homograph is the one the pronunciation dictionary keeps
-// (scripts/build-dectalk-dict.ts); DECtalk's choice by context
-// (LTS/ls_homo.c) is not reproduced.
+// dic/Dic_us.txt (one character per bit, bit 0 first). A word with two rows
+// (a homograph) has its primary row here and its secondary row in
+// `homographs`; the dictionary compiler marks the primary with
+// FC_CHARACTER | FC_HOMOGRAPH and the secondary with FC_HOMOGRAPH
+// (dic/dic_comm.c:485-501).
 const dictionaryText = fs.readFileSync(
   path.join(dectalkRoot, "dapi", "src", "dic", "Dic_us.txt"),
   "utf8",
 );
 const NAME_BIT = formClassNames.indexOf("name");
-const wordFormClasses: Record<string, number> = {};
-// For each dictionary word with a `~` in its phoneme field, the indices (in
-// the word's phones as public/dectalk-dictionary.json has them) of the phones
-// whose allophone rules DECtalk blocks.
-const wordRuleBlocks: Record<string, number[]> = {};
-for (const [word, row] of [...selectDictionaryRows(dictionaryText).best].sort(([a], [b]) =>
-  a < b ? -1 : a > b ? 1 : 0,
-)) {
-  const { rulesBlocked } = convertPhonemeFieldDetailed(row.phonemes);
-  if (rulesBlocked.length > 0) wordRuleBlocks[word] = rulesBlocked;
-  let mask = 0;
-  [...row.formClass].forEach((char, bit) => {
+const CHARACTER_BIT = formClassNames.indexOf("character");
+const HOMOGRAPH_BIT = formClassNames.indexOf("homograph");
+const rowFormClass = (formClass: string, pos: string): number => {
+  const bits = new Set<number>();
+  [...formClass].forEach((char, bit) => {
     // The text marks 3,997 words as names (bit 28); the dictionary
     // say.exe loads reports none of them with it (98 of 98 sampled words in
     // test/fixtures/dectalk-oracle/dectalk-us-form-classes-v1.json). Where
     // the bit is dropped was not found in the source; the running program is
     // followed.
-    if (char === "1" && bit !== NAME_BIT) mask += 2 ** bit;
+    if (char === "1" && bit !== NAME_BIT) bits.add(bit);
   });
+  if (pos === "P") bits.add(CHARACTER_BIT);
+  if (pos === "P" || pos === "S") bits.add(HOMOGRAPH_BIT);
+  return [...bits].reduce((mask, bit) => mask + 2 ** bit, 0);
+};
+const byWord = <T>(entries: Map<string, T>): [string, T][] =>
+  [...entries].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+const dictionaryRows = selectDictionaryRows(dictionaryText);
+const wordFormClasses: Record<string, number> = {};
+// For each dictionary word with a `~` in its phoneme field, the indices (in
+// the word's phones as public/dectalk-dictionary.json has them) of the phones
+// whose allophone rules DECtalk blocks.
+const wordRuleBlocks: Record<string, number[]> = {};
+for (const [word, row] of byWord(dictionaryRows.best)) {
+  const { rulesBlocked } = convertPhonemeFieldDetailed(row.phonemes);
+  if (rulesBlocked.length > 0) wordRuleBlocks[word] = rulesBlocked;
+  const mask = rowFormClass(row.formClass, row.pos);
   if (mask !== 0) wordFormClasses[word] = mask;
 }
+// The secondary entry of each homograph: its phones as the pronunciation
+// dictionary spells them, its class word and its `~` marks.
+const homographs: Record<
+  string,
+  { phonemes: string[]; formClass: number; rulesBlockedAt?: number[] }
+> = {};
+for (const [word, row] of byWord(dictionaryRows.secondary)) {
+  const { phones, rulesBlocked } = convertPhonemeFieldDetailed(row.phonemes);
+  homographs[word] = {
+    phonemes: phones,
+    formClass: rowFormClass(row.formClass, row.pos),
+    ...(rulesBlocked.length > 0 ? { rulesBlockedAt: rulesBlocked } : {}),
+  };
+}
+// The rules that choose between the two (LTS/ls_homo.h homo_table): four
+// class words each, {suffix, context, select, eliminate}.
+const homographSource = fs.readFileSync(path.join(ltsDir, "ls_homo.h"), "utf8");
+const homographTableText = /homo_table\[MAX_HOMO_RULE\]\s*=\s*\{([^}]*)\}/.exec(homographSource);
+if (!homographTableText) throw new Error("E_HOMOGRAPH_TABLE: homo_table not found in ls_homo.h");
+const homographWords = [...homographTableText[1].matchAll(/0x([0-9a-fA-F]{8})/g)].map((match) =>
+  Number.parseInt(match[1], 16),
+);
+const homographRuleCount = Number(/#define MAX_HOMO_RULE (\d+)/.exec(homographSource)?.[1]);
+if (homographWords.length !== homographRuleCount * 4) {
+  throw new Error(
+    `E_HOMOGRAPH_TABLE: ${homographWords.length.toString()} words for ${homographRuleCount.toString()} rules`,
+  );
+}
+const homographRules = Array.from({ length: homographRuleCount }, (_unused, index) =>
+  homographWords.slice(index * 4, index * 4 + 4),
+);
 // The words of the mini dictionary sdic[] (LTS/l_us_con.c:1187-1195) take a
 // form class written into the lookup itself, by first letter
 // (LTS/ls_task.c:1062-1078), whatever the main dictionary says.
@@ -334,6 +375,8 @@ fs.writeFileSync(
     formClassNames,
     wordFormClasses,
     wordRuleBlocks,
+    homographs,
+    homographRules,
     specialWordFormClasses,
     specialWordPhraseStarts,
     numberPhones,

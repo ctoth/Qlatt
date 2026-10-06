@@ -18,7 +18,7 @@ import { runGraphRuleEngine } from "./declarative-frontend/hrg/rule-engine";
 import { loadFrontendResources, parseInventorySymbol } from "./declarative-frontend/inventory";
 import { type CompiledRulepack, QLATT_ENGLISH_RULEPACK } from "./declarative-frontend/rule-pack";
 import type { SourceTranscriptionInput } from "./declarative-frontend/source-recognition";
-import { pronounce } from "./g2p";
+import { pronounce, pronounceClause } from "./g2p";
 import type { DictLookup, PronunciationResult } from "./g2p/types";
 import type {
   TranscriptionConfig,
@@ -359,6 +359,34 @@ export function transcribeText(
     nonPunctuation.length > 0 &&
     nonPunctuation.every((w) => !w.pronunciationKey && getEffectiveSymbol(w.word) !== null);
 
+  // The words between two punctuation marks are pronounced in each other's
+  // context (a frontend's lexicon may choose between a word's entries by its
+  // neighbours). A word spoken by its letter name or as a symbol takes no
+  // part.
+  const inClause = new Map<number, PronunciationResult>();
+  if (!useSymbolMode) {
+    const pronounceRun = (run: readonly number[]): void => {
+      const results = pronounceClause(
+        run.map((position) => orthographyWords[position].word),
+        effectiveDictLookup,
+        { ltsPath, morphologyPath, stressPolicyPath },
+      );
+      run.forEach((position, order) => {
+        inClause.set(position, results[order]);
+      });
+    };
+    let run: number[] = [];
+    orthographyWords.forEach((token, position) => {
+      if (token.isPunctuation) {
+        if (run.length > 0) pronounceRun(run);
+        run = [];
+      } else if (token.word && typeof token.pronunciationKey !== "string") {
+        run.push(position);
+      }
+    });
+    if (run.length > 0) pronounceRun(run);
+  }
+
   for (let index = 0; index < orthographyWords.length; ) {
     const inputToken = orthographyWords[index];
     const word = inputToken?.word ?? "";
@@ -426,11 +454,12 @@ export function transcribeText(
               word: sourceWord.toLowerCase(),
             }
           : symbolPronunciation == null
-            ? pronounce(sourceWord, effectiveDictLookup, {
+            ? ((consumedWords === 1 ? inClause.get(index) : undefined) ??
+              pronounce(sourceWord, effectiveDictLookup, {
                 ltsPath,
                 morphologyPath,
                 stressPolicyPath,
-              })
+              }))
             : {
                 phonemes: symbolPronunciation,
                 source: "unknown",

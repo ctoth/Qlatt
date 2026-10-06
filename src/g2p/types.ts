@@ -26,6 +26,8 @@ export interface PronunciationResult {
    * know. Absent when the frontend has no form class data.
    */
   formClasses?: string[];
+  /** The same classes as one word of bits, for the next word's context. */
+  formClassWord?: number;
   /**
    * The form classes as the frontend's phonetic rules receive them, where
    * that differs from what the lexicon holds (table-lts-pronounce.ts

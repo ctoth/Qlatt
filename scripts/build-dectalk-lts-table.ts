@@ -290,6 +290,17 @@ const specialWordFormClasses: Record<string, number> = {
 // Each of those entries begins with PPSTART: the word starts a prepositional
 // phrase (LTS/l_us_con.c:1190-1193).
 const specialWordPhraseStarts: Record<string, "pp"> = { to: "pp", and: "pp", for: "pp" };
+// The one-letter word "a" (LTS/ls_task.c:2647-2673): "The default one, from
+// the spelling entry in the dictionary, is ['e]. The exception (actually the
+// most common case) is [x]. Use [x] if no stripping, and the 'a' is not
+// sitting against a punctuation mark ('a box.' vs 'box a.')." The [x] form is
+// sent with the class FC_ART alone; the other keeps the dictionary's class.
+const wordsByPunctuation = {
+  a: {
+    apart: { phonemes: ["AX0"], formClass: formClassMask(["art"]) },
+    against: { phonemes: ["EY1"] },
+  },
+};
 
 // The phone lists DECtalk speaks numbers from (LTS/l_us_con.c:640-900,
 // 1000-1035), used by LTS/l_us_pr1.c without a dictionary lookup. A list
@@ -379,6 +390,7 @@ fs.writeFileSync(
     homographRules,
     specialWordFormClasses,
     specialWordPhraseStarts,
+    wordsByPunctuation,
     numberPhones,
     words,
     bytes,

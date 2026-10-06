@@ -42,10 +42,16 @@ export interface ClauseContext {
    * reading; null during that reading.
    */
   laterVerb: boolean | null;
+  /** Whether the word is the last one before the punctuation mark. */
+  atPunctuation: boolean;
 }
 
 /** The context of a word spoken alone. */
-export const loneWordContext = (): ClauseContext => ({ before: [], laterVerb: false });
+export const loneWordContext = (): ClauseContext => ({
+  before: [],
+  laterVerb: false,
+  atPunctuation: true,
+});
 
 const shares = (a: number, b: number): boolean => (BigInt(a) & BigInt(b)) !== 0n;
 const contains = (a: number, b: number): boolean => (BigInt(a) & BigInt(b)) === BigInt(b);

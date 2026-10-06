@@ -14,6 +14,10 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // docs/klatt-1975-duration-review.md for the release/aspiration changes.
 // #61 regenerates only qlatt-english snapshots for per-phone duration floors;
 // the exact base 1af37573 passes the old snapshots. See docs/per-phone-duration-floors.md.
+// The single output clock regenerates only the four dectalk-english snapshots:
+// every frame keeps its fields, and only frame times and order change (segment
+// starts move onto the 71/11025 s packet clock with the F0 ticks). Checked by
+// hashing each track with times removed and frames sorted, before and after.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

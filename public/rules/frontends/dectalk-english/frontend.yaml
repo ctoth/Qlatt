@@ -124,8 +124,10 @@ f0_model:
   # Citation: DECtalk 4.63 ph_claus.c ("For each 6.4 msec frame of current clause")
   frame_period_sec: 0.0064
   # The VTM emits each completed control cell as one 71-sample packet at
-  # 11,025 Hz. Keep this packet clock separate from the nominal controller
-  # clock so long clauses do not advance to the next cell before DECtalk does.
+  # 11,025 Hz (71 / 11025 s). Rules count time in nominal controller frames;
+  # lowering stretches every output time, segment starts and F0 ticks alike,
+  # by output_frame_period_sec / frame_period_sec so the whole clause sits on
+  # the packet clock.
   # Citation: DECtalk 4.63 VTM/vtmiont.c delaypars packet loop.
   output_frame_period_sec: 0.006439909297052154
   citations:

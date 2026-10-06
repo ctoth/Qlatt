@@ -10,6 +10,7 @@
 
 import { applyLtsRules, type LtsTable } from "./table-lts";
 import { adjustLts, type LtsAdjustTables } from "./table-lts-adjust";
+import type { NumberPhones } from "./table-number";
 
 export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
   format: "lts-table";
@@ -28,6 +29,8 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
   specialWordFormClasses?: Readonly<Record<string, number>>;
   /** The phrase each of those words starts. */
   specialWordPhraseStarts?: Readonly<Record<string, "pp">>;
+  /** The phone lists numbers are spoken from (table-number.ts). */
+  numberPhones?: NumberPhones;
 }
 
 /** The names of the bits set in a form class word, lowest bit first. */

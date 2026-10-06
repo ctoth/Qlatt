@@ -808,6 +808,13 @@ describe("dectalk-english clause breaks", () => {
     expect(commas("The big dog barked and ran.")).toBe(0);
   });
 
+  // DECtalk's phoneme log: no comma in "Do you know where the station is?"
+  // (three words after "where"), one in "... is today?" (four).
+  it("needs more than three words after the marked word", () => {
+    expect(commas("Do you know where the station is?")).toBe(0);
+    expect(commas("Do you know where the station is today?")).toBe(1);
+  });
+
   it("breaks before a preposition, and not again within three words", () => {
     const words = active("The big dog barked at the small cat in the box.");
     const comma = words.findIndex((item) => item.get("punctuationSymbol") === ",");

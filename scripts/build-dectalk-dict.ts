@@ -416,9 +416,13 @@ function parseLine(line: string): Row | null {
  *
  * The fifth field is not a preference between rows: the dictionary compiler
  * leaves out rows above a size limit given on its command line
- * (dic/dic_comm.c:646-664). Between two `N` rows that differ only in case
- * ("Baton", "baton") the higher number is kept, the first on a tie; DECtalk's
- * own choice there has not been traced.
+ * (dic/dic_comm.c:646-664).
+ *
+ * Five words have two `N` rows that differ in case ("New" n`uw and "new"
+ * n'uw). The keys here are lower case, so the lower-case row is kept: it is
+ * the one DECtalk speaks for the word written in lower case ("a new car" has
+ * primary stress on "new", "baton" is b@t'an). The capitalised row, which
+ * DECtalk uses for the capitalised word, is not kept.
  */
 export function selectDictionaryRows(text: string): {
   best: Map<string, Row>;
@@ -446,7 +450,7 @@ export function selectDictionaryRows(text: string): {
     } else if (row.pos === "P" && existing.pos === "S") {
       secondary.set(key, existing);
       best.set(key, row);
-    } else if (row.priority > existing.priority) {
+    } else if (row.word === key && existing.word !== key) {
       best.set(key, row);
     }
   }

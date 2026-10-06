@@ -109,6 +109,26 @@
     { "id": "mark-without", "text": "They went without it.", "group": "dictionary-marks", "tags": ["compound"], "expectedFocus": ["duration"] },
     { "id": "mark-something", "text": "Something stopped outside.", "group": "dictionary-marks", "tags": ["compound", "homograph"], "expectedFocus": ["duration"] },
     { "id": "mark-stopover", "text": "It was a stopover.", "group": "dictionary-marks", "tags": ["compound"], "expectedFocus": ["duration"] },
-    { "id": "mark-otherwise", "text": "Otherwise we stay.", "group": "dictionary-marks", "tags": ["compound"], "expectedFocus": ["duration"] }
+    { "id": "mark-otherwise", "text": "Otherwise we stay.", "group": "dictionary-marks", "tags": ["compound"], "expectedFocus": ["duration"] },
+    { "id": "fresh-01", "text": "My mother bought a new car yesterday.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-02", "text": "The children are playing in the garden.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-03", "text": "Please close the window before you leave.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-04", "text": "I would like a cup of coffee.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-05", "text": "She has been working here for three years.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-06", "text": "The train arrives at seven in the morning.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-07", "text": "Do you know where the station is?", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-08", "text": "We could not find the keys anywhere.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-09", "text": "That was the best movie I have ever seen.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-10", "text": "He opened the door and walked into the room.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-11", "text": "It is raining, so take your umbrella.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-12", "text": "Their house is bigger than ours.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-13", "text": "Can you help me with this problem?", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-14", "text": "The weather was beautiful last weekend.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-15", "text": "I think they will arrive tomorrow.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-16", "text": "Nobody answered the telephone.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-17", "text": "What time does the meeting start?", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-18", "text": "She gave him a book about birds.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-19", "text": "Winter is colder than summer.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] },
+    { "id": "fresh-20", "text": "Thank you very much for your help.", "group": "fresh", "tags": ["unseen"], "expectedFocus": ["duration"] }
   ]
 }

@@ -64,6 +64,37 @@ functions:
     description: Product of two numbers where one is a fraction of 16384, rounded down.
     citations:
       - "DECtalk 4.63 ph_defs.h:794 mlsh1(x,y) = (S16)(((S32)x * (S32)y) >> 14)"
+  # A Segment's Word. What the lexicon says of a word (its form classes, the
+  # phrase it starts) is kept there, because allophone rules replace Segments.
+  dectalk_has_class:
+    params: [item, name]
+    body: >-
+      item != null && path(item, 'R:SylStructure.parent.parent') != null
+      && name in get(path(item, 'R:SylStructure.parent.parent'), 'form_classes', [])
+    description: Whether a Segment's word has a form class.
+    citations:
+      - "Taylor, Black & Caley 2001 (heterogeneous relation graphs: a Segment's Word through SylStructure)"
+      - "DECtalk 4.63 INCLUDE/fc_def.tab (form class bits)"
+      - "DECtalk 4.63 PH/ph_task.c:590-600 (wordclass of each symbol is its word's class)"
+  dectalk_phrase_start:
+    params: [item]
+    body: >-
+      item == null || path(item, 'R:SylStructure.parent.parent') == null ? ''
+      : get(path(item, 'R:SylStructure.parent.parent'), 'phrase_start', '')
+    description: The phrase a Segment's word starts ('vp'), or ''.
+    citations:
+      - "DECtalk 4.63 LTS/ls_dict.c:774-778 (PPSTART and VPSTART ahead of a dictionary entry)"
+  dectalk_word_start:
+    params: [item]
+    body: >-
+      path(item, 'R:SylStructure.parent.parent') != null
+      && (behind(item, 1) == null
+          || path(behind(item, 1), 'R:SylStructure.parent.parent') == null
+          || path(behind(item, 1), 'R:SylStructure.parent.parent').id
+             != path(item, 'R:SylStructure.parent.parent').id)
+    description: Whether a Segment is the first of its word.
+    citations:
+      - "DECtalk 4.63 PH/ph_task.c:598-600 (a word's class arrives ahead of its first phone)"
 predicates:
   # A Segment that stands for one DECtalk allophone: every phone, a stop by its
   # closure, and the silence at a clause boundary.
@@ -76,27 +107,21 @@ predicates:
     current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null
   # ph_task.c:611-614: the first Segment of a word DECtalk counts as a verb.
   is_verb_count_word_start: >-
-    has(current.form_classes) && has(current.sourceTokenId)
-    && (behind(current, 1) == null
-        || get(behind(current, 1), "sourceTokenId", "") != current.sourceTokenId)
-    && ("verb" in current.form_classes || "ed" in current.form_classes
-        || "be" in current.form_classes || "ing" in current.form_classes)
+    dectalk_word_start(current)
+    && (dectalk_has_class(current, "verb") || dectalk_has_class(current, "ed")
+        || dectalk_has_class(current, "be") || dectalk_has_class(current, "ing"))
   # ph_task.c:624: a counted verb that is also a function word.
   is_function_verb_word_start: >-
-    has(current.form_classes) && has(current.sourceTokenId)
-    && (behind(current, 1) == null
-        || get(behind(current, 1), "sourceTokenId", "") != current.sourceTokenId)
-    && ("verb" in current.form_classes || "ed" in current.form_classes
-        || "be" in current.form_classes || "ing" in current.form_classes)
-    && "func" in current.form_classes
+    dectalk_word_start(current)
+    && (dectalk_has_class(current, "verb") || dectalk_has_class(current, "ed")
+        || dectalk_has_class(current, "be") || dectalk_has_class(current, "ing"))
+    && dectalk_has_class(current, "func")
   # ph_sort.c:1272-1284: a word reaches the verb branch only if it is neither a
   # noun nor an adjective.
   is_verb_branch_word_start: >-
-    has(current.form_classes) && has(current.sourceTokenId)
-    && (behind(current, 1) == null
-        || get(behind(current, 1), "sourceTokenId", "") != current.sourceTokenId)
-    && ("verb" in current.form_classes || "ed" in current.form_classes)
-    && !("noun" in current.form_classes) && !("adj" in current.form_classes)
+    dectalk_word_start(current)
+    && (dectalk_has_class(current, "verb") || dectalk_has_class(current, "ed"))
+    && !dectalk_has_class(current, "noun") && !dectalk_has_class(current, "adj")
   # FSYLL: a vowel or a syllabic consonant.
   is_dectalk_syllabic: >-
     current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"]
@@ -430,9 +455,6 @@ relations:
       voiceless: []
       weak: []
       word: []
-      sourceTokenId: []
-      # The word's form classes from DECtalk's dictionary and suffix rules.
-      form_classes: []
       # On a clause's final silence: how many of its words DECtalk counts as
       # verbs, how many of those are function words, and how many reach the
       # verb branch of its phone sort (ph_task.c:611-626, ph_sort.c:1272-1284).
@@ -442,8 +464,6 @@ relations:
       # A vowel the helper-verb promotion gave secondary stress.
       helper_verb_promoted: { kind: boolean }
       word_initial_consonant: { kind: boolean }
-      # The phrase a word starts, on each of its Segments (from the lexicon).
-      phrase_start: []
       rime_boundary: { kind: string, values: [word, vp, comma, period, question, exclaim] }
       # FHAT_BEGINS and FHAT_ENDS of a syllabic, and the state DECtalk's walk
       # leaves after it (ph_aloph.c:1396-1525).
@@ -504,6 +524,10 @@ relations:
       # set once per allophone by dectalk_allophone_duration; nothing rounds or
       # floors it afterwards. ph_defs.h NF640MS = 100 frames is the longest.
       duration: { unit: ms, max: 640 }
+  # Word over Syllable over Segment. A Segment's Word carries what the lexicon
+  # says of the word: form_classes and phrase_start.
+  SylStructure:
+    type: span
   F0Point:
     type: point
     value_type: number

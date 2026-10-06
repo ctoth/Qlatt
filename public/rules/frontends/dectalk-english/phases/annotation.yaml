@@ -177,7 +177,7 @@ rules:
           # of the word boundary (LTS/ls_dict.c:777-778).
           - when: >-
               boundary_item != null && boundary_item.phoneme != 'SIL'
-              && get(boundary_item, 'phrase_start', '') == 'vp'
+              && dectalk_phrase_start(boundary_item) == 'vp'
             value: "'vp'"
           - when: "boundary_item != null && boundary_item.phoneme != 'SIL'"
             value: "'word'"

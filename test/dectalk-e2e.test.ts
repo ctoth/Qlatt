@@ -721,6 +721,13 @@ describe("dectalk-english verb-phrase boundaries", () => {
     expect(boundaries("He goes home.")[0]).toBe("IY:vp");
   });
 
+  it("still knows the verb when an allophone rule has replaced its first phone", () => {
+    // "They receive it.": ey 160. The R of "receive" is rewritten after the
+    // lexicon is read; the word's phrase start is kept on its Word.
+    expect(boundaries("They receive it.")[0]).toBe("EY:vp");
+    expect(boundaries("They remain.")[0]).toBe("EY:vp");
+  });
+
   it("leaves a word boundary before a word that is also a noun", () => {
     // "We tested it.": iy 96.
     expect(boundaries("We tested it.")[0]).toBe("IY:word");

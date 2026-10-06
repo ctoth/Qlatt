@@ -69,3 +69,51 @@ export function recordedAllophoneClauses(entry: {
     ),
   );
 }
+
+/** The vowels IY..UR (codes 1-23); only these carry a stress level in a log. */
+export const US_VOWEL_NAMES: ReadonlySet<string> = new Set(US_ALLOPHONE_NAMES.slice(1, 24));
+
+/** One phone of DECtalk's phoneme log; `stress` is null for a non-vowel. */
+export type LoggedPhone = { name: string; stress: number | null };
+
+// The log's spelling of each allophone: lower case, with Y written `yx`.
+const LOG_SYMBOLS = new Map(
+  US_ALLOPHONE_NAMES.filter((name) => name !== "SIL").map((name) => [
+    name === "Y" ? "yx" : name.toLowerCase(),
+    name,
+  ]),
+);
+// Morpheme, compound and syllable marks, and the phrase symbols DECtalk
+// prints before some words (`)` starts a verb phrase, `(` a prepositional one).
+const LOG_SKIPPED = new Set('*#-~=()>/\\+^&"_');
+
+/**
+ * Parse DECtalk's phoneme log (`say.exe -lp`) for one word: a run of two- or
+ * one-letter phoneme symbols with `'` (primary) or a backtick (secondary)
+ * before a stressed vowel.
+ */
+export function parsePhonemeLog(log: string): LoggedPhone[] {
+  const phones: LoggedPhone[] = [];
+  let pending = 0;
+  for (let i = 0; i < log.length; ) {
+    const char = log[i];
+    if (/\s/.test(char) || LOG_SKIPPED.has(char)) {
+      i += 1;
+    } else if (char === "'") {
+      pending = 1;
+      i += 1;
+    } else if (char === "`") {
+      pending = 2;
+      i += 1;
+    } else {
+      const two = LOG_SYMBOLS.get(log.slice(i, i + 2));
+      const name = two ?? LOG_SYMBOLS.get(char);
+      if (!name) throw new Error(`E_LOG_SYMBOL: '${log.slice(i, i + 2)}' in '${log}'`);
+      const vowel = US_VOWEL_NAMES.has(name);
+      phones.push({ name, stress: vowel ? pending : null });
+      if (vowel) pending = 0;
+      i += two ? 2 : 1;
+    }
+  }
+  return phones;
+}

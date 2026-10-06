@@ -760,7 +760,9 @@ rules:
           copy_fields:
             - stress
             - word
-          phoneme: fused_name
+          # The phone is named without a stress digit, like every other vowel;
+          # the digit only selects the inventory target.
+          phoneme: fused_base
           type: fv.type
           target: fv
           duration: fv.duration

@@ -47,6 +47,8 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // The dictionary's RR and IX vowels are no longer folded into ER and IH, which
 // regenerates dectalk-english "The cat sat." ("Saturday") and "Did Bob buy a
 // blue balloon?".
+// "balloon" is not in DECtalk's dictionary; it is now pronounced by DECtalk's
+// compiled letter-to-sound tables, which regenerates that snapshot once more.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

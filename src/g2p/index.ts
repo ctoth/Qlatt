@@ -17,10 +17,31 @@
  * Citation: Hayes (1982), Extrametricality and English Stress, pp. 237–274.
  */
 
+import { loadYamlDocumentSync } from "../yaml-loader";
 import { applyLtsRules } from "./lts-engine";
 import { decomposeClitic, decomposeWord, getStressHintForWord } from "./morphology";
 import { stressPronunciation } from "./stress";
+import {
+  isLtsTableDocument,
+  type LtsTableDocument,
+  pronounceWithLtsTable,
+} from "./table-lts-pronounce";
 import type { DictLookup, PronunciationResult } from "./types";
+
+// A letter-to-sound file is either a rule list (lts-engine.ts) or a compiled
+// table with its own stress assignment (table-lts-pronounce.ts). The file's
+// `format` says which; null records a rule list.
+const ltsTables = new Map<string, LtsTableDocument | null>();
+
+function ltsTableAt(path: string): LtsTableDocument | null {
+  const cached = ltsTables.get(path);
+  if (cached !== undefined) return cached;
+  // A table is a JSON document; a rule list is YAML and its engine loads it.
+  const document = path.endsWith(".json") ? loadYamlDocumentSync<unknown>(path) : null;
+  const table = isLtsTableDocument(document) ? document : null;
+  ltsTables.set(path, table);
+  return table;
+}
 
 /**
  * Pronounce a single word using the multi-layer G2P pipeline.
@@ -59,6 +80,15 @@ export function pronounce(
       throw new Error(
         `E_LTS_PATH_MISSING: word '${word}' not in dictionary and no ltsPath configured`,
       );
+    }
+    const table = ltsTableAt(options.ltsPath);
+    if (table) {
+      // The table's passes place the stress themselves; no stress policy runs.
+      return {
+        phonemes: pronounceWithLtsTable(lowerWord, table),
+        source: "lts-rules",
+        word: lowerWord,
+      };
     }
     generated = {
       phonemes: applyLtsRules(lowerWord, options.ltsPath),

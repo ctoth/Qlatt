@@ -143,7 +143,9 @@ phoneme_targets:
     mid: true
   # DECtalk 4.63 US_IX code 18 from p_us_rom.h
   # us_maltar/us_inhdr/us_mindur; used directly by the final dummy-vowel rule.
-  IX0:
+  # DECtalk has one US_IX target whatever the stress; IX1 names it for a
+  # letter-to-sound IX that carries stress (the "mc" of "McGuigan").
+  IX0: &dectalk_ix
     TL: 3
     F1: 460
     F2: 1680
@@ -158,6 +160,7 @@ phoneme_targets:
     voiced: true
     mid: true
     front: true
+  IX1: *dectalk_ix
   EY1:
     TL: 3
     F1: 520

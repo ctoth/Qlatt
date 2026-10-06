@@ -60,6 +60,17 @@
     { "id": "pp-it-is-for", "text": "It is for.", "group": "prepositional-phrase", "tags": ["pp", "dropped"], "expectedFocus": ["duration"] },
     { "id": "vp-they-receive-it", "text": "They receive it.", "group": "verb-phrase", "tags": ["vp", "rewritten-phone"], "expectedFocus": ["duration"] },
     { "id": "r-around", "text": "Around.", "group": "r", "tags": ["fusion-gate"], "expectedFocus": ["duration"] },
-    { "id": "r-every-hundred", "text": "Every hundred.", "group": "r", "tags": ["prevocalic-r"], "expectedFocus": ["duration"] }
+    { "id": "r-every-hundred", "text": "Every hundred.", "group": "r", "tags": ["prevocalic-r"], "expectedFocus": ["duration"] },
+    { "id": "nt-president-arrived", "text": "The president arrived.", "group": "nt", "tags": ["nt-d", "flap-count"], "expectedFocus": ["duration"] },
+    { "id": "nt-giant-apple", "text": "The giant apple.", "group": "nt", "tags": ["nt-d"], "expectedFocus": ["duration"] },
+    { "id": "nt-front-of-it", "text": "The front of it.", "group": "nt", "tags": ["nt-d"], "expectedFocus": ["duration"] },
+    { "id": "nt-twenty", "text": "Twenty.", "group": "nt", "tags": ["nt-kept"], "expectedFocus": ["duration"] },
+    { "id": "nt-seventy-winters", "text": "Seventy winters.", "group": "nt", "tags": ["nt-kept"], "expectedFocus": ["duration"] },
+    { "id": "flap-it-is-better", "text": "It is better.", "group": "flap-count", "tags": ["flap"], "expectedFocus": ["duration"] },
+    { "id": "flap-they-went-better", "text": "They went better.", "group": "flap-count", "tags": ["no-flap", "vp"], "expectedFocus": ["duration"] },
+    { "id": "flap-it-is-much-better", "text": "It is, much better.", "group": "flap-count", "tags": ["no-flap", "comma"], "expectedFocus": ["duration"] },
+    { "id": "flap-yes-it-is-better", "text": "Yes, it is better.", "group": "flap-count", "tags": ["flap", "comma"], "expectedFocus": ["duration"] },
+    { "id": "flap-it-went-to-better", "text": "It went to better.", "group": "flap-count", "tags": ["flap", "pp"], "expectedFocus": ["duration"] },
+    { "id": "the-answer-in-the-oven", "text": "Is the answer in the oven?", "group": "the", "tags": ["the-iy"], "expectedFocus": ["duration"] }
   ]
 }

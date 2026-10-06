@@ -34,6 +34,25 @@ functions:
     description: Whether DECtalk's feature word for the Segment's allophone has the named bit.
     citations:
       - "DECtalk 4.63 p_us_rom.h us_featb; ph_romi.c:214-225 phone_feature"
+  # A phone as the duration routine sees it when looking AHEAD from an earlier
+  # phone. The routine turns the /t/ of [nt] into [d] while it times the /n/
+  # (p_us_tim.c:627-638), so the vowel and the /n/ before it still saw a /t/.
+  dectalk_ahead_name:
+    params: [item]
+    body: >-
+      item == null ? 'SIL'
+      : (get(item, 'voiced_from_t', false) ? 'T'
+      : regexReplace(get(params.policy.timing.port_names, item.phoneme, item.phoneme), '[0-9]$', '', ''))
+    description: DECtalk's allophone name for a later Segment, as it was when an earlier one was timed.
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:627-638 (the /t/ of [nt] becomes [d] during the /n/'s turn)"
+  dectalk_ahead_has:
+    params: [item, feature]
+    body: "feature in get(params.policy.timing.features, dectalk_ahead_name(item), [])"
+    description: Whether a later Segment's allophone, as it was when an earlier one was timed, has the named feature bit.
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:627-638"
+      - "DECtalk 4.63 p_us_rom.h us_featb"
   dectalk_boundary:
     params: [item]
     body: "item == null ? 0.0 : get(params.policy.timing.boundary, get(item, 'rime_boundary', ''), 0.0)"
@@ -132,6 +151,10 @@ predicates:
     dectalk_word_start(current)
     && (dectalk_has_class(current, "verb") || dectalk_has_class(current, "ed"))
     && !dectalk_has_class(current, "noun") && !dectalk_has_class(current, "adj")
+  # The first Segment of a word DECtalk's number_words counts: one entered
+  # with a word boundary, which a verb-phrase start replaces (ph_sort.c:1464).
+  is_counted_word_start: >-
+    dectalk_word_start(current) && dectalk_phrase_start(current) != "vp"
   # FSYLL: a vowel or a syllabic consonant.
   is_dectalk_syllabic: >-
     current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"]
@@ -488,6 +511,8 @@ relations:
       # An obstruent whose identical neighbour before it was deleted
       # (ph_aloph.c:558-562); DECtalk's "two phones back" still counts that one.
       after_deleted_geminate: { kind: boolean }
+      # A [d] that the duration routine made from the /t/ of [nt] (p_us_tim.c:627-638).
+      voiced_from_t: { kind: boolean }
       word_initial_consonant: { kind: boolean }
       rime_boundary: { kind: string, values: [word, vp, comma, period, question, exclaim] }
       # FHAT_BEGINS and FHAT_ENDS of a syllabic, and the state DECtalk's walk
@@ -677,6 +702,8 @@ phases:
       - dectalk_postvocalic_liquid
       - dectalk_syllabic_n_after_tx
       - dectalk_dental_dh
+      # From the duration routine, so after every allophone rule.
+      - dectalk_nt_voicing
   - name: structural
     rules:
       - dectalk_apply_diphthong_trajectories

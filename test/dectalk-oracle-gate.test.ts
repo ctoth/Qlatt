@@ -63,7 +63,6 @@ const KNOWN_GAPS: Readonly<Record<string, string>> = {
   "numbers-room-101":
     "'hundred and': DECtalk has AX and a flapped D in 'hundred', and EH in 'and'; here IX, D, AE",
   // dectalk-us-clause-v1. Allophones:
-  "hat-president": "DECtalk has D for the final T of 'president' before a vowel; here T",
   "hat-two-phrases": "DECtalk breaks the clause before 'and' and says it EH N D; here one clause",
   // dectalk-us-clause-v1. Structure and duration, with DECtalk's allophones:
   "carry-be-late":

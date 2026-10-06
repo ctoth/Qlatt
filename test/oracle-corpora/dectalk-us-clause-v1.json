@@ -84,6 +84,16 @@
     { "id": "block-usually-really", "text": "It is usually really yellow.", "group": "rule-block", "tags": ["blocked-l"], "expectedFocus": ["duration"] },
     { "id": "block-we-arise", "text": "We arise early.", "group": "rule-block", "tags": ["blocked-r"], "expectedFocus": ["duration"] },
     { "id": "block-the-bladder", "text": "The bladder is full.", "group": "rule-block", "tags": ["blocked-d"], "expectedFocus": ["duration"] },
-    { "id": "block-competent-idol", "text": "A competent idol is here.", "group": "rule-block", "tags": ["blocked-t", "blocked-d"], "expectedFocus": ["duration"] }
+    { "id": "block-competent-idol", "text": "A competent idol is here.", "group": "rule-block", "tags": ["blocked-t", "blocked-d"], "expectedFocus": ["duration"] },
+    { "id": "break-none-third-word", "text": "The dog and the cat ran.", "group": "clause-break", "tags": ["conjunction", "no-break"], "expectedFocus": ["duration"] },
+    { "id": "break-none-near-end", "text": "The big dog barked and ran.", "group": "clause-break", "tags": ["conjunction", "no-break"], "expectedFocus": ["duration"] },
+    { "id": "break-at-only", "text": "The big dog barked at the small cat in the box.", "group": "clause-break", "tags": ["preposition", "second-too-near"], "expectedFocus": ["duration"] },
+    { "id": "break-none-that", "text": "He said that the small cat ran away today.", "group": "clause-break", "tags": ["that", "no-break"], "expectedFocus": ["duration"] },
+    { "id": "break-from", "text": "The small cat ran away from the big dog today.", "group": "clause-break", "tags": ["preposition"], "expectedFocus": ["duration"] },
+    { "id": "break-late-class", "text": "The big small cat and they remain here today.", "group": "clause-break", "tags": ["conjunction", "class-before-comma"], "expectedFocus": ["duration"] },
+    { "id": "break-after-comma", "text": "Yes, the big dog barked and the small cat ran away.", "group": "clause-break", "tags": ["conjunction", "written-comma"], "expectedFocus": ["duration"] },
+    { "id": "break-none-number", "text": "The 25 and the small cat ran away.", "group": "clause-break", "tags": ["conjunction", "digits", "no-break"], "expectedFocus": ["duration"] },
+    { "id": "cite-look-at-me", "text": "Look at me.", "group": "citation", "tags": ["at", "nine-entries"], "expectedFocus": ["duration"] },
+    { "id": "cite-look-at-them", "text": "Look at them.", "group": "citation", "tags": ["at", "ten-entries"], "expectedFocus": ["duration"] }
   ]
 }

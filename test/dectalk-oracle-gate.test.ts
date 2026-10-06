@@ -59,8 +59,6 @@ type AllophoneFixture = {
 const repoRoot = path.resolve(__dirname, "..");
 
 const KNOWN_GAPS: Readonly<Record<string, string>> = {
-  // dectalk-us-clause-v1. Allophones:
-  "hat-two-phrases": "DECtalk breaks the clause before 'and' and says it EH N D; here one clause",
   // dectalk-us-clause-v1. Structure and duration, with DECtalk's allophones:
   "carry-be-late":
     "after 'Be late,' DECtalk does not carry the helper-verb promotion; here it does (unexplained)",

@@ -297,6 +297,16 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
           text: { kind: "string" },
           tokenIndex: { kind: "number" },
           form_classes: { kind: "array", items: { kind: "string" } },
+          // The classes before the lexicon hands them to the phonetic rules.
+          text_form_classes: { kind: "array", items: { kind: "string" } },
+          // The written word's place among the words between two punctuation
+          // marks, from 1, and how many there are.
+          clause_word_index: { kind: "number" },
+          clause_word_count: { kind: "number" },
+          // Set by a frontend's rules: the word can carry a clause break, and
+          // a break stands before it.
+          break_marker: { kind: "boolean" },
+          clause_break_before: { kind: "boolean" },
           phrase_start: { kind: "string", values: ["vp", "pp"] },
           // What a frontend's rules make of a prepositional-phrase start in
           // its context (kept or dropped).
@@ -441,6 +451,19 @@ function createStructure(
       citations: ["Taylor, Black & Caley 2001", "DECtalk 4.63 ph_syl.c ph_syllab"],
       stage: "transcribe",
     });
+  // Each written word's place between two punctuation marks. A number spoken
+  // as several words is one written word, and the pause inside it ends nothing.
+  const clausePlace = new Map<string, { index: number; clause: { count: number } }>();
+  let clause = { count: 0 };
+  for (const token of transcribed) {
+    if (token.isPunctuation) {
+      if (!token.continuesWrittenWord) clause = { count: 0 };
+      continue;
+    }
+    if (clausePlace.has(token.sourceTokenId)) continue;
+    if (!token.continuesWrittenWord) clause.count += 1;
+    clausePlace.set(token.sourceTokenId, { index: clause.count, clause });
+  }
   const sharedTransaction = Object.hasOwn(spec, "text_recognition") ? null : beginStructure();
   let wordIndex = 0;
   for (const [tokenId, group] of byToken) {
@@ -455,8 +478,14 @@ function createStructure(
     transaction.set(word, "tokenIndex", wordIndex);
     // What the lexicon says of the word belongs to the Word: its Segments are
     // replaced by allophone rules, the Word is not.
-    const { formClasses, phraseStart } = group[0].token;
+    const { formClasses, textFormClasses, phraseStart } = group[0].token;
     if (formClasses) transaction.set(word, "form_classes", [...formClasses]);
+    if (textFormClasses) transaction.set(word, "text_form_classes", [...textFormClasses]);
+    const place = clausePlace.get(tokenId);
+    if (place) {
+      transaction.set(word, "clause_word_index", place.index);
+      transaction.set(word, "clause_word_count", place.clause.count);
+    }
     if (phraseStart) transaction.set(word, "phrase_start", phraseStart);
     transaction.append("Word", word);
     transaction.addRoot("SylStructure", word);

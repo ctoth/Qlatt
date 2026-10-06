@@ -1551,6 +1551,7 @@ function applySplice(
       if (
         field === "copy_from" ||
         field === "copy_fields" ||
+        field === "outside_structure" ||
         field === "target" ||
         field === "fields"
       )
@@ -1561,9 +1562,14 @@ function applySplice(
     transaction.insertAfter(match.relationName, previous, item);
     // A whole copy of another Item is that Item re-emitted, so it takes that
     // Item's place in the tree (its own syllable and word, or none for a
-    // punctuation silence). Anything else is a new piece of the source.
+    // punctuation silence). Anything else is a new piece of the source, unless
+    // the template says `outside_structure: true`: an Item that belongs to no
+    // word (a silence put between two words).
     const owner = copySource && targetExpression === null ? copySource : source;
-    const ownerNode = utterance.getRelation("SylStructure")?.node(owner);
+    const ownerNode =
+      template.outside_structure === true
+        ? undefined
+        : utterance.getRelation("SylStructure")?.node(owner);
     if (ownerNode?.parent) {
       const siblings = ownerNode.parent.daughters;
       const ownerFollowsInsertion =

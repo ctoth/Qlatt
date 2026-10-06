@@ -527,6 +527,7 @@ phases:
     rules:
       # ph_sort.c structure-word fields that the allophone rules below read.
       - dectalk_breath_group_primary_stress
+      - dectalk_exclamation_emphasis
       - dectalk_word_initial_consonant
       - dectalk_consonant_stress
       - dectalk_reduce_article_a

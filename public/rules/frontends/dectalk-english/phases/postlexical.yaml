@@ -98,6 +98,31 @@ rules:
       - "DECtalk 4.63 ph_sort.c:1181-1189 (every breath group must have at least one 1-stress)"
       - "DECtalk 4.63 ph_sort2.c:129-181 find_syll_to_stress (first syllabic of the last word)"
 
+  # "Exclamation point raises last stress of sentence to emphasis"
+  # (ph_sort.c:1205-1209): raise_last_stress walks back from the '!' and turns
+  # the first primary stress it meets into emphasis. It runs after the
+  # breath-group rule above, in the same pass.
+  dectalk_exclamation_emphasis:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.type == 'vowel' && get(current, 'stress', 0) == 1"
+    define:
+      next_primary_or_boundary: >-
+        look_ahead_where(current, 1000,
+          '(candidate.type == "vowel" && get(candidate, "stress", 0) == 1) || (candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null)')
+    constraint: >-
+      next_primary_or_boundary != null && next_primary_or_boundary.phoneme == 'SIL'
+      && next_primary_or_boundary.punctuationSymbol == '!'
+    apply:
+      - field: stress
+        op: set
+        value: 3
+        tag: emphasis
+    citations:
+      - "DECtalk 4.63 ph_sort.c:1205-1209 (exclamation point raises last stress of sentence to emphasis)"
+      - "DECtalk 4.63 ph_sort.c:1817-1829 raise_last_stress"
+
   dectalk_word_initial_consonant:
     kind: scalar
     select:

@@ -44,8 +44,10 @@ frame_programs:
 - A **unit** is the stretch of Items one set of features describes. The first
   Item starts a unit, and so does every Item `unit` accepts; any other Item
   extends the unit before it. Without `unit` every Item is its own unit.
-- An Item has `round(duration / frame_ms)` frames. A duration that is not a
-  whole number of frames is rounded and reported (`HRG_FRAME_DURATION_ROUNDED`).
+- The frame clock starts at the first Item. A unit owns the frames between its
+  two ends, each rounded to that clock; a unit that does not end on a frame is
+  reported (`HRG_FRAME_DURATION_ROUNDED`). The Items inside a unit need not
+  start on a frame: each gets the frames it overlaps.
 - `unit`, `frame_ms`, `lead_in_frames` and each feature's `value` are ordinary
   rule-engine expressions: `current`, `prev`, `next`, navigation, predicates
   and `functions:` macros all work. `frame_ms` and `lead_in_frames` are read
@@ -133,7 +135,7 @@ of the unit:
 
 ```yaml
 period_ms: 5
-lead: 2                 # frames in `columns` that belong before this Item
+origin_ms: -10          # where columns[0] starts, from this Item's start
 columns:
   LEVEL: [0, 0, 4, 6, 7]
 fired:                  # on the unit's first Item

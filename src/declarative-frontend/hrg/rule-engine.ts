@@ -2154,8 +2154,10 @@ function finalizePhase(
  * phase lists, and write each Item's frames to the program's feature.
  *
  * Units: the first Item starts one, and so does every Item the program's
- * `unit` condition accepts; any other Item extends the unit before it. An
- * Item has round(duration / frame_ms) frames. Unit features are read once per
+ * `unit` condition accepts; any other Item extends the unit before it. A
+ * unit owns the frames between its two ends, each rounded to the frame clock
+ * that starts at the first Item; an Item of the unit gets the frames it
+ * overlaps and need not start on one. Unit features are read once per
  * unit through that unit's transaction, so the decision that records a unit's
  * frames depends on the decisions behind every feature it read.
  *
@@ -2255,6 +2257,7 @@ function runFrameRules(
   for (const [name, declaration] of featureSpecs) {
     edgeFeatures[name] = isPlainObject(declaration) ? declaration.edge : null;
   }
+  let cursorMs = 0;
   const units = starts.map((start, unitIndex) => {
     const members = items.slice(start, starts[unitIndex + 1] ?? items.length);
     const transaction = begin(
@@ -2265,30 +2268,42 @@ function runFrameRules(
     for (const [name, declaration] of featureSpecs) {
       features[name] = evaluate(isPlainObject(declaration) ? declaration.value : null, context);
     }
-    const memberFrames = members.map((item) => {
+    // Frame k of the run covers [k, k + 1) frame periods from the first
+    // Item's start. A unit owns the frames between its rounded ends; an Item
+    // inside it need not start on a frame.
+    const firstFrame = Math.round(cursorMs / framePeriodMs);
+    const memberSpans = members.map((item) => {
       const duration = transaction.read(item, "duration");
       if (typeof duration !== "number" || !Number.isFinite(duration) || duration < 0) {
         throw new Error(
           `E_FRAME_DURATION: Item '${item.id}' has no finite non-negative duration for frame program '${programName}'`,
         );
       }
-      const exact = duration / framePeriodMs;
-      const frames = Math.round(exact);
-      if (Math.abs(exact - frames) > 1e-6) {
-        utterance.diagnostics.warn(
-          "Frame program rounded a duration that is not a whole number of frames",
-          { itemId: item.id, program: programName, durationMs: duration, framePeriodMs, frames },
-          "HRG_FRAME_DURATION_ROUNDED",
-        );
-      }
-      return frames;
+      const span = { startMs: cursorMs, endMs: cursorMs + duration };
+      cursorMs += duration;
+      return span;
     });
-    return { members, memberFrames, transaction, features };
+    const exactEnd = cursorMs / framePeriodMs;
+    const endFrame = Math.max(firstFrame, Math.round(exactEnd));
+    if (Math.abs(exactEnd - endFrame) > 1e-6) {
+      utterance.diagnostics.warn(
+        "Frame program rounded a unit that does not end on a frame",
+        {
+          itemId: members[members.length - 1]?.id,
+          program: programName,
+          endMs: cursorMs,
+          framePeriodMs,
+          endFrame,
+        },
+        "HRG_FRAME_DURATION_ROUNDED",
+      );
+    }
+    return { members, memberSpans, firstFrame, endFrame, transaction, features };
   });
 
   const machineUnits: FrameUnit[] = units.map((unit) => ({
     features: unit.features,
-    frames: unit.memberFrames.reduce((sum, frames) => sum + frames, 0),
+    frames: unit.endFrame - unit.firstFrame,
   }));
   if (leadFrames > 0) machineUnits.unshift({ features: edgeFeatures, frames: leadFrames });
   const results = runFrameProgram({
@@ -2317,15 +2332,20 @@ function runFrameRules(
     const result = results[unitIndex] as FrameUnitResult;
     const fired = unitIndex === 0 && lead ? [...lead.fired, ...result.fired] : result.fired;
     unit.transaction.cite(fired.flatMap((firing) => citationsByRule.get(firing.rule) ?? []));
-    let offset = 0;
     unit.members.forEach((item, memberIndex) => {
-      const frames = unit.memberFrames[memberIndex] as number;
+      const span = unit.memberSpans[memberIndex] as { startMs: number; endMs: number };
       const leadHere = unitIndex === 0 && memberIndex === 0 && lead ? leadFrames : 0;
+      // The unit's frames this Item overlaps.
+      const from =
+        span.endMs > span.startMs
+          ? Math.max(unit.firstFrame, Math.floor(span.startMs / framePeriodMs + 1e-6))
+          : unit.endFrame;
+      const to = Math.min(unit.endFrame, Math.ceil(span.endMs / framePeriodMs - 1e-6));
       const columns: Record<string, number[]> = {};
       for (const [column, values] of Object.entries(result.columns)) {
         columns[column] = [
           ...(leadHere > 0 ? (lead?.columns[column] ?? []) : []),
-          ...values.slice(offset, offset + frames),
+          ...values.slice(from - unit.firstFrame, Math.max(from, to) - unit.firstFrame),
         ];
       }
       unit.transaction.set(
@@ -2333,10 +2353,10 @@ function runFrameRules(
         writeKey,
         {
           period_ms: framePeriodMs,
-          lead: leadHere,
+          origin_ms: (from - leadHere) * framePeriodMs - span.startMs,
           columns,
           // On the unit's first Item: the rules that assigned in this unit
-          // (and, with `lead`, in the lead-in before it), by unit frame.
+          // (and in the lead-in, when this Item carries it), by unit frame.
           fired:
             memberIndex === 0
               ? [
@@ -2350,7 +2370,6 @@ function runFrameRules(
         },
         tag,
       );
-      offset += frames;
     });
     const committed = unit.transaction.commit();
     if (captureTooling) {

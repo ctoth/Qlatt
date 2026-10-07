@@ -2319,7 +2319,7 @@ export function lowerToFrames(
       if (!isFrameValues(values)) continue;
       const frames = Math.max(0, ...Object.values(values.columns).map((column) => column.length));
       for (let index = 0; index < frames; index += 1) {
-        offsets.push((index - values.lead) * values.period_ms);
+        offsets.push(values.origin_ms + index * values.period_ms);
       }
     }
     return offsets;

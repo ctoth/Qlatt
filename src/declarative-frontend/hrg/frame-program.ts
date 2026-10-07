@@ -323,11 +323,13 @@ export function runFrameProgram(run: FrameProgramRun): FrameUnitResult[] {
 
 /**
  * What lowering reads from the Segment feature a program writes: the frames
- * of this Item, preceded by `lead` frames that belong before its start.
+ * this Item overlaps. `origin_ms` is where the first of them starts, counted
+ * from the Item's start: negative when the Item begins inside a frame, or
+ * when lead-in frames come before it.
  */
 export interface FrameValues {
   period_ms: number;
-  lead: number;
+  origin_ms: number;
   columns: Readonly<Record<string, readonly number[]>>;
 }
 
@@ -336,7 +338,7 @@ export const FRAME_VALUES_SCHEMA: FeatureSchema = {
   kind: "object",
   fields: {
     period_ms: { kind: "number" },
-    lead: { kind: "number" },
+    origin_ms: { kind: "number" },
     columns: {
       kind: "object",
       fields: {},
@@ -380,7 +382,7 @@ export function isFrameValues(value: unknown): value is FrameValues {
   return (
     typeof candidate.period_ms === "number" &&
     candidate.period_ms > 0 &&
-    typeof candidate.lead === "number" &&
+    typeof candidate.origin_ms === "number" &&
     typeof candidate.columns === "object" &&
     candidate.columns !== null
   );
@@ -390,6 +392,6 @@ export function isFrameValues(value: unknown): value is FrameValues {
 export function frameValueIndex(values: FrameValues, offsetMs: number, length: number): number {
   // The tolerance keeps an offset that is a frame boundary up to rounding in
   // the frame it starts.
-  const index = values.lead + Math.floor(offsetMs / values.period_ms + 1e-6);
+  const index = Math.floor((offsetMs - values.origin_ms) / values.period_ms + 1e-6);
   return Math.min(Math.max(index, 0), length - 1);
 }

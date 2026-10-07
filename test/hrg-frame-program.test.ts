@@ -485,7 +485,7 @@ describe("frame rules in the rule engine", () => {
     // frames toward 0 (7 + floor(-7/2) = 3, 3 + floor(-3/2) = 1).
     expect(frames("a")).toEqual({
       period_ms: 5,
-      lead: 2,
+      origin_ms: -10,
       columns: { LEVEL: [0, 0, 4, 6, 7], INDEX: [0, 1, 0, 1, 2] },
       fired: [
         { rule: "tank_target_shut", first: 0, last: 0, count: 1, lead_in: true },
@@ -496,13 +496,13 @@ describe("frame rules in the rule engine", () => {
     });
     expect(frames("b")).toEqual({
       period_ms: 5,
-      lead: 0,
+      origin_ms: 0,
       columns: { LEVEL: [7, 7], INDEX: [3, 4] },
       fired: [],
     });
     expect(frames("c")).toEqual({
       period_ms: 5,
-      lead: 0,
+      origin_ms: 0,
       columns: { LEVEL: [3, 1], INDEX: [0, 1] },
       fired: [
         { rule: "tank_target_shut", first: 0, last: 0, count: 1, lead_in: false },
@@ -549,7 +549,63 @@ describe("frame rules in the rule engine", () => {
     expect(replayJournal(SCHEMA, utterance.journal()).graphDigest()).toBe(utterance.graphDigest());
   });
 
-  it("warns when a duration is not a whole number of frames", () => {
+  it("gives an Item that starts inside a frame the frames it overlaps", () => {
+    // a 13 ms + b 12 ms: the unit is still 5 frames, and the boundary between
+    // its Items falls inside frame 2 (10-15 ms), which both overlap.
+    const utterance = tankUtterance();
+    const transaction = utterance.beginTransaction(META);
+    for (const [id, duration] of [
+      ["a", 13],
+      ["b", 12],
+    ] as const) {
+      const item = utterance.getItem(id);
+      if (!item) throw new Error("fixture Item missing");
+      transaction.set(item, "duration", duration);
+    }
+    transaction.commit();
+    const spec = compileRuleEngineSpec(TANK_SPEC);
+    runGraphRuleEngine(utterance, spec);
+
+    expect(utterance.getItem("a")?.get("tank_frames")).toMatchObject({
+      origin_ms: -10,
+      columns: { LEVEL: [0, 0, 4, 6, 7] },
+    });
+    expect(utterance.getItem("b")?.get("tank_frames")).toMatchObject({
+      origin_ms: -3,
+      columns: { LEVEL: [7, 7, 7], INDEX: [2, 3, 4] },
+    });
+    expect(utterance.getItem("c")?.get("tank_frames")).toMatchObject({
+      origin_ms: 0,
+      columns: { LEVEL: [3, 1] },
+    });
+    expect(utterance.diagnostics.getEntries()).toEqual([]);
+
+    // Events stay on the frame clock: b's first frame starts 2 ms into it.
+    const lowered = lowerToFrames(utterance, POLICY, {
+      frameValueFeatures: frameValueFeatures(spec.frame_programs),
+    });
+    expect(
+      lowered.frames.map((frame) => [
+        Math.round(frame.time * 1000),
+        frame.params.LEVEL,
+        frame.segmentId ?? null,
+      ]),
+    ).toEqual([
+      [0, 0, null],
+      [5, 0, null],
+      [10, 4, "a"],
+      [15, 6, "a"],
+      [20, 7, "a"],
+      [23, 7, "b"],
+      [25, 7, "b"],
+      [30, 7, "b"],
+      [35, 3, "c"],
+      [40, 1, "c"],
+      [45, undefined, null],
+    ]);
+  });
+
+  it("warns when a unit does not end on a frame", () => {
     const utterance = tankUtterance();
     const item = utterance.getItem("c");
     if (!item) throw new Error("fixture Item missing");
@@ -562,7 +618,7 @@ describe("frame rules in the rule engine", () => {
         .getEntries()
         .filter((entry) => entry.code === "HRG_FRAME_DURATION_ROUNDED")
         .map((entry) => entry.data),
-    ).toEqual([{ itemId: "c", program: "tank", durationMs: 12, framePeriodMs: 5, frames: 2 }]);
+    ).toEqual([{ itemId: "c", program: "tank", endMs: 37, framePeriodMs: 5, endFrame: 7 }]);
   });
 });
 

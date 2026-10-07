@@ -46,6 +46,22 @@ params:
     range: [0, 80]
     default: 0
     unit: dB
+  # DECtalk packet words the dectalk-english frontend emits for the dectalk-vtm
+  # experiment (scripts/oracle/dectalk-debug/ph-contract.md), in the packet's
+  # integer scale. No node of this graph binds them; they are declared here so
+  # that the frontend's columns are all known to the experiment it ships with.
+  PS:
+    description: "OUT_PS, subglottal pressure (packet word; unused by this graph)"
+    type: int
+    default: 0
+  CNK:
+    description: "OUT_CNK, posterior glottal chink area (packet word; unused by this graph)"
+    type: int
+    default: 0
+  AG:
+    description: "OUT_AG, glottal area (packet word; unused by this graph)"
+    type: int
+    default: 0
   # DECtalk 4.63 uses KLGLOTT88, but the runtime default remains the impulse
   # fallback while mode 3 emits no voiced waveform.
   sourceMode:

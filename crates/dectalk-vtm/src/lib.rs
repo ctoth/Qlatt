@@ -45,6 +45,17 @@
 //!   after lines 1292-1319 have overwritten T0, F1-F3, B1, the amplitudes, FZ,
 //!   FNP, GF, TLT and DP with hlsyn's output.
 //!
+//! # Modules
+//!
+//! - this file: the vocal tract model, [`Vtm`];
+//! - [`hlsyn`]: the high-level synthesizer;
+//! - [`vtmio`]: the per-packet code around the two, and the speaker setup;
+//! - [`backend`]: the three chained as one host node, with a frame clock;
+//! - [`resample`]: conversion of the 11025 Hz output to a host's rate.
+//!
+//! The first three are DECtalk's code transcribed. The last two are not
+//! DECtalk code and say so.
+//!
 //! # Out-of-range input
 //!
 //! Where the C indexes a table out of bounds (a dB word outside 0..=87, a
@@ -66,8 +77,10 @@
     clippy::comparison_chain
 )]
 
+pub mod backend;
 pub mod hlsyn;
 mod hlsyn_tables;
+pub mod resample;
 mod tables;
 pub mod vtmio;
 

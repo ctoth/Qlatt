@@ -55,6 +55,12 @@ frame_programs:
 - The **lead-in** is a unit of `lead_in_frames` frames before the first Item,
   with every feature at its `edge` value. It exists because lowering's initial
   silence is not a Segment.
+- `delay_frames: N` (optional, default 0) shows every frame N frame periods
+  after the instant it was computed for, for a controller that sends a word
+  later than it computes it. The delay crosses Item boundaries: an Item's
+  first frames are then the last ones of the Item before. The first instant
+  holds the first frame, so a lead-in N frames longer than the initial silence
+  puts its first frame exactly there.
 - Every output column must be listed in `output.lowering.columns`, and `write`
   must be a declared feature of the relation.
 

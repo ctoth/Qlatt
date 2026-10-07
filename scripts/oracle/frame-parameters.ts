@@ -38,24 +38,19 @@ export type FrameParameter = {
    * so appear to match.
    */
   required?: boolean;
-  /**
-   * True when the track's value for packet j is read at packet j - 1.
-   * TEMPORARY. DECtalk sends these words one frame late (ph_claus.c:754-757);
-   * the frame program computes them on the controller's clock and lowering
-   * does not delay them yet (`output.lowering.timeline.delayed_columns`,
-   * branch rules/dectalk-formants). Remove with that change, or every one of
-   * these words will compare one packet off in the other direction.
-   */
-  previousPacket?: boolean;
 };
 
-/** A word a frame program emits: required, and for now read one packet back. */
+/**
+ * A word the synthesizer reads. DECtalk sends these one frame late
+ * (ph_claus.c:754-757) and so does the track (`delay_frames` of the frame
+ * program that writes them), so they compare packet for packet.
+ */
 function frameWord(
   label: string,
   oracleValue: FrameParameter["oracleValue"],
   qlatt = label,
 ): FrameParameter {
-  return { label, oracleValue, qlatt, sourceClock: false, required: true, previousPacket: true };
+  return { label, oracleValue, qlatt, sourceClock: false, required: true };
 }
 
 const US_PHONE = 1 << 8;
@@ -363,7 +358,6 @@ export function compareTrackToFrames(
   );
   let segmentLabelsDiffer = 0;
   let cursor = -1;
-  let previousEvent: TrackEvent | undefined;
   for (let index = 0; index < frames.length; index += 1) {
     const frame = frames[index] as DectalkTraceFrame;
     const timeSec = (frame.frame * DECTALK_SAMPLES_PER_FRAME) / DECTALK_NATIVE_SAMPLE_RATE_HZ;
@@ -373,13 +367,10 @@ export function compareTrackToFrames(
       cursor += 1;
     }
     const event = cursor >= 0 ? track[cursor] : undefined;
-    // Packet 0 has no packet before it; it holds the first value.
-    const earlierEvent = index === 0 ? event : previousEvent;
-    previousEvent = event;
     if (sameSegmentLabel(frames, index, event?.phoneme) === false) segmentLabelsDiffer += 1;
     for (const parameter of FRAME_PARAMETERS) {
       const dectalk = parameter.oracleValue(frame);
-      const qlatt = qlattValue(parameter.previousPacket ? earlierEvent : event, parameter.qlatt);
+      const qlatt = qlattValue(event, parameter.qlatt);
       if (dectalk == null) continue;
       const summary = parameters[parameter.label] as ParameterComparison;
       if (qlatt == null) {

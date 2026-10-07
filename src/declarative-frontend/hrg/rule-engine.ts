@@ -2325,6 +2325,20 @@ function runFrameRules(
         }
       : {}),
   });
+  // Every column over the whole run, lead-in first.
+  const runColumns: Record<string, number[]> = {};
+  for (const result of results) {
+    for (const [column, values] of Object.entries(result.columns)) {
+      runColumns[column] = (runColumns[column] ?? []).concat(values);
+    }
+  }
+  const runFrames = machineUnits.reduce((sum, unit) => sum + unit.frames, 0) - leadFrames;
+  const delayFrames = program.delay_frames == null ? 0 : Number(program.delay_frames);
+  if (!Number.isInteger(delayFrames) || delayFrames < 0) {
+    throw new Error(
+      `E_FRAME_DELAY: frame program '${programName}' delay_frames is ${String(program.delay_frames)}`,
+    );
+  }
   const lead = leadFrames > 0 ? results.shift() : undefined;
   const citationsByRule = new Map(rules.map((rule) => [rule.name, rule.citations]));
 
@@ -2335,25 +2349,24 @@ function runFrameRules(
     unit.members.forEach((item, memberIndex) => {
       const span = unit.memberSpans[memberIndex] as { startMs: number; endMs: number };
       const leadHere = unitIndex === 0 && memberIndex === 0 && lead ? leadFrames : 0;
-      // The unit's frames this Item overlaps.
-      const from =
-        span.endMs > span.startMs
-          ? Math.max(unit.firstFrame, Math.floor(span.startMs / framePeriodMs + 1e-6))
-          : unit.endFrame;
-      const to = Math.min(unit.endFrame, Math.ceil(span.endMs / framePeriodMs - 1e-6));
+      // The frames shown while this Item lasts: those it overlaps, moved
+      // `delayFrames` earlier, and for the first Item the lead-in as well.
+      // Frame 0 is the first Item's first; the lead-in's are negative.
+      const from = Math.max(
+        -leadFrames,
+        leadHere > 0 ? -leadFrames : Math.floor(span.startMs / framePeriodMs + 1e-6) - delayFrames,
+      );
+      const to = Math.min(runFrames, Math.ceil(span.endMs / framePeriodMs - 1e-6) - delayFrames);
       const columns: Record<string, number[]> = {};
-      for (const [column, values] of Object.entries(result.columns)) {
-        columns[column] = [
-          ...(leadHere > 0 ? (lead?.columns[column] ?? []) : []),
-          ...values.slice(from - unit.firstFrame, Math.max(from, to) - unit.firstFrame),
-        ];
+      for (const [column, values] of Object.entries(runColumns)) {
+        columns[column] = values.slice(from + leadFrames, Math.max(from, to) + leadFrames);
       }
       unit.transaction.set(
         item,
         writeKey,
         {
           period_ms: framePeriodMs,
-          origin_ms: (from - leadHere) * framePeriodMs - span.startMs,
+          origin_ms: (from + delayFrames) * framePeriodMs - span.startMs,
           columns,
           // On the unit's first Item: the rules that assigned in this unit
           // (and in the lead-in, when this Item carries it), by unit frame.

@@ -11,15 +11,17 @@ version: v1
 # an allophone of its own (ph_inton1.c:1808-1820) although this frontend keeps
 # it as a `SIL` Segment.
 #
-# Frames. The lead-in is DECtalk's clause-initial silence, allophone 0, less
-# its first controller frame, for which send_pars() writes no packet
-# (ph_claus.c:759-766): the lead-in's frame i is the silence's frame i + 1, and
-# the once-per-phone code of that silence runs in the lead-in's first frame.
-# DECtalk's counters are spelled out where a rule reads them:
-#   tcum      f.index (the lead-in: f.index + unemitted_initial_frames)
-#   nframb    g.frame + 1 + unemitted_initial_frames: pht0draw has counted the
-#             frame before phdraw runs (ph_claus.c:478-482, Ph_drwt02.c:2059)
-#   tcumdur   g.counted_frames + unemitted_initial_frames
+# Frames. The lead-in is DECtalk's clause-initial silence, allophone 0, all of
+# it: one frame longer than the track's initial silence, because send_pars()
+# writes no packet on its first call (ph_claus.c:759-766). DECtalk sends these
+# words one frame late (ph_claus.c:754-757), so packet 0 carries that first
+# frame's; `delay_frames: 1` shows every frame one period after it was
+# computed, and the lead-in's first frame lands on the track's first instant.
+# DECtalk's counters, where a rule reads them:
+#   tcum      f.index
+#   nframb    g.frame + 1: pht0draw has counted the frame before phdraw runs
+#             (ph_claus.c:478-482, Ph_drwt02.c:2059)
+#   tcumdur   g.counted_frames
 #   nphone    g.unit
 #
 # Ported so far: PS (subglottal pressure), AG (glottal area), CNK (chink) and
@@ -97,10 +99,14 @@ frame_programs:
     relation: Segment
     unit: { predicate: is_articulation_unit }
     frame_ms: "params.policy.timing.frame_ms"
+    # The track's initial silence and the frame before it that is never sent.
     lead_in_frames: >-
       round(get(current, 'utterance_initial_silence_ms',
         (params.policy.timing.pause_frames.clause_initial - params.policy.timing.unemitted_initial_frames)
         * params.policy.timing.frame_ms) / params.policy.timing.frame_ms)
+      + params.policy.timing.unemitted_initial_frames
+    # ph_claus.c:754-757
+    delay_frames: 1
     features:
       # DECtalk's allophone 0 of a clause; here only the lead-in.
       initial: { value: "false", edge: true }
@@ -305,7 +311,7 @@ rules:
       && u.last_obstruent && !u.last_voiced
     when: >-
       r.syl_pressure == 0
-      && g.frame + 1 + params.policy.timing.unemitted_initial_frames > 9
+      && g.frame + 1 > 9
       && g.counted_frames - g.final_dummy_half - (g.frame + 1) > 0
     set:
       - register: syl_pressure
@@ -325,7 +331,7 @@ rules:
       && !(u.last_obstruent && !u.last_voiced)
     when: >-
       r.syl_pressure == 0
-      && g.frame + 1 + params.policy.timing.unemitted_initial_frames > 9
+      && g.frame + 1 > 9
       && g.counted_frames - g.final_dummy_half - (g.frame + 1) > 0
     set:
       - register: syl_pressure
@@ -898,24 +904,6 @@ rules:
       - { register: agspeed, value: 3, tag: glottal_area }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:4016-4025"
-  # The step of the clause's first controller frame, which is never sent
-  # (ph_claus.c:759-766): the lead-in starts one frame later, so its first
-  # frame takes that step and its own. One unemitted frame; see
-  # params.policy.timing.unemitted_initial_frames.
-  artic_glottis_step_of_unsent_frame:
-    kind: frame
-    program: articulation
-    unit: "u.initial"
-    when: "f.index == 0"
-    set:
-      - register: area_g
-        value: >-
-          floor((r.target_ag - r.area_g) / pow(2, r.agspeed)) > 300 ? r.area_g + 250
-          : r.area_g + floor((r.target_ag - r.area_g) / pow(2, r.agspeed)) + r.delta_area_g
-        tag: glottal_area
-    citations:
-      - "DECtalk 4.63 PH/ph_draw.c:4075-4081"
-      - "DECtalk 4.63 PH/ph_claus.c:759-766 (send_pars writes no packet on its first call)"
   # A step over 300 is limited to 250, and then delta_area_g is not added.
   # `>>` is an arithmetic shift: floor.
   artic_glottis_step:
@@ -978,7 +966,6 @@ phases:
       - artic_end_of_clause_spread
       - artic_no_spread_before_the_end
       - artic_glottis_after_voiced_glottal
-      - artic_glottis_step_of_unsent_frame
       - artic_glottis_step
       - artic_initial_reset_pressure
       - artic_initial_pressure_before_voiced_labial

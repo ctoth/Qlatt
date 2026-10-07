@@ -79,12 +79,10 @@ const PS_REASON =
   "end-of-clause drop (3929-3969) are not ported";
 // The glottal rules are ported and "cat." is exact. What is known of the rest:
 const AG_REASON =
-  "packet 0 of a phrase that starts with a voiced phone: DECtalk sends there the area after " +
-  "the clause's first controller frame, the one whose other words are never sent " +
-  "(ph_claus.c:759-766), and the lead-in starts a frame later. Beyond that, not ported: the " +
-  "early exits of the end-of-clause spread (ph_draw.c:3604-3624), the nasal case of the " +
-  "initial silence (1146-1190), a reset for clauses after the first; and differences inside " +
-  "phrases that have not been traced to a rule yet";
+  "not ported: the early exits of the end-of-clause spread (ph_draw.c:3604-3624), the nasal " +
+  "case of the initial silence (1146-1190), and a reset for clauses after the first (their " +
+  "initial silence is the tail of the previous clause's pause Segment, not a unit); and " +
+  "differences inside phrases that have not been traced to a rule yet";
 const CNK_REASON =
   "target_ap follows ph_draw.c:1555-1864 and 966; the phrases that still differ have not been " +
   "traced, and a clause after the first gets no reset (ph_draw.c:929-930)";

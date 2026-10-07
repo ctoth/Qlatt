@@ -86,12 +86,10 @@ let phoneStart = 0;
 frames.forEach((frame, index) => {
   if (index > 0 && frame.phoneIndex !== frames[index - 1]?.phoneIndex) phoneStart = index;
   const event = events[eventIndexAt(events, index * packetSec)];
-  // As the gate reads them (FrameParameter.previousPacket).
-  const earlierEvent = events[eventIndexAt(events, Math.max(0, index - 1) * packetSec)];
   let differs = false;
   const cells = parameters.map((parameter) => {
     const dectalk = parameter.oracleValue(frame);
-    const here = qlattValue(parameter.previousPacket ? earlierEvent : event, parameter.qlatt);
+    const here = qlattValue(event, parameter.qlatt);
     if (dectalk != null && (here == null || Math.abs(here - dectalk) > 0.5)) differs = true;
     return `${dectalk ?? "."}|${here == null ? "." : Math.round(here * 10) / 10}`;
   });

@@ -716,4 +716,51 @@ describe("frame values in lowering", () => {
       lowered.frames.filter((frame) => frame.segmentId).map((frame) => frame.params.LEVEL),
     ).toEqual([-1, -1, -1]);
   });
+
+  it("shows each frame delay_frames later, across Items, holding the first", () => {
+    const delayed = {
+      ...TANK_SPEC,
+      frame_programs: {
+        tank: {
+          ...TANK_SPEC.frame_programs.tank,
+          delay_frames: 1,
+          outputs: { LEVEL: "r.level", FRAME: "f.frame" },
+        },
+      },
+    };
+    expect(codes(delayed)).toEqual([]);
+    expect(
+      codes({
+        ...delayed,
+        frame_programs: { tank: { ...delayed.frame_programs.tank, delay_frames: 0.5 } },
+      }),
+    ).toContain("E_FRAME_PROGRAM_SCHEMA frame_programs.tank.delay_frames");
+
+    const utterance = tankUtterance();
+    const spec = compileRuleEngineSpec(delayed);
+    runGraphRuleEngine(utterance, spec);
+    const lowered = lowerToFrames(
+      utterance,
+      { ...POLICY, columns: ["LEVEL", "FRAME"] },
+      { frameValueFeatures: frameValueFeatures(spec.frame_programs) },
+    );
+    // Run frames 0-1 are the lead-in, 2-6 unit a+b, 7-8 unit c. Undelayed,
+    // frame k starts at 5k ms; here it starts at 5(k + 1) ms and the first
+    // instant holds frame 0. c's first frame (LEVEL 3) is shown inside b.
+    expect(
+      lowered.frames
+        .filter((frame) => frame.params.FRAME !== undefined)
+        .map((frame) => [Math.round(frame.time * 1000), frame.params.FRAME, frame.params.LEVEL]),
+    ).toEqual([
+      [0, 0, 0],
+      [5, 0, 0],
+      [10, 1, 0],
+      [15, 2, 4],
+      [20, 3, 6],
+      [25, 4, 7],
+      [30, 5, 7],
+      [35, 6, 7],
+      [40, 7, 3],
+    ]);
+  });
 });

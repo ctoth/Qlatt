@@ -41,6 +41,7 @@ const ALLOWED_FRAME_PROGRAM_FIELDS = new Set([
   "unit",
   "frame_ms",
   "lead_in_frames",
+  "delay_frames",
   "features",
   "group",
   "registers",
@@ -3298,6 +3299,22 @@ function validateFramePrograms(
       );
     }
     checkItemExpression(program.frame_ms, `${path}.frame_ms`, `Frame program '${name}' frame_ms`);
+    if (
+      program.delay_frames != null &&
+      !(
+        typeof program.delay_frames === "number" &&
+        Number.isInteger(program.delay_frames) &&
+        program.delay_frames >= 0
+      )
+    ) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_FRAME_PROGRAM_SCHEMA",
+          `Frame program '${name}' delay_frames must be a whole number of frames, 0 or more`,
+          `${path}.delay_frames`,
+        ),
+      );
+    }
     if (program.lead_in_frames != null) {
       checkItemExpression(
         program.lead_in_frames,

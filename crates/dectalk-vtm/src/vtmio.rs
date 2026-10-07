@@ -39,7 +39,7 @@
 // Kept in the shape of the C source so the two can be compared line by line.
 #![allow(clippy::collapsible_else_if, clippy::if_same_then_else)]
 
-use crate::hlsyn::{HLSpeaker, HlSynth, LLFrame, OUT_SEX};
+use crate::hlsyn::{take_fault, HLSpeaker, HlError, HlSynth, LLFrame, OUT_SEX};
 use crate::{
     OUT_A2, OUT_A3, OUT_A4, OUT_A5, OUT_A6, OUT_AB, OUT_AP, OUT_AV, OUT_B1, OUT_B2, OUT_B3, OUT_DP,
     OUT_F1, OUT_F2, OUT_F3, OUT_FNP, OUT_FZ, OUT_GF, OUT_PH, OUT_T0, OUT_TLT, SPDEF_PARS,
@@ -311,9 +311,34 @@ impl VtmIo {
         changeSpeakerValues(&mut self.hl.speaker, last_voice, NOM_Open_Quo, Tiltm);
     }
 
+    /// [`voice_packet`](Self::voice_packet) with fault reporting: `Err` if
+    /// hlsyn read one of its tables out of bounds for this packet (see
+    /// [`HlError`]). The frame such a call computed is discarded, and the
+    /// state it leaves behind is not DECtalk's.
+    ///
+    /// The code of `vtmiont.c:796-1319` itself has no such read: it indexes no
+    /// table, and its one division, `400000 / NF0` (line 1291), runs only for
+    /// `NF0 >= 500`.
+    pub fn try_voice_packet(
+        &mut self,
+        parambuff: &[i16; VOICE_PARS],
+        lang_curr: i32,
+    ) -> Result<[i16; VOICE_PARS], HlError> {
+        take_fault();
+        let frame = self.voice_packet(parambuff, lang_curr);
+        match take_fault() {
+            Some(error) => Err(error),
+            None => Ok(frame),
+        }
+    }
+
     /// One voice packet, `vtmiont.c:656-1319`. `parambuff` is the PH packet;
     /// the returned frame is what the vocal tract model reads. `lang_curr` is
     /// `pKsd_t->lang_curr` (one of the `LANG_*` values).
+    ///
+    /// An out-of-bounds table read in hlsyn is left for
+    /// [`take_fault`](crate::hlsyn::take_fault);
+    /// [`try_voice_packet`](Self::try_voice_packet) returns it.
     pub fn voice_packet(
         &mut self,
         parambuff: &[i16; VOICE_PARS],
@@ -555,4 +580,57 @@ fn set_gains(llframe: &mut LLFrame, a2: i16, a3: i16, a4: i16, a5: i16, a6: i16)
     llframe.NA4F = a4;
     llframe.NA5F = a5;
     llframe.NA6F = a6;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The second `P` line of `tests/fixtures/paul-cat.hl.txt`.
+    fn paul_packet() -> [i16; VOICE_PARS] {
+        let mut packet = [0i16; VOICE_PARS];
+        packet[..33].copy_from_slice(&[
+            0, 279, 0, 0, 0, 0, 0, 0, 0, 979, 0, 2091, 2702, 290, 300, 210, 280, 256, 4, 305, 290,
+            0, 3500, 0, 0, 1410, 1000, 0, 1000, 200, 50, 0, 0,
+        ]);
+        packet
+    }
+
+    /// Without `InitializeHLSynthesizer` every speaker constant is zero, the
+    /// circuit's coefficients are 0/0, and the NaN reaches `DT_f_sqrt`, which
+    /// truncates it to `0x8000_0000` and would read `sqrttable[-pos/100]`.
+    #[test]
+    fn a_packet_without_speaker_setup_is_a_fault_not_a_panic() {
+        let mut io = VtmIo::new();
+        let error = io
+            .try_voice_packet(&paul_packet(), LANG_english)
+            .expect_err("fault");
+        assert_eq!(error, HlError::SqrtTableIndex(i32::MIN / 100));
+        assert_eq!(error.code(), -7);
+    }
+
+    #[test]
+    fn a_fault_does_not_carry_over_to_the_next_packet() {
+        let mut faulted = VtmIo::new();
+        faulted
+            .try_voice_packet(&paul_packet(), LANG_english)
+            .expect_err("fault");
+
+        // A fresh state with Perfect Paul's setup (`S` and `V` lines of
+        // `tests/fixtures/paul-cat.hl.txt`) runs clean on the same thread.
+        let mut spdef = [0i16; SPDEF_PARS];
+        spdef[..24].copy_from_slice(&[
+            3503, 260, 6000, 6000, 3550, 4850, 0, 87, 66, 58, 59, 76, 9800, 0, 0, 4100, 64, 87, 65,
+            64, 0, 0, 0, 1,
+        ]);
+        let mut io = VtmIo::new();
+        io.speaker_packet(&spdef, Paul, 0, 0);
+        let mut unchecked = io.clone();
+        let frame = io
+            .try_voice_packet(&paul_packet(), LANG_english)
+            .expect("no fault");
+        // The checked call computes what the unchecked one does.
+        assert_eq!(frame, unchecked.voice_packet(&paul_packet(), LANG_english));
+        assert_eq!(take_fault(), None);
+    }
 }

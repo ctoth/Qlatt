@@ -36,6 +36,14 @@
 //! changes no output word, and the `log10` path above 100 never influences
 //! one.
 //!
+//! # Out-of-range input
+//!
+//! `DT_f_sqrt` and `DT_f_log10` index their tables with a truncated `float`.
+//! Where the C would read outside a table (a NaN, or a negative argument of
+//! `DT_f_log10`) this port reads 0, finishes the frame and records the first
+//! such read as an [`HlError`], returned by [`take_fault`]. Results on input
+//! that stays inside the tables are unchanged.
+//!
 //! # In the `vtmio` module, not here
 //!
 //! - `changeSpeakerValues` and `initDefaultSpeakerValues`
@@ -57,6 +65,8 @@
     clippy::neg_cmp_op_on_partial_ord,
     clippy::too_many_arguments
 )]
+
+use core::cell::Cell;
 
 use crate::hlsyn_tables::{LOG10TABLE, SQRTTABLE};
 use crate::{OUT_F1, OUT_F2, OUT_F3, OUT_T0, VOICE_PARS};
@@ -170,11 +180,114 @@ fn short_d(x: f64) -> i16 {
     cvtt(x) as i16
 }
 
+/// An input that makes the C read `sqrttable` or `log10table` out of bounds.
+/// Each variant carries the offending index.
+///
+/// Both tables are indexed by a truncated `float`. A finite argument of
+/// `DT_f_sqrt` always lands inside its table and every call site of
+/// `DT_f_log10` guards its argument with a `<` comparison, but a NaN passes
+/// those guards and truncates to `0x8000_0000`, and a negative argument of
+/// `DT_f_log10` indexes below the table. hlsyn has no integer division by a
+/// variable, and its `float` divisions by zero give an infinity or a NaN in
+/// the C as they do here, so these two reads are the only places where the C
+/// is undefined.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum HlError {
+    /// `sqrttable[index]` with `index` outside 0..=403
+    /// (`hlsyn/sqrttable.c:1069-1083`).
+    SqrtTableIndex(i32),
+    /// `log10table[index]` with `index` outside 0..=1000
+    /// (`hlsyn/log10table.c:306-314`).
+    Log10TableIndex(i32),
+}
+
+impl HlError {
+    /// A stable negative code for the C ABI, continuing after
+    /// [`VtmError::code`](crate::VtmError::code).
+    pub fn code(self) -> i32 {
+        match self {
+            HlError::SqrtTableIndex(_) => -7,
+            HlError::Log10TableIndex(_) => -8,
+        }
+    }
+
+    /// The offending table index.
+    pub fn index(self) -> i32 {
+        match self {
+            HlError::SqrtTableIndex(index) | HlError::Log10TableIndex(index) => index,
+        }
+    }
+}
+
+impl core::fmt::Display for HlError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            HlError::SqrtTableIndex(index) => write!(f, "sqrttable[{index}] is out of bounds"),
+            HlError::Log10TableIndex(index) => write!(f, "log10table[{index}] is out of bounds"),
+        }
+    }
+}
+
+impl std::error::Error for HlError {}
+
+thread_local! {
+    /// The first out-of-range table read since the last [`take_fault`]. The
+    /// table functions are free functions called from inside the root finders,
+    /// as in the C, so the fault is kept beside them instead of being threaded
+    /// through every signature.
+    static FAULT: Cell<Option<HlError>> = const { Cell::new(None) };
+}
+
+#[inline]
+fn record_fault(error: HlError) {
+    FAULT.with(|fault| {
+        if fault.get().is_none() {
+            fault.set(Some(error));
+        }
+    });
+}
+
+/// Returns and clears the first out-of-range table read (see [`HlError`])
+/// made on this thread since the previous call. Where the C reads outside a
+/// table this port reads 0, finishes the frame and leaves the fault here; the
+/// frame and the state such a call leaves behind are not DECtalk's.
+/// [`VtmIo::try_voice_packet`](crate::vtmio::VtmIo::try_voice_packet) wraps a
+/// whole packet with it.
+pub fn take_fault() -> Option<HlError> {
+    FAULT.with(Cell::take)
+}
+
+/// `sqrttable[index]`; the table starts at `hlsyn/sqrttable.c:40`.
+#[inline]
+fn sqrttable(index: i32) -> f32 {
+    match usize::try_from(index).ok().and_then(|i| SQRTTABLE.get(i)) {
+        Some(value) => *value,
+        None => {
+            record_fault(HlError::SqrtTableIndex(index));
+            0.0
+        }
+    }
+}
+
+/// `log10table[index]`; the table starts at `hlsyn/log10table.c:34`.
+#[inline]
+fn log10table(index: i32) -> f32 {
+    match usize::try_from(index).ok().and_then(|i| LOG10TABLE.get(i)) {
+        Some(value) => *value,
+        None => {
+            record_fault(HlError::Log10TableIndex(index));
+            0.0
+        }
+    }
+}
+
 /// `DT_f_sqrt`, `hlsyn/sqrttable.c:1059-1084`.
 ///
 /// Returns the value the compiled function leaves in the x87 return register
 /// (see the module documentation): the `sqrttable[pos/100]*10.0f` products
 /// are not rounded to `float`; every other path returns a `float` value.
+///
+/// `-pos` wraps for `0x8000_0000` (a NaN argument), as the x86 `neg` does.
 fn DTsqrt(input: f32) -> f64 {
     if input > 40000.0 {
         return f64::from(f64::from(input).sqrt() as f32);
@@ -186,21 +299,22 @@ fn DTsqrt(input: f32) -> f64 {
 
     let pos = cvtt(f64::from(input));
     if pos > 400 {
-        return f64::from(SQRTTABLE[(pos / 100) as usize]) * 10.0;
+        return f64::from(sqrttable(pos / 100)) * 10.0;
     }
 
     if pos < -400 {
-        return f64::from(-SQRTTABLE[(-pos / 100) as usize]) * 10.0;
+        return f64::from(-sqrttable(pos.wrapping_neg() / 100)) * 10.0;
     }
 
     if pos < 0 {
-        return f64::from(-SQRTTABLE[(-pos) as usize]);
+        return f64::from(-sqrttable(pos.wrapping_neg()));
     }
-    f64::from(SQRTTABLE[pos as usize])
+    f64::from(sqrttable(pos))
 }
 
 /// `DT_f_log10`, `hlsyn/log10table.c:299-315`. Every call site guards its
-/// argument to be positive, so the table index is never negative.
+/// argument to be positive, so the table index is negative only for a NaN
+/// (see [`HlError`]).
 ///
 /// Returns the value left in the x87 return register: `log10table[pos]+1` is
 /// not rounded to `float`; the other paths return a `float` value.
@@ -211,11 +325,11 @@ fn DTlog10(input: f32) -> f64 {
 
     if input > 10.0 {
         let pos = cvtt(f64::from(input * 10.0));
-        return f64::from(LOG10TABLE[pos as usize]) + 1.0;
+        return f64::from(log10table(pos)) + 1.0;
     }
 
     let pos = cvtt(f64::from(input * 100.0));
-    f64::from(LOG10TABLE[pos as usize])
+    f64::from(log10table(pos))
 }
 
 /// `HLFrame`, `PH/hlsynapi.h:31-49`. Areas in mm^2.

@@ -576,62 +576,26 @@ parameters:
       # Ph_inton2.c:815: phinton() leaves its allophone loop at a syllabic that
       # begins and ends the hat when `nphon > 4`.
       intonation_stop_after_allophone: 4
-      # Retained for the classic reading-mode/reset paths below.
-      short_phrase_hat_word_limit: 3
-      short_phrase_hat_divisor: 4
-      # Final fall below baseline at declarative sentence end (internal Hz*10).
-      # Source: ph_inton1.c F0_FINAL_FALL = 180.
-      final_fall_hz: 180
-      # DECtalk frac4mul divisor used when speaker assertiveness scales f0fall.
-      assertiveness_divisor: 4096
-      # DECtalk 4.63 ph_inton1.c Rule 3:
-      # hat fall starts dur - 180 ms from the stressed vowel onset, with a
-      # minimum onset delay of 25 ms.
-      hat_fall_early_offset_ms: 180
-      hat_fall_min_delay_ms: 25
-      # DECtalk 4.63 ph_inton1.c Rule 3:
-      # if sonorants follow the nucleus, delay the fall by 90 ms instead.
-      hat_fall_following_sonorant_delay_ms: 90
-      # Non-final clause boundary fall (internal Hz*10).
-      # Source: ph_inton1.c F0_NON_FINAL_FALL = 150.
-      non_final_fall_hz: 150
-      # Comma boundary fall (internal Hz*10).
-      # Source: ph_inton1.c F0_COMMA_FALL = 120.
-      comma_fall_hz: 120
-      # Question boundary fall (internal Hz*10).
-      # Source: ph_inton1.c F0_QSYLL_FALL = 80.
-      question_fall_hz: 80
-      # Boundary GESTURE impulse pairs (internal Hz*10), emitted on the final
-      # stressed vowel into the `boundary` impulse layer.  These are the
-      # explicit F0 gestures DECtalk adds on top of the hat-fall for questions
-      # and commas (ph_inton1.c make_f0_command IMPULSE pairs).
-      #
-      # Yes/no question terminal rise: a small dip then a large rise at the end
-      # of the clause-final stressed vowel.  The +451 rise dominates the reduced
-      # question fall (question_fall_hz=80), producing a terminal RISE.
-      # Source: ph_inton1.c:219-220 (F0_QGesture1=-151, F0_QGesture2=+451),
-      #         :1351-1352 (emitted on the final stressed vowel for FQUENEXT).
+      # Ph_drwt02.c:1660-1663, 1686-1689: a period clause of more than 3 words
+      # and an exclamation of more than 2 take the long declarative baseline.
+      baseline_long_declarative_words: 3
+      baseline_long_exclamation_words: 2
+      # Ph_inton2.c:580-581: the US question gestures, internal Hz*10.
       question_gesture_dip_hz: -151
       question_gesture_rise_hz: 451
-      # Comma continuation rise: an upward IMPULSE pair at a comma boundary, so
-      # F0 continues/rises rather than falling fully (signals "more to come").
-      # Source: ph_inton1.c:221-222 (F0_CGesture1=+171, F0_CGesture2=+250),
-      #         :1367-1368 (emitted on the final stressed vowel for FCBNEXT comma).
-      comma_gesture1_hz: 171
-      comma_gesture2_hz: 250
-      # Gesture IMPULSE length in native DECtalk control frames.
-      # Source: ph_inton1.c:1352 (make_f0_command ... length 24).
-      boundary_gesture_duration_frames: 24
-      # Citation-mode Ph_inton2.c emits the US hat rise as a STEP with length 15.
+      # Ph_inton2.c:1253-1262: the dip is 5 frames early in a one-word clause
+      # and 6 otherwise, length 15. The rise of a one-word clause is 100 lower,
+      # at the syllabic's end, length 24; otherwise it is at a quarter of the
+      # syllabic less 4 frames, length 20.
+      question_dip_early_frames_one_word: 5
+      question_dip_early_frames: 6
+      question_dip_frames: 15
+      question_rise_one_word_reduction_hz: 100
+      question_rise_frames_one_word: 24
+      question_rise_back_frames: 4
+      question_rise_frames: 20
+      # Ph_inton2.c:899: the US hat rise is a STEP whose descriptor length is 15.
       hat_rise_glide_frames: 15
-      # Question terminal-rise GLIDE span in native DECtalk control frames. The
-      # +451 yes/no rise is rendered as a GLIDE that climbs to the target over
-      # the final vowel rather than a transient impulse, so the contour rises
-      # smoothly into the question boundary and HOLDS the elevated F0.
-      # Source: ph_inton1.c:1635 (make_f0_command GLIDE, F0_QGesture2, span =
-      # allodurs[nphon]; ~24 control frames at the 6.4 ms cadence for a ~150 ms
-      # final vowel). # engineering span estimate (final-vowel-length proxy)
-      question_rise_glide_frames: 24
       # Stress impulse duration in native DECtalk control frames.
       # Source: Ph_inton2.c:1056 make_f0_command(IMPULSE, 2, targf0, delayf0, 20, ...).
       stress_impulse_duration_frames: 20

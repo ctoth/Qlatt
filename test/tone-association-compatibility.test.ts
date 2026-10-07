@@ -58,6 +58,10 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // impulse on every stressed syllabic, sized by its place among the clause's
 // stresses) regenerate all four dectalk-english snapshots: only F0 changes.
 // The frame gate checks F0 packet by packet on 190 corpus phrases.
+// The clause-type baselines, the question gestures as Ph_inton2.c issues
+// them, and the removal of the comma rises (which the live routine never
+// issues in English) regenerate dectalk-english "Did Bob buy a blue
+// balloon?" and "Gag, gang; go!": F0 only, checked by the frame gate.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

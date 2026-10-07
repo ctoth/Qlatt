@@ -38,7 +38,25 @@ export type FrameParameter = {
    * so appear to match.
    */
   required?: boolean;
+  /**
+   * True when the track's value for packet j is read at packet j - 1.
+   * TEMPORARY. DECtalk sends these words one frame late (ph_claus.c:754-757);
+   * the frame program computes them on the controller's clock and lowering
+   * does not delay them yet (`output.lowering.timeline.delayed_columns`,
+   * branch rules/dectalk-formants). Remove with that change, or every one of
+   * these words will compare one packet off in the other direction.
+   */
+  previousPacket?: boolean;
 };
+
+/** A word a frame program emits: required, and for now read one packet back. */
+function frameWord(
+  label: string,
+  oracleValue: FrameParameter["oracleValue"],
+  qlatt = label,
+): FrameParameter {
+  return { label, oracleValue, qlatt, sourceClock: false, required: true, previousPacket: true };
+}
 
 const US_PHONE = 1 << 8;
 const USP_W = US_PHONE + 24;
@@ -278,42 +296,18 @@ export const FRAME_PARAMETERS: readonly FrameParameter[] = [
   // already uses them: AREA_N is OUT_AN (the track's AN is a nasal amplitude)
   // and A2_CODE is the raw OUT_A2 control code (the track's A2 is a level;
   // the A2 row above decodes the code to that level).
-  { label: "AG", oracleValue: area("AG"), qlatt: "AG", sourceClock: false, required: true },
-  { label: "PS", oracleValue: area("PS"), qlatt: "PS", sourceClock: false, required: true },
-  { label: "CNK", oracleValue: area("CNK"), qlatt: "CNK", sourceClock: false, required: true },
-  { label: "AL", oracleValue: area("AL"), qlatt: "AL", sourceClock: false, required: true },
-  {
-    label: "ABLADE",
-    oracleValue: area("ABLADE"),
-    qlatt: "ABLADE",
-    sourceClock: false,
-    required: true,
-  },
-  { label: "ATB", oracleValue: area("ATB"), qlatt: "ATB", sourceClock: false, required: true },
-  {
-    label: "AREA_N",
-    oracleValue: area("AN"),
-    qlatt: "AREA_N",
-    sourceClock: false,
-    required: true,
-  },
-  { label: "DC", oracleValue: area("DC"), qlatt: "DC", sourceClock: false, required: true },
-  { label: "UE", oracleValue: area("UE"), qlatt: "UE", sourceClock: false, required: true },
-  {
-    label: "PLACE",
-    oracleValue: area("PLACE"),
-    qlatt: "PLACE",
-    sourceClock: false,
-    required: true,
-  },
-  {
-    label: "A2_CODE",
-    oracleValue: out("A2"),
-    qlatt: "A2_CODE",
-    sourceClock: false,
-    required: true,
-  },
-  { label: "F4", oracleValue: area("F4"), qlatt: "F4", sourceClock: false, required: true },
+  frameWord("AG", area("AG")),
+  frameWord("PS", area("PS")),
+  frameWord("CNK", area("CNK")),
+  frameWord("AL", area("AL")),
+  frameWord("ABLADE", area("ABLADE")),
+  frameWord("ATB", area("ATB")),
+  frameWord("AREA_N", area("AN")),
+  frameWord("DC", area("DC")),
+  frameWord("UE", area("UE")),
+  frameWord("PLACE", area("PLACE")),
+  frameWord("A2_CODE", out("A2")),
+  frameWord("F4", area("F4")),
 ];
 
 export function eventIndexAt(track: readonly TrackEvent[], timeSec: number): number {
@@ -369,6 +363,7 @@ export function compareTrackToFrames(
   );
   let segmentLabelsDiffer = 0;
   let cursor = -1;
+  let previousEvent: TrackEvent | undefined;
   for (let index = 0; index < frames.length; index += 1) {
     const frame = frames[index] as DectalkTraceFrame;
     const timeSec = (frame.frame * DECTALK_SAMPLES_PER_FRAME) / DECTALK_NATIVE_SAMPLE_RATE_HZ;
@@ -378,10 +373,13 @@ export function compareTrackToFrames(
       cursor += 1;
     }
     const event = cursor >= 0 ? track[cursor] : undefined;
+    // Packet 0 has no packet before it; it holds the first value.
+    const earlierEvent = index === 0 ? event : previousEvent;
+    previousEvent = event;
     if (sameSegmentLabel(frames, index, event?.phoneme) === false) segmentLabelsDiffer += 1;
     for (const parameter of FRAME_PARAMETERS) {
       const dectalk = parameter.oracleValue(frame);
-      const qlatt = qlattValue(event, parameter.qlatt);
+      const qlatt = qlattValue(parameter.previousPacket ? earlierEvent : event, parameter.qlatt);
       if (dectalk == null) continue;
       const summary = parameters[parameter.label] as ParameterComparison;
       if (qlatt == null) {

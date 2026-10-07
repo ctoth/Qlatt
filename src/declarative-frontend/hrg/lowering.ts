@@ -904,6 +904,15 @@ export function lowerToFrames(
       const value = item.get(key);
       const write = item.latestWrite(key);
       if (typeof value === "number" && Number.isFinite(value) && write) continue;
+      // A column a frame program computes frame by frame needs no Segment value.
+      if (
+        (context.frameValueFeatures ?? []).some((feature) => {
+          const frames = item.get(feature);
+          return isFrameValues(frames) && (frames.columns[key]?.length ?? 0) > 0;
+        })
+      ) {
+        continue;
+      }
       utterance.diagnostics.error(
         "Segment is missing a finite stamped value for a declared backend column",
         { itemId: item.id, key, value },

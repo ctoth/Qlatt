@@ -32,6 +32,7 @@ include:
   - phases/duration.yaml
   - phases/formant.yaml
   - phases/prosody.yaml
+  - phases/articulation.yaml
 # Declarative voice registry. Each entry names a voice YAML under `dir`; a
 # caller selects one by name via the textToKlattTrack `speaker` option (a
 # string voice name). The selected voice's parameters populate the speaker
@@ -232,6 +233,48 @@ parameters:
         - "DECtalk 4.63 p_us_sr1.c:175-228 us_phcluster (CLUSTER and CLUSTER_TRYS onset pairs)"
         - "DECtalk 4.63 LTS/l_us_con.c:1215-1226 whdic"
         - "DECtalk 4.63 LTS/ls_task.c:4636-4645 verbs[]"
+    # Data for the area and pressure rules of phases/articulation.yaml
+    # (PH/ph_draw.c, HLSYN section).
+    articulation:
+      # p_us_rom.h:982 us_place, one list per bit (ph_defs.h:339-346): FLABIAL
+      # labial, FDENTAL dental, FPALATL palatal, FALVEL alveolar, FVELAR velar,
+      # FGLOTTAL glottal, F2BACKI f2backi, F2BACKF f2backf. TX carries FALVEL
+      # and FGLOTTAL. ph_defs.h:150 BLADEAFFECTED is dental, palatal or alveolar.
+      place:
+        labial: [M, F, V, P, B]
+        dental: [DZ, TH, DH]
+        palatal: [SH, ZH, CH, JH, TZ]
+        alveolar: [N, EN, S, Z, T, D, TX]
+        velar: [NX, K, G]
+        glottal: [TX, Q, CZ]
+        f2backi: [YU, Y]
+        f2backf: [IY, EY, Y]
+      # Paul. The frontend's voice files do not carry these yet, so every
+      # voice gets Paul's.
+      voice:
+        # P_us_vdf1.h:699-746 us_paul, by INCLUDE/cmd.h:169-195 index:
+        # [SPD_F4] 3500, [SPD_AGO] 400, [SPD_AGVO] 900, [SPD_AGUO] 1900,
+        # [SPD_CHINK] 50. The source comments the entry at SPD_CHINK "open
+        # quotient" and the one before it "chink area"; the index decides.
+        # ph_vset.c:587-592 copies them to NOM_VOIC_GLOT_AREA,
+        # NOM_VOICED_OBSTRUENT, NOM_Open_Glottis and NOM_Area_Chink, and sets
+        # NOM_UNVOICED_SON to 1800.
+        f4: 3500
+        glottis_voiced: 400
+        glottis_voiced_obstruent: 900
+        glottis_open: 1900
+        chink: 50
+        unvoiced_sonorant: 1800
+        # VTM/vtmiont.c:2941, 2963-2971 (case Paul): STRESS_STEP,
+        # STRESS_PRESSURE, NOM_Sub_Pressure, NOM_Fricative_Opening,
+        # NOM_Glot_Stop_Area, VOT_speed, EndOfPhrase_Spread.
+        stress_step: 10
+        stress_pressure: 100
+        sub_pressure: 800
+        fricative_opening: 100
+        glottal_stop_area: 0
+        vot_speed: 1
+        end_of_phrase_spread: 10
     # Data for DECtalk's duration rules (p_us_tim.c), transcribed by hand from
     # its ROM and headers. scripts/oracle/check-dectalk-timing-policy.ts checks
     # phonemes, inherent_ms, minimum_ms, features and syllabic_codes against the
@@ -821,7 +864,7 @@ output:
   lowering:
     id: dectalk-english-track-lowering
     # Stable Klatt backend vocabulary captured by the production-frame oracle.
-    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO]
+    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO, PS, CNK]
     timeline:
       initial_silence_ms:
         value: 19.2

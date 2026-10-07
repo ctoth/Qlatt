@@ -875,7 +875,13 @@ function buildTextToKlattTrackDetailed(
   const f0Range = rate ** -f0Exponent;
   runGraphRuleEngine(utterance, spec, {
     evaluationOwner,
-    phases: ["prosody", "finalize"],
+    // Then every phase the rulepack declares after `finalize`: rules that need
+    // final durations and times, such as frame programs.
+    phases: [
+      "prosody",
+      "finalize",
+      ...spec.phases.filter((phase) => phase.after.includes("finalize")).map((phase) => phase.name),
+    ],
     parameters: mergedPolicy(spec, {
       ...speakerPolicy,
       f0: {

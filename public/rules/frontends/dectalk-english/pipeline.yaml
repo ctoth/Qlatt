@@ -497,6 +497,8 @@ relations:
   Segment:
     type: base
     features:
+      # The frames phases/articulation.yaml computes for this Segment.
+      articulation_frames: []
       A1: []
       A2: []
       A3: []

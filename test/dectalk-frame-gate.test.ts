@@ -67,9 +67,19 @@ const AREA_REASON =
   "not emitted: the frontend has no port yet of the area, pressure and control-code words " +
   "ph_draw.c:908-4193 computes (the words DECtalk's synthesizer actually reads, " +
   "VTM/vtmiont.c:660-683)";
-const F4_REASON =
-  "the track's F4 is the Segment's inventory target; DECtalk sends the voice's fourth formant " +
-  "on every packet (ph_draw.c:4189, curspdef[SPD_F4])";
+// phases/articulation.yaml ports the pressure rules of ph_draw.c. Where PS
+// still differs, by what dump-frame-columns.ts shows, none of it explained
+// further than this:
+const PS_REASON =
+  "three open cases: a clause after the first gets no reset (ph_draw.c:908-941 runs in each " +
+  "clause's initial silence, and only the utterance's first has a unit here); the slope of " +
+  "the final fall (ph_draw.c:3795-3887) comes out steeper than DECtalk's in some phrases and " +
+  "is applied in some questions where DECtalk applies none, so its tcumdur, nframb or " +
+  "boundary inputs are not all DECtalk's; and the emphasis pulse (1509-1552) and the " +
+  "end-of-clause drop (3929-3969) are not ported";
+const CNK_REASON =
+  "the chink is the voice's constant: target_ap, which ph_draw.c:1555-1982 raises in voiced " +
+  "obstruents, is not ported";
 
 const GAP_REASONS: Readonly<Record<string, string>> = {
   length: TIMING_REASON,
@@ -90,8 +100,8 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   A6: AMPLITUDE_REASON,
   AB: AMPLITUDE_REASON,
   AG: AREA_REASON,
-  PS: AREA_REASON,
-  CNK: AREA_REASON,
+  PS: PS_REASON,
+  CNK: CNK_REASON,
   AL: AREA_REASON,
   ABLADE: AREA_REASON,
   ATB: AREA_REASON,
@@ -100,7 +110,6 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   UE: AREA_REASON,
   PLACE: AREA_REASON,
   A2_CODE: AREA_REASON,
-  F4: F4_REASON,
 };
 
 const loaded = DECTALK_CORPUS_FILES.map((fileName) => {

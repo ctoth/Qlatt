@@ -65,6 +65,11 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // Rendering F0 clause by clause, as DECtalk restarts it at every clause,
 // regenerates dectalk-english "Gag, gang; go!", its only snapshot of more
 // than one clause.
+// The packet words of phases/articulation.yaml regenerate all four
+// dectalk-english snapshots: every frame gains PS, CNK and AG, and F4 becomes
+// the voice's 3500 on every frame. Nothing else changes: with those four
+// params dropped, scripts/review-track-fields.ts prints the same hashes, times
+// included, for this tree and for master 20b91b67 on all four phrases.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

@@ -32,6 +32,12 @@ export type FrameParameter = {
   qlatt: string;
   /** True for AV, TLT and F0, which DECtalk does not delay (ph_claus.c:771-792). */
   sourceClock: boolean;
+  /**
+   * True when a packet whose track event lacks the key counts as differing.
+   * Without it a parameter the frontend never emits would compare nowhere and
+   * so appear to match.
+   */
+  required?: boolean;
 };
 
 const US_PHONE = 1 << 8;
@@ -238,6 +244,12 @@ const out =
   (frame: DectalkTraceFrame): number | null =>
     finiteNumber(frame.out[key]);
 
+/** A packet word the `-lt` trace does not print, by its packet-word name. */
+const area =
+  (key: string) =>
+  (frame: DectalkTraceFrame): number | null =>
+    finiteNumber(frame.area?.[key]);
+
 export const FRAME_PARAMETERS: readonly FrameParameter[] = [
   {
     label: "F0",
@@ -260,6 +272,48 @@ export const FRAME_PARAMETERS: readonly FrameParameter[] = [
   { label: "A6", oracleValue: out("A6"), qlatt: "A6", sourceClock: false },
   { label: "AB", oracleValue: out("AB"), qlatt: "AB", sourceClock: false },
   { label: "TLT", oracleValue: out("TLT"), qlatt: "TL", sourceClock: true },
+  // The words DECtalk's synthesizer builds voicing and noise from
+  // (VTM/vtmiont.c:660-683), under the track's names and in the packet's own
+  // integer scale. Two names differ from the packet's because the track
+  // already uses them: AREA_N is OUT_AN (the track's AN is a nasal amplitude)
+  // and A2_CODE is the raw OUT_A2 control code (the track's A2 is a level;
+  // the A2 row above decodes the code to that level).
+  { label: "AG", oracleValue: area("AG"), qlatt: "AG", sourceClock: false, required: true },
+  { label: "PS", oracleValue: area("PS"), qlatt: "PS", sourceClock: false, required: true },
+  { label: "CNK", oracleValue: area("CNK"), qlatt: "CNK", sourceClock: false, required: true },
+  { label: "AL", oracleValue: area("AL"), qlatt: "AL", sourceClock: false, required: true },
+  {
+    label: "ABLADE",
+    oracleValue: area("ABLADE"),
+    qlatt: "ABLADE",
+    sourceClock: false,
+    required: true,
+  },
+  { label: "ATB", oracleValue: area("ATB"), qlatt: "ATB", sourceClock: false, required: true },
+  {
+    label: "AREA_N",
+    oracleValue: area("AN"),
+    qlatt: "AREA_N",
+    sourceClock: false,
+    required: true,
+  },
+  { label: "DC", oracleValue: area("DC"), qlatt: "DC", sourceClock: false, required: true },
+  { label: "UE", oracleValue: area("UE"), qlatt: "UE", sourceClock: false, required: true },
+  {
+    label: "PLACE",
+    oracleValue: area("PLACE"),
+    qlatt: "PLACE",
+    sourceClock: false,
+    required: true,
+  },
+  {
+    label: "A2_CODE",
+    oracleValue: out("A2"),
+    qlatt: "A2_CODE",
+    sourceClock: false,
+    required: true,
+  },
+  { label: "F4", oracleValue: area("F4"), qlatt: "F4", sourceClock: false, required: true },
 ];
 
 export function eventIndexAt(track: readonly TrackEvent[], timeSec: number): number {
@@ -279,6 +333,8 @@ export function eventIndexAt(track: readonly TrackEvent[], timeSec: number): num
 export type ParameterComparison = {
   compared: number;
   mismatched: number;
+  /** Of `mismatched`: packets whose track event lacks a required key. */
+  missing: number;
   sumAbs: number;
   maxAbs: number;
   firstMismatch: { packet: number; dectalk: number; qlatt: number } | null;
@@ -308,7 +364,7 @@ export function compareTrackToFrames(
   const parameters: Record<string, ParameterComparison> = Object.fromEntries(
     FRAME_PARAMETERS.map((parameter) => [
       parameter.label,
-      { compared: 0, mismatched: 0, sumAbs: 0, maxAbs: 0, firstMismatch: null },
+      { compared: 0, mismatched: 0, missing: 0, sumAbs: 0, maxAbs: 0, firstMismatch: null },
     ]),
   );
   let segmentLabelsDiffer = 0;
@@ -326,8 +382,16 @@ export function compareTrackToFrames(
     for (const parameter of FRAME_PARAMETERS) {
       const dectalk = parameter.oracleValue(frame);
       const qlatt = qlattValue(event, parameter.qlatt);
-      if (dectalk == null || qlatt == null) continue;
+      if (dectalk == null) continue;
       const summary = parameters[parameter.label] as ParameterComparison;
+      if (qlatt == null) {
+        if (parameter.required) {
+          summary.compared += 1;
+          summary.mismatched += 1;
+          summary.missing += 1;
+        }
+        continue;
+      }
       const abs = Math.abs(qlatt - dectalk);
       summary.compared += 1;
       summary.sumAbs += abs;

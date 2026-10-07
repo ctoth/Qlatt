@@ -14,6 +14,9 @@
  *   F0, F1-F3, B1-B3, AV, AP, A2-A6, AB, TLT
  *             the track's value rounds to the integer DECtalk sent (F0 to the
  *             tenth of a hertz)
+ *   AG, PS, CNK, AL, ABLADE, ATB, AREA_N, DC, UE, PLACE, A2_CODE, F4
+ *             the same for the words DECtalk's synthesizer reads; a packet
+ *             where the track has no such value differs
  *
  * What does not match yet is listed per phrase in
  * test/fixtures/dectalk-oracle/<corpus>.frame-gaps.json, and that list is a
@@ -60,6 +63,14 @@ const AMPLITUDE_REASON =
   "synthesizer never reads these packet values: it recomputes them from area parameters the " +
   "packets do not record (VTM/vtmiont.c:660-683, 1300-1319)";
 
+const AREA_REASON =
+  "not emitted: the frontend has no port yet of the area, pressure and control-code words " +
+  "ph_draw.c:908-4193 computes (the words DECtalk's synthesizer actually reads, " +
+  "VTM/vtmiont.c:660-683)";
+const F4_REASON =
+  "the track's F4 is the Segment's inventory target; DECtalk sends the voice's fourth formant " +
+  "on every packet (ph_draw.c:4189, curspdef[SPD_F4])";
+
 const GAP_REASONS: Readonly<Record<string, string>> = {
   length: TIMING_REASON,
   segments: TIMING_REASON,
@@ -78,6 +89,18 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   A5: AMPLITUDE_REASON,
   A6: AMPLITUDE_REASON,
   AB: AMPLITUDE_REASON,
+  AG: AREA_REASON,
+  PS: AREA_REASON,
+  CNK: AREA_REASON,
+  AL: AREA_REASON,
+  ABLADE: AREA_REASON,
+  ATB: AREA_REASON,
+  AREA_N: AREA_REASON,
+  DC: AREA_REASON,
+  UE: AREA_REASON,
+  PLACE: AREA_REASON,
+  A2_CODE: AREA_REASON,
+  F4: F4_REASON,
 };
 
 const loaded = DECTALK_CORPUS_FILES.map((fileName) => {
@@ -101,9 +124,8 @@ describe("DECtalk frame gate", () => {
       });
 
       // AG, AL, AN, ABLADE, PS, CNK, DC, UE, F4, ATB and PLACE are what
-      // DECtalk's synthesizer builds voicing and noise from. The frontend
-      // does not emit them yet, so nothing is compared: this only keeps the
-      // oracle for that port complete.
+      // DECtalk's synthesizer builds voicing and noise from. The phrase tests
+      // below compare them; this keeps the oracle complete.
       it("has the synthesizer's area words for every packet", () => {
         for (const id of ids) {
           const recorded = fixture.entries[id];

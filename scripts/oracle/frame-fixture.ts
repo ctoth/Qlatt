@@ -37,8 +37,8 @@ export type FrameFixtureColumn = (typeof FRAME_FIXTURE_COLUMNS)[number];
  * name and index in the packet (OUT_* in PH/ph_defs.h:559-604). The `-lt`
  * trace does not print them; they come from the `P` record of the shared
  * instrumented copy (scripts/oracle/dectalk-debug/vtm-trace.md on branch
- * dsp/dectalk-vtm). The frontend emits none of them yet, so the gate does
- * not compare them: they are here as the oracle for that port.
+ * dsp/dectalk-vtm). The gate compares them under the track names listed in
+ * frame-parameters.ts.
  */
 export const FRAME_FIXTURE_AREA_WORDS = [
   ["F4", 22],
@@ -189,7 +189,13 @@ export function decodeFrameFixtureEntry(entry: FrameFixtureEntry): DectalkTraceF
   }
   const at = (column: FrameFixtureColumn, index: number): number =>
     columns[column][index] as number;
+  const areaColumns = FRAME_FIXTURE_AREA_COLUMNS.map(
+    (column) => [column, decodeFrameFixtureAreaColumn(entry, column)] as const,
+  );
   return Array.from({ length: entry.packets }, (_, index) => ({
+    area: Object.fromEntries(
+      areaColumns.map(([column, values]) => [column, values[index] as number]),
+    ),
     frame: index,
     timeFrames: index,
     tcum: 0,

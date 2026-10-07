@@ -1,6 +1,6 @@
 import { cloneValue, isPlainObject } from "../yaml-loader";
 import { validateExpressionSyntax } from "./cel-expressions";
-import { FRAME_COUNTERS } from "./hrg/frame-program";
+import { FRAME_COUNTERS, FRAME_GROUP_COUNTERS } from "./hrg/frame-program";
 import { parseRecognitionConfig } from "./recognition-config";
 import * as S from "./struct-schema";
 
@@ -42,15 +42,19 @@ const ALLOWED_FRAME_PROGRAM_FIELDS = new Set([
   "frame_ms",
   "lead_in_frames",
   "features",
+  "group",
   "registers",
   "outputs",
   "write",
   "tag",
   "citations",
 ]);
-const FRAME_UNIT_VARIABLES = ["u", "p", "n", "params"] as const;
+/** What a group's start and totals may read: a unit and its frame count. */
+const FRAME_GROUP_VARIABLES = ["u", "p", "n", "params", "f"] as const;
+/** What a rule's once-per-unit condition may read. */
+const FRAME_UNIT_VARIABLES = ["u", "p", "n", "params", "g"] as const;
 const FRAME_VARIABLES = [...FRAME_UNIT_VARIABLES, "r", "f"] as const;
-const FRAME_MEMBER_PATTERN = /(?<![.\w])([upnrf])\.([A-Za-z_][A-Za-z0-9_]*)/g;
+const FRAME_MEMBER_PATTERN = /(?<![.\w])([upnrfg])\.([A-Za-z_][A-Za-z0-9_]*)/g;
 const ALLOWED_RULE_FIELDS = new Set([
   ...FRAME_RULE_FIELDS,
   "apply",
@@ -3068,7 +3072,8 @@ function validateFramePrograms(
   const loweringColumns =
     lowering && Array.isArray(lowering.columns) ? new Set(lowering.columns.map(String)) : null;
   const counters = new Set<string>(FRAME_COUNTERS);
-  const declared = new Map<string, { features: Set<string>; registers: Set<string> }>();
+  type FrameNames = { features: Set<string>; registers: Set<string>; group: Set<string> };
+  const declared = new Map<string, FrameNames>();
 
   const checkTag = (tag: unknown, path: string, label: string): void => {
     if (typeof tag !== "string" || tag.length === 0) {
@@ -3085,7 +3090,7 @@ function validateFramePrograms(
     path: string,
     label: string,
     variables: readonly string[],
-    names: { features: Set<string>; registers: Set<string> },
+    names: FrameNames,
   ): void => {
     if (typeof expression !== "string" || expression.length === 0) {
       diagnostics.push(
@@ -3108,9 +3113,23 @@ function validateFramePrograms(
       const root = match[1] as string;
       const member = match[2] as string;
       if (!variables.includes(root)) continue;
-      const known = root === "r" ? names.registers : root === "f" ? counters : names.features;
+      const known =
+        root === "r"
+          ? names.registers
+          : root === "f"
+            ? counters
+            : root === "g"
+              ? names.group
+              : names.features;
       if (known.has(member)) continue;
-      const kind = root === "r" ? "register" : root === "f" ? "frame counter" : "unit feature";
+      const kind =
+        root === "r"
+          ? "register"
+          : root === "f"
+            ? "frame counter"
+            : root === "g"
+              ? "group counter or total"
+              : "unit feature";
       diagnostics.push(
         makeDiagnostic(
           "E_FRAME_NAME_UNKNOWN",
@@ -3136,7 +3155,11 @@ function validateFramePrograms(
 
   for (const [name, program] of Object.entries(programs)) {
     const path = `frame_programs.${name}`;
-    const names = { features: new Set<string>(), registers: new Set<string>() };
+    const names: FrameNames = {
+      features: new Set<string>(),
+      registers: new Set<string>(),
+      group: new Set<string>(FRAME_GROUP_COUNTERS),
+    };
     declared.set(name, names);
     if (!isPlainObject(program)) {
       diagnostics.push(
@@ -3297,6 +3320,54 @@ function validateFramePrograms(
         `${featurePath}.value`,
         `Frame program '${name}' feature '${feature}'`,
       );
+    }
+
+    if (program.group != null) {
+      const group = program.group;
+      const groupPath = `${path}.group`;
+      if (
+        !isPlainObject(group) ||
+        Object.keys(group).some((key) => key !== "start" && key !== "totals") ||
+        (group.totals != null && !isPlainObject(group.totals))
+      ) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_FRAME_PROGRAM_SCHEMA",
+            `Frame program '${name}' group must be { start: <expression>, totals: { <name>: <expression> } }`,
+            groupPath,
+          ),
+        );
+      } else {
+        if (group.start != null) {
+          checkFrameExpression(
+            group.start,
+            `${groupPath}.start`,
+            `Frame program '${name}' group start`,
+            FRAME_GROUP_VARIABLES,
+            names,
+          );
+        }
+        const totals = isPlainObject(group.totals) ? group.totals : {};
+        for (const [total, expression] of Object.entries(totals)) {
+          if (names.group.has(total)) {
+            diagnostics.push(
+              makeDiagnostic(
+                "E_FRAME_PROGRAM_SCHEMA",
+                `Frame program '${name}' group total '${total}' is declared twice or is a group counter`,
+                `${groupPath}.totals.${total}`,
+              ),
+            );
+          }
+          checkFrameExpression(
+            expression,
+            `${groupPath}.totals.${total}`,
+            `Frame program '${name}' group total '${total}'`,
+            FRAME_GROUP_VARIABLES,
+            names,
+          );
+        }
+        for (const total of Object.keys(totals)) names.group.add(total);
+      }
     }
 
     const registers = isPlainObject(program.registers) ? program.registers : {};

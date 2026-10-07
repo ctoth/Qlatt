@@ -23,6 +23,10 @@
  *         <name>:                # unit's first Item
  *           value: <expression>
  *           edge: <literal>      # value in the lead-in and beyond either end
+ *       group:                   # optional: units in groups (clauses, say)
+ *         start: <frame expression>    # units that start a group
+ *         totals:
+ *           <name>: <frame expression> # summed over the group's units
  *       registers:
  *         <name>: <number | boolean>   # value before the first frame
  *       outputs:
@@ -46,6 +50,7 @@
  *   u, p, n   features of this unit, the one before and the one after
  *   r         the registers
  *   f         counters, see FRAME_COUNTERS
+ *   g         the unit's group: FRAME_GROUP_COUNTERS and the declared totals
  *   params    rulepack parameters
  * Rules run in the order the phase lists them, each frame; the assignments of
  * a rule run in order and later ones see earlier ones.
@@ -76,6 +81,18 @@ export const FRAME_COUNTERS = [
   "prev_count",
   /** Frames in the unit after; 0 when there is none. */
   "next_count",
+] as const;
+
+/** The members of `g` every group has, beside its declared totals. */
+export const FRAME_GROUP_COUNTERS = [
+  /** Frame within the group, from 0. */
+  "frame",
+  /** Frames in the group. */
+  "frames",
+  /** Unit within the group, from 0. */
+  "unit",
+  /** Units in the group. */
+  "units",
 ] as const;
 
 export type FrameRegisterValue = number | boolean;
@@ -121,6 +138,15 @@ export interface FrameProgramRun {
   /** Feature values of the unit before the first and after the last. */
   edgeFeatures: Readonly<Record<string, unknown>>;
   params: unknown;
+  /**
+   * Units in groups (clauses, say). The first unit starts a group and so does
+   * every unit `start` accepts. `totals` are sums over a group's units of an
+   * expression read once per unit, known before the group's first frame.
+   */
+  group?: {
+    start: string | null;
+    totals: Readonly<Record<string, string>>;
+  };
 }
 
 function evaluateFrame(expression: string, context: unknown, where: string): unknown {
@@ -168,8 +194,7 @@ export function runFrameProgram(run: FrameProgramRun): FrameUnitResult[] {
   };
   const outputs = Object.entries(run.outputs);
   const results: FrameUnitResult[] = [];
-
-  for (let unitIndex = 0; unitIndex < run.units.length; unitIndex += 1) {
+  const enterUnit = (unitIndex: number): FrameUnit => {
     const unit = run.units[unitIndex] as FrameUnit;
     const previous = run.units[unitIndex - 1];
     const next = run.units[unitIndex + 1];
@@ -181,6 +206,49 @@ export function runFrameProgram(run: FrameProgramRun): FrameUnitResult[] {
     counters.prev_count = previous?.frames ?? 0;
     counters.next_count = next?.frames ?? 0;
     counters.index = 0;
+    return unit;
+  };
+
+  // Groups, before any frame runs: where each starts, and its totals.
+  const totalSpecs = Object.entries(run.group?.totals ?? {});
+  const groups: Record<string, number>[] = [];
+  const groupOfUnit: Record<string, number>[] = [];
+  for (let unitIndex = 0; unitIndex < run.units.length; unitIndex += 1) {
+    const unit = enterUnit(unitIndex);
+    const start = run.group?.start;
+    if (
+      unitIndex === 0 ||
+      (start != null && truthy(evaluateFrame(start, context, "group start"), "group start", start))
+    ) {
+      groups.push({
+        frame: 0,
+        frames: 0,
+        unit: 0,
+        units: 0,
+        ...Object.fromEntries(totalSpecs.map(([name]) => [name, 0])),
+      });
+    }
+    const group = groups[groups.length - 1] as Record<string, number>;
+    group.frames = (group.frames as number) + unit.frames;
+    group.units = (group.units as number) + 1;
+    for (const [name, expression] of totalSpecs) {
+      const where = `group total '${name}'`;
+      const value = evaluateFrame(expression, context, where);
+      if (typeof value !== "number" || !Number.isFinite(value)) {
+        throw new Error(
+          `E_FRAME_TOTAL_TYPE: ${where}: '${expression}' is ${String(value)}, not a number`,
+        );
+      }
+      group[name] = (group[name] as number) + value;
+    }
+    groupOfUnit.push(group);
+  }
+
+  for (let unitIndex = 0; unitIndex < run.units.length; unitIndex += 1) {
+    const unit = enterUnit(unitIndex);
+    const group = groupOfUnit[unitIndex] as Record<string, number>;
+    if (group !== groupOfUnit[unitIndex - 1]) group.unit = 0;
+    context.g = group;
 
     const active: FrameRule[] = [];
     for (const rule of run.rules) {
@@ -245,7 +313,9 @@ export function runFrameProgram(run: FrameProgramRun): FrameUnitResult[] {
         (columns[column] as number[])[index] = value;
       }
       counters.frame += 1;
+      group.frame = (group.frame as number) + 1;
     }
+    group.unit = (group.unit as number) + 1;
     results.push({ columns, fired: [...firings.values()] });
   }
   return results;

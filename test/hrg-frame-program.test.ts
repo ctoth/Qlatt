@@ -126,6 +126,47 @@ describe("frame program machine", () => {
     });
   });
 
+  it("groups units and knows a group's totals before its first frame", () => {
+    const results = runFrameProgram({
+      registers: { seen: 0 },
+      outputs: {
+        G_FRAME: "g.frame",
+        G_FRAMES: "g.frames",
+        G_UNIT: "g.unit",
+        G_UNITS: "g.units",
+        LOUD: "g.loud_frames",
+        LEFT: "g.loud_frames - r.seen",
+      },
+      edgeFeatures: { first: false, loud: false },
+      params: {},
+      group: { start: "u.first", totals: { loud_frames: "u.loud ? f.count : 0" } },
+      units: [
+        { features: { first: true, loud: true }, frames: 2 },
+        { features: { first: false, loud: false }, frames: 1 },
+        { features: { first: true, loud: true }, frames: 1 },
+        { features: { first: false, loud: true }, frames: 2 },
+      ],
+      rules: [
+        rule("reset", {
+          when: "g.frame == 0",
+          set: [{ register: "seen", value: "0", tag: "t" }],
+        }),
+        rule("count", {
+          unit: "u.loud && g.loud_frames > 2",
+          set: [{ register: "seen", value: "r.seen + 1", tag: "t" }],
+        }),
+      ],
+    });
+    const column = (name: string) => results.flatMap((result) => result.columns[name]);
+    expect(column("G_FRAME")).toEqual([0, 1, 2, 0, 1, 2]);
+    expect(column("G_FRAMES")).toEqual([3, 3, 3, 3, 3, 3]);
+    expect(column("G_UNIT")).toEqual([0, 0, 1, 0, 1, 1]);
+    expect(column("G_UNITS")).toEqual([2, 2, 2, 2, 2, 2]);
+    expect(column("LOUD")).toEqual([2, 2, 2, 3, 3, 3]);
+    // Only the second group has more than two loud frames to count down.
+    expect(column("LEFT")).toEqual([2, 2, 2, 2, 1, 0]);
+  });
+
   it("rejects a value of the wrong type and a condition that is not true or false", () => {
     const base = {
       registers: { level: 0 },
@@ -345,6 +386,26 @@ describe("frame program validation", () => {
         },
       }),
     ).toContain("E_RULE_FIELD_UNKNOWN rules.plain.when");
+  });
+
+  it("checks a group's expressions and every read of its totals", () => {
+    const grouped = {
+      group: { start: "u.open", totals: { open_frames: "u.open ? f.count : 0" } },
+      outputs: { LEVEL: "r.level", INDEX: "g.open_frames - g.frame" },
+    };
+    expect(codes(withProgram(grouped))).toEqual([]);
+    expect(codes(withProgram({ ...grouped, outputs: { LEVEL: "g.shut_frames" } }))).toContain(
+      "E_FRAME_NAME_UNKNOWN frame_programs.tank.outputs.LEVEL",
+    );
+    expect(
+      codes(withProgram({ ...grouped, group: { start: "r.level > 0", totals: {} } })),
+    ).toContain("E_CEL_INVALID frame_programs.tank.group.start");
+    expect(
+      codes(withProgram({ ...grouped, group: { start: "u.open", totals: { frames: "1" } } })),
+    ).toContain("E_FRAME_PROGRAM_SCHEMA frame_programs.tank.group.totals.frames");
+    expect(codes(withProgram({ ...grouped, group: { begin: "u.open" } }))).toContain(
+      "E_FRAME_PROGRAM_SCHEMA frame_programs.tank.group",
+    );
   });
 
   it("requires the rules of a program to sit in one phase", () => {

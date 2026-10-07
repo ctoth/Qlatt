@@ -56,6 +56,27 @@ frame_programs:
 - Every output column must be listed in `output.lowering.columns`, and `write`
   must be a declared feature of the relation.
 
+### Groups
+
+A rule sometimes needs to know how much of something is still to come, a
+clause's remaining frames for instance. A program may put its units in groups
+and declare sums over each group, which are known before the group's first
+frame:
+
+```yaml
+    group:
+      start: "u.clause_initial"            # units that start a group
+      totals:
+        voiced_frames: "u.voiced ? f.count : 0"
+```
+
+The first unit starts a group, and so does every unit `start` accepts. `start`
+and each total are frame expressions read once per unit; they may read `u`,
+`p`, `n`, `params` and `f` (of which `f.count` is the useful one), not `r`.
+Rules and outputs read the group as `g`: `g.frame` and `g.frames` (frame within
+the group from 0, frames in it), `g.unit` and `g.units`, and each total by
+name.
+
 ## Writing a rule
 
 ```yaml
@@ -83,6 +104,7 @@ rules:
 | `f.unit`, `f.units` | unit number from 0 (the lead-in is 0 when there is one), units in the run |
 | `f.frame`, `f.frames` | frame within the run from 0, frames in the run |
 | `f.prev_count`, `f.next_count` | frames in the unit before and after, 0 when there is none |
+| `g` | the unit's group, when the program declares groups |
 | `params` | rulepack parameters |
 
 `unit` may not read `r` or `f`. Both conditions must be true or false, not a

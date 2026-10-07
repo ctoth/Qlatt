@@ -2298,6 +2298,17 @@ function runFrameRules(
     units: machineUnits,
     edgeFeatures,
     params,
+    ...(isPlainObject(program.group)
+      ? {
+          group: {
+            start: typeof program.group.start === "string" ? program.group.start : null,
+            totals: (isPlainObject(program.group.totals) ? program.group.totals : {}) as Record<
+              string,
+              string
+            >,
+          },
+        }
+      : {}),
   });
   const lead = leadFrames > 0 ? results.shift() : undefined;
   const citationsByRule = new Map(rules.map((rule) => [rule.name, rule.citations]));

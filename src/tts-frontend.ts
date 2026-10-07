@@ -7,6 +7,7 @@ import {
   readLowerOptions,
   Utterance,
 } from "./declarative-frontend/hrg";
+import { FRAME_VALUES_SCHEMA, frameValueFeatures } from "./declarative-frontend/hrg/frame-program";
 import {
   GraphRuleEvaluationOwner,
   runGraphRuleEngine,
@@ -257,6 +258,9 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
   for (const [key, declaration] of Object.entries(declared)) {
     const schema = declaredFeatureSchema(declaration);
     if (schema) segmentFeatures[key] = schema;
+  }
+  for (const key of frameValueFeatures(spec.frame_programs)) {
+    segmentFeatures[key] = FRAME_VALUES_SCHEMA;
   }
   for (const key of Object.keys(inventory.base_params)) segmentFeatures[key] = { kind: "number" };
   for (const target of Object.values(inventory.phoneme_targets)) {
@@ -985,6 +989,7 @@ function buildTextToKlattTrackDetailed(
   };
   const lowered = lowerToFrames(utterance, lowerOptions, {
     f0Model: isLayeredF0Model(spec.f0_model) ? spec.f0_model : undefined,
+    frameValueFeatures: frameValueFeatures(spec.frame_programs),
     speakerParams,
     speakerSex: selectedVoice?.sex,
     silence: {

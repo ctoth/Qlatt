@@ -82,6 +82,7 @@ const MERGED_CHILD_ROOT_KEYS = new Set([
   "string_sets",
   "maps",
   "tags",
+  "frame_programs",
   "syllabification",
   "text_recognition",
   "phases",
@@ -143,6 +144,7 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
     "string_sets",
     "maps",
     "tags",
+    "frame_programs",
   ] as const) {
     const childDict = (child[key] ?? {}) as Record<string, unknown>;
     for (const [k, v] of Object.entries(childDict)) {

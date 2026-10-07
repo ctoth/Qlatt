@@ -1,5 +1,6 @@
 import { cloneValue, isPlainObject } from "../yaml-loader";
 import { validateExpressionSyntax } from "./cel-expressions";
+import { FRAME_COUNTERS } from "./hrg/frame-program";
 import { parseRecognitionConfig } from "./recognition-config";
 import * as S from "./struct-schema";
 
@@ -19,8 +20,39 @@ type PhaseSpec = {
   resolve_scalars: string[];
 };
 const ALLOWED_CUSTOM_RULE_OPS = new Set(["noop"]);
-const ALLOWED_RULE_KINDS = new Set(["scalar", "point", "postlexical", "structural", "f0_layer"]);
+const ALLOWED_RULE_KINDS = new Set([
+  "scalar",
+  "point",
+  "postlexical",
+  "structural",
+  "f0_layer",
+  "frame",
+]);
+/** Fields only a rule of kind `frame` has (hrg/frame-program.ts). */
+const FRAME_RULE_FIELDS = ["program", "unit", "when", "set"] as const;
+const ALLOWED_FRAME_RULE_FIELDS = new Set<string>([
+  ...FRAME_RULE_FIELDS,
+  "kind",
+  "citations",
+  "citation",
+]);
+const ALLOWED_FRAME_PROGRAM_FIELDS = new Set([
+  "relation",
+  "unit",
+  "frame_ms",
+  "lead_in_frames",
+  "features",
+  "registers",
+  "outputs",
+  "write",
+  "tag",
+  "citations",
+]);
+const FRAME_UNIT_VARIABLES = ["u", "p", "n", "params"] as const;
+const FRAME_VARIABLES = [...FRAME_UNIT_VARIABLES, "r", "f"] as const;
+const FRAME_MEMBER_PATTERN = /(?<![.\w])([upnrf])\.([A-Za-z_][A-Za-z0-9_]*)/g;
 const ALLOWED_RULE_FIELDS = new Set([
+  ...FRAME_RULE_FIELDS,
   "apply",
   "associate",
   "associate_tones",
@@ -2225,6 +2257,20 @@ function validateRules(
         ),
       );
     }
+    // A frame rule has no select, match or apply; validateFramePrograms
+    // checks its own shape and expressions.
+    if (r.kind === "frame") continue;
+    for (const field of FRAME_RULE_FIELDS) {
+      if (r[field] != null) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_RULE_FIELD_UNKNOWN",
+            `Rule '${name}' uses '${field}', which only a rule of kind 'frame' has`,
+            `rules.${name}.${field}`,
+          ),
+        );
+      }
+    }
 
     const select = isPlainObject(r.select) ? r.select : null;
     const matchName = typeof r.match === "string" && r.match.length > 0 ? r.match : null;
@@ -2987,6 +3033,445 @@ const stringSetsSchema = S.record({
       },
     }),
 });
+
+function isEmptyRuleValue(value: unknown): boolean {
+  if (value == null || value === false || value === "") return true;
+  if (Array.isArray(value)) return value.length === 0;
+  return isPlainObject(value) && Object.keys(value).length === 0;
+}
+
+/**
+ * Frame programs and the rules of kind `frame` (hrg/frame-program.ts).
+ *
+ * Checked at load: every program field; that the relation, the feature the
+ * program writes, the tags and the output columns are declared; every
+ * expression's syntax and variables; every `u.`, `p.`, `n.`, `r.` and `f.`
+ * member against the program's features, registers and the frame counters;
+ * every `params.policy` path; and that the rules of one program sit in one
+ * phase, since they run together, frame by frame, in that phase's order.
+ */
+function validateFramePrograms(
+  spec: PlainObject,
+  phases: readonly PhaseSpec[],
+  relationByName: Map<string, unknown>,
+  predicates: PlainObject,
+  policyState: PolicyValidationState,
+  tagVocabulary: Set<string>,
+  parameters: unknown,
+  diagnostics: ValidationDiagnostic[],
+): void {
+  const relationNames = new Set(relationByName.keys());
+  const rules = isPlainObject(spec.rules) ? spec.rules : {};
+  const programs = isPlainObject(spec.frame_programs) ? spec.frame_programs : {};
+  const lowering =
+    isPlainObject(spec.output) && isPlainObject(spec.output.lowering) ? spec.output.lowering : null;
+  const loweringColumns =
+    lowering && Array.isArray(lowering.columns) ? new Set(lowering.columns.map(String)) : null;
+  const counters = new Set<string>(FRAME_COUNTERS);
+  const declared = new Map<string, { features: Set<string>; registers: Set<string> }>();
+
+  const checkTag = (tag: unknown, path: string, label: string): void => {
+    if (typeof tag !== "string" || tag.length === 0) {
+      diagnostics.push(makeDiagnostic("E_RULE_TAG_REQUIRED", `${label} requires tag`, path));
+    } else if (tagVocabulary.size > 0 && !tagVocabulary.has(tag)) {
+      diagnostics.push(
+        makeDiagnostic("E_RULE_TAG_UNKNOWN", `${label} uses undeclared tag '${tag}'`, path),
+      );
+    }
+  };
+
+  const checkFrameExpression = (
+    expression: unknown,
+    path: string,
+    label: string,
+    variables: readonly string[],
+    names: { features: Set<string>; registers: Set<string> },
+  ): void => {
+    if (typeof expression !== "string" || expression.length === 0) {
+      diagnostics.push(
+        makeDiagnostic("E_FRAME_EXPRESSION", `${label} must be a CEL expression`, path),
+      );
+      return;
+    }
+    const syntaxError = validateExpressionSyntax(expression, { variables });
+    if (syntaxError) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_CEL_INVALID",
+          `${label} has invalid CEL expression: ${syntaxError}`,
+          path,
+        ),
+      );
+      return;
+    }
+    for (const match of expression.matchAll(FRAME_MEMBER_PATTERN)) {
+      const root = match[1] as string;
+      const member = match[2] as string;
+      if (!variables.includes(root)) continue;
+      const known = root === "r" ? names.registers : root === "f" ? counters : names.features;
+      if (known.has(member)) continue;
+      const kind = root === "r" ? "register" : root === "f" ? "frame counter" : "unit feature";
+      diagnostics.push(
+        makeDiagnostic(
+          "E_FRAME_NAME_UNKNOWN",
+          `${label} reads undeclared ${kind} '${root}.${member}'`,
+          path,
+        ),
+      );
+    }
+    for (const match of expression.matchAll(PARAMETER_PATH_PATTERN)) {
+      const parameterPath = (match[1] as string).slice(1);
+      if (isPlainObject(parameters) && !parameterPathExists(parameters, parameterPath)) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_PARAM_UNKNOWN",
+            `${label} references unknown parameter 'params.${parameterPath}'`,
+            path,
+          ),
+        );
+      }
+    }
+    validatePolicyReferencesAndLiterals(expression, path, label, diagnostics, policyState);
+  };
+
+  for (const [name, program] of Object.entries(programs)) {
+    const path = `frame_programs.${name}`;
+    const names = { features: new Set<string>(), registers: new Set<string>() };
+    declared.set(name, names);
+    if (!isPlainObject(program)) {
+      diagnostics.push(
+        makeDiagnostic("E_FRAME_PROGRAM_SCHEMA", `Frame program '${name}' must be an object`, path),
+      );
+      continue;
+    }
+    for (const key of Object.keys(program)) {
+      if (!ALLOWED_FRAME_PROGRAM_FIELDS.has(key)) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_FRAME_PROGRAM_SCHEMA",
+            `Frame program '${name}' uses unknown field '${key}'`,
+            `${path}.${key}`,
+          ),
+        );
+      }
+    }
+    if (!Array.isArray(program.citations) || program.citations.length === 0) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_RULE_CITATIONS_REQUIRED",
+          `Frame program '${name}' requires citations`,
+          `${path}.citations`,
+        ),
+      );
+    }
+    checkTag(program.tag, `${path}.tag`, `Frame program '${name}'`);
+    const relationName = program.relation;
+    if (typeof relationName !== "string" || !relationByName.has(relationName)) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_RULE_RELATION_UNKNOWN",
+          `Frame program '${name}' references unknown relation '${String(relationName)}'`,
+          `${path}.relation`,
+        ),
+      );
+    }
+    const declaredFields = relationDeclaredFields(relationByName, relationName);
+    if (typeof program.write !== "string" || program.write.length === 0) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_FRAME_PROGRAM_SCHEMA",
+          `Frame program '${name}' requires write, the feature that receives its columns`,
+          `${path}.write`,
+        ),
+      );
+    } else if (declaredFields.size > 0 && !declaredFields.has(program.write)) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_RULE_FEATURE_UNKNOWN",
+          `Frame program '${name}' writes undeclared feature '${program.write}' on relation '${String(relationName)}'`,
+          `${path}.write`,
+        ),
+      );
+    }
+
+    // Evaluated by the rule engine against Items, like a select.where.
+    const checkItemExpression = (expression: unknown, expressionPath: string, label: string) => {
+      if (typeof expression !== "string" || expression.length === 0) {
+        diagnostics.push(
+          makeDiagnostic("E_FRAME_EXPRESSION", `${label} must be a CEL expression`, expressionPath),
+        );
+        return;
+      }
+      const before = diagnostics.length;
+      validateConditionIdentifiers(
+        expression,
+        CORE_CEL_VARIABLES,
+        relationNames,
+        diagnostics,
+        expressionPath,
+      );
+      if (diagnostics.length > before) return;
+      validateExpressionReferences(
+        expression,
+        relationByName,
+        relationName,
+        CORE_ITEM_VARIABLES,
+        parameters,
+        diagnostics,
+        expressionPath,
+      );
+      validatePolicyReferencesAndLiterals(
+        expression,
+        expressionPath,
+        label,
+        diagnostics,
+        policyState,
+      );
+    };
+
+    if (program.unit != null) {
+      validateConditionIdentifiers(
+        program.unit,
+        CORE_CEL_VARIABLES,
+        relationNames,
+        diagnostics,
+        `${path}.unit`,
+      );
+      validateConditionSpec(
+        program.unit,
+        relationByName,
+        relationName,
+        relationNames,
+        predicates,
+        diagnostics,
+        `${path}.unit`,
+        `Frame program '${name}' unit`,
+        {
+          expandPredicateBodies: true,
+          policyState,
+          variables: CORE_CEL_VARIABLES,
+          itemVariables: CORE_ITEM_VARIABLES,
+          parameters,
+        },
+      );
+    }
+    checkItemExpression(program.frame_ms, `${path}.frame_ms`, `Frame program '${name}' frame_ms`);
+    if (program.lead_in_frames != null) {
+      checkItemExpression(
+        program.lead_in_frames,
+        `${path}.lead_in_frames`,
+        `Frame program '${name}' lead_in_frames`,
+      );
+    }
+
+    const features = isPlainObject(program.features) ? program.features : {};
+    if (program.features != null && !isPlainObject(program.features)) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_FRAME_PROGRAM_SCHEMA",
+          `Frame program '${name}' features must be a map`,
+          `${path}.features`,
+        ),
+      );
+    }
+    for (const [feature, declaration] of Object.entries(features)) {
+      names.features.add(feature);
+      const featurePath = `${path}.features.${feature}`;
+      if (
+        !isPlainObject(declaration) ||
+        !Object.hasOwn(declaration, "edge") ||
+        Object.keys(declaration).some((key) => key !== "value" && key !== "edge") ||
+        !["string", "number", "boolean"].includes(typeof declaration.edge)
+      ) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_FRAME_PROGRAM_SCHEMA",
+            `Frame program '${name}' feature '${feature}' must be { value: <expression>, edge: <string, number or boolean> }`,
+            featurePath,
+          ),
+        );
+        continue;
+      }
+      checkItemExpression(
+        declaration.value,
+        `${featurePath}.value`,
+        `Frame program '${name}' feature '${feature}'`,
+      );
+    }
+
+    const registers = isPlainObject(program.registers) ? program.registers : {};
+    if (!isPlainObject(program.registers) || Object.keys(registers).length === 0) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_FRAME_PROGRAM_SCHEMA",
+          `Frame program '${name}' requires registers`,
+          `${path}.registers`,
+        ),
+      );
+    }
+    for (const [register, initial] of Object.entries(registers)) {
+      names.registers.add(register);
+      if (
+        typeof initial !== "boolean" &&
+        !(typeof initial === "number" && Number.isFinite(initial))
+      ) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_FRAME_PROGRAM_SCHEMA",
+            `Frame program '${name}' register '${register}' must start at a number or a boolean`,
+            `${path}.registers.${register}`,
+          ),
+        );
+      }
+    }
+
+    const outputs = isPlainObject(program.outputs) ? program.outputs : {};
+    if (!isPlainObject(program.outputs) || Object.keys(outputs).length === 0) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_FRAME_PROGRAM_SCHEMA",
+          `Frame program '${name}' requires outputs`,
+          `${path}.outputs`,
+        ),
+      );
+    }
+    for (const [column, expression] of Object.entries(outputs)) {
+      if (loweringColumns && !loweringColumns.has(column)) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_FRAME_OUTPUT_COLUMN",
+            `Frame program '${name}' output '${column}' is not in output.lowering.columns`,
+            `${path}.outputs.${column}`,
+          ),
+        );
+      }
+      checkFrameExpression(
+        expression,
+        `${path}.outputs.${column}`,
+        `Frame program '${name}' output '${column}'`,
+        FRAME_VARIABLES,
+        names,
+      );
+    }
+  }
+
+  const phasesByProgram = new Map<string, Set<string>>();
+  const phaseByRule = new Map<string, string>();
+  for (const phase of phases) {
+    for (const ruleName of Array.isArray(phase.rules) ? phase.rules : []) {
+      phaseByRule.set(ruleName, phase.name);
+    }
+  }
+
+  for (const [name, rule] of Object.entries(rules)) {
+    if (!isPlainObject(rule) || rule.kind !== "frame") continue;
+    const path = `rules.${name}`;
+    for (const [key, value] of Object.entries(rule)) {
+      if (!ALLOWED_FRAME_RULE_FIELDS.has(key) && !isEmptyRuleValue(value)) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_RULE_FIELD_UNKNOWN",
+            `Frame rule '${name}' uses '${key}', which a rule of kind 'frame' does not have`,
+            `${path}.${key}`,
+          ),
+        );
+      }
+    }
+    const names = typeof rule.program === "string" ? declared.get(rule.program) : undefined;
+    if (!names) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_FRAME_PROGRAM_UNKNOWN",
+          `Frame rule '${name}' names unknown frame program '${String(rule.program)}'`,
+          `${path}.program`,
+        ),
+      );
+      continue;
+    }
+    const phaseName = phaseByRule.get(name);
+    if (phaseName !== undefined) {
+      const used = phasesByProgram.get(rule.program as string) ?? new Set<string>();
+      used.add(phaseName);
+      phasesByProgram.set(rule.program as string, used);
+    }
+    if (rule.unit != null) {
+      checkFrameExpression(
+        rule.unit,
+        `${path}.unit`,
+        `Frame rule '${name}' unit`,
+        FRAME_UNIT_VARIABLES,
+        names,
+      );
+    }
+    if (rule.when != null) {
+      checkFrameExpression(
+        rule.when,
+        `${path}.when`,
+        `Frame rule '${name}' when`,
+        FRAME_VARIABLES,
+        names,
+      );
+    }
+    if (!Array.isArray(rule.set) || rule.set.length === 0) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_FRAME_RULE_SCHEMA",
+          `Frame rule '${name}' requires a non-empty set`,
+          `${path}.set`,
+        ),
+      );
+      continue;
+    }
+    rule.set.forEach((assignment: unknown, index: number) => {
+      const assignmentPath = `${path}.set[${index}]`;
+      if (
+        !isPlainObject(assignment) ||
+        Object.keys(assignment).some((key) => !["register", "value", "tag"].includes(key))
+      ) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_FRAME_RULE_SCHEMA",
+            `Frame rule '${name}' set entry must be { register, value, tag }`,
+            assignmentPath,
+          ),
+        );
+        return;
+      }
+      if (typeof assignment.register !== "string" || !names.registers.has(assignment.register)) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_FRAME_NAME_UNKNOWN",
+            `Frame rule '${name}' sets undeclared register '${String(assignment.register)}'`,
+            `${assignmentPath}.register`,
+          ),
+        );
+      }
+      checkTag(assignment.tag, `${assignmentPath}.tag`, `Frame rule '${name}' set entry`);
+      checkFrameExpression(
+        // A YAML number or boolean is a constant assignment.
+        typeof assignment.value === "number" || typeof assignment.value === "boolean"
+          ? String(assignment.value)
+          : assignment.value,
+        `${assignmentPath}.value`,
+        `Frame rule '${name}' register '${String(assignment.register)}'`,
+        FRAME_VARIABLES,
+        names,
+      );
+    });
+  }
+
+  for (const [program, used] of phasesByProgram) {
+    if (used.size > 1) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_FRAME_PROGRAM_PHASES",
+          `Frame program '${program}' has rules in phases ${[...used].join(", ")}; they run together and must be in one`,
+          `frame_programs.${program}`,
+        ),
+      );
+    }
+  }
+}
 
 function validateStringSets(spec: PlainObject, diagnostics: ValidationDiagnostic[]): void {
   if (!Object.hasOwn(spec, "string_sets")) return;
@@ -3764,6 +4249,16 @@ export function validateDslSpec(
     policyState,
     tagVocabulary,
     inventoryPhonemes,
+    referenceParameters,
+    diagnostics,
+  );
+  validateFramePrograms(
+    spec,
+    phases,
+    relationByName,
+    predicates,
+    policyState,
+    tagVocabulary,
     referenceParameters,
     diagnostics,
   );

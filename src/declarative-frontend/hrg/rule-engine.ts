@@ -7,6 +7,13 @@ import {
 } from "../inventory";
 import { type CompiledRulepack, rulepackMapOrigins } from "../rule-pack";
 import { trajectoryControlWindows } from "../trajectory-control-windows";
+import {
+  type FrameRegisterValue,
+  type FrameRule,
+  type FrameUnit,
+  type FrameUnitResult,
+  runFrameProgram,
+} from "./frame-program";
 import type { Item } from "./item";
 import { evalPath, isNavOp } from "./path";
 import type { HrgNode } from "./relation";
@@ -2142,6 +2149,215 @@ function finalizePhase(
   if (captureTooling) utterance.checkpoint(phase.name, "after");
 }
 
+/**
+ * Run one frame program (frame-program.ts) for the rules of kind `frame` a
+ * phase lists, and write each Item's frames to the program's feature.
+ *
+ * Units: the first Item starts one, and so does every Item the program's
+ * `unit` condition accepts; any other Item extends the unit before it. An
+ * Item has round(duration / frame_ms) frames. Unit features are read once per
+ * unit through that unit's transaction, so the decision that records a unit's
+ * frames depends on the decisions behind every feature it read.
+ *
+ * Provenance is one transaction a unit and one write an Item, not one a
+ * frame or a rule: the write's citations are the program's and those of each
+ * rule that assigned in the unit, and the value written to the unit's first
+ * Item lists those rules with the first and last frame they assigned in
+ * (`fired`). A frame's column value points at that write.
+ */
+function runFrameRules(
+  utterance: Utterance,
+  owner: GraphRuleEvaluationOwner,
+  spec: CompiledRulepack,
+  phase: CompiledRulepack["phases"][number],
+  programName: string,
+  params: Readonly<Record<string, unknown>>,
+  predicates: Readonly<Record<string, unknown>>,
+  captureTooling: boolean,
+  inventory?: GraphInventoryResource,
+): void {
+  const program = spec.frame_programs[programName];
+  if (!isPlainObject(program) || typeof program.relation !== "string") {
+    throw new Error(`E_FRAME_PROGRAM_UNKNOWN: frame program '${programName}' is not declared`);
+  }
+  const relationName = program.relation;
+  const writeKey = String(program.write);
+  const tag = String(program.tag);
+  const programCitations = stringArray(program.citations);
+  const rules: FrameRule[] = [];
+  for (const ruleName of phase.rules) {
+    const rule = spec.rules[ruleName];
+    if (!isPlainObject(rule) || rule.kind !== "frame" || rule.program !== programName) continue;
+    rules.push({
+      name: ruleName,
+      unit: typeof rule.unit === "string" ? rule.unit : null,
+      when: typeof rule.when === "string" ? rule.when : null,
+      set: (Array.isArray(rule.set) ? rule.set : []).filter(isPlainObject).map((assignment) => ({
+        register: String(assignment.register),
+        value: String(assignment.value),
+        tag: String(assignment.tag),
+      })),
+      citations: stringArray(rule.citations),
+    });
+  }
+  const items = activeItems(utterance.relation(relationName).listItems());
+  if (items.length === 0) return;
+
+  const begin = (reason: string): HrgTransaction =>
+    utterance.beginTransaction({
+      ruleId: `${phase.name}:${programName}`,
+      phase: phase.name,
+      tag,
+      reason,
+      citations: programCitations,
+    });
+  const contextAt = (transaction: HrgTransaction, index: number): EvaluationContext =>
+    buildEvaluationContext({
+      utterance,
+      transaction,
+      owner,
+      items,
+      index,
+      params,
+      relationName,
+      predicates,
+      inventory,
+    });
+
+  // Grouping reads belong to no unit's decision; this transaction is never
+  // committed, like the one of a select that does not match.
+  const grouping = begin(`group ${relationName} Items into units of ${programName}`);
+  const starts: number[] = [0];
+  for (let index = 1; index < items.length; index += 1) {
+    if (
+      program.unit == null ||
+      evaluateCondition(program.unit, contextAt(grouping, index), predicates).matched
+    ) {
+      starts.push(index);
+    }
+  }
+  const framePeriodMs = evaluate(program.frame_ms, contextAt(grouping, 0));
+  if (typeof framePeriodMs !== "number" || !(framePeriodMs > 0)) {
+    throw new Error(
+      `E_FRAME_PERIOD: frame program '${programName}' frame_ms is ${String(framePeriodMs)}`,
+    );
+  }
+  const leadFrames =
+    program.lead_in_frames == null ? 0 : evaluate(program.lead_in_frames, contextAt(grouping, 0));
+  if (typeof leadFrames !== "number" || !Number.isInteger(leadFrames) || leadFrames < 0) {
+    throw new Error(
+      `E_FRAME_LEAD_IN: frame program '${programName}' lead_in_frames is ${String(leadFrames)}`,
+    );
+  }
+
+  const featureSpecs = Object.entries(isPlainObject(program.features) ? program.features : {});
+  const edgeFeatures: Record<string, unknown> = {};
+  for (const [name, declaration] of featureSpecs) {
+    edgeFeatures[name] = isPlainObject(declaration) ? declaration.edge : null;
+  }
+  const units = starts.map((start, unitIndex) => {
+    const members = items.slice(start, starts[unitIndex + 1] ?? items.length);
+    const transaction = begin(
+      `frames of ${members.map((item) => item.id).join(", ")} by ${programName}`,
+    );
+    const context = contextAt(transaction, start);
+    const features: Record<string, unknown> = {};
+    for (const [name, declaration] of featureSpecs) {
+      features[name] = evaluate(isPlainObject(declaration) ? declaration.value : null, context);
+    }
+    const memberFrames = members.map((item) => {
+      const duration = transaction.read(item, "duration");
+      if (typeof duration !== "number" || !Number.isFinite(duration) || duration < 0) {
+        throw new Error(
+          `E_FRAME_DURATION: Item '${item.id}' has no finite non-negative duration for frame program '${programName}'`,
+        );
+      }
+      const exact = duration / framePeriodMs;
+      const frames = Math.round(exact);
+      if (Math.abs(exact - frames) > 1e-6) {
+        utterance.diagnostics.warn(
+          "Frame program rounded a duration that is not a whole number of frames",
+          { itemId: item.id, program: programName, durationMs: duration, framePeriodMs, frames },
+          "HRG_FRAME_DURATION_ROUNDED",
+        );
+      }
+      return frames;
+    });
+    return { members, memberFrames, transaction, features };
+  });
+
+  const machineUnits: FrameUnit[] = units.map((unit) => ({
+    features: unit.features,
+    frames: unit.memberFrames.reduce((sum, frames) => sum + frames, 0),
+  }));
+  if (leadFrames > 0) machineUnits.unshift({ features: edgeFeatures, frames: leadFrames });
+  const results = runFrameProgram({
+    registers: program.registers as Record<string, FrameRegisterValue>,
+    outputs: program.outputs as Record<string, string>,
+    rules,
+    units: machineUnits,
+    edgeFeatures,
+    params,
+  });
+  const lead = leadFrames > 0 ? results.shift() : undefined;
+  const citationsByRule = new Map(rules.map((rule) => [rule.name, rule.citations]));
+
+  units.forEach((unit, unitIndex) => {
+    const result = results[unitIndex] as FrameUnitResult;
+    const fired = unitIndex === 0 && lead ? [...lead.fired, ...result.fired] : result.fired;
+    unit.transaction.cite(fired.flatMap((firing) => citationsByRule.get(firing.rule) ?? []));
+    let offset = 0;
+    unit.members.forEach((item, memberIndex) => {
+      const frames = unit.memberFrames[memberIndex] as number;
+      const leadHere = unitIndex === 0 && memberIndex === 0 && lead ? leadFrames : 0;
+      const columns: Record<string, number[]> = {};
+      for (const [column, values] of Object.entries(result.columns)) {
+        columns[column] = [
+          ...(leadHere > 0 ? (lead?.columns[column] ?? []) : []),
+          ...values.slice(offset, offset + frames),
+        ];
+      }
+      unit.transaction.set(
+        item,
+        writeKey,
+        {
+          period_ms: framePeriodMs,
+          lead: leadHere,
+          columns,
+          // On the unit's first Item: the rules that assigned in this unit
+          // (and, with `lead`, in the lead-in before it), by unit frame.
+          fired:
+            memberIndex === 0
+              ? [
+                  ...(leadHere > 0 ? (lead?.fired ?? []) : []).map((firing) => ({
+                    ...firing,
+                    lead_in: true,
+                  })),
+                  ...result.fired.map((firing) => ({ ...firing, lead_in: false })),
+                ]
+              : [],
+        },
+        tag,
+      );
+      offset += frames;
+    });
+    const committed = unit.transaction.commit();
+    if (captureTooling) {
+      const itemIds = Object.freeze(unit.members.map((item) => item.id));
+      for (const ruleName of new Set(fired.map((firing) => firing.rule))) {
+        utterance._recordRuleAttempt({
+          status: "fired",
+          phase: phase.name,
+          rule: ruleName,
+          itemIds,
+          journalLength: utterance.journal().length,
+          transactionId: committed.id,
+        });
+      }
+    }
+  });
+}
+
 export function runGraphRuleEngine(
   utterance: Utterance,
   spec: CompiledRulepack,
@@ -2169,9 +2385,30 @@ export function runGraphRuleEngine(
   for (const phase of spec.phases) {
     if (selectedPhases && !selectedPhases.has(phase.name)) continue;
     if (captureTooling) utterance.checkpoint(phase.name, "before");
+    const frameProgramsRun = new Set<string>();
     for (const ruleName of phase.rules) {
       const rule = spec.rules[ruleName];
       if (!isPlainObject(rule)) continue;
+      if (rule.kind === "frame") {
+        // The frame rules of a program run together, every frame, in the
+        // order the phase lists them; the first one met runs them all.
+        const programName = String(rule.program);
+        if (!frameProgramsRun.has(programName)) {
+          frameProgramsRun.add(programName);
+          runFrameRules(
+            utterance,
+            evaluationOwner,
+            spec,
+            phase,
+            programName,
+            params,
+            predicates,
+            captureTooling,
+            options.inventory,
+          );
+        }
+        continue;
+      }
       const matches = isPlainObject(rule.select)
         ? selectMatches(
             utterance,

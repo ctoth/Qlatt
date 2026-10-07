@@ -23,6 +23,7 @@ import {
 } from "../../input/vq-channels";
 import type { KlattFrame } from "../../tts-frontend-types";
 import { isPlainObject } from "../../yaml-loader";
+import { frameValueIndex, isFrameValues } from "./frame-program";
 import { buildHolmesTransitions, sampleHolmesCurve } from "./holmes-transitions";
 import type { Item } from "./item";
 import { applyScalarOp } from "./scalar-op";
@@ -169,6 +170,12 @@ export interface LowerOptions {
 
 export type LowerContext = {
   f0Model?: LayeredF0ModelConfig;
+  /**
+   * Segment features that hold per-frame column values written by frame
+   * programs (frame-program.ts, FrameValues). Each frame of such a feature is
+   * an event point, and its columns override the Segment's own values.
+   */
+  frameValueFeatures?: readonly string[];
   speakerParams?: Readonly<Record<string, unknown>>;
   speakerSex?: string;
   silence?: {
@@ -962,6 +969,7 @@ export function lowerToFrames(
   const segmentTotalMs = previousEndMs ?? 0;
 
   const paramKeys = options.columns.slice();
+  const frameValueFeatures = context.frameValueFeatures ?? [];
   const smoothTypes = new Set(options.transitions.blend.smooth_types);
   const transitionsByItem = new Map<Item, ResolvedSegmentTransition[]>();
   const holmes = buildHolmesTransitions(timings, utterance);
@@ -2281,6 +2289,47 @@ export function lowerToFrames(
     }
   };
 
+  /**
+   * Columns a frame program computed for this Item (frame-program.ts): the
+   * value of the frame that covers `segmentOffsetMs`. A negative offset reads
+   * the lead-in frames before the Item.
+   */
+  const applyFrameValues = (
+    params: Record<string, number>,
+    provenance: Record<string, string>,
+    item: Item,
+    segmentOffsetMs: number,
+  ): void => {
+    for (const feature of frameValueFeatures) {
+      const values = item.get(feature);
+      if (!isFrameValues(values)) continue;
+      const decisionId = item.latestWrite(feature)?.decisionId;
+      for (const [key, column] of Object.entries(values.columns)) {
+        if (column.length === 0 || !paramKeys.includes(key)) continue;
+        params[key] = column[frameValueIndex(values, segmentOffsetMs, column.length)] as number;
+        if (decisionId) provenance[key] = decisionId;
+      }
+    }
+  };
+  /** Offsets from the Item's start at which a frame of its frame values begins. */
+  const frameValueOffsets = (item: Item): number[] => {
+    const offsets: number[] = [];
+    for (const feature of frameValueFeatures) {
+      const values = item.get(feature);
+      if (!isFrameValues(values)) continue;
+      const frames = Math.max(0, ...Object.values(values.columns).map((column) => column.length));
+      for (let index = 0; index < frames; index += 1) {
+        offsets.push((index - values.lead) * values.period_ms);
+      }
+    }
+    return offsets;
+  };
+  /** Add `value` unless the set already holds that instant up to rounding. */
+  const addEventTime = (times: Set<number>, value: number): void => {
+    for (const existing of times) if (Math.abs(existing - value) <= 1e-6) return;
+    times.add(value);
+  };
+
   const appendFrame = (
     timeMs: number,
     item?: Item,
@@ -2293,10 +2342,15 @@ export function lowerToFrames(
     const provenance: Record<string, string> = {};
     if (!item && silenceEdge) {
       applySilenceEdgeParams(params, provenance, segmentOffsetMs, silenceEdge);
+      // The initial silence is the lead-in of the first Segment's frames.
+      if (silenceEdge === "initial" && timings[0]) {
+        applyFrameValues(params, provenance, timings[0].item, segmentOffsetMs);
+      }
     }
     if (item) {
       applyItemParams(params, provenance, item);
       applyItemTransitions(params, provenance, item, segmentOffsetMs);
+      applyFrameValues(params, provenance, item, segmentOffsetMs);
       for (const [key, curve] of holmes.curves.get(item) ?? []) {
         if (!paramKeys.includes(key)) continue;
         params[key] = sampleHolmesCurve(curve, segmentOffsetMs);
@@ -2359,6 +2413,12 @@ export function lowerToFrames(
       initialEventTimes.add(point.timeMs);
     }
   }
+  if (firstTiming) {
+    for (const offsetMs of frameValueOffsets(firstTiming.item)) {
+      const timeMs = initialSilenceMs + offsetMs;
+      if (offsetMs < -1e-6 && timeMs > 1e-6) addEventTime(initialEventTimes, timeMs);
+    }
+  }
   for (const timeMs of [...initialEventTimes].sort((left, right) => left - right)) {
     appendFrame(
       timeMs,
@@ -2412,6 +2472,9 @@ export function lowerToFrames(
           offsets.add(point.timeMs - segmentStartMs);
         }
       }
+    }
+    for (const offsetMs of frameValueOffsets(timing.item)) {
+      if (offsetMs > 1e-6 && offsetMs < timing.durationMs - 1e-6) addEventTime(offsets, offsetMs);
     }
     for (const offsetMs of [...offsets].sort((left, right) => left - right)) {
       const controlTimeMs = initialSilenceMs + timing.startMs + offsetMs;

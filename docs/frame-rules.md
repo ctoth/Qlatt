@@ -1,0 +1,143 @@
+# Frame rules
+
+A rule of kind `frame` is a guarded assignment to a named register, run once
+for every control frame of the utterance. The frame rules of one program run
+together, in the order their phase lists them, and what they leave in the
+registers is sampled into track columns every frame.
+
+Use them for a parameter that depends on its own past: a value that moves a
+fraction of the remaining distance toward a target each frame, a counter that
+steps while a condition holds, a flag one phone sets and the next clears. A
+Segment target with a transition cannot express that. Everything else (a
+target, a duration, an F0 command) stays a `scalar`, `point` or `f0_layer`
+rule.
+
+Code: `src/declarative-frontend/hrg/frame-program.ts` (the machine),
+`runFrameRules` in `hrg/rule-engine.ts` (units, transactions),
+`validateFramePrograms` in `validation.ts`, `applyFrameValues` in
+`hrg/lowering.ts`. Tests: `test/hrg-frame-program.test.ts`.
+
+## Declaring a program
+
+```yaml
+frame_programs:
+  tank:
+    relation: Segment              # the Items the frames run over, in order
+    unit: "current.valve != 'pipe'" # Items that start a unit
+    frame_ms: "params.policy.tank.frame_ms"
+    lead_in_frames: "2"            # a silent unit before the first Item
+    features:                      # read once per unit
+      open:
+        value: "current.valve == 'open'"
+        edge: false                # value in the lead-in and beyond either end
+    registers:                     # value before the first frame
+      level: 0
+      target: 0
+    outputs:                       # sampled after the rules, every frame
+      LEVEL: "r.level"
+    write: tank_frames             # Segment feature that receives the columns
+    tag: tank
+    citations:
+      - "..."
+```
+
+- A **unit** is the stretch of Items one set of features describes. The first
+  Item starts a unit, and so does every Item `unit` accepts; any other Item
+  extends the unit before it. Without `unit` every Item is its own unit.
+- An Item has `round(duration / frame_ms)` frames. A duration that is not a
+  whole number of frames is rounded and reported (`HRG_FRAME_DURATION_ROUNDED`).
+- `unit`, `frame_ms`, `lead_in_frames` and each feature's `value` are ordinary
+  rule-engine expressions: `current`, `prev`, `next`, navigation, predicates
+  and `functions:` macros all work. `frame_ms` and `lead_in_frames` are read
+  at the first Item.
+- The **lead-in** is a unit of `lead_in_frames` frames before the first Item,
+  with every feature at its `edge` value. It exists because lowering's initial
+  silence is not a Segment.
+- Every output column must be listed in `output.lowering.columns`, and `write`
+  must be a declared feature of the relation.
+
+## Writing a rule
+
+```yaml
+rules:
+  tank_target_open:
+    kind: frame
+    program: tank
+    unit: "u.open"                 # once per unit
+    when: "f.index == 0"           # every frame of a unit that passed `unit`
+    set:
+      - register: target
+        value: "params.policy.tank.fill"
+        tag: tank
+    citations:
+      - "..."
+```
+
+`unit`, `when` and `value` are frame expressions: CEL over
+
+| name | holds |
+|------|-------|
+| `u`, `p`, `n` | the features of this unit, the one before and the one after |
+| `r` | the registers |
+| `f.index`, `f.count` | frame within the unit from 0, frames in the unit |
+| `f.unit`, `f.units` | unit number from 0 (the lead-in is 0 when there is one), units in the run |
+| `f.frame`, `f.frames` | frame within the run from 0, frames in the run |
+| `f.prev_count`, `f.next_count` | frames in the unit before and after, 0 when there is none |
+| `params` | rulepack parameters |
+
+`unit` may not read `r` or `f`. Both conditions must be true or false, not a
+number. The assignments of a rule run in order and later ones see earlier
+ones. A register keeps the type it was declared with, and the machine never
+resets one: a rule that wants a reset writes it. Integer arithmetic is written
+out, for example `floor((r.target - r.level) / 4)` for an arithmetic shift
+right by two.
+
+A frame rule has no `select`, `match` or `apply`. All frame rules of a program
+must be listed in one phase; that phase should come after the last rule that
+changes a duration.
+
+## What is checked at load
+
+Citations on every rule and program; a declared tag on the program and on
+every assignment; the relation, the written feature and the output columns;
+the syntax and variables of every expression; every `u.`, `p.`, `n.`, `r.` and
+`f.` member against the program's features, registers and the counters; every
+`params` path; the one-phase rule.
+
+## What the engine writes
+
+For each unit, one transaction that writes the program's feature on every Item
+of the unit:
+
+```yaml
+period_ms: 5
+lead: 2                 # frames in `columns` that belong before this Item
+columns:
+  LEVEL: [0, 0, 4, 6, 7]
+fired:                  # on the unit's first Item
+  - { rule: tank_target_open, first: 0, last: 0, count: 1, lead_in: false }
+  - { rule: tank_approach, first: 0, last: 4, count: 5, lead_in: false }
+```
+
+`fired` lists each rule that assigned in the unit with the first and last unit
+frame in which it did. The write's citations are the program's plus those of
+every rule in `fired`, and its parents are the decisions behind each feature
+the unit read. Provenance therefore grows with Items, not with frames or
+rules: to ask why a column has its value at a frame, follow the frame's
+provenance id to this write and read `fired` for the rules active at that
+frame.
+
+## What lowering does
+
+Each frame of the feature is an event point. At an event inside an Item the
+frame covering that instant overrides the Item's own value for each column;
+the initial silence reads the first Item's lead-in frames. Frame values are
+applied after Segment targets and transitions and before control windows.
+
+## Cost
+
+Features are read once per unit through the rule engine. `unit` is evaluated
+once per rule per unit, and `when` and the assignments once per frame, in a
+context of plain objects, which costs well under a microsecond per expression
+where a rule-engine `select` costs tens. `scripts/measure-frontend-time.ts`
+reports frontend time per second of speech.

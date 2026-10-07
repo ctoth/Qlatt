@@ -146,7 +146,7 @@ Text → normalizeText() → transcribeText() → [inventory lookup]
 2. **Declarative HRG Rule Engine** (`src/declarative-frontend/hrg/rule-engine.ts`)
    - Processes rule phases defined in `public/rules/frontends/<frontend-id>/phases/*.yaml`
    - Reads and writes typed Items and Relations through atomic transactions
-   - Rule kinds: `scalar` (modify values), `point` (insert F0 targets), `postlexical` (splice/replace tokens), `structural` (expand phonemes into sub-segments)
+   - Rule kinds: `scalar` (modify values), `point` (insert F0 targets), `postlexical` (splice/replace tokens), `structural` (expand phonemes into sub-segments), `f0_layer` (insert a command or tilt for the layered F0 model), `frame` (guarded assignments to named registers, run every control frame; see `docs/frame-rules.md`)
    - Rules use CEL expressions for conditions and values
    - Navigation is relation-aware and preserves shared Item identity
    - Every committed write is versioned and provenance-stamped from the rule's
@@ -232,6 +232,7 @@ These are registered with the CEL evaluator for use in semantics expressions.
 ## Documentation
 
 - `docs/parameter-scheduling.md` - How parameters flow from text to audio (track structure, ramp vs step, semantics)
+- `docs/frame-rules.md` - Rules of kind `frame`: per-frame registers, how they are declared, validated, run and traced
 - `docs/adding-a-synthesizer.md` - Guide for adding new synthesizer configurations
 - `docs/synthesizer-architecture.md` - Overview of synthesizer architecture
 - `docs/yaml-graph-tests.md` - Testing YAML graph definitions

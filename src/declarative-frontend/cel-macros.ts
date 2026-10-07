@@ -497,7 +497,7 @@ export function expandSpecCelMacros<T extends Record<string, unknown>>(
       unmatched: expandSpeaking(spec.text_recognition.unmatched, "text_recognition.unmatched"),
     };
   }
-  for (const root of ["predicates", "patterns", "rules"]) {
+  for (const root of ["predicates", "patterns", "rules", "frame_programs"]) {
     const entries = spec[root];
     if (!isPlainObject(entries)) continue;
     expanded[root] = Object.fromEntries(

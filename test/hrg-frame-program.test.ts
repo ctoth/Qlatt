@@ -167,6 +167,24 @@ describe("frame program machine", () => {
     expect(column("LEFT")).toEqual([2, 2, 2, 2, 1, 0]);
   });
 
+  it("has max, min, abs and pow beside the context-free functions", () => {
+    const results = runFrameProgram({
+      registers: { level: -7, shift: 2 },
+      outputs: {
+        MAX: "max([r.level, 0])",
+        MIN: "min(r.level, 3)",
+        ABS: "abs(r.level)",
+        // An arithmetic shift right: floor, not truncation.
+        SHIFT: "floor(r.level / pow(2, r.shift))",
+      },
+      edgeFeatures: {},
+      params: {},
+      units: [{ features: {}, frames: 1 }],
+      rules: [],
+    });
+    expect(results[0]?.columns).toEqual({ MAX: [0], MIN: [-7], ABS: [7], SHIFT: [-2] });
+  });
+
   it("rejects a value of the wrong type and a condition that is not true or false", () => {
     const base = {
       registers: { level: 0 },
@@ -328,6 +346,15 @@ describe("frame program validation", () => {
     expect(codes(withProgram({ outputs: { LEVEL: "r.depth" } }))).toContain(
       "E_FRAME_NAME_UNKNOWN frame_programs.tank.outputs.LEVEL",
     );
+  });
+
+  it("rejects a function that reads Items in a frame expression", () => {
+    expect(codes(withRule("tank_approach", { when: "word_count() > 2" }))).toContain(
+      "E_FRAME_FUNCTION rules.tank_approach.when",
+    );
+    expect(
+      codes(withProgram({ outputs: { LEVEL: "max([r.level, 0])", INDEX: "f.index" } })),
+    ).toEqual([]);
   });
 
   it("keeps registers and counters out of the once-per-unit condition", () => {

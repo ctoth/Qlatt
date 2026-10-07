@@ -80,7 +80,11 @@ for (const corpusFile of DECTALK_CORPUS_FILES) {
     const cells = columns.map((column) => {
       const dectalk = column.oracleValue(frame);
       const here = qlattValue(event, column.qlatt);
-      if (dectalk != null && here != null && Math.abs(here - dectalk) > parameterTolerance(column)) {
+      if (
+        dectalk != null &&
+        here != null &&
+        Math.abs(here - dectalk) > parameterTolerance(column)
+      ) {
         differs = true;
       }
       return `${show(dectalk)}/${show(here)}`;

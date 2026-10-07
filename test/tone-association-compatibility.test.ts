@@ -62,6 +62,9 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // them, and the removal of the comma rises (which the live routine never
 // issues in English) regenerate dectalk-english "Did Bob buy a blue
 // balloon?" and "Gag, gang; go!": F0 only, checked by the frame gate.
+// Rendering F0 clause by clause, as DECtalk restarts it at every clause,
+// regenerates dectalk-english "Gag, gang; go!", its only snapshot of more
+// than one clause.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

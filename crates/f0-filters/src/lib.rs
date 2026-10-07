@@ -262,12 +262,45 @@ struct RenderInputs<'a> {
 /// Generic layer behavior follows the former TypeScript renderer; DECtalk's
 /// coefficient path follows the cited native integer recurrences.
 fn render(inp: &RenderInputs, out: &mut [f64]) {
+    // ph_draw.c writes each -lt cell after the active Ph_drwt02.c path has
+    // completed the following F0 control update. Run and discard that first
+    // internal cell for the complete DECtalk coefficient+speaker renderer.
+    let output_phase_lead = usize::from(
+        inp.filter_mode == FILTER_COEFFICIENT_2POLE && inp.has_scale,
+    );
+    render_with_lead(inp, out, output_phase_lead, 0);
+}
+
+/// `render` for a stretch of one continuous output. `output_phase_lead` is
+/// the number of leading internal frames to run and discard: a stretch after
+/// the first (a later clause) passes 0, because the frame the default
+/// discards is, there, the one that follows the previous stretch.
+/// `elapsed_frames` is how many frames the earlier stretches ran: the
+/// pseudojitter phases are never reset between clauses (Ph_drwt02.c:2278-2289
+/// advances them every frame; the clause initialisation at 1652-1810 leaves
+/// them alone), so they start that far along.
+fn render_with_lead(
+    inp: &RenderInputs,
+    out: &mut [f64],
+    output_phase_lead: usize,
+    elapsed_frames: usize,
+) {
     let mut filter_state = IIRFilterState::default();
     let mut one_pole_y = 0.0f64;
     let mut coefficient_2pole_y1 = 0i32;
     let mut coefficient_2pole_y2 = 0i32;
     let mut dectalk_timecos3 = 0i32;
     let mut dectalk_timecos5 = 0i32;
+    for _ in 0..elapsed_frames {
+        dectalk_timecos5 += 131;
+        if dectalk_timecos5 > 4096 {
+            dectalk_timecos5 -= 4096;
+        }
+        dectalk_timecos3 += 79;
+        if dectalk_timecos3 > 4096 {
+            dectalk_timecos3 -= 4096;
+        }
+    }
 
     // Pre-fill filter state to avoid startup transient (init_total computed in TS
     // — it is exact: persistent cmd.value sums + profile point[0]).
@@ -308,13 +341,6 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
 
     let frame_period = inp.frame_period;
     let profile_duration_frames = (inp.total_duration / frame_period).round().max(1.0) as i32;
-    // ph_draw.c writes each -lt cell after the active Ph_drwt02.c path has
-    // completed the following F0 control update. Run and discard that first
-    // internal cell for the complete DECtalk coefficient+speaker renderer.
-    let output_phase_lead = usize::from(
-        inp.filter_mode == FILTER_COEFFICIENT_2POLE && inp.has_scale,
-    );
-
     for frame in 0..inp.num_frames + output_phase_lead {
         let time = (frame as f64) * frame_period;
 
@@ -768,7 +794,15 @@ pub unsafe extern "C" fn render_f0(
         cmds: &cmds,
         profile_points,
     };
-    render(&inputs, out);
+    // scalars[18], when present, is the number of leading internal frames to
+    // run and discard, and scalars[19] the frames earlier stretches ran;
+    // absent, the renderer's own defaults apply.
+    if scalars_len > 18 && s[18] >= 0.0 {
+        let elapsed = if scalars_len > 19 && s[19] > 0.0 { s[19] as usize } else { 0 };
+        render_with_lead(&inputs, out, s[18] as usize, elapsed);
+    } else {
+        render(&inputs, out);
+    }
     RENDER_OK
 }
 

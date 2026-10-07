@@ -49,8 +49,7 @@ const TIMING_REASON =
   "the phrase's allophones or their durations are not DECtalk's (KNOWN_GAPS in dectalk-oracle-gate.test.ts)";
 const F0_REASON =
   "not ported: the glottalization dip before a word-initial vowel (Ph_drwt02.c:2264-2275, " +
-  "4040-4130), and the restart of every F0 state at each clause (Ph_drwt02.c:1652-1810): " +
-  "a phrase of more than one clause is still rendered as one";
+  "4040-4130). Not every remaining phrase has been traced to it";
 const FORMANT_REASON =
   "lowering blends Segment targets; DECtalk draws each parameter from ph_setar.c and p_us_st1.c " +
   "targets with ph_draw.c:343-460's forward and backward smoothing, then delays it one frame " +

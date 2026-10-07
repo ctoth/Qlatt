@@ -550,6 +550,13 @@ function renderLayeredF0(
   model: LayeredF0ModelConfig,
   totalDurationSec: number,
   speakerParams?: Readonly<Record<string, unknown>>,
+  /**
+   * Leading internal frames the kernel runs and discards. Omitted: the
+   * kernel's own default. A stretch that continues an earlier one passes 0.
+   */
+  outputLeadFrames?: number,
+  /** Frames the earlier stretches of the same output ran (kernel scalars[19]). */
+  elapsedFrames = 0,
 ): Array<{ time: number; f0: number }> {
   const framePeriod = requirePositiveNumber(model.frame_period_sec, "f0_model.frame_period_sec");
   const frameCount = Math.ceil(totalDurationSec / framePeriod) + 1;
@@ -721,6 +728,7 @@ function renderLayeredF0(
     maxHz,
     initialTotal,
     scalePivot,
+    ...(outputLeadFrames == null ? [] : [outputLeadFrames, elapsedFrames]),
   ];
   const exports = getF0FilterExports();
   const allocate = (values: readonly number[]): { ptr: number; len: number } => {
@@ -1670,6 +1678,8 @@ export function lowerToFrames(
     const usesSegmentalControllerClock = f0ControlItems.some(
       (item) => f0Model.layers[String(item.get("layer"))]?.type === "dectalk_segmental",
     );
+    // Command times before the clamp at 0, in seconds, by command index.
+    const unclampedCommandTimes: number[] = [];
     const commands = f0ControlItems.map((item): F0LayerCommand => {
       const timeMs = utterance.resolveAnchorTime(item);
       const layer = item.get("layer");
@@ -1708,6 +1718,7 @@ export function lowerToFrames(
         layerType === "persistent" || layerType === "impulse" || layerType === "glide"
           ? timeMs + (usesSegmentalControllerClock ? 0 : initialSilenceMs)
           : timeMs;
+      unclampedCommandTimes.push(outputTimeMs / 1000);
       return {
         layer,
         time: Math.max(0, outputTimeMs) / 1000,
@@ -1717,6 +1728,118 @@ export function lowerToFrames(
         ...(typeof tag === "string" ? { tag } : {}),
       };
     });
+    // A controller-clock contour restarts at every clause: Ph_drwt02.c:1652-1810
+    // re-initialises the baseline, both filters, the hat and the impulse when
+    // a clause's first frame is drawn, and Ph_inton2.c:484-496 starts that
+    // clause's command clock afresh. A clause is the run of segmental commands
+    // from one opening-pause command up to the next.
+    const isSegmentalCommand = (command: F0LayerCommand): boolean =>
+      f0Model.layers[command.layer]?.type === "dectalk_segmental";
+    const acousticCommands = commands.slice();
+    const clauseStarts = usesSegmentalControllerClock
+      ? acousticCommands.flatMap((command, index) =>
+          isSegmentalCommand(command) && command.tag === "f0_segmental_initial_silence"
+            ? [index]
+            : [],
+        )
+      : [];
+    const renderClauses = (): Array<{ time: number; f0: number }> => {
+      const framePeriod = f0Model.frame_period_sec;
+      const clauses = clauseStarts.map((startIndex, clauseIndex) => {
+        const firstPhoneTime = unclampedCommandTimes[startIndex] ?? 0;
+        const openingFrames = acousticCommands[startIndex]?.durationFrames ?? 0;
+        return {
+          // The opening pause of a later clause lies before its first phone.
+          startTime:
+            clauseIndex === 0
+              ? Number.NEGATIVE_INFINITY
+              : firstPhoneTime - openingFrames * framePeriod,
+          members: [] as number[],
+        };
+      });
+      // Commands arrive in rule order; put them in time order, keeping rule
+      // order among equal times (an opening pause before its first phone, a
+      // stress impulse before a question gesture).
+      const timeOrder = acousticCommands
+        .map((_, index) => index)
+        .sort(
+          (left, right) =>
+            (unclampedCommandTimes[left] ?? 0) - (unclampedCommandTimes[right] ?? 0) ||
+            left - right,
+        );
+      let segmentalOwner = 0;
+      for (const index of timeOrder) {
+        const time = unclampedCommandTimes[index] ?? 0;
+        let owner = 0;
+        for (let clauseIndex = 0; clauseIndex < clauses.length; clauseIndex += 1) {
+          if ((clauses[clauseIndex]?.startTime ?? 0) <= time + 1e-9) owner = clauseIndex;
+        }
+        // A segmental command belongs to the clause whose opening pause it
+        // follows, whatever its time: a clause's closing pause holds the next
+        // clause's opening frames.
+        if (isSegmentalCommand(acousticCommands[index] as F0LayerCommand)) {
+          const startsClause = clauseStarts.indexOf(index);
+          if (startsClause >= 0) segmentalOwner = startsClause;
+          owner = segmentalOwner;
+        }
+        clauses[owner]?.members.push(index);
+      }
+      const output: Array<{ time: number; f0: number }> = [];
+      let elapsedControllerFrames = 0;
+      clauses.forEach((clause, clauseIndex) => {
+        const anchors: Array<{ acousticTime: number; controllerTime: number }> = [];
+        let clauseFrames = 0;
+        for (const index of clause.members) {
+          const command = acousticCommands[index] as F0LayerCommand;
+          if (!isSegmentalCommand(command)) continue;
+          const acousticTime = unclampedCommandTimes[index] ?? 0;
+          const existing = anchors.find((anchor) => anchor.acousticTime === acousticTime);
+          if (existing) existing.controllerTime = clauseFrames * framePeriod;
+          else anchors.push({ acousticTime, controllerTime: clauseFrames * framePeriod });
+          clauseFrames += command.durationFrames ?? 0;
+        }
+        anchors.sort((left, right) => left.acousticTime - right.acousticTime);
+        const outputOffsetFrames = output.length;
+        const clauseCommands = clause.members.map((index): F0LayerCommand => {
+          const command = acousticCommands[index] as F0LayerCommand;
+          const layerType = f0Model.layers[command.layer]?.type;
+          const time = unclampedCommandTimes[index] ?? 0;
+          let localTime = 0;
+          if (layerType === "persistent" || layerType === "impulse" || layerType === "glide") {
+            const anchor =
+              anchors.find((candidate) => candidate.acousticTime >= time - 1e-9) ?? anchors.at(-1);
+            if (anchor) {
+              localTime =
+                Math.round(
+                  Math.max(0, anchor.controllerTime - (anchor.acousticTime - time)) / framePeriod,
+                ) * framePeriod;
+            }
+          }
+          commands[index] = { ...command, time: outputOffsetFrames * framePeriod + localTime };
+          return { ...command, time: localTime };
+        });
+        // The first clause's first controller frame is never emitted, which is
+        // the kernel's default lead; a later clause's first frame is the one
+        // after the previous clause's last.
+        const frames = renderLayeredF0(
+          clauseCommands,
+          f0Model,
+          clauseFrames * framePeriod,
+          context.speakerParams,
+          clauseIndex === 0 ? undefined : 0,
+          elapsedControllerFrames,
+        );
+        elapsedControllerFrames += clauseFrames;
+        const isLast = clauseIndex === clauses.length - 1;
+        const keep = isLast
+          ? frames.length
+          : Math.min(frames.length, clauseIndex === 0 ? clauseFrames - 1 : clauseFrames);
+        for (let frame = 0; frame < keep; frame += 1) {
+          output.push({ time: output.length * framePeriod, f0: frames[frame]?.f0 ?? 0 });
+        }
+      });
+      return output;
+    };
     if (usesSegmentalControllerClock) {
       // Ph_inton2.c and pht0draw() share the ordered allodurs[] controller
       // clock. Preserve a command's offset from its following acoustic
@@ -1757,12 +1880,15 @@ export function lowerToFrames(
     }
     let rendered: Array<{ time: number; f0: number }>;
     try {
-      rendered = renderLayeredF0(
-        commands,
-        f0Model,
-        (initialSilenceMs + segmentTotalMs + finalSilenceMs) / 1000,
-        context.speakerParams,
-      );
+      rendered =
+        clauseStarts.length > 1
+          ? renderClauses()
+          : renderLayeredF0(
+              commands,
+              f0Model,
+              (initialSilenceMs + segmentTotalMs + finalSilenceMs) / 1000,
+              context.speakerParams,
+            );
     } catch (error) {
       utterance.diagnostics.error(
         "Selected layered F0 model failed final realization",

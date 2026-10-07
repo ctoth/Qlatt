@@ -149,9 +149,34 @@ export interface FrameProgramRun {
   };
 }
 
+function numbers(args: unknown[]): number[] {
+  const values = (args.length === 1 && Array.isArray(args[0]) ? args[0] : args).map(Number);
+  if (values.length === 0 || values.some((value) => !Number.isFinite(value))) {
+    throw new Error("expects finite numbers");
+  }
+  return values;
+}
+
+/**
+ * The functions a frame expression may call beside the context-free ones every
+ * CEL environment has (floor, ceil, round, mod, get, ...). The rule engine's
+ * other functions read Items and are not available here.
+ */
+export const FRAME_FUNCTIONS: Readonly<Record<string, (...args: unknown[]) => unknown>> =
+  Object.freeze({
+    max: (...args: unknown[]) => Math.max(...numbers(args)),
+    min: (...args: unknown[]) => Math.min(...numbers(args)),
+    abs: (value: unknown) => Math.abs(Number(value)),
+    pow: (value: unknown, exponent: unknown) => Number(value) ** Number(exponent),
+  });
+
 function evaluateFrame(expression: string, context: unknown, where: string): unknown {
   try {
-    return evaluateExpression(expression, context);
+    return evaluateExpression(
+      expression,
+      context,
+      FRAME_FUNCTIONS as Record<string, (...args: unknown[]) => unknown>,
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`E_FRAME_EXPRESSION: ${where}: '${expression}': ${message}`);

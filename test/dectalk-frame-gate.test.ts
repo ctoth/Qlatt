@@ -77,9 +77,17 @@ const PS_REASON =
   "is applied in some questions where DECtalk applies none, so its tcumdur, nframb or " +
   "boundary inputs are not all DECtalk's; and the emphasis pulse (1509-1552) and the " +
   "end-of-clause drop (3929-3969) are not ported";
+// The glottal rules are ported and "cat." is exact. What is known of the rest:
+const AG_REASON =
+  "packet 0 of a phrase that starts with a voiced phone: DECtalk sends there the area after " +
+  "the clause's first controller frame, the one whose other words are never sent " +
+  "(ph_claus.c:759-766), and the lead-in starts a frame later. Beyond that, not ported: the " +
+  "early exits of the end-of-clause spread (ph_draw.c:3604-3624), the nasal case of the " +
+  "initial silence (1146-1190), a reset for clauses after the first; and differences inside " +
+  "phrases that have not been traced to a rule yet";
 const CNK_REASON =
-  "the chink is the voice's constant: target_ap, which ph_draw.c:1555-1982 raises in voiced " +
-  "obstruents, is not ported";
+  "target_ap follows ph_draw.c:1555-1864 and 966; the phrases that still differ have not been " +
+  "traced, and a clause after the first gets no reset (ph_draw.c:929-930)";
 
 const GAP_REASONS: Readonly<Record<string, string>> = {
   length: TIMING_REASON,
@@ -99,7 +107,7 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   A5: AMPLITUDE_REASON,
   A6: AMPLITUDE_REASON,
   AB: AMPLITUDE_REASON,
-  AG: AREA_REASON,
+  AG: AG_REASON,
   PS: PS_REASON,
   CNK: CNK_REASON,
   AL: AREA_REASON,

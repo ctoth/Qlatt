@@ -22,10 +22,11 @@ version: v1
 #   tcumdur   g.counted_frames + unemitted_initial_frames
 #   nphone    g.unit
 #
-# Ported so far: PS (subglottal pressure), CNK with the chink target held at
-# zero, F4. Not ported, and listed where the C has them: the emphasis pulse
-# (ph_draw.c:1509-1552), the end-of-clause pressure drop of 3929-3969, and
-# every other word of the section.
+# Ported so far: PS (subglottal pressure), AG (glottal area), CNK (chink) and
+# F4. Not ported, and named where the C has them: the emphasis pulse
+# (ph_draw.c:1509-1552), the end-of-clause pressure drop of 3929-3969, the two
+# early exits of the end-of-clause glottal spread (3604-3624), the nasal case
+# of the initial silence (1146-1190), and every other word of the section.
 #
 # Only the first clause of an utterance is known to be numbered as DECtalk
 # numbers it. A later clause has no initial-silence unit of its own here.
@@ -43,6 +44,34 @@ functions:
     description: Whether a Segment is the dummy vowel that releases a plosive into silence.
     citations:
       - "DECtalk 4.63 ph_inton1.c:1780-1820 (Rule 9)"
+  artic_prev_unit:
+    params: [item]
+    body: "item == null ? null : look_back_pred(item, 8, 'is_articulation_unit')"
+    description: The first Segment of the DECtalk allophone before this one, dummy vowels included.
+    citations:
+      - "DECtalk 4.63 ph_inton1.c:1808-1820 (the dummy vowel is allophone nphon + 1)"
+  artic_has:
+    params: [item, feature]
+    body: >-
+      artic_is_dummy(item) ? feature in params.policy.timing.features.IX
+      : dectalk_has(item, feature)
+    description: A us_featb bit of an allophone; the dummy vowel has those of IX (AX has the same).
+    citations:
+      - "DECtalk 4.63 p_us_rom.h us_featb; ph_inton1.c:1780-1806 (the dummy vowel is IX or AX)"
+  artic_place:
+    params: [item, place]
+    body: "!artic_is_dummy(item) && dectalk_name(item) in get(params.policy.articulation.place, place, [])"
+    description: A us_place bit of an allophone; the dummy vowel has none.
+    citations:
+      - "DECtalk 4.63 p_us_rom.h:982 us_place"
+  artic_stress:
+    params: [item]
+    body: >-
+      item == null ? 0
+      : get(artic_is_dummy(item) ? look_back_pred(item, 8, 'is_dectalk_phone') : item, 'stress', 0)
+    description: FSTRESS of an allophone (0 none, 1 primary, 2 secondary, 3 emphasis); a dummy vowel has the plosive's.
+    citations:
+      - "DECtalk 4.63 ph_defs.h:219-225; ph_inton1.c:1818"
   artic_boundary:
     params: [item]
     body: >-
@@ -60,6 +89,7 @@ predicates:
 tags:
   subglottal_pressure: sets the subglottal pressure the synthesizer's source model reads
   glottal_chink: sets the posterior glottal chink area
+  glottal_area: sets the glottal area, its target or the speed it moves at
   voice_formant: sends a formant fixed by the voice
 
 frame_programs:
@@ -76,10 +106,45 @@ frame_programs:
       initial: { value: "false", edge: true }
       silence: { value: "current.phoneme == 'SIL' && !isTrue(current, 'dummy_vowel')", edge: true }
       dummy: { value: "artic_is_dummy(current)", edge: false }
-      # p_us_rom.h us_featb bits. The dummy vowel is IX or AX: a voiced syllabic.
-      voiced: { value: "artic_is_dummy(current) || dectalk_has(current, 'voiced')", edge: false }
-      syllabic: { value: "artic_is_dummy(current) || dectalk_has(current, 'syllabic')", edge: false }
-      labial: { value: "dectalk_name(current) in params.policy.articulation.place.labial", edge: false }
+      # p_us_rom.h us_featb bits. Silence has FSONOR alone.
+      voiced: { value: "artic_has(current, 'voiced')", edge: false }
+      syllabic: { value: "artic_has(current, 'syllabic')", edge: false }
+      vowel: { value: "artic_has(current, 'vowel')", edge: false }
+      son1: { value: "artic_has(current, 'son1')", edge: false }
+      sonorant: { value: "artic_has(current, 'sonorant')", edge: true }
+      obstruent: { value: "artic_has(current, 'obstruent')", edge: false }
+      plosive: { value: "artic_has(current, 'plosive')", edge: false }
+      nasal: { value: "artic_has(current, 'nasal')", edge: false }
+      consonant: { value: "artic_has(current, 'consonant')", edge: false }
+      soncon: { value: "artic_has(current, 'sonorant_consonant')", edge: false }
+      burst: { value: "artic_has(current, 'burst')", edge: false }
+      stop: { value: "artic_has(current, 'stop')", edge: false }
+      # p_us_rom.h us_place bits.
+      labial: { value: "artic_place(current, 'labial')", edge: false }
+      blade:
+        value: >-
+          artic_place(current, 'dental') || artic_place(current, 'palatal')
+          || artic_place(current, 'alveolar')
+        edge: false
+      velar: { value: "artic_place(current, 'velar')", edge: false }
+      glottal: { value: "artic_place(current, 'glottal')", edge: false }
+      # FSTRESS of the allophone's structure word: any stress, and bit 01.
+      stressed: { value: "artic_stress(current) > 0", edge: false }
+      primary: { value: "artic_stress(current) == 1 || artic_stress(current) == 3", edge: false }
+      is_r: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'R'", edge: false }
+      is_rr: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'RR'", edge: false }
+      is_l: { value: "!artic_is_dummy(current) && dectalk_name(current) in ['LL', 'LX']", edge: false }
+      # p_us_st1.c:1397-1400: the allophone two back is /s/ with no boundary after it.
+      after_s_cluster:
+        value: >-
+          dectalk_name(artic_prev_unit(artic_prev_unit(current))) == 'S'
+          && artic_boundary(artic_prev_unit(artic_prev_unit(current))) == 0.0
+        edge: false
+      after_s:
+        value: "dectalk_name(artic_prev_unit(artic_prev_unit(current))) == 'S'"
+        edge: false
+      # ph_sort.c:1464 number_words, as postlexical.yaml reads it.
+      few_words: { value: "word_count() < 3", edge: false }
       # FBOUNDARY of this allophone and of the ones two and three after it.
       boundary: { value: "artic_boundary(current)", edge: 0 }
       boundary_2: { value: "artic_boundary(artic_next_unit(artic_next_unit(current)))", edge: 0 }
@@ -130,8 +195,20 @@ frame_programs:
       target_ap: 0
       area_ap: 0
       ps: 0
+      # ph_draw.c:927-928. agspeed is not set at start-up; the structure it
+      # lives in is zeroed, and every path through the initial silence but one
+      # (a voiceless phone that is not a burst stop) sets it.
+      target_ag: 400
+      area_g: 0
+      agspeed: 0
+      delta_area_g: 0
+      # PAV.tspesh of the current phone (p_us_st1.c Special Rule 2), in frames.
+      vot: 0
     outputs:
       PS: "r.ps"
+      # ph_draw.c:4101-4104. delta_area_gst is only ever reset and
+      # delta_area_gstop moves only for a German phone (3994-4014).
+      AG: "max([r.area_g, 0])"
       # ph_draw.c:4100
       CNK: "r.area_ap + params.policy.articulation.voice.chink"
       # ph_draw.c:4189
@@ -152,10 +229,8 @@ rules:
       - { register: pressure, value: 200, tag: subglottal_pressure }
       - { register: pressure_drop, value: 0, tag: subglottal_pressure }
       - { register: syl_pressure, value: 0, tag: subglottal_pressure }
-      - { register: target_ap, value: 0, tag: glottal_chink }
-      - { register: area_ap, value: 0, tag: glottal_chink }
     citations:
-      - "DECtalk 4.63 PH/ph_draw.c:925-930, 941"
+      - "DECtalk 4.63 PH/ph_draw.c:925-926, 941"
   # The burst-stop and fricative branches set 200 again (998, 1073).
   artic_initial_pressure_before_voiced_labial:
     kind: frame
@@ -295,10 +370,616 @@ rules:
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:4180-4187"
 
+  # ===========================================================================
+  # The glottis: target_ag, agspeed, area_g, delta_area_g, and target_ap.
+  # ===========================================================================
+
+  # --- voice onset time of the phone: p_us_st1.c:1362-1442 -----------------
+  # Special Rule 2, HLSYN build: aspiration of a voiceless plosive runs `vot`
+  # frames into the sonorant after it. NF60MS is 9 frames, NF7MS 1, NF15MS 2,
+  # NF20MS 3 (ph_defs.h:435-443); durfon is the phone's length in frames.
+  artic_vot_none:
+    kind: frame
+    program: articulation
+    when: "f.index == 0"
+    set:
+      - { register: vot, value: 0, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:1362 (vot = 0)"
+  artic_vot_after_voiceless_plosive:
+    kind: frame
+    program: articulation
+    unit: "p.plosive && !p.voiced && u.sonorant && !u.initial && !(u.silence)"
+    when: "f.index == 0"
+    set:
+      - register: vot
+        value: "u.stressed ? params.policy.articulation.vot.stressed : params.policy.articulation.vot.unstressed"
+        tag: glottal_area
+      - register: vot
+        value: >-
+          (u.soncon || u.is_rr) ? r.vot + params.policy.articulation.vot.sonorant_consonant_bonus
+          : (u.after_s ? (u.after_s_cluster ? params.policy.articulation.vot.s_cluster : r.vot)
+          : (!u.syllabic ? r.vot + params.policy.articulation.vot.nonsyllabic_bonus : r.vot))
+        tag: glottal_area
+      - { register: vot, value: "r.vot >= f.count ? f.count - 1 : r.vot", tag: glottal_area }
+      - register: vot
+        value: >-
+          r.vot > floor(f.count / params.policy.articulation.vot.syllabic_divisor)
+            && u.syllabic && u.primary
+          ? floor(f.count / params.policy.articulation.vot.syllabic_divisor) : r.vot
+        tag: glottal_area
+      - { register: vot, value: "u.dummy ? f.count : r.vot", tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:1363-1441 (Special Rule 2: PAV.tspesh = vot)"
+
+  # --- closing the glottis through the aspiration: ph_draw.c:524-590 --------
+  # In the parameter loop, so before everything below in the same frame.
+  artic_vot_slow_drop:
+    kind: frame
+    program: articulation
+    unit: "u.son1 && !u.dummy"
+    when: >-
+      r.vot != 0 && f.index == params.policy.articulation.aspiration.slow_drop_frame
+      && r.vot > params.policy.articulation.aspiration.slow_drop_longer_than
+      && params.policy.articulation.voice.vot_speed != 0
+    set:
+      - register: target_ag
+        value: "min([r.target_ag, params.policy.articulation.voice.glottis_voiced + 900])"
+        tag: glottal_area
+      - { register: agspeed, value: 3, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:538-552"
+  artic_vot_speed:
+    kind: frame
+    program: articulation
+    unit: "u.son1 && !u.dummy"
+    when: >-
+      r.vot != 0 && f.index == r.vot - params.policy.articulation.aspiration.close_before_end
+      && params.policy.articulation.voice.vot_speed != 0
+    set:
+      - { register: agspeed, value: "params.policy.articulation.voice.vot_speed", tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:553-559"
+  artic_vot_five_before:
+    kind: frame
+    program: articulation
+    unit: "u.son1 && !u.dummy"
+    when: "r.vot != 0 && f.index == r.vot - params.policy.articulation.aspiration.close_before_end"
+    set:
+      - register: target_ag
+        value: "min([r.target_ag, params.policy.articulation.voice.glottis_voiced + 800])"
+        tag: glottal_area
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:553, 561-562"
+  # `else if`: not in the frame the rule above took.
+  artic_vot_two_before:
+    kind: frame
+    program: articulation
+    unit: "u.son1 && !u.dummy"
+    when: >-
+      r.vot != 0 && f.index != r.vot - params.policy.articulation.aspiration.close_before_end
+      && f.index == r.vot - params.policy.articulation.aspiration.last_before_end
+    set:
+      - register: target_ag
+        value: "min([r.target_ag, params.policy.articulation.voice.glottis_voiced + 380])"
+        tag: glottal_area
+      - register: agspeed
+        value: >-
+          params.policy.articulation.voice.vot_speed > params.policy.articulation.aspiration.fast_voice_speed_over
+            && r.vot >= params.policy.articulation.aspiration.fast_voice_at_least
+          ? params.policy.articulation.aspiration.fast_voice_speed : 1
+        tag: glottal_area
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:564-578"
+  artic_vot_end:
+    kind: frame
+    program: articulation
+    unit: "u.son1 && !u.dummy"
+    when: "r.vot != 0 && f.index == r.vot"
+    set:
+      - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:580-590"
+
+  # --- allophone 0, once: ph_draw.c:919-930, 953-1202 ----------------------
+  artic_initial_reset_glottis:
+    kind: frame
+    program: articulation
+    unit: "u.initial"
+    when: "f.index == 0"
+    set:
+      - { register: delta_area_g, value: 0, tag: glottal_area }
+      - { register: target_ag, value: 400, tag: glottal_area }
+      - { register: area_g, value: 0, tag: glottal_area }
+      - { register: target_ap, value: 0, tag: glottal_chink }
+      - { register: area_ap, value: 0, tag: glottal_chink }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:919-930"
+  artic_initial_before_voiced_burst_stop:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.obstruent && n.burst && n.stop && n.voiced"
+    when: "f.index == 0"
+    set:
+      - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
+      - { register: area_g, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
+      - { register: agspeed, value: 2, tag: glottal_area }
+      - { register: target_ap, value: 100, tag: glottal_chink }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:953-966"
+  artic_initial_before_voiceless_burst_stop:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.obstruent && n.burst && n.stop && !n.voiced"
+    when: "f.index == 0"
+    set:
+      - { register: target_ag, value: "params.policy.articulation.voice.glottis_open", tag: glottal_area }
+      - { register: area_g, value: "params.policy.articulation.voice.glottis_open", tag: glottal_area }
+      - { register: agspeed, value: 3, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:974-980"
+  # An obstruent without a burst, made with the blade.
+  artic_initial_before_blade_fricative:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.obstruent && !(n.burst && n.stop) && n.blade"
+    when: "f.index == 0"
+    set:
+      - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
+      - { register: area_g, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
+      - { register: agspeed, value: 3, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1049-1067"
+  artic_initial_before_voiced:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.voiced"
+    when: "f.index == 0"
+    set:
+      - { register: agspeed, value: 2, tag: glottal_area }
+      - register: target_ag
+        value: >-
+          n.obstruent ? params.policy.articulation.voice.glottis_voiced_obstruent
+          : params.policy.articulation.voice.glottis_voiced
+        tag: glottal_area
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1085-1103"
+  artic_initial_before_vowel:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.voiced && n.vowel"
+    when: "f.index == 0"
+    set:
+      - { register: area_g, value: 0, tag: glottal_area }
+      - { register: agspeed, value: 1, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1132-1139"
+  artic_initial_before_voiceless:
+    kind: frame
+    program: articulation
+    unit: "u.initial && !n.voiced"
+    when: "f.index == 0"
+    set:
+      - { register: area_g, value: 1410, tag: glottal_area }
+      - { register: target_ag, value: 1410, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1194-1197"
+
+  # --- a later silence, once: ph_draw.c:1239, 1290-1308 --------------------
+  artic_silence_after_sonorant:
+    kind: frame
+    program: articulation
+    unit: "u.silence && !u.initial && p.son1"
+    when: "f.index == 0"
+    set:
+      - { register: target_ag, value: 1800, tag: glottal_area }
+      - { register: area_g, value: "r.area_g - 80", tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1290-1296"
+  artic_silence_after_obstruent:
+    kind: frame
+    program: articulation
+    unit: "u.silence && !u.initial && p.obstruent"
+    when: "f.index == 0"
+    set:
+      - { register: target_ag, value: 2500, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1297-1300"
+  artic_silence_after_voiceless:
+    kind: frame
+    program: articulation
+    unit: "u.silence && !u.initial && !p.voiced"
+    when: "f.index == 0"
+    set:
+      - { register: target_ag, value: 1800, tag: glottal_area }
+      - { register: area_g, value: "r.area_g + 100", tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1302-1308"
+
+  # --- a phone that is not silence, once: ph_draw.c:1555-1982 --------------
+  artic_chink_closes_after_voiced_obstruent:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && p.obstruent && p.voiced"
+    when: "f.index == 0"
+    set:
+      - { register: target_ap, value: 0, tag: glottal_chink }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1557-1563"
+  artic_voiced_glottal_obstruent:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && u.voiced && u.glottal"
+    when: "f.index == 0"
+    set:
+      - { register: target_ag, value: "params.policy.articulation.voice.glottal_stop_area", tag: glottal_area }
+      - { register: agspeed, value: 1, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1596-1608"
+  artic_voiced_obstruent:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && u.voiced && !u.glottal"
+    when: "f.index == 0"
+    set:
+      - register: target_ag
+        value: "u.stop ? params.policy.articulation.voice.glottis_voiced_obstruent : 600"
+        tag: glottal_area
+      - { register: agspeed, value: 2, tag: glottal_area }
+      - { register: target_ap, value: "u.stop ? 200 : 600", tag: glottal_chink }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1610-1634"
+  # The cap applies when the next allophone's structure word has no stress.
+  artic_voiceless_obstruent:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && !u.voiced"
+    when: "f.index == 0"
+    set:
+      - register: target_ag
+        value: >-
+          n.stressed ? params.policy.articulation.voice.glottis_open
+          : min([params.policy.articulation.voice.glottis_open, 1400])
+        tag: glottal_area
+      - { register: agspeed, value: 1, tag: glottal_area }
+      - { register: target_ap, value: 0, tag: glottal_chink }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1654-1681"
+  # An obstruent without a burst (`feat & 004000`, FBURST) and with no lip,
+  # blade or velar place.
+  artic_placeless_obstruent:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && !u.burst && !u.labial && !u.blade && !u.velar"
+    when: "f.index == 0"
+    set:
+      - { register: target_ag, value: 1000, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1756-1857"
+  artic_chink_closed_in_non_obstruent:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && !u.obstruent"
+    when: "f.index == 0"
+    set:
+      - { register: target_ap, value: 0, tag: glottal_chink }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1862-1864"
+  # A stop without a burst: the three `if`s are tried in this order and each
+  # that holds assigns.
+  artic_burstless_stop_blade:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.stop && !u.burst && u.blade"
+    when: "f.index == 0"
+    set:
+      - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
+      - { register: agspeed, value: 1, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1865-1891"
+  artic_burstless_stop_velar:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.stop && !u.burst && u.velar"
+    when: "f.index == 0"
+    set:
+      - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
+      - { register: agspeed, value: 2, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1893-1900"
+  artic_burstless_stop_labial:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.stop && !u.burst && u.labial"
+    when: "f.index == 0"
+    set:
+      - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1902-1915"
+  artic_dummy_vowel_glottis:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.son1 && u.dummy"
+    when: "f.index == 0"
+    set:
+      - register: target_ag
+        value: >-
+          p.voiced ? params.policy.articulation.voice.glottis_voiced_obstruent + 100
+          : params.policy.articulation.voice.glottis_open + 100
+        tag: glottal_area
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1933, 1949-1957"
+  artic_sonorant_glottis:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.son1 && !u.dummy && !(p.plosive && !p.voiced)"
+    when: "f.index == 0"
+    set:
+      - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1960-1964"
+
+  # --- a vowel, every frame: ph_draw.c:1986-2040 ---------------------------
+  # The block for German vowels at 1988-2027 never matches a US phone code.
+  # 2029-2035: before an obstruent that is neither a stop nor has a burst.
+  artic_vowel_before_fricative:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.vowel && n.obstruent && !n.stop && !n.burst"
+    set:
+      - { register: target_ag, value: "r.target_ag + 20", tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2029-2035"
+  # 2036-2040: the braces after that `if` are not its body. Reproduced as
+  # compiled: every vowel opens toward 1200 in its last frame.
+  artic_vowel_last_frame:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.vowel"
+    when: "f.index >= f.count - 1"
+    set:
+      - { register: target_ag, value: 1200, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2036-2040"
+
+  # 2113-2120, still inside the vowel's braces: before a voiceless sonorant
+  # consonant (/h/), so that no glottal pulse sounds at its release.
+  artic_vowel_before_voiceless_sonorant:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.vowel && !n.dummy && !n.voiced && n.sonorant && n.consonant"
+    when: "f.index >= f.count - 2"
+    set:
+      - { register: target_ag, value: 1800, tag: glottal_area }
+      - { register: agspeed, value: 3, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2112-2120"
+
+  # --- before a voiceless sonorant consonant: ph_draw.c:2165-2192 ----------
+  artic_before_voiceless_sonorant:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && !n.dummy && !n.voiced && n.sonorant && n.consonant"
+    when: >-
+      f.index >= f.count - 7
+      && r.target_ag < params.policy.articulation.voice.unvoiced_sonorant
+      && r.target_ag < 1100
+    set:
+      - { register: target_ag, value: "r.target_ag + (u.nasal ? 50 : 80)", tag: glottal_area }
+      - { register: agspeed, value: 1, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2165-2192"
+
+  # --- a sonorant consonant, every frame: ph_draw.c:2340-2397 --------------
+  artic_sonorant_consonant_speed:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.soncon"
+    when: >-
+      f.index <= floor(f.count / 2)
+        ? (r.target_ag < params.policy.articulation.voice.glottis_voiced + 300 && !u.is_r)
+        : r.target_ag > params.policy.articulation.voice.glottis_voiced
+    set:
+      - { register: agspeed, value: 1, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2340-2357"
+  # 2379-2388 (before LL or LX) tests `(!phone_feature(...) & FSTOP)`, which is
+  # never true for a phone with any feature bit: no rule.
+  artic_lateral_glottis:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.is_l"
+    set:
+      - { register: target_ag, value: 600, tag: glottal_area }
+      - { register: agspeed, value: 3, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2390-2397"
+
+  # --- a nasal, every frame: ph_draw.c:2400-2515 ---------------------------
+  artic_nasal_glottis:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.nasal"
+    set:
+      - { register: target_ag, value: 700, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2400, 2505-2515"
+
+  # --- opening for the next phone, every frame: ph_draw.c:2676-2797 --------
+  # NF60MS is 9 frames, NF50MS 8 (ph_defs.h:442-443).
+  artic_unstressed_before_voiceless_fricative_late:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
+    when: "f.index >= f.count - 9 && f.index >= floor(f.count / 2) && r.target_ag < 1000"
+    set:
+      - { register: target_ag, value: "r.target_ag + 10", tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2676-2689"
+  artic_unstressed_before_voiceless_fricative_early:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
+    when: "!(f.index >= f.count - 9 && f.index >= floor(f.count / 2)) && r.target_ag < 1100"
+    set:
+      - { register: target_ag, value: "r.target_ag + (r.target_ag < 700 ? 75 : 40)", tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2690-2699"
+  artic_plosive_before_nasal:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && u.plosive && n.nasal"
+    when: "f.index >= f.count - 8 && r.target_ag > 1100"
+    set:
+      - { register: target_ag, value: 1100, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2701-2712"
+  artic_fricative_before_voiced_closing:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && !u.plosive && n.voiced && !n.nasal && !n.stop && !n.is_r"
+    when: "r.target_ag >= 800 && f.index >= f.count - 8"
+    set:
+      - { register: target_ag, value: "min([r.target_ag, 1200])", tag: glottal_area }
+      - { register: agspeed, value: 1, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2713-2730"
+  artic_fricative_before_voiced_open:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && !u.plosive && n.voiced && !n.nasal"
+    when: "r.target_ag >= 800 && !(f.index >= f.count - 8 && !n.stop)"
+    set:
+      - { register: agspeed, value: 3, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2718-2721, 2731-2738"
+  artic_fricative_before_voiced_low:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && !u.plosive && n.voiced && !n.nasal"
+    when: "r.target_ag < 800"
+    set:
+      - { register: agspeed, value: 2, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2740-2746"
+
+  # --- spreading the glottis toward the end of the clause: ph_draw.c:3601-3660
+  # nframb > tcumdur - 12 and - 25, with nframb - tcumdur = g.frame + 1 -
+  # g.counted_frames. Not ported: the two `goto abort_til_later` tests at
+  # 3604-3624, which skip the step in some phones near the end, and the reset
+  # in the clause's first frame (3986-3990), which the initial reset covers
+  # for the first clause.
+  artic_end_of_clause_spread:
+    kind: frame
+    program: articulation
+    unit: "g.unit < g.units - 1"
+    when: "g.frame + 1 > g.counted_frames - 12 && r.delta_area_g < 800"
+    set:
+      - register: delta_area_g
+        value: "r.delta_area_g + (u.few_words ? 5 : params.policy.articulation.voice.end_of_phrase_spread)"
+        tag: glottal_area
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3602, 3626-3647"
+  artic_no_spread_before_the_end:
+    kind: frame
+    program: articulation
+    when: "!(g.frame + 1 > g.counted_frames - 12)"
+    set:
+      - { register: delta_area_g, value: 0, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3602, 3653-3659"
+
+  # --- the glottis moves: ph_draw.c:4016-4081 ------------------------------
+  artic_glottis_after_voiced_glottal:
+    kind: frame
+    program: articulation
+    unit: "p.voiced && p.glottal"
+    set:
+      - { register: agspeed, value: 3, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:4016-4025"
+  # The step of the clause's first controller frame, which is never sent
+  # (ph_claus.c:759-766): the lead-in starts one frame later, so its first
+  # frame takes that step and its own. One unemitted frame; see
+  # params.policy.timing.unemitted_initial_frames.
+  artic_glottis_step_of_unsent_frame:
+    kind: frame
+    program: articulation
+    unit: "u.initial"
+    when: "f.index == 0"
+    set:
+      - register: area_g
+        value: >-
+          floor((r.target_ag - r.area_g) / pow(2, r.agspeed)) > 300 ? r.area_g + 250
+          : r.area_g + floor((r.target_ag - r.area_g) / pow(2, r.agspeed)) + r.delta_area_g
+        tag: glottal_area
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:4075-4081"
+      - "DECtalk 4.63 PH/ph_claus.c:759-766 (send_pars writes no packet on its first call)"
+  # A step over 300 is limited to 250, and then delta_area_g is not added.
+  # `>>` is an arithmetic shift: floor.
+  artic_glottis_step:
+    kind: frame
+    program: articulation
+    set:
+      - register: area_g
+        value: >-
+          floor((r.target_ag - r.area_g) / pow(2, r.agspeed)) > 300 ? r.area_g + 250
+          : r.area_g + floor((r.target_ag - r.area_g) / pow(2, r.agspeed)) + r.delta_area_g
+        tag: glottal_area
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:4075-4081"
+
 phases:
   - name: articulation
     after: [finalize]
     rules:
+      - artic_vot_none
+      - artic_vot_after_voiceless_plosive
+      - artic_vot_slow_drop
+      - artic_vot_speed
+      - artic_vot_five_before
+      - artic_vot_two_before
+      - artic_vot_end
+      - artic_initial_reset_glottis
+      - artic_initial_before_voiced_burst_stop
+      - artic_initial_before_voiceless_burst_stop
+      - artic_initial_before_blade_fricative
+      - artic_initial_before_voiced
+      - artic_initial_before_vowel
+      - artic_initial_before_voiceless
+      - artic_silence_after_sonorant
+      - artic_silence_after_obstruent
+      - artic_silence_after_voiceless
+      - artic_chink_closes_after_voiced_obstruent
+      - artic_voiced_glottal_obstruent
+      - artic_voiced_obstruent
+      - artic_voiceless_obstruent
+      - artic_placeless_obstruent
+      - artic_chink_closed_in_non_obstruent
+      - artic_burstless_stop_blade
+      - artic_burstless_stop_velar
+      - artic_burstless_stop_labial
+      - artic_dummy_vowel_glottis
+      - artic_sonorant_glottis
+      - artic_vowel_before_fricative
+      - artic_vowel_last_frame
+      - artic_vowel_before_voiceless_sonorant
+      - artic_before_voiceless_sonorant
+      - artic_sonorant_consonant_speed
+      - artic_lateral_glottis
+      - artic_nasal_glottis
+      - artic_unstressed_before_voiceless_fricative_late
+      - artic_unstressed_before_voiceless_fricative_early
+      - artic_plosive_before_nasal
+      - artic_fricative_before_voiced_closing
+      - artic_fricative_before_voiced_open
+      - artic_fricative_before_voiced_low
+      - artic_end_of_clause_spread
+      - artic_no_spread_before_the_end
+      - artic_glottis_after_voiced_glottal
+      - artic_glottis_step_of_unsent_frame
+      - artic_glottis_step
       - artic_initial_reset_pressure
       - artic_initial_pressure_before_voiced_labial
       - artic_silence_pressure_drop

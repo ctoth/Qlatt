@@ -1,6 +1,6 @@
 import { cloneValue, isPlainObject } from "../yaml-loader";
-import { validateExpressionSyntax } from "./cel-expressions";
-import { FRAME_COUNTERS, FRAME_GROUP_COUNTERS } from "./hrg/frame-program";
+import { CEL_FUNCTION_CATALOG, validateExpressionSyntax } from "./cel-expressions";
+import { FRAME_COUNTERS, FRAME_FUNCTIONS, FRAME_GROUP_COUNTERS } from "./hrg/frame-program";
 import { parseRecognitionConfig } from "./recognition-config";
 import * as S from "./struct-schema";
 
@@ -55,6 +55,11 @@ const FRAME_GROUP_VARIABLES = ["u", "p", "n", "params", "f"] as const;
 const FRAME_UNIT_VARIABLES = ["u", "p", "n", "params", "g"] as const;
 const FRAME_VARIABLES = [...FRAME_UNIT_VARIABLES, "r", "f"] as const;
 const FRAME_MEMBER_PATTERN = /(?<![.\w])([upnrfg])\.([A-Za-z_][A-Za-z0-9_]*)/g;
+const FRAME_FUNCTION_CALL_PATTERN = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
+/** Catalog functions the rule engine binds to its evaluation context. */
+const ITEM_BOUND_FUNCTIONS = new Set<string>(
+  CEL_FUNCTION_CATALOG.filter((entry) => entry.binding === "context").map((entry) => entry.name),
+);
 const ALLOWED_RULE_FIELDS = new Set([
   ...FRAME_RULE_FIELDS,
   "apply",
@@ -3108,6 +3113,20 @@ function validateFramePrograms(
         ),
       );
       return;
+    }
+    // A frame expression runs without Items: of the catalog's functions only
+    // the context-free ones and FRAME_FUNCTIONS exist there.
+    for (const match of expression.matchAll(FRAME_FUNCTION_CALL_PATTERN)) {
+      const called = match[1] as string;
+      if (ITEM_BOUND_FUNCTIONS.has(called) && !Object.hasOwn(FRAME_FUNCTIONS, called)) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_FRAME_FUNCTION",
+            `${label} calls '${called}', which reads Items and is not available in a frame expression`,
+            path,
+          ),
+        );
+      }
     }
     for (const match of expression.matchAll(FRAME_MEMBER_PATTERN)) {
       const root = match[1] as string;

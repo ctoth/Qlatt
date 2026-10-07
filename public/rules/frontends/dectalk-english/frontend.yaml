@@ -249,6 +249,32 @@ parameters:
         glottal: [TX, Q, CZ]
         f2backi: [YU, Y]
         f2backf: [IY, EY, Y]
+      # p_us_st1.c:1362-1441, Special Rule 2 in the HLSYN build: frames of
+      # aspiration in the sonorant after a voiceless plosive. NF60MS before a
+      # stressed phone, NF7MS before an unstressed one; 5 more in a sonorant
+      # consonant or RR; NF15MS in an /s/ cluster; NF20MS more in any other
+      # non-syllabic; at most half (>> 1) of a primary-stressed syllabic
+      # (ph_defs.h:435-443: NF7MS 1, NF15MS 2, NF20MS 3, NF60MS 9).
+      vot:
+        stressed: 9
+        unstressed: 1
+        sonorant_consonant_bonus: 5
+        s_cluster: 2
+        nonsyllabic_bonus: 3
+        syllabic_divisor: 2
+      # ph_draw.c:538-590: when the glottis closes through that aspiration.
+      # A slow drop starts at frame 3 if the aspiration is longer than 5
+      # frames; the closing proper starts 5 frames before its end and ends 2
+      # before; a voice whose VOT_speed is over 2 closes at speed 2 when the
+      # aspiration is at least 5 frames.
+      aspiration:
+        slow_drop_frame: 3
+        slow_drop_longer_than: 5
+        close_before_end: 5
+        last_before_end: 2
+        fast_voice_speed_over: 2
+        fast_voice_at_least: 5
+        fast_voice_speed: 2
       # Paul. The frontend's voice files do not carry these yet, so every
       # voice gets Paul's.
       voice:
@@ -864,7 +890,7 @@ output:
   lowering:
     id: dectalk-english-track-lowering
     # Stable Klatt backend vocabulary captured by the production-frame oracle.
-    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO, PS, CNK]
+    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO, PS, CNK, AG]
     timeline:
       initial_silence_ms:
         value: 19.2

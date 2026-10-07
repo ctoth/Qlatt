@@ -1,0 +1,63 @@
+suite: dectalk-vtm-schedule
+semantics: public/experiments/dectalk-vtm/semantics.yaml
+graph: public/experiments/dectalk-vtm/graph.yaml
+registry: public/experiments/dectalk-vtm/registry.yaml
+
+# One frame is 71/11025 s (DECtalk 4.63 VTM/vtm3.c:2400-2411).
+tests:
+  - name: OUT_T0 is F0 in tenths of a hertz, as an integer
+    # VTM/vtmiont.c:680; 97.3 Hz is the first packet of the paul-cat fixture.
+    inputs:
+      F0: 97.3
+    assert:
+      approx:
+        OUT_T0: 973
+
+  - name: OUT_T0 rounds an F0 that is not a whole tenth
+    inputs:
+      F0: 110.26
+    assert:
+      approx:
+        OUT_T0: 1103
+
+  - name: packet words hold for their frame and are never interpolated
+    # A ramp between two control codes (A2_CODE 1000 -> 3000) or two phoneme
+    # codes would pass through values that mean something else.
+    frames:
+      - time: 0.0
+        params: { run: 1, speaker_epoch: 1, A2_CODE: 1000, PH: 297, F0: 110, AG: 400 }
+      - time: 0.006439909297052154
+        params: { run: 1, speaker_epoch: 1, A2_CODE: 3000, PH: 261, F0: 115, AG: 0 }
+      - time: 0.012879818594104308
+        params: { run: 0 }
+    assertSchedule:
+      stepAt:
+        - bind: A2_CODE
+          time: 0.0
+        - bind: A2_CODE
+          time: 0.006439909297052154
+        - bind: PH
+          time: 0.006439909297052154
+        - bind: OUT_T0
+          time: 0.006439909297052154
+        - bind: AG
+          time: 0.006439909297052154
+        - bind: run
+          time: 0.012879818594104308
+
+  - name: a speaker definition word steps with the packet that follows it
+    frames:
+      - time: 0.0
+        params: { run: 1, speaker_epoch: 1, SPD_R4CB: 3503, last_voice: 0, Tiltm: 0 }
+      - time: 0.006439909297052154
+        params: { run: 1, speaker_epoch: 2, SPD_R4CB: 2977, last_voice: 2, Tiltm: 12 }
+    assertSchedule:
+      stepAt:
+        - bind: speaker_epoch
+          time: 0.006439909297052154
+        - bind: SPD_R4CB
+          time: 0.006439909297052154
+        - bind: last_voice
+          time: 0.006439909297052154
+        - bind: Tiltm
+          time: 0.006439909297052154

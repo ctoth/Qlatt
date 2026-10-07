@@ -43,6 +43,12 @@
       "description": "Klatt 80 synthesizer configured for DECtalk 4.63 English frontend (impulse source, DECtalk defaults)"
     },
     {
+      "id": "dectalk-vtm",
+      "name": "DECtalk 4.63 Synthesizer",
+      "description": "DECtalk 4.63's own synthesizer (hlsyn and the integer vocal tract model) as one node, driven by DECtalk's PH packet words",
+      "path": "dectalk-vtm"
+    },
+    {
       "id": "qlatt-beauty",
       "name": "Qlatt Beauty",
       "description": "Experimental beauty-first Klatt synthesizer",

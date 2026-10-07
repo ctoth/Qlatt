@@ -1,21 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import {
-  builtinAbs,
-  builtinExp,
-  builtinLog,
-  builtinSqrt,
-  dbToLinear,
-  dbToLinearKlsyn,
-  max,
-  min,
-  pow,
-  proximity,
-} from "../../src/builtin-functions";
+import { proximity } from "../../src/builtin-functions";
 import type { BaconGraph, ParamValueSpec } from "../../src/klatt-runtime";
-import { createCelEvaluator } from "../../src/semantics/cel-evaluator";
-import { createTopologicalEvaluator } from "../../src/semantics/topological-evaluator";
+import { createConfiguredEvaluator } from "../../src/semantics/evaluator-factory";
 import type {
   EvaluationContext,
   ParamValue,
@@ -203,13 +191,6 @@ interface EvaluatedFrame {
   realized: Record<string, ParamValue>;
 }
 
-function requireNumericArg(fnName: string, index: number, value: ParamValue): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`${fnName} expected finite numeric argument at index ${index}`);
-  }
-  return value;
-}
-
 function createSemanticsHarness(
   semantics: SemanticsDocument,
   suiteSampleRate: number | undefined,
@@ -221,50 +202,8 @@ function createSemanticsHarness(
   evalExpr(expr: string, values: Record<string, ParamValue>): ParamValue;
   scheduling: SchedulingInfo;
 } {
-  const celEvaluator = createCelEvaluator();
-  celEvaluator.registerFunction("dbToLinear", (...args: ParamValue[]): ParamValue => {
-    const db = requireNumericArg("dbToLinear", 0, args[0]);
-    return dbToLinear(db);
-  });
-  celEvaluator.registerFunction("dbToLinearKlsyn", (...args: ParamValue[]): ParamValue => {
-    const db = requireNumericArg("dbToLinearKlsyn", 0, args[0]);
-    return dbToLinearKlsyn(db);
-  });
-  celEvaluator.registerFunction("min", (...args: ParamValue[]): ParamValue => {
-    const values = args.map((arg, index) => requireNumericArg("min", index, arg));
-    return min(...values);
-  });
-  celEvaluator.registerFunction("max", (...args: ParamValue[]): ParamValue => {
-    const values = args.map((arg, index) => requireNumericArg("max", index, arg));
-    return max(...values);
-  });
-  celEvaluator.registerFunction("pow", (...args: ParamValue[]): ParamValue => {
-    const x = requireNumericArg("pow", 0, args[0]);
-    const y = requireNumericArg("pow", 1, args[1]);
-    return pow(x, y);
-  });
-  celEvaluator.registerFunction("proximity", (...args: ParamValue[]): ParamValue => {
-    const delta = requireNumericArg("proximity", 0, args[0]);
-    return proximity(delta);
-  });
-  celEvaluator.registerFunction("sqrt", (...args: ParamValue[]): ParamValue => {
-    const x = requireNumericArg("sqrt", 0, args[0]);
-    return builtinSqrt(x);
-  });
-  celEvaluator.registerFunction("exp", (...args: ParamValue[]): ParamValue => {
-    const x = requireNumericArg("exp", 0, args[0]);
-    return builtinExp(x);
-  });
-  celEvaluator.registerFunction("abs", (...args: ParamValue[]): ParamValue => {
-    const x = requireNumericArg("abs", 0, args[0]);
-    return builtinAbs(x);
-  });
-  celEvaluator.registerFunction("log", (...args: ParamValue[]): ParamValue => {
-    const x = requireNumericArg("log", 0, args[0]);
-    return builtinLog(x);
-  });
-
-  const topoEvaluator = createTopologicalEvaluator(celEvaluator);
+  // The builtins the interpreter and the runtime register, not a copy of them.
+  const { celEvaluator, topoEvaluator } = createConfiguredEvaluator();
   const defaults = getParamDefaults(semantics);
   const constants = semantics.constants ?? {};
   const scheduling = getSchedulingInfo(semantics);

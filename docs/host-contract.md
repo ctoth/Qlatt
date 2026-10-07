@@ -428,6 +428,74 @@ It provides self-oscillation and asymmetry-driven period doubling; it does not
 implement Story's three-mass model or the bilateral tract of Ishizaka–Flanagan.
 See the [corrected Steinecke–Herzel notes](../papers/Steinecke_Herzel_1995_BifurcationsAsymmetricVocalFold/notes.md).
 
+## DECtalk synthesizer node
+
+The `dectalk-vtm` experiment is one node, `dectalk-vtm`, with no inputs: the
+per-packet path of DECtalk 4.63's VTM thread (hlsyn, the `vtmiont.c`
+overrides, the integer vocal tract model), ported in `crates/dectalk-vtm`.
+The doc comment of `crates/dectalk-vtm/src/backend.rs` is the normative
+definition; this section is what a host has to do.
+
+**Track.** A frame carries DECtalk's PH packet words and the speaker
+definition, each the 16-bit word itself, an integer. Index, meaning and scale
+of every word are in `scripts/oracle/dectalk-debug/ph-contract.md`. The node's
+parameters have DECtalk's names (`OUT_F1`, `OUT_AG`, ..., `SPD_R4CB`, ...).
+The track keys of the packet words are the `dectalk-english` frontend's
+columns: the `OUT_` name without its prefix (`F1`, `AG`, `PS`, ...), except
+`A2_CODE` for `OUT_A2` and `AREA_N` for `OUT_AN` (whose plain names are Klatt
+dB levels in that frontend), and `F0` in Hz, from which the semantics
+document's one realize rule forms `OUT_T0 = round(F0 * 10)`. The speaker
+definition words keep their `SPD_*` names. Frame `n` is at `n * 71 / 11025` s
+(DECtalk's frame, 71 samples at 11025 Hz). `run` is 1 on every frame and 0 on
+a final frame after the last packet. `speaker_epoch` counts the speaker
+definition packets sent so far. Every parameter is scheduled as a step.
+`src/dectalk-vtm-track.ts` builds such a track from recorded packets.
+
+**Parameters are a-rate.** Unlike the k-rate rule of section 6, this node
+reads its parameters at single output samples, so a host must make a scheduled
+step visible at its own sample. `run` going high starts a run at that sample,
+from DECtalk's start-up state. Counting output samples `m` from there at rate
+`R`, frame `n`'s packet is the parameter values at
+`m = floor(n * 71 * R / 11025) + 2`. At the first frame, and at any frame where
+`speaker_epoch` differs from the value last loaded, the speaker definition is
+loaded first, as DECtalk does for a speaker packet. `run` read low at a frame
+instant ends the run.
+
+**Declared latency.** Output sample `m` of a run is DECtalk's signal at input
+position `(m - delay) * 11025 / R`, with `delay = 2` samples at 11025 Hz and
+`2 + ceil(16 * R / 11025)` samples otherwise (66 at 44100 Hz, 72 at 48000 Hz,
+1.5 ms). The 2 samples let a step scheduled for a frame boundary land whichever
+way the host rounded its time (engineering estimate); the rest is the
+lookahead of the sample-rate converter.
+
+**Sample rate.** DECtalk produces 11025 Hz and that is where exactness against
+`say.exe` is defined: at a context rate of 11025 Hz the node's output is
+DECtalk's 16-bit samples divided by 32768. At a higher whole-number rate the
+samples are converted by band-limited interpolation, a Kaiser-windowed sinc
+with its zero crossings on the input samples (Smith & Gossett 1984; Kaiser
+1974), 16 input samples on each side and designed for 80 dB (both engineering
+estimates); see `crates/dectalk-vtm/src/resample.rs`. Rates below 11025 Hz and
+fractional rates are not supported: the node is silent and reports
+`dectalk-vtm.unsupported_sample_rate`.
+
+**Faults and fallbacks.** Where DECtalk's C would read a table out of bounds
+or divide by zero, the frame is silent and the model is put back to its state
+before the frame; a speaker definition that faults is not loaded. A parameter
+that is not an integer is rounded; one that is not finite or does not fit a
+16-bit word silences the frame. Each of these is posted on the node's port as
+`{ type: "diagnostic", level, code, message, node, data }` with a
+`dectalk-vtm.*` code, once per code and run with a summary of repeats at the
+end of the run, and a host must forward such messages to its diagnostic sink
+(`createKlattRuntime` does). The node also reports each run start (rate,
+delay, conversion method with its citations) and each speaker definition load
+at level `info`; `scripts/rendering/dectalk-vtm-render.ts` turns those into
+provenance decisions.
+
+`test/dectalk-vtm-wasm.test.ts` holds the wasm32 build to DECtalk's frames and
+samples; `test/dectalk-vtm-render.test.ts` renders the recorded packets
+through this contract on the Node host and requires the stock WAV at 11025 Hz;
+`scripts/render-dectalk-packets.ts` measures the converted output.
+
 ## Text normalization actions and CEL operations
 
 Text normalization uses the existing HRG rule engine. `text_recognition.rules`

@@ -4,8 +4,9 @@
  *
  * The words, their order and their scales are DECtalk's, documented word by
  * word in `scripts/oracle/dectalk-debug/ph-contract.md`. A track parameter
- * carries the packet word itself (an integer), under the name of DECtalk's
- * index constant.
+ * carries the packet word itself (an integer); only F0 is in Hz. The node's
+ * parameters have DECtalk's names (`OUT_*`, `SPD_*`); the track's keys for the
+ * packet words are the frontend's columns ([`PACKET_TRACK_KEYS`]).
  */
 
 import type { KlattFrame } from "./klatt-interpreter";
@@ -52,6 +53,42 @@ export const PACKET_WORDS: ReadonlyArray<readonly [name: string, index: number]>
   ["OUT_ATB", 36],
   ["OUT_PLACE", 37],
 ];
+
+/**
+ * The track key that carries each packet word. These are the columns the
+ * `dectalk-english` frontend's rules emit or are being written to emit (agreed
+ * with the rule authors, 2026-10-07): the packet word itself, an integer, under
+ * the `OUT_*` name without its prefix, except
+ *
+ * - `OUT_A2` is `A2_CODE` and `OUT_AN` is `AREA_N`, because `A2` and `AN`
+ *   already name Klatt's dB levels in that frontend's track;
+ * - `OUT_T0` has no column of its own: the track has `F0` in Hz and the
+ *   semantics document forms the word, `round(F0 * 10)`.
+ *
+ * `PH` and `BRST` are this module's names for words no rule emits yet.
+ */
+export const F0_TRACK_KEY = "F0";
+export const PACKET_TRACK_KEYS: Readonly<Record<string, string>> = {
+  OUT_F1: "F1",
+  OUT_A2: "A2_CODE",
+  OUT_F2: "F2",
+  OUT_F3: "F3",
+  OUT_B2: "B2",
+  OUT_B3: "B3",
+  OUT_PH: "PH",
+  OUT_F4: "F4",
+  OUT_AG: "AG",
+  OUT_AL: "AL",
+  OUT_AN: "AREA_N",
+  OUT_ABLADE: "ABLADE",
+  OUT_PS: "PS",
+  OUT_CNK: "CNK",
+  OUT_DC: "DC",
+  OUT_UE: "UE",
+  OUT_BRST: "BRST",
+  OUT_ATB: "ATB",
+  OUT_PLACE: "PLACE",
+};
 
 /**
  * The speaker definition words the synthesizer reads, with their index in the
@@ -101,6 +138,14 @@ export const NODE_PARAMS: readonly string[] = [
   ...SPEAKER_SHARED,
   ...SPEAKER_WORDS.map(([name]) => name),
 ];
+
+/**
+ * Every track parameter of the experiment's semantics document, in the order
+ * of [`NODE_PARAMS`]: the node's own name except for the packet words.
+ */
+export const TRACK_PARAMS: readonly string[] = NODE_PARAMS.map((name) =>
+  name === "OUT_T0" ? F0_TRACK_KEY : (PACKET_TRACK_KEYS[name] ?? name),
+);
 
 /** A speaker definition packet and the shared values read with it. */
 export interface VtmSpeakerEvent {
@@ -156,7 +201,12 @@ export function vtmEventsToTrack(events: readonly VtmEvent[]): KlattFrame[] {
       NOM_Open_Quo: speaker.nomOpenQuo,
       Tiltm: speaker.tiltm,
     };
-    for (const [name, index] of PACKET_WORDS) params[name] = event.words[index];
+    for (const [name, index] of PACKET_WORDS) {
+      const key = PACKET_TRACK_KEYS[name];
+      // OUT_T0 is F0 in Hz x 10 (VTM/vtmiont.c:680); the track carries Hz.
+      if (key === undefined) params[F0_TRACK_KEY] = event.words[index] / 10;
+      else params[key] = event.words[index];
+    }
     for (const [name, index] of SPEAKER_WORDS) params[name] = speaker.spdef[index];
     track.push({ time: track.length * FRAME_PERIOD_SEC, params });
   }

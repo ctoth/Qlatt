@@ -261,6 +261,7 @@ a2Linear:
 | `fujisaki-resonator` | Resonator with history compensation | frequency, bandwidth |
 | `reconstruction-filter` | Fixed output reconstruction lowpass | — |
 | `aerodynamic-model` | Stevens & Bickley 1991 coupling | (physical params) |
+| `dectalk-vtm` | DECtalk 4.63 synthesizer (hlsyn + integer vocal tract model), one node | DECtalk packet words |
 
 WASM primitives live in `crates/`. Each has:
 - Rust implementation (`src/lib.rs`)

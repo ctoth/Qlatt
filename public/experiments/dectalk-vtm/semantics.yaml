@@ -1,0 +1,108 @@
+# DECtalk 4.63 synthesizer semantics
+#
+# The track parameters are DECtalk's packet words, passed to the node
+# unchanged; the one realize rule forms the F0 word from F0 in Hz. The
+# conversions Qlatt's Klatt graphs do here (dB to linear, proximity
+# corrections) are done inside DECtalk's own synthesizer, ported in
+# crates/dectalk-vtm.
+#
+# Names, indices and scales: scripts/oracle/dectalk-debug/ph-contract.md.
+# Source citations are to the DECtalk 4.63 tree (dapi/src).
+
+bacon: "0.1"
+name: dectalk-vtm
+
+# A packet word holds for its whole frame: DECtalk hands the synthesizer one
+# packet per 71-sample frame and does not interpolate between packets
+# (VTM/vtmiont.c:656-1351), and control codes such as OUT_A2 and OUT_PH have no
+# intermediate values.
+defaultScheduling: step
+
+params:
+  # Frame clock of the node (crates/dectalk-vtm/src/backend.rs). A track sets
+  # run to 1 on every frame and to 0 on a final frame after the last packet.
+  run:
+    type: float
+    range: [0, 1]
+    default: 0
+    description: "1 while packets are being sent; a rise starts a run from DECtalk's start-up state"
+  speaker_epoch:
+    type: float
+    default: 0
+    description: "Count of speaker definition packets sent so far; a change reloads the definition at that frame"
+
+  # Per frame, outside the packet.
+  lang_curr:
+    type: int
+    range: [0, 2]
+    default: 0
+    description: "0 English, 1 French, 2 German (INCLUDE/kernel.h:423-425)"
+  vol_att:
+    type: int
+    range: [0, 140]
+    default: 100 # unity, int_volume_table (VTM/vtm3.c:264-427)
+    description: "Output volume, pKsd_t->vol_att"
+
+  # Voice packet words (OUT_*, PH/ph_defs.h:559-604) under the track keys of
+  # the dectalk-english frontend's columns: the OUT_ name without its prefix,
+  # except A2_CODE (OUT_A2) and AREA_N (OUT_AN), whose plain names are Klatt's
+  # dB levels in that frontend's track, and F0, which is in Hz (OUT_T0 is
+  # formed below). Each value is the packet word itself. Defaults are 0, the
+  # value of an unset word. PH and BRST are not emitted by any rule yet.
+  F1: { type: int, default: 0, unit: Hz, description: "OUT_F1" }
+  A2_CODE: { type: int, default: 0, description: "OUT_A2: frication gain control code" }
+  F0: { type: float, default: 0, unit: Hz, description: "Fundamental frequency; OUT_T0 is F0 x 10" }
+  F2: { type: int, default: 0, unit: Hz, description: "OUT_F2" }
+  F3: { type: int, default: 0, unit: Hz, description: "OUT_F3" }
+  B2: { type: int, default: 0, unit: Hz, description: "OUT_B2" }
+  B3: { type: int, default: 0, unit: Hz, description: "OUT_B3" }
+  PH: { type: int, default: 0, description: "OUT_PH: (font << 8) | phoneme code" }
+  F4: { type: int, default: 0, unit: Hz, description: "OUT_F4" }
+  AG: { type: int, default: 0, unit: "mm2 x 100", description: "OUT_AG" }
+  AL: { type: int, default: 0, unit: "mm2 x 10", description: "OUT_AL" }
+  AREA_N: { type: int, default: 0, unit: "mm2 x 10", description: "OUT_AN" }
+  ABLADE: { type: int, default: 0, unit: "mm2 x 10", description: "OUT_ABLADE" }
+  PS: { type: int, default: 0, unit: "cm H2O x 100", description: "OUT_PS" }
+  CNK: { type: int, default: 0, unit: "mm2 x 100", description: "OUT_CNK" }
+  DC: { type: int, default: 0, unit: "%", description: "OUT_DC" }
+  UE: { type: int, default: 0, unit: "cm3/s", description: "OUT_UE" }
+  BRST: { type: int, default: 0, description: "OUT_BRST" }
+  ATB: { type: int, default: 0, unit: "mm2 x 10", description: "OUT_ATB" }
+  PLACE: { type: int, default: 0, description: "OUT_PLACE" }
+
+  # Speaker. Defaults are Perfect Paul, DECtalk's voice 0: the speaker
+  # definition packet and shared values the stock say.exe sends for it at
+  # 11025 Hz, as recorded in crates/dectalk-vtm/tests/fixtures/paul-cat.hl.txt
+  # (S and V lines).
+  last_voice: { type: int, default: 0 }
+  NOM_Open_Quo: { type: int, default: 0, unit: "%" }
+  Tiltm: { type: int, default: 0, unit: dB }
+  SPD_R4CB: { type: int, default: 3503, unit: Hz }
+  SPD_R4CC: { type: int, default: 260, unit: Hz }
+  SPD_R5CB: { type: int, default: 6000, unit: Hz }
+  SPD_R5CC: { type: int, default: 6000, unit: Hz }
+  SPD_R4PB: { type: int, default: 3550, unit: Hz }
+  SPD_R5PB: { type: int, default: 4850, unit: Hz }
+  SPD_T0JIT: { type: int, default: 0 }
+  SPD_R5CA: { type: int, default: 87, unit: dB }
+  SPD_R4CA: { type: int, default: 66, unit: dB }
+  SPD_R3CA: { type: int, default: 58, unit: dB }
+  SPD_R2CA: { type: int, default: 59, unit: dB }
+  SPD_R1CA: { type: int, default: 76, unit: dB }
+  SPD_NOPEN1: { type: int, default: 9800 }
+  SPD_NOPEN2: { type: int, default: 0 }
+  SPD_ATURB: { type: int, default: 0, unit: dB }
+  SPD_AFGAIN: { type: int, default: 64, unit: dB }
+  SPD_AZGAIN: { type: int, default: 65, unit: dB }
+  SPD_APGAIN: { type: int, default: 64, unit: dB }
+  SPD_SEX: { type: int, default: 1 }
+
+constants: {}
+
+realize:
+  # OUT_T0 is F0 in tenths of a hertz (VTM/vtmiont.c:680, `frame.f0`,
+  # "deciHz"); PH writes it as an integer (PH/Ph_drwt02.c:2337-2339).
+  OUT_T0:
+    expr: "round(F0 * 10.0)"
+    deps: [F0]
+    step: true

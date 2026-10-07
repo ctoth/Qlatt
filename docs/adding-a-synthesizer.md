@@ -128,6 +128,7 @@ These primitives use Rust/WASM for DSP with JavaScript worklet wrappers.
 | `fujisaki-resonator` | Resonator with Fujisaki history compensation | `frequency` (Hz), `bandwidth` (Hz) |
 | `reconstruction-filter` | Fixed output reconstruction lowpass | — |
 | `aerodynamic-model` | Stevens & Bickley 1991 aerodynamic coupling | (physical params) |
+| `dectalk-vtm` | DECtalk 4.63's whole synthesizer as one node (`dectalk-vtm` experiment) | DECtalk's packet and speaker definition words; see `docs/host-contract.md` |
 
 **Note**: `signal-switch` is particularly useful for synthesizers with multiple source types (e.g., klsyn88's impulsive/natural/triangular sources). Wire all sources to the switch, bind the selector to a source-select parameter.
 

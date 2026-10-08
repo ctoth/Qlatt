@@ -6,7 +6,9 @@
  *
  * The rates stand on both sides of what DECtalk's timing code tests: 160 and
  * 161 (p_us_tim.c:319), 140 (ph_sort.c:1171), 180 from below and above
- * (ph_timng.c:273-302), 250 and 300 (ph_timng.c:240-243).
+ * (ph_timng.c:273-302), 250 and 300 (ph_timng.c:240-243), and 99 and 100,
+ * where every clause starts being cited (ph_aloph.c:500-501): two sentences
+ * whose "at" and clause-initial "and" keep their full vowel below 100.
  *
  * The fixtures are the say.exe WAVs alone. Regenerate with the instrumented
  * and stock builds (scripts/oracle/export-dectalk-vtm-fixture.ts header):

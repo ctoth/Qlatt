@@ -767,9 +767,8 @@ rules:
   # included (:486-501; citation mode is DECtalk's default, cm_util.c:156):
   # "Silver, and gold." keeps the AE of its promoted "and" (nine entries), the
   # second clause of "The big dog barked, and the small cat ran away." has EH.
-  #
-  # Not ported: at a speaking rate under 100 words a minute every clause is
-  # cited (:500-501).
+  # At a speaking rate under 100 words a minute every clause is cited
+  # (:500-501), whatever its length.
   dectalk_clause_initial_and:
     kind: postlexical
     select:
@@ -784,7 +783,9 @@ rules:
       spells_and: "n != null && n.phoneme == 'N' && d != null && d.phoneme == 'D'"
       unstressed: "get(current, 'stress', 0) == 0 && get(d, 'stress', 0) == 0"
       # nphonetot counts the clause's phones and its two silences.
-      cited: "clause_phone_count() + 2 < 10"
+      cited: >-
+        clause_phone_count() + 2 < 10
+        || params.policy.timing.speaking_rate_wpm < params.policy.timing.citation_below_wpm
     constraint: "after_silence && spells_and && (unstressed || !cited)"
     splice:
       type: replace_range
@@ -802,7 +803,7 @@ rules:
           voiced: "has(eh.voiced) ? eh.voiced : true"
     citations:
       - "DECtalk 4.63 ph_aloph.c:765-781 (Rule 1c: after a silence, AE N D -> EH N D when AE and D are unstressed or !Cite_It)"
-      - "DECtalk 4.63 ph_aloph.c:486-501 (docitation = nphonetot < 10; Cite_It = MODE_CITATION && docitation)"
+      - "DECtalk 4.63 ph_aloph.c:486-501 (docitation = nphonetot < 10; Cite_It = MODE_CITATION && docitation; Cite_It = TRUE when sprate < 100)"
 
   # The rule the source also labels 1c (ph_aloph.c:801-814): an AE before T
   # becomes EH in a clause that is not cited, when the AE and the phone before
@@ -831,7 +832,9 @@ rules:
         && after != null && after.phoneme != 'SIL' && dectalk_word_start(after)
       plain_after: >-
         dectalk_phrase_start(after) != 'vp' && dectalk_phrase_state(after) != 'pp'
-      cited: "clause_phone_count() + 2 < 10"
+      cited: >-
+        clause_phone_count() + 2 < 10
+        || params.policy.timing.speaking_rate_wpm < params.policy.timing.citation_below_wpm
     constraint: "plain_before && before_final_t && plain_after && !cited"
     splice:
       type: replace_range
@@ -849,7 +852,7 @@ rules:
           voiced: "has(eh.voiced) ? eh.voiced : true"
     citations:
       - "DECtalk 4.63 ph_aloph.c:801-814 (AE before T, FWBNEXT on the AE and on the phone before it, !Cite_It: AE -> EH)"
-      - "DECtalk 4.63 ph_aloph.c:486-501 (docitation = nphonetot < 10; Cite_It = MODE_CITATION && docitation)"
+      - "DECtalk 4.63 ph_aloph.c:486-501 (docitation = nphonetot < 10; Cite_It = MODE_CITATION && docitation; Cite_It = TRUE when sprate < 100)"
       - "DECtalk 4.63 ph_defs.h:250-261 (FBOUNDARY values; FWBNEXT 0140 is the plain word boundary)"
 
   # -------------------------------------------------------------------------

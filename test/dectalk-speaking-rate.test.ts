@@ -103,10 +103,13 @@ describe("dectalk-english speaking rate", () => {
   });
 
   it("outside the rates whose rules are all ported, it warns", () => {
-    expect(speak(100 / 180).rateCodes).toEqual([]);
-    expect(speak(300 / 180).rateCodes).toEqual([]);
-    expect(speak(99 / 180).rateCodes).toEqual(["W_RATE_RULES_NOT_PORTED"]);
-    expect(speak(301 / 180).rateCodes).toEqual(["W_RATE_RULES_NOT_PORTED"]);
+    // 50 to 349: every rate-dependent rule this frontend can reach is ported.
+    for (const wpm of [50, 99, 100, 300, 349]) {
+      expect(speak(wpm / 180).rateCodes, String(wpm)).toEqual([]);
+    }
+    // 350 and above: the glottal area's forced speed (ph_draw.c:4069-4072) is not.
+    expect(speak(350 / 180).rateCodes).toEqual(["W_RATE_RULES_NOT_PORTED"]);
+    expect(speak(550 / 180).rateCodes).toEqual(["W_RATE_RULES_NOT_PORTED"]);
   });
 
   it("every allophone lasts a whole number of frames at any rate", () => {

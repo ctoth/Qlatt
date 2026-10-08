@@ -642,6 +642,9 @@ parameters:
       # (dectalk_sprat0, dectalk_sprat1, dectalk_sprat2), by Rule 3
       # (p_us_tim.c:319) and by the slow-rate phrase rule (ph_sort.c:1171).
       speaking_rate_wpm: 180
+      # Below this rate every clause is cited, whatever its length
+      # (ph_aloph.c:500-501: Cite_It = TRUE when sprate < 100).
+      citation_below_wpm: 100
       # init_timing's constants (ph_timng.c:238-302), by the names used there.
       # sprat0 is the rate, with the part above `linear_above` halved and a
       # floor of `sprat0_minimum` (SLOWTALK, ph_timng.c:262-267). sprat1 and
@@ -1107,11 +1110,17 @@ parameters:
           citations:
             - "DECtalk 4.63 PH/ph_task.c:711-712 (SLOWTALK: sprate = deadstop(rate, 50, 550))"
         # Rates whose rate-dependent rules are all in this rulepack. Not ported:
-        # below 100, ph_aloph.c:500 and 1104 and p_us_st1.c:169; above 300,
-        # p_us_st1.c:1429; 350 and above, ph_draw.c:4072; below 75,
-        # p_us_tim.c:906-908.
-        ported_minimum: 100
-        ported_maximum: 300
+        # 350 and above, ph_draw.c:4069-4072 (the glottal area's speed is
+        # forced to 1).
+        # Below 100 the citation rules are in (timing.citation_below_wpm).
+        # What else the source tests there changes nothing this frontend
+        # produces: the voicing amplitude targets of p_us_st1.c:169-171 and
+        # 184-190 are not read by the HLSYN build, and a glottal stop
+        # (p_us_tim.c:906-908) is never put into the phone string by the US
+        # English rules. p_us_st1.c:1429 (above 300) is compiled only with
+        # FASTTYPING_MODE, which this build does not define.
+        ported_minimum: 50
+        ported_maximum: 349
       undershoot_coefficient:
         value: 0.3
         citations:

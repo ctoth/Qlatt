@@ -34,6 +34,30 @@
       "group": "rate"
     },
     {
+      "id": "cite-at-99",
+      "rate": 99,
+      "text": "The big dog barked at the small cat.",
+      "group": "citation"
+    },
+    {
+      "id": "cite-at-100",
+      "rate": 100,
+      "text": "The big dog barked at the small cat.",
+      "group": "citation"
+    },
+    {
+      "id": "cite-and-99",
+      "rate": 99,
+      "text": "The dog barked, and the small cat ran away.",
+      "group": "citation"
+    },
+    {
+      "id": "cite-and-100",
+      "rate": 100,
+      "text": "The dog barked, and the small cat ran away.",
+      "group": "citation"
+    },
+    {
       "id": "betty-fox-120",
       "voiceId": "betty",
       "rate": 120,

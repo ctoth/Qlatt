@@ -84,6 +84,8 @@ function numericAggregate(args: unknown[], mode: "min" | "max"): number {
 
 type EvaluationContext = {
   values: Record<string, unknown>;
+  /** Add a named value (a rule's `define:` entry) for later expressions. */
+  define: (name: string, value: unknown) => void;
   functions: Record<string, (...args: unknown[]) => unknown>;
   isItemView: (value: unknown) => boolean;
   owner: GraphRuleEvaluationOwner;
@@ -499,9 +501,12 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
     transcription: params.transcription,
     ...bindingViews,
     ...extra,
-  };
+  } as Record<string, unknown>;
   return {
     owner,
+    define: (name, value) => {
+      values[name] = value;
+    },
     isItemView: (value) => value !== null && typeof value === "object" && itemByView.has(value),
     values: new Proxy(values, {
       get: (target, property, receiver) => {
@@ -1766,13 +1771,8 @@ function executeMatch(
     ...(match.contour ? { contour: match.contour } : {}),
     ...(match.phrase ? { phrase: match.phrase } : {}),
   };
-  let context = buildEvaluationContext({ ...contextBase, extra: scopeExtra });
-  context = evaluateRuleDefinitions(rule, context, (definitions) =>
-    buildEvaluationContext({
-      ...contextBase,
-      extra: { ...scopeExtra, ...definitions },
-    }),
-  );
+  const context = buildEvaluationContext({ ...contextBase, extra: scopeExtra });
+  evaluateRuleDefinitions(rule, context);
   const constraintEvidence = evaluateCondition(rule.constraint, context, predicates);
   if (!constraintEvidence.matched) {
     if (captureTooling)
@@ -1873,19 +1873,20 @@ function executeMatch(
   }
 }
 
+/**
+ * Evaluate a rule's `define:` entries in order, each seeing the ones before
+ * it. They are added to the one context: building a context is the costly
+ * part of a match (every navigation function is a closure over it), and one
+ * context keeps one view per Item for the whole rule.
+ */
 function evaluateRuleDefinitions(
   rule: Readonly<Record<string, unknown>>,
-  initialContext: EvaluationContext,
-  rebuild: (definitions: Readonly<Record<string, unknown>>) => EvaluationContext,
-): EvaluationContext {
-  if (!isPlainObject(rule.define)) return initialContext;
-  const definitions: Record<string, unknown> = {};
-  let context = initialContext;
+  context: EvaluationContext,
+): void {
+  if (!isPlainObject(rule.define)) return;
   for (const [name, expression] of Object.entries(rule.define)) {
-    definitions[name] = evaluate(expression, context);
-    context = rebuild(definitions);
+    context.define(name, evaluate(expression, context));
   }
-  return context;
 }
 
 function selectMatches(

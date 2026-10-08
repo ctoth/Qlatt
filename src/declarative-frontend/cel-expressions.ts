@@ -24,6 +24,7 @@ let _celCacheHitCount = 0;
 let _celCacheMissCount = 0;
 let _celEvalTimeMs = 0;
 let _celTimingEnabled = false;
+const _celExpressionProfile = new Map<string, { count: number; ms: number }>();
 
 /** Total number of CEL evaluations since last reset. */
 export function getCelEvalCount(): number {
@@ -45,12 +46,21 @@ export function getCelEvalTimeMs(): number {
 export function setCelTimingEnabled(enabled: boolean): void {
   _celTimingEnabled = enabled;
 }
+/**
+ * Per expression, how often it was evaluated and for how long while timing
+ * was enabled. An expression that evaluates others (a scan with a condition)
+ * includes their time; the counts are separate.
+ */
+export function getCelExpressionProfile(): ReadonlyMap<string, { count: number; ms: number }> {
+  return _celExpressionProfile;
+}
 /** Reset all CEL profiling counters to zero. */
 export function resetCelCounters(): void {
   _celEvalCount = 0;
   _celCacheHitCount = 0;
   _celCacheMissCount = 0;
   _celEvalTimeMs = 0;
+  _celExpressionProfile.clear();
 }
 
 type CelFunctionCatalogEntry = {
@@ -302,6 +312,15 @@ function createCelEnvironment(
     enableOptionalTypes: true,
   });
   env.registerType("ItemView", ItemViewType);
+  // Two views are equal when they show the same Item, whichever context made
+  // them. (cel-js compares objects of a registered type by reference unless
+  // an `==` is registered; taken for maps, two views of one Item compared
+  // equal by content.)
+  env.registerOperator(
+    "ItemView == ItemView",
+    (a: { id?: unknown }, b: { id?: unknown }) =>
+      a === b || (typeof a.id === "string" && a.id === b.id),
+  );
 
   // Register mixed-type arithmetic operators.
   // @marcbachmann/cel-js follows the CEL spec strictly: int + double is not
@@ -552,7 +571,15 @@ export function evaluateExpression(
   if (_celTimingEnabled) {
     const t0 = performance.now();
     const result = coerceResult(compiled(isRecord(context) ? context : {}));
-    _celEvalTimeMs += performance.now() - t0;
+    const elapsed = performance.now() - t0;
+    _celEvalTimeMs += elapsed;
+    const entry = _celExpressionProfile.get(expression);
+    if (entry) {
+      entry.count += 1;
+      entry.ms += elapsed;
+    } else {
+      _celExpressionProfile.set(expression, { count: 1, ms: elapsed });
+    }
     return result;
   }
   return coerceResult(compiled(isRecord(context) ? context : {}));

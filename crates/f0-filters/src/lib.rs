@@ -39,6 +39,11 @@ const LAYER_DECTALK_SEGMENTAL: i32 = 4;
 // rest of the render. DECtalk's female routine scales an exclamation by
 // `f0scalefac + 500` (Ph_drwt02.c:3805-3808); the 500 is the command's value.
 const LAYER_RANGE: i32 = 5;
+// A command on this layer replaces the speaker's F0 floor (the minimum the
+// scaled range is added to) for the rest of the render. DECtalk 4.63's text
+// stage overwrites f0minimum around a clause break it inserts
+// (LTS/ls_util.c:829-837); the value written is the command's.
+const LAYER_FLOOR: i32 = 6;
 const FILTER_ONE_POLE: i32 = 1;
 const FILTER_COEFFICIENT_2POLE: i32 = 2;
 
@@ -447,6 +452,8 @@ fn render_with_options(
     // (a ramped persistent that holds after the ramp completes).
     // Added to the speaker's range by LAYER_RANGE commands.
     let mut range_added = 0.0f64;
+    // The speaker's F0 floor, until a LAYER_FLOOR command replaces it.
+    let mut floor = inp.f0_minimum;
     let mut glide_totals = vec![0.0f64; n_layers];
     let mut active_glides: Vec<Vec<ActiveGlide>> = (0..n_layers).map(|_| Vec::new()).collect();
     let mut segmental_states: Vec<DectalkSegmentalState> = (0..n_layers)
@@ -484,6 +491,9 @@ fn render_with_options(
                         }
                         LAYER_RANGE => {
                             range_added += cmd.value;
+                        }
+                        LAYER_FLOOR => {
+                            floor = cmd.value;
                         }
                         LAYER_IMPULSE => {
                             let step_plus_ramp = is_step_decay(layer.decay_mode);
@@ -665,13 +675,13 @@ fn render_with_options(
         // Speaker scaling (DECtalk Ph_drwt02.c) or pass-through.
         let mut f0_hz = if inp.has_scale {
             if inp.filter_mode == FILTER_COEFFICIENT_2POLE && inp.scale_divisor == 4096.0 {
-                let scaled_internal = inp.f0_minimum as i32
+                let scaled_internal = floor as i32
                     + (((unscaled_f0 as i32 - inp.scale_pivot as i32)
                         * (inp.f0_scale_factor + range_added) as i32)
                         >> 12);
                 scaled_internal as f64 * inp.scale_output
             } else {
-                (inp.f0_minimum
+                (floor
                     + (unscaled_f0 - inp.scale_pivot) * (inp.f0_scale_factor + range_added)
                         / inp.scale_divisor)
                     * inp.scale_output
@@ -2151,6 +2161,16 @@ mod tests {
         assert_eq!(
             call_render_f0(&scalars, &two_layers, 2, &cmds, 2, &[], 0, 1),
             (RENDER_OK, vec![120.0])
+        );
+
+        // A floor command of -12 in place of the range command: the floor of
+        // 100 is replaced, -12 + (30 - 10) * 2 / 4 = -2.
+        let mut floor_layers = two_layers;
+        floor_layers[7] = LAYER_FLOOR as f64;
+        let floor_cmds = [0.0, 30.0, 0.0, 0.0, 0.0, 0.0, -12.0, 0.0, 0.0, 0.0];
+        assert_eq!(
+            call_render_f0(&scalars, &floor_layers, 2, &floor_cmds, 2, &[], 0, 1),
+            (RENDER_OK, vec![-2.0])
         );
     }
 

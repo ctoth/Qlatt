@@ -41,7 +41,14 @@ type LocusTable = Readonly<
 >;
 type VowelCategoryTable = Readonly<Record<string, { forward?: number; backward?: number }>>;
 
-type LayerType = "profile" | "persistent" | "impulse" | "glide" | "dectalk_segmental" | "range";
+type LayerType =
+  | "profile"
+  | "persistent"
+  | "impulse"
+  | "glide"
+  | "dectalk_segmental"
+  | "range"
+  | "floor";
 type DecayMode = "halving" | "step_plus_ramp" | "exponential" | "step_plus_rise";
 
 type LayerConfig = {
@@ -692,6 +699,7 @@ function renderLayeredF0(
     glide: 3,
     dectalk_segmental: 4,
     range: 5,
+    floor: 6,
   };
   const decayCodes: Record<DecayMode, number> = {
     halving: 0,

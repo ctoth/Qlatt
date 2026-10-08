@@ -66,13 +66,22 @@ import type { OracleCorpusDocument } from "../scripts/oracle/types";
 
 const repoRoot = path.resolve(__dirname, "..");
 
-// No list holds length, segments, F0, F1-F3, B2, B3, PH or any word of
+// No list holds length, segments, B2, B3, PH or any word of
 // phases/articulation.yaml (AG, PS, CNK, AL, ABLADE, ATB, AREA_N, DC, UE,
 // A2_CODE) any more: every phrase of every corpus matches DECtalk on them, so
 // they have no reason here and a new gap in one of them fails this test.
 // Known and not ported, with no phrase showing it: a glottal-stop gesture
 // carries from one clause into the next (Ph_drwt02.c:1614 is reset only at a
 // hard start).
+//
+// F0 and F1-F3 are listed for two phrases only, the initials of
+// dectalk-us-letters-v1 ("A.", "A. B. C."): in the clause with no phone that
+// DECtalk speaks for an initial's second period and, in "A. B. C.", in the
+// letters that follow such a clause.
+const EMPTY_CLAUSE_REASON =
+  "the clause with no phone after an initial (two silences of 5 frames; LTS/ls_task.c:" +
+  "1516-1519, 1547-1549 send the period twice): the F0 and formant drawing of such a clause " +
+  "is not ported; the track differs from DECtalk in its ten packets and in the clause after it";
 const B1_REASON =
   "lowering blends Segment targets; DECtalk draws B1 from ph_setar.c and p_us_st1.c targets " +
   "with ph_draw.c:343-460's forward and backward smoothing, then delays it one frame " +
@@ -94,6 +103,10 @@ const A2_AMPLITUDE_REASON =
   "DECtalk's packets with amplitudes put in every non-code A2 word and gets DECtalk's samples";
 
 const GAP_REASONS: Readonly<Record<string, string>> = {
+  F0: EMPTY_CLAUSE_REASON,
+  F1: EMPTY_CLAUSE_REASON,
+  F2: EMPTY_CLAUSE_REASON,
+  F3: EMPTY_CLAUSE_REASON,
   B1: B1_REASON,
   AV: AMPLITUDE_REASON,
   AP: AMPLITUDE_REASON,

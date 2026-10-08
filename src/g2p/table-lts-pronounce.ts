@@ -58,6 +58,11 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
       }
     >
   >;
+  /**
+   * The name of each letter: what a one-letter word that is in no dictionary
+   * is spoken as (it is spelled).
+   */
+  letterPhones?: Readonly<Record<string, readonly string[]>>;
   /** The phone lists numbers are spoken from (table-number.ts). */
   numberPhones?: NumberPhones;
 }

@@ -307,6 +307,27 @@ const wordsByPunctuation = {
     against: { phonemes: ["EY1"] },
   },
 };
+// The names of the letters. A one-letter word that reaches DECtalk's
+// single-letter rules is spelled (LTS/ls_task.c:2760-2775 "Most other single
+// letter words get spelled"; 2612-2623 for a capital followed by a period),
+// and the spelling routine folds the case and speaks the character's own
+// entry (LTS/ls_spel.c ls_spel_spell): the lower-case rows of the typing
+// table, in the dictionary's phoneme spelling.
+const typingTable = fs.readFileSync(
+  path.join(dectalkRoot, "dapi", "src", "INCLUDE", "usa_type.tab"),
+  "utf8",
+);
+const letterPhones: Record<string, string[]> = {};
+for (const match of typingTable.matchAll(/"([^"]*)",\s*\/\*\s*Lower case ([A-Z])\s*\*\//g)) {
+  letterPhones[(match[2] as string).toLowerCase()] = convertPhonemeFieldDetailed(
+    match[1] as string,
+  ).phones;
+}
+if (Object.keys(letterPhones).length !== 26) {
+  throw new Error(
+    `E_LETTER_NAMES: read ${Object.keys(letterPhones).length.toString()} letter names from usa_type.tab, expected 26`,
+  );
+}
 
 // The phone lists DECtalk speaks numbers from (LTS/l_us_con.c:640-900,
 // 1000-1035), used by LTS/l_us_pr1.c without a dictionary lookup. A list
@@ -398,6 +419,7 @@ fs.writeFileSync(
     specialWordFormClasses,
     specialWordPhraseStarts,
     wordsByPunctuation,
+    letterPhones,
     numberPhones,
     words,
     bytes,

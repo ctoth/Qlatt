@@ -9,3 +9,10 @@ maps:
     # lists (LTS/l_us_pr1.c), not from the words in its dictionary.
     bare_numbers: digits
     fraction_exception: '100'
+    # A capital letter followed by a period is an initial: it is spelled and
+    # its period is sent twice (LTS/ls_task.c:2612-2623, 1516-1519,
+    # 1547-1549). "I." is not: DECtalk's dictionary search, which runs before
+    # the single-letter rules (ls_task.c main loop), takes "I" as the pronoun
+    # (PH receives the class PRON|FUNC for it, 00802000, and one period).
+    initials: spelled
+    initial_exceptions: 'I'

@@ -38,10 +38,20 @@ export const DECTALK_VOICE_CORPUS_FILES: readonly string[] = [
   "dectalk-us-ursula-v1.json",
 ];
 
+/**
+ * Paul corpora with a packet record only: sentences added for one rule of the
+ * text stage or of the stress rules, where the packets say everything.
+ */
+export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
+  // One-letter words and initials; promote_last_2 before a verb phrase.
+  "dectalk-us-letters-v1.json",
+];
+
 /** Every corpus with a packet record. */
 export const DECTALK_FRAME_CORPUS_FILES: readonly string[] = [
   ...DECTALK_CORPUS_FILES,
   ...DECTALK_VOICE_CORPUS_FILES,
+  ...DECTALK_PACKET_CORPUS_FILES,
 ];
 
 /**

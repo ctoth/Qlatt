@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-letters-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "letters-initial-a", "text": "A.", "group": "letters", "tags": ["initial", "empty-clause"], "expectedFocus": ["trace"] },
+    { "id": "letters-pronoun-i", "text": "I.", "group": "letters", "tags": ["dictionary-letter"], "expectedFocus": ["trace"] },
+    { "id": "letters-initials-a-b-c", "text": "A. B. C.", "group": "letters", "tags": ["initial", "empty-clause", "spelling"], "expectedFocus": ["trace"] },
+    { "id": "letters-plan-c", "text": "Plan C is ready.", "group": "letters", "tags": ["spelling"], "expectedFocus": ["trace"] },
+    { "id": "promote-and-then-he-went", "text": "And then he went to bed.", "group": "stress", "tags": ["promote-last-2"], "expectedFocus": ["trace"] },
+    { "id": "promote-he-went", "text": "He went to bed.", "group": "stress", "tags": ["promote-last-2"], "expectedFocus": ["trace"] }
+  ]
+}

@@ -76,6 +76,24 @@ rules:
       output: "tn_words(split(lower(current.text), '.').filter(letter, letter != '').join(' '))"
     citations:
       - "Allen, Hunnicutt & Klatt 1987; initialisms"
+  # An initial is spelled, and its period reaches the phonetics twice: once
+  # from the spelling routine and once from the routine that reads the next
+  # word. The second period is a clause of its own with no phone in it.
+  tn_initial:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'initial' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'request', 'kind': 'words', 'payload': {'text': lower(current.payload.letter)}},
+         {'type': 'request', 'kind': 'words', 'payload': {'text': '.'}},
+         {'type': 'request', 'kind': 'words', 'payload': {'text': '.'}}]
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2612-2623 (the initial: rbphone = PERIOD, the word is spelled)"
+      - "DECtalk 4.63 LTS/ls_task.c:1516-1519 (the spelling routine sends the PERIOD), 1547-1549 (the next-word routine sends it again)"
   tn_bare_number_request:
     kind: structural
     select:
@@ -112,4 +130,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_abbreviation, tn_initialism, tn_bare_number_request, tn_unmatched_words]
+    rules: [tn_abbreviation, tn_initialism, tn_initial, tn_bare_number_request, tn_unmatched_words]

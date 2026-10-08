@@ -22,6 +22,22 @@ text_recognition:
       speak: current.text
       vocabulary_keys: '[]'
       citations: ['Allen, Hunnicutt & Klatt 1987; initialism recognition']
+    # A capital letter standing alone with a period after it and nothing
+    # stripped from it: "someone's initial". Only for a frontend whose policy
+    # asks for it (tn_recognition_policy.initials: spelled), and not for a
+    # letter its dictionary takes as a word before this rule is reached.
+    - id: tn_initial_source
+      pattern: '(?<=^|\s)(?<letter>[A-Z])\.(?=\s|$)'
+      flags: ''
+      class: initial
+      captures: {letter: letter}
+      when: >-
+        get(maps.tn_recognition_policy, 'initials', 'word') == 'spelled'
+        && !get(maps.tn_recognition_policy, 'initial_exceptions', '').contains(captures.letter)
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:2600-2623 (an upper case letter with no stripped punctuation, followed by a period, is taken to be an initial)'
     - id: tn_slash_date_source
       pattern: '\b(?<month>[0-1]?[0-9])/(?<day>[0-3]?[0-9])/(?<year>[0-9]{4})\b'
       flags: ''

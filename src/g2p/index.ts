@@ -182,6 +182,22 @@ export function pronounce(
     };
   }
 
+  // A one-letter word that is in no dictionary is spelled: it is spoken as
+  // the letter's name, with the form class `noun` (DECtalk 4.63
+  // LTS/ls_task.c:2760-2775 for the letter, 1493-1509 for the class,
+  // LTS/ls_spel.c ls_spel_spell for the name).
+  const letterName = lowerWord.length === 1 ? table?.letterPhones?.[lowerWord] : undefined;
+  if (letterName) {
+    return {
+      phonemes: [...letterName],
+      source: "spelling",
+      word: lowerWord,
+      ...(table?.formClassNames
+        ? { formClasses: ["noun"], formClassWord: 2 ** table.formClassNames.indexOf("noun") }
+        : {}),
+    };
+  }
+
   // A frontend whose letter-to-sound file is a compiled table follows that
   // table's own order: suffix stripping against the dictionary, then the
   // rules. The stress comes from the dictionary root or from the table's

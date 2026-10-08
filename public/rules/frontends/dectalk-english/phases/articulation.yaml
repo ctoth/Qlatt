@@ -1122,6 +1122,17 @@ rules:
       - { register: delta_area_g, value: 0, tag: glottal_area }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:3602, 3653-3659"
+  # The spread is cleared in a clause's first frame. It shows only in a
+  # clause short enough for the spread to have started there: the clause with
+  # no phone that follows an initial ("A.").
+  artic_no_spread_in_the_first_frame:
+    kind: frame
+    program: articulation
+    when: "g.frame + 1 <= 1"
+    set:
+      - { register: delta_area_g, value: 0, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3986-3990 (if (nframb <= 1) delta_area_g = 0)"
 
   # --- the glottis moves: ph_draw.c:4016-4081 ------------------------------
   artic_glottis_after_voiced_glottal:
@@ -2240,6 +2251,7 @@ phases:
       - artic_fricative_before_voiced_low
       - artic_end_of_clause_spread
       - artic_no_spread_before_the_end
+      - artic_no_spread_in_the_first_frame
       - artic_glottis_after_voiced_glottal
       - artic_glottis_speed_at_high_rate
       - artic_glottis_step

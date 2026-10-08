@@ -1,6 +1,12 @@
 import type { LexicalStressResult } from "./lexical-stress-types";
 
-export type PronunciationSource = "dictionary" | "morphology" | "lts-rules" | "number" | "unknown";
+export type PronunciationSource =
+  | "dictionary"
+  | "morphology"
+  | "lts-rules"
+  | "number"
+  | "spelling"
+  | "unknown";
 
 /** One spoken word of a token that is spoken as several (a number in digits). */
 export interface PronunciationPart {

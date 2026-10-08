@@ -208,6 +208,19 @@ rules:
       output: "[{'type': 'terminal', 'text': current.text}]"
     citations:
       - "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent as its phonemes, with no dictionary lookup)"
+  # A clause end that has words to end (tn_parser_clause_end_source) ends them
+  # as a period does.
+  tn_parser_clause_end:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'parser_clause_end' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: "[{'type': 'request', 'kind': 'words', 'payload': {'text': '.'}}]"
+    citations:
+      - "DECtalk 4.63 PH/ph_task.c:665-676 (pending symbols are ended with PERIOD when a control item arrives)"
   tn_unmatched_words:
     kind: structural
     select:
@@ -226,4 +239,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_parser_phones, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]

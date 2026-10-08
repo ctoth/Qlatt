@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-parser-text-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "title-doctor", "text": "Dr. Smith is here.", "group": "rewrite" },
+    { "id": "title-saint", "text": "St. John is here.", "group": "rewrite" },
+    { "id": "brackets", "text": "He said (quietly) that it was late.", "group": "rewrite" },
+    { "id": "end-none", "text": "Hello world", "group": "clause-end" },
+    { "id": "end-period", "text": "Hello world.", "group": "clause-end" },
+    { "id": "end-one-word", "text": "Seven", "group": "clause-end" },
+    { "id": "end-after-comma", "text": "Come here, John", "group": "clause-end" },
+    { "id": "end-tab", "text": "One two\tthree four.", "group": "clause-end" },
+    { "id": "end-question-words", "text": "Is it late", "group": "clause-end" },
+    { "id": "end-letter", "text": "b", "group": "clause-end" },
+    { "id": "end-letters", "text": "a f c", "group": "clause-end" }
+  ]
+}

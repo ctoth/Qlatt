@@ -29,6 +29,21 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 CMD/cm_text.c:1088-1145 (text between PAR_PHONES_ON_D and PAR_PHONES_OFF_D goes to letter-to-sound as phonemes), CMD/par_def1.h:286-287'
+    # The clause end the parser's text carries (the host's "speak this now",
+    # and the ends the parser's own rules write): it ends the words said since
+    # the last sentence or clause mark as a period does, and does nothing when
+    # there are none. So only the first of a run counts, and none at the start
+    # of the text or after a mark that has already ended the clause.
+    - id: tn_parser_clause_end_source
+      pattern: '(?<!(?:^|[.,;:!?\x0b]|\x81,\x82)\s*)\x0b'
+      flags: ''
+      class: parser_clause_end
+      captures: {}
+      when: "get(maps.tn_recognition_policy, 'parser_marks', 'none') == 'phonemic'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:1239-1264 (a clause end character sends BREATH_BREAK); PH/ph_task.c:665-676 (a control item arriving while symbols are pending ends them with PERIOD)'
     # A unit's abbreviation with its period, one or two words after a word
     # that begins with a digit: kept as one token, which the frontend's
     # lexicon reads from its table of units by the number. In any case of

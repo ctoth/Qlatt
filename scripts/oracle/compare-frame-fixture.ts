@@ -9,7 +9,8 @@
  * compared, packets that differ, mean absolute difference, and how many
  * phrases match on every packet.
  *
- *   --corpus <corpusId>   one corpus instead of all
+ *   --corpus <corpusId>   one corpus instead of all (all: Paul's three and
+ *                         every voice corpus, as the frame gate test covers)
  *   --id <phraseId>       also print that phrase's first mismatch per parameter
  *   --json <file>         write the per-corpus table as JSON
  *   --write-gaps          rewrite <corpus>.frame-gaps.json from this run
@@ -24,7 +25,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { selectedCorpusFiles } from "./allophones";
+import { DECTALK_FRAME_CORPUS_FILES, selectedCorpusFiles } from "./allophones";
 import {
   comparePhraseFrames,
   FRAME_GAP_NAMES,
@@ -55,7 +56,7 @@ type Row = {
 };
 const report: Record<string, { phrases: number; packets: number; rows: Row[] }> = {};
 
-for (const corpusFile of selectedCorpusFiles(argv)) {
+for (const corpusFile of selectedCorpusFiles(argv, DECTALK_FRAME_CORPUS_FILES)) {
   const corpus = JSON.parse(
     fs.readFileSync(path.join(repoRoot, "test", "oracle-corpora", corpusFile), "utf8"),
   ) as OracleCorpusDocument;

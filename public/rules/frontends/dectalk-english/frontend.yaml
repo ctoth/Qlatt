@@ -127,6 +127,17 @@ speakers:
       kind: number
       citations:
         - "DECtalk 4.63 PH/ph_vset.c:615-616, 712-713; ph_draw.c:733-736"
+    # size_hat_rise, the hat pattern's rise in tenths of a hertz: HR * 10, and
+    # (HR - 10) * 10 in Frank's block.
+    hat_rise_hz10:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:597, 680; Ph_inton2.c:820"
+    # scale_str_rise, SR: a stress impulse is its table value times this over 32.
+    scale_str_rise:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:598, 681; Ph_inton2.c:992-1005"
   voices:
     - paul
     - harry
@@ -1047,10 +1058,9 @@ parameters:
         - 980
         - 952
         - 863
-      # Citation-mode hat rise (internal Hz*10 units).
-      # Paul: HR=12, general ph_vset.c path -> size_hat_rise = HR*10 = 120.
-      # Ph_inton2.c adds 70 when the stressed nucleus is in the first syllable.
-      hat_rise_hz: 120
+      # The hat rise itself, size_hat_rise, is the voice rule field
+      # hat_rise_hz10. Ph_inton2.c adds 70 when the stressed nucleus is in the
+      # first syllable.
       hat_first_syllable_bonus_hz: 70
       # Ph_inton2.c:830: the 70 is added when `nphon <= 2`.
       hat_first_syllable_through_allophone: 2

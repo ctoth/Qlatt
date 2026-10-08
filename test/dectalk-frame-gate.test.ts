@@ -34,9 +34,13 @@
  * with another head size; and, five sentences each, Frank (setspdef()'s own
  * block), Dennis (no fifth formant) and Ursula (a female voice with one).
  * In them F1, F2, F3, B2 and B3 match on every packet, through the voice rule
- * fields `sex` and `fnscale`. The words that do not (F0, AG, PS, CNK, F4 among
- * them) are computed from values the frontend still takes from Paul; the
- * reasons below were written for Paul's corpora and do not explain those.
+ * fields `sex` and `fnscale`. F0 of the male voices takes its floor, range,
+ * hat rise and stress scale from the voice and differs only where Paul's
+ * does; F0 of the female voices does not match anywhere: DECtalk runs a
+ * second copy of its F0 routine for them (Ph_drwt02.c:2445 on) with other
+ * baselines and stress tables (Ph_inton2.c:936-946), which is not ported.
+ * AG, PS, CNK and F4 are still computed from Paul's values; the reasons
+ * below were written for Paul's corpora and do not explain those.
  */
 
 import fs from "node:fs";

@@ -236,7 +236,7 @@ rules:
         ? -params.policy.f0.hat_rise_early_frames
         : floor(get(la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
       rise_hz: >-
-        params.policy.f0.hat_rise_hz
+        params.policy.voice.hat_rise_hz10
         + (position > params.policy.f0.hat_late_after_allophone ? params.policy.f0.hat_late_bonus_hz : 0.0)
         + (position <= params.policy.f0.hat_first_syllable_through_allophone ? params.policy.f0.hat_first_syllable_bonus_hz : 0.0)
     constraint: "reached && isTrue(current, 'hat_begins')"
@@ -403,7 +403,7 @@ rules:
         !final ? question_hz
         : (reduced_hz < 0.0 ? params.policy.f0.stress_final_floor_hz : reduced_hz)
       impulse_hz: >-
-        floor(params.policy.speaker.scale_str_rise * final_hz / params.policy.f0.stress_scale_divisor)
+        floor(params.policy.voice.scale_str_rise * final_hz / params.policy.f0.stress_scale_divisor)
       own_delay: >-
         stress_now == params.policy.f0.stress_emphasis_level ? params.policy.f0.stress_emphasis_delay_frames
         : (final ? -params.policy.f0.stress_final_early_frames

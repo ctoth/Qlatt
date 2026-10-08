@@ -1,10 +1,10 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`tone association preserves the existing frontend tracks > dectalk-english: Did Bob buy a blue balloon? 1`] = `"1070264685592c409b0047700134a161d1be7cfebd29a00e5efc5d48b0c6ffef"`;
+exports[`tone association preserves the existing frontend tracks > dectalk-english: Did Bob buy a blue balloon? 1`] = `"34b199cdbe93345d922cf81cda12f42c8a29a10409834871a26b6ed410e8498f"`;
 
-exports[`tone association preserves the existing frontend tracks > dectalk-english: Gag, gang; go! 1`] = `"d4ac00f626e35552b8a4c6bc454952888afec82a3b1dbe47dff0cc4fd51fe53d"`;
+exports[`tone association preserves the existing frontend tracks > dectalk-english: Gag, gang; go! 1`] = `"2bc8b7695c789bfeb0c626030791b9674c14e9d6f573dcf943feaaa07086e88a"`;
 
-exports[`tone association preserves the existing frontend tracks > dectalk-english: The cat sat. 1`] = `"e346cb7f366660b3097728ca40079bdd47f8756b163741d09cd110f8a53b75a3"`;
+exports[`tone association preserves the existing frontend tracks > dectalk-english: The cat sat. 1`] = `"9b77f8999700f8d780b71bf95d6ef4e4c64abeff7b40b455235f4f7640433005"`;
 
 exports[`tone association preserves the existing frontend tracks > dectalk-english: sip sip. 1`] = `"490f5063ac0402a196b9eb77ea69c232dc83dd6077cd0138040273eb10781fbe"`;
 

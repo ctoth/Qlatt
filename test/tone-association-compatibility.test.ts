@@ -75,6 +75,10 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // The reset of pressure and glottis in a later clause's initial silence
 // regenerates "Gag, gang; go!" alone: against 062c027e the other three are
 // unchanged, and it is unchanged with `--drop PS,CNK,AG`.
+// Corrections to the glottal rules found by tracing DECtalk (the voice's
+// end-of-phrase spread, which initial-silence cases run every frame, when the
+// next phone's opening applies) regenerate three: against fc64b694 only AG
+// changes (`--drop AG` gives equal hashes) and "sip sip." not at all.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

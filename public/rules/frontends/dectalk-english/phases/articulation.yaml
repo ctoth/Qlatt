@@ -145,6 +145,17 @@ frame_programs:
       is_r: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'R'", edge: false }
       is_rr: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'RR'", edge: false }
       is_l: { value: "!artic_is_dummy(current) && dectalk_name(current) in ['LL', 'LX']", edge: false }
+      # allophons[nphone + 1] == allophons[nphone + 2]
+      next_repeats:
+        value: >-
+          artic_next_unit(current) != null && artic_next_unit(artic_next_unit(current)) != null
+          && !artic_is_dummy(artic_next_unit(current))
+          && !artic_is_dummy(artic_next_unit(artic_next_unit(current)))
+          && dectalk_name(artic_next_unit(current)) == dectalk_name(artic_next_unit(artic_next_unit(current)))
+        edge: false
+      is_affricate:
+        value: "!artic_is_dummy(current) && dectalk_name(current) in ['CH', 'JH']"
+        edge: false
       # p_us_st1.c:1397-1400: the allophone two back is /s/ with no boundary after it.
       after_s_cluster:
         value: >-
@@ -260,7 +271,6 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial && n.voiced && n.labial"
-    when: "f.index == 0"
     set:
       - { register: pressure, value: 300, tag: subglottal_pressure }
     citations:
@@ -505,7 +515,12 @@ rules:
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:580-590"
 
-  # --- allophone 0, once: ph_draw.c:919-930, 953-1202 ----------------------
+  # --- allophone 0: ph_draw.c:919-1076 once, 1085-1202 every frame ---------
+  # The `if (nphone != nphonelast)` at 912 closes at 1080: the reset and the
+  # obstruent cases run once, the voiced and voiceless cases below them on
+  # every frame of the silence. Seen in DECtalk itself: before a vowel the
+  # area is set to 0 and steps to 200 on each of the four frames, while
+  # before /b/ or /dh/ it starts at 400 once and keeps moving.
   artic_initial_reset_glottis:
     kind: frame
     program: articulation
@@ -558,7 +573,6 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial && n.voiced"
-    when: "f.index == 0"
     set:
       - { register: agspeed, value: 2, tag: glottal_area }
       - register: target_ag
@@ -572,7 +586,6 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial && n.voiced && n.vowel"
-    when: "f.index == 0"
     set:
       - { register: area_g, value: 0, tag: glottal_area }
       - { register: agspeed, value: 1, tag: glottal_area }
@@ -582,7 +595,6 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial && !n.voiced"
-    when: "f.index == 0"
     set:
       - { register: area_g, value: 1410, tag: glottal_area }
       - { register: target_ag, value: 1410, tag: glottal_area }
@@ -794,6 +806,17 @@ rules:
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:2165-2192"
 
+  # --- CH and JH, every frame: ph_draw.c:2251-2259 -------------------------
+  # In the chain that picks the frication code by place (2197-2312).
+  artic_affricate_speed:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.is_affricate"
+    set:
+      - { register: agspeed, value: 2, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2251-2259"
+
   # --- a sonorant consonant, every frame: ph_draw.c:2340-2397 --------------
   artic_sonorant_consonant_speed:
     kind: frame
@@ -830,11 +853,14 @@ rules:
       - "DECtalk 4.63 PH/ph_draw.c:2400, 2505-2515"
 
   # --- opening for the next phone, every frame: ph_draw.c:2676-2797 --------
+  # The last branch of the chain that starts at 2400: reached only when this
+  # phone is not a nasal, and not when the next is a nasal unless the phone
+  # after that is the same nasal again (2526-2530, 2586).
   # NF60MS is 9 frames, NF50MS 8 (ph_defs.h:442-443).
   artic_unstressed_before_voiceless_fricative_late:
     kind: frame
     program: articulation
-    unit: "!u.silence && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
+    unit: "!u.silence && !u.nasal && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
     when: "f.index >= f.count - 9 && f.index >= floor(f.count / 2) && r.target_ag < 1000"
     set:
       - { register: target_ag, value: "r.target_ag + 10", tag: glottal_area }
@@ -843,7 +869,7 @@ rules:
   artic_unstressed_before_voiceless_fricative_early:
     kind: frame
     program: articulation
-    unit: "!u.silence && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
+    unit: "!u.silence && !u.nasal && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
     when: "!(f.index >= f.count - 9 && f.index >= floor(f.count / 2)) && r.target_ag < 1100"
     set:
       - { register: target_ag, value: "r.target_ag + (r.target_ag < 700 ? 75 : 40)", tag: glottal_area }
@@ -852,7 +878,7 @@ rules:
   artic_plosive_before_nasal:
     kind: frame
     program: articulation
-    unit: "!u.silence && u.obstruent && u.plosive && n.nasal"
+    unit: "!u.silence && u.obstruent && u.plosive && n.nasal && u.next_repeats"
     when: "f.index >= f.count - 8 && r.target_ag > 1100"
     set:
       - { register: target_ag, value: 1100, tag: glottal_area }
@@ -972,6 +998,7 @@ phases:
       - artic_vowel_last_frame
       - artic_vowel_before_voiceless_sonorant
       - artic_before_voiceless_sonorant
+      - artic_affricate_speed
       - artic_sonorant_consonant_speed
       - artic_lateral_glottis
       - artic_nasal_glottis

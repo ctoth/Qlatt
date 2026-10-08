@@ -2319,6 +2319,16 @@ output:
     overlays:
       operation_order: [voice_quality, timed_controls, f0]
 transcription:
+  # A text made only of phoneme symbols is ordinary text here: "B." is the
+  # letter. DECtalk takes phonemes only inside brackets, and only after
+  # [:phoneme on]: the mode starts off (CMD/Cmd_init.c:87) and the parser
+  # tests it before reading a bracket as phonemes (CMD/cm_pars.c:361).
+  diagnostic_symbol_input: false
+  # The dictionary is searched by the written word: "n" does not find "'n",
+  # "em" does not find "'em". Measured on DECtalk 4.63 say.exe (symbols into
+  # ph_sort): "Plan n is ready." has EH N, "Plan 'n is ready." EN;
+  # "Plan em is ready." has EH M, "Plan 'em is ready." IX M.
+  elided_apostrophe_lookup: false
   # Standard English letter-name pronunciations for declarative spelling mode.
   # Citation anchor: Allen et al. 1987 Ch.2-3 (LETTER-* morphs for symbol strings).
   letter_names:

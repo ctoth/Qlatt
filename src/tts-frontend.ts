@@ -375,6 +375,13 @@ function getTranscriptionConfig(spec: CompiledRulepack): TranscriptionConfig | u
     : undefined;
   return {
     diagnostic_symbols: diagnosticSymbols,
+    // Passed as written; requireTranscriptionTables refuses a non-boolean.
+    ...(value.diagnostic_symbol_input !== undefined
+      ? { diagnostic_symbol_input: value.diagnostic_symbol_input as boolean }
+      : {}),
+    ...(value.elided_apostrophe_lookup !== undefined
+      ? { elided_apostrophe_lookup: value.elided_apostrophe_lookup as boolean }
+      : {}),
     letter_names: letterNames,
     punctuation_tokens: punctuationTokens,
   };

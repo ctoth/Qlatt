@@ -75,4 +75,31 @@ describe("one-letter words in dectalk-english", () => {
   it("leaves a frontend that does not ask for initials alone", () => {
     expect(phones("A.", "qlatt-english").filter((phone) => phone === "SIL")).toHaveLength(1);
   });
+
+  // DECtalk reads phonemes only in brackets after [:phoneme on]
+  // (CMD/Cmd_init.c:87, CMD/cm_pars.c:361), so a text of letters that are
+  // also phoneme symbols is letters. Exported "B." is B, release, IY and the
+  // two clause ends.
+  it("reads a letter that is also a phoneme symbol as the letter", () => {
+    expect(phones("B.")).toEqual(["B", "B_REL", "IY", "SIL", "SIL"]);
+    expect(phones("b")).toEqual(["B", "B_REL", "IY"]);
+  });
+
+  it("keeps phoneme-symbol input in a frontend that does not turn it off", () => {
+    expect(phones("B.", "qlatt-english")).toEqual(["B_CL", "B_REL", "SIL"]);
+  });
+
+  // Measured on DECtalk 4.63 (symbols into ph_sort): "Plan n is ready." has
+  // EH N and "Plan em is ready." EH M; the dictionary's "'n" (EN) and "'em"
+  // (IX M) are reached only by the written apostrophe.
+  it("does not find a dictionary word by adding an apostrophe", () => {
+    expect(phones("N.")).toEqual(["EH", "N", "SIL", "SIL"]);
+    expect(phones("Plan n is ready.").slice(5, 7)).toEqual(["EH", "N"]);
+    expect(phones("Plan em is ready.").slice(5, 7)).toEqual(["EH", "M"]);
+  });
+
+  it("keeps the apostrophe lookup in a frontend that does not turn it off", () => {
+    // The default dictionary has "'cuse" (K Y UW1 Z) and no "cuse".
+    expect(phones("cuse", "qlatt-english").slice(-3)).toEqual(["Y", "UW", "Z"]);
+  });
 });

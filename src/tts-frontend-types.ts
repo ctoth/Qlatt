@@ -28,6 +28,17 @@ export interface TranscriptionToken {
 
 export type TranscriptionConfig = {
   diagnostic_symbols?: Record<string, string[]>;
+  /**
+   * Whether a text made only of `diagnostic_symbols` is spoken as those
+   * phonemes. On unless a frontend says false: a frontend that ports a system
+   * with no such input turns it off, so "B." is the letter and not /b/.
+   */
+  diagnostic_symbol_input?: boolean;
+  /**
+   * Whether a word the dictionary lacks is also looked up with an apostrophe
+   * in front ("cuse" finds "'cuse"). On unless a frontend says false.
+   */
+  elided_apostrophe_lookup?: boolean;
   letter_names?: Record<string, string[]>;
   punctuation_tokens?: string[];
 };

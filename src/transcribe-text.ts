@@ -74,6 +74,10 @@ type OrthographyInputToken = {
 
 type RequiredTranscriptionTables = {
   diagnosticSymbols: Record<string, string[]>;
+  /** False when the frontend turns phoneme-symbol input off. */
+  symbolInput: boolean;
+  /** False when the frontend's dictionary is searched by the written word only. */
+  elidedApostropheLookup: boolean;
   letterNames: Record<string, string[]>;
   punctuationTokens: Set<string>;
 };
@@ -96,14 +100,18 @@ const CMU_DICT_MAP: Record<string, string | undefined> = await preloadCmuDiction
  *
  * Also handles alternate pronunciation entries like "read(1)".
  */
-function makeDictLookup(map: Record<string, string | undefined>): DictLookup {
+function makeDictLookup(
+  map: Record<string, string | undefined>,
+  elidedApostrophe = true,
+): DictLookup {
   return (word: string): string[] | null => {
     const lowerWord = word.toLowerCase();
     const candidates: string[] = [lowerWord];
 
     // Handle elided spellings where the dictionary key keeps leading apostrophe
-    // (e.g., "'cuse") but normalized input token may not ("cuse").
-    if (!lowerWord.startsWith("'")) candidates.push(`'${lowerWord}`);
+    // (e.g., "'cuse") but normalized input token may not ("cuse"). A frontend
+    // turns this off with `transcription.elided_apostrophe_lookup: false`.
+    if (elidedApostrophe && !lowerWord.startsWith("'")) candidates.push(`'${lowerWord}`);
     // Handle converse elision: input may omit or include trailing apostrophe.
     if (!lowerWord.endsWith("'")) candidates.push(`${lowerWord}'`);
     if (lowerWord.endsWith("'") && lowerWord.length > 1) candidates.push(lowerWord.slice(0, -1));
@@ -201,7 +209,21 @@ function requireTranscriptionTables(
   if (!config || typeof config !== "object") {
     throw new Error("E_TRANSCRIPTION_CONFIG_REQUIRED: transcription config is required");
   }
+  const symbolInput = config.diagnostic_symbol_input;
+  if (symbolInput !== undefined && typeof symbolInput !== "boolean") {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.diagnostic_symbol_input must be true or false",
+    );
+  }
+  const elidedApostropheLookup = config.elided_apostrophe_lookup;
+  if (elidedApostropheLookup !== undefined && typeof elidedApostropheLookup !== "boolean") {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.elided_apostrophe_lookup must be true or false",
+    );
+  }
   return {
+    symbolInput: symbolInput !== false,
+    elidedApostropheLookup: elidedApostropheLookup !== false,
     diagnosticSymbols: requirePronunciationMap(config.diagnostic_symbols, "diagnostic_symbols"),
     letterNames: requirePronunciationMap(config.letter_names, "letter_names"),
     punctuationTokens: new Set(requireStringArray(config.punctuation_tokens, "punctuation_tokens")),
@@ -322,9 +344,6 @@ export function transcribeText(
   // recovery). An explicit `dictLookup` override still wins for the lookup
   // (used e.g. for diagnostic injection in tests).
   const effectiveDictMap = options.dictionaryMap ?? CMU_DICT_MAP;
-  const effectiveDictLookup =
-    options.dictLookup ??
-    (options.dictionaryMap ? makeDictLookup(options.dictionaryMap) : cmuDictLookup);
   const compiledSpec = options.compiledSpec ?? QLATT_ENGLISH_RULEPACK;
   const resources = loadFrontendResources(compiledSpec);
   const ltsPath = options.ltsPath ?? resources.ltsPath;
@@ -332,6 +351,11 @@ export function transcribeText(
   const stressPolicyPath = options.stressPolicyPath ?? resources.stressPolicyPath;
   const cfg = options.transcriptionConfig ?? getSpecTranscriptionConfig(compiledSpec);
   const transcriptionTables = requireTranscriptionTables(cfg);
+  const effectiveDictLookup =
+    options.dictLookup ??
+    (options.dictionaryMap || !transcriptionTables.elidedApostropheLookup
+      ? makeDictLookup(effectiveDictMap, transcriptionTables.elidedApostropheLookup)
+      : cmuDictLookup);
 
   const _isEffectivePunctuation = (word: string): boolean =>
     isPunctuationTokenWithTables(word, transcriptionTables);
@@ -356,6 +380,7 @@ export function transcribeText(
   // Use effective lookup functions for symbol mode detection
   const nonPunctuation = orthographyWords.filter((w) => w.word.length > 0 && !w.isPunctuation);
   const useSymbolMode =
+    transcriptionTables.symbolInput &&
     nonPunctuation.length > 0 &&
     nonPunctuation.every((w) => !w.pronunciationKey && getEffectiveSymbol(w.word) !== null);
 

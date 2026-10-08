@@ -50,12 +50,29 @@ type LayerConfig = {
   initial_decay_divisor?: number;
   termination_threshold?: number;
   exponential_factor?: number;
+  /**
+   * On a dectalk_segmental layer: the dip in F0 around a glottal-stop
+   * gesture, `distance * slope - depth` within `reach_frames` of it, and the
+   * frame of an allophone at which the gesture at its end is taken up.
+   * Absent: no dip.
+   */
+  glottal_gesture?: {
+    depth: number;
+    slope: number;
+    reach_frames: number;
+    latch_frame: number;
+  };
 };
 
 type LayeredFilterConfig = {
-  type: "lowpass_2pole_coefficient" | "lowpass_2pole_coefficient_half_scale";
+  type: "lowpass_2pole_coefficient";
   alpha_param?: string;
   default_alpha: number;
+  /**
+   * Bits the filter's state and input are shifted down and its output up
+   * (default 0). The shift drops bits, so it changes the output.
+   */
+  scale_shift?: number;
 };
 
 type SpeakerScaleConfig = {
@@ -684,8 +701,27 @@ function renderLayeredF0(
   };
   // f0-filters ABI constants; keep synchronized with crates/f0-filters/src/lib.rs.
   const commandDescriptorWidth = 5;
-  const coefficientTwoPoleFilterMode =
-    model.filter.type === "lowpass_2pole_coefficient_half_scale" ? 3 : 2;
+  const coefficientTwoPoleFilterMode = 2;
+  const filterScaleShift =
+    model.filter.scale_shift == null
+      ? 0
+      : requireFiniteNumber(model.filter.scale_shift, "f0_model.filter.scale_shift");
+  const gestures = layerNames.flatMap((name) => {
+    const gesture = model.layers[name]?.glottal_gesture;
+    return gesture ? [{ name, gesture }] : [];
+  });
+  if (gestures.length > 1) {
+    throw new Error("E_HRG_LOWER_F0_MODEL: only one layer may declare glottal_gesture");
+  }
+  const glottalGesture = gestures.map(({ name, gesture }) => [
+    requireFiniteNumber(gesture.depth, `f0_model.layers.${name}.glottal_gesture.depth`),
+    requireFiniteNumber(gesture.slope, `f0_model.layers.${name}.glottal_gesture.slope`),
+    requireFiniteNumber(
+      gesture.reach_frames,
+      `f0_model.layers.${name}.glottal_gesture.reach_frames`,
+    ),
+    requireFiniteNumber(gesture.latch_frame, `f0_model.layers.${name}.glottal_gesture.latch_frame`),
+  ])[0] ?? [0, 0, 0, 0];
   const layerDescriptors: number[] = [];
   const commandDescriptors: number[] = [];
   const profilePool: number[] = [];
@@ -732,9 +768,10 @@ function renderLayeredF0(
       const profileStart = profilePool.length;
       const profileCount =
         config.type === "profile" || dectalkSegmental ? (command.profilePoints?.length ?? 0) : 0;
-      if (dectalkSegmental && profileCount !== 3) {
+      // A fourth flag marks a glottal-stop gesture at the allophone's end.
+      if (dectalkSegmental && profileCount !== 3 && profileCount !== 4) {
         throw new Error(
-          `E_HRG_LOWER_F0_MODEL: f0_control.${name}.profilePoints requires [voiceless, plosive, stressed]`,
+          `E_HRG_LOWER_F0_MODEL: f0_control.${name}.profilePoints requires [voiceless, plosive, stressed] and optionally [glottal gesture]`,
         );
       }
       if (profileCount > 0 && command.profilePoints) profilePool.push(...command.profilePoints);
@@ -776,7 +813,11 @@ function renderLayeredF0(
     maxHz,
     initialTotal,
     scalePivot,
-    ...(outputLeadFrames == null ? [] : [outputLeadFrames, elapsedFrames]),
+    // -1: the kernel's own default lead.
+    outputLeadFrames ?? -1,
+    elapsedFrames,
+    filterScaleShift,
+    ...glottalGesture,
   ];
   const exports = getF0FilterExports();
   const allocate = (values: readonly number[]): { ptr: number; len: number } => {

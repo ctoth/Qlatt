@@ -45,12 +45,16 @@ export const DECTALK_FRAME_CORPUS_FILES: readonly string[] = [
 ];
 
 /**
- * The corpus files a comparison script covers: Paul's three, or the one named
- * by `--corpus <id>`, which may also be a voice corpus.
+ * The corpus files a comparison script covers: `all` (Paul's three unless the
+ * script has a record of the voice corpora too), or the one named by
+ * `--corpus <id>`, which may also be a voice corpus.
  */
-export function selectedCorpusFiles(argv: readonly string[]): readonly string[] {
+export function selectedCorpusFiles(
+  argv: readonly string[],
+  all: readonly string[] = DECTALK_CORPUS_FILES,
+): readonly string[] {
   const index = argv.indexOf("--corpus");
-  if (index < 0) return DECTALK_CORPUS_FILES;
+  if (index < 0) return all;
   const file = `${argv[index + 1]}.json`;
   if (!DECTALK_FRAME_CORPUS_FILES.includes(file)) {
     throw new Error(`E_CORPUS_UNKNOWN: '${argv[index + 1]}'`);

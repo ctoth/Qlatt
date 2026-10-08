@@ -563,7 +563,10 @@ rules:
   # frames, and the three tests pht0draw makes on the phone:
   #   profile_points = [voiceless (FVOICD minus), plosive (FPLOSV), stressed
   #   (allofeats & FSTRESS)]. The last two are read only for a voiceless phone.
-  # The f0-filters kernel owns the fixed-point filter and its delays.
+  # A fourth entry says whether a glottal-stop gesture stands at the
+  # allophone's end (set_tglst, Ph_drwt02.c:4040-4128); absent, there is none.
+  # The f0-filters kernel owns the fixed-point filter and its delays, and the
+  # gesture's clock and its dip in F0 (2266-2275).
   # --------------------------------------------------------------------------
   dectalk_segmental_f0_initial_silence:
     kind: f0_layer
@@ -578,9 +581,25 @@ rules:
       at: at_sync(current.sync_left)
       value: "params.policy.f0.segmental.targets[params.policy.voice.sex].SIL"
       duration_frames: dectalk_clause_initial_pause_frames(current)
-      profile_points: [1, 0, 0]
+      # The fourth flag: a gesture at the pause's end when the clause's first
+      # allophone is glottalized (Ph_drwt02.c:4110-4114), or is a vowel with
+      # primary stress in its word's first syllable (4078-4098, the consonant
+      # case: the pause carries FWBNEXT, which the word boundary ahead of the
+      # first word gives the phone before it, ph_sort.c:1457-1466).
+      profile_points:
+        - 1
+        - 0
+        - 0
+        - >-
+          dectalk_name(current) in params.policy.articulation.place.glottal
+          || (dectalk_has(current, 'vowel') && dectalk_name(current) != 'YU'
+              && get(current, 'syllable_type', 'only') in ['first', 'only']
+              && get(current, 'stress', 0) in [1, params.policy.f0.stress_emphasis_level])
+          ? 1 : 0
       tag: f0_segmental_initial_silence
     citations:
+      - "DECtalk 4.63 Ph_drwt02.c:4040-4128 set_tglst (where a glottal-stop gesture is placed)"
+      - "DECtalk 4.63 ph_sort.c:1457-1466 (WBOUND adds FWBNEXT to the phone before it)"
       - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (SI target) and :2080-2150 pht0draw"
       - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause of 4 or 5 frames)"
 
@@ -609,6 +628,50 @@ rules:
           '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")')
       counted: >-
         !isTrue(current, 'intonation_stops') && (stopped_at == null || stopped_at.phoneme == 'SIL')
+      # set_tglst() (Ph_drwt02.c:4040-4128): whether a glottal-stop gesture
+      # stands at this allophone's end. The kernel times it and dips F0 around
+      # it (2266-2275).
+      gl_next: dectalk_next(current)
+      gl_prev: dectalk_prev(current)
+      gl_name: dectalk_name(current)
+      gl_next_name: dectalk_name(gl_next)
+      gl_boundary: dectalk_boundary(current)
+      # 4065-4077: no gesture after a function word's phone when this is the
+      # /n/ after its word-final EH, or a word-final schwa. The routine returns
+      # there, before the glottalized-phone tests below.
+      gl_function_word: >-
+        gl_prev != null && dectalk_has_class(gl_prev, 'func')
+        && ((gl_name == 'N' && dectalk_name(gl_prev) == 'EH'
+             && dectalk_boundary(gl_prev) >= params.policy.timing.boundary.word)
+            || (gl_name == 'AX' && gl_boundary >= params.policy.timing.boundary.word))
+      # FSTRESS_1 is the low bit: primary stress and emphasis.
+      gl_next_primary: >-
+        gl_next != null
+        && get(gl_next, 'stress', 0) in [1, params.policy.f0.stress_emphasis_level]
+      # 4078-4081: the next allophone is a vowel other than YU in its word's
+      # first or only syllable, and this one is word-final. (The source masks
+      # with FMEDIALSYL & FFINALSYL, which is the medial bit; a final syllable
+      # has it too.)
+      gl_before_word_vowel: >-
+        gl_next != null && dectalk_has(gl_next, 'vowel') && gl_next_name != 'YU'
+        && get(gl_next, 'syllable_type', 'only') in ['first', 'only']
+        && gl_boundary >= params.policy.timing.boundary.word
+      # 4083-4098: after a syllabic only between identical vowels, the second
+      # with primary stress, or at a verb-phrase boundary or stronger; after a
+      # consonant other than a plosive or flap only before a primary-stressed
+      # vowel that is not nasal.
+      gl_at_hiatus: >-
+        dectalk_has(current, 'syllabic')
+        ? ((gl_name == gl_next_name && gl_next_primary)
+           || gl_boundary >= params.policy.timing.boundary.vp)
+        : (!dectalk_has(current, 'plosive') && gl_name != 'DX' && gl_next_primary
+           && !dectalk_has(gl_next, 'nasal'))
+      # 4110-4119: at the start and the end of a glottalized allophone.
+      gl_glottalized: >-
+        gl_name in params.policy.articulation.place.glottal
+        || (gl_next != null && gl_next_name in params.policy.articulation.place.glottal)
+      glottal_gesture: >-
+        !gl_function_word && ((gl_before_word_vowel && gl_at_hiatus) || gl_glottalized)
     constraint: counted
     insert:
       relation: Tilt
@@ -617,13 +680,17 @@ rules:
       value: "get(params.policy.f0.segmental.targets[params.policy.voice.sex], current.phoneme, 0)"
       duration_frames: "round(allophone_ms / params.policy.f0.segmental.frame_ms)"
       profile_points: &segmental_phone_flags
-        - "isTrue(current, 'voiced') ? 0 : 1"
+        # The allophone's own feature word: the glottalized /t/ is FVOICD.
+        - "dectalk_has(current, 'voiced') ? 0 : 1"
         - "current.type == 'stop_closure' ? 1 : 0"
         - "get(current, 'stress', 0) > 0 ? 1 : 0"
+        - "glottal_gesture ? 1 : 0"
       tag: f0_segmental_phone
     citations:
       - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (incremental F0 target per phone)"
       - "DECtalk 4.63 Ph_drwt02.c:2080-2150 pht0draw (allodurs[] frames; FVOICD, FPLOSV and FSTRESS tests)"
+      - "DECtalk 4.63 Ph_drwt02.c:4040-4128 set_tglst (where a glottal-stop gesture is placed)"
+      - "DECtalk 4.63 ph_sort.c:1305-1308 (F_FUNC on the phones of a function word)"
 
   dectalk_segmental_f0_phone_after_intonation_stop:
     kind: f0_layer

@@ -37,11 +37,10 @@
  * fields `sex` and `fnscale`. F0 of the male voices takes its floor, range,
  * hat rise and stress scale from the voice. The female voices go through
  * DECtalk's second copy of its F0 routine (Ph_drwt02.c:2445 on; its own
- * baselines, stress and segmental tables, half-scale filter and pivot), which
- * is ported: their F0 differs in one sentence each, at a dip that has the
- * shape of the glottalization F0_REASON names (not traced further). Their
- * corpora have no question, exclamation or second comma clause, so those
- * female cases are not checked against DECtalk.
+ * baselines, stress and segmental tables, filter shift and pivot), which is
+ * ported: their F0 matches on every packet. Their corpora have no question,
+ * exclamation or second comma clause, so those female cases are not checked
+ * against DECtalk.
  * AG, PS, CNK and F4 are still computed from Paul's values; the reasons
  * below were written for Paul's corpora and do not explain those.
  */
@@ -67,8 +66,9 @@ const repoRoot = path.resolve(__dirname, "..");
 const TIMING_REASON =
   "the phrase's allophones or their durations are not DECtalk's (KNOWN_GAPS in dectalk-oracle-gate.test.ts)";
 const F0_REASON =
-  "not ported: the glottalization dip before a word-initial vowel (Ph_drwt02.c:2264-2275, " +
-  "4040-4130). Not every remaining phrase has been traced to it";
+  "not traced. Not ported and possibly involved: phinton's Rule 5, the final fall on an " +
+  "unstressed clause-final syllable (Ph_inton2.c:1444-1526), and the carry of a glottal-stop " +
+  "gesture from one clause into the next (Ph_drwt02.c:1614 is reset only at a hard start)";
 // phases/formant-drawing.yaml draws F1, F2, F3, B2 and B3 as phsettar() and
 // phdraw() do. The one phrase that still differs, carry-be-late, is the one
 // whose allophone durations are not DECtalk's.

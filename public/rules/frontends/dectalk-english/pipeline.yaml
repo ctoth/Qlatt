@@ -697,6 +697,11 @@ relations:
       # On a clause's first phone: DECtalk's number_words for the clause
       # (prosody.yaml, dectalk_clause_number_words).
       number_words: { kind: number }
+      # On every phone: its place in its clause from 1, and whether
+      # phinton's walk reaches it (prosody.yaml, dectalk_clause_running_state).
+      intonation_position: { kind: number }
+      intonation_reached: { kind: boolean }
+      stressed_before: { kind: number }
       # State of DECtalk's duration routine for one allophone (p_us_tim.c), in
       # its own units: frames, and a percentage where 128 is 100%.
       clause_position: { kind: number }
@@ -950,6 +955,7 @@ phases:
   - name: prosody
     rules:
       - dectalk_clause_number_words
+      - dectalk_clause_running_state
       - dectalk_short_declarative_baseline_declination
       - dectalk_baseline_declination
       - dectalk_comma_baseline

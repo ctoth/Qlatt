@@ -72,6 +72,43 @@ rules:
     citations:
       - "DECtalk 4.63 ph_sort.c:439-441, 1462-1464 (number_words: reset for a clause, one more at each WBOUND)"
       - "DECtalk 4.63 ph_sort.c:1055-1070 (a clause-final PPSTART becomes a second WBOUND)"
+  # Three things phinton knows at each allophone because it walks the clause
+  # in order, kept here as running values, each phone taking the one before it:
+  #   intonation_position  nphon, the allophone's place in its clause from 1;
+  #   intonation_reached   the walk has not left its loop at or before it
+  #                        (Ph_inton2.c:809-819, dectalk_intonation_stops);
+  #   stressed_before      the stressed syllabics of the clause before it, from
+  #                        which the stress impulse takes nrises_sofar.
+  dectalk_clause_running_state:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define:
+      before: dectalk_prev(current)
+      first: "before == null || before.phoneme == 'SIL'"
+    apply:
+      - field: intonation_position
+        op: set
+        value: "first ? 1.0 : get(before, 'intonation_position', 0.0) + 1.0"
+        tag: boundary
+      - field: intonation_reached
+        op: set
+        value: >-
+          !isTrue(current, 'intonation_stops') && (first || isTrue(before, 'intonation_reached'))
+        tag: boundary
+      - field: stressed_before
+        op: set
+        value: >-
+          first ? 0.0
+          : get(before, 'stressed_before', 0.0)
+            + ((before.type == 'vowel' || before.phoneme in ['EL', 'EM', 'EN'])
+               && get(before, 'stress', 0) > 0 ? 1.0 : 0.0)
+        tag: stress
+    citations:
+      - "DECtalk 4.63 Ph_inton2.c:632 (the loop over the clause's allophones, nphon)"
+      - "DECtalk 4.63 Ph_inton2.c:480, 1059 (nrises_sofar: 0 at the clause's start, one more at each stress impulse)"
+      - "DECtalk 4.63 Ph_inton2.c:809-819 (the loop is left at a syllabic that begins and ends the hat)"
   dectalk_baseline_declination:
     kind: f0_layer
     select:
@@ -421,12 +458,8 @@ rules:
       relation: Segment
       where: { predicate: is_dectalk_syllabic }
     define:
-      stopped_at: >-
-        look_back_where(current, 1000,
-          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")')
-      reached: >-
-        !isTrue(current, 'intonation_stops') && (stopped_at == null || stopped_at.phoneme == 'SIL')
-      position: "1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
+      reached: "isTrue(current, 'intonation_reached')"
+      position: "get(current, 'intonation_position', 1.0)"
       la: dectalk_prev(current)
       # gesture_ref (Ph_inton2.c:460, 849-852): the allophone before this
       # syllabic when it is FSON1; otherwise the one the clause's last hat rise
@@ -438,7 +471,7 @@ rules:
       ref_la: "ref_syllabic == null ? null : dectalk_prev(ref_syllabic)"
       gesture_ref: >-
         ref_syllabic == null ? 0.0
-        : count_back_pred(ref_syllabic, 1000, 'is_clause_silence', 'is_dectalk_phone')
+        : get(ref_syllabic, 'intonation_position', 1.0) - 1.0
       delay_frames: >-
         gesture_ref <= params.policy.f0.hat_rise_early_through_allophone
         ? -params.policy.f0.hat_rise_early_frames
@@ -491,11 +524,7 @@ rules:
         (current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'])
         && get(current, 'rime_boundary', '') == 'question'
     define: &question_gesture
-      stopped_at: >-
-        look_back_where(current, 1000,
-          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")')
-      reached: >-
-        !isTrue(current, 'intonation_stops') && (stopped_at == null || stopped_at.phoneme == 'SIL')
+      reached: "isTrue(current, 'intonation_reached')"
       # number_words == 1, counted as the baseline rules count it.
       one_word: >-
         (dectalk_word_start(current)
@@ -511,7 +540,7 @@ rules:
       # The commands issued before these on the same syllabic (Rules 1 and 2):
       # make_f0_command lets neither gesture start before them
       # (ph_inton1.c:1880-1883).
-      position: "1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
+      position: "get(current, 'intonation_position', 1.0)"
       la: dectalk_prev(current)
       # gesture_ref (Ph_inton2.c:460, 849-852): the allophone before this
       # syllabic when it is FSON1; otherwise the one the clause's last hat rise
@@ -523,7 +552,7 @@ rules:
       ref_la: "ref_syllabic == null ? null : dectalk_prev(ref_syllabic)"
       gesture_ref: >-
         ref_syllabic == null ? 0.0
-        : count_back_pred(ref_syllabic, 1000, 'is_clause_silence', 'is_dectalk_phone')
+        : get(ref_syllabic, 'intonation_position', 1.0) - 1.0
       hat_delay: >-
         gesture_ref <= params.policy.f0.hat_rise_early_through_allophone
         ? -params.policy.f0.hat_rise_early_frames
@@ -604,17 +633,13 @@ rules:
       relation: Segment
       where: { predicate: is_dectalk_syllabic }
     define:
-      stopped_at: >-
-        look_back_where(current, 1000,
-          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")')
-      reached: >-
-        !isTrue(current, 'intonation_stops') && (stopped_at == null || stopped_at.phoneme == 'SIL')
+      reached: "isTrue(current, 'intonation_reached')"
       stress_now: "get(current, 'stress', 0)"
       clause_end: >-
         look_ahead_where(current, 1000,
           'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
       question: "clause_end != null && clause_end.punctuationSymbol == '?'"
-      rises: "count_back_pred(current, 1000, 'is_clause_silence', 'is_stressed_syllabic')"
+      rises: "get(current, 'stressed_before', 0.0)"
       rise_index: >-
         rises < params.policy.f0.stress_max_rises ? rises
         : 1.0 + mod(rises - params.policy.f0.stress_max_rises, params.policy.f0.stress_max_rises - 1.0)
@@ -645,7 +670,7 @@ rules:
         : (final ? -params.policy.f0.stress_final_early_frames
            : floor(get(current, 'timing_frames', 0.0) / params.policy.f0.stress_delay_divisor))
       # The hat rise issued just before it on the same syllabic (Rule 1).
-      position: "1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
+      position: "get(current, 'intonation_position', 1.0)"
       la: dectalk_prev(current)
       # gesture_ref (Ph_inton2.c:460, 849-852): the allophone before this
       # syllabic when it is FSON1; otherwise the one the clause's last hat rise
@@ -657,7 +682,7 @@ rules:
       ref_la: "ref_syllabic == null ? null : dectalk_prev(ref_syllabic)"
       gesture_ref: >-
         ref_syllabic == null ? 0.0
-        : count_back_pred(ref_syllabic, 1000, 'is_clause_silence', 'is_dectalk_phone')
+        : get(ref_syllabic, 'intonation_position', 1.0) - 1.0
       hat_delay: >-
         gesture_ref <= params.policy.f0.hat_rise_early_through_allophone
         ? -params.policy.f0.hat_rise_early_frames
@@ -755,11 +780,7 @@ rules:
       piece2: "piece1 && n2 != null && n2.type in ['stop_release', 'stop_aspiration']"
       allophone_ms: >-
         current.duration + (piece1 ? n1.duration : 0) + (piece2 ? n2.duration : 0)
-      stopped_at: >-
-        look_back_where(current, 1000,
-          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")')
-      counted: >-
-        !isTrue(current, 'intonation_stops') && (stopped_at == null || stopped_at.phoneme == 'SIL')
+      counted: "isTrue(current, 'intonation_reached')"
       # set_tglst() (Ph_drwt02.c:4040-4128): whether a glottal-stop gesture
       # stands at this allophone's end. The kernel times it and dips F0 around
       # it (2266-2275).

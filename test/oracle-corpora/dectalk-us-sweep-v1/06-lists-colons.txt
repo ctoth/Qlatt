@@ -1,0 +1,58 @@
+## lists
+I bought apples, oranges, and pears.
+Red, white, and blue.
+We need bread, milk, eggs, and butter.
+She speaks English, French, and German.
+One, two, three, go.
+He was tall, dark, and quiet.
+Monday, Tuesday, Wednesday, Thursday, Friday.
+The cat, the dog, and the bird slept.
+Slowly, carefully, he opened the door.
+Yes, please.
+No, thank you.
+Well, that depends.
+However, the plan failed.
+In fact, it was true.
+After dinner, we played cards.
+My brother, who lives in Boston, called.
+The house, which was old, fell down.
+John, come here.
+Come here, John.
+Paris, France, is lovely in spring.
+First, mix the flour; then, add the eggs.
+On Monday, we rest; on Tuesday, we work.
+He ran, jumped, and swam.
+She laughed, and he smiled.
+I came, I saw, I conquered.
+To err is human, to forgive divine.
+Sooner or later, everyone leaves.
+Hello, world.
+Oh, I see.
+Come in, sit down, and tell me everything.
+
+## colons-semicolons
+There is one rule: be kind.
+He had a plan: leave at dawn.
+Bring three things: a pen, a pad, and a map.
+The answer is simple: no.
+Note: the store closes early.
+Warning: the floor is wet.
+She had one wish: to go home.
+Remember this: time is short.
+Dear sir: thank you for your letter.
+The time is now: act.
+It was late; we went home.
+The sun set; the stars came out.
+I like tea; she likes coffee.
+He tried; he failed.
+Some came early; others came late.
+The road was long; however, we kept going.
+She sings; he plays the piano.
+Wait here; I will be back.
+It rained all day; the river rose.
+We won; they lost.
+Call me tomorrow; I am busy today.
+The door was open; nobody was inside.
+First we eat; then we talk.
+He is rich; yet he is not happy.
+Speak softly; the baby is asleep.

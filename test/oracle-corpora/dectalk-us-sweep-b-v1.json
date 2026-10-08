@@ -1,0 +1,263 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-sweep-b-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    {
+      "id": "everyday-001",
+      "text": "The kettle is on the stove.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-002",
+      "text": "Put the keys on the shelf by the door.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-003",
+      "text": "My bicycle has a flat tire.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-004",
+      "text": "The bus stops in front of the library.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-005",
+      "text": "We planted tomatoes behind the garage.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-006",
+      "text": "The window on the left does not close.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-007",
+      "text": "Please turn off the light in the hall.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-008",
+      "text": "There is a blanket in the bottom drawer.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-009",
+      "text": "The clock on the wall runs five minutes fast.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-010",
+      "text": "She left her umbrella on the train.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-011",
+      "text": "The soup needs a little more salt.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-012",
+      "text": "A gray cat sleeps under the porch.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-013",
+      "text": "The mail comes before noon on most days.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-014",
+      "text": "He painted the fence green last summer.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-015",
+      "text": "The bridge is closed until Thursday.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-016",
+      "text": "Fold the towels and stack them on the chair.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-017",
+      "text": "Our neighbor grows roses along the wall.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-018",
+      "text": "The ferry crosses the bay every hour.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-019",
+      "text": "Winter mornings are dark and very quiet.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-020",
+      "text": "A light wind moved the curtains.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-021",
+      "text": "The road to the farm is muddy after rain.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-022",
+      "text": "Wash the cups and leave them to dry.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-023",
+      "text": "The baker opens his shop at six.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-024",
+      "text": "Three sparrows sat on the wire.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-025",
+      "text": "It takes ten minutes to walk to the school.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-026",
+      "text": "The printer is out of paper again.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-027",
+      "text": "Her suitcase was too heavy to lift.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-028",
+      "text": "The garden gate squeaks when it opens.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-029",
+      "text": "Clouds gathered over the hills by evening.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-030",
+      "text": "He keeps a spare key under the mat.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-031",
+      "text": "The children built a fort out of boxes.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-032",
+      "text": "Fill the bucket halfway with warm water.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-033",
+      "text": "The last bus leaves at a quarter past eleven.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-034",
+      "text": "A thin layer of ice covered the pond.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-035",
+      "text": "The carpenter measured the board twice.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-036",
+      "text": "Snow fell all night and stopped at dawn.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-037",
+      "text": "Set the table for six people.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-038",
+      "text": "The lamp on my desk flickers sometimes.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-039",
+      "text": "We counted nine boats in the harbor.",
+      "group": "everyday"
+    },
+    {
+      "id": "everyday-040",
+      "text": "The path through the woods is easy to follow.",
+      "group": "everyday"
+    },
+    {
+      "id": "long-001",
+      "text": "The woman at the counter said that the next train to the coast would leave from the far platform in about twenty minutes.",
+      "group": "long"
+    },
+    {
+      "id": "long-002",
+      "text": "Before the guests arrived, he swept the kitchen floor, wiped the table, and put a bowl of fruit in the middle of it.",
+      "group": "long"
+    },
+    {
+      "id": "long-003",
+      "text": "On the first warm day of spring, the whole street came outside to wash cars, trim hedges, and talk over the fences.",
+      "group": "long"
+    },
+    {
+      "id": "long-004",
+      "text": "Because the map was old and the signs had faded, it took them most of the afternoon to find the right trail.",
+      "group": "long"
+    },
+    {
+      "id": "long-005",
+      "text": "When the power came back on, every clock in the house was blinking and the radio started playing by itself.",
+      "group": "long"
+    },
+    {
+      "id": "long-006",
+      "text": "The farmer walked the length of the field, checked each row for weeds, and then went back to the barn for his tools.",
+      "group": "long"
+    },
+    {
+      "id": "long-007",
+      "text": "If the weather holds until the weekend, we plan to drive to the lake, pitch the tent, and stay for two nights.",
+      "group": "long"
+    },
+    {
+      "id": "long-008",
+      "text": "After the meeting ended, a few people stayed behind to stack the chairs and carry the cups to the sink.",
+      "group": "long"
+    },
+    {
+      "id": "long-009",
+      "text": "The shop on the corner sells bread in the morning, sandwiches at noon, and whatever is left at half price after five.",
+      "group": "long"
+    },
+    {
+      "id": "long-010",
+      "text": "Although she had read the instructions twice, the shelf still leaned to one side when she stood it against the wall.",
+      "group": "long"
+    }
+  ]
+}

@@ -1,0 +1,1938 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-sweep-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    {
+      "id": "repo-001",
+      "text": "A zoo can be fun on a sunny day.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-002",
+      "text": "Bob bought a big blue balloon.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-003",
+      "text": "Fresh frost forms on five fields.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-004",
+      "text": "Gag, gang, and gunk go together.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-005",
+      "text": "He had your dark suit in greasy wash water all year.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-006",
+      "text": "Layer, lawyer, royal, rural.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-007",
+      "text": "Nina mumbled many minimal numbers.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-008",
+      "text": "Pat tapped a pot and picked a paper cup.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-009",
+      "text": "S, f, sh, th, z, v, zh, dh.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-010",
+      "text": "Say oh, ee, and oo again.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-011",
+      "text": "She sells seashells by the seashore.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-012",
+      "text": "Ship shape, sheep shop, and cheap chips.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-013",
+      "text": "Shy sharks shimmer in shallow shoals.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-014",
+      "text": "Sip zip, sip ship, sip sip.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-015",
+      "text": "Soft, safe, fuzzy, fussy, sassy, feisty, zesty, shifty.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-016",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-017",
+      "text": "They bathed the smooth leather.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-018",
+      "text": "Thin thieves thought that they thrilled.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-019",
+      "text": "Vera vapes very vivid violets.",
+      "group": "repo"
+    },
+    {
+      "id": "repo-020",
+      "text": "Zesty zest is easy to spot.",
+      "group": "repo"
+    },
+    {
+      "id": "one-word-001",
+      "text": "A.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-002",
+      "text": "I.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-003",
+      "text": "Yes.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-004",
+      "text": "No.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-005",
+      "text": "Hello.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-006",
+      "text": "Okay.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-007",
+      "text": "Stop.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-008",
+      "text": "Go.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-009",
+      "text": "Why?",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-010",
+      "text": "What?",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-011",
+      "text": "Really?",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-012",
+      "text": "Today.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-013",
+      "text": "Tomorrow.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-014",
+      "text": "Yesterday.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-015",
+      "text": "Computer.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-016",
+      "text": "Banana.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-017",
+      "text": "Elephant.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-018",
+      "text": "Beautiful.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-019",
+      "text": "Thanks.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-020",
+      "text": "Please.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-021",
+      "text": "Sorry.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-022",
+      "text": "Maybe.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-023",
+      "text": "Never.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-024",
+      "text": "Always.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-025",
+      "text": "Water.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-026",
+      "text": "Mother.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-027",
+      "text": "Father.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-028",
+      "text": "Seven.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-029",
+      "text": "Eleven.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-030",
+      "text": "Zero.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-031",
+      "text": "Wow!",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-032",
+      "text": "Help!",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-033",
+      "text": "Run!",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-034",
+      "text": "Good.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-035",
+      "text": "Bad.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-036",
+      "text": "The.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-037",
+      "text": "An.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-038",
+      "text": "And.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-039",
+      "text": "But.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-040",
+      "text": "Or.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-041",
+      "text": "Strengths.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-042",
+      "text": "Understanding.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-043",
+      "text": "Photography.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-044",
+      "text": "Photograph.",
+      "group": "one-word"
+    },
+    {
+      "id": "one-word-045",
+      "text": "Unbelievable.",
+      "group": "one-word"
+    },
+    {
+      "id": "two-word-001",
+      "text": "Good morning.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-002",
+      "text": "Thank you.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-003",
+      "text": "Not now.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-004",
+      "text": "Come here.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-005",
+      "text": "Go away.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-006",
+      "text": "Be quiet.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-007",
+      "text": "Very good.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-008",
+      "text": "Too late.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-009",
+      "text": "Blue sky.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-010",
+      "text": "Red apple.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-011",
+      "text": "My name.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-012",
+      "text": "Your turn.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-013",
+      "text": "His house.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-014",
+      "text": "Her book.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-015",
+      "text": "Our team.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-016",
+      "text": "Their car.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-017",
+      "text": "Big dog.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-018",
+      "text": "Small cat.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-019",
+      "text": "Open it.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-020",
+      "text": "Close them.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-021",
+      "text": "Who knows?",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-022",
+      "text": "Why not?",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-023",
+      "text": "How much?",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-024",
+      "text": "Which one?",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-025",
+      "text": "Of course.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-026",
+      "text": "At last.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-027",
+      "text": "For now.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-028",
+      "text": "To go.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-029",
+      "text": "And then.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-030",
+      "text": "But why?",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-031",
+      "text": "An apple.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-032",
+      "text": "The end.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-033",
+      "text": "A day.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-034",
+      "text": "No way!",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-035",
+      "text": "Oh no!",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-036",
+      "text": "Look out!",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-037",
+      "text": "Nine lives.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-038",
+      "text": "Twelve months.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-039",
+      "text": "Fresh bread.",
+      "group": "two-word"
+    },
+    {
+      "id": "two-word-040",
+      "text": "Cold water.",
+      "group": "two-word"
+    },
+    {
+      "id": "function-initial-001",
+      "text": "And then he went to bed.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-002",
+      "text": "And the rain came down.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-003",
+      "text": "But nobody answered the door.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-004",
+      "text": "Or we could stay at home.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-005",
+      "text": "To be honest, I forgot.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-006",
+      "text": "To the left is the kitchen.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-007",
+      "text": "For a moment nothing moved.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-008",
+      "text": "For him it was easy.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-009",
+      "text": "At noon the bell rang.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-010",
+      "text": "At the corner, turn right.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-011",
+      "text": "In the morning we walked.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-012",
+      "text": "On the table sat a lamp.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-013",
+      "text": "Of all the days, he picked this one.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-014",
+      "text": "From here the road goes north.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-015",
+      "text": "With a sigh, she sat down.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-016",
+      "text": "If it rains, we stay inside.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-017",
+      "text": "When he arrived, the room was empty.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-018",
+      "text": "As you can see, it works.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-019",
+      "text": "Because of the storm, the game was cancelled.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-020",
+      "text": "So we waited for an hour.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-021",
+      "text": "The the.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-022",
+      "text": "It is.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-023",
+      "text": "There is a way.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-024",
+      "text": "That is that.",
+      "group": "function-initial"
+    },
+    {
+      "id": "function-initial-025",
+      "text": "This is it.",
+      "group": "function-initial"
+    },
+    {
+      "id": "numbers-001",
+      "text": "I have 42 cats.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-002",
+      "text": "The year is 1999.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-003",
+      "text": "She was born in 2004.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-004",
+      "text": "It costs 5 dollars.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-005",
+      "text": "It costs $3.50.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-006",
+      "text": "The total is $1,250.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-007",
+      "text": "Call 555 1234.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-008",
+      "text": "Room 101 is on the first floor.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-009",
+      "text": "He ran 26.2 miles.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-010",
+      "text": "Add 3 and 4 to get 7.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-011",
+      "text": "There are 365 days in a year.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-012",
+      "text": "The temperature is 72 degrees.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-013",
+      "text": "It weighs 2.5 kilograms.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-014",
+      "text": "She came in 1st.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-015",
+      "text": "He finished 2nd.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-016",
+      "text": "The 3rd door is locked.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-017",
+      "text": "It is the 21st of June.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-018",
+      "text": "About 1,000,000 people live there.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-019",
+      "text": "The score was 3 to 0.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-020",
+      "text": "Half of 100 is 50.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-021",
+      "text": "Count 1, 2, 3, 4, 5.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-022",
+      "text": "Chapter 12 begins on page 340.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-023",
+      "text": "The meeting is at 3:30.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-024",
+      "text": "The train leaves at 10:15.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-025",
+      "text": "He is 6 feet tall.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-026",
+      "text": "Take 2 tablets every 8 hours.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-027",
+      "text": "The bill came to 19.99.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-028",
+      "text": "Only 7 of the 30 arrived.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-029",
+      "text": "It happened in the 1800s.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-030",
+      "text": "Flight 370 is delayed.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-031",
+      "text": "Zero, one, two.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-032",
+      "text": "Thirteen, thirty, fourteen, forty.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-033",
+      "text": "One hundred and one.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-034",
+      "text": "Nineteen eighty four.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-035",
+      "text": "Twenty twenty six.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-036",
+      "text": "A dozen eggs and 16 ounces of milk.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-037",
+      "text": "The ratio is 3 to 1.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-038",
+      "text": "I need 0.5 liters.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-039",
+      "text": "He owes me 100 dollars.",
+      "group": "numbers"
+    },
+    {
+      "id": "numbers-040",
+      "text": "Add 15 percent.",
+      "group": "numbers"
+    },
+    {
+      "id": "abbreviations-001",
+      "text": "Dr. Smith will see you now.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-002",
+      "text": "Mr. Jones and Mrs. Doe arrived.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-003",
+      "text": "Ms. Lee teaches math.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-004",
+      "text": "Prof. Adams wrote the book.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-005",
+      "text": "It is on Main St. near the park.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-006",
+      "text": "We live at 12 Oak Ave.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-007",
+      "text": "The U.S. flag was raised.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-008",
+      "text": "The U.S.A. is large.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-009",
+      "text": "He works for the F.B.I.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-010",
+      "text": "NASA launched a rocket.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-011",
+      "text": "The CEO spoke on TV.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-012",
+      "text": "Use e.g. a hammer.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-013",
+      "text": "Bring pens, paper, etc.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-014",
+      "text": "The meeting is on Jan. 5.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-015",
+      "text": "It opens Mon. through Fri.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-016",
+      "text": "She has a Ph.D. in physics.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-017",
+      "text": "The file is 20 MB.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-018",
+      "text": "Drive 30 mph in town.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-019",
+      "text": "It weighs 5 lbs.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-020",
+      "text": "Mt. Everest is tall.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-021",
+      "text": "St. Paul is a city.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-022",
+      "text": "Send it to the IRS.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-023",
+      "text": "The DVD is in the PC.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-024",
+      "text": "Ask the M.D. about it.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "abbreviations-025",
+      "text": "See fig. 3 on p. 12.",
+      "group": "abbreviations"
+    },
+    {
+      "id": "contractions-001",
+      "text": "I can't go.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-002",
+      "text": "Don't do that.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-003",
+      "text": "It's raining.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-004",
+      "text": "We're late.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-005",
+      "text": "They're here.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-006",
+      "text": "You're right.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-007",
+      "text": "He's gone.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-008",
+      "text": "She's reading.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-009",
+      "text": "I'll call you.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-010",
+      "text": "We'll see.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-011",
+      "text": "I'd like some tea.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-012",
+      "text": "You'd better hurry.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-013",
+      "text": "That's fine.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-014",
+      "text": "There's a problem.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-015",
+      "text": "What's the matter?",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-016",
+      "text": "Who's there?",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-017",
+      "text": "Isn't it lovely?",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-018",
+      "text": "Wasn't that fun?",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-019",
+      "text": "I've seen it.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-020",
+      "text": "They've left.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-021",
+      "text": "Let's go.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-022",
+      "text": "Won't you stay?",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-023",
+      "text": "It wouldn't start.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-024",
+      "text": "John's dog barked.",
+      "group": "contractions"
+    },
+    {
+      "id": "contractions-025",
+      "text": "The dogs' bowls were empty.",
+      "group": "contractions"
+    },
+    {
+      "id": "questions-001",
+      "text": "Is the cat on the mat?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-002",
+      "text": "Are you coming with us?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-003",
+      "text": "Did he have a house?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-004",
+      "text": "Can you hear me?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-005",
+      "text": "Will it rain tomorrow?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-006",
+      "text": "Do you know the way?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-007",
+      "text": "Has the mail arrived?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-008",
+      "text": "Was it worth the trouble?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-009",
+      "text": "Should we wait for them?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-010",
+      "text": "Could you pass the salt?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-011",
+      "text": "Where are you going?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-012",
+      "text": "What time is it?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-013",
+      "text": "Who told you that?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-014",
+      "text": "Why did she leave?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-015",
+      "text": "How does it work?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-016",
+      "text": "Which road leads to town?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-017",
+      "text": "When does the train arrive?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-018",
+      "text": "Whose coat is this?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-019",
+      "text": "How many apples are there?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-020",
+      "text": "What did you say?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-021",
+      "text": "You saw him, didn't you?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-022",
+      "text": "It's cold, isn't it?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-023",
+      "text": "She can swim, can't she?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-024",
+      "text": "You're coming, right?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-025",
+      "text": "Is it red or blue?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-026",
+      "text": "Tea or coffee?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-027",
+      "text": "Ready?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-028",
+      "text": "Him?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-029",
+      "text": "Are they the ones who called yesterday?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-030",
+      "text": "Do you think that he will come?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-031",
+      "text": "What is the name of the river that runs through the city?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-032",
+      "text": "Is that all?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-033",
+      "text": "Why me?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-034",
+      "text": "How come?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-035",
+      "text": "Now what?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-036",
+      "text": "Does anybody here remember the old house on the hill?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-037",
+      "text": "May I ask who is calling?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-038",
+      "text": "Would you like to dance?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-039",
+      "text": "Have you ever been to Rome?",
+      "group": "questions"
+    },
+    {
+      "id": "questions-040",
+      "text": "Is this the right way to the station?",
+      "group": "questions"
+    },
+    {
+      "id": "exclamations-001",
+      "text": "Look at that!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-002",
+      "text": "What a day!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-003",
+      "text": "How strange!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-004",
+      "text": "Watch out for the car!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-005",
+      "text": "I can't believe it!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-006",
+      "text": "That was amazing!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-007",
+      "text": "Stop right there!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-008",
+      "text": "Get out of here!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-009",
+      "text": "We won!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-010",
+      "text": "Happy birthday!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-011",
+      "text": "Good grief!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-012",
+      "text": "Not again!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-013",
+      "text": "Hurry up!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-014",
+      "text": "Come back here at once!",
+      "group": "exclamations"
+    },
+    {
+      "id": "exclamations-015",
+      "text": "What a beautiful morning it is!",
+      "group": "exclamations"
+    },
+    {
+      "id": "lists-001",
+      "text": "I bought apples, oranges, and pears.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-002",
+      "text": "Red, white, and blue.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-003",
+      "text": "We need bread, milk, eggs, and butter.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-004",
+      "text": "She speaks English, French, and German.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-005",
+      "text": "One, two, three, go.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-006",
+      "text": "He was tall, dark, and quiet.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-007",
+      "text": "Monday, Tuesday, Wednesday, Thursday, Friday.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-008",
+      "text": "The cat, the dog, and the bird slept.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-009",
+      "text": "Slowly, carefully, he opened the door.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-010",
+      "text": "Yes, please.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-011",
+      "text": "No, thank you.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-012",
+      "text": "Well, that depends.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-013",
+      "text": "However, the plan failed.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-014",
+      "text": "In fact, it was true.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-015",
+      "text": "After dinner, we played cards.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-016",
+      "text": "My brother, who lives in Boston, called.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-017",
+      "text": "The house, which was old, fell down.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-018",
+      "text": "John, come here.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-019",
+      "text": "Come here, John.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-020",
+      "text": "Paris, France, is lovely in spring.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-021",
+      "text": "First, mix the flour; then, add the eggs.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-022",
+      "text": "On Monday, we rest; on Tuesday, we work.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-023",
+      "text": "He ran, jumped, and swam.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-024",
+      "text": "She laughed, and he smiled.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-025",
+      "text": "I came, I saw, I conquered.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-026",
+      "text": "To err is human, to forgive divine.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-027",
+      "text": "Sooner or later, everyone leaves.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-028",
+      "text": "Hello, world.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-029",
+      "text": "Oh, I see.",
+      "group": "lists"
+    },
+    {
+      "id": "lists-030",
+      "text": "Come in, sit down, and tell me everything.",
+      "group": "lists"
+    },
+    {
+      "id": "colons-semicolons-001",
+      "text": "There is one rule: be kind.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-002",
+      "text": "He had a plan: leave at dawn.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-003",
+      "text": "Bring three things: a pen, a pad, and a map.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-004",
+      "text": "The answer is simple: no.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-005",
+      "text": "Note: the store closes early.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-006",
+      "text": "Warning: the floor is wet.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-007",
+      "text": "She had one wish: to go home.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-008",
+      "text": "Remember this: time is short.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-009",
+      "text": "Dear sir: thank you for your letter.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-010",
+      "text": "The time is now: act.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-011",
+      "text": "It was late; we went home.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-012",
+      "text": "The sun set; the stars came out.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-013",
+      "text": "I like tea; she likes coffee.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-014",
+      "text": "He tried; he failed.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-015",
+      "text": "Some came early; others came late.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-016",
+      "text": "The road was long; however, we kept going.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-017",
+      "text": "She sings; he plays the piano.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-018",
+      "text": "Wait here; I will be back.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-019",
+      "text": "It rained all day; the river rose.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-020",
+      "text": "We won; they lost.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-021",
+      "text": "Call me tomorrow; I am busy today.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-022",
+      "text": "The door was open; nobody was inside.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-023",
+      "text": "First we eat; then we talk.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-024",
+      "text": "He is rich; yet he is not happy.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "colons-semicolons-025",
+      "text": "Speak softly; the baby is asleep.",
+      "group": "colons-semicolons"
+    },
+    {
+      "id": "quoted-001",
+      "text": "\"Hello,\" she said.",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-002",
+      "text": "He said, \"Come in.\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-003",
+      "text": "\"Where are you going?\" he asked.",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-004",
+      "text": "\"Stop!\" cried the guard.",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-005",
+      "text": "She whispered, \"Not now.\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-006",
+      "text": "\"I think,\" he said, \"that we are lost.\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-007",
+      "text": "The sign said \"No entry.\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-008",
+      "text": "He called it \"a small mistake.\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-009",
+      "text": "\"Yes,\" said the boy, \"I did it.\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-010",
+      "text": "\"Wait for me,\" she called.",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-011",
+      "text": "They shouted, \"We won!\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-012",
+      "text": "\"Is anyone there?\" asked the old man.",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-013",
+      "text": "\"Good morning,\" said the teacher.",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-014",
+      "text": "The word \"cat\" has three letters.",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-015",
+      "text": "She answered, \"I don't know.\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-016",
+      "text": "\"Never again,\" he promised.",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-017",
+      "text": "He asked, \"What time is it?\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-018",
+      "text": "\"Run!\" she screamed.",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-019",
+      "text": "\"It is late,\" said Tom; \"let us go.\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-020",
+      "text": "My mother always said, \"Be careful.\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-021",
+      "text": "\"Thank you,\" he replied, \"for everything.\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-022",
+      "text": "The note read: \"Back in five minutes.\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-023",
+      "text": "\"Well,\" she said, \"what now?\"",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-024",
+      "text": "He muttered \"fine\" and left.",
+      "group": "quoted"
+    },
+    {
+      "id": "quoted-025",
+      "text": "\"Open the door,\" said the voice.",
+      "group": "quoted"
+    },
+    {
+      "id": "long-001",
+      "text": "The old man sat by the window and watched the rain fall on the empty street.",
+      "group": "long"
+    },
+    {
+      "id": "long-002",
+      "text": "When the storm had passed, the children ran outside to play in the puddles.",
+      "group": "long"
+    },
+    {
+      "id": "long-003",
+      "text": "She opened the letter slowly, read it twice, and then put it away without a word.",
+      "group": "long"
+    },
+    {
+      "id": "long-004",
+      "text": "Although the road was long and the night was cold, they kept walking until they reached the village.",
+      "group": "long"
+    },
+    {
+      "id": "long-005",
+      "text": "The scientist explained that the results of the experiment were not what anyone had expected.",
+      "group": "long"
+    },
+    {
+      "id": "long-006",
+      "text": "Every morning before breakfast, my grandfather would walk down to the river to feed the ducks.",
+      "group": "long"
+    },
+    {
+      "id": "long-007",
+      "text": "If you had told me yesterday that this would happen, I would not have believed you.",
+      "group": "long"
+    },
+    {
+      "id": "long-008",
+      "text": "The museum, which had been closed for repairs since last winter, finally opened its doors again.",
+      "group": "long"
+    },
+    {
+      "id": "long-009",
+      "text": "Nobody knew why the lights had gone out, but everyone agreed that it was time to leave.",
+      "group": "long"
+    },
+    {
+      "id": "long-010",
+      "text": "After a long discussion, the committee decided to postpone the vote until the following week.",
+      "group": "long"
+    },
+    {
+      "id": "words-in-carrier-001",
+      "text": "Say the word again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-002",
+      "text": "Say cat again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-003",
+      "text": "Say dog again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-004",
+      "text": "Say church again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-005",
+      "text": "Say judge again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-006",
+      "text": "Say thing again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-007",
+      "text": "Say measure again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-008",
+      "text": "Say yellow again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-009",
+      "text": "Say window again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-010",
+      "text": "Say rabbit again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-011",
+      "text": "Say little again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-012",
+      "text": "Say button again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-013",
+      "text": "Say water again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-014",
+      "text": "Say singing again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-015",
+      "text": "Say strength again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-016",
+      "text": "Say twelfth again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-017",
+      "text": "Say sixths again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-018",
+      "text": "Say about again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-019",
+      "text": "Say today again.",
+      "group": "words-in-carrier"
+    },
+    {
+      "id": "words-in-carrier-020",
+      "text": "Say banana again.",
+      "group": "words-in-carrier"
+    }
+  ]
+}

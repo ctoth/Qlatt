@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-repeated-words-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "repeat-sip-sip", "text": "Sip sip.", "group": "repeated-words", "tags": ["same-word"], "expectedFocus": ["trace"] },
+    { "id": "repeat-sip-list", "text": "Sip zip, sip ship, sip sip.", "group": "repeated-words", "tags": ["same-word"], "expectedFocus": ["trace"] },
+    { "id": "repeat-the-the", "text": "The the.", "group": "repeated-words", "tags": ["same-word", "function-word"], "expectedFocus": ["trace"] },
+    { "id": "repeat-that-that", "text": "That that.", "group": "repeated-words", "tags": ["same-word", "function-word"], "expectedFocus": ["trace"] },
+    { "id": "repeat-had-had", "text": "Had had.", "group": "repeated-words", "tags": ["same-word", "function-word"], "expectedFocus": ["trace"] },
+    { "id": "repeat-he-had-had-it", "text": "He had had it.", "group": "repeated-words", "tags": ["same-word", "function-word"], "expectedFocus": ["trace"] },
+    { "id": "repeat-know-that-that", "text": "I know that that is true.", "group": "repeated-words", "tags": ["same-word", "function-word"], "expectedFocus": ["trace"] },
+    { "id": "repeat-no-no-no", "text": "No no no.", "group": "repeated-words", "tags": ["same-word"], "expectedFocus": ["trace"] },
+    { "id": "repeat-very-very", "text": "It was very very good.", "group": "repeated-words", "tags": ["same-word"], "expectedFocus": ["trace"] },
+    { "id": "repeat-bye-bye", "text": "Bye bye.", "group": "repeated-words", "tags": ["same-word"], "expectedFocus": ["trace"] },
+    { "id": "repeat-better-better", "text": "Better better butter.", "group": "repeated-words", "tags": ["same-word", "flap"], "expectedFocus": ["trace"] },
+    { "id": "repeat-again-again", "text": "Again again and again.", "group": "repeated-words", "tags": ["same-word"], "expectedFocus": ["trace"] }
+  ]
+}

@@ -47,6 +47,8 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-letters-v1.json",
   // Abbreviations the dictionary holds with their period, by the word's case.
   "dectalk-us-abbrev-v1.json",
+  // The same word twice in a row: a word is its Word Item, not its spelling.
+  "dectalk-us-repeated-words-v1.json",
 ];
 
 /** Every corpus with a packet record. */

@@ -87,11 +87,14 @@ frame:
 ```
 
 The first unit starts a group, and so does every unit `start` accepts. `start`
-and each total are frame expressions read once per unit; they may read `u`,
-`p`, `n`, `params` and `f` (of which `f.count` is the useful one), not `r`.
-Rules and outputs read the group as `g`: `g.frame` and `g.frames` (frame within
-the group from 0, frames in it), `g.unit` and `g.units`, and each total by
-name.
+and each total are frame expressions read once per unit, in unit order; they
+may read the units, `params` and `f` (of which `f.count` is the useful one),
+not `r`. A total may also read `g`, which at that point is the group as summed
+so far: the units before this one, and this unit's totals declared above it.
+That is how a sum stops at a marker ("frames before the first stop").
+Rules and outputs read the finished group as `g`: `g.frame` and `g.frames`
+(frame within the group from 0, frames in it), `g.unit` and `g.units`, and
+each total by name.
 
 ## Writing a rule
 
@@ -115,11 +118,13 @@ rules:
 | name | holds |
 |------|-------|
 | `u`, `p`, `n` | the features of this unit, the one before and the one after |
+| `p2`, `p3`, `n2`, `n3` | the units two and three before and after; beyond either end, the `edge` values |
 | `r` | the registers |
 | `f.index`, `f.count` | frame within the unit from 0, frames in the unit |
 | `f.unit`, `f.units` | unit number from 0 (the lead-in is 0 when there is one), units in the run |
 | `f.frame`, `f.frames` | frame within the run from 0, frames in the run |
 | `f.prev_count`, `f.next_count` | frames in the unit before and after, 0 when there is none |
+| `f.prev2_count`, `f.next2_count`, `f.next3_count` | the same two before, two after and three after |
 | `g` | the unit's group, when the program declares groups |
 | `params` | rulepack parameters |
 

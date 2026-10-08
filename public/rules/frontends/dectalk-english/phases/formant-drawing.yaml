@@ -251,6 +251,16 @@ frame_programs:
       is_rr: { value: "fd_name(current) == 'RR'", edge: false }
       is_n: { value: "fd_name(current) in ['N', 'EN']", edge: false }
       is_tx: { value: "fd_name(current) == 'TX'", edge: false }
+      is_k: { value: "fd_name(current) == 'K'", edge: false }
+      # How many phonemes of phalloph's input the allophone stands for: 2 for
+      # a vowel fused with its /r/ and for the survivor of a deleted geminate,
+      # none for the dummy vowel, which is inserted later (Ph_inton2.c:1683-1722).
+      input_phones:
+        value: >-
+          fd_is_dummy(current) ? 0
+          : (isTrue(current, 'fused_with_r') || isTrue(current, 'after_deleted_geminate') ? 2 : 1)
+        edge: 1
+      doubled: { value: "isTrue(current, 'after_deleted_geminate')", edge: false }
       begtyp: { value: "fd_begtyp(current)", edge: 4 }
       endtyp: { value: "fd_endtyp(current)", edge: 4 }
       # FSTRESS of the allophone's structure word: any stress, and bit 01.
@@ -440,6 +450,14 @@ frame_programs:
       half_max: 0
       # PAV.tspesh of the allophone (Special Rule 2).
       vot: 0
+      # nphone, the index of the allophone's first phoneme in phalloph's
+      # input, and the input indices of the clause's last four /k/.
+      allophone_index: 0
+      input_index: 1
+      k_index_1: -100
+      k_index_2: -100
+      k_index_3: -100
+      k_index_4: -100
       # Working values of setloc(): locus, percent, duration in ms.
       loc_hz: 0
       loc_percent: 0
@@ -578,6 +596,122 @@ rules:
       - { register: nxr_B3, value: "params.policy.formant_drawing.parini.B3", tag: formant_target }
     citations:
       - "DECtalk 4.63 PH/ph_setar.c:1661-1909 (gettar of the last allophone and of the one past it)"
+
+  # --- gettar() past the end of the clause -----------------------------------
+  # gettar() adds 300 Hz to F2 and 500 Hz to F3 when allophons[phone + index]
+  # is /k/ (ph_setar.c:1854-1866), and that test is not kept inside the clause
+  # as get_phone() is. The array is shared: phalloph's input phonemes lie in
+  # it eight places up (ph_defs.h:745 SAFETY, ph_claus.c:588), and phalloph
+  # writes a silence only into the one place after its last allophone
+  # (ph_aloph.c:1620). So with n allophones in the clause, places n + 1 and
+  # n + 2 still hold input phonemes n - 7 and n - 6; the dummy vowel's shift
+  # (Ph_inton2.c:1693) leaves that so. When one of them is /k/, the target
+  # gettar() finds there is the silence's -1 plus 300 or 500, which is above
+  # 0 and so is returned:
+  #   - for the clause's last silence (allophone n - 1) and for the beginning
+  #     of that silence as the last phone sees it, when input phoneme n - 7
+  #     is /k/ (the place two ahead is read because it is past the end);
+  #   - for the place after the last silence, when n - 7 or n - 6 is.
+  # A slip of the C, kept because the packets have it ("It takes energy.",
+  # "Many men make money.").
+  fd_clause_index_reset:
+    kind: frame
+    program: formants
+    unit: "u.initial"
+    when: "f.index == 0"
+    set:
+      - { register: allophone_index, value: "0", tag: formant_target }
+      - { register: input_index, value: "1", tag: formant_target }
+      - { register: k_index_1, value: "-100", tag: formant_target }
+      - { register: k_index_2, value: "-100", tag: formant_target }
+      - { register: k_index_3, value: "-100", tag: formant_target }
+      - { register: k_index_4, value: "-100", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_claus.c:571-590 (the arrays of a clause; allophone 0 is its first silence)"
+  fd_allophone_index:
+    kind: frame
+    program: formants
+    unit: "!u.initial"
+    when: "f.index == 0"
+    set:
+      - { register: allophone_index, value: "r.allophone_index + 1", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_claus.c:400 (nphone++)"
+  fd_input_k:
+    kind: frame
+    program: formants
+    unit: "u.is_k"
+    when: "f.index == 0"
+    set:
+      - { register: k_index_4, value: "r.k_index_3", tag: formant_target }
+      - { register: k_index_3, value: "r.k_index_2", tag: formant_target }
+      - { register: k_index_2, value: "r.k_index_1", tag: formant_target }
+      - { register: k_index_1, value: "r.input_index", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_claus.c:588 (phonemes = &allophons[SAFETY]); ph_defs.h:745"
+  # The survivor of two /k/ stands for both input phonemes.
+  fd_input_k_doubled:
+    kind: frame
+    program: formants
+    unit: "u.is_k && u.doubled"
+    when: "f.index == 0"
+    set:
+      - { register: k_index_4, value: "r.k_index_3", tag: formant_target }
+      - { register: k_index_3, value: "r.k_index_2", tag: formant_target }
+      - { register: k_index_2, value: "r.k_index_1", tag: formant_target }
+      - { register: k_index_1, value: "r.input_index + 1", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_claus.c:588 (phonemes = &allophons[SAFETY]); ph_defs.h:745"
+  fd_input_index:
+    kind: frame
+    program: formants
+    unit: "!u.silence"
+    when: "f.index == 0"
+    set:
+      - { register: input_index, value: "r.input_index + u.input_phones", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_claus.c:588 (phonemes = &allophons[SAFETY]); ph_defs.h:745"
+  # The last phone before the clause's final silence is allophone n - 2, so
+  # input phoneme n - 7 is the one at its own index less 5.
+  fd_next_target_past_end:
+    kind: frame
+    program: formants
+    unit: "!u.silence && n.silence"
+    when: >-
+      f.index == 0 && (r.k_index_1 == r.allophone_index - 5 || r.k_index_2 == r.allophone_index - 5
+        || r.k_index_3 == r.allophone_index - 5 || r.k_index_4 == r.allophone_index - 5)
+    set:
+      - { register: nxr_F2, value: "299", tag: formant_target }
+      - { register: nxr_F3, value: "499", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1667-1674, 1854-1866, 1895-1902 (gettar of the last allophone, index 2)"
+  # The final silence is allophone n - 1.
+  fd_final_silence_target_past_end:
+    kind: frame
+    program: formants
+    unit: "u.silence && !u.initial"
+    when: >-
+      f.index == 0 && (r.k_index_1 == r.allophone_index - 6 || r.k_index_2 == r.allophone_index - 6
+        || r.k_index_3 == r.allophone_index - 6 || r.k_index_4 == r.allophone_index - 6)
+    set:
+      - { register: tgt_F2, value: "299", tag: formant_target }
+      - { register: tgt_F3, value: "499", tag: formant_target }
+      - { register: nxr_F2, value: "299", tag: formant_target }
+      - { register: nxr_F3, value: "499", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1667-1674, 1854-1866, 1895-1902 (gettar of the last allophone and of the place after it)"
+  fd_final_silence_next_target_past_end:
+    kind: frame
+    program: formants
+    unit: "u.silence && !u.initial"
+    when: >-
+      f.index == 0 && (r.k_index_1 == r.allophone_index - 5 || r.k_index_2 == r.allophone_index - 5
+        || r.k_index_3 == r.allophone_index - 5 || r.k_index_4 == r.allophone_index - 5)
+    set:
+      - { register: nxr_F2, value: "299", tag: formant_target }
+      - { register: nxr_F3, value: "499", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1667-1674, 1854-1866, 1889-1902 (gettar of the place after the last allophone)"
 
   # Sonorants but silence: how short the phone is beside its inherent length.
   # muldv() of positive numbers.
@@ -1848,6 +1982,14 @@ phases:
       - fd_table_targets
       - fd_table_targets_initial_silence
       - fd_table_targets_final_silence
+      - fd_clause_index_reset
+      - fd_allophone_index
+      - fd_input_k
+      - fd_input_k_doubled
+      - fd_input_index
+      - fd_next_target_past_end
+      - fd_final_silence_target_past_end
+      - fd_final_silence_next_target_past_end
       - fd_shrink
       - fd_target_coarticulated
       - fd_target_diphthong_onset

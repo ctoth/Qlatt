@@ -37,7 +37,7 @@
   "fric-safe-zone": ["B1","AV","AP","A2","A4","A5","A6","AB","AG","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
   "fric-these-shoes": ["B1","AV","AP","A2","A3","A4","A6","AB","AG","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
   "fric-vision": ["B1","AV","AP","A2","A3","A4","A6","AB","AG","PS","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
-  "nasal-many-men": ["F2","F3","B1","AV","AP","A2","A5","AG","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
+  "nasal-many-men": ["B1","AV","AP","A2","A5","AG","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
   "nasal-sing-song": ["B1","AV","AP","A2","A4","A5","AG","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
   "liquid-red-lorry": ["B1","AV","AP","A2","A4","A5","A6","AG","PS","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
   "liquid-clear-light": ["B1","AV","AP","A2","A4","A5","AG","PS","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],

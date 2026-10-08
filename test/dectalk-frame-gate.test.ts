@@ -54,14 +54,12 @@ const F0_REASON =
   "not ported: the glottalization dip before a word-initial vowel (Ph_drwt02.c:2264-2275, " +
   "4040-4130). Not every remaining phrase has been traced to it";
 // phases/formant-drawing.yaml draws F1, F2, F3, B2 and B3 as phsettar() and
-// phdraw() do. What is known of the phrases that still differ:
+// phdraw() do. Every phrase of one clause is exact; the phrases that still
+// differ all have more than one clause:
 const FORMANT_REASON =
-  "three open cases: inside an utterance DECtalk starts a second silence where a new clause " +
-  "opens (ph_setar.c runs again for allophone 0), and here the pause between two clauses is " +
-  "one unit; the F1 the HLSYN section writes around velars (ph_draw.c:2937-3109) is not " +
-  "ported; and gettar() reads allophons[] one place past the clause's end " +
-  "(ph_setar.c:1854), which in nasal-many-men holds a /k/. Not every remaining phrase has " +
-  "been traced to one of these";
+  "inside an utterance DECtalk starts a second silence where a new clause opens (phsettar " +
+  "runs again for allophone 0), and here the pause between two clauses is one unit. No " +
+  "phrase with more than one clause has been checked beyond its first difference";
 const B1_REASON =
   "lowering blends Segment targets; DECtalk draws B1 from ph_setar.c and p_us_st1.c targets " +
   "with ph_draw.c:343-460's forward and backward smoothing, then delays it one frame " +

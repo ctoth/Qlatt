@@ -5,7 +5,8 @@
  * path (scripts/oracle/dectalk-voice-compare.ts):
  *
  *   - texts the parser's rules rewrite: a title before a name ("Dr.", "St."),
- *     brackets;
+ *     brackets, and a telephone number, which is read digit by digit with a
+ *     pause between its groups and one after it (CMD/par_rule2.par:675-690);
  *   - texts that end, or are cut, by a clause end and not by a written mark:
  *     no final mark, a tab. The clause end the host sends after a text ends
  *     the words still pending as a period does (PH/ph_task.c:665-676); the

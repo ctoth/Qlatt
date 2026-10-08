@@ -2405,6 +2405,12 @@ transcription:
     hyphenated:
       name: DECtalk's reading of a hyphenated word by its parts
       citation: "DECtalk 4.63 LTS/ls_task.c:4208-4435 ls_task_process_word (each part between hyphens looked up, then by rule or spelled; HYPHEN after a first part the dictionary has :4330 and after a part the rules read :4374)"
+  # The characters that end the stretch of text DECtalk parses at once when a
+  # written word ends in one and a space follows: DECtalk 4.63
+  # LTS/ls_task.c:362-368 (the text is handed on at a space after a
+  # MARK_clause character) with CMD/cm_char.c:93-123 (the characters that
+  # have MARK_clause). An abbreviation's period is one.
+  word_stretch_end_characters: "!',-.:;?"
   # The names of the letters, for a token the orthography phase marks as a
   # spelled letter: DECtalk 4.63 INCLUDE/usa_type.tab, the lower-case rows,
   # the same phones as letterPhones in lts-table.json (a test holds the two

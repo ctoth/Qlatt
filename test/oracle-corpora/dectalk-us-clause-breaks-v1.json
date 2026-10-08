@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-clause-breaks-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "cb-text-end-break", "text": "Milk bread eggs and a dozen apples", "group": "stretch-length", "tags": ["no-final-punctuation", "break"], "expectedFocus": ["trace"] },
+    { "id": "cb-period-no-break", "text": "Milk bread eggs and a dozen apples.", "group": "stretch-length", "tags": ["final-period", "no-break"], "expectedFocus": ["trace"] },
+    { "id": "cb-unit-ends-stretch", "text": "The old bag weighs 5 lb. and the small one weighs less today.", "group": "stretch-end", "tags": ["abbreviation-period", "no-break"], "expectedFocus": ["trace"] },
+    { "id": "cb-unit-written-out", "text": "The old bag weighs five pounds and the small one weighs less today.", "group": "stretch-end", "tags": ["no-abbreviation", "break"], "expectedFocus": ["trace"] },
+    { "id": "cb-title-ends-stretch", "text": "He said the Mr. Smith left and the small one stayed late today.", "group": "stretch-end", "tags": ["abbreviation-period", "no-break"], "expectedFocus": ["trace"] },
+    { "id": "cb-capitals-end-stretch", "text": "The U.S. flag was raised and the old man sang loudly today.", "group": "stretch-end", "tags": ["dotted-capitals", "break"], "expectedFocus": ["trace"] },
+    { "id": "cb-apostrophe-ends-stretch", "text": "All the dogs' old bones and the small cat ran away.", "group": "stretch-end", "tags": ["final-apostrophe", "no-break"], "expectedFocus": ["trace"] },
+    { "id": "cb-dash-ends-stretch", "text": "The big dog barked loudly - the small cat ran away today.", "group": "stretch-end", "tags": ["lone-dash", "no-break"], "expectedFocus": ["trace"] },
+    { "id": "cb-dash-short", "text": "Red - green.", "group": "stretch-end", "tags": ["lone-dash"], "expectedFocus": ["trace"] },
+    { "id": "cb-two-dashes", "text": "Red -- green.", "group": "stretch-end", "tags": ["lone-dash", "doubled"], "expectedFocus": ["trace"] },
+    { "id": "cb-even-if", "text": "I will go there even if the weather turns very bad today.", "group": "conjunction-sequence", "tags": ["two-words", "break"], "expectedFocus": ["trace"] },
+    { "id": "cb-as-soon-as", "text": "The big dog barked loudly as soon as the small cat ran away.", "group": "conjunction-sequence", "tags": ["three-words", "break"], "expectedFocus": ["trace"] },
+    { "id": "cb-on-the-other-hand", "text": "The old man walked slowly on the other hand the boy ran fast today.", "group": "conjunction-sequence", "tags": ["four-words", "break"], "expectedFocus": ["trace"] },
+    { "id": "cb-word-after-three", "text": "He ran as soon as the old dog by the gate barked loudly at him today.", "group": "conjunction-sequence", "tags": ["three-words", "word-after-marked", "no-break"], "expectedFocus": ["trace"] },
+    { "id": "cb-after-two", "text": "He ran even if the old dog by the gate barked loudly at him today.", "group": "conjunction-sequence", "tags": ["two-words", "break-later"], "expectedFocus": ["trace"] },
+    { "id": "cb-plain-conjunction", "text": "The big dog barked and the small cat ran away.", "group": "conjunction-sequence", "tags": ["one-word", "break"], "expectedFocus": ["trace"] }
+  ]
+}

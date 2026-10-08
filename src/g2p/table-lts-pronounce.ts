@@ -69,6 +69,11 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
    */
   characterNames?: Readonly<Record<string, readonly (readonly string[])[]>>;
   /**
+   * The word sequences taken as one conjunction, in the order they are
+   * tried (table-conjunctions.ts).
+   */
+  conjunctionSequences?: readonly (readonly string[])[];
+  /**
    * The words of the compiled dictionary, in its order and with their case,
    * for the search that depends on both (table-dictionary-search.ts).
    */

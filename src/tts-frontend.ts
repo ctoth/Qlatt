@@ -308,6 +308,11 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
           // marks, from 1, and how many there are.
           clause_word_index: { kind: "number" },
           clause_word_count: { kind: "number" },
+          // The stretch of words ends at the text's end, where no mark is
+          // written (a text rule supplied the one that closes it).
+          clause_end_supplied: { kind: "boolean" },
+          // The word's part in a conjunction of several words.
+          conjunction_sequence: { kind: "string", values: ["first", "rest"] },
           // Set by a frontend's rules: the word can carry a clause break, and
           // a break stands before it.
           break_marker: { kind: "boolean" },
@@ -386,6 +391,10 @@ function getTranscriptionConfig(spec: CompiledRulepack): TranscriptionConfig | u
       : {}),
     ...(value.elided_apostrophe_lookup !== undefined
       ? { elided_apostrophe_lookup: value.elided_apostrophe_lookup as boolean }
+      : {}),
+    // Passed as written; requireTranscriptionTables refuses a non-string.
+    ...(value.word_stretch_end_characters !== undefined
+      ? { word_stretch_end_characters: value.word_stretch_end_characters as string }
       : {}),
     letter_names: letterNames,
     punctuation_tokens: punctuationTokens,
@@ -548,15 +557,27 @@ function createStructure(
     });
   // Each written word's place between two punctuation marks. A number spoken
   // as several words is one written word, and the pause inside it ends nothing.
-  const clausePlace = new Map<string, { index: number; clause: { count: number } }>();
-  let clause = { count: 0 };
+  // A written word that ends in one of the frontend's stretch-end characters
+  // ends the stretch too, once all of its tokens have gone by.
+  type Stretch = { count: number; endSupplied: boolean };
+  const clausePlace = new Map<string, { index: number; clause: Stretch }>();
+  let clause: Stretch = { count: 0, endSupplied: false };
+  let endsAfterWord = false;
   for (const token of transcribed) {
     if (token.isPunctuation) {
-      if (!token.continuesWrittenWord) clause = { count: 0 };
+      if (!token.continuesWrittenWord) {
+        if (token.supplied) clause.endSupplied = true;
+        clause = { count: 0, endSupplied: false };
+        endsAfterWord = false;
+      }
       continue;
     }
     if (clausePlace.has(token.sourceTokenId)) continue;
-    if (!token.continuesWrittenWord) clause.count += 1;
+    if (!token.continuesWrittenWord) {
+      if (endsAfterWord) clause = { count: 0, endSupplied: false };
+      endsAfterWord = token.endsWordStretch === true;
+      clause.count += 1;
+    }
     clausePlace.set(token.sourceTokenId, { index: clause.count, clause });
   }
   const sharedTransaction = Object.hasOwn(spec, "text_recognition") ? null : beginStructure();
@@ -573,13 +594,15 @@ function createStructure(
     transaction.set(word, "tokenIndex", wordIndex);
     // What the lexicon says of the word belongs to the Word: its Segments are
     // replaced by allophone rules, the Word is not.
-    const { formClasses, textFormClasses, phraseStart } = group[0].token;
+    const { formClasses, textFormClasses, phraseStart, conjunctionRole } = group[0].token;
     if (formClasses) transaction.set(word, "form_classes", [...formClasses]);
     if (textFormClasses) transaction.set(word, "text_form_classes", [...textFormClasses]);
+    if (conjunctionRole) transaction.set(word, "conjunction_sequence", conjunctionRole);
     const place = clausePlace.get(tokenId);
     if (place) {
       transaction.set(word, "clause_word_index", place.index);
       transaction.set(word, "clause_word_count", place.clause.count);
+      if (place.clause.endSupplied) transaction.set(word, "clause_end_supplied", true);
     }
     if (phraseStart) transaction.set(word, "phrase_start", phraseStart);
     transaction.append("Word", word);

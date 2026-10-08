@@ -175,6 +175,19 @@ rules:
          {'type': 'request', 'kind': 'words', 'payload': {'text': current.payload.last}}]
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:4118-4150 (the word with the mark on it goes to the spelling routine; the last mark ends the clause)"
+  # A hyphen standing alone: one terminal, the hyphen, which the frontend's
+  # dictionary speaks.
+  tn_lone_dash:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'lone_dash' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': '-'}]"
+    citations:
+      - "DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entry \"-\"), LTS/ls_task.c:2040-2160 (the word is looked up as written)"
   tn_bare_number_request:
     kind: structural
     select:
@@ -267,4 +280,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]

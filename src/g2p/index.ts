@@ -21,6 +21,7 @@ import { ltsDocumentAt } from "./lts-document";
 import { applyLtsRules } from "./lts-engine";
 import { decomposeClitic, decomposeWord, getStressHintForWord } from "./morphology";
 import { stressPronunciation } from "./stress";
+import { conjunctionRoles } from "./table-conjunctions";
 import { type ClauseContext, chooseHomograph, loneWordContext } from "./table-homograph";
 import {
   formClassNamesOf,
@@ -769,5 +770,16 @@ export function pronounceClause(
     });
   };
   const firstClasses = read(null).map((result) => result.formClassWord ?? 0);
-  return read((index) => firstClasses.slice(index + 1).some(isVerb));
+  const spoken = read((index) => firstClasses.slice(index + 1).some(isVerb));
+  // The conjunctions of several words among them (table-conjunctions.ts). A
+  // word with a written mark on it is no part of one.
+  if (!table.conjunctionSequences) return spoken;
+  const roles = conjunctionRoles(
+    words,
+    table.conjunctionSequences,
+    options.atWrittenPunctuation !== false,
+  );
+  return spoken.map((result, index) =>
+    roles[index] ? { ...result, conjunctionRole: roles[index] } : result,
+  );
 }

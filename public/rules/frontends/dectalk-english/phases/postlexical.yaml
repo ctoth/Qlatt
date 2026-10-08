@@ -173,16 +173,39 @@ rules:
   # barked, and the small cat ran away."; "The dog and the cat ran." (third
   # word) and "The big dog barked and ran." (one word follows) are not broken.
   #
-  # Not ported: the marks for quotes, parentheses and a dash (:5082-5127), and
-  # the multi-word conjunctions and verb particles of LTS/proverbs.h
-  # (:5116-5120, :5174-5189).
+  # The stretch of words that is parsed at once ends at any written word that
+  # ends in one of ! ' , - . : ; ? (LTS/ls_task.c:362-368 with CMD/cm_char.c
+  # MARK_clause), an abbreviation's period included: "The old bag weighs 5 lb.
+  # and the small one weighs less today." has no break, because "and" is the
+  # first word of its stretch. The frontend's transcription declares those
+  # characters (word_stretch_end_characters) and the word counts follow them.
+  #
+  # A stretch that the text's end closes, with no mark written, counts one
+  # word more than it has (the flush character is a word of its own to the
+  # parse; an instrumented build prints length=8 for the seven words of "Milk
+  # bread eggs and a dozen apples", which is broken before "and").
+  #
+  # A conjunction of several words (LTS/proverbs.h conj_words, :4960-5025,
+  # :5174-5189): its first word is marked as one, and each later word as a
+  # plain conjunction whatever its own class; a sequence of three words marks
+  # the word after it too. When the first word is tested the later ones are
+  # not marked yet, so they never stand in its way: "I will go there even if
+  # the weather turns very bad today." is broken before "even".
+  #
+  # Not ported: the marks for quotes and parentheses (:5082-5106; DECtalk's
+  # parser has removed those characters before the parse, so they do not
+  # arise), and the shift of every later break by one word after a word that
+  # a number routine reads ahead ("9 am", "$2 million": the break test reads
+  # the mark of the word slot before; measured, "…opens 9 am and the small
+  # one closes late today." has its break after "and").
   # -------------------------------------------------------------------------
   dectalk_break_marker:
     kind: scalar
     select:
       relation: Word
       where: >-
-        'conj' in get(current, 'text_form_classes', [])
+        get(current, 'conjunction_sequence', '') != ''
+        || 'conj' in get(current, 'text_form_classes', [])
         || 'that' in get(current, 'text_form_classes', [])
         || ('prep' in get(current, 'text_form_classes', [])
             && !('part' in get(current, 'text_form_classes', []))
@@ -194,6 +217,7 @@ rules:
         tag: boundary
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:5129-5153 (PRO_CONJ, PRO_PREP for a preposition that is neither a particle nor 'to', PRO_THAT)"
+      - "DECtalk 4.63 LTS/ls_task.c:4960-5025 ls_task_search_for_conj and 5174-5189 (PRO_MULTI_CONJ on the first word of a sequence of LTS/proverbs.h conj_words, PRO_CONJ on the later ones)"
 
   dectalk_clause_break:
     kind: scalar
@@ -216,10 +240,18 @@ rules:
         && get(marked_before, 'clause_word_index', 0) < place
           ? get(marked_before, 'clause_word_index', 0) : 0
       n: next
-      next_marked: "n != null && isTrue(n, 'break_marker')"
+      # The later words of this word's own sequence are not marked yet when it
+      # is tested (they are marked when the loop reaches them, :5174-5189).
+      next_marked: >-
+        get(current, 'conjunction_sequence', '') != 'first'
+        && n != null && isTrue(n, 'break_marker')
+      # `length`: the stretch's words, and one more when the text's end closes it.
+      length: >-
+        get(current, 'clause_word_count', 0)
+        + (isTrue(current, 'clause_end_supplied') ? 1 : 0)
     constraint: >-
       place - last_marker > 3 && !next_marked
-      && get(current, 'clause_word_count', 0) > place + 3
+      && length > place + 3
     apply:
       - field: clause_break_before
         op: set
@@ -229,6 +261,7 @@ rules:
       - "DECtalk 4.63 LTS/ls_task.c:5190-5229 (no break within three words of the last marker or when the next word is marked; otherwise a required or an optional break)"
       - "DECtalk 4.63 LTS/ls_task.c:4843-4856 find_next_marker"
       - "DECtalk 4.63 LTS/ls_util.c:824-853 (either break is sent as a COMMA before the word when length > fc_index + 3)"
+      - "DECtalk 4.63 LTS/ls_task.c:5066-5075 and 5168 (length is the number of word slots; the flush character at a text's end makes one)"
 
   # The comma itself: a punctuation silence in front of the word's first
   # phone. It belongs to no word.

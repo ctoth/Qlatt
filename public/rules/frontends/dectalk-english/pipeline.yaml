@@ -822,6 +822,10 @@ relations:
       text_form_classes: []
       clause_word_index: []
       clause_word_count: []
+      # The stretch ends at the text's end with no mark written, and the
+      # word's part in a conjunction of several words (LTS/proverbs.h).
+      clause_end_supplied: [true, false]
+      conjunction_sequence: [first, rest]
       # LTS/ls_task.c:5129-5229: a word that may carry a clause break, and one
       # that does.
       break_marker: [true, false]

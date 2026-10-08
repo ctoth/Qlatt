@@ -29,6 +29,7 @@ import { fileURLToPath } from "node:url";
 import { searchDictionary } from "../src/g2p/table-dictionary-search";
 import { stripSuffixes } from "../src/g2p/table-suffix";
 import { convertPhonemeFieldDetailed, selectDictionaryRows } from "./build-dectalk-dict";
+import { conjunctionSequences } from "./dectalk-proverbs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);
@@ -638,6 +639,10 @@ fs.writeFileSync(
     wordsByPunctuation,
     letterPhones,
     characterNames,
+    // The word sequences the text stage's sentence parse takes as one
+    // conjunction, in the table's order (LTS/proverbs.h conj_words, read by
+    // LTS/ls_task.c ls_task_search_for_conj).
+    conjunctionSequences: conjunctionSequences(read("proverbs.h")),
     dictionaryWords,
     numberAbbreviations,
     numberPhones,

@@ -39,6 +39,11 @@ export interface PronunciationResult {
   /** The same classes as one word of bits, for the next word's context. */
   formClassWord?: number;
   /**
+   * The word's part in a conjunction of several words, when the frontend's
+   * table lists such (table-conjunctions.ts).
+   */
+  conjunctionRole?: "first" | "rest";
+  /**
    * The form classes as the frontend's phonetic rules receive them, where
    * that differs from what the lexicon holds (table-lts-pronounce.ts
    * receivedFormClassWord).

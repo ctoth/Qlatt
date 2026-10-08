@@ -85,6 +85,11 @@ type OrthographyInputToken = {
   isPunctuation: boolean;
   /** A punctuation token that is not in the source text: a text rule supplied it. */
   supplied?: boolean;
+  /**
+   * The written word this token comes from ends in one of the frontend's
+   * `word_stretch_end_characters` ("Mr.", "dogs'").
+   */
+  endsWordStretch?: boolean;
   symbol?: string;
   pronunciationKey?: string;
   parentDecisionId?: string;
@@ -100,6 +105,8 @@ type RequiredTranscriptionTables = {
   sources: Partial<Record<LexiconSourceKey, LexiconSource>>;
   letterNames: Record<string, string[]>;
   punctuationTokens: Set<string>;
+  /** Characters that end a stretch of words when a written word ends in one. */
+  wordStretchEndCharacters: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -277,7 +284,14 @@ function requireTranscriptionTables(
       "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.elided_apostrophe_lookup must be true or false",
     );
   }
+  const stretchEnd = config.word_stretch_end_characters;
+  if (stretchEnd !== undefined && typeof stretchEnd !== "string") {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.word_stretch_end_characters must be a string",
+    );
+  }
   return {
+    wordStretchEndCharacters: stretchEnd ?? "",
     symbolInput: symbolInput !== false,
     elidedApostropheLookup: elidedApostropheLookup !== false,
     sources: requireLexiconSources(config.sources),
@@ -328,22 +342,28 @@ function rewriteOrthographyTokens(
   // Punctuation tokens that a text rule supplied: the mark is not in the
   // source text the token comes from (a text's end closed as a sentence).
   const suppliedPunctuation = new Set<string>();
+  // Word tokens whose written word ends in a character that ends a stretch
+  // of words for the frontend (an abbreviation's period, a final apostrophe).
+  const stretchEnds = new Set<string>();
   entries.forEach((entry, index) => {
     const input = sharedInput ?? beginInput();
     const word = typeof entry === "string" ? entry : entry.word;
     const punctuation = isPunctuationTokenWithTables(word, tables);
     const token = input.createItem("token", `token_${index.toString()}`);
-    if (punctuation && typeof entry !== "string") {
+    if (typeof entry !== "string") {
       const sourceText = utterance.getItem(String(entry.source.get("sourceTextId")))?.get("text");
       const start = entry.source.get("sourceStart");
       const end = entry.source.get("sourceEnd");
-      if (
-        typeof sourceText === "string" &&
-        typeof start === "number" &&
-        typeof end === "number" &&
-        !sourceText.slice(start, end).includes(word)
-      ) {
-        suppliedPunctuation.add(token.id);
+      if (typeof sourceText === "string" && typeof start === "number" && typeof end === "number") {
+        const written = sourceText.slice(start, end);
+        if (punctuation && !written.includes(word)) suppliedPunctuation.add(token.id);
+        if (
+          !punctuation &&
+          written.length > 0 &&
+          tables.wordStretchEndCharacters.includes(written.at(-1) as string)
+        ) {
+          stretchEnds.add(token.id);
+        }
       }
     }
     if (typeof entry !== "string") {
@@ -379,6 +399,7 @@ function rewriteOrthographyTokens(
         word,
         isPunctuation: tokenType === "punctuation",
         ...(suppliedPunctuation.has(token.id) ? { supplied: true } : {}),
+        ...(stretchEnds.has(token.id) ? { endsWordStretch: true } : {}),
         ...(typeof punctuationSymbol === "string" ? { symbol: punctuationSymbol } : {}),
         ...(typeof pronunciationKey === "string" && pronunciationKey.length > 0
           ? { pronunciationKey }
@@ -554,6 +575,7 @@ export function transcribeText(
         isPunctuation: true,
         symbol: inputToken.symbol ?? word,
         word: word, // Associate punctuation with itself as the 'word'
+        ...(inputToken.supplied ? { supplied: true } : {}),
       });
       index += 1;
     } else {
@@ -791,6 +813,10 @@ export function transcribeText(
                   }
                 : {}),
               ...(part !== spokenParts[0] ? { continuesWrittenWord: true } : {}),
+              ...("conjunctionRole" in pronResult && pronResult.conjunctionRole
+                ? { conjunctionRole: pronResult.conjunctionRole }
+                : {}),
+              ...(inputToken.endsWordStretch ? { endsWordStretch: true } : {}),
               ...(part.phraseStart ? { phraseStart: part.phraseStart } : {}),
               ...(part.morphemeAfter?.includes(phoneIndex) ? { morphemeBoundaryAfter: true } : {}),
               // Indices of a one-word result are indices into its phones.

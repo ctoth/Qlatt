@@ -1,0 +1,18 @@
+{
+  "cb-text-end-break": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-period-no-break": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-unit-ends-stretch": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-unit-written-out": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-title-ends-stretch": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "cb-capitals-end-stretch": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-apostrophe-ends-stretch": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-dash-ends-stretch": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-dash-short": ["B1","AV","AP","A2","A3","A4","A5","A6","A2_AMPLITUDE"],
+  "cb-two-dashes": ["B1","AV","AP","A2","A3","A4","A5","A6","A2_AMPLITUDE"],
+  "cb-even-if": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-as-soon-as": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-on-the-other-hand": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-word-after-three": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-after-two": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-plain-conjunction": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"]
+}

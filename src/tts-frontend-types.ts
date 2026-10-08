@@ -13,6 +13,19 @@ export interface TranscriptionToken {
   textFormClasses?: readonly string[];
   /** A later word of one written word (a number spoken as several words). */
   continuesWrittenWord?: boolean;
+  /**
+   * The word's part in a conjunction of several words, when the frontend's
+   * lexicon finds such ("as soon as"): its first word, or a later one.
+   */
+  conjunctionRole?: "first" | "rest";
+  /**
+   * The written word ends in a character that ends a stretch of words for
+   * the frontend, though no punctuation token follows (an abbreviation's
+   * period).
+   */
+  endsWordStretch?: boolean;
+  /** A punctuation token that is not in the text: a text rule supplied it. */
+  supplied?: boolean;
   /** The phrase the word starts, when the frontend's lexicon marks one. */
   phraseStart?: "vp" | "pp";
   /** A morpheme boundary stands after this phone, inside its word. */
@@ -63,6 +76,12 @@ export type TranscriptionConfig = {
   sources?: Partial<Record<LexiconSourceKey, LexiconSource>>;
   letter_names?: Record<string, string[]>;
   punctuation_tokens?: string[];
+  /**
+   * Characters that end a stretch of words when a written word ends in one,
+   * for a frontend that counts a word's place among the words up to such a
+   * character and not only up to a punctuation token. None when absent.
+   */
+  word_stretch_end_characters?: string;
 };
 
 export type TranscriptionOptions = {

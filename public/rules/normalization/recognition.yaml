@@ -194,6 +194,19 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:158-170 (each character by its name)'
+    # A hyphen that stands alone between two words, or two of them: a word of
+    # its own, which the frontend's dictionary names. Only for a frontend
+    # whose policy asks for it (tn_recognition_policy.lone_dash: word).
+    - id: tn_lone_dash_source
+      pattern: '(?<=^|\s)(?<dash>--?)(?=\s)'
+      flags: ''
+      class: lone_dash
+      captures: {dash: dash}
+      when: "get(maps.tn_recognition_policy, 'lone_dash', 'dropped') == 'word'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entry "-"), LTS/ls_task.c:2040-2160 (the word is looked up as written)'
     - id: tn_initialism_source
       pattern: '\b(?:[a-z]\.){2,}[a-z]?\.?'
       flags: i

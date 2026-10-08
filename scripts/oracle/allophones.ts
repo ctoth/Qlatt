@@ -70,6 +70,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-number-forms-v1.json",
   // A word with "?!" on it, and "am" and "pm" after a number: both spelled.
   "dectalk-us-spelled-forms-v1.json",
+  // The clause breaks the text stage inserts: where a stretch of words ends,
+  // its length at a text's end, and conjunctions of several words.
+  "dectalk-us-clause-breaks-v1.json",
 ];
 
 /** Every corpus with a packet record. */

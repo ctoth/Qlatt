@@ -78,6 +78,11 @@ maps:
     # "What?!" is "w h a t question mark" and an exclamation's clause end,
     # "What!?" "w h a t exclamation point" and a question's.
     marked_words: spelled
+    # A hyphen that stands alone between two words is the dictionary's word
+    # for it, with no pause: measured on say.exe, "Red - green." is R EH D,
+    # D AE SH, G R IY N, and "Red -- green." the same (DECtalk's parser makes
+    # one hyphen of the two).
+    lone_dash: word
 # A text that does not end in punctuation is still closed as a sentence: when
 # the text is flushed the text task sends a breath break (LTS/ls_task.c:1236-1260,
 # the VT case) and the clause ends as one that ends in a period. Measured on

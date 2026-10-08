@@ -154,13 +154,17 @@ rules:
       where: "current.kind in ['cardinal', 'ordinal'] && current.outputType == 'source'"
     # A frontend whose lexicon speaks digits itself keeps a bare cardinal as
     # one terminal (tn_recognition_policy.bare_numbers: digits), so the number
-    # is not confused with the same words typed out.
+    # is not confused with the same words typed out. The same for a number
+    # with an ordinal ending ("42nd"), kept as written, under the policy
+    # tn_recognition_policy.ordinal_numbers: source.
     expand_text:
       allowed_types: [request, terminal]
       tag: normalization_lexical
       output: >-
         maps.tn_recognition_policy.bare_numbers == 'digits' && current.kind == 'cardinal'
           ? [{'type': 'terminal', 'text': current.payload.value}]
+          : current.kind == 'ordinal' && get(maps.tn_recognition_policy, 'ordinal_numbers', 'words') == 'source'
+            ? [{'type': 'terminal', 'text': lower(current.text)}]
           : tn_number_request(double(current.payload.value), current.kind == 'ordinal' ? 'hundred' : maps.tn_recognition_policy.hundreds, current.kind == 'ordinal', '')
     citations:
       - "Issue #144: explicit bare-number convention"

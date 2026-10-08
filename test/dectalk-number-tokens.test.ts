@@ -68,17 +68,11 @@ const NOT_READ: readonly string[] = [
   "1 800 555 1234",
   "12 34",
   "1234 5678",
-  // Other rules of the text stage: percent, ordinals, signs, exponents.
+  // Other rules of the text stage: percent, signs, exponents.
   "10%",
   "100%",
   "1%",
   "0.5%",
-  "1st",
-  "2nd",
-  "3rd",
-  "21st",
-  "100th",
-  "11th",
   "-5",
   "+5",
   "-3.5",

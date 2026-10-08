@@ -47,6 +47,8 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-long-text-v1.json",
   // One-letter words and initials; promote_last_2 before a verb phrase.
   "dectalk-us-letters-v1.json",
+  // Numbers with an ordinal ending, spoken by the number routine.
+  "dectalk-us-ordinals-v1.json",
   // Abbreviations the dictionary holds with their period, by the word's case.
   "dectalk-us-abbrev-v1.json",
   // Words DECtalk's command-stage parser rewrites before letter-to-sound.

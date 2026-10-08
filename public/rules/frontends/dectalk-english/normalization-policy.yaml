@@ -14,6 +14,13 @@ maps:
     # money, 3622-3652 time, 3747-3825 and 3936-4046 numbers and plurals),
     # with its own boundaries between the parts.
     number_tokens: source
+    # A number with an ordinal ending stays as written as well: the number
+    # routine speaks it with its ordinal flag (LTS/ls_task.c:3967-3972,
+    # LTS/ls_util.c:517-553), from the number phone lists and not from the
+    # dictionary's words. Measured on say.exe: "11th" is AX L EH V AX N TH
+    # (the word "eleventh" begins IH) and "100th" has R AX D TH (the word
+    # "hundredth" has R IX D TH).
+    ordinal_numbers: source
     fraction_exception: '100'
     # A capital letter followed by a period is an initial: it is spelled and
     # its period is sent twice (LTS/ls_task.c:2612-2623, 1516-1519,

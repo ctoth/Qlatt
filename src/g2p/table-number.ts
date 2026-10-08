@@ -401,17 +401,35 @@ export function speakPluralNumber(text: string, lists: NumberPhones): number[] |
 }
 
 /**
+ * A whole number with the ending that goes with its last digit, "1st", "42nd",
+ * "3rd", "11th" (LTS/ls_util.c:517-553 ls_util_is_ordinal: "st" after 1, "nd"
+ * after 2, "rd" after 3, "th" after anything else and after any digit that
+ * follows a 1): the number routine speaks it with its ordinal flag
+ * (LTS/ls_task.c:3967-3972). Null for anything else, a number with the wrong
+ * ending included.
+ */
+export function speakOrdinalNumber(text: string, lists: NumberPhones): number[] | null {
+  const match = /^([0-9]+)(st|nd|rd|th)$/.exec(text);
+  if (!match) return null;
+  const digits = match[1] as string;
+  const unit = digits.length > 1 && digits.at(-2) === "1" ? "0" : (digits.at(-1) as string);
+  const ending = unit === "1" ? "st" : unit === "2" ? "nd" : unit === "3" ? "rd" : "th";
+  return match[2] === ending ? speakNumber(digits, lists, { ordinal: true }) : null;
+}
+
+/**
  * A number-like word that DECtalk's text task reads whole, in the order the
  * task tries its rules (LTS/ls_task.c: money :3181, time :3622, plain numbers
- * :3747): a dollar amount, a clock time, a plural number, or a number with
- * separators or fraction digits. Null when `text` is none of these; the
- * caller then reads it as it reads any other word.
+ * :3747): a dollar amount, a clock time, a plural number, an ordinal, or a
+ * number with separators or fraction digits. Null when `text` is none of
+ * these; the caller then reads it as it reads any other word.
  */
 export function speakNumberToken(text: string, lists: NumberPhones): number[] | null {
   if (text.startsWith("$")) return speakMoney(text.slice(1), lists);
   return (
     speakTime(text, lists) ??
     speakPluralNumber(text, lists) ??
+    speakOrdinalNumber(text, lists) ??
     (/[,.]/.test(text) ? (speakDecimal(text, lists)?.symbols ?? null) : null)
   );
 }

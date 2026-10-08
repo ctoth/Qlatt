@@ -78,9 +78,7 @@ describe("F0 at a time", () => {
     for (const count of [0, 1, 2, 3, 5200]) {
       const points = orderedPoints(count, random);
       for (const timeMs of probes(points, random)) {
-        expect(resolveF0AtTime(points, timeMs, sampling)).toEqual(
-          scanF0(points, timeMs, sampling),
-        );
+        expect(resolveF0AtTime(points, timeMs, sampling)).toEqual(scanF0(points, timeMs, sampling));
       }
     }
   });

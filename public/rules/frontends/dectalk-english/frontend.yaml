@@ -44,7 +44,7 @@ source_contour_path: /rules/frontends/dectalk-english/source-contour.yaml
 # lexicon speaks those from DECtalk's number phone lists (src/g2p/table-number.ts).
 # Citation: DECtalk 4.63 ls_util.c:598-622 (is_year), l_us_pr1.c:297-785.
 normalization:
-  phases: [normalization_lexical, normalization_currency, normalization_time, normalization_date, normalization_decimal_fraction, normalization_number_requests, normalization_number_groups, normalization_terminal_words, normalization_text_end]
+  phases: [normalization_lexical, normalization_currency, normalization_time, normalization_date, normalization_decimal_fraction, normalization_number_requests, normalization_number_groups, normalization_terminal_words]
 include:
   - /rules/normalization/components.yaml
   - normalization-policy.yaml

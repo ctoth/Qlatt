@@ -249,8 +249,9 @@ rules:
       - "Engineering approximation: represent DECtalk's PAV/PAP/PB1/PB2 timed overrides as a timed prefix window on the following segment without shortening that segment"
 
   # No rule here for a voiceless stop that is the last segment of all: the
-  # text rules close every text as a sentence (normalization-policy.yaml,
-  # tn_text_end), as DECtalk does at a flush, so a stop always has a silence
+  # text rules close every text as a sentence (the clause end in the text
+  # parser's output, tn_parser_clause_end), as DECtalk does at a flush, so a
+  # stop always has a silence
   # after it and the rule above for a release into silence takes it.
   dectalk_insert_voiced_stop_release:
     kind: structural

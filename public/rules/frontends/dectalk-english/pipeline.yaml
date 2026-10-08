@@ -308,6 +308,18 @@ predicates:
   is_stressed_syllabic: >-
     (current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"])
     && get(current, "stress", 0) > 0
+  # A syllabic whose stress is FSTRESS_2 alone: what promote_last_2 looks for
+  # (ph_aloph.c:1701-1704).
+  is_secondary_syllabic: >-
+    (current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"])
+    && get(current, "stress", 0) == 2
+  # Scanning back from a syllabic: the syllabic at which promote_last_2 was
+  # called, or the point its scan cannot pass (is_clause_or_phrase_start).
+  is_promotion_origin_or_stop: >-
+    isTrue(current, "hat_promotes")
+    || (current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null)
+    || (dectalk_word_start(current) && dectalk_phrase_state(current) != ""
+        && dectalk_phrase_state(current) != "word")
   # A syllabic with FSTRESS_1: primary stress or emphasis.
   is_primary_syllabic: >-
     (current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"])
@@ -691,6 +703,8 @@ relations:
       hat_locked: { kind: boolean }
       hat_stresses: { kind: number }
       hat_delay: { kind: number }
+      # The walk called promote_last_2 at this syllabic (ph_aloph.c:1470-1474).
+      hat_promotes: { kind: boolean }
       # The syllabic at which DECtalk's intonation routine leaves its loop
       # (Ph_inton2.c:809-819).
       intonation_stops: { kind: boolean }

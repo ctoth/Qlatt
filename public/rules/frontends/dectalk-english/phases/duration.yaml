@@ -30,18 +30,28 @@ rules:
   # silence: after a clause's closing pause comes the next clause's opening
   # pause (229-232). One silence Segment stands here for both, so a pause that
   # another clause follows also holds that clause's opening frames.
+  #
+  # The comma and period lengths are given only to a silence past the
+  # clause's second allophone (`if (nphon > 1)`, 238). In a clause with no
+  # phone the closing silence is allophone 1, so it keeps the opening value,
+  # and nothing follows it, so that is 5 frames: DECtalk speaks the second
+  # period of "A. ." as two silences of 5 frames.
   dectalk_pause_duration:
     kind: scalar
     select:
       relation: Segment
       where: { predicate: is_clause_silence }
+    define:
+      empty_clause: >-
+        prev != null && prev.phoneme == 'SIL' && get(prev, 'punctuationSymbol', null) != null
     apply:
       - field: duration
         op: set
         value: >-
-          (dectalk_pause_frames(current.punctuationSymbol in [',', ';', ':']
-            ? params.policy.timing.pause_frames.comma
-            : params.policy.timing.pause_frames.period)
+          (dectalk_pause_frames(empty_clause ? params.policy.timing.pause_frames.clause_initial_other
+            : (current.punctuationSymbol in [',', ';', ':']
+              ? params.policy.timing.pause_frames.comma
+              : params.policy.timing.pause_frames.period))
            + (next != null ? dectalk_clause_initial_pause_frames(next) : 0.0))
           * params.policy.timing.frame_ms
         tag: boundary
@@ -49,6 +59,7 @@ rules:
       - "DECtalk 4.63 p_us_tim.c:225-277 Rule 1 (pause durations depend on syntax)"
       - "DECtalk 4.63 p_us_tim.c:229-232 (clause-initial pause of 4 or 5 frames)"
       - "DECtalk 4.63 p_us_tim.c:261-268 (each pause scaled by sprat1, at least 2 frames)"
+      - "DECtalk 4.63 p_us_tim.c:237-253 (the comma and period lengths apply only when nphon > 1)"
 
   # The pause that opens the utterance, as the synthesizer hears it: the first
   # clause's opening pause less the one frame DECtalk never sends. Computed in

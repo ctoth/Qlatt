@@ -243,9 +243,11 @@ rules:
   # "Phones left" is DECtalk's nphonetot - n: the phones after this one, the
   # clause's final silence, and one more.
   #
-  # Not ported: promote_last_2 (:1470-1474), which turns the clause's last
-  # secondary stress into a primary one when the falling syllabic stands
-  # before a verb phrase.
+  # In 2c, whatever the clause type: a syllabic that stands before a verb
+  # phrase calls promote_last_2 (:1470-1474), which gives primary stress to
+  # the last secondary-stressed syllabic before the clause's end or the next
+  # phrase start. "He went to bed." has primary stress on "went" (its vowel
+  # is 18 frames); "They went to bed." does not (15), "they" being unstressed.
   # ---------------------------------------------------------------------------
   dectalk_hat_pattern:
     kind: scalar
@@ -279,11 +281,32 @@ rules:
       syllabics_after: "count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_syllabic')"
       # remaining_stresses_til(FCBNEXT): up to the clause's end or a phrase
       # start that carries the comma value.
-      primaries_in_clause: "count_ahead_pred(current, 1000, 'is_clause_or_phrase_start', 'is_primary_syllabic')"
+      # promote_last_2 (ph_aloph.c:1470-1474, 1689-1722). When the walk
+      # reaches its "last stress" test at a syllabic that stands before a verb
+      # phrase, the last syllabic with secondary stress between there and the
+      # clause's end or a phrase start gets primary stress, at once: the walk
+      # then sees it so. The syllabic where that happened is marked
+      # (hat_promotes); a later one finds it by scanning back.
+      origin: "look_back_pred(current, 1000, 'is_promotion_origin_or_stop')"
+      in_promotion_span: >-
+        origin != null && isTrue(origin, 'hat_promotes')
+        && !(dectalk_word_start(current) && dectalk_phrase_state(current) != ''
+             && dectalk_phrase_state(current) != 'word')
+      secondaries_ahead: "count_ahead_pred(current, 1000, 'is_clause_or_phrase_start', 'is_secondary_syllabic')"
+      secondaries_in_phrase: >-
+        dectalk_boundary(current) >= params.policy.timing.boundary.vp ? 0.0
+        : count_ahead_pred(current, 1000, 'is_past_phrase_boundary', 'is_secondary_syllabic')
+      promoted: "in_promotion_span && get(current, 'stress', 0) == 2 && secondaries_ahead == 0.0"
+      # A syllabic ahead that has been promoted but not yet rewritten.
+      promoted_ahead: "in_promotion_span && secondaries_ahead > 0.0"
+      primaries_in_clause: >-
+        count_ahead_pred(current, 1000, 'is_clause_or_phrase_start', 'is_primary_syllabic')
+        + (promoted_ahead ? 1.0 : 0.0)
       primaries_in_phrase: >-
         dectalk_boundary(current) >= params.policy.timing.boundary.vp ? 0.0
         : count_ahead_pred(current, 1000, 'is_past_phrase_boundary', 'is_primary_syllabic')
-      stress_now: "get(current, 'stress', 0)"
+          + (promoted_ahead && secondaries_in_phrase == secondaries_ahead ? 1.0 : 0.0)
+      stress_now: "promoted ? 1 : get(current, 'stress', 0)"
       stressed: "stress_now == 1 || stress_now == 2 || stress_now == 3"
       # A phone the dictionary exempts from allophone rules (FBLOCK) jumps over
       # all of this in DECtalk (ph_aloph.c:563-567 to the label at :1528): no
@@ -311,6 +334,16 @@ rules:
       falls: "delayed_fall || emphasis_fall || last_fall || phrase_fall"
       top_out: "active ? !(emphasis_fall || last_fall || phrase_fall) : top_1"
     apply:
+      - field: stress
+        op: set
+        value: stress_now
+        tag: stress
+      - field: hat_promotes
+        op: set
+        value: >-
+          last_stress && dectalk_boundary(current) == params.policy.timing.boundary.vp
+          && secondaries_ahead > 0.0
+        tag: stress
       - field: hat_begins
         op: set
         value: rises
@@ -341,6 +374,7 @@ rules:
       - "DECtalk 4.63 ph_aloph.c:1396-1525 (hat rise on the first stress, fall on emphasis, on the last stress of a declarative clause, and between two phrases of two stresses)"
       - "DECtalk 4.63 ph_aloph.c:597-606 (the delayed fall)"
       - "DECtalk 4.63 ph_aloph.c:1646-1668 remaining_stresses_til"
+      - "DECtalk 4.63 ph_aloph.c:1463-1474, 1689-1722 (promote_last_2: at a syllabic before a verb phrase, the last FSTRESS_2 syllabic up to a boundary of FCBNEXT or more becomes FSTRESS_1)"
       - "DECtalk 4.63 ph_defs.h:151-154 (DECLARATIVE is a clause that ends with a period)"
       - "DECtalk 4.63 ph_aloph.c:563-567 (a phone with FBLOCK skips to :1528, past the hat pattern)"
 

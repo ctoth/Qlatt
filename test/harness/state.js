@@ -24,6 +24,10 @@ export const state = {
   sessionId: 0,
   lastRun: null,
   runStartTime: 0,
+  // Stage timings (ms) of the last Speak click (harness/runtime.js) and of
+  // the last frontend warm-up (harness/warmup.js)
+  lastSpeakTimings: null,
+  lastWarmup: null,
 
   // DOM elements
   status: document.getElementById("status"),

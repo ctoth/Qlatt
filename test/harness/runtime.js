@@ -33,12 +33,44 @@ export function slugify(text) {
     .slice(0, 64);
 }
 
+// Where a Speak click spends its time, as User Timing measures
+// (`qlatt:speak:<stage>`, visible in the browser's performance panel) and in
+// `state.lastSpeakTimings` (ms).
+function stageTimer() {
+  const timings = {};
+  let last = performance.now();
+  return {
+    timings,
+    mark(stage) {
+      const now = performance.now();
+      timings[stage] = Math.round((now - last) * 10) / 10;
+      performance.measure(`qlatt:speak:${stage}`, { start: last, end: now });
+      last = now;
+    },
+  };
+}
+
+/**
+ * Load, validate and compile a frontend by running one utterance through it,
+ * with the voice the page has selected. The track is discarded. Synchronous:
+ * test/harness/warmup.js calls it in idle time.
+ */
+export function warmFrontend(frontendId, phrase) {
+  const speaker = getSelectedSpeaker();
+  const options = { rate: 1, frontendId };
+  if (speaker) options.speaker = speaker;
+  textToKlattTrack(phrase, undefined, 30, options);
+}
+
 export async function speak() {
+  const timer = stageTimer();
   await state.ctx.resume();
+  timer.mark("resume");
   // The layered-additive F0 renderer (dectalk-english) calls a synchronous
   // WASM kernel; in the browser its bytes must be fetched and injected before
   // the synchronous textToKlattTrack() below. Idempotent after the first call.
   await preloadF0Filters(`${state.WORKLET_BASE_PATH}f0-filters.wasm`);
+  timer.mark("f0Filters");
   const phrase = document.getElementById("phrase").value.trim();
   const baseF0 = Number(document.getElementById("baseF0").value) || 110;
   const rate = Number(document.getElementById("rate").value) || 1.0;
@@ -51,7 +83,11 @@ export async function speak() {
   const options = { rate, frontendId };
   if (speaker) options.speaker = speaker;
   const track = textToKlattTrack(phrase, baseF0, 30, options);
+  timer.mark("textToTrack");
   await speakWithNewRuntime(track);
+  timer.mark("runtimeAndSchedule");
+  state.lastSpeakTimings = timer.timings;
+  console.log("[QLATT] Speak timings (ms)", timer.timings);
 }
 
 export async function initializeNewRuntime() {

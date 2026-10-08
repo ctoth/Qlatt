@@ -1,4 +1,9 @@
 import { isNodeRuntime, normalizePath, readFileFromFsSync } from "./path-utils";
+import {
+  noteSynchronousFetch,
+  noteSyncResourceRequest,
+  primedSyncResource,
+} from "./sync-resource-cache";
 
 function readDictionarySourceFromUrlSync(specPath: string): string | null {
   if (typeof XMLHttpRequest !== "function") return null;
@@ -102,9 +107,22 @@ export function loadCmuDictionaryFromPathSync(specPath: string): CmuDictionary {
 
   const attempts = normalizeAttempts(specPath);
 
+  // Text a host fetched ahead of time (src/sync-resource-cache.ts): no request.
+  for (const attempt of attempts) {
+    const fromPrimed = primedSyncResource(attempt);
+    if (typeof fromPrimed === "string") {
+      noteSyncResourceRequest(specPath);
+      const parsed = parseDictionary(fromPrimed, attempt);
+      DICTIONARY_CACHE.set(specPath, parsed);
+      return parsed;
+    }
+  }
+
   for (const attempt of attempts) {
     const fromUrl = readDictionarySourceFromUrlSync(attempt);
     if (typeof fromUrl === "string") {
+      noteSyncResourceRequest(specPath);
+      noteSynchronousFetch(specPath);
       const parsed = parseDictionary(fromUrl, attempt);
       DICTIONARY_CACHE.set(specPath, parsed);
       return parsed;
@@ -114,6 +132,7 @@ export function loadCmuDictionaryFromPathSync(specPath: string): CmuDictionary {
   for (const attempt of attempts) {
     const source = readFileFromFsSync(attempt);
     if (typeof source === "string") {
+      noteSyncResourceRequest(specPath);
       const parsed = parseDictionary(source, attempt);
       DICTIONARY_CACHE.set(specPath, parsed);
       return parsed;

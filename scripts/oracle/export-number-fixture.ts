@@ -22,8 +22,14 @@
  * scripts/oracle/adapters/render-dectalk.ts):
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
  *     scripts/oracle/export-number-fixture.ts [--out <file>]
+ *     scripts/oracle/export-number-fixture.ts --list <texts.txt> --out <file>
  *
  * Output: test/fixtures/dectalk-oracle/dectalk-us-numbers-v1.phonemes.json
+ *
+ * --list records the texts of a list file instead (one per line), for
+ * number-like tokens the text stage reads in its own ways: money, times,
+ * decimals (test/oracle-corpora/dectalk-us-number-tokens-v1.txt). A text
+ * say.exe refuses is recorded as null.
  */
 
 import { spawnSync } from "node:child_process";
@@ -49,6 +55,18 @@ const outPath = path.resolve(
         "dectalk-us-numbers-v1.phonemes.json",
       ),
 );
+
+const listIndex = argv.indexOf("--list");
+/** With --list: the texts of a list file, one per line; `#` lines and blank lines skipped. */
+const listed: string[] | undefined =
+  listIndex >= 0
+    ? fs
+        .readFileSync(path.resolve(argv[listIndex + 1]), "utf8")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0 && !line.startsWith("#"))
+    : undefined;
+if (listed && outIndex < 0) throw new Error("--list needs --out");
 
 const numbers: string[] = [];
 for (let n = 0; n <= 120; n += 1) numbers.push(n.toString());
@@ -83,8 +101,20 @@ function logOf(text: string): string {
   return log;
 }
 
-const entries: Record<string, string> = {};
-for (const text of [...new Set(numbers)]) entries[text] = logOf(text);
+const entries: Record<string, string | null> = {};
+if (listed) {
+  // A listed text may be one say.exe will not take as its text argument (it
+  // reads a leading "-" as an option): that entry is recorded as null.
+  for (const text of [...new Set(listed)]) {
+    try {
+      entries[text] = logOf(text);
+    } catch {
+      entries[text] = null;
+    }
+  }
+} else {
+  for (const text of [...new Set(numbers)]) entries[text] = logOf(text);
+}
 
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(

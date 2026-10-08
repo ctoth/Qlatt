@@ -5,6 +5,7 @@ export type PronunciationSource =
   | "morphology"
   | "lts-rules"
   | "number"
+  | "phonemic"
   | "spelling"
   | "position"
   | "number-abbreviation"

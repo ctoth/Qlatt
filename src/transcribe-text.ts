@@ -55,6 +55,8 @@ const LETTER_NAME_PRONUNCIATION_CITATION =
   "Allen et al. 1987 Ch.2-3 (symbol strings pronounced as LETTER-* morphs)";
 const NUMBER_PRONUNCIATION_CITATION =
   "DECtalk 4.63 LTS/l_us_pr1.c (ls_proc_do_number, ls_proc_do_4_digits) with the phone lists of LTS/l_us_con.c";
+const PHONEMIC_PRONUNCIATION_CITATION =
+  "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on as phonemes) with the character table usa_ascky_rev of INCLUDE/usa_phon.tab:70";
 
 const TOKEN_SCHEMA = {
   itemTypes: {
@@ -626,6 +628,10 @@ export function transcribeText(
         decisionType = "number_pronunciation_selected";
         reason = `Spoke the digits '${sourceWord}' as ${(pronResult.parts ?? []).length.toString()} words from the frontend's number phone lists`;
         citations = [NUMBER_PRONUNCIATION_CITATION];
+      } else if (pronResult.source === "phonemic") {
+        decisionType = "phonemic_pronunciation_selected";
+        reason = `Spoke the phonemic text '${sourceWord.slice(1, -1)}' as the phones its characters name: ${pronResult.phonemes.join(" ")}`;
+        citations = [PHONEMIC_PRONUNCIATION_CITATION];
       } else if (pronResult.source === "dictionary") {
         const used = lexiconSource("dictionary");
         decisionType = "dictionary_pronunciation_selected";

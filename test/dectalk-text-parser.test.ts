@@ -87,6 +87,21 @@ describe("dectalk-english runs its text parser first", () => {
     expect(pauses.length).toBe(1);
   });
 
+  it("speaks the parser's other phonemic text as the phones it names", () => {
+    const decisions = decisionsFor("Open readme.txt now.", "dectalk-english");
+    const rewrites = decisions.filter((decision) => decision.type === "text_parser_rewrite");
+    expect(rewrites.map((decision) => decision.reason)).toEqual([
+      'Rule R60 (CMD/par_rule2.par line 317) rewrote "readme.txt" as "readme . txt"',
+      'Rule R339 (CMD/par_rule2.par line 546) rewrote ". txt" as "{phonemes d\'at} txt"',
+    ]);
+    const spoken = decisions.filter(
+      (decision) => decision.type === "phonemic_pronunciation_selected",
+    );
+    expect(spoken.map((decision) => decision.reason)).toEqual([
+      "Spoke the phonemic text 'd'at' as the phones its characters name: D AA1 T",
+    ]);
+  });
+
   it("takes a command out of the text and says so", () => {
     const decisions = decisionsFor("Say this [:rate 180] and then that.", "dectalk-english");
     const dropped = decisions.filter((decision) => decision.type === "text_parser_command_dropped");

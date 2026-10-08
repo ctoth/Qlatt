@@ -469,6 +469,50 @@ const numberAbbreviations: Record<string, { singular: number[]; plural: number[]
   }
 }
 
+// The characters of phonemic text: usa_ascky_rev[] (INCLUDE/usa_phon.tab:70),
+// by character code, the symbol each stands for; null for a character that
+// stands for none (NULL_ASCKY) or for the pitch command. The control symbols
+// are INCLUDE/l_com_ph.h's.
+for (const match of fs
+  .readFileSync(path.join(dectalkRoot, "dapi", "src", "INCLUDE", "l_com_ph.h"), "latin1")
+  .matchAll(/^#define\s+([A-Z0-9_]+)\s+\(100(?:\s*\+\s*(\d+))?\)/gm)) {
+  const code = 100 + Number(match[2] ?? 0);
+  const known = SYMBOLS.get(match[1]);
+  if (known !== undefined && known !== code) {
+    throw new Error(`E_SYMBOL_CODE: ${match[1]} is ${code} in l_com_ph.h, ${known} here`);
+  }
+  SYMBOLS.set(match[1], code);
+}
+const characterTable = /usa_ascky_rev\s*\[\s*\]\s*=\s*\{([\s\S]*?)\};/.exec(
+  fs.readFileSync(path.join(dectalkRoot, "dapi", "src", "INCLUDE", "usa_phon.tab"), "latin1"),
+);
+if (!characterTable) throw new Error("E_PHONEME_CHARACTERS: usa_phon.tab has no usa_ascky_rev");
+const phonemeCharacters = characterTable[1]
+  .replace(/\/\*[\s\S]*?\*\//g, "")
+  .split(",")
+  .map((cell) => cell.trim())
+  .filter((cell) => cell.length > 0)
+  .map((cell) => {
+    const symbol = /^PUSA\((\w+)\)$/.exec(cell)?.[1];
+    if (symbol !== undefined) return symbolCode(symbol);
+    if (cell === "NULL_ASCKY" || cell === "PITCH_CHANGE") return null;
+    throw new Error(`E_PHONEME_CHARACTERS: unknown cell '${cell}'`);
+  });
+if (phonemeCharacters.length !== 128) {
+  throw new Error(`E_PHONEME_CHARACTERS: ${phonemeCharacters.length} entries, expected 128`);
+}
+// The two characters DECtalk's text parser puts around phonemic text
+// (CMD/par_def1.h PAR_PHONES_ON_D, PAR_PHONES_OFF_D; CMD/cm_text.c:1088-1145).
+const parserDefinitions = fs.readFileSync(
+  path.join(dectalkRoot, "dapi", "src", "CMD", "par_def1.h"),
+  "latin1",
+);
+const phonemicMarks = ["PAR_PHONES_ON_D", "PAR_PHONES_OFF_D"].map((name) => {
+  const match = new RegExp(`^#define\\s+${name}\\s+(0x[0-9A-Fa-f]+)`, "m").exec(parserDefinitions);
+  if (!match) throw new Error(`E_PHONEMIC_MARKS: par_def1.h does not define ${name}`);
+  return Number(match[1]);
+});
+
 // The frontend's spelling of each allophone code (INCLUDE/l_all_ph.h order).
 // Four names differ from DECtalk's (as in scripts/build-dectalk-dict.ts).
 const FRONTEND_SYMBOLS: Readonly<Record<string, string[]>> = {
@@ -514,6 +558,8 @@ fs.writeFileSync(
     dictionaryWords,
     numberAbbreviations,
     numberPhones,
+    phonemeCharacters,
+    phonemicMarks,
     words,
     bytes,
   })}\n`,

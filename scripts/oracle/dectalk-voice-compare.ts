@@ -1,7 +1,7 @@
 /**
  * Text to samples the way the page does it, compared with the stock say.exe:
  * the dectalk-english frontend's track for a voice, scheduled onto the
- * experiment the frontend is paired with and started 50 ms in, against the WAV
+ * experiment the frontend is paired with and started the page's lead in, against the WAV
  * say.exe wrote for `[:n<voice>] [:ra <rate>] <text>`
  * (scripts/oracle/export-dectalk-vtm-fixture.ts --corpus).
  *
@@ -17,6 +17,7 @@ import {
   defaultExperimentFor,
   type FrontendManifest,
 } from "../../src/experiments/frontend-pairing.ts";
+import { PLAYBACK_LEAD_SEC } from "../../src/track-playback.ts";
 import { textToKlattTrack } from "../../src/tts-frontend.ts";
 import { renderDectalkVtmTrack, renderToInt16 } from "../rendering/dectalk-vtm-render.ts";
 import { readWavInt16 } from "./dectalk-vtm-fixture.ts";
@@ -24,8 +25,8 @@ import type { OracleCorpusDocument, OracleCorpusEntry } from "./types.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-/** test/harness/runtime.js: `state.ctx.currentTime + 0.05`. */
-export const PAGE_START_DELAY_SEC = 0.05;
+/** The page starts a track this long after the time its context is held at (src/track-playback.ts). */
+export const PAGE_START_DELAY_SEC = PLAYBACK_LEAD_SEC;
 /**
  * say.exe's `[:ra 180]` is DECtalk's default rate and the frontend's rate 1
  * (test/dectalk-vtm-frontend.test.ts). Another rate is given to the frontend

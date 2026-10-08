@@ -59,6 +59,25 @@ export type ScheduleEntry = {
   mode: "step" | "ramp";
 };
 
+/** A track compiled to automation events whose times count from `baseTime`. */
+export type PreparedTrack = {
+  /** Frames in the track; 0 is an empty track, which schedules nothing. */
+  frames: number;
+  /**
+   * The time the track's time 0 was compiled at: 0 when it was prepared
+   * without a start. The diagnostics compiling emitted carry times from it.
+   */
+  baseTime: number;
+  schedule: ScheduleEntry[];
+  /** The time of the track's last frame, in seconds from its start. */
+  duration: number;
+  /**
+   * What compiling reported (a plosive's step, say), with times from
+   * `baseTime`; passed on moved to the start when the track is scheduled.
+   */
+  telemetry: TelemetryEvent[];
+};
+
 export interface KlattScheduleCompilerOptions {
   sampleRate: number;
   semantics: SemanticsDocument;
@@ -98,6 +117,30 @@ export interface KlattInterpreter {
    * @param startTime AudioContext time when playback begins
    */
   scheduleTrack(track: KlattFrame[], startTime: number): void;
+
+  /**
+   * Compile a track's automation without a start time. All semantics
+   * evaluation happens here; it is the slow part of scheduling and needs no
+   * clock, so a real-time host does it before it chooses when the track
+   * starts.
+   */
+  prepareTrack(track: KlattFrame[]): PreparedTrack;
+
+  /**
+   * Schedule a prepared track to start at `startTime`: AudioParam writes
+   * only. What was scheduled before is cancelled first.
+   */
+  schedulePrepared(prepared: PreparedTrack, startTime: number): void;
+
+  /**
+   * End the track that was scheduled last, now: cancel what is still
+   * scheduled and put every parameter of its final frame at that frame's
+   * value. A track's final frame is its resting state (a dectalk-vtm track
+   * ends with `run` 0, which ends the node's run; a formant track ends
+   * silent), so whatever comes next starts from there. Nothing happens if no
+   * track has been scheduled.
+   */
+  endTrack(): void;
 
   /**
    * Cancel all scheduled parameter changes.
@@ -483,11 +526,22 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       params.set(target.nodeId, nodeParams);
     }
   }
+  // Telemetry of a compile is kept with the prepared track and passed on when
+  // it is scheduled, when its times can be given as context times.
+  let compiling: TelemetryEvent[] | null = null;
   const { compileSchedule } = createKlattScheduleCompiler({
     ...options,
     sampleRate: audioContext.sampleRate,
     bindingMap: bindings,
     diagnostics,
+    ...(options.telemetryHandler
+      ? {
+          telemetryHandler: (event: TelemetryEvent) => {
+            if (compiling) compiling.push(event);
+            else options.telemetryHandler?.(event);
+          },
+        }
+      : {}),
   });
   let trackDuration = 0;
   const scheduledParams = new Set<AudioParam>();
@@ -511,16 +565,87 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
    * Execute a pre-compiled schedule.
    * Pure AudioParam writes, no evaluation logic.
    */
-  function executeSchedule(schedule: ScheduleEntry[]): void {
+  function executeSchedule(schedule: ScheduleEntry[], baseTime: number): void {
     for (const { time, target, value, mode } of schedule) {
       const param = params.get(target.nodeId)!.get(target.paramName)!;
       if (mode === "ramp") {
-        param.linearRampToValueAtTime(value, time);
+        param.linearRampToValueAtTime(value, baseTime + time);
       } else {
-        param.setValueAtTime(value, time);
+        param.setValueAtTime(value, baseTime + time);
       }
       scheduledParams.add(param);
     }
+  }
+
+  // The entries of the last scheduled track's final frame: its resting state.
+  let finalEntries: ScheduleEntry[] = [];
+  // The context time of the last endTrack() that nothing has been scheduled after.
+  let endedAt = Number.NaN;
+
+  function prepareTrack(track: KlattFrame[], baseTime = 0): PreparedTrack {
+    if (!track || track.length === 0) {
+      return { frames: 0, baseTime, schedule: [], duration: 0, telemetry: [] };
+    }
+    // Compile entire schedule (all semantics evaluation happens here). An
+    // entry's time is the base time plus its frame's; scheduling moves it by
+    // the start less the base time, which is nothing when they are the same.
+    const telemetry: TelemetryEvent[] = [];
+    compiling = telemetry;
+    try {
+      const schedule = compileSchedule(track, baseTime);
+      return {
+        frames: track.length,
+        baseTime,
+        schedule,
+        duration: track[track.length - 1].time,
+        telemetry,
+      };
+    } finally {
+      compiling = null;
+    }
+  }
+
+  function schedulePrepared(prepared: PreparedTrack, startTime: number): void {
+    if (prepared.frames === 0) {
+      log("Empty track, nothing to schedule");
+      return;
+    }
+    if (
+      !Number.isFinite(startTime) ||
+      startTime < 0 ||
+      !Number.isFinite(startTime + prepared.duration)
+    ) {
+      const message =
+        "Invalid track timing: finite, nonnegative, ordered frame times and start time required";
+      diagnostics.error(
+        message,
+        { startTime, duration: prepared.duration, outcome: "track rejected" },
+        "interpreter.invalid_timing",
+      );
+      throw new Error(message);
+    }
+    log(`Scheduling ${prepared.schedule.length} entries starting at ${startTime.toFixed(3)}s`);
+    // endTrack() at this very time has already cancelled everything and put
+    // the resting values there; cancelling from the same time again would
+    // remove them and hold the values of the track that was ended.
+    if (endedAt !== audioContext.currentTime) cancelScheduled();
+    endedAt = Number.NaN;
+    trackDuration = prepared.duration;
+    const lastTime = prepared.schedule[prepared.schedule.length - 1]?.time ?? 0;
+    finalEntries = prepared.schedule.filter((entry) => entry.time === lastTime);
+
+    const shift = startTime - prepared.baseTime;
+    for (const event of prepared.telemetry) {
+      options.telemetryHandler?.({
+        ...event,
+        ...(typeof event.time === "number" ? { time: event.time + shift } : {}),
+      });
+    }
+
+    // Execute schedule (pure AudioParam writes, no logic)
+    executeSchedule(prepared.schedule, shift);
+
+    log(`Track scheduled: ${trackDuration.toFixed(3)}s duration`);
   }
 
   /**
@@ -531,22 +656,31 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       log("Empty track, nothing to schedule");
       return;
     }
+    // Compiled at its start time, so the times in what compiling reports are
+    // the context's; a bad start time rejects the track before anything is compiled.
+    schedulePrepared(prepareTrack(track, startTime), startTime);
+  }
 
-    const baseTime = startTime;
-    // Compile entire schedule (all semantics evaluation happens here)
-    const schedule = compileSchedule(track, baseTime);
-    log(`Scheduling ${track.length} frames starting at ${baseTime.toFixed(3)}s`);
+  function endTrack(): void {
+    if (finalEntries.length === 0) return;
     cancelScheduled();
-    trackDuration = track[track.length - 1].time;
-
-    // Execute schedule (pure AudioParam writes, no logic)
-    executeSchedule(schedule);
-
-    log(`Track scheduled: ${trackDuration.toFixed(3)}s duration, ${schedule.length} entries`);
+    const now = audioContext.currentTime;
+    endedAt = now;
+    for (const { target, value } of finalEntries) {
+      const param = params.get(target.nodeId)!.get(target.paramName)!;
+      // After cancelScheduled()'s hold of the current value at the same
+      // time: the later event at one time is the one that stands.
+      param.setValueAtTime(value, now);
+      scheduledParams.add(param);
+    }
+    finalEntries = [];
   }
 
   return {
     scheduleTrack,
+    prepareTrack,
+    schedulePrepared,
+    endTrack,
     cancelScheduled,
     getTrackDuration(): number {
       return trackDuration;

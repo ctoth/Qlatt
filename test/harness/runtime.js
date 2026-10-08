@@ -6,6 +6,7 @@ import { parseDiagConfig } from "../../src/harness-diagnostics/schema.ts";
 import { createKlattInterpreter } from "../../src/klatt-interpreter.ts";
 import { createKlattRuntime } from "../../src/klatt-runtime.ts";
 import { summarizeParallel, summarizeTrack } from "../../src/track-analysis.ts";
+import { contextGate, endPlayback, playTrack, untilAdvanced } from "../../src/track-playback.ts";
 import { textToKlattTrack, textToKlattTrackDetailed } from "../../src/tts-frontend";
 import { updateDiagnostics } from "./diagnostics.js";
 import { loadNewRuntimeConfig } from "./experiment.js";
@@ -16,6 +17,12 @@ import { state } from "./state.js";
 import { installTap, tapEnabled } from "./tap.js";
 import { handleTelemetry } from "./telemetry.js";
 
+// Context time Stop lets pass after ending a track before it suspends the
+// context: a few render blocks (128 frames is 2.7 ms at 48 kHz) and more than
+// one dectalk-vtm frame (6.4 ms), so the nodes have rendered the end.
+// engineering estimate
+const STOP_SETTLE_SEC = 0.02;
+
 export async function start() {
   await state.ctx.resume();
   await initializeNewRuntime();
@@ -23,6 +30,13 @@ export async function start() {
 }
 
 export async function stop() {
+  // Stop ends what is being spoken, so the next Speak starts a run of its
+  // own: the track's resting state is applied now, and the context is given
+  // a moment to render it before it is suspended (src/track-playback.ts).
+  if (state.newInterpreter && state.ctx.state === "running") {
+    endPlayback(state.newInterpreter);
+    await untilAdvanced(state.ctx, STOP_SETTLE_SEC);
+  }
   await state.ctx.suspend();
   state.status.textContent = "Status: suspended";
 }
@@ -166,29 +180,8 @@ export async function speakWithNewRuntime(track, baseF0) {
   const phrase = document.getElementById("phrase").value.trim();
 
   // Session setup (matching speak())
-  const startTime = state.ctx.currentTime + 0.05;
   state.sessionId += 1;
   const currentSessionId = state.sessionId;
-
-  // Clear state BEFORE scheduling (matching speak())
-  state.plstepEvents.length = 0;
-  state.plstepTotalCount = 0;
-  state.telemetry.clear();
-  state.telemetryMax.clear();
-
-  // Set run context BEFORE scheduling so telemetry handler can use it
-  state.lastRun = { phrase, baseF0, track, sessionId: currentSessionId, startTime };
-  state.runStartTime = startTime;
-
-  if (state.diagEngine) {
-    state.diagEngine.onPlayStart({
-      phrase,
-      baseF0,
-      track,
-      sessionId: currentSessionId,
-      startTime,
-    });
-  }
 
   state.status.textContent = `Status: speaking "${phrase}" (new runtime)`;
 
@@ -227,14 +220,50 @@ export async function speakWithNewRuntime(track, baseF0) {
     }
   }
 
+  // The track is compiled first; then, with the context held, what was
+  // playing is ended and this track is scheduled a lead after the held time,
+  // so its run cannot begin before all of its events exist and is a run of
+  // its own (src/track-playback.ts). The start time is known only then.
+  const startTime = await playTrack({
+    clock: state.ctx,
+    gate: contextGate(state.ctx),
+    interpreter: state.newInterpreter,
+    track,
+    beforeSchedule: (scheduledStart) => {
+      // Clear state BEFORE scheduling (matching speak())
+      state.plstepEvents.length = 0;
+      state.plstepTotalCount = 0;
+      state.telemetry.clear();
+      state.telemetryMax.clear();
+
+      // Set run context BEFORE scheduling so telemetry handler can use it
+      state.lastRun = {
+        phrase,
+        baseF0,
+        track,
+        sessionId: currentSessionId,
+        startTime: scheduledStart,
+      };
+      state.runStartTime = scheduledStart;
+
+      if (state.diagEngine) {
+        state.diagEngine.onPlayStart({
+          phrase,
+          baseF0,
+          track,
+          sessionId: currentSessionId,
+          startTime: scheduledStart,
+        });
+      }
+    },
+  });
+
   console.log("[QLATT] New runtime: scheduling track", {
     frames: track.length,
     startTime,
     duration: track[track.length - 1]?.time ?? 0,
     sessionId: currentSessionId,
   });
-
-  state.newInterpreter.scheduleTrack(track, startTime);
 
   const trackDuration = state.newInterpreter.getTrackDuration();
   console.log("[QLATT] Track summary", summarizeTrack(track));

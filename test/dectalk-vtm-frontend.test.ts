@@ -6,8 +6,8 @@
  * vocabulary check. Nothing here reads DECtalk's packets: the fixture supplies
  * only the WAV the stock say.exe wrote for the same text.
  *
- * The page starts a track 50 ms after the current time
- * (test/harness/runtime.js), which is not on the node's frame grid; the render
+ * The page starts a track a lead after the time its context is held at
+ * (src/track-playback.ts), which is not on the node's frame grid; the render
  * does the same.
  */
 
@@ -17,12 +17,13 @@ import { describe, expect, it } from "vitest";
 import { readVtmFixture } from "../scripts/oracle/dectalk-vtm-fixture";
 import { renderDectalkVtmTrack, renderToInt16 } from "../scripts/rendering/dectalk-vtm-render";
 import { defaultExperimentFor, type FrontendManifest } from "../src/experiments/frontend-pairing";
+import { PLAYBACK_LEAD_SEC } from "../src/track-playback";
 import { textToKlattTrack } from "../src/tts-frontend";
 
 const fixtureDir = path.join("crates", "dectalk-vtm", "tests", "fixtures");
 const FRONTEND = "dectalk-english";
-/** test/harness/runtime.js: `state.ctx.currentTime + 0.05`. */
-const PAGE_START_DELAY_SEC = 0.05;
+/** The page's lead from the time its context is held at to a track's start. */
+const PAGE_START_DELAY_SEC = PLAYBACK_LEAD_SEC;
 
 const frontendManifest = JSON.parse(
   readFileSync("public/rules/frontends/manifest.json", "utf8"),

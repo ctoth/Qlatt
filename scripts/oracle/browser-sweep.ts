@@ -12,8 +12,8 @@
  * What is rendered. scripts/rendering/browser-session.ts builds the app for
  * production with the offline render page as a second entry, serves it with
  * `vite preview` on its own port, and drives the page in a headless browser.
- * Each text is one OfflineAudioContext with a fresh runtime, scheduled 50 ms
- * in as the page's Speak does. It is NOT the page's own AudioContext: that
+ * Each text is one OfflineAudioContext with a fresh runtime, scheduled the
+ * page's lead in (src/track-playback.ts). It is NOT the page's own AudioContext: that
  * one runs in real time, keeps one runtime from utterance to utterance and
  * has spoken a warm-up phrase first; none of that is measured here.
  *
@@ -31,10 +31,11 @@
  * Usage:
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
  *     scripts/oracle/browser-sweep.ts [--corpus <list.json>] [--fixture-dir <dir>]
- *       [--rates 11025,48000] [--port 8817] [--server build|dev] [--base-f0 <Hz>]
+ *       [--rates 11025,48000] [--port <n>] [--server build|dev] [--base-f0 <Hz>]
  *       [--id <entry id>]... [--limit <n>] [--out <report.json>] [--verbose]
  *
- *   --port     the preview server's port on 127.0.0.1 (default 8817; 0 = any free)
+ *   --port     the server's port on 127.0.0.1. Default: any free port, so
+ *              that two sweeps can run at once.
  *   --server   "build" (default) or "dev", Vite's dev server
  *   --base-f0  a base F0 for the frontend, as a number in the page's "Base F0"
  *              box gives one (the box starts empty; it used to start at 110).
@@ -79,7 +80,7 @@ const flag = (name: string): string | undefined => flags(name)[0];
 const corpusPath = path.resolve(flag("corpus") ?? path.join(repoRoot, SWEEP_GATE_LIST_PATH));
 const fixtureDir = path.resolve(flag("fixture-dir") ?? path.join(repoRoot, SWEEP_GATE_FIXTURE_DIR));
 const rates = (flag("rates") ?? "11025,48000").split(",").map(Number);
-const port = Number(flag("port") ?? 8817);
+const port = Number(flag("port") ?? 0);
 const server = (flag("server") ?? "build") as "build" | "dev";
 const verbose = argv.includes("--verbose");
 // The frontend's base F0: none, so each voice keeps its own, as say.exe's
@@ -114,12 +115,18 @@ if (argv.includes("--live")) {
       scene = row.scene;
       console.log(`${scene}:`);
     }
+    // Where the page says the Speak spent its time before the run was scheduled.
+    const stageList = Object.entries(row.stagesMs ?? {})
+      .map(([stage, ms]) => `${stage} ${ms.toFixed(0)}`)
+      .join(", ");
+    const stages = stageList ? ` (${stageList})` : "";
     console.log(
       `  ${row.exact ? "EXACT  " : "differs"}  ${row.step}: ${row.id} (${row.voice}) at ${row.contextRate.toString()} Hz, ` +
         `${row.equal.toString()} of ${row.compared.toString()} grid samples equal` +
         `${row.firstMismatch >= 0 ? `, first differing DECtalk sample ${row.firstMismatch.toString()}` : ""}; ` +
-        `run of ${row.packetsRun.toString()} packets against ${row.packetsOracle.toString()} (${row.endReason}); ` +
+        `run of ${row.packetsRun.toString()} packets${row.cut ? ", cut short, of" : " against"} ${row.packetsOracle.toString()} (${row.endReason}); ` +
         `${row.lateFrames === null ? "no run of its own" : `started ${row.lateFrames.toString()} frames after the scheduled one`}; ` +
+        `${row.clickToFirstSampleMs === null ? "" : `${row.clickToFirstSampleMs.toFixed(0)} ms from the click to the first sample${stages}; `}` +
         `capture gaps in the run ${row.gapsInRun.toString()}, elsewhere ${row.gapsElsewhere.toString()}` +
         `${row.problems.length > 0 ? `; ${row.problems.join("; ")}` : ""}` +
         `${row.note ? `; ${row.note}` : ""}`,

@@ -346,6 +346,36 @@ describe("frame program validation", () => {
     expect(codes(TANK_SPEC)).toEqual([]);
   });
 
+  it("expands a function in a feature, total or output whatever its name", () => {
+    const spec = {
+      ...TANK_SPEC,
+      functions: {
+        is_open: {
+          params: ["item"],
+          body: "item.valve == 'open'",
+          description: "fixture",
+          citations: [CITATION],
+        },
+      },
+      frame_programs: {
+        tank: {
+          ...TANK_SPEC.frame_programs.tank,
+          features: {
+            ...TANK_SPEC.frame_programs.tank.features,
+            name: { value: "is_open(current)", edge: false },
+            kind: { value: "is_open(current)", edge: false },
+          },
+        },
+      },
+    };
+    expect(codes(spec)).toEqual([]);
+    const parsed = parseDslSpec(spec) as unknown as {
+      frame_programs: { tank: { features: Record<string, { value: string }> } };
+    };
+    expect(parsed.frame_programs.tank.features.name?.value).toBe("(current.valve == 'open')");
+    expect(parsed.frame_programs.tank.features.kind?.value).toBe("(current.valve == 'open')");
+  });
+
   it("requires citations on rule and program, and a declared tag on every assignment", () => {
     expect(codes(withRule("tank_approach", { citations: [] }))).toContain(
       "E_RULE_CITATIONS_REQUIRED rules.tank_approach.citations",

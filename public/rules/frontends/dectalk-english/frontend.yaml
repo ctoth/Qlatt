@@ -288,8 +288,8 @@ parameters:
       # (`allodurs[...] >> 1`).
       pressure:
         dummy_vowel_divisor: 2
-      # engineering estimate: how many Segments to scan for the next or the
-      # previous allophone. A stop is at most a closure, a release and an
+      # engineering estimate: how many Segments to scan back from a dummy
+      # vowel for its plosive. A stop is at most a closure, a release and an
       # aspiration Segment, so 8 is ample; the same bound as pipeline.yaml's
       # allophone helpers.
       unit_scan_items: 8

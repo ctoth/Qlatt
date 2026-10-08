@@ -352,6 +352,60 @@ phoneme_targets:
     - AO1
     - IH1
     Rd: 1.45
+  # Unstressed AY, AW and OY ("idea" AY0, "outrun" AW0, "ballpoint" OY0 in the
+  # dictionary): each is its strong target, parameter for parameter, as in
+  # qlatt-english. Engineering estimate; no source here gives a reduced
+  # target for a diphthong.
+  AY0:
+    F1: 850
+    F2: 1400
+    F3: 2750
+    B1: 130
+    B2: 100
+    B3: 190
+    AV: 64
+    dur: 180
+    type: vowel
+    low: true
+    dac: 2  # Recasens 1997
+    diph:
+    - AA1
+    - IH1
+    Rd: 1.45
+  AW0:
+    F1: 820
+    F2: 1400
+    F3: 2750
+    B1: 130
+    B2: 100
+    B3: 190
+    AV: 64
+    dur: 190
+    type: vowel
+    low: true
+    dac: 2  # Recasens 1997
+    diph:
+    - AE1
+    - UH1
+    Rd: 1.45
+  OY0:
+    F1: 590
+    F2: 920
+    F3: 2710
+    B1: 80
+    B2: 90
+    B3: 180
+    AV: 63
+    dur: 170
+    type: vowel
+    mid: true
+    back: true
+    is_back_rounded: true
+    dac: 2  # Recasens 1997
+    diph:
+    - AO1
+    - IH1
+    Rd: 1.45
   IY0:
     F1: 310
     F2: 2790

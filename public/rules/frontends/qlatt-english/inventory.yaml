@@ -140,9 +140,9 @@ duration_models:
     UW: {minimum_ms: 70, inherent_ms: 210, targets: ["UW1", "UW0"]}
     AH: {minimum_ms: 60, inherent_ms: 140, targets: ["AH1", "AH0"]}
     ER: {minimum_ms: 80, inherent_ms: 180, targets: ["ER1", "ER0"]}
-    AY: {minimum_ms: 150, inherent_ms: 250, targets: ["AY1"]}
-    AW: {minimum_ms: 100, inherent_ms: 260, targets: ["AW1"]}
-    OY: {minimum_ms: 150, inherent_ms: 280, targets: ["OY1"]}
+    AY: {minimum_ms: 150, inherent_ms: 250, targets: ["AY1", "AY0"]}
+    AW: {minimum_ms: 100, inherent_ms: 260, targets: ["AW1", "AW0"]}
+    OY: {minimum_ms: 150, inherent_ms: 280, targets: ["OY1", "OY0"]}
     SS: {minimum_ms: 60, inherent_ms: 105, targets: ["S"]}
     ZZ: {minimum_ms: 40, inherent_ms: 75, targets: ["Z"]}
     SH: {minimum_ms: 80, inherent_ms: 105, targets: ["SH"]}
@@ -400,6 +400,59 @@ phoneme_targets:
     B3: 130
     AV: 63
     dur: 360  # Peterson & Lehiste 1960 Table I, all CNC: 36.0 csec
+    type: vowel
+    mid: true
+    back: true
+    is_back_rounded: true
+    dac: 2  # Recasens 1997
+    diph:
+      - AO1
+      - IH1
+  # Unstressed AY, AW and OY ("idea" AY0, "outrun" AW0, "ballpoint" OY0 in the
+  # dictionary). No source here gives a reduced target for a diphthong, so each
+  # is its strong target, parameter for parameter: engineering estimate. It is
+  # what a missing unstressed target resolved to before targets had to be
+  # declared (docs/inventory-conventions.md). The duration rows scale it by
+  # lexical stress like any other vowel.
+  AY0:
+    F1: 660
+    F2: 1200
+    F3: 2550
+    B1: 100
+    B2: 70
+    B3: 200
+    AV: 64
+    dur: 310  # AY1's, engineering estimate
+    type: vowel
+    low: true
+    dac: 2  # Recasens 1997
+    diph:
+      - AA1
+      - IH1
+  AW0:
+    F1: 640
+    F2: 1230
+    F3: 2550
+    B1: 80
+    B2: 70
+    B3: 140
+    AV: 64
+    dur: 302  # AW1's, engineering estimate
+    type: vowel
+    low: true
+    dac: 2  # Recasens 1997
+    diph:
+      - AE1
+      - UH1
+  OY0:
+    F1: 550
+    F2: 960
+    F3: 2400
+    B1: 80
+    B2: 50
+    B3: 130
+    AV: 63
+    dur: 360  # OY1's, engineering estimate
     type: vowel
     mid: true
     back: true

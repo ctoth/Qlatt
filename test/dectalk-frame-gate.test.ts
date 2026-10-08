@@ -54,12 +54,11 @@ const F0_REASON =
   "not ported: the glottalization dip before a word-initial vowel (Ph_drwt02.c:2264-2275, " +
   "4040-4130). Not every remaining phrase has been traced to it";
 // phases/formant-drawing.yaml draws F1, F2, F3, B2 and B3 as phsettar() and
-// phdraw() do. Every phrase of one clause is exact; the phrases that still
-// differ all have more than one clause:
+// phdraw() do. The one phrase that still differs, carry-be-late, is the one
+// whose allophone durations are not DECtalk's:
 const FORMANT_REASON =
-  "inside an utterance DECtalk starts a second silence where a new clause opens (phsettar " +
-  "runs again for allophone 0), and here the pause between two clauses is one unit. No " +
-  "phrase with more than one clause has been checked beyond its first difference";
+  "the phrase's durations are not DECtalk's (its `length` and `segments` gaps), and every " +
+  "ramp is computed from them";
 const B1_REASON =
   "lowering blends Segment targets; DECtalk draws B1 from ph_setar.c and p_us_st1.c targets " +
   "with ph_draw.c:343-460's forward and backward smoothing, then delays it one frame " +

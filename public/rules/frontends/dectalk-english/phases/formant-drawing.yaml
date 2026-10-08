@@ -39,8 +39,8 @@ version: v1
 #   - W has FOBST in the ROM, so it is an obstruent in every test below.
 #
 # Not ported: the F1 the HLSYN section writes over this one around velars
-# (ph_draw.c:2937-3109); the second silence DECtalk starts where a new clause
-# opens inside an utterance (here the pause between two clauses is one unit).
+# (ph_draw.c:2937-3109). No phrase of one clause in the three oracle corpora
+# shows it in its packets.
 # -----------------------------------------------------------------------------
 functions:
   fd_is_dummy:
@@ -232,8 +232,18 @@ frame_programs:
     # ph_claus.c:754-757
     delay_frames: 1
     features:
-      # DECtalk's allophone 0 of a clause; here only the lead-in.
+      # DECtalk's allophone 0 of the utterance's first clause: the lead-in.
       initial: { value: "false", edge: true }
+      # A pause that a new clause follows is two allophones in DECtalk: the
+      # old clause's last silence, then the new clause's allophone 0, whose
+      # length depends on the clause's first phone (p_us_tim.c:229-232). Here
+      # it is one Segment; this is the frames of its second part, 0 when no
+      # clause follows.
+      reopen:
+        value: >-
+          fd_is_silence(current) && fd_next(current) != null
+            ? dectalk_clause_initial_pause_frames(fd_next(current)) : 0
+        edge: 0
       silence: { value: "fd_is_silence(current)", edge: true }
       dummy: { value: "fd_is_dummy(current)", edge: false }
       # p_us_rom.h us_featb bits. Silence has FSONOR alone.
@@ -324,6 +334,15 @@ frame_programs:
       sc_F2: { value: "fd_special(current, 'F2')", edge: 0 }
       sc_F3: { value: "fd_special(current, 'F3')", edge: 0 }
     registers:
+      # The allophone the frame belongs to, as DECtalk counts: tcum and durfon;
+      # whether this is its first frame; whether it is a clause's first
+      # silence (allophone 0); whether it is a last silence with another
+      # clause after it, so that its next allophone is a silence too.
+      tcum: 0
+      durfon: 0
+      start: false
+      opening: false
+      closing: false
       # tarlas, the table target, getbegtar() of the next phone, tarcur,
       # tarend, tarnex.
       las_F1: 0
@@ -482,6 +501,30 @@ frame_programs:
 
 rules:
   # ===========================================================================
+  # Which allophone the frame is in. One unit is one allophone, except the
+  # pause before a new clause, whose last `reopen` frames are the new clause's
+  # allophone 0: phsettar() runs again there, with silence on its left.
+  # ===========================================================================
+  fd_clock:
+    kind: frame
+    program: formants
+    set:
+      - register: opening
+        value: "u.initial || (u.reopen > 0 && f.index >= f.count - u.reopen)"
+        tag: formant_target
+      - { register: closing, value: "u.reopen > 0 && !r.opening", tag: formant_target }
+      - register: tcum
+        value: "u.reopen > 0 && r.opening ? f.index - (f.count - u.reopen) : f.index"
+        tag: formant_target
+      - register: durfon
+        value: "u.reopen > 0 ? (r.opening ? u.reopen : f.count - u.reopen) : f.count"
+        tag: formant_target
+      - { register: start, value: "r.tcum == 0", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_claus.c:395-470 (tcum, durfon and phsettar at each allophone)"
+      - "DECtalk 4.63 PH/p_us_tim.c:229-232 (the pause that opens a clause)"
+
+  # ===========================================================================
   # Targets: ph_setar.c:377-773.
   # ===========================================================================
 
@@ -502,7 +545,7 @@ rules:
   fd_last_target:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: las_F1, value: "r.end_F1", tag: formant_target }
       - { register: las_F2, value: "r.end_F2", tag: formant_target }
@@ -515,7 +558,7 @@ rules:
     kind: frame
     program: formants
     unit: "!u.silence"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: tgt_F1, value: "u.own_F1 != -1 ? u.own_F1 : (n.own_F1 > 0 ? n.own_F1 : (p.end_F1 > 0 ? p.end_F1 : params.policy.formant_drawing.parini.F1))", tag: formant_target }
       - { register: tgt_F2, value: "u.own_F2 != -1 ? u.own_F2 : (n.own_F2 > 0 ? n.own_F2 : (p.end_F2 > 0 ? p.end_F2 : params.policy.formant_drawing.parini.F2))", tag: formant_target }
@@ -560,8 +603,8 @@ rules:
   fd_table_targets_initial_silence:
     kind: frame
     program: formants
-    unit: "u.initial"
-    when: "f.index == 0"
+    unit: "u.silence"
+    when: "r.start && r.opening"
     set:
       - { register: tgt_F1, value: "n.own_F1 > 0 ? n.own_F1 : params.policy.formant_drawing.parini.F1", tag: formant_target }
       - { register: tgt_F2, value: "n.own_F2 > 0 ? n.own_F2 : params.policy.formant_drawing.parini.F2", tag: formant_target }
@@ -581,8 +624,8 @@ rules:
   fd_table_targets_final_silence:
     kind: frame
     program: formants
-    unit: "u.silence && !u.initial"
-    when: "f.index == 0"
+    unit: "u.silence"
+    when: "r.start && !r.opening"
     set:
       - { register: tgt_F1, value: "p.end_F1 > 0 ? p.end_F1 : params.policy.formant_drawing.parini.F1", tag: formant_target }
       - { register: tgt_F2, value: "p.end_F2 > 0 ? p.end_F2 : params.policy.formant_drawing.parini.F2", tag: formant_target }
@@ -617,8 +660,8 @@ rules:
   fd_clause_index_reset:
     kind: frame
     program: formants
-    unit: "u.initial"
-    when: "f.index == 0"
+    unit: "u.silence"
+    when: "r.start && r.opening"
     set:
       - { register: allophone_index, value: "0", tag: formant_target }
       - { register: input_index, value: "1", tag: formant_target }
@@ -631,8 +674,7 @@ rules:
   fd_allophone_index:
     kind: frame
     program: formants
-    unit: "!u.initial"
-    when: "f.index == 0"
+    when: "r.start && !r.opening"
     set:
       - { register: allophone_index, value: "r.allophone_index + 1", tag: formant_target }
     citations:
@@ -641,7 +683,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.is_k"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: k_index_4, value: "r.k_index_3", tag: formant_target }
       - { register: k_index_3, value: "r.k_index_2", tag: formant_target }
@@ -654,7 +696,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.is_k && u.doubled"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: k_index_4, value: "r.k_index_3", tag: formant_target }
       - { register: k_index_3, value: "r.k_index_2", tag: formant_target }
@@ -666,7 +708,7 @@ rules:
     kind: frame
     program: formants
     unit: "!u.silence"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: input_index, value: "r.input_index + u.input_phones", tag: formant_target }
     citations:
@@ -678,7 +720,7 @@ rules:
     program: formants
     unit: "!u.silence && n.silence"
     when: >-
-      f.index == 0 && (r.k_index_1 == r.allophone_index - 5 || r.k_index_2 == r.allophone_index - 5
+      r.start && !r.opening && (r.k_index_1 == r.allophone_index - 5 || r.k_index_2 == r.allophone_index - 5
         || r.k_index_3 == r.allophone_index - 5 || r.k_index_4 == r.allophone_index - 5)
     set:
       - { register: nxr_F2, value: "299", tag: formant_target }
@@ -689,9 +731,9 @@ rules:
   fd_final_silence_target_past_end:
     kind: frame
     program: formants
-    unit: "u.silence && !u.initial"
+    unit: "u.silence"
     when: >-
-      f.index == 0 && (r.k_index_1 == r.allophone_index - 6 || r.k_index_2 == r.allophone_index - 6
+      r.start && !r.opening && (r.k_index_1 == r.allophone_index - 6 || r.k_index_2 == r.allophone_index - 6
         || r.k_index_3 == r.allophone_index - 6 || r.k_index_4 == r.allophone_index - 6)
     set:
       - { register: tgt_F2, value: "299", tag: formant_target }
@@ -703,9 +745,9 @@ rules:
   fd_final_silence_next_target_past_end:
     kind: frame
     program: formants
-    unit: "u.silence && !u.initial"
+    unit: "u.silence"
     when: >-
-      f.index == 0 && (r.k_index_1 == r.allophone_index - 5 || r.k_index_2 == r.allophone_index - 5
+      r.start && !r.opening && (r.k_index_1 == r.allophone_index - 5 || r.k_index_2 == r.allophone_index - 5
         || r.k_index_3 == r.allophone_index - 5 || r.k_index_4 == r.allophone_index - 5)
     set:
       - { register: nxr_F2, value: "299", tag: formant_target }
@@ -719,12 +761,12 @@ rules:
     kind: frame
     program: formants
     unit: "!u.silence && !u.obstruent"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - register: shrink
         value: >-
-          f.count < u.inherent * 2
-            ? floor(params.policy.timing.fraction.one * f.count / u.inherent)
+          r.durfon < u.inherent * 2
+            ? floor(params.policy.timing.fraction.one * r.durfon / u.inherent)
             : params.policy.timing.fraction.one + params.policy.timing.fraction.one - 1
         tag: formant_ramp
       - { register: shrif, value: "floor(r.shrink / 2) + params.policy.timing.fraction.half", tag: formant_ramp }
@@ -738,7 +780,7 @@ rules:
   fd_target_coarticulated:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - register: cur_F1
         value: >-
@@ -769,7 +811,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.dip_F1 || u.dip_F2 || u.dip_F3"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - register: cur_F1
         value: >-
@@ -797,7 +839,7 @@ rules:
   fd_bandwidth_targets:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: cur_B2, value: "r.tgt_B2", tag: formant_target }
       - { register: cur_B3, value: "r.tgt_B3", tag: formant_target }
@@ -812,7 +854,7 @@ rules:
   fd_target_end:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - register: end_F1
         value: >-
@@ -847,7 +889,7 @@ rules:
   fd_next_target_coarticulated:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: nex_F1, value: "r.nxr_F1 + floor((r.end_F1 - r.nxr_F1) * params.policy.formant_drawing.coarticulation.next / 16384)", tag: formant_target }
       - { register: nex_F2, value: "r.nxr_F2 + floor((r.end_F2 - r.nxr_F2) * params.policy.formant_drawing.coarticulation.next / 16384)", tag: formant_target }
@@ -861,7 +903,7 @@ rules:
   fd_forward_default:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: bou_F1, value: "floor((r.las_F1 + r.cur_F1) / 2)", tag: formant_ramp }
       - { register: bou_F2, value: "floor((r.las_F2 + r.cur_F2) / 2)", tag: formant_ramp }
@@ -878,7 +920,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.sonorant && !u.soncon"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: dur_F1, value: "params.policy.timing.frames.ms45", tag: formant_ramp }
       - { register: dur_F2, value: "params.policy.timing.frames.ms45", tag: formant_ramp }
@@ -891,7 +933,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.sonorant && !u.soncon && p.soncon"
-    when: "f.index == 0"
+    when: "r.start && !r.opening"
     set:
       - { register: bou_F1, value: "floor((r.bou_F1 + r.las_F1) / 2) + (p.is_ll ? 80 : 0)", tag: formant_ramp }
       - { register: bou_F2, value: "floor((r.bou_F2 + r.las_F2) / 2)", tag: formant_ramp }
@@ -905,7 +947,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.sonorant && !u.soncon && !p.soncon && u.is_hx"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: bou_F1, value: "floor((r.bou_F1 + r.las_F1) / 2)", tag: formant_ramp }
       - { register: bou_F2, value: "floor((r.bou_F2 + r.las_F2) / 2)", tag: formant_ramp }
@@ -918,7 +960,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.sonorant && u.soncon"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: bou_F1, value: "p.soncon ? r.bou_F1 : floor((r.bou_F1 + r.cur_F1) / 2)", tag: formant_ramp }
       - { register: bou_F2, value: "p.soncon ? r.bou_F2 : floor((r.bou_F2 + r.cur_F2) / 2)", tag: formant_ramp }
@@ -934,14 +976,14 @@ rules:
     kind: frame
     program: formants
     unit: "u.silence"
-    when: "f.index == 0"
+    when: "r.start"
     set:
-      - { register: bou_F1, value: "u.initial ? r.nex_F1 : r.las_F1", tag: formant_ramp }
-      - { register: bou_F2, value: "u.initial ? r.nex_F2 : r.las_F2", tag: formant_ramp }
-      - { register: bou_F3, value: "u.initial ? r.nex_F3 : r.las_F3", tag: formant_ramp }
-      - { register: dur_F1, value: "f.count", tag: formant_ramp }
-      - { register: dur_F2, value: "f.count", tag: formant_ramp }
-      - { register: dur_F3, value: "f.count", tag: formant_ramp }
+      - { register: bou_F1, value: "r.opening ? r.nex_F1 : r.las_F1", tag: formant_ramp }
+      - { register: bou_F2, value: "r.opening ? r.nex_F2 : r.las_F2", tag: formant_ramp }
+      - { register: bou_F3, value: "r.opening ? r.nex_F3 : r.las_F3", tag: formant_ramp }
+      - { register: dur_F1, value: "r.durfon", tag: formant_ramp }
+      - { register: dur_F2, value: "r.durfon", tag: formant_ramp }
+      - { register: dur_F3, value: "r.durfon", tag: formant_ramp }
     citations:
       - "DECtalk 4.63 PH/p_us_st1.c:491-505"
   # 5 and 6. Between an obstruent and a sonorant the boundary comes from the
@@ -958,7 +1000,7 @@ rules:
     kind: frame
     program: formants
     unit: "!u.silence && p.endtyp == 4 && u.begtyp != 4"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
       - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
@@ -1009,7 +1051,7 @@ rules:
     kind: frame
     program: formants
     unit: "!u.silence && u.begtyp == 4 && p.endtyp != 4"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
       - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
@@ -1059,11 +1101,11 @@ rules:
     kind: frame
     program: formants
     unit: "!u.silence && u.obstruent"
-    when: "f.index == 0"
+    when: "r.start"
     set:
-      - { register: dur_F1, value: "u.plosive ? f.count : params.policy.timing.frames.ms20", tag: formant_ramp }
-      - { register: dur_F2, value: "u.plosive ? f.count : params.policy.timing.frames.ms30", tag: formant_ramp }
-      - { register: dur_F3, value: "u.plosive ? f.count : params.policy.timing.frames.ms30", tag: formant_ramp }
+      - { register: dur_F1, value: "u.plosive ? r.durfon : params.policy.timing.frames.ms20", tag: formant_ramp }
+      - { register: dur_F2, value: "u.plosive ? r.durfon : params.policy.timing.frames.ms30", tag: formant_ramp }
+      - { register: dur_F3, value: "u.plosive ? r.durfon : params.policy.timing.frames.ms30", tag: formant_ramp }
     citations:
       - "DECtalk 4.63 PH/p_us_st1.c:534-545"
   # Inside a nasal F2 and F3 take its whole length and F1 jumps. The lowered
@@ -1072,11 +1114,11 @@ rules:
     kind: frame
     program: formants
     unit: "!u.silence && u.nasal"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: dur_F1, value: "0", tag: formant_ramp }
-      - { register: dur_F2, value: "f.count", tag: formant_ramp }
-      - { register: dur_F3, value: "f.count", tag: formant_ramp }
+      - { register: dur_F2, value: "r.durfon", tag: formant_ramp }
+      - { register: dur_F3, value: "r.durfon", tag: formant_ramp }
     citations:
       - "DECtalk 4.63 PH/p_us_st1.c:547-555"
   # A short sonorant has shorter ramps, unless the phone before ends as an
@@ -1085,7 +1127,7 @@ rules:
     kind: frame
     program: formants
     unit: "!u.obstruent && p.endtyp != 4"
-    when: "f.index == 0"
+    when: "r.start && !r.opening"
     set:
       - { register: dur_F1, value: "r.dur_F1 > 0 ? floor(r.dur_F1 * r.shrif / 16384) + 1 : r.dur_F1", tag: formant_ramp }
       - { register: dur_F2, value: "r.dur_F2 > 0 ? floor(r.dur_F2 * r.shrif / 16384) + 1 : r.dur_F2", tag: formant_ramp }
@@ -1098,7 +1140,7 @@ rules:
   fd_bandwidth_forward_default:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: dur_B2, value: "u.voiced ? params.policy.timing.frames.ms40 : params.policy.timing.frames.ms20", tag: formant_ramp }
       - { register: dur_B3, value: "u.voiced ? params.policy.timing.frames.ms40 : params.policy.timing.frames.ms20", tag: formant_ramp }
@@ -1108,8 +1150,7 @@ rules:
   fd_bandwidth_forward_after_silence:
     kind: frame
     program: formants
-    unit: "p.silence"
-    when: "f.index == 0"
+    when: "r.start && (p.silence || r.opening)"
     set:
       - { register: bou_B2, value: "r.cur_B2 + 50", tag: formant_ramp }
       - { register: bou_B3, value: "r.cur_B3", tag: formant_ramp }
@@ -1121,7 +1162,7 @@ rules:
     kind: frame
     program: formants
     unit: "!p.silence && u.silence"
-    when: "f.index == 0"
+    when: "r.start && !r.opening"
     set:
       - { register: bou_B2, value: "r.las_B2 + 50", tag: formant_ramp }
       - { register: bou_B3, value: "r.las_B3", tag: formant_ramp }
@@ -1135,7 +1176,7 @@ rules:
     kind: frame
     program: formants
     unit: "p.nasal"
-    when: "f.index == 0"
+    when: "r.start && !r.opening"
     set:
       - { register: bou_B2, value: "p.is_n && u.begtyp != 1 ? r.cur_B2 + 60 : r.cur_B2", tag: formant_ramp }
       - { register: bou_B3, value: "r.cur_B3", tag: formant_ramp }
@@ -1146,7 +1187,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.nasal"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: dur_B2, value: "0", tag: formant_ramp }
       - { register: dur_B3, value: "0", tag: formant_ramp }
@@ -1157,13 +1198,13 @@ rules:
   fd_forward_limits:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
-      - { register: dur_F1, value: "min([r.dur_F1, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_F2, value: "min([r.dur_F2, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_F3, value: "min([r.dur_F3, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_B2, value: "min([r.dur_B2, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_B3, value: "min([r.dur_B3, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_F1, value: "min([r.dur_F1, r.durfon, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_F2, value: "min([r.dur_F2, r.durfon, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_F3, value: "min([r.dur_F3, r.durfon, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_B2, value: "min([r.dur_B2, r.durfon, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_B3, value: "min([r.dur_B3, r.durfon, params.policy.timing.frames.ms130])", tag: formant_ramp }
       - { register: bou_F1, value: "max([r.bou_F1, 0])", tag: formant_ramp }
       - { register: bou_F2, value: "max([r.bou_F2, 0])", tag: formant_ramp }
       - { register: bou_F3, value: "max([r.bou_F3, 0])", tag: formant_ramp }
@@ -1176,7 +1217,7 @@ rules:
   fd_forward_ramp:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: ftran_F1, value: "r.dur_F1 > 0 ? (r.bou_F1 - r.cur_F1) * 8 : 0", tag: formant_ramp }
       - { register: dft_F1, value: "r.ftran_F1 != 0 ? floor(r.ftran_F1 * params.policy.formant_drawing.divtab[r.dur_F1] / 16384) : r.dft_F1", tag: formant_ramp }
@@ -1202,7 +1243,7 @@ rules:
   fd_backward_default:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: bou_F1, value: "floor((r.end_F1 + r.nex_F1) / 2)", tag: formant_ramp }
       - { register: bou_F2, value: "floor((r.end_F2 + r.nex_F2) / 2)", tag: formant_ramp }
@@ -1218,7 +1259,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.sonorant"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: dur_F1, value: "params.policy.timing.frames.ms45", tag: formant_ramp }
       - { register: dur_F2, value: "params.policy.timing.frames.ms45", tag: formant_ramp }
@@ -1231,7 +1272,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.sonorant && !u.soncon && n.soncon"
-    when: "f.index == 0"
+    when: "r.start && !r.closing"
     set:
       - { register: bou_F1, value: "floor((r.bou_F1 + r.nex_F1) / 2) + (n.is_ll ? 80 : 0)", tag: formant_ramp }
       - { register: bou_F2, value: "floor((r.bou_F2 + r.nex_F2) / 2)", tag: formant_ramp }
@@ -1244,7 +1285,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.sonorant && !u.soncon && !n.soncon && n.is_hx"
-    when: "f.index == 0"
+    when: "r.start && !r.closing"
     set:
       - { register: bou_F1, value: "floor((r.bou_F1 + r.end_F1) / 2)", tag: formant_ramp }
       - { register: bou_F2, value: "floor((r.bou_F2 + r.end_F2) / 2)", tag: formant_ramp }
@@ -1257,7 +1298,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.sonorant && u.soncon"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: bou_F1, value: "n.soncon ? r.bou_F1 : floor((r.bou_F1 + r.end_F1) / 2)", tag: formant_ramp }
       - { register: bou_F2, value: "n.soncon ? r.bou_F2 : floor((r.bou_F2 + r.end_F2) / 2)", tag: formant_ramp }
@@ -1270,8 +1311,7 @@ rules:
   fd_backward_before_silence:
     kind: frame
     program: formants
-    unit: "n.silence"
-    when: "f.index == 0"
+    when: "r.start && (n.silence || r.closing)"
     set:
       - { register: dur_F1, value: "0", tag: formant_ramp }
       - { register: dur_F2, value: "0", tag: formant_ramp }
@@ -1283,7 +1323,7 @@ rules:
     kind: frame
     program: formants
     unit: "!n.silence && n.begtyp == 4 && u.endtyp != 4"
-    when: "f.index == 0"
+    when: "r.start && !r.closing"
     set:
       - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
       - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
@@ -1332,7 +1372,7 @@ rules:
     kind: frame
     program: formants
     unit: "!n.silence && u.endtyp == 4 && n.begtyp != 4"
-    when: "f.index == 0"
+    when: "r.start && !r.closing"
     set:
       - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
       - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
@@ -1382,18 +1422,18 @@ rules:
     kind: frame
     program: formants
     unit: "!n.silence && u.obstruent"
-    when: "f.index == 0"
+    when: "r.start"
     set:
-      - { register: dur_F1, value: "u.plosive ? f.count : params.policy.timing.frames.ms20", tag: formant_ramp }
-      - { register: dur_F2, value: "u.plosive ? f.count : params.policy.timing.frames.ms30", tag: formant_ramp }
-      - { register: dur_F3, value: "u.plosive ? f.count : params.policy.timing.frames.ms30", tag: formant_ramp }
+      - { register: dur_F1, value: "u.plosive ? r.durfon : params.policy.timing.frames.ms20", tag: formant_ramp }
+      - { register: dur_F2, value: "u.plosive ? r.durfon : params.policy.timing.frames.ms30", tag: formant_ramp }
+      - { register: dur_F3, value: "u.plosive ? r.durfon : params.policy.timing.frames.ms30", tag: formant_ramp }
     citations:
       - "DECtalk 4.63 PH/p_us_st1.c:903-920"
   fd_backward_shrink:
     kind: frame
     program: formants
     unit: "!u.obstruent && n.begtyp != 4"
-    when: "f.index == 0"
+    when: "r.start && !r.closing"
     set:
       - { register: dur_F1, value: "r.dur_F1 > 0 ? floor(r.dur_F1 * r.shrib / 16384) + 1 : r.dur_F1", tag: formant_ramp }
       - { register: dur_F2, value: "r.dur_F2 > 0 ? floor(r.dur_F2 * r.shrib / 16384) + 1 : r.dur_F2", tag: formant_ramp }
@@ -1405,7 +1445,7 @@ rules:
   fd_bandwidth_backward_default:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: dur_B2, value: "u.voiced ? params.policy.timing.frames.ms40 : params.policy.timing.frames.ms20", tag: formant_ramp }
       - { register: dur_B3, value: "u.voiced ? params.policy.timing.frames.ms40 : params.policy.timing.frames.ms20", tag: formant_ramp }
@@ -1414,8 +1454,7 @@ rules:
   fd_bandwidth_backward_before_silence:
     kind: frame
     program: formants
-    unit: "n.silence"
-    when: "f.index == 0"
+    when: "r.start && (n.silence || r.closing)"
     set:
       - { register: bou_B2, value: "r.end_B2 + 50", tag: formant_ramp }
       - { register: bou_B3, value: "r.end_B3", tag: formant_ramp }
@@ -1427,7 +1466,7 @@ rules:
     kind: frame
     program: formants
     unit: "!n.silence && u.silence"
-    when: "f.index == 0"
+    when: "r.start && !r.closing"
     set:
       - { register: bou_B2, value: "r.nex_B2 + 50", tag: formant_ramp }
       - { register: bou_B3, value: "r.nex_B3", tag: formant_ramp }
@@ -1439,7 +1478,7 @@ rules:
     kind: frame
     program: formants
     unit: "n.nasal"
-    when: "f.index == 0"
+    when: "r.start && !r.closing"
     set:
       - { register: bou_B2, value: "n.is_n && u.endtyp != 1 ? r.end_B2 + 60 : r.end_B2", tag: formant_ramp }
       - { register: bou_B3, value: "r.end_B3", tag: formant_ramp }
@@ -1450,7 +1489,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.nasal"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: dur_B2, value: "0", tag: formant_ramp }
       - { register: dur_B3, value: "0", tag: formant_ramp }
@@ -1461,18 +1500,18 @@ rules:
   fd_backward_limits:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
-      - { register: dur_F1, value: "min([r.dur_F1, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_F2, value: "min([r.dur_F2, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_F3, value: "min([r.dur_F3, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_B2, value: "min([r.dur_B2, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_B3, value: "min([r.dur_B3, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: tback_F1, value: "f.count - r.dur_F1", tag: formant_ramp }
-      - { register: tback_F2, value: "f.count - r.dur_F2", tag: formant_ramp }
-      - { register: tback_F3, value: "f.count - r.dur_F3", tag: formant_ramp }
-      - { register: tback_B2, value: "f.count - r.dur_B2", tag: formant_ramp }
-      - { register: tback_B3, value: "f.count - r.dur_B3", tag: formant_ramp }
+      - { register: dur_F1, value: "min([r.dur_F1, r.durfon, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_F2, value: "min([r.dur_F2, r.durfon, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_F3, value: "min([r.dur_F3, r.durfon, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_B2, value: "min([r.dur_B2, r.durfon, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_B3, value: "min([r.dur_B3, r.durfon, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: tback_F1, value: "r.durfon - r.dur_F1", tag: formant_ramp }
+      - { register: tback_F2, value: "r.durfon - r.dur_F2", tag: formant_ramp }
+      - { register: tback_F3, value: "r.durfon - r.dur_F3", tag: formant_ramp }
+      - { register: tback_B2, value: "r.durfon - r.dur_B2", tag: formant_ramp }
+      - { register: tback_B3, value: "r.durfon - r.dur_B3", tag: formant_ramp }
       - { register: bou_F1, value: "max([r.bou_F1, 0])", tag: formant_ramp }
       - { register: bou_F2, value: "max([r.bou_F2, 0])", tag: formant_ramp }
       - { register: bou_F3, value: "max([r.bou_F3, 0])", tag: formant_ramp }
@@ -1483,7 +1522,7 @@ rules:
   fd_backward_ramp:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: btran_F1, value: "0", tag: formant_ramp }
       - { register: btran_F2, value: "0", tag: formant_ramp }
@@ -1504,7 +1543,7 @@ rules:
   fd_no_override:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: tsp_B2, value: "0", tag: formant_override }
       - { register: tsp_B3, value: "0", tag: formant_override }
@@ -1517,7 +1556,7 @@ rules:
     kind: frame
     program: formants
     unit: "p.plosive && !p.voiced && u.sonorant"
-    when: "f.index == 0"
+    when: "r.start && !r.opening"
     set:
       - register: vot
         value: "u.stressed ? params.policy.articulation.vot.stressed : params.policy.articulation.vot.unstressed"
@@ -1528,14 +1567,14 @@ rules:
           : (u.after_s ? (u.after_s_cluster ? params.policy.articulation.vot.s_cluster : r.vot)
           : (!u.syllabic ? r.vot + params.policy.articulation.vot.nonsyllabic_bonus : r.vot))
         tag: formant_override
-      - { register: vot, value: "r.vot >= f.count ? f.count - 1 : r.vot", tag: formant_override }
+      - { register: vot, value: "r.vot >= r.durfon ? r.durfon - 1 : r.vot", tag: formant_override }
       - register: vot
         value: >-
-          r.vot > floor(f.count / params.policy.articulation.vot.syllabic_divisor)
+          r.vot > floor(r.durfon / params.policy.articulation.vot.syllabic_divisor)
             && u.syllabic && u.primary
-          ? floor(f.count / params.policy.articulation.vot.syllabic_divisor) : r.vot
+          ? floor(r.durfon / params.policy.articulation.vot.syllabic_divisor) : r.vot
         tag: formant_override
-      - { register: vot, value: "u.dummy ? f.count : r.vot", tag: formant_override }
+      - { register: vot, value: "u.dummy ? r.durfon : r.vot", tag: formant_override }
       - { register: tsp_B2, value: "r.vot", tag: formant_override }
       - { register: psp_B2, value: "r.cur_B2 + 70", tag: formant_override }
     citations:
@@ -1546,10 +1585,10 @@ rules:
     kind: frame
     program: formants
     unit: "u.burst && u.voiced && p.voiced && !n.voiced && !u.is_tx"
-    when: "f.index == 0"
+    when: "r.start"
     set:
-      - { register: tsp_B2, value: "f.count", tag: formant_override }
-      - { register: tsp_B3, value: "f.count", tag: formant_override }
+      - { register: tsp_B2, value: "r.durfon", tag: formant_override }
+      - { register: tsp_B3, value: "r.durfon", tag: formant_override }
       - { register: psp_B2, value: "150", tag: formant_override }
       - { register: psp_B3, value: "150", tag: formant_override }
     citations:
@@ -1565,7 +1604,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.dip_F1 || u.dip_F2 || u.dip_F3 || u.dip_B2 || u.dip_B3"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       # halfinhdr = inhdr_frames * NSAMP_FRAME >> 1, NSAMP_FRAME 71
       - { register: half_inherent, value: "floor(u.inherent * 71 / 2)", tag: formant_diphthong }
@@ -1576,7 +1615,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.dip_F1"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: line_F1, value: "0", tag: formant_diphthong }
       - { register: dipcum_F1, value: "0", tag: formant_diphthong }
@@ -1589,7 +1628,7 @@ rules:
       - &shr_4 { register: shr, value: "floor(floor((r.shrink + 16384) / 2) * (r.half_inherent - r.shr) / 16384)", tag: formant_diphthong }
       - &shr_5 { register: shr, value: "r.shr > r.half_max ? r.half_max : r.shr", tag: formant_diphthong }
       - &shr_6 { register: shr, value: "r.shr_fold == 1 ? r.half_max + r.shr : r.half_max - r.shr", tag: formant_diphthong }
-      - &shr_7 { register: shr, value: "r.shr_ms < 0 ? f.count : floor((r.shr < 71 ? 71 : r.shr) / 64)", tag: formant_diphthong }
+      - &shr_7 { register: shr, value: "r.shr_ms < 0 ? r.durfon : floor((r.shr < 71 ? 71 : r.shr) / 64)", tag: formant_diphthong }
       - { register: durlin_F1, value: "r.shr", tag: formant_diphthong }
       - { register: told_F1, value: "r.shr", tag: formant_diphthong }
     citations:
@@ -1598,7 +1637,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.dip_F2"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: line_F2, value: "0", tag: formant_diphthong }
       - { register: dipcum_F2, value: "0", tag: formant_diphthong }
@@ -1620,7 +1659,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.dip_F3"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: line_F3, value: "0", tag: formant_diphthong }
       - { register: dipcum_F3, value: "0", tag: formant_diphthong }
@@ -1642,7 +1681,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.dip_B2"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: line_B2, value: "0", tag: formant_diphthong }
       - { register: dipcum_B2, value: "0", tag: formant_diphthong }
@@ -1664,7 +1703,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.dip_B3"
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: line_B3, value: "0", tag: formant_diphthong }
       - { register: dipcum_B3, value: "0", tag: formant_diphthong }
@@ -1686,7 +1725,7 @@ rules:
   fd_no_diphthong:
     kind: frame
     program: formants
-    when: "f.index == 0"
+    when: "r.start"
     set:
       - { register: dipcum_F1, value: "0", tag: formant_diphthong }
       - { register: dipcum_F2, value: "0", tag: formant_diphthong }
@@ -1698,11 +1737,11 @@ rules:
       - { register: deldip_F3, value: "u.dip_F3 ? r.deldip_F3 : 0", tag: formant_diphthong }
       - { register: deldip_B2, value: "u.dip_B2 ? r.deldip_B2 : 0", tag: formant_diphthong }
       - { register: deldip_B3, value: "u.dip_B3 ? r.deldip_B3 : 0", tag: formant_diphthong }
-      - { register: durlin_F1, value: "u.dip_F1 ? r.durlin_F1 : f.count", tag: formant_diphthong }
-      - { register: durlin_F2, value: "u.dip_F2 ? r.durlin_F2 : f.count", tag: formant_diphthong }
-      - { register: durlin_F3, value: "u.dip_F3 ? r.durlin_F3 : f.count", tag: formant_diphthong }
-      - { register: durlin_B2, value: "u.dip_B2 ? r.durlin_B2 : f.count", tag: formant_diphthong }
-      - { register: durlin_B3, value: "u.dip_B3 ? r.durlin_B3 : f.count", tag: formant_diphthong }
+      - { register: durlin_F1, value: "u.dip_F1 ? r.durlin_F1 : r.durfon", tag: formant_diphthong }
+      - { register: durlin_F2, value: "u.dip_F2 ? r.durlin_F2 : r.durfon", tag: formant_diphthong }
+      - { register: durlin_F3, value: "u.dip_F3 ? r.durlin_F3 : r.durfon", tag: formant_diphthong }
+      - { register: durlin_B2, value: "u.dip_B2 ? r.durlin_B2 : r.durfon", tag: formant_diphthong }
+      - { register: durlin_B3, value: "u.dip_B3 ? r.durlin_B3 : r.durfon", tag: formant_diphthong }
     citations:
       - "DECtalk 4.63 PH/ph_setar.c:399, 411-412"
 
@@ -1714,7 +1753,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.dip_F1"
-    when: "f.index > r.durlin_F1 && r.durlin_F1 >= 0 && r.line_F1 + 1 < size(u.dv_F1)"
+    when: "r.tcum > r.durlin_F1 && r.durlin_F1 >= 0 && r.line_F1 + 1 < size(u.dv_F1)"
     set:
       - { register: cur_F1, value: "r.cur_F1 + floor(r.dipcum_F1 / 8)", tag: formant_diphthong }
       - { register: dipcum_F1, value: "0", tag: formant_diphthong }
@@ -1754,7 +1793,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.dip_F2"
-    when: "f.index > r.durlin_F2 && r.durlin_F2 >= 0 && r.line_F2 + 1 < size(u.dv_F2)"
+    when: "r.tcum > r.durlin_F2 && r.durlin_F2 >= 0 && r.line_F2 + 1 < size(u.dv_F2)"
     set:
       - { register: cur_F2, value: "r.cur_F2 + floor(r.dipcum_F2 / 8)", tag: formant_diphthong }
       - { register: dipcum_F2, value: "0", tag: formant_diphthong }
@@ -1794,7 +1833,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.dip_F3"
-    when: "f.index > r.durlin_F3 && r.durlin_F3 >= 0 && r.line_F3 + 1 < size(u.dv_F3)"
+    when: "r.tcum > r.durlin_F3 && r.durlin_F3 >= 0 && r.line_F3 + 1 < size(u.dv_F3)"
     set:
       - { register: cur_F3, value: "r.cur_F3 + floor(r.dipcum_F3 / 8)", tag: formant_diphthong }
       - { register: dipcum_F3, value: "0", tag: formant_diphthong }
@@ -1834,7 +1873,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.dip_B2"
-    when: "f.index > r.durlin_B2 && r.durlin_B2 >= 0 && r.line_B2 + 1 < size(u.dv_B2)"
+    when: "r.tcum > r.durlin_B2 && r.durlin_B2 >= 0 && r.line_B2 + 1 < size(u.dv_B2)"
     set:
       - { register: cur_B2, value: "r.cur_B2 + floor(r.dipcum_B2 / 8)", tag: formant_diphthong }
       - { register: dipcum_B2, value: "0", tag: formant_diphthong }
@@ -1867,7 +1906,7 @@ rules:
     kind: frame
     program: formants
     unit: "u.dip_B3"
-    when: "f.index > r.durlin_B3 && r.durlin_B3 >= 0 && r.line_B3 + 1 < size(u.dv_B3)"
+    when: "r.tcum > r.durlin_B3 && r.durlin_B3 >= 0 && r.line_B3 + 1 < size(u.dv_B3)"
     set:
       - { register: cur_B3, value: "r.cur_B3 + floor(r.dipcum_B3 / 8)", tag: formant_diphthong }
       - { register: dipcum_B3, value: "0", tag: formant_diphthong }
@@ -1907,29 +1946,29 @@ rules:
     program: formants
     set:
       - { register: dipcum_F1, value: "r.dipcum_F1 + r.deldip_F1", tag: formant_draw }
-      - { register: val_F1, value: "r.dipcum_F1 + r.ftran_F1 + (f.index >= r.tback_F1 ? r.btran_F1 : 0)", tag: formant_draw }
+      - { register: val_F1, value: "r.dipcum_F1 + r.ftran_F1 + (r.tcum >= r.tback_F1 ? r.btran_F1 : 0)", tag: formant_draw }
       - { register: ftran_F1, value: "r.ftran_F1 != 0 ? r.ftran_F1 - r.dft_F1 : 0", tag: formant_draw }
-      - { register: btran_F1, value: "f.index >= r.tback_F1 ? r.btran_F1 + r.dbt_F1 : r.btran_F1", tag: formant_draw }
+      - { register: btran_F1, value: "r.tcum >= r.tback_F1 ? r.btran_F1 + r.dbt_F1 : r.btran_F1", tag: formant_draw }
       - { register: val_F1, value: "floor(r.val_F1 / 8) + r.cur_F1", tag: formant_draw }
       - { register: dipcum_F2, value: "r.dipcum_F2 + r.deldip_F2", tag: formant_draw }
-      - { register: val_F2, value: "r.dipcum_F2 + r.ftran_F2 + (f.index >= r.tback_F2 ? r.btran_F2 : 0)", tag: formant_draw }
+      - { register: val_F2, value: "r.dipcum_F2 + r.ftran_F2 + (r.tcum >= r.tback_F2 ? r.btran_F2 : 0)", tag: formant_draw }
       - { register: ftran_F2, value: "r.ftran_F2 != 0 ? r.ftran_F2 - r.dft_F2 : 0", tag: formant_draw }
-      - { register: btran_F2, value: "f.index >= r.tback_F2 ? r.btran_F2 + r.dbt_F2 : r.btran_F2", tag: formant_draw }
+      - { register: btran_F2, value: "r.tcum >= r.tback_F2 ? r.btran_F2 + r.dbt_F2 : r.btran_F2", tag: formant_draw }
       - { register: val_F2, value: "floor(r.val_F2 / 8) + r.cur_F2", tag: formant_draw }
       - { register: dipcum_F3, value: "r.dipcum_F3 + r.deldip_F3", tag: formant_draw }
-      - { register: val_F3, value: "r.dipcum_F3 + r.ftran_F3 + (f.index >= r.tback_F3 ? r.btran_F3 : 0)", tag: formant_draw }
+      - { register: val_F3, value: "r.dipcum_F3 + r.ftran_F3 + (r.tcum >= r.tback_F3 ? r.btran_F3 : 0)", tag: formant_draw }
       - { register: ftran_F3, value: "r.ftran_F3 != 0 ? r.ftran_F3 - r.dft_F3 : 0", tag: formant_draw }
-      - { register: btran_F3, value: "f.index >= r.tback_F3 ? r.btran_F3 + r.dbt_F3 : r.btran_F3", tag: formant_draw }
+      - { register: btran_F3, value: "r.tcum >= r.tback_F3 ? r.btran_F3 + r.dbt_F3 : r.btran_F3", tag: formant_draw }
       - { register: val_F3, value: "floor(r.val_F3 / 8) + r.cur_F3", tag: formant_draw }
       - { register: dipcum_B2, value: "r.dipcum_B2 + r.deldip_B2", tag: formant_draw }
-      - { register: val_B2, value: "r.dipcum_B2 + r.ftran_B2 + (f.index >= r.tback_B2 ? r.btran_B2 : 0)", tag: formant_draw }
+      - { register: val_B2, value: "r.dipcum_B2 + r.ftran_B2 + (r.tcum >= r.tback_B2 ? r.btran_B2 : 0)", tag: formant_draw }
       - { register: ftran_B2, value: "r.ftran_B2 != 0 ? r.ftran_B2 - r.dft_B2 : 0", tag: formant_draw }
-      - { register: btran_B2, value: "f.index >= r.tback_B2 ? r.btran_B2 + r.dbt_B2 : r.btran_B2", tag: formant_draw }
+      - { register: btran_B2, value: "r.tcum >= r.tback_B2 ? r.btran_B2 + r.dbt_B2 : r.btran_B2", tag: formant_draw }
       - { register: val_B2, value: "floor(r.val_B2 / 8) + r.cur_B2", tag: formant_draw }
       - { register: dipcum_B3, value: "r.dipcum_B3 + r.deldip_B3", tag: formant_draw }
-      - { register: val_B3, value: "r.dipcum_B3 + r.ftran_B3 + (f.index >= r.tback_B3 ? r.btran_B3 : 0)", tag: formant_draw }
+      - { register: val_B3, value: "r.dipcum_B3 + r.ftran_B3 + (r.tcum >= r.tback_B3 ? r.btran_B3 : 0)", tag: formant_draw }
       - { register: ftran_B3, value: "r.ftran_B3 != 0 ? r.ftran_B3 - r.dft_B3 : 0", tag: formant_draw }
-      - { register: btran_B3, value: "f.index >= r.tback_B3 ? r.btran_B3 + r.dbt_B3 : r.btran_B3", tag: formant_draw }
+      - { register: btran_B3, value: "r.tcum >= r.tback_B3 ? r.btran_B3 + r.dbt_B3 : r.btran_B3", tag: formant_draw }
       - { register: val_B3, value: "floor(r.val_B3 / 8) + r.cur_B3", tag: formant_draw }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:367-402"
@@ -1938,8 +1977,8 @@ rules:
     kind: frame
     program: formants
     set:
-      - { register: out_B2, value: "r.tsp_B2 > 0 && f.index < r.tsp_B2 ? r.psp_B2 : r.val_B2", tag: formant_override }
-      - { register: out_B3, value: "r.tsp_B3 > 0 && f.index < r.tsp_B3 ? r.psp_B3 : r.val_B3", tag: formant_override }
+      - { register: out_B2, value: "r.tsp_B2 > 0 && r.tcum < r.tsp_B2 ? r.psp_B2 : r.val_B2", tag: formant_override }
+      - { register: out_B3, value: "r.tsp_B3 > 0 && r.tcum < r.tsp_B3 ? r.psp_B3 : r.val_B3", tag: formant_override }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:405-412"
   # The speaker's formant scale, frac4mul(F, fnscale) plus (4096 - fnscale)
@@ -1977,6 +2016,7 @@ phases:
   - name: formant_drawing
     after: [finalize]
     rules:
+      - fd_clock
       - fd_startup_last_target
       - fd_last_target
       - fd_table_targets

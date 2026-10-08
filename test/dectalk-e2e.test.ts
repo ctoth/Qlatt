@@ -1042,18 +1042,17 @@ describe("dectalk-english output clock", () => {
 // pseudojitter phases index one past its cosine table there (f0-filters,
 // dectalk_pseudojitter). What DECtalk's packets hold on that frame is checked
 // by the frame gate's dectalk-us-long-text-v1.
+//
+// The text is one-word sentences: a sentence's closing pause is 94 frames, so
+// 28 words run past frame 4096 where connected prose needs over a hundred, and
+// the frontend's time goes with the words. Frame 8192 is reached without any
+// text in test/f0-lowering.test.ts and in the kernel's own tests.
 describe("dectalk-english text longer than 4096 frames", () => {
-  const sentence =
-    "The man who lived in the small white house at the end of the long road that ran beside " +
-    "the river told the children who came to visit him every morning that he had once sailed " +
-    "around the world on a ship that carried tea and spices from the far east to the cold " +
-    "ports of the north.";
-
   it.each([
-    ["one sentence, short of it", sentence, false],
-    ["two sentences, past it", `${sentence} ${sentence}`, true],
-    ["four sentences, past 8192 too", `${sentence} ${sentence} ${sentence} ${sentence}`, true],
-  ])("speaks %s", (_name, text, reaches) => {
+    ["a text short of it", 12, false],
+    ["a text past it", 28, true],
+  ])("speaks %s", (_name, sentences, reaches) => {
+    const text = Array.from({ length: sentences }, () => "Go.").join(" ");
     const { track } = textToKlattTrackDetailed(text, undefined, 30, {
       frontendId: "dectalk-english",
     });

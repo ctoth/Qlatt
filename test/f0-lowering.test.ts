@@ -158,5 +158,10 @@ describe("renderLayeredF0 range and floor layers", () => {
       const contour = renderLayeredF0([level], model, 0.1, speaker, 0, 4090);
       expect(contour.slice(3, 8).map((point) => point.f0)).toEqual([1499, 1499, 1500, 1499, 1499]);
     });
+
+    it("renders frame 8192 the same way: the phases meet every 4096 frames", () => {
+      const contour = renderLayeredF0([level], model, 0.1, speaker, 0, 8186);
+      expect(contour.slice(3, 8).map((point) => point.f0)).toEqual([1499, 1499, 1500, 1499, 1499]);
+    });
   });
 });

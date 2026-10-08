@@ -46,6 +46,32 @@ rules:
   #   exclamation:  [0] with more than 2 words, else [2]
   #   question:     [3]
   # The tables are the ENGLISH_US block, Ph_drwt02.c:1293-1392.
+  #
+  # number_words is counted once for each clause, on its first phone; the
+  # rules below read it there.
+  dectalk_clause_number_words:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme != "SIL"
+        && (prev == null || prev.phoneme == "SIL")
+    apply:
+      - field: number_words
+        op: set
+        # One for each word that comes in with a word boundary; a verb-phrase
+        # start replaces that boundary, so its word is not counted, except the
+        # clause's first word. A clause-final "to", "and" or "for" has two
+        # boundaries and counts twice.
+        value: >-
+          (dectalk_word_start(current) ? 1.0 : 0.0)
+          + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')
+          + (dectalk_phrase_state(current) == 'word' ? 1.0 : 0.0)
+          + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_twice_counted_word_start')
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 ph_sort.c:439-441, 1462-1464 (number_words: reset for a clause, one more at each WBOUND)"
+      - "DECtalk 4.63 ph_sort.c:1055-1070 (a clause-final PPSTART becomes a second WBOUND)"
   dectalk_baseline_declination:
     kind: f0_layer
     select:
@@ -58,16 +84,8 @@ rules:
         look_ahead_where(current, 1000,
           'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
       mark: "clause_end == null ? '.' : clause_end.punctuationSymbol"
-      # number_words (ph_sort.c:439-441, 1462-1464): one for each word that
-      # comes in with a word boundary; a verb-phrase start replaces that
-      # boundary, so its word is not counted, except the clause's first word.
-      # A clause-final "to", "and" or "for" has two boundaries and counts
-      # twice (ph_sort.c:1055-1070).
-      words: >-
-        (dectalk_word_start(current) ? 1.0 : 0.0)
-        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')
-        + (dectalk_phrase_state(current) == 'word' ? 1.0 : 0.0)
-        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_twice_counted_word_start')
+      # number_words, as dectalk_clause_number_words counted it.
+      words: "get(current, 'number_words', 0.0)"
       # pht0draw is two routines, one for each sex (Ph_drwt02.c:771, 2445).
       male: "params.policy.voice.sex == 'male'"
       comma: "mark in [',', ';', ':']"
@@ -461,9 +479,13 @@ rules:
   # --------------------------------------------------------------------------
   dectalk_question_dip:
     kind: f0_layer
-    select:
+    select: &question_syllabic
       relation: Segment
-      where: { predicate: is_dectalk_syllabic }
+      # The syllabic before a question mark; tested here so that nothing
+      # else is worked out for the other syllabics.
+      where: >-
+        (current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'])
+        && get(current, 'rime_boundary', '') == 'question'
     define: &question_gesture
       stopped_at: >-
         look_back_where(current, 1000,
@@ -535,9 +557,7 @@ rules:
 
   dectalk_question_rise:
     kind: f0_layer
-    select:
-      relation: Segment
-      where: { predicate: is_dectalk_syllabic }
+    select: *question_syllabic
     define: *question_gesture
     constraint: "reached && get(current, 'rime_boundary', '') == 'question'"
     insert:

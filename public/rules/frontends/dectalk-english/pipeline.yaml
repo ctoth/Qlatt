@@ -623,6 +623,9 @@ relations:
       # The syllabic at which DECtalk's intonation routine leaves its loop
       # (Ph_inton2.c:809-819).
       intonation_stops: { kind: boolean }
+      # On a clause's first phone: DECtalk's number_words for the clause
+      # (prosody.yaml, dectalk_clause_number_words).
+      number_words: { kind: number }
       # State of DECtalk's duration routine for one allophone (p_us_tim.c), in
       # its own units: frames, and a percentage where 128 is 100%.
       clause_position: { kind: number }
@@ -873,6 +876,7 @@ phases:
       - dectalk_silence_carries_formants
   - name: prosody
     rules:
+      - dectalk_clause_number_words
       - dectalk_short_declarative_baseline_declination
       - dectalk_baseline_declination
       - dectalk_comma_baseline

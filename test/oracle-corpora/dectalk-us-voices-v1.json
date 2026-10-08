@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-voices-v1",
+  "defaults": {
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "paul-cat", "voiceId": "paul", "text": "cat.", "group": "voice-word" },
+    { "id": "betty-cat", "voiceId": "betty", "text": "cat.", "group": "voice-word" },
+    { "id": "harry-cat", "voiceId": "harry", "text": "cat.", "group": "voice-word" },
+    { "id": "frank-cat", "voiceId": "frank", "text": "cat.", "group": "voice-word" },
+    { "id": "dennis-cat", "voiceId": "dennis", "text": "cat.", "group": "voice-word" },
+    { "id": "kit-cat", "voiceId": "kit", "text": "cat.", "group": "voice-word" },
+    { "id": "ursula-cat", "voiceId": "ursula", "text": "cat.", "group": "voice-word" },
+    { "id": "rita-cat", "voiceId": "rita", "text": "cat.", "group": "voice-word" },
+    { "id": "wendy-cat", "voiceId": "wendy", "text": "cat.", "group": "voice-word" },
+    {
+      "id": "paul-fox",
+      "voiceId": "paul",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "voice-sentence"
+    },
+    {
+      "id": "betty-fox",
+      "voiceId": "betty",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "voice-sentence"
+    },
+    {
+      "id": "harry-fox",
+      "voiceId": "harry",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "voice-sentence"
+    },
+    {
+      "id": "frank-fox",
+      "voiceId": "frank",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "voice-sentence"
+    },
+    {
+      "id": "dennis-fox",
+      "voiceId": "dennis",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "voice-sentence"
+    },
+    {
+      "id": "kit-fox",
+      "voiceId": "kit",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "voice-sentence"
+    },
+    {
+      "id": "ursula-fox",
+      "voiceId": "ursula",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "voice-sentence"
+    },
+    {
+      "id": "rita-fox",
+      "voiceId": "rita",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "voice-sentence"
+    },
+    {
+      "id": "wendy-fox",
+      "voiceId": "wendy",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "voice-sentence"
+    }
+  ]
+}

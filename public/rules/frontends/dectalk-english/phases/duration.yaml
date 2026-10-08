@@ -92,8 +92,14 @@ rules:
       where: { predicate: is_dectalk_phone }
     define:
       name: dectalk_name(current)
-      position: "1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
-      following: "count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
+      # Both are running values: a phone takes them from the phone before it,
+      # and only the clause's first phone counts the clause.
+      before: dectalk_prev(current)
+      first: "before == null || before.phoneme == 'SIL'"
+      position: "first ? 1.0 : get(before, 'clause_position', 0.0) + 1.0"
+      length: >-
+        first ? 3.0 + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')
+        : get(before, 'clause_length', 0.0)
     apply:
       - field: timing_inherent_frames
         op: set
@@ -121,7 +127,7 @@ rules:
         tag: timing_setup
       - field: clause_length
         op: set
-        value: position + following + 2.0
+        value: length
         tag: timing_setup
     citations:
       - "DECtalk 4.63 p_us_tim.c:209-218 (durinh, durmin in frames; deldur 0; prcnt 128)"

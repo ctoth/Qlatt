@@ -22,7 +22,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { textToKlattTrackDetailed } from "../../src/tts-frontend";
-import { DECTALK_CORPUS_FILES } from "./allophones";
+import { DECTALK_FRAME_CORPUS_FILES } from "./allophones";
 import { DECTALK_NATIVE_SAMPLE_RATE_HZ, DECTALK_SAMPLES_PER_FRAME } from "./dectalk-trace";
 import { decodeFrameFixtureEntry } from "./frame-fixture";
 import { loadFrameFixture } from "./frame-gate";
@@ -53,7 +53,7 @@ const parameters = labels.map((label) => {
   return parameter;
 });
 
-const corpusFile = DECTALK_CORPUS_FILES.find((fileName) => {
+const corpusFile = DECTALK_FRAME_CORPUS_FILES.find((fileName) => {
   const document = JSON.parse(
     fs.readFileSync(path.join(repoRoot, "test", "oracle-corpora", fileName), "utf8"),
   ) as OracleCorpusDocument;
@@ -75,6 +75,8 @@ const { track } = textToKlattTrackDetailed(
   corpus.defaults?.transitionMs ?? 30,
   {
     frontendId: "dectalk-english",
+    // A voice corpus is spoken by its voice, as the gate does.
+    ...(corpus.defaults?.voiceId ? { speaker: corpus.defaults.voiceId } : {}),
   },
 );
 const events = track as readonly TrackEvent[];

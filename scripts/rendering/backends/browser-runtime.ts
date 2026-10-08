@@ -63,6 +63,14 @@ export const browserRuntimeBackend: RenderBackend = {
       );
     }
 
+    // The page's offline render driver takes no voice; rendering the default
+    // voice under another voice's name would be a wrong answer.
+    if (request.speaker) {
+      throw new Error(
+        `The browser render backend cannot select a voice (--speaker ${request.speaker}). Use --host node.`,
+      );
+    }
+
     const chromePath = request.browserExecutablePath ?? resolveChromePath();
     if (!chromePath) {
       throw new Error("No Chrome/Edge found. Set CHROME_PATH to continue.");

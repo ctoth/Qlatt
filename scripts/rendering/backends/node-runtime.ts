@@ -76,6 +76,7 @@ export function createNodeRuntimeBackend({
           {
             frontendId: request.frontendId,
             rate: request.rate,
+            ...(request.speaker ? { speaker: request.speaker } : {}),
             diagnostics,
           },
         );

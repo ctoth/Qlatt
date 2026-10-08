@@ -117,6 +117,8 @@ export interface FrameAssignment {
 export interface FrameRule {
   name: string;
   unit: string | null;
+  /** Runs in a unit's first frame only (`at: start`); `when` is still tested there. */
+  start: boolean;
   when: string | null;
   set: readonly FrameAssignment[];
   citations: readonly string[];
@@ -324,6 +326,7 @@ export function runFrameProgram(run: FrameProgramRun): FrameUnitResult[] {
     for (let index = 0; index < unit.frames; index += 1) {
       counters.index = index;
       for (const rule of active) {
+        if (rule.start && index !== 0) continue;
         if (
           rule.when !== null &&
           !truthy(

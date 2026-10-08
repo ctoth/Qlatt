@@ -43,6 +43,12 @@ export interface RenderRequest {
   phrase: string;
   baseF0?: number;
   frontendId: string;
+  /**
+   * A voice of the frontend's registry (`speakers.voices`), given to the
+   * frontend as the page gives its voice selection. Absent: the frontend's
+   * default voice.
+   */
+  speaker?: string;
   experimentId: string;
   engine: string;
   rate: number;

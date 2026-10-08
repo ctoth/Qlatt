@@ -51,6 +51,19 @@ describe("Item views in CEL", () => {
     expect(evaluateExpression("[current, next].exists(v, v.phoneme == 'AE')", context)).toBe(true);
   });
 
+  it("takes two views of one Item for equal, and views of two Items for different", () => {
+    const here = countingView({ id: "seg:3", phoneme: "AE" });
+    const again = countingView({ id: "seg:3", phoneme: "AE" });
+    const other = countingView({ id: "seg:4", phoneme: "AE" });
+    const context = { a: here.view, b: again.view, c: other.view };
+    expect(evaluateExpression("a == b", context)).toBe(true);
+    expect(evaluateExpression("a != b", context)).toBe(false);
+    expect(evaluateExpression("a == c", context)).toBe(false);
+    expect(evaluateExpression("a != c", context)).toBe(true);
+    expect(evaluateExpression("a == null", context)).toBe(false);
+    expect(here.enumerations() + again.enumerations() + other.enumerations()).toBe(0);
+  });
+
   it("does not enumerate a view to type it", () => {
     const first = countingView({ phoneme: "AE", duration: 120 });
     const second = countingView({ phoneme: "T", duration: 60 });

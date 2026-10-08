@@ -128,6 +128,11 @@ rules:
 | `g` | the unit's group, when the program declares groups |
 | `params` | rulepack parameters |
 
+A rule that sets something up when a unit begins says `at: start` instead of
+`when: "f.index == 0"`: it runs in the unit's first frame only, in its place
+among the other rules, and the machine evaluates nothing for it in later
+frames. `when` may be given as well and is tested in that first frame.
+
 `unit` may not read `r` or `f`. Both conditions must be true or false, not a
 number. The assignments of a rule run in order and later ones see earlier
 ones. A register keeps the type it was declared with, and the machine never

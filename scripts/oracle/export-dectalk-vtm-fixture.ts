@@ -34,7 +34,8 @@
  *
  * Without --corpus it regenerates the checked-in fixtures (CHECKED_IN below)
  * in crates/dectalk-vtm/tests/fixtures. With --corpus it exports every corpus
- * entry (voice paul, the corpus default rate) into --out-dir, which the Rust
+ * entry (the entry's `voiceId` and `rate`, else the corpus defaults, else
+ * voice paul) into --out-dir, which the Rust
  * test replays when DECTALK_VTM_FIXTURE_DIR points at it.
  */
 
@@ -43,6 +44,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { DECTALK_VOICES } from "./dectalk-vtm-fixture";
 import type { OracleCorpusDocument } from "./types";
 
 /**
@@ -141,6 +143,19 @@ if (tracedExe === stockExe) {
   throw new Error("DECTALK_VTM_SAY_EXE and DECTALK_SAY_EXE name the same file");
 }
 
+/**
+ * The letter of say.exe's `[:n<letter>]` command for a built-in voice: the
+ * voice's initial, as in the nine-voice text of CHECKED_IN above.
+ */
+function voiceLetter(voiceId: string, entryId: string): string {
+  if (!(DECTALK_VOICES as readonly string[]).includes(voiceId)) {
+    throw new Error(
+      `E_VTM_FIXTURE: ${entryId}: voice '${voiceId}' is not one of ${DECTALK_VOICES.join(", ")}`,
+    );
+  }
+  return voiceId[0];
+}
+
 function phrasesAndOutDir(): { phrases: Phrase[]; outDir: string } {
   const corpusFlag = flag("corpus");
   if (!corpusFlag) {
@@ -162,7 +177,7 @@ function phrasesAndOutDir(): { phrases: Phrase[]; outDir: string } {
     phrases: [
       ...corpus.entries.map((entry) => ({
         id: entry.id,
-        text: `[:np] [:ra ${Math.round(rate)}] ${entry.text}`,
+        text: `[:n${voiceLetter(entry.voiceId ?? corpus.defaults?.voiceId ?? "paul", entry.id)}] [:ra ${Math.round(entry.rate ?? rate)}] ${entry.text}`,
         hl: "full" as const,
       })),
       ALL_VOICES_FULL,

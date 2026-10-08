@@ -1,7 +1,7 @@
 {
-  "dennis-call-me": ["B1","AV","AP","A2","A3","A4","A5","AG","A2_CODE","F4"],
-  "dennis-hot-coffee": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","A2_CODE","F4"],
-  "dennis-sang-well": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","F4"],
-  "dennis-your-book": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","A2_CODE","F4"],
-  "dennis-judge": ["B1","AV","AP","A2","A3","A4","A6","AG","F4"]
+  "dennis-call-me": ["B1","AV","AP","A2","A3","A4","A5","A2_CODE"],
+  "dennis-hot-coffee": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_CODE"],
+  "dennis-sang-well": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "dennis-your-book": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_CODE"],
+  "dennis-judge": ["B1","AV","AP","A2","A3","A4","A6"]
 }

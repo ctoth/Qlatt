@@ -232,11 +232,15 @@ export function pronounce(
   // a digit from punits[], any other character from the typing table).
   // Measured on say.exe: "tom_west42" is T IY, OW, EH M, AH N D RR S K OW R,
   // D AH B EL Y UW, IY, EH S, T IY, F OR, T UW, with no pause among them.
+  // A word the dictionary holds is the dictionary's (the search comes first,
+  // LTS/ls_task.c:697): "_" alone is the entry `'^ndR#sk`or`, with its
+  // compound joint, and "Type _ now." is measured so.
   if (
     table?.letterPhones &&
     table.characterNames &&
     table.numberPhones &&
-    /^[a-z0-9_]*_[a-z0-9_]*$/.test(lowerWord)
+    /^[a-z0-9_]*_[a-z0-9_]*$/.test(lowerWord) &&
+    !dictLookup(lowerWord)
   ) {
     const letterPhones = table.letterPhones;
     const characterNames = table.characterNames;

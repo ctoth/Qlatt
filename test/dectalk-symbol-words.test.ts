@@ -58,16 +58,14 @@ describe("a symbol standing alone", () => {
     expect(wordsOf("Type > now.").length).toBe(4);
   });
 
-  it("is not spoken when it is not in the generated map", () => {
+  it("is in the generated map, as every dictionary entry with no letter and no digit is", () => {
     const map = readFileSync(
       "public/rules/frontends/dectalk-english/dictionary-abbreviations.yaml",
       "utf8",
     );
     const symbols = map.slice(map.indexOf("tn_symbol_words:"));
-    expect(symbols).toContain('"@": "word"');
-    // The marks the text rules treat themselves are not in it.
-    for (const mark of ["!", "?", ",", ".", "-", "/", "(", ")"]) {
-      expect(symbols).not.toContain(`"${mark}": "word"`);
+    for (const symbol of ["@", "#", "?", "!"]) {
+      expect(symbols).toContain(`"${symbol}": "word"`);
     }
   });
 });

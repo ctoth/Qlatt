@@ -1779,6 +1779,9 @@ export function lowerToFrames(
     );
     // Command times before the clamp at 0, in seconds, by command index.
     const unclampedCommandTimes: number[] = [];
+    // The time of the place each command is anchored to, without the
+    // anchor's offset, in seconds: where the phone it was issued on begins.
+    const commandAnchorTimes: number[] = [];
     const commands = f0ControlItems.map((item): F0LayerCommand => {
       const timeMs = utterance.resolveAnchorTime(item);
       const layer = item.get("layer");
@@ -1818,6 +1821,9 @@ export function lowerToFrames(
           ? timeMs + (usesSegmentalControllerClock ? 0 : initialSilenceMs)
           : timeMs;
       unclampedCommandTimes.push(outputTimeMs / 1000);
+      commandAnchorTimes.push(
+        (outputTimeMs - (utterance.temporalAnchor(item)?.offsetMs ?? 0)) / 1000,
+      );
       return {
         layer,
         time: Math.max(0, outputTimeMs) / 1000,
@@ -1868,7 +1874,12 @@ export function lowerToFrames(
         );
       let segmentalOwner = 0;
       for (const index of timeOrder) {
-        const time = unclampedCommandTimes[index] ?? 0;
+        // A command belongs to the clause of the phone it was issued on, not
+        // to the clause its own time falls in: one meant before its clause's
+        // first frame is clamped to that frame (make_f0_command,
+        // ph_inton1.c:1880-1883), it does not reach back into the clause
+        // before.
+        const time = commandAnchorTimes[index] ?? 0;
         let owner = 0;
         for (let clauseIndex = 0; clauseIndex < clauses.length; clauseIndex += 1) {
           if ((clauses[clauseIndex]?.startTime ?? 0) <= time + 1e-9) owner = clauseIndex;
@@ -1963,13 +1974,16 @@ export function lowerToFrames(
         const layerType = f0Model.layers[command.layer]?.type;
         if (layerType !== "persistent" && layerType !== "impulse" && layerType !== "glide")
           continue;
+        // The command's time before its clamp at 0: one meant before the
+        // first phone lies in the opening pause, not at the phone's start.
+        const acousticTime = unclampedCommandTimes[index] ?? command.time;
         const anchor =
-          controllerAnchors.find((candidate) => candidate.acousticTime >= command.time - 1e-9) ??
+          controllerAnchors.find((candidate) => candidate.acousticTime >= acousticTime - 1e-9) ??
           controllerAnchors.at(-1);
         if (!anchor) continue;
         const mappedTime = Math.max(
           0,
-          anchor.controllerTime - (anchor.acousticTime - command.time),
+          anchor.controllerTime - (anchor.acousticTime - acousticTime),
         );
         commands[index] = {
           ...command,

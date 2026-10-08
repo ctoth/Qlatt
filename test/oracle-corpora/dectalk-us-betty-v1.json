@@ -18,6 +18,11 @@
     { "id": "betty-yes-we-can", "text": "Yes, we can go now.", "group": "voice", "tags": ["two-clauses", "velars"], "expectedFocus": ["trace"] },
     { "id": "betty-voice-clear", "text": "Her voice is clear.", "group": "voice", "tags": ["r-vowels", "diphthongs", "clusters"], "expectedFocus": ["trace"] },
     { "id": "betty-judge", "text": "judge.", "group": "voice", "tags": ["affricate", "single-word"], "expectedFocus": ["trace"] },
-    { "id": "betty-look-boy", "text": "Look at the boy.", "group": "voice", "tags": ["laterals", "diphthongs", "velars"], "expectedFocus": ["trace"] }
+    { "id": "betty-look-boy", "text": "Look at the boy.", "group": "voice", "tags": ["laterals", "diphthongs", "velars"], "expectedFocus": ["trace"] },
+    { "id": "betty-red-car", "text": "Did you see the red car?", "group": "voice", "tags": ["question", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-lovely-day", "text": "What a lovely day!", "group": "voice", "tags": ["exclamation", "female-range"], "expectedFocus": ["trace"] },
+    { "id": "betty-stop-now", "text": "Stop now!", "group": "voice", "tags": ["exclamation", "two-words", "female-range"], "expectedFocus": ["trace"] },
+    { "id": "betty-eat-sing", "text": "First we eat, then we sing, and then we go home.", "group": "voice", "tags": ["comma", "consecutive-commas", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-long-morning", "text": "After a long and very busy morning, we rested.", "group": "voice", "tags": ["comma", "long-comma-clause", "female-baseline"], "expectedFocus": ["trace"] }
   ]
 }

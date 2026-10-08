@@ -1040,9 +1040,9 @@ rules:
   # "did you" -> "didja").  Source trigger:
   #   if ((next == USP_YU || next == USP_YX) && (sentstruc[n+1] & FSTRESS) IS_MINUS)
   #       T -> CH (goto endrul3);  D -> JH (goto endrul3)
-  # USP_YX resolves to US_Y (p_all_ph.h:80), USP_YU to US_YU; this port's
-  # inventory has only the plain glide Y, so "next in {YU,YX}" maps to
-  # next.phoneme == 'Y'.  The `goto endrul3` means palatalization is mutually
+  # USP_YX resolves to US_Y (p_all_ph.h:80), USP_YU to US_YU: the glide Y and
+  # the vowel YU of "you".  (sentstruc & FSTRESS) IS_MINUS is no stress bit at
+  # all.  The `goto endrul3` means palatalization is mutually
   # exclusive with (and takes precedence over) glottalization and flapping for
   # the same /t,d/; the pipeline orders these rules first to honor that.
   # -------------------------------------------------------------------------
@@ -1055,7 +1055,7 @@ rules:
       n: next
       ch: "target('CH')"
       next_unstressed_y: >-
-        n != null && n.phoneme == 'Y' && (!has(n.stress) || n.stress != 1)
+        n != null && n.phoneme in ['Y', 'YU'] && get(n, 'stress', 0) == 0
     constraint: next_unstressed_y
     splice:
       type: replace_range
@@ -1084,7 +1084,7 @@ rules:
       n: next
       jh: "target('JH')"
       next_unstressed_y: >-
-        n != null && n.phoneme == 'Y' && (!has(n.stress) || n.stress != 1)
+        n != null && n.phoneme in ['Y', 'YU'] && get(n, 'stress', 0) == 0
     constraint: next_unstressed_y
     splice:
       type: replace_range

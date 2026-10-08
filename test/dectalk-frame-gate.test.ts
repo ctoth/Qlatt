@@ -66,9 +66,9 @@ const repoRoot = path.resolve(__dirname, "..");
 const TIMING_REASON =
   "the phrase's allophones or their durations are not DECtalk's (KNOWN_GAPS in dectalk-oracle-gate.test.ts)";
 const F0_REASON =
-  "not traced. Not ported and possibly involved: phinton's Rule 5, the final fall on an " +
-  "unstressed clause-final syllable (Ph_inton2.c:1444-1526), and the carry of a glottal-stop " +
-  "gesture from one clause into the next (Ph_drwt02.c:1614 is reset only at a hard start)";
+  "not traced: F0 now differs only in sentences of the clause corpus. Known and not ported: a " +
+  "glottal-stop gesture carries from one clause into the next (Ph_drwt02.c:1614 is reset only " +
+  "at a hard start)";
 // phases/formant-drawing.yaml draws F1, F2, F3, B2 and B3 as phsettar() and
 // phdraw() do. The one phrase that still differs, carry-be-late, is the one
 // whose allophone durations are not DECtalk's.

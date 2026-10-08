@@ -394,6 +394,85 @@ function requirePolicyNumber(entry: unknown, path: string): number {
   return value;
 }
 
+function policyCitations(entry: unknown): string[] {
+  return isPlainObject(entry) && Array.isArray(entry.citations)
+    ? entry.citations.filter((citation): citation is string => typeof citation === "string")
+    : [];
+}
+
+/**
+ * The speaking rate in words per minute for a frontend whose rules take it
+ * that way, or undefined for a frontend that declares no such mapping.
+ *
+ * `policy.rate.words_per_minute` says what the API's rate multiplier means:
+ * `unit` is the words per minute of rate 1, and `minimum` and `maximum` are
+ * the limits. The rate is a whole number of words per minute, as the
+ * synthesizer the frontend follows keeps it. `ported_minimum` and
+ * `ported_maximum`, when given, bound the rates for which every rate-dependent
+ * rule of the original is in the rulepack; outside them the result is that of
+ * the rules that are.
+ */
+function speakingRateWordsPerMinute(
+  mapping: unknown,
+  relativeRate: number,
+  frontendId: string,
+  diagnostics: Diagnostics | null | undefined,
+  provenance: ProvenanceCollector,
+): number | undefined {
+  if (!isPlainObject(mapping)) return undefined;
+  const unit = requirePolicyNumber(mapping.unit, "rate.words_per_minute.unit");
+  const minimum = requirePolicyNumber(mapping.minimum, "rate.words_per_minute.minimum");
+  const maximum = requirePolicyNumber(mapping.maximum, "rate.words_per_minute.maximum");
+  const requested = relativeRate * unit;
+  const rounded = Math.round(requested);
+  const used = Math.min(maximum, Math.max(minimum, rounded));
+  const data = { frontendId, requestedWordsPerMinute: requested, usedWordsPerMinute: used };
+  // In messages the requested rate is shown to a thousandth; `data` has it whole.
+  const shown = Number(requested.toFixed(3));
+  if (used !== rounded) {
+    diagnostics?.warn(
+      `Speaking rate ${shown} words per minute is outside ${minimum} to ${maximum}; using ${used}`,
+      { ...data, minimum, maximum },
+      "W_RATE_CLAMPED",
+    );
+  } else if (Math.abs(requested - rounded) > 1e-9) {
+    diagnostics?.info(
+      `Speaking rate ${shown} words per minute is not a whole number; using ${used}`,
+      data,
+      "I_RATE_ROUNDED",
+    );
+  }
+  const portedMinimum = readPolicyNumber(mapping.ported_minimum);
+  const portedMaximum = readPolicyNumber(mapping.ported_maximum);
+  if (
+    (portedMinimum !== undefined && used < portedMinimum) ||
+    (portedMaximum !== undefined && used > portedMaximum)
+  ) {
+    diagnostics?.warn(
+      `Speaking rate ${used} words per minute is outside ${String(portedMinimum)} to ${String(portedMaximum)}, ` +
+        "the range whose rate-dependent rules are all in the rulepack",
+      { ...data, portedMinimum, portedMaximum },
+      "W_RATE_RULES_NOT_PORTED",
+    );
+  }
+  provenance.add({
+    stage: "frontend",
+    type: "speaking_rate_selected",
+    subject: `frontend:${frontendId}:speaking_rate`,
+    reason:
+      `Rate ${Number(relativeRate.toFixed(6))} is ${shown} words per minute (rate 1 is ${unit}); ` +
+      `policy.timing.speaking_rate_wpm = ${used}` +
+      (used !== rounded ? ` (limits ${minimum} to ${maximum})` : ""),
+    citations: [
+      ...policyCitations(mapping.unit),
+      ...policyCitations(mapping.minimum),
+      ...policyCitations(mapping.maximum),
+    ],
+    parents: [],
+  });
+  return used;
+}
+
 function policyRecord(spec: CompiledRulepack): Record<string, unknown> {
   return isPlainObject(spec.parameters.policy) ? spec.parameters.policy : {};
 }
@@ -820,10 +899,25 @@ function buildTextToKlattTrackDetailed(
   // No ceiling and no floor: the requested rate is the rate. Duration floors
   // (Klatt 1976 incompressible portion, projected by the duration_floor_* rules)
   // are the only limit on compression, and they are cited per phone.
-  const rate = referenceRate && referenceRate > 0 ? requestedRate / referenceRate : requestedRate;
+  const relativeRate =
+    referenceRate && referenceRate > 0 ? requestedRate / referenceRate : requestedRate;
+  // A frontend whose rules take the speaking rate in words per minute
+  // (policy.rate.words_per_minute) gets the rate as the policy value
+  // policy.timing.speaking_rate_wpm and nothing else: its own rules say what a
+  // rate does, so the generic effects below (uniform duration scaling, F0
+  // range, transition time, undershoot) see a rate of 1.
+  const wordsPerMinute = speakingRateWordsPerMinute(
+    recordOrEmpty(policyRecord(spec).rate).words_per_minute,
+    relativeRate,
+    frontendId,
+    options.diagnostics,
+    provenance,
+  );
+  const rate = wordsPerMinute === undefined ? relativeRate : 1;
   const speakerPolicy = {
     speaker: resolvedSpeaker,
     ...(voiceRuleFields ? { voice: voiceRuleFields } : {}),
+    ...(wordsPerMinute === undefined ? {} : { timing: { speaking_rate_wpm: wordsPerMinute } }),
   };
   const graphInventory = {
     spec: resources.inventory,

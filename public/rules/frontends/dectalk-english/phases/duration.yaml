@@ -23,9 +23,8 @@ version: v1
 # Not ported: the FHAT_ENDS branch of Rule 7 (p_us_tim.c:497-508), which needs
 # the hat pattern from the intonation rules.
 rules:
-  # Rule 1 (p_us_tim.c:225-277). The pause at a clause boundary. The values are
-  # DECtalk's own at the corpus speaking rate (nfcomma and nfperiod scaled by
-  # sprat1), in frames.
+  # Rule 1 (p_us_tim.c:225-277). The pause at a clause boundary: nfcomma or
+  # nfperiod frames, scaled by the speaking rate (dectalk_pause_frames).
   #
   # DECtalk times one clause at a time, and each clause is silence, phones,
   # silence: after a clause's closing pause comes the next clause's opening
@@ -40,7 +39,7 @@ rules:
       - field: duration
         op: set
         value: >-
-          ((current.punctuationSymbol in [',', ';', ':']
+          (dectalk_pause_frames(current.punctuationSymbol in [',', ';', ':']
             ? params.policy.timing.pause_frames.comma
             : params.policy.timing.pause_frames.period)
            + (next != null ? dectalk_clause_initial_pause_frames(next) : 0.0))
@@ -49,6 +48,7 @@ rules:
     citations:
       - "DECtalk 4.63 p_us_tim.c:225-277 Rule 1 (pause durations depend on syntax)"
       - "DECtalk 4.63 p_us_tim.c:229-232 (clause-initial pause of 4 or 5 frames)"
+      - "DECtalk 4.63 p_us_tim.c:261-268 (each pause scaled by sprat1, at least 2 frames)"
 
   # The pause that opens the utterance, as the synthesizer hears it: the first
   # clause's opening pause less the one frame DECtalk never sends. Computed in
@@ -244,7 +244,18 @@ rules:
         plosive && dectalk_has(la, 'nasal') && stress == 0.0 ? F.p10
         : (plosive && la_name == 'S' ? F.p60 : F.p70)
       # --- Final duration ---
-      computed: "floor(prcnt * (durinh - durmin) / 128.0) + durmin + deldur"
+      # 895-901: the multiplied part with the minimum back in.
+      durxx: "floor(prcnt * (durinh - durmin) / 128.0) + durmin"
+      # 911-925: at a rate other than 180 the multiplied part is scaled by
+      # sprat2 and rounded up, and the added part by sprat1. The test is on
+      # sprat0, so every rate above 550 would behave as 550 does.
+      wpm: params.policy.timing.speaking_rate_wpm
+      rated: >-
+        dectalk_sprat0(wpm) != params.policy.timing.rate_scaling.neutral && durxx != 0.0
+      computed: >-
+        rated
+          ? dectalk_mlsh1(durxx, dectalk_sprat2(wpm)) + 1.0 + dectalk_mlsh1(deldur, dectalk_sprat1(wpm))
+          : durxx + deldur
       positive: "computed < 0.0 ? 1.0 : computed"
       capped: >-
         name == 'HX' && positive > params.policy.timing.hx_max_frames
@@ -830,8 +841,9 @@ rules:
     citations:
       - "DECtalk 4.63 p_us_tim.c:879-889 Rule 24 (before NX: N60PRCNT)"
 
-  # 895-941: the duration in frames. A negative result becomes 1 (the C tests
-  # `< 0`, so 0 passes through), and HX is capped.
+  # 895-941: the duration in frames, with the speaking rate applied (911-925;
+  # a duration fixed earlier skips that, as its `goto break3` does). A negative
+  # result becomes 1 (the C tests `< 0`, so 0 passes through), and HX is capped.
   dectalk_timing_frames:
     kind: scalar
     select:
@@ -845,6 +857,7 @@ rules:
         tag: allophone_duration
     citations:
       - "DECtalk 4.63 p_us_tim.c:895-941 (durxx = ((prcnt * (durinh - durmin)) >> 7) + durmin + deldur)"
+      - "DECtalk 4.63 p_us_tim.c:911-925 (at a rate other than 180: durxx = mlsh1(durxx, sprat2) + 1, deldur = mlsh1(deldur, sprat1))"
 
   # A phone lasts its allophone's frames. A stop's closure is handled below.
   dectalk_allophone_duration:
@@ -881,25 +894,6 @@ rules:
     citations:
       - "DECtalk 4.63 p_us_tim.c:940 (one duration per stop allophone; the burst is drawn inside it)"
       - "Engineering estimate: a release longer than its allophone leaves the closure one frame"
-
-  # The frontend API's `rate` option is a multiplier on speaking rate, not
-  # DECtalk's words-per-minute setting. DECtalk's own rate scaling
-  # (p_us_tim.c:910-925, sprat1 and sprat2, inactive at 180 wpm) is not ported;
-  # this divides every speech duration by the multiplier instead.
-  dectalk_rate_scaling:
-    kind: scalar
-    select:
-      relation: Segment
-      where: current.phoneme != 'SIL'
-    constraint: params.policy.duration.rate_scale != 1.0
-    apply:
-      - field: duration
-        op: mul
-        value: 1.0 / params.policy.duration.rate_scale
-        tag: rate
-    citations:
-      - "Qlatt frontend API: options.rate is a speaking-rate multiplier applied to segment durations"
-      - "Engineering estimate: uniform scaling stands in for DECtalk 4.63 p_us_tim.c:910-925 (sprat2 on the multiplied part, sprat1 on the added part)"
 
   # The release gives up whatever the one-frame closure above could not.
   dectalk_stop_release_duration:

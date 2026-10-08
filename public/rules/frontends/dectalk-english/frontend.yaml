@@ -629,12 +629,29 @@ parameters:
       # ph_defs.h:465-506 NxxPRCNT: fractions of 16384. N90PRCNT has the
       # N85PRCNT value in the header (ph_defs.h:488); it is kept.
       fraction: { one: 16384, half: 8192, p10: 1638, p25: 4096, p35: 5734, p60: 9831, p70: 11469, p80: 13108, p85: 13927, p90: 13927, p120: 19661, p150: 24576 }
-      # p_us_tim.c:319 compares the speaking rate with 160 words per minute.
-      # The oracle corpus is rendered at [:ra 180].
+      # DECtalk's sprate: the speaking rate in words per minute, 180 unless
+      # the caller asks for another (rate.words_per_minute below sets it from
+      # the API's rate). Read by the rate functions of pipeline.yaml
+      # (dectalk_sprat0, dectalk_sprat1, dectalk_sprat2), by Rule 3
+      # (p_us_tim.c:319) and by the slow-rate phrase rule (ph_sort.c:1171).
       speaking_rate_wpm: 180
-      # Rule 1 pause lengths in frames, as DECtalk records them at this rate:
-      # 16 after a comma, 94 after a period, question mark or exclamation mark
-      # (nfcomma and nfperiod scaled by sprat1, p_us_tim.c:240-268).
+      # init_timing's constants (ph_timng.c:238-302), by the names used there.
+      # sprat0 is the rate, with the part above `linear_above` halved and a
+      # floor of `sprat0_minimum` (SLOWTALK, ph_timng.c:262-267). sprat1 and
+      # sprat2 are fractions of 16384: (offset - sprat0) / divisor.
+      rate_scaling:
+        neutral: 180
+        linear_above: 250
+        sprat0_minimum: 75
+        sprat1_fast: { offset: 400, divisor: 220 }
+        sprat1_slow: { offset: 300, divisor: 120 }
+        sprat2_fast: { offset: 460, divisor: 280 }
+        # p_us_tim.c:266-268: a pause is never shorter than this, in frames.
+        pause_minimum_frames: 2
+      # Rule 1 pause lengths in frames before the rate is applied (nfcomma and
+      # nfperiod, ph_claus.c:225-240): 16 after a comma, 94 after a period,
+      # question mark or exclamation mark. p_us_tim.c:263-268 scales each by
+      # sprat1, which is 1 at 180 words per minute.
       # Every clause also opens with a pause: 4 frames before a phone that is
       # voiced, an obstruent or a plosive, 5 before any other (in US English
       # /h/ and the glottal stop), p_us_tim.c:229-232.
@@ -1064,6 +1081,30 @@ parameters:
         - "DECtalk 4.63 PH/ph_setar.c:421, 559-567, 629; ph_defs.h:466-469"
         - "DECtalk 4.63 PH/ph_vset.c:712; P_us_vdf1.h us_paul"
     rate:
+      # What the API's rate means for this frontend: DECtalk's speaking rate in
+      # words per minute, written to timing.speaking_rate_wpm. With this
+      # declared the rules are the only thing a rate changes; the three
+      # generic effects below are given a rate of 1 (src/tts-frontend.ts).
+      words_per_minute:
+        unit:
+          value: 180
+          citations:
+            - "DECtalk 4.63 PH/phinit.c:119 and PH/ph_task.c:318 (sprate = 180, the rate when none is asked for)"
+        minimum:
+          value: 50
+          citations:
+            - "DECtalk 4.63 CMD/cm_defs.h:62-66 MIN_SPEAKING_RATE 50 (ACCESS32, dectalkf.h:162-165); CMD/cm_copt.c:2346-2352"
+            - "DECtalk 4.63 PH/ph_task.c:711-712 (SLOWTALK, dectalkf.h:172-174: sprate = deadstop(rate, 50, 550))"
+        maximum:
+          value: 550
+          citations:
+            - "DECtalk 4.63 PH/ph_task.c:711-712 (SLOWTALK: sprate = deadstop(rate, 50, 550))"
+        # Rates whose rate-dependent rules are all in this rulepack. Not ported:
+        # below 100, ph_aloph.c:500 and 1104 and p_us_st1.c:169; above 300,
+        # p_us_st1.c:1429; 350 and above, ph_draw.c:4072; below 75,
+        # p_us_tim.c:906-908.
+        ported_minimum: 100
+        ported_maximum: 300
       undershoot_coefficient:
         value: 0.3
         citations:
@@ -1079,11 +1120,10 @@ parameters:
           - Broad & Fertig 1970 (formant transition durations scale inversely with rate)
     duration:
       rate_scale: 1.0
-      # Qlatt's frontend API already passes a normalized rate multiplier
-      # (textToKlattTrack options.rate), not DECtalk's raw WPM control value.
-      # Keep the reference at 1.0 so UI sliders and script callers behave as
-      # documented; DECtalk WPM mapping belongs in an adapter layer instead.
-      # Engineering boundary: multiplier normalization happens before frontend rules.
+      # The frontend API's rate (textToKlattTrack options.rate) is a multiplier
+      # of the neutral rate. With the reference at 1.0 it is taken as given;
+      # rate.words_per_minute above turns it into DECtalk's words per minute,
+      # and rate_scale stays 1 for this frontend.
       rate_reference: 1.0
       # Duration floors consumed by the duration_floor_* rules. The canonical
       # magnitudes live in output.lowering.timeline.duration_floors (also read by

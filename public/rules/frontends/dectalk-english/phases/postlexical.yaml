@@ -291,6 +291,14 @@ rules:
   #
   # The first rule writes on each such Word what became of its start: 'pp'
   # kept, 'word' dropped.
+  #
+  # Not ported, because here it changes nothing: at 140 words per minute or
+  # slower the phone sort turns every remaining PPSTART into a VPSTART
+  # (ph_sort.c:1171-1177). These three words are entered after a word
+  # boundary, so the phone before them gets the word boundary's bits with the
+  # phrase start's added (ph_sort.c:1487-1496), and FWBNEXT 0140 with FVPNEXT
+  # 0240 is the same FCBNEXT 0340 as with FPPNEXT 0200 (ph_defs.h:255-260).
+  # A phrase start entered without a word boundary before it would differ.
   # -------------------------------------------------------------------------
   dectalk_pp_start_state:
     kind: scalar

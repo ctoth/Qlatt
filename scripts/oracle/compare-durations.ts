@@ -77,9 +77,20 @@ function dectalkAllophones(tracePath: string): Allophone[] {
   return groups.slice(1);
 }
 
-function qlattAllophones(text: string, transitionMs: number): Allophone[] {
+/**
+ * `rateWpm` is the entry's say.exe `[:ra]` value; the frontend takes a
+ * multiplier of its neutral rate, which is 180 words per minute.
+ */
+function qlattAllophones(
+  text: string,
+  transitionMs: number,
+  rateWpm: number,
+  voice: string | undefined,
+): Allophone[] {
   const { utterance } = textToKlattTrackDetailed(text, undefined, transitionMs, {
     frontendId: "dectalk-english",
+    rate: rateWpm / 180,
+    ...(voice ? { speaker: voice } : {}),
   });
   const allophones: Allophone[] = [];
   for (const item of utterance.relation("Segment").listItems()) {
@@ -106,7 +117,12 @@ for (const run of runs) {
     if (!fs.existsSync(tracePath)) throw new Error(`E_ORACLE_TRACE_MISSING: ${tracePath}`);
     const dectalk = dectalkAllophones(tracePath);
     try {
-      const qlatt = qlattAllophones(entry.text, corpus.defaults?.transitionMs ?? 30);
+      const qlatt = qlattAllophones(
+        entry.text,
+        entry.transitionMs ?? corpus.defaults?.transitionMs ?? 30,
+        entry.rate ?? corpus.defaults?.rate ?? 180,
+        entry.voiceId ?? corpus.defaults?.voiceId,
+      );
       results.push({
         ...base,
         status: dectalk.length === qlatt.length ? "compared" : "count_mismatch",

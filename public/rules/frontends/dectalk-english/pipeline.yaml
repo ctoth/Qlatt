@@ -34,16 +34,70 @@ functions:
     description: Whether DECtalk's feature word for the Segment's allophone has the named bit.
     citations:
       - "DECtalk 4.63 p_us_rom.h us_featb; ph_romi.c:214-225 phone_feature"
+  # --- The speaking rate (ph_timng.c init_timing) --------------------------
+  # Three numbers from the rate in words per minute. The argument is always
+  # params.policy.timing.speaking_rate_wpm; integer division is a floor here
+  # because every operand is positive.
+  dectalk_sprat0:
+    params: [wpm]
+    body: >-
+      max([params.policy.timing.rate_scaling.sprat0_minimum,
+           wpm > params.policy.timing.rate_scaling.linear_above
+             ? params.policy.timing.rate_scaling.linear_above
+               + floor((wpm - params.policy.timing.rate_scaling.linear_above) / 2.0)
+             : wpm])
+    description: DECtalk's sprat0, the rate with its part above 250 halved and a floor of 75.
+    citations:
+      - "DECtalk 4.63 PH/ph_timng.c:238-247 (sprat0 = 250 + ((sprate - 250) >> 1) above 250)"
+      - "DECtalk 4.63 PH/ph_timng.c:262-267 (SLOWTALK: sprat0 is at least 75)"
+  dectalk_sprat1:
+    params: [wpm]
+    body: >-
+      dectalk_sprat0(wpm) >= params.policy.timing.rate_scaling.neutral
+        ? floor(16384.0
+            * (params.policy.timing.rate_scaling.sprat1_fast.offset - dectalk_sprat0(wpm) < 0.0
+                ? 1.0 : params.policy.timing.rate_scaling.sprat1_fast.offset - dectalk_sprat0(wpm))
+            / params.policy.timing.rate_scaling.sprat1_fast.divisor)
+        : floor(16384.0
+            * (params.policy.timing.rate_scaling.sprat1_slow.offset - dectalk_sprat0(wpm))
+            / params.policy.timing.rate_scaling.sprat1_slow.divisor)
+    description: DECtalk's sprat1, the fraction of 16384 that scales pauses and the added part of a duration.
+    citations:
+      - "DECtalk 4.63 PH/ph_timng.c:273-288 (sprat1 = FRAC_ONE * (400 - sprat0) / 220 at 180 and above, FRAC_ONE * (300 - sprat0) / 120 below; a negative numerator is 1)"
+      - "DECtalk 4.63 PH/ph_defs.h:793 muldv; ph_defs.h:418 FRAC_ONE 16384"
+  dectalk_sprat2:
+    params: [wpm]
+    body: >-
+      dectalk_sprat0(wpm) > params.policy.timing.rate_scaling.neutral
+        ? floor(16384.0
+            * (params.policy.timing.rate_scaling.sprat2_fast.offset - dectalk_sprat0(wpm) <= 0.0
+                ? 1.0 : params.policy.timing.rate_scaling.sprat2_fast.offset - dectalk_sprat0(wpm))
+            / params.policy.timing.rate_scaling.sprat2_fast.divisor)
+        : floor((dectalk_sprat1(wpm) + 16384.0) / 2.0)
+    description: DECtalk's sprat2, the fraction of 16384 that scales the multiplied part of a duration.
+    citations:
+      - "DECtalk 4.63 PH/ph_timng.c:290-302 (sprat2 = FRAC_ONE * (460 - sprat0) / 280 above 180, a numerator of 0 or less is 1; otherwise (sprat1 + FRAC_ONE) >> 1)"
+  # A pause of Rule 1 at the current rate, from its length at 180.
+  dectalk_pause_frames:
+    params: [frames]
+    body: >-
+      max([params.policy.timing.rate_scaling.pause_minimum_frames,
+           dectalk_mlsh1(frames, dectalk_sprat1(params.policy.timing.speaking_rate_wpm))])
+    description: Frames of a clause pause after the speaking rate is applied; never fewer than two.
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:261-268 (dpause = mlsh1(dpause, sprat1); a pause shorter than 2 frames is 2)"
   # Rule 1's pause at the head of a clause, from the clause's first phone.
   dectalk_clause_initial_pause_frames:
     params: [item]
     body: >-
-      dectalk_has(item, 'voiced') || dectalk_has(item, 'obstruent') || dectalk_has(item, 'plosive')
-        ? params.policy.timing.pause_frames.clause_initial
-        : params.policy.timing.pause_frames.clause_initial_other
+      dectalk_pause_frames(
+        dectalk_has(item, 'voiced') || dectalk_has(item, 'obstruent') || dectalk_has(item, 'plosive')
+          ? params.policy.timing.pause_frames.clause_initial
+          : params.policy.timing.pause_frames.clause_initial_other)
     description: Frames of the pause DECtalk puts before a clause whose first phone is the given Segment.
     citations:
       - "DECtalk 4.63 p_us_tim.c:229-232 (dpause = 4 when the next phone is FVOICD, FOBST or FPLOSV, else 5)"
+      - "DECtalk 4.63 p_us_tim.c:261-268 (the pause is scaled by the speaking rate)"
   # A phone as the duration routine sees it when looking AHEAD from an earlier
   # phone. The routine turns the /t/ of [nt] into [d] while it times the /n/
   # (p_us_tim.c:627-638), so the vowel and the /n/ before it still saw a /t/.
@@ -681,8 +735,11 @@ relations:
     scalars:
       # A duration is a whole number of DECtalk frames times the frame period,
       # set once per allophone by dectalk_allophone_duration; nothing rounds or
-      # floors it afterwards. ph_defs.h NF640MS = 100 frames is the longest.
-      duration: { unit: ms, max: 640 }
+      # floors it afterwards. The longest is a sentence pause with the next
+      # clause's opening pause at the slowest rate: sprat0 75 gives sprat1
+      # 30720 (ph_timng.c:262-288), so mlsh1(94, 30720) + mlsh1(5, 30720) =
+      # 176 + 9 = 185 frames of 6.4 ms.
+      duration: { unit: ms, max: 1184 }
   # Word over Syllable over Segment. A Segment's Word carries what the lexicon
   # says of the word: form_classes and phrase_start.
   SylStructure:
@@ -763,7 +820,6 @@ phases:
       - dectalk_allophone_duration
       - dectalk_stop_closure_duration
       - dectalk_stop_release_duration
-      - dectalk_rate_scaling
     resolve_scalars: [duration]
   - name: postlexical
     # Order encodes DECtalk ph_aloph.c source precedence (each /t,d/ rule has goto

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-rates-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "fox-120", "rate": 120, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate" },
+    { "id": "fox-140", "rate": 140, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate" },
+    { "id": "fox-160", "rate": 160, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate" },
+    { "id": "fox-161", "rate": 161, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate" },
+    { "id": "fox-240", "rate": 240, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate" },
+    { "id": "fox-250", "rate": 250, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate" },
+    { "id": "fox-300", "rate": 300, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate" },
+    { "id": "comma-120", "rate": 120, "text": "When the sun sets, the birds fly home.", "group": "rate" },
+    { "id": "comma-140", "rate": 140, "text": "When the sun sets, the birds fly home.", "group": "rate" },
+    { "id": "comma-160", "rate": 160, "text": "When the sun sets, the birds fly home.", "group": "rate" },
+    { "id": "comma-240", "rate": 240, "text": "When the sun sets, the birds fly home.", "group": "rate" },
+    { "id": "comma-300", "rate": 300, "text": "When the sun sets, the birds fly home.", "group": "rate" },
+    {
+      "id": "pp-120",
+      "rate": 120,
+      "text": "I went to the store for bread and milk.",
+      "group": "rate"
+    },
+    {
+      "id": "pp-140",
+      "rate": 140,
+      "text": "I went to the store for bread and milk.",
+      "group": "rate"
+    },
+    {
+      "id": "betty-fox-120",
+      "voiceId": "betty",
+      "rate": 120,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "rate"
+    },
+    {
+      "id": "betty-fox-300",
+      "voiceId": "betty",
+      "rate": 300,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "rate"
+    }
+  ]
+}

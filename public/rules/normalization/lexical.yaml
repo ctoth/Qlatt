@@ -42,6 +42,20 @@ maps:
     unlisted: "[^\\w\\s'\uE000]"
     whitespace: '\s+'
 functions:
+  # Two digits as phonemic text, from the frontend's number phone lists:
+  # "05" zero five, "15" fifteen, "30" thirty, "31" thirty one.
+  tn_phonemic_two_digits:
+    params: [first, second]
+    body: >-
+      first == '0'
+        ? vocabulary('tn_number_phonemes', 'units.0') + maps.tn_phonemic_text.word_boundary
+          + vocabulary('tn_number_phonemes', 'units.' + second)
+        : first == '1'
+          ? vocabulary('tn_number_phonemes', 'teens.' + second)
+          : vocabulary('tn_number_phonemes', 'tens.' + first)
+            + (second == '0' ? '' : maps.tn_phonemic_text.word_boundary
+              + vocabulary('tn_number_phonemes', 'units.' + second))
+    citations: ['DECtalk 4.63 LTS/l_us_pr1.c:297-315 (ls_proc_do_2_digits: pzero and the unit after a 0, pteens[] after a 1, ptens[] and the unit otherwise)']
   tn_clean_text:
     params: [text]
     body: >-
@@ -238,6 +252,46 @@ rules:
       output: "[{'type': 'terminal', 'text': current.payload.token}]"
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:3181-3513, 3622-3652, 3747-3825 (money, times and numbers are read from the word as written, by the number routines)"
+  # A clock time (tn_clock_time_source) written out as one word of phonemic
+  # text, as DECtalk's time routine speaks it: the hour, a verb-phrase start,
+  # the minutes unless they are "00", and the seconds after another
+  # verb-phrase start. The phone lists are the frontend's generated map
+  # tn_number_phonemes; ")" is the verb-phrase start and a space the word
+  # boundary in the frontend's phonemic text (maps.tn_phonemic_text). The
+  # word boundary at the end is the one letter-to-sound sends after a word
+  # it has read.
+  tn_clock_time:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'clock_time' && current.outputType == 'source'"
+    define:
+      hour: "current.payload.hour"
+      s1: "get(current.payload, 's1', '')"
+      hourText: >-
+        size(hour) == 1
+          ? vocabulary('tn_number_phonemes', 'units.' + hour)
+          : tn_phonemic_two_digits(substring(hour, 0, 1), substring(hour, 1, 2))
+      minuteText: >-
+        current.payload.m1 == '0' && current.payload.m2 == '0'
+          ? ''
+          : tn_phonemic_two_digits(current.payload.m1, current.payload.m2)
+      secondText: >-
+        s1 == null || s1 == ''
+          ? ''
+          : maps.tn_phonemic_text.verb_phrase + tn_phonemic_two_digits(s1, current.payload.s2)
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open + hourText + maps.tn_phonemic_text.verb_phrase
+            + minuteText + secondText + maps.tn_phonemic_text.word_boundary
+            + maps.tn_phonemic_text.close}]
+    citations:
+      - "DECtalk 4.63 LTS/l_us_pr1.c:1182-1209 (ls_proc_do_time: the hour from punits[] or by ls_proc_do_2_digits, VPSTART, the minutes unless 00, VPSTART and the seconds)"
+      - "DECtalk 4.63 LTS/l_us_pr1.c:297-315 (ls_proc_do_2_digits)"
+      - "DECtalk 4.63 LTS/ls_task.c:3622-3625 (the word boundary is sent after the time)"
   # A pause the text parser asks for (tn_parser_pause_source) is the comma: the
   # phoneme the parser names is the one a written comma gives.
   tn_parser_pause:
@@ -295,4 +349,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_clock_time, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]

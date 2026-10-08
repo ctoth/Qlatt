@@ -8,6 +8,7 @@
     "/rules/frontends/dectalk-english/inventory.yaml",
     "/rules/frontends/dectalk-english/lts-table.json",
     "/rules/frontends/dectalk-english/normalization-policy.yaml",
+    "/rules/frontends/dectalk-english/number-phonemes.yaml",
     "/rules/frontends/dectalk-english/phases/annotation.yaml",
     "/rules/frontends/dectalk-english/phases/articulation.yaml",
     "/rules/frontends/dectalk-english/phases/duration.yaml",

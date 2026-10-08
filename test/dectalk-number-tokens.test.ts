@@ -13,25 +13,47 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { numberLogTokens, numberSymbolTokens } from "../scripts/oracle/number-log";
 import {
+  NUMBER_WBOUND,
   type NumberPhones,
   speakDigits,
   speakNumberToken,
   storeSyntacticMarkers,
 } from "../src/g2p/table-number";
+import { normalizeText } from "../src/tts-frontend";
 
 const entries = (
   JSON.parse(
     readFileSync("test/fixtures/dectalk-oracle/dectalk-us-number-tokens-v1.phonemes.json", "utf8"),
   ) as { entries: Record<string, string | null> }
 ).entries;
-const lists = (
-  JSON.parse(readFileSync("public/rules/frontends/dectalk-english/lts-table.json", "utf8")) as {
-    numberPhones: NumberPhones;
-  }
-).numberPhones;
+const { numberPhones: lists, phonemeCharacters } = JSON.parse(
+  readFileSync("public/rules/frontends/dectalk-english/lts-table.json", "utf8"),
+) as { numberPhones: NumberPhones; phonemeCharacters: (number | null)[] };
+
+/**
+ * A text that the frontend's text rules write out as one word of phonemic
+ * text (a clock time: lexical rule tn_clock_time), as the symbols its
+ * characters stand for; null for any other text. The word boundary the text
+ * ends in is the one letter-to-sound sends after a word, which a one-word log
+ * does not have.
+ */
+const composed = (text: string): number[] | null => {
+  const written = normalizeText(text, "dectalk-english").replace(/ \.$/, "");
+  if (!/^\x81[^\x81\x82]+\x82$/.test(written)) return null;
+  const symbols = [...written.slice(1, -1)].map((char) => {
+    const symbol = phonemeCharacters[char.charCodeAt(0)];
+    if (symbol === null || symbol === undefined) {
+      throw new Error(`no symbol for '${char}' in the phonemic text of '${text}'`);
+    }
+    return symbol;
+  });
+  return symbols.at(-1) === NUMBER_WBOUND ? symbols.slice(0, -1) : symbols;
+};
 
 const spoken = (text: string): number[] | null =>
-  /^[0-9]+$/.test(text) ? speakDigits(text, lists) : speakNumberToken(text, lists);
+  /^[0-9]+$/.test(text)
+    ? speakDigits(text, lists)
+    : (composed(text) ?? speakNumberToken(text, lists));
 
 /**
  * Not read by speakNumberToken, with what each needs. DECtalk's own reading of

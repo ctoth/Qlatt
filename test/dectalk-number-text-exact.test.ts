@@ -33,7 +33,9 @@ const corpus = readVoiceCorpus(
 describe("DECtalk number-like words from text", () => {
   it("dectalk-english keeps the word whole; qlatt-english writes it out", () => {
     expect(normalizeText("It costs $3.50.", "dectalk-english")).toBe("it costs $3.50 .");
-    expect(normalizeText("It is 3:30.", "dectalk-english")).toBe("it is 3:30 .");
+    // A clock time is written out by a text rule (tn_clock_time) as one word
+    // of phonemic text: three, a verb-phrase start, thirty, a word boundary.
+    expect(normalizeText("It is 3:30.", "dectalk-english")).toBe("it is \x81Tr'i)T'Rti \x82 .");
     expect(normalizeText("About 1,000,000 came.", "dectalk-english")).toBe(
       "about 1,000,000 came .",
     );

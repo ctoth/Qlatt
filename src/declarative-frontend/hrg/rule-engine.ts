@@ -1501,10 +1501,12 @@ function applyTextExpansion(
       if (
         typeof entry.text !== "string" ||
         !entry.text.length ||
-        /\s/.test(entry.text) ||
-        // `kind: 'word'` says the terminal is a word whatever its text is: a
-        // punctuation mark that is spoken by its name.
+        // `kind: 'word'` says the terminal is one word whatever its text is:
+        // a punctuation mark that is spoken by its name, or text with white
+        // space in it (phonemic text of several words).
         (entry.kind !== undefined && entry.kind !== "word") ||
+        (entry.kind !== "word" && /\s/.test(entry.text)) ||
+        !entry.text.trim().length ||
         Object.keys(entry).some((key) => !["type", "text", "kind"].includes(key))
       )
         fail("terminal requires text, and may say kind: 'word'");

@@ -107,6 +107,21 @@ maps:
     # "-.5", "-1/2" (minus one half), "-1990" (minus one thousand, nine
     # hundred and ninety: no year with a sign).
     signed_numbers: source
+    # A clock time is written out by a text rule (tn_clock_time) as phonemic
+    # text, from the number phone lists of number-phonemes.yaml, as
+    # ls_proc_do_time speaks it (LTS/l_us_pr1.c:1182-1209).
+    clock_times: phonemic
+  # The characters of this frontend's phonemic text that the text rules
+  # compose with: the two marks around phonemic text (CMD/par_def1.h
+  # PAR_PHONES_ON_D 0x81, PAR_PHONES_OFF_D 0x82) and, from INCLUDE/usa_phon.tab
+  # usa_ascky_rev[], the characters of the word boundary, the verb-phrase
+  # start and the comma.
+  tn_phonemic_text:
+    open: "\x81"
+    close: "\x82"
+    word_boundary: " "
+    verb_phrase: ")"
+    pause: ","
 # A text that does not end in punctuation is still closed as a sentence: when
 # the text is flushed the text task sends a breath break (LTS/ls_task.c:1236-1260,
 # the VT case) and the clause ends as one that ends in a period. Measured on

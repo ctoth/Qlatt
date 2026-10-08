@@ -64,6 +64,7 @@ include:
   - /rules/normalization/components.yaml
   - normalization-policy.yaml
   - dictionary-abbreviations.yaml
+  - number-phonemes.yaml
   - pipeline.yaml
   - phases/orthography.yaml
   - phases/postlexical.yaml

@@ -530,28 +530,6 @@ export function speakPartDigits(run: string, lists: NumberPhones): number[] | nu
 }
 
 /**
- * A clock time, as ls_proc_do_time speaks it (LTS/l_us_pr1.c:1182-1209): the
- * hour, a verb-phrase start, the minutes unless they are "00", and seconds
- * after another verb-phrase start. Only the forms hour:minutes and
- * hour:minutes:seconds; DECtalk's test (ls_proc_is_time, :1090-1129) also
- * admits a fraction, which its recorded output reads another way, so that is
- * left to the caller. Null for anything else.
- */
-export function speakTime(text: string, lists: NumberPhones): number[] | null {
-  const match = /^([0-9]{1,2}):([0-9]{2})(?::([0-9]{2}))?$/.exec(text);
-  if (!match) return null;
-  const [, hour, minutes, seconds] = match;
-  const symbols: number[] =
-    hour.length === 1 ? [...lists.units[digit(hour)]] : twoDigits(hour[0], hour[1], lists);
-  symbols.push(NUMBER_VPSTART);
-  if (minutes !== "00") symbols.push(...twoDigits(minutes[0], minutes[1], lists));
-  if (seconds !== undefined) {
-    symbols.push(NUMBER_VPSTART, ...twoDigits(seconds[0], seconds[1], lists));
-  }
-  return symbols;
-}
-
-/**
  * A number with a plural ending, "60s" or "60's" (LTS/ls_task.c:3936-3962,
  * 4031-4046): a year by ls_util_is_year in its two halves, any other as a
  * number, then the ending ls_util_pluralize picks from the last phone
@@ -597,17 +575,19 @@ export function speakOrdinalNumber(text: string, lists: NumberPhones): number[] 
 
 /**
  * A number-like word that DECtalk's text task reads whole, in the order the
- * task tries its rules (LTS/ls_task.c: money :3181, date :3612, time :3622,
- * plain numbers :3747): a dollar amount, a date word, a clock time, a plural
- * number, an ordinal, or a number with separators or fraction digits. Null
- * when `text` is none of these; the caller then reads it as it reads any
- * other word.
+ * task tries its rules (LTS/ls_task.c: money :3181, date :3612, plain numbers
+ * :3747): a dollar amount, a date word, a plural number, an ordinal, or a
+ * number with separators or fraction digits. Null when `text` is none of
+ * these; the caller then reads it as it reads any other word.
+ *
+ * A clock time (:3622) is not read here: the frontend's text rules write it
+ * out as phonemic text (public/rules/normalization/lexical.yaml
+ * tn_clock_time).
  */
 export function speakNumberToken(text: string, lists: NumberPhones): number[] | null {
   if (text.startsWith("$")) return speakMoney(text.slice(1), lists);
   return (
     speakDate(text, lists) ??
-    speakTime(text, lists) ??
     speakPluralNumber(text, lists) ??
     speakOrdinalNumber(text, lists) ??
     (/[,.]/.test(text) ? (speakDecimal(text, lists)?.symbols ?? null) : null)

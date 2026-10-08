@@ -1749,8 +1749,10 @@ rules:
 
   # --- the flap: ph_draw.c:3290-3330 ---------------------------------------
   # 3312 reads `tcum >= (allodurs >> 1 - 3)`: a shift by -2, which C leaves
-  # undefined. Taken here as always true (a count of 30 on x86), so the first
-  # half of a flap closes; not yet checked against DECtalk's own values.
+  # undefined. As this build behaves, the test is always true: the first half
+  # of a flap closes by 400 a frame from its first frame. DECtalk's own
+  # area_flap in "It is much better." is 800, 400, 0, 400, 800 in a flap of
+  # seven frames and 800, 400, 800 in one of four.
   artic_flap_opening:
     kind: frame
     program: articulation

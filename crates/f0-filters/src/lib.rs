@@ -585,18 +585,28 @@ fn render_with_options(
                         if count > 0 {
                             // DECtalk Ph_drwt02.c advances the 17-point baseline
                             // through integer lastbase/basetime state over tcumdur.
+                            // basestep, basetime, lastbase and f0delta are C
+                            // shorts (ph_data.h:592-593, 626, 648): each
+                            // assignment keeps 16 bits. In a clause of a few
+                            // frames f0delta = basestep << 6 overflows, and
+                            // DECtalk's baseline goes where the wrapped value
+                            // sends it (Ph_drwt02.c:1996, 2010, 2024-2026).
                             let elapsed = profile_elapsed_frames[li];
                             if (elapsed << 4) >= profile_base_time[li] {
                                 let next = (profile_base_counter[li] + 1).min(count - 1);
-                                profile_base_step[li] = (profile_last_base[li] >> 2)
-                                    - inp.profile_points[start + next] as i32;
-                                profile_base_time[li] += profile_duration_frames;
+                                profile_base_step[li] = ((profile_last_base[li] >> 2)
+                                    - inp.profile_points[start + next] as i32)
+                                    as i16 as i32;
+                                profile_base_time[li] =
+                                    (profile_base_time[li] + profile_duration_frames) as i16 as i32;
                                 if profile_base_counter[li] + 2 < count {
                                     profile_base_counter[li] += 1;
                                 }
                             }
-                            profile_last_base[li] -=
-                                (profile_base_step[li] << 6) / profile_duration_frames;
+                            let f0delta = (profile_base_step[li] << 6) as i16 as i32;
+                            profile_last_base[li] = (profile_last_base[li]
+                                - f0delta / profile_duration_frames)
+                                as i16 as i32;
                             total += (profile_last_base[li] >> 2) as f64;
                             profile_elapsed_frames[li] += 1;
                         }
@@ -2107,6 +2117,45 @@ mod tests {
         // Nor when the caller gives the gesture no numbers.
         let (_, unset) = call_render_f0(&scalars[..16], &layers, 1, &cmds, 2, &flags, 8, 12);
         assert_eq!(unset, [0.0; 12]);
+    }
+
+    #[test]
+    fn profile_state_wraps_at_sixteen_bits_as_dectalks_shorts_do() {
+        // A profile from 1000 to 100 over a clause of one frame. lastbase
+        // starts at 1000 << 2 = 4000.
+        //   frame 0: basestep = 1000 - 100 = 900; f0delta = 900 << 6 = 57600,
+        //            as a short -7936; lastbase = 4000 + 7936 = 11936 -> 2984
+        //   frame 1: basestep = 2884; 184576 as a short is -12032;
+        //            lastbase = 23968 -> 5992
+        //   frame 2: basestep = 5892; 377088 as a short is -16128;
+        //            lastbase = 40096, as a short -25440 -> -6360
+        // Without the wrap frame 0 alone would give (4000 - 57600) >> 2.
+        let scalars = [
+            0.0064,
+            0.0064,
+            FILTER_ONE_POLE as f64,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            -1e9,
+            1e9,
+        ];
+        let layers = [LAYER_PROFILE as f64, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0];
+        let cmds = [0.0, 0.0, 0.0, 0.0, 2.0];
+        let points = [1000.0, 100.0];
+
+        let (status, out) = call_render_f0(&scalars, &layers, 1, &cmds, 1, &points, 2, 3);
+
+        assert_eq!(status, RENDER_OK);
+        assert_eq!(out, [2984.0, 5992.0, -6360.0]);
     }
 
     #[test]

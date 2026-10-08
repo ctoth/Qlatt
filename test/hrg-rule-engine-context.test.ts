@@ -181,3 +181,37 @@ describe("evaluation contexts of one scope", () => {
     expect(utterance.getItem("k")?.get("duration")).toBe(11);
   });
 });
+
+describe("an Item view is not a map", () => {
+  const probe = (definition: string) =>
+    specWith({
+      probe: {
+        select: { relation: "Segment", where: "current.phoneme == 'K'" },
+        define: { merged: definition },
+        apply: [
+          { field: "duration", op: "add", value: "get(merged, 'a', 0.0)", tag: "navigation" },
+        ],
+        citations: CITATIONS,
+      },
+    });
+
+  it("merges maps", () => {
+    const utterance = utteranceOfTwoWords();
+    runGraphRuleEngine(utterance, probe("merge({'a': 1.0, 'b': 2.0}, {'a': 5.0})"));
+    expect(utterance.getItem("k")?.get("duration")).toBe(5);
+  });
+
+  it.each([
+    ["the first argument", "merge(current, {'a': 1.0})"],
+    ["the second argument", "merge({'a': 1.0}, next)"],
+    [
+      "a scan's result",
+      "merge(look_ahead_where(current, 8, \"candidate.stress == 1\"), {'a': 1.0})",
+    ],
+  ])("refuses an Item as %s of merge, by name", (_which, definition) => {
+    const utterance = utteranceOfTwoWords();
+    expect(() => runGraphRuleEngine(utterance, probe(definition))).toThrow(
+      /E_HRG_VIEW_NOT_A_MAP: rule '[^']*probe[^']*' passes an Item to merge\(\)/,
+    );
+  });
+});

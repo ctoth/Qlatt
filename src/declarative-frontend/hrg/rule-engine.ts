@@ -315,6 +315,13 @@ function buildEvaluationScope(
     return view(target);
   };
   const merge = (left: unknown, right: unknown): Record<string, unknown> => {
+    // A view is not a map of an Item's features: what it lists is a matter of
+    // how views are made, and copying it would read every feature unasked.
+    if (isItemView(left) || isItemView(right)) {
+      throw new Error(
+        `E_HRG_VIEW_NOT_A_MAP: rule '${transaction.metadata.ruleId}' passes an Item to merge(); merge takes maps, so name the features to copy`,
+      );
+    }
     return {
       ...(isPlainObject(left) ? left : {}),
       ...(isPlainObject(right) ? right : {}),
@@ -1621,6 +1628,11 @@ function applySplice(
     }
     const targetExpression = Object.hasOwn(template, "target") ? template.target : null;
     const target = targetExpression !== null ? evaluate(targetExpression, context) : null;
+    if (context.isItemView(target)) {
+      throw new Error(
+        `E_HRG_VIEW_NOT_A_MAP: rule '${transaction.metadata.ruleId}' target is an Item; a target is a map of fields, and an Item's features are copied with copy_from`,
+      );
+    }
     if (targetExpression !== null && !isPlainObject(target)) {
       throw new Error(
         `E_HRG_SPLICE_TARGET: rule '${transaction.metadata.ruleId}' target must evaluate to an object`,

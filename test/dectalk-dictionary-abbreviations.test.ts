@@ -14,12 +14,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { searchDictionary } from "../src/g2p/table-dictionary-search";
+import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 const table = JSON.parse(
   fs.readFileSync(path.resolve("public/rules/frontends/dectalk-english/lts-table.json"), "utf8"),
-) as { dictionaryWords: string[] };
+) as { dictionaryWords: string[]; letterPhones: Record<string, string[]> };
 const words = table.dictionaryWords;
 
 /** The entry an abbreviation lookup of `word` ends on, marked when it is word + ".". */
@@ -129,5 +131,70 @@ describe("abbreviations in dectalk-english", () => {
   it("leaves the shared list to a frontend that does not ask for its dictionary", () => {
     // "No." is "number" in the shared list.
     expect(phones("No.", "qlatt-english")).toContain("M");
+  });
+});
+
+// LTS/ls_task.c:2840-2890. The four sentences are in dectalk-us-abbrev-v1.
+describe("words of capitals and periods in dectalk-english", () => {
+  it("spells each letter and does not end the sentence at the last period", () => {
+    expect(phones("The U.S. flag was raised.").slice(0, 9)).toEqual([
+      "DH",
+      "AX",
+      "Y",
+      "UW",
+      "EH",
+      "S",
+      "F",
+      "L",
+      "AE",
+    ]);
+  });
+
+  it("speaks the letter A as the letter, not as the article", () => {
+    expect(phones("The U.S.A. is large.").slice(2, 8)).toEqual(["Y", "UW", "EH", "S", "EY", "IH"]);
+  });
+
+  it("ends the sentence at the end of the text", () => {
+    expect(phones("He works for the F.B.I.").slice(-6)).toEqual([
+      "F",
+      "B",
+      "B_REL",
+      "IY",
+      "AY",
+      "SIL",
+    ]);
+  });
+
+  it("makes each letter a word of its own", () => {
+    const { utterance } = textToKlattTrackDetailed("Ask the M.D. about it.", undefined, 30, {
+      frontendId: "dectalk-english",
+    });
+    expect(utterance.relation("Word").listItems()).toHaveLength(6);
+  });
+
+  it("names the letters as DECtalk's typing table does", () => {
+    const spec = loadBundledRulepackSpec("dectalk-english");
+    const names = (spec.transcription as { letter_names: Record<string, string[]> }).letter_names;
+    for (const [letter, phonesOfLetter] of Object.entries(table.letterPhones)) {
+      expect(names[`LETTER_${letter.toUpperCase()}`], letter).toEqual(phonesOfLetter);
+    }
+  });
+
+  it("records the spelled letter under the frontend's spelling source", () => {
+    const provenance = createProvenanceCollector();
+    textToKlattTrackDetailed("The U.S. flag.", undefined, 30, {
+      frontendId: "dectalk-english",
+      provenance,
+    });
+    const record = provenance
+      .getDecisions()
+      .find((entry) => entry.type === "letter_name_pronunciation_selected");
+    expect(record?.reason).toContain("DECtalk letter names");
+    expect(record?.citations?.[0]).toContain("INCLUDE/usa_type.tab");
+  });
+
+  it("leaves the shared initialism rule to a frontend that does not ask for capitals", () => {
+    // The shared rule takes lower case too.
+    expect(phones("the u.s. flag.", "qlatt-english").slice(2, 4)).toEqual(["Y", "UW"]);
   });
 });

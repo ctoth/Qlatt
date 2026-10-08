@@ -14,5 +14,9 @@
   "abbrev-fig-upper": ["B1","AV","AP","A2","A3","A4","A5","AB"],
   "word-no": ["B1","AV","AP"],
   "word-no-then": ["B1","AV","AP","A2","A4","A5","A6","AB"],
-  "word-sat": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"]
+  "word-sat": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "dotted-us": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dotted-usa": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "dotted-fbi-final": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dotted-md": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"]
 }

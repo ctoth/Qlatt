@@ -115,6 +115,24 @@ rules:
           : [{'type': 'terminal', 'text': lower(current.payload.word) + '.'}]
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:2040-2160 (the abbreviation hit sends the dictionary entry's phones and eats the period)"
+  # A word of capitals and periods: each letter a terminal written as the
+  # letter and a period, the form the frontend's orthography rule speaks as
+  # the letter's name. The text's end is still a sentence end.
+  tn_dotted_capitals:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'dotted_capitals' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal, request]
+      tag: normalization_lexical
+      output: >-
+        split(lower(current.payload.letters), '.').map(letter, {'type': 'terminal', 'text': letter + '.'})
+          + (get(current.payload, 'final', '') == '.'
+              ? [{'type': 'request', 'kind': 'words', 'payload': {'text': '.'}}]
+              : [])
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2840-2890 (each letter through the spelling routine, a word boundary between, the last period eaten)"
   tn_bare_number_request:
     kind: structural
     select:
@@ -164,4 +182,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_unmatched_words]

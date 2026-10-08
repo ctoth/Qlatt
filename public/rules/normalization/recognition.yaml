@@ -38,12 +38,27 @@ text_recognition:
       speak: current.text
       vocabulary_keys: '[]'
       citations: ['Allen, Hunnicutt & Klatt 1987; abbreviation prefix matching']
+    # A word of capitals with a period between each two ("U.S", "F.B.I"): every
+    # letter is spelled, and a period after the last letter belongs to the
+    # word, not to the sentence. Only for a frontend whose policy asks for it
+    # (tn_recognition_policy.initialisms: capitals).
+    - id: tn_dotted_capitals_source
+      pattern: '(?<=^|\s)(?<letters>[A-Z](?:\.[A-Z])+)(?:(?<final>\.)(?=\s*$)|\.(?=\s)|(?=\s|$))'
+      flags: ''
+      class: dotted_capitals
+      captures: {letters: letters, final: final}
+      when: "get(maps.tn_recognition_policy, 'initialisms', 'shared') == 'capitals'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:2840-2890 (a word of alternating upper-case letters and periods is spelled letter by letter with a word boundary between; the period it sits on is eaten)'
     - id: tn_initialism_source
       pattern: '\b(?:[a-z]\.){2,}[a-z]?\.?'
       flags: i
       class: initialism
       captures: {}
-      when: 'true'
+      # The shared rule, unless the frontend has its own.
+      when: "get(maps.tn_recognition_policy, 'initialisms', 'shared') == 'shared'"
       speak: current.text
       vocabulary_keys: '[]'
       citations: ['Allen, Hunnicutt & Klatt 1987; initialism recognition']

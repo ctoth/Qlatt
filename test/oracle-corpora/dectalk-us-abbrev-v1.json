@@ -24,6 +24,10 @@
     { "id": "abbrev-fig-upper", "text": "See FIG. two now.", "group": "dictionary-case", "tags": ["abbreviation", "case"], "expectedFocus": ["trace"] },
     { "id": "word-no", "text": "No.", "group": "not-abbreviation", "tags": ["shared-list"], "expectedFocus": ["trace"] },
     { "id": "word-no-then", "text": "He said no. Then he left.", "group": "not-abbreviation", "tags": ["shared-list"], "expectedFocus": ["trace"] },
-    { "id": "word-sat", "text": "He laughed. Then he sat down, and began to write.", "group": "not-abbreviation", "tags": ["added-period"], "expectedFocus": ["trace"] }
+    { "id": "word-sat", "text": "He laughed. Then he sat down, and began to write.", "group": "not-abbreviation", "tags": ["added-period"], "expectedFocus": ["trace"] },
+    { "id": "dotted-us", "text": "The U.S. flag was raised.", "group": "dotted-capitals", "tags": ["spelling", "no-sentence-end"], "expectedFocus": ["trace"] },
+    { "id": "dotted-usa", "text": "The U.S.A. is large.", "group": "dotted-capitals", "tags": ["spelling", "letter-a"], "expectedFocus": ["trace"] },
+    { "id": "dotted-fbi-final", "text": "He works for the F.B.I.", "group": "dotted-capitals", "tags": ["spelling", "text-final"], "expectedFocus": ["trace"] },
+    { "id": "dotted-md", "text": "Ask the M.D. about it.", "group": "dotted-capitals", "tags": ["spelling"], "expectedFocus": ["trace"] }
   ]
 }

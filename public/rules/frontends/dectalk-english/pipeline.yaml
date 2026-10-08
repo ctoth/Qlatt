@@ -580,6 +580,7 @@ tags:
   nasal_bandwidth: widens formant bandwidth beside a nasal
   non_final: shortens a non-final segment
   nt_cluster: adjusts an alveolar stop in an nt cluster
+  orthography: maps written tokens to pronunciation keys
   phrase_initial: adjusts a phrase-initial segment
   polysyllabic: adjusts duration in a polysyllabic word
   post_plosive: adjusts a segment following a plosive
@@ -822,7 +823,19 @@ relations:
     type: point
     value_type: number
     unit: Hz
+  Token:
+    type: parallel
+    features:
+      pronunciationKey: []
+      word: []
+      tokenType:
+        - word
+        - punctuation
 phases:
+  # Runs on the written tokens, before pronunciation (phases/orthography.yaml).
+  - name: orthography
+    rules:
+      - dectalk_spelled_letter
   - name: duration
     rules:
       # p_us_tim.c, one rule per branch, in source order. Every rule reads and

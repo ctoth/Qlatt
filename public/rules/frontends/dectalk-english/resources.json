@@ -13,6 +13,7 @@
     "/rules/frontends/dectalk-english/phases/duration.yaml",
     "/rules/frontends/dectalk-english/phases/formant-drawing.yaml",
     "/rules/frontends/dectalk-english/phases/formant.yaml",
+    "/rules/frontends/dectalk-english/phases/orthography.yaml",
     "/rules/frontends/dectalk-english/phases/postlexical.yaml",
     "/rules/frontends/dectalk-english/phases/prosody.yaml",
     "/rules/frontends/dectalk-english/phases/structural.yaml",

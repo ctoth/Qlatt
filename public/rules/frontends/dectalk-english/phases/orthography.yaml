@@ -1,0 +1,49 @@
+version: v1
+
+# A letter that the text stage spells is written, as a token, the letter and a
+# period ("u." "s." for "U.S."). It is spoken as the letter's name whatever
+# word the letter alone would be: DECtalk hands each letter of such a word to
+# its spelling routine (LTS/ls_spel.c ls_spel_spell), which reads the letter's
+# own entry, so the A of "U.S.A." is the letter and not the article.
+maps:
+  dectalk_spelled_letter_key:
+    a.: LETTER_A
+    b.: LETTER_B
+    c.: LETTER_C
+    d.: LETTER_D
+    e.: LETTER_E
+    f.: LETTER_F
+    g.: LETTER_G
+    h.: LETTER_H
+    i.: LETTER_I
+    j.: LETTER_J
+    k.: LETTER_K
+    l.: LETTER_L
+    m.: LETTER_M
+    n.: LETTER_N
+    o.: LETTER_O
+    p.: LETTER_P
+    q.: LETTER_Q
+    r.: LETTER_R
+    s.: LETTER_S
+    t.: LETTER_T
+    u.: LETTER_U
+    v.: LETTER_V
+    w.: LETTER_W
+    x.: LETTER_X
+    y.: LETTER_Y
+    z.: LETTER_Z
+rules:
+  dectalk_spelled_letter:
+    kind: scalar
+    select:
+      relation: Token
+      where: "current.tokenType == 'word' && current.word in maps.dectalk_spelled_letter_key"
+    apply:
+      - field: pronunciationKey
+        op: set
+        value: maps.dectalk_spelled_letter_key[current.word]
+        tag: orthography
+    citations:
+      - "DECtalk 4.63 LTS/ls_spel.c ls_spel_spell (a spelled letter is spoken from its own entry)"
+      - "DECtalk 4.63 LTS/ls_task.c:2840-2890 (each letter of a word of capitals and periods is spelled)"

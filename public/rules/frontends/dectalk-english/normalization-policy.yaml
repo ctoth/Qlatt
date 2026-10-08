@@ -41,3 +41,10 @@ maps:
     # is "department" while "The dept. and" is not (the entry is "Dept."),
     # "See fig. 3" is "figure" while "See Fig. 3" is "fig" and a sentence end.
     abbreviations: dictionary
+    # A word of capitals with periods between is spelled, each letter a word,
+    # and the period after it is eaten (LTS/ls_task.c:2840-2890). Measured on
+    # say.exe: "The U.S. flag was raised." is one clause with Y UW, EH S;
+    # "The U.S.A. is large." has EY for the A; "He works for the F.B.I." ends
+    # the sentence at the text's end. The shared rule, which also takes lower
+    # case and speaks the letters as words, is off.
+    initialisms: capitals

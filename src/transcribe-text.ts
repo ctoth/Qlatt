@@ -584,8 +584,13 @@ export function transcribeText(
       let citations: string[];
       if (letterPronunciation != null) {
         decisionType = "letter_name_pronunciation_selected";
-        reason = `Used letter-name pronunciation for '${sourceWord}' via ${inputToken.pronunciationKey}`;
-        citations = [LETTER_NAME_PRONUNCIATION_CITATION];
+        // A frontend that declares its spelling source names the letters from
+        // it; the shared letter names are the default.
+        const declared = cfg?.sources?.spelling;
+        reason = declared
+          ? `Used ${declared.name} for '${sourceWord}' via ${inputToken.pronunciationKey ?? ""}`
+          : `Used letter-name pronunciation for '${sourceWord}' via ${inputToken.pronunciationKey}`;
+        citations = [declared ? declared.citation : LETTER_NAME_PRONUNCIATION_CITATION];
       } else if (symbolPronunciation != null) {
         decisionType = "symbol_pronunciation_selected";
         reason = `Used diagnostic symbol pronunciation for '${sourceWord}'`;

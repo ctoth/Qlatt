@@ -1,3 +1,4 @@
+import { withVoiceRulePolicy } from "../dectalk-voice";
 import {
   cloneValue,
   isPlainObject,
@@ -448,7 +449,7 @@ export function getRulepackValidationDiagnostics(
 
 export function compileRuleEngineSpec(source: unknown): CompiledRulepack {
   const parameterSchemaDeclared = isPlainObject(source) && Object.hasOwn(source, "parameters");
-  const spec = parseDslSpec(source);
+  const spec = parseDslSpec(withVoiceRulePolicy(source));
   const inventory =
     typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
   const diagnostics = assertValidSpec(spec, {
@@ -519,7 +520,7 @@ export function loadRulepackSpecFromPath(
       merged.accent_policy_path,
     );
   }
-  const spec = parseDslSpec(merged);
+  const spec = parseDslSpec(withVoiceRulePolicy(merged));
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
@@ -598,7 +599,7 @@ export async function preloadRulepackSpecFromPath(
       merged.accent_policy_path,
     );
   }
-  const spec = parseDslSpec(merged);
+  const spec = parseDslSpec(withVoiceRulePolicy(merged));
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));

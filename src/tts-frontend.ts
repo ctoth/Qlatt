@@ -619,6 +619,17 @@ function buildTextToKlattTrackDetailed(
     : null;
   const speakerOverride: SpeakerProfileOverride | undefined =
     typeof options.speaker === "object" ? options.speaker : undefined;
+  // A voice's rule fields select data inside the rules (tables, constants);
+  // a caller's profile override may not change them.
+  const overriddenRuleFields = Object.keys(speakerOverride ?? {}).filter((field) =>
+    Object.hasOwn(registry?.ruleFields ?? {}, field),
+  );
+  if (overriddenRuleFields.length > 0) {
+    throw new Error(
+      `E_VOICE_RULE_FIELD_OVERRIDE: a speaker override may not set the voice rule field(s) ` +
+        `${overriddenRuleFields.join(", ")}; select a voice by name instead`,
+    );
+  }
 
   const resolvedSpeaker = resolveSpeakerProfile({
     baseF0,
@@ -635,6 +646,26 @@ function buildTextToKlattTrackDetailed(
       .join(", ")}`,
     citations: collectSpeakerProfileCitations(speakerProfile, speakerProfilePath),
   });
+  // What rules read as params.policy.voice: the selected voice's rule fields.
+  const voiceRuleFields =
+    selectedVoice && Object.keys(selectedVoice.ruleFields).length > 0
+      ? selectedVoice.ruleFields
+      : null;
+  if (selectedVoice && voiceRuleFields && registry) {
+    provenance.add({
+      stage: "frontend",
+      type: "voice_parameters_selected",
+      subject: `voice:${selectedVoice.name}`,
+      reason: `Rule parameters of voice ${selectedVoice.name}: ${Object.entries(voiceRuleFields)
+        .map(([name, value]) => `${name}=${value}`)
+        .join(", ")}`,
+      citations: [
+        ...selectedVoice.citations,
+        ...Object.values(registry.ruleFields).flatMap((field) => field.citations),
+      ],
+      parents: [speakerDecision.id],
+    });
+  }
 
   const sourcePath = spec.source_contour_path ?? DEFAULT_SOURCE_CONTOUR_PATH;
   const source = resolveSourceContour({
@@ -784,7 +815,10 @@ function buildTextToKlattTrackDetailed(
   // (Klatt 1976 incompressible portion, projected by the duration_floor_* rules)
   // are the only limit on compression, and they are cited per phone.
   const rate = referenceRate && referenceRate > 0 ? requestedRate / referenceRate : requestedRate;
-  const speakerPolicy = { speaker: resolvedSpeaker };
+  const speakerPolicy = {
+    speaker: resolvedSpeaker,
+    ...(voiceRuleFields ? { voice: voiceRuleFields } : {}),
+  };
   const graphInventory = {
     spec: resources.inventory,
     decisionId: inventoryDecision.id,

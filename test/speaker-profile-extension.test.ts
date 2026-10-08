@@ -53,6 +53,7 @@ describe("declarative speaker profile fields", () => {
         dir: "test/fixtures/speaker-profile",
         default: "voice",
         voices: ["voice"],
+        ruleFields: {},
         speakerFrameParams: [],
         speakerGainOffsets: [],
       },

@@ -1,0 +1,6 @@
+# Fixture voice whose `register` is not one of the declared values and whose
+# `lift` is not a number.
+name: falsetto
+register: whistle
+lift: "seven"
+citations: [fixture voice of the wrong kinds]

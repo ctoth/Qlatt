@@ -1,0 +1,4 @@
+# Fixture voice that lacks the rule field `lift`.
+name: no-lift
+register: chest
+citations: [fixture voice without lift]

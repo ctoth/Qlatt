@@ -70,6 +70,18 @@ params:
     description: "Frame clock of the dectalk-vtm node: 1 while packets are sent (unused by this graph)"
     type: int
     default: 0
+  AL:
+    description: "OUT_AL, lip area (packet word; unused by this graph)"
+    type: int
+    default: 0
+  ABLADE:
+    description: "OUT_ABLADE, tongue blade area (packet word; unused by this graph)"
+    type: int
+    default: 0
+  ATB:
+    description: "OUT_ATB, tongue body area (packet word; unused by this graph)"
+    type: int
+    default: 0
   # DECtalk 4.63 uses KLGLOTT88, but the runtime default remains the impulse
   # fallback while mode 3 emits no voiced waveform.
   sourceMode:

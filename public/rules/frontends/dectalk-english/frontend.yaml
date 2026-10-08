@@ -277,6 +277,25 @@ parameters:
       # aspiration Segment, so 8 is ample; the same bound as pipeline.yaml's
       # allophone helpers.
       unit_scan_items: 8
+      # p_us_rom.h:722 us_burdr, the burst's length in ms (DZ 13, P 7, B 7,
+      # T 7, D 13, K 26, G 26, CH 71, JH 45, every other phone 0), in frames
+      # as mstofr gives them: (ms * 10) >> 6 (ph_task.c:1380-1387).
+      burst_frames: { DZ: 2, P: 1, B: 1, T: 1, D: 2, K: 4, G: 4, CH: 11, JH: 7 }
+      # ph_draw.c:241-244 area_rel[18], the areas a release steps through; its
+      # first entry is set to the voice's NOM_Fricative_Opening at 288.
+      area_release: [100, 500, 800, 900, 900, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
+      # Special Rule 1 and ph_draw.c:740-886: a burst loses a frame before an
+      # obstruent or in a phone shorter than NF50MS; an affricate's closure is
+      # at most NF60MS and at least 2 frames; the closure flag is raised
+      # bplos_build_time (ph_draw.c:156) frames before the closure ends at the
+      # lips and one more at the blade; a constriction left by another
+      # articulator is held for `coarticulation` frames (ph_draw.c:338-340).
+      closure:
+        short_phone_frames: 8
+        affricate_max_frames: 9
+        affricate_min_frames: 2
+        build_frames: 7
+        coarticulation_frames: 4
       # ph_draw.c:538-590: when the glottis closes through that aspiration.
       # A slow drop starts at frame 3 if the aspiration is longer than 5
       # frames; the closing proper starts 5 frames before its end and ends 2
@@ -908,7 +927,7 @@ output:
   lowering:
     id: dectalk-english-track-lowering
     # Stable Klatt backend vocabulary captured by the production-frame oracle.
-    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO, PS, CNK, AG, PH, run]
+    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO, PS, CNK, AG, PH, run, AL, ABLADE, ATB]
     timeline:
       initial_silence_ms:
         value: 19.2

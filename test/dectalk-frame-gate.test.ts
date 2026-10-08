@@ -80,6 +80,11 @@ const AG_REASON =
   "not ported: the early exits of the end-of-clause spread (ph_draw.c:3604-3624) and the " +
   "nasal case of the initial silence (1146-1190); and differences inside phrases that have " +
   "not been traced to a rule yet";
+// The lips, blade and tongue body rules are ported (ph_draw.c:740-886,
+// 931-1220, 1239-1296, 1565-1945, 2807-2930, 3113-3553) and "cat." is exact.
+const CONSTRICTION_REASON =
+  "the phrases that still differ have not been traced. Known to be untested against DECtalk: " +
+  "the flap (ph_draw.c:3312 shifts by a negative count, which C leaves undefined)";
 
 const GAP_REASONS: Readonly<Record<string, string>> = {
   length: TIMING_REASON,
@@ -102,9 +107,9 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   AG: AG_REASON,
   PS: PS_REASON,
   CNK: TIMING_REASON,
-  AL: AREA_REASON,
-  ABLADE: AREA_REASON,
-  ATB: AREA_REASON,
+  AL: CONSTRICTION_REASON,
+  ABLADE: CONSTRICTION_REASON,
+  ATB: CONSTRICTION_REASON,
   AREA_N: AREA_REASON,
   DC: AREA_REASON,
   UE: AREA_REASON,

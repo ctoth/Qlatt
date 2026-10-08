@@ -103,6 +103,7 @@ tags:
   subglottal_pressure: sets the subglottal pressure the synthesizer's source model reads
   glottal_chink: sets the posterior glottal chink area
   glottal_area: sets the glottal area, its target or the speed it moves at
+  constriction: sets the area of the lips, the tongue blade or the tongue body, or the state that moves it
   voice_formant: sends a formant fixed by the voice
 
 frame_programs:
@@ -163,6 +164,22 @@ frame_programs:
           && !artic_is_dummy(artic_next_unit(artic_next_unit(current)))
           && dectalk_name(artic_next_unit(current)) == dectalk_name(artic_next_unit(artic_next_unit(current)))
         edge: false
+      alveolar: { value: "artic_place(current, 'alveolar')", edge: false }
+      is_dh_th:
+        value: "!artic_is_dummy(current) && dectalk_name(current) in ['DH', 'TH']"
+        edge: false
+      is_dh_th_dz:
+        value: "!artic_is_dummy(current) && dectalk_name(current) in ['DH', 'TH', 'DZ']"
+        edge: false
+      is_flap:
+        value: "!artic_is_dummy(current) && dectalk_name(current) in ['DX', 'DF']"
+        edge: false
+      # us_burdr through mstofr: the burst's length in frames.
+      burst_frames:
+        value: >-
+          artic_is_dummy(current) ? 0
+          : get(params.policy.articulation.burst_frames, dectalk_name(current), 0)
+        edge: 0
       is_affricate:
         value: "!artic_is_dummy(current) && dectalk_name(current) in ['CH', 'JH']"
         edge: false
@@ -266,6 +283,37 @@ frame_programs:
       delta_area_g: 0
       # PAV.tspesh of the current phone (p_us_st1.c Special Rule 2), in frames.
       vot: 0
+      # The constrictions: lips, tongue blade, tongue body (ph_draw.c:931-940).
+      # Each has a target, an area, a release step into area_release, and
+      # closure and release flags. in_lfric and last_area_tb exist in DECtalk
+      # but nothing ever sets them; they are 0 here by not existing (a read
+      # of last_area_tb is written as 0).
+      target_l: 1000
+      area_l: 1000
+      target_b: 1000
+      area_b: 1000
+      target_tb: 1000
+      area_tb: 1000
+      lstep: 0
+      bstep: 0
+      tbstep: 0
+      in_lclosure: false
+      in_lrelease: false
+      in_bclosure: false
+      in_brelease: false
+      in_tbclosure: false
+      in_tbrelease: false
+      area_flap: 1200
+      last_area_l: 0
+      last_area_b: 0
+      # tspesh of PAREAL, PAREAB and PTONGUEBODY: the frame the closure ends
+      # (p_us_st1.c Special Rule 1); 0 when the phone has no burst there.
+      closure: 0
+      # Which branch of an articulator's update the frame takes.
+      move_case: 0
+      ts_l: 0
+      ts_b: 0
+      ts_tb: 0
     outputs:
       PS: "r.ps"
       # ph_draw.c:4101-4104. delta_area_gst is only ever reset and
@@ -280,6 +328,10 @@ frame_programs:
       # Not a packet word: the frame clock of the dectalk-vtm node
       # (crates/dectalk-vtm/src/backend.rs), 1 while packets are being sent.
       run: "1"
+      # ph_draw.c:4106-4117
+      AL: "r.area_l"
+      ABLADE: "min([r.area_flap, r.area_b])"
+      ATB: "r.area_tb"
     after:
       run: 0
     write: articulation_frames
@@ -1008,6 +1060,742 @@ rules:
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:4075-4081"
 
+  # ===========================================================================
+  # The constrictions: lips (l), tongue blade (b), tongue body (tb).
+  # ===========================================================================
+
+  # --- when the closure ends: p_us_st1.c:1247-1343 (Special Rule 1) ---------
+  # closure_dur = durfon - bdur, the burst a frame shorter before an obstruent
+  # or in a short phone when it is longer than one frame; it is the tspesh of
+  # the articulator that makes the closure: lips, else blade, else tongue body.
+  artic_closure_end:
+    kind: frame
+    program: articulation
+    when: "f.index == 0"
+    set:
+      - register: closure
+        value: >-
+          !u.burst ? 0
+          : f.count - (u.burst_frames > 1
+              && ((u.plosive && n.obstruent) || f.count < params.policy.articulation.closure.short_phone_frames)
+              ? u.burst_frames - 1 : u.burst_frames)
+        tag: constriction
+      - register: closure
+        value: >-
+          u.is_affricate
+            ? max([min([r.closure, params.policy.articulation.closure.affricate_max_frames]),
+                   params.policy.articulation.closure.affricate_min_frames])
+            : r.closure
+        tag: constriction
+      - { register: ts_l, value: "u.burst && u.labial ? r.closure : 0", tag: constriction }
+      - { register: ts_b, value: "u.burst && !u.labial && u.blade ? r.closure : 0", tag: constriction }
+      - register: ts_tb
+        value: "u.burst && !u.labial && !u.blade && u.velar ? r.closure : 0"
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:1247-1343"
+
+  # --- closure and release flags, every frame: ph_draw.c:740-886 -----------
+  # In the parameter loop, before the rest of the frame.
+  artic_lips_closure_over:
+    kind: frame
+    program: articulation
+    when: "r.ts_l != 0 && f.index >= r.ts_l"
+    set:
+      - { register: in_brelease, value: false, tag: constriction }
+      - { register: in_lclosure, value: false, tag: constriction }
+      - register: target_l
+        value: >-
+          u.consonant && u.plosive && !n.plosive && !n.labial
+            ? params.policy.articulation.voice.fricative_opening : r.target_l
+        tag: constriction
+      - register: in_lrelease
+        value: >-
+          u.consonant ? ((u.plosive && !n.plosive && !n.labial) ? true : r.in_lrelease)
+          : (!n.nasal ? true : r.in_lrelease)
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:741-764"
+  artic_lips_closure_building:
+    kind: frame
+    program: articulation
+    unit: "u.burst"
+    when: >-
+      r.ts_l != 0 && f.index < r.ts_l
+      && f.index >= r.ts_l - params.policy.articulation.closure.build_frames
+    set:
+      - { register: in_lclosure, value: true, tag: constriction }
+      - { register: in_lrelease, value: false, tag: constriction }
+      - { register: in_brelease, value: false, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:765-772"
+  artic_blade_closure_over:
+    kind: frame
+    program: articulation
+    when: "r.ts_b != 0 && f.index >= r.ts_b"
+    set:
+      - { register: in_lrelease, value: false, tag: constriction }
+      - { register: in_bclosure, value: false, tag: constriction }
+      - register: in_brelease
+        value: >-
+          u.consonant ? ((!u.plosive || (!n.stop && !n.blade)) ? true : r.in_brelease)
+          : (!n.nasal ? true : r.in_brelease)
+        tag: constriction
+      - register: bstep
+        value: "u.consonant && (!u.plosive || (!n.stop && !n.blade)) ? -1 : r.bstep"
+        tag: constriction
+      - register: target_b
+        value: >-
+          u.consonant && (!u.plosive || (!n.stop && !n.blade))
+            ? params.policy.articulation.voice.fricative_opening : r.target_b
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:773-808"
+  artic_blade_closure_building:
+    kind: frame
+    program: articulation
+    unit: "u.burst"
+    when: >-
+      r.ts_b != 0 && f.index < r.ts_b
+      && f.index >= r.ts_b - (params.policy.articulation.closure.build_frames + 1)
+    set:
+      - { register: in_bclosure, value: true, tag: constriction }
+      - { register: in_brelease, value: false, tag: constriction }
+      - { register: in_lrelease, value: false, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:809-816"
+  artic_tongue_closure_over:
+    kind: frame
+    program: articulation
+    unit: "!n.stop"
+    when: "r.ts_tb != 0 && f.index >= r.ts_tb"
+    set:
+      - { register: in_tbclosure, value: false, tag: constriction }
+      - { register: in_lrelease, value: false, tag: constriction }
+      - { register: target_tb, value: 100, tag: constriction }
+      - { register: tbstep, value: "r.tbstep <= -2 ? -1 : r.tbstep", tag: constriction }
+      - { register: in_tbrelease, value: true, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:819-832"
+  artic_tongue_closure_starts:
+    kind: frame
+    program: articulation
+    unit: "u.stop"
+    when: "r.ts_tb != 0 && f.index == 0 && !(f.index >= r.ts_tb && !n.stop)"
+    set:
+      - { register: in_tbclosure, value: true, tag: constriction }
+      - { register: in_tbrelease, value: false, tag: constriction }
+      - { register: tbstep, value: -2, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:833-840"
+
+  # --- allophone 0: ph_draw.c:931-940 once, 989-1073 once, 1085-1220 every frame
+  artic_initial_reset_areas:
+    kind: frame
+    program: articulation
+    unit: "u.initial"
+    when: "f.index == 0"
+    set:
+      - { register: area_b, value: 1000, tag: constriction }
+      - { register: target_b, value: 1000, tag: constriction }
+      - { register: area_l, value: 1000, tag: constriction }
+      - { register: target_l, value: 1000, tag: constriction }
+      - { register: in_lrelease, value: false, tag: constriction }
+      - { register: in_brelease, value: false, tag: constriction }
+      - { register: in_tbrelease, value: false, tag: constriction }
+      - { register: in_tbclosure, value: false, tag: constriction }
+      - { register: area_tb, value: 1000, tag: constriction }
+      - { register: target_tb, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:931-940"
+  artic_initial_before_labial_burst_stop:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.obstruent && n.burst && n.stop && n.labial"
+    when: "f.index == 0"
+    set:
+      - { register: in_lclosure, value: true, tag: constriction }
+      - { register: area_l, value: 0, tag: constriction }
+      - { register: area_b, value: 1000, tag: constriction }
+      - { register: target_l, value: 0, tag: constriction }
+      - { register: lstep, value: 0, tag: constriction }
+      - { register: bstep, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:989-998"
+  artic_initial_before_blade_burst_stop:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.obstruent && n.burst && n.stop && n.blade"
+    when: "f.index == 0"
+    set:
+      - { register: in_bclosure, value: true, tag: constriction }
+      - { register: area_b, value: 0, tag: constriction }
+      - { register: target_b, value: 0, tag: constriction }
+      - { register: target_l, value: 1000, tag: constriction }
+      - { register: bstep, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1009-1023"
+  artic_initial_before_velar_burst_stop:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.obstruent && n.burst && n.stop && n.velar"
+    when: "f.index == 0"
+    set:
+      - { register: in_tbclosure, value: true, tag: constriction }
+      - { register: in_bclosure, value: false, tag: constriction }
+      - { register: area_b, value: 1000, tag: constriction }
+      - { register: target_b, value: 1000, tag: constriction }
+      - { register: target_l, value: 1000, tag: constriction }
+      - { register: tbstep, value: 0, tag: constriction }
+      - { register: target_tb, value: 0, tag: constriction }
+      - { register: area_tb, value: 0, tag: constriction }
+      - { register: bstep, value: 0, tag: constriction }
+      - { register: lstep, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1025-1046"
+  artic_initial_blade_fricative_area:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.obstruent && !(n.burst && n.stop) && n.blade"
+    when: "f.index == 0"
+    set:
+      - { register: in_bclosure, value: false, tag: constriction }
+      - { register: target_b, value: "params.policy.articulation.voice.fricative_opening + 300", tag: constriction }
+      - { register: area_b, value: "params.policy.articulation.voice.fricative_opening + 300", tag: constriction }
+      - { register: target_l, value: 1000, tag: constriction }
+      - { register: bstep, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1053-1071"
+  artic_initial_voiced_areas:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.voiced"
+    set:
+      - { register: in_tbclosure, value: false, tag: constriction }
+      - { register: in_tbrelease, value: false, tag: constriction }
+      - { register: in_lclosure, value: false, tag: constriction }
+      - { register: lstep, value: 0, tag: constriction }
+      - { register: bstep, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1085-1094"
+  artic_initial_voiced_labial_areas:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.voiced && n.labial"
+    set:
+      - { register: area_l, value: "params.policy.articulation.voice.fricative_opening", tag: constriction }
+      - { register: area_b, value: 1000, tag: constriction }
+      - { register: target_l, value: 150, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1113-1120"
+  artic_initial_vowel_areas:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.voiced && n.vowel"
+    set:
+      - { register: area_l, value: 1000, tag: constriction }
+      - { register: area_b, value: 1000, tag: constriction }
+      - { register: target_l, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1132-1142"
+  # 1163-1184 tests UK phone codes; for a US nasal its `else` closes the lips,
+  # whatever the nasal. Reproduced as compiled.
+  artic_initial_nasal_areas:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.voiced && n.nasal"
+    set:
+      - { register: area_l, value: 0, tag: constriction }
+      - { register: target_l, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1146, 1163-1184"
+  artic_initial_before_dental:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.is_dh_th_dz"
+    set:
+      - { register: target_b, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1204-1212"
+
+  # --- a later silence, once: ph_draw.c:1239-1296 --------------------------
+  artic_silence_areas:
+    kind: frame
+    program: articulation
+    unit: "u.silence && !u.initial"
+    when: "f.index == 0"
+    set:
+      - { register: target_l, value: "p.labial ? (p.plosive ? 1000 : 0) : 1000", tag: constriction }
+      - { register: lstep, value: "p.labial ? 0 : r.lstep", tag: constriction }
+      - { register: bstep, value: "p.labial || p.blade ? 0 : r.bstep", tag: constriction }
+      - { register: in_lclosure, value: "p.blade || p.son1 ? false : r.in_lclosure", tag: constriction }
+      - { register: target_b, value: "p.blade ? 0 : 1000", tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1242-1292"
+
+  # --- a phone that is not silence, once: ph_draw.c:1565-1945 --------------
+  artic_releases_end_after_non_plosive:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && !p.plosive"
+    when: "f.index == 0"
+    set:
+      - { register: in_lrelease, value: false, tag: constriction }
+      - { register: in_brelease, value: false, tag: constriction }
+      - { register: in_tbrelease, value: false, tag: constriction }
+      - { register: bstep, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1565-1572"
+  # An obstruent with a burst (`feat & 004000`): three `if`s, each that holds
+  # assigns, lips first.
+  artic_burst_obstruent_labial:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && u.burst && u.labial"
+    when: "f.index == 0"
+    set:
+      - { register: target_l, value: 0, tag: constriction }
+      - { register: target_b, value: 1000, tag: constriction }
+      - { register: target_tb, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1721, 1731-1744"
+  artic_burst_obstruent_blade:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && u.burst && u.blade"
+    when: "f.index == 0"
+    set:
+      - { register: target_b, value: 0, tag: constriction }
+      - { register: target_l, value: 1000, tag: constriction }
+      - { register: target_tb, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1746-1761"
+  artic_burst_obstruent_velar:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && u.burst && u.velar"
+    when: "f.index == 0"
+    set:
+      - { register: lstep, value: 0, tag: constriction }
+      - { register: target_b, value: 1000, tag: constriction }
+      - { register: target_l, value: 1000, tag: constriction }
+      - { register: target_tb, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1764-1783"
+  # An obstruent without a burst: an else-if chain, lips, blade, tongue body.
+  artic_fricative_labial:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && !u.burst && u.labial"
+    when: "f.index == 0"
+    set:
+      - { register: lstep, value: 0, tag: constriction }
+      - { register: target_l, value: 100, tag: constriction }
+      - { register: target_b, value: 1000, tag: constriction }
+      - { register: bstep, value: 0, tag: constriction }
+      - { register: target_tb, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1786, 1798-1816"
+  artic_fricative_blade:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && !u.burst && !u.labial && u.blade"
+    when: "f.index == 0"
+    set:
+      - { register: lstep, value: 0, tag: constriction }
+      - { register: target_b, value: "params.policy.articulation.voice.fricative_opening", tag: constriction }
+      - { register: target_l, value: 1000, tag: constriction }
+      - { register: target_tb, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1818-1833"
+  artic_fricative_velar:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && !u.burst && !u.labial && !u.blade && u.velar"
+    when: "f.index == 0"
+    set:
+      - { register: lstep, value: 0, tag: constriction }
+      - { register: target_b, value: 1000, tag: constriction }
+      - { register: target_l, value: 1000, tag: constriction }
+      - { register: target_tb, value: 100, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1834-1851"
+  artic_fricative_placeless:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent && !u.burst && !u.labial && !u.blade && !u.velar"
+    when: "f.index == 0"
+    set:
+      - { register: target_l, value: 1000, tag: constriction }
+      - { register: target_tb, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1852-1855"
+  # A stop without a burst: three `if`s again.
+  artic_burstless_stop_blade_area:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.stop && !u.burst && u.blade"
+    when: "f.index == 0"
+    set:
+      - { register: in_bclosure, value: true, tag: constriction }
+      - { register: target_b, value: 0, tag: constriction }
+      - { register: target_l, value: 1000, tag: constriction }
+      - { register: target_tb, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1870-1889"
+  artic_burstless_stop_velar_area:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.stop && !u.burst && u.velar"
+    when: "f.index == 0"
+    set:
+      - { register: target_b, value: 1000, tag: constriction }
+      - { register: target_l, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1893-1898"
+  artic_burstless_stop_labial_area:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.stop && !u.burst && u.labial"
+    when: "f.index == 0"
+    set:
+      - { register: target_b, value: 1000, tag: constriction }
+      - { register: target_l, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1903-1914"
+  # 1935-1945: `else if (place & FALVEL)`, then `else if (phone_feature(...) &
+  # FLABIAL)`: a place bit tested on the feature word, where it is FSYLL.
+  # Reproduced as compiled.
+  artic_sonorant_areas:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.son1"
+    when: "f.index == 0"
+    set:
+      - { register: target_b, value: "!u.stop || (!u.alveolar && u.syllabic) ? 1000 : r.target_b", tag: constriction }
+      - { register: target_l, value: "!u.stop || u.alveolar ? 1000 : r.target_l", tag: constriction }
+      - { register: target_tb, value: "!u.stop ? 1000 : r.target_tb", tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1924-1945"
+
+  # --- a vowel's last frame before a labial: ph_draw.c:2038-2044 -----------
+  artic_vowel_before_labial:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.vowel && n.labial"
+    when: "f.index >= f.count - 1"
+    set:
+      - { register: area_l, value: "params.policy.articulation.voice.fricative_opening", tag: constriction }
+      - { register: target_l, value: 100, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2038-2044"
+
+  # --- the tongue body moves, every frame: ph_draw.c:2807-2930 -------------
+  artic_tongue_closure_needs_velar:
+    kind: frame
+    program: articulation
+    unit: "!u.velar"
+    set:
+      - { register: in_tbclosure, value: false, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2812-2815"
+  artic_tongue_closed:
+    kind: frame
+    program: articulation
+    when: "r.in_tbclosure"
+    set:
+      - { register: target_tb, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2816-2819"
+  # Which branch of 2820-2930 this frame takes: 1 closing, 2 a release after
+  # a burst, 3 a release without one, 4 moving toward the target, 0 none.
+  artic_tongue_case:
+    kind: frame
+    program: articulation
+    set:
+      - register: move_case
+        value: >-
+          r.target_tb < r.area_tb ? 1
+          : (r.target_tb == r.area_tb ? 0
+          : (r.in_tbrelease && r.area_tb < 1000 ? (p.burst || u.burst ? 2 : 3)
+          : (!r.in_tbrelease || !r.in_tbclosure ? 4 : 0)))
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2820, 2829-2835, 2869"
+  artic_tongue_closing:
+    kind: frame
+    program: articulation
+    when: "r.move_case == 1 && r.area_tb != 0"
+    set:
+      - { register: area_tb, value: "max([r.area_tb - 310, r.target_tb])", tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2820-2828"
+  artic_tongue_release_after_burst:
+    kind: frame
+    program: articulation
+    when: "r.move_case == 2"
+    set:
+      - register: area_tb
+        value: >-
+          r.tbstep == -1 ? params.policy.articulation.voice.fricative_opening
+          : params.policy.articulation.area_release[max([r.tbstep, 0])]
+        tag: constriction
+      - { register: tbstep, value: "r.tbstep <= 9 ? r.tbstep + 1 : r.tbstep", tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2836-2848"
+  artic_tongue_release_without_burst:
+    kind: frame
+    program: articulation
+    when: "r.move_case == 3"
+    set:
+      - { register: area_tb, value: "params.policy.articulation.voice.fricative_opening", tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2856-2866"
+  # last_area_tb is never assigned, so the hold after a velar zeroes the area.
+  artic_tongue_moving:
+    kind: frame
+    program: articulation
+    when: "r.move_case == 4"
+    set:
+      - { register: area_tb, value: "r.area_tb + floor((r.target_tb - r.area_tb) / 8)", tag: constriction }
+      - register: area_tb
+        value: >-
+          u.blade && p.velar && f.index < params.policy.articulation.closure.coarticulation_frames
+            ? 0 : r.area_tb
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2869-2884"
+
+  # --- the lips move, every frame: ph_draw.c:3113-3282 ---------------------
+  artic_lips_closed:
+    kind: frame
+    program: articulation
+    when: "r.in_lclosure"
+    set:
+      - { register: target_l, value: 0, tag: constriction }
+      - { register: lstep, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3113-3118"
+  artic_lips_case:
+    kind: frame
+    program: articulation
+    set:
+      - register: move_case
+        value: >-
+          r.target_l < r.area_l ? 1
+          : (r.target_l == r.area_l ? 0
+          : (r.in_lrelease && r.area_l < 1000 ? (p.burst || u.burst ? 2 : 3)
+          : (!r.in_lrelease || !r.in_lclosure ? 4 : 0)))
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3169, 3181-3188, 3234"
+  artic_lips_closing:
+    kind: frame
+    program: articulation
+    when: "r.move_case == 1 && r.area_l != 0"
+    set:
+      - { register: area_l, value: "max([r.area_l - 250, r.target_l])", tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3169-3180"
+  artic_lips_release_after_burst:
+    kind: frame
+    program: articulation
+    when: "r.move_case == 2"
+    set:
+      - register: area_l
+        value: >-
+          r.lstep == -1 ? params.policy.articulation.voice.fricative_opening
+          : params.policy.articulation.area_release[max([r.lstep, 0])]
+        tag: constriction
+      - register: lstep
+        value: "r.lstep == -1 ? 1 : (r.lstep <= 9 ? r.lstep + 1 : r.lstep)"
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3187-3201"
+  artic_lips_release_without_burst:
+    kind: frame
+    program: articulation
+    unit: "u.labial"
+    when: "r.move_case == 3"
+    set:
+      - { register: area_l, value: "params.policy.articulation.voice.fricative_opening", tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3210-3219"
+  # 3236-3276: the quarter step is taken twice, once in the `if` and once
+  # after it; a blade phone holds both areas for its first frames.
+  artic_lips_moving:
+    kind: frame
+    program: articulation
+    when: "r.move_case == 4"
+    set:
+      - { register: area_l, value: "r.area_l + floor((r.target_l - r.area_l) / 4)", tag: constriction }
+      - register: area_b
+        value: >-
+          u.blade && f.index < params.policy.articulation.closure.coarticulation_frames
+            ? r.last_area_b : r.area_b
+        tag: constriction
+      - { register: area_l, value: "r.area_l + floor((r.target_l - r.area_l) / 4)", tag: constriction }
+      - { register: area_l, value: "r.target_l == 0 && r.area_l < 260 ? 0 : r.area_l", tag: constriction }
+      - register: area_l
+        value: >-
+          u.blade && f.index < params.policy.articulation.closure.coarticulation_frames
+            ? r.last_area_l : r.area_l
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3234-3276"
+  artic_lips_limit:
+    kind: frame
+    program: articulation
+    when: "r.move_case >= 2 && r.area_l > 1000"
+    set:
+      - { register: area_l, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3280-3281"
+
+  # --- the flap: ph_draw.c:3290-3330 ---------------------------------------
+  # 3312 reads `tcum >= (allodurs >> 1 - 3)`: a shift by -2, which C leaves
+  # undefined. Taken here as always true (a count of 30 on x86), so the first
+  # half of a flap closes; not yet checked against DECtalk's own values.
+  artic_flap_opening:
+    kind: frame
+    program: articulation
+    unit: "u.is_flap"
+    when: "f.index >= floor(f.count / 2)"
+    set:
+      - { register: area_flap, value: "r.area_flap <= 850 ? r.area_flap + 400 : 1200", tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3303-3309"
+  artic_flap_closing:
+    kind: frame
+    program: articulation
+    unit: "u.is_flap"
+    when: "f.index < floor(f.count / 2)"
+    set:
+      - { register: area_flap, value: "r.area_flap > 0 ? r.area_flap - 400 : 0", tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3312-3324"
+  artic_no_flap:
+    kind: frame
+    program: articulation
+    unit: "!u.is_flap"
+    set:
+      - { register: area_flap, value: 1200, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3329-3330"
+
+  # --- the blade moves, every frame: ph_draw.c:3333-3488 -------------------
+  artic_blade_case:
+    kind: frame
+    program: articulation
+    set:
+      - register: move_case
+        value: >-
+          r.target_b < r.area_b ? 1
+          : (r.target_b == r.area_b && r.bstep != -1 ? 0
+          : (r.in_brelease && r.area_b < 1000 ? (p.burst || u.burst ? 2 : 3)
+          : (!r.in_brelease || !r.in_bclosure ? 4 : 0)))
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3333, 3346-3355, 3411"
+  artic_blade_closing:
+    kind: frame
+    program: articulation
+    when: "r.move_case == 1 && r.area_b != 0"
+    set:
+      - { register: area_b, value: "max([r.area_b - 400, r.target_b])", tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3333-3344"
+  artic_blade_release_after_burst:
+    kind: frame
+    program: articulation
+    when: "r.move_case == 2"
+    set:
+      - register: area_b
+        value: >-
+          r.bstep == -1 ? params.policy.articulation.voice.fricative_opening
+          : (r.target_b != 0 ? params.policy.articulation.area_release[max([r.bstep, 0])] : 0)
+        tag: constriction
+      - register: bstep
+        value: >-
+          r.bstep == -1 ? 1
+          : (r.target_b != 0 && r.bstep <= 9 ? r.bstep + 1 : r.bstep)
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3354-3374"
+  artic_blade_release_without_burst:
+    kind: frame
+    program: articulation
+    when: "r.move_case == 3"
+    set:
+      - register: area_b
+        value: >-
+          u.blade ? params.policy.articulation.voice.fricative_opening
+          : r.area_b + floor((r.target_b - r.area_b) / 2)
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3384-3406"
+  # The block under `#ifdef notworking` (3417-3437) is not compiled.
+  artic_blade_moving:
+    kind: frame
+    program: articulation
+    when: "r.move_case == 4"
+    set:
+      - register: area_b
+        value: >-
+          r.target_b > r.area_b
+            ? (r.target_b <= 200 && r.area_b < 100 ? r.target_b
+               : r.area_b + floor((r.target_b - r.area_b) / 2))
+            : r.area_b
+        tag: constriction
+      - register: area_b
+        value: >-
+          (u.labial || u.velar) && f.index < params.policy.articulation.closure.coarticulation_frames
+            ? (p.blade && r.last_area_b < 200 ? 0 : r.last_area_b) : r.area_b
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3411-3443, 3464-3474"
+  artic_blade_limit:
+    kind: frame
+    program: articulation
+    when: "r.move_case >= 2 && r.area_b > 1000"
+    set:
+      - { register: area_b, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3486-3487"
+
+  # --- DH and TH close the blade first: ph_draw.c:3490-3553 ----------------
+  # Six frames from the end inside a word, eight before a word boundary or a
+  # stronger one, the blade is given 300 to open to.
+  artic_dental_closed:
+    kind: frame
+    program: articulation
+    unit: "u.is_dh_th"
+    when: "f.index < f.count - (u.boundary < params.policy.timing.boundary.word ? 6 : 8)"
+    set:
+      - { register: target_b, value: 0, tag: constriction }
+      - { register: area_b, value: 0, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3490-3514, 3530-3541"
+  artic_dental_opening:
+    kind: frame
+    program: articulation
+    unit: "u.is_dh_th"
+    when: "!(f.index < f.count - (u.boundary < params.policy.timing.boundary.word ? 6 : 8))"
+    set:
+      - { register: target_b, value: 300, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3515-3525, 3542-3552"
+
+  # --- after the packet is written: ph_draw.c:4107-4108 --------------------
+  artic_remember_areas:
+    kind: frame
+    program: articulation
+    set:
+      - { register: last_area_b, value: "r.area_b", tag: constriction }
+      - { register: last_area_l, value: "r.area_l", tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:4107-4108"
+
 phases:
   - name: articulation
     after: [finalize]
@@ -1070,3 +1858,62 @@ phases:
       - artic_chink_area
       - artic_pressure_out
       - artic_pressure_out_floor
+      # The constrictions share no register with the rules above; among
+      # themselves they are in the C's order.
+      - artic_closure_end
+      - artic_lips_closure_over
+      - artic_lips_closure_building
+      - artic_blade_closure_over
+      - artic_blade_closure_building
+      - artic_tongue_closure_over
+      - artic_tongue_closure_starts
+      - artic_initial_reset_areas
+      - artic_initial_before_labial_burst_stop
+      - artic_initial_before_blade_burst_stop
+      - artic_initial_before_velar_burst_stop
+      - artic_initial_blade_fricative_area
+      - artic_initial_voiced_areas
+      - artic_initial_voiced_labial_areas
+      - artic_initial_vowel_areas
+      - artic_initial_nasal_areas
+      - artic_initial_before_dental
+      - artic_silence_areas
+      - artic_releases_end_after_non_plosive
+      - artic_burst_obstruent_labial
+      - artic_burst_obstruent_blade
+      - artic_burst_obstruent_velar
+      - artic_fricative_labial
+      - artic_fricative_blade
+      - artic_fricative_velar
+      - artic_fricative_placeless
+      - artic_burstless_stop_blade_area
+      - artic_burstless_stop_velar_area
+      - artic_burstless_stop_labial_area
+      - artic_sonorant_areas
+      - artic_vowel_before_labial
+      - artic_tongue_closure_needs_velar
+      - artic_tongue_closed
+      - artic_tongue_case
+      - artic_tongue_closing
+      - artic_tongue_release_after_burst
+      - artic_tongue_release_without_burst
+      - artic_tongue_moving
+      - artic_lips_closed
+      - artic_lips_case
+      - artic_lips_closing
+      - artic_lips_release_after_burst
+      - artic_lips_release_without_burst
+      - artic_lips_moving
+      - artic_lips_limit
+      - artic_flap_opening
+      - artic_flap_closing
+      - artic_no_flap
+      - artic_blade_case
+      - artic_blade_closing
+      - artic_blade_release_after_burst
+      - artic_blade_release_without_burst
+      - artic_blade_moving
+      - artic_blade_limit
+      - artic_dental_closed
+      - artic_dental_opening
+      - artic_remember_areas

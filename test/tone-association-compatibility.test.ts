@@ -79,6 +79,8 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // end-of-phrase spread, which initial-silence cases run every frame, when the
 // next phone's opening applies) regenerate three: against fc64b694 only AG
 // changes (`--drop AG` gives equal hashes) and "sip sip." not at all.
+// AL, ABLADE and ATB regenerate all four: against 3f603345 the tracks are
+// equal with `--drop AL,ABLADE,ATB`.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

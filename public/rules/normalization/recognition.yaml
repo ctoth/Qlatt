@@ -335,6 +335,25 @@ text_recognition:
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:3688-3707 (a fraction) and 4118-4180 (a part number: a word of digits, slashes, hyphens and letters that has a digit or a slash); the text task reads the whole word'
         - 'DECtalk 4.63 LTS/l_us_pr1.c:815-863 (ls_proc_is_date, the date form, which is tried first)'
+    # A number with a sign written on it ("-7", "+2.5", "-$20", "-.5",
+    # "-1/2"), kept whole for a frontend whose lexicon speaks the sign
+    # (tn_recognition_policy.signed_numbers: source). A word that begins with
+    # a hyphen and a digit and is no number ("-5th", "-10-15") is kept the
+    # same way: the lexicon reads it as a part number, the hyphen by name. A
+    # plus sign is kept only on a number.
+    - id: tn_signed_number_source
+      pattern: '(?<![\w$.,:/+-])(?<token>[-+]\$?\.?[0-9](?:[A-Za-z0-9,./-]*[A-Za-z0-9])?)(?![\w$:%/-]|[.,][0-9])'
+      flags: ''
+      class: number_token
+      captures: {token: token}
+      when: >-
+        get(maps.tn_recognition_policy, 'signed_numbers', 'words') == 'source'
+        && (captures.token.startsWith('-') || matches(captures.token, '^\\+\\$?[0-9.,]*[0-9]$'))
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_pr1.c:80-110 (ls_proc_do_sign: "minus" and "plus" from their phone lists, then a word boundary), LTS/ls_task.c:3148-3215 (the sign is taken off the word and the number rules read the rest)'
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4180 (a word the number rules do not take, with a hyphen and a digit, is a part number)'
     # A decimal number written with no digit before its point (".5", ".25"),
     # kept whole for a frontend whose lexicon reads it
     # (tn_recognition_policy.bare_decimals: source): the point is not a

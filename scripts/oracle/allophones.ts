@@ -80,6 +80,8 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // A symbol standing alone that the dictionary names, a decimal with no
   // digit before its point, a path with slashes, and two words written apart.
   "dectalk-us-symbol-words-v1.json",
+  // A sign written on a number, and a lone "a" right after a number.
+  "dectalk-us-signed-numbers-v1.json",
 ];
 
 /** Every corpus with a packet record. */

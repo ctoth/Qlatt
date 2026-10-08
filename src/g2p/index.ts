@@ -45,6 +45,7 @@ import {
   speakNumberToken,
   speakPartDigits,
   speakQuantityAfterMoney,
+  speakSignedNumber,
 } from "./table-number";
 import { stripSuffixes } from "./table-suffix";
 import type { DictLookup, PronunciationResult } from "./types";
@@ -265,7 +266,11 @@ export function pronounce(
   // "9:30 am" have EY, EH M; "9th am", "$9 am" and "I am" have the word.
   // The letters are sent inside the number's own word, so they have its
   // class: `adj` after a plain number, none after a time.
-  if (table?.letterPhones && context.afterNumber && /^[ap]m$/.test(lowerWord)) {
+  if (
+    table?.letterPhones &&
+    (context.afterNumber === "plain" || context.afterNumber === "time") &&
+    /^[ap]m$/.test(lowerWord)
+  ) {
     const letterPhones = table.letterPhones;
     const parts = [...lowerWord].map((letter) => ({
       phonemes: [...(letterPhones[letter] ?? [])],
@@ -291,17 +296,22 @@ export function pronounce(
   // fraction digits (LTS/ls_task.c:3181, 3622, 3747; speakNumberToken). Only
   // the plain-number rule sets the class (:3776-3782), which a word with a
   // dollar sign, a colon or a plural ending does not reach.
-  if (table?.numberPhones && /^[$0-9.]/.test(lowerWord)) {
+  // A sign written on the number is spoken first ("-7" is "minus seven";
+  // speakSignedNumber) and changes nothing of the class.
+  if (table?.numberPhones && /^(?:[$0-9.]|[-+][$0-9.])/.test(lowerWord)) {
     const digitsOnly = /^[0-9]+$/.test(lowerWord);
+    const signed = /^[-+]/.test(lowerWord);
     // A dollar amount before a word that takes "dollars" behind it ("$2
     // million") is only its number here; that word speaks the rest
     // (LTS/ls_task.c:3227-3290).
     const symbols = digitsOnly
       ? speakDigits(lowerWord, table.numberPhones)
-      : lowerWord.startsWith("$") && context.quantityAfter
-        ? speakMoneyBeforeQuantity(lowerWord.slice(1), table.numberPhones)
-        : speakNumberToken(lowerWord, table.numberPhones);
-    const plainNumber = digitsOnly || /^[0-9,.]+$/.test(lowerWord);
+      : signed
+        ? speakSignedNumber(lowerWord, table.numberPhones)
+        : lowerWord.startsWith("$") && context.quantityAfter
+          ? speakMoneyBeforeQuantity(lowerWord.slice(1), table.numberPhones)
+          : speakNumberToken(lowerWord, table.numberPhones);
+    const plainNumber = digitsOnly || /^[-+]?[0-9,.]+$/.test(lowerWord);
     if (symbols) {
       const parts = numberWords(symbols, table);
       return {
@@ -373,6 +383,24 @@ export function pronounce(
   // punctuation, with its own class, and another against a punctuation mark
   // ("a box." and "box a."; DECtalk 4.63 LTS/ls_task.c:2647-2673).
   const placed = table?.wordsByPunctuation?.[lowerWord];
+  // Right after a plain number or an ordinal the word is neither form: it is
+  // spelled, the letter's name with the class `noun` (:2655-2657: the article
+  // only while the count a number starts stands at 0 or 1, and it stands at
+  // 2 for the word after the number). Measured on say.exe: "Seat 23 A",
+  // "Take 2 a day" and "2nd a day" have EY; "2 of a kind", "$2 a day" and
+  // "9:30 a day" have the article.
+  if (
+    placed &&
+    table?.letterPhones?.[lowerWord] &&
+    (context.afterNumber === "plain" || context.afterNumber === "ordinal")
+  ) {
+    return {
+      phonemes: [...table.letterPhones[lowerWord]],
+      source: "spelling",
+      word: lowerWord,
+      ...nounClass(),
+    };
+  }
   if (placed && !context.atPunctuation) {
     return {
       phonemes: [...placed.apart.phonemes],
@@ -823,14 +851,16 @@ export function pronounceClause(
     word !== undefined && /^\$(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)?(?:\.[0-9]+)?$/.test(word);
   // A plain number (digits, with separators or fraction digits) or a clock
   // time: the two kinds of word after which "am" and "pm" are spelled.
-  const numberKind = (word: string | undefined): "plain" | "time" | undefined =>
+  const numberKind = (word: string | undefined): "plain" | "time" | "ordinal" | undefined =>
     word === undefined
       ? undefined
       : /^(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)(?:\.[0-9]+)?$/.test(word)
         ? "plain"
         : /^[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?$/.test(word)
           ? "time"
-          : undefined;
+          : /^[0-9]+(?:st|nd|rd|th)$/i.test(word)
+            ? "ordinal"
+            : undefined;
   const read = (laterVerbAt: ((index: number) => boolean) | null): PronunciationResult[] => {
     const before: number[] = [];
     return words.map((word, index) => {

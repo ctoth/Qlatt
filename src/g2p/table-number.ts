@@ -50,6 +50,9 @@ export interface NumberPhones {
   /** "half" and "halves", a fraction's denominator 2. */
   half?: readonly number[];
   halves?: readonly number[];
+  /** "minus" and "plus", a sign written on a number. */
+  minus?: readonly number[];
+  plus?: readonly number[];
   /**
    * The words that take "dollars" behind them after a dollar amount
    * ("million"), each with its phones.
@@ -554,10 +557,16 @@ export function speakTime(text: string, lists: NumberPhones): number[] | null {
  * number, then the ending ls_util_pluralize picks from the last phone
  * (LTS/ls_util.c:1442-1466). Null for anything else.
  */
-export function speakPluralNumber(text: string, lists: NumberPhones): number[] | null {
+export function speakPluralNumber(
+  text: string,
+  lists: NumberPhones,
+  options: { signed?: boolean } = {},
+): number[] | null {
   const match = PLURAL.exec(text);
   if (!match) return null;
-  const symbols = isYear(match[1]) ? speakYear(match[1], lists) : speakNumber(match[1], lists);
+  // A number with a sign is never read as a year (LTS/ls_task.c:3950, 4037).
+  const symbols =
+    !options.signed && isYear(match[1]) ? speakYear(match[1], lists) : speakNumber(match[1], lists);
   if (!symbols) return null;
   const last = symbols.findLast((symbol) => symbol < NUMBER_S2);
   const ending =
@@ -603,6 +612,31 @@ export function speakNumberToken(text: string, lists: NumberPhones): number[] | 
     speakOrdinalNumber(text, lists) ??
     (/[,.]/.test(text) ? (speakDecimal(text, lists)?.symbols ?? null) : null)
   );
+}
+
+/**
+ * A number with a sign written on it, as the text task speaks it: "minus" or
+ * "plus" from the phone lists and a word boundary (LTS/l_us_pr1.c:80-110
+ * ls_proc_do_sign), then the number by the rule that takes it: a dollar
+ * amount, a fraction (LTS/ls_task.c:3697-3701; "-1/2" is "minus one half",
+ * not the dictionary's "1/2"), a plural number, digits, or a decimal. A
+ * number with a sign is never a year (:3786, :3950, :4037): "-1990" is "minus
+ * one thousand, nine hundred and ninety". Null when `text` is not a sign and
+ * one of those ("-5th" and "-10-15" are part numbers).
+ */
+export function speakSignedNumber(text: string, lists: NumberPhones): number[] | null {
+  const match = /^([-+])(.+)$/.exec(text);
+  if (!match || !lists.minus || !lists.plus) return null;
+  const rest = match[2];
+  const spoken = rest.startsWith("$")
+    ? speakMoney(rest.slice(1), lists)
+    : /^[0-9]+$/.test(rest)
+      ? speakNumber(rest, lists)
+      : (speakFraction(rest, lists) ??
+        speakPluralNumber(rest, lists, { signed: true }) ??
+        (/^[0-9,]*\.?[0-9]+$/.test(rest) ? (speakDecimal(rest, lists)?.symbols ?? null) : null));
+  if (!spoken) return null;
+  return [...(match[1] === "-" ? lists.minus : lists.plus), NUMBER_WBOUND, ...spoken];
 }
 
 /**

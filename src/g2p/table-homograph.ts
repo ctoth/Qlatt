@@ -65,10 +65,11 @@ export interface ClauseContext {
   /** The word is such a word and stands right after a dollar amount. */
   moneyBefore?: boolean;
   /**
-   * The word right before this one is a plain number or a clock time; "am"
-   * and "pm" are spelled there.
+   * The word right before this one is a plain number, a clock time or a
+   * number with an ordinal ending: "am" and "pm" are spelled after the first
+   * two, and a lone "a" is the letter after the first and the last.
    */
-  afterNumber?: "plain" | "time";
+  afterNumber?: "plain" | "time" | "ordinal";
 }
 
 /** The context of a word spoken alone. */

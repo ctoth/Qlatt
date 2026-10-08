@@ -473,6 +473,9 @@ const numberPhones = {
   // A fraction's denominator 2 (LTS/l_us_pr1.c:1034-1067).
   half: phoneList("phalf"),
   halves: phoneList("phalves"),
+  // A sign written on a number (LTS/l_us_pr1.c:80-110 ls_proc_do_sign).
+  minus: phoneList("pminus"),
+  plus: phoneList("pplus"),
   // The words that take "dollars" behind them when they follow a dollar
   // amount, nwdtab[] (LTS/l_us_con.c:539-567; LTS/ls_task.c:3227-3290): each
   // entry is its length, the letters, EOS and the phones up to SIL; a 0 ends

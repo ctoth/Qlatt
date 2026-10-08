@@ -19,6 +19,25 @@
     { "id": "end-tab", "text": "One two\tthree four.", "group": "clause-end" },
     { "id": "end-question-words", "text": "Is it late", "group": "clause-end" },
     { "id": "end-letter", "text": "b", "group": "clause-end" },
-    { "id": "end-letters", "text": "a f c", "group": "clause-end" }
+    { "id": "end-letters", "text": "a f c", "group": "clause-end" },
+    { "id": "bracket-word", "text": "See the note [here] for more.", "group": "bracket" },
+    { "id": "bracket-index", "text": "The array[3] holds a value.", "group": "bracket" },
+    { "id": "bracket-lone", "text": "A lone [ bracket is here.", "group": "bracket" },
+    { "id": "bracket-sic", "text": "He wrote [sic] in the margin.", "group": "bracket" },
+    {
+      "id": "space-run",
+      "text": "One two                                              three four.",
+      "group": "white-space"
+    },
+    {
+      "id": "space-run-period",
+      "text": "Wait.                                                  Go on.",
+      "group": "white-space"
+    },
+    {
+      "id": "long-clause",
+      "text": "The quiet harbor town kept its small wooden boats tied along the gray stone wall while the tide went out past the long sand bar and the gulls walked slowly over the wet mud looking for whatever the water had left behind that morning and the old men on the bench watched them without saying a word to each other until the church bell rang twelve times.",
+      "group": "long-clause"
+    }
   ]
 }

@@ -9,7 +9,12 @@
  *   - texts that end, or are cut, by a clause end and not by a written mark:
  *     no final mark, a tab. The clause end the host sends after a text ends
  *     the words still pending as a period does (PH/ph_task.c:665-676); the
- *     parser's output carries it and the rule tn_parser_clause_end reads it.
+ *     parser's output carries it and the rule tn_parser_clause_end reads it;
+ *   - a bracket that does not start a command, which is text
+ *     (CMD/cm_pars.c:1379-1472), and a run of more than forty white space
+ *     characters, which ends a clause (CMD/cm_pars.c:1333-1343);
+ *   - a clause of 351 characters with no mark in it, which DECtalk hands on
+ *     in part before its end (CMD/cm_text.c:597-603, :1247-1269).
  *
  * The fixtures are the say.exe WAVs alone. Regenerate with the instrumented
  * and stock builds (scripts/oracle/export-dectalk-vtm-fixture.ts header):

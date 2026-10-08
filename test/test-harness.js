@@ -12,6 +12,7 @@ import { refreshSpeakerOptions } from "./harness/speaker.js";
 import { attachSpectrogram, clearSpectrogram } from "./harness/spectrogram.js";
 import { state } from "./harness/state.js";
 import { warmFrontendOnce } from "./harness/warmup.js";
+import { waitForWarmup } from "./harness/warmup-wait.js";
 
 let runtimeModulePromise = null;
 
@@ -45,8 +46,9 @@ function warmSelectedFrontend() {
 
 async function speakWithRuntime() {
   // If the frontend is still being prepared, let that finish: it is the same
-  // work Speak would otherwise repeat with blocking requests.
-  await warmSelectedFrontend();
+  // work Speak would otherwise repeat with blocking requests. The wait has a
+  // limit (harness/warmup-wait.js): Speak never depends on the warm-up.
+  await waitForWarmup(warmSelectedFrontend(), selectedFrontendId());
   const { speak } = await loadRuntimeModule();
   await speak();
 }

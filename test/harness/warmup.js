@@ -23,24 +23,12 @@ import { preloadF0Filters } from "../../src/f0-filters-loader.ts";
 import { primeSyncResources, takeSynchronousFetches } from "../../src/sync-resource-cache.ts";
 import { loadNewRuntimeConfig } from "./experiment.js";
 import { state } from "./state.js";
+import { idle } from "./warmup-wait.js";
 
 /** The utterance compiled in step 4. Its audio is never played. */
 const WARMUP_PHRASE = "a.";
 
 const warmed = new Map();
-
-/** The longest the compile waits for an idle moment, in ms. Engineering estimate. */
-const IDLE_WAIT_LIMIT_MS = 200;
-
-// An idle moment, or the limit, whichever is first. The timer is not a
-// formality: a tab that is not visible is never given an idle callback, and
-// Speak waits for the warm-up.
-function idle() {
-  return new Promise((resolve) => {
-    if (typeof requestIdleCallback === "function") requestIdleCallback(() => resolve());
-    setTimeout(resolve, IDLE_WAIT_LIMIT_MS);
-  });
-}
 
 async function warm(frontendId, loadRuntimeModule) {
   const timings = {};
@@ -67,6 +55,7 @@ async function warm(frontendId, loadRuntimeModule) {
   await preloadF0Filters(`${state.WORKLET_BASE_PATH}f0-filters.wasm`);
   mark("f0Filters");
 
+  // An idle moment or a time limit, whichever is first (warmup-wait.js).
   await idle();
   mark("idleWait");
   takeSynchronousFetches();

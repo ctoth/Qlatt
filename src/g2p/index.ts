@@ -347,7 +347,18 @@ export function pronounce(
 export function pronounceClause(
   words: readonly string[],
   dictLookup: DictLookup,
-  options: { ltsPath: string; morphologyPath: string; stressPolicyPath: string },
+  options: {
+    ltsPath: string;
+    morphologyPath: string;
+    stressPolicyPath: string;
+    /**
+     * False when the mark that ends the run is not in the text (a text's end
+     * closed as a sentence): the last word then does not stand against
+     * punctuation. DECtalk's "a" is [x] at an unpunctuated text end and ['e]
+     * before a written period (LTS/ls_task.c:2647-2673).
+     */
+    atWrittenPunctuation?: boolean;
+  },
 ): PronunciationResult[] {
   const table = options.ltsPath ? ltsTableAt(options.ltsPath) : null;
   // Without words of two entries no word depends on another.
@@ -368,7 +379,7 @@ export function pronounceClause(
         context: {
           before,
           laterVerb: laterVerbAt ? laterVerbAt(index) : null,
-          atPunctuation: index === words.length - 1,
+          atPunctuation: index === words.length - 1 && options.atWrittenPunctuation !== false,
           ...(number === undefined ? {} : { numberBefore: number }),
         },
       });

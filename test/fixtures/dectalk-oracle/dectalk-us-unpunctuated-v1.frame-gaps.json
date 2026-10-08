@@ -1,0 +1,14 @@
+{
+  "bare-word": ["B1","AV","AP","A2","A3","A5"],
+  "bare-word-vowel": ["B1","AV","AP","A2"],
+  "bare-words": ["B1","AV","AP","A2","A4","A5"],
+  "bare-sentence": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "bare-number": ["B1","AV","AP","A2","A4","A5","AB"],
+  "bare-ordinal": ["B1","AV","AP","A2","A4","A5","AB"],
+  "bare-money": ["B1","AV","AP","A2","A4","A5"],
+  "bare-abbreviation": ["B1","AV","AP","A2"],
+  "bare-letter": ["B1","AV","AP","A6","AB"],
+  "bare-letter-a": ["B1","AV","AP"],
+  "bare-after-sentence": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "bare-trailing-space": ["B1","AV","AP","A2","A3","A5"]
+}

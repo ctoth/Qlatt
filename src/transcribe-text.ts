@@ -81,6 +81,8 @@ type OrthographyInputToken = {
   tokenId: string;
   word: string;
   isPunctuation: boolean;
+  /** A punctuation token that is not in the source text: a text rule supplied it. */
+  supplied?: boolean;
   symbol?: string;
   pronunciationKey?: string;
   parentDecisionId?: string;
@@ -321,11 +323,27 @@ function rewriteOrthographyTokens(
       citations: ["Allen et al. 1987 Ch.2-3"],
     });
   const sharedInput = typeof entries[0] === "string" ? beginInput() : null;
+  // Punctuation tokens that a text rule supplied: the mark is not in the
+  // source text the token comes from (a text's end closed as a sentence).
+  const suppliedPunctuation = new Set<string>();
   entries.forEach((entry, index) => {
     const input = sharedInput ?? beginInput();
     const word = typeof entry === "string" ? entry : entry.word;
     const punctuation = isPunctuationTokenWithTables(word, tables);
     const token = input.createItem("token", `token_${index.toString()}`);
+    if (punctuation && typeof entry !== "string") {
+      const sourceText = utterance.getItem(String(entry.source.get("sourceTextId")))?.get("text");
+      const start = entry.source.get("sourceStart");
+      const end = entry.source.get("sourceEnd");
+      if (
+        typeof sourceText === "string" &&
+        typeof start === "number" &&
+        typeof end === "number" &&
+        !sourceText.slice(start, end).includes(word)
+      ) {
+        suppliedPunctuation.add(token.id);
+      }
+    }
     if (typeof entry !== "string") {
       input.read(entry.source, "normalizedText");
       input.set(token, "sourceNormalizationId", entry.source.id);
@@ -358,6 +376,7 @@ function rewriteOrthographyTokens(
         tokenId: token.id,
         word,
         isPunctuation: tokenType === "punctuation",
+        ...(suppliedPunctuation.has(token.id) ? { supplied: true } : {}),
         ...(typeof punctuationSymbol === "string" ? { symbol: punctuationSymbol } : {}),
         ...(typeof pronunciationKey === "string" && pronunciationKey.length > 0
           ? { pronunciationKey }
@@ -483,11 +502,13 @@ export function transcribeText(
   // part.
   const inClause = new Map<number, PronunciationResult>();
   if (!useSymbolMode) {
-    const pronounceRun = (run: readonly number[]): void => {
+    // A run that ends at a mark a text rule supplied does not stand against
+    // punctuation: the text has none there.
+    const pronounceRun = (run: readonly number[], atWrittenPunctuation = true): void => {
       const results = pronounceClause(
         run.map((position) => orthographyWords[position].word),
         effectiveDictLookup,
-        { ltsPath, morphologyPath, stressPolicyPath },
+        { ltsPath, morphologyPath, stressPolicyPath, atWrittenPunctuation },
       );
       run.forEach((position, order) => {
         inClause.set(position, results[order]);
@@ -496,7 +517,7 @@ export function transcribeText(
     let run: number[] = [];
     orthographyWords.forEach((token, position) => {
       if (token.isPunctuation) {
-        if (run.length > 0) pronounceRun(run);
+        if (run.length > 0) pronounceRun(run, token.supplied !== true);
         run = [];
       } else if (token.word && typeof token.pronunciationKey !== "string") {
         run.push(position);

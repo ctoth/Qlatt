@@ -51,6 +51,8 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-repeated-words-v1.json",
   // One sentence at speaking rates on both sides of 350 words per minute.
   "dectalk-us-rate-frames-v1.json",
+  // Texts with no punctuation at their end.
+  "dectalk-us-unpunctuated-v1.json",
 ];
 
 /** Every corpus with a packet record. */

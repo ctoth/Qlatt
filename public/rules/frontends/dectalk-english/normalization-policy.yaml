@@ -48,3 +48,27 @@ maps:
     # the sentence at the text's end. The shared rule, which also takes lower
     # case and speaks the letters as words, is off.
     initialisms: capitals
+# A text that does not end in punctuation is still closed as a sentence: when
+# the text is flushed the text task sends a breath break (LTS/ls_task.c:1236-1260,
+# the VT case) and the clause ends as one that ends in a period. Measured on
+# DECtalk 4.63 say.exe, as the symbols the phonemic stage receives: "cat" is
+# K AE T, a word boundary and the period symbol; the same for "1st", "42",
+# "hello world", "Mr" (spelled, then the period) and "B".
+rules:
+  tn_text_end:
+    kind: structural
+    select:
+      relation: Normalization
+      where: >-
+        current.outputType == 'terminal' && next == null
+        && !(current.text in transcription.punctuation_tokens)
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': current.text}, {'type': 'terminal', 'text': '.'}]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:1236-1260 (the flush character ends the clause with a breath break)"
+phases:
+  - name: normalization_text_end
+    after: [normalization_terminal_words]
+    rules: [tn_text_end]

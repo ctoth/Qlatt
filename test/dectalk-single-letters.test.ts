@@ -39,7 +39,8 @@ function classesOf(text: string, word: string): unknown {
 describe("one-letter words in dectalk-english", () => {
   it("spells a letter that is not a word, with the class noun", () => {
     expect(phones("Plan C is ready.").slice(5, 7)).toEqual(["S", "IY"]);
-    expect(phones("a f c")).toEqual(["AX", "EH", "F", "S", "IY"]);
+    // No period is written; the text's end is the sentence end (SIL).
+    expect(phones("a f c")).toEqual(["AX", "EH", "F", "S", "IY", "SIL"]);
     expect(classesOf("Plan C is ready.", "c")).toEqual(["noun"]);
   });
 
@@ -82,7 +83,7 @@ describe("one-letter words in dectalk-english", () => {
   // two clause ends.
   it("reads a letter that is also a phoneme symbol as the letter", () => {
     expect(phones("B.")).toEqual(["B", "B_REL", "IY", "SIL", "SIL"]);
-    expect(phones("b")).toEqual(["B", "B_REL", "IY"]);
+    expect(phones("b")).toEqual(["B", "B_REL", "IY", "SIL"]);
   });
 
   it("keeps phoneme-symbol input in a frontend that does not turn it off", () => {

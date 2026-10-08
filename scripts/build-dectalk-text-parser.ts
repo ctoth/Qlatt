@@ -1,0 +1,240 @@
+#!/usr/bin/env node
+
+/**
+ * build-dectalk-text-parser.ts
+ * ============================
+ * Writes the rule table of DECtalk 4.63's command text parser as data: the
+ * program that rewrites text (phone numbers, dates, some abbreviations,
+ * punctuation) before the letter-to-sound stage reads it.
+ *
+ * Source. The build compiles CMD/par_rule2.h (NEW_BINARY_PARSER,
+ * dectalkf.h:99; CMD/par_rule.c:54-65), which a rule compiler generated from
+ * CMD/par_rule2.par. The compiler source in the tree (CMD/par_comp.c) is older
+ * than that rule file and rejects two of its head tags, so the compiled
+ * header is decoded here, not the rule text. The rule text is read only to
+ * find each rule's line, as its citation.
+ *
+ * What is decoded (CMD/par_pars1.c:1171-1369, CMD/par_bin.h):
+ *   - each entry's 16-bit flag word; for a special entry (stop, return, goto,
+ *     call) its target; for a rule its number, language mask, mode mask and
+ *     the targets its flags announce, in the order hit, miss, call-on-hit,
+ *     call-on-miss, copy-hit;
+ *   - the rule's body, kept as the bytes the interpreter reads
+ *     (src/text-parser, a port of par_pars1.c);
+ *   - the section starts and the word lists.
+ * Nothing is filtered: which rules run is decided when the table is used, by
+ * the language and mode a frontend's policy gives.
+ *
+ * Usage:
+ *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
+ *     scripts/build-dectalk-text-parser.ts [--dectalk C:/Users/Q/src/dectalk/463] [--out <file>]
+ */
+
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const argv = process.argv.slice(2);
+const flag = (name: string): string | undefined => {
+  const index = argv.indexOf(`--${name}`);
+  return index >= 0 ? argv[index + 1] : undefined;
+};
+const dectalkRoot = path.resolve(flag("dectalk") ?? "C:/Users/Q/src/dectalk/463");
+const cmdDir = path.join(dectalkRoot, "dapi", "src", "CMD");
+const outPath = path.resolve(
+  flag("out") ??
+    path.join(
+      repoRoot,
+      "public",
+      "rules",
+      "frontends",
+      "dectalk-english",
+      "text-parser-table.json",
+    ),
+);
+const HEADER = "par_rule2.h";
+const RULE_TEXT = "par_rule2.par";
+
+const header = fs.readFileSync(path.join(cmdDir, HEADER), "latin1");
+
+/** The numbers of `name[...] = { ... };` in the header. */
+function arrayOf(name: string): number[] {
+  const match = new RegExp(`\\b${name}\\s*\\[[^\\]]*\\]\\s*=\\s*\\{([\\s\\S]*?)\\};`).exec(header);
+  if (!match) throw new Error(`E_PARSER_TABLE: ${HEADER} has no array ${name}`);
+  return (match[1].match(/0x[0-9A-Fa-f]+|\d+/g) ?? []).map(Number);
+}
+function scalarOf(name: string): number {
+  const match = new RegExp(`\\b${name}\\s*=\\s*(\\d+)\\s*;`).exec(header);
+  if (!match) throw new Error(`E_PARSER_TABLE: ${HEADER} has no value ${name}`);
+  return Number(match[1]);
+}
+
+const ruleSections = arrayOf("rule_sections");
+const ruleIndexTable = arrayOf("rule_index_table");
+const ruleData = arrayOf("rule_data_table");
+const numRules = scalarOf("num_rules");
+if (ruleIndexTable.length !== numRules) {
+  throw new Error(`E_PARSER_TABLE: ${ruleIndexTable.length} rule offsets, num_rules ${numRules}`);
+}
+if (ruleSections.length !== scalarOf("num_rule_sections")) {
+  throw new Error("E_PARSER_TABLE: rule_sections does not match num_rule_sections");
+}
+
+// CMD/par_bin.h, the rule flag word.
+const BIN_SPECIAL_RULE_MASK = 0xe000;
+const SPECIAL: ReadonlyMap<number, string> = new Map([
+  [0x2000, "stop"],
+  [0x4000, "return"],
+  [0xa000, "goto"],
+  [0xc000, "call"],
+]);
+const BIN_NEXT_HIT = 0x1000;
+const BIN_NEXT_MISS = 0x0800;
+const BIN_GORET_HIT = 0x0400;
+const BIN_GORET_MISS = 0x0200;
+const BIN_COPY_HIT = 0x0100;
+const BIN_DICT_HIT = 0x0080;
+const BIN_DICT_MISS = 0x0040;
+
+const u16 = (bytes: readonly number[], at: number): number => bytes[at] | (bytes[at + 1] << 8);
+const u32 = (bytes: readonly number[], at: number): number =>
+  (bytes[at] | (bytes[at + 1] << 8) | (bytes[at + 2] << 16) | (bytes[at + 3] << 24)) >>> 0;
+const hex = (bytes: readonly number[]): string =>
+  bytes.map((byte) => byte.toString(16).padStart(2, "0")).join("");
+
+/** Line of each rule number in the rule text: `...:R<n>` in a head, or `STOP,R<n>`. */
+const lineOfRule = new Map<number, number>();
+fs.readFileSync(path.join(cmdDir, RULE_TEXT), "latin1")
+  .split(/\r?\n/)
+  .forEach((line, index) => {
+    if (line.startsWith(";")) return;
+    const head = /^(?:0x[0-9A-Fa-f]{8}-0x[0-9A-Fa-f]{8}:([^,]*)|[A-Z]+[0-9]*),/.exec(line);
+    if (!head) return;
+    const number = /(?:^|[;,:])R(\d+)/.exec(head[1] ?? line.slice(0, line.indexOf(",") + 12));
+    if (number && !lineOfRule.has(Number(number[1]))) lineOfRule.set(Number(number[1]), index + 1);
+  });
+
+interface RuleEntry {
+  /** Position in the table; targets are positions. */
+  index: number;
+  kind: "rule" | "stop" | "return" | "goto" | "call";
+  /** The 16-bit flag word (par_bin.h). */
+  flags: number;
+  /** goto and call: the entry to continue at. */
+  target?: number;
+  /** The rule's R number in the rule text. */
+  number?: number;
+  /** Its line in the rule text, when the number is found there. */
+  line?: number;
+  language?: number;
+  mode?: number;
+  /** The word's dictionary state the rule needs (par_pars1.c:1280-1317). */
+  dictionary?: "hit" | "miss" | "abbreviation";
+  hit?: number;
+  miss?: number;
+  callHit?: number;
+  callMiss?: number;
+  copyHit?: number;
+  /** The whole compiled entry, as hexadecimal. */
+  bytes: string;
+  /** Offset of the body inside `bytes`, in bytes. */
+  body?: number;
+}
+
+const rules: RuleEntry[] = ruleIndexTable.map((start, index) => {
+  const end = index + 1 < ruleIndexTable.length ? ruleIndexTable[index + 1] : ruleData.length;
+  const bytes = ruleData.slice(start, end);
+  const flags = u16(bytes, 0);
+  if (flags & BIN_SPECIAL_RULE_MASK) {
+    const kind = SPECIAL.get(flags & BIN_SPECIAL_RULE_MASK);
+    if (!kind) throw new Error(`E_PARSER_TABLE: entry ${index} has special flags ${flags}`);
+    return {
+      index,
+      kind: kind as RuleEntry["kind"],
+      flags,
+      ...(kind === "goto" || kind === "call" ? { target: u16(bytes, 2) } : {}),
+      bytes: hex(bytes),
+    };
+  }
+  const number = u16(bytes, 2);
+  let at = 12;
+  const field = (bit: number): number | undefined => {
+    if (!(flags & bit)) return undefined;
+    const value = u16(bytes, at);
+    at += 2;
+    return value;
+  };
+  const hit = field(BIN_NEXT_HIT);
+  const miss = field(BIN_NEXT_MISS);
+  const callHit = field(BIN_GORET_HIT);
+  const callMiss = field(BIN_GORET_MISS);
+  const copyHit = field(BIN_COPY_HIT);
+  const dictionary =
+    flags & BIN_DICT_HIT && flags & BIN_DICT_MISS
+      ? "abbreviation"
+      : flags & BIN_DICT_HIT
+        ? "hit"
+        : flags & BIN_DICT_MISS
+          ? "miss"
+          : undefined;
+  const line = lineOfRule.get(number);
+  return {
+    index,
+    kind: "rule",
+    flags,
+    number,
+    ...(line !== undefined ? { line } : {}),
+    language: u32(bytes, 4),
+    mode: u32(bytes, 8),
+    ...(dictionary ? { dictionary } : {}),
+    ...(hit !== undefined ? { hit } : {}),
+    ...(miss !== undefined ? { miss } : {}),
+    ...(callHit !== undefined ? { callHit } : {}),
+    ...(callMiss !== undefined ? { callMiss } : {}),
+    ...(copyHit !== undefined ? { copyHit } : {}),
+    bytes: hex(bytes),
+    body: at,
+  };
+});
+
+// The word lists: dict_point[k] = { first, last } entries of dict_index_table,
+// each an offset into dict_data_table.
+const dictPoint = arrayOf("dict_point");
+const dictIndex = arrayOf("dict_index_table");
+const dictData = arrayOf("dict_data_table");
+const dictionaries: string[][] = [];
+for (let k = 0; k + 1 < dictPoint.length; k += 2) {
+  const [first, last] = [dictPoint[k], dictPoint[k + 1]];
+  const entries: string[] = [];
+  for (let entry = first; entry <= last; entry += 1) {
+    const start = dictIndex[entry];
+    const end = entry + 1 < dictIndex.length ? dictIndex[entry + 1] : dictData.length;
+    entries.push(hex(dictData.slice(start, end)));
+  }
+  dictionaries.push(entries);
+}
+
+fs.mkdirSync(path.dirname(outPath), { recursive: true });
+fs.writeFileSync(
+  outPath,
+  `${JSON.stringify({
+    schemaVersion: "v1",
+    source: `DECtalk 4.63 CMD/${HEADER} (compiled from CMD/${RULE_TEXT}); decoded by scripts/build-dectalk-text-parser.ts`,
+    ruleText: `CMD/${RULE_TEXT}`,
+    sections: ruleSections,
+    rules,
+    dictionaries,
+  })}\n`,
+);
+const kinds = new Map<string, number>();
+for (const rule of rules) kinds.set(rule.kind, (kinds.get(rule.kind) ?? 0) + 1);
+console.log(
+  JSON.stringify({
+    entries: rules.length,
+    kinds: Object.fromEntries(kinds),
+    withLine: rules.filter((rule) => rule.line !== undefined).length,
+    dictionaries: dictionaries.length,
+    out: path.relative(repoRoot, outPath),
+  }),
+);

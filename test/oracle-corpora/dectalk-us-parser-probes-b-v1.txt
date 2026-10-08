@@ -1,0 +1,33 @@
+# Second list of probes for DECtalk 4.63's command text parser: clauses too
+# long to wait for their end, brackets that are and are not commands, and
+# runs of white space. One text per line; written before the export and not
+# edited afterwards (scripts/oracle/export-text-parser-fixture.ts).
+
+# Clauses longer than the rolling limit, with no clause mark before a space.
+The quiet harbor town kept its small wooden boats tied along the gray stone wall while the tide went out past the long sand bar and the gulls walked slowly over the wet mud looking for whatever the water had left behind that morning and the old men on the bench watched them without saying a word to each other until the church bell rang twelve times.
+Each of the forty two students in the room wrote down the long list of names that the teacher read aloud from the yellow paper while the rain kept falling on the tin roof and the wind pushed the open door back and forth on its old hinges and nobody stood up to close it because the list went on and on for most of the hour and then started again from the top with the same names in another order that no one could follow at all.
+We drove north for three days through flat dry country where the road ran straight between low fences and the only things that moved were the dust behind the truck and a few dark birds far above us and on the fourth day the hills came up out of the haze and the air turned cool and green and we stopped at a small store that sold bread and fuel and maps of a lake that none of us had ever heard of and the woman there told us the way.
+Call 555 1234 or 555 9876 or 555 2468 or 555 1357 or 555 8642 or 555 7531 or 555 1122 or 555 3344 or 555 5566 or 555 7788 or 555 9900 or 555 1212 or 555 3434 or 555 5656 or 555 7878 or 555 9090 or 555 2323 or 555 4545 or 555 6767 or 555 8989 or 555 1010 or 555 2020 or 555 3030 or 555 4040 or 555 5050 or 555 6060 now.
+Dr. Smith and Dr. Jones and Dr. Lee and Dr. Adams and Dr. Baker and Dr. Clark and Dr. Davis and Dr. Evans and Dr. Ford and Dr. Gray and Dr. Hall and Dr. Irwin and Dr. James and Dr. Kent and Dr. Lane and Dr. Moore and Dr. Nash and Dr. Owen and Dr. Park and Dr. Quinn and Dr. Reed and Dr. Stone and Dr. Todd and Dr. Vance and Dr. Wood and Dr. Young met.
+
+# Brackets that are only text.
+See the note [here] for more.
+The array[3] holds a value.
+Open [ the door ] now.
+Use [[double]] brackets here.
+An empty [] pair stays out.
+A lone [ bracket is here.
+A lone ] bracket is here.
+It ends with a bracket [
+He wrote [sic] in the margin.
+
+# Brackets that start a command.
+Say this [:rate 180] and then that.
+Before [:nosuchcommand 5] after.
+One [: rate 180 ] two.
+Three [ :rate 180] four.
+
+# Runs of white space, and a period inside a run.
+One two                                              three four.
+Wait.                                                  Go on.
+A     b     c.

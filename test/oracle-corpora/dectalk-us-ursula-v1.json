@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-ursula-v1",
+  "defaults": {
+    "voiceId": "ursula",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "ursula-nothing-easy", "text": "Nothing is easy.", "group": "voice", "tags": ["dental", "velar-nasal", "front-vowels"], "expectedFocus": ["trace"] },
+    { "id": "ursula-blue-bird", "text": "We saw a blue bird.", "group": "voice", "tags": ["glides", "r-vowels", "clusters"], "expectedFocus": ["trace"] },
+    { "id": "ursula-give-key", "text": "Give him the key.", "group": "voice", "tags": ["velars", "h"], "expectedFocus": ["trace"] },
+    { "id": "ursula-yes-thank-you", "text": "Yes, thank you.", "group": "voice", "tags": ["two-clauses", "dental"], "expectedFocus": ["trace"] },
+    { "id": "ursula-cat", "text": "cat.", "group": "voice", "tags": ["single-word", "aspiration"], "expectedFocus": ["trace"] }
+  ]
+}

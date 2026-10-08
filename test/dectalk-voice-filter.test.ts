@@ -57,27 +57,7 @@ describe("DECtalk Q14 pitch-filter coefficients", () => {
     expect(voice.f0_lp_filter_alpha).toBe(Number(voice.f0_lp_filter) / 16384);
   });
 
-  it("preserves the Q14 scale when importing voice tables", async () => {
-    const outputs: string[] = [];
-    vi.doMock("node:fs", () => ({
-      default: {
-        mkdirSync() {},
-        readFileSync: () => "name: Betty\nf0_lp_filter: 2175\n",
-        writeFileSync: (_path: string, text: string) => outputs.push(text),
-      },
-    }));
-    const log = vi.spyOn(console, "log").mockImplementation(() => {});
-    try {
-      await import("../scripts/dt1-import-voices");
-      expect(outputs.length).toBeGreaterThan(0);
-      for (const output of outputs) {
-        const voice = parseVoice(output);
-        expect(voice.f0_lp_filter).toBe(2175);
-        expect(voice.f0_lp_filter_alpha).toBe(2175 / 16384);
-      }
-    } finally {
-      vi.doUnmock("node:fs");
-      log.mockRestore();
-    }
-  });
+  // The files are written by scripts/oracle/import-dectalk-voices.ts, whose
+  // --check (test/dectalk-voice-files.test.ts) holds every field, this
+  // coefficient among them, to DECtalk's source.
 });

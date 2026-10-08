@@ -29,9 +29,10 @@
  * Why each name is still on the lists is GAP_REASONS below. Read the last
  * entry before spending effort on the amplitudes.
  *
- * Voices. Three corpora are Paul's. dectalk-us-betty-v1 and
- * dectalk-us-harry-v1 are spoken by Betty and by Harry (the corpus's
- * `defaults.voiceId`): a female voice, and a male one with another head size.
+ * Voices. Three corpora are Paul's. The others are spoken by another voice
+ * (the corpus's `defaults.voiceId`): Betty, a female voice; Harry, a male one
+ * with another head size; and, five sentences each, Frank (setspdef()'s own
+ * block), Dennis (no fifth formant) and Ursula (a female voice with one).
  * In them F1, F2, F3, B2 and B3 match on every packet, through the voice rule
  * fields `sex` and `fnscale`. The words that do not (F0, AG, PS, CNK, F4 among
  * them) are computed from values the frontend still takes from Paul; the

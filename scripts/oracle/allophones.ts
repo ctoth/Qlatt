@@ -31,6 +31,11 @@ export const DECTALK_CORPUS_FILES: readonly string[] = [
 export const DECTALK_VOICE_CORPUS_FILES: readonly string[] = [
   "dectalk-us-betty-v1.json",
   "dectalk-us-harry-v1.json",
+  // One voice for each further path of setspdef() (ph_vset.c): Frank's own
+  // block, a voice whose F5 is switched off, and a female voice with an F5.
+  "dectalk-us-frank-v1.json",
+  "dectalk-us-dennis-v1.json",
+  "dectalk-us-ursula-v1.json",
 ];
 
 /** Every corpus with a packet record. */

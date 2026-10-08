@@ -1,56 +1,68 @@
-# DECtalk voice "Wendy" — converted from DECtalk 4.63 voice tables.
-# Imported by scripts/dt1-import-voices.ts from the canonical converted
-# source (dectalk/463 ph_vset.c / Ph_drwt02.c voice parameter set).
-# f0_lp_filter_alpha is derived: f0_lp_filter / 16384
-# (DECtalk 4.63 Ph_drwt02.c signed Q14 coefficient).
+# DECtalk voice "Wendy". Generated from DECtalk 4.63
+# dapi/src/PH/P_us_vdf1.h:1228-1272 (us_wendy, by SPD_ index, INCLUDE/cmd.h:159-205)
+# and setspdef() (PH/ph_vset.c) by scripts/oracle/import-dectalk-voices.ts --write.
+# Do not edit: change the script and run it again.
 #
-# F4-F8, per-voice gains (GF/GH/GV/GN/G1-G4/LO), and glottal params
-# (AGO/AGVO/AGUO/UNVOW/CHINK, smoothness/breathiness/richness/...) are
-# STORED here but not yet wired into the synthesis graph (deferred chunk).
+# sex: SPD_SEX. fnscale: (200 - HS) * 41 (ph_vset.c:712). base_f0_hz: AP.
+# f0_minimum: (AP - 12) * 10. f0_scale_factor: PR * 41. f0_lp_filter:
+# 1500 + 15 * QU, and f0_lp_filter_alpha that over 16384 (the F0 filter's Q14
+# coefficient, Ph_drwt02.c). hat_rise_hz10: HR * 10. scale_str_rise: SR.
+# assertiveness: AS * 41. baseline_fall_hz10: BF * 10. falling_target: FT
+# (ph_vset.c:675-685). F4, F5: the definition's times fnscale >> 12, or 6000
+# (off) when the definition says so or the result is too high; B4, B5 with
+# them (ph_vset.c:714-757). F7, F8: P4, P5. spd_F4: the definition's own F4.
+# GF..LO, AGO, AGVO, AGUO, UNVOW, CHINK, smoothness (SM), breathiness (BR),
+# richness (RI), nopen_fraction (NF), laryngealization (LA), head_size (HS),
+# quickness (QU): the definition's entries.
+#
+# formant_scale, rd_default and spectral_tilt_offset_db are not DECtalk's:
+# the Klatt-graph backend's stand-ins (1 or 1.17 by sex; 0.7 or 0.8 plus
+# 0.004 a dB of breathiness; a tenth of the breathiness). engineering estimate
 citations:
-  - "DECtalk 4.63 ph_vset.c (speaker-dependent parameter set)"
-  - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"
+  - "DECtalk 4.63 PH/P_us_vdf1.h us_wendy; INCLUDE/cmd.h:159-205 SPD_ indices"
+  - "DECtalk 4.63 PH/ph_vset.c:580-800 setspdef"
+  - "DECtalk 4.63 PH/ph_main.c:511-519 voidef; ph_vset.c:433-442 usevoice"
 name: Wendy
 sex: female
-# (200 - HS) * 41 with HS 100 (P_us_vdf1.h:1241 us_wendy; ph_vset.c:712).
 fnscale: 4100
-base_f0_hz: 200
+base_f0_hz: 180
 formant_scale: 1.17
-rd_default: 1.02
-spectral_tilt_offset_db: 5.5
-f0_minimum: 1880
-f0_scale_factor: 3280
+rd_default: 0.94
+spectral_tilt_offset_db: 3.5
+f0_minimum: 1680
+f0_scale_factor: 5535
 f0_lp_filter: 1650
 f0_lp_filter_alpha: 0.1007080078125
 hat_rise_hz10: 150
-scale_str_rise: 28
+scale_str_rise: 15
 assertiveness: 2050
 baseline_fall_hz10: 100
 falling_target: 100
-F4: 4279
+F4: 4204
 B4: 400
-F5: 4564
+F5: 4804
 B5: 600
 F7: 4200
-F8: 4900
+F8: 4800
 GF: 65
-GH: 65
-GV: 60
+GH: 60
+GV: 52
 GN: 71
 G1: 69
 G2: 78
 G3: 56
 G4: 57
 LO: 68
-AGO: 850
-AGVO: 1100
-AGUO: 1900
-UNVOW: 30
-CHINK: 75
-smoothness: 100
-breathiness: 55
-richness: 30
-nopen_fraction: 10
+AGO: 750
+AGVO: 1000
+AGUO: 1800
+UNVOW: 20
+CHINK: 65
+smoothness: 10
+breathiness: 35
+richness: 10
+nopen_fraction: 0
 laryngealization: 0
-head_size: 105
+head_size: 100
 quickness: 10
+spd_F4: 4200

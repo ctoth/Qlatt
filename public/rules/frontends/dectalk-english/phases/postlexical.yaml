@@ -1009,6 +1009,10 @@ rules:
       # Counted once a clause by dectalk_clause_counted_words.
       counted_words: "get(current, 'clause_counted_words', 0.0)"
       phrase_ok: "counted_words >= 3.0"
+      # (curr_instruc & FBOUNDARY) >= FMBNEXT (ph_aloph.c:974): the dictionary's
+      # morpheme boundary after the consonant flaps it like a word's end
+      # ("what-ever" has DF before its stressed EH).
+      morpheme_final: "isTrue(current, 'morpheme_boundary_after')"
       current_unstressed: "get(current, 'stress', 0) == 0"
       prev_son1: >-
         p != null && (p.type in ['vowel', 'glide', 'liquid', 'nasal']) &&
@@ -1027,7 +1031,8 @@ rules:
         )
     constraint: >-
       phrase_ok && current_unstressed && prev_son1 && next_syllabic &&
-      (next_word_boundary || (!isTrue(current, 'word_initial_consonant') && next_weak_vowel))
+      (next_word_boundary || morpheme_final
+       || (!isTrue(current, 'word_initial_consonant') && next_weak_vowel))
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -1063,6 +1068,10 @@ rules:
       # Counted once a clause by dectalk_clause_counted_words.
       counted_words: "get(current, 'clause_counted_words', 0.0)"
       phrase_ok: "counted_words >= 3.0"
+      # (curr_instruc & FBOUNDARY) >= FMBNEXT (ph_aloph.c:974): the dictionary's
+      # morpheme boundary after the consonant flaps it like a word's end
+      # ("what-ever" has DF before its stressed EH).
+      morpheme_final: "isTrue(current, 'morpheme_boundary_after')"
       current_unstressed: "get(current, 'stress', 0) == 0"
       prev_son1: >-
         p != null && (p.type in ['vowel', 'glide', 'liquid', 'nasal']) &&
@@ -1081,7 +1090,8 @@ rules:
         )
     constraint: >-
       phrase_ok && current_unstressed && prev_son1 && next_syllabic &&
-      (next_word_boundary || (!isTrue(current, 'word_initial_consonant') && next_weak_vowel))
+      (next_word_boundary || morpheme_final
+       || (!isTrue(current, 'word_initial_consonant') && next_weak_vowel))
     splice:
       type: replace_range
       range_left: current.sync_left

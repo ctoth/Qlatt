@@ -171,7 +171,15 @@ describe("dectalk-vtm processor parameters", () => {
       params: Record<string, { default: number }>;
       realize: Record<string, { expr: string; step: boolean }>;
     };
-    expect(Object.keys(semantics.params)).toEqual(TRACK_PARAMS);
+    // The parameters the node reads come first, in the node's order. The rest
+    // are the paired frontend's other columns, accepted and not read: no node
+    // parameter is bound to one and the realize rule does not depend on one.
+    const declared = Object.keys(semantics.params);
+    expect(declared.slice(0, TRACK_PARAMS.length)).toEqual(TRACK_PARAMS);
+    const unread = declared.slice(TRACK_PARAMS.length);
+    expect(unread.length).toBeGreaterThan(0);
+    const bound = new Set(Object.values(graph.nodes.vtm.params).map((spec) => spec.bind));
+    expect(unread.filter((name) => bound.has(name) || name === F0_TRACK_KEY)).toEqual([]);
     expect(semantics.defaultScheduling).toBe("step");
     // The one word the track does not carry as such: F0 is in Hz.
     expect(semantics.realize).toEqual({

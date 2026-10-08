@@ -154,6 +154,8 @@ class DectalkVtmProcessor extends AudioWorkletProcessor {
   private nodeId: string;
 
   private running = false;
+  // Samples produced by earlier process() calls.
+  private processedFrames = 0;
   private awaitLow = false;
   private speakerAttempted = false;
   private epoch = 0;
@@ -476,6 +478,12 @@ class DectalkVtmProcessor extends AudioWorkletProcessor {
               : `Run started; output is DECtalk's ${DECTALK_SAMPLE_RATE} Hz samples, not resampled`,
             {
               sampleRate,
+              // Samples this node had produced when the run started; the
+              // run's first DECtalk sample is delaySamples later. For a node
+              // that has run since its context started this is the context's
+              // sample index. (Counted here because the Node host's
+              // currentFrame global stays 0.)
+              startFrame: this.processedFrames + at,
               delaySamples: wasm.dectalk_backend_delay(this.state),
               resampling: resampled ? "kaiser-windowed-sinc" : "none",
               citations: resampled ? RESAMPLING_CITATIONS : [],
@@ -503,6 +511,7 @@ class DectalkVtmProcessor extends AudioWorkletProcessor {
     }
     this.output.refresh();
     if (this.output.view) channel.set(this.output.view.subarray(0, length));
+    this.processedFrames += length;
     return true;
   }
 }

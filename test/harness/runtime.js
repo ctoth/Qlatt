@@ -175,7 +175,14 @@ export async function speakWithNewRuntime(track) {
 
   // Connect spectrogram to new runtime output (if analyser exists)
   if (state.specState.analyser) {
-    const outputNode = runtime.getNode("masterGain") ?? runtime.getNode("outputGain");
+    // A graph without those nodes (dectalk-vtm is a single node) is tapped at
+    // the first output it declares.
+    const firstOutput = state.newRuntimeGraph?.outputs?.[0];
+    const firstOutputId = typeof firstOutput === "string" ? firstOutput : firstOutput?.node;
+    const outputNode =
+      runtime.getNode("masterGain") ??
+      runtime.getNode("outputGain") ??
+      (firstOutputId ? runtime.getNode(firstOutputId) : undefined);
     if (outputNode) {
       try {
         outputNode.connect(state.specState.analyser);

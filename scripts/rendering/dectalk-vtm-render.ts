@@ -32,9 +32,11 @@ export interface DectalkVtmRender {
   /** The context's output, starting at context time 0. */
   samples: Float32Array;
   sampleRate: number;
-  /** Output samples before the first DECtalk sample appears. */
+  /** The output sample at which the track's time 0 falls (the run starts). */
+  startSample: number;
+  /** Output samples from the run's start to its first DECtalk sample. */
   delaySamples: number;
-  /** Packets in the track (frames with `run` high). */
+  /** Packets in the track. */
   frames: number;
   diagnostics: DiagnosticEntry[];
 }
@@ -45,20 +47,60 @@ export interface DectalkVtmRenderOptions {
   sampleRate: number;
   /** Receives a decision record for each choice the node reports. */
   provenance?: ProvenanceCollector;
+  /**
+   * The frontend the track came from. The experiment is then loaded as the
+   * page loads it, with the frontend/experiment vocabulary check
+   * (`loadExperimentConfig(experimentId, frontendId)`).
+   */
+  frontendId?: string;
+  /** Default: `dectalk-vtm`. */
+  experimentId?: string;
+  /** Context time of the track's time 0, in seconds. Default 0. */
+  startTime?: number;
+}
+
+/**
+ * Packets in a track: the time of the frame that ends the run (`run` 0 after
+ * frames with `run` 1), in frame periods. A track built from recorded packets
+ * has one frame per packet; a frontend's track has an event wherever a
+ * parameter changes, so its frames cannot be counted.
+ */
+export function packetCount(track: readonly KlattFrame[]): number {
+  let running = false;
+  for (const frame of track) {
+    const run = frame.params[RUN_PARAM];
+    if (run === 1) running = true;
+    else if (run === 0 && running) {
+      const packets = (frame.time * DECTALK_SAMPLE_RATE) / FRAME_SAMPLES;
+      if (Math.abs(packets - Math.round(packets)) > 1e-6) {
+        throw new Error(`The run ends at ${frame.time} s, which is not a whole number of frames`);
+      }
+      return Math.round(packets);
+    }
+  }
+  throw new Error("The track has no frame that ends the run (run: 0 after run: 1)");
 }
 
 export async function renderDectalkVtmTrack(
   options: DectalkVtmRenderOptions,
 ): Promise<DectalkVtmRender> {
   const { repoRoot, track, sampleRate, provenance } = options;
-  const frames = track.filter((frame) => frame.params[RUN_PARAM] === 1).length;
+  const startTime = options.startTime ?? 0;
+  // Only for the length of the render; where the run really starts is the
+  // host's rounding of the start time, which the node reports (below).
+  const latestStartSample = Math.ceil(startTime * sampleRate);
+  const frames = packetCount(track);
   const delaySamples = dectalkVtmDelaySamples(sampleRate);
   // Every DECtalk sample, resampled, plus the node's delay and the same again
   // for the interpolation kernel's tail after the last frame.
   const length =
-    Math.ceil((frames * FRAME_SAMPLES * sampleRate) / DECTALK_SAMPLE_RATE) + 2 * delaySamples;
+    latestStartSample +
+    Math.ceil((frames * FRAME_SAMPLES * sampleRate) / DECTALK_SAMPLE_RATE) +
+    2 * delaySamples;
 
-  const config = structuredClone(await loadExperimentConfig(DECTALK_VTM_EXPERIMENT));
+  const config = structuredClone(
+    await loadExperimentConfig(options.experimentId ?? DECTALK_VTM_EXPERIMENT, options.frontendId),
+  );
   const assetLoader = await createNodeRuntimeAssetLoader(path.join(repoRoot, "public", "worklets"));
   const diagnostics = createDiagnostics({ maxEntries: 1000 });
   try {
@@ -87,7 +129,7 @@ export async function renderDectalkVtmTrack(
         semantics: config.semantics,
         bindingMap: runtime.getBindingMap(),
       });
-      interpreter.scheduleTrack(track, 0);
+      interpreter.scheduleTrack(track, startTime);
       const buffer = await ctx.startRendering();
       const samples = new Float32Array(buffer.length);
       buffer.copyFromChannel(samples, 0);
@@ -96,7 +138,13 @@ export async function renderDectalkVtmTrack(
 
       const entries = diagnostics.getEntries();
       if (provenance) recordNodeDecisions(entries, provenance);
-      return { samples, sampleRate, delaySamples, frames, diagnostics: entries };
+      // The node says at which context sample its run started.
+      const started = entries.find((entry) => entry.code === "dectalk-vtm.run_started");
+      const startSample = (started?.data as { startFrame?: unknown } | undefined)?.startFrame;
+      if (typeof startSample !== "number") {
+        throw new Error("The dectalk-vtm node did not report where its run started");
+      }
+      return { samples, sampleRate, startSample, delaySamples, frames, diagnostics: entries };
     } finally {
       runtime.disconnect();
     }
@@ -165,7 +213,7 @@ export function renderToInt16(render: DectalkVtmRender): Int16Array {
   const count = render.frames * FRAME_SAMPLES;
   const out = new Int16Array(count);
   for (let i = 0; i < count; i += 1) {
-    const value = render.samples[render.delaySamples + i] * 32768;
+    const value = render.samples[render.startSample + render.delaySamples + i] * 32768;
     if (!Number.isInteger(value) || value < -32768 || value > 32767) {
       throw new Error(`Sample ${i} (${value}) is not a 16-bit value`);
     }

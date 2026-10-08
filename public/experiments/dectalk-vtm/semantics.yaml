@@ -97,6 +97,80 @@ params:
   SPD_APGAIN: { type: int, default: 64, unit: dB }
   SPD_SEX: { type: int, default: 1 }
 
+  # ---------------------------------------------------------------------------
+  # Accepted and not read. The dectalk-english frontend also lowers the columns
+  # of its Klatt-graph experiment (output.lowering.columns in its
+  # frontend.yaml), and a frontend may only be paired with an experiment that
+  # declares every column it emits (src/experiments/frontend-vocabulary.ts).
+  # They are declared here so the pair loads. No node binds any of them and no
+  # realize rule reads one: they have no effect on this experiment's audio.
+  # This is the mirror of the packet-word block in
+  # ../dectalk-english/semantics.yaml.
+  #
+  # (1) Words DECtalk's PH does write into the packet, which its VTM thread
+  # overwrites with hlsyn's values before the synthesizer reads them
+  # (VTM/vtmiont.c:1292-1319; ph-contract.md, "Words PH writes that the VTM
+  # thread ignores"). Column, then the packet word it corresponds to:
+  AV: { type: float, default: 0, unit: dB, description: "OUT_AV; replaced by hlsyn's NAV. Unread." }
+  AH: { type: float, default: 0, unit: dB, description: "OUT_AP (aspiration); replaced by NAH. Unread." }
+  A3: { type: float, default: 0, unit: dB, description: "OUT_A3; replaced by NA3F. Unread." }
+  A4: { type: float, default: 0, unit: dB, description: "OUT_A4; replaced by NA4F. Unread." }
+  A5: { type: float, default: 0, unit: dB, description: "OUT_A5; replaced by NA5F. Unread." }
+  A6: { type: float, default: 0, unit: dB, description: "OUT_A6; replaced by NA6F. Unread." }
+  AB: { type: float, default: 0, unit: dB, description: "OUT_AB; replaced by NAB. Unread." }
+  TL: { type: float, default: 0, unit: dB, description: "OUT_TLT; replaced by NTL. Unread." }
+  B1: { type: float, default: 0, unit: Hz, description: "OUT_B1; replaced by NB1. Unread." }
+  FNZ: { type: float, default: 0, unit: Hz, description: "OUT_FZ; replaced by NFNZ. Unread." }
+  FNP: { type: float, default: 0, unit: Hz, description: "OUT_FNP; replaced by NFNP. Unread." }
+  BNP: { type: float, default: 0, unit: Hz, description: "OUT_BNP; replaced by NBNP, which the generator does not read either. Unread." }
+  #
+  # (2) The voice's cascade B4, F5, B5 and breathiness, which the frontend
+  # stamps on every frame for the Klatt graph (speakers.speaker_frame_params).
+  # DECtalk sends these once, in the speaker definition packet (r4cc, r5cb,
+  # r5cc, aturb: PH/ph_vset.c:725-786), and this node takes them as SPD_R4CC,
+  # SPD_R5CB, SPD_R5CC and SPD_ATURB above, not from these columns.
+  B4: { type: float, default: 0, unit: Hz, description: "Voice cascade B4 as a frame column. Unread; see SPD_R4CC." }
+  F5: { type: float, default: 0, unit: Hz, description: "Voice cascade F5 as a frame column. Unread; see SPD_R5CB." }
+  B5: { type: float, default: 0, unit: Hz, description: "Voice cascade B5 as a frame column. Unread; see SPD_R5CC." }
+  breathiness: { type: float, default: 0, unit: dB, description: "Voice BR as a frame column. Unread; see SPD_ATURB." }
+  #
+  # (3) Columns of Qlatt's Klatt graph that no DECtalk packet word corresponds
+  # to: its source model (sourceMode, lfMode, Rd, RdRef, OQ, flutter, jitter,
+  # EePhraseDb, RdPhraseOffset), its glottal and nasal filters (FGP, BGP, FGZ,
+  # BGZ, BGS, BNZ, AN), its sixth formant and formant count (F6, B6, NFC), its
+  # parallel branch and switch (A1, A2 as a level, A7-A10, AVS, SW), its
+  # frication level (AF: OUT_GF exists, but PH never writes it) and its overall
+  # gain (GO).
+  sourceMode: { type: float, default: 0, description: "Klatt-graph source selector. Unread." }
+  lfMode: { type: float, default: 0, description: "Klatt-graph LF source mode. Unread." }
+  Rd: { type: float, default: 0, description: "Klatt-graph LF shape. Unread." }
+  RdRef: { type: float, default: 0, description: "Klatt-graph LF reference shape. Unread." }
+  OQ: { type: float, default: 0, description: "Klatt-graph open quotient. Unread." }
+  flutter: { type: float, default: 0, description: "Klatt-graph F0 flutter. Unread." }
+  jitter: { type: float, default: 0, description: "Klatt-graph jitter. Unread." }
+  EePhraseDb: { type: float, default: 0, unit: dB, description: "Klatt-graph phrase-level excitation. Unread." }
+  RdPhraseOffset: { type: float, default: 0, description: "Klatt-graph phrase-level Rd offset. Unread." }
+  FGP: { type: float, default: 0, unit: Hz, description: "Klatt-graph glottal pole frequency. Unread." }
+  BGP: { type: float, default: 0, unit: Hz, description: "Klatt-graph glottal pole bandwidth. Unread." }
+  FGZ: { type: float, default: 0, unit: Hz, description: "Klatt-graph glottal zero frequency. Unread." }
+  BGZ: { type: float, default: 0, unit: Hz, description: "Klatt-graph glottal zero bandwidth. Unread." }
+  BGS: { type: float, default: 0, unit: Hz, description: "Klatt-graph second glottal pole bandwidth. Unread." }
+  BNZ: { type: float, default: 0, unit: Hz, description: "Klatt-graph nasal zero bandwidth. Unread." }
+  AN: { type: float, default: 0, unit: dB, description: "Klatt-graph nasal amplitude (not OUT_AN, which is AREA_N). Unread." }
+  F6: { type: float, default: 0, unit: Hz, description: "Klatt-graph sixth formant. Unread." }
+  B6: { type: float, default: 0, unit: Hz, description: "Klatt-graph sixth formant bandwidth. Unread." }
+  NFC: { type: float, default: 0, description: "Klatt-graph cascade formant count. Unread." }
+  A1: { type: float, default: 0, unit: dB, description: "Klatt-graph parallel F1 amplitude. Unread." }
+  A2: { type: float, default: 0, unit: dB, description: "Klatt-graph parallel F2 amplitude (not OUT_A2, which is A2_CODE). Unread." }
+  A7: { type: float, default: 0, unit: dB, description: "Klatt-graph parallel amplitude. Unread." }
+  A8: { type: float, default: 0, unit: dB, description: "Klatt-graph parallel amplitude. Unread." }
+  A9: { type: float, default: 0, unit: dB, description: "Klatt-graph parallel amplitude. Unread." }
+  A10: { type: float, default: 0, unit: dB, description: "Klatt-graph parallel amplitude. Unread." }
+  AVS: { type: float, default: 0, unit: dB, description: "Klatt-graph parallel voicing amplitude. Unread." }
+  SW: { type: float, default: 0, description: "Klatt-graph cascade/parallel switch. Unread." }
+  AF: { type: float, default: 0, unit: dB, description: "Klatt-graph frication amplitude. Unread." }
+  GO: { type: float, default: 0, unit: dB, description: "Klatt-graph overall gain. Unread." }
+
 constants: {}
 
 realize:

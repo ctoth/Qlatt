@@ -58,6 +58,22 @@ export async function loadExperimentManifest() {
   }
 }
 
+/**
+ * Load the frontend manifest, which says which experiment each frontend is
+ * paired with by default (src/experiments/frontend-pairing.ts). Without it the
+ * pairing falls back to the same-id rule.
+ */
+export async function loadFrontendManifest() {
+  try {
+    const res = await fetch("./rules/frontends/manifest.json");
+    if (!res.ok) throw new Error("Failed to fetch frontend manifest");
+    state.frontendManifest = await res.json();
+  } catch (err) {
+    console.error("[QLATT] Failed to load frontend manifest:", err);
+    state.frontendManifest = null;
+  }
+}
+
 export function onExperimentChange() {
   const selected = getSelectedExperiment();
   if (selected !== state.currentExperimentId) {

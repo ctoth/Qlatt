@@ -1,3 +1,4 @@
+import { ItemViewType } from "../cel-expressions";
 import type { Item } from "./item";
 import type { HrgNode } from "./relation";
 import type {
@@ -117,6 +118,8 @@ export class HrgTransaction {
         get: (_target, property) => {
           if (property === "id") return item.id;
           if (property === "itemType") return item.type;
+          // What the expression evaluator types the view by.
+          if (property === "constructor") return ItemViewType;
           return typeof property === "string" ? this.read(item, property) : undefined;
         },
         has: (_target, property) => {

@@ -10,7 +10,8 @@
       "id": "dectalk-english",
       "name": "DECtalk 4.63 English",
       "description": "DECtalk 4.63 English TTS frontend (extracted from C source)",
-      "entryPoint": "frontend.yaml"
+      "entryPoint": "frontend.yaml",
+      "defaultExperiment": "dectalk-vtm"
     },
     {
       "id": "qlatt-beauty",

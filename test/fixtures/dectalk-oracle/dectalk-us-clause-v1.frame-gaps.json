@@ -17,7 +17,7 @@
   "carry-used-by-rained": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
   "carry-to-be": ["B1","AV","AP","A2","A4","A5","A6","AB"],
   "carry-being-here": ["B1","AV","AP","A2","A4","A5","A6","AB"],
-  "carry-be-late": ["length","segments","F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A4","A5","A6","AB","AG","PS","CNK","ABLADE","AREA_N","DC","UE","A2_CODE","PH"],
+  "carry-be-late": ["B1","AV","AP","A2","A4","A5","A6","AB"],
   "aux-was-it-raining": ["B1","AV","AP","A2","A4","A6"],
   "aux-it-was-raining": ["B1","AV","AP","A2","A4","A6"],
   "aux-well-was-it-raining": ["B1","AV","AP","A2","A4","A6"],

@@ -540,24 +540,46 @@ rules:
       late_verb_branch: >-
         (dectalk_late_class(n, 'verb') || dectalk_late_class(n, 'ed'))
         && !dectalk_late_class(n, 'noun') && !dectalk_late_class(n, 'adj')
+      # A written comma, colon or semicolon: LTS sets its form-class index
+      # back to 1 and then sends the COMMA, and sending a phone first sends
+      # the class at the index when the index has moved. So the class of the
+      # first word since the last written break arrives a second time, in the
+      # clause the comma ends, and is counted again: "Be late, they went."
+      # counts "be" twice, which clears the flag "be" had set, and "went" is
+      # not promoted. The comma carries that class through the phone sort too.
+      written_break: >-
+        get(current, 'punctuationSymbol', null) in [',', ':', ';']
+        && !(n != null && path(n, 'R:SylStructure.parent.parent') != null
+             && isTrue(path(n, 'R:SylStructure.parent.parent'), 'clause_break_before'))
+      written_before: "look_back_pred(current, 1000, 'is_written_clause_silence')"
+      first: "written_before == null ? behind(current, current_index) : ahead(written_before, 1)"
+      resent_verb: >-
+        written_break
+        && (dectalk_word_class(first, 'verb') || dectalk_word_class(first, 'ed')
+            || dectalk_word_class(first, 'be') || dectalk_word_class(first, 'ing'))
+      resent_function_verb: "resent_verb && dectalk_word_class(first, 'func')"
+      resent_verb_branch: >-
+        written_break
+        && (dectalk_word_class(first, 'verb') || dectalk_word_class(first, 'ed'))
+        && !dectalk_word_class(first, 'noun') && !dectalk_word_class(first, 'adj')
     apply:
       - field: clause_verb_count
         op: set
         value: >-
           count_back_pred(current, 1000, 'is_clause_silence', 'is_verb_count_word_start')
-          + (late_verb ? 1.0 : 0.0)
+          + (late_verb ? 1.0 : 0.0) + (resent_verb ? 1.0 : 0.0)
         tag: stress
       - field: clause_function_verb_count
         op: set
         value: >-
           count_back_pred(current, 1000, 'is_clause_silence', 'is_function_verb_word_start')
-          + (late_function_verb ? 1.0 : 0.0)
+          + (late_function_verb ? 1.0 : 0.0) + (resent_function_verb ? 1.0 : 0.0)
         tag: stress
       - field: clause_verb_branch_count
         op: set
         value: >-
           count_back_pred(current, 1000, 'is_clause_silence', 'is_verb_branch_word_start')
-          + (late_verb_branch ? 1.0 : 0.0)
+          + (late_verb_branch ? 1.0 : 0.0) + (resent_verb_branch ? 1.0 : 0.0)
         tag: stress
     citations:
       - "DECtalk 4.63 ph_task.c:611-626 (number_verbs counts words of class VERB, ED, BE or ING; FUNC sets promote_helper_verb)"
@@ -565,6 +587,9 @@ rules:
       - "DECtalk 4.63 ph_claus.c:405 (number_verbs is cleared when a clause has been spoken)"
       - "DECtalk 4.63 LTS/ls_util.c:808-853 (a word's WORD_CLASS is written before the COMMA of a break in front of it)"
       - "DECtalk 4.63 ph_task.c:590 with ph_sort.c:1245-1302 (every symbol has the held class; the sort tests each one)"
+      - "DECtalk 4.63 LTS/ls_task.c:1269-1275 (at ',', ':' or ';' fc_index is set to 1 and old_fc_index to -1, then the COMMA is sent); ls_task.c:5062-5063, 5284-5285 (a sentence's first word is index 1)"
+      - "DECtalk 4.63 LTS/ls_util.c:808-818 (sending a phone first sends WORD_CLASS of fc_struct[fc_index] when the index differs from the last one sent)"
+      - "DECtalk 4.63 word classes as PH receives them, printed by the instrumented build: 'Be late, they went.' 00800010, 00000003, 00800010 before the comma; 'To be, they went.' 00811000, 00800010, 00811000; 'He can, they went.' 00802000, 00820408, 00802000"
 
   dectalk_helper_verb_promotion:
     kind: scalar

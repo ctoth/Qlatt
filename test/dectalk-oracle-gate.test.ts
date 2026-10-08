@@ -58,11 +58,7 @@ type AllophoneFixture = {
 
 const repoRoot = path.resolve(__dirname, "..");
 
-const KNOWN_GAPS: Readonly<Record<string, string>> = {
-  // dectalk-us-clause-v1. Structure and duration, with DECtalk's allophones:
-  "carry-be-late":
-    "after 'Be late,' DECtalk does not carry the helper-verb promotion; here it does (unexplained)",
-};
+const KNOWN_GAPS: Readonly<Record<string, string>> = {};
 
 function loadCorpus(fileName: string): { corpus: OracleCorpusDocument; fixture: AllophoneFixture } {
   const corpus = JSON.parse(

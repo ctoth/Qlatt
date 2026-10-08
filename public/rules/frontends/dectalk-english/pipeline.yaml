@@ -185,6 +185,15 @@ functions:
     citations:
       - "DECtalk 4.63 LTS/ls_util.c:808-853 (WORD_CLASS is written, then the break's COMMA)"
       - "DECtalk 4.63 PH/ph_task.c:598-626 (the class is counted when it arrives)"
+  # A word's class as the lexicon gives it, wherever it was sent.
+  dectalk_word_class:
+    params: [item, name]
+    body: >-
+      item != null && path(item, 'R:SylStructure.parent.parent') != null
+      && name in get(path(item, 'R:SylStructure.parent.parent'), 'form_classes', [])
+    description: Whether a Segment's word has a form class in the lexicon.
+    citations:
+      - "DECtalk 4.63 INCLUDE/fc_def.tab (form class bits)"
   dectalk_phrase_start:
     params: [item]
     body: >-
@@ -235,6 +244,14 @@ predicates:
     && get(behind(current, 1), "punctuationSymbol", null) != null
     && isTrue(path(current, 'R:SylStructure.parent.parent'), 'clause_break_before')
     && count_back_pred(current, 1000, 'is_never', 'is_clause_silence') == 1.0
+  # A clause silence the text wrote (a sentence end, a comma, colon or
+  # semicolon), not one DECtalk put in front of a word itself. LTS starts its
+  # form-class index again at each of these (LTS/ls_task.c:1255-1256,
+  # 1272-1273); a break it inserts leaves the index alone (ls_util.c:824-853).
+  is_written_clause_silence: >-
+    current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null
+    && !(next != null && path(next, 'R:SylStructure.parent.parent') != null
+         && isTrue(path(next, 'R:SylStructure.parent.parent'), 'clause_break_before'))
   # Phones that stand for two of DECtalk's input phones: a vowel fused with
   # its /r/, and the survivor of a deleted geminate.
   is_fused_vowel: isTrue(current, "fused_with_r")

@@ -38,9 +38,10 @@
  * hat rise and stress scale from the voice. The female voices go through
  * DECtalk's second copy of its F0 routine (Ph_drwt02.c:2445 on; its own
  * baselines, stress and segmental tables, half-scale filter and pivot), which
- * is ported: their F0 differs in one sentence each, at the same unported dip
- * as the male voices'. Their corpora have no question, exclamation or second
- * comma clause, so those female cases are not checked against DECtalk.
+ * is ported: their F0 differs in one sentence each, at a dip that has the
+ * shape of the glottalization F0_REASON names (not traced further). Their
+ * corpora have no question, exclamation or second comma clause, so those
+ * female cases are not checked against DECtalk.
  * AG, PS, CNK and F4 are still computed from Paul's values; the reasons
  * below were written for Paul's corpora and do not explain those.
  */

@@ -1,10 +1,10 @@
 {
   "harry-happy-there": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
-  "harry-good-morning": ["B1","AV","AP","A2","A3","A4","A5","AB","A2_CODE"],
+  "harry-good-morning": ["B1","AV","AP","A2","A3","A4","A5","AB","A2_AMPLITUDE"],
   "harry-ship-noon": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
   "harry-hear-bell": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
   "harry-father-tall": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
-  "harry-book-away": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_CODE"],
+  "harry-book-away": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
   "harry-wait-here": ["B1","AV","AP","A2","A3","A4","A5"],
   "harry-nine-men": ["B1","AV","AP","A2","A3","A4","A5"],
   "harry-thought": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],

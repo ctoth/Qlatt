@@ -17,6 +17,9 @@
  *   AG, PS, CNK, AL, ABLADE, ATB, AREA_N, DC, UE, PLACE, A2_CODE, F4
  *             the same for the words DECtalk's synthesizer reads; a packet
  *             where the track has no such value differs
+ *   A2_AMPLITUDE
+ *             the OUT_A2 word where it is not a code, which the synthesizer
+ *             does not use; A2_CODE is the word where it is one
  *
  * What does not match yet is listed per phrase in
  * test/fixtures/dectalk-oracle/<corpus>.frame-gaps.json, and that list is a
@@ -85,11 +88,16 @@ const AMPLITUDE_REASON =
   "synthesizer never reads these packet values: it recomputes them from area parameters the " +
   "packets do not record (VTM/vtmiont.c:660-683, 1300-1319)";
 
-const A2_CODE_REASON =
-  "OUT_A2 is both a frication place code and the generic A2 amplitude. The codes are ported " +
-  "(ph_draw.c:2037-2394); the amplitude, which the word holds on a few hundred packets and " +
-  "the synthesizer ignores (VTM/vtmiont.c:797-1147 tests only the codes), is not, and the " +
-  "track has 0 there. Not ported either: the TZ case (ph_draw.c:4370-4390)";
+// OUT_A2 is compared in two rows (scripts/oracle/frame-parameters.ts). Its
+// codes (A2_CODE) are ported (ph_draw.c:2037-2394) and differ only where the
+// allophones do (TIMING_REASON).
+const A2_AMPLITUDE_REASON =
+  "where no frication code applies, PH leaves the generic A2 amplitude in OUT_A2 (a small " +
+  "number ramping across a phone boundary) and the track has 0. It is not ported, and it " +
+  "cannot be heard: DECtalk's synthesizer only compares the incoming word with its eleven " +
+  "codes (VTM/vtmiont.c:797-1147) and then overwrites it (1303), as the port does " +
+  "(crates/dectalk-vtm/src/vtmio.rs:354-509, 554); test/dectalk-a2-word.test.ts renders " +
+  "DECtalk's packets with amplitudes put in every non-code A2 word and gets DECtalk's samples";
 // phases/articulation.yaml ports the pressure, glottis, constriction, velum
 // and DC/UE rules of ph_draw.c. Those words differ only in the one phrase
 // whose allophones are not DECtalk's (TIMING_REASON).
@@ -121,11 +129,9 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   AREA_N: TIMING_REASON,
   DC: TIMING_REASON,
   UE: TIMING_REASON,
-  A2_CODE: A2_CODE_REASON,
+  A2_CODE: TIMING_REASON,
+  A2_AMPLITUDE: A2_AMPLITUDE_REASON,
   PH: TIMING_REASON,
-  // Only in the voice corpora: phases/articulation.yaml sends Paul's F4
-  // (policy.articulation.voice.f4) for every voice.
-  F4: "the frontend sends Paul's fourth formant for every voice",
 };
 
 const loaded = DECTALK_FRAME_CORPUS_FILES.map((fileName) => {

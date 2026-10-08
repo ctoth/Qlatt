@@ -4,9 +4,9 @@
   "held-lake": ["B1","AV","AP","A2","A3","A5"],
   "held-cape": ["B1","AV","AP","A2","A3","A5","A6","AB"],
   "held-kate": ["B1","AV","AP","A2","A3","A5"],
-  "held-coke": ["B1","AV","AP","A2","A5","A2_CODE"],
+  "held-coke": ["B1","AV","AP","A2","A5","A2_AMPLITUDE"],
   "held-kick": ["B1","AV","AP","A2","A3","A5"],
   "held-a": ["B1","AV","AP"],
   "held-they": ["B1","AV","AP","A6","AB"],
-  "held-cake-phrase": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_CODE"]
+  "held-cake-phrase": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"]
 }

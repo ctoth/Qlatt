@@ -1,17 +1,17 @@
 {
   "betty-sea-shells": ["B1","AV","AP","A2","A3","A4","A5","A6"],
   "betty-yellow-moon": ["B1","AV","AP","A2","A3","A4","A6","AB"],
-  "betty-cup-of-tea": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_CODE"],
+  "betty-cup-of-tea": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
   "betty-how-old": ["B1","AV","AP","A2","A3","A4"],
-  "betty-big-dog": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_CODE"],
+  "betty-big-dog": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
   "betty-thank-you": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
-  "betty-yes-we-can": ["B1","AV","AP","A2","A3","A4","A5","A2_CODE"],
-  "betty-voice-clear": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_CODE"],
+  "betty-yes-we-can": ["B1","AV","AP","A2","A3","A4","A5","A2_AMPLITUDE"],
+  "betty-voice-clear": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
   "betty-judge": ["B1","AV","AP","A2","A3","A4","A6"],
   "betty-look-boy": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
-  "betty-red-car": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_CODE"],
+  "betty-red-car": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
   "betty-lovely-day": ["B1","AV","AP","A2","A3","A4","A5","AB"],
   "betty-stop-now": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
-  "betty-eat-sing": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_CODE"],
+  "betty-eat-sing": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
   "betty-long-morning": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"]
 }

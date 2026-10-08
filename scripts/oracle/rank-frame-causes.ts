@@ -25,6 +25,7 @@ import {
   qlattValue,
   sameSegmentLabel,
   type TrackEvent,
+  trackValueOf,
 } from "./frame-parameters";
 
 function flag(name: string): string | undefined {
@@ -102,7 +103,7 @@ function main(): void {
 
       for (const parameter of parameters) {
         const oracleValue = parameter.oracleValue(frame);
-        const qlatt = qlattValue(event, parameter.qlatt);
+        const qlatt = trackValueOf(event, parameter);
         if (oracleValue == null || qlatt == null) continue;
         if (parameter.label === "F0") {
           // Pitch is audible only where both are voiced (summarize-trace-run.ts).

@@ -30,8 +30,8 @@ import {
   eventIndexAt,
   FRAME_PARAMETERS,
   PHONE_BY_CODE,
-  qlattValue,
   type TrackEvent,
+  trackValueOf,
 } from "./frame-parameters";
 import type { OracleCorpusDocument } from "./types";
 
@@ -91,7 +91,7 @@ frames.forEach((frame, index) => {
   let differs = false;
   const cells = parameters.map((parameter) => {
     const dectalk = parameter.oracleValue(frame);
-    const here = qlattValue(event, parameter.qlatt);
+    const here = trackValueOf(event, parameter);
     if (dectalk != null && (here == null || Math.abs(here - dectalk) > 0.5)) differs = true;
     return `${dectalk ?? "."}|${here == null ? "." : Math.round(here * 10) / 10}`;
   });

@@ -28,8 +28,17 @@ version: v1
 # BRST, PLACE, F4, PH and the node's `run` gate. Not ported: the end-of-clause
 # pressure drop of ph_draw.c:3929-3969 (inside the block that computes the
 # final slope, reached only when the syllabic is the clause's last
-# allophone), the TZ case of OUT_A2 (4370-4390), the A2 amplitude, and
-# everything for languages other than US English. A voice's values (its
+# allophone), and everything for languages other than US English. Two more
+# things are left out on evidence:
+# - The A2 amplitude. Where no frication code applies PH leaves the generic
+#   A2 amplitude in OUT_A2 and these rules send 0. The synthesizer only
+#   compares the word with its codes (VTM/vtmiont.c:797-1147) and overwrites
+#   it (1303); test/dectalk-a2-word.test.ts shows a non-code value changes no
+#   sample. The frame gate lists it as A2_AMPLITUDE.
+# - The delay counter of ph_draw.c:4361-4397, which runs only in the phone TZ.
+#   No rule of PH or LTS produces TZ and no pronunciation in the dictionary
+#   sources (dic/Dic_us.txt, Dic_u_s.txt) has it; typed phoneme input can
+#   ([tz], INCLUDE/usa_phon.tab), which this frontend does not take. A voice's values (its
 # definition's entries and what VTM/vtmiont.c assigns for it) are the voice
 # rule fields, params.policy.voice.
 #

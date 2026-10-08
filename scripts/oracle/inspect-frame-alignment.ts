@@ -18,9 +18,9 @@ import {
   FRAME_PARAMETERS,
   oracleSourceClockPhoneCode,
   phoneCodeToQlatt,
-  qlattValue,
   sameSegmentLabel,
   type TrackEvent,
+  trackValueOf,
 } from "./frame-parameters";
 
 function flag(name: string): string | undefined {
@@ -88,8 +88,7 @@ function main(): void {
       previousKey = key;
       if (changesOnly && !changed) continue;
       const cells = columns.map(
-        (column) =>
-          `${format(column.oracleValue(frame))}/${format(qlattValue(event, column.qlatt))}`,
+        (column) => `${format(column.oracleValue(frame))}/${format(trackValueOf(event, column))}`,
       );
       process.stdout.write(
         `${frame.frame}\t${(timeSec * 1000).toFixed(2)}\t${frame.phoneIndex}\t${phoneCodeToQlatt(frame.out.PH)}\t${controllerPhone}\t${event?.phoneme ?? "(none)"}\t${same == null ? "?" : same ? "y" : "N"}\t${cells.join("\t")}\n`,

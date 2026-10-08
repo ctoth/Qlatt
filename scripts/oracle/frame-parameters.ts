@@ -38,7 +38,24 @@ export type FrameParameter = {
    * so appear to match.
    */
   required?: boolean;
+  /**
+   * What of the track's value is compared, when a row looks at one part of a
+   * word (OUT_A2 is a code on some packets and an amplitude on others).
+   */
+  trackValue?: (value: number) => number;
 };
+
+/**
+ * The values of OUT_A2 that are codes: every one VTM/vtmiont.c:797-1147
+ * compares the word with. The synthesizer does nothing else with the word, so
+ * any other value is the generic A2 amplitude PH left there and has no effect
+ * (test/dectalk-a2-word.test.ts).
+ */
+export const A2_CODES: ReadonlySet<number> = new Set([
+  1000, 1100, 1200, 1300, 2000, 2100, 3000, 3100, 3200, 3300, 4000,
+]);
+const a2Code = (word: number): number => (A2_CODES.has(word) ? word : 0);
+const a2Amplitude = (word: number): number => (A2_CODES.has(word) ? 0 : word);
 
 /**
  * A word the synthesizer reads. DECtalk sends these one frame late
@@ -49,8 +66,20 @@ function frameWord(
   label: string,
   oracleValue: FrameParameter["oracleValue"],
   qlatt = label,
+  part?: (word: number) => number,
 ): FrameParameter {
-  return { label, oracleValue, qlatt, sourceClock: false, required: true };
+  if (!part) return { label, oracleValue, qlatt, sourceClock: false, required: true };
+  return {
+    label,
+    oracleValue: (frame) => {
+      const word = oracleValue(frame);
+      return word == null ? null : part(word);
+    },
+    qlatt,
+    sourceClock: false,
+    required: true,
+    trackValue: part,
+  };
 }
 
 const US_PHONE = 1 << 8;
@@ -301,7 +330,12 @@ export const FRAME_PARAMETERS: readonly FrameParameter[] = [
   frameWord("DC", area("DC")),
   frameWord("UE", area("UE")),
   frameWord("PLACE", area("PLACE")),
-  frameWord("A2_CODE", out("A2")),
+  // OUT_A2 in two rows. A2_CODE is the word where it is a code, 0 elsewhere:
+  // what the synthesizer acts on. A2_AMPLITUDE is the word where it is not a
+  // code, 0 elsewhere: the generic A2 amplitude PH leaves in it, which the
+  // synthesizer never uses. The track has both in its A2_CODE column.
+  frameWord("A2_CODE", out("A2"), "A2_CODE", a2Code),
+  frameWord("A2_AMPLITUDE", out("A2"), "A2_CODE", a2Amplitude),
   frameWord("F4", area("F4")),
   // OUT_PH, the allophone with its font in the high byte. The Segment labels
   // above are checked on the source clock; this is the word itself.
@@ -373,7 +407,7 @@ export function compareTrackToFrames(
     if (sameSegmentLabel(frames, index, event?.phoneme) === false) segmentLabelsDiffer += 1;
     for (const parameter of FRAME_PARAMETERS) {
       const dectalk = parameter.oracleValue(frame);
-      const qlatt = qlattValue(event, parameter.qlatt);
+      const qlatt = trackValueOf(event, parameter);
       if (dectalk == null) continue;
       const summary = parameters[parameter.label] as ParameterComparison;
       if (qlatt == null) {
@@ -395,6 +429,15 @@ export function compareTrackToFrames(
     }
   }
   return { packets: frames.length, segmentLabelsDiffer, parameters };
+}
+
+/** The track's value for a row: its column, and the row's part of it if it names one. */
+export function trackValueOf(
+  event: TrackEvent | null | undefined,
+  parameter: FrameParameter,
+): number | null {
+  const value = qlattValue(event, parameter.qlatt);
+  return value != null && parameter.trackValue ? parameter.trackValue(value) : value;
 }
 
 export function qlattValue(event: TrackEvent | null | undefined, key: string): number | null {

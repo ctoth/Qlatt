@@ -151,6 +151,12 @@ frame_programs:
         edge: false
       # ph_sort.c:1464 number_words, as postlexical.yaml reads it.
       few_words: { value: "word_count() < 3", edge: false }
+      # The allophone's code (l_all_ph.h); silence is 0, the dummy vowel IX or AX.
+      phone_code:
+        value: >-
+          params.policy.articulation.phone_code[
+            artic_is_dummy(current) ? get(current, 'dummy_phone', 'IX') : dectalk_name(current)]
+        edge: 0
       # FBOUNDARY of this allophone and of the ones two and three after it.
       boundary: { value: "artic_boundary(current)", edge: 0 }
       boundary_2: { value: "artic_boundary(artic_next_unit(artic_next_unit(current)))", edge: 0 }
@@ -219,6 +225,13 @@ frame_programs:
       CNK: "r.area_ap + params.policy.articulation.voice.chink"
       # ph_draw.c:4189
       F4: "params.policy.articulation.voice.f4"
+      # ph_claus.c:453: the allophone as phdraw sees it, font in the high byte.
+      PH: "params.policy.articulation.phone_font + u.phone_code"
+      # Not a packet word: the frame clock of the dectalk-vtm node
+      # (crates/dectalk-vtm/src/backend.rs), 1 while packets are being sent.
+      run: "1"
+    after:
+      run: 0
     write: articulation_frames
     tag: subglottal_pressure
     citations:

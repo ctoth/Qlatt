@@ -356,6 +356,8 @@ export interface FrameValues {
   period_ms: number;
   origin_ms: number;
   columns: Readonly<Record<string, readonly number[]>>;
+  /** On the run's last Item: column values for the instant the run ends. */
+  after?: Readonly<Record<string, number>>;
 }
 
 /** Schema of the feature a program writes: FrameValues and the rules behind them. */
@@ -382,7 +384,9 @@ export const FRAME_VALUES_SCHEMA: FeatureSchema = {
         },
       },
     },
+    after: { kind: "object", fields: {}, additional: { kind: "number" } },
   },
+  optional: ["after"],
 };
 
 /** The features the frame programs of a rulepack write. */

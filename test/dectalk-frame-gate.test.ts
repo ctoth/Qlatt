@@ -116,6 +116,7 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   UE: AREA_REASON,
   PLACE: AREA_REASON,
   A2_CODE: AREA_REASON,
+  PH: TIMING_REASON,
 };
 
 const loaded = DECTALK_CORPUS_FILES.map((fileName) => {

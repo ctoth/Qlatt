@@ -70,6 +70,8 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // the voice's 3500 on every frame. Nothing else changes: with those four
 // params dropped, scripts/review-track-fields.ts prints the same hashes, times
 // included, for this tree and for master 20b91b67 on all four phrases.
+// PH and run regenerate them again, checked the same way against 3db3a34c
+// with `--drop PH,run`: the two new keys are the only change.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

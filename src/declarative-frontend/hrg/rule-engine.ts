@@ -2380,6 +2380,11 @@ function runFrameRules(
                   ...result.fired.map((firing) => ({ ...firing, lead_in: false })),
                 ]
               : [],
+          ...(isPlainObject(program.after) &&
+          unitIndex === units.length - 1 &&
+          memberIndex === unit.members.length - 1
+            ? { after: program.after }
+            : {}),
         },
         tag,
       );

@@ -61,6 +61,9 @@ frame_programs:
   first frames are then the last ones of the Item before. The first instant
   holds the first frame, so a lead-in N frames longer than the initial silence
   puts its first frame exactly there.
+- `after: { COLUMN: number }` (optional) gives output columns a value for the
+  instant the run ends, the track's last event: a gate that must fall, say.
+  Columns it does not name keep no value there.
 - Every output column must be listed in `output.lowering.columns`, and `write`
   must be a declared feature of the relation.
 

@@ -236,6 +236,12 @@ parameters:
     # Data for the area and pressure rules of phases/articulation.yaml
     # (PH/ph_draw.c, HLSYN section).
     articulation:
+      # l_all_ph.h US_<name>: the allophone codes, in the order of
+      # timing.phonemes above. A packet's PH word is the code with the
+      # language's font in the high byte: US English is font 1 (the oracle's
+      # packets carry 256 for silence and 305 for K, code 49).
+      phone_font: 256
+      phone_code: { SIL: 0, IY: 1, IH: 2, EY: 3, EH: 4, AE: 5, AA: 6, AY: 7, AW: 8, AH: 9, AO: 10, OW: 11, OY: 12, UH: 13, UW: 14, RR: 15, YU: 16, AX: 17, IX: 18, IR: 19, ER: 20, AR: 21, OR: 22, UR: 23, W: 24, Y: 25, R: 26, LL: 27, HX: 28, RX: 29, LX: 30, M: 31, N: 32, NX: 33, EL: 34, DZ: 35, EN: 36, F: 37, V: 38, TH: 39, DH: 40, S: 41, Z: 42, SH: 43, ZH: 44, P: 45, B: 46, T: 47, D: 48, K: 49, G: 50, DX: 51, TX: 52, Q: 53, CH: 54, JH: 55, DF: 56, TZ: 57, CZ: 58 }
       # p_us_rom.h:982 us_place, one list per bit (ph_defs.h:339-346): FLABIAL
       # labial, FDENTAL dental, FPALATL palatal, FALVEL alveolar, FVELAR velar,
       # FGLOTTAL glottal, F2BACKI f2backi, F2BACKF f2backf. TX carries FALVEL
@@ -890,7 +896,7 @@ output:
   lowering:
     id: dectalk-english-track-lowering
     # Stable Klatt backend vocabulary captured by the production-frame oracle.
-    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO, PS, CNK, AG]
+    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO, PS, CNK, AG, PH, run]
     timeline:
       initial_silence_ms:
         value: 19.2

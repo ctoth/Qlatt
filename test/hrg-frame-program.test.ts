@@ -717,6 +717,38 @@ describe("frame values in lowering", () => {
     ).toEqual([-1, -1, -1]);
   });
 
+  it("gives the columns named in `after` a value at the instant the run ends", () => {
+    const gated = {
+      ...TANK_SPEC,
+      frame_programs: { tank: { ...TANK_SPEC.frame_programs.tank, after: { LEVEL: -5 } } },
+    };
+    expect(codes(gated)).toEqual([]);
+    expect(
+      codes({
+        ...TANK_SPEC,
+        frame_programs: { tank: { ...TANK_SPEC.frame_programs.tank, after: { DEPTH: 0 } } },
+      }),
+    ).toContain("E_FRAME_PROGRAM_SCHEMA frame_programs.tank.after.DEPTH");
+
+    const utterance = tankUtterance();
+    const spec = compileRuleEngineSpec(gated);
+    runGraphRuleEngine(utterance, spec);
+    expect(utterance.getItem("b")?.get("tank_frames")).not.toHaveProperty("after");
+    expect(utterance.getItem("c")?.get("tank_frames")).toMatchObject({ after: { LEVEL: -5 } });
+    const lowered = lowerToFrames(utterance, POLICY, {
+      frameValueFeatures: frameValueFeatures(spec.frame_programs),
+    });
+    const last = lowered.frames[lowered.frames.length - 1];
+    expect([Math.round((last?.time ?? 0) * 1000), last?.params.LEVEL, last?.segmentId]).toEqual([
+      45,
+      -5,
+      undefined,
+    ]);
+    expect(last?.provenance?.LEVEL).toBe(
+      utterance.getItem("c")?.latestWrite("tank_frames")?.decisionId,
+    );
+  });
+
   it("shows each frame delay_frames later, across Items, holding the first", () => {
     const delayed = {
       ...TANK_SPEC,

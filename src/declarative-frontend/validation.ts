@@ -42,6 +42,7 @@ const ALLOWED_FRAME_PROGRAM_FIELDS = new Set([
   "frame_ms",
   "lead_in_frames",
   "delay_frames",
+  "after",
   "features",
   "group",
   "registers",
@@ -3433,6 +3434,33 @@ function validateFramePrograms(
     }
 
     const outputs = isPlainObject(program.outputs) ? program.outputs : {};
+    if (program.after != null) {
+      const after = isPlainObject(program.after) ? program.after : null;
+      if (!after) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_FRAME_PROGRAM_SCHEMA",
+            `Frame program '${name}' after must map output columns to numbers`,
+            `${path}.after`,
+          ),
+        );
+      }
+      for (const [column, value] of Object.entries(after ?? {})) {
+        if (
+          !Object.hasOwn(outputs, column) ||
+          typeof value !== "number" ||
+          !Number.isFinite(value)
+        ) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_FRAME_PROGRAM_SCHEMA",
+              `Frame program '${name}' after '${column}' must be a number for one of its outputs`,
+              `${path}.after.${column}`,
+            ),
+          );
+        }
+      }
+    }
     if (!isPlainObject(program.outputs) || Object.keys(outputs).length === 0) {
       diagnostics.push(
         makeDiagnostic(

@@ -303,6 +303,9 @@ export const FRAME_PARAMETERS: readonly FrameParameter[] = [
   frameWord("PLACE", area("PLACE")),
   frameWord("A2_CODE", out("A2")),
   frameWord("F4", area("F4")),
+  // OUT_PH, the allophone with its font in the high byte. The Segment labels
+  // above are checked on the source clock; this is the word itself.
+  frameWord("PH", out("PH")),
 ];
 
 export function eventIndexAt(track: readonly TrackEvent[], timeSec: number): number {

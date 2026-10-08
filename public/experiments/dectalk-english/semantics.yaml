@@ -62,6 +62,14 @@ params:
     description: "OUT_AG, glottal area (packet word; unused by this graph)"
     type: int
     default: 0
+  PH:
+    description: "OUT_PH, (font << 8) | allophone code (packet word; unused by this graph)"
+    type: int
+    default: 0
+  run:
+    description: "Frame clock of the dectalk-vtm node: 1 while packets are sent (unused by this graph)"
+    type: int
+    default: 0
   # DECtalk 4.63 uses KLGLOTT88, but the runtime default remains the impulse
   # fallback while mode 3 emits no voiced waveform.
   sourceMode:

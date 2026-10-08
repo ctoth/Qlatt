@@ -1300,11 +1300,20 @@ parameters:
       # clause is spoken with an F0 floor of -12, unless it is the first of
       # the run and loads the voice at its start.
       break_floor: -12
+      # Switch for that: false leaves the voice's own floor in such a clause.
+      # A running DECtalk does this at every inserted break after its first
+      # clause.
+      break_floor_applies: true
       # What the text stage saves and puts back when no clause has been
       # spoken yet: f0minimum before the voice is loaded. DECtalk's packets
       # are recorded one phrase to a process, so this is what every clause
       # after such a break is spoken with.
       unloaded_floor: 0
+      # Switch for that. This is the fresh-process behaviour of say.exe: it
+      # arises only when the utterance's first clause is the first the process
+      # speaks. A long-running DECtalk differs (the saved value is then the
+      # voice's floor); set false to speak as one.
+      unloaded_floor_applies: true
       # Ph_inton2.c:580-581: the US question gestures, internal Hz*10.
       question_gesture_dip_hz: -151
       question_gesture_rise_hz: 451

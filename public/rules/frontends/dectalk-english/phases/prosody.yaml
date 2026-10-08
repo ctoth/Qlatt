@@ -383,12 +383,16 @@ rules:
         (isTrue(path(current, 'R:SylStructure.parent.parent'), 'clause_break_before')
           && count_back_pred(current, 1000, 'is_never', 'is_clause_silence') == 1.0)
         || count_back_pred(current, 1000, 'is_never', 'is_first_clause_break_start') > 0.0
-    constraint: ends_at_break || first_clause_broke
+      # Each case has its switch in policy; the second is what say.exe does
+      # as a fresh process.
+      in_break_clause: "ends_at_break && params.policy.f0.break_floor_applies"
+      after_first_break: "first_clause_broke && params.policy.f0.unloaded_floor_applies"
+    constraint: in_break_clause || after_first_break
     insert:
       relation: PhraseCommand
       layer: floor
       at: at_sync(current.sync_left)
-      value: "ends_at_break ? params.policy.f0.break_floor : params.policy.f0.unloaded_floor"
+      value: "in_break_clause ? params.policy.f0.break_floor : params.policy.f0.unloaded_floor"
       tag: f0_break_floor
     citations:
       - "DECtalk 4.63 LTS/ls_util.c:829-837, 842-849 (compause saved, set to -12 and restored around the break's COMMA)"

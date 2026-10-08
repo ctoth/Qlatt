@@ -8,6 +8,12 @@ maps:
     # A bare number or year stays digits: DECtalk speaks it from its own phone
     # lists (LTS/l_us_pr1.c), not from the words in its dictionary.
     bare_numbers: digits
+    # A dollar amount, a clock time, a plural number and a number with
+    # thousands separators or fraction digits stay as written too: DECtalk's
+    # text task reads each from the word itself (LTS/ls_task.c:3181-3513
+    # money, 3622-3652 time, 3747-3825 and 3936-4046 numbers and plurals),
+    # with its own boundaries between the parts.
+    number_tokens: source
     fraction_exception: '100'
     # A capital letter followed by a period is an initial: it is spelled and
     # its period is sent twice (LTS/ls_task.c:2612-2623, 1516-1519,

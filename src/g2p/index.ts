@@ -30,7 +30,7 @@ import {
   receivedFormClassWord,
   startsVerbPhrase,
 } from "./table-lts-pronounce";
-import { numberWords, speakDigits } from "./table-number";
+import { numberWords, speakDigits, speakNumberToken } from "./table-number";
 import { stripSuffixes } from "./table-suffix";
 import type { DictLookup, PronunciationResult } from "./types";
 
@@ -135,8 +135,17 @@ export function pronounce(
   // A table with number phone lists speaks an all-digit word itself, ahead of
   // any lookup, as several words; the whole number has the one form class
   // `adj` (DECtalk 4.63 LTS/ls_task.c:3776-3806).
-  if (table?.numberPhones && /^[0-9]+$/.test(lowerWord)) {
-    const symbols = speakDigits(lowerWord, table.numberPhones);
+  // The same for a number-like word the text task reads whole: a dollar
+  // amount, a clock time, a plural number, a number with separators or
+  // fraction digits (LTS/ls_task.c:3181, 3622, 3747; speakNumberToken). Only
+  // the plain-number rule sets the class (:3776-3782), which a word with a
+  // dollar sign, a colon or a plural ending does not reach.
+  if (table?.numberPhones && /^[$0-9.]/.test(lowerWord)) {
+    const digitsOnly = /^[0-9]+$/.test(lowerWord);
+    const symbols = digitsOnly
+      ? speakDigits(lowerWord, table.numberPhones)
+      : speakNumberToken(lowerWord, table.numberPhones);
+    const plainNumber = digitsOnly || /^[0-9,.]+$/.test(lowerWord);
     if (symbols) {
       const parts = numberWords(symbols, table);
       return {
@@ -144,7 +153,7 @@ export function pronounce(
         source: "number",
         word: lowerWord,
         parts,
-        ...(table.formClassNames
+        ...(table.formClassNames && plainNumber
           ? { formClasses: ["adj"], formClassWord: 2 ** table.formClassNames.indexOf("adj") }
           : {}),
       };

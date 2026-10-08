@@ -362,6 +362,14 @@ const phoneListTable = (name: string): number[][] => {
   if (names.length !== 10) throw new Error(`E_PHONE_LIST_TABLE: ${name} has ${names.length}`);
   return names.map(phoneList);
 };
+const symbolCode = (name: string): number => {
+  const code = SYMBOLS.get(name);
+  if (code === undefined) throw new Error(`E_SYMBOL_NAME: '${name}'`);
+  return code;
+};
+/** Phoneme codes whose pfeat[] word satisfies `test`. */
+const phonesWith = (test: (features: number) => boolean): number[] =>
+  phonemeFeatures.flatMap((features, code) => (test(features) ? [code] : []));
 const numberPhones = {
   units: phoneListTable("punits"),
   // "Allow for unstressed digits before hundred, thousand etc." (:733-734).
@@ -376,6 +384,27 @@ const numberPhones = {
   trillion: phoneList("ptrillion"),
   quadrillion: phoneList("pquadrillion"),
   and: phoneList("pand"),
+  // What the text task adds around a number (LTS/ls_task.c money and plain
+  // number processing; LTS/l_us_pr1.c:731-749 fraction digits).
+  point: phoneList("ppoint"),
+  dollar: phoneList("pdollar"),
+  cent: phoneList("pcent"),
+  // ls_util_pluralize (LTS/ls_util.c:1442-1466): [IX Z] after a sibilant
+  // consonant, [S] after a voiceless consonant, [Z] after anything else.
+  plural: {
+    afterSibilant: [symbolCode("US_IX"), symbolCode("US_Z")],
+    afterVoiceless: [symbolCode("US_S")],
+    otherwise: [symbolCode("US_Z")],
+    sibilants: phonesWith(
+      (features) =>
+        (features & (symbolCode("PCONS") | symbolCode("PSIB"))) ===
+        (symbolCode("PCONS") | symbolCode("PSIB")),
+    ),
+    voicelessConsonants: phonesWith(
+      (features) =>
+        (features & (symbolCode("PCONS") | symbolCode("PVOICE"))) === symbolCode("PCONS"),
+    ),
+  },
 };
 
 // The frontend's spelling of each allophone code (INCLUDE/l_all_ph.h order).

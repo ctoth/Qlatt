@@ -10,7 +10,10 @@
  *
  * Usage:
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
- *     scripts/oracle/compare-numbers.ts [--limit N]
+ *     scripts/oracle/compare-numbers.ts [--limit N] [--fixture <file name>]
+ *
+ * --fixture names another fixture of test/fixtures/dectalk-oracle, e.g.
+ * dectalk-us-number-tokens-v1.phonemes.json (money, times, decimals, plurals).
  *
  * A measurement tool: exit code 0.
  */
@@ -18,7 +21,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { type NumberPhones, speakDigits, storeSyntacticMarkers } from "../../src/g2p/table-number";
+import {
+  type NumberPhones,
+  speakDigits,
+  speakNumberToken,
+  storeSyntacticMarkers,
+} from "../../src/g2p/table-number";
 import { numberLogTokens, numberSymbolTokens } from "./number-log";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -27,12 +35,19 @@ const readJson = <T>(...parts: string[]): T =>
 const limitIndex = process.argv.indexOf("--limit");
 const limit = limitIndex >= 0 ? Number(process.argv[limitIndex + 1]) : Number.POSITIVE_INFINITY;
 
-const entries = readJson<{ entries: Record<string, string> }>(
-  "test",
-  "fixtures",
-  "dectalk-oracle",
-  "dectalk-us-numbers-v1.phonemes.json",
-).entries;
+const fixtureIndex = process.argv.indexOf("--fixture");
+const fixtureName =
+  fixtureIndex >= 0 ? process.argv[fixtureIndex + 1] : "dectalk-us-numbers-v1.phonemes.json";
+const entries = Object.fromEntries(
+  Object.entries(
+    readJson<{ entries: Record<string, string | null> }>(
+      "test",
+      "fixtures",
+      "dectalk-oracle",
+      fixtureName,
+    ).entries,
+  ).filter((entry): entry is [string, string] => entry[1] !== null),
+);
 const lists = readJson<{ numberPhones: NumberPhones }>(
   "public",
   "rules",
@@ -45,7 +60,8 @@ let equal = 0;
 let shown = 0;
 for (const [text, log] of Object.entries(entries)) {
   // The log is written by the phonetic stage, from the symbols as it stored them.
-  const symbols = speakDigits(text, lists);
+  // A word the text task reads whole (money, a time, a plural, a decimal), or digits.
+  const symbols = speakNumberToken(text, lists) ?? speakDigits(text, lists);
   const mine =
     symbols === null
       ? "not a number"

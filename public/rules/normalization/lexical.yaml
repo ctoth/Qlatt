@@ -113,6 +113,19 @@ rules:
     citations:
       - "Issue #144: explicit bare-number convention"
       - "DECtalk 4.63 LTS/ls_task.c:3776-3806 (an all-digit word is spoken by the number routines, not looked up)"
+  # A number-like word recognised whole (tn_number_token_source) stays one
+  # terminal, as written: the frontend's lexicon reads it.
+  tn_number_token:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'number_token' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': current.payload.token}]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:3181-3513, 3622-3652, 3747-3825 (money, times and numbers are read from the word as written, by the number routines)"
   tn_unmatched_words:
     kind: structural
     select:
@@ -131,4 +144,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_abbreviation, tn_initialism, tn_initial, tn_bare_number_request, tn_unmatched_words]
+    rules: [tn_abbreviation, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_unmatched_words]

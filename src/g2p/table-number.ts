@@ -35,6 +35,23 @@ export interface NumberPhones {
   quadrillion: readonly number[];
   /** "and" between a hundred and what follows: a verb-phrase start, EH N D. */
   and: readonly number[];
+  /** "point" before fraction digits. */
+  point: readonly number[];
+  /** "dollar", with the word boundary before it. */
+  dollar: readonly number[];
+  /** "cent". */
+  cent: readonly number[];
+  /**
+   * ls_util_pluralize (LTS/ls_util.c:1442-1466): the plural ending by the
+   * phone before it.
+   */
+  plural: {
+    afterSibilant: readonly number[];
+    afterVoiceless: readonly number[];
+    otherwise: readonly number[];
+    sibilants: readonly number[];
+    voicelessConsonants: readonly number[];
+  };
 }
 
 // INCLUDE/l_com_ph.h.
@@ -228,25 +245,175 @@ export function isYear(text: string): boolean {
  */
 export function speakYear(text: string, lists: NumberPhones): number[] {
   const out: number[] = [];
-  const twoDigits = (first: string, second: string): void => {
-    if (first === "0") {
-      out.push(...lists.units[0], NUMBER_WBOUND, ...lists.units[digit(second)]);
-    } else if (first === "1") {
-      out.push(...lists.teens[digit(second)]);
-    } else {
-      out.push(...lists.tens[digit(first)]);
-      if (second !== "0") out.push(NUMBER_WBOUND, ...lists.units[digit(second)]);
-    }
-  };
   if (text[2] === "0" && text[3] === "0") {
-    twoDigits(text[0], text[1]);
-    out.push(NUMBER_WBOUND, ...lists.hundred);
+    out.push(...twoDigits(text[0], text[1], lists), NUMBER_WBOUND, ...lists.hundred);
   } else {
-    twoDigits(text[0], text[1]);
-    out.push(NUMBER_WBOUND);
-    twoDigits(text[2], text[3]);
+    out.push(
+      ...twoDigits(text[0], text[1], lists),
+      NUMBER_WBOUND,
+      ...twoDigits(text[2], text[3], lists),
+    );
   }
   return out;
+}
+
+/**
+ * Digits as the functions below accept them: bare, or in groups of three
+ * with a comma between. DECtalk speaks any other grouping ("1,00", "12,34")
+ * sign by sign, the comma by name; that reading is the caller's.
+ */
+const INTEGER = "[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+";
+const DECIMAL = new RegExp(`^(${INTEGER})?(?:\\.([0-9]+))?$`);
+const PLURAL = new RegExp(`^(${INTEGER})'?s$`);
+
+/** ls_proc_do_2_digits (LTS/l_us_pr1.c:297-315): "zero five", "fifteen", "thirty one". */
+function twoDigits(first: string, second: string, lists: NumberPhones): number[] {
+  if (first === "0") return [...lists.units[0], NUMBER_WBOUND, ...lists.units[digit(second)]];
+  if (first === "1") return [...lists.teens[digit(second)]];
+  return [
+    ...lists.tens[digit(first)],
+    ...(second !== "0" ? [NUMBER_WBOUND, ...lists.units[digit(second)]] : []),
+  ];
+}
+
+/**
+ * A number with fraction digits after a period, as ls_proc_do_number speaks
+ * it (LTS/l_us_pr1.c:497-749): the integer part as a number, "point", and
+ * each fraction digit by its name. `plural` is the routine's return value,
+ * which the text task uses to pick "dollar" or "dollars": false only for the
+ * integer one with no fraction, and for a text with no digit before a
+ * missing fraction (:518, 605-606, 748). Null when `text` is not such a
+ * number.
+ */
+export function speakDecimal(
+  text: string,
+  lists: NumberPhones,
+): { symbols: number[]; plural: boolean } | null {
+  const match = DECIMAL.exec(text);
+  if (!match || (match[1] === undefined && match[2] === undefined)) return null;
+  const [, integer, fraction] = match;
+  const symbols: number[] = [];
+  let plural = false;
+  if (integer !== undefined) {
+    const spoken = speakNumber(integer, lists);
+    if (!spoken) return null;
+    symbols.push(...spoken);
+    // "Watch for 1" (:605-606); a long or zero-led digit string is plural (:553, 590).
+    plural = integer.replaceAll(",", "") !== "1";
+  }
+  if (fraction !== undefined) {
+    if (integer !== undefined) symbols.push(NUMBER_WBOUND);
+    symbols.push(...lists.point);
+    for (const char of fraction) symbols.push(NUMBER_WBOUND, ...lists.units[digit(char)]);
+    plural = true;
+  }
+  return { symbols, plural };
+}
+
+/**
+ * A currency amount after its dollar sign, as the text task speaks it
+ * (LTS/ls_task.c:3312-3513):
+ *
+ *   $3      three dollars
+ *   $3.00   three dollars
+ *   $3.24   three dollars and twenty four cents
+ *   $.50    fifty cents
+ *   $3.240  three point two four zero dollars
+ *
+ * Not here, because each needs more than the word: a sign after the dollar
+ * sign (:3192-3215), and a following "million" that moves "dollars" behind it
+ * (:3234-3309). Null for those and for anything that is not a number.
+ */
+export function speakMoney(amount: string, lists: NumberPhones): number[] | null {
+  const match = DECIMAL.exec(amount);
+  if (!match || (match[1] === undefined && match[2] === undefined)) return null;
+  const [, integer, fraction] = match;
+  const [voicedPlural] = lists.plural.otherwise;
+  const [voicelessPlural] = lists.plural.afterVoiceless;
+  // Any fraction but one of exactly two digits: a decimal number of dollars (:3464-3513).
+  if (fraction !== undefined && fraction.length !== 2) {
+    const whole = speakDecimal(amount, lists);
+    if (!whole) return null;
+    return [...whole.symbols, ...lists.dollar, ...(whole.plural ? [voicedPlural] : [])];
+  }
+  const symbols: number[] = [];
+  if (integer !== undefined) {
+    const dollars = speakDecimal(integer, lists);
+    if (!dollars) return null;
+    symbols.push(...dollars.symbols, ...lists.dollar, ...(dollars.plural ? [voicedPlural] : []));
+    if (fraction === undefined || fraction === "00") return symbols;
+    symbols.push(...lists.and);
+  }
+  if (fraction === undefined) return symbols;
+  // "Just after the '.'": one leading zero is passed over (:3410-3412).
+  const cents = speakDecimal(fraction[0] === "0" ? fraction.slice(1) : fraction, lists);
+  if (!cents) return null;
+  symbols.push(
+    ...cents.symbols,
+    NUMBER_WBOUND,
+    ...lists.cent,
+    ...(cents.plural ? [voicelessPlural] : []),
+  );
+  return symbols;
+}
+
+/**
+ * A clock time, as ls_proc_do_time speaks it (LTS/l_us_pr1.c:1182-1209): the
+ * hour, a verb-phrase start, the minutes unless they are "00", and seconds
+ * after another verb-phrase start. Only the forms hour:minutes and
+ * hour:minutes:seconds; DECtalk's test (ls_proc_is_time, :1090-1129) also
+ * admits a fraction, which its recorded output reads another way, so that is
+ * left to the caller. Null for anything else.
+ */
+export function speakTime(text: string, lists: NumberPhones): number[] | null {
+  const match = /^([0-9]{1,2}):([0-9]{2})(?::([0-9]{2}))?$/.exec(text);
+  if (!match) return null;
+  const [, hour, minutes, seconds] = match;
+  const symbols: number[] =
+    hour.length === 1 ? [...lists.units[digit(hour)]] : twoDigits(hour[0], hour[1], lists);
+  symbols.push(NUMBER_VPSTART);
+  if (minutes !== "00") symbols.push(...twoDigits(minutes[0], minutes[1], lists));
+  if (seconds !== undefined) {
+    symbols.push(NUMBER_VPSTART, ...twoDigits(seconds[0], seconds[1], lists));
+  }
+  return symbols;
+}
+
+/**
+ * A number with a plural ending, "60s" or "60's" (LTS/ls_task.c:3936-3962,
+ * 4031-4046): a year by ls_util_is_year in its two halves, any other as a
+ * number, then the ending ls_util_pluralize picks from the last phone
+ * (LTS/ls_util.c:1442-1466). Null for anything else.
+ */
+export function speakPluralNumber(text: string, lists: NumberPhones): number[] | null {
+  const match = PLURAL.exec(text);
+  if (!match) return null;
+  const symbols = isYear(match[1]) ? speakYear(match[1], lists) : speakNumber(match[1], lists);
+  if (!symbols) return null;
+  const last = symbols.findLast((symbol) => symbol < NUMBER_S2);
+  const ending =
+    last !== undefined && lists.plural.sibilants.includes(last)
+      ? lists.plural.afterSibilant
+      : last !== undefined && lists.plural.voicelessConsonants.includes(last)
+        ? lists.plural.afterVoiceless
+        : lists.plural.otherwise;
+  return [...symbols, ...ending];
+}
+
+/**
+ * A number-like word that DECtalk's text task reads whole, in the order the
+ * task tries its rules (LTS/ls_task.c: money :3181, time :3622, plain numbers
+ * :3747): a dollar amount, a clock time, a plural number, or a number with
+ * separators or fraction digits. Null when `text` is none of these; the
+ * caller then reads it as it reads any other word.
+ */
+export function speakNumberToken(text: string, lists: NumberPhones): number[] | null {
+  if (text.startsWith("$")) return speakMoney(text.slice(1), lists);
+  return (
+    speakTime(text, lists) ??
+    speakPluralNumber(text, lists) ??
+    (/[,.]/.test(text) ? (speakDecimal(text, lists)?.symbols ?? null) : null)
+  );
 }
 
 /**

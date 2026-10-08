@@ -135,4 +135,28 @@ describe("renderLayeredF0 range and floor layers", () => {
       987, 987, 986, 986,
     ]);
   });
+
+  // DECtalk's two pseudojitter phases are both TWOPI on frame 4096 of a text
+  // and read the same cell past its cosine table, so the jitter is 0 there
+  // (Ph_drwt02.c:2279-2284; f0-filters, dectalk_pseudojitter). The kernel used
+  // to trap on that frame: any text of 26.2 s or more.
+  describe("frame 4096 of a text", () => {
+    it("renders a stretch that runs through it, with no jitter on that frame", () => {
+      // The first emitted frame is the second the kernel runs, so frame 4096
+      // is output 4094. Frame 4095 has cos[61] - cos[62] = -3 and frame 4097
+      // cos[2] - cos[1] = -2; either times 700 >> 14 is -1.
+      const contour = renderLayeredF0([level], model, FRAME * 4200, speaker);
+      expect(contour.length).toBeGreaterThan(4100);
+      expect(contour.slice(4092, 4097).map((point) => point.f0)).toEqual([
+        1499, 1499, 1500, 1499, 1499,
+      ]);
+    });
+
+    it("renders it in a later stretch, counted from the frames that ran before", () => {
+      // A later clause discards no frame: after 4090 frames its outputs are
+      // frames 4091 on, and frame 4096 is output 5.
+      const contour = renderLayeredF0([level], model, 0.1, speaker, 0, 4090);
+      expect(contour.slice(3, 8).map((point) => point.f0)).toEqual([1499, 1499, 1500, 1499, 1499]);
+    });
+  });
 });

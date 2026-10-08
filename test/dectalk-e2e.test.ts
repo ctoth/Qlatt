@@ -1037,3 +1037,28 @@ describe("dectalk-english output clock", () => {
     expect(uwStart).toBeGreaterThan(15 * DECTALK_PACKET_PERIOD_SEC);
   });
 });
+
+// The F0 kernel trapped on frame 4096 of a text (26.2 s): DECtalk's two
+// pseudojitter phases index one past its cosine table there (f0-filters,
+// dectalk_pseudojitter). What DECtalk's packets hold on that frame is checked
+// by the frame gate's dectalk-us-long-text-v1.
+describe("dectalk-english text longer than 4096 frames", () => {
+  const sentence =
+    "The man who lived in the small white house at the end of the long road that ran beside " +
+    "the river told the children who came to visit him every morning that he had once sailed " +
+    "around the world on a ship that carried tea and spices from the far east to the cold " +
+    "ports of the north.";
+
+  it.each([
+    ["one sentence, short of it", sentence, false],
+    ["two sentences, past it", `${sentence} ${sentence}`, true],
+    ["four sentences, past 8192 too", `${sentence} ${sentence} ${sentence} ${sentence}`, true],
+  ])("speaks %s", (_name, text, reaches) => {
+    const { track } = textToKlattTrackDetailed(text, undefined, 30, {
+      frontendId: "dectalk-english",
+    });
+    const packets = Math.round((track[track.length - 1]?.time ?? 0) / DECTALK_PACKET_PERIOD_SEC);
+    expect(packets > 4096).toBe(reaches);
+    for (const frame of track) expect(Number.isFinite(frame.params.F0)).toBe(true);
+  });
+});

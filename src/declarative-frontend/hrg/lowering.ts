@@ -13,7 +13,7 @@
  * design/beauty-synthesis/11-sota-frontend-architecture.md §5 (one final lowering).
  */
 
-import { getF0FilterExports, RENDER_OK } from "../../f0-filters-loader";
+import { describeRenderStatus, getF0FilterExports, RENDER_OK } from "../../f0-filters-loader";
 import { projectRd } from "../../input/rd-policy";
 import {
   VQ_FIELDS,
@@ -899,7 +899,9 @@ export function renderLayeredF0(
       outputPtr,
       frameCount,
     );
-    if (status !== RENDER_OK) throw new Error(`E_HRG_LOWER_F0_RENDER: status ${status}`);
+    if (status !== RENDER_OK) {
+      throw new Error(`E_HRG_LOWER_F0_RENDER: ${describeRenderStatus(status)}`);
+    }
     const values = new Float64Array(new Float64Array(exports.memory.buffer, outputPtr, frameCount));
     return Array.from(values, (f0, index) => ({
       time: index * framePeriod,

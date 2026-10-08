@@ -38,6 +38,21 @@ export interface F0FilterExports {
 /** render_f0 success status code (mirrors RENDER_OK in crates/f0-filters/src/lib.rs). */
 export const RENDER_OK = 0;
 
+/** render_f0's error status codes by name (mirrors RENDER_ERR_* in crates/f0-filters/src/lib.rs). */
+export const RENDER_ERROR_NAMES: Readonly<Record<number, string>> = {
+  [-1]: "RENDER_ERR_SCALARS",
+  [-2]: "RENDER_ERR_OUT",
+  [-3]: "RENDER_ERR_BUFFER",
+  [-4]: "RENDER_ERR_CMD_RANGE",
+  [-5]: "RENDER_ERR_PROFILE_RANGE",
+  [-6]: "RENDER_ERR_PHASE_RANGE",
+};
+
+/** A render_f0 status as its name and number, for an error message. */
+export function describeRenderStatus(status: number): string {
+  return `${RENDER_ERROR_NAMES[status] ?? "unknown status"} (${status.toString()})`;
+}
+
 let cachedInstance: WebAssembly.Instance | null = null;
 let injectedBytes: ArrayBuffer | ArrayBufferView | null = null;
 

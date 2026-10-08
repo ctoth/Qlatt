@@ -78,6 +78,59 @@ const DECTALK_COSINE: [i32; 64] = [
     154, 158, 161, 163,
 ];
 
+// `#define TWOPI 4096` (Ph_drwt02.c:235).
+const DECTALK_TWOPI: i32 = 4096;
+// What each pseudojitter phase gains in a frame (Ph_drwt02.c:2279, 2281).
+const DECTALK_TIMECOS5_STEP: i32 = 131;
+const DECTALK_TIMECOS3_STEP: i32 = 79;
+
+/// One frame's advance of a pseudojitter phase: `phase += step; if (phase >
+/// TWOPI) phase -= TWOPI;` (Ph_drwt02.c:2279-2282). The test is `>`, so a
+/// phase can be TWOPI itself.
+fn advance_dectalk_phase(phase: i32, step: i32) -> i32 {
+    let next = phase + step;
+    if next > DECTALK_TWOPI {
+        next - DECTALK_TWOPI
+    } else {
+        next
+    }
+}
+
+/// `getcosine[timecos5 >> 6] - getcosine[timecos3 >> 6]` (Ph_drwt02.c:2283).
+///
+/// A phase of TWOPI gives index 64, one past the table's 64 entries, and
+/// DECtalk reads past its array there. The phases are never reset, so this
+/// comes at frame 4096 of a text (26.2 s) and every 4096 frames after: both
+/// steps are odd, so `step * frames` is a multiple of 4096 only when `frames`
+/// is, and both phases are TWOPI in the same frame. Both then read the same
+/// cell and the difference is 0 whatever that cell holds; that is the value
+/// here. `None` is one phase past the table without the other, which the
+/// two steps cannot produce.
+fn dectalk_pseudojitter(timecos5: i32, timecos3: i32) -> Option<i32> {
+    let index5 = usize::try_from(timecos5 >> 6).ok()?;
+    let index3 = usize::try_from(timecos3 >> 6).ok()?;
+    match (DECTALK_COSINE.get(index5), DECTALK_COSINE.get(index3)) {
+        (Some(cosine5), Some(cosine3)) => Some(cosine5 - cosine3),
+        (None, None) if index5 == index3 => Some(0),
+        _ => None,
+    }
+}
+
+/// Whether every frame of a stretch has a pseudojitter: `elapsed_frames`
+/// frames ran before it and it runs `frames` more.
+fn dectalk_pseudojitter_in_range(elapsed_frames: usize, frames: usize) -> bool {
+    let mut timecos5 = 0i32;
+    let mut timecos3 = 0i32;
+    for frame in 0..elapsed_frames + frames {
+        timecos5 = advance_dectalk_phase(timecos5, DECTALK_TIMECOS5_STEP);
+        timecos3 = advance_dectalk_phase(timecos3, DECTALK_TIMECOS3_STEP);
+        if frame >= elapsed_frames && dectalk_pseudojitter(timecos5, timecos3).is_none() {
+            return false;
+        }
+    }
+    true
+}
+
 // Decay mode tags for impulse layers.
 const DECAY_HALVING: i32 = 0;
 const DECAY_STEP_PLUS_RAMP: i32 = 1;
@@ -417,14 +470,8 @@ fn render_with_options(
     let mut dectalk_timecos3 = 0i32;
     let mut dectalk_timecos5 = 0i32;
     for _ in 0..elapsed_frames {
-        dectalk_timecos5 += 131;
-        if dectalk_timecos5 > 4096 {
-            dectalk_timecos5 -= 4096;
-        }
-        dectalk_timecos3 += 79;
-        if dectalk_timecos3 > 4096 {
-            dectalk_timecos3 -= 4096;
-        }
+        dectalk_timecos5 = advance_dectalk_phase(dectalk_timecos5, DECTALK_TIMECOS5_STEP);
+        dectalk_timecos3 = advance_dectalk_phase(dectalk_timecos3, DECTALK_TIMECOS3_STEP);
     }
 
     // Pre-fill filter state to avoid startup transient (init_total computed in TS
@@ -669,16 +716,12 @@ fn render_with_options(
         // cosine phases on every output frame, then adds signed-Q14 pseudojitter
         // after the main and segmental filters and before speaker scaling.
         if inp.filter_mode == FILTER_COEFFICIENT_2POLE && inp.has_scale {
-            dectalk_timecos5 += 131;
-            if dectalk_timecos5 > 4096 {
-                dectalk_timecos5 -= 4096;
-            }
-            dectalk_timecos3 += 79;
-            if dectalk_timecos3 > 4096 {
-                dectalk_timecos3 -= 4096;
-            }
-            let pseudojitter = DECTALK_COSINE[(dectalk_timecos5 >> 6) as usize]
-                - DECTALK_COSINE[(dectalk_timecos3 >> 6) as usize];
+            dectalk_timecos5 = advance_dectalk_phase(dectalk_timecos5, DECTALK_TIMECOS5_STEP);
+            dectalk_timecos3 = advance_dectalk_phase(dectalk_timecos3, DECTALK_TIMECOS3_STEP);
+            // render_f0 refuses a stretch with a frame that has none
+            // (RENDER_ERR_PHASE_RANGE) before anything is rendered.
+            let pseudojitter =
+                dectalk_pseudojitter(dectalk_timecos5, dectalk_timecos3).unwrap_or(0);
             unscaled_f0 += q14_multiply(pseudojitter, 700) as f64;
         }
 
@@ -806,6 +849,9 @@ pub const RENDER_ERR_BUFFER: i32 = -3;
 pub const RENDER_ERR_CMD_RANGE: i32 = -4;
 /// A command's profile_start/profile_count range falls outside the pool.
 pub const RENDER_ERR_PROFILE_RANGE: i32 = -5;
+/// A frame's pseudojitter phases fall outside DECtalk's cosine table in a way
+/// DECtalk's own code gives no value for (see `dectalk_pseudojitter`).
+pub const RENDER_ERR_PHASE_RANGE: i32 = -6;
 
 /// Render the layered F0 contour.
 ///
@@ -975,6 +1021,12 @@ pub unsafe extern "C" fn render_f0(
     } else {
         DectalkOptions::default()
     };
+    if inputs.filter_mode == FILTER_COEFFICIENT_2POLE
+        && inputs.has_scale
+        && !dectalk_pseudojitter_in_range(elapsed, lead.saturating_add(out.len()))
+    {
+        return RENDER_ERR_PHASE_RANGE;
+    }
     render_with_options(&inputs, out, lead, elapsed, &options);
     RENDER_OK
 }
@@ -1974,6 +2026,98 @@ mod tests {
 
         assert_eq!(status, RENDER_OK);
         assert_eq!(out, [1097.0 * 0.1, 1097.0 * 0.1, 1096.0 * 0.1, 1096.0 * 0.1]);
+    }
+
+    #[test]
+    fn pseudojitter_phases_reach_twopi_together_every_4096_frames() {
+        // Ph_drwt02.c:2279-2282: `>` TWOPI, so a phase can be 4096 itself.
+        assert_eq!(advance_dectalk_phase(3965, DECTALK_TIMECOS5_STEP), 4096);
+        assert_eq!(advance_dectalk_phase(4096, DECTALK_TIMECOS5_STEP), 131);
+        let mut timecos5 = 0;
+        let mut timecos3 = 0;
+        let mut frames_at_twopi = Vec::new();
+        for frame in 1..=12288 {
+            timecos5 = advance_dectalk_phase(timecos5, DECTALK_TIMECOS5_STEP);
+            timecos3 = advance_dectalk_phase(timecos3, DECTALK_TIMECOS3_STEP);
+            assert_eq!(timecos5 == DECTALK_TWOPI, timecos3 == DECTALK_TWOPI, "frame {frame}");
+            if timecos5 == DECTALK_TWOPI {
+                frames_at_twopi.push(frame);
+            }
+        }
+        assert_eq!(frames_at_twopi, [4096, 8192, 12288]);
+    }
+
+    #[test]
+    fn pseudojitter_past_the_cosine_table_is_zero_only_when_both_phases_are() {
+        // getcosine[64] - getcosine[64]: the same cell, whatever it holds.
+        assert_eq!(dectalk_pseudojitter(DECTALK_TWOPI, DECTALK_TWOPI), Some(0));
+        // Inside the table: cos[2] - cos[1] for the first frame's 131 and 79.
+        assert_eq!(dectalk_pseudojitter(131, 79), Some(161 - 163));
+        assert_eq!(dectalk_pseudojitter(4095, 4095), Some(0));
+        // One phase past the table without the other has no value in DECtalk.
+        assert_eq!(dectalk_pseudojitter(DECTALK_TWOPI, 79), None);
+        assert_eq!(dectalk_pseudojitter(131, DECTALK_TWOPI), None);
+        assert_eq!(dectalk_pseudojitter(-64, 79), None);
+        // The two steps never produce that, from any number of earlier frames.
+        assert!(dectalk_pseudojitter_in_range(0, 20000));
+        assert!(dectalk_pseudojitter_in_range(4090, 12));
+    }
+
+    #[test]
+    fn renders_frame_4096_of_a_text_and_the_frames_around_it() {
+        // The setup of the jitter test above, 4090 frames into a text: with
+        // the one discarded cell, the eight outputs are frames 4092 to 4099.
+        // The held level is 1299 internal units after the filter; the output
+        // is 1100 + ((1299 + jitter - 1300) * 4100 >> 12). This panicked at
+        // frame 4096 (index 64 of a 64-entry table).
+        let mut scalars = vec![
+            0.0064,
+            0.0064,
+            FILTER_COEFFICIENT_2POLE as f64,
+            2100.0 / 16384.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1100.0,
+            4100.0,
+            4096.0,
+            0.1,
+            -1e9,
+            1e9,
+            1300.0,
+            1300.0,
+        ];
+        scalars.push(-1.0); // the default lead
+        scalars.push(4090.0); // frames already run
+        let layers = [1.0, 0.0, 4.0, 0.01, 0.9, 0.0, 1.0];
+        let cmds = [0.0, 1300.0, 0.0, 0.0, 0.0];
+
+        let (status, out) = call_render_f0(&scalars, &layers, 1, &cmds, 1, &[], 0, 8);
+
+        assert_eq!(status, RENDER_OK);
+        let expected: Vec<f64> = (4092..=4099)
+            .map(|frame: i32| {
+                let jitter = if frame == 4096 {
+                    0
+                } else {
+                    let phase = |step: i32| {
+                        let phase = (step * frame) % DECTALK_TWOPI;
+                        (phase >> 6) as usize
+                    };
+                    DECTALK_COSINE[phase(DECTALK_TIMECOS5_STEP)]
+                        - DECTALK_COSINE[phase(DECTALK_TIMECOS3_STEP)]
+                };
+                let internal = 1299 + q14_multiply(jitter, 700);
+                (1100 + (((internal - 1300) * 4100) >> 12)) as f64 * 0.1
+            })
+            .collect();
+        assert_eq!(out, expected);
+        // Frame 4096 has no jitter; its neighbours do.
+        assert_eq!(out[4], 1098.0 * 0.1);
+        assert_ne!(out[3], out[4]);
     }
 
     #[test]

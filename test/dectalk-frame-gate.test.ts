@@ -35,10 +35,12 @@
  * block), Dennis (no fifth formant) and Ursula (a female voice with one).
  * In them F1, F2, F3, B2 and B3 match on every packet, through the voice rule
  * fields `sex` and `fnscale`. F0 of the male voices takes its floor, range,
- * hat rise and stress scale from the voice and differs only where Paul's
- * does; F0 of the female voices does not match anywhere: DECtalk runs a
- * second copy of its F0 routine for them (Ph_drwt02.c:2445 on) with other
- * baselines and stress tables (Ph_inton2.c:936-946), which is not ported.
+ * hat rise and stress scale from the voice. The female voices go through
+ * DECtalk's second copy of its F0 routine (Ph_drwt02.c:2445 on; its own
+ * baselines, stress and segmental tables, half-scale filter and pivot), which
+ * is ported: their F0 differs in one sentence each, at the same unported dip
+ * as the male voices'. Their corpora have no question, exclamation or second
+ * comma clause, so those female cases are not checked against DECtalk.
  * AG, PS, CNK and F4 are still computed from Paul's values; the reasons
  * below were written for Paul's corpora and do not explain those.
  */

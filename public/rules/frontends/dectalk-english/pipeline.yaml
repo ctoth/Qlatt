@@ -847,6 +847,10 @@ phases:
       - dectalk_comma_baseline
       - dectalk_short_exclamation_baseline
       - dectalk_question_baseline
+      - dectalk_female_baseline_declination
+      - dectalk_female_comma_baseline
+      - dectalk_female_question_baseline
+      - dectalk_female_exclamation_range
       # phinton's order on one syllabic: hat rise, stress impulse, question
       # gestures (Ph_inton2.c Rules 1, 2, 4).
       - dectalk_hat_rise

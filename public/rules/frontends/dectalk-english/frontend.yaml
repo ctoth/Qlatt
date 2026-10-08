@@ -205,6 +205,29 @@ f0_model:
     # filter_seg_commands() in signed Q14 arithmetic.
     segmental:
       type: dectalk_segmental
+    # A command here adds its value to the voice's range (f0_scale_factor) for
+    # the clause: the female routine's exclamation, Ph_drwt02.c:3805-3808.
+    range:
+      type: range
+  # DECtalk has two copies of pht0draw(), chosen by the voice's sex
+  # (Ph_drwt02.c:771 male, 2445 female). Compared as compiled, the female copy
+  # differs from the male one in this block as follows:
+  by_sex:
+    female:
+      filter:
+        # The command filter runs at half scale: its state starts at
+        # (f0basestart << 3) >> 1 (3182-3183), its input is f0in >> 1 (3702)
+        # and its output is doubled (3710).
+        type: lowpass_2pole_coefficient_half_scale
+      layers:
+        stress:
+          # tarimp is still raised by delimp after each frame (3685-3691), but
+          # the `tarimp -= delimp` the male copy does before the frame
+          # (2070-2073) is absent (3563-3568).
+          decay: step_plus_rise
+      speaker_scale:
+        # f0prime = f0minimum + frac4mul(f0prime - 2100, f0scalefac) (3812).
+        pivot: 2100
   combine: sum
   # Speaker scaling: converts internal Hz*10 units to final Hz using the
   # DECtalk formula:
@@ -1082,11 +1105,17 @@ parameters:
       stress_emphasis_level: 3
       # Ph_inton2.c:488: phinton starts its command clock at cumdur = -6.
       command_clock_lead_frames: 6
-      # Ph_inton2.c:311, 327: us_f0_mphrase_position and us_f0_mstress_level,
-      # the stress impulse's two terms, by stresses so far in the clause and
-      # by stress level (none, primary, secondary, emphasis).
-      stress_phrase_position: [160, 80, 60, 40, 30, 20, 20, 5]
-      stress_level: [1, 81, 61, 261]
+      # The stress impulse's two terms, by stresses so far in the clause and
+      # by stress level (none, primary, secondary, emphasis), for each sex
+      # (Ph_inton2.c:936-946 chooses by malfem). Ph_inton2.c:313, 323-324:
+      # us_f0_mphrase_position and us_f0_mstress_level; 328-329, 333:
+      # us_f0_fphrase_position and us_f0_fstress_level.
+      stress_phrase_position:
+        male: [160, 80, 60, 40, 30, 20, 20, 5]
+        female: [180, 80, 70, 60, 50, 40, 34, 30]
+      stress_level:
+        male: [1, 81, 61, 261]
+        female: [1, 80, 70, 161]
       # Ph_inton2.c:585, 1059-1062: MAX_NRISES; the count goes back to 1 there.
       stress_max_rises: 7
       # Ph_inton2.c:960-973: the clause's last stress, or a syllabic before a
@@ -1103,6 +1132,12 @@ parameters:
       # and an exclamation of more than 2 take the long declarative baseline.
       baseline_long_declarative_words: 3
       baseline_long_exclamation_words: 2
+      # Ph_drwt02.c:3240: in the female routine a comma clause of more than 4
+      # words takes the declarative baseline.
+      baseline_long_comma_words: 4
+      # Ph_drwt02.c:3805-3808: the female routine scales an exclamation by
+      # f0scalefac + 500.
+      exclamation_range_added: 500
       # Ph_inton2.c:580-581: the US question gestures, internal Hz*10.
       question_gesture_dip_hz: -151
       question_gesture_rise_hz: 451
@@ -1123,33 +1158,66 @@ parameters:
       # Source: Ph_inton2.c:1056 make_f0_command(IMPULSE, 2, targf0, delayf0, 20, ...).
       stress_impulse_duration_frames: 20
       segmental:
-        # us_f0msegtars[]: incremental segmental F0 target per phone, internal
-        # Hz*10, for the phones whose entry is not 0. A phone not listed here
-        # has target 0. Keys are this port's phone names (SI is SIL).
+        # us_f0msegtars[] and us_f0fsegtars[]: incremental segmental F0 target
+        # per phone, internal Hz*10, for the phones whose entry is not 0. A
+        # phone not listed here has target 0. Keys are this port's phone names
+        # (SI is SIL). The tables are read by position, so the female one is
+        # given as its numbers fall: 500 for S, SH, B, T and K, none for P.
         targets:
-          SIL: 50
-          IY: 140
-          IH: 80
-          EY: 50
-          EH: 30
-          AH: 20
-          OW: 30
-          OY: 60
-          UH: 80
-          UW: 140
-          RR: 50
-          YU: 140
-          AX: 30
-          IX: 70
-          IR: 110
-          W: 100
-          Y: 140
-          Z: -200
+          male:
+            SIL: 50
+            IY: 140
+            IH: 80
+            EY: 50
+            EH: 30
+            AH: 20
+            OW: 30
+            OY: 60
+            UH: 80
+            UW: 140
+            RR: 50
+            YU: 140
+            AX: 30
+            IX: 70
+            IR: 110
+            W: 100
+            Y: 140
+            Z: -200
+          female:
+            SIL: 50
+            IY: 190
+            IH: 120
+            EY: 60
+            EH: 40
+            AH: 40
+            OW: 60
+            OY: 80
+            UH: 190
+            UW: 190
+            RR: 80
+            YU: 150
+            AX: 60
+            IX: 80
+            IR: 120
+            ER: 80
+            OR: 50
+            UR: 120
+            W: 80
+            Y: 80
+            # DECtalk's HX.
+            HH: 90
+            S: 500
+            Z: -20
+            SH: 500
+            B: 500
+            T: 500
+            K: 500
         # The controller counts durations in these frames. The clause-initial
         # pause's frames are timing.pause_frames.clause_initial(_other).
         frame_ms: 6.4
         citations:
           - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars"
+          - "DECtalk 4.63 Ph_drwt02.c:686-705 us_f0fsegtars"
           - "DECtalk 4.63 ph_claus.c (6.4 ms controller frames)"
       citations:
         - "DECtalk 4.63 ph_inton1.c (hat-pattern F0 model)"

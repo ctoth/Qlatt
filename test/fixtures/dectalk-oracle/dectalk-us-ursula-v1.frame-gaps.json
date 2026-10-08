@@ -1,7 +1,7 @@
 {
   "ursula-nothing-easy": ["F0","B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE","F4"],
-  "ursula-blue-bird": ["F0","B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","AL","ABLADE","AREA_N","DC","UE","PLACE","A2_CODE","F4"],
-  "ursula-give-key": ["F0","B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","AL","ATB","AREA_N","DC","UE","PLACE","A2_CODE","F4"],
-  "ursula-yes-thank-you": ["F0","B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE","F4"],
-  "ursula-cat": ["F0","B1","AV","AP","A2","A3","A4","A5","AG","PS","CNK","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE","F4"]
+  "ursula-blue-bird": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","AL","ABLADE","AREA_N","DC","UE","PLACE","A2_CODE","F4"],
+  "ursula-give-key": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","AL","ATB","AREA_N","DC","UE","PLACE","A2_CODE","F4"],
+  "ursula-yes-thank-you": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE","F4"],
+  "ursula-cat": ["B1","AV","AP","A2","A3","A4","A5","AG","PS","CNK","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE","F4"]
 }

@@ -62,9 +62,17 @@ rules:
       words: >-
         (dectalk_word_start(current) ? 1.0 : 0.0)
         + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_word_start')
+      # pht0draw is two routines, one for each sex (Ph_drwt02.c:771, 2445).
+      male: "params.policy.voice.sex == 'male'"
+      comma: "mark in [',', ';', ':']"
+      # dcommacnt (Ph_drwt02.c:3231-3256): comma clauses since the last clause
+      # that ended otherwise. This is the first when the clause before it did
+      # not end in a comma.
+      first_comma: >-
+        !(prev != null && get(prev, 'punctuationSymbol', '') in [',', ';', ':'])
     constraint: >-
-      (mark == '.' && words > params.policy.f0.baseline_long_declarative_words)
-      || (mark == '!' && words > params.policy.f0.baseline_long_exclamation_words)
+      male && ((mark == '.' && words > params.policy.f0.baseline_long_declarative_words)
+      || (mark == '!' && words > params.policy.f0.baseline_long_exclamation_words))
     insert:
       relation: PhraseCommand
       layer: baseline
@@ -107,7 +115,7 @@ rules:
         current.phoneme != "SIL"
         && (prev == null || prev.phoneme == "SIL")
     define: *baseline_clause
-    constraint: "mark == '.' && words <= params.policy.f0.baseline_long_declarative_words"
+    constraint: "male && mark == '.' && words <= params.policy.f0.baseline_long_declarative_words"
     insert:
       relation: PhraseCommand
       layer: baseline
@@ -147,7 +155,7 @@ rules:
         current.phoneme != "SIL"
         && (prev == null || prev.phoneme == "SIL")
     define: *baseline_clause
-    constraint: "mark in [',', ';', ':']"
+    constraint: "male && comma"
     insert:
       relation: PhraseCommand
       layer: baseline
@@ -169,7 +177,7 @@ rules:
         current.phoneme != "SIL"
         && (prev == null || prev.phoneme == "SIL")
     define: *baseline_clause
-    constraint: "mark == '!' && words <= params.policy.f0.baseline_long_exclamation_words"
+    constraint: "male && mark == '!' && words <= params.policy.f0.baseline_long_exclamation_words"
     insert:
       relation: PhraseCommand
       layer: baseline
@@ -189,7 +197,7 @@ rules:
         current.phoneme != "SIL"
         && (prev == null || prev.phoneme == "SIL")
     define: *baseline_clause
-    constraint: "mark == '?'"
+    constraint: "male && mark == '?'"
     insert:
       relation: PhraseCommand
       layer: baseline
@@ -200,6 +208,112 @@ rules:
     citations:
       - "DECtalk 4.63 Ph_drwt02.c:1375-1391 f0basetypes[3][] (question)"
       - "DECtalk 4.63 Ph_drwt02.c:1695-1699 (clausetype 3 selects f0basetypes[3])"
+
+  # --------------------------------------------------------------------------
+  # The baselines of a female voice: the second copy of pht0draw
+  # (Ph_drwt02.c:2445 on) fills f0basetypes with other numbers (2462-2556)
+  # and chooses among them otherwise (3223-3257):
+  #   period:       [0] whatever the word count
+  #   comma:        [1] for the first comma clause in a row, unless it has more
+  #                 than 4 words; [0] for that one and for the later ones
+  #   exclamation:  [0] with more than 2 words, else [2]
+  #   question:     [3]
+  # Rows 0, 2 and 3 hold the same seventeen numbers.
+  #
+  # Each list below has an eighteenth number. The female copy steps its
+  # baseline counter while `basecntr <= 15` (3530; the male copy has 14,
+  # 2013), so at the clause's end it reads f0baseline[17], one past the row:
+  # in f0basetypes[5][17] (ph_data.h:863) that is the next row's first number.
+  # --------------------------------------------------------------------------
+  dectalk_female_baseline_declination:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme != "SIL"
+        && (prev == null || prev.phoneme == "SIL")
+    define: *baseline_clause
+    constraint: >-
+      !male && (mark == '.' || mark == '!'
+        || (comma && (!first_comma || words > params.policy.f0.baseline_long_comma_words)))
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1795, 1782, 1779, 1765, 1763, 1750, 1748, 1734, 1720, 1714, 1708, 1887]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:2462-2478, 2501-2517 f0basetypes[0][] and [2][] (female; the same numbers)"
+      - "DECtalk 4.63 Ph_drwt02.c:2482, 2520 (f0basetypes[1][0] and [3][0], read as f0baseline[17])"
+      - "DECtalk 4.63 Ph_drwt02.c:3223-3252 (clausetype 0, 1 and 2 in the female routine)"
+      - "DECtalk 4.63 Ph_drwt02.c:3530 (basecntr <= 15)"
+
+  dectalk_female_comma_baseline:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme != "SIL"
+        && (prev == null || prev.phoneme == "SIL")
+    define: *baseline_clause
+    constraint: >-
+      !male && comma && first_comma && words <= params.policy.f0.baseline_long_comma_words
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1785, 1762, 1749, 1725, 1703, 1710, 1718, 1764, 1810, 1864, 1928, 1887]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:2482-2498 f0basetypes[1][] (female comma clause)"
+      - "DECtalk 4.63 Ph_drwt02.c:2501 (f0basetypes[2][0], read as f0baseline[17])"
+      - "DECtalk 4.63 Ph_drwt02.c:3233-3242 (dcommacnt == 1 selects f0basetypes[1] unless number_words > 4)"
+      - "DECtalk 4.63 Ph_drwt02.c:3530 (basecntr <= 15)"
+
+  dectalk_female_question_baseline:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme != "SIL"
+        && (prev == null || prev.phoneme == "SIL")
+    define: *baseline_clause
+    constraint: "!male && mark == '?'"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1795, 1782, 1779, 1765, 1763, 1750, 1748, 1734, 1720, 1714, 1708, 1890]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:2520-2536 f0basetypes[3][] (female question)"
+      - "DECtalk 4.63 Ph_drwt02.c:2540 (f0basetypes[4][0], read as f0baseline[17])"
+      - "DECtalk 4.63 Ph_drwt02.c:3253-3257 (clausetype 3 selects f0basetypes[3])"
+      - "DECtalk 4.63 Ph_drwt02.c:3530 (basecntr <= 15)"
+
+  # The female routine scales an exclamation's F0 over a wider range:
+  #   f0prime = f0minimum + frac4mul(f0prime - 2100, f0scalefac + 500)
+  # (Ph_drwt02.c:3805-3808). The male routine has no such case (2306-2312).
+  dectalk_female_exclamation_range:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme != "SIL"
+        && (prev == null || prev.phoneme == "SIL")
+    define: *baseline_clause
+    constraint: "!male && mark == '!'"
+    insert:
+      relation: PhraseCommand
+      layer: range
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.exclamation_range_added
+      tag: f0_exclamation_range
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:3805-3808 (clausetype 2: f0scalefac + 500 in the female routine)"
 
   # --------------------------------------------------------------------------
   # Rule 1 (Ph_inton2.c:809-908): the hat rise, a STEP at the syllabic that
@@ -390,8 +504,8 @@ rules:
         rises < params.policy.f0.stress_max_rises ? rises
         : 1.0 + mod(rises - params.policy.f0.stress_max_rises, params.policy.f0.stress_max_rises - 1.0)
       raw_hz: >-
-        params.policy.f0.stress_level[stress_now]
-        + params.policy.f0.stress_phrase_position[rise_index]
+        params.policy.f0.stress_level[params.policy.voice.sex][stress_now]
+        + params.policy.f0.stress_phrase_position[params.policy.voice.sex][rise_index]
       question_hz: "question ? floor(raw_hz / params.policy.f0.stress_question_divisor) : raw_hz"
       # (struccur & FPERNEXT) IS_PLUS tests one bit, 0400, which the question
       # and exclamation boundary values (0440, 0500) carry too.
@@ -430,7 +544,7 @@ rules:
       tag: f0_stress_impulse
     citations:
       - "DECtalk 4.63 Ph_inton2.c:924-1062 Rule 2 (stress impulse: us_f0_mstress_level + us_f0_mphrase_position[nrises_sofar], length 20)"
-      - "DECtalk 4.63 Ph_inton2.c:311, 327 (the two US tables)"
+      - "DECtalk 4.63 Ph_inton2.c:313, 323-324, 328-329, 333 (the US tables, male and female); 936-946 (chosen by malfem)"
       - "DECtalk 4.63 Ph_inton2.c:1771-1791 make_f0_command (a command is never earlier than the one before)"
       - "DECtalk 4.63 Ph_drwt02.c:1908-1957 US non-reading IMPULSE (step plus ramp)"
 
@@ -462,12 +576,12 @@ rules:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.targets.SIL
+      value: "params.policy.f0.segmental.targets[params.policy.voice.sex].SIL"
       duration_frames: dectalk_clause_initial_pause_frames(current)
       profile_points: [1, 0, 0]
       tag: f0_segmental_initial_silence
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (SI target) and :2080-2150 pht0draw"
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (SI target) and :2080-2150 pht0draw"
       - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause of 4 or 5 frames)"
 
   # The baseline's clock is tcumdur, which phinton adds up one allophone at a
@@ -500,7 +614,7 @@ rules:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
-      value: "get(params.policy.f0.segmental.targets, current.phoneme, 0)"
+      value: "get(params.policy.f0.segmental.targets[params.policy.voice.sex], current.phoneme, 0)"
       duration_frames: "round(allophone_ms / params.policy.f0.segmental.frame_ms)"
       profile_points: &segmental_phone_flags
         - "isTrue(current, 'voiced') ? 0 : 1"
@@ -508,7 +622,7 @@ rules:
         - "get(current, 'stress', 0) > 0 ? 1 : 0"
       tag: f0_segmental_phone
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (incremental F0 target per phone)"
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (incremental F0 target per phone)"
       - "DECtalk 4.63 Ph_drwt02.c:2080-2150 pht0draw (allodurs[] frames; FVOICD, FPLOSV and FSTRESS tests)"
 
   dectalk_segmental_f0_phone_after_intonation_stop:
@@ -520,12 +634,12 @@ rules:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
-      value: "get(params.policy.f0.segmental.targets, current.phoneme, 0)"
+      value: "get(params.policy.f0.segmental.targets[params.policy.voice.sex], current.phoneme, 0)"
       duration_frames: "round(allophone_ms / params.policy.f0.segmental.frame_ms)"
       profile_points: *segmental_phone_flags
       tag: f0_segmental_uncounted_phone
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (incremental F0 target per phone)"
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (incremental F0 target per phone)"
       - "DECtalk 4.63 Ph_drwt02.c:2080-2150 pht0draw (allodurs[] frames; FVOICD, FPLOSV and FSTRESS tests)"
       - "DECtalk 4.63 Ph_inton2.c:809-819, 1659-1671 (tcumdur is not added to once the loop is left)"
 
@@ -538,12 +652,12 @@ rules:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
-      value: "get(params.policy.f0.segmental.targets, get(current, 'dummy_phone', 'IX'), 0)"
+      value: "get(params.policy.f0.segmental.targets[params.policy.voice.sex], get(current, 'dummy_phone', 'IX'), 0)"
       duration_frames: "round(current.duration / params.policy.f0.segmental.frame_ms)"
       profile_points: [0, 0, 0]
       tag: f0_segmental_dummy_vowel
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (IX and AX targets) and :2080-2150 pht0draw"
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (IX and AX targets) and :2080-2150 pht0draw"
 
   dectalk_segmental_f0_final_silence:
     kind: f0_layer
@@ -554,7 +668,7 @@ rules:
       relation: Tilt
       layer: segmental
       at: at_sync(current.sync_left)
-      value: params.policy.f0.segmental.targets.SIL
+      value: "params.policy.f0.segmental.targets[params.policy.voice.sex].SIL"
       # The Segment also holds the next clause's opening pause
       # (dectalk_pause_duration); that pause has its own command above.
       duration_frames: >-
@@ -563,7 +677,7 @@ rules:
       profile_points: [1, 0, 0]
       tag: f0_segmental_terminal_silence
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c:662-684 us_f0msegtars (SI target) and :2080-2150 pht0draw"
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (SI target) and :2080-2150 pht0draw"
 
   # --------------------------------------------------------------------------
   # Rule 6: Connected-speech source contour (Fant 1997)

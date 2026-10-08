@@ -1,0 +1,19 @@
+# Third list of probes for DECtalk 4.63's command text parser: commands that
+# mark a place in the text (index commands), which do not end the clause
+# before them as other commands do, with their names in full and shortened;
+# and a command at the start and at the end of a text. One text per line;
+# written before the export and not edited afterwards
+# (scripts/oracle/export-text-parser-fixture.ts).
+
+Say this [:index mark 5] and then that.
+Say this [:index reply 7] and then that.
+Say this [:i m 5] and then that.
+Say this [:in mark 5] and then that.
+Say this [:ind m 5] and then that.
+Say this[:index mark 5]and then that.
+[:index mark 1] Start here.
+End here [:index mark 2]
+Say this [:sync] and then that.
+[:sync] Start here.
+End here [:sync]
+One [:index mark 1] two [:index mark 2] three.

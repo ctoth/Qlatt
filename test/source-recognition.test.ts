@@ -192,15 +192,18 @@ describe("source-backed recognition", () => {
 
   it("uses the selected normalization resources when handing off source items", () => {
     // dectalk-english keeps a bare number as digits (its lexicon speaks them);
-    // qlatt-english writes it out. dectalk-english also closes a text that
-    // has no punctuation at its end as a sentence (tn_text_end).
-    const words = (frontend: string): string[] => {
+    // qlatt-english writes it out. dectalk-english closes a text that has no
+    // punctuation at its end as a sentence where its text carries the host's
+    // clause end, which its text parser's output does (tn_parser_clause_end);
+    // text given straight to recognition, as here, has none.
+    const words = (frontend: string, text = "123"): string[] => {
       const spec = loadBundledRulepackSpec(frontend);
       const utterance = new Utterance(NORMALIZATION_SCHEMA);
-      recognizeText("123", utterance, spec);
+      recognizeText(text, utterance, spec);
       return normalizeSourceItems(utterance, spec).map((entry) => entry.word);
     };
-    expect(words("dectalk-english")).toEqual(["123", "."]);
+    expect(words("dectalk-english")).toEqual(["123"]);
+    expect(words("dectalk-english", "123 \x0b")).toEqual(["123", "."]);
     expect(words("qlatt-english")).toContain("hundred");
   });
 

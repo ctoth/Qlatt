@@ -1,0 +1,1982 @@
+{
+ "schemaVersion": "v1",
+ "source": "DECtalk 4.63 say.exe, instrumented: the text of each clause as CMD/cm_text.c hands it to the letter-to-sound stage",
+ "encoding": "one string per clause; a byte outside printable ASCII is written \\xNN",
+ "inputs": [
+  "dectalk-us-parser-probes-v1.txt",
+  "dectalk-us-number-tokens-v1.txt",
+  "dectalk-us-sweep-v1.json",
+  "dectalk-us-sweep-b-v1.json"
+ ],
+ "entries": {
+  "999": [
+   "999 "
+  ],
+  "1066": [
+   "1066 "
+  ],
+  "1800": [
+   "1800 "
+  ],
+  "1900": [
+   "1900 "
+  ],
+  "1999": [
+   "1999 "
+  ],
+  "2000": [
+   "2000 "
+  ],
+  "2004": [
+   "2004 "
+  ],
+  "2026": [
+   "2026 "
+  ],
+  "10000": [
+   "10000 "
+  ],
+  "Call 1-800-555-1212 now.": [
+   "Call 1, 8 0 0, 5 5 5, 1 2 1 2\\x81,\\x82 now. "
+  ],
+  "Call 800-555-1212 now.": [
+   "Call 8 0 0, 5 5 5, 1 2 1 2\\x81,\\x82 now. "
+  ],
+  "Call 1 800 555 1212 now.": [
+   "Call 1, 8 0 0, 5 5 5, 1 2 1 2\\x81,\\x82 now. "
+  ],
+  "Call (800)555-1212 now.": [
+   "Call \\x81,\\x828 0 0,  5 5 5, 1 2 1 2\\x81,\\x82 now. "
+  ],
+  "Call (800) 555 1212 now.": [
+   "Call 8 0 0, 5 5 5, 1 2 1 2\\x81,\\x82 now. "
+  ],
+  "Call 18005551212 now.": [
+   "Call 1, 8 0 0, 5 5 5, 1 2 1 2\\x81,\\x82 now. "
+  ],
+  "Call 8005551212 now.": [
+   "Call 8 0 0, 5 5 5, 1 2 1 2\\x81,\\x82 now. "
+  ],
+  "Call 555-1212 now.": [
+   "Call 5 5 5, 1 2 1 2\\x81,\\x82 now. "
+  ],
+  "Call 5551212 now.": [
+   "Call 5551212 now. "
+  ],
+  "Call 555 1212.": [
+   "Call 5 5 5, 1 2 1 2.\\x81,\\x82 "
+  ],
+  "Boston, MA 02134": [
+   "Boston, ",
+   "Massachusetts 0 2 1 3 4 \\x81,\\x82 "
+  ],
+  "He lives in Austin, TX 78701.": [
+   "He lives in Austin, ",
+   "Texas 7 8 7 0 1 \\x81,\\x82. "
+  ],
+  "Dr. Smith is here.": [
+   "Doctor Smith is here. "
+  ],
+  "He lives on Elm Dr. now.": [
+   "He lives on Elm Dr. now. "
+  ],
+  "St. John is here.": [
+   "Saint John is here. "
+  ],
+  "Turn on Main St. now.": [
+   "Turn on Main St. now. "
+  ],
+  "Meet me at 42 St. today.": [
+   "Meet me at 42 St. today. "
+  ],
+  "It was 5/10/96 then.": [
+   "It was 10-may-96 then. "
+  ],
+  "It was 5-10-96 then.": [
+   "It was 10-may-96 then. "
+  ],
+  "It was 12/25/2004 then.": [
+   "It was 25-dec-2004 then. "
+  ],
+  "It was May 3, 1996 then.": [
+   "It was 3-May, ",
+   "1996 then. "
+  ],
+  "It was May. 3, 1996 then.": [
+   "It was May. ",
+   "3, ",
+   "1996 then. "
+  ],
+  "It was Jan. 5 then.": [
+   "It was 5-Jan then. "
+  ],
+  "It was 3 May 1996 then.": [
+   "It was  3-May-1996 then. "
+  ],
+  "Add 1 1/2 cups.": [
+   "Add 1 1/2 cups. "
+  ],
+  "Add 3/4 cup.": [
+   "Add 3/4 cup. "
+  ],
+  "The vt100 is old.": [
+   "The vt 100 is old. "
+  ],
+  "Use v4.2 now.": [
+   "Use v 4.2 now. "
+  ],
+  "It is 4.2bw here.": [
+   "It is  4 point 2 bw here. "
+  ],
+  "The price/performance is good.": [
+   "The price performance is good. "
+  ],
+  "It runs OS/2 here.": [
+   "It runs OS/2 here. "
+  ],
+  "Send 3/matt now.": [
+   "Send 3 / matt now. "
+  ],
+  "The part is bw-x01 here.": [
+   "The part is bw-x01 here. "
+  ],
+  "It was 34.45-45 there.": [
+   "It was  34 point 45 -45 there. "
+  ],
+  "Open readme.txt now.": [
+   "Open readme \\x81d'at\\x82 txt now. "
+  ],
+  "Run setup.exe now.": [
+   "Run setup \\x81d'at\\x82 x e now. "
+  ],
+  "Go to http://www.example.com now.": [
+   "Go to h t t p \\x81k'olxn\\x82 / / www \\x81d'at\\x82 example \\x81d'at\\x82 com\\x0bnow. "
+  ],
+  "Go to www.example.com now.": [
+   "Go to www \\x81d'at\\x82 example \\x81d'at\\x82 com\\x0bnow. "
+  ],
+  "Write to joe@example.com now.": [
+   "Write to joe @ example \\x81d'at\\x82 com\\x0bnow. "
+  ],
+  "Card 1234 5678 9012 3456 expired.": [
+   "Card 1234 5678 9012 3456 expired. "
+  ],
+  "Card 1234-5678-9012-3456 expired.": [
+   "Card 1 2 3 4, 5 6 7 8, 9 0 1 2, 3 4 5 6\\x81,\\x82 expired. "
+  ],
+  "It is 3:23pm now.": [
+   "It is 3:23 pm now. "
+  ],
+  "It is 3:23 pm now.": [
+   "It is 3:23 pm now. "
+  ],
+  "It is 9:00 a.m. now.": [
+   "It is 9:00 am ",
+   "now. "
+  ],
+  "It is 9:00 A.M. now.": [
+   "It is 9:00 A.M. ",
+   "now. "
+  ],
+  "The U.S.A. is large.": [
+   "The U.S.A. ",
+   "is large. "
+  ],
+  "He said hi :-) today.": [
+   "He said hi smile! today. "
+  ],
+  "Wait... what?": [
+   "Wait. ",
+   "what? "
+  ],
+  "What?! No!!": [
+   "What?! ",
+   "No! "
+  ],
+  "He said (quietly) that it was late.": [
+   "He said quietly that it was late. "
+  ],
+  "It was --- strange.": [
+   "It was - ",
+   "strange. "
+  ],
+  "It was a \"test\" today.": [
+   "It was a test today. "
+  ],
+  "He is 6' tall.": [
+   "He is 6' ",
+   "tall. "
+  ],
+  "A 3x5 card.": [
+   "A 3 x 5 card. "
+  ],
+  "Rock & roll.": [
+   "Rock & roll. "
+  ],
+  "It is 50% off.": [
+   "It is 50 % off. "
+  ],
+  "It is #1 here.": [
+   "It is # 1 here. "
+  ],
+  "Mix 2+2 now.": [
+   "Mix 2 + 2 now. "
+  ],
+  "It is -5 degrees.": [
+   "It is -5 degrees. "
+  ],
+  "It is +5 degrees.": [
+   "It is +5 degrees. "
+  ],
+  "$3": [
+   "$3 "
+  ],
+  "$1": [
+   "$1 "
+  ],
+  "$3.00": [
+   "$3.00 "
+  ],
+  "$3.24": [
+   "$3.24 "
+  ],
+  "$3.240": [
+   "$3.240 "
+  ],
+  "$0.50": [
+   "$0.50 "
+  ],
+  "$.50": [
+   "$.50 "
+  ],
+  "$1.01": [
+   "$1.01 "
+  ],
+  "$3.5": [
+   "$3.5 "
+  ],
+  "$3.50": [
+   "$3.50 "
+  ],
+  "$1,250": [
+   "$1,250 "
+  ],
+  "$1,250.75": [
+   "$1,250.75 "
+  ],
+  "$1,000,000": [
+   "$1,000,000 "
+  ],
+  "$20": [
+   "$20 "
+  ],
+  "$100": [
+   "$100 "
+  ],
+  "$1.00": [
+   "$1.00 "
+  ],
+  "$2.05": [
+   "$2.05 "
+  ],
+  "$-5": [
+   " $ -5 "
+  ],
+  "$+5": [
+   " $ +5 "
+  ],
+  "$": [
+   "$ "
+  ],
+  "$12.345": [
+   "$12.345 "
+  ],
+  "$1000": [
+   "$1000 "
+  ],
+  "$007": [
+   "$007 "
+  ],
+  "$3 million": [
+   "$3 million "
+  ],
+  "$5 billion": [
+   "$5 billion "
+  ],
+  "$1 million": [
+   "$1 million "
+  ],
+  "$2.5 million": [
+   "$2.5 million "
+  ],
+  "$3 dollars": [
+   "$3 dollars "
+  ],
+  "3:30": [
+   "3:30 "
+  ],
+  "10:15": [
+   "10:15 "
+  ],
+  "12:00": [
+   "12:00 "
+  ],
+  "1:05": [
+   "1:05 "
+  ],
+  "9:00": [
+   "9:00 "
+  ],
+  "00:00": [
+   "00:00 "
+  ],
+  "23:59": [
+   "23:59 "
+  ],
+  "3:30:15": [
+   "3:30:15 "
+  ],
+  "10:15:00": [
+   "10:15:00 "
+  ],
+  "3:5": [
+   "3:5 "
+  ],
+  "123:45": [
+   "123 : 45 "
+  ],
+  "3:30.5": [
+   "3 : 30.5 "
+  ],
+  "12:60": [
+   "12:60 "
+  ],
+  "3:30 pm": [
+   "3:30 pm "
+  ],
+  "3:30 am": [
+   "3:30 am "
+  ],
+  "10:15 PM": [
+   "10:15 PM "
+  ],
+  "9:00 a.m.": [
+   "9:00 am "
+  ],
+  "3:30 today": [
+   "3:30 today "
+  ],
+  "19.99": [
+   "19.99 "
+  ],
+  "0.5": [
+   "0.5 "
+  ],
+  ".5": [
+   ".5 "
+  ],
+  "3.14159": [
+   "3.14159 "
+  ],
+  "1.0": [
+   "1.0 "
+  ],
+  "1.01": [
+   "1.01 "
+  ],
+  "100.001": [
+   "100.001 "
+  ],
+  "1,234.56": [
+   "1,234.56 "
+  ],
+  "2.50": [
+   "2.50 "
+  ],
+  "0.05": [
+   "0.05 "
+  ],
+  "1800s": [
+   "1800s "
+  ],
+  "60s": [
+   "60s "
+  ],
+  "1990s": [
+   "1990s "
+  ],
+  "1984s": [
+   "1984s "
+  ],
+  "5s": [
+   "5s "
+  ],
+  "100s": [
+   "100s "
+  ],
+  "60's": [
+   "60's "
+  ],
+  "1800's": [
+   "1800's "
+  ],
+  "2000s": [
+   "2000s "
+  ],
+  "20s": [
+   "20s "
+  ],
+  "1,000,000": [
+   "1,000,000 "
+  ],
+  "10,000": [
+   "10,000 "
+  ],
+  "250,000": [
+   "250,000 "
+  ],
+  "1,00": [
+   "1,00 "
+  ],
+  "12,34": [
+   "12,34 "
+  ],
+  "1,2345": [
+   "1,2345 "
+  ],
+  "555 1234": [
+   "5 5 5, 1 2 3 4\\x81,\\x82 "
+  ],
+  "555-1234": [
+   "5 5 5, 1 2 3 4\\x81,\\x82 "
+  ],
+  "1 800 555 1234": [
+   "1, 8 0 0, 5 5 5, 1 2 3 4\\x81,\\x82 "
+  ],
+  "12 34": [
+   "12 34 "
+  ],
+  "1234 5678": [
+   "1234 5678 "
+  ],
+  "10%": [
+   "10 % "
+  ],
+  "100%": [
+   "100 % "
+  ],
+  "1%": [
+   "1 % "
+  ],
+  "0.5%": [
+   " 0 point 5  % "
+  ],
+  "1st": [
+   "1st "
+  ],
+  "2nd": [
+   "2nd "
+  ],
+  "3rd": [
+   "3rd "
+  ],
+  "21st": [
+   "21st "
+  ],
+  "100th": [
+   "100th "
+  ],
+  "11th": [
+   "11th "
+  ],
+  "1,000th": [
+   "1 , 000th "
+  ],
+  "-5": [],
+  "+5": [
+   "+5 "
+  ],
+  "-3.5": [],
+  "1e5": [
+   "1 e 5 "
+  ],
+  "2.5e-3": [
+   " 2 point 5 e-3 "
+  ],
+  "A zoo can be fun on a sunny day.": [
+   "A zoo can be fun on a sunny day. "
+  ],
+  "Bob bought a big blue balloon.": [
+   "Bob bought a big blue balloon. "
+  ],
+  "Fresh frost forms on five fields.": [
+   "Fresh frost forms on five fields. "
+  ],
+  "Gag, gang, and gunk go together.": [
+   "Gag, ",
+   "gang, ",
+   "and gunk go together. "
+  ],
+  "He had your dark suit in greasy wash water all year.": [
+   "He had your dark suit in greasy wash water all year. "
+  ],
+  "Layer, lawyer, royal, rural.": [
+   "Layer, ",
+   "lawyer, ",
+   "royal, ",
+   "rural. "
+  ],
+  "Nina mumbled many minimal numbers.": [
+   "Nina mumbled many minimal numbers. "
+  ],
+  "Pat tapped a pot and picked a paper cup.": [
+   "Pat tapped a pot and picked a paper cup. "
+  ],
+  "S, f, sh, th, z, v, zh, dh.": [
+   "S, ",
+   "f, ",
+   "sh, ",
+   "th, ",
+   "z, ",
+   "v, ",
+   "zh, ",
+   "dh. "
+  ],
+  "Say oh, ee, and oo again.": [
+   "Say oh, ",
+   "ee, ",
+   "and oo again. "
+  ],
+  "She sells seashells by the seashore.": [
+   "She sells seashells by the seashore. "
+  ],
+  "Ship shape, sheep shop, and cheap chips.": [
+   "Ship shape, ",
+   "sheep shop, ",
+   "and cheap chips. "
+  ],
+  "Shy sharks shimmer in shallow shoals.": [
+   "Shy sharks shimmer in shallow shoals. "
+  ],
+  "Sip zip, sip ship, sip sip.": [
+   "Sip zip, ",
+   "sip ship, ",
+   "sip sip. "
+  ],
+  "Soft, safe, fuzzy, fussy, sassy, feisty, zesty, shifty.": [
+   "Soft, ",
+   "safe, ",
+   "fuzzy, ",
+   "fussy, ",
+   "sassy, ",
+   "feisty, ",
+   "zesty, ",
+   "shifty. "
+  ],
+  "The quick brown fox jumps over the lazy dog.": [
+   "The quick brown fox jumps over the lazy dog. "
+  ],
+  "They bathed the smooth leather.": [
+   "They bathed the smooth leather. "
+  ],
+  "Thin thieves thought that they thrilled.": [
+   "Thin thieves thought that they thrilled. "
+  ],
+  "Vera vapes very vivid violets.": [
+   "Vera vapes very vivid violets. "
+  ],
+  "Zesty zest is easy to spot.": [
+   "Zesty zest is easy to spot. "
+  ],
+  "A.": [
+   "A. "
+  ],
+  "I.": [
+   "I. "
+  ],
+  "Yes.": [
+   "Yes. "
+  ],
+  "No.": [
+   "No. "
+  ],
+  "Hello.": [
+   "Hello. "
+  ],
+  "Okay.": [
+   "Okay. "
+  ],
+  "Stop.": [
+   "Stop. "
+  ],
+  "Go.": [
+   "Go. "
+  ],
+  "Why?": [
+   "Why? "
+  ],
+  "What?": [
+   "What? "
+  ],
+  "Really?": [
+   "Really? "
+  ],
+  "Today.": [
+   "Today. "
+  ],
+  "Tomorrow.": [
+   "Tomorrow. "
+  ],
+  "Yesterday.": [
+   "Yesterday. "
+  ],
+  "Computer.": [
+   "Computer. "
+  ],
+  "Banana.": [
+   "Banana. "
+  ],
+  "Elephant.": [
+   "Elephant. "
+  ],
+  "Beautiful.": [
+   "Beautiful. "
+  ],
+  "Thanks.": [
+   "Thanks. "
+  ],
+  "Please.": [
+   "Please. "
+  ],
+  "Sorry.": [
+   "Sorry. "
+  ],
+  "Maybe.": [
+   "Maybe. "
+  ],
+  "Never.": [
+   "Never. "
+  ],
+  "Always.": [
+   "Always. "
+  ],
+  "Water.": [
+   "Water. "
+  ],
+  "Mother.": [
+   "Mother. "
+  ],
+  "Father.": [
+   "Father. "
+  ],
+  "Seven.": [
+   "Seven. "
+  ],
+  "Eleven.": [
+   "Eleven. "
+  ],
+  "Zero.": [
+   "Zero. "
+  ],
+  "Wow!": [
+   "Wow! "
+  ],
+  "Help!": [
+   "Help! "
+  ],
+  "Run!": [
+   "Run! "
+  ],
+  "Good.": [
+   "Good. "
+  ],
+  "Bad.": [
+   "Bad. "
+  ],
+  "The.": [
+   "The. "
+  ],
+  "An.": [
+   "An. "
+  ],
+  "And.": [
+   "And. "
+  ],
+  "But.": [
+   "But. "
+  ],
+  "Or.": [
+   "Or. "
+  ],
+  "Strengths.": [
+   "Strengths. "
+  ],
+  "Understanding.": [
+   "Understanding. "
+  ],
+  "Photography.": [
+   "Photography. "
+  ],
+  "Photograph.": [
+   "Photograph. "
+  ],
+  "Unbelievable.": [
+   "Unbelievable. "
+  ],
+  "Good morning.": [
+   "Good morning. "
+  ],
+  "Thank you.": [
+   "Thank you. "
+  ],
+  "Not now.": [
+   "Not now. "
+  ],
+  "Come here.": [
+   "Come here. "
+  ],
+  "Go away.": [
+   "Go away. "
+  ],
+  "Be quiet.": [
+   "Be quiet. "
+  ],
+  "Very good.": [
+   "Very good. "
+  ],
+  "Too late.": [
+   "Too late. "
+  ],
+  "Blue sky.": [
+   "Blue sky. "
+  ],
+  "Red apple.": [
+   "Red apple. "
+  ],
+  "My name.": [
+   "My name. "
+  ],
+  "Your turn.": [
+   "Your turn. "
+  ],
+  "His house.": [
+   "His house. "
+  ],
+  "Her book.": [
+   "Her book. "
+  ],
+  "Our team.": [
+   "Our team. "
+  ],
+  "Their car.": [
+   "Their car. "
+  ],
+  "Big dog.": [
+   "Big dog. "
+  ],
+  "Small cat.": [
+   "Small cat. "
+  ],
+  "Open it.": [
+   "Open it. "
+  ],
+  "Close them.": [
+   "Close them. "
+  ],
+  "Who knows?": [
+   "Who knows? "
+  ],
+  "Why not?": [
+   "Why not? "
+  ],
+  "How much?": [
+   "How much? "
+  ],
+  "Which one?": [
+   "Which one? "
+  ],
+  "Of course.": [
+   "Of course. "
+  ],
+  "At last.": [
+   "At last. "
+  ],
+  "For now.": [
+   "For now. "
+  ],
+  "To go.": [
+   "To go. "
+  ],
+  "And then.": [
+   "And then. "
+  ],
+  "But why?": [
+   "But why? "
+  ],
+  "An apple.": [
+   "An apple. "
+  ],
+  "The end.": [
+   "The end. "
+  ],
+  "A day.": [
+   "A day. "
+  ],
+  "No way!": [
+   "No way! "
+  ],
+  "Oh no!": [
+   "Oh no! "
+  ],
+  "Look out!": [
+   "Look out! "
+  ],
+  "Nine lives.": [
+   "Nine lives. "
+  ],
+  "Twelve months.": [
+   "Twelve months. "
+  ],
+  "Fresh bread.": [
+   "Fresh bread. "
+  ],
+  "Cold water.": [
+   "Cold water. "
+  ],
+  "And then he went to bed.": [
+   "And then he went to bed. "
+  ],
+  "And the rain came down.": [
+   "And the rain came down. "
+  ],
+  "But nobody answered the door.": [
+   "But nobody answered the door. "
+  ],
+  "Or we could stay at home.": [
+   "Or we could stay at home. "
+  ],
+  "To be honest, I forgot.": [
+   "To be honest, ",
+   "I forgot. "
+  ],
+  "To the left is the kitchen.": [
+   "To the left is the kitchen. "
+  ],
+  "For a moment nothing moved.": [
+   "For a moment nothing moved. "
+  ],
+  "For him it was easy.": [
+   "For him it was easy. "
+  ],
+  "At noon the bell rang.": [
+   "At noon the bell rang. "
+  ],
+  "At the corner, turn right.": [
+   "At the corner, ",
+   "turn right. "
+  ],
+  "In the morning we walked.": [
+   "In the morning we walked. "
+  ],
+  "On the table sat a lamp.": [
+   "On the table sat a lamp. "
+  ],
+  "Of all the days, he picked this one.": [
+   "Of all the days, ",
+   "he picked this one. "
+  ],
+  "From here the road goes north.": [
+   "From here the road goes north. "
+  ],
+  "With a sigh, she sat down.": [
+   "With a sigh, ",
+   "she sat down. "
+  ],
+  "If it rains, we stay inside.": [
+   "If it rains, ",
+   "we stay inside. "
+  ],
+  "When he arrived, the room was empty.": [
+   "When he arrived, ",
+   "the room was empty. "
+  ],
+  "As you can see, it works.": [
+   "As you can see, ",
+   "it works. "
+  ],
+  "Because of the storm, the game was cancelled.": [
+   "Because of the storm, ",
+   "the game was cancelled. "
+  ],
+  "So we waited for an hour.": [
+   "So we waited for an hour. "
+  ],
+  "The the.": [
+   "The the. "
+  ],
+  "It is.": [
+   "It is. "
+  ],
+  "There is a way.": [
+   "There is a way. "
+  ],
+  "That is that.": [
+   "That is that. "
+  ],
+  "This is it.": [
+   "This is it. "
+  ],
+  "I have 42 cats.": [
+   "I have 42 cats. "
+  ],
+  "The year is 1999.": [
+   "The year is 1999. "
+  ],
+  "She was born in 2004.": [
+   "She was born in 2004. "
+  ],
+  "It costs 5 dollars.": [
+   "It costs 5 dollars. "
+  ],
+  "It costs $3.50.": [
+   "It costs $3.50. "
+  ],
+  "The total is $1,250.": [
+   "The total is $1,250. "
+  ],
+  "Call 555 1234.": [
+   "Call 5 5 5, 1 2 3 4.\\x81,\\x82 "
+  ],
+  "Room 101 is on the first floor.": [
+   "Room 101 is on the first floor. "
+  ],
+  "He ran 26.2 miles.": [
+   "He ran 26.2 miles. "
+  ],
+  "Add 3 and 4 to get 7.": [
+   "Add 3 and 4 to get 7. "
+  ],
+  "There are 365 days in a year.": [
+   "There are 365 days in a year. "
+  ],
+  "The temperature is 72 degrees.": [
+   "The temperature is 72 degrees. "
+  ],
+  "It weighs 2.5 kilograms.": [
+   "It weighs 2.5 kilograms. "
+  ],
+  "She came in 1st.": [
+   "She came in 1st. "
+  ],
+  "He finished 2nd.": [
+   "He finished 2nd. "
+  ],
+  "The 3rd door is locked.": [
+   "The 3rd door is locked. "
+  ],
+  "It is the 21st of June.": [
+   "It is the 21st of June. "
+  ],
+  "About 1,000,000 people live there.": [
+   "About 1,000,000 people live there. "
+  ],
+  "The score was 3 to 0.": [
+   "The score was 3 to 0. "
+  ],
+  "Half of 100 is 50.": [
+   "Half of 100 is 50. "
+  ],
+  "Count 1, 2, 3, 4, 5.": [
+   "Count 1, ",
+   "2, ",
+   "3, ",
+   "4, ",
+   "5. "
+  ],
+  "Chapter 12 begins on page 340.": [
+   "Chapter 12 begins on page 340. "
+  ],
+  "The meeting is at 3:30.": [
+   "The meeting is at 3:30. "
+  ],
+  "The train leaves at 10:15.": [
+   "The train leaves at 10:15. "
+  ],
+  "He is 6 feet tall.": [
+   "He is 6 feet tall. "
+  ],
+  "Take 2 tablets every 8 hours.": [
+   "Take 2 tablets every 8 hours. "
+  ],
+  "The bill came to 19.99.": [
+   "The bill came to 19.99. "
+  ],
+  "Only 7 of the 30 arrived.": [
+   "Only 7 of the 30 arrived. "
+  ],
+  "It happened in the 1800s.": [
+   "It happened in the 1800s. "
+  ],
+  "Flight 370 is delayed.": [
+   "Flight 370 is delayed. "
+  ],
+  "Zero, one, two.": [
+   "Zero, ",
+   "one, ",
+   "two. "
+  ],
+  "Thirteen, thirty, fourteen, forty.": [
+   "Thirteen, ",
+   "thirty, ",
+   "fourteen, ",
+   "forty. "
+  ],
+  "One hundred and one.": [
+   "One hundred and one. "
+  ],
+  "Nineteen eighty four.": [
+   "Nineteen eighty four. "
+  ],
+  "Twenty twenty six.": [
+   "Twenty twenty six. "
+  ],
+  "A dozen eggs and 16 ounces of milk.": [
+   "A dozen eggs and 16 ounces of milk. "
+  ],
+  "The ratio is 3 to 1.": [
+   "The ratio is 3 to 1. "
+  ],
+  "I need 0.5 liters.": [
+   "I need 0.5 liters. "
+  ],
+  "He owes me 100 dollars.": [
+   "He owes me 100 dollars. "
+  ],
+  "Add 15 percent.": [
+   "Add 15 percent. "
+  ],
+  "Dr. Smith will see you now.": [
+   "Doctor Smith will see you now. "
+  ],
+  "Mr. Jones and Mrs. Doe arrived.": [
+   "Mr. Jones and Mrs. Doe arrived. "
+  ],
+  "Ms. Lee teaches math.": [
+   "Ms. Lee teaches math. "
+  ],
+  "Prof. Adams wrote the book.": [
+   "Prof. Adams wrote the book. "
+  ],
+  "It is on Main St. near the park.": [
+   "It is on Main St. near the park. "
+  ],
+  "We live at 12 Oak Ave.": [
+   "We live at 12 Oak Ave. "
+  ],
+  "The U.S. flag was raised.": [
+   "The U.S. ",
+   "flag was raised. "
+  ],
+  "He works for the F.B.I.": [
+   "He works for the F.B.I. "
+  ],
+  "NASA launched a rocket.": [
+   "NASA launched a rocket. "
+  ],
+  "The CEO spoke on TV.": [
+   "The CEO spoke on TV. "
+  ],
+  "Use e.g. a hammer.": [
+   "Use for example a hammer. "
+  ],
+  "Bring pens, paper, etc.": [
+   "Bring pens, ",
+   "paper, ",
+   "etc. "
+  ],
+  "The meeting is on Jan. 5.": [
+   "The meeting is on 5-Jan. "
+  ],
+  "It opens Mon. through Fri.": [
+   "It opens Monday through Friday "
+  ],
+  "She has a Ph.D. in physics.": [
+   "She has a Ph \\x81d'at\\x82 D. ",
+   "in physics. "
+  ],
+  "The file is 20 MB.": [
+   "The file is 20 MB. "
+  ],
+  "Drive 30 mph in town.": [
+   "Drive 30 miles per hour in town. "
+  ],
+  "It weighs 5 lbs.": [
+   "It weighs 5 lbs. "
+  ],
+  "Mt. Everest is tall.": [
+   "Mt. Everest is tall. "
+  ],
+  "St. Paul is a city.": [
+   "Saint Paul is a city. "
+  ],
+  "Send it to the IRS.": [
+   "Send it to the IRS. "
+  ],
+  "The DVD is in the PC.": [
+   "The DVD is in the PC. "
+  ],
+  "Ask the M.D. about it.": [
+   "Ask the M.D. ",
+   "about it. "
+  ],
+  "See fig. 3 on p. 12.": [
+   "See fig. 3 on p. ",
+   "12. "
+  ],
+  "I can't go.": [
+   "I can't go. "
+  ],
+  "Don't do that.": [
+   "Don't do that. "
+  ],
+  "It's raining.": [
+   "It's raining. "
+  ],
+  "We're late.": [
+   "We're late. "
+  ],
+  "They're here.": [
+   "They're here. "
+  ],
+  "You're right.": [
+   "You're right. "
+  ],
+  "He's gone.": [
+   "He's gone. "
+  ],
+  "She's reading.": [
+   "She's reading. "
+  ],
+  "I'll call you.": [
+   "I'll call you. "
+  ],
+  "We'll see.": [
+   "We'll see. "
+  ],
+  "I'd like some tea.": [
+   "I'd like some tea. "
+  ],
+  "You'd better hurry.": [
+   "You'd better hurry. "
+  ],
+  "That's fine.": [
+   "That's fine. "
+  ],
+  "There's a problem.": [
+   "There's a problem. "
+  ],
+  "What's the matter?": [
+   "What's the matter? "
+  ],
+  "Who's there?": [
+   "Who's there? "
+  ],
+  "Isn't it lovely?": [
+   "Isn't it lovely? "
+  ],
+  "Wasn't that fun?": [
+   "Wasn't that fun? "
+  ],
+  "I've seen it.": [
+   "I've seen it. "
+  ],
+  "They've left.": [
+   "They've left. "
+  ],
+  "Let's go.": [
+   "Let's go. "
+  ],
+  "Won't you stay?": [
+   "Won't you stay? "
+  ],
+  "It wouldn't start.": [
+   "It wouldn't start. "
+  ],
+  "John's dog barked.": [
+   "John's dog barked. "
+  ],
+  "The dogs' bowls were empty.": [
+   "The dogs' ",
+   "bowls were empty. "
+  ],
+  "Is the cat on the mat?": [
+   "Is the cat on the mat? "
+  ],
+  "Are you coming with us?": [
+   "Are you coming with us? "
+  ],
+  "Did he have a house?": [
+   "Did he have a house? "
+  ],
+  "Can you hear me?": [
+   "Can you hear me? "
+  ],
+  "Will it rain tomorrow?": [
+   "Will it rain tomorrow? "
+  ],
+  "Do you know the way?": [
+   "Do you know the way? "
+  ],
+  "Has the mail arrived?": [
+   "Has the mail arrived? "
+  ],
+  "Was it worth the trouble?": [
+   "Was it worth the trouble? "
+  ],
+  "Should we wait for them?": [
+   "Should we wait for them? "
+  ],
+  "Could you pass the salt?": [
+   "Could you pass the salt? "
+  ],
+  "Where are you going?": [
+   "Where are you going? "
+  ],
+  "What time is it?": [
+   "What time is it? "
+  ],
+  "Who told you that?": [
+   "Who told you that? "
+  ],
+  "Why did she leave?": [
+   "Why did she leave? "
+  ],
+  "How does it work?": [
+   "How does it work? "
+  ],
+  "Which road leads to town?": [
+   "Which road leads to town? "
+  ],
+  "When does the train arrive?": [
+   "When does the train arrive? "
+  ],
+  "Whose coat is this?": [
+   "Whose coat is this? "
+  ],
+  "How many apples are there?": [
+   "How many apples are there? "
+  ],
+  "What did you say?": [
+   "What did you say? "
+  ],
+  "You saw him, didn't you?": [
+   "You saw him, ",
+   "didn't you? "
+  ],
+  "It's cold, isn't it?": [
+   "It's cold, ",
+   "isn't it? "
+  ],
+  "She can swim, can't she?": [
+   "She can swim, ",
+   "can't she? "
+  ],
+  "You're coming, right?": [
+   "You're coming, ",
+   "right? "
+  ],
+  "Is it red or blue?": [
+   "Is it red or blue? "
+  ],
+  "Tea or coffee?": [
+   "Tea or coffee? "
+  ],
+  "Ready?": [
+   "Ready? "
+  ],
+  "Him?": [
+   "Him? "
+  ],
+  "Are they the ones who called yesterday?": [
+   "Are they the ones who called yesterday? "
+  ],
+  "Do you think that he will come?": [
+   "Do you think that he will come? "
+  ],
+  "What is the name of the river that runs through the city?": [
+   "What is the name of the river that runs through the city? "
+  ],
+  "Is that all?": [
+   "Is that all? "
+  ],
+  "Why me?": [
+   "Why me? "
+  ],
+  "How come?": [
+   "How come? "
+  ],
+  "Now what?": [
+   "Now what? "
+  ],
+  "Does anybody here remember the old house on the hill?": [
+   "Does anybody here remember the old house on the hill? "
+  ],
+  "May I ask who is calling?": [
+   "May I ask who is calling? "
+  ],
+  "Would you like to dance?": [
+   "Would you like to dance? "
+  ],
+  "Have you ever been to Rome?": [
+   "Have you ever been to Rome? "
+  ],
+  "Is this the right way to the station?": [
+   "Is this the right way to the station? "
+  ],
+  "Look at that!": [
+   "Look at that! "
+  ],
+  "What a day!": [
+   "What a day! "
+  ],
+  "How strange!": [
+   "How strange! "
+  ],
+  "Watch out for the car!": [
+   "Watch out for the car! "
+  ],
+  "I can't believe it!": [
+   "I can't believe it! "
+  ],
+  "That was amazing!": [
+   "That was amazing! "
+  ],
+  "Stop right there!": [
+   "Stop right there! "
+  ],
+  "Get out of here!": [
+   "Get out of here! "
+  ],
+  "We won!": [
+   "We won! "
+  ],
+  "Happy birthday!": [
+   "Happy birthday! "
+  ],
+  "Good grief!": [
+   "Good grief! "
+  ],
+  "Not again!": [
+   "Not again! "
+  ],
+  "Hurry up!": [
+   "Hurry up! "
+  ],
+  "Come back here at once!": [
+   "Come back here at once! "
+  ],
+  "What a beautiful morning it is!": [
+   "What a beautiful morning it is! "
+  ],
+  "I bought apples, oranges, and pears.": [
+   "I bought apples, ",
+   "oranges, ",
+   "and pears. "
+  ],
+  "Red, white, and blue.": [
+   "Red, ",
+   "white, ",
+   "and blue. "
+  ],
+  "We need bread, milk, eggs, and butter.": [
+   "We need bread, ",
+   "milk, ",
+   "eggs, ",
+   "and butter. "
+  ],
+  "She speaks English, French, and German.": [
+   "She speaks English, ",
+   "French, ",
+   "and German. "
+  ],
+  "One, two, three, go.": [
+   "One, ",
+   "two, ",
+   "three, ",
+   "go. "
+  ],
+  "He was tall, dark, and quiet.": [
+   "He was tall, ",
+   "dark, ",
+   "and quiet. "
+  ],
+  "Monday, Tuesday, Wednesday, Thursday, Friday.": [
+   "Monday, ",
+   "Tuesday, ",
+   "Wednesday, ",
+   "Thursday, ",
+   "Friday. "
+  ],
+  "The cat, the dog, and the bird slept.": [
+   "The cat, ",
+   "the dog, ",
+   "and the bird slept. "
+  ],
+  "Slowly, carefully, he opened the door.": [
+   "Slowly, ",
+   "carefully, ",
+   "he opened the door. "
+  ],
+  "Yes, please.": [
+   "Yes, ",
+   "please. "
+  ],
+  "No, thank you.": [
+   "No, ",
+   "thank you. "
+  ],
+  "Well, that depends.": [
+   "Well, ",
+   "that depends. "
+  ],
+  "However, the plan failed.": [
+   "However, ",
+   "the plan failed. "
+  ],
+  "In fact, it was true.": [
+   "In fact, ",
+   "it was true. "
+  ],
+  "After dinner, we played cards.": [
+   "After dinner, ",
+   "we played cards. "
+  ],
+  "My brother, who lives in Boston, called.": [
+   "My brother, ",
+   "who lives in Boston, ",
+   "called. "
+  ],
+  "The house, which was old, fell down.": [
+   "The house, ",
+   "which was old, ",
+   "fell down. "
+  ],
+  "John, come here.": [
+   "John, ",
+   "come here. "
+  ],
+  "Come here, John.": [
+   "Come here, ",
+   "John. "
+  ],
+  "Paris, France, is lovely in spring.": [
+   "Paris, ",
+   "France, ",
+   "is lovely in spring. "
+  ],
+  "First, mix the flour; then, add the eggs.": [
+   "First, ",
+   "mix the flour; ",
+   "then, ",
+   "add the eggs. "
+  ],
+  "On Monday, we rest; on Tuesday, we work.": [
+   "On Monday, ",
+   "we rest; ",
+   "on Tuesday, ",
+   "we work. "
+  ],
+  "He ran, jumped, and swam.": [
+   "He ran, ",
+   "jumped, ",
+   "and swam. "
+  ],
+  "She laughed, and he smiled.": [
+   "She laughed, ",
+   "and he smiled. "
+  ],
+  "I came, I saw, I conquered.": [
+   "I came, ",
+   "I saw, ",
+   "I conquered. "
+  ],
+  "To err is human, to forgive divine.": [
+   "To err is human, ",
+   "to forgive divine. "
+  ],
+  "Sooner or later, everyone leaves.": [
+   "Sooner or later, ",
+   "everyone leaves. "
+  ],
+  "Hello, world.": [
+   "Hello, ",
+   "world. "
+  ],
+  "Oh, I see.": [
+   "Oh, ",
+   "I see. "
+  ],
+  "Come in, sit down, and tell me everything.": [
+   "Come in, ",
+   "sit down, ",
+   "and tell me everything. "
+  ],
+  "There is one rule: be kind.": [
+   "There is one rule: ",
+   "be kind. "
+  ],
+  "He had a plan: leave at dawn.": [
+   "He had a plan: ",
+   "leave at dawn. "
+  ],
+  "Bring three things: a pen, a pad, and a map.": [
+   "Bring three things: ",
+   "a pen, ",
+   "a pad, ",
+   "and a map. "
+  ],
+  "The answer is simple: no.": [
+   "The answer is simple: ",
+   "no. "
+  ],
+  "Note: the store closes early.": [
+   "Note: ",
+   "the store closes early. "
+  ],
+  "Warning: the floor is wet.": [
+   "Warning: ",
+   "the floor is wet. "
+  ],
+  "She had one wish: to go home.": [
+   "She had one wish: ",
+   "to go home. "
+  ],
+  "Remember this: time is short.": [
+   "Remember this: ",
+   "time is short. "
+  ],
+  "Dear sir: thank you for your letter.": [
+   "Dear sir: ",
+   "thank you for your letter. "
+  ],
+  "The time is now: act.": [
+   "The time is now: ",
+   "act. "
+  ],
+  "It was late; we went home.": [
+   "It was late; ",
+   "we went home. "
+  ],
+  "The sun set; the stars came out.": [
+   "The sun set; ",
+   "the stars came out. "
+  ],
+  "I like tea; she likes coffee.": [
+   "I like tea; ",
+   "she likes coffee. "
+  ],
+  "He tried; he failed.": [
+   "He tried; ",
+   "he failed. "
+  ],
+  "Some came early; others came late.": [
+   "Some came early; ",
+   "others came late. "
+  ],
+  "The road was long; however, we kept going.": [
+   "The road was long; ",
+   "however, ",
+   "we kept going. "
+  ],
+  "She sings; he plays the piano.": [
+   "She sings; ",
+   "he plays the piano. "
+  ],
+  "Wait here; I will be back.": [
+   "Wait here; ",
+   "I will be back. "
+  ],
+  "It rained all day; the river rose.": [
+   "It rained all day; ",
+   "the river rose. "
+  ],
+  "We won; they lost.": [
+   "We won; ",
+   "they lost. "
+  ],
+  "Call me tomorrow; I am busy today.": [
+   "Call me tomorrow; ",
+   "I am busy today. "
+  ],
+  "The door was open; nobody was inside.": [
+   "The door was open; ",
+   "nobody was inside. "
+  ],
+  "First we eat; then we talk.": [
+   "First we eat; ",
+   "then we talk. "
+  ],
+  "He is rich; yet he is not happy.": [
+   "He is rich; ",
+   "yet he is not happy. "
+  ],
+  "Speak softly; the baby is asleep.": [
+   "Speak softly; ",
+   "the baby is asleep. "
+  ],
+  "\"Hello,\" she said.": [
+   "Hello, she said. "
+  ],
+  "He said, \"Come in.\"": [
+   "He said, ",
+   "Come in. "
+  ],
+  "\"Where are you going?\" he asked.": [
+   "Where are you going? he asked. "
+  ],
+  "\"Stop!\" cried the guard.": [
+   "Stop! cried the guard. "
+  ],
+  "She whispered, \"Not now.\"": [
+   "She whispered, ",
+   "Not now. "
+  ],
+  "\"I think,\" he said, \"that we are lost.\"": [
+   "I think, he said, ",
+   "that we are lost. "
+  ],
+  "The sign said \"No entry.\"": [
+   "The sign said No entry. "
+  ],
+  "He called it \"a small mistake.\"": [
+   "He called it a small mistake. "
+  ],
+  "\"Yes,\" said the boy, \"I did it.\"": [
+   "Yes, said the boy, ",
+   "I did it. "
+  ],
+  "\"Wait for me,\" she called.": [
+   "Wait for me, she called. "
+  ],
+  "They shouted, \"We won!\"": [
+   "They shouted, ",
+   "We won! "
+  ],
+  "\"Is anyone there?\" asked the old man.": [
+   "Is anyone there? asked the old man. "
+  ],
+  "\"Good morning,\" said the teacher.": [
+   "Good morning, said the teacher. "
+  ],
+  "The word \"cat\" has three letters.": [
+   "The word cat has three letters. "
+  ],
+  "She answered, \"I don't know.\"": [
+   "She answered, ",
+   "\"I don't know. "
+  ],
+  "\"Never again,\" he promised.": [
+   "Never again, he promised. "
+  ],
+  "He asked, \"What time is it?\"": [
+   "He asked, ",
+   "What time is it? "
+  ],
+  "\"Run!\" she screamed.": [
+   "Run! she screamed. "
+  ],
+  "\"It is late,\" said Tom; \"let us go.\"": [
+   "It is late, said Tom; ",
+   "let us go. "
+  ],
+  "My mother always said, \"Be careful.\"": [
+   "My mother always said, ",
+   "Be careful. "
+  ],
+  "\"Thank you,\" he replied, \"for everything.\"": [
+   "Thank you, he replied, ",
+   "for everything. "
+  ],
+  "The note read: \"Back in five minutes.\"": [
+   "The note read: ",
+   "Back in five minutes. "
+  ],
+  "\"Well,\" she said, \"what now?\"": [
+   "Well, she said, ",
+   "what now? "
+  ],
+  "He muttered \"fine\" and left.": [
+   "He muttered fine and left. "
+  ],
+  "\"Open the door,\" said the voice.": [
+   "Open the door, said the voice. "
+  ],
+  "The old man sat by the window and watched the rain fall on the empty street.": [
+   "The old man sat by the window and watched the rain fall on the empty street. "
+  ],
+  "When the storm had passed, the children ran outside to play in the puddles.": [
+   "When the storm had passed, ",
+   "the children ran outside to play in the puddles. "
+  ],
+  "She opened the letter slowly, read it twice, and then put it away without a word.": [
+   "She opened the letter slowly, ",
+   "read it twice, ",
+   "and then put it away without a word. "
+  ],
+  "Although the road was long and the night was cold, they kept walking until they reached the village.": [
+   "Although the road was long and the night was cold, ",
+   "they kept walking until they reached the village. "
+  ],
+  "The scientist explained that the results of the experiment were not what anyone had expected.": [
+   "The scientist explained that the results of the experiment were not what anyone had expected. "
+  ],
+  "Every morning before breakfast, my grandfather would walk down to the river to feed the ducks.": [
+   "Every morning before breakfast, ",
+   "my grandfather would walk down to the river to feed the ducks. "
+  ],
+  "If you had told me yesterday that this would happen, I would not have believed you.": [
+   "If you had told me yesterday that this would happen, ",
+   "I would not have believed you. "
+  ],
+  "The museum, which had been closed for repairs since last winter, finally opened its doors again.": [
+   "The museum, ",
+   "which had been closed for repairs since last winter, ",
+   "finally opened its doors again. "
+  ],
+  "Nobody knew why the lights had gone out, but everyone agreed that it was time to leave.": [
+   "Nobody knew why the lights had gone out, ",
+   "but everyone agreed that it was time to leave. "
+  ],
+  "After a long discussion, the committee decided to postpone the vote until the following week.": [
+   "After a long discussion, ",
+   "the committee decided to postpone the vote until the following week. "
+  ],
+  "Say the word again.": [
+   "Say the word again. "
+  ],
+  "Say cat again.": [
+   "Say cat again. "
+  ],
+  "Say dog again.": [
+   "Say dog again. "
+  ],
+  "Say church again.": [
+   "Say church again. "
+  ],
+  "Say judge again.": [
+   "Say judge again. "
+  ],
+  "Say thing again.": [
+   "Say thing again. "
+  ],
+  "Say measure again.": [
+   "Say measure again. "
+  ],
+  "Say yellow again.": [
+   "Say yellow again. "
+  ],
+  "Say window again.": [
+   "Say window again. "
+  ],
+  "Say rabbit again.": [
+   "Say rabbit again. "
+  ],
+  "Say little again.": [
+   "Say little again. "
+  ],
+  "Say button again.": [
+   "Say button again. "
+  ],
+  "Say water again.": [
+   "Say water again. "
+  ],
+  "Say singing again.": [
+   "Say singing again. "
+  ],
+  "Say strength again.": [
+   "Say strength again. "
+  ],
+  "Say twelfth again.": [
+   "Say twelfth again. "
+  ],
+  "Say sixths again.": [
+   "Say sixths again. "
+  ],
+  "Say about again.": [
+   "Say about again. "
+  ],
+  "Say today again.": [
+   "Say today again. "
+  ],
+  "Say banana again.": [
+   "Say banana again. "
+  ],
+  "The kettle is on the stove.": [
+   "The kettle is on the stove. "
+  ],
+  "Put the keys on the shelf by the door.": [
+   "Put the keys on the shelf by the door. "
+  ],
+  "My bicycle has a flat tire.": [
+   "My bicycle has a flat tire. "
+  ],
+  "The bus stops in front of the library.": [
+   "The bus stops in front of the library. "
+  ],
+  "We planted tomatoes behind the garage.": [
+   "We planted tomatoes behind the garage. "
+  ],
+  "The window on the left does not close.": [
+   "The window on the left does not close. "
+  ],
+  "Please turn off the light in the hall.": [
+   "Please turn off the light in the hall. "
+  ],
+  "There is a blanket in the bottom drawer.": [
+   "There is a blanket in the bottom drawer. "
+  ],
+  "The clock on the wall runs five minutes fast.": [
+   "The clock on the wall runs five minutes fast. "
+  ],
+  "She left her umbrella on the train.": [
+   "She left her umbrella on the train. "
+  ],
+  "The soup needs a little more salt.": [
+   "The soup needs a little more salt. "
+  ],
+  "A gray cat sleeps under the porch.": [
+   "A gray cat sleeps under the porch. "
+  ],
+  "The mail comes before noon on most days.": [
+   "The mail comes before noon on most days. "
+  ],
+  "He painted the fence green last summer.": [
+   "He painted the fence green last summer. "
+  ],
+  "The bridge is closed until Thursday.": [
+   "The bridge is closed until Thursday. "
+  ],
+  "Fold the towels and stack them on the chair.": [
+   "Fold the towels and stack them on the chair. "
+  ],
+  "Our neighbor grows roses along the wall.": [
+   "Our neighbor grows roses along the wall. "
+  ],
+  "The ferry crosses the bay every hour.": [
+   "The ferry crosses the bay every hour. "
+  ],
+  "Winter mornings are dark and very quiet.": [
+   "Winter mornings are dark and very quiet. "
+  ],
+  "A light wind moved the curtains.": [
+   "A light wind moved the curtains. "
+  ],
+  "The road to the farm is muddy after rain.": [
+   "The road to the farm is muddy after rain. "
+  ],
+  "Wash the cups and leave them to dry.": [
+   "Wash the cups and leave them to dry. "
+  ],
+  "The baker opens his shop at six.": [
+   "The baker opens his shop at six. "
+  ],
+  "Three sparrows sat on the wire.": [
+   "Three sparrows sat on the wire. "
+  ],
+  "It takes ten minutes to walk to the school.": [
+   "It takes ten minutes to walk to the school. "
+  ],
+  "The printer is out of paper again.": [
+   "The printer is out of paper again. "
+  ],
+  "Her suitcase was too heavy to lift.": [
+   "Her suitcase was too heavy to lift. "
+  ],
+  "The garden gate squeaks when it opens.": [
+   "The garden gate squeaks when it opens. "
+  ],
+  "Clouds gathered over the hills by evening.": [
+   "Clouds gathered over the hills by evening. "
+  ],
+  "He keeps a spare key under the mat.": [
+   "He keeps a spare key under the mat. "
+  ],
+  "The children built a fort out of boxes.": [
+   "The children built a fort out of boxes. "
+  ],
+  "Fill the bucket halfway with warm water.": [
+   "Fill the bucket halfway with warm water. "
+  ],
+  "The last bus leaves at a quarter past eleven.": [
+   "The last bus leaves at a quarter past eleven. "
+  ],
+  "A thin layer of ice covered the pond.": [
+   "A thin layer of ice covered the pond. "
+  ],
+  "The carpenter measured the board twice.": [
+   "The carpenter measured the board twice. "
+  ],
+  "Snow fell all night and stopped at dawn.": [
+   "Snow fell all night and stopped at dawn. "
+  ],
+  "Set the table for six people.": [
+   "Set the table for six people. "
+  ],
+  "The lamp on my desk flickers sometimes.": [
+   "The lamp on my desk flickers sometimes. "
+  ],
+  "We counted nine boats in the harbor.": [
+   "We counted nine boats in the harbor. "
+  ],
+  "The path through the woods is easy to follow.": [
+   "The path through the woods is easy to follow. "
+  ],
+  "The woman at the counter said that the next train to the coast would leave from the far platform in about twenty minutes.": [
+   "The woman at the counter said that the next train to the coast would leave from the far platform in about twenty minutes. "
+  ],
+  "Before the guests arrived, he swept the kitchen floor, wiped the table, and put a bowl of fruit in the middle of it.": [
+   "Before the guests arrived, ",
+   "he swept the kitchen floor, ",
+   "wiped the table, ",
+   "and put a bowl of fruit in the middle of it. "
+  ],
+  "On the first warm day of spring, the whole street came outside to wash cars, trim hedges, and talk over the fences.": [
+   "On the first warm day of spring, ",
+   "the whole street came outside to wash cars, ",
+   "trim hedges, ",
+   "and talk over the fences. "
+  ],
+  "Because the map was old and the signs had faded, it took them most of the afternoon to find the right trail.": [
+   "Because the map was old and the signs had faded, ",
+   "it took them most of the afternoon to find the right trail. "
+  ],
+  "When the power came back on, every clock in the house was blinking and the radio started playing by itself.": [
+   "When the power came back on, ",
+   "every clock in the house was blinking and the radio started playing by itself. "
+  ],
+  "The farmer walked the length of the field, checked each row for weeds, and then went back to the barn for his tools.": [
+   "The farmer walked the length of the field, ",
+   "checked each row for weeds, ",
+   "and then went back to the barn for his tools. "
+  ],
+  "If the weather holds until the weekend, we plan to drive to the lake, pitch the tent, and stay for two nights.": [
+   "If the weather holds until the weekend, ",
+   "we plan to drive to the lake, ",
+   "pitch the tent, ",
+   "and stay for two nights. "
+  ],
+  "After the meeting ended, a few people stayed behind to stack the chairs and carry the cups to the sink.": [
+   "After the meeting ended, ",
+   "a few people stayed behind to stack the chairs and carry the cups to the sink. "
+  ],
+  "The shop on the corner sells bread in the morning, sandwiches at noon, and whatever is left at half price after five.": [
+   "The shop on the corner sells bread in the morning, ",
+   "sandwiches at noon, ",
+   "and whatever is left at half price after five. "
+  ],
+  "Although she had read the instructions twice, the shelf still leaned to one side when she stood it against the wall.": [
+   "Although she had read the instructions twice, ",
+   "the shelf still leaned to one side when she stood it against the wall. "
+  ]
+ }
+}

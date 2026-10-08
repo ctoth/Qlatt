@@ -1,0 +1,81 @@
+{
+ "schemaVersion": "v1",
+ "source": "DECtalk 4.63 say.exe, instrumented: the text of each clause as CMD/cm_text.c hands it to the letter-to-sound stage",
+ "encoding": "one string per clause; a byte outside printable ASCII is written \\xNN",
+ "inputs": [
+  "dectalk-us-parser-probes-b-v1.txt"
+ ],
+ "entries": {
+  "The quiet harbor town kept its small wooden boats tied along the gray stone wall while the tide went out past the long sand bar and the gulls walked slowly over the wet mud looking for whatever the water had left behind that morning and the old men on the bench watched them without saying a word to each other until the church bell rang twelve times.": [
+   "The quiet harbor town kept its small wooden boats tied along the gray stone wall while the tide went out past the long sand bar and the gulls walked slowly over the wet mud looking for whatever the water",
+   " had left behind that morning and the old men on the bench watched them without saying a word to each other until the church bell rang twelve times. "
+  ],
+  "Each of the forty two students in the room wrote down the long list of names that the teacher read aloud from the yellow paper while the rain kept falling on the tin roof and the wind pushed the open door back and forth on its old hinges and nobody stood up to close it because the list went on and on for most of the hour and then started again from the top with the same names in another order that no one could follow at all.": [
+   "Each of the forty two students in the room wrote down the long list of names that the teacher read aloud from the yellow paper while the rain kept falling on the tin roof and the wind pushed the open door",
+   " back and forth on its old hinges and nobody stood up to close it because the list went on and on for most of the hour and then started again from the top with the same names in another order that no one could follow at all. "
+  ],
+  "We drove north for three days through flat dry country where the road ran straight between low fences and the only things that moved were the dust behind the truck and a few dark birds far above us and on the fourth day the hills came up out of the haze and the air turned cool and green and we stopped at a small store that sold bread and fuel and maps of a lake that none of us had ever heard of and the woman there told us the way.": [
+   "We drove north for three days through flat dry country where the road ran straight between low fences and the only things that moved were the dust behind the truck and a few dark birds far above us and",
+   " on the fourth day the hills came up out of the haze and the air turned cool and green and we stopped at a small store that sold bread and fuel and maps of a lake that none of us had ever heard of and the woman there told us the way. "
+  ],
+  "Call 555 1234 or 555 9876 or 555 2468 or 555 1357 or 555 8642 or 555 7531 or 555 1122 or 555 3344 or 555 5566 or 555 7788 or 555 9900 or 555 1212 or 555 3434 or 555 5656 or 555 7878 or 555 9090 or 555 2323 or 555 4545 or 555 6767 or 555 8989 or 555 1010 or 555 2020 or 555 3030 or 555 4040 or 555 5050 or 555 6060 now.": null,
+  "Dr. Smith and Dr. Jones and Dr. Lee and Dr. Adams and Dr. Baker and Dr. Clark and Dr. Davis and Dr. Evans and Dr. Ford and Dr. Gray and Dr. Hall and Dr. Irwin and Dr. James and Dr. Kent and Dr. Lane and Dr. Moore and Dr. Nash and Dr. Owen and Dr. Park and Dr. Quinn and Dr. Reed and Dr. Stone and Dr. Todd and Dr. Vance and Dr. Wood and Dr. Young met.": [
+   "Doctor Smith and Doctor Jones and Doctor Lee and Doctor Adams and Doctor Baker and Doctor Clark and Doctor Davis and Doctor Evans and Doctor Ford and Doctor Gray and Doctor Hall and Doctor Irwin and Doctor James and Doctor Kent and Doctor Lane and",
+   " Doctor Moore and Doctor Nash and Doctor Owen and Doctor Park and Doctor Quinn and Doctor Reed and Doctor Stone and Doctor Todd and Doctor Vance and Doctor Wood and Doctor Young met. "
+  ],
+  "See the note [here] for more.": [
+   "See the note here for more. "
+  ],
+  "The array[3] holds a value.": [
+   "The array 3 holds a value. "
+  ],
+  "Open [ the door ] now.": [
+   "Open the door ] now. "
+  ],
+  "Use [[double]] brackets here.": [
+   "Use double brackets here. "
+  ],
+  "An empty [] pair stays out.": [
+   "An empty pair stays out. "
+  ],
+  "A lone [ bracket is here.": [
+   "A lone bracket is here. "
+  ],
+  "A lone ] bracket is here.": [
+   "A lone ] bracket is here. "
+  ],
+  "It ends with a bracket [": [
+   "It ends with a bracket "
+  ],
+  "He wrote [sic] in the margin.": [
+   "He wrote sic in the margin. "
+  ],
+  "Say this [:rate 180] and then that.": [
+   "Say this ",
+   " and then that. "
+  ],
+  "Before [:nosuchcommand 5] after.": [
+   "Before ",
+   " after. "
+  ],
+  "One [: rate 180 ] two.": [
+   "One ",
+   " two. "
+  ],
+  "Three [ :rate 180] four.": [
+   "Three ",
+   " four. "
+  ],
+  "One two                                              three four.": [
+   "One two ",
+   " three four. "
+  ],
+  "Wait.                                                  Go on.": [
+   "Wait. ",
+   " Go on. "
+  ],
+  "A     b     c.": [
+   "A b c. "
+  ]
+ }
+}

@@ -30,9 +30,29 @@ import {
   receivedFormClassWord,
   startsVerbPhrase,
 } from "./table-lts-pronounce";
-import { numberWords, speakDigits, speakNumberToken } from "./table-number";
+import {
+  NUMBER_COMMA,
+  NUMBER_MBOUND,
+  NUMBER_S1,
+  NUMBER_S2,
+  NUMBER_VPSTART,
+  NUMBER_WBOUND,
+  numberWords,
+  speakDigits,
+  speakNumberToken,
+} from "./table-number";
 import { stripSuffixes } from "./table-suffix";
 import type { DictLookup, PronunciationResult } from "./types";
+
+/** The control symbols numberWords carries (INCLUDE/l_com_ph.h). */
+const WORD_SYMBOLS: ReadonlySet<number> = new Set([
+  NUMBER_S1,
+  NUMBER_S2,
+  NUMBER_MBOUND,
+  NUMBER_WBOUND,
+  NUMBER_VPSTART,
+  NUMBER_COMMA,
+]);
 
 // A letter-to-sound file is either a rule list (lts-engine.ts) or a compiled
 // table with its own stress assignment (table-lts-pronounce.ts). The file's
@@ -131,6 +151,39 @@ export function pronounce(
       ? { boundaryAfterAt: [...entry.boundaryAfter] }
       : {}),
   });
+
+  // Phonemic text, between the table's two marks, is spoken as its symbols
+  // with no lookup (DECtalk 4.63 CMD/cm_text.c:1118-1144 sends each character
+  // on as the phoneme INCLUDE/usa_phon.tab's usa_ascky_rev[] gives it). The
+  // characters keep their case. Left out: a character that stands for no
+  // symbol, silence, and the control symbols the number speaker's word
+  // builder does not carry (table-number.ts numberWords); all passed over.
+  const [phonemicOpen, phonemicClose] = table?.phonemicMarks ?? [];
+  if (
+    table?.phonemeCharacters &&
+    phonemicOpen !== undefined &&
+    phonemicClose !== undefined &&
+    word.length >= 2 &&
+    word.charCodeAt(0) === phonemicOpen &&
+    word.charCodeAt(word.length - 1) === phonemicClose
+  ) {
+    const characters = table.phonemeCharacters;
+    const symbols = [...word.slice(1, -1)].flatMap((char) => {
+      const symbol = characters[char.charCodeAt(0)] ?? null;
+      // Phone codes start at 1; 0 is silence, which a word here cannot hold.
+      const carried =
+        symbol !== null &&
+        ((symbol > 0 && symbol < table.phonemeSymbols.length) || WORD_SYMBOLS.has(symbol));
+      return carried ? [symbol] : [];
+    });
+    const parts = numberWords(symbols, table);
+    return {
+      phonemes: parts.flatMap((part) => part.phonemes),
+      source: "phonemic",
+      word,
+      parts,
+    };
+  }
 
   // A table with number phone lists speaks an all-digit word itself, ahead of
   // any lookup, as several words; the whole number has the one form class

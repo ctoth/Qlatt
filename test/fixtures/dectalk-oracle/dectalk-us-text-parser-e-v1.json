@@ -1,0 +1,134 @@
+{
+ "schemaVersion": "v1",
+ "source": "DECtalk 4.63 say.exe, instrumented: the text of each clause as CMD/cm_text.c hands it to the letter-to-sound stage",
+ "encoding": "one string per clause; a byte outside printable ASCII is written \\xNN",
+ "inputs": [
+  "dectalk-us-parser-probes-e-v1.json"
+ ],
+ "entries": {
+  "Ask Dr.\r\nSmith now.": [
+   "Ask Dr.\\x0d\\x0aSmith now. "
+  ],
+  "Ask Dr.\nSmith now.": [
+   "Ask Dr.\\x0aSmith now. "
+  ],
+  "Ask Dr.   \r\nSmith now.": [
+   "Ask Dr.\\x0d\\x0aSmith now. "
+  ],
+  "Go to Main St.\r\nThen stop.": [
+   "Go to Main St.\\x0d\\x0aThen stop. "
+  ],
+  "St.\r\nJohn is here.": [
+   "St.\\x0d\\x0aJohn is here. "
+  ],
+  "One line here\r\nand one more.": [
+   "One line here\\x0dand one more. "
+  ],
+  "One line.\r\n\r\nTwo lines.": [
+   "One line.\\x0d",
+   "\\x0aTwo lines. "
+  ],
+  "One two\tthree four.": [
+   "One two\\x0b",
+   "three four. "
+  ],
+  "Try tsktsks today.": [
+   "Try t s k t s k s today. "
+  ],
+  "Ask Mr Strngthz today.": [
+   "Ask Mr S t r n g t h z today. "
+  ],
+  "Try healthblorp today.": [
+   "Try health-blorp today. "
+  ],
+  "Try workerbrain today.": [
+   "Try worker-brain today. "
+  ],
+  "Try greenblorp today.": [
+   "Try green-blorp today. "
+  ],
+  "Try cedarbrook today.": [
+   "Try cedar-brook today. "
+  ],
+  "Try fireblorp today.": [
+   "Try \\x81'\\x82fire-blorp today. "
+  ],
+  "Try flexblorp today.": [
+   "Try flex-blorp today. "
+  ],
+  "Try bigblorp today.": [
+   "Try big-blorp today. "
+  ],
+  "Try ckzorp today.": [
+   "Try ck-zorp today. "
+  ],
+  "Try ltblue today.": [
+   "Try lt-blue today. "
+  ],
+  "Try zorpfolk today.": [
+   "Try zorpfolk today. "
+  ],
+  "Try blorpleaf today.": [
+   "Try blorpleaf today. "
+  ],
+  "Try zorpbrook today.": [
+   "Try zorpbrook today. "
+  ],
+  "He said aaargh then.": [
+   "He said eyh eyh eyh rgh then. "
+  ],
+  "Ask McZorple about it.": [
+   "Ask McZorple about it. "
+  ],
+  "Go to example dot uk now.": [
+   "Go to example dot uk now. "
+  ],
+  "Go to example dot us today.": [
+   "Go to example dot us today. "
+  ],
+  "See site.uk/path now.": [
+   "See site . uk path now. "
+  ],
+  "See example.io/docs now.": [
+   "See example . io docs now. "
+  ],
+  "See example.io:80/docs now.": [
+   "See example \\x81d'at\\x82 i o : 80/docs now. "
+  ],
+  "It’s here.": [
+   "It's here. "
+  ],
+  "She said “hello” then.": [
+   "She said \"hello\" then. "
+  ],
+  "He said ‘yes’ then.": [
+   "He said 'yes' then. "
+  ],
+  "``hello'' there.": [
+   "hello ",
+   "there. "
+  ],
+  "Say ''hello'' now.": [
+   "Say hello ",
+   "now. "
+  ],
+  "Mail ann@mit.edu": [
+   "Mail ann @ m i t \\x81d'at\\x82 e d u\\x0b"
+  ],
+  "Visit www.mit.edu now.": [
+   "Visit www \\x81d'at\\x82 m i t \\x81d'at\\x82 e d u\\x0bnow. "
+  ],
+  "Go to mit.edu now.": [
+   "Go to mit \\x81d'at\\x82 e d u now. "
+  ],
+  "Ask ucla.edu today.": [
+   "Ask ucla \\x81d'at\\x82 e d u today. "
+  ],
+  "It is a/b/c here.": [
+   "It is a / b c here. "
+  ],
+  "Try x/y/z/w now.": [
+   "Try x / y / z w now. "
+  ]
+ }
+}

@@ -2,6 +2,48 @@
 # retain legacy boundaries; eligibility and speaking are separate CEL rules.
 text_recognition:
   rules:
+    # A pause a frontend's text parser asks for (src/text-parser): the comma
+    # written as phonemic text, between the parser's two marks for it. Only
+    # for a frontend whose policy says its text carries such marks
+    # (tn_recognition_policy.parser_marks: phonemic).
+    - id: tn_parser_pause_source
+      pattern: '\x81,\x82'
+      flags: ''
+      class: parser_pause
+      captures: {}
+      when: "get(maps.tn_recognition_policy, 'parser_marks', 'none') == 'phonemic'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 CMD/cm_text.c:1088-1145 (text between PAR_PHONES_ON_D and PAR_PHONES_OFF_D goes to letter-to-sound as phonemes), CMD/par_def1.h:286-287'
+    # Any other phonemic text of the parser is a word given by its phonemes
+    # (the words for "dot" and "colon" in an address). It stays one word, its
+    # marks on it, for the frontend's lexicon to read.
+    - id: tn_parser_phones_source
+      pattern: '\x81[^\x82]+\x82'
+      flags: ''
+      class: parser_phones
+      captures: {}
+      when: "get(maps.tn_recognition_policy, 'parser_marks', 'none') == 'phonemic'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 CMD/cm_text.c:1088-1145 (text between PAR_PHONES_ON_D and PAR_PHONES_OFF_D goes to letter-to-sound as phonemes), CMD/par_def1.h:286-287'
+    # The clause end the parser's text carries (the host's "speak this now",
+    # and the ends the parser's own rules write): it ends the words said since
+    # the last sentence or clause mark as a period does, and does nothing when
+    # there are none. So only the first of a run counts, and none at the start
+    # of the text or after a mark that has already ended the clause.
+    - id: tn_parser_clause_end_source
+      pattern: '(?<!(?:^|[.,;:!?\x0b]|\x81,\x82)\s*)\x0b'
+      flags: ''
+      class: parser_clause_end
+      captures: {}
+      when: "get(maps.tn_recognition_policy, 'parser_marks', 'none') == 'phonemic'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:1239-1264 (a clause end character sends BREATH_BREAK); PH/ph_task.c:665-676 (a control item arriving while symbols are pending ends them with PERIOD)'
     # A unit's abbreviation with its period, one or two words after a word
     # that begins with a digit: kept as one token, which the frontend's
     # lexicon reads from its table of units by the number. In any case of
@@ -137,6 +179,21 @@ text_recognition:
       speak: current.text
       vocabulary_keys: '[]'
       citations: ['Ebden & Sproat 2015; ISO date roles']
+    # A date word kept whole, for the same frontends as the rule after this
+    # one: a day of one or two digits, a hyphen, the three letters of a month
+    # in either case, and maybe a hyphen and a year of two or four digits
+    # ("3-May", "23-Aug-84", "2-Apr-2001"). It is the form DECtalk's text
+    # parser writes a date in; anything longer or shorter is not this word.
+    - id: tn_date_token_source
+      pattern: '(?<![\w$.,:-])(?<token>[0-9]{1,2}-(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)(?:-(?:[0-9]{4}|[0-9]{2}))?)(?![\w-])'
+      flags: i
+      class: number_token
+      captures: {token: token}
+      when: "get(maps.tn_recognition_policy, 'number_tokens', 'words') == 'source'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_pr1.c:815-863 (ls_proc_is_date: the forms 23-Aug, 23-Aug-84, 23-Aug-1984); LTS/ls_task.c:3612-3614 (the text task reads the whole word as a date)'
     # A number-like word kept whole, for a frontend whose lexicon reads such
     # words itself (tn_recognition_policy.number_tokens: source): a dollar
     # amount, a clock time, a number with a plural ending, a number with

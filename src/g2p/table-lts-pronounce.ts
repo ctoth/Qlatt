@@ -78,6 +78,14 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
   >;
   /** The phone lists numbers are spoken from (table-number.ts). */
   numberPhones?: NumberPhones;
+  /**
+   * Phonemic text: the symbol each character stands for, by character code
+   * (a phone code of `phonemeSymbols`, or a control symbol as in the number
+   * phone lists; null for none), and the two characters that stand around
+   * such text in a word.
+   */
+  phonemeCharacters?: readonly (number | null)[];
+  phonemicMarks?: readonly number[];
 }
 
 /** The names of the bits set in a form class word, lowest bit first. */

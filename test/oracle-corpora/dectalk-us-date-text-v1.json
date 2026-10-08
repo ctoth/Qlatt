@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-date-text-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "month-day-year", "text": "It was May 3, 1996 then.", "group": "written" },
+    { "id": "abbreviated-month", "text": "The meeting is on Jan. 5.", "group": "written" },
+    { "id": "full-month-two-thousand", "text": "It was January 5, 2000 then.", "group": "written" },
+    { "id": "slashes", "text": "It was 5/3/1996 then.", "group": "written" },
+    { "id": "word-four-digit-year", "text": "We met on 23-Aug-1984.", "group": "word" },
+    { "id": "word-oh-year", "text": "It ends on 2-Apr-2001.", "group": "word" },
+    { "id": "word-two-digit-year", "text": "He left on 4-Jul-76.", "group": "word" },
+    { "id": "word-no-year", "text": "Come on 3-May.", "group": "word" }
+  ]
+}

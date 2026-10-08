@@ -56,6 +56,7 @@ import {
   type SpeakerProfileOverride,
 } from "./speaker-profile";
 import { projectSpeakerFields } from "./speaker-projection";
+import { parseTextParserConfig, runTextParser } from "./text-parser/frontend";
 import { transcribeText } from "./transcribe-text";
 import type { KlattFrame, TranscriptionConfig, TranscriptionToken } from "./tts-frontend-types";
 import { isPlainObject } from "./yaml-loader";
@@ -654,7 +655,19 @@ function createStructure(
 }
 
 export function normalizeText(text: string, frontendId = "qlatt-english"): string {
-  return normalizeGraphText(text, loadBundledRulepackSpec(frontendId));
+  const spec = loadBundledRulepackSpec(frontendId);
+  // The same text the frontend speaks: after its text parser, when it has one.
+  const textParser = parseTextParserConfig(spec);
+  if (!textParser) return normalizeGraphText(text, spec);
+  const dictionaryPath = loadFrontendResources(spec).dictionaryPath;
+  const dictionary = dictionaryPath ? loadCmuDictionaryFromPathSync(dictionaryPath) : undefined;
+  const parsed = runTextParser(
+    textParser,
+    text,
+    (word) => dictionary !== undefined && Object.hasOwn(dictionary, word),
+    createProvenanceCollector(),
+  );
+  return normalizeGraphText(parsed.text, spec);
 }
 export { transcribeText } from "./transcribe-text";
 
@@ -784,7 +797,23 @@ function buildTextToKlattTrackDetailed(
   });
 
   const transcriptionConfig = getTranscriptionConfig(spec);
-  recognizeText(inputText, utterance, spec);
+  // A frontend whose policy names a text parser table has its text rewritten
+  // by those rules before anything else reads it (src/text-parser).
+  const textParser = parseTextParserConfig(spec);
+  if (textParser) {
+    const parsed = runTextParser(
+      textParser,
+      inputText,
+      (word) => dictionary !== undefined && Object.hasOwn(dictionary, word),
+      provenance,
+    );
+    recognizeText(parsed.text, utterance, spec, {
+      parents: parsed.decisionIds,
+      reason: `Source text is the text parser's output; UTF-16 source coordinates are its`,
+    });
+  } else {
+    recognizeText(inputText, utterance, spec);
+  }
   const normalized = normalizeSourceItems(utterance, spec);
   const transcribed = transcribeText(normalized, {
     provenance,

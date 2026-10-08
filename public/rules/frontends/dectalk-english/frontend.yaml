@@ -16,6 +16,25 @@ stress_policy_path: /rules/frontends/qlatt-english/stress-policy.yaml
 # This 13,272-entry dictionary was converted from DECtalk's Dic_us.txt to the
 # same flat word->ARPABET JSON the CMU loader consumes (see scripts/build-dectalk-dict.ts).
 dictionary_path: /dectalk-dictionary.json
+# DECtalk's command text parser: the rules that rewrite text (phone numbers,
+# dates, some abbreviations, punctuation) before letter-to-sound reads it.
+# The table is DECtalk 4.63's compiled CMD/par_rule2.h with the character
+# tables of CMD/cm_char.c and CMD/par_char.c, decoded by
+# scripts/build-dectalk-text-parser.ts; src/text-parser runs it.
+text_parser:
+  table_path: /rules/frontends/dectalk-english/text-parser-table.json
+  # 1 << PAR_LANG_CODE for US English (CMD/cm_text.c:885).
+  language: 1
+  # The punctuation rules run in the mode 1 << PUNCT_some, DECtalk's default
+  # (CMD/cm_text.c:846, CMD/cm_util.c:125).
+  punctuation: { section: 1, mode: 2 }
+  # The main rules run in MODE_CITATION, 0x0100 (CMD/cm_text.c:989,
+  # INCLUDE/esc.h:131).
+  main: { section: 2, mode: 256 }
+  # What DECtalk's say program sends after the text: eight spaces, and the
+  # clause end a forced speak appends (samples/SAY/say.c:249,
+  # API/ttsapi.c:4559).
+  ending: "        \v"
 # DECtalk uses its own source contour so shared qlatt-english LF policy
 # (source_mode: 1) cannot override it. The default remains the impulse fallback
 # while KLGLOTT88 mode 3 is blocked by silent worklet voice output.
@@ -24,8 +43,23 @@ source_contour_path: /rules/frontends/dectalk-english/source-contour.yaml
 # normalization-policy.yaml, and leave a bare number or year as digits: the
 # lexicon speaks those from DECtalk's number phone lists (src/g2p/table-number.ts).
 # Citation: DECtalk 4.63 ls_util.c:598-622 (is_year), l_us_pr1.c:297-785.
+#
+# These shared phases read the text parser's output, not the text as typed.
+# Measured over the 616 texts of the first parser fixtures
+# (scripts/oracle/normalization-rules-fired.ts), after the parser:
+#   - still at work: normalization_lexical (words, the parser's marks,
+#     dictionary abbreviations, initials, bare numbers and years, number-like
+#     words kept whole), normalization_number_requests and
+#     normalization_number_groups (ordinals, fractions),
+#     normalization_terminal_words;
+#   - never reached on those texts: the recognition rules that feed
+#     normalization_currency, normalization_time, normalization_date and
+#     normalization_decimal_fraction, because a dollar amount, a clock time,
+#     a decimal and the parser's date word are each kept whole for the
+#     lexicon first. The phases stay listed: a text those rules still catch
+#     has not been ruled out, only not been seen.
 normalization:
-  phases: [normalization_lexical, normalization_currency, normalization_time, normalization_date, normalization_decimal_fraction, normalization_number_requests, normalization_number_groups, normalization_terminal_words, normalization_text_end]
+  phases: [normalization_lexical, normalization_currency, normalization_time, normalization_date, normalization_decimal_fraction, normalization_number_requests, normalization_number_groups, normalization_terminal_words]
 include:
   - /rules/normalization/components.yaml
   - normalization-policy.yaml

@@ -384,6 +384,7 @@ function rewriteOrthographyTokens(
   tables: RequiredTranscriptionTables,
   compiledSpec: CompiledRulepack,
   existingUtterance?: Utterance,
+  captureTooling?: boolean,
 ): OrthographyInputToken[] {
   const entries = words.filter(
     (entry) => (typeof entry === "string" ? entry : entry.word).length > 0,
@@ -464,7 +465,10 @@ function rewriteOrthographyTokens(
       }
     }
   }
-  runGraphRuleEngine(utterance, compiledSpec, { phases: ["orthography"] });
+  runGraphRuleEngine(utterance, compiledSpec, {
+    phases: ["orthography"],
+    ...(captureTooling === undefined ? {} : { captureTooling }),
+  });
 
   return utterance
     .relation("Token")
@@ -575,6 +579,7 @@ export function transcribeText(
     transcriptionTables,
     compiledSpec,
     options.utterance,
+    options.captureTooling,
   );
   // A frontend that searches its dictionary by the written word looks a word
   // up with its apostrophes first and, on a miss, without the ones at its

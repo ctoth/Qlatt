@@ -853,8 +853,12 @@ function buildTextToKlattTrackDetailed(
   } else {
     recognizeText(inputText, utterance, spec);
   }
-  const normalized = normalizeSourceItems(utterance, spec);
+  // Phase checkpoints and rule attempts are recorded only when asked for, in
+  // these phases as in the later ones: a checkpoint serializes the whole graph.
+  const captureTooling = options.captureTooling === true;
+  const normalized = normalizeSourceItems(utterance, spec, { captureTooling });
   const transcribed = transcribeText(normalized, {
+    captureTooling,
     provenance,
     utterance,
     compiledSpec: spec,
@@ -1004,7 +1008,6 @@ function buildTextToKlattTrackDetailed(
     onInvalidParameter: (fallback: InventoryParameterFallback) =>
       invalidInventoryParameters.push(fallback),
   };
-  const captureTooling = options.captureTooling === true;
   let evaluationOwner = ruleEvaluationOwners.get(spec);
   if (!evaluationOwner) {
     evaluationOwner = new GraphRuleEvaluationOwner();

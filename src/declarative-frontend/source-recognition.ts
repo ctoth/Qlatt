@@ -259,15 +259,23 @@ export function recognizeText(
   }
 }
 
-/** Execute the selected bounded phases and hand off terminal words exactly once. */
+/**
+ * Execute the selected bounded phases and hand off terminal words exactly once.
+ * `captureTooling` is the rule engine's option (phase checkpoints and rule
+ * attempts are recorded unless it is false).
+ */
 export function normalizeSourceItems(
   utterance: Utterance,
   spec: CompiledRulepack,
+  options: { captureTooling?: boolean } = {},
 ): SourceTranscriptionInput[] {
   if (!parseRecognitionConfig(spec))
     throw new Error("E_RECOGNITION_CONFIG: text_recognition is required");
   if (Array.isArray(spec.normalization.phases)) {
-    runGraphRuleEngine(utterance, spec, { phases: spec.normalization.phases as string[] });
+    runGraphRuleEngine(utterance, spec, {
+      phases: spec.normalization.phases as string[],
+      ...(options.captureTooling === undefined ? {} : { captureTooling: options.captureTooling }),
+    });
     return utterance
       .relation("Normalization")
       .listItems()

@@ -118,6 +118,8 @@ export type TranscriptionOptions = {
   dictionaryMap?: Record<string, string | undefined>;
   utterance?: Utterance;
   compiledSpec?: CompiledRulepack;
+  /** The rule engine's option for the orthography phase; recorded unless false. */
+  captureTooling?: boolean;
 };
 
 /** A final timestamped backend parameter frame emitted by HRG lowering. */

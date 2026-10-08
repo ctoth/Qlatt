@@ -459,6 +459,25 @@ const SCHEMA = {
         valve: { kind: "string" },
         LEVEL: { kind: "number" },
         tank_frames: FRAME_VALUES_SCHEMA,
+        control_windows: {
+          kind: "array",
+          items: {
+            kind: "object",
+            fields: {
+              start_ms: { kind: "number" },
+              end_ms: { kind: "number" },
+              fields: {
+                kind: "object",
+                fields: {},
+                additional: {
+                  kind: "object",
+                  fields: { op: { kind: "string", values: ["set"] }, value: { kind: "number" } },
+                },
+              },
+              tag: { kind: "string" },
+            },
+          },
+        },
       },
     },
   },
@@ -715,6 +734,36 @@ describe("frame values in lowering", () => {
     expect(
       lowered.frames.filter((frame) => frame.segmentId).map((frame) => frame.params.LEVEL),
     ).toEqual([-1, -1, -1]);
+  });
+
+  it("lets a frame's value stand over a control window on the same column", () => {
+    const windowed = (withFrames: boolean): (number | undefined)[] => {
+      const utterance = tankUtterance();
+      const spec = compileRuleEngineSpec(TANK_SPEC);
+      runGraphRuleEngine(utterance, spec);
+      utterance.getItem("a")?.set(
+        "control_windows",
+        [
+          {
+            start_ms: 0,
+            end_ms: 15,
+            fields: { LEVEL: { op: "set", value: 99 } },
+            tag: "fixture",
+          },
+        ],
+        META,
+      );
+      const lowered = lowerToFrames(utterance, POLICY, {
+        frameValueFeatures: withFrames ? frameValueFeatures(spec.frame_programs) : [],
+      });
+      return lowered.frames
+        .filter((frame) => frame.segmentId === "a")
+        .map((frame) => frame.params.LEVEL);
+    };
+    // The window alone sets the column for the whole Item.
+    expect(new Set(windowed(false))).toEqual(new Set([99]));
+    // With the program's frames the column is theirs, window or not.
+    expect(windowed(true)).toEqual([4, 6, 7]);
   });
 
   it("makes a unit's last frames a unit of their own with the edge features", () => {

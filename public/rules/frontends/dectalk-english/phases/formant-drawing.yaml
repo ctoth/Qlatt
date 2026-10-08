@@ -40,9 +40,17 @@ version: v1
 #     last sonorant (ph_setar.c:1621-1642 sets it for sonorants only).
 #   - W has FOBST in the ROM, so it is an obstruent in every test below.
 #
-# Not ported: the F1 the HLSYN section writes over this one around velars
-# (ph_draw.c:2937-3109). No phrase of one clause in the three oracle corpora
-# shows it in its packets.
+# Which C is compiled, from the build files: dapi/src/dtstatic.mak:164 defines
+# NDEBUG and not _DEBUG, so PH_DEBUG (dectalkf.h, under `#ifdef _DEBUG`) is
+# off and the `F2 <= 708` line of ph_draw.c:4460 with it; HLSYN is defined
+# (dectalkf.h:114), so the `#ifndef HLSYN` branches of p_us_st1.c are off;
+# TONGUE_BODY_AREA is defined (dectalkf.h:186), so the F1 the `#else` branch
+# of ph_draw.c:2935-3111 writes around velars is off. The packets agree on
+# each.
+#
+# ONLY PAUL IS DECTALK'S. The tables and the formant scale are Paul's
+# (policy.formant_drawing); rule parameters do not see the selected voice yet,
+# so every other voice is drawn with them too.
 # -----------------------------------------------------------------------------
 functions:
   fd_is_dummy:

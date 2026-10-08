@@ -55,7 +55,9 @@ const F0_REASON =
   "4040-4130). Not every remaining phrase has been traced to it";
 // phases/formant-drawing.yaml draws F1, F2, F3, B2 and B3 as phsettar() and
 // phdraw() do. The one phrase that still differs, carry-be-late, is the one
-// whose allophone durations are not DECtalk's:
+// whose allophone durations are not DECtalk's. This gate renders Paul only:
+// the tables and the formant scale are his, and every other voice is drawn
+// with them until rule parameters can see the selected voice.
 const FORMANT_REASON =
   "the phrase's durations are not DECtalk's (its `length` and `segments` gaps), and every " +
   "ramp is computed from them";

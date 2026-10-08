@@ -1170,8 +1170,9 @@ output:
         # 903-904). The universal midpoint fallback gives B1 a transition at
         # obstruent-adjacent boundaries instead of a step.
         smooth_all_boundaries: true
-      # NOT READ ANY MORE (no vowel_category below): the locus tables of the
-      # lowering resolver, which phases/formant-drawing.yaml replaces.
+      # Nothing reads `loci` since 2d402ebd: lowering's locus resolver needs a
+      # vowel_category table, which went when phases/formant-drawing.yaml took
+      # over setloc() (it reads parameters.policy.formant_drawing.locus).
       # Obstruent->sonorant formant LOCUS tables (DATA), extracted from
       # DECtalk 4.63 PH/p_us_rom.h us_maleloc[] (Paul / male voice) via the
       # dectalk repo scripts/extract_loci.py, reshaped by
@@ -1522,6 +1523,8 @@ output:
             F1: { locus_hz: 340, prcnt: 32, durtran_ms: 55 }
             F2: { locus_hz: 1830, prcnt: 27, durtran_ms: 90 }
             F3: { locus_hz: 2100, prcnt: 20, durtran_ms: 110 }
+      # Nothing reads `loci_female` since 2d402ebd, for the same reason; the
+      # frame program draws every voice from Paul's (male) tables for now.
       loci_female:
         B:
           "1":

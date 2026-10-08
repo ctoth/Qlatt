@@ -10,7 +10,8 @@
  *   q   the frontend's symbols at that point (frontendSymbols)
  *   =   "same" or "differs" (d against q)
  *   w   the frontend's words with what d and q leave out: the phrase a word
- *       starts, as "(vp)" or "(pp)" before it
+ *       starts, as "(vp)" or "(pp)" before it, and a clause break its rules
+ *       put before a word, as ", /"
  *
  * Usage (instrumented say.exe as for trace-text.ts):
  *   DECTALK_SAY_EXE=... DECTALK_WORKDIR=... \
@@ -37,7 +38,9 @@ function frontendWords(text: string): string {
     .listItems()
     .map((word) => {
       const phrase = word.get("phrase_start");
-      return `${typeof phrase === "string" ? `(${phrase}) ` : ""}${String(word.get("text"))}`;
+      return `${word.get("clause_break_before") === true ? ", / " : ""}${
+        typeof phrase === "string" ? `(${phrase}) ` : ""
+      }${String(word.get("text"))}`;
     })
     .join(" _ ");
 }

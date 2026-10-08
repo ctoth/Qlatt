@@ -400,6 +400,10 @@ function getTranscriptionConfig(spec: CompiledRulepack): TranscriptionConfig | u
     ...(value.word_stretch_end_characters !== undefined
       ? { word_stretch_end_characters: value.word_stretch_end_characters as string }
       : {}),
+    // Passed as written; requireTranscriptionTables refuses anything but two numbers.
+    ...(value.word_stretch_length_limits !== undefined
+      ? { word_stretch_length_limits: value.word_stretch_length_limits as number[] }
+      : {}),
     letter_names: letterNames,
     punctuation_tokens: punctuationTokens,
   };

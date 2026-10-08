@@ -107,6 +107,8 @@ type RequiredTranscriptionTables = {
   punctuationTokens: Set<string>;
   /** Characters that end a stretch of words when a written word ends in one. */
   wordStretchEndCharacters: string;
+  /** The lengths of gathered text at which a stretch of words ends (gatheredStretchEnds). */
+  wordStretchLimits?: readonly [number, number];
 };
 
 // ---------------------------------------------------------------------------
@@ -290,8 +292,24 @@ function requireTranscriptionTables(
       "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.word_stretch_end_characters must be a string",
     );
   }
+  const stretchLimits = config.word_stretch_length_limits;
+  if (
+    stretchLimits !== undefined &&
+    !(
+      Array.isArray(stretchLimits) &&
+      stretchLimits.length === 2 &&
+      stretchLimits.every((limit) => Number.isInteger(limit) && limit > 0)
+    )
+  ) {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.word_stretch_length_limits must be two positive whole numbers",
+    );
+  }
   return {
     wordStretchEndCharacters: stretchEnd ?? "",
+    ...(stretchLimits
+      ? { wordStretchLimits: [stretchLimits[0] as number, stretchLimits[1] as number] as const }
+      : {}),
     symbolInput: symbolInput !== false,
     elidedApostropheLookup: elidedApostropheLookup !== false,
     sources: requireLexiconSources(config.sources),
@@ -307,6 +325,48 @@ function getDefaultTranscriptionTables(): RequiredTranscriptionTables {
 
 function isPunctuationTokenWithTables(word: string, tables: RequiredTranscriptionTables): boolean {
   return tables.punctuationTokens.has(word);
+}
+
+/**
+ * The places in `text` where the text gathered so far is handed on because of
+ * its length alone: the index of the character at which more than `limits[0]`
+ * characters have been gathered and the character is white space, or at which
+ * more than `limits[1]` have been gathered whatever the character.
+ *
+ * DECtalk's letter-to-sound gathers the characters it is sent and parses and
+ * speaks them together (LTS/ls_task.c:365-372) when a white space character
+ * follows a clause-mark character, when the character is the clause end 0x0b,
+ * or at these two lengths (`temp>400` at white space, `temp>480`); a
+ * character that is not text does the same (:446-470). Gathering starts
+ * again after each. `endCharacters` are the clause-mark characters; the
+ * characters 0x80 to 0x9f are a text parser's marks around what is not text.
+ */
+function gatheredStretchEnds(
+  text: string,
+  endCharacters: string,
+  limits: readonly [number, number],
+): number[] {
+  const ends: number[] = [];
+  let gathered = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index] as string;
+    const code = char.charCodeAt(0);
+    if (code >= 0x80 && code <= 0x9f) {
+      gathered = 0;
+      continue;
+    }
+    const white = /\s/.test(char);
+    const afterMark = index > 0 && endCharacters.includes(text[index - 1] as string);
+    if ((white && afterMark) || code === 0x0b) {
+      gathered = 0;
+    } else if ((gathered > limits[0] && white) || gathered > limits[1]) {
+      ends.push(index);
+      gathered = 0;
+    } else {
+      gathered += 1;
+    }
+  }
+  return ends;
 }
 
 function getDiagnosticSymbolPronunciationWithTables(
@@ -345,6 +405,8 @@ function rewriteOrthographyTokens(
   // Word tokens whose written word ends in a character that ends a stretch
   // of words for the frontend (an abbreviation's period, a final apostrophe).
   const stretchEnds = new Set<string>();
+  // Each word token with the text it was written in and where it ends there.
+  const writtenWords: Array<{ tokenId: string; text: string; end: number }> = [];
   entries.forEach((entry, index) => {
     const input = sharedInput ?? beginInput();
     const word = typeof entry === "string" ? entry : entry.word;
@@ -367,6 +429,7 @@ function rewriteOrthographyTokens(
         ) {
           stretchEnds.add(token.id);
         }
+        if (!punctuation) writtenWords.push({ tokenId: token.id, text: sourceText, end });
       }
     }
     if (typeof entry !== "string") {
@@ -383,6 +446,24 @@ function rewriteOrthographyTokens(
     if (!sharedInput) input.commit();
   });
   sharedInput?.commit();
+  // A stretch of words also ends where the text gathered since the last end
+  // grows past the frontend's limit: the last word written before that place.
+  if (tables.wordStretchLimits) {
+    const places = new Map<string, number[]>();
+    for (const word of writtenWords) {
+      const ends =
+        places.get(word.text) ??
+        gatheredStretchEnds(word.text, tables.wordStretchEndCharacters, tables.wordStretchLimits);
+      places.set(word.text, ends);
+    }
+    for (const [text, ends] of places) {
+      const words = writtenWords.filter((word) => word.text === text);
+      for (const place of ends) {
+        const last = words.findLast((word) => word.end <= place);
+        if (last) stretchEnds.add(last.tokenId);
+      }
+    }
+  }
   runGraphRuleEngine(utterance, compiledSpec, { phases: ["orthography"] });
 
   return utterance

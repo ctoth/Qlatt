@@ -99,6 +99,12 @@ export type TranscriptionConfig = {
    * character and not only up to a punctuation token. None when absent.
    */
   word_stretch_end_characters?: string;
+  /**
+   * Two lengths of text gathered since a stretch of words last ended: past
+   * the first a stretch ends at the next white space, past the second at
+   * once. None when absent.
+   */
+  word_stretch_length_limits?: number[];
 };
 
 export type TranscriptionOptions = {

@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-voices-extended-v1",
+  "defaults": {
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    {
+      "id": "paul-fox-120",
+      "voiceId": "paul",
+      "rate": 120,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "rate"
+    },
+    {
+      "id": "paul-fox-300",
+      "voiceId": "paul",
+      "rate": 300,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "rate"
+    },
+    {
+      "id": "betty-fox-120",
+      "voiceId": "betty",
+      "rate": 120,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "rate"
+    },
+    {
+      "id": "betty-fox-300",
+      "voiceId": "betty",
+      "rate": 300,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "group": "rate"
+    },
+
+    { "id": "paul-q", "voiceId": "paul", "text": "Is the cat on the mat?", "group": "question" },
+    { "id": "betty-q", "voiceId": "betty", "text": "Is the cat on the mat?", "group": "question" },
+    { "id": "harry-q", "voiceId": "harry", "text": "Is the cat on the mat?", "group": "question" },
+    { "id": "frank-q", "voiceId": "frank", "text": "Is the cat on the mat?", "group": "question" },
+    { "id": "dennis-q", "voiceId": "dennis", "text": "Is the cat on the mat?", "group": "question" },
+    { "id": "kit-q", "voiceId": "kit", "text": "Is the cat on the mat?", "group": "question" },
+    { "id": "ursula-q", "voiceId": "ursula", "text": "Is the cat on the mat?", "group": "question" },
+    { "id": "rita-q", "voiceId": "rita", "text": "Is the cat on the mat?", "group": "question" },
+    { "id": "wendy-q", "voiceId": "wendy", "text": "Is the cat on the mat?", "group": "question" },
+
+    { "id": "paul-x", "voiceId": "paul", "text": "Look at that!", "group": "exclamation" },
+    { "id": "betty-x", "voiceId": "betty", "text": "Look at that!", "group": "exclamation" },
+    { "id": "harry-x", "voiceId": "harry", "text": "Look at that!", "group": "exclamation" },
+    { "id": "frank-x", "voiceId": "frank", "text": "Look at that!", "group": "exclamation" },
+    { "id": "dennis-x", "voiceId": "dennis", "text": "Look at that!", "group": "exclamation" },
+    { "id": "kit-x", "voiceId": "kit", "text": "Look at that!", "group": "exclamation" },
+    { "id": "ursula-x", "voiceId": "ursula", "text": "Look at that!", "group": "exclamation" },
+    { "id": "rita-x", "voiceId": "rita", "text": "Look at that!", "group": "exclamation" },
+    { "id": "wendy-x", "voiceId": "wendy", "text": "Look at that!", "group": "exclamation" },
+
+    {
+      "id": "paul-c",
+      "voiceId": "paul",
+      "text": "When the sun sets, the birds fly home.",
+      "group": "comma"
+    },
+    {
+      "id": "betty-c",
+      "voiceId": "betty",
+      "text": "When the sun sets, the birds fly home.",
+      "group": "comma"
+    },
+    {
+      "id": "harry-c",
+      "voiceId": "harry",
+      "text": "When the sun sets, the birds fly home.",
+      "group": "comma"
+    },
+    {
+      "id": "frank-c",
+      "voiceId": "frank",
+      "text": "When the sun sets, the birds fly home.",
+      "group": "comma"
+    },
+    {
+      "id": "dennis-c",
+      "voiceId": "dennis",
+      "text": "When the sun sets, the birds fly home.",
+      "group": "comma"
+    },
+    {
+      "id": "kit-c",
+      "voiceId": "kit",
+      "text": "When the sun sets, the birds fly home.",
+      "group": "comma"
+    },
+    {
+      "id": "ursula-c",
+      "voiceId": "ursula",
+      "text": "When the sun sets, the birds fly home.",
+      "group": "comma"
+    },
+    {
+      "id": "rita-c",
+      "voiceId": "rita",
+      "text": "When the sun sets, the birds fly home.",
+      "group": "comma"
+    },
+    {
+      "id": "wendy-c",
+      "voiceId": "wendy",
+      "text": "When the sun sets, the birds fly home.",
+      "group": "comma"
+    },
+
+    { "id": "paul-number", "voiceId": "paul", "text": "I have 42 cats.", "group": "number" },
+    { "id": "betty-number", "voiceId": "betty", "text": "I have 42 cats.", "group": "number" },
+    { "id": "paul-oov", "voiceId": "paul", "text": "The zorblat is here.", "group": "oov" },
+    { "id": "betty-oov", "voiceId": "betty", "text": "The zorblat is here.", "group": "oov" }
+  ]
+}

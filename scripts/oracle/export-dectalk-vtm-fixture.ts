@@ -30,7 +30,11 @@
  *   DECTALK_WORKDIR=<stock>/dapi/src/dic \
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
  *     scripts/oracle/export-dectalk-vtm-fixture.ts \
- *     [--corpus test/oracle-corpora/dectalk-us-v1.json --out-dir <dir>]
+ *     [--corpus test/oracle-corpora/dectalk-us-v1.json --out-dir <dir> [--wav-only]]
+ *
+ * --wav-only writes `<id>.wav` for each corpus entry and nothing else, after
+ * the same checks: the fixtures of test/dectalk-voices-exact.test.ts, which
+ * compares audio and reads no frames.
  *
  * Without --corpus it regenerates the checked-in fixtures (CHECKED_IN below)
  * in crates/dectalk-vtm/tests/fixtures. With --corpus it exports every corpus
@@ -52,7 +56,14 @@ import type { OracleCorpusDocument } from "./types";
  * L lines; "full" adds X and T (the HLFrame and HLState as float bits), which
  * let the Rust test check the port's internal state bit for bit.
  */
-type Phrase = { id: string; text: string; hl?: "compact" | "full"; speakersOnly?: boolean };
+type Phrase = {
+  id: string;
+  text: string;
+  hl?: "compact" | "full";
+  speakersOnly?: boolean;
+  /** Write `<id>.wav` alone, after the same checks. */
+  wavOnly?: boolean;
+};
 
 /** The fixtures kept in the repository: id and the exact text given to say.exe. */
 const CHECKED_IN: Phrase[] = [
@@ -173,14 +184,17 @@ function phrasesAndOutDir(): { phrases: Phrase[]; outDir: string } {
   ) as OracleCorpusDocument;
   const rate = corpus.defaults?.rate;
   if (rate == null) throw new Error(`E_VTM_FIXTURE: ${corpusFlag} has no defaults.rate`);
+  const wavOnly = argv.includes("--wav-only");
   return {
     phrases: [
       ...corpus.entries.map((entry) => ({
         id: entry.id,
         text: `[:n${voiceLetter(entry.voiceId ?? corpus.defaults?.voiceId ?? "paul", entry.id)}] [:ra ${Math.round(entry.rate ?? rate)}] ${entry.text}`,
         hl: "full" as const,
+        wavOnly,
       })),
-      ALL_VOICES_FULL,
+      // The nine-voice utterance is for the Rust replay, which reads frames.
+      ...(wavOnly ? [] : [ALL_VOICES_FULL]),
     ],
     outDir: path.resolve(outDirFlag),
   };
@@ -290,6 +304,11 @@ function exportPhrase(phrase: Phrase, outDir: string, tmpDir: string): string {
     throw new Error(
       `E_VTM_FIXTURE: ${phrase.id}: trace and WAV differ at sample ${firstDifference}`,
     );
+  }
+
+  if (phrase.wavOnly) {
+    fs.writeFileSync(path.join(outDir, `${phrase.id}.wav`), stockBytes);
+    return `${phrase.id}: frames=${frames} samples=${samples.length} (WAV only)`;
   }
 
   if (phrase.speakersOnly) {

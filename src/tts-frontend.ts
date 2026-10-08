@@ -56,6 +56,7 @@ import {
   type SpeakerProfileOverride,
 } from "./speaker-profile";
 import { projectSpeakerFields } from "./speaker-projection";
+import { parseTextParserConfig, runTextParser } from "./text-parser/frontend";
 import { transcribeText } from "./transcribe-text";
 import type { KlattFrame, TranscriptionConfig, TranscriptionToken } from "./tts-frontend-types";
 import { isPlainObject } from "./yaml-loader";
@@ -784,7 +785,23 @@ function buildTextToKlattTrackDetailed(
   });
 
   const transcriptionConfig = getTranscriptionConfig(spec);
-  recognizeText(inputText, utterance, spec);
+  // A frontend whose policy names a text parser table has its text rewritten
+  // by those rules before anything else reads it (src/text-parser).
+  const textParser = parseTextParserConfig(spec);
+  if (textParser) {
+    const parsed = runTextParser(
+      textParser,
+      inputText,
+      (word) => dictionary !== undefined && Object.hasOwn(dictionary, word),
+      provenance,
+    );
+    recognizeText(parsed.text, utterance, spec, {
+      parents: parsed.decisionIds,
+      reason: `Source text is the text parser's output; UTF-16 source coordinates are its`,
+    });
+  } else {
+    recognizeText(inputText, utterance, spec);
+  }
   const normalized = normalizeSourceItems(utterance, spec);
   const transcribed = transcribeText(normalized, {
     provenance,

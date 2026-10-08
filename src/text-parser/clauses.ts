@@ -23,7 +23,7 @@ import {
   type DictionaryState,
   type PassOptions,
   type TextParserTable,
-} from "./interpreter.ts";
+} from "./interpreter";
 
 export interface ClauseOptions {
   /** The language bit of the rules to run. */

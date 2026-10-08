@@ -10,6 +10,8 @@
 
 import { describe, expect, it } from "vitest";
 import { recordedClauses, textParserPort } from "../scripts/oracle/text-parser-port";
+import { createProvenanceCollector } from "../src/provenance";
+import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 const recorded = Object.entries(recordedClauses()).filter(
   (entry): entry is [string, string[]] => entry[1] !== null && entry[1].length > 0,
@@ -34,5 +36,58 @@ describe("dectalk text parser", () => {
     const text = "Dr. Smith is here.";
     expect(textParserPort()(text)).toEqual(["Doctor Smith is here. "]);
     expect(textParserPort({ dictionary: false })(text)).toEqual(["Dr. ", "Smith is here. "]);
+  });
+});
+
+describe("dectalk-english runs its text parser first", () => {
+  const decisionsFor = (text: string, frontendId: string) => {
+    const provenance = createProvenanceCollector();
+    textToKlattTrackDetailed(text, undefined, 30, { frontendId, provenance });
+    return provenance.getDecisions();
+  };
+
+  it("records the input and each rewrite with its rule and line", () => {
+    const decisions = decisionsFor("Dr. Smith is here.", "dectalk-english");
+    const input = decisions.find((decision) => decision.type === "text_parser_input");
+    expect(input?.reason).toContain('"Dr. Smith is here."');
+    const rewrites = decisions.filter((decision) => decision.type === "text_parser_rewrite");
+    expect(rewrites.map((decision) => decision.subject)).toEqual(["text_parser:R315"]);
+    expect(rewrites[0].reason).toBe(
+      'Rule R315 (CMD/par_rule2.par line 523) rewrote "Dr. Smith" as "Doctor Smith"',
+    );
+    expect(rewrites[0].citations).toEqual(["DECtalk 4.63 CMD/par_rule2.par:523"]);
+    expect(rewrites[0].parents).toEqual([input?.id]);
+  });
+
+  it("makes the source text depend on the parser's decisions", () => {
+    const decisions = decisionsFor("Dr. Smith is here.", "dectalk-english");
+    const parser = decisions
+      .filter((decision) => decision.type.startsWith("text_parser_"))
+      .map((decision) => decision.id);
+    const source = decisions.find(
+      (decision) => decision.type === "item_create" && decision.subject === "item:source_text",
+    );
+    expect(parser.length).toBe(2);
+    expect(source?.parents).toEqual(expect.arrayContaining(parser));
+  });
+
+  it("reads the parser's comma written as phonemic text as a pause", () => {
+    const decisions = decisionsFor("Call 555 1234.", "dectalk-english");
+    const rewrite = decisions.find((decision) => decision.type === "text_parser_rewrite");
+    expect(rewrite?.reason).toBe(
+      'Rule R208 (CMD/par_rule2.par line 690) rewrote "555 1234." as "5 5 5, 1 2 3 4.{phonemes ,}"',
+    );
+    const pauses = decisions.filter(
+      (decision) =>
+        decision.type === "text_recognition" &&
+        decision.recognition?.ruleId === "tn_parser_pause_source" &&
+        decision.recognition.outcome === "accepted",
+    );
+    expect(pauses.length).toBe(1);
+  });
+
+  it("leaves a frontend without the policy block alone", () => {
+    const decisions = decisionsFor("Dr. Smith is here.", "qlatt-english");
+    expect(decisions.filter((decision) => decision.type.startsWith("text_parser_"))).toEqual([]);
   });
 });

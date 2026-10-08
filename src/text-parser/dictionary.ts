@@ -10,7 +10,7 @@
  * that matches counts.
  */
 
-import type { DictionaryState, TextParserTable } from "./interpreter.ts";
+import type { DictionaryState, TextParserTable } from "./interpreter";
 
 const HIT = 1;
 const ABBREVIATION = 2;

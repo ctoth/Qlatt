@@ -182,6 +182,19 @@ rules:
       output: "[{'type': 'terminal', 'text': current.payload.token}]"
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:3181-3513, 3622-3652, 3747-3825 (money, times and numbers are read from the word as written, by the number routines)"
+  # A pause the text parser asks for (tn_parser_pause_source) is the comma: the
+  # phoneme the parser names is the one a written comma gives.
+  tn_parser_pause:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'parser_pause' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: "[{'type': 'request', 'kind': 'words', 'payload': {'text': ','}}]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:1266-1279 (a written comma sends the COMMA phoneme); CMD/cm_text.c:1139 (phonemic text is sent as its phonemes)"
   tn_unmatched_words:
     kind: structural
     select:
@@ -200,4 +213,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_unmatched_words]

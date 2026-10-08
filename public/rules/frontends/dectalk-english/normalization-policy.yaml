@@ -21,6 +21,10 @@ maps:
     # (the word "eleventh" begins IH) and "100th" has R AX D TH (the word
     # "hundredth" has R IX D TH).
     ordinal_numbers: source
+    # This frontend's text comes from its text parser (frontend.yaml
+    # text_parser), which writes a pause as phonemic text between two marks
+    # (DECtalk 4.63 CMD/par_def1.h:286-287, CMD/cm_text.c:1088-1145).
+    parser_marks: phonemic
     fraction_exception: '100'
     # A capital letter followed by a period is an initial: it is spelled and
     # its period is sent twice (LTS/ls_task.c:2612-2623, 1516-1519,

@@ -2,6 +2,20 @@
 # retain legacy boundaries; eligibility and speaking are separate CEL rules.
 text_recognition:
   rules:
+    # A pause a frontend's text parser asks for (src/text-parser): the comma
+    # written as phonemic text, between the parser's two marks for it. Only
+    # for a frontend whose policy says its text carries such marks
+    # (tn_recognition_policy.parser_marks: phonemic).
+    - id: tn_parser_pause_source
+      pattern: '\x81,\x82'
+      flags: ''
+      class: parser_pause
+      captures: {}
+      when: "get(maps.tn_recognition_policy, 'parser_marks', 'none') == 'phonemic'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 CMD/cm_text.c:1088-1145 (text between PAR_PHONES_ON_D and PAR_PHONES_OFF_D goes to letter-to-sound as phonemes), CMD/par_def1.h:286-287'
     # A unit's abbreviation with its period, one or two words after a word
     # that begins with a digit: kept as one token, which the frontend's
     # lexicon reads from its table of units by the number. In any case of

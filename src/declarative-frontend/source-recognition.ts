@@ -67,7 +67,17 @@ function speak(
 }
 
 /** Host span matching only. The selected rulepack owns eligibility and speech. */
-export function recognizeText(text: string, utterance: Utterance, spec: CompiledRulepack): void {
+export function recognizeText(
+  text: string,
+  utterance: Utterance,
+  spec: CompiledRulepack,
+  /**
+   * When `text` is not the caller's input but what an earlier step made of
+   * it: the decisions of that step, which the source text then depends on,
+   * and what to say of it.
+   */
+  origin?: { parents: readonly string[]; reason: string },
+): void {
   const config = parseRecognitionConfig(spec);
   if (!config) throw new Error("E_RECOGNITION_CONFIG: text_recognition is required");
   const sourceItemId = "source_text";
@@ -190,10 +200,11 @@ export function recognizeText(text: string, utterance: Utterance, spec: Compiled
     ruleId: "source_text_ingestion",
     phase: "recognition",
     tag: "source",
-    reason: "Preserved original input and UTF-16 source coordinates",
+    reason: origin?.reason ?? "Preserved original input and UTF-16 source coordinates",
     citations: ["Issue #142: source-backed normalization contract"],
     stage: "transcribe",
   });
+  for (const parent of origin?.parents ?? []) ingestion.dependOn(parent);
   const source = ingestion.createItem("sourceText", sourceItemId);
   ingestion.set(source, "text", text);
   ingestion.append("SourceText", source);

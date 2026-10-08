@@ -16,6 +16,25 @@ stress_policy_path: /rules/frontends/qlatt-english/stress-policy.yaml
 # This 13,272-entry dictionary was converted from DECtalk's Dic_us.txt to the
 # same flat word->ARPABET JSON the CMU loader consumes (see scripts/build-dectalk-dict.ts).
 dictionary_path: /dectalk-dictionary.json
+# DECtalk's command text parser: the rules that rewrite text (phone numbers,
+# dates, some abbreviations, punctuation) before letter-to-sound reads it.
+# The table is DECtalk 4.63's compiled CMD/par_rule2.h with the character
+# tables of CMD/cm_char.c and CMD/par_char.c, decoded by
+# scripts/build-dectalk-text-parser.ts; src/text-parser runs it.
+text_parser:
+  table_path: /rules/frontends/dectalk-english/text-parser-table.json
+  # 1 << PAR_LANG_CODE for US English (CMD/cm_text.c:885).
+  language: 1
+  # The punctuation rules run in the mode 1 << PUNCT_some, DECtalk's default
+  # (CMD/cm_text.c:846, CMD/cm_util.c:125).
+  punctuation: { section: 1, mode: 2 }
+  # The main rules run in MODE_CITATION, 0x0100 (CMD/cm_text.c:989,
+  # INCLUDE/esc.h:131).
+  main: { section: 2, mode: 256 }
+  # What DECtalk's say program sends after the text: eight spaces, and the
+  # clause end a forced speak appends (samples/SAY/say.c:249,
+  # API/ttsapi.c:4559).
+  ending: "        \v"
 # DECtalk uses its own source contour so shared qlatt-english LF policy
 # (source_mode: 1) cannot override it. The default remains the impulse fallback
 # while KLGLOTT88 mode 3 is blocked by silent worklet voice output.

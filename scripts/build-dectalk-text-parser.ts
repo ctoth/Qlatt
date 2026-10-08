@@ -258,18 +258,116 @@ if (lowerCase.length !== 256) {
   throw new Error(`E_PARSER_TABLE: ${lowerCase.length} case folding entries, expected 256`);
 }
 
+// What cuts text into clauses before the rules run (CMD/cm_text.c
+// cm_text_getclause, CMD/cm_pars.c cm_pars_loop): char_types[] of
+// CMD/cm_char.c with the MARK_ bits of CMD/cm_defs.h, and the constants those
+// two functions use.
+const defsSource = fs.readFileSync(path.join(cmdDir, "cm_defs.h"), "latin1");
+const MARK_BITS = new Map<string, number>();
+for (const match of defsSource.matchAll(/^#define\s+(MARK_[a-z_]+)\s+(0x[0-9A-Fa-f]+)/gm)) {
+  MARK_BITS.set(match[1], Number(match[2]));
+}
+const defined = (source: string, name: string, file: string): number => {
+  const match = new RegExp(`^#define\\s+${name}\\s+(0x[0-9A-Fa-f]+|\\d+)`, "m").exec(source);
+  if (!match) throw new Error(`E_PARSER_TABLE: ${file} does not define ${name}`);
+  return Number(match[1]);
+};
+const markBit = (name: string): number => {
+  const bit = MARK_BITS.get(name);
+  if (bit === undefined) throw new Error(`E_PARSER_TABLE: unknown character mark '${name}'`);
+  return bit;
+};
+const markTable = /\bchar_types\s*\[\s*\]\s*=\s*\{([\s\S]*?)\};/.exec(
+  fs.readFileSync(path.join(cmdDir, "cm_char.c"), "latin1"),
+);
+if (!markTable) throw new Error("E_PARSER_TABLE: cm_char.c has no char_types");
+const marks = markTable[1]
+  .replace(/\/\*[\s\S]*?\*\//g, "")
+  .split(",")
+  .map((cell) => cell.trim())
+  .filter((cell) => cell.length > 0)
+  .map((cell) => cell.split("+").reduce((bits, name) => bits | markBit(name.trim()), 0))
+  // The table has two entries after code 255 that no character reaches.
+  .slice(0, 256);
+if (marks.length !== 256) {
+  throw new Error(`E_PARSER_TABLE: ${marks.length} character marks, expected 256`);
+}
+// par_def1.h gives PAR_MIN_INPUT_SIZE and the buffer sizes once per platform;
+// the build is WIN32 and not MSDOS.
+const parDefs = fs.readFileSync(path.join(cmdDir, "par_def1.h"), "latin1");
+const minimumLength =
+  /#ifdef MSDOS\s+#define PAR_MIN_INPUT_SIZE\s+\d+\s+#else\s+#define PAR_MIN_INPUT_SIZE\s+(\d+)/.exec(
+    parDefs,
+  );
+const rollingStop = /#ifdef WIN32[\s\S]*?#define PAR_ROLLING_STOP_VALUE\s+(\d+)/.exec(parDefs);
+if (!minimumLength || !rollingStop) {
+  throw new Error("E_PARSER_TABLE: par_def1.h has no clause sizes where expected");
+}
+const typeBit = (name: string): number => {
+  const bit = TYPE_BITS.get(name);
+  if (bit === undefined) throw new Error(`E_PARSER_TABLE: unknown character type '${name}'`);
+  return bit;
+};
+const clauses = {
+  marks,
+  spaceMark: markBit("MARK_space"),
+  clauseMark: markBit("MARK_clause"),
+  punctuationMark: markBit("MARK_punct"),
+  // cm_text.c:413-435: in the punctuation mode "some" a character of the
+  // quote type arrives as a space, these six excepted.
+  quoteType: typeBit("TYPE_quot"),
+  quoteMode: 1 << defined(defsSource, "PUNCT_some", "cm_defs.h"),
+  keptQuotes: [")", "]", "}", '"', "\\", ">"].map((char) => char.charCodeAt(0)),
+  // cm_text.c:636: a clause shorter than this goes by the rules, except in
+  // the punctuation mode "all".
+  minimumLength: Number(minimumLength[1]),
+  wholeMode: 1 << defined(defsSource, "PUNCT_all", "cm_defs.h"),
+  // cm_text.c:599: a clause this long is handed on in part.
+  rollingStop: Number(rollingStop[1]),
+  // cm_pars.c:1336: this many white space characters in a row end a clause.
+  whiteSpaceRun: 40,
+  // The character that ends a clause (cm_text.c:471) and the marks around
+  // phonemic text (par_def1.h).
+  clauseEnd: 0x0b,
+  phonesOn: defined(parDefs, "PAR_PHONES_ON_D", "par_def1.h"),
+  phonesOff: defined(parDefs, "PAR_PHONES_OFF_D", "par_def1.h"),
+  indexMark: defined(parDefs, "PAR_INDEX_DUMMY_CHAR", "par_def1.h"),
+};
+
+// The dictionary the parser asks about words (CMD/par_dict.c) is the
+// pronunciation dictionary, dic/Dic_us.txt. A capital in an entry matches a
+// capital only (par_dict_dlook, par_dict.c:531-542), and the dictionary asset
+// (scripts/build-dectalk-dict.ts) has its words in lower case, so the entries
+// with a capital are listed here: every spelling of a word that has one.
+const spellings = new Map<string, string[]>();
+for (const line of fs
+  .readFileSync(path.join(dectalkRoot, "dapi", "src", "dic", "Dic_us.txt"), "latin1")
+  .split(/\r?\n/)) {
+  if (line.length === 0 || line.startsWith(";")) continue;
+  // A word is the text before ",<one letter>,": the word itself may be a comma.
+  const word = /^(.+?),[A-Z],/.exec(line)?.[1];
+  if (word === undefined) continue;
+  const key = word.toLowerCase();
+  spellings.set(key, [...(spellings.get(key) ?? []), word]);
+}
+const capitalSpellings = Object.fromEntries(
+  [...spellings].filter(([key, list]) => list.some((word) => word !== key)),
+);
+
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(
   outPath,
   `${JSON.stringify({
     schemaVersion: "v1",
-    source: `DECtalk 4.63 CMD/${HEADER} (compiled from CMD/${RULE_TEXT}), CMD/par_char.c, INCLUDE/ls_lower.tab; decoded by scripts/build-dectalk-text-parser.ts`,
+    source: `DECtalk 4.63 CMD/${HEADER} (compiled from CMD/${RULE_TEXT}), CMD/par_char.c, INCLUDE/ls_lower.tab, CMD/cm_char.c, CMD/cm_defs.h, CMD/par_def1.h, CMD/cm_text.c, CMD/cm_pars.c; decoded by scripts/build-dectalk-text-parser.ts`,
     ruleText: `CMD/${RULE_TEXT}`,
     sections: ruleSections,
     rules,
     dictionaries,
     characterTypes,
     lowerCase,
+    clauses,
+    capitalSpellings,
   })}\n`,
 );
 const kinds = new Map<string, number>();

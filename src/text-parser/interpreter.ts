@@ -25,6 +25,37 @@ export interface TextParserTable {
   characterTypes: readonly number[];
   /** Case folding per character code (par_lower). */
   lowerCase: readonly number[];
+  /** What cuts text into clauses before the rules run (src/text-parser/clauses.ts). */
+  clauses: ClauseTable;
+  /**
+   * The dictionary words that have a capital in some spelling: lower-case
+   * word to all its spellings (src/text-parser/dictionary.ts).
+   */
+  capitalSpellings: Readonly<Record<string, readonly string[]>>;
+}
+
+export interface ClauseTable {
+  /** MARK_ bits per character code (CMD/cm_char.c char_types). */
+  marks: readonly number[];
+  spaceMark: number;
+  clauseMark: number;
+  punctuationMark: number;
+  /** The TYPE_ bit of bracket and quote characters, the punctuation mode in
+   * which they arrive as spaces, and those that are kept. */
+  quoteType: number;
+  quoteMode: number;
+  keptQuotes: readonly number[];
+  /** A clause shorter than this goes by the rules, except in `wholeMode`. */
+  minimumLength: number;
+  wholeMode: number;
+  /** A clause longer than this is handed on in part. */
+  rollingStop: number;
+  /** This many white space characters in a row end a clause. */
+  whiteSpaceRun: number;
+  clauseEnd: number;
+  phonesOn: number;
+  phonesOff: number;
+  indexMark: number;
 }
 
 export interface TextParserRule {
@@ -51,19 +82,34 @@ export interface TextParserRule {
 /** What a word's dictionary lookup gave (CMD/par_def1.h DICT_*_VALUE). */
 export type DictionaryState = 0 | 1 | 2;
 
-export interface RewriteOptions {
+/** One run of a rule section over a clause. */
+export interface PassOptions {
   /** The caller's language bit and mode bit (cm_text.c:845-888). */
   language: number;
   mode: number;
   /** Which rule section to run. */
   section: number;
+  /** Called for every rule that hits, in order. */
+  onHit?: (hit: { rule: TextParserRule; before: string; after: string }) => void;
+}
+
+export interface TextParser {
+  /**
+   * Rewrite a clause, given as bytes, with the rules of a section.
+   * `dictHit[i]` is the dictionary state of the word that starts at byte i.
+   * The answer is the output up to where the rules left off.
+   */
+  rewrite(input: readonly number[], dictHit: readonly number[], options: PassOptions): number[];
+  /** What a status state last set. */
+  parserFlag: number;
+}
+
+export interface RewriteOptions extends PassOptions {
   /**
    * The dictionary state of the word that starts at `position` of `text`
    * (0 not found, 1 found, 2 found as an abbreviation). Default: not found.
    */
   dictionaryState?: (text: string, position: number) => DictionaryState;
-  /** Called for every rule that hits, in order. */
-  onHit?: (hit: { rule: TextParserRule; before: string; after: string }) => void;
 }
 
 // par_def1.h
@@ -1186,21 +1232,46 @@ function matchRule(
  * of a section. Characters are bytes (Latin-1), as in the C.
  */
 export function rewriteText(table: TextParserTable, text: string, options: RewriteOptions): string {
-  const types = table.characterTypes;
+  const input = toBytes(text);
+  const dictHit = input.map((_, position) =>
+    options.dictionaryState ? options.dictionaryState(text, position) : DICT_MISS_VALUE,
+  );
+  return fromBytes(createTextParser(table).rewrite(input, dictHit, options));
+}
+
+/**
+ * A parser that keeps what the C keeps from one call to the next: the saved
+ * strings $0 to $9 (match_array) and the status flag.
+ */
+export function createTextParser(table: TextParserTable): TextParser {
   const machine: Machine = {
     table,
     compiled: table.rules.map((rule) => fromHex(rule.bytes)),
     captures: Array.from({ length: 10 }, () => []),
     dictionaries: table.dictionaries.map((list) => list.map(dictionaryEntry)),
   };
+  const parser: TextParser = {
+    parserFlag: 0,
+    rewrite: (input, dictHit, options) =>
+      processInput(machine, parser, [...input], [...dictHit], options),
+  };
+  return parser;
+}
+
+/** par_process_input (:1029-1752). */
+function processInput(
+  machine: Machine,
+  parser: TextParser,
+  newInput: number[],
+  dictHit: number[],
+  options: PassOptions,
+): number[] {
+  const table = machine.table;
+  const types = table.characterTypes;
   if (options.section >= table.sections.length) {
     throw new Error(`E_TEXT_PARSER: no rule section ${options.section}`);
   }
   const numRules = table.rules.length;
-  const newInput = toBytes(text);
-  const dictHit: number[] = newInput.map((_, position) =>
-    options.dictionaryState ? options.dictionaryState(text, position) : DICT_MISS_VALUE,
-  );
   const output: number[] = [];
   let newRet: ReturnValue = {
     inputPos: 0,
@@ -1210,7 +1281,7 @@ export function rewriteText(table: TextParserTable, text: string, options: Rewri
     rule: 0,
     value: FAIL,
     optional: 0,
-    parserFlag: 0,
+    parserFlag: parser.parserFlag,
   };
   let hitRet = copyReturn(newRet);
   let saveRet = copyReturn(newRet);
@@ -1298,6 +1369,8 @@ export function rewriteText(table: TextParserTable, text: string, options: Rewri
       const rule = machine.compiled[currentRuleNumber];
       newRet.rule = entry.body as number;
       matchRule(machine, rule, BIN_END_OF_RULE, newInput, output, newRet);
+      // The status flag goes back to the caller (:1427).
+      parser.parserFlag = newRet.parserFlag;
 
       const push = (value: number): void => {
         if (returnRule.length < PAR_MAX_RETURN_LEVEL) returnRule.push(value);
@@ -1429,7 +1502,8 @@ export function rewriteText(table: TextParserTable, text: string, options: Rewri
       newRet.outputOffset += i;
     }
   }
-  return fromBytes(
-    output.slice(0, newRet.outputPos + newRet.outputOffset).map((char) => char ?? 0),
+  return Array.from(
+    { length: newRet.outputPos + newRet.outputOffset },
+    (_, index) => output[index] ?? 0,
   );
 }

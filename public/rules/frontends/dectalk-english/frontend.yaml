@@ -359,6 +359,12 @@ f0_model:
     # the clause: the female routine's exclamation, Ph_drwt02.c:3805-3808.
     range:
       type: range
+    # A command here replaces the voice's F0 floor (f0_minimum) for the
+    # clause: what DECtalk's text stage does to f0minimum around a clause
+    # break it inserts (LTS/ls_util.c:829-837; the rule is
+    # dectalk_break_f0_floor in prosody.yaml).
+    floor:
+      type: floor
   # DECtalk has two copies of pht0draw(), chosen by the voice's sex
   # (Ph_drwt02.c:771 male, 2445 female). Compared as compiled, the female copy
   # differs from the male one in this block as follows:
@@ -1286,6 +1292,19 @@ parameters:
       # Ph_drwt02.c:3805-3808: the female routine scales an exclamation by
       # f0scalefac + 500.
       exclamation_range_added: 500
+      # LTS/ls_util.c:829-837: around a clause break it inserts, the text
+      # stage saves "compause", sets it to -12, has the clause before the
+      # break spoken, and puts the saved value back. The field it reaches
+      # under that name is the phonetic stage's f0minimum (the two stages see
+      # pDph_t three shorts apart; read from an instrumented build). So that
+      # clause is spoken with an F0 floor of -12, unless it is the first of
+      # the run and loads the voice at its start.
+      break_floor: -12
+      # What the text stage saves and puts back when no clause has been
+      # spoken yet: f0minimum before the voice is loaded. DECtalk's packets
+      # are recorded one phrase to a process, so this is what every clause
+      # after such a break is spoken with.
+      unloaded_floor: 0
       # Ph_inton2.c:580-581: the US question gestures, internal Hz*10.
       question_gesture_dip_hz: -151
       question_gesture_rise_hz: 451

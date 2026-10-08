@@ -170,6 +170,17 @@ predicates:
     !(current.type in ["stop_release", "stop_aspiration"]) && current.phoneme != "SIL"
   is_clause_silence: >-
     current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null
+  # Never true: the stop of a count that runs to the utterance's start.
+  is_never: "false"
+  # The first phone of the utterance's second clause, when that clause comes
+  # after a break the text stage inserted (the word has clause_break_before):
+  # the utterance's first clause ended at an inserted break.
+  is_first_clause_break_start: >-
+    current.phoneme != "SIL" && behind(current, 1) != null
+    && behind(current, 1).phoneme == "SIL"
+    && get(behind(current, 1), "punctuationSymbol", null) != null
+    && isTrue(path(current, 'R:SylStructure.parent.parent'), 'clause_break_before')
+    && count_back_pred(current, 1000, 'is_never', 'is_clause_silence') == 1.0
   # Phones that stand for two of DECtalk's input phones: a vowel fused with
   # its /r/, and the survivor of a deleted geminate.
   is_fused_vowel: isTrue(current, "fused_with_r")
@@ -206,6 +217,12 @@ predicates:
     dectalk_word_start(current)
     && (dectalk_phrase_start(current) != "vp"
         || behind(current, 1) == null || behind(current, 1).phoneme == "SIL")
+  # A word counted a second time: "to", "and" or "for" at its clause's end.
+  # It comes in as word boundary, SPECIALWORD, PPSTART, and the phone sort
+  # turns that PPSTART into another word boundary (ph_sort.c:1055-1070):
+  # DECtalk itself counts 4 words in "It is for." and 5 in "What is it for."
+  is_twice_counted_word_start: >-
+    dectalk_word_start(current) && dectalk_phrase_state(current) == "word"
   # FSYLL: a vowel or a syllabic consonant.
   is_dectalk_syllabic: >-
     current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"]
@@ -865,6 +882,7 @@ phases:
       - dectalk_female_comma_baseline
       - dectalk_female_question_baseline
       - dectalk_female_exclamation_range
+      - dectalk_break_f0_floor
       # phinton's order on one syllabic: hat rise, stress impulse, question
       # gestures (Ph_inton2.c Rules 1, 2, 4).
       - dectalk_hat_rise

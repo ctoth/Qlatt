@@ -61,9 +61,13 @@ rules:
       # number_words (ph_sort.c:439-441, 1462-1464): one for each word that
       # comes in with a word boundary; a verb-phrase start replaces that
       # boundary, so its word is not counted, except the clause's first word.
+      # A clause-final "to", "and" or "for" has two boundaries and counts
+      # twice (ph_sort.c:1055-1070).
       words: >-
         (dectalk_word_start(current) ? 1.0 : 0.0)
         + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')
+        + (dectalk_phrase_state(current) == 'word' ? 1.0 : 0.0)
+        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_twice_counted_word_start')
       # pht0draw is two routines, one for each sex (Ph_drwt02.c:771, 2445).
       male: "params.policy.voice.sex == 'male'"
       comma: "mark in [',', ';', ':']"
@@ -318,6 +322,63 @@ rules:
       - "DECtalk 4.63 Ph_drwt02.c:3805-3808 (clausetype 2: f0scalefac + 500 in the female routine)"
 
   # --------------------------------------------------------------------------
+  # The F0 floor around a clause break the text stage inserts. This is a
+  # defect of DECtalk 4.63 that its output depends on, reproduced as it is.
+  #
+  # LTS/ls_util.c:829-837 means to shorten the comma pause of such a break:
+  #   pause = pDph_t->compause;  pDph_t->compause = -12;
+  #   <send the COMMA: the clause before the break is spoken here>
+  #   pDph_t->compause = pause;
+  # but the field it reaches is the phonetic stage's f0minimum (an
+  # instrumented build prints 1100, Paul's floor, for that "compause", and
+  # -12 for f0minimum in the clause spoken meanwhile). The first clause of a
+  # run loads the voice when it starts, which puts its floor right again. So:
+  #   - a clause that ends at an inserted break, other than the run's first,
+  #     is spoken with a floor of -12;
+  #   - if the run's first clause ended at one, the value saved and put back
+  #     was the floor before any voice was loaded, 0, and every later clause
+  #     has that (or -12, as above).
+  # With such a floor F0 comes out at pht0draw's lower clamp, 50 Hz, wherever
+  # the scaled contour is below it (Ph_drwt02.c:2312-2324).
+  # DECtalk's packets are recorded one phrase to a process; in a process that
+  # has already spoken, the saved value is the voice's floor and only the
+  # first case arises.
+  # --------------------------------------------------------------------------
+  dectalk_break_f0_floor:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme != "SIL" && prev != null && prev.phoneme == "SIL"
+        && get(prev, "punctuationSymbol", null) != null
+    define:
+      clause_end: >-
+        look_ahead_where(current, 1000,
+          'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
+      after: "clause_end == null ? null : ahead(clause_end, 1)"
+      ends_at_break: >-
+        after != null && after.phoneme != 'SIL'
+        && isTrue(path(after, 'R:SylStructure.parent.parent'), 'clause_break_before')
+      # Whether the run's first clause ended at an inserted break: this is the
+      # second clause and starts after one, or an earlier clause was that.
+      first_clause_broke: >-
+        (isTrue(path(current, 'R:SylStructure.parent.parent'), 'clause_break_before')
+          && count_back_pred(current, 1000, 'is_never', 'is_clause_silence') == 1.0)
+        || count_back_pred(current, 1000, 'is_never', 'is_first_clause_break_start') > 0.0
+    constraint: ends_at_break || first_clause_broke
+    insert:
+      relation: PhraseCommand
+      layer: floor
+      at: at_sync(current.sync_left)
+      value: "ends_at_break ? params.policy.f0.break_floor : params.policy.f0.unloaded_floor"
+      tag: f0_break_floor
+    citations:
+      - "DECtalk 4.63 LTS/ls_util.c:829-837, 842-849 (compause saved, set to -12 and restored around the break's COMMA)"
+      - "DECtalk 4.63 PH/ph_data.h:841-851 (f0minimum three shorts before compause)"
+      - "DECtalk 4.63 PH/ph_vset.c:683 (f0minimum is set when a voice is loaded)"
+      - "DECtalk 4.63 PH/Ph_drwt02.c:2312-2324 (f0prime = f0minimum + ...; clamped to LOWEST_F0)"
+
+  # --------------------------------------------------------------------------
   # Rule 1 (Ph_inton2.c:809-908): the hat rise, a STEP at the syllabic that
   # carries FHAT_BEGINS, unless phinton's walk has stopped at or before it
   # (annotation.yaml, dectalk_intonation_stops).
@@ -415,7 +476,10 @@ rules:
           && (dectalk_phrase_start(current) != 'vp' || prev == null || prev.phoneme == 'SIL')
           ? 1.0 : 0.0)
         + count_back_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')
-        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_number_word_start') == 1.0
+        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')
+        + (dectalk_word_start(current) && dectalk_phrase_state(current) == 'word' ? 1.0 : 0.0)
+        + count_back_pred(current, 1000, 'is_clause_silence', 'is_twice_counted_word_start')
+        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_twice_counted_word_start') == 1.0
       frames: "get(current, 'timing_frames', 0.0)"
       stress_now: "get(current, 'stress', 0)"
       # The commands issued before these on the same syllabic (Rules 1 and 2):

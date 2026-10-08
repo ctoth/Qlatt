@@ -70,6 +70,17 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // the voice's 3500 on every frame. Nothing else changes: with those four
 // params dropped, scripts/review-track-fields.ts prints the same hashes, times
 // included, for this tree and for master 20b91b67 on all four phrases.
+// PH and run regenerate them again, checked the same way against 3db3a34c
+// with `--drop PH,run`: the two new keys are the only change.
+// The reset of pressure and glottis in a later clause's initial silence
+// regenerates "Gag, gang; go!" alone: against 062c027e the other three are
+// unchanged, and it is unchanged with `--drop PS,CNK,AG`.
+// Corrections to the glottal rules found by tracing DECtalk (the voice's
+// end-of-phrase spread, which initial-silence cases run every frame, when the
+// next phone's opening applies) regenerate three: against fc64b694 only AG
+// changes (`--drop AG` gives equal hashes) and "sip sip." not at all.
+// AL, ABLADE and ATB regenerate all four: against 3f603345 the tracks are
+// equal with `--drop AL,ABLADE,ATB`.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

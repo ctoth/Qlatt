@@ -2298,14 +2298,35 @@ function runFrameRules(
         "HRG_FRAME_DURATION_ROUNDED",
       );
     }
-    return { members, memberSpans, firstFrame, endFrame, transaction, features };
+    // The unit's last frames may be a unit of their own, with every feature
+    // at its edge value: a pause that belongs to what follows.
+    const tail =
+      program.tail_frames == null
+        ? 0
+        : evaluate(program.tail_frames, contextAt(transaction, start + members.length - 1));
+    if (typeof tail !== "number" || !Number.isInteger(tail) || tail < 0) {
+      throw new Error(
+        `E_FRAME_TAIL: frame program '${programName}' tail_frames is ${String(tail)} at Item '${members[members.length - 1]?.id}'`,
+      );
+    }
+    const tailFrames = Math.min(tail, endFrame - firstFrame);
+    return { members, memberSpans, firstFrame, endFrame, tailFrames, transaction, features };
   });
 
-  const machineUnits: FrameUnit[] = units.map((unit) => ({
-    features: unit.features,
-    frames: unit.endFrame - unit.firstFrame,
-  }));
-  if (leadFrames > 0) machineUnits.unshift({ features: edgeFeatures, frames: leadFrames });
+  // Machine units: the lead-in, then each unit and its tail if it has one.
+  const machineUnits: FrameUnit[] = [];
+  if (leadFrames > 0) machineUnits.push({ features: edgeFeatures, frames: leadFrames });
+  const mainIndex: number[] = [];
+  for (const unit of units) {
+    mainIndex.push(machineUnits.length);
+    machineUnits.push({
+      features: unit.features,
+      frames: unit.endFrame - unit.firstFrame - unit.tailFrames,
+    });
+    if (unit.tailFrames > 0) {
+      machineUnits.push({ features: edgeFeatures, frames: unit.tailFrames });
+    }
+  }
   const results = runFrameProgram({
     registers: program.registers as Record<string, FrameRegisterValue>,
     outputs: program.outputs as Record<string, string>,
@@ -2339,12 +2360,18 @@ function runFrameRules(
       `E_FRAME_DELAY: frame program '${programName}' delay_frames is ${String(program.delay_frames)}`,
     );
   }
-  const lead = leadFrames > 0 ? results.shift() : undefined;
+  const lead = leadFrames > 0 ? results[0] : undefined;
   const citationsByRule = new Map(rules.map((rule) => [rule.name, rule.citations]));
 
   units.forEach((unit, unitIndex) => {
-    const result = results[unitIndex] as FrameUnitResult;
-    const fired = unitIndex === 0 && lead ? [...lead.fired, ...result.fired] : result.fired;
+    const result = results[mainIndex[unitIndex] as number] as FrameUnitResult;
+    const tailResult =
+      unit.tailFrames > 0 ? results[(mainIndex[unitIndex] as number) + 1] : undefined;
+    const fired = [
+      ...(unitIndex === 0 && lead ? lead.fired : []),
+      ...result.fired,
+      ...(tailResult?.fired ?? []),
+    ];
     unit.transaction.cite(fired.flatMap((firing) => citationsByRule.get(firing.rule) ?? []));
     unit.members.forEach((item, memberIndex) => {
       const span = unit.memberSpans[memberIndex] as { startMs: number; endMs: number };
@@ -2378,8 +2405,19 @@ function runFrameRules(
                     lead_in: true,
                   })),
                   ...result.fired.map((firing) => ({ ...firing, lead_in: false })),
+                  // And in the unit's tail, by the tail's own frame numbers.
+                  ...(tailResult?.fired ?? []).map((firing) => ({
+                    ...firing,
+                    lead_in: false,
+                    tail: true,
+                  })),
                 ]
               : [],
+          ...(isPlainObject(program.after) &&
+          unitIndex === units.length - 1 &&
+          memberIndex === unit.members.length - 1
+            ? { after: program.after }
+            : {}),
         },
         tag,
       );

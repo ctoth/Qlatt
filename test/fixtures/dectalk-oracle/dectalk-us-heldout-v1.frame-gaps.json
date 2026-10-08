@@ -1,12 +1,12 @@
 {
-  "held-take": ["B1","AP","A2","A3","A4","A5","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
-  "held-bake": ["B1","AV","AP","A3","A5","A6","AB","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
-  "held-lake": ["B1","AV","AP","A2","A3","A5","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
-  "held-cape": ["B1","AV","AP","A2","A3","A5","A6","AB","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
-  "held-kate": ["B1","AV","AP","A2","A3","A5","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
-  "held-coke": ["B1","AV","AP","A2","A5","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
-  "held-kick": ["B1","AV","AP","A2","A3","A5","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
-  "held-a": ["F0","B1","AV","AP","AG","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
-  "held-they": ["B1","AV","AP","A6","AB","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"],
-  "held-cake-phrase": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE"]
+  "held-take": ["B1","AP","A2","A3","A4","A5","AREA_N","DC","UE","PLACE","A2_CODE"],
+  "held-bake": ["B1","AV","AP","A3","A5","A6","AB","AREA_N","DC","UE","PLACE","A2_CODE"],
+  "held-lake": ["B1","AV","AP","A2","A3","A5","AREA_N","DC","UE","PLACE","A2_CODE"],
+  "held-cape": ["B1","AV","AP","A2","A3","A5","A6","AB","AREA_N","DC","UE","PLACE","A2_CODE"],
+  "held-kate": ["B1","AV","AP","A2","A3","A5","AREA_N","DC","UE","PLACE","A2_CODE"],
+  "held-coke": ["B1","AV","AP","A2","A5","AREA_N","DC","UE","PLACE","A2_CODE"],
+  "held-kick": ["B1","AV","AP","A2","A3","A5","AREA_N","DC","UE","PLACE","A2_CODE"],
+  "held-a": ["F0","B1","AV","AP","AREA_N","DC","UE","PLACE","A2_CODE"],
+  "held-they": ["B1","AV","AP","A6","AB","AREA_N","DC","UE","PLACE","A2_CODE"],
+  "held-cake-phrase": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","ABLADE","AREA_N","DC","UE","PLACE","A2_CODE"]
 }

@@ -2355,6 +2355,20 @@ export function lowerToFrames(
       if (silenceEdge === "initial" && timings[0]) {
         applyFrameValues(params, provenance, timings[0].item, segmentOffsetMs);
       }
+      // After the last frame: the values a frame program declares for then.
+      const lastItem = timings[timings.length - 1]?.item;
+      if (silenceEdge === "final" && lastItem) {
+        for (const feature of frameValueFeatures) {
+          const values = lastItem.get(feature);
+          if (!isFrameValues(values) || !values.after) continue;
+          const decisionId = lastItem.latestWrite(feature)?.decisionId;
+          for (const [key, value] of Object.entries(values.after)) {
+            if (!paramKeys.includes(key)) continue;
+            params[key] = value;
+            if (decisionId) provenance[key] = decisionId;
+          }
+        }
+      }
     }
     if (item) {
       applyItemParams(params, provenance, item);

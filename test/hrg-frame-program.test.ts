@@ -717,6 +717,40 @@ describe("frame values in lowering", () => {
     ).toEqual([-1, -1, -1]);
   });
 
+  it("makes a unit's last frames a unit of their own with the edge features", () => {
+    const tailed = {
+      ...TANK_SPEC,
+      frame_programs: {
+        tank: { ...TANK_SPEC.frame_programs.tank, tail_frames: "current.id == 'b' ? 1 : 0" },
+      },
+    };
+    expect(codes(tailed)).toEqual([]);
+    expect(
+      codes({
+        ...TANK_SPEC,
+        frame_programs: { tank: { ...TANK_SPEC.frame_programs.tank, tail_frames: "r.level" } },
+      }),
+    ).toContain("E_CEL_INVALID frame_programs.tank.tail_frames");
+
+    const utterance = tankUtterance();
+    runGraphRuleEngine(utterance, compileRuleEngineSpec(tailed));
+    // Unit a+b keeps four frames (4, 6, 7, 7); its fifth is a unit with the
+    // valve shut (the edge value), so the level starts down a frame early:
+    // 7 + floor(-7/2) = 3. Then c: 1, 0.
+    expect(utterance.getItem("b")?.get("tank_frames")).toMatchObject({
+      columns: { LEVEL: [7, 3], INDEX: [3, 0] },
+    });
+    expect(utterance.getItem("c")?.get("tank_frames")).toMatchObject({
+      columns: { LEVEL: [1, 0], INDEX: [0, 1] },
+    });
+    const written = utterance.getItem("a")?.get("tank_frames") as { fired: unknown[] } | undefined;
+    expect(written?.fired.slice(-2)).toEqual([
+      { rule: "tank_target_shut", first: 0, last: 0, count: 1, lead_in: false, tail: true },
+      { rule: "tank_approach", first: 0, last: 0, count: 1, lead_in: false, tail: true },
+    ]);
+    expect(replayJournal(SCHEMA, utterance.journal()).graphDigest()).toBe(utterance.graphDigest());
+  });
+
   it("gives the columns named in `after` a value at the instant the run ends", () => {
     const gated = {
       ...TANK_SPEC,

@@ -61,6 +61,11 @@ frame_programs:
   first frames are then the last ones of the Item before. The first instant
   holds the first frame, so a lead-in N frames longer than the initial silence
   puts its first frame exactly there.
+- `tail_frames: <expression>` (optional) is read at each unit's last Item and
+  makes that many of the unit's last frames a unit of their own, with every
+  feature at its `edge` value like the lead-in: a pause inside one Item whose
+  end belongs to what follows. The rules that assigned in a tail are listed on
+  the unit's first Item with `tail: true`.
 - `after: { COLUMN: number }` (optional) gives output columns a value for the
   instant the run ends, the track's last event: a gate that must fall, say.
   Columns it does not name keep no value there.

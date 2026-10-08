@@ -71,21 +71,15 @@ const AREA_REASON =
 // still differs, by what dump-frame-columns.ts shows, none of it explained
 // further than this:
 const PS_REASON =
-  "three open cases: a clause after the first gets no reset (ph_draw.c:908-941 runs in each " +
-  "clause's initial silence, and only the utterance's first has a unit here); the slope of " +
-  "the final fall (ph_draw.c:3795-3887) comes out steeper than DECtalk's in some phrases and " +
-  "is applied in some questions where DECtalk applies none, so its tcumdur, nframb or " +
-  "boundary inputs are not all DECtalk's; and the emphasis pulse (1509-1552) and the " +
-  "end-of-clause drop (3929-3969) are not ported";
+  "the slope of the final fall (ph_draw.c:3795-3887) comes out steeper than DECtalk's in " +
+  "some phrases and is applied in some questions where DECtalk applies none, so its tcumdur, " +
+  "nframb or boundary inputs are not all DECtalk's; and the emphasis pulse (1509-1552) and " +
+  "the end-of-clause drop (3929-3969) are not ported";
 // The glottal rules are ported and "cat." is exact. What is known of the rest:
 const AG_REASON =
-  "not ported: the early exits of the end-of-clause spread (ph_draw.c:3604-3624), the nasal " +
-  "case of the initial silence (1146-1190), and a reset for clauses after the first (their " +
-  "initial silence is the tail of the previous clause's pause Segment, not a unit); and " +
-  "differences inside phrases that have not been traced to a rule yet";
-const CNK_REASON =
-  "target_ap follows ph_draw.c:1555-1864 and 966; the phrases that still differ have not been " +
-  "traced, and a clause after the first gets no reset (ph_draw.c:929-930)";
+  "not ported: the early exits of the end-of-clause spread (ph_draw.c:3604-3624) and the " +
+  "nasal case of the initial silence (1146-1190); and differences inside phrases that have " +
+  "not been traced to a rule yet";
 
 const GAP_REASONS: Readonly<Record<string, string>> = {
   length: TIMING_REASON,
@@ -107,7 +101,7 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   AB: AMPLITUDE_REASON,
   AG: AG_REASON,
   PS: PS_REASON,
-  CNK: CNK_REASON,
+  CNK: TIMING_REASON,
   AL: AREA_REASON,
   ABLADE: AREA_REASON,
   ATB: AREA_REASON,

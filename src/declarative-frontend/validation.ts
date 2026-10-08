@@ -41,6 +41,7 @@ const ALLOWED_FRAME_PROGRAM_FIELDS = new Set([
   "unit",
   "frame_ms",
   "lead_in_frames",
+  "tail_frames",
   "delay_frames",
   "after",
   "features",
@@ -3321,6 +3322,13 @@ function validateFramePrograms(
         program.lead_in_frames,
         `${path}.lead_in_frames`,
         `Frame program '${name}' lead_in_frames`,
+      );
+    }
+    if (program.tail_frames != null) {
+      checkItemExpression(
+        program.tail_frames,
+        `${path}.tail_frames`,
+        `Frame program '${name}' tail_frames`,
       );
     }
 

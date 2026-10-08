@@ -30,8 +30,9 @@ version: v1
 # early exits of the end-of-clause glottal spread (3604-3624), the nasal case
 # of the initial silence (1146-1190), and every other word of the section.
 #
-# Only the first clause of an utterance is known to be numbered as DECtalk
-# numbers it. A later clause has no initial-silence unit of its own here.
+# A later clause's initial silence is the tail of the pause Segment before it
+# (duration.yaml dectalk_pause_duration adds its 4 or 5 frames there);
+# `tail_frames` makes those frames a unit, with the lead-in's features.
 # -----------------------------------------------------------------------------
 functions:
   artic_next_unit:
@@ -107,8 +108,12 @@ frame_programs:
       + params.policy.timing.unemitted_initial_frames
     # ph_claus.c:754-757
     delay_frames: 1
+    # p_us_tim.c:229-232: the pause that opens the next clause.
+    tail_frames: >-
+      current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null && next != null
+        ? dectalk_clause_initial_pause_frames(next) : 0
     features:
-      # DECtalk's allophone 0 of a clause; here only the lead-in.
+      # DECtalk's allophone 0 of a clause: the lead-in and each such tail.
       initial: { value: "false", edge: true }
       silence: { value: "current.phoneme == 'SIL' && !isTrue(current, 'dummy_vowel')", edge: true }
       dummy: { value: "artic_is_dummy(current)", edge: false }
@@ -186,8 +191,8 @@ frame_programs:
             8, 'is_dectalk_phone'), 'voiced')
         edge: false
     group:
-      # A clause: from the lead-in, and from the phone after a clause's final silence.
-      start: "p.silence && !p.initial && !u.silence"
+      # A clause starts at its initial silence.
+      start: "u.initial"
       totals:
         # tcumdur less the unemitted frame: the initial silence and every
         # phone, dummy vowels included, but not the final silence

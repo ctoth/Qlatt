@@ -268,6 +268,15 @@ parameters:
         s_cluster: 2
         nonsyllabic_bonus: 3
         syllabic_divisor: 2
+      # ph_draw.c:3818: the final fall ends half a dummy vowel early
+      # (`allodurs[...] >> 1`).
+      pressure:
+        dummy_vowel_divisor: 2
+      # engineering estimate: how many Segments to scan for the next or the
+      # previous allophone. A stop is at most a closure, a release and an
+      # aspiration Segment, so 8 is ample; the same bound as pipeline.yaml's
+      # allophone helpers.
+      unit_scan_items: 8
       # ph_draw.c:538-590: when the glottis closes through that aspiration.
       # A slow drop starts at frame 3 if the aspiration is longer than 5
       # frames; the closing proper starts 5 frames before its end and ends 2

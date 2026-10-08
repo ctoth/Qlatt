@@ -37,7 +37,7 @@ version: v1
 functions:
   artic_next_unit:
     params: [item]
-    body: "item == null ? null : look_ahead_pred(item, 8, 'is_articulation_unit')"
+    body: "item == null ? null : look_ahead_pred(item, params.policy.articulation.unit_scan_items,'is_articulation_unit')"
     description: The first Segment of the next DECtalk allophone, dummy vowels included.
     citations:
       - "DECtalk 4.63 ph_inton1.c:1808-1820 (the dummy vowel is allophone nphon + 1)"
@@ -49,7 +49,7 @@ functions:
       - "DECtalk 4.63 ph_inton1.c:1780-1820 (Rule 9)"
   artic_prev_unit:
     params: [item]
-    body: "item == null ? null : look_back_pred(item, 8, 'is_articulation_unit')"
+    body: "item == null ? null : look_back_pred(item, params.policy.articulation.unit_scan_items,'is_articulation_unit')"
     description: The first Segment of the DECtalk allophone before this one, dummy vowels included.
     citations:
       - "DECtalk 4.63 ph_inton1.c:1808-1820 (the dummy vowel is allophone nphon + 1)"
@@ -71,15 +71,25 @@ functions:
     params: [item]
     body: >-
       item == null ? 0
-      : get(artic_is_dummy(item) ? look_back_pred(item, 8, 'is_dectalk_phone') : item, 'stress', 0)
+      : get(artic_is_dummy(item) ? look_back_pred(item, params.policy.articulation.unit_scan_items,'is_dectalk_phone') : item, 'stress', 0)
     description: FSTRESS of an allophone (0 none, 1 primary, 2 secondary, 3 emphasis); a dummy vowel has the plosive's.
     citations:
       - "DECtalk 4.63 ph_defs.h:219-225; ph_inton1.c:1818"
+  artic_dummy_half:
+    params: [item]
+    body: >-
+      artic_is_dummy(item)
+        ? floor(round(item.duration / params.policy.timing.frame_ms)
+                / params.policy.articulation.pressure.dummy_vowel_divisor)
+        : 0
+    description: Half the frames of a dummy vowel, 0 for any other allophone (allodurs >> 1).
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:3815-3818"
   artic_boundary:
     params: [item]
     body: >-
       item == null ? 0.0
-      : (artic_is_dummy(item) ? dectalk_boundary(look_back_pred(item, 8, 'is_dectalk_phone'))
+      : (artic_is_dummy(item) ? dectalk_boundary(look_back_pred(item, params.policy.articulation.unit_scan_items,'is_dectalk_phone'))
       : dectalk_boundary(item))
     description: FBOUNDARY of an allophone; a dummy vowel has the plosive's.
     citations:
@@ -179,38 +189,57 @@ frame_programs:
       boundary_3:
         value: "artic_boundary(artic_next_unit(artic_next_unit(artic_next_unit(current))))"
         edge: 0
-      # nphonetot - nphone, as annotation.yaml's hat pattern counts it.
-      phones_left:
+      # How many input phones this allophone stands for: none for a dummy
+      # vowel (added after the count), two for a vowel fused with its /r/ and
+      # for the survivor of a deleted geminate (annotation.yaml, hat pattern).
+      phonemes:
         value: >-
-          artic_is_dummy(current) ? 1.0
-          : 2.0 + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')
-          + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_fused_vowel')
-          + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_geminate_survivor')
-          + (isTrue(current, 'fused_with_r') ? 1.0 : 0.0)
+          artic_is_dummy(current) ? 0
+          : 1 + (isTrue(current, 'fused_with_r') ? 1 : 0)
+              + (isTrue(current, 'after_deleted_geminate') ? 1 : 0)
+        edge: 1
+      # ph_draw.c:3812-3870 reads allophone arrays at nphonetot - 2 and
+      # nphonetot - 1, a count of input phones used as an allophone index. From
+      # an allophone with `left` phones left (nphonetot - nphone) those are
+      # the allophones left - 2 and left - 1 further on: what the rule needs
+      # of them, for the offsets it can reach.
+      voiceless_obstruent_1:
+        value: >-
+          artic_has(artic_next_unit(current), 'obstruent')
+          && !artic_has(artic_next_unit(current), 'voiced')
+        edge: false
+      voiceless_obstruent_2:
+        value: >-
+          artic_has(artic_next_unit(artic_next_unit(current)), 'obstruent')
+          && !artic_has(artic_next_unit(artic_next_unit(current)), 'voiced')
+        edge: false
+      dummy_half_1: { value: "artic_dummy_half(artic_next_unit(current))", edge: 0 }
+      dummy_half_2:
+        value: "artic_dummy_half(artic_next_unit(artic_next_unit(current)))"
         edge: 0
-      # The clause's last phone before its final silence, dummy vowel aside.
-      last_obstruent:
+      dummy_half_3:
+        value: "artic_dummy_half(artic_next_unit(artic_next_unit(artic_next_unit(current))))"
+        edge: 0
+      # tcumdur is not added to from the syllabic where phinton's walk stops
+      # (prosody.yaml dectalk_segmental_f0_phone, Ph_inton2.c:809-819, 1659-1671).
+      counted:
         value: >-
-          dectalk_has(look_back_pred(look_ahead_where(current, 1000,
-            'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null'),
-            8, 'is_dectalk_phone'), 'obstruent')
-        edge: false
-      last_voiced:
-        value: >-
-          dectalk_has(look_back_pred(look_ahead_where(current, 1000,
-            'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null'),
-            8, 'is_dectalk_phone'), 'voiced')
-        edge: false
+          !isTrue(current, 'intonation_stops')
+          && (look_back_where(current, 1000,
+                '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")') == null
+              || look_back_where(current, 1000,
+                '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")').phoneme == 'SIL')
+        edge: true
     group:
       # A clause starts at its initial silence.
       start: "u.initial"
       totals:
-        # tcumdur less the unemitted frame: the initial silence and every
-        # phone, dummy vowels included, but not the final silence
-        # (ph_inton1.c:1765-1777, 1817).
-        counted_frames: "u.silence && !u.initial ? 0 : f.count"
-        # Half the dummy vowel that ends the clause (ph_draw.c:3815-3818).
-        final_dummy_half: "u.dummy && n.silence ? floor(f.count / 2) : 0"
+        # tcumdur: the initial silence and every phone phinton counted, dummy
+        # vowels included, but not the final silence (ph_inton1.c:1765-1777,
+        # 1817).
+        counted_frames: "(u.silence && !u.initial) || !u.counted ? 0 : f.count"
+        # nphonetot: the clause's input phones, both silences included.
+        phonemes: "u.phonemes"
     registers:
       # ph_claus.c:217-221 sets pressure to 10000 at start-up; the reset at
       # ph_draw.c:925 replaces it in the first frame of every clause.
@@ -219,6 +248,11 @@ frame_programs:
       syl_pressure: 0
       # ph_draw.c:1509-1552; the emphasis rule that moves it is not ported.
       stress_pulse: 0
+      # Inputs of the final fall: nphonetot - nphone, value - nframb, and the
+      # pressure it falls to (ph_draw.c:3812-3870).
+      phones_left: 0
+      fall_frames: 0
+      fall_floor: 500
       # ph_draw.c:929-930
       target_ap: 0
       area_ap: 0
@@ -325,49 +359,61 @@ rules:
   # boundary, once: the slope that takes the pressure down to 450 or 500 by
   # the end of the clause. The `if (FSYLL)` at 3795 has no braces and governs
   # only this block. Integer division; the numerator is positive here.
-  # value - nframb = (counted_frames - final_dummy_half) - (g.frame + 1).
-  # The slope is added once inside the block (3887) and again by the next
-  # rule (3985) in the frame that computes it.
-  artic_syllable_pressure_slope_voiceless_obstruent:
+  # The slope is added once inside the block (3887) and again by the rule
+  # after these (3985) in the frame that computes it.
+  #
+  # Its inputs first. `value` is tcumdur, less half the allophone at
+  # nphonetot - 1 when that is a dummy vowel; the pressure falls to 450 when
+  # the allophone at nphonetot - 2 is a voiceless obstruent and to 500
+  # otherwise. Both indices are reproduced as compiled, for the offsets a
+  # phone within four of the end can reach; at any other offset the dummy
+  # half is 0 and the floor 500.
+  artic_fall_inputs:
     kind: frame
     program: articulation
-    unit: >-
-      u.syllabic && u.phones_left <= 4
-      && (u.boundary >= params.policy.timing.boundary.pp
-          || u.boundary_2 >= params.policy.timing.boundary.pp
-          || u.boundary_3 >= params.policy.timing.boundary.pp)
-      && u.last_obstruent && !u.last_voiced
-    when: >-
-      r.syl_pressure == 0
-      && g.frame + 1 > 9
-      && g.counted_frames - g.final_dummy_half - (g.frame + 1) > 0
+    unit: "u.syllabic"
+    when: "r.syl_pressure == 0"
     set:
-      - register: syl_pressure
-        value: "floor((r.pressure - 450) / (g.counted_frames - g.final_dummy_half - (g.frame + 1)))"
+      - { register: phones_left, value: "g.phonemes - g.unit", tag: subglottal_pressure }
+      - register: fall_frames
+        value: >-
+          g.counted_frames - (g.frame + 1)
+          - (r.phones_left == 1 ? (u.dummy ? floor(f.count / params.policy.articulation.pressure.dummy_vowel_divisor) : 0)
+             : (r.phones_left == 2 ? u.dummy_half_1
+             : (r.phones_left == 3 ? u.dummy_half_2
+             : (r.phones_left == 4 ? u.dummy_half_3 : 0))))
         tag: subglottal_pressure
-      - { register: pressure_drop, value: "r.pressure_drop + r.syl_pressure", tag: subglottal_pressure }
+      - register: fall_floor
+        value: >-
+          (r.phones_left == 1 ? (p.obstruent && !p.voiced)
+           : (r.phones_left == 2 ? (u.obstruent && !u.voiced)
+           : (r.phones_left == 3 ? u.voiceless_obstruent_1
+           : (r.phones_left == 4 ? u.voiceless_obstruent_2 : false)))) ? 450 : 500
+        tag: subglottal_pressure
     citations:
-      - "DECtalk 4.63 PH/ph_draw.c:3795-3830, 3850-3864, 3887"
+      - "DECtalk 4.63 PH/ph_draw.c:3812-3825, 3850-3870"
   artic_syllable_pressure_slope:
     kind: frame
     program: articulation
     unit: >-
-      u.syllabic && u.phones_left <= 4
+      u.syllabic
       && (u.boundary >= params.policy.timing.boundary.pp
           || u.boundary_2 >= params.policy.timing.boundary.pp
           || u.boundary_3 >= params.policy.timing.boundary.pp)
-      && !(u.last_obstruent && !u.last_voiced)
     when: >-
-      r.syl_pressure == 0
+      r.syl_pressure == 0 && r.phones_left <= 4
       && g.frame + 1 > 9
-      && g.counted_frames - g.final_dummy_half - (g.frame + 1) > 0
+      && r.fall_frames > 0
+      && g.counted_frames - (g.frame + 1) > 0
     set:
       - register: syl_pressure
-        value: "floor((r.pressure - 500) / (g.counted_frames - g.final_dummy_half - (g.frame + 1)))"
+        value: >-
+          r.pressure - r.fall_floor >= 0 ? floor((r.pressure - r.fall_floor) / r.fall_frames)
+          : 0 - floor((r.fall_floor - r.pressure) / r.fall_frames)
         tag: subglottal_pressure
       - { register: pressure_drop, value: "r.pressure_drop + r.syl_pressure", tag: subglottal_pressure }
     citations:
-      - "DECtalk 4.63 PH/ph_draw.c:3795-3830, 3850-3858, 3867-3870, 3887"
+      - "DECtalk 4.63 PH/ph_draw.c:3795-3830, 3850-3870, 3887"
   artic_pressure_drop_by_slope:
     kind: frame
     program: articulation
@@ -1018,7 +1064,7 @@ phases:
       - artic_pressure_rise_voiced
       - artic_pressure_rise_voiceless
       - artic_pressure_rise_voiced_again
-      - artic_syllable_pressure_slope_voiceless_obstruent
+      - artic_fall_inputs
       - artic_syllable_pressure_slope
       - artic_pressure_drop_by_slope
       - artic_chink_area

@@ -1,7 +1,7 @@
 {
-  "frank-fresh-fruit": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","ABLADE","ATB","A2_CODE","F4"],
-  "frank-where-going": ["B1","AV","AP","A2","A3","A4","A5","AG","PS","CNK","ATB","A2_CODE","F4"],
-  "frank-dog-barked": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","AL","ABLADE","A2_CODE","F4"],
-  "frank-open-window": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","AL","ABLADE","F4"],
-  "frank-moon": ["B1","AV","AP","A2","A3","A4","A5","AG","PS","CNK","F4"]
+  "frank-fresh-fruit": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_CODE"],
+  "frank-where-going": ["B1","AV","AP","A2","A3","A4","A5","A2_CODE"],
+  "frank-dog-barked": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_CODE"],
+  "frank-open-window": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "frank-moon": ["B1","AV","AP","A2","A3","A4","A5"]
 }

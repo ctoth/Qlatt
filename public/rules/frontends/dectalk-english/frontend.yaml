@@ -248,6 +248,32 @@ speakers:
       kind: number
       optional: true
       citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (EndOfPhrase_Spread); PH/ph_draw.c:3646"]
+    # The definition's own F4, sent unscaled as the F4 word.
+    spd_F4:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_draw.c:4189 (parstochip[OUT_F4] = curspdef[SPD_F4]); INCLUDE/cmd.h:159-205"
+    # NOM_VOIC_GLOT_AREA, NOM_VOICED_OBSTRUENT, NOM_Open_Glottis and
+    # NOM_Area_Chink: the glottal area of a voiced sound, of a voiced
+    # obstruent and of an open glottis, and the posterior chink. The source
+    # comments the entry at SPD_CHINK "open quotient" and the one before it
+    # "chink area"; the index decides.
+    AGO:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:587, 668 (NOM_VOIC_GLOT_AREA = curspdef[SPD_AGO])"
+    AGVO:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:588, 669 (NOM_VOICED_OBSTRUENT = curspdef[SPD_AGVO])"
+    AGUO:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:589, 670 (NOM_Open_Glottis = curspdef[SPD_AGUO])"
+    CHINK:
+      kind: number
+      citations:
+        - "DECtalk 4.63 PH/ph_vset.c:590, 671 (NOM_Area_Chink = curspdef[SPD_CHINK])"
   # Chris (speakers/chris.yaml) is not offered: DECtalk 4.63's US build
   # defines us_chris (PH/P_us_vdf1.h:751) but its voice table has no entry for
   # it (PH/ph_main.c:511-520), so DECtalk never builds a speaker definition
@@ -455,8 +481,9 @@ parameters:
       # T 7, D 13, K 26, G 26, CH 71, JH 45, every other phone 0), in frames
       # as mstofr gives them: (ms * 10) >> 6 (ph_task.c:1380-1387).
       burst_frames: { DZ: 2, P: 1, B: 1, T: 1, D: 2, K: 4, G: 4, CH: 11, JH: 7 }
-      # ph_draw.c:241-244 area_rel[18], the areas a release steps through; its
-      # first entry is set to the voice's NOM_Fricative_Opening at 288.
+      # ph_draw.c:241-244 area_rel[18], the areas a release steps through. Its
+      # first entry is overwritten with the voice's NOM_Fricative_Opening at
+      # 288, so the rules read that for step 0 and never this list's 100.
       area_release: [100, 500, 800, 900, 900, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
       # Special Rule 1 and ph_draw.c:740-886: a burst loses a frame before an
       # obstruent or in a phone shorter than NF50MS; an affricate's closure is
@@ -491,35 +518,22 @@ parameters:
         fast_voice_speed_over: 2
         fast_voice_at_least: 5
         fast_voice_speed: 2
-      # Paul. The frontend's voice files do not carry these yet, so every
-      # voice gets Paul's.
+      # The voice's F4, its glottal areas (NOM_VOIC_GLOT_AREA,
+      # NOM_VOICED_OBSTRUENT, NOM_Open_Glottis, NOM_Area_Chink) and what
+      # changeSpeakerValues() assigns for it are voice rule fields:
+      # params.policy.voice.spd_F4, AGO, AGVO, AGUO, CHINK, stress_step,
+      # stress_pressure, sub_pressure, fricative_opening, glottal_stop_area,
+      # vot_speed, end_of_phrase_spread (speakers.rule_fields above).
       voice:
-        # P_us_vdf1.h:699-746 us_paul, by INCLUDE/cmd.h:169-195 index:
-        # [SPD_F4] 3500, [SPD_AGO] 400, [SPD_AGVO] 900, [SPD_AGUO] 1900,
-        # [SPD_CHINK] 50. The source comments the entry at SPD_CHINK "open
-        # quotient" and the one before it "chink area"; the index decides.
-        # ph_vset.c:587-592 copies them to NOM_VOIC_GLOT_AREA,
-        # NOM_VOICED_OBSTRUENT, NOM_Open_Glottis and NOM_Area_Chink, and sets
-        # NOM_UNVOICED_SON to 1800.
-        f4: 3500
-        glottis_voiced: 400
-        glottis_voiced_obstruent: 900
-        glottis_open: 1900
-        chink: 50
+        # NOM_UNVOICED_SON, the same in every voice (ph_vset.c:592, 675).
         unvoiced_sonorant: 1800
-        # VTM/vtmiont.c:2941 (case Paul), the branch that is compiled, 2990-2998
-        # (2963-2971 is under `#ifdef KEN` and differs in EndOfPhrase_Spread,
-        # 10): STRESS_STEP, STRESS_PRESSURE, NOM_Sub_Pressure,
-        # NOM_Fricative_Opening, NOM_Glot_Stop_Area, VOT_speed,
-        # EndOfPhrase_Spread. DECtalk's own trace shows delta_area_g rising by
-        # 30 a frame in a clause of three words or more.
-        stress_step: 10
-        stress_pressure: 100
-        sub_pressure: 800
-        fricative_opening: 100
-        glottal_stop_area: 0
-        vot_speed: 1
-        end_of_phrase_spread: 30
+        # EndOfPhrase_Spread for a voice whose case assigns none, which is
+        # Frank (VTM/vtmiont.c:3223-3249): DECtalk keeps the value of the
+        # voice before him. 30 is Paul's (vtmiont.c:2998), the voice a
+        # process starts with, and what the packets of the Frank corpus show
+        # (its AG is exact with 30 in clauses of three words or more). After
+        # another voice in the same process DECtalk's Frank would differ.
+        end_of_phrase_spread_default: 30
     # Data for DECtalk's duration rules (p_us_tim.c), transcribed by hand from
     # its ROM and headers. scripts/oracle/check-dectalk-timing-policy.ts checks
     # phonemes, inherent_ms, minimum_ms, features and syllabic_codes against the

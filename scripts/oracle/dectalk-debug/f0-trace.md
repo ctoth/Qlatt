@@ -50,6 +50,24 @@ fprintf(stderr, "F0OUT prime=%d f0=%d f0s=%d min=%d scale=%d mode=%d las1=%d\n",
 declarative, 1107 short exclamation, 1187 question) and `words` is
 `number_words`, which is not the number of words.
 
+## Other prints that settled something
+
+- `PH/ph_claus.c`, around the stage calls of the clause routine (`phsort`,
+  `phalloph`, the timing call, `phinton`): `fprintf(stderr, "F0MIN ...=%d\n",
+  pDph_t->f0minimum)`. Showed that f0minimum changes between clauses, not in
+  any stage.
+- `LTS/ls_util.c:829-837` (object `lsa_util.obj`), before the write of the
+  break's COMMA, after it, and after the restore: `pDph_t->compause` and
+  `pDph_t->f0minimum`. Showed that the text stage's `compause` is the
+  phonetic stage's `f0minimum` (it reads 1100, Paul's floor, and its own
+  "f0minimum" reads 120, the hat rise): the two stages see the structure
+  three shorts apart. The rule `dectalk_break_f0_floor` reproduces what
+  follows from it.
+- `PH/ph_sort.c`, top of the symbol loop (after `snphonetot = ...`, line
+  1249): `pDph_t->symbols[n] & PVALUE` and `pDph_t->number_words`. Showed how
+  number_words is counted: one per WBOUND (111); a verb-phrase start (113)
+  comes without one; a clause-final "to", "and" or "for" has two.
+
 ## Running
 
 ```bash

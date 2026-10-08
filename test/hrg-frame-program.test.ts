@@ -22,10 +22,59 @@ import { validateDslSpec } from "../src/declarative-frontend/validation";
 const CITATION = "fixture: frame program test";
 
 function rule(name: string, fields: Partial<FrameRule>): FrameRule {
-  return { name, unit: null, when: null, set: [], citations: [CITATION], ...fields };
+  return { name, unit: null, start: false, when: null, set: [], citations: [CITATION], ...fields };
 }
 
 describe("frame program machine", () => {
+  it("runs a start rule in a unit's first frame only, in its place among the others", () => {
+    const results = runFrameProgram({
+      registers: { level: 0, seen: 0, order: 0 },
+      outputs: { LEVEL: "r.level", SEEN: "r.seen", ORDER: "r.order" },
+      edgeFeatures: { fill: 0 },
+      params: {},
+      units: [
+        { features: { fill: 8 }, frames: 3 },
+        { features: { fill: 0 }, frames: 2 },
+        { features: { fill: 5 }, frames: 2 },
+      ],
+      rules: [
+        // Every frame, before the start rules: they see what it left.
+        rule("count", { set: [{ register: "seen", value: "r.seen + 1", tag: "t" }] }),
+        rule("fill", {
+          start: true,
+          set: [{ register: "level", value: "u.fill", tag: "t" }],
+        }),
+        // `when` is still tested, in the first frame.
+        rule("mark", {
+          start: true,
+          when: "u.fill > 0",
+          set: [{ register: "order", value: "r.seen * 10 + r.level", tag: "t" }],
+        }),
+        // Every frame, after them.
+        rule("drain", { set: [{ register: "level", value: "r.level - 1", tag: "t" }] }),
+      ],
+    });
+    expect(results.map((result) => result.columns.LEVEL)).toEqual([
+      [7, 6, 5],
+      [-1, -2],
+      [4, 3],
+    ]);
+    // seen is 1 at the first unit's start and 6 at the third's; the second
+    // unit's `when` is false, so `order` keeps 18.
+    expect(results.map((result) => result.columns.ORDER)).toEqual([
+      [18, 18, 18],
+      [18, 18],
+      [65, 65],
+    ]);
+    expect(results[0]?.fired).toEqual([
+      { rule: "count", first: 0, last: 2, count: 3 },
+      { rule: "fill", first: 0, last: 0, count: 1 },
+      { rule: "mark", first: 0, last: 0, count: 1 },
+      { rule: "drain", first: 0, last: 2, count: 3 },
+    ]);
+    expect(results[1]?.fired.map((firing) => firing.rule)).toEqual(["count", "fill", "drain"]);
+  });
+
   it("runs the rules in order every frame and keeps registers across units", () => {
     const results = runFrameProgram({
       registers: { level: 0, target: 0, full: false },
@@ -301,7 +350,7 @@ const TANK_SPEC = {
       kind: "frame",
       program: "tank",
       unit: "!u.open",
-      when: "f.index == 0",
+      at: "start",
       set: [{ register: "target", value: 0, tag: "tank" }],
       citations: ["fixture: valve shut"],
     },
@@ -488,6 +537,14 @@ describe("frame program validation", () => {
         },
       }),
     ).toContain("E_RULE_FIELD_UNKNOWN rules.plain.when");
+  });
+
+  it("accepts `at: start` on a frame rule and nothing else there", () => {
+    expect(codes(withRule("tank_target_open", { at: "start", when: undefined }))).toEqual([]);
+    expect(codes(withRule("tank_target_open", { at: "start" }))).toEqual([]);
+    expect(codes(withRule("tank_target_open", { at: "end" }))).toContain(
+      "E_FRAME_RULE_SCHEMA rules.tank_target_open.at",
+    );
   });
 
   it("checks a group's expressions and every read of its totals", () => {

@@ -34,7 +34,7 @@ const ALLOWED_RULE_KINDS = new Set([
   "frame",
 ]);
 /** Fields only a rule of kind `frame` has (hrg/frame-program.ts). */
-const FRAME_RULE_FIELDS = ["program", "unit", "when", "set"] as const;
+const FRAME_RULE_FIELDS = ["program", "unit", "at", "when", "set"] as const;
 const ALLOWED_FRAME_RULE_FIELDS = new Set<string>([
   ...FRAME_RULE_FIELDS,
   "kind",
@@ -3553,6 +3553,15 @@ function validateFramePrograms(
         `Frame rule '${name}' unit`,
         FRAME_UNIT_VARIABLES,
         names,
+      );
+    }
+    if (rule.at != null && rule.at !== "start") {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_FRAME_RULE_SCHEMA",
+          `Frame rule '${name}' at must be 'start' (the unit's first frame) when given`,
+          `${path}.at`,
+        ),
       );
     }
     if (rule.when != null) {

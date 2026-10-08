@@ -369,7 +369,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: pressure, value: 200, tag: subglottal_pressure }
       - { register: pressure_drop, value: 0, tag: subglottal_pressure }
@@ -564,7 +564,7 @@ rules:
   artic_vot_none:
     kind: frame
     program: articulation
-    when: "f.index == 0"
+    at: start
     set:
       - { register: vot, value: 0, tag: glottal_area }
     citations:
@@ -573,7 +573,7 @@ rules:
     kind: frame
     program: articulation
     unit: "p.plosive && !p.voiced && u.sonorant && !u.initial && !(u.silence)"
-    when: "f.index == 0"
+    at: start
     set:
       - register: vot
         value: "u.stressed ? params.policy.articulation.vot.stressed : params.policy.articulation.vot.unstressed"
@@ -674,7 +674,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: delta_area_g, value: 0, tag: glottal_area }
       - { register: target_ag, value: 400, tag: glottal_area }
@@ -687,7 +687,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial && n.obstruent && n.burst && n.stop && n.voiced"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
       - { register: area_g, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
@@ -699,7 +699,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial && n.obstruent && n.burst && n.stop && !n.voiced"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ag, value: "params.policy.articulation.voice.glottis_open", tag: glottal_area }
       - { register: area_g, value: "params.policy.articulation.voice.glottis_open", tag: glottal_area }
@@ -711,7 +711,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial && n.obstruent && !(n.burst && n.stop) && n.blade"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
       - { register: area_g, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
@@ -755,7 +755,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.silence && !u.initial && p.son1"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ag, value: 1800, tag: glottal_area }
       - { register: area_g, value: "r.area_g - 80", tag: glottal_area }
@@ -765,7 +765,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.silence && !u.initial && p.obstruent"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ag, value: 2500, tag: glottal_area }
     citations:
@@ -774,7 +774,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.silence && !u.initial && !p.voiced"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ag, value: 1800, tag: glottal_area }
       - { register: area_g, value: "r.area_g + 100", tag: glottal_area }
@@ -786,7 +786,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && p.obstruent && p.voiced"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ap, value: 0, tag: glottal_chink }
     citations:
@@ -795,7 +795,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.obstruent && u.voiced && u.glottal"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ag, value: "params.policy.articulation.voice.glottal_stop_area", tag: glottal_area }
       - { register: agspeed, value: 1, tag: glottal_area }
@@ -805,7 +805,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.obstruent && u.voiced && !u.glottal"
-    when: "f.index == 0"
+    at: start
     set:
       - register: target_ag
         value: "u.stop ? params.policy.articulation.voice.glottis_voiced_obstruent : 600"
@@ -819,7 +819,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.obstruent && !u.voiced"
-    when: "f.index == 0"
+    at: start
     set:
       - register: target_ag
         value: >-
@@ -836,7 +836,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.obstruent && !u.burst && !u.labial && !u.blade && !u.velar"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ag, value: 1000, tag: glottal_area }
     citations:
@@ -845,7 +845,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && !u.obstruent"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ap, value: 0, tag: glottal_chink }
     citations:
@@ -856,7 +856,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.stop && !u.burst && u.blade"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
       - { register: agspeed, value: 1, tag: glottal_area }
@@ -866,7 +866,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.stop && !u.burst && u.velar"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
       - { register: agspeed, value: 2, tag: glottal_area }
@@ -876,7 +876,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.stop && !u.burst && u.labial"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
     citations:
@@ -885,7 +885,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.son1 && u.dummy"
-    when: "f.index == 0"
+    at: start
     set:
       - register: target_ag
         value: >-
@@ -898,7 +898,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.son1 && !u.dummy && !(p.plosive && !p.voiced)"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_ag, value: "params.policy.articulation.voice.glottis_voiced", tag: glottal_area }
     citations:
@@ -1144,7 +1144,7 @@ rules:
   artic_closure_end:
     kind: frame
     program: articulation
-    when: "f.index == 0"
+    at: start
     set:
       - register: closure
         value: >-
@@ -1254,7 +1254,8 @@ rules:
     kind: frame
     program: articulation
     unit: "u.stop"
-    when: "r.ts_tb != 0 && f.index == 0 && !(f.index >= r.ts_tb && !n.stop)"
+    at: start
+    when: "r.ts_tb != 0 && !(f.index >= r.ts_tb && !n.stop)"
     set:
       - { register: in_tbclosure, value: true, tag: constriction }
       - { register: in_tbrelease, value: false, tag: constriction }
@@ -1267,7 +1268,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: in_bclosure, value: false, tag: constriction }
       - { register: in_lclosure, value: false, tag: constriction }
@@ -1287,7 +1288,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial && n.obstruent && n.burst && n.stop && n.labial"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: in_lclosure, value: true, tag: constriction }
       - { register: area_l, value: 0, tag: constriction }
@@ -1301,7 +1302,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial && n.obstruent && n.burst && n.stop && n.blade"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: in_bclosure, value: true, tag: constriction }
       - { register: area_b, value: 0, tag: constriction }
@@ -1314,7 +1315,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial && n.obstruent && n.burst && n.stop && n.velar"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: in_tbclosure, value: true, tag: constriction }
       - { register: in_bclosure, value: false, tag: constriction }
@@ -1332,7 +1333,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial && n.obstruent && !(n.burst && n.stop) && n.blade"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: in_bclosure, value: false, tag: constriction }
       - { register: target_b, value: "params.policy.articulation.voice.fricative_opening + 300", tag: constriction }
@@ -1398,7 +1399,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.silence && !u.initial"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_l, value: "p.labial ? (p.plosive ? 1000 : 0) : 1000", tag: constriction }
       - { register: lstep, value: "p.labial ? 0 : r.lstep", tag: constriction }
@@ -1413,7 +1414,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && !p.plosive"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: in_lrelease, value: false, tag: constriction }
       - { register: in_brelease, value: false, tag: constriction }
@@ -1427,7 +1428,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.obstruent && u.burst && u.labial"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_l, value: 0, tag: constriction }
       - { register: target_b, value: 1000, tag: constriction }
@@ -1438,7 +1439,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.obstruent && u.burst && u.blade"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_b, value: 0, tag: constriction }
       - { register: target_l, value: 1000, tag: constriction }
@@ -1453,7 +1454,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.obstruent && !u.burst && u.labial"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: lstep, value: 0, tag: constriction }
       - { register: target_l, value: 100, tag: constriction }
@@ -1466,7 +1467,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.obstruent && !u.burst && !u.labial && u.blade"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: lstep, value: 0, tag: constriction }
       - { register: target_b, value: "params.policy.articulation.voice.fricative_opening", tag: constriction }
@@ -1478,7 +1479,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.obstruent && !u.burst && !u.labial && !u.blade && u.velar"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: lstep, value: 0, tag: constriction }
       - { register: target_b, value: 1000, tag: constriction }
@@ -1490,7 +1491,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.obstruent && !u.burst && !u.labial && !u.blade && !u.velar"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_l, value: 1000, tag: constriction }
       - { register: target_tb, value: 1000, tag: constriction }
@@ -1501,7 +1502,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.stop && !u.burst && u.blade"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: in_bclosure, value: true, tag: constriction }
       - { register: target_b, value: 0, tag: constriction }
@@ -1513,7 +1514,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.stop && !u.burst && u.velar"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_b, value: 1000, tag: constriction }
       - { register: target_l, value: 1000, tag: constriction }
@@ -1523,7 +1524,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.stop && !u.burst && u.labial"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_b, value: 1000, tag: constriction }
       - { register: target_l, value: 0, tag: constriction }
@@ -1536,7 +1537,7 @@ rules:
     kind: frame
     program: articulation
     unit: "!u.silence && u.son1"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: target_b, value: "!u.stop || (!u.alveolar && u.syllabic) ? 1000 : r.target_b", tag: constriction }
       - { register: target_l, value: "!u.stop || u.alveolar ? 1000 : r.target_l", tag: constriction }
@@ -1895,7 +1896,7 @@ rules:
     kind: frame
     program: articulation
     unit: "u.initial"
-    when: "f.index == 0"
+    at: start
     set:
       - { register: area_n, value: 0, tag: velum }
     citations:

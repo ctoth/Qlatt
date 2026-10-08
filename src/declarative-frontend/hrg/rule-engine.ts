@@ -2193,6 +2193,7 @@ function runFrameRules(
     rules.push({
       name: ruleName,
       unit: typeof rule.unit === "string" ? rule.unit : null,
+      start: rule.at === "start",
       when: typeof rule.when === "string" ? rule.when : null,
       set: (Array.isArray(rule.set) ? rule.set : []).filter(isPlainObject).map((assignment) => ({
         register: String(assignment.register),

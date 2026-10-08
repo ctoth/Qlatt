@@ -47,6 +47,14 @@ export interface NumberPhones {
   months?: readonly (readonly number[])[];
   /** The "oh" of "twenty oh one". */
   oh?: readonly number[];
+  /** "half" and "halves", a fraction's denominator 2. */
+  half?: readonly number[];
+  halves?: readonly number[];
+  /**
+   * The words that take "dollars" behind them after a dollar amount
+   * ("million"), each with its phones.
+   */
+  quantityWords?: Readonly<Record<string, readonly number[]>>;
   /**
    * ls_util_pluralize (LTS/ls_util.c:1442-1466): the plural ending by the
    * phone before it.
@@ -424,6 +432,98 @@ export function speakMoney(amount: string, lists: NumberPhones): number[] | null
     ...(cents.plural ? [voicelessPlural] : []),
   );
   return symbols;
+}
+
+/**
+ * A dollar amount that stands before one of the words that take "dollars"
+ * behind them ("$2 million"): only the amount is spoken here, as a number
+ * ("$2.50 million" is "two point five zero"), and the word that follows
+ * speaks itself and "dollars" (speakQuantityAfterMoney). DECtalk 4.63
+ * LTS/ls_task.c:3227-3290. Null when `amount` is not a number.
+ */
+export function speakMoneyBeforeQuantity(amount: string, lists: NumberPhones): number[] | null {
+  return speakDecimal(amount, lists)?.symbols ?? null;
+}
+
+/**
+ * The word after such an amount: its phones from the table, then "dollars",
+ * plural whatever the amount (:3243-3285; "$1 million" is "one million
+ * dollars"). Null when `word` is not in the table.
+ */
+export function speakQuantityAfterMoney(word: string, lists: NumberPhones): number[] | null {
+  const phones = lists.quantityWords?.[word];
+  if (!phones) return null;
+  return [...phones, ...lists.dollar, ...lists.plural.otherwise];
+}
+
+/**
+ * ls_proc_is_frac (LTS/l_us_pr1.c:980-1015): one or two digits not starting
+ * with 0, a slash, then one to three digits not starting with 0, three only
+ * as "100". (The routine also lets a "%" end it; DECtalk's parser has cut
+ * that off the word before this point, so it is not read here.)
+ */
+export function isFraction(text: string): boolean {
+  const match = /^([1-9][0-9]?)\/([1-9][0-9]{0,2})$/.exec(text);
+  return match !== null && (match[2].length < 3 || match[2] === "100");
+}
+
+/**
+ * A fraction as ls_proc_do_frac speaks it (LTS/l_us_pr1.c:1034-1067): the
+ * numerator as a number, a word boundary, and the denominator as an ordinal,
+ * in the plural unless the numerator is the one digit 1: [Z] after a last
+ * digit 2 or 3 that is not a teen's ("thirds", "twenty seconds"), [S]
+ * otherwise ("eighths", "thirteenths"). The denominator 2 is "half" or
+ * "halves". Null when `text` is not a fraction by the test above, or the
+ * table has no "half".
+ */
+export function speakFraction(text: string, lists: NumberPhones): number[] | null {
+  if (!isFraction(text) || !lists.half || !lists.halves) return null;
+  const [numerator, denominator] = text.split("/") as [string, string];
+  const top = speakNumber(numerator, lists);
+  if (!top) return null;
+  const plural = numerator !== "1";
+  const symbols = [...top, NUMBER_WBOUND];
+  if (denominator === "2") {
+    symbols.push(...(plural ? lists.halves : lists.half));
+  } else {
+    const bottom = speakNumber(denominator, lists, { ordinal: true });
+    if (!bottom) return null;
+    symbols.push(...bottom);
+    if (plural) {
+      const last = denominator.at(-1) as string;
+      const teen = denominator.length > 1 && denominator.at(-2) === "1";
+      const [voiced] = lists.plural.otherwise;
+      const [voiceless] = lists.plural.afterVoiceless;
+      symbols.push(!teen && (last === "2" || last === "3") ? voiced : voiceless);
+    }
+  }
+  return symbols;
+}
+
+/**
+ * A run of digits inside a part number (LTS/l_us_pr1.c:183-208): two digits
+ * by ls_proc_do_2_digits (:297-315), three by ls_proc_do_3_digits (:333-349:
+ * the first digit without stress, then "hundred" or the last two), four by
+ * ls_proc_do_4_digits (:367-398: "one thousand", "nineteen hundred",
+ * "nineteen ninety"). Null for a run of any other length and for one that
+ * starts with 0: those are spelled digit by digit, which is the caller's.
+ */
+export function speakPartDigits(run: string, lists: NumberPhones): number[] | null {
+  if (!/^[1-9][0-9]{1,3}$/.test(run)) return null;
+  if (run.length === 2) return twoDigits(run[0], run[1], lists);
+  if (run.length === 3) {
+    return [
+      ...lists.unstressedUnits[digit(run[0])],
+      NUMBER_WBOUND,
+      ...(run[1] === "0" && run[2] === "0" ? lists.hundred : twoDigits(run[1], run[2], lists)),
+    ];
+  }
+  if (run[2] === "0" && run[3] === "0") {
+    return run[1] === "0"
+      ? [...lists.unstressedUnits[digit(run[0])], NUMBER_WBOUND, ...lists.thousand]
+      : [...twoDigits(run[0], run[1], lists), NUMBER_WBOUND, ...lists.hundred];
+  }
+  return [...twoDigits(run[0], run[1], lists), NUMBER_WBOUND, ...twoDigits(run[2], run[3], lists)];
 }
 
 /**

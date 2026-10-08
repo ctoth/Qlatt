@@ -235,6 +235,28 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/l_us_pr1.c:815-863 (ls_proc_is_date: the forms 23-Aug, 23-Aug-84, 23-Aug-1984); LTS/ls_task.c:3612-3614 (the text task reads the whole word as a date)'
+    # A word of digits and letters joined by hyphens or slashes, with a digit
+    # in it ("10-15", "1/8", "B-52"), kept whole for a frontend whose lexicon
+    # reads it as a fraction or a part number
+    # (tn_recognition_policy.part_numbers: source). Not the form DECtalk reads
+    # as a date, a day, a month's three letters and maybe a year ("3-May",
+    # "15-oct-20"): that is left to the other rules, as is a word with a
+    # percent sign after it.
+    - id: tn_part_number_source
+      pattern: '(?<![\w$.,:/-])(?<token>[A-Za-z0-9]+(?:[-/][A-Za-z0-9]+)+)(?![\w/%-]|[.,][0-9])'
+      flags: ''
+      class: number_token
+      captures: {token: token}
+      when: >-
+        get(maps.tn_recognition_policy, 'part_numbers', 'words') == 'source'
+        && matches(captures.token, '[0-9]')
+        && !matches(lower(captures.token),
+          '^[0-9]{1,2}-(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)(-[0-9]{2}([0-9]{2})?)?$')
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3688-3707 (a fraction) and 4118-4180 (a part number: a word of digits, slashes, hyphens and letters that has a digit or a slash); the text task reads the whole word'
+        - 'DECtalk 4.63 LTS/l_us_pr1.c:815-863 (ls_proc_is_date, the date form, which is tried first)'
     # A number-like word kept whole, for a frontend whose lexicon reads such
     # words itself (tn_recognition_policy.number_tokens: source): a dollar
     # amount, a clock time, a number with a plural ending, a number with

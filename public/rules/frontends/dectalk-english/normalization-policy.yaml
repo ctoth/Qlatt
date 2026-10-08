@@ -25,6 +25,13 @@ maps:
     # text_parser), which writes a pause as phonemic text between two marks
     # (DECtalk 4.63 CMD/par_def1.h:286-287, CMD/cm_text.c:1088-1145).
     parser_marks: phonemic
+    # A word of digits and letters joined by hyphens or slashes stays as
+    # written too: the text task reads a fraction as one (LTS/ls_task.c:3688,
+    # LTS/l_us_pr1.c:980-1067) and any other as a part number, the hyphen and
+    # the slash by name (LTS/ls_task.c:4118-4180, LTS/l_us_pr1.c:161-255).
+    # Measured on say.exe: "1/8" is "one eighth", "3/8" "three eighths",
+    # "10-15" "ten dash fifteen", "1/1000" "one slash one thousand".
+    part_numbers: source
     fraction_exception: '100'
     # A capital letter followed by a period is an initial: it is spelled and
     # its period is sent twice (LTS/ls_task.c:2612-2623, 1516-1519,

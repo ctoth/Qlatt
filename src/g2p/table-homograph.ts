@@ -57,6 +57,13 @@ export interface ClauseContext {
    * before a mark and the mark is known.
    */
   markAfter?: string;
+  /**
+   * The word is a dollar amount and the next one is a word that takes
+   * "dollars" behind it ("$2 million").
+   */
+  quantityAfter?: boolean;
+  /** The word is such a word and stands right after a dollar amount. */
+  moneyBefore?: boolean;
 }
 
 /** The context of a word spoken alone. */

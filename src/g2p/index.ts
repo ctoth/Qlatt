@@ -39,7 +39,11 @@ import {
   NUMBER_WBOUND,
   numberWords,
   speakDigits,
+  speakFraction,
+  speakMoneyBeforeQuantity,
   speakNumberToken,
+  speakPartDigits,
+  speakQuantityAfterMoney,
 } from "./table-number";
 import { stripSuffixes } from "./table-suffix";
 import type { DictLookup, PronunciationResult } from "./types";
@@ -195,9 +199,14 @@ export function pronounce(
   // dollar sign, a colon or a plural ending does not reach.
   if (table?.numberPhones && /^[$0-9.]/.test(lowerWord)) {
     const digitsOnly = /^[0-9]+$/.test(lowerWord);
+    // A dollar amount before a word that takes "dollars" behind it ("$2
+    // million") is only its number here; that word speaks the rest
+    // (LTS/ls_task.c:3227-3290).
     const symbols = digitsOnly
       ? speakDigits(lowerWord, table.numberPhones)
-      : speakNumberToken(lowerWord, table.numberPhones);
+      : lowerWord.startsWith("$") && context.quantityAfter
+        ? speakMoneyBeforeQuantity(lowerWord.slice(1), table.numberPhones)
+        : speakNumberToken(lowerWord, table.numberPhones);
     const plainNumber = digitsOnly || /^[0-9,.]+$/.test(lowerWord);
     if (symbols) {
       const parts = numberWords(symbols, table);
@@ -211,6 +220,26 @@ export function pronounce(
           : {}),
       };
     }
+  }
+
+  // The word after a dollar amount, when it is one of the words that take
+  // "dollars" behind them: its phones from the table of those words, then
+  // "dollars", whatever the amount (DECtalk 4.63 LTS/ls_task.c:3234-3290 the
+  // lookahead and what is sent, LTS/l_us_con.c:539 nwdtab). Measured on
+  // say.exe: "$2 million" is "two million dollars", "$1 million" "one million
+  // dollars", "$2 millions" "two dollars millions".
+  const afterMoney =
+    table?.numberPhones && context.moneyBefore
+      ? speakQuantityAfterMoney(lowerWord, table.numberPhones)
+      : null;
+  if (table && afterMoney) {
+    const parts = numberWords(afterMoney, table);
+    return {
+      phonemes: parts.flatMap((part) => part.phonemes),
+      source: "number",
+      word: lowerWord,
+      parts,
+    };
   }
 
   // A unit's abbreviation, written with its period, one or two words after a
@@ -271,6 +300,92 @@ export function pronounce(
       ...phrased(entry.formClass),
       ...marked(entry),
     };
+  }
+
+  // A word of digits, letters, hyphens and slashes that has a digit and a
+  // hyphen or slash, and that the dictionary does not have ("1/2" it has).
+  // A fraction by DECtalk's test is spoken as one (LTS/ls_task.c:3688,
+  // speakFraction). Any other is a part number (LTS/ls_task.c:4118-4180,
+  // LTS/l_us_pr1.c:161-255): each hyphen and slash by its name, each run of
+  // digits as a number of two, three or four digits or digit by digit, each
+  // run of letters as the dictionary's word when it has three letters or
+  // more and the dictionary has it, and letter by letter otherwise; every
+  // piece a word. Measured on say.exe: "10-15" is "ten dash fifteen",
+  // "1990-1998" "nineteen ninety dash nineteen ninety eight", "1/1000" "one
+  // slash one thousand", "B-52" "b dash fifty two".
+  if (
+    table?.numberPhones &&
+    /^[a-z0-9/-]+$/.test(lowerWord) &&
+    /[0-9]/.test(lowerWord) &&
+    /[/-]/.test(lowerWord)
+  ) {
+    const lists = table.numberPhones;
+    const fraction = speakFraction(lowerWord, lists);
+    type Piece = NonNullable<PronunciationResult["parts"]>[number];
+    const pieces = (): Piece[] | null => {
+      const parts: Piece[] = [];
+      let pause = false;
+      const add = (...words: Piece[]): void => {
+        for (const word of words) {
+          parts.push(pause ? { ...word, pauseBefore: true } : word);
+          pause = false;
+        }
+      };
+      // The spelling routine speaks a character as the dictionary's entry
+      // for it (LTS/ls_spel.c ls_spel_spell). This frontend's dictionary
+      // file has no entries for the digits; a digit's name is taken from
+      // the number phone lists, which the recorded packets bear out.
+      const named = (char: string): Piece | null => {
+        if (/^[0-9]$/.test(char)) {
+          return numberWords(lists.units[Number(char)] as readonly number[], table)[0] ?? null;
+        }
+        const name = table.letterPhones?.[char] ?? dictLookup(char);
+        return name ? { phonemes: [...name] } : null;
+      };
+      for (const run of lowerWord.match(/[0-9]+|[a-z]+|[/-]/g) ?? []) {
+        if (/^[0-9]/.test(run)) {
+          const spoken = speakPartDigits(run, lists);
+          if (spoken) {
+            add(...numberWords(spoken, table));
+            continue;
+          }
+        } else if (/^[a-z]/.test(run) && run.length >= 3) {
+          // The dictionary lookup, suffixes included ("cats-12" has "cats").
+          const entry = dictLookup(run);
+          if (entry) {
+            add({ phonemes: [...(entryOf(run, 0).other?.phonemes ?? entry)] });
+            continue;
+          }
+          const { suffixIndex, suffixTable } = table;
+          const suffixed =
+            suffixIndex && suffixTable
+              ? stripSuffixes(run, dictLookup, { ...table, suffixIndex, suffixTable })
+              : null;
+          if (suffixed?.phonemes) {
+            add({ phonemes: [...suffixed.phonemes] });
+            continue;
+          }
+        }
+        const letters = [...run].map(named);
+        if (letters.some((letter) => letter === null)) return null;
+        add(...(letters as Piece[]));
+        // A run of four letters or more is spelled slowly, with a pause
+        // after it (LTS/ls_spel.c:224-256, LTS/l_us_pr1.c:241-246). When
+        // the run ends the word the pause falls after the word, which is
+        // not reproduced: "12-zorb now" has a pause before "now" in DECtalk.
+        if (/^[a-z]{4,}$/.test(run)) pause = true;
+      }
+      return parts;
+    };
+    const parts = fraction ? numberWords(fraction, table) : pieces();
+    if (parts && parts.length > 0) {
+      return {
+        phonemes: parts.flatMap((part) => part.phonemes),
+        source: "number",
+        word: lowerWord,
+        parts,
+      };
+    }
   }
 
   // A one-letter word that is in no dictionary is spelled: it is spoken as
@@ -557,6 +672,11 @@ export function pronounceClause(
   // (LTS/ls_task.c:3772 and 634).
   const numberBefore = (index: number): string | undefined =>
     [words[index - 1], words[index - 2]].find((word) => word !== undefined && /^[0-9]/.test(word));
+  const quantityWords = table.numberPhones?.quantityWords ?? {};
+  const quantityAt = (index: number): boolean =>
+    words[index] !== undefined && Object.hasOwn(quantityWords, words[index].toLowerCase());
+  const isAmount = (word: string | undefined): boolean =>
+    word !== undefined && /^\$(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)?(?:\.[0-9]+)?$/.test(word);
   const read = (laterVerbAt: ((index: number) => boolean) | null): PronunciationResult[] => {
     const before: number[] = [];
     return words.map((word, index) => {
@@ -571,6 +691,10 @@ export function pronounceClause(
           ...(index === words.length - 1 && options.endMark !== undefined
             ? { markAfter: options.endMark }
             : {}),
+          // A dollar amount and one of the words that take "dollars" behind
+          // them, side by side (LTS/ls_task.c:3234-3242).
+          ...(quantityAt(index + 1) && isAmount(word) ? { quantityAfter: true } : {}),
+          ...(quantityAt(index) && isAmount(words[index - 1]) ? { moneyBefore: true } : {}),
         },
       });
       before.push(result.formClassWord ?? 0);

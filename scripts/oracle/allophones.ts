@@ -66,6 +66,8 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // Hyphenated words, dictionary words with a slash, punctuation written
   // against an abbreviation, and the letter-to-sound rules' morpheme marks.
   "dectalk-us-word-forms-v1.json",
+  // Fractions, part numbers ("10-15") and a dollar amount before "million".
+  "dectalk-us-number-forms-v1.json",
 ];
 
 /** Every corpus with a packet record. */

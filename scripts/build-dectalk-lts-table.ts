@@ -445,6 +445,40 @@ const numberPhones = {
   monthNames: nameList("months", 12).map(stringConstant),
   months: nameList("pmonths", 12).map(phoneList),
   oh: phoneList("pOH"),
+  // A fraction's denominator 2 (LTS/l_us_pr1.c:1034-1067).
+  half: phoneList("phalf"),
+  halves: phoneList("phalves"),
+  // The words that take "dollars" behind them when they follow a dollar
+  // amount, nwdtab[] (LTS/l_us_con.c:539-567; LTS/ls_task.c:3227-3290): each
+  // entry is its length, the letters, EOS and the phones up to SIL; a 0 ends
+  // the table.
+  quantityWords: (() => {
+    const cells = arrayBody(read("l_us_con.c"), "nwdtab")
+      .split(",")
+      .map((cell) => cell.trim())
+      .filter((cell) => cell.length > 0);
+    const words: Record<string, number[]> = {};
+    let at = 0;
+    while (cells[at] !== "0") {
+      if (!/^\d+$/.test(cells[at] ?? "")) throw new Error(`E_NWDTAB: no length at cell ${at}`);
+      at += 1;
+      let key = "";
+      for (; cells[at] !== "EOS"; at += 1) {
+        const letter = /^'([a-z])'$/.exec(cells[at] ?? "");
+        if (!letter) throw new Error(`E_NWDTAB: '${String(cells[at])}' is not a letter`);
+        key += letter[1];
+      }
+      at += 1;
+      const list: number[] = [];
+      for (; cells[at] !== "SIL"; at += 1) {
+        if (at >= cells.length) throw new Error("E_NWDTAB: a phone list does not end with SIL");
+        list.push(symbolCode(cells[at] as string));
+      }
+      at += 1;
+      words[key] = list;
+    }
+    return words;
+  })(),
   // ls_util_pluralize (LTS/ls_util.c:1442-1466): [IX Z] after a sibilant
   // consonant, [S] after a voiceless consonant, [Z] after anything else.
   plural: {

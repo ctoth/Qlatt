@@ -36,8 +36,9 @@
  *
  *   --port     the preview server's port on 127.0.0.1 (default 8817; 0 = any free)
  *   --server   "build" (default) or "dev", Vite's dev server
- *   --base-f0  a base F0 for the frontend, as the page's "Base F0" box gives
- *              one (110 unless changed). Default: none, each voice's own.
+ *   --base-f0  a base F0 for the frontend, as a number in the page's "Base F0"
+ *              box gives one (the box starts empty; it used to start at 110).
+ *              Default: none, each voice's own.
  *
  * A text the browser does not render exactly is rendered again through Node
  * (scripts/oracle/dectalk-voice-compare.ts) so the table says whether the

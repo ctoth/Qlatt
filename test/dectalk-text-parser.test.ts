@@ -1,8 +1,9 @@
 /**
  * The command text parser port (src/text-parser: the rule interpreter, the
  * clause reader and the dictionary question) against DECtalk 4.63's own
- * parser: for every text of the recorded fixture
- * (test/fixtures/dectalk-oracle/dectalk-us-text-parser-v1.json, written by
+ * parser: for every text of the recorded fixtures
+ * (test/fixtures/dectalk-oracle/dectalk-us-text-parser-v1.json and
+ * dectalk-us-text-parser-b-v1.json, written by
  * scripts/oracle/export-text-parser-fixture.ts from the instrumented say.exe),
  * the clauses the port hands on must be the clauses DECtalk handed to its
  * letter-to-sound stage, character for character.
@@ -19,7 +20,7 @@ const recorded = Object.entries(recordedClauses()).filter(
 
 describe("dectalk text parser", () => {
   it("has the recorded texts to compare", () => {
-    expect(recorded.length).toBe(594);
+    expect(recorded.length).toBe(614);
   });
 
   it("cuts and rewrites every recorded text as DECtalk does", () => {
@@ -84,6 +85,22 @@ describe("dectalk-english runs its text parser first", () => {
         decision.recognition.outcome === "accepted",
     );
     expect(pauses.length).toBe(1);
+  });
+
+  it("takes a command out of the text and says so", () => {
+    const decisions = decisionsFor("Say this [:rate 180] and then that.", "dectalk-english");
+    const dropped = decisions.filter((decision) => decision.type === "text_parser_command_dropped");
+    expect(dropped.map((decision) => decision.reason)).toEqual([
+      'The command "[:rate 180]" was taken out of the text and not carried out: in-text commands are not ported',
+    ]);
+  });
+
+  it("speaks a text with a bracket or a very long clause without an error", () => {
+    const long = `${"the long road went on and on past the low hills ".repeat(8)}to the sea.`;
+    expect(long.length).toBeGreaterThan(300);
+    for (const text of ["The array[3] holds a value.", "A lone [ bracket is here.", long]) {
+      expect(() => decisionsFor(text, "dectalk-english")).not.toThrow();
+    }
   });
 
   it("leaves a frontend without the policy block alone", () => {

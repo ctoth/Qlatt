@@ -12,7 +12,7 @@
 
 import type { ProvenanceCollector } from "../provenance";
 import { loadYamlDocumentSync } from "../yaml-loader";
-import { readClauses } from "./clauses";
+import { clauseStream, readClauses } from "./clauses";
 import { dictionaryLookup } from "./dictionary";
 import type { TextParserTable } from "./interpreter";
 
@@ -210,6 +210,17 @@ export function runTextParser(
       });
       decisionIds.push(decision.id);
     },
+    onCommand: (command) => {
+      const decision = provenance.add({
+        stage: "transcribe",
+        type: "text_parser_command_dropped",
+        subject: "text_parser",
+        reason: `The command ${quoted(`[:${decode(command, marks)}]`)} was taken out of the text and not carried out: in-text commands are not ported`,
+        citations: ["DECtalk 4.63 CMD/cm_pars.c:1379-1403 (a bracket and a colon start a command)"],
+        parents: [input.id],
+      });
+      decisionIds.push(decision.id);
+    },
   });
-  return { text: decode(clauses.join(""), marks), decisionIds };
+  return { text: decode(clauseStream(table, clauses), marks), decisionIds };
 }

@@ -27,6 +27,8 @@ const MAIN_MODE = 0x0100;
  * forced speak appends (samples/SAY/say.c:249, API/ttsapi.c:4559).
  */
 const SAY_ENDING = `${" ".repeat(8)}\x0b`;
+/** The recorded fixtures: the first lists, and the second list of probes. */
+const FIXTURES = ["dectalk-us-text-parser-v1.json", "dectalk-us-text-parser-b-v1.json"];
 /** say.exe's closing flush, as export-text-parser-fixture.ts leaves it out. */
 const FLUSH = /^(?:\s|\\x0[ab])*$/;
 
@@ -81,18 +83,22 @@ export function textParserPort(options: PortOptions = {}): (text: string) => str
       dictionary,
       onHit: options.onHit,
     })
-      .map(visible)
+      .map((clause) => visible(clause.text))
       .filter((clause) => !FLUSH.test(clause));
 }
 
 /** The recorded clauses of each text; null where say.exe would not take the text. */
 export function recordedClauses(): Record<string, string[] | null> {
-  return (
-    JSON.parse(
-      fs.readFileSync(
-        path.join(repoRoot, "test", "fixtures", "dectalk-oracle", "dectalk-us-text-parser-v1.json"),
-        "utf8",
-      ),
-    ) as { entries: Record<string, string[] | null> }
-  ).entries;
+  const entries: Record<string, string[] | null> = {};
+  for (const file of FIXTURES) {
+    Object.assign(
+      entries,
+      (
+        JSON.parse(
+          fs.readFileSync(path.join(repoRoot, "test", "fixtures", "dectalk-oracle", file), "utf8"),
+        ) as { entries: Record<string, string[] | null> }
+      ).entries,
+    );
+  }
+  return entries;
 }

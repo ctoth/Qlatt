@@ -52,6 +52,8 @@ export interface ClauseTable {
   rollingStop: number;
   /** This many white space characters in a row end a clause. */
   whiteSpaceRun: number;
+  /** Commands (by the start of their name) that do not end the clause before them. */
+  markingCommands: readonly string[];
   clauseEnd: number;
   phonesOn: number;
   phonesOff: number;
@@ -89,17 +91,28 @@ export interface PassOptions {
   mode: number;
   /** Which rule section to run. */
   section: number;
+  /**
+   * Stop once two thirds of the input are read (the C's go_until, for a
+   * clause too long to wait for its end; :1121-1132).
+   */
+  partial?: boolean;
   /** Called for every rule that hits, in order. */
   onHit?: (hit: { rule: TextParserRule; before: string; after: string }) => void;
+}
+
+/** What a pass wrote, and how many bytes of its input it read. */
+export interface PassResult {
+  output: number[];
+  consumed: number;
 }
 
 export interface TextParser {
   /**
    * Rewrite a clause, given as bytes, with the rules of a section.
    * `dictHit[i]` is the dictionary state of the word that starts at byte i.
-   * The answer is the output up to where the rules left off.
+   * The output is what was written up to where the rules left off.
    */
-  rewrite(input: readonly number[], dictHit: readonly number[], options: PassOptions): number[];
+  rewrite(input: readonly number[], dictHit: readonly number[], options: PassOptions): PassResult;
   /** What a status state last set. */
   parserFlag: number;
 }
@@ -1236,7 +1249,7 @@ export function rewriteText(table: TextParserTable, text: string, options: Rewri
   const dictHit = input.map((_, position) =>
     options.dictionaryState ? options.dictionaryState(text, position) : DICT_MISS_VALUE,
   );
-  return fromBytes(createTextParser(table).rewrite(input, dictHit, options));
+  return fromBytes(createTextParser(table).rewrite(input, dictHit, options).output);
 }
 
 /**
@@ -1265,7 +1278,7 @@ function processInput(
   newInput: number[],
   dictHit: number[],
   options: PassOptions,
-): number[] {
+): PassResult {
   const table = machine.table;
   const types = table.characterTypes;
   if (options.section >= table.sections.length) {
@@ -1287,8 +1300,16 @@ function processInput(
   let saveRet = copyReturn(newRet);
   let doNotCopyNextWord = false;
   const isWhite = (char: number): boolean => (types[char] & TYPE_WHITE) !== 0;
+  // A partial pass reads two thirds of the input as it was given; what the
+  // rules have added to the input since does not count (:1128-1132, :1601).
+  const partialLength = Math.floor((newInput.length * 2) / 3);
+  let newInputDiff = 0;
+  const more = (): boolean => {
+    const position = newRet.inputPos + newRet.inputOffset;
+    return options.partial ? position - newInputDiff < partialLength : at(newInput, position) !== 0;
+  };
 
-  while (at(newInput, newRet.inputPos + newRet.inputOffset) !== 0) {
+  while (more()) {
     let done = false;
     // par_skip_white_space (:4980-5041): the first white space is copied.
     {
@@ -1452,6 +1473,7 @@ function processInput(
                 }
                 // The C moves the terminating NUL too; here the array ends.
                 while (newInput.length > 0 && newInput[newInput.length - 1] === 0) newInput.pop();
+                newInputDiff += sizeDiff;
                 for (let i = 0; i < outputSize; i += 1) newInput[wordStart + i] = written[i];
                 hitRet.inputOffset += sizeDiff;
                 newRet.inputOffset = saveRet.inputOffset;
@@ -1502,8 +1524,12 @@ function processInput(
       newRet.outputOffset += i;
     }
   }
-  return Array.from(
-    { length: newRet.outputPos + newRet.outputOffset },
-    (_, index) => output[index] ?? 0,
-  );
+  return {
+    output: Array.from(
+      { length: newRet.outputPos + newRet.outputOffset },
+      (_, index) => output[index] ?? 0,
+    ),
+    // :1746: where the pass left off, in the input as it was given.
+    consumed: newRet.inputPos + newRet.inputOffset - newInputDiff,
+  };
 }

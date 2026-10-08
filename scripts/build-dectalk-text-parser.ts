@@ -326,6 +326,9 @@ const clauses = {
   rollingStop: Number(rollingStop[1]),
   // cm_pars.c:1336: this many white space characters in a row end a clause.
   whiteSpaceRun: 40,
+  // cm_cmd.c:168, :288: every command but the index commands has the clause
+  // before it finished.
+  markingCommands: ["index"],
   // The character that ends a clause (cm_text.c:471) and the marks around
   // phonemic text (par_def1.h).
   clauseEnd: 0x0b,

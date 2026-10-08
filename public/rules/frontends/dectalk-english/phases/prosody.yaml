@@ -760,6 +760,67 @@ rules:
       - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (SI target) and :2080-2150 pht0draw"
       - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause of 4 or 5 frames)"
 
+  # --------------------------------------------------------------------------
+  # A clause with no phone. A capital letter with a period ("A.") sends its
+  # period twice (LTS/ls_task.c:1516-1519, 1547-1549), and DECtalk speaks the
+  # second as a clause of two silences, an opening and a closing one. Here it
+  # is a clause silence that directly follows another. pht0draw starts it
+  # like any clause: its opening pause is an allophone of the segmental path
+  # (the closing one comes from dectalk_segmental_f0_final_silence), and it
+  # takes a baseline by its mark and its word count, which is 0: the short
+  # declarative row for a male voice, the declarative row for a female one.
+  # --------------------------------------------------------------------------
+  dectalk_empty_clause_f0_opening_silence:
+    kind: f0_layer
+    select: &empty_clause
+      relation: Segment
+      where: >-
+        current.phoneme == 'SIL' && has(current.punctuationSymbol)
+        && prev != null && prev.phoneme == 'SIL' && has(prev.punctuationSymbol)
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: "params.policy.f0.segmental.targets[params.policy.voice.sex].SIL"
+      duration_frames: dectalk_clause_initial_pause_frames(current)
+      profile_points: [1, 0, 0, 0]
+      tag: f0_segmental_initial_silence
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:1516-1519, 1547-1549 (a capital letter and a period: the period is sent twice)"
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (SI target) and :2080-2150 pht0draw"
+      - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause of 4 or 5 frames)"
+
+  dectalk_empty_clause_baseline:
+    kind: f0_layer
+    select: *empty_clause
+    constraint: "params.policy.voice.sex == 'male' && current.punctuationSymbol == '.'"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1160, 1150, 1140, 1152, 1132, 1140, 1130, 1124, 1110, 1100, 1080, 1060, 1040, 1020, 980, 960, 950]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c f0basetypes[4][] (short declarative baseline, number_words <= 3)"
+      - "DECtalk 4.63 Ph_drwt02.c:1660-1667 (clausetype 0: f0basetypes[4] unless number_words > 3)"
+
+  dectalk_female_empty_clause_baseline:
+    kind: f0_layer
+    select: *empty_clause
+    constraint: "params.policy.voice.sex != 'male' && current.punctuationSymbol == '.'"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1795, 1782, 1779, 1765, 1763, 1750, 1748, 1734, 1720, 1714, 1708, 1887]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:2462-2478 f0basetypes[0][] (female)"
+      - "DECtalk 4.63 Ph_drwt02.c:2482 (f0basetypes[1][0], read as f0baseline[17]); :3530 (basecntr <= 15)"
+      - "DECtalk 4.63 Ph_drwt02.c:3225-3232 (clausetype 0 in the female routine)"
+
   # The baseline's clock is tcumdur, which phinton adds up one allophone at a
   # time at the foot of its loop (Ph_inton2.c:1659-1671). Where the walk stops
   # early (809-819) the allophones from the stopping syllabic on are never

@@ -300,12 +300,13 @@ frame_programs:
         value: "fd_place(current, 'palatal') || fd_place(current, 'dental')"
         edge: false
       # The own target of the allophone after this one, which gettar() takes
-      # for a phone that has none.
-      nextown_F1: { value: "fd_own(fd_next(current), 'F1')", edge: -1 }
-      nextown_F2: { value: "fd_own(fd_next(current), 'F2')", edge: -1 }
-      nextown_F3: { value: "fd_own(fd_next(current), 'F3')", edge: -1 }
-      nextown_B2: { value: "fd_own(fd_next(current), 'B2')", edge: -1 }
-      nextown_B3: { value: "fd_own(fd_next(current), 'B3')", edge: -1 }
+      # for a phone that has none. A clause's closing silence has no allophone
+      # after it: the next clause's first phone is not in its clause.
+      nextown_F1: { value: "fd_is_silence(current) ? -1 : fd_own(fd_next(current), 'F1')", edge: -1 }
+      nextown_F2: { value: "fd_is_silence(current) ? -1 : fd_own(fd_next(current), 'F2')", edge: -1 }
+      nextown_F3: { value: "fd_is_silence(current) ? -1 : fd_own(fd_next(current), 'F3')", edge: -1 }
+      nextown_B2: { value: "fd_is_silence(current) ? -1 : fd_own(fd_next(current), 'B2')", edge: -1 }
+      nextown_B3: { value: "fd_is_silence(current) ? -1 : fd_own(fd_next(current), 'B3')", edge: -1 }
       # The allophone's own table target at its beginning and at its end; -1 for none.
       own_F1: { value: "fd_own(current, 'F1')", edge: -1 }
       own_F2: { value: "fd_own(current, 'F2')", edge: -1 }
@@ -945,17 +946,19 @@ rules:
       - { register: dur_F3, value: "params.policy.timing.frames.ms30", tag: formant_ramp }
     citations:
       - "DECtalk 4.63 PH/p_us_st1.c:475-489"
-  # Silence: from where the last phone ended, over the whole silence; the
-  # clause's first silence (nphone <= 1) from the next phone's beginning.
+  # Silence: from where the last phone ended, over the whole silence; a
+  # silence that is the clause's allophone 0 or 1 (nphone <= 1) from the next
+  # phone's beginning. Allophone 1 is a silence only in a clause with no
+  # phone, whose closing silence directly follows its opening one.
   fd_forward_silence:
     kind: frame
     program: formants
     unit: "u.silence"
     at: start
     set:
-      - { register: bou_F1, value: "u.initial ? r.nex_F1 : r.las_F1", tag: formant_ramp }
-      - { register: bou_F2, value: "u.initial ? r.nex_F2 : r.las_F2", tag: formant_ramp }
-      - { register: bou_F3, value: "u.initial ? r.nex_F3 : r.las_F3", tag: formant_ramp }
+      - { register: bou_F1, value: "u.initial || p.initial ? r.nex_F1 : r.las_F1", tag: formant_ramp }
+      - { register: bou_F2, value: "u.initial || p.initial ? r.nex_F2 : r.las_F2", tag: formant_ramp }
+      - { register: bou_F3, value: "u.initial || p.initial ? r.nex_F3 : r.las_F3", tag: formant_ramp }
       - { register: dur_F1, value: "f.count", tag: formant_ramp }
       - { register: dur_F2, value: "f.count", tag: formant_ramp }
       - { register: dur_F3, value: "f.count", tag: formant_ramp }

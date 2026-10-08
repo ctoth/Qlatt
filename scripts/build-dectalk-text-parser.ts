@@ -28,6 +28,10 @@
  * Usage:
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
  *     scripts/build-dectalk-text-parser.ts [--dectalk C:/Users/Q/src/dectalk/463] [--out <file>]
+ *       [--check]
+ *
+ *   --check  write nothing; exit 1 unless the file at --out (the frontend's
+ *            table by default) is exactly what the DECtalk source gives
  */
 
 import fs from "node:fs";
@@ -364,38 +368,49 @@ const capitalSpellings = Object.fromEntries(
   [...spellings].filter(([key, list]) => list.some((word) => word !== key)),
 );
 
-fs.mkdirSync(path.dirname(outPath), { recursive: true });
-fs.writeFileSync(
-  outPath,
-  `${JSON.stringify({
-    schemaVersion: "v1",
-    source: `DECtalk 4.63 CMD/${HEADER} (compiled from CMD/${RULE_TEXT}), CMD/par_char.c, INCLUDE/ls_lower.tab, CMD/cm_char.c, CMD/cm_defs.h, CMD/par_def1.h, CMD/cm_text.c, CMD/cm_pars.c; decoded by scripts/build-dectalk-text-parser.ts`,
-    ruleText: `CMD/${RULE_TEXT}`,
-    // The bytes above 0x7F and the control byte that the rules write into
-    // their output or read from their input, and what each is.
-    controlBytes: {
-      "0x0B":
-        "the clause end: the host's 'speak this now' (CMD/cm_text.c:471), also written by the address rules after an address",
-      "0x81": "start of phonemic text (CMD/par_def1.h PAR_PHONES_ON_D)",
-      "0x82": "end of phonemic text (PAR_PHONES_OFF_D)",
-      "0x83":
-        "the place of an index mark (PAR_INDEX_DUMMY_CHAR); in the input only after an in-text index command",
-      "0x84":
-        "written and read back by the path rules R2431, R2444 and R2450 (lines 172, 348, 350): the end of a path being split at its backslashes",
-      "0x85":
-        "written by R2444 for a backslash inside a path and turned back into one by R2430 (line 171)",
-      "0x86":
-        "written after each digit by the telephone rules R520 to R532 (lines 778-788) and read by R540 and R547, which replace the digit and the mark with the digit's word from the list spanish_num; those rules are reached only from rules of the Spanish language masks, so the byte never occurs for US English",
-    },
-    sections: ruleSections,
-    rules,
-    dictionaries,
-    characterTypes,
-    lowerCase,
-    clauses,
-    capitalSpellings,
-  })}\n`,
-);
+const content = `${JSON.stringify({
+  schemaVersion: "v1",
+  source: `DECtalk 4.63 CMD/${HEADER} (compiled from CMD/${RULE_TEXT}), CMD/par_char.c, INCLUDE/ls_lower.tab, CMD/cm_char.c, CMD/cm_defs.h, CMD/par_def1.h, CMD/cm_text.c, CMD/cm_pars.c; decoded by scripts/build-dectalk-text-parser.ts`,
+  ruleText: `CMD/${RULE_TEXT}`,
+  // The bytes above 0x7F and the control byte that the rules write into
+  // their output or read from their input, and what each is.
+  controlBytes: {
+    "0x0B":
+      "the clause end: the host's 'speak this now' (CMD/cm_text.c:471), also written by the address rules after an address",
+    "0x81": "start of phonemic text (CMD/par_def1.h PAR_PHONES_ON_D)",
+    "0x82": "end of phonemic text (PAR_PHONES_OFF_D)",
+    "0x83":
+      "the place of an index mark (PAR_INDEX_DUMMY_CHAR); in the input only after an in-text index command",
+    "0x84":
+      "written and read back by the path rules R2431, R2444 and R2450 (lines 172, 348, 350): the end of a path being split at its backslashes",
+    "0x85":
+      "written by R2444 for a backslash inside a path and turned back into one by R2430 (line 171)",
+    "0x86":
+      "written after each digit by the telephone rules R520 to R532 (lines 778-788) and read by R540 and R547, which replace the digit and the mark with the digit's word from the list spanish_num; those rules are reached only from rules of the Spanish language masks, so the byte never occurs for US English",
+  },
+  sections: ruleSections,
+  rules,
+  dictionaries,
+  characterTypes,
+  lowerCase,
+  clauses,
+  capitalSpellings,
+})}\n`;
+if (argv.includes("--check")) {
+  // The table in the tree against what the DECtalk source gives now.
+  const current = fs.existsSync(outPath) ? fs.readFileSync(outPath, "utf8") : null;
+  if (current !== content) {
+    console.error(
+      current === null
+        ? `E_TEXT_PARSER_TABLE_MISSING: ${path.relative(repoRoot, outPath)} does not exist`
+        : `E_TEXT_PARSER_TABLE_STALE: ${path.relative(repoRoot, outPath)} is not what this script writes from ${dectalkRoot}; run it without --check and read the diff`,
+    );
+    process.exit(1);
+  }
+} else {
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, content);
+}
 const kinds = new Map<string, number>();
 for (const rule of rules) kinds.set(rule.kind, (kinds.get(rule.kind) ?? 0) + 1);
 console.log(

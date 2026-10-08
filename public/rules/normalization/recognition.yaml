@@ -180,6 +180,43 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entries with a slash), LTS/ls_task.c:2040-2160 (the word is looked up as written before anything is stripped from it)'
+    # A word with no letter and no digit, standing alone between white space,
+    # that the frontend's dictionary holds: "%", "@", "&", "+", "=", "#", "*",
+    # and a mark a text parser has left alone ("?", "!", ",", a quote). One
+    # word, the dictionary's ("percent", "at", "question mark", "comma").
+    # The generated map tn_symbol_words is the dictionary's entries with no
+    # letter and no digit. A period alone is not this rule's: it ends a
+    # clause. Only for a frontend whose policy asks for it
+    # (tn_recognition_policy.symbol_words: dictionary). Measured on say.exe:
+    # "It is % here." has P RR S EH N T; the parser's `'no' ? " he` has
+    # K W EH S CH AX N, M AA R K, K W OW T between "no" and "he" and no
+    # clause end.
+    - id: tn_symbol_word_source
+      pattern: '(?<=^|\s)(?<word>[^\sA-Za-z0-9.\x00-\x1f\x7f-\x9f]+?)(?=[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: symbol_word
+      captures: {word: word}
+      when: >-
+        get(maps.tn_recognition_policy, 'symbol_words', 'dropped') == 'dictionary'
+        && captures.word in get(maps, 'tn_symbol_words', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entries with no letter and no digit), LTS/ls_task.c:697 and 746 (the dictionary search comes before punctuation is stripped), 2040-2160 (the word is looked up as written)'
+    # A word of letters and digits with an underscore in it
+    # ("tom_west42"): one word, which the frontend's lexicon spells character
+    # by character. Only for a frontend whose policy asks for it
+    # (tn_recognition_policy.underscore_words: spelled).
+    - id: tn_underscore_word_source
+      pattern: '(?<=^|\s)(?<word>(?=[A-Za-z0-9_]*[A-Za-z0-9])[A-Za-z0-9_]*_[A-Za-z0-9_]*)(?=[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'underscore_words', 'split') == 'spelled'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:151-170 (each character by its name)'
     # A word with a question mark and an exclamation mark written on it, in
     # either order ("What?!", "that!?", and "?!?", "?!!"): the last mark ends
     # the clause and what stands before it stays on the word, which the

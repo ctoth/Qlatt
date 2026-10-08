@@ -41,6 +41,18 @@ export interface TranscriptionToken {
   symbol?: string;
   duration?: number;
   _pronDecisionId?: string;
+  /**
+   * Inside transcription only: the phone is in the last word of phonemic
+   * text, which has no word boundary after it (transcribe-text.ts
+   * joinPhonemicText removes the mark).
+   */
+  _joinsNextWord?: boolean;
+  /**
+   * Inside transcription only: the token's reading ends in this phrase
+   * start, which is the next word's (transcribe-text.ts
+   * startPhraseAtNextWord removes the mark).
+   */
+  _phraseStartAfter?: "vp" | "pp";
   sourceTokenId: string;
 }
 
@@ -87,6 +99,12 @@ export type TranscriptionConfig = {
    * character and not only up to a punctuation token. None when absent.
    */
   word_stretch_end_characters?: string;
+  /**
+   * Two lengths of text gathered since a stretch of words last ended: past
+   * the first a stretch ends at the next white space, past the second at
+   * once. None when absent.
+   */
+  word_stretch_length_limits?: number[];
 };
 
 export type TranscriptionOptions = {

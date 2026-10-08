@@ -107,6 +107,8 @@ type RequiredTranscriptionTables = {
   punctuationTokens: Set<string>;
   /** Characters that end a stretch of words when a written word ends in one. */
   wordStretchEndCharacters: string;
+  /** The lengths of gathered text at which a stretch of words ends (gatheredStretchEnds). */
+  wordStretchLimits?: readonly [number, number];
 };
 
 // ---------------------------------------------------------------------------
@@ -290,8 +292,24 @@ function requireTranscriptionTables(
       "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.word_stretch_end_characters must be a string",
     );
   }
+  const stretchLimits = config.word_stretch_length_limits;
+  if (
+    stretchLimits !== undefined &&
+    !(
+      Array.isArray(stretchLimits) &&
+      stretchLimits.length === 2 &&
+      stretchLimits.every((limit) => Number.isInteger(limit) && limit > 0)
+    )
+  ) {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.word_stretch_length_limits must be two positive whole numbers",
+    );
+  }
   return {
     wordStretchEndCharacters: stretchEnd ?? "",
+    ...(stretchLimits
+      ? { wordStretchLimits: [stretchLimits[0] as number, stretchLimits[1] as number] as const }
+      : {}),
     symbolInput: symbolInput !== false,
     elidedApostropheLookup: elidedApostropheLookup !== false,
     sources: requireLexiconSources(config.sources),
@@ -307,6 +325,48 @@ function getDefaultTranscriptionTables(): RequiredTranscriptionTables {
 
 function isPunctuationTokenWithTables(word: string, tables: RequiredTranscriptionTables): boolean {
   return tables.punctuationTokens.has(word);
+}
+
+/**
+ * The places in `text` where the text gathered so far is handed on because of
+ * its length alone: the index of the character at which more than `limits[0]`
+ * characters have been gathered and the character is white space, or at which
+ * more than `limits[1]` have been gathered whatever the character.
+ *
+ * DECtalk's letter-to-sound gathers the characters it is sent and parses and
+ * speaks them together (LTS/ls_task.c:365-372) when a white space character
+ * follows a clause-mark character, when the character is the clause end 0x0b,
+ * or at these two lengths (`temp>400` at white space, `temp>480`); a
+ * character that is not text does the same (:446-470). Gathering starts
+ * again after each. `endCharacters` are the clause-mark characters; the
+ * characters 0x80 to 0x9f are a text parser's marks around what is not text.
+ */
+function gatheredStretchEnds(
+  text: string,
+  endCharacters: string,
+  limits: readonly [number, number],
+): number[] {
+  const ends: number[] = [];
+  let gathered = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index] as string;
+    const code = char.charCodeAt(0);
+    if (code >= 0x80 && code <= 0x9f) {
+      gathered = 0;
+      continue;
+    }
+    const white = /\s/.test(char);
+    const afterMark = index > 0 && endCharacters.includes(text[index - 1] as string);
+    if ((white && afterMark) || code === 0x0b) {
+      gathered = 0;
+    } else if ((gathered > limits[0] && white) || gathered > limits[1]) {
+      ends.push(index);
+      gathered = 0;
+    } else {
+      gathered += 1;
+    }
+  }
+  return ends;
 }
 
 function getDiagnosticSymbolPronunciationWithTables(
@@ -345,10 +405,15 @@ function rewriteOrthographyTokens(
   // Word tokens whose written word ends in a character that ends a stretch
   // of words for the frontend (an abbreviation's period, a final apostrophe).
   const stretchEnds = new Set<string>();
+  // Each word token with the text it was written in and where it ends there.
+  const writtenWords: Array<{ tokenId: string; text: string; end: number }> = [];
   entries.forEach((entry, index) => {
     const input = sharedInput ?? beginInput();
     const word = typeof entry === "string" ? entry : entry.word;
-    const punctuation = isPunctuationTokenWithTables(word, tables);
+    // A terminal a text rule declared a word is one, whatever its text: a
+    // mark standing alone that the frontend's lexicon speaks by its name.
+    const declaredWord = typeof entry !== "string" && entry.source.get("kind") === "word";
+    const punctuation = !declaredWord && isPunctuationTokenWithTables(word, tables);
     const token = input.createItem("token", `token_${index.toString()}`);
     if (typeof entry !== "string") {
       const sourceText = utterance.getItem(String(entry.source.get("sourceTextId")))?.get("text");
@@ -364,6 +429,7 @@ function rewriteOrthographyTokens(
         ) {
           stretchEnds.add(token.id);
         }
+        if (!punctuation) writtenWords.push({ tokenId: token.id, text: sourceText, end });
       }
     }
     if (typeof entry !== "string") {
@@ -380,6 +446,24 @@ function rewriteOrthographyTokens(
     if (!sharedInput) input.commit();
   });
   sharedInput?.commit();
+  // A stretch of words also ends where the text gathered since the last end
+  // grows past the frontend's limit: the last word written before that place.
+  if (tables.wordStretchLimits) {
+    const places = new Map<string, number[]>();
+    for (const word of writtenWords) {
+      const ends =
+        places.get(word.text) ??
+        gatheredStretchEnds(word.text, tables.wordStretchEndCharacters, tables.wordStretchLimits);
+      places.set(word.text, ends);
+    }
+    for (const [text, ends] of places) {
+      const words = writtenWords.filter((word) => word.text === text);
+      for (const place of ends) {
+        const last = words.findLast((word) => word.end <= place);
+        if (last) stretchEnds.add(last.tokenId);
+      }
+    }
+  }
   runGraphRuleEngine(utterance, compiledSpec, { phases: ["orthography"] });
 
   return utterance
@@ -806,6 +890,18 @@ export function transcribeText(
               stress: match.stress,
               sourceTokenId: part.tokenId,
               word: part.word,
+              // The last word of phonemic text has no word boundary after it
+              // (joinPhonemicText below).
+              ...(pronResult.source === "phonemic" && part === spokenParts.at(-1)
+                ? { _joinsNextWord: true }
+                : {}),
+              // A phrase start after the token's last word is the next
+              // word's (startPhraseAtNextWord below).
+              ...("phraseStartAfter" in pronResult &&
+              pronResult.phraseStartAfter &&
+              part === spokenParts.at(-1)
+                ? { _phraseStartAfter: pronResult.phraseStartAfter }
+                : {}),
               // The rules that read a word's classes are the phonetic stage's.
               ...("formClasses" in pronResult && pronResult.formClasses
                 ? {
@@ -895,5 +991,138 @@ export function transcribeText(
       { count: emptyPronunciations.length, affected: emptyPronunciations },
       "EMPTY_PRONUNCIATION_SILENCE",
     );
+  joinPhonemicText(flatPhonemeList, provenance);
+  startPhraseAtNextWord(flatPhonemeList, provenance);
   return flatPhonemeList; // Return the flat list of phoneme objects
+}
+
+/**
+ * A phrase start that a token's reading ends in belongs to the word after
+ * it. DECtalk's time routine sends the hour, a verb-phrase start, and the
+ * minutes unless they are "00" (LTS/l_us_pr1.c:1182-1199); the text task then
+ * sends the word boundary (LTS/ls_task.c:3612-3625) and the next word. Of two
+ * markers in a row the phonemic stage keeps the stronger (PH/ph_task.c:856-885):
+ * the word boundary after the phrase start is dropped, and so is a
+ * prepositional-phrase start the next word brings. Punctuation after the
+ * token ends the clause and the mark with it.
+ *
+ * Measured on DECtalk 4.63 say.exe, as the symbols the phonemic stage
+ * receives: "Dinner is at 6:00 sharp." has S IH K S, verb-phrase start,
+ * SH AA R P; "We close at 5:30 today." has the mark between F AY V and
+ * TH RR T IY and a word boundary before "today".
+ */
+function startPhraseAtNextWord(
+  phones: TranscriptionToken[],
+  provenance: TranscriptionOptions["provenance"],
+): void {
+  phones.forEach((phone, index) => {
+    const mark = phone._phraseStartAfter;
+    if (!mark) return;
+    delete phone._phraseStartAfter;
+    const next = phones[index + 1];
+    // Every phone of the token's last word carries the mark; act at the last.
+    if (!next || next.sourceTokenId === phone.sourceTokenId || next.isPunctuation) return;
+    for (let at = index + 1; phones[at]?.sourceTokenId === next.sourceTokenId; at += 1) {
+      (phones[at] as TranscriptionToken).phraseStart = mark;
+    }
+    provenance?.add({
+      stage: "transcribe",
+      type: "phrase_start_from_previous_word",
+      subject: next.sourceTokenId,
+      reason: `'${next.word}' starts a ${mark === "vp" ? "verb" : "prepositional"} phrase: '${phone.word}' ends in that mark`,
+      citations: [
+        "DECtalk 4.63 LTS/l_us_pr1.c:1182-1199 (ls_proc_do_time: the hour, a verb-phrase start, the minutes unless 00)",
+        "DECtalk 4.63 PH/ph_task.c:856-885 (of two markers in a row the stronger is kept)",
+      ],
+      parents: phone._pronDecisionId ? [phone._pronDecisionId] : [],
+    });
+  });
+}
+
+/**
+ * Phonemic text has no word boundary after it: its phones and those of the
+ * word that follows are one word. DECtalk's letter-to-sound sends the symbol
+ * that ends a word after each word it reads (LTS/ls_task.c:1144-1260
+ * ls_task_do_right_punct, the word boundary unless a mark was stripped from
+ * the word); phonemic text is sent on symbol by symbol with nothing after it
+ * (CMD/cm_text.c:1118-1144). A phrase mark in front of the next word still
+ * parts the two, and so does punctuation.
+ *
+ * Measured on DECtalk 4.63 say.exe, as the symbols the phonemic stage
+ * receives: "john.smith@example.com", which its text parser writes with
+ * phonemic text for each period, is JH AA N, boundary, D AA T S M IH TH,
+ * boundary, AE T, boundary, IX G Z AE M P EL, boundary, D AA T K AA M;
+ * "...but nobody came." starts D AA T B AH T; "...and then" has the phrase
+ * mark of "and" after D AA T.
+ */
+function joinPhonemicText(
+  phones: TranscriptionToken[],
+  provenance: TranscriptionOptions["provenance"],
+): void {
+  for (let start = 0; start < phones.length; ) {
+    const first = phones[start] as TranscriptionToken;
+    if (!first._joinsNextWord) {
+      start += 1;
+      continue;
+    }
+    let end = start;
+    while (
+      end < phones.length &&
+      phones[end]?._joinsNextWord &&
+      phones[end]?.sourceTokenId === first.sourceTokenId
+    ) {
+      end += 1;
+    }
+    const next = phones[end];
+    const run = phones.slice(start, end);
+    for (const phone of run) delete phone._joinsNextWord;
+    // The words before phonemic text are a stretch of their own: an item
+    // that is not a character makes letter-to-sound parse and speak the text
+    // it has gathered before the item is sent on (LTS/ls_task.c:446-470).
+    const before = phones[start - 1];
+    if (before && !before.isPunctuation) {
+      for (let at = start - 1; phones[at]?.sourceTokenId === before.sourceTokenId; at -= 1) {
+        (phones[at] as TranscriptionToken).endsWordStretch = true;
+      }
+    }
+    if (
+      next &&
+      !next.isPunctuation &&
+      !next.phraseStart &&
+      // Phonemic text after phonemic text is joined when its own turn comes.
+      next.sourceTokenId !== first.sourceTokenId
+    ) {
+      const {
+        formClasses,
+        textFormClasses,
+        conjunctionRole,
+        readAhead,
+        endsWordStretch,
+        continuesWrittenWord,
+      } = next;
+      for (const phone of run) {
+        phone.sourceTokenId = next.sourceTokenId;
+        phone.word = next.word;
+        if (formClasses) phone.formClasses = formClasses;
+        if (textFormClasses) phone.textFormClasses = textFormClasses;
+        if (conjunctionRole) phone.conjunctionRole = conjunctionRole;
+        if (readAhead) phone.readAhead = readAhead;
+        if (endsWordStretch) phone.endsWordStretch = endsWordStretch;
+        if (continuesWrittenWord) phone.continuesWrittenWord = continuesWrittenWord;
+        else delete phone.continuesWrittenWord;
+      }
+      provenance?.add({
+        stage: "transcribe",
+        type: "phonemic_text_joined",
+        subject: next.sourceTokenId,
+        reason: `Phonemic text ${run.map((phone) => phone.phoneme).join(" ")} has no word boundary after it: one word with '${next.word}'`,
+        citations: [
+          "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on symbol by symbol)",
+          "DECtalk 4.63 LTS/ls_task.c:1144-1260 (ls_task_do_right_punct: the word boundary is sent after a word letter-to-sound read)",
+        ],
+        parents: first._pronDecisionId ? [first._pronDecisionId] : [],
+      });
+    }
+    start = end;
+  }
 }

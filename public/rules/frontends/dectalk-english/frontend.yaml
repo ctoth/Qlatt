@@ -2411,6 +2411,13 @@ transcription:
   # MARK_clause character) with CMD/cm_char.c:93-123 (the characters that
   # have MARK_clause). An abbreviation's period is one.
   word_stretch_end_characters: "!',-.:;?"
+  # The same stretch also ends by its length alone: DECtalk 4.63
+  # LTS/ls_task.c:371-372, the gathered text is handed on at white space once
+  # more than 400 characters have been gathered (`temp>400`), and at any
+  # character past 480 (`temp>480`). A clause of some 450 characters with no
+  # mark in it is therefore two stretches, and the clause breaks of the second
+  # are counted from its own first word.
+  word_stretch_length_limits: [400, 480]
   # The names of the letters, for a token the orthography phase marks as a
   # spelled letter: DECtalk 4.63 INCLUDE/usa_type.tab, the lower-case rows,
   # the same phones as letterPhones in lts-table.json (a test holds the two

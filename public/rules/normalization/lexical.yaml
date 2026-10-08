@@ -189,6 +189,20 @@ rules:
       output: "[{'type': 'terminal', 'text': '-'}]"
     citations:
       - "DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entry \"-\"), LTS/ls_task.c:2040-2160 (the word is looked up as written)"
+  # A symbol standing alone that the frontend's dictionary holds: one
+  # terminal, declared a word, so that a mark among them ("?", "!", ",") is
+  # spoken by its name and does not end a clause.
+  tn_symbol_word:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'symbol_word' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': current.payload.word, 'kind': 'word'}]"
+    citations:
+      - "DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entries with no letter and no digit), LTS/ls_task.c:697 and 746 (the dictionary search comes before punctuation is stripped)"
   tn_bare_number_request:
     kind: structural
     select:
@@ -281,4 +295,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]

@@ -36,6 +36,12 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
    * boundary or a compound's joint stands (the dictionary's `*` and `#`).
    */
   wordBoundaries?: Readonly<Record<string, readonly number[]>>;
+  /**
+   * For a dictionary word spoken as several words, the indices of the phones
+   * after which a word boundary stands (a space in the dictionary's phoneme
+   * field: "#" is "number sign").
+   */
+  wordBreaks?: Readonly<Record<string, readonly number[]>>;
   /** The secondary entry of each word with two entries (table-homograph.ts). */
   homographs?: Readonly<Record<string, HomographEntry>>;
   /** The rules that choose between a word's two entries, in order. */

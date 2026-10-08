@@ -1,12 +1,12 @@
 {
   "betty-sea-shells": ["B1","AV","AP","A2","A3","A4","A5","A6","AG","PS","CNK","F4"],
-  "betty-yellow-moon": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","F4"],
+  "betty-yellow-moon": ["B1","AV","AP","A2","A3","A4","A6","AB","AG","PS","CNK","F4"],
   "betty-cup-of-tea": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","A2_CODE","F4"],
-  "betty-how-old": ["B1","AV","AP","A2","A3","A4","A5","AG","PS","CNK","F4"],
+  "betty-how-old": ["B1","AV","AP","A2","A3","A4","AG","PS","CNK","F4"],
   "betty-big-dog": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","A2_CODE","F4"],
   "betty-thank-you": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","F4"],
   "betty-yes-we-can": ["B1","AV","AP","A2","A3","A4","A5","AG","PS","CNK","A2_CODE","F4"],
   "betty-voice-clear": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","A2_CODE","F4"],
-  "betty-judge": ["B1","AV","AP","A2","A3","A4","A5","A6","AG","PS","CNK","F4"],
+  "betty-judge": ["B1","AV","AP","A2","A3","A4","A6","AG","PS","CNK","F4"],
   "betty-look-boy": ["F0","B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","F4"]
 }

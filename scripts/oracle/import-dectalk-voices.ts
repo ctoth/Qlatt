@@ -18,10 +18,17 @@
  * A field is the entry at its SPD_ index (INCLUDE/cmd.h:159-205), whatever
  * the comment beside it says: the comments of the last entries are shifted.
  *
- * What setspdef() makes of them (PH/ph_vset.c:660-800, and for voice 3,
+ * The tuning tables. usevoice() adds a table to the definition entry by entry
+ * (PH/ph_vset.c:446-448), us_<voice>_tune of PH/p_us_vdf_tunehl.h in this
+ * build (HLSYN, PH/ph_vdefi.c:69-70). They change the gains (GF, GH, GV, GN,
+ * G1-G4, LO); every field here is computed from the sum.
+ *
+ * What setspdef() makes of them (PH/ph_vset.c:660-818, and for voice 3,
  * Frank, outside reading mode the block at 580-659 instead): the pitch
  * floor and range, the F0 filter, the hat rise, the formant scale, the
- * cascade F4 and F5 the generator gets.
+ * cascade F4 and F5 the generator gets, and the speaker definition packet it
+ * sends the synthesizer, which the files carry as SPD_* fields with
+ * last_voice, NOM_Open_Quo and Tiltm for the dectalk-vtm node.
  *
  * Usage:
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
@@ -170,10 +177,16 @@ function compiledLines(text: string, defines: readonly string[]): { line: number
 
 type Struct = { values: number[]; firstLine: number; lastLine: number };
 
-function readStruct(lines: { line: number; text: string }[], name: string): Struct {
+/**
+ * The one compiled initializer of `const short <name>[<size>]`. The voice
+ * definitions are declared `[SPDEF]`, the tuning tables `[]`.
+ */
+function readStruct(lines: { line: number; text: string }[], name: string, size = "SPDEF"): Struct {
   const starts = lines
     .map((entry, index) => ({ entry, index }))
-    .filter(({ entry }) => new RegExp(`const\\s+short\\s+${name}\\s*\\[SPDEF\\]`).test(entry.text));
+    .filter(({ entry }) =>
+      new RegExp(`const\\s+short\\s+${name}\\s*\\[${size}\\]`).test(entry.text),
+    );
   if (starts.length !== 1) {
     throw new Error(`E_VOICE_STRUCT: ${starts.length} compiled definitions of ${name}`);
   }
@@ -216,11 +229,29 @@ const header = fs.readFileSync(
 );
 const lines = compiledLines(header, BUILD_DEFINES);
 
+// The tuning tables. usevoice() does not copy the definition alone: it adds
+// the voice's tuning table to it, entry by entry,
+// `curspdef[i] = newspdef[i] + tunespdef[i]` (PH/ph_vset.c:446-448), with
+// tunedef[voice] set to us_<voice>_tune (ph_vset.c:285-293). With HLSYN
+// defined (dectalkf.h:114), PH/ph_vdefi.c:69-70 takes those tables from
+// PH/p_us_vdf_tunehl.h. Everything setspdef() and the rules read is the sum.
+const tuneLines = compiledLines(
+  fs.readFileSync(path.join(dectalkRoot, "dapi", "src", "PH", "p_us_vdf_tunehl.h"), "latin1"),
+  BUILD_DEFINES,
+);
+
 type VoiceFile = { comment: string[]; fields: Record<string, number | string> };
 
-function voiceFile(voice: string, structName: string): VoiceFile {
+function voiceFile(voice: string, structName: string, voiceNumber: number): VoiceFile {
   const struct = readStruct(lines, structName);
-  const spd = (name: keyof typeof SPD): number => struct.values[SPD[name]] as number;
+  const tune = readStruct(tuneLines, `${structName}_tune`, "");
+  // curspdef: the definition plus its tuning table. Entries past either
+  // initializer are zero.
+  const spd = (name: keyof typeof SPD): number =>
+    (struct.values[SPD[name]] ?? 0) + (tune.values[SPD[name]] ?? 0);
+  const tuned = (Object.keys(SPD) as (keyof typeof SPD)[]).filter(
+    (name) => (tune.values[SPD[name]] ?? 0) !== 0,
+  );
   // Voice 3 outside reading mode: ph_vset.c:580-659.
   const frank = voice === "frank";
   const male = spd("SEX") === CONSTANTS.MALE;
@@ -293,6 +324,41 @@ function voiceFile(voice: string, structName: string): VoiceFile {
     // (OUT_F4, ph_draw.c:4189); F4 above is the generator's, scaled.
     spd_F4: spd("F4"),
   };
+  // The speaker definition packet setspdef() sends the synthesizer (struct
+  // SPD_CHIP, PH/ph_defs.h:693-720) and the three values the VTM thread reads
+  // beside it, under the names of the dectalk-vtm node's parameters
+  // (public/experiments/dectalk-vtm/registry.yaml). Line numbers are the
+  // general path's, PH/ph_vset.c; Frank's block (580-659) sets the same words
+  // from the values above.
+  const number = (key: string): number => fields[key] as number;
+  Object.assign(fields, {
+    SPD_R4CB: f4, // r4cb, 714-730
+    SPD_R4CC: b4, // r4cc, 725-730
+    SPD_R5CB: f5, // r5cb, 732-760
+    SPD_R5CC: b5, // r5cc, 755-760
+    SPD_R4PB: number("F7"), // r4pb = P4, 761
+    SPD_R5PB: number("F8"), // r5pb = P5, 762
+    SPD_T0JIT: number("laryngealization"), // t0jit = LA, 763
+    SPD_R5CA: number("G1"), // r5ca, 765
+    SPD_R4CA: number("G2"), // r4ca, 766
+    SPD_R3CA: number("G3"), // r3ca, 767
+    SPD_R2CA: number("G4"), // r2ca, 772
+    SPD_R1CA: number("LO"), // r1ca, 775
+    SPD_NOPEN1: 5000 + 160 * (100 - number("richness")), // nopen1, 783
+    SPD_NOPEN2: number("nopen_fraction") * 4, // nopen2, 784
+    SPD_ATURB: breathiness, // aturb = BR, 786
+    SPD_AFGAIN: number("GF"), // afgain, 816
+    SPD_AZGAIN: number("GV"), // azgain, 810
+    SPD_APGAIN: number("GH"), // apgain, 818
+    SPD_SEX: spd("SEX"), // sex = malfem = SPD_SEX, 537-538
+    // pKsd_t->last_voice: the voice's place in voidef[] (ph_main.c:511-519).
+    last_voice: voiceNumber,
+    // NOM_Open_Quo = curspdef[SPD_OQ], 672 (591 for Frank): past the end of
+    // the definition's initializer, so zero.
+    NOM_Open_Quo: spd("OQ"),
+    // Tiltm = SM * 20 / 100 in integers, 689; SM - 40 in Frank's block, 605.
+    Tiltm: frank ? spd("SM") - 40 : Math.trunc((spd("SM") * 20) / 100),
+  });
   const comment = [
     `DECtalk voice "${fields.name}". Generated from DECtalk 4.63`,
     `dapi/src/PH/P_us_vdf1.h:${struct.firstLine}-${struct.lastLine} (${structName}, by SPD_ index, INCLUDE/cmd.h:159-205)`,
@@ -310,6 +376,30 @@ function voiceFile(voice: string, structName: string): VoiceFile {
     "GF..LO, AGO, AGVO, AGUO, UNVOW, CHINK, smoothness (SM), breathiness (BR),",
     "richness (RI), nopen_fraction (NF), laryngealization (LA), head_size (HS),",
     "quickness (QU): the definition's entries.",
+    "",
+    "Every entry is the definition's plus the voice's tuning table's, as",
+    `usevoice() adds them (ph_vset.c:446-448; PH/p_us_vdf_tunehl.h:${tune.firstLine}-${tune.lastLine},`,
+    `${structName}_tune). The table changes ${
+      tuned.length > 0
+        ? tuned
+            .map((name) => {
+              const delta = tune.values[SPD[name]] as number;
+              return `${name} by ${delta > 0 ? "+" : ""}${delta}`;
+            })
+            .join(", ")
+        : "nothing"
+    }.`,
+    "",
+    "SPD_R4CB..SPD_SEX: the speaker definition packet setspdef() sends the",
+    "synthesizer (struct SPD_CHIP, ph_defs.h:693-720), word by word: r4cb F4,",
+    "r4cc B4, r5cb F5, r5cc B5 as above; r4pb F7; r5pb F8; t0jit LA; r5ca G1;",
+    "r4ca G2; r3ca G3; r2ca G4; r1ca LO; nopen1 5000 + 160 * (100 - RI); nopen2",
+    "NF * 4; aturb BR; afgain GF; azgain GV; apgain GH; sex SPD_SEX",
+    "(ph_vset.c:537-538, 714-818). last_voice: the voice number. NOM_Open_Quo:",
+    "entry SPD_OQ (672). Tiltm: SM * 20 / 100 (689). The dectalk-vtm node takes",
+    'these (scripts/oracle/dectalk-debug/ph-contract.md, "Per speaker"); they',
+    "equal the packet the stock say.exe sent",
+    "(test/dectalk-speaker-packets.test.ts).",
     ...(frank
       ? [
           "",
@@ -318,7 +408,7 @@ function voiceFile(voice: string, structName: string): VoiceFile {
           "(AP - 65) * 10, hat rise (HR - 10) * 10, filter 1500 + 15 * (QU + 40),",
           "F4 3400 scaled and B4 260, no F5, F7 3400, F8 4800, G1 65, G2 65, G3 66,",
           "G4 60, LO 70, GV - 5, GF - 3, GH - 3, richness 30, nopen_fraction 20, no",
-          "breathiness, no laryngealization.",
+          "breathiness, no laryngealization, Tiltm SM - 40 (605).",
         ]
       : []),
     "",
@@ -333,7 +423,10 @@ function render(file: VoiceFile, structName: string): string {
   const out = file.comment.map((line) => (line.length > 0 ? `# ${line}` : "#"));
   out.push("citations:");
   out.push(`  - "DECtalk 4.63 PH/P_us_vdf1.h ${structName}; INCLUDE/cmd.h:159-205 SPD_ indices"`);
-  out.push('  - "DECtalk 4.63 PH/ph_vset.c:580-800 setspdef"');
+  out.push(
+    `  - "DECtalk 4.63 PH/p_us_vdf_tunehl.h ${structName}_tune; ph_vset.c:446-448 (definition plus tuning table)"`,
+  );
+  out.push('  - "DECtalk 4.63 PH/ph_vset.c:537-538, 580-818 setspdef"');
   out.push('  - "DECtalk 4.63 PH/ph_main.c:511-519 voidef; ph_vset.c:433-442 usevoice"');
   for (const [key, value] of Object.entries(file.fields)) out.push(`${key}: ${value}`);
   return `${out.join("\n")}\n`;
@@ -379,8 +472,8 @@ if (listingFlag >= 0) {
 }
 
 const differences: string[] = [];
-for (const [voice, structName] of VOICES) {
-  const file = voiceFile(voice, structName);
+for (const [voiceNumber, [voice, structName]] of VOICES.entries()) {
+  const file = voiceFile(voice, structName, voiceNumber);
   const target = path.join(speakersDir, `${voice}.yaml`);
   if (argv.includes("--write")) {
     fs.writeFileSync(target, render(file, structName));

@@ -459,6 +459,19 @@ a final frame after the last packet. `speaker_epoch` counts the speaker
 definition packets sent so far. Every parameter is scheduled as a step.
 `src/dectalk-vtm-track.ts` builds such a track from recorded packets.
 
+**Speaker from the frontend.** The `dectalk-english` frontend gives the node
+the selected voice's speaker definition by the path every voice value takes:
+each voice file (`public/rules/frontends/dectalk-english/speakers/`) has the
+packet's words as fields named like the node's parameters, the frontend
+declares them in `speakers.rule_fields`, and its articulation frame program
+emits them on every frame. `scripts/oracle/import-dectalk-voices.ts` derives
+the values from DECtalk's voice definitions and tuning tables as `setspdef()`
+does, and `test/dectalk-speaker-packets.test.ts` holds them to the packets
+DECtalk's `say.exe` sent for each voice. The frontend takes one voice per
+utterance, so the definition is loaded once per run and no `speaker_epoch` is
+emitted. A track that carries no speaker words gets the semantics defaults,
+which are Paul's.
+
 **Parameters are a-rate.** Unlike the k-rate rule of section 6, this node
 reads its parameters at single output samples, so a host must make a scheduled
 step visible at its own sample. `run` going high starts a run at that sample,

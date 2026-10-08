@@ -15,19 +15,35 @@
 # richness (RI), nopen_fraction (NF), laryngealization (LA), head_size (HS),
 # quickness (QU): the definition's entries.
 #
+# Every entry is the definition's plus the voice's tuning table's, as
+# usevoice() adds them (ph_vset.c:446-448; PH/p_us_vdf_tunehl.h:717-772,
+# us_frank_tune). The table changes GN by +14, G1 by +11, G2 by -13, G3 by +3, G4 by -2, LO by +22.
+#
+# SPD_R4CB..SPD_SEX: the speaker definition packet setspdef() sends the
+# synthesizer (struct SPD_CHIP, ph_defs.h:693-720), word by word: r4cb F4,
+# r4cc B4, r5cb F5, r5cc B5 as above; r4pb F7; r5pb F8; t0jit LA; r5ca G1;
+# r4ca G2; r3ca G3; r2ca G4; r1ca LO; nopen1 5000 + 160 * (100 - RI); nopen2
+# NF * 4; aturb BR; afgain GF; azgain GV; apgain GH; sex SPD_SEX
+# (ph_vset.c:537-538, 714-818). last_voice: the voice number. NOM_Open_Quo:
+# entry SPD_OQ (672). Tiltm: SM * 20 / 100 (689). The dectalk-vtm node takes
+# these (scripts/oracle/dectalk-debug/ph-contract.md, "Per speaker"); they
+# equal the packet the stock say.exe sent
+# (test/dectalk-speaker-packets.test.ts).
+#
 # Voice 3 outside reading mode takes setspdef()'s own block
 # (ph_vset.c:580-659): head size 100 for fnscale, f0_minimum
 # (AP - 65) * 10, hat rise (HR - 10) * 10, filter 1500 + 15 * (QU + 40),
 # F4 3400 scaled and B4 260, no F5, F7 3400, F8 4800, G1 65, G2 65, G3 66,
 # G4 60, LO 70, GV - 5, GF - 3, GH - 3, richness 30, nopen_fraction 20, no
-# breathiness, no laryngealization.
+# breathiness, no laryngealization, Tiltm SM - 40 (605).
 #
 # formant_scale, rd_default and spectral_tilt_offset_db are not DECtalk's:
 # the Klatt-graph backend's stand-ins (1 or 1.17 by sex; 0.7 or 0.8 plus
 # 0.004 a dB of breathiness; a tenth of the breathiness). engineering estimate
 citations:
   - "DECtalk 4.63 PH/P_us_vdf1.h us_frank; INCLUDE/cmd.h:159-205 SPD_ indices"
-  - "DECtalk 4.63 PH/ph_vset.c:580-800 setspdef"
+  - "DECtalk 4.63 PH/p_us_vdf_tunehl.h us_frank_tune; ph_vset.c:446-448 (definition plus tuning table)"
+  - "DECtalk 4.63 PH/ph_vset.c:537-538, 580-818 setspdef"
   - "DECtalk 4.63 PH/ph_main.c:511-519 voidef; ph_vset.c:433-442 usevoice"
 name: Frank
 sex: male
@@ -54,7 +70,7 @@ F8: 4800
 GF: 62
 GH: 62
 GV: 50
-GN: 73
+GN: 87
 G1: 65
 G2: 65
 G3: 66
@@ -73,3 +89,25 @@ laryngealization: 0
 head_size: 97
 quickness: 0
 spd_F4: 3300
+SPD_R4CB: 3403
+SPD_R4CC: 260
+SPD_R5CB: 6000
+SPD_R5CC: 6000
+SPD_R4PB: 3400
+SPD_R5PB: 4800
+SPD_T0JIT: 0
+SPD_R5CA: 65
+SPD_R4CA: 65
+SPD_R3CA: 66
+SPD_R2CA: 60
+SPD_R1CA: 70
+SPD_NOPEN1: 16200
+SPD_NOPEN2: 80
+SPD_ATURB: 0
+SPD_AFGAIN: 62
+SPD_AZGAIN: 50
+SPD_APGAIN: 62
+SPD_SEX: 1
+last_voice: 3
+NOM_Open_Quo: 0
+Tiltm: 20

@@ -138,6 +138,86 @@ speakers:
       kind: number
       citations:
         - "DECtalk 4.63 PH/ph_vset.c:598, 681; Ph_inton2.c:992-1005"
+    # The speaker definition DECtalk sends its synthesizer when the voice is
+    # selected: the words of the speaker definition packet setspdef() builds
+    # (struct SPD_CHIP, PH/ph_defs.h:693-720) and the three values the VTM
+    # thread reads beside it. The articulation frame program emits them on
+    # every frame for the dectalk-vtm node, whose parameters have these names
+    # (public/experiments/dectalk-vtm/registry.yaml;
+    # scripts/oracle/dectalk-debug/ph-contract.md, "Per speaker"). Each voice
+    # file's values are setspdef()'s for the voice's tuned definition
+    # (scripts/oracle/import-dectalk-voices.ts), and equal the packet the
+    # stock say.exe sent for that voice (test/dectalk-speaker-packets.test.ts).
+    SPD_R4CB:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:714-730 (r4cb, cascade F4); VTM/vtm3.c:2054-2061"]
+    SPD_R4CC:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:725-730 (r4cc, cascade B4); VTM/vtm3.c:2055"]
+    SPD_R5CB:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:732-760 (r5cb, cascade F5); VTM/vtm3.c:2067-2075"]
+    SPD_R5CC:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:755-760 (r5cc, cascade B5); VTM/vtm3.c:2068"]
+    SPD_R4PB:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:761 (r4pb, parallel F4); VTM/vtm3.c:2081-2084"]
+    SPD_R5PB:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:762 (r5pb, parallel F5); VTM/vtm3.c:2090-2098"]
+    SPD_T0JIT:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:763 (t0jit, period jitter); VTM/vtm3.c:2125-2142"]
+    SPD_R5CA:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:765 (r5ca, cascade F5 gain); VTM/vtm3.c:2149"]
+    SPD_R4CA:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:766 (r4ca, cascade F4 gain); VTM/vtm3.c:2151"]
+    SPD_R3CA:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:767 (r3ca, cascade F3 gain); VTM/vtm3.c:2153"]
+    SPD_R2CA:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:772 (r2ca, cascade F2 gain); VTM/vtm3.c:2155"]
+    SPD_R1CA:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:775 (r1ca, cascade F1 gain); VTM/vtm3.c:2157"]
+    SPD_NOPEN1:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:783 (nopen1, open phase); VTM/vtm3.c:2165"]
+    SPD_NOPEN2:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:784 (nopen2, open phase offset); VTM/vtm3.c:2166"]
+    SPD_ATURB:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:786 (aturb, breathiness); VTM/vtm3.c:2172-2176"]
+    SPD_AFGAIN:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:816 (afgain, frication gain); VTM/vtm3.c:2194"]
+    SPD_AZGAIN:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:810 (azgain, voicing gain); VTM/vtm3.c:2211"]
+    SPD_APGAIN:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:818 (apgain, aspiration gain); VTM/vtm3.c:2218"]
+    SPD_SEX:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_defs.h:693-720 (sex, word 23); VTM/vtmiont.c:1643-1644"]
+    last_voice:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:1645, 2899-3430 changeSpeakerValues; PH/hlsynapi.h:456-468"]
+    NOM_Open_Quo:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:591, 672 (NOM_Open_Quo); VTM/vtmiont.c:2899-3430 (OQm)"]
+    Tiltm:
+      kind: number
+      citations: ["DECtalk 4.63 PH/ph_vset.c:605, 689 (Tiltm); VTM/vtmiont.c:2899-3430 (TLm)"]
+  # Chris (speakers/chris.yaml) is not offered: DECtalk 4.63's US build
+  # defines us_chris (PH/P_us_vdf1.h:751) but its voice table has no entry for
+  # it (PH/ph_main.c:511-520), so DECtalk never builds a speaker definition
+  # packet for it and there is none to give the synthesizer.
   voices:
     - paul
     - harry
@@ -148,7 +228,6 @@ speakers:
     - wendy
     - rita
     - kit
-    - chris
 f0_model:
   type: layered_additive
   # DECtalk's clause loop advances in 6.4 ms synthesis/control frames.
@@ -1336,7 +1415,7 @@ output:
   lowering:
     id: dectalk-english-track-lowering
     # Stable Klatt backend vocabulary captured by the production-frame oracle.
-    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO, PS, CNK, AG, PH, run, AL, ABLADE, ATB, AREA_N, DC, UE, A2_CODE, BRST, PLACE]
+    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO, PS, CNK, AG, PH, run, AL, ABLADE, ATB, AREA_N, DC, UE, A2_CODE, BRST, PLACE, SPD_R4CB, SPD_R4CC, SPD_R5CB, SPD_R5CC, SPD_R4PB, SPD_R5PB, SPD_T0JIT, SPD_R5CA, SPD_R4CA, SPD_R3CA, SPD_R2CA, SPD_R1CA, SPD_NOPEN1, SPD_NOPEN2, SPD_ATURB, SPD_AFGAIN, SPD_AZGAIN, SPD_APGAIN, SPD_SEX, last_voice, NOM_Open_Quo, Tiltm]
     timeline:
       initial_silence_ms:
         value: 19.2

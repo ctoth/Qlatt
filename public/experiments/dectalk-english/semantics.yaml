@@ -106,6 +106,32 @@ params:
     description: "OUT_PLACE, velar place (packet word; unused by this graph)"
     type: int
     default: 0
+  # The selected voice's speaker definition packet words and the three values
+  # DECtalk's VTM thread reads beside them, which the frontend emits for the
+  # dectalk-vtm experiment (ph-contract.md, "Per speaker"). No node of this
+  # graph binds them; declared for the same reason as the packet words above.
+  SPD_R4CB: { type: int, default: 0, description: "Speaker packet r4cb (unused by this graph)" }
+  SPD_R4CC: { type: int, default: 0, description: "Speaker packet r4cc (unused by this graph)" }
+  SPD_R5CB: { type: int, default: 0, description: "Speaker packet r5cb (unused by this graph)" }
+  SPD_R5CC: { type: int, default: 0, description: "Speaker packet r5cc (unused by this graph)" }
+  SPD_R4PB: { type: int, default: 0, description: "Speaker packet r4pb (unused by this graph)" }
+  SPD_R5PB: { type: int, default: 0, description: "Speaker packet r5pb (unused by this graph)" }
+  SPD_T0JIT: { type: int, default: 0, description: "Speaker packet t0jit (unused by this graph)" }
+  SPD_R5CA: { type: int, default: 0, description: "Speaker packet r5ca (unused by this graph)" }
+  SPD_R4CA: { type: int, default: 0, description: "Speaker packet r4ca (unused by this graph)" }
+  SPD_R3CA: { type: int, default: 0, description: "Speaker packet r3ca (unused by this graph)" }
+  SPD_R2CA: { type: int, default: 0, description: "Speaker packet r2ca (unused by this graph)" }
+  SPD_R1CA: { type: int, default: 0, description: "Speaker packet r1ca (unused by this graph)" }
+  SPD_NOPEN1: { type: int, default: 0, description: "Speaker packet nopen1 (unused by this graph)" }
+  SPD_NOPEN2: { type: int, default: 0, description: "Speaker packet nopen2 (unused by this graph)" }
+  SPD_ATURB: { type: int, default: 0, description: "Speaker packet aturb (unused by this graph)" }
+  SPD_AFGAIN: { type: int, default: 0, description: "Speaker packet afgain (unused by this graph)" }
+  SPD_AZGAIN: { type: int, default: 0, description: "Speaker packet azgain (unused by this graph)" }
+  SPD_APGAIN: { type: int, default: 0, description: "Speaker packet apgain (unused by this graph)" }
+  SPD_SEX: { type: int, default: 0, description: "Speaker packet sex (unused by this graph)" }
+  last_voice: { type: int, default: 0, description: "DECtalk voice number (unused by this graph)" }
+  NOM_Open_Quo: { type: int, default: 0, description: "hlsyn modal open quotient (unused by this graph)" }
+  Tiltm: { type: int, default: 0, description: "hlsyn modal spectral tilt (unused by this graph)" }
   # DECtalk 4.63 uses KLGLOTT88, but the runtime default remains the impulse
   # fallback while mode 3 emits no voiced waveform.
   sourceMode:

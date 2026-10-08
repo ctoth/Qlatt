@@ -604,6 +604,19 @@ function interpolateProfile(points: readonly number[], position: number): number
 }
 
 /**
+ * Command indices by the commands' times, keeping issue order among equal
+ * times. Commands are issued rule by rule, so their order is not time order.
+ */
+export function f0CommandsInTimeOrder(
+  indices: readonly number[],
+  times: readonly number[],
+): number[] {
+  return [...indices].sort(
+    (left, right) => (times[left] ?? 0) - (times[right] ?? 0) || left - right,
+  );
+}
+
+/**
  * The clause an F0 command belongs to: the last clause that has started by
  * the time of the phone the command was issued on (`anchorTime`, without the
  * command's own offset). A command timed before its clause's first frame
@@ -1883,11 +1896,16 @@ export function lowerToFrames(
     const isSegmentalCommand = (command: F0LayerCommand): boolean =>
       f0Model.layers[command.layer]?.type === "dectalk_segmental";
     const acousticCommands = commands.slice();
+    // In time order: the commands come in rule order, and the opening pauses
+    // of different clauses may come from different rules.
     const clauseStarts = usesSegmentalControllerClock
-      ? acousticCommands.flatMap((command, index) =>
-          isSegmentalCommand(command) && command.tag === "f0_segmental_initial_silence"
-            ? [index]
-            : [],
+      ? f0CommandsInTimeOrder(
+          acousticCommands.flatMap((command, index) =>
+            isSegmentalCommand(command) && command.tag === "f0_segmental_initial_silence"
+              ? [index]
+              : [],
+          ),
+          unclampedCommandTimes,
         )
       : [];
     const renderClauses = (): Array<{ time: number; f0: number }> => {

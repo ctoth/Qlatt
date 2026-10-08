@@ -8,11 +8,25 @@ import { describe, expect, it } from "vitest";
 import {
   f0CommandClause,
   f0CommandControllerTime,
+  f0CommandsInTimeOrder,
   type LayeredF0ModelConfig,
   renderLayeredF0,
 } from "../src/declarative-frontend/hrg/lowering";
 
 const FRAME = 0.01;
+
+describe("f0CommandsInTimeOrder", () => {
+  it("orders clause starts by time, not by the order they were issued in", () => {
+    // Commands 2 and 5 open clauses and come from one rule; command 7 opens
+    // a clause between them and comes from a later rule.
+    const times = [0, 0, 0, 0.3, 0.5, 2.0, 2.1, 1.0];
+    expect(f0CommandsInTimeOrder([2, 5, 7], times)).toEqual([2, 7, 5]);
+  });
+
+  it("keeps the issue order of commands at the same time", () => {
+    expect(f0CommandsInTimeOrder([4, 1, 3], [0, 1, 0, 1, 1])).toEqual([1, 3, 4]);
+  });
+});
 
 describe("f0CommandControllerTime", () => {
   // An opening pause of 4 frames, then allophones of 10 and 6 frames. The

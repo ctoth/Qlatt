@@ -90,10 +90,15 @@ functions:
     body: >-
       item == null ? 0.0
       : (artic_is_dummy(item) ? dectalk_boundary(look_back_pred(item, params.policy.articulation.unit_scan_items,'is_dectalk_phone'))
-      : dectalk_boundary(item))
-    description: FBOUNDARY of an allophone; a dummy vowel has the plosive's.
+      : (item.phoneme == 'SIL' && get(item, 'punctuationSymbol', null) == '.'
+           ? params.policy.timing.boundary.period
+      : dectalk_boundary(item)))
+    description: >-
+      FBOUNDARY of an allophone; a dummy vowel has the plosive's, and the
+      silence that ends a clause on a period has FPERNEXT.
     citations:
       - "DECtalk 4.63 ph_inton1.c:1818 (allofeats[nphon + 1] = allofeats[nphon] | FDUMMY_VOWEL)"
+      - "DECtalk 4.63 allofeats as printed per frame by the instrumented build: 0400 on the silence after a period, 0 after a comma, semicolon, colon, question mark or exclamation mark; the assignment itself was not located in the source"
 
 predicates:
   is_articulation_unit: >-
@@ -193,7 +198,23 @@ frame_programs:
         value: "dectalk_name(artic_prev_unit(artic_prev_unit(current))) == 'S'"
         edge: false
       # ph_sort.c:1464 number_words, as postlexical.yaml reads it.
-      few_words: { value: "word_count() < 3", edge: false }
+      # ph_sort.c:1464 number_words: a word entered with a word boundary; a
+      # verb-phrase start is not counted (pipeline.yaml is_counted_word_start).
+      counted_word:
+        value: "dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp'"
+        edge: false
+      # FSON1 of the clause's allophones at nallotot - 2 and nallotot - 3: the
+      # last before the final silence and the one before it.
+      end_2_son1:
+        value: >-
+          artic_has(artic_prev_unit(look_ahead_where(current, 1000,
+            'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')), 'son1')
+        edge: false
+      end_3_son1:
+        value: >-
+          artic_has(artic_prev_unit(artic_prev_unit(look_ahead_where(current, 1000,
+            'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null'))), 'son1')
+        edge: false
       # The allophone's code (l_all_ph.h); silence is 0, the dummy vowel IX or AX.
       phone_code:
         value: >-
@@ -257,6 +278,8 @@ frame_programs:
         counted_frames: "(u.silence && !u.initial) || !u.counted ? 0 : f.count"
         # nphonetot: the clause's input phones, both silences included.
         phonemes: "u.phonemes"
+        # number_words
+        words: "u.counted_word ? 1 : 0"
     registers:
       # ph_claus.c:217-221 sets pressure to 10000 at start-up; the reset at
       # ph_draw.c:925 replaces it in the first frame of every clause.
@@ -1029,21 +1052,27 @@ rules:
 
   # --- spreading the glottis toward the end of the clause: ph_draw.c:3601-3660
   # nframb > tcumdur - 12 and - 25, with nframb - tcumdur = g.frame + 1 -
-  # g.counted_frames. Not ported: the two `goto abort_til_later` tests at
-  # 3604-3624, which skip the step in some phones near the end, and the reset
-  # in the clause's first frame (3986-3990), which the initial reset covers
-  # for the first clause.
+  # g.counted_frames; nphone is g.unit and nallotot g.units. Two tests jump
+  # past the step (`goto abort_til_later`, 3604-3624): among the last phones
+  # before the final silence when the phone at nallotot - 3 is a sonorant and
+  # this one comes before it, and earlier in the clause when the phone at
+  # nallotot - 2 is one. The step is 5 in a clause of fewer than three
+  # counted words, else the voice's.
   artic_end_of_clause_spread:
     kind: frame
     program: articulation
-    unit: "g.unit < g.units - 1"
+    unit: >-
+      g.unit < g.units - 1
+      && !(g.unit >= g.units - 4
+           ? (g.unit > 3 && u.end_3_son1 && g.unit < g.units - 3)
+           : (g.unit > 3 && u.end_2_son1 && g.unit < g.units - 4))
     when: "g.frame + 1 > g.counted_frames - 12 && r.delta_area_g < 800"
     set:
       - register: delta_area_g
-        value: "r.delta_area_g + (u.few_words ? 5 : params.policy.articulation.voice.end_of_phrase_spread)"
+        value: "r.delta_area_g + (g.words < 3 ? 5 : params.policy.articulation.voice.end_of_phrase_spread)"
         tag: glottal_area
     citations:
-      - "DECtalk 4.63 PH/ph_draw.c:3602, 3626-3647"
+      - "DECtalk 4.63 PH/ph_draw.c:3602-3647"
   artic_no_spread_before_the_end:
     kind: frame
     program: articulation

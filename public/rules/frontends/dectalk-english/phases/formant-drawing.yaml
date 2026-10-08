@@ -473,6 +473,14 @@ frame_programs:
       k_index_2: -100
       k_index_3: -100
       k_index_4: -100
+      # Whether places 3 to 7 of the allophone array hold /k/ (1) or not (0):
+      # what the last clause that reached the place left there. Nothing is
+      # there before the first clause of a text.
+      place_k_3: 0
+      place_k_4: 0
+      place_k_5: 0
+      place_k_6: 0
+      place_k_7: 0
       # Working values of setloc(): locus, percent, duration in ms.
       loc_hz: 0
       loc_percent: 0
@@ -725,6 +733,99 @@ rules:
     when: >-
       r.k_index_1 == r.allophone_index - 5 || r.k_index_2 == r.allophone_index - 5
         || r.k_index_3 == r.allophone_index - 5 || r.k_index_4 == r.allophone_index - 5
+    set:
+      - { register: nxr_F2, value: "299", tag: formant_target }
+      - { register: nxr_F3, value: "499", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1667-1674, 1854-1866, 1889-1902 (gettar of the place after the last allophone)"
+
+  # The same slip in a short clause. The input phonemes begin at place 8, so
+  # when place n + 1 or n + 2 is below 8 it holds no input phoneme of this
+  # clause but the ALLOPHONE an earlier clause left there: the array is not
+  # cleared between clauses or sentences, a clause writes places 0 to n - 1
+  # and a silence at place n (ph_aloph.c:1620), and nothing else. So the
+  # place keeps what the last clause long enough to reach it wrote.
+  # "Do you like it? I do.": "I do." has n = 5, place 6 still holds the /k/
+  # of "like", and the F2 and F3 of "do" run down toward 299 and 499 Hz.
+  # "For breakfast there was bread, cheese, and coffee.": the same for
+  # "cheese," with the /k/ of "breakfast".
+  # The first clause of a text finds nothing there, as a newly started
+  # DECtalk does; what a running DECtalk has left from an earlier text is
+  # not modelled.
+  fd_place_k:
+    kind: frame
+    program: formants
+    unit: "!u.initial"
+    at: start
+    set:
+      - register: place_k_3
+        value: >-
+          r.allophone_index == 3 ? (u.is_k ? 1 : 0)
+          : (u.silence && r.allophone_index == 2 ? 0 : r.place_k_3)
+        tag: formant_target
+      - register: place_k_4
+        value: >-
+          r.allophone_index == 4 ? (u.is_k ? 1 : 0)
+          : (u.silence && r.allophone_index == 3 ? 0 : r.place_k_4)
+        tag: formant_target
+      - register: place_k_5
+        value: >-
+          r.allophone_index == 5 ? (u.is_k ? 1 : 0)
+          : (u.silence && r.allophone_index == 4 ? 0 : r.place_k_5)
+        tag: formant_target
+      - register: place_k_6
+        value: >-
+          r.allophone_index == 6 ? (u.is_k ? 1 : 0)
+          : (u.silence && r.allophone_index == 5 ? 0 : r.place_k_6)
+        tag: formant_target
+      - register: place_k_7
+        value: >-
+          r.allophone_index == 7 ? (u.is_k ? 1 : 0)
+          : (u.silence && r.allophone_index == 6 ? 0 : r.place_k_7)
+        tag: formant_target
+    citations:
+      - "DECtalk 4.63 PH/ph_claus.c:571-590 (one allophons[] for every clause, never cleared)"
+      - "DECtalk 4.63 PH/ph_aloph.c:1620 (a silence in the place after the last allophone)"
+  # The last phone is allophone n - 2: place n + 1 is its index plus 3.
+  fd_next_target_earlier_clause:
+    kind: frame
+    program: formants
+    unit: "!u.silence && n.silence"
+    at: start
+    when: >-
+      (r.allophone_index == 1 && r.place_k_4 == 1) || (r.allophone_index == 2 && r.place_k_5 == 1)
+        || (r.allophone_index == 3 && r.place_k_6 == 1) || (r.allophone_index == 4 && r.place_k_7 == 1)
+    set:
+      - { register: nxr_F2, value: "299", tag: formant_target }
+      - { register: nxr_F3, value: "499", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1667-1674, 1854-1866, 1895-1902 (gettar of the last allophone, index 2)"
+  # The final silence is allophone n - 1: place n + 1 is its index plus 2.
+  fd_final_silence_target_earlier_clause:
+    kind: frame
+    program: formants
+    unit: "u.silence && !u.initial"
+    at: start
+    when: >-
+      (r.allophone_index == 1 && r.place_k_3 == 1) || (r.allophone_index == 2 && r.place_k_4 == 1)
+        || (r.allophone_index == 3 && r.place_k_5 == 1) || (r.allophone_index == 4 && r.place_k_6 == 1)
+        || (r.allophone_index == 5 && r.place_k_7 == 1)
+    set:
+      - { register: tgt_F2, value: "299", tag: formant_target }
+      - { register: tgt_F3, value: "499", tag: formant_target }
+      - { register: nxr_F2, value: "299", tag: formant_target }
+      - { register: nxr_F3, value: "499", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1667-1674, 1854-1866, 1895-1902 (gettar of the last allophone and of the place after it)"
+  # Place n + 2 is the final silence's index plus 3.
+  fd_final_silence_next_target_earlier_clause:
+    kind: frame
+    program: formants
+    unit: "u.silence && !u.initial"
+    at: start
+    when: >-
+      (r.allophone_index == 1 && r.place_k_4 == 1) || (r.allophone_index == 2 && r.place_k_5 == 1)
+        || (r.allophone_index == 3 && r.place_k_6 == 1) || (r.allophone_index == 4 && r.place_k_7 == 1)
     set:
       - { register: nxr_F2, value: "299", tag: formant_target }
       - { register: nxr_F3, value: "499", tag: formant_target }
@@ -2010,6 +2111,10 @@ phases:
       - fd_next_target_past_end
       - fd_final_silence_target_past_end
       - fd_final_silence_next_target_past_end
+      - fd_next_target_earlier_clause
+      - fd_final_silence_target_earlier_clause
+      - fd_final_silence_next_target_earlier_clause
+      - fd_place_k
       - fd_shrink
       - fd_target_coarticulated
       - fd_target_diphthong_onset

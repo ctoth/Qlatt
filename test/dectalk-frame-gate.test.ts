@@ -67,24 +67,16 @@ const AREA_REASON =
   "not emitted: the frontend has no port yet of the area, pressure and control-code words " +
   "ph_draw.c:908-4193 computes (the words DECtalk's synthesizer actually reads, " +
   "VTM/vtmiont.c:660-683)";
-// phases/articulation.yaml ports the pressure rules of ph_draw.c. Where PS
-// still differs, by what dump-frame-columns.ts shows, none of it explained
-// further than this:
+// phases/articulation.yaml ports the pressure, glottis, constriction, velum
+// and DC/UE rules of ph_draw.c. The areas, the velum and DC/UE differ only in
+// the one phrase whose allophones are not DECtalk's (TIMING_REASON). Where PS
+// and AG still differ:
 const PS_REASON =
-  "the slope of the final fall (ph_draw.c:3795-3887) comes out steeper than DECtalk's in " +
-  "some phrases and is applied in some questions where DECtalk applies none, so its tcumdur, " +
-  "nframb or boundary inputs are not all DECtalk's; and the emphasis pulse (1509-1552) and " +
-  "the end-of-clause drop (3929-3969) are not ported";
-// The glottal rules are ported and "cat." is exact. What is known of the rest:
+  "untraced in the phrases that still differ (one exclamation, some two-clause phrases). Not " +
+  "ported: the emphasis pulse (ph_draw.c:1509-1552) and the end-of-clause drop (3929-3969)";
 const AG_REASON =
-  "not ported: the early exits of the end-of-clause spread (ph_draw.c:3604-3624) and the " +
-  "nasal case of the initial silence (1146-1190); and differences inside phrases that have " +
-  "not been traced to a rule yet";
-// The lips, blade and tongue body rules are ported (ph_draw.c:740-886,
-// 931-1220, 1239-1296, 1565-1945, 2807-2930, 3113-3553) and "cat." is exact.
-const CONSTRICTION_REASON =
-  "the phrases that still differ have not been traced. Known to be untested against DECtalk: " +
-  "the flap (ph_draw.c:3312 shifts by a negative count, which C leaves undefined)";
+  "the phrase whose allophones are not DECtalk's, and one untraced phrase " +
+  "(homograph-read-first)";
 
 const GAP_REASONS: Readonly<Record<string, string>> = {
   length: TIMING_REASON,
@@ -107,12 +99,12 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   AG: AG_REASON,
   PS: PS_REASON,
   CNK: TIMING_REASON,
-  AL: CONSTRICTION_REASON,
-  ABLADE: CONSTRICTION_REASON,
-  ATB: CONSTRICTION_REASON,
-  AREA_N: AREA_REASON,
-  DC: AREA_REASON,
-  UE: AREA_REASON,
+  AL: TIMING_REASON,
+  ABLADE: TIMING_REASON,
+  ATB: TIMING_REASON,
+  AREA_N: TIMING_REASON,
+  DC: TIMING_REASON,
+  UE: TIMING_REASON,
   PLACE: AREA_REASON,
   A2_CODE: AREA_REASON,
   PH: TIMING_REASON,

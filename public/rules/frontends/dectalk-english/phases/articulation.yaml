@@ -110,6 +110,8 @@ tags:
   glottal_area: sets the glottal area, its target or the speed it moves at
   constriction: sets the area of the lips, the tongue blade or the tongue body, or the state that moves it
   voice_formant: sends a formant fixed by the voice
+  velum: sets the velopharyngeal area or the step that moves it
+  obstruent_source: sets the DC and UE words that shape an obstruent's source
 
 frame_programs:
   articulation:
@@ -185,6 +187,7 @@ frame_programs:
           artic_is_dummy(current) ? 0
           : get(params.policy.articulation.burst_frames, dectalk_name(current), 0)
         edge: 0
+      is_dh: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'DH'", edge: false }
       is_affricate:
         value: "!artic_is_dummy(current) && dectalk_name(current) in ['CH', 'JH']"
         edge: false
@@ -334,6 +337,13 @@ frame_programs:
       closure: 0
       # Which branch of an articulator's update the frame takes.
       move_case: 0
+      # The velum: nasal_step indexes the nasalization table (ph_draw.c:219).
+      area_n: 0
+      nasal_step: 0
+      # ph_draw.c:1314-1465: dcstep indexes dcval and ueval by its size.
+      dcstep: 0
+      dc: 0
+      ue: 0
       ts_l: 0
       ts_b: 0
       ts_tb: 0
@@ -355,6 +365,11 @@ frame_programs:
       AL: "r.area_l"
       ABLADE: "min([r.area_flap, r.area_b])"
       ATB: "r.area_tb"
+      # ph_draw.c:4193
+      AREA_N: "r.area_n"
+      # ph_draw.c:1427-1464
+      DC: "r.dc"
+      UE: "r.ue"
     after:
       run: 0
     write: articulation_frames
@@ -1241,6 +1256,8 @@ rules:
     unit: "u.initial"
     when: "f.index == 0"
     set:
+      - { register: in_bclosure, value: false, tag: constriction }
+      - { register: in_lclosure, value: false, tag: constriction }
       - { register: area_b, value: 1000, tag: constriction }
       - { register: target_b, value: 1000, tag: constriction }
       - { register: area_l, value: 1000, tag: constriction }
@@ -1252,7 +1269,7 @@ rules:
       - { register: area_tb, value: 1000, tag: constriction }
       - { register: target_tb, value: 1000, tag: constriction }
     citations:
-      - "DECtalk 4.63 PH/ph_draw.c:931-940"
+      - "DECtalk 4.63 PH/ph_draw.c:923-924, 931-940"
   artic_initial_before_labial_burst_stop:
     kind: frame
     program: articulation
@@ -1854,6 +1871,173 @@ rules:
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:4107-4108"
 
+  # ===========================================================================
+  # The velum (area_n, nasal_step) and the obstruent's DC and UE steps.
+  # ===========================================================================
+
+  # --- allophone 0: ph_draw.c:922 once; 1132-1192 every frame --------------
+  artic_initial_reset_velum:
+    kind: frame
+    program: articulation
+    unit: "u.initial"
+    when: "f.index == 0"
+    set:
+      - { register: area_n, value: 0, tag: velum }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:922"
+  artic_initial_velum_before_vowel:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.voiced && n.vowel"
+    set:
+      - { register: area_n, value: 0, tag: velum }
+      - { register: nasal_step, value: 0, tag: velum }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1132, 1143-1144"
+  artic_initial_velum_before_nasal:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.voiced && n.nasal"
+    set:
+      - { register: area_n, value: 200, tag: velum }
+      - { register: nasal_step, value: 7, tag: velum }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1146-1148, 1189"
+  artic_initial_velum_before_voiced_oral:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.voiced && !n.nasal"
+    set:
+      - { register: nasal_step, value: 0, tag: velum }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1191-1192"
+
+  # --- DC and UE, a phone that is not silence, every frame: ph_draw.c:1314-1465
+  # dcstep climbs to 9 through a voiced obstruent and falls to -9 through a
+  # voiceless one, a few frames in and not while the velum is open; any other
+  # phone brings it back by two a frame. In a silence the two words keep the
+  # value they had.
+  artic_dc_starts:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent"
+    when: "r.dcstep == 0 && r.area_n == 0 && f.index > 1"
+    set:
+      - { register: dcstep, value: "u.voiced ? 1 : -1", tag: obstruent_source }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1314-1334"
+  artic_dc_step_voiced:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.voiced"
+    when: "r.dcstep != 0"
+    set:
+      - register: dcstep
+        value: >-
+          u.obstruent && r.area_n == 0
+            ? (r.dcstep < 0 ? r.dcstep + 1 : r.dcstep)
+            : r.dcstep
+        tag: obstruent_source
+      - register: dcstep
+        value: >-
+          u.obstruent && r.area_n == 0
+            ? (r.dcstep < 9 ? r.dcstep + 1 : r.dcstep)
+            : ((!u.obstruent && f.index > 1) || r.area_n != 0 ? max([r.dcstep - 2, 0]) : r.dcstep)
+        tag: obstruent_source
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1338-1372"
+  artic_dc_step_voiceless:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && !u.voiced"
+    when: "r.dcstep != 0"
+    set:
+      - register: dcstep
+        value: >-
+          u.obstruent && r.area_n == 0
+            ? (r.dcstep > 0 ? r.dcstep - 1 : r.dcstep)
+            : r.dcstep
+        tag: obstruent_source
+      - register: dcstep
+        value: >-
+          u.obstruent && r.area_n == 0
+            ? (r.dcstep > -9 ? r.dcstep - 1 : r.dcstep)
+            : min([r.dcstep + 2, 0])
+        tag: obstruent_source
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1388-1414"
+  artic_dc_out:
+    kind: frame
+    program: articulation
+    unit: "!u.silence"
+    set:
+      - register: dc
+        value: >-
+          r.dcstep >= 0 ? params.policy.articulation.dc_values[r.dcstep]
+          : 0 - params.policy.articulation.dc_values[0 - r.dcstep]
+        tag: obstruent_source
+      - register: ue
+        value: >-
+          r.dcstep >= 0 ? params.policy.articulation.ue_values[r.dcstep]
+          : 0 - params.policy.articulation.ue_values[0 - r.dcstep]
+        tag: obstruent_source
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1419-1465"
+
+  # --- the velum, every phone, every frame: ph_draw.c:2414-2671 ------------
+  # A chain of three: in a nasal; before a nasal that is not doubled; any
+  # other phone that is not a nasal.
+  artic_velum_in_nasal:
+    kind: frame
+    program: articulation
+    unit: "u.nasal"
+    set:
+      - register: nasal_step
+        value: >-
+          u.blade && p.blade ? (r.nasal_step == 0 ? 4 : (r.nasal_step < 7 ? r.nasal_step + 1 : r.nasal_step))
+          : (n.obstruent && f.index >= f.count - 1 && !n.is_dh ? max([r.nasal_step - 2, 0])
+          : (r.nasal_step < 7 ? r.nasal_step + 2 : r.nasal_step))
+        tag: velum
+      - { register: area_n, value: "params.policy.articulation.nasalization[r.nasal_step]", tag: velum }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2414-2510"
+  artic_velum_before_nasal:
+    kind: frame
+    program: articulation
+    unit: "!u.nasal && n.nasal && !u.next_repeats"
+    set:
+      - register: nasal_step
+        value: "f.count < 7 && r.nasal_step < 7 ? r.nasal_step + 1 : r.nasal_step"
+        tag: velum
+      - register: nasal_step
+        value: >-
+          !u.obstruent && f.index >= floor(f.count / 2) && r.nasal_step < 7
+            ? r.nasal_step + 1 : r.nasal_step
+        tag: velum
+      - register: area_n
+        value: >-
+          u.obstruent || f.index >= floor(f.count / 2)
+            ? params.policy.articulation.nasalization[r.nasal_step] : r.area_n
+        tag: velum
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2526-2581"
+  # A sonorant waits two frames before the velum starts to close (`goto
+  # skipit`); other phones close it by three while it is wide.
+  artic_velum_closing:
+    kind: frame
+    program: articulation
+    unit: "!u.nasal && !(n.nasal && !u.next_repeats)"
+    when: "r.nasal_step != 0 && f.index != 0 && !(u.sonorant && f.index < 3)"
+    set:
+      - register: nasal_step
+        value: >-
+          u.sonorant ? r.nasal_step - 1
+          : max([r.nasal_step > 4 ? r.nasal_step - 3 : r.nasal_step - 1, 0])
+        tag: velum
+      - { register: area_n, value: "params.policy.articulation.nasalization[r.nasal_step]", tag: velum }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2587, 2618-2671"
+
 phases:
   - name: articulation
     after: [finalize]
@@ -1977,3 +2161,15 @@ phases:
       - artic_dental_closed
       - artic_dental_opening
       - artic_remember_areas
+      # The velum and the DC step; DC reads the velum as the frame before left it.
+      - artic_initial_reset_velum
+      - artic_initial_velum_before_vowel
+      - artic_initial_velum_before_nasal
+      - artic_initial_velum_before_voiced_oral
+      - artic_dc_starts
+      - artic_dc_step_voiced
+      - artic_dc_step_voiceless
+      - artic_dc_out
+      - artic_velum_in_nasal
+      - artic_velum_before_nasal
+      - artic_velum_closing

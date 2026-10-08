@@ -85,6 +85,7 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // regenerate "Gag, gang; go!", again equal to e5fbed47 without those words.
 // The per-clause word count and the early exits of the glottal spread
 // regenerate "Gag, gang; go!" once more: equal to 21b80a5d with `--drop AG,PS`.
+// AREA_N, DC and UE regenerate all four: equal to f06eecfd without them.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

@@ -18,5 +18,12 @@
   "dotted-us": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
   "dotted-usa": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
   "dotted-fbi-final": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
-  "dotted-md": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"]
+  "dotted-md": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "vowelless-tv": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "vowelless-dvd-pc": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "vowelless-nth": ["B1","AV","AP","A2","A3","A4","A5"],
+  "vowelless-tvs": ["B1","AV","AP","A2","A4","A5","AB"],
+  "vowelless-brr": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "vowel-y-xyz": ["B1","AV","AP","A2","A4","A5","A6"],
+  "vowelless-letters": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"]
 }

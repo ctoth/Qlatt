@@ -612,7 +612,7 @@ export function transcribeText(
       } else if (pronResult.source === "spelling") {
         const used = lexiconSource("spelling");
         decisionType = "spelling_pronunciation_selected";
-        reason = `Word '${sourceWord}' is one letter and not in the dictionary; used ${used.name}`;
+        reason = `Word '${sourceWord}' ${pronResult.word.length === 1 ? "is one letter" : "has no vowel"} and is not in the dictionary; used ${used.name}`;
         citations = [used.citation];
       } else if (pronResult.source === "position") {
         const used = lexiconSource("position");

@@ -28,6 +28,13 @@
     { "id": "dotted-us", "text": "The U.S. flag was raised.", "group": "dotted-capitals", "tags": ["spelling", "no-sentence-end"], "expectedFocus": ["trace"] },
     { "id": "dotted-usa", "text": "The U.S.A. is large.", "group": "dotted-capitals", "tags": ["spelling", "letter-a"], "expectedFocus": ["trace"] },
     { "id": "dotted-fbi-final", "text": "He works for the F.B.I.", "group": "dotted-capitals", "tags": ["spelling", "text-final"], "expectedFocus": ["trace"] },
-    { "id": "dotted-md", "text": "Ask the M.D. about it.", "group": "dotted-capitals", "tags": ["spelling"], "expectedFocus": ["trace"] }
+    { "id": "dotted-md", "text": "Ask the M.D. about it.", "group": "dotted-capitals", "tags": ["spelling"], "expectedFocus": ["trace"] },
+    { "id": "vowelless-tv", "text": "The CEO spoke on TV.", "group": "no-vowel", "tags": ["spelling", "dictionary-acronym"], "expectedFocus": ["trace"] },
+    { "id": "vowelless-dvd-pc", "text": "The DVD is in the PC.", "group": "no-vowel", "tags": ["spelling", "dictionary-acronym"], "expectedFocus": ["trace"] },
+    { "id": "vowelless-nth", "text": "Say nth now.", "group": "no-vowel", "tags": ["spelling"], "expectedFocus": ["trace"] },
+    { "id": "vowelless-tvs", "text": "Say tvs now.", "group": "no-vowel", "tags": ["spelling"], "expectedFocus": ["trace"] },
+    { "id": "vowelless-brr", "text": "Say brr now.", "group": "no-vowel", "tags": ["spelling"], "expectedFocus": ["trace"] },
+    { "id": "vowel-y-xyz", "text": "Say xyz now.", "group": "no-vowel", "tags": ["not-spelled"], "expectedFocus": ["trace"] },
+    { "id": "vowelless-letters", "text": "S, f, sh, th, z, v, zh, dh.", "group": "no-vowel", "tags": ["spelling"], "expectedFocus": ["trace"] }
   ]
 }

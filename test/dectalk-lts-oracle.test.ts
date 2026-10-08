@@ -38,9 +38,7 @@ const options = {
   stressPolicyPath: "/rules/frontends/qlatt-english/stress-policy.yaml",
 };
 
-const KNOWN_GAPS: Readonly<Record<string, string>> = {
-  mrs: "DECtalk reads the abbreviation letter by letter (EH M AA R EH S)",
-};
+const KNOWN_GAPS: Readonly<Record<string, string>> = {};
 
 /** Words whose form classes differ from DECtalk's; the same ratchet. */
 const FORM_CLASS_GAPS: Readonly<Record<string, string>> = {

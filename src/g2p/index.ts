@@ -248,6 +248,31 @@ export function pronounce(
         ...marked(entry),
       };
     }
+    // A word of letters with no vowel among them is spelled, each letter a
+    // word; a "y" that is not the first letter counts as a vowel (DECtalk
+    // 4.63 LTS/ls_task.c ls_task_process_word, lines 4255-4290 for the letter
+    // classes and 4401-4405 "Spell if no vowels"). Measured on say.exe:
+    // "nth", "psst", "tv", "tvs", "brr" are spelled; "xyz" and "zyx" are not.
+    const letterPhones = table.letterPhones;
+    if (
+      letterPhones &&
+      /^[a-z]{2,}$/.test(lowerWord) &&
+      !/[aeiou]/.test(lowerWord) &&
+      !lowerWord.slice(1).includes("y")
+    ) {
+      const parts = [...lowerWord].map((letter) => ({
+        phonemes: [...(letterPhones[letter] ?? [])],
+      }));
+      return {
+        phonemes: parts.flatMap((part) => part.phonemes),
+        source: "spelling",
+        word: lowerWord,
+        parts,
+        // No class of its own: what the suffix search left, as for a word
+        // the rules speak.
+        ...classed(stripped.formClass),
+      };
+    }
     return {
       phonemes: pronounceWithLtsTable(lowerWord, table),
       source: "lts-rules",

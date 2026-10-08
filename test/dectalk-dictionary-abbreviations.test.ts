@@ -198,3 +198,55 @@ describe("words of capitals and periods in dectalk-english", () => {
     expect(phones("the u.s. flag.", "qlatt-english").slice(2, 4)).toEqual(["Y", "UW"]);
   });
 });
+
+// LTS/ls_task.c ls_task_process_word: a word the dictionary does not have and
+// that has no vowel is spelled. The sentences are in dectalk-us-abbrev-v1.
+describe("words with no vowel in dectalk-english", () => {
+  function words(text: string): number {
+    const { utterance } = textToKlattTrackDetailed(text, undefined, 30, {
+      frontendId: "dectalk-english",
+    });
+    return utterance.relation("Word").listItems().length;
+  }
+
+  it("spells the word, each letter a word", () => {
+    expect(phones("Say nth now.").slice(2, 8)).toEqual(["EH", "N", "T", "T_REL", "IY", "EY"]);
+    expect(words("Say nth now.")).toBe(5);
+    expect(words("Say tvs now.")).toBe(5);
+    expect(words("Say brr now.")).toBe(5);
+  });
+
+  it("spells it whatever its case", () => {
+    expect(phones("The CEO spoke on TV.").slice(-6)).toEqual([
+      "T",
+      "T_REL",
+      "IY",
+      "V",
+      "IY",
+      "SIL",
+    ]);
+  });
+
+  it("counts a y after the first letter as a vowel", () => {
+    expect(words("Say xyz now.")).toBe(3);
+  });
+
+  it("speaks a word the dictionary has, vowel or not", () => {
+    // "PC" is the dictionary's entry, one word.
+    expect(words("The DVD is in the PC.")).toBe(8);
+  });
+
+  it("records the spelling and says why", () => {
+    const provenance = createProvenanceCollector();
+    textToKlattTrackDetailed("Say nth now.", undefined, 30, {
+      frontendId: "dectalk-english",
+      provenance,
+    });
+    const record = provenance
+      .getDecisions()
+      .find((entry) => entry.type === "spelling_pronunciation_selected");
+    expect(record?.reason).toBe(
+      "Word 'nth' has no vowel and is not in the dictionary; used DECtalk letter names",
+    );
+  });
+});

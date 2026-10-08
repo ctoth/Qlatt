@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-long-clause-sweep-v1",
+  "description": "Ten texts with very long clauses for Paul at 180 words per minute: clauses of 40 to 150 words with no punctuation inside, alone and beside short ones. An addition to dectalk-us-messy-sweep-v1. Written before any export and not edited afterwards. Measurement only.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    {"id":"lc-01", "voiceId":"paul", "text":"The woman who sold flowers at the corner of the old market street every morning before the sun came up told my mother that her son had gone to sea when he was only fifteen years old and had not come home again.", "group":"40-to-60-words"},
+    {"id":"lc-02", "voiceId":"paul", "text":"When the last of the snow had gone from the hills above the town the farmers took their sheep up the narrow path that ran beside the stream and left them there until the first cold nights of autumn brought them down again to the low fields near the river.", "group":"40-to-60-words"},
+    {"id":"lc-03", "voiceId":"paul", "text":"I do not know who it was that told the children they could play in the empty house at the end of the lane but whoever it was should have known that the floor of the upper room had been weak for years and that nobody had dared to walk on it since the old man died.", "group":"40-to-60-words"},
+    {"id":"lc-04", "voiceId":"paul", "text":"The letter that came on the morning of the third day after the storm said that the bridge at the north end of the valley had been washed away during the night and that the road to the city would be closed until the men from the county could build a new one out of the timber that lay in the yard behind the mill which meant that nobody in the village could expect any mail or any fresh food for at least two weeks and perhaps for a good deal longer than that.", "group":"80-to-100-words"},
+    {"id":"lc-05", "voiceId":"paul", "text":"My grandfather used to say that a man who could not mend his own boots or bake his own bread or find his own way home across the moor in the dark had no business living so far from the town and that he himself had learned all three of those things before he was twelve years old from an uncle who had been a sailor and a soldier and a shepherd and who had never once in his long life asked another man to do for him what he could do for himself.", "group":"80-to-100-words"},
+    {"id":"lc-06", "voiceId":"paul", "text":"The boy ran down the hill and across the yard and through the gate and along the lane and over the bridge and past the church and round the pond and up the steps and into the kitchen where his mother was baking bread and his father was mending a chair and his sister was reading a book and the dog was asleep by the fire and the cat was watching a fly on the window and nobody looked up or said a word until he had shut the door behind him and sat down at the table and put his head in his hands and begun to cry.", "group":"over-100-words"},
+    {"id":"lc-07", "voiceId":"paul", "text":"There was once a king who had three sons and the first of them was strong and the second of them was clever and the third of them was neither strong nor clever but kind and when the king grew old he called the three of them to him and told them that he would give his crown to the one who could bring him the most useful thing in the whole world and so the first son rode north and the second son rode south and the third son who had no horse walked east along the river until he came to a mill where an old woman was grinding corn and singing a song that he had never heard before.", "group":"over-100-words"},
+    {"id":"lc-08", "voiceId":"paul", "text":"Yes. The man who kept the lighthouse on the rock at the mouth of the bay for more than thirty years without a single day of leave told the reporter from the city paper that he had never once felt lonely out there because the sea and the birds and the ships that went by in the night were all the company a man could want. No.", "group":"long-between-short"},
+    {"id":"lc-09", "voiceId":"paul", "text":"Wait, the people who live in the house across the road from the school where my sister teaches the youngest children how to read and write and count have a dog that barks at every car that goes by from six in the morning until ten at night, and nobody has ever complained.", "group":"long-between-short"},
+    {"id":"lc-10", "voiceId":"paul", "text":"Did the woman who sold flowers at the corner of the old market street every morning before the sun came up really tell your mother that her son had gone to sea when he was only fifteen years old and had not come home again?", "group":"long-question"}
+  ]
+}

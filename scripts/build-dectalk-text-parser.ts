@@ -215,16 +215,61 @@ for (let k = 0; k + 1 < dictPoint.length; k += 2) {
   dictionaries.push(entries);
 }
 
+// The character classes the rules test: parser_char_types[] of CMD/par_char.c,
+// one TYPE_ expression per character code, with the bit of each name from
+// CMD/par_def1.h.
+const TYPE_BITS = new Map<string, number>();
+for (const match of fs
+  .readFileSync(path.join(cmdDir, "par_def1.h"), "latin1")
+  .matchAll(/^#define\s+(TYPE_[a-z_]+)\s+(0x[0-9A-Fa-f]+)/gm)) {
+  TYPE_BITS.set(match[1], Number(match[2]));
+}
+const charSource = fs.readFileSync(path.join(cmdDir, "par_char.c"), "latin1");
+const typeTable = /parser_char_types\s*\[\s*\]\s*=\s*\{([\s\S]*?)\};/.exec(charSource);
+if (!typeTable) throw new Error("E_PARSER_TABLE: par_char.c has no parser_char_types");
+const characterTypes = typeTable[1]
+  .replace(/\/\*[\s\S]*?\*\//g, "")
+  .split(",")
+  .map((cell) => cell.trim())
+  .filter((cell) => cell.length > 0)
+  .map((cell) =>
+    cell.split("|").reduce((bits, name) => {
+      const bit = TYPE_BITS.get(name.trim());
+      if (bit === undefined) throw new Error(`E_PARSER_TABLE: unknown character type '${name}'`);
+      return bits | bit;
+    }, 0),
+  )
+  // The table has one entry after code 255 that no character reaches.
+  .slice(0, 256);
+if (characterTypes.length !== 256) {
+  throw new Error(`E_PARSER_TABLE: ${characterTypes.length} character types, expected 256`);
+}
+// par_lower[] (CMD/par_char.c:337) is INCLUDE/ls_lower.tab: the case folding
+// of case-insensitive literals.
+const lowerCase = (
+  fs
+    .readFileSync(path.join(dectalkRoot, "dapi", "src", "INCLUDE", "ls_lower.tab"), "latin1")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/.*$/gm, "")
+    // Entries are hexadecimal numbers or character constants ('a').
+    .match(/0x[0-9A-Fa-f]+|'[^'\\]'/g) ?? []
+).map((cell) => (cell.startsWith("'") ? cell.charCodeAt(1) : Number(cell)));
+if (lowerCase.length !== 256) {
+  throw new Error(`E_PARSER_TABLE: ${lowerCase.length} case folding entries, expected 256`);
+}
+
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(
   outPath,
   `${JSON.stringify({
     schemaVersion: "v1",
-    source: `DECtalk 4.63 CMD/${HEADER} (compiled from CMD/${RULE_TEXT}); decoded by scripts/build-dectalk-text-parser.ts`,
+    source: `DECtalk 4.63 CMD/${HEADER} (compiled from CMD/${RULE_TEXT}), CMD/par_char.c, INCLUDE/ls_lower.tab; decoded by scripts/build-dectalk-text-parser.ts`,
     ruleText: `CMD/${RULE_TEXT}`,
     sections: ruleSections,
     rules,
     dictionaries,
+    characterTypes,
+    lowerCase,
   })}\n`,
 );
 const kinds = new Map<string, number>();

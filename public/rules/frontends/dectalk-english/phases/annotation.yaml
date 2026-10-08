@@ -366,13 +366,16 @@ rules:
         has(current.word) && current.word != ''
         && (current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'])
     define:
-      position: "1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
+      hat_begins_and_ends: "isTrue(current, 'hat_begins') && isTrue(current, 'hat_ends')"
+      # nphon, counted only for a syllabic where the hat begins and ends.
+      position: >-
+        hat_begins_and_ends
+        ? 1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone') : 0.0
     apply:
       - field: intonation_stops
         op: set
         value: >-
-          isTrue(current, 'hat_begins') && isTrue(current, 'hat_ends')
-          && position > params.policy.f0.intonation_stop_after_allophone
+          hat_begins_and_ends && position > params.policy.f0.intonation_stop_after_allophone
         tag: hat_pattern
     citations:
       - "DECtalk 4.63 Ph_inton2.c:809-819 (break out of the allophone loop when the hat begins and ends on one syllabic and nphon > 4)"

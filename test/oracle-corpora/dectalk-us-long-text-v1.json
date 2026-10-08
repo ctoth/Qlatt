@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-long-text-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "long-two-sentences", "text": "The man who lived in the small white house at the end of the long road that ran beside the river told the children who came to visit him every morning that he had once sailed around the world on a ship that carried tea and spices from the far east to the cold ports of the north. The man who lived in the small white house at the end of the long road that ran beside the river told the children who came to visit him every morning that he had once sailed around the world on a ship that carried tea and spices from the far east to the cold ports of the north.", "group": "frame-4096", "tags": ["over-4096-frames"], "expectedFocus": ["trace"] }
+  ]
+}

@@ -43,6 +43,8 @@ export const DECTALK_VOICE_CORPUS_FILES: readonly string[] = [
  * text stage or of the stress rules, where the packets say everything.
  */
 export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
+  // A text of more than 4096 frames: the frame where the pseudojitter phases wrap.
+  "dectalk-us-long-text-v1.json",
   // One-letter words and initials; promote_last_2 before a verb phrase.
   "dectalk-us-letters-v1.json",
   // Abbreviations the dictionary holds with their period, by the word's case.

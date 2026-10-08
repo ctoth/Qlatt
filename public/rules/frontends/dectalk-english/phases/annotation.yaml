@@ -249,6 +249,53 @@ rules:
   # phrase start. "He went to bed." has primary stress on "went" (its vowel
   # is 18 frames); "They went to bed." does not (15), "they" being unstressed.
   # ---------------------------------------------------------------------------
+  # Counts the hat pattern needs of what lies ahead in the clause, kept as a
+  # clause total and a running count so that no syllabic scans to the clause's
+  # end: the clause's first Segment counts the clause, every later one takes
+  # the total from the Segment before it and adds itself to the running count.
+  #   input phones  one for a phone, one more for a vowel that absorbed its
+  #                 /r/, one more for the survivor of a deleted geminate
+  #                 (nphonetot counts the phones as they came in);
+  #   syllabics     vowels and syllabic consonants.
+  dectalk_clause_phone_counts:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "!(current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null)"
+    define:
+      first: "prev == null || (prev.phoneme == 'SIL' && get(prev, 'punctuationSymbol', null) != null)"
+      own_phones: >-
+        (!(current.type in ['stop_release', 'stop_aspiration']) && current.phoneme != 'SIL' ? 1.0 : 0.0)
+        + (isTrue(current, 'fused_with_r') ? 1.0 : 0.0)
+        + (isTrue(current, 'after_deleted_geminate') ? 1.0 : 0.0)
+      own_syllabic: "current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'] ? 1.0 : 0.0"
+      phones_total: >-
+        !first ? get(prev, 'input_phones_total', 0.0)
+        : own_phones + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')
+          + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_fused_vowel')
+          + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_geminate_survivor')
+      syllabics_total: >-
+        !first ? get(prev, 'syllabics_total', 0.0)
+        : own_syllabic + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_syllabic')
+    apply:
+      - field: input_phones_total
+        op: set
+        value: phones_total
+        tag: boundary
+      - field: input_phones_through
+        op: set
+        value: "(first ? 0.0 : get(prev, 'input_phones_through', 0.0)) + own_phones"
+        tag: boundary
+      - field: syllabics_total
+        op: set
+        value: syllabics_total
+        tag: boundary
+      - field: syllabics_through
+        op: set
+        value: "(first ? 0.0 : get(prev, 'syllabics_through', 0.0)) + own_syllabic"
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:600, 1481 (the hat pattern's tests on nphonetot - n)"
   dectalk_hat_pattern:
     kind: scalar
     select:
@@ -273,12 +320,13 @@ rules:
       # nphonetot - n counts the phones as they came in: a vowel that has
       # since absorbed its /r/ (this one or a later one) was two phones, and
       # so was a geminate that has lost its first half.
+      # What lies ahead is the clause's total less what has gone by
+      # (dectalk_clause_phone_counts).
       phones_left: >-
-        2.0 + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')
-        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_fused_vowel')
-        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_geminate_survivor')
+        2.0 + get(current, 'input_phones_total', 0.0) - get(current, 'input_phones_through', 0.0)
         + (isTrue(current, 'fused_with_r') ? 1.0 : 0.0)
-      syllabics_after: "count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_syllabic')"
+      syllabics_after: >-
+        get(current, 'syllabics_total', 0.0) - get(current, 'syllabics_through', 0.0)
       # remaining_stresses_til(FCBNEXT): up to the clause's end or a phrase
       # start that carries the comma value.
       # promote_last_2 (ph_aloph.c:1470-1474, 1689-1722). When the walk

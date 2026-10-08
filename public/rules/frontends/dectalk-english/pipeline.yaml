@@ -703,6 +703,13 @@ relations:
       hat_locked: { kind: boolean }
       hat_stresses: { kind: number }
       hat_delay: { kind: number }
+      # For the hat pattern's counts of what lies ahead: the clause's total
+      # and the count up to and including this Segment (annotation.yaml,
+      # dectalk_clause_phone_counts).
+      input_phones_total: { kind: number }
+      input_phones_through: { kind: number }
+      syllabics_total: { kind: number }
+      syllabics_through: { kind: number }
       # The walk called promote_last_2 at this syllabic (ph_aloph.c:1470-1474).
       hat_promotes: { kind: boolean }
       # The syllabic at which DECtalk's intonation routine leaves its loop
@@ -961,6 +968,7 @@ phases:
       # the marks in its input before phsort(), so it needs no second pass.
       - dectalk_consonant_stress
       - dectalk_rime_boundary
+      - dectalk_clause_phone_counts
       # Reads the stress and boundary of every phone of the clause.
       - dectalk_hat_pattern
       - dectalk_intonation_stops

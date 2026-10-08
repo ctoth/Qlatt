@@ -26,7 +26,7 @@ import {
   recordSyncResources,
   takeSynchronousFetches,
 } from "../src/sync-resource-cache";
-import { loadYamlSourceSync } from "../src/yaml-loader";
+import { loadYamlSource, loadYamlSourceSync } from "../src/yaml-loader";
 
 describe("frontend resource manifests", () => {
   it.each(frontendIds())(
@@ -85,6 +85,23 @@ describe("primed resources", () => {
     expect(loadYamlSourceSync("/fixture/a.yaml")).toBe("a: 1\n");
     expect(blocking).toEqual(["/fixture/a.yaml"]);
     expect(takeSynchronousFetches()).toEqual(["/fixture/a.yaml"]);
+  });
+
+  it("a file that was not primed is requested once, however often it is read", () => {
+    const { blocking } = stubBrowser({ "/fixture/a.yaml": "a: 1\n" });
+    expect(loadYamlSourceSync("/fixture/a.yaml")).toBe("a: 1\n");
+    expect(loadYamlSourceSync("/fixture/a.yaml")).toBe("a: 1\n");
+    expect(loadYamlSourceSync("/fixture/a.yaml")).toBe("a: 1\n");
+    expect(blocking).toEqual(["/fixture/a.yaml"]);
+    expect(takeSynchronousFetches()).toEqual(["/fixture/a.yaml"]);
+  });
+
+  it("the asynchronous loader reuses text the synchronous loader fetched", async () => {
+    const { blocking, parallel } = stubBrowser({ "/fixture/a.yaml": "a: 1\n" });
+    expect(loadYamlSourceSync("/fixture/a.yaml")).toBe("a: 1\n");
+    expect(await loadYamlSource("/fixture/a.yaml")).toBe("a: 1\n");
+    expect(blocking).toEqual(["/fixture/a.yaml"]);
+    expect(parallel).toEqual([]);
   });
 
   it("after priming, the same load makes no request", async () => {

@@ -19,7 +19,7 @@
  * Citation: Elovitz, Johnson, McHugh & Shore (1976). NRL Report 7948.
  */
 
-import { loadYamlDocumentSync } from "../yaml-loader";
+import { ltsDocumentAt } from "./lts-document";
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -44,7 +44,7 @@ function loadRules(rulesPath: string): { data: LtsRulesData; contextCache: Map<s
   const cached = rulesCache.get(rulesPath);
   if (cached) return cached;
 
-  const data = loadYamlDocumentSync<LtsRulesData>(rulesPath);
+  const data = ltsDocumentAt(rulesPath) as LtsRulesData;
   const contextCache = new Map<string, RegExp>();
   const entry = { data, contextCache };
   rulesCache.set(rulesPath, entry);

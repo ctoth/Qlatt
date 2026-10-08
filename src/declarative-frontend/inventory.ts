@@ -1,4 +1,5 @@
 import type { Diagnostics } from "../diagnostics";
+import { ltsDocumentAt } from "../g2p/lts-document";
 import { loadStressPolicy } from "../g2p/stress-policy";
 import type { AreaFunctionDerivation } from "../provenance";
 import {
@@ -579,20 +580,25 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   if (typeof inventoryPath !== "string" || inventoryPath.length === 0) {
     throw new Error("E_FRONTEND_SPEC: inventory_path is required");
   }
-  const requireAsset = (value: unknown, name: string): string => {
+  const requireAsset = (
+    value: unknown,
+    name: string,
+    load: (path: string) => unknown = loadYamlDocumentSync,
+  ): string => {
     if (typeof value !== "string" || !value.trim()) {
       throw new Error(`E_FRONTEND_CONFIG: ${name} is required`);
     }
     try {
       if (!FRONTEND_ASSET_CACHE.has(value)) {
-        FRONTEND_ASSET_CACHE.set(value, loadYamlDocumentSync(value));
+        FRONTEND_ASSET_CACHE.set(value, load(value));
       }
     } catch (cause) {
       throw new Error(`E_FRONTEND_CONFIG: ${name} could not load '${value}'`, { cause });
     }
     return value;
   };
-  const ltsPath = requireAsset(spec.lts_path, "lts_path");
+  // The pronouncers read the same parsed document (g2p/lts-document.ts).
+  const ltsPath = requireAsset(spec.lts_path, "lts_path", ltsDocumentAt);
   const morphologyPath = requireAsset(spec.morphology_path, "morphology_path");
   const morphology = FRONTEND_ASSET_CACHE.get(morphologyPath);
   requireAsset(

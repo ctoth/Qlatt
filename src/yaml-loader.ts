@@ -1,6 +1,7 @@
 import { load as loadYaml } from "js-yaml";
 import { isNodeRuntime, normalizePath, readFileFromFsSync } from "./path-utils";
 import {
+  keepSyncResource,
   noteSynchronousFetch,
   noteSyncResourceRequest,
   primedSyncResource,
@@ -45,6 +46,7 @@ export function loadYamlSourceSync(specPath: string): string {
     if (typeof fromUrl === "string") {
       noteSyncResourceRequest(specPath);
       noteSynchronousFetch(specPath);
+      keepSyncResource(attempt, fromUrl);
       return fromUrl;
     }
   }
@@ -65,6 +67,12 @@ export async function loadYamlSource(specPath: string): Promise<string> {
   const attempts = [normalizedPath, specPath].filter(
     (value, index, all) => all.indexOf(value) === index,
   );
+
+  // Text already fetched for the synchronous loaders: no second request.
+  for (const attempt of attempts) {
+    const fromPrimed = primedSyncResource(attempt);
+    if (typeof fromPrimed === "string") return fromPrimed;
+  }
 
   // In Node/test/CLI, prefer filesystem paths to avoid failed fetch() probes.
   if (isNodeRuntime()) {

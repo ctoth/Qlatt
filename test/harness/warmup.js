@@ -29,10 +29,16 @@ const WARMUP_PHRASE = "a.";
 
 const warmed = new Map();
 
+/** The longest the compile waits for an idle moment, in ms. Engineering estimate. */
+const IDLE_WAIT_LIMIT_MS = 200;
+
+// An idle moment, or the limit, whichever is first. The timer is not a
+// formality: a tab that is not visible is never given an idle callback, and
+// Speak waits for the warm-up.
 function idle() {
   return new Promise((resolve) => {
     if (typeof requestIdleCallback === "function") requestIdleCallback(() => resolve());
-    else setTimeout(resolve, 0);
+    setTimeout(resolve, IDLE_WAIT_LIMIT_MS);
   });
 }
 

@@ -58,6 +58,17 @@ export async function primeSyncResources(paths: readonly string[]): Promise<stri
   return failed;
 }
 
+/**
+ * Keep text a synchronous loader fetched with a blocking request, so that the
+ * same resource is not requested again. The loaders' callers each cache what
+ * they parse, per caller: without this a file with two readers (a voice file
+ * is read when the rule pack is checked and again at every utterance) is one
+ * request per read.
+ */
+export function keepSyncResource(pathOrUrl: string, text: string): void {
+  primed.set(pathOrUrl, text);
+}
+
 /** Forget every primed resource. */
 export function clearPrimedSyncResources(): void {
   primed.clear();

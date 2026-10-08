@@ -80,7 +80,9 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // next phone's opening applies) regenerate three: against fc64b694 only AG
 // changes (`--drop AG` gives equal hashes) and "sip sip." not at all.
 // AL, ABLADE and ATB regenerate all four: against 3f603345 the tracks are
-// equal with `--drop AL,ABLADE,ATB`.
+// equal with `--drop AL,ABLADE,ATB`. Two corrections to those rules (a velar
+// stop sets no lip or blade target; the velar nasal closes the tongue body)
+// regenerate "Gag, gang; go!", again equal to e5fbed47 without those words.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

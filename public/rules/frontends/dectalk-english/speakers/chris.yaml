@@ -12,6 +12,8 @@ citations:
   - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"
 name: Chris
 sex: female
+# (200 - HS) * 41 with HS 125 (P_us_vdf1.h:762 us_chris; ph_vset.c:712).
+fnscale: 3075
 base_f0_hz: 110
 formant_scale: 1.17
 rd_default: 0.8

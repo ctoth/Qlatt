@@ -12,6 +12,9 @@ citations:
   - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"
 name: Betty
 sex: female
+# (200 - HS) * 41 with HS 100 (P_us_vdf1.h:811 us_betty, the OLD_VOICES
+# definition, ph_defs.h:121; ph_vset.c:712).
+fnscale: 4100
 base_f0_hz: 208
 formant_scale: 1.17
 rd_default: 0.9

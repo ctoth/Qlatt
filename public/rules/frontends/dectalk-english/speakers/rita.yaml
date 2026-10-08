@@ -12,6 +12,8 @@ citations:
   - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"
 name: Rita
 sex: female
+# (200 - HS) * 41 with HS 95 (P_us_vdf1.h:1193 us_rita; ph_vset.c:712).
+fnscale: 4305
 base_f0_hz: 106
 formant_scale: 1.17
 rd_default: 0.94

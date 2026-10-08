@@ -48,9 +48,11 @@ version: v1
 # of ph_draw.c:2935-3111 writes around velars is off. The packets agree on
 # each.
 #
-# ONLY PAUL IS DECTALK'S. The tables and the formant scale are Paul's
-# (policy.formant_drawing); rule parameters do not see the selected voice yet,
-# so every other voice is drawn with them too.
+# The voice. Two things here depend on it, both voice rule fields
+# (frontend.yaml speakers.rule_fields): `sex` picks the male or the female
+# target, diphthong and locus tables, as malfem does (ph_setar.c:1684-1697,
+# ph_sttr2.c:162-169), and `fnscale` is the formant scale setspdef() derives
+# from the voice's head size (ph_vset.c:712-713).
 # -----------------------------------------------------------------------------
 functions:
   fd_is_dummy:
@@ -118,14 +120,15 @@ functions:
       - "DECtalk 4.63 p_us_rom.h:917 us_endtyp"
   fd_raw:
     params: [item, par]
-    body: "params.policy.formant_drawing.target[fd_name(item)][par]"
+    body: "params.policy.formant_drawing.tables[params.policy.voice.sex].target[fd_name(item)][par]"
     description: The table target; -1 is none, under -1 a diphthong.
     citations:
       - "DECtalk 4.63 p_us_st1.c:92-106 (p_tar[phone + pphotr])"
   fd_dip:
     params: [item, par, field]
     body: >-
-      get(get(get(params.policy.formant_drawing.diphthong, fd_name(item), {}), par, {}), field, [])
+      get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].diphthong,
+        fd_name(item), {}), par, {}), field, [])
     description: The values or the times of the allophone's diphthong lines.
     citations:
       - "DECtalk 4.63 p_us_rom.h:1992 us_maldip; ph_setar.c:1234-1386"
@@ -974,9 +977,9 @@ rules:
     unit: "!u.silence && p.endtyp == 4 && u.begtyp != 4"
     when: "f.index == 0"
     set:
-      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
-      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
-      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F1', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,p.phone, {}), u.begkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,p.phone, {}), u.begkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,p.phone, {}), u.begkey, {}), 'F1', [-1, 0, 0])[2]", tag: formant_ramp }
       - register: bou_F1
         value: >-
           r.loc_hz < 0 ? r.bou_F1
@@ -985,9 +988,9 @@ rules:
             : floor(r.loc_percent * (u.own_F1 - r.loc_hz) / 100))
         tag: formant_ramp
       - { register: dur_F1, value: "r.loc_hz < 0 ? r.dur_F1 : floor(r.loc_ms * 10 / 64)", tag: formant_ramp }
-      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F2', [-1, 0, 0])[0]", tag: formant_ramp }
-      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F2', [-1, 0, 0])[1]", tag: formant_ramp }
-      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F2', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,p.phone, {}), u.begkey, {}), 'F2', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,p.phone, {}), u.begkey, {}), 'F2', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,p.phone, {}), u.begkey, {}), 'F2', [-1, 0, 0])[2]", tag: formant_ramp }
       - { register: loc_percent, value: "u.begtyp == 5 && !p.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
       - { register: loc_percent, value: "u.f2backi ? r.loc_percent + 25 - floor(r.loc_percent / 4) : r.loc_percent", tag: formant_ramp }
       - register: bou_F2
@@ -1002,9 +1005,9 @@ rules:
           r.loc_hz < 0 ? r.dur_F2
           : (u.f2backi ? floor(floor(r.loc_ms * 10 / 64) / 2) + 2 : floor(r.loc_ms * 10 / 64))
         tag: formant_ramp
-      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F3', [-1, 0, 0])[0]", tag: formant_ramp }
-      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F3', [-1, 0, 0])[1]", tag: formant_ramp }
-      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F3', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,p.phone, {}), u.begkey, {}), 'F3', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,p.phone, {}), u.begkey, {}), 'F3', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,p.phone, {}), u.begkey, {}), 'F3', [-1, 0, 0])[2]", tag: formant_ramp }
       - { register: loc_percent, value: "u.begtyp == 5 && !p.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
       - register: bou_F3
         value: >-
@@ -1025,9 +1028,9 @@ rules:
     unit: "!u.silence && u.begtyp == 4 && p.endtyp != 4"
     when: "f.index == 0"
     set:
-      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
-      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
-      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F1', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), p.endkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), p.endkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), p.endkey, {}), 'F1', [-1, 0, 0])[2]", tag: formant_ramp }
       - register: bou_F1
         value: >-
           r.loc_hz < 0 ? r.bou_F1
@@ -1036,9 +1039,9 @@ rules:
             : floor(r.loc_percent * (p.end_F1 - r.loc_hz) / 100))
         tag: formant_ramp
       - { register: dur_F1, value: "r.loc_hz < 0 ? r.dur_F1 : floor(r.loc_ms * 10 / 64)", tag: formant_ramp }
-      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F2', [-1, 0, 0])[0]", tag: formant_ramp }
-      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F2', [-1, 0, 0])[1]", tag: formant_ramp }
-      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F2', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), p.endkey, {}), 'F2', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), p.endkey, {}), 'F2', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), p.endkey, {}), 'F2', [-1, 0, 0])[2]", tag: formant_ramp }
       - { register: loc_percent, value: "p.endtyp == 5 && !u.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
       - { register: loc_percent, value: "p.f2backf ? r.loc_percent + 25 - floor(r.loc_percent / 4) : r.loc_percent", tag: formant_ramp }
       - register: bou_F2
@@ -1053,9 +1056,9 @@ rules:
           r.loc_hz < 0 ? r.dur_F2
           : (p.f2backf ? floor(floor(r.loc_ms * 10 / 64) / 2) + 2 : floor(r.loc_ms * 10 / 64))
         tag: formant_ramp
-      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F3', [-1, 0, 0])[0]", tag: formant_ramp }
-      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F3', [-1, 0, 0])[1]", tag: formant_ramp }
-      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F3', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), p.endkey, {}), 'F3', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), p.endkey, {}), 'F3', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), p.endkey, {}), 'F3', [-1, 0, 0])[2]", tag: formant_ramp }
       - { register: loc_percent, value: "p.endtyp == 5 && !u.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
       - register: bou_F3
         value: >-
@@ -1299,9 +1302,9 @@ rules:
     unit: "!n.silence && n.begtyp == 4 && u.endtyp != 4"
     when: "f.index == 0"
     set:
-      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
-      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
-      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F1', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,n.phone, {}), u.endkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,n.phone, {}), u.endkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,n.phone, {}), u.endkey, {}), 'F1', [-1, 0, 0])[2]", tag: formant_ramp }
       - register: bou_F1
         value: >-
           r.loc_hz < 0 ? r.bou_F1
@@ -1310,9 +1313,9 @@ rules:
             : floor(r.loc_percent * (u.end_F1 - r.loc_hz) / 100))
         tag: formant_ramp
       - { register: dur_F1, value: "r.loc_hz < 0 ? r.dur_F1 : floor(r.loc_ms * 10 / 64)", tag: formant_ramp }
-      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F2', [-1, 0, 0])[0]", tag: formant_ramp }
-      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F2', [-1, 0, 0])[1]", tag: formant_ramp }
-      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F2', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,n.phone, {}), u.endkey, {}), 'F2', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,n.phone, {}), u.endkey, {}), 'F2', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,n.phone, {}), u.endkey, {}), 'F2', [-1, 0, 0])[2]", tag: formant_ramp }
       - { register: loc_percent, value: "u.endtyp == 5 && !n.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
       - { register: loc_percent, value: "u.f2backf ? r.loc_percent + 25 - floor(r.loc_percent / 4) : r.loc_percent", tag: formant_ramp }
       - register: bou_F2
@@ -1327,9 +1330,9 @@ rules:
           r.loc_hz < 0 ? r.dur_F2
           : (u.f2backf ? floor(floor(r.loc_ms * 10 / 64) / 2) + 2 : floor(r.loc_ms * 10 / 64))
         tag: formant_ramp
-      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F3', [-1, 0, 0])[0]", tag: formant_ramp }
-      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F3', [-1, 0, 0])[1]", tag: formant_ramp }
-      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F3', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,n.phone, {}), u.endkey, {}), 'F3', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,n.phone, {}), u.endkey, {}), 'F3', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,n.phone, {}), u.endkey, {}), 'F3', [-1, 0, 0])[2]", tag: formant_ramp }
       - { register: loc_percent, value: "u.endtyp == 5 && !n.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
       - register: bou_F3
         value: >-
@@ -1348,9 +1351,9 @@ rules:
     unit: "!n.silence && u.endtyp == 4 && n.begtyp != 4"
     when: "f.index == 0"
     set:
-      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
-      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
-      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F1', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), n.begkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), n.begkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), n.begkey, {}), 'F1', [-1, 0, 0])[2]", tag: formant_ramp }
       - register: bou_F1
         value: >-
           r.loc_hz < 0 ? r.bou_F1
@@ -1359,9 +1362,9 @@ rules:
             : floor(r.loc_percent * (n.own_F1 - r.loc_hz) / 100))
         tag: formant_ramp
       - { register: dur_F1, value: "r.loc_hz < 0 ? r.dur_F1 : floor(r.loc_ms * 10 / 64)", tag: formant_ramp }
-      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F2', [-1, 0, 0])[0]", tag: formant_ramp }
-      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F2', [-1, 0, 0])[1]", tag: formant_ramp }
-      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F2', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), n.begkey, {}), 'F2', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), n.begkey, {}), 'F2', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), n.begkey, {}), 'F2', [-1, 0, 0])[2]", tag: formant_ramp }
       - { register: loc_percent, value: "n.begtyp == 5 && !u.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
       - { register: loc_percent, value: "n.f2backi ? r.loc_percent + 25 - floor(r.loc_percent / 4) : r.loc_percent", tag: formant_ramp }
       - register: bou_F2
@@ -1376,9 +1379,9 @@ rules:
           r.loc_hz < 0 ? r.dur_F2
           : (n.f2backi ? floor(floor(r.loc_ms * 10 / 64) / 2) + 2 : floor(r.loc_ms * 10 / 64))
         tag: formant_ramp
-      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F3', [-1, 0, 0])[0]", tag: formant_ramp }
-      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F3', [-1, 0, 0])[1]", tag: formant_ramp }
-      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F3', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), n.begkey, {}), 'F3', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), n.begkey, {}), 'F3', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.tables[params.policy.voice.sex].locus,u.phone, {}), n.begkey, {}), 'F3', [-1, 0, 0])[2]", tag: formant_ramp }
       - { register: loc_percent, value: "n.begtyp == 5 && !u.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
       - register: bou_F3
         value: >-
@@ -1966,16 +1969,16 @@ rules:
       - register: out_F1
         value: >-
           r.val_F1 > 250
-            ? floor(r.val_F1 * params.policy.formant_drawing.voice.fnscale / 4096)
-              - ceil((params.policy.formant_drawing.voice.fnscale - 4096) / 16)
+            ? floor(r.val_F1 * params.policy.voice.fnscale / 4096)
+              - ceil((params.policy.voice.fnscale - 4096) / 16)
             : r.val_F1
         tag: formant_draw
       - register: out_F2
         value: >-
-          floor(r.val_F2 * params.policy.formant_drawing.voice.fnscale / 4096)
-          - ceil((params.policy.formant_drawing.voice.fnscale - 4096) / 8)
+          floor(r.val_F2 * params.policy.voice.fnscale / 4096)
+          - ceil((params.policy.voice.fnscale - 4096) / 8)
         tag: formant_draw
-      - { register: out_F3, value: "floor(r.val_F3 * params.policy.formant_drawing.voice.fnscale / 4096)", tag: formant_draw }
+      - { register: out_F3, value: "floor(r.val_F3 * params.policy.voice.fnscale / 4096)", tag: formant_draw }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:733-736; ph_defs.h:798 frac4mul"
   fd_third_formant_floor:

@@ -12,6 +12,11 @@ citations:
   - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"
 name: Frank
 sex: male
+# (200 - 100) * 41: outside reading mode setspdef() gives voice 3 a block of
+# its own with the head size taken as 100 (ph_vset.c:580-582, 615-616). The
+# voice definition's HS is 97 (P_us_vdf1.h:1006), which the general path
+# would turn into 4223.
+fnscale: 4100
 base_f0_hz: 135
 formant_scale: 1
 rd_default: 0.82

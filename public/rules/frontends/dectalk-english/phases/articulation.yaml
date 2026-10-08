@@ -876,12 +876,17 @@ rules:
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:2036-2040"
 
-  # 2113-2120, still inside the vowel's braces: before a voiceless sonorant
-  # consonant (/h/), so that no glottal pulse sounds at its release.
+  # From here on the C is outside the three-way split on allophone 0, silence
+  # and other phones, which ends at 1983: these rules run in every phone, the
+  # silences included (the compiled listing's brace depth says so, and
+  # DECtalk's own values before an utterance-initial /h/ agree).
+  #
+  # 2112-2120: before a voiceless sonorant consonant (/h/), so that no
+  # glottal pulse sounds at its release.
   artic_vowel_before_voiceless_sonorant:
     kind: frame
     program: articulation
-    unit: "!u.silence && u.vowel && !n.dummy && !n.voiced && n.sonorant && n.consonant"
+    unit: "!n.dummy && !n.voiced && n.sonorant && n.consonant"
     when: "f.index >= f.count - 2"
     set:
       - { register: target_ag, value: 1800, tag: glottal_area }
@@ -889,11 +894,22 @@ rules:
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:2112-2120"
 
+  # 2140-2150: in a voiceless sonorant consonant itself, every frame.
+  artic_voiceless_sonorant_glottis:
+    kind: frame
+    program: articulation
+    unit: "!u.dummy && !u.voiced && u.sonorant && u.consonant"
+    set:
+      - { register: target_ag, value: 1800, tag: glottal_area }
+      - { register: agspeed, value: 2, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2140-2150"
+
   # --- before a voiceless sonorant consonant: ph_draw.c:2165-2192 ----------
   artic_before_voiceless_sonorant:
     kind: frame
     program: articulation
-    unit: "!u.silence && !n.dummy && !n.voiced && n.sonorant && n.consonant"
+    unit: "!n.dummy && !n.voiced && n.sonorant && n.consonant"
     when: >-
       f.index >= f.count - 7
       && r.target_ag < params.policy.articulation.voice.unvoiced_sonorant
@@ -958,7 +974,7 @@ rules:
   artic_unstressed_before_voiceless_fricative_late:
     kind: frame
     program: articulation
-    unit: "!u.silence && !u.nasal && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
+    unit: "!u.nasal && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
     when: "f.index >= f.count - 9 && f.index >= floor(f.count / 2) && r.target_ag < 1000"
     set:
       - { register: target_ag, value: "r.target_ag + 10", tag: glottal_area }
@@ -967,7 +983,7 @@ rules:
   artic_unstressed_before_voiceless_fricative_early:
     kind: frame
     program: articulation
-    unit: "!u.silence && !u.nasal && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
+    unit: "!u.nasal && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
     when: "!(f.index >= f.count - 9 && f.index >= floor(f.count / 2)) && r.target_ag < 1100"
     set:
       - { register: target_ag, value: "r.target_ag + (r.target_ag < 700 ? 75 : 40)", tag: glottal_area }
@@ -1481,6 +1497,18 @@ rules:
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:2038-2044"
 
+  # --- a voiceless sonorant consonant opens everything: ph_draw.c:2140-2147
+  artic_voiceless_sonorant_areas:
+    kind: frame
+    program: articulation
+    unit: "!u.dummy && !u.voiced && u.sonorant && u.consonant"
+    set:
+      - { register: target_l, value: 1000, tag: constriction }
+      - { register: target_b, value: 1000, tag: constriction }
+      - { register: target_tb, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2140-2147"
+
   # --- the velar nasal closes the tongue body: ph_draw.c:2400-2410 ---------
   artic_velar_nasal_closure:
     kind: frame
@@ -1832,6 +1860,7 @@ phases:
       - artic_vowel_before_fricative
       - artic_vowel_last_frame
       - artic_vowel_before_voiceless_sonorant
+      - artic_voiceless_sonorant_glottis
       - artic_before_voiceless_sonorant
       - artic_affricate_speed
       - artic_sonorant_consonant_speed
@@ -1891,6 +1920,7 @@ phases:
       - artic_burstless_stop_labial_area
       - artic_sonorant_areas
       - artic_vowel_before_labial
+      - artic_voiceless_sonorant_areas
       - artic_velar_nasal_closure
       - artic_tongue_closure_needs_velar
       - artic_tongue_closed

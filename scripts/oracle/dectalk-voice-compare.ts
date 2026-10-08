@@ -25,7 +25,7 @@ import type { OracleCorpusDocument, OracleCorpusEntry } from "./types.ts";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 /** test/harness/runtime.js: `state.ctx.currentTime + 0.05`. */
-const PAGE_START_DELAY_SEC = 0.05;
+export const PAGE_START_DELAY_SEC = 0.05;
 /**
  * say.exe's `[:ra 180]` is DECtalk's default rate and the frontend's rate 1
  * (test/dectalk-vtm-frontend.test.ts). Another rate is given to the frontend
@@ -34,7 +34,7 @@ const PAGE_START_DELAY_SEC = 0.05;
  * `rate_reference`). Whether the frontend then does what DECtalk does at that
  * rate is what the comparison measures.
  */
-const NEUTRAL_RATE_WPM = 180;
+export const NEUTRAL_RATE_WPM = 180;
 
 export interface VoiceResult {
   id: string;
@@ -72,7 +72,8 @@ export function readVoiceCorpus(corpusPath: string): OracleCorpusDocument {
 
 let pairing: { manifest: FrontendManifest; experimentIds: string[] } | undefined;
 
-function experimentFor(frontendId: string): string {
+/** The experiment the page pairs a frontend with. */
+export function experimentFor(frontendId: string): string {
   pairing ??= {
     manifest: JSON.parse(
       fs.readFileSync(path.join(repoRoot, "public", "rules", "frontends", "manifest.json"), "utf8"),

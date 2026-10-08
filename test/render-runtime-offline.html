@@ -7,6 +7,7 @@
   </head>
   <body>
     <script type="module">
+      import { createDiagnostics } from "../src/diagnostics.ts";
       import { loadExperimentConfig } from "../src/experiments/load-experiment-config.ts";
       import { preloadF0Filters } from "../src/f0-filters-loader.ts";
       import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
@@ -22,12 +23,18 @@
         frontendId = "qlatt-english",
         experimentId = "klatt80-baseline",
         rate = 1,
+        // A voice of the frontend's registry, as the page's voice selection
+        // gives it (test/harness/runtime.js). Absent: the frontend's default.
+        speaker,
         transitionMs = 30,
         sampleRate = 48000,
         leadTime = 0.05,
         tailTime = 0.2,
         track,
         includeTrack = false,
+        // "float32-base64": the samples as the bytes of a Float32Array, exact
+        // and far smaller than a JSON array of numbers. Absent: the array.
+        encodeSamples,
       }) {
         const config = await loadExperimentConfig(experimentId, Array.isArray(track) ? undefined : frontendId);
         // Layered-additive F0 frontends (e.g. dectalk-english) call a
@@ -37,9 +44,12 @@
         }
         const resolvedTrack = Array.isArray(track)
           ? track
-          : textToKlattTrackDetailed(phrase, baseF0, transitionMs, {
+          : // A base F0 of null is none: the voice keeps its own (undefined
+            // does not survive the driver's serialization and would be 110).
+            textToKlattTrackDetailed(phrase, baseF0 === null ? undefined : baseF0, transitionMs, {
               frontendId,
               rate,
+              ...(speaker ? { speaker } : {}),
             }).track;
         const totalTime =
           (resolvedTrack.length ? resolvedTrack[resolvedTrack.length - 1].time : 0) +
@@ -48,7 +58,11 @@
         const length = Math.max(1, Math.ceil(totalTime * sampleRate));
 
         const ctx = new OfflineAudioContext(1, length, sampleRate);
+        // What the graph's nodes report (where a run started, a fallback, a
+        // fault) goes back with the samples.
+        const diagnostics = createDiagnostics({ maxEntries: 1000 });
         const runtime = await createKlattRuntime({
+          diagnostics,
           audioContext: ctx,
           graph: config.graph,
           semantics: config.semantics,
@@ -66,21 +80,33 @@
         interpreter.scheduleTrack(resolvedTrack, leadTime);
 
         const buffer = await ctx.startRendering();
+        // Worklet messages are delivered on a later turn of the event loop.
+        await new Promise((resolve) => setTimeout(resolve, 0));
         runtime.disconnect();
 
         const channel = new Float32Array(buffer.length);
         buffer.copyFromChannel(channel, 0);
         let rms = 0;
         let peak = 0;
-        const samples = new Array(channel.length);
+        const encoded = encodeSamples === "float32-base64";
+        const samples = encoded ? [] : new Array(channel.length);
         for (let i = 0; i < channel.length; i += 1) {
           const value = channel[i];
-          samples[i] = value;
+          if (!encoded) samples[i] = value;
           rms += value * value;
           const absValue = Math.abs(value);
           if (absValue > peak) peak = absValue;
         }
         rms = channel.length ? Math.sqrt(rms / channel.length) : 0;
+        let samplesBase64;
+        if (encoded) {
+          const bytes = new Uint8Array(channel.buffer, channel.byteOffset, channel.byteLength);
+          let binary = "";
+          for (let i = 0; i < bytes.length; i += 32768) {
+            binary += String.fromCharCode(...bytes.subarray(i, i + 32768));
+          }
+          samplesBase64 = btoa(binary);
+        }
 
         return {
           phrase,
@@ -88,6 +114,7 @@
           frontendId,
           experimentId,
           rate,
+          speaker,
           transitionMs,
           sampleRate,
           leadTime,
@@ -97,6 +124,13 @@
           trackSummary: summarizeTrack(resolvedTrack),
           track: includeTrack ? resolvedTrack : undefined,
           samples,
+          samplesBase64,
+          diagnostics: diagnostics.getEntries().map((entry) => ({
+            level: entry.level,
+            code: entry.code,
+            message: entry.message,
+            data: entry.data,
+          })),
         };
       }
 

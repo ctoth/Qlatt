@@ -5,10 +5,14 @@
  * for that voice, and without the voice it does not.
  */
 
+import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { readWavInt16 } from "../scripts/oracle/dectalk-vtm-fixture";
-import { browserRuntimeBackend } from "../scripts/rendering/backends/browser-runtime";
+import {
+  browserRenderOptions,
+  browserRuntimeBackend,
+} from "../scripts/rendering/backends/browser-runtime";
 import { nodeRuntimeBackend } from "../scripts/rendering/backends/node-runtime";
 import type { RenderRequest } from "../src/rendering/types";
 
@@ -82,10 +86,22 @@ describe("render request speaker", () => {
     );
   });
 
-  it("the browser backend refuses a voice it cannot select", async () => {
+  // No browser is launched here. That the browser's render with a voice is
+  // say.exe's audio is measured by scripts/oracle/browser-sweep.ts.
+  it("the browser backend hands the voice to the page's offline driver", () => {
+    const browser = { allowBrowserRender: true, renderHost: "browser" } as const;
+    expect(browserRenderOptions({ ...request("she.", "betty"), ...browser }).speaker).toBe("betty");
+    expect(browserRenderOptions({ ...request("she."), ...browser })).not.toHaveProperty("speaker");
+    // The driver gives it to the frontend as the page's voice selection does.
+    const page = fs.readFileSync(path.join("test", "render-runtime-offline.html"), "utf8");
+    expect(page).toContain("...(speaker ? { speaker } : {}),");
+  });
+
+  it("the browser backend refuses a voice for the legacy page, which cannot select one", async () => {
     await expect(
       browserRuntimeBackend.render({
         ...request("she.", "betty"),
+        engine: "legacy",
         allowBrowserRender: true,
         renderHost: "browser",
       }),

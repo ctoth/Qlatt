@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-empty-clause-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "empty-clause-k-initial-mary", "text": "Ask Mary K. Brown about it.", "group": "earlier-clause-k", "tags": ["empty-clause", "initial", "sweep-miss"], "expectedFocus": ["trace"] },
+    { "id": "empty-clause-k-initial-ask", "text": "Ask J. Smith today.", "group": "earlier-clause-k", "tags": ["empty-clause", "initial", "predicted"], "expectedFocus": ["trace"] },
+    { "id": "empty-clause-l-initial-tell", "text": "Tell Mary K. Brown about it.", "group": "earlier-clause-k", "tags": ["empty-clause", "initial", "third-allophone-not-k"], "expectedFocus": ["trace"] }
+  ]
+}

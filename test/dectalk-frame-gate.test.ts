@@ -105,6 +105,24 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   A2_AMPLITUDE: A2_AMPLITUDE_REASON,
 };
 
+/**
+ * Corpora recorded ahead of the port that will speak them: one reason covers
+ * every name on such a corpus's list, the ratchet still holds each phrase to
+ * exactly the names listed, and the entry goes when the lists hold nothing but
+ * the names of GAP_REASONS.
+ */
+const CORPUS_GAP_REASONS: Readonly<Record<string, string>> = {
+  "dectalk-us-parser-words-v1":
+    "DECtalk's command-stage text parser (CMD/cm_text.c, CMD/par_pars1.c, the rules of " +
+    "CMD/par_rule2.par) rewrites these sentences before letter-to-sound: a listed " +
+    'abbreviation becomes its words ("mph", "fyi", "URL", "e.g.", "w/o", "apt.", "Mon."), ' +
+    '"Dr." and "St." before a capitalised word become Doctor and Saint. That parser is ' +
+    "being ported once, as a table decoded from the compiled rules with an interpreter of " +
+    "it, and is not wired into the frontend yet; until it is, these words go to the " +
+    "dictionary and the letter-to-sound rules as written and the phrase differs from its " +
+    "first changed word on. The six phrases the parser leaves alone match already",
+};
+
 const loaded = DECTALK_FRAME_CORPUS_FILES.map((fileName) => {
   const corpus = JSON.parse(
     fs.readFileSync(path.join(repoRoot, "test", "oracle-corpora", fileName), "utf8"),
@@ -144,7 +162,11 @@ describe("DECtalk frame gate", () => {
         expect(Object.keys(gaps).filter((id) => !ids.includes(id))).toEqual([]);
         const names = [...new Set(Object.values(gaps).flat())];
         expect(names.filter((name) => !FRAME_GAP_NAMES.includes(name))).toEqual([]);
-        expect(names.filter((name) => !(name in GAP_REASONS))).toEqual([]);
+        expect(
+          names.filter(
+            (name) => !(name in GAP_REASONS) && !(corpus.corpusId in CORPUS_GAP_REASONS),
+          ),
+        ).toEqual([]);
       });
 
       for (const entry of corpus.entries) {

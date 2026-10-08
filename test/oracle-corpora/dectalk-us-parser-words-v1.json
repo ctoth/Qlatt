@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-parser-words-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "parser-mph", "text": "Drive 30 mph in town.", "group": "parser-words", "tags": ["R375"], "expectedFocus": ["trace"] },
+    { "id": "parser-mph-upper-period", "text": "Drive 30 MPH. in town.", "group": "parser-words", "tags": ["R375", "period-deleted"], "expectedFocus": ["trace"] },
+    { "id": "parser-mph-final", "text": "Drive 30 mph.", "group": "parser-words", "tags": ["R375", "text-final"], "expectedFocus": ["trace"] },
+    { "id": "parser-url", "text": "Send the URL now.", "group": "parser-words", "tags": ["R375", "spelling"], "expectedFocus": ["trace"] },
+    { "id": "parser-api", "text": "See the API now.", "group": "parser-words", "tags": ["R375", "spelling"], "expectedFocus": ["trace"] },
+    { "id": "parser-fyi", "text": "It is fyi only.", "group": "parser-words", "tags": ["R375"], "expectedFocus": ["trace"] },
+    { "id": "parser-capt", "text": "Ask capt Smith now.", "group": "parser-words", "tags": ["R375"], "expectedFocus": ["trace"] },
+    { "id": "parser-rm", "text": "The rm is big.", "group": "parser-words", "tags": ["R375"], "expectedFocus": ["trace"] },
+    { "id": "parser-apt-period", "text": "The apt. is big.", "group": "parser-words", "tags": ["R3751"], "expectedFocus": ["trace"] },
+    { "id": "parser-apt-bare", "text": "The apt is big.", "group": "parser-words", "tags": ["R3751", "not-replaced"], "expectedFocus": ["trace"] },
+    { "id": "parser-days", "text": "It opens Mon. through Fri.", "group": "parser-words", "tags": ["R371", "text-final"], "expectedFocus": ["trace"] },
+    { "id": "parser-days-bare", "text": "Go on Mon and Tue.", "group": "parser-words", "tags": ["R371", "not-replaced"], "expectedFocus": ["trace"] },
+    { "id": "parser-eg", "text": "Use e.g. a hammer.", "group": "parser-words", "tags": ["R49"], "expectedFocus": ["trace"] },
+    { "id": "parser-eg-upper", "text": "Use E.G. this.", "group": "parser-words", "tags": ["R49", "not-replaced", "dictionary-abbreviation"], "expectedFocus": ["trace"] },
+    { "id": "parser-ie", "text": "Use i.e. this.", "group": "parser-words", "tags": ["R49"], "expectedFocus": ["trace"] },
+    { "id": "parser-without", "text": "Use w/o this.", "group": "parser-words", "tags": ["R49"], "expectedFocus": ["trace"] },
+    { "id": "parser-recd", "text": "He has rec'd it.", "group": "parser-words", "tags": ["R49"], "expectedFocus": ["trace"] },
+    { "id": "parser-doctor-drive", "text": "Dr. Smith lives on Oak Dr. now.", "group": "parser-titles", "tags": ["R315", "dictionary-abbreviation"], "expectedFocus": ["trace"] },
+    { "id": "parser-doctor-upper", "text": "DR. Smith is here.", "group": "parser-titles", "tags": ["R315"], "expectedFocus": ["trace"] },
+    { "id": "parser-doctor-lower-name", "text": "Dr. smith is here.", "group": "parser-titles", "tags": ["R315", "not-replaced"], "expectedFocus": ["trace"] },
+    { "id": "parser-doctor-no-period", "text": "Dr Smith is here.", "group": "parser-titles", "tags": ["R315", "not-replaced"], "expectedFocus": ["trace"] },
+    { "id": "parser-doctor-possessive", "text": "Dr. Jones' car.", "group": "parser-titles", "tags": ["R315", "not-replaced"], "expectedFocus": ["trace"] },
+    { "id": "parser-saint-street", "text": "St. Paul is on Main St.", "group": "parser-titles", "tags": ["R316", "dictionary-abbreviation"], "expectedFocus": ["trace"] },
+    { "id": "parser-saint-doctor", "text": "St. John's Dr. Smith.", "group": "parser-titles", "tags": ["R315", "R316"], "expectedFocus": ["trace"] }
+  ]
+}

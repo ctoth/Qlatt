@@ -49,6 +49,8 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-letters-v1.json",
   // Abbreviations the dictionary holds with their period, by the word's case.
   "dectalk-us-abbrev-v1.json",
+  // Words DECtalk's command-stage parser rewrites before letter-to-sound.
+  "dectalk-us-parser-words-v1.json",
   // The same word twice in a row: a word is its Word Item, not its spelling.
   "dectalk-us-repeated-words-v1.json",
   // A word-initial AE before T in the word's last rime (ph_aloph.c:801-814).

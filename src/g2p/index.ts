@@ -719,6 +719,12 @@ export function pronounceClause(
      * before a written period (LTS/ls_task.c:2647-2673).
      */
     atWrittenPunctuation?: boolean;
+    /**
+     * For each word, whether the stretch of words that is read at once ends
+     * after it though no punctuation mark follows (the written word ends in
+     * one of the frontend's stretch-end characters).
+     */
+    stretchEnds?: readonly boolean[];
     /** The mark that ends the run, as written. */
     endMark?: string;
   },
@@ -770,11 +776,22 @@ export function pronounceClause(
         },
       });
       before.push(result.formClassWord ?? 0);
+      // The words are read a stretch at a time (LTS/ls_task.c:362-390: the
+      // text is handed on, and its classes start anew, at a space after a
+      // clause character; an apostrophe or a period written on a word is
+      // one). "We stayed at my parents' house.": "house" is the first word of
+      // its stretch and has no word before it to choose its entry by.
+      if (options.stretchEnds?.[index]) before.length = 0;
       return result;
     });
   };
+  // Where the stretch of the word at `index` ends (the index after its last word).
+  const stretchEnd = (index: number): number => {
+    const end = (options.stretchEnds ?? []).findIndex((ends, at) => at >= index && ends);
+    return end < 0 ? words.length : end + 1;
+  };
   const firstClasses = read(null).map((result) => result.formClassWord ?? 0);
-  const spoken = read((index) => firstClasses.slice(index + 1).some(isVerb));
+  const spoken = read((index) => firstClasses.slice(index + 1, stretchEnd(index)).some(isVerb));
   // The conjunctions of several words among them (table-conjunctions.ts). A
   // word with a written mark on it is no part of one.
   if (!table.conjunctionSequences) return spoken;

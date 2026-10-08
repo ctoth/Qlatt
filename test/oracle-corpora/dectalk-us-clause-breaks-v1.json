@@ -27,6 +27,8 @@
     { "id": "cb-plain-conjunction", "text": "The big dog barked and the small cat ran away.", "group": "conjunction-sequence", "tags": ["one-word", "break"], "expectedFocus": ["trace"] },
     { "id": "cb-late-after-am", "text": "The big store opens 9 am and the small one closes late today.", "group": "read-ahead-word", "tags": ["am-after-number", "break-one-word-late"], "expectedFocus": ["trace"] },
     { "id": "cb-not-late", "text": "The big store opens nine and the small one closes late today.", "group": "read-ahead-word", "tags": ["no-read-ahead", "break"], "expectedFocus": ["trace"] },
-    { "id": "cb-late-after-million", "text": "The big house cost $2 million and the small one cost less today.", "group": "read-ahead-word", "tags": ["quantity-after-money", "break-one-word-late"], "expectedFocus": ["trace"] }
+    { "id": "cb-late-after-million", "text": "The big house cost $2 million and the small one cost less today.", "group": "read-ahead-word", "tags": ["quantity-after-money", "break-one-word-late"], "expectedFocus": ["trace"] },
+    { "id": "cb-homograph-after-stretch-end", "text": "We stayed at my parents' house.", "group": "stretch-homograph", "tags": ["final-apostrophe", "homograph-first-in-stretch"], "expectedFocus": ["trace"] },
+    { "id": "cb-homograph-in-stretch", "text": "We stayed at my parents house.", "group": "stretch-homograph", "tags": ["no-apostrophe", "homograph-by-context"], "expectedFocus": ["trace"] }
   ]
 }

@@ -541,6 +541,7 @@ export function transcribeText(
           stressPolicyPath,
           atWrittenPunctuation,
           ...(endMark === undefined ? {} : { endMark }),
+          stretchEnds: run.map((position) => orthographyWords[position].endsWordStretch === true),
         },
       );
       run.forEach((position, order) => {

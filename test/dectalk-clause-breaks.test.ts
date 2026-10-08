@@ -156,4 +156,22 @@ describe("clause breaks in dectalk-english", () => {
       withBreaks("The big house cost $2 million and the small one cost less today."),
     ).toContain("and, the small");
   });
+
+  it("chooses a word of two entries by the words of its own stretch", () => {
+    // "house" after "parents'" is the first word of its stretch and ends in
+    // Z; after "parents" it follows "my parents" and ends in S (say.exe).
+    const last = (text: string): string => {
+      const { utterance } = textToKlattTrackDetailed(text, undefined, 30, {
+        frontendId: "dectalk-english",
+      });
+      const phones = utterance
+        .relation("Segment")
+        .listItems()
+        .map((segment) => String(segment.get("phoneme")))
+        .filter((phone) => phone !== "SIL");
+      return phones.at(-1) as string;
+    };
+    expect(last("We stayed at my parents' house.")).toBe("Z");
+    expect(last("We stayed at my parents house.")).toBe("S");
+  });
 });

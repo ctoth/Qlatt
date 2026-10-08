@@ -33,3 +33,11 @@ maps:
     # dictionary's words), "'tis", "'cause", "'bout", "'hello'" the same as
     # without the marks, "'n'" EH N and "'em'" EH M.
     lexical_apostrophe: "(?<=[a-z])'|'(?=[a-z])"
+    # Abbreviations are the dictionary's entries that end in a period
+    # (dictionary-abbreviations.yaml, generated), not the shared list: a word
+    # followed by a period is looked up with it and a hit eats the period
+    # (LTS/ls_task.c:2040-2160). Measured on say.exe: "No." is "no" and a
+    # sentence end, "Main St. near" is "street" with no break, "The Dept. and"
+    # is "department" while "The dept. and" is not (the entry is "Dept."),
+    # "See fig. 3" is "figure" while "See Fig. 3" is "fig" and a sentence end.
+    abbreviations: dictionary

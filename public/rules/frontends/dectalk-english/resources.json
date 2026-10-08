@@ -3,6 +3,7 @@
   "resources": [
     "/dectalk-dictionary.json",
     "/rules/affect/presets.yaml",
+    "/rules/frontends/dectalk-english/dictionary-abbreviations.yaml",
     "/rules/frontends/dectalk-english/frontend.yaml",
     "/rules/frontends/dectalk-english/inventory.yaml",
     "/rules/frontends/dectalk-english/lts-table.json",

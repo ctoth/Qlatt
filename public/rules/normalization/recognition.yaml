@@ -2,6 +2,30 @@
 # retain legacy boundaries; eligibility and speaking are separate CEL rules.
 text_recognition:
   rules:
+    # A word written with a period after it that the frontend's dictionary
+    # holds with the period: the abbreviation is the dictionary's word and the
+    # period is not a sentence end. Only for a frontend whose policy takes its
+    # abbreviations from its dictionary (tn_recognition_policy.abbreviations:
+    # dictionary); the generated map tn_dictionary_abbreviations says, per
+    # entry, which ways of writing the word find it (l lower case, C
+    # capitalised, U upper case). A word in mixed case is not in the map's
+    # terms and is left to the other rules.
+    - id: tn_dictionary_abbreviation_source
+      pattern: '(?<=^|\s)(?<word>[A-Za-z][A-Za-z.]*?)(?:(?<final>\.)(?=\s*$)|\.(?=\s))'
+      flags: ''
+      class: dictionary_abbreviation
+      captures: {word: word, final: final}
+      when: >-
+        get(maps.tn_recognition_policy, 'abbreviations', 'shared') == 'dictionary'
+        && get(get(maps, 'tn_dictionary_abbreviations', {}), lower(captures.word) + '.', '').contains(
+          captures.word == lower(captures.word) ? 'l'
+            : matches(captures.word, '^[^a-z]+$') ? 'U'
+            : matches(captures.word, '^[A-Z][^A-Z]*$') ? 'C' : 'x')
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:2040-2160 (a word followed by a period is looked up as an abbreviation; on a hit the period is eaten)'
+        - 'DECtalk 4.63 LTS/ls_dict.c:916-920 (an entry that is the word plus a period), 960-964 (a lower-case letter matches only a lower-case entry letter)'
     - id: tn_abbreviation_source
       table: tn_abbreviations
       prefix: '\b'
@@ -9,7 +33,8 @@ text_recognition:
       flags: i
       class: abbreviation
       captures: {key: key, tail: tail}
-      when: 'true'
+      # The shared abbreviation list, unless the frontend has its own source.
+      when: "get(maps.tn_recognition_policy, 'abbreviations', 'shared') == 'shared'"
       speak: current.text
       vocabulary_keys: '[]'
       citations: ['Allen, Hunnicutt & Klatt 1987; abbreviation prefix matching']

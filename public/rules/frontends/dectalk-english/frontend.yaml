@@ -29,6 +29,7 @@ normalization:
 include:
   - /rules/normalization/components.yaml
   - normalization-policy.yaml
+  - dictionary-abbreviations.yaml
   - pipeline.yaml
   - phases/postlexical.yaml
   - phases/structural.yaml

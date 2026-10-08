@@ -45,6 +45,8 @@ export const DECTALK_VOICE_CORPUS_FILES: readonly string[] = [
 export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // One-letter words and initials; promote_last_2 before a verb phrase.
   "dectalk-us-letters-v1.json",
+  // Abbreviations the dictionary holds with their period, by the word's case.
+  "dectalk-us-abbrev-v1.json",
 ];
 
 /** Every corpus with a packet record. */

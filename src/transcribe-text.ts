@@ -134,7 +134,9 @@ function makeDictLookup(
       if (lowerWord.endsWith("'") && lowerWord.length > 1) candidates.push(lowerWord.slice(0, -1));
     }
     // Normalization strips trailing punctuation tokens; recover abbreviations like "cr.".
-    if (!lowerWord.endsWith(".")) candidates.push(`${lowerWord}.`);
+    // Not for a frontend that looks words up as written: its text rules keep
+    // the period on an abbreviation, and "sat" must not find "sat.".
+    if (elidedApostrophe && !lowerWord.endsWith(".")) candidates.push(`${lowerWord}.`);
 
     for (const candidate of candidates) {
       const entry = map[candidate];

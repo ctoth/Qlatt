@@ -1,0 +1,18 @@
+{
+  "abbrev-mr-mrs": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "abbrev-ms": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "abbrev-st-street": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "abbrev-mt": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "abbrev-etc-final": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "abbrev-before-capital": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "abbrev-dept-capital": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "abbrev-dept-upper": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "abbrev-dept-lower": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "abbrev-ave-lower": ["B1","AV","AP","A2","A3","A5","AB"],
+  "abbrev-fig-lower": ["B1","AV","AP","A2","A3","A4","A5","AB"],
+  "abbrev-fig-capital": ["B1","AV","AP","A2","A3","A4","A5","AB"],
+  "abbrev-fig-upper": ["B1","AV","AP","A2","A3","A4","A5","AB"],
+  "word-no": ["B1","AV","AP"],
+  "word-no-then": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "word-sat": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"]
+}

@@ -46,9 +46,10 @@ export type TranscriptionConfig = {
   diagnostic_symbol_input?: boolean;
   /**
    * Whether a word the dictionary lacks is also looked up with an apostrophe
-   * added in front or at its end ("cuse" finds "'cuse"). On unless a frontend
-   * says false; such a frontend looks a word up as written and, on a miss,
-   * without the apostrophes at its ends.
+   * added in front or at its end ("cuse" finds "'cuse"), or with a period
+   * added ("cr" finds "cr."). On unless a frontend says false; such a
+   * frontend looks a word up as written and, on a miss, without the
+   * apostrophes at its ends, and its text rules keep an abbreviation's period.
    */
   elided_apostrophe_lookup?: boolean;
   /**

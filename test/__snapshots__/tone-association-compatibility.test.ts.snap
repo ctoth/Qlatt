@@ -4,7 +4,7 @@ exports[`tone association preserves the existing frontend tracks > dectalk-engli
 
 exports[`tone association preserves the existing frontend tracks > dectalk-english: Gag, gang; go! 1`] = `"2dbef17556e8e39e209eddd590c44f9317aa7d7862e77c2166a16ee3d8e43dbb"`;
 
-exports[`tone association preserves the existing frontend tracks > dectalk-english: The cat sat. 1`] = `"f5005dec79d519b66baa50fd9b35ec72ec220df34f76df4f3f8f1eb2c8707013"`;
+exports[`tone association preserves the existing frontend tracks > dectalk-english: The cat sat. 1`] = `"d15000542ac97d8a8d5613481318cd5719a96a2f77552e0cb5ad8eb574de0ab4"`;
 
 exports[`tone association preserves the existing frontend tracks > dectalk-english: sip sip. 1`] = `"f0d3ee80210ae95bf52d469c39371ae5ecb9fbd2159834cefc80b27bbc92a8eb"`;
 

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-abbrev-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "abbrev-mr-mrs", "text": "Mr. Jones and Mrs. Doe arrived.", "group": "dictionary-abbreviation", "tags": ["abbreviation"], "expectedFocus": ["trace"] },
+    { "id": "abbrev-ms", "text": "Ms. Lee teaches math.", "group": "dictionary-abbreviation", "tags": ["abbreviation"], "expectedFocus": ["trace"] },
+    { "id": "abbrev-st-street", "text": "It is on Main St. near the park.", "group": "dictionary-abbreviation", "tags": ["abbreviation"], "expectedFocus": ["trace"] },
+    { "id": "abbrev-mt", "text": "Mt. Everest is tall.", "group": "dictionary-abbreviation", "tags": ["abbreviation"], "expectedFocus": ["trace"] },
+    { "id": "abbrev-etc-final", "text": "Bring pens, paper, etc.", "group": "dictionary-abbreviation", "tags": ["abbreviation", "text-final"], "expectedFocus": ["trace"] },
+    { "id": "abbrev-before-capital", "text": "Ask Mr. Then go.", "group": "dictionary-abbreviation", "tags": ["abbreviation", "no-sentence-end"], "expectedFocus": ["trace"] },
+    { "id": "abbrev-dept-capital", "text": "The Dept. and the group agree.", "group": "dictionary-case", "tags": ["abbreviation", "case"], "expectedFocus": ["trace"] },
+    { "id": "abbrev-dept-upper", "text": "The DEPT. and the group agree.", "group": "dictionary-case", "tags": ["abbreviation", "case"], "expectedFocus": ["trace"] },
+    { "id": "abbrev-dept-lower", "text": "The dept. and the group agree.", "group": "dictionary-case", "tags": ["not-abbreviation", "case"], "expectedFocus": ["trace"] },
+    { "id": "abbrev-ave-lower", "text": "We live on Oak ave. now.", "group": "dictionary-case", "tags": ["not-abbreviation", "case"], "expectedFocus": ["trace"] },
+    { "id": "abbrev-fig-lower", "text": "See fig. two now.", "group": "dictionary-case", "tags": ["abbreviation", "case"], "expectedFocus": ["trace"] },
+    { "id": "abbrev-fig-capital", "text": "See Fig. two now.", "group": "dictionary-case", "tags": ["not-abbreviation", "case"], "expectedFocus": ["trace"] },
+    { "id": "abbrev-fig-upper", "text": "See FIG. two now.", "group": "dictionary-case", "tags": ["abbreviation", "case"], "expectedFocus": ["trace"] },
+    { "id": "word-no", "text": "No.", "group": "not-abbreviation", "tags": ["shared-list"], "expectedFocus": ["trace"] },
+    { "id": "word-no-then", "text": "He said no. Then he left.", "group": "not-abbreviation", "tags": ["shared-list"], "expectedFocus": ["trace"] },
+    { "id": "word-sat", "text": "He laughed. Then he sat down, and began to write.", "group": "not-abbreviation", "tags": ["added-period"], "expectedFocus": ["trace"] }
+  ]
+}

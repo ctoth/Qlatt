@@ -63,6 +63,11 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
    * is spoken as (it is spelled).
    */
   letterPhones?: Readonly<Record<string, readonly string[]>>;
+  /**
+   * The words of the compiled dictionary, in its order and with their case,
+   * for the search that depends on both (table-dictionary-search.ts).
+   */
+  dictionaryWords?: readonly string[];
   /** The phone lists numbers are spoken from (table-number.ts). */
   numberPhones?: NumberPhones;
 }

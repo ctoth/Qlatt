@@ -28,12 +28,20 @@
  *
  * Why each name is still on the lists is GAP_REASONS below. Read the last
  * entry before spending effort on the amplitudes.
+ *
+ * Voices. Three corpora are Paul's. dectalk-us-betty-v1 and
+ * dectalk-us-harry-v1 are spoken by Betty and by Harry (the corpus's
+ * `defaults.voiceId`): a female voice, and a male one with another head size.
+ * In them F1, F2, F3, B2 and B3 match on every packet, through the voice rule
+ * fields `sex` and `fnscale`. The words that do not (F0, AG, PS, CNK, F4 among
+ * them) are computed from values the frontend still takes from Paul; the
+ * reasons below were written for Paul's corpora and do not explain those.
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { DECTALK_CORPUS_FILES } from "../scripts/oracle/allophones";
+import { DECTALK_FRAME_CORPUS_FILES } from "../scripts/oracle/allophones";
 import {
   decodeFrameFixtureAreaColumn,
   FRAME_FIXTURE_AREA_COLUMNS,
@@ -55,9 +63,7 @@ const F0_REASON =
   "4040-4130). Not every remaining phrase has been traced to it";
 // phases/formant-drawing.yaml draws F1, F2, F3, B2 and B3 as phsettar() and
 // phdraw() do. The one phrase that still differs, carry-be-late, is the one
-// whose allophone durations are not DECtalk's. This gate renders Paul only:
-// the tables and the formant scale are his, and every other voice is drawn
-// with them until rule parameters can see the selected voice.
+// whose allophone durations are not DECtalk's.
 const FORMANT_REASON =
   "the phrase's durations are not DECtalk's (its `length` and `segments` gaps), and every " +
   "ramp is computed from them";
@@ -124,9 +130,12 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   PLACE: AREA_REASON,
   A2_CODE: AREA_REASON,
   PH: TIMING_REASON,
+  // Only in the voice corpora: phases/articulation.yaml sends Paul's F4
+  // (policy.articulation.voice.f4) for every voice.
+  F4: "the frontend sends Paul's fourth formant for every voice",
 };
 
-const loaded = DECTALK_CORPUS_FILES.map((fileName) => {
+const loaded = DECTALK_FRAME_CORPUS_FILES.map((fileName) => {
   const corpus = JSON.parse(
     fs.readFileSync(path.join(repoRoot, "test", "oracle-corpora", fileName), "utf8"),
   ) as OracleCorpusDocument;

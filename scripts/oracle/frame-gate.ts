@@ -65,8 +65,10 @@ export function comparePhraseFrames(
   if (recorded.text !== text) {
     throw new Error(`E_FRAME_FIXTURE_STALE: ${id} fixture text '${recorded.text}' != '${text}'`);
   }
+  // The corpus's voice; without one the frontend's default, Paul.
   const { track } = textToKlattTrackDetailed(text, undefined, corpus.defaults?.transitionMs ?? 30, {
     frontendId: "dectalk-english",
+    ...(corpus.defaults?.voiceId ? { speaker: corpus.defaults.voiceId } : {}),
   });
   const frames = decodeFrameFixtureEntry(recorded);
   const comparison = compareTrackToFrames(frames, track as readonly TrackEvent[]);

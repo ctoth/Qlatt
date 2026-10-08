@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-betty-v1",
+  "defaults": {
+    "voiceId": "betty",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "betty-sea-shells", "text": "She sells sea shells.", "group": "voice", "tags": ["fricatives", "front-vowels"], "expectedFocus": ["trace"] },
+    { "id": "betty-yellow-moon", "text": "The yellow moon rose.", "group": "voice", "tags": ["glides", "nasals", "back-vowels"], "expectedFocus": ["trace"] },
+    { "id": "betty-cup-of-tea", "text": "Bring me a cup of tea.", "group": "voice", "tags": ["stops", "nasals"], "expectedFocus": ["trace"] },
+    { "id": "betty-how-old", "text": "How old are you?", "group": "voice", "tags": ["question", "h", "diphthongs"], "expectedFocus": ["trace"] },
+    { "id": "betty-big-dog", "text": "A big dog ran by.", "group": "voice", "tags": ["voiced-stops", "diphthongs"], "expectedFocus": ["trace"] },
+    { "id": "betty-thank-you", "text": "Thank you very much.", "group": "voice", "tags": ["velar-nasal", "affricate"], "expectedFocus": ["trace"] },
+    { "id": "betty-yes-we-can", "text": "Yes, we can go now.", "group": "voice", "tags": ["two-clauses", "velars"], "expectedFocus": ["trace"] },
+    { "id": "betty-voice-clear", "text": "Her voice is clear.", "group": "voice", "tags": ["r-vowels", "diphthongs", "clusters"], "expectedFocus": ["trace"] },
+    { "id": "betty-judge", "text": "judge.", "group": "voice", "tags": ["affricate", "single-word"], "expectedFocus": ["trace"] },
+    { "id": "betty-look-boy", "text": "Look at the boy.", "group": "voice", "tags": ["laterals", "diphthongs", "velars"], "expectedFocus": ["trace"] }
+  ]
+}

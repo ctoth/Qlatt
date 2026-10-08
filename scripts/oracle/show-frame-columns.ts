@@ -20,7 +20,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { textToKlattTrackDetailed } from "../../src/tts-frontend.ts";
-import { DECTALK_CORPUS_FILES } from "./allophones";
+import { DECTALK_FRAME_CORPUS_FILES } from "./allophones";
 import { dectalkFrameStartSec } from "./dectalk-trace";
 import { decodeFrameFixtureEntry } from "./frame-fixture";
 import { loadFrameFixture } from "./frame-gate";
@@ -56,7 +56,7 @@ const diffOnly = argv.includes("--diff");
 const show = (value: number | null): string =>
   value == null ? "-" : Number.isInteger(value) ? String(value) : value.toFixed(1);
 
-for (const corpusFile of DECTALK_CORPUS_FILES) {
+for (const corpusFile of DECTALK_FRAME_CORPUS_FILES) {
   const corpus = JSON.parse(
     fs.readFileSync(path.join(repoRoot, "test", "oracle-corpora", corpusFile), "utf8"),
   ) as OracleCorpusDocument;
@@ -67,6 +67,7 @@ for (const corpusFile of DECTALK_CORPUS_FILES) {
   const frames = decodeFrameFixtureEntry(recorded);
   const { track } = textToKlattTrackDetailed(entry.text, undefined, 30, {
     frontendId: "dectalk-english",
+    ...(corpus.defaults?.voiceId ? { speaker: corpus.defaults.voiceId } : {}),
   });
   const events = track as readonly TrackEvent[];
   process.stdout.write(`${id}: "${entry.text}"\n`);

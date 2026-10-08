@@ -26,7 +26,10 @@
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
  *     scripts/render-dectalk-frontend.ts --id paul-cat --text "cat." \
  *     [--fixture-dir crates/dectalk-vtm/tests/fixtures] [--frame-words AG,PS,CNK,F4,PH] \
- *     [--out-dir <dir>] [--json <file>]
+ *     [--speaker <voice>] [--out-dir <dir>] [--json <file>]
+ *
+ * --speaker is the frontend voice the fixture was spoken with (default: the
+ * frontend's own default, Paul), e.g. `--id betty-she --text "she." --speaker betty`.
  */
 
 import fs from "node:fs";
@@ -67,8 +70,10 @@ const WORD_KEYS = PACKET_WORDS.map(([name]) => PACKET_TRACK_KEYS[name] ?? F0_TRA
 const fixture = readVtmFixture(fixtureDir, id);
 const oracleTrack = vtmEventsToTrack(fixture.events);
 const packets = oracleTrack.length - 1;
+const speaker = flag("speaker");
 const { track: frontendTrack } = textToKlattTrackDetailed(text, undefined, 30, {
   frontendId: "dectalk-english",
+  ...(speaker ? { speaker } : {}),
 });
 
 /** The frontend's frame in force at packet `index`'s start. */

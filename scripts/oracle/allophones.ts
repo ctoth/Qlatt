@@ -23,12 +23,31 @@ export const DECTALK_CORPUS_FILES: readonly string[] = [
   "dectalk-us-clause-v1.json",
 ];
 
-/** The corpus files a comparison script covers: all, or the one named by `--corpus <id>`. */
+/**
+ * Corpora spoken by a voice other than Paul (`defaults.voiceId`). They have a
+ * packet record only (<corpus>.frames.json), for the frame gate: what a voice
+ * changes is in the packets.
+ */
+export const DECTALK_VOICE_CORPUS_FILES: readonly string[] = [
+  "dectalk-us-betty-v1.json",
+  "dectalk-us-harry-v1.json",
+];
+
+/** Every corpus with a packet record. */
+export const DECTALK_FRAME_CORPUS_FILES: readonly string[] = [
+  ...DECTALK_CORPUS_FILES,
+  ...DECTALK_VOICE_CORPUS_FILES,
+];
+
+/**
+ * The corpus files a comparison script covers: Paul's three, or the one named
+ * by `--corpus <id>`, which may also be a voice corpus.
+ */
 export function selectedCorpusFiles(argv: readonly string[]): readonly string[] {
   const index = argv.indexOf("--corpus");
   if (index < 0) return DECTALK_CORPUS_FILES;
   const file = `${argv[index + 1]}.json`;
-  if (!DECTALK_CORPUS_FILES.includes(file)) {
+  if (!DECTALK_FRAME_CORPUS_FILES.includes(file)) {
     throw new Error(`E_CORPUS_UNKNOWN: '${argv[index + 1]}'`);
   }
   return [file];

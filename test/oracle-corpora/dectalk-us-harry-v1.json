@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-harry-v1",
+  "defaults": {
+    "voiceId": "harry",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "harry-happy-there", "text": "He was happy there.", "group": "voice", "tags": ["h", "r-vowels"], "expectedFocus": ["trace"] },
+    { "id": "harry-good-morning", "text": "Good morning, everyone.", "group": "voice", "tags": ["two-clauses", "nasals", "velars"], "expectedFocus": ["trace"] },
+    { "id": "harry-ship-noon", "text": "The ship left at noon.", "group": "voice", "tags": ["fricatives", "clusters", "nasals"], "expectedFocus": ["trace"] },
+    { "id": "harry-hear-bell", "text": "Can you hear the bell?", "group": "voice", "tags": ["question", "velars", "laterals"], "expectedFocus": ["trace"] },
+    { "id": "harry-father-tall", "text": "My father is tall.", "group": "voice", "tags": ["diphthongs", "back-vowels", "laterals"], "expectedFocus": ["trace"] },
+    { "id": "harry-book-away", "text": "Put the book away.", "group": "voice", "tags": ["stops", "glides"], "expectedFocus": ["trace"] },
+    { "id": "harry-wait-here", "text": "We will wait here.", "group": "voice", "tags": ["glides", "r-vowels"], "expectedFocus": ["trace"] },
+    { "id": "harry-nine-men", "text": "Nine men sang a song.", "group": "voice", "tags": ["nasals", "velar-nasal"], "expectedFocus": ["trace"] },
+    { "id": "harry-thought", "text": "thought.", "group": "voice", "tags": ["single-word", "dental"], "expectedFocus": ["trace"] },
+    { "id": "harry-take-time", "text": "Take your time.", "group": "voice", "tags": ["aspiration", "diphthongs"], "expectedFocus": ["trace"] }
+  ]
+}

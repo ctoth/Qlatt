@@ -97,6 +97,10 @@ maps:
     # LTS/ls_spel.c:151-170). Measured on say.exe: "tom_west42" is
     # "t o m underscore w e s t four two".
     underscore_words: spelled
+    # A decimal with no digit before its point is a number: ".5" is "point
+    # five" and ".05" "point zero five" on say.exe, not a sentence end
+    # (LTS/l_us_pr1.c:497-749).
+    bare_decimals: source
 # A text that does not end in punctuation is still closed as a sentence: when
 # the text is flushed the text task sends a breath break (LTS/ls_task.c:1236-1260,
 # the VT case) and the clause ends as one that ends in a period. Measured on

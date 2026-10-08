@@ -21,6 +21,8 @@ export interface PronunciationPart {
   pauseBefore?: boolean;
   /** Indices of the phones after which a morpheme boundary stands. */
   morphemeAfter?: number[];
+  /** Indices of the phones the lexicon exempts from allophone rules. */
+  rulesBlockedAt?: number[];
 }
 
 export interface PronunciationResult {

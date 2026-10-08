@@ -77,6 +77,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // with a comma and a mark on it, letters and digits in one word, questions
   // that begin with a wh-word, and "Dr." and "St." by what follows them.
   "dectalk-us-odd-words-v1.json",
+  // A symbol standing alone that the dictionary names, a decimal with no
+  // digit before its point, a path with slashes, and two words written apart.
+  "dectalk-us-symbol-words-v1.json",
 ];
 
 /** Every corpus with a packet record. */

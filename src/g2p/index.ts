@@ -398,9 +398,15 @@ export function pronounce(
         const morphemeAfter = (entry.boundaryAfter ?? [])
           .filter((index) => index >= start && index < end)
           .map((index) => index - start);
+        // The entry's "~" marks (the phones no rule may change) go with the
+        // word they stand in: "}" is `r'Yt br'e~s`, and the S keeps its mark.
+        const rulesBlockedAt = (entry.rulesBlockedAt ?? [])
+          .filter((index) => index >= start && index < end)
+          .map((index) => index - start);
         return {
           phonemes: dictResult.slice(start, end),
           ...(morphemeAfter.length > 0 ? { morphemeAfter } : {}),
+          ...(rulesBlockedAt.length > 0 ? { rulesBlockedAt } : {}),
         };
       });
       return {
@@ -409,6 +415,7 @@ export function pronounce(
         word: lowerWord,
         parts,
         ...classed(entry.formClass),
+        ...phrased(entry.formClass),
       };
     }
     return {
@@ -436,12 +443,13 @@ export function pronounce(
   // more and the dictionary has it, and letter by letter otherwise; every
   // piece a word. Measured on say.exe: "10-15" is "ten dash fifteen",
   // "1990-1998" "nineteen ninety dash nineteen ninety eight", "1/1000" "one
-  // slash one thousand", "B-52" "b dash fifty two".
+  // slash one thousand", "B-52" "b dash fifty two". A slash makes a word a
+  // part number as a digit does (:4138-4141): "/usr/bin" is "slash u s r
+  // slash b i n".
   if (
     table?.numberPhones &&
     /^[a-z0-9/-]+$/.test(lowerWord) &&
-    /[0-9]/.test(lowerWord) &&
-    /[/-]/.test(lowerWord)
+    (lowerWord.includes("/") || (/[0-9]/.test(lowerWord) && lowerWord.includes("-")))
   ) {
     const lists = table.numberPhones;
     const fraction = speakFraction(lowerWord, lists);

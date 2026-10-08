@@ -670,7 +670,12 @@ export function transcribeText(
 
       // Recover CMUdict compounds after normalization splits tokens.
       // Citation anchor: CMUdict orthography includes hyphenated and apostrophe-linked compounds.
-      const maxCompoundSpan = 4;
+      // Not for a frontend that looks a word up as it is written
+      // (elided_apostrophe_lookup: false): its text rules keep a written
+      // hyphen on the word, and two words written apart are two words
+      // (DECtalk 4.63 speaks "zip code" as two words and "zipcode" as its
+      // dictionary's one).
+      const maxCompoundSpan = transcriptionTables.elidedApostropheLookup ? 4 : 0;
       for (
         let span = Math.min(maxCompoundSpan, orthographyWords.length - index);
         span >= 2;
@@ -842,6 +847,7 @@ export function transcribeText(
         phraseStart?: "vp" | "pp";
         pauseBefore?: boolean;
         morphemeAfter?: readonly number[];
+        rulesBlockedAt?: readonly number[];
       }> =
         "parts" in pronResult && pronResult.parts && pronResult.parts.length > 0
           ? pronResult.parts.map((part, partIndex) => ({
@@ -851,6 +857,7 @@ export function transcribeText(
               ...(part.phraseStart ? { phraseStart: part.phraseStart } : {}),
               ...(part.pauseBefore ? { pauseBefore: true } : {}),
               ...(part.morphemeAfter ? { morphemeAfter: part.morphemeAfter } : {}),
+              ...(part.rulesBlockedAt ? { rulesBlockedAt: part.rulesBlockedAt } : {}),
             }))
           : [
               {
@@ -917,6 +924,7 @@ export function transcribeText(
               ...("readAhead" in pronResult && pronResult.readAhead ? { readAhead: true } : {}),
               ...(part.phraseStart ? { phraseStart: part.phraseStart } : {}),
               ...(part.morphemeAfter?.includes(phoneIndex) ? { morphemeBoundaryAfter: true } : {}),
+              ...(part.rulesBlockedAt?.includes(phoneIndex) ? { rulesBlocked: true } : {}),
               // Indices of a one-word result are indices into its phones.
               ...(spokenParts.length === 1 &&
               "rulesBlockedAt" in pronResult &&

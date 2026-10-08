@@ -7,6 +7,7 @@ export type PronunciationSource =
   | "number"
   | "spelling"
   | "position"
+  | "number-abbreviation"
   | "unknown";
 
 /** One spoken word of a token that is spoken as several (a number in digits). */

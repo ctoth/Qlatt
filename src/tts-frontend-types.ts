@@ -32,6 +32,7 @@ export const LEXICON_SOURCE_KEYS = [
   "lts-rules",
   "spelling",
   "position",
+  "number-abbreviation",
 ] as const;
 export type LexiconSourceKey = (typeof LEXICON_SOURCE_KEYS)[number];
 export type LexiconSource = { name: string; citation: string };

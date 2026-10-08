@@ -46,6 +46,12 @@ export interface ClauseContext {
   laterVerb: boolean | null;
   /** Whether the word is the last one before the punctuation mark. */
   atPunctuation: boolean;
+  /**
+   * The number word that stands one or two words before this one, as written
+   * ("5", "1,000", "1.5"); absent when none does. A unit abbreviation is read
+   * by it (table-lts-pronounce.ts numberAbbreviations).
+   */
+  numberBefore?: string;
 }
 
 /** The context of a word spoken alone. */

@@ -160,6 +160,28 @@ export function pronounce(
     }
   }
 
+  // A unit's abbreviation, written with its period, one or two words after a
+  // number: read from the table of such units before the dictionary, the
+  // singular when the number is singular and the plural otherwise (DECtalk
+  // 4.63 LTS/ls_task.c:3772 the number arms the lookup, 634 each word counts
+  // it down, 2125-2152 the lookup and the choice of form). The number routine
+  // calls a number singular only when it is the one digit 1
+  // (LTS/l_us_pr1.c ls_proc_do_number, "Watch for 1"); measured on say.exe,
+  // "1 lb." is pound and "5", "21", "01", "1,000", "1.0" and "1.5" are pounds.
+  const unit =
+    context.numberBefore !== undefined && lowerWord.endsWith(".")
+      ? table?.numberAbbreviations?.[lowerWord.slice(0, -1)]
+      : undefined;
+  if (table && unit) {
+    const parts = numberWords(context.numberBefore === "1" ? unit.singular : unit.plural, table);
+    return {
+      phonemes: parts.flatMap((part) => part.phonemes),
+      source: "number-abbreviation",
+      word: lowerWord,
+      parts,
+    };
+  }
+
   // A word the table speaks by where it stands: one form apart from
   // punctuation, with its own class, and another against a punctuation mark
   // ("a box." and "box a."; DECtalk 4.63 LTS/ls_task.c:2647-2673).
@@ -333,15 +355,21 @@ export function pronounceClause(
   const verbBit = table?.formClassNames ? table.formClassNames.indexOf("verb") : -1;
   const isVerb = (classWord: number): boolean =>
     verbBit >= 0 && Math.floor(classWord / 2 ** verbBit) % 2 === 1;
+  // A word that begins with a digit is a number for the two words after it
+  // (LTS/ls_task.c:3772 and 634).
+  const numberBefore = (index: number): string | undefined =>
+    [words[index - 1], words[index - 2]].find((word) => word !== undefined && /^[0-9]/.test(word));
   const read = (laterVerbAt: ((index: number) => boolean) | null): PronunciationResult[] => {
     const before: number[] = [];
     return words.map((word, index) => {
+      const number = numberBefore(index);
       const result = pronounce(word, dictLookup, {
         ...options,
         context: {
           before,
           laterVerb: laterVerbAt ? laterVerbAt(index) : null,
           atPunctuation: index === words.length - 1,
+          ...(number === undefined ? {} : { numberBefore: number }),
         },
       });
       before.push(result.formClassWord ?? 0);

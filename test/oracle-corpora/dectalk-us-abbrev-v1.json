@@ -35,6 +35,24 @@
     { "id": "vowelless-tvs", "text": "Say tvs now.", "group": "no-vowel", "tags": ["spelling"], "expectedFocus": ["trace"] },
     { "id": "vowelless-brr", "text": "Say brr now.", "group": "no-vowel", "tags": ["spelling"], "expectedFocus": ["trace"] },
     { "id": "vowel-y-xyz", "text": "Say xyz now.", "group": "no-vowel", "tags": ["not-spelled"], "expectedFocus": ["trace"] },
-    { "id": "vowelless-letters", "text": "S, f, sh, th, z, v, zh, dh.", "group": "no-vowel", "tags": ["spelling"], "expectedFocus": ["trace"] }
+    { "id": "vowelless-letters", "text": "S, f, sh, th, z, v, zh, dh.", "group": "no-vowel", "tags": ["spelling"], "expectedFocus": ["trace"] },
+    { "id": "unit-5-lbs-final", "text": "It weighs 5 lbs.", "group": "units", "tags": ["plural", "text-final"], "expectedFocus": ["trace"] },
+    { "id": "unit-1-lb", "text": "It weighs 1 lb. now.", "group": "units", "tags": ["singular"], "expectedFocus": ["trace"] },
+    { "id": "unit-1-lbs", "text": "It weighs 1 lbs. now.", "group": "units", "tags": ["plural-entry"], "expectedFocus": ["trace"] },
+    { "id": "unit-5-lb", "text": "It weighs 5 lb. now.", "group": "units", "tags": ["plural"], "expectedFocus": ["trace"] },
+    { "id": "unit-1-ft", "text": "It is 1 ft. tall.", "group": "units", "tags": ["singular"], "expectedFocus": ["trace"] },
+    { "id": "unit-21-ft", "text": "It is 21 ft. tall.", "group": "units", "tags": ["plural"], "expectedFocus": ["trace"] },
+    { "id": "unit-upper", "text": "It is 5 FT. tall.", "group": "units", "tags": ["plural", "case"], "expectedFocus": ["trace"] },
+    { "id": "unit-two-words-back", "text": "It has 5 big lbs. now.", "group": "units", "tags": ["plural", "second-word"], "expectedFocus": ["trace"] },
+    { "id": "unit-sq-ft", "text": "It is 5 sq. ft. wide.", "group": "units", "tags": ["plural", "second-word", "dictionary-abbreviation"], "expectedFocus": ["trace"] },
+    { "id": "unit-in-number", "text": "It is 5 in. and 1 in. long.", "group": "units", "tags": ["plural", "singular"], "expectedFocus": ["trace"] },
+    { "id": "unit-in-no-number", "text": "It is in. long.", "group": "units", "tags": ["not-a-unit"], "expectedFocus": ["trace"] },
+    { "id": "unit-no-period", "text": "It is 5 ft tall.", "group": "units", "tags": ["not-a-unit", "spelling"], "expectedFocus": ["trace"] },
+    { "id": "unit-ha", "text": "It is 5 ha. wide.", "group": "units", "tags": ["plural"], "expectedFocus": ["trace"] },
+    { "id": "unit-kts", "text": "It weighs 5 kts. now.", "group": "units", "tags": ["plural"], "expectedFocus": ["trace"] },
+    { "id": "unit-hr-min", "text": "It took 1 hr. and 5 min. then.", "group": "units", "tags": ["singular", "plural"], "expectedFocus": ["trace"] },
+    { "id": "unit-decimal", "text": "It weighs 1.5 lb. now.", "group": "units", "tags": ["plural", "fraction"], "expectedFocus": ["trace"] },
+    { "id": "unit-thousand", "text": "It is 1,000 ft. tall.", "group": "units", "tags": ["plural"], "expectedFocus": ["trace"] },
+    { "id": "unit-word-one", "text": "It weighs one lb. now.", "group": "units", "tags": ["dictionary-abbreviation"], "expectedFocus": ["trace"] }
   ]
 }

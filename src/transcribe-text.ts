@@ -625,6 +625,11 @@ export function transcribeText(
         decisionType = "position_pronunciation_selected";
         reason = `Word '${sourceWord}' is spoken by where it stands; used ${used.name}`;
         citations = [used.citation];
+      } else if (pronResult.source === "number-abbreviation") {
+        const used = lexiconSource("number-abbreviation");
+        decisionType = "number_abbreviation_pronunciation_selected";
+        reason = `Word '${sourceWord}' follows a number; used ${used.name}`;
+        citations = [used.citation];
       } else {
         const used = lexiconSource("lts-rules");
         decisionType = "fallback_pronunciation_selected";

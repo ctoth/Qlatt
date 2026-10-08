@@ -432,6 +432,42 @@ const numberPhones = {
   },
 };
 
+// The abbreviations of units read after a number, nabtab[] (LTS/l_us_con.c:366):
+// each entry is its length, the letters, EOS, the phones of the singular up to
+// SIL and the phones of the plural up to SIL; a 0 ends the table. LTS/ls_task.c
+// looks a word that is followed by a period up here before the dictionary
+// while a number stands at most two words back (lines 3772, 634, 2125-2152),
+// and takes the plural when the number routine says the number is plural.
+const numberAbbreviations: Record<string, { singular: number[]; plural: number[] }> = {};
+{
+  const cells = arrayBody(constantsSource, "nabtab")
+    .split(",")
+    .map((cell) => cell.trim())
+    .filter((cell) => cell.length > 0);
+  let at = 0;
+  const symbolsToSil = (): number[] => {
+    const list: number[] = [];
+    for (; cells[at] !== "SIL"; at += 1) {
+      if (at >= cells.length) throw new Error("E_NABTAB: a phone list does not end with SIL");
+      list.push(symbolCode(cells[at] as string));
+    }
+    at += 1;
+    return list;
+  };
+  while (cells[at] !== "0") {
+    if (!/^\d+$/.test(cells[at] ?? "")) throw new Error(`E_NABTAB: no length at cell ${at}`);
+    at += 1;
+    let key = "";
+    for (; cells[at] !== "EOS"; at += 1) {
+      const letter = /^'([a-z])'$/.exec(cells[at] ?? "");
+      if (!letter) throw new Error(`E_NABTAB: '${String(cells[at])}' is not a letter`);
+      key += letter[1];
+    }
+    at += 1;
+    numberAbbreviations[key] = { singular: symbolsToSil(), plural: symbolsToSil() };
+  }
+}
+
 // The frontend's spelling of each allophone code (INCLUDE/l_all_ph.h order).
 // Four names differ from DECtalk's (as in scripts/build-dectalk-dict.ts).
 const FRONTEND_SYMBOLS: Readonly<Record<string, string[]>> = {
@@ -475,6 +511,7 @@ fs.writeFileSync(
     wordsByPunctuation,
     letterPhones,
     dictionaryWords,
+    numberAbbreviations,
     numberPhones,
     words,
     bytes,
@@ -523,6 +560,13 @@ fs.writeFileSync(
     ...Object.keys(abbreviationForms)
       .sort()
       .map((key) => `    ${JSON.stringify(key)}: ${JSON.stringify(abbreviationForms[key])}`),
+    "  # The unit abbreviations read after a number, in any case: the keys of",
+    "  # nabtab[] (DECtalk 4.63 LTS/l_us_con.c:366); their phones are in",
+    "  # lts-table.json, numberAbbreviations.",
+    "  tn_number_abbreviations:",
+    ...Object.keys(numberAbbreviations)
+      .sort()
+      .map((key) => `    ${JSON.stringify(key)}: "unit"`),
     "",
   ].join("\n"),
 );

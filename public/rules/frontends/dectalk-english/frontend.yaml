@@ -2365,6 +2365,9 @@ transcription:
     position:
       name: DECtalk's two forms of the word "a"
       citation: "DECtalk 4.63 LTS/ls_task.c:2647-2673 ([x] when no punctuation was stripped and none follows, else the spelling entry's ['e]), as wordsByPunctuation in /rules/frontends/dectalk-english/lts-table.json"
+    number-abbreviation:
+      name: DECtalk's unit abbreviations after a number
+      citation: "DECtalk 4.63 LTS/l_us_con.c:366 nabtab[] (singular and plural phones), LTS/ls_task.c:2125-2152 (looked up before the dictionary while a number stands at most two words back), as numberAbbreviations in /rules/frontends/dectalk-english/lts-table.json"
   # The names of the letters, for a token the orthography phase marks as a
   # spelled letter: DECtalk 4.63 INCLUDE/usa_type.tab, the lower-case rows,
   # the same phones as letterPhones in lts-table.json (a test holds the two

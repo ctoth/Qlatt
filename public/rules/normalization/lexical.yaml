@@ -99,12 +99,14 @@ rules:
   # terminal, the word with the period, which the dictionary then speaks. The
   # period is not a sentence end, but the text's end still is one: measured on
   # DECtalk 4.63 say.exe, "We live at 12 Oak Ave." ends in "avenue" and the
-  # period symbol, and "Ask Mr. Then go." is one clause.
+  # period symbol, and "Ask Mr. Then go." is one clause. A unit's
+  # abbreviation after a number is the same token, read by the lexicon from
+  # its table of units.
   tn_dictionary_abbreviation:
     kind: structural
     select:
       relation: Normalization
-      where: "current.kind == 'dictionary_abbreviation' && current.outputType == 'source'"
+      where: "current.kind in ['dictionary_abbreviation', 'number_abbreviation'] && current.outputType == 'source'"
     expand_text:
       allowed_types: [terminal, request]
       tag: normalization_lexical

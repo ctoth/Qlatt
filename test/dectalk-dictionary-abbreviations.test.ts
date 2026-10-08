@@ -250,3 +250,52 @@ describe("words with no vowel in dectalk-english", () => {
     );
   });
 });
+
+// LTS/l_us_con.c nabtab[], LTS/ls_task.c:2125-2152. The sentences are in
+// dectalk-us-abbrev-v1 against say.exe's packets.
+describe("a unit's abbreviation after a number in dectalk-english", () => {
+  const same = (written: string, read: string): void => {
+    expect(phones(written), written).toEqual(phones(read));
+  };
+
+  it("is the plural unless the number is the digit 1", () => {
+    same("It weighs 5 lb. now.", "It weighs 5 pounds now.");
+    same("It weighs 1 lb. now.", "It weighs 1 pound now.");
+    same("It is 21 ft. tall.", "It is 21 feet tall.");
+    same("It is 1 ft. tall.", "It is 1 foot tall.");
+    same("It weighs 1.5 lb. now.", "It weighs 1.5 pounds now.");
+    same("It is 1,000 ft. tall.", "It is 1,000 feet tall.");
+  });
+
+  it("is read in any case and up to two words after the number", () => {
+    same("It is 5 FT. tall.", "It is 5 feet tall.");
+    same("It has 5 big lbs. now.", "It has 5 big pounds now.");
+    // The table's own phones, not the dictionary word's: its "inch" ends in SH.
+    const inches = phones("It is 5 in. and 1 in. long.");
+    expect(inches.slice(7, 12)).toEqual(["IH", "N", "SH", "IX", "Z"]);
+    expect(inches.slice(-7, -4)).toEqual(["IH", "N", "SH"]);
+  });
+
+  it("ends the text as a sentence", () => {
+    same("It weighs 5 lbs.", "It weighs 5 pounds.");
+  });
+
+  it("is not a unit without a number or without its period", () => {
+    // "in." alone is the word and a sentence end; "ft" alone has no vowel.
+    expect(phones("It is in. long.").slice(4, 7)).toEqual(["IH", "N", "SIL"]);
+    expect(phones("It is 5 ft tall.")).not.toEqual(phones("It is 5 feet tall."));
+  });
+
+  it("records the unit under its own source", () => {
+    const provenance = createProvenanceCollector();
+    textToKlattTrackDetailed("It weighs 5 lbs.", undefined, 30, {
+      frontendId: "dectalk-english",
+      provenance,
+    });
+    const record = provenance
+      .getDecisions()
+      .find((entry) => entry.type === "number_abbreviation_pronunciation_selected");
+    expect(record?.subject).toBe("word:lbs.");
+    expect(record?.citations?.[0]).toContain("nabtab");
+  });
+});

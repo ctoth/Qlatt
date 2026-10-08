@@ -68,6 +68,14 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
    * for the search that depends on both (table-dictionary-search.ts).
    */
   dictionaryWords?: readonly string[];
+  /**
+   * The unit abbreviations read after a number, each with the symbols of its
+   * singular and of its plural (phone codes and stress marks, as the number
+   * phone lists).
+   */
+  numberAbbreviations?: Readonly<
+    Record<string, { singular: readonly number[]; plural: readonly number[] }>
+  >;
   /** The phone lists numbers are spoken from (table-number.ts). */
   numberPhones?: NumberPhones;
 }

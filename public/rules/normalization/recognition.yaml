@@ -2,6 +2,24 @@
 # retain legacy boundaries; eligibility and speaking are separate CEL rules.
 text_recognition:
   rules:
+    # A unit's abbreviation with its period, one or two words after a word
+    # that begins with a digit: kept as one token, which the frontend's
+    # lexicon reads from its table of units by the number. In any case of
+    # letters, and before the dictionary's abbreviations, as the lookup is.
+    # Only under tn_recognition_policy.abbreviations: dictionary, with the
+    # generated map tn_number_abbreviations.
+    - id: tn_number_abbreviation_source
+      pattern: '(?<=(?:^|\s)[0-9]\S*\s+(?:\S+\s+)?)(?<word>[A-Za-z]+)(?:(?<final>\.)(?=\s*$)|\.(?=\s))'
+      flags: ''
+      class: number_abbreviation
+      captures: {word: word, final: final}
+      when: >-
+        get(maps.tn_recognition_policy, 'abbreviations', 'shared') == 'dictionary'
+        && lower(captures.word) in get(maps, 'tn_number_abbreviations', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3772 (a word that starts with a digit arms the unit lookup), 634 (each word counts it down from 3), 2125-2152 (a word followed by a period is looked up in nabtab first, and the period is eaten)'
     # A word written with a period after it that the frontend's dictionary
     # holds with the period: the abbreviation is the dictionary's word and the
     # period is not a sentence end. Only for a frontend whose policy takes its

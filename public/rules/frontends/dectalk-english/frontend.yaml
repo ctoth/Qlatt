@@ -1118,8 +1118,10 @@ parameters:
       stress_delay_divisor: 4
       # Ph_inton2.c:955-958: targf0 >>= 2 in a clause that ends in "?".
       stress_question_divisor: 4
-      # Ph_inton2.c:992-999: muldv(scale_str_rise, targf0, 32).
+      # Ph_inton2.c:1005-1012: muldv(scale_str_rise, targf0, 32); under
+      # emphasis a scale_str_rise below 16 is taken as 16.
       stress_scale_divisor: 32
+      stress_emphasis_scale_minimum: 16
       # ph_defs.h FEMPHASIS: stress level 3.
       stress_emphasis_level: 3
       # Ph_inton2.c:488: phinton starts its command clock at cumdur = -6.

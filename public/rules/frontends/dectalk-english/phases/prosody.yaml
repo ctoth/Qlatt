@@ -473,7 +473,8 @@ rules:
   #   size  = us_f0_mstress_level[stress] + us_f0_mphrase_position[nrises_sofar]
   #           (935-942); a quarter of that in a clause that ends in "?" (955-958);
   #           50 less, and never below 30, on the syllabic where the hat ends or
-  #           before a period (963-972); then times scale_str_rise / 32 (992-999).
+  #           before a period (963-972); then times scale_str_rise / 32, the
+  #           scale taken as at least 16 under emphasis (1005-1012).
   #   delay = a quarter of the syllabic's frames (961); -3 frames in the
   #           hat-end or period case; 1 frame under emphasis (976-979).
   #   nrises_sofar counts the clause's stress impulses so far; at 7 it goes
@@ -516,8 +517,15 @@ rules:
       final_hz: >-
         !final ? question_hz
         : (reduced_hz < 0.0 ? params.policy.f0.stress_final_floor_hz : reduced_hz)
+      # Under emphasis a voice's stress scale counts as at least 16
+      # (Ph_inton2.c:1005-1009).
+      stress_scale: >-
+        stress_now == params.policy.f0.stress_emphasis_level
+          && params.policy.voice.scale_str_rise < params.policy.f0.stress_emphasis_scale_minimum
+        ? params.policy.f0.stress_emphasis_scale_minimum
+        : params.policy.voice.scale_str_rise
       impulse_hz: >-
-        floor(params.policy.voice.scale_str_rise * final_hz / params.policy.f0.stress_scale_divisor)
+        floor(stress_scale * final_hz / params.policy.f0.stress_scale_divisor)
       own_delay: >-
         stress_now == params.policy.f0.stress_emphasis_level ? params.policy.f0.stress_emphasis_delay_frames
         : (final ? -params.policy.f0.stress_final_early_frames

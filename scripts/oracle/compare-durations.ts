@@ -11,6 +11,10 @@
  * number of frames in a group is that allophone's duration (p_us_tim.c stores
  * `allodurs[]` in frames). Group 0 is the clause-initial silence, which this
  * frontend emits as a lowering edge rather than a Segment, so it is skipped.
+ * DECtalk numbers the phones of each clause from 0, so a later group 0 is the
+ * opening silence of the next clause; the frontend has one silence Segment for
+ * a clause's closing pause and the next clause's opening pause, and that group
+ * is added to the one before it.
  *
  * Qlatt side: active Segment items in order. A stop is one DECtalk allophone
  * but several Segments here (closure, release, aspiration); consecutive
@@ -70,7 +74,9 @@ function dectalkAllophones(tracePath: string): Allophone[] {
   for (const frame of frames) {
     if (frame.phoneIndex !== currentIndex) {
       currentIndex = frame.phoneIndex;
-      groups.push({ label: `#${frame.phoneIndex}`, frames: 0 });
+      // A later clause's opening silence continues the closing pause before it.
+      const continuesPause = frame.phoneIndex === 0 && groups.length > 0;
+      if (!continuesPause) groups.push({ label: `#${frame.phoneIndex}`, frames: 0 });
     }
     groups[groups.length - 1].frames += 1;
   }

@@ -2,7 +2,7 @@
 
 exports[`tone association preserves the existing frontend tracks > dectalk-english: Did Bob buy a blue balloon? 1`] = `"57df8c7017a3c07dd7241113bf5f9c70f6d1156fb80ac4cd41378ee20b650ce8"`;
 
-exports[`tone association preserves the existing frontend tracks > dectalk-english: Gag, gang; go! 1`] = `"c82cd3629307426537283c89adcae0c4a9b417adc808d77ce6978748bb9877af"`;
+exports[`tone association preserves the existing frontend tracks > dectalk-english: Gag, gang; go! 1`] = `"4b5c53397227f5ae7f630decaddc6409234ed12110890938d53f915b605fad44"`;
 
 exports[`tone association preserves the existing frontend tracks > dectalk-english: The cat sat. 1`] = `"cf824d33bf92e7ac7f1139d8effeb8209bf4f66f743b6d6fc52f2c6fd99ca709"`;
 

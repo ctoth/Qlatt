@@ -24,11 +24,17 @@ version: v1
 #   tcumdur   g.counted_frames
 #   nphone    g.unit
 #
-# Ported so far: PS (subglottal pressure), AG (glottal area), CNK (chink) and
-# F4. Not ported, and named where the C has them: the emphasis pulse
-# (ph_draw.c:1509-1552), the end-of-clause pressure drop of 3929-3969, the two
-# early exits of the end-of-clause glottal spread (3604-3624), the nasal case
-# of the initial silence (1146-1190), and every other word of the section.
+# Emitted: PS, AG, CNK, AL, ABLADE, ATB, AREA_N, DC, UE, A2_CODE (the codes),
+# BRST, PLACE, F4, PH and the node's `run` gate. Not ported: the end-of-clause
+# pressure drop of ph_draw.c:3929-3969 (inside the block that computes the
+# final slope, reached only when the syllabic is the clause's last
+# allophone), the TZ case of OUT_A2 (4370-4390), the A2 amplitude, and
+# everything for languages other than US English. Voice values are Paul's.
+#
+# The C was read from a preprocessed listing made with the build's flags
+# (scripts/oracle/dectalk-debug/compiled-lines.awk): `#ifdef PH_DEBUG` blocks
+# hide live code and close late. Where a rule reproduces a slip of the C, it
+# says so.
 #
 # A later clause's initial silence is the tail of the pause Segment before it
 # (duration.yaml dectalk_pause_duration adds its 4 or 5 frames there);
@@ -161,6 +167,7 @@ frame_programs:
       # FSTRESS of the allophone's structure word: any stress, and bit 01.
       stressed: { value: "artic_stress(current) > 0", edge: false }
       primary: { value: "artic_stress(current) == 1 || artic_stress(current) == 3", edge: false }
+      emphasis: { value: "artic_stress(current) == 3", edge: false }
       is_r: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'R'", edge: false }
       is_rr: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'RR'", edge: false }
       is_l: { value: "!artic_is_dummy(current) && dectalk_name(current) in ['LL', 'LX']", edge: false }
@@ -301,7 +308,7 @@ frame_programs:
       pressure: 200
       pressure_drop: 0
       syl_pressure: 0
-      # ph_draw.c:1509-1552; the emphasis rule that moves it is not ported.
+      # ph_draw.c:1509-1552
       stress_pulse: 0
       # Inputs of the final fall: nphonetot - nphone, value - nframb, and the
       # pressure it falls to (ph_draw.c:3812-3870).
@@ -540,6 +547,33 @@ rules:
       - { register: area_ap, value: "r.area_ap + floor((r.target_ap - r.area_ap) / 4)", tag: glottal_chink }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:4098 (area_ap += (target_ap - area_ap) >> 2)"
+
+  # --- emphasis, a phone that is not silence, every frame: ph_draw.c:1509-1552
+  # A phone with emphatic stress adds a pulse to the pressure over its last
+  # NF130MS (20 frames), a step a frame up to the voice's limit, and takes it
+  # back before that; any other phone clears it. A silence leaves it alone.
+  artic_emphasis_pulse:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.emphasis"
+    set:
+      - register: stress_pulse
+        value: >-
+          f.index <= f.count - 20
+            ? (r.stress_pulse > 0 ? r.stress_pulse - params.policy.articulation.voice.stress_step : r.stress_pulse)
+            : (r.stress_pulse < params.policy.articulation.voice.stress_pressure
+                ? r.stress_pulse + params.policy.articulation.voice.stress_step : r.stress_pulse)
+        tag: subglottal_pressure
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1509-1523"
+  artic_no_emphasis:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && !u.emphasis"
+    set:
+      - { register: stress_pulse, value: 0, tag: subglottal_pressure }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1550-1552"
   artic_pressure_out:
     kind: frame
     program: articulation
@@ -2228,6 +2262,8 @@ phases:
       - artic_silence_pressure_drop
       - artic_pressure_rise_voiced
       - artic_pressure_rise_voiceless
+      - artic_emphasis_pulse
+      - artic_no_emphasis
       - artic_pressure_rise_voiced_again
       - artic_fall_inputs
       - artic_syllable_pressure_slope

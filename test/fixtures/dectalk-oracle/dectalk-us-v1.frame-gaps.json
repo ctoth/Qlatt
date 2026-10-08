@@ -30,7 +30,7 @@
   "numbers-12-dogs": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A4","A5","A6","AB","A2_CODE"],
   "punct-comma": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5"],
   "punct-question": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A5"],
-  "punct-exclaim": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A4","A5","A6","AB","PS"],
+  "punct-exclaim": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A4","A5","A6","AB"],
   "stops-big-dog": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A4","A5","A6","AB","A2_CODE"],
   "stops-take-two": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5","A2_CODE"],
   "stops-give-back": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A5","A6","AB","A2_CODE"],

@@ -87,6 +87,8 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // regenerate "Gag, gang; go!" once more: equal to 21b80a5d with `--drop AG,PS`.
 // AREA_N, DC and UE regenerate all four: equal to f06eecfd without them.
 // A2_CODE, BRST and PLACE likewise: equal to e4ba44f4 without them.
+// The emphasis pulse regenerates "Gag, gang; go!": equal to f691f753 with
+// `--drop PS`.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

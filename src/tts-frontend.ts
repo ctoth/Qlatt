@@ -655,7 +655,19 @@ function createStructure(
 }
 
 export function normalizeText(text: string, frontendId = "qlatt-english"): string {
-  return normalizeGraphText(text, loadBundledRulepackSpec(frontendId));
+  const spec = loadBundledRulepackSpec(frontendId);
+  // The same text the frontend speaks: after its text parser, when it has one.
+  const textParser = parseTextParserConfig(spec);
+  if (!textParser) return normalizeGraphText(text, spec);
+  const dictionaryPath = loadFrontendResources(spec).dictionaryPath;
+  const dictionary = dictionaryPath ? loadCmuDictionaryFromPathSync(dictionaryPath) : undefined;
+  const parsed = runTextParser(
+    textParser,
+    text,
+    (word) => dictionary !== undefined && Object.hasOwn(dictionary, word),
+    createProvenanceCollector(),
+  );
+  return normalizeGraphText(parsed.text, spec);
 }
 export { transcribeText } from "./transcribe-text";
 

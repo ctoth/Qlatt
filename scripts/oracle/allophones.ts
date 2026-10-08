@@ -51,6 +51,8 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-abbrev-v1.json",
   // The same word twice in a row: a word is its Word Item, not its spelling.
   "dectalk-us-repeated-words-v1.json",
+  // A word-initial AE before T in the word's last rime (ph_aloph.c:801-814).
+  "dectalk-us-at-rime-v1.json",
   // One sentence at speaking rates on both sides of 350 words per minute.
   "dectalk-us-rate-frames-v1.json",
   // Texts with no punctuation at their end.

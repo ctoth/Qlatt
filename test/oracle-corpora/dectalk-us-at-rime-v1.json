@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-at-rime-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "at-plain", "text": "He looked at the small cat.", "group": "ae-before-t", "tags": ["fires", "word-at"], "expectedFocus": ["trace"] },
+    { "id": "at-before-word", "text": "Please say at now.", "group": "ae-before-t", "tags": ["fires", "word-at"], "expectedFocus": ["trace"] },
+    { "id": "atms", "text": "Say atms now.", "group": "ae-before-t", "tags": ["fires", "longer-rime"], "expectedFocus": ["trace"] },
+    { "id": "atms-long", "text": "Please say atms now.", "group": "ae-before-t", "tags": ["fires", "longer-rime"], "expectedFocus": ["trace"] },
+    { "id": "ats", "text": "Please say ats now.", "group": "ae-before-t", "tags": ["fires", "longer-rime"], "expectedFocus": ["trace"] },
+    { "id": "ats-cited", "text": "Say ats now.", "group": "ae-before-t", "tags": ["cited"], "expectedFocus": ["trace"] },
+    { "id": "attic", "text": "Please say attic now.", "group": "ae-before-t", "tags": ["not-last-rime"], "expectedFocus": ["trace"] },
+    { "id": "atlas", "text": "Please say atlas now.", "group": "ae-before-t", "tags": ["not-last-rime"], "expectedFocus": ["trace"] },
+    { "id": "hat", "text": "Please say hat now.", "group": "ae-before-t", "tags": ["not-word-initial"], "expectedFocus": ["trace"] },
+    { "id": "act", "text": "Please say act now.", "group": "ae-before-t", "tags": ["not-before-t"], "expectedFocus": ["trace"] },
+    { "id": "add", "text": "Please say add now.", "group": "ae-before-t", "tags": ["not-before-t"], "expectedFocus": ["trace"] }
+  ]
+}

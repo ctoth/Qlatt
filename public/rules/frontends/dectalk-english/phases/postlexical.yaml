@@ -848,11 +848,10 @@ rules:
   # becomes EH in a clause that is not cited, when the AE and the phone before
   # it both carry a plain word boundary. The AE then begins its word (the
   # phone before it ends one, or is the clause's first silence before a plain
-  # word) and is in its last rime, with a plain word after it: the word "at".
-  # "barked, at the small cat ..." has EH T.
-  #
-  # Here the last rime is taken as AE T alone; a longer one (AE T S) is not
-  # covered.
+  # word) and is in its last rime, with a plain word after it: the word "at",
+  # and any other word of one syllable that begins AE T. "barked, at the small
+  # cat ..." has EH T; so have "ats" and "atms" (dectalk-us-at-rime-v1), while
+  # "attic" and "atlas", whose AE is not in the last rime, keep AE.
   dectalk_at_reduced:
     kind: postlexical
     select:
@@ -860,7 +859,15 @@ rules:
       where: "current.phoneme == 'AE' && dectalk_word_start(current)"
     define:
       n: next
-      after: "ahead(current, 2)"
+      # The first phone after the AE's word, or the silence that ends the clause.
+      after: >-
+        look_ahead_where(current, 100,
+          'candidate.phoneme == "SIL" || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id)')
+      # A later syllabic phone of the word: the AE is then not in its last rime.
+      later_syllabic: >-
+        find_within_word(current,
+          "current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']",
+          "ahead")
       eh: "target('EH0')"
       # The boundary in front of the word is a word boundary: the word starts
       # no phrase.
@@ -868,7 +875,8 @@ rules:
         dectalk_phrase_start(current) != 'vp' && dectalk_phrase_state(current) != 'pp'
       before_final_t: >-
         n != null && n.phoneme == 'T' && dectalk_same_word(current, n)
-        && after != null && after.phoneme != 'SIL' && dectalk_word_start(after)
+        && later_syllabic == null
+        && after != null && after.phoneme != 'SIL'
       plain_after: >-
         dectalk_phrase_start(after) != 'vp' && dectalk_phrase_state(after) != 'pp'
       cited: >-

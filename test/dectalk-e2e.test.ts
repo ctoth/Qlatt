@@ -177,10 +177,15 @@ describe("dectalk-english end-to-end", () => {
         speaker: "paul",
       },
     );
-    // The rule: N beside a high front vowel takes B3 1600; elsewhere 350.
+    // The rule: N beside a high front vowel takes B3 1600; elsewhere 350. A
+    // nasal's bandwidths do not ramp, and DECtalk sends them one frame late
+    // (ph_claus.c:754-757), so the N's first packet still carries the last
+    // frame of the phone before it.
+    const isN = (frame: (typeof result.track)[number] | undefined, word: string) =>
+      frame?.word === word && frame.phoneme === "N";
     const b3Of = (word: string) =>
       result.track
-        .filter((frame) => frame.word === word && frame.phoneme === "N")
+        .filter((frame, index) => isN(frame, word) && isN(result.track[index - 1], word))
         .map((frame) => frame.params.B3);
     expect(b3Of("rain").length).toBeGreaterThan(0);
     expect(new Set(b3Of("rain"))).toEqual(new Set([1600]));
@@ -188,11 +193,9 @@ describe("dectalk-english end-to-end", () => {
     expect(new Set(b3Of("in"))).toEqual(new Set([350]));
   });
 
-  // DECtalk's trace puts the /n/ of "rain" on packets 62 to 70. That is a
-  // statement about durations, and ours do not match DECtalk's yet (see
-  // scripts/oracle/compare-durations.ts). `it.fails` turns red the moment they
-  // do, which is the signal to make this an ordinary test.
-  it.fails("places the N of rain on DECtalk's packets 62 to 70", () => {
+  // DECtalk's trace has B3 1600 on packets 62 to 70: the /n/ of "rain", one
+  // frame late.
+  it("places the N of rain on DECtalk's packets 62 to 70", () => {
     const result = textToKlattTrackDetailed(
       "The rain in Spain stays mainly in the plain.",
       110,
@@ -209,44 +212,20 @@ describe("dectalk-english end-to-end", () => {
     expect(b3).toEqual(Array(9).fill(1600));
   });
 
-  it("projects punct-question's initial K F3 through the K-to-AE locus", () => {
+  // The clause's first silence holds the /k/ target (2200 + 500, ph_setar.c:1854-1866,
+  // scaled by the speaker's fnscale), and the /k/ starts one packet after its
+  // Segment does. The frame gate holds every later packet of this phrase.
+  it("draws punct-question's F3 from the initial silence into the K", () => {
     const result = textToKlattTrackDetailed("Can you hear me?", 110, 30, {
       frontendId: "dectalk-english",
       speaker: "paul",
     });
-    const initialSilence = Array.from({ length: 4 }, (_, frameIndex) => {
+    const f3 = Array.from({ length: 5 }, (_, frameIndex) => {
       const time = frameIndex * DECTALK_PACKET_PERIOD_SEC;
       return result.track.filter((frame) => frame.time <= time + 1e-9).at(-1)?.params.F3;
     });
-    const initialK = result.track.find((frame) => frame.phoneme === "K");
-    const firstKPacket = result.track
-      .filter((frame) => frame.time <= 4 * DECTALK_PACKET_PERIOD_SEC + 1e-9)
-      .at(-1);
-    const initialRelease = result.track.find((frame) => frame.phoneme === "K_REL");
-    if (!initialK || !firstKPacket || !initialRelease)
-      throw new Error("initial K carriers missing");
-    const closureDurationMs = result.utterance
-      .relation("Segment")
-      .listItems()
-      .find((item) => item.get("active") !== false && item.get("phoneme") === "K")
-      ?.get("duration");
-    if (typeof closureDurationMs !== "number") throw new Error("initial K duration missing");
-    const nativeFrameMs = 6.4;
-    const expectedReleaseStart =
-      firstKPacket.params.F3 +
-      (2287.5 - firstKPacket.params.F3) * ((closureDurationMs - nativeFrameMs) / closureDurationMs);
-    // One controller frame into the release is one packet later in output time.
-    const releaseBoundary = result.track.find(
-      (frame) =>
-        frame.phoneme === "K_REL" &&
-        Math.abs(frame.time - initialRelease.time - DECTALK_PACKET_PERIOD_SEC) <= 1e-9,
-    );
 
-    expect(initialSilence).toEqual([2702, 2702, 2702, 2702]);
-    expect(initialK.params.F3).toBe(2702);
-    expect(firstKPacket.params.F3).toBe(2690);
-    expect(initialRelease.params.F3).toBeCloseTo(expectedReleaseStart, 10);
-    expect(releaseBoundary?.params.F3).toBe(2287.5);
+    expect(f3).toEqual([2702, 2702, 2702, 2702, 2690]);
   });
 
   it("applies DECtalk Rule 14 to a sonorant after a voiceless plosive", () => {

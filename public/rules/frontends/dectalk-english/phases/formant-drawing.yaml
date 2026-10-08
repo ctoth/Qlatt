@@ -1,0 +1,1910 @@
+version: v1
+# -----------------------------------------------------------------------------
+# F1, F2, F3, B2 and B3 as DECtalk's controller draws them: the three formant
+# frequencies its synthesizer reads and the two bandwidths it passes to the
+# generator unchanged (scripts/oracle/dectalk-debug/ph-contract.md).
+#
+# At the start of every allophone phsettar() (PH/ph_setar.c:315-1063) sets, for
+# each parameter, a target, a boundary value and a duration for a ramp from the
+# phone's start ("forward") and for one into its end ("backward"); phdraw()
+# (PH/ph_draw.c:343-420) then draws target + (diphthong line + forward ramp +
+# backward ramp) >> 3 every frame. The target of a phone depends on where the
+# phone before ended (tarlas = tarend, ph_setar.c:377), so the state lives in
+# registers, one per C variable and parameter: rules of kind `frame`
+# (docs/frame-rules.md).
+#
+# What depends only on the phones is a unit feature, computed by the functions
+# below from the ROM tables in parameters.policy.formant_drawing: the table
+# target with us_gettar's changes, the diphthong lines, the next phone's
+# target, the locus boundary of setloc().
+#
+# One unit is one DECtalk allophone, as in phases/articulation.yaml: a stop's
+# release and aspiration belong to the stop; the dummy vowel that releases a
+# plosive into silence is the allophone IX or AX. The lead-in is the clause's
+# initial silence, allophone 0, and `delay_frames: 1` is send_pars() sending
+# these words one frame late (ph_claus.c:754-757).
+#
+# Arithmetic. mlsh1(x, y) is floor(x * y / 16384) and `>> n` is floor(x / 2^n)
+# (ph_defs.h:794, arithmetic shifts); muldv(x, y, z) is C division, which
+# drops the fraction toward zero (ph_defs.h:793).
+#
+# Slips of the C that the packets depend on, kept:
+#   - us_special_coartic() is added to a diphthong's first value and in
+#     getendtar(), but not in getbegtar() nor to a diphthong's later values,
+#     where the font test reads the allophone's index (ph_setar.c:1092, 1317);
+#     and it is always called with diphpos 0, so its AY, OY and YU branches
+#     never run.
+#   - a silence and an obstruent shrink their ramps by the factor left by the
+#     last sonorant (ph_setar.c:1621-1642 sets it for sonorants only).
+#   - W has FOBST in the ROM, so it is an obstruent in every test below.
+#
+# Not ported: the F1 the HLSYN section writes over this one around velars
+# (ph_draw.c:2937-3109); the second silence DECtalk starts where a new clause
+# opens inside an utterance (here the pause between two clauses is one unit).
+# -----------------------------------------------------------------------------
+functions:
+  fd_is_dummy:
+    params: [item]
+    body: "item != null && item.phoneme == 'SIL' && isTrue(item, 'dummy_vowel')"
+    description: Whether a Segment is the dummy vowel that releases a plosive into silence.
+    citations:
+      - "DECtalk 4.63 Ph_inton2.c:1683-1722 (Rule 9)"
+  fd_is_silence:
+    params: [item]
+    body: "item == null || (item.phoneme == 'SIL' && !isTrue(item, 'dummy_vowel'))"
+    description: Whether a Segment is GEN_SIL; so is the place beyond either end (get_phone).
+    citations:
+      - "DECtalk 4.63 ph_defs.h:935 get_phone"
+  fd_name:
+    params: [item]
+    body: >-
+      fd_is_dummy(item) ? get(item, 'dummy_phone', 'AX') : dectalk_name(item)
+    description: The allophone's DECtalk name; the dummy vowel is IX or AX.
+    citations:
+      - "DECtalk 4.63 Ph_inton2.c:1683-1722 (the dummy vowel is SCHWA2 or SCHWA1)"
+  fd_next:
+    params: [item]
+    body: "item == null ? null : look_ahead_pred(item, 8, 'is_formant_unit')"
+    description: The first Segment of the next allophone.
+    citations:
+      - "DECtalk 4.63 ph_setar.c:1584-1589 (allophons[nphone + 1])"
+  fd_prev:
+    params: [item]
+    body: "item == null ? null : look_back_pred(item, 8, 'is_formant_unit')"
+    description: The first Segment of the allophone before.
+    citations:
+      - "DECtalk 4.63 ph_setar.c:1578 (pholas)"
+  fd_has:
+    params: [item, feature]
+    body: "feature in get(params.policy.timing.features, fd_name(item), [])"
+    description: A us_featb bit of the allophone.
+    citations:
+      - "DECtalk 4.63 p_us_rom.h us_featb; ph_setar.c:204 phone_feature"
+  fd_place:
+    params: [item, place]
+    body: "fd_name(item) in get(params.policy.articulation.place, place, [])"
+    description: A us_place bit of the allophone.
+    citations:
+      - "DECtalk 4.63 p_us_rom.h:982 us_place"
+  fd_stress:
+    params: [item]
+    body: >-
+      item == null ? 0
+      : get(fd_is_dummy(item) ? look_back_pred(item, 8, 'is_dectalk_phone') : item, 'stress', 0)
+    description: FSTRESS of the allophone's structure word; a dummy vowel has the plosive's.
+    citations:
+      - "DECtalk 4.63 ph_defs.h:219-225; Ph_inton2.c:1683-1722"
+  fd_begtyp:
+    params: [item]
+    body: "params.policy.formant_drawing.begtyp[fd_name(item)]"
+    description: us_begtyp, the type of the allophone's beginning (4 is an obstruent).
+    citations:
+      - "DECtalk 4.63 p_us_rom.h:852 us_begtyp; ph_defs.h:172-176"
+  fd_endtyp:
+    params: [item]
+    body: "params.policy.formant_drawing.endtyp[fd_name(item)]"
+    description: us_endtyp, the type of the allophone's end.
+    citations:
+      - "DECtalk 4.63 p_us_rom.h:917 us_endtyp"
+  fd_raw:
+    params: [item, par]
+    body: "params.policy.formant_drawing.target[fd_name(item)][par]"
+    description: The table target; -1 is none, under -1 a diphthong.
+    citations:
+      - "DECtalk 4.63 p_us_st1.c:92-106 (p_tar[phone + pphotr])"
+  fd_dip:
+    params: [item, par, field]
+    body: >-
+      get(get(get(params.policy.formant_drawing.diphthong, fd_name(item), {}), par, {}), field, [])
+    description: The values or the times of the allophone's diphthong lines.
+    citations:
+      - "DECtalk 4.63 p_us_rom.h:1992 us_maldip; ph_setar.c:1234-1386"
+  # us_gettar's changes to a table target and the one gettar() adds for /k/.
+  fd_adjust:
+    params: [item, par, value]
+    body: >-
+      par == 'F1'
+        ? (fd_has(item, 'obstruent') && !fd_has(item, 'stop') && fd_has(fd_prev(item), 'syllabic')
+           ? value + 40 : value)
+      : (par == 'F2' ? (fd_name(item) == 'K' ? value + 300 : value)
+      : (par == 'F3' ? (fd_name(item) == 'K' ? value + 500 : value)
+      : (par == 'B2'
+        ? (fd_name(item) in ['N', 'EN'] && fd_begtyp(fd_next(item)) != 1 ? value + 60 : value)
+      : (fd_name(item) in ['N', 'EN', 'NX']
+           && (fd_place(fd_next(item), 'f2backi') || fd_place(fd_prev(item), 'f2backf'))
+         ? 1600 : value))))
+    description: >-
+      A fricative's F1 is 40 Hz higher after a syllabic; B2 of N is 60 Hz wider
+      before a phone that does not begin front; B3 of a nasal is 1600 Hz beside
+      a high front phone; /k/ has F2 300 and F3 500 Hz higher.
+    citations:
+      - "DECtalk 4.63 p_us_st1.c:114-141"
+      - "DECtalk 4.63 ph_setar.c:1854-1866"
+  fd_own:
+    params: [item, par]
+    body: >-
+      fd_raw(item, par) < -1 ? fd_dip(item, par, 'values')[0] : fd_adjust(item, par, fd_raw(item, par))
+    description: The allophone's own target at its beginning; -1 when it has none.
+    citations:
+      - "DECtalk 4.63 ph_setar.c:1895-1901 (a diphthong gives its first value)"
+  fd_own_end:
+    params: [item, par]
+    body: >-
+      fd_raw(item, par) < -1
+        ? fd_dip(item, par, 'values')[size(fd_dip(item, par, 'values')) - 1]
+        : fd_adjust(item, par, fd_raw(item, par))
+    description: The allophone's own target at its end; -1 when it has none.
+    citations:
+      - "DECtalk 4.63 ph_setar.c:1869-1888 (a diphthong gives its last value)"
+  fd_special_f2:
+    params: [item]
+    body: >-
+      fd_name(item) in ['IY', 'IH', 'EY', 'EH', 'AE', 'IX']
+        ? (fd_name(fd_next(item)) == 'LX' || fd_name(fd_prev(item)) in ['W', 'LL', 'LX'] ? -150 : 0)
+      : (fd_name(item) == 'UW'
+        ? (fd_place(fd_prev(item), 'alveolar') ? 200 : 0) + (fd_place(fd_next(item), 'alveolar') ? 200 : 0)
+        : 0)
+    description: >-
+      F2 of a front vowel is 150 Hz lower before LX or after W, LL or LX; F2 of
+      UW is 200 Hz higher for each alveolar beside it.
+    citations:
+      - "DECtalk 4.63 p_us_st1.c:341-385"
+  fd_special_f2_weighted:
+    params: [item]
+    body: >-
+      fd_stress(item) == 0 ? fd_special_f2(item) + floor(fd_special_f2(item) / 2)
+      : (dectalk_boundary(item) >= params.policy.timing.boundary.vp
+         ? floor(fd_special_f2(item) / 2) : fd_special_f2(item))
+    description: >-
+      The F2 change, half again as large in an unstressed vowel and halved in
+      a stressed one at a verb-phrase boundary or above.
+    citations:
+      - "DECtalk 4.63 p_us_st1.c:386-401"
+  fd_special:
+    params: [item, par]
+    body: >-
+      par == 'F2'
+        ? (fd_special_f2_weighted(item) > 400 ? 400
+           : (fd_special_f2_weighted(item) < -400 ? -400 : fd_special_f2_weighted(item)))
+      : (par == 'F3' && fd_has(item, 'vowel') && fd_name(item) != 'RR'
+           && (fd_name(fd_prev(item)) in ['W', 'R', 'RX'] || fd_name(fd_next(item)) in ['W', 'R', 'RX'])
+         ? -150 : 0)
+    description: >-
+      us_special_coartic() with diphpos 0: the F2 change, half again as large
+      in an unstressed vowel and halved in a stressed one at a verb-phrase
+      boundary or above, within 400 Hz; F3 of a vowel but RR is 150 Hz lower
+      beside W, R or RX.
+    citations:
+      - "DECtalk 4.63 p_us_st1.c:314-410 us_special_coartic"
+  # The table row setloc() reads: us_begtyp or us_endtyp of the sonorant, with
+  # a rounded sonorant consonant (5) on the rounded vowels' row (3).
+  fd_type_key:
+    params: [sonorant_type]
+    body: >-
+      sonorant_type == 1 ? '1' : (sonorant_type == 2 ? '2'
+      : (sonorant_type == 3 || sonorant_type == 5 ? '3' : ''))
+    description: The key of a sonorant type in the locus table; empty for an obstruent.
+    citations:
+      - "DECtalk 4.63 ph_sttr2.c:131-161"
+
+predicates:
+  is_formant_unit: >-
+    !(current.type in ["stop_release", "stop_aspiration"])
+
+tags:
+  formant_target: sets a formant or bandwidth target of the allophone
+  formant_ramp: sets the boundary value or the length of a ramp at an allophone's edge
+  formant_diphthong: moves a target along the allophone's diphthong lines
+  formant_draw: draws a formant or bandwidth value for the frame
+  formant_override: replaces a drawn bandwidth for the first frames of the allophone
+
+frame_programs:
+  formants:
+    relation: Segment
+    unit: { predicate: is_formant_unit }
+    frame_ms: "params.policy.timing.frame_ms"
+    # The track's initial silence and the frame before it that is never sent.
+    lead_in_frames: >-
+      round(get(current, 'utterance_initial_silence_ms',
+        (params.policy.timing.pause_frames.clause_initial - params.policy.timing.unemitted_initial_frames)
+        * params.policy.timing.frame_ms) / params.policy.timing.frame_ms)
+      + params.policy.timing.unemitted_initial_frames
+    # ph_claus.c:754-757
+    delay_frames: 1
+    features:
+      # DECtalk's allophone 0 of a clause; here only the lead-in.
+      initial: { value: "false", edge: true }
+      silence: { value: "fd_is_silence(current)", edge: true }
+      dummy: { value: "fd_is_dummy(current)", edge: false }
+      # p_us_rom.h us_featb bits. Silence has FSONOR alone.
+      sonorant: { value: "fd_has(current, 'sonorant')", edge: true }
+      soncon: { value: "fd_has(current, 'sonorant_consonant')", edge: false }
+      obstruent: { value: "fd_has(current, 'obstruent')", edge: false }
+      plosive: { value: "fd_has(current, 'plosive')", edge: false }
+      nasal: { value: "fd_has(current, 'nasal')", edge: false }
+      voiced: { value: "fd_has(current, 'voiced')", edge: false }
+      syllabic: { value: "fd_has(current, 'syllabic')", edge: false }
+      burst: { value: "fd_has(current, 'burst')", edge: false }
+      is_hx: { value: "fd_name(current) == 'HX'", edge: false }
+      is_ll: { value: "fd_name(current) == 'LL'", edge: false }
+      is_r: { value: "fd_name(current) == 'R'", edge: false }
+      is_rr: { value: "fd_name(current) == 'RR'", edge: false }
+      is_n: { value: "fd_name(current) in ['N', 'EN']", edge: false }
+      is_tx: { value: "fd_name(current) == 'TX'", edge: false }
+      begtyp: { value: "fd_begtyp(current)", edge: 4 }
+      endtyp: { value: "fd_endtyp(current)", edge: 4 }
+      # FSTRESS of the allophone's structure word: any stress, and bit 01.
+      stressed: { value: "fd_stress(current) > 0", edge: false }
+      primary: { value: "fd_stress(current) == 1 || fd_stress(current) == 3", edge: false }
+      # p_us_st1.c:1397-1400: the allophone two back is /s/, with no boundary after it.
+      after_s: { value: "fd_name(fd_prev(fd_prev(current))) == 'S'", edge: false }
+      after_s_cluster:
+        value: >-
+          fd_name(fd_prev(fd_prev(current))) == 'S' && dectalk_boundary(fd_prev(fd_prev(current))) == 0.0
+        edge: false
+      # mstofr(us_inhdr): the inherent duration in frames (ph_setar.c:1616).
+      inherent: { value: "floor(params.policy.timing.inherent_ms[fd_name(current)] * 10 / 64)", edge: 0 }
+      # For setloc(): the allophone's name, the locus table's key for a
+      # sonorant that begins or ends as this one does, and the us_place bits
+      # it tests.
+      phone: { value: "fd_name(current)", edge: "SIL" }
+      begkey: { value: "fd_type_key(fd_begtyp(current))", edge: "" }
+      endkey: { value: "fd_type_key(fd_endtyp(current))", edge: "" }
+      f2backi: { value: "fd_place(current, 'f2backi')", edge: false }
+      f2backf: { value: "fd_place(current, 'f2backf')", edge: false }
+      palatal_or_dental:
+        value: "fd_place(current, 'palatal') || fd_place(current, 'dental')"
+        edge: false
+      # The own target of the allophone after this one, which gettar() takes
+      # for a phone that has none.
+      nextown_F1: { value: "fd_own(fd_next(current), 'F1')", edge: -1 }
+      nextown_F2: { value: "fd_own(fd_next(current), 'F2')", edge: -1 }
+      nextown_F3: { value: "fd_own(fd_next(current), 'F3')", edge: -1 }
+      nextown_B2: { value: "fd_own(fd_next(current), 'B2')", edge: -1 }
+      nextown_B3: { value: "fd_own(fd_next(current), 'B3')", edge: -1 }
+      # The allophone's own table target at its beginning and at its end; -1 for none.
+      own_F1: { value: "fd_own(current, 'F1')", edge: -1 }
+      own_F2: { value: "fd_own(current, 'F2')", edge: -1 }
+      own_F3: { value: "fd_own(current, 'F3')", edge: -1 }
+      own_B2: { value: "fd_own(current, 'B2')", edge: -1 }
+      own_B3: { value: "fd_own(current, 'B3')", edge: -1 }
+      end_F1: { value: "fd_own_end(current, 'F1')", edge: -1 }
+      end_F2: { value: "fd_own_end(current, 'F2')", edge: -1 }
+      end_F3: { value: "fd_own_end(current, 'F3')", edge: -1 }
+      end_B2: { value: "fd_own_end(current, 'B2')", edge: -1 }
+      end_B3: { value: "fd_own_end(current, 'B3')", edge: -1 }
+      # Diphthong lines: whether the target is one, its values, and the times
+      # in ms at which each value but the last is reached.
+      dip_F1: { value: "fd_raw(current, 'F1') < -1", edge: false }
+      dip_F2: { value: "fd_raw(current, 'F2') < -1", edge: false }
+      dip_F3: { value: "fd_raw(current, 'F3') < -1", edge: false }
+      dip_B2: { value: "fd_raw(current, 'B2') < -1", edge: false }
+      dip_B3: { value: "fd_raw(current, 'B3') < -1", edge: false }
+      dv_F1: { value: "fd_dip(current, 'F1', 'values')", edge: 0 }
+      dv_F2: { value: "fd_dip(current, 'F2', 'values')", edge: 0 }
+      dv_F3: { value: "fd_dip(current, 'F3', 'values')", edge: 0 }
+      dv_B2: { value: "fd_dip(current, 'B2', 'values')", edge: 0 }
+      dv_B3: { value: "fd_dip(current, 'B3', 'values')", edge: 0 }
+      dt_F1: { value: "fd_dip(current, 'F1', 'times')", edge: 0 }
+      dt_F2: { value: "fd_dip(current, 'F2', 'times')", edge: 0 }
+      dt_F3: { value: "fd_dip(current, 'F3', 'times')", edge: 0 }
+      dt_B2: { value: "fd_dip(current, 'B2', 'times')", edge: 0 }
+      dt_B3: { value: "fd_dip(current, 'B3', 'times')", edge: 0 }
+      # us_special_coartic() of the allophone.
+      sc_F2: { value: "fd_special(current, 'F2')", edge: 0 }
+      sc_F3: { value: "fd_special(current, 'F3')", edge: 0 }
+    registers:
+      # tarlas, the table target, getbegtar() of the next phone, tarcur,
+      # tarend, tarnex.
+      las_F1: 0
+      las_F2: 0
+      las_F3: 0
+      las_B2: 0
+      las_B3: 0
+      tgt_F1: 0
+      tgt_F2: 0
+      tgt_F3: 0
+      tgt_B2: 0
+      tgt_B3: 0
+      nxr_F1: 0
+      nxr_F2: 0
+      nxr_F3: 0
+      nxr_B2: 0
+      nxr_B3: 0
+      cur_F1: 0
+      cur_F2: 0
+      cur_F3: 0
+      cur_B2: 0
+      cur_B3: 0
+      end_F1: 0
+      end_F2: 0
+      end_F3: 0
+      end_B2: 0
+      end_B3: 0
+      nex_F1: 0
+      nex_F2: 0
+      nex_F3: 0
+      nex_B2: 0
+      nex_B3: 0
+      # bouval and durtran, of the forward ramp and then of the backward one.
+      bou_F1: 0
+      bou_F2: 0
+      bou_F3: 0
+      bou_B2: 0
+      bou_B3: 0
+      dur_F1: 0
+      dur_F2: 0
+      dur_F3: 0
+      dur_B2: 0
+      dur_B3: 0
+      # ftran, dftran, btran, dbtran, tbacktr.
+      ftran_F1: 0
+      ftran_F2: 0
+      ftran_F3: 0
+      ftran_B2: 0
+      ftran_B3: 0
+      dft_F1: 0
+      dft_F2: 0
+      dft_F3: 0
+      dft_B2: 0
+      dft_B3: 0
+      btran_F1: 0
+      btran_F2: 0
+      btran_F3: 0
+      btran_B2: 0
+      btran_B3: 0
+      dbt_F1: 0
+      dbt_F2: 0
+      dbt_F3: 0
+      dbt_B2: 0
+      dbt_B3: 0
+      tback_F1: 0
+      tback_F2: 0
+      tback_F3: 0
+      tback_B2: 0
+      tback_B3: 0
+      # dipcum, deldip, durlin; the line being drawn, and make_dip()'s
+      # oldvalue and oldtime.
+      dipcum_F1: 0
+      dipcum_F2: 0
+      dipcum_F3: 0
+      dipcum_B2: 0
+      dipcum_B3: 0
+      deldip_F1: 0
+      deldip_F2: 0
+      deldip_F3: 0
+      deldip_B2: 0
+      deldip_B3: 0
+      durlin_F1: 0
+      durlin_F2: 0
+      durlin_F3: 0
+      durlin_B2: 0
+      durlin_B3: 0
+      line_F1: 0
+      line_F2: 0
+      line_F3: 0
+      line_B2: 0
+      line_B3: 0
+      dold_F1: 0
+      dold_F2: 0
+      dold_F3: 0
+      dold_B2: 0
+      dold_B3: 0
+      told_F1: 0
+      told_F2: 0
+      told_F3: 0
+      told_B2: 0
+      told_B3: 0
+      # tspesh and pspesh.
+      tsp_B2: 0
+      tsp_B3: 0
+      psp_B2: 0
+      psp_B3: 0
+      # The frame's value before and after the speaker's scaling.
+      val_F1: 0
+      val_F2: 0
+      val_F3: 0
+      val_B2: 0
+      val_B3: 0
+      out_F1: 0
+      out_F2: 0
+      out_F3: 0
+      out_B2: 0
+      out_B3: 0
+      # shrink, shrif, shrib: zero until the first sonorant sets them.
+      shrink: 0
+      shrif: 0
+      shrib: 0
+      # shrdur()'s halfinhdr and halfmaxdur for the allophone.
+      half_inherent: 0
+      half_max: 0
+      # PAV.tspesh of the allophone (Special Rule 2).
+      vot: 0
+      # Working values of setloc(): locus, percent, duration in ms.
+      loc_hz: 0
+      loc_percent: 0
+      loc_ms: 0
+      # Working values of shrdur() and make_dip().
+      shr_ms: 0
+      shr: 0
+      shr_fold: 0
+      dip_new: 0
+      dip_span: 0
+    outputs:
+      F1: "r.out_F1"
+      F2: "r.out_F2"
+      F3: "r.out_F3"
+      B2: "r.out_B2"
+      B3: "r.out_B3"
+    write: formant_frames
+    tag: formant_draw
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:315-1063 phsettar"
+      - "DECtalk 4.63 PH/ph_draw.c:343-420, 733-736 phdraw"
+
+rules:
+  # ===========================================================================
+  # Targets: ph_setar.c:377-773.
+  # ===========================================================================
+
+  # The first clause's first frame: tarend = getbegtar(0) (init_variables).
+  fd_startup_last_target:
+    kind: frame
+    program: formants
+    unit: "u.initial"
+    when: "f.frame == 0"
+    set:
+      - { register: end_F1, value: "n.own_F1 > 0 ? n.own_F1 : params.policy.formant_drawing.parini.F1", tag: formant_target }
+      - { register: end_F2, value: "n.own_F2 > 0 ? n.own_F2 : params.policy.formant_drawing.parini.F2", tag: formant_target }
+      - { register: end_F3, value: "n.own_F3 > 0 ? n.own_F3 : params.policy.formant_drawing.parini.F3", tag: formant_target }
+      - { register: end_B2, value: "n.own_B2 > 0 ? n.own_B2 : params.policy.formant_drawing.parini.B2", tag: formant_target }
+      - { register: end_B3, value: "n.own_B3 > 0 ? n.own_B3 : params.policy.formant_drawing.parini.B3", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1562-1575"
+  fd_last_target:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: las_F1, value: "r.end_F1", tag: formant_target }
+      - { register: las_F2, value: "r.end_F2", tag: formant_target }
+      - { register: las_F3, value: "r.end_F3", tag: formant_target }
+      - { register: las_B2, value: "r.end_B2", tag: formant_target }
+      - { register: las_B3, value: "r.end_B3", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:377 (tarlas = tarend)"
+  fd_table_targets:
+    kind: frame
+    program: formants
+    unit: "!u.silence"
+    when: "f.index == 0"
+    set:
+      - { register: tgt_F1, value: "u.own_F1 != -1 ? u.own_F1 : (n.own_F1 > 0 ? n.own_F1 : (p.end_F1 > 0 ? p.end_F1 : params.policy.formant_drawing.parini.F1))", tag: formant_target }
+      - { register: tgt_F2, value: "u.own_F2 != -1 ? u.own_F2 : (n.own_F2 > 0 ? n.own_F2 : (p.end_F2 > 0 ? p.end_F2 : params.policy.formant_drawing.parini.F2))", tag: formant_target }
+      - { register: tgt_F3, value: "u.own_F3 != -1 ? u.own_F3 : (n.own_F3 > 0 ? n.own_F3 : (p.end_F3 > 0 ? p.end_F3 : params.policy.formant_drawing.parini.F3))", tag: formant_target }
+      - { register: tgt_B2, value: "u.own_B2 != -1 ? u.own_B2 : (n.own_B2 > 0 ? n.own_B2 : (p.end_B2 > 0 ? p.end_B2 : params.policy.formant_drawing.parini.B2))", tag: formant_target }
+      - { register: tgt_B3, value: "u.own_B3 != -1 ? u.own_B3 : (n.own_B3 > 0 ? n.own_B3 : (p.end_B3 > 0 ? p.end_B3 : params.policy.formant_drawing.parini.B3))", tag: formant_target }
+      - register: nxr_F1
+        value: >-
+          n.silence ? (u.end_F1 > 0 ? u.end_F1 : params.policy.formant_drawing.parini.F1)
+          : (n.own_F1 != -1 ? n.own_F1 : (n.nextown_F1 > 0 ? n.nextown_F1
+          : (u.end_F1 > 0 ? u.end_F1 : params.policy.formant_drawing.parini.F1)))
+        tag: formant_target
+      - register: nxr_F2
+        value: >-
+          n.silence ? (u.end_F2 > 0 ? u.end_F2 : params.policy.formant_drawing.parini.F2)
+          : (n.own_F2 != -1 ? n.own_F2 : (n.nextown_F2 > 0 ? n.nextown_F2
+          : (u.end_F2 > 0 ? u.end_F2 : params.policy.formant_drawing.parini.F2)))
+        tag: formant_target
+      - register: nxr_F3
+        value: >-
+          n.silence ? (u.end_F3 > 0 ? u.end_F3 : params.policy.formant_drawing.parini.F3)
+          : (n.own_F3 != -1 ? n.own_F3 : (n.nextown_F3 > 0 ? n.nextown_F3
+          : (u.end_F3 > 0 ? u.end_F3 : params.policy.formant_drawing.parini.F3)))
+        tag: formant_target
+      - register: nxr_B2
+        value: >-
+          n.silence ? (u.end_B2 > 0 ? u.end_B2 : params.policy.formant_drawing.parini.B2)
+          : (n.own_B2 != -1 ? n.own_B2 : (n.nextown_B2 > 0 ? n.nextown_B2
+          : (u.end_B2 > 0 ? u.end_B2 : params.policy.formant_drawing.parini.B2)))
+        tag: formant_target
+      - register: nxr_B3
+        value: >-
+          n.silence ? (u.end_B3 > 0 ? u.end_B3 : params.policy.formant_drawing.parini.B3)
+          : (n.own_B3 != -1 ? n.own_B3 : (n.nextown_B3 > 0 ? n.nextown_B3
+          : (u.end_B3 > 0 ? u.end_B3 : params.policy.formant_drawing.parini.B3)))
+        tag: formant_target
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:384, 398, 1073-1121 getbegtar, 1661-1909 gettar"
+      - "DECtalk 4.63 PH/ph_romi.c:162-168 parini"
+  # Silence has no target: the clause's first takes the next phone's own, or
+  # the start-up value when that phone has none either.
+  fd_table_targets_initial_silence:
+    kind: frame
+    program: formants
+    unit: "u.initial"
+    when: "f.index == 0"
+    set:
+      - { register: tgt_F1, value: "n.own_F1 > 0 ? n.own_F1 : params.policy.formant_drawing.parini.F1", tag: formant_target }
+      - { register: tgt_F2, value: "n.own_F2 > 0 ? n.own_F2 : params.policy.formant_drawing.parini.F2", tag: formant_target }
+      - { register: tgt_F3, value: "n.own_F3 > 0 ? n.own_F3 : params.policy.formant_drawing.parini.F3", tag: formant_target }
+      - { register: tgt_B2, value: "n.own_B2 > 0 ? n.own_B2 : params.policy.formant_drawing.parini.B2", tag: formant_target }
+      - { register: tgt_B3, value: "n.own_B3 > 0 ? n.own_B3 : params.policy.formant_drawing.parini.B3", tag: formant_target }
+      - { register: nxr_F1, value: "n.own_F1 != -1 ? n.own_F1 : (n.nextown_F1 > 0 ? n.nextown_F1 : params.policy.formant_drawing.parini.F1)", tag: formant_target }
+      - { register: nxr_F2, value: "n.own_F2 != -1 ? n.own_F2 : (n.nextown_F2 > 0 ? n.nextown_F2 : params.policy.formant_drawing.parini.F2)", tag: formant_target }
+      - { register: nxr_F3, value: "n.own_F3 != -1 ? n.own_F3 : (n.nextown_F3 > 0 ? n.nextown_F3 : params.policy.formant_drawing.parini.F3)", tag: formant_target }
+      - { register: nxr_B2, value: "n.own_B2 != -1 ? n.own_B2 : (n.nextown_B2 > 0 ? n.nextown_B2 : params.policy.formant_drawing.parini.B2)", tag: formant_target }
+      - { register: nxr_B3, value: "n.own_B3 != -1 ? n.own_B3 : (n.nextown_B3 > 0 ? n.nextown_B3 : params.policy.formant_drawing.parini.B3)", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1661-1909 (gettar of allophone 0)"
+  # The clause's last silence takes the end of the phone before it; past the
+  # end of the clause gettar() finds only that silence, and gives the start-up
+  # value.
+  fd_table_targets_final_silence:
+    kind: frame
+    program: formants
+    unit: "u.silence && !u.initial"
+    when: "f.index == 0"
+    set:
+      - { register: tgt_F1, value: "p.end_F1 > 0 ? p.end_F1 : params.policy.formant_drawing.parini.F1", tag: formant_target }
+      - { register: tgt_F2, value: "p.end_F2 > 0 ? p.end_F2 : params.policy.formant_drawing.parini.F2", tag: formant_target }
+      - { register: tgt_F3, value: "p.end_F3 > 0 ? p.end_F3 : params.policy.formant_drawing.parini.F3", tag: formant_target }
+      - { register: tgt_B2, value: "p.end_B2 > 0 ? p.end_B2 : params.policy.formant_drawing.parini.B2", tag: formant_target }
+      - { register: tgt_B3, value: "p.end_B3 > 0 ? p.end_B3 : params.policy.formant_drawing.parini.B3", tag: formant_target }
+      - { register: nxr_F1, value: "params.policy.formant_drawing.parini.F1", tag: formant_target }
+      - { register: nxr_F2, value: "params.policy.formant_drawing.parini.F2", tag: formant_target }
+      - { register: nxr_F3, value: "params.policy.formant_drawing.parini.F3", tag: formant_target }
+      - { register: nxr_B2, value: "params.policy.formant_drawing.parini.B2", tag: formant_target }
+      - { register: nxr_B3, value: "params.policy.formant_drawing.parini.B3", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1661-1909 (gettar of the last allophone and of the one past it)"
+
+  # Sonorants but silence: how short the phone is beside its inherent length.
+  # muldv() of positive numbers.
+  fd_shrink:
+    kind: frame
+    program: formants
+    unit: "!u.silence && !u.obstruent"
+    when: "f.index == 0"
+    set:
+      - register: shrink
+        value: >-
+          f.count < u.inherent * 2
+            ? floor(params.policy.timing.fraction.one * f.count / u.inherent)
+            : params.policy.timing.fraction.one + params.policy.timing.fraction.one - 1
+        tag: formant_ramp
+      - { register: shrif, value: "floor(r.shrink / 2) + params.policy.timing.fraction.half", tag: formant_ramp }
+      - { register: shrib, value: "r.shrif - 1600", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1616-1642"
+
+  # A target that is not a diphthong moves toward the mean of the last phone's
+  # end and the next phone's beginning: 10%, or 15% (F2 25%) when the phone
+  # has no stress; a nasal's does not move.
+  fd_target_coarticulated:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - register: cur_F1
+        value: >-
+          u.dip_F1 ? r.cur_F1
+          : r.tgt_F1 + floor((floor((r.las_F1 + r.nxr_F1) / 2) - r.tgt_F1)
+            * (u.nasal ? 0 : (u.stressed ? params.policy.formant_drawing.coarticulation.stressed
+                              : params.policy.formant_drawing.coarticulation.unstressed)) / 16384)
+        tag: formant_target
+      - register: cur_F2
+        value: >-
+          u.dip_F2 ? r.cur_F2
+          : r.tgt_F2 + floor((floor((r.las_F2 + r.nxr_F2) / 2) - r.tgt_F2)
+            * (u.nasal ? 0 : (u.stressed ? params.policy.formant_drawing.coarticulation.stressed
+                              : params.policy.formant_drawing.coarticulation.unstressed_f2)) / 16384)
+        tag: formant_target
+      - register: cur_F3
+        value: >-
+          u.dip_F3 ? r.cur_F3
+          : r.tgt_F3 + floor((floor((r.las_F3 + r.nxr_F3) / 2) - r.tgt_F3)
+            * (u.nasal ? 0 : (u.stressed ? params.policy.formant_drawing.coarticulation.stressed
+                              : params.policy.formant_drawing.coarticulation.unstressed)) / 16384)
+        tag: formant_target
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:419-421, 559-567, 605-616"
+  # A diphthong's first value moves toward the last phone's end by the same
+  # fraction, and takes us_special_coartic().
+  fd_target_diphthong_onset:
+    kind: frame
+    program: formants
+    unit: "u.dip_F1 || u.dip_F2 || u.dip_F3"
+    when: "f.index == 0"
+    set:
+      - register: cur_F1
+        value: >-
+          !u.dip_F1 ? r.cur_F1
+          : r.tgt_F1 + floor((r.las_F1 - r.tgt_F1)
+            * (u.stressed ? params.policy.formant_drawing.coarticulation.stressed
+               : params.policy.formant_drawing.coarticulation.unstressed) / 16384)
+        tag: formant_target
+      - register: cur_F2
+        value: >-
+          !u.dip_F2 ? r.cur_F2
+          : r.tgt_F2 + floor((r.las_F2 - r.tgt_F2)
+            * (u.stressed ? params.policy.formant_drawing.coarticulation.stressed
+               : params.policy.formant_drawing.coarticulation.unstressed_f2) / 16384) + u.sc_F2
+        tag: formant_target
+      - register: cur_F3
+        value: >-
+          !u.dip_F3 ? r.cur_F3
+          : r.tgt_F3 + floor((r.las_F3 - r.tgt_F3)
+            * (u.stressed ? params.policy.formant_drawing.coarticulation.stressed
+               : params.policy.formant_drawing.coarticulation.unstressed) / 16384) + u.sc_F3
+        tag: formant_target
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1234-1286"
+  fd_bandwidth_targets:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: cur_B2, value: "r.tgt_B2", tag: formant_target }
+      - { register: cur_B3, value: "r.tgt_B3", tag: formant_target }
+      - { register: end_B2, value: "u.dip_B2 ? u.dv_B2[size(u.dv_B2) - 1] : r.tgt_B2", tag: formant_target }
+      - { register: end_B3, value: "u.dip_B3 ? u.dv_B3[size(u.dv_B3) - 1] : r.tgt_B3", tag: formant_target }
+      - { register: nex_B2, value: "r.nxr_B2", tag: formant_target }
+      - { register: nex_B3, value: "r.nxr_B3", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:398-412, 619, 1286, 1389 (no coarticulation for a bandwidth)"
+  # tarend: the target, or a diphthong's last value moved toward the next
+  # phone's beginning (when that is above 0) by the phone's fraction.
+  fd_target_end:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - register: end_F1
+        value: >-
+          !(u.dip_F1 && size(u.dv_F1) > 1) ? r.cur_F1
+          : u.dv_F1[size(u.dv_F1) - 1] + (r.nxr_F1 > 0
+            ? floor((r.nxr_F1 - u.dv_F1[size(u.dv_F1) - 1])
+              * (u.stressed ? params.policy.formant_drawing.coarticulation.stressed
+                 : params.policy.formant_drawing.coarticulation.unstressed) / 16384)
+            : 0)
+        tag: formant_target
+      - register: end_F2
+        value: >-
+          !(u.dip_F2 && size(u.dv_F2) > 1) ? r.cur_F2
+          : u.dv_F2[size(u.dv_F2) - 1] + (r.nxr_F2 > 0
+            ? floor((r.nxr_F2 - u.dv_F2[size(u.dv_F2) - 1])
+              * (u.stressed ? params.policy.formant_drawing.coarticulation.stressed
+                 : params.policy.formant_drawing.coarticulation.unstressed_f2) / 16384)
+            : 0)
+        tag: formant_target
+      - register: end_F3
+        value: >-
+          !(u.dip_F3 && size(u.dv_F3) > 1) ? r.cur_F3
+          : u.dv_F3[size(u.dv_F3) - 1] + (r.nxr_F3 > 0
+            ? floor((r.nxr_F3 - u.dv_F3[size(u.dv_F3) - 1])
+              * (u.stressed ? params.policy.formant_drawing.coarticulation.stressed
+                 : params.policy.formant_drawing.coarticulation.unstressed) / 16384)
+            : 0)
+        tag: formant_target
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:619, 1303-1314, 1389"
+  # The next phone's beginning moves 10% toward this phone's end.
+  fd_next_target_coarticulated:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: nex_F1, value: "r.nxr_F1 + floor((r.end_F1 - r.nxr_F1) * params.policy.formant_drawing.coarticulation.next / 16384)", tag: formant_target }
+      - { register: nex_F2, value: "r.nxr_F2 + floor((r.end_F2 - r.nxr_F2) * params.policy.formant_drawing.coarticulation.next / 16384)", tag: formant_target }
+      - { register: nex_F3, value: "r.nxr_F3 + floor((r.end_F3 - r.nxr_F3) * params.policy.formant_drawing.coarticulation.next / 16384)", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:627-629, 771-773 (the stress branch at 732-743 is German's)"
+
+  # ===========================================================================
+  # The forward ramp: ph_setar.c:784-855, us_forw_smooth_rules.
+  # ===========================================================================
+  fd_forward_default:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: bou_F1, value: "floor((r.las_F1 + r.cur_F1) / 2)", tag: formant_ramp }
+      - { register: bou_F2, value: "floor((r.las_F2 + r.cur_F2) / 2)", tag: formant_ramp }
+      - { register: bou_F3, value: "floor((r.las_F3 + r.cur_F3) / 2)", tag: formant_ramp }
+      - { register: bou_B2, value: "floor((r.las_B2 + r.cur_B2) / 2)", tag: formant_ramp }
+      - { register: bou_B3, value: "floor((r.las_B3 + r.cur_B3) / 2)", tag: formant_ramp }
+      - { register: dur_F1, value: "params.policy.timing.frames.ms30", tag: formant_ramp }
+      - { register: dur_F2, value: "params.policy.timing.frames.ms30", tag: formant_ramp }
+      - { register: dur_F3, value: "params.policy.timing.frames.ms30", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:784-785"
+  # A sonorant that is not a sonorant consonant: vowels, /h/, silence.
+  fd_forward_vowel:
+    kind: frame
+    program: formants
+    unit: "u.sonorant && !u.soncon"
+    when: "f.index == 0"
+    set:
+      - { register: dur_F1, value: "params.policy.timing.frames.ms45", tag: formant_ramp }
+      - { register: dur_F2, value: "params.policy.timing.frames.ms45", tag: formant_ramp }
+      - { register: dur_F3, value: "params.policy.timing.frames.ms45", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:445-449"
+  # 1. After a sonorant consonant the boundary is a quarter of the way from it;
+  # F1 jumps 80 Hz out of a light /l/; F2 and F3 leave /r/ slowly.
+  fd_forward_vowel_after_sonorant_consonant:
+    kind: frame
+    program: formants
+    unit: "u.sonorant && !u.soncon && p.soncon"
+    when: "f.index == 0"
+    set:
+      - { register: bou_F1, value: "floor((r.bou_F1 + r.las_F1) / 2) + (p.is_ll ? 80 : 0)", tag: formant_ramp }
+      - { register: bou_F2, value: "floor((r.bou_F2 + r.las_F2) / 2)", tag: formant_ramp }
+      - { register: bou_F3, value: "floor((r.bou_F3 + r.las_F3) / 2)", tag: formant_ramp }
+      - { register: dur_F2, value: "p.is_r ? params.policy.timing.frames.ms70 : r.dur_F2", tag: formant_ramp }
+      - { register: dur_F3, value: "p.is_r ? params.policy.timing.frames.ms70 : r.dur_F3", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:450-464"
+  # 2. /h/ begins close to the phone before it.
+  fd_forward_h:
+    kind: frame
+    program: formants
+    unit: "u.sonorant && !u.soncon && !p.soncon && u.is_hx"
+    when: "f.index == 0"
+    set:
+      - { register: bou_F1, value: "floor((r.bou_F1 + r.las_F1) / 2)", tag: formant_ramp }
+      - { register: bou_F2, value: "floor((r.bou_F2 + r.las_F2) / 2)", tag: formant_ramp }
+      - { register: bou_F3, value: "floor((r.bou_F3 + r.las_F3) / 2)", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:465-473"
+  # 3 and 4. A sonorant consonant begins a quarter of the way from itself,
+  # unless the phone before is one too.
+  fd_forward_sonorant_consonant:
+    kind: frame
+    program: formants
+    unit: "u.sonorant && u.soncon"
+    when: "f.index == 0"
+    set:
+      - { register: bou_F1, value: "p.soncon ? r.bou_F1 : floor((r.bou_F1 + r.cur_F1) / 2)", tag: formant_ramp }
+      - { register: bou_F2, value: "p.soncon ? r.bou_F2 : floor((r.bou_F2 + r.cur_F2) / 2)", tag: formant_ramp }
+      - { register: bou_F3, value: "p.soncon ? r.bou_F3 : floor((r.bou_F3 + r.cur_F3) / 2)", tag: formant_ramp }
+      - { register: dur_F1, value: "params.policy.timing.frames.ms30", tag: formant_ramp }
+      - { register: dur_F2, value: "params.policy.timing.frames.ms30", tag: formant_ramp }
+      - { register: dur_F3, value: "params.policy.timing.frames.ms30", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:475-489"
+  # Silence: from where the last phone ended, over the whole silence; the
+  # clause's first silence (nphone <= 1) from the next phone's beginning.
+  fd_forward_silence:
+    kind: frame
+    program: formants
+    unit: "u.silence"
+    when: "f.index == 0"
+    set:
+      - { register: bou_F1, value: "u.initial ? r.nex_F1 : r.las_F1", tag: formant_ramp }
+      - { register: bou_F2, value: "u.initial ? r.nex_F2 : r.las_F2", tag: formant_ramp }
+      - { register: bou_F3, value: "u.initial ? r.nex_F3 : r.las_F3", tag: formant_ramp }
+      - { register: dur_F1, value: "f.count", tag: formant_ramp }
+      - { register: dur_F2, value: "f.count", tag: formant_ramp }
+      - { register: dur_F3, value: "f.count", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:491-505"
+  # 5 and 6. Between an obstruent and a sonorant the boundary comes from the
+  # obstruent's locus.
+  # setloc(): boundary = locus + percent * (sonorant's target - locus) / 100
+  # (C division), over mstofr() of the table's duration. The percent is halved
+  # plus 50 for F2 and F3 of a rounded sonorant consonant beside an obstruent
+  # that is neither palatal nor dental; for an F2 that belongs to the back
+  # cavity it moves a quarter of the way to 100 and the ramp is half as long
+  # plus 2 frames. An obstruent without a row in the table (-1 here) leaves
+  # the boundary alone. The vowel-to-vowel term is zero (ph_sttr2.c:410-411).
+  # 5. The phone before ends as an obstruent and this one does not begin as one.
+  fd_forward_locus_after_obstruent:
+    kind: frame
+    program: formants
+    unit: "!u.silence && p.endtyp == 4 && u.begtyp != 4"
+    when: "f.index == 0"
+    set:
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F1', [-1, 0, 0])[2]", tag: formant_ramp }
+      - register: bou_F1
+        value: >-
+          r.loc_hz < 0 ? r.bou_F1
+          : r.loc_hz + (r.loc_percent * (u.own_F1 - r.loc_hz) < 0
+            ? ceil(r.loc_percent * (u.own_F1 - r.loc_hz) / 100)
+            : floor(r.loc_percent * (u.own_F1 - r.loc_hz) / 100))
+        tag: formant_ramp
+      - { register: dur_F1, value: "r.loc_hz < 0 ? r.dur_F1 : floor(r.loc_ms * 10 / 64)", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F2', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F2', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F2', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_percent, value: "u.begtyp == 5 && !p.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
+      - { register: loc_percent, value: "u.f2backi ? r.loc_percent + 25 - floor(r.loc_percent / 4) : r.loc_percent", tag: formant_ramp }
+      - register: bou_F2
+        value: >-
+          r.loc_hz < 0 ? r.bou_F2
+          : r.loc_hz + (r.loc_percent * (u.own_F2 - r.loc_hz) < 0
+            ? ceil(r.loc_percent * (u.own_F2 - r.loc_hz) / 100)
+            : floor(r.loc_percent * (u.own_F2 - r.loc_hz) / 100))
+        tag: formant_ramp
+      - register: dur_F2
+        value: >-
+          r.loc_hz < 0 ? r.dur_F2
+          : (u.f2backi ? floor(floor(r.loc_ms * 10 / 64) / 2) + 2 : floor(r.loc_ms * 10 / 64))
+        tag: formant_ramp
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F3', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F3', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, p.phone, {}), u.begkey, {}), 'F3', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_percent, value: "u.begtyp == 5 && !p.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
+      - register: bou_F3
+        value: >-
+          r.loc_hz < 0 ? r.bou_F3
+          : r.loc_hz + (r.loc_percent * (u.own_F3 - r.loc_hz) < 0
+            ? ceil(r.loc_percent * (u.own_F3 - r.loc_hz) / 100)
+            : floor(r.loc_percent * (u.own_F3 - r.loc_hz) / 100))
+        tag: formant_ramp
+      - { register: dur_F3, value: "r.loc_hz < 0 ? r.dur_F3 : floor(r.loc_ms * 10 / 64)", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:506-512; ph_sttr2.c:71-369 setloc ('i')"
+  # 6. This phone begins as an obstruent and the one before does not end as
+  # one: the sonorant's target is getendtar(), a diphthong's last value with
+  # us_special_coartic() added.
+  fd_forward_locus_obstruent:
+    kind: frame
+    program: formants
+    unit: "!u.silence && u.begtyp == 4 && p.endtyp != 4"
+    when: "f.index == 0"
+    set:
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F1', [-1, 0, 0])[2]", tag: formant_ramp }
+      - register: bou_F1
+        value: >-
+          r.loc_hz < 0 ? r.bou_F1
+          : r.loc_hz + (r.loc_percent * (p.end_F1 - r.loc_hz) < 0
+            ? ceil(r.loc_percent * (p.end_F1 - r.loc_hz) / 100)
+            : floor(r.loc_percent * (p.end_F1 - r.loc_hz) / 100))
+        tag: formant_ramp
+      - { register: dur_F1, value: "r.loc_hz < 0 ? r.dur_F1 : floor(r.loc_ms * 10 / 64)", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F2', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F2', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F2', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_percent, value: "p.endtyp == 5 && !u.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
+      - { register: loc_percent, value: "p.f2backf ? r.loc_percent + 25 - floor(r.loc_percent / 4) : r.loc_percent", tag: formant_ramp }
+      - register: bou_F2
+        value: >-
+          r.loc_hz < 0 ? r.bou_F2
+          : r.loc_hz + (r.loc_percent * (p.end_F2 + p.sc_F2 - r.loc_hz) < 0
+            ? ceil(r.loc_percent * (p.end_F2 + p.sc_F2 - r.loc_hz) / 100)
+            : floor(r.loc_percent * (p.end_F2 + p.sc_F2 - r.loc_hz) / 100))
+        tag: formant_ramp
+      - register: dur_F2
+        value: >-
+          r.loc_hz < 0 ? r.dur_F2
+          : (p.f2backf ? floor(floor(r.loc_ms * 10 / 64) / 2) + 2 : floor(r.loc_ms * 10 / 64))
+        tag: formant_ramp
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F3', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F3', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), p.endkey, {}), 'F3', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_percent, value: "p.endtyp == 5 && !u.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
+      - register: bou_F3
+        value: >-
+          r.loc_hz < 0 ? r.bou_F3
+          : r.loc_hz + (r.loc_percent * (p.end_F3 + p.sc_F3 - r.loc_hz) < 0
+            ? ceil(r.loc_percent * (p.end_F3 + p.sc_F3 - r.loc_hz) / 100)
+            : floor(r.loc_percent * (p.end_F3 + p.sc_F3 - r.loc_hz) / 100))
+        tag: formant_ramp
+      - { register: dur_F3, value: "r.loc_hz < 0 ? r.dur_F3 : floor(r.loc_ms * 10 / 64)", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:513-517; ph_sttr2.c:71-369 setloc ('f'); ph_setar.c:1142-1193 getendtar"
+  # Inside an obstruent 30 ms, F1 20 ms; a plosive's take its whole length.
+  # The raised F1 after a voiceless plosive (525-533) is not in the HLSYN build.
+  fd_forward_obstruent:
+    kind: frame
+    program: formants
+    unit: "!u.silence && u.obstruent"
+    when: "f.index == 0"
+    set:
+      - { register: dur_F1, value: "u.plosive ? f.count : params.policy.timing.frames.ms20", tag: formant_ramp }
+      - { register: dur_F2, value: "u.plosive ? f.count : params.policy.timing.frames.ms30", tag: formant_ramp }
+      - { register: dur_F3, value: "u.plosive ? f.count : params.policy.timing.frames.ms30", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:534-545"
+  # Inside a nasal F2 and F3 take its whole length and F1 jumps. The lowered
+  # F2 and F3 of the murmur (556-578) are not in the HLSYN build.
+  fd_forward_nasal:
+    kind: frame
+    program: formants
+    unit: "!u.silence && u.nasal"
+    when: "f.index == 0"
+    set:
+      - { register: dur_F1, value: "0", tag: formant_ramp }
+      - { register: dur_F2, value: "f.count", tag: formant_ramp }
+      - { register: dur_F3, value: "f.count", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:547-555"
+  # A short sonorant has shorter ramps, unless the phone before ends as an
+  # obstruent.
+  fd_forward_shrink:
+    kind: frame
+    program: formants
+    unit: "!u.obstruent && p.endtyp != 4"
+    when: "f.index == 0"
+    set:
+      - { register: dur_F1, value: "r.dur_F1 > 0 ? floor(r.dur_F1 * r.shrif / 16384) + 1 : r.dur_F1", tag: formant_ramp }
+      - { register: dur_F2, value: "r.dur_F2 > 0 ? floor(r.dur_F2 * r.shrif / 16384) + 1 : r.dur_F2", tag: formant_ramp }
+      - { register: dur_F3, value: "r.dur_F3 > 0 ? floor(r.dur_F3 * r.shrif / 16384) + 1 : r.dur_F3", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:582-590"
+
+  # --- bandwidths, forward: p_us_st1.c:603-667 ------------------------------
+  # 40 ms, 20 ms in a voiceless phone. The B1 branches are not this program's.
+  fd_bandwidth_forward_default:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: dur_B2, value: "u.voiced ? params.policy.timing.frames.ms40 : params.policy.timing.frames.ms20", tag: formant_ramp }
+      - { register: dur_B3, value: "u.voiced ? params.policy.timing.frames.ms40 : params.policy.timing.frames.ms20", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:606-623"
+  # (&PB3 - np) * 50: B2 is 50 Hz wider at a boundary with silence, B3 not.
+  fd_bandwidth_forward_after_silence:
+    kind: frame
+    program: formants
+    unit: "p.silence"
+    when: "f.index == 0"
+    set:
+      - { register: bou_B2, value: "r.cur_B2 + 50", tag: formant_ramp }
+      - { register: bou_B3, value: "r.cur_B3", tag: formant_ramp }
+      - { register: dur_B2, value: "params.policy.timing.frames.ms50", tag: formant_ramp }
+      - { register: dur_B3, value: "params.policy.timing.frames.ms50", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:625-630"
+  fd_bandwidth_forward_silence:
+    kind: frame
+    program: formants
+    unit: "!p.silence && u.silence"
+    when: "f.index == 0"
+    set:
+      - { register: bou_B2, value: "r.las_B2 + 50", tag: formant_ramp }
+      - { register: bou_B3, value: "r.las_B3", tag: formant_ramp }
+      - { register: dur_B2, value: "params.policy.timing.frames.ms50", tag: formant_ramp }
+      - { register: dur_B3, value: "params.policy.timing.frames.ms50", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:631-641"
+  # After a nasal B2 and B3 start at their targets; B2 60 Hz wider after N in
+  # a phone that does not begin front.
+  fd_bandwidth_forward_after_nasal:
+    kind: frame
+    program: formants
+    unit: "p.nasal"
+    when: "f.index == 0"
+    set:
+      - { register: bou_B2, value: "p.is_n && u.begtyp != 1 ? r.cur_B2 + 60 : r.cur_B2", tag: formant_ramp }
+      - { register: bou_B3, value: "r.cur_B3", tag: formant_ramp }
+      - { register: dur_B2, value: "p.is_n && u.begtyp != 1 ? params.policy.timing.frames.ms60 : r.dur_B2", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:643-653"
+  fd_bandwidth_forward_nasal:
+    kind: frame
+    program: formants
+    unit: "u.nasal"
+    when: "f.index == 0"
+    set:
+      - { register: dur_B2, value: "0", tag: formant_ramp }
+      - { register: dur_B3, value: "0", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:661-666"
+
+  # No longer than the phone or 20 frames; no boundary below zero.
+  fd_forward_limits:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: dur_F1, value: "min([r.dur_F1, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_F2, value: "min([r.dur_F2, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_F3, value: "min([r.dur_F3, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_B2, value: "min([r.dur_B2, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_B3, value: "min([r.dur_B3, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: bou_F1, value: "max([r.bou_F1, 0])", tag: formant_ramp }
+      - { register: bou_F2, value: "max([r.bou_F2, 0])", tag: formant_ramp }
+      - { register: bou_F3, value: "max([r.bou_F3, 0])", tag: formant_ramp }
+      - { register: bou_B2, value: "max([r.bou_B2, 0])", tag: formant_ramp }
+      - { register: bou_B3, value: "max([r.bou_B3, 0])", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:794-802"
+  # ftran = dftran * durtran with dftran = mlsh1((bouval - tarcur) << 3,
+  # divtab[durtran]); dftran keeps its old value when the difference is zero.
+  fd_forward_ramp:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: ftran_F1, value: "r.dur_F1 > 0 ? (r.bou_F1 - r.cur_F1) * 8 : 0", tag: formant_ramp }
+      - { register: dft_F1, value: "r.ftran_F1 != 0 ? floor(r.ftran_F1 * params.policy.formant_drawing.divtab[r.dur_F1] / 16384) : r.dft_F1", tag: formant_ramp }
+      - { register: ftran_F1, value: "r.ftran_F1 != 0 ? r.dft_F1 * r.dur_F1 : 0", tag: formant_ramp }
+      - { register: ftran_F2, value: "r.dur_F2 > 0 ? (r.bou_F2 - r.cur_F2) * 8 : 0", tag: formant_ramp }
+      - { register: dft_F2, value: "r.ftran_F2 != 0 ? floor(r.ftran_F2 * params.policy.formant_drawing.divtab[r.dur_F2] / 16384) : r.dft_F2", tag: formant_ramp }
+      - { register: ftran_F2, value: "r.ftran_F2 != 0 ? r.dft_F2 * r.dur_F2 : 0", tag: formant_ramp }
+      - { register: ftran_F3, value: "r.dur_F3 > 0 ? (r.bou_F3 - r.cur_F3) * 8 : 0", tag: formant_ramp }
+      - { register: dft_F3, value: "r.ftran_F3 != 0 ? floor(r.ftran_F3 * params.policy.formant_drawing.divtab[r.dur_F3] / 16384) : r.dft_F3", tag: formant_ramp }
+      - { register: ftran_F3, value: "r.ftran_F3 != 0 ? r.dft_F3 * r.dur_F3 : 0", tag: formant_ramp }
+      - { register: ftran_B2, value: "r.dur_B2 > 0 ? (r.bou_B2 - r.cur_B2) * 8 : 0", tag: formant_ramp }
+      - { register: dft_B2, value: "r.ftran_B2 != 0 ? floor(r.ftran_B2 * params.policy.formant_drawing.divtab[r.dur_B2] / 16384) : r.dft_B2", tag: formant_ramp }
+      - { register: ftran_B2, value: "r.ftran_B2 != 0 ? r.dft_B2 * r.dur_B2 : 0", tag: formant_ramp }
+      - { register: ftran_B3, value: "r.dur_B3 > 0 ? (r.bou_B3 - r.cur_B3) * 8 : 0", tag: formant_ramp }
+      - { register: dft_B3, value: "r.ftran_B3 != 0 ? floor(r.ftran_B3 * params.policy.formant_drawing.divtab[r.dur_B3] / 16384) : r.dft_B3", tag: formant_ramp }
+      - { register: ftran_B3, value: "r.ftran_B3 != 0 ? r.dft_B3 * r.dur_B3 : 0", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:840-855; ph_romi.c:147-159 divtab"
+
+  # ===========================================================================
+  # The backward ramp: ph_setar.c:900-978, us_back_smooth_rules.
+  # ===========================================================================
+  fd_backward_default:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: bou_F1, value: "floor((r.end_F1 + r.nex_F1) / 2)", tag: formant_ramp }
+      - { register: bou_F2, value: "floor((r.end_F2 + r.nex_F2) / 2)", tag: formant_ramp }
+      - { register: bou_F3, value: "floor((r.end_F3 + r.nex_F3) / 2)", tag: formant_ramp }
+      - { register: bou_B2, value: "floor((r.end_B2 + r.nex_B2) / 2)", tag: formant_ramp }
+      - { register: bou_B3, value: "floor((r.end_B3 + r.nex_B3) / 2)", tag: formant_ramp }
+      - { register: dur_F1, value: "params.policy.timing.frames.ms25", tag: formant_ramp }
+      - { register: dur_F2, value: "params.policy.timing.frames.ms25", tag: formant_ramp }
+      - { register: dur_F3, value: "params.policy.timing.frames.ms25", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:903-904"
+  fd_backward_sonorant:
+    kind: frame
+    program: formants
+    unit: "u.sonorant"
+    when: "f.index == 0"
+    set:
+      - { register: dur_F1, value: "params.policy.timing.frames.ms45", tag: formant_ramp }
+      - { register: dur_F2, value: "params.policy.timing.frames.ms45", tag: formant_ramp }
+      - { register: dur_F3, value: "params.policy.timing.frames.ms45", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:840-842"
+  # 1. Before a sonorant consonant the boundary is a quarter of the way from
+  # it; F3 moves slowly; F1 jumps 80 Hz into a light /l/.
+  fd_backward_vowel_before_sonorant_consonant:
+    kind: frame
+    program: formants
+    unit: "u.sonorant && !u.soncon && n.soncon"
+    when: "f.index == 0"
+    set:
+      - { register: bou_F1, value: "floor((r.bou_F1 + r.nex_F1) / 2) + (n.is_ll ? 80 : 0)", tag: formant_ramp }
+      - { register: bou_F2, value: "floor((r.bou_F2 + r.nex_F2) / 2)", tag: formant_ramp }
+      - { register: bou_F3, value: "floor((r.bou_F3 + r.nex_F3) / 2)", tag: formant_ramp }
+      - { register: dur_F3, value: "params.policy.timing.frames.ms64", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:843-859"
+  # 2. A following /h/ has little influence.
+  fd_backward_before_h:
+    kind: frame
+    program: formants
+    unit: "u.sonorant && !u.soncon && !n.soncon && n.is_hx"
+    when: "f.index == 0"
+    set:
+      - { register: bou_F1, value: "floor((r.bou_F1 + r.end_F1) / 2)", tag: formant_ramp }
+      - { register: bou_F2, value: "floor((r.bou_F2 + r.end_F2) / 2)", tag: formant_ramp }
+      - { register: bou_F3, value: "floor((r.bou_F3 + r.end_F3) / 2)", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:860-868"
+  # 3 and 4. A sonorant consonant: 40 ms; before a phone that is not one,
+  # 20 ms and a quarter of the way from itself.
+  fd_backward_sonorant_consonant:
+    kind: frame
+    program: formants
+    unit: "u.sonorant && u.soncon"
+    when: "f.index == 0"
+    set:
+      - { register: bou_F1, value: "n.soncon ? r.bou_F1 : floor((r.bou_F1 + r.end_F1) / 2)", tag: formant_ramp }
+      - { register: bou_F2, value: "n.soncon ? r.bou_F2 : floor((r.bou_F2 + r.end_F2) / 2)", tag: formant_ramp }
+      - { register: bou_F3, value: "n.soncon ? r.bou_F3 : floor((r.bou_F3 + r.end_F3) / 2)", tag: formant_ramp }
+      - { register: dur_F1, value: "n.soncon ? params.policy.timing.frames.ms40 : params.policy.timing.frames.ms20", tag: formant_ramp }
+      - { register: dur_F2, value: "n.soncon ? params.policy.timing.frames.ms40 : params.policy.timing.frames.ms20", tag: formant_ramp }
+      - { register: dur_F3, value: "n.soncon ? params.policy.timing.frames.ms40 : params.policy.timing.frames.ms20", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:870-884"
+  fd_backward_before_silence:
+    kind: frame
+    program: formants
+    unit: "n.silence"
+    when: "f.index == 0"
+    set:
+      - { register: dur_F1, value: "0", tag: formant_ramp }
+      - { register: dur_F2, value: "0", tag: formant_ramp }
+      - { register: dur_F3, value: "0", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:886-890"
+  # 5. The next phone begins as an obstruent and this one does not end as one.
+  fd_backward_locus_before_obstruent:
+    kind: frame
+    program: formants
+    unit: "!n.silence && n.begtyp == 4 && u.endtyp != 4"
+    when: "f.index == 0"
+    set:
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F1', [-1, 0, 0])[2]", tag: formant_ramp }
+      - register: bou_F1
+        value: >-
+          r.loc_hz < 0 ? r.bou_F1
+          : r.loc_hz + (r.loc_percent * (u.end_F1 - r.loc_hz) < 0
+            ? ceil(r.loc_percent * (u.end_F1 - r.loc_hz) / 100)
+            : floor(r.loc_percent * (u.end_F1 - r.loc_hz) / 100))
+        tag: formant_ramp
+      - { register: dur_F1, value: "r.loc_hz < 0 ? r.dur_F1 : floor(r.loc_ms * 10 / 64)", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F2', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F2', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F2', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_percent, value: "u.endtyp == 5 && !n.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
+      - { register: loc_percent, value: "u.f2backf ? r.loc_percent + 25 - floor(r.loc_percent / 4) : r.loc_percent", tag: formant_ramp }
+      - register: bou_F2
+        value: >-
+          r.loc_hz < 0 ? r.bou_F2
+          : r.loc_hz + (r.loc_percent * (u.end_F2 + u.sc_F2 - r.loc_hz) < 0
+            ? ceil(r.loc_percent * (u.end_F2 + u.sc_F2 - r.loc_hz) / 100)
+            : floor(r.loc_percent * (u.end_F2 + u.sc_F2 - r.loc_hz) / 100))
+        tag: formant_ramp
+      - register: dur_F2
+        value: >-
+          r.loc_hz < 0 ? r.dur_F2
+          : (u.f2backf ? floor(floor(r.loc_ms * 10 / 64) / 2) + 2 : floor(r.loc_ms * 10 / 64))
+        tag: formant_ramp
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F3', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F3', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, n.phone, {}), u.endkey, {}), 'F3', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_percent, value: "u.endtyp == 5 && !n.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
+      - register: bou_F3
+        value: >-
+          r.loc_hz < 0 ? r.bou_F3
+          : r.loc_hz + (r.loc_percent * (u.end_F3 + u.sc_F3 - r.loc_hz) < 0
+            ? ceil(r.loc_percent * (u.end_F3 + u.sc_F3 - r.loc_hz) / 100)
+            : floor(r.loc_percent * (u.end_F3 + u.sc_F3 - r.loc_hz) / 100))
+        tag: formant_ramp
+      - { register: dur_F3, value: "r.loc_hz < 0 ? r.dur_F3 : floor(r.loc_ms * 10 / 64)", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:891-897; ph_sttr2.c:71-369 setloc ('f'); ph_setar.c:1142-1193 getendtar"
+  # 6. This phone ends as an obstruent and the next does not begin as one.
+  fd_backward_locus_obstruent:
+    kind: frame
+    program: formants
+    unit: "!n.silence && u.endtyp == 4 && n.begtyp != 4"
+    when: "f.index == 0"
+    set:
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F1', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F1', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F1', [-1, 0, 0])[2]", tag: formant_ramp }
+      - register: bou_F1
+        value: >-
+          r.loc_hz < 0 ? r.bou_F1
+          : r.loc_hz + (r.loc_percent * (n.own_F1 - r.loc_hz) < 0
+            ? ceil(r.loc_percent * (n.own_F1 - r.loc_hz) / 100)
+            : floor(r.loc_percent * (n.own_F1 - r.loc_hz) / 100))
+        tag: formant_ramp
+      - { register: dur_F1, value: "r.loc_hz < 0 ? r.dur_F1 : floor(r.loc_ms * 10 / 64)", tag: formant_ramp }
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F2', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F2', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F2', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_percent, value: "n.begtyp == 5 && !u.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
+      - { register: loc_percent, value: "n.f2backi ? r.loc_percent + 25 - floor(r.loc_percent / 4) : r.loc_percent", tag: formant_ramp }
+      - register: bou_F2
+        value: >-
+          r.loc_hz < 0 ? r.bou_F2
+          : r.loc_hz + (r.loc_percent * (n.own_F2 - r.loc_hz) < 0
+            ? ceil(r.loc_percent * (n.own_F2 - r.loc_hz) / 100)
+            : floor(r.loc_percent * (n.own_F2 - r.loc_hz) / 100))
+        tag: formant_ramp
+      - register: dur_F2
+        value: >-
+          r.loc_hz < 0 ? r.dur_F2
+          : (n.f2backi ? floor(floor(r.loc_ms * 10 / 64) / 2) + 2 : floor(r.loc_ms * 10 / 64))
+        tag: formant_ramp
+      - { register: loc_hz, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F3', [-1, 0, 0])[0]", tag: formant_ramp }
+      - { register: loc_percent, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F3', [-1, 0, 0])[1]", tag: formant_ramp }
+      - { register: loc_ms, value: "get(get(get(params.policy.formant_drawing.locus, u.phone, {}), n.begkey, {}), 'F3', [-1, 0, 0])[2]", tag: formant_ramp }
+      - { register: loc_percent, value: "n.begtyp == 5 && !u.palatal_or_dental ? floor(r.loc_percent / 2) + 50 : r.loc_percent", tag: formant_ramp }
+      - register: bou_F3
+        value: >-
+          r.loc_hz < 0 ? r.bou_F3
+          : r.loc_hz + (r.loc_percent * (n.own_F3 - r.loc_hz) < 0
+            ? ceil(r.loc_percent * (n.own_F3 - r.loc_hz) / 100)
+            : floor(r.loc_percent * (n.own_F3 - r.loc_hz) / 100))
+        tag: formant_ramp
+      - { register: dur_F3, value: "r.loc_hz < 0 ? r.dur_F3 : floor(r.loc_ms * 10 / 64)", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:898-902; ph_sttr2.c:71-369 setloc ('i')"
+  # The raised F1 of a voiceless plosive (913-918) and the nasal block
+  # (922-953) are not in the HLSYN build.
+  fd_backward_obstruent:
+    kind: frame
+    program: formants
+    unit: "!n.silence && u.obstruent"
+    when: "f.index == 0"
+    set:
+      - { register: dur_F1, value: "u.plosive ? f.count : params.policy.timing.frames.ms20", tag: formant_ramp }
+      - { register: dur_F2, value: "u.plosive ? f.count : params.policy.timing.frames.ms30", tag: formant_ramp }
+      - { register: dur_F3, value: "u.plosive ? f.count : params.policy.timing.frames.ms30", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:903-920"
+  fd_backward_shrink:
+    kind: frame
+    program: formants
+    unit: "!u.obstruent && n.begtyp != 4"
+    when: "f.index == 0"
+    set:
+      - { register: dur_F1, value: "r.dur_F1 > 0 ? floor(r.dur_F1 * r.shrib / 16384) + 1 : r.dur_F1", tag: formant_ramp }
+      - { register: dur_F2, value: "r.dur_F2 > 0 ? floor(r.dur_F2 * r.shrib / 16384) + 1 : r.dur_F2", tag: formant_ramp }
+      - { register: dur_F3, value: "r.dur_F3 > 0 ? floor(r.dur_F3 * r.shrib / 16384) + 1 : r.dur_F3", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:955-963"
+
+  # --- bandwidths, backward: p_us_st1.c:979-1041 ----------------------------
+  fd_bandwidth_backward_default:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: dur_B2, value: "u.voiced ? params.policy.timing.frames.ms40 : params.policy.timing.frames.ms20", tag: formant_ramp }
+      - { register: dur_B3, value: "u.voiced ? params.policy.timing.frames.ms40 : params.policy.timing.frames.ms20", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:982-1005"
+  fd_bandwidth_backward_before_silence:
+    kind: frame
+    program: formants
+    unit: "n.silence"
+    when: "f.index == 0"
+    set:
+      - { register: bou_B2, value: "r.end_B2 + 50", tag: formant_ramp }
+      - { register: bou_B3, value: "r.end_B3", tag: formant_ramp }
+      - { register: dur_B2, value: "params.policy.timing.frames.ms50", tag: formant_ramp }
+      - { register: dur_B3, value: "params.policy.timing.frames.ms50", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:1008-1012"
+  fd_bandwidth_backward_silence:
+    kind: frame
+    program: formants
+    unit: "!n.silence && u.silence"
+    when: "f.index == 0"
+    set:
+      - { register: bou_B2, value: "r.nex_B2 + 50", tag: formant_ramp }
+      - { register: bou_B3, value: "r.nex_B3", tag: formant_ramp }
+      - { register: dur_B2, value: "params.policy.timing.frames.ms50", tag: formant_ramp }
+      - { register: dur_B3, value: "params.policy.timing.frames.ms50", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:1013-1017"
+  fd_bandwidth_backward_before_nasal:
+    kind: frame
+    program: formants
+    unit: "n.nasal"
+    when: "f.index == 0"
+    set:
+      - { register: bou_B2, value: "n.is_n && u.endtyp != 1 ? r.end_B2 + 60 : r.end_B2", tag: formant_ramp }
+      - { register: bou_B3, value: "r.end_B3", tag: formant_ramp }
+      - { register: dur_B2, value: "n.is_n && u.endtyp != 1 ? params.policy.timing.frames.ms60 : r.dur_B2", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:1018-1028"
+  fd_bandwidth_backward_nasal:
+    kind: frame
+    program: formants
+    unit: "u.nasal"
+    when: "f.index == 0"
+    set:
+      - { register: dur_B2, value: "0", tag: formant_ramp }
+      - { register: dur_B3, value: "0", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:1035-1040"
+
+  # No longer than 20 frames or the phone; tbacktr; no boundary below zero.
+  fd_backward_limits:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: dur_F1, value: "min([r.dur_F1, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_F2, value: "min([r.dur_F2, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_F3, value: "min([r.dur_F3, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_B2, value: "min([r.dur_B2, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_B3, value: "min([r.dur_B3, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: tback_F1, value: "f.count - r.dur_F1", tag: formant_ramp }
+      - { register: tback_F2, value: "f.count - r.dur_F2", tag: formant_ramp }
+      - { register: tback_F3, value: "f.count - r.dur_F3", tag: formant_ramp }
+      - { register: tback_B2, value: "f.count - r.dur_B2", tag: formant_ramp }
+      - { register: tback_B3, value: "f.count - r.dur_B3", tag: formant_ramp }
+      - { register: bou_F1, value: "max([r.bou_F1, 0])", tag: formant_ramp }
+      - { register: bou_F2, value: "max([r.bou_F2, 0])", tag: formant_ramp }
+      - { register: bou_F3, value: "max([r.bou_F3, 0])", tag: formant_ramp }
+      - { register: bou_B2, value: "max([r.bou_B2, 0])", tag: formant_ramp }
+      - { register: bou_B3, value: "max([r.bou_B3, 0])", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:1199-1209"
+  fd_backward_ramp:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: btran_F1, value: "0", tag: formant_ramp }
+      - { register: btran_F2, value: "0", tag: formant_ramp }
+      - { register: btran_F3, value: "0", tag: formant_ramp }
+      - { register: btran_B2, value: "0", tag: formant_ramp }
+      - { register: btran_B3, value: "0", tag: formant_ramp }
+      - { register: dbt_F1, value: "r.dur_F1 > 0 && r.bou_F1 != r.end_F1 ? floor((r.bou_F1 - r.end_F1) * 8 * params.policy.formant_drawing.divtab[r.dur_F1] / 16384) : 0", tag: formant_ramp }
+      - { register: dbt_F2, value: "r.dur_F2 > 0 && r.bou_F2 != r.end_F2 ? floor((r.bou_F2 - r.end_F2) * 8 * params.policy.formant_drawing.divtab[r.dur_F2] / 16384) : 0", tag: formant_ramp }
+      - { register: dbt_F3, value: "r.dur_F3 > 0 && r.bou_F3 != r.end_F3 ? floor((r.bou_F3 - r.end_F3) * 8 * params.policy.formant_drawing.divtab[r.dur_F3] / 16384) : 0", tag: formant_ramp }
+      - { register: dbt_B2, value: "r.dur_B2 > 0 && r.bou_B2 != r.end_B2 ? floor((r.bou_B2 - r.end_B2) * 8 * params.policy.formant_drawing.divtab[r.dur_B2] / 16384) : 0", tag: formant_ramp }
+      - { register: dbt_B3, value: "r.dur_B3 > 0 && r.bou_B3 != r.end_B3 ? floor((r.bou_B3 - r.end_B3) * 8 * params.policy.formant_drawing.divtab[r.dur_B3] / 16384) : 0", tag: formant_ramp }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:965-978"
+
+  # ===========================================================================
+  # Special rules: p_us_st1.c:1360-1478.
+  # ===========================================================================
+  fd_no_override:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: tsp_B2, value: "0", tag: formant_override }
+      - { register: tsp_B3, value: "0", tag: formant_override }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1647-1648"
+  # Special Rule 2, HLSYN build: the aspiration of a voiceless plosive runs
+  # `vot` frames into the sonorant after it, and B2 is 70 Hz wider for as long.
+  # The same arithmetic as phases/articulation.yaml's artic_vot_after_voiceless_plosive.
+  fd_aspiration_bandwidth:
+    kind: frame
+    program: formants
+    unit: "p.plosive && !p.voiced && u.sonorant"
+    when: "f.index == 0"
+    set:
+      - register: vot
+        value: "u.stressed ? params.policy.articulation.vot.stressed : params.policy.articulation.vot.unstressed"
+        tag: formant_override
+      - register: vot
+        value: >-
+          (u.soncon || u.is_rr) ? r.vot + params.policy.articulation.vot.sonorant_consonant_bonus
+          : (u.after_s ? (u.after_s_cluster ? params.policy.articulation.vot.s_cluster : r.vot)
+          : (!u.syllabic ? r.vot + params.policy.articulation.vot.nonsyllabic_bonus : r.vot))
+        tag: formant_override
+      - { register: vot, value: "r.vot >= f.count ? f.count - 1 : r.vot", tag: formant_override }
+      - register: vot
+        value: >-
+          r.vot > floor(f.count / params.policy.articulation.vot.syllabic_divisor)
+            && u.syllabic && u.primary
+          ? floor(f.count / params.policy.articulation.vot.syllabic_divisor) : r.vot
+        tag: formant_override
+      - { register: vot, value: "u.dummy ? f.count : r.vot", tag: formant_override }
+      - { register: tsp_B2, value: "r.vot", tag: formant_override }
+      - { register: psp_B2, value: "r.cur_B2 + 70", tag: formant_override }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:1362-1448 (Special Rule 2)"
+  # Special Rule 3: a voiced plosive or affricate between a voiced phone and a
+  # voiceless one keeps B2 and B3 at 150 Hz (HLSYN build).
+  fd_voicebar_bandwidth:
+    kind: frame
+    program: formants
+    unit: "u.burst && u.voiced && p.voiced && !n.voiced && !u.is_tx"
+    when: "f.index == 0"
+    set:
+      - { register: tsp_B2, value: "f.count", tag: formant_override }
+      - { register: tsp_B3, value: "f.count", tag: formant_override }
+      - { register: psp_B2, value: "150", tag: formant_override }
+      - { register: psp_B3, value: "150", tag: formant_override }
+    citations:
+      - "DECtalk 4.63 PH/p_us_st1.c:1457-1472"
+
+  # ===========================================================================
+  # Diphthong lines: make_dip (ph_setar.c:1217-1392) and shrdur
+  # (ph_sttr2.c:444-487). The first line holds the first value until the
+  # table's first time; phdraw asks for the next line when tcum passes the
+  # end of the current one.
+  # ===========================================================================
+  fd_diphthong_scale:
+    kind: frame
+    program: formants
+    unit: "u.dip_F1 || u.dip_F2 || u.dip_F3 || u.dip_B2 || u.dip_B3"
+    when: "f.index == 0"
+    set:
+      # halfinhdr = inhdr_frames * NSAMP_FRAME >> 1, NSAMP_FRAME 71
+      - { register: half_inherent, value: "floor(u.inherent * 71 / 2)", tag: formant_diphthong }
+      - { register: half_max, value: "floor(r.half_inherent * r.shrink / 16384)", tag: formant_diphthong }
+    citations:
+      - "DECtalk 4.63 PH/ph_sttr2.c:452-456; ph_defs.h:379 NSAMP_FRAME"
+  fd_diphthong_start_f1:
+    kind: frame
+    program: formants
+    unit: "u.dip_F1"
+    when: "f.index == 0"
+    set:
+      - { register: line_F1, value: "0", tag: formant_diphthong }
+      - { register: dipcum_F1, value: "0", tag: formant_diphthong }
+      - { register: deldip_F1, value: "0", tag: formant_diphthong }
+      - { register: dold_F1, value: "r.cur_F1", tag: formant_diphthong }
+      - { register: shr_ms, value: "size(u.dt_F1) > 0 ? u.dt_F1[0] : -1", tag: formant_diphthong }
+      - &shr_1 { register: shr, value: "r.shr_ms * 10 + 5", tag: formant_diphthong }
+      - &shr_2 { register: shr_fold, value: "r.shr > r.half_inherent ? 1 : 0", tag: formant_diphthong }
+      - &shr_3 { register: shr, value: "r.shr_fold == 1 ? u.inherent * 71 - r.shr : r.shr", tag: formant_diphthong }
+      - &shr_4 { register: shr, value: "floor(floor((r.shrink + 16384) / 2) * (r.half_inherent - r.shr) / 16384)", tag: formant_diphthong }
+      - &shr_5 { register: shr, value: "r.shr > r.half_max ? r.half_max : r.shr", tag: formant_diphthong }
+      - &shr_6 { register: shr, value: "r.shr_fold == 1 ? r.half_max + r.shr : r.half_max - r.shr", tag: formant_diphthong }
+      - &shr_7 { register: shr, value: "r.shr_ms < 0 ? f.count : floor((r.shr < 71 ? 71 : r.shr) / 64)", tag: formant_diphthong }
+      - { register: durlin_F1, value: "r.shr", tag: formant_diphthong }
+      - { register: told_F1, value: "r.shr", tag: formant_diphthong }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1286-1300, 1344-1392; ph_sttr2.c:444-487 shrdur"
+  fd_diphthong_start_f2:
+    kind: frame
+    program: formants
+    unit: "u.dip_F2"
+    when: "f.index == 0"
+    set:
+      - { register: line_F2, value: "0", tag: formant_diphthong }
+      - { register: dipcum_F2, value: "0", tag: formant_diphthong }
+      - { register: deldip_F2, value: "0", tag: formant_diphthong }
+      - { register: dold_F2, value: "r.cur_F2", tag: formant_diphthong }
+      - { register: shr_ms, value: "size(u.dt_F2) > 0 ? u.dt_F2[0] : -1", tag: formant_diphthong }
+      - *shr_1
+      - *shr_2
+      - *shr_3
+      - *shr_4
+      - *shr_5
+      - *shr_6
+      - *shr_7
+      - { register: durlin_F2, value: "r.shr", tag: formant_diphthong }
+      - { register: told_F2, value: "r.shr", tag: formant_diphthong }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1286-1300, 1344-1392; ph_sttr2.c:444-487 shrdur"
+  fd_diphthong_start_f3:
+    kind: frame
+    program: formants
+    unit: "u.dip_F3"
+    when: "f.index == 0"
+    set:
+      - { register: line_F3, value: "0", tag: formant_diphthong }
+      - { register: dipcum_F3, value: "0", tag: formant_diphthong }
+      - { register: deldip_F3, value: "0", tag: formant_diphthong }
+      - { register: dold_F3, value: "r.cur_F3", tag: formant_diphthong }
+      - { register: shr_ms, value: "size(u.dt_F3) > 0 ? u.dt_F3[0] : -1", tag: formant_diphthong }
+      - *shr_1
+      - *shr_2
+      - *shr_3
+      - *shr_4
+      - *shr_5
+      - *shr_6
+      - *shr_7
+      - { register: durlin_F3, value: "r.shr", tag: formant_diphthong }
+      - { register: told_F3, value: "r.shr", tag: formant_diphthong }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1286-1300, 1344-1392; ph_sttr2.c:444-487 shrdur"
+  fd_diphthong_start_b2:
+    kind: frame
+    program: formants
+    unit: "u.dip_B2"
+    when: "f.index == 0"
+    set:
+      - { register: line_B2, value: "0", tag: formant_diphthong }
+      - { register: dipcum_B2, value: "0", tag: formant_diphthong }
+      - { register: deldip_B2, value: "0", tag: formant_diphthong }
+      - { register: dold_B2, value: "r.cur_B2", tag: formant_diphthong }
+      - { register: shr_ms, value: "size(u.dt_B2) > 0 ? u.dt_B2[0] : -1", tag: formant_diphthong }
+      - *shr_1
+      - *shr_2
+      - *shr_3
+      - *shr_4
+      - *shr_5
+      - *shr_6
+      - *shr_7
+      - { register: durlin_B2, value: "r.shr", tag: formant_diphthong }
+      - { register: told_B2, value: "r.shr", tag: formant_diphthong }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1286-1300, 1344-1392; ph_sttr2.c:444-487 shrdur"
+  fd_diphthong_start_b3:
+    kind: frame
+    program: formants
+    unit: "u.dip_B3"
+    when: "f.index == 0"
+    set:
+      - { register: line_B3, value: "0", tag: formant_diphthong }
+      - { register: dipcum_B3, value: "0", tag: formant_diphthong }
+      - { register: deldip_B3, value: "0", tag: formant_diphthong }
+      - { register: dold_B3, value: "r.cur_B3", tag: formant_diphthong }
+      - { register: shr_ms, value: "size(u.dt_B3) > 0 ? u.dt_B3[0] : -1", tag: formant_diphthong }
+      - *shr_1
+      - *shr_2
+      - *shr_3
+      - *shr_4
+      - *shr_5
+      - *shr_6
+      - *shr_7
+      - { register: durlin_B3, value: "r.shr", tag: formant_diphthong }
+      - { register: told_B3, value: "r.shr", tag: formant_diphthong }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:1286-1300, 1344-1392; ph_sttr2.c:444-487 shrdur"
+  # A phone that is not a diphthong: one line, flat, to the end of the phone.
+  fd_no_diphthong:
+    kind: frame
+    program: formants
+    when: "f.index == 0"
+    set:
+      - { register: dipcum_F1, value: "0", tag: formant_diphthong }
+      - { register: dipcum_F2, value: "0", tag: formant_diphthong }
+      - { register: dipcum_F3, value: "0", tag: formant_diphthong }
+      - { register: dipcum_B2, value: "0", tag: formant_diphthong }
+      - { register: dipcum_B3, value: "0", tag: formant_diphthong }
+      - { register: deldip_F1, value: "u.dip_F1 ? r.deldip_F1 : 0", tag: formant_diphthong }
+      - { register: deldip_F2, value: "u.dip_F2 ? r.deldip_F2 : 0", tag: formant_diphthong }
+      - { register: deldip_F3, value: "u.dip_F3 ? r.deldip_F3 : 0", tag: formant_diphthong }
+      - { register: deldip_B2, value: "u.dip_B2 ? r.deldip_B2 : 0", tag: formant_diphthong }
+      - { register: deldip_B3, value: "u.dip_B3 ? r.deldip_B3 : 0", tag: formant_diphthong }
+      - { register: durlin_F1, value: "u.dip_F1 ? r.durlin_F1 : f.count", tag: formant_diphthong }
+      - { register: durlin_F2, value: "u.dip_F2 ? r.durlin_F2 : f.count", tag: formant_diphthong }
+      - { register: durlin_F3, value: "u.dip_F3 ? r.durlin_F3 : f.count", tag: formant_diphthong }
+      - { register: durlin_B2, value: "u.dip_B2 ? r.durlin_B2 : f.count", tag: formant_diphthong }
+      - { register: durlin_B3, value: "u.dip_B3 ? r.durlin_B3 : f.count", tag: formant_diphthong }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:399, 411-412"
+
+  # The next line: its value moves toward the next phone's beginning by the
+  # phone's fraction (formant frequencies only); its slope is
+  # mlsh1(divtab[frames], (new - old) << 3), a C division from 50 frames up,
+  # and zero with old value and time kept when the line has no length.
+  fd_diphthong_next_line_f1:
+    kind: frame
+    program: formants
+    unit: "u.dip_F1"
+    when: "f.index > r.durlin_F1 && r.durlin_F1 >= 0 && r.line_F1 + 1 < size(u.dv_F1)"
+    set:
+      - { register: cur_F1, value: "r.cur_F1 + floor(r.dipcum_F1 / 8)", tag: formant_diphthong }
+      - { register: dipcum_F1, value: "0", tag: formant_diphthong }
+      - { register: line_F1, value: "r.line_F1 + 1", tag: formant_diphthong }
+      - register: dip_new
+        value: >-
+          u.dv_F1[r.line_F1] + (r.nxr_F1 > 0
+            ? floor((r.nxr_F1 - u.dv_F1[r.line_F1])
+              * (u.stressed ? params.policy.formant_drawing.coarticulation.stressed
+                 : params.policy.formant_drawing.coarticulation.unstressed) / 16384)
+            : 0)
+        tag: formant_diphthong
+      - { register: shr_ms, value: "r.line_F1 < size(u.dt_F1) ? u.dt_F1[r.line_F1] : -1", tag: formant_diphthong }
+      - *shr_1
+      - *shr_2
+      - *shr_3
+      - *shr_4
+      - *shr_5
+      - *shr_6
+      - *shr_7
+      - { register: dip_span, value: "r.shr - r.told_F1", tag: formant_diphthong }
+      - register: deldip_F1
+        value: >-
+          r.dip_span == 0 ? 0
+          : (r.dip_span > 0 && r.dip_span < 50
+            ? floor(params.policy.formant_drawing.divtab[r.dip_span] * (r.dip_new - r.dold_F1) * 8 / 16384)
+            : ((r.dip_new - r.dold_F1) * 8 / r.dip_span < 0
+              ? ceil((r.dip_new - r.dold_F1) * 8 / r.dip_span)
+              : floor((r.dip_new - r.dold_F1) * 8 / r.dip_span)))
+        tag: formant_diphthong
+      - { register: dold_F1, value: "r.dip_span == 0 ? r.dold_F1 : r.dip_new", tag: formant_diphthong }
+      - { register: told_F1, value: "r.dip_span == 0 ? r.told_F1 : r.shr", tag: formant_diphthong }
+      - { register: durlin_F1, value: "r.shr", tag: formant_diphthong }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:359-365; ph_setar.c:1301-1386"
+  fd_diphthong_next_line_f2:
+    kind: frame
+    program: formants
+    unit: "u.dip_F2"
+    when: "f.index > r.durlin_F2 && r.durlin_F2 >= 0 && r.line_F2 + 1 < size(u.dv_F2)"
+    set:
+      - { register: cur_F2, value: "r.cur_F2 + floor(r.dipcum_F2 / 8)", tag: formant_diphthong }
+      - { register: dipcum_F2, value: "0", tag: formant_diphthong }
+      - { register: line_F2, value: "r.line_F2 + 1", tag: formant_diphthong }
+      - register: dip_new
+        value: >-
+          u.dv_F2[r.line_F2] + (r.nxr_F2 > 0
+            ? floor((r.nxr_F2 - u.dv_F2[r.line_F2])
+              * (u.stressed ? params.policy.formant_drawing.coarticulation.stressed
+                 : params.policy.formant_drawing.coarticulation.unstressed_f2) / 16384)
+            : 0)
+        tag: formant_diphthong
+      - { register: shr_ms, value: "r.line_F2 < size(u.dt_F2) ? u.dt_F2[r.line_F2] : -1", tag: formant_diphthong }
+      - *shr_1
+      - *shr_2
+      - *shr_3
+      - *shr_4
+      - *shr_5
+      - *shr_6
+      - *shr_7
+      - { register: dip_span, value: "r.shr - r.told_F2", tag: formant_diphthong }
+      - register: deldip_F2
+        value: >-
+          r.dip_span == 0 ? 0
+          : (r.dip_span > 0 && r.dip_span < 50
+            ? floor(params.policy.formant_drawing.divtab[r.dip_span] * (r.dip_new - r.dold_F2) * 8 / 16384)
+            : ((r.dip_new - r.dold_F2) * 8 / r.dip_span < 0
+              ? ceil((r.dip_new - r.dold_F2) * 8 / r.dip_span)
+              : floor((r.dip_new - r.dold_F2) * 8 / r.dip_span)))
+        tag: formant_diphthong
+      - { register: dold_F2, value: "r.dip_span == 0 ? r.dold_F2 : r.dip_new", tag: formant_diphthong }
+      - { register: told_F2, value: "r.dip_span == 0 ? r.told_F2 : r.shr", tag: formant_diphthong }
+      - { register: durlin_F2, value: "r.shr", tag: formant_diphthong }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:359-365; ph_setar.c:1301-1386"
+  fd_diphthong_next_line_f3:
+    kind: frame
+    program: formants
+    unit: "u.dip_F3"
+    when: "f.index > r.durlin_F3 && r.durlin_F3 >= 0 && r.line_F3 + 1 < size(u.dv_F3)"
+    set:
+      - { register: cur_F3, value: "r.cur_F3 + floor(r.dipcum_F3 / 8)", tag: formant_diphthong }
+      - { register: dipcum_F3, value: "0", tag: formant_diphthong }
+      - { register: line_F3, value: "r.line_F3 + 1", tag: formant_diphthong }
+      - register: dip_new
+        value: >-
+          u.dv_F3[r.line_F3] + (r.nxr_F3 > 0
+            ? floor((r.nxr_F3 - u.dv_F3[r.line_F3])
+              * (u.stressed ? params.policy.formant_drawing.coarticulation.stressed
+                 : params.policy.formant_drawing.coarticulation.unstressed) / 16384)
+            : 0)
+        tag: formant_diphthong
+      - { register: shr_ms, value: "r.line_F3 < size(u.dt_F3) ? u.dt_F3[r.line_F3] : -1", tag: formant_diphthong }
+      - *shr_1
+      - *shr_2
+      - *shr_3
+      - *shr_4
+      - *shr_5
+      - *shr_6
+      - *shr_7
+      - { register: dip_span, value: "r.shr - r.told_F3", tag: formant_diphthong }
+      - register: deldip_F3
+        value: >-
+          r.dip_span == 0 ? 0
+          : (r.dip_span > 0 && r.dip_span < 50
+            ? floor(params.policy.formant_drawing.divtab[r.dip_span] * (r.dip_new - r.dold_F3) * 8 / 16384)
+            : ((r.dip_new - r.dold_F3) * 8 / r.dip_span < 0
+              ? ceil((r.dip_new - r.dold_F3) * 8 / r.dip_span)
+              : floor((r.dip_new - r.dold_F3) * 8 / r.dip_span)))
+        tag: formant_diphthong
+      - { register: dold_F3, value: "r.dip_span == 0 ? r.dold_F3 : r.dip_new", tag: formant_diphthong }
+      - { register: told_F3, value: "r.dip_span == 0 ? r.told_F3 : r.shr", tag: formant_diphthong }
+      - { register: durlin_F3, value: "r.shr", tag: formant_diphthong }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:359-365; ph_setar.c:1301-1386"
+  fd_diphthong_next_line_b2:
+    kind: frame
+    program: formants
+    unit: "u.dip_B2"
+    when: "f.index > r.durlin_B2 && r.durlin_B2 >= 0 && r.line_B2 + 1 < size(u.dv_B2)"
+    set:
+      - { register: cur_B2, value: "r.cur_B2 + floor(r.dipcum_B2 / 8)", tag: formant_diphthong }
+      - { register: dipcum_B2, value: "0", tag: formant_diphthong }
+      - { register: line_B2, value: "r.line_B2 + 1", tag: formant_diphthong }
+      - { register: dip_new, value: "u.dv_B2[r.line_B2]", tag: formant_diphthong }
+      - { register: shr_ms, value: "r.line_B2 < size(u.dt_B2) ? u.dt_B2[r.line_B2] : -1", tag: formant_diphthong }
+      - *shr_1
+      - *shr_2
+      - *shr_3
+      - *shr_4
+      - *shr_5
+      - *shr_6
+      - *shr_7
+      - { register: dip_span, value: "r.shr - r.told_B2", tag: formant_diphthong }
+      - register: deldip_B2
+        value: >-
+          r.dip_span == 0 ? 0
+          : (r.dip_span > 0 && r.dip_span < 50
+            ? floor(params.policy.formant_drawing.divtab[r.dip_span] * (r.dip_new - r.dold_B2) * 8 / 16384)
+            : ((r.dip_new - r.dold_B2) * 8 / r.dip_span < 0
+              ? ceil((r.dip_new - r.dold_B2) * 8 / r.dip_span)
+              : floor((r.dip_new - r.dold_B2) * 8 / r.dip_span)))
+        tag: formant_diphthong
+      - { register: dold_B2, value: "r.dip_span == 0 ? r.dold_B2 : r.dip_new", tag: formant_diphthong }
+      - { register: told_B2, value: "r.dip_span == 0 ? r.told_B2 : r.shr", tag: formant_diphthong }
+      - { register: durlin_B2, value: "r.shr", tag: formant_diphthong }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:359-365; ph_setar.c:1301-1386"
+  fd_diphthong_next_line_b3:
+    kind: frame
+    program: formants
+    unit: "u.dip_B3"
+    when: "f.index > r.durlin_B3 && r.durlin_B3 >= 0 && r.line_B3 + 1 < size(u.dv_B3)"
+    set:
+      - { register: cur_B3, value: "r.cur_B3 + floor(r.dipcum_B3 / 8)", tag: formant_diphthong }
+      - { register: dipcum_B3, value: "0", tag: formant_diphthong }
+      - { register: line_B3, value: "r.line_B3 + 1", tag: formant_diphthong }
+      - { register: dip_new, value: "u.dv_B3[r.line_B3]", tag: formant_diphthong }
+      - { register: shr_ms, value: "r.line_B3 < size(u.dt_B3) ? u.dt_B3[r.line_B3] : -1", tag: formant_diphthong }
+      - *shr_1
+      - *shr_2
+      - *shr_3
+      - *shr_4
+      - *shr_5
+      - *shr_6
+      - *shr_7
+      - { register: dip_span, value: "r.shr - r.told_B3", tag: formant_diphthong }
+      - register: deldip_B3
+        value: >-
+          r.dip_span == 0 ? 0
+          : (r.dip_span > 0 && r.dip_span < 50
+            ? floor(params.policy.formant_drawing.divtab[r.dip_span] * (r.dip_new - r.dold_B3) * 8 / 16384)
+            : ((r.dip_new - r.dold_B3) * 8 / r.dip_span < 0
+              ? ceil((r.dip_new - r.dold_B3) * 8 / r.dip_span)
+              : floor((r.dip_new - r.dold_B3) * 8 / r.dip_span)))
+        tag: formant_diphthong
+      - { register: dold_B3, value: "r.dip_span == 0 ? r.dold_B3 : r.dip_new", tag: formant_diphthong }
+      - { register: told_B3, value: "r.dip_span == 0 ? r.told_B3 : r.shr", tag: formant_diphthong }
+      - { register: durlin_B3, value: "r.shr", tag: formant_diphthong }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:359-365; ph_setar.c:1301-1386"
+
+  # ===========================================================================
+  # The frame: ph_draw.c:367-412. The forward ramp shrinks after it is read;
+  # the backward one grows after it is read, from tbacktr on. The F2 terms for
+  # vowel-to-vowel coarticulation are always zero (ph_sttr2.c:410-411).
+  # ===========================================================================
+  fd_draw:
+    kind: frame
+    program: formants
+    set:
+      - { register: dipcum_F1, value: "r.dipcum_F1 + r.deldip_F1", tag: formant_draw }
+      - { register: val_F1, value: "r.dipcum_F1 + r.ftran_F1 + (f.index >= r.tback_F1 ? r.btran_F1 : 0)", tag: formant_draw }
+      - { register: ftran_F1, value: "r.ftran_F1 != 0 ? r.ftran_F1 - r.dft_F1 : 0", tag: formant_draw }
+      - { register: btran_F1, value: "f.index >= r.tback_F1 ? r.btran_F1 + r.dbt_F1 : r.btran_F1", tag: formant_draw }
+      - { register: val_F1, value: "floor(r.val_F1 / 8) + r.cur_F1", tag: formant_draw }
+      - { register: dipcum_F2, value: "r.dipcum_F2 + r.deldip_F2", tag: formant_draw }
+      - { register: val_F2, value: "r.dipcum_F2 + r.ftran_F2 + (f.index >= r.tback_F2 ? r.btran_F2 : 0)", tag: formant_draw }
+      - { register: ftran_F2, value: "r.ftran_F2 != 0 ? r.ftran_F2 - r.dft_F2 : 0", tag: formant_draw }
+      - { register: btran_F2, value: "f.index >= r.tback_F2 ? r.btran_F2 + r.dbt_F2 : r.btran_F2", tag: formant_draw }
+      - { register: val_F2, value: "floor(r.val_F2 / 8) + r.cur_F2", tag: formant_draw }
+      - { register: dipcum_F3, value: "r.dipcum_F3 + r.deldip_F3", tag: formant_draw }
+      - { register: val_F3, value: "r.dipcum_F3 + r.ftran_F3 + (f.index >= r.tback_F3 ? r.btran_F3 : 0)", tag: formant_draw }
+      - { register: ftran_F3, value: "r.ftran_F3 != 0 ? r.ftran_F3 - r.dft_F3 : 0", tag: formant_draw }
+      - { register: btran_F3, value: "f.index >= r.tback_F3 ? r.btran_F3 + r.dbt_F3 : r.btran_F3", tag: formant_draw }
+      - { register: val_F3, value: "floor(r.val_F3 / 8) + r.cur_F3", tag: formant_draw }
+      - { register: dipcum_B2, value: "r.dipcum_B2 + r.deldip_B2", tag: formant_draw }
+      - { register: val_B2, value: "r.dipcum_B2 + r.ftran_B2 + (f.index >= r.tback_B2 ? r.btran_B2 : 0)", tag: formant_draw }
+      - { register: ftran_B2, value: "r.ftran_B2 != 0 ? r.ftran_B2 - r.dft_B2 : 0", tag: formant_draw }
+      - { register: btran_B2, value: "f.index >= r.tback_B2 ? r.btran_B2 + r.dbt_B2 : r.btran_B2", tag: formant_draw }
+      - { register: val_B2, value: "floor(r.val_B2 / 8) + r.cur_B2", tag: formant_draw }
+      - { register: dipcum_B3, value: "r.dipcum_B3 + r.deldip_B3", tag: formant_draw }
+      - { register: val_B3, value: "r.dipcum_B3 + r.ftran_B3 + (f.index >= r.tback_B3 ? r.btran_B3 : 0)", tag: formant_draw }
+      - { register: ftran_B3, value: "r.ftran_B3 != 0 ? r.ftran_B3 - r.dft_B3 : 0", tag: formant_draw }
+      - { register: btran_B3, value: "f.index >= r.tback_B3 ? r.btran_B3 + r.dbt_B3 : r.btran_B3", tag: formant_draw }
+      - { register: val_B3, value: "floor(r.val_B3 / 8) + r.cur_B3", tag: formant_draw }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:367-402"
+  # From the phone's start to tspesh the special rule's value stands instead.
+  fd_draw_override:
+    kind: frame
+    program: formants
+    set:
+      - { register: out_B2, value: "r.tsp_B2 > 0 && f.index < r.tsp_B2 ? r.psp_B2 : r.val_B2", tag: formant_override }
+      - { register: out_B3, value: "r.tsp_B3 > 0 && f.index < r.tsp_B3 ? r.psp_B3 : r.val_B3", tag: formant_override }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:405-412"
+  # The speaker's formant scale, frac4mul(F, fnscale) plus (4096 - fnscale)
+  # >> 4 for F1 and >> 3 for F2, written here as minus the ceiling of
+  # (fnscale - 4096) / 16 and / 8; F1 only above 250 Hz.
+  fd_speaker_scale:
+    kind: frame
+    program: formants
+    set:
+      - register: out_F1
+        value: >-
+          r.val_F1 > 250
+            ? floor(r.val_F1 * params.policy.formant_drawing.voice.fnscale / 4096)
+              - ceil((params.policy.formant_drawing.voice.fnscale - 4096) / 16)
+            : r.val_F1
+        tag: formant_draw
+      - register: out_F2
+        value: >-
+          floor(r.val_F2 * params.policy.formant_drawing.voice.fnscale / 4096)
+          - ceil((params.policy.formant_drawing.voice.fnscale - 4096) / 8)
+        tag: formant_draw
+      - { register: out_F3, value: "floor(r.val_F3 * params.policy.formant_drawing.voice.fnscale / 4096)", tag: formant_draw }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:733-736; ph_defs.h:798 frac4mul"
+  fd_third_formant_floor:
+    kind: frame
+    program: formants
+    when: "r.out_F3 - r.out_F2 < 300"
+    set:
+      - { register: out_F3, value: "r.out_F2 + 300", tag: formant_draw }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:4564-4567"
+
+phases:
+  - name: formant_drawing
+    after: [finalize]
+    rules:
+      - fd_startup_last_target
+      - fd_last_target
+      - fd_table_targets
+      - fd_table_targets_initial_silence
+      - fd_table_targets_final_silence
+      - fd_shrink
+      - fd_target_coarticulated
+      - fd_target_diphthong_onset
+      - fd_bandwidth_targets
+      - fd_target_end
+      - fd_next_target_coarticulated
+      - fd_forward_default
+      - fd_forward_vowel
+      - fd_forward_vowel_after_sonorant_consonant
+      - fd_forward_h
+      - fd_forward_sonorant_consonant
+      - fd_forward_silence
+      - fd_forward_locus_after_obstruent
+      - fd_forward_locus_obstruent
+      - fd_forward_obstruent
+      - fd_forward_nasal
+      - fd_forward_shrink
+      - fd_bandwidth_forward_default
+      - fd_bandwidth_forward_after_silence
+      - fd_bandwidth_forward_silence
+      - fd_bandwidth_forward_after_nasal
+      - fd_bandwidth_forward_nasal
+      - fd_forward_limits
+      - fd_forward_ramp
+      - fd_backward_default
+      - fd_backward_sonorant
+      - fd_backward_vowel_before_sonorant_consonant
+      - fd_backward_before_h
+      - fd_backward_sonorant_consonant
+      - fd_backward_before_silence
+      - fd_backward_locus_before_obstruent
+      - fd_backward_locus_obstruent
+      - fd_backward_obstruent
+      - fd_backward_shrink
+      - fd_bandwidth_backward_default
+      - fd_bandwidth_backward_before_silence
+      - fd_bandwidth_backward_silence
+      - fd_bandwidth_backward_before_nasal
+      - fd_bandwidth_backward_nasal
+      - fd_backward_limits
+      - fd_backward_ramp
+      - fd_no_override
+      - fd_aspiration_bandwidth
+      - fd_voicebar_bandwidth
+      - fd_diphthong_scale
+      - fd_diphthong_start_f1
+      - fd_diphthong_start_f2
+      - fd_diphthong_start_f3
+      - fd_diphthong_start_b2
+      - fd_diphthong_start_b3
+      - fd_no_diphthong
+      - fd_diphthong_next_line_f1
+      - fd_diphthong_next_line_f2
+      - fd_diphthong_next_line_f3
+      - fd_diphthong_next_line_b2
+      - fd_diphthong_next_line_b3
+      - fd_draw
+      - fd_draw_override
+      - fd_speaker_scale
+      - fd_third_formant_floor

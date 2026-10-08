@@ -499,6 +499,8 @@ relations:
     features:
       # The frames phases/articulation.yaml computes for this Segment.
       articulation_frames: []
+      # The frames phases/formant-drawing.yaml computes for this Segment.
+      formant_frames: []
       A1: []
       A2: []
       A3: []
@@ -802,8 +804,6 @@ phases:
       - dectalk_nt_voicing
   - name: structural
     rules:
-      - dectalk_apply_diphthong_trajectories
-      - dectalk_ow_alveolar_stop_late_f2_locus
       - dectalk_insert_voiceless_stop_release_into_silence
       - dectalk_insert_voiceless_stop_release_and_aspiration
       - dectalk_insert_voiceless_stop_release_and_aspiration_final
@@ -838,12 +838,7 @@ phases:
     rules:
       - dectalk_sw_explicit_override
       - dectalk_sw_default_assignment
-      - dectalk_hx_carries_following_vowel_formants
-      - dectalk_initial_k_f3
       - dectalk_obstruent_parallel_amplitudes
-      - dectalk_special_coartic_f3
-      - dectalk_special_coartic_f2
-      - dectalk_n_high_front_b3
       - dectalk_silence_carries_formants
   - name: prosody
     rules:

@@ -35,8 +35,22 @@ const LAYER_GLIDE: i32 = 3;
 // allophones, and is added immediately before speaker scaling.
 // Source: DECtalk 4.63 Ph_drwt02.c pht0draw()/filter_seg_commands().
 const LAYER_DECTALK_SEGMENTAL: i32 = 4;
+// A command on this layer adds its value to the speaker's F0 range for the
+// rest of the render. DECtalk's female routine scales an exclamation by
+// `f0scalefac + 500` (Ph_drwt02.c:3805-3808); the 500 is the command's value.
+const LAYER_RANGE: i32 = 5;
 const FILTER_ONE_POLE: i32 = 1;
 const FILTER_COEFFICIENT_2POLE: i32 = 2;
+// The same recurrence run at half scale, as the female copy of pht0draw()
+// runs it: the filter state starts at (f0basestart << 3) >> 1
+// (Ph_drwt02.c:3182-3183), the input is halved before filter_commands()
+// (3702) and the output doubled after it (3710). The halving drops a bit, so
+// this is not the full-scale filter.
+const FILTER_COEFFICIENT_2POLE_HALF_SCALE: i32 = 3;
+
+fn is_coefficient_2pole(filter_mode: i32) -> bool {
+    filter_mode == FILTER_COEFFICIENT_2POLE || filter_mode == FILTER_COEFFICIENT_2POLE_HALF_SCALE
+}
 
 // DECtalk 4.63 ph_romi.c getcosine table used by Ph_drwt02.c's deterministic
 // 3 Hz / 5 Hz control-frame pseudojitter.
@@ -52,6 +66,16 @@ const DECTALK_COSINE: [i32; 64] = [
 const DECAY_HALVING: i32 = 0;
 const DECAY_STEP_PLUS_RAMP: i32 = 1;
 const DECAY_EXPONENTIAL: i32 = 2;
+// The female copy of pht0draw(): the impulse is set as in the male copy
+// (tarimp = 2 * f0command, delimp = f0command >> 2, Ph_drwt02.c:3466-3483)
+// and `tarimp += delimp; delimp >>= 1` still runs after each sampled frame
+// (3685-3691), but the male copy's `tarimp -= delimp` before the sample
+// (2070-2073) is absent (3563-3568). So the step rises instead of ramping.
+const DECAY_STEP_PLUS_RISE: i32 = 3;
+
+fn is_step_decay(decay_mode: i32) -> bool {
+    decay_mode == DECAY_STEP_PLUS_RAMP || decay_mode == DECAY_STEP_PLUS_RISE
+}
 
 /// 2-pole Butterworth coefficients via bilinear transform.
 /// Mirrors `computeButterworth2Coefficients` in track-assembler.ts.
@@ -265,9 +289,7 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
     // ph_draw.c writes each -lt cell after the active Ph_drwt02.c path has
     // completed the following F0 control update. Run and discard that first
     // internal cell for the complete DECtalk coefficient+speaker renderer.
-    let output_phase_lead = usize::from(
-        inp.filter_mode == FILTER_COEFFICIENT_2POLE && inp.has_scale,
-    );
+    let output_phase_lead = usize::from(is_coefficient_2pole(inp.filter_mode) && inp.has_scale);
     render_with_lead(inp, out, output_phase_lead, 0);
 }
 
@@ -310,6 +332,9 @@ fn render_with_lead(
         } else if inp.filter_mode == FILTER_COEFFICIENT_2POLE {
             coefficient_2pole_y1 = (inp.init_total as i32) << 3;
             coefficient_2pole_y2 = (inp.init_total as i32) << 3;
+        } else if inp.filter_mode == FILTER_COEFFICIENT_2POLE_HALF_SCALE {
+            coefficient_2pole_y1 = ((inp.init_total as i32) << 3) >> 1;
+            coefficient_2pole_y2 = ((inp.init_total as i32) << 3) >> 1;
         } else {
             filter_state.y1 = inp.init_total;
             filter_state.y2 = inp.init_total;
@@ -325,6 +350,8 @@ fn render_with_lead(
     // Glide layers: a held accumulated total per layer, plus the set of ramps
     // still in progress. The held total is what the layer contributes each frame
     // (a ramped persistent that holds after the ramp completes).
+    // Added to the speaker's range by LAYER_RANGE commands.
+    let mut range_added = 0.0f64;
     let mut glide_totals = vec![0.0f64; n_layers];
     let mut active_glides: Vec<Vec<ActiveGlide>> = (0..n_layers).map(|_| Vec::new()).collect();
     let mut segmental_states: Vec<DectalkSegmentalState> = (0..n_layers)
@@ -358,8 +385,11 @@ fn render_with_lead(
                         LAYER_PERSISTENT => {
                             persistent_levels[li] += cmd.value;
                         }
+                        LAYER_RANGE => {
+                            range_added += cmd.value;
+                        }
                         LAYER_IMPULSE => {
-                            let step_plus_ramp = layer.decay_mode == DECAY_STEP_PLUS_RAMP;
+                            let step_plus_ramp = is_step_decay(layer.decay_mode);
                             if step_plus_ramp {
                                 // Ph_drwt02.c:1908-1957 keeps one impulse: an
                                 // IMPULSE command overwrites tarimp, delimp and
@@ -420,7 +450,7 @@ fn render_with_lead(
         // then restores delimp and halves delimp after the sampled frame.
         for li in 0..n_layers {
             let layer = &inp.layers[li];
-            if layer.layer_type != LAYER_IMPULSE || layer.decay_mode != DECAY_STEP_PLUS_RAMP {
+            if layer.layer_type != LAYER_IMPULSE || !is_step_decay(layer.decay_mode) {
                 continue;
             }
             let impulses = &mut active_impulses[li];
@@ -431,7 +461,9 @@ fn render_with_lead(
                     impulses.remove(i);
                     continue;
                 }
-                impulses[i].value -= impulses[i].decay;
+                if layer.decay_mode == DECAY_STEP_PLUS_RAMP {
+                    impulses[i].value -= impulses[i].decay;
+                }
                 impulses[i].remaining_frames -= 1.0;
             }
         }
@@ -489,6 +521,15 @@ fn render_with_lead(
                 &mut coefficient_2pole_y2,
                 inp.one_pole_alpha,
             )
+        } else if inp.filter_mode == FILTER_COEFFICIENT_2POLE_HALF_SCALE {
+            let halved = ((total as i32) >> 1) as f64;
+            let filtered = coefficient_2pole_lowpass(
+                halved,
+                &mut coefficient_2pole_y1,
+                &mut coefficient_2pole_y2,
+                inp.one_pole_alpha,
+            );
+            ((filtered as i32) << 1) as f64
         } else {
             iir_filter_2pole(total, &mut filter_state, &inp.coeffs)
         };
@@ -509,7 +550,7 @@ fn render_with_lead(
         // The active non-singing DECtalk renderer advances both zero-initialized
         // cosine phases on every output frame, then adds signed-Q14 pseudojitter
         // after the main and segmental filters and before speaker scaling.
-        if inp.filter_mode == FILTER_COEFFICIENT_2POLE && inp.has_scale {
+        if is_coefficient_2pole(inp.filter_mode) && inp.has_scale {
             dectalk_timecos5 += 131;
             if dectalk_timecos5 > 4096 {
                 dectalk_timecos5 -= 4096;
@@ -525,15 +566,15 @@ fn render_with_lead(
 
         // Speaker scaling (DECtalk Ph_drwt02.c) or pass-through.
         let mut f0_hz = if inp.has_scale {
-            if inp.filter_mode == FILTER_COEFFICIENT_2POLE && inp.scale_divisor == 4096.0 {
+            if is_coefficient_2pole(inp.filter_mode) && inp.scale_divisor == 4096.0 {
                 let scaled_internal = inp.f0_minimum as i32
                     + (((unscaled_f0 as i32 - inp.scale_pivot as i32)
-                        * inp.f0_scale_factor as i32)
+                        * (inp.f0_scale_factor + range_added) as i32)
                         >> 12);
                 scaled_internal as f64 * inp.scale_output
             } else {
                 (inp.f0_minimum
-                    + (unscaled_f0 - inp.scale_pivot) * inp.f0_scale_factor
+                    + (unscaled_f0 - inp.scale_pivot) * (inp.f0_scale_factor + range_added)
                         / inp.scale_divisor)
                     * inp.scale_output
             }
@@ -559,7 +600,7 @@ fn render_with_lead(
             let mut i = impulses.len();
             while i > 0 {
                 i -= 1;
-                if layer.decay_mode == DECAY_STEP_PLUS_RAMP {
+                if is_step_decay(layer.decay_mode) {
                     if impulses[i].value != 0.0 {
                         impulses[i].value += impulses[i].decay;
                     }
@@ -1801,6 +1842,134 @@ mod tests {
 
         assert_eq!(status, RENDER_OK);
         assert_eq!(out, [1097.0 * 0.1, 1097.0 * 0.1, 1096.0 * 0.1, 1096.0 * 0.1]);
+    }
+
+    #[test]
+    fn half_scale_coefficient_filter_drops_the_bit_the_female_routine_drops() {
+        // Ph_drwt02.c:3182-3183, 3702, 3710. A held level of 1001 with
+        // coefficient 8192: the state starts at (1001 << 3) >> 1 = 4004 and
+        // the input is 1001 >> 1 = 500, so
+        //   first  = mlsh1(8192 << 3, 500) + mlsh1(8192, 4004) = 2000 + 2002
+        //   second = mlsh1(8192, 4002) + mlsh1(8192, 4004)     = 2001 + 2002
+        //   f0     = (4003 >> 3) << 1                          = 1000
+        // The full-scale filter holds 1001.
+        let render = |filter_mode: i32| {
+            let scalars = [
+                0.0064,
+                0.0064,
+                filter_mode as f64,
+                0.5,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                1.0,
+                -1e9,
+                1e9,
+                1001.0,
+            ];
+            let layers = [LAYER_PERSISTENT as f64, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0];
+            let cmds = [0.0, 1001.0, 0.0, 0.0, 0.0];
+            call_render_f0(&scalars, &layers, 1, &cmds, 1, &[], 0, 1)
+        };
+
+        assert_eq!(render(FILTER_COEFFICIENT_2POLE_HALF_SCALE), (RENDER_OK, vec![1000.0]));
+        assert_eq!(render(FILTER_COEFFICIENT_2POLE), (RENDER_OK, vec![1001.0]));
+    }
+
+    #[test]
+    fn step_plus_rise_impulse_is_the_ramp_without_its_subtraction() {
+        // A command of 40 for 3 frames: tarimp = 80, delimp = 10. The male
+        // routine samples tarimp - delimp and then restores and halves delimp
+        // (Ph_drwt02.c:2070-2073, 2194-2200): 70, 75, 78. The female routine
+        // has no subtraction (3563-3568) but still adds delimp after each
+        // frame (3685-3691): 80, 90, 95. Both end when the count runs out.
+        let render = |decay_mode: i32| {
+            let scalars = [
+                0.0064,
+                0.0064,
+                FILTER_ONE_POLE as f64,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                1.0,
+                -1e9,
+                1e9,
+            ];
+            let layers = [LAYER_IMPULSE as f64, decay_mode as f64, 0.0, 0.0, 0.0, 0.0, 1.0];
+            let cmds = [0.0, 40.0, 3.0, 0.0, 0.0];
+            call_render_f0(&scalars, &layers, 1, &cmds, 1, &[], 0, 4)
+        };
+
+        assert_eq!(render(DECAY_STEP_PLUS_RAMP), (RENDER_OK, vec![70.0, 75.0, 78.0, 0.0]));
+        assert_eq!(render(DECAY_STEP_PLUS_RISE), (RENDER_OK, vec![80.0, 90.0, 95.0, 0.0]));
+    }
+
+    #[test]
+    fn range_layer_command_adds_to_the_speaker_range() {
+        // minimum 100, range 2, pivot 10, divisor 4: a level of 30 scales to
+        // 100 + (30 - 10) * 2 / 4 = 110. A range command of 2 makes the range
+        // 4: 100 + (30 - 10) * 4 / 4 = 120.
+        let scalars = [
+            0.0064,
+            0.0064,
+            FILTER_ONE_POLE as f64,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            100.0,
+            2.0,
+            4.0,
+            1.0,
+            -1e9,
+            1e9,
+            0.0,
+            10.0,
+        ];
+        let level = [0.0, 30.0, 0.0, 0.0, 0.0];
+        let one_layer = [LAYER_PERSISTENT as f64, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0];
+        assert_eq!(
+            call_render_f0(&scalars, &one_layer, 1, &level, 1, &[], 0, 1),
+            (RENDER_OK, vec![110.0])
+        );
+
+        let two_layers = [
+            LAYER_PERSISTENT as f64,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            LAYER_RANGE as f64,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+        ];
+        let cmds = [0.0, 30.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0];
+        assert_eq!(
+            call_render_f0(&scalars, &two_layers, 2, &cmds, 2, &[], 0, 1),
+            (RENDER_OK, vec![120.0])
+        );
     }
 
     #[test]

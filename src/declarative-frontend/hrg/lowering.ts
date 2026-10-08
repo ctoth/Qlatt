@@ -41,8 +41,8 @@ type LocusTable = Readonly<
 >;
 type VowelCategoryTable = Readonly<Record<string, { forward?: number; backward?: number }>>;
 
-type LayerType = "profile" | "persistent" | "impulse" | "glide" | "dectalk_segmental";
-type DecayMode = "halving" | "step_plus_ramp" | "exponential";
+type LayerType = "profile" | "persistent" | "impulse" | "glide" | "dectalk_segmental" | "range";
+type DecayMode = "halving" | "step_plus_ramp" | "exponential" | "step_plus_rise";
 
 type LayerConfig = {
   type: LayerType;
@@ -53,7 +53,7 @@ type LayerConfig = {
 };
 
 type LayeredFilterConfig = {
-  type: "lowpass_2pole_coefficient";
+  type: "lowpass_2pole_coefficient" | "lowpass_2pole_coefficient_half_scale";
   alpha_param?: string;
   default_alpha: number;
 };
@@ -79,7 +79,41 @@ export type LayeredF0ModelConfig = {
   layers: Readonly<Record<string, LayerConfig>>;
   speaker_scale?: SpeakerScaleConfig;
   output_clamp: { min_hz: number; max_hz: number };
+  /**
+   * What the model takes instead for a voice of the keyed sex: the filter,
+   * layers and speaker-scale fields given replace the model's own.
+   */
+  by_sex?: Readonly<Record<string, F0ModelVoiceOverlay>>;
 };
+
+type F0ModelVoiceOverlay = {
+  filter?: Partial<LayeredFilterConfig>;
+  layers?: Readonly<Record<string, Partial<LayerConfig>>>;
+  speaker_scale?: Partial<SpeakerScaleConfig>;
+};
+
+/** The model a voice of `sex` renders with: `model` under its `by_sex` entry. */
+export function f0ModelForVoice(
+  model: LayeredF0ModelConfig,
+  sex: string | undefined,
+): LayeredF0ModelConfig {
+  const overlay = sex == null ? undefined : model.by_sex?.[sex];
+  if (!overlay) return model;
+  const layers: Record<string, LayerConfig> = { ...model.layers };
+  for (const [name, fields] of Object.entries(overlay.layers ?? {})) {
+    const base = layers[name];
+    if (!base) throw new Error(`E_HRG_LOWER_F0_MODEL: by_sex.${sex} names unknown layer '${name}'`);
+    layers[name] = { ...base, ...fields };
+  }
+  return {
+    ...model,
+    filter: { ...model.filter, ...overlay.filter },
+    layers,
+    ...(model.speaker_scale
+      ? { speaker_scale: { ...model.speaker_scale, ...overlay.speaker_scale } }
+      : {}),
+  };
+}
 
 type F0LayerCommand = {
   layer: string;
@@ -640,11 +674,18 @@ function renderLayeredF0(
     impulse: 2,
     glide: 3,
     dectalk_segmental: 4,
+    range: 5,
   };
-  const decayCodes: Record<DecayMode, number> = { halving: 0, step_plus_ramp: 1, exponential: 2 };
+  const decayCodes: Record<DecayMode, number> = {
+    halving: 0,
+    step_plus_ramp: 1,
+    exponential: 2,
+    step_plus_rise: 3,
+  };
   // f0-filters ABI constants; keep synchronized with crates/f0-filters/src/lib.rs.
   const commandDescriptorWidth = 5;
-  const coefficientTwoPoleFilterMode = 2;
+  const coefficientTwoPoleFilterMode =
+    model.filter.type === "lowpass_2pole_coefficient_half_scale" ? 3 : 2;
   const layerDescriptors: number[] = [];
   const commandDescriptors: number[] = [];
   const profilePool: number[] = [];
@@ -665,7 +706,7 @@ function renderLayeredF0(
           )
         : 0;
     const terminationThreshold =
-      impulse && config.decay !== "step_plus_ramp"
+      impulse && config.decay !== "step_plus_ramp" && config.decay !== "step_plus_rise"
         ? requirePositiveNumber(
             config.termination_threshold,
             `f0_model.layers.${name}.termination_threshold`,
@@ -1691,7 +1732,7 @@ export function lowerToFrames(
       );
       throw new Error("E_HRG_LOWER_F0_MODEL: layered_additive requires the selected F0 model");
     }
-    const f0Model = context.f0Model;
+    const f0Model = f0ModelForVoice(context.f0Model, context.speakerSex);
     const usesSegmentalControllerClock = f0ControlItems.some(
       (item) => f0Model.layers[String(item.get("layer"))]?.type === "dectalk_segmental",
     );

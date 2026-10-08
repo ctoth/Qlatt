@@ -27,6 +27,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { searchDictionary } from "../src/g2p/table-dictionary-search";
+import { stripSuffixes } from "../src/g2p/table-suffix";
 import { convertPhonemeFieldDetailed, selectDictionaryRows } from "./build-dectalk-dict";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -547,6 +548,66 @@ for (const entry of dictionaryWords) {
   const union = ["l", "C", "U"].filter((form) => found.includes(form) || known.includes(form));
   if (union.length > 0) abbreviationForms[key] = union.join("");
 }
+
+// Words of capitals that DECtalk spells: ls_spel_say_it (LTS/l_us_sp1.c:63-99)
+// looks only at a word of 2 or more letters A-Z that the dictionary search,
+// with its suffix stripping, did not find (LTS/ls_task.c:697 before 746). It
+// spells the word when every letter is a vowel (A E I O U Y,
+// INCLUDE/ls_feat.tab CFEAT_vowel), and, for a word of at most 4 letters,
+// when spell_it[first][second] has SPELL_BEGIN (2) or spell_it[last][last but
+// one] has SPELL_END (1) (LTS/l_us_spe.c:44, LTS/ls_defs.h:692-698).
+// Written out for the text rules: the letter pairs, in the order they are
+// written, and the words that meet the test but that the dictionary search
+// finds, which are therefore spoken.
+const spellSource = read("l_us_spe.c");
+const spellAt = spellSource.indexOf("spell_it[26][26] = {");
+if (spellAt < 0) throw new Error("E_TABLE_MISSING: spell_it[26][26]");
+const spellIt = numbers(
+  spellSource.slice(spellSource.indexOf("{", spellAt) + 1, spellSource.indexOf("};", spellAt)),
+);
+if (spellIt.length !== 26 * 26) {
+  throw new Error(`E_SPELL_IT: ${spellIt.length.toString()} cells, expected 676`);
+}
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const spellBeginPairs: string[] = [];
+const spellEndPairs: string[] = [];
+for (let first = 0; first < 26; first += 1) {
+  for (let second = 0; second < 26; second += 1) {
+    const cell = spellIt[first * 26 + second] as number;
+    if (cell & 2) spellBeginPairs.push(`${LETTERS[first]}${LETTERS[second]}`);
+    // The end pair is indexed last letter first.
+    if (cell & 1) spellEndPairs.push(`${LETTERS[second]}${LETTERS[first]}`);
+  }
+}
+const spelledByTest = (word: string): boolean =>
+  /^[AEIOUY]+$/.test(word) ||
+  (word.length <= 4 &&
+    (spellBeginPairs.includes(word.slice(0, 2)) || spellEndPairs.includes(word.slice(-2))));
+const dictionaryPhones = (spelling: string): readonly string[] | null => {
+  const row = dictionaryRows.best.get(spelling);
+  return row ? convertPhonemeFieldDetailed(row.phonemes).phones : null;
+};
+const capitalsSpoken: string[] = [];
+const capitalWords = function* (length: number, prefix = ""): Generator<string> {
+  if (prefix.length === length) yield prefix;
+  else for (const letter of LETTERS) yield* capitalWords(length, prefix + letter);
+};
+for (const length of [2, 3, 4]) {
+  for (const word of capitalWords(length)) {
+    if (!spelledByTest(word)) continue;
+    const lower = word.toLowerCase();
+    const found =
+      dictionaryPhones(lower) !== null ||
+      stripSuffixes(lower, dictionaryPhones, {
+        suffixIndex,
+        suffixTable,
+        phonemeFeatures,
+        phonemeSymbols,
+        stressBearing,
+      }).phonemes !== null;
+    if (found) capitalsSpoken.push(word);
+  }
+}
 const abbreviationsPath = path.join(path.dirname(outPath), "dictionary-abbreviations.yaml");
 fs.writeFileSync(
   abbreviationsPath,
@@ -567,6 +628,16 @@ fs.writeFileSync(
     ...Object.keys(numberAbbreviations)
       .sort()
       .map((key) => `    ${JSON.stringify(key)}: "unit"`),
+    "  # Words of capitals that are spelled: the first two letters of a word of",
+    "  # at most 4 (spell_it SPELL_BEGIN), its last two (SPELL_END), from DECtalk",
+    "  # 4.63 LTS/l_us_spe.c:44, and the words that meet that test or are all",
+    "  # vowels but that the dictionary search finds, so that they are spoken.",
+    "  tn_spell_begin_pairs:",
+    ...spellBeginPairs.map((pair) => `    ${JSON.stringify(pair)}: "spell"`),
+    "  tn_spell_end_pairs:",
+    ...spellEndPairs.sort().map((pair) => `    ${JSON.stringify(pair)}: "spell"`),
+    "  tn_capitals_in_dictionary:",
+    ...capitalsSpoken.map((word) => `    ${JSON.stringify(word)}: "word"`),
     "",
   ].join("\n"),
 );

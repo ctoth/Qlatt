@@ -299,3 +299,44 @@ describe("a unit's abbreviation after a number in dectalk-english", () => {
     expect(record?.citations?.[0]).toContain("nabtab");
   });
 });
+
+// LTS/l_us_sp1.c ls_spel_say_it. Each outcome is what say.exe sends for the
+// same sentence; the sentences are in dectalk-us-abbrev-v1.
+describe("words all in capitals in dectalk-english", () => {
+  function wordCount(text: string): number {
+    const { utterance } = textToKlattTrackDetailed(text, undefined, 30, {
+      frontendId: "dectalk-english",
+    });
+    return utterance.relation("Word").listItems().length;
+  }
+
+  it("spells a short word whose first or last two letters the table marks", () => {
+    expect(phones("Say USB now.").slice(2, 9)).toEqual(["Y", "UW", "EH", "S", "B", "B_REL", "IY"]);
+    expect(wordCount("Say USB now.")).toBe(5);
+    expect(wordCount("Say KGB now.")).toBe(5);
+    expect(wordCount("Say ATM now.")).toBe(5);
+  });
+
+  it("spells a word of vowels only", () => {
+    expect(phones("Say EU now.").slice(2, 5)).toEqual(["IY", "Y", "UW"]);
+    expect(wordCount("Say OUI now.")).toBe(5);
+  });
+
+  it("speaks a word the dictionary has, and a word the test passes", () => {
+    // CIA is a dictionary entry; IQ, NASA and AIDS pass the test.
+    for (const text of ["Say CIA now.", "Say IQ now.", "Say NASA now.", "Say AIDS now."]) {
+      expect(wordCount(text), text).toBe(3);
+    }
+  });
+
+  it("looks only at capitals", () => {
+    expect(wordCount("Say usb now.")).toBe(3);
+  });
+
+  it("leaves a frontend that does not ask for it alone", () => {
+    const { utterance } = textToKlattTrackDetailed("Say USB now.", undefined, 30, {
+      frontendId: "qlatt-english",
+    });
+    expect(utterance.relation("Word").listItems()).toHaveLength(3);
+  });
+});

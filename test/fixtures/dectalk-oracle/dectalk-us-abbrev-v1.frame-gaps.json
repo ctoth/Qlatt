@@ -43,5 +43,15 @@
   "unit-hr-min": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
   "unit-decimal": ["B1","AV","AP","A2","A4","A5","A6","AB"],
   "unit-thousand": ["B1","AV","AP","A2","A4","A5","A6","AB"],
-  "unit-word-one": ["B1","AV","AP","A2","A4","A5","A6","AB"]
+  "unit-word-one": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "capitals-usb": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "capitals-kgb": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "capitals-atm": ["B1","AV","AP","A2","A4","A5"],
+  "capitals-eu": ["B1","AV","AP","A2","A4","A5"],
+  "capitals-oui": ["B1","AV","AP","A2","A4","A5"],
+  "capitals-cia": ["B1","AV","AP","A2","A4","A5"],
+  "capitals-iq": ["B1","AV","AP","A2","A4","A5","A2_AMPLITUDE"],
+  "capitals-nasa": ["B1","AV","AP","A2","A4","A5"],
+  "capitals-aids": ["B1","AV","AP","A2","A4","A5","A6"],
+  "capitals-lower-usb": ["B1","AV","AP","A2","A4","A5","A6","AB"]
 }

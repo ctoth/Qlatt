@@ -70,6 +70,29 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:2840-2890 (a word of alternating upper-case letters and periods is spelled letter by letter with a word boundary between; the period it sits on is eaten)'
+    # A word all in capitals that the frontend's dictionary does not have and
+    # that is spelled by the letters it is made of: every letter a vowel, or,
+    # in a word of at most four letters, a first or a last pair of letters
+    # the generated maps mark. The same policy as the rule above; the maps
+    # (pairs, and the words the dictionary search finds) are generated.
+    - id: tn_spelled_capitals_source
+      pattern: '(?<=^|\s)(?<word>[A-Z]{2,})(?=[\s.,;:!?]|$)'
+      flags: ''
+      class: spelled_capitals
+      captures: {word: word}
+      when: >-
+        get(maps.tn_recognition_policy, 'initialisms', 'shared') == 'capitals'
+        && !(captures.word in get(maps, 'tn_capitals_in_dictionary', {}))
+        && (matches(captures.word, '^[AEIOUY]+$')
+            || (size(captures.word) <= 4
+                && (substring(captures.word, 0, 2) in get(maps, 'tn_spell_begin_pairs', {})
+                    || substring(captures.word, size(captures.word) - 2, size(captures.word))
+                         in get(maps, 'tn_spell_end_pairs', {}))))
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_sp1.c:63-99 (ls_spel_say_it: a word of capitals is spelled when all its letters are vowels, or it has at most four letters and its first pair has SPELL_BEGIN or its last pair SPELL_END in spell_it)'
+        - 'DECtalk 4.63 LTS/ls_task.c:697 and 746 (the dictionary search comes before the test)'
     - id: tn_initialism_source
       pattern: '\b(?:[a-z]\.){2,}[a-z]?\.?'
       flags: i

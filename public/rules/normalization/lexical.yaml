@@ -135,6 +135,18 @@ rules:
               : [])
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:2840-2890 (each letter through the spelling routine, a word boundary between, the last period eaten)"
+  # A word of capitals that is spelled: each letter a spelled-letter terminal.
+  tn_spelled_capitals:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'spelled_capitals' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "regexSplit(lower(current.payload.word), '').map(letter, {'type': 'terminal', 'text': letter + '.'})"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2512-2545 (ls_task_spell_vs_speak: the word goes to the spelling routine), LTS/ls_spel.c ls_spel_spell"
   tn_bare_number_request:
     kind: structural
     select:
@@ -184,4 +196,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_unmatched_words]

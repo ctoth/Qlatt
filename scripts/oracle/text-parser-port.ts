@@ -87,10 +87,20 @@ export function textParserPort(options: PortOptions = {}): (text: string) => str
       .filter((clause) => !FLUSH.test(clause));
 }
 
+/**
+ * The third list of probes: commands that mark a place in the text. DECtalk
+ * writes an index byte where such a command stood; the port does not carry
+ * index marks, so this fixture is compared apart from the others
+ * (test/dectalk-text-parser.test.ts).
+ */
+export const INDEX_COMMAND_FIXTURE = "dectalk-us-text-parser-c-v1.json";
+
 /** The recorded clauses of each text; null where say.exe would not take the text. */
-export function recordedClauses(): Record<string, string[] | null> {
+export function recordedClauses(
+  files: readonly string[] = FIXTURES,
+): Record<string, string[] | null> {
   const entries: Record<string, string[] | null> = {};
-  for (const file of FIXTURES) {
+  for (const file of files) {
     Object.assign(
       entries,
       (

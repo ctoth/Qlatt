@@ -10,7 +10,11 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { recordedClauses, textParserPort } from "../scripts/oracle/text-parser-port";
+import {
+  INDEX_COMMAND_FIXTURE,
+  recordedClauses,
+  textParserPort,
+} from "../scripts/oracle/text-parser-port";
 import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
@@ -38,7 +42,40 @@ describe("dectalk text parser", () => {
     expect(textParserPort()(text)).toEqual(["Doctor Smith is here. "]);
     expect(textParserPort({ dictionary: false })(text)).toEqual(["Dr. ", "Smith is here. "]);
   });
+
+  // DECtalk writes an index byte (\x83) where a place-marking command stood
+  // and does not end the clause there. The port carries no index marks: it
+  // must agree once that byte is taken out of DECtalk's clauses. It knows such
+  // a command by its full name only; the texts with a shortened name, which
+  // it cuts like any other command, are listed so the list cannot change
+  // unnoticed.
+  it("agrees on commands that mark a place, the index byte apart", () => {
+    const port = textParserPort();
+    // As the clauses go on to letter-to-sound: without the white space each
+    // starts with (CMD/cm_text.c:1049), runs of white space as one.
+    const flat = (clauses: readonly string[]): string =>
+      clauses
+        .map((clause) => clause.trimStart())
+        .join("")
+        .replace(/\s+/g, " ");
+    const different = Object.entries(recordedClauses([INDEX_COMMAND_FIXTURE]))
+      .filter((entry): entry is [string, string[]] => entry[1] !== null)
+      .filter(([text, clauses]) => {
+        const dectalk = clauses.map((clause) => clause.replaceAll("\\x83", ""));
+        const mine = port(text);
+        return flat(mine) !== flat(dectalk) || mine.length !== dectalk.length;
+      })
+      .map(([text]) => text);
+    expect(different).toEqual(INDEX_COMMANDS_NOT_AS_DECTALK);
+  });
 });
+
+/** Shortened names of the index command, which the port takes for other commands. */
+const INDEX_COMMANDS_NOT_AS_DECTALK: readonly string[] = [
+  "Say this [:i m 5] and then that.",
+  "Say this [:in mark 5] and then that.",
+  "Say this [:ind m 5] and then that.",
+];
 
 describe("dectalk-english runs its text parser first", () => {
   const decisionsFor = (text: string, frontendId: string) => {

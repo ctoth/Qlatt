@@ -9,6 +9,22 @@ import type {
 } from "./types";
 import type { Utterance } from "./utterance";
 
+/** What `ItemViewDerived.get` returns for a name it does not supply. */
+export const NOT_DERIVED: unique symbol = Symbol("not derived");
+
+/**
+ * Names a view answers beside the Item's own features (what the rule engine
+ * adds: structure, anchors). They live in the view's one proxy, not in a
+ * second proxy around it: the expression evaluator reads a view's properties
+ * several times per operator, and each proxy layer multiplies that cost.
+ */
+export interface ItemViewDerived {
+  /** The value of a derived name, or NOT_DERIVED to read the Item's feature. */
+  get(property: string): unknown;
+  /** Whether a derived name exists; when false the Item's features decide. */
+  has(property: string): boolean;
+}
+
 type StagedOperation =
   | { kind: "create_item"; item: Item }
   | { kind: "set_feature"; item: Item; key: string; value: unknown; tag?: string }
@@ -110,21 +126,27 @@ export class HrgTransaction {
     return item.get(key);
   }
 
-  view(item: Item): Readonly<Record<string, unknown>> {
+  view(item: Item, derived?: ItemViewDerived): Readonly<Record<string, unknown>> {
     this.assertAvailableItem(item);
     return new Proxy<Record<string, unknown>>(
       {},
       {
         get: (_target, property) => {
+          // What the expression evaluator types the view by; read most often.
+          if (property === "constructor") return ItemViewType;
+          if (typeof property !== "string") return undefined;
+          if (derived) {
+            const value = derived.get(property);
+            if (value !== NOT_DERIVED) return value;
+          }
           if (property === "id") return item.id;
           if (property === "itemType") return item.type;
-          // What the expression evaluator types the view by.
-          if (property === "constructor") return ItemViewType;
-          return typeof property === "string" ? this.read(item, property) : undefined;
+          return this.read(item, property);
         },
         has: (_target, property) => {
-          if (property === "id" || property === "itemType") return true;
           if (typeof property !== "string") return false;
+          if (derived?.has(property)) return true;
+          if (property === "id" || property === "itemType") return true;
           if (item.has(property)) this.read(item, property);
           return item.has(property);
         },

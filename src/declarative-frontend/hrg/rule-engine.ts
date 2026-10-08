@@ -19,7 +19,7 @@ import { evalPath, isNavOp } from "./path";
 import type { HrgNode } from "./relation";
 import { applyScalarOp } from "./scalar-op";
 import { applyToneAssociation } from "./tone-association";
-import type { HrgTransaction } from "./transaction";
+import { type HrgTransaction, NOT_DERIVED } from "./transaction";
 import type { ConditionEvidence, FeatureValue, TransactionJournalEntry } from "./types";
 import type { Utterance } from "./utterance";
 
@@ -134,6 +134,18 @@ interface EvaluationContextOptions {
   inventory?: GraphInventoryResource;
 }
 
+/** The names an Item view answers beside the Item's features (`view` below). */
+const DERIVED_VIEW_NAMES: ReadonlySet<string> = new Set([
+  "sync_left",
+  "sync_right",
+  "syllable",
+  "word",
+  "parent",
+  "daughters",
+  "is_final",
+  "next_boundary",
+]);
+
 /** What every context of one transaction over one Item list shares. */
 type EvaluationScope = {
   at: (
@@ -236,9 +248,9 @@ function buildEvaluationScope(
     if (!item) return null;
     let result = views.get(item);
     if (!result) {
-      const featureView = transaction.view(item);
-      result = new Proxy(featureView, {
-        get: (target, property, receiver) => {
+      result = transaction.view(item, {
+        get: (property) => {
+          if (!DERIVED_VIEW_NAMES.has(property)) return NOT_DERIVED;
           if (property === "sync_left" || property === "sync_right") {
             const anchor = utterance.temporalAnchor(item);
             if (!anchor) return null;
@@ -263,18 +275,18 @@ function buildEvaluationScope(
             return isFinalSyllable(item);
           }
           if (property === "next_boundary") return view(nextBoundary(item));
-          return Reflect.get(target, property, receiver);
+          return NOT_DERIVED;
         },
-        has: (target, property) =>
-          property === "sync_left" ||
-          property === "sync_right" ||
-          (property === "syllable" && structureAncestor(item, "syllable") != null) ||
-          (property === "word" && structureAncestor(item, "word") != null) ||
-          (property === "parent" && structureRelation?.node(item)?.parent != null) ||
-          (property === "daughters" && structureChildren(item).length > 0) ||
-          (property === "is_final" && item.type === "syllable") ||
-          property === "next_boundary" ||
-          Reflect.has(target, property),
+        has: (property) =>
+          DERIVED_VIEW_NAMES.has(property) &&
+          (property === "sync_left" ||
+            property === "sync_right" ||
+            (property === "syllable" && structureAncestor(item, "syllable") != null) ||
+            (property === "word" && structureAncestor(item, "word") != null) ||
+            (property === "parent" && structureRelation?.node(item)?.parent != null) ||
+            (property === "daughters" && structureChildren(item).length > 0) ||
+            (property === "is_final" && item.type === "syllable") ||
+            property === "next_boundary"),
       });
       views.set(item, result);
       itemByView.set(result, item);

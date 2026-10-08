@@ -1,9 +1,11 @@
 version: v1
 functions:
-  # Bundled condition inventory (#133): six duration bindings, two postlexical
-  # bindings, and structural in_s_cluster share this equality. Keep the
-  # permissive missing-word test in dectalk_fuse_vowel_r, cross-word/boundary
-  # tests, and Qlatt/beauty's existing named predicates separate.
+  # Bundled condition inventory (#133): the rime boundary (annotation), the
+  # postlexical bindings and structural in_s_cluster share dectalk_same_word;
+  # test/declarative-frontend-same-word.test.ts names every caller. It is
+  # false whenever either Segment is in no word. dectalk_fuse_vowel_r keeps
+  # its permissive form (a Segment in no word passes) by testing
+  # dectalk_word_id itself; Qlatt/beauty's named predicates stay separate.
   # A Segment's word is its Word Item (its SylStructure parent's parent), not
   # the word's text: in "sip sip." the two words have the same text and are
   # two words. The id of that Item, or '' for a Segment in no word.

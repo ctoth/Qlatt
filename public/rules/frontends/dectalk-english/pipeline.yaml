@@ -198,9 +198,23 @@ predicates:
   # with a word boundary, which a verb-phrase start replaces (ph_sort.c:1464).
   is_counted_word_start: >-
     dectalk_word_start(current) && dectalk_phrase_start(current) != "vp"
+  # The same with the clause's first word, which always counts: the words
+  # that make up number_words. DECtalk itself reports 2 for "I want to go."
+  # and 3 for "The president arrived yesterday." (pht0draw's number_words,
+  # read from an instrumented build).
+  is_number_word_start: >-
+    dectalk_word_start(current)
+    && (dectalk_phrase_start(current) != "vp"
+        || behind(current, 1) == null || behind(current, 1).phoneme == "SIL")
   # FSYLL: a vowel or a syllabic consonant.
   is_dectalk_syllabic: >-
     current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"]
+  # A syllabic where the hat rises and whose previous allophone is FSON1: the
+  # hat rise there sets phinton's gesture_ref (Ph_inton2.c:849-852).
+  is_hat_rise_reference: >-
+    (current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"])
+    && isTrue(current, "hat_begins")
+    && dectalk_has(dectalk_prev(current), "son1")
   # A syllabic with any FSTRESS bit: primary, secondary or emphasis
   # (Ph_inton2.c:926, the stress impulse's test).
   is_stressed_syllabic: >-

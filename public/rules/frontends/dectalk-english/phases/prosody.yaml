@@ -58,10 +58,12 @@ rules:
         look_ahead_where(current, 1000,
           'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
       mark: "clause_end == null ? '.' : clause_end.punctuationSymbol"
-      # number_words: the words of this clause (ph_sort.c:439-441, 1462-1464).
+      # number_words (ph_sort.c:439-441, 1462-1464): one for each word that
+      # comes in with a word boundary; a verb-phrase start replaces that
+      # boundary, so its word is not counted, except the clause's first word.
       words: >-
         (dectalk_word_start(current) ? 1.0 : 0.0)
-        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_word_start')
+        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')
       # pht0draw is two routines, one for each sex (Ph_drwt02.c:771, 2445).
       male: "params.policy.voice.sex == 'male'"
       comma: "mark in [',', ';', ':']"
@@ -322,11 +324,10 @@ rules:
   #
   #   hatsize = size_hat_rise, +15 past the tenth allophone, +70 on the first
   #             or second allophone (820-833);
-  #   delay   = -2 frames, or half the previous allophone's frames when that
-  #             allophone is FSON1 and is past the second (849-861). The
-  #             routine keeps `gesture_ref` from an earlier rise of the clause
-  #             when the previous allophone is not FSON1; that carry-over is
-  #             not ported.
+  #   delay   = -2 frames, or half the frames of allophone `gesture_ref` when
+  #             that is past the second (854-861). gesture_ref is the previous
+  #             allophone when it is FSON1; otherwise the routine keeps the
+  #             one an earlier rise of the clause set (849-852).
   #
   # A command's time is its allophone's start, less the six frames the routine
   # starts its clock at (cumdur = -6, :488), plus the delay.
@@ -344,11 +345,21 @@ rules:
         !isTrue(current, 'intonation_stops') && (stopped_at == null || stopped_at.phoneme == 'SIL')
       position: "1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
       la: dectalk_prev(current)
-      gesture_ref: "la != null && dectalk_has(la, 'son1') ? position - 1.0 : 0.0"
+      # gesture_ref (Ph_inton2.c:460, 849-852): the allophone before this
+      # syllabic when it is FSON1; otherwise the one the clause's last hat rise
+      # set, and 0 when none has.
+      ref_syllabic: >-
+        la != null && dectalk_has(la, 'son1') ? current
+        : (count_back_pred(current, 1000, 'is_clause_silence', 'is_hat_rise_reference') > 0.0
+           ? look_back_pred(current, 1000, 'is_hat_rise_reference') : null)
+      ref_la: "ref_syllabic == null ? null : dectalk_prev(ref_syllabic)"
+      gesture_ref: >-
+        ref_syllabic == null ? 0.0
+        : count_back_pred(ref_syllabic, 1000, 'is_clause_silence', 'is_dectalk_phone')
       delay_frames: >-
         gesture_ref <= params.policy.f0.hat_rise_early_through_allophone
         ? -params.policy.f0.hat_rise_early_frames
-        : floor(get(la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
+        : floor(get(ref_la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
       rise_hz: >-
         params.policy.voice.hat_rise_hz10
         + (position > params.policy.f0.hat_late_after_allophone ? params.policy.f0.hat_late_bonus_hz : 0.0)
@@ -366,7 +377,8 @@ rules:
       tag: f0_hat_rise
     citations:
       - "DECtalk 4.63 Ph_inton2.c:809-908 Rule 1 (STEP of size_hat_rise, +15 when nphon > 10, +70 when nphon <= 2; delay -2 or allodurs[gesture_ref] >> 1)"
-      - "DECtalk 4.63 Ph_inton2.c:488, 1771-1791 (cumdur starts at -6; make_f0_command)"
+      - "DECtalk 4.63 Ph_inton2.c:488 (cumdur starts at -6)"
+      - "DECtalk 4.63 ph_inton1.c:1857-1902 make_f0_command (the copy at Ph_inton2.c:1753-1791 is under #if 0)"
       - "Klatt 1982 (hat rise at first accent in phrase)"
 
   # --------------------------------------------------------------------------
@@ -397,21 +409,35 @@ rules:
           '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")')
       reached: >-
         !isTrue(current, 'intonation_stops') && (stopped_at == null || stopped_at.phoneme == 'SIL')
+      # number_words == 1, counted as the baseline rules count it.
       one_word: >-
-        (dectalk_word_start(current) ? 1.0 : 0.0)
-        + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_word_start')
-        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_word_start') == 1.0
+        (dectalk_word_start(current)
+          && (dectalk_phrase_start(current) != 'vp' || prev == null || prev.phoneme == 'SIL')
+          ? 1.0 : 0.0)
+        + count_back_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')
+        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_number_word_start') == 1.0
       frames: "get(current, 'timing_frames', 0.0)"
       stress_now: "get(current, 'stress', 0)"
       # The commands issued before these on the same syllabic (Rules 1 and 2):
-      # make_f0_command lets neither gesture start before them (1771-1774).
+      # make_f0_command lets neither gesture start before them
+      # (ph_inton1.c:1880-1883).
       position: "1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
       la: dectalk_prev(current)
-      gesture_ref: "la != null && dectalk_has(la, 'son1') ? position - 1.0 : 0.0"
+      # gesture_ref (Ph_inton2.c:460, 849-852): the allophone before this
+      # syllabic when it is FSON1; otherwise the one the clause's last hat rise
+      # set, and 0 when none has.
+      ref_syllabic: >-
+        la != null && dectalk_has(la, 'son1') ? current
+        : (count_back_pred(current, 1000, 'is_clause_silence', 'is_hat_rise_reference') > 0.0
+           ? look_back_pred(current, 1000, 'is_hat_rise_reference') : null)
+      ref_la: "ref_syllabic == null ? null : dectalk_prev(ref_syllabic)"
+      gesture_ref: >-
+        ref_syllabic == null ? 0.0
+        : count_back_pred(ref_syllabic, 1000, 'is_clause_silence', 'is_dectalk_phone')
       hat_delay: >-
         gesture_ref <= params.policy.f0.hat_rise_early_through_allophone
         ? -params.policy.f0.hat_rise_early_frames
-        : floor(get(la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
+        : floor(get(ref_la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
       stress_delay: >-
         stress_now == params.policy.f0.stress_emphasis_level ? params.policy.f0.stress_emphasis_delay_frames
         : (isTrue(current, 'hat_ends') || get(current, 'rime_boundary', '') in ['period', 'question', 'exclaim']
@@ -441,7 +467,7 @@ rules:
     citations:
       - "DECtalk 4.63 Ph_inton2.c:1238-1263 Rule 4 (IMPULSE F0_QGesture1 at -5 or -6 frames, length 15)"
       - "DECtalk 4.63 Ph_inton2.c:580-581 (US F0_QGesture1 = -151, F0_QGesture2 = 451)"
-      - "DECtalk 4.63 Ph_inton2.c:1771-1791 make_f0_command"
+      - "DECtalk 4.63 ph_inton1.c:1857-1902 make_f0_command"
 
   dectalk_question_rise:
     kind: f0_layer
@@ -464,7 +490,7 @@ rules:
       tag: f0_question_rise
     citations:
       - "DECtalk 4.63 Ph_inton2.c:1253-1262 Rule 4 (one word: F0_QGesture2 - 100 at the vowel's end, length 24; otherwise F0_QGesture2 at (allodurs >> 2) - 4, length 20)"
-      - "DECtalk 4.63 Ph_inton2.c:1771-1791 make_f0_command"
+      - "DECtalk 4.63 ph_inton1.c:1857-1902 make_f0_command"
 
   # --------------------------------------------------------------------------
   # Rule 2 (Ph_inton2.c:924-1062): a stress IMPULSE on every stressed
@@ -481,7 +507,7 @@ rules:
   #           back to 1 (1059-1062).
   #
   # make_f0_command never lets a command precede the one before it
-  # (1771-1774): on a syllabic that also carries the hat rise the impulse
+  # (ph_inton1.c:1880-1883): on a syllabic that also carries the hat rise the impulse
   # cannot start before the rise.
   # --------------------------------------------------------------------------
   dectalk_stress_impulse:
@@ -533,11 +559,21 @@ rules:
       # The hat rise issued just before it on the same syllabic (Rule 1).
       position: "1.0 + count_back_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')"
       la: dectalk_prev(current)
-      gesture_ref: "la != null && dectalk_has(la, 'son1') ? position - 1.0 : 0.0"
+      # gesture_ref (Ph_inton2.c:460, 849-852): the allophone before this
+      # syllabic when it is FSON1; otherwise the one the clause's last hat rise
+      # set, and 0 when none has.
+      ref_syllabic: >-
+        la != null && dectalk_has(la, 'son1') ? current
+        : (count_back_pred(current, 1000, 'is_clause_silence', 'is_hat_rise_reference') > 0.0
+           ? look_back_pred(current, 1000, 'is_hat_rise_reference') : null)
+      ref_la: "ref_syllabic == null ? null : dectalk_prev(ref_syllabic)"
+      gesture_ref: >-
+        ref_syllabic == null ? 0.0
+        : count_back_pred(ref_syllabic, 1000, 'is_clause_silence', 'is_dectalk_phone')
       hat_delay: >-
         gesture_ref <= params.policy.f0.hat_rise_early_through_allophone
         ? -params.policy.f0.hat_rise_early_frames
-        : floor(get(la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
+        : floor(get(ref_la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
       delay_frames: >-
         isTrue(current, 'hat_begins') ? max([own_delay, hat_delay]) : own_delay
     constraint: "reached && stress_now > 0"
@@ -553,7 +589,7 @@ rules:
     citations:
       - "DECtalk 4.63 Ph_inton2.c:924-1062 Rule 2 (stress impulse: us_f0_mstress_level + us_f0_mphrase_position[nrises_sofar], length 20)"
       - "DECtalk 4.63 Ph_inton2.c:313, 323-324, 328-329, 333 (the US tables, male and female); 936-946 (chosen by malfem)"
-      - "DECtalk 4.63 Ph_inton2.c:1771-1791 make_f0_command (a command is never earlier than the one before)"
+      - "DECtalk 4.63 ph_inton1.c:1857-1902 make_f0_command (a command is never earlier than the one before)"
       - "DECtalk 4.63 Ph_drwt02.c:1908-1957 US non-reading IMPULSE (step plus ramp)"
 
   # --------------------------------------------------------------------------

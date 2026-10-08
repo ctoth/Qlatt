@@ -697,8 +697,9 @@ relations:
       # On a clause's first phone: DECtalk's number_words for the clause
       # (prosody.yaml, dectalk_clause_number_words).
       number_words: { kind: number }
-      # On every phone: its place in its clause from 1, and whether
-      # phinton's walk reaches it (prosody.yaml, dectalk_clause_running_state).
+      # On every phone: its place in its clause from 1, whether phinton's walk
+      # reaches it, and the stressed syllabics of the clause before it
+      # (prosody.yaml, dectalk_clause_running_state).
       intonation_position: { kind: number }
       intonation_reached: { kind: boolean }
       stressed_before: { kind: number }

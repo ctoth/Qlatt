@@ -9,6 +9,8 @@
     "transitionMs": 30
   },
   "entries": [
+    { "id": "comma-50", "rate": 50, "text": "When the sun sets, the birds fly home.", "group": "rate" },
+    { "id": "comma-550", "rate": 550, "text": "When the sun sets, the birds fly home.", "group": "rate" },
     { "id": "fox-120", "rate": 120, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate" },
     { "id": "fox-140", "rate": 140, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate" },
     { "id": "fox-160", "rate": 160, "text": "The quick brown fox jumps over the lazy dog.", "group": "rate" },

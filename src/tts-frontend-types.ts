@@ -41,6 +41,12 @@ export interface TranscriptionToken {
   symbol?: string;
   duration?: number;
   _pronDecisionId?: string;
+  /**
+   * Inside transcription only: the phone is in the last word of phonemic
+   * text, which has no word boundary after it (transcribe-text.ts
+   * joinPhonemicText removes the mark).
+   */
+  _joinsNextWord?: boolean;
   sourceTokenId: string;
 }
 

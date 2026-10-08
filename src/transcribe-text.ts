@@ -809,6 +809,11 @@ export function transcribeText(
               stress: match.stress,
               sourceTokenId: part.tokenId,
               word: part.word,
+              // The last word of phonemic text has no word boundary after it
+              // (joinPhonemicText below).
+              ...(pronResult.source === "phonemic" && part === spokenParts.at(-1)
+                ? { _joinsNextWord: true }
+                : {}),
               // The rules that read a word's classes are the phonetic stage's.
               ...("formClasses" in pronResult && pronResult.formClasses
                 ? {
@@ -884,5 +889,85 @@ export function transcribeText(
       { count: emptyPronunciations.length, affected: emptyPronunciations },
       "EMPTY_PRONUNCIATION_SILENCE",
     );
+  joinPhonemicText(flatPhonemeList, provenance);
   return flatPhonemeList; // Return the flat list of phoneme objects
+}
+
+/**
+ * Phonemic text has no word boundary after it: its phones and those of the
+ * word that follows are one word. DECtalk's letter-to-sound sends the symbol
+ * that ends a word after each word it reads (LTS/ls_task.c:1144-1260
+ * ls_task_do_right_punct, the word boundary unless a mark was stripped from
+ * the word); phonemic text is sent on symbol by symbol with nothing after it
+ * (CMD/cm_text.c:1118-1144). A phrase mark in front of the next word still
+ * parts the two, and so does punctuation.
+ *
+ * Measured on DECtalk 4.63 say.exe, as the symbols the phonemic stage
+ * receives: "john.smith@example.com", which its text parser writes with
+ * phonemic text for each period, is JH AA N, boundary, D AA T S M IH TH,
+ * boundary, AE T, boundary, IX G Z AE M P EL, boundary, D AA T K AA M;
+ * "...but nobody came." starts D AA T B AH T; "...and then" has the phrase
+ * mark of "and" after D AA T.
+ */
+function joinPhonemicText(
+  phones: TranscriptionToken[],
+  provenance: TranscriptionOptions["provenance"],
+): void {
+  for (let start = 0; start < phones.length; ) {
+    const first = phones[start] as TranscriptionToken;
+    if (!first._joinsNextWord) {
+      start += 1;
+      continue;
+    }
+    let end = start;
+    while (
+      end < phones.length &&
+      phones[end]?._joinsNextWord &&
+      phones[end]?.sourceTokenId === first.sourceTokenId
+    ) {
+      end += 1;
+    }
+    const next = phones[end];
+    const run = phones.slice(start, end);
+    for (const phone of run) delete phone._joinsNextWord;
+    if (
+      next &&
+      !next.isPunctuation &&
+      !next.phraseStart &&
+      // Phonemic text after phonemic text is joined when its own turn comes.
+      next.sourceTokenId !== first.sourceTokenId
+    ) {
+      const {
+        formClasses,
+        textFormClasses,
+        conjunctionRole,
+        readAhead,
+        endsWordStretch,
+        continuesWrittenWord,
+      } = next;
+      for (const phone of run) {
+        phone.sourceTokenId = next.sourceTokenId;
+        phone.word = next.word;
+        if (formClasses) phone.formClasses = formClasses;
+        if (textFormClasses) phone.textFormClasses = textFormClasses;
+        if (conjunctionRole) phone.conjunctionRole = conjunctionRole;
+        if (readAhead) phone.readAhead = readAhead;
+        if (endsWordStretch) phone.endsWordStretch = endsWordStretch;
+        if (continuesWrittenWord) phone.continuesWrittenWord = continuesWrittenWord;
+        else delete phone.continuesWrittenWord;
+      }
+      provenance?.add({
+        stage: "transcribe",
+        type: "phonemic_text_joined",
+        subject: next.sourceTokenId,
+        reason: `Phonemic text ${run.map((phone) => phone.phoneme).join(" ")} has no word boundary after it: one word with '${next.word}'`,
+        citations: [
+          "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on symbol by symbol)",
+          "DECtalk 4.63 LTS/ls_task.c:1144-1260 (ls_task_do_right_punct: the word boundary is sent after a word letter-to-sound read)",
+        ],
+        parents: first._pronDecisionId ? [first._pronDecisionId] : [],
+      });
+    }
+    start = end;
+  }
 }

@@ -20,21 +20,35 @@ import { type CompiledRulepack, QLATT_ENGLISH_RULEPACK } from "./declarative-fro
 import type { SourceTranscriptionInput } from "./declarative-frontend/source-recognition";
 import { pronounce, pronounceClause } from "./g2p";
 import type { DictLookup, PronunciationResult } from "./g2p/types";
-import type {
-  TranscriptionConfig,
-  TranscriptionOptions,
-  TranscriptionToken,
+import {
+  LEXICON_SOURCE_KEYS,
+  type LexiconSource,
+  type LexiconSourceKey,
+  type TranscriptionConfig,
+  type TranscriptionOptions,
+  type TranscriptionToken,
 } from "./tts-frontend-types";
 
 // ---------------------------------------------------------------------------
 // Citation constants for provenance tracking
 // ---------------------------------------------------------------------------
 
-const CMU_DICTIONARY_CITATION = "CMU Pronouncing Dictionary";
-const FALLBACK_PRONUNCIATION_CITATION =
-  "G2P pipeline: Elovitz LTS (NRL 7948); Hayes (1982), pp. 237–274 (configured lexical stress)";
-const MORPHOLOGY_PRONUNCIATION_CITATION =
-  "G2P pipeline: morphological decomposition (Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5)";
+// The shared English lexicon: what a frontend that declares no
+// `transcription.sources` entry for a source uses. There is no shared spelling
+// source; a frontend whose lexicon spells letters declares its own.
+const SHARED_LEXICON_SOURCES: Partial<Record<LexiconSourceKey, LexiconSource>> = {
+  dictionary: { name: "CMU dictionary", citation: "CMU Pronouncing Dictionary" },
+  "lts-rules": {
+    name: "Elovitz LTS + configured lexical stress",
+    citation:
+      "G2P pipeline: Elovitz LTS (NRL 7948); Hayes (1982), pp. 237–274 (configured lexical stress)",
+  },
+  morphology: {
+    name: "Morphological decomposition",
+    citation:
+      "G2P pipeline: morphological decomposition (Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5)",
+  },
+};
 const SYMBOL_PRONUNCIATION_CITATION =
   "Diagnostic symbol mode: direct ARPABET symbol-to-phoneme mapping for explicit segment-list utterances";
 const LETTER_NAME_PRONUNCIATION_CITATION =
@@ -78,6 +92,8 @@ type RequiredTranscriptionTables = {
   symbolInput: boolean;
   /** False when the frontend's dictionary is searched by the written word only. */
   elidedApostropheLookup: boolean;
+  /** What each pronunciation source is, for the decision record of a word. */
+  sources: Partial<Record<LexiconSourceKey, LexiconSource>>;
   letterNames: Record<string, string[]>;
   punctuationTokens: Set<string>;
 };
@@ -113,8 +129,10 @@ function makeDictLookup(
     // turns this off with `transcription.elided_apostrophe_lookup: false`.
     if (elidedApostrophe && !lowerWord.startsWith("'")) candidates.push(`'${lowerWord}`);
     // Handle converse elision: input may omit or include trailing apostrophe.
-    if (!lowerWord.endsWith("'")) candidates.push(`${lowerWord}'`);
-    if (lowerWord.endsWith("'") && lowerWord.length > 1) candidates.push(lowerWord.slice(0, -1));
+    if (elidedApostrophe) {
+      if (!lowerWord.endsWith("'")) candidates.push(`${lowerWord}'`);
+      if (lowerWord.endsWith("'") && lowerWord.length > 1) candidates.push(lowerWord.slice(0, -1));
+    }
     // Normalization strips trailing punctuation tokens; recover abbreviations like "cr.".
     if (!lowerWord.endsWith(".")) candidates.push(`${lowerWord}.`);
 
@@ -203,6 +221,38 @@ function getSpecTranscriptionConfig(specSource: unknown): TranscriptionConfig | 
   return (specSource as { transcription?: TranscriptionConfig })?.transcription;
 }
 
+/** The frontend's declared lexicon sources over the shared English ones. */
+function requireLexiconSources(
+  declared: TranscriptionConfig["sources"],
+): Partial<Record<LexiconSourceKey, LexiconSource>> {
+  if (declared === undefined) return SHARED_LEXICON_SOURCES;
+  if (!declared || typeof declared !== "object" || Array.isArray(declared)) {
+    throw new Error("E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.sources must be a map");
+  }
+  const sources = { ...SHARED_LEXICON_SOURCES };
+  for (const [key, value] of Object.entries(declared)) {
+    if (!(LEXICON_SOURCE_KEYS as readonly string[]).includes(key)) {
+      throw new Error(
+        `E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.sources.${key} is not a lexicon source (${LEXICON_SOURCE_KEYS.join(", ")})`,
+      );
+    }
+    const name = (value as LexiconSource | undefined)?.name;
+    const citation = (value as LexiconSource | undefined)?.citation;
+    if (
+      typeof name !== "string" ||
+      name.length === 0 ||
+      typeof citation !== "string" ||
+      citation.length === 0
+    ) {
+      throw new Error(
+        `E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.sources.${key} needs a name and a citation`,
+      );
+    }
+    sources[key as LexiconSourceKey] = { name, citation };
+  }
+  return sources;
+}
+
 function requireTranscriptionTables(
   config: TranscriptionConfig | undefined,
 ): RequiredTranscriptionTables {
@@ -224,6 +274,7 @@ function requireTranscriptionTables(
   return {
     symbolInput: symbolInput !== false,
     elidedApostropheLookup: elidedApostropheLookup !== false,
+    sources: requireLexiconSources(config.sources),
     diagnosticSymbols: requirePronunciationMap(config.diagnostic_symbols, "diagnostic_symbols"),
     letterNames: requirePronunciationMap(config.letter_names, "letter_names"),
     punctuationTokens: new Set(requireStringArray(config.punctuation_tokens, "punctuation_tokens")),
@@ -357,19 +408,53 @@ export function transcribeText(
       ? makeDictLookup(effectiveDictMap, transcriptionTables.elidedApostropheLookup)
       : cmuDictLookup);
 
+  // A frontend with its own dictionary or letter-to-sound file says what they
+  // are: the shared names would put a source it did not use into the record.
+  const sharedResources = loadFrontendResources(QLATT_ENGLISH_RULEPACK);
+  const undeclared = [
+    ...(resources.dictionaryPath !== sharedResources.dictionaryPath ? ["dictionary"] : []),
+    ...(resources.ltsPath !== sharedResources.ltsPath ? ["lts-rules", "morphology"] : []),
+  ].filter((key) => options.compiledSpec && cfg?.sources?.[key as LexiconSourceKey] === undefined);
+  if (undeclared.length > 0) {
+    throw new Error(
+      `E_TRANSCRIPTION_CONFIG_REQUIRED: the frontend has its own lexicon files and must declare transcription.sources.${undeclared.join(", transcription.sources.")}`,
+    );
+  }
+  const lexiconSource = (key: LexiconSourceKey): LexiconSource => {
+    const used = transcriptionTables.sources[key];
+    if (!used) {
+      throw new Error(
+        `E_TRANSCRIPTION_CONFIG_REQUIRED: a word was pronounced by '${key}' but transcription.sources.${key} is not declared`,
+      );
+    }
+    return used;
+  };
   const _isEffectivePunctuation = (word: string): boolean =>
     isPunctuationTokenWithTables(word, transcriptionTables);
   const getEffectiveSymbol = (word: string): string[] | null => {
     return getDiagnosticSymbolPronunciationWithTables(word, transcriptionTables);
   };
 
-  const orthographyWords = rewriteOrthographyTokens(
+  const writtenWords = rewriteOrthographyTokens(
     typeof text === "string" ? text.split(" ") : text,
     provenance,
     transcriptionTables,
     compiledSpec,
     options.utterance,
   );
+  // A frontend that searches its dictionary by the written word looks a word
+  // up with its apostrophes first and, on a miss, without the ones at its
+  // ends ("'em" is the dictionary's word, "'hello'" is "hello"; DECtalk 4.63
+  // LTS/ls_task.c:2161 lookup as written, 2244-2325 strip, 2477-2478 lookup
+  // again).
+  const orthographyWords = transcriptionTables.elidedApostropheLookup
+    ? writtenWords
+    : writtenWords.map((token) => {
+        if (token.isPunctuation || !/^'|'$/.test(token.word)) return token;
+        if (effectiveDictLookup(token.word)) return token;
+        const stripped = token.word.replace(/^'+|'+$/g, "");
+        return stripped.length > 0 ? { ...token, word: stripped } : token;
+      });
   const flatPhonemeList: TranscriptionToken[] = [];
   const dictionaryMisses: { word: string; token: string; applied: string }[] = [];
   const emptyPronunciations: { word: string; token: string; applied: string; duration: number }[] =
@@ -508,17 +593,25 @@ export function transcribeText(
         reason = `Spoke the digits '${sourceWord}' as ${(pronResult.parts ?? []).length.toString()} words from the frontend's number phone lists`;
         citations = [NUMBER_PRONUNCIATION_CITATION];
       } else if (pronResult.source === "dictionary") {
+        const used = lexiconSource("dictionary");
         decisionType = "dictionary_pronunciation_selected";
-        reason = `Used CMU dictionary pronunciation for '${sourceWord}'`;
-        citations = [CMU_DICTIONARY_CITATION];
+        reason = `Used ${used.name} pronunciation for '${sourceWord}'`;
+        citations = [used.citation];
       } else if (pronResult.source === "morphology") {
+        const used = lexiconSource("morphology");
         decisionType = "morphology_pronunciation_selected";
-        reason = `Morphological decomposition for '${sourceWord}' (root: ${pronResult.rootWord ?? "?"})`;
-        citations = [MORPHOLOGY_PRONUNCIATION_CITATION];
+        reason = `${used.name} for '${sourceWord}' (root: ${pronResult.rootWord ?? "?"})`;
+        citations = [used.citation];
+      } else if (pronResult.source === "spelling") {
+        const used = lexiconSource("spelling");
+        decisionType = "spelling_pronunciation_selected";
+        reason = `Word '${sourceWord}' is one letter and not in the dictionary; used ${used.name}`;
+        citations = [used.citation];
       } else {
+        const used = lexiconSource("lts-rules");
         decisionType = "fallback_pronunciation_selected";
-        reason = `Word '${sourceWord}' not in dictionary; used Elovitz LTS + configured lexical stress`;
-        citations = [FALLBACK_PRONUNCIATION_CITATION];
+        reason = `Word '${sourceWord}' not in dictionary; used ${used.name}`;
+        citations = [used.citation];
         dictionaryMisses.push({
           word: sourceWord,
           token: inputToken.tokenId,

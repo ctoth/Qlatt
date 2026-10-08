@@ -20,3 +20,10 @@ maps:
     # letters-initial-a and initial-b to initial-z against letters-pronoun-i).
     initials: spelled
     initial_exceptions: 'I'
+    # An apostrophe in front of a letter stays on its word, as one after a
+    # letter does: DECtalk looks the word up as written before it strips the
+    # punctuation at its ends (LTS/ls_task.c:2161, then 2244-2325 and
+    # 2477-2478). Measured on say.exe: "'n" is EN and "'em" IX M (the
+    # dictionary's words), "'tis", "'cause", "'bout", "'hello'" the same as
+    # without the marks, "'n'" EH N and "'em'" EH M.
+    lexical_apostrophe: "(?<=[a-z])'|'(?=[a-z])"

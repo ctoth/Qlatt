@@ -2329,6 +2329,24 @@ transcription:
   # ph_sort): "Plan n is ready." has EH N, "Plan 'n is ready." EN;
   # "Plan em is ready." has EH M, "Plan 'em is ready." IX M.
   elided_apostrophe_lookup: false
+  # A word that misses as written is looked up again without the apostrophes
+  # at its ends (LTS/ls_task.c:2161 as written, 2244-2325 strip, 2477-2478
+  # again).
+  #
+  # What this frontend's lexicon is, for the decision record of each word.
+  sources:
+    dictionary:
+      name: DECtalk dictionary
+      citation: "DECtalk 4.63 dapi/src/dic/Dic_us.txt, converted by scripts/build-dectalk-dict.ts (/dectalk-dictionary.json)"
+    morphology:
+      name: DECtalk suffix stripping against the dictionary
+      citation: "DECtalk 4.63 LTS/ls_suff.c (ls_suff_suffix_find, ls_suff_append_pron), as src/g2p/table-suffix.ts"
+    lts-rules:
+      name: DECtalk letter-to-sound rules
+      citation: "DECtalk 4.63 LTS/lsa_rta.c compiled rule tables, run as LTS/l_us_ru1.c runs them (/rules/frontends/dectalk-english/lts-table.json)"
+    spelling:
+      name: DECtalk letter names
+      citation: "DECtalk 4.63 LTS/ls_task.c:2760-2775 (a one-letter word is spelled), INCLUDE/usa_type.tab lower-case rows (the names)"
   # Standard English letter-name pronunciations for declarative spelling mode.
   # Citation anchor: Allen et al. 1987 Ch.2-3 (LETTER-* morphs for symbol strings).
   letter_names:

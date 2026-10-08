@@ -64,6 +64,15 @@
     { "id": "carrier-w", "text": "Plan w is ready.", "group": "carrier-letters", "tags": ["spelling"], "expectedFocus": ["trace"] },
     { "id": "carrier-x", "text": "Plan x is ready.", "group": "carrier-letters", "tags": ["spelling"], "expectedFocus": ["trace"] },
     { "id": "carrier-y", "text": "Plan y is ready.", "group": "carrier-letters", "tags": ["spelling"], "expectedFocus": ["trace"] },
-    { "id": "carrier-z", "text": "Plan z is ready.", "group": "carrier-letters", "tags": ["spelling"], "expectedFocus": ["trace"] }
+    { "id": "carrier-z", "text": "Plan z is ready.", "group": "carrier-letters", "tags": ["spelling"], "expectedFocus": ["trace"] },
+    { "id": "apostrophe-n", "text": "Plan 'n is ready.", "group": "apostrophe", "tags": ["dictionary-apostrophe"], "expectedFocus": ["trace"] },
+    { "id": "apostrophe-em", "text": "Plan 'em is ready.", "group": "apostrophe", "tags": ["dictionary-apostrophe"], "expectedFocus": ["trace"] },
+    { "id": "bare-em", "text": "Plan em is ready.", "group": "apostrophe", "tags": ["dictionary-apostrophe"], "expectedFocus": ["trace"] },
+    { "id": "apostrophe-tis", "text": "Plan 'tis is ready.", "group": "apostrophe", "tags": ["stripped-apostrophe"], "expectedFocus": ["trace"] },
+    { "id": "apostrophe-cause", "text": "Plan 'cause is ready.", "group": "apostrophe", "tags": ["stripped-apostrophe"], "expectedFocus": ["trace"] },
+    { "id": "quoted-hello", "text": "Plan 'hello' is ready.", "group": "apostrophe", "tags": ["single-quotes"], "expectedFocus": ["trace"] },
+    { "id": "quoted-n", "text": "Plan 'n' is ready.", "group": "apostrophe", "tags": ["single-quotes", "spelling"], "expectedFocus": ["trace"] },
+    { "id": "quoted-em", "text": "Plan 'em' is ready.", "group": "apostrophe", "tags": ["single-quotes"], "expectedFocus": ["trace"] },
+    { "id": "quoted-hello-there", "text": "Say 'hello there' now.", "group": "apostrophe", "tags": ["single-quotes"], "expectedFocus": ["trace"] }
   ]
 }

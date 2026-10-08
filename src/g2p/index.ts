@@ -232,6 +232,7 @@ export function pronounce(
         phonemes: stripped.phonemes ?? [],
         source: "morphology",
         word: lowerWord,
+        rootWord: root,
         ...classed(wordClass),
         ...phrased(entry.formClass),
         ...marked(entry),

@@ -26,6 +26,10 @@ export interface TranscriptionToken {
   sourceTokenId: string;
 }
 
+export const LEXICON_SOURCE_KEYS = ["dictionary", "morphology", "lts-rules", "spelling"] as const;
+export type LexiconSourceKey = (typeof LEXICON_SOURCE_KEYS)[number];
+export type LexiconSource = { name: string; citation: string };
+
 export type TranscriptionConfig = {
   diagnostic_symbols?: Record<string, string[]>;
   /**
@@ -36,9 +40,18 @@ export type TranscriptionConfig = {
   diagnostic_symbol_input?: boolean;
   /**
    * Whether a word the dictionary lacks is also looked up with an apostrophe
-   * in front ("cuse" finds "'cuse"). On unless a frontend says false.
+   * added in front or at its end ("cuse" finds "'cuse"). On unless a frontend
+   * says false; such a frontend looks a word up as written and, on a miss,
+   * without the apostrophes at its ends.
    */
   elided_apostrophe_lookup?: boolean;
+  /**
+   * What the frontend's lexicon is, per pronunciation source, for the decision
+   * record of a word: `name` goes into the record's reason and `citation` is
+   * its citation. A frontend with its own dictionary or letter-to-sound file
+   * declares these; an undeclared source is the shared English default.
+   */
+  sources?: Partial<Record<LexiconSourceKey, LexiconSource>>;
   letter_names?: Record<string, string[]>;
   punctuation_tokens?: string[];
 };

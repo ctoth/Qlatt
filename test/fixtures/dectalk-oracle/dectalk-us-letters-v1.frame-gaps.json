@@ -54,5 +54,14 @@
   "carrier-w": ["B1","AV","AP","A2","A4","A5","A6","AB"],
   "carrier-x": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
   "carrier-y": ["B1","AV","AP","A2","A6","AB"],
-  "carrier-z": ["B1","AV","AP","A2","A6","AB"]
+  "carrier-z": ["B1","AV","AP","A2","A6","AB"],
+  "apostrophe-n": ["B1","AV","AP","A2","A6","AB"],
+  "apostrophe-em": ["B1","AV","AP","A2","A6","AB"],
+  "bare-em": ["B1","AV","AP","A2","A6","AB"],
+  "apostrophe-tis": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "apostrophe-cause": ["B1","AV","AP","A2","A5","A6","AB","A2_AMPLITUDE"],
+  "quoted-hello": ["B1","AV","AP","A2","A6","AB"],
+  "quoted-n": ["B1","AV","AP","A2","A6","AB"],
+  "quoted-em": ["B1","AV","AP","A2","A6","AB"],
+  "quoted-hello-there": ["B1","AV","AP","A2","A4","A5","A6","AB"]
 }

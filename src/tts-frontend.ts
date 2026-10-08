@@ -379,6 +379,10 @@ function getTranscriptionConfig(spec: CompiledRulepack): TranscriptionConfig | u
     ...(value.diagnostic_symbol_input !== undefined
       ? { diagnostic_symbol_input: value.diagnostic_symbol_input as boolean }
       : {}),
+    // Passed as written; requireTranscriptionTables checks each entry.
+    ...(value.sources !== undefined
+      ? { sources: value.sources as TranscriptionConfig["sources"] }
+      : {}),
     ...(value.elided_apostrophe_lookup !== undefined
       ? { elided_apostrophe_lookup: value.elided_apostrophe_lookup as boolean }
       : {}),

@@ -98,6 +98,28 @@ describe("one-letter words in dectalk-english", () => {
     expect(phones("Plan em is ready.").slice(5, 7)).toEqual(["EH", "M"]);
   });
 
+  // DECtalk looks a word up as written, then strips the punctuation at its
+  // ends and looks again (LTS/ls_task.c:2161, 2244-2325, 2477-2478). The same
+  // sentences are in dectalk-us-letters-v1 against say.exe's packets.
+  it("finds a dictionary word written with its apostrophe", () => {
+    expect(phones("Plan 'n is ready.").slice(5, 6)).toEqual(["EN"]);
+    expect(phones("Plan 'em is ready.").slice(5, 7)).toEqual(["IX", "M"]);
+  });
+
+  it("takes a word the dictionary lacks without the apostrophes at its ends", () => {
+    expect(phones("Plan 'tis is ready.")).toEqual(phones("Plan tis is ready."));
+    expect(phones("Plan 'cause is ready.")).toEqual(phones("Plan cause is ready."));
+    expect(phones("Plan 'hello' is ready.")).toEqual(phones("Plan hello is ready."));
+    expect(phones("Say 'hello there' now.")).toEqual(phones("Say hello there now."));
+    // Quoted, "'n'" and "'em'" are not the dictionary's "'n" and "'em".
+    expect(phones("Plan 'n' is ready.").slice(5, 7)).toEqual(["EH", "N"]);
+    expect(phones("Plan 'em' is ready.").slice(5, 7)).toEqual(["EH", "M"]);
+  });
+
+  it("keeps the apostrophe inside and after a word", () => {
+    expect(phones("It's John's.")).toEqual(["IH", "T", "T_REL", "S", "JH", "AA", "N", "Z", "SIL"]);
+  });
+
   it("keeps the apostrophe lookup in a frontend that does not turn it off", () => {
     // The default dictionary has "'cuse" (K Y UW1 Z) and no "cuse".
     expect(phones("cuse", "qlatt-english").slice(-3)).toEqual(["Y", "UW", "Z"]);

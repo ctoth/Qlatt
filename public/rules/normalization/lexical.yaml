@@ -49,7 +49,8 @@ functions:
         lower(text), maps.tn_lexical_policy.apostrophe_quotes, "'", 'g'),
         maps.tn_lexical_policy.double_quotes, '"', 'g'),
         maps.tn_lexical_policy.ellipsis, '...', 'g'),
-        maps.tn_lexical_policy.lexical_apostrophe, '\uE000', 'g'),
+        get(maps.tn_recognition_policy, 'lexical_apostrophe',
+          maps.tn_lexical_policy.lexical_apostrophe), '\uE000', 'g'),
         "'", ' ', 'g'),
         '\uE000', "'", 'g')
     citations: ['Issue #16: lexical apostrophe and punctuation contract']

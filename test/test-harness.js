@@ -11,6 +11,8 @@ import {
 import { refreshSpeakerOptions } from "./harness/speaker.js";
 import { attachSpectrogram, clearSpectrogram } from "./harness/spectrogram.js";
 import { state } from "./harness/state.js";
+// `?tap=1`: window.__qlattTap from the start (harness/tap.js); nothing otherwise.
+import "./harness/tap.js";
 import { warmFrontendOnce } from "./harness/warmup.js";
 import { waitForWarmup } from "./harness/warmup-wait.js";
 

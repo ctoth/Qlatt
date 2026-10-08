@@ -13,6 +13,7 @@ import { readSpeakRequest } from "./speak-request.js";
 import { getSelectedSpeaker } from "./speaker.js";
 import { startSpectrogram } from "./spectrogram.js";
 import { state } from "./state.js";
+import { installTap, tapEnabled } from "./tap.js";
 import { handleTelemetry } from "./telemetry.js";
 
 export async function start() {
@@ -108,6 +109,8 @@ export async function initializeNewRuntime() {
         telemetryHandler: (data) => handleTelemetry(data), // Route to shared handler
       });
       state.newRuntime.connectToDestination();
+      // `?tap=1`: record what leaves the graph's output (harness/tap.js).
+      if (tapEnabled) await installTap(state.newRuntime);
       state.status.textContent = "Status: new runtime initialized";
       console.log("[QLATT] New runtime initialized");
 

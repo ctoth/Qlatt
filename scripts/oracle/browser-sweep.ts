@@ -39,6 +39,11 @@
  *   --base-f0  a base F0 for the frontend, as a number in the page's "Base F0"
  *              box gives one (the box starts empty; it used to start at 110).
  *              Default: none, each voice's own.
+ *   --live    instead of the offline renders: the app's own page, driven
+ *              with real clicks, its real-time AudioContext recorded by the
+ *              page's `?tap=1` tap (scripts/oracle/browser-live-page.ts, which
+ *              says what is spoken and how it is compared). Takes --port,
+ *              --server, --corpus, --fixture-dir, --out and --verbose.
  *
  * A text the browser does not render exactly is rendered again through Node
  * (scripts/oracle/dectalk-voice-compare.ts) so the table says whether the
@@ -53,6 +58,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DECTALK_SAMPLE_RATE, FRAME_SAMPLES } from "../../src/dectalk-vtm-track.ts";
 import { openBrowserSession, payloadSamples } from "../rendering/browser-session.ts";
+import { runLivePage } from "./browser-live-page.ts";
 import {
   compareVoiceEntry,
   experimentFor,
@@ -87,6 +93,46 @@ const limit = flag("limit") ? Number(flag("limit")) : undefined;
 const entries = corpus.entries
   .filter((entry) => ids.length === 0 || ids.includes(entry.id))
   .slice(0, limit);
+
+// --live: the app's own page, driven with real clicks; see browser-live-page.ts.
+if (argv.includes("--live")) {
+  const live = await runLivePage({
+    repoRoot,
+    corpus,
+    fixtureDir,
+    port,
+    server,
+    log: (line) => {
+      if (verbose) process.stderr.write(`${line}\n`);
+    },
+  });
+  console.log(`${live.browserVersion}, the page at ${live.url}`);
+  console.log("");
+  let scene = "";
+  for (const row of live.rows) {
+    if (row.scene !== scene) {
+      scene = row.scene;
+      console.log(`${scene}:`);
+    }
+    console.log(
+      `  ${row.exact ? "EXACT  " : "differs"}  ${row.step}: ${row.id} (${row.voice}) at ${row.contextRate.toString()} Hz, ` +
+        `${row.equal.toString()} of ${row.compared.toString()} grid samples equal` +
+        `${row.firstMismatch >= 0 ? `, first differing DECtalk sample ${row.firstMismatch.toString()}` : ""}; ` +
+        `run of ${row.packetsRun.toString()} packets against ${row.packetsOracle.toString()} (${row.endReason}); ` +
+        `${row.lateFrames === null ? "no run of its own" : `started ${row.lateFrames.toString()} frames after the scheduled one`}; ` +
+        `capture gaps in the run ${row.gapsInRun.toString()}, elsewhere ${row.gapsElsewhere.toString()}` +
+        `${row.problems.length > 0 ? `; ${row.problems.join("; ")}` : ""}` +
+        `${row.note ? `; ${row.note}` : ""}`,
+    );
+  }
+  console.log("");
+  console.log(
+    `${live.rows.filter((row) => row.exact).length.toString()} of ${live.rows.length.toString()} exact; ${live.seconds.toFixed(1)} s`,
+  );
+  const liveOut = flag("out");
+  if (liveOut) fs.writeFileSync(path.resolve(liveOut), `${JSON.stringify(live, null, 2)}\n`);
+  process.exit(0);
+}
 
 /** Greatest common divisor, for the grid a rate shares with DECtalk's. */
 function gcd(a: number, b: number): number {

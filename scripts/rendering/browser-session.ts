@@ -15,7 +15,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { chromium } from "playwright-core";
+import { type Browser, chromium } from "playwright-core";
 import { build, createServer as createViteServer, preview } from "vite";
 import type { RenderPayload } from "../../src/rendering/types.ts";
 
@@ -179,6 +179,68 @@ async function serveBuild(
   }
 }
 
+const BROWSER_ARGS: readonly string[] = [
+  "--autoplay-policy=no-user-gesture-required",
+  "--disable-background-networking",
+  "--disable-default-apps",
+  "--disable-dev-shm-usage",
+  "--disable-extensions",
+  "--disable-features=Translate,OptimizationHints,MediaRouter",
+  "--disable-sync",
+  "--hide-scrollbars",
+  "--mute-audio",
+  "--no-default-browser-check",
+  "--no-first-run",
+  "--password-store=basic",
+  "--use-mock-keychain",
+];
+
+export interface ServedBrowser {
+  /** "http://127.0.0.1:<port>" of the server. */
+  origin: string;
+  browser: Browser;
+  close(): Promise<void>;
+}
+
+/**
+ * The server and a headless browser with no page opened, for driving the
+ * app's own page (index.html) rather than the offline render page.
+ */
+export async function openServedBrowser(
+  options: Omit<BrowserSessionOptions, "rendersPerPage">,
+): Promise<ServedBrowser> {
+  const log = options.log ?? (() => {});
+  const chromePath = options.browserExecutablePath ?? resolveChromePath();
+  if (!chromePath) {
+    throw new Error("No Chrome/Edge found. Set CHROME_PATH to continue.");
+  }
+  const served =
+    (options.server ?? "dev") === "dev"
+      ? await serveDev(options.repoRoot, options.port)
+      : await serveBuild(options.repoRoot, options.port, options.engine);
+  log("[browser:driver] server ready");
+  try {
+    const browser = await chromium.launch({
+      headless: true,
+      timeout: 120000,
+      executablePath: chromePath,
+      args: [...BROWSER_ARGS],
+    });
+    log("[browser:driver] browser launched");
+    return {
+      origin: `http://127.0.0.1:${served.port.toString()}`,
+      browser,
+      close: async () => {
+        await browser.close();
+        await served.close();
+      },
+    };
+  } catch (error) {
+    await served.close();
+    throw error;
+  }
+}
+
 export async function openBrowserSession(options: BrowserSessionOptions): Promise<BrowserSession> {
   const log = options.log ?? (() => {});
   const chromePath = options.browserExecutablePath ?? resolveChromePath();
@@ -206,21 +268,7 @@ export async function openBrowserSession(options: BrowserSessionOptions): Promis
       headless: true,
       timeout: 120000,
       executablePath: chromePath,
-      args: [
-        "--autoplay-policy=no-user-gesture-required",
-        "--disable-background-networking",
-        "--disable-default-apps",
-        "--disable-dev-shm-usage",
-        "--disable-extensions",
-        "--disable-features=Translate,OptimizationHints,MediaRouter",
-        "--disable-sync",
-        "--hide-scrollbars",
-        "--mute-audio",
-        "--no-default-browser-check",
-        "--no-first-run",
-        "--password-store=basic",
-        "--use-mock-keychain",
-      ],
+      args: [...BROWSER_ARGS],
     });
     log("[browser:driver] browser launched");
     const launched = browser;

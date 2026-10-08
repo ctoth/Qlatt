@@ -11,6 +11,8 @@ import {
 import { refreshSpeakerOptions } from "./harness/speaker.js";
 import { attachSpectrogram, clearSpectrogram } from "./harness/spectrogram.js";
 import { state } from "./harness/state.js";
+import { warmFrontendOnce } from "./harness/warmup.js";
+import { waitForWarmup } from "./harness/warmup-wait.js";
 
 let runtimeModulePromise = null;
 
@@ -29,7 +31,24 @@ async function stopRuntime() {
   await stop();
 }
 
+function selectedFrontendId() {
+  return document.getElementById("frontendSelect")?.value || "qlatt-english";
+}
+
+// Get the selected frontend ready ahead of the first Speak (harness/warmup.js).
+// `?warmup=0` in the page URL turns this off, so that the first Speak loads
+// everything itself: the comparison case when measuring.
+const warmupEnabled = new URLSearchParams(location.search).get("warmup") !== "0";
+function warmSelectedFrontend() {
+  if (!warmupEnabled) return Promise.resolve(null);
+  return warmFrontendOnce(selectedFrontendId(), loadRuntimeModule);
+}
+
 async function speakWithRuntime() {
+  // If the frontend is still being prepared, let that finish: it is the same
+  // work Speak would otherwise repeat with blocking requests. The wait has a
+  // limit (harness/warmup-wait.js): Speak never depends on the warm-up.
+  await waitForWarmup(warmSelectedFrontend(), selectedFrontendId());
   const { speak } = await loadRuntimeModule();
   await speak();
 }
@@ -44,9 +63,10 @@ Promise.all([loadExperimentManifest(), loadFrontendManifest()]).then(() => {
   if (experimentSelect) {
     experimentSelect.addEventListener("change", onExperimentChange);
   }
-  // Auto-pair frontend -> experiment on load and populate the voice dropdown.
+  // Auto-pair frontend -> experiment on load and populate the voice dropdown,
+  // then prepare the frontend with the voice the dropdown shows.
   pairExperimentToFrontend();
-  refreshSpeakerOptions();
+  refreshSpeakerOptions().then(warmSelectedFrontend);
 });
 
 // Generic frontend -> experiment auto-pairing, from data: the frontend's
@@ -80,7 +100,7 @@ function pairExperimentToFrontend() {
 // Frontend change: re-pair the experiment graph and repopulate the voices.
 document.getElementById("frontendSelect")?.addEventListener("change", () => {
   pairExperimentToFrontend();
-  refreshSpeakerOptions();
+  refreshSpeakerOptions().then(warmSelectedFrontend);
 });
 
 // Initialize

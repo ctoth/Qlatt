@@ -329,6 +329,33 @@ frame_programs:
       A2_CODE: "r.a2"
       BRST: "r.brst"
       PLACE: "r.place"
+      # Not packet words of a frame: the speaker definition DECtalk sends once
+      # when the voice is selected (setspdef, ph_vset.c:522-880, and the
+      # values changeSpeakerValues reads, vtmiont.c:1641-1645), for the
+      # dectalk-vtm node, which loads it at the first frame of a run. The
+      # selected voice's values, speakers.rule_fields in frontend.yaml.
+      SPD_R4CB: "params.policy.voice.SPD_R4CB"
+      SPD_R4CC: "params.policy.voice.SPD_R4CC"
+      SPD_R5CB: "params.policy.voice.SPD_R5CB"
+      SPD_R5CC: "params.policy.voice.SPD_R5CC"
+      SPD_R4PB: "params.policy.voice.SPD_R4PB"
+      SPD_R5PB: "params.policy.voice.SPD_R5PB"
+      SPD_T0JIT: "params.policy.voice.SPD_T0JIT"
+      SPD_R5CA: "params.policy.voice.SPD_R5CA"
+      SPD_R4CA: "params.policy.voice.SPD_R4CA"
+      SPD_R3CA: "params.policy.voice.SPD_R3CA"
+      SPD_R2CA: "params.policy.voice.SPD_R2CA"
+      SPD_R1CA: "params.policy.voice.SPD_R1CA"
+      SPD_NOPEN1: "params.policy.voice.SPD_NOPEN1"
+      SPD_NOPEN2: "params.policy.voice.SPD_NOPEN2"
+      SPD_ATURB: "params.policy.voice.SPD_ATURB"
+      SPD_AFGAIN: "params.policy.voice.SPD_AFGAIN"
+      SPD_AZGAIN: "params.policy.voice.SPD_AZGAIN"
+      SPD_APGAIN: "params.policy.voice.SPD_APGAIN"
+      SPD_SEX: "params.policy.voice.SPD_SEX"
+      last_voice: "params.policy.voice.last_voice"
+      NOM_Open_Quo: "params.policy.voice.NOM_Open_Quo"
+      Tiltm: "params.policy.voice.Tiltm"
     after:
       run: 0
     write: articulation_frames

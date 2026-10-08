@@ -1,0 +1,165 @@
+#!/usr/bin/env node
+
+/**
+ * build-frontend-resource-manifests.ts
+ * ====================================
+ * Writes `public/rules/frontends/<id>/resources.json` for every frontend in
+ * `public/rules/frontends/manifest.json`: the resources the frontend's
+ * synchronous pipeline reads when it is loaded cold and speaks one phrase.
+ *
+ * Why. In a browser those resources are read with synchronous XMLHttpRequest,
+ * one after another, inside the first Speak. With the list in hand a page can
+ * fetch them in parallel beforehand (src/sync-resource-cache.ts,
+ * test/harness/warmup.js) and the first Speak makes no request.
+ *
+ * How. Nothing is listed by hand: each frontend is loaded in a fresh process
+ * (module caches are per process, and frontends share resources) with the
+ * synchronous loaders' recorder on, the modules imported after the recorder
+ * starts so that what they read at import is recorded too, and two phrases
+ * (MANIFEST_PHRASES) spoken with each voice the frontend registers. A resource
+ * read only for an input those phrases do not exercise is not in the list; the page then reads it
+ * synchronously as before, and reports it (takeSynchronousFetches).
+ *
+ * Usage:
+ *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
+ *     scripts/build-frontend-resource-manifests.ts [--write | --check]
+ *
+ * Without a flag it prints, per frontend, the paths to add and to remove.
+ * --write rewrites the files. --check exits 1 if a file is not current;
+ * test/frontend-resource-manifests.test.ts runs it.
+ */
+
+import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { load as loadYaml } from "js-yaml";
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const frontendsDir = path.join(repoRoot, "public", "rules", "frontends");
+
+/**
+ * The phrases spoken to find what a frontend reads: words in the dictionary,
+ * then a word in no dictionary (letter-to-sound) and a number (number
+ * normalization). Each is spoken with every voice the frontend registers.
+ */
+export const MANIFEST_PHRASES = ["Hello world.", "The zorblat costs 42 dollars."] as const;
+
+export function manifestPath(frontendId: string): string {
+  return path.join(frontendsDir, frontendId, "resources.json");
+}
+
+export function frontendIds(): string[] {
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(frontendsDir, "manifest.json"), "utf8"),
+  ) as {
+    frontends: { id: string }[];
+  };
+  return manifest.frontends.map((frontend) => frontend.id);
+}
+
+/**
+ * The voices a frontend registers (`speakers.voices` in its frontend.yaml), or
+ * one unnamed voice for a frontend without a registry. Read here with the
+ * filesystem, not with the frontend's loaders, so that this script's own read
+ * is not recorded as the frontend's.
+ */
+function registeredVoices(frontendId: string): (string | undefined)[] {
+  const spec = loadYaml(
+    fs.readFileSync(path.join(frontendsDir, frontendId, "frontend.yaml"), "utf8"),
+  ) as { speakers?: { default?: unknown; voices?: unknown } } | null;
+  const voices = [spec?.speakers?.default, ...[spec?.speakers?.voices ?? []].flat()].filter(
+    (voice): voice is string => typeof voice === "string",
+  );
+  return voices.length > 0 ? [...new Set(voices)] : [undefined];
+}
+
+/** What one frontend reads, recorded in this process. Call once per process. */
+async function record(frontendId: string): Promise<string[]> {
+  const { recordSyncResources } = await import("../src/sync-resource-cache.ts");
+  const stop = recordSyncResources();
+  const { textToKlattTrack } = await import("../src/tts-frontend.ts");
+  for (const speaker of registeredVoices(frontendId)) {
+    for (const phrase of MANIFEST_PHRASES) {
+      textToKlattTrack(phrase, undefined, 30, { frontendId, rate: 1, speaker });
+    }
+  }
+  return stop().sort();
+}
+
+/** What a frontend reads, recorded in a fresh process. */
+export function recordFrontendResources(frontendId: string): string[] {
+  const output = execFileSync(
+    process.execPath,
+    [
+      "--no-deprecation",
+      "--loader",
+      "ts-node/esm/transpile-only",
+      "--experimental-specifier-resolution=node",
+      fileURLToPath(import.meta.url),
+      "--record",
+      frontendId,
+    ],
+    { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+  );
+  const line = output.split(/\r?\n/).find((text) => text.startsWith("RESOURCES "));
+  if (!line) throw new Error(`No resource list from the recording of ${frontendId}`);
+  return JSON.parse(line.slice("RESOURCES ".length)) as string[];
+}
+
+export function renderManifest(frontendId: string, resources: readonly string[]): string {
+  return `${JSON.stringify(
+    {
+      description:
+        `Resources the ${frontendId} frontend reads synchronously when loaded cold and speaking ` +
+        `${MANIFEST_PHRASES.map((phrase) => `"${phrase}"`).join(" and ")} with each of its ` +
+        "voices. Generated by scripts/build-frontend-resource-manifests.ts --write; do not edit.",
+      resources,
+    },
+    null,
+    2,
+  )}\n`;
+}
+
+export function readManifest(frontendId: string): string[] {
+  const file = manifestPath(frontendId);
+  if (!fs.existsSync(file)) return [];
+  return (JSON.parse(fs.readFileSync(file, "utf8")) as { resources: string[] }).resources;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  const argv = process.argv.slice(2);
+  const recordFlag = argv.indexOf("--record");
+  if (recordFlag >= 0) {
+    const resources = await record(argv[recordFlag + 1] as string);
+    process.stdout.write(`RESOURCES ${JSON.stringify(resources)}\n`);
+  } else {
+    let stale = false;
+    for (const frontendId of frontendIds()) {
+      const recorded = recordFrontendResources(frontendId);
+      const current = readManifest(frontendId);
+      const add = recorded.filter((resource) => !current.includes(resource));
+      const remove = current.filter((resource) => !recorded.includes(resource));
+      if (argv.includes("--write")) {
+        fs.writeFileSync(manifestPath(frontendId), renderManifest(frontendId, recorded));
+        process.stdout.write(`wrote ${manifestPath(frontendId)} (${recorded.length} resources)\n`);
+        continue;
+      }
+      if (add.length > 0 || remove.length > 0) stale = true;
+      process.stdout.write(
+        `${frontendId}: ${recorded.length} resources` +
+          (add.length > 0 ? `; to add: ${add.join(", ")}` : "") +
+          (remove.length > 0 ? `; to remove: ${remove.join(", ")}` : "") +
+          "\n",
+      );
+    }
+    if (!argv.includes("--write")) {
+      process.stdout.write(
+        stale
+          ? "resource manifests are stale: run with --write\n"
+          : "resource manifests are current\n",
+      );
+      if (argv.includes("--check")) process.exit(stale ? 1 : 0);
+    }
+  }
+}

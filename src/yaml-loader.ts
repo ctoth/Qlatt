@@ -1,5 +1,11 @@
 import { load as loadYaml } from "js-yaml";
 import { isNodeRuntime, normalizePath, readFileFromFsSync } from "./path-utils";
+import {
+  keepSyncResource,
+  noteSynchronousFetch,
+  noteSyncResourceRequest,
+  primedSyncResource,
+} from "./sync-resource-cache";
 
 type PlainObject = Record<string, unknown>;
 
@@ -26,14 +32,31 @@ export function loadYamlSourceSync(specPath: string): string {
     (value, index, all) => all.indexOf(value) === index,
   );
 
+  // Text a host fetched ahead of time (src/sync-resource-cache.ts): no request.
+  for (const attempt of attempts) {
+    const fromPrimed = primedSyncResource(attempt);
+    if (typeof fromPrimed === "string") {
+      noteSyncResourceRequest(specPath);
+      return fromPrimed;
+    }
+  }
+
   for (const attempt of attempts) {
     const fromUrl = readYamlSourceFromUrlSync(attempt);
-    if (typeof fromUrl === "string") return fromUrl;
+    if (typeof fromUrl === "string") {
+      noteSyncResourceRequest(specPath);
+      noteSynchronousFetch(specPath);
+      keepSyncResource(attempt, fromUrl);
+      return fromUrl;
+    }
   }
 
   for (const attempt of attempts) {
     const fromFs = readFileFromFsSync(attempt);
-    if (typeof fromFs === "string") return fromFs;
+    if (typeof fromFs === "string") {
+      noteSyncResourceRequest(specPath);
+      return fromFs;
+    }
   }
 
   throw new Error(`E_YAML_PATH_UNKNOWN: '${specPath}' could not be loaded`);
@@ -44,6 +67,12 @@ export async function loadYamlSource(specPath: string): Promise<string> {
   const attempts = [normalizedPath, specPath].filter(
     (value, index, all) => all.indexOf(value) === index,
   );
+
+  // Text already fetched for the synchronous loaders: no second request.
+  for (const attempt of attempts) {
+    const fromPrimed = primedSyncResource(attempt);
+    if (typeof fromPrimed === "string") return fromPrimed;
+  }
 
   // In Node/test/CLI, prefer filesystem paths to avoid failed fetch() probes.
   if (isNodeRuntime()) {

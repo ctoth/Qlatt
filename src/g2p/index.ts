@@ -17,7 +17,7 @@
  * Citation: Hayes (1982), Extrametricality and English Stress, pp. 237–274.
  */
 
-import { loadYamlDocumentSync } from "../yaml-loader";
+import { ltsDocumentAt } from "./lts-document";
 import { applyLtsRules } from "./lts-engine";
 import { decomposeClitic, decomposeWord, getStressHintForWord } from "./morphology";
 import { stressPronunciation } from "./stress";
@@ -43,7 +43,7 @@ function ltsTableAt(path: string): LtsTableDocument | null {
   const cached = ltsTables.get(path);
   if (cached !== undefined) return cached;
   // A table is a JSON document; a rule list is YAML and its engine loads it.
-  const document = path.endsWith(".json") ? loadYamlDocumentSync<unknown>(path) : null;
+  const document = path.endsWith(".json") ? ltsDocumentAt(path) : null;
   const table = isLtsTableDocument(document) ? document : null;
   ltsTables.set(path, table);
   return table;

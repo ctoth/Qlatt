@@ -15,6 +15,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   SPDEF_PARS,
+  SPEAKER_WORDS,
   VOICE_PARS,
   type VtmEvent,
   type VtmSpeakerEvent,
@@ -137,6 +138,62 @@ export function readVtmFixture(directory: string, id: string): VtmFixture {
 
   const { samples, sampleRate } = readWavInt16(path.join(directory, `${id}.wav`));
   return { id, events, frames, samples, sampleRate };
+}
+
+/**
+ * DECtalk's voices by number, `pKsd_t->last_voice` (voidef[] order,
+ * DECtalk 4.63 PH/ph_main.c:511-519), as the dectalk-english frontend names
+ * its voice files.
+ */
+export const DECTALK_VOICES = [
+  "paul",
+  "betty",
+  "harry",
+  "frank",
+  "dennis",
+  "kit",
+  "ursula",
+  "rita",
+  "wendy",
+] as const;
+
+/** A voice's recorded speaker definition, by `dectalk-vtm` parameter name. */
+export interface RecordedSpeakerPacket {
+  voice: string;
+  fields: Record<string, number>;
+}
+
+/**
+ * The speaker definition the stock say.exe sent for each voice: every `S`
+ * record of a `.speakers.txt` fixture with the `V` record after it
+ * (`V <last_voice> 0 <NOM_Open_Quo> <Tiltm>`), reduced to the words the
+ * synthesizer reads.
+ */
+export function readRecordedSpeakerPackets(file: string): RecordedSpeakerPacket[] {
+  const out: RecordedSpeakerPacket[] = [];
+  let spdef: number[] | undefined;
+  fs.readFileSync(file, "utf8")
+    .split(/\r?\n/)
+    .forEach((line, index) => {
+      const where = `${file}:${index + 1}`;
+      const fields = line.trim().split(/\s+/);
+      if (fields[0] === "S") {
+        spdef = integers(fields.slice(3), SPDEF_PARS, where);
+      } else if (fields[0] === "V") {
+        if (!spdef) throw new Error(`${where}: V without S`);
+        const [lastVoice, , nomOpenQuo, tiltm] = integers(fields.slice(1), 4, where);
+        const voice = DECTALK_VOICES[lastVoice as number];
+        if (voice === undefined) throw new Error(`${where}: no voice ${lastVoice}`);
+        const record: Record<string, number> = {};
+        for (const [name, word] of SPEAKER_WORDS) record[name] = spdef[word] as number;
+        record.last_voice = lastVoice as number;
+        record.NOM_Open_Quo = nomOpenQuo as number;
+        record.Tiltm = tiltm as number;
+        out.push({ voice, fields: record });
+        spdef = undefined;
+      }
+    });
+  return out;
 }
 
 /** Ids of the fixtures in a directory that have all three files. */

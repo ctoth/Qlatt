@@ -15,13 +15,35 @@
 # richness (RI), nopen_fraction (NF), laryngealization (LA), head_size (HS),
 # quickness (QU): the definition's entries.
 #
+# Every entry is the definition's plus the voice's tuning table's, as
+# usevoice() adds them (ph_vset.c:446-448; PH/p_us_vdf_tunehl.h:888-943,
+# us_rita_tune). The table changes GN by +18, G1 by +1, G2 by -19, G3 by +24, LO by +13.
+#
+# SPD_R4CB..SPD_SEX: the speaker definition packet setspdef() sends the
+# synthesizer (struct SPD_CHIP, ph_defs.h:693-720), word by word: r4cb F4,
+# r4cc B4, r5cb F5, r5cc B5 as above; r4pb F7; r5pb F8; t0jit LA; r5ca G1;
+# r4ca G2; r3ca G3; r2ca G4; r1ca LO; nopen1 5000 + 160 * (100 - RI); nopen2
+# NF * 4; aturb BR; afgain GF; azgain GV; apgain GH; sex SPD_SEX
+# (ph_vset.c:537-538, 714-818). last_voice: the voice number. NOM_Open_Quo:
+# entry SPD_OQ (672). Tiltm: SM * 20 / 100 (689). The dectalk-vtm node takes
+# these (scripts/oracle/dectalk-debug/ph-contract.md, "Per speaker"); they
+# equal the packet the stock say.exe sent
+# (test/dectalk-speaker-packets.test.ts).
+#
+# stress_step..end_of_phrase_spread: what case Rita of
+# changeSpeakerValues() assigns (VTM/vtmiont.c:3194-3217, the lines the build
+# compiles): STRESS_STEP, UNSTRESS_PRESSURE, STRESS_PRESSURE, NOM_Sub_Pressure,
+# NOM_Fricative_Opening, NOM_Glot_Stop_Area, VOT_speed, EndOfPhrase_Spread.
+#
 # formant_scale, rd_default and spectral_tilt_offset_db are not DECtalk's:
 # the Klatt-graph backend's stand-ins (1 or 1.17 by sex; 0.7 or 0.8 plus
 # 0.004 a dB of breathiness; a tenth of the breathiness). engineering estimate
 citations:
   - "DECtalk 4.63 PH/P_us_vdf1.h us_rita; INCLUDE/cmd.h:159-205 SPD_ indices"
-  - "DECtalk 4.63 PH/ph_vset.c:580-800 setspdef"
+  - "DECtalk 4.63 PH/p_us_vdf_tunehl.h us_rita_tune; ph_vset.c:446-448 (definition plus tuning table)"
+  - "DECtalk 4.63 PH/ph_vset.c:537-538, 580-818 setspdef"
   - "DECtalk 4.63 PH/ph_main.c:511-519 voidef; ph_vset.c:433-442 usevoice"
+  - "DECtalk 4.63 VTM/vtmiont.c:2899-3426 changeSpeakerValues"
 name: Rita
 sex: female
 fnscale: 4305
@@ -47,12 +69,12 @@ F8: 4700
 GF: 65
 GH: 60
 GV: 60
-GN: 69
-G1: 69
-G2: 80
-G3: 48
+GN: 87
+G1: 70
+G2: 61
+G3: 72
 G4: 58
-LO: 73
+LO: 86
 AGO: 500
 AGVO: 700
 AGUO: 1900
@@ -66,3 +88,33 @@ laryngealization: 1
 head_size: 95
 quickness: 30
 spd_F4: 4000
+SPD_R4CB: 4204
+SPD_R4CC: 250
+SPD_R5CB: 5044
+SPD_R5CC: 700
+SPD_R4PB: 4100
+SPD_R5PB: 4700
+SPD_T0JIT: 1
+SPD_R5CA: 70
+SPD_R4CA: 61
+SPD_R3CA: 72
+SPD_R2CA: 58
+SPD_R1CA: 86
+SPD_NOPEN1: 17800
+SPD_NOPEN2: 40
+SPD_ATURB: 36
+SPD_AFGAIN: 65
+SPD_AZGAIN: 60
+SPD_APGAIN: 60
+SPD_SEX: 0
+last_voice: 7
+NOM_Open_Quo: 0
+Tiltm: 8
+stress_step: 20
+unstress_pressure: 80
+stress_pressure: 100
+sub_pressure: 800
+fricative_opening: 110
+glottal_stop_area: 0
+vot_speed: 0
+end_of_phrase_spread: 0

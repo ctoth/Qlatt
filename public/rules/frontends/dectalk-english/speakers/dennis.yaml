@@ -15,13 +15,35 @@
 # richness (RI), nopen_fraction (NF), laryngealization (LA), head_size (HS),
 # quickness (QU): the definition's entries.
 #
+# Every entry is the definition's plus the voice's tuning table's, as
+# usevoice() adds them (ph_vset.c:446-448; PH/p_us_vdf_tunehl.h:1002-1057,
+# us_dennis_tune). The table changes GN by +16, G1 by +12, G2 by +4, G3 by +8, G4 by -5, LO by -4.
+#
+# SPD_R4CB..SPD_SEX: the speaker definition packet setspdef() sends the
+# synthesizer (struct SPD_CHIP, ph_defs.h:693-720), word by word: r4cb F4,
+# r4cc B4, r5cb F5, r5cc B5 as above; r4pb F7; r5pb F8; t0jit LA; r5ca G1;
+# r4ca G2; r3ca G3; r2ca G4; r1ca LO; nopen1 5000 + 160 * (100 - RI); nopen2
+# NF * 4; aturb BR; afgain GF; azgain GV; apgain GH; sex SPD_SEX
+# (ph_vset.c:537-538, 714-818). last_voice: the voice number. NOM_Open_Quo:
+# entry SPD_OQ (672). Tiltm: SM * 20 / 100 (689). The dectalk-vtm node takes
+# these (scripts/oracle/dectalk-debug/ph-contract.md, "Per speaker"); they
+# equal the packet the stock say.exe sent
+# (test/dectalk-speaker-packets.test.ts).
+#
+# stress_step..end_of_phrase_spread: what case Dennis of
+# changeSpeakerValues() assigns (VTM/vtmiont.c:3361-3389, the lines the build
+# compiles): STRESS_STEP, UNSTRESS_PRESSURE, STRESS_PRESSURE, NOM_Sub_Pressure,
+# NOM_Fricative_Opening, NOM_Glot_Stop_Area, VOT_speed, EndOfPhrase_Spread.
+#
 # formant_scale, rd_default and spectral_tilt_offset_db are not DECtalk's:
 # the Klatt-graph backend's stand-ins (1 or 1.17 by sex; 0.7 or 0.8 plus
 # 0.004 a dB of breathiness; a tenth of the breathiness). engineering estimate
 citations:
   - "DECtalk 4.63 PH/P_us_vdf1.h us_dennis; INCLUDE/cmd.h:159-205 SPD_ indices"
-  - "DECtalk 4.63 PH/ph_vset.c:580-800 setspdef"
+  - "DECtalk 4.63 PH/p_us_vdf_tunehl.h us_dennis_tune; ph_vset.c:446-448 (definition plus tuning table)"
+  - "DECtalk 4.63 PH/ph_vset.c:537-538, 580-818 setspdef"
   - "DECtalk 4.63 PH/ph_main.c:511-519 voidef; ph_vset.c:433-442 usevoice"
+  - "DECtalk 4.63 VTM/vtmiont.c:2899-3426 changeSpeakerValues"
 name: Dennis
 sex: male
 fnscale: 3895
@@ -47,12 +69,12 @@ F8: 6000
 GF: 63
 GH: 63
 GV: 65
-GN: 71
-G1: 75
-G2: 65
-G3: 57
-G4: 62
-LO: 72
+GN: 87
+G1: 87
+G2: 69
+G3: 65
+G4: 57
+LO: 68
 AGO: 400
 AGVO: 800
 AGUO: 1200
@@ -66,3 +88,33 @@ laryngealization: 0
 head_size: 105
 quickness: 50
 spd_F4: 3400
+SPD_R4CB: 3233
+SPD_R4CC: 240
+SPD_R5CB: 6000
+SPD_R5CC: 6000
+SPD_R4PB: 4100
+SPD_R5PB: 6000
+SPD_T0JIT: 0
+SPD_R5CA: 87
+SPD_R4CA: 69
+SPD_R3CA: 65
+SPD_R2CA: 57
+SPD_R1CA: 68
+SPD_NOPEN1: 17800
+SPD_NOPEN2: 40
+SPD_ATURB: 30
+SPD_AFGAIN: 63
+SPD_AZGAIN: 65
+SPD_APGAIN: 63
+SPD_SEX: 1
+last_voice: 4
+NOM_Open_Quo: 0
+Tiltm: 12
+stress_step: 10
+unstress_pressure: 80
+stress_pressure: 100
+sub_pressure: 800
+fricative_opening: 100
+glottal_stop_area: 0
+vot_speed: 1
+end_of_phrase_spread: 10

@@ -1305,11 +1305,14 @@ rules:
         !dectalk_same_word(n, current)
       next_son2: >-
         n != null && (n.phoneme in ['W', 'Y', 'R', 'L', 'YU', 'M', 'N', 'NG', 'EM', 'EN'])
+      # (curr_instruc & FBOUNDARY) >= FMBNEXT (ph_aloph.c:917): the end of a
+      # morpheme counts like the end of a word ("light-house" has TX).
+      morpheme_final: "isTrue(current, 'morpheme_boundary_after')"
       glottalizing_context: >-
         n != null && (
           n.phoneme == 'L' ||
           n.phoneme == 'DH' ||
-          (next_word_boundary && (next_son2 || n.phoneme == 'HH')) ||
+          ((next_word_boundary || morpheme_final) && (next_son2 || n.phoneme == 'HH')) ||
           n.phoneme == 'EN'
         )
       prev_son1: >-

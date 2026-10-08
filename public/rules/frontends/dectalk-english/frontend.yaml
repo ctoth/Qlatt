@@ -346,6 +346,14 @@ parameters:
         affricate_min_frames: 2
         build_frames: 7
         coarticulation_frames: 4
+      # ph_draw.c:219-224: the velum's area by nasal_step, and the DC and UE
+      # words by the size of dcstep.
+      nasalization: [0, 30, 60, 100, 130, 160, 190, 320, 450, 570, 675, 780, 885]
+      dc_values: [0, 30, 40, 80, 90, 95, 95, 100, 100, 105, 105]
+      ue_values: [0, 40, 60, 80, 90, 100, 120, 120, 125, 125, 130]
+      # p_us_rom.h:852 us_begtyp: the phones whose beginning type is 3
+      # (rounded back). Type 1 is timing.front_onset_phones.
+      rounded_onset_phones: [AO, OW, OY, UH, UW, RR, OR, UR, RX]
       # ph_draw.c:538-590: when the glottis closes through that aspiration.
       # A slow drop starts at frame 3 if the aspiration is longer than 5
       # frames; the closing proper starts 5 frames before its end and ends 2
@@ -1328,7 +1336,7 @@ output:
   lowering:
     id: dectalk-english-track-lowering
     # Stable Klatt backend vocabulary captured by the production-frame oracle.
-    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO, PS, CNK, AG, PH, run, AL, ABLADE, ATB]
+    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO, PS, CNK, AG, PH, run, AL, ABLADE, ATB, AREA_N, DC, UE, A2_CODE, BRST, PLACE]
     timeline:
       initial_silence_ms:
         value: 19.2

@@ -84,28 +84,14 @@ const AMPLITUDE_REASON =
   "synthesizer never reads these packet values: it recomputes them from area parameters the " +
   "packets do not record (VTM/vtmiont.c:660-683, 1300-1319)";
 
-const AREA_REASON =
-  "not emitted: the frontend has no port yet of the area, pressure and control-code words " +
-  "ph_draw.c:908-4193 computes (the words DECtalk's synthesizer actually reads, " +
-  "VTM/vtmiont.c:660-683)";
-// phases/articulation.yaml ports the pressure rules of ph_draw.c. Where PS
-// still differs, by what dump-frame-columns.ts shows, none of it explained
-// further than this:
-const PS_REASON =
-  "the slope of the final fall (ph_draw.c:3795-3887) comes out steeper than DECtalk's in " +
-  "some phrases and is applied in some questions where DECtalk applies none, so its tcumdur, " +
-  "nframb or boundary inputs are not all DECtalk's; and the emphasis pulse (1509-1552) and " +
-  "the end-of-clause drop (3929-3969) are not ported";
-// The glottal rules are ported and "cat." is exact. What is known of the rest:
-const AG_REASON =
-  "not ported: the early exits of the end-of-clause spread (ph_draw.c:3604-3624) and the " +
-  "nasal case of the initial silence (1146-1190); and differences inside phrases that have " +
-  "not been traced to a rule yet";
-// The lips, blade and tongue body rules are ported (ph_draw.c:740-886,
-// 931-1220, 1239-1296, 1565-1945, 2807-2930, 3113-3553) and "cat." is exact.
-const CONSTRICTION_REASON =
-  "the phrases that still differ have not been traced. Known to be untested against DECtalk: " +
-  "the flap (ph_draw.c:3312 shifts by a negative count, which C leaves undefined)";
+const A2_CODE_REASON =
+  "OUT_A2 is both a frication place code and the generic A2 amplitude. The codes are ported " +
+  "(ph_draw.c:2037-2394); the amplitude, which the word holds on a few hundred packets and " +
+  "the synthesizer ignores (VTM/vtmiont.c:797-1147 tests only the codes), is not, and the " +
+  "track has 0 there. Not ported either: the TZ case (ph_draw.c:4370-4390)";
+// phases/articulation.yaml ports the pressure, glottis, constriction, velum
+// and DC/UE rules of ph_draw.c. Those words differ only in the one phrase
+// whose allophones are not DECtalk's (TIMING_REASON).
 
 const GAP_REASONS: Readonly<Record<string, string>> = {
   length: TIMING_REASON,
@@ -125,17 +111,16 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   A5: AMPLITUDE_REASON,
   A6: AMPLITUDE_REASON,
   AB: AMPLITUDE_REASON,
-  AG: AG_REASON,
-  PS: PS_REASON,
+  AG: TIMING_REASON,
+  PS: TIMING_REASON,
   CNK: TIMING_REASON,
-  AL: CONSTRICTION_REASON,
-  ABLADE: CONSTRICTION_REASON,
-  ATB: CONSTRICTION_REASON,
-  AREA_N: AREA_REASON,
-  DC: AREA_REASON,
-  UE: AREA_REASON,
-  PLACE: AREA_REASON,
-  A2_CODE: AREA_REASON,
+  AL: TIMING_REASON,
+  ABLADE: TIMING_REASON,
+  ATB: TIMING_REASON,
+  AREA_N: TIMING_REASON,
+  DC: TIMING_REASON,
+  UE: TIMING_REASON,
+  A2_CODE: A2_CODE_REASON,
   PH: TIMING_REASON,
   // Only in the voice corpora: phases/articulation.yaml sends Paul's F4
   // (policy.articulation.voice.f4) for every voice.

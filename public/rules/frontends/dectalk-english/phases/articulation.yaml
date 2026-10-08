@@ -24,11 +24,17 @@ version: v1
 #   tcumdur   g.counted_frames
 #   nphone    g.unit
 #
-# Ported so far: PS (subglottal pressure), AG (glottal area), CNK (chink) and
-# F4. Not ported, and named where the C has them: the emphasis pulse
-# (ph_draw.c:1509-1552), the end-of-clause pressure drop of 3929-3969, the two
-# early exits of the end-of-clause glottal spread (3604-3624), the nasal case
-# of the initial silence (1146-1190), and every other word of the section.
+# Emitted: PS, AG, CNK, AL, ABLADE, ATB, AREA_N, DC, UE, A2_CODE (the codes),
+# BRST, PLACE, F4, PH and the node's `run` gate. Not ported: the end-of-clause
+# pressure drop of ph_draw.c:3929-3969 (inside the block that computes the
+# final slope, reached only when the syllabic is the clause's last
+# allophone), the TZ case of OUT_A2 (4370-4390), the A2 amplitude, and
+# everything for languages other than US English. Voice values are Paul's.
+#
+# The C was read from a preprocessed listing made with the build's flags
+# (scripts/oracle/dectalk-debug/compiled-lines.awk): `#ifdef PH_DEBUG` blocks
+# hide live code and close late. Where a rule reproduces a slip of the C, it
+# says so.
 #
 # A later clause's initial silence is the tail of the pause Segment before it
 # (duration.yaml dectalk_pause_duration adds its 4 or 5 frames there);
@@ -90,10 +96,15 @@ functions:
     body: >-
       item == null ? 0.0
       : (artic_is_dummy(item) ? dectalk_boundary(look_back_pred(item, params.policy.articulation.unit_scan_items,'is_dectalk_phone'))
-      : dectalk_boundary(item))
-    description: FBOUNDARY of an allophone; a dummy vowel has the plosive's.
+      : (item.phoneme == 'SIL' && get(item, 'punctuationSymbol', null) == '.'
+           ? params.policy.timing.boundary.period
+      : dectalk_boundary(item)))
+    description: >-
+      FBOUNDARY of an allophone; a dummy vowel has the plosive's, and the
+      silence that ends a clause on a period has FPERNEXT.
     citations:
       - "DECtalk 4.63 ph_inton1.c:1818 (allofeats[nphon + 1] = allofeats[nphon] | FDUMMY_VOWEL)"
+      - "DECtalk 4.63 allofeats as printed per frame by the instrumented build: 0400 on the silence after a period, 0 after a comma, semicolon, colon, question mark or exclamation mark; the assignment itself was not located in the source"
 
 predicates:
   is_articulation_unit: >-
@@ -105,6 +116,9 @@ tags:
   glottal_area: sets the glottal area, its target or the speed it moves at
   constriction: sets the area of the lips, the tongue blade or the tongue body, or the state that moves it
   voice_formant: sends a formant fixed by the voice
+  velum: sets the velopharyngeal area or the step that moves it
+  frication_place: sets the code that tells the synthesizer where frication is made
+  obstruent_source: sets the DC and UE words that shape an obstruent's source
 
 frame_programs:
   articulation:
@@ -153,6 +167,7 @@ frame_programs:
       # FSTRESS of the allophone's structure word: any stress, and bit 01.
       stressed: { value: "artic_stress(current) > 0", edge: false }
       primary: { value: "artic_stress(current) == 1 || artic_stress(current) == 3", edge: false }
+      emphasis: { value: "artic_stress(current) == 3", edge: false }
       is_r: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'R'", edge: false }
       is_rr: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'RR'", edge: false }
       is_l: { value: "!artic_is_dummy(current) && dectalk_name(current) in ['LL', 'LX']", edge: false }
@@ -180,6 +195,18 @@ frame_programs:
           artic_is_dummy(current) ? 0
           : get(params.policy.articulation.burst_frames, dectalk_name(current), 0)
         edge: 0
+      dental: { value: "artic_place(current, 'dental')", edge: false }
+      palatal: { value: "artic_place(current, 'palatal')", edge: false }
+      is_w_or_r: { value: "!artic_is_dummy(current) && dectalk_name(current) in ['W', 'R']", edge: false }
+      # us_begtyp: 1 front, 3 rounded back; a dummy vowel is IX or AX.
+      onset:
+        value: >-
+          (artic_is_dummy(current) ? get(current, 'dummy_phone', 'IX') : dectalk_name(current))
+            in params.policy.timing.front_onset_phones ? 'front'
+          : ((artic_is_dummy(current) ? get(current, 'dummy_phone', 'IX') : dectalk_name(current))
+            in params.policy.articulation.rounded_onset_phones ? 'round' : 'other')
+        edge: other
+      is_dh: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'DH'", edge: false }
       is_affricate:
         value: "!artic_is_dummy(current) && dectalk_name(current) in ['CH', 'JH']"
         edge: false
@@ -192,8 +219,27 @@ frame_programs:
       after_s:
         value: "dectalk_name(artic_prev_unit(artic_prev_unit(current))) == 'S'"
         edge: false
-      # ph_sort.c:1464 number_words, as postlexical.yaml reads it.
-      few_words: { value: "word_count() < 3", edge: false }
+      # ph_sort.c:1464 number_words: one for each word boundary. A word that
+      # starts a verb phrase comes in with that boundary instead and is not
+      # counted, except the clause's first word, which always is: DECtalk
+      # itself counts 3 in "Read the book.", 4 in "Give back the bag.", 2 in
+      # "can we go?" and in "Stop now!".
+      word_start: { value: "dectalk_word_start(current)", edge: false }
+      counted_word:
+        value: "dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp'"
+        edge: false
+      # FSON1 of the clause's allophones at nallotot - 2 and nallotot - 3: the
+      # last before the final silence and the one before it.
+      end_2_son1:
+        value: >-
+          artic_has(artic_prev_unit(look_ahead_where(current, 1000,
+            'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')), 'son1')
+        edge: false
+      end_3_son1:
+        value: >-
+          artic_has(artic_prev_unit(artic_prev_unit(look_ahead_where(current, 1000,
+            'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null'))), 'son1')
+        edge: false
       # The allophone's code (l_all_ph.h); silence is 0, the dummy vowel IX or AX.
       phone_code:
         value: >-
@@ -257,13 +303,15 @@ frame_programs:
         counted_frames: "(u.silence && !u.initial) || !u.counted ? 0 : f.count"
         # nphonetot: the clause's input phones, both silences included.
         phonemes: "u.phonemes"
+        # number_words
+        words: "u.counted_word || (u.word_start && p.initial) ? 1 : 0"
     registers:
       # ph_claus.c:217-221 sets pressure to 10000 at start-up; the reset at
       # ph_draw.c:925 replaces it in the first frame of every clause.
       pressure: 200
       pressure_drop: 0
       syl_pressure: 0
-      # ph_draw.c:1509-1552; the emphasis rule that moves it is not ported.
+      # ph_draw.c:1509-1552
       stress_pulse: 0
       # Inputs of the final fall: nphonetot - nphone, value - nframb, and the
       # pressure it falls to (ph_draw.c:3812-3870).
@@ -311,6 +359,18 @@ frame_programs:
       closure: 0
       # Which branch of an articulator's update the frame takes.
       move_case: 0
+      # The velum: nasal_step indexes the nasalization table (ph_draw.c:219).
+      area_n: 0
+      nasal_step: 0
+      # ph_draw.c:1314-1465: dcstep indexes dcval and ueval by its size.
+      dcstep: 0
+      dc: 0
+      ue: 0
+      # OUT_A2's code, the code to carry into the next phone, OUT_BRST, OUT_PLACE.
+      a2: 0
+      lastthing: 0
+      brst: 0
+      place: 0
       ts_l: 0
       ts_b: 0
       ts_tb: 0
@@ -332,6 +392,14 @@ frame_programs:
       AL: "r.area_l"
       ABLADE: "min([r.area_flap, r.area_b])"
       ATB: "r.area_tb"
+      # ph_draw.c:4193
+      AREA_N: "r.area_n"
+      # ph_draw.c:1427-1464
+      DC: "r.dc"
+      UE: "r.ue"
+      A2_CODE: "r.a2"
+      BRST: "r.brst"
+      PLACE: "r.place"
     after:
       run: 0
     write: articulation_frames
@@ -482,6 +550,33 @@ rules:
       - { register: area_ap, value: "r.area_ap + floor((r.target_ap - r.area_ap) / 4)", tag: glottal_chink }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:4098 (area_ap += (target_ap - area_ap) >> 2)"
+
+  # --- emphasis, a phone that is not silence, every frame: ph_draw.c:1509-1552
+  # A phone with emphatic stress adds a pulse to the pressure over its last
+  # NF130MS (20 frames), a step a frame up to the voice's limit, and takes it
+  # back before that; any other phone clears it. A silence leaves it alone.
+  artic_emphasis_pulse:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.emphasis"
+    set:
+      - register: stress_pulse
+        value: >-
+          f.index <= f.count - 20
+            ? (r.stress_pulse > 0 ? r.stress_pulse - params.policy.articulation.voice.stress_step : r.stress_pulse)
+            : (r.stress_pulse < params.policy.articulation.voice.stress_pressure
+                ? r.stress_pulse + params.policy.articulation.voice.stress_step : r.stress_pulse)
+        tag: subglottal_pressure
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1509-1523"
+  artic_no_emphasis:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && !u.emphasis"
+    set:
+      - { register: stress_pulse, value: 0, tag: subglottal_pressure }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1550-1552"
   artic_pressure_out:
     kind: frame
     program: articulation
@@ -876,12 +971,17 @@ rules:
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:2036-2040"
 
-  # 2113-2120, still inside the vowel's braces: before a voiceless sonorant
-  # consonant (/h/), so that no glottal pulse sounds at its release.
+  # From here on the C is outside the three-way split on allophone 0, silence
+  # and other phones, which ends at 1983: these rules run in every phone, the
+  # silences included (the compiled listing's brace depth says so, and
+  # DECtalk's own values before an utterance-initial /h/ agree).
+  #
+  # 2112-2120: before a voiceless sonorant consonant (/h/), so that no
+  # glottal pulse sounds at its release.
   artic_vowel_before_voiceless_sonorant:
     kind: frame
     program: articulation
-    unit: "!u.silence && u.vowel && !n.dummy && !n.voiced && n.sonorant && n.consonant"
+    unit: "!n.dummy && !n.voiced && n.sonorant && n.consonant"
     when: "f.index >= f.count - 2"
     set:
       - { register: target_ag, value: 1800, tag: glottal_area }
@@ -889,11 +989,22 @@ rules:
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:2112-2120"
 
+  # 2140-2150: in a voiceless sonorant consonant itself, every frame.
+  artic_voiceless_sonorant_glottis:
+    kind: frame
+    program: articulation
+    unit: "!u.dummy && !u.voiced && u.sonorant && u.consonant"
+    set:
+      - { register: target_ag, value: 1800, tag: glottal_area }
+      - { register: agspeed, value: 2, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2140-2150"
+
   # --- before a voiceless sonorant consonant: ph_draw.c:2165-2192 ----------
   artic_before_voiceless_sonorant:
     kind: frame
     program: articulation
-    unit: "!u.silence && !n.dummy && !n.voiced && n.sonorant && n.consonant"
+    unit: "!n.dummy && !n.voiced && n.sonorant && n.consonant"
     when: >-
       f.index >= f.count - 7
       && r.target_ag < params.policy.articulation.voice.unvoiced_sonorant
@@ -958,7 +1069,7 @@ rules:
   artic_unstressed_before_voiceless_fricative_late:
     kind: frame
     program: articulation
-    unit: "!u.silence && !u.nasal && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
+    unit: "!u.nasal && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
     when: "f.index >= f.count - 9 && f.index >= floor(f.count / 2) && r.target_ag < 1000"
     set:
       - { register: target_ag, value: "r.target_ag + 10", tag: glottal_area }
@@ -967,7 +1078,7 @@ rules:
   artic_unstressed_before_voiceless_fricative_early:
     kind: frame
     program: articulation
-    unit: "!u.silence && !u.nasal && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
+    unit: "!u.nasal && !u.obstruent && n.obstruent && !u.stressed && !n.voiced && !n.stop"
     when: "!(f.index >= f.count - 9 && f.index >= floor(f.count / 2)) && r.target_ag < 1100"
     set:
       - { register: target_ag, value: "r.target_ag + (r.target_ag < 700 ? 75 : 40)", tag: glottal_area }
@@ -1013,21 +1124,27 @@ rules:
 
   # --- spreading the glottis toward the end of the clause: ph_draw.c:3601-3660
   # nframb > tcumdur - 12 and - 25, with nframb - tcumdur = g.frame + 1 -
-  # g.counted_frames. Not ported: the two `goto abort_til_later` tests at
-  # 3604-3624, which skip the step in some phones near the end, and the reset
-  # in the clause's first frame (3986-3990), which the initial reset covers
-  # for the first clause.
+  # g.counted_frames; nphone is g.unit and nallotot g.units. Two tests jump
+  # past the step (`goto abort_til_later`, 3604-3624): among the last phones
+  # before the final silence when the phone at nallotot - 3 is a sonorant and
+  # this one comes before it, and earlier in the clause when the phone at
+  # nallotot - 2 is one. The step is 5 in a clause of fewer than three
+  # counted words, else the voice's.
   artic_end_of_clause_spread:
     kind: frame
     program: articulation
-    unit: "g.unit < g.units - 1"
+    unit: >-
+      g.unit < g.units - 1
+      && !(g.unit >= g.units - 4
+           ? (g.unit > 3 && u.end_3_son1 && g.unit < g.units - 3)
+           : (g.unit > 3 && u.end_2_son1 && g.unit < g.units - 4))
     when: "g.frame + 1 > g.counted_frames - 12 && r.delta_area_g < 800"
     set:
       - register: delta_area_g
-        value: "r.delta_area_g + (u.few_words ? 5 : params.policy.articulation.voice.end_of_phrase_spread)"
+        value: "r.delta_area_g + (g.words < 3 ? 5 : params.policy.articulation.voice.end_of_phrase_spread)"
         tag: glottal_area
     citations:
-      - "DECtalk 4.63 PH/ph_draw.c:3602, 3626-3647"
+      - "DECtalk 4.63 PH/ph_draw.c:3602-3647"
   artic_no_spread_before_the_end:
     kind: frame
     program: articulation
@@ -1196,6 +1313,8 @@ rules:
     unit: "u.initial"
     when: "f.index == 0"
     set:
+      - { register: in_bclosure, value: false, tag: constriction }
+      - { register: in_lclosure, value: false, tag: constriction }
       - { register: area_b, value: 1000, tag: constriction }
       - { register: target_b, value: 1000, tag: constriction }
       - { register: area_l, value: 1000, tag: constriction }
@@ -1207,7 +1326,7 @@ rules:
       - { register: area_tb, value: 1000, tag: constriction }
       - { register: target_tb, value: 1000, tag: constriction }
     citations:
-      - "DECtalk 4.63 PH/ph_draw.c:931-940"
+      - "DECtalk 4.63 PH/ph_draw.c:923-924, 931-940"
   artic_initial_before_labial_burst_stop:
     kind: frame
     program: articulation
@@ -1370,18 +1489,9 @@ rules:
       - { register: target_tb, value: 1000, tag: constriction }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:1746-1761"
-  artic_burst_obstruent_velar:
-    kind: frame
-    program: articulation
-    unit: "!u.silence && u.obstruent && u.burst && u.velar"
-    when: "f.index == 0"
-    set:
-      - { register: lstep, value: 0, tag: constriction }
-      - { register: target_b, value: 1000, tag: constriction }
-      - { register: target_l, value: 1000, tag: constriction }
-      - { register: target_tb, value: 0, tag: constriction }
-    citations:
-      - "DECtalk 4.63 PH/ph_draw.c:1764-1783"
+  # The velar case (1764-1783) assigns nothing: its four assignments are
+  # inside `#ifdef PH_DEBUG`, whose `#endif` comes after them. So /k/ and /g/
+  # leave the lips and blade where the phone before left them.
   # An obstruent without a burst: an else-if chain, lips, blade, tongue body.
   artic_fricative_labial:
     kind: frame
@@ -1489,6 +1599,28 @@ rules:
       - { register: target_l, value: 100, tag: constriction }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:2038-2044"
+
+  # --- a voiceless sonorant consonant opens everything: ph_draw.c:2140-2147
+  artic_voiceless_sonorant_areas:
+    kind: frame
+    program: articulation
+    unit: "!u.dummy && !u.voiced && u.sonorant && u.consonant"
+    set:
+      - { register: target_l, value: 1000, tag: constriction }
+      - { register: target_b, value: 1000, tag: constriction }
+      - { register: target_tb, value: 1000, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2140-2147"
+
+  # --- the velar nasal closes the tongue body: ph_draw.c:2400-2410 ---------
+  artic_velar_nasal_closure:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.velar && u.nasal"
+    set:
+      - { register: in_tbclosure, value: true, tag: constriction }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2400-2410"
 
   # --- the tongue body moves, every frame: ph_draw.c:2807-2930 -------------
   artic_tongue_closure_needs_velar:
@@ -1654,8 +1786,10 @@ rules:
 
   # --- the flap: ph_draw.c:3290-3330 ---------------------------------------
   # 3312 reads `tcum >= (allodurs >> 1 - 3)`: a shift by -2, which C leaves
-  # undefined. Taken here as always true (a count of 30 on x86), so the first
-  # half of a flap closes; not yet checked against DECtalk's own values.
+  # undefined. As this build behaves, the test is always true: the first half
+  # of a flap closes by 400 a frame from its first frame. DECtalk's own
+  # area_flap in "It is much better." is 800, 400, 0, 400, 800 in a flap of
+  # seven frames and 800, 400, 800 in one of four.
   artic_flap_opening:
     kind: frame
     program: articulation
@@ -1796,6 +1930,285 @@ rules:
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:4107-4108"
 
+  # ===========================================================================
+  # The velum (area_n, nasal_step) and the obstruent's DC and UE steps.
+  # ===========================================================================
+
+  # --- allophone 0: ph_draw.c:922 once; 1132-1192 every frame --------------
+  artic_initial_reset_velum:
+    kind: frame
+    program: articulation
+    unit: "u.initial"
+    when: "f.index == 0"
+    set:
+      - { register: area_n, value: 0, tag: velum }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:922"
+  artic_initial_velum_before_vowel:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.voiced && n.vowel"
+    set:
+      - { register: area_n, value: 0, tag: velum }
+      - { register: nasal_step, value: 0, tag: velum }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1132, 1143-1144"
+  artic_initial_velum_before_nasal:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.voiced && n.nasal"
+    set:
+      - { register: area_n, value: 200, tag: velum }
+      - { register: nasal_step, value: 7, tag: velum }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1146-1148, 1189"
+  artic_initial_velum_before_voiced_oral:
+    kind: frame
+    program: articulation
+    unit: "u.initial && n.voiced && !n.nasal"
+    set:
+      - { register: nasal_step, value: 0, tag: velum }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1191-1192"
+
+  # --- DC and UE, a phone that is not silence, every frame: ph_draw.c:1314-1465
+  # dcstep climbs to 9 through a voiced obstruent and falls to -9 through a
+  # voiceless one, a few frames in and not while the velum is open; any other
+  # phone brings it back by two a frame. In a silence the two words keep the
+  # value they had.
+  artic_dc_starts:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.obstruent"
+    when: "r.dcstep == 0 && r.area_n == 0 && f.index > 1"
+    set:
+      - { register: dcstep, value: "u.voiced ? 1 : -1", tag: obstruent_source }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1314-1334"
+  artic_dc_step_voiced:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && u.voiced"
+    when: "r.dcstep != 0"
+    set:
+      - register: dcstep
+        value: >-
+          u.obstruent && r.area_n == 0
+            ? (r.dcstep < 0 ? r.dcstep + 1 : r.dcstep)
+            : r.dcstep
+        tag: obstruent_source
+      - register: dcstep
+        value: >-
+          u.obstruent && r.area_n == 0
+            ? (r.dcstep < 9 ? r.dcstep + 1 : r.dcstep)
+            : ((!u.obstruent && f.index > 1) || r.area_n != 0 ? max([r.dcstep - 2, 0]) : r.dcstep)
+        tag: obstruent_source
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1338-1372"
+  artic_dc_step_voiceless:
+    kind: frame
+    program: articulation
+    unit: "!u.silence && !u.voiced"
+    when: "r.dcstep != 0"
+    set:
+      - register: dcstep
+        value: >-
+          u.obstruent && r.area_n == 0
+            ? (r.dcstep > 0 ? r.dcstep - 1 : r.dcstep)
+            : r.dcstep
+        tag: obstruent_source
+      - register: dcstep
+        value: >-
+          u.obstruent && r.area_n == 0
+            ? (r.dcstep > -9 ? r.dcstep - 1 : r.dcstep)
+            : min([r.dcstep + 2, 0])
+        tag: obstruent_source
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1388-1414"
+  artic_dc_out:
+    kind: frame
+    program: articulation
+    unit: "!u.silence"
+    set:
+      - register: dc
+        value: >-
+          r.dcstep >= 0 ? params.policy.articulation.dc_values[r.dcstep]
+          : 0 - params.policy.articulation.dc_values[0 - r.dcstep]
+        tag: obstruent_source
+      - register: ue
+        value: >-
+          r.dcstep >= 0 ? params.policy.articulation.ue_values[r.dcstep]
+          : 0 - params.policy.articulation.ue_values[0 - r.dcstep]
+        tag: obstruent_source
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:1419-1465"
+
+  # --- the velum, every phone, every frame: ph_draw.c:2414-2671 ------------
+  # A chain of three: in a nasal; before a nasal that is not doubled; any
+  # other phone that is not a nasal.
+  artic_velum_in_nasal:
+    kind: frame
+    program: articulation
+    unit: "u.nasal"
+    set:
+      - register: nasal_step
+        value: >-
+          u.blade && p.blade ? (r.nasal_step == 0 ? 4 : (r.nasal_step < 7 ? r.nasal_step + 1 : r.nasal_step))
+          : (n.obstruent && f.index >= f.count - 1 && !n.is_dh ? max([r.nasal_step - 2, 0])
+          : (r.nasal_step < 7 ? r.nasal_step + 2 : r.nasal_step))
+        tag: velum
+      - { register: area_n, value: "params.policy.articulation.nasalization[r.nasal_step]", tag: velum }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2414-2510"
+  artic_velum_before_nasal:
+    kind: frame
+    program: articulation
+    unit: "!u.nasal && n.nasal && !u.next_repeats"
+    set:
+      - register: nasal_step
+        value: "f.count < 7 && r.nasal_step < 7 ? r.nasal_step + 1 : r.nasal_step"
+        tag: velum
+      - register: nasal_step
+        value: >-
+          !u.obstruent && f.index >= floor(f.count / 2) && r.nasal_step < 7
+            ? r.nasal_step + 1 : r.nasal_step
+        tag: velum
+      - register: area_n
+        value: >-
+          u.obstruent || f.index >= floor(f.count / 2)
+            ? params.policy.articulation.nasalization[r.nasal_step] : r.area_n
+        tag: velum
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2526-2581"
+  # A sonorant waits two frames before the velum starts to close (`goto
+  # skipit`); other phones close it by three while it is wide.
+  artic_velum_closing:
+    kind: frame
+    program: articulation
+    unit: "!u.nasal && !(n.nasal && !u.next_repeats)"
+    when: "r.nasal_step != 0 && f.index != 0 && !(u.sonorant && f.index < 3)"
+    set:
+      - register: nasal_step
+        value: >-
+          u.sonorant ? r.nasal_step - 1
+          : max([r.nasal_step > 4 ? r.nasal_step - 3 : r.nasal_step - 1, 0])
+        tag: velum
+      - { register: area_n, value: "params.policy.articulation.nasalization[r.nasal_step]", tag: velum }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2587, 2618-2671"
+
+  # ===========================================================================
+  # The frication code (OUT_A2), the burst marker and the velar's place.
+  # ===========================================================================
+  # OUT_A2 is also the generic A2 amplitude, drawn before this section; in
+  # this build it is 0 on all but a few hundred of the corpus's packets, and
+  # the synthesizer acts only on the codes (VTM/vtmiont.c:797-1147). The
+  # amplitude is not ported: the word is the code or 0.
+  artic_frication_code_none:
+    kind: frame
+    program: articulation
+    set:
+      - { register: a2, value: 0, tag: frication_place }
+    citations:
+      - "DECtalk 4.63 VTM/vtmiont.c:797-1147 (only the codes are read)"
+  # A vowel's last frame announces the next consonant's place.
+  artic_frication_code_vowel_end:
+    kind: frame
+    program: articulation
+    unit: "u.vowel"
+    when: "f.index >= f.count - 1"
+    set:
+      - register: a2
+        value: >-
+          u.dental || n.labial ? 1000
+          : (n.palatal ? 2000
+          : (n.alveolar && f.index > 2 ? 3000 : r.a2))
+        tag: frication_place
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2037, 2056-2100"
+  artic_frication_code_by_place:
+    kind: frame
+    program: articulation
+    unit: "!u.nasal"
+    set:
+      - register: a2
+        value: >-
+          u.dental ? (u.is_dh_th_dz ? 1200 : (u.voiced ? 1100 : 1000))
+          : (u.labial ? 1300
+          : (u.palatal ? (u.is_affricate && f.index <= 4 ? 3200 : 2000)
+          : (u.alveolar ? 3000 : r.a2)))
+        tag: frication_place
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2197-2312"
+  # After an obstruent with a place, the code of that obstruent is repeated in
+  # the phone's first frame, and all through a dummy vowel; later frames
+  # forget it. The `else` belongs to the inner `if`.
+  artic_frication_code_carried:
+    kind: frame
+    program: articulation
+    unit: >-
+      !u.nasal && (p.palatal || p.dental || p.alveolar || p.labial)
+      && !(p.stop && u.obstruent) && p.obstruent
+    set:
+      - { register: a2, value: "f.index < 1 || u.dummy ? r.lastthing : r.a2", tag: frication_place }
+      - { register: lastthing, value: "f.index < 1 || u.dummy ? r.lastthing : 0", tag: frication_place }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2315-2335"
+  artic_frication_code_remembered:
+    kind: frame
+    program: articulation
+    unit: "!u.nasal"
+    when: "r.a2 >= 1000"
+    set:
+      - { register: lastthing, value: "r.a2", tag: frication_place }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2336-2337"
+  artic_frication_code_glide:
+    kind: frame
+    program: articulation
+    unit: "!u.initial && u.soncon && u.is_w_or_r"
+    set:
+      - { register: a2, value: 4000, tag: frication_place }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2343-2373"
+  artic_frication_code_lateral:
+    kind: frame
+    program: articulation
+    unit: "u.is_l"
+    set:
+      - { register: a2, value: 4000, tag: frication_place }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2391-2394"
+
+  # --- the burst marker: ph_draw.c:4084-4096 -------------------------------
+  # 1 or 2 in the first frame of a release (tongue body, or lips or blade),
+  # -1 in its later frames, 0 otherwise.
+  artic_burst_marker:
+    kind: frame
+    program: articulation
+    set:
+      - register: brst
+        value: >-
+          r.in_lrelease || r.in_tbrelease || r.in_brelease
+            ? (r.brst == 0 ? (r.in_tbrelease ? 1 : 2) : -1)
+            : 0
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:4084-4096"
+
+  # --- where a velar is made: ph_draw.c:4128-4150 --------------------------
+  # By the beginning type of the next phone (p_us_rom.h us_begtyp): 45 before
+  # a front one, 40 before a rounded back one, 42 otherwise. Nothing resets
+  # the word, so it keeps the last velar's value.
+  artic_velar_place:
+    kind: frame
+    program: articulation
+    unit: "u.velar"
+    set:
+      - { register: place, value: "n.onset == 'front' ? 45 : (n.onset == 'round' ? 40 : 42)", tag: frication_place }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:4128-4150"
+
 phases:
   - name: articulation
     after: [finalize]
@@ -1831,6 +2244,7 @@ phases:
       - artic_vowel_before_fricative
       - artic_vowel_last_frame
       - artic_vowel_before_voiceless_sonorant
+      - artic_voiceless_sonorant_glottis
       - artic_before_voiceless_sonorant
       - artic_affricate_speed
       - artic_sonorant_consonant_speed
@@ -1851,6 +2265,8 @@ phases:
       - artic_silence_pressure_drop
       - artic_pressure_rise_voiced
       - artic_pressure_rise_voiceless
+      - artic_emphasis_pulse
+      - artic_no_emphasis
       - artic_pressure_rise_voiced_again
       - artic_fall_inputs
       - artic_syllable_pressure_slope
@@ -1881,7 +2297,6 @@ phases:
       - artic_releases_end_after_non_plosive
       - artic_burst_obstruent_labial
       - artic_burst_obstruent_blade
-      - artic_burst_obstruent_velar
       - artic_fricative_labial
       - artic_fricative_blade
       - artic_fricative_velar
@@ -1891,6 +2306,8 @@ phases:
       - artic_burstless_stop_labial_area
       - artic_sonorant_areas
       - artic_vowel_before_labial
+      - artic_voiceless_sonorant_areas
+      - artic_velar_nasal_closure
       - artic_tongue_closure_needs_velar
       - artic_tongue_closed
       - artic_tongue_case
@@ -1917,3 +2334,24 @@ phases:
       - artic_dental_closed
       - artic_dental_opening
       - artic_remember_areas
+      # The velum and the DC step; DC reads the velum as the frame before left it.
+      - artic_initial_reset_velum
+      - artic_initial_velum_before_vowel
+      - artic_initial_velum_before_nasal
+      - artic_initial_velum_before_voiced_oral
+      - artic_dc_starts
+      - artic_dc_step_voiced
+      - artic_dc_step_voiceless
+      - artic_dc_out
+      - artic_velum_in_nasal
+      - artic_velum_before_nasal
+      - artic_velum_closing
+      - artic_frication_code_none
+      - artic_frication_code_vowel_end
+      - artic_frication_code_by_place
+      - artic_frication_code_carried
+      - artic_frication_code_remembered
+      - artic_frication_code_glide
+      - artic_frication_code_lateral
+      - artic_burst_marker
+      - artic_velar_place

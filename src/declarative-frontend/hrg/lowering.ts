@@ -2359,13 +2359,13 @@ export function lowerToFrames(
     if (item) {
       applyItemParams(params, provenance, item);
       applyItemTransitions(params, provenance, item, segmentOffsetMs);
-      applyFrameValues(params, provenance, item, segmentOffsetMs);
       for (const [key, curve] of holmes.curves.get(item) ?? []) {
         if (!paramKeys.includes(key)) continue;
         params[key] = sampleHolmesCurve(curve, segmentOffsetMs);
         provenance[key] = curve.decisionId;
       }
       applyControlWindows(params, provenance, item, segmentOffsetMs);
+      applyFrameValues(params, provenance, item, segmentOffsetMs);
       applyItemF0Sample(params, provenance, item, timeMs);
       applyAffectProjection(params, provenance, item);
     }

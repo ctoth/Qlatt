@@ -162,7 +162,10 @@ frame.
 Each frame of the feature is an event point. At an event inside an Item the
 frame covering that instant overrides the Item's own value for each column;
 the initial silence reads the first Item's lead-in frames. Frame values are
-applied after Segment targets and transitions and before control windows.
+applied after Segment targets, transitions and control windows: a column a
+frame program computes is the controller's last word for that frame, and a
+window that carries a whole target (a stop's release, say) does not replace
+it.
 
 ## Cost
 

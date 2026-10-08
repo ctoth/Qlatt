@@ -65,6 +65,12 @@ describe("lexicon sources in decision records", () => {
     expect(letter.type).toBe("spelling_pronunciation_selected");
     expect(letter.reason).toContain("DECtalk letter names");
     expect(letter.citations?.[0]).toContain("INCLUDE/usa_type.tab");
+
+    // "A." is the form of "a" against punctuation: the positioned word's
+    // record, not the dictionary's.
+    const article = wordRecord(records, "a");
+    expect(article.type).toBe("position_pronunciation_selected");
+    expect(article.citations?.[0]).toContain("LTS/ls_task.c:2647-2673");
   });
 
   it("keeps the shared names in a frontend with the shared lexicon", () => {

@@ -607,6 +607,11 @@ export function transcribeText(
         decisionType = "spelling_pronunciation_selected";
         reason = `Word '${sourceWord}' is one letter and not in the dictionary; used ${used.name}`;
         citations = [used.citation];
+      } else if (pronResult.source === "position") {
+        const used = lexiconSource("position");
+        decisionType = "position_pronunciation_selected";
+        reason = `Word '${sourceWord}' is spoken by where it stands; used ${used.name}`;
+        citations = [used.citation];
       } else {
         const used = lexiconSource("lts-rules");
         decisionType = "fallback_pronunciation_selected";

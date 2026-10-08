@@ -158,7 +158,7 @@ export function pronounce(
   if (placed && !context.atPunctuation) {
     return {
       phonemes: [...placed.apart.phonemes],
-      source: "dictionary",
+      source: "position",
       word: lowerWord,
       ...classed(placed.apart.formClass),
     };
@@ -174,7 +174,8 @@ export function pronounce(
         : entry.other
           ? [...entry.other.phonemes]
           : dictResult,
-      source: "dictionary",
+      // The phones of a placed word are the table's, not the entry's.
+      source: placed ? "position" : "dictionary",
       word: lowerWord,
       ...classed(entry.formClass),
       ...phrased(entry.formClass),

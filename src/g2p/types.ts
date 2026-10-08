@@ -6,6 +6,7 @@ export type PronunciationSource =
   | "lts-rules"
   | "number"
   | "spelling"
+  | "position"
   | "unknown";
 
 /** One spoken word of a token that is spoken as several (a number in digits). */

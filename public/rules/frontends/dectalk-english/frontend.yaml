@@ -3,9 +3,13 @@ inventory_path: /rules/frontends/dectalk-english/inventory.yaml
 # DECtalk's own compiled letter-to-sound tables, run by the table interpreter
 # (src/g2p/table-lts*.ts); built by scripts/build-dectalk-lts-table.ts.
 lts_path: /rules/frontends/dectalk-english/lts-table.json
-# Engineering choice: explicitly retain the shared English morphology rules.
+# The loader requires both paths, but neither file is used to pronounce a word
+# here: with a compiled table the order is dictionary, the table's suffix
+# stripping against the dictionary, then the table's rules, and stress comes
+# from the dictionary root or the table's passes (src/g2p/index.ts, the
+# `if (table)` branch of pronounce, which returns before the shared clitic,
+# morphology and stress-policy steps).
 morphology_path: /rules/frontends/qlatt-english/morphology.yaml
-# Engineering choice: shared English lexical policy for generated phones; dictionary stress wins.
 stress_policy_path: /rules/frontends/qlatt-english/stress-policy.yaml
 # DECtalk is dictionary-first with LTS fallback (DECtalk 4.63 ls_task.c:697:
 # main dictionary search precedes the LTS rule engine; rules run only on miss).
@@ -2347,6 +2351,9 @@ transcription:
     spelling:
       name: DECtalk letter names
       citation: "DECtalk 4.63 LTS/ls_task.c:2760-2775 (a one-letter word is spelled), INCLUDE/usa_type.tab lower-case rows (the names)"
+    position:
+      name: DECtalk's two forms of the word "a"
+      citation: "DECtalk 4.63 LTS/ls_task.c:2647-2673 ([x] when no punctuation was stripped and none follows, else the spelling entry's ['e]), as wordsByPunctuation in /rules/frontends/dectalk-english/lts-table.json"
   # Standard English letter-name pronunciations for declarative spelling mode.
   # Citation anchor: Allen et al. 1987 Ch.2-3 (LETTER-* morphs for symbol strings).
   letter_names:

@@ -26,7 +26,13 @@ export interface TranscriptionToken {
   sourceTokenId: string;
 }
 
-export const LEXICON_SOURCE_KEYS = ["dictionary", "morphology", "lts-rules", "spelling"] as const;
+export const LEXICON_SOURCE_KEYS = [
+  "dictionary",
+  "morphology",
+  "lts-rules",
+  "spelling",
+  "position",
+] as const;
 export type LexiconSourceKey = (typeof LEXICON_SOURCE_KEYS)[number];
 export type LexiconSource = { name: string; citation: string };
 

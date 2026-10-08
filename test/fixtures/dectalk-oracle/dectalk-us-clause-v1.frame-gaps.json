@@ -87,7 +87,7 @@
   "cite-look-at-them": ["F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5","A6","AB"],
   "homograph-in-the-house": ["F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5","A6","AB","A2_CODE"],
   "homograph-to-house": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5","A6","AB"],
-  "homograph-read-first": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A4","A5","A6","AB","AG","A2_CODE"],
+  "homograph-read-first": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A4","A5","A6","AB","A2_CODE"],
   "homograph-present": ["F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A4","A5","A6","AB"],
   "article-final": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A4","A5"],
   "article-before-comma": ["F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5"],

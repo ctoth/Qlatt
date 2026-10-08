@@ -69,12 +69,8 @@ const A2_CODE_REASON =
   "the synthesizer ignores (VTM/vtmiont.c:797-1147 tests only the codes), is not, and the " +
   "track has 0 there. Not ported either: the TZ case (ph_draw.c:4370-4390)";
 // phases/articulation.yaml ports the pressure, glottis, constriction, velum
-// and DC/UE rules of ph_draw.c. The pressure, the areas, the velum and DC/UE
-// differ only in the one phrase whose allophones are not DECtalk's
-// (TIMING_REASON). AG differs there and in one more:
-const AG_REASON =
-  "the phrase whose allophones are not DECtalk's, and one untraced phrase " +
-  "(homograph-read-first)";
+// and DC/UE rules of ph_draw.c. Those words differ only in the one phrase
+// whose allophones are not DECtalk's (TIMING_REASON).
 
 const GAP_REASONS: Readonly<Record<string, string>> = {
   length: TIMING_REASON,
@@ -94,7 +90,7 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   A5: AMPLITUDE_REASON,
   A6: AMPLITUDE_REASON,
   AB: AMPLITUDE_REASON,
-  AG: AG_REASON,
+  AG: TIMING_REASON,
   PS: TIMING_REASON,
   CNK: TIMING_REASON,
   AL: TIMING_REASON,

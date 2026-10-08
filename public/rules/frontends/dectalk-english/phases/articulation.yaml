@@ -219,9 +219,12 @@ frame_programs:
       after_s:
         value: "dectalk_name(artic_prev_unit(artic_prev_unit(current))) == 'S'"
         edge: false
-      # ph_sort.c:1464 number_words, as postlexical.yaml reads it.
-      # ph_sort.c:1464 number_words: a word entered with a word boundary; a
-      # verb-phrase start is not counted (pipeline.yaml is_counted_word_start).
+      # ph_sort.c:1464 number_words: one for each word boundary. A word that
+      # starts a verb phrase comes in with that boundary instead and is not
+      # counted, except the clause's first word, which always is: DECtalk
+      # itself counts 3 in "Read the book.", 4 in "Give back the bag.", 2 in
+      # "can we go?" and in "Stop now!".
+      word_start: { value: "dectalk_word_start(current)", edge: false }
       counted_word:
         value: "dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp'"
         edge: false
@@ -301,7 +304,7 @@ frame_programs:
         # nphonetot: the clause's input phones, both silences included.
         phonemes: "u.phonemes"
         # number_words
-        words: "u.counted_word ? 1 : 0"
+        words: "u.counted_word || (u.word_start && p.initial) ? 1 : 0"
     registers:
       # ph_claus.c:217-221 sets pressure to 10000 at start-up; the reset at
       # ph_draw.c:925 replaces it in the first frame of every clause.

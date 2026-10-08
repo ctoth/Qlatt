@@ -82,9 +82,6 @@ rules:
   # ls_task_lookup_first_verbs is called for the same first word: "are",
   # "had", "is", "was", "were" and "will" are then sent with secondary stress
   # on their vowel instead of their unstressed dictionary form ("Is it here?").
-  #
-  # Not ported: the table also gives "had" the vowel EH there, where the
-  # dictionary has AE.
   # -------------------------------------------------------------------------
   dectalk_sentence_initial_auxiliary:
     kind: scalar
@@ -97,7 +94,7 @@ rules:
       # The nearest earlier Segment that is a sentence end or belongs to another word.
       before_word: >-
         look_back_where(current, 5000,
-          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) in [".", "?", "!"]) || !(has(candidate.word) && has(source.word) && candidate.word == source.word)')
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) in [".", "?", "!"]) || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id)')
     constraint: >-
       before_word == null
       || (before_word.phoneme == 'SIL' && get(before_word, 'punctuationSymbol', null) in ['.', '?', '!'])
@@ -108,6 +105,53 @@ rules:
         tag: stress
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:4636-4645 verbs[] (are, had, is, was, were, will with S2)"
+      - "DECtalk 4.63 LTS/ls_task.c:4672-4728 ls_task_lookup_first_verbs (first word after a sentence end)"
+
+  # The same table sends "had" as HX S2 EH D (ls_task.c:4640), where the
+  # dictionary has AE: "Had had." is EH D, AE D. This runs after the rule
+  # above, so the word is known by the secondary stress that rule wrote.
+  dectalk_sentence_initial_had:
+    kind: postlexical
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme == 'AE' && has(current.word) && lower(current.word) == 'had'
+        && get(current, 'stress', 0) == 2
+    define:
+      eh: "target('EH1')"
+      before_word: >-
+        look_back_where(current, 5000,
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) in [".", "?", "!"]) || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id)')
+    constraint: >-
+      before_word == null
+      || (before_word.phoneme == 'SIL' && get(before_word, 'punctuationSymbol', null) in ['.', '?', '!'])
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          # What a phone keeps when a rule rewrites it in place: DECtalk's
+          # allophone rules change the phone and leave its structure word
+          # (ph_aloph.c writes allophons[] and copies sentstruc[] across).
+          # Every in-place rewrite below copies this one list.
+          copy_fields: &structure_word
+            - stress
+            - word
+            - word_initial_consonant
+            - helper_verb_promoted
+            - phrase_start_follows
+            - morpheme_boundary_after
+            - dictionary_duration_ms
+          phoneme: "'EH'"
+          type: eh.type
+          target: eh
+          duration: eh.duration
+          inherentDuration: eh.inherentDuration
+          minimumDuration: "has(eh.minimumDuration) ? eh.minimumDuration : eh.duration"
+          voiced: "has(eh.voiced) ? eh.voiced : true"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:4640 verbs[] ({\"had\"}, { US_HX, S2, US_EH, US_D, SIL })"
       - "DECtalk 4.63 LTS/ls_task.c:4672-4728 ls_task_lookup_first_verbs (first word after a sentence end)"
 
   # -------------------------------------------------------------------------
@@ -368,18 +412,7 @@ rules:
       range_right: current.sync_right
       insert:
         - copy_from: current
-          # What a phone keeps when a rule rewrites it in place: DECtalk's
-          # allophone rules change the phone and leave its structure word
-          # (ph_aloph.c writes allophons[] and copies sentstruc[] across).
-          # Every in-place rewrite below copies this one list.
-          copy_fields: &structure_word
-            - stress
-            - word
-            - word_initial_consonant
-            - helper_verb_promoted
-            - phrase_start_follows
-            - morpheme_boundary_after
-            - dictionary_duration_ms
+          copy_fields: *structure_word
           phoneme: full_name
           type: full.type
           target: full
@@ -464,7 +497,7 @@ rules:
         && (next_primary_or_boundary == null || next_primary_or_boundary.phoneme == 'SIL')
       after_word: >-
         look_ahead_where(current, 100,
-          'candidate.phoneme == "SIL" || !(has(candidate.word) && has(source.word) && candidate.word == source.word)')
+          'candidate.phoneme == "SIL" || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id)')
       in_last_word: "after_word == null || after_word.phoneme == 'SIL'"
       already_primary: "has(current.stress) && current.stress == 1"
     constraint: "!already_primary && no_primary_in_clause && in_last_word && prior_vowel_in_word == null"
@@ -745,7 +778,8 @@ rules:
       # (curr_instruc & FBOUNDARY) IS_PLUS: the schwa is the last phone of its word.
       word_final: >-
         n != null && n.phoneme != 'SIL'
-        && has(n.word) && has(current.word) && n.word != current.word
+        && dectalk_word_id(n) != '' && dectalk_word_id(current) != ''
+        && dectalk_word_id(n) != dectalk_word_id(current)
       before_syllabic: >-
         n != null && (n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN'])
     constraint: "after_word_initial_dh && word_final && before_syllabic"
@@ -1023,7 +1057,7 @@ rules:
         n != null && (n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN'])
       next_word_boundary: >-
         n == null ? true :
-        (has(n.word) && has(current.word) ? n.word != current.word : true)
+        !dectalk_same_word(n, current)
       next_weak_vowel: >-
         n != null && (
           n.phoneme in ['AX', 'RR', 'IY', 'IX', 'EL'] ||
@@ -1082,7 +1116,7 @@ rules:
         n != null && (n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN'])
       next_word_boundary: >-
         n == null ? true :
-        (has(n.word) && has(current.word) ? n.word != current.word : true)
+        !dectalk_same_word(n, current)
       next_weak_vowel: >-
         n != null && (
           n.phoneme in ['AX', 'RR', 'IY', 'IX', 'EL'] ||
@@ -1224,7 +1258,7 @@ rules:
         b2 == null || !(b2.type == 'vowel' || b2.phoneme in ['EL', 'EM', 'EN'])
       next_word_boundary: >-
         n == null ? true :
-        (has(n.word) && has(current.word) ? n.word != current.word : true)
+        !dectalk_same_word(n, current)
       next_son2: >-
         n != null && (n.phoneme in ['W', 'Y', 'R', 'L', 'YU', 'M', 'N', 'NG', 'EM', 'EN'])
       glottalizing_context: >-
@@ -1516,7 +1550,7 @@ rules:
       current_unstressed: "get(current, 'stress', 0) == 0"
       r_not_word_initial: >-
         p != null &&
-        (!has(p.word) || !has(current.word) ? true : p.word == current.word)
+        (dectalk_word_id(p) == '' || dectalk_word_id(current) == '' || dectalk_same_word(p, current))
       prev_is_vowel: "p != null && p.type == 'vowel'"
       fused_base: >-
         !prev_is_vowel ? '' : (

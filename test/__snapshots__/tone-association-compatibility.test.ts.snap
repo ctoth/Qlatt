@@ -6,7 +6,7 @@ exports[`tone association preserves the existing frontend tracks > dectalk-engli
 
 exports[`tone association preserves the existing frontend tracks > dectalk-english: The cat sat. 1`] = `"d15000542ac97d8a8d5613481318cd5719a96a2f77552e0cb5ad8eb574de0ab4"`;
 
-exports[`tone association preserves the existing frontend tracks > dectalk-english: sip sip. 1`] = `"f0d3ee80210ae95bf52d469c39371ae5ecb9fbd2159834cefc80b27bbc92a8eb"`;
+exports[`tone association preserves the existing frontend tracks > dectalk-english: sip sip. 1`] = `"ff7e187efc78f6a3d3ed5f94d3866b0103131e1dd8792cef6fa9b2a68acc58e4"`;
 
 exports[`tone association preserves the existing frontend tracks > qlatt-beauty: Did Bob buy a blue balloon? 1`] = `"2bbd7b3fe5d6e1e05327827a6bc3efa9e12bfa38cdab4dd9a52ff6ab8d3aebf7"`;
 

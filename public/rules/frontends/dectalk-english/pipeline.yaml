@@ -4,12 +4,24 @@ functions:
   # bindings, and structural in_s_cluster share this equality. Keep the
   # permissive missing-word test in dectalk_fuse_vowel_r, cross-word/boundary
   # tests, and Qlatt/beauty's existing named predicates separate.
+  # A Segment's word is its Word Item (its SylStructure parent's parent), not
+  # the word's text: in "sip sip." the two words have the same text and are
+  # two words. The id of that Item, or '' for a Segment in no word.
+  dectalk_word_id:
+    params: [item]
+    body: >-
+      item == null || path(item, 'R:SylStructure.parent.parent') == null ? ''
+      : path(item, 'R:SylStructure.parent.parent').id
+    description: The id of the Word Item a Segment belongs to; '' when it belongs to none.
+    citations:
+      - "Taylor, Black & Caley 2001 (heterogeneous relation graphs: a Segment's Word through SylStructure)"
   dectalk_same_word:
     params: [a, b]
-    body: has(a.word) && has(b.word) && a.word == b.word
-    description: Presence-guarded word equality; callers retain their item-null and navigation conditions.
+    body: "dectalk_word_id(a) != '' && dectalk_word_id(a) == dectalk_word_id(b)"
+    description: Whether two Segments belong to one Word Item; callers retain their item-null and navigation conditions.
     citations:
-      - "Qlatt #133 engineering convention: same word requires both word fields to be present and equal"
+      - "Taylor, Black & Caley 2001 (heterogeneous relation graphs: a Segment's Word through SylStructure)"
+      - "Qlatt #133 engineering convention: same word requires both Segments to be in a word"
   # us_phcluster(first, second) as data: 'cluster', 's_onset' (CLUSTER_TRYS) or
   # 'none'. Arguments are phone names.
   dectalk_onset_cluster:
@@ -909,6 +921,7 @@ phases:
       # A wh-question's "?" becomes "." before anything reads the punctuation.
       - dectalk_wh_question_period
       - dectalk_sentence_initial_auxiliary
+      - dectalk_sentence_initial_had
       # The text stage's clause breaks: a comma the phonetic stage then reads
       # like a written one.
       - dectalk_break_marker

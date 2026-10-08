@@ -162,10 +162,10 @@ rules:
       # final stop is a silence of the same word; the scan passes over it.)
       boundary_item: >-
         look_ahead_where(current, 100,
-          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || (candidate.phoneme != "SIL" && (!(has(candidate.word) && has(source.word) && candidate.word == source.word) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]))')
+          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || (candidate.phoneme != "SIL" && (!(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]))')
       syllabic_first: >-
         boundary_item != null && boundary_item.phoneme != 'SIL'
-        && has(boundary_item.word) && boundary_item.word == current.word
+        && dectalk_same_word(boundary_item, current)
       mark: >-
         boundary_item != null && boundary_item.phoneme == 'SIL'
         ? boundary_item.punctuationSymbol : ''
@@ -174,11 +174,11 @@ rules:
       # before the boundary carries the mark.
       marked_ahead: >-
         look_ahead_where(current, 100,
-          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || !(has(candidate.word) && has(source.word) && candidate.word == source.word) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"] || isTrue(candidate, "morpheme_boundary_after")')
+          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"] || isTrue(candidate, "morpheme_boundary_after")')
       before_morpheme: >-
         isTrue(current, 'morpheme_boundary_after')
         || (marked_ahead != null && marked_ahead.phoneme != 'SIL'
-            && has(marked_ahead.word) && marked_ahead.word == current.word
+            && dectalk_same_word(marked_ahead, current)
             && !(marked_ahead.type == 'vowel' || marked_ahead.phoneme in ['EL', 'EM', 'EN'])
             && isTrue(marked_ahead, 'morpheme_boundary_after'))
     constraint: "in_rhyme && (before_morpheme || !syllabic_first)"

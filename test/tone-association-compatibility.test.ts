@@ -89,6 +89,11 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // A2_CODE, BRST and PLACE likewise: equal to e4ba44f4 without them.
 // The emphasis pulse regenerates "Gag, gang; go!": equal to f691f753 with
 // `--drop PS`.
+// Deciding "the same word" by the Word Item instead of its spelling
+// regenerates dectalk-english "sip sip.": the two words were read as one, so
+// the first had no word-final rime. Its durations are now DECtalk's (S 22,
+// IH 18, P 14, S 19, IH 22, P 14 frames), checked packet by packet by the
+// frame gate's dectalk-us-repeated-words-v1 "Sip sip.".
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

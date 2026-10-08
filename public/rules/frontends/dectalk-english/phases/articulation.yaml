@@ -111,6 +111,7 @@ tags:
   constriction: sets the area of the lips, the tongue blade or the tongue body, or the state that moves it
   voice_formant: sends a formant fixed by the voice
   velum: sets the velopharyngeal area or the step that moves it
+  frication_place: sets the code that tells the synthesizer where frication is made
   obstruent_source: sets the DC and UE words that shape an obstruent's source
 
 frame_programs:
@@ -187,6 +188,17 @@ frame_programs:
           artic_is_dummy(current) ? 0
           : get(params.policy.articulation.burst_frames, dectalk_name(current), 0)
         edge: 0
+      dental: { value: "artic_place(current, 'dental')", edge: false }
+      palatal: { value: "artic_place(current, 'palatal')", edge: false }
+      is_w_or_r: { value: "!artic_is_dummy(current) && dectalk_name(current) in ['W', 'R']", edge: false }
+      # us_begtyp: 1 front, 3 rounded back; a dummy vowel is IX or AX.
+      onset:
+        value: >-
+          (artic_is_dummy(current) ? get(current, 'dummy_phone', 'IX') : dectalk_name(current))
+            in params.policy.timing.front_onset_phones ? 'front'
+          : ((artic_is_dummy(current) ? get(current, 'dummy_phone', 'IX') : dectalk_name(current))
+            in params.policy.articulation.rounded_onset_phones ? 'round' : 'other')
+        edge: other
       is_dh: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'DH'", edge: false }
       is_affricate:
         value: "!artic_is_dummy(current) && dectalk_name(current) in ['CH', 'JH']"
@@ -344,6 +356,11 @@ frame_programs:
       dcstep: 0
       dc: 0
       ue: 0
+      # OUT_A2's code, the code to carry into the next phone, OUT_BRST, OUT_PLACE.
+      a2: 0
+      lastthing: 0
+      brst: 0
+      place: 0
       ts_l: 0
       ts_b: 0
       ts_tb: 0
@@ -370,6 +387,9 @@ frame_programs:
       # ph_draw.c:1427-1464
       DC: "r.dc"
       UE: "r.ue"
+      A2_CODE: "r.a2"
+      BRST: "r.brst"
+      PLACE: "r.place"
     after:
       run: 0
     write: articulation_frames
@@ -2038,6 +2058,118 @@ rules:
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:2587, 2618-2671"
 
+  # ===========================================================================
+  # The frication code (OUT_A2), the burst marker and the velar's place.
+  # ===========================================================================
+  # OUT_A2 is also the generic A2 amplitude, drawn before this section; in
+  # this build it is 0 on all but a few hundred of the corpus's packets, and
+  # the synthesizer acts only on the codes (VTM/vtmiont.c:797-1147). The
+  # amplitude is not ported: the word is the code or 0.
+  artic_frication_code_none:
+    kind: frame
+    program: articulation
+    set:
+      - { register: a2, value: 0, tag: frication_place }
+    citations:
+      - "DECtalk 4.63 VTM/vtmiont.c:797-1147 (only the codes are read)"
+  # A vowel's last frame announces the next consonant's place.
+  artic_frication_code_vowel_end:
+    kind: frame
+    program: articulation
+    unit: "u.vowel"
+    when: "f.index >= f.count - 1"
+    set:
+      - register: a2
+        value: >-
+          u.dental || n.labial ? 1000
+          : (n.palatal ? 2000
+          : (n.alveolar && f.index > 2 ? 3000 : r.a2))
+        tag: frication_place
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2037, 2056-2100"
+  artic_frication_code_by_place:
+    kind: frame
+    program: articulation
+    unit: "!u.nasal"
+    set:
+      - register: a2
+        value: >-
+          u.dental ? (u.is_dh_th_dz ? 1200 : (u.voiced ? 1100 : 1000))
+          : (u.labial ? 1300
+          : (u.palatal ? (u.is_affricate && f.index <= 4 ? 3200 : 2000)
+          : (u.alveolar ? 3000 : r.a2)))
+        tag: frication_place
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2197-2312"
+  # After an obstruent with a place, the code of that obstruent is repeated in
+  # the phone's first frame, and all through a dummy vowel; later frames
+  # forget it. The `else` belongs to the inner `if`.
+  artic_frication_code_carried:
+    kind: frame
+    program: articulation
+    unit: >-
+      !u.nasal && (p.palatal || p.dental || p.alveolar || p.labial)
+      && !(p.stop && u.obstruent) && p.obstruent
+    set:
+      - { register: a2, value: "f.index < 1 || u.dummy ? r.lastthing : r.a2", tag: frication_place }
+      - { register: lastthing, value: "f.index < 1 || u.dummy ? r.lastthing : 0", tag: frication_place }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2315-2335"
+  artic_frication_code_remembered:
+    kind: frame
+    program: articulation
+    unit: "!u.nasal"
+    when: "r.a2 >= 1000"
+    set:
+      - { register: lastthing, value: "r.a2", tag: frication_place }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2336-2337"
+  artic_frication_code_glide:
+    kind: frame
+    program: articulation
+    unit: "!u.initial && u.soncon && u.is_w_or_r"
+    set:
+      - { register: a2, value: 4000, tag: frication_place }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2343-2373"
+  artic_frication_code_lateral:
+    kind: frame
+    program: articulation
+    unit: "u.is_l"
+    set:
+      - { register: a2, value: 4000, tag: frication_place }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:2391-2394"
+
+  # --- the burst marker: ph_draw.c:4084-4096 -------------------------------
+  # 1 or 2 in the first frame of a release (tongue body, or lips or blade),
+  # -1 in its later frames, 0 otherwise.
+  artic_burst_marker:
+    kind: frame
+    program: articulation
+    set:
+      - register: brst
+        value: >-
+          r.in_lrelease || r.in_tbrelease || r.in_brelease
+            ? (r.brst == 0 ? (r.in_tbrelease ? 1 : 2) : -1)
+            : 0
+        tag: constriction
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:4084-4096"
+
+  # --- where a velar is made: ph_draw.c:4128-4150 --------------------------
+  # By the beginning type of the next phone (p_us_rom.h us_begtyp): 45 before
+  # a front one, 40 before a rounded back one, 42 otherwise. Nothing resets
+  # the word, so it keeps the last velar's value.
+  artic_velar_place:
+    kind: frame
+    program: articulation
+    unit: "u.velar"
+    set:
+      - { register: place, value: "n.onset == 'front' ? 45 : (n.onset == 'round' ? 40 : 42)", tag: frication_place }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:4128-4150"
+
 phases:
   - name: articulation
     after: [finalize]
@@ -2173,3 +2305,12 @@ phases:
       - artic_velum_in_nasal
       - artic_velum_before_nasal
       - artic_velum_closing
+      - artic_frication_code_none
+      - artic_frication_code_vowel_end
+      - artic_frication_code_by_place
+      - artic_frication_code_carried
+      - artic_frication_code_remembered
+      - artic_frication_code_glide
+      - artic_frication_code_lateral
+      - artic_burst_marker
+      - artic_velar_place

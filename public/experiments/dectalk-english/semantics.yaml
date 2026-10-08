@@ -94,6 +94,18 @@ params:
     description: "OUT_UE (packet word; unused by this graph)"
     type: int
     default: 0
+  A2_CODE:
+    description: "OUT_A2, frication place code (packet word; unused by this graph)"
+    type: int
+    default: 0
+  BRST:
+    description: "OUT_BRST, burst marker (packet word; unused by this graph)"
+    type: int
+    default: 0
+  PLACE:
+    description: "OUT_PLACE, velar place (packet word; unused by this graph)"
+    type: int
+    default: 0
   # DECtalk 4.63 uses KLGLOTT88, but the runtime default remains the impulse
   # fallback while mode 3 emits no voiced waveform.
   sourceMode:

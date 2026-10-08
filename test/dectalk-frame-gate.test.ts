@@ -63,10 +63,11 @@ const AMPLITUDE_REASON =
   "synthesizer never reads these packet values: it recomputes them from area parameters the " +
   "packets do not record (VTM/vtmiont.c:660-683, 1300-1319)";
 
-const AREA_REASON =
-  "not emitted: the frontend has no port yet of the area, pressure and control-code words " +
-  "ph_draw.c:908-4193 computes (the words DECtalk's synthesizer actually reads, " +
-  "VTM/vtmiont.c:660-683)";
+const A2_CODE_REASON =
+  "OUT_A2 is both a frication place code and the generic A2 amplitude. The codes are ported " +
+  "(ph_draw.c:2037-2394); the amplitude, which the word holds on a few hundred packets and " +
+  "the synthesizer ignores (VTM/vtmiont.c:797-1147 tests only the codes), is not, and the " +
+  "track has 0 there. Not ported either: the TZ case (ph_draw.c:4370-4390)";
 // phases/articulation.yaml ports the pressure, glottis, constriction, velum
 // and DC/UE rules of ph_draw.c. The areas, the velum and DC/UE differ only in
 // the one phrase whose allophones are not DECtalk's (TIMING_REASON). Where PS
@@ -105,8 +106,7 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   AREA_N: TIMING_REASON,
   DC: TIMING_REASON,
   UE: TIMING_REASON,
-  PLACE: AREA_REASON,
-  A2_CODE: AREA_REASON,
+  A2_CODE: A2_CODE_REASON,
   PH: TIMING_REASON,
 };
 

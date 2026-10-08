@@ -13,8 +13,6 @@
  * Left out, each because plain text cannot reach it:
  *   - index marks (positions of in-text commands that every action carries
  *     along in the C; text here has none);
- *   - the dictionary, word and status states (0x1D-0x1F), which stop with an
- *     error until they are ported (:3503-4015);
  *   - `go_until`, the 2/3-of-the-buffer mode of the caller's rolling input.
  */
 
@@ -77,6 +75,10 @@ const FATAL_FAIL = 4;
 const PAR_MAX_RETURN_LEVEL = 10;
 const PAR_MAX_MATCH_ARRAY = 30;
 const TYPE_DIGIT = 0x0001;
+const TYPE_UPPER = 0x0002;
+const TYPE_ALPHA = 0x0008;
+const TYPE_VOWEL = 0x0100;
+const TYPE_CONSONANT = 0x0200;
 const TYPE_WHITE = 0x0020;
 const TYPE_CLAUSE = 0x0800;
 const DICT_MISS_VALUE = 0;
@@ -97,10 +99,18 @@ const BIN_SAVE = 0x17;
 const BIN_MACRO = 0x18;
 const BIN_REPLACE = 0x19;
 const BIN_INSERT = 0x1a;
-const BIN_AFTER = 0x1b;
-const BIN_BEFORE = 0x1c;
+// The build defines GERMAN_COMPOUND_NOUNS (dectalkf.h:100): inserting after
+// and before are the insert state with a flag, and 0x1B is a compound break.
+const BIN_COMP_BREAK = 0x1b;
+const BIN_AFTER_FLAG = 0x40;
+const BIN_BEFORE_FLAG = 0x20;
+const INSERT_AFTER = BIN_INSERT | BIN_AFTER_FLAG;
+const INSERT_BEFORE = BIN_INSERT | BIN_BEFORE_FLAG;
 const BIN_DICTIONARY = 0x1d;
 const BIN_STATUS = 0x1e;
+const BIN_WORD = 0x1f;
+const BIN_DICT_HIT_FAIL = 0x80;
+const BIN_DICT_MISS_FAIL = 0x40;
 const BIN_LOOK_FROM_DISABLE = 0x40;
 const BIN_DIGIT_RANGE = 0x20;
 const BIN_CASE_INSEN = 0x20;
@@ -122,6 +132,8 @@ const CHAR_TYPE_TABLE: readonly number[] = [
 ];
 
 const INT_MAX = 0x7fffffff;
+/** Rules tried at one word before the port gives up. engineering estimate */
+const MAX_RULE_STEPS = 100000;
 
 /** return_value_t: where a match stands. */
 interface ReturnValue {
@@ -132,6 +144,8 @@ interface ReturnValue {
   rule: number;
   value: number;
   optional: number;
+  /** What a status state last set (:3951-3972); the caller's to read. */
+  parserFlag: number;
 }
 
 /** range_value_t: what a digit range or a set chose, for conditional replacement. */
@@ -147,6 +161,13 @@ interface Machine {
   compiled: readonly Uint8Array[];
   /** match_array: the saved strings $0 to $9. */
   captures: number[][];
+  /** The word lists: each entry's word and what it stands for. */
+  dictionaries: readonly (readonly DictionaryEntry[])[];
+}
+
+interface DictionaryEntry {
+  word: readonly number[];
+  expansion: readonly number[];
 }
 
 const copyReturn = (source: ReturnValue): ReturnValue => ({ ...source });
@@ -163,6 +184,90 @@ function fromHex(hex: string): Uint8Array {
 
 const toBytes = (text: string): number[] => [...text].map((char) => char.charCodeAt(0) & 0xff);
 const fromBytes = (bytes: readonly number[]): string => String.fromCharCode(...bytes);
+
+/** A word list entry of the table: the word, a NUL, what it stands for, a NUL. */
+function dictionaryEntry(hex: string): DictionaryEntry {
+  const bytes = [...fromHex(hex)];
+  const end = bytes.indexOf(0);
+  const word = end < 0 ? bytes : bytes.slice(0, end);
+  const rest = end < 0 ? [] : bytes.slice(end + 1);
+  const restEnd = rest.indexOf(0);
+  return { word, expansion: restEnd < 0 ? rest : rest.slice(0, restEnd) };
+}
+
+/** strcmp, and _stricmp when `fold` (the C library's: ASCII letters only). */
+function compareBytes(a: readonly number[], b: readonly number[], fold: boolean): number {
+  const lowered = (char: number): number => (fold && char >= 65 && char <= 90 ? char + 32 : char);
+  for (let i = 0; ; i += 1) {
+    const left = lowered(at(a, i));
+    const right = lowered(at(b, i));
+    if (left !== right) return left - right;
+    if (left === 0) return 0;
+  }
+}
+
+/**
+ * par_search_for_word (:3699-3826): look a word up in a word list. An entry
+ * that starts with a capital matches its exact spelling only; with
+ * `shortSearch` any spelling counts and nothing is returned but an empty
+ * expansion.
+ */
+function searchForWord(
+  machine: Machine,
+  word: readonly number[],
+  dictionaryNumber: number,
+  shortSearch: boolean,
+): readonly number[] | null {
+  const types = machine.table.characterTypes;
+  const entries = machine.dictionaries[dictionaryNumber - 1] ?? [];
+  const startsUpper = (index: number): boolean =>
+    (types[at(entries[index].word, 0)] & TYPE_UPPER) !== 0;
+  const low = 0;
+  const high = entries.length - 1;
+  let revSame = low;
+  let forSame = high;
+  let pos = 0;
+  let value = 0;
+  while (revSame <= forSame) {
+    pos = (revSame + forSame) >> 1;
+    value = compareBytes(word, entries[pos].word, true);
+    if (value === 0) break;
+    if (value < 0) forSame = pos - 1;
+    else revSame = pos + 1;
+  }
+  // A list with no entries: the C would read outside it; no table has one.
+  if (entries.length === 0) return null;
+  if (shortSearch && value === 0) return [];
+  if (value !== 0) return null;
+  revSame = pos - 1;
+  while (revSame >= low && compareBytes(word, entries[revSame].word, true) === 0) revSame -= 1;
+  forSame = pos + 1;
+  while (forSame <= high && compareBytes(word, entries[forSame].word, true) === 0) forSame += 1;
+  revSame += 1;
+  forSame -= 1;
+  // The last of the spellings is the lower-case one if there is any (:3769).
+  let saveFor = forSame;
+  while (forSame !== revSame && !startsUpper(forSame)) forSame -= 1;
+  if (revSame !== forSame) {
+    let npos = 0;
+    while (revSame <= forSame) {
+      npos = (revSame + forSame) >> 1;
+      value = compareBytes(word, entries[npos].word, false);
+      if (value === 0) break;
+      if (value < 0) forSame = npos - 1;
+      else revSame = npos + 1;
+    }
+    if (value !== 0) return null;
+    saveFor = npos;
+  }
+  return entries[saveFor].expansion;
+}
+
+/** atoi: the number a string starts with. */
+function parseInteger(bytes: readonly number[]): number {
+  const match = /^\s*([+-]?\d+)/.exec(fromBytes(bytes));
+  return match ? Number.parseInt(match[1], 10) : 0;
+}
 
 /** par_convert_number (:4534): the number in the first `count` characters. */
 function convertNumber(input: readonly number[], from: number, count: number): number {
@@ -407,6 +512,7 @@ function matchSet(
     rule: sectP,
     value: SUCCESS,
     optional: ret.optional,
+    parserFlag: 0,
   };
   const saveRet = copyReturn(newRet);
   const numSections = at(rule, ruleP);
@@ -472,6 +578,7 @@ function matchSetsWithRanges(
     rule: 0,
     value: SUCCESS,
     optional: 0,
+    parserFlag: 0,
   };
   const sectionP = ruleP;
   const endOfAllTypes = at(rule, sectionP + at(rule, ruleP)) + 1;
@@ -568,6 +675,7 @@ function lookAhead(
     rule: findIndex,
     value: SUCCESS,
     optional: 0,
+    parserFlag: 0,
   });
   const range: RangeValue = { rangeSet: 0, start: 0, min: 0, end: 0 };
   if (charType === BIN_EXACT) {
@@ -607,8 +715,17 @@ function lookAhead(
     const length = matchSetsWithRanges(machine, rule, input, newRet, range, 0, 1);
     return newRet.value === SUCCESS && length > 0 ? 1 : 0;
   }
-  void ret;
-  throw new Error("E_TEXT_PARSER: look-ahead to a dictionary state is not ported");
+  // A dictionary state (:4860-4876, par_look_ahead_dictionary :3649-3672).
+  // As written: the copy keeps the caller's place in the rule and its input
+  // offset, and a word that is not found leaves the value at success, so the
+  // answer is whether the state's own pattern matched.
+  const newRet = copyReturn(ret);
+  newRet.inputPos = ipos;
+  newRet.outputPos = 0;
+  newRet.outputOffset = 0;
+  newRet.value = SUCCESS;
+  matchRule(machine, rule, BIN_DICTIONARY, input, [], newRet, 1);
+  return newRet.value === SUCCESS ? 1 : 0;
 }
 
 /** par_match_string (:4250-4460): one matching element. */
@@ -697,8 +814,8 @@ function buildString(
       return digit < 0 || digit > 9 ? 0 : digit;
     };
     if (range.rangeSet === 2) condNum = range.start;
-    else if (state === BIN_BEFORE) condNum = digitAt(ret.outputPos);
-    else if (state === BIN_AFTER) condNum = digitAt(ret.outputPos + ret.outputOffset - 1);
+    else if (state === INSERT_BEFORE) condNum = digitAt(ret.outputPos);
+    else if (state === INSERT_AFTER) condNum = digitAt(ret.outputPos + ret.outputOffset - 1);
     else {
       condNum = convertNumber(output, ret.outputPos, ret.outputOffset);
       if (range.rangeSet === 1) condNum -= range.start;
@@ -750,15 +867,96 @@ function performAction(
   machine: Machine,
   rule: Uint8Array,
   state: number,
+  input: readonly number[],
   output: number[],
   ret: ReturnValue,
   range: RangeValue,
   saveNum: number,
+  dictStateFlag: number,
   inRuleIndex: number,
 ): void {
   const from = ret.outputPos;
   const count = ret.outputOffset;
-  switch (state) {
+  // par_insert_string (:3120-3130): after before before, by the state's flags.
+  let action = state;
+  if (state === BIN_INSERT) {
+    const flags = at(rule, inRuleIndex);
+    if (flags & BIN_AFTER_FLAG) action = INSERT_AFTER;
+    else if (flags & BIN_BEFORE_FLAG) action = INSERT_BEFORE;
+  }
+  switch (action) {
+    case BIN_COMP_BREAK:
+      // par_compound_break (:2822): German compound nouns.
+      throw new Error("E_TEXT_PARSER: the compound break state is not ported");
+    case BIN_DICTIONARY: {
+      // par_dom_dict_search (:3503-3625). `saveNum` is the list's number.
+      if (ret.inputOffset >= PAR_MAX_MATCH_ARRAY || count >= PAR_MAX_MATCH_ARRAY) {
+        ret.value = FATAL_FAIL;
+        return;
+      }
+      machine.captures[7] = input.slice(ret.inputPos, ret.inputPos + ret.inputOffset);
+      machine.captures[8] = output.slice(from, from + count).map((char) => char ?? 0);
+      // The C searches for a string: it ends at the first NUL.
+      const end = machine.captures[8].indexOf(0);
+      const word = end < 0 ? machine.captures[8] : machine.captures[8].slice(0, end);
+      const found = searchForWord(machine, word, saveNum, dictStateFlag !== 0);
+      if (dictStateFlag) {
+        if (found) ret.value = SUCCESS;
+        return;
+      }
+      const failed = (): void => {
+        ret.value = ret.optional === 1 ? OPT_FAIL : FAIL;
+      };
+      if (found) {
+        machine.captures[9] = [...found];
+        if (at(rule, inRuleIndex) & BIN_DICT_HIT_FAIL) {
+          failed();
+          return;
+        }
+        // The hit action matches again from the start of the word.
+        ret.inputOffset = 0;
+        ret.outputOffset = 0;
+        matchRule(machine, rule, BIN_COPY, input, output, ret, dictStateFlag);
+        ret.rule = at(rule, inRuleIndex + 4) + 1;
+        return;
+      }
+      ret.rule = at(rule, inRuleIndex + 3) + 1;
+      if (at(rule, inRuleIndex) & BIN_DICT_MISS_FAIL) {
+        failed();
+        return;
+      }
+      ret.inputOffset = 0;
+      ret.outputOffset = 0;
+      matchRule(machine, rule, BIN_COPY, input, output, ret, dictStateFlag);
+      return;
+    }
+    case BIN_WORD: {
+      // par_check_word_string (:3856-3948): letters, with a consonant and a
+      // vowel among them, two characters or more.
+      const types = machine.table.characterTypes;
+      const failed = (): void => {
+        ret.value = ret.optional ? OPT_FAIL : FAIL;
+      };
+      let hasConsonant = false;
+      let hasVowel = false;
+      for (let i = from; i < from + count && !(hasConsonant && hasVowel); i += 1) {
+        const type = types[at(output, i)];
+        if (type & TYPE_CONSONANT) hasConsonant = true;
+        if (type & TYPE_VOWEL) hasVowel = true;
+        if ((type & TYPE_ALPHA) === 0) {
+          failed();
+          return;
+        }
+      }
+      if (!(hasConsonant && hasVowel && count >= 2)) failed();
+      return;
+    }
+    case BIN_STATUS: {
+      // par_status_string (:3951-3972).
+      const built = buildString(machine, rule, output, ret, range, BIN_STATUS, inRuleIndex);
+      ret.parserFlag = parseInteger(built ?? []);
+      return;
+    }
     case BIN_DELETE:
       // par_delete_string (:2639-2701).
       ret.outputOffset = 0;
@@ -795,17 +993,17 @@ function performAction(
       ret.outputOffset = newLength;
       return;
     }
-    case BIN_AFTER: {
+    case INSERT_AFTER: {
       // par_insert_string_after (:3231-3317).
-      const built = buildString(machine, rule, output, ret, range, BIN_AFTER, inRuleIndex);
+      const built = buildString(machine, rule, output, ret, range, INSERT_AFTER, inRuleIndex);
       if (!built) return;
       for (let i = 0; i < built.length; i += 1) output[from + count + i] = built[i];
       ret.outputOffset += built.length;
       return;
     }
-    case BIN_BEFORE: {
+    case INSERT_BEFORE: {
       // par_insert_string_before (:3318-3411).
-      const built = buildString(machine, rule, output, ret, range, BIN_BEFORE, inRuleIndex);
+      const built = buildString(machine, rule, output, ret, range, INSERT_BEFORE, inRuleIndex);
       if (!built) return;
       const original = output.slice(from, from + count);
       for (let i = 0; i < built.length; i += 1) output[from + i] = built[i];
@@ -819,9 +1017,7 @@ function performAction(
       // ERROR_func2 (:649-667): nothing.
       return;
     default:
-      throw new Error(
-        `E_TEXT_PARSER: state 0x${state.toString(16)} (dictionary, status or word) is not ported`,
-      );
+      throw new Error(`E_TEXT_PARSER: no action for state 0x${state.toString(16)}`);
   }
 }
 
@@ -833,6 +1029,7 @@ function matchRule(
   input: readonly number[],
   output: number[],
   ret: ReturnValue,
+  dictStateFlag = 0,
 ): void {
   const lengthOfInput = input.length;
   const newRet: ReturnValue = {
@@ -843,6 +1040,7 @@ function matchRule(
     rule: ret.rule,
     value: SUCCESS,
     optional: state === BIN_OPTIONAL ? 1 : ret.optional,
+    parserFlag: ret.parserFlag,
   };
   const inRuleIndex = ret.rule;
   const range: RangeValue = { rangeSet: 0, start: 0, min: 0, end: 0 };
@@ -878,7 +1076,7 @@ function matchRule(
       newRet.rule += 1;
       endOfMatch = at(rule, newRet.rule);
       newRet.rule += 1;
-      if (state >= BIN_REPLACE && state <= BIN_BEFORE) {
+      if (state >= BIN_REPLACE && state <= BIN_INSERT) {
         newRet.rule += 1;
         if (at(rule, inRuleIndex) & BIN_CONDITIONAL_REPLACE) {
           newRet.rule += at(rule, newRet.rule);
@@ -947,8 +1145,20 @@ function matchRule(
       return;
     }
     if (state !== BIN_END_OF_RULE) {
-      performAction(machine, rule, state, output, newRet, range, saveStateNum, inRuleIndex);
+      performAction(
+        machine,
+        rule,
+        state,
+        input,
+        output,
+        newRet,
+        range,
+        saveStateNum,
+        dictStateFlag,
+        inRuleIndex,
+      );
     }
+    ret.parserFlag = newRet.parserFlag;
     if (newRet.value === FATAL_FAIL) {
       ret.value = FATAL_FAIL;
       return;
@@ -981,6 +1191,7 @@ export function rewriteText(table: TextParserTable, text: string, options: Rewri
     table,
     compiled: table.rules.map((rule) => fromHex(rule.bytes)),
     captures: Array.from({ length: 10 }, () => []),
+    dictionaries: table.dictionaries.map((list) => list.map(dictionaryEntry)),
   };
   if (options.section >= table.sections.length) {
     throw new Error(`E_TEXT_PARSER: no rule section ${options.section}`);
@@ -999,6 +1210,7 @@ export function rewriteText(table: TextParserTable, text: string, options: Rewri
     rule: 0,
     value: FAIL,
     optional: 0,
+    parserFlag: 0,
   };
   let hitRet = copyReturn(newRet);
   let saveRet = copyReturn(newRet);
@@ -1025,8 +1237,16 @@ export function rewriteText(table: TextParserTable, text: string, options: Rewri
     let lastRuleWasHit = 0;
     const returnRule: number[] = [];
 
+    let steps = 0;
     while (!done) {
       const entry = table.rules[currentRuleNumber];
+      // Not in the C, which would hang: a chain of rules that never ends.
+      steps += 1;
+      if (steps > MAX_RULE_STEPS) {
+        throw new Error(
+          `E_TEXT_PARSER: the rules do not come to an end at character ${newRet.inputPos + newRet.inputOffset} (rule ${entry.number ?? entry.index})`,
+        );
+      }
       if (entry.kind !== "rule") {
         if (entry.kind === "stop") {
           done = true;

@@ -73,13 +73,35 @@ const visible = (text: string): string =>
     .join("");
 const collapsed = (text: string): string => text.replace(/\s+/g, " ").trim();
 
+/** With --hits: each rule that hits, with its .par line, as it happens. */
+const showHits = argv.includes("--hits");
+let hitsShown = 0;
+const onHit = (hit: {
+  rule: { number?: number; line?: number };
+  before: string;
+  after: string;
+}): void => {
+  hitsShown += 1;
+  if (!showHits || hitsShown > 200) return;
+  console.error(
+    `  R${hit.rule.number} (line ${hit.rule.line}): "${visible(hit.before)}" -> "${visible(hit.after)}"`,
+  );
+};
+
 function port(text: string): string {
+  hitsShown = 0;
   const punctuated = rewriteText(table, text, {
     language: LANGUAGE,
     mode: PUNCTUATION_MODE,
     section: 1,
+    onHit,
   });
-  return rewriteText(table, punctuated, { language: LANGUAGE, mode: MAIN_MODE, section: 2 });
+  return rewriteText(table, punctuated, {
+    language: LANGUAGE,
+    mode: MAIN_MODE,
+    section: 2,
+    onHit,
+  });
 }
 
 let total = 0;
@@ -91,6 +113,7 @@ for (const [text, clauses] of Object.entries(fixture.entries)) {
   if (clauses === null || clauses.length === 0) continue;
   if (only && !text.includes(only)) continue;
   total += 1;
+  if (argv.includes("--progress")) console.error(text);
   const theirs = clauses.join("");
   let mine: string;
   try {

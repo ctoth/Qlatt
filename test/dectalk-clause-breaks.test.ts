@@ -141,4 +141,19 @@ describe("clause breaks in dectalk-english", () => {
       ",",
     );
   });
+
+  it("speaks a break one word late after a word that was read ahead", () => {
+    // The break test reads the mark of the slot whose number is the count of
+    // words spoken so far, and "am" after "9" is not counted (ls_util.c:827,
+    // ls_task.c:3828-3843): the break of "and" is spoken before "the".
+    expect(withBreaks("The big store opens nine and the small one closes late today.")).toContain(
+      "nine, and the",
+    );
+    const late = withBreaks("The big store opens 9 am and the small one closes late today.");
+    expect(late).toContain("and, the small");
+    expect(late.split(",").length).toBe(2);
+    expect(
+      withBreaks("The big house cost $2 million and the small one cost less today."),
+    ).toContain("and, the small");
+  });
 });

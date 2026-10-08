@@ -822,13 +822,17 @@ relations:
       text_form_classes: []
       clause_word_index: []
       clause_word_count: []
+      # The word's place among the stretch's words as they are spoken; 0 for
+      # a word the routine before it read ahead.
+      clause_spoken_index: []
       # The stretch ends at the text's end with no mark written, and the
       # word's part in a conjunction of several words (LTS/proverbs.h).
       clause_end_supplied: [true, false]
       conjunction_sequence: [first, rest]
-      # LTS/ls_task.c:5129-5229: a word that may carry a clause break, and one
-      # that does.
+      # LTS/ls_task.c:5129-5229: a word that may carry a clause break, one
+      # whose slot in the parse has a break, and one a break is spoken before.
       break_marker: [true, false]
+      break_slot: [true, false]
       clause_break_before: [true, false]
       phrase_start: [vp, pp]
       # What the phone sort makes of a prepositional-phrase start: kept or
@@ -937,6 +941,7 @@ phases:
       # like a written one.
       - dectalk_break_marker
       - dectalk_clause_break
+      - dectalk_clause_break_place
       - dectalk_clause_break_comma
       # ph_sort.c:1313-1329: looked up on the symbols as they come in, before
       # any rule below changes a phone or its stress.

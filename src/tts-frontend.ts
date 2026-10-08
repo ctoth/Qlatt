@@ -308,14 +308,18 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
           // marks, from 1, and how many there are.
           clause_word_index: { kind: "number" },
           clause_word_count: { kind: "number" },
+          // The word's place among the stretch's words as they are spoken one
+          // by one; 0 for a word the routine before it read ahead.
+          clause_spoken_index: { kind: "number" },
           // The stretch of words ends at the text's end, where no mark is
           // written (a text rule supplied the one that closes it).
           clause_end_supplied: { kind: "boolean" },
           // The word's part in a conjunction of several words.
           conjunction_sequence: { kind: "string", values: ["first", "rest"] },
-          // Set by a frontend's rules: the word can carry a clause break, and
-          // a break stands before it.
+          // Set by a frontend's rules: the word can carry a clause break, its
+          // place in the stretch has one, and a break stands before it.
           break_marker: { kind: "boolean" },
+          break_slot: { kind: "boolean" },
           clause_break_before: { kind: "boolean" },
           phrase_start: { kind: "string", values: ["vp", "pp"] },
           // What a frontend's rules make of a prepositional-phrase start in
@@ -559,26 +563,33 @@ function createStructure(
   // as several words is one written word, and the pause inside it ends nothing.
   // A written word that ends in one of the frontend's stretch-end characters
   // ends the stretch too, once all of its tokens have gone by.
-  type Stretch = { count: number; endSupplied: boolean };
-  const clausePlace = new Map<string, { index: number; clause: Stretch }>();
-  let clause: Stretch = { count: 0, endSupplied: false };
+  // `spoken` is the word's place among the stretch's words as they are
+  // spoken one by one: a word that the routine before it read ahead is not
+  // counted there and has no place (0).
+  type Stretch = { count: number; endSupplied: boolean; readAhead: number };
+  const newStretch = (): Stretch => ({ count: 0, endSupplied: false, readAhead: 0 });
+  const clausePlace = new Map<string, { index: number; spoken: number; clause: Stretch }>();
+  let clause = newStretch();
   let endsAfterWord = false;
+  let spoken = 0;
   for (const token of transcribed) {
     if (token.isPunctuation) {
       if (!token.continuesWrittenWord) {
         if (token.supplied) clause.endSupplied = true;
-        clause = { count: 0, endSupplied: false };
+        clause = newStretch();
         endsAfterWord = false;
       }
       continue;
     }
     if (clausePlace.has(token.sourceTokenId)) continue;
     if (!token.continuesWrittenWord) {
-      if (endsAfterWord) clause = { count: 0, endSupplied: false };
+      if (endsAfterWord) clause = newStretch();
       endsAfterWord = token.endsWordStretch === true;
       clause.count += 1;
+      if (token.readAhead) clause.readAhead += 1;
+      spoken = token.readAhead ? 0 : clause.count - clause.readAhead;
     }
-    clausePlace.set(token.sourceTokenId, { index: clause.count, clause });
+    clausePlace.set(token.sourceTokenId, { index: clause.count, spoken, clause });
   }
   const sharedTransaction = Object.hasOwn(spec, "text_recognition") ? null : beginStructure();
   let wordIndex = 0;
@@ -602,6 +613,7 @@ function createStructure(
     if (place) {
       transaction.set(word, "clause_word_index", place.index);
       transaction.set(word, "clause_word_count", place.clause.count);
+      transaction.set(word, "clause_spoken_index", place.spoken);
       if (place.clause.endSupplied) transaction.set(word, "clause_end_supplied", true);
     }
     if (phraseStart) transaction.set(word, "phrase_start", phraseStart);

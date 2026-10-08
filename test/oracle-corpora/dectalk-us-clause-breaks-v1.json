@@ -24,6 +24,9 @@
     { "id": "cb-on-the-other-hand", "text": "The old man walked slowly on the other hand the boy ran fast today.", "group": "conjunction-sequence", "tags": ["four-words", "break"], "expectedFocus": ["trace"] },
     { "id": "cb-word-after-three", "text": "He ran as soon as the old dog by the gate barked loudly at him today.", "group": "conjunction-sequence", "tags": ["three-words", "word-after-marked", "no-break"], "expectedFocus": ["trace"] },
     { "id": "cb-after-two", "text": "He ran even if the old dog by the gate barked loudly at him today.", "group": "conjunction-sequence", "tags": ["two-words", "break-later"], "expectedFocus": ["trace"] },
-    { "id": "cb-plain-conjunction", "text": "The big dog barked and the small cat ran away.", "group": "conjunction-sequence", "tags": ["one-word", "break"], "expectedFocus": ["trace"] }
+    { "id": "cb-plain-conjunction", "text": "The big dog barked and the small cat ran away.", "group": "conjunction-sequence", "tags": ["one-word", "break"], "expectedFocus": ["trace"] },
+    { "id": "cb-late-after-am", "text": "The big store opens 9 am and the small one closes late today.", "group": "read-ahead-word", "tags": ["am-after-number", "break-one-word-late"], "expectedFocus": ["trace"] },
+    { "id": "cb-not-late", "text": "The big store opens nine and the small one closes late today.", "group": "read-ahead-word", "tags": ["no-read-ahead", "break"], "expectedFocus": ["trace"] },
+    { "id": "cb-late-after-million", "text": "The big house cost $2 million and the small one cost less today.", "group": "read-ahead-word", "tags": ["quantity-after-money", "break-one-word-late"], "expectedFocus": ["trace"] }
   ]
 }

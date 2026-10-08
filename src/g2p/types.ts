@@ -44,6 +44,12 @@ export interface PronunciationResult {
    */
   conjunctionRole?: "first" | "rest";
   /**
+   * The word was read ahead by the routine that spoke the word before it
+   * ("am" after a number, "million" after a dollar amount): it is no word of
+   * its own to what counts words as they are spoken.
+   */
+  readAhead?: boolean;
+  /**
    * The form classes as the frontend's phonetic rules receive them, where
    * that differs from what the lexicon holds (table-lts-pronounce.ts
    * receivedFormClassWord).

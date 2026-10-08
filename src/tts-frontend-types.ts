@@ -19,6 +19,11 @@ export interface TranscriptionToken {
    */
   conjunctionRole?: "first" | "rest";
   /**
+   * The written word was read ahead by the routine that spoke the word
+   * before it, and is no word of its own where words are counted as spoken.
+   */
+  readAhead?: boolean;
+  /**
    * The written word ends in a character that ends a stretch of words for
    * the frontend, though no punctuation token follows (an abbreviation's
    * period).

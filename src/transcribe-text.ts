@@ -817,6 +817,7 @@ export function transcribeText(
                 ? { conjunctionRole: pronResult.conjunctionRole }
                 : {}),
               ...(inputToken.endsWordStretch ? { endsWordStretch: true } : {}),
+              ...("readAhead" in pronResult && pronResult.readAhead ? { readAhead: true } : {}),
               ...(part.phraseStart ? { phraseStart: part.phraseStart } : {}),
               ...(part.morphemeAfter?.includes(phoneIndex) ? { morphemeBoundaryAfter: true } : {}),
               // Indices of a one-word result are indices into its phones.

@@ -241,6 +241,8 @@ export function pronounce(
       source: "spelling",
       word: lowerWord,
       parts,
+      // The number or time routine read this word ahead (:3626-3640, :3828-3843).
+      readAhead: true,
       ...(table.formClassNames && context.afterNumber === "plain"
         ? { formClasses: ["adj"], formClassWord: 2 ** table.formClassNames.indexOf("adj") }
         : {}),
@@ -297,6 +299,8 @@ export function pronounce(
       source: "number",
       word: lowerWord,
       parts,
+      // The money routine read this word ahead (LTS/ls_task.c:3234-3242).
+      readAhead: true,
     };
   }
 

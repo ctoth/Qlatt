@@ -14,5 +14,8 @@
   "cb-on-the-other-hand": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
   "cb-word-after-three": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
   "cb-after-two": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
-  "cb-plain-conjunction": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"]
+  "cb-plain-conjunction": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-late-after-am": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-not-late": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cb-late-after-million": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"]
 }

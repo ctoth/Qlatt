@@ -253,7 +253,7 @@ rules:
       place - last_marker > 3 && !next_marked
       && length > place + 3
     apply:
-      - field: clause_break_before
+      - field: break_slot
         op: set
         value: "true"
         tag: boundary
@@ -262,6 +262,38 @@ rules:
       - "DECtalk 4.63 LTS/ls_task.c:4843-4856 find_next_marker"
       - "DECtalk 4.63 LTS/ls_util.c:824-853 (either break is sent as a COMMA before the word when length > fc_index + 3)"
       - "DECtalk 4.63 LTS/ls_task.c:5066-5075 and 5168 (length is the number of word slots; the flush character at a text's end makes one)"
+
+  # Where the break is spoken. The rule above sets it on a word's slot in the
+  # parse; the comma is written when a word's class is sent, from the mark of
+  # the slot whose number is the count of words spoken so far (ls_util.c:827,
+  # pro_markers[fc_index]). The two agree until a routine reads a word ahead
+  # and speaks it with its own ("am" after a number, LTS/ls_task.c:3828-3843;
+  # "million" after a dollar amount, :3234-3242): that word is never counted,
+  # and from there to the stretch's end every break is spoken one word late.
+  # Measured on say.exe: "The big store opens 9 am and the small one closes
+  # late today." has its comma after "and", "…opens nine and…" before it.
+  dectalk_clause_break_place:
+    kind: scalar
+    select:
+      relation: Word
+      where: "get(current, 'clause_spoken_index', 0) > 0"
+    define:
+      spoken: "get(current, 'clause_spoken_index', 0)"
+      slot_word: >-
+        spoken == get(current, 'clause_word_index', 0) ? current
+        : look_back_where(current, 500,
+            'get(candidate, "clause_word_index", 0) == get(source, "clause_spoken_index", 0) || get(candidate, "clause_word_index", 0) <= 1')
+    constraint: >-
+      slot_word != null && isTrue(slot_word, 'break_slot')
+      && get(slot_word, 'clause_word_index', 0) == spoken
+    apply:
+      - field: clause_break_before
+        op: set
+        value: "true"
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 LTS/ls_util.c:824-853 (the break is read from pro_markers[fc_index] when a word's class is sent)"
+      - "DECtalk 4.63 LTS/ls_task.c:3234-3242 and 3828-3843 (the next word is read ahead and spoken by the routine of the word before it)"
 
   # The comma itself: a punctuation silence in front of the word's first
   # phone. It belongs to no word.
@@ -391,7 +423,13 @@ rules:
       # The Segment after the Word's last one: the punctuation silence for a
       # clause's last word, nothing for the utterance's last word.
       after_this: "path(current, 'R:SylStructure.daughtern.daughtern.R:Segment.n')"
-      clause_final: "after_this == null || after_this.phoneme == 'SIL'"
+      # A break the text stage puts before the next word ends the clause here
+      # as a written mark does ("…opens 9 am and, the small one…": DECtalk's
+      # duration routine has the "and" stressed, with the comma's boundary).
+      n: next
+      clause_final: >-
+        after_this == null || after_this.phoneme == 'SIL'
+        || (n != null && isTrue(n, 'clause_break_before'))
     apply:
       - field: phrase_start_state
         op: set

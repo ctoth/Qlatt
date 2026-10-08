@@ -73,6 +73,12 @@ export type TextToKlattTrackOptions = {
   directionTrack?: DirectionTrack;
   diagnostics?: Diagnostics | null;
   captureTooling?: boolean;
+  /**
+   * Called each time a stage of the pipeline has finished, with its name (a
+   * rule phase is `phase <name>`), so a caller can time the stages
+   * (scripts/measure-frontend-time.ts --stages).
+   */
+  onStage?: (stage: string) => void;
 };
 
 export type TextToKlattTrackDetailedResult = {
@@ -835,6 +841,9 @@ function buildTextToKlattTrackDetailed(
     parents: [speakerDecision.id],
   });
 
+  const { onStage } = options;
+  const onPhaseEnd = onStage ? (phase: string) => onStage(`phase ${phase}`) : undefined;
+  onStage?.("setup");
   const transcriptionConfig = getTranscriptionConfig(spec);
   // A frontend whose policy names a text parser table has its text rewritten
   // by those rules before anything else reads it (src/text-parser).
@@ -856,7 +865,9 @@ function buildTextToKlattTrackDetailed(
   // Phase checkpoints and rule attempts are recorded only when asked for, in
   // these phases as in the later ones: a checkpoint serializes the whole graph.
   const captureTooling = options.captureTooling === true;
+  onStage?.("text parser and recognition");
   const normalized = normalizeSourceItems(utterance, spec, { captureTooling });
+  onStage?.("normalization phases");
   const transcribed = transcribeText(normalized, {
     captureTooling,
     provenance,
@@ -871,6 +882,7 @@ function buildTextToKlattTrackDetailed(
     dictLookup: dictionary == null && spec.skip_dictionary ? () => null : undefined,
   });
 
+  onStage?.("transcription");
   const inventoryDecision = provenance.add({
     stage: "frontend",
     type: "inventory_selected",
@@ -969,7 +981,9 @@ function buildTextToKlattTrackDetailed(
     construct.partitionAnchors(segments, utterance.axis.start.id, utterance.axis.end.id);
   }
   construct.commit();
+  onStage?.("segments");
   createStructure(utterance, transcribed, segments, spec, resources.inventory);
+  onStage?.("structure");
 
   const requestedRate = options.rate ?? 1;
   if (!Number.isFinite(requestedRate) || requestedRate <= 0) {
@@ -1019,6 +1033,7 @@ function buildTextToKlattTrackDetailed(
     parameters: mergedPolicy(spec, speakerPolicy),
     inventory: graphInventory,
     captureTooling,
+    onPhaseEnd,
   });
   if (options.directionTrack) {
     const parsed = parseDirectionInput(
@@ -1043,6 +1058,7 @@ function buildTextToKlattTrackDetailed(
     parameters: mergedPolicy(spec, speakerPolicy),
     inventory: graphInventory,
     captureTooling,
+    onPhaseEnd,
   });
 
   const ratePolicy = recordOrEmpty(policyRecord(spec).rate);
@@ -1076,6 +1092,7 @@ function buildTextToKlattTrackDetailed(
     }),
     inventory: graphInventory,
     captureTooling,
+    onPhaseEnd,
   });
   runGraphRuleEngine(utterance, spec, {
     evaluationOwner,
@@ -1086,6 +1103,7 @@ function buildTextToKlattTrackDetailed(
     }),
     inventory: graphInventory,
     captureTooling,
+    onPhaseEnd,
   });
   const f0Policy = recordOrEmpty(policyRecord(spec).f0);
   const f0Range = rate ** -f0Exponent;
@@ -1109,6 +1127,7 @@ function buildTextToKlattTrackDetailed(
     }),
     inventory: graphInventory,
     captureTooling,
+    onPhaseEnd,
   });
 
   const referenceVoice = registry ? resolveVoice(registry, registry.default, speakerProfile) : null;
@@ -1171,6 +1190,7 @@ function buildTextToKlattTrackDetailed(
     }
   }
   speakerStamp.commit();
+  onStage?.("speaker projection");
 
   let speakerParams: Record<string, unknown> | undefined;
   if (isLayeredF0Model(spec.f0_model)) {
@@ -1221,6 +1241,7 @@ function buildTextToKlattTrackDetailed(
       decisionId: silenceDecision.id,
     },
   });
+  onStage?.("lowering");
   return { track: lowered.frames, utterance, resolvedSpeaker, speakerParams };
 }
 

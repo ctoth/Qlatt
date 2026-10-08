@@ -29,6 +29,8 @@ export interface GraphRuleEngineOptions {
   inventory?: GraphInventoryResource;
   evaluationOwner?: GraphRuleEvaluationOwner;
   captureTooling?: boolean;
+  /** Called with a phase's name when the phase has run, for timing. */
+  onPhaseEnd?: (phase: string) => void;
 }
 
 export interface GraphInventoryResource {
@@ -2731,6 +2733,7 @@ export function runGraphRuleEngine(
       }
     }
     finalizePhase(utterance, spec, phase, captureTooling);
+    options.onPhaseEnd?.(phase.name);
     if (phase.compute_times) timingFinalized = true;
   }
   return {

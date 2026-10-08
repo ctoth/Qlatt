@@ -167,6 +167,51 @@ describe("frame program machine", () => {
     expect(column("LEFT")).toEqual([2, 2, 2, 2, 1, 0]);
   });
 
+  it("sees three units back and three ahead, and lets a total read its group so far", () => {
+    const results = runFrameProgram({
+      registers: { seen: 0 },
+      outputs: {
+        P3: "p3.size",
+        P2: "p2.size",
+        N2: "n2.size",
+        N3: "n3.size",
+        P2_COUNT: "f.prev2_count",
+        N2_COUNT: "f.next2_count",
+        N3_COUNT: "f.next3_count",
+        BEFORE_STOP: "g.before_stop",
+      },
+      edgeFeatures: { size: -1, stop: false },
+      params: {},
+      // Frames of the units before the first stop: a running sum decides.
+      group: {
+        start: null,
+        totals: {
+          stops: "u.stop ? 1 : 0",
+          before_stop: "g.stops > 0 ? 0 : f.count",
+        },
+      },
+      units: [
+        { features: { size: 10, stop: false }, frames: 1 },
+        { features: { size: 20, stop: false }, frames: 2 },
+        { features: { size: 30, stop: true }, frames: 1 },
+        { features: { size: 40, stop: false }, frames: 3 },
+        { features: { size: 50, stop: false }, frames: 1 },
+      ],
+      rules: [],
+    });
+    const first = (name: string) => results.map((result) => result.columns[name]?.[0]);
+    expect(first("P3")).toEqual([-1, -1, -1, 10, 20]);
+    expect(first("P2")).toEqual([-1, -1, 10, 20, 30]);
+    expect(first("N2")).toEqual([30, 40, 50, -1, -1]);
+    expect(first("N3")).toEqual([40, 50, -1, -1, -1]);
+    expect(first("P2_COUNT")).toEqual([0, 0, 1, 2, 1]);
+    expect(first("N2_COUNT")).toEqual([1, 3, 1, 0, 0]);
+    expect(first("N3_COUNT")).toEqual([3, 1, 0, 0, 0]);
+    // Units 0 and 1 (three frames) come before the stop; the stop itself is
+    // read after its own count, so it and what follows add nothing.
+    expect(first("BEFORE_STOP")).toEqual([3, 3, 3, 3, 3]);
+  });
+
   it("has max, min, abs and pow beside the context-free functions", () => {
     const results = runFrameProgram({
       registers: { level: -7, shift: 2 },

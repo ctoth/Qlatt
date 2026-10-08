@@ -1,6 +1,11 @@
 import { cloneValue, isPlainObject } from "../yaml-loader";
 import { CEL_FUNCTION_CATALOG, validateExpressionSyntax } from "./cel-expressions";
-import { FRAME_COUNTERS, FRAME_FUNCTIONS, FRAME_GROUP_COUNTERS } from "./hrg/frame-program";
+import {
+  FRAME_COUNTERS,
+  FRAME_FUNCTIONS,
+  FRAME_GROUP_COUNTERS,
+  FRAME_UNIT_NAMES,
+} from "./hrg/frame-program";
 import { parseRecognitionConfig } from "./recognition-config";
 import * as S from "./struct-schema";
 
@@ -52,12 +57,14 @@ const ALLOWED_FRAME_PROGRAM_FIELDS = new Set([
   "tag",
   "citations",
 ]);
-/** What a group's start and totals may read: a unit and its frame count. */
-const FRAME_GROUP_VARIABLES = ["u", "p", "n", "params", "f"] as const;
+/** What a group's start may read: a unit, its neighbours and its frame count. */
+const FRAME_GROUP_VARIABLES = [...FRAME_UNIT_NAMES, "params", "f"] as const;
+/** A total may also read its group as summed so far. */
+const FRAME_TOTAL_VARIABLES = [...FRAME_GROUP_VARIABLES, "g"] as const;
 /** What a rule's once-per-unit condition may read. */
-const FRAME_UNIT_VARIABLES = ["u", "p", "n", "params", "g"] as const;
+const FRAME_UNIT_VARIABLES = [...FRAME_UNIT_NAMES, "params", "g"] as const;
 const FRAME_VARIABLES = [...FRAME_UNIT_VARIABLES, "r", "f"] as const;
-const FRAME_MEMBER_PATTERN = /(?<![.\w])([upnrfg])\.([A-Za-z_][A-Za-z0-9_]*)/g;
+const FRAME_MEMBER_PATTERN = /(?<![.\w])(u|p|p2|p3|n|n2|n3|r|f|g)\.([A-Za-z_][A-Za-z0-9_]*)/g;
 const FRAME_FUNCTION_CALL_PATTERN = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
 /** Catalog functions the rule engine binds to its evaluation context. */
 const ITEM_BOUND_FUNCTIONS = new Set<string>(
@@ -3393,7 +3400,7 @@ function validateFramePrograms(
           );
         }
         const totals = isPlainObject(group.totals) ? group.totals : {};
-        for (const [total, expression] of Object.entries(totals)) {
+        for (const total of Object.keys(totals)) {
           if (names.group.has(total)) {
             diagnostics.push(
               makeDiagnostic(
@@ -3403,15 +3410,17 @@ function validateFramePrograms(
               ),
             );
           }
+        }
+        for (const total of Object.keys(totals)) names.group.add(total);
+        for (const [total, expression] of Object.entries(totals)) {
           checkFrameExpression(
             expression,
             `${groupPath}.totals.${total}`,
             `Frame program '${name}' group total '${total}'`,
-            FRAME_GROUP_VARIABLES,
+            FRAME_TOTAL_VARIABLES,
             names,
           );
         }
-        for (const total of Object.keys(totals)) names.group.add(total);
       }
     }
 

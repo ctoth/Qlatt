@@ -81,7 +81,18 @@ export const FRAME_COUNTERS = [
   "prev_count",
   /** Frames in the unit after; 0 when there is none. */
   "next_count",
+  /** Frames in the units two before, two after and three after; 0 when none. */
+  "prev2_count",
+  "next2_count",
+  "next3_count",
 ] as const;
+
+/**
+ * The units a frame expression sees by name: this one, the three before
+ * (p, p2, p3) and the three after (n, n2, n3). Beyond either end of the run a
+ * unit has the edge features.
+ */
+export const FRAME_UNIT_NAMES = ["u", "p", "p2", "p3", "n", "n2", "n3"] as const;
 
 /** The members of `g` every group has, beside its declared totals. */
 export const FRAME_GROUP_COUNTERS = [
@@ -208,11 +219,18 @@ export function runFrameProgram(run: FrameProgramRun): FrameUnitResult[] {
     frames: totalFrames,
     prev_count: 0,
     next_count: 0,
+    prev2_count: 0,
+    next2_count: 0,
+    next3_count: 0,
   };
   const context: Record<string, unknown> = {
     u: run.edgeFeatures,
     p: run.edgeFeatures,
+    p2: run.edgeFeatures,
+    p3: run.edgeFeatures,
     n: run.edgeFeatures,
+    n2: run.edgeFeatures,
+    n3: run.edgeFeatures,
     r: registers,
     f: counters,
     params: run.params,
@@ -223,13 +241,21 @@ export function runFrameProgram(run: FrameProgramRun): FrameUnitResult[] {
     const unit = run.units[unitIndex] as FrameUnit;
     const previous = run.units[unitIndex - 1];
     const next = run.units[unitIndex + 1];
+    const at = (offset: number): FrameUnit | undefined => run.units[unitIndex + offset];
     context.u = unit.features;
     context.p = previous?.features ?? run.edgeFeatures;
+    context.p2 = at(-2)?.features ?? run.edgeFeatures;
+    context.p3 = at(-3)?.features ?? run.edgeFeatures;
     context.n = next?.features ?? run.edgeFeatures;
+    context.n2 = at(2)?.features ?? run.edgeFeatures;
+    context.n3 = at(3)?.features ?? run.edgeFeatures;
     counters.unit = unitIndex;
     counters.count = unit.frames;
     counters.prev_count = previous?.frames ?? 0;
     counters.next_count = next?.frames ?? 0;
+    counters.prev2_count = at(-2)?.frames ?? 0;
+    counters.next2_count = at(2)?.frames ?? 0;
+    counters.next3_count = at(3)?.frames ?? 0;
     counters.index = 0;
     return unit;
   };
@@ -254,8 +280,9 @@ export function runFrameProgram(run: FrameProgramRun): FrameUnitResult[] {
       });
     }
     const group = groups[groups.length - 1] as Record<string, number>;
-    group.frames = (group.frames as number) + unit.frames;
-    group.units = (group.units as number) + 1;
+    // A total may read what its group has summed so far: `g` here is the
+    // group up to, not including, this unit, plus this unit's earlier totals.
+    context.g = group;
     for (const [name, expression] of totalSpecs) {
       const where = `group total '${name}'`;
       const value = evaluateFrame(expression, context, where);
@@ -266,6 +293,8 @@ export function runFrameProgram(run: FrameProgramRun): FrameUnitResult[] {
       }
       group[name] = (group[name] as number) + value;
     }
+    group.frames = (group.frames as number) + unit.frames;
+    group.units = (group.units as number) + 1;
     groupOfUnit.push(group);
   }
 

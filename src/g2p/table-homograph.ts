@@ -64,6 +64,11 @@ export interface ClauseContext {
   quantityAfter?: boolean;
   /** The word is such a word and stands right after a dollar amount. */
   moneyBefore?: boolean;
+  /**
+   * The word right before this one is a plain number or a clock time; "am"
+   * and "pm" are spelled there.
+   */
+  afterNumber?: "plain" | "time";
 }
 
 /** The context of a word spoken alone. */

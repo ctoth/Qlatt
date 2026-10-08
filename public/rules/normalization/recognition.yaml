@@ -176,6 +176,24 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entries with a slash), LTS/ls_task.c:2040-2160 (the word is looked up as written before anything is stripped from it)'
+    # A word with a question mark and an exclamation mark written on it, in
+    # either order ("What?!", "that!?", and "?!?", "?!!"): the last mark ends
+    # the clause and what stands before it stays on the word, which the
+    # frontend's lexicon then spells, the mark by its name. Only for a
+    # frontend whose policy asks for it (tn_recognition_policy.marked_words:
+    # spelled). Two marks of the same kind are not this rule's.
+    - id: tn_marked_word_source
+      pattern: '(?<=^|\s)(?<word>[A-Za-z]+)(?<inner>\?!?|!)(?<last>[?!])(?=\s|$)'
+      flags: ''
+      class: marked_word
+      captures: {word: word, inner: inner, last: last}
+      when: >-
+        get(maps.tn_recognition_policy, 'marked_words', 'words') == 'spelled'
+        && (captures.inner + captures.last) in ['?!', '!?', '?!?', '?!!']
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:158-170 (each character by its name)'
     - id: tn_initialism_source
       pattern: '\b(?:[a-z]\.){2,}[a-z]?\.?'
       flags: i

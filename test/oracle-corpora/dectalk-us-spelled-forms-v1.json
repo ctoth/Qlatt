@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-spelled-forms-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "mw-question-exclaim", "text": "What?!", "group": "marked-word", "tags": ["question-then-exclaim"], "expectedFocus": ["trace"] },
+    { "id": "mw-exclaim-question", "text": "What!?", "group": "marked-word", "tags": ["exclaim-then-question"], "expectedFocus": ["trace"] },
+    { "id": "mw-three-marks", "text": "What?!?", "group": "marked-word", "tags": ["three-marks"], "expectedFocus": ["trace"] },
+    { "id": "mw-three-marks-exclaim", "text": "Go?!! Now.", "group": "marked-word", "tags": ["three-marks"], "expectedFocus": ["trace"] },
+    { "id": "mw-after-word", "text": "Why me?!", "group": "marked-word", "tags": ["question-then-exclaim", "two-words"], "expectedFocus": ["trace"] },
+    { "id": "mw-in-text", "text": "You did what?! Yes.", "group": "marked-word", "tags": ["question-then-exclaim", "two-sentences"], "expectedFocus": ["trace"] },
+    { "id": "mw-in-text-exclaim", "text": "He said what!? Yes.", "group": "marked-word", "tags": ["exclaim-then-question", "two-sentences"], "expectedFocus": ["trace"] },
+    { "id": "mw-two-sentences", "text": "Really?! You did that!?", "group": "marked-word", "tags": ["both-orders"], "expectedFocus": ["trace"] },
+    { "id": "mw-one-question", "text": "Is it so? Yes.", "group": "marked-word", "tags": ["one-mark"], "expectedFocus": ["trace"] },
+    { "id": "mw-one-exclaim", "text": "No way! Yes.", "group": "marked-word", "tags": ["one-mark"], "expectedFocus": ["trace"] },
+    { "id": "ap-am-capitals", "text": "Open at 9 AM now.", "group": "am-pm", "tags": ["am", "after-number"], "expectedFocus": ["trace"] },
+    { "id": "ap-am-lower", "text": "Open at 9 am now.", "group": "am-pm", "tags": ["am", "after-number"], "expectedFocus": ["trace"] },
+    { "id": "ap-pm-capitals", "text": "Open at 9 PM now.", "group": "am-pm", "tags": ["pm", "after-number"], "expectedFocus": ["trace"] },
+    { "id": "ap-am-decimal", "text": "At 9.5 am now.", "group": "am-pm", "tags": ["am", "after-decimal"], "expectedFocus": ["trace"] },
+    { "id": "ap-am-separators", "text": "At 1,000 am now.", "group": "am-pm", "tags": ["am", "after-grouped-number"], "expectedFocus": ["trace"] },
+    { "id": "ap-am-year", "text": "At 1990 am now.", "group": "am-pm", "tags": ["am", "after-year"], "expectedFocus": ["trace"] },
+    { "id": "ap-am-time", "text": "Open at 9:30 AM now.", "group": "am-pm", "tags": ["am", "after-time"], "expectedFocus": ["trace"] },
+    { "id": "ap-pm-time", "text": "Open at 9:30 pm now.", "group": "am-pm", "tags": ["pm", "after-time"], "expectedFocus": ["trace"] },
+    { "id": "ap-am-seconds", "text": "At 9:30:15 am now.", "group": "am-pm", "tags": ["am", "after-time"], "expectedFocus": ["trace"] },
+    { "id": "ap-am-text-end", "text": "Open at 9 am.", "group": "am-pm", "tags": ["am", "after-number", "text-end"], "expectedFocus": ["trace"] },
+    { "id": "ap-am-comma", "text": "At 9 am, go.", "group": "am-pm", "tags": ["am", "after-number", "comma"], "expectedFocus": ["trace"] },
+    { "id": "ap-both", "text": "I am 9 am now.", "group": "am-pm", "tags": ["am", "word-and-spelled"], "expectedFocus": ["trace"] },
+    { "id": "ap-not-after-money", "text": "At $9 am now.", "group": "am-pm", "tags": ["am", "after-money", "word"], "expectedFocus": ["trace"] },
+    { "id": "ap-word-capitals", "text": "It is AM now.", "group": "am-pm", "tags": ["am", "word"], "expectedFocus": ["trace"] },
+    { "id": "ap-word", "text": "I AM here.", "group": "am-pm", "tags": ["am", "word"], "expectedFocus": ["trace"] },
+    { "id": "ap-pm-alone", "text": "It is PM now.", "group": "am-pm", "tags": ["pm", "no-number"], "expectedFocus": ["trace"] }
+  ]
+}

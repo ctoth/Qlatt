@@ -160,6 +160,21 @@ rules:
       output: "[{'type': 'terminal', 'text': lower(current.payload.word)}]"
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:4208-4435 (a hyphenated word is read part by part by ls_task_process_word), 2040-2160 (a word the dictionary has as written is spoken from it)"
+  # A word with a mark written on it ahead of the clause's own mark: one
+  # terminal, the word with that mark, and the clause's mark after it.
+  tn_marked_word:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'marked_word' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal, request]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'text': lower(current.payload.word) + current.payload.inner},
+         {'type': 'request', 'kind': 'words', 'payload': {'text': current.payload.last}}]
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:4118-4150 (the word with the mark on it goes to the spelling routine; the last mark ends the clause)"
   tn_bare_number_request:
     kind: structural
     select:
@@ -252,4 +267,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]

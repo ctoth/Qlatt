@@ -72,6 +72,12 @@ maps:
     # W EH LL, the mark, N OW N; "mother-in-law" M AH DH RR, the mark,
     # IH N LL AO with nothing between "in" and "law".
     hyphenated_words: source
+    # A word with "?!" or "!?" on it is the word with the first mark and a
+    # clause that ends in the second: the word is spelled and the mark named
+    # (LTS/ls_task.c:4118-4150, LTS/ls_spel.c:158-170). Measured on say.exe:
+    # "What?!" is "w h a t question mark" and an exclamation's clause end,
+    # "What!?" "w h a t exclamation point" and a question's.
+    marked_words: spelled
 # A text that does not end in punctuation is still closed as a sentence: when
 # the text is flushed the text task sends a breath break (LTS/ls_task.c:1236-1260,
 # the VT case) and the clause ends as one that ends in a period. Measured on

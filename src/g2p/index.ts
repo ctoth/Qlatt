@@ -189,6 +189,63 @@ export function pronounce(
     };
   }
 
+  const nounClass = (): { formClasses?: string[]; formClassWord?: number } =>
+    table?.formClassNames
+      ? { formClasses: ["noun"], formClassWord: 2 ** table.formClassNames.indexOf("noun") }
+      : {};
+
+  // A word with a question or exclamation mark written on it, ahead of the
+  // mark that ends the clause ("What?!" is the word "What?" and the mark
+  // "!"): the word is spelled, each letter a word, and the mark is spoken by
+  // its name (DECtalk 4.63 LTS/ls_task.c:4118-4150, a character that is not
+  // a letter, a digit, a hyphen, a slash or an apostrophe sends the word to
+  // the spelling routine; LTS/ls_spel.c:158-170, the names). Measured on
+  // say.exe: "What?!" is D AH B EL Y UW, EY CH, EY, T IY, K W EH S CH AX N,
+  // M AA R K and an exclamation's clause end; the class is `noun`.
+  const withMarks = /^([a-z]+)([?!]+)$/.exec(lowerWord);
+  if (table?.letterPhones && table.characterNames && withMarks) {
+    const letterPhones = table.letterPhones;
+    const characterNames = table.characterNames;
+    const parts = [
+      ...[...(withMarks[1] as string)].map((letter) => ({
+        phonemes: [...(letterPhones[letter] ?? [])],
+      })),
+      ...[...(withMarks[2] as string)].flatMap((mark) =>
+        (characterNames[mark] ?? []).map((word) => ({ phonemes: [...word] })),
+      ),
+    ];
+    return {
+      phonemes: parts.flatMap((part) => part.phonemes),
+      source: "spelling",
+      word: lowerWord,
+      parts,
+      ...nounClass(),
+    };
+  }
+
+  // "am" and "pm" right after a number or a clock time are spelled, in any
+  // case of their letters (DECtalk 4.63 LTS/ls_task.c:3626-3640 after a
+  // time, 3828-3843 after a plain number; LTS/l_us_pr1.c:1150-1162
+  // ls_proc_is_am_pm). Measured on say.exe: "9 am", "9.5 AM", "1,000 am" and
+  // "9:30 am" have EY, EH M; "9th am", "$9 am" and "I am" have the word.
+  // The letters are sent inside the number's own word, so they have its
+  // class: `adj` after a plain number, none after a time.
+  if (table?.letterPhones && context.afterNumber && /^[ap]m$/.test(lowerWord)) {
+    const letterPhones = table.letterPhones;
+    const parts = [...lowerWord].map((letter) => ({
+      phonemes: [...(letterPhones[letter] ?? [])],
+    }));
+    return {
+      phonemes: parts.flatMap((part) => part.phonemes),
+      source: "spelling",
+      word: lowerWord,
+      parts,
+      ...(table.formClassNames && context.afterNumber === "plain"
+        ? { formClasses: ["adj"], formClassWord: 2 ** table.formClassNames.indexOf("adj") }
+        : {}),
+    };
+  }
+
   // A table with number phone lists speaks an all-digit word itself, ahead of
   // any lookup, as several words; the whole number has the one form class
   // `adj` (DECtalk 4.63 LTS/ls_task.c:3776-3806).
@@ -676,6 +733,16 @@ export function pronounceClause(
     words[index] !== undefined && Object.hasOwn(quantityWords, words[index].toLowerCase());
   const isAmount = (word: string | undefined): boolean =>
     word !== undefined && /^\$(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)?(?:\.[0-9]+)?$/.test(word);
+  // A plain number (digits, with separators or fraction digits) or a clock
+  // time: the two kinds of word after which "am" and "pm" are spelled.
+  const numberKind = (word: string | undefined): "plain" | "time" | undefined =>
+    word === undefined
+      ? undefined
+      : /^(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)(?:\.[0-9]+)?$/.test(word)
+        ? "plain"
+        : /^[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?$/.test(word)
+          ? "time"
+          : undefined;
   const read = (laterVerbAt: ((index: number) => boolean) | null): PronunciationResult[] => {
     const before: number[] = [];
     return words.map((word, index) => {
@@ -694,6 +761,7 @@ export function pronounceClause(
           // them, side by side (LTS/ls_task.c:3234-3242).
           ...(quantityAt(index + 1) && isAmount(word) ? { quantityAfter: true } : {}),
           ...(quantityAt(index) && isAmount(words[index - 1]) ? { moneyBefore: true } : {}),
+          ...(numberKind(words[index - 1]) ? { afterNumber: numberKind(words[index - 1]) } : {}),
         },
       });
       before.push(result.formClassWord ?? 0);

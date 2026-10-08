@@ -721,6 +721,9 @@ relations:
       # its own units: frames, and a percentage where 128 is 100%.
       clause_position: { kind: number }
       clause_length: { kind: number }
+      # On every phone, for the flapping rules: the clause's words that came
+      # in with a word boundary (postlexical.yaml, dectalk_clause_counted_words).
+      clause_counted_words: { kind: number }
       timing_inherent_frames: { kind: number }
       timing_minimum_frames: { kind: number }
       timing_percent: { kind: number }
@@ -921,6 +924,7 @@ phases:
       - dectalk_palatalize_d
       - dectalk_glottalize_t
       - dectalk_to_before_vowel
+      - dectalk_clause_counted_words
       - dectalk_flap_t
       - dectalk_flap_d
       - dectalk_fuse_vowel_r

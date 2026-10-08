@@ -955,6 +955,30 @@ rules:
       - "DECtalk 4.63 ph_aloph.c:715-722 (A4: /s/ -> SH, /z/ -> ZH before /SH/)"
       - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_SH/US_ZH postalveolar fricative targets)"
 
+  # number_words for the flapping rules below (ph_aloph.c:958): DECtalk counts
+  # the word-boundary symbols of the clause (ph_sort.c:1464), and a word
+  # entered with a verb-phrase start has none. The clause's first phone counts
+  # the clause; every later phone takes the number from the phone before it.
+  dectalk_clause_counted_words:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_dectalk_phone }
+    define:
+      before: dectalk_prev(current)
+      first: "before == null || before.phoneme == 'SIL'"
+    apply:
+      - field: clause_counted_words
+        op: set
+        value: >-
+          !first ? get(before, 'clause_counted_words', 0.0)
+          : (dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp' ? 1.0 : 0.0)
+            + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_counted_word_start')
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 ph_sort.c:1462-1464 (number_words: one more at each WBOUND)"
+      - "DECtalk 4.63 ph_aloph.c:958 (the flapping rule's number_words >= 3)"
+
   dectalk_flap_t:
     kind: postlexical
     select:
@@ -968,10 +992,8 @@ rules:
       # symbols of the clause (ph_sort.c:1464), and a word entered with a
       # verb-phrase start has none: "It is better." flaps, "They went better."
       # and "It is, much better." do not.
-      counted_words: >-
-        count_back_pred(current, 1000, 'is_clause_silence', 'is_counted_word_start')
-        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_counted_word_start')
-        + (dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp' ? 1.0 : 0.0)
+      # Counted once a clause by dectalk_clause_counted_words.
+      counted_words: "get(current, 'clause_counted_words', 0.0)"
       phrase_ok: "counted_words >= 3.0"
       current_unstressed: "get(current, 'stress', 0) == 0"
       prev_son1: >-
@@ -1024,10 +1046,8 @@ rules:
       # symbols of the clause (ph_sort.c:1464), and a word entered with a
       # verb-phrase start has none: "It is better." flaps, "They went better."
       # and "It is, much better." do not.
-      counted_words: >-
-        count_back_pred(current, 1000, 'is_clause_silence', 'is_counted_word_start')
-        + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_counted_word_start')
-        + (dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp' ? 1.0 : 0.0)
+      # Counted once a clause by dectalk_clause_counted_words.
+      counted_words: "get(current, 'clause_counted_words', 0.0)"
       phrase_ok: "counted_words >= 3.0"
       current_unstressed: "get(current, 'stress', 0) == 0"
       prev_son1: >-

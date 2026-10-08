@@ -22,6 +22,11 @@
  *     [--json <file>] ["sentence" ...]
  *
  * Without sentences it uses SENTENCES below.
+ *
+ * Do not time or profile with `tsx`: it wraps every closure in a `__name()`
+ * call (esbuild keepNames), which made this script report 2110 ms per second
+ * of speech for a tree that measures 733 with the loader above, and shows in
+ * a profile as a native call taking a quarter of the time.
  */
 
 import fs from "node:fs";

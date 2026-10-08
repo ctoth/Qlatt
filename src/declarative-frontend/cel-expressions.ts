@@ -301,6 +301,7 @@ function createCelEnvironment(
     homogeneousAggregateLiterals: false,
     enableOptionalTypes: true,
   });
+  env.registerType("ItemView", ItemViewType);
 
   // Register mixed-type arithmetic operators.
   // @marcbachmann/cel-js follows the CEL spec strictly: int + double is not
@@ -353,8 +354,23 @@ function createCelEnvironment(
   return env;
 }
 
+/**
+ * The type cel-js sees for a live view of an Item. A view answers
+ * `constructor` with this class.
+ *
+ * Without it cel-js takes a view for a map, and to type a map it reads the
+ * map's first entry with `for (key in view)` (cel-js 8.0.0 lib/evaluator.js
+ * #firstMapElement, from debugTypeDeep) on every operator and function call
+ * that has the view as an operand. On a view that enumerates every feature of
+ * the Item through the view's traps. A registered object type is typed by its
+ * constructor alone; with no declared fields every property stays readable.
+ */
+export class ItemViewType {}
+
 const celEnv = createCelEnvironment();
 const boundExpressionCaches = new WeakMap<object, Map<string, CompiledCelExpression>>();
+const boundEnvironments = new WeakMap<object, Environment>();
+const checkEnvironments = new Map<string, Environment>();
 
 function compileBoundExpression(
   expression: string,
@@ -367,9 +383,32 @@ function compileBoundExpression(
   }
   const cached = cache.get(expression);
   if (cached) return cached;
-  const compiled = createCelEnvironment(functions).parse(expression);
+  // One environment per function registry: building one registers every
+  // catalog function, which costs far more than parsing an expression.
+  let env = boundEnvironments.get(functions);
+  if (!env) {
+    env = createCelEnvironment(functions);
+    boundEnvironments.set(functions, env);
+  }
+  const compiled = env.parse(expression);
   cache.set(expression, compiled);
   return compiled;
+}
+
+/**
+ * The environment that checks an expression against a set of declared
+ * variables. Validation asks for the same few sets thousands of times.
+ */
+function checkEnvironment(variables: Iterable<string>): Environment {
+  const names = [...new Set(variables)].sort();
+  const key = names.join("\u0000");
+  let env = checkEnvironments.get(key);
+  if (!env) {
+    env = createCelEnvironment(null, false);
+    for (const variable of names) env.registerVariable(variable, "dyn");
+    checkEnvironments.set(key, env);
+  }
+  return env;
 }
 
 /**
@@ -482,11 +521,7 @@ export function validateExpressionSyntax(
 
   if (options.variables) {
     try {
-      const env = createCelEnvironment(null, false);
-      for (const variable of options.variables) {
-        env.registerVariable(variable, "dyn");
-      }
-      const checked = env.check(expression);
+      const checked = checkEnvironment(options.variables).check(expression);
       if (!checked.valid) {
         const message =
           checked.error instanceof Error

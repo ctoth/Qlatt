@@ -31,7 +31,9 @@ const SAY_ENDING = `${" ".repeat(8)}\x0b`;
 /**
  * The recorded fixtures: the first lists; the second list of probes; the
  * fourth, with the 150 texts of the messy sweep
- * (test/oracle-corpora/dectalk-us-messy-sweep-v1.json); the fifth and sixth.
+ * (test/oracle-corpora/dectalk-us-messy-sweep-v1.json); the fifth and sixth;
+ * the seventh, the 150 texts of the second messy sweep
+ * (test/oracle-corpora/dectalk-us-messy-sweep-2-v1.json).
  */
 const FIXTURES = [
   "dectalk-us-text-parser-v1.json",
@@ -39,6 +41,7 @@ const FIXTURES = [
   "dectalk-us-text-parser-d-v1.json",
   "dectalk-us-text-parser-e-v1.json",
   "dectalk-us-text-parser-f-v1.json",
+  "dectalk-us-text-parser-g-v1.json",
 ];
 /** say.exe's closing flush, as export-text-parser-fixture.ts leaves it out. */
 const FLUSH = /^(?:\s|\\x0[ab])*$/;

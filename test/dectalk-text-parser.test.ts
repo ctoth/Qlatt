@@ -3,7 +3,7 @@
  * clause reader and the dictionary question) against DECtalk 4.63's own
  * parser: for every text of the recorded fixtures
  * (test/fixtures/dectalk-oracle/dectalk-us-text-parser-v1.json and its -b-,
- * -d-, -e- and -f- companions, the 150 texts of the messy sweep among them;
+ * -d-, -e-, -f- and -g- companions, the 150 texts of each messy sweep among them;
  * written by scripts/oracle/export-text-parser-fixture.ts from the
  * instrumented say.exe),
  * the clauses the port hands on must be the clauses DECtalk handed to its
@@ -25,7 +25,7 @@ const recorded = Object.entries(recordedClauses()).filter(
 
 describe("dectalk text parser", () => {
   it("has the recorded texts to compare", () => {
-    expect(recorded.length).toBe(923);
+    expect(recorded.length).toBe(1072);
   });
 
   it("cuts and rewrites every recorded text as DECtalk does", () => {

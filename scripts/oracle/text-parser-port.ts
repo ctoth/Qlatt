@@ -12,7 +12,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { type ClauseOptions, readClauses } from "../../src/text-parser/clauses.ts";
 import { dictionaryLookup } from "../../src/text-parser/dictionary.ts";
-import type { TextParserTable } from "../../src/text-parser/interpreter.ts";
+import { encodeWindows1252 } from "../../src/text-parser/frontend.ts";
+import type { TextParserRule, TextParserTable } from "../../src/text-parser/interpreter.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -27,8 +28,18 @@ const MAIN_MODE = 0x0100;
  * forced speak appends (samples/SAY/say.c:249, API/ttsapi.c:4559).
  */
 const SAY_ENDING = `${" ".repeat(8)}\x0b`;
-/** The recorded fixtures: the first lists, and the second list of probes. */
-const FIXTURES = ["dectalk-us-text-parser-v1.json", "dectalk-us-text-parser-b-v1.json"];
+/**
+ * The recorded fixtures: the first lists; the second list of probes; the
+ * fourth, with the 150 texts of the messy sweep
+ * (test/oracle-corpora/dectalk-us-messy-sweep-v1.json); the fifth and sixth.
+ */
+const FIXTURES = [
+  "dectalk-us-text-parser-v1.json",
+  "dectalk-us-text-parser-b-v1.json",
+  "dectalk-us-text-parser-d-v1.json",
+  "dectalk-us-text-parser-e-v1.json",
+  "dectalk-us-text-parser-f-v1.json",
+];
 /** say.exe's closing flush, as export-text-parser-fixture.ts leaves it out. */
 const FLUSH = /^(?:\s|\\x0[ab])*$/;
 
@@ -73,8 +84,9 @@ export function textParserPort(options: PortOptions = {}): (text: string) => str
   );
   const dictionary =
     options.dictionary === false ? undefined : dictionaryLookup(table, (word) => words.has(word));
+  // The text reaches the parser in Windows-1252, as say.exe's argument does.
   return (text) =>
-    readClauses(table, text + SAY_ENDING, {
+    readClauses(table, encodeWindows1252(text) + SAY_ENDING, {
       language: LANGUAGE,
       punctuationSection: 1,
       punctuationMode: PUNCTUATION_MODE,
@@ -111,4 +123,62 @@ export function recordedClauses(
     );
   }
   return entries;
+}
+
+function parserTable(): TextParserTable {
+  return JSON.parse(
+    fs.readFileSync(
+      path.join(
+        repoRoot,
+        "public",
+        "rules",
+        "frontends",
+        "dectalk-english",
+        "text-parser-table.json",
+      ),
+      "utf8",
+    ),
+  ) as TextParserTable;
+}
+
+/**
+ * The rules the port's two passes can start: those of the punctuation section
+ * and the main section whose language mask has the port's language bit and
+ * whose mode mask has the pass's mode bit (par_pars1.c:1242-1278; a mode mask
+ * of all ones passes any mode). A rule reached only as another rule's hit or
+ * miss target is run whatever its masks say and is not counted here.
+ */
+export function liveRules(): TextParserRule[] {
+  const table = parserTable();
+  const passes = [
+    { section: 1, mode: PUNCTUATION_MODE },
+    { section: 2, mode: MAIN_MODE },
+  ];
+  return passes.flatMap(({ section, mode }) => {
+    const start = table.sections[section];
+    const end = table.sections[section + 1] ?? table.rules.length;
+    return table.rules
+      .slice(start, end)
+      .filter(
+        (rule) =>
+          rule.kind === "rule" &&
+          ((rule.language as number) & LANGUAGE) !== 0 &&
+          (rule.mode === 0xffffffff || ((rule.mode as number) & mode) !== 0),
+      );
+  });
+}
+
+/** How many times each rule (by its number) hit over the recorded texts of all fixtures. */
+export function firedRules(): Map<number, number> {
+  const fired = new Map<number, number>();
+  const port = textParserPort({
+    onHit: (hit) => {
+      const number = hit.rule.number as number;
+      fired.set(number, (fired.get(number) ?? 0) + 1);
+    },
+  });
+  for (const text of Object.keys(recordedClauses([...FIXTURES, INDEX_COMMAND_FIXTURE]))) {
+    port(text);
+  }
+  return fired;
 }

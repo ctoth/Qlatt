@@ -2,9 +2,10 @@
  * The command text parser port (src/text-parser: the rule interpreter, the
  * clause reader and the dictionary question) against DECtalk 4.63's own
  * parser: for every text of the recorded fixtures
- * (test/fixtures/dectalk-oracle/dectalk-us-text-parser-v1.json and
- * dectalk-us-text-parser-b-v1.json, written by
- * scripts/oracle/export-text-parser-fixture.ts from the instrumented say.exe),
+ * (test/fixtures/dectalk-oracle/dectalk-us-text-parser-v1.json and its -b-,
+ * -d-, -e- and -f- companions, the 150 texts of the messy sweep among them;
+ * written by scripts/oracle/export-text-parser-fixture.ts from the
+ * instrumented say.exe),
  * the clauses the port hands on must be the clauses DECtalk handed to its
  * letter-to-sound stage, character for character.
  */
@@ -24,7 +25,7 @@ const recorded = Object.entries(recordedClauses()).filter(
 
 describe("dectalk text parser", () => {
   it("has the recorded texts to compare", () => {
-    expect(recorded.length).toBe(614);
+    expect(recorded.length).toBe(923);
   });
 
   it("cuts and rewrites every recorded text as DECtalk does", () => {

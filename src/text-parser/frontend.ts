@@ -111,7 +111,7 @@ const WINDOWS_1252: Readonly<Record<number, string>> = {
 const TO_BYTE = new Map(Object.entries(WINDOWS_1252).map(([byte, char]) => [char, Number(byte)]));
 
 /** The text as the bytes the parser reads, one character of the result per byte. */
-function encode(text: string): string {
+export function encodeWindows1252(text: string): string {
   return [...text]
     .map((char) => {
       const code = char.codePointAt(0) ?? 0;
@@ -191,7 +191,7 @@ export function runTextParser(
     citations: [config.tablePath],
   });
   const decisionIds = [input.id];
-  const clauses = readClauses(table, encode(text) + config.ending, {
+  const clauses = readClauses(table, encodeWindows1252(text) + config.ending, {
     language: config.language,
     punctuationSection: config.punctuation.section,
     punctuationMode: config.punctuation.mode,

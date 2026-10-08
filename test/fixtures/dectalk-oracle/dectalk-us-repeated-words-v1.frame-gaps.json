@@ -6,7 +6,7 @@
   "repeat-had-had": ["B1","AV","AP","A2","A4","A5"],
   "repeat-he-had-had-it": ["B1","AV","AP","A2","A4","A5"],
   "repeat-know-that-that": ["B1","AV","AP","A2","A4","A5","A6","AB"],
-  "repeat-no-no-no": ["length","segments","F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A6","AB","AG","PS","CNK","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE","A2_AMPLITUDE","PH"],
+  "repeat-no-no-no": ["B1","AV","AP","A2"],
   "repeat-very-very": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
   "repeat-bye-bye": ["B1","AV","AP","A2","A6","AB"],
   "repeat-better-better": ["B1","AV","AP","A2","A6","AB"],

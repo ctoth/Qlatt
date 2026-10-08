@@ -179,6 +179,21 @@ text_recognition:
       speak: current.text
       vocabulary_keys: '[]'
       citations: ['Ebden & Sproat 2015; ISO date roles']
+    # A date word kept whole, for the same frontends as the rule after this
+    # one: a day of one or two digits, a hyphen, the three letters of a month
+    # in either case, and maybe a hyphen and a year of two or four digits
+    # ("3-May", "23-Aug-84", "2-Apr-2001"). It is the form DECtalk's text
+    # parser writes a date in; anything longer or shorter is not this word.
+    - id: tn_date_token_source
+      pattern: '(?<![\w$.,:-])(?<token>[0-9]{1,2}-(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)(?:-(?:[0-9]{4}|[0-9]{2}))?)(?![\w-])'
+      flags: i
+      class: number_token
+      captures: {token: token}
+      when: "get(maps.tn_recognition_policy, 'number_tokens', 'words') == 'source'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_pr1.c:815-863 (ls_proc_is_date: the forms 23-Aug, 23-Aug-84, 23-Aug-1984); LTS/ls_task.c:3612-3614 (the text task reads the whole word as a date)'
     # A number-like word kept whole, for a frontend whose lexicon reads such
     # words itself (tn_recognition_policy.number_tokens: source): a dollar
     # amount, a clock time, a number with a plural ending, a number with

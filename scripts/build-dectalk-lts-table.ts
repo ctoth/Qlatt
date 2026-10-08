@@ -393,6 +393,29 @@ const symbolCode = (name: string): number => {
   if (code === undefined) throw new Error(`E_SYMBOL_NAME: '${name}'`);
   return code;
 };
+/**
+ * The names an array of pointers lists, e.g. `pmonths[] = { pjan, pfeb, ... }`.
+ * The declaration may be written twice around an #if, the body once after it.
+ */
+const nameList = (name: string, count: number): string[] => {
+  const body = arrayBody(constantsSource, name);
+  const names = body
+    .slice(body.lastIndexOf("{") + 1)
+    .replace(/^\s*#.*$/gm, "")
+    .split(",")
+    .map((cell) => cell.trim())
+    .filter((cell) => cell.length > 0);
+  if (names.length !== count) {
+    throw new Error(`E_NAME_LIST: ${name} has ${names.length} names, expected ${count}`);
+  }
+  return names;
+};
+/** A string constant, e.g. `m_jan[] = "jan";`. */
+const stringConstant = (name: string): string => {
+  const match = new RegExp(`\\b${name}\\s*\\[\\s*\\]\\s*=\\s*"([^"]*)"`).exec(constantsSource);
+  if (!match) throw new Error(`E_STRING_CONSTANT: l_us_con.c has no string ${name}`);
+  return match[1];
+};
 /** Phoneme codes whose pfeat[] word satisfies `test`. */
 const phonesWith = (test: (features: number) => boolean): number[] =>
   phonemeFeatures.flatMap((features, code) => (test(features) ? [code] : []));
@@ -415,6 +438,13 @@ const numberPhones = {
   point: phoneList("ppoint"),
   dollar: phoneList("pdollar"),
   cent: phoneList("pcent"),
+  // The date reader's lists (LTS/l_us_pr1.c:815-961): the three letters a
+  // month is known by (months[], l_us_con.c:570-600), what each month is
+  // spoken as (pmonths[], :910-975), and the "oh" of "twenty oh one" (pOH,
+  // :638).
+  monthNames: nameList("months", 12).map(stringConstant),
+  months: nameList("pmonths", 12).map(phoneList),
+  oh: phoneList("pOH"),
   // ls_util_pluralize (LTS/ls_util.c:1442-1466): [IX Z] after a sibilant
   // consonant, [S] after a voiceless consonant, [Z] after anything else.
   plural: {

@@ -13,5 +13,6 @@
   "betty-lovely-day": ["B1","AV","AP","A2","A3","A4","A5","AB"],
   "betty-stop-now": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
   "betty-eat-sing": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
-  "betty-long-morning": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"]
+  "betty-long-morning": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "betty-big-dog-break": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"]
 }

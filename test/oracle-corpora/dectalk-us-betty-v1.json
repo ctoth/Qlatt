@@ -23,6 +23,7 @@
     { "id": "betty-lovely-day", "text": "What a lovely day!", "group": "voice", "tags": ["exclamation", "female-range"], "expectedFocus": ["trace"] },
     { "id": "betty-stop-now", "text": "Stop now!", "group": "voice", "tags": ["exclamation", "two-words", "female-range"], "expectedFocus": ["trace"] },
     { "id": "betty-eat-sing", "text": "First we eat, then we sing, and then we go home.", "group": "voice", "tags": ["comma", "consecutive-commas", "female-baseline"], "expectedFocus": ["trace"] },
-    { "id": "betty-long-morning", "text": "After a long and very busy morning, we rested.", "group": "voice", "tags": ["comma", "long-comma-clause", "female-baseline"], "expectedFocus": ["trace"] }
+    { "id": "betty-long-morning", "text": "After a long and very busy morning, we rested.", "group": "voice", "tags": ["comma", "long-comma-clause", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-big-dog-break", "text": "The big dog barked and the small cat ran away.", "group": "voice", "tags": ["inserted-break", "f0-floor"], "expectedFocus": ["trace"] }
   ]
 }

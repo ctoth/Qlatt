@@ -27,13 +27,20 @@ export interface SpeakerGainOffset {
 /**
  * One field of a voice file that rules may read as `params.policy.voice.<name>`:
  * a number, or one of a closed list of strings. Declared in the frontend's
- * `speakers.rule_fields`; every registered voice must give every field.
+ * `speakers.rule_fields`; every registered voice must give every field,
+ * unless the field is declared `optional: true`. An optional field a voice
+ * does not give is `null` in `params.policy.voice`, so a rule reads one as
+ * `get(params.policy.voice, '<name>', <its own default>)`. It is an explicit
+ * null and not a missing key because the selected voice's fields are laid
+ * over the default voice's (see `withVoiceRulePolicy`): a missing key would
+ * silently read the default voice's value. (DECtalk's voice setup leaves some
+ * values unassigned for some voices.)
  */
 export type VoiceRuleFieldSpec =
-  | { kind: "number"; citations: string[] }
-  | { kind: "string"; values: string[]; citations: string[] };
+  | { kind: "number"; citations: string[]; optional?: true }
+  | { kind: "string"; values: string[]; citations: string[]; optional?: true };
 
-export type VoiceRuleFields = Record<string, number | string>;
+export type VoiceRuleFields = Record<string, number | string | null>;
 
 export interface VoiceRegistry {
   dir: string;
@@ -92,15 +99,19 @@ function parseRuleFields(raw: unknown): Record<string, VoiceRuleFieldSpec> {
     if (citations.length === 0) {
       throw new Error(`E_VOICE_RULE_FIELDS: ${where} requires citations`);
     }
+    if (spec.optional !== undefined && spec.optional !== true && spec.optional !== false) {
+      throw new Error(`E_VOICE_RULE_FIELDS: ${where}.optional must be true or false`);
+    }
+    const optional = spec.optional === true ? { optional: true as const } : {};
     if (spec.kind === "number" && spec.values === undefined) {
-      fields[name] = { kind: "number", citations };
+      fields[name] = { kind: "number", citations, ...optional };
     } else if (
       spec.kind === undefined &&
       Array.isArray(spec.values) &&
       spec.values.length > 0 &&
       spec.values.every((value) => typeof value === "string")
     ) {
-      fields[name] = { kind: "string", values: spec.values as string[], citations };
+      fields[name] = { kind: "string", values: spec.values as string[], citations, ...optional };
     } else {
       throw new Error(
         `E_VOICE_RULE_FIELDS: ${where} must be { kind: number } or { values: [...] }`,
@@ -110,7 +121,10 @@ function parseRuleFields(raw: unknown): Record<string, VoiceRuleFieldSpec> {
   return fields;
 }
 
-/** The rule fields of one voice document; every declared field, of its kind. */
+/**
+ * The rule fields of one voice document: every declared field, of its kind;
+ * an optional field the document does not give is null.
+ */
 export function readVoiceRuleFields(
   fields: Readonly<Record<string, VoiceRuleFieldSpec>>,
   doc: Readonly<Record<string, unknown>>,
@@ -120,6 +134,10 @@ export function readVoiceRuleFields(
   for (const [name, spec] of Object.entries(fields)) {
     const value = doc[name];
     if (value === undefined || value === null) {
+      if (spec.optional) {
+        values[name] = null;
+        continue;
+      }
       throw new Error(`E_VOICE_RULE_FIELD: voice file '${docPath}' lacks rule field '${name}'`);
     }
     if (spec.kind === "number") {

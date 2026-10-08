@@ -240,6 +240,108 @@ const tuneLines = compiledLines(
   BUILD_DEFINES,
 );
 
+/**
+ * The per-voice values changeSpeakerValues() stores for PH's articulation
+ * code (VTM/vtmiont.c; the function is called for every speaker packet,
+ * vtmiont.c:1645, and when a voice is selected, PH/ph_vset.c:432). They are
+ * not in the voice definition: the function is a switch on the voice number
+ * whose cases assign constants. Voice-file field, then the VTM_T member.
+ */
+const SPEAKER_VALUES: ReadonlyArray<readonly [field: string, member: string]> = [
+  ["stress_step", "STRESS_STEP"],
+  ["unstress_pressure", "UNSTRESS_PRESSURE"],
+  ["stress_pressure", "STRESS_PRESSURE"],
+  ["sub_pressure", "NOM_Sub_Pressure"],
+  ["fricative_opening", "NOM_Fricative_Opening"],
+  ["glottal_stop_area", "NOM_Glot_Stop_Area"],
+  ["vot_speed", "VOT_speed"],
+  ["end_of_phrase_spread", "EndOfPhrase_Spread"],
+];
+
+type SpeakerValues = { values: Record<string, number>; firstLine: number; lastLine: number };
+
+/**
+ * What each `case` of changeSpeakerValues() assigns to the members above, as
+ * the build compiles it. Only the function's own lines go through the #ifdef
+ * reader (the file has `#if defined` lines elsewhere, which it does not
+ * handle); the function opens and closes its conditionals itself. Not
+ * defined, and so left out: EPSON_ARM7, KEN, GERMAN, DIANE, SUEB, TOMBUCHLER,
+ * why. A member a case does not assign keeps whatever the previous voice left
+ * there; no value is recorded for it.
+ */
+function readSpeakerValues(): Map<string, SpeakerValues> {
+  const source = fs
+    .readFileSync(path.join(dectalkRoot, "dapi", "src", "VTM", "vtmiont.c"), "latin1")
+    .split(/\r?\n/);
+  const start = source.findIndex((line) => /^void\s+changeSpeakerValues\s*\(/.test(line));
+  const end = source.findIndex(
+    (line, index) => index > start && /^void\s+initDefaultSpeakerValues\s*\(/.test(line),
+  );
+  if (start < 0 || end < 0) {
+    throw new Error("E_VOICE_SOURCE: changeSpeakerValues not found in VTM/vtmiont.c");
+  }
+  // Blank the lines outside the function so that line numbers stay the file's.
+  const body = source.map((line, index) => (index >= start && index < end ? line : ""));
+  const compiled = compiledLines(body.join("\n"), BUILD_DEFINES);
+
+  const cases = new Map<string, SpeakerValues>();
+  let open: { label: string; record: SpeakerValues } | undefined;
+  let inBlockComment = false;
+  for (const { line, text: raw } of compiled) {
+    // Strip comments; a block comment may span lines.
+    let text = "";
+    for (let rest = raw; rest.length > 0; ) {
+      if (inBlockComment) {
+        const close = rest.indexOf("*/");
+        if (close < 0) break;
+        rest = rest.slice(close + 2);
+        inBlockComment = false;
+        continue;
+      }
+      const block = rest.indexOf("/*");
+      const lineComment = rest.indexOf("//");
+      if (lineComment >= 0 && (block < 0 || lineComment < block)) {
+        text += rest.slice(0, lineComment);
+        break;
+      }
+      if (block < 0) {
+        text += rest;
+        break;
+      }
+      text += rest.slice(0, block);
+      rest = rest.slice(block + 2);
+      inBlockComment = true;
+    }
+    const label = /^\s*(?:case\s+(\w+)|(default))\s*:/.exec(text);
+    if (label) {
+      if (open) {
+        throw new Error(
+          `E_VOICE_SOURCE: vtmiont.c:${line}: case ${open.label} falls through to another`,
+        );
+      }
+      const name = label[1] ?? "default";
+      if (cases.has(name)) throw new Error(`E_VOICE_SOURCE: vtmiont.c:${line}: second ${name}`);
+      open = { label: name, record: { values: {}, firstLine: line, lastLine: line } };
+      cases.set(name, open.record);
+    }
+    if (!open) continue;
+    for (const [field, member] of SPEAKER_VALUES) {
+      const assigned = new RegExp(`pVtm_t\\s*->\\s*${member}\\s*=\\s*([^;]+);`).exec(text);
+      if (!assigned) continue;
+      const value = Number((assigned[1] as string).trim());
+      if (!Number.isInteger(value)) {
+        throw new Error(`E_VOICE_SOURCE: vtmiont.c:${line}: ${member} = '${assigned[1]}'`);
+      }
+      open.record.values[field] = value;
+    }
+    open.record.lastLine = line;
+    if (/\bbreak\s*;/.test(text)) open = undefined;
+  }
+  return cases;
+}
+
+const speakerValues = readSpeakerValues();
+
 type VoiceFile = { comment: string[]; fields: Record<string, number | string> };
 
 function voiceFile(voice: string, structName: string, voiceNumber: number): VoiceFile {
@@ -359,6 +461,16 @@ function voiceFile(voice: string, structName: string, voiceNumber: number): Voic
     // Tiltm = SM * 20 / 100 in integers, 689; SM - 40 in Frank's block, 605.
     Tiltm: frank ? spd("SM") - 40 : Math.trunc((spd("SM") * 20) / 100),
   });
+  // What changeSpeakerValues() assigns in this voice's case. A member the
+  // case leaves alone gets no field.
+  const caseLabel = `${(voice[0] as string).toUpperCase()}${voice.slice(1)}`;
+  const speakerCase = speakerValues.get(caseLabel);
+  if (!speakerCase) throw new Error(`E_VOICE_SOURCE: changeSpeakerValues has no case ${caseLabel}`);
+  const unassigned = SPEAKER_VALUES.filter(([field]) => !(field in speakerCase.values));
+  for (const [field] of SPEAKER_VALUES) {
+    const value = speakerCase.values[field];
+    if (value !== undefined) fields[field] = value;
+  }
   const comment = [
     `DECtalk voice "${fields.name}". Generated from DECtalk 4.63`,
     `dapi/src/PH/P_us_vdf1.h:${struct.firstLine}-${struct.lastLine} (${structName}, by SPD_ index, INCLUDE/cmd.h:159-205)`,
@@ -400,6 +512,17 @@ function voiceFile(voice: string, structName: string, voiceNumber: number): Voic
     'these (scripts/oracle/dectalk-debug/ph-contract.md, "Per speaker"); they',
     "equal the packet the stock say.exe sent",
     "(test/dectalk-speaker-packets.test.ts).",
+    "",
+    `stress_step..end_of_phrase_spread: what case ${caseLabel} of`,
+    `changeSpeakerValues() assigns (VTM/vtmiont.c:${speakerCase.firstLine}-${speakerCase.lastLine}, the lines the build`,
+    "compiles): STRESS_STEP, UNSTRESS_PRESSURE, STRESS_PRESSURE, NOM_Sub_Pressure,",
+    "NOM_Fricative_Opening, NOM_Glot_Stop_Area, VOT_speed, EndOfPhrase_Spread.",
+    ...(unassigned.length > 0
+      ? [
+          `The case does not assign ${unassigned.map(([, member]) => member).join(", ")}, so there is no`,
+          `${unassigned.map(([field]) => field).join(", ")} here: DECtalk keeps the previous voice's value.`,
+        ]
+      : []),
     ...(frank
       ? [
           "",
@@ -428,6 +551,7 @@ function render(file: VoiceFile, structName: string): string {
   );
   out.push('  - "DECtalk 4.63 PH/ph_vset.c:537-538, 580-818 setspdef"');
   out.push('  - "DECtalk 4.63 PH/ph_main.c:511-519 voidef; ph_vset.c:433-442 usevoice"');
+  out.push('  - "DECtalk 4.63 VTM/vtmiont.c:2899-3426 changeSpeakerValues"');
   for (const [key, value] of Object.entries(file.fields)) out.push(`${key}: ${value}`);
   return `${out.join("\n")}\n`;
 }
@@ -484,6 +608,13 @@ for (const [voiceNumber, [voice, structName]] of VOICES.entries()) {
   for (const [key, value] of Object.entries(file.fields)) {
     if (current[key] !== value) {
       differences.push(`${voice}.${key}: ${String(current[key])} -> ${String(value)}`);
+    }
+  }
+  // A field DECtalk gives this voice no value for must not be in its file
+  // (Frank's case assigns no EndOfPhrase_Spread).
+  for (const key of Object.keys(current)) {
+    if (key !== "citations" && !(key in file.fields)) {
+      differences.push(`${voice}.${key}: ${String(current[key])} -> (no such field)`);
     }
   }
 }

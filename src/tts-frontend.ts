@@ -652,13 +652,19 @@ function buildTextToKlattTrackDetailed(
       ? selectedVoice.ruleFields
       : null;
   if (selectedVoice && voiceRuleFields && registry) {
+    // Optional rule fields this voice does not give: a rule that reads one
+    // falls back to its own default, so the record says which they are.
+    const given = Object.entries(voiceRuleFields).filter(([, value]) => value !== null);
+    const notGiven = Object.keys(voiceRuleFields).filter((name) => voiceRuleFields[name] === null);
+    const notGivenNote =
+      notGiven.length > 0 ? `; not given by this voice: ${notGiven.join(", ")}` : "";
     provenance.add({
       stage: "frontend",
       type: "voice_parameters_selected",
       subject: `voice:${selectedVoice.name}`,
-      reason: `Rule parameters of voice ${selectedVoice.name}: ${Object.entries(voiceRuleFields)
+      reason: `Rule parameters of voice ${selectedVoice.name}: ${given
         .map(([name, value]) => `${name}=${value}`)
-        .join(", ")}`,
+        .join(", ")}${notGivenNote}`,
       citations: [
         ...selectedVoice.citations,
         ...Object.values(registry.ruleFields).flatMap((field) => field.citations),

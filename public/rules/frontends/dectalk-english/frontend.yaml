@@ -214,6 +214,40 @@ speakers:
     Tiltm:
       kind: number
       citations: ["DECtalk 4.63 PH/ph_vset.c:605, 689 (Tiltm); VTM/vtmiont.c:2899-3430 (TLm)"]
+    # What changeSpeakerValues() stores per voice for PH's articulation code
+    # (VTM/vtmiont.c:2899-3426, one `case` a voice; each voice file names its
+    # case's lines). They are constants of the function, not entries of the
+    # voice definition. scripts/oracle/import-dectalk-voices.ts reads them from
+    # the lines the build compiles.
+    stress_step:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (STRESS_STEP); PH/ph_draw.c:1516-1537"]
+    unstress_pressure:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (UNSTRESS_PRESSURE); PH/ph_draw.c:1536"]
+    stress_pressure:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (STRESS_PRESSURE); PH/ph_draw.c:1520"]
+    sub_pressure:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (NOM_Sub_Pressure); PH/ph_draw.c:1474, 2802"]
+    fricative_opening:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (NOM_Fricative_Opening); PH/ph_draw.c:288, 770-833, 1063-1116, 1828, 2043, 2854-2883, 3132-3394"]
+    glottal_stop_area:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (NOM_Glot_Stop_Area); PH/ph_draw.c:1606"]
+    vot_speed:
+      kind: number
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (VOT_speed); PH/ph_draw.c:546-572"]
+    # Frank's case (vtmiont.c:3223-3249) assigns no EndOfPhrase_Spread, so
+    # DECtalk keeps whatever the voice before Frank left there and Frank's
+    # voice file has no such field. A rule reads it as
+    # get(params.policy.voice, 'end_of_phrase_spread', <its cited default>).
+    end_of_phrase_spread:
+      kind: number
+      optional: true
+      citations: ["DECtalk 4.63 VTM/vtmiont.c:2899-3426 (EndOfPhrase_Spread); PH/ph_draw.c:3646"]
   # Chris (speakers/chris.yaml) is not offered: DECtalk 4.63's US build
   # defines us_chris (PH/P_us_vdf1.h:751) but its voice table has no entry for
   # it (PH/ph_main.c:511-520), so DECtalk never builds a speaker definition

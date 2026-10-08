@@ -30,6 +30,13 @@
 # equal the packet the stock say.exe sent
 # (test/dectalk-speaker-packets.test.ts).
 #
+# stress_step..end_of_phrase_spread: what case Frank of
+# changeSpeakerValues() assigns (VTM/vtmiont.c:3223-3249, the lines the build
+# compiles): STRESS_STEP, UNSTRESS_PRESSURE, STRESS_PRESSURE, NOM_Sub_Pressure,
+# NOM_Fricative_Opening, NOM_Glot_Stop_Area, VOT_speed, EndOfPhrase_Spread.
+# The case does not assign EndOfPhrase_Spread, so there is no
+# end_of_phrase_spread here: DECtalk keeps the previous voice's value.
+#
 # Voice 3 outside reading mode takes setspdef()'s own block
 # (ph_vset.c:580-659): head size 100 for fnscale, f0_minimum
 # (AP - 65) * 10, hat rise (HR - 10) * 10, filter 1500 + 15 * (QU + 40),
@@ -45,6 +52,7 @@ citations:
   - "DECtalk 4.63 PH/p_us_vdf_tunehl.h us_frank_tune; ph_vset.c:446-448 (definition plus tuning table)"
   - "DECtalk 4.63 PH/ph_vset.c:537-538, 580-818 setspdef"
   - "DECtalk 4.63 PH/ph_main.c:511-519 voidef; ph_vset.c:433-442 usevoice"
+  - "DECtalk 4.63 VTM/vtmiont.c:2899-3426 changeSpeakerValues"
 name: Frank
 sex: male
 fnscale: 4100
@@ -111,3 +119,10 @@ SPD_SEX: 1
 last_voice: 3
 NOM_Open_Quo: 0
 Tiltm: 20
+stress_step: 5
+unstress_pressure: 40
+stress_pressure: 0
+sub_pressure: 700
+fricative_opening: 120
+glottal_stop_area: 0
+vot_speed: 1

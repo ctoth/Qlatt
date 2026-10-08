@@ -163,6 +163,58 @@ describe("voice rule fields at load", () => {
     );
   });
 
+  // DECtalk's voice setup leaves some values unassigned for some voices; such
+  // a field is declared optional and the rule supplies its own default.
+  it("lets a voice omit a field declared optional, and the rule read it with a default", () => {
+    const speakers = {
+      ...SPEAKERS,
+      voices: ["low", "high", "no-lift"],
+      rule_fields: {
+        ...SPEAKERS.rule_fields,
+        lift: { kind: "number", citations: [CITATION], optional: true },
+      },
+    };
+    const spec = {
+      ...TANK_SPEC,
+      speakers,
+      rules: {
+        tank_fill: {
+          ...TANK_SPEC.rules.tank_fill,
+          set: [{ register: "level", value: "get(params.policy.voice, 'lift', 9)", tag: "tank" }],
+        },
+      },
+    };
+    const compiled = rulepack.compileRuleEngineSpec(spec);
+    const registry = getVoiceRegistry(compiled);
+    if (!registry) throw new Error("fixture registry missing");
+    // An explicit null, not a missing key: the default voice's lift (3) is in
+    // the rulepack's parameters and would show through a missing key.
+    expect(resolveVoice(registry, "no-lift").ruleFields).toEqual({ register: "chest", lift: null });
+    expect(resolveVoice(registry, "high").ruleFields).toEqual({ register: "head", lift: 7 });
+    const level = (voice: string): unknown => {
+      const utterance = oneSegment();
+      runGraphRuleEngine(utterance, compiled, {
+        parameters: { policy: { voice: resolveVoice(registry, voice).ruleFields } },
+      });
+      const frames = utterance.getItem("a")?.get("tank_frames") as
+        | { columns: { LEVEL: number[] } }
+        | undefined;
+      return frames?.columns.LEVEL;
+    };
+    expect(level("high")).toEqual([7, 7]);
+    expect(level("low")).toEqual([3, 3]);
+    expect(level("no-lift")).toEqual([9, 9]);
+    expect(() =>
+      withVoiceRulePolicy({
+        ...spec,
+        speakers: {
+          ...speakers,
+          rule_fields: { lift: { kind: "number", citations: [CITATION], optional: "yes" } },
+        },
+      }),
+    ).toThrow(/E_VOICE_RULE_FIELDS: speakers\.rule_fields\.lift\.optional must be true or false/);
+  });
+
   it("rejects a field of the wrong kind, a string outside the list or a non-number", () => {
     const spec = { ...TANK_SPEC, speakers: { ...SPEAKERS, voices: ["low", "falsetto"] } };
     expect(() => rulepack.compileRuleEngineSpec(spec)).toThrow(

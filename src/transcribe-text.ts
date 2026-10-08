@@ -412,10 +412,16 @@ export function transcribeText(
 
   // A frontend with its own dictionary or letter-to-sound file says what they
   // are: the shared names would put a source it did not use into the record.
-  const sharedResources = loadFrontendResources(QLATT_ENGLISH_RULEPACK);
+  // The paths are compared as the two rulepacks declare them: loading the
+  // shared frontend's resources here would make every frontend read the
+  // shared letter-to-sound file.
+  const declaredPath = (spec: CompiledRulepack, key: "dictionary_path" | "lts_path"): unknown =>
+    (spec as unknown as Record<string, unknown>)[key] ?? null;
+  const ownsFile = (key: "dictionary_path" | "lts_path"): boolean =>
+    declaredPath(compiledSpec, key) !== declaredPath(QLATT_ENGLISH_RULEPACK, key);
   const undeclared = [
-    ...(resources.dictionaryPath !== sharedResources.dictionaryPath ? ["dictionary"] : []),
-    ...(resources.ltsPath !== sharedResources.ltsPath ? ["lts-rules", "morphology"] : []),
+    ...(ownsFile("dictionary_path") ? ["dictionary"] : []),
+    ...(ownsFile("lts_path") ? ["lts-rules", "morphology"] : []),
   ].filter((key) => options.compiledSpec && cfg?.sources?.[key as LexiconSourceKey] === undefined);
   if (undeclared.length > 0) {
     throw new Error(

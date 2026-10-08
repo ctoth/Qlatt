@@ -28,7 +28,6 @@
     "/rules/frontends/dectalk-english/speakers/rita.yaml",
     "/rules/frontends/dectalk-english/speakers/ursula.yaml",
     "/rules/frontends/dectalk-english/speakers/wendy.yaml",
-    "/rules/frontends/qlatt-english/lts-rules.yaml",
     "/rules/frontends/qlatt-english/morphology.yaml",
     "/rules/frontends/qlatt-english/phonotactics.yaml",
     "/rules/frontends/qlatt-english/stress-policy.yaml",

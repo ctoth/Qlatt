@@ -47,6 +47,12 @@ export interface TranscriptionToken {
    * joinPhonemicText removes the mark).
    */
   _joinsNextWord?: boolean;
+  /**
+   * Inside transcription only: the token's reading ends in this phrase
+   * start, which is the next word's (transcribe-text.ts
+   * startPhraseAtNextWord removes the mark).
+   */
+  _phraseStartAfter?: "vp" | "pp";
   sourceTokenId: string;
 }
 

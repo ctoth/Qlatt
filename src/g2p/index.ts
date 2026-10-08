@@ -224,6 +224,39 @@ export function pronounce(
     };
   }
 
+  // A word with an underscore in it is spelled, each character a word: a
+  // letter by its name, a digit from the number lists, the underscore by its
+  // name (DECtalk 4.63 LTS/ls_task.c:4118-4150 as above; LTS/ls_spel.c:151-170,
+  // a digit from punits[], any other character from the typing table).
+  // Measured on say.exe: "tom_west42" is T IY, OW, EH M, AH N D RR S K OW R,
+  // D AH B EL Y UW, IY, EH S, T IY, F OR, T UW, with no pause among them.
+  if (
+    table?.letterPhones &&
+    table.characterNames &&
+    table.numberPhones &&
+    /^[a-z0-9_]*_[a-z0-9_]*$/.test(lowerWord)
+  ) {
+    const letterPhones = table.letterPhones;
+    const characterNames = table.characterNames;
+    const units = table.numberPhones.units;
+    const parts = [...lowerWord].flatMap((char) =>
+      /[0-9]/.test(char)
+        ? numberWords(units[Number(char)] as readonly number[], table)
+        : char === "_"
+          ? (characterNames[char] ?? []).map((word) => ({ phonemes: [...word] }))
+          : [{ phonemes: [...(letterPhones[char] ?? [])] }],
+    );
+    if (parts.length > 0 && parts.every((part) => part.phonemes.length > 0)) {
+      return {
+        phonemes: parts.flatMap((part) => part.phonemes),
+        source: "spelling",
+        word: lowerWord,
+        parts,
+        ...nounClass(),
+      };
+    }
+  }
+
   // "am" and "pm" right after a number or a clock time are spelled, in any
   // case of their letters (DECtalk 4.63 LTS/ls_task.c:3626-3640 after a
   // time, 3828-3843 after a plain number; LTS/l_us_pr1.c:1150-1162
@@ -278,6 +311,9 @@ export function pronounce(
         ...(table.formClassNames && plainNumber
           ? { formClasses: ["adj"], formClassWord: 2 ** table.formClassNames.indexOf("adj") }
           : {}),
+        // A time that ends in ":00" ends in its verb-phrase start
+        // (LTS/l_us_pr1.c:1197-1199): the mark is the next word's.
+        ...(symbols.at(-1) === NUMBER_VPSTART ? { phraseStartAfter: "vp" as const } : {}),
       };
     }
   }

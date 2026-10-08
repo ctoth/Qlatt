@@ -199,6 +199,20 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entries with no letter and no digit), LTS/ls_task.c:697 and 746 (the dictionary search comes before punctuation is stripped), 2040-2160 (the word is looked up as written)'
+    # A word of letters and digits with an underscore in it
+    # ("tom_west42"): one word, which the frontend's lexicon spells character
+    # by character. Only for a frontend whose policy asks for it
+    # (tn_recognition_policy.underscore_words: spelled).
+    - id: tn_underscore_word_source
+      pattern: '(?<=^|\s)(?<word>(?=[A-Za-z0-9_]*[A-Za-z0-9])[A-Za-z0-9_]*_[A-Za-z0-9_]*)(?=[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'underscore_words', 'split') == 'spelled'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:151-170 (each character by its name)'
     # A word with a question mark and an exclamation mark written on it, in
     # either order ("What?!", "that!?", and "?!?", "?!!"): the last mark ends
     # the clause and what stands before it stays on the word, which the

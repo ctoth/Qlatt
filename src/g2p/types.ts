@@ -72,6 +72,11 @@ export interface PronunciationResult {
    * is then all of them in order.
    */
   parts?: PronunciationPart[];
+  /**
+   * A phrase start that stands after the token's last word: the word that
+   * follows starts that phrase (a clock time that ends in ":00").
+   */
+  phraseStartAfter?: "vp";
 }
 
 /** Boundaries are phone offsets in the final pronunciation, end exclusive. */

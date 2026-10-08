@@ -814,6 +814,13 @@ export function transcribeText(
               ...(pronResult.source === "phonemic" && part === spokenParts.at(-1)
                 ? { _joinsNextWord: true }
                 : {}),
+              // A phrase start after the token's last word is the next
+              // word's (startPhraseAtNextWord below).
+              ...("phraseStartAfter" in pronResult &&
+              pronResult.phraseStartAfter &&
+              part === spokenParts.at(-1)
+                ? { _phraseStartAfter: pronResult.phraseStartAfter }
+                : {}),
               // The rules that read a word's classes are the phonetic stage's.
               ...("formClasses" in pronResult && pronResult.formClasses
                 ? {
@@ -890,7 +897,51 @@ export function transcribeText(
       "EMPTY_PRONUNCIATION_SILENCE",
     );
   joinPhonemicText(flatPhonemeList, provenance);
+  startPhraseAtNextWord(flatPhonemeList, provenance);
   return flatPhonemeList; // Return the flat list of phoneme objects
+}
+
+/**
+ * A phrase start that a token's reading ends in belongs to the word after
+ * it. DECtalk's time routine sends the hour, a verb-phrase start, and the
+ * minutes unless they are "00" (LTS/l_us_pr1.c:1182-1199); the text task then
+ * sends the word boundary (LTS/ls_task.c:3612-3625) and the next word. Of two
+ * markers in a row the phonemic stage keeps the stronger (PH/ph_task.c:856-885):
+ * the word boundary after the phrase start is dropped, and so is a
+ * prepositional-phrase start the next word brings. Punctuation after the
+ * token ends the clause and the mark with it.
+ *
+ * Measured on DECtalk 4.63 say.exe, as the symbols the phonemic stage
+ * receives: "Dinner is at 6:00 sharp." has S IH K S, verb-phrase start,
+ * SH AA R P; "We close at 5:30 today." has the mark between F AY V and
+ * TH RR T IY and a word boundary before "today".
+ */
+function startPhraseAtNextWord(
+  phones: TranscriptionToken[],
+  provenance: TranscriptionOptions["provenance"],
+): void {
+  phones.forEach((phone, index) => {
+    const mark = phone._phraseStartAfter;
+    if (!mark) return;
+    delete phone._phraseStartAfter;
+    const next = phones[index + 1];
+    // Every phone of the token's last word carries the mark; act at the last.
+    if (!next || next.sourceTokenId === phone.sourceTokenId || next.isPunctuation) return;
+    for (let at = index + 1; phones[at]?.sourceTokenId === next.sourceTokenId; at += 1) {
+      (phones[at] as TranscriptionToken).phraseStart = mark;
+    }
+    provenance?.add({
+      stage: "transcribe",
+      type: "phrase_start_from_previous_word",
+      subject: next.sourceTokenId,
+      reason: `'${next.word}' starts a ${mark === "vp" ? "verb" : "prepositional"} phrase: '${phone.word}' ends in that mark`,
+      citations: [
+        "DECtalk 4.63 LTS/l_us_pr1.c:1182-1199 (ls_proc_do_time: the hour, a verb-phrase start, the minutes unless 00)",
+        "DECtalk 4.63 PH/ph_task.c:856-885 (of two markers in a row the stronger is kept)",
+      ],
+      parents: phone._pronDecisionId ? [phone._pronDecisionId] : [],
+    });
+  });
 }
 
 /**
@@ -930,6 +981,15 @@ function joinPhonemicText(
     const next = phones[end];
     const run = phones.slice(start, end);
     for (const phone of run) delete phone._joinsNextWord;
+    // The words before phonemic text are a stretch of their own: an item
+    // that is not a character makes letter-to-sound parse and speak the text
+    // it has gathered before the item is sent on (LTS/ls_task.c:446-470).
+    const before = phones[start - 1];
+    if (before && !before.isPunctuation) {
+      for (let at = start - 1; phones[at]?.sourceTokenId === before.sourceTokenId; at -= 1) {
+        (phones[at] as TranscriptionToken).endsWordStretch = true;
+      }
+    }
     if (
       next &&
       !next.isPunctuation &&

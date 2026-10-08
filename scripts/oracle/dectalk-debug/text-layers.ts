@@ -9,6 +9,8 @@
  *   d   the same as compared (messy-sweep-layers.ts comparedSymbols)
  *   q   the frontend's symbols at that point (frontendSymbols)
  *   =   "same" or "differs" (d against q)
+ *   w   the frontend's words with what d and q leave out: the phrase a word
+ *       starts, as "(vp)" or "(pp)" before it
  *
  * Usage (instrumented say.exe as for trace-text.ts):
  *   DECTALK_SAY_EXE=... DECTALK_WORKDIR=... \
@@ -21,8 +23,24 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { textToKlattTrackDetailed } from "../../../src/tts-frontend";
 import { comparedSymbols, frontendSymbols } from "./messy-sweep-layers";
 import { requiredEnvironment, runTextTrace } from "./text-trace";
+
+/** The frontend's words in order, each with the phrase it starts. */
+function frontendWords(text: string): string {
+  const { utterance } = textToKlattTrackDetailed(text, undefined, 30, {
+    frontendId: "dectalk-english",
+  });
+  return utterance
+    .relation("Word")
+    .listItems()
+    .map((word) => {
+      const phrase = word.get("phrase_start");
+      return `${typeof phrase === "string" ? `(${phrase}) ` : ""}${String(word.get("text"))}`;
+    })
+    .join(" _ ");
+}
 
 const args = process.argv.slice(2);
 const ids: string[] = [];
@@ -70,6 +88,7 @@ try {
     console.log(`  d ${compared}`);
     console.log(`  q ${frontend}`);
     console.log(`  = ${compared === frontend ? "same" : "differs"}`);
+    if (!frontend.startsWith("ERROR")) console.log(`  w ${frontendWords(text)}`);
   }
 } finally {
   fs.rmSync(scratch, { recursive: true, force: true });

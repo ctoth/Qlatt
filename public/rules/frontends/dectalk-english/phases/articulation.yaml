@@ -1666,14 +1666,19 @@ rules:
       - { register: tbstep, value: "r.tbstep <= 9 ? r.tbstep + 1 : r.tbstep", tag: constriction }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:2836-2848"
+  # Only in a phone made with the blade. The assignment stands under the
+  # place test once the debug print between them is compiled out (PH_DEBUG is
+  # not defined), so in any other phone a release that did not reach 1000 is
+  # left where it stands: the silence after "dog" at 350 words per minute
+  # holds 900 (dectalk-us-rate-frames-v1, fox-dog-350 and fox-dog-450).
   artic_tongue_release_without_burst:
     kind: frame
     program: articulation
-    when: "r.move_case == 3"
+    when: "r.move_case == 3 && u.blade"
     set:
       - { register: area_tb, value: "params.policy.voice.fricative_opening", tag: constriction }
     citations:
-      - "DECtalk 4.63 PH/ph_draw.c:2856-2866"
+      - "DECtalk 4.63 PH/ph_draw.c:2874-2883 (if the phone's place is BLADEAFFECTED, area_tb = NOM_Fricative_Opening)"
   # last_area_tb is never assigned, so the hold after a velar zeroes the area.
   artic_tongue_moving:
     kind: frame

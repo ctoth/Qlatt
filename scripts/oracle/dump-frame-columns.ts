@@ -25,7 +25,7 @@ import { textToKlattTrackDetailed } from "../../src/tts-frontend";
 import { DECTALK_FRAME_CORPUS_FILES } from "./allophones";
 import { DECTALK_NATIVE_SAMPLE_RATE_HZ, DECTALK_SAMPLES_PER_FRAME } from "./dectalk-trace";
 import { decodeFrameFixtureEntry } from "./frame-fixture";
-import { loadFrameFixture } from "./frame-gate";
+import { FRAME_GATE_REFERENCE_WPM, loadFrameFixture } from "./frame-gate";
 import {
   eventIndexAt,
   FRAME_PARAMETERS,
@@ -77,6 +77,8 @@ const { track } = textToKlattTrackDetailed(
     frontendId: "dectalk-english",
     // A voice corpus is spoken by its voice, as the gate does.
     ...(corpus.defaults?.voiceId ? { speaker: corpus.defaults.voiceId } : {}),
+    // And at the entry's own rate, when it names one.
+    ...(entry.rate === undefined ? {} : { rate: entry.rate / FRAME_GATE_REFERENCE_WPM }),
   },
 );
 const events = track as readonly TrackEvent[];

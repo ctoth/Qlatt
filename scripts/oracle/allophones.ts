@@ -49,6 +49,8 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-abbrev-v1.json",
   // The same word twice in a row: a word is its Word Item, not its spelling.
   "dectalk-us-repeated-words-v1.json",
+  // One sentence at speaking rates on both sides of 350 words per minute.
+  "dectalk-us-rate-frames-v1.json",
 ];
 
 /** Every corpus with a packet record. */

@@ -54,6 +54,13 @@ export function loadFrameGapList(repoRoot: string, corpusId: string): FrameGapLi
   return JSON.parse(fs.readFileSync(frameGapListPath(repoRoot, corpusId), "utf8")) as FrameGapList;
 }
 
+/**
+ * dectalk-english's policy.rate.words_per_minute.unit: the frontend takes a
+ * rate as a multiple of this many words per minute, a corpus entry names
+ * words per minute.
+ */
+export const FRAME_GATE_REFERENCE_WPM = 180;
+
 export function comparePhraseFrames(
   corpus: OracleCorpusDocument,
   fixture: FrameFixture,
@@ -65,10 +72,15 @@ export function comparePhraseFrames(
   if (recorded.text !== text) {
     throw new Error(`E_FRAME_FIXTURE_STALE: ${id} fixture text '${recorded.text}' != '${text}'`);
   }
-  // The corpus's voice; without one the frontend's default, Paul.
+  // The corpus's voice; without one the frontend's default, Paul. An entry
+  // that names a speaking rate is spoken at it (the fixture was recorded with
+  // `[:ra <rate>]`, export-frame-fixture.ts). The frontend takes a rate as a
+  // multiple of its reference, 180 words per minute.
+  const wordsPerMinute = corpus.entries.find((entry) => entry.id === id)?.rate;
   const { track } = textToKlattTrackDetailed(text, undefined, corpus.defaults?.transitionMs ?? 30, {
     frontendId: "dectalk-english",
     ...(corpus.defaults?.voiceId ? { speaker: corpus.defaults.voiceId } : {}),
+    ...(wordsPerMinute === undefined ? {} : { rate: wordsPerMinute / FRAME_GATE_REFERENCE_WPM }),
   });
   const frames = decodeFrameFixtureEntry(recorded);
   const comparison = compareTrackToFrames(frames, track as readonly TrackEvent[]);

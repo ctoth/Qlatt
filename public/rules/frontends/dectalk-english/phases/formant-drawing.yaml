@@ -831,6 +831,22 @@ rules:
       - { register: nxr_F3, value: "499", tag: formant_target }
     citations:
       - "DECtalk 4.63 PH/ph_setar.c:1667-1674, 1854-1866, 1889-1902 (gettar of the place after the last allophone)"
+  # A clause with no phone (an initial's second period) has n = 2, and its
+  # first silence looks for the next target at places 1, 2 and 3: its closing
+  # silence, the silence written after it, and place 3, which an earlier
+  # clause left. "Ask Mary K. Brown about it.": place 3 still holds the /k/
+  # of "ask".
+  fd_initial_silence_next_target_earlier_clause:
+    kind: frame
+    program: formants
+    unit: "u.initial && n.silence"
+    at: start
+    when: "r.place_k_3 == 1"
+    set:
+      - { register: nxr_F2, value: "299", tag: formant_target }
+      - { register: nxr_F3, value: "499", tag: formant_target }
+    citations:
+      - "DECtalk 4.63 PH/ph_setar.c:384, 1667-1674, 1854-1866, 1895-1902 (getbegtar of allophone 1 from allophone 0, index 2)"
 
   # Sonorants but silence: how short the phone is beside its inherent length.
   # muldv() of positive numbers.
@@ -2114,6 +2130,7 @@ phases:
       - fd_next_target_earlier_clause
       - fd_final_silence_target_earlier_clause
       - fd_final_silence_next_target_earlier_clause
+      - fd_initial_silence_next_target_earlier_clause
       - fd_place_k
       - fd_shrink
       - fd_target_coarticulated

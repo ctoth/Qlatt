@@ -331,15 +331,14 @@ export function pronounce(
           pause = false;
         }
       };
-      // The spelling routine speaks a character as the dictionary's entry
-      // for it (LTS/ls_spel.c ls_spel_spell). This frontend's dictionary
-      // file has no entries for the digits; a digit's name is taken from
-      // the number phone lists, which the recorded packets bear out.
+      // The spelling routine speaks a digit from the number phone lists and
+      // any other character by its name in the typing table
+      // (LTS/ls_spel.c:158-170).
       const named = (char: string): Piece | null => {
         if (/^[0-9]$/.test(char)) {
           return numberWords(lists.units[Number(char)] as readonly number[], table)[0] ?? null;
         }
-        const name = table.letterPhones?.[char] ?? dictLookup(char);
+        const name = table.letterPhones?.[char] ?? table.characterNames?.[char]?.[0];
         return name ? { phonemes: [...name] } : null;
       };
       for (const run of lowerWord.match(/[0-9]+|[a-z]+|[/-]/g) ?? []) {

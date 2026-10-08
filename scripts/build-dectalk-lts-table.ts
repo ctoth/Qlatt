@@ -330,6 +330,24 @@ if (Object.keys(letterPhones).length !== 26) {
     `E_LETTER_NAMES: read ${Object.keys(letterPhones).length.toString()} letter names from usa_type.tab, expected 26`,
   );
 }
+// The names of the marks the spelling routine speaks when one stands inside
+// a spelled word (LTS/ls_spel.c:158-170: a digit from the number lists, any
+// other character from this table): the same table's rows, each name a list
+// of words (a space in the row is a word boundary).
+const characterNames: Record<string, string[][]> = {};
+for (const [character, comment] of [
+  ["!", "Exclaimation point"],
+  ["?", "Question Mark"],
+  [",", "Comma"],
+  ["-", "Minus sign"],
+  ["/", "Forward slash"],
+] as const) {
+  const row = new RegExp(`"([^"]*)",\\s*/\\*\\s*${comment}\\s*\\*/`).exec(typingTable);
+  if (!row) throw new Error(`E_CHARACTER_NAMES: no row '${comment}' in usa_type.tab`);
+  characterNames[character] = (row[1] as string)
+    .split(" ")
+    .map((word) => convertPhonemeFieldDetailed(word).phones);
+}
 
 // The words of the compiled dictionary DECtalk loads, in its order and with
 // their case: the main dictionary search is a binary search whose result
@@ -619,6 +637,7 @@ fs.writeFileSync(
     specialWordPhraseStarts,
     wordsByPunctuation,
     letterPhones,
+    characterNames,
     dictionaryWords,
     numberAbbreviations,
     numberPhones,

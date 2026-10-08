@@ -64,6 +64,11 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
    */
   letterPhones?: Readonly<Record<string, readonly string[]>>;
   /**
+   * The name of each mark that is spoken when it stands inside a spelled
+   * word ("question mark"), as the words of the name.
+   */
+  characterNames?: Readonly<Record<string, readonly (readonly string[])[]>>;
+  /**
    * The words of the compiled dictionary, in its order and with their case,
    * for the search that depends on both (table-dictionary-search.ts).
    */

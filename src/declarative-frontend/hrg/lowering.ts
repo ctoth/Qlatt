@@ -604,13 +604,47 @@ function interpolateProfile(points: readonly number[], position: number): number
 }
 
 /**
+ * The clause an F0 command belongs to: the last clause that has started by
+ * the time of the phone the command was issued on (`anchorTime`, without the
+ * command's own offset). A command timed before its clause's first frame
+ * still belongs to that clause.
+ */
+export function f0CommandClause(clauseStartTimes: readonly number[], anchorTime: number): number {
+  let owner = 0;
+  for (let index = 0; index < clauseStartTimes.length; index += 1) {
+    if ((clauseStartTimes[index] ?? 0) <= anchorTime + 1e-9) owner = index;
+  }
+  return owner;
+}
+
+/**
+ * An F0 command's time on a clause's controller clock, in seconds, rounded to
+ * a frame. `anchors` pair the acoustic time of each allophone's start with
+ * its controller time, in acoustic order; the command keeps its distance
+ * from the first allophone that starts at or after it. `time` is the
+ * command's acoustic time before any clamp: one that would fall before the
+ * clause's first frame is put at that frame.
+ */
+export function f0CommandControllerTime(
+  anchors: ReadonlyArray<{ acousticTime: number; controllerTime: number }>,
+  time: number,
+  framePeriod: number,
+): number | undefined {
+  const anchor =
+    anchors.find((candidate) => candidate.acousticTime >= time - 1e-9) ?? anchors.at(-1);
+  if (!anchor) return undefined;
+  const mapped = Math.max(0, anchor.controllerTime - (anchor.acousticTime - time));
+  return Math.round(mapped / framePeriod) * framePeriod;
+}
+
+/**
  * Realize selected PhraseCommand/Tilt Items through the f0-filters ABI.
  *
  * Citations: DECtalk 4.63 Ph_drwt02.c (command cadence, two-pole coefficient
  * smoothing, speaker scaling); Klatt 1982 (hat-pattern layers); Fujisaki,
  * Information, Prosody, and Modeling (additive phrase/accent commands).
  */
-function renderLayeredF0(
+export function renderLayeredF0(
   commands: readonly F0LayerCommand[],
   model: LayeredF0ModelConfig,
   totalDurationSec: number,
@@ -1887,11 +1921,10 @@ export function lowerToFrames(
         // first frame is clamped to that frame (make_f0_command,
         // ph_inton1.c:1880-1883), it does not reach back into the clause
         // before.
-        const time = commandAnchorTimes[index] ?? 0;
-        let owner = 0;
-        for (let clauseIndex = 0; clauseIndex < clauses.length; clauseIndex += 1) {
-          if ((clauses[clauseIndex]?.startTime ?? 0) <= time + 1e-9) owner = clauseIndex;
-        }
+        let owner = f0CommandClause(
+          clauses.map((clause) => clause.startTime),
+          commandAnchorTimes[index] ?? 0,
+        );
         // A segmental command belongs to the clause whose opening pause it
         // follows, whatever its time: a clause's closing pause holds the next
         // clause's opening frames.
@@ -1924,14 +1957,7 @@ export function lowerToFrames(
           const time = unclampedCommandTimes[index] ?? 0;
           let localTime = 0;
           if (layerType === "persistent" || layerType === "impulse" || layerType === "glide") {
-            const anchor =
-              anchors.find((candidate) => candidate.acousticTime >= time - 1e-9) ?? anchors.at(-1);
-            if (anchor) {
-              localTime =
-                Math.round(
-                  Math.max(0, anchor.controllerTime - (anchor.acousticTime - time)) / framePeriod,
-                ) * framePeriod;
-            }
+            localTime = f0CommandControllerTime(anchors, time, framePeriod) ?? 0;
           }
           commands[index] = { ...command, time: outputOffsetFrames * framePeriod + localTime };
           return { ...command, time: localTime };
@@ -1984,19 +2010,13 @@ export function lowerToFrames(
           continue;
         // The command's time before its clamp at 0: one meant before the
         // first phone lies in the opening pause, not at the phone's start.
-        const acousticTime = unclampedCommandTimes[index] ?? command.time;
-        const anchor =
-          controllerAnchors.find((candidate) => candidate.acousticTime >= acousticTime - 1e-9) ??
-          controllerAnchors.at(-1);
-        if (!anchor) continue;
-        const mappedTime = Math.max(
-          0,
-          anchor.controllerTime - (anchor.acousticTime - acousticTime),
+        const mappedTime = f0CommandControllerTime(
+          controllerAnchors,
+          unclampedCommandTimes[index] ?? command.time,
+          f0Model.frame_period_sec,
         );
-        commands[index] = {
-          ...command,
-          time: Math.round(mappedTime / f0Model.frame_period_sec) * f0Model.frame_period_sec,
-        };
+        if (mappedTime == null) continue;
+        commands[index] = { ...command, time: mappedTime };
       }
     }
     let rendered: Array<{ time: number; f0: number }>;

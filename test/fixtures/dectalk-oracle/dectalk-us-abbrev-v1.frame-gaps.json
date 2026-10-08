@@ -53,5 +53,9 @@
   "capitals-iq": ["B1","AV","AP","A2","A4","A5","A2_AMPLITUDE"],
   "capitals-nasa": ["B1","AV","AP","A2","A4","A5"],
   "capitals-aids": ["B1","AV","AP","A2","A4","A5","A6"],
-  "capitals-lower-usb": ["B1","AV","AP","A2","A4","A5","A6","AB"]
+  "capitals-lower-usb": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "sweep-isnt-it": ["B1","AV","AP","A2","A4","A6","AB"],
+  "sweep-colon-no": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "sweep-table-sat": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "sweep-sigh-sat": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"]
 }

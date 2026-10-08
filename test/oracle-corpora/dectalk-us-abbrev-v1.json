@@ -63,6 +63,10 @@
     { "id": "capitals-iq", "text": "Say IQ now.", "group": "capitals", "tags": ["not-spelled"], "expectedFocus": ["trace"] },
     { "id": "capitals-nasa", "text": "Say NASA now.", "group": "capitals", "tags": ["not-spelled"], "expectedFocus": ["trace"] },
     { "id": "capitals-aids", "text": "Say AIDS now.", "group": "capitals", "tags": ["not-spelled"], "expectedFocus": ["trace"] },
-    { "id": "capitals-lower-usb", "text": "Say usb now.", "group": "capitals", "tags": ["not-spelled", "case"], "expectedFocus": ["trace"] }
+    { "id": "capitals-lower-usb", "text": "Say usb now.", "group": "capitals", "tags": ["not-spelled", "case"], "expectedFocus": ["trace"] },
+    { "id": "sweep-isnt-it", "text": "Isn't it lovely?", "group": "sweep-words", "tags": ["sweep"], "expectedFocus": ["trace"] },
+    { "id": "sweep-colon-no", "text": "The answer is simple: no.", "group": "sweep-words", "tags": ["sweep", "shared-list"], "expectedFocus": ["trace"] },
+    { "id": "sweep-table-sat", "text": "On the table sat a lamp.", "group": "sweep-words", "tags": ["sweep", "added-period"], "expectedFocus": ["trace"] },
+    { "id": "sweep-sigh-sat", "text": "With a sigh, she sat down.", "group": "sweep-words", "tags": ["sweep", "added-period"], "expectedFocus": ["trace"] }
   ]
 }

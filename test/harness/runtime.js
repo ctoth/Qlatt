@@ -6,9 +6,10 @@ import { parseDiagConfig } from "../../src/harness-diagnostics/schema.ts";
 import { createKlattInterpreter } from "../../src/klatt-interpreter.ts";
 import { createKlattRuntime } from "../../src/klatt-runtime.ts";
 import { summarizeParallel, summarizeTrack } from "../../src/track-analysis.ts";
-import { textToKlattTrack } from "../../src/tts-frontend";
+import { textToKlattTrack, textToKlattTrackDetailed } from "../../src/tts-frontend";
 import { updateDiagnostics } from "./diagnostics.js";
 import { loadNewRuntimeConfig } from "./experiment.js";
+import { readSpeakRequest } from "./speak-request.js";
 import { getSelectedSpeaker } from "./speaker.js";
 import { startSpectrogram } from "./spectrogram.js";
 import { state } from "./state.js";
@@ -71,20 +72,15 @@ export async function speak() {
   // the synchronous textToKlattTrack() below. Idempotent after the first call.
   await preloadF0Filters(`${state.WORKLET_BASE_PATH}f0-filters.wasm`);
   timer.mark("f0Filters");
-  const phrase = document.getElementById("phrase").value.trim();
-  const baseF0 = Number(document.getElementById("baseF0").value) || 110;
-  const rate = Number(document.getElementById("rate").value) || 1.0;
-  const frontendId = document.getElementById("frontendSelect")?.value || "qlatt-english";
-  if (!phrase) return;
   // Selected voice (string name) comes from the frontend's declarative speakers
   // registry; null when the active frontend has no registry, in which case we
   // pass no `speaker` option (default voice / current behavior).
-  const speaker = getSelectedSpeaker();
-  const options = { rate, frontendId };
-  if (speaker) options.speaker = speaker;
-  const track = textToKlattTrack(phrase, baseF0, 30, options);
+  const { phrase, baseF0, options } = readSpeakRequest(document, getSelectedSpeaker());
+  if (!phrase) return;
+  // No base F0 is passed unless the box holds one: the voice's own applies.
+  const { track, resolvedSpeaker } = textToKlattTrackDetailed(phrase, baseF0, 30, options);
   timer.mark("textToTrack");
-  await speakWithNewRuntime(track);
+  await speakWithNewRuntime(track, resolvedSpeaker.base_f0_hz);
   timer.mark("runtimeAndSchedule");
   state.lastSpeakTimings = timer.timings;
   console.log("[QLATT] Speak timings (ms)", timer.timings);
@@ -155,7 +151,8 @@ export async function initializeNewRuntime() {
   return state.newRuntimeInitPromise;
 }
 
-export async function speakWithNewRuntime(track) {
+/** `baseF0` is the base F0 the frontend resolved for the track, for the diagnostics. */
+export async function speakWithNewRuntime(track, baseF0) {
   const runtime = await initializeNewRuntime();
 
   if (!track || track.length === 0) {
@@ -164,7 +161,6 @@ export async function speakWithNewRuntime(track) {
   }
 
   const phrase = document.getElementById("phrase").value.trim();
-  const baseF0 = Number(document.getElementById("baseF0").value) || 110;
 
   // Session setup (matching speak())
   const startTime = state.ctx.currentTime + 0.05;

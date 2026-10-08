@@ -17,6 +17,8 @@ export const state = {
   // Experiment
   currentExperimentId: null,
   experimentManifest: null,
+  // public/rules/frontends/manifest.json: frontend ids and default experiments
+  frontendManifest: null,
 
   // Session
   sessionId: 0,

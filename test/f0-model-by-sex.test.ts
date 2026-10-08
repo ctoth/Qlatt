@@ -27,7 +27,7 @@ const model: LayeredF0ModelConfig = {
   output_clamp: { min_hz: 40, max_hz: 600 },
   by_sex: {
     high: {
-      filter: { type: "lowpass_2pole_coefficient_half_scale" },
+      filter: { scale_shift: 1 },
       layers: { accent: { decay: "step_plus_rise" } },
       speaker_scale: { pivot: 1800 },
     },
@@ -44,9 +44,10 @@ describe("f0ModelForVoice", () => {
     const selected = f0ModelForVoice(model, "high");
 
     expect(selected.filter).toEqual({
-      type: "lowpass_2pole_coefficient_half_scale",
+      type: "lowpass_2pole_coefficient",
       alpha_param: "smoothing",
       default_alpha: 0.25,
+      scale_shift: 1,
     });
     expect(selected.layers).toEqual({
       level: { type: "persistent" },

@@ -49,6 +49,8 @@ export interface PronunciationResult {
    * its own to what counts words as they are spoken.
    */
   readAhead?: boolean;
+  /** A pause (a comma's) stands after the word, though no mark is written. */
+  pauseAfter?: boolean;
   /**
    * The form classes as the frontend's phonetic rules receive them, where
    * that differs from what the lexicon holds (table-lts-pronounce.ts

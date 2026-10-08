@@ -44,11 +44,17 @@ rules:
     define:
       empty_clause: >-
         prev != null && prev.phoneme == 'SIL' && get(prev, 'punctuationSymbol', null) != null
+      # The comma and period lengths are read from the boundary of the phone
+      # before the silence (struclas, 242 and 249), not from the mark. A word
+      # that ends in a hyphen has only the hyphen's morpheme value there, so
+      # its pause keeps the opening value: "Red-, green." has 5 frames.
+      last: "dectalk_prev(current)"
+      hyphen_before: "last != null && get(last, 'rime_boundary', '') == 'morpheme'"
     apply:
       - field: duration
         op: set
         value: >-
-          (dectalk_pause_frames(empty_clause ? params.policy.timing.pause_frames.clause_initial_other
+          (dectalk_pause_frames(empty_clause || hyphen_before ? params.policy.timing.pause_frames.clause_initial_other
             : (current.punctuationSymbol in [',', ';', ':']
               ? params.policy.timing.pause_frames.comma
               : params.policy.timing.pause_frames.period))

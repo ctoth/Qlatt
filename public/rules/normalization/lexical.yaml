@@ -161,7 +161,8 @@ rules:
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:4208-4435 (a hyphenated word is read part by part by ls_task_process_word), 2040-2160 (a word the dictionary has as written is spoken from it)"
   # A word with a mark written on it ahead of the clause's own mark: one
-  # terminal, the word with that mark, and the clause's mark after it.
+  # terminal, the word with that mark, and the clause's mark after it. A
+  # period there is left off the word: it is not spoken.
   tn_marked_word:
     kind: structural
     select:
@@ -171,7 +172,7 @@ rules:
       allowed_types: [terminal, request]
       tag: normalization_lexical
       output: >-
-        [{'type': 'terminal', 'text': lower(current.payload.word) + current.payload.inner},
+        [{'type': 'terminal', 'text': lower(current.payload.word) + (current.payload.inner == '.' ? '' : current.payload.inner)},
          {'type': 'request', 'kind': 'words', 'payload': {'text': current.payload.last}}]
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:4118-4150 (the word with the mark on it goes to the spelling routine; the last mark ends the clause)"

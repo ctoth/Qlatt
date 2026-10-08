@@ -850,6 +850,20 @@ export function transcribeText(
             });
           }
         }
+        // A pause the lexicon puts after the word (a part number that ends
+        // in a slowly spelled part): a comma's, and no written mark.
+        if ("pauseAfter" in pronResult && pronResult.pauseAfter) {
+          flatPhonemeList.push({
+            phoneme: resources.inventory.silence_symbol,
+            stress: null,
+            sourceTokenId: `${inputToken.tokenId}:pause-after`,
+            continuesWrittenWord: true,
+            isPunctuation: true,
+            symbol: ",",
+            word: ",",
+            _pronDecisionId: stressDecisionId,
+          });
+        }
       } else {
         emptyPronunciations.push({
           word: sourceWord,

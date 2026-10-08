@@ -151,13 +151,17 @@ text_recognition:
     # A word written with hyphens between its parts stays one word, hyphens
     # and all: the frontend's lexicon reads it part by part. Only for a
     # frontend whose policy asks for it (tn_recognition_policy.
-    # hyphenated_words: source). A doubled hyphen is not this rule's.
+    # hyphenated_words: source). A doubled hyphen is not this rule's. A hyphen
+    # written at the word's end stays on it too ("Red- green."): the lexicon
+    # puts the compound mark after the word's last phone.
     - id: tn_hyphenated_word_source
-      pattern: '(?<=(?:^|\s)[("'']*)(?<word>[A-Za-z]+(?:-[A-Za-z]+)+)(?=[\s.,;:!?)"'']|$)'
+      pattern: '(?<=(?:^|\s)[("'']*)(?<word>[A-Za-z]+(?:-[A-Za-z]+)*-?)(?=[\s.,;:!?)"'']|$)'
       flags: ''
       class: whole_word
       captures: {word: word}
-      when: "get(maps.tn_recognition_policy, 'hyphenated_words', 'split') == 'source'"
+      when: >-
+        get(maps.tn_recognition_policy, 'hyphenated_words', 'split') == 'source'
+        && captures.word.contains('-')
       speak: current.text
       vocabulary_keys: '[]'
       citations:
@@ -181,15 +185,18 @@ text_recognition:
     # the clause and what stands before it stays on the word, which the
     # frontend's lexicon then spells, the mark by its name. Only for a
     # frontend whose policy asks for it (tn_recognition_policy.marked_words:
-    # spelled). Two marks of the same kind are not this rule's.
+    # spelled). Two marks of the same kind are not this rule's. A comma before
+    # the clause's mark is spelled the same way ("What,!"); a period there is
+    # not spoken and the word is not spelled ("What.!" is "what" and the
+    # exclamation's clause end; both measured on say.exe).
     - id: tn_marked_word_source
-      pattern: '(?<=^|\s)(?<word>[A-Za-z]+)(?<inner>\?!?|!)(?<last>[?!])(?=\s|$)'
+      pattern: '(?<=^|\s)(?<word>[A-Za-z]+)(?<inner>\?!?|!|,|\.)(?<last>[?!])(?=\s|$)'
       flags: ''
       class: marked_word
       captures: {word: word, inner: inner, last: last}
       when: >-
         get(maps.tn_recognition_policy, 'marked_words', 'words') == 'spelled'
-        && (captures.inner + captures.last) in ['?!', '!?', '?!?', '?!!']
+        && (captures.inner + captures.last) in ['?!', '!?', '?!?', '?!!', ',!', '.!']
       speak: current.text
       vocabulary_keys: '[]'
       citations:

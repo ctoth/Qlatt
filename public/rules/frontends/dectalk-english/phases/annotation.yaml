@@ -199,6 +199,27 @@ rules:
               && dectalk_next(current) != null && dectalk_next(current).id == boundary_item.id
               && dectalk_phrase_start(boundary_item) == 'vp'
             value: "'comma'"
+          # A hyphen written at a word's end ("well- known"): the word's last
+          # phone has the hyphen's morpheme value and the word boundary's,
+          # which together are the word boundary's (0100 | 0140 = 0140), or
+          # the comma value before a kept prepositional-phrase start. Before a
+          # punctuation mark nothing is added (the COMMA and PERIOD symbols
+          # give the phone no feature, ph_sort.c:1512-1527), and the phone
+          # keeps the morpheme value: the rule below.
+          - when: >-
+              isTrue(current, 'morpheme_boundary_after')
+              && boundary_item != null && boundary_item.phoneme != 'SIL'
+              && !dectalk_same_word(boundary_item, current)
+              && dectalk_next(current) != null && dectalk_next(current).id == boundary_item.id
+            value: "isTrue(current, 'phrase_start_follows') ? 'comma' : 'word'"
+          # The same phone before a period: the PERIOD symbol does add its
+          # value to the phone before it (ph_sort.c:1529-1531), and with the
+          # hyphen's that is the exclamation's (0100 | 0400 = 0500). "It is
+          # red-. Then green." has the period's full pause.
+          - when: >-
+              isTrue(current, 'morpheme_boundary_after') && mark == '.'
+              && (dectalk_next(current) == null || dectalk_next(current).phoneme == 'SIL')
+            value: "'exclaim'"
           - when: before_morpheme
             value: "'morpheme'"
           # The last phone before "to", "and" or "for" has the word boundary

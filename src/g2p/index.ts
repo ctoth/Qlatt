@@ -203,7 +203,8 @@ export function pronounce(
   // the spelling routine; LTS/ls_spel.c:158-170, the names). Measured on
   // say.exe: "What?!" is D AH B EL Y UW, EY CH, EY, T IY, K W EH S CH AX N,
   // M AA R K and an exclamation's clause end; the class is `noun`.
-  const withMarks = /^([a-z]+)([?!]+)$/.exec(lowerWord);
+  // A comma there is named the same way ("What,!" has K AA M AX).
+  const withMarks = /^([a-z]+)([?!]+|,)$/.exec(lowerWord);
   if (table?.letterPhones && table.characterNames && withMarks) {
     const letterPhones = table.letterPhones;
     const characterNames = table.characterNames;
@@ -432,12 +433,14 @@ export function pronounce(
         add(...(letters as Piece[]));
         // A run of four letters or more is spelled slowly, with a pause
         // after it (LTS/ls_spel.c:224-256, LTS/l_us_pr1.c:241-246). When
-        // the run ends the word the pause falls after the word, which is
-        // not reproduced: "12-zorb now" has a pause before "now" in DECtalk.
+        // the run ends the word the pause falls after the word: "12-zorb
+        // now" has a comma before "now" on say.exe.
         if (/^[a-z]{4,}$/.test(run)) pause = true;
       }
+      pauseAfter = pause;
       return parts;
     };
+    let pauseAfter = false;
     const parts = fraction ? numberWords(fraction, table) : pieces();
     if (parts && parts.length > 0) {
       return {
@@ -445,6 +448,7 @@ export function pronounce(
         source: "number",
         word: lowerWord,
         parts,
+        ...(pauseAfter ? { pauseAfter: true } : {}),
       };
     }
   }
@@ -603,8 +607,12 @@ export function pronounce(
         startsVerbPhrase: false,
       };
     };
-    if (/^[a-z]+(?:-[a-z]+)+$/.test(lowerWord)) {
-      const chunks = lowerWord.split("-");
+    // A hyphen written at the word's end counts as one with more to follow:
+    // the mark stands after the word's last phone ("Red- green." is R EH D,
+    // the mark, a word boundary, G R IY N on say.exe).
+    if (/^[a-z]+(?:-[a-z]+)*-?$/.test(lowerWord) && lowerWord.includes("-")) {
+      const trailing = lowerWord.endsWith("-");
+      const chunks = (trailing ? lowerWord.slice(0, -1) : lowerWord).split("-");
       type Piece = NonNullable<PronunciationResult["parts"]>[number];
       const parts: Piece[] = [{ phonemes: [] }];
       const boundaries: number[][] = [[]];
@@ -628,7 +636,7 @@ export function pronounce(
           boundaries.push([]);
         }
         const joint = read.kind === "dictionary" ? at === 0 : read.kind === "rules";
-        if (joint && at < chunks.length - 1 && part.phonemes.length > 0) {
+        if (joint && (at < chunks.length - 1 || trailing) && part.phonemes.length > 0) {
           marks.push(part.phonemes.length - 1);
         }
       }

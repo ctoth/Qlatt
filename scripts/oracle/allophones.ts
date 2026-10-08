@@ -73,6 +73,10 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // The clause breaks the text stage inserts: where a stretch of words ends,
   // its length at a text's end, and conjunctions of several words.
   "dectalk-us-clause-breaks-v1.json",
+  // A slowly spelled part at a word's end, a hyphen at a word's end, a word
+  // with a comma and a mark on it, letters and digits in one word, questions
+  // that begin with a wh-word, and "Dr." and "St." by what follows them.
+  "dectalk-us-odd-words-v1.json",
 ];
 
 /** Every corpus with a packet record. */

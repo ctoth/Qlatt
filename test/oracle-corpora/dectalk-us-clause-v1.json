@@ -93,6 +93,8 @@
     { "id": "break-late-class", "text": "The big small cat and they remain here today.", "group": "clause-break", "tags": ["conjunction", "class-before-comma"], "expectedFocus": ["duration"] },
     { "id": "break-after-comma", "text": "Yes, the big dog barked and the small cat ran away.", "group": "clause-break", "tags": ["conjunction", "written-comma"], "expectedFocus": ["duration"] },
     { "id": "break-none-number", "text": "The 25 and the small cat ran away.", "group": "clause-break", "tags": ["conjunction", "digits", "no-break"], "expectedFocus": ["duration"] },
+    { "id": "break-marker-in-earlier-clause", "text": "Every morning before breakfast, my grandfather would walk down to the river to feed the ducks.", "group": "clause-break", "tags": ["preposition", "written-comma", "marker-before-comma"], "expectedFocus": ["duration"] },
+    { "id": "break-marker-in-earlier-clause-2", "text": "Late in the evening, the old dog ran across the wide field to the barn.", "group": "clause-break", "tags": ["preposition", "written-comma", "marker-before-comma"], "expectedFocus": ["duration"] },
     { "id": "cite-look-at-me", "text": "Look at me.", "group": "citation", "tags": ["at", "nine-entries"], "expectedFocus": ["duration"] },
     { "id": "cite-look-at-them", "text": "Look at them.", "group": "citation", "tags": ["at", "ten-entries"], "expectedFocus": ["duration"] },
     { "id": "homograph-in-the-house", "text": "The big dog barked at the small cat in the house.", "group": "homograph", "tags": ["noun", "after-article"], "expectedFocus": ["duration"] },

@@ -956,9 +956,13 @@ rules:
       - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_SH/US_ZH postalveolar fricative targets)"
 
   # number_words for the flapping rules below (ph_aloph.c:958): DECtalk counts
-  # the word-boundary symbols of the clause (ph_sort.c:1464), and a word
-  # entered with a verb-phrase start has none. The clause's first phone counts
-  # the clause; every later phone takes the number from the phone before it.
+  # the word-boundary symbols of the clause (ph_sort.c:1464). A word entered
+  # with a verb-phrase start has none, except the clause's first word, which
+  # always has one ("Read it twice." counts 3 and flaps its /d/); a
+  # clause-final "to", "and" or "for" has two (ph_sort.c:1055-1070). The same
+  # count as the F0 baseline's (prosody.yaml, dectalk_clause_number_words).
+  # The clause's first phone counts the clause; every later phone takes the
+  # number from the phone before it.
   dectalk_clause_counted_words:
     kind: scalar
     select:
@@ -972,8 +976,10 @@ rules:
         op: set
         value: >-
           !first ? get(before, 'clause_counted_words', 0.0)
-          : (dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp' ? 1.0 : 0.0)
-            + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_counted_word_start')
+          : (dectalk_word_start(current) ? 1.0 : 0.0)
+            + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')
+            + (dectalk_phrase_state(current) == 'word' ? 1.0 : 0.0)
+            + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_twice_counted_word_start')
         tag: boundary
     citations:
       - "DECtalk 4.63 ph_sort.c:1462-1464 (number_words: one more at each WBOUND)"
@@ -1013,7 +1019,7 @@ rules:
         )
     constraint: >-
       phrase_ok && current_unstressed && prev_son1 && next_syllabic &&
-      (next_word_boundary || next_weak_vowel)
+      (next_word_boundary || (!isTrue(current, 'word_initial_consonant') && next_weak_vowel))
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -1067,7 +1073,7 @@ rules:
         )
     constraint: >-
       phrase_ok && current_unstressed && prev_son1 && next_syllabic &&
-      (next_word_boundary || next_weak_vowel)
+      (next_word_boundary || (!isTrue(current, 'word_initial_consonant') && next_weak_vowel))
     splice:
       type: replace_range
       range_left: current.sync_left

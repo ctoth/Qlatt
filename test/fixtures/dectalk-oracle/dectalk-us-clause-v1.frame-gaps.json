@@ -83,6 +83,8 @@
   "break-late-class": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
   "break-after-comma": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
   "break-none-number": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "break-marker-in-earlier-clause": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "break-marker-in-earlier-clause-2": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
   "cite-look-at-me": ["B1","AV","AP","A2","A3","A4","A5"],
   "cite-look-at-them": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
   "homograph-in-the-house": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],

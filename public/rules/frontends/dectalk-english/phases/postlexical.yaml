@@ -158,13 +158,18 @@ rules:
       where: "isTrue(current, 'break_marker')"
     define:
       place: "get(current, 'clause_word_index', 0)"
-      # The marked word before this one. An earlier clause's words have places
-      # that are not smaller.
+      # The marked word before this one in its clause: last_marker starts at 0
+      # for every stretch between two punctuation marks (ls_task.c:5170). The
+      # scan stops at a clause's first word, so a marked word of an earlier
+      # clause is never taken ("... before breakfast, my grandfather would
+      # walk down to ...": "before" is the third word of its clause, "down"
+      # the fifth of the next, and DECtalk breaks before "down").
       marked_before: >-
         look_back_where(current, 500,
-          'isTrue(candidate, "break_marker") || get(candidate, "clause_word_index", 0) >= get(source, "clause_word_index", 0)')
+          'isTrue(candidate, "break_marker") || get(candidate, "clause_word_index", 0) <= 1')
       last_marker: >-
-        marked_before != null && get(marked_before, 'clause_word_index', 0) < place
+        marked_before != null && isTrue(marked_before, 'break_marker')
+        && get(marked_before, 'clause_word_index', 0) < place
           ? get(marked_before, 'clause_word_index', 0) : 0
       n: next
       next_marked: "n != null && isTrue(n, 'break_marker')"

@@ -2402,6 +2402,9 @@ transcription:
     number-abbreviation:
       name: DECtalk's unit abbreviations after a number
       citation: "DECtalk 4.63 LTS/l_us_con.c:366 nabtab[] (singular and plural phones), LTS/ls_task.c:2125-2152 (looked up before the dictionary while a number stands at most two words back), as numberAbbreviations in /rules/frontends/dectalk-english/lts-table.json"
+    hyphenated:
+      name: DECtalk's reading of a hyphenated word by its parts
+      citation: "DECtalk 4.63 LTS/ls_task.c:4208-4435 ls_task_process_word (each part between hyphens looked up, then by rule or spelled; HYPHEN after a first part the dictionary has :4330 and after a part the rules read :4374)"
   # The names of the letters, for a token the orthography phase marks as a
   # spelled letter: DECtalk 4.63 INCLUDE/usa_type.tab, the lower-case rows,
   # the same phones as letterPhones in lts-table.json (a test holds the two

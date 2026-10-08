@@ -349,11 +349,16 @@ predicates:
   # Where remaining_stresses_til(FCBNEXT) stops: the clause's final silence, or
   # the first Segment of a word whose phrase start left the comma value on the
   # phone before it. The word start is tested, not that phone's boundary:
-  # DECtalk's scan runs before its rules delete or fuse the phone.
+  # DECtalk's scan runs before its rules delete or fuse the phone. The same
+  # for the part of a hyphenated word that starts a verb phrase: the phone
+  # before it has the hyphen's value and the phrase start's, which together
+  # are the comma value (dectalk_rime_boundary).
   is_clause_or_phrase_start: >-
     (current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null)
     || (dectalk_word_start(current) && dectalk_phrase_state(current) != ""
         && dectalk_phrase_state(current) != "word")
+    || (dectalk_word_start(current) && dectalk_phrase_start(current) == "vp"
+        && behind(current, 1) != null && isTrue(behind(current, 1), "morpheme_boundary_after"))
   is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
   is_stressed_vowel: 'current.type == "vowel" && has(current.stress) && current.stress == 1'
   is_stressed_vowel_or_boundary: >-

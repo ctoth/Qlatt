@@ -63,6 +63,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-unpunctuated-v1.json",
   // An initial's empty clause after a clause whose third allophone is /k/.
   "dectalk-us-empty-clause-v1.json",
+  // Hyphenated words, dictionary words with a slash, punctuation written
+  // against an abbreviation, and the letter-to-sound rules' morpheme marks.
+  "dectalk-us-word-forms-v1.json",
 ];
 
 /** Every corpus with a packet record. */

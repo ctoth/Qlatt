@@ -948,3 +948,17 @@ maps:
     "VOGT": "word"
     "XRAY": "word"
     "XTRA": "word"
+  # The dictionary's entries with a slash in them, in lower case: a word
+  # written so is the dictionary's word.
+  tn_slash_words:
+    "/": "word"
+    "1/2": "word"
+    "1/4": "word"
+    "3/4": "word"
+    "and/or": "word"
+    "both/and": "word"
+    "cad/cam": "word"
+    "cp/m": "word"
+    "either/or": "word"
+    "tcp/ip": "word"
+    "yes/no": "word"

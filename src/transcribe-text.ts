@@ -506,11 +506,21 @@ export function transcribeText(
   if (!useSymbolMode) {
     // A run that ends at a mark a text rule supplied does not stand against
     // punctuation: the text has none there.
-    const pronounceRun = (run: readonly number[], atWrittenPunctuation = true): void => {
+    const pronounceRun = (
+      run: readonly number[],
+      atWrittenPunctuation = true,
+      endMark?: string,
+    ): void => {
       const results = pronounceClause(
         run.map((position) => orthographyWords[position].word),
         effectiveDictLookup,
-        { ltsPath, morphologyPath, stressPolicyPath, atWrittenPunctuation },
+        {
+          ltsPath,
+          morphologyPath,
+          stressPolicyPath,
+          atWrittenPunctuation,
+          ...(endMark === undefined ? {} : { endMark }),
+        },
       );
       run.forEach((position, order) => {
         inClause.set(position, results[order]);
@@ -519,7 +529,7 @@ export function transcribeText(
     let run: number[] = [];
     orthographyWords.forEach((token, position) => {
       if (token.isPunctuation) {
-        if (run.length > 0) pronounceRun(run, token.supplied !== true);
+        if (run.length > 0) pronounceRun(run, token.supplied !== true, token.word);
         run = [];
       } else if (token.word && typeof token.pronunciationKey !== "string") {
         run.push(position);
@@ -656,6 +666,11 @@ export function transcribeText(
         const used = lexiconSource("number-abbreviation");
         decisionType = "number_abbreviation_pronunciation_selected";
         reason = `Word '${sourceWord}' follows a number; used ${used.name}`;
+        citations = [used.citation];
+      } else if (pronResult.source === "hyphenated") {
+        const used = lexiconSource("hyphenated");
+        decisionType = "hyphenated_pronunciation_selected";
+        reason = `Word '${sourceWord}' is written with a hyphen; used ${used.name}`;
         citations = [used.citation];
       } else {
         const used = lexiconSource("lts-rules");

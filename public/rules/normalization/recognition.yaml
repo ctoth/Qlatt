@@ -49,9 +49,12 @@ text_recognition:
     # lexicon reads from its table of units by the number. In any case of
     # letters, and before the dictionary's abbreviations, as the lookup is.
     # Only under tn_recognition_policy.abbreviations: dictionary, with the
-    # generated map tn_number_abbreviations.
+    # generated map tn_number_abbreviations. A closing bracket or quote after
+    # the period does not hide the unit, but a comma or another mark there
+    # does: measured on say.exe, "5 lb. now" is "pounds" and "5 lb., not" is
+    # "pound", the dictionary's word for "lb.", which the next rule finds.
     - id: tn_number_abbreviation_source
-      pattern: '(?<=(?:^|\s)[0-9]\S*\s+(?:\S+\s+)?)(?<word>[A-Za-z]+)(?:(?<final>\.)(?=\s*$)|\.(?=\s))'
+      pattern: '(?<=(?:^|\s)[0-9]\S*\s+(?:\S+\s+)?)(?<word>[A-Za-z]+)(?:(?<final>\.)(?=[)"'']*\s*$)|\.(?=[\s)"'']))'
       flags: ''
       class: number_abbreviation
       captures: {word: word, final: final}
@@ -70,8 +73,18 @@ text_recognition:
     # entry, which ways of writing the word find it (l lower case, C
     # capitalised, U upper case). A word in mixed case is not in the map's
     # terms and is left to the other rules.
+    # Punctuation written against the word does not hide it: an opening
+    # bracket or quote before it, and a comma, semicolon, colon, question or
+    # exclamation mark, closing bracket or quote after its period. DECtalk
+    # strips the punctuation at a word's ends and looks the word up again
+    # (LTS/ls_task.c:2244-2325, 2436-2482). Measured on say.exe: "Smith Jr.,
+    # a lawyer" is "junior" and a comma, "Main St.: go" "street" and a comma,
+    # "Smith Jr.? He" "junior" and a question, "The (Dept. of State)"
+    # "department", "(Smith Jr.) now" "junior" with no break, and "He is
+    # (Smith Jr.)" ends the sentence at the text's end. The same for the unit
+    # rule above and the dotted capitals below.
     - id: tn_dictionary_abbreviation_source
-      pattern: '(?<=^|\s)(?<word>[A-Za-z][A-Za-z.]*?)(?:(?<final>\.)(?=\s*$)|\.(?=\s))'
+      pattern: '(?<=(?:^|\s)[("'']*)(?<word>[A-Za-z][A-Za-z.]*?)(?:(?<final>\.)(?=[)"'']*\s*$)|\.(?=[\s,;:!?)"'']))'
       flags: ''
       class: dictionary_abbreviation
       captures: {word: word, final: final}
@@ -103,7 +116,7 @@ text_recognition:
     # word, not to the sentence. Only for a frontend whose policy asks for it
     # (tn_recognition_policy.initialisms: capitals).
     - id: tn_dotted_capitals_source
-      pattern: '(?<=^|\s)(?<letters>[A-Z](?:\.[A-Z])+)(?:(?<final>\.)(?=\s*$)|\.(?=\s)|(?=\s|$))'
+      pattern: '(?<=(?:^|\s)[("'']*)(?<letters>[A-Z](?:\.[A-Z])+)(?:(?<final>\.)(?=[)"'']*\s*$)|\.(?=[\s,;:!?)"''])|(?=[\s,;:!?)"'']|$))'
       flags: ''
       class: dotted_capitals
       captures: {letters: letters, final: final}
@@ -135,6 +148,34 @@ text_recognition:
       citations:
         - 'DECtalk 4.63 LTS/l_us_sp1.c:63-99 (ls_spel_say_it: a word of capitals is spelled when all its letters are vowels, or it has at most four letters and its first pair has SPELL_BEGIN or its last pair SPELL_END in spell_it)'
         - 'DECtalk 4.63 LTS/ls_task.c:697 and 746 (the dictionary search comes before the test)'
+    # A word written with hyphens between its parts stays one word, hyphens
+    # and all: the frontend's lexicon reads it part by part. Only for a
+    # frontend whose policy asks for it (tn_recognition_policy.
+    # hyphenated_words: source). A doubled hyphen is not this rule's.
+    - id: tn_hyphenated_word_source
+      pattern: '(?<=(?:^|\s)[("'']*)(?<word>[A-Za-z]+(?:-[A-Za-z]+)+)(?=[\s.,;:!?)"'']|$)'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'hyphenated_words', 'split') == 'source'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4208-4435 (ls_task_process_word reads a word with hyphens in it part by part)'
+    # A word with a slash in it that the frontend's dictionary holds as
+    # written ("yes/no", "and/or"), and a slash standing alone, which the
+    # dictionary holds too: one word. The generated map tn_slash_words is the
+    # dictionary's entries with a slash.
+    - id: tn_slash_word_source
+      pattern: '(?<=(?:^|\s)[("'']*)(?<word>[A-Za-z]+/[A-Za-z]+|/)(?=[\s.,;:!?)"'']|$)'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "lower(captures.word) in get(maps, 'tn_slash_words', {})"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entries with a slash), LTS/ls_task.c:2040-2160 (the word is looked up as written before anything is stripped from it)'
     - id: tn_initialism_source
       pattern: '\b(?:[a-z]\.){2,}[a-z]?\.?'
       flags: i

@@ -52,6 +52,11 @@ export interface ClauseContext {
    * by it (table-lts-pronounce.ts numberAbbreviations).
    */
   numberBefore?: string;
+  /**
+   * The punctuation mark the word stands against, when it is the last one
+   * before a mark and the mark is known.
+   */
+  markAfter?: string;
 }
 
 /** The context of a word spoken alone. */

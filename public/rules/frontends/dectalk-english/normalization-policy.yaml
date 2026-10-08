@@ -59,6 +59,12 @@ maps:
     # the sentence at the text's end. The shared rule, which also takes lower
     # case and speaks the letters as words, is off.
     initialisms: capitals
+    # A word with hyphens between its parts is one word, read part by part
+    # with the compound mark between (LTS/ls_task.c:4208-4435). Measured on
+    # say.exe, as the symbols the phonemic stage receives: "well-known" is
+    # W EH LL, the mark, N OW N; "mother-in-law" M AH DH RR, the mark,
+    # IH N LL AO with nothing between "in" and "law".
+    hyphenated_words: source
 # A text that does not end in punctuation is still closed as a sentence: when
 # the text is flushed the text task sends a breath break (LTS/ls_task.c:1236-1260,
 # the VT case) and the clause ends as one that ends in a period. Measured on

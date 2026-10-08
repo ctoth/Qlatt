@@ -1300,9 +1300,12 @@ rules:
       b2: "isTrue(current, 'after_deleted_geminate') ? behind(current, 1) : behind(current, 2)"
       two_back_not_syllabic: >-
         b2 == null || !(b2.type == 'vowel' || b2.phoneme in ['EL', 'EM', 'EN'])
+      # (curr_instruc & FBOUNDARY) >= FMBNEXT: a word's end, or a morpheme
+      # boundary or a compound's joint after the /t/ ("light*house", which the
+      # letter-to-sound rules mark, has TX before its HX).
       next_word_boundary: >-
         n == null ? true :
-        !dectalk_same_word(n, current)
+        !dectalk_same_word(n, current) || isTrue(current, 'morpheme_boundary_after')
       next_son2: >-
         n != null && (n.phoneme in ['W', 'Y', 'R', 'L', 'YU', 'M', 'N', 'NG', 'EM', 'EN'])
       # (curr_instruc & FBOUNDARY) >= FMBNEXT (ph_aloph.c:917): the end of a

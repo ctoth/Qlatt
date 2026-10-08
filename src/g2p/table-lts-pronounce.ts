@@ -142,10 +142,30 @@ export function isLtsTableDocument(value: unknown): value is LtsTableDocument {
  * consonant; the digit goes on the next stress-bearing phone.
  */
 export function pronounceWithLtsTable(word: string, table: LtsTableDocument): string[] {
+  return pronounceWithLtsTableDetailed(word, table).phonemes;
+}
+
+/**
+ * The same, with the indices of the phones a morpheme boundary or a
+ * compound's joint stands after: the rules mark them (the `*` and `#` flags of
+ * LTS/ls_adju.c, sent as MBOUND and HYPHEN), and the phonemic stage reads
+ * them as it reads the dictionary's ("lighthouse" is L AY T, boundary, HH AW S).
+ */
+export function pronounceWithLtsTableDetailed(
+  word: string,
+  table: LtsTableDocument,
+): { phonemes: string[]; boundaryAfter: number[] } {
   const stressBearing = new Set(table.stressBearing);
   const phonemes: string[] = [];
+  const boundaryAfter: number[] = [];
   let pending = 0;
   for (const symbol of adjustLts(applyLtsRules(word, table), table)) {
+    if (symbol.kind === "morpheme_boundary" || symbol.kind === "compound_boundary") {
+      if (phonemes.length > 0 && boundaryAfter.at(-1) !== phonemes.length - 1) {
+        boundaryAfter.push(phonemes.length - 1);
+      }
+      continue;
+    }
     if (symbol.kind !== "phone") continue;
     if (symbol.stress !== 0) pending = symbol.stress;
     const symbols = table.phonemeSymbols[symbol.phone];
@@ -161,5 +181,5 @@ export function pronounceWithLtsTable(word: string, table: LtsTableDocument): st
     phonemes.push(...symbols.slice(0, -1), `${symbols[symbols.length - 1]}${pending.toString()}`);
     pending = 0;
   }
-  return phonemes;
+  return { phonemes, boundaryAfter };
 }

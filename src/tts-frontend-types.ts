@@ -33,6 +33,7 @@ export const LEXICON_SOURCE_KEYS = [
   "spelling",
   "position",
   "number-abbreviation",
+  "hyphenated",
 ] as const;
 export type LexiconSourceKey = (typeof LEXICON_SOURCE_KEYS)[number];
 export type LexiconSource = { name: string; citation: string };

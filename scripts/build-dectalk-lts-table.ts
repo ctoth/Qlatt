@@ -714,6 +714,16 @@ fs.writeFileSync(
     ...spellEndPairs.sort().map((pair) => `    ${JSON.stringify(pair)}: "spell"`),
     "  tn_capitals_in_dictionary:",
     ...capitalsSpoken.map((word) => `    ${JSON.stringify(word)}: "word"`),
+    "  # The dictionary's entries with a slash in them, in lower case: a word",
+    "  # written so is the dictionary's word.",
+    "  tn_slash_words:",
+    ...[
+      ...new Set(
+        dictionaryWords.filter((word) => word.includes("/")).map((word) => word.toLowerCase()),
+      ),
+    ]
+      .sort()
+      .map((word) => `    ${JSON.stringify(word)}: "word"`),
     "",
   ].join("\n"),
 );

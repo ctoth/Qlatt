@@ -26,7 +26,7 @@ import {
   formClassNamesOf,
   isLtsTableDocument,
   type LtsTableDocument,
-  pronounceWithLtsTable,
+  pronounceWithLtsTableDetailed,
   receivedFormClassWord,
   startsVerbPhrase,
 } from "./table-lts-pronounce";
@@ -221,8 +221,14 @@ export function pronounce(
   // calls a number singular only when it is the one digit 1
   // (LTS/l_us_pr1.c ls_proc_do_number, "Watch for 1"); measured on say.exe,
   // "1 lb." is pound and "5", "21", "01", "1,000", "1.0" and "1.5" are pounds.
+  // Only a word whose period is the last thing written on it is looked up so
+  // (:2102-2116, the next item is the period or the word ends in it): with
+  // another mark after the period the word goes on to the dictionary, and
+  // "5 lb., not more" is "pound", the dictionary's entry "lb.".
   const unit =
-    context.numberBefore !== undefined && lowerWord.endsWith(".")
+    context.numberBefore !== undefined &&
+    lowerWord.endsWith(".") &&
+    (context.markAfter === undefined || context.markAfter === ".")
       ? table?.numberAbbreviations?.[lowerWord.slice(0, -1)]
       : undefined;
   if (table && unit) {
@@ -348,11 +354,137 @@ export function pronounce(
         ...classed(stripped.formClass),
       };
     }
+    // A word of letters with hyphens in it is read in the chunks between
+    // them (DECtalk 4.63 LTS/ls_task.c:4208-4435 ls_task_process_word). Each
+    // chunk is looked up, suffixes included; one the dictionary lacks goes to
+    // the rules when it has a vowel and more than one letter, and is spelled
+    // otherwise. The compound mark follows the first chunk when the
+    // dictionary has it (:4330) and any chunk the rules read (:4374); nothing
+    // at all follows a later chunk the dictionary has, or a spelled one. The
+    // letters of a spelled chunk are words of their own, but the first joins
+    // what stands before it and the last what follows. A chunk whose entry
+    // starts a verb phrase starts it here too. Measured on say.exe:
+    // "mother-in-law" is M AH DH RR, mark, IH N L AO; "zorb-blat" Z AO R B,
+    // mark, B L AE T; "re-read" R IY, mark, verb-phrase start, R IY D;
+    // "tv-set" T IY, word boundary, V IY S EH T; "f-a-r" EH F EY AA R.
+    // Several hyphens in a row are not read here (:4374 sends a comma there,
+    // but DECtalk's parser has rewritten such a word before this point).
+    const readChunk = (
+      chunk: string,
+    ): {
+      kind: "dictionary" | "rules" | "spelled";
+      /** The chunk's phones; of a spelled chunk, those of its first letter. */
+      phonemes: string[];
+      /** The further letters of a spelled chunk, each a word. */
+      letters?: string[][];
+      boundaryAfter: readonly number[];
+      formClass: number | null;
+      startsVerbPhrase: boolean;
+    } => {
+      // The one letter "a" is never found here (LTS/ls_dict.c:444).
+      const direct = chunk === "a" ? null : dictLookup(chunk);
+      if (direct) {
+        const entry = entryOf(chunk, 0);
+        return {
+          kind: "dictionary",
+          phonemes: entry.other ? [...entry.other.phonemes] : direct,
+          boundaryAfter: entry.boundaryAfter ?? [],
+          formClass: entry.formClass,
+          startsVerbPhrase: startsVerbPhrase(entry.formClass, table),
+        };
+      }
+      const suffixed =
+        chunk.length > 1 && suffixIndex && suffixTable
+          ? stripSuffixes(chunk, dictLookup, { ...table, suffixIndex, suffixTable })
+          : null;
+      if (suffixed?.phonemes && suffixed.root !== null) {
+        const entry = entryOf(suffixed.root, suffixed.formClass);
+        return {
+          kind: "dictionary",
+          phonemes: suffixed.phonemes,
+          boundaryAfter: entry.boundaryAfter ?? [],
+          formClass: suffixed.formClass,
+          startsVerbPhrase: startsVerbPhrase(entry.formClass, table),
+        };
+      }
+      if (chunk.length > 1 && (/[aeiou]/.test(chunk) || chunk.slice(1).includes("y"))) {
+        const byRules = pronounceWithLtsTableDetailed(chunk, table);
+        return {
+          kind: "rules",
+          phonemes: byRules.phonemes,
+          boundaryAfter: byRules.boundaryAfter,
+          formClass: null,
+          startsVerbPhrase: false,
+        };
+      }
+      const names = [...chunk].map((letter) => [...(letterPhones?.[letter] ?? [])]);
+      return {
+        kind: "spelled",
+        phonemes: names[0] ?? [],
+        letters: names.slice(1),
+        boundaryAfter: [],
+        formClass: null,
+        startsVerbPhrase: false,
+      };
+    };
+    if (/^[a-z]+(?:-[a-z]+)+$/.test(lowerWord)) {
+      const chunks = lowerWord.split("-");
+      type Piece = NonNullable<PronunciationResult["parts"]>[number];
+      const parts: Piece[] = [{ phonemes: [] }];
+      const boundaries: number[][] = [[]];
+      let firstClass: number | null = null;
+      let firstPhrase: "vp" | undefined;
+      for (const [at, chunk] of chunks.entries()) {
+        const read = readChunk(chunk);
+        if (at === 0) {
+          firstClass = read.formClass;
+          firstPhrase = read.startsVerbPhrase ? "vp" : undefined;
+        } else if (read.startsVerbPhrase) {
+          parts.push({ phonemes: [], phraseStart: "vp" });
+          boundaries.push([]);
+        }
+        const part = parts.at(-1) as Piece;
+        const marks = boundaries.at(-1) as number[];
+        for (const index of read.boundaryAfter) marks.push(part.phonemes.length + index);
+        part.phonemes.push(...read.phonemes);
+        for (const letter of read.letters ?? []) {
+          parts.push({ phonemes: [...letter] });
+          boundaries.push([]);
+        }
+        const joint = read.kind === "dictionary" ? at === 0 : read.kind === "rules";
+        if (joint && at < chunks.length - 1 && part.phonemes.length > 0) {
+          marks.push(part.phonemes.length - 1);
+        }
+      }
+      const spoken = parts
+        .map((part, index) => ({
+          ...part,
+          ...((boundaries[index] as number[]).length > 0
+            ? { morphemeAfter: [...new Set(boundaries[index] as number[])] }
+            : {}),
+        }))
+        .filter((part) => part.phonemes.length > 0);
+      return {
+        phonemes: spoken.flatMap((part) => part.phonemes),
+        source: "hyphenated",
+        word: lowerWord,
+        ...(spoken.length > 1
+          ? { parts: spoken }
+          : spoken[0]?.morphemeAfter
+            ? { boundaryAfterAt: [...spoken[0].morphemeAfter] }
+            : {}),
+        ...classed(firstClass ?? 0),
+        ...(firstPhrase ? { phraseStart: firstPhrase } : {}),
+      };
+    }
+    const byRules = pronounceWithLtsTableDetailed(lowerWord, table);
     return {
-      phonemes: pronounceWithLtsTable(lowerWord, table),
+      phonemes: byRules.phonemes,
       source: "lts-rules",
       word: lowerWord,
       ...classed(stripped.formClass),
+      // The rules' own morpheme marks ("lighthouse": L AY T, mark, HH AW S).
+      ...(byRules.boundaryAfter.length > 0 ? { boundaryAfterAt: byRules.boundaryAfter } : {}),
     };
   }
 
@@ -411,6 +543,8 @@ export function pronounceClause(
      * before a written period (LTS/ls_task.c:2647-2673).
      */
     atWrittenPunctuation?: boolean;
+    /** The mark that ends the run, as written. */
+    endMark?: string;
   },
 ): PronunciationResult[] {
   const table = options.ltsPath ? ltsTableAt(options.ltsPath) : null;
@@ -434,6 +568,9 @@ export function pronounceClause(
           laterVerb: laterVerbAt ? laterVerbAt(index) : null,
           atPunctuation: index === words.length - 1 && options.atWrittenPunctuation !== false,
           ...(number === undefined ? {} : { numberBefore: number }),
+          ...(index === words.length - 1 && options.endMark !== undefined
+            ? { markAfter: options.endMark }
+            : {}),
         },
       });
       before.push(result.formClassWord ?? 0);

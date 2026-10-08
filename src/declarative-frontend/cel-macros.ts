@@ -436,6 +436,10 @@ const NON_EXPRESSION_KEYS = new Set([
   "match",
 ]);
 
+// Maps of a frame program whose keys are the author's names, not fields: a
+// feature may be called `name` or `kind`.
+const FRAME_NAME_MAP = /^frame_programs\.[^.]+\.(features|outputs|group\.totals)$/;
+
 function expandValue(
   value: unknown,
   macros: CelMacroTable,
@@ -457,7 +461,7 @@ function expandValue(
     return Object.fromEntries(
       Object.entries(value).map(([key, entry]) => [
         key,
-        NON_EXPRESSION_KEYS.has(key) && !path.endsWith(".define")
+        NON_EXPRESSION_KEYS.has(key) && !path.endsWith(".define") && !FRAME_NAME_MAP.test(path)
           ? entry
           : expandValue(entry, macros, `${path}.${key}`, citations),
       ]),

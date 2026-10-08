@@ -41,24 +41,12 @@ version: v1
 # `tail_frames` makes those frames a unit, with the lead-in's features.
 # -----------------------------------------------------------------------------
 functions:
-  artic_next_unit:
-    params: [item]
-    body: "item == null ? null : look_ahead_pred(item, params.policy.articulation.unit_scan_items,'is_articulation_unit')"
-    description: The first Segment of the next DECtalk allophone, dummy vowels included.
-    citations:
-      - "DECtalk 4.63 ph_inton1.c:1808-1820 (the dummy vowel is allophone nphon + 1)"
   artic_is_dummy:
     params: [item]
     body: "item != null && item.phoneme == 'SIL' && isTrue(item, 'dummy_vowel')"
     description: Whether a Segment is the dummy vowel that releases a plosive into silence.
     citations:
       - "DECtalk 4.63 ph_inton1.c:1780-1820 (Rule 9)"
-  artic_prev_unit:
-    params: [item]
-    body: "item == null ? null : look_back_pred(item, params.policy.articulation.unit_scan_items,'is_articulation_unit')"
-    description: The first Segment of the DECtalk allophone before this one, dummy vowels included.
-    citations:
-      - "DECtalk 4.63 ph_inton1.c:1808-1820 (the dummy vowel is allophone nphon + 1)"
   artic_has:
     params: [item, feature]
     body: >-
@@ -81,16 +69,6 @@ functions:
     description: FSTRESS of an allophone (0 none, 1 primary, 2 secondary, 3 emphasis); a dummy vowel has the plosive's.
     citations:
       - "DECtalk 4.63 ph_defs.h:219-225; ph_inton1.c:1818"
-  artic_dummy_half:
-    params: [item]
-    body: >-
-      artic_is_dummy(item)
-        ? floor(round(item.duration / params.policy.timing.frame_ms)
-                / params.policy.articulation.pressure.dummy_vowel_divisor)
-        : 0
-    description: Half the frames of a dummy vowel, 0 for any other allophone (allodurs >> 1).
-    citations:
-      - "DECtalk 4.63 PH/ph_draw.c:3815-3818"
   artic_boundary:
     params: [item]
     body: >-
@@ -171,14 +149,9 @@ frame_programs:
       is_r: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'R'", edge: false }
       is_rr: { value: "!artic_is_dummy(current) && dectalk_name(current) == 'RR'", edge: false }
       is_l: { value: "!artic_is_dummy(current) && dectalk_name(current) in ['LL', 'LX']", edge: false }
-      # allophons[nphone + 1] == allophons[nphone + 2]
-      next_repeats:
-        value: >-
-          artic_next_unit(current) != null && artic_next_unit(artic_next_unit(current)) != null
-          && !artic_is_dummy(artic_next_unit(current))
-          && !artic_is_dummy(artic_next_unit(artic_next_unit(current)))
-          && dectalk_name(artic_next_unit(current)) == dectalk_name(artic_next_unit(artic_next_unit(current)))
-        edge: false
+      # The allophone's name, for a rule that compares two of them
+      # (allophons[nphone + 1] == allophons[nphone + 2], say).
+      name: { value: "dectalk_name(current)", edge: "" }
       alveolar: { value: "artic_place(current, 'alveolar')", edge: false }
       is_dh_th:
         value: "!artic_is_dummy(current) && dectalk_name(current) in ['DH', 'TH']"
@@ -210,15 +183,6 @@ frame_programs:
       is_affricate:
         value: "!artic_is_dummy(current) && dectalk_name(current) in ['CH', 'JH']"
         edge: false
-      # p_us_st1.c:1397-1400: the allophone two back is /s/ with no boundary after it.
-      after_s_cluster:
-        value: >-
-          dectalk_name(artic_prev_unit(artic_prev_unit(current))) == 'S'
-          && artic_boundary(artic_prev_unit(artic_prev_unit(current))) == 0.0
-        edge: false
-      after_s:
-        value: "dectalk_name(artic_prev_unit(artic_prev_unit(current))) == 'S'"
-        edge: false
       # ph_sort.c:1464 number_words: one for each word boundary. A word that
       # starts a verb phrase comes in with that boundary instead and is not
       # counted, except the clause's first word, which always is: DECtalk
@@ -228,17 +192,9 @@ frame_programs:
       counted_word:
         value: "dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp'"
         edge: false
-      # FSON1 of the clause's allophones at nallotot - 2 and nallotot - 3: the
-      # last before the final silence and the one before it.
-      end_2_son1:
-        value: >-
-          artic_has(artic_prev_unit(look_ahead_where(current, 1000,
-            'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')), 'son1')
-        edge: false
-      end_3_son1:
-        value: >-
-          artic_has(artic_prev_unit(artic_prev_unit(look_ahead_where(current, 1000,
-            'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null'))), 'son1')
+      # The silence that ends a clause.
+      clause_end:
+        value: "current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null"
         edge: false
       # The allophone's code (l_all_ph.h); silence is 0, the dummy vowel IX or AX.
       phone_code:
@@ -246,12 +202,8 @@ frame_programs:
           params.policy.articulation.phone_code[
             artic_is_dummy(current) ? get(current, 'dummy_phone', 'IX') : dectalk_name(current)]
         edge: 0
-      # FBOUNDARY of this allophone and of the ones two and three after it.
+      # FBOUNDARY of this allophone.
       boundary: { value: "artic_boundary(current)", edge: 0 }
-      boundary_2: { value: "artic_boundary(artic_next_unit(artic_next_unit(current)))", edge: 0 }
-      boundary_3:
-        value: "artic_boundary(artic_next_unit(artic_next_unit(artic_next_unit(current))))"
-        edge: 0
       # How many input phones this allophone stands for: none for a dummy
       # vowel (added after the count), two for a vowel fused with its /r/ and
       # for the survivor of a deleted geminate (annotation.yaml, hat pattern).
@@ -261,46 +213,23 @@ frame_programs:
           : 1 + (isTrue(current, 'fused_with_r') ? 1 : 0)
               + (isTrue(current, 'after_deleted_geminate') ? 1 : 0)
         edge: 1
-      # ph_draw.c:3812-3870 reads allophone arrays at nphonetot - 2 and
-      # nphonetot - 1, a count of input phones used as an allophone index. From
-      # an allophone with `left` phones left (nphonetot - nphone) those are
-      # the allophones left - 2 and left - 1 further on: what the rule needs
-      # of them, for the offsets it can reach.
-      voiceless_obstruent_1:
-        value: >-
-          artic_has(artic_next_unit(current), 'obstruent')
-          && !artic_has(artic_next_unit(current), 'voiced')
-        edge: false
-      voiceless_obstruent_2:
-        value: >-
-          artic_has(artic_next_unit(artic_next_unit(current)), 'obstruent')
-          && !artic_has(artic_next_unit(artic_next_unit(current)), 'voiced')
-        edge: false
-      dummy_half_1: { value: "artic_dummy_half(artic_next_unit(current))", edge: 0 }
-      dummy_half_2:
-        value: "artic_dummy_half(artic_next_unit(artic_next_unit(current)))"
-        edge: 0
-      dummy_half_3:
-        value: "artic_dummy_half(artic_next_unit(artic_next_unit(artic_next_unit(current))))"
-        edge: 0
-      # tcumdur is not added to from the syllabic where phinton's walk stops
-      # (prosody.yaml dectalk_segmental_f0_phone, Ph_inton2.c:809-819, 1659-1671).
-      counted:
-        value: >-
-          !isTrue(current, 'intonation_stops')
-          && (look_back_where(current, 1000,
-                '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")') == null
-              || look_back_where(current, 1000,
-                '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || isTrue(candidate, "intonation_stops")').phoneme == 'SIL')
-        edge: true
+      # The syllabic where phinton's walk stops (prosody.yaml
+      # dectalk_segmental_f0_phone, Ph_inton2.c:809-819, 1659-1671).
+      stops: { value: "isTrue(current, 'intonation_stops')", edge: false }
     group:
       # A clause starts at its initial silence.
       start: "u.initial"
       totals:
+        # Whether the walk has stopped by this allophone.
+        stopped: "u.stops ? 1 : 0"
         # tcumdur: the initial silence and every phone phinton counted, dummy
         # vowels included, but not the final silence (ph_inton1.c:1765-1777,
-        # 1817).
-        counted_frames: "(u.silence && !u.initial) || !u.counted ? 0 : f.count"
+        # 1817), and nothing from the syllabic where the walk stops.
+        counted_frames: "(u.silence && !u.initial) || g.stopped > 0 ? 0 : f.count"
+        # FSON1 of the clause's allophones at nallotot - 2 and nallotot - 3:
+        # the last before the final silence and the one before it.
+        end_2_son1: "n.clause_end && u.son1 ? 1 : 0"
+        end_3_son1: "n2.clause_end && u.son1 ? 1 : 0"
         # nphonetot: the clause's input phones, both silences included.
         phonemes: "u.phonemes"
         # number_words
@@ -499,16 +428,16 @@ rules:
         value: >-
           g.counted_frames - (g.frame + 1)
           - (r.phones_left == 1 ? (u.dummy ? floor(f.count / params.policy.articulation.pressure.dummy_vowel_divisor) : 0)
-             : (r.phones_left == 2 ? u.dummy_half_1
-             : (r.phones_left == 3 ? u.dummy_half_2
-             : (r.phones_left == 4 ? u.dummy_half_3 : 0))))
+             : (r.phones_left == 2 ? (n.dummy ? floor(f.next_count / params.policy.articulation.pressure.dummy_vowel_divisor) : 0)
+             : (r.phones_left == 3 ? (n2.dummy ? floor(f.next2_count / params.policy.articulation.pressure.dummy_vowel_divisor) : 0)
+             : (r.phones_left == 4 ? (n3.dummy ? floor(f.next3_count / params.policy.articulation.pressure.dummy_vowel_divisor) : 0) : 0))))
         tag: subglottal_pressure
       - register: fall_floor
         value: >-
           (r.phones_left == 1 ? (p.obstruent && !p.voiced)
            : (r.phones_left == 2 ? (u.obstruent && !u.voiced)
-           : (r.phones_left == 3 ? u.voiceless_obstruent_1
-           : (r.phones_left == 4 ? u.voiceless_obstruent_2 : false)))) ? 450 : 500
+           : (r.phones_left == 3 ? (n.obstruent && !n.voiced)
+           : (r.phones_left == 4 ? (n2.obstruent && !n2.voiced) : false)))) ? 450 : 500
         tag: subglottal_pressure
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:3812-3825, 3850-3870"
@@ -518,8 +447,8 @@ rules:
     unit: >-
       u.syllabic
       && (u.boundary >= params.policy.timing.boundary.pp
-          || u.boundary_2 >= params.policy.timing.boundary.pp
-          || u.boundary_3 >= params.policy.timing.boundary.pp)
+          || n2.boundary >= params.policy.timing.boundary.pp
+          || n3.boundary >= params.policy.timing.boundary.pp)
     when: >-
       r.syl_pressure == 0 && r.phones_left <= 4
       && g.frame + 1 > 9
@@ -625,7 +554,7 @@ rules:
       - register: vot
         value: >-
           (u.soncon || u.is_rr) ? r.vot + params.policy.articulation.vot.sonorant_consonant_bonus
-          : (u.after_s ? (u.after_s_cluster ? params.policy.articulation.vot.s_cluster : r.vot)
+          : (p2.name == 'S' ? (p2.boundary == 0.0 ? params.policy.articulation.vot.s_cluster : r.vot)
           : (!u.syllabic ? r.vot + params.policy.articulation.vot.nonsyllabic_bonus : r.vot))
         tag: glottal_area
       - { register: vot, value: "r.vot >= f.count ? f.count - 1 : r.vot", tag: glottal_area }
@@ -1087,7 +1016,7 @@ rules:
   artic_plosive_before_nasal:
     kind: frame
     program: articulation
-    unit: "!u.silence && u.obstruent && u.plosive && n.nasal && u.next_repeats"
+    unit: "!u.silence && u.obstruent && u.plosive && n.nasal && n.name == n2.name"
     when: "f.index >= f.count - 8 && r.target_ag > 1100"
     set:
       - { register: target_ag, value: 1100, tag: glottal_area }
@@ -1136,8 +1065,8 @@ rules:
     unit: >-
       g.unit < g.units - 1
       && !(g.unit >= g.units - 4
-           ? (g.unit > 3 && u.end_3_son1 && g.unit < g.units - 3)
-           : (g.unit > 3 && u.end_2_son1 && g.unit < g.units - 4))
+           ? (g.unit > 3 && g.end_3_son1 > 0 && g.unit < g.units - 3)
+           : (g.unit > 3 && g.end_2_son1 > 0 && g.unit < g.units - 4))
     when: "g.frame + 1 > g.counted_frames - 12 && r.delta_area_g < 800"
     set:
       - register: delta_area_g
@@ -2063,7 +1992,7 @@ rules:
   artic_velum_before_nasal:
     kind: frame
     program: articulation
-    unit: "!u.nasal && n.nasal && !u.next_repeats"
+    unit: "!u.nasal && n.nasal && n.name != n2.name"
     set:
       - register: nasal_step
         value: "f.count < 7 && r.nasal_step < 7 ? r.nasal_step + 1 : r.nasal_step"
@@ -2085,7 +2014,7 @@ rules:
   artic_velum_closing:
     kind: frame
     program: articulation
-    unit: "!u.nasal && !(n.nasal && !u.next_repeats)"
+    unit: "!u.nasal && !(n.nasal && n.name != n2.name)"
     when: "r.nasal_step != 0 && f.index != 0 && !(u.sonorant && f.index < 3)"
     set:
       - register: nasal_step

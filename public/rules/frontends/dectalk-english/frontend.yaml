@@ -205,6 +205,17 @@ f0_model:
     # filter_seg_commands() in signed Q14 arithmetic.
     segmental:
       type: dectalk_segmental
+      # The glottal-stop gesture. A command's fourth flag puts one at its
+      # allophone's end (set_tglst, Ph_drwt02.c:4040-4128; the conditions are
+      # the segmental rules' in prosody.yaml). Within 7 frames of it F0 is
+      # lowered by 550 less 70 a frame (2266-2275: dtglst * 70 - 550 while
+      # dtglst <= 7; the same at 3753-3762 in the female routine). A gesture
+      # is taken up at an allophone's frame 8, or its last frame (4124).
+      glottal_gesture:
+        depth: 550
+        slope: 70
+        reach_frames: 7
+        latch_frame: 8
     # A command here adds its value to the voice's range (f0_scale_factor) for
     # the clause: the female routine's exclamation, Ph_drwt02.c:3805-3808.
     range:
@@ -215,10 +226,10 @@ f0_model:
   by_sex:
     female:
       filter:
-        # The command filter runs at half scale: its state starts at
+        # The command filter runs one bit down: its state starts at
         # (f0basestart << 3) >> 1 (3182-3183), its input is f0in >> 1 (3702)
-        # and its output is doubled (3710).
-        type: lowpass_2pole_coefficient_half_scale
+        # and its output is f0 << 1 (3710).
+        scale_shift: 1
       layers:
         stress:
           # tarimp is still raised by delimp after each frame (3685-3691), but

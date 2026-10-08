@@ -8,5 +8,5 @@
   "betty-yes-we-can": ["B1","AV","AP","A2","A3","A4","A5","AG","PS","CNK","A2_CODE","F4"],
   "betty-voice-clear": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","A2_CODE","F4"],
   "betty-judge": ["B1","AV","AP","A2","A3","A4","A5","A6","AG","PS","CNK","F4"],
-  "betty-look-boy": ["F0","B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","F4"]
+  "betty-look-boy": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","F4"]
 }

@@ -105,6 +105,8 @@ const hex = (bytes: readonly number[]): string =>
 
 /** Line of each rule number in the rule text: `...:R<n>` in a head, or `STOP,R<n>`. */
 const lineOfRule = new Map<number, number>();
+/** The rule as written on that line, for a reader of the table and of a decision. */
+const textOfRule = new Map<number, string>();
 fs.readFileSync(path.join(cmdDir, RULE_TEXT), "latin1")
   .split(/\r?\n/)
   .forEach((line, index) => {
@@ -112,7 +114,10 @@ fs.readFileSync(path.join(cmdDir, RULE_TEXT), "latin1")
     const head = /^(?:0x[0-9A-Fa-f]{8}-0x[0-9A-Fa-f]{8}:([^,]*)|[A-Z]+[0-9]*),/.exec(line);
     if (!head) return;
     const number = /(?:^|[;,:])R(\d+)/.exec(head[1] ?? line.slice(0, line.indexOf(",") + 12));
-    if (number && !lineOfRule.has(Number(number[1]))) lineOfRule.set(Number(number[1]), index + 1);
+    if (number && !lineOfRule.has(Number(number[1]))) {
+      lineOfRule.set(Number(number[1]), index + 1);
+      textOfRule.set(Number(number[1]), line.trimEnd());
+    }
   });
 
 interface RuleEntry {
@@ -127,6 +132,8 @@ interface RuleEntry {
   number?: number;
   /** Its line in the rule text, when the number is found there. */
   line?: number;
+  /** The rule as the rule text writes it on that line (Latin-1 characters). */
+  text?: string;
   language?: number;
   mode?: number;
   /** The word's dictionary state the rule needs (par_pars1.c:1280-1317). */
@@ -184,7 +191,7 @@ const rules: RuleEntry[] = ruleIndexTable.map((start, index) => {
     kind: "rule",
     flags,
     number,
-    ...(line !== undefined ? { line } : {}),
+    ...(line !== undefined ? { line, text: textOfRule.get(number) } : {}),
     language: u32(bytes, 4),
     mode: u32(bytes, 8),
     ...(dictionary ? { dictionary } : {}),

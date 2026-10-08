@@ -90,8 +90,11 @@ describe("dectalk-english runs its text parser first", () => {
     expect(input?.reason).toContain('"Dr. Smith is here."');
     const rewrites = decisions.filter((decision) => decision.type === "text_parser_rewrite");
     expect(rewrites.map((decision) => decision.subject)).toEqual(["text_parser:R315"]);
+    // The reason says what was rewritten and quotes the rule as the rule text
+    // writes it, so a reader need not decode the table.
     expect(rewrites[0].reason).toBe(
-      'Rule R315 (CMD/par_rule2.par line 523) rewrote "Dr. Smith" as "Doctor Smith"',
+      'Rule R315 (CMD/par_rule2.par line 523) rewrote "Dr. Smith" as "Doctor Smith"; the rule: ' +
+        "0x00000021-0xFFFFFFFF:R315,r/'D'`r.`/'Doctor'/r/Wx<+>/' '/U<1>r/S{'.'A<+>,A<+>,'.'}<1-3>/$8|$8|''/o/'\\'s'/",
     );
     expect(rewrites[0].citations).toEqual(["DECtalk 4.63 CMD/par_rule2.par:523"]);
     expect(rewrites[0].parents).toEqual([input?.id]);
@@ -112,7 +115,7 @@ describe("dectalk-english runs its text parser first", () => {
   it("reads the parser's comma written as phonemic text as a pause", () => {
     const decisions = decisionsFor("Call 555 1234.", "dectalk-english");
     const rewrite = decisions.find((decision) => decision.type === "text_parser_rewrite");
-    expect(rewrite?.reason).toBe(
+    expect(rewrite?.reason.split("; the rule: ")[0]).toBe(
       'Rule R208 (CMD/par_rule2.par line 690) rewrote "555 1234." as "5 5 5, 1 2 3 4.{phonemes ,}"',
     );
     const pauses = decisions.filter(
@@ -127,7 +130,7 @@ describe("dectalk-english runs its text parser first", () => {
   it("speaks the parser's other phonemic text as the phones it names", () => {
     const decisions = decisionsFor("Open readme.txt now.", "dectalk-english");
     const rewrites = decisions.filter((decision) => decision.type === "text_parser_rewrite");
-    expect(rewrites.map((decision) => decision.reason)).toEqual([
+    expect(rewrites.map((decision) => decision.reason.split("; the rule: ")[0])).toEqual([
       'Rule R60 (CMD/par_rule2.par line 317) rewrote "readme.txt" as "readme . txt"',
       'Rule R339 (CMD/par_rule2.par line 546) rewrote ". txt" as "{phonemes d\'at} txt"',
     ]);

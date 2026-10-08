@@ -67,6 +67,8 @@ export interface TextParserRule {
   target?: number;
   number?: number;
   line?: number;
+  /** The rule as the rule text writes it on that line. */
+  text?: string;
   language?: number;
   mode?: number;
   dictionary?: "hit" | "miss" | "abbreviation";

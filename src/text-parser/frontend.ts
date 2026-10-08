@@ -204,7 +204,7 @@ export function runTextParser(
         stage: "transcribe",
         type: "text_parser_rewrite",
         subject: `text_parser:R${rule.number}`,
-        reason: `Rule R${rule.number} (${ruleText} line ${rule.line}) rewrote ${readable(decode(before, marks), table)} as ${readable(decode(after, marks), table)}`,
+        reason: `Rule R${rule.number} (${ruleText} line ${rule.line}) rewrote ${readable(decode(before, marks), table)} as ${readable(decode(after, marks), table)}; the rule: ${rule.text ?? "not in the rule text"}`,
         citations: [`DECtalk 4.63 ${ruleText}:${rule.line}`],
         parents: [input.id],
       });

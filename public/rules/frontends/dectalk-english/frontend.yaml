@@ -478,6 +478,9 @@ parameters:
       # (`allodurs[...] >> 1`).
       pressure:
         dummy_vowel_divisor: 2
+      # ph_draw.c:4071: from this speaking rate up, in words a minute, the
+      # glottal area moves at speed 1 on every frame.
+      glottis_fast_rate_wpm: 350
       # engineering estimate: how many Segments to scan back from a dummy
       # vowel for its plosive. A stop is at most a closure, a release and an
       # aspiration Segment, so 8 is ample; the same bound as pipeline.yaml's

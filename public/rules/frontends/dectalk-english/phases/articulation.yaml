@@ -1132,6 +1132,16 @@ rules:
       - { register: agspeed, value: 3, tag: glottal_area }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:4016-4025"
+  # At 350 words a minute and above the glottis always moves at speed 1,
+  # whatever a rule above chose; the 1 stays in the register.
+  artic_glottis_speed_at_high_rate:
+    kind: frame
+    program: articulation
+    when: "params.policy.timing.speaking_rate_wpm >= params.policy.articulation.glottis_fast_rate_wpm"
+    set:
+      - { register: agspeed, value: 1, tag: glottal_area }
+    citations:
+      - "DECtalk 4.63 PH/ph_draw.c:4072-4074 (if (sprate >= 350) agspeed = 1)"
   # A step over 300 is limited to 250, and then delta_area_g is not added.
   # `>>` is an arithmetic shift: floor.
   artic_glottis_step:
@@ -2231,6 +2241,7 @@ phases:
       - artic_end_of_clause_spread
       - artic_no_spread_before_the_end
       - artic_glottis_after_voiced_glottal
+      - artic_glottis_speed_at_high_rate
       - artic_glottis_step
       - artic_initial_reset_pressure
       - artic_initial_pressure_before_voiced_labial

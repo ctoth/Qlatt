@@ -66,18 +66,13 @@ import type { OracleCorpusDocument } from "../scripts/oracle/types";
 
 const repoRoot = path.resolve(__dirname, "..");
 
-const TIMING_REASON =
-  "the phrase's allophones or their durations are not DECtalk's (KNOWN_GAPS in dectalk-oracle-gate.test.ts)";
-const F0_REASON =
-  "the phrase's durations are not DECtalk's (its `length` and `segments` gaps): the one phrase " +
-  "left, carry-be-late. Known and not ported, with no phrase showing it: a glottal-stop " +
-  "gesture carries from one clause into the next (Ph_drwt02.c:1614 is reset only at a hard start)";
-// phases/formant-drawing.yaml draws F1, F2, F3, B2 and B3 as phsettar() and
-// phdraw() do. The one phrase that still differs, carry-be-late, is the one
-// whose allophone durations are not DECtalk's.
-const FORMANT_REASON =
-  "the phrase's durations are not DECtalk's (its `length` and `segments` gaps), and every " +
-  "ramp is computed from them";
+// No list holds length, segments, F0, F1-F3, B2, B3, PH or any word of
+// phases/articulation.yaml (AG, PS, CNK, AL, ABLADE, ATB, AREA_N, DC, UE,
+// A2_CODE) any more: every phrase of every corpus matches DECtalk on them, so
+// they have no reason here and a new gap in one of them fails this test.
+// Known and not ported, with no phrase showing it: a glottal-stop gesture
+// carries from one clause into the next (Ph_drwt02.c:1614 is reset only at a
+// hard start).
 const B1_REASON =
   "lowering blends Segment targets; DECtalk draws B1 from ph_setar.c and p_us_st1.c targets " +
   "with ph_draw.c:343-460's forward and backward smoothing, then delays it one frame " +
@@ -89,8 +84,7 @@ const AMPLITUDE_REASON =
   "packets do not record (VTM/vtmiont.c:660-683, 1300-1319)";
 
 // OUT_A2 is compared in two rows (scripts/oracle/frame-parameters.ts). Its
-// codes (A2_CODE) are ported (ph_draw.c:2037-2394) and differ only where the
-// allophones do (TIMING_REASON).
+// codes (A2_CODE) are ported (ph_draw.c:2037-2394) and match everywhere.
 const A2_AMPLITUDE_REASON =
   "where no frication code applies, PH leaves the generic A2 amplitude in OUT_A2 (a small " +
   "number ramping across a phone boundary) and the track has 0. It is not ported, and it " +
@@ -98,20 +92,9 @@ const A2_AMPLITUDE_REASON =
   "codes (VTM/vtmiont.c:797-1147) and then overwrites it (1303), as the port does " +
   "(crates/dectalk-vtm/src/vtmio.rs:354-509, 554); test/dectalk-a2-word.test.ts renders " +
   "DECtalk's packets with amplitudes put in every non-code A2 word and gets DECtalk's samples";
-// phases/articulation.yaml ports the pressure, glottis, constriction, velum
-// and DC/UE rules of ph_draw.c. Those words differ only in the one phrase
-// whose allophones are not DECtalk's (TIMING_REASON).
 
 const GAP_REASONS: Readonly<Record<string, string>> = {
-  length: TIMING_REASON,
-  segments: TIMING_REASON,
-  F0: F0_REASON,
-  F1: FORMANT_REASON,
-  F2: FORMANT_REASON,
-  F3: FORMANT_REASON,
   B1: B1_REASON,
-  B2: FORMANT_REASON,
-  B3: FORMANT_REASON,
   AV: AMPLITUDE_REASON,
   AP: AMPLITUDE_REASON,
   A2: AMPLITUDE_REASON,
@@ -120,18 +103,7 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
   A5: AMPLITUDE_REASON,
   A6: AMPLITUDE_REASON,
   AB: AMPLITUDE_REASON,
-  AG: TIMING_REASON,
-  PS: TIMING_REASON,
-  CNK: TIMING_REASON,
-  AL: TIMING_REASON,
-  ABLADE: TIMING_REASON,
-  ATB: TIMING_REASON,
-  AREA_N: TIMING_REASON,
-  DC: TIMING_REASON,
-  UE: TIMING_REASON,
-  A2_CODE: TIMING_REASON,
   A2_AMPLITUDE: A2_AMPLITUDE_REASON,
-  PH: TIMING_REASON,
 };
 
 const loaded = DECTALK_FRAME_CORPUS_FILES.map((fileName) => {

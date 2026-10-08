@@ -28,6 +28,14 @@ Experiments may `extends` a parent (see `public/experiments/manifest.json`);
 registries, graphs, and semantics merge child-over-parent
 (`src/experiments/load-experiment-config.ts`).
 
+A frontend is played through one experiment. Its entry in
+`public/rules/frontends/manifest.json` may name a `defaultExperiment`
+(`dectalk-english` names `dectalk-vtm`); without one, its default is the
+experiment with its own id, and a frontend with neither keeps whatever
+experiment is selected (`src/experiments/frontend-pairing.ts`). An experiment
+must declare every column the frontend lowers
+(`src/experiments/frontend-vocabulary.ts`), including columns it does not read.
+
 ## 2. The frames boundary
 
 The interchange format between frontend and backend is the `KlattFrame` track
@@ -489,7 +497,11 @@ end of the run, and a host must forward such messages to its diagnostic sink
 (`createKlattRuntime` does). The node also reports each run start (rate,
 delay, conversion method with its citations) and each speaker definition load
 at level `info`; `scripts/rendering/dectalk-vtm-render.ts` turns those into
-provenance decisions.
+provenance decisions. The run start carries `startFrame`, the number of
+samples the node had produced when the run began: hosts round a scheduled
+start time to a sample differently (for a start at 551.25 samples the Node
+host begins the run at sample 551, Chrome at 552), so the run's position in
+the output is the node's to state.
 
 `test/dectalk-vtm-wasm.test.ts` holds the wasm32 build to DECtalk's frames and
 samples; `test/dectalk-vtm-render.test.ts` renders the recorded packets

@@ -86,6 +86,10 @@ type EvaluationContext = {
   values: Record<string, unknown>;
   /** Add a named value (a rule's `define:` entry) for later expressions. */
   define: (name: string, value: unknown) => void;
+  /** Position of this context's Item in the scope's Item list. */
+  index: number;
+  /** The scope's record of the Item being evaluated; see `evaluate`. */
+  cursor: { index: number };
   functions: Record<string, (...args: unknown[]) => unknown>;
   isItemView: (value: unknown) => boolean;
   owner: GraphRuleEvaluationOwner;
@@ -130,32 +134,42 @@ interface EvaluationContextOptions {
   inventory?: GraphInventoryResource;
 }
 
-function buildEvaluationContext(options: EvaluationContextOptions): EvaluationContext {
+/** What every context of one transaction over one Item list shares. */
+type EvaluationScope = {
+  at: (
+    index: number,
+    extra: Readonly<Record<string, unknown>>,
+    bindings: Readonly<Record<string, Item>>,
+  ) => EvaluationContext;
+};
+
+/**
+ * Build the navigation functions, the views and the dependency recording for
+ * one transaction over one list of Items, once. A context (`at`) is then only
+ * the named values seen from one Item. A scope must not outlive its
+ * transaction or serve another Item list: its functions record what they read
+ * on that transaction and index into that list.
+ */
+function buildEvaluationScope(
+  options: Omit<EvaluationContextOptions, "index" | "extra" | "bindings">,
+): EvaluationScope {
   const {
     utterance,
     transaction,
     owner,
     items,
-    index,
     params,
-    extra = {},
-    bindings = {},
     relationName,
     predicates = {},
     inventory,
   } = options;
-  const recurseBase = {
-    utterance,
-    transaction,
-    owner,
-    items,
-    params,
-    relationName,
-    predicates,
-    inventory,
-  };
+  // The Item the expression being evaluated right now is about. One scope
+  // serves every context made from it, so the functions that speak of "the
+  // current Item" without naming it read this; `evaluate` sets it for the
+  // length of one evaluation and puts the outer one back.
+  const cursor = { index: -1 };
   const recurse = (index: number, extra: Readonly<Record<string, unknown>>): EvaluationContext =>
-    buildEvaluationContext({ ...recurseBase, index, extra });
+    at(index, extra, {});
   const views = new Map<Item, Readonly<Record<string, unknown>>>();
   const silenceSymbol = (): string => {
     if (!inventory)
@@ -481,350 +495,389 @@ function buildEvaluationContext(options: EvaluationContextOptions): EvaluationCo
     if (endsInFeature) return result.node ? result.value : null;
     return view(result.node?.item);
   };
-  const bindingViews = Object.fromEntries(
-    Object.entries(bindings).map(([name, item]) => [name, view(item)]),
-  );
-  const navigationItems: Readonly<Record<string, Item | undefined>> = {
-    current: items[index],
-    prev: items[index - 1],
-    next: items[index + 1],
-    ...bindings,
-  };
-  const values = {
-    current: view(items[index]),
-    prev: view(items[index - 1]),
-    next: view(items[index + 1]),
-    current_index: index,
-    params,
-    sets: params.sets,
-    maps: params.maps,
-    transcription: params.transcription,
-    ...bindingViews,
-    ...extra,
-  } as Record<string, unknown>;
-  return {
-    owner,
-    define: (name, value) => {
-      values[name] = value;
-    },
-    isItemView: (value) => value !== null && typeof value === "object" && itemByView.has(value),
-    values: new Proxy(values, {
-      get: (target, property, receiver) => {
-        if (typeof property === "string" && relationName) {
-          const item = navigationItems[property];
-          // A text item's value has its own source ancestry. Its append write
-          // also depends on preceding source spans for list ordering; reading
-          // current text must not make those spans pronunciation ancestors.
-          // Explicit prev/next navigation still records that ordering evidence.
-          const write =
-            item && !(property === "current" && item.type === "normalization")
-              ? utterance.relation(relationName).node(item)?.write
-              : undefined;
-          if (write) transaction.dependOn(write.decisionId);
-        }
-        return Reflect.get(target, property, receiver);
+  const isItemView = (value: unknown): boolean =>
+    value !== null && typeof value === "object" && itemByView.has(value);
+  // One context: the scope seen from one Item. Only the named values differ
+  // between the contexts of a scope.
+  const at = (
+    index: number,
+    extra: Readonly<Record<string, unknown>>,
+    bindings: Readonly<Record<string, Item>>,
+  ): EvaluationContext => {
+    const bindingViews = Object.fromEntries(
+      Object.entries(bindings).map(([name, item]) => [name, view(item)]),
+    );
+    const navigationItems: Readonly<Record<string, Item | undefined>> = {
+      current: items[index],
+      prev: items[index - 1],
+      next: items[index + 1],
+      ...bindings,
+    };
+    const values = {
+      current: view(items[index]),
+      prev: view(items[index - 1]),
+      next: view(items[index + 1]),
+      current_index: index,
+      params,
+      sets: params.sets,
+      maps: params.maps,
+      transcription: params.transcription,
+      ...bindingViews,
+      ...extra,
+    } as Record<string, unknown>;
+    return {
+      owner,
+      index,
+      cursor,
+      functions,
+      define: (name, value) => {
+        values[name] = value;
       },
-    }),
-    functions: {
-      vocabulary: (table, key) => {
-        const invalidLookup = (message: string): never => {
-          utterance.diagnostics.error(
-            message,
-            { table, key, ruleId: transaction.metadata.ruleId },
-            "E_VOCABULARY_LOOKUP",
-          );
-          throw new Error(`E_VOCABULARY_LOOKUP: ${message}`);
-        };
-        if (typeof table !== "string" || typeof key !== "string" || !isPlainObject(params.maps))
-          return invalidLookup("table and key must be strings and maps must exist");
-        const entries = params.maps[table];
-        if (
-          !isPlainObject(entries) ||
-          !Object.hasOwn(entries, key) ||
-          typeof entries[key] !== "string"
-        )
-          return invalidLookup(`missing ${table}[${key}]`);
-        const origins = isPlainObject(params.mapOrigins) ? params.mapOrigins[table] : undefined;
-        const resource =
-          isPlainObject(origins) && typeof origins[key] === "string"
-            ? origins[key]
-            : "<programmatic rulepack>";
-        const source = items[index];
-        const parents = source
-          ? source.featureKeys().flatMap((field) => {
-              const write = source.latestWrite(field);
-              return write ? [write.decisionId] : [];
-            })
-          : [];
-        const decision = utterance.provenance.add({
-          stage: "rules",
-          type: "normalization_vocabulary_lookup",
-          subject: source?.id ?? table,
-          reason: `${transaction.metadata.ruleId} read ${resource}: ${table}[${JSON.stringify(key)}]`,
-          citations: [...transaction.metadata.citations],
-          parents,
-          vocabularyLookup: {
-            resource,
-            table,
-            key,
-            value: entries[key],
-            ruleId: transaction.metadata.ruleId,
-          },
-        });
-        transaction.dependOn(decision.id);
-        return entries[key];
-      },
-      ahead: (source, amount = 1) => offset(source, amount),
-      behind: (source, amount = 1) => offset(source, -Number(amount)),
-      total: (name) => relationItems(name).length,
-      max: (...args) => numericAggregate(args, "max"),
-      min: (...args) => numericAggregate(args, "min"),
-      exp: (value) => Math.exp(Number(value)),
-      sqrt: (value) => Math.sqrt(Number(value)),
-      abs: (value) => Math.abs(Number(value)),
-      log: (value) => Math.log(Number(value)),
-      pow: (value, exponent) => Number(value) ** Number(exponent),
-      contains: (container, candidate) =>
-        typeof container === "string"
-          ? container.includes(String(candidate))
-          : Array.isArray(container) && container.includes(candidate),
-      merge,
-      target: (phoneme) => {
-        if (!inventory)
-          throw new Error(
-            "E_HRG_INVENTORY_REQUIRED: target() requires the selected frontend inventory",
-          );
-        transaction.dependOn(inventory.decisionId);
-        const materialized = materializePhonemeTarget(phoneme, {
-          inventorySpec: inventory.spec,
-          diagnostics: utterance.diagnostics,
-          onInvalidParameter: inventory.onInvalidParameter,
-        });
-        return Object.freeze({ ...materialized, ...materialized.params });
-      },
-      assoc: association,
-      midpoint: (source) => pointAnchor(source, 0.5),
-      at_ratio: pointAnchor,
-      at_sync: (markId) =>
-        typeof markId === "string" ? { leftMarkId: markId, rightMarkId: markId, ratio: 0 } : null,
-      at_offset: (markId, offsetMs) => {
-        const offset = Number(offsetMs);
-        return typeof markId === "string" && Number.isFinite(offset)
-          ? { leftMarkId: markId, rightMarkId: markId, ratio: 0, offsetMs: offset }
-          : null;
-      },
-      prev_point: (name) => {
-        const candidates = relationItems(name);
-        const candidate = candidates[candidates.length - 1];
-        const anchor = candidate ? utterance.temporalAnchor(candidate) : undefined;
-        if (anchor) transaction.dependOn(anchor.decisionId);
-        return view(candidate);
-      },
-      look_back_where: (source, maxSteps, expression) => scan(source, maxSteps, expression, -1),
-      look_ahead_where: (source, maxSteps, expression) => scan(source, maxSteps, expression, 1),
-      look_back_pred: (source, maxSteps, predicateName) =>
-        typeof predicateName === "string"
-          ? scan(source, maxSteps, { predicate: predicateName }, -1)
-          : null,
-      look_ahead_pred: (source, maxSteps, predicateName) =>
-        typeof predicateName === "string"
-          ? scan(source, maxSteps, { predicate: predicateName }, 1)
-          : null,
-      count_back_pred: (source, maxSteps, stopPredicate, countPredicate) =>
-        countScan(source, maxSteps, stopPredicate, countPredicate, -1),
-      count_ahead_pred: (source, maxSteps, stopPredicate, countPredicate) =>
-        countScan(source, maxSteps, stopPredicate, countPredicate, 1),
-      find_within_word: findWithinWord,
-      path: navigatePath,
-      span_ms: spanMs,
-      trajectory_control_windows: trajectoryControlWindows,
-      word_count: () => relationItems("Word").length,
-      phone_count: () =>
-        relationItems("Segment").filter((item) => {
-          const phoneme = transaction.read(item, "phoneme");
-          return phoneme !== silenceSymbol();
-        }).length,
-      clause_phone_count: () => {
-        let left = index;
-        let right = index;
-        while (left > 0 && transaction.read(items[left - 1], "phoneme") !== silenceSymbol())
-          left -= 1;
-        while (
-          right + 1 < items.length &&
-          transaction.read(items[right + 1], "phoneme") !== silenceSymbol()
-        )
-          right += 1;
-        let count = 0;
-        for (let itemIndex = left; itemIndex <= right; itemIndex += 1) {
-          if (transaction.read(items[itemIndex], "phoneme") !== silenceSymbol()) count += 1;
-        }
-        return count;
-      },
-      count_word_vowels: () => {
-        const source = items[index];
-        return source
-          ? wordSegments(source).filter((item) => isNucleus(transaction.read(item, "type"))).length
-          : 0;
-      },
-      cluster_position_in_word: () => {
-        const source = items[index];
-        if (!source) return 0;
-        const segments = wordSegments(source);
-        const sourceIndex = segments.indexOf(source);
-        if (sourceIndex < 0 || isNucleus(transaction.read(source, "type"))) return 0;
-        let position = 0;
-        for (let itemIndex = sourceIndex - 1; itemIndex >= 0; itemIndex -= 1) {
-          if (isNucleus(transaction.read(segments[itemIndex], "type"))) break;
-          position += 1;
-        }
-        return position;
-      },
-      // ---------------------------------------------------------------------
-      // Contiguous word-run accent helpers.
-      //
-      // Faithful port of the prosodic-annotator `assignAccent` word grouping:
-      // a "word run" is the maximal contiguous run of non-SIL selected items
-      // (suppressed items are already excluded from `items`) that share the
-      // same `word` string, bounded by a SIL token or a word-string change.
-      // Two ADJACENT words with identical orthography (e.g. "sip sip") merge
-      // into one run exactly as the imperative pass merged them by contiguous
-      // string equality — preserving byte-identical carrier placement rather
-      // than the SylStructure word split.
-      //
-      // Citations: O'Shaughnessy 1976 (accent by word class),
-      //   Allen, Hunnicutt & Klatt 1987 (accent levels).
-      // ---------------------------------------------------------------------
-      word_run_has_primary_stress: () => {
-        const source = items[index];
-        if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
-        const word = transaction.read(source, "word");
-        let hasPrimaryStress = false;
-        for (let k = index; k >= 0; k -= 1) {
-          if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
-          if (transaction.read(items[k], "word") !== word) break;
-          if (transaction.read(items[k], "stress") === 1) hasPrimaryStress = true;
-        }
-        for (let k = index + 1; k < items.length; k += 1) {
-          if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
-          if (transaction.read(items[k], "word") !== word) break;
-          if (transaction.read(items[k], "stress") === 1) hasPrimaryStress = true;
-        }
-        return hasPrimaryStress;
-      },
-      // Qlatt #152: authored metrical stress overrides word-class eligibility.
-      // Read the versioned stress provenance, keeping the rule's dependency DAG.
-      word_has_metrical_stress: () => {
-        const source = items[index];
-        return source
-          ? wordSegments(source).some((item) => {
-              transaction.read(item, "stress");
-              return item.latestWrite("stress")?.tag === "metrical_stress";
-            })
-          : false;
-      },
-      is_first_primary_stress_in_word_run: () => {
-        const source = items[index];
-        if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
-        if (transaction.read(source, "stress") !== 1) return false;
-        const word = transaction.read(source, "word");
-        for (let k = index - 1; k >= 0; k -= 1) {
-          if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
-          if (transaction.read(items[k], "word") !== word) break;
-          if (transaction.read(items[k], "stress") === 1) return false;
-        }
-        return true;
-      },
-      // True iff the current phone is the LAST phone of its contiguous word run
-      // (the next active item is a SIL, a different word, or the end of the
-      // utterance). This is the declarative-correct "last phone of the word" the
-      // imperative assignBreakIndices word-boundary pass computed by raw-order
-      // walking — but WITHOUT that walk's suppressed-SIL flush quirk (a suppressed
-      // punctuation SIL wedged mid-word made the old pass stamp a spurious
-      // word-INTERNAL breakIndex=1). Suppressed items are excluded from `items`,
-      // so the run is not split by them. Citation: Silverman et al. 1992.
-      is_last_in_word_run: () => {
-        const source = items[index];
-        if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
-        const word = transaction.read(source, "word");
-        const next = items[index + 1];
-        if (!next) return true;
-        if (transaction.read(next, "phoneme") === silenceSymbol()) return true;
-        return transaction.read(next, "word") !== word;
-      },
-      // Terminal punctuation of the current item's intonational phrase.
-      //
-      // Scans forward (in selection order, over active items) to the first SIL
-      // that carries a punctuation symbol and returns that symbol — the phrase
-      // boundary the imperative `identifyPhrases` used to type the phrase
-      // (declarative/question/exclamation/continuation). Returns "" when no
-      // trailing punctuation SIL exists (the final phrase of unterminated text),
-      // which the caller maps to the default declarative tune. Suppressed SILs
-      // are excluded from `items`, matching the imperative !isSuppressedToken
-      // boundary guard. Citations: Pierrehumbert 1980, Ladd 2008 Ch.3.
-      phrase_terminal_punctuation: () => {
-        for (let k = index; k < items.length; k += 1) {
-          if (transaction.read(items[k], "phoneme") === silenceSymbol()) {
-            const punct = transaction.read(items[k], "punctuationSymbol");
-            if (typeof punct === "string" && punct !== "") return punct;
+      isItemView,
+      values: new Proxy(values, {
+        get: (target, property, receiver) => {
+          if (typeof property === "string" && relationName) {
+            const item = navigationItems[property];
+            // A text item's value has its own source ancestry. Its append write
+            // also depends on preceding source spans for list ordering; reading
+            // current text must not make those spans pronunciation ancestors.
+            // Explicit prev/next navigation still records that ordering evidence.
+            const write =
+              item && !(property === "current" && item.type === "normalization")
+                ? utterance.relation(relationName).node(item)?.write
+                : undefined;
+            if (write) transaction.dependOn(write.decisionId);
           }
+          return Reflect.get(target, property, receiver);
+        },
+      }),
+    };
+  };
+  // The functions of every context of this scope. None of them closes over an
+  // Item position: those that mean "the current Item" read `cursor`.
+  const functions: EvaluationContext["functions"] = {
+    vocabulary: (table, key) => {
+      const invalidLookup = (message: string): never => {
+        utterance.diagnostics.error(
+          message,
+          { table, key, ruleId: transaction.metadata.ruleId },
+          "E_VOCABULARY_LOOKUP",
+        );
+        throw new Error(`E_VOCABULARY_LOOKUP: ${message}`);
+      };
+      if (typeof table !== "string" || typeof key !== "string" || !isPlainObject(params.maps))
+        return invalidLookup("table and key must be strings and maps must exist");
+      const entries = params.maps[table];
+      if (
+        !isPlainObject(entries) ||
+        !Object.hasOwn(entries, key) ||
+        typeof entries[key] !== "string"
+      )
+        return invalidLookup(`missing ${table}[${key}]`);
+      const origins = isPlainObject(params.mapOrigins) ? params.mapOrigins[table] : undefined;
+      const resource =
+        isPlainObject(origins) && typeof origins[key] === "string"
+          ? origins[key]
+          : "<programmatic rulepack>";
+      const source = items[cursor.index];
+      const parents = source
+        ? source.featureKeys().flatMap((field) => {
+            const write = source.latestWrite(field);
+            return write ? [write.decisionId] : [];
+          })
+        : [];
+      const decision = utterance.provenance.add({
+        stage: "rules",
+        type: "normalization_vocabulary_lookup",
+        subject: source?.id ?? table,
+        reason: `${transaction.metadata.ruleId} read ${resource}: ${table}[${JSON.stringify(key)}]`,
+        citations: [...transaction.metadata.citations],
+        parents,
+        vocabularyLookup: {
+          resource,
+          table,
+          key,
+          value: entries[key],
+          ruleId: transaction.metadata.ruleId,
+        },
+      });
+      transaction.dependOn(decision.id);
+      return entries[key];
+    },
+    ahead: (source, amount = 1) => offset(source, amount),
+    behind: (source, amount = 1) => offset(source, -Number(amount)),
+    total: (name) => relationItems(name).length,
+    max: (...args) => numericAggregate(args, "max"),
+    min: (...args) => numericAggregate(args, "min"),
+    exp: (value) => Math.exp(Number(value)),
+    sqrt: (value) => Math.sqrt(Number(value)),
+    abs: (value) => Math.abs(Number(value)),
+    log: (value) => Math.log(Number(value)),
+    pow: (value, exponent) => Number(value) ** Number(exponent),
+    contains: (container, candidate) =>
+      typeof container === "string"
+        ? container.includes(String(candidate))
+        : Array.isArray(container) && container.includes(candidate),
+    merge,
+    target: (phoneme) => {
+      if (!inventory)
+        throw new Error(
+          "E_HRG_INVENTORY_REQUIRED: target() requires the selected frontend inventory",
+        );
+      transaction.dependOn(inventory.decisionId);
+      const materialized = materializePhonemeTarget(phoneme, {
+        inventorySpec: inventory.spec,
+        diagnostics: utterance.diagnostics,
+        onInvalidParameter: inventory.onInvalidParameter,
+      });
+      return Object.freeze({ ...materialized, ...materialized.params });
+    },
+    assoc: association,
+    midpoint: (source) => pointAnchor(source, 0.5),
+    at_ratio: pointAnchor,
+    at_sync: (markId) =>
+      typeof markId === "string" ? { leftMarkId: markId, rightMarkId: markId, ratio: 0 } : null,
+    at_offset: (markId, offsetMs) => {
+      const offset = Number(offsetMs);
+      return typeof markId === "string" && Number.isFinite(offset)
+        ? { leftMarkId: markId, rightMarkId: markId, ratio: 0, offsetMs: offset }
+        : null;
+    },
+    prev_point: (name) => {
+      const candidates = relationItems(name);
+      const candidate = candidates[candidates.length - 1];
+      const anchor = candidate ? utterance.temporalAnchor(candidate) : undefined;
+      if (anchor) transaction.dependOn(anchor.decisionId);
+      return view(candidate);
+    },
+    look_back_where: (source, maxSteps, expression) => scan(source, maxSteps, expression, -1),
+    look_ahead_where: (source, maxSteps, expression) => scan(source, maxSteps, expression, 1),
+    look_back_pred: (source, maxSteps, predicateName) =>
+      typeof predicateName === "string"
+        ? scan(source, maxSteps, { predicate: predicateName }, -1)
+        : null,
+    look_ahead_pred: (source, maxSteps, predicateName) =>
+      typeof predicateName === "string"
+        ? scan(source, maxSteps, { predicate: predicateName }, 1)
+        : null,
+    count_back_pred: (source, maxSteps, stopPredicate, countPredicate) =>
+      countScan(source, maxSteps, stopPredicate, countPredicate, -1),
+    count_ahead_pred: (source, maxSteps, stopPredicate, countPredicate) =>
+      countScan(source, maxSteps, stopPredicate, countPredicate, 1),
+    find_within_word: findWithinWord,
+    path: navigatePath,
+    span_ms: spanMs,
+    trajectory_control_windows: trajectoryControlWindows,
+    word_count: () => relationItems("Word").length,
+    phone_count: () =>
+      relationItems("Segment").filter((item) => {
+        const phoneme = transaction.read(item, "phoneme");
+        return phoneme !== silenceSymbol();
+      }).length,
+    clause_phone_count: () => {
+      let left = cursor.index;
+      let right = cursor.index;
+      while (left > 0 && transaction.read(items[left - 1], "phoneme") !== silenceSymbol())
+        left -= 1;
+      while (
+        right + 1 < items.length &&
+        transaction.read(items[right + 1], "phoneme") !== silenceSymbol()
+      )
+        right += 1;
+      let count = 0;
+      for (let itemIndex = left; itemIndex <= right; itemIndex += 1) {
+        if (transaction.read(items[itemIndex], "phoneme") !== silenceSymbol()) count += 1;
+      }
+      return count;
+    },
+    count_word_vowels: () => {
+      const source = items[cursor.index];
+      return source
+        ? wordSegments(source).filter((item) => isNucleus(transaction.read(item, "type"))).length
+        : 0;
+    },
+    cluster_position_in_word: () => {
+      const source = items[cursor.index];
+      if (!source) return 0;
+      const segments = wordSegments(source);
+      const sourceIndex = segments.indexOf(source);
+      if (sourceIndex < 0 || isNucleus(transaction.read(source, "type"))) return 0;
+      let position = 0;
+      for (let itemIndex = sourceIndex - 1; itemIndex >= 0; itemIndex -= 1) {
+        if (isNucleus(transaction.read(segments[itemIndex], "type"))) break;
+        position += 1;
+      }
+      return position;
+    },
+    // ---------------------------------------------------------------------
+    // Contiguous word-run accent helpers.
+    //
+    // Faithful port of the prosodic-annotator `assignAccent` word grouping:
+    // a "word run" is the maximal contiguous run of non-SIL selected items
+    // (suppressed items are already excluded from `items`) that share the
+    // same `word` string, bounded by a SIL token or a word-string change.
+    // Two ADJACENT words with identical orthography (e.g. "sip sip") merge
+    // into one run exactly as the imperative pass merged them by contiguous
+    // string equality — preserving byte-identical carrier placement rather
+    // than the SylStructure word split.
+    //
+    // Citations: O'Shaughnessy 1976 (accent by word class),
+    //   Allen, Hunnicutt & Klatt 1987 (accent levels).
+    // ---------------------------------------------------------------------
+    word_run_has_primary_stress: () => {
+      const source = items[cursor.index];
+      if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
+      const word = transaction.read(source, "word");
+      let hasPrimaryStress = false;
+      for (let k = cursor.index; k >= 0; k -= 1) {
+        if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
+        if (transaction.read(items[k], "word") !== word) break;
+        if (transaction.read(items[k], "stress") === 1) hasPrimaryStress = true;
+      }
+      for (let k = cursor.index + 1; k < items.length; k += 1) {
+        if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
+        if (transaction.read(items[k], "word") !== word) break;
+        if (transaction.read(items[k], "stress") === 1) hasPrimaryStress = true;
+      }
+      return hasPrimaryStress;
+    },
+    // Qlatt #152: authored metrical stress overrides word-class eligibility.
+    // Read the versioned stress provenance, keeping the rule's dependency DAG.
+    word_has_metrical_stress: () => {
+      const source = items[cursor.index];
+      return source
+        ? wordSegments(source).some((item) => {
+            transaction.read(item, "stress");
+            return item.latestWrite("stress")?.tag === "metrical_stress";
+          })
+        : false;
+    },
+    is_first_primary_stress_in_word_run: () => {
+      const source = items[cursor.index];
+      if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
+      if (transaction.read(source, "stress") !== 1) return false;
+      const word = transaction.read(source, "word");
+      for (let k = cursor.index - 1; k >= 0; k -= 1) {
+        if (transaction.read(items[k], "phoneme") === silenceSymbol()) break;
+        if (transaction.read(items[k], "word") !== word) break;
+        if (transaction.read(items[k], "stress") === 1) return false;
+      }
+      return true;
+    },
+    // True iff the current phone is the LAST phone of its contiguous word run
+    // (the next active item is a SIL, a different word, or the end of the
+    // utterance). This is the declarative-correct "last phone of the word" the
+    // imperative assignBreakIndices word-boundary pass computed by raw-order
+    // walking — but WITHOUT that walk's suppressed-SIL flush quirk (a suppressed
+    // punctuation SIL wedged mid-word made the old pass stamp a spurious
+    // word-INTERNAL breakIndex=1). Suppressed items are excluded from `items`,
+    // so the run is not split by them. Citation: Silverman et al. 1992.
+    is_last_in_word_run: () => {
+      const source = items[cursor.index];
+      if (!source || transaction.read(source, "phoneme") === silenceSymbol()) return false;
+      const word = transaction.read(source, "word");
+      const next = items[cursor.index + 1];
+      if (!next) return true;
+      if (transaction.read(next, "phoneme") === silenceSymbol()) return true;
+      return transaction.read(next, "word") !== word;
+    },
+    // Terminal punctuation of the current item's intonational phrase.
+    //
+    // Scans forward (in selection order, over active items) to the first SIL
+    // that carries a punctuation symbol and returns that symbol — the phrase
+    // boundary the imperative `identifyPhrases` used to type the phrase
+    // (declarative/question/exclamation/continuation). Returns "" when no
+    // trailing punctuation SIL exists (the final phrase of unterminated text),
+    // which the caller maps to the default declarative tune. Suppressed SILs
+    // are excluded from `items`, matching the imperative !isSuppressedToken
+    // boundary guard. Citations: Pierrehumbert 1980, Ladd 2008 Ch.3.
+    phrase_terminal_punctuation: () => {
+      for (let k = cursor.index; k < items.length; k += 1) {
+        if (transaction.read(items[k], "phoneme") === silenceSymbol()) {
+          const punct = transaction.read(items[k], "punctuationSymbol");
+          if (typeof punct === "string" && punct !== "") return punct;
         }
-        return "";
-      },
-      syllable_index: () => {
-        const source = items[index];
-        const syllable = source ? structureAncestor(source, "syllable") : undefined;
-        const word = source ? structureAncestor(source, "word") : undefined;
-        if (!syllable || !word) return null;
-        return structureChildren(word)
-          .filter((item) => item.type.toLowerCase() === "syllable")
-          .indexOf(syllable);
-      },
-      syllable_role: () => {
-        const source = items[index];
-        const syllable = source ? structureAncestor(source, "syllable") : undefined;
-        if (!source || !syllable) return null;
-        const segments = structureChildren(syllable).filter(
-          (item) => item.type.toLowerCase() === "segment",
-        );
-        const sourceIndex = segments.indexOf(source);
-        const nucleusIndex = segments.findIndex((item) =>
-          isNucleus(transaction.read(item, "type")),
-        );
-        if (sourceIndex < 0 || nucleusIndex < 0) return null;
-        return sourceIndex < nucleusIndex
-          ? "onset"
-          : sourceIndex === nucleusIndex
-            ? "nucleus"
-            : "coda";
-      },
-      syllable_position_in_word: () => {
-        const source = items[index];
-        const syllable = source ? structureAncestor(source, "syllable") : undefined;
-        const word = source ? structureAncestor(source, "word") : undefined;
-        if (!syllable || !word) return null;
-        const syllables = structureChildren(word).filter(
-          (item) => item.type.toLowerCase() === "syllable",
-        );
-        const syllableIndex = syllables.indexOf(syllable);
-        if (syllableIndex < 0) return null;
-        if (syllables.length === 1) return "only";
-        if (syllableIndex === 0) return "initial";
-        if (syllableIndex === syllables.length - 1) return "final";
-        return "medial";
-      },
+      }
+      return "";
+    },
+    syllable_index: () => {
+      const source = items[cursor.index];
+      const syllable = source ? structureAncestor(source, "syllable") : undefined;
+      const word = source ? structureAncestor(source, "word") : undefined;
+      if (!syllable || !word) return null;
+      return structureChildren(word)
+        .filter((item) => item.type.toLowerCase() === "syllable")
+        .indexOf(syllable);
+    },
+    syllable_role: () => {
+      const source = items[cursor.index];
+      const syllable = source ? structureAncestor(source, "syllable") : undefined;
+      if (!source || !syllable) return null;
+      const segments = structureChildren(syllable).filter(
+        (item) => item.type.toLowerCase() === "segment",
+      );
+      const sourceIndex = segments.indexOf(source);
+      const nucleusIndex = segments.findIndex((item) => isNucleus(transaction.read(item, "type")));
+      if (sourceIndex < 0 || nucleusIndex < 0) return null;
+      return sourceIndex < nucleusIndex
+        ? "onset"
+        : sourceIndex === nucleusIndex
+          ? "nucleus"
+          : "coda";
+    },
+    syllable_position_in_word: () => {
+      const source = items[cursor.index];
+      const syllable = source ? structureAncestor(source, "syllable") : undefined;
+      const word = source ? structureAncestor(source, "word") : undefined;
+      if (!syllable || !word) return null;
+      const syllables = structureChildren(word).filter(
+        (item) => item.type.toLowerCase() === "syllable",
+      );
+      const syllableIndex = syllables.indexOf(syllable);
+      if (syllableIndex < 0) return null;
+      if (syllables.length === 1) return "only";
+      if (syllableIndex === 0) return "initial";
+      if (syllableIndex === syllables.length - 1) return "final";
+      return "medial";
     },
   };
+  return { at };
+}
+
+function buildEvaluationContext(options: EvaluationContextOptions): EvaluationContext {
+  return buildEvaluationScope(options).at(
+    options.index,
+    options.extra ?? {},
+    options.bindings ?? {},
+  );
 }
 
 function evaluate(expression: unknown, context: EvaluationContext): unknown {
   if (typeof expression !== "string") return expression;
-  return normalizeCelValue(
-    context.owner.evaluate(expression, context.values, context.functions),
-    context.isItemView,
-  );
+  // Evaluation is synchronous and nests (a scan evaluates its condition in
+  // the candidate's context), so the scope's cursor is set to this context's
+  // Item for this one evaluation and the outer Item put back afterwards.
+  const { cursor } = context;
+  const outer = cursor.index;
+  cursor.index = context.index;
+  try {
+    return normalizeCelValue(
+      context.owner.evaluate(expression, context.values, context.functions),
+      context.isItemView,
+    );
+  } finally {
+    cursor.index = outer;
+  }
 }
 
+/**
+ * A CEL result as the engine uses it: integers as numbers, maps as plain
+ * objects. A list or object with nothing to convert inside is returned as it
+ * is, not copied: most results that are objects are policy tables or targets,
+ * which are large and already in that form.
+ */
 function normalizeCelValue(value: unknown, isItemView: (value: unknown) => boolean): unknown {
+  if (value === null || (typeof value !== "object" && typeof value !== "bigint")) return value;
   if (isItemView(value)) return value;
   if (typeof value === "bigint") {
     const number = Number(value);
@@ -843,11 +896,26 @@ function normalizeCelValue(value: unknown, isItemView: (value: unknown) => boole
       ]),
     );
   }
-  if (Array.isArray(value)) return value.map((entry) => normalizeCelValue(entry, isItemView));
+  if (Array.isArray(value)) {
+    let converted: unknown[] | null = null;
+    for (let index = 0; index < value.length; index += 1) {
+      const entry = value[index];
+      const normal = normalizeCelValue(entry, isItemView);
+      if (normal === entry) continue;
+      converted ??= [...value];
+      converted[index] = normal;
+    }
+    return converted ?? value;
+  }
   if (!isPlainObject(value)) return value;
-  return Object.fromEntries(
-    Object.entries(value).map(([key, nested]) => [key, normalizeCelValue(nested, isItemView)]),
-  );
+  let converted: Record<string, unknown> | null = null;
+  for (const [key, nested] of Object.entries(value)) {
+    const normal = normalizeCelValue(nested, isItemView);
+    if (normal === nested) continue;
+    converted ??= { ...value };
+    converted[key] = normal;
+  }
+  return converted ?? value;
 }
 
 function evaluateStructured(value: unknown, context: EvaluationContext): unknown {

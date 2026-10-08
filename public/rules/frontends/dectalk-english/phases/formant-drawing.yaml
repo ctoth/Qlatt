@@ -283,12 +283,9 @@ frame_programs:
       # FSTRESS of the allophone's structure word: any stress, and bit 01.
       stressed: { value: "fd_stress(current) > 0", edge: false }
       primary: { value: "fd_stress(current) == 1 || fd_stress(current) == 3", edge: false }
-      # p_us_st1.c:1397-1400: the allophone two back is /s/, with no boundary after it.
-      after_s: { value: "fd_name(fd_prev(fd_prev(current))) == 'S'", edge: false }
-      after_s_cluster:
-        value: >-
-          fd_name(fd_prev(fd_prev(current))) == 'S' && dectalk_boundary(fd_prev(fd_prev(current))) == 0.0
-        edge: false
+      # FBOUNDARY of the allophone. p_us_st1.c:1397-1400 asks whether the
+      # allophone two back is /s/ with no boundary after it (p2 in the rule).
+      boundary: { value: "dectalk_boundary(current)", edge: 0 }
       # mstofr(us_inhdr): the inherent duration in frames (ph_setar.c:1616).
       inherent: { value: "floor(params.policy.timing.inherent_ms[fd_name(current)] * 10 / 64)", edge: 0 }
       # For setloc(): the allophone's name, the locus table's key for a
@@ -1545,7 +1542,7 @@ rules:
       - register: vot
         value: >-
           (u.soncon || u.is_rr) ? r.vot + params.policy.articulation.vot.sonorant_consonant_bonus
-          : (u.after_s ? (u.after_s_cluster ? params.policy.articulation.vot.s_cluster : r.vot)
+          : (p2.phone == 'S' ? (p2.boundary == 0.0 ? params.policy.articulation.vot.s_cluster : r.vot)
           : (!u.syllabic ? r.vot + params.policy.articulation.vot.nonsyllabic_bonus : r.vot))
         tag: formant_override
       - { register: vot, value: "r.vot >= f.count ? f.count - 1 : r.vot", tag: formant_override }

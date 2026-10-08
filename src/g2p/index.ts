@@ -349,6 +349,31 @@ export function pronounce(
   const dictResult = dictLookup(lowerWord);
   if (dictResult) {
     const entry = entryOf(lowerWord, 0);
+    // An entry with a word boundary in it is several words ("#" is "number
+    // sign", "!" "exclamation point"): the boundary is one of the entry's
+    // symbols and goes to the phonemic stage with the phones (DECtalk 4.63
+    // dapi/src/dic/Dic_us.txt, a space in the phoneme field).
+    const breaks = placed || entry.other ? undefined : table?.wordBreaks?.[lowerWord];
+    if (breaks && breaks.length > 0) {
+      const bounds = [...breaks.map((index) => index + 1), dictResult.length];
+      const parts = bounds.map((end, at) => {
+        const start = at === 0 ? 0 : (bounds[at - 1] as number);
+        const morphemeAfter = (entry.boundaryAfter ?? [])
+          .filter((index) => index >= start && index < end)
+          .map((index) => index - start);
+        return {
+          phonemes: dictResult.slice(start, end),
+          ...(morphemeAfter.length > 0 ? { morphemeAfter } : {}),
+        };
+      });
+      return {
+        phonemes: [...dictResult],
+        source: "dictionary",
+        word: lowerWord,
+        parts,
+        ...classed(entry.formClass),
+      };
+    }
     return {
       phonemes: placed
         ? [...placed.against.phonemes]

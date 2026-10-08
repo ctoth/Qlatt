@@ -83,6 +83,15 @@ maps:
     # D AE SH, G R IY N, and "Red -- green." the same (DECtalk's parser makes
     # one hyphen of the two).
     lone_dash: word
+    # A word with no letter and no digit that stands alone is the
+    # dictionary's word for it: the dictionary is searched for the word as
+    # written before any punctuation is stripped (LTS/ls_task.c:697, 746).
+    # Measured on say.exe, as the symbols the phonemic stage receives:
+    # "It is % here." has P RR S EH N T, "Meet me @ the gate." AE T,
+    # "Two + two = four." P LL AH S and IY K W AX LL Z. DECtalk's text parser
+    # writes "12%" as "12 %", and leaves a mark alone after nested quotes
+    # (`'no' ? " he`): "question mark" and "quote" are then words too.
+    symbol_words: dictionary
 # A text that does not end in punctuation is still closed as a sentence: when
 # the text is flushed the text task sends a breath break (LTS/ls_task.c:1236-1260,
 # the VT case) and the clause ends as one that ends in a period. Measured on

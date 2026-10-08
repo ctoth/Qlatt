@@ -249,10 +249,15 @@ const wordRuleBlocks: Record<string, number[]> = {};
 // joint) in its phoneme field, the indices of the phones the mark stands
 // after.
 const wordBoundaries: Record<string, number[]> = {};
+// For each dictionary word with a space in its phoneme field ("#" is
+// `n'^mbR s`An`), the indices of the phones a word boundary stands after: the
+// entry is spoken as several words.
+const wordBreaks: Record<string, number[]> = {};
 for (const [word, row] of byWord(dictionaryRows.best)) {
-  const { rulesBlocked, boundaryAfter } = convertPhonemeFieldDetailed(row.phonemes);
+  const { rulesBlocked, boundaryAfter, wordBreakAfter } = convertPhonemeFieldDetailed(row.phonemes);
   if (rulesBlocked.length > 0) wordRuleBlocks[word] = rulesBlocked;
   if (boundaryAfter.length > 0) wordBoundaries[word] = boundaryAfter;
+  if (wordBreakAfter.length > 0) wordBreaks[word] = wordBreakAfter;
   const mask = rowFormClass(row.formClass, row.pos);
   if (mask !== 0) wordFormClasses[word] = mask;
 }
@@ -632,6 +637,7 @@ fs.writeFileSync(
     wordFormClasses,
     wordRuleBlocks,
     wordBoundaries,
+    wordBreaks,
     homographs,
     homographRules,
     specialWordFormClasses,
@@ -780,6 +786,14 @@ fs.writeFileSync(
         dictionaryWords.filter((word) => word.includes("/")).map((word) => word.toLowerCase()),
       ),
     ]
+      .sort()
+      .map((word) => `    ${JSON.stringify(word)}: "word"`),
+    "  # The dictionary's entries with no letter and no digit in them: a word",
+    "  # written so, standing alone, is the dictionary's word (DECtalk 4.63",
+    "  # LTS/ls_task.c:697 and 746, the dictionary search comes before any",
+    "  # punctuation is stripped).",
+    "  tn_symbol_words:",
+    ...[...new Set(dictionaryWords.filter((word) => !/[A-Za-z0-9]/.test(word)))]
       .sort()
       .map((word) => `    ${JSON.stringify(word)}: "word"`),
     "",

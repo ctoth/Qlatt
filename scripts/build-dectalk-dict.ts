@@ -330,15 +330,20 @@ export function convertPhonemeField(field: string): string {
  * morpheme boundary) or a `#` (HYPHEN, the joint of a compound) stands after
  * (INCLUDE/phonlist.h). Both give the rime before them the morpheme boundary
  * type (PH/ph_romi.c bounftab).
+ *
+ * `wordBreakAfter` holds the indices of the phones that a space stands after:
+ * a word boundary inside the entry ("#" is `n'^mbR s`An`, two words).
  */
 export function convertPhonemeFieldDetailed(field: string): {
   phones: string[];
   rulesBlocked: number[];
   boundaryAfter: number[];
+  wordBreakAfter: number[];
 } {
   const out: string[] = [];
   const rulesBlocked: number[] = [];
   const boundaryAfter: number[] = [];
+  const wordBreakAfter: number[] = [];
   let stress = "0";
   let blockNext = false;
   for (const c of field) {
@@ -360,7 +365,13 @@ export function convertPhonemeFieldDetailed(field: string): {
       }
       continue;
     }
-    if (c === " ") continue; // a word boundary inside an entry
+    if (c === " ") {
+      // A word boundary inside an entry.
+      if (out.length > 0 && !wordBreakAfter.includes(out.length - 1)) {
+        wordBreakAfter.push(out.length - 1);
+      }
+      continue;
+    }
     // Glottal stop (q / US_Q): a juncture marker between abutting vowels (the
     // sole occurrence is "minutiae" = mIn'uSi q`i). The dectalk-english Klatt
     // inventory has no discrete glottal-stop segment, and CMU likewise omits it
@@ -378,7 +389,13 @@ export function convertPhonemeFieldDetailed(field: string): {
     // that carries a stress digit.
     if (tokens.some((tok) => /[0-9]$/.test(tok))) stress = "0";
   }
-  return { phones: out, rulesBlocked, boundaryAfter };
+  return {
+    phones: out,
+    rulesBlocked,
+    boundaryAfter,
+    // A space after the last phone divides nothing.
+    wordBreakAfter: wordBreakAfter.filter((index) => index < out.length - 1),
+  };
 }
 
 export interface Row {
@@ -395,13 +412,21 @@ export interface Row {
 
 function parseLine(line: string): Row | null {
   if (!line || line.startsWith(";")) return null;
-  const f = line.split(",");
-  if (f.length < 5) return null;
-  const word = f[0];
-  const pos = f[1];
-  const phonemes = f[2];
-  const formClass = f[3];
-  const priority = Number.parseInt(f[4], 10);
+  // In the word, a backslash stands before a character that is taken as
+  // written (dic/dic_comm.c:445-469): `\,` is the comma, `\;` the semicolon
+  // and `\\` the backslash.
+  let word = "";
+  let at = 0;
+  for (; at < line.length && line[at] !== ","; at += 1) {
+    if (line[at] === "\\") at += 1;
+    word += line[at] ?? "";
+  }
+  const f = line.slice(at + 1).split(",");
+  if (f.length < 4) return null;
+  const pos = f[0];
+  const phonemes = f[1];
+  const formClass = f[2];
+  const priority = Number.parseInt(f[3], 10);
   if (!word || !phonemes) return null;
   return { word, pos, phonemes, formClass, priority: Number.isNaN(priority) ? 0 : priority };
 }

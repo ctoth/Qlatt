@@ -1502,9 +1502,12 @@ function applyTextExpansion(
         typeof entry.text !== "string" ||
         !entry.text.length ||
         /\s/.test(entry.text) ||
-        Object.keys(entry).some((key) => !["type", "text"].includes(key))
+        // `kind: 'word'` says the terminal is a word whatever its text is: a
+        // punctuation mark that is spoken by its name.
+        (entry.kind !== undefined && entry.kind !== "word") ||
+        Object.keys(entry).some((key) => !["type", "text", "kind"].includes(key))
       )
-        fail("terminal requires text only");
+        fail("terminal requires text, and may say kind: 'word'");
     } else if (entry.type === "request") {
       if (
         typeof entry.kind !== "string" ||

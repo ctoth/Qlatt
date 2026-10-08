@@ -153,7 +153,7 @@ const CLAUSE_ENDS = new Set([",", ".", "?", "!"]);
  * DECtalk's symbols as compared: without the clause's first silence and the
  * marks left out, a phrase mark read as the word boundary it stands at.
  */
-function comparedSymbols(clauses: readonly (readonly string[])[]): string[] {
+export function comparedSymbols(clauses: readonly (readonly string[])[]): string[] {
   const out: string[] = [];
   for (const clause of clauses) {
     clause.forEach((raw, index) => {
@@ -171,7 +171,7 @@ function comparedSymbols(clauses: readonly (readonly string[])[]): string[] {
 }
 
 /** The frontend's symbols at the same point, from its transcription records. */
-function frontendSymbols(text: string): string[] {
+export function frontendSymbols(text: string): string[] {
   const provenance = createProvenanceCollector();
   const { utterance } = textToKlattTrackDetailed(text, undefined, 30, {
     frontendId: "dectalk-english",
@@ -311,4 +311,5 @@ function main(): void {
   );
 }
 
-main();
+// Not when text-layers.ts imports the two symbol functions above.
+if (path.resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) main();

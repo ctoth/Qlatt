@@ -348,7 +348,10 @@ function rewriteOrthographyTokens(
   entries.forEach((entry, index) => {
     const input = sharedInput ?? beginInput();
     const word = typeof entry === "string" ? entry : entry.word;
-    const punctuation = isPunctuationTokenWithTables(word, tables);
+    // A terminal a text rule declared a word is one, whatever its text: a
+    // mark standing alone that the frontend's lexicon speaks by its name.
+    const declaredWord = typeof entry !== "string" && entry.source.get("kind") === "word";
+    const punctuation = !declaredWord && isPunctuationTokenWithTables(word, tables);
     const token = input.createItem("token", `token_${index.toString()}`);
     if (typeof entry !== "string") {
       const sourceText = utterance.getItem(String(entry.source.get("sourceTextId")))?.get("text");

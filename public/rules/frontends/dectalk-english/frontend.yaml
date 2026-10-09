@@ -416,6 +416,27 @@ f0_model:
     # dectalk_break_f0_floor in prosody.yaml).
     floor:
       type: floor
+    # F0 a user wrote on phonemes: DECtalk's f0mode SINGING and
+    # PHONE_TARGETS_SPECIFIED (Ph_drwt02.c:199-213). A clause with a command
+    # here is drawn from this layer alone: a straight line to each target
+    # (set_user_target, 3953-4026; linear_interp, 4249-4290) and the glottal
+    # gesture, with no baseline, hat, impulse or segmental term, no flutter
+    # and no speaker scaling (2258-2330). A command's value is its target in
+    # Hz * 10; its first flag says the target is a note to sing (the rule is
+    # dectalk_user_pitch_command in prosody.yaml).
+    user_target:
+      type: dectalk_user_target
+      # 2325-2328: a sung clause's F0 is frac4mul(f0prime, 4190), "change
+      # from middle C = 256 Hz to A = 440 Hz".
+      note_scale: 4190
+      # 4279-4287: a vibrato on a sung note, timecosvib += 165 a frame and
+      # getcosine[timecosvib >> 6] >> 3 added.
+      vibrato:
+        phase_step: 165
+        shift: 3
+      # 3981: delnote = (newnote - f0) >> 2, "so transition happens over 16
+      # frames".
+      note_transition_shift: 2
   # DECtalk has two copies of pht0draw(), chosen by the voice's sex
   # (Ph_drwt02.c:771 male, 2445 female). Compared as compiled, the female copy
   # differs from the male one in this block as follows:
@@ -1376,6 +1397,23 @@ parameters:
       stress_emphasis_level: 3
       # Ph_inton2.c:488: phinton starts its command clock at cumdur = -6.
       command_clock_lead_frames: 6
+      # F0 written on a phoneme in phonemic text ("[uw<400,140>]").
+      user_pitch:
+        # ph_sort.c:1694-1703 and Ph_drwt02.c:3972-3976: the number is taken
+        # modulo 1000, and up to 37 it is a note to sing, above that a
+        # target in Hz.
+        number_modulus: 1000
+        note_maximum: 37
+        # PH/ph_romi.c:95-134 notetab[]: the notes C2 (1) to C5 (37), Hz * 10
+        # with middle C at 256 Hz.
+        note_table: [640, 678, 718, 761, 806, 854, 905, 959, 1016, 1076, 1140, 1208,
+                     1280, 1356, 1437, 1522, 1613, 1709, 1810, 1918, 2032, 2152, 2280,
+                     2416, 2560, 2712, 2874, 3044, 3226, 3418, 3620, 3836, 4064, 4304,
+                     4560, 4832, 5120]
+        # Ph_drwt02.c:243-244 LOWEST_F0 and HIGHEST_F0, Hz * 10: a target in
+        # Hz is held between them (3984-3992).
+        target_lowest: 500
+        target_highest: 5121
       # The stress impulse's two terms, by stresses so far in the clause and
       # by stress level (none, primary, secondary, emphasis), for each sex
       # (Ph_inton2.c:936-946 chooses by malfem). Ph_inton2.c:313, 323-324:

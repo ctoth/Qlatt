@@ -702,6 +702,60 @@ rules:
       - "DECtalk 4.63 Ph_drwt02.c:1908-1957 US non-reading IMPULSE (step plus ramp)"
 
   # --------------------------------------------------------------------------
+  # Rule 0 (Ph_inton2.c:733-741): "User-specified commands for phoneme f0
+  # targets or singing". In a clause whose f0mode is SINGING or
+  # PHONE_TARGETS_SPECIFIED each allophone with a pitch issues one command,
+  # make_f0_command(USER, 0, 1000 + f0, 0, 0), on the command clock at the
+  # allophone's start, and no other rule of the walk is tried.
+  #
+  # The command's value is its target in Hz * 10 as set_user_target() reads
+  # it (Ph_drwt02.c:3972-3994): the number modulo 1000; up to 37 the note of
+  # that number from notetab[], above that the number times ten, held between
+  # LOWEST_F0 and HIGHEST_F0. The first flag says the number is a note (the
+  # target then has a vibrato and is reached in sixteen frames, not over the
+  # allophone); the second that the clause is a sung one (its F0 is then
+  # rescaled, 2325-2328). The drawing is the user_target layer of the F0
+  # model (frontend.yaml).
+  #
+  # The other F0 rules still issue their commands in such a clause; the layer
+  # draws from its own commands alone, as pht0draw() does in these modes.
+  #
+  # Not ported: the subglottal pressure set_user_target() takes from a
+  # command above 1500 (3959-3970), which a pitch of 500 or more would give.
+  # --------------------------------------------------------------------------
+  dectalk_user_pitch_command:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: "get(current, 'pitch_command', 0.0) != 0.0"
+    define:
+      number: "get(current, 'pitch_command', 0.0) % params.policy.f0.user_pitch.number_modulus"
+      is_note: "number <= params.policy.f0.user_pitch.note_maximum"
+      hertz_target: "number * 10.0"
+    # notetab[number - 1] has no entry for a number below 1.
+    constraint: "number >= 1.0"
+    insert:
+      relation: Tilt
+      layer: user_target
+      at: >-
+        at_offset(current.sync_left,
+          (0.0 - params.policy.f0.command_clock_lead_frames) * params.policy.f0.segmental.frame_ms)
+      value: >-
+        is_note ? params.policy.f0.user_pitch.note_table[number - 1.0]
+        : (hertz_target < params.policy.f0.user_pitch.target_lowest ? params.policy.f0.user_pitch.target_lowest
+        : (hertz_target > params.policy.f0.user_pitch.target_highest ? params.policy.f0.user_pitch.target_highest
+        : hertz_target))
+      profile_points:
+        - "is_note ? 1 : 0"
+        - "dectalk_clause_pitch_mode(current) == 'singing' ? 1 : 0"
+      tag: f0_user_target
+    citations:
+      - "DECtalk 4.63 Ph_inton2.c:733-741 Rule 0 (make_f0_command(USER, 0, 1000 + user_f0[nphon]); goto skiprules)"
+      - "DECtalk 4.63 Ph_drwt02.c:3953-4026 set_user_target (the number modulo 1000; a note up to 37, else Hz times ten between LOWEST_F0 and HIGHEST_F0)"
+      - "DECtalk 4.63 PH/ph_romi.c:95-134 notetab (notes C2 to C5)"
+      - "DECtalk 4.63 ph_inton1.c:1857-1902 make_f0_command (the command clock)"
+
+  # --------------------------------------------------------------------------
   # Segmental F0 (Ph_drwt02.c pht0draw, 2080-2150).
   #
   # DECtalk steps through the clause's allophones (allophons[], allodurs[]) and

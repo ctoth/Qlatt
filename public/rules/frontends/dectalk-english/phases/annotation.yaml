@@ -396,6 +396,54 @@ rules:
         tag: boundary
     citations:
       - "DECtalk 4.63 ph_aloph.c:600, 1481 (the hat pattern's tests on nphonetot - n)"
+  # ---------------------------------------------------------------------------
+  # A pitch written on a phoneme in phonemic text ("[uw<400,140>]").
+  #
+  # interp_user_f0 (ph_sort.c:1657-1728) reads the clause's phonemes in order
+  # and sets f0mode at each one that has a pitch: a number up to 37 (taken
+  # modulo 1000) makes the clause one of sung notes unless it already has
+  # targets in hertz; any other makes it one of targets unless it is already
+  # sung, and in a sung clause such a number is dropped. (A note's number in
+  # a clause of targets is carried: set_user_target still reads it as a
+  # note.) The mode so far is a running value, each allophone taking the one
+  # before it; the clause's mode is the last one's
+  # (dectalk_clause_pitch_mode).
+  #
+  # Not ported: a pitch on a stress or hat symbol (the stress-impulse and hat
+  # sizes, f0mode HAT_F0_SIZES_SPECIFIED, 1661-1689), and that a dropped
+  # number takes its phoneme's written duration with it (1711-1712).
+  # ---------------------------------------------------------------------------
+  dectalk_pitch_mode:
+    kind: scalar
+    select:
+      relation: Segment
+      where: { predicate: is_clause_allophone }
+    define:
+      before: dectalk_prev(current)
+      first: "before == null || (before.phoneme == 'SIL' && !isTrue(before, 'written_silence'))"
+      mode_in: "first ? 'none' : get(before, 'pitch_mode', 'none')"
+      number: "get(current, 'written_pitch', 0.0)"
+      is_note: >-
+        number != 0.0
+        && number % params.policy.f0.user_pitch.number_modulus <= params.policy.f0.user_pitch.note_maximum
+      dropped: "mode_in == 'singing' && !is_note"
+    apply:
+      - field: pitch_mode
+        op: set
+        value: >-
+          number == 0.0 ? mode_in
+          : (is_note && mode_in != 'targets' ? 'singing'
+          : (mode_in != 'singing' ? 'targets' : mode_in))
+        tag: written_pitch
+      - field: pitch_command
+        op: set
+        value: "number != 0.0 && !dropped ? number : 0.0"
+        tag: written_pitch
+    citations:
+      - "DECtalk 4.63 PH/ph_sort.c:1657-1728 interp_user_f0 (a pitch on a phoneme sets f0mode: SINGING up to 37, else PHONE_TARGETS_SPECIFIED; the two do not mix)"
+      - "DECtalk 4.63 PH/ph_sort.c:1969-1984 make_phone (the pitch stays with its phoneme)"
+  # With a pitch written on a phoneme the clause has no hat pattern: the
+  # block that places it runs only for f0mode NORMAL (ph_aloph.c:1409).
   dectalk_hat_pattern:
     kind: scalar
     select:
@@ -403,6 +451,7 @@ rules:
       where: >-
         has(current.word) && current.word != ''
         && (current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN'])
+        && dectalk_clause_pitch_mode(current) == 'none'
     define:
       # The syllabic processed before this one, or the silence that starts the clause.
       before: >-

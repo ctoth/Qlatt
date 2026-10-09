@@ -18,6 +18,11 @@
  *   - a duration written on a symbol ("[uw<500>]");
  *   - a silence symbol in a bracket ("[_<600>m'uwn]"; more of it in
  *     test/dectalk-phoneme-silence.test.ts);
+ *   - a pitch written on a symbol, in hertz ("[uw<400,140>]") or as a note
+ *     to sing ("[uw<400,20>]"): PH/ph_sort.c:1657-1728, Ph_inton2.c:733-741
+ *     and the user-target branch of Ph_drwt02.c, here the rules
+ *     dectalk_pitch_mode and dectalk_user_pitch_command and the F0 model's
+ *     user_target layer;
  *   - the mode turned off again;
  *   - a bracket that holds what is no phoneme: the symbols before it, then
  *     DECtalk's error text.
@@ -50,18 +55,15 @@ const corpus = readVoiceCorpus(
   path.join("test", "oracle-corpora", "dectalk-us-phoneme-mode-v1.json"),
 );
 
-const PITCH =
-  "a pitch written on a symbol (the second number) is read and not applied: the pitch is " +
-  "the rules'";
-
 /** Not DECtalk's samples yet. */
 const NOT_EXACT: Readonly<Record<string, string>> = {
-  "pm-19": PITCH,
-  "pm-20": PITCH,
-  "pm-21": PITCH,
-  "pm-22": PITCH,
-  "pm-23": PITCH,
-  "pm-24": PITCH,
+  "pm-24":
+    'the first bracket ends in a vowel and "and" follows it with no word boundary. ' +
+    'DECtalk sends a secondary stress mark ahead of "and" (symbols 102 120 111 ...), and ' +
+    "there its phone sort has the vowel twice where the vowel and the mark stood: the vowel " +
+    "loses the duration and the pitch written on it (22 frames, no pitch command) while the " +
+    "clause is still a sung one. Here the vowel keeps both. Not a matter of the pitch: " +
+    '"[uw] and." differs the same way',
 };
 
 const run = (text: string) => {
@@ -137,16 +139,48 @@ describe("DECtalk's phoneme mode", () => {
     expect(framesOf("[:phoneme arpabet speak on] The [m'uwn] rose.", "UW")).toEqual([16]);
   });
 
-  it("names what of a bracket's numbers and symbols it leaves out", () => {
-    const { decisions, warnings } = run("[:phoneme arpabet speak on] The [m'uw<400,140>n] rose.");
+  it("names what of a bracket's numbers it leaves out", () => {
+    // Numbers on a stress mark are DECtalk's size and delay of the pitch
+    // gesture there (ph_sort.c:1657-1689): not ported, and said so.
+    const { decisions, warnings } = run("[:phoneme arpabet speak on] The [m'<10,30>uwn] rose.");
     const left = decisions.find(
       (decision) => decision.type === "text_parser_phonemes_not_carried_out",
     );
-    expect(left?.reason).toContain("a pitch written on a symbol is not applied");
+    expect(left?.reason).toContain("the numbers written on a stress or hat mark are not applied");
     expect(left?.citations.length).toBeGreaterThan(0);
     expect(warnings.map((event) => event.code)).toEqual(["W_TEXT_PHONEMES_NOT_CARRIED_OUT"]);
-    // A duration alone is carried out: nothing to name.
+    // A duration and a pitch on a phone are carried out: nothing to name.
     expect(run("[:phoneme arpabet speak on] The [m'uw<400>n] rose.").warnings).toEqual([]);
+    expect(run("[:phoneme arpabet speak on] The [m'uw<400,140>n] rose.").warnings).toEqual([]);
+  });
+
+  it("makes of the pitches written on a clause's phones a sung clause or one of targets", () => {
+    const modes = (text: string) =>
+      run(text)
+        .result.utterance.relation("Segment")
+        .listItems()
+        .filter((item) => item.get("active") !== false && item.get("pitch_mode") !== undefined)
+        .map((item) => `${String(item.get("phoneme"))}:${String(item.get("pitch_mode"))}`)
+        .join(" ");
+    // A number up to 37 is a note; the mode holds from that phone on
+    // (PH/ph_sort.c:1657-1728).
+    expect(modes("[:phoneme arpabet speak on][m<100>uw<400,20>n<150>] now.")).toContain(
+      "M:none UW:singing N:singing",
+    );
+    expect(modes("[:phoneme arpabet speak on][m<100>uw<400,140>n<150>] now.")).toContain(
+      "M:none UW:targets N:targets",
+    );
+    // A number in hertz in a sung clause is dropped: no command for it.
+    const commands = (text: string) =>
+      run(text)
+        .result.utterance.relation("Segment")
+        .listItems()
+        .filter((item) => Number(item.get("pitch_command") ?? 0) !== 0)
+        .map((item) => `${String(item.get("phoneme"))}:${String(item.get("pitch_command"))}`);
+    expect(commands("[:phoneme arpabet speak on][m<100,20>uw<400,140>n<150,22>] now.")).toEqual([
+      "M:20",
+      "N:22",
+    ]);
   });
 
   it("lists only texts of the corpus as not exact", () => {

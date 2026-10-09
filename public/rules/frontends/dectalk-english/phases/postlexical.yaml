@@ -143,6 +143,7 @@ rules:
             - morpheme_boundary_after
             - dictionary_duration_ms
             - written_duration_ms
+            - written_pitch
           phoneme: "'EH'"
           type: eh.type
           target: eh

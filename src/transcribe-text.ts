@@ -1021,8 +1021,11 @@ export function transcribeText(
           // The first number written on a phone in phonemic text is its
           // duration in milliseconds; none, or 0, leaves it to the rules
           // (DECtalk 4.63 PH/ph_task.c:835-852, p_us_tim.c:192).
-          const writtenDuration = part.numbersAt?.find((entry) => entry.at === phoneIndex)
-            ?.numbers[0];
+          // The second is its pitch: a note to sing or a target in hertz
+          // (PH/ph_sort.c:1657-1728); what it is, is the frontend's rules'.
+          const writtenNumbers = part.numbersAt?.find((entry) => entry.at === phoneIndex)?.numbers;
+          const writtenDuration = writtenNumbers?.[0];
+          const writtenPitch = writtenNumbers?.[1];
           if (phoneIndex === 0 && part.pauseBefore) {
             flatPhonemeList.push({
               phoneme: resources.inventory.silence_symbol,
@@ -1080,6 +1083,7 @@ export function transcribeText(
               ...(writtenDuration !== undefined && writtenDuration !== 0
                 ? { writtenDurationMs: writtenDuration }
                 : {}),
+              ...(writtenPitch !== undefined && writtenPitch !== 0 ? { writtenPitch } : {}),
               // A silence among a word's phones: phonemic text wrote it.
               ...(match.phoneme === resources.inventory.silence_symbol
                 ? { writtenSilence: true }

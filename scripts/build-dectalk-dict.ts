@@ -493,9 +493,24 @@ export function selectDictionaryRows(text: string): {
   return { best, secondary, capitalised, totalRows, multiRowWords };
 }
 
+/**
+ * The dictionary's text, one character per byte ("exposé" has the byte E9,
+ * which is the character U+00E9 here): a byte above 127 is what say.exe is
+ * handed for an accented letter typed on its command line, and the
+ * dictionary is searched for the word as it was written (LTS/ls_task.c:697,
+ * 2040-2160). The compiled dictionary's words are read the same way
+ * (scripts/build-dectalk-lts-table.ts), so the two agree and a word's place
+ * in the search order is its bytes'. Bytes 80 to 9F are not mapped to the
+ * characters the Windows code page gives them (the entry for byte 80, the
+ * euro sign there, is under U+0080).
+ */
+export function readDictionaryText(srcPath: string): string {
+  return fs.readFileSync(srcPath, "latin1");
+}
+
 function main(): void {
   const srcPath = process.argv[2] ?? DEFAULT_SRC;
-  const text = fs.readFileSync(srcPath, "utf8");
+  const text = readDictionaryText(srcPath);
 
   // One row per word: a homograph's primary row.
   const { best, totalRows, multiRowWords } = selectDictionaryRows(text);

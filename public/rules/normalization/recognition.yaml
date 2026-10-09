@@ -381,6 +381,27 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:4128-4158 (ls_task_part_number: a word with a digit and an apostrophe in it is spelled), LTS/ls_spel.c:151-170 (each character by its name), LTS/l_us_con.c:126 (the double quote is strippable at a word''s end)'
+    # A word with an accented letter in it ("café", "naïve", "Zürich"): one
+    # word, its accents kept. The frontend's lexicon looks it up as written
+    # and, when the dictionary does not have it, reads it by rule with each
+    # accented letter as its plain one. Only for a frontend whose policy
+    # asks for it (tn_recognition_policy.accented_words: kept). Measured on
+    # say.exe (which is handed one byte for each such letter): "café" is
+    # K EY F, the rules' reading of "cafe", where the dictionary's "cafe" is
+    # K AE F EY; "naïve" is N EY V; "exposé", which the dictionary has, is
+    # EH K S P OW Z EY. The letters are those INCLUDE/ls_fold.tab gives a
+    # plain letter for, less the two that are signs in the Windows code page
+    # (the multiplication and division signs: not measured).
+    - id: tn_accented_word_source
+      pattern: '(?<![A-Za-zÀ-ÖØ-öø-ý])(?<word>[A-Za-z]*[À-ÖØ-öø-ý][A-Za-zÀ-ÖØ-öø-ý]*)(?![A-Za-zÀ-ÖØ-öø-ý])'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'accented_words', 'cleaned') == 'kept'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:697 and 2040-2160 (the dictionary is searched for the word as written), 752-765 (the word is not folded before the rules and the dictionary is not searched again), LTS/l_us_ru1.c:108-112 (ls_rule_lts reads each character through ls_fold[]), INCLUDE/ls_fold.tab'
     # A word with a question mark and an exclamation mark written on it, in
     # either order ("What?!", "that!?", and "?!?", "?!!"): the last mark ends
     # the clause and what stands before it stays on the word, which the

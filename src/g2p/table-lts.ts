@@ -29,6 +29,11 @@ export interface LtsTable {
   graphemeFeatures: readonly number[];
   words: readonly number[];
   bytes: readonly number[];
+  /**
+   * The letter the rules read for a character above 127 (INCLUDE/ls_fold.tab,
+   * used at LTS/l_us_ru1.c:108-112): "é" is read as "e".
+   */
+  letterFold?: Readonly<Record<string, string>>;
 }
 
 /** One generated phoneme (LTS/ls_defs.h PHONE). */
@@ -171,7 +176,10 @@ export function applyLtsRules(
 
   // l_us_ru1.c:107-131: letters to grapheme codes.
   let gp1 = 0;
-  for (const char of word.toLowerCase()) {
+  // l_us_ru1.c:108-112: each character goes through ls_fold[] first, which
+  // gives an accented letter its plain one.
+  for (const written of word.toLowerCase()) {
+    const char = table.letterFold?.[written] ?? written;
     if (gp1 >= NGWORD - 1) break;
     if (char >= "a" && char <= "z") {
       if (addGraph(gp1, char.charCodeAt(0) - 97 + GA, false)) gp1 += 1;

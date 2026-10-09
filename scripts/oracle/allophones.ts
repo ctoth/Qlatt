@@ -123,6 +123,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // A period standing apart with a comma or a semicolon on it (the parser's
   // `Ibid .,`): the word "period", then the mark as its delimiter.
   "dectalk-us-period-word-marks-v1.json",
+  // Words with an accented letter: looked up as written, else read by rule
+  // with the accent folded away.
+  "dectalk-us-accented-letters-v1.json",
 ];
 
 /** Every corpus with a packet record. */

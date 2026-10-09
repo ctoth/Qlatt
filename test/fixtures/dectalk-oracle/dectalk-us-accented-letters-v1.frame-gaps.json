@@ -1,0 +1,14 @@
+{
+  "ac-cafe": ["B1","AV","AP","A2","A3","A4","A5","AB"],
+  "ac-naive": ["B1","AV","AP","A2","A4","A6","AB"],
+  "ac-jose": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "ac-resume": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "ac-pinata": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "ac-fiance": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "ac-creme": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "ac-dictionary": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "ac-capital": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "ac-plural": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "ac-plain-cafe-control": ["B1","AV","AP","A2","A3","A4","A5","AB"],
+  "ac-plain-resume-control": ["B1","AV","AP","A2","A4","A5","A6","AB"]
+}

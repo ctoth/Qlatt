@@ -228,6 +228,7 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
     rules_blocked: { kind: "boolean" },
     written_duration_ms: { kind: "number" },
     written_silence: { kind: "boolean" },
+    written_pitch: { kind: "number" },
     sourceTokenId: { kind: "string" },
     punctuationSymbol: STRING_OR_NULL,
     // The mark was sent by a text rule, not read as a word's delimiter.
@@ -1018,6 +1019,7 @@ function buildTextToKlattTrackDetailed(
       construct.set(item, "written_duration_ms", token.writtenDurationMs);
     }
     if (token.writtenSilence) construct.set(item, "written_silence", true);
+    if (token.writtenPitch !== undefined) construct.set(item, "written_pitch", token.writtenPitch);
     construct.set(item, "stress", token.stress);
     construct.set(item, "word", token.word);
     construct.set(item, "sourceTokenId", token.sourceTokenId);

@@ -252,6 +252,19 @@ functions:
     citations:
       - "DECtalk 4.63 PH/ph_task.c:657-668, 931 (a clause is what stands between two clause-ending symbols)"
       - "DECtalk 4.63 PH/ph_sort.c:1331-1333 (a silence symbol in the input is a phone of the clause)"
+  # f0mode of a Segment's clause once the phone sort has read all of it
+  # (PH/ph_sort.c:1657-1728): 'none' (NORMAL), 'singing' or 'targets'. It is
+  # the running value dectalk_pitch_mode leaves on the clause's last
+  # allophone.
+  dectalk_clause_pitch_mode:
+    params: [item]
+    body: >-
+      get(dectalk_prev(isTrue(item, 'written_silence') || item.phoneme != 'SIL'
+            ? look_ahead_pred(item, 1000, 'is_clause_silence') : item),
+          'pitch_mode', 'none')
+    description: What the clause of a Segment makes of the pitches written on its phonemes.
+    citations:
+      - "DECtalk 4.63 PH/ph_sort.c:1657-1728 interp_user_f0 (f0mode SINGING or PHONE_TARGETS_SPECIFIED)"
   # The text stage's "first word of a sentence" state is reset where its
   # delimiter routine reads a period, a question mark or an exclamation mark.
   # The two periods after an initial ("J. Smith") do not pass through that
@@ -693,6 +706,7 @@ tags:
   adjacent_nasals: lengthens a nasal after a different nasal
   retroflex_minimum: keeps a retroflex vowel above its minimum length
   allophone_duration: sets a segment's duration from its allophone's frame count
+  written_pitch: records what a clause makes of a pitch written on a phoneme
 relations:
   Segment:
     type: base
@@ -788,6 +802,14 @@ relations:
       # CMD/cm_phon.c:225-330, PH/ph_task.c:835-852), in ms; the duration
       # rules are not applied to it either.
       written_duration_ms: { kind: number }
+      # A pitch written on the phone in phonemic text, the second number
+      # ("[uw<400,140>]", PH/ph_task.c:835-852 user_f0), and what the clause
+      # so far has made of such numbers: none yet, notes to sing, or targets
+      # in hertz (PH/ph_sort.c:1657-1728 f0mode, dectalk_pitch_mode).
+      # pitch_command is the number when it is carried out, else 0.
+      written_pitch: { kind: number }
+      pitch_mode: { kind: string, values: [none, singing, targets] }
+      pitch_command: { kind: number }
       # The vowel has absorbed the /r/ after it (ph_aloph.c:835-872); it was
       # two phones when DECtalk's rules looked ahead at it.
       fused_with_r: { kind: boolean }
@@ -1106,6 +1128,8 @@ phases:
       - dectalk_consonant_stress
       - dectalk_rime_boundary
       - dectalk_clause_phone_counts
+      # The clause's f0mode, which the hat pattern is placed only without.
+      - dectalk_pitch_mode
       # Reads the stress and boundary of every phone of the clause.
       - dectalk_hat_pattern
       - dectalk_intonation_stops
@@ -1140,7 +1164,8 @@ phases:
       - dectalk_break_f0_floor
       - dectalk_empty_clause_break_f0_floor
       # phinton's order on one syllabic: hat rise, stress impulse, question
-      # gestures (Ph_inton2.c Rules 1, 2, 4).
+      # gestures (Ph_inton2.c Rules 1, 2, 4). Rule 0 comes before them.
+      - dectalk_user_pitch_command
       - dectalk_hat_rise
       - dectalk_stress_impulse
       - dectalk_question_dip

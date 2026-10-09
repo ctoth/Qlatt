@@ -44,6 +44,9 @@ const LAYER_RANGE: i32 = 5;
 // stage overwrites f0minimum around a clause break it inserts
 // (LTS/ls_util.c:829-837); the value written is the command's.
 const LAYER_FLOOR: i32 = 6;
+// F0 targets a user wrote on phonemes (DectalkUserTargetState). A stretch
+// whose layer of this type has a command is drawn from that layer alone.
+const LAYER_DECTALK_USER_TARGET: i32 = 7;
 const FILTER_ONE_POLE: i32 = 1;
 const FILTER_COEFFICIENT_2POLE: i32 = 2;
 
@@ -66,6 +69,19 @@ struct DectalkOptions {
     /// The frame of an allophone at which the gesture waiting at its end
     /// becomes the current one (set_tglst, 4124: nframg == 8).
     gesture_latch_frame: i32,
+    /// LAYER_DECTALK_USER_TARGET. What a sung clause's F0 is multiplied by,
+    /// out of 4096 (Ph_drwt02.c:2325-2328: frac4mul(f0prime, 4190), from
+    /// middle C = 256 Hz to A = 440 Hz).
+    note_scale: i32,
+    /// What the vibrato's phase gains in a frame, and the bits its cosine is
+    /// shifted down (linear_interp, 4279-4287: timecosvib += 165;
+    /// getcosine[timecosvib >> 6] >> 3).
+    vibrato_step: i32,
+    vibrato_shift: u32,
+    /// The bits a move to a note is shifted down to give its change in a
+    /// frame, times four (set_user_target, 3981: (newnote - f0) >> 2, "so
+    /// transition happens over 16 frames").
+    note_transition_shift: u32,
 }
 
 // DECtalk 4.63 ph_romi.c getcosine table used by Ph_drwt02.c's deterministic
@@ -400,6 +416,95 @@ impl DectalkGlottalState {
     }
 }
 
+/// F0 a user wrote on phonemes: DECtalk's f0mode SINGING and
+/// PHONE_TARGETS_SPECIFIED (Ph_drwt02.c:199-213). pht0draw() then draws no
+/// baseline, hat, impulse or segmental term: F0 moves in a straight line to
+/// each command's target (set_user_target 3953-4026, linear_interp
+/// 4249-4290), a sung note with a vibrato; the glottal-stop gesture is still
+/// added, the flutter and the speaker's scaling are not (2258-2330).
+///
+/// A command's value is its target in Hz * 10 (a note's from DECtalk's note
+/// table, by the frontend's rule); its first flag says the target is a sung
+/// note.
+#[derive(Default)]
+struct DectalkUserTargetState {
+    /// pDph_t->f0.
+    f0: i32,
+    f0start: i32,
+    newnote: i32,
+    delnote: i32,
+    delcum: i32,
+    vibrato: bool,
+    timecosvib: i32,
+}
+
+impl DectalkUserTargetState {
+    /// set_user_target(): `transition_frames` is allodurs[npg + 1], the
+    /// allophone after the one the gesture clock stands in.
+    fn take(
+        &mut self,
+        target: i32,
+        note: bool,
+        transition_frames: i32,
+        options: &DectalkOptions,
+    ) {
+        self.newnote = target;
+        self.vibrato = note;
+        if note {
+            self.delnote = (target - self.f0) >> options.note_transition_shift;
+        } else {
+            let mut delnote = (target - self.f0) << 2;
+            if delnote > 0 {
+                delnote += transition_frames - 1;
+            }
+            if delnote < 0 {
+                delnote -= transition_frames - 1;
+            }
+            if transition_frames != 0 {
+                // C division: toward zero.
+                delnote /= transition_frames;
+            }
+            self.delnote = delnote;
+        }
+        self.delcum = 0;
+        self.f0start = self.f0;
+    }
+
+    /// linear_interp(): one frame's unscaled F0.
+    fn render_frame(&mut self, options: &DectalkOptions) -> i32 {
+        self.delcum += self.delnote;
+        self.f0 = self.f0start + (self.delcum >> 2);
+        let past = if self.delnote >= 0 {
+            self.f0 > self.newnote
+        } else {
+            self.f0 < self.newnote
+        };
+        if past {
+            self.f0 = self.newnote;
+            self.f0start = self.newnote;
+            self.delcum = 0;
+            self.delnote = 0;
+        }
+        let mut f0prime = self.f0;
+        if self.vibrato {
+            self.timecosvib += options.vibrato_step;
+            if self.timecosvib > DECTALK_TWOPI {
+                self.timecosvib -= DECTALK_TWOPI;
+            }
+            // A phase of exactly TWOPI indexes one past the table (the test
+            // is `>`); DECtalk reads whatever follows its array there. That
+            // is first reached at frame 4096 of a sung stretch; 0 here.
+            let cosine = usize::try_from(self.timecosvib >> 6)
+                .ok()
+                .and_then(|index| DECTALK_COSINE.get(index))
+                .copied()
+                .unwrap_or(0);
+            f0prime += cosine >> options.vibrato_shift;
+        }
+        f0prime
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 struct RenderInputs<'a> {
     frame_period: f64,
@@ -516,6 +621,36 @@ fn render_with_options(
     let mut profile_base_step = vec![0i32; n_layers];
     let mut profile_elapsed_frames = vec![0i32; n_layers];
     let mut command_cursors = vec![0usize; n_layers];
+    // F0 written on phonemes: the layer that has such commands, if any, and
+    // the allophones the gesture clock steps through (allodurs[]).
+    let user_layer = (0..n_layers).find(|&li| {
+        inp.layers[li].layer_type == LAYER_DECTALK_USER_TARGET && inp.layers[li].cmd_count > 0
+    });
+    let allophone_layer =
+        (0..n_layers).find(|&li| inp.layers[li].layer_type == LAYER_DECTALK_SEGMENTAL);
+    // Where a clause's first frame finds F0: pht0draw()'s start of a clause
+    // sets f0 to the baseline's first value (Ph_drwt02.c:1787), and leaves
+    // f0start, which the line is drawn from, at the 0 it has had since
+    // start-up (1643). So a command taken in the first frame starts its line
+    // at the baseline, and without one the first frame puts F0 at 0.
+    // Measured on both: "[m<100,180>uw...]" has 148, 164, 180 Hz in its
+    // first packets, "[m<100>uw<400,140>...]" the lowest F0 until the line
+    // from 0 has risen past it.
+    let mut user_state = DectalkUserTargetState {
+        f0: inp.init_total as i32,
+        ..DectalkUserTargetState::default()
+    };
+    // f0mode is one for the clause (ph_sort.c:1657-1728): every command
+    // carries it as its second flag. The first flag is the command's own:
+    // whether its number is a note (set_user_target tests the number, 3976,
+    // not the mode).
+    let user_sings = user_layer.is_some_and(|li| {
+        DectalkSegmentalState::command_flag(
+            &inp.cmds[inp.layers[li].cmd_start],
+            inp.profile_points,
+            1,
+        )
+    });
 
     let frame_period = inp.frame_period;
     let profile_duration_frames = (inp.total_duration / frame_period).round().max(1.0) as i32;
@@ -589,6 +724,26 @@ fn render_with_options(
                             } else {
                                 glide_totals[li] += cmd.value;
                             }
+                        }
+                        LAYER_DECTALK_USER_TARGET => {
+                            // trandur = allodurs[npg + 1] (Ph_drwt02.c:4003):
+                            // the allophone after the gesture clock's.
+                            let transition_frames = allophone_layer.map_or(0, |seg| {
+                                let layer = &inp.layers[seg];
+                                let next = glottal_states[seg].index + 1;
+                                usize::try_from(next)
+                                    .ok()
+                                    .filter(|&next| next < layer.cmd_count)
+                                    .map_or(0, |next| {
+                                        inp.cmds[layer.cmd_start + next].duration_frames as i32
+                                    })
+                            });
+                            user_state.take(
+                                cmd.value as i32,
+                                DectalkSegmentalState::command_flag(cmd, inp.profile_points, 0),
+                                transition_frames,
+                                options,
+                            );
                         }
                         _ => {}
                     }
@@ -701,6 +856,7 @@ fn render_with_options(
         // DECtalk adds the independently filtered segmental term after the
         // main command filter and immediately before speaker scaling.
         let mut segmental = 0.0f64;
+        let mut gesture = 0.0f64;
         for li in 0..n_layers {
             let layer = &inp.layers[li];
             if layer.layer_type != LAYER_DECTALK_SEGMENTAL {
@@ -708,9 +864,9 @@ fn render_with_options(
             }
             let commands = &inp.cmds[layer.cmd_start..layer.cmd_start + layer.cmd_count];
             segmental += segmental_states[li].render_frame(commands, inp.profile_points);
-            segmental += glottal_states[li].render_frame(commands, inp.profile_points, options);
+            gesture += glottal_states[li].render_frame(commands, inp.profile_points, options);
         }
-        let mut unscaled_f0 = filtered + segmental;
+        let mut unscaled_f0 = filtered + segmental + gesture;
 
         // The active non-singing DECtalk renderer advances both zero-initialized
         // cosine phases on every output frame, then adds signed-Q14 pseudojitter
@@ -742,6 +898,19 @@ fn render_with_options(
         } else {
             unscaled_f0
         };
+        if user_layer.is_some() {
+            // Ph_drwt02.c:2258-2330 with f0mode >= SINGING: the line to the
+            // target and the gesture, no flutter and no speaker scaling; the
+            // legal bounds; then a sung clause's change of scale.
+            let lowest = (inp.min_hz / inp.scale_output).round() as i32;
+            let highest = (inp.max_hz / inp.scale_output).round() as i32;
+            let mut f0prime = user_state.render_frame(options) + gesture as i32;
+            f0prime = f0prime.clamp(lowest, highest);
+            if user_sings {
+                f0prime = (f0prime * options.note_scale) >> 12;
+            }
+            f0_hz = f0prime as f64 * inp.scale_output;
+        }
         f0_hz = inp.min_hz.max(inp.max_hz.min(f0_hz));
         if frame >= output_phase_lead {
             out[frame - output_phase_lead] = f0_hz;
@@ -1010,6 +1179,8 @@ pub unsafe extern "C" fn render_f0(
         default_output_phase_lead(&inputs)
     };
     let elapsed = if scalars_len > 19 && s[19] > 0.0 { s[19] as usize } else { 0 };
+    // scalars[25..29], when present, are the user-target layer's numbers.
+    let user_numbers = scalars_len > 28;
     let options = if scalars_len > 24 {
         DectalkOptions {
             filter_scale_shift: s[20].max(0.0) as u32,
@@ -1017,6 +1188,10 @@ pub unsafe extern "C" fn render_f0(
             dip_slope: s[22] as i32,
             dip_reach: s[23] as i32,
             gesture_latch_frame: s[24] as i32,
+            note_scale: if user_numbers { s[25] as i32 } else { 0 },
+            vibrato_step: if user_numbers { s[26] as i32 } else { 0 },
+            vibrato_shift: if user_numbers { s[27].clamp(0.0, 31.0) as u32 } else { 0 },
+            note_transition_shift: if user_numbers { s[28].clamp(0.0, 31.0) as u32 } else { 0 },
         }
     } else {
         DectalkOptions::default()
@@ -2300,6 +2475,136 @@ mod tests {
 
         assert_eq!(status, RENDER_OK);
         assert_eq!(out, [2984.0, 5992.0, -6360.0]);
+    }
+
+    /// Scalars for a user-target render in DECtalk's units (output scale 1):
+    /// F0 held between 500 and 5121, the baseline's first value `start`,
+    /// then DectalkOptions with the note scale 4190, the vibrato's step 165
+    /// and shift 3, and the note transition shift 2.
+    fn user_target_scalars(start: f64) -> [f64; 29] {
+        [
+            0.0064,
+            0.0064,
+            FILTER_ONE_POLE as f64,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            500.0,
+            5121.0,
+            start,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            4190.0,
+            165.0,
+            3.0,
+            2.0,
+        ]
+    }
+
+    #[test]
+    fn user_target_in_hertz_is_a_straight_line_over_the_allophone() {
+        // "[m<100>uw<400,140>n<150>]." as the stock say.exe speaks it: the
+        // command for 140 Hz is taken at frame 14, when the gesture clock
+        // stands in the second allophone (4 frames, then 16), so the line
+        // runs over the third allophone's 63 frames:
+        // delnote = ((1400 - 0) << 2 + 62) / 63 = 89, f0 = (89 k) >> 2.
+        // Its packets hold 50 Hz until the line passes it (51.1 Hz at
+        // k = 23), and 140 Hz from k = 63 on.
+        let layers = [
+            LAYER_DECTALK_SEGMENTAL as f64, 0.0, 0.0, 0.0, 0.0, 0.0, 3.0,
+            LAYER_DECTALK_USER_TARGET as f64, 0.0, 0.0, 0.0, 0.0, 3.0, 1.0,
+        ];
+        let cmds = [
+            0.0, 0.0, 4.0, 0.0, 3.0,
+            0.0, 0.0, 16.0, 3.0, 3.0,
+            0.0, 0.0, 63.0, 6.0, 3.0,
+            14.0 * 0.0064, 1400.0, 0.0, 9.0, 2.0,
+        ];
+        let flags = [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+
+        let (status, out) =
+            call_render_f0(&user_target_scalars(0.0), &layers, 2, &cmds, 4, &flags, 11, 80);
+
+        assert_eq!(status, RENDER_OK);
+        // Before the command, and while the line is below the lowest F0.
+        assert_eq!(out[0], 500.0);
+        assert_eq!(out[13], 500.0);
+        assert_eq!(out[14 + 21], 500.0);
+        assert_eq!(out[14 + 22], 511.0);
+        assert_eq!(out[14 + 23], 534.0);
+        assert_eq!(out[14 + 61], 1379.0);
+        assert_eq!(out[14 + 62], 1400.0);
+        assert_eq!(out[79], 1400.0);
+    }
+
+    #[test]
+    fn user_target_taken_in_the_first_frame_starts_from_the_baseline() {
+        // "[m<100,180>uw<300,180>n<150,120>].": the first command is taken
+        // in the clause's first frame, where F0 is the baseline's first
+        // value (1160), and its line runs over the opening pause's 4 frames:
+        // delnote = ((1800 - 1160) << 2 + 3) / 4 = 640, 160 a frame. The
+        // stock say.exe's first packets (the first frame is not sent) hold
+        // 148, 164 and 180 Hz.
+        let layers = [
+            LAYER_DECTALK_SEGMENTAL as f64, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0,
+            LAYER_DECTALK_USER_TARGET as f64, 0.0, 0.0, 0.0, 0.0, 2.0, 1.0,
+        ];
+        let cmds = [
+            0.0, 0.0, 4.0, 0.0, 3.0,
+            0.0, 0.0, 16.0, 3.0, 3.0,
+            0.0, 1800.0, 0.0, 6.0, 2.0,
+        ];
+        let flags = [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+
+        let (status, out) =
+            call_render_f0(&user_target_scalars(1160.0), &layers, 2, &cmds, 3, &flags, 8, 6);
+
+        assert_eq!(status, RENDER_OK);
+        assert_eq!(out, [1320.0, 1480.0, 1640.0, 1800.0, 1800.0, 1800.0]);
+    }
+
+    #[test]
+    fn user_target_note_has_a_vibrato_and_a_sung_clause_its_scale() {
+        // "[m<100>uw<400,20>n<150>].": note 20 is 1918. delnote =
+        // (1918 - 0) >> 2 = 479; in frame k of the move f0 = (479 k) >> 2,
+        // the vibrato adds getcosine[(165 k) >> 6] >> 3, and a sung
+        // clause's F0 is multiplied by 4190 / 4096. The stock say.exe's
+        // packets hold 51.1 Hz before the move (500 scaled) and 62.0 Hz in
+        // its fifth frame: (598 + 9) * 4190 >> 12 = 620.
+        let layers = [
+            LAYER_DECTALK_SEGMENTAL as f64, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            LAYER_DECTALK_USER_TARGET as f64, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0,
+        ];
+        let cmds = [
+            0.0, 0.0, 40.0, 0.0, 3.0,
+            2.0 * 0.0064, 1918.0, 0.0, 3.0, 2.0,
+        ];
+        let flags = [1.0, 0.0, 0.0, 1.0, 1.0];
+
+        let (status, out) =
+            call_render_f0(&user_target_scalars(0.0), &layers, 2, &cmds, 2, &flags, 5, 30);
+
+        assert_eq!(status, RENDER_OK);
+        assert_eq!(out[0], 511.0);
+        assert_eq!(out[1], 511.0);
+        assert_eq!(out[2], 511.0);
+        assert_eq!(out[2 + 4], 620.0);
+        // At the note: 1918 and the vibrato, scaled; within 21 of 1962.
+        assert!(out[29] >= 1941.0 && out[29] <= 1983.0, "{}", out[29]);
     }
 
     #[test]

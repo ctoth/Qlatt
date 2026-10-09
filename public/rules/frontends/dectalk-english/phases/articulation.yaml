@@ -237,6 +237,9 @@ frame_programs:
       # The syllabic where phinton's walk stops (prosody.yaml
       # dectalk_segmental_f0_phone, Ph_inton2.c:809-819, 1659-1671).
       stops: { value: "isTrue(current, 'intonation_stops')", edge: false }
+      # The clause has a pitch written on a phoneme: f0mode SINGING or
+      # PHONE_TARGETS_SPECIFIED (pipeline.yaml dectalk_clause_pitch_mode).
+      user_pitch: { value: "dectalk_clause_pitch_mode(current) != 'none'", edge: false }
     group:
       # A clause starts at its initial silence.
       start: "u.initial"
@@ -1108,12 +1111,15 @@ rules:
   # before the final silence when the phone at nallotot - 3 is a sonorant and
   # this one comes before it, and earlier in the clause when the phone at
   # nallotot - 2 is one. The step is 5 in a clause of fewer than three
-  # counted words, else the voice's.
+  # counted words, else the voice's. The step is taken only when f0mode is
+  # below SINGING (3627): in a clause with a pitch written on a phoneme the
+  # spread is neither stepped nor, near the end, cleared.
   artic_end_of_clause_spread:
     kind: frame
     program: articulation
     unit: >-
-      g.unit < g.units - 1
+      !u.user_pitch
+      && g.unit < g.units - 1
       && !(g.unit >= g.units - 4
            ? (g.unit > 3 && g.end_3_son1 > 0 && g.unit < g.units - 3)
            : (g.unit > 3 && g.end_2_son1 > 0 && g.unit < g.units - 4))

@@ -347,11 +347,18 @@ export function runTextParser(
             "DECtalk 4.63 INCLUDE/usa_phon.tab (usa_arpa[], usa_ascky[])",
           ],
         );
-        // What of a spoken bracket this frontend leaves out: a pitch (the
-        // second number after a symbol).
+        // What of a spoken bracket this frontend leaves out: the numbers
+        // written on a symbol that is no phone (a stress or hat mark, where
+        // DECtalk takes them as the size and delay of the pitch gesture). A
+        // phone's name begins with a letter; the silence's is "_".
+        const names = commandTable?.phonemes.arpabet ?? [];
+        const isPhone = (symbol: number): boolean =>
+          symbol === 0 || /^[a-z]/.test(names[symbol] ?? "");
         const leftOut = [
-          ...(read.phonemes.some((phoneme) => phoneme.parameters.length > 1)
-            ? ["a pitch written on a symbol is not applied (its duration is)"]
+          ...(read.phonemes.some(
+            (phoneme) => phoneme.parameters.length > 0 && !isPhone(phoneme.symbol),
+          )
+            ? ["the numbers written on a stress or hat mark are not applied"]
             : []),
         ];
         if (speak && leftOut.length > 0) {
@@ -360,7 +367,7 @@ export function runTextParser(
             `Of the phonemic text ${shown}: ${leftOut.join("; ")}`,
             [
               "DECtalk 4.63 PH/ph_task.c:835-852 (the numbers after a phoneme: user_durs, user_f0)",
-              "DECtalk 4.63 PH/ph_sort.c:1657-1710 (interp_user_f0: a pitch selects phoneme targets or singing)",
+              "DECtalk 4.63 PH/ph_sort.c:1657-1689 (interp_user_f0: numbers on a stress or hat symbol are a stress-impulse or hat command)",
             ],
           );
           options.diagnostics?.warn(

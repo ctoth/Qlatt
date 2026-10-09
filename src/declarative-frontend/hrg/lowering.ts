@@ -48,8 +48,17 @@ type LayerType =
   | "glide"
   | "dectalk_segmental"
   | "range"
-  | "floor";
+  | "floor"
+  | "dectalk_user_target";
 type DecayMode = "halving" | "step_plus_ramp" | "exponential" | "step_plus_rise";
+
+/**
+ * Layers whose commands DECtalk's make_f0_command() issues on the controller
+ * clock (ph_inton1.c:1857-1902: steps, impulses, glides and user targets), as
+ * against the per-allophone and whole-clause layers.
+ */
+const isClockedCommandLayer = (type: LayerType | undefined): boolean =>
+  type === "persistent" || type === "impulse" || type === "glide" || type === "dectalk_user_target";
 
 type LayerConfig = {
   type: LayerType;
@@ -69,6 +78,19 @@ type LayerConfig = {
     reach_frames: number;
     latch_frame: number;
   };
+  /**
+   * On a dectalk_user_target layer (F0 a user wrote on phonemes: DECtalk
+   * 4.63 Ph_drwt02.c set_user_target 3953-4026, linear_interp 4249-4290). A
+   * command's value is its target in Hz * 10 and its first profile point says
+   * the target is a sung note. A stretch with such a command is drawn from
+   * this layer alone, with the glottal gesture of the segmental layer.
+   */
+  /** What a sung stretch's F0 is multiplied by, out of 4096. */
+  note_scale?: number;
+  /** The vibrato of a sung note: its phase's gain in a frame, and the bits its cosine is shifted down. */
+  vibrato?: { phase_step: number; shift: number };
+  /** The bits a move to a note is shifted down to give its change in a frame, times four. */
+  note_transition_shift?: number;
 };
 
 type LayeredFilterConfig = {
@@ -747,6 +769,7 @@ export function renderLayeredF0(
     dectalk_segmental: 4,
     range: 5,
     floor: 6,
+    dectalk_user_target: 7,
   };
   const decayCodes: Record<DecayMode, number> = {
     halving: 0,
@@ -777,6 +800,22 @@ export function renderLayeredF0(
     ),
     requireFiniteNumber(gesture.latch_frame, `f0_model.layers.${name}.glottal_gesture.latch_frame`),
   ])[0] ?? [0, 0, 0, 0];
+  const userTargets = layerNames.filter(
+    (name) => model.layers[name]?.type === "dectalk_user_target",
+  );
+  if (userTargets.length > 1) {
+    throw new Error("E_HRG_LOWER_F0_MODEL: only one layer may be a dectalk_user_target");
+  }
+  const userTarget = userTargets.map((name) => {
+    const config = model.layers[name];
+    const at = `f0_model.layers.${name}`;
+    return [
+      requirePositiveNumber(config?.note_scale, `${at}.note_scale`),
+      requirePositiveNumber(config?.vibrato?.phase_step, `${at}.vibrato.phase_step`),
+      requireFiniteNumber(config?.vibrato?.shift, `${at}.vibrato.shift`),
+      requireFiniteNumber(config?.note_transition_shift, `${at}.note_transition_shift`),
+    ];
+  })[0] ?? [0, 0, 0, 0];
   const layerDescriptors: number[] = [];
   const commandDescriptors: number[] = [];
   const profilePool: number[] = [];
@@ -822,7 +861,9 @@ export function renderLayeredF0(
             : 0;
       const profileStart = profilePool.length;
       const profileCount =
-        config.type === "profile" || dectalkSegmental ? (command.profilePoints?.length ?? 0) : 0;
+        config.type === "profile" || dectalkSegmental || config.type === "dectalk_user_target"
+          ? (command.profilePoints?.length ?? 0)
+          : 0;
       // A fourth flag marks a glottal-stop gesture at the allophone's end.
       if (dectalkSegmental && profileCount !== 3 && profileCount !== 4) {
         throw new Error(
@@ -873,6 +914,7 @@ export function renderLayeredF0(
     elapsedFrames,
     filterScaleShift,
     ...glottalGesture,
+    ...userTarget,
   ];
   const exports = getF0FilterExports();
   const allocate = (values: readonly number[]): { ptr: number; len: number } => {
@@ -1985,10 +2027,9 @@ export function lowerToFrames(
       // commands across the synthesized initial-silence edge. When the exact
       // segmental stream exists, its integer durations own this projection
       // below; acoustic Segment timing is not the DECtalk command clock.
-      const outputTimeMs =
-        layerType === "persistent" || layerType === "impulse" || layerType === "glide"
-          ? timeMs + (usesSegmentalControllerClock ? 0 : initialSilenceMs)
-          : timeMs;
+      const outputTimeMs = isClockedCommandLayer(layerType)
+        ? timeMs + (usesSegmentalControllerClock ? 0 : initialSilenceMs)
+        : timeMs;
       unclampedCommandTimes.push(outputTimeMs / 1000);
       commandAnchorTimes.push(
         (outputTimeMs - (utterance.temporalAnchor(item)?.offsetMs ?? 0)) / 1000,
@@ -2088,7 +2129,7 @@ export function lowerToFrames(
           const layerType = f0Model.layers[command.layer]?.type;
           const time = unclampedCommandTimes[index] ?? 0;
           let localTime = 0;
-          if (layerType === "persistent" || layerType === "impulse" || layerType === "glide") {
+          if (isClockedCommandLayer(layerType)) {
             localTime = f0CommandControllerTime(anchors, time, framePeriod) ?? 0;
           }
           commands[index] = { ...command, time: outputOffsetFrames * framePeriod + localTime };
@@ -2148,8 +2189,7 @@ export function lowerToFrames(
         const command = commands[index];
         if (!command) continue;
         const layerType = f0Model.layers[command.layer]?.type;
-        if (layerType !== "persistent" && layerType !== "impulse" && layerType !== "glide")
-          continue;
+        if (!isClockedCommandLayer(layerType)) continue;
         // The command's time before its clamp at 0: one meant before the
         // first phone lies in the opening pause, not at the phone's start.
         const mappedTime = f0CommandControllerTime(

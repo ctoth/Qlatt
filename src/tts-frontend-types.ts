@@ -62,6 +62,8 @@ export interface TranscriptionToken {
    * ("uw<400>").
    */
   writtenDurationMs?: number;
+  /** A pitch written on this phone in phonemic text ("uw<400,140>"). */
+  writtenPitch?: number;
   /** A silence phonemic text wrote among a word's phones ("[m'uw_n]"). */
   writtenSilence?: boolean;
   isPunctuation?: boolean;

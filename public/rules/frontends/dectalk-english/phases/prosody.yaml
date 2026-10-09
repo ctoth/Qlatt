@@ -54,8 +54,7 @@ rules:
     select:
       relation: Segment
       where: >-
-        current.phoneme != "SIL"
-        && (prev == null || prev.phoneme == "SIL")
+        dectalk_clause_first(current)
     apply:
       - field: number_words
         op: set
@@ -83,10 +82,13 @@ rules:
     kind: scalar
     select:
       relation: Segment
-      where: { predicate: is_dectalk_phone }
+      # A silence phonemic text wrote is one of the clause's allophones: the
+      # walk passes it, counts it, and at it sets nrises_sofar to 1 (Rule 7's
+      # "soft reset", Ph_inton2.c:1622-1634).
+      where: { predicate: is_clause_allophone }
     define:
       before: dectalk_prev(current)
-      first: "before == null || before.phoneme == 'SIL'"
+      first: "before == null || (before.phoneme == 'SIL' && !isTrue(before, 'written_silence'))"
     apply:
       - field: intonation_position
         op: set
@@ -101,21 +103,22 @@ rules:
         op: set
         value: >-
           first ? 0.0
+          : (isTrue(before, 'written_silence') ? 1.0
           : get(before, 'stressed_before', 0.0)
             + ((before.type == 'vowel' || before.phoneme in ['EL', 'EM', 'EN'])
-               && get(before, 'stress', 0) > 0 ? 1.0 : 0.0)
+               && get(before, 'stress', 0) > 0 ? 1.0 : 0.0))
         tag: stress
     citations:
       - "DECtalk 4.63 Ph_inton2.c:632 (the loop over the clause's allophones, nphon)"
       - "DECtalk 4.63 Ph_inton2.c:480, 1059 (nrises_sofar: 0 at the clause's start, one more at each stress impulse)"
+      - "DECtalk 4.63 Ph_inton2.c:1622-1634 Rule 7 (at a silence after the clause's first allophone, nrises_sofar = 1)"
       - "DECtalk 4.63 Ph_inton2.c:809-819 (the loop is left at a syllabic that begins and ends the hat)"
   dectalk_baseline_declination:
     kind: f0_layer
     select:
       relation: Segment
       where: >-
-        current.phoneme != "SIL"
-        && (prev == null || prev.phoneme == "SIL")
+        dectalk_clause_first(current)
     define: &baseline_clause
       clause_end: >-
         look_ahead_where(current, 1000,
@@ -173,8 +176,7 @@ rules:
     select:
       relation: Segment
       where: >-
-        current.phoneme != "SIL"
-        && (prev == null || prev.phoneme == "SIL")
+        dectalk_clause_first(current)
     define: *baseline_clause
     constraint: "male && mark == '.' && words <= params.policy.f0.baseline_long_declarative_words"
     insert:
@@ -213,8 +215,7 @@ rules:
     select:
       relation: Segment
       where: >-
-        current.phoneme != "SIL"
-        && (prev == null || prev.phoneme == "SIL")
+        dectalk_clause_first(current)
     define: *baseline_clause
     constraint: "male && comma"
     insert:
@@ -235,8 +236,7 @@ rules:
     select:
       relation: Segment
       where: >-
-        current.phoneme != "SIL"
-        && (prev == null || prev.phoneme == "SIL")
+        dectalk_clause_first(current)
     define: *baseline_clause
     constraint: "male && mark == '!' && words <= params.policy.f0.baseline_long_exclamation_words"
     insert:
@@ -255,8 +255,7 @@ rules:
     select:
       relation: Segment
       where: >-
-        current.phoneme != "SIL"
-        && (prev == null || prev.phoneme == "SIL")
+        dectalk_clause_first(current)
     define: *baseline_clause
     constraint: "male && mark == '?'"
     insert:
@@ -291,8 +290,7 @@ rules:
     select:
       relation: Segment
       where: >-
-        current.phoneme != "SIL"
-        && (prev == null || prev.phoneme == "SIL")
+        dectalk_clause_first(current)
     define: *baseline_clause
     constraint: >-
       !male && (mark == '.' || mark == '!'
@@ -315,8 +313,7 @@ rules:
     select:
       relation: Segment
       where: >-
-        current.phoneme != "SIL"
-        && (prev == null || prev.phoneme == "SIL")
+        dectalk_clause_first(current)
     define: *baseline_clause
     constraint: >-
       !male && comma && first_comma && words <= params.policy.f0.baseline_long_comma_words
@@ -338,8 +335,7 @@ rules:
     select:
       relation: Segment
       where: >-
-        current.phoneme != "SIL"
-        && (prev == null || prev.phoneme == "SIL")
+        dectalk_clause_first(current)
     define: *baseline_clause
     constraint: "!male && mark == '?'"
     insert:
@@ -363,8 +359,7 @@ rules:
     select:
       relation: Segment
       where: >-
-        current.phoneme != "SIL"
-        && (prev == null || prev.phoneme == "SIL")
+        dectalk_clause_first(current)
     define: *baseline_clause
     constraint: "!male && mark == '!'"
     insert:
@@ -726,12 +721,14 @@ rules:
   # The f0-filters kernel owns the fixed-point filter and its delays, and the
   # gesture's clock and its dip in F0 (2266-2275).
   # --------------------------------------------------------------------------
+  # The clause's first allophone is a phone, or a silence phonemic text wrote
+  # ("[_<600>m'uwn]."): the opening pause stands before either.
   dectalk_segmental_f0_initial_silence:
     kind: f0_layer
     select:
       relation: Segment
       where: >-
-        current.phoneme != 'SIL'
+        (current.phoneme != 'SIL' || isTrue(current, 'written_silence'))
         && (prev == null || (prev.phoneme == 'SIL' && get(prev, 'punctuationSymbol', null) != null))
     insert:
       relation: Tilt
@@ -1066,6 +1063,29 @@ rules:
       - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (incremental F0 target per phone)"
       - "DECtalk 4.63 Ph_drwt02.c:2080-2150 pht0draw (allodurs[] frames; FVOICD, FPLOSV and FSTRESS tests)"
       - "DECtalk 4.63 Ph_inton2.c:809-819, 1659-1671 (tcumdur is not added to once the loop is left)"
+
+  # A silence phonemic text wrote is an allophone pht0draw steps through like
+  # any other, with the silence's target. phinton does not add it to tcumdur
+  # ("don't count" a silence after the clause's first allophone,
+  # Ph_inton2.c:1662-1671), so it has the tag lowering leaves out of the
+  # baseline's duration.
+  dectalk_segmental_f0_written_silence:
+    kind: f0_layer
+    select:
+      relation: Segment
+      where: "current.phoneme == 'SIL' && isTrue(current, 'written_silence')"
+    insert:
+      relation: Tilt
+      layer: segmental
+      at: at_sync(current.sync_left)
+      value: "params.policy.f0.segmental.targets[params.policy.voice.sex].SIL"
+      duration_frames: "round(current.duration / params.policy.f0.segmental.frame_ms)"
+      profile_points: [1, 0, 0]
+      tag: f0_segmental_uncounted_phone
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (SI target) and :2080-2150 pht0draw"
+      - "DECtalk 4.63 Ph_inton2.c:1662-1671 (tcumdur: a silence is counted only as the clause's first allophone)"
+      - "DECtalk 4.63 PH/ph_sort.c:1331-1333 (a silence symbol in the input is a phone of the clause)"
 
   dectalk_segmental_f0_dummy_vowel:
     kind: f0_layer

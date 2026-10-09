@@ -100,6 +100,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // will speak them, for Paul and for Betty.
   "dectalk-us-empty-clause-ahead-v1.json",
   "dectalk-us-betty-empty-clause-ahead-v1.json",
+  // A word the text parser leaves an opening quotation mark on: a clause
+  // break before it, by the rules for a conjunction.
+  "dectalk-us-quote-breaks-v1.json",
 ];
 
 /** Every corpus with a packet record. */

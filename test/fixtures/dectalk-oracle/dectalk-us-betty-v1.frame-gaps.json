@@ -14,5 +14,10 @@
   "betty-stop-now": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
   "betty-eat-sing": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
   "betty-long-morning": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
-  "betty-big-dog-break": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"]
+  "betty-big-dog-break": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "betty-empty-clause-period": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "betty-empty-clause-exclamation": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "betty-empty-clause-comma": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "betty-empty-clause-quote-exclamation": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "betty-empty-clause-quote-period": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"]
 }

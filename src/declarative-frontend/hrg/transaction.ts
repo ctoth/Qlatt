@@ -76,6 +76,8 @@ export class HrgTransaction {
   private readonly operations: StagedOperation[] = [];
   private readonly reads = new Set<string>();
   private readonly stagedItems = new Set<Item>();
+  /** The ids of `stagedItems`: one transaction can stage every Segment of a text. */
+  private readonly stagedItemIds = new Set<string>();
   private closed = false;
 
   private currentMetadata: TransactionMetadata;
@@ -109,11 +111,12 @@ export class HrgTransaction {
 
   createItem(type: string, explicitId: string): Item {
     this.assertOpen();
-    if ([...this.stagedItems].some((item) => item.id === explicitId)) {
+    if (this.stagedItemIds.has(explicitId)) {
       throw new Error(`E_HRG_DUPLICATE_ITEM: item id '${explicitId}' is staged twice`);
     }
     const item = this.utterance._createDetachedItem(type, explicitId);
     this.stagedItems.add(item);
+    this.stagedItemIds.add(explicitId);
     this.operations.push({ kind: "create_item", item });
     return item;
   }

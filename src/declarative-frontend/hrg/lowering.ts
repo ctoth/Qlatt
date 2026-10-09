@@ -916,16 +916,128 @@ export function renderLayeredF0(
   }
 }
 
-function resolveF0AtTime(
+/** Whether a point list is in time order with finite times; found once a list. */
+const pointListsInTimeOrder = new WeakMap<readonly { timeMs: number }[], boolean>();
+
+function inTimeOrder(points: readonly { timeMs: number }[]): boolean {
+  let ordered = pointListsInTimeOrder.get(points);
+  if (ordered === undefined) {
+    ordered = true;
+    for (let index = 0; index < points.length && ordered; index += 1) {
+      const time = points[index]?.timeMs;
+      if (
+        typeof time !== "number" ||
+        !Number.isFinite(time) ||
+        (index > 0 && time < (points[index - 1] as { timeMs: number }).timeMs)
+      ) {
+        ordered = false;
+      }
+    }
+    pointListsInTimeOrder.set(points, ordered);
+  }
+  return ordered;
+}
+
+/**
+ * The first index whose point is later than `timeMs`, in a list in time
+ * order; `points.length` if there is none.
+ */
+function firstPointAfter(points: readonly { timeMs: number }[], timeMs: number): number {
+  let low = 0;
+  let high = points.length;
+  while (low < high) {
+    const middle = (low + high) >> 1;
+    if ((points[middle] as { timeMs: number }).timeMs > timeMs) high = middle;
+    else low = middle + 1;
+  }
+  return low;
+}
+
+/**
+ * The points later than `afterMs` and earlier than `beforeMs`, in list order.
+ * A list in time order is searched, not scanned: a track has a point for
+ * every frame, and every Segment asks.
+ */
+export function pointsBetween<Point extends { timeMs: number }>(
+  points: readonly Point[],
+  afterMs: number,
+  beforeMs: number,
+): Point[] {
+  if (!inTimeOrder(points) || Number.isNaN(afterMs) || Number.isNaN(beforeMs)) {
+    return points.filter((point) => point.timeMs > afterMs && point.timeMs < beforeMs);
+  }
+  const found: Point[] = [];
+  for (let index = firstPointAfter(points, afterMs); index < points.length; index += 1) {
+    const point = points[index] as Point;
+    if (!(point.timeMs < beforeMs)) break;
+    found.push(point);
+  }
+  return found;
+}
+
+/**
+ * The index of the first pair of neighbouring points that `timeMs` lies
+ * between (ends included), or -1. Searched in a list in time order.
+ */
+function spanIndexAt(points: readonly ResolvedF0Point[], timeMs: number): number {
+  const lastPair = points.length - 2;
+  if (lastPair < 0) return -1;
+  if (!inTimeOrder(points) || Number.isNaN(timeMs)) {
+    for (let index = 0; index <= lastPair; index += 1) {
+      const left = points[index];
+      const right = points[index + 1];
+      if (!left || !right || timeMs < left.timeMs || timeMs > right.timeMs) continue;
+      return index;
+    }
+    return -1;
+  }
+  const first = points[0] as ResolvedF0Point;
+  const last = points[lastPair + 1] as ResolvedF0Point;
+  if (timeMs < first.timeMs || timeMs > last.timeMs) return -1;
+  // The lowest pair whose right end is not before `timeMs`. Its left end is
+  // not after it: either it is the first point, or the pair before it ended
+  // before `timeMs`.
+  let low = 0;
+  let high = lastPair;
+  while (low < high) {
+    const middle = (low + high) >> 1;
+    if ((points[middle + 1] as ResolvedF0Point).timeMs >= timeMs) high = middle;
+    else low = middle + 1;
+  }
+  return low;
+}
+
+/**
+ * The index of the first frame later than `time`, or -1: where a frame at
+ * `time` goes into a track kept in time order. Frames are nearly always
+ * appended in order, so the last frame is looked at first; otherwise the
+ * track is searched. The track must be in time order and hold no NaN time,
+ * which it is when every frame was put in this way; the caller scans instead
+ * once a NaN time has been seen.
+ */
+export function firstFrameAfter(frames: readonly { time: number }[], time: number): number {
+  const count = frames.length;
+  if (count === 0 || !((frames[count - 1] as { time: number }).time > time)) return -1;
+  let low = 0;
+  let high = count - 1;
+  while (low < high) {
+    const middle = (low + high) >> 1;
+    if ((frames[middle] as { time: number }).time > time) high = middle;
+    else low = middle + 1;
+  }
+  return low;
+}
+
+export function resolveF0AtTime(
   points: readonly ResolvedF0Point[],
   timeMs: number,
   sampling: "linear" | "step",
 ): ResolvedF0Point | null {
   if (points.length === 0) return null;
-  for (let index = 0; index < points.length - 1; index += 1) {
-    const left = points[index];
-    const right = points[index + 1];
-    if (!left || !right || timeMs < left.timeMs || timeMs > right.timeMs) continue;
+  const index = spanIndexAt(points, timeMs);
+  if (index >= 0) {
+    const left = points[index] as ResolvedF0Point;
+    const right = points[index + 1] as ResolvedF0Point;
     const spanMs = right.timeMs - left.timeMs;
     if (Math.abs(spanMs) < 1e-6) return left;
     if (sampling === "step") {
@@ -2170,6 +2282,7 @@ export function lowerToFrames(
    * the initial edge blend in the first segment's boundary + control-window
    * values so the run-in glides toward the first phone.
    */
+  let silenceResourceKnown: boolean | undefined;
   const applySilenceEdgeParams = (
     params: Record<string, number>,
     provenance: Record<string, string>,
@@ -2177,10 +2290,13 @@ export function lowerToFrames(
     silenceEdge: "initial" | "final",
   ): void => {
     if (context.silence) {
-      const resourceKnown = utterance.provenance
+      // Looked up once: the list is a copy of every decision of the
+      // utterance, and each frame of the edges asks. A decision that is there
+      // stays there, and one that is not ends the lowering below.
+      silenceResourceKnown ??= utterance.provenance
         .getDecisions()
         .some((decision) => decision.id === context.silence?.decisionId);
-      if (!resourceKnown) {
+      if (!silenceResourceKnown) {
         utterance.diagnostics.error(
           "Selected silence/source resource decision is absent from the Utterance",
           { decisionId: context.silence.decisionId, edge: silenceEdge },
@@ -2447,6 +2563,7 @@ export function lowerToFrames(
    * value of the frame that covers `segmentOffsetMs`. A negative offset reads
    * the lead-in frames before the Item.
    */
+  const trackColumns = new WeakMap<object, [string, readonly number[]][]>();
   const applyFrameValues = (
     params: Record<string, number>,
     provenance: Record<string, string>,
@@ -2457,8 +2574,16 @@ export function lowerToFrames(
       const values = item.get(feature);
       if (!isFrameValues(values)) continue;
       const decisionId = item.latestWrite(feature)?.decisionId;
-      for (const [key, column] of Object.entries(values.columns)) {
-        if (column.length === 0 || !paramKeys.includes(key)) continue;
+      // The columns that reach the track, found once for a set of frame
+      // values: every frame of the Item reads them.
+      let columns = trackColumns.get(values);
+      if (!columns) {
+        columns = Object.entries(values.columns).filter(
+          ([key, column]) => column.length > 0 && paramKeys.includes(key),
+        );
+        trackColumns.set(values, columns);
+      }
+      for (const [key, column] of columns) {
         params[key] = column[frameValueIndex(values, segmentOffsetMs, column.length)] as number;
         if (decisionId) provenance[key] = decisionId;
       }
@@ -2483,6 +2608,8 @@ export function lowerToFrames(
     times.add(value);
   };
 
+  // Once a frame's time is NaN the track is no longer searched (firstFrameAfter).
+  let framesHoldNaN = false;
   const appendFrame = (
     timeMs: number,
     item?: Item,
@@ -2554,7 +2681,10 @@ export function lowerToFrames(
     } else if (phonemeOverride) {
       frame.phoneme = phonemeOverride;
     }
-    const insertionIndex = frames.findIndex((existing) => existing.time > frame.time);
+    if (Number.isNaN(frame.time)) framesHoldNaN = true;
+    const insertionIndex = framesHoldNaN
+      ? frames.findIndex((existing) => existing.time > frame.time)
+      : firstFrameAfter(frames, frame.time);
     if (insertionIndex < 0) {
       frames.push(frame);
       provenanceByFrame.push(provenance);
@@ -2634,10 +2764,8 @@ export function lowerToFrames(
     ) {
       const segmentStartMs = initialSilenceMs + timing.startMs;
       const segmentEndMs = initialSilenceMs + timing.endMs;
-      for (const point of f0Points) {
-        if (point.timeMs > segmentStartMs + 1e-6 && point.timeMs < segmentEndMs - 1e-6) {
-          offsets.add(point.timeMs - segmentStartMs);
-        }
+      for (const point of pointsBetween(f0Points, segmentStartMs + 1e-6, segmentEndMs - 1e-6)) {
+        offsets.add(point.timeMs - segmentStartMs);
       }
     }
     for (const offsetMs of frameValueOffsets(timing.item)) {

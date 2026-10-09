@@ -42,6 +42,14 @@
  * ones inside a run's samples apart from the rest, and a run with one inside
  * it is not called exact.
  *
+ * Known, not explained (2026-10-08): in about one live run of ten the row
+ * "the text spoken over, up to where it was cut" was not exact, with 122 of
+ * 123 grid samples equal, the difference in the last packets before the cut,
+ * and one such step inside the run. The page holds its context when the
+ * second Speak arrives, so the step may be the capture losing a block there
+ * and not a wrong sample; that has not been established. If it recurs, look
+ * at the step's frame against the run's last frames before anything else.
+ *
  * The Base F0 box. A number in it replaces the voice's own base F0; the box
  * starts empty, and the driver leaves it as the page has it, so each voice
  * speaks at its own.

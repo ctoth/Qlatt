@@ -19,9 +19,11 @@
  * Usage:
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
  *     scripts/measure-frontend-time.ts [--frontend dectalk-english] [--repeat 5] \
- *     [--json <file>] ["sentence" ...]
+ *     [--json <file>] [--stages] ["sentence" ...]
  *
- * Without sentences it uses SENTENCES below.
+ * Without sentences it uses SENTENCES below. `--stages` also prints, for each
+ * sentence, the median time of each stage of the pipeline (the frontend's
+ * `onStage` callback): the text stages, each rule phase, lowering.
  *
  * Do not time or profile with `tsx`: it wraps every closure in a `__name()`
  * call (esbuild keepNames), which made this script report 2110 ms per second
@@ -54,10 +56,15 @@ const flagValue = (name: string): string | undefined => {
 };
 const flagNames = new Set(["frontend", "repeat", "json"]);
 const positional: string[] = [];
+let showStages = false;
 for (let index = 0; index < argv.length; index += 1) {
   const arg = argv[index] as string;
   if (arg.startsWith("--") && flagNames.has(arg.slice(2))) {
     index += 1;
+    continue;
+  }
+  if (arg === "--stages") {
+    showStages = true;
     continue;
   }
   positional.push(arg);
@@ -86,6 +93,7 @@ type Row = {
 };
 
 const rows: Row[] = [];
+const stageRows: { text: string; stages: { stage: string; ms: number }[] }[] = [];
 for (const text of sentences) {
   const warm = run(text);
   const speechSec = warm[warm.length - 1]?.time ?? 0;
@@ -95,6 +103,30 @@ for (const text of sentences) {
     const start = performance.now();
     run(text);
     times.push(performance.now() - start);
+  }
+
+  if (showStages) {
+    const runs: Map<string, number>[] = [];
+    for (let index = 0; index < repeat; index += 1) {
+      const stages = new Map<string, number>();
+      let last = performance.now();
+      textToKlattTrackDetailed(text, undefined, 30, {
+        frontendId,
+        onStage: (stage) => {
+          const now = performance.now();
+          stages.set(stage, (stages.get(stage) ?? 0) + now - last);
+          last = now;
+        },
+      });
+      runs.push(stages);
+    }
+    stageRows.push({
+      text,
+      stages: [...(runs[0] as Map<string, number>).keys()].map((stage) => ({
+        stage,
+        ms: median(runs.map((stages) => stages.get(stage) ?? 0)),
+      })),
+    });
   }
 
   resetCelCounters();
@@ -139,10 +171,22 @@ console.log(
     .padStart(8)}  ${String(totalEvals).padStart(9)}  ${totalCelMs.toFixed(1).padStart(6)}  TOTAL`,
 );
 
+for (const { text, stages } of stageRows) {
+  const sum = stages.reduce((total, { ms }) => total + ms, 0);
+  console.log(`\nstages of ${JSON.stringify(text.length > 60 ? `${text.slice(0, 57)}...` : text)}`);
+  for (const { stage, ms } of stages) {
+    // Stages under half a percent are left out.
+    if (ms < sum * 0.005) continue;
+    console.log(
+      `${ms.toFixed(1).padStart(9)} ms ${((ms / sum) * 100).toFixed(0).padStart(3)}%  ${stage}`,
+    );
+  }
+}
+
 const jsonPath = flagValue("json");
 if (jsonPath) {
   fs.writeFileSync(
     jsonPath,
-    `${JSON.stringify({ frontendId, repeat, rows, totalSpeech, totalMs, totalEvals, totalCelMs }, null, 2)}\n`,
+    `${JSON.stringify({ frontendId, repeat, rows, stageRows, totalSpeech, totalMs, totalEvals, totalCelMs }, null, 2)}\n`,
   );
 }

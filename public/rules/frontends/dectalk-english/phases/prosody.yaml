@@ -791,10 +791,29 @@ rules:
       - "DECtalk 4.63 Ph_drwt02.c:662-705 us_f0msegtars and us_f0fsegtars (SI target) and :2080-2150 pht0draw"
       - "DECtalk 4.63 p_us_tim.c:229-232 Rule 1 (clause-initial pause of 4 or 5 frames)"
 
+  # The mark of a clause with no phone is whatever the text stage sent: a
+  # period after an initial, or the mark after a parenthesis that closes
+  # inside a quotation (`"Stop (now)!"` is a comma clause and then an empty
+  # exclamation; LTS symbols 115 0 118 0 in an instrumented build). pht0draw
+  # picks the row by that mark as for any clause, with number_words 0:
+  #   male (Ph_drwt02.c:1658-1700): period [4], comma [1], exclamation [2],
+  #     question [3];
+  #   female (3223-3257): period and exclamation [0] and [2] (the same
+  #     numbers), question [3], comma [1] when the clause before it did not
+  #     end in a comma (dcommacnt 1) and [0] otherwise.
+  # Measured against DECtalk: the period and the exclamation, for Paul and for
+  # Betty (dectalk-us-empty-clause-v1, dectalk-us-betty-v1). The question and
+  # the comma are from the source alone: the frontend does not yet produce
+  # those two clauses from the texts that have them.
   dectalk_empty_clause_baseline:
     kind: f0_layer
     select: *empty_clause
-    constraint: "params.policy.voice.sex == 'male' && current.punctuationSymbol == '.'"
+    define: &empty_clause_mark
+      male: "params.policy.voice.sex == 'male'"
+      mark: current.punctuationSymbol
+      comma: "mark in [',', ';', ':']"
+      first_comma: "!(get(prev, 'punctuationSymbol', '') in [',', ';', ':'])"
+    constraint: "male && mark == '.'"
     insert:
       relation: PhraseCommand
       layer: baseline
@@ -806,10 +825,59 @@ rules:
       - "DECtalk 4.63 Ph_drwt02.c f0basetypes[4][] (short declarative baseline, number_words <= 3)"
       - "DECtalk 4.63 Ph_drwt02.c:1660-1667 (clausetype 0: f0basetypes[4] unless number_words > 3)"
 
+  dectalk_empty_clause_comma_baseline:
+    kind: f0_layer
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "male && comma"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1157, 1145, 1139, 1127, 1113, 1109, 1085, 1062, 1049, 1035, 1023, 1015, 1005, 1010, 1057, 1124, 1040]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:1335-1352 f0basetypes[1][] (comma clause)"
+      - "DECtalk 4.63 Ph_drwt02.c:1669-1681 (clausetype 1 selects f0basetypes[1])"
+
+  dectalk_empty_clause_exclamation_baseline:
+    kind: f0_layer
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "male && mark == '!'"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1107, 1135, 1159, 1167, 1163, 1199, 1145, 1132, 1129, 1115, 1103, 1090, 1088, 1074, 1030, 902, 893]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:1354-1373 f0basetypes[2][] (exclamatory clause)"
+      - "DECtalk 4.63 Ph_drwt02.c:1683-1692 (clausetype 2: f0basetypes[2] unless number_words > 2)"
+
+  dectalk_empty_clause_question_baseline:
+    kind: f0_layer
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "male && mark == '?'"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1187, 1165, 1139, 1127, 1113, 1109, 1095, 1082, 1079, 1065, 1053, 940, 938, 924, 1010, 1014, 1018]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:1375-1391 f0basetypes[3][] (question)"
+      - "DECtalk 4.63 Ph_drwt02.c:1695-1699 (clausetype 3 selects f0basetypes[3])"
+
   dectalk_female_empty_clause_baseline:
     kind: f0_layer
     select: *empty_clause
-    constraint: "params.policy.voice.sex != 'male' && current.punctuationSymbol == '.'"
+    define: *empty_clause_mark
+    constraint: "!male && (mark == '.' || mark == '!' || (comma && !first_comma))"
     insert:
       relation: PhraseCommand
       layer: baseline
@@ -818,9 +886,57 @@ rules:
       profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1795, 1782, 1779, 1765, 1763, 1750, 1748, 1734, 1720, 1714, 1708, 1887]
       tag: f0_baseline
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c:2462-2478 f0basetypes[0][] (female)"
-      - "DECtalk 4.63 Ph_drwt02.c:2482 (f0basetypes[1][0], read as f0baseline[17]); :3530 (basecntr <= 15)"
-      - "DECtalk 4.63 Ph_drwt02.c:3225-3232 (clausetype 0 in the female routine)"
+      - "DECtalk 4.63 Ph_drwt02.c:2462-2478, 2501-2517 f0basetypes[0][] and [2][] (female; the same numbers)"
+      - "DECtalk 4.63 Ph_drwt02.c:2482, 2520 (f0basetypes[1][0] and [3][0], read as f0baseline[17]); :3530 (basecntr <= 15)"
+      - "DECtalk 4.63 Ph_drwt02.c:3223-3252 (clausetype 0, 1 and 2 in the female routine)"
+
+  dectalk_female_empty_clause_comma_baseline:
+    kind: f0_layer
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "!male && comma && first_comma"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1785, 1762, 1749, 1725, 1703, 1710, 1718, 1764, 1810, 1864, 1928, 1887]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:2482-2498 f0basetypes[1][] (female comma clause)"
+      - "DECtalk 4.63 Ph_drwt02.c:2501 (f0basetypes[2][0], read as f0baseline[17]); :3530 (basecntr <= 15)"
+      - "DECtalk 4.63 Ph_drwt02.c:3233-3242 (dcommacnt == 1 selects f0basetypes[1] unless number_words > 4)"
+
+  dectalk_female_empty_clause_question_baseline:
+    kind: f0_layer
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "!male && mark == '?'"
+    insert:
+      relation: PhraseCommand
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points: [1887, 1865, 1839, 1827, 1813, 1809, 1795, 1782, 1779, 1765, 1763, 1750, 1748, 1734, 1720, 1714, 1708, 1890]
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:2520-2536 f0basetypes[3][] (female question)"
+      - "DECtalk 4.63 Ph_drwt02.c:2540 (f0basetypes[4][0], read as f0baseline[17]); :3530 (basecntr <= 15)"
+      - "DECtalk 4.63 Ph_drwt02.c:3253-3257 (clausetype 3 selects f0basetypes[3])"
+
+  dectalk_female_empty_clause_exclamation_range:
+    kind: f0_layer
+    select: *empty_clause
+    define: *empty_clause_mark
+    constraint: "!male && mark == '!'"
+    insert:
+      relation: PhraseCommand
+      layer: range
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.exclamation_range_added
+      tag: f0_exclamation_range
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c:3805-3808 (clausetype 2: f0scalefac + 500 in the female routine)"
 
   # The baseline's clock is tcumdur, which phinton adds up one allophone at a
   # time at the foot of its loop (Ph_inton2.c:1659-1671). Where the walk stops

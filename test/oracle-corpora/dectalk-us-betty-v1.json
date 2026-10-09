@@ -24,6 +24,11 @@
     { "id": "betty-stop-now", "text": "Stop now!", "group": "voice", "tags": ["exclamation", "two-words", "female-range"], "expectedFocus": ["trace"] },
     { "id": "betty-eat-sing", "text": "First we eat, then we sing, and then we go home.", "group": "voice", "tags": ["comma", "consecutive-commas", "female-baseline"], "expectedFocus": ["trace"] },
     { "id": "betty-long-morning", "text": "After a long and very busy morning, we rested.", "group": "voice", "tags": ["comma", "long-comma-clause", "female-baseline"], "expectedFocus": ["trace"] },
-    { "id": "betty-big-dog-break", "text": "The big dog barked and the small cat ran away.", "group": "voice", "tags": ["inserted-break", "f0-floor"], "expectedFocus": ["trace"] }
+    { "id": "betty-big-dog-break", "text": "The big dog barked and the small cat ran away.", "group": "voice", "tags": ["inserted-break", "f0-floor"], "expectedFocus": ["trace"] },
+    { "id": "betty-empty-clause-period", "text": "Ask J. Smith today.", "group": "clause-type", "tags": ["empty-clause", "period", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-empty-clause-exclamation", "text": "It is B.! Go.", "group": "clause-type", "tags": ["empty-clause", "exclamation", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-empty-clause-comma", "text": "Ask J., then go.", "group": "clause-type", "tags": ["empty-clause", "comma", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-empty-clause-quote-exclamation", "text": "She said \"Stop (now)!\" Then left.", "group": "clause-type-after-comma", "tags": ["empty-clause", "exclamation", "after-comma", "female-baseline"], "expectedFocus": ["trace"] },
+    { "id": "betty-empty-clause-quote-period", "text": "He said \"Go (now).\" Then left.", "group": "clause-type-after-comma", "tags": ["empty-clause", "period", "after-comma", "female-baseline"], "expectedFocus": ["trace"] }
   ]
 }

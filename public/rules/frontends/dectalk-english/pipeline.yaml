@@ -1050,7 +1050,13 @@ phases:
       - dectalk_female_question_baseline
       - dectalk_female_exclamation_range
       - dectalk_empty_clause_baseline
+      - dectalk_empty_clause_comma_baseline
+      - dectalk_empty_clause_exclamation_baseline
+      - dectalk_empty_clause_question_baseline
       - dectalk_female_empty_clause_baseline
+      - dectalk_female_empty_clause_comma_baseline
+      - dectalk_female_empty_clause_question_baseline
+      - dectalk_female_empty_clause_exclamation_range
       - dectalk_break_f0_floor
       # phinton's order on one syllabic: hat rise, stress impulse, question
       # gestures (Ph_inton2.c Rules 1, 2, 4).

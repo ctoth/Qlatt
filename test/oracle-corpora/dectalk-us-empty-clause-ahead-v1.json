@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-empty-clause-ahead-v1",
+  "description": "Texts with a mark after an initial's period or after a parenthesis inside a quotation, recorded ahead of the text stage that will speak them: DECtalk sends one period for \"J.?\", a question mark for \"Mary K.?\", and a comma and an empty clause for a question mark or a comma after \"(...)\" inside a quotation. The sentences were listed with those of dectalk-us-empty-clause-v1 and moved here, unchanged, when the export showed the frontend does not yet give DECtalk's clauses for them.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "empty-clause-question-who", "text": "Who is J.? Ask him.", "group": "clause-type", "tags": ["empty-clause", "question", "f0-baseline"], "expectedFocus": ["trace"] },
+    { "id": "empty-clause-question-is", "text": "Is it Mary K.? Yes.", "group": "clause-type", "tags": ["empty-clause", "question", "f0-baseline"], "expectedFocus": ["trace"] },
+    { "id": "empty-clause-quote-question", "text": "She asked \"Is it (this)?\" Then left.", "group": "clause-type-after-comma", "tags": ["empty-clause", "question", "after-comma", "f0-baseline"], "expectedFocus": ["trace"] },
+    { "id": "empty-clause-quote-comma", "text": "He said \"Wait (now),\" then left.", "group": "clause-type-after-comma", "tags": ["empty-clause", "comma", "after-comma", "f0-baseline"], "expectedFocus": ["trace"] }
+  ]
+}

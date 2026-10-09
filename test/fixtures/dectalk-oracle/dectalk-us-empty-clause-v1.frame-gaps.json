@@ -1,5 +1,11 @@
 {
   "empty-clause-k-initial-mary": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
   "empty-clause-k-initial-ask": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
-  "empty-clause-l-initial-tell": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"]
+  "empty-clause-l-initial-tell": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "empty-clause-exclamation-it": ["B1","AV","AP","A2","A5","A6","AB","A2_AMPLITUDE"],
+  "empty-clause-exclamation-ask": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "empty-clause-comma-ask": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "empty-clause-quote-exclamation": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "empty-clause-quote-exclamation-final": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "empty-clause-quote-period": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"]
 }

@@ -50,14 +50,24 @@ rules:
       # its pause keeps the opening value: "Red-, green." has 5 frames.
       last: "dectalk_prev(current)"
       hyphen_before: "last != null && get(last, 'rime_boundary', '') == 'morpheme'"
+      # compause or perpause (241-252): what a pause command added, held
+      # between its limits, in frames (mstofr: ms * 10 >> 6, a floor).
+      comma: "current.punctuationSymbol in [',', ';', ':']"
+      added_ms: >-
+        comma ? params.policy.timing.pause_added_ms.comma : params.policy.timing.pause_added_ms.period
+      limits: >-
+        comma ? params.policy.timing.pause_added_limits_ms.comma
+        : params.policy.timing.pause_added_limits_ms.period
+      added_frames: >-
+        floor((added_ms < limits[0] ? limits[0] : (added_ms > limits[1] ? limits[1] : added_ms))
+              * 10.0 / 64.0)
     apply:
       - field: duration
         op: set
         value: >-
           (dectalk_pause_frames(empty_clause || hyphen_before ? params.policy.timing.pause_frames.clause_initial_other
-            : (current.punctuationSymbol in [',', ';', ':']
-              ? params.policy.timing.pause_frames.comma
-              : params.policy.timing.pause_frames.period))
+            : (comma ? params.policy.timing.pause_frames.comma
+              : params.policy.timing.pause_frames.period) + added_frames)
            + (next != null ? dectalk_clause_initial_pause_frames(next) : 0.0))
           * params.policy.timing.frame_ms
         tag: boundary
@@ -66,6 +76,7 @@ rules:
       - "DECtalk 4.63 p_us_tim.c:229-232 (clause-initial pause of 4 or 5 frames)"
       - "DECtalk 4.63 p_us_tim.c:261-268 (each pause scaled by sprat1, at least 2 frames)"
       - "DECtalk 4.63 p_us_tim.c:237-253 (the comma and period lengths apply only when nphon > 1)"
+      - "DECtalk 4.63 PH/ph_task.c:717-722 (compause = mstofr(deadstop(N, -280, 30000)), perpause = mstofr(deadstop(N, -420, 30000))); p_us_tim.c:245, 251 (added to nfcomma and nfperiod)"
 
   # A silence phonemic text wrote ("[m'uw_n]", "[_<600>m'uwn]") is an
   # allophone inside its clause. With a duration written on it, it takes

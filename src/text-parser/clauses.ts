@@ -90,6 +90,11 @@ const toBytes = (text: string): number[] => [...text].map((char) => char.charCod
 const fromBytes = (bytes: readonly number[]): string => String.fromCharCode(...bytes);
 const at = (bytes: readonly number[], index: number): number => bytes[index] ?? 0;
 
+/**
+ * The punctuation mode in which the text stage does not read clauses at all
+ * (CMD/C_US_CDE.H punct_options[], CMD/cm_text.c:379).
+ */
+export const PUNCTUATION_PASS = "pass";
 const TAB = 0x09;
 const LINE_FEED = 0x0a;
 const CARRIAGE_RETURN = 0x0d;
@@ -173,6 +178,8 @@ export function readClauses(
   };
 
   const clauses: Clause[] = [];
+  /** punct_mode as a rule mode: the one the text starts in, until a command changes it. */
+  let punctuationMode = options.punctuationMode;
   /** clausebuf: the clause being gathered. */
   let buffer: number[] = [];
   /** Where the last word of the buffer starts (prevword). */
@@ -200,10 +207,7 @@ export function readClauses(
       parseChar = config.clauseEnd;
     }
     // :413-452: brackets and quotes arrive as spaces.
-    if (
-      (types[parseChar] & config.quoteType) !== 0 &&
-      options.punctuationMode === config.quoteMode
-    ) {
+    if ((types[parseChar] & config.quoteType) !== 0 && punctuationMode === config.quoteMode) {
       lastQuote = parseChar;
       if (!config.keptQuotes.includes(parseChar)) parseChar = SPACE;
     } else {
@@ -247,13 +251,13 @@ export function readClauses(
     /** clausebuf once the passes have run: what the rules read last. */
     let read = buffer;
     let consumed = 0;
-    if (count < config.minimumLength && options.punctuationMode !== config.wholeMode) {
+    if (count < config.minimumLength && punctuationMode !== config.wholeMode) {
       // :636-641: a short clause goes by the rules.
       output = buffer;
     } else {
       const punctuated = parser.rewrite(buffer, lookups(buffer), {
         language: options.language,
-        mode: options.punctuationMode,
+        mode: punctuationMode,
         section: options.punctuationSection,
         onHit: options.onHit,
       }).output;
@@ -403,6 +407,21 @@ export function readClauses(
           else if (option === "silent") phonemeMode.speak = false;
           else if (option === "off") phonemeMode.off = true;
           else if (option === "on") phonemeMode.off = false;
+        }
+      }
+      // The punctuation command sets the mode the clause reader and the
+      // punctuation rules run in from here on (CMD/cm_copt.c:1249-1276: the
+      // routine only stores it, so the clause being gathered is not ended
+      // and is read in the new mode when it ends). Not the mode "pass", in
+      // which DECtalk's text stage hands the characters on without this
+      // reader (CMD/cm_text.c:379): that path is not ported, and the mode
+      // stays.
+      const punctuationWords = table.commandTable?.options.punct_options ?? [];
+      for (const one of read) {
+        if (one.kind !== "command" || one.row.routine !== "cm_cmd_punct") continue;
+        const index = optionIndex(punctuationWords, one.words[0]);
+        if (index >= 0 && punctuationWords[index] !== PUNCTUATION_PASS) {
+          punctuationMode = 1 << index;
         }
       }
       options.onCommand?.(body, clauses.length, read);

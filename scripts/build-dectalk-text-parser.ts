@@ -279,7 +279,7 @@ for (const match of defsSource.matchAll(/^#define\s+(MARK_[a-z_]+)\s+(0x[0-9A-Fa
   MARK_BITS.set(match[1], Number(match[2]));
 }
 const defined = (source: string, name: string, file: string): number => {
-  const match = new RegExp(`^#define\\s+${name}\\s+(0x[0-9A-Fa-f]+|\\d+)`, "m").exec(source);
+  const match = new RegExp(`^#define\\s+${name}\\s+(0x[0-9A-Fa-f]+|-?\\d+)`, "m").exec(source);
   if (!match) throw new Error(`E_PARSER_TABLE: ${file} does not define ${name}`);
   return Number(match[1]);
 };
@@ -540,6 +540,13 @@ const commandTable = {
     command: [access32 ? 50 : 75, defined(defsSource, "MAX_SPEAKING_RATE", "cm_defs.h")],
     spoken: slowTalk ? [50, 550] : [75, 600],
   },
+  // The period pause command holds its number between these, in ms
+  // (CMD/cm_defs.h:71-72, CMD/cm_copt.c:2484-2506); the comma pause command
+  // sends its number as typed (2453-2468).
+  periodPause: [
+    defined(defsSource, "MIN_PERIOD_PAUSE", "cm_defs.h"),
+    defined(defsSource, "MAX_PERIOD_PAUSE", "cm_defs.h"),
+  ],
 };
 
 const content = `${JSON.stringify({

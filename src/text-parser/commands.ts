@@ -64,6 +64,8 @@ export interface CommandTable {
   /** The alphabets of phonemic text in brackets (phonemes.ts). */
   phonemes: PhonemeAlphabets;
   rate: { command: [number, number]; spoken: [number, number] };
+  /** The limits of the period pause command's number, in ms. */
+  periodPause: [number, number];
 }
 
 /** How many parameter slots the command stage has (INCLUDE/dectalk.h:90 NPARAM). */

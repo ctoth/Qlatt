@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-address-plus-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "ap-underscore-plus", "text": "Write to help_desk+orders@example.net.", "group": "plus-in-word", "tags": ["spelled", "underscore", "address"], "expectedFocus": ["trace"] },
+    { "id": "ap-letters", "text": "Write to a+b@example.net.", "group": "plus-in-word", "tags": ["spelled", "address"], "expectedFocus": ["trace"] },
+    { "id": "ap-words", "text": "Write to ann+news@example.net.", "group": "plus-in-word", "tags": ["spelled", "address"], "expectedFocus": ["trace"] },
+    { "id": "ap-underscore-address-control", "text": "Write to tom_west@example.net.", "group": "plus-in-word", "tags": ["control", "underscore", "address"], "expectedFocus": ["trace"] },
+    { "id": "ap-plain-words-control", "text": "Type ann+news now.", "group": "plus-in-word", "tags": ["control", "parser-splits"], "expectedFocus": ["trace"] },
+    { "id": "ap-plain-letters-control", "text": "Type a+b now.", "group": "plus-in-word", "tags": ["control", "parser-splits"], "expectedFocus": ["trace"] }
+  ]
+}

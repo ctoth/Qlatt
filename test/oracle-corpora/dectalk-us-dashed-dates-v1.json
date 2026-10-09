@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-dashed-dates-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "dd-year-month-day", "text": "The meeting is on 2024-03-15.", "group": "dashed-date", "tags": ["part-number", "text-end"], "expectedFocus": ["trace"] },
+    { "id": "dd-nineteen-hundreds", "text": "It is dated 1999-12-31 here.", "group": "dashed-date", "tags": ["part-number"], "expectedFocus": ["trace"] },
+    { "id": "dd-first-of-year", "text": "The log starts at 2000-01-01 exactly.", "group": "dashed-date", "tags": ["part-number", "zeros"], "expectedFocus": ["trace"] },
+    { "id": "dd-year-month-control", "text": "Call 2024-03 the start.", "group": "dashed-date", "tags": ["control", "two-groups"], "expectedFocus": ["trace"] },
+    { "id": "dd-single-digits-control", "text": "It is 2024-3-5 today.", "group": "dashed-date", "tags": ["control", "one-digit-groups"], "expectedFocus": ["trace"] },
+    { "id": "dd-code-control", "text": "The code is 12-34-56.", "group": "dashed-date", "tags": ["control", "no-year"], "expectedFocus": ["trace"] },
+    { "id": "dd-slash-date-control", "text": "The fiscal year ends 6/30/2025.", "group": "dashed-date", "tags": ["control", "slash-date"], "expectedFocus": ["trace"] }
+  ]
+}

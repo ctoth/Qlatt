@@ -110,20 +110,40 @@ rules:
         find_within_word(current,
           "current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']",
           "ahead")
+      # "to", "and" and "for" come in as SPECIALWORD, PPSTART, phones. After
+      # a word boundary the forward scan stops at that boundary. With none
+      # before them (the word before is phonemic text; phrase state 'alone')
+      # the scan meets SPECIALWORD first and tests it as a phone: its code is
+      # 120 (INCLUDE/l_com_ph.h:65), past the feature table's 101 words, and
+      # the program's data there has the syllabic bit
+      # (timing.syllabic_indices_past_table holds 120). So the last syllabic
+      # of the phonemic text has "a syllabic after it" before the phrase
+      # start ends the scan. Measured on say.exe: the AA of "dot" in "...and
+      # then it rained." has the first-syllable bit (structure word 521) and
+      # Rule 5's shortening (prcnt 60); in "Dot and then" it has neither.
+      next_word_start: >-
+        look_ahead_where(current, 100,
+          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || (candidate.phoneme != "SIL" && !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id))')
+      special_reads_syllabic: >-
+        later == null && next_word_start != null && next_word_start.phoneme != 'SIL'
+        && dectalk_phrase_state(next_word_start) == 'alone'
+        && 120 in params.policy.timing.syllabic_indices_past_table
+      later_in_scan: "later != null || special_reads_syllabic"
     apply:
       - field: syllable_type
         op: set
         dispatch:
-          - when: "earlier != null && later != null"
+          - when: "earlier != null && later_in_scan"
             value: "'medial'"
           - when: "earlier != null"
             value: "'final'"
-          - when: "later != null"
+          - when: later_in_scan
             value: "'first'"
           - default: "'only'"
         tag: syllabification
     citations:
       - "DECtalk 4.63 ph_sort2.c:60-110 init_med_final (FTYPESYL from the syllabics before and after in the word)"
+      - "DECtalk 4.63 INCLUDE/l_com_ph.h:65 (SPECIALWORD is 120), PH/ph_aloph.c:146 and PH/ph_romi.c:214-222 (phone_feature indexes us_featb by the symbol's code), LTS/l_us_con.c:1187-1195 (for, and, to are entered with SPECIALWORD and PPSTART)"
       - "DECtalk 4.63 ph_sort.c:1358 (called for each syllabic)"
 
   # ---------------------------------------------------------------------------
@@ -182,11 +202,38 @@ rules:
             && dectalk_same_word(marked_ahead, current)
             && !(marked_ahead.type == 'vowel' || marked_ahead.phoneme in ['EL', 'EM', 'EN'])
             && isTrue(marked_ahead, 'morpheme_boundary_after'))
-    constraint: "in_rhyme && (before_morpheme || !syllabic_first)"
+      # The next word starts a prepositional phrase with no word boundary
+      # before it (the word before is phonemic text; dectalk_pp_start_state
+      # 'alone'). The forward scan gives no phone a value there: measured on
+      # say.exe, in "...and then it rained." the AA of "dot" has no boundary.
+      # The scan gives up when it meets a syllabic before a boundary
+      # (ph_sort2.c:217-220), and the SPECIALWORD symbol ahead of the phrase
+      # start reads as one (dectalk_syllable_type). Only the last phone has a
+      # value, which the phrase start's own symbol adds.
+      alone_ahead: >-
+        boundary_item != null && boundary_item.phoneme != 'SIL'
+        && !dectalk_same_word(boundary_item, current)
+        && dectalk_phrase_state(boundary_item) == 'alone'
+      last_before_alone: >-
+        alone_ahead && dectalk_next(current) != null
+        && dectalk_next(current).id == boundary_item.id
+    constraint: >-
+      in_rhyme && (before_morpheme || !syllabic_first)
+      && (!alone_ahead || last_before_alone)
     apply:
       - field: rime_boundary
         op: set
         dispatch:
+          # The last phone before a phrase start that has no word boundary
+          # before it: the phrase start's value alone, FPPNEXT, or FVPNEXT at
+          # the rate where the phone sort raises every such start
+          # (timing.phrase_start_raised_at_wpm). DECtalk's duration routine
+          # prints bou=128 for the T of "dot" in "...and then it rained.",
+          # and 160 at 140 words per minute.
+          - when: last_before_alone
+            value: >-
+              params.policy.timing.speaking_rate_wpm <= params.policy.timing.phrase_start_raised_at_wpm
+              ? 'vp' : 'pp'
           # The last phone of a hyphenated word's part, when the next part
           # starts a verb phrase ("re-enter"): the scan gives it the hyphen's
           # morpheme value and the VPSTART symbol adds its own to the same
@@ -247,6 +294,7 @@ rules:
       - "DECtalk 4.63 ph_sort2.c:203-222 get_next_bound_type"
       - "DECtalk 4.63 ph_romi.c:174-205 bounftab (boundary symbol to FBOUNDARY value)"
       - "DECtalk 4.63 ph_sort.c:1491-1495 (VPSTART adds FVPNEXT to the phone before it), 2026-2043 (add_feature ORs the value in)"
+      - "DECtalk 4.63 ph_sort.c:1487-1490 (PPSTART adds FPPNEXT to the phone before it), 1171-1177 (at 140 words per minute or slower a PPSTART becomes a VPSTART)"
       - "DECtalk 4.63 LTS/ls_dict.c:777-778 (VPSTART before a dictionary entry of class verb, or verb and character)"
 
   # ---------------------------------------------------------------------------
@@ -389,7 +437,7 @@ rules:
       stretch_mark: "look_back_pred(current, 1000, 'is_hat_state_or_stretch_start')"
       starts_stretch: >-
         dectalk_word_start(current)
-        && ((dectalk_phrase_state(current) != '' && dectalk_phrase_state(current) != 'word')
+        && (dectalk_phrase_state(current) == 'pp'
             || (dectalk_phrase_start(current) == 'vp' && behind(current, 1) != null
                 && isTrue(behind(current, 1), 'morpheme_boundary_after')))
       same_stretch: >-

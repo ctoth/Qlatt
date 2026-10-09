@@ -86,6 +86,7 @@ describe("bundled DECtalk same-word callers", () => {
 
   it("names every caller, each carrying the macro's citations", () => {
     expect(callers.map(({ phase, rule, name }) => `${phase}:${rule}.${name}`).sort()).toEqual([
+      "annotation:dectalk_rime_boundary.alone_ahead",
       "annotation:dectalk_rime_boundary.before_morpheme",
       "annotation:dectalk_rime_boundary.syllabic_first",
       "postlexical:dectalk_at_reduced.before_final_t",

@@ -201,7 +201,11 @@ frame_programs:
       # "can we go?" and in "Stop now!".
       word_start: { value: "dectalk_word_start(current)", edge: false }
       counted_word:
-        value: "dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp'"
+        # Nor is a word with no word boundary before its phrase start
+        # (phrase state 'alone': the word before is phonemic text).
+        value: >-
+          dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp'
+          && dectalk_phrase_state(current) != 'alone'
         edge: false
       # The silence that ends a clause.
       clause_end:

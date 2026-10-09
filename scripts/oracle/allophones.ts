@@ -92,6 +92,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // promote_last_2: which secondary stress a stressed syllabic before a
   // verb phrase makes primary, past stretches that have none.
   "dectalk-us-promotion-v1.json",
+  // A prepositional-phrase start with no word boundary before it: "and" or
+  // "for" after the text parser's phonemic "dot".
+  "dectalk-us-phrase-start-alone-v1.json",
 ];
 
 /** Every corpus with a packet record. */

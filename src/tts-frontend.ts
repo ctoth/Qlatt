@@ -322,9 +322,12 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
           break_slot: { kind: "boolean" },
           clause_break_before: { kind: "boolean" },
           phrase_start: { kind: "string", values: ["vp", "pp"] },
+          // The word before is phonemic text: no word boundary stands before
+          // this word's phrase start.
+          phrase_start_unbounded: { kind: "boolean" },
           // What a frontend's rules make of a prepositional-phrase start in
-          // its context (kept or dropped).
-          phrase_start_state: { kind: "string", values: ["pp", "word"] },
+          // its context (kept, dropped, or kept with no word boundary before it).
+          phrase_start_state: { kind: "string", values: ["pp", "word", "alone"] },
         },
       },
       syllable: {
@@ -621,6 +624,9 @@ function createStructure(
       if (place.clause.endSupplied) transaction.set(word, "clause_end_supplied", true);
     }
     if (phraseStart) transaction.set(word, "phrase_start", phraseStart);
+    if (group[0].token.phraseStartUnbounded) {
+      transaction.set(word, "phrase_start_unbounded", true);
+    }
     transaction.append("Word", word);
     transaction.addRoot("SylStructure", word);
     const annotations = tables

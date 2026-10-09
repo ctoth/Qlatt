@@ -404,15 +404,26 @@ rules:
   # and "to" stays unstressed.
   #
   # The first rule writes on each such Word what became of its start: 'pp'
-  # kept, 'word' dropped.
+  # kept, 'word' dropped, 'alone' kept with no word boundary before it.
   #
-  # Not ported, because here it changes nothing: at 140 words per minute or
-  # slower the phone sort turns every remaining PPSTART into a VPSTART
-  # (ph_sort.c:1171-1177). These three words are entered after a word
-  # boundary, so the phone before them gets the word boundary's bits with the
-  # phrase start's added (ph_sort.c:1487-1496), and FWBNEXT 0140 with FVPNEXT
-  # 0240 is the same FCBNEXT 0340 as with FPPNEXT 0200 (ph_defs.h:255-260).
-  # A phrase start entered without a word boundary before it would differ.
+  # At 140 words per minute or slower the phone sort turns every remaining
+  # PPSTART into a VPSTART (ph_sort.c:1171-1177). After a word boundary that
+  # changes nothing: the phone before these words gets the word boundary's
+  # bits with the phrase start's added (ph_sort.c:1462-1496), and FWBNEXT
+  # 0140 with FVPNEXT 0240 is the same FCBNEXT 0340 as with FPPNEXT 0200
+  # (ph_defs.h:255-260).
+  #
+  # 'alone': the word before is the text parser's phonemic text ("dot" for a
+  # period: "...and then"), which is sent with no word boundary after it
+  # (src/transcribe-text.ts joinPhonemicText). The phone before the word then
+  # has the phrase start's value and nothing else: FPPNEXT, or FVPNEXT at 140
+  # words per minute or slower (dectalk_rime_boundary). Measured on say.exe
+  # (its duration routine's structure words): in "...and then it rained." the
+  # T of "dot" has boundary 128 and the AA none, at rate 140 the T has 160;
+  # in "Dot and then it rained." the T has 224 and the AA 96.
+  # Not measured: such a word at its clause's end ("...and."), where the
+  # phone sort would turn the start into a word boundary; it is 'word' here
+  # as for any other.
   # -------------------------------------------------------------------------
   dectalk_pp_start_state:
     kind: scalar
@@ -433,10 +444,13 @@ rules:
     apply:
       - field: phrase_start_state
         op: set
-        value: "clause_final ? 'word' : 'pp'"
+        value: >-
+          clause_final ? 'word'
+          : (isTrue(current, 'phrase_start_unbounded') ? 'alone' : 'pp')
         tag: boundary
     citations:
       - "DECtalk 4.63 ph_sort.c:1055-1070 (a PPSTART whose word is followed by a clause boundary becomes a word boundary)"
+      - "DECtalk 4.63 ph_sort.c:1462-1496 (WBOUND adds FWBNEXT and PPSTART adds FPPNEXT to the phone before it, each for itself), CMD/cm_text.c:1118-1144 (phonemic text is sent with no word boundary after it)"
       - "DECtalk 4.63 LTS/l_us_con.c:1187-1195 sdic (for, and, to with SPECIALWORD and PPSTART)"
 
   # A word whose start was dropped takes primary stress on its first vowel:
@@ -943,13 +957,15 @@ rules:
       # The boundary in front of the word is a word boundary: the word starts
       # no phrase.
       plain_before: >-
-        dectalk_phrase_start(current) != 'vp' && dectalk_phrase_state(current) != 'pp'
+        dectalk_phrase_start(current) != 'vp'
+        && !(dectalk_phrase_state(current) in ['pp', 'alone'])
       before_final_t: >-
         n != null && n.phoneme == 'T' && dectalk_same_word(current, n)
         && later_syllabic == null
         && after != null && after.phoneme != 'SIL'
       plain_after: >-
-        dectalk_phrase_start(after) != 'vp' && dectalk_phrase_state(after) != 'pp'
+        dectalk_phrase_start(after) != 'vp'
+        && !(dectalk_phrase_state(after) in ['pp', 'alone'])
       cited: >-
         clause_phone_count() + 2 < 10
         || params.policy.timing.speaking_rate_wpm < params.policy.timing.citation_below_wpm

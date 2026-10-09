@@ -691,6 +691,10 @@ parameters:
       # Below this rate every clause is cited, whatever its length
       # (ph_aloph.c:500-501: Cite_It = TRUE when sprate < 100).
       citation_below_wpm: 100
+      # At this rate or slower the phone sort turns every prepositional-phrase
+      # start it has kept into a verb-phrase start (ph_sort.c:1171-1177:
+      # sprate <= 140).
+      phrase_start_raised_at_wpm: 140
       # init_timing's constants (ph_timng.c:238-302), by the names used there.
       # sprat0 is the rate, with the part above `linear_above` halved and a
       # floor of `sprat0_minimum` (SLOWTALK, ph_timng.c:262-267). sprat1 and

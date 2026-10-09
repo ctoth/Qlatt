@@ -33,6 +33,11 @@ export interface TranscriptionToken {
   supplied?: boolean;
   /** The phrase the word starts, when the frontend's lexicon marks one. */
   phraseStart?: "vp" | "pp";
+  /**
+   * No word boundary stands before this word's phrase start: phonemic text,
+   * which has no boundary after it, is the word before.
+   */
+  phraseStartUnbounded?: boolean;
   /** A morpheme boundary stands after this phone, inside its word. */
   morphemeBoundaryAfter?: boolean;
   /** The lexicon exempts this phone from the frontend's allophone rules. */

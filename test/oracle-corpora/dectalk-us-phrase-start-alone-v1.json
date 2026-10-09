@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-phrase-start-alone-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "pa-and", "text": "...and then it rained.", "group": "phrase-start-alone", "tags": ["and", "text-start"], "expectedFocus": ["trace"] },
+    { "id": "pa-for", "text": "...for now it works.", "group": "phrase-start-alone", "tags": ["for", "text-start"], "expectedFocus": ["trace"] },
+    { "id": "pa-and-mid", "text": "He waited ...and then left.", "group": "phrase-start-alone", "tags": ["and", "mid-sentence"], "expectedFocus": ["trace"] },
+    { "id": "pa-and-140", "rate": 140, "text": "...and then it rained.", "group": "phrase-start-alone", "tags": ["and", "raised-to-verb-phrase"], "expectedFocus": ["trace"] },
+    { "id": "pa-and-141", "rate": 141, "text": "...and then it rained.", "group": "phrase-start-alone", "tags": ["and", "rate-above-140"], "expectedFocus": ["trace"] },
+    { "id": "pa-written-control", "text": "Dot and then it rained.", "group": "phrase-start-alone", "tags": ["control", "word-boundary"], "expectedFocus": ["trace"] },
+    { "id": "pa-article-control", "text": "...a dog barked.", "group": "phrase-start-alone", "tags": ["control", "no-phrase-start"], "expectedFocus": ["trace"] },
+    { "id": "pa-joined-control", "text": "...but nobody came.", "group": "phrase-start-alone", "tags": ["control", "joined"], "expectedFocus": ["trace"] }
+  ]
+}

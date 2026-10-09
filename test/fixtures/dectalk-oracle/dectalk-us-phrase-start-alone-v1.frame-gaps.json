@@ -1,0 +1,10 @@
+{
+  "pa-and": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pa-for": ["B1","AV","AP","A2","A4","A5","AB","A2_AMPLITUDE"],
+  "pa-and-mid": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pa-and-140": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pa-and-141": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pa-written-control": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "pa-article-control": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "pa-joined-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"]
+}

@@ -57,11 +57,6 @@ const NOT_EXACT: Readonly<Record<string, string>> = {
     "begins a sentence compares the word as written (LTS/ls_task.c:4672-4728 " +
     "ls_task_lookup_first_verbs), so IH has no secondary stress; the frontend's rule " +
     "dectalk_sentence_initial_auxiliary goes by the word alone",
-  "qu-02":
-    'the parser leaves `"Gone back by noon) .`: DECtalk has a comma after "said", one after ' +
-    '"noon" (a closing bracket stripped from a word forces a break, LTS/ls_task.c ' +
-    "ls_task_strip_right_punctuation with FB of LTS/l_us_con.c lsctype) and then a clause " +
-    'that holds only the period. Not ported; the comma after "said" is not traced',
 };
 
 describe("DECtalk's letter-to-sound on the parser's text, from text to samples", () => {

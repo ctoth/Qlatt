@@ -266,12 +266,18 @@ predicates:
   is_sentence_reset_or_first: >-
     dectalk_ends_sentence(current) || behind(current, 1) == null
   # A Segment that stands for one DECtalk allophone: every phone, a stop by its
-  # closure, and the silence at a clause boundary.
+  # closure, the silence at a clause boundary, and a silence phonemic text
+  # wrote.
   is_dectalk_allophone: >-
     !(current.type in ["stop_release", "stop_aspiration"])
-    && (current.phoneme != "SIL" || get(current, "punctuationSymbol", null) != null)
+    && (current.phoneme != "SIL" || get(current, "punctuationSymbol", null) != null
+        || isTrue(current, "written_silence"))
   is_dectalk_phone: >-
     !(current.type in ["stop_release", "stop_aspiration"]) && current.phoneme != "SIL"
+  # An allophone inside a clause: a phone, or a silence phonemic text wrote.
+  is_clause_allophone: >-
+    !(current.type in ["stop_release", "stop_aspiration"])
+    && (current.phoneme != "SIL" || isTrue(current, "written_silence"))
   is_clause_silence: >-
     current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null
   # Never true: the stop of a count that runs to the utterance's start.
@@ -739,6 +745,10 @@ relations:
       # A duration the duration dictionary gives the phone (ph_sort.c:192-215),
       # in ms; the duration rules are not applied to it.
       dictionary_duration_ms: { kind: number }
+      # A silence phonemic text wrote among a word's phones ("[m'uw_n]"): one
+      # of DECtalk's allophones, and no clause boundary (ph_sort.c:1331-1333
+      # makes every symbol below MAX_PHONES a phone, silence included).
+      written_silence: { kind: boolean }
       # A duration written on the phone in phonemic text ("[uw<400>]",
       # CMD/cm_phon.c:225-330, PH/ph_task.c:835-852), in ms; the duration
       # rules are not applied to it either.
@@ -917,6 +927,7 @@ phases:
       # p_us_tim.c, one rule per branch, in source order. Every rule reads and
       # writes the allophone's timing_* state; only the last two write duration.
       - dectalk_pause_duration
+      - dectalk_written_silence_duration
       - dectalk_utterance_initial_pause
       - dectalk_timing_setup
       - dectalk_timing_dictionary_duration

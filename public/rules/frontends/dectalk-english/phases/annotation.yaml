@@ -123,7 +123,7 @@ rules:
       # Rule 5's shortening (prcnt 60); in "Dot and then" it has neither.
       next_word_start: >-
         look_ahead_where(current, 100,
-          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || (candidate.phoneme != "SIL" && !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id))')
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || (candidate.phoneme != "SIL" && !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id))')
       special_reads_syllabic: >-
         later == null && next_word_start != null && next_word_start.phoneme != 'SIL'
         && dectalk_phrase_state(next_word_start) == 'alone'
@@ -174,7 +174,7 @@ rules:
       # in_rhyme: the clause has had a syllabic at or before this phone.
       prior_syllabic_or_clause_start: >-
         look_back_where(current, 100,
-          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]')
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]')
       in_rhyme: >-
         current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']
         || (prior_syllabic_or_clause_start != null && prior_syllabic_or_clause_start.phoneme != 'SIL')
@@ -183,7 +183,7 @@ rules:
       # final stop is a silence of the same word; the scan passes over it.)
       boundary_item: >-
         look_ahead_where(current, 100,
-          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || (candidate.phoneme != "SIL" && (!(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]))')
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || (candidate.phoneme != "SIL" && (!(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]))')
       syllabic_first: >-
         boundary_item != null && boundary_item.phoneme != 'SIL'
         && dectalk_same_word(boundary_item, current)
@@ -195,7 +195,7 @@ rules:
       # before the boundary carries the mark.
       marked_ahead: >-
         look_ahead_where(current, 100,
-          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"] || isTrue(candidate, "morpheme_boundary_after")')
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"] || isTrue(candidate, "morpheme_boundary_after")')
       before_morpheme: >-
         isTrue(current, 'morpheme_boundary_after')
         || (marked_ahead != null && marked_ahead.phoneme != 'SIL'

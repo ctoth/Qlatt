@@ -51,7 +51,10 @@ const corpus = readVoiceCorpus(
 const PITCH =
   "a pitch written on a symbol (the second number) is read and not applied: the pitch is " +
   "the rules'";
-const SILENCE = "a silence symbol inside a bracket is dropped";
+const SILENCE =
+  "a silence symbol inside a bracket is spoken with DECtalk's length " +
+  "(test/dectalk-phoneme-silence.test.ts), but the pitch and the formants around it are not " +
+  "DECtalk's";
 
 /** Not DECtalk's samples yet. */
 const NOT_EXACT: Readonly<Record<string, string>> = {

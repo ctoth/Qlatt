@@ -732,7 +732,7 @@ rules:
       relation: Segment
       where: >-
         current.phoneme != 'SIL'
-        && (prev == null || (prev.phoneme == 'SIL' && has(prev.punctuationSymbol)))
+        && (prev == null || (prev.phoneme == 'SIL' && get(prev, 'punctuationSymbol', null) != null))
     insert:
       relation: Tilt
       layer: segmental
@@ -776,8 +776,8 @@ rules:
     select: &empty_clause
       relation: Segment
       where: >-
-        current.phoneme == 'SIL' && has(current.punctuationSymbol)
-        && prev != null && prev.phoneme == 'SIL' && has(prev.punctuationSymbol)
+        current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null
+        && prev != null && prev.phoneme == 'SIL' && get(prev, 'punctuationSymbol', null) != null
     insert:
       relation: Tilt
       layer: segmental
@@ -1087,7 +1087,7 @@ rules:
     kind: f0_layer
     select:
       relation: Segment
-      where: "current.phoneme == 'SIL' && has(current.punctuationSymbol)"
+      where: "current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null"
     insert:
       relation: Tilt
       layer: segmental

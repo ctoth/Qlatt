@@ -1027,6 +1027,10 @@ export function transcribeText(
               ...(writtenDuration !== undefined && writtenDuration !== 0
                 ? { writtenDurationMs: writtenDuration }
                 : {}),
+              // A silence among a word's phones: phonemic text wrote it.
+              ...(match.phoneme === resources.inventory.silence_symbol
+                ? { writtenSilence: true }
+                : {}),
               // Indices of a one-word result are indices into its phones.
               ...(spokenParts.length === 1 &&
               "rulesBlockedAt" in pronResult &&

@@ -203,8 +203,13 @@ export function pronounce(
           .map(Number);
         at = end;
       }
-      // Phone codes start at 1; 0 is silence, which a word here cannot hold.
-      const isPhone = symbol !== null && symbol > 0 && symbol < table.phonemeSymbols.length;
+      // Phone codes start at 1. 0 is silence: a phone like the others where a
+      // bracket wrote it ("[m'uw_<300>n]"; PH/ph_sort.c:1331-1333 makes every
+      // symbol below MAX_PHONES a phone), and passed over in text a rule
+      // composed.
+      const fromBracket = code >= PHONEME_SYMBOL_BASE && code < PHONEME_SYMBOL_LIMIT;
+      const isPhone =
+        symbol !== null && (symbol > 0 || fromBracket) && symbol < table.phonemeSymbols.length;
       if (isPhone) phoneNumbers.push(numbers);
       if (symbol !== null && (isPhone || WORD_SYMBOLS.has(symbol))) symbols.push(symbol);
     }

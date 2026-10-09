@@ -21,13 +21,20 @@
  *   - the e-mail and table reading modes, and index marks.
  */
 
-import { type CommandSlots, newCommandSlots, type ReadCommand, readCommands } from "./commands";
+import {
+  type CommandSlots,
+  newCommandSlots,
+  optionIndex,
+  type ReadCommand,
+  readCommands,
+} from "./commands";
 import {
   createTextParser,
   type DictionaryState,
   type PassOptions,
   type TextParserTable,
 } from "./interpreter";
+import { type PhonemeAlphabets, type ReadPhonemes, readPhonemes } from "./phonemes";
 
 export interface ClauseOptions {
   /** The language bit of the rules to run. */
@@ -50,6 +57,12 @@ export interface ClauseOptions {
    * read from it (empty when the table has no command table).
    */
   onCommand?: (command: string, clausesBefore: number, read: readonly ReadCommand[]) => void;
+  /**
+   * Called with each bracket of phonemic text taken out while the phoneme
+   * mode is on: its text, how many clauses were finished before it, the
+   * symbols read from it (phonemes.ts), and whether phonemes are spoken.
+   */
+  onPhonemes?: (body: string, clausesBefore: number, read: ReadPhonemes, speak: boolean) => void;
   /**
    * The numbers the commands' parameter slots hold when the text starts
    * (commands.ts): a parameter nobody types keeps its slot's number.
@@ -283,7 +296,12 @@ export function readClauses(
   // The character loop (CMD/cm_pars.c:1296-1510) with its states for a
   // bracket: a command, or a bracket that is only text.
   const slots = options.commandSlots ?? newCommandSlots();
-  let state: "normal" | "bracket" | "command" = "normal";
+  // How a bracket that is no command is read: as text while the phoneme
+  // mode is off, which it is when DECtalk starts, with phonemes spoken once
+  // it is on (CMD/cm_util.c:139: PHONEME_OFF | PHONEME_SPEAK, the arpabet).
+  const phonemeMode = { off: true, speak: true, ascky: false };
+  const alphabets = table.commandTable?.phonemes;
+  let state: "normal" | "bracket" | "command" | "phoneme" = "normal";
   let command: number[] = [];
   let whiteSpaceRun = 0;
   for (const byte of toBytes(text)) {
@@ -319,6 +337,15 @@ export function readClauses(
         parseChar === LINE_FEED
       ) {
         // White space after a bracket is dropped.
+      } else if (alphabets && !phonemeMode.off) {
+        // The phoneme mode is on: the bracket holds phonemic text, and the
+        // clause before it is finished as before a command (:1410-1420).
+        const held = parseChar;
+        parseChar = COMMAND_FOLLOWS;
+        take();
+        parseChar = held;
+        command = [parseChar];
+        state = "phoneme";
       } else {
         // Not a command: the bracket was text, and so is this character.
         const held = parseChar;
@@ -327,6 +354,19 @@ export function readClauses(
         parseChar = held;
         take();
         state = "normal";
+      }
+    } else if (state === "phoneme") {
+      if (parseChar === RIGHT_BRACKET) {
+        const body = fromBytes(command);
+        options.onPhonemes?.(
+          body,
+          clauses.length,
+          readPhonemes(alphabets as PhonemeAlphabets, body, phonemeMode.ascky),
+          phonemeMode.speak,
+        );
+        state = "normal";
+      } else {
+        command.push(parseChar);
       }
     } else if (parseChar === RIGHT_BRACKET) {
       // CMD/cm_cmd.c:160-304: a command has the clause before it finished,
@@ -346,6 +386,24 @@ export function readClauses(
         parseChar = COMMAND_FOLLOWS;
         take();
         parseChar = held;
+      }
+      // The phoneme command sets how brackets are read from here on
+      // (CMD/cm_copt.c:221-280), word by word, up to a word that is no
+      // option.
+      const modeWords = table.commandTable?.options.phoneme_modes ?? [];
+      for (const one of read) {
+        if (one.kind !== "command" || one.row.routine !== "cm_cmd_phoneme") continue;
+        for (const word of one.words) {
+          if (word === undefined) continue;
+          const option = modeWords[optionIndex(modeWords, word)];
+          if (option === undefined) break;
+          if (option === "asky") phonemeMode.ascky = true;
+          else if (option === "arpabet") phonemeMode.ascky = false;
+          else if (option === "speak") phonemeMode.speak = true;
+          else if (option === "silent") phonemeMode.speak = false;
+          else if (option === "off") phonemeMode.off = true;
+          else if (option === "on") phonemeMode.off = false;
+        }
       }
       options.onCommand?.(body, clauses.length, read);
       state = "normal";

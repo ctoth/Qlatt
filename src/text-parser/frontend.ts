@@ -16,6 +16,7 @@ import { clauseTexts, readClauses } from "./clauses";
 import { newCommandSlots, optionIndex, type ReadCommand } from "./commands";
 import { dictionaryLookup } from "./dictionary";
 import type { TextParserTable } from "./interpreter";
+import { phonemeCharacters, type ReadPhonemes } from "./phonemes";
 
 export interface TextParserPass {
   section: number;
@@ -217,7 +218,13 @@ export function runTextParser(
 ): TextParserResult {
   const slots = newCommandSlots();
   slots[0] = options.initialRate ?? 0;
-  const brackets: Array<{ body: string; clausesBefore: number; read: readonly ReadCommand[] }> = [];
+  // Each bracket taken out of the text, in order: commands, or phonemic text.
+  const brackets: Array<{
+    body: string;
+    clausesBefore: number;
+    read: readonly ReadCommand[];
+    phonemes?: { read: ReadPhonemes; speak: boolean };
+  }> = [];
   const table = textParserTableAt(config.tablePath);
   const marks = new Set([
     table.clauses.phonesOn,
@@ -256,6 +263,9 @@ export function runTextParser(
     commandSlots: slots,
     onCommand: (body, clausesBefore, read) => {
       brackets.push({ body, clausesBefore, read });
+    },
+    onPhonemes: (body, clausesBefore, read, speak) => {
+      brackets.push({ body, clausesBefore, read: [], phonemes: { read, speak } });
     },
   });
 
@@ -315,6 +325,33 @@ export function runTextParser(
   texts.forEach((clauseText, index) => {
     for (const bracket of brackets) {
       if (bracket.clausesBefore !== index) continue;
+      if (bracket.phonemes) {
+        // Phonemic text in a bracket: its symbols go on as phonemic text
+        // between the table's two marks, when phonemes are spoken. On an
+        // error the symbols read before it stand and the error is spoken.
+        const { read, speak } = bracket.phonemes;
+        const shown = quoted(`[${decode(bracket.body, marks)}]`);
+        if (speak && read.phonemes.length > 0) {
+          out +=
+            String.fromCharCode(table.clauses.phonesOn) +
+            phonemeCharacters(read.phonemes) +
+            String.fromCharCode(table.clauses.phonesOff);
+          spoken = true;
+        }
+        record(
+          "text_parser_phonemes",
+          `The bracket ${shown} is phonemic text (the phoneme mode is on): ${read.phonemes.length.toString()} symbols` +
+            (speak ? "" : ", not spoken (the phoneme mode is silent)"),
+          [
+            "DECtalk 4.63 CMD/cm_pars.c:1399-1420 (a bracket in the phoneme mode), CMD/cm_phon.c:438-634 (cm_phon_match)",
+            "DECtalk 4.63 INCLUDE/usa_phon.tab (usa_arpa[], usa_ascky[])",
+          ],
+        );
+        if (read.error && commandTable) {
+          speakError(shown, commandTable.errorCodes.phoneme, "a character in it is no phoneme");
+        }
+        continue;
+      }
       const written = quoted(`[:${decode(bracket.body, marks)}]`);
       if (!commandTable) {
         record(
@@ -343,6 +380,24 @@ export function runTextParser(
           (row.sendsItem || row.syncs) && !config.commandsWithoutClauseEnd.includes(row.name);
         const rate = row.routine === "cm_cmd_rate";
         const voice = row.routine === "cm_cmd_name";
+        if (row.routine === "cm_cmd_phoneme") {
+          // The clause reader has set the mode already (clauses.ts); a word
+          // that is no option is the routine's error (CMD/cm_copt.c:228-231).
+          const modes = commandTable.options.phoneme_modes ?? [];
+          const words = command.words.filter((word): word is string => word !== undefined);
+          if (words.some((word) => optionIndex(modes, word) < 0)) {
+            speakError(written, commandTable.errorCodes.string, "a word of it is no phoneme mode");
+            continue;
+          }
+          record(
+            "text_parser_command",
+            `The command ${written} (phoneme) sets how a bracket is read from here on: ${words.map((word) => modes[optionIndex(modes, word)]).join(", ") || "nothing changed"}`,
+            [
+              "DECtalk 4.63 CMD/cm_copt.c:221-280 (cm_cmd_phoneme), CMD/cm_util.c:139 (the mode DECtalk starts in: off, spoken, arpabet)",
+            ],
+          );
+          continue;
+        }
         if (voice) {
           const names = commandTable.options.voice_names ?? [];
           const number = row.voice ?? optionIndex(names, command.words[0]);

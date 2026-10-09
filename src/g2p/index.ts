@@ -17,6 +17,12 @@
  * Citation: Hayes (1982), Extrametricality and English Stress, pp. 237–274.
  */
 
+import {
+  PHONEME_PARAMETERS_CLOSE,
+  PHONEME_PARAMETERS_OPEN,
+  PHONEME_SYMBOL_BASE,
+  PHONEME_SYMBOL_LIMIT,
+} from "../text-parser/phonemes";
 import { ltsDocumentAt } from "./lts-document";
 import { applyLtsRules } from "./lts-engine";
 import { decomposeClitic, decomposeWord, getStressHintForWord } from "./morphology";
@@ -175,8 +181,24 @@ export function pronounce(
     word.charCodeAt(word.length - 1) === phonemicClose
   ) {
     const characters = table.phonemeCharacters;
-    const symbols = [...word.slice(1, -1)].flatMap((char) => {
-      const symbol = characters[char.charCodeAt(0)] ?? null;
+    // Phonemic text a bracket in the text gave (src/text-parser/phonemes.ts)
+    // holds each symbol by its code, and after a symbol its parameters,
+    // which are not this function's.
+    const inner = word
+      .slice(1, -1)
+      .replace(
+        new RegExp(
+          `${PHONEME_PARAMETERS_OPEN}[^${PHONEME_PARAMETERS_CLOSE}]*${PHONEME_PARAMETERS_CLOSE}`,
+          "g",
+        ),
+        "",
+      );
+    const symbols = [...inner].flatMap((char) => {
+      const code = char.charCodeAt(0);
+      const symbol =
+        code >= PHONEME_SYMBOL_BASE && code < PHONEME_SYMBOL_LIMIT
+          ? code - PHONEME_SYMBOL_BASE
+          : (characters[code] ?? null);
       // Phone codes start at 1; 0 is silence, which a word here cannot hold.
       const carried =
         symbol !== null &&

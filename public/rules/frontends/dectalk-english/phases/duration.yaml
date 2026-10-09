@@ -208,8 +208,18 @@ rules:
       # Line 539 reads phone_feature(pDph_t, nphon+1): the allophone's POSITION
       # in the clause used as if it were an allophone code. This is the feature
       # of the allophone whose code equals clause_position + 1.
-      code_at_position: "get(current, 'clause_position', 0.0) + 1.0"
-      position_reads_syllabic: code_at_position in params.policy.timing.syllabic_codes
+      # phone_feature(a, b) is all_featb[b >> 8][b & 0xff] (ph_aloph.c:146) and
+      # tables 0 and 1 are both the US one (ph_romi.c:214-222), so from the
+      # 256th value on the index starts again. (Table 2, from 512 on, is the
+      # British one: not ported.) An index past the table's 101 words reads
+      # the program's data after it (timing.syllabic_indices_past_table).
+      # Measured on say.exe: the AH of "was" at position 118 of a clause of
+      # 130 allophones has prcnt 51, as at position 22 of a short clause.
+      position_value: "get(current, 'clause_position', 0.0) + 1.0"
+      code_at_position: "position_value >= 256.0 ? position_value - 256.0 : position_value"
+      position_reads_syllabic: >-
+        code_at_position in params.policy.timing.syllabic_codes
+        || code_at_position in params.policy.timing.syllabic_indices_past_table
       percent_in: "position_reads_syllabic ? dectalk_mlsh1(prcnt, F.p70) : prcnt"
       # The next allophone belongs to this syllable's rime.
       next_in_rime: >-

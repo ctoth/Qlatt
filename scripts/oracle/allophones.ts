@@ -86,6 +86,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // parenthesis, a period before a comma, words of slashes and hyphens, and
   // a word with two periods on it.
   "dectalk-us-lone-marks-v1.json",
+  // Two /w/ across a word boundary, and clauses of more allophones than the
+  // feature table has words (duration Rule 9 indexes it by clause position).
+  "dectalk-us-long-clauses-v1.json",
 ];
 
 /** Every corpus with a packet record. */

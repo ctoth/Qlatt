@@ -1019,12 +1019,12 @@ rules:
   #   if (phonemes[n] == phonemes[n+1]
   #       && (phone_feature(phonemes[n]) & FOBST))
   #       dodelete = TRUE;
-  # FOBST (ph_defs.h) = obstruents: stops + fricatives + affricates.  This port
-  # represents that membership in `type` exactly as the duration rules already do
-  # (duration.yaml:36-37 / 268-270): type in
-  # ['fricative','stop_closure','affricate'].  At the postlexical stage a raw stop
-  # is still a single closure token (the structural release/aspiration split runs
-  # later), so 'stop_closure' is the right obstruent-stop type here.  The rule
+  # FOBST is read from the frontend's copy of DECtalk's feature table
+  # (frontend.yaml policy features, `obstruent`): the stops, the fricatives
+  # and the affricates, and /w/, which carries the bit in the ROM, and not
+  # /h/. So "new one" (N UW W, W AH N: the dictionary writes "new" with the
+  # glide) has one [w]: measured on say.exe, "A new one." is AX 17, N 14,
+  # UW 29, W 8, AH 18, N 17 frames. The rule
   # compares the RAW input phonemes, so it keys on `current.phoneme` vs
   # `next.phoneme` (no prior allophone rewrite has fired on these yet -- this is
   # the FIRST postlexical rule, mirroring its position before the FBLOCK skip at
@@ -1041,8 +1041,7 @@ rules:
     kind: postlexical
     select:
       relation: Segment
-      where: >-
-        current.type in ['fricative', 'stop_closure', 'affricate']
+      where: "dectalk_has(current, 'obstruent')"
     define:
       n: next
       same_as_next: >-
@@ -1059,7 +1058,7 @@ rules:
           after_deleted_geminate: "true"
     citations:
       - "DECtalk 4.63 ph_aloph.c:558-562 (A1: delete an obstruent identical to the following phoneme; geminate reduction)"
-      - "DECtalk 4.63 ph_defs.h (FOBST obstruent feature = stops + fricatives + affricates)"
+      - "DECtalk 4.63 PH/p_us_rom.h us_featb (FOBST: the stops, fricatives and affricates, and /w/)"
 
   # -------------------------------------------------------------------------
   # CORONAL SIBILANT ASSIMILATION (ph_aloph.c:715-722, A4).  An /s/ or /z/ that

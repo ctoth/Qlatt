@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-long-clauses-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "ln-new-one", "text": "A new one.", "group": "geminate-glide", "tags": ["w-w", "word-boundary"], "expectedFocus": ["trace"] },
+    { "id": "ln-new-one-sentence", "text": "They could build a new one out of timber.", "group": "geminate-glide", "tags": ["w-w", "word-boundary"], "expectedFocus": ["trace"] },
+    { "id": "ln-new-car", "text": "A new car.", "group": "geminate-glide", "tags": ["control", "w-k"], "expectedFocus": ["trace"] },
+    { "id": "ln-clause-130", "text": "The boy ran down the hill and across the yard and through the gate and along the lane and over the bridge and past the church and round the pond and up the steps and into the kitchen where his mother was baking bread.", "group": "position-past-table", "tags": ["rule-9", "clause-of-130-allophones"], "expectedFocus": ["trace"] },
+    { "id": "ln-clause-short", "text": "Into the kitchen where his mother was baking bread.", "group": "position-past-table", "tags": ["control", "rule-9"], "expectedFocus": ["trace"] },
+    { "id": "ln-bridge-letter", "text": "The letter that came on the morning of the third day after the storm said that the bridge at the north end of the valley had been washed away during the night and that the road to the city would be closed until the men from the county could build a new one out of the timber that lay in the yard behind the mill.", "group": "position-past-table", "tags": ["rule-9", "w-w", "long-clause"], "expectedFocus": ["trace"] }
+  ]
+}

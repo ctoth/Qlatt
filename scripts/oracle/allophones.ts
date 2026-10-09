@@ -100,6 +100,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // ahead of the text rules that speak them, hence the name.)
   "dectalk-us-empty-clause-ahead-v1.json",
   "dectalk-us-betty-empty-clause-ahead-v1.json",
+  // An initial's periods leave the text stage's first-word state as it was:
+  // the question mark of a wh-question and a first auxiliary's stress after one.
+  "dectalk-us-initial-sentence-state-v1.json",
 ];
 
 /** Every corpus with a packet record. */

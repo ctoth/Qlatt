@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-initial-sentence-state-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "is-wh-initials-question", "text": "Who is J. R.? Ask.", "group": "initial-keeps-state", "tags": ["wh-word", "initials", "question-as-period"], "expectedFocus": ["trace"] },
+    { "id": "is-wh-initial-name-question", "text": "Who is J. Smith? Ask.", "group": "initial-keeps-state", "tags": ["wh-word", "initial", "question-as-period"], "expectedFocus": ["trace"] },
+    { "id": "is-wh-initial-auxiliary", "text": "Who is J. Is it Bob? Ask.", "group": "initial-keeps-state", "tags": ["wh-word", "initial", "auxiliary-unstressed", "question-as-period"], "expectedFocus": ["trace"] },
+    { "id": "is-plain-initials-question", "text": "Is it J. R.? Ask.", "group": "initial-keeps-state", "tags": ["no-wh-word", "initials", "question"], "expectedFocus": ["trace"] },
+    { "id": "is-initial-first-auxiliary", "text": "J. Is it Bob? Ask.", "group": "initial-keeps-state", "tags": ["initial-first", "auxiliary-unstressed", "question"], "expectedFocus": ["trace"] },
+    { "id": "is-period-control", "text": "Who is he. Is it Bob? Ask.", "group": "initial-keeps-state", "tags": ["control", "written-period-resets"], "expectedFocus": ["trace"] }
+  ]
+}

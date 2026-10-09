@@ -89,6 +89,7 @@ describe("bundled DECtalk same-word callers", () => {
       "annotation:dectalk_rime_boundary.alone_ahead",
       "annotation:dectalk_rime_boundary.before_morpheme",
       "annotation:dectalk_rime_boundary.syllabic_first",
+      "annotation:dectalk_rime_boundary.word_end_before_rhyme",
       "postlexical:dectalk_at_reduced.before_final_t",
       "postlexical:dectalk_consonant_stress.in1",
       "postlexical:dectalk_consonant_stress.in2",

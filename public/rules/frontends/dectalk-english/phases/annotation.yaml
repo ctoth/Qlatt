@@ -217,8 +217,20 @@ rules:
       last_before_alone: >-
         alone_ahead && dectalk_next(current) != null
         && dectalk_next(current).id == boundary_item.id
+      # A word's last phone before the clause has had a syllabic (a word of
+      # consonants alone that starts the clause, as phonemic text can give:
+      # "[dh ax]" is DH, a word boundary, AX). The scan is not run for it,
+      # but the boundary symbol itself adds its value to the phone before it
+      # (ph_sort.c:1462-1495), as it does to every word's last phone.
+      # Measured on say.exe: in "[dh ax r'ihvrr r'aen d'awn]." the blade
+      # opens from the DH's first frame, which is ph_draw.c:3528's branch for
+      # a phone with a word boundary or a stronger one.
+      word_end_before_rhyme: >-
+        !in_rhyme && boundary_item != null && boundary_item.phoneme != 'SIL'
+        && !dectalk_same_word(boundary_item, current)
+        && dectalk_next(current) != null && dectalk_next(current).id == boundary_item.id
     constraint: >-
-      in_rhyme && (before_morpheme || !syllabic_first)
+      ((in_rhyme && (before_morpheme || !syllabic_first)) || word_end_before_rhyme)
       && (!alone_ahead || last_before_alone)
     apply:
       - field: rime_boundary
@@ -293,6 +305,7 @@ rules:
     citations:
       - "DECtalk 4.63 ph_sort2.c:203-222 get_next_bound_type"
       - "DECtalk 4.63 ph_romi.c:174-205 bounftab (boundary symbol to FBOUNDARY value)"
+      - "DECtalk 4.63 ph_sort.c:1462-1473 (WBOUND adds FWBNEXT to the phone before it, whether or not the clause has had a syllabic)"
       - "DECtalk 4.63 ph_sort.c:1491-1495 (VPSTART adds FVPNEXT to the phone before it), 2026-2043 (add_feature ORs the value in)"
       - "DECtalk 4.63 ph_sort.c:1487-1490 (PPSTART adds FPPNEXT to the phone before it), 1171-1177 (at 140 words per minute or slower a PPSTART becomes a VPSTART)"
       - "DECtalk 4.63 LTS/ls_dict.c:777-778 (VPSTART before a dictionary entry of class verb, or verb and character)"

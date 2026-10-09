@@ -55,10 +55,6 @@ const SILENCE = "a silence symbol inside a bracket is dropped";
 
 /** Not DECtalk's samples yet. */
 const NOT_EXACT: Readonly<Record<string, string>> = {
-  "pm-05":
-    "the symbols the phonemic stage receives are DECtalk's (the words r'aen d'awn and " +
-    '"period" run together as one word of three stresses) and the packet count is ' +
-    "DECtalk's; the samples differ from the first voiced frames on. Cause not found",
   "pm-18": SILENCE,
   "pm-19": PITCH,
   "pm-20": PITCH,

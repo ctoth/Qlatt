@@ -111,6 +111,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-spelled-word-breaks-v1.json",
   // Labels that end in a colon, one after another.
   "dectalk-us-label-colons-v1.json",
+  // Words the dictionary holds capitalised and in lower case with different
+  // phones ("New" and "new"), by how the word is written.
+  "dectalk-us-capitalised-entries-v1.json",
 ];
 
 /** Every corpus with a packet record. */

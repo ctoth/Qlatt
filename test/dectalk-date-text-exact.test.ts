@@ -31,17 +31,18 @@ const fixtureDir = path.join("test", "fixtures", "dectalk-date-text");
 const corpus = readVoiceCorpus(path.join("test", "oracle-corpora", "dectalk-us-date-text-v1.json"));
 
 describe("DECtalk dates from text", () => {
-  it("dectalk-english keeps the parser's date word whole", () => {
-    // The word is as the parser writes it: the month's letters as they stood
-    // in the text, or in lower case from the parser's own table of months.
+  it("dectalk-english writes the parser's date word out as phonemic text", () => {
+    // The parser writes "3-May", "3-may-1996" and "5-Jan"; the text rule
+    // tn_date_text writes each out as one word: the month, the day as an
+    // ordinal, and after a pause (",") the year.
     expect(normalizeText("It was May 3, 1996 then.", "dectalk-english")).toBe(
-      "it was 3-May , 1996 then .",
+      "it was \x81m'e T'Rd \x82 , 1996 then .",
     );
     expect(normalizeText("It was 5/3/1996 then.", "dectalk-english")).toBe(
-      "it was 3-may-1996 then .",
+      "it was \x81m'e T'Rd,n'An*t'in n'Anti s'Iks \x82 then .",
     );
     expect(normalizeText("The meeting is on Jan. 5.", "dectalk-english")).toBe(
-      "the meeting is on 5-Jan .",
+      "the meeting is on \x81J'@nYEri f'IfT \x82 .",
     );
   });
 

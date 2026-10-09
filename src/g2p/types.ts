@@ -81,6 +81,11 @@ export interface PronunciationResult {
    * follows starts that phrase (a clock time that ends in ":00").
    */
   phraseStartAfter?: "vp";
+  /**
+   * Phonemic text that ends in a word boundary: a word like any other, with
+   * a boundary after it. Phonemic text without one has none after it.
+   */
+  wordBoundaryAfter?: boolean;
 }
 
 /** Boundaries are phone offsets in the final pronunciation, end exclusive. */

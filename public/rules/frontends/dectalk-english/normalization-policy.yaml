@@ -124,6 +124,32 @@ maps:
     # A word of slashes and hyphens goes to the part-number reader
     # (LTS/ls_task.c:4118-4170): "/-" is "slash dash" on say.exe.
     slash_dash_words: part_number
+    # A clock time is written out by a text rule (tn_clock_time) as phonemic
+    # text, from the number phone lists of number-phonemes.yaml, as
+    # ls_proc_do_time speaks it (LTS/l_us_pr1.c:1182-1209).
+    clock_times: phonemic
+    # A date word ("23-Aug-1984", the form the text parser writes a date in)
+    # is written out the same way by tn_date_text, as ls_proc_do_date speaks
+    # it (LTS/l_us_pr1.c:815-961).
+    date_words: phonemic
+    # A number with a plural ending ("60s", "1990's") too, by
+    # tn_plural_number (LTS/ls_task.c:3936-3962, LTS/ls_util.c:1442-1466).
+    plural_numbers: phonemic
+    # And a dollar amount, by tn_money_text (LTS/ls_task.c:3312-3513), unless
+    # one of the words that take "dollars" behind them follows it ("$2
+    # million"): the lexicon reads those two words together.
+    money_amounts: phonemic
+  # The characters of this frontend's phonemic text that the text rules
+  # compose with: the two marks around phonemic text (CMD/par_def1.h
+  # PAR_PHONES_ON_D 0x81, PAR_PHONES_OFF_D 0x82) and, from INCLUDE/usa_phon.tab
+  # usa_ascky_rev[], the characters of the word boundary, the verb-phrase
+  # start and the comma.
+  tn_phonemic_text:
+    open: "\x81"
+    close: "\x82"
+    word_boundary: " "
+    verb_phrase: ")"
+    pause: ","
 # A text that does not end in punctuation is still closed as a sentence: when
 # the text is flushed the text task sends a breath break (LTS/ls_task.c:1236-1260,
 # the VT case) and the clause ends as one that ends in a period. Measured on

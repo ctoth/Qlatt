@@ -42,6 +42,25 @@ maps:
     unlisted: "[^\\w\\s'\uE000]"
     whitespace: '\s+'
 functions:
+  # Two digits as phonemic text, from the frontend's number phone lists:
+  # "05" zero five, "15" fifteen, "30" thirty, "31" thirty one.
+  tn_phonemic_two_digits:
+    params: [first, second]
+    body: >-
+      first == '0'
+        ? vocabulary('tn_number_phonemes', 'units.0') + maps.tn_phonemic_text.word_boundary
+          + vocabulary('tn_number_phonemes', 'units.' + second)
+        : first == '1'
+          ? vocabulary('tn_number_phonemes', 'teens.' + second)
+          : vocabulary('tn_number_phonemes', 'tens.' + first)
+            + (second == '0' ? '' : maps.tn_phonemic_text.word_boundary
+              + vocabulary('tn_number_phonemes', 'units.' + second))
+    citations: ['DECtalk 4.63 LTS/l_us_pr1.c:297-315 (ls_proc_do_2_digits: pzero and the unit after a 0, pteens[] after a 1, ptens[] and the unit otherwise)']
+  # A capture that did not take part in the match, as the empty text.
+  tn_text_or_empty:
+    params: [value]
+    body: "value == null ? '' : value"
+    citations: ['Issue #142: source-backed normalization contract']
   tn_clean_text:
     params: [text]
     body: >-
@@ -280,6 +299,186 @@ rules:
       output: "[{'type': 'terminal', 'text': current.payload.token}]"
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:3181-3513, 3622-3652, 3747-3825 (money, times and numbers are read from the word as written, by the number routines)"
+  # A clock time (tn_clock_time_source) written out as one word of phonemic
+  # text, as DECtalk's time routine speaks it: the hour, a verb-phrase start,
+  # the minutes unless they are "00", and the seconds after another
+  # verb-phrase start. The phone lists are the frontend's generated map
+  # tn_number_phonemes; ")" is the verb-phrase start and a space the word
+  # boundary in the frontend's phonemic text (maps.tn_phonemic_text). The
+  # word boundary at the end is the one letter-to-sound sends after a word
+  # it has read.
+  tn_clock_time:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'clock_time' && current.outputType == 'source'"
+    define:
+      hour: "current.payload.hour"
+      s1: "get(current.payload, 's1', '')"
+      hourText: >-
+        size(hour) == 1
+          ? vocabulary('tn_number_phonemes', 'units.' + hour)
+          : tn_phonemic_two_digits(substring(hour, 0, 1), substring(hour, 1, 2))
+      minuteText: >-
+        current.payload.m1 == '0' && current.payload.m2 == '0'
+          ? ''
+          : tn_phonemic_two_digits(current.payload.m1, current.payload.m2)
+      secondText: >-
+        s1 == null || s1 == ''
+          ? ''
+          : maps.tn_phonemic_text.verb_phrase + tn_phonemic_two_digits(s1, current.payload.s2)
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open + hourText + maps.tn_phonemic_text.verb_phrase
+            + minuteText + secondText + maps.tn_phonemic_text.word_boundary
+            + maps.tn_phonemic_text.close}]
+    citations:
+      - "DECtalk 4.63 LTS/l_us_pr1.c:1182-1209 (ls_proc_do_time: the hour from punits[] or by ls_proc_do_2_digits, VPSTART, the minutes unless 00, VPSTART and the seconds)"
+      - "DECtalk 4.63 LTS/l_us_pr1.c:297-315 (ls_proc_do_2_digits)"
+      - "DECtalk 4.63 LTS/ls_task.c:3622-3625 (the word boundary is sent after the time)"
+  # A date word (tn_date_text_source: "23-Aug", "23-Aug-84", "2-Apr-2001")
+  # written out as one word of phonemic text, as DECtalk's date routine
+  # speaks it: the month, the day as an ordinal, and after a pause the year.
+  #   23-Aug        August twenty third
+  #   01-Jan        January first (a two-digit day loses its leading zero)
+  #   23-Aug-84     August twenty third, eighty four
+  #   23-Aug-1984   August twenty third, nineteen eighty four
+  #   2-Apr-2001    April second, twenty oh one ("oh" and the digit one word)
+  #   1-Jan-2000    January first, two thousand
+  # The day is not checked against the month. The month's phones and "oh"
+  # are the frontend's generated map tn_number_phonemes; the day and a
+  # four-digit year are whole numbers, read by number_phonemes().
+  tn_date_text:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'date_text' && current.outputType == 'source'"
+    define:
+      day: "current.payload.day"
+      year: "get(current.payload, 'year', '')"
+      monthText: >-
+        vocabulary('tn_number_phonemes',
+          'months.' + vocabulary('tn_month_numbers', lower(current.payload.month)))
+      dayText: >-
+        number_phonemes(size(day) == 2 && substring(day, 0, 1) == '0' ? substring(day, 1, 2) : day,
+          'ordinal')
+      yearText: >-
+        year == null || year == ''
+          ? ''
+          : maps.tn_phonemic_text.pause + (
+              size(year) == 2
+                ? tn_phonemic_two_digits(substring(year, 0, 1), substring(year, 1, 2))
+                : substring(year, 1, 3) == '00' && substring(year, 3, 4) != '0'
+                  ? tn_phonemic_two_digits(substring(year, 0, 1), substring(year, 1, 2))
+                    + maps.tn_phonemic_text.word_boundary
+                    + vocabulary('tn_number_phonemes', 'oh')
+                    + vocabulary('tn_number_phonemes', 'units.' + substring(year, 3, 4))
+                  : number_phonemes(year, 'four_digits'))
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open + monthText + maps.tn_phonemic_text.word_boundary
+            + dayText + yearText + maps.tn_phonemic_text.word_boundary
+            + maps.tn_phonemic_text.close}]
+    citations:
+      - "DECtalk 4.63 LTS/l_us_pr1.c:815-961 (ls_proc_do_date: the month from pmonths[], the day by ls_proc_do_number with its ordinal flag, COMMA, the year)"
+      - "DECtalk 4.63 LTS/l_us_pr1.c:924-927 (a two-digit day loses its leading zero), 944-954 (a 200X year: two digits, \"oh\" and the unit with no word boundary between), 367-398 (ls_proc_do_4_digits)"
+  # A number with a plural ending (tn_plural_number_source: "60s", "1990's")
+  # written out as one word of phonemic text: the number, as a year in its
+  # two halves when it is one (four digits, the first not 0, the middle two
+  # not "00"), and the ending its last phone picks: one after a sibilant,
+  # one after another voiceless consonant, one otherwise. The endings and the
+  # two sets of phones are in the frontend's generated map tn_number_phonemes
+  # (plural.*), in the characters of its phonemic text.
+  tn_plural_number:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'plural_number' && current.outputType == 'source'"
+    define:
+      digits: "current.payload.digits"
+      numberText: >-
+        number_phonemes(digits,
+          matches(digits, '^[1-9][0-9]{3}$') && substring(digits, 1, 3) != '00' ? 'year' : 'cardinal')
+      last: "substring(numberText, size(numberText) - 1)"
+      ending: >-
+        contains(vocabulary('tn_number_phonemes', 'plural.sibilants'), last)
+          ? vocabulary('tn_number_phonemes', 'plural.afterSibilant')
+          : contains(vocabulary('tn_number_phonemes', 'plural.voicelessConsonants'), last)
+            ? vocabulary('tn_number_phonemes', 'plural.afterVoiceless')
+            : vocabulary('tn_number_phonemes', 'plural.otherwise')
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open + numberText + ending
+            + maps.tn_phonemic_text.word_boundary + maps.tn_phonemic_text.close}]
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:3936-3962 and 4031-4046 (the number, as a year by ls_util_is_year, and ls_util_pluralize)"
+      - "DECtalk 4.63 LTS/ls_util.c:1442-1466 (ls_util_pluralize: the ending by the last phone)"
+      - "DECtalk 4.63 LTS/ls_util.c:598-622 (ls_util_is_year)"
+  # A dollar amount (tn_money_text_source) written out as one word of
+  # phonemic text, as DECtalk's text task speaks it:
+  #   $3      three dollars            $1      one dollar
+  #   $3.00   three dollars
+  #   $3.24   three dollars and twenty four cents
+  #   $3.01   three dollars and one cent
+  #   $.50    fifty cents
+  #   $3.240  three point two four zero dollars
+  # A fraction of any length but two makes the amount a decimal number of
+  # dollars; one of two digits is cents, read without one leading zero.
+  # "dollar" is singular after the whole number one alone, "cent" after one.
+  # The words and the two plural endings are in the frontend's generated map
+  # tn_number_phonemes; a whole number is read by number_phonemes().
+  tn_money_text:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'money_text' && current.outputType == 'source'"
+    define:
+      integer: "tn_text_or_empty(get(current.payload, 'integer', ''))"
+      fraction: >-
+        tn_text_or_empty(get(current.payload, 'fraction', ''))
+        + tn_text_or_empty(get(current.payload, 'bare', ''))
+      dollar: "vocabulary('tn_number_phonemes', 'dollar')"
+      dollarsText: >-
+        integer == ''
+          ? ''
+          : number_phonemes(integer, 'cardinal') + dollar
+            + (regexReplace(integer, ',', '', 'g') == '1'
+                ? '' : vocabulary('tn_number_phonemes', 'plural.otherwise'))
+      cents: "size(fraction) == 2 && substring(fraction, 0, 1) == '0' ? substring(fraction, 1, 2) : fraction"
+      amountText: >-
+        fraction != '' && size(fraction) != 2
+          ? (integer == '' ? '' : number_phonemes(integer, 'cardinal')
+              + maps.tn_phonemic_text.word_boundary)
+            + vocabulary('tn_number_phonemes', 'point')
+            + regexSplit(fraction, '').map(digit,
+                maps.tn_phonemic_text.word_boundary
+                + vocabulary('tn_number_phonemes', 'units.' + digit)).join('')
+            + dollar + vocabulary('tn_number_phonemes', 'plural.otherwise')
+          : fraction == '' || (fraction == '00' && integer != '')
+            ? dollarsText
+            : dollarsText + (integer == '' ? '' : vocabulary('tn_number_phonemes', 'and'))
+              + number_phonemes(cents, 'cardinal') + maps.tn_phonemic_text.word_boundary
+              + vocabulary('tn_number_phonemes', 'cent')
+              + (cents == '1' ? '' : vocabulary('tn_number_phonemes', 'plural.afterVoiceless'))
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open + amountText
+            + maps.tn_phonemic_text.word_boundary + maps.tn_phonemic_text.close}]
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:3312-3513 (the amount: dollars, \"and\", cents; a fraction that is not two digits read as a decimal number of dollars :3464-3513; one leading zero of the cents passed over :3410-3412)"
+      - "DECtalk 4.63 LTS/l_us_pr1.c:497-749 (ls_proc_do_number and its return value, which picks \"dollar\" or \"dollars\": :605-606)"
   # A pause the text parser asks for (tn_parser_pause_source) is the comma: the
   # phoneme the parser names is the one a written comma gives.
   tn_parser_pause:
@@ -337,4 +536,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_lone_period, tn_stripped_parenthesis_mark, tn_silent_mark, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_lone_period, tn_stripped_parenthesis_mark, tn_silent_mark, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_clock_time, tn_date_text, tn_plural_number, tn_money_text, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]

@@ -46,6 +46,7 @@ import {
   speakPartDigits,
   speakQuantityAfterMoney,
   speakSignedNumber,
+  storeSyntacticMarkers,
 } from "./table-number";
 import { stripSuffixes } from "./table-suffix";
 import type { DictLookup, PronunciationResult } from "./types";
@@ -183,11 +184,21 @@ export function pronounce(
       return carried ? [symbol] : [];
     });
     const parts = numberWords(symbols, table);
+    // The mark the text ends in, as the phonetic stage stores it: a word
+    // boundary (text a rule composed for a word letter-to-sound would have
+    // read, which sends one after each word), or a verb-phrase start, which
+    // is then the next word's. The text parser's own phonemic text ends in
+    // neither.
+    const lastMark = storeSyntacticMarkers(symbols).at(-1);
     return {
       phonemes: parts.flatMap((part) => part.phonemes),
       source: "phonemic",
       word,
       parts,
+      ...(lastMark === NUMBER_WBOUND || lastMark === NUMBER_VPSTART
+        ? { wordBoundaryAfter: true }
+        : {}),
+      ...(lastMark === NUMBER_VPSTART ? { phraseStartAfter: "vp" as const } : {}),
     };
   }
 
@@ -836,6 +847,12 @@ export function pronounceClause(
      * one of the frontend's stretch-end characters).
      */
     stretchEnds?: readonly boolean[];
+    /**
+     * For each word, what was written when a text rule composed the word
+     * anew (a clock time written out as phonemic text): the words beside it
+     * know it by that.
+     */
+    written?: readonly (string | undefined)[];
     /** The mark that ends the run, as written. */
     endMark?: string;
   },
@@ -848,11 +865,14 @@ export function pronounceClause(
     verbBit >= 0 && Math.floor(classWord / 2 ** verbBit) % 2 === 1;
   // A word that begins with a digit is a number for the two words after it
   // (LTS/ls_task.c:3772 and 634).
+  // What its neighbours know a word by: the word, or what was written when a
+  // text rule composed the word anew.
+  const seen = words.map((word, index) => options.written?.[index] ?? word);
   const numberBefore = (index: number): string | undefined =>
-    [words[index - 1], words[index - 2]].find((word) => word !== undefined && /^[0-9]/.test(word));
+    [seen[index - 1], seen[index - 2]].find((word) => word !== undefined && /^[0-9]/.test(word));
   const quantityWords = table.numberPhones?.quantityWords ?? {};
   const quantityAt = (index: number): boolean =>
-    words[index] !== undefined && Object.hasOwn(quantityWords, words[index].toLowerCase());
+    seen[index] !== undefined && Object.hasOwn(quantityWords, seen[index].toLowerCase());
   const isAmount = (word: string | undefined): boolean =>
     word !== undefined && /^\$(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)?(?:\.[0-9]+)?$/.test(word);
   // A plain number (digits, with separators or fraction digits) or a clock
@@ -883,9 +903,9 @@ export function pronounceClause(
             : {}),
           // A dollar amount and one of the words that take "dollars" behind
           // them, side by side (LTS/ls_task.c:3234-3242).
-          ...(quantityAt(index + 1) && isAmount(word) ? { quantityAfter: true } : {}),
-          ...(quantityAt(index) && isAmount(words[index - 1]) ? { moneyBefore: true } : {}),
-          ...(numberKind(words[index - 1]) ? { afterNumber: numberKind(words[index - 1]) } : {}),
+          ...(quantityAt(index + 1) && isAmount(seen[index]) ? { quantityAfter: true } : {}),
+          ...(quantityAt(index) && isAmount(seen[index - 1]) ? { moneyBefore: true } : {}),
+          ...(numberKind(seen[index - 1]) ? { afterNumber: numberKind(seen[index - 1]) } : {}),
         },
       });
       before.push(result.formClassWord ?? 0);

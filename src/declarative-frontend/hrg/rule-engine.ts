@@ -1,3 +1,8 @@
+import {
+  NUMBER_PHONEMIC_FORMS,
+  type NumberPhonemicForm,
+  numberPhonemicText,
+} from "../../g2p/number-phonemic-text";
 import { isPlainObject } from "../../yaml-loader";
 import { evaluateExpression } from "../cel-expressions";
 import {
@@ -664,6 +669,42 @@ function buildEvaluationScope(
       });
       transaction.dependOn(decision.id);
       return entries[key];
+    },
+    // A whole number as phonemic text, from the number phone lists of the
+    // frontend's letter-to-sound table (src/g2p/number-phonemic-text.ts).
+    number_phonemes: (digits, form) => {
+      const invalid = (message: string): never => {
+        utterance.diagnostics.error(
+          message,
+          { digits, form, ruleId: transaction.metadata.ruleId },
+          "E_NUMBER_PHONEMES",
+        );
+        throw new Error(`E_NUMBER_PHONEMES: ${message}`);
+      };
+      if (typeof digits !== "string" || typeof form !== "string")
+        return invalid("digits and form must be strings");
+      if (!(NUMBER_PHONEMIC_FORMS as readonly string[]).includes(form))
+        return invalid(`unknown form '${form}'`);
+      if (typeof params.ltsPath !== "string")
+        return invalid("the frontend has no letter-to-sound table (lts_path)");
+      const text = numberPhonemicText(digits, form as NumberPhonemicForm, params.ltsPath);
+      if (text === null) return invalid(`'${digits}' is not read as ${form}`);
+      const source = items[cursor.index];
+      const decision = utterance.provenance.add({
+        stage: "rules",
+        type: "normalization_number_composed",
+        subject: source?.id ?? digits,
+        reason: `${transaction.metadata.ruleId} read '${digits}' as ${form} from the number phone lists of ${params.ltsPath}: ${text}`,
+        citations: [...transaction.metadata.citations],
+        parents: source
+          ? source.featureKeys().flatMap((field) => {
+              const write = source.latestWrite(field);
+              return write ? [write.decisionId] : [];
+            })
+          : [],
+      });
+      transaction.dependOn(decision.id);
+      return text;
     },
     ahead: (source, amount = 1) => offset(source, amount),
     behind: (source, amount = 1) => offset(source, -Number(amount)),
@@ -1565,10 +1606,12 @@ function applyTextExpansion(
       if (
         typeof entry.text !== "string" ||
         !entry.text.length ||
-        /\s/.test(entry.text) ||
-        // `kind: 'word'` says the terminal is a word whatever its text is: a
-        // punctuation mark that is spoken by its name.
+        // `kind: 'word'` says the terminal is one word whatever its text is:
+        // a punctuation mark that is spoken by its name, or text with white
+        // space in it (phonemic text of several words).
         (entry.kind !== undefined && entry.kind !== "word") ||
+        (entry.kind !== "word" && /\s/.test(entry.text)) ||
+        !entry.text.trim().length ||
         Object.keys(entry).some((key) => !["type", "text", "kind"].includes(key))
       )
         fail("terminal requires text, and may say kind: 'word'");
@@ -2668,6 +2711,7 @@ export function runGraphRuleEngine(
     maps: spec.maps,
     mapOrigins: rulepackMapOrigins(spec),
     transcription: spec.transcription,
+    ltsPath: spec.lts_path,
   });
   const predicates = spec.predicates;
   const evaluationOwner = options.evaluationOwner ?? new GraphRuleEvaluationOwner();

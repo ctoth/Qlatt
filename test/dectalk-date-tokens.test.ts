@@ -1,44 +1,41 @@
 /**
  * Date words as DECtalk's command text parser writes them ("3-May",
- * "23-Aug-1984"), read by the dectalk-english lexicon (src/g2p/table-number.ts
- * speakDate) against DECtalk's phoneme log for the same text
+ * "23-Aug-1984"), written out by the dectalk-english text rules as phonemic
+ * text (public/rules/normalization/lexical.yaml tn_date_text, after the
+ * recognition rule tn_date_text_source) against DECtalk's phoneme log for the
+ * same text
  * (test/fixtures/dectalk-oracle/dectalk-us-date-tokens-v1.phonemes.json,
  * recorded by scripts/oracle/export-number-fixture.ts --list).
  *
- * Every text the port reads must read as DECtalk does. The texts it does not
+ * Every text the rules read must read as DECtalk does. The texts they do not
  * read are listed here by name, so that the list cannot change unnoticed.
  */
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { numberLogTokens, numberSymbolTokens } from "../scripts/oracle/number-log";
 import {
-  type NumberPhones,
-  speakNumberToken,
-  storeSyntacticMarkers,
-} from "../src/g2p/table-number";
+  composedNumberSymbols,
+  numberLogTokens,
+  numberSymbolTokens,
+} from "../scripts/oracle/number-log";
+import { storeSyntacticMarkers } from "../src/g2p/table-number";
 
 const entries = (
   JSON.parse(
     readFileSync("test/fixtures/dectalk-oracle/dectalk-us-date-tokens-v1.phonemes.json", "utf8"),
   ) as { entries: Record<string, string | null> }
 ).entries;
-const lists = (
-  JSON.parse(readFileSync("public/rules/frontends/dectalk-english/lts-table.json", "utf8")) as {
-    numberPhones: NumberPhones;
-  }
-).numberPhones;
+const { phonemeCharacters } = JSON.parse(
+  readFileSync("public/rules/frontends/dectalk-english/lts-table.json", "utf8"),
+) as { phonemeCharacters: (number | null)[] };
+
+const spoken = (text: string): number[] | null => composedNumberSymbols(text, phonemeCharacters);
 
 /**
- * Not read by speakNumberToken, with why. DECtalk's own reading of each is in
+ * Not written out as a date, with why. DECtalk's own reading of each is in
  * the fixture.
  */
 const NOT_READ: readonly string[] = [
-  // A month written out: DECtalk's text parser shortens it to three letters
-  // before the word reaches letter-to-sound (CMD/par_rule2.par:517), so the
-  // word as written is not a date.
-  "3-June",
-  "5-January",
   // Not dates to DECtalk either: spelled, the hyphen by name.
   "3-Mayor",
   "3-Abc",
@@ -55,25 +52,25 @@ describe("DECtalk date words", () => {
     expect(Object.values(entries).filter((log) => log === null)).toEqual([]);
   });
 
-  it("the texts the port does not read are exactly the listed ones", () => {
-    const unread = Object.keys(entries).filter((text) => speakNumberToken(text, lists) === null);
+  it("the texts the rules do not read are exactly the listed ones", () => {
+    const unread = Object.keys(entries).filter((text) => spoken(text) === null);
     expect([...unread].sort()).toEqual([...NOT_READ].sort());
   });
 
   const read = Object.entries(entries).filter(
-    (entry): entry is [string, string] =>
-      entry[1] !== null && speakNumberToken(entry[0], lists) !== null,
+    (entry): entry is [string, string] => entry[1] !== null && spoken(entry[0]) !== null,
   );
 
-  it("the port reads the dates of the list", () => {
+  it("the rules read the dates of the list", () => {
     expect(read.length).toBe(Object.keys(entries).length - NOT_READ.length);
-    expect(read.length).toBe(33);
+    // Two of them have the month written out ("3-June", "5-January"): the
+    // text goes through the frontend's text parser here, which shortens the
+    // month to three letters (CMD/par_rule2.par:517) as DECtalk's does.
+    expect(read.length).toBe(35);
   });
 
   it.each(read)("%s reads as DECtalk reads it", (text, log) => {
-    const mine = numberSymbolTokens(
-      storeSyntacticMarkers(speakNumberToken(text, lists) as number[]),
-    ).join(" ");
+    const mine = numberSymbolTokens(storeSyntacticMarkers(spoken(text) as number[])).join(" ");
     expect(mine).toBe(numberLogTokens(log).join(" "));
   });
 });

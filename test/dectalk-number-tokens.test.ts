@@ -11,7 +11,11 @@
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { numberLogTokens, numberSymbolTokens } from "../scripts/oracle/number-log";
+import {
+  composedNumberSymbols,
+  numberLogTokens,
+  numberSymbolTokens,
+} from "../scripts/oracle/number-log";
 import {
   type NumberPhones,
   speakDigits,
@@ -24,14 +28,16 @@ const entries = (
     readFileSync("test/fixtures/dectalk-oracle/dectalk-us-number-tokens-v1.phonemes.json", "utf8"),
   ) as { entries: Record<string, string | null> }
 ).entries;
-const lists = (
-  JSON.parse(readFileSync("public/rules/frontends/dectalk-english/lts-table.json", "utf8")) as {
-    numberPhones: NumberPhones;
-  }
-).numberPhones;
+const { numberPhones: lists, phonemeCharacters } = JSON.parse(
+  readFileSync("public/rules/frontends/dectalk-english/lts-table.json", "utf8"),
+) as { numberPhones: NumberPhones; phonemeCharacters: (number | null)[] };
 
+// A clock time is written out by the frontend's text rules; the lexicon reads
+// the other words.
 const spoken = (text: string): number[] | null =>
-  /^[0-9]+$/.test(text) ? speakDigits(text, lists) : speakNumberToken(text, lists);
+  /^[0-9]+$/.test(text)
+    ? speakDigits(text, lists)
+    : (composedNumberSymbols(text, phonemeCharacters) ?? speakNumberToken(text, lists));
 
 /**
  * Not read by speakNumberToken, with what each needs. DECtalk's own reading of

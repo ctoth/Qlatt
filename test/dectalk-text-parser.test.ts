@@ -47,9 +47,9 @@ describe("dectalk text parser", () => {
   // DECtalk writes an index byte (\x83) where a place-marking command stood
   // and does not end the clause there. The port carries no index marks: it
   // must agree once that byte is taken out of DECtalk's clauses. It knows such
-  // a command by its full name only; the texts with a shortened name, which
-  // it cuts like any other command, are listed so the list cannot change
-  // unnoticed.
+  // a command as DECtalk does, by the row of the command table its name
+  // leaves, so a shortened name ("[:i m 5]", "[:in mark 5]", "[:ind m 5]")
+  // marks a place too.
   it("agrees on commands that mark a place, the index byte apart", () => {
     const port = textParserPort();
     // As the clauses go on to letter-to-sound: without the white space each
@@ -67,16 +67,9 @@ describe("dectalk text parser", () => {
         return flat(mine) !== flat(dectalk) || mine.length !== dectalk.length;
       })
       .map(([text]) => text);
-    expect(different).toEqual(INDEX_COMMANDS_NOT_AS_DECTALK);
+    expect(different).toEqual([]);
   });
 });
-
-/** Shortened names of the index command, which the port takes for other commands. */
-const INDEX_COMMANDS_NOT_AS_DECTALK: readonly string[] = [
-  "Say this [:i m 5] and then that.",
-  "Say this [:in mark 5] and then that.",
-  "Say this [:ind m 5] and then that.",
-];
 
 describe("dectalk-english runs its text parser first", () => {
   const decisionsFor = (text: string, frontendId: string) => {
@@ -145,9 +138,14 @@ describe("dectalk-english runs its text parser first", () => {
 
   it("takes a command out of the text and says so", () => {
     const decisions = decisionsFor("Say this [:rate 180] and then that.", "dectalk-english");
-    const dropped = decisions.filter((decision) => decision.type === "text_parser_command_dropped");
-    expect(dropped.map((decision) => decision.reason)).toEqual([
-      'The command "[:rate 180]" was taken out of the text and not carried out: in-text commands are not ported',
+    // The command is read against DECtalk's command table and named
+    // (test/dectalk-commands-exact.test.ts has the commands that are
+    // carried out).
+    const named = decisions.filter(
+      (decision) => decision.type === "text_parser_command_not_carried_out",
+    );
+    expect(named.map((decision) => decision.reason)).toEqual([
+      'The command "[:rate 180]" (rate) was recognised and taken out of the text; the clause before it is ended, but the rate stays: a rate change inside a text (to 180 words per minute) is not ported',
     ]);
   });
 

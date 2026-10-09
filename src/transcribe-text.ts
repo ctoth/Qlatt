@@ -90,6 +90,8 @@ type OrthographyInputToken = {
    * `word_stretch_end_characters` ("Mr.", "dogs'").
    */
   endsWordStretch?: boolean;
+  /** What was written, when a text rule composed the token's word anew. */
+  written?: string;
   symbol?: string;
   pronunciationKey?: string;
   parentDecisionId?: string;
@@ -408,6 +410,8 @@ function rewriteOrthographyTokens(
   const stretchEnds = new Set<string>();
   // Each word token with the text it was written in and where it ends there.
   const writtenWords: Array<{ tokenId: string; text: string; end: number }> = [];
+  // What was written, for each word token a text rule composed anew.
+  const composedFrom = new Map<string, string>();
   entries.forEach((entry, index) => {
     const input = sharedInput ?? beginInput();
     const word = typeof entry === "string" ? entry : entry.word;
@@ -431,6 +435,9 @@ function rewriteOrthographyTokens(
           stretchEnds.add(token.id);
         }
         if (!punctuation) writtenWords.push({ tokenId: token.id, text: sourceText, end });
+        // A word a text rule composed is known to its neighbours by what
+        // was written ("9:30" for a time written out as phonemic text).
+        if (declaredWord && written !== word) composedFrom.set(token.id, written);
       }
     }
     if (typeof entry !== "string") {
@@ -488,6 +495,7 @@ function rewriteOrthographyTokens(
         isPunctuation: tokenType === "punctuation",
         ...(suppliedPunctuation.has(token.id) ? { supplied: true } : {}),
         ...(stretchEnds.has(token.id) ? { endsWordStretch: true } : {}),
+        ...(composedFrom.has(token.id) ? { written: composedFrom.get(token.id) as string } : {}),
         ...(typeof punctuationSymbol === "string" ? { symbol: punctuationSymbol } : {}),
         ...(typeof pronunciationKey === "string" && pronunciationKey.length > 0
           ? { pronunciationKey }
@@ -631,6 +639,7 @@ export function transcribeText(
           atWrittenPunctuation,
           ...(endMark === undefined ? {} : { endMark }),
           stretchEnds: run.map((position) => orthographyWords[position].endsWordStretch === true),
+          written: run.map((position) => orthographyWords[position].written),
         },
       );
       run.forEach((position, order) => {
@@ -904,7 +913,9 @@ export function transcribeText(
               word: part.word,
               // The last word of phonemic text has no word boundary after it
               // (joinPhonemicText below).
-              ...(pronResult.source === "phonemic" && part === spokenParts.at(-1)
+              ...(pronResult.source === "phonemic" &&
+              !("wordBoundaryAfter" in pronResult && pronResult.wordBoundaryAfter) &&
+              part === spokenParts.at(-1)
                 ? { _joinsNextWord: true }
                 : {}),
               // A phrase start after the token's last word is the next

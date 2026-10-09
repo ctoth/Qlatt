@@ -16,6 +16,8 @@
  *   - `go_until`, the 2/3-of-the-buffer mode of the caller's rolling input.
  */
 
+import type { CommandTable } from "./commands";
+
 /** A rule table as scripts/build-dectalk-text-parser.ts writes it. */
 export interface TextParserTable {
   sections: readonly number[];
@@ -32,6 +34,8 @@ export interface TextParserTable {
    * word to all its spellings (src/text-parser/dictionary.ts).
    */
   capitalSpellings: Readonly<Record<string, readonly string[]>>;
+  /** The in-text commands (src/text-parser/commands.ts). */
+  commandTable?: CommandTable;
 }
 
 export interface ClauseTable {

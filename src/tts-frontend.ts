@@ -762,12 +762,51 @@ function buildTextToKlattTrackDetailed(
   if (typeof options.speaker === "string" && !registry) {
     throw new Error(`E_VOICE_REGISTRY_MISSING: frontend '${frontendId}' has no voice registry`);
   }
+
+  // A frontend with a command text parser has its text rewritten by those
+  // rules before anything else reads it (src/text-parser). The parser also
+  // reads the text's commands, and a voice or rate command that stands
+  // before any spoken text sets the voice and the rate of the whole text:
+  // so it runs before the voice is chosen. The voice and the rate that were
+  // asked for are the state the text starts in, as say.exe's are.
+  const textParser = parseTextParserConfig(spec);
+  const rateUnit = readPolicyNumber(
+    recordOrEmpty(recordOrEmpty(policyRecord(spec).rate).words_per_minute).unit,
+  );
+  const rateReference =
+    readPolicyNumber(recordOrEmpty(policyRecord(spec).duration).rate_reference) || 1;
+  const parsedText = textParser
+    ? runTextParser(
+        textParser,
+        inputText,
+        (word) => dictionary !== undefined && Object.hasOwn(dictionary, word),
+        provenance,
+        {
+          ...(options.diagnostics ? { diagnostics: options.diagnostics } : {}),
+          ...(rateUnit !== undefined && Number.isFinite(options.rate ?? 1)
+            ? { initialRate: Math.round(((options.rate ?? 1) / rateReference) * rateUnit) }
+            : {}),
+        },
+      )
+    : null;
+  let commandVoice: string | undefined;
+  if (parsedText?.initial.voice !== undefined && registry) {
+    if (registry.voices.length === 0 || registry.voices.includes(parsedText.initial.voice)) {
+      commandVoice = parsedText.initial.voice;
+    } else {
+      options.diagnostics?.warn(
+        `The text asks for the voice '${parsedText.initial.voice}', which this frontend does not have; the voice stays`,
+        { voice: parsedText.initial.voice, available: registry.voices },
+        "W_TEXT_COMMAND_VOICE_UNKNOWN",
+      );
+    }
+  }
   const speakerProfilePath = spec.speaker_profile_path ?? DEFAULT_SPEAKER_PROFILE_PATH;
   const speakerProfile = loadSpeakerProfileSync(speakerProfilePath);
   const selectedVoice: ResolvedVoice | null = registry
     ? resolveVoice(
         registry,
-        typeof options.speaker === "string" ? options.speaker : registry.default,
+        commandVoice ?? (typeof options.speaker === "string" ? options.speaker : registry.default),
         speakerProfile,
       )
     : null;
@@ -851,18 +890,11 @@ function buildTextToKlattTrackDetailed(
   const onPhaseEnd = onStage ? (phase: string) => onStage(`phase ${phase}`) : undefined;
   onStage?.("setup");
   const transcriptionConfig = getTranscriptionConfig(spec);
-  // A frontend whose policy names a text parser table has its text rewritten
-  // by those rules before anything else reads it (src/text-parser).
-  const textParser = parseTextParserConfig(spec);
-  if (textParser) {
-    const parsed = runTextParser(
-      textParser,
-      inputText,
-      (word) => dictionary !== undefined && Object.hasOwn(dictionary, word),
-      provenance,
-    );
-    recognizeText(parsed.text, utterance, spec, {
-      parents: parsed.decisionIds,
+  // The text parser's output (run above, before the voice was chosen) is the
+  // source text.
+  if (parsedText) {
+    recognizeText(parsedText.text, utterance, spec, {
+      parents: parsedText.decisionIds,
       reason: `Source text is the text parser's output; UTF-16 source coordinates are its`,
     });
   } else {
@@ -1002,8 +1034,15 @@ function buildTextToKlattTrackDetailed(
   // No ceiling and no floor: the requested rate is the rate. Duration floors
   // (Klatt 1976 incompressible portion, projected by the duration_floor_* rules)
   // are the only limit on compression, and they are cited per phone.
+  // A rate command that stands before any spoken text gives the text's rate
+  // in words per minute (src/text-parser/frontend.ts).
+  const commandRate = parsedText?.initial.rate;
   const relativeRate =
-    referenceRate && referenceRate > 0 ? requestedRate / referenceRate : requestedRate;
+    commandRate !== undefined && rateUnit !== undefined
+      ? commandRate / rateUnit
+      : referenceRate && referenceRate > 0
+        ? requestedRate / referenceRate
+        : requestedRate;
   // A frontend whose rules take the speaking rate in words per minute
   // (policy.rate.words_per_minute) gets the rate as the policy value
   // policy.timing.speaking_rate_wpm and nothing else: its own rules say what a

@@ -45,6 +45,16 @@ describe("a period standing alone", () => {
     );
   });
 
+  it.each([
+    // The parser's text is `Ibid ., `: the period is a word, the comma its delimiter.
+    ["Ibid., p. 44.", "IH B IX D P IR IY AX D , P IY ."],
+    ["Smith et al., 2004.", "AE LX P IR IY AX D , T UW"],
+    ["Ibid.; p. 44.", "IH B IX D P IR IY AX D ; P IY ."],
+  ])("%s has the word period and then the mark", (text, expected) => {
+    // Packets: test/oracle-corpora/dectalk-us-period-word-marks-v1.json.
+    expect(phones(text)).toContain(expected);
+  });
+
   it("is the word period after the pause behind a zip code, and joins the next sentence", () => {
     expect(phones("She moved to Boston, MA 02134. Then she left.")).toContain(
       "F OR , P IR IY AX D DH EH N SH IY L EH F T .",

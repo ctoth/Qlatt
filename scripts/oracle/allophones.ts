@@ -120,6 +120,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-plural-letters-v1.json",
   // Digits with an apostrophe between them ("5'10"), spelled.
   "dectalk-us-digit-apostrophe-v1.json",
+  // A period standing apart with a comma or a semicolon on it (the parser's
+  // `Ibid .,`): the word "period", then the mark as its delimiter.
+  "dectalk-us-period-word-marks-v1.json",
 ];
 
 /** Every corpus with a packet record. */

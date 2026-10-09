@@ -251,8 +251,15 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:446-470 (an item that is not a character ends the gathered text), 1420-1437 (ls_task_readword: at a word''s start a character that "might" be in a word is kept when nothing was kept before it), LTS/l_us_con.c:125, 139, 153, 154 and 158 ("!" "," ":" ";" "?" are such characters), dapi/src/dic/dtalk_us.dic (their entries)'
+    # The same period with a comma, a semicolon or a colon on it (the parser
+    # writes "Ibid.," as `Ibid .,`): the period begins a word and is kept,
+    # the mark after it is not (white space follows it), so the word is the
+    # period and the mark its delimiter. Measured on say.exe: "Ibid., p. 44."
+    # has IH B IX D, P IY R IY AX D and a comma; "Smith et al., 2004." the
+    # same after AE L; "Ibid.; p. 44." the same with the semicolon's comma.
+    # (A question or an exclamation mark there has not been measured.)
     - id: tn_lone_period_source
-      pattern: '(?<=\s|\x82)\.(?=\s|$)'
+      pattern: '(?<=\s|\x82)\.(?=[,;:]?(?:\s|$))'
       flags: ''
       class: lone_period
       captures: {}

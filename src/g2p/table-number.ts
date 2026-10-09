@@ -525,19 +525,20 @@ export function speakOrdinalNumber(text: string, lists: NumberPhones): number[] 
 
 /**
  * A number-like word that DECtalk's text task reads whole, in the order the
- * task tries its rules (LTS/ls_task.c: money :3181, plain numbers :3747): a
- * dollar amount, an ordinal, or a number with separators or fraction digits.
- * Null when `text` is none of these; the caller then reads it as it reads
- * any other word.
+ * task tries its rules (LTS/ls_task.c: plain numbers :3747): an ordinal, or a
+ * number with separators or fraction digits. Null when `text` is neither;
+ * the caller then reads it as it reads any other word.
  *
- * A date word (:3612), a clock time (:3622) and a number with a plural
- * ending (:3936) are not read here: the frontend's text rules write them out
- * as phonemic text (public/rules/normalization/lexical.yaml tn_date_text,
- * tn_clock_time and tn_plural_number). speakPluralNumber stays for a plural
- * number with a sign on it (speakSignedNumber).
+ * A dollar amount (:3181), a date word (:3612), a clock time (:3622) and a
+ * number with a plural ending (:3936) are not read here: the frontend's text
+ * rules write them out as phonemic text
+ * (public/rules/normalization/lexical.yaml tn_money_text, tn_date_text,
+ * tn_clock_time and tn_plural_number). speakMoney and speakPluralNumber stay
+ * for an amount and a plural number with a sign on them (speakSignedNumber);
+ * an amount before a word that takes "dollars" behind it is read by
+ * speakMoneyBeforeQuantity.
  */
 export function speakNumberToken(text: string, lists: NumberPhones): number[] | null {
-  if (text.startsWith("$")) return speakMoney(text.slice(1), lists);
   return (
     speakOrdinalNumber(text, lists) ??
     (/[,.]/.test(text) ? (speakDecimal(text, lists)?.symbols ?? null) : null)

@@ -118,6 +118,10 @@ maps:
     # A number with a plural ending ("60s", "1990's") too, by
     # tn_plural_number (LTS/ls_task.c:3936-3962, LTS/ls_util.c:1442-1466).
     plural_numbers: phonemic
+    # And a dollar amount, by tn_money_text (LTS/ls_task.c:3312-3513), unless
+    # one of the words that take "dollars" behind them follows it ("$2
+    # million"): the lexicon reads those two words together.
+    money_amounts: phonemic
   # The characters of this frontend's phonemic text that the text rules
   # compose with: the two marks around phonemic text (CMD/par_def1.h
   # PAR_PHONES_ON_D 0x81, PAR_PHONES_OFF_D 0x82) and, from INCLUDE/usa_phon.tab

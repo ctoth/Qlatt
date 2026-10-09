@@ -56,6 +56,11 @@ functions:
             + (second == '0' ? '' : maps.tn_phonemic_text.word_boundary
               + vocabulary('tn_number_phonemes', 'units.' + second))
     citations: ['DECtalk 4.63 LTS/l_us_pr1.c:297-315 (ls_proc_do_2_digits: pzero and the unit after a 0, pteens[] after a 1, ptens[] and the unit otherwise)']
+  # A capture that did not take part in the match, as the empty text.
+  tn_text_or_empty:
+    params: [value]
+    body: "value == null ? '' : value"
+    citations: ['Issue #142: source-backed normalization contract']
   tn_clean_text:
     params: [text]
     body: >-
@@ -376,6 +381,62 @@ rules:
       - "DECtalk 4.63 LTS/ls_task.c:3936-3962 and 4031-4046 (the number, as a year by ls_util_is_year, and ls_util_pluralize)"
       - "DECtalk 4.63 LTS/ls_util.c:1442-1466 (ls_util_pluralize: the ending by the last phone)"
       - "DECtalk 4.63 LTS/ls_util.c:598-622 (ls_util_is_year)"
+  # A dollar amount (tn_money_text_source) written out as one word of
+  # phonemic text, as DECtalk's text task speaks it:
+  #   $3      three dollars            $1      one dollar
+  #   $3.00   three dollars
+  #   $3.24   three dollars and twenty four cents
+  #   $3.01   three dollars and one cent
+  #   $.50    fifty cents
+  #   $3.240  three point two four zero dollars
+  # A fraction of any length but two makes the amount a decimal number of
+  # dollars; one of two digits is cents, read without one leading zero.
+  # "dollar" is singular after the whole number one alone, "cent" after one.
+  # The words and the two plural endings are in the frontend's generated map
+  # tn_number_phonemes; a whole number is read by number_phonemes().
+  tn_money_text:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'money_text' && current.outputType == 'source'"
+    define:
+      integer: "tn_text_or_empty(get(current.payload, 'integer', ''))"
+      fraction: >-
+        tn_text_or_empty(get(current.payload, 'fraction', ''))
+        + tn_text_or_empty(get(current.payload, 'bare', ''))
+      dollar: "vocabulary('tn_number_phonemes', 'dollar')"
+      dollarsText: >-
+        integer == ''
+          ? ''
+          : number_phonemes(integer, 'cardinal') + dollar
+            + (regexReplace(integer, ',', '', 'g') == '1'
+                ? '' : vocabulary('tn_number_phonemes', 'plural.otherwise'))
+      cents: "size(fraction) == 2 && substring(fraction, 0, 1) == '0' ? substring(fraction, 1, 2) : fraction"
+      amountText: >-
+        fraction != '' && size(fraction) != 2
+          ? (integer == '' ? '' : number_phonemes(integer, 'cardinal')
+              + maps.tn_phonemic_text.word_boundary)
+            + vocabulary('tn_number_phonemes', 'point')
+            + regexSplit(fraction, '').map(digit,
+                maps.tn_phonemic_text.word_boundary
+                + vocabulary('tn_number_phonemes', 'units.' + digit)).join('')
+            + dollar + vocabulary('tn_number_phonemes', 'plural.otherwise')
+          : fraction == '' || (fraction == '00' && integer != '')
+            ? dollarsText
+            : dollarsText + (integer == '' ? '' : vocabulary('tn_number_phonemes', 'and'))
+              + number_phonemes(cents, 'cardinal') + maps.tn_phonemic_text.word_boundary
+              + vocabulary('tn_number_phonemes', 'cent')
+              + (cents == '1' ? '' : vocabulary('tn_number_phonemes', 'plural.afterVoiceless'))
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open + amountText
+            + maps.tn_phonemic_text.word_boundary + maps.tn_phonemic_text.close}]
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:3312-3513 (the amount: dollars, \"and\", cents; a fraction that is not two digits read as a decimal number of dollars :3464-3513; one leading zero of the cents passed over :3410-3412)"
+      - "DECtalk 4.63 LTS/l_us_pr1.c:497-749 (ls_proc_do_number and its return value, which picks \"dollar\" or \"dollars\": :605-606)"
   # A pause the text parser asks for (tn_parser_pause_source) is the comma: the
   # phoneme the parser names is the one a written comma gives.
   tn_parser_pause:
@@ -433,4 +494,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_clock_time, tn_date_text, tn_plural_number, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_clock_time, tn_date_text, tn_plural_number, tn_money_text, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]

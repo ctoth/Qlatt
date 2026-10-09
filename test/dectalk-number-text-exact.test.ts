@@ -31,8 +31,14 @@ const corpus = readVoiceCorpus(
 );
 
 describe("DECtalk number-like words from text", () => {
-  it("dectalk-english keeps the word whole; qlatt-english writes it out", () => {
-    expect(normalizeText("It costs $3.50.", "dectalk-english")).toBe("it costs $3.50 .");
+  it("dectalk-english writes the word out as phonemic text or keeps it whole; qlatt-english writes words", () => {
+    // A dollar amount is written out by a text rule (tn_money_text): three
+    // dollars, "and" with its verb-phrase start, fifty cents.
+    expect(normalizeText("It costs $3.50.", "dectalk-english")).toBe(
+      "it costs \x81Tr'i d'alRz )End f'Ifti s'Ents \x82 .",
+    );
+    // Before a word that takes "dollars" behind it the amount stays whole.
+    expect(normalizeText("It costs $2 million.", "dectalk-english")).toBe("it costs $2 million .");
     // A clock time is written out by a text rule (tn_clock_time) as one word
     // of phonemic text: three, a verb-phrase start, thirty, a word boundary.
     expect(normalizeText("It is 3:30.", "dectalk-english")).toBe("it is \x81Tr'i)T'Rti \x82 .");

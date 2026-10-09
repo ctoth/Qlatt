@@ -92,6 +92,11 @@ type OrthographyInputToken = {
   endsWordStretch?: boolean;
   /** The frontend's named marks at the start or the end of the written word. */
   writtenMarks?: string[];
+  /**
+   * The token comes from the same place in the text as the word token before
+   * it: a text rule made several words of one written word ("NW" spelled).
+   */
+  continuesWrittenWord?: boolean;
   /** What was written, when a text rule composed the token's word anew. */
   written?: string;
   symbol?: string;
@@ -478,6 +483,12 @@ function rewriteOrthographyTokens(
   const composedFrom = new Map<string, string>();
   // The frontend's named marks on the written word, for the token it starts with.
   const markedWords = new Map<string, string[]>();
+  // Word tokens made from the same place in the text as the word token right
+  // before them. A written word is one word wherever words are counted,
+  // however many are spoken for it: DECtalk counts each item between white
+  // space once (LTS/ls_task.c:5066-5075).
+  const continuesWritten = new Set<string>();
+  let writtenBefore: { textId: string; start: number; end: number } | null = null;
   entries.forEach((entry, index) => {
     const input = sharedInput ?? beginInput();
     const word = typeof entry === "string" ? entry : entry.word;
@@ -486,11 +497,23 @@ function rewriteOrthographyTokens(
     const declaredWord = typeof entry !== "string" && entry.source.get("kind") === "word";
     const punctuation = !declaredWord && isPunctuationTokenWithTables(word, tables);
     const token = input.createItem("token", `token_${index.toString()}`);
+    let writtenHere: typeof writtenBefore = null;
     if (typeof entry !== "string") {
-      const sourceText = utterance.getItem(String(entry.source.get("sourceTextId")))?.get("text");
+      const sourceTextId = String(entry.source.get("sourceTextId"));
+      const sourceText = utterance.getItem(sourceTextId)?.get("text");
       const start = entry.source.get("sourceStart");
       const end = entry.source.get("sourceEnd");
       if (typeof sourceText === "string" && typeof start === "number" && typeof end === "number") {
+        if (!punctuation && end > start) {
+          writtenHere = { textId: sourceTextId, start, end };
+          if (
+            writtenBefore?.textId === sourceTextId &&
+            writtenBefore.start === start &&
+            writtenBefore.end === end
+          ) {
+            continuesWritten.add(token.id);
+          }
+        }
         const written = sourceText.slice(start, end);
         if (punctuation && !written.includes(word)) suppliedPunctuation.add(token.id);
         if (
@@ -510,6 +533,7 @@ function rewriteOrthographyTokens(
         if (declaredWord && written !== word) composedFrom.set(token.id, written);
       }
     }
+    writtenBefore = writtenHere;
     if (typeof entry !== "string") {
       input.read(entry.source, "normalizedText");
       input.set(token, "sourceNormalizationId", entry.source.id);
@@ -568,6 +592,7 @@ function rewriteOrthographyTokens(
         ...(markedWords.has(token.id)
           ? { writtenMarks: markedWords.get(token.id) as string[] }
           : {}),
+        ...(continuesWritten.has(token.id) ? { continuesWrittenWord: true } : {}),
         ...(composedFrom.has(token.id) ? { written: composedFrom.get(token.id) as string } : {}),
         ...(typeof punctuationSymbol === "string" ? { symbol: punctuationSymbol } : {}),
         ...(typeof pronunciationKey === "string" && pronunciationKey.length > 0
@@ -1005,7 +1030,9 @@ export function transcribeText(
                     textFormClasses: pronResult.formClasses,
                   }
                 : {}),
-              ...(part !== spokenParts[0] ? { continuesWrittenWord: true } : {}),
+              ...(part !== spokenParts[0] || inputToken.continuesWrittenWord
+                ? { continuesWrittenWord: true }
+                : {}),
               ...("conjunctionRole" in pronResult && pronResult.conjunctionRole
                 ? { conjunctionRole: pronResult.conjunctionRole }
                 : {}),

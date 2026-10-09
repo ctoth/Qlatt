@@ -87,7 +87,7 @@ type OrthographyInputToken = {
   supplied?: boolean;
   /** A punctuation token a text rule sent itself: it was not read as a delimiter. */
   sentMark?: boolean;
-  /** No white space stands before the token's span in the source text. */
+  /** A letter or a digit stands right before the token's span in the source text. */
   writtenAgainstPrevious?: boolean;
   /**
    * The written word this token comes from ends in one of the frontend's
@@ -487,9 +487,10 @@ function rewriteOrthographyTokens(
   // Punctuation tokens a text rule sent itself (terminal kind 'sent_mark'):
   // the mark was not read as the delimiter of the word before it.
   const sentMarks = new Set<string>();
-  // Tokens whose source span has no white space in front of it: the token
-  // is written against what stands before it ("p" and phonemic text in the
-  // text parser's "p's").
+  // Tokens whose source span has a letter or a digit right in front of it:
+  // the token is written against the word before it ("p" and phonemic text
+  // in the text parser's "p's"; not "'90s" after "The ", whose apostrophe is
+  // stripped from a word of its own).
   const writtenAgainst = new Set<string>();
   // Word tokens whose written word ends in a character that ends a stretch
   // of words for the frontend (an abbreviation's period, a final apostrophe).
@@ -539,7 +540,9 @@ function rewriteOrthographyTokens(
         }
         const written = sourceText.slice(start, end);
         if (punctuation && !written.includes(word)) suppliedPunctuation.add(token.id);
-        if (start > 0 && !/\s/.test(sourceText[start - 1] as string)) writtenAgainst.add(token.id);
+        if (start > 0 && /[A-Za-z0-9]/.test(sourceText[start - 1] as string)) {
+          writtenAgainst.add(token.id);
+        }
         if (
           !punctuation &&
           written.length > 0 &&

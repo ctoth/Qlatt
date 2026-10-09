@@ -118,6 +118,8 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // against the letter, with no word boundary before or after it, and a
   // mark right after it is a word.
   "dectalk-us-plural-letters-v1.json",
+  // Digits with an apostrophe between them ("5'10"), spelled.
+  "dectalk-us-digit-apostrophe-v1.json",
 ];
 
 /** Every corpus with a packet record. */

@@ -355,6 +355,25 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:151-170 (each character by its name)'
+    # Digits with an apostrophe between them ("5'10", a height; an inch mark
+    # after it is stripped): one word, which the frontend's lexicon spells,
+    # each digit by its name and the apostrophe by its own. Only for a
+    # frontend whose policy asks for it
+    # (tn_recognition_policy.digit_apostrophe_words: spelled). Measured on
+    # say.exe: `He is 5'10" and still growing.` has F AY V, AX P AA S T R AX
+    # F IY, W AH N, Z IY R OW; "12'6" is W AH N, T UW, the apostrophe, S IH K
+    # S. An apostrophe first or last is stripped ("'09", "6'"), and "80's"
+    # is the plural: not this rule's.
+    - id: tn_digit_apostrophe_source
+      pattern: '(?<=^|\s)(?<word>[0-9]+''[0-9]+)(?="?[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'digit_apostrophe_words', 'split') == 'spelled'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4128-4158 (ls_task_part_number: a word with a digit and an apostrophe in it is spelled), LTS/ls_spel.c:151-170 (each character by its name), LTS/l_us_con.c:126 (the double quote is strippable at a word''s end)'
     # A word with a question mark and an exclamation mark written on it, in
     # either order ("What?!", "that!?", and "?!?", "?!!"): the last mark ends
     # the clause and what stands before it stays on the word, which the

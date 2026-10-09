@@ -368,6 +368,151 @@ const capitalSpellings = Object.fromEntries(
   [...spellings].filter(([key, list]) => list.some((word) => word !== key)),
 );
 
+// The in-text commands ("[:rate 300]", "[:nb]"): the command table and its
+// option lists (CMD/C_US_CDE.H), the texts DECtalk speaks for a command it
+// cannot carry out (INCLUDE/usa_err.tab, by the error codes of
+// CMD/cm_defs.h:139-144), and what each command's routine does with the
+// text pipe (CMD/cm_copt.c).
+const stripComments = (source: string): string =>
+  source.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
+// The names the build defines: every `#define NAME` of dectalkf.h (its own
+// conditions are not followed: the ones met here, ACCESS32 and SLOWTALK, are
+// defined for every build but SAPI5 and ARM7, dectalkf.h:161-175). A
+// platform name such as MSDOS, ARM7 or OS_PALM is not among them.
+const buildDefines = stripComments(fs.readFileSync(path.join(dectalkRoot, "dectalkf.h"), "latin1"));
+const builtWith = new Set(
+  [...buildDefines.matchAll(/^\s*#define\s+([A-Za-z0-9_]+)/gm)].map((match) => match[1]),
+);
+/** `source` without the lines its #ifdef, #ifndef, #else and #endif leave out. */
+const conditioned = (source: string, file: string): string => {
+  const open: boolean[] = [];
+  const kept: string[] = [];
+  for (const line of source.split(/\r?\n/)) {
+    const directive = /^\s*#\s*(ifdef|ifndef|else|endif|if)\b\s*([A-Za-z0-9_]*)/.exec(line);
+    if (!directive) {
+      if (open.every(Boolean)) kept.push(line);
+    } else if (directive[1] === "ifdef") open.push(builtWith.has(directive[2] as string));
+    else if (directive[1] === "ifndef") open.push(!builtWith.has(directive[2] as string));
+    else if (directive[1] === "else") open.push(!open.pop());
+    else if (directive[1] === "endif") open.pop();
+    else throw new Error(`E_COMMAND_TABLE: ${file} has an #if this script does not read`);
+  }
+  return kept.join("\n");
+};
+const commandSource = conditioned(
+  stripComments(fs.readFileSync(path.join(cmdDir, "C_US_CDE.H"), "latin1")),
+  "C_US_CDE.H",
+);
+const commandTableText = commandSource.slice(commandSource.lastIndexOf("command_table[]"));
+// A list of words (`const unsigned char *const voice_names[] = {...}`).
+const optionLists: Record<string, string[]> = {};
+for (const match of commandSource.matchAll(
+  /const unsigned char \*const ([a-z_]+)\[\]\s*=\s*\{([^}]*)\}/g,
+)) {
+  const [, name, body] = match as unknown as [string, string, string];
+  if (optionLists[name]) continue;
+  optionLists[name] = [...body.matchAll(/"([^"]*)"/g)].map((word) => word[1] as string);
+}
+const optionListOf: Readonly<Record<string, string>> = {
+  name: "voice_names",
+  error: "error_options",
+  phoneme: "phoneme_modes",
+  log: "log_options",
+  mode: "mode_options",
+  say: "say_options",
+  punctuation: "punct_options",
+  skip: "skip_options",
+  volume: "volume_options",
+  index: "index_options",
+  flush: "flush_options",
+  pronounce: "pronounce_options",
+  language: "lang_options",
+  gender: "gender_options",
+  define_voice: "define_options",
+  dv: "define_options",
+};
+// The routines are in cm_copt.c, but for "play" (cmd_wav.c).
+const coptSource = ["cm_copt.c", "cmd_wav.c"]
+  .map((file) => stripComments(fs.readFileSync(path.join(cmdDir, file), "latin1")))
+  .join("\n");
+// Every definition of a routine (some have one per platform), from its first
+// line to the closing brace in the first column.
+const routineBodies = (routine: string): string =>
+  [...coptSource.matchAll(new RegExp(`^int ${routine}\\([^)]*\\)[\\s\\S]*?^\\}`, "gm"))]
+    .map((match) => match[0])
+    .join("\n");
+const escSource = fs.readFileSync(
+  path.join(dectalkRoot, "dapi", "src", "INCLUDE", "esc.h"),
+  "latin1",
+);
+const commands = [
+  ...commandTableText.matchAll(
+    /\{\s*"([a-z_]+)"\s*,\s*"([a-z*]*)"\s*,\s*([0-9]+)\s*,\s*([A-Z0-9_]+)\s*,\s*(cm_cmd_[a-z_]+)\s*\}/g,
+  ),
+].map((match) => {
+  const [, name, format, parameters, code, routine] = match as unknown as string[];
+  // A routine with no definition in these files (the tone commands of other
+  // builds) has neither flag: `routineRead` says so.
+  const body = routineBodies(routine as string);
+  // A voice command with no parameter carries its voice in its code
+  // (INCLUDE/esc.h: DCS_NAME_BETTY is SKIP_ESCAPE+1; cm_copt.c cm_cmd_name).
+  const voice = new RegExp(`#define\\s+${String(code)}\\s+SKIP_ESCAPE\\+([0-9]+)`).exec(
+    escSource,
+  )?.[1];
+  return {
+    name,
+    // One character per parameter: d decimal, a word, h hexadecimal; "*"
+    // repeats what stands before it (cm_cmd.c cm_cmd_build_param).
+    format,
+    parameters: Number(parameters),
+    routine,
+    ...(optionListOf[name as string] ? { options: optionListOf[name as string] } : {}),
+    ...(routine === "cm_cmd_name" && format === "" && voice !== undefined
+      ? { voice: Number(voice) }
+      : {}),
+    routineRead: body.length > 0,
+    // The routine sends an item down the text pipe, in at least one of its
+    // branches: letter-to-sound then speaks the text it holds and the
+    // phonemic stage ends the clause (LTS/ls_task.c:446-470,
+    // PH/ph_task.c:657-668).
+    sendsItem: /lts_pipe|lts_loop\s*\(/.test(body),
+    // The routine calls cm_cmd_sync, which sends a clause end, in at least
+    // one of its branches.
+    syncs: routine !== "cm_cmd_sync" && /cm_cmd_sync\s*\(/.test(body),
+  };
+});
+// 43 for the Windows build; the table has 60 rows over all its conditions.
+if (commands.length < 40) {
+  throw new Error(`E_COMMAND_TABLE: read ${commands.length.toString()} commands, expected over 40`);
+}
+const errorTexts = [
+  ...stripComments(
+    fs.readFileSync(path.join(dectalkRoot, "dapi", "src", "INCLUDE", "usa_err.tab"), "latin1"),
+  ).matchAll(/^\s*"(Command error[^"]*)"/gm),
+].map((match) => match[1] as string);
+const slowTalk = builtWith.has("SLOWTALK");
+const access32 = builtWith.has("ACCESS32");
+const commandTable = {
+  commands,
+  options: optionLists,
+  // By error code (CMD/cm_defs.h:139-144): 1 a word that is not an option,
+  // 2 a number, 3 the command's name, 4 a parameter, 5 a phoneme.
+  errorTexts,
+  errorCodes: {
+    string: defined(defsSource, "CMD_bad_string", "cm_defs.h"),
+    value: defined(defsSource, "CMD_bad_value", "cm_defs.h"),
+    command: defined(defsSource, "CMD_bad_command", "cm_defs.h"),
+    parameter: defined(defsSource, "CMD_bad_param", "cm_defs.h"),
+  },
+  // The speaking rate: the command's own limits (CMD/cm_defs.h:63-69,
+  // 50 with ACCESS32) and those of the phonemic stage (PH/ph_task.c:710-714,
+  // 50 to 550 with SLOWTALK); dectalkf.h:162-173 defines both.
+  rate: {
+    command: [access32 ? 50 : 75, defined(defsSource, "MAX_SPEAKING_RATE", "cm_defs.h")],
+    spoken: slowTalk ? [50, 550] : [75, 600],
+  },
+};
+
 const content = `${JSON.stringify({
   schemaVersion: "v1",
   source: `DECtalk 4.63 CMD/${HEADER} (compiled from CMD/${RULE_TEXT}), CMD/par_char.c, INCLUDE/ls_lower.tab, CMD/cm_char.c, CMD/cm_defs.h, CMD/par_def1.h, CMD/cm_text.c, CMD/cm_pars.c; decoded by scripts/build-dectalk-text-parser.ts`,
@@ -395,6 +540,7 @@ const content = `${JSON.stringify({
   lowerCase,
   clauses,
   capitalSpellings,
+  commandTable,
 })}\n`;
 if (argv.includes("--check")) {
   // The table in the tree against what the DECtalk source gives now.

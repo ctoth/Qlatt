@@ -12,9 +12,14 @@
  *   features        PH/p_us_rom.h       us_featb, bit names from PH/ph_defs.h:315-333
  *   syllabic_codes  the codes whose us_featb word has FSYLL
  *
+ * and `syllabic_indices_past_table` against the built say.exe (what stands
+ * after us_featb is the program's, not the source's; see
+ * dectalk-debug/featb-past-table.ts).
+ *
  * Usage:
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
  *     scripts/oracle/check-dectalk-timing-policy.ts [--dectalk C:/Users/Q/src/dectalk/463]
+ *     [--say-exe <say.exe>]
  *
  * Prints every difference. Exit code 1 if there is one.
  */
@@ -23,6 +28,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as yaml from "js-yaml";
+import { wordsPastTable } from "./dectalk-debug/featb-past-table.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const argv = process.argv.slice(2);
@@ -31,6 +37,11 @@ const dectalkRoot = path.resolve(
   (dectalkFlag >= 0 ? argv[dectalkFlag + 1] : undefined) ??
     process.env.DECTALK_SOURCE_ROOT ??
     "C:/Users/Q/src/dectalk/463",
+);
+const sayExeFlag = argv.indexOf("--say-exe");
+const sayExe = path.resolve(
+  (sayExeFlag >= 0 ? argv[sayExeFlag + 1] : undefined) ??
+    path.join(dectalkRoot, "samples", "SAY", "build", "us", "static", "say.exe"),
 );
 
 // PH/ph_defs.h:315-333.
@@ -111,9 +122,29 @@ for (const table of [oursInherent, oursMinimum, oursFeatures]) {
 expectEqual(
   "syllabic_codes",
   timing.syllabic_codes,
-  names.flatMap((_name, code) => ((featb[code] & 0o1) !== 0 ? [code] : [])),
+  // Every word of the table, the codes past the last allophone too (all 0).
+  featb.flatMap((word, code) => ((word & 0o1) !== 0 ? [code] : [])),
 );
+// What Rule 9 reads past the table's end is in the executable, not the source.
+let pastTable = "not checked: no say.exe";
+if (fs.existsSync(sayExe)) {
+  const { offsets, words } = wordsPastTable(sayExe, featb);
+  if (offsets.length !== 1) {
+    differences.push(
+      `syllabic_indices_past_table: us_featb found ${offsets.length.toString()} times in ${sayExe}`,
+    );
+  } else {
+    expectEqual(
+      "syllabic_indices_past_table",
+      timing.syllabic_indices_past_table,
+      words.flatMap((word, at) => ((word & 0o1) !== 0 ? [featb.length + at] : [])),
+    );
+    pastTable = sayExe;
+  }
+}
 
 for (const difference of differences) console.log(difference);
-console.log(JSON.stringify({ allophones: names.length, differences: differences.length }));
+console.log(
+  JSON.stringify({ allophones: names.length, pastTable, differences: differences.length }),
+);
 process.exit(differences.length > 0 ? 1 : 0);

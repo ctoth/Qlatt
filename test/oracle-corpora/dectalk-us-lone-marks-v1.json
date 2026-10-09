@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-lone-marks-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "lm-phd", "text": "Dr. White, Ph.D., spoke.", "group": "lone-period", "tags": ["period-word", "parser-written"], "expectedFocus": ["trace"] },
+    { "id": "lm-phd-names", "text": "Dr. A. B. White, Ph.D., spoke.", "group": "lone-period", "tags": ["period-word", "initials"], "expectedFocus": ["trace"] },
+    { "id": "lm-zip-end", "text": "She moved to Boston, MA 02134.", "group": "lone-period", "tags": ["period-word", "after-pause", "text-end"], "expectedFocus": ["trace"] },
+    { "id": "lm-zip-mid", "text": "She moved to Boston, MA 02134. Then she left.", "group": "lone-period", "tags": ["period-word", "after-pause", "joins-next"], "expectedFocus": ["trace"] },
+    { "id": "lm-zip-texas", "text": "He lives in Austin, TX 78701.", "group": "lone-period", "tags": ["period-word", "after-pause", "text-end"], "expectedFocus": ["trace"] },
+    { "id": "lm-phd-control", "text": "He has a Ph.D. in math.", "group": "lone-period", "tags": ["control"], "expectedFocus": ["trace"] },
+    { "id": "lm-paren-period", "text": "She said \"Go (now).\" Then left.", "group": "stripped-parenthesis", "tags": ["period", "delimiter"], "expectedFocus": ["trace"] },
+    { "id": "lm-paren-period-end", "text": "She said \"Go (now).\"", "group": "stripped-parenthesis", "tags": ["period", "delimiter", "text-end"], "expectedFocus": ["trace"] },
+    { "id": "lm-paren-single-quote", "text": "He said 'Go (now).' Then left.", "group": "stripped-parenthesis", "tags": ["period", "delimiter", "single-quote"], "expectedFocus": ["trace"] },
+    { "id": "lm-initial-comma", "text": "He met B., then left.", "group": "period-before-mark", "tags": ["initial", "comma"], "expectedFocus": ["trace"] },
+    { "id": "lm-initials-comma", "text": "He met J. R., then left.", "group": "period-before-mark", "tags": ["initials", "comma"], "expectedFocus": ["trace"] },
+    { "id": "lm-initial-i-comma", "text": "He met I., then left.", "group": "period-before-mark", "tags": ["initial", "pronoun-letter", "comma"], "expectedFocus": ["trace"] },
+    { "id": "lm-word-comma", "text": "He saw the cat., then left.", "group": "period-before-mark", "tags": ["word", "comma"], "expectedFocus": ["trace"] },
+    { "id": "lm-initial-semicolon", "text": "He met Q.; then left.", "group": "period-before-mark", "tags": ["initial", "semicolon"], "expectedFocus": ["trace"] },
+    { "id": "lm-initial-colon", "text": "He met Q.: then left.", "group": "period-before-mark", "tags": ["initial", "colon"], "expectedFocus": ["trace"] },
+    { "id": "lm-abbreviation-control", "text": "He said etc., and left.", "group": "period-before-mark", "tags": ["control", "abbreviation"], "expectedFocus": ["trace"] },
+    { "id": "lm-dotted-capitals-control", "text": "John Smith, M.D., spoke.", "group": "period-before-mark", "tags": ["control", "dotted-capitals"], "expectedFocus": ["trace"] },
+    { "id": "lm-plus-slash-minus", "text": "His score was 5 +/- 1.", "group": "slash-dash", "tags": ["slash-dash", "parser-written"], "expectedFocus": ["trace"] },
+    { "id": "lm-slash-dash", "text": "It was x /- y today.", "group": "slash-dash", "tags": ["slash-dash"], "expectedFocus": ["trace"] },
+    { "id": "lm-dash-slash", "text": "It was x -/ y.", "group": "slash-dash", "tags": ["dash-slash"], "expectedFocus": ["trace"] },
+    { "id": "lm-slash-dash-slash", "text": "It was x /-/ y.", "group": "slash-dash", "tags": ["three-characters"], "expectedFocus": ["trace"] },
+    { "id": "lm-ellipsis-spaced", "text": "It goes on . . . and on.", "group": "dotted-word", "tags": ["spelled", "parser-written"], "expectedFocus": ["trace"] },
+    { "id": "lm-ellipsis-spaced-long", "text": "The list goes on and on . . . and on.", "group": "dotted-word", "tags": ["spelled", "parser-written"], "expectedFocus": ["trace"] },
+    { "id": "lm-ellipsis-control", "text": "It goes on... and on.", "group": "dotted-word", "tags": ["control"], "expectedFocus": ["trace"] }
+  ]
+}

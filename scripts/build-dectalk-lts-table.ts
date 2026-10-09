@@ -345,6 +345,7 @@ for (const [character, comment] of [
   ["!", "Exclaimation point"],
   ["?", "Question Mark"],
   [",", "Comma"],
+  [".", "Period"],
   ["-", "Minus sign"],
   ["/", "Forward slash"],
   ["_", "Underscore"],

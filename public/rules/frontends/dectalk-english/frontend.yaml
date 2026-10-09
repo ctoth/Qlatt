@@ -665,6 +665,16 @@ parameters:
       # and `features` above: IY..UR (1-23), EL (34) and EN (36). Rule 9 tests
       # a clause position against this set (p_us_tim.c:539).
       syllabic_codes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 34, 36]
+      # Rule 9's index is a clause position, and us_featb has 101 words
+      # (PH/p_us_rom.h:1047-1150; the words of codes 59 to 100 are 0). From
+      # index 101 to 255 the test reads the program's data after the table:
+      # these are the indices whose word there has the FSYLL bit. The source
+      # does not fix what stands there; it is read from the built say.exe by
+      # scripts/oracle/dectalk-debug/featb-past-table.ts, and is the same in
+      # the stock build and the instrumented ones.
+      # scripts/oracle/check-dectalk-timing-policy.ts checks it against the
+      # executable.
+      syllabic_indices_past_table: [118, 119, 120, 121, 189, 190, 191, 192, 193, 195, 196, 198, 199, 200, 201, 202, 203, 204, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 218, 222, 239, 249, 250, 251, 252, 253, 254, 255]
       # ph_defs.h:249-262 FBOUNDARY values, keyed by this port's rime_boundary.
       boundary: { syllable: 32, morpheme: 64, word: 96, pp: 128, vp: 160, relative: 192, comma: 224, period: 256, question: 288, exclaim: 320 }
       # ph_defs.h:435-452 NFxxMS: a duration in whole frames.

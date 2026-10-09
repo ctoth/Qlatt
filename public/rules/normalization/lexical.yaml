@@ -203,6 +203,48 @@ rules:
       output: "[{'type': 'terminal', 'text': current.payload.word, 'kind': 'word'}]"
     citations:
       - "DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entries with no letter and no digit), LTS/ls_task.c:697 and 746 (the dictionary search comes before punctuation is stripped)"
+  # A period standing alone that is a word (tn_lone_period_source): one
+  # terminal, declared a word, which the frontend's dictionary names.
+  tn_lone_period:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'lone_period' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': '.', 'kind': 'word'}]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:1420-1437 (a mark that begins a word is kept as the word), 697 and 746 (the dictionary is searched for the word as written), dapi/src/dic/dtalk_us.dic (the entry \".\")"
+  # A closing parenthesis stripped from a word, with a mark standing alone
+  # after it (tn_stripped_parenthesis_mark_source): the comma the
+  # parenthesis forces, then the mark as a clause end.
+  tn_stripped_parenthesis_mark:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'stripped_parenthesis_mark' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'request', 'kind': 'words', 'payload': {'text': ','}},
+         {'type': 'request', 'kind': 'words', 'payload': {'text': current.payload.mark}}]
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2303-2319 (the stripped parenthesis sets the comma), 1547-1558 (the comma is sent, the white space is skipped, and the next character is read as the word's delimiter)"
+  # A period that stays in its word and is not spoken
+  # (tn_period_before_mark_source): nothing.
+  tn_silent_mark:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'silent_mark' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: "[]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:1451-1463 and LTS/ls_util.c:887-900 (the period is kept in the word when a comma, a colon or a semicolon follows it; only that mark is left as the delimiter)"
   tn_bare_number_request:
     kind: structural
     select:
@@ -295,4 +337,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_lone_period, tn_stripped_parenthesis_mark, tn_silent_mark, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]

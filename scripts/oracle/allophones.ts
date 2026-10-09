@@ -82,6 +82,16 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-symbol-words-v1.json",
   // A sign written on a number, and a lone "a" right after a number.
   "dectalk-us-signed-numbers-v1.json",
+  // A period standing alone that is a word, a mark after a stripped
+  // parenthesis, a period before a comma, words of slashes and hyphens, and
+  // a word with two periods on it.
+  "dectalk-us-lone-marks-v1.json",
+  // Two /w/ across a word boundary, and clauses of more allophones than the
+  // feature table has words (duration Rule 9 indexes it by clause position).
+  "dectalk-us-long-clauses-v1.json",
+  // promote_last_2: which secondary stress a stressed syllabic before a
+  // verb phrase makes primary, past stretches that have none.
+  "dectalk-us-promotion-v1.json",
 ];
 
 /** Every corpus with a packet record. */

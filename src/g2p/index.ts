@@ -204,8 +204,10 @@ export function pronounce(
   // the spelling routine; LTS/ls_spel.c:158-170, the names). Measured on
   // say.exe: "What?!" is D AH B EL Y UW, EY CH, EY, T IY, K W EH S CH AX N,
   // M AA R K and an exclamation's clause end; the class is `noun`.
-  // A comma there is named the same way ("What,!" has K AA M AX).
-  const withMarks = /^([a-z]+)([?!]+|,)$/.exec(lowerWord);
+  // A comma there is named the same way ("What,!" has K AA M AX), and so are
+  // two periods ("on..." is the word "on.." and the period that ends the
+  // clause: OW, EH N, P IY R IY AX D, P IY R IY AX D).
+  const withMarks = /^([a-z]+)([?!]+|,|\.\.)$/.exec(lowerWord);
   if (table?.letterPhones && table.characterNames && withMarks) {
     const letterPhones = table.letterPhones;
     const characterNames = table.characterNames;

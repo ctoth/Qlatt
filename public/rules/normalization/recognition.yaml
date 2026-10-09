@@ -44,6 +44,22 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:1239-1264 (a clause end character sends BREATH_BREAK); PH/ph_task.c:665-676 (a control item arriving while symbols are pending ends them with PERIOD)'
+    # The same clause end after a period that is a word
+    # (tn_lone_period_source): the word "period" is one of the words it ends.
+    # Measured on say.exe: "She moved to Boston, MA 02134." ends
+    # P IY R IY AX D, a word boundary and the period symbol.
+    - id: tn_parser_clause_end_after_period_word_source
+      pattern: '(?<=(?<![A-Za-z0-9]\)\s*)(?:\s|\x82)\.\s*)\x0b'
+      flags: ''
+      class: parser_clause_end
+      captures: {}
+      when: >-
+        get(maps.tn_recognition_policy, 'parser_marks', 'none') == 'phonemic'
+        && get(maps.tn_recognition_policy, 'lone_period', 'clause_end') == 'word'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:1239-1264 (a clause end character sends BREATH_BREAK); PH/ph_task.c:665-676 (a control item arriving while symbols are pending ends them with PERIOD)'
     # A unit's abbreviation with its period, one or two words after a word
     # that begins with a digit: kept as one token, which the frontend's
     # lexicon reads from its table of units by the number. In any case of
@@ -180,13 +196,105 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 dapi/src/dic/dtalk_us.dic (the entries with a slash), LTS/ls_task.c:2040-2160 (the word is looked up as written before anything is stripped from it)'
+    # A closing parenthesis at a word's end, white space, and then a mark
+    # standing alone (the parser's `two) . ` and `now) ! "`): the parenthesis
+    # is stripped from the word and forces a comma; when a comma is sent so,
+    # all white space after the word is skipped and the next character is
+    # the word's delimiter, so the mark ends a clause that holds nothing.
+    # Only for a frontend whose policy asks for it
+    # (tn_recognition_policy.stripped_parenthesis_mark: delimiter). Measured
+    # on say.exe: the parser's `said "Go now) . Then left. ` has N AW, a
+    # comma, a period, then DH EH N; `"Stop now) ! " Then` has N AW, a comma,
+    # an exclamation's clause end, then K W OW T.
+    - id: tn_stripped_parenthesis_mark_source
+      pattern: '(?<=[A-Za-z0-9])\)\s+(?<mark>[.!])(?=\s|$)'
+      flags: ''
+      class: stripped_parenthesis_mark
+      captures: {mark: mark}
+      when: "get(maps.tn_recognition_policy, 'stripped_parenthesis_mark', 'words') == 'delimiter'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_con.c:136 (")" is right-strippable and forces a break), LTS/ls_task.c:2303-2319 (stripping it sets the comma), 1547-1558 (the comma is sent, the white space after the word is skipped, and ls_task_do_right_punct reads the next character as the delimiter)'
+    # A period standing alone after white space or after the parser's
+    # phonemic text (the parser's `Ph . D., ` and its pause before a
+    # sentence's period, `4 <pause>. `): a word, the dictionary's "period",
+    # and no clause end: the word reader keeps a mark that begins a word.
+    # Only for a frontend whose policy asks for it
+    # (tn_recognition_policy.lone_period: word). Measured on say.exe:
+    # "Dr. White, Ph.D., spoke." has P IY, EY CH, P IY R IY AX D, D IY and a
+    # comma; "She moved to Boston, MA 02134. Then she left." has the pause,
+    # then P IY R IY AX D, DH EH N, SH IY, L EH F T in one clause.
+    - id: tn_lone_period_source
+      pattern: '(?<=\s|\x82)\.(?=\s|$)'
+      flags: ''
+      class: lone_period
+      captures: {}
+      when: "get(maps.tn_recognition_policy, 'lone_period', 'clause_end') == 'word'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:1420-1437 (ls_task_readword: at a word''s start a character that "might" be in a word is kept when nothing was kept before it), LTS/l_us_con.c:141 ("." is such a character), 697 and 746 of ls_task.c (the dictionary is searched for the word as written), dapi/src/dic/dtalk_us.dic (the entry ".")'
+    # A period on a word with a comma, a semicolon or a colon right after it
+    # ("B., then", "cat., then", "Q.; then"): the period stays in the word
+    # and is not spoken; the mark after it is the word's delimiter. Only for
+    # a frontend whose policy asks for it
+    # (tn_recognition_policy.period_before_mark: silent). Measured on
+    # say.exe: "He met B., then left." has B IY and a comma, with no period;
+    # "He saw the cat., then left." has K AE T and a comma.
+    - id: tn_period_before_mark_source
+      pattern: '(?<=[A-Za-z])\.(?=[,;:](?:\s|$))'
+      flags: ''
+      class: silent_mark
+      captures: {}
+      when: "get(maps.tn_recognition_policy, 'period_before_mark', 'clause_end') == 'silent'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:1451-1463 (ls_task_readword: inside a word a character that "might" be in a word is kept when the next one is of that kind too), LTS/ls_util.c:887-900 (ls_util_is_might), LTS/l_us_con.c:139, 141, 153 and 154 ("," "." ":" ";" are such characters), LTS/ls_task.c:1266-1279 (the comma, colon or semicolon left as delimiter sends a comma)'
+    # A word of slashes and hyphens, both in it ("/-", "-/", "/-/"): one
+    # word for the part-number reader, which names each character. Only for
+    # a frontend whose policy asks for it
+    # (tn_recognition_policy.slash_dash_words: part_number). Measured on
+    # say.exe: "His score was 5 +/- 1." (the parser writes `5 + /- 1`) has
+    # P L AH S, S L AE SH, D AE SH, W AH N with no pause among them.
+    - id: tn_slash_dash_word_source
+      pattern: '(?<=^|\s)(?<token>[/-]+)(?=\s|$)'
+      flags: ''
+      class: number_token
+      captures: {token: token}
+      when: >-
+        get(maps.tn_recognition_policy, 'slash_dash_words', 'dropped') == 'part_number'
+        && matches(captures.token, '/') && matches(captures.token, '-')
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4170 (ls_task_part_number: a word of slashes, digits, hyphens and letters with a slash or a digit in it is read by ls_proc_do_part_number)'
+    # A word with two periods on it ahead of the clause's own period (the
+    # parser writes " . . ." so: "on..."): the word with the two periods is
+    # spelled, each period by its name, and the third ends the clause. Only
+    # for a frontend whose policy asks for it
+    # (tn_recognition_policy.marked_words: spelled). Measured on say.exe:
+    # "It goes on . . . and on." has OW, EH N, P IY R IY AX D, P IY R IY AX D
+    # and a period's clause end. (The parser makes "on." of "on...", of
+    # "on . ." and of "on . . . .".)
+    - id: tn_dotted_word_source
+      pattern: '(?<=^|\s)(?<word>[A-Za-z]+)(?<inner>\.\.)(?<last>\.)(?=\s|$)'
+      flags: ''
+      class: marked_word
+      captures: {word: word, inner: inner, last: last}
+      when: "get(maps.tn_recognition_policy, 'marked_words', 'words') == 'spelled'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:1451-1463 and LTS/ls_util.c:887-900 (a period is kept in the word when another follows it), LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:158-170 (each character by its name)'
     # A word with no letter and no digit, standing alone between white space,
     # that the frontend's dictionary holds: "%", "@", "&", "+", "=", "#", "*",
     # and a mark a text parser has left alone ("?", "!", ",", a quote). One
     # word, the dictionary's ("percent", "at", "question mark", "comma").
     # The generated map tn_symbol_words is the dictionary's entries with no
-    # letter and no digit. A period alone is not this rule's: it ends a
-    # clause. Only for a frontend whose policy asks for it
+    # letter and no digit. A period alone is not this rule's
+    # (tn_lone_period_source above). Only for a frontend whose policy asks for it
     # (tn_recognition_policy.symbol_words: dictionary). Measured on say.exe:
     # "It is % here." has P RR S EH N T; the parser's `'no' ? " he` has
     # K W EH S CH AX N, M AA R K, K W OW T between "no" and "he" and no

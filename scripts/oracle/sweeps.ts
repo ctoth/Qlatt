@@ -22,6 +22,7 @@ export const SWEEP_CORPUS_IDS: readonly string[] = [
   "dectalk-us-long-clause-sweep-v1",
   "dectalk-us-messy-sweep-2-v1",
   "dectalk-us-messy-sweep-3-v1",
+  "dectalk-us-messy-sweep-4-v1",
 ];
 
 export function sweepCorpusPath(repoRoot: string, corpusId: string): string {

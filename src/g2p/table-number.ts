@@ -279,62 +279,12 @@ export function speakYear(text: string, lists: NumberPhones): number[] {
  * need not be a year by isYear: "two thousand" for X000, else as speakYear.
  * Null for a leading zero, which DECtalk spells digit by digit (:369-370).
  */
-function fourDigits(text: string, lists: NumberPhones): number[] | null {
+export function fourDigits(text: string, lists: NumberPhones): number[] | null {
   if (text[0] === "0") return null;
   if (text[1] === "0" && text[2] === "0" && text[3] === "0") {
     return [...lists.unstressedUnits[digit(text[0])], NUMBER_WBOUND, ...lists.thousand];
   }
   return speakYear(text, lists);
-}
-
-/**
- * A date word, as ls_proc_is_date accepts it and ls_proc_do_date speaks it
- * (LTS/l_us_pr1.c:815-961): a day of one or two digits, a hyphen, the three
- * letters of a month, and maybe a hyphen and a year of two or four digits.
- *
- *   23-Aug        August twenty third
- *   01-Jan        January first
- *   23-Aug-84     August twenty third, eighty four
- *   23-Aug-1984   August twenty third, nineteen eighty four
- *   2-Apr-2001    April second, twenty oh one
- *   1-Jan-2000    January first, two thousand
- *
- * The day is not checked against the month ("32-Jan" is "January thirty
- * second"). Not here: the day-first order of DECtalk's European mode
- * (:907-919), and a four-digit year with a leading zero, which DECtalk
- * spells. Null for those and for anything that is not such a word.
- */
-export function speakDate(text: string, lists: NumberPhones): number[] | null {
-  if (!lists.monthNames || !lists.months || !lists.oh) return null;
-  const match = /^([0-9]{1,2})-([a-z]{3})(?:-([0-9]{2}|[0-9]{4}))?$/i.exec(text);
-  if (!match) return null;
-  const [, day, name, year] = match;
-  const month = lists.monthNames.indexOf(name.toLowerCase());
-  if (month < 0) return null;
-  // "Get 01-Jan-84 ok" (:924-927): a two-digit day loses its leading zero.
-  const spokenDay = speakNumber(day.length === 2 && day[0] === "0" ? day.slice(1) : day, lists, {
-    ordinal: true,
-  });
-  if (!spokenDay) return null;
-  const symbols = [...lists.months[month], NUMBER_WBOUND, ...spokenDay];
-  if (year === undefined) return symbols;
-  symbols.push(NUMBER_COMMA);
-  if (year.length === 2) {
-    symbols.push(...twoDigits(year[0], year[1], lists));
-  } else if (year[0] !== "0" && year[1] === "0" && year[2] === "0" && year[3] !== "0") {
-    // "A 200X date" (:944-954): no word boundary between "oh" and the digit.
-    symbols.push(
-      ...twoDigits(year[0], year[1], lists),
-      NUMBER_WBOUND,
-      ...lists.oh,
-      ...lists.units[digit(year[3])],
-    );
-  } else {
-    const spokenYear = fourDigits(year, lists);
-    if (!spokenYear) return null;
-    symbols.push(...spokenYear);
-  }
-  return symbols;
 }
 
 /**
@@ -575,19 +525,18 @@ export function speakOrdinalNumber(text: string, lists: NumberPhones): number[] 
 
 /**
  * A number-like word that DECtalk's text task reads whole, in the order the
- * task tries its rules (LTS/ls_task.c: money :3181, date :3612, plain numbers
- * :3747): a dollar amount, a date word, a plural number, an ordinal, or a
- * number with separators or fraction digits. Null when `text` is none of
- * these; the caller then reads it as it reads any other word.
+ * task tries its rules (LTS/ls_task.c: money :3181, plain numbers :3747): a
+ * dollar amount, a plural number, an ordinal, or a number with separators or
+ * fraction digits. Null when `text` is none of these; the caller then reads
+ * it as it reads any other word.
  *
- * A clock time (:3622) is not read here: the frontend's text rules write it
- * out as phonemic text (public/rules/normalization/lexical.yaml
- * tn_clock_time).
+ * A date word (:3612) and a clock time (:3622) are not read here: the
+ * frontend's text rules write them out as phonemic text
+ * (public/rules/normalization/lexical.yaml tn_date_text and tn_clock_time).
  */
 export function speakNumberToken(text: string, lists: NumberPhones): number[] | null {
   if (text.startsWith("$")) return speakMoney(text.slice(1), lists);
   return (
-    speakDate(text, lists) ??
     speakPluralNumber(text, lists) ??
     speakOrdinalNumber(text, lists) ??
     (/[,.]/.test(text) ? (speakDecimal(text, lists)?.symbols ?? null) : null)

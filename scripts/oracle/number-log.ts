@@ -19,6 +19,7 @@ import {
   NUMBER_VPSTART,
   NUMBER_WBOUND,
 } from "../../src/g2p/table-number";
+import { normalizeText } from "../../src/tts-frontend";
 import { US_ALLOPHONE_NAMES } from "./allophones";
 
 const CONTROL: ReadonlyMap<number, string> = new Map([
@@ -65,4 +66,27 @@ export function numberSymbolTokens(symbols: readonly number[]): string[] {
     else if (symbol < US_ALLOPHONE_NAMES.length) tokens.push(US_ALLOPHONE_NAMES[symbol]);
   }
   return trimBoundaries(tokens);
+}
+
+/**
+ * A text that the dectalk-english text rules write out as one word of
+ * phonemic text (a clock time, a date word: the lexical rules tn_clock_time
+ * and tn_date_text), as the symbols its characters stand for; null for any
+ * other text. `phonemeCharacters` is the table's list of the symbol each
+ * character stands for (lts-table.json).
+ */
+export function composedNumberSymbols(
+  text: string,
+  phonemeCharacters: readonly (number | null)[],
+): number[] | null {
+  // The text stage closes a text with no mark at its end as a sentence.
+  const written = normalizeText(text, "dectalk-english").replace(/ \.$/, "");
+  if (!/^\x81[^\x81\x82]+\x82$/.test(written)) return null;
+  return [...written.slice(1, -1)].map((char) => {
+    const symbol = phonemeCharacters[char.charCodeAt(0)];
+    if (symbol === null || symbol === undefined) {
+      throw new Error(`no symbol for '${char}' in the phonemic text of '${text}'`);
+    }
+    return symbol;
+  });
 }

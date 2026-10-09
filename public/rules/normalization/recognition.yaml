@@ -295,6 +295,24 @@ text_recognition:
       speak: current.text
       vocabulary_keys: '[]'
       citations: ['Ebden & Sproat 2015; ISO date roles']
+    # A date word with its day, month and year apart, for a frontend whose
+    # text rules write it out as phonemic text
+    # (tn_recognition_policy.date_words: phonemic; the lexical rule
+    # tn_date_text). The same word as the rule after this one takes, less
+    # the one that frontend's lists do not read: a year of four digits that
+    # starts with 0, which is left to that rule.
+    - id: tn_date_text_source
+      pattern: '(?<![\w$.,:-])(?<day>[0-9]{1,2})-(?<month>jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)(?:-(?<year>[1-9][0-9]{3}|[0-9]{2}))?(?![\w-])'
+      flags: i
+      class: date_text
+      captures: {day: day, month: month, year: year}
+      when: >-
+        get(maps.tn_recognition_policy, 'date_words', 'token') == 'phonemic'
+        && lower(captures.month) in get(maps, 'tn_month_numbers', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_pr1.c:815-863 (ls_proc_is_date: the forms 23-Aug, 23-Aug-84, 23-Aug-1984); LTS/ls_task.c:3612-3614 (the text task reads the whole word as a date); LTS/l_us_pr1.c:369-370 (four digits with a leading zero are spelled)'
     # A date word kept whole, for the same frontends as the rule after this
     # one: a day of one or two digits, a hyphen, the three letters of a month
     # in either case, and maybe a hyphen and a year of two or four digits

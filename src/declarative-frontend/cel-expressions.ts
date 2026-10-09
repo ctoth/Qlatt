@@ -249,6 +249,7 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "total", arities: [1], binding: "context" },
   { name: "target", arities: [1], binding: "context" },
   { name: "vocabulary", arities: [2], binding: "context" },
+  { name: "number_phonemes", arities: [2], binding: "context" },
   { name: "assoc", arities: [2], binding: "context" },
   { name: "max", arities: [1, 2, 3, 4], binding: "context" },
   { name: "min", arities: [1, 2, 3, 4], binding: "context" },

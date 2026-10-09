@@ -90,3 +90,18 @@ maps:
     "unstressedUnits.7": "sEvxn"
     "unstressedUnits.8": "et"
     "unstressedUnits.9": "nAn"
+  # The three letters of each month as a date word has them (LTS/l_us_pr1.c
+  # ls_proc_is_date), with the month's place in the list `months` above.
+  tn_month_numbers:
+    "jan": "0"
+    "feb": "1"
+    "mar": "2"
+    "apr": "3"
+    "may": "4"
+    "jun": "5"
+    "jul": "6"
+    "aug": "7"
+    "sep": "8"
+    "oct": "9"
+    "nov": "10"
+    "dec": "11"

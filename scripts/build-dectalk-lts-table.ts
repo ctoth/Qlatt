@@ -859,6 +859,12 @@ fs.writeFileSync(
     ...Object.keys(numberPhonemes)
       .sort()
       .map((key) => `    ${JSON.stringify(key)}: ${JSON.stringify(numberPhonemes[key])}`),
+    "  # The three letters of each month as a date word has them (LTS/l_us_pr1.c",
+    "  # ls_proc_is_date), with the month's place in the list `months` above.",
+    "  tn_month_numbers:",
+    ...(numberPhones.monthNames ?? []).map(
+      (name, index) => `    ${JSON.stringify(name)}: ${JSON.stringify(index.toString())}`,
+    ),
     "",
   ].join("\n"),
 );

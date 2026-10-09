@@ -111,6 +111,10 @@ maps:
     # text, from the number phone lists of number-phonemes.yaml, as
     # ls_proc_do_time speaks it (LTS/l_us_pr1.c:1182-1209).
     clock_times: phonemic
+    # A date word ("23-Aug-1984", the form the text parser writes a date in)
+    # is written out the same way by tn_date_text, as ls_proc_do_date speaks
+    # it (LTS/l_us_pr1.c:815-961).
+    date_words: phonemic
   # The characters of this frontend's phonemic text that the text rules
   # compose with: the two marks around phonemic text (CMD/par_def1.h
   # PAR_PHONES_ON_D 0x81, PAR_PHONES_OFF_D 0x82) and, from INCLUDE/usa_phon.tab

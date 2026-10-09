@@ -292,6 +292,55 @@ rules:
       - "DECtalk 4.63 LTS/l_us_pr1.c:1182-1209 (ls_proc_do_time: the hour from punits[] or by ls_proc_do_2_digits, VPSTART, the minutes unless 00, VPSTART and the seconds)"
       - "DECtalk 4.63 LTS/l_us_pr1.c:297-315 (ls_proc_do_2_digits)"
       - "DECtalk 4.63 LTS/ls_task.c:3622-3625 (the word boundary is sent after the time)"
+  # A date word (tn_date_text_source: "23-Aug", "23-Aug-84", "2-Apr-2001")
+  # written out as one word of phonemic text, as DECtalk's date routine
+  # speaks it: the month, the day as an ordinal, and after a pause the year.
+  #   23-Aug        August twenty third
+  #   01-Jan        January first (a two-digit day loses its leading zero)
+  #   23-Aug-84     August twenty third, eighty four
+  #   23-Aug-1984   August twenty third, nineteen eighty four
+  #   2-Apr-2001    April second, twenty oh one ("oh" and the digit one word)
+  #   1-Jan-2000    January first, two thousand
+  # The day is not checked against the month. The month's phones and "oh"
+  # are the frontend's generated map tn_number_phonemes; the day and a
+  # four-digit year are whole numbers, read by number_phonemes().
+  tn_date_text:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'date_text' && current.outputType == 'source'"
+    define:
+      day: "current.payload.day"
+      year: "get(current.payload, 'year', '')"
+      monthText: >-
+        vocabulary('tn_number_phonemes',
+          'months.' + vocabulary('tn_month_numbers', lower(current.payload.month)))
+      dayText: >-
+        number_phonemes(size(day) == 2 && substring(day, 0, 1) == '0' ? substring(day, 1, 2) : day,
+          'ordinal')
+      yearText: >-
+        year == null || year == ''
+          ? ''
+          : maps.tn_phonemic_text.pause + (
+              size(year) == 2
+                ? tn_phonemic_two_digits(substring(year, 0, 1), substring(year, 1, 2))
+                : substring(year, 1, 3) == '00' && substring(year, 3, 4) != '0'
+                  ? tn_phonemic_two_digits(substring(year, 0, 1), substring(year, 1, 2))
+                    + maps.tn_phonemic_text.word_boundary
+                    + vocabulary('tn_number_phonemes', 'oh')
+                    + vocabulary('tn_number_phonemes', 'units.' + substring(year, 3, 4))
+                  : number_phonemes(year, 'four_digits'))
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open + monthText + maps.tn_phonemic_text.word_boundary
+            + dayText + yearText + maps.tn_phonemic_text.word_boundary
+            + maps.tn_phonemic_text.close}]
+    citations:
+      - "DECtalk 4.63 LTS/l_us_pr1.c:815-961 (ls_proc_do_date: the month from pmonths[], the day by ls_proc_do_number with its ordinal flag, COMMA, the year)"
+      - "DECtalk 4.63 LTS/l_us_pr1.c:924-927 (a two-digit day loses its leading zero), 944-954 (a 200X year: two digits, \"oh\" and the unit with no word boundary between), 367-398 (ls_proc_do_4_digits)"
   # A pause the text parser asks for (tn_parser_pause_source) is the comma: the
   # phoneme the parser names is the one a written comma gives.
   tn_parser_pause:
@@ -349,4 +398,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_clock_time, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_clock_time, tn_date_text, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]

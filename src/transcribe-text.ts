@@ -90,6 +90,8 @@ type OrthographyInputToken = {
    * `word_stretch_end_characters` ("Mr.", "dogs'").
    */
   endsWordStretch?: boolean;
+  /** The frontend's named marks at the start or the end of the written word. */
+  writtenMarks?: string[];
   /** What was written, when a text rule composed the token's word anew. */
   written?: string;
   symbol?: string;
@@ -111,6 +113,8 @@ type RequiredTranscriptionTables = {
   wordStretchEndCharacters: string;
   /** The lengths of gathered text at which a stretch of words ends (gatheredStretchEnds). */
   wordStretchLimits?: readonly [number, number];
+  /** Characters at a written word's start and end, with the name of each (writtenWordMarks). */
+  writtenWordMarks?: { open: Record<string, string>; close: Record<string, string> };
 };
 
 // ---------------------------------------------------------------------------
@@ -307,11 +311,35 @@ function requireTranscriptionTables(
       "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.word_stretch_length_limits must be two positive whole numbers",
     );
   }
+  const marks = config.written_word_marks;
+  const markNames = (side: unknown): side is Record<string, string> | undefined =>
+    side === undefined ||
+    (typeof side === "object" &&
+      side !== null &&
+      !Array.isArray(side) &&
+      Object.entries(side).every(
+        ([character, name]) =>
+          character.length === 1 && typeof name === "string" && name.length > 0,
+      ));
+  if (
+    marks !== undefined &&
+    !(
+      typeof marks === "object" &&
+      marks !== null &&
+      markNames(marks.open) &&
+      markNames(marks.close)
+    )
+  ) {
+    throw new Error(
+      "E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.written_word_marks must be open and close maps from one character to a name",
+    );
+  }
   return {
     wordStretchEndCharacters: stretchEnd ?? "",
     ...(stretchLimits
       ? { wordStretchLimits: [stretchLimits[0] as number, stretchLimits[1] as number] as const }
       : {}),
+    ...(marks ? { writtenWordMarks: { open: marks.open ?? {}, close: marks.close ?? {} } } : {}),
     symbolInput: symbolInput !== false,
     elidedApostropheLookup: elidedApostropheLookup !== false,
     sources: requireLexiconSources(config.sources),
@@ -371,6 +399,42 @@ function gatheredStretchEnds(
   return ends;
 }
 
+/**
+ * The named marks of the written word that starts at `start` in `text`: the
+ * name of its first character if `marks.open` has it, and of its last if
+ * `marks.close` has it and something is left after an opening mark. A written
+ * word is what stands between two white spaces. A token that is not at the
+ * start of its written word (a later part of it) has none.
+ *
+ * DECtalk's letter-to-sound parses the words it has gathered this way before
+ * it speaks them (LTS/ls_task.c:5066-5106): a word is the characters up to
+ * white space, `(` or `"` in front sets a mark and is skipped, and `)` or `"`
+ * at the end sets one when `k - start >= 1`.
+ */
+function writtenWordMarks(
+  text: string,
+  start: number,
+  marks: { open: Record<string, string>; close: Record<string, string> },
+): string[] {
+  // A token's span may begin with the white space before its word.
+  let first = start;
+  while (first < text.length && /\s/u.test(text[first] as string)) first += 1;
+  let from = first;
+  while (from > 0 && !/\s/u.test(text[from - 1] as string)) from -= 1;
+  if (/[\p{L}\p{N}]/u.test(text.slice(from, first))) return [];
+  let to = first;
+  while (to < text.length && !/\s/u.test(text[to] as string)) to += 1;
+  const word = text.slice(from, to);
+  const found: string[] = [];
+  const open = Object.hasOwn(marks.open, word[0] ?? "") ? marks.open[word[0] as string] : null;
+  if (open) found.push(open);
+  if (word.length - (open ? 1 : 0) >= 1) {
+    const last = word.at(-1) as string;
+    if (Object.hasOwn(marks.close, last)) found.push(marks.close[last] as string);
+  }
+  return found;
+}
+
 function getDiagnosticSymbolPronunciationWithTables(
   word: string,
   tables: RequiredTranscriptionTables,
@@ -412,6 +476,8 @@ function rewriteOrthographyTokens(
   const writtenWords: Array<{ tokenId: string; text: string; end: number }> = [];
   // What was written, for each word token a text rule composed anew.
   const composedFrom = new Map<string, string>();
+  // The frontend's named marks on the written word, for the token it starts with.
+  const markedWords = new Map<string, string[]>();
   entries.forEach((entry, index) => {
     const input = sharedInput ?? beginInput();
     const word = typeof entry === "string" ? entry : entry.word;
@@ -435,6 +501,10 @@ function rewriteOrthographyTokens(
           stretchEnds.add(token.id);
         }
         if (!punctuation) writtenWords.push({ tokenId: token.id, text: sourceText, end });
+        if (!punctuation && tables.writtenWordMarks) {
+          const marks = writtenWordMarks(sourceText, start, tables.writtenWordMarks);
+          if (marks.length > 0) markedWords.set(token.id, marks);
+        }
         // A word a text rule composed is known to its neighbours by what
         // was written ("9:30" for a time written out as phonemic text).
         if (declaredWord && written !== word) composedFrom.set(token.id, written);
@@ -495,6 +565,9 @@ function rewriteOrthographyTokens(
         isPunctuation: tokenType === "punctuation",
         ...(suppliedPunctuation.has(token.id) ? { supplied: true } : {}),
         ...(stretchEnds.has(token.id) ? { endsWordStretch: true } : {}),
+        ...(markedWords.has(token.id)
+          ? { writtenMarks: markedWords.get(token.id) as string[] }
+          : {}),
         ...(composedFrom.has(token.id) ? { written: composedFrom.get(token.id) as string } : {}),
         ...(typeof punctuationSymbol === "string" ? { symbol: punctuationSymbol } : {}),
         ...(typeof pronunciationKey === "string" && pronunciationKey.length > 0
@@ -937,6 +1010,9 @@ export function transcribeText(
                 ? { conjunctionRole: pronResult.conjunctionRole }
                 : {}),
               ...(inputToken.endsWordStretch ? { endsWordStretch: true } : {}),
+              ...(inputToken.writtenMarks && part === spokenParts[0]
+                ? { writtenMarks: inputToken.writtenMarks }
+                : {}),
               ...("readAhead" in pronResult && pronResult.readAhead ? { readAhead: true } : {}),
               ...(part.phraseStart ? { phraseStart: part.phraseStart } : {}),
               ...(part.morphemeAfter?.includes(phoneIndex) ? { morphemeBoundaryAfter: true } : {}),
@@ -1132,6 +1208,7 @@ function joinPhonemicText(
         if (conjunctionRole) phone.conjunctionRole = conjunctionRole;
         if (readAhead) phone.readAhead = readAhead;
         if (endsWordStretch) phone.endsWordStretch = endsWordStretch;
+        if (next.writtenMarks) phone.writtenMarks = next.writtenMarks;
         if (continuesWrittenWord) phone.continuesWrittenWord = continuesWrittenWord;
         else delete phone.continuesWrittenWord;
       }

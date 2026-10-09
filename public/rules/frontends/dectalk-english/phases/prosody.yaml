@@ -938,6 +938,32 @@ rules:
     citations:
       - "DECtalk 4.63 Ph_drwt02.c:3805-3808 (clausetype 2: f0scalefac + 500 in the female routine)"
 
+  # A clause with no phone is spoken with the F0 floor every clause has once
+  # the run's first clause has ended at an inserted break
+  # (dectalk_break_f0_floor, which starts at a clause's first phone and so
+  # does not reach it). `The sign said "Closed (back at two)."` is three
+  # clauses, the first ending at the break before "Closed" and the last
+  # holding only the period: its ten packets are at 50 Hz.
+  dectalk_empty_clause_break_f0_floor:
+    kind: f0_layer
+    select: *empty_clause
+    define:
+      # An earlier clause was the second one and began after an inserted break.
+      first_clause_broke: >-
+        count_back_pred(current, 1000, 'is_never', 'is_first_clause_break_start') > 0.0
+    constraint: params.policy.f0.unloaded_floor_applies && first_clause_broke
+    insert:
+      relation: PhraseCommand
+      layer: floor
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.unloaded_floor
+      tag: f0_break_floor
+    citations:
+      - "DECtalk 4.63 LTS/ls_util.c:829-837, 842-849 (compause saved, set to -12 and restored around the break's COMMA)"
+      - "DECtalk 4.63 PH/ph_data.h:841-851 (f0minimum three shorts before compause)"
+      - "DECtalk 4.63 PH/ph_vset.c:683 (f0minimum is set when a voice is loaded)"
+      - "DECtalk 4.63 PH/Ph_drwt02.c:2312-2324 (f0prime = f0minimum + ...; clamped to LOWEST_F0)"
+
   # The baseline's clock is tcumdur, which phinton adds up one allophone at a
   # time at the foot of its loop (Ph_inton2.c:1659-1671). Where the walk stops
   # early (809-819) the allophones from the stopping syllabic on are never

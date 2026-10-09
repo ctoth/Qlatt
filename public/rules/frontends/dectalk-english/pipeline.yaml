@@ -841,6 +841,9 @@ relations:
       # word's part in a conjunction of several words (LTS/proverbs.h).
       clause_end_supplied: [true, false]
       conjunction_sequence: [first, rest]
+      # The quotation marks and parentheses the written word still has when
+      # letter-to-sound parses it (frontend.yaml written_word_marks).
+      written_marks: []
       # LTS/ls_task.c:5129-5229: a word that may carry a clause break, one
       # whose slot in the parse has a break, and one a break is spoken before.
       break_marker: [true, false]
@@ -1058,6 +1061,7 @@ phases:
       - dectalk_female_empty_clause_question_baseline
       - dectalk_female_empty_clause_exclamation_range
       - dectalk_break_f0_floor
+      - dectalk_empty_clause_break_f0_floor
       # phinton's order on one syllabic: hat rise, stress impulse, question
       # gestures (Ph_inton2.c Rules 1, 2, 4).
       - dectalk_hat_rise

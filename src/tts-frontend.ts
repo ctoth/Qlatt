@@ -310,6 +310,9 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
           form_classes: { kind: "array", items: { kind: "string" } },
           // The classes before the lexicon hands them to the phonetic rules.
           text_form_classes: { kind: "array", items: { kind: "string" } },
+          // The marks the frontend names that the written word has at its
+          // start or its end (transcription.written_word_marks).
+          written_marks: { kind: "array", items: { kind: "string" } },
           // The written word's place among the words between two punctuation
           // marks, from 1, and how many there are.
           clause_word_index: { kind: "number" },
@@ -412,6 +415,12 @@ function getTranscriptionConfig(spec: CompiledRulepack): TranscriptionConfig | u
     // Passed as written; requireTranscriptionTables refuses anything but two numbers.
     ...(value.word_stretch_length_limits !== undefined
       ? { word_stretch_length_limits: value.word_stretch_length_limits as number[] }
+      : {}),
+    // Passed as written; requireTranscriptionTables refuses anything but two maps of names.
+    ...(value.written_word_marks !== undefined
+      ? {
+          written_word_marks: value.written_word_marks as TranscriptionConfig["written_word_marks"],
+        }
       : {}),
     letter_names: letterNames,
     punctuation_tokens: punctuationTokens,
@@ -622,6 +631,8 @@ function createStructure(
     if (formClasses) transaction.set(word, "form_classes", [...formClasses]);
     if (textFormClasses) transaction.set(word, "text_form_classes", [...textFormClasses]);
     if (conjunctionRole) transaction.set(word, "conjunction_sequence", conjunctionRole);
+    const { writtenMarks } = group[0].token;
+    if (writtenMarks?.length) transaction.set(word, "written_marks", [...writtenMarks]);
     const place = clausePlace.get(tokenId);
     if (place) {
       transaction.set(word, "clause_word_index", place.index);

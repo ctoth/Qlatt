@@ -29,6 +29,11 @@ export interface TranscriptionToken {
    * period).
    */
   endsWordStretch?: boolean;
+  /**
+   * The marks the frontend names (`written_word_marks`) that the written
+   * word has at its start or its end: an opening quotation mark, say.
+   */
+  writtenMarks?: string[];
   /** A punctuation token that is not in the text: a text rule supplied it. */
   supplied?: boolean;
   /** The phrase the word starts, when the frontend's lexicon marks one. */
@@ -110,6 +115,13 @@ export type TranscriptionConfig = {
    * once. None when absent.
    */
   word_stretch_length_limits?: number[];
+  /**
+   * Characters at the start (`open`) or the end (`close`) of a written word,
+   * each with the name its Word is given for it (`written_marks`). A written
+   * word is what stands between two white spaces in the text the frontend
+   * reads. None when absent.
+   */
+  written_word_marks?: { open?: Record<string, string>; close?: Record<string, string> };
 };
 
 export type TranscriptionOptions = {

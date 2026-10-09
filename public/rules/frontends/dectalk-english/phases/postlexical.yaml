@@ -192,12 +192,20 @@ rules:
   # not marked yet, so they never stand in its way: "I will go there even if
   # the weather turns very bad today." is broken before "even".
   #
-  # Not ported: the marks for quotes and parentheses (:5082-5106; DECtalk's
-  # parser has removed those characters before the parse, so they do not
-  # arise), and the shift of every later break by one word after a word that
-  # a number routine reads ahead ("9 am", "$2 million": the break test reads
-  # the mark of the word slot before; measured, "…opens 9 am and the small
-  # one closes late today." has its break after "and").
+  # A word written with a quotation mark or a parenthesis at its start or its
+  # end is marked too (:5082-5106), whatever its class. DECtalk's parser has
+  # removed nearly all of those characters before the parse; a quotation that
+  # ends in a parenthesis and a period keeps its opening mark and that
+  # parenthesis, and `The sign said "Closed (back at two)."` is spoken with a
+  # comma before "Closed" (its fourth word; "They said "Go (home)."" has none,
+  # "Go" being the third). The frontend's transcription names the marks
+  # (written_word_marks) and the Word carries them (written_marks). Measured:
+  # the opening quotation mark (dectalk-us-quote-breaks-v1). The closing
+  # parenthesis is on the stretch's last word there and changes nothing; an
+  # opening parenthesis and a closing quotation mark have not been seen to
+  # reach the parse.
+  #
+  # Not ported: the mark of a hyphen standing alone (PRO_DASH, :5122-5125).
   # -------------------------------------------------------------------------
   dectalk_break_marker:
     kind: scalar
@@ -210,6 +218,7 @@ rules:
         || ('prep' in get(current, 'text_form_classes', [])
             && !('part' in get(current, 'text_form_classes', []))
             && !('to' in get(current, 'text_form_classes', [])))
+        || size(get(current, 'written_marks', [])) > 0
     apply:
       - field: break_marker
         op: set
@@ -217,6 +226,7 @@ rules:
         tag: boundary
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:5129-5153 (PRO_CONJ, PRO_PREP for a preposition that is neither a particle nor 'to', PRO_THAT)"
+      - "DECtalk 4.63 LTS/ls_task.c:5082-5106 (PRO_OPEN_PAREN, PRO_OPEN_QUOTE, PRO_CLOSE_PAREN, PRO_CLOSE_QUOTE on a word written with the mark)"
       - "DECtalk 4.63 LTS/ls_task.c:4960-5025 ls_task_search_for_conj and 5174-5189 (PRO_MULTI_CONJ on the first word of a sequence of LTS/proverbs.h conj_words, PRO_CONJ on the later ones)"
 
   dectalk_clause_break:

@@ -2443,6 +2443,15 @@ transcription:
   # mark in it is therefore two stretches, and the clause breaks of the second
   # are counted from its own first word.
   word_stretch_length_limits: [400, 480]
+  # The marks DECtalk's parse of a stretch notes on a word: DECtalk 4.63
+  # LTS/ls_task.c:5082-5106, `(` or `"` as the word's first character
+  # (PRO_OPEN_PAREN, PRO_OPEN_QUOTE) and `)` or `"` as its last
+  # (PRO_CLOSE_PAREN, PRO_CLOSE_QUOTE). The command-stage parser has removed
+  # most of them by then; a quotation that ends in a parenthesis and a period
+  # keeps its opening mark and that parenthesis.
+  written_word_marks:
+    open: { "(": open_paren, "\"": open_quote }
+    close: { ")": close_paren, "\"": close_quote }
   # The names of the letters, for a token the orthography phase marks as a
   # spelled letter: DECtalk 4.63 INCLUDE/usa_type.tab, the lower-case rows,
   # the same phones as letterPhones in lts-table.json (a test holds the two

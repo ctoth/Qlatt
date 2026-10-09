@@ -398,11 +398,26 @@ predicates:
     || (dectalk_word_start(current) && dectalk_phrase_state(current) == "pp")
     || (dectalk_word_start(current) && dectalk_phrase_start(current) == "vp"
         && behind(current, 1) != null && isTrue(behind(current, 1), "morpheme_boundary_after"))
+  # The same two stops for the count of primary stresses ahead, which also
+  # ends at any silence (ph_aloph.c:1663-1664, `phonemes[m] == GEN_SIL`): a
+  # silence phonemic text wrote inside the clause ends it too.
+  is_stress_count_phrase_stop: >-
+    (current.phoneme == "SIL"
+     && (get(current, "punctuationSymbol", null) != null || isTrue(current, "written_silence")))
+    || (behind(current, 1) != null
+        && get(behind(current, 1), "rime_boundary", "") in ["vp", "comma", "period", "question", "exclaim"])
+    || (dectalk_word_start(current) && dectalk_phrase_state(current) == "pp")
+  is_stress_count_clause_stop: >-
+    (current.phoneme == "SIL"
+     && (get(current, "punctuationSymbol", null) != null || isTrue(current, "written_silence")))
+    || (dectalk_word_start(current) && dectalk_phrase_state(current) == "pp")
+    || (dectalk_word_start(current) && dectalk_phrase_start(current) == "vp"
+        && behind(current, 1) != null && isTrue(behind(current, 1), "morpheme_boundary_after"))
   is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
   is_stressed_vowel: 'current.type == "vowel" && has(current.stress) && current.stress == 1'
   is_stressed_vowel_or_boundary: >-
     (current.type == "vowel" && has(current.stress) && current.stress == 1)
-    || current.phoneme == "SIL"
+    || (current.phoneme == "SIL" && !isTrue(current, "written_silence"))
   is_syllabic_or_boundary: >-
     current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"]
     || current.phoneme == "SIL"

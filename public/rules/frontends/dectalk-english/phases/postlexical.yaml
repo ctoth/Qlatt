@@ -572,6 +572,12 @@ rules:
   # must have at least one 1-stress" (ph_sort.c:1181-1189). When a clause has
   # none, find_syll_to_stress (ph_sort2.c:129-181) stresses the first syllabic
   # of the clause's LAST word. Consonant stress then follows from it.
+  #
+  # A breath group ends at a comma, a period, a question or an exclamation
+  # mark's symbol (ph_sort.c:1182) and nowhere else: a silence phonemic text
+  # wrote ("The [_m'uwn] rose.") is a phone inside it and ends neither the
+  # group nor a word. Measured on say.exe: the "the" there has its plain 8
+  # and 9 frames, not a stressed word's.
   # -------------------------------------------------------------------------
   dectalk_breath_group_primary_stress:
     kind: scalar
@@ -581,7 +587,7 @@ rules:
     define:
       prev_primary_or_boundary: >-
         look_back_where(current, 100,
-          '(candidate.type == "vowel" && has(candidate.stress) && candidate.stress == 1) || candidate.phoneme == "SIL"')
+          '(candidate.type == "vowel" && has(candidate.stress) && candidate.stress == 1) || (candidate.phoneme == "SIL" && !isTrue(candidate, "written_silence"))')
       next_primary_or_boundary: "look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')"
       prior_vowel_in_word: >-
         find_within_word(current,
@@ -592,7 +598,7 @@ rules:
         && (next_primary_or_boundary == null || next_primary_or_boundary.phoneme == 'SIL')
       after_word: >-
         look_ahead_where(current, 100,
-          'candidate.phoneme == "SIL" || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id)')
+          '!isTrue(candidate, "written_silence") && (candidate.phoneme == "SIL" || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id))')
       in_last_word: "after_word == null || after_word.phoneme == 'SIL'"
       already_primary: "has(current.stress) && current.stress == 1"
     constraint: "!already_primary && no_primary_in_clause && in_last_word && prior_vowel_in_word == null"

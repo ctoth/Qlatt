@@ -39,24 +39,20 @@ const corpus = readVoiceCorpus(
 const FRAMES: Readonly<Record<string, string>> = {
   "ps-01": "DH:8 AX:9 M:13 UW:17 SIL:4 N:7 R:8 OW:37 Z:22",
   "ps-02": "DH:8 AX:9 M:13 UW:17 SIL:47 N:7 R:8 OW:37 Z:22",
+  // The hat falls on the last stress before a silence, and Rule 7 gives
+  // that vowel its four frames (ph_aloph.c:1646-1668, p_us_tim.c:497-508).
+  "ps-03": "DH:8 AX:9 M:13 UW:24 SIL:4 N:13 R:9 OW:41 Z:22",
   "ps-04": "DH:8 AX:9 M:13 UW:16 N:9 SIL:31 R:10 OW:37 Z:22",
+  // "the" is no breath group of its own: it stays unstressed
+  // (ph_sort.c:1181-1189).
+  "ps-05": "DH:8 AX:9 SIL:4 M:13 UW:16 N:7 R:8 OW:37 Z:22",
+  "ps-06": "DH:8 AX:9 SIL:39 M:13 UW:16 N:7 R:8 OW:37 Z:22",
   "ps-07": "SIL:63 DH:8 AX:9 M:13 UW:19 N:9 R:9 OW:41 Z:22",
   "ps-08": "DH:8 AX:9 M:13 UW:19 N:9 R:9 OW:29 Z:19 SIL:47 S:16 L:8 OW:23 L:6 IY:20",
   "ps-09": "DH:8 AX:9 S:16 SIL:24 T:14 AR:28 R:10 OW:37 Z:22",
   "ps-10": "DH:8 AX:9 M:13 UW:17 SIL:16 SIL:16 N:7 R:8 OW:37 Z:22",
   "ps-11": "W:6 IY:16 S:20 AO:26 DH:8 AX:9 R:12 IH:19 V:13 SIL:39 RR:17 T:11 UW:12 D:12 EY:33",
   "ps-12": "M:13 UW:19 N:9 SIL:31 R:12 OW:25 Z:13 P:12 IR:32 IY:14 AX:20 D:10",
-};
-
-/**
- * Texts whose frames are not DECtalk's yet, with DECtalk's: in each the
- * silence is the first allophone after a word boundary that follows a
- * vowel. Cause not found.
- */
-const FRAMES_DIFFER: Readonly<Record<string, string>> = {
-  "ps-03": "DECtalk has UW:24 where the frontend has 20",
-  "ps-05": "DECtalk has DH:8 AX:9 where the frontend has 10 and 17",
-  "ps-06": "DECtalk has DH:8 AX:9 where the frontend has 10 and 17",
 };
 
 /** The frontend's allophones and frames, the clause's own pauses left off. */
@@ -84,12 +80,12 @@ const framesOf = (text: string): string => {
 };
 
 describe("the silence symbol in a bracket of the phoneme mode", () => {
-  it("sorts every text of the corpus into one of the two lists", () => {
+  it("has DECtalk's frames for every text of the corpus", () => {
     const ids = corpus.entries.map((entry) => entry.id).sort();
-    expect([...Object.keys(FRAMES), ...Object.keys(FRAMES_DIFFER)].sort()).toEqual(ids);
+    expect(Object.keys(FRAMES).sort()).toEqual(ids);
   });
 
-  it.each(corpus.entries.filter((entry) => entry.id in FRAMES).map((entry) => [entry.id, entry]))(
+  it.each(corpus.entries.map((entry) => [entry.id, entry] as const))(
     "%s has DECtalk's frames on the silence and the phones around it",
     (id, entry) => {
       expect(framesOf(entry.text)).toBe(FRAMES[id]);

@@ -470,13 +470,13 @@ rules:
       # yet rewritten: its last ones, one for each open scan.
       promoted_ahead: "min([scans_in, secondaries_ahead])"
       primaries_in_clause: >-
-        count_ahead_pred(current, 1000, 'is_clause_or_phrase_start', 'is_primary_syllabic')
+        count_ahead_pred(current, 1000, 'is_stress_count_clause_stop', 'is_primary_syllabic')
         + promoted_ahead
       # Of those, the ones before the next phrase boundary: the secondary
       # stresses of this phrase less the ones no scan has taken.
       primaries_in_phrase: >-
         dectalk_boundary(current) >= params.policy.timing.boundary.vp ? 0.0
-        : count_ahead_pred(current, 1000, 'is_past_phrase_boundary', 'is_primary_syllabic')
+        : count_ahead_pred(current, 1000, 'is_stress_count_phrase_stop', 'is_primary_syllabic')
           + max([0.0, secondaries_in_phrase - (secondaries_ahead - promoted_ahead)])
       stress_now: "promoted ? 1 : get(current, 'stress', 0)"
       stressed: "stress_now == 1 || stress_now == 2 || stress_now == 3"

@@ -1,0 +1,9 @@
+{
+  "dd-year-month-day": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "dd-nineteen-hundreds": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "dd-first-of-year": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dd-year-month-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dd-single-digits-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "dd-code-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dd-slash-date-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"]
+}

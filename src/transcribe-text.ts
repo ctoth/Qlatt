@@ -107,6 +107,11 @@ type OrthographyInputToken = {
    * that looks at a word's case calls capitalised.
    */
   writtenCapitalised?: boolean;
+  /**
+   * The word was written with an apostrophe at an end ("'and"), was not in
+   * the dictionary so, and is looked up again without it.
+   */
+  edgeStripped?: boolean;
   /** What was written, when a text rule composed the token's word anew. */
   written?: string;
   symbol?: string;
@@ -731,7 +736,9 @@ export function transcribeText(
         if (token.isPunctuation || !/^'|'$/.test(token.word)) return token;
         if (effectiveDictLookup(token.word)) return token;
         const stripped = token.word.replace(/^'+|'+$/g, "");
-        return stripped.length > 0 ? { ...token, word: stripped } : token;
+        // The word was not found as written: a lookup that is made before
+        // the apostrophes are stripped has missed it (edgeStripped).
+        return stripped.length > 0 ? { ...token, word: stripped, edgeStripped: true } : token;
       });
   const flatPhonemeList: TranscriptionToken[] = [];
   const dictionaryMisses: { word: string; token: string; applied: string }[] = [];
@@ -774,6 +781,7 @@ export function transcribeText(
           writtenCapitalised: run.map(
             (position) => orthographyWords[position].writtenCapitalised === true,
           ),
+          edgeStripped: run.map((position) => orthographyWords[position].edgeStripped === true),
         },
       );
       run.forEach((position, order) => {

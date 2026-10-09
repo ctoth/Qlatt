@@ -268,6 +268,20 @@ rules:
       output: "[]"
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:1451-1463 and LTS/ls_util.c:887-900 (the period is kept in the word when a comma, a colon or a semicolon follows it; only that mark is left as the delimiter)"
+  # A comma, colon or semicolon stripped from its word with the apostrophe
+  # after it (tn_mark_stripped_with_quote_source): the mark, sent by the
+  # word's own routine and not read as a delimiter.
+  tn_stripped_mark:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'stripped_mark' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: "[{'type': 'terminal', 'text': current.payload.mark, 'kind': 'sent_mark'}]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2303-2340 (the mark is stripped with the apostrophe and sets the comma), 1547-1549 (the next-word routine sends it)"
   tn_bare_number_request:
     kind: structural
     select:
@@ -540,4 +554,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_lone_period, tn_stripped_parenthesis_mark, tn_silent_mark, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_clock_time, tn_date_text, tn_plural_number, tn_money_text, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_lone_period, tn_stripped_parenthesis_mark, tn_silent_mark, tn_stripped_mark, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_clock_time, tn_date_text, tn_plural_number, tn_money_text, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]

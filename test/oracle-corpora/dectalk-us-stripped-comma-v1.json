@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-stripped-comma-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "sc-comma-quote", "text": "'Be late,' they went.", "group": "mark-stripped-with-quote", "tags": ["comma", "no-class-resend"], "expectedFocus": ["trace"] },
+    { "id": "sc-semicolon-quote", "text": "'Be late;' they went.", "group": "mark-stripped-with-quote", "tags": ["semicolon", "no-class-resend"], "expectedFocus": ["trace"] },
+    { "id": "sc-comma-quote-said", "text": "'Come in,' said the old man.", "group": "mark-stripped-with-quote", "tags": ["comma"], "expectedFocus": ["trace"] },
+    { "id": "sc-written-comma-control", "text": "Be late, they went.", "group": "mark-stripped-with-quote", "tags": ["control", "written-comma"], "expectedFocus": ["trace"] },
+    { "id": "sc-written-semicolon-control", "text": "Be late; they went.", "group": "mark-stripped-with-quote", "tags": ["control", "written-semicolon"], "expectedFocus": ["trace"] }
+  ]
+}

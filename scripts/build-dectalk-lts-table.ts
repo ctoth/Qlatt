@@ -367,6 +367,8 @@ for (const [character, comment] of [
   ["/", "Forward slash"],
   ["_", "Underscore"],
   ["'", "Apostrophe"],
+  ["+", "Plus sign"],
+  [":", "Colon"],
 ] as const) {
   const row = new RegExp(`"([^"]*)",\\s*/\\*\\s*${comment}\\s*\\*/`).exec(typingTable);
   if (!row) throw new Error(`E_CHARACTER_NAMES: no row '${comment}' in usa_type.tab`);

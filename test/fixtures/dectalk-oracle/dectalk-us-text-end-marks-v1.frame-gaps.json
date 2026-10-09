@@ -1,0 +1,9 @@
+{
+  "te-quote-after-period": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "te-quote-short": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "te-quote-unpaired": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "te-period-word-clause-end": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "te-quote-mid-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "te-exclaim-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "te-path-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"]
+}

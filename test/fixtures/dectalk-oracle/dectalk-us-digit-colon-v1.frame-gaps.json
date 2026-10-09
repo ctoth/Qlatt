@@ -1,0 +1,12 @@
+{
+  "dc-ratio": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dc-two-digits-first": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dc-twelve": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dc-thirteen": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dc-chain": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dc-text-end": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dc-time-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dc-time-zero-control": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "dc-parser-splits-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "dc-parser-splits-minutes-control": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"]
+}

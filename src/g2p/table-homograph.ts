@@ -63,6 +63,13 @@ export interface ClauseContext {
    */
   capitalised?: boolean;
   /**
+   * The word was written with an apostrophe at an end that was stripped
+   * before this lookup ("'and"). DECtalk's mini dictionary is searched for
+   * the word as written, before anything is stripped (LTS/ls_task.c:686-697,
+   * 1900-1917), so such a word is not one of its words.
+   */
+  edgeStripped?: boolean;
+  /**
    * The word is a dollar amount and the next one is a word that takes
    * "dollars" behind it ("$2 million").
    */

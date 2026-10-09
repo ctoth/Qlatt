@@ -247,7 +247,7 @@ export const CEL_FUNCTION_CATALOG = [
   { name: "ahead", arities: [1, 2], binding: "context" },
   { name: "behind", arities: [1, 2], binding: "context" },
   { name: "total", arities: [1], binding: "context" },
-  { name: "target", arities: [1], binding: "context" },
+  { name: "target", arities: [1, 2], binding: "context" },
   { name: "vocabulary", arities: [2], binding: "context" },
   { name: "assoc", arities: [2], binding: "context" },
   { name: "max", arities: [1, 2, 3, 4], binding: "context" },

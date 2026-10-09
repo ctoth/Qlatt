@@ -2,6 +2,7 @@ import { isPlainObject } from "../../yaml-loader";
 import { evaluateExpression } from "../cel-expressions";
 import {
   type InventoryParameterFallback,
+  type InventorySelection,
   type InventorySpec,
   materializePhonemeTarget,
 } from "../inventory";
@@ -638,16 +639,36 @@ function buildEvaluationScope(
         ? container.includes(String(candidate))
         : Array.isArray(container) && container.includes(candidate),
     merge,
-    target: (phoneme) => {
+    // target(key) reads the inventory entry of that name. target(phoneme,
+    // stress) selects a phoneme's entry for a lexical stress the way the
+    // frontend does when it first makes a Segment: by the inventory's stress
+    // markers, and for a secondary stress with no entry of its own by the
+    // inventory's cited secondary_stress_fallback. A rule that spells the
+    // entry's name itself ("AH2") goes past that policy.
+    target: (...args) => {
+      const phoneme = args[0];
       if (!inventory)
         throw new Error(
           "E_HRG_INVENTORY_REQUIRED: target() requires the selected frontend inventory",
         );
       transaction.dependOn(inventory.decisionId);
+      const byStress = args.length > 1;
+      const stress = args[1];
       const materialized = materializePhonemeTarget(phoneme, {
         inventorySpec: inventory.spec,
         diagnostics: utterance.diagnostics,
         onInvalidParameter: inventory.onInvalidParameter,
+        ...(byStress
+          ? {
+              stress: stress == null ? null : Number(stress),
+              onSelection: (selection: InventorySelection) => {
+                const fallback = inventory.spec.secondary_stress_fallback;
+                if (selection.secondaryStressFallback && fallback) {
+                  transaction.cite(fallback.citations);
+                }
+              },
+            }
+          : {}),
       });
       return Object.freeze({ ...materialized, ...materialized.params });
     },

@@ -15,13 +15,11 @@ rules:
       relation: Segment
       where: current.phoneme == 'AX'
     define:
-      # AX always maps to AH; stress digit preserved from Hunnicutt assignment.
-      # cel-js lacks int(); use ternary chain for stress-keyed inventory lookup.
-      ah_key: >-
-        has(current.stress) && current.stress != null
-        ? (current.stress == 1 ? "AH1" : (current.stress == 2 ? "AH2" : "AH0"))
-        : "AH0"
-      ah_target: target(ah_key)
+      # AX always maps to AH; the stress the letter-to-sound path assigned is
+      # kept, and the inventory chooses the entry for it: AH1 or AH0, and for a
+      # secondary stress (a long word's schwa, "seven" inside a digit string)
+      # the entry its secondary_stress_fallback names, since there is no AH2.
+      ah_target: "target('AH', has(current.stress) ? current.stress : null)"
     splice:
       type: replace_range
       range_left: current.sync_left

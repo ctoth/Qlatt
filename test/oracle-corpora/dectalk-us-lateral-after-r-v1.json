@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-lateral-after-r-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "lr-clearly", "text": "Yes, clearly.", "group": "lateral-after-fused-r", "tags": ["ir", "text-end"], "expectedFocus": ["trace"] },
+    { "id": "lr-clearly-sentence", "text": "Speaker 1: Can you hear me? Speaker 2: Yes, clearly.", "group": "lateral-after-fused-r", "tags": ["ir", "sweep-text"], "expectedFocus": ["trace"] },
+    { "id": "lr-spoke-clearly", "text": "He spoke clearly.", "group": "lateral-after-fused-r", "tags": ["ir"], "expectedFocus": ["trace"] },
+    { "id": "lr-nearly", "text": "It is nearly done.", "group": "lateral-after-fused-r", "tags": ["ir", "word-after"], "expectedFocus": ["trace"] },
+    { "id": "lr-fairly", "text": "Fairly soon.", "group": "lateral-after-fused-r", "tags": ["er"], "expectedFocus": ["trace"] },
+    { "id": "lr-barley", "text": "Barley grows.", "group": "lateral-after-fused-r", "tags": ["ar"], "expectedFocus": ["trace"] },
+    { "id": "lr-early-control", "text": "The early bird.", "group": "lateral-after-fused-r", "tags": ["control", "rr-vowel"], "expectedFocus": ["trace"] },
+    { "id": "lr-really-control", "text": "She is really here.", "group": "lateral-after-fused-r", "tags": ["control", "plain-vowel"], "expectedFocus": ["trace"] },
+    { "id": "lr-girl-control", "text": "A girl ran.", "group": "lateral-after-fused-r", "tags": ["control", "word-final-lateral"], "expectedFocus": ["trace"] }
+  ]
+}

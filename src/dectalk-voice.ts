@@ -10,6 +10,14 @@
 // Citation: DECtalk 4.63 ph_vset.c (speaker-dependent parameter tables).
 
 import {
+  changeDefinition,
+  type DefinitionChange,
+  isSpeakerDefinition,
+  isSpeakerDefinitionData,
+  OWN_BLOCK_VOICE,
+  voiceFieldsOfDefinition,
+} from "./dectalk-speaker-definition";
+import {
   loadSpeakerProfileSync,
   type SpeakerProfileOverride,
   type SpeakerProfileSpec,
@@ -56,6 +64,12 @@ export interface VoiceRegistry {
    *  param). Applied as Paul-relative additive offsets by generic infra with no
    *  per-voice or per-gain branches. Empty when not declared. */
   speakerGainOffsets: SpeakerGainOffset[];
+  /**
+   * Where the names and limits of a speaker definition's entries are
+   * (`speakers.definition_path`), for a frontend whose voice files carry
+   * their definition and whose texts may change it. Absent otherwise.
+   */
+  definitionPath?: string;
 }
 
 export interface ResolvedVoice {
@@ -228,7 +242,54 @@ export function getVoiceRegistry(frontendSpec: unknown): VoiceRegistry | null {
         .map((e) => ({ gain: e.gain, param: e.param }))
     : [];
   const ruleFields = parseRuleFields(speakers.rule_fields);
-  return { dir, default: def, voices, ruleFields, speakerFrameParams, speakerGainOffsets };
+  return {
+    dir,
+    default: def,
+    voices,
+    ruleFields,
+    speakerFrameParams,
+    speakerGainOffsets,
+    ...(typeof speakers.definition_path === "string"
+      ? { definitionPath: speakers.definition_path }
+      : {}),
+  };
+}
+
+/**
+ * A voice document with entries of its speaker definition changed: the
+ * fields that come from the definition are derived again, as DECtalk's
+ * setspdef() does after setparam() (src/dectalk-speaker-definition.ts).
+ */
+function withDefinitionChanges(
+  registry: VoiceRegistry,
+  docPath: string,
+  doc: Record<string, unknown>,
+  changes: readonly DefinitionChange[],
+): Record<string, unknown> {
+  if (registry.definitionPath === undefined) {
+    throw new Error(
+      "E_VOICE_DEFINITION: the frontend declares no speakers.definition_path, so a voice's definition cannot be changed",
+    );
+  }
+  const data = loadYamlDocumentSync<unknown>(registry.definitionPath);
+  if (!isSpeakerDefinitionData(data)) {
+    throw new Error(
+      `E_VOICE_DEFINITION: '${registry.definitionPath}' does not hold the names and limits of a speaker definition`,
+    );
+  }
+  if (!isSpeakerDefinition(doc.definition)) {
+    throw new Error(`E_VOICE_DEFINITION: voice file '${docPath}' has no definition`);
+  }
+  const voiceNumber = typeof doc.last_voice === "number" ? doc.last_voice : -1;
+  const definition = changeDefinition(doc.definition, data, changes);
+  return {
+    ...doc,
+    ...voiceFieldsOfDefinition(definition.values, data, {
+      frank: voiceNumber === OWN_BLOCK_VOICE,
+      voiceNumber,
+    }),
+    definition,
+  };
 }
 
 function toNumberRecord(doc: Record<string, unknown>): Record<string, number> {
@@ -251,6 +312,8 @@ export function resolveVoice(
   registry: VoiceRegistry,
   voiceName: string,
   profileSpec: SpeakerProfileSpec = loadSpeakerProfileSync(),
+  /** Changes to the voice's speaker definition, in the order they were asked. */
+  definitionChanges: readonly DefinitionChange[] = [],
 ): ResolvedVoice {
   const name = voiceName.trim().toLowerCase();
   if (registry.voices.length > 0 && !registry.voices.includes(name)) {
@@ -260,7 +323,11 @@ export function resolveVoice(
     );
   }
 
-  const [docPath, doc] = loadVoiceDocument(registry, name);
+  const [docPath, loaded] = loadVoiceDocument(registry, name);
+  const doc =
+    definitionChanges.length > 0
+      ? withDefinitionChanges(registry, docPath, loaded, definitionChanges)
+      : loaded;
 
   const params = toNumberRecord(doc);
   const ruleFields = readVoiceRuleFields(registry.ruleFields, doc, docPath);

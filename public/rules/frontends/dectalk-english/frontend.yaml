@@ -95,6 +95,13 @@ include:
 speakers:
   dir: /rules/frontends/dectalk-english/speakers
   default: paul
+  # The names and limits of a speaker definition's entries, by SPD_ index
+  # (INCLUDE/cmd.h:159-205, PH/ph_vdefi.c limit[]). Each voice file carries
+  # its definition; a text changes entries of the selected voice's with
+  # "[:dv <word> <number>]" (PH/ph_vset.c:175-232 setparam), and the fields
+  # that come from the definition are then derived again
+  # (src/dectalk-speaker-definition.ts, PH/ph_vset.c setspdef).
+  definition_path: /rules/frontends/dectalk-english/speaker-definition.json
   # Declarative speaker-field -> frame-param bindings. Each name in this list is
   # BOTH the voice-YAML field and the same-named per-frame Klatt param; the
   # selected voice's value is stamped (absolute set) onto every frame's params,
@@ -748,6 +755,14 @@ parameters:
       # voiced, an obstruent or a plosive, 5 before any other (in US English
       # /h/ and the glottal stop), p_us_tim.c:229-232.
       pause_frames: { comma: 16, period: 94, clause_initial: 4, clause_initial_other: 5 }
+      # compause and perpause: what the commands [:comma N] and [:period N]
+      # add to nfcomma and nfperiod, in ms, each held between its limits and
+      # turned into frames (PH/ph_task.c:717-722: mstofr(deadstop(N, -280,
+      # 30000)) and mstofr(deadstop(N, -420, 30000)); p_us_tim.c:241-252).
+      # 0 until a command that stands before any spoken text says otherwise
+      # (ph_task.c:320-321).
+      pause_added_ms: { comma: 0, period: 0 }
+      pause_added_limits_ms: { comma: [-280, 30000], period: [-420, 30000] }
       # p_us_rom.h us_begtyp: the phones whose beginning type is 1 (front).
       # Ph_inton2.c:1701-1706 releases a plosive into IX after one of these.
       front_onset_phones: [IY, IH, EY, EH, AE, YU, IX, IR, ER, Y, TZ]

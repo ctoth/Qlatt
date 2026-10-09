@@ -124,7 +124,7 @@ describe("DECtalk's in-text commands", () => {
 
   it("names each command it recognises and does not carry out, in a decision and a diagnostic", () => {
     const { decisions, warnings } = run(
-      "The ship came [:dv ap 200] in. [:nb] We went [:punct all] down.",
+      "The ship came [:dv ap 200] in. [:nb] We went [:mode spell on] down.",
     );
     expect(decisions.map((decision) => decision.type)).toEqual([
       "text_parser_command_not_carried_out",
@@ -134,7 +134,7 @@ describe("DECtalk's in-text commands", () => {
     expect(decisions[0]?.reason).toContain("(dv)");
     expect(decisions[1]?.reason).toContain("(nb)");
     expect(decisions[1]?.reason).toContain("a voice change inside a text (to betty) is not ported");
-    expect(decisions[2]?.reason).toContain("(punctuation)");
+    expect(decisions[2]?.reason).toContain("(mode)");
     expect(warnings.map((event) => event.code)).toEqual([
       "W_TEXT_COMMAND_NOT_CARRIED_OUT",
       "W_TEXT_COMMAND_NOT_CARRIED_OUT",

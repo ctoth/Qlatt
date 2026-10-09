@@ -824,6 +824,9 @@ function buildTextToKlattTrackDetailed(
         registry,
         commandVoice ?? (typeof options.speaker === "string" ? options.speaker : registry.default),
         speakerProfile,
+        // Entries of the voice's speaker definition that commands before any
+        // spoken text changed (src/text-parser/frontend.ts).
+        parsedText?.initial.definition ?? [],
       )
     : null;
   const speakerOverride: SpeakerProfileOverride | undefined =
@@ -1078,10 +1081,28 @@ function buildTextToKlattTrackDetailed(
     provenance,
   );
   const rate = wordsPerMinute === undefined ? relativeRate : 1;
+  const commandPauses = parsedText?.initial.pauseAddedMs;
   const speakerPolicy = {
     speaker: resolvedSpeaker,
     ...(voiceRuleFields ? { voice: voiceRuleFields } : {}),
-    ...(wordsPerMinute === undefined ? {} : { timing: { speaking_rate_wpm: wordsPerMinute } }),
+    ...(wordsPerMinute === undefined && !commandPauses
+      ? {}
+      : {
+          timing: {
+            ...(wordsPerMinute === undefined ? {} : { speaking_rate_wpm: wordsPerMinute }),
+            // What pause commands before any spoken text add to the comma's
+            // and the period's pause (src/text-parser/frontend.ts); the
+            // frontend's rules say what that does.
+            ...(commandPauses
+              ? {
+                  pause_added_ms: {
+                    comma: commandPauses.comma ?? 0,
+                    period: commandPauses.period ?? 0,
+                  },
+                }
+              : {}),
+          },
+        }),
   };
   const graphInventory = {
     spec: resources.inventory,

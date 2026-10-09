@@ -12,7 +12,7 @@
 
 import type { ProvenanceCollector } from "../provenance";
 import { loadYamlDocumentSync } from "../yaml-loader";
-import { clauseTexts, readClauses } from "./clauses";
+import { clauseTexts, PUNCTUATION_PASS, readClauses } from "./clauses";
 import { newCommandSlots, optionIndex, type ReadCommand } from "./commands";
 import { dictionaryLookup } from "./dictionary";
 import type { TextParserTable } from "./interpreter";
@@ -179,10 +179,20 @@ export interface TextParserResult {
   decisionIds: string[];
   /**
    * What commands that stand before any spoken text ask for: the voice (a
-   * name of the table's voice_names) and the speaking rate in words per
-   * minute for the whole text.
+   * name of the table's voice_names), the speaking rate in words per minute,
+   * and what is added to the pause at a comma and at a period, in ms, for
+   * the whole text.
    */
-  initial: { voice?: string; rate?: number };
+  initial: {
+    voice?: string;
+    rate?: number;
+    pauseAddedMs?: { comma?: number; period?: number };
+    /**
+     * Changes to the voice's speaker definition, in order: the entry's index
+     * and the number typed. A voice command after them starts again.
+     */
+    definition?: { index: number; value: number }[];
+  };
 }
 
 export interface TextParserRunOptions {
@@ -437,6 +447,9 @@ export function runTextParser(
           }
           if (!spoken) {
             initial.voice = name;
+            // usevoice() loads the voice's own definition
+            // (PH/ph_vset.c:433-448): changes made before it are gone.
+            delete initial.definition;
             record(
               "text_parser_command",
               `The command ${written} (${row.name}) stands before any spoken text: the text is spoken by the voice ${name}`,
@@ -475,6 +488,152 @@ export function runTextParser(
             written,
             row.name,
             `the clause before it is ended, but the rate stays: a rate change inside a text (to ${value.toString()} words per minute) is not ported`,
+          );
+        } else if (row.routine === "cm_cmd_define") {
+          // One word and its number (a list runs once for each pair). The
+          // word's place in the option list less one is the entry's index;
+          // the first word, "save", takes no number
+          // (CMD/cm_copt.c:2840-2887).
+          const words = commandTable.options.define_options ?? [];
+          if (command.words[0] === undefined && command.untyped.every((none) => none)) {
+            // Nothing typed: the routine returns at once (2847-2848).
+            record(
+              "text_parser_command",
+              `The command ${written} (${row.name}) has no word: nothing is changed`,
+              ["DECtalk 4.63 CMD/cm_copt.c:2847-2848 (cm_cmd_define with no parameter)"],
+            );
+            if (endsClause) out += clauseEnd;
+            continue;
+          }
+          const option = optionIndex(words, command.words[0]);
+          if (option < 0) {
+            speakError(
+              written,
+              commandTable.errorCodes.string,
+              "its word is no entry of a speaker definition",
+            );
+            continue;
+          }
+          const numberTyped = command.untyped[1] === false;
+          if ((option === 0) === numberTyped) {
+            speakError(
+              written,
+              commandTable.errorCodes.value,
+              option === 0 ? "save takes no number" : "the entry has no number",
+            );
+            continue;
+          }
+          if (option === 0) {
+            notCarriedOut(
+              written,
+              row.name,
+              "DECtalk keeps the definition as it now stands for the voice Val (PH/ph_task.c SAVE, saveval); that voice is not ported, and the current voice is not changed by it",
+            );
+          } else if (!spoken) {
+            const value = command.numbers[1] ?? 0;
+            initial.definition = [...(initial.definition ?? []), { index: option - 1, value }];
+            record(
+              "text_parser_command",
+              `The command ${written} (${row.name}) stands before any spoken text: entry ${words[option] ?? ""} of the voice's speaker definition is set to ${value.toString()} for the whole text (the voice's tuning table is added and the entry's limits hold)`,
+              [
+                "DECtalk 4.63 CMD/cm_copt.c:2840-2887 (cm_cmd_define: the word's place less one is the entry)",
+                "DECtalk 4.63 PH/ph_vset.c:175-232 (setparam), 537-818 (setspdef derives the voice from the definition)",
+              ],
+            );
+            continue;
+          } else {
+            notCarriedOut(
+              written,
+              row.name,
+              `the clause before it is ended, but the voice stays: a change of the speaker definition inside a text (${words[option] ?? ""} to ${(command.numbers[1] ?? 0).toString()}) is not ported`,
+            );
+          }
+        } else if (row.routine === "cm_cmd_stress") {
+          // The pitch command stores a number (pitch_delta) that the
+          // phonemic stage adds to the voice's average pitch when it gets a
+          // PITCH_CHANGE item (PH/ph_task.c:751-757). Nothing in this build
+          // sends that item (LTS/ls_util.c:1873 only names it in a debug
+          // print), so the command changes no speech; here as in DECtalk,
+          // anywhere in a text.
+          record(
+            "text_parser_command",
+            `The command ${written} (pitch) sets the number DECtalk would raise the pitch by at a pitch-change item (${command.untyped[0] ? "0, no number typed" : (command.numbers[0] ?? 0).toString()}); nothing sends such an item, so no speech is changed`,
+            [
+              "DECtalk 4.63 CMD/cm_copt.c:3039-3048 (cm_cmd_stress stores pitch_delta)",
+              "DECtalk 4.63 PH/ph_task.c:751-757 (its one use, at a PITCH_CHANGE item); LTS/ls_util.c:1873 (the item is named in a debug print and sent nowhere)",
+            ],
+          );
+          continue;
+        } else if (row.routine === "cm_cmd_volume") {
+          notCarriedOut(
+            written,
+            row.name,
+            "the clause before it is ended as DECtalk ends it; the command sets the volume of the audio device DECtalk plays through (StereoVolumeControl), not the samples, and there is no such device here",
+          );
+        } else if (row.routine === "cm_cmd_mode") {
+          notCarriedOut(
+            written,
+            row.name,
+            `the clause before it is ended as DECtalk ends it; the mode (${command.words.filter((word) => word !== undefined).join(" ") || "none named"}) is a flag of DECtalk's letter-to-sound stage (LTS_MODE_SET and LTS_MODE_CLEAR, CMD/cm_copt.c:2148-2260), and no mode but the one a text starts in is ported`,
+          );
+        } else if (row.routine === "cm_cmd_punct") {
+          // The clause reader has taken the mode already (clauses.ts), here
+          // or anywhere in the text; a word that is no option is the
+          // routine's error (CMD/cm_copt.c:1254-1256).
+          const modes = commandTable.options.punct_options ?? [];
+          const mode = modes[optionIndex(modes, command.words[0])];
+          if (mode === undefined) {
+            speakError(written, commandTable.errorCodes.string, "its word is no punctuation mode");
+            continue;
+          }
+          if (mode === PUNCTUATION_PASS) {
+            notCarriedOut(
+              written,
+              row.name,
+              "in the mode pass DECtalk's text stage hands the characters on without reading clauses or running its rules, which is not ported: the mode stays",
+            );
+            continue;
+          }
+          record(
+            "text_parser_command",
+            `The command ${written} (punctuation) sets the punctuation mode to ${mode} from here on: the clause reader and the punctuation rules run in it`,
+            [
+              "DECtalk 4.63 CMD/cm_copt.c:1249-1276 (cm_cmd_punct stores the mode)",
+              "DECtalk 4.63 CMD/cm_text.c:413, 636, 846 (the clause reader's and the rules' use of it)",
+            ],
+          );
+          continue;
+        } else if (row.routine === "cm_cmd_comma" || row.routine === "cm_cmd_period") {
+          // The number is sent on as typed, or as the slot holds it; the
+          // period's is first held between the command's own limits.
+          const period = row.routine === "cm_cmd_period";
+          const which = period ? "period" : "comma";
+          const asked = command.numbers[0] ?? 0;
+          const [low, high] = commandTable.periodPause;
+          const value = period ? Math.min(high, Math.max(low, asked)) : asked;
+          if (!spoken) {
+            initial.pauseAddedMs = { ...initial.pauseAddedMs, [which]: value };
+            record(
+              "text_parser_command",
+              `The command ${written} (${row.name}) stands before any spoken text: ${value.toString()} ms is added to the pause at each ${period ? "sentence end" : "comma"} of the text` +
+                (command.untyped[0]
+                  ? " (no number was typed: the command's number slot held this one)"
+                  : value !== asked
+                    ? ` (${asked.toString()} is outside ${low.toString()} to ${high.toString()})`
+                    : ""),
+              [
+                period
+                  ? "DECtalk 4.63 CMD/cm_copt.c:2484-2506 (cm_cmd_period), CMD/cm_defs.h:71-72 (its limits)"
+                  : "DECtalk 4.63 CMD/cm_copt.c:2453-2468 (cm_cmd_comma)",
+                "DECtalk 4.63 PH/ph_task.c:717-722 (compause, perpause), PH/p_us_tim.c:241-252 (added to the comma's and the period's pause)",
+              ],
+            );
+            continue;
+          }
+          notCarriedOut(
+            written,
+            row.name,
+            `the clause before it is ended, but the pauses stay: a change of the ${which} pause inside a text (to ${value.toString()} ms more) is not ported`,
           );
         } else {
           notCarriedOut(

@@ -207,6 +207,12 @@ frame_programs:
           dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp'
           && dectalk_phrase_state(current) != 'alone'
         edge: false
+      # "to", "and" or "for" at its clause's end is counted a second time: the
+      # phone sort turns its PPSTART into another word boundary
+      # (ph_sort.c:1055-1070, pipeline.yaml is_twice_counted_word_start).
+      twice_counted_word:
+        value: "dectalk_word_start(current) && dectalk_phrase_state(current) == 'word'"
+        edge: false
       # The silence that ends a clause.
       clause_end:
         value: "current.phoneme == 'SIL' && get(current, 'punctuationSymbol', null) != null"
@@ -248,7 +254,9 @@ frame_programs:
         # nphonetot: the clause's input phones, both silences included.
         phonemes: "u.phonemes"
         # number_words
-        words: "u.counted_word || (u.word_start && p.initial) ? 1 : 0"
+        words: >-
+          (u.counted_word || (u.word_start && p.initial) ? 1 : 0)
+          + (u.twice_counted_word ? 1 : 0)
     registers:
       # ph_claus.c:217-221 sets pressure to 10000 at start-up; the reset at
       # ph_draw.c:925 replaces it in the first frame of every clause.

@@ -1,0 +1,7 @@
+{
+  "spelled-break-nw-at": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "spelled-break-xq-and": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "spelled-break-length": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "spelled-break-kept-nw": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "spelled-break-kept-usb": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"]
+}

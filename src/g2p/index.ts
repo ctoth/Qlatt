@@ -457,8 +457,32 @@ export function pronounce(
     };
   }
 
+  // A word the dictionary holds twice, capitalised and in lower case ("New"
+  // n`uw and "new" n'uw): a word written with a capital first letter and a
+  // lower-case second one finds the capitalised entry, any other writing the
+  // lower-case one (DECtalk 4.63 LTS/ls_dict.c:641-718; "NEW" is not
+  // "capitalized" by the test at :665). A suffixed word's root is searched
+  // the same way: "Misses" has the phones of "Miss".
+  const capitalisedEntry = (candidate: string) =>
+    context.capitalised ? table?.capitalisedEntries?.[candidate] : undefined;
+  const lookupAsWritten: DictLookup = (candidate) => {
+    const capitalised = capitalisedEntry(candidate);
+    return capitalised ? [...capitalised.phonemes] : dictLookup(candidate);
+  };
+
   // 1. Try direct dictionary lookup
   const dictResult = dictLookup(lowerWord);
+  const capitalised = placed ? undefined : capitalisedEntry(lowerWord);
+  if (dictResult && capitalised) {
+    return {
+      phonemes: [...capitalised.phonemes],
+      source: "dictionary",
+      word: lowerWord,
+      ...classed(capitalised.formClass),
+      ...phrased(capitalised.formClass),
+      ...marked(capitalised),
+    };
+  }
   if (dictResult) {
     const entry = entryOf(lowerWord, 0);
     // An entry with a word boundary in it is several words ("#" is "number
@@ -623,15 +647,25 @@ export function pronounce(
       suffixIndex && suffixTable
         ? stripSuffixes(lowerWord, lookup, { ...table, suffixIndex, suffixTable })
         : { phonemes: null, formClass: 0, root: null };
-    let stripped = strip(dictLookup);
+    let stripped = strip(lookupAsWritten);
     if (stripped.phonemes && stripped.root !== null) {
       const root = stripped.root;
-      const entry = entryOf(root, stripped.formClass);
+      const rootCapitalised = capitalisedEntry(root);
+      const entry = rootCapitalised
+        ? {
+            other: undefined,
+            bySuffixRule: false,
+            isHomograph: false,
+            formClass: rootCapitalised.formClass,
+            rulesBlockedAt: rootCapitalised.rulesBlockedAt,
+            boundaryAfter: rootCapitalised.boundaryAfter,
+          }
+        : entryOf(root, stripped.formClass);
       // The root's other entry: the same search, with that entry's phones.
       const other = entry.other;
       if (other) {
         stripped = strip((candidate) =>
-          candidate === root ? [...other.phonemes] : dictLookup(candidate),
+          candidate === root ? [...other.phonemes] : lookupAsWritten(candidate),
         );
       }
       // The suffix's class stays on the word and a homograph root adds its
@@ -883,6 +917,11 @@ export function pronounceClause(
      * know it by that.
      */
     written?: readonly (string | undefined)[];
+    /**
+     * For each word, whether it was written with a capital first letter and
+     * a lower-case second one (ClauseContext.capitalised).
+     */
+    writtenCapitalised?: readonly boolean[];
     /** The mark that ends the run, as written. */
     endMark?: string;
   },
@@ -928,6 +967,7 @@ export function pronounceClause(
           laterVerb: laterVerbAt ? laterVerbAt(index) : null,
           atPunctuation: index === words.length - 1 && options.atWrittenPunctuation !== false,
           ...(number === undefined ? {} : { numberBefore: number }),
+          ...(options.writtenCapitalised?.[index] ? { capitalised: true } : {}),
           ...(index === words.length - 1 && options.endMark !== undefined
             ? { markAfter: options.endMark }
             : {}),

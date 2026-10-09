@@ -276,6 +276,20 @@ for (const [word, row] of byWord(dictionaryRows.secondary)) {
     ...(boundaryAfter.length > 0 ? { boundaryAfter } : {}),
   };
 }
+// The capitalised entry of each word the dictionary holds twice, once with a
+// capital first letter and once in lower case ("New" n`uw, "new" n'uw): the
+// search takes it for a word written with a capital first letter and a
+// lower-case second one (LTS/ls_dict.c:641-718).
+const capitalisedEntries: typeof homographs = {};
+for (const [word, row] of byWord(dictionaryRows.capitalised)) {
+  const { phones, rulesBlocked, boundaryAfter } = convertPhonemeFieldDetailed(row.phonemes);
+  capitalisedEntries[word] = {
+    phonemes: phones,
+    formClass: rowFormClass(row.formClass, row.pos),
+    ...(rulesBlocked.length > 0 ? { rulesBlockedAt: rulesBlocked } : {}),
+    ...(boundaryAfter.length > 0 ? { boundaryAfter } : {}),
+  };
+}
 // The rules that choose between the two (LTS/ls_homo.h homo_table): four
 // class words each, {suffix, context, select, eliminate}.
 const homographSource = fs.readFileSync(path.join(ltsDir, "ls_homo.h"), "utf8");
@@ -645,6 +659,7 @@ fs.writeFileSync(
     wordBreaks,
     homographs,
     homographRules,
+    capitalisedEntries,
     specialWordFormClasses,
     specialWordPhraseStarts,
     wordsByPunctuation,

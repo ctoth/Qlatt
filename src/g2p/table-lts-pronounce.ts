@@ -46,6 +46,11 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
   homographs?: Readonly<Record<string, HomographEntry>>;
   /** The rules that choose between a word's two entries, in order. */
   homographRules?: readonly (readonly number[])[];
+  /**
+   * The capitalised entry of each word the dictionary holds both capitalised
+   * and in lower case, by the lower-case word (DECtalk 4.63 LTS/ls_dict.c:641-718).
+   */
+  capitalisedEntries?: Readonly<Record<string, HomographEntry>>;
   /** Words whose form class is fixed whatever the dictionary says. */
   specialWordFormClasses?: Readonly<Record<string, number>>;
   /** The phrase each of those words starts. */

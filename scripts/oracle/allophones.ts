@@ -106,6 +106,14 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // An initial's periods leave the text stage's first-word state as it was:
   // the question mark of a wh-question and a first auxiliary's stress after one.
   "dectalk-us-initial-sentence-state-v1.json",
+  // A written word spelled letter by letter is one word in the count the
+  // clause breaks before conjunctions and prepositions are made by.
+  "dectalk-us-spelled-word-breaks-v1.json",
+  // Labels that end in a colon, one after another.
+  "dectalk-us-label-colons-v1.json",
+  // Words the dictionary holds capitalised and in lower case with different
+  // phones ("New" and "new"), by how the word is written.
+  "dectalk-us-capitalised-entries-v1.json",
 ];
 
 /** Every corpus with a packet record. */

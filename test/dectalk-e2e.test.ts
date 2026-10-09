@@ -907,6 +907,17 @@ describe("dectalk-english clause breaks", () => {
     expect(commas("The 25 and the small cat ran away.")).toBe(0);
   });
 
+  // LTS/ls_task.c:5066-5075: one item between white space is one word of the
+  // count. DECtalk's symbols for this text have no comma before "and".
+  it("counts a word spelled letter by letter as one written word", () => {
+    const places = detailed("The dog ran off and the XQ came.")
+      .relation("Word")
+      .listItems()
+      .map((word) => word.get("clause_word_index"));
+    expect(places).toEqual([1, 2, 3, 4, 5, 6, 7, 7, 8]);
+    expect(commas("The XQ and the old cat ran off down the road today.")).toBe(0);
+  });
+
   it("starts the count again after a written comma", () => {
     expect(commas("Yes, the big dog barked and the small cat ran away.")).toBe(2);
   });

@@ -97,6 +97,12 @@ type OrthographyInputToken = {
    * it: a text rule made several words of one written word ("NW" spelled).
    */
   continuesWrittenWord?: boolean;
+  /**
+   * The token's word is what was written, and that has a capital first
+   * letter and a lower-case second one ("New"): the form a dictionary search
+   * that looks at a word's case calls capitalised.
+   */
+  writtenCapitalised?: boolean;
   /** What was written, when a text rule composed the token's word anew. */
   written?: string;
   symbol?: string;
@@ -488,6 +494,9 @@ function rewriteOrthographyTokens(
   // however many are spoken for it: DECtalk counts each item between white
   // space once (LTS/ls_task.c:5066-5075).
   const continuesWritten = new Set<string>();
+  // Word tokens that are their written word in lower case, where that word
+  // has a capital first letter and a lower-case second one.
+  const writtenCapitalised = new Set<string>();
   let writtenBefore: { textId: string; start: number; end: number } | null = null;
   entries.forEach((entry, index) => {
     const input = sharedInput ?? beginInput();
@@ -527,6 +536,9 @@ function rewriteOrthographyTokens(
         if (!punctuation && tables.writtenWordMarks) {
           const marks = writtenWordMarks(sourceText, start, tables.writtenWordMarks);
           if (marks.length > 0) markedWords.set(token.id, marks);
+        }
+        if (!punctuation && /^[A-Z][a-z]/.test(written) && written.toLowerCase() === word) {
+          writtenCapitalised.add(token.id);
         }
         // A word a text rule composed is known to its neighbours by what
         // was written ("9:30" for a time written out as phonemic text).
@@ -593,6 +605,7 @@ function rewriteOrthographyTokens(
           ? { writtenMarks: markedWords.get(token.id) as string[] }
           : {}),
         ...(continuesWritten.has(token.id) ? { continuesWrittenWord: true } : {}),
+        ...(writtenCapitalised.has(token.id) ? { writtenCapitalised: true } : {}),
         ...(composedFrom.has(token.id) ? { written: composedFrom.get(token.id) as string } : {}),
         ...(typeof punctuationSymbol === "string" ? { symbol: punctuationSymbol } : {}),
         ...(typeof pronunciationKey === "string" && pronunciationKey.length > 0
@@ -738,6 +751,9 @@ export function transcribeText(
           ...(endMark === undefined ? {} : { endMark }),
           stretchEnds: run.map((position) => orthographyWords[position].endsWordStretch === true),
           written: run.map((position) => orthographyWords[position].written),
+          writtenCapitalised: run.map(
+            (position) => orthographyWords[position].writtenCapitalised === true,
+          ),
         },
       );
       run.forEach((position, order) => {

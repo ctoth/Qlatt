@@ -447,16 +447,19 @@ function parseLine(line: string): Row | null {
  * n'uw). The keys here are lower case, so the lower-case row is kept: it is
  * the one DECtalk speaks for the word written in lower case ("a new car" has
  * primary stress on "new", "baton" is b@t'an). The capitalised row, which
- * DECtalk uses for the capitalised word, is not kept.
+ * DECtalk uses for the capitalised word (LTS/ls_dict.c:641-718), is in
+ * `capitalised`.
  */
 export function selectDictionaryRows(text: string): {
   best: Map<string, Row>;
   secondary: Map<string, Row>;
+  capitalised: Map<string, Row>;
   totalRows: number;
   multiRowWords: Set<string>;
 } {
   const best = new Map<string, Row>();
   const secondary = new Map<string, Row>();
+  const capitalised = new Map<string, Row>();
   let totalRows = 0;
   const multiRowWords = new Set<string>();
   for (const line of text.split(/\r?\n/)) {
@@ -476,7 +479,10 @@ export function selectDictionaryRows(text: string): {
       secondary.set(key, existing);
       best.set(key, row);
     } else if (row.word === key && existing.word !== key) {
+      capitalised.set(key, existing);
       best.set(key, row);
+    } else if (row.word !== key && existing.word === key && row.pos === "N") {
+      capitalised.set(key, row);
     }
   }
   for (const [key, row] of best) {
@@ -484,7 +490,7 @@ export function selectDictionaryRows(text: string): {
       throw new Error(`E_HOMOGRAPH_UNPAIRED: '${key}' has a ${row.pos} row and no partner`);
     }
   }
-  return { best, secondary, totalRows, multiRowWords };
+  return { best, secondary, capitalised, totalRows, multiRowWords };
 }
 
 function main(): void {

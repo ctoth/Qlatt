@@ -1,0 +1,15 @@
+{
+  "cap-new-first": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "cap-new-lower": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "cap-new-upper": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "cap-new-inside": ["B1","AV","AP","A2","A3","A4","A6","AB"],
+  "cap-miss-title": ["B1","AV","AP","A2","A4","A5"],
+  "cap-miss-first": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "cap-miss-lower": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cap-miss-upper": ["B1","AV","AP","A2","A4","A5"],
+  "cap-miss-suffix": ["B1","AV","AP","A2","A4","A5","A6"],
+  "cap-baton": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "cap-baton-lower": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "cap-bologna": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "cap-bologna-lower": ["B1","AV","AP","A2","A4","A5","A6","AB"]
+}

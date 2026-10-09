@@ -58,6 +58,11 @@ export interface ClauseContext {
    */
   markAfter?: string;
   /**
+   * The word was written with a capital first letter and a lower-case second
+   * one: DECtalk's dictionary search calls it capitalised (LTS/ls_dict.c:665).
+   */
+  capitalised?: boolean;
+  /**
    * The word is a dollar amount and the next one is a word that takes
    * "dollars" behind it ("$2 million").
    */

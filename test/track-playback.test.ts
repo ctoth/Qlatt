@@ -3,10 +3,10 @@
  *
  * The first tests check the order of `playTrack`'s steps with stand-ins. The
  * others put the real interpreter and the real dectalk-vtm node behind it, in
- * an offline context that is suspended at the time of each later Speak or
- * Stop, so that the press finds the context as a page's is: its clock at that
- * time and its parameters at the values the playing track gave them. The
- * fixtures supply the WAV the stock say.exe wrote.
+ * an offline context. Every Speak and Stop is scheduled before the render
+ * starts, each finding what a page's held context shows it: the clock at the
+ * time of the press and the parameters at the values the playing track gives
+ * them then. The fixtures supply the WAV the stock say.exe wrote.
  */
 
 import path from "node:path";
@@ -110,9 +110,57 @@ describe("runs of the dectalk-vtm node on the Speak path", () => {
   ) => Promise<void>;
 
   /**
-   * Render `seconds`: `first` is pressed before the render starts, and each
-   * of `later` with the context suspended at its time (which the context
-   * moves to a block boundary, as a page's context is at one when held).
+   * Make each of a node's parameters report, as its `value`, the value its
+   * automation has at the clock's time: what a context that is held at that
+   * time reports. Before an offline render a parameter's `value` is its
+   * default whatever is scheduled, and ending a track holds each parameter
+   * at its `value`. The tracks of this node only step; a ramp is refused.
+   */
+  function reportScheduledValues(node: AudioNode, clock: { readonly currentTime: number }): void {
+    const parameters = (node as AudioWorkletNode).parameters as unknown as Map<string, AudioParam>;
+    parameters.forEach((param) => {
+      const events: { time: number; value: number }[] = [];
+      const initial = param.value;
+      const set = param.setValueAtTime.bind(param);
+      const cancel = param.cancelScheduledValues.bind(param);
+      param.setValueAtTime = (value: number, time: number) => {
+        events.push({ time, value });
+        return set(value, time);
+      };
+      param.cancelScheduledValues = (time: number) => {
+        for (let index = events.length - 1; index >= 0; index -= 1) {
+          if ((events[index] as { time: number }).time >= time) events.splice(index, 1);
+        }
+        return cancel(time);
+      };
+      param.linearRampToValueAtTime = () => {
+        throw new Error("the test's parameters do not model a ramp");
+      };
+      Object.defineProperty(param, "value", {
+        configurable: true,
+        get: () => {
+          // The latest event at or before now; of two at one time, the later written.
+          let value = initial;
+          let at = Number.NEGATIVE_INFINITY;
+          for (const event of events) {
+            if (event.time <= clock.currentTime && event.time >= at) {
+              value = event.value;
+              at = event.time;
+            }
+          }
+          return value;
+        },
+      });
+    });
+  }
+
+  /**
+   * Render `seconds`. Everything is scheduled before the render starts:
+   * `first` is pressed at time 0 and each of `later` with the clock set to
+   * its time, which is what a page's context reads when it is held there.
+   * (The audio library's own OfflineAudioContext.suspend is not used: it
+   * registers a suspension on another thread, and panics if startRendering
+   * gets there first.)
    */
   async function render(seconds: number, first: Press, later: { at: number; press: Press }[]) {
     const config = structuredClone(await loadExperimentConfig("dectalk-vtm", FRONTEND));
@@ -133,27 +181,34 @@ describe("runs of the dectalk-vtm node on the Speak path", () => {
       });
       runtime.connectToDestination();
       try {
+        // The interpreter reads the time from a clock the test sets.
+        const clock = { currentTime: 0, sampleRate: RATE };
+        const nodes = config.graph.nodes as unknown;
+        const nodeIds = Array.isArray(nodes)
+          ? nodes.map((node) => String((node as { id: unknown }).id))
+          : Object.keys(nodes as object);
+        let shimmed = 0;
+        for (const id of nodeIds) {
+          const node = runtime.getNode(id);
+          if (node && "parameters" in node) {
+            reportScheduledValues(node, clock);
+            shimmed += 1;
+          }
+        }
+        expect(shimmed).toBeGreaterThan(0);
         const interpreter = createKlattInterpreter({
-          audioContext: ctx as unknown as AudioContext,
+          audioContext: clock as unknown as AudioContext,
           runtime,
           semantics: config.semantics,
           bindingMap: runtime.getBindingMap(),
         });
-        await first(ctx, interpreter);
-        const failures: unknown[] = [];
+        await first(clock, interpreter);
         for (const { at, press } of later) {
-          void ctx.suspend(at).then(async () => {
-            try {
-              await press(ctx, interpreter);
-            } catch (error) {
-              failures.push(error);
-            } finally {
-              await ctx.resume();
-            }
-          });
+          expect(at).toBeGreaterThan(clock.currentTime);
+          clock.currentTime = at;
+          await press(clock, interpreter);
         }
         const buffer = await ctx.startRendering();
-        expect(failures).toEqual([]);
         const samples = new Float32Array(buffer.length);
         buffer.copyFromChannel(samples, 0);
         // Worklet messages are delivered on a later turn of the event loop.

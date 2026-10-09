@@ -29,6 +29,73 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 CMD/cm_text.c:1088-1145 (text between PAR_PHONES_ON_D and PAR_PHONES_OFF_D goes to letter-to-sound as phonemes), CMD/par_def1.h:286-287'
+    # SPELLING MODE (maps.tn_text_modes.spell, laid over the rulepack's maps
+    # when a mode command before the text turned it on). Every word of the
+    # parser's text is spelled, whatever it is made of: the test stands in
+    # front of every other reading of a word, and a word is what stands
+    # between white space, less the marks at its end. White space after a
+    # word is then a comma's pause, not a word boundary, also when the text
+    # ends there: the clause end the parser's text carries after it has
+    # nothing left to end, so this rule takes it with the white space. A
+    # clause end right after the word, with no white space between (the
+    # parser writes a tab so), ends the word's clause as a period does:
+    # measured, "The tide<tab>went out." has a period after "tide".
+    # Measured on say.exe (test/oracle-corpora/dectalk-us-mode-spell-v1.json):
+    # "The tide went out." is T IY, EY CH, IY, comma, T IY, AY, D IY, IY,
+    # comma, and so on to a period; "tide" ends in a comma.
+    #
+    # Not spelled: one of the six auxiliaries as the first word of a
+    # sentence. The first-word test runs before the spelling test and speaks
+    # the auxiliary itself. The white space after it is a comma's pause all
+    # the same. The first word is the one after a period, a question mark, an
+    # exclamation mark or a clause end. Measured: "Is it out? Was it in." has
+    # IH Z and W AH Z, "It is out." has AY, EH S.
+    - id: tn_spell_mode_first_verb_source
+      pattern: '(?<=^\s*|[.?!]\s+|\x0b\s*)(?<word>[A-Za-z]+)(?:(?<gap>[^\S\x0b]+)\x0b?|(?=[.,;:!?]+(?:\s|$))|(?=\x0b)|$)'
+      flags: ''
+      class: spell_mode_first_verb
+      captures: {word: word, gap: gap}
+      when: >-
+        get(get(maps, 'tn_text_modes', {}), 'spell', 'off') == 'on'
+        && lower(captures.word) in get(maps, 'tn_first_verbs', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:656 and 688 (ls_task_set_what_state runs before ls_task_spell_mode), 1584-1625 and 4672-4728 (ls_task_lookup_first_verbs speaks the first word when it is in verbs[] and the word is finished)'
+        - 'DECtalk 4.63 LTS/ls_task.c:1175-1236 (the first-word state is set again after a period, a question mark, an exclamation mark and a clause end)'
+        - 'DECtalk 4.63 LTS/ls_task.c:1281-1290 (in the spelling mode white space after a word sends COMMA)'
+    - id: tn_spell_mode_word_source
+      pattern: '(?<=^|\s)(?<word>[^\s\x0b\x81\x82]*[^\s\x0b\x81\x82.,;:!?])(?:(?<gap>[^\S\x0b]+)\x0b?|(?=[.,;:!?]+(?:\s|$))|(?=\x0b)|$)'
+      flags: ''
+      class: spell_mode_word
+      captures: {word: word, gap: gap}
+      when: "get(get(maps, 'tn_text_modes', {}), 'spell', 'off') == 'on'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:688 and 1835-1871 (ls_task_spell_mode: in the spelling mode every word goes to ls_spel_spell, ahead of the dictionary and every other reading)'
+        - 'DECtalk 4.63 LTS/ls_task.c:1281-1290 (in the spelling mode white space after a word sends COMMA)'
+    # A question mark that ends a sentence whose first word is one of the
+    # question words is sent as a period, in the spelling mode as outside it:
+    # the first-word test comes before the spelling test. Outside the mode
+    # the frontend's own rule does this from the first word it has spoken;
+    # here the first word is spelled and this rule reads it as written. The
+    # first word is the one after a period, a question mark, an exclamation
+    # mark that ends a word, or a clause end. Measured on say.exe: "What is
+    # it?" ends in a period's clause, "Is it out?" in a question's.
+    - id: tn_spell_mode_wh_mark_source
+      pattern: '(?<=(?:^\s*|[.?!]\s+|\x0b\s*)(?<first>[A-Za-z]+)(?=[\s.,;:!?])(?:[^.?!\x0b]|[.?!](?=\S))*)\?(?=\s|$)'
+      flags: ''
+      class: spell_mode_wh_mark
+      captures: {first: first}
+      when: >-
+        get(get(maps, 'tn_text_modes', {}), 'spell', 'off') == 'on'
+        && lower(captures.first) in get(maps, 'tn_wh_words', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:656 and 688 (ls_task_set_what_state runs before ls_task_spell_mode), 1584-1616 (the first word of a sentence is looked up in whdic)'
+        - 'DECtalk 4.63 LTS/ls_task.c:1196-1208 (a question mark after such a sentence is sent as PERIOD), LTS/l_us_con.c:1215-1226 whdic'
     # The clause end the parser's text carries (the host's "speak this now",
     # and the ends the parser's own rules write): it ends the words said since
     # the last sentence or clause mark as a period does, and does nothing when

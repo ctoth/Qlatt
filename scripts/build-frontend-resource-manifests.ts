@@ -15,7 +15,7 @@
  * How. Nothing is listed by hand: each frontend is loaded in a fresh process
  * (module caches are per process, and frontends share resources) with the
  * synchronous loaders' recorder on, the modules imported after the recorder
- * starts so that what they read at import is recorded too, and two phrases
+ * starts so that what they read at import is recorded too, and a few phrases
  * (MANIFEST_PHRASES) spoken with each voice the frontend registers. A resource
  * read only for an input those phrases do not exercise is not in the list; the page then reads it
  * synchronously as before, and reports it (takeSynchronousFetches).
@@ -41,9 +41,16 @@ const frontendsDir = path.join(repoRoot, "public", "rules", "frontends");
 /**
  * The phrases spoken to find what a frontend reads: words in the dictionary,
  * then a word in no dictionary (letter-to-sound) and a number (number
- * normalization). Each is spoken with every voice the frontend registers.
+ * normalization), then an in-text command that changes the voice's speaker
+ * definition (a frontend with a text parser reads its speaker-definition
+ * data for it; to any other frontend the bracket is text). Each is spoken
+ * with every voice the frontend registers.
  */
-export const MANIFEST_PHRASES = ["Hello world.", "The zorblat costs 42 dollars."] as const;
+export const MANIFEST_PHRASES = [
+  "Hello world.",
+  "The zorblat costs 42 dollars.",
+  "[:dv ap 120] Hello world.",
+] as const;
 
 export function manifestPath(frontendId: string): string {
   return path.join(frontendsDir, frontendId, "resources.json");

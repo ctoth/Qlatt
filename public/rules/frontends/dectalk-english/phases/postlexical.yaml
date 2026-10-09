@@ -690,7 +690,9 @@ rules:
       # Not a comma the word's own routine sent (punctuation_sent: one
       # stripped from the word with an apostrophe): the delimiter routine,
       # which sets the index back, never has it (LTS/ls_task.c:1547-1549
-      # against 1266-1279).
+      # against 1266-1279). Nor the comma for the white space after a word
+      # in the spelling mode, which a text rule sends: the index is left
+      # where it is (LTS/ls_task.c:1281-1290).
       written_break: >-
         get(current, 'punctuationSymbol', null) in [',', ':', ';']
         && !isTrue(current, 'punctuation_sent')
@@ -769,7 +771,11 @@ rules:
       # Words of the verb branch that begin before this vowel in its clause;
       # this vowel's own word is one of them unless the vowel begins it.
       branch_words_before: "count_back_pred(current, 1000, 'is_clause_silence', 'is_verb_branch_word_start')"
-      in_first_branch_word: "branch_words_before == (at_word_start ? 0.0 : 1.0)"
+      # Of a written word spoken as several (one spelled letter by letter)
+      # the first has the vowel: every later one stands after it.
+      in_first_branch_word: >-
+        branch_words_before == (at_word_start ? 0.0 : 1.0)
+        && !isTrue(path(current, 'R:SylStructure.parent.parent'), 'continues_written_word')
       verbs: "clause_end == null ? 0.0 : get(clause_end, 'clause_verb_count', 0.0)"
       function_verbs: "clause_end == null ? 0.0 : get(clause_end, 'clause_function_verb_count', 0.0)"
       # The nearest earlier clause that left the flag in a known state: it had

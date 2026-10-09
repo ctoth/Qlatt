@@ -332,6 +332,8 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
           clause_end_supplied: { kind: "boolean" },
           // The word's part in a conjunction of several words.
           conjunction_sequence: { kind: "string", values: ["first", "rest"] },
+          // A later word of the words one written word is spoken as.
+          continues_written_word: { kind: "boolean" },
           // Set by a frontend's rules: the word can carry a clause break, its
           // place in the stretch has one, and a break stands before it.
           break_marker: { kind: "boolean" },
@@ -648,6 +650,12 @@ function createStructure(
       if (place.clause.endSupplied) transaction.set(word, "clause_end_supplied", true);
     }
     if (phraseStart) transaction.set(word, "phrase_start", phraseStart);
+    // A later word of the words a written word is spoken as: what is said
+    // of the written word once (its form class arriving) is said at the
+    // first.
+    if (group[0].token.continuesWrittenWord) {
+      transaction.set(word, "continues_written_word", true);
+    }
     if (group[0].token.phraseStartUnbounded) {
       transaction.set(word, "phrase_start_unbounded", true);
     }
@@ -914,7 +922,20 @@ function buildTextToKlattTrackDetailed(
   // The text parser's output (run above, before the voice was chosen) is the
   // source text.
   if (parsedText) {
-    recognizeText(parsedText.text, utterance, spec, {
+    // The modes a command before the text turned on are laid over the
+    // rulepack's maps for the text rules to read (maps.tn_text_modes).
+    const modes = parsedText.initial.modes ?? [];
+    const withModes =
+      modes.length > 0
+        ? {
+            ...spec,
+            maps: {
+              ...(spec.maps as Record<string, unknown> | undefined),
+              tn_text_modes: Object.fromEntries(modes.map((mode) => [mode, "on"])),
+            },
+          }
+        : spec;
+    recognizeText(parsedText.text, utterance, withModes, {
       parents: parsedText.decisionIds,
       reason: `Source text is the text parser's output; UTF-16 source coordinates are its`,
     });

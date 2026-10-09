@@ -41,6 +41,17 @@
  */
 export const PHONEME_SYMBOL_BASE = 0xe000;
 export const PHONEME_SYMBOL_LIMIT = 0xe100;
+/**
+ * Phonemic text a rule composed for a written word may begin with that word
+ * between these two characters: the lexicon looks the word up and the
+ * phonemic text has its form class. DECtalk looks every word of a sentence
+ * up before it speaks any (LTS/ls_task.c:5109-5113, ls_dict_blook into
+ * fc_struct[]) and sends a word's class ahead of its first phone
+ * (LTS/ls_util.c:808-818), whatever then speaks the word. engineering
+ * choice: private-use characters, as the two below.
+ */
+export const PHONEMIC_CLASS_WORD_OPEN = "";
+export const PHONEMIC_CLASS_WORD_CLOSE = "";
 export const PHONEME_PARAMETERS_OPEN = "";
 export const PHONEME_PARAMETERS_CLOSE = "";
 

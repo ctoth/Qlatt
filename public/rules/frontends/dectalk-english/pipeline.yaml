@@ -327,13 +327,16 @@ predicates:
   is_secondary_syllabic: >-
     (current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"])
     && get(current, "stress", 0) == 2
-  # Scanning back from a syllabic: the syllabic at which promote_last_2 was
-  # called, or the point its scan cannot pass (is_clause_or_phrase_start).
-  is_promotion_origin_or_stop: >-
-    isTrue(current, "hat_promotes")
+  # Scanning back from a syllabic: the syllabic the hat pattern processed
+  # before it, or the start of its stretch (is_clause_or_phrase_start),
+  # whichever is nearer. promote_last_2's scans are counted a stretch at a time.
+  is_hat_state_or_stretch_start: >-
+    get(current, "hat_top", null) != null
     || (current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null)
     || (dectalk_word_start(current) && dectalk_phrase_state(current) != ""
         && dectalk_phrase_state(current) != "word")
+    || (dectalk_word_start(current) && dectalk_phrase_start(current) == "vp"
+        && behind(current, 1) != null && isTrue(behind(current, 1), "morpheme_boundary_after"))
   # A syllabic with FSTRESS_1: primary stress or emphasis.
   is_primary_syllabic: >-
     (current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"])
@@ -732,6 +735,10 @@ relations:
       syllabics_through: { kind: number }
       # The walk called promote_last_2 at this syllabic (ph_aloph.c:1470-1474).
       hat_promotes: { kind: boolean }
+      # promote_last_2's scans open after this syllabic, and the promotions
+      # in its stretch so far (annotation.yaml, dectalk_hat_pattern).
+      promotion_scans: { kind: number }
+      promotion_taken: { kind: number }
       # The syllabic at which DECtalk's intonation routine leaves its loop
       # (Ph_inton2.c:809-819).
       intonation_stops: { kind: boolean }

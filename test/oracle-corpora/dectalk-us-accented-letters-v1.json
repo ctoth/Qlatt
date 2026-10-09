@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-accented-letters-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "ac-cafe", "text": "We met at a small café downtown.", "group": "accented-letter", "tags": ["e-acute", "rules-on-folded"], "expectedFocus": ["trace"] },
+    { "id": "ac-naive", "text": "He is a bit naïve about money.", "group": "accented-letter", "tags": ["i-diaeresis", "inside-word"], "expectedFocus": ["trace"] },
+    { "id": "ac-jose", "text": "José made a jalapeño dip.", "group": "accented-letter", "tags": ["e-acute", "n-tilde", "capital-first"], "expectedFocus": ["trace"] },
+    { "id": "ac-resume", "text": "Send your résumé by Friday.", "group": "accented-letter", "tags": ["e-acute", "two-in-word"], "expectedFocus": ["trace"] },
+    { "id": "ac-pinata", "text": "The piñata broke on the first hit.", "group": "accented-letter", "tags": ["n-tilde"], "expectedFocus": ["trace"] },
+    { "id": "ac-fiance", "text": "Her fiancé is from Zürich.", "group": "accented-letter", "tags": ["e-acute", "u-diaeresis"], "expectedFocus": ["trace"] },
+    { "id": "ac-creme", "text": "We had crème brûlée for dessert.", "group": "accented-letter", "tags": ["e-grave", "u-circumflex", "two-words"], "expectedFocus": ["trace"] },
+    { "id": "ac-dictionary", "text": "The exposé ran on Sunday.", "group": "accented-letter", "tags": ["dictionary-entry"], "expectedFocus": ["trace"] },
+    { "id": "ac-capital", "text": "The École is closed.", "group": "accented-letter", "tags": ["capital-accented"], "expectedFocus": ["trace"] },
+    { "id": "ac-plural", "text": "Two cafés were open.", "group": "accented-letter", "tags": ["e-acute", "suffix"], "expectedFocus": ["trace"] },
+    { "id": "ac-plain-cafe-control", "text": "We met at a small cafe downtown.", "group": "accented-letter", "tags": ["control", "no-accent"], "expectedFocus": ["trace"] },
+    { "id": "ac-plain-resume-control", "text": "Send your resume by Friday.", "group": "accented-letter", "tags": ["control", "no-accent"], "expectedFocus": ["trace"] }
+  ]
+}

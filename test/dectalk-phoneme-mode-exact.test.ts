@@ -13,6 +13,9 @@
  *     symbols are spoken, in the arpabet and in the one-character alphabet,
  *     with no word boundary between the bracket and the text after it
  *     (CMD/cm_phon.c, CMD/cm_pars.c);
+ *   - a period right after a bracket, which is the word "period" (the rule
+ *     for a period that stands alone, tn_lone_period_source);
+ *   - a duration written on a symbol ("[uw<500>]");
  *   - the mode turned off again;
  *   - a bracket that holds what is no phoneme: the symbols before it, then
  *     DECtalk's error text.
@@ -45,9 +48,6 @@ const corpus = readVoiceCorpus(
   path.join("test", "oracle-corpora", "dectalk-us-phoneme-mode-v1.json"),
 );
 
-const PERIOD_WORD =
-  'the period right after the bracket is the word "period" in DECtalk (a period that ' +
-  "stands alone); the symbols of the bracket itself are DECtalk's";
 const PITCH =
   "a pitch written on a symbol (the second number) is read and not applied: the pitch is " +
   "the rules'";
@@ -55,16 +55,17 @@ const SILENCE = "a silence symbol inside a bracket is dropped";
 
 /** Not DECtalk's samples yet. */
 const NOT_EXACT: Readonly<Record<string, string>> = {
-  "pm-05": PERIOD_WORD,
-  "pm-12": PERIOD_WORD,
-  "pm-16": PERIOD_WORD,
-  "pm-18": `${SILENCE}; ${PERIOD_WORD}`,
-  "pm-19": `${PITCH}; ${PERIOD_WORD}`,
-  "pm-20": `${PITCH}; ${PERIOD_WORD}`,
-  "pm-21": `${PITCH}; ${PERIOD_WORD}`,
-  "pm-22": `${PITCH}; ${PERIOD_WORD}`,
-  "pm-23": `${PITCH}; ${SILENCE}; ${PERIOD_WORD}`,
-  "pm-24": `${PITCH}; ${PERIOD_WORD}`,
+  "pm-05":
+    "the symbols the phonemic stage receives are DECtalk's (the words r'aen d'awn and " +
+    '"period" run together as one word of three stresses) and the packet count is ' +
+    "DECtalk's; the samples differ from the first voiced frames on. Cause not found",
+  "pm-18": SILENCE,
+  "pm-19": PITCH,
+  "pm-20": PITCH,
+  "pm-21": PITCH,
+  "pm-22": PITCH,
+  "pm-23": `${PITCH}; ${SILENCE}`,
+  "pm-24": PITCH,
 };
 
 const run = (text: string) => {

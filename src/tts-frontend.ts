@@ -224,6 +224,7 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
     word: { kind: "string" },
     morpheme_boundary_after: { kind: "boolean" },
     rules_blocked: { kind: "boolean" },
+    written_duration_ms: { kind: "number" },
     sourceTokenId: { kind: "string" },
     punctuationSymbol: STRING_OR_NULL,
     stress: NUMBER_OR_NULL,
@@ -1007,6 +1008,9 @@ function buildTextToKlattTrackDetailed(
     construct.set(item, "phoneme", token.phoneme);
     if (token.morphemeBoundaryAfter) construct.set(item, "morpheme_boundary_after", true);
     if (token.rulesBlocked) construct.set(item, "rules_blocked", true);
+    if (token.writtenDurationMs !== undefined) {
+      construct.set(item, "written_duration_ms", token.writtenDurationMs);
+    }
     construct.set(item, "stress", token.stress);
     construct.set(item, "word", token.word);
     construct.set(item, "sourceTokenId", token.sourceTokenId);

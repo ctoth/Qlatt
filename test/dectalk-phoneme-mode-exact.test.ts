@@ -48,23 +48,23 @@ const corpus = readVoiceCorpus(
 const PERIOD_WORD =
   'the period right after the bracket is the word "period" in DECtalk (a period that ' +
   "stands alone); the symbols of the bracket itself are DECtalk's";
-const NUMBERS =
-  "the numbers after a symbol (a duration, a pitch) are read and not applied: the symbols " +
-  "are DECtalk's, their durations and pitch are the rules'";
+const PITCH =
+  "a pitch written on a symbol (the second number) is read and not applied: the pitch is " +
+  "the rules'";
+const SILENCE = "a silence symbol inside a bracket is dropped";
 
 /** Not DECtalk's samples yet. */
 const NOT_EXACT: Readonly<Record<string, string>> = {
   "pm-05": PERIOD_WORD,
   "pm-12": PERIOD_WORD,
-  "pm-16": `${NUMBERS}; ${PERIOD_WORD}`,
-  "pm-17": NUMBERS,
-  "pm-18": `a silence symbol inside a bracket is dropped; ${NUMBERS}; ${PERIOD_WORD}`,
-  "pm-19": `${NUMBERS}; ${PERIOD_WORD}`,
-  "pm-20": `${NUMBERS}; ${PERIOD_WORD}`,
-  "pm-21": `${NUMBERS}; ${PERIOD_WORD}`,
-  "pm-22": `${NUMBERS}; ${PERIOD_WORD}`,
-  "pm-23": `${NUMBERS}; ${PERIOD_WORD}`,
-  "pm-24": `${NUMBERS}; ${PERIOD_WORD}`,
+  "pm-16": PERIOD_WORD,
+  "pm-18": `${SILENCE}; ${PERIOD_WORD}`,
+  "pm-19": `${PITCH}; ${PERIOD_WORD}`,
+  "pm-20": `${PITCH}; ${PERIOD_WORD}`,
+  "pm-21": `${PITCH}; ${PERIOD_WORD}`,
+  "pm-22": `${PITCH}; ${PERIOD_WORD}`,
+  "pm-23": `${PITCH}; ${SILENCE}; ${PERIOD_WORD}`,
+  "pm-24": `${PITCH}; ${PERIOD_WORD}`,
 };
 
 const run = (text: string) => {
@@ -82,9 +82,17 @@ const run = (text: string) => {
     decisions: provenance
       .getDecisions()
       .filter((decision) => decision.type.startsWith("text_parser_")),
-    warnings: diagnostics.getEntries().filter((event) => event.code?.startsWith("W_TEXT_COMMAND")),
+    warnings: diagnostics.getEntries().filter((event) => event.code?.startsWith("W_TEXT_")),
   };
 };
+
+/** The frames the duration rules gave each `phone` of the text. */
+const framesOf = (text: string, phone: string): number[] =>
+  run(text)
+    .result.utterance.relation("Segment")
+    .listItems()
+    .filter((item) => item.get("phoneme") === phone)
+    .map((item) => Number(item.get("timing_frames")));
 
 describe("DECtalk's phoneme mode", () => {
   it("leaves a bracket as text while the mode is off", () => {
@@ -121,6 +129,27 @@ describe("DECtalk's phoneme mode", () => {
     const error = decisions.find((decision) => decision.type === "text_parser_command_error");
     expect(error?.reason).toContain('"Command error in phoneme"');
     expect(warnings.map((event) => event.code)).toEqual(["W_TEXT_COMMAND_ERROR"]);
+  });
+
+  it("gives a phone the duration written on it, in place of the rules'", () => {
+    // mstofr(500 + 4): 504 ms in frames of 6.4 ms, rounded down
+    // (PH/p_us_tim.c:192-206, PH/ph_task.c:1380-1387).
+    expect(framesOf("[:phoneme arpabet speak on] The [m'uw<500>n] rose.", "UW")).toEqual([78]);
+    expect(framesOf("[:phoneme arpabet speak on] The [m'uw<200>n] rose.", "UW")).toEqual([31]);
+    // Without a number the rules give it 16 frames here.
+    expect(framesOf("[:phoneme arpabet speak on] The [m'uwn] rose.", "UW")).toEqual([16]);
+  });
+
+  it("names what of a bracket's numbers and symbols it leaves out", () => {
+    const { decisions, warnings } = run("[:phoneme arpabet speak on] The [m'uw<400,140>n] rose.");
+    const left = decisions.find(
+      (decision) => decision.type === "text_parser_phonemes_not_carried_out",
+    );
+    expect(left?.reason).toContain("a pitch written on a symbol is not applied");
+    expect(left?.citations.length).toBeGreaterThan(0);
+    expect(warnings.map((event) => event.code)).toEqual(["W_TEXT_PHONEMES_NOT_CARRIED_OUT"]);
+    // A duration alone is carried out: nothing to name.
+    expect(run("[:phoneme arpabet speak on] The [m'uw<400>n] rose.").warnings).toEqual([]);
   });
 
   it("lists only texts of the corpus as not exact", () => {

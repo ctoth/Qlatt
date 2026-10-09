@@ -739,6 +739,10 @@ relations:
       # A duration the duration dictionary gives the phone (ph_sort.c:192-215),
       # in ms; the duration rules are not applied to it.
       dictionary_duration_ms: { kind: number }
+      # A duration written on the phone in phonemic text ("[uw<400>]",
+      # CMD/cm_phon.c:225-330, PH/ph_task.c:835-852), in ms; the duration
+      # rules are not applied to it either.
+      written_duration_ms: { kind: number }
       # The vowel has absorbed the /r/ after it (ph_aloph.c:835-872); it was
       # two phones when DECtalk's rules looked ahead at it.
       fused_with_r: { kind: boolean }

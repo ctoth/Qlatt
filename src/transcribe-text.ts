@@ -935,6 +935,7 @@ export function transcribeText(
         pauseBefore?: boolean;
         morphemeAfter?: readonly number[];
         rulesBlockedAt?: readonly number[];
+        numbersAt?: readonly { at: number; numbers: readonly number[] }[];
       }> =
         "parts" in pronResult && pronResult.parts && pronResult.parts.length > 0
           ? pronResult.parts.map((part, partIndex) => ({
@@ -945,6 +946,7 @@ export function transcribeText(
               ...(part.pauseBefore ? { pauseBefore: true } : {}),
               ...(part.morphemeAfter ? { morphemeAfter: part.morphemeAfter } : {}),
               ...(part.rulesBlockedAt ? { rulesBlockedAt: part.rulesBlockedAt } : {}),
+              ...(part.numbersAt ? { numbersAt: part.numbersAt } : {}),
             }))
           : [
               {
@@ -965,6 +967,11 @@ export function transcribeText(
           })),
         );
         for (const { part, phoneIndex, phoneWithStress } of spokenPhones) {
+          // The first number written on a phone in phonemic text is its
+          // duration in milliseconds; none, or 0, leaves it to the rules
+          // (DECtalk 4.63 PH/ph_task.c:835-852, p_us_tim.c:192).
+          const writtenDuration = part.numbersAt?.find((entry) => entry.at === phoneIndex)
+            ?.numbers[0];
           if (phoneIndex === 0 && part.pauseBefore) {
             flatPhonemeList.push({
               phoneme: resources.inventory.silence_symbol,
@@ -1017,6 +1024,9 @@ export function transcribeText(
               ...(part.phraseStart ? { phraseStart: part.phraseStart } : {}),
               ...(part.morphemeAfter?.includes(phoneIndex) ? { morphemeBoundaryAfter: true } : {}),
               ...(part.rulesBlockedAt?.includes(phoneIndex) ? { rulesBlocked: true } : {}),
+              ...(writtenDuration !== undefined && writtenDuration !== 0
+                ? { writtenDurationMs: writtenDuration }
+                : {}),
               // Indices of a one-word result are indices into its phones.
               ...(spokenParts.length === 1 &&
               "rulesBlockedAt" in pronResult &&

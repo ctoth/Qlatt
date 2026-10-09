@@ -142,6 +142,7 @@ rules:
             - phrase_start_follows
             - morpheme_boundary_after
             - dictionary_duration_ms
+            - written_duration_ms
           phoneme: "'EH'"
           type: eh.type
           target: eh

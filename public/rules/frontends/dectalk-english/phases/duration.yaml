@@ -141,22 +141,28 @@ rules:
 
   # 189-206: "Use user-specified duration if one exists." The phone takes
   # mstofr(duration + 4) frames and none of the rules below (the `goto
-  # break3`). The only such durations here are the duration dictionary's
-  # (postlexical.yaml, dectalk_duration_dictionary).
+  # break3`). Such a duration is the duration dictionary's (postlexical.yaml,
+  # dectalk_duration_dictionary) or one written on the phone in phonemic
+  # text ("[uw<400>]"); the dictionary's is stored over a written one
+  # (ph_sort.c:1312-1326).
   dectalk_timing_dictionary_duration:
     kind: scalar
     select:
       relation: Segment
       where: { predicate: is_dectalk_phone }
-    constraint: "get(current, 'dictionary_duration_ms', 0.0) > 0.0"
+    define:
+      from_dictionary: "get(current, 'dictionary_duration_ms', 0.0)"
+      given_ms: "from_dictionary > 0.0 ? from_dictionary : get(current, 'written_duration_ms', 0.0)"
+    constraint: "given_ms != 0.0"
     apply:
       - field: timing_fixed_frames
         op: set
-        value: "floor((get(current, 'dictionary_duration_ms', 0.0) + 4.0) * 10.0 / 64.0)"
+        value: "floor((given_ms + 4.0) * 10.0 / 64.0)"
         tag: timing_setup
     citations:
       - "DECtalk 4.63 p_us_tim.c:189-206 (durxx = mstofr(user_durs[nphon] + 4); goto break3)"
       - "DECtalk 4.63 PH/ph_task.c:1380-1387 mstofr (ms * 10 >> 6)"
+      - "DECtalk 4.63 PH/ph_task.c:835-852 (the first number after a phoneme is stored in user_durs)"
 
   # Rule 2 (281-314): lengthening in the clause-final rime.
   dectalk_timing_2_clause_final_rime:

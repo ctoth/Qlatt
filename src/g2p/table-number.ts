@@ -592,6 +592,11 @@ export interface NumberWord {
    * DECtalk's structure word records it on the rime before it.
    */
   morphemeAfter?: number[];
+  /**
+   * The numbers written after a phone in phonemic text ("uw<400,140>"), by
+   * the phone's index.
+   */
+  numbersAt?: { at: number; numbers: number[] }[];
 }
 
 /**
@@ -600,6 +605,9 @@ export interface NumberWord {
  * frontend's symbols (`phonemeSymbols`, by phone code) with the stress mark
  * that precedes a stress-bearing phone as its digit. A morpheme boundary
  * inside a word is kept as the index of the phone before it.
+ *
+ * `phoneNumbers` holds, for the phones of `symbols` in their order (marks
+ * not counted), the numbers written after each; they stay with the phone.
  */
 export function numberWords(
   symbols: readonly number[],
@@ -607,11 +615,13 @@ export function numberWords(
     phonemeSymbols: readonly (readonly string[])[];
     stressBearing: readonly number[];
   },
+  phoneNumbers: readonly (readonly number[])[] = [],
 ): NumberWord[] {
   const stressBearing = new Set(table.stressBearing);
   const words: NumberWord[] = [];
   let current: NumberWord = { phonemes: [] };
   let pending = 0;
+  let phone = 0;
   const close = (next: NumberWord): void => {
     if (current.phonemes.length > 0) words.push(current);
     // A marker with no phones before it passes its effect on.
@@ -640,6 +650,14 @@ export function numberWords(
       } else {
         current.phonemes.push(...names);
       }
+      const numbers = phoneNumbers[phone];
+      if (numbers && numbers.length > 0) {
+        current.numbersAt = [
+          ...(current.numbersAt ?? []),
+          { at: current.phonemes.length - 1, numbers: [...numbers] },
+        ];
+      }
+      phone += 1;
     }
   }
   if (current.phonemes.length > 0) words.push(current);

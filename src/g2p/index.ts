@@ -182,30 +182,33 @@ export function pronounce(
   ) {
     const characters = table.phonemeCharacters;
     // Phonemic text a bracket in the text gave (src/text-parser/phonemes.ts)
-    // holds each symbol by its code, and after a symbol its parameters,
-    // which are not this function's.
-    const inner = word
-      .slice(1, -1)
-      .replace(
-        new RegExp(
-          `${PHONEME_PARAMETERS_OPEN}[^${PHONEME_PARAMETERS_CLOSE}]*${PHONEME_PARAMETERS_CLOSE}`,
-          "g",
-        ),
-        "",
-      );
-    const symbols = [...inner].flatMap((char) => {
-      const code = char.charCodeAt(0);
+    // holds each symbol by its code, and after a symbol the numbers written
+    // on it, which stay with a phone (a mark's are passed over).
+    const symbols: number[] = [];
+    const phoneNumbers: number[][] = [];
+    const inner = word.slice(1, -1);
+    for (let at = 0; at < inner.length; at += 1) {
+      const code = inner.charCodeAt(at);
       const symbol =
         code >= PHONEME_SYMBOL_BASE && code < PHONEME_SYMBOL_LIMIT
           ? code - PHONEME_SYMBOL_BASE
           : (characters[code] ?? null);
+      let numbers: number[] = [];
+      if (inner[at + 1] === PHONEME_PARAMETERS_OPEN) {
+        const close = inner.indexOf(PHONEME_PARAMETERS_CLOSE, at + 2);
+        const end = close < 0 ? inner.length : close;
+        numbers = inner
+          .slice(at + 2, end)
+          .split(",")
+          .map(Number);
+        at = end;
+      }
       // Phone codes start at 1; 0 is silence, which a word here cannot hold.
-      const carried =
-        symbol !== null &&
-        ((symbol > 0 && symbol < table.phonemeSymbols.length) || WORD_SYMBOLS.has(symbol));
-      return carried ? [symbol] : [];
-    });
-    const parts = numberWords(symbols, table);
+      const isPhone = symbol !== null && symbol > 0 && symbol < table.phonemeSymbols.length;
+      if (isPhone) phoneNumbers.push(numbers);
+      if (symbol !== null && (isPhone || WORD_SYMBOLS.has(symbol))) symbols.push(symbol);
+    }
+    const parts = numberWords(symbols, table, phoneNumbers);
     // The mark the text ends in, as the phonetic stage stores it: a word
     // boundary (text a rule composed for a word letter-to-sound would have
     // read, which sends one after each word), or a verb-phrase start, which

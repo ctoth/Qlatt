@@ -347,6 +347,31 @@ export function runTextParser(
             "DECtalk 4.63 INCLUDE/usa_phon.tab (usa_arpa[], usa_ascky[])",
           ],
         );
+        // What of a spoken bracket this frontend leaves out: a pitch (the
+        // second number after a symbol) and a silence symbol.
+        const leftOut = [
+          ...(read.phonemes.some((phoneme) => phoneme.parameters.length > 1)
+            ? ["a pitch written on a symbol is not applied (its duration is)"]
+            : []),
+          ...(read.phonemes.some((phoneme) => phoneme.symbol === 0)
+            ? ["a silence symbol is dropped"]
+            : []),
+        ];
+        if (speak && leftOut.length > 0) {
+          record(
+            "text_parser_phonemes_not_carried_out",
+            `Of the phonemic text ${shown}: ${leftOut.join("; ")}`,
+            [
+              "DECtalk 4.63 PH/ph_task.c:835-852 (the numbers after a phoneme: user_durs, user_f0)",
+              "DECtalk 4.63 PH/ph_sort.c:1657-1710 (interp_user_f0: a pitch selects phoneme targets or singing)",
+            ],
+          );
+          options.diagnostics?.warn(
+            `Of the phonemic text ${shown}: ${leftOut.join("; ")}`,
+            { written: shown },
+            "W_TEXT_PHONEMES_NOT_CARRIED_OUT",
+          );
+        }
         if (read.error && commandTable) {
           speakError(shown, commandTable.errorCodes.phoneme, "a character in it is no phoneme");
         }

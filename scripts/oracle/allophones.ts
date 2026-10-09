@@ -96,8 +96,8 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // "for" after the text parser's phonemic "dot".
   "dectalk-us-phrase-start-alone-v1.json",
   // A mark after an initial's period, and a question mark or a comma after
-  // a parenthesis inside a quotation: recorded ahead of the text stage that
-  // will speak them, for Paul and for Betty.
+  // a parenthesis inside a quotation, for Paul and for Betty. (Recorded
+  // ahead of the text rules that speak them, hence the name.)
   "dectalk-us-empty-clause-ahead-v1.json",
   "dectalk-us-betty-empty-clause-ahead-v1.json",
 ];

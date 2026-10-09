@@ -8,9 +8,10 @@
  * Every expected reading was measured on DECtalk 4.63 say.exe, as the symbols
  * its phonemic stage receives; the same texts are in
  * test/oracle-corpora/dectalk-us-lone-marks-v1.json against its packets,
- * except the exclamation after a parenthesis: its symbols agree, and the
- * pitch of its empty clause is not ported (prosody.yaml
- * dectalk_empty_clause_baseline covers a period only).
+ * except an exclamation mark, a question mark or a comma after a
+ * parenthesis: those are in dectalk-us-empty-clause-v1.json and
+ * dectalk-us-empty-clause-ahead-v1.json, with the pitch rules of their
+ * empty clauses.
  */
 
 import { describe, expect, it } from "vitest";
@@ -74,8 +75,7 @@ describe("a mark standing alone after a stripped parenthesis", () => {
     );
   });
 
-  // These two are not in the packet corpus: the pitch of an empty clause that
-  // ends in "?" or "," is not in this rulepack's empty-clause rules.
+  // The packets of these two are in dectalk-us-empty-clause-ahead-v1.json.
   it("is a question's clause end the same way", () => {
     // The parser's text is `"Is it this) ? " Then left. `.
     expect(phones('She asked "Is it (this)?" Then left.')).toContain(

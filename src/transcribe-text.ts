@@ -1362,6 +1362,9 @@ function joinPhonemicText(
       else delete earlier.readAhead;
       if (continuesWrittenWord) earlier.continuesWrittenWord = continuesWrittenWord;
       else delete earlier.continuesWrittenWord;
+      // The marks written on the word joined after it, as the phonemic
+      // text's own phones took them above.
+      if (phone.writtenMarks) earlier.writtenMarks = phone.writtenMarks;
     }
     provenance?.add({
       stage: "transcribe",

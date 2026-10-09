@@ -48,6 +48,11 @@ export interface TranscriptionToken {
    * which has no boundary after it, is the word before.
    */
   phraseStartUnbounded?: boolean;
+  /**
+   * The first phone of the word's own text, when phones written before it
+   * (phonemic text) were joined to the word: the word's class arrives here.
+   */
+  wordTextStart?: boolean;
   /** A morpheme boundary stands after this phone, inside its word. */
   morphemeBoundaryAfter?: boolean;
   /** The lexicon exempts this phone from the frontend's allophone rules. */
@@ -75,6 +80,12 @@ export interface TranscriptionToken {
    * startPhraseAtNextWord removes the mark).
    */
   _phraseStartAfter?: "vp" | "pp";
+  /**
+   * Inside transcription only: phonemic text written against the word before
+   * it, with no word boundary between them (transcribe-text.ts
+   * joinPhonemicText removes the mark).
+   */
+  _joinsPreviousWord?: boolean;
   sourceTokenId: string;
 }
 

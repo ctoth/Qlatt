@@ -47,9 +47,12 @@ text_recognition:
     # The same clause end after a period that is a word
     # (tn_lone_period_source): the word "period" is one of the words it ends.
     # Measured on say.exe: "She moved to Boston, MA 02134." ends
-    # P IY R IY AX D, a word boundary and the period symbol.
+    # P IY R IY AX D, a word boundary and the period symbol. And after any
+    # other mark that is a word because it stands right after phonemic text
+    # (tn_mark_after_phonemic_source): "Did he get two B's?" ends
+    # K W EH S CH AX N, M AA R K and the period symbol.
     - id: tn_parser_clause_end_after_period_word_source
-      pattern: '(?<=(?<![A-Za-z0-9]\)\s*)(?:\s|\x82)\.\s*)\x0b'
+      pattern: '(?<=(?:(?<![A-Za-z0-9]\)\s*)(?:\s|\x82)\.|\x82[,;:?!])\s*)\x0b'
       flags: ''
       class: parser_clause_end
       captures: {}
@@ -227,6 +230,27 @@ text_recognition:
     # "Dr. White, Ph.D., spoke." has P IY, EY CH, P IY R IY AX D, D IY and a
     # comma; "She moved to Boston, MA 02134. Then she left." has the pause,
     # then P IY R IY AX D, DH EH N, SH IY, L EH F T in one clause.
+    # Any other mark right after the parser's phonemic text ("B's?" is the
+    # letter, phonemic z and the mark): the phonemic text ended the text
+    # letter-to-sound had gathered, so the mark begins a word and is kept as
+    # one, the dictionary's word for it. Only for a frontend whose policy
+    # asks for it (tn_recognition_policy.lone_period: word). Measured on
+    # say.exe: "Did he get two B's? Yes." has B IY Z, K W EH S CH AX N,
+    # M AA R K, Y EH S in one clause; "He got two B's! Yes." has
+    # EH K S K L AX M EY SH AX N, P OY N T; "Two c's, then" K AA M AX;
+    # "He got two B's; then" S EH M IY K OW L AX N.
+    - id: tn_mark_after_phonemic_source
+      pattern: '(?<=\x82)(?<word>[,;:?!])(?=\s|$)'
+      flags: ''
+      class: symbol_word
+      captures: {word: word}
+      when: >-
+        get(maps.tn_recognition_policy, 'lone_period', 'clause_end') == 'word'
+        && captures.word in get(maps, 'tn_symbol_words', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:446-470 (an item that is not a character ends the gathered text), 1420-1437 (ls_task_readword: at a word''s start a character that "might" be in a word is kept when nothing was kept before it), LTS/l_us_con.c:125, 139, 153, 154 and 158 ("!" "," ":" ";" "?" are such characters), dapi/src/dic/dtalk_us.dic (their entries)'
     - id: tn_lone_period_source
       pattern: '(?<=\s|\x82)\.(?=\s|$)'
       flags: ''

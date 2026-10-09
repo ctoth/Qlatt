@@ -86,6 +86,11 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // parenthesis, a period before a comma, words of slashes and hyphens, and
   // a word with two periods on it.
   "dectalk-us-lone-marks-v1.json",
+  // A mark after an initial's period, and a question mark or a comma after
+  // a parenthesis inside a quotation: recorded ahead of the text stage that
+  // will speak them, for Paul and for Betty.
+  "dectalk-us-empty-clause-ahead-v1.json",
+  "dectalk-us-betty-empty-clause-ahead-v1.json",
 ];
 
 /** Every corpus with a packet record. */

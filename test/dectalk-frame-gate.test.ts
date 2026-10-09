@@ -109,11 +109,22 @@ const GAP_REASONS: Readonly<Record<string, string>> = {
  * Corpora recorded ahead of the port that will speak them: one reason covers
  * every name on such a corpus's list, the ratchet still holds each phrase to
  * exactly the names listed, and the entry goes when the lists hold nothing but
- * the names of GAP_REASONS. None now: dectalk-us-parser-words-v1 was here
- * until DECtalk's command-stage text parser was wired in (frontend.yaml
+ * the names of GAP_REASONS. dectalk-us-parser-words-v1 was here until
+ * DECtalk's command-stage text parser was wired in (frontend.yaml
  * text_parser); its 24 phrases then left every name but those of GAP_REASONS.
  */
-const CORPUS_GAP_REASONS: Readonly<Record<string, string>> = {};
+const EMPTY_CLAUSE_AHEAD_REASON =
+  "The text stage does not give DECtalk's clauses for these texts yet. DECtalk sends one " +
+  'period for "J.?" (the second is sent only when white space follows the initial\'s ' +
+  'period, LTS/ls_task.c:1547-1549) and a question mark for "Mary K.?"; the frontend ' +
+  "sends a period and then the question mark, an empty clause DECtalk does not speak. " +
+  "For a question mark or a comma after a parenthesis inside a quotation DECtalk sends a " +
+  "comma and then an empty clause that ends in the mark (symbols 115 0 117 0 and " +
+  "115 0 115 0 in an instrumented build); the frontend sends one clause.";
+const CORPUS_GAP_REASONS: Readonly<Record<string, string>> = {
+  "dectalk-us-empty-clause-ahead-v1": EMPTY_CLAUSE_AHEAD_REASON,
+  "dectalk-us-betty-empty-clause-ahead-v1": EMPTY_CLAUSE_AHEAD_REASON,
+};
 
 const loaded = DECTALK_FRAME_CORPUS_FILES.map((fileName) => {
   const corpus = JSON.parse(

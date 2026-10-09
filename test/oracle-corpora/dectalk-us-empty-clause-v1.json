@@ -12,15 +12,11 @@
     { "id": "empty-clause-k-initial-mary", "text": "Ask Mary K. Brown about it.", "group": "earlier-clause-k", "tags": ["empty-clause", "initial", "sweep-miss"], "expectedFocus": ["trace"] },
     { "id": "empty-clause-k-initial-ask", "text": "Ask J. Smith today.", "group": "earlier-clause-k", "tags": ["empty-clause", "initial", "predicted"], "expectedFocus": ["trace"] },
     { "id": "empty-clause-l-initial-tell", "text": "Tell Mary K. Brown about it.", "group": "earlier-clause-k", "tags": ["empty-clause", "initial", "third-allophone-not-k"], "expectedFocus": ["trace"] },
-    { "id": "empty-clause-question-who", "text": "Who is J.? Ask him.", "group": "clause-type", "tags": ["empty-clause", "question", "f0-baseline"], "expectedFocus": ["trace"] },
-    { "id": "empty-clause-question-is", "text": "Is it Mary K.? Yes.", "group": "clause-type", "tags": ["empty-clause", "question", "f0-baseline"], "expectedFocus": ["trace"] },
     { "id": "empty-clause-exclamation-it", "text": "It is B.! Go.", "group": "clause-type", "tags": ["empty-clause", "exclamation", "f0-baseline"], "expectedFocus": ["trace"] },
     { "id": "empty-clause-exclamation-ask", "text": "Ask Mary K.! Then go.", "group": "clause-type", "tags": ["empty-clause", "exclamation", "f0-baseline"], "expectedFocus": ["trace"] },
     { "id": "empty-clause-comma-ask", "text": "Ask J., then go.", "group": "clause-type", "tags": ["empty-clause", "comma", "f0-baseline"], "expectedFocus": ["trace"] },
     { "id": "empty-clause-quote-exclamation", "text": "She said \"Stop (now)!\" Then left.", "group": "clause-type-after-comma", "tags": ["empty-clause", "exclamation", "after-comma", "f0-baseline"], "expectedFocus": ["trace"] },
     { "id": "empty-clause-quote-exclamation-final", "text": "She said \"Stop (now)!\"", "group": "clause-type-after-comma", "tags": ["empty-clause", "exclamation", "after-comma", "text-final", "f0-baseline"], "expectedFocus": ["trace"] },
-    { "id": "empty-clause-quote-question", "text": "She asked \"Is it (this)?\" Then left.", "group": "clause-type-after-comma", "tags": ["empty-clause", "question", "after-comma", "f0-baseline"], "expectedFocus": ["trace"] },
-    { "id": "empty-clause-quote-comma", "text": "He said \"Wait (now),\" then left.", "group": "clause-type-after-comma", "tags": ["empty-clause", "comma", "after-comma", "f0-baseline"], "expectedFocus": ["trace"] },
     { "id": "empty-clause-quote-period", "text": "He said \"Go (now).\" Then left.", "group": "clause-type-after-comma", "tags": ["empty-clause", "period", "after-comma", "f0-baseline"], "expectedFocus": ["trace"] }
   ]
 }

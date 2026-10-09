@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-promotion-v1",
+  "description": "promote_last_2 (DECtalk 4.63 ph_aloph.c:1689-1722): a stressed syllabic before a verb phrase, at the last stress before a clause-level boundary or with a delayed hat fall pending, gives primary stress to the last secondary-stressed syllabic of the first stretch after it that has one. A stretch ends at a boundary of the comma value or more, which a kept prepositional-phrase start leaves on the phone before it. \"Boys for\" sets the delayed fall, so \"men\" before the verb makes the call although primary stresses follow.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "promotion-none", "text": "Boys for men asked for it.", "group": "promote-last-2", "tags": ["no-secondary"], "expectedFocus": ["trace"] },
+    { "id": "promotion-first-stretch", "text": "Boys for men went for it when he had it then.", "group": "promote-last-2", "tags": ["first-stretch", "later-secondaries-kept"], "expectedFocus": ["trace"] },
+    { "id": "promotion-past-one-stretch", "text": "Boys for men asked for it when he had it then.", "group": "promote-last-2", "tags": ["past-a-stretch", "last-of-four"], "expectedFocus": ["trace"] },
+    { "id": "promotion-past-one-stretch-had", "text": "Boys for men asked for it when he had it.", "group": "promote-last-2", "tags": ["past-a-stretch", "last-of-three"], "expectedFocus": ["trace"] },
+    { "id": "promotion-past-one-stretch-and", "text": "Boys and men asked for it when he had it then.", "group": "promote-last-2", "tags": ["past-a-stretch", "conjunction"], "expectedFocus": ["trace"] },
+    { "id": "promotion-same-stretch-many", "text": "Boys for men asked for them then when he had it.", "group": "promote-last-2", "tags": ["past-a-stretch", "last-of-four"], "expectedFocus": ["trace"] },
+    { "id": "promotion-two-calls", "text": "Boys for men asked for it then went for it when he had it.", "group": "promote-last-2", "tags": ["two-calls", "second-call-past-a-stretch"], "expectedFocus": ["trace"] },
+    { "id": "promotion-two-calls-then", "text": "Boys for men went for it when he asked for it then.", "group": "promote-last-2", "tags": ["two-calls", "second-call-past-a-stretch"], "expectedFocus": ["trace"] },
+    { "id": "promotion-second-call-finds-none", "text": "Boys for men asked for it if he had it when he went.", "group": "promote-last-2", "tags": ["two-calls", "nothing-left"], "expectedFocus": ["trace"] },
+    { "id": "promotion-no-call", "text": "Men for boys ran to it for him then.", "group": "promote-last-2", "tags": ["no-verb-phrase", "secondary-kept"], "expectedFocus": ["trace"] }
+  ]
+}

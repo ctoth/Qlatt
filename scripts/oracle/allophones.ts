@@ -89,6 +89,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // Two /w/ across a word boundary, and clauses of more allophones than the
   // feature table has words (duration Rule 9 indexes it by clause position).
   "dectalk-us-long-clauses-v1.json",
+  // promote_last_2: which secondary stress a stressed syllabic before a
+  // verb phrase makes primary, past stretches that have none.
+  "dectalk-us-promotion-v1.json",
 ];
 
 /** Every corpus with a packet record. */

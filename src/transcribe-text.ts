@@ -1130,6 +1130,24 @@ function joinPhonemicText(
         ],
         parents: first._pronDecisionId ? [first._pronDecisionId] : [],
       });
+    } else if (next && !next.isPunctuation && next.phraseStart === "pp") {
+      // The phrase start parts the two words, with no word boundary before
+      // it: the phone sort gives the phonemic text's last phone the phrase
+      // start's boundary alone (PH/ph_sort.c:1462-1496).
+      for (let at = end; phones[at]?.sourceTokenId === next.sourceTokenId; at += 1) {
+        (phones[at] as TranscriptionToken).phraseStartUnbounded = true;
+      }
+      provenance?.add({
+        stage: "transcribe",
+        type: "phrase_start_without_word_boundary",
+        subject: next.sourceTokenId,
+        reason: `Phonemic text ${run.map((phone) => phone.phoneme).join(" ")} has no word boundary after it: '${next.word}' starts its phrase with none before it`,
+        citations: [
+          "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on symbol by symbol)",
+          "DECtalk 4.63 PH/ph_sort.c:1462-1496 (a word boundary and a phrase start each add their own value to the phone before them)",
+        ],
+        parents: first._pronDecisionId ? [first._pronDecisionId] : [],
+      });
     }
     start = end;
   }

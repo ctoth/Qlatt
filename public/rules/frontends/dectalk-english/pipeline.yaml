@@ -292,15 +292,17 @@ predicates:
     && !dectalk_has_class(current, "noun") && !dectalk_has_class(current, "adj")
   # The first Segment of a word DECtalk's number_words counts: one entered
   # with a word boundary, which a verb-phrase start replaces (ph_sort.c:1464).
+  # A word after phonemic text has none either (phrase state 'alone').
   is_counted_word_start: >-
     dectalk_word_start(current) && dectalk_phrase_start(current) != "vp"
+    && dectalk_phrase_state(current) != "alone"
   # The same with the clause's first word, which always counts: the words
   # that make up number_words. DECtalk itself reports 2 for "I want to go."
   # and 3 for "The president arrived yesterday." (pht0draw's number_words,
   # read from an instrumented build).
   is_number_word_start: >-
     dectalk_word_start(current)
-    && (dectalk_phrase_start(current) != "vp"
+    && ((dectalk_phrase_start(current) != "vp" && dectalk_phrase_state(current) != "alone")
         || behind(current, 1) == null || behind(current, 1).phoneme == "SIL")
   # A word counted a second time: "to", "and" or "for" at its clause's end.
   # It comes in as word boundary, SPECIALWORD, PPSTART, and the phone sort
@@ -332,8 +334,7 @@ predicates:
   is_promotion_origin_or_stop: >-
     isTrue(current, "hat_promotes")
     || (current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null)
-    || (dectalk_word_start(current) && dectalk_phrase_state(current) != ""
-        && dectalk_phrase_state(current) != "word")
+    || (dectalk_word_start(current) && dectalk_phrase_state(current) == "pp")
   # A syllabic with FSTRESS_1: primary stress or emphasis.
   is_primary_syllabic: >-
     (current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"])
@@ -344,8 +345,11 @@ predicates:
     (current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null)
     || (behind(current, 1) != null
         && get(behind(current, 1), "rime_boundary", "") in ["vp", "comma", "period", "question", "exclaim"])
-    || (dectalk_word_start(current) && dectalk_phrase_state(current) != ""
-        && dectalk_phrase_state(current) != "word")
+    || (dectalk_word_start(current) && dectalk_phrase_state(current) == "pp")
+  # A phrase start with no word boundary before it (state 'alone') leaves
+  # FPPNEXT alone on the phone before it, which is below FVPNEXT and FCBNEXT:
+  # neither scan stops there. At 140 words per minute or slower that phone
+  # has FVPNEXT, which its rime_boundary says (the test above).
   # Where remaining_stresses_til(FCBNEXT) stops: the clause's final silence, or
   # the first Segment of a word whose phrase start left the comma value on the
   # phone before it. The word start is tested, not that phone's boundary:
@@ -355,8 +359,7 @@ predicates:
   # are the comma value (dectalk_rime_boundary).
   is_clause_or_phrase_start: >-
     (current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null)
-    || (dectalk_word_start(current) && dectalk_phrase_state(current) != ""
-        && dectalk_phrase_state(current) != "word")
+    || (dectalk_word_start(current) && dectalk_phrase_state(current) == "pp")
     || (dectalk_word_start(current) && dectalk_phrase_start(current) == "vp"
         && behind(current, 1) != null && isTrue(behind(current, 1), "morpheme_boundary_after"))
   is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
@@ -714,7 +717,9 @@ relations:
       # (ph_sort.c:1611-1612, ph_aloph.c:563-567). The geminate deletion comes
       # before the skip and still applies.
       rules_blocked: { kind: boolean }
-      rime_boundary: { kind: string, values: [morpheme, word, vp, comma, period, question, exclaim] }
+      # 'pp' is a prepositional-phrase start with no word boundary before it
+      # (FPPNEXT alone); after a word boundary the two are the comma value.
+      rime_boundary: { kind: string, values: [morpheme, word, pp, vp, comma, period, question, exclaim] }
       # FHAT_BEGINS and FHAT_ENDS of a syllabic, and the state DECtalk's walk
       # leaves after it (ph_aloph.c:1396-1525).
       hat_begins: { kind: boolean }
@@ -835,9 +840,12 @@ relations:
       break_slot: [true, false]
       clause_break_before: [true, false]
       phrase_start: [vp, pp]
+      # The word before is phonemic text, which has no word boundary after it.
+      phrase_start_unbounded: [true, false]
       # What the phone sort makes of a prepositional-phrase start: kept or
-      # dropped (ph_sort.c:1055-1070).
-      phrase_start_state: [pp, word]
+      # dropped (ph_sort.c:1055-1070), or kept with no word boundary before
+      # it ('alone').
+      phrase_start_state: [pp, word, alone]
   F0Point:
     type: point
     value_type: number

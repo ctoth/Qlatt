@@ -89,6 +89,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // Two /w/ across a word boundary, and clauses of more allophones than the
   // feature table has words (duration Rule 9 indexes it by clause position).
   "dectalk-us-long-clauses-v1.json",
+  // A prepositional-phrase start with no word boundary before it: "and" or
+  // "for" after the text parser's phonemic "dot".
+  "dectalk-us-phrase-start-alone-v1.json",
 ];
 
 /** Every corpus with a packet record. */

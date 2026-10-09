@@ -528,7 +528,8 @@ rules:
       # number_words == 1, counted as the baseline rules count it.
       one_word: >-
         (dectalk_word_start(current)
-          && (dectalk_phrase_start(current) != 'vp' || prev == null || prev.phoneme == 'SIL')
+          && ((dectalk_phrase_start(current) != 'vp' && dectalk_phrase_state(current) != 'alone')
+              || prev == null || prev.phoneme == 'SIL')
           ? 1.0 : 0.0)
         + count_back_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')
         + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_number_word_start')

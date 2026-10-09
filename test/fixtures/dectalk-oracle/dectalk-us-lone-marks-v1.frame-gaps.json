@@ -22,5 +22,9 @@
   "lm-slash-dash-slash": ["B1","AV","AP","A2","A3","A4","A5","A6","A2_AMPLITUDE"],
   "lm-ellipsis-spaced": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
   "lm-ellipsis-spaced-long": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
-  "lm-ellipsis-control": ["B1","AV","AP","A2","A4","A5","A6","A2_AMPLITUDE"]
+  "lm-ellipsis-control": ["B1","AV","AP","A2","A4","A5","A6","A2_AMPLITUDE"],
+  "lm-initial-question": ["B1","AV","AP","A2","A3","A4","A5","A6"],
+  "lm-initial-wh-question": ["B1","AV","AP","A2","A3","A4","A5","A6","A2_AMPLITUDE"],
+  "lm-word-question": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "lm-dotted-capitals-question": ["B1","AV","AP","A2","A4","A5","A6","AB"]
 }

@@ -8,9 +8,10 @@
  * Every expected reading was measured on DECtalk 4.63 say.exe, as the symbols
  * its phonemic stage receives; the same texts are in
  * test/oracle-corpora/dectalk-us-lone-marks-v1.json against its packets,
- * except the exclamation after a parenthesis: its symbols agree, and the
- * pitch of its empty clause is not ported (prosody.yaml
- * dectalk_empty_clause_baseline covers a period only).
+ * except an exclamation mark, a question mark or a comma after a
+ * parenthesis: those are in dectalk-us-empty-clause-v1.json and
+ * dectalk-us-empty-clause-ahead-v1.json, with the pitch rules of their
+ * empty clauses.
  */
 
 import { describe, expect, it } from "vitest";
@@ -72,6 +73,31 @@ describe("a mark standing alone after a stripped parenthesis", () => {
     expect(phones('She said "Stop (now)!" Then left.')).toContain(
       "N AW , ! K W OW TX DH EH N L EH F T .",
     );
+  });
+
+  // The packets of these two are in dectalk-us-empty-clause-ahead-v1.json.
+  it("is a question's clause end the same way", () => {
+    // The parser's text is `"Is it this) ? " Then left. `.
+    expect(phones('She asked "Is it (this)?" Then left.')).toContain(
+      // "this" after "it": the frontend's allophone of DH there is DZ.
+      "DZ IH S , ? K W OW TX DH EH N L EH F T .",
+    );
+  });
+
+  it("is a second comma after the parenthesis's own", () => {
+    expect(phones('He said "Wait (now)," then left.')).toContain("N AW , , DH EH N L EH F T .");
+  });
+});
+
+describe("a period with a question mark right after it", () => {
+  it.each([
+    ["Is it Mary K.? Yes.", "K EY ? Y EH S ."],
+    ["Was it the cat.? Yes.", "K AE T ? Y EH S ."],
+    ["Is it the U.S.? Yes.", "Y UW EH S ? Y EH S ."],
+    // A question that begins with a wh-word ends as a statement does.
+    ["Who is J.? Ask him.", "JH EY . AE S K"],
+  ])("%s has the mark alone", (text, expected) => {
+    expect(phones(text)).toContain(expected);
   });
 });
 

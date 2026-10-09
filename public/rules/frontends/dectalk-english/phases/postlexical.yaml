@@ -48,7 +48,9 @@ rules:
   #
   # The state is reset at ".", "?" and "!" only (ls_task.c:1160, 1195, 1220,
   # 1236), not at a comma: in "Well, where are they?" the first word is
-  # "well" and the question mark stays.
+  # "well" and the question mark stays. Nor at the two periods after an
+  # initial, which are not read as a delimiter (dectalk_ends_sentence): "Who
+  # is J. R.? Ask." ends "R" with a period, and so does "Who is J. Smith?".
   # -------------------------------------------------------------------------
   dectalk_wh_question_period:
     kind: scalar
@@ -58,8 +60,7 @@ rules:
     define:
       # The previous sentence's final silence, or the utterance's first Segment.
       sentence_edge: >-
-        look_back_where(current, 5000,
-          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) in [".", "?", "!"]) || behind(candidate, 1) == null')
+        look_back_pred(current, 5000, 'is_sentence_reset_or_first')
       first_phone: >-
         sentence_edge == null ? null
         : (sentence_edge.phoneme == 'SIL' ? ahead(sentence_edge, 1) : sentence_edge)
@@ -82,6 +83,8 @@ rules:
   # ls_task_lookup_first_verbs is called for the same first word: "are",
   # "had", "is", "was", "were" and "will" are then sent with secondary stress
   # on their vowel instead of their unstressed dictionary form ("Is it here?").
+  # Not after an initial's periods, which leave the first-word state as it
+  # was (dectalk_ends_sentence): "Who is J. Is it Bob?" has "is" unstressed.
   # -------------------------------------------------------------------------
   dectalk_sentence_initial_auxiliary:
     kind: scalar
@@ -95,9 +98,7 @@ rules:
       before_word: >-
         look_back_where(current, 5000,
           '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) in [".", "?", "!"]) || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id)')
-    constraint: >-
-      before_word == null
-      || (before_word.phoneme == 'SIL' && get(before_word, 'punctuationSymbol', null) in ['.', '?', '!'])
+    constraint: "before_word == null || dectalk_ends_sentence(before_word)"
     apply:
       - field: stress
         op: set
@@ -122,9 +123,7 @@ rules:
       before_word: >-
         look_back_where(current, 5000,
           '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) in [".", "?", "!"]) || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id)')
-    constraint: >-
-      before_word == null
-      || (before_word.phoneme == 'SIL' && get(before_word, 'punctuationSymbol', null) in ['.', '?', '!'])
+    constraint: "before_word == null || dectalk_ends_sentence(before_word)"
     splice:
       type: replace_range
       range_left: current.sync_left

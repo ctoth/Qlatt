@@ -205,9 +205,11 @@ text_recognition:
     # (tn_recognition_policy.stripped_parenthesis_mark: delimiter). Measured
     # on say.exe: the parser's `said "Go now) . Then left. ` has N AW, a
     # comma, a period, then DH EH N; `"Stop now) ! " Then` has N AW, a comma,
-    # an exclamation's clause end, then K W OW T.
+    # an exclamation's clause end, then K W OW T; `"Is it this) ? " Then` has
+    # DH IH S, a comma, a question's clause end, then K W OW T; `"Wait now) ,
+    # then` has N AW and two commas.
     - id: tn_stripped_parenthesis_mark_source
-      pattern: '(?<=[A-Za-z0-9])\)\s+(?<mark>[.!])(?=\s|$)'
+      pattern: '(?<=[A-Za-z0-9])\)\s+(?<mark>[.!?,])(?=\s|$)'
       flags: ''
       class: stripped_parenthesis_mark
       captures: {mark: mark}
@@ -241,9 +243,13 @@ text_recognition:
     # a frontend whose policy asks for it
     # (tn_recognition_policy.period_before_mark: silent). Measured on
     # say.exe: "He met B., then left." has B IY and a comma, with no period;
-    # "He saw the cat., then left." has K AE T and a comma.
+    # "He saw the cat., then left." has K AE T and a comma. A question mark
+    # after the period is the same ("?" is such a character too,
+    # LTS/l_us_con.c:158): "Is it Mary K.? Yes." has K EY and the question's
+    # clause end, "Who is J.? Ask him." JH EY and one period, the mark of a
+    # question that begins with a wh-word.
     - id: tn_period_before_mark_source
-      pattern: '(?<=[A-Za-z])\.(?=[,;:](?:\s|$))'
+      pattern: '(?<=[A-Za-z])\.(?=[,;:?](?:\s|$))'
       flags: ''
       class: silent_mark
       captures: {}

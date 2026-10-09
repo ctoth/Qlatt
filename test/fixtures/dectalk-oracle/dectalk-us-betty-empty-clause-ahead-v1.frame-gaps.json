@@ -1,5 +1,5 @@
 {
-  "betty-empty-clause-question": ["length","segments","F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5","A6","AG","PS","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE","A2_AMPLITUDE","PH"],
-  "betty-empty-clause-quote-question": ["length","segments","F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","AL","ABLADE","ATB","AREA_N","DC","UE","A2_CODE","A2_AMPLITUDE","PH"],
-  "betty-empty-clause-quote-comma": ["length","segments","F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE","PH"]
+  "betty-empty-clause-question": ["B1","AV","AP","A2","A3","A4","A5","A6","A2_AMPLITUDE"],
+  "betty-empty-clause-quote-question": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "betty-empty-clause-quote-comma": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"]
 }

@@ -1,6 +1,6 @@
 {
-  "empty-clause-question-who": ["length","segments","F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5","A6","AG","PS","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE","A2_AMPLITUDE","PH"],
-  "empty-clause-question-is": ["length","segments","F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5","A6","AG","PS","ABLADE","DC","UE","A2_CODE","PH"],
-  "empty-clause-quote-question": ["length","segments","F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A3","A4","A5","A6","AB","AG","PS","CNK","AL","ABLADE","ATB","AREA_N","DC","UE","A2_CODE","A2_AMPLITUDE","PH"],
-  "empty-clause-quote-comma": ["length","segments","F0","F1","F2","F3","B1","B2","B3","AV","AP","A2","A4","A5","A6","AB","AG","PS","CNK","AL","ABLADE","ATB","AREA_N","DC","UE","PLACE","A2_CODE","PH"]
+  "empty-clause-question-who": ["B1","AV","AP","A2","A3","A4","A5","A6","A2_AMPLITUDE"],
+  "empty-clause-question-is": ["B1","AV","AP","A2","A3","A4","A5","A6"],
+  "empty-clause-quote-question": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "empty-clause-quote-comma": ["B1","AV","AP","A2","A4","A5","A6","AB"]
 }

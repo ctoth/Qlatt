@@ -1,0 +1,8 @@
+{
+  "qs-and-first": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "qs-and-then": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "qs-to": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "qs-for": ["B1","AV","AP","A2","A6","AB"],
+  "qs-and-both": ["B1","AV","AP","A2","A3","A4","A5","A6"],
+  "qs-plain-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"]
+}

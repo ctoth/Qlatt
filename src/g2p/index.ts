@@ -112,11 +112,21 @@ export function pronounce(
   // word it does not know. A fixed class wins over the dictionary's
   // (DECtalk 4.63 LTS/ls_task.c:1062-1078), and a class set by a suffix rule
   // stays (LTS/ls_dict.c:749-750).
+  // The mini dictionary's words ("to", "and", "for") are found only as
+  // written: with an apostrophe on it that is stripped afterwards ("'and
+  // shut the door") the word is the main dictionary's, with that entry's
+  // class and no phrase start (LTS/ls_task.c:686-697, the mini dictionary
+  // is searched before the punctuation is stripped; 1900-1917). Measured on
+  // say.exe: "He left, 'and shut the door.'" has AE N D with no phrase
+  // start before it, "He left and shut the door." has one.
+  const specialClass = context.edgeStripped
+    ? undefined
+    : table?.specialWordFormClasses?.[lowerWord];
   const classed = (
     mask: number,
   ): { formClasses?: string[]; formClassWord?: number; receivedFormClasses?: string[] } => {
     if (!table?.formClassNames) return {};
-    const word = table.specialWordFormClasses?.[lowerWord] ?? mask;
+    const word = specialClass ?? mask;
     return {
       formClasses: formClassNamesOf(word, table),
       formClassWord: word,
@@ -142,11 +152,11 @@ export function pronounce(
   // reached, a suffixed word's root included; the fixed-class words come from
   // DECtalk's mini dictionary and never reach it.
   const phrased = (entryClass: number | null): { phraseStart?: "vp" | "pp" } => {
-    const fixed = table?.specialWordPhraseStarts?.[lowerWord];
+    const fixed = context.edgeStripped ? undefined : table?.specialWordPhraseStarts?.[lowerWord];
     if (fixed) return { phraseStart: fixed };
     return table?.wordFormClasses &&
       entryClass !== null &&
-      table.specialWordFormClasses?.[lowerWord] === undefined &&
+      specialClass === undefined &&
       startsVerbPhrase(entryClass, table)
       ? { phraseStart: "vp" }
       : {};
@@ -286,7 +296,15 @@ export function pronounce(
     table?.letterPhones &&
     table.characterNames &&
     table.numberPhones &&
-    (/^[a-z0-9_]*_[a-z0-9_]*$/.test(lowerWord) || /^[0-9]+'[0-9]+$/.test(lowerWord)) &&
+    // The same for a plus sign between letters or digits (the local part of
+    // an address, which the text parser leaves whole: "ann+news" is EY, EH N,
+    // EH N, P L AH S, EH N, IY, D AH B EL Y UW, EH S) and for digits with a
+    // colon that are no time ("10:1" is W AH N, Z IY R OW, K OW L AX N,
+    // W AH N): neither character is one the part-number test lets through.
+    (/^[a-z0-9_]*_[a-z0-9_]*$/.test(lowerWord) ||
+      /^[0-9]+'[0-9]+$/.test(lowerWord) ||
+      /^[a-z0-9_]+(?:\+[a-z0-9_]+)+$/.test(lowerWord) ||
+      /^[0-9]+(?::[0-9])+$/.test(lowerWord)) &&
     !dictLookup(lowerWord)
   ) {
     const letterPhones = table.letterPhones;
@@ -295,7 +313,7 @@ export function pronounce(
     const parts = [...lowerWord].flatMap((char) =>
       /[0-9]/.test(char)
         ? numberWords(units[Number(char)] as readonly number[], table)
-        : char === "_" || char === "'"
+        : ["_", "'", "+", ":"].includes(char)
           ? (characterNames[char] ?? []).map((word) => ({ phonemes: [...word] }))
           : [{ phonemes: [...(letterPhones[char] ?? [])] }],
     );
@@ -926,6 +944,11 @@ export function pronounceClause(
      * a lower-case second one (ClauseContext.capitalised).
      */
     writtenCapitalised?: readonly boolean[];
+    /**
+     * For each word, whether an apostrophe was stripped from an end of what
+     * was written before this lookup (ClauseContext.edgeStripped).
+     */
+    edgeStripped?: readonly boolean[];
     /** The mark that ends the run, as written. */
     endMark?: string;
   },
@@ -972,6 +995,7 @@ export function pronounceClause(
           atPunctuation: index === words.length - 1 && options.atWrittenPunctuation !== false,
           ...(number === undefined ? {} : { numberBefore: number }),
           ...(options.writtenCapitalised?.[index] ? { capitalised: true } : {}),
+          ...(options.edgeStripped?.[index] ? { edgeStripped: true } : {}),
           ...(index === words.length - 1 && options.endMark !== undefined
             ? { markAfter: options.endMark }
             : {}),

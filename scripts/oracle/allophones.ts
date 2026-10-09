@@ -126,6 +126,21 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // Words with an accented letter: looked up as written, else read by rule
   // with the accent folded away.
   "dectalk-us-accented-letters-v1.json",
+  // A text that ends in a mark with an apostrophe on it, or in the word
+  // "period" and two clause ends: one period.
+  "dectalk-us-text-end-marks-v1.json",
+  // A plus sign inside a word (the local part of a mail address): spelled.
+  "dectalk-us-address-plus-v1.json",
+  // Digits with a colon that are no clock time: spelled, "colon" by name.
+  "dectalk-us-digit-colon-v1.json",
+  // "2024-03-15": a part number, not a date.
+  "dectalk-us-dashed-dates-v1.json",
+  // "to", "and", "for" written with an apostrophe on them: the main
+  // dictionary's words, with no phrase start.
+  "dectalk-us-quoted-special-words-v1.json",
+  // A comma or semicolon stripped from its word with an apostrophe: it ends
+  // the clause but sends no word's class again.
+  "dectalk-us-stripped-comma-v1.json",
 ];
 
 /** Every corpus with a packet record. */

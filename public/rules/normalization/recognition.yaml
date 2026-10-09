@@ -33,9 +33,13 @@ text_recognition:
     # and the ends the parser's own rules write): it ends the words said since
     # the last sentence or clause mark as a period does, and does nothing when
     # there are none. So only the first of a run counts, and none at the start
-    # of the text or after a mark that has already ended the clause.
+    # of the text or after a mark that has already ended the clause. An
+    # apostrophe written against that mark changes nothing: it is stripped
+    # from its word and nothing is spoken for it (LTS/l_us_con.c:132,
+    # LTS/ls_task.c:2303-2319). Measured on say.exe: "He said 'shut the
+    # door.'" ends in one period.
     - id: tn_parser_clause_end_source
-      pattern: '(?<!(?:^|[.,;:!?\x0b]|\x81,\x82)\s*)\x0b'
+      pattern: '(?<!(?:^|[.,;:!?\x0b]''?|\x81,\x82)\s*)\x0b'
       flags: ''
       class: parser_clause_end
       captures: {}
@@ -50,9 +54,12 @@ text_recognition:
     # P IY R IY AX D, a word boundary and the period symbol. And after any
     # other mark that is a word because it stands right after phonemic text
     # (tn_mark_after_phonemic_source): "Did he get two B's?" ends
-    # K W EH S CH AX N, M AA R K and the period symbol.
+    # K W EH S CH AX N, M AA R K and the period symbol. Only the first
+    # clause end after such a word: the white space between may not be
+    # another clause end ("See ftp://files.example.com/pub/." ends `/ .` and
+    # two clause ends, the parser's and the host's, and has one period).
     - id: tn_parser_clause_end_after_period_word_source
-      pattern: '(?<=(?:(?<![A-Za-z0-9]\)\s*)(?:\s|\x82)\.|\x82[,;:?!])\s*)\x0b'
+      pattern: '(?<=(?:(?<![A-Za-z0-9]\)\s*)(?:\s|\x82)\.|\x82[,;:?!])[^\S\x0b]*)\x0b'
       flags: ''
       class: parser_clause_end
       captures: {}
@@ -268,6 +275,27 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:1420-1437 (ls_task_readword: at a word''s start a character that "might" be in a word is kept when nothing was kept before it), LTS/l_us_con.c:141 ("." is such a character), 697 and 746 of ls_task.c (the dictionary is searched for the word as written), dapi/src/dic/dtalk_us.dic (the entry ".")'
+    # A comma, a semicolon or a colon with an apostrophe on it at a word's
+    # end ("'Come in,' said…"): the apostrophe is stripped from the word and
+    # the mark with it, and the word's own routine sends the comma. No
+    # routine reads the mark as a delimiter, so what a delimiter does besides
+    # ending the clause does not happen (a written comma sends the class of
+    # the stretch's first word again). The mark is one the rule sends. Only
+    # for a frontend whose policy asks for it
+    # (tn_recognition_policy.mark_stripped_with_quote: sent). Measured on
+    # say.exe: "'Come in,' said the old man, 'and shut the door.'" has the
+    # symbols of the same text without the quotes; its packets are in
+    # dectalk-us-text-end-marks-v1.
+    - id: tn_mark_stripped_with_quote_source
+      pattern: '(?<=[A-Za-z0-9])(?<mark>[,;:])(?=''(?:\s|$))'
+      flags: ''
+      class: stripped_mark
+      captures: {mark: mark}
+      when: "get(maps.tn_recognition_policy, 'mark_stripped_with_quote', 'delimiter') == 'sent'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_con.c:132 (the apostrophe is strippable at a word''s end), LTS/ls_task.c:2303-2340 (stripping it takes a comma, a colon or a semicolon before it too and sets the comma), 1547-1549 (the next-word routine sends that comma), 1266-1279 (only the delimiter routine sets the form-class index back before a comma)'
     # A period on a word with a comma, a semicolon or a colon right after it
     # ("B., then", "cat., then", "Q.; then"): the period stays in the word
     # and is not spoken; the mark after it is the word's delimiter. Only for
@@ -381,6 +409,41 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:4128-4158 (ls_task_part_number: a word with a digit and an apostrophe in it is spelled), LTS/ls_spel.c:151-170 (each character by its name), LTS/l_us_con.c:126 (the double quote is strippable at a word''s end)'
+    # A word with a plus sign between its letters or digits (the local part
+    # of a mail address, which DECtalk's text parser leaves whole:
+    # "ann+news@…"; elsewhere the parser writes the plus apart): one word,
+    # which the frontend's lexicon spells, the plus by its name. Only for a
+    # frontend whose policy asks for it (tn_recognition_policy.plus_words:
+    # spelled). Measured on say.exe: "Write to ann+news@example.net." has
+    # EY, EH N, EH N, P L AH S, EH N, IY, D AH B EL Y UW, EH S before AE T;
+    # "help_desk+orders" is spelled whole, "underscore" and "plus" included.
+    - id: tn_plus_word_source
+      pattern: '(?<=^|\s)(?<word>[A-Za-z0-9_]+(?:\+[A-Za-z0-9_]+)+)(?=[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'plus_words', 'split') == 'spelled'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:151-170 (each character by its name), INCLUDE/usa_type.tab (the row "Plus sign")'
+    # Digits, a colon and one digit, once or more ("3:2", "10:1", "3:2:1";
+    # not a clock time, whose minutes have two digits, and not the forms the
+    # text parser writes apart, "100 : 1"): one word, spelled digit by digit
+    # with the colon by its name. Only for a frontend whose policy asks for
+    # it (tn_recognition_policy.digit_colon_words: spelled). Measured on
+    # say.exe: "The ratio is 3:2" has TH R IY, K OW L AX N, T UW; "10:1" is
+    # W AH N, Z IY R OW, K OW L AX N, W AH N; "3:16" is "three sixteen".
+    - id: tn_digit_colon_source
+      pattern: '(?<![\w$.,:])(?<word>[0-9]+(?::[0-9])+)(?![\w:]|[.,][0-9])'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'digit_colon_words', 'split') == 'spelled'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3603-3612 (a word that is no date and no time goes on), 4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:151-170 (each character by its name), INCLUDE/usa_type.tab (the row "Colon")'
     # A word with an accented letter in it ("café", "naïve", "Zürich"): one
     # word, its accents kept. The frontend's lexicon looks it up as written
     # and, when the dictionary does not have it, reads it by rule with each
@@ -471,15 +534,24 @@ text_recognition:
       speak: current.text
       vocabulary_keys: '[]'
       citations: ['Ebden & Sproat 2015; legacy Qlatt month/day bounds, not calendar validation']
+    # Not for a frontend whose policy says such a word is no date to it
+    # (tn_recognition_policy.dashed_number_dates: part_number): DECtalk reads
+    # "2024-03-15" as a part number, "twenty twenty four dash zero three
+    # dash fifteen" on say.exe.
     - id: tn_iso_date_source
       pattern: '\b(?<year>[0-9]{4})-(?<month>[0-1][0-9])-(?<day>[0-3][0-9])\b'
       flags: ''
       class: date
       captures: {month: month, day: day, year: year}
-      when: 'double(captures.month) >= 1.0 && double(captures.month) <= 12.0 && double(captures.day) >= 1.0 && double(captures.day) <= 31.0'
+      when: >-
+        get(maps.tn_recognition_policy, 'dashed_number_dates', 'date') == 'date'
+        && double(captures.month) >= 1.0 && double(captures.month) <= 12.0
+        && double(captures.day) >= 1.0 && double(captures.day) <= 31.0
       speak: current.text
       vocabulary_keys: '[]'
-      citations: ['Ebden & Sproat 2015; ISO date roles']
+      citations:
+        - 'Ebden & Sproat 2015; ISO date roles'
+        - 'DECtalk 4.63 LTS/ls_task.c:3589-3652 (ls_task_date_processing takes a day, a month''s name and a year only), 4118-4170 (digits and hyphens are a part number)'
     # A date word with its day, month and year apart, for a frontend whose
     # text rules write it out as phonemic text
     # (tn_recognition_policy.date_words: phonemic; the lexical rule

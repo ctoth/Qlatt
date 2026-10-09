@@ -687,8 +687,13 @@ rules:
       # clause the comma ends, and is counted again: "Be late, they went."
       # counts "be" twice, which clears the flag "be" had set, and "went" is
       # not promoted. The comma carries that class through the phone sort too.
+      # Not a comma the word's own routine sent (punctuation_sent: one
+      # stripped from the word with an apostrophe): the delimiter routine,
+      # which sets the index back, never has it (LTS/ls_task.c:1547-1549
+      # against 1266-1279).
       written_break: >-
         get(current, 'punctuationSymbol', null) in [',', ':', ';']
+        && !isTrue(current, 'punctuation_sent')
         && !(n != null && path(n, 'R:SylStructure.parent.parent') != null
              && isTrue(path(n, 'R:SylStructure.parent.parent'), 'clause_break_before'))
       written_before: "look_back_pred(current, 1000, 'is_written_clause_silence')"

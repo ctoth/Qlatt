@@ -106,6 +106,17 @@ maps:
     # its plain one (LTS/l_us_ru1.c:108-112, INCLUDE/ls_fold.tab). "café" is
     # K EY F on say.exe, not the dictionary's "cafe".
     accented_words: kept
+    # A word with a plus sign in it, where the text parser leaves one whole
+    # (the local part of a mail address), is spelled, the plus by its name
+    # (LTS/ls_task.c:4118-4150): "ann+news" is "a n n plus n e w s".
+    plus_words: spelled
+    # Digits with a colon that are no clock time are spelled digit by digit,
+    # the colon by its name (the same lines): "10:1" is "one zero colon one".
+    digit_colon_words: spelled
+    # "2024-03-15" is a part number, not a date: DECtalk's date routine takes
+    # a day, a month's name and a year (LTS/ls_task.c:3589-3608), and the
+    # word is "twenty twenty four dash zero three dash fifteen" on say.exe.
+    dashed_number_dates: part_number
     # A decimal with no digit before its point is a number: ".5" is "point
     # five" and ".05" "point zero five" on say.exe, not a sentence end
     # (LTS/l_us_pr1.c:497-749).
@@ -126,6 +137,13 @@ maps:
     # (LTS/ls_task.c:2303-2319, 1547-1558). DECtalk's parser writes
     # `two) . ` for `(back at two)."` inside a quotation.
     stripped_parenthesis_mark: delimiter
+    # A comma, colon or semicolon with an apostrophe on it at a word's end
+    # is stripped with the apostrophe and sent by the word's own routine
+    # (LTS/ls_task.c:2303-2340, 1547-1549): it ends the clause but is not a
+    # written break: the class of the stretch's first word is not sent again.
+    # Measured on say.exe: "'Be late,' they went." has "went" with emphasis,
+    # "Be late, they went." has it with primary stress.
+    mark_stripped_with_quote: sent
     # A period with a comma, a colon or a semicolon right after it stays in
     # its word and is not spoken (LTS/ls_task.c:1451-1463,
     # LTS/ls_util.c:887-900): "B., then" is B IY and a comma on say.exe.

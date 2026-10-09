@@ -82,6 +82,10 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-symbol-words-v1.json",
   // A sign written on a number, and a lone "a" right after a number.
   "dectalk-us-signed-numbers-v1.json",
+  // A period standing alone that is a word, a mark after a stripped
+  // parenthesis, a period before a comma, words of slashes and hyphens, and
+  // a word with two periods on it.
+  "dectalk-us-lone-marks-v1.json",
 ];
 
 /** Every corpus with a packet record. */

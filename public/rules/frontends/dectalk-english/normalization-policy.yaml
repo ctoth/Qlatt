@@ -107,6 +107,23 @@ maps:
     # "-.5", "-1/2" (minus one half), "-1990" (minus one thousand, nine
     # hundred and ninety: no year with a sign).
     signed_numbers: source
+    # A period standing alone after white space is a word, the dictionary's
+    # "period": the word reader keeps a mark that begins a word
+    # (LTS/ls_task.c:1420-1437). DECtalk's parser writes one in "Ph.D.,"
+    # (`Ph . D., `) and after the pause it puts behind a zip code.
+    lone_period: word
+    # A closing parenthesis stripped from a word forces a comma, and a mark
+    # standing alone after it is then that word's delimiter
+    # (LTS/ls_task.c:2303-2319, 1547-1558). DECtalk's parser writes
+    # `two) . ` for `(back at two)."` inside a quotation.
+    stripped_parenthesis_mark: delimiter
+    # A period with a comma, a colon or a semicolon right after it stays in
+    # its word and is not spoken (LTS/ls_task.c:1451-1463,
+    # LTS/ls_util.c:887-900): "B., then" is B IY and a comma on say.exe.
+    period_before_mark: silent
+    # A word of slashes and hyphens goes to the part-number reader
+    # (LTS/ls_task.c:4118-4170): "/-" is "slash dash" on say.exe.
+    slash_dash_words: part_number
 # A text that does not end in punctuation is still closed as a sentence: when
 # the text is flushed the text task sends a breath break (LTS/ls_task.c:1236-1260,
 # the VT case) and the clause ends as one that ends in a period. Measured on

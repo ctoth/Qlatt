@@ -23,6 +23,8 @@ export interface PronunciationPart {
   morphemeAfter?: number[];
   /** Indices of the phones the lexicon exempts from allophone rules. */
   rulesBlockedAt?: number[];
+  /** The numbers written after a phone in phonemic text, by the phone's index. */
+  numbersAt?: { at: number; numbers: number[] }[];
 }
 
 export interface PronunciationResult {

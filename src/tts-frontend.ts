@@ -224,6 +224,8 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
     word: { kind: "string" },
     morpheme_boundary_after: { kind: "boolean" },
     rules_blocked: { kind: "boolean" },
+    written_duration_ms: { kind: "number" },
+    written_silence: { kind: "boolean" },
     sourceTokenId: { kind: "string" },
     punctuationSymbol: STRING_OR_NULL,
     // The mark was sent by a text rule, not read as a word's delimiter.
@@ -1009,6 +1011,10 @@ function buildTextToKlattTrackDetailed(
     construct.set(item, "phoneme", token.phoneme);
     if (token.morphemeBoundaryAfter) construct.set(item, "morpheme_boundary_after", true);
     if (token.rulesBlocked) construct.set(item, "rules_blocked", true);
+    if (token.writtenDurationMs !== undefined) {
+      construct.set(item, "written_duration_ms", token.writtenDurationMs);
+    }
+    if (token.writtenSilence) construct.set(item, "written_silence", true);
     construct.set(item, "stress", token.stress);
     construct.set(item, "word", token.word);
     construct.set(item, "sourceTokenId", token.sourceTokenId);

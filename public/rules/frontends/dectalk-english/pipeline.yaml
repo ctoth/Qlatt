@@ -263,12 +263,18 @@ predicates:
   is_sentence_reset_or_first: >-
     dectalk_ends_sentence(current) || behind(current, 1) == null
   # A Segment that stands for one DECtalk allophone: every phone, a stop by its
-  # closure, and the silence at a clause boundary.
+  # closure, the silence at a clause boundary, and a silence phonemic text
+  # wrote.
   is_dectalk_allophone: >-
     !(current.type in ["stop_release", "stop_aspiration"])
-    && (current.phoneme != "SIL" || get(current, "punctuationSymbol", null) != null)
+    && (current.phoneme != "SIL" || get(current, "punctuationSymbol", null) != null
+        || isTrue(current, "written_silence"))
   is_dectalk_phone: >-
     !(current.type in ["stop_release", "stop_aspiration"]) && current.phoneme != "SIL"
+  # An allophone inside a clause: a phone, or a silence phonemic text wrote.
+  is_clause_allophone: >-
+    !(current.type in ["stop_release", "stop_aspiration"])
+    && (current.phoneme != "SIL" || isTrue(current, "written_silence"))
   is_clause_silence: >-
     current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null
   # Never true: the stop of a count that runs to the utterance's start.
@@ -389,11 +395,26 @@ predicates:
     || (dectalk_word_start(current) && dectalk_phrase_state(current) == "pp")
     || (dectalk_word_start(current) && dectalk_phrase_start(current) == "vp"
         && behind(current, 1) != null && isTrue(behind(current, 1), "morpheme_boundary_after"))
+  # The same two stops for the count of primary stresses ahead, which also
+  # ends at any silence (ph_aloph.c:1663-1664, `phonemes[m] == GEN_SIL`): a
+  # silence phonemic text wrote inside the clause ends it too.
+  is_stress_count_phrase_stop: >-
+    (current.phoneme == "SIL"
+     && (get(current, "punctuationSymbol", null) != null || isTrue(current, "written_silence")))
+    || (behind(current, 1) != null
+        && get(behind(current, 1), "rime_boundary", "") in ["vp", "comma", "period", "question", "exclaim"])
+    || (dectalk_word_start(current) && dectalk_phrase_state(current) == "pp")
+  is_stress_count_clause_stop: >-
+    (current.phoneme == "SIL"
+     && (get(current, "punctuationSymbol", null) != null || isTrue(current, "written_silence")))
+    || (dectalk_word_start(current) && dectalk_phrase_state(current) == "pp")
+    || (dectalk_word_start(current) && dectalk_phrase_start(current) == "vp"
+        && behind(current, 1) != null && isTrue(behind(current, 1), "morpheme_boundary_after"))
   is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
   is_stressed_vowel: 'current.type == "vowel" && has(current.stress) && current.stress == 1'
   is_stressed_vowel_or_boundary: >-
     (current.type == "vowel" && has(current.stress) && current.stress == 1)
-    || current.phoneme == "SIL"
+    || (current.phoneme == "SIL" && !isTrue(current, "written_silence"))
   is_syllabic_or_boundary: >-
     current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"]
     || current.phoneme == "SIL"
@@ -740,6 +761,14 @@ relations:
       # A duration the duration dictionary gives the phone (ph_sort.c:192-215),
       # in ms; the duration rules are not applied to it.
       dictionary_duration_ms: { kind: number }
+      # A silence phonemic text wrote among a word's phones ("[m'uw_n]"): one
+      # of DECtalk's allophones, and no clause boundary (ph_sort.c:1331-1333
+      # makes every symbol below MAX_PHONES a phone, silence included).
+      written_silence: { kind: boolean }
+      # A duration written on the phone in phonemic text ("[uw<400>]",
+      # CMD/cm_phon.c:225-330, PH/ph_task.c:835-852), in ms; the duration
+      # rules are not applied to it either.
+      written_duration_ms: { kind: number }
       # The vowel has absorbed the /r/ after it (ph_aloph.c:835-872); it was
       # two phones when DECtalk's rules looked ahead at it.
       fused_with_r: { kind: boolean }
@@ -914,6 +943,7 @@ phases:
       # p_us_tim.c, one rule per branch, in source order. Every rule reads and
       # writes the allophone's timing_* state; only the last two write duration.
       - dectalk_pause_duration
+      - dectalk_written_silence_duration
       - dectalk_utterance_initial_pause
       - dectalk_timing_setup
       - dectalk_timing_dictionary_duration

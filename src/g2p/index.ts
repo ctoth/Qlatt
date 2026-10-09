@@ -17,6 +17,12 @@
  * Citation: Hayes (1982), Extrametricality and English Stress, pp. 237–274.
  */
 
+import {
+  PHONEME_PARAMETERS_CLOSE,
+  PHONEME_PARAMETERS_OPEN,
+  PHONEME_SYMBOL_BASE,
+  PHONEME_SYMBOL_LIMIT,
+} from "../text-parser/phonemes";
 import { ltsDocumentAt } from "./lts-document";
 import { applyLtsRules } from "./lts-engine";
 import { decomposeClitic, decomposeWord, getStressHintForWord } from "./morphology";
@@ -175,15 +181,39 @@ export function pronounce(
     word.charCodeAt(word.length - 1) === phonemicClose
   ) {
     const characters = table.phonemeCharacters;
-    const symbols = [...word.slice(1, -1)].flatMap((char) => {
-      const symbol = characters[char.charCodeAt(0)] ?? null;
-      // Phone codes start at 1; 0 is silence, which a word here cannot hold.
-      const carried =
-        symbol !== null &&
-        ((symbol > 0 && symbol < table.phonemeSymbols.length) || WORD_SYMBOLS.has(symbol));
-      return carried ? [symbol] : [];
-    });
-    const parts = numberWords(symbols, table);
+    // Phonemic text a bracket in the text gave (src/text-parser/phonemes.ts)
+    // holds each symbol by its code, and after a symbol the numbers written
+    // on it, which stay with a phone (a mark's are passed over).
+    const symbols: number[] = [];
+    const phoneNumbers: number[][] = [];
+    const inner = word.slice(1, -1);
+    for (let at = 0; at < inner.length; at += 1) {
+      const code = inner.charCodeAt(at);
+      const symbol =
+        code >= PHONEME_SYMBOL_BASE && code < PHONEME_SYMBOL_LIMIT
+          ? code - PHONEME_SYMBOL_BASE
+          : (characters[code] ?? null);
+      let numbers: number[] = [];
+      if (inner[at + 1] === PHONEME_PARAMETERS_OPEN) {
+        const close = inner.indexOf(PHONEME_PARAMETERS_CLOSE, at + 2);
+        const end = close < 0 ? inner.length : close;
+        numbers = inner
+          .slice(at + 2, end)
+          .split(",")
+          .map(Number);
+        at = end;
+      }
+      // Phone codes start at 1. 0 is silence: a phone like the others where a
+      // bracket wrote it ("[m'uw_<300>n]"; PH/ph_sort.c:1331-1333 makes every
+      // symbol below MAX_PHONES a phone), and passed over in text a rule
+      // composed.
+      const fromBracket = code >= PHONEME_SYMBOL_BASE && code < PHONEME_SYMBOL_LIMIT;
+      const isPhone =
+        symbol !== null && (symbol > 0 || fromBracket) && symbol < table.phonemeSymbols.length;
+      if (isPhone) phoneNumbers.push(numbers);
+      if (symbol !== null && (isPhone || WORD_SYMBOLS.has(symbol))) symbols.push(symbol);
+    }
+    const parts = numberWords(symbols, table, phoneNumbers);
     // The mark the text ends in, as the phonetic stage stores it: a word
     // boundary (text a rule composed for a word letter-to-sound would have
     // read, which sends one after each word), or a verb-phrase start, which

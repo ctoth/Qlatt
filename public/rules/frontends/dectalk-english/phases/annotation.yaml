@@ -123,7 +123,7 @@ rules:
       # Rule 5's shortening (prcnt 60); in "Dot and then" it has neither.
       next_word_start: >-
         look_ahead_where(current, 100,
-          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || (candidate.phoneme != "SIL" && !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id))')
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || (candidate.phoneme != "SIL" && !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id))')
       special_reads_syllabic: >-
         later == null && next_word_start != null && next_word_start.phoneme != 'SIL'
         && dectalk_phrase_state(next_word_start) == 'alone'
@@ -174,7 +174,7 @@ rules:
       # in_rhyme: the clause has had a syllabic at or before this phone.
       prior_syllabic_or_clause_start: >-
         look_back_where(current, 100,
-          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]')
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]')
       in_rhyme: >-
         current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']
         || (prior_syllabic_or_clause_start != null && prior_syllabic_or_clause_start.phoneme != 'SIL')
@@ -183,7 +183,7 @@ rules:
       # final stop is a silence of the same word; the scan passes over it.)
       boundary_item: >-
         look_ahead_where(current, 100,
-          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || (candidate.phoneme != "SIL" && (!(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]))')
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || (candidate.phoneme != "SIL" && (!(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"]))')
       syllabic_first: >-
         boundary_item != null && boundary_item.phoneme != 'SIL'
         && dectalk_same_word(boundary_item, current)
@@ -195,7 +195,7 @@ rules:
       # before the boundary carries the mark.
       marked_ahead: >-
         look_ahead_where(current, 100,
-          '(candidate.phoneme == "SIL" && has(candidate.punctuationSymbol)) || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"] || isTrue(candidate, "morpheme_boundary_after")')
+          '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id) || candidate.type == "vowel" || candidate.phoneme in ["EL", "EM", "EN"] || isTrue(candidate, "morpheme_boundary_after")')
       before_morpheme: >-
         isTrue(current, 'morpheme_boundary_after')
         || (marked_ahead != null && marked_ahead.phoneme != 'SIL'
@@ -217,8 +217,20 @@ rules:
       last_before_alone: >-
         alone_ahead && dectalk_next(current) != null
         && dectalk_next(current).id == boundary_item.id
+      # A word's last phone before the clause has had a syllabic (a word of
+      # consonants alone that starts the clause, as phonemic text can give:
+      # "[dh ax]" is DH, a word boundary, AX). The scan is not run for it,
+      # but the boundary symbol itself adds its value to the phone before it
+      # (ph_sort.c:1462-1495), as it does to every word's last phone.
+      # Measured on say.exe: in "[dh ax r'ihvrr r'aen d'awn]." the blade
+      # opens from the DH's first frame, which is ph_draw.c:3528's branch for
+      # a phone with a word boundary or a stronger one.
+      word_end_before_rhyme: >-
+        !in_rhyme && boundary_item != null && boundary_item.phoneme != 'SIL'
+        && !dectalk_same_word(boundary_item, current)
+        && dectalk_next(current) != null && dectalk_next(current).id == boundary_item.id
     constraint: >-
-      in_rhyme && (before_morpheme || !syllabic_first)
+      ((in_rhyme && (before_morpheme || !syllabic_first)) || word_end_before_rhyme)
       && (!alone_ahead || last_before_alone)
     apply:
       - field: rime_boundary
@@ -293,6 +305,7 @@ rules:
     citations:
       - "DECtalk 4.63 ph_sort2.c:203-222 get_next_bound_type"
       - "DECtalk 4.63 ph_romi.c:174-205 bounftab (boundary symbol to FBOUNDARY value)"
+      - "DECtalk 4.63 ph_sort.c:1462-1473 (WBOUND adds FWBNEXT to the phone before it, whether or not the clause has had a syllabic)"
       - "DECtalk 4.63 ph_sort.c:1491-1495 (VPSTART adds FVPNEXT to the phone before it), 2026-2043 (add_feature ORs the value in)"
       - "DECtalk 4.63 ph_sort.c:1487-1490 (PPSTART adds FPPNEXT to the phone before it), 1171-1177 (at 140 words per minute or slower a PPSTART becomes a VPSTART)"
       - "DECtalk 4.63 LTS/ls_dict.c:777-778 (VPSTART before a dictionary entry of class verb, or verb and character)"
@@ -457,13 +470,13 @@ rules:
       # yet rewritten: its last ones, one for each open scan.
       promoted_ahead: "min([scans_in, secondaries_ahead])"
       primaries_in_clause: >-
-        count_ahead_pred(current, 1000, 'is_clause_or_phrase_start', 'is_primary_syllabic')
+        count_ahead_pred(current, 1000, 'is_stress_count_clause_stop', 'is_primary_syllabic')
         + promoted_ahead
       # Of those, the ones before the next phrase boundary: the secondary
       # stresses of this phrase less the ones no scan has taken.
       primaries_in_phrase: >-
         dectalk_boundary(current) >= params.policy.timing.boundary.vp ? 0.0
-        : count_ahead_pred(current, 1000, 'is_past_phrase_boundary', 'is_primary_syllabic')
+        : count_ahead_pred(current, 1000, 'is_stress_count_phrase_stop', 'is_primary_syllabic')
           + max([0.0, secondaries_in_phrase - (secondaries_ahead - promoted_ahead)])
       stress_now: "promoted ? 1 : get(current, 'stress', 0)"
       stressed: "stress_now == 1 || stress_now == 2 || stress_now == 3"

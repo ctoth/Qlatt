@@ -492,6 +492,29 @@ const errorTexts = [
 ].map((match) => match[1] as string);
 const slowTalk = builtWith.has("SLOWTALK");
 const access32 = builtWith.has("ACCESS32");
+const phonemeSource = stripComments(
+  fs.readFileSync(path.join(dectalkRoot, "dapi", "src", "INCLUDE", "usa_phon.tab"), "latin1"),
+);
+/** The elements of a C array of characters: 'x', an escaped character, or 0. */
+const characterArray = (name: string): string[] => {
+  const body = new RegExp(`${name}\\[\\]\\s*=\\s*\\{([\\s\\S]*?)\\};`).exec(phonemeSource)?.[1];
+  if (body === undefined) throw new Error(`E_PHONEME_TABLE: usa_phon.tab has no ${name}[]`);
+  return [...body.matchAll(/'(\\.|[^'\\])'|\b0\b/g)].map((match) =>
+    match[1] === undefined ? "" : match[1].length === 2 ? (match[1][1] as string) : match[1],
+  );
+};
+const arpabetCharacters = characterArray("usa_arpa");
+const phonemeAlphabets = {
+  arpabet: Array.from(
+    { length: arpabetCharacters.length / 2 },
+    (_unused, index) =>
+      `${arpabetCharacters[2 * index] as string}${arpabetCharacters[2 * index + 1] as string}`,
+  ),
+  ascky: characterArray("usa_ascky"),
+};
+if (phonemeAlphabets.arpabet[1] !== "iy" || phonemeAlphabets.ascky[1] !== "i") {
+  throw new Error("E_PHONEME_TABLE: usa_phon.tab is not read as expected");
+}
 const commandTable = {
   commands,
   options: optionLists,
@@ -503,7 +526,13 @@ const commandTable = {
     value: defined(defsSource, "CMD_bad_value", "cm_defs.h"),
     command: defined(defsSource, "CMD_bad_command", "cm_defs.h"),
     parameter: defined(defsSource, "CMD_bad_param", "cm_defs.h"),
+    phoneme: defined(defsSource, "CMD_bad_phoneme", "cm_defs.h"),
   },
+  // The two alphabets of phonemic text in brackets (INCLUDE/usa_phon.tab):
+  // for each symbol by its code, its two characters in the arpabet
+  // (usa_arpa[], a one-letter name stands with a space) and its character in
+  // the one-character alphabet (usa_ascky[]); "" where a code has none.
+  phonemes: phonemeAlphabets,
   // The speaking rate: the command's own limits (CMD/cm_defs.h:63-69,
   // 50 with ACCESS32) and those of the phonemic stage (PH/ph_task.c:710-714,
   // 50 to 550 with SLOWTALK); dectalkf.h:162-173 defines both.

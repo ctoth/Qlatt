@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-phoneme-mode-v1",
+  "description": "Texts with DECtalk's phoneme mode: brackets as text when the mode is off, bracketed phonemic text in arpabet and in the one-character alphabet once it is on, inside and around ordinary words and punctuation, with stress marks and word boundaries, with durations, with pitch in hertz and as note numbers, a bad phoneme, and the mode turned off again. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "pm-01", "text": "The [m uw n] rose.", "group": "off" },
+    { "id": "pm-02", "text": "[:phoneme arpabet speak on] The [m'uwn] rose.", "group": "arpabet" },
+    { "id": "pm-03", "text": "[:phoneme arpabet speak on] The [m uw n] rose.", "group": "arpabet" },
+    { "id": "pm-04", "text": "[:phoneme arpabet on] We saw the [r'ihvrr] today.", "group": "arpabet" },
+    { "id": "pm-05", "text": "[:phoneme arpabet speak on][dh ax r'ihvrr r'aen d'awn].", "group": "arpabet" },
+    { "id": "pm-06", "text": "[:phoneme arpabet speak on][dhax r'ihvrr] ran down.", "group": "arpabet" },
+    { "id": "pm-07", "text": "[:phoneme arpabet speak on] She said [hxehl'ow], and left.", "group": "arpabet" },
+    { "id": "pm-08", "text": "[:phoneme arpabet speak on] Say [t'uw] [th r'iy] now.", "group": "arpabet" },
+    { "id": "pm-09", "text": "[:phone on] The [m'uwn] rose.", "group": "arpabet" },
+    { "id": "pm-10", "text": "[:phoneme arpabet speak on] The [M'UWN] rose.", "group": "arpabet" },
+    { "id": "pm-11", "text": "[:phoneme asky speak on] The [m'un] rose.", "group": "asky" },
+    { "id": "pm-12", "text": "[:phoneme asky speak on][Dx r'IvR r'@n d'Wn].", "group": "asky" },
+    { "id": "pm-13", "text": "[:phoneme arpabet speak on] The [m'uwn] rose. [:phoneme off] The [m uw n] set.", "group": "off-again" },
+    { "id": "pm-14", "text": "[:phoneme arpabet speak on] The [m'uwq] rose.", "group": "error" },
+    { "id": "pm-15", "text": "[:phoneme arpabet speak on] The [zz] rose.", "group": "error" },
+    { "id": "pm-16", "text": "[:phoneme arpabet speak on][m<200>uw<400>n<150>].", "group": "duration" },
+    { "id": "pm-17", "text": "[:phoneme arpabet speak on] The [m'uw<500>n] rose.", "group": "duration" },
+    { "id": "pm-18", "text": "[:phoneme arpabet speak on][_<600>m'uwn].", "group": "duration" },
+    { "id": "pm-19", "text": "[:phoneme arpabet speak on][m<100>uw<400,140>n<150>].", "group": "pitch-hertz" },
+    { "id": "pm-20", "text": "[:phoneme arpabet speak on][m<100,180>uw<300,180>n<150,120>].", "group": "pitch-hertz" },
+    { "id": "pm-21", "text": "[:phoneme arpabet speak on][m<100>uw<400,20>n<150>].", "group": "pitch-note" },
+    { "id": "pm-22", "text": "[:phoneme arpabet speak on][llaa<300,15>llaa<300,17>llaa<300,19>llaa<600,15>].", "group": "pitch-note" },
+    { "id": "pm-23", "text": "[:phoneme arpabet speak on][s<120>ow<400,22>f<100>ax<300,20>_<200>r<100>iy<500,17>].", "group": "pitch-note" },
+    { "id": "pm-24", "text": "[:phoneme arpabet speak on][uw<400,30>] and [uw<400,10>].", "group": "pitch-note" }
+  ]
+}

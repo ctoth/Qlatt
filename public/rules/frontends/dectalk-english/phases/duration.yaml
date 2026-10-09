@@ -67,15 +67,56 @@ rules:
       - "DECtalk 4.63 p_us_tim.c:261-268 (each pause scaled by sprat1, at least 2 frames)"
       - "DECtalk 4.63 p_us_tim.c:237-253 (the comma and period lengths apply only when nphon > 1)"
 
+  # A silence phonemic text wrote ("[m'uw_n]", "[_<600>m'uwn]") is an
+  # allophone inside its clause. With a duration written on it, it takes
+  # mstofr(duration + 4) frames like any phone (189-206, checked before Rule
+  # 1); without one, Rule 1's opening value, 4 or 5 frames by the phone
+  # after it, scaled by the speaking rate. Measured on say.exe: "The
+  # [m'uw_<300>n] rose." has a silence of 47 frames, "The [m'uw_n] rose."
+  # one of 4.
+  #
+  # Not ported: Rule 1's comma and period lengths for such a silence when
+  # the phone before it has a comma's or a sentence end's boundary (237-253);
+  # no phone inside a clause has one here.
+  dectalk_written_silence_duration:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.phoneme == 'SIL' && isTrue(current, 'written_silence')"
+    define:
+      given_ms: "get(current, 'written_duration_ms', 0.0)"
+      after: "dectalk_next(current)"
+      frames: >-
+        given_ms != 0.0 ? floor((given_ms + 4.0) * 10.0 / 64.0)
+        : (after == null ? dectalk_pause_frames(params.policy.timing.pause_frames.clause_initial_other)
+           : dectalk_clause_initial_pause_frames(after))
+    apply:
+      - field: timing_frames
+        op: set
+        value: frames
+        tag: boundary
+      - field: duration
+        op: set
+        value: frames * params.policy.timing.frame_ms
+        tag: boundary
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:189-206 (durxx = mstofr(user_durs[nphon] + 4); goto break3)"
+      - "DECtalk 4.63 p_us_tim.c:225-277 Rule 1 (a silence: 4 frames before a voiced phone, an obstruent or a plosive, else 5; scaled by sprat1)"
+      - "DECtalk 4.63 PH/ph_sort.c:1331-1333 (a silence symbol in the input is a phone)"
+
   # The pause that opens the utterance, as the synthesizer hears it: the first
   # clause's opening pause less the one frame DECtalk never sends. Computed in
   # tenths of a millisecond (64 a frame) so that three frames are exactly the
-  # 19.2 ms the lowering policy names.
+  # 19.2 ms the lowering policy names. A silence phonemic text wrote can be
+  # the clause's first allophone ("[_<600>m'uwn]."): the opening pause is
+  # then the 5 frames of one before a phone that is neither voiced, an
+  # obstruent nor a plosive (measured on say.exe: 5, then the silence's own
+  # 94).
   dectalk_utterance_initial_pause:
     kind: scalar
     select:
       relation: Segment
-      where: prev == null && current.phoneme != 'SIL'
+      where: "prev == null && (current.phoneme != 'SIL' || isTrue(current, 'written_silence'))"
     apply:
       - field: utterance_initial_silence_ms
         op: set
@@ -90,21 +131,23 @@ rules:
 
   # p_us_tim.c:209-218. Inherent and minimum duration in frames, and the start
   # of the state. clause_position is nphon (the clause's first silence is 0);
-  # clause_length is nallotot, which counts both silences.
+  # clause_length is nallotot, which counts both silences. A silence phonemic
+  # text wrote is an allophone of the clause like its phones: it has a
+  # position and is counted, and the clause goes on after it.
   dectalk_timing_setup:
     kind: scalar
     select:
       relation: Segment
-      where: { predicate: is_dectalk_phone }
+      where: { predicate: is_clause_allophone }
     define:
       name: dectalk_name(current)
       # Both are running values: a phone takes them from the phone before it,
       # and only the clause's first phone counts the clause.
       before: dectalk_prev(current)
-      first: "before == null || before.phoneme == 'SIL'"
+      first: "before == null || (before.phoneme == 'SIL' && !isTrue(before, 'written_silence'))"
       position: "first ? 1.0 : get(before, 'clause_position', 0.0) + 1.0"
       length: >-
-        first ? 3.0 + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_dectalk_phone')
+        first ? 3.0 + count_ahead_pred(current, 1000, 'is_clause_silence', 'is_clause_allophone')
         : get(before, 'clause_length', 0.0)
     apply:
       - field: timing_inherent_frames
@@ -141,22 +184,28 @@ rules:
 
   # 189-206: "Use user-specified duration if one exists." The phone takes
   # mstofr(duration + 4) frames and none of the rules below (the `goto
-  # break3`). The only such durations here are the duration dictionary's
-  # (postlexical.yaml, dectalk_duration_dictionary).
+  # break3`). Such a duration is the duration dictionary's (postlexical.yaml,
+  # dectalk_duration_dictionary) or one written on the phone in phonemic
+  # text ("[uw<400>]"); the dictionary's is stored over a written one
+  # (ph_sort.c:1312-1326).
   dectalk_timing_dictionary_duration:
     kind: scalar
     select:
       relation: Segment
       where: { predicate: is_dectalk_phone }
-    constraint: "get(current, 'dictionary_duration_ms', 0.0) > 0.0"
+    define:
+      from_dictionary: "get(current, 'dictionary_duration_ms', 0.0)"
+      given_ms: "from_dictionary > 0.0 ? from_dictionary : get(current, 'written_duration_ms', 0.0)"
+    constraint: "given_ms != 0.0"
     apply:
       - field: timing_fixed_frames
         op: set
-        value: "floor((get(current, 'dictionary_duration_ms', 0.0) + 4.0) * 10.0 / 64.0)"
+        value: "floor((given_ms + 4.0) * 10.0 / 64.0)"
         tag: timing_setup
     citations:
       - "DECtalk 4.63 p_us_tim.c:189-206 (durxx = mstofr(user_durs[nphon] + 4); goto break3)"
       - "DECtalk 4.63 PH/ph_task.c:1380-1387 mstofr (ms * 10 >> 6)"
+      - "DECtalk 4.63 PH/ph_task.c:835-852 (the first number after a phoneme is stored in user_durs)"
 
   # Rule 2 (281-314): lengthening in the clause-final rime.
   dectalk_timing_2_clause_final_rime:

@@ -52,6 +52,13 @@ export interface TranscriptionToken {
   morphemeBoundaryAfter?: boolean;
   /** The lexicon exempts this phone from the frontend's allophone rules. */
   rulesBlocked?: boolean;
+  /**
+   * A duration in milliseconds written on this phone in phonemic text
+   * ("uw<400>").
+   */
+  writtenDurationMs?: number;
+  /** A silence phonemic text wrote among a word's phones ("[m'uw_n]"). */
+  writtenSilence?: boolean;
   isPunctuation?: boolean;
   symbol?: string;
   duration?: number;

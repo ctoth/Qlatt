@@ -28,6 +28,8 @@
  * other than a colon: it is passed over here.
  */
 
+import type { PhonemeAlphabets } from "./phonemes";
+
 /** One row of the command table. */
 export interface CommandRow {
   name: string;
@@ -52,7 +54,15 @@ export interface CommandTable {
   options: Record<string, string[]>;
   /** Spoken texts by error code. */
   errorTexts: string[];
-  errorCodes: { string: number; value: number; command: number; parameter: number };
+  errorCodes: {
+    string: number;
+    value: number;
+    command: number;
+    parameter: number;
+    phoneme: number;
+  };
+  /** The alphabets of phonemic text in brackets (phonemes.ts). */
+  phonemes: PhonemeAlphabets;
   rate: { command: [number, number]; spoken: [number, number] };
 }
 

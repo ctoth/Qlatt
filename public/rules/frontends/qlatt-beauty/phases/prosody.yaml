@@ -109,8 +109,8 @@ rules:
       # (within the last few segments). Last entry => last-wins at sync_right so it
       # supersedes any lower boundary target on this token. Also stamped mid-vowel
       # so the rise climbs through the nucleus rather than jumping at the edge.
-      - { relation: F0Point, when: "(next != null && next.phoneme == 'SIL' && next.boundaryTone == 'H%') || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && ahead(current, 2).boundaryTone == 'H%') || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && ahead(current, 3).boundaryTone == 'H%')", at: "at_ratio(current, 0.3)", value: low_hz, tag: f0_question_rise_onset }
-      - { relation: F0Point, when: "(next != null && next.phoneme == 'SIL' && next.boundaryTone == 'H%') || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && ahead(current, 2).boundaryTone == 'H%') || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && ahead(current, 3).boundaryTone == 'H%')", at: "at_ratio(current, 0.65)", value: q_rise_hz, tag: f0_question_final_rise }
+      - { relation: F0Point, when: "(next != null && next.phoneme == 'SIL' && get(next, 'boundaryTone', null) == 'H%') || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && get(ahead(current, 2), 'boundaryTone', null) == 'H%') || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && get(ahead(current, 3), 'boundaryTone', null) == 'H%')", at: "at_ratio(current, 0.3)", value: low_hz, tag: f0_question_rise_onset }
+      - { relation: F0Point, when: "(next != null && next.phoneme == 'SIL' && get(next, 'boundaryTone', null) == 'H%') || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && get(ahead(current, 2), 'boundaryTone', null) == 'H%') || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && get(ahead(current, 3), 'boundaryTone', null) == 'H%')", at: "at_ratio(current, 0.65)", value: q_rise_hz, tag: f0_question_final_rise }
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"
@@ -148,14 +148,18 @@ rules:
       # yes/no-question rise (H%) is never phonated. Detect an upcoming H%/L% IP
       # boundary within the last few segments and shape THIS vowel's tail so the
       # rise (question) or final-lowering (statement) is actually heard.
+      # Only a silence that stands for a punctuation mark has a boundary tone
+      # (assign_phrase_edge_tones); a silence inside a word has none (the
+      # letter-to-sound rules speak a lone "_" as one), so the tone is read
+      # with a default.
       pre_h_pct: >-
-        (next != null && next.phoneme == 'SIL' && next.boundaryTone == 'H%')
-        || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && ahead(current, 2).boundaryTone == 'H%')
-        || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && ahead(current, 3).boundaryTone == 'H%')
+        (next != null && next.phoneme == 'SIL' && get(next, 'boundaryTone', null) == 'H%')
+        || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && get(ahead(current, 2), 'boundaryTone', null) == 'H%')
+        || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && get(ahead(current, 3), 'boundaryTone', null) == 'H%')
       pre_l_pct: >-
-        (next != null && next.phoneme == 'SIL' && next.boundaryTone == 'L%')
-        || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && ahead(current, 2).boundaryTone == 'L%')
-        || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && ahead(current, 3).boundaryTone == 'L%')
+        (next != null && next.phoneme == 'SIL' && get(next, 'boundaryTone', null) == 'L%')
+        || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && get(ahead(current, 2), 'boundaryTone', null) == 'L%')
+        || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && get(ahead(current, 3), 'boundaryTone', null) == 'L%')
       # Yes/no-question final rise, near the top of the range (Pierrehumbert 1980 H-H%).
       rise_target: >-
         params.policy.f0.female_base_hz + params.policy.f0.range_hz * params.policy.f0.question_rise_fraction

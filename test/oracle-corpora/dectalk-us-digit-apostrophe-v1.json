@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-digit-apostrophe-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "da-feet-inches", "text": "He is 5'10\" and still growing.", "group": "digit-apostrophe", "tags": ["spelled", "inch-mark"], "expectedFocus": ["trace"] },
+    { "id": "da-no-inch-mark", "text": "He is 5'10 and growing.", "group": "digit-apostrophe", "tags": ["spelled"], "expectedFocus": ["trace"] },
+    { "id": "da-one-digit", "text": "It is 6'2 long.", "group": "digit-apostrophe", "tags": ["spelled"], "expectedFocus": ["trace"] },
+    { "id": "da-text-end", "text": "It is 5'10\".", "group": "digit-apostrophe", "tags": ["spelled", "inch-mark", "text-end"], "expectedFocus": ["trace"] },
+    { "id": "da-two-digits-first", "text": "He ran 12'6\" today.", "group": "digit-apostrophe", "tags": ["spelled", "inch-mark"], "expectedFocus": ["trace"] },
+    { "id": "da-after-quoted-word", "text": "Rock 'n' roll is 3'4\" here.", "group": "digit-apostrophe", "tags": ["spelled", "inch-mark"], "expectedFocus": ["trace"] },
+    { "id": "da-final-apostrophe-control", "text": "It is 6' long.", "group": "digit-apostrophe", "tags": ["control", "apostrophe-last"], "expectedFocus": ["trace"] },
+    { "id": "da-plural-control", "text": "Use the 80's style.", "group": "digit-apostrophe", "tags": ["control", "plural"], "expectedFocus": ["trace"] },
+    { "id": "da-leading-apostrophe-control", "text": "The class of '09 met.", "group": "digit-apostrophe", "tags": ["control", "apostrophe-first"], "expectedFocus": ["trace"] },
+    { "id": "da-leading-apostrophe-plural", "text": "The '90s were fun.", "group": "digit-apostrophe", "tags": ["control", "apostrophe-first", "plural"], "expectedFocus": ["trace"] }
+  ]
+}

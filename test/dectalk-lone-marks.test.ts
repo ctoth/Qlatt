@@ -73,6 +73,32 @@ describe("a mark standing alone after a stripped parenthesis", () => {
       "N AW , ! K W OW TX DH EH N L EH F T .",
     );
   });
+
+  // These two are not in the packet corpus: the pitch of an empty clause that
+  // ends in "?" or "," is not in this rulepack's empty-clause rules.
+  it("is a question's clause end the same way", () => {
+    // The parser's text is `"Is it this) ? " Then left. `.
+    expect(phones('She asked "Is it (this)?" Then left.')).toContain(
+      // "this" after "it": the frontend's allophone of DH there is DZ.
+      "DZ IH S , ? K W OW TX DH EH N L EH F T .",
+    );
+  });
+
+  it("is a second comma after the parenthesis's own", () => {
+    expect(phones('He said "Wait (now)," then left.')).toContain("N AW , , DH EH N L EH F T .");
+  });
+});
+
+describe("a period with a question mark right after it", () => {
+  it.each([
+    ["Is it Mary K.? Yes.", "K EY ? Y EH S ."],
+    ["Was it the cat.? Yes.", "K AE T ? Y EH S ."],
+    ["Is it the U.S.? Yes.", "Y UW EH S ? Y EH S ."],
+    // A question that begins with a wh-word ends as a statement does.
+    ["Who is J.? Ask him.", "JH EY . AE S K"],
+  ])("%s has the mark alone", (text, expected) => {
+    expect(phones(text)).toContain(expected);
+  });
 });
 
 describe("a period with a comma, a semicolon or a colon right after it", () => {

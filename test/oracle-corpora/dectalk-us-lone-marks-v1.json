@@ -32,6 +32,10 @@
     { "id": "lm-slash-dash-slash", "text": "It was x /-/ y.", "group": "slash-dash", "tags": ["three-characters"], "expectedFocus": ["trace"] },
     { "id": "lm-ellipsis-spaced", "text": "It goes on . . . and on.", "group": "dotted-word", "tags": ["spelled", "parser-written"], "expectedFocus": ["trace"] },
     { "id": "lm-ellipsis-spaced-long", "text": "The list goes on and on . . . and on.", "group": "dotted-word", "tags": ["spelled", "parser-written"], "expectedFocus": ["trace"] },
-    { "id": "lm-ellipsis-control", "text": "It goes on... and on.", "group": "dotted-word", "tags": ["control"], "expectedFocus": ["trace"] }
+    { "id": "lm-ellipsis-control", "text": "It goes on... and on.", "group": "dotted-word", "tags": ["control"], "expectedFocus": ["trace"] },
+    { "id": "lm-initial-question", "text": "Is it Mary K.? Yes.", "group": "period-before-mark", "tags": ["initial", "question"], "expectedFocus": ["trace"] },
+    { "id": "lm-initial-wh-question", "text": "Who is J.? Ask him.", "group": "period-before-mark", "tags": ["initial", "question", "wh-word"], "expectedFocus": ["trace"] },
+    { "id": "lm-word-question", "text": "Was it the cat.? Yes.", "group": "period-before-mark", "tags": ["word", "question"], "expectedFocus": ["trace"] },
+    { "id": "lm-dotted-capitals-question", "text": "Is it the U.S.? Yes.", "group": "period-before-mark", "tags": ["dotted-capitals", "question"], "expectedFocus": ["trace"] }
   ]
 }

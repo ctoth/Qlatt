@@ -1608,13 +1608,15 @@ function applyTextExpansion(
         !entry.text.length ||
         // `kind: 'word'` says the terminal is one word whatever its text is:
         // a punctuation mark that is spoken by its name, or text with white
-        // space in it (phonemic text of several words).
-        (entry.kind !== undefined && entry.kind !== "word") ||
+        // space in it (phonemic text of several words). `kind: 'sent_mark'`
+        // says the terminal is a punctuation mark the rule itself sends: it
+        // was not read as the delimiter of the word before it.
+        (entry.kind !== undefined && entry.kind !== "word" && entry.kind !== "sent_mark") ||
         (entry.kind !== "word" && /\s/.test(entry.text)) ||
         !entry.text.trim().length ||
         Object.keys(entry).some((key) => !["type", "text", "kind"].includes(key))
       )
-        fail("terminal requires text, and may say kind: 'word'");
+        fail("terminal requires text, and may say kind: 'word' or 'sent_mark'");
     } else if (entry.type === "request") {
       if (
         typeof entry.kind !== "string" ||

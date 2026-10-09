@@ -226,6 +226,8 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
     rules_blocked: { kind: "boolean" },
     sourceTokenId: { kind: "string" },
     punctuationSymbol: STRING_OR_NULL,
+    // The mark was sent by a text rule, not read as a word's delimiter.
+    punctuation_sent: { kind: "boolean" },
     stress: NUMBER_OR_NULL,
     duration: { kind: "number" },
     durationFloor: { kind: "number" },
@@ -1011,6 +1013,7 @@ function buildTextToKlattTrackDetailed(
     construct.set(item, "word", token.word);
     construct.set(item, "sourceTokenId", token.sourceTokenId);
     construct.set(item, "punctuationSymbol", token.isPunctuation ? (token.symbol ?? null) : null);
+    if (token.isPunctuation && token.sentMark) construct.set(item, "punctuation_sent", true);
     construct.set(item, "active", true);
     for (const [key, value] of Object.entries(materialized)) {
       if (key === "phoneme" || key === "params") continue;

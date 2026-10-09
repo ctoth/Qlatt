@@ -99,20 +99,24 @@ rules:
   # An initial is spelled, and its period reaches the phonetics twice: once
   # from the spelling routine and once from the routine that reads the next
   # word. The second period is a clause of its own with no phone in it.
+  # Both are marks the rule sends (kind 'sent_mark'): the initial rule reads
+  # the written period itself, so no routine reads it as a delimiter, and
+  # what a delimiter does besides ending the clause does not happen.
   tn_initial:
     kind: structural
     select:
       relation: Normalization
       where: "current.kind == 'initial' && current.outputType == 'source'"
     expand_text:
-      allowed_types: [request]
+      allowed_types: [request, terminal]
       tag: normalization_lexical
       output: >-
         [{'type': 'request', 'kind': 'words', 'payload': {'text': lower(current.payload.letter)}},
-         {'type': 'request', 'kind': 'words', 'payload': {'text': '.'}},
-         {'type': 'request', 'kind': 'words', 'payload': {'text': '.'}}]
+         {'type': 'terminal', 'text': '.', 'kind': 'sent_mark'},
+         {'type': 'terminal', 'text': '.', 'kind': 'sent_mark'}]
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:2612-2623 (the initial: rbphone = PERIOD, the word is spelled)"
+      - "DECtalk 4.63 LTS/ls_task.c:2612-2617 (the rule reads the period item itself: ls_util_read_item), 1144-1236 (ls_task_do_right_punct, the delimiter routine, never has it)"
       - "DECtalk 4.63 LTS/ls_task.c:1516-1519 (the spelling routine sends the PERIOD), 1547-1549 (the next-word routine sends it again)"
   # An abbreviation the frontend's dictionary holds with its period: one
   # terminal, the word with the period, which the dictionary then speaks. The

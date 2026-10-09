@@ -241,8 +241,9 @@ functions:
   # delimiter routine reads a period, a question mark or an exclamation mark.
   # The two periods after an initial ("J. Smith") do not pass through that
   # routine: the initial rule eats the written period and the periods are
-  # sent as phones. They are the only two period silences in a row the text
-  # rules make (lexical.yaml tn_initial). Measured on say.exe: in "Who is J.
+  # sent as phones. The text rule that speaks an initial says so of its two
+  # periods (lexical.yaml tn_initial, terminal kind 'sent_mark'), and their
+  # silences carry it as punctuation_sent. Measured on say.exe: in "Who is J.
   # Is it Bob? Ask." the "Is" keeps its unstressed form and the question
   # mark is sent as a period; in "Who is he. Is it Bob? Ask." neither.
   dectalk_ends_sentence:
@@ -250,11 +251,7 @@ functions:
     body: >-
       item != null && item.phoneme == 'SIL'
       && get(item, 'punctuationSymbol', null) in ['.', '?', '!']
-      && !(get(item, 'punctuationSymbol', null) == '.'
-           && ((behind(item, 1) != null && behind(item, 1).phoneme == 'SIL'
-                && get(behind(item, 1), 'punctuationSymbol', null) == '.')
-               || (ahead(item, 1) != null && ahead(item, 1).phoneme == 'SIL'
-                   && get(ahead(item, 1), 'punctuationSymbol', null) == '.')))
+      && !isTrue(item, 'punctuation_sent')
     description: Whether a silence is a sentence end that resets the text stage's first-word state.
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:1160, 1195, 1220 and 1236 (ls_task_do_right_punct resets wstate at a period, a question mark, an exclamation mark and a flush)"
@@ -736,6 +733,10 @@ relations:
       # The phone before a morpheme boundary inside its word (MBOUND, e.g.
       # "nine|teen" in DECtalk's number lists).
       morpheme_boundary_after: { kind: boolean }
+      # A punctuation silence whose mark a text rule sent itself: no routine
+      # read it as a word's delimiter (an initial's two periods,
+      # LTS/ls_task.c:2612-2617).
+      punctuation_sent: { kind: boolean }
       # A duration the duration dictionary gives the phone (ph_sort.c:192-215),
       # in ms; the duration rules are not applied to it.
       dictionary_duration_ms: { kind: number }

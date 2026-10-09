@@ -36,6 +36,11 @@ export interface TranscriptionToken {
   writtenMarks?: string[];
   /** A punctuation token that is not in the text: a text rule supplied it. */
   supplied?: boolean;
+  /**
+   * A punctuation token a text rule sent itself: no routine read the mark
+   * as the delimiter of the word before it (an initial's two periods).
+   */
+  sentMark?: boolean;
   /** The phrase the word starts, when the frontend's lexicon marks one. */
   phraseStart?: "vp" | "pp";
   /**

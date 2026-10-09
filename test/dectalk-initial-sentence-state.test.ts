@@ -54,6 +54,24 @@ const lastIsStress = (text: string): unknown =>
     .at(-1)?.stress;
 
 describe("an initial's periods", () => {
+  it("are marked as sent by the text rule, and a written period is not", () => {
+    const sent = (text: string): unknown[] => {
+      const { utterance } = textToKlattTrackDetailed(text, undefined, 30, {
+        frontendId: "dectalk-english",
+      });
+      return utterance
+        .relation("Segment")
+        .listItems()
+        .filter((segment) => segment.get("active") !== false)
+        .filter((segment) => segment.get("punctuationSymbol") != null)
+        .map((segment) => segment.get("punctuation_sent") ?? false);
+    };
+    expect(sent("Who is J. Smith? Ask.")).toEqual([true, true, false, false]);
+    expect(sent("Who is he. Ask.")).toEqual([false, false]);
+    // Two written periods in a row are not an initial's.
+    expect(sent("He left.. Then she did.")).not.toContain(true);
+  });
+
   it("leave a wh-question a wh-question", () => {
     // DECtalk: JH EY . . AA R . (the question mark is sent as a period).
     expect(marks("Who is J. R.? Ask.")).toBe(". . . .");

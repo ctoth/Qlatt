@@ -2116,6 +2116,14 @@ export function lowerToFrames(
       });
       return output;
     };
+    // The segmental commands (one per controller allophone) by their times.
+    const segmentalSlots = commands.flatMap((command, index) =>
+      isSegmentalCommand(command) ? [index] : [],
+    );
+    const segmentalCommandsInTimeOrder = (): F0LayerCommand[] =>
+      f0CommandsInTimeOrder(segmentalSlots, unclampedCommandTimes).map(
+        (index) => commands[index] as F0LayerCommand,
+      );
     if (usesSegmentalControllerClock) {
       // Ph_inton2.c and pht0draw() share the ordered allodurs[] controller
       // clock. Preserve a command's offset from its following acoustic
@@ -2124,8 +2132,10 @@ export function lowerToFrames(
       // DECtalk 4.63 Ph_inton2.c make_f0_command(); Ph_drwt02.c pht0draw().
       const controllerTimeByAcousticTime = new Map<number, number>();
       let controllerFrames = 0;
-      for (const command of commands) {
-        if (f0Model.layers[command.layer]?.type !== "dectalk_segmental") continue;
+      // The allophones in time order: the commands come rule by rule, and an
+      // allophone of one rule may stand between two of another (a silence
+      // inside a clause, between phones).
+      for (const command of segmentalCommandsInTimeOrder()) {
         controllerTimeByAcousticTime.set(command.time, controllerFrames * f0Model.frame_period_sec);
         if (command.tag !== "f0_segmental_terminal_silence") {
           controllerFrames += command.durationFrames ?? 0;
@@ -2151,13 +2161,23 @@ export function lowerToFrames(
         commands[index] = { ...command, time: mappedTime };
       }
     }
+    // The kernel steps through the segmental commands in the order it is
+    // given them: time order, each in a segmental command's place.
+    const commandsForKernel = (): F0LayerCommand[] => {
+      const ordered = commands.slice();
+      const inTimeOrder = segmentalCommandsInTimeOrder();
+      segmentalSlots.forEach((slot, place) => {
+        ordered[slot] = inTimeOrder[place] as F0LayerCommand;
+      });
+      return ordered;
+    };
     let rendered: Array<{ time: number; f0: number }>;
     try {
       rendered =
         clauseStarts.length > 1
           ? renderClauses()
           : renderLayeredF0(
-              commands,
+              usesSegmentalControllerClock ? commandsForKernel() : commands,
               f0Model,
               (initialSilenceMs + segmentTotalMs + finalSilenceMs) / 1000,
               context.speakerParams,

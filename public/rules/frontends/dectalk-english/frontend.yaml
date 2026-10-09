@@ -35,6 +35,16 @@ text_parser:
   # clause end a forced speak appends (samples/SAY/say.c:249,
   # API/ttsapi.c:4559).
   ending: "        \v"
+  # An in-text command ends the clause it stands in when its routine sends an
+  # item down the text pipe or syncs (the table's commandTable flags, read
+  # from CMD/cm_copt.c). These three are the measured exceptions, on say.exe
+  # with "The ship came [:X] in at dawn." (299 packets when the clause goes
+  # on, 440 when it is ended): "index mark 1" and "pronounce name" send an
+  # item and the clause goes on (letter-to-sound keeps an index item in a
+  # list, LTS/ls_task.c:420-440); "say clause" goes on too (the routine
+  # syncs for its letter modes only, CMD/cm_copt.c:766-820; "say word" does
+  # end it, by what that mode itself does, which is not ported).
+  commands_without_clause_end: [index, pronounce, say]
 # DECtalk uses its own source contour so shared qlatt-english LF policy
 # (source_mode: 1) cannot override it. The default remains the impulse fallback
 # while KLGLOTT88 mode 3 is blocked by silent worklet voice output.

@@ -13,15 +13,15 @@
  *
  * Left out:
  *   - what a command in the text does (`[:name ...]`): its characters are
- *     taken out of the text and handed to the caller, and the clause before
- *     it is finished; a place-marking command is known by its full name
- *     only, not by an abbreviation of it (the C matches unique prefixes of
- *     its command table);
+ *     taken out of the text, read against the table's commands
+ *     (src/text-parser/commands.ts) and handed to the caller, and the clause
+ *     before it is finished unless the command only marks a place;
  *   - phonemic text typed in brackets (the phoneme mode is off, as it is when
  *     DECtalk starts, CMD/cm_util.c:139);
  *   - the e-mail and table reading modes, and index marks.
  */
 
+import { type CommandSlots, newCommandSlots, type ReadCommand, readCommands } from "./commands";
 import {
   createTextParser,
   type DictionaryState,
@@ -44,8 +44,17 @@ export interface ClauseOptions {
    */
   dictionary?: (word: string) => DictionaryState;
   onHit?: PassOptions["onHit"];
-  /** Called with the text of each command (between `[:` and `]`) taken out. */
-  onCommand?: (command: string) => void;
+  /**
+   * Called with each bracket of commands taken out: its text (between `[:`
+   * and `]`), how many clauses were finished before it, and the commands
+   * read from it (empty when the table has no command table).
+   */
+  onCommand?: (command: string, clausesBefore: number, read: readonly ReadCommand[]) => void;
+  /**
+   * The numbers the commands' parameter slots hold when the text starts
+   * (commands.ts): a parameter nobody types keeps its slot's number.
+   */
+  commandSlots?: CommandSlots;
 }
 
 /** A clause as the rules leave it. */
@@ -273,6 +282,7 @@ export function readClauses(
 
   // The character loop (CMD/cm_pars.c:1296-1510) with its states for a
   // bracket: a command, or a bracket that is only text.
+  const slots = options.commandSlots ?? newCommandSlots();
   let state: "normal" | "bracket" | "command" = "normal";
   let command: number[] = [];
   let whiteSpaceRun = 0;
@@ -322,14 +332,22 @@ export function readClauses(
       // CMD/cm_cmd.c:160-304: a command has the clause before it finished,
       // unless it only marks a place in the text. (The C does so while it
       // matches the name; no text is taken in between.)
-      const name = fromBytes(command).trim().toLowerCase();
-      if (!config.markingCommands.some((prefix) => name.startsWith(prefix))) {
+      // The command that marks a place is known as the C knows it, by the
+      // row of the command table its name leaves (:168, :288); a name that
+      // leaves none, or several, finishes the clause too (:183, :240).
+      const body = fromBytes(command);
+      const read = table.commandTable ? readCommands(table.commandTable, body, slots) : [];
+      const first = read[0];
+      const marksPlace = table.commandTable
+        ? first?.kind === "command" && config.markingCommands.includes(first.row.name)
+        : config.markingCommands.some((prefix) => body.trim().toLowerCase().startsWith(prefix));
+      if (!marksPlace) {
         const held = parseChar;
         parseChar = COMMAND_FOLLOWS;
         take();
         parseChar = held;
       }
-      options.onCommand?.(fromBytes(command));
+      options.onCommand?.(body, clauses.length, read);
       state = "normal";
     } else {
       command.push(parseChar);
@@ -344,21 +362,24 @@ export function readClauses(
  * marks, a space first after a clause handed on in part, and its clause end.
  */
 export function clauseStream(table: TextParserTable, clauses: readonly Clause[]): string {
+  return clauseTexts(table, clauses).join("");
+}
+
+/** The same characters, clause by clause. */
+export function clauseTexts(table: TextParserTable, clauses: readonly Clause[]): string[] {
   const config = table.clauses;
   const isSpace = (char: string): boolean =>
     (config.marks[char.charCodeAt(0)] & config.spaceMark) !== 0;
-  return clauses
-    .map((clause) => {
-      let start = 0;
-      while (start < clause.text.length && isSpace(clause.text[start])) start += 1;
-      const body = [...clause.text.slice(start)]
-        .filter((char) => char.charCodeAt(0) !== config.indexMark)
-        .join("");
-      return (
-        (clause.rolled ? " " : "") +
-        body +
-        (clause.end === null ? "" : String.fromCharCode(clause.end))
-      );
-    })
-    .join("");
+  return clauses.map((clause) => {
+    let start = 0;
+    while (start < clause.text.length && isSpace(clause.text[start])) start += 1;
+    const body = [...clause.text.slice(start)]
+      .filter((char) => char.charCodeAt(0) !== config.indexMark)
+      .join("");
+    return (
+      (clause.rolled ? " " : "") +
+      body +
+      (clause.end === null ? "" : String.fromCharCode(clause.end))
+    );
+  });
 }

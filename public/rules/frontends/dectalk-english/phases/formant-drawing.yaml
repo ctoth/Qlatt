@@ -252,6 +252,10 @@ frame_programs:
       # DECtalk's allophone 0 of a clause: the lead-in and each such tail.
       initial: { value: "false", edge: true }
       silence: { value: "fd_is_silence(current)", edge: true }
+      # A silence phonemic text wrote inside the clause ("[m'uw_n]"): GEN_SIL
+      # like the clause's first and last allophones, but with allophones of
+      # the clause on both sides (ph_sort.c:1331-1333).
+      inner: { value: "isTrue(current, 'written_silence')", edge: false }
       dummy: { value: "fd_is_dummy(current)", edge: false }
       # p_us_rom.h us_featb bits. Silence has FSONOR alone.
       sonorant: { value: "fd_has(current, 'sonorant')", edge: true }
@@ -302,11 +306,11 @@ frame_programs:
       # The own target of the allophone after this one, which gettar() takes
       # for a phone that has none. A clause's closing silence has no allophone
       # after it: the next clause's first phone is not in its clause.
-      nextown_F1: { value: "fd_is_silence(current) ? -1 : fd_own(fd_next(current), 'F1')", edge: -1 }
-      nextown_F2: { value: "fd_is_silence(current) ? -1 : fd_own(fd_next(current), 'F2')", edge: -1 }
-      nextown_F3: { value: "fd_is_silence(current) ? -1 : fd_own(fd_next(current), 'F3')", edge: -1 }
-      nextown_B2: { value: "fd_is_silence(current) ? -1 : fd_own(fd_next(current), 'B2')", edge: -1 }
-      nextown_B3: { value: "fd_is_silence(current) ? -1 : fd_own(fd_next(current), 'B3')", edge: -1 }
+      nextown_F1: { value: "fd_is_silence(current) && !isTrue(current, 'written_silence') ? -1 : fd_own(fd_next(current), 'F1')", edge: -1 }
+      nextown_F2: { value: "fd_is_silence(current) && !isTrue(current, 'written_silence') ? -1 : fd_own(fd_next(current), 'F2')", edge: -1 }
+      nextown_F3: { value: "fd_is_silence(current) && !isTrue(current, 'written_silence') ? -1 : fd_own(fd_next(current), 'F3')", edge: -1 }
+      nextown_B2: { value: "fd_is_silence(current) && !isTrue(current, 'written_silence') ? -1 : fd_own(fd_next(current), 'B2')", edge: -1 }
+      nextown_B3: { value: "fd_is_silence(current) && !isTrue(current, 'written_silence') ? -1 : fd_own(fd_next(current), 'B3')", edge: -1 }
       # The allophone's own table target at its beginning and at its end; -1 for none.
       own_F1: { value: "fd_own(current, 'F1')", edge: -1 }
       own_F2: { value: "fd_own(current, 'F2')", edge: -1 }
@@ -534,10 +538,13 @@ rules:
       - { register: las_B3, value: "r.end_B3", tag: formant_target }
     citations:
       - "DECtalk 4.63 PH/ph_setar.c:377 (tarlas = tarend)"
+  # A silence inside the clause has no target of its own and is looked up as
+  # any phone with none: the next allophone's own, else the end of the one
+  # before (gettar's indices 1 and -1).
   fd_table_targets:
     kind: frame
     program: formants
-    unit: "!u.silence"
+    unit: "!u.silence || u.inner"
     at: start
     set:
       - { register: tgt_F1, value: "u.own_F1 != -1 ? u.own_F1 : (n.own_F1 > 0 ? n.own_F1 : (p.end_F1 > 0 ? p.end_F1 : params.policy.formant_drawing.parini.F1))", tag: formant_target }
@@ -547,31 +554,31 @@ rules:
       - { register: tgt_B3, value: "u.own_B3 != -1 ? u.own_B3 : (n.own_B3 > 0 ? n.own_B3 : (p.end_B3 > 0 ? p.end_B3 : params.policy.formant_drawing.parini.B3))", tag: formant_target }
       - register: nxr_F1
         value: >-
-          n.silence ? (u.end_F1 > 0 ? u.end_F1 : params.policy.formant_drawing.parini.F1)
+          n.silence && !n.inner ? (u.end_F1 > 0 ? u.end_F1 : params.policy.formant_drawing.parini.F1)
           : (n.own_F1 != -1 ? n.own_F1 : (n.nextown_F1 > 0 ? n.nextown_F1
           : (u.end_F1 > 0 ? u.end_F1 : params.policy.formant_drawing.parini.F1)))
         tag: formant_target
       - register: nxr_F2
         value: >-
-          n.silence ? (u.end_F2 > 0 ? u.end_F2 : params.policy.formant_drawing.parini.F2)
+          n.silence && !n.inner ? (u.end_F2 > 0 ? u.end_F2 : params.policy.formant_drawing.parini.F2)
           : (n.own_F2 != -1 ? n.own_F2 : (n.nextown_F2 > 0 ? n.nextown_F2
           : (u.end_F2 > 0 ? u.end_F2 : params.policy.formant_drawing.parini.F2)))
         tag: formant_target
       - register: nxr_F3
         value: >-
-          n.silence ? (u.end_F3 > 0 ? u.end_F3 : params.policy.formant_drawing.parini.F3)
+          n.silence && !n.inner ? (u.end_F3 > 0 ? u.end_F3 : params.policy.formant_drawing.parini.F3)
           : (n.own_F3 != -1 ? n.own_F3 : (n.nextown_F3 > 0 ? n.nextown_F3
           : (u.end_F3 > 0 ? u.end_F3 : params.policy.formant_drawing.parini.F3)))
         tag: formant_target
       - register: nxr_B2
         value: >-
-          n.silence ? (u.end_B2 > 0 ? u.end_B2 : params.policy.formant_drawing.parini.B2)
+          n.silence && !n.inner ? (u.end_B2 > 0 ? u.end_B2 : params.policy.formant_drawing.parini.B2)
           : (n.own_B2 != -1 ? n.own_B2 : (n.nextown_B2 > 0 ? n.nextown_B2
           : (u.end_B2 > 0 ? u.end_B2 : params.policy.formant_drawing.parini.B2)))
         tag: formant_target
       - register: nxr_B3
         value: >-
-          n.silence ? (u.end_B3 > 0 ? u.end_B3 : params.policy.formant_drawing.parini.B3)
+          n.silence && !n.inner ? (u.end_B3 > 0 ? u.end_B3 : params.policy.formant_drawing.parini.B3)
           : (n.own_B3 != -1 ? n.own_B3 : (n.nextown_B3 > 0 ? n.nextown_B3
           : (u.end_B3 > 0 ? u.end_B3 : params.policy.formant_drawing.parini.B3)))
         tag: formant_target
@@ -604,7 +611,7 @@ rules:
   fd_table_targets_final_silence:
     kind: frame
     program: formants
-    unit: "u.silence && !u.initial"
+    unit: "u.silence && !u.initial && !u.inner"
     at: start
     set:
       - { register: tgt_F1, value: "p.end_F1 > 0 ? p.end_F1 : params.policy.formant_drawing.parini.F1", tag: formant_target }
@@ -688,7 +695,7 @@ rules:
   fd_input_index:
     kind: frame
     program: formants
-    unit: "!u.silence"
+    unit: "!u.silence || u.inner"
     at: start
     set:
       - { register: input_index, value: "r.input_index + u.input_phones", tag: formant_target }
@@ -699,7 +706,7 @@ rules:
   fd_next_target_past_end:
     kind: frame
     program: formants
-    unit: "!u.silence && n.silence"
+    unit: "!u.silence && n.silence && !n.inner"
     at: start
     when: >-
       r.k_index_1 == r.allophone_index - 5 || r.k_index_2 == r.allophone_index - 5
@@ -713,7 +720,7 @@ rules:
   fd_final_silence_target_past_end:
     kind: frame
     program: formants
-    unit: "u.silence && !u.initial"
+    unit: "u.silence && !u.initial && !u.inner"
     at: start
     when: >-
       r.k_index_1 == r.allophone_index - 6 || r.k_index_2 == r.allophone_index - 6
@@ -728,7 +735,7 @@ rules:
   fd_final_silence_next_target_past_end:
     kind: frame
     program: formants
-    unit: "u.silence && !u.initial"
+    unit: "u.silence && !u.initial && !u.inner"
     at: start
     when: >-
       r.k_index_1 == r.allophone_index - 5 || r.k_index_2 == r.allophone_index - 5
@@ -761,27 +768,27 @@ rules:
       - register: place_k_3
         value: >-
           r.allophone_index == 3 ? (u.is_k ? 1 : 0)
-          : (u.silence && r.allophone_index == 2 ? 0 : r.place_k_3)
+          : (u.silence && !u.inner && r.allophone_index == 2 ? 0 : r.place_k_3)
         tag: formant_target
       - register: place_k_4
         value: >-
           r.allophone_index == 4 ? (u.is_k ? 1 : 0)
-          : (u.silence && r.allophone_index == 3 ? 0 : r.place_k_4)
+          : (u.silence && !u.inner && r.allophone_index == 3 ? 0 : r.place_k_4)
         tag: formant_target
       - register: place_k_5
         value: >-
           r.allophone_index == 5 ? (u.is_k ? 1 : 0)
-          : (u.silence && r.allophone_index == 4 ? 0 : r.place_k_5)
+          : (u.silence && !u.inner && r.allophone_index == 4 ? 0 : r.place_k_5)
         tag: formant_target
       - register: place_k_6
         value: >-
           r.allophone_index == 6 ? (u.is_k ? 1 : 0)
-          : (u.silence && r.allophone_index == 5 ? 0 : r.place_k_6)
+          : (u.silence && !u.inner && r.allophone_index == 5 ? 0 : r.place_k_6)
         tag: formant_target
       - register: place_k_7
         value: >-
           r.allophone_index == 7 ? (u.is_k ? 1 : 0)
-          : (u.silence && r.allophone_index == 6 ? 0 : r.place_k_7)
+          : (u.silence && !u.inner && r.allophone_index == 6 ? 0 : r.place_k_7)
         tag: formant_target
     citations:
       - "DECtalk 4.63 PH/ph_claus.c:571-590 (one allophons[] for every clause, never cleared)"
@@ -790,7 +797,7 @@ rules:
   fd_next_target_earlier_clause:
     kind: frame
     program: formants
-    unit: "!u.silence && n.silence"
+    unit: "!u.silence && n.silence && !n.inner"
     at: start
     when: >-
       (r.allophone_index == 1 && r.place_k_4 == 1) || (r.allophone_index == 2 && r.place_k_5 == 1)
@@ -804,7 +811,7 @@ rules:
   fd_final_silence_target_earlier_clause:
     kind: frame
     program: formants
-    unit: "u.silence && !u.initial"
+    unit: "u.silence && !u.initial && !u.inner"
     at: start
     when: >-
       (r.allophone_index == 1 && r.place_k_3 == 1) || (r.allophone_index == 2 && r.place_k_4 == 1)
@@ -821,7 +828,7 @@ rules:
   fd_final_silence_next_target_earlier_clause:
     kind: frame
     program: formants
-    unit: "u.silence && !u.initial"
+    unit: "u.silence && !u.initial && !u.inner"
     at: start
     when: >-
       (r.allophone_index == 1 && r.place_k_4 == 1) || (r.allophone_index == 2 && r.place_k_5 == 1)

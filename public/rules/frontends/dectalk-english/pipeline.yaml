@@ -237,6 +237,21 @@ functions:
     description: Whether a Segment is the first of its word.
     citations:
       - "DECtalk 4.63 PH/ph_task.c:598-600 (a word's class arrives ahead of its first phone)"
+  # The clause's first allophone after its opening pause: nothing before it,
+  # or the silence that ends the clause before. A silence phonemic text wrote
+  # is an allophone inside its clause (ph_sort.c:1331-1333): it can be the
+  # first ("[_<600>m'uwn]."), and the phone after one starts no clause
+  # ("[m'uw_n]").
+  dectalk_clause_first:
+    params: [item]
+    body: >-
+      (item.phoneme != 'SIL' || isTrue(item, 'written_silence'))
+      && (behind(item, 1) == null
+          || (behind(item, 1).phoneme == 'SIL' && !isTrue(behind(item, 1), 'written_silence')))
+    description: Whether a Segment is the first allophone of its clause.
+    citations:
+      - "DECtalk 4.63 PH/ph_task.c:657-668, 931 (a clause is what stands between two clause-ending symbols)"
+      - "DECtalk 4.63 PH/ph_sort.c:1331-1333 (a silence symbol in the input is a phone of the clause)"
   # The text stage's "first word of a sentence" state is reset where its
   # delimiter routine reads a period, a question mark or an exclamation mark.
   # The two periods after an initial ("J. Smith") do not pass through that
@@ -1131,6 +1146,7 @@ phases:
       - dectalk_empty_clause_f0_opening_silence
       - dectalk_segmental_f0_phone
       - dectalk_segmental_f0_phone_after_intonation_stop
+      - dectalk_segmental_f0_written_silence
       - dectalk_segmental_f0_dummy_vowel
       - dectalk_segmental_f0_final_silence
       - dectalk_connected_speech_source_contour

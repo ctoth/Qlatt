@@ -3,18 +3,16 @@
  * (test/oracle-corpora/dectalk-us-phoneme-silence-v1.json, written before
  * any export).
  *
- * Carried out, and asserted here: the silence is an allophone inside its
- * clause, with the frames DECtalk gives it and its neighbours. FRAMES holds,
- * for each text, the frames of each allophone as the instrumented say.exe
- * printed them (the ALLO line of scripts/oracle/dectalk-debug/f0-trace.md;
- * the port's side is scripts/oracle/dectalk-debug/segment-frames.ts), the
- * clause's opening and closing pauses left off.
- *
- * Not carried out: the pitch and the formants around such a silence, which
- * the frontend draws as at a clause's edge (DECtalk 4.63 PH/Ph_inton2.c:678,
- * 1620-1650 does otherwise inside a clause). No text of the corpus is
- * DECtalk's samples; each is in NOT_EXACT, and a text there that becomes
- * exact fails its test, so that it is taken off the list.
+ * The silence is an allophone inside its clause (DECtalk 4.63
+ * PH/ph_sort.c:1331-1333). Asserted here, for every text of the corpus:
+ *   - the frames DECtalk gives it and the phones around it. FRAMES holds the
+ *     frames of each allophone as the instrumented say.exe printed them (the
+ *     ALLO line of scripts/oracle/dectalk-debug/f0-trace.md; the port's side
+ *     is scripts/oracle/dectalk-debug/segment-frames.ts), the clause's
+ *     opening and closing pauses left off;
+ *   - the stock say.exe's audio, sample for sample: the pitch runs on
+ *     through the silence with the clause's one baseline, and the formants
+ *     are drawn through it to the allophone after it.
  *
  * The fixtures are the say.exe WAVs alone
  * (scripts/oracle/export-dectalk-vtm-fixture.ts --corpus ... --wav-only).
@@ -93,12 +91,15 @@ describe("the silence symbol in a bracket of the phoneme mode", () => {
   );
 
   it.each(corpus.entries.map((entry) => [entry.id, entry] as const))(
-    "%s renders, and is not DECtalk's samples yet",
-    async (id, entry) => {
+    "%s against the say.exe WAV, sample for sample",
+    async (_id, entry) => {
       const result = await compareVoiceEntry(entry, corpus.defaults, fixtureDir);
       expect(result.error).toBeUndefined();
+      expect(result.problems).toEqual([]);
       expect(result.samplesOracle).toBeGreaterThan(0);
-      expect(isExact(result), `${id} is exact now: assert it`).toBe(false);
+      expect(result.packetsRender).toBe(result.packetsOracle);
+      expect(result.firstMismatch).toBe(-1);
+      expect(isExact(result)).toBe(true);
     },
     120000,
   );

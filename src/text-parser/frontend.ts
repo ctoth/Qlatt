@@ -348,16 +348,10 @@ export function runTextParser(
           ],
         );
         // What of a spoken bracket this frontend leaves out: a pitch (the
-        // second number after a symbol), and of a silence symbol all but its
-        // place and its length.
+        // second number after a symbol).
         const leftOut = [
           ...(read.phonemes.some((phoneme) => phoneme.parameters.length > 1)
             ? ["a pitch written on a symbol is not applied (its duration is)"]
-            : []),
-          ...(read.phonemes.some((phoneme) => phoneme.symbol === 0)
-            ? [
-                "a silence symbol is spoken with DECtalk's length, but the pitch and the formants around it are drawn as at a clause's edge, which is not what DECtalk does inside a clause",
-              ]
             : []),
         ];
         if (speak && leftOut.length > 0) {
@@ -367,7 +361,6 @@ export function runTextParser(
             [
               "DECtalk 4.63 PH/ph_task.c:835-852 (the numbers after a phoneme: user_durs, user_f0)",
               "DECtalk 4.63 PH/ph_sort.c:1657-1710 (interp_user_f0: a pitch selects phoneme targets or singing)",
-              "DECtalk 4.63 PH/Ph_inton2.c:678-680, 1620-1650 (what the intonation rules do at a silence inside a clause)",
             ],
           );
           options.diagnostics?.warn(

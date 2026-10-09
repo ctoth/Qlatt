@@ -16,6 +16,8 @@
  *   - a period right after a bracket, which is the word "period" (the rule
  *     for a period that stands alone, tn_lone_period_source);
  *   - a duration written on a symbol ("[uw<500>]");
+ *   - a silence symbol in a bracket ("[_<600>m'uwn]"; more of it in
+ *     test/dectalk-phoneme-silence.test.ts);
  *   - the mode turned off again;
  *   - a bracket that holds what is no phoneme: the symbols before it, then
  *     DECtalk's error text.
@@ -51,19 +53,14 @@ const corpus = readVoiceCorpus(
 const PITCH =
   "a pitch written on a symbol (the second number) is read and not applied: the pitch is " +
   "the rules'";
-const SILENCE =
-  "a silence symbol inside a bracket is spoken with DECtalk's length " +
-  "(test/dectalk-phoneme-silence.test.ts), but the pitch and the formants around it are not " +
-  "DECtalk's";
 
 /** Not DECtalk's samples yet. */
 const NOT_EXACT: Readonly<Record<string, string>> = {
-  "pm-18": SILENCE,
   "pm-19": PITCH,
   "pm-20": PITCH,
   "pm-21": PITCH,
   "pm-22": PITCH,
-  "pm-23": `${PITCH}; ${SILENCE}`,
+  "pm-23": PITCH,
   "pm-24": PITCH,
 };
 

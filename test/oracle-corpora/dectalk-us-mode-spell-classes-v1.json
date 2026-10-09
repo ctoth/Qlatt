@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-mode-spell-classes-v1",
+  "description": "More texts in DECtalk's spelling mode, written after the first corpus showed that a spelled word keeps its form class: verbs, auxiliaries, nouns and adjectives in several places of a clause, each of the six auxiliaries first in a sentence, a wh-question, a conjunction in a long sentence, written commas, words the text parser rewrites, runs of white space, a tab; and the mode command with one word, with a wrong word, with its words in the wrong order, taken away by another mode's set, and inside a text. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "sc-01", "text": "[:mode spell on] The big dog barked and the small cat ran away.", "group": "classes" },
+    { "id": "sc-02", "text": "[:mode spell on] What is it?", "group": "classes" },
+    { "id": "sc-03", "text": "[:mode spell on] Had we gone? Will it rain.", "group": "classes" },
+    { "id": "sc-04", "text": "[:mode spell on] Are we late, were they early?", "group": "classes" },
+    { "id": "sc-05", "text": "[:mode spell on] She can go, they went home.", "group": "classes" },
+    { "id": "sc-06", "text": "[:mode spell on] We walked and talked.", "group": "classes" },
+    { "id": "sc-07", "text": "[:mode spell on] He is not here; she has been there.", "group": "classes" },
+    { "id": "sc-08", "text": "[:mode spell on] Open the old red door.", "group": "classes" },
+    { "id": "sc-09", "text": "[:mode spell on] To be or not to be.", "group": "classes" },
+    { "id": "sc-10", "text": "[:mode spell on] I am in. You do it!", "group": "classes" },
+    { "id": "sc-11", "text": "[:mode spell on] They will have gone. Where were you?", "group": "classes" },
+    { "id": "sc-12", "text": "[:mode spell on][:name betty] Is the tide out?", "group": "classes" },
+    { "id": "sc-13", "text": "[:mode spell on] Mr. Reed lives at 12 Elm St. in Ohio.", "group": "written" },
+    { "id": "sc-14", "text": "[:mode spell on] It's 3.5 or -7, e.g. café.", "group": "written" },
+    { "id": "sc-15", "text": "[:mode spell on] The tide\twent out.", "group": "written" },
+    { "id": "sc-16", "text": "[:mode spell on] One.  Two   three.", "group": "written" },
+    { "id": "sc-17", "text": "[:mode spell on] ABC xyz Q.", "group": "written" },
+    { "id": "sc-18", "text": "[:mode spell on] Stop... go!", "group": "written" },
+    { "id": "sc-19", "text": "The tide [:mode spell] went out.", "group": "command" },
+    { "id": "sc-20", "text": "The tide [:mode foo on] went out.", "group": "command" },
+    { "id": "sc-21", "text": "The tide [:mode on spell] went out.", "group": "command" },
+    { "id": "sc-22", "text": "[:mode spell on][:mode name set] The tide went out.", "group": "command" },
+    { "id": "sc-23", "text": "[:mode name set][:mode spell on] The tide.", "group": "command" },
+    { "id": "sc-24", "text": "The tide [:mode spell on] went out.", "group": "command" }
+  ]
+}

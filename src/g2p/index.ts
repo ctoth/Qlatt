@@ -278,11 +278,15 @@ export function pronounce(
   // A word the dictionary holds is the dictionary's (the search comes first,
   // LTS/ls_task.c:697): "_" alone is the entry `'^ndR#sk`or`, with its
   // compound joint, and "Type _ now." is measured so.
+  // Digits with an apostrophe between them are spelled the same way: the
+  // part-number test sends a word with a digit and an apostrophe to the
+  // spelling routine (LTS/ls_task.c:4128-4158). Measured on say.exe: "5'10"
+  // is F AY V, AX P AA S T R AX F IY, W AH N, Z IY R OW.
   if (
     table?.letterPhones &&
     table.characterNames &&
     table.numberPhones &&
-    /^[a-z0-9_]*_[a-z0-9_]*$/.test(lowerWord) &&
+    (/^[a-z0-9_]*_[a-z0-9_]*$/.test(lowerWord) || /^[0-9]+'[0-9]+$/.test(lowerWord)) &&
     !dictLookup(lowerWord)
   ) {
     const letterPhones = table.letterPhones;
@@ -291,7 +295,7 @@ export function pronounce(
     const parts = [...lowerWord].flatMap((char) =>
       /[0-9]/.test(char)
         ? numberWords(units[Number(char)] as readonly number[], table)
-        : char === "_"
+        : char === "_" || char === "'"
           ? (characterNames[char] ?? []).map((word) => ({ phonemes: [...word] }))
           : [{ phonemes: [...(letterPhones[char] ?? [])] }],
     );

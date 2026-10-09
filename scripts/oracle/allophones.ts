@@ -114,6 +114,18 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // Words the dictionary holds capitalised and in lower case with different
   // phones ("New" and "new"), by how the word is written.
   "dectalk-us-capitalised-entries-v1.json",
+  // The plural of a letter ("p's"): the text parser writes phonemic z
+  // against the letter, with no word boundary before or after it, and a
+  // mark right after it is a word.
+  "dectalk-us-plural-letters-v1.json",
+  // Digits with an apostrophe between them ("5'10"), spelled.
+  "dectalk-us-digit-apostrophe-v1.json",
+  // A period standing apart with a comma or a semicolon on it (the parser's
+  // `Ibid .,`): the word "period", then the mark as its delimiter.
+  "dectalk-us-period-word-marks-v1.json",
+  // Words with an accented letter: looked up as written, else read by rule
+  // with the accent folded away.
+  "dectalk-us-accented-letters-v1.json",
 ];
 
 /** Every corpus with a packet record. */

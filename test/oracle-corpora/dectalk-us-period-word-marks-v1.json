@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-period-word-marks-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "pw-ibid", "text": "Ibid., p. 44.", "group": "period-word-before-mark", "tags": ["comma", "text-start"], "expectedFocus": ["trace"] },
+    { "id": "pw-see-ibid", "text": "See ibid., p. 44.", "group": "period-word-before-mark", "tags": ["comma"], "expectedFocus": ["trace"] },
+    { "id": "pw-et-al", "text": "Smith et al., 2004.", "group": "period-word-before-mark", "tags": ["comma", "year-after"], "expectedFocus": ["trace"] },
+    { "id": "pw-semicolon", "text": "Ibid.; p. 44.", "group": "period-word-before-mark", "tags": ["semicolon"], "expectedFocus": ["trace"] },
+    { "id": "pw-number-after", "text": "Ibid., 44.", "group": "period-word-before-mark", "tags": ["comma"], "expectedFocus": ["trace"] },
+    { "id": "pw-op-cit", "text": "Op. cit., p. 5.", "group": "period-word-before-mark", "tags": ["comma", "after-period"], "expectedFocus": ["trace"] },
+    { "id": "pw-cf", "text": "Cf., e.g., the note.", "group": "period-word-before-mark", "tags": ["comma", "spelled-word"], "expectedFocus": ["trace"] },
+    { "id": "pw-after-comma", "text": "Jones, Ibid., p. 2.", "group": "period-word-before-mark", "tags": ["comma", "after-comma"], "expectedFocus": ["trace"] },
+    { "id": "pw-period-control", "text": "See Ibid. for more.", "group": "period-word-before-mark", "tags": ["control", "no-mark-after"], "expectedFocus": ["trace"] },
+    { "id": "pw-word-control", "text": "He saw the cat., then left.", "group": "period-word-before-mark", "tags": ["control", "parser-leaves-it"], "expectedFocus": ["trace"] }
+  ]
+}

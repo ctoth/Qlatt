@@ -97,6 +97,15 @@ maps:
     # LTS/ls_spel.c:151-170). Measured on say.exe: "tom_west42" is
     # "t o m underscore w e s t four two".
     underscore_words: spelled
+    # Digits with an apostrophe between them are spelled, the apostrophe by
+    # its name (LTS/ls_task.c:4128-4158): "5'10" is "five apostrophe one
+    # zero" on say.exe.
+    digit_apostrophe_words: spelled
+    # A word with an accented letter keeps its accents: the dictionary is
+    # searched for it as written, and the rules read each accented letter as
+    # its plain one (LTS/l_us_ru1.c:108-112, INCLUDE/ls_fold.tab). "café" is
+    # K EY F on say.exe, not the dictionary's "cafe".
+    accented_words: kept
     # A decimal with no digit before its point is a number: ".5" is "point
     # five" and ".05" "point zero five" on say.exe, not a sentence end
     # (LTS/l_us_pr1.c:497-749).

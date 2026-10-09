@@ -47,9 +47,12 @@ text_recognition:
     # The same clause end after a period that is a word
     # (tn_lone_period_source): the word "period" is one of the words it ends.
     # Measured on say.exe: "She moved to Boston, MA 02134." ends
-    # P IY R IY AX D, a word boundary and the period symbol.
+    # P IY R IY AX D, a word boundary and the period symbol. And after any
+    # other mark that is a word because it stands right after phonemic text
+    # (tn_mark_after_phonemic_source): "Did he get two B's?" ends
+    # K W EH S CH AX N, M AA R K and the period symbol.
     - id: tn_parser_clause_end_after_period_word_source
-      pattern: '(?<=(?<![A-Za-z0-9]\)\s*)(?:\s|\x82)\.\s*)\x0b'
+      pattern: '(?<=(?:(?<![A-Za-z0-9]\)\s*)(?:\s|\x82)\.|\x82[,;:?!])\s*)\x0b'
       flags: ''
       class: parser_clause_end
       captures: {}
@@ -227,8 +230,36 @@ text_recognition:
     # "Dr. White, Ph.D., spoke." has P IY, EY CH, P IY R IY AX D, D IY and a
     # comma; "She moved to Boston, MA 02134. Then she left." has the pause,
     # then P IY R IY AX D, DH EH N, SH IY, L EH F T in one clause.
+    # Any other mark right after the parser's phonemic text ("B's?" is the
+    # letter, phonemic z and the mark): the phonemic text ended the text
+    # letter-to-sound had gathered, so the mark begins a word and is kept as
+    # one, the dictionary's word for it. Only for a frontend whose policy
+    # asks for it (tn_recognition_policy.lone_period: word). Measured on
+    # say.exe: "Did he get two B's? Yes." has B IY Z, K W EH S CH AX N,
+    # M AA R K, Y EH S in one clause; "He got two B's! Yes." has
+    # EH K S K L AX M EY SH AX N, P OY N T; "Two c's, then" K AA M AX;
+    # "He got two B's; then" S EH M IY K OW L AX N.
+    - id: tn_mark_after_phonemic_source
+      pattern: '(?<=\x82)(?<word>[,;:?!])(?=\s|$)'
+      flags: ''
+      class: symbol_word
+      captures: {word: word}
+      when: >-
+        get(maps.tn_recognition_policy, 'lone_period', 'clause_end') == 'word'
+        && captures.word in get(maps, 'tn_symbol_words', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:446-470 (an item that is not a character ends the gathered text), 1420-1437 (ls_task_readword: at a word''s start a character that "might" be in a word is kept when nothing was kept before it), LTS/l_us_con.c:125, 139, 153, 154 and 158 ("!" "," ":" ";" "?" are such characters), dapi/src/dic/dtalk_us.dic (their entries)'
+    # The same period with a comma, a semicolon or a colon on it (the parser
+    # writes "Ibid.," as `Ibid .,`): the period begins a word and is kept,
+    # the mark after it is not (white space follows it), so the word is the
+    # period and the mark its delimiter. Measured on say.exe: "Ibid., p. 44."
+    # has IH B IX D, P IY R IY AX D and a comma; "Smith et al., 2004." the
+    # same after AE L; "Ibid.; p. 44." the same with the semicolon's comma.
+    # (A question or an exclamation mark there has not been measured.)
     - id: tn_lone_period_source
-      pattern: '(?<=\s|\x82)\.(?=\s|$)'
+      pattern: '(?<=\s|\x82)\.(?=[,;:]?(?:\s|$))'
       flags: ''
       class: lone_period
       captures: {}
@@ -331,6 +362,46 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:151-170 (each character by its name)'
+    # Digits with an apostrophe between them ("5'10", a height; an inch mark
+    # after it is stripped): one word, which the frontend's lexicon spells,
+    # each digit by its name and the apostrophe by its own. Only for a
+    # frontend whose policy asks for it
+    # (tn_recognition_policy.digit_apostrophe_words: spelled). Measured on
+    # say.exe: `He is 5'10" and still growing.` has F AY V, AX P AA S T R AX
+    # F IY, W AH N, Z IY R OW; "12'6" is W AH N, T UW, the apostrophe, S IH K
+    # S. An apostrophe first or last is stripped ("'09", "6'"), and "80's"
+    # is the plural: not this rule's.
+    - id: tn_digit_apostrophe_source
+      pattern: '(?<=^|\s)(?<word>[0-9]+''[0-9]+)(?="?[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'digit_apostrophe_words', 'split') == 'spelled'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4128-4158 (ls_task_part_number: a word with a digit and an apostrophe in it is spelled), LTS/ls_spel.c:151-170 (each character by its name), LTS/l_us_con.c:126 (the double quote is strippable at a word''s end)'
+    # A word with an accented letter in it ("café", "naïve", "Zürich"): one
+    # word, its accents kept. The frontend's lexicon looks it up as written
+    # and, when the dictionary does not have it, reads it by rule with each
+    # accented letter as its plain one. Only for a frontend whose policy
+    # asks for it (tn_recognition_policy.accented_words: kept). Measured on
+    # say.exe (which is handed one byte for each such letter): "café" is
+    # K EY F, the rules' reading of "cafe", where the dictionary's "cafe" is
+    # K AE F EY; "naïve" is N EY V; "exposé", which the dictionary has, is
+    # EH K S P OW Z EY. The letters are those INCLUDE/ls_fold.tab gives a
+    # plain letter for, less the two that are signs in the Windows code page
+    # (the multiplication and division signs: not measured).
+    - id: tn_accented_word_source
+      pattern: '(?<![A-Za-zÀ-ÖØ-öø-ý])(?<word>[A-Za-z]*[À-ÖØ-öø-ý][A-Za-zÀ-ÖØ-öø-ý]*)(?![A-Za-zÀ-ÖØ-öø-ý])'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: "get(maps.tn_recognition_policy, 'accented_words', 'cleaned') == 'kept'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:697 and 2040-2160 (the dictionary is searched for the word as written), 752-765 (the word is not folded before the rules and the dictionary is not searched again), LTS/l_us_ru1.c:108-112 (ls_rule_lts reads each character through ls_fold[]), INCLUDE/ls_fold.tab'
     # A word with a question mark and an exclamation mark written on it, in
     # either order ("What?!", "that!?", and "?!?", "?!!"): the last mark ends
     # the clause and what stands before it stays on the word, which the

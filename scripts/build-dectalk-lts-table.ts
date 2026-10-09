@@ -28,7 +28,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { searchDictionary } from "../src/g2p/table-dictionary-search";
 import { stripSuffixes } from "../src/g2p/table-suffix";
-import { convertPhonemeFieldDetailed, selectDictionaryRows } from "./build-dectalk-dict";
+import {
+  convertPhonemeFieldDetailed,
+  readDictionaryText,
+  selectDictionaryRows,
+} from "./build-dectalk-dict";
 import { conjunctionSequences } from "./dectalk-proverbs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -216,9 +220,8 @@ const formClassMask = (names: readonly string[]): number =>
 // `homographs`; the dictionary compiler marks the primary with
 // FC_CHARACTER | FC_HOMOGRAPH and the secondary with FC_HOMOGRAPH
 // (dic/dic_comm.c:485-501).
-const dictionaryText = fs.readFileSync(
+const dictionaryText = readDictionaryText(
   path.join(dectalkRoot, "dapi", "src", "dic", "Dic_us.txt"),
-  "utf8",
 );
 const NAME_BIT = formClassNames.indexOf("name");
 const CHARACTER_BIT = formClassNames.indexOf("character");
@@ -363,12 +366,34 @@ for (const [character, comment] of [
   ["-", "Minus sign"],
   ["/", "Forward slash"],
   ["_", "Underscore"],
+  ["'", "Apostrophe"],
 ] as const) {
   const row = new RegExp(`"([^"]*)",\\s*/\\*\\s*${comment}\\s*\\*/`).exec(typingTable);
   if (!row) throw new Error(`E_CHARACTER_NAMES: no row '${comment}' in usa_type.tab`);
   characterNames[character] = (row[1] as string)
     .split(" ")
     .map((word) => convertPhonemeFieldDetailed(word).phones);
+}
+
+// The letters the rule engine reads for a character above 127: it converts
+// each character of the word through ls_fold[] before it looks for a letter
+// (LTS/l_us_ru1.c:108-112; INCLUDE/ls_fold.tab, one entry per byte). Only
+// the entries that give a letter are kept: any other character is no
+// grapheme to the rules. The key is the byte as a character (E9 is U+00E9).
+const foldTable = [
+  ...fs
+    .readFileSync(path.join(dectalkRoot, "dapi", "src", "INCLUDE", "ls_fold.tab"), "latin1")
+    .matchAll(/0x[0-9a-fA-F]{2}|'(.)'/g),
+].map((match) => (match[1] !== undefined ? match[1] : String.fromCharCode(Number(match[0]))));
+if (foldTable.length !== 256) {
+  throw new Error(
+    `E_FOLD_TABLE: read ${foldTable.length.toString()} entries from ls_fold.tab, expected 256`,
+  );
+}
+const letterFold: Record<string, string> = {};
+for (let code = 128; code < 256; code += 1) {
+  const folded = foldTable[code] as string;
+  if (/^[a-z]$/.test(folded)) letterFold[String.fromCharCode(code)] = folded;
 }
 
 // The words of the compiled dictionary DECtalk loads, in its order and with
@@ -665,6 +690,7 @@ fs.writeFileSync(
     wordsByPunctuation,
     letterPhones,
     characterNames,
+    letterFold,
     // The word sequences the text stage's sentence parse takes as one
     // conjunction, in the table's order (LTS/proverbs.h conj_words, read by
     // LTS/ls_task.c ls_task_search_for_conj).

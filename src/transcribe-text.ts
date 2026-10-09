@@ -87,6 +87,8 @@ type OrthographyInputToken = {
   supplied?: boolean;
   /** A punctuation token a text rule sent itself: it was not read as a delimiter. */
   sentMark?: boolean;
+  /** A letter or a digit stands right before the token's span in the source text. */
+  writtenAgainstPrevious?: boolean;
   /**
    * The written word this token comes from ends in one of the frontend's
    * `word_stretch_end_characters` ("Mr.", "dogs'").
@@ -485,6 +487,11 @@ function rewriteOrthographyTokens(
   // Punctuation tokens a text rule sent itself (terminal kind 'sent_mark'):
   // the mark was not read as the delimiter of the word before it.
   const sentMarks = new Set<string>();
+  // Tokens whose source span has a letter or a digit right in front of it:
+  // the token is written against the word before it ("p" and phonemic text
+  // in the text parser's "p's"; not "'90s" after "The ", whose apostrophe is
+  // stripped from a word of its own).
+  const writtenAgainst = new Set<string>();
   // Word tokens whose written word ends in a character that ends a stretch
   // of words for the frontend (an abbreviation's period, a final apostrophe).
   const stretchEnds = new Set<string>();
@@ -533,6 +540,9 @@ function rewriteOrthographyTokens(
         }
         const written = sourceText.slice(start, end);
         if (punctuation && !written.includes(word)) suppliedPunctuation.add(token.id);
+        if (start > 0 && /[A-Za-z0-9]/.test(sourceText[start - 1] as string)) {
+          writtenAgainst.add(token.id);
+        }
         if (
           !punctuation &&
           written.length > 0 &&
@@ -609,6 +619,7 @@ function rewriteOrthographyTokens(
         isPunctuation: tokenType === "punctuation",
         ...(suppliedPunctuation.has(token.id) ? { supplied: true } : {}),
         ...(sentMarks.has(token.id) ? { sentMark: true } : {}),
+        ...(writtenAgainst.has(token.id) ? { writtenAgainstPrevious: true } : {}),
         ...(stretchEnds.has(token.id) ? { endsWordStretch: true } : {}),
         ...(markedWords.has(token.id)
           ? { writtenMarks: markedWords.get(token.id) as string[] }
@@ -1049,6 +1060,13 @@ export function transcribeText(
               part === spokenParts.at(-1)
                 ? { _joinsNextWord: true }
                 : {}),
+              // Phonemic text written against the word before it has no word
+              // boundary before it either (joinPhonemicText below).
+              ...(pronResult.source === "phonemic" &&
+              inputToken.writtenAgainstPrevious &&
+              part === spokenParts[0]
+                ? { _joinsPreviousWord: true }
+                : {}),
               // A phrase start after the token's last word is the next
               // word's (startPhraseAtNextWord below).
               ...("phraseStartAfter" in pronResult &&
@@ -1279,6 +1297,9 @@ function joinPhonemicText(
         if (continuesWrittenWord) phone.continuesWrittenWord = continuesWrittenWord;
         else delete phone.continuesWrittenWord;
       }
+      // The word's own text begins here: its class reached the phonetics
+      // after the phonemic text had gone by (PH/ph_task.c:598-601).
+      next.wordTextStart = true;
       provenance?.add({
         stage: "transcribe",
         type: "phonemic_text_joined",
@@ -1310,5 +1331,51 @@ function joinPhonemicText(
       });
     }
     start = end;
+  }
+  // Phonemic text written against the word before it ("p" and z in the text
+  // parser's "p's"): that word is the last of the text letter-to-sound had
+  // gathered, and what follows it is not a character, so its delimiter
+  // routine sends no word boundary (LTS/ls_task.c:1153-1154). The word is
+  // one with the phonemic text, and with whatever that was joined to above.
+  for (let at = 1; at < phones.length; at += 1) {
+    const phone = phones[at] as TranscriptionToken;
+    if (!phone._joinsPreviousWord) continue;
+    delete phone._joinsPreviousWord;
+    const before = phones[at - 1] as TranscriptionToken;
+    if (before.isPunctuation || before.sourceTokenId === phone.sourceTokenId) continue;
+    const joined: TranscriptionToken[] = [];
+    for (let back = at - 1; phones[back]?.sourceTokenId === before.sourceTokenId; back -= 1) {
+      joined.unshift(phones[back] as TranscriptionToken);
+    }
+    const { formClasses, textFormClasses, conjunctionRole, readAhead, continuesWrittenWord } =
+      phone;
+    for (const earlier of joined) {
+      earlier.sourceTokenId = phone.sourceTokenId;
+      earlier.word = phone.word;
+      if (formClasses) earlier.formClasses = formClasses;
+      else delete earlier.formClasses;
+      if (textFormClasses) earlier.textFormClasses = textFormClasses;
+      else delete earlier.textFormClasses;
+      if (conjunctionRole) earlier.conjunctionRole = conjunctionRole;
+      else delete earlier.conjunctionRole;
+      if (readAhead) earlier.readAhead = readAhead;
+      else delete earlier.readAhead;
+      if (continuesWrittenWord) earlier.continuesWrittenWord = continuesWrittenWord;
+      else delete earlier.continuesWrittenWord;
+      // The marks written on the word joined after it, as the phonemic
+      // text's own phones took them above.
+      if (phone.writtenMarks) earlier.writtenMarks = phone.writtenMarks;
+    }
+    provenance?.add({
+      stage: "transcribe",
+      type: "word_joined_to_phonemic_text",
+      subject: phone.sourceTokenId,
+      reason: `'${before.word}' is written against phonemic text ${phone.phoneme}…: no word boundary between them`,
+      citations: [
+        "DECtalk 4.63 LTS/ls_task.c:446-470 (an item that is not a character ends the gathered text), 1153-1154 (the delimiter routine sends nothing when the item after the word is not a character)",
+        "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on symbol by symbol)",
+      ],
+      parents: phone._pronDecisionId ? [phone._pronDecisionId] : [],
+    });
   }
 }

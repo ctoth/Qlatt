@@ -223,6 +223,8 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
     type: { kind: "string" },
     word: { kind: "string" },
     morpheme_boundary_after: { kind: "boolean" },
+    // The first phone of the word's own text, after phones joined to it.
+    word_text_start: { kind: "boolean" },
     rules_blocked: { kind: "boolean" },
     written_duration_ms: { kind: "number" },
     written_silence: { kind: "boolean" },
@@ -1010,6 +1012,7 @@ function buildTextToKlattTrackDetailed(
     });
     construct.set(item, "phoneme", token.phoneme);
     if (token.morphemeBoundaryAfter) construct.set(item, "morpheme_boundary_after", true);
+    if (token.wordTextStart) construct.set(item, "word_text_start", true);
     if (token.rulesBlocked) construct.set(item, "rules_blocked", true);
     if (token.writtenDurationMs !== undefined) {
       construct.set(item, "written_duration_ms", token.writtenDurationMs);

@@ -769,6 +769,10 @@ relations:
       # The phone before a morpheme boundary inside its word (MBOUND, e.g.
       # "nine|teen" in DECtalk's number lists).
       morpheme_boundary_after: { kind: boolean }
+      # The first phone of a word's own text, when phonemic text was joined
+      # to the word in front of it: the word's class arrives there
+      # (PH/ph_task.c:598-601).
+      word_text_start: { kind: boolean }
       # A punctuation silence whose mark a text rule sent itself: no routine
       # read it as a word's delimiter (an initial's two periods,
       # LTS/ls_task.c:2612-2617).

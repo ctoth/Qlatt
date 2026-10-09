@@ -44,6 +44,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as yaml from "js-yaml";
+import {
+  OWN_BLOCK_VOICE,
+  type SpeakerDefinition,
+  type SpeakerDefinitionData,
+  voiceFieldsOfDefinition,
+} from "../../src/dectalk-speaker-definition.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const argv = process.argv.slice(2);
@@ -139,8 +145,68 @@ const SPD = {
 
 /** PH/ph_defs.h:733-734, 726-727 (the non-MSDOS values). */
 const CONSTANTS: Readonly<Record<string, number>> = { MALE: 1, FEMALE: 0, ZAPF: 6000, ZAPB: 6000 };
-const ZAPF = 6000;
-const ZAPB = 6000;
+
+/**
+ * limit[] of PH/ph_vdefi.c:250-300: the lowest and highest value setparam()
+ * lets each entry of a definition have, by SPD_ index. The file is read as
+ * written (no #ifdef stands inside the table).
+ */
+function readLimits(count: number): [number, number][] {
+  const source = fs.readFileSync(
+    path.join(dectalkRoot, "dapi", "src", "PH", "ph_vdefi.c"),
+    "latin1",
+  );
+  const table = /const\s+LIMIT\s+limit\s*\[\s*\]\s*=\s*\{([\s\S]*?)\};/.exec(source);
+  if (!table) throw new Error("E_VOICE_SOURCE: ph_vdefi.c has no limit[]");
+  const cells = (table[1] as string)
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/.*$/gm, "")
+    .split(",")
+    .map((cell) => cell.trim())
+    .filter((cell) => cell.length > 0)
+    .map((cell) => {
+      const value = cell in CONSTANTS ? (CONSTANTS[cell] as number) : Number(cell);
+      if (!Number.isInteger(value)) throw new Error(`E_VOICE_CELL: limit[]: '${cell}'`);
+      return value;
+    });
+  if (cells.length < count * 2) {
+    throw new Error(`E_VOICE_SOURCE: limit[] has ${cells.length / 2} entries, fewer than ${count}`);
+  }
+  return Array.from({ length: count }, (_, index) => [
+    cells[index * 2] as number,
+    cells[index * 2 + 1] as number,
+  ]);
+}
+
+/**
+ * The entries of a definition by index, and their limits: what
+ * src/dectalk-speaker-definition.ts needs beside a voice's own numbers.
+ * Written to the frontend as speaker-definition.json.
+ */
+const DEFINITION_DATA: SpeakerDefinitionData = {
+  names: (Object.entries(SPD) as [string, number][])
+    .sort((left, right) => left[1] - right[1])
+    .map(([name]) => name),
+  limits: readLimits(Object.keys(SPD).length),
+};
+const definitionDataPath = path.join(
+  repoRoot,
+  "public",
+  "rules",
+  "frontends",
+  "dectalk-english",
+  "speaker-definition.json",
+);
+const definitionDataText = `${JSON.stringify(
+  {
+    schemaVersion: "v1",
+    source:
+      "DECtalk 4.63 INCLUDE/cmd.h:159-205 (the SPD_ indices), PH/ph_vdefi.c:250-300 (limit[]); written by scripts/oracle/import-dectalk-voices.ts --write",
+    ...DEFINITION_DATA,
+  },
+  null,
+  1,
+)}\n`;
 
 /** The lines of a header that survive #ifdef, #ifndef, #else and #endif. */
 function compiledLines(text: string, defines: readonly string[]): { line: number; text: string }[] {
@@ -342,7 +408,11 @@ function readSpeakerValues(): Map<string, SpeakerValues> {
 
 const speakerValues = readSpeakerValues();
 
-type VoiceFile = { comment: string[]; fields: Record<string, number | string> };
+type VoiceFile = {
+  comment: string[];
+  fields: Record<string, number | string>;
+  definition: SpeakerDefinition;
+};
 
 function voiceFile(voice: string, structName: string, voiceNumber: number): VoiceFile {
   const struct = readStruct(lines, structName);
@@ -355,112 +425,19 @@ function voiceFile(voice: string, structName: string, voiceNumber: number): Voic
     (name) => (tune.values[SPD[name]] ?? 0) !== 0,
   );
   // Voice 3 outside reading mode: ph_vset.c:580-659.
-  const frank = voice === "frank";
-  const male = spd("SEX") === CONSTANTS.MALE;
-  const fnscale = frank ? (200 - 100) * 41 : (200 - spd("HS")) * 41;
-  const scaled = (hz: number): number => Math.floor((hz * fnscale) / 4096);
-  // ph_vset.c:714-757: the cascade F4 and F5 the generator gets.
-  let f4 = frank ? scaled(3400) : spd("F4") === ZAPF ? ZAPF : scaled(spd("F4"));
-  let b4 = frank ? 260 : spd("B4");
-  if (!frank && f4 > 4950) {
-    f4 = ZAPF;
-    b4 = ZAPB;
-  }
-  let f5 = frank || spd("F5") === ZAPF ? ZAPF : scaled(spd("F5"));
-  let b5 = frank ? ZAPB : spd("B5");
-  if (!frank && f5 > Math.floor(11025 / 2)) {
-    f5 = ZAPF;
-    b5 = ZAPB;
-  }
-  const lowpass = frank ? 1500 + 15 * (spd("QU") + 40) : 1500 + 15 * spd("QU");
-  const breathiness = frank ? 0 : spd("BR");
+  const frank = voiceNumber === OWN_BLOCK_VOICE;
+  // The definition as usevoice() leaves it, and the tuning table setparam()
+  // adds to a number a text gives ("[:dv ap 200]", ph_vset.c:219).
+  const definition: SpeakerDefinition = {
+    values: DEFINITION_DATA.names.map((name) => spd(name as keyof typeof SPD)),
+    tune: DEFINITION_DATA.names.map((name) => tune.values[SPD[name as keyof typeof SPD]] ?? 0),
+  };
+  // What setspdef() makes of it: src/dectalk-speaker-definition.ts, which the
+  // frontend also runs when a text changes the definition.
   const fields: Record<string, number | string> = {
     name: voice[0]?.toUpperCase() + voice.slice(1),
-    sex: male ? "male" : "female",
-    fnscale,
-    base_f0_hz: spd("AP"),
-    // Not DECtalk's: the Klatt-graph backend's own stand-ins for a voice's
-    // formant scale and source quality. engineering estimate
-    formant_scale: male ? 1 : 1.17,
-    rd_default:
-      Math.round(Math.max(0.3, Math.min(2.7, (male ? 0.7 : 0.8) + breathiness * 0.004)) * 100) /
-      100,
-    spectral_tilt_offset_db: Math.round(breathiness * 0.1 * 10) / 10,
-    f0_minimum: frank ? (spd("AP") - 65) * 10 : (spd("AP") - 12) * 10,
-    f0_scale_factor: spd("PR") * 41,
-    f0_lp_filter: lowpass,
-    f0_lp_filter_alpha: lowpass / 16384,
-    hat_rise_hz10: frank ? (spd("HR") - 10) * 10 : spd("HR") * 10,
-    scale_str_rise: spd("SR"),
-    assertiveness: spd("AS") * 41,
-    baseline_fall_hz10: spd("BF") * 10,
-    falling_target: spd("FT"),
-    F4: f4,
-    B4: b4,
-    F5: f5,
-    B5: b5,
-    F7: frank ? 3400 : spd("P4"),
-    F8: frank ? 4800 : spd("P5"),
-    GF: frank ? spd("GF") - 3 : spd("GF"),
-    GH: frank ? spd("GH") - 3 : spd("GH"),
-    GV: frank ? spd("GV") - 5 : spd("GV"),
-    GN: spd("GN"),
-    G1: frank ? 65 : spd("G1"),
-    G2: frank ? 65 : spd("G2"),
-    G3: frank ? 66 : spd("G3"),
-    G4: frank ? 60 : spd("G4"),
-    LO: frank ? 70 : spd("LO"),
-    AGO: spd("AGO"),
-    AGVO: spd("AGVO"),
-    AGUO: spd("AGUO"),
-    UNVOW: spd("UNVOW"),
-    CHINK: spd("CHINK"),
-    smoothness: spd("SM"),
-    breathiness,
-    richness: frank ? 30 : spd("RI"),
-    nopen_fraction: frank ? 20 : spd("NF"),
-    laryngealization: frank ? 0 : spd("LA"),
-    head_size: spd("HS"),
-    quickness: spd("QU"),
-    // The voice definition's own fourth formant, which the packets carry
-    // (OUT_F4, ph_draw.c:4189); F4 above is the generator's, scaled.
-    spd_F4: spd("F4"),
+    ...voiceFieldsOfDefinition(definition.values, DEFINITION_DATA, { frank, voiceNumber }),
   };
-  // The speaker definition packet setspdef() sends the synthesizer (struct
-  // SPD_CHIP, PH/ph_defs.h:693-720) and the three values the VTM thread reads
-  // beside it, under the names of the dectalk-vtm node's parameters
-  // (public/experiments/dectalk-vtm/registry.yaml). Line numbers are the
-  // general path's, PH/ph_vset.c; Frank's block (580-659) sets the same words
-  // from the values above.
-  const number = (key: string): number => fields[key] as number;
-  Object.assign(fields, {
-    SPD_R4CB: f4, // r4cb, 714-730
-    SPD_R4CC: b4, // r4cc, 725-730
-    SPD_R5CB: f5, // r5cb, 732-760
-    SPD_R5CC: b5, // r5cc, 755-760
-    SPD_R4PB: number("F7"), // r4pb = P4, 761
-    SPD_R5PB: number("F8"), // r5pb = P5, 762
-    SPD_T0JIT: number("laryngealization"), // t0jit = LA, 763
-    SPD_R5CA: number("G1"), // r5ca, 765
-    SPD_R4CA: number("G2"), // r4ca, 766
-    SPD_R3CA: number("G3"), // r3ca, 767
-    SPD_R2CA: number("G4"), // r2ca, 772
-    SPD_R1CA: number("LO"), // r1ca, 775
-    SPD_NOPEN1: 5000 + 160 * (100 - number("richness")), // nopen1, 783
-    SPD_NOPEN2: number("nopen_fraction") * 4, // nopen2, 784
-    SPD_ATURB: breathiness, // aturb = BR, 786
-    SPD_AFGAIN: number("GF"), // afgain, 816
-    SPD_AZGAIN: number("GV"), // azgain, 810
-    SPD_APGAIN: number("GH"), // apgain, 818
-    SPD_SEX: spd("SEX"), // sex = malfem = SPD_SEX, 537-538
-    // pKsd_t->last_voice: the voice's place in voidef[] (ph_main.c:511-519).
-    last_voice: voiceNumber,
-    // NOM_Open_Quo = curspdef[SPD_OQ], 672 (591 for Frank): past the end of
-    // the definition's initializer, so zero.
-    NOM_Open_Quo: spd("OQ"),
-    // Tiltm = SM * 20 / 100 in integers, 689; SM - 40 in Frank's block, 605.
-    Tiltm: frank ? spd("SM") - 40 : Math.trunc((spd("SM") * 20) / 100),
-  });
   // What changeSpeakerValues() assigns in this voice's case. A member the
   // case leaves alone gets no field.
   const caseLabel = `${(voice[0] as string).toUpperCase()}${voice.slice(1)}`;
@@ -539,7 +516,7 @@ function voiceFile(voice: string, structName: string, voiceNumber: number): Voic
     "the Klatt-graph backend's stand-ins (1 or 1.17 by sex; 0.7 or 0.8 plus",
     "0.004 a dB of breathiness; a tenth of the breathiness). engineering estimate",
   ];
-  return { comment, fields };
+  return { comment, fields, definition };
 }
 
 function render(file: VoiceFile, structName: string): string {
@@ -553,6 +530,14 @@ function render(file: VoiceFile, structName: string): string {
   out.push('  - "DECtalk 4.63 PH/ph_main.c:511-519 voidef; ph_vset.c:433-442 usevoice"');
   out.push('  - "DECtalk 4.63 VTM/vtmiont.c:2899-3426 changeSpeakerValues"');
   for (const [key, value] of Object.entries(file.fields)) out.push(`${key}: ${value}`);
+  // The definition itself, by SPD_ index (the names are in
+  // speaker-definition.json): `values` as usevoice() leaves it, the
+  // definition plus the tuning table, and `tune`, the table, which
+  // setparam() adds to a number a text gives with "[:dv <word> <number>]"
+  // (PH/ph_vset.c:219, 446-448).
+  out.push("definition:");
+  out.push(`  values: [${file.definition.values.join(", ")}]`);
+  out.push(`  tune: [${file.definition.tune.join(", ")}]`);
   return `${out.join("\n")}\n`;
 }
 
@@ -596,6 +581,19 @@ if (listingFlag >= 0) {
 }
 
 const differences: string[] = [];
+if (argv.includes("--write")) {
+  fs.writeFileSync(definitionDataPath, definitionDataText);
+  process.stdout.write(`wrote ${definitionDataPath}\n`);
+} else if (
+  !fs.existsSync(definitionDataPath) ||
+  fs.readFileSync(definitionDataPath, "utf8") !== definitionDataText
+) {
+  differences.push("speaker-definition.json: not what INCLUDE/cmd.h and limit[] give");
+}
+const sameList = (left: unknown, right: readonly number[]): boolean =>
+  Array.isArray(left) &&
+  left.length === right.length &&
+  left.every((value, index) => value === right[index]);
 for (const [voiceNumber, [voice, structName]] of VOICES.entries()) {
   const file = voiceFile(voice, structName, voiceNumber);
   const target = path.join(speakersDir, `${voice}.yaml`);
@@ -613,9 +611,16 @@ for (const [voiceNumber, [voice, structName]] of VOICES.entries()) {
   // A field DECtalk gives this voice no value for must not be in its file
   // (Frank's case assigns no EndOfPhrase_Spread).
   for (const key of Object.keys(current)) {
-    if (key !== "citations" && !(key in file.fields)) {
+    if (key !== "citations" && key !== "definition" && !(key in file.fields)) {
       differences.push(`${voice}.${key}: ${String(current[key])} -> (no such field)`);
     }
+  }
+  const written = (current.definition ?? {}) as { values?: unknown; tune?: unknown };
+  if (!sameList(written.values, file.definition.values)) {
+    differences.push(`${voice}.definition.values: not the definition plus its tuning table`);
+  }
+  if (!sameList(written.tune, file.definition.tune)) {
+    differences.push(`${voice}.definition.tune: not the tuning table`);
   }
 }
 if (!argv.includes("--write")) {

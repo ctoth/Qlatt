@@ -39,7 +39,11 @@ describe("DECtalk number-like words from text", () => {
     expect(normalizeText("About 1,000,000 came.", "dectalk-english")).toBe(
       "about 1,000,000 came .",
     );
-    expect(normalizeText("In the 1800s.", "dectalk-english")).toBe("in the 1800s .");
+    // So is a number with a plural ending (tn_plural_number): eighteen
+    // hundred and the ending after a voiced phone.
+    expect(normalizeText("In the 1800s.", "dectalk-english")).toBe(
+      "in the \x81'e*t'in h'^ndrxdz \x82 .",
+    );
     // A sentence's own comma or period is not part of the number.
     expect(normalizeText("It was 19.99, then 20.", "dectalk-english")).toBe(
       "it was 19.99 , then 20 .",

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-mode-spell-v1",
+  "description": "Texts spoken in DECtalk's spelling mode, the mode command standing before any spoken text: words of letters, capitals, digits, marks inside a word, each clause mark after a word, several sentences, a sentence that begins with an auxiliary, words the text rules read in their own way outside the mode (a number, money, a time, an abbreviation, an initialism, quotation marks, parentheses), phonemic text, a text with no closing mark, and the mode set, cleared and set again before the text. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "sp-01", "text": "[:mode spell on] The tide went out.", "group": "letters" },
+    { "id": "sp-02", "text": "[:mode spell on] Boats.", "group": "letters" },
+    { "id": "sp-03", "text": "[:mode spell on] A jug of quince wax.", "group": "letters" },
+    { "id": "sp-04", "text": "[:mode spell on] My hazy fox.", "group": "letters" },
+    { "id": "sp-05", "text": "[:mode spell on] NASA sent Pat up.", "group": "letters" },
+    { "id": "sp-06", "text": "[:mode spell on] tide", "group": "letters" },
+    { "id": "sp-07", "text": "[:mode spell on] Tide, out at 9.", "group": "marks" },
+    { "id": "sp-08", "text": "[:mode spell on] Go on; we wait: no.", "group": "marks" },
+    { "id": "sp-09", "text": "[:mode spell on] A cat. It ran? Yes!", "group": "marks" },
+    { "id": "sp-10", "text": "[:mode spell on] Is it out? Was it in.", "group": "marks" },
+    { "id": "sp-11", "text": "[:mode spell on] It is out. He was in.", "group": "marks" },
+    { "id": "sp-12", "text": "[:mode spell on] Don't go.", "group": "inside" },
+    { "id": "sp-13", "text": "[:mode spell on] A well-known tom_west.", "group": "inside" },
+    { "id": "sp-14", "text": "[:mode spell on] Room 42 or 1990.", "group": "inside" },
+    { "id": "sp-15", "text": "[:mode spell on] Pay $5 at 9:30 on 3/8.", "group": "inside" },
+    { "id": "sp-16", "text": "[:mode spell on] Ask Dr. Reed or the U.S. now.", "group": "inside" },
+    { "id": "sp-17", "text": "[:mode spell on] He said \"no\" (twice).", "group": "inside" },
+    { "id": "sp-18", "text": "[:mode spell on] Add 50% & more.", "group": "inside" },
+    { "id": "sp-19", "text": "[:mode spell on] Say [k'ae t] now.", "group": "inside" },
+    { "id": "sp-20", "text": "[:mode spell set] The tide.", "group": "command" },
+    { "id": "sp-21", "text": "[:mode spell on][:mode spell off] The tide went out.", "group": "command" },
+    { "id": "sp-22", "text": "[:mode spell off][:mode spell on] The tide.", "group": "command" },
+    { "id": "sp-23", "text": "[:mode spell on][:rate 240] The tide went out.", "group": "command" },
+    { "id": "sp-24", "text": "[:nb][:mode spell on] The tide went out.", "group": "command" }
+  ]
+}

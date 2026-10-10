@@ -346,14 +346,20 @@ describe("loadExperimentConfig with realize_each", () => {
       };
     });
     vi.doMock("../src/yaml-loader", async (importOriginal) => {
+      const actual = await importOriginal<typeof import("../src/yaml-loader")>();
       const read = async (specPath: string) => {
-        if (!Object.hasOwn(documents, specPath)) throw new Error(`missing ${specPath}`);
+        if (!Object.hasOwn(documents, specPath)) throw new actual.YamlNotFoundError(specPath);
         return structuredClone(documents[specPath]);
       };
       return {
-        ...(await importOriginal<typeof import("../src/yaml-loader")>()),
+        ...actual,
         loadYamlDocument: read,
-        loadYamlDocumentOrNull: (specPath: string) => read(specPath).catch(() => null),
+        // As the real one: null for a document that does not exist, nothing else.
+        loadYamlDocumentOrNull: (specPath: string) =>
+          read(specPath).catch((error) => {
+            if (actual.isYamlNotFoundError(error)) return null;
+            throw error;
+          }),
       };
     });
     const { loadExperimentConfig } = await import("../src/experiments/load-experiment-config");

@@ -22,8 +22,9 @@ export async function loadSemanticsDocument(specPath: string): Promise<Semantics
 }
 
 /**
- * Null when the document cannot be loaded (an inheriting experiment may have
- * none). An expansion error in a document that did load is still thrown.
+ * Null when the document does not exist (an inheriting experiment may have
+ * none). A document that exists but cannot be read or parsed is an error, and
+ * so is an expansion error in a document that did load.
  */
 export async function loadSemanticsDocumentOrNull(
   specPath: string,

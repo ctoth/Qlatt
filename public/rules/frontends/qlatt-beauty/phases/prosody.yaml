@@ -35,6 +35,10 @@ rules:
       relation: Segment
       where: "assoc(current, 'tones').exists(t, t.starred)"
     define:
+      # An H% boundary silence within the next three segments (the question rise).
+      pre_h_pct: >-
+        look_ahead_where(current, 3,
+          'candidate.phoneme == "SIL" && get(candidate, "boundaryTone", null) == "H%"') != null
       accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
       # Nuclear suppression applies only to the H*/H*+L families; all others
       # downstep unconditionally (reduces to pow(downstep_k, accent_idx)).
@@ -74,8 +78,8 @@ rules:
       # (within the last few segments). Last entry => last-wins at sync_right so it
       # supersedes any lower boundary target on this token. Also stamped mid-vowel
       # so the rise climbs through the nucleus rather than jumping at the edge.
-      - { relation: F0Point, when: "(next != null && next.phoneme == 'SIL' && get(next, 'boundaryTone', null) == 'H%') || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && get(ahead(current, 2), 'boundaryTone', null) == 'H%') || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && get(ahead(current, 3), 'boundaryTone', null) == 'H%')", at: "at_ratio(current, 0.3)", value: low_hz, tag: f0_question_rise_onset }
-      - { relation: F0Point, when: "(next != null && next.phoneme == 'SIL' && get(next, 'boundaryTone', null) == 'H%') || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && get(ahead(current, 2), 'boundaryTone', null) == 'H%') || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && get(ahead(current, 3), 'boundaryTone', null) == 'H%')", at: "at_ratio(current, 0.65)", value: q_rise_hz, tag: f0_question_final_rise }
+      - { relation: F0Point, when: pre_h_pct, at: "at_ratio(current, 0.3)", value: low_hz, tag: f0_question_rise_onset }
+      - { relation: F0Point, when: pre_h_pct, at: "at_ratio(current, 0.65)", value: q_rise_hz, tag: f0_question_final_rise }
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"
@@ -118,13 +122,11 @@ rules:
       # letter-to-sound rules speak a lone "_" as one), so the tone is read
       # with a default.
       pre_h_pct: >-
-        (next != null && next.phoneme == 'SIL' && get(next, 'boundaryTone', null) == 'H%')
-        || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && get(ahead(current, 2), 'boundaryTone', null) == 'H%')
-        || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && get(ahead(current, 3), 'boundaryTone', null) == 'H%')
+        look_ahead_where(current, 3,
+          'candidate.phoneme == "SIL" && get(candidate, "boundaryTone", null) == "H%"') != null
       pre_l_pct: >-
-        (next != null && next.phoneme == 'SIL' && get(next, 'boundaryTone', null) == 'L%')
-        || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && get(ahead(current, 2), 'boundaryTone', null) == 'L%')
-        || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && get(ahead(current, 3), 'boundaryTone', null) == 'L%')
+        look_ahead_where(current, 3,
+          'candidate.phoneme == "SIL" && get(candidate, "boundaryTone", null) == "L%"') != null
       # Yes/no-question final rise, near the top of the range (Pierrehumbert 1980 H-H%).
       rise_target: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.question_rise_fraction

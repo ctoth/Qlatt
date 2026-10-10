@@ -3,12 +3,20 @@
 #
 # Declared as qlatt-english + deltas via `extends`. The base frontend supplies
 # the language infrastructure (g2p/dict/lts/normalize/syllabification/stress),
-# the shared phase rule bodies, the ~880-line parameters/policy tree, the output
-# lowering spec, and the transcription table. This file carries ONLY what makes
-# beauty different from english:
+# the shared phase rule bodies, the parameters/policy tree, the output lowering
+# spec, and the transcription table. This file carries ONLY what makes beauty
+# different from english:
 #   - its own segment inventory (inventory_path)
-#   - its own pipeline.yaml (adds the voice-quality phase rules to `formant`)
-#   - its own phases/prosody.yaml (Pierrehumbert intonation)
+#   - its own pipeline.yaml: the phase list (rules by name, including the
+#     voice-quality rules in `formant`), three voice-quality tags, the
+#     string_sets, a Segment relation that replaces english's whole, and the
+#     include of phases/voice-quality.yaml. Its predicates, maps and the other
+#     tags and relations are english's pipeline.yaml entries, inherited by name.
+#   - its own phases/prosody.yaml, which defines only the three prosody rules
+#     that differ from english's: tobi_accent, tobi_unaccented_declination and
+#     connected_speech_source_contour. The ten other prosody rules the phase
+#     names (tobi_baseline_init ... f0_continuation_rise) are english's, taken
+#     from qlatt-english/phases/prosody.yaml by phase name.
 #   - its own phases/voice-quality.yaml (pulled in by pipeline.yaml)
 #   - its `speakers:` registry: the voices of this frontend. The default voice
 #     (speakers/beauty.yaml) gives the pitch level and span the prosody rules
@@ -18,10 +26,10 @@
 #
 # Everything NOT declared here is inherited from qlatt-english. Includes are
 # resolved against beauty's directory first and fall back to qlatt-english's
-# directory (rule-pack.ts `extends` support), so the byte-identical phase files
-# (orthography/normalize/postlexical/structural/annotation/duration/formant) are
-# resolved from the base without a local copy. Fixes to those shared files now
-# land in one place.
+# directory (rule-pack.ts `extends` support), so the phase files beauty has no
+# local copy of (orthography, normalize, postlexical, structural, annotation,
+# tone-association, duration, formant) are resolved from the base. Fixes to
+# those shared files land in one place.
 # =============================================================================
 extends: qlatt-english
 inventory_path: /rules/frontends/qlatt-beauty/inventory.yaml

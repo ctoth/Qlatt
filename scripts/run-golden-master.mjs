@@ -21,7 +21,9 @@ const phrasesPath = args.get("phrases")
 const outDir = path.resolve(
   args.get("out-dir") ?? path.join(repoRoot, "test", "golden", "linguistic-master"),
 );
-const baseF0 = Number(args.get("base-f0") ?? 110);
+// Absent: no base pitch is requested, and the frontend's voice keeps its own.
+const baseF0Arg = args.get("base-f0");
+const baseF0 = baseF0Arg === undefined ? null : Number(baseF0Arg);
 const sampleRate = Number(args.get("sample-rate") ?? 10000);
 const normalize = (args.get("normalize") ?? "1") === "1";
 const maxShift = Number(args.get("max-shift") ?? 128);
@@ -86,8 +88,7 @@ for (const phrase of phrases) {
     "scripts/render-phrase.mjs",
     "--phrase",
     phrase,
-    "--base-f0",
-    String(baseF0),
+    ...(baseF0 === null ? [] : ["--base-f0", String(baseF0)]),
     "--sample-rate",
     String(sampleRate),
     "--lead-time",

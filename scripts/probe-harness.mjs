@@ -56,7 +56,9 @@ const url = args.get("url") ?? "http://localhost:8000/";
 const phrase = args.get("phrase") ?? "hello world";
 const experimentId = args.get("experiment-id") ?? "klatt80-baseline";
 const frontendId = args.get("frontend-id") ?? "qlatt-english";
-const baseF0 = Number(args.get("base-f0") ?? 110);
+// Absent: the page's Base F0 box stays empty, and the voice keeps its own.
+const baseF0Arg = args.get("base-f0");
+const baseF0 = baseF0Arg === undefined ? null : Number(baseF0Arg);
 const rate = Number(args.get("rate") ?? 1);
 const waitMs = Number(args.get("wait-ms") ?? 2500);
 const engineDiagnostics = (args.get("engine-diagnostics") ?? "1") === "1";
@@ -109,7 +111,9 @@ try {
   await page.selectOption("#experimentSelect", experimentId);
   await page.selectOption("#frontendSelect", frontendId);
   await page.fill("#phrase", phrase);
-  await page.fill("#baseF0", String(baseF0));
+  if (baseF0 !== null) {
+    await page.fill("#baseF0", String(baseF0));
+  }
   await page.evaluate((nextRate) => {
     const input = document.getElementById("rate");
     input.value = String(nextRate);

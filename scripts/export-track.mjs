@@ -17,7 +17,9 @@ const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), "..");
 
 const phrase = args.get("phrase") ?? "hello world";
-const baseF0 = Number(args.get("base-f0") ?? 110);
+// Absent: no base pitch is requested, and the frontend's voice keeps its own.
+const baseF0Arg = args.get("base-f0");
+const baseF0 = baseF0Arg === undefined ? undefined : Number(baseF0Arg);
 const sampleRate = Number(args.get("sample-rate") ?? 10000);
 const leadTime = Number(args.get("lead-time") ?? 0);
 const tailTime = Number(args.get("tail-time") ?? 0);

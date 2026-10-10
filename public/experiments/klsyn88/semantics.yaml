@@ -694,61 +694,11 @@ realize:
     expr: "NFCASC % 2 == 0 ? -1 : 1"
     deps: [NFCASC]
 
-  cascadeF2Freq:
-    expr: "NFCASC >= 2 ? F2 : 0"
-    deps: [NFCASC, F2]
-
+  # F2 cascade bandwidth reads effectiveB2, not B2, so it is not an instance of
+  # the cascadeF{n}Bw template in realize_each below.
   cascadeF2Bw:
     expr: "NFCASC >= 2 ? effectiveB2 : 0"
     deps: [NFCASC, effectiveB2]
-
-  cascadeF3Freq:
-    expr: "NFCASC >= 3 ? F3 : 0"
-    deps: [NFCASC, F3]
-
-  cascadeF3Bw:
-    expr: "NFCASC >= 3 ? B3 : 0"
-    deps: [NFCASC, B3]
-
-  cascadeF4Freq:
-    expr: "NFCASC >= 4 ? F4 : 0"
-    deps: [NFCASC, F4]
-
-  cascadeF4Bw:
-    expr: "NFCASC >= 4 ? B4 : 0"
-    deps: [NFCASC, B4]
-
-  cascadeF5Freq:
-    expr: "NFCASC >= 5 ? F5 : 0"
-    deps: [NFCASC, F5]
-
-  cascadeF5Bw:
-    expr: "NFCASC >= 5 ? B5 : 0"
-    deps: [NFCASC, B5]
-
-  cascadeF6Freq:
-    expr: "NFCASC >= 6 ? F6 : 0"
-    deps: [NFCASC, F6]
-
-  cascadeF6Bw:
-    expr: "NFCASC >= 6 ? B6 : 0"
-    deps: [NFCASC, B6]
-
-  cascadeF7Freq:
-    expr: "NFCASC >= 7 ? F7 : 0"
-    deps: [NFCASC, F7]
-
-  cascadeF7Bw:
-    expr: "NFCASC >= 7 ? B7 : 0"
-    deps: [NFCASC, B7]
-
-  cascadeF8Freq:
-    expr: "NFCASC >= 8 ? F8 : 0"
-    deps: [NFCASC, F8]
-
-  cascadeF8Bw:
-    expr: "NFCASC >= 8 ? B8 : 0"
-    deps: [NFCASC, B8]
 
   # Klatt 1980 PARCOE.FOR amplitude convention retained for host telemetry.
   # klsyn88 synthesizes its own bursts; these values are not audio bindings.
@@ -771,3 +721,21 @@ realize:
   plstepBurstOffsetDb:
     expr: "plstepBurstOffsetDb"
     deps: []
+
+# Realize rules written once per family and generated at load for each value
+# of `over` (src/semantics/realize-each.ts).
+realize_each:
+  # Cascade formant gates: formant n is passed to the cascade chain only when
+  # NFCASC >= n, otherwise zeroed.
+  - index: n
+    over: [2, 3, 4, 5, 6, 7, 8]
+    rules:
+      "cascadeF{n}Freq":
+        expr: "NFCASC >= {n} ? F{n} : 0"
+        deps: [NFCASC, "F{n}"]
+  - index: n
+    over: [3, 4, 5, 6, 7, 8]
+    rules:
+      "cascadeF{n}Bw":
+        expr: "NFCASC >= {n} ? B{n} : 0"
+        deps: [NFCASC, "B{n}"]

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-mode-inside-text-v1",
+  "description": "Texts with DECtalk's spelling mode turned on or off by a mode command inside the text: between sentences, inside a sentence, on and off again, off after a text that began in the mode, taken away by another mode's set, before a sentence that begins with an auxiliary or a question word, after a comma, and together with a voice and a rate command. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "im-01", "text": "The tide went out. [:mode spell on] We sat down.", "group": "on" },
+    { "id": "im-02", "text": "The boat [:mode spell on] came in.", "group": "on" },
+    { "id": "im-03", "text": "The tide went out. [:mode spell set] We sat down.", "group": "on" },
+    { "id": "im-04", "text": "The tide went out, [:mode spell on] and we sat down.", "group": "on" },
+    { "id": "im-05", "text": "[:mode spell on] The tide. [:mode spell off] We sat down.", "group": "off" },
+    { "id": "im-06", "text": "The tide [:mode spell on] went [:mode spell off] out again.", "group": "off" },
+    { "id": "im-07", "text": "[:mode spell on] The tide [:mode name set] went out.", "group": "off" },
+    { "id": "im-08", "text": "The tide went out. [:mode spell on] We sat. [:mode spell off] The rain began. [:mode spell on] Go.", "group": "off" },
+    { "id": "im-09", "text": "The tide went out. [:mode spell on] Is it out? [:mode spell off] Is it in?", "group": "first-word" },
+    { "id": "im-10", "text": "The tide went out. [:mode spell on] What is it? [:mode spell off] What is it?", "group": "first-word" },
+    { "id": "im-11", "text": "The tide went out. [:nb][:mode spell on] We sat down. [:np][:mode spell off] The rain began.", "group": "with-others" },
+    { "id": "im-12", "text": "The tide went out. [:mode spell on][:rate 240] We sat. [:rate 180][:mode spell off] The rain began.", "group": "with-others" }
+  ]
+}

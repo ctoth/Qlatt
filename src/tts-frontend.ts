@@ -615,7 +615,9 @@ function createStructure(
   let spoken = 0;
   for (const token of transcribed) {
     if (token.isPunctuation) {
-      if (!token.continuesWrittenWord) {
+      // A mark a text rule sent itself is no mark of the text: the stretch
+      // ends where the written text ends it (endsWordStretch on the word).
+      if (!token.continuesWrittenWord && !token.sentMark) {
         if (token.supplied && !uncountedEnds.has(token.sourceTokenId.split(":")[0] as string)) {
           clause.endSupplied = true;
         }

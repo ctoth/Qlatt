@@ -56,6 +56,12 @@ export interface PronunciationResult {
   /** A pause (a comma's) stands after the word, though no mark is written. */
   pauseAfter?: boolean;
   /**
+   * Phonemic text a rule composed for one written word, which named the
+   * word (src/text-parser/phonemes.ts PHONEMIC_CLASS_WORD_OPEN): a word of
+   * letter-to-sound's own, with that word's class or with none.
+   */
+  forWrittenWord?: boolean;
+  /**
    * The form classes as the frontend's phonetic rules receive them, where
    * that differs from what the lexicon holds (table-lts-pronounce.ts
    * receivedFormClassWord).

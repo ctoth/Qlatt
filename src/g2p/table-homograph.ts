@@ -64,6 +64,8 @@ export interface ClauseContext {
    * before a mark and the mark is known.
    */
   markAfter?: string;
+  /** That mark was sent by a text rule: it is not written on the word. */
+  markSent?: boolean;
   /**
    * The word was written with a capital first letter and a lower-case second
    * one: DECtalk's dictionary search calls it capitalised (LTS/ls_dict.c:665).

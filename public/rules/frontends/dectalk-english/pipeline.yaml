@@ -1150,6 +1150,7 @@ phases:
       # After both: DECtalk's promotion adds to whatever stress the vowel has.
       - dectalk_clause_verb_summary
       - dectalk_helper_verb_class_start
+      - dectalk_helper_verb_resent_class_start
       - dectalk_helper_verb_promotion
       - dectalk_helper_verb_promotion_ahead_of_word
       - dectalk_helper_verb_mark_before_phrase_start

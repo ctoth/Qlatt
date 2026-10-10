@@ -766,6 +766,7 @@ export function transcribeText(
       run: readonly number[],
       atWrittenPunctuation = true,
       endMark?: string,
+      endMarkSent = false,
     ): void => {
       const results = pronounceClause(
         run.map((position) => orthographyWords[position].word),
@@ -776,6 +777,7 @@ export function transcribeText(
           stressPolicyPath,
           atWrittenPunctuation,
           ...(endMark === undefined ? {} : { endMark }),
+          ...(endMarkSent ? { endMarkSent } : {}),
           stretchEnds: run.map((position) => orthographyWords[position].endsWordStretch === true),
           written: run.map((position) => orthographyWords[position].written),
           writtenCapitalised: run.map(
@@ -791,7 +793,9 @@ export function transcribeText(
     let run: number[] = [];
     orthographyWords.forEach((token, position) => {
       if (token.isPunctuation) {
-        if (run.length > 0) pronounceRun(run, token.supplied !== true, token.word);
+        if (run.length > 0) {
+          pronounceRun(run, token.supplied !== true, token.word, token.sentMark === true);
+        }
         run = [];
       } else if (token.word && typeof token.pronunciationKey !== "string") {
         run.push(position);
@@ -1065,8 +1069,14 @@ export function transcribeText(
               sourceTokenId: part.tokenId,
               word: part.word,
               // Phonemic text is no word of letter-to-sound's: it is sent on
-              // symbol by symbol (CMD/cm_text.c:1118-1144).
-              ...(pronResult.source === "phonemic" ? { phonemicText: true } : {}),
+              // symbol by symbol (CMD/cm_text.c:1118-1144). Text a rule
+              // composed for a written word and named the word in (a word
+              // spelled in the spelling mode) is that word, which
+              // letter-to-sound has in its list.
+              ...(pronResult.source === "phonemic" &&
+              !("forWrittenWord" in pronResult && pronResult.forWrittenWord)
+                ? { phonemicText: true }
+                : {}),
               // The last word of phonemic text has no word boundary after it
               // (joinPhonemicText below).
               ...(pronResult.source === "phonemic" &&

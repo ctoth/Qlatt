@@ -2,10 +2,11 @@
  * DECtalk's spelling mode, [:mode spell on] standing before any spoken text
  * or inside the text, from text, against the stock say.exe's audio sample for
  * sample, through the page's path (scripts/oracle/dectalk-voice-compare.ts).
- * Three corpora, each written and committed before its export:
+ * Four corpora, each written and committed before its export:
  *   test/oracle-corpora/dectalk-us-mode-spell-v1.json          (24 texts)
  *   test/oracle-corpora/dectalk-us-mode-spell-classes-v1.json  (24 texts)
  *   test/oracle-corpora/dectalk-us-mode-inside-text-v1.json    (12 texts)
+ *   test/oracle-corpora/dectalk-us-mode-spell-marks-v1.json    (20 texts)
  *
  * In the mode every word of the text parser's output is spelled, ahead of
  * every other reading of a word (LTS/ls_task.c:688, 1835-1871): each
@@ -22,6 +23,17 @@
  *     before any word is spoken (LTS/ls_task.c:5109-5113): the phonetic
  *     stage's rule for a clause's only verb stresses the first letter of a
  *     spelled "is" or "don't" (PH/ph_sort.c:1283-1302).
+ * What that look-up and the classes do in the mode, as measured
+ * (dectalk-us-mode-spell-marks-v1):
+ *   - a word with a mark written on it other than one period has no class:
+ *     the look-up takes the word with its mark (LTS/ls_task.c:5066-5113);
+ *   - at a written comma, colon or semicolon the first word's class is sent
+ *     again and lies on the last phone before the mark; when that makes the
+ *     clause's only verb a function verb, a vowel there is stressed
+ *     (postlexical.yaml dectalk_helper_verb_resent_class_start);
+ *   - the stretch of words the text stage parses is the written one: the
+ *     commas for white space do not cut it, and the clause break before a
+ *     conjunction is spoken on top of that comma, as an empty clause.
  *
  * Text rules do the spelling (public/rules/normalization: recognition.yaml
  * tn_spell_mode_*_source, lexical.yaml tn_spell_mode_*), on in the stretches
@@ -67,27 +79,16 @@ const corpora = [
       path.join("test", "oracle-corpora", "dectalk-us-mode-inside-text-v1.json"),
     ),
   },
+  {
+    fixtureDir: path.join("test", "fixtures", "dectalk-mode-spell-marks"),
+    corpus: readVoiceCorpus(
+      path.join("test", "oracle-corpora", "dectalk-us-mode-spell-marks-v1.json"),
+    ),
+  },
 ];
 
-/** Not DECtalk's samples yet. */
-const NOT_EXACT: Readonly<Record<string, string>> = {
-  "sc-01":
-    "DECtalk has an empty clause (10 frames) in front of the spelled word and: the text stage's " +
-    "clause break before a conjunction (LTS/ls_util.c:824-853) is sent on top of the comma for " +
-    "the white space. Every other frame count is the same. The frontend's break rule does not " +
-    "see a spelled word",
-  "sc-04":
-    "the last letter of the word late, before the written comma, is 42 frames in DECtalk and " +
-    "33 here. Measured: 42 only when the first word since the last written break is a function " +
-    "verb (Are late, / Is late,); 33 after Go late, / We late, and with no comma. The class " +
-    "DECtalk sends again at a written comma (LTS/ls_task.c:1269-1275) is not followed through " +
-    "the spelling mode",
-  "sc-05":
-    "DECtalk stresses the first letter of went and not of go; here the reverse. Measured: " +
-    "[Can go.] stresses go, [Can go, went.] went, [Can, went.] neither. The form-class index " +
-    "after a written comma in the spelling mode (LTS/ls_task.c:1269-1275 with 1667-1673) is " +
-    "not followed",
-};
+/** Not DECtalk's samples yet: none. */
+const NOT_EXACT: Readonly<Record<string, string>> = {};
 
 const run = (text: string) => {
   const provenance = createProvenanceCollector();

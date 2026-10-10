@@ -211,18 +211,22 @@ rules:
   #
   # Not ported: the mark of a hyphen standing alone (PRO_DASH, :5122-5125).
   # -------------------------------------------------------------------------
+  # A written word spoken as several words (one spelled letter by letter in
+  # the spelling mode, each letter with the word's class) is one slot of the
+  # parse: the mark is on the first of them.
   dectalk_break_marker:
     kind: scalar
     select:
       relation: Word
       where: >-
-        get(current, 'conjunction_sequence', '') != ''
+        !isTrue(current, 'continues_written_word')
+        && (get(current, 'conjunction_sequence', '') != ''
         || 'conj' in get(current, 'text_form_classes', [])
         || 'that' in get(current, 'text_form_classes', [])
         || ('prep' in get(current, 'text_form_classes', [])
             && !('part' in get(current, 'text_form_classes', []))
             && !('to' in get(current, 'text_form_classes', [])))
-        || size(get(current, 'written_marks', [])) > 0
+        || size(get(current, 'written_marks', [])) > 0)
     apply:
       - field: break_marker
         op: set
@@ -830,6 +834,74 @@ rules:
       - "DECtalk 4.63 ph_sort.c:1774-1790 insertphone (moves symbols, durations and pitches, not classes)"
       - "DECtalk 4.63 ph_sort.c:1283-1302 (the search for the first vowel starts at the first symbol with the class)"
       - "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on symbol by symbol, with no word boundary after it)"
+
+  # The same one place early for the class that is sent a second time at a
+  # written comma, colon or semicolon (dectalk_clause_verb_summary): it
+  # arrives when the clause's last phone is in, ahead of the mark, so it is
+  # written at the mark's place and, after the sort's word boundary, lies on
+  # the last phone. When that class takes the verb branch and the flag is
+  # set, the search for a vowel begins at that phone: a vowel there is
+  # stressed (the rule after the next), a consonant there is followed by
+  # the mark alone and nothing is.
+  # This shows where the first word of the stretch stands in a clause before
+  # the mark's own, so that its second arrival is the mark's clause's only
+  # verb: after a clause break the text stage put in, and in the spelling
+  # mode, where every word is a clause.
+  # Measured on say.exe in the spelling mode (allophone frames, and the
+  # classes the phonetic stage receives): "Are late, they." has the class of
+  # "Are" (00820020) a second time in the clause of "late" with the flag
+  # set, and the last letter's IY is 42 frames, 33 after "Go late," (00020000,
+  # no function word), and 33 before a period or a question mark, where no
+  # class is sent again; a colon and a semicolon do as the comma; "Are in,
+  # they." (N last) is the same as "Go in, they.".
+  dectalk_helper_verb_resent_class_start:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.phoneme != 'SIL' && next != null && next.phoneme == 'SIL'
+        && get(next, 'punctuationSymbol', null) in [',', ':', ';']
+        && !isTrue(next, 'punctuation_sent')
+    define:
+      mark: next
+      after: "ahead(mark, 1)"
+      written_break: >-
+        !(after != null && path(after, 'R:SylStructure.parent.parent') != null
+          && isTrue(path(after, 'R:SylStructure.parent.parent'), 'clause_break_before'))
+      # The first word since the last written break, as the summary finds it.
+      written_before: "look_back_pred(current, 1000, 'is_written_clause_silence')"
+      first_phone: "written_before == null ? behind(current, current_index) : ahead(written_before, 1)"
+      first: >-
+        first_phone != null && isTrue(first_phone, 'phonemic_text')
+        ? look_ahead_pred(first_phone, 1000, 'is_not_phonemic_text') : first_phone
+      resent_verb_branch: >-
+        (dectalk_word_class(first, 'verb') || dectalk_word_class(first, 'ed'))
+        && !dectalk_word_class(first, 'noun') && !dectalk_word_class(first, 'adj')
+      # No word of this clause has been through the verb branch before the
+      # class arrives.
+      branch_words: "count_back_pred(mark, 1000, 'is_clause_silence', 'is_verb_branch_word_start')"
+      verbs: "get(mark, 'clause_verb_count', 0.0)"
+      function_verbs: "get(mark, 'clause_function_verb_count', 0.0)"
+      settling_clause: >-
+        look_back_where(current, 5000,
+          'candidate.phoneme == "SIL" && (get(candidate, "clause_verb_count", 0.0) > 1.0 || get(candidate, "clause_function_verb_count", 0.0) >= 1.0 || get(candidate, "clause_verb_branch_count", 0.0) > 0.0)')
+      carried: >-
+        settling_clause != null
+        && get(settling_clause, 'clause_verb_count', 0.0) == 1.0
+        && get(settling_clause, 'clause_function_verb_count', 0.0) == 1.0
+        && get(settling_clause, 'clause_verb_branch_count', 0.0) == 0.0
+      flag: "verbs > 1.0 ? false : (verbs == 1.0 && function_verbs == 1.0 ? true : carried)"
+    constraint: "written_break && resent_verb_branch && branch_words == 0.0 && flag"
+    apply:
+      - field: helper_verb_ahead
+        op: set
+        value: "true"
+        tag: stress
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:1269-1275 (at ',', ':' or ';' fc_index is set to 1 and old_fc_index to -1, then the COMMA is sent)"
+      - "DECtalk 4.63 LTS/ls_util.c:808-818 (sending a phone first sends WORD_CLASS of fc_struct[fc_index] when the index differs from the last one sent)"
+      - "DECtalk 4.63 ph_task.c:590, 598-626 (the held class is written at the place of each arriving symbol; the class is counted when it arrives)"
+      - "DECtalk 4.63 ph_sort.c:460-463 (a word boundary is inserted at the clause's second place when none is there), 1283-1302 (the search for the first vowel starts at the first symbol with the class)"
 
   dectalk_helper_verb_promotion:
     kind: scalar

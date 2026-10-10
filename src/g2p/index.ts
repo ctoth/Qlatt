@@ -208,17 +208,37 @@ export function pronounce(
       : -1;
     const classWord = classWordEnd < 0 ? "" : between.slice(1, classWordEnd);
     const inner = between.slice(classWordEnd + 1);
+    // The marks alone, with no word between them: text for a written word
+    // that has no class.
+    const forWrittenWord = classWordEnd >= 0;
     const classOfWord = (): {
       formClasses?: string[];
       formClassWord?: number;
       receivedFormClasses?: string[];
+      forWrittenWord?: boolean;
     } => {
-      if (classWord === "") return {};
+      if (!forWrittenWord) return {};
+      // The look-up before any word is spoken takes the word as it stands
+      // between white space, a mark written on it included, and finds
+      // nothing; only one period at its end is taken off for a second try
+      // (DECtalk 4.63 LTS/ls_task.c:5066-5113). Outside such text the
+      // word's own reading sets the class afterwards. Measured on say.exe in
+      // the spelling mode, the classes the phonetic stage receives: "Can
+      // go, went." has 0 for "go,"; "Can go. Went." has go's class.
+      const markOnWord =
+        context.markAfter !== undefined && context.markAfter !== "." && !context.markSent;
+      if (classWord === "" || markOnWord) {
+        return {
+          forWrittenWord: true,
+          ...(table?.formClassNames ? { formClasses: [], formClassWord: 0 } : {}),
+        };
+      }
       const looked = pronounce(classWord, dictLookup, {
         ...options,
         context: { ...context, classLookup: true },
       });
       return {
+        forWrittenWord: true,
         ...("formClasses" in looked && looked.formClasses
           ? { formClasses: [...looked.formClasses] }
           : {}),
@@ -999,6 +1019,8 @@ export function pronounceClause(
     edgeStripped?: readonly boolean[];
     /** The mark that ends the run, as written. */
     endMark?: string;
+    /** That mark was sent by a text rule: it is not written in the text. */
+    endMarkSent?: boolean;
   },
 ): PronunciationResult[] {
   const table = options.ltsPath ? ltsTableAt(options.ltsPath) : null;
@@ -1045,7 +1067,7 @@ export function pronounceClause(
           ...(options.writtenCapitalised?.[index] ? { capitalised: true } : {}),
           ...(options.edgeStripped?.[index] ? { edgeStripped: true } : {}),
           ...(index === words.length - 1 && options.endMark !== undefined
-            ? { markAfter: options.endMark }
+            ? { markAfter: options.endMark, ...(options.endMarkSent ? { markSent: true } : {}) }
             : {}),
           // A dollar amount and one of the words that take "dollars" behind
           // them, side by side (LTS/ls_task.c:3234-3242).

@@ -104,6 +104,21 @@ describe("a lone a right after a number", () => {
     expect(phones("Take 2 a day.")).toContain("T UW EY D EY");
   });
 
+  // LTS/ls_task.c:3768-3773: the count is set for any word that begins with
+  // a digit and reaches the plain-number routine, before the word is found
+  // to be no number. Each is what say.exe sends.
+  it("is the letter after a part number that begins with a digit", () => {
+    expect(classOf("Rooms are 80-120 a night.")).toEqual(["noun"]);
+    expect(classOf("Pay 10-taxes a day.")).toEqual(["noun"]);
+    expect(classOf("Rooms are $80- a night.")).toEqual(["noun"]);
+  });
+
+  it("is the article after a part number that begins with a letter, a fraction or a date", () => {
+    expect(classOf("Fly the B-52 a day.")).toEqual(["art"]);
+    expect(classOf("Take 3/7 a day.")).toEqual(["art"]);
+    expect(classOf("Go 3-May a day.")).toEqual(["art"]);
+  });
+
   it("is the article anywhere else", () => {
     expect(classOf("Take 2 of a kind.")).toEqual(["art"]);
     expect(classOf("Take $2 a day.")).toEqual(["art"]);

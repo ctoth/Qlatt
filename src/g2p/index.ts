@@ -491,11 +491,15 @@ export function pronounce(
   // only while the count a number starts stands at 0 or 1, and it stands at
   // 2 for the word after the number). Measured on say.exe: "Seat 23 A",
   // "Take 2 a day" and "2nd a day" have EY; "2 of a kind", "$2 a day" and
-  // "9:30 a day" have the article.
+  // "9:30 a day" have the article. The count is set for any word that begins
+  // with a digit and reaches the plain-number routine (:3768-3773), a part
+  // number among them: "80-120 a night" and "$80- a night" have EY.
   if (
     placed &&
     table?.letterPhones?.[lowerWord] &&
-    (context.afterNumber === "plain" || context.afterNumber === "ordinal")
+    (context.afterNumber === "plain" ||
+      context.afterNumber === "ordinal" ||
+      context.afterNumber === "part")
   ) {
     return {
       phonemes: [...table.letterPhones[lowerWord]],
@@ -1021,7 +1025,22 @@ export function pronounceClause(
     word !== undefined && /^\$(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)?(?:\.[0-9]+)?$/.test(word);
   // A plain number (digits, with separators or fraction digits) or a clock
   // time: the two kinds of word after which "am" and "pm" are spelled.
-  const numberKind = (word: string | undefined): "plain" | "time" | "ordinal" | undefined =>
+  // A part number whose first character is a digit ("80-120", "80-") counts
+  // too for the word "a" after it: the plain-number routine sets the count
+  // for any word that begins with a digit, before it finds that the word is
+  // no number and leaves it to the part-number reader (LTS/ls_task.c:3768-3773,
+  // then :807). Money, a date and a fraction are taken by the routines before
+  // it and never reach it (:780-789).
+  const isDigitFirstPartNumber = (word: string): boolean =>
+    /^[0-9][a-z0-9/-]*$/i.test(word) &&
+    /[/-]/.test(word) &&
+    !/^[0-9]{1,2}-(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)(?:-[0-9]{2}(?:[0-9]{2})?)?$/i.test(
+      word,
+    ) &&
+    !(table.numberPhones && speakFraction(word.toLowerCase(), table.numberPhones));
+  const numberKind = (
+    word: string | undefined,
+  ): "plain" | "time" | "ordinal" | "part" | undefined =>
     word === undefined
       ? undefined
       : /^(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)(?:\.[0-9]+)?$/.test(word)
@@ -1030,7 +1049,9 @@ export function pronounceClause(
           ? "time"
           : /^[0-9]+(?:st|nd|rd|th)$/i.test(word)
             ? "ordinal"
-            : undefined;
+            : isDigitFirstPartNumber(word)
+              ? "part"
+              : undefined;
   const read = (laterVerbAt: ((index: number) => boolean) | null): PronunciationResult[] => {
     const before: number[] = [];
     return words.map((word, index) => {

@@ -1,0 +1,14 @@
+{
+  "nhe-dollar-range": ["B1","AV","AP","A2","A3","A4","A5","A6"],
+  "nhe-dollar-range-2": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "nhe-dollar-first": ["B1","AV","AP","A2","A3","A4","A5","A6"],
+  "nhe-dollar-second": ["B1","AV","AP","A2","A3","A4","A5","A6"],
+  "nhe-inside": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "nhe-one-digit": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "nhe-comma": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "nhe-sentence-end": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "nhe-three-digits": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "nhe-letter-first": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "nhe-part-a": ["B1","AV","AP","A2","A3","A4","A5","A6"],
+  "nhe-part-a-dollar": ["B1","AV","AP","A2","A3","A4","A5","A6"]
+}

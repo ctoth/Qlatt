@@ -7,7 +7,7 @@ patterns:
         where:
           all:
             - current.phoneme == 'D'
-            - { predicate: next_diff_word }
+            - next != null && different_word(next, current)
       - capture: y_token
         where: >-
           current.phoneme == 'Y'
@@ -18,7 +18,7 @@ patterns:
         where:
           all:
             - current.phoneme == 'T'
-            - { predicate: next_diff_word }
+            - next != null && different_word(next, current)
       - capture: y_token
         where: >-
           current.phoneme == 'Y'
@@ -109,10 +109,9 @@ rules:
         all:
           - "current.phoneme == 'T'"
           - "prev != null && prev.type != 'vowel'"
-          - predicate: prev_same_word
+          - same_word(prev, current)
           - "next != null && next.type != 'vowel'"
-          - not:
-              predicate: next_same_word
+          - not: same_word(next, current)
     apply:
       - field: duration
         op: set
@@ -145,7 +144,7 @@ rules:
         all:
           - "current.phoneme == 'T'"
           - "next != null && (next.type == 'nasal' || next.type == 'liquid' || next.type == 'glide')"
-          - predicate: next_same_word
+          - same_word(next, current)
     define:
       after_sonorant: ahead(current, 2.0)
       gs_target: target("GS")
@@ -202,10 +201,9 @@ rules:
         all:
           - "current.phoneme == 'D'"
           - "prev != null && prev.type != 'vowel'"
-          - predicate: prev_same_word
+          - same_word(prev, current)
           - "next != null && next.type != 'vowel'"
-          - not:
-              predicate: next_same_word
+          - not: same_word(next, current)
     apply:
       - field: duration
         op: set
@@ -287,7 +285,7 @@ rules:
         all:
           - "current.type == 'vowel'"
           - "has(current.stress) && current.stress >= 1"
-          - predicate: prev_diff_word
+          - prev == null || !same_word(prev, current)
           - "prev == null || prev.type == 'vowel' || has(prev.boundary)"
     define:
       gs_target: target("GS")

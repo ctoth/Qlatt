@@ -21,6 +21,71 @@ functions:
           || (has(item.AVS) && item.AVS > 0))
     citations:
       - "Engineering estimate: Qlatt acoustic F0 eligibility requires F1 presence and positive AV or AVS; extracted unchanged from prosody selectors (#135)"
+  # Item-argument phonological tests. Each replaces a family of predicates that
+  # was written once per cursor position (current / prev / next). Expansion is
+  # textual, so a call reads exactly as the predicate it replaced did: none of
+  # these guards a null item, and a caller that may pass one keeps its own
+  # `x != null &&` in front, as the positional predicates did.
+  voiced:
+    params: [item]
+    body: has(item.voiced) && item.voiced == true
+    citations:
+      - "Engineering convention: Qlatt inventory `voiced` flag; extracted unchanged from the is_voiced and prev_is_voiced predicates"
+  voiceless:
+    params: [item]
+    body: has(item.voiceless) && item.voiceless == true
+    citations:
+      - "Engineering convention: Qlatt inventory `voiceless` flag; extracted unchanged from the is_voiceless and prev_is_voiceless predicates"
+  bilabial:
+    params: [item]
+    body: has(item.bilabial) && item.bilabial == true
+    citations:
+      - "Engineering convention: Qlatt inventory `bilabial` place flag; extracted unchanged from the is_bilabial predicate"
+  alveolar:
+    params: [item]
+    body: has(item.alveolar) && item.alveolar == true
+    citations:
+      - "Engineering convention: Qlatt inventory `alveolar` place flag; extracted unchanged from the is_alveolar predicate"
+  velar:
+    params: [item]
+    body: has(item.velar) && item.velar == true
+    citations:
+      - "Engineering convention: Qlatt inventory `velar` place flag; extracted unchanged from the is_velar predicate"
+  # "Coronal" is the disjunction of the alveolar and postalveolar feature flags.
+  # No token in this codebase carries a `coronal: true` annotation.
+  coronal:
+    params: [item]
+    body: >-
+      (has(item.alveolar) && item.alveolar == true)
+      || (has(item.postalveolar) && item.postalveolar == true)
+    citations:
+      - "Engineering convention: coronal is the Qlatt inventory `alveolar` or `postalveolar` place flag; extracted unchanged from the prev/next/both/one_coronal predicates"
+  # A word here is the `word` text a Segment carries, not its Word Item:
+  # DECtalk's dectalk_same_word compares Word Items and stays separate.
+  # False when either Segment carries no word.
+  same_word:
+    params: [a, b]
+    body: has(a.word) && has(b.word) && a.word == b.word
+    citations:
+      - "Engineering convention: two Segments are in one word when both carry the same `word` text; extracted unchanged from the prev_same_word and next_same_word predicates"
+  # Not the negation of same_word: false, not true, when either Segment
+  # carries no word ("any missing = no match").
+  different_word:
+    params: [a, b]
+    body: has(a.word) && has(b.word) && a.word != b.word
+    citations:
+      - "Engineering convention: two Segments are in different words only when both carry a `word` text and the texts differ; extracted unchanged from the next_diff_word predicate"
+  # Whether `item` hangs under the syllable `anchor` names. Asymmetric as
+  # extracted: `item` is read through SylStructure, `anchor` through its
+  # `syllable` feature, which the caller has already established.
+  in_syllable_of:
+    params: [item, anchor]
+    body: >-
+      path(item, 'R:SylStructure.parent') != null
+      && path(item, 'R:SylStructure.parent').id == anchor.syllable.id
+    citations:
+      - "Taylor, Black & Caley 2001 (heterogeneous relation graphs: a Segment's Syllable through SylStructure)"
+      - "Engineering convention: same-syllable test extracted unchanged from hertz_nucleus_timing"
 include:
   - /rules/normalization/components.yaml
   - normalization-policy.yaml

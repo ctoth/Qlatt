@@ -315,14 +315,11 @@ rules:
       - field: F1
         op: set
         dispatch:
-          - when:
-              predicate: is_bilabial
+          - when: bilabial(current)
             value: params.policy.formant.f1_release_labial
-          - when:
-              predicate: is_alveolar
+          - when: alveolar(current)
             value: params.policy.formant.f1_release_alveolar
-          - when:
-              predicate: is_velar
+          - when: velar(current)
             value: params.policy.formant.f1_release_velar
           - default: params.policy.formant.f1_release_default
         tag: stop_release_formant
@@ -342,14 +339,11 @@ rules:
         field: "{field}"
         op: set
         dispatch:
-          - when:
-              predicate: is_bilabial
+          - when: bilabial(current)
             value: "params.policy.formant.burst_amplitudes.{field}.bilabial"
-          - when:
-              predicate: is_alveolar
+          - when: alveolar(current)
             value: "params.policy.formant.burst_amplitudes.{field}.alveolar"
-          - when:
-              predicate: is_velar
+          - when: velar(current)
             value: "params.policy.formant.burst_amplitudes.{field}.velar"
           - default: "has(current.?{field}) ? current.{field} : 0"
         tag: burst_spectrum
@@ -510,14 +504,12 @@ rules:
       where: >-
         current.phoneme in ['AH', 'AH0'] && current.type == 'vowel' &&
         (has(current.stress) ? current.stress == 0 : true)
-    constraint:
-      predicate: one_coronal
+    constraint: coronal(prev) || coronal(next)
     apply:
       - field: F2
         op: set
         dispatch:
-          - when:
-              predicate: both_coronal
+          - when: coronal(prev) && coronal(next)
             value: >-
               current.F2 + (params.policy.formant.schwa_coronal_f2_target - current.F2) *
               params.policy.formant.schwa_coronal_fronting_rate
@@ -532,14 +524,12 @@ rules:
     select:
       relation: Segment
       where: current.phoneme in ['UW1', 'UW0', 'UW'] && current.type == 'vowel'
-    constraint:
-      predicate: one_coronal
+    constraint: coronal(prev) || coronal(next)
     apply:
       - field: F2
         op: set
         dispatch:
-          - when:
-              predicate: both_coronal
+          - when: coronal(prev) && coronal(next)
             value: >-
               current.F2 + (params.policy.formant.uw_coronal_f2_target - current.F2) *
               params.policy.formant.uw_coronal_fronting_rate

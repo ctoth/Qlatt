@@ -328,7 +328,7 @@ rules:
         all:
           - current.type == 'vowel'
           - prev != null && prev.type in ['stop_release', 'stop_aspiration', 'fricative']
-          - { predicate: prev_is_voiceless }
+          - prev != null && voiceless(prev)
     define:
       prev_f0: prev_point('F0Point')
     insert_point:
@@ -354,7 +354,7 @@ rules:
         all:
           - current.type == 'vowel'
           - prev != null && prev.type in ['stop_closure', 'stop_release']
-          - { predicate: prev_is_voiced }
+          - prev != null && voiced(prev)
     define:
       prev_f0: prev_point('F0Point')
     insert_point:

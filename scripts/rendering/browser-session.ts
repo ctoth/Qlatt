@@ -42,7 +42,7 @@ export interface BrowserSessionOptions {
 /** What the page's `renderOfflineRuntime` takes (test/render-runtime-offline.html). */
 export interface BrowserRenderOptions {
   phrase: string;
-  /** Absent: the page's 110 Hz. null: none, the voice keeps its own. */
+  /** Absent or null: none, the voice keeps its own. */
   baseF0?: number | null;
   engine?: string;
   frontendId?: string;

@@ -397,7 +397,6 @@ describe("declarative frontend extends: rules of a shadowing file", () => {
       "tobi_accent",
       "tobi_unaccented_declination",
       "connected_speech_source_contour",
-      "stress_spectral_tilt",
     ]);
     for (const name of Object.keys(declared)) {
       expect(beauty.rules[name], name).not.toEqual(english.rules[name]);

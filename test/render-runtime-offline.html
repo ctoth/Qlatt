@@ -19,7 +19,8 @@
 
       async function renderOfflineRuntime({
         phrase,
-        baseF0 = 110,
+        // Absent or null: none, the selected voice keeps its own.
+        baseF0,
         frontendId = "qlatt-english",
         experimentId = "klatt80-baseline",
         rate = 1,
@@ -47,9 +48,9 @@
         }
         const resolvedTrack = Array.isArray(track)
           ? track
-          : // A base F0 of null is none: the voice keeps its own (undefined
-            // does not survive the driver's serialization and would be 110).
-            textToKlattTrackDetailed(phrase, baseF0 === null ? undefined : baseF0, transitionMs, {
+          : // A base F0 of null reaches the frontend as absent (null is how a
+            // driver's JSON says none).
+            textToKlattTrackDetailed(phrase, baseF0 ?? undefined, transitionMs, {
               frontendId,
               rate,
               ...(speaker ? { speaker } : {}),

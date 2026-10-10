@@ -34,7 +34,8 @@
 
       async function renderOffline({
         phrase,
-        baseF0 = 110,
+        // Absent: none, the voice keeps its own.
+        baseF0,
         frontendId = "qlatt-english",
         rate = 1,
         transitionMs = 30,

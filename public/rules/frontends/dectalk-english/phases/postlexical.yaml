@@ -1430,11 +1430,23 @@ rules:
       # (curr_instruc & FBOUNDARY) >= FMBNEXT (ph_aloph.c:917): the end of a
       # morpheme counts like the end of a word ("light-house" has TX).
       morpheme_final: "isTrue(current, 'morpheme_boundary_after')"
+      # The boundary bits are on every phone of a word's last rime, not only
+      # on its last phone: the phone sort gives each phone the type of the
+      # next boundary unless a syllabic comes first (ph_sort2.c:203-222). So
+      # the /t/ of "attn" (AE T N, then the word's end) has them, and the /n/
+      # after it is the sonorant: DECtalk's duration routine has AE 38, TX 6,
+      # N 15 there. "witness", "Whitney" and "partner" have a syllabic after
+      # the /n/ and keep T.
+      in_final_rime: >-
+        find_within_word(current,
+          "current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']",
+          "ahead") == null
       glottalizing_context: >-
         n != null && (
           n.phoneme == 'L' ||
           n.phoneme == 'DH' ||
-          ((next_word_boundary || morpheme_final) && (next_son2 || n.phoneme == 'HH')) ||
+          ((next_word_boundary || in_final_rime || morpheme_final)
+            && (next_son2 || n.phoneme == 'HH')) ||
           n.phoneme == 'EN'
         )
       prev_son1: >-
@@ -1788,6 +1800,13 @@ rules:
   # the prevocalic R -> RR rule: in the C that rule (A5) writes RR first and
   # this one then overwrites it, so RX wins for an /r/ between two vowels that
   # does not fuse.
+  #
+  # "The phoneme before" is DECtalk's input phone (phonemes[n - 1]). After a
+  # vowel that has absorbed its /r/ that phone is the /r/, a consonant, so
+  # the rule does not apply: the /l/ of "clearly" (K L IY R L IY) stays LL.
+  # DECtalk's duration routine has IR 31, LL 8 there, ER 30, LL 8 in "fairly"
+  # and AR 25, LL 6 in "barley". (After RR, which is a vowel of the input,
+  # the test holds: "girl".)
   # -------------------------------------------------------------------------
   dectalk_postvocalic_liquid:
     kind: postlexical
@@ -1800,7 +1819,7 @@ rules:
       at: target(allophone)
     constraint: >-
       get(current, 'stress', 0) == 0 && !isTrue(current, 'word_initial_consonant')
-      && p != null && p.type == 'vowel'
+      && p != null && p.type == 'vowel' && !isTrue(p, 'fused_with_r')
     splice:
       type: replace_range
       range_left: current.sync_left

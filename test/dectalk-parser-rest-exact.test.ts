@@ -48,10 +48,6 @@ const corpus = readVoiceCorpus(
 
 /** Not DECtalk's samples yet. The symbols named are those its phonemic stage receives. */
 const NOT_EXACT: Readonly<Record<string, string>> = {
-  "pc-02":
-    'DECtalk ends a clause after "percent", before "of" (also with the word written out: ' +
-    '"Nearly forty percent of the seats were empty."); the frontend\'s clause-break rules put ' +
-    "none there. Not traced",
   "qu-01":
     'the parser leaves the opening quote on "Is", and DECtalk\'s test for an auxiliary that ' +
     "begins a sentence compares the word as written (LTS/ls_task.c:4672-4728 " +

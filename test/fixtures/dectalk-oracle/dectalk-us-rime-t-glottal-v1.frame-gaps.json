@@ -1,0 +1,10 @@
+{
+  "tg-attn-sentence": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "tg-attn-short": ["B1","AV","AP","A2","A4","A6"],
+  "tg-attn-then-word": ["B1","AV","AP","A2","A4","A5"],
+  "tg-word-boundary-control": ["B1","AV","AP","A2","A4","A5"],
+  "tg-syllabic-n-control": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "tg-vowel-after-control": ["B1","AV","AP","A2","A4","A5","A6"],
+  "tg-name-control": ["B1","AV","AP","A2","A4","A5","A6"],
+  "tg-partner-control": ["B1","AV","AP","A2","A4","A5","A6","AB"]
+}

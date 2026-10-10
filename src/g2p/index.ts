@@ -594,7 +594,7 @@ export function pronounce(
         const name = table.letterPhones?.[char] ?? table.characterNames?.[char]?.[0];
         return name ? { phonemes: [...name] } : null;
       };
-      for (const run of lowerWord.match(/[0-9]+|[a-z]+|[/-]/g) ?? []) {
+      for (const [at, run] of (lowerWord.match(/[0-9]+|[a-z]+|[/-]/g) ?? []).entries()) {
         if (/^[0-9]/.test(run)) {
           const spoken = speakPartDigits(run, lists);
           if (spoken) {
@@ -605,7 +605,9 @@ export function pronounce(
           // The dictionary lookup, suffixes included ("cats-12" has "cats").
           const entry = dictLookup(run);
           if (entry) {
-            add({ phonemes: [...(entryOf(run, 0).other?.phonemes ?? entry)] });
+            const reached = entryOf(run, 0);
+            if (at === 0) firstRunClass = reached.formClass;
+            add({ phonemes: [...(reached.other?.phonemes ?? entry)] });
             continue;
           }
           const { suffixIndex, suffixTable } = table;
@@ -614,6 +616,7 @@ export function pronounce(
               ? stripSuffixes(run, dictLookup, { ...table, suffixIndex, suffixTable })
               : null;
           if (suffixed?.phonemes) {
+            if (at === 0) firstRunClass = suffixed.formClass;
             add({ phonemes: [...suffixed.phonemes] });
             continue;
           }
@@ -631,6 +634,16 @@ export function pronounce(
       return parts;
     };
     let pauseAfter = false;
+    // The class of a part number is its first run's, when that run is a
+    // word the dictionary lookup finds: a word's class is sent once, ahead
+    // of its first phone (LTS/ls_util.c:808-818), and the part-number
+    // routine looks a run of three letters or more up before it speaks it
+    // (LTS/l_us_pr1.c:210-214). A first run of digits, of letters that are
+    // spelled, or a slash leaves the word with no class. Classes as the
+    // phonetics receives them, from an instrumented build:
+    // "Documents/2024/taxes" 80020400 (that of "Documents"), "walks-10"
+    // 00020400, "music/2024" 00000400, "ab/2024/taxes" and "10-taxes" 0.
+    let firstRunClass: number | null = null;
     const parts = fraction ? numberWords(fraction, table) : pieces();
     if (parts && parts.length > 0) {
       return {
@@ -639,6 +652,7 @@ export function pronounce(
         word: lowerWord,
         parts,
         ...(pauseAfter ? { pauseAfter: true } : {}),
+        ...(firstRunClass === null ? {} : classed(firstRunClass)),
       };
     }
   }

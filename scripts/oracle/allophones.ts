@@ -141,6 +141,12 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // A comma or semicolon stripped from its word with an apostrophe: it ends
   // the clause but sends no word's class again.
   "dectalk-us-stripped-comma-v1.json",
+  // A /t/ in a word's last rime before a sonorant ("attn"): glottalized.
+  "dectalk-us-rime-t-glottal-v1.json",
+  // An /l/ after a vowel that absorbed its /r/ ("clearly"): not postvocalic.
+  "dectalk-us-lateral-after-r-v1.json",
+  // A part number's class is its first run's, when the dictionary has it.
+  "dectalk-us-part-number-class-v1.json",
 ];
 
 /** Every corpus with a packet record. */

@@ -1,0 +1,11 @@
+{
+  "lr-clearly": ["B1","AV","AP","A2","A4","A5","A2_AMPLITUDE"],
+  "lr-clearly-sentence": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "lr-spoke-clearly": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "lr-nearly": ["B1","AV","AP","A2","A4","A5","A6"],
+  "lr-fairly": ["B1","AV","AP","A2","A4","A5","AB"],
+  "lr-barley": ["B1","AV","A2","A5","A6","AB","A2_AMPLITUDE"],
+  "lr-early-control": ["B1","AV","AP","A2","A4","A5","A6","AB"],
+  "lr-really-control": ["B1","AV","AP","A2","A3","A4","A6"],
+  "lr-girl-control": ["B1","AV","AP","A2","A5","A2_AMPLITUDE"]
+}

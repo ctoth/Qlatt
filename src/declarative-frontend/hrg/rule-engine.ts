@@ -21,6 +21,7 @@ import {
   runFrameProgram,
 } from "./frame-program";
 import type { Item } from "./item";
+import { inheritParameterScope, PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
 import { evalPath, isNavOp } from "./path";
 import type { HrgNode } from "./relation";
 import { applyScalarOp } from "./scalar-op";
@@ -29,9 +30,13 @@ import { type HrgTransaction, NOT_DERIVED } from "./transaction";
 import type { ConditionEvidence, FeatureValue, TransactionJournalEntry } from "./types";
 import type { Utterance } from "./utterance";
 
+export { PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
+
 export interface GraphRuleEngineOptions {
   phases?: readonly string[];
   parameters?: Readonly<Record<string, unknown>>;
+  /** The overlay of each parameter scope, by the scope's name (parameter-scope.ts). */
+  parameterScopes?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
   inventory?: GraphInventoryResource;
   evaluationOwner?: GraphRuleEvaluationOwner;
   captureTooling?: boolean;
@@ -83,6 +88,41 @@ function mergeParameterRecords(
   return merged;
 }
 
+/**
+ * The parameters of each scope, by name, carried on the parameters record of
+ * a run under a key no expression can name. Absent when no scope is declared.
+ */
+const SCOPED_PARAMETERS = Symbol("parameterScopes");
+type ScopedParameters = ReadonlyMap<string, Readonly<Record<string, unknown>>>;
+
+function scopedParametersOf(
+  params: Readonly<Record<string, unknown>>,
+): ScopedParameters | undefined {
+  return (params as { [SCOPED_PARAMETERS]?: ScopedParameters })[SCOPED_PARAMETERS];
+}
+
+/**
+ * The parameters an Item's scope gives it, read on `transaction` so that the
+ * decision that put the Item in its scope becomes a dependency. `params`
+ * itself for an Item in no scope, and when no scope is declared.
+ */
+function parametersFor(
+  params: Readonly<Record<string, unknown>>,
+  item: Item | undefined,
+  transaction: HrgTransaction,
+): Readonly<Record<string, unknown>> {
+  const scopes = scopedParametersOf(params);
+  if (!scopes || !item?.has(PARAMETER_SCOPE_FEATURE)) return params;
+  const name = transaction.read(item, PARAMETER_SCOPE_FEATURE);
+  const scoped = typeof name === "string" ? scopes.get(name) : undefined;
+  if (!scoped) {
+    throw new Error(
+      `E_HRG_PARAMETER_SCOPE: Item '${item.id}' is in the parameter scope '${String(name)}', which is not declared`,
+    );
+  }
+  return scoped;
+}
+
 function numericAggregate(args: unknown[], mode: "min" | "max"): number {
   const values = (args.length === 1 && Array.isArray(args[0]) ? args[0] : args).filter(
     (value): value is number => typeof value === "number" && Number.isFinite(value),
@@ -104,8 +144,14 @@ type EvaluationContext = {
   ) => void;
   /** Position of this context's Item in the scope's Item list. */
   index: number;
+  /**
+   * Position of the Item the rule is evaluating on: this context's own Item,
+   * or, for a context a scan made for a candidate, the Item of the context
+   * the scan was called from. `params` is this Item's.
+   */
+  ruleIndex: number;
   /** The scope's record of the Item being evaluated; see `evaluate`. */
-  cursor: { index: number };
+  cursor: { index: number; rule: number };
   functions: Record<string, (...args: unknown[]) => unknown>;
   isItemView: (value: unknown) => boolean;
   owner: GraphRuleEvaluationOwner;
@@ -205,9 +251,9 @@ function buildEvaluationScope(
   // serves every context made from it, so the functions that speak of "the
   // current Item" without naming it read this; `evaluate` sets it for the
   // length of one evaluation and puts the outer one back.
-  const cursor = { index: -1 };
+  const cursor = { index: -1, rule: -1 };
   const recurse = (index: number, extra: Readonly<Record<string, unknown>>): EvaluationContext =>
-    at(index, extra, {});
+    at(index, extra, {}, cursor.rule >= 0 ? cursor.rule : index);
   const views = new Map<Item, Readonly<Record<string, unknown>>>();
   const silenceSymbol = (): string => {
     if (!inventory)
@@ -548,6 +594,7 @@ function buildEvaluationScope(
     index: number,
     extra: Readonly<Record<string, unknown>>,
     bindings: Readonly<Record<string, Item>>,
+    ruleIndex: number = index,
   ): EvaluationContext => {
     const bindingViews = Object.fromEntries(
       Object.entries(bindings).map(([name, item]) => [name, view(item)]),
@@ -579,6 +626,7 @@ function buildEvaluationScope(
     return {
       owner,
       index,
+      ruleIndex,
       cursor,
       functions,
       define: (name, value) => {
@@ -612,6 +660,8 @@ function buildEvaluationScope(
                 : undefined;
             if (write) transaction.dependOn(write.decisionId);
           }
+          // The parameters of the scope of the Item the rule is evaluating on.
+          if (property === "params") return parametersFor(params, items[ruleIndex], transaction);
           return Reflect.get(target, property, receiver);
         },
       }),
@@ -709,6 +759,8 @@ function buildEvaluationScope(
     ahead: (source, amount = 1) => offset(source, amount),
     behind: (source, amount = 1) => offset(source, -Number(amount)),
     total: (name) => relationItems(name).length,
+    // The parameters as another Item's scope gives them (parameter-scope.ts).
+    params_of: (value) => parametersFor(params, resolveItem(value), transaction),
     max: (...args) => numericAggregate(args, "max"),
     min: (...args) => numericAggregate(args, "min"),
     exp: (value) => Math.exp(Number(value)),
@@ -983,7 +1035,9 @@ function evaluate(expression: unknown, context: EvaluationContext): unknown {
   // Item for this one evaluation and the outer Item put back afterwards.
   const { cursor } = context;
   const outer = cursor.index;
+  const outerRule = cursor.rule;
   cursor.index = context.index;
+  cursor.rule = context.ruleIndex;
   try {
     return normalizeCelValue(
       context.owner.evaluate(expression, context.values, context.functions),
@@ -991,6 +1045,7 @@ function evaluate(expression: unknown, context: EvaluationContext): unknown {
     );
   } finally {
     cursor.index = outer;
+    cursor.rule = outerRule;
   }
 }
 
@@ -1636,6 +1691,7 @@ function applyTextExpansion(
   for (const [index, raw] of records.entries()) {
     const record = raw as Record<string, unknown>;
     const item = transaction.createItem("normalization", `${source.id}:${match.ruleName}:${index}`);
+    inheritParameterScope(transaction, item, source);
     for (const field of ["sourceStart", "sourceEnd", "sourceTextId"])
       transaction.set(item, field, transaction.read(source, field));
     transaction.read(source, "text");
@@ -1720,6 +1776,7 @@ function applySplice(
       source.type,
       `${source.id}:${transaction.metadata.ruleId}:${index.toString()}`,
     );
+    inheritParameterScope(transaction, item, source);
     const copySourceName = typeof template.copy_from === "string" ? template.copy_from : null;
     const copySource = copySourceName ? resolveTarget(copySourceName) : undefined;
     if (copySourceName && !copySource) {
@@ -1915,6 +1972,7 @@ function applyPointActions(
       itemTypes[0],
       `${source.id}:${match.transaction.metadata.ruleId}:point:${index.toString()}`,
     );
+    inheritParameterScope(match.transaction, point, source);
     match.transaction.set(point, "value", evaluateDispatch(spec.value, context, predicates));
     if (typeof spec.tag === "string") match.transaction.set(point, "tag", spec.tag);
     if (f0Layer) {
@@ -2566,23 +2624,48 @@ function runFrameRules(
       );
     }
     const tailFrames = Math.min(tail, endFrame - firstFrame);
-    return { members, memberSpans, firstFrame, endFrame, tailFrames, transaction, features };
+    // The unit's frames have the parameters of its first Item's scope.
+    const unitParams = parametersFor(params, members[0], transaction);
+    return {
+      members,
+      memberSpans,
+      firstFrame,
+      endFrame,
+      tailFrames,
+      transaction,
+      features,
+      unitParams,
+    };
   });
 
   // Machine units: the lead-in, then each unit and its tail if it has one.
+  // A unit whose parameters are the run's says nothing of them. The lead-in
+  // has the first unit's, and a tail, which belongs to what follows, those
+  // of the unit after it.
+  const scopedParams = (
+    unit: (typeof units)[number] | undefined,
+  ): { params?: Readonly<Record<string, unknown>> } =>
+    unit && unit.unitParams !== params ? { params: unit.unitParams } : {};
   const machineUnits: FrameUnit[] = [];
-  if (leadFrames > 0) machineUnits.push({ features: edgeFeatures, frames: leadFrames });
+  if (leadFrames > 0) {
+    machineUnits.push({ features: edgeFeatures, frames: leadFrames, ...scopedParams(units[0]) });
+  }
   const mainIndex: number[] = [];
-  for (const unit of units) {
+  units.forEach((unit, unitIndex) => {
     mainIndex.push(machineUnits.length);
     machineUnits.push({
       features: unit.features,
       frames: unit.endFrame - unit.firstFrame - unit.tailFrames,
+      ...scopedParams(unit),
     });
     if (unit.tailFrames > 0) {
-      machineUnits.push({ features: edgeFeatures, frames: unit.tailFrames });
+      machineUnits.push({
+        features: edgeFeatures,
+        frames: unit.tailFrames,
+        ...scopedParams(units[unitIndex + 1] ?? unit),
+      });
     }
-  }
+  });
   const results = runFrameProgram({
     registers: program.registers as Record<string, FrameRegisterValue>,
     outputs: program.outputs as Record<string, string>,
@@ -2707,14 +2790,36 @@ export function runGraphRuleEngine(
   if (!isPlainObject(specParameters) || !isPlainObject(optionParameters)) {
     throw new Error("E_HRG_PARAMETERS: compiled and runtime parameters must be objects");
   }
-  const params = Object.freeze({
-    ...mergeParameterRecords(specParameters, optionParameters),
+  const runParameters = mergeParameterRecords(specParameters, optionParameters);
+  const withResources = (
+    parameters: Readonly<Record<string, unknown>>,
+  ): Record<string | symbol, unknown> => ({
+    ...parameters,
     sets: spec.string_sets,
     maps: spec.maps,
     mapOrigins: rulepackMapOrigins(spec),
     transcription: spec.transcription,
     ltsPath: spec.lts_path,
   });
+  // Each declared scope's parameters, made once: the run's with the scope's
+  // overlay laid over them. Every one of them, and the run's own, carries
+  // the whole table, so that `params_of` works from any of them.
+  const scopeOverlays = Object.entries(options.parameterScopes ?? {});
+  const scoped = new Map<string, Readonly<Record<string, unknown>>>();
+  const root = withResources(runParameters);
+  if (scopeOverlays.length > 0) {
+    root[SCOPED_PARAMETERS] = scoped;
+    for (const [name, overlay] of scopeOverlays) {
+      const projected = projectPolicyValues(overlay);
+      if (!isPlainObject(projected)) {
+        throw new Error(`E_HRG_PARAMETERS: parameter scope '${name}' must be an object`);
+      }
+      const own = withResources(mergeParameterRecords(runParameters, projected));
+      own[SCOPED_PARAMETERS] = scoped;
+      scoped.set(name, Object.freeze(own) as Readonly<Record<string, unknown>>);
+    }
+  }
+  const params = Object.freeze(root) as Readonly<Record<string, unknown>>;
   const predicates = spec.predicates;
   const evaluationOwner = options.evaluationOwner ?? new GraphRuleEvaluationOwner();
   const captureTooling = options.captureTooling ?? true;

@@ -127,6 +127,11 @@ export interface FrameRule {
 export interface FrameUnit {
   features: Readonly<Record<string, unknown>>;
   frames: number;
+  /**
+   * `params` for the frames of this unit, when they are not the run's: the
+   * parameters of the unit's parameter scope (parameter-scope.ts).
+   */
+  params?: unknown;
 }
 
 /** One rule's activity within one unit: the frames in which it assigned. */
@@ -245,6 +250,7 @@ export function runFrameProgram(run: FrameProgramRun): FrameUnitResult[] {
     const next = run.units[unitIndex + 1];
     const at = (offset: number): FrameUnit | undefined => run.units[unitIndex + offset];
     context.u = unit.features;
+    context.params = unit.params ?? run.params;
     context.p = previous?.features ?? run.edgeFeatures;
     context.p2 = at(-2)?.features ?? run.edgeFeatures;
     context.p3 = at(-3)?.features ?? run.edgeFeatures;

@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { dump as dumpYaml, load as loadYaml } from "js-yaml";
@@ -9,6 +9,7 @@ import {
   loadRulepackSpecFromPath,
   preloadRulepackSpecFromPath,
   rulepackMapOrigins,
+  rulepackRuleOrigins,
 } from "../src/declarative-frontend/rule-pack";
 import { getVoiceRegistry, resolveVoice } from "../src/dectalk-voice";
 
@@ -177,7 +178,7 @@ function writeExtendingFrontend(dir: string, sections: Dict): string {
 /**
  * A child file that shadows a base include (same relative path as an entry of
  * the base's `include:` list) inherits that file's predicates, maps, tags and
- * relations key-wise; string_sets, phases and rules stay the child's alone.
+ * relations key-wise; string_sets and phases stay the child's alone.
  */
 describe("declarative frontend extends: keyed sections of a shadowing file", () => {
   const sectionsOf = (frontendId: string) =>
@@ -305,6 +306,127 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
       for (const key of Object.keys(own[section] as Dict)) {
         expect(Object.keys(dectalk[section]), section).toContain(key);
       }
+    }
+  });
+});
+
+const ENGLISH_PROSODY = "/rules/frontends/qlatt-english/phases/prosody.yaml";
+
+/**
+ * A child file that shadows a base include inherits a rule of that base file
+ * only when no file of the child frontend defines a rule of that name and one
+ * of the child frontend's phases names it.
+ */
+describe("declarative frontend extends: rules of a shadowing file", () => {
+  const english = loadBundledRulepackSpec("qlatt-english") as RulepackFixture;
+  const baseProsody = readYamlFile(`${FRONTENDS_DIR}/qlatt-english/phases/prosody.yaml`)
+    .rules as Dict;
+  const ownBaseline = {
+    ...(baseProsody.tobi_baseline_init as Dict),
+    citations: ["Fixture citation for the child's own baseline rule"],
+  };
+
+  /**
+   * A frontend whose phases/prosody.yaml shadows the base's and defines one
+   * rule, and whose pipeline phases every base rule but `vocal_effort`.
+   */
+  function writeProsodyShadowingFrontend(dir: string): string {
+    const englishPipeline = readYamlFile(`${FRONTENDS_DIR}/qlatt-english/pipeline.yaml`);
+    const phases = (englishPipeline.phases as { rules?: string[] }[]).map((phase) => ({
+      ...phase,
+      ...(phase.rules ? { rules: phase.rules.filter((name) => name !== "vocal_effort") } : {}),
+    }));
+    const frontendPath = writeExtendingFrontend(dir, { phases });
+    mkdirSync(join(dir, "phases"));
+    writeFileSync(
+      join(dir, "phases", "prosody.yaml"),
+      dumpYaml({ version: "v1", rules: { tobi_baseline_init: ownBaseline } }),
+    );
+    return frontendPath;
+  }
+
+  function expectPhasedRuleInheritance(child: CompiledRulepack, dir: string): void {
+    const rules = (child as RulepackFixture).rules;
+    const origins = rulepackRuleOrigins(child);
+    // Undefined by the child and named by one of its phases: inherited, and
+    // attributed to the base file the body was read from.
+    for (const name of ["tobi_accent", "f0_continuation_rise", "accent_index_in_phrase"]) {
+      expect(rules[name], name).toEqual(english.rules[name]);
+      expect(origins[name], name).toBe(ENGLISH_PROSODY);
+    }
+    // The child's own definition replaces the base's whole.
+    expect((rules.tobi_baseline_init as Dict).citations).toEqual(ownBaseline.citations);
+    expect(rules.tobi_baseline_init).not.toEqual(english.rules.tobi_baseline_init);
+    expect(origins.tobi_baseline_init).toBe(`${dir.replace(/\\/g, "/")}/phases/prosody.yaml`);
+    // A base rule the child phases nowhere is not inherited.
+    expect(english.rules).toHaveProperty("vocal_effort");
+    expect(rules).not.toHaveProperty("vocal_effort");
+    expect(origins).not.toHaveProperty("vocal_effort");
+  }
+
+  it("inherits an undefined, phased base rule; the child's definition wins (synchronous loader)", () => {
+    const dir = mkdtempSync(join(tmpdir(), "qlatt-extends-rules-"));
+    try {
+      expectPhasedRuleInheritance(
+        loadRulepackSpecFromPath(writeProsodyShadowingFrontend(dir)),
+        dir,
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("inherits an undefined, phased base rule; the child's definition wins (asynchronous loader)", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "qlatt-extends-rules-"));
+    try {
+      expectPhasedRuleInheritance(
+        await preloadRulepackSpecFromPath(writeProsodyShadowingFrontend(dir)),
+        dir,
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("qlatt-beauty defines only the prosody rules that differ and compiles the base's others", () => {
+    const beauty = loadBundledRulepackSpec("qlatt-beauty") as RulepackFixture;
+    const origins = rulepackRuleOrigins(beauty);
+    const declared = readYamlFile(`${FRONTENDS_DIR}/qlatt-beauty/phases/prosody.yaml`)
+      .rules as Dict;
+    expect(Object.keys(declared)).toEqual([
+      "tobi_accent",
+      "tobi_unaccented_declination",
+      "connected_speech_source_contour",
+      "stress_spectral_tilt",
+    ]);
+    for (const name of Object.keys(declared)) {
+      expect(beauty.rules[name], name).not.toEqual(english.rules[name]);
+      expect(origins[name], name).toBe("/rules/frontends/qlatt-beauty/phases/prosody.yaml");
+    }
+    const phased = new Set(
+      (beauty.phases as unknown as { rules: string[] }[]).flatMap((phase) => phase.rules),
+    );
+    for (const name of Object.keys(baseProsody)) {
+      if (name in declared) continue;
+      if (phased.has(name)) {
+        expect(beauty.rules[name], name).toEqual(english.rules[name]);
+        expect(origins[name], name).toBe(ENGLISH_PROSODY);
+      } else {
+        expect(beauty.rules, name).not.toHaveProperty(name);
+      }
+    }
+    // The base rules beauty does not run stay out of its compiled rulepack.
+    expect(beauty.rules).not.toHaveProperty("vocal_effort");
+    expect(beauty.rules).not.toHaveProperty("accent_index_in_phrase");
+    expect(beauty.rules).toHaveProperty("tobi_baseline_init");
+  });
+
+  it("leaves a frontend without `extends` (dectalk-english) with only its own rules", () => {
+    const dectalk = loadBundledRulepackSpec("dectalk-english") as RulepackFixture;
+    for (const name of Object.keys(baseProsody))
+      expect(dectalk.rules, name).not.toHaveProperty(name);
+    for (const [name, origin] of Object.entries(rulepackRuleOrigins(dectalk))) {
+      expect(origin, name).not.toContain("/qlatt-english/");
     }
   });
 });

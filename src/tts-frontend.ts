@@ -50,11 +50,13 @@ import {
   type SourceContourVoiceQuality,
 } from "./source-contour";
 import {
+  collectPitchCompositionCitations,
   collectSpeakerProfileCitations,
   DEFAULT_SPEAKER_PROFILE_PATH,
   loadSpeakerProfileSync,
   type ResolvedSpeakerProfile,
   resolveSpeakerProfile,
+  resolveSpeakerProfileDetailed,
   type SpeakerProfileOverride,
 } from "./speaker-profile";
 import { projectSpeakerFields } from "./speaker-projection";
@@ -72,6 +74,12 @@ export type TextToKlattTrackOptions = {
   frontendPath?: string;
   rate?: number;
   speaker?: string | SpeakerProfileOverride;
+  /**
+   * A requested pitch as a ratio of the selected voice's base pitch
+   * (/rules/policy/speaker-profile.yaml pitch_composition.pitch_scale). For a
+   * caller that names its voice; a speaker override gives it as `pitch_scale`.
+   */
+  pitchScale?: number;
   voiceQuality?: VoiceQuality;
   directionTrack?: DirectionTrack;
   diagnostics?: Diagnostics | null;
@@ -869,21 +877,39 @@ function buildTextToKlattTrackDetailed(
     );
   }
 
-  const resolvedSpeaker = resolveSpeakerProfile({
+  const speakerResolution = resolveSpeakerProfileDetailed({
     baseF0,
+    pitchScale: options.pitchScale,
     speakerOverride,
     voiceProfile: selectedVoice?.override,
     profileSpec: speakerProfile,
   });
+  const resolvedSpeaker = speakerResolution.profile;
+  for (const issue of speakerResolution.issues) {
+    options.diagnostics?.warn(issue.message, issue.data, issue.code);
+  }
+  // What the profile's pitch_composition did: the reference level, the level
+  // asked for, their ratio and the span that follows from it.
+  const pitch = speakerResolution.pitch;
+  const pitchNote = pitch
+    ? `; pitch composition: reference_base_hz=${pitch.referenceBaseHz}, ` +
+      `effective_base_hz=${pitch.effectiveBaseHz} ` +
+      `(base ${pitch.requestedBaseHz} x pitch_scale ${pitch.pitchScale}), ` +
+      `ratio=${pitch.ratio}, span_hz=${pitch.spanHz} ` +
+      (pitch.spanFollowsLevel
+        ? `(span ${pitch.profileSpanHz} x ratio)`
+        : "(as requested, not scaled)")
+    : "";
   const speakerDecision = provenance.add({
     stage: "frontend",
     type: "speaker_profile_selected",
     subject: "speaker_profile",
     reason: `Resolved speaker profile ${Object.entries(resolvedSpeaker)
       .map(([name, value]) => `${name}=${value}`)
-      .join(", ")}`,
+      .join(", ")}${pitchNote}`,
     citations: [
       ...collectSpeakerProfileCitations(speakerProfile, speakerProfilePath),
+      ...collectPitchCompositionCitations(speakerProfile),
       // The voice file and its sources, when the voice sets profile fields.
       ...(selectedVoice && Object.keys(selectedVoice.override).length > 0
         ? selectedVoice.citations
@@ -1231,6 +1257,7 @@ function buildTextToKlattTrackDetailed(
             ...scope,
             speaker: resolveSpeakerProfile({
               baseF0,
+              pitchScale: options.pitchScale,
               speakerOverride,
               voiceProfile: scope.voice.override,
               profileSpec: speakerProfile,

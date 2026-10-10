@@ -12,6 +12,7 @@ export function browserRenderOptions(request: RenderRequest): BrowserRenderOptio
     rate: request.rate,
     // The voice goes to the frontend as the page's voice selection gives it.
     ...(request.speaker ? { speaker: request.speaker } : {}),
+    ...(request.pitchScale === undefined ? {} : { pitchScale: request.pitchScale }),
     transitionMs: request.transitionMs,
     sampleRate: request.sampleRate,
     leadTime: request.leadTime,

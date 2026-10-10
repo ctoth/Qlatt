@@ -77,6 +77,7 @@ export function createNodeRuntimeBackend({
             frontendId: request.frontendId,
             rate: request.rate,
             ...(request.speaker ? { speaker: request.speaker } : {}),
+            ...(request.pitchScale === undefined ? {} : { pitchScale: request.pitchScale }),
             diagnostics,
           },
         );

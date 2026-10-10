@@ -86,8 +86,13 @@ describe("a requested base pitch", () => {
     ).toBeCloseTo(188, 6);
   });
 
-  it("leaves the span the voice's", () => {
-    expect(speak("qlatt-beauty", STATEMENT, 220).resolvedSpeaker.f0_range_hz).toBe(95);
+  // The span follows the level (speaker-profile.yaml
+  // pitch_composition.span_follows_level): the voice's 95 times the requested
+  // 220 over the voice's own 138.
+  it("scales the voice's span by the same ratio", () => {
+    expect(speak("qlatt-beauty", STATEMENT, 220).resolvedSpeaker.f0_range_hz).toBe(
+      95 * (220 / 138),
+    );
   });
 });
 

@@ -7,8 +7,12 @@
  * distinguished from an IMPULSE spike+decay (a single-frame peak that decays).
  *
  * Usage:
- *   npx tsx scripts/probe-f0-contour.ts "<phrase>" [baseF0] [--frontend <id>] [--tail N] [--full]
+ *   npx tsx scripts/probe-f0-contour.ts "<phrase>" [baseF0] [--frontend <id>] [--pitch-scale R] [--tail N] [--full]
  *
+ * --pitch-scale R : a requested pitch as a ratio of the base pitch
+ *            (/rules/policy/speaker-profile.yaml pitch_composition).
+ * baseF0   : a requested base pitch in Hz. Absent: none is requested, and the
+ *            frontend's voice keeps its own.
  * --tail N : print the last N frames in full (default 24).
  * --full   : print every frame.
  */
@@ -16,7 +20,8 @@ import { textToKlattTrack } from "../src/tts-frontend.ts";
 
 const rawArgs = process.argv.slice(2);
 let phrase = "are you home?";
-let baseF0 = 110;
+let baseF0: number | undefined;
+let pitchScale: number | undefined;
 let frontendId = "dectalk-english";
 let tail = 24;
 let full = false;
@@ -26,6 +31,8 @@ for (let i = 0; i < rawArgs.length; i += 1) {
   const a = rawArgs[i];
   if (a === "--frontend") {
     frontendId = rawArgs[++i];
+  } else if (a === "--pitch-scale") {
+    pitchScale = Number(rawArgs[++i]);
   } else if (a === "--tail") {
     tail = Number(rawArgs[++i]);
   } else if (a === "--full") {
@@ -38,7 +45,10 @@ if (positional[0] != null) phrase = positional[0];
 if (positional[1] != null) baseF0 = Number(positional[1]);
 
 // textToKlattTrack returns the KlattFrame[] track directly (see f0-fingerprint.ts).
-const track = textToKlattTrack(phrase, baseF0, 30, { frontendId });
+const track = textToKlattTrack(phrase, baseF0, 30, {
+  frontendId,
+  ...(pitchScale === undefined ? {} : { pitchScale }),
+});
 
 type Frame = { time: number; params: { F0?: number } };
 const frames = track as unknown as Frame[];
@@ -63,7 +73,9 @@ for (let i = 0; i < f0s.length; i += 1) {
   }
 }
 
-console.log(`phrase=${JSON.stringify(phrase)} frontend=${frontendId} baseF0=${baseF0}`);
+console.log(
+  `phrase=${JSON.stringify(phrase)} frontend=${frontendId} baseF0=${baseF0 ?? "not requested"} pitchScale=${pitchScale ?? "not requested"}`,
+);
 console.log(
   `frames=${frames.length} nan=${nan} f0_min=${min.toFixed(2)} f0_max=${max.toFixed(2)} argmax_frame=${argmax}/${frames.length - 1}`,
 );

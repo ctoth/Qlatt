@@ -110,7 +110,7 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 | `--subject <pat>` | Filter by subject (exact or `prefix*` wildcard) |
 | `--range <spec>` | Filter by `seq:START-END`, `time:START-END`, `token:START-END`, or `id:START-END` |
 | `--why <id>` | Show ancestry chain for a decision (e.g., `--why d000045`) |
-| `--base-f0 <Hz>` | Fundamental frequency (default: 110) |
+| `--base-f0 <Hz>` | Requested base pitch (default: none; the frontend's voice keeps its own) |
 | `--transition-ms <ms>` | Formant transition duration (default: 30) |
 | `--strict-citations` | Exit code 2 if any decisions lack citations |
 | `--out <file>` | Write output to file instead of stdout |

@@ -9,9 +9,17 @@
  * Requests:
  *   {"id": 1, "op": "speak", "text": "Hello world.",
  *    "frontendId"?: "qlatt-english", "experimentId"?: "klatt80-baseline",
- *    "rate"?: 1.0, "baseF0"?: 110, "sampleRate"?: 22050}
+ *    "rate"?: 1.0, "pitchScale"?: 1.0, "baseF0"?: 110, "sampleRate"?: 22050}
  *   {"id": 2, "op": "hello"}      -> capabilities
  *   {"op": "quit"}
+ *
+ * Pitch: "pitchScale" is a ratio of the frontend's voice's own base pitch
+ * (2 is an octave up, 0.5 an octave down), so one value means the same
+ * interval on every voice of every frontend. "baseF0" is a base pitch in Hz
+ * that replaces the voice's own; when both are given, the base is
+ * baseF0 * pitchScale. With neither, the voice keeps its own pitch. The pitch
+ * span follows the level (/rules/policy/speaker-profile.yaml
+ * pitch_composition).
  *
  * Responses for a speak request, in order:
  *   {"id": 1, "event": "audio", "sampleRate": 22050, "format": "s16le",
@@ -43,13 +51,14 @@ import { createNodeRuntimeBackend } from "./rendering/backends/node-runtime.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-type SpeakRequest = {
+export type SpeakRequest = {
   id?: number | string;
   op: "speak";
   text: string;
   frontendId?: string;
   experimentId?: string;
   rate?: number;
+  pitchScale?: number;
   baseF0?: number;
   sampleRate?: number;
 };
@@ -91,26 +100,24 @@ function write(message: Record<string, unknown>): void {
   process.stdout.write(`${JSON.stringify(message)}\n`);
 }
 
-async function speak(
-  request: SpeakRequest,
-  backend: ReturnType<typeof createNodeRuntimeBackend>,
-): Promise<void> {
+/** The render a speak request asks for. */
+export function speakRenderRequest(request: SpeakRequest): RenderRequest {
   const frontendId = request.frontendId ?? DEFAULT_FRONTEND_ID;
   const experimentId =
     request.experimentId ?? DEFAULT_EXPERIMENT_BY_FRONTEND[frontendId] ?? "klatt80-baseline";
-  const sampleRate = request.sampleRate ?? 22050;
-  const leadTime = 0.02;
-  const renderRequest: RenderRequest = {
+  return {
     repoRoot,
     phrase: request.text,
+    // Absent: the frontend's voice keeps its own base pitch.
     baseF0: request.baseF0,
+    ...(request.pitchScale === undefined ? {} : { pitchScale: request.pitchScale }),
     frontendId,
     experimentId,
     engine: "runtime",
     rate: request.rate ?? 1,
     transitionMs: 30,
-    sampleRate,
-    leadTime,
+    sampleRate: request.sampleRate ?? 22050,
+    leadTime: 0.02,
     tailTime: 0.05,
     includeTrack: true,
     noiseSeed: 20260214,
@@ -118,6 +125,14 @@ async function speak(
     allowBrowserRender: false,
     renderHost: "node",
   };
+}
+
+async function speak(
+  request: SpeakRequest,
+  backend: ReturnType<typeof createNodeRuntimeBackend>,
+): Promise<void> {
+  const renderRequest = speakRenderRequest(request);
+  const { sampleRate, leadTime } = renderRequest;
   const payload = await backend.render(renderRequest);
   const pcm = toInt16(payload.samples);
   const track = Array.isArray(payload.track) ? (payload.track as KlattFrame[]) : [];

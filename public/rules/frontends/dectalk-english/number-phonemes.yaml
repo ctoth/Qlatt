@@ -238,3 +238,16 @@ maps:
     "ý": "w'A xky'ut"
     "þ": "T'crn"
     "ÿ": "w'A 'umlWt"
+  # The name a sign has in the math mode (LTS/l_us_ma1.c math_table[];
+  # LTS/ls_task.c:1949-1957, LTS/ls_math.c:86-104): phonemic text.
+  tn_math_names:
+    "+": "pl'^s"
+    "-": "m'An|s"
+    "*": "m'^lt|plAd*bA"
+    "/": "d|v'Ad|d*bA"
+    "^": "tU*Dx*p'WR*xv"
+    "<": "l'Es*DEn"
+    ">": "gr'etR*DEn"
+    "=": "'ikwLz"
+    "%": "pRs'Ent"
+    ".": "p'Ont"

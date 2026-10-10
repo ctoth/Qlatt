@@ -67,6 +67,12 @@ export interface ClauseContext {
   /** That mark was sent by a text rule: it is not written on the word. */
   markSent?: boolean;
   /**
+   * The modes of the text that are on where the word stands, by the words a
+   * frontend's text parser has for them ("math"): a character such a mode
+   * names is spoken by that name (the table's `modeCharacterNames`).
+   */
+  modes?: readonly string[];
+  /**
    * The word was written with a capital first letter and a lower-case second
    * one: DECtalk's dictionary search calls it capitalised (LTS/ls_dict.c:665).
    */

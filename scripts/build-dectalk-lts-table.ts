@@ -376,6 +376,22 @@ for (const [character, comment] of [
     .split(" ")
     .map((word) => convertPhonemeFieldDetailed(word).phones);
 }
+// The math table: the name a sign has in the math mode, where a
+// one-character word that is such a sign is spoken by it
+// (LTS/ls_task.c:1949-1957) and the spelling routine tries the table for
+// each character before the typing table (LTS/ls_spel.c, ls_math_do_math).
+// Each name as the table writes it: phonemic text.
+const mathNames: Record<string, string> = {};
+for (const match of stripComments(read("l_us_ma1.c")).matchAll(
+  /\{\s*'(\\?.)'\s*,\s*"([^"]*)"\s*\}/g,
+)) {
+  mathNames[match[1] as string] = match[2] as string;
+}
+if (mathNames["-"] !== "m'An|s" || Object.keys(mathNames).length !== 10) {
+  throw new Error(
+    `E_MATH_TABLE: read ${Object.keys(mathNames).length.toString()} signs from l_us_ma1.c math_table[], expected 10`,
+  );
+}
 
 // The letters the rule engine reads for a character above 127: it converts
 // each character of the word through ls_fold[] before it looks for a letter
@@ -692,6 +708,9 @@ fs.writeFileSync(
     wordsByPunctuation,
     letterPhones,
     characterNames,
+    // The names characters have in a mode of the text, by the mode's word:
+    // the math table, as phonemic text.
+    modeCharacterNames: { math: mathNames },
     letterFold,
     // The word sequences the text stage's sentence parse takes as one
     // conjunction, in the table's order (LTS/proverbs.h conj_words, read by
@@ -937,6 +956,12 @@ fs.writeFileSync(
     "  tn_character_names:",
     ...Object.keys(typedCharacterNames).map(
       (key) => `    ${JSON.stringify(key)}: ${JSON.stringify(typedCharacterNames[key])}`,
+    ),
+    "  # The name a sign has in the math mode (LTS/l_us_ma1.c math_table[];",
+    "  # LTS/ls_task.c:1949-1957, LTS/ls_math.c:86-104): phonemic text.",
+    "  tn_math_names:",
+    ...Object.keys(mathNames).map(
+      (key) => `    ${JSON.stringify(key)}: ${JSON.stringify(mathNames[key])}`,
     ),
     "",
   ].join("\n"),

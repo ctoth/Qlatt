@@ -547,7 +547,28 @@ const commandTable = {
     defined(defsSource, "MIN_PERIOD_PAUSE", "cm_defs.h"),
     defined(defsSource, "MAX_PERIOD_PAUSE", "cm_defs.h"),
   ],
+  // The flag of each mode the mode command names, by the mode's word
+  // (CMD/cm_copt.c cm_cmd_mode: the word's place in mode_options[] picks a
+  // MODE_ constant; INCLUDE/esc.h:126-143 has their values). The rules of
+  // the main section are run in the flags that are on, with MODE_CITATION
+  // (CMD/cm_text.c:989-1011).
+  modeFlags: Object.fromEntries(
+    [
+      ...routineBodies("cm_cmd_mode").matchAll(
+        /case\s+(\d+)\s*:\s*pipe_value\[2\]\s*\|=\s*(MODE_[A-Z]+)/g,
+      ),
+    ].map((match) => {
+      const word = (optionLists.mode_options ?? [])[Number(match[1])];
+      if (word === undefined) {
+        throw new Error(`E_PARSER_TABLE: cm_cmd_mode case ${match[1] as string} names no option`);
+      }
+      return [word, defined(escSource, match[2] as string, "esc.h")];
+    }),
+  ),
 };
+if (commandTable.modeFlags.math !== 4 || commandTable.modeFlags.spell !== 16) {
+  throw new Error("E_PARSER_TABLE: the mode flags of cm_cmd_mode are not read as expected");
+}
 
 const content = `${JSON.stringify({
   schemaVersion: "v1",

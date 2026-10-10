@@ -18,7 +18,9 @@
  *     (src/dectalk-speaker-definition.ts). A voice command after it starts
  *     again from that voice's own definition.
  *   - [:mode spell on|off|set]: the spelling mode
- *     (test/dectalk-mode-spell.test.ts).
+ *     (test/dectalk-mode-spell.test.ts);
+ *   - [:mode math on|off|set]: the math mode
+ *     (test/dectalk-mode-math.test.ts).
  * Carried out wherever it stands:
  *   - [:punct none|some|all]: the mode of the clause reader and of the
  *     punctuation rules (CMD/cm_copt.c:1249-1276);
@@ -59,15 +61,14 @@ const corpus = readVoiceCorpus(
 );
 
 const MODE =
-  "the mode is a flag of DECtalk's letter-to-sound stage; of the modes only spell is ported " +
-  "(test/dectalk-mode-spell.test.ts)";
+  "the mode is a flag of DECtalk's letter-to-sound stage; of the modes only spell and math " +
+  "are ported (test/dectalk-mode-spell.test.ts, test/dectalk-mode-math.test.ts)";
 
 /** Not DECtalk's samples yet. */
 const NOT_EXACT: Readonly<Record<string, string>> = {
   "bo-08":
     "[:punct pass]: DECtalk's text stage hands the characters on without reading clauses " +
     "(CMD/cm_text.c:379); not ported, the mode stays",
-  "bo-10": `[:mode math on]: ${MODE}`,
   "bo-11": `[:mode europe on]: ${MODE}`,
   "bo-14": `[:mode reading on]: ${MODE}`,
 };
@@ -207,7 +208,7 @@ describe("DECtalk's commands before any spoken text", () => {
 
   it("keeps a decision and a diagnostic for each command it does not carry out", () => {
     const { decisions, warnings } = run(
-      "[:mode math on][:volume set 50][:dv save] The tide went out.",
+      "[:mode europe on][:volume set 50][:dv save] The tide went out.",
     );
     expect(decisions.map((decision) => decision.type)).toEqual([
       "text_parser_command_not_carried_out",

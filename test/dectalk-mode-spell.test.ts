@@ -174,7 +174,7 @@ describe("DECtalk's mode command", () => {
 
   it("keeps a decision and a diagnostic for a mode it does not carry out", () => {
     const other = run("[:mode europe on] The tide went out.");
-    expect(other.commands[0]?.reason).toContain("of the modes only spell is ported");
+    expect(other.commands[0]?.reason).toContain("of the modes only these are ported: spell, math");
     expect(other.warnings.map((event) => event.code)).toEqual(["W_TEXT_COMMAND_NOT_CARRIED_OUT"]);
   });
 });

@@ -80,6 +80,12 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
    */
   characterNames?: Readonly<Record<string, readonly (readonly string[])[]>>;
   /**
+   * The names characters have while a mode of the text is on, by the mode's
+   * word and then by the character: phonemic text (`phonemeCharacters`). The
+   * spelling routine and a one-character word take such a name first.
+   */
+  modeCharacterNames?: Readonly<Record<string, Readonly<Record<string, string>>>>;
+  /**
    * The word sequences taken as one conjunction, in the order they are
    * tried (table-conjunctions.ts).
    */

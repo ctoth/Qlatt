@@ -253,11 +253,12 @@ export interface TextParserChange {
 }
 
 /**
- * The modes of DECtalk's letter-to-sound stage that a mode command before
- * any spoken text turns on here: spell (LTS/ls_task.c:1835-1871, every word
- * goes to the spelling routine).
+ * The modes a mode command turns on here: spell (LTS/ls_task.c:1835-1871,
+ * every word goes to the spelling routine) and math (LTS/ls_task.c:1949-1957
+ * and LTS/ls_spel.c, a sign is spoken by its name in the math table; the
+ * parser's main rules run with the mode's flag).
  */
-export const PORTED_MODES: readonly string[] = ["spell"];
+export const PORTED_MODES: readonly string[] = ["spell", "math"];
 
 export interface TextParserRunOptions {
   /** Told of each command that is in error or not carried out. */
@@ -321,6 +322,14 @@ export function runTextParser(
     punctuationMode: config.punctuation.mode,
     mainSection: config.main.section,
     mainMode: config.main.mode,
+    // The ported modes alone: a mode that is not ported changes nothing
+    // after the parser either.
+    modeFlags: Object.fromEntries(
+      PORTED_MODES.flatMap((mode) => {
+        const flag = table.commandTable?.modeFlags?.[mode];
+        return flag === undefined ? [] : [[mode, flag]];
+      }),
+    ),
     dictionary: dictionaryLookup(table, hasWord),
     onHit: ({ rule, before, after }) => {
       if (before === after) return;
@@ -760,7 +769,7 @@ export function runTextParser(
               : notCarriedOut(
                   written,
                   row.name,
-                  `the clause before it is ended as DECtalk ends it; the mode (${mode} ${action}) is a flag of DECtalk's letter-to-sound stage (LTS_MODE_SET and LTS_MODE_CLEAR, CMD/cm_copt.c:2148-2260), and of the modes only ${PORTED_MODES.join(", ")} is ported; the modes that are ported are taken away from here on, as set takes away every other mode`,
+                  `the clause before it is ended as DECtalk ends it; the mode (${mode} ${action}) is a flag of DECtalk's letter-to-sound stage (LTS_MODE_SET and LTS_MODE_CLEAR, CMD/cm_copt.c:2148-2260), and of the modes only these are ported: ${PORTED_MODES.join(", ")}; the modes that are ported are taken away from here on, as set takes away every other mode`,
                 );
             modeChanges.push({ offset: out.length, decisionId, modes: [...modesNow] });
             continue;
@@ -785,7 +794,7 @@ export function runTextParser(
             written,
             row.name,
             // A mode that is not ported, on or off, or its set before any text.
-            `the clause before it is ended as DECtalk ends it; the mode (${mode} ${action}) is a flag of DECtalk's letter-to-sound stage (LTS_MODE_SET and LTS_MODE_CLEAR, CMD/cm_copt.c:2148-2260), and of the modes only ${PORTED_MODES.join(", ")} is ported` +
+            `the clause before it is ended as DECtalk ends it; the mode (${mode} ${action}) is a flag of DECtalk's letter-to-sound stage (LTS_MODE_SET and LTS_MODE_CLEAR, CMD/cm_copt.c:2148-2260), and of the modes only these are ported: ${PORTED_MODES.join(", ")}` +
               (action === "set"
                 ? "; the modes that are ported are taken away, as set takes away every other mode"
                 : ""),

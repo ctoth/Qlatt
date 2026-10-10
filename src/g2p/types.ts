@@ -10,6 +10,7 @@ export type PronunciationSource =
   | "position"
   | "number-abbreviation"
   | "hyphenated"
+  | "mode-character"
   | "unknown";
 
 /** One spoken word of a token that is spoken as several (a number in digits). */
@@ -61,6 +62,12 @@ export interface PronunciationResult {
    * letter-to-sound's own, with that word's class or with none.
    */
   forWrittenWord?: boolean;
+  /**
+   * The mode of the text whose table named the word (source
+   * "mode-character"): a one-character word spoken by the name it has while
+   * that mode is on.
+   */
+  mode?: string;
   /**
    * The form classes as the frontend's phonetic rules receive them, where
    * that differs from what the lexicon holds (table-lts-pronounce.ts

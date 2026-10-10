@@ -46,6 +46,7 @@ import {
   NUMBER_S2,
   NUMBER_VPSTART,
   NUMBER_WBOUND,
+  type NumberWord,
   numberWords,
   speakDigits,
   speakFraction,
@@ -300,6 +301,62 @@ export function pronounce(
     table?.formClassNames
       ? { formClasses: ["noun"], formClassWord: 2 ** table.formClassNames.indexOf("noun") }
       : {};
+
+  // The name a character has in a mode of the text that is on where the word
+  // stands (the table's `modeCharacterNames`, phonemic text), as one word;
+  // null when no such mode names it. DECtalk's math mode: ls_math_do_math
+  // looks the character up in math_table[] only while the mode is on
+  // (DECtalk 4.63 LTS/ls_math.c:82-104).
+  const modeName = (char: string): { mode: string; name: NumberWord } | null => {
+    const characters = table?.phonemeCharacters;
+    if (!table || !characters) return null;
+    for (const mode of context.modes ?? []) {
+      const text = table.modeCharacterNames?.[mode]?.[char];
+      if (text === undefined) continue;
+      const symbols = [...text]
+        .map((character) => characters[character.charCodeAt(0)] ?? null)
+        .filter(
+          (symbol): symbol is number =>
+            symbol !== null &&
+            ((symbol > 0 && symbol < table.phonemeSymbols.length) || WORD_SYMBOLS.has(symbol)),
+        );
+      const name = numberWords(symbols, table)[0];
+      if (name) return { mode, name };
+    }
+    return null;
+  };
+  // A word of one character that a mode names is spoken by that name: the
+  // test stands after the spelling mode's and the mini dictionary's and
+  // ahead of the dictionary search (DECtalk 4.63 LTS/ls_task.c:687-697 the
+  // order, 1949-1957 ls_task_math_mode: the word, less the marks at its
+  // ends, is one character). The word's class is the one the look-up before
+  // any word is spoken found for it, the dictionary's (:5066-5113), but the
+  // phonetic stage receives none on the name's phones: the name is sent
+  // without the routine that sends a class ahead of a word's first phone
+  // (LTS/ls_math.c:128-144), and the class goes out with the word boundary
+  // after it.
+  // Measured on say.exe with the math mode on
+  // (test/oracle-corpora/dectalk-us-mode-math-v1.json): "3 - 2" is "three
+  // minus two" and "4 * 5" "four multiplied by five"; with the mode off
+  // "dash" and "asterisk", the dictionary's words. Classes as the phonetics
+  // receives them, from an instrumented build, for "4 * 5 = 20": `adj` at
+  // the first symbol of "four", `character` at the word boundary after
+  // "multiplied by" (symbol 18), `adj` at the first symbol of "five" (19).
+  const modeWord = word.length === 1 ? modeName(word) : null;
+  if (modeWord) {
+    return {
+      phonemes: [...modeWord.name.phonemes],
+      source: "mode-character",
+      word: lowerWord,
+      mode: modeWord.mode,
+      ...(modeWord.name.morphemeAfter && modeWord.name.morphemeAfter.length > 0
+        ? { boundaryAfterAt: [...modeWord.name.morphemeAfter] }
+        : {}),
+      ...(dictLookup(lowerWord)
+        ? { ...classed(entryOf(lowerWord, 0).formClass), receivedFormClasses: [] }
+        : {}),
+    };
+  }
 
   // A word with a question or exclamation mark written on it, ahead of the
   // mark that ends the clause ("What?!" is the word "What?" and the mark
@@ -641,7 +698,14 @@ export function pronounce(
       // The spelling routine speaks a digit from the number phone lists and
       // any other character by its name in the typing table
       // (LTS/ls_spel.c:158-170).
+      // In a mode that names the character it speaks that name instead: the
+      // routine tries the mode's table for each character first
+      // (LTS/ls_spel.c:117). Measured on say.exe with the math mode on:
+      // "3-2" is "three minus two", "1990-1998" "nineteen ninety minus
+      // nineteen ninety eight", "/5" "divided by five".
       const named = (char: string): Piece | null => {
+        const inMode = modeName(char);
+        if (inMode) return inMode.name;
         if (/^[0-9]$/.test(char)) {
           return numberWords(lists.units[Number(char)] as readonly number[], table)[0] ?? null;
         }
@@ -1021,6 +1085,8 @@ export function pronounceClause(
     endMark?: string;
     /** That mark was sent by a text rule: it is not written in the text. */
     endMarkSent?: boolean;
+    /** For each word, the modes of the text that are on where it stands. */
+    modes?: readonly (readonly string[] | undefined)[];
   },
 ): PronunciationResult[] {
   const table = options.ltsPath ? ltsTableAt(options.ltsPath) : null;
@@ -1066,6 +1132,7 @@ export function pronounceClause(
           ...(number === undefined ? {} : { numberBefore: number }),
           ...(options.writtenCapitalised?.[index] ? { capitalised: true } : {}),
           ...(options.edgeStripped?.[index] ? { edgeStripped: true } : {}),
+          ...(options.modes?.[index] ? { modes: options.modes[index] } : {}),
           ...(index === words.length - 1 && options.endMark !== undefined
             ? { markAfter: options.endMark, ...(options.endMarkSent ? { markSent: true } : {}) }
             : {}),

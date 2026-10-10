@@ -10,6 +10,10 @@ relations:
       kind: []
       payload: []
       spokenText: []
+      # Where the item begins in the source text (a UTF-16 offset): a rule
+      # reads it to know which modes of the text are on there
+      # (maps.tn_text_mode_spans).
+      sourceStart: []
       active: [true, false]
       outputType: [source, terminal, request]
 maps:

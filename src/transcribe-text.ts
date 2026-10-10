@@ -114,6 +114,8 @@ type OrthographyInputToken = {
   edgeStripped?: boolean;
   /** What was written, when a text rule composed the token's word anew. */
   written?: string;
+  /** The modes of the text that are on where the token's span begins. */
+  textModes?: string[];
   symbol?: string;
   pronunciationKey?: string;
   parentDecisionId?: string;
@@ -471,6 +473,7 @@ function rewriteOrthographyTokens(
   compiledSpec: CompiledRulepack,
   existingUtterance?: Utterance,
   captureTooling?: boolean,
+  textModeSpans?: Readonly<Record<string, readonly (readonly number[])[]>>,
 ): OrthographyInputToken[] {
   const entries = words.filter(
     (entry) => (typeof entry === "string" ? entry : entry.word).length > 0,
@@ -514,6 +517,8 @@ function rewriteOrthographyTokens(
   // Word tokens that are their written word in lower case, where that word
   // has a capital first letter and a lower-case second one.
   const writtenCapitalised = new Set<string>();
+  // For each token, the modes of the text that are on where its span begins.
+  const modesAt = new Map<string, string[]>();
   let writtenBefore: { textId: string; start: number; end: number } | null = null;
   entries.forEach((entry, index) => {
     const input = sharedInput ?? beginInput();
@@ -544,6 +549,14 @@ function rewriteOrthographyTokens(
           }
         }
         const written = sourceText.slice(start, end);
+        if (textModeSpans) {
+          const on = Object.keys(textModeSpans).filter((mode) =>
+            (textModeSpans[mode] ?? []).some(
+              (span) => (span[0] as number) <= start && start < (span[1] as number),
+            ),
+          );
+          if (on.length > 0) modesAt.set(token.id, on);
+        }
         if (punctuation && !written.includes(word)) suppliedPunctuation.add(token.id);
         if (start > 0 && /[A-Za-z0-9]/.test(sourceText[start - 1] as string)) {
           writtenAgainst.add(token.id);
@@ -632,6 +645,7 @@ function rewriteOrthographyTokens(
         ...(continuesWritten.has(token.id) ? { continuesWrittenWord: true } : {}),
         ...(writtenCapitalised.has(token.id) ? { writtenCapitalised: true } : {}),
         ...(composedFrom.has(token.id) ? { written: composedFrom.get(token.id) as string } : {}),
+        ...(modesAt.has(token.id) ? { textModes: modesAt.get(token.id) as string[] } : {}),
         ...(typeof punctuationSymbol === "string" ? { symbol: punctuationSymbol } : {}),
         ...(typeof pronunciationKey === "string" && pronunciationKey.length > 0
           ? { pronunciationKey }
@@ -724,6 +738,7 @@ export function transcribeText(
     compiledSpec,
     options.utterance,
     options.captureTooling,
+    options.textModeSpans,
   );
   // A frontend that searches its dictionary by the written word looks a word
   // up with its apostrophes first and, on a miss, without the ones at its
@@ -784,6 +799,7 @@ export function transcribeText(
             (position) => orthographyWords[position].writtenCapitalised === true,
           ),
           edgeStripped: run.map((position) => orthographyWords[position].edgeStripped === true),
+          modes: run.map((position) => orthographyWords[position].textModes),
         },
       );
       run.forEach((position, order) => {
@@ -939,6 +955,11 @@ export function transcribeText(
         const used = lexiconSource("number-abbreviation");
         decisionType = "number_abbreviation_pronunciation_selected";
         reason = `Word '${sourceWord}' follows a number; used ${used.name}`;
+        citations = [used.citation];
+      } else if (pronResult.source === "mode-character") {
+        const used = lexiconSource("mode-character");
+        decisionType = "mode_character_pronunciation_selected";
+        reason = `Word '${sourceWord}' is one character and the ${pronResult.mode ?? ""} mode of the text is on where it stands; used ${used.name}`;
         citations = [used.citation];
       } else if (pronResult.source === "hyphenated") {
         const used = lexiconSource("hyphenated");

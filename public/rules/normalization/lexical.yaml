@@ -516,12 +516,23 @@ rules:
     select:
       relation: Normalization
       where: "current.kind == 'spell_mode_word' && current.outputType == 'source'"
+    # While the math mode is on as well (maps.tn_text_mode_spans.math), a
+    # character the math table names is spoken by that name: the spelling
+    # routine tries that table first. Measured on say.exe
+    # (test/oracle-corpora/dectalk-us-mode-math-v1.json): with both modes on
+    # "3 - 2." is TH R IY, M AY N IX S, T UW.
     define:
+      mathNames: >-
+        get(get(maps, 'tn_text_mode_spans', {}), 'math', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
+          ? get(maps, 'tn_math_names', {}) : {}
       names: >-
         split(lower(current.payload.word), '').map(char,
-          matches(char, '^[0-9]$')
-            ? vocabulary('tn_number_phonemes', 'units.' + char)
-            : get(maps.tn_character_names, char, '')).filter(name, name != '')
+          char in mathNames
+            ? mathNames[char]
+            : matches(char, '^[0-9]$')
+              ? vocabulary('tn_number_phonemes', 'units.' + char)
+              : get(maps.tn_character_names, char, '')).filter(name, name != '')
     expand_text:
       allowed_types: [terminal]
       tag: normalization_lexical
@@ -534,7 +545,7 @@ rules:
         + (tn_text_or_empty(get(current.payload, 'gap', null)) == '' ? []
             : [{'type': 'terminal', 'text': ',', 'kind': 'sent_mark'}])
     citations:
-      - "DECtalk 4.63 LTS/ls_spel.c:100-190 (ls_spel_spell: each character's case folded, a digit from punits[], any other character from the typing table, WBOUND between two characters)"
+      - "DECtalk 4.63 LTS/ls_spel.c:100-190 (ls_spel_spell: each character's case folded, a digit from punits[], any other character from the typing table, WBOUND between two characters; :117 the math table is tried first for each character)"
       - "DECtalk 4.63 INCLUDE/usa_type.tab (the typing table), LTS/l_us_con.c punits[]"
       - "DECtalk 4.63 LTS/ls_task.c:5109-5113 (every word of the sentence is looked up first, its class kept in fc_struct[]), LTS/ls_util.c:808-818 (a word's class is sent ahead of its first phone)"
       - "DECtalk 4.63 LTS/ls_task.c:1281-1290 (in the spelling mode white space after a word sends COMMA)"

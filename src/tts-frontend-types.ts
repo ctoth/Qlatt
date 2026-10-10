@@ -101,6 +101,7 @@ export const LEXICON_SOURCE_KEYS = [
   "position",
   "number-abbreviation",
   "hyphenated",
+  "mode-character",
 ] as const;
 export type LexiconSourceKey = (typeof LEXICON_SOURCE_KEYS)[number];
 export type LexiconSource = { name: string; citation: string };
@@ -164,6 +165,13 @@ export type TranscriptionOptions = {
   compiledSpec?: CompiledRulepack;
   /** The rule engine's option for the orthography phase; recorded unless false. */
   captureTooling?: boolean;
+  /**
+   * The modes of the text a frontend's text parser turned on: for each mode,
+   * the stretches of the source text it is on in, each from an offset up to
+   * another. A word knows the modes on where it begins
+   * (ClauseContext.modes).
+   */
+  textModeSpans?: Readonly<Record<string, readonly (readonly number[])[]>>;
 };
 
 /** A final timestamped backend parameter frame emitted by HRG lowering. */

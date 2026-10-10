@@ -66,6 +66,8 @@ export interface CommandTable {
   rate: { command: [number, number]; spoken: [number, number] };
   /** The limits of the period pause command's number, in ms. */
   periodPause: [number, number];
+  /** The flag of each mode the mode command names, by the mode's word. */
+  modeFlags?: Record<string, number>;
 }
 
 /** How many parameter slots the command stage has (INCLUDE/dectalk.h:90 NPARAM). */

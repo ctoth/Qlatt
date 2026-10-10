@@ -935,6 +935,8 @@ function buildTextToKlattTrackDetailed(
   const transcriptionConfig = getTranscriptionConfig(spec);
   // The text parser's output (run above, before the voice was chosen) is the
   // source text.
+  let textModeSpans: Record<string, number[][]> | undefined;
+  let specWithModes = spec;
   if (parsedText) {
     // The modes the text parser's commands turned on are laid over the
     // rulepack's maps for the text rules to read
@@ -963,6 +965,8 @@ function buildTextToKlattTrackDetailed(
             },
           }
         : spec;
+    specWithModes = withModes;
+    if (Object.keys(modeSpans).length > 0) textModeSpans = modeSpans;
     recognizeText(parsedText.text, utterance, withModes, {
       parents: parsedText.decisionIds,
       reason: `Source text is the text parser's output; UTF-16 source coordinates are its`,
@@ -974,10 +978,13 @@ function buildTextToKlattTrackDetailed(
   // these phases as in the later ones: a checkpoint serializes the whole graph.
   const captureTooling = options.captureTooling === true;
   onStage?.("text parser and recognition");
-  const normalized = normalizeSourceItems(utterance, spec, { captureTooling });
+  // The text rules of the normalization phases read the same modes as the
+  // recognition rules, and so does the lexicon for each word.
+  const normalized = normalizeSourceItems(utterance, specWithModes, { captureTooling });
   onStage?.("normalization phases");
   const transcribed = transcribeText(normalized, {
     captureTooling,
+    ...(textModeSpans ? { textModeSpans } : {}),
     provenance,
     utterance,
     compiledSpec: spec,

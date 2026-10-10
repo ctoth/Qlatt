@@ -46,6 +46,13 @@ export interface ClauseOptions {
   mainSection: number;
   mainMode: number;
   /**
+   * The flag of each mode a mode command may turn on for the main pass, by
+   * the mode's word: the rules of the main pass are run in `mainMode` and
+   * the flags that are on (CMD/cm_text.c:989-1011, modeflag with
+   * MODE_CITATION). A mode not named here leaves the main pass as it is.
+   */
+  modeFlags?: Readonly<Record<string, number>>;
+  /**
    * Is this spelling in the dictionary: 0 no, 1 yes, 2 yes and marked as an
    * abbreviation (CMD/par_dict.c par_dict_find_word). Default: no.
    */
@@ -180,6 +187,8 @@ export function readClauses(
   const clauses: Clause[] = [];
   /** punct_mode as a rule mode: the one the text starts in, until a command changes it. */
   let punctuationMode = options.punctuationMode;
+  /** The flags of the modes a mode command has turned on (options.modeFlags). */
+  let modeFlagsOn = 0;
   /** clausebuf: the clause being gathered. */
   let buffer: number[] = [];
   /** Where the last word of the buffer starts (prevword). */
@@ -266,7 +275,7 @@ export function readClauses(
       read = end < 0 ? punctuated : punctuated.slice(0, end);
       const main = parser.rewrite(read, lookups(read), {
         language: options.language,
-        mode: options.mainMode,
+        mode: options.mainMode | modeFlagsOn,
         section: options.mainSection,
         partial: done === 2,
         onHit: options.onHit,
@@ -423,6 +432,25 @@ export function readClauses(
         if (index >= 0 && punctuationWords[index] !== PUNCTUATION_PASS) {
           punctuationMode = 1 << index;
         }
+      }
+      // The mode command turns a mode's flag on or off, or leaves it alone
+      // standing (CMD/cm_copt.c:2148-2250; LTS/ls_util.c:1197-1205): a mode
+      // word, then on, off or set. The clause before it has been finished in
+      // the modes as they were; the main pass of what follows runs in the
+      // new ones. A command the routine refuses changes nothing.
+      const modeOptions = table.commandTable?.options.mode_options ?? [];
+      const modeActions = ["on", "off", "set"];
+      for (const one of read) {
+        if (one.kind !== "command" || one.row.routine !== "cm_cmd_mode") continue;
+        const typed = one.words.filter((word) => word !== undefined);
+        const mode = modeOptions[optionIndex(modeOptions, typed[0])];
+        const action = modeOptions[optionIndex(modeOptions, typed[1])];
+        if (typed.length !== 2 || mode === undefined || action === undefined) continue;
+        if (modeActions.includes(mode) || !modeActions.includes(action)) continue;
+        const flag = options.modeFlags?.[mode] ?? 0;
+        if (action === "set") modeFlagsOn = flag;
+        else if (action === "on") modeFlagsOn |= flag;
+        else modeFlagsOn &= ~flag;
       }
       options.onCommand?.(body, clauses.length, read);
       state = "normal";

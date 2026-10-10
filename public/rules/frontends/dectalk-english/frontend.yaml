@@ -2516,6 +2516,9 @@ transcription:
     hyphenated:
       name: DECtalk's reading of a hyphenated word by its parts
       citation: "DECtalk 4.63 LTS/ls_task.c:4208-4435 ls_task_process_word (each part between hyphens looked up, then by rule or spelled; HYPHEN after a first part the dictionary has :4330 and after a part the rules read :4374)"
+    mode-character:
+      name: DECtalk's math table
+      citation: "DECtalk 4.63 LTS/ls_task.c:1949-1957 ls_task_math_mode (a word of one character, while the math mode is on), LTS/ls_math.c:82-104 ls_math_do_math, LTS/l_us_ma1.c math_table[] (the names), as modeCharacterNames in /rules/frontends/dectalk-english/lts-table.json"
   # The characters that end the stretch of text DECtalk parses at once when a
   # written word ends in one and a space follows: DECtalk 4.63
   # LTS/ls_task.c:362-368 (the text is handed on at a space after a

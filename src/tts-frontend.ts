@@ -882,7 +882,13 @@ function buildTextToKlattTrackDetailed(
     reason: `Resolved speaker profile ${Object.entries(resolvedSpeaker)
       .map(([name, value]) => `${name}=${value}`)
       .join(", ")}`,
-    citations: collectSpeakerProfileCitations(speakerProfile, speakerProfilePath),
+    citations: [
+      ...collectSpeakerProfileCitations(speakerProfile, speakerProfilePath),
+      // The voice file and its sources, when the voice sets profile fields.
+      ...(selectedVoice && Object.keys(selectedVoice.override).length > 0
+        ? selectedVoice.citations
+        : []),
+    ].filter((value, index, all) => all.indexOf(value) === index),
   });
   // What rules read as params.policy.voice: the selected voice's rule fields.
   const voiceRuleFields =
@@ -1408,6 +1414,11 @@ function buildTextToKlattTrackDetailed(
       ...speakerPolicy,
       f0: {
         base_hz: source.effectiveBaseF0Hz,
+        // The speaker's pitch span. A speaker profile that declares no
+        // f0_range_hz leaves the frontend's own policy.f0.range_hz.
+        ...(Number.isFinite(resolvedSpeaker.f0_range_hz)
+          ? { range_hz: resolvedSpeaker.f0_range_hz }
+          : {}),
         continuation_rise_hz: (readPolicyNumber(f0Policy.continuation_rise_hz) ?? 8) * f0Range,
         continuation_minor_rise_hz:
           (readPolicyNumber(f0Policy.continuation_minor_rise_hz) ?? 5) * f0Range,

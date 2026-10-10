@@ -53,29 +53,55 @@ describe("primed resources", () => {
     vi.unstubAllGlobals();
   });
 
-  /** A browser's two ways of reading a URL, counting the blocking one. */
-  function stubBrowser(files: Record<string, string>) {
+  type Answer = { status: number; contentType: string; body: string };
+  const NOT_FOUND: Answer = { status: 404, contentType: "text/html", body: "Not Found" };
+  /** What the Vite dev server answers for a path with no file behind it. */
+  const DEV_SERVER_FALLBACK: Answer = {
+    status: 200,
+    contentType: "text/html",
+    body: '<!doctype html>\n<html lang="en"></html>\n',
+  };
+
+  /**
+   * A browser's two ways of reading a URL, counting the blocking one. A string
+   * is a YAML file's text; a path that is not listed is answered 404.
+   */
+  function stubBrowser(files: Record<string, string | Answer>) {
     const blocking: string[] = [];
     const parallel: string[] = [];
+    const answerTo = (url: string): Answer => {
+      const file = files[url] ?? NOT_FOUND;
+      return typeof file === "string"
+        ? { status: 200, contentType: "text/yaml", body: file }
+        : file;
+    };
     class FakeRequest {
       status = 0;
       responseText = "";
       private url = "";
+      private contentType = "";
       open(_method: string, url: string) {
         this.url = url;
       }
       send() {
         blocking.push(this.url);
-        const text = files[this.url];
-        this.status = text === undefined ? 404 : 200;
-        this.responseText = text ?? "";
+        const answer = answerTo(this.url);
+        this.status = answer.status;
+        this.responseText = answer.body;
+        this.contentType = answer.contentType;
+      }
+      getResponseHeader(name: string) {
+        return name.toLowerCase() === "content-type" ? this.contentType : null;
       }
     }
     vi.stubGlobal("XMLHttpRequest", FakeRequest);
     vi.stubGlobal("fetch", async (url: string) => {
       parallel.push(url);
-      const text = files[url];
-      return { ok: text !== undefined, text: async () => text ?? "" };
+      const answer = answerTo(url);
+      return new Response(answer.body, {
+        status: answer.status,
+        headers: { "content-type": answer.contentType },
+      });
     });
     return { blocking, parallel };
   }
@@ -109,12 +135,12 @@ describe("primed resources", () => {
       "/fixture/a.yaml": "a: 1\n",
       "/fixture/b.yaml": "b: 2\n",
     });
-    const failed = await primeSyncResources([
+    const notPrimed = await primeSyncResources([
       "/fixture/a.yaml",
       "/fixture/b.yaml",
       "/fixture/missing.yaml",
     ]);
-    expect(failed).toEqual(["/fixture/missing.yaml"]);
+    expect(notPrimed).toEqual({ absent: ["/fixture/missing.yaml"], failed: [] });
     expect(parallel.sort()).toEqual([
       "/fixture/a.yaml",
       "/fixture/b.yaml",
@@ -128,8 +154,46 @@ describe("primed resources", () => {
     expect(takeSynchronousFetches()).toEqual([]);
     // The recorder still sees what was read: distinct paths, first-read order.
     expect(stop()).toEqual(["/fixture/a.yaml", "/fixture/b.yaml"]);
-    // A resource that could not be primed is still loaded the blocking way.
+    // The server said the third does not exist: it is not found, and not asked for again.
     expect(() => loadYamlSourceSync("/fixture/missing.yaml")).toThrow(/E_YAML_PATH_UNKNOWN/);
-    expect(blocking).toEqual(["/fixture/missing.yaml"]);
+    expect(blocking).toEqual([]);
+  });
+
+  it("priming does not keep a dev server's HTML fallback page as a file's text", async () => {
+    const { blocking, parallel } = stubBrowser({
+      "/fixture/a.yaml": "a: 1\n",
+      "/fixture/child/a.yaml": DEV_SERVER_FALLBACK,
+    });
+    expect(await primeSyncResources(["/fixture/a.yaml", "/fixture/child/a.yaml"])).toEqual({
+      absent: ["/fixture/child/a.yaml"],
+      failed: [],
+    });
+    expect(() => loadYamlSourceSync("/fixture/child/a.yaml")).toThrow(/E_YAML_PATH_UNKNOWN/);
+    await expect(loadYamlSource("/fixture/child/a.yaml")).rejects.toThrow(/E_YAML_PATH_UNKNOWN/);
+    // Neither loader asked again, and priming again reports it without a request.
+    expect(await primeSyncResources(["/fixture/child/a.yaml"])).toEqual({
+      absent: ["/fixture/child/a.yaml"],
+      failed: [],
+    });
+    expect(blocking).toEqual([]);
+    expect(parallel.sort()).toEqual(["/fixture/a.yaml", "/fixture/child/a.yaml"]);
+  });
+
+  it("a resource whose priming request failed is not absent: the loader asks for it", async () => {
+    const files: Record<string, string | Answer> = {
+      "/fixture/a.yaml": { status: 503, contentType: "text/plain", body: "" },
+    };
+    const { blocking } = stubBrowser(files);
+    expect(await primeSyncResources(["/fixture/a.yaml"])).toEqual({
+      absent: [],
+      failed: ["/fixture/a.yaml"],
+    });
+    expect(() => loadYamlSourceSync("/fixture/a.yaml")).toThrow(
+      "E_YAML_FETCH: '/fixture/a.yaml' request for '/fixture/a.yaml' failed (HTTP 503)",
+    );
+    // The server recovers: the file is read.
+    files["/fixture/a.yaml"] = "a: 1\n";
+    expect(loadYamlSourceSync("/fixture/a.yaml")).toBe("a: 1\n");
+    expect(blocking).toEqual(["/fixture/a.yaml", "/fixture/a.yaml"]);
   });
 });

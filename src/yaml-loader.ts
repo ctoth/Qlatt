@@ -5,8 +5,11 @@ import {
   readFileFromFsSync,
   resolveFileFromFsSync,
 } from "./path-utils";
+import { isAbsentResourceAnswer, requestFailureDetail, requestTextSync } from "./resource-answer";
 import {
+  isAbsentSyncResource,
   keepSyncResource,
+  noteAbsentSyncResource,
   noteSynchronousFetch,
   noteSyncResourceRequest,
   primedSyncResource,
@@ -42,15 +45,6 @@ function errorText(error: unknown): string {
 
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i;
 
-function readYamlSourceFromUrlSync(specPath: string): string | null {
-  if (typeof XMLHttpRequest !== "function") return null;
-  const request = new XMLHttpRequest();
-  request.open("GET", specPath, false);
-  request.send();
-  if (request.status < 200 || request.status >= 300) return null;
-  return typeof request.responseText === "string" ? request.responseText : null;
-}
-
 function parseYaml<T = unknown>(source: string, label: string): T {
   const parsed = loadYaml(source);
   if (parsed === null || parsed === undefined) {
@@ -59,6 +53,11 @@ function parseYaml<T = unknown>(source: string, label: string): T {
   return parsed as T;
 }
 
+/**
+ * Throws {@link YamlNotFoundError} when the resource does not exist, and a
+ * different error when it exists but could not be read or the request for it
+ * failed.
+ */
 export function loadYamlSourceSync(specPath: string): string {
   const normalizedPath = normalizePath(specPath);
   const attempts = [normalizedPath, specPath].filter(
@@ -75,13 +74,24 @@ export function loadYamlSourceSync(specPath: string): string {
   }
 
   for (const attempt of attempts) {
-    const fromUrl = readYamlSourceFromUrlSync(attempt);
-    if (typeof fromUrl === "string") {
-      noteSyncResourceRequest(specPath);
-      noteSynchronousFetch(specPath);
-      keepSyncResource(attempt, fromUrl);
-      return fromUrl;
+    // The server already said there is no such resource: no second request.
+    if (isAbsentSyncResource(attempt)) continue;
+    const answer = requestTextSync(attempt);
+    if (answer === null) break;
+    if (answer.kind === "absent") {
+      noteAbsentSyncResource(attempt);
+      continue;
     }
+    if (answer.kind === "failed") {
+      throw new Error(
+        `E_YAML_FETCH: '${specPath}' request for '${attempt}' failed${requestFailureDetail(answer.status, answer.cause)}`,
+        { cause: answer.cause },
+      );
+    }
+    noteSyncResourceRequest(specPath);
+    noteSynchronousFetch(specPath);
+    keepSyncResource(attempt, answer.text);
+    return answer.text;
   }
 
   for (const attempt of attempts) {
@@ -89,6 +99,10 @@ export function loadYamlSourceSync(specPath: string): string {
     if (typeof fromFs === "string") {
       noteSyncResourceRequest(specPath);
       return fromFs;
+    }
+    const existing = resolveFileFromFsSync(attempt);
+    if (existing !== null) {
+      throw new Error(`E_YAML_READ: '${specPath}' exists at '${existing}' but could not be read`);
     }
   }
 
@@ -129,6 +143,8 @@ export async function loadYamlSource(specPath: string): Promise<string> {
       // Under Node a path that is not a URL has no base to resolve against:
       // the filesystem probe above was the whole answer.
       if (isNodeRuntime() && !ABSOLUTE_URL.test(attempt)) continue;
+      // The server already said there is no such resource: no second request.
+      if (isAbsentSyncResource(attempt)) continue;
       let response: Response;
       try {
         response = await fetch(attempt);
@@ -140,17 +156,13 @@ export async function loadYamlSource(specPath: string): Promise<string> {
           { cause: error },
         );
       }
-      if (response.status === 404 || response.status === 410) continue;
+      // 404, 410, or the Vite dev server's 200 with index.html.
+      if (isAbsentResourceAnswer(response.status, response.headers.get("content-type"))) continue;
       if (!response.ok) {
         throw new Error(
           `E_YAML_FETCH: '${specPath}' request for '${attempt}' failed (HTTP ${response.status})`,
         );
       }
-      // The Vite dev server answers a path with no file behind it with
-      // 200 and index.html (its SPA fallback), so an HTML answer to a YAML
-      // request is also "no such resource". A YAML file is served as text/yaml.
-      const contentType = response.headers.get("content-type") ?? "";
-      if (contentType.toLowerCase().startsWith("text/html")) continue;
       return await response.text();
     }
   }

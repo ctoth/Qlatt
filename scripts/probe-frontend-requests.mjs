@@ -4,13 +4,19 @@
 // waits for its warm-up (test/harness/warmup.js: the resources of its manifest
 // are fetched, then one short utterance is compiled), and prints
 //   - the status of every request whose URL matches --match,
-//   - every request that failed or was answered with 400 or above,
+//   - every YAML or JSON request the server answered "no such file" (404, 410,
+//     or a 200 with an HTML page, which is what a dev server sends): a frontend
+//     that extends another asks for each include in its own directory first,
+//     so these are expected,
+//   - every other request that failed or was answered with 400 or above,
 //   - the warm-up report: resources primed, resources the manifest listed that
-//     could not be fetched, and resources read with a blocking request because
-//     the manifest did not list them.
+//     the server does not have or that could not be fetched, and resources
+//     read with a blocking request because the manifest did not list them.
 //
 // It shows whether a browser finds every document a frontend's inventory is
-// made of. Exits 1 when a request failed or a warm-up did not finish.
+// made of. Exits 1 when a request failed, a manifest lists a file the server
+// does not have, or a warm-up did not finish (a "no such file" answer taken
+// for the file's content shows up as that).
 //
 // Usage (dev server running, e.g. `npx vite --port 8137`):
 //   node scripts/probe-frontend-requests.mjs --url http://localhost:8137/ \
@@ -49,17 +55,23 @@ const browser = await chromium.launch({
 const page = await browser.newPage();
 const matched = [];
 const failed = [];
+const absent = [];
 const reports = new Map();
 page.on("response", (response) => {
   const path = new URL(response.url()).pathname;
-  if (match.test(path)) matched.push(`${response.status()} ${path}`);
-  if (response.status() >= 400) failed.push(`${response.status()} ${path}`);
+  const status = response.status();
+  if (match.test(path)) matched.push(`${status} ${path}`);
   // A dev server answers a missing file with the page itself and status 200.
-  else if (
-    /\.(ya?ml|json|wasm)$/.test(path) &&
-    (response.headers()["content-type"] ?? "").includes("text/html")
+  const html = (response.headers()["content-type"] ?? "").includes("text/html");
+  if (
+    /\.(ya?ml|json)$/.test(path) &&
+    (status === 404 || status === 410 || (html && status < 300))
   ) {
-    failed.push(`${response.status()} ${path} (answered with an HTML page: no such file)`);
+    absent.push(`${status} ${path}${html ? " (an HTML page)" : ""}`);
+  } else if (status >= 400) {
+    failed.push(`${status} ${path}`);
+  } else if (/\.wasm$/.test(path) && html) {
+    failed.push(`${status} ${path} (answered with an HTML page: no such file)`);
   }
 });
 page.on("requestfailed", (request) => {
@@ -99,14 +111,16 @@ for (const frontendId of frontends) {
     continue;
   }
   console.log(
-    `${frontendId}: primed=${report.primed} failed=${JSON.stringify(report.failed)} unprimed=${JSON.stringify(report.unprimed)} configError=${JSON.stringify(report.configError)}`,
+    `${frontendId}: primed=${report.primed} absent=${JSON.stringify(report.absent)} failed=${JSON.stringify(report.failed)} unprimed=${JSON.stringify(report.unprimed)} configError=${JSON.stringify(report.configError)}`,
   );
-  if (report.failed.length > 0) ok = false;
+  if (report.failed.length > 0 || report.absent.length > 0) ok = false;
 }
 await browser.close();
 
 console.log(`requests matching ${match}:`);
 for (const line of matched) console.log(`  ${line}`);
+console.log(`requests answered "no such file": ${absent.length}`);
+for (const line of absent) console.log(`  ${line}`);
 console.log(`failed requests: ${failed.length}`);
 for (const line of failed) console.log(`  ${line}`);
 process.exit(ok && failed.length === 0 ? 0 : 1);

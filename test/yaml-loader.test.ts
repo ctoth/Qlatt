@@ -17,6 +17,30 @@ describe("loadYamlDocumentOrNull", () => {
   /** The loader as a browser runs it: no filesystem, every path answered by `answers`. */
   async function browserLoader(answers: Record<string, Answer>) {
     const requested: string[] = [];
+    const requestedSync: string[] = [];
+    const answerTo = (url: string): Answer =>
+      answers[url] ?? { status: 404, contentType: "text/html", body: "Not Found" };
+    class FakeRequest {
+      status = 0;
+      responseText = "";
+      private url = "";
+      private contentType: string | null = null;
+      open(_method: string, url: string) {
+        this.url = url;
+      }
+      send() {
+        requestedSync.push(this.url);
+        const answer = answerTo(this.url);
+        if (answer instanceof Error) throw answer;
+        this.status = answer.status;
+        this.responseText = answer.body;
+        this.contentType = answer.contentType;
+      }
+      getResponseHeader(name: string) {
+        return name.toLowerCase() === "content-type" ? this.contentType : null;
+      }
+    }
+    vi.stubGlobal("XMLHttpRequest", FakeRequest);
     vi.resetModules();
     vi.doMock("../src/path-utils", async (importOriginal) => ({
       ...(await importOriginal<typeof import("../src/path-utils")>()),
@@ -26,14 +50,24 @@ describe("loadYamlDocumentOrNull", () => {
     }));
     vi.stubGlobal("fetch", async (url: string) => {
       requested.push(url);
-      const answer = answers[url] ?? { status: 404, contentType: "text/html", body: "Not Found" };
+      const answer = answerTo(url);
       if (answer instanceof Error) throw answer;
       return new Response(answer.body, {
         status: answer.status,
         headers: { "content-type": answer.contentType },
       });
     });
-    return { requested, ...(await import("../src/yaml-loader")) };
+    return { requested, requestedSync, ...(await import("../src/yaml-loader")) };
+  }
+
+  /** What a synchronous load of `path` throws. */
+  function syncFailure(load: (path: string) => string, path: string): Error {
+    try {
+      load(path);
+    } catch (error) {
+      return error as Error;
+    }
+    throw new Error(`'${path}' loaded`);
   }
 
   it("is null when the server answers 404", async () => {
@@ -121,14 +155,67 @@ describe("loadYamlDocumentOrNull", () => {
     );
     const failed = await loadYamlSource("/experiments/child/registry.yaml").catch((error) => error);
     expect(isYamlNotFoundError(failed)).toBe(false);
-    // No XMLHttpRequest and no filesystem here: the synchronous loader finds nothing.
-    let fromSync: unknown;
-    try {
-      loadYamlSourceSync("/experiments/child/graph.yaml");
-    } catch (error) {
-      fromSync = error;
-    }
+    // The server answers 404 and there is no filesystem: the synchronous loader finds nothing.
+    const fromSync = syncFailure(loadYamlSourceSync, "/experiments/child/graph.yaml");
     expect(isYamlNotFoundError(fromSync)).toBe(true);
+  });
+
+  it("synchronous: a 200 with an HTML page is not found, and is not taken for the file's text", async () => {
+    const { isYamlNotFoundError, loadYamlSourceSync, requestedSync } = await browserLoader({
+      "/rules/child/policy.yaml": {
+        status: 200,
+        contentType: "text/html; charset=utf-8",
+        body: '<!doctype html>\n<html lang="en"></html>\n',
+      },
+    });
+    const missing = syncFailure(loadYamlSourceSync, "/rules/child/policy.yaml");
+    expect(isYamlNotFoundError(missing)).toBe(true);
+    expect(missing.message).toBe(
+      "E_YAML_PATH_UNKNOWN: '/rules/child/policy.yaml' could not be loaded",
+    );
+    // The answer is remembered: a second load does not ask again.
+    expect(isYamlNotFoundError(syncFailure(loadYamlSourceSync, "/rules/child/policy.yaml"))).toBe(
+      true,
+    );
+    expect(requestedSync).toEqual(["/rules/child/policy.yaml"]);
+  });
+
+  it("synchronous: returns the text the server serves as YAML", async () => {
+    const { loadYamlSourceSync } = await browserLoader({
+      "/rules/child/policy.yaml": { status: 200, contentType: "text/yaml", body: "a: 1\n" },
+    });
+    expect(loadYamlSourceSync("/rules/child/policy.yaml")).toBe("a: 1\n");
+  });
+
+  it("synchronous: throws on a server error instead of reading it as absence", async () => {
+    const { isYamlNotFoundError, loadYamlSourceSync } = await browserLoader({
+      "/rules/child/policy.yaml": { status: 500, contentType: "text/plain", body: "boom" },
+    });
+    const failed = syncFailure(loadYamlSourceSync, "/rules/child/policy.yaml");
+    expect(isYamlNotFoundError(failed)).toBe(false);
+    expect(failed.message).toBe(
+      "E_YAML_FETCH: '/rules/child/policy.yaml' request for '/rules/child/policy.yaml' failed (HTTP 500)",
+    );
+  });
+
+  it("synchronous: throws on a request that got no answer instead of reading it as absence", async () => {
+    const cause = new Error("Failed to execute 'send' on 'XMLHttpRequest'");
+    const { isYamlNotFoundError, loadYamlSourceSync } = await browserLoader({
+      "/rules/child/policy.yaml": cause,
+    });
+    const failed = syncFailure(loadYamlSourceSync, "/rules/child/policy.yaml");
+    expect(isYamlNotFoundError(failed)).toBe(false);
+    expect(failed.message).toBe(
+      "E_YAML_FETCH: '/rules/child/policy.yaml' request for '/rules/child/policy.yaml' failed: Failed to execute 'send' on 'XMLHttpRequest'",
+    );
+    expect(failed.cause).toBe(cause);
+  });
+
+  it("the asynchronous loader does not ask again for what the synchronous loader found absent", async () => {
+    const { loadYamlDocumentOrNull, loadYamlSourceSync, requested } = await browserLoader({});
+    syncFailure(loadYamlSourceSync, "/rules/child/policy.yaml");
+    expect(await loadYamlDocumentOrNull("/rules/child/policy.yaml")).toBeNull();
+    expect(requested).toEqual([]);
   });
 
   it("under Node, is null for a file that is not on disk and makes no request", async () => {

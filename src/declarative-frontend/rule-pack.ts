@@ -2,6 +2,7 @@ import { withVoiceRulePolicy } from "../dectalk-voice";
 import {
   cloneValue,
   isPlainObject,
+  isYamlNotFoundError,
   loadYamlSource,
   loadYamlSourceSync,
   parseYamlString,
@@ -425,8 +426,10 @@ function resolveIncludesSync(
       source = loadYamlSourceSync(absPath);
       shadowedPath = shadowedBaseIncludePath(absPath, fallback);
     } catch (error) {
+      // Only a file the child directory does not have is read from the base;
+      // one that is there but could not be loaded is an error.
       const altPath = fallbackIncludePath(absPath, fallback);
-      if (altPath === null) throw error;
+      if (altPath === null || !isYamlNotFoundError(error)) throw error;
       source = loadYamlSourceSync(altPath);
       absPath = altPath;
     }
@@ -534,8 +537,9 @@ async function resolveIncludesAsync(
       source = await loadYamlSource(absPath);
       shadowedPath = shadowedBaseIncludePath(absPath, fallback);
     } catch (error) {
+      // See resolveIncludesSync: fall back only when the file is absent.
       const altPath = fallbackIncludePath(absPath, fallback);
-      if (altPath === null) throw error;
+      if (altPath === null || !isYamlNotFoundError(error)) throw error;
       source = await loadYamlSource(altPath);
       absPath = altPath;
     }
@@ -627,6 +631,20 @@ export function listBundledRulepackPaths(): string[] {
   return [...known].sort();
 }
 
+/**
+ * The error for a rule pack that could not be loaded: "path unknown" when the
+ * file does not exist, and the loader's own error for anything else.
+ */
+function rulepackPathUnknown(specPath: string, cause: unknown): unknown {
+  if (!isYamlNotFoundError(cause)) return cause;
+  const known = listBundledRulepackPaths();
+  return new Error(
+    `E_RULESET_PATH_UNKNOWN: '${specPath}' could not be loaded` +
+      (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
+    { cause },
+  );
+}
+
 export function loadRulepackSpecFromPath(
   specPath: string = DEFAULT_RULEPACK_PATH,
 ): CompiledRulepack {
@@ -636,12 +654,8 @@ export function loadRulepackSpecFromPath(
   let source = "";
   try {
     source = loadYamlSourceSync(specPath);
-  } catch {
-    const known = listBundledRulepackPaths();
-    throw new Error(
-      `E_RULESET_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
-    );
+  } catch (cause) {
+    throw rulepackPathUnknown(specPath, cause);
   }
 
   // Resolve `extends` (cross-frontend inheritance) first, then resolve includes
@@ -719,12 +733,8 @@ export async function preloadRulepackSpecFromPath(
   let source = "";
   try {
     source = await loadYamlSource(specPath);
-  } catch {
-    const known = listBundledRulepackPaths();
-    throw new Error(
-      `E_RULESET_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
-    );
+  } catch (cause) {
+    throw rulepackPathUnknown(specPath, cause);
   }
 
   // See loadRulepackSpecFromPath: resolve `extends` then includes on the raw

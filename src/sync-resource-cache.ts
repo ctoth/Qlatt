@@ -19,8 +19,11 @@
  */
 
 import { normalizePath } from "./path-utils";
+import { isAbsentResourceAnswer } from "./resource-answer";
 
 const primed = new Map<string, string>();
+/** Paths and URLs the server said have no resource behind them. */
+const absent = new Set<string>();
 let recording: string[] | null = null;
 const fetchedSynchronously: string[] = [];
 
@@ -30,32 +33,65 @@ export function primedSyncResource(pathOrUrl: string): string | undefined {
 }
 
 /**
+ * True when the server has already said there is no resource at this path or
+ * URL ({@link isAbsentResourceAnswer}). A loader does not ask again.
+ */
+export function isAbsentSyncResource(pathOrUrl: string): boolean {
+  return absent.has(pathOrUrl);
+}
+
+/** Record that the server said there is no resource at this path or URL. */
+export function noteAbsentSyncResource(pathOrUrl: string): void {
+  absent.add(pathOrUrl);
+}
+
+export interface PrimeSyncResourcesResult {
+  /** Paths the server said do not exist. Nothing is kept as their text. */
+  absent: string[];
+  /** Paths whose request failed for any other reason. A loader asks again. */
+  failed: string[];
+}
+
+/**
  * Fetch resources in parallel and keep their text for the synchronous
  * loaders. `paths` are resource paths as the loaders are given them
- * (`/rules/frontends/...`). Returns the paths that could not be fetched; those
- * are simply not primed.
+ * (`/rules/frontends/...`). Returns the paths that were not primed: those the
+ * server said do not exist, which the loaders then treat as absent without
+ * asking again, and those whose request failed, which are loaded as before.
  */
-export async function primeSyncResources(paths: readonly string[]): Promise<string[]> {
-  const failed: string[] = [];
+export async function primeSyncResources(
+  paths: readonly string[],
+): Promise<PrimeSyncResourcesResult> {
+  const result: PrimeSyncResourcesResult = { absent: [], failed: [] };
   await Promise.all(
     paths.map(async (path) => {
       if (primed.has(path)) return;
+      if (absent.has(path)) {
+        result.absent.push(path);
+        return;
+      }
       const url = normalizePath(path);
       try {
         const response = await fetch(url);
+        if (isAbsentResourceAnswer(response.status, response.headers.get("content-type"))) {
+          absent.add(path);
+          absent.add(url);
+          result.absent.push(path);
+          return;
+        }
         if (!response.ok) {
-          failed.push(path);
+          result.failed.push(path);
           return;
         }
         const text = await response.text();
         primed.set(path, text);
         primed.set(url, text);
       } catch {
-        failed.push(path);
+        result.failed.push(path);
       }
     }),
   );
-  return failed;
+  return result;
 }
 
 /**
@@ -69,9 +105,10 @@ export function keepSyncResource(pathOrUrl: string, text: string): void {
   primed.set(pathOrUrl, text);
 }
 
-/** Forget every primed resource. */
+/** Forget every primed resource and every recorded absence. */
 export function clearPrimedSyncResources(): void {
   primed.clear();
+  absent.clear();
 }
 
 /**

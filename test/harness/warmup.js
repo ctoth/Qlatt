@@ -20,6 +20,7 @@
 // user has just chosen a frontend, not when they press Speak.
 
 import { preloadF0Filters } from "../../src/f0-filters-loader.ts";
+import { isAbsentResourceAnswer } from "../../src/resource-answer.ts";
 import { primeSyncResources, takeSynchronousFetches } from "../../src/sync-resource-cache.ts";
 import { loadNewRuntimeConfig } from "./experiment.js";
 import { state } from "./state.js";
@@ -40,14 +41,17 @@ async function warm(frontendId, loadRuntimeModule) {
     last = now;
   };
 
+  // No manifest: nothing is primed and the loaders read as before. A manifest
+  // that is there but could not be fetched or parsed fails the warm-up.
   let resources = [];
-  try {
-    const response = await fetch(`./rules/frontends/${frontendId}/resources.json`);
-    if (response.ok) resources = (await response.json()).resources ?? [];
-  } catch {
-    // No manifest: nothing is primed and the loaders read as before.
+  const manifestUrl = `./rules/frontends/${frontendId}/resources.json`;
+  const response = await fetch(manifestUrl);
+  if (!isAbsentResourceAnswer(response.status, response.headers.get("content-type"))) {
+    if (!response.ok) throw new Error(`${manifestUrl}: HTTP ${response.status}`);
+    resources = (await response.json()).resources ?? [];
   }
-  const failed = await primeSyncResources(resources);
+  // absent: listed, but the server has no such file. failed: the request failed.
+  const { absent, failed } = await primeSyncResources(resources);
   mark("prime");
 
   const { warmFrontend } = await loadRuntimeModule();
@@ -79,7 +83,8 @@ async function warm(frontendId, loadRuntimeModule) {
 
   const report = {
     frontendId,
-    primed: resources.length - failed.length,
+    primed: resources.length - failed.length - absent.length,
+    absent,
     failed,
     unprimed,
     configError,

@@ -810,10 +810,13 @@ export function runTextParser(
             continue;
           }
           if (mode === PUNCTUATION_PASS) {
-            notCarriedOut(
-              written,
-              row.name,
-              "in the mode pass DECtalk's text stage hands the characters on without reading clauses or running its rules, which is not ported: the mode stays",
+            record(
+              "text_parser_command",
+              `The command ${written} (punctuation) sets the punctuation mode to pass from here on: the characters go on to letter-to-sound as they come, with no clause read and no text rule run`,
+              [
+                "DECtalk 4.63 CMD/cm_copt.c:1249-1276 (cm_cmd_punct stores the mode)",
+                "DECtalk 4.63 CMD/cm_text.c:379-399 (in the mode pass the character is sent on and the clause reader returns)",
+              ],
             );
             continue;
           }

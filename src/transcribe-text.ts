@@ -544,10 +544,15 @@ function rewriteOrthographyTokens(
       if (typeof sourceText === "string" && typeof start === "number" && typeof end === "number") {
         if (!punctuation && end > start) {
           writtenHere = { textId: sourceTextId, start, end };
+          // Or from the place where that word token's text ends, with no
+          // white space between and no mark spoken between ("12%" read as
+          // a number and the sign's word: one item between white space).
           if (
             writtenBefore?.textId === sourceTextId &&
-            writtenBefore.start === start &&
-            writtenBefore.end === end
+            ((writtenBefore.start === start && writtenBefore.end === end) ||
+              // (A token's text may begin with the white space before its
+              // word: that is no such place.)
+              (writtenBefore.end === start && !/\s/.test(sourceText[start] ?? " ")))
           ) {
             continuesWritten.add(token.id);
           }

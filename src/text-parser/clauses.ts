@@ -91,6 +91,12 @@ export interface Clause {
    * the rules' output does not already end with one (:1207-1227).
    */
   end: number | null;
+  /**
+   * Not a clause: characters handed on one by one, as they came, while the
+   * punctuation mode was pass (CMD/cm_text.c:379-399). Nothing is taken from
+   * them or added to them on the way.
+   */
+  passed?: true;
 }
 
 const toBytes = (text: string): number[] => [...text].map((char) => char.charCodeAt(0) & 0xff);
@@ -99,7 +105,8 @@ const at = (bytes: readonly number[], index: number): number => bytes[index] ?? 
 
 /**
  * The punctuation mode in which the text stage does not read clauses at all
- * (CMD/C_US_CDE.H punct_options[], CMD/cm_text.c:379).
+ * (CMD/C_US_CDE.H punct_options[], CMD/cm_text.c:379): each character goes
+ * on to letter-to-sound as it comes.
  */
 export const PUNCTUATION_PASS = "pass";
 const TAB = 0x09;
@@ -198,6 +205,15 @@ export function readClauses(
   let lastChar = 0;
   let lastQuote = 0;
   let rolled = false;
+  /** punct_mode is pass: the characters are handed on as they come. */
+  let pass = false;
+  /** The characters handed on so since the last clause or bracket. */
+  let passed: number[] = [];
+  const flushPassed = (): void => {
+    if (passed.length === 0) return;
+    clauses.push({ text: fromBytes(passed), rolled: false, end: null, passed: true });
+    passed = [];
+  };
 
   /** cm_text_getclause: take `parseChar` into the clause; finish the clause when it ends. */
   const take = (): void => {
@@ -206,6 +222,14 @@ export function readClauses(
     // :358-370: a tab ends the clause unless white space came before it.
     if (parseChar === TAB) {
       parseChar = !isSpace(lastChar) || lastQuote !== 0 ? config.clauseEnd : SPACE;
+    }
+    // :379-399: in the mode pass the character goes on at once, a space for
+    // a NUL, an XON or the place of a command, and nothing below is done:
+    // no clause is gathered and no rule is run.
+    if (pass) {
+      if (parseChar === 0 || parseChar === XON || parseChar === COMMAND_FOLLOWS) parseChar = SPACE;
+      passed.push(parseChar);
+      return;
     }
     // :403-410: an empty line ends the clause.
     if (
@@ -371,6 +395,7 @@ export function readClauses(
     } else if (state === "phoneme") {
       if (parseChar === RIGHT_BRACKET) {
         const body = fromBytes(command);
+        flushPassed();
         options.onPhonemes?.(
           body,
           clauses.length,
@@ -421,17 +446,18 @@ export function readClauses(
       // The punctuation command sets the mode the clause reader and the
       // punctuation rules run in from here on (CMD/cm_copt.c:1249-1276: the
       // routine only stores it, so the clause being gathered is not ended
-      // and is read in the new mode when it ends). Not the mode "pass", in
-      // which DECtalk's text stage hands the characters on without this
-      // reader (CMD/cm_text.c:379): that path is not ported, and the mode
-      // stays.
+      // and is read in the new mode when it ends). In the mode "pass" the
+      // characters go on without this reader (CMD/cm_text.c:379) until
+      // another mode is set; the rules' mode is then that one.
       const punctuationWords = table.commandTable?.options.punct_options ?? [];
+      // What was handed on before the bracket stands before it.
+      flushPassed();
       for (const one of read) {
         if (one.kind !== "command" || one.row.routine !== "cm_cmd_punct") continue;
         const index = optionIndex(punctuationWords, one.words[0]);
-        if (index >= 0 && punctuationWords[index] !== PUNCTUATION_PASS) {
-          punctuationMode = 1 << index;
-        }
+        if (index < 0) continue;
+        pass = punctuationWords[index] === PUNCTUATION_PASS;
+        if (!pass) punctuationMode = 1 << index;
       }
       // The mode command turns a mode's flag on or off, or leaves it alone
       // standing (CMD/cm_copt.c:2148-2250; LTS/ls_util.c:1197-1205): a mode
@@ -458,6 +484,8 @@ export function readClauses(
       command.push(parseChar);
     }
   }
+  // Nothing of them is held back for more text, as an open clause is.
+  flushPassed();
   return clauses;
 }
 
@@ -476,6 +504,7 @@ export function clauseTexts(table: TextParserTable, clauses: readonly Clause[]):
   const isSpace = (char: string): boolean =>
     (config.marks[char.charCodeAt(0)] & config.spaceMark) !== 0;
   return clauses.map((clause) => {
+    if (clause.passed) return clause.text;
     let start = 0;
     while (start < clause.text.length && isSpace(clause.text[start])) start += 1;
     const body = [...clause.text.slice(start)]

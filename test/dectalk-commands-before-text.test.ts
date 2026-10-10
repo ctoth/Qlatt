@@ -66,9 +66,6 @@ const MODE =
 
 /** Not DECtalk's samples yet. */
 const NOT_EXACT: Readonly<Record<string, string>> = {
-  "bo-08":
-    "[:punct pass]: DECtalk's text stage hands the characters on without reading clauses " +
-    "(CMD/cm_text.c:379); not ported, the mode stays",
   "bo-11": `[:mode europe on]: ${MODE}`,
   "bo-14": `[:mode reading on]: ${MODE}`,
 };
@@ -195,15 +192,15 @@ describe("DECtalk's commands before any spoken text", () => {
     );
   });
 
-  it("takes the punctuation mode anywhere in a text, and not the mode pass", () => {
+  it("takes the punctuation mode anywhere in a text, the mode pass too", () => {
     const all = run("The tide went [:punct all] out (at noon).");
     expect(all.decisions.map((decision) => decision.type)).toEqual(["text_parser_command"]);
     expect(all.decisions[0]?.reason).toContain("punctuation mode to all");
+    // The mode pass: test/dectalk-punct-pass.test.ts.
     const pass = run("[:punct pass] The tide went out (at noon).");
-    expect(pass.decisions.map((decision) => decision.type)).toEqual([
-      "text_parser_command_not_carried_out",
-    ]);
-    expect(pass.warnings.map((event) => event.code)).toEqual(["W_TEXT_COMMAND_NOT_CARRIED_OUT"]);
+    expect(pass.decisions.map((decision) => decision.type)).toEqual(["text_parser_command"]);
+    expect(pass.decisions[0]?.reason).toContain("punctuation mode to pass");
+    expect(pass.warnings).toEqual([]);
   });
 
   it("keeps a decision and a diagnostic for each command it does not carry out", () => {

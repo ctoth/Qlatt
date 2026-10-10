@@ -305,6 +305,42 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/l_us_con.c:136 (")" is right-strippable and forces a break), LTS/ls_task.c:2303-2319 (stripping it sets the comma), 1547-1558 (the comma is sent, the white space after the word is skipped, and ls_task_do_right_punct reads the next character as the delimiter)'
+    # A parenthesis, an angle bracket or a curly brace on a word's edge: it
+    # is stripped from the word and forces a break, a comma before the word
+    # for an opening one and after the word for a closing one. DECtalk's
+    # text parser takes these marks away in its default mode, so they reach
+    # letter-to-sound when the parser hands the text on as written (its
+    # punctuation mode pass). Only between two words of a clause here, and
+    # only for a frontend whose policy asks for it
+    # (tn_recognition_policy.enclosing_marks: comma). Measured on say.exe in
+    # that mode: "See the (red) car." is S IY, DH AX, comma, R EH D, comma,
+    # K AA R; "The tide (at noon went out." has the one comma before AE T,
+    # "The tide at noon) went out." the one after N UW N; "See {red} and
+    # <blue> cars." has four commas.
+    # Not ported, measured: the opening mark on a clause's first word
+    # ("(Now) we left." begins with a comma's clause), a closing mark before
+    # a clause's own mark ("We left (now)." has the one period), and such a
+    # mark inside a word ("tide(at" is spelled, "left parenthesis" by name).
+    - id: tn_opening_mark_source
+      pattern: '(?<=[A-Za-z0-9]\s+)(?<open>[(<{]+)(?=[A-Za-z0-9])'
+      flags: ''
+      class: forced_comma
+      captures: {open: open}
+      when: "get(maps.tn_recognition_policy, 'enclosing_marks', 'dropped') == 'comma'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_con.c:135, 155 and the rows for "{" and "[" (left-strippable, forces a break), LTS/ls_task.c:2244-2275 (ls_task_strip_left_punctuation: such a mark sets the comma before the word)'
+    - id: tn_closing_mark_source
+      pattern: '(?<=[A-Za-z0-9])(?<close>[)>}]+)(?=\s+[A-Za-z0-9(<{])'
+      flags: ''
+      class: forced_comma
+      captures: {close: close}
+      when: "get(maps.tn_recognition_policy, 'enclosing_marks', 'dropped') == 'comma'"
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/l_us_con.c:136, 157 and the rows for "}" and "]" (right-strippable, forces a break), LTS/ls_task.c:2303-2319 (ls_task_strip_right_punctuation: such a mark sets the comma after the word)'
     # A period standing alone after white space or after the parser's
     # phonemic text (the parser's `Ph . D., ` and its pause before a
     # sentence's period, `4 <pause>. `): a word, the dictionary's "period",
@@ -504,6 +540,50 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:151-170 (each character by its name), INCLUDE/usa_type.tab (the row "Plus sign")'
+    # A word with a sign in it that letter-to-sound's last test does not let
+    # through (one of @ & = # $ * + %, with a letter or a digit, and periods
+    # among them): one word, which the frontend's lexicon spells, each sign
+    # by its name. DECtalk's text parser writes such signs apart or rewrites
+    # the word, so the word reaches letter-to-sound whole only when the
+    # parser hands the text on as it is written (its punctuation mode pass).
+    # Not a sum of money, a signed number, or a number with a percent sign,
+    # which the number routines read. Only for a frontend whose policy asks
+    # for it (tn_recognition_policy.sign_words: spelled). Measured on
+    # say.exe in that mode: "bob@example.com" is spelled whole, AE T and
+    # P IY R IY AX D among the letters; "a@b", "C++", "AT&T", "a=b",
+    # "Item#4" likewise; "#42" is "number sign four two" and "15$" "one five
+    # dollar".
+    - id: tn_sign_word_source
+      pattern: '(?<=^|\s)(?<word>(?=[A-Za-z0-9.]*[@&=#$*+%])(?=[@&=#$*+%.]*[A-Za-z0-9])[A-Za-z0-9@&=#$*+%](?:[A-Za-z0-9@&=#$*+%.]*[A-Za-z0-9@&=#$*+%])?)(?=[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: whole_word
+      captures: {word: word}
+      when: >-
+        get(maps.tn_recognition_policy, 'sign_words', 'split') == 'spelled'
+        && !matches(captures.word, '^[$+][0-9.]')
+        && !matches(captures.word, '^[0-9.]+%$')
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (ls_task_part_number: a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:151-170 (each character by its name), INCLUDE/usa_type.tab:92-127 (the names)'
+        - 'DECtalk 4.63 CMD/cm_text.c:379-399 (in the punctuation mode pass the text reaches letter-to-sound as written)'
+    # A percent sign right after a number: the dictionary's word for it,
+    # after the number. The number routine takes the sign with its number.
+    # Measured on say.exe in the mode pass: "12%" is "twelve percent" and
+    # "50.5%" "fifty point five percent". (Outside that mode the text parser
+    # writes the sign apart, "12 %", and tn_symbol_word_source reads it.)
+    - id: tn_number_percent_source
+      pattern: '(?<=[0-9])(?<word>%)(?=[.,;:!?]*(?:\s|$))'
+      flags: ''
+      class: symbol_word
+      captures: {word: word}
+      when: >-
+        get(maps.tn_recognition_policy, 'symbol_words', 'dropped') == 'dictionary'
+        && captures.word in get(maps, 'tn_symbol_words', {})
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:4001-4060 (a number with a percent sign after it: the number, then the sign''s word)'
     # Digits, a colon and one digit, once or more ("3:2", "10:1", "3:2:1";
     # not a clock time, whose minutes have two digits, and not the forms the
     # text parser writes apart, "100 : 1"): one word, spelled digit by digit
@@ -552,22 +632,35 @@ text_recognition:
     # not spoken and the word is not spelled ("What.!" is "what" and the
     # exclamation's clause end; both measured on say.exe).
     - id: tn_marked_word_source
-      pattern: '(?<=^|\s)(?<word>[A-Za-z]+)(?<inner>\?!?|!|,|\.)(?<last>[?!])(?=\s|$)'
+      pattern: '(?<=^|\s)(?<word>[A-Za-z]+)(?<inner>[?!]+|,|\.)(?<last>[?!,])(?=\s|$)'
       flags: ''
       class: marked_word
       captures: {word: word, inner: inner, last: last}
+      # Marks of one kind in a row, which DECtalk's text parser folds into
+      # one, reach letter-to-sound when the parser hands the text on as
+      # written (its punctuation mode pass), and are read the same way.
+      # Measured on say.exe in that mode: "No!!" is EH N, OW,
+      # EH K S K L AX M EY SH AX N, P OY N T and an exclamation's clause end,
+      # "No!!!" has the name twice, "Really??" ends in K W EH S CH AX N,
+      # M AA R K and a question's clause end, "So,," in K AA M AX and a
+      # comma. (Not ported: "What.." is spelled with one P IY R IY AX D.)
       when: >-
         get(maps.tn_recognition_policy, 'marked_words', 'words') == 'spelled'
-        && (captures.inner + captures.last) in ['?!', '!?', '?!?', '?!!', ',!', '.!']
+        && ((captures.inner + captures.last) in ['?!', '!?', '?!?', '?!!', ',!', '.!', ',,']
+            || (captures.last != ',' && matches(captures.inner, '^[?!]+$')))
       speak: current.text
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word with a character that is not a letter, a digit, a hyphen, a slash or an apostrophe is spelled), LTS/ls_spel.c:158-170 (each character by its name)'
-    # A hyphen that stands alone between two words, or two of them: a word of
-    # its own, which the frontend's dictionary names. Only for a frontend
-    # whose policy asks for it (tn_recognition_policy.lone_dash: word).
+    # A hyphen that stands alone between two words: a word of its own, which
+    # the frontend's dictionary names. Only for a frontend whose policy asks
+    # for it (tn_recognition_policy.lone_dash: word). Two or more hyphens
+    # standing alone are no word of the dictionary's, and every one of them
+    # is stripped: nothing is spoken. Measured on say.exe in the punctuation
+    # mode pass, where they reach letter-to-sound: "One - two." has D AE SH,
+    # "She waited -- and left." and "One --- two." have nothing there.
     - id: tn_lone_dash_source
-      pattern: '(?<=^|\s)(?<dash>--?)(?=\s)'
+      pattern: '(?<=^|\s)(?<dash>-)(?=\s)'
       flags: ''
       class: lone_dash
       captures: {dash: dash}
@@ -607,7 +700,14 @@ text_recognition:
       flags: ''
       class: date
       captures: {month: month, day: day, year: year}
-      when: 'double(captures.month) >= 1.0 && double(captures.month) <= 12.0 && double(captures.day) >= 1.0 && double(captures.day) <= 31.0'
+      # Not for a frontend whose policy says such a word is no date to it
+      # (tn_recognition_policy.slash_dates: part_number): DECtalk's text
+      # parser rewrites the date before letter-to-sound sees it, and in its
+      # punctuation mode pass, where it does not, "3/4/2024" is a part
+      # number, "three slash four slash twenty twenty four" on say.exe.
+      when: >-
+        get(maps.tn_recognition_policy, 'slash_dates', 'date') == 'date'
+        && double(captures.month) >= 1.0 && double(captures.month) <= 12.0 && double(captures.day) >= 1.0 && double(captures.day) <= 31.0
       speak: current.text
       vocabulary_keys: '[]'
       citations: ['Ebden & Sproat 2015; legacy Qlatt month/day bounds, not calendar validation']

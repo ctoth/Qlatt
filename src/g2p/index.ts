@@ -415,7 +415,24 @@ export function pronounce(
     (/^[a-z0-9_]*_[a-z0-9_]*$/.test(lowerWord) ||
       /^[0-9]+'[0-9]+$/.test(lowerWord) ||
       /^[a-z0-9_]+(?:\+[a-z0-9_]+)+$/.test(lowerWord) ||
-      /^[0-9]+(?::[0-9])+$/.test(lowerWord)) &&
+      /^[0-9]+(?::[0-9])+$/.test(lowerWord) ||
+      // And for a word with any other sign the part-number test does not
+      // let through, which reaches letter-to-sound when the text parser
+      // hands the text on as written (the punctuation mode pass): a letter
+      // or a digit and one of @ & = # $ * + %, with periods among them. A
+      // number that ends in a percent sign is the number routine's, not
+      // this (LTS/ls_task.c:4001-4060). Measured on say.exe: "a@b" is EY,
+      // AE T, B IY; "C++" S IY, P L AH S, P L AH S; "AT&T" EY, T IY,
+      // AE N D, T IY; "a=b" EY, IY K W EL Z, B IY; "#42" N AH M B RR, S AY N,
+      // F OR, T UW; "15$" W AH N, F AY V, D AA L RR; "bob@example.com" is
+      // spelled whole, its period by name.
+      (/[@&=#$*+%]/.test(lowerWord) &&
+        /^[a-z0-9@&=#$*+%.]+$/.test(lowerWord) &&
+        /[a-z0-9]/.test(lowerWord) &&
+        !/^[0-9.,]+%$/.test(lowerWord) &&
+        // Nor a sum of money or a signed number, which the money and sign
+        // routines read first (LTS/ls_task.c:3181-3476, LTS/l_us_pr1.c:80-110).
+        !/^[$+][0-9.]/.test(lowerWord))) &&
     !dictLookup(lowerWord)
   ) {
     const letterPhones = table.letterPhones;
@@ -424,9 +441,9 @@ export function pronounce(
     const parts = [...lowerWord].flatMap((char) =>
       /[0-9]/.test(char)
         ? numberWords(units[Number(char)] as readonly number[], table)
-        : ["_", "'", "+", ":"].includes(char)
-          ? (characterNames[char] ?? []).map((word) => ({ phonemes: [...word] }))
-          : [{ phonemes: [...(letterPhones[char] ?? [])] }],
+        : /[a-z]/.test(char)
+          ? [{ phonemes: [...(letterPhones[char] ?? [])] }]
+          : (characterNames[char] ?? []).map((word) => ({ phonemes: [...word] })),
     );
     if (parts.length > 0 && parts.every((part) => part.phonemes.length > 0)) {
       return {

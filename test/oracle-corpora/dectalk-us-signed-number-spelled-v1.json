@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-signed-number-spelled-v1",
+  "description": "Plain text, no mode on: a word with a minus or a plus sign written on digits that have a comma or a period in them and are no number the number reader takes (a comma with fewer or more than three digits after it, two periods), beside the same sign on a number it does take; with a dollar sign after the sign; at the start and at the end of a sentence; and one such word in the europe mode, where the marks are the other way round. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "sn-01", "text": "The lake froze at -4,5 last night.", "group": "minus" },
+    { "id": "sn-02", "text": "The lake froze at -4.5 last night.", "group": "minus-number" },
+    { "id": "sn-03", "text": "It dropped by -12,75 points.", "group": "minus" },
+    { "id": "sn-04", "text": "It dropped by -2,750 points.", "group": "minus-number" },
+    { "id": "sn-05", "text": "They gained +6,5 on the day.", "group": "plus" },
+    { "id": "sn-06", "text": "They gained +6.5 on the day.", "group": "plus-number" },
+    { "id": "sn-07", "text": "Set it to -1.2.3 and wait.", "group": "minus" },
+    { "id": "sn-08", "text": "The bill shows -$8,5 today.", "group": "money" },
+    { "id": "sn-09", "text": "-7,5 was the lowest.", "group": "place" },
+    { "id": "sn-10", "text": "The lowest was -7,5.", "group": "place" },
+    { "id": "sn-11", "text": "Read -9,25, then stop.", "group": "place" },
+    { "id": "sn-12", "text": "[:mode europe on] The lake froze at -4.5 last night.", "group": "europe" }
+  ]
+}

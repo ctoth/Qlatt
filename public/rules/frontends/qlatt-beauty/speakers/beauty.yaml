@@ -1,0 +1,20 @@
+# The default voice of the qlatt-beauty frontend: an entry of its `speakers:`
+# registry (frontend.yaml). Its fields that are speaker-profile fields
+# (/rules/policy/speaker-profile.yaml) set the speaker profile.
+#
+# base_f0_hz: the floor Fr of the speaker's range, the anchor the prosody rules
+# read as params.policy.f0.base_hz. The span (f0_range_hz, read as
+# params.policy.f0.range_hz) opens the range up from that floor (Ladd 2008:
+# raising the voice expands span up from a ~constant floor). Top of range
+# (H% ceiling) = base + range; L% = floor.
+citations:
+  # base_f0_hz
+  - "Pierrehumbert 1980 (female baseline ~150-200 Hz)"
+  - "Ladd 2008 Ch.5 (floor Fr is the speaker anchor; level set by sex/register)"
+  - "O'Shaughnessy 1976 (female floor 150-200 Hz)"
+  # f0_range_hz
+  - "Pierrehumbert 1980 (female range wider in Hz than male; top ~290 Hz over ~188 Hz floor)"
+  - "Ladd 2008 Ch.5 (span = width of range, independent of level; female span ~1.5x male in Hz)"
+name: Beauty
+base_f0_hz: 138
+f0_range_hz: 95

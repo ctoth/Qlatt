@@ -8,11 +8,13 @@
 # beauty different from english:
 #   - its own segment inventory (inventory_path)
 #   - its own pipeline.yaml (adds the voice-quality phase rules to `formant`)
-#   - its own phases/prosody.yaml (Pierrehumbert intonation, female register)
+#   - its own phases/prosody.yaml (Pierrehumbert intonation)
 #   - its own phases/voice-quality.yaml (pulled in by pipeline.yaml)
-#   - the policy.f0 delta below (female floor/range, intrinsic pitch, sagging
-#     transitions, question rise, final lowering) and the output columns delta
-#     (adds GO, DI).
+#   - its `speakers:` registry: the voices of this frontend. The default voice
+#     (speakers/beauty.yaml) gives the pitch level and span the prosody rules
+#     read as params.policy.f0.base_hz and params.policy.f0.range_hz.
+#   - the policy.f0 delta below (intrinsic pitch, sagging transitions,
+#     question rise, final lowering) and the output columns delta (adds GO, DI).
 #
 # Everything NOT declared here is inherited from qlatt-english. Includes are
 # resolved against beauty's directory first and fall back to qlatt-english's
@@ -36,88 +38,24 @@ include:
   - phases/duration.yaml
   - phases/formant.yaml
   - phases/prosody.yaml
+# The voices of this frontend: each entry of `voices` is a file of `dir` whose
+# numeric fields that are speaker-profile fields
+# (/rules/policy/speaker-profile.yaml) set the speaker profile; a request's
+# own values come before the voice's.
+speakers:
+  dir: /rules/frontends/qlatt-beauty/speakers
+  default: beauty
+  voices:
+    - beauty
 parameters:
   policy:
     f0:
-      # --- Pitch Range Model (Pierrehumbert 1980, Ladd 2008) ---
-      # NOTE: `base_hz` is OVERRIDDEN at runtime by the resolved speaker profile's
-      # base_f0_hz (src/tts-frontend.ts injects policy.f0.base_hz = effectiveBaseF0
-      # into the prosody phase). Editing base_hz here therefore does NOT move the
-      # melody. The shared speaker-profile.yaml is owned elsewhere, so the FEMALE
-      # floor for this frontend's prosody rules is carried by `female_base_hz`
-      # below, which the prosody rules reference directly and which the runtime
-      # does NOT override. (base_hz is kept only as a documented fallback.)
-      base_hz:
-        value: 110
-        citations:
-          - "O'Shaughnessy 1976"
-          - "Pierrehumbert 1980"
-          - "Engineering note: runtime-overridden by speaker profile; see female_base_hz"
-      # FEMALE floor Fr. Span (range_hz) opens the range UP from this floor (Ladd
-      # 2008: raising the voice expands span up from a ~constant floor). Top of
-      # range (H% ceiling) = female_base + range; H* peak (0.85 frac); L% = floor.
-      female_base_hz:
-        value: 138
-        citations:
-          - "Pierrehumbert 1980 (female baseline ~150-200 Hz)"
-          - "Ladd 2008 Ch.5 (floor Fr is the speaker anchor; level set by sex/register)"
-          - "O'Shaughnessy 1976 (female floor 150-200 Hz)"
-      range_hz:
-        value: 95
-        citations:
-          - "Pierrehumbert 1980 (female range wider in Hz than male; top ~290 Hz over ~188 Hz floor)"
-          - "Ladd 2008 Ch.5 (span = width of range, independent of level; female span ~1.5x male in Hz)"
-      # --- Accent targets (fraction of range) ---
-      h_star_height:
-        value: 0.85
-        citations:
-          - "Pierrehumbert 1980 (H* target near top of range)"
-          - Ladd 2008
-      l_star_height:
-        value: 0.15
-        citations:
-          - "Pierrehumbert 1980 (L* target near bottom of range)"
-      # --- Downstep ---
-      downstep_k:
-        value: 0.6
-        citations:
-          - "Pierrehumbert 1980 (k ≈ 0.60)"
-          - "Ladd 2008 (confirmed cross-linguistically)"
-      downstep_floor_fraction:
-        value: 0.25
-        citations:
-          - "Engineering estimate: prevents F0 collapse on long sentences"
-          - "Derived from Pierrehumbert 1980 exponential floor behavior"
-      # --- Boundary tones (fraction of range) ---
-      boundary_l_pct_fraction:
-        value: 0.0
-        citations:
-          - "Pierrehumbert 1980 Rule 6: L% = 0 (on baseline)"
-      boundary_h_pct_fraction:
-        value: 0.8
-        citations:
-          - "Pierrehumbert 1980 (H% near top of range)"
-      upstep_factor:
-        value: 0.2
-        citations:
-          - "Pierrehumbert 1980 Rule 9 / upstep formula (a ≈ 0.2)"
-          - "Ladd 2008 Ch.3 (H% final rise modeled as local upstep)"
-      # --- Final lowering ---
-      final_lowering_factor:
-        value: 0.85
-        citations:
-          - "Ladd 2008 pp.79-80 (final accent lower than downstep predicts)"
-          - "Pierrehumbert 1980 (final lowering as separate effect)"
-      # --- Microprosodic (segmental, kept from O'Shaughnessy 1976) ---
-      voiceless_onset_raise:
-        value: 1.08
-        citations:
-          - "Hombert 1979 (~8% measured perturbation after voiceless onset)"
-          - "O'Shaughnessy 1976 (synthesis rule: +20% F0 after voiceless onset)"
-      voiced_onset_lower:
-        value: 0.95
-        citations:
-          - O'Shaughnessy 1976
+      # The pitch level and span (base_hz, range_hz) are the speaker's: the
+      # runtime gives the prosody phase the resolved speaker profile's
+      # base_f0_hz and f0_range_hz, which this frontend's default voice sets
+      # (speakers/beauty.yaml). The accent, downstep, boundary-tone, onset and
+      # continuation-rise leaves are qlatt-english's, inherited. The leaves
+      # below are the ones only this frontend's prosody rules read.
       # --- Intrinsic vowel pitch (segmental micro-prosody, the aliveness overlay) ---
       # High vowels (/iy/,/ih/,/uw/,/uh/) carry intrinsically higher F0 than low
       # vowels (/aa/,/ae/,/ah/). Ladd 1985 used +0.5 st for /i/, -1.0 st for /a/.
@@ -173,16 +111,6 @@ parameters:
           - "Pierrehumbert 1980 (H%/H- yes-no question rise to near top of range)"
           - "Ladd 2008 Ch.4 (uptalk/question final rise realized on the final sonorant)"
           - "O'Shaughnessy 1976 (question endpoint 170-190 Hz male; scales up for female)"
-      # --- Continuation rise (kept for intermediate phrase boundaries) ---
-      continuation_rise_hz:
-        value: 8
-        citations:
-          - O'Shaughnessy 1976
-      continuation_minor_rise_hz:
-        value: 5
-        citations:
-          - O'Shaughnessy 1976
-          - "Engineering estimate: semicolon/colon continuation rise is milder than comma rise"
 output:
   lowering:
     id: qlatt-beauty-track-lowering

@@ -7,6 +7,7 @@
     "/rules/frontends/qlatt-beauty/phases/prosody.yaml",
     "/rules/frontends/qlatt-beauty/phases/voice-quality.yaml",
     "/rules/frontends/qlatt-beauty/pipeline.yaml",
+    "/rules/frontends/qlatt-beauty/speakers/beauty.yaml",
     "/rules/frontends/qlatt-english/frontend.yaml",
     "/rules/frontends/qlatt-english/lts-rules.yaml",
     "/rules/frontends/qlatt-english/morphology.yaml",

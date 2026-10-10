@@ -280,7 +280,7 @@ describe("tone association in the production frontend", () => {
   });
 
   it("keeps beauty accent eligibility and DECtalk's own intonation contract", () => {
-    const beauty = textToKlattTrackDetailed("The cat sat.", 110, 30, {
+    const beauty = textToKlattTrackDetailed("The cat sat.", undefined, 30, {
       frontendId: "qlatt-beauty",
     }).utterance;
     const tones = beauty.getRelation("Tone")?.listItems() ?? [];

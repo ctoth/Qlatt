@@ -141,7 +141,12 @@ describe("prosody acoustic eligibility", () => {
       // voice-specific rise. The separate selector test retains a DECtalk control.
       const results = ["The cat sat.", "Will the cat sit?"].map((text) => {
         const provenance = createProvenanceCollector();
-        const { utterance } = textToKlattTrackDetailed(text, 110, 30, { frontendId, provenance });
+        // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+        const baseF0 = frontendId === "qlatt-beauty" ? undefined : 110;
+        const { utterance } = textToKlattTrackDetailed(text, baseF0, 30, {
+          frontendId,
+          provenance,
+        });
         const raw = eligibilityDocument(frontendId);
         const macro = readDocument("qlatt-english/frontend.yaml").functions!.has_voiced_formants;
         for (const record of provenance.getDecisions()) {

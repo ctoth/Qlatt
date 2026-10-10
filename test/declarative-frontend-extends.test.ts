@@ -10,14 +10,16 @@ import {
   preloadRulepackSpecFromPath,
   rulepackMapOrigins,
 } from "../src/declarative-frontend/rule-pack";
+import { getVoiceRegistry, resolveVoice } from "../src/dectalk-voice";
 
 interface PolicyLeaf {
   value: number;
 }
 
 interface F0Policy {
+  base_hz: PolicyLeaf;
   range_hz: PolicyLeaf;
-  female_base_hz: PolicyLeaf;
+  female_base_hz?: PolicyLeaf;
   sag_depth_fraction: PolicyLeaf;
   question_rise_fraction: PolicyLeaf;
   downstep_k: unknown;
@@ -96,17 +98,27 @@ describe("declarative frontend extends (qlatt-beauty ← qlatt-english)", () => 
 
   // ---- OVERRIDE PRECEDENCE (child wins) ----
 
-  it("overrides the f0 pitch-range delta while merging onto the base f0 block", () => {
-    // Overridden leaves:
-    expect(beauty.parameters.policy.f0.range_hz.value).toBe(95);
-    expect(english.parameters.policy.f0.range_hz.value).toBe(80);
+  it("adds its own f0 leaves onto the inherited base f0 block", () => {
     // Child-only leaves added onto the inherited f0 block:
-    expect(beauty.parameters.policy.f0.female_base_hz.value).toBe(138);
     expect(beauty.parameters.policy.f0.sag_depth_fraction.value).toBe(0.35);
     expect(beauty.parameters.policy.f0.question_rise_fraction.value).toBe(0.9);
-    expect(english.parameters.policy.f0.female_base_hz).toBeUndefined();
-    // Inherited f0 leaf the child does not touch:
+    expect((english.parameters.policy.f0 as Partial<F0Policy>).sag_depth_fraction).toBeUndefined();
+    // Inherited f0 leaves the child does not touch:
     expect(beauty.parameters.policy.f0.downstep_k).toEqual(english.parameters.policy.f0.downstep_k);
+    // The pitch level and span are the speaker's, not a frontend override:
+    // beauty inherits the base's leaves and its default voice sets the values
+    // (public/rules/frontends/qlatt-beauty/speakers/beauty.yaml).
+    expect(beauty.parameters.policy.f0.base_hz).toEqual(english.parameters.policy.f0.base_hz);
+    expect(beauty.parameters.policy.f0.range_hz).toEqual(english.parameters.policy.f0.range_hz);
+    expect(beauty.parameters.policy.f0.female_base_hz).toBeUndefined();
+    const voices = getVoiceRegistry(beauty);
+    expect(voices?.default).toBe("beauty");
+    expect(getVoiceRegistry(english)).toBeNull();
+    if (!voices) throw new Error("qlatt-beauty has no voice registry");
+    expect(resolveVoice(voices, voices.default).override).toEqual({
+      base_f0_hz: 138,
+      f0_range_hz: 95,
+    });
   });
 
   it("overrides the output lowering id and columns", () => {

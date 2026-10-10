@@ -132,6 +132,10 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
   }
   MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(root), ...MAP_ORIGINS.get(child) });
   RULE_ORIGINS.set(merged, { ...RULE_ORIGINS.get(root), ...RULE_ORIGINS.get(child) });
+  INHERITABLE_SHADOWED_RULES.set(merged, {
+    ...INHERITABLE_SHADOWED_RULES.get(root),
+    ...INHERITABLE_SHADOWED_RULES.get(child),
+  });
   // Merge keyed dictionaries (error on duplicate).
   // Chunk 3: `string_sets` and `maps` are pipeline-level reusable literal-data
   // blocks; merge them the same way as predicates so a child include can
@@ -237,9 +241,11 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
 // the base's own `include:` list, e.g. both frontends' pipeline.yaml) inherits
 // that base file's INHERITED_SHADOWED_FILE_KEYS dictionaries key-wise: an entry
 // the child declares replaces the base's entry of that name whole, and every
-// other base entry is inherited. Everything else in a shadowing file (rules,
-// phases, include, string_sets, …) is still the child's alone, and the base
-// file's own nested includes are not followed.
+// other base entry is inherited. It also inherits the base file's rules that
+// the child frontend runs but does not define (see INHERITED_SHADOWED_FILE_KEYS).
+// Everything else in a shadowing file (phases, include, string_sets, …) is
+// still the child's alone, and the base file's own nested includes are not
+// followed.
 
 /** Directory portion of a "/"-separated resource path. */
 function dirOfPath(path: string): string {
@@ -250,12 +256,56 @@ function dirOfPath(path: string): string {
  * Keyed sections a child file inherits from the base include it shadows.
  * `string_sets` is not among them: inheriting it would hand an extending
  * frontend every base set, and a child has no way to decline one.
+ *
+ * `rules` is inherited by a narrower test, for the same reason: a shadowing
+ * file inherits a rule of the base file only when no file of the child
+ * frontend defines a rule of that name AND one of the child frontend's phases
+ * names it. A base rule the child does not run stays out of its compiled
+ * rulepack, so leaving a rule out of every phase is how a child declines it;
+ * a rule the child defines anywhere replaces the base's whole. The phase lists
+ * are only complete once every include is resolved, so the base file's rules
+ * are carried as candidates (INHERITABLE_SHADOWED_RULES) and
+ * inheritPhasedShadowedRules settles them then. An inherited rule's origin is
+ * the base file its body was read from.
  */
 const INHERITED_SHADOWED_FILE_KEYS = ["predicates", "maps", "tags", "relations"] as const;
+
+/** A base file's rule that a shadowing child file left undefined. */
+type InheritableRule = Readonly<{ rule: unknown; origin: string }>;
+/** Rule name -> the shadowed base file's rule, until the phases settle it. */
+const INHERITABLE_SHADOWED_RULES = new WeakMap<object, Readonly<Record<string, InheritableRule>>>();
+
+/**
+ * Add to a fully include-resolved document each candidate rule of a shadowed
+ * base file that the document does not define and one of its phases names.
+ */
+function inheritPhasedShadowedRules(resolved: PlainObject): void {
+  const candidates = INHERITABLE_SHADOWED_RULES.get(resolved);
+  if (!candidates) return;
+  const phased = new Set<unknown>();
+  for (const phase of Array.isArray(resolved.phases) ? resolved.phases : []) {
+    if (!isPlainObject(phase) || !Array.isArray(phase.rules)) continue;
+    for (const name of phase.rules) phased.add(name);
+  }
+  const defined = isPlainObject(resolved.rules) ? resolved.rules : {};
+  const inherited = Object.entries(candidates).filter(
+    ([name]) => !Object.hasOwn(defined, name) && phased.has(name),
+  );
+  if (inherited.length === 0) return;
+  resolved.rules = {
+    ...defined,
+    ...Object.fromEntries(inherited.map(([name, candidate]) => [name, candidate.rule])),
+  };
+  RULE_ORIGINS.set(resolved, {
+    ...RULE_ORIGINS.get(resolved),
+    ...Object.fromEntries(inherited.map(([name, candidate]) => [name, candidate.origin])),
+  });
+}
 
 /**
  * Lay a child file's INHERITED_SHADOWED_FILE_KEYS over the base file it
  * shadows: per section, base entries first, child entries replacing by name.
+ * The base file's rules become candidates for inheritPhasedShadowedRules.
  */
 function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObject): PlainObject {
   const merged: PlainObject = { ...childFile };
@@ -270,6 +320,16 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
   }
   MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(baseFile), ...MAP_ORIGINS.get(childFile) });
   RULE_ORIGINS.set(merged, RULE_ORIGINS.get(childFile) ?? {});
+  const baseOrigins = RULE_ORIGINS.get(baseFile) ?? {};
+  INHERITABLE_SHADOWED_RULES.set(
+    merged,
+    Object.fromEntries(
+      Object.entries(isPlainObject(baseFile.rules) ? baseFile.rules : {}).map(([name, rule]) => [
+        name,
+        { rule: cloneValue(rule), origin: baseOrigins[name] as string },
+      ]),
+    ),
+  );
   return merged;
 }
 
@@ -594,6 +654,7 @@ export function loadRulepackSpecFromPath(
     specPath,
   );
   const merged = resolveIncludesSync(rootDoc, specPath, undefined, fallback);
+  inheritPhasedShadowedRules(merged);
   if (typeof merged.accent_policy_path === "string") {
     attachAccentPolicy(
       merged,
@@ -673,6 +734,7 @@ export async function preloadRulepackSpecFromPath(
     specPath,
   );
   const merged = await resolveIncludesAsync(rootDoc, specPath, undefined, fallback);
+  inheritPhasedShadowedRules(merged);
   if (typeof merged.accent_policy_path === "string") {
     attachAccentPolicy(
       merged,

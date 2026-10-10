@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-first-word-after-command-v1",
+  "description": "The first word after a clause that a command inside the text ended, with no sentence mark written there: one of the auxiliaries that are stressed as a sentence's first word, and a question word, whose sentence has its question mark sent as a period; after a rate, a voice, a definition, a pause and a mode command, with a sentence mark written before the command for comparison, and in the spelling mode. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "fw-01", "text": "The old gate [:rate 200] is shut now.", "group": "auxiliary" },
+    { "id": "fw-02", "text": "The old gate [:nb] was shut then.", "group": "auxiliary" },
+    { "id": "fw-03", "text": "Both doors [:dv ap 180] were open all day.", "group": "auxiliary" },
+    { "id": "fw-04", "text": "The boys [:comma 100] had gone home, and so had we.", "group": "auxiliary" },
+    { "id": "fw-05", "text": "The rain [:mode math on] will stop soon.", "group": "auxiliary" },
+    { "id": "fw-06", "text": "The old gate. [:rate 200] Is it shut now?", "group": "auxiliary" },
+    { "id": "fw-07", "text": "They asked us [:rate 200] where is the key?", "group": "question-word" },
+    { "id": "fw-08", "text": "Where [:rate 200] is the key?", "group": "question-word" },
+    { "id": "fw-09", "text": "Is the gate [:nh] where it was?", "group": "question-word" },
+    { "id": "fw-10", "text": "The gate [:mode spell on] is [:mode spell off] is shut.", "group": "spelling" },
+    { "id": "fw-11", "text": "[:mode spell on] The gate [:rate 200] was shut.", "group": "spelling" },
+    { "id": "fw-12", "text": "[:mode spell on] We ask [:rate 200] who is it?", "group": "spelling" }
+  ]
+}

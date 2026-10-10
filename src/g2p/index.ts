@@ -535,10 +535,16 @@ export function pronounce(
   // Measured on say.exe: "2,5" is "two comma five"; with the europe mode on
   // "4.5" is "four period five", "$7.25" "dollar seven period two five", and
   // ".000" after "1.250" "period zero zero zero".
+  // A sign written on such a word is spelled with it, by its own name: the
+  // number rules take the sign off only for a word they then read
+  // (LTS/ls_task.c:3148-3215). Measured on say.exe
+  // (test/oracle-corpora/dectalk-us-signed-number-spelled-v1.json): "-4,5" is
+  // "dash four comma five", "+6,5" "plus six comma five", "-$8,5" "dash
+  // dollar eight comma five"; "-4.5" is "minus four point five".
   if (
     table?.numberPhones &&
     table.characterNames &&
-    /^\$?[0-9.,]*[0-9][0-9.,]*$/.test(lowerWord) &&
+    /^[-+]?\$?[0-9.,]*[0-9][0-9.,]*$/.test(lowerWord) &&
     /[.,]/.test(lowerWord)
   ) {
     const characterNames = table.characterNames;

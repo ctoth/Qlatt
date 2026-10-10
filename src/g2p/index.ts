@@ -478,20 +478,36 @@ export function pronounce(
   // dollar sign, a colon or a plural ending does not reach.
   // A sign written on the number is spoken first ("-7" is "minus seven";
   // speakSignedNumber) and changes nothing of the class.
-  if (table?.numberPhones && /^(?:[$0-9.]|[-+][$0-9.])/.test(lowerWord)) {
-    const digitsOnly = /^[0-9]+$/.test(lowerWord);
-    const signed = /^[-+]/.test(lowerWord);
+  // In a mode of the text that has its own two number marks (the table's
+  // `modeNumberMarks`; DECtalk's europe mode, LTS/ls_task.c:3080-3086) the
+  // word is read by them: written the readers' way first, each of the two
+  // marks in the other's place. Measured on say.exe with the europe mode on
+  // (test/oracle-corpora/dectalk-us-mode-europe-v1.json): "2,5" is "two point
+  // five", "12.500" "twelve thousand five hundred", "6,200" "six point two
+  // zero zero".
+  const modeMarks = (context.modes ?? [])
+    .map((mode) => table?.modeNumberMarks?.[mode])
+    .find((marks) => marks !== undefined);
+  const numberWord =
+    modeMarks && /^[-+]?\$?[0-9.,]+(?:'?s)?$/.test(lowerWord)
+      ? [...lowerWord]
+          .map((char) => (char === modeMarks.decimal ? "." : char === modeMarks.group ? "," : char))
+          .join("")
+      : lowerWord;
+  if (table?.numberPhones && /^(?:[$0-9.]|[-+][$0-9.])/.test(numberWord)) {
+    const digitsOnly = /^[0-9]+$/.test(numberWord);
+    const signed = /^[-+]/.test(numberWord);
     // A dollar amount before a word that takes "dollars" behind it ("$2
     // million") is only its number here; that word speaks the rest
     // (LTS/ls_task.c:3227-3290).
     const symbols = digitsOnly
-      ? speakDigits(lowerWord, table.numberPhones)
+      ? speakDigits(numberWord, table.numberPhones)
       : signed
-        ? speakSignedNumber(lowerWord, table.numberPhones)
-        : lowerWord.startsWith("$") && context.quantityAfter
-          ? speakMoneyBeforeQuantity(lowerWord.slice(1), table.numberPhones)
-          : speakNumberToken(lowerWord, table.numberPhones);
-    const plainNumber = digitsOnly || /^[-+]?[0-9,.]+$/.test(lowerWord);
+        ? speakSignedNumber(numberWord, table.numberPhones)
+        : numberWord.startsWith("$") && context.quantityAfter
+          ? speakMoneyBeforeQuantity(numberWord.slice(1), table.numberPhones)
+          : speakNumberToken(numberWord, table.numberPhones);
+    const plainNumber = digitsOnly || /^[-+]?[0-9,.]+$/.test(numberWord);
     if (symbols) {
       const parts = numberWords(symbols, table);
       return {
@@ -505,6 +521,40 @@ export function pronounce(
         // A time that ends in ":00" ends in its verb-phrase start
         // (LTS/l_us_pr1.c:1197-1199): the mark is the next word's.
         ...(symbols.at(-1) === NUMBER_VPSTART ? { phraseStartAfter: "vp" as const } : {}),
+      };
+    }
+  }
+
+  // A word of digits with a period, a comma or a dollar sign in it that the
+  // number rules do not take is spelled, each character a word: a digit from
+  // the number lists, a mark by its name as written (DECtalk 4.63
+  // LTS/ls_task.c:897-1010 ls_task_parse_number must take the whole word:
+  // the mark between groups only with three digits after it; :4118-4150 a
+  // character that is not a letter, a digit, a hyphen, a slash or an
+  // apostrophe sends the word to the spelling routine; LTS/ls_spel.c:151-170).
+  // Measured on say.exe: "2,5" is "two comma five"; with the europe mode on
+  // "4.5" is "four period five", "$7.25" "dollar seven period two five", and
+  // ".000" after "1.250" "period zero zero zero".
+  if (
+    table?.numberPhones &&
+    table.characterNames &&
+    /^\$?[0-9.,]*[0-9][0-9.,]*$/.test(lowerWord) &&
+    /[.,]/.test(lowerWord)
+  ) {
+    const characterNames = table.characterNames;
+    const units = table.numberPhones.units;
+    const parts = [...lowerWord].flatMap((char) =>
+      /[0-9]/.test(char)
+        ? numberWords(units[Number(char)] as readonly number[], table)
+        : (characterNames[char] ?? []).map((word) => ({ phonemes: [...word] })),
+    );
+    if (parts.length > 0 && parts.every((part) => part.phonemes.length > 0)) {
+      return {
+        phonemes: parts.flatMap((part) => part.phonemes),
+        source: "spelling",
+        word: lowerWord,
+        parts,
+        ...nounClass(),
       };
     }
   }

@@ -30,6 +30,13 @@ records `maps.clock_words.12`, `maps.clock_words.30`, and `maps.period_words.pm`
 `text_recognition.unmatched` requires its own `speak`, `vocabulary_keys`, and
 `citations`. No case or punctuation cleanup precedes these expressions.
 
+A rule may also declare `enabled`, a CEL boolean over `source.text`, `maps` and
+`sets` that is evaluated once for a text, before the rule seeks any match. A
+rule whose `enabled` is false does not run: it matches nothing and leaves no
+decision record, where `when` leaves an `ineligible` record for every match it
+rejects. It is for a rule that belongs to a state of the whole text, such as a
+mode a command in the text turns on, and would otherwise match in every text.
+
 Rules run in declaration order. Each scans left to right against the original
 input; accepted spans cannot overlap previously accepted spans. There is no
 longest-match selection. Rejection leaves input available to later recognizers

@@ -86,6 +86,12 @@ export interface LtsTableDocument extends LtsTable, LtsAdjustTables {
    */
   modeCharacterNames?: Readonly<Record<string, Readonly<Record<string, string>>>>;
   /**
+   * The two marks of a number while a mode of the text is on that changes
+   * them, by the mode's word: the mark before the fraction and the mark
+   * between groups of three digits ("." and "," otherwise).
+   */
+  modeNumberMarks?: Readonly<Record<string, { decimal: string; group: string }>>;
+  /**
    * The word sequences taken as one conjunction, in the order they are
    * tried (table-conjunctions.ts).
    */

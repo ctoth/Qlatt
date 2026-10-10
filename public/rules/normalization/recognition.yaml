@@ -709,6 +709,73 @@ text_recognition:
       citations:
         - 'DECtalk 4.63 LTS/l_us_pr1.c:80-110 (ls_proc_do_sign: "minus" and "plus" from their phone lists, then a word boundary), LTS/ls_task.c:3148-3215 (the sign is taken off the word and the number rules read the rest)'
         - 'DECtalk 4.63 LTS/ls_task.c:4118-4180 (a word the number rules do not take, with a hyphen and a digit, is a part number)'
+    # THE EUROPE MODE (maps.tn_text_mode_spans.europe, the stretches of the
+    # text a mode command turned it on in): the number reader takes a comma
+    # before the fraction and a period between groups of three digits. The
+    # three rules below stand in front of the rules for the same words
+    # outside the mode and take their place for a word that begins inside
+    # such a stretch; they do not run at all for a text with no such stretch
+    # (`enabled`).
+    # A dollar amount written the mode's way, its whole part and its fraction
+    # digits apart as tn_money_text_source has them. Measured on say.exe
+    # (test/oracle-corpora/dectalk-us-mode-europe-v1.json): "$45,90" is
+    # "forty five dollars and ninety cents", "$2.300" "two thousand three
+    # hundred dollars".
+    - id: tn_europe_money_text_source
+      pattern: '(?<![\w$.,:])\$(?:(?<integer>[0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+)(?:,(?<fraction>[0-9]+))?|,(?<bare>[0-9]+))(?![\w$:]|[.,][0-9])(?=(?:\s+(?<next>[A-Za-z]+))?)'
+      flags: ''
+      class: money_text
+      captures: {integer: integer, fraction: fraction, bare: bare}
+      enabled: "size(get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])) > 0"
+      when: >-
+        get(maps.tn_recognition_policy, 'money_amounts', 'token') == 'phonemic'
+        && get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
+        && (captures.next == null
+            || !(('quantityWords.' + lower(captures.next)) in get(maps, 'tn_number_phonemes', {})))
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3080-3086 (in the europe mode fchar is "," and schar "."), 3181-3513 (ls_task_currency_processing reads the amount with them)'
+    # A number with a plural ending, its digits written the mode's way
+    # ("1.000s"), apart from the ending as tn_plural_number_source has them.
+    - id: tn_europe_plural_number_source
+      pattern: '(?<![\w$.,:])(?<digits>[0-9]{1,3}(?:\.[0-9]{3})+)''?s(?![\w$:]|[.,][0-9])'
+      flags: ''
+      class: plural_number
+      captures: {digits: digits}
+      enabled: "size(get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])) > 0"
+      when: >-
+        get(maps.tn_recognition_policy, 'plural_numbers', 'token') == 'phonemic'
+        && get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3080-3086 (schar is "." in the europe mode), 3936-3962 and 4031-4046 (a number with a plural ending)'
+    # Any other word of digits with a period or a comma in it, a dollar sign
+    # before it or not, kept whole: the frontend's lexicon reads it by the
+    # mode's two marks, and spells a word that is no number by them, each
+    # mark by its name. Measured on say.exe with the mode on: "2,5" is "two
+    # point five", "12.500" "twelve thousand five hundred", "3.456,75" "three
+    # thousand, four hundred and fifty six point seven five", "6,200" "six
+    # point two zero zero"; "4.5" is "four period five" and "$7.25" "dollar
+    # seven period two five".
+    - id: tn_europe_number_token_source
+      pattern: '(?<![\w$.,:])(?<token>\$?(?:[0-9]+(?:[.,][0-9]+)+|[.,][0-9]+(?:[.,][0-9]+)*))(?![\w$:%]|[.,][0-9])'
+      flags: ''
+      class: number_token
+      captures: {token: token}
+      enabled: "size(get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])) > 0"
+      when: >-
+        get(maps.tn_recognition_policy, 'number_tokens', 'words') == 'source'
+        && get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:3080-3086 (the two marks of the europe mode), 897-1010 (ls_task_parse_number: the mark between groups only with three digits after it, then the mark before the fraction)'
+        - 'DECtalk 4.63 LTS/ls_task.c:4118-4150 (a word the number rules do not take, with a character that is no letter, digit, hyphen, slash or apostrophe, is spelled)'
     # A decimal number written with no digit before its point (".5", ".25"),
     # kept whole for a frontend whose lexicon reads it
     # (tn_recognition_policy.bare_decimals: source): the point is not a
@@ -788,6 +855,25 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:3181-3513 (money), 3747-3825 (numbers): the text task reads the whole word'
+    # A word of digits with a period or a comma between them that is none of
+    # the numbers the rule above takes ("2,5", "1,23"), kept whole for the
+    # same frontends: the number reader does not take it (a comma stands
+    # between groups only with three digits after it) and the word is
+    # spelled, the mark by its name. Measured on say.exe: "Add 2,5 now." has
+    # T UW, K AA M AX, F AY V, with no pause. The rule runs only for those
+    # frontends (`enabled`), and its pattern passes over the words the rule
+    # above takes.
+    - id: tn_spelled_number_source
+      pattern: '(?<![\w$.,:])(?!(?:\$(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)(?:\.[0-9]+)?|\$\.[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]+)?|[0-9]+\.[0-9]+)(?![\w$:]|[.,][0-9]))(?<token>\$?[0-9]+(?:[.,][0-9]+)+)(?![\w$:%]|[.,][0-9])'
+      flags: ''
+      class: number_token
+      captures: {token: token}
+      enabled: "get(maps.tn_recognition_policy, 'number_tokens', 'words') == 'source'"
+      when: 'true'
+      speak: current.text
+      vocabulary_keys: '[]'
+      citations:
+        - 'DECtalk 4.63 LTS/ls_task.c:897-1010 (ls_task_parse_number: a comma is taken only with three digits after it), 4118-4150 (a word the number rules do not take, with a character that is no letter, digit, hyphen, slash or apostrophe, is spelled), LTS/ls_spel.c:151-170'
     - id: tn_explicit_time_source
       pattern: '\b(?<hour>[0-2]?[0-9]):(?<minute>[0-5][0-9])\s*(?<period>[ap]\.?m\.?)\b'
       flags: i

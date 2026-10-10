@@ -369,6 +369,10 @@ rules:
   # The day is not checked against the month. The month's phones and "oh"
   # are the frontend's generated map tn_number_phonemes; the day and a
   # four-digit year are whole numbers, read by number_phonemes().
+  # While the europe mode is on (maps.tn_text_mode_spans.europe) the day is
+  # spoken first, between the words "the" and "of" from the same map:
+  #   5-sep-1998    the fifth of September, nineteen ninety eight
+  # Measured on say.exe (test/oracle-corpora/dectalk-us-mode-europe-v1.json).
   tn_date_text:
     kind: structural
     select:
@@ -377,6 +381,9 @@ rules:
     define:
       day: "current.payload.day"
       year: "get(current.payload, 'year', '')"
+      dayFirst: >-
+        get(get(maps, 'tn_text_mode_spans', {}), 'europe', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
       monthText: >-
         vocabulary('tn_number_phonemes',
           'months.' + vocabulary('tn_month_numbers', lower(current.payload.month)))
@@ -400,11 +407,18 @@ rules:
       tag: normalization_lexical
       output: >-
         [{'type': 'terminal', 'kind': 'word',
-          'text': maps.tn_phonemic_text.open + monthText + maps.tn_phonemic_text.word_boundary
-            + dayText + yearText + maps.tn_phonemic_text.word_boundary
+          'text': maps.tn_phonemic_text.open
+            + (dayFirst
+                ? vocabulary('tn_number_phonemes', 'the') + maps.tn_phonemic_text.word_boundary
+                  + dayText + maps.tn_phonemic_text.word_boundary
+                  + vocabulary('tn_number_phonemes', 'of') + maps.tn_phonemic_text.word_boundary
+                  + monthText
+                : monthText + maps.tn_phonemic_text.word_boundary + dayText)
+            + yearText + maps.tn_phonemic_text.word_boundary
             + maps.tn_phonemic_text.close}]
     citations:
       - "DECtalk 4.63 LTS/l_us_pr1.c:815-961 (ls_proc_do_date: the month from pmonths[], the day by ls_proc_do_number with its ordinal flag, COMMA, the year)"
+      - "DECtalk 4.63 LTS/l_us_pr1.c:907-918 (in the europe mode: pthe[], the day, pof[], the month, a word boundary between each)"
       - "DECtalk 4.63 LTS/l_us_pr1.c:924-927 (a two-digit day loses its leading zero), 944-954 (a 200X year: two digits, \"oh\" and the unit with no word boundary between), 367-398 (ls_proc_do_4_digits)"
   # A number with a plural ending (tn_plural_number_source: "60s", "1990's")
   # written out as one word of phonemic text: the number, as a year in its
@@ -418,8 +432,10 @@ rules:
     select:
       relation: Normalization
       where: "current.kind == 'plural_number' && current.outputType == 'source'"
+    # A period between the digits is the europe mode's mark between groups
+    # (tn_europe_plural_number_source), read as the comma is.
     define:
-      digits: "current.payload.digits"
+      digits: "regexReplace(current.payload.digits, '\\\\.', ',', 'g')"
       numberText: >-
         number_phonemes(digits,
           matches(digits, '^[1-9][0-9]{3}$') && substring(digits, 1, 3) != '00' ? 'year' : 'cardinal')
@@ -459,8 +475,10 @@ rules:
     select:
       relation: Normalization
       where: "current.kind == 'money_text' && current.outputType == 'source'"
+    # A period in the whole part is the europe mode's mark between groups
+    # (tn_europe_money_text_source), read as the comma is.
     define:
-      integer: "tn_text_or_empty(get(current.payload, 'integer', ''))"
+      integer: "regexReplace(tn_text_or_empty(get(current.payload, 'integer', '')), '\\\\.', ',', 'g')"
       fraction: >-
         tn_text_or_empty(get(current.payload, 'fraction', ''))
         + tn_text_or_empty(get(current.payload, 'bare', ''))

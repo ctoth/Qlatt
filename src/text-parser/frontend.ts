@@ -256,9 +256,12 @@ export interface TextParserChange {
  * The modes a mode command turns on here: spell (LTS/ls_task.c:1835-1871,
  * every word goes to the spelling routine) and math (LTS/ls_task.c:1949-1957
  * and LTS/ls_spel.c, a sign is spoken by its name in the math table; the
- * parser's main rules run with the mode's flag).
+ * parser's main rules run with the mode's flag) and europe (the parser's
+ * date rule writes the day first, LTS/l_us_pr1.c:907-918 reads a date as
+ * "the" day "of" month, and LTS/ls_task.c:3082-3086 reads a comma in a number
+ * as the decimal mark and a period as the mark between thousands).
  */
-export const PORTED_MODES: readonly string[] = ["spell", "math"];
+export const PORTED_MODES: readonly string[] = ["spell", "math", "europe"];
 
 export interface TextParserRunOptions {
   /** Told of each command that is in error or not carried out. */

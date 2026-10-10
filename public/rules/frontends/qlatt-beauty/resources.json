@@ -21,6 +21,7 @@
     "/rules/frontends/qlatt-english/phases/prosody.yaml",
     "/rules/frontends/qlatt-english/phases/structural.yaml",
     "/rules/frontends/qlatt-english/phases/tone-association.yaml",
+    "/rules/frontends/qlatt-english/phonology.yaml",
     "/rules/frontends/qlatt-english/phonotactics.yaml",
     "/rules/frontends/qlatt-english/pipeline.yaml",
     "/rules/frontends/qlatt-english/policy/accent-policy.yaml",

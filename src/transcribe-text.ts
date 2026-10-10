@@ -1190,7 +1190,7 @@ export function transcribeText(
               type: "phoneme_symbol_rejected",
               subject: inputToken.tokenId,
               reason: `Rejected '${phoneWithStress}' against inventory symbol_grammar '${resources.inventory.symbol_grammar}'`,
-              citations: [resources.inventoryPath],
+              citations: [...resources.inventoryDocuments],
               parents: stressDecisionId ? [stressDecisionId] : [],
             });
           }

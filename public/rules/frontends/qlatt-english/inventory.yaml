@@ -1,9 +1,9 @@
 version: v1
-# Engineering convention: CMU/ARPABET symbols and lexical stress suffixes.
-silence_symbol: SIL
-nucleus_types: [vowel]
-symbol_grammar: '[A-Z]+'
-stress_markers: {0: '0', 1: '1', 2: '2'}
+# The symbol conventions and each target's `type`, phonological features and
+# `dac` are the language's: phonology.yaml, merged under these acoustic targets
+# by the loader (docs/inventory-conventions.md, "Layering an inventory over a
+# phonology document"). A field may be in one of the two documents, never both.
+phonology_path: /rules/frontends/qlatt-english/phonology.yaml
 default_duration_ms: 30 # engineering estimate: duration for a target without dur
 secondary_stress_fallback:
   target: 1
@@ -203,10 +203,6 @@ phoneme_targets:
     B3: 120
     AV: 63
     dur: 207  # Peterson & Lehiste 1960 Table I, all CNC: 20.7 csec
-    type: vowel
-    hi: true
-    front: true
-    dac: 3  # Recasens 1997
   IH1:
     F1: 427
     F2: 2034
@@ -216,10 +212,6 @@ phoneme_targets:
     B3: 120
     AV: 62
     dur: 161  # Peterson & Lehiste 1960 Table I, all CNC: 16.1 csec
-    type: vowel
-    hi: true
-    front: true
-    dac: 3  # Recasens 1997
   EY1:
     F1: 476
     F2: 2089
@@ -229,13 +221,6 @@ phoneme_targets:
     B3: 200
     AV: 63
     dur: 200  # Peterson & Lehiste 1960 Table I, all CNC: 20.0 csec
-    type: vowel
-    mid: true
-    front: true
-    dac: 2  # Recasens 1997
-    diph:
-      - EH1
-      - IH1
   EH1:
     F1: 580
     F2: 1799
@@ -245,10 +230,6 @@ phoneme_targets:
     B3: 130
     AV: 62
     dur: 204  # Peterson & Lehiste 1960 Table I, all CNC: 20.4 csec
-    type: vowel
-    mid: true
-    front: true
-    dac: 2  # Recasens 1997
   AE1:
     F1: 588
     F2: 1952
@@ -258,10 +239,6 @@ phoneme_targets:
     B3: 140
     AV: 64
     dur: 284  # Peterson & Lehiste 1960 Table I, all CNC: 28.4 csec
-    type: vowel
-    low: true
-    front: true
-    dac: 2  # Recasens 1997
   AA1:
     F1: 768
     F2: 1333
@@ -271,10 +248,6 @@ phoneme_targets:
     B3: 130
     AV: 64
     dur: 265  # Peterson & Lehiste 1960 Table I, all CNC: 26.5 csec
-    type: vowel
-    low: true
-    back: true
-    dac: 2  # Recasens 1997
   AO1:
     F1: 652
     F2: 997
@@ -284,11 +257,6 @@ phoneme_targets:
     B3: 120
     AV: 63
     dur: 250  # Peterson & Lehiste 1960 Table I, all CNC: 25.0 csec
-    type: vowel
-    mid: true
-    back: true
-    is_back_rounded: true
-    dac: 2  # Recasens 1997
   OW1:
     F1: 497
     F2: 910
@@ -298,14 +266,6 @@ phoneme_targets:
     B3: 100
     AV: 63
     dur: 222  # Peterson & Lehiste 1960 Table I, all CNC: 22.2 csec
-    type: vowel
-    mid: true
-    back: true
-    is_back_rounded: true
-    dac: 2  # Recasens 1997
-    diph:
-      - AO1
-      - UH1
   UH1:
     F1: 469
     F2: 1122
@@ -315,11 +275,6 @@ phoneme_targets:
     B3: 120
     AV: 62
     dur: 163  # Peterson & Lehiste 1960 Table I, all CNC: 16.3 csec
-    type: vowel
-    hi: true
-    back: true
-    is_back_rounded: true
-    dac: 3  # Recasens 1997
   UW1:
     F1: 378
     F2: 997
@@ -329,11 +284,6 @@ phoneme_targets:
     B3: 110
     AV: 63
     dur: 235  # Peterson & Lehiste 1960 Table I, all CNC: 23.5 csec
-    type: vowel
-    hi: true
-    back: true
-    is_back_rounded: true
-    dac: 3  # Recasens 1997
   AH1:
     F1: 623
     F2: 1200
@@ -343,10 +293,6 @@ phoneme_targets:
     B3: 130
     AV: 62
     dur: 181  # Peterson & Lehiste 1960 Table I, all CNC: 18.1 csec
-    type: vowel
-    mid: true
-    central: true
-    dac: 1  # Recasens 1997
   ER1:
     F1: 490  # Peterson & Barney 1952 men's average for stressed /ɝ/ ("heard")
     F2: 1350
@@ -356,11 +302,6 @@ phoneme_targets:
     B3: 120
     AV: 63
     dur: 256  # Peterson & Lehiste 1960 Table I, all CNC: 25.6 csec
-    type: vowel
-    mid: true
-    central: true
-    rhotic: true
-    dac: 2  # Recasens 1997
   AY1:
     F1: 660
     F2: 1200
@@ -370,12 +311,6 @@ phoneme_targets:
     B3: 200
     AV: 64
     dur: 310  # Peterson & Lehiste 1960 Table I, all CNC: 31.0 csec
-    type: vowel
-    low: true
-    dac: 2  # Recasens 1997
-    diph:
-      - AA1
-      - IH1
   AW1:
     F1: 640
     F2: 1230
@@ -385,12 +320,6 @@ phoneme_targets:
     B3: 140
     AV: 64
     dur: 302  # Peterson & Lehiste 1960 Table I, all CNC: 30.2 csec
-    type: vowel
-    low: true
-    dac: 2  # Recasens 1997
-    diph:
-      - AE1
-      - UH1
   OY1:
     F1: 550
     F2: 960
@@ -400,14 +329,6 @@ phoneme_targets:
     B3: 130
     AV: 63
     dur: 360  # Peterson & Lehiste 1960 Table I, all CNC: 36.0 csec
-    type: vowel
-    mid: true
-    back: true
-    is_back_rounded: true
-    dac: 2  # Recasens 1997
-    diph:
-      - AO1
-      - IH1
   # Unstressed AY, AW and OY ("idea" AY0, "outrun" AW0, "ballpoint" OY0 in the
   # dictionary). No source here gives a reduced target for a diphthong, so each
   # is its strong target, parameter for parameter: engineering estimate. It is
@@ -423,12 +344,6 @@ phoneme_targets:
     B3: 200
     AV: 64
     dur: 310  # AY1's, engineering estimate
-    type: vowel
-    low: true
-    dac: 2  # Recasens 1997
-    diph:
-      - AA1
-      - IH1
   AW0:
     F1: 640
     F2: 1230
@@ -438,12 +353,6 @@ phoneme_targets:
     B3: 140
     AV: 64
     dur: 302  # AW1's, engineering estimate
-    type: vowel
-    low: true
-    dac: 2  # Recasens 1997
-    diph:
-      - AE1
-      - UH1
   OY0:
     F1: 550
     F2: 960
@@ -453,14 +362,6 @@ phoneme_targets:
     B3: 130
     AV: 63
     dur: 360  # OY1's, engineering estimate
-    type: vowel
-    mid: true
-    back: true
-    is_back_rounded: true
-    dac: 2  # Recasens 1997
-    diph:
-      - AO1
-      - IH1
   IY0:
     F1: 342
     F2: 2322
@@ -470,10 +371,6 @@ phoneme_targets:
     B3: 120
     AV: 58
     dur: 70
-    type: vowel
-    hi: true
-    front: true
-    dac: 3  # Recasens 1997
   IH0:
     F1: 427
     F2: 2034
@@ -483,10 +380,6 @@ phoneme_targets:
     B3: 120
     AV: 57
     dur: 60
-    type: vowel
-    hi: true
-    front: true
-    dac: 3  # Recasens 1997
   EY0:
     F1: 500
     F2: 1700
@@ -496,13 +389,6 @@ phoneme_targets:
     B3: 220
     AV: 58
     dur: 70
-    type: vowel
-    mid: true
-    front: true
-    dac: 2  # Recasens 1997
-    diph:
-      - EH0
-      - IH0
   EH0:
     F1: 580
     F2: 1799
@@ -512,10 +398,6 @@ phoneme_targets:
     B3: 130
     AV: 57
     dur: 65
-    type: vowel
-    mid: true
-    front: true
-    dac: 2  # Recasens 1997
   AE0:
     F1: 588
     F2: 1952
@@ -525,10 +407,6 @@ phoneme_targets:
     B3: 140
     AV: 59
     dur: 75
-    type: vowel
-    low: true
-    front: true
-    dac: 2  # Recasens 1997
   AA0:
     F1: 768
     F2: 1333
@@ -538,10 +416,6 @@ phoneme_targets:
     B3: 130
     AV: 59
     dur: 80
-    type: vowel
-    low: true
-    back: true
-    dac: 2  # Recasens 1997
   AO0:
     F1: 652
     F2: 997
@@ -551,11 +425,6 @@ phoneme_targets:
     B3: 120
     AV: 58
     dur: 70
-    type: vowel
-    mid: true
-    back: true
-    is_back_rounded: true
-    dac: 2  # Recasens 1997
   OW0:
     F1: 560
     F2: 1120
@@ -565,14 +434,6 @@ phoneme_targets:
     B3: 90
     AV: 58
     dur: 80
-    type: vowel
-    mid: true
-    back: true
-    is_back_rounded: true
-    dac: 2  # Recasens 1997
-    diph:
-      - AO0
-      - UH0
   UH0:
     F1: 469
     F2: 1122
@@ -582,11 +443,6 @@ phoneme_targets:
     B3: 120
     AV: 57
     dur: 60
-    type: vowel
-    hi: true
-    back: true
-    is_back_rounded: true
-    dac: 3  # Recasens 1997
   UW0:
     F1: 378
     F2: 997
@@ -596,11 +452,6 @@ phoneme_targets:
     B3: 110
     AV: 58
     dur: 80
-    type: vowel
-    hi: true
-    back: true
-    is_back_rounded: true
-    dac: 3  # Recasens 1997
   AH0:
     F1: 623
     F2: 1200
@@ -610,10 +461,6 @@ phoneme_targets:
     B3: 130
     AV: 57
     dur: 50
-    type: vowel
-    mid: true
-    central: true
-    dac: 1  # Recasens 1997
   ER0:
     F1: 400  # Espy-Wilson et al. 2000 syllabic American /r/: less open than stressed /ɝ/
     F2: 1325  # engineering estimate within Espy-Wilson's /r/ F2 range (900-1500 Hz), widened from 1385 to reduce F2/F3 crowding
@@ -623,11 +470,6 @@ phoneme_targets:
     B3: 120
     AV: 58
     dur: 70
-    type: vowel
-    mid: true
-    central: true
-    rhotic: true
-    dac: 2  # Recasens 1997
   S:
     # Engineering targets within Stevens 1971 Fig. 9; cavity per Shadle 1985.
     # Reference dB is internal calibration, not Shadle's absolute SPL.
@@ -665,11 +507,6 @@ phoneme_targets:
     A10: 30
     dur: 100
     fricative_min_ms: 30  # Jongman 1989
-    type: fricative
-    is_obstruent: true
-    voiceless: true
-    alveolar: true
-    dac: 2  # Recasens 1997
   Z:
     # Voiced cognate: reduced flow (Stevens 1971 section III.C).
     Ac: 0.08
@@ -706,11 +543,6 @@ phoneme_targets:
     A10: 28
     dur: 90
     fricative_min_ms: 30  # Jongman 1989
-    type: fricative
-    is_obstruent: true
-    voiced: true
-    alveolar: true
-    dac: 2  # Recasens 1997
   SH:
     # Engineering area/flow within Stevens Fig. 9 and Badin's measured ranges.
     # Effective cavity length corresponds to Badin & Fant's 3200 Hz front pole.
@@ -750,11 +582,6 @@ phoneme_targets:
     A10: 15
     dur: 100
     fricative_min_ms: 30  # Jongman 1989
-    type: fricative
-    is_obstruent: true
-    voiceless: true
-    postalveolar: true
-    dac: 3  # Recasens 1997
   ZH:
     # Voiced cognate: reduced flow (Stevens 1971 section III.C).
     Ac: 0.15
@@ -793,11 +620,6 @@ phoneme_targets:
     A10: 13
     dur: 90
     fricative_min_ms: 30  # Jongman 1989
-    type: fricative
-    is_obstruent: true
-    voiced: true
-    postalveolar: true
-    dac: 3  # Recasens 1997
   F:
     # Engineering area/flow target within Stevens' range; Badin & Fant p=.8,q=.2.
     # Stevens p. 1184: anterior source is 5 dB weaker, with no cavity pole.
@@ -835,11 +657,6 @@ phoneme_targets:
     A10: 45
     dur: 90
     fricative_min_ms: 50  # Jongman 1989
-    type: fricative
-    is_obstruent: true
-    voiceless: true
-    labiodental: true
-    dac: 1  # Recasens 1997
   V:
     # Voiced f model; reduced flow per Stevens 1971 section III.C.
     Ac: 0.1
@@ -876,11 +693,6 @@ phoneme_targets:
     A10: 40
     dur: 80
     fricative_min_ms: 50  # Jongman 1989
-    type: fricative
-    is_obstruent: true
-    voiced: true
-    labiodental: true
-    dac: 1  # Recasens 1997
   TH:
     # Engineering extension of the anterior f source; Shadle's theta is 3 dB lower.
     Ac: 0.1
@@ -918,11 +730,6 @@ phoneme_targets:
     A10: 42
     dur: 80
     fricative_min_ms: 60  # Jongman 1989
-    type: fricative
-    is_obstruent: true
-    voiceless: true
-    dental: true
-    dac: 1  # Recasens 1997
   DH:
     # Voiced theta model; reduced flow per Stevens 1971 section III.C.
     Ac: 0.1
@@ -960,11 +767,6 @@ phoneme_targets:
     A10: 38
     dur: 70
     fricative_min_ms: 60  # Jongman 1989
-    type: fricative
-    is_obstruent: true
-    voiced: true
-    dental: true
-    dac: 1  # Recasens 1997
   HH:
     # Holmes et al. 1964 Appendix 1; HH mapped to HH.
     boundary_rank: 9
@@ -987,11 +789,6 @@ phoneme_targets:
     SW: 0
     dur: 80
     fricative_min_ms: 40  # Engineering estimate; Jongman 1989 did not test /hh/
-    type: fricative
-    is_obstruent: true
-    voiceless: true
-    glottal: true
-    dac: 1  # Recasens 1997
   M:
     # Holmes et al. 1964 Appendix 1; M mapped to M.
     boundary_rank: 15
@@ -1012,13 +809,6 @@ phoneme_targets:
     B3: 150
     AV: 58
     dur: 80
-    type: nasal
-    voiced: true
-    bilabial: true
-    nasal_segment: true
-    nasal_place_index: 1  # Klatt 1980 Table I
-    nasal_place: m
-    dac: 1  # Recasens 1997
   'N':
     # Holmes et al. 1964 Appendix 1; N mapped to N.
     boundary_rank: 15
@@ -1038,13 +828,6 @@ phoneme_targets:
     B3: 150
     AV: 58
     dur: 70
-    type: nasal
-    voiced: true
-    alveolar: true
-    nasal_segment: true
-    nasal_place_index: 2  # Klatt 1980 Table I
-    nasal_place: n
-    dac: 2  # Recasens 1997
   NG:
     # Holmes et al. 1964 Appendix 1; NG mapped to NG.
     boundary_rank: 15
@@ -1064,13 +847,6 @@ phoneme_targets:
     B3: 150
     AV: 58
     dur: 90
-    type: nasal
-    voiced: true
-    velar: true
-    nasal_segment: true
-    nasal_place_index: 3  # Klatt 1980 Table I
-    nasal_place: ng
-    dac: 3  # Recasens 1997
   L:
     # Holmes et al. 1964 Appendix 1; L mapped to L.
     boundary_rank: 11
@@ -1088,10 +864,6 @@ phoneme_targets:
     B3: 200
     AV: 59
     dur: 80
-    type: liquid
-    voiced: true
-    alveolar: true
-    dac: 3  # Recasens 1997
   R:
     # Holmes et al. 1964 Appendix 1; R mapped to R.
     boundary_rank: 10
@@ -1109,10 +881,6 @@ phoneme_targets:
     B3: 150
     AV: 59
     dur: 90
-    type: liquid
-    voiced: true
-    rhotic: true
-    dac: 3  # Recasens 1997
   W:
     # Holmes et al. 1964 Appendix 1; W mapped to W.
     boundary_rank: 10
@@ -1130,11 +898,6 @@ phoneme_targets:
     B3: 60
     AV: 59
     dur: 80
-    type: glide
-    is_back_rounded: true
-    voiced: true
-    labiovelar: true
-    dac: 1  # Recasens 1997; Volenec 2015
   'Y':
     # Holmes et al. 1964 Appendix 1; Y mapped to Y.
     boundary_rank: 10
@@ -1152,10 +915,6 @@ phoneme_targets:
     B3: 500
     AV: 59
     dur: 80
-    type: glide
-    voiced: true
-    palatal: true
-    dac: 3  # Recasens 1997
   # Plain stop bases are abstract symbols rewritten to closure/release targets
   # by the structural phase (Klatt 1980 stop model).
   P:
@@ -1168,8 +927,6 @@ phoneme_targets:
     boundary_citations:
       - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     dur: 100
-    type: silence
-    is_stop_base: true
   T:
     # Holmes et al. 1964 Appendix 1; T mapped to T.
     boundary_rank: 23
@@ -1180,8 +937,6 @@ phoneme_targets:
     boundary_citations:
       - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     dur: 100
-    type: silence
-    is_stop_base: true
   K:
     # Holmes et al. 1964 Appendix 1; K mapped to K.
     boundary_rank: 23
@@ -1192,8 +947,6 @@ phoneme_targets:
     boundary_citations:
       - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     dur: 100
-    type: silence
-    is_stop_base: true
   B:
     # Holmes et al. 1964 Appendix 1; B mapped to B.
     boundary_rank: 26
@@ -1204,8 +957,6 @@ phoneme_targets:
     boundary_citations:
       - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     dur: 100
-    type: silence
-    is_stop_base: true
   D:
     # Holmes et al. 1964 Appendix 1; D mapped to D.
     boundary_rank: 26
@@ -1216,8 +967,6 @@ phoneme_targets:
     boundary_citations:
       - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     dur: 100
-    type: silence
-    is_stop_base: true
   G:
     # Holmes et al. 1964 Appendix 1; G mapped to G.
     boundary_rank: 26
@@ -1228,8 +977,6 @@ phoneme_targets:
     boundary_citations:
       - "Holmes, Mattingly & Shearme 1964 Appendix 1 pp.140–142"
     dur: 100
-    type: silence
-    is_stop_base: true
   P_CL:
     # Holmes et al. 1964 Appendix 1; P mapped to P_CL.
     boundary_rank: 23
@@ -1247,11 +994,6 @@ phoneme_targets:
     B3: 150
     AV: 0
     dur: 50
-    type: stop_closure
-    is_obstruent: true
-    voiceless: true
-    bilabial: true
-    dac: 1  # Recasens 1997
   T_CL:
     # Holmes et al. 1964 Appendix 1; T mapped to T_CL.
     boundary_rank: 23
@@ -1269,11 +1011,6 @@ phoneme_targets:
     B3: 150
     AV: 0
     dur: 50  # Crystal & House 1988
-    type: stop_closure
-    is_obstruent: true
-    voiceless: true
-    alveolar: true
-    dac: 2  # Recasens 1997
   K_CL:
     # Holmes et al. 1964 Appendix 1; K mapped to K_CL.
     boundary_rank: 23
@@ -1291,11 +1028,6 @@ phoneme_targets:
     B3: 150
     AV: 0
     dur: 60
-    type: stop_closure
-    is_obstruent: true
-    voiceless: true
-    velar: true
-    dac: 3  # Recasens 1997
   B_CL:
     # Holmes et al. 1964 Appendix 1; B mapped to B_CL.
     boundary_rank: 26
@@ -1314,11 +1046,6 @@ phoneme_targets:
     AV: 47
     AVS: -70
     dur: 45
-    type: stop_closure
-    is_obstruent: true
-    voiced: true
-    bilabial: true
-    dac: 1  # Recasens 1997
   D_CL:
     # Holmes et al. 1964 Appendix 1; D mapped to D_CL.
     boundary_rank: 26
@@ -1337,11 +1064,6 @@ phoneme_targets:
     AV: 47
     AVS: -70
     dur: 50  # Crystal & House 1988
-    type: stop_closure
-    is_obstruent: true
-    voiced: true
-    alveolar: true
-    dac: 2  # Recasens 1997
   G_CL:
     # Holmes et al. 1964 Appendix 1; G mapped to G_CL.
     boundary_rank: 26
@@ -1360,11 +1082,6 @@ phoneme_targets:
     AV: 47
     AVS: -70
     dur: 55
-    type: stop_closure
-    is_obstruent: true
-    voiced: true
-    velar: true
-    dac: 3  # Recasens 1997
   P_REL:
     # Holmes et al. 1964 Appendix 1; P mapped to P_REL.
     boundary_rank: 29
@@ -1389,11 +1106,6 @@ phoneme_targets:
     A10: 35
     SW: 1
     dur: 5
-    type: stop_release
-    is_obstruent: true
-    voiceless: true
-    bilabial: true
-    dac: 1  # Recasens 1997
   T_REL:
     # Holmes et al. 1964 Appendix 1; T mapped to T_REL.
     boundary_rank: 29
@@ -1422,11 +1134,6 @@ phoneme_targets:
     AB: 0
     SW: 1
     dur: 15
-    type: stop_release
-    is_obstruent: true
-    voiceless: true
-    alveolar: true
-    dac: 2  # Recasens 1997
   K_REL:
     # Holmes et al. 1964 Appendix 1; K mapped to K_REL.
     boundary_rank: 29
@@ -1455,11 +1162,6 @@ phoneme_targets:
     AB: 0
     SW: 1
     dur: 25  # Zue 1976, Stevens 1993
-    type: stop_release
-    is_obstruent: true
-    voiceless: true
-    velar: true
-    dac: 3  # Recasens 1997
   B_REL:
     # Holmes et al. 1964 Appendix 1; B mapped to B_REL.
     boundary_rank: 29
@@ -1487,11 +1189,6 @@ phoneme_targets:
     A10: 30
     SW: 1
     dur: 5
-    type: stop_release
-    is_obstruent: true
-    voiced: true
-    bilabial: true
-    dac: 1  # Recasens 1997
   D_REL:
     # Holmes et al. 1964 Appendix 1; D mapped to D_REL.
     boundary_rank: 29
@@ -1522,11 +1219,6 @@ phoneme_targets:
     A10: 28
     SW: 1
     dur: 10
-    type: stop_release
-    is_obstruent: true
-    voiced: true
-    alveolar: true
-    dac: 2  # Recasens 1997
   G_REL:
     # Holmes et al. 1964 Appendix 1; G mapped to G_REL.
     boundary_rank: 29
@@ -1557,11 +1249,6 @@ phoneme_targets:
     A10: 13
     SW: 1
     dur: 20
-    type: stop_release
-    is_obstruent: true
-    voiced: true
-    velar: true
-    dac: 3  # Recasens 1997
   P_ASP:
     # Holmes et al. 1964 Appendix 1; P mapped to P_ASP.
     boundary_rank: 23
@@ -1586,11 +1273,6 @@ phoneme_targets:
     A9: 35
     A10: 28
     dur: 53
-    type: stop_aspiration
-    is_obstruent: true
-    voiceless: true
-    bilabial: true
-    dac: 1  # Recasens 1997
   T_ASP:
     # Holmes et al. 1964 Appendix 1; T mapped to T_ASP.
     boundary_rank: 23
@@ -1618,11 +1300,6 @@ phoneme_targets:
     A9: 33
     A10: 25
     dur: 56
-    type: stop_aspiration
-    is_obstruent: true
-    voiceless: true
-    alveolar: true
-    dac: 2  # Recasens 1997
   K_ASP:
     # Holmes et al. 1964 Appendix 1; K mapped to K_ASP.
     boundary_rank: 23
@@ -1650,11 +1327,6 @@ phoneme_targets:
     A9: 22
     A10: 15
     dur: 58  # Zue 1976 — restores labial < alveolar < velar ordering
-    type: stop_aspiration
-    is_obstruent: true
-    voiceless: true
-    velar: true
-    dac: 3  # Recasens 1997
   # Affricate closure targets provide the stop-gap component preceding postalveolar frication.
   # Citation: Stevens 1998 Ch.8 (affricate stop closure + frication sequence).
   CH_CL:
@@ -1677,11 +1349,6 @@ phoneme_targets:
     AH: 0
     AVS: -70
     dur: 16
-    type: stop_closure
-    is_obstruent: true
-    voiceless: true
-    postalveolar: true
-    dac: 3  # Recasens 1997
   JH_CL:
     # Holmes et al. 1964 Appendix 1; D mapped to JH_CL.
     boundary_rank: 26
@@ -1702,11 +1369,6 @@ phoneme_targets:
     AH: 0
     AVS: -70
     dur: 14
-    type: stop_closure
-    is_obstruent: true
-    voiced: true
-    postalveolar: true
-    dac: 3  # Recasens 1997
   CH:
     # Holmes et al. 1964 Appendix 1; SH mapped to CH.
     boundary_rank: 18
@@ -1744,11 +1406,6 @@ phoneme_targets:
     AB: 0
     SW: 1
     dur: 54
-    type: affricate
-    is_obstruent: true
-    voiceless: true
-    postalveolar: true
-    dac: 3  # Recasens 1997
   JH:
     # Holmes et al. 1964 Appendix 1; ZH mapped to JH.
     boundary_rank: 20
@@ -1783,11 +1440,6 @@ phoneme_targets:
     AB: 0
     SW: 1
     dur: 51
-    type: affricate
-    is_obstruent: true
-    voiced: true
-    postalveolar: true
-    dac: 3  # Recasens 1997
   DX:
     F1: 300
     F2: 1600
@@ -1800,10 +1452,6 @@ phoneme_targets:
     AH: 0
     AVS: -70
     dur: 30
-    type: flap
-    voiced: true
-    alveolar: true
-    dac: 2  # Recasens 1997
   SIL:
     # Klatt 1980 source-off amplitudes; AVS -70 is an engineering estimate.
     # dur 100 ms is an engineering estimate for the default pause.
@@ -1819,7 +1467,6 @@ phoneme_targets:
     AVS: -70
     F0: 0
     dur: 100
-    type: silence
   GS:
     F1: 500       # neutral vocal tract; Allen 1987 (glottal segments inherit context)
     F2: 1500      # neutral
@@ -1832,8 +1479,3 @@ phoneme_targets:
     AH: 0
     AVS: -70
     dur: 30       # engineering estimate: brief glottal closure ~20-40 ms
-    type: stop_closure
-    is_obstruent: true
-    voiceless: true
-    glottal: true
-    dac: 1        # Recasens 1997: glottal = minimal constraint

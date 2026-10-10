@@ -19,12 +19,13 @@
  * Usage:
  *   node --no-warnings --loader ts-node/esm/transpile-only \
  *     --experimental-specifier-resolution=node \
- *     scripts/hash-frontend-outputs.ts --out <file> [--jobs 12]
+ *     scripts/hash-frontend-outputs.ts --out <file> [--jobs 12] [--only <part of a corpus file name>]
  *   ... scripts/hash-frontend-outputs.ts --compare <before> <after>
  *
  * --out writes one line a text and frontend: corpus, id, frontend and the
  * three hashes, sorted. --compare prints the lines that differ and which of
- * the three hashes differ, and exits 1 when any does.
+ * the three hashes differ, and exits 1 when any does (a line in one file
+ * only is a difference, so compare files made with the same --only).
  *
  * A measurement tool; nothing in the build depends on it.
  */
@@ -49,11 +50,16 @@ type Text = {
   transitionMs?: number;
 };
 
+/** The corpus files to read: all, or those `--only <text>` names a part of. */
+const onlyAt = process.argv.indexOf("--only");
+const only = onlyAt >= 0 ? process.argv[onlyAt + 1] : undefined;
+
 function corpusTexts(): Text[] {
   const texts: Text[] = [];
   for (const name of fs.readdirSync(corporaDir).sort()) {
     const file = path.join(corporaDir, name);
     if (fs.statSync(file).isDirectory()) continue;
+    if (only !== undefined && !name.includes(only)) continue;
     if (name.endsWith(".json")) {
       const document = JSON.parse(fs.readFileSync(file, "utf8")) as {
         defaults?: Partial<Text>;
@@ -206,6 +212,7 @@ async function main(): Promise<void> {
               index.toString(),
               "--jobs",
               jobs.toString(),
+              ...(only === undefined ? [] : ["--only", only]),
             ],
             { stdio: ["ignore", "ignore", "inherit"] },
           );

@@ -54,6 +54,7 @@ describe("speaker profile schema", () => {
       }),
     ).toEqual({
       base_f0_hz: 200,
+      f0_range_hz: 80,
       tract_length_scale: 1,
       pharynx_scale: 1,
       mouth_scale: 1,
@@ -70,6 +71,7 @@ describe("speaker profile schema", () => {
       }),
     ).toEqual({
       base_f0_hz: 150,
+      f0_range_hz: 80,
       tract_length_scale: 1,
       pharynx_scale: 1,
       mouth_scale: 1,

@@ -99,7 +99,9 @@ describe("tone association preserves the existing frontend tracks", () => {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(
       `${frontendId}: %s`,
       (phrase) => {
-        const { track } = textToKlattTrackDetailed(phrase, 110, 30, { frontendId });
+        // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+        const baseF0 = frontendId === "qlatt-beauty" ? undefined : 110;
+        const { track } = textToKlattTrackDetailed(phrase, baseF0, 30, { frontendId });
         // Decision identities necessarily change when association decisions are
         // inserted. Compare every original synthesis field; ancestry is tested separately.
         const payload = track.map(({ provenance: _provenance, ...frame }) => {

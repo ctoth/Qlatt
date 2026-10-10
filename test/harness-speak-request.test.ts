@@ -63,13 +63,24 @@ describe("the frontend's own base F0, which the empty box leaves in force", () =
       ...(speaker ? { speaker } : {}),
     });
 
-  // The 110 the box used to hold is these frontends' own default
-  // (public/rules/frontends/qlatt-english/frontend.yaml policy.speaker.base_f0_hz;
-  // qlatt-beauty extends qlatt-english), so their tracks do not change.
-  it.each(["qlatt-english", "qlatt-beauty"])("%s: none is 110", (frontendId) => {
-    const none = speak(frontendId, undefined);
+  // The 110 the box used to hold is this frontend's own default
+  // (public/rules/policy/speaker-profile.yaml base_f0_hz; qlatt-english has no
+  // voice registry), so its track does not change.
+  it("qlatt-english: none is 110", () => {
+    const none = speak("qlatt-english", undefined);
     expect(none.resolvedSpeaker.base_f0_hz).toBe(110);
-    expect(none.track).toEqual(speak(frontendId, 110).track);
+    expect(none.track).toEqual(speak("qlatt-english", 110).track);
+  });
+
+  // qlatt-beauty's default voice sets 138 Hz
+  // (public/rules/frontends/qlatt-beauty/speakers/beauty.yaml); 110 passed in
+  // replaces it and moves the contour.
+  it("qlatt-beauty: none is its voice's 138, and 110 is a different track", () => {
+    const none = speak("qlatt-beauty", undefined);
+    const overridden = speak("qlatt-beauty", 110);
+    expect(none.resolvedSpeaker.base_f0_hz).toBe(138);
+    expect(overridden.resolvedSpeaker.base_f0_hz).toBe(110);
+    expect(overridden.track).not.toEqual(none.track);
   });
 
   // DECtalk 4.63 Paul's average pitch is 122 Hz (dectalk-english frontend.yaml

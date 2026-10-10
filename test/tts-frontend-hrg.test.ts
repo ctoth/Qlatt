@@ -24,7 +24,9 @@ describe("graph-native production frontend", () => {
   it.each(["dectalk-english", "qlatt-beauty"])(
     "executes %s through the same Utterance and lowerer",
     (frontendId) => {
-      const result = textToKlattTrackDetailed("hello world.", 110, 30, { frontendId });
+      // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+      const baseF0 = frontendId === "qlatt-beauty" ? undefined : 110;
+      const result = textToKlattTrackDetailed("hello world.", baseF0, 30, { frontendId });
 
       expect(result.track.length).toBeGreaterThan(0);
       expect(result.utterance.relation("Word").listItems()).toHaveLength(2);

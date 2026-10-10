@@ -18,7 +18,9 @@ try {
       "Gag, gang; go!",
       "sip sip.",
     ]) {
-      const { track } = textToKlattTrackDetailed(phrase, 110, 30, { frontendId });
+      // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+      const baseF0 = frontendId === "qlatt-beauty" ? undefined : 110;
+      const { track } = textToKlattTrackDetailed(phrase, baseF0, 30, { frontendId });
       rows.push({
         frontendId,
         phrase,

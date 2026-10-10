@@ -88,8 +88,10 @@ describe("input contract — Direction Track schema", () => {
 
 describe("input contract — authored syllable stress", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
+    // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+    const baseF0 = frontendId === "qlatt-beauty" ? undefined : 110;
     it(`promotes to and demotes I before annotation (${frontendId})`, () => {
-      const control = textToKlattTrackDetailed("I go to school.", 110, 30, {
+      const control = textToKlattTrackDetailed("I go to school.", baseF0, 30, {
         frontendId,
         directionTrack: {
           version: "1",
@@ -107,7 +109,7 @@ describe("input contract — authored syllable stress", () => {
           ],
         },
       });
-      const result = textToKlattTrackDetailed("I go to school.", 110, 30, {
+      const result = textToKlattTrackDetailed("I go to school.", baseF0, 30, {
         frontendId,
         directionTrack: {
           version: "1",

@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 function firstVot(text: string, frontendId = "qlatt-english") {
-  const result = textToKlattTrackDetailed(text, 110, 30, { frontendId });
+  // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+  const baseF0 = frontendId === "qlatt-beauty" ? undefined : 110;
+  const result = textToKlattTrackDetailed(text, baseF0, 30, { frontendId });
   const segments = result.utterance.segments
     .listItems()
     .filter((item) => item.get("active") !== false);

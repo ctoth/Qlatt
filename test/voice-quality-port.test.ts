@@ -36,7 +36,8 @@ async function render(experimentId: string, nodeParameterOverrides?: Record<stri
   return nodeRuntimeBackend.render({
     repoRoot: path.resolve(__dirname, ".."),
     phrase: "hello world",
-    baseF0: 110,
+    // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+    ...(experimentId === "qlatt-beauty" ? {} : { baseF0: 110 }),
     frontendId: frontend(experimentId),
     experimentId,
     engine: "runtime",
@@ -126,7 +127,9 @@ describe.each(experiments)("%s Klatt 1990 voice quality", (experimentId) => {
 it.each(["qlatt-english", "qlatt-beauty"])(
   "%s projects the cited breathy cues into frames",
   (frontendId) => {
-    const track = textToKlattTrack("hello", 110, 30, { voiceQuality: "breathy", frontendId });
+    // qlatt-beauty speaks at its own voice's pitch: none is requested of it.
+    const baseF0 = frontendId === "qlatt-beauty" ? undefined : 110;
+    const track = textToKlattTrack("hello", baseF0, 30, { voiceQuality: "breathy", frontendId });
     const frames = track.filter((frame) => frame.phoneme && frame.phoneme !== "SIL");
     expect(frames.length).toBeGreaterThan(0);
     for (const frame of frames) {

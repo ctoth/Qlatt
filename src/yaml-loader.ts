@@ -1,5 +1,10 @@
 import { load as loadYaml } from "js-yaml";
-import { isNodeRuntime, normalizePath, readFileFromFsSync } from "./path-utils";
+import {
+  isNodeRuntime,
+  normalizePath,
+  readFileFromFsSync,
+  resolveFileFromFsSync,
+} from "./path-utils";
 import {
   keepSyncResource,
   noteSynchronousFetch,
@@ -8,6 +13,34 @@ import {
 } from "./sync-resource-cache";
 
 type PlainObject = Record<string, unknown>;
+
+/**
+ * The resource does not exist: no primed text, no file, and (in a browser) the
+ * server said so. Every other load failure is some other error.
+ */
+export class YamlNotFoundError extends Error {
+  readonly code = "E_YAML_PATH_UNKNOWN";
+
+  constructor(specPath: string) {
+    super(`E_YAML_PATH_UNKNOWN: '${specPath}' could not be loaded`);
+    this.name = "YamlNotFoundError";
+  }
+}
+
+/**
+ * True for a {@link YamlNotFoundError}. Checks the code, not the class, so an
+ * error from another instance of this module (a hot reload, a test's module
+ * reset) is still recognized.
+ */
+export function isYamlNotFoundError(error: unknown): boolean {
+  return error instanceof Error && (error as { code?: unknown }).code === "E_YAML_PATH_UNKNOWN";
+}
+
+function errorText(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i;
 
 function readYamlSourceFromUrlSync(specPath: string): string | null {
   if (typeof XMLHttpRequest !== "function") return null;
@@ -59,9 +92,14 @@ export function loadYamlSourceSync(specPath: string): string {
     }
   }
 
-  throw new Error(`E_YAML_PATH_UNKNOWN: '${specPath}' could not be loaded`);
+  throw new YamlNotFoundError(specPath);
 }
 
+/**
+ * Throws {@link YamlNotFoundError} when the resource does not exist, and a
+ * different error when it exists but could not be read or the request for it
+ * failed.
+ */
 export async function loadYamlSource(specPath: string): Promise<string> {
   const normalizedPath = normalizePath(specPath);
   const attempts = [normalizedPath, specPath].filter(
@@ -79,34 +117,72 @@ export async function loadYamlSource(specPath: string): Promise<string> {
     for (const attempt of attempts) {
       const fromFs = readFileFromFsSync(attempt);
       if (typeof fromFs === "string") return fromFs;
+      const existing = resolveFileFromFsSync(attempt);
+      if (existing !== null) {
+        throw new Error(`E_YAML_READ: '${specPath}' exists at '${existing}' but could not be read`);
+      }
     }
   }
 
   if (typeof fetch === "function") {
     for (const attempt of attempts) {
+      // Under Node a path that is not a URL has no base to resolve against:
+      // the filesystem probe above was the whole answer.
+      if (isNodeRuntime() && !ABSOLUTE_URL.test(attempt)) continue;
+      let response: Response;
       try {
-        const response = await fetch(attempt);
-        if (!response.ok) continue;
-        return await response.text();
-      } catch {
-        // Try next candidate path.
+        response = await fetch(attempt);
+      } catch (error) {
+        // A request that got no answer says nothing about whether the
+        // resource exists.
+        throw new Error(
+          `E_YAML_FETCH: '${specPath}' request for '${attempt}' failed: ${errorText(error)}`,
+          { cause: error },
+        );
       }
+      if (response.status === 404 || response.status === 410) continue;
+      if (!response.ok) {
+        throw new Error(
+          `E_YAML_FETCH: '${specPath}' request for '${attempt}' failed (HTTP ${response.status})`,
+        );
+      }
+      // The Vite dev server answers a path with no file behind it with
+      // 200 and index.html (its SPA fallback), so an HTML answer to a YAML
+      // request is also "no such resource". A YAML file is served as text/yaml.
+      const contentType = response.headers.get("content-type") ?? "";
+      if (contentType.toLowerCase().startsWith("text/html")) continue;
+      return await response.text();
     }
   }
 
-  throw new Error(`E_YAML_PATH_UNKNOWN: '${specPath}' could not be loaded`);
+  throw new YamlNotFoundError(specPath);
 }
 
 export async function loadYamlDocument<T = unknown>(specPath: string): Promise<T> {
   const source = await loadYamlSource(specPath);
-  return parseYaml<T>(source, specPath);
+  let parsed: unknown;
+  try {
+    parsed = loadYaml(source);
+  } catch (error) {
+    throw new Error(`E_YAML_PARSE: '${specPath}': ${errorText(error)}`, { cause: error });
+  }
+  if (parsed === null || parsed === undefined) {
+    throw new Error(`E_YAML_SCHEMA: '${specPath}' resolved to empty document`);
+  }
+  return parsed as T;
 }
 
+/**
+ * Null only when the resource does not exist ({@link YamlNotFoundError}). A
+ * resource that exists but is empty, is not valid YAML, or could not be
+ * fetched is an error, with the path in its message.
+ */
 export async function loadYamlDocumentOrNull<T = unknown>(specPath: string): Promise<T | null> {
   try {
     return await loadYamlDocument<T>(specPath);
-  } catch {
-    return null;
+  } catch (error) {
+    if (isYamlNotFoundError(error)) return null;
+    throw error;
   }
 }
 

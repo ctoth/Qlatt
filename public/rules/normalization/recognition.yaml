@@ -32,7 +32,9 @@ text_recognition:
     # SPELLING MODE (maps.tn_text_mode_spans.spell, laid over the rulepack's
     # maps when a mode command turned it on: the stretches of the parser's
     # text the mode is on in, each a pair of offsets, from and up to; a rule
-    # here holds for a match that begins inside one). Every word of the
+    # here holds for a match that begins inside one; the three rules do not
+    # run at all for a text with no such stretch, `enabled`, and leave no
+    # record in it). Every word of the
     # parser's text in the mode is spelled, whatever it is made of: the test stands in
     # front of every other reading of a word, and a word is what stands
     # between white space, less the marks at its end. White space after a
@@ -60,6 +62,7 @@ text_recognition:
       flags: ''
       class: spell_mode_first_verb
       captures: {word: word, gap: gap}
+      enabled: "size(get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])) > 0"
       when: >-
         get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])
           .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
@@ -68,13 +71,14 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 LTS/ls_task.c:656 and 688 (ls_task_set_what_state runs before ls_task_spell_mode), 1584-1625 and 4672-4728 (ls_task_lookup_first_verbs speaks the first word when it is in verbs[] and the word is finished)'
-        - 'DECtalk 4.63 LTS/ls_task.c:1175-1236 (the first-word state is set again after a period, a question mark, an exclamation mark and a clause end)'
+        - 'DECtalk 4.63 LTS/ls_task.c:1175-1236 (the first-word state is set again after a period, a question mark and an exclamation mark)'
         - 'DECtalk 4.63 LTS/ls_task.c:1281-1290 (in the spelling mode white space after a word sends COMMA)'
     - id: tn_spell_mode_word_source
       pattern: '(?<=^|\s)(?<word>[^\s\x0b\x81\x82]*[^\s\x0b\x81\x82.,;:!?])(?:(?<gap>[^\S\x0b]+)\x0b?|(?=[.,;:!?]+(?:\s|$))|(?=\x0b)|$)'
       flags: ''
       class: spell_mode_word
       captures: {word: word, gap: gap}
+      enabled: "size(get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])) > 0"
       when: >-
         get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])
           .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
@@ -97,6 +101,7 @@ text_recognition:
       flags: ''
       class: spell_mode_wh_mark
       captures: {first: first}
+      enabled: "size(get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])) > 0"
       when: >-
         get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])
           .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])

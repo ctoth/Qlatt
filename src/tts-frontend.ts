@@ -59,6 +59,7 @@ import {
 } from "./speaker-profile";
 import { projectSpeakerFields } from "./speaker-projection";
 import { parseTextParserConfig, runTextParser } from "./text-parser/frontend";
+import type { TextScope } from "./text-scopes";
 import { transcribeText } from "./transcribe-text";
 import type { KlattFrame, TranscriptionConfig, TranscriptionToken } from "./tts-frontend-types";
 import { isPlainObject } from "./yaml-loader";
@@ -1149,139 +1150,57 @@ function buildTextToKlattTrackDetailed(
           },
         }),
   };
-  // COMMANDS INSIDE THE TEXT. Each place in the parser's text where a
-  // command changes the voice, an entry of its speaker definition, the rate
-  // or a pause addition starts a parameter scope
-  // (declarative-frontend/hrg/parameter-scope.ts): the state every such
-  // command has left by then, as an overlay on the policy the rules read.
-  // The words, syllables and segments that were written from that place on
-  // are put in the scope, in one transaction a scope, whose decision names
-  // the command and depends on the parser's decision for it.
-  type CommandScope = {
-    name: string;
-    offset: number;
-    decisionIds: string[];
-    voice: ResolvedVoice;
-    speaker: typeof resolvedSpeaker;
-    wordsPerMinute: number | undefined;
-    pauses: { comma: number; period: number } | undefined;
-    /** Speaker definitions sent since the text began, this scope's included. */
-    definitionsSent: number;
-  };
-  const commandScopes: CommandScope[] = [];
-  if (parsedText && registry && selectedVoice && parsedText.changes.length > 0) {
-    let voiceName = selectedVoice.name;
-    let definition = [...(parsedText.initial.definition ?? [])];
-    let scopeRate = wordsPerMinute;
-    let pauses = commandPauses
-      ? { comma: commandPauses.comma ?? 0, period: commandPauses.period ?? 0 }
-      : undefined;
-    let definitionsSent = 0;
-    let carriedRuleFields = selectedVoice.ruleFields;
-    // The parser's decision for the command each part of the state is from.
-    const inForce: {
-      voice?: string;
-      definition: string[];
-      rate?: string;
-      comma?: string;
-      period?: string;
-    } = { definition: [] };
-    for (const change of parsedText.changes) {
-      let sends = false;
-      if (change.voice !== undefined) {
-        if (registry.voices.length === 0 || registry.voices.includes(change.voice)) {
-          // usevoice() loads the voice's own definition (PH/ph_vset.c:433-448).
-          voiceName = change.voice;
-          definition = [];
-          sends = true;
-          inForce.voice = change.decisionId;
-          inForce.definition = [];
-        } else {
-          options.diagnostics?.warn(
-            `The text asks for the voice '${change.voice}', which this frontend does not have; the voice stays`,
-            { voice: change.voice, available: registry.voices },
-            "W_TEXT_COMMAND_VOICE_UNKNOWN",
-          );
-        }
-      }
-      if (change.definition) {
-        definition = [...definition, change.definition];
-        sends = true;
-        inForce.definition.push(change.decisionId);
-      }
-      if (change.rate !== undefined && rateUnit !== undefined) {
-        inForce.rate = change.decisionId;
-        scopeRate =
-          speakingRateWordsPerMinute(
-            recordOrEmpty(policyRecord(spec).rate).words_per_minute,
-            change.rate / rateUnit,
-            frontendId,
-            options.diagnostics,
-            provenance,
-          ) ?? scopeRate;
-      }
-      if (change.pauseAddedMs) {
-        if (change.pauseAddedMs.comma !== undefined) inForce.comma = change.decisionId;
-        if (change.pauseAddedMs.period !== undefined) inForce.period = change.decisionId;
-        pauses = {
-          comma: change.pauseAddedMs.comma ?? pauses?.comma ?? 0,
-          period: change.pauseAddedMs.period ?? pauses?.period ?? 0,
-        };
-      }
-      if (sends) definitionsSent += 1;
-      // A rule field the voice does not give keeps what the voice before it
-      // in the text gave: DECtalk's per-voice values are set by one case a
-      // voice, and a case that leaves a value alone leaves the last voice's
-      // (VTM/vtmiont.c:2899-3430 changeSpeakerValues). Measured on say.exe:
-      // after Dennis, Frank's clause ends with Dennis's glottal spread.
-      const resolved = resolveVoice(registry, voiceName, speakerProfile, definition);
-      const voice: ResolvedVoice = {
-        ...resolved,
-        ruleFields: Object.fromEntries(
-          Object.entries(resolved.ruleFields).map(([name, value]) => [
-            name,
-            value ?? carriedRuleFields[name] ?? null,
-          ]),
-        ),
-      };
-      carriedRuleFields = voice.ruleFields;
-      const state = {
-        voice,
-        speaker: resolveSpeakerProfile({
-          baseF0,
-          speakerOverride,
-          voiceProfile: voice.override,
-          profileSpec: speakerProfile,
-        }),
-        wordsPerMinute: scopeRate,
-        pauses,
-        definitionsSent,
-      };
-      // The commands whose values are in force from here on.
-      const decisionIds = [
-        ...new Set(
-          [
-            inForce.voice,
-            ...inForce.definition,
-            inForce.rate,
-            inForce.comma,
-            inForce.period,
-          ].filter((id): id is string => id !== undefined),
-        ),
-      ];
-      // Commands at one place make one scope.
-      const last = commandScopes.at(-1);
-      if (last && last.offset === change.offset) {
-        Object.assign(last, state, { decisionIds });
-      } else {
-        commandScopes.push({
-          name: `command_${(commandScopes.length + 1).toString()}`,
-          offset: change.offset,
-          decisionIds,
-          ...state,
-        });
-      }
-    }
+  // TEXT SCOPES. The frontend's text stage says where inside the text the way
+  // it is spoken changes, and what the state is from each such place on
+  // (src/text-scopes.ts; for a frontend with the DECtalk text parser,
+  // src/text-parser/command-scopes.ts). Each is made a parameter scope
+  // (declarative-frontend/hrg/parameter-scope.ts): an overlay on the policy
+  // the rules read. The words, syllables and segments that were written from
+  // that place on are put in the scope, in one transaction a scope, whose
+  // decision says what the text stage said and depends on its decisions.
+  type CommandScope = TextScope & { speaker: typeof resolvedSpeaker };
+  const commandScopes: CommandScope[] =
+    parsedText && registry && selectedVoice
+      ? parsedText
+          .scopes(
+            {
+              voice: selectedVoice,
+              definition: parsedText.initial.definition ?? [],
+              wordsPerMinute,
+              pauses: commandPauses
+                ? { comma: commandPauses.comma ?? 0, period: commandPauses.period ?? 0 }
+                : undefined,
+            },
+            {
+              voices: registry.voices,
+              resolveVoice: (name, definition) =>
+                resolveVoice(registry, name, speakerProfile, definition),
+              ...(rateUnit === undefined
+                ? {}
+                : {
+                    wordsPerMinute: (asked: number) =>
+                      speakingRateWordsPerMinute(
+                        recordOrEmpty(policyRecord(spec).rate).words_per_minute,
+                        asked / rateUnit,
+                        frontendId,
+                        options.diagnostics,
+                        provenance,
+                      ),
+                  }),
+              warn: (message, data, code) => options.diagnostics?.warn(message, data, code),
+            },
+          )
+          .map((scope) => ({
+            ...scope,
+            speaker: resolveSpeakerProfile({
+              baseF0,
+              speakerOverride,
+              voiceProfile: scope.voice.override,
+              profileSpec: speakerProfile,
+            }),
+          }))
+      : [];
+  if (commandScopes.length > 0) {
     // Where each token was written, from the text item it was made of.
     const writtenAt = new Map<string, number>();
     for (const token of utterance.relation("Token").listItems()) {
@@ -1311,19 +1230,9 @@ function buildTextToKlattTrackDetailed(
         phase: "frontend",
         tag: "parameter_scope",
         reason:
-          `From offset ${scope.offset.toString()} of the parser's text the commands inside the text have left: ` +
-          `voice ${scope.voice.name}` +
-          (scope.wordsPerMinute === undefined
-            ? ""
-            : `, ${scope.wordsPerMinute.toString()} words per minute`) +
-          (scope.pauses
-            ? `, ${scope.pauses.comma.toString()} ms more at a comma and ${scope.pauses.period.toString()} ms more at a sentence end`
-            : "") +
+          `From offset ${scope.offset.toString()} of the parser's text ${scope.summary}` +
           `; ${items.size.toString()} Items written from there on are in the parameter scope ${scope.name}`,
-        citations: [
-          "DECtalk 4.63 CMD/cm_cmd.c:766-790 (a command in the text is carried out where it stands)",
-          "DECtalk 4.63 PH/ph_task.c:665-676 (the clause before a control item is ended), 710-750 (RATE, CPAUSE, PPAUSE, NEW_SPEAKER, NEW_PARAM hold for what follows)",
-        ],
+        citations: scope.citations,
         stage: "frontend",
       });
       for (const decisionId of scope.decisionIds) binding.dependOn(decisionId);

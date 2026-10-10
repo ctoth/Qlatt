@@ -11,8 +11,10 @@
  */
 
 import type { ProvenanceCollector } from "../provenance";
+import type { TextScopeSource } from "../text-scopes";
 import { loadYamlDocumentSync } from "../yaml-loader";
 import { clauseTexts, PUNCTUATION_PASS, readClauses } from "./clauses";
+import { commandScopes } from "./command-scopes";
 import { newCommandSlots, optionIndex, type ReadCommand } from "./commands";
 import { dictionaryLookup } from "./dictionary";
 import type { TextParserTable } from "./interpreter";
@@ -210,6 +212,11 @@ export interface TextParserResult {
    * made counts as one more of them.
    */
   itemClauseEnds: number[];
+  /**
+   * The scopes `changes` make of the text, for the frontend that runs the
+   * parser (src/text-scopes.ts; command-scopes.ts works them out).
+   */
+  scopes: TextScopeSource;
 }
 
 /**
@@ -828,5 +835,12 @@ export function runTextParser(
     out += clauseText;
     if ([...clauseText].some((char) => char !== clauseEnd && char.trim() !== "")) spoken = true;
   });
-  return { text: decode(out, marks), decisionIds, initial, changes, itemClauseEnds };
+  return {
+    text: decode(out, marks),
+    decisionIds,
+    initial,
+    changes,
+    itemClauseEnds,
+    scopes: commandScopes(changes),
+  };
 }

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-mode-spell-marks-v1",
+  "description": "Texts in DECtalk's spelling mode for what a written mark and a conjunction do to a spelled word's form class: a verb, an auxiliary and a noun right before a comma, a semicolon, a colon, a question mark, an exclamation mark and a period; a function verb as the first word of a stretch that a comma, semicolon or colon ends on a vowel or on a consonant; a verb after such a stretch; conjunctions and prepositions far enough into a long stretch for the text stage's clause break, near its start, near its end, and two of them. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "sm-01", "text": "[:mode spell on] Can go, went.", "group": "mark-on-word" },
+    { "id": "sm-02", "text": "[:mode spell on] Can go; went.", "group": "mark-on-word" },
+    { "id": "sm-03", "text": "[:mode spell on] Can go: went.", "group": "mark-on-word" },
+    { "id": "sm-04", "text": "[:mode spell on] Can go? Went.", "group": "mark-on-word" },
+    { "id": "sm-05", "text": "[:mode spell on] Can go! Went.", "group": "mark-on-word" },
+    { "id": "sm-06", "text": "[:mode spell on] Can go. Went.", "group": "mark-on-word" },
+    { "id": "sm-07", "text": "[:mode spell on] It is, he was; they do: we go.", "group": "mark-on-word" },
+    { "id": "sm-08", "text": "[:mode spell on] He can, went home.", "group": "mark-on-word" },
+    { "id": "sm-09", "text": "[:mode spell on] Are late, they.", "group": "resent-class" },
+    { "id": "sm-10", "text": "[:mode spell on] Is free; they.", "group": "resent-class" },
+    { "id": "sm-11", "text": "[:mode spell on] Was low: they.", "group": "resent-class" },
+    { "id": "sm-12", "text": "[:mode spell on] Are in, they.", "group": "resent-class" },
+    { "id": "sm-13", "text": "[:mode spell on] Go late, they.", "group": "resent-class" },
+    { "id": "sm-14", "text": "[:mode spell on] We are late, were they free, is she?", "group": "resent-class" },
+    { "id": "sm-15", "text": "[:mode spell on] Do we stay, or go.", "group": "resent-class" },
+    { "id": "sm-16", "text": "[:mode spell on] A small boat came in and the old man sat down.", "group": "break" },
+    { "id": "sm-17", "text": "[:mode spell on] The boat and the man sat down.", "group": "break" },
+    { "id": "sm-18", "text": "[:mode spell on] The old boat came back in and sank.", "group": "break" },
+    { "id": "sm-19", "text": "[:mode spell on] A small boat came in with the tide at noon today.", "group": "break" },
+    { "id": "sm-20", "text": "[:mode spell on] We saw that the old boat came in and the tide went out at noon.", "group": "break" }
+  ]
+}

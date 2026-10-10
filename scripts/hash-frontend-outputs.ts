@@ -11,7 +11,9 @@
  *   - the decisions (every field but the wall-clock timestamp),
  *   - the diagnostics (level, code, message, data),
  *   - the frames: the track without the ids of the decisions its frames
- *     name, which a single added decision record renumbers.
+ *     name, which a single added decision record renumbers,
+ *   - the messages: the diagnostics without such ids,
+ * and the number of decision records.
  *
  * A corpus entry's own voice and rate are used for the frontend the corpus
  * names (the page's path: rate as a multiple of 180 words per minute, the
@@ -139,6 +141,19 @@ async function runShard(shard: number, shards: number, out: string): Promise<voi
             .update(JSON.stringify(result.track).replace(/"d[0-9]{6,}"/g, '"d"'))
             .digest("hex")
             .slice(0, 20),
+          // The diagnostics again without such ids (a diagnostic's data may
+          // name a decision), and the number of decision records.
+          createHash("sha256")
+            .update(
+              JSON.stringify(
+                diagnostics
+                  .getEntries()
+                  .map(({ level, code, message, data }) => ({ level, code, message, data })),
+              ).replace(/"d[0-9]{6,}"/g, '"d"'),
+            )
+            .digest("hex")
+            .slice(0, 20),
+          provenance.getDecisions().length.toString(),
         ].join(" ");
       } catch (error) {
         hashes = `error ${sha(error instanceof Error ? error.message : String(error))} -`;
@@ -163,8 +178,12 @@ function compare(beforePath: string, afterPath: string): number {
     );
   const before = read(beforePath);
   const after = read(afterPath);
-  const parts = ["track", "decisions", "diagnostics", "frames"];
-  const counts = { track: 0, decisions: 0, diagnostics: 0, frames: 0, missing: 0 };
+  const parts = ["track", "decisions", "diagnostics", "frames", "messages"];
+  const counts = { track: 0, decisions: 0, diagnostics: 0, frames: 0, messages: 0, missing: 0 };
+  // The change in the number of decision records (the sixth column), by
+  // frontend: how many texts, the sum, and the least and the greatest change.
+  const records: Record<string, { texts: number; sum: number; least: number; greatest: number }> =
+    {};
   let shown = 0;
   for (const key of new Set([...before.keys(), ...after.keys()])) {
     const a = before.get(key);
@@ -178,15 +197,29 @@ function compare(beforePath: string, afterPath: string): number {
     const differing = parts.filter(
       (_part, index) => a[index] !== undefined && b[index] !== undefined && a[index] !== b[index],
     );
+    if (a[5] !== undefined && b[5] !== undefined) {
+      const change = Number(b[5]) - Number(a[5]);
+      const frontend = key.split("\t")[2] as string;
+      const entry = records[frontend] ?? { texts: 0, sum: 0, least: change, greatest: change };
+      entry.texts += 1;
+      entry.sum += change;
+      entry.least = Math.min(entry.least, change);
+      entry.greatest = Math.max(entry.greatest, change);
+      records[frontend] = entry;
+    }
     if (differing.length === 0) continue;
     for (const part of differing) counts[part as "track"] += 1;
-    // Every line whose frames differ is shown; of the others the first 60.
-    if (shown < 60 || differing.includes("frames")) console.log(`${key}\t${differing.join(", ")}`);
+    // Every line whose frames or id-free diagnostics differ is shown; of the
+    // others the first 60.
+    if (shown < 60 || differing.includes("frames") || differing.includes("messages")) {
+      console.log(`${key}\t${differing.join(", ")}`);
+    }
     shown += 1;
   }
   console.log(
     JSON.stringify({ before: before.size, after: after.size, linesDiffering: shown, ...counts }),
   );
+  if (Object.keys(records).length > 0) console.log(JSON.stringify({ decisionRecords: records }));
   return shown + counts.missing === 0 ? 0 : 1;
 }
 

@@ -36,6 +36,8 @@ export interface TranscriptionToken {
   writtenMarks?: string[];
   /** A punctuation token that is not in the text: a text rule supplied it. */
   supplied?: boolean;
+  /** What is written in the source text where a supplied mark stands. */
+  suppliedFor?: string;
   /**
    * A punctuation token a text rule sent itself: no routine read the mark
    * as the delimiter of the word before it (an initial's two periods).

@@ -54,9 +54,8 @@ const fixtureDir = path.join("test", "fixtures", "dectalk-mode-math");
 const corpus = readVoiceCorpus(path.join("test", "oracle-corpora", "dectalk-us-mode-math-v1.json"));
 
 /**
- * Not DECtalk's samples yet. None of the three is a difference of the math
- * mode: each text differs in the same way with the mode off, or with another
- * command in the mode command's place.
+ * Not DECtalk's samples yet. Neither is a difference of the math mode: each
+ * text differs in the same way with the mode off.
  */
 const NOT_EXACT: Readonly<Record<string, string>> = {
   "mm-08":
@@ -68,12 +67,6 @@ const NOT_EXACT: Readonly<Record<string, string>> = {
     'two dates in one clause: the text differs from the "and" after the first date on, at ' +
     'the same sample with the mode off ("On 3/8/2001 and 12-25-99." 22285 of 55806); either ' +
     'date alone is exact ("On 3/8/2001 and then.", "On 12-25-99."). The cause is not found.',
-  "mm-16":
-    '"is" after the mode is turned off: a clause a command ended is not a sentence end for ' +
-    "DECtalk's first-word state (LTS/ls_task.c:1175-1236 reset it at a period, a question " +
-    "mark and an exclamation mark only), so the auxiliary keeps its unstressed form; this " +
-    'frontend stresses it. The same with any command: "The sum [:rate 180] is done." ' +
-    "differs from sample 13715 of 27051.",
 };
 
 const run = (text: string) => {

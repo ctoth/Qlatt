@@ -49,11 +49,14 @@ text_recognition:
     # Not spelled: one of the six auxiliaries as the first word of a
     # sentence. The first-word test runs before the spelling test and speaks
     # the auxiliary itself. The white space after it is a comma's pause all
-    # the same. The first word is the one after a period, a question mark, an
-    # exclamation mark or a clause end. Measured: "Is it out? Was it in." has
-    # IH Z and W AH Z, "It is out." has AY, EH S.
+    # the same. The first word is the one after a period, a question mark or
+    # an exclamation mark; a clause end with no such mark before it (a command
+    # inside the text) starts no sentence. Measured: "Is it out? Was it in."
+    # has IH Z and W AH Z, "It is out." has AY, EH S; "The gate [:rate 200]
+    # was shut." has D AH B EL Y UW, EY, EH S for "was"
+    # (test/oracle-corpora/dectalk-us-first-word-after-command-v1.json).
     - id: tn_spell_mode_first_verb_source
-      pattern: '(?<=^\s*|[.?!]\s+|\x0b\s*)(?<word>[A-Za-z]+)(?:(?<gap>[^\S\x0b]+)\x0b?|(?=[.,;:!?]+(?:\s|$))|(?=\x0b)|$)'
+      pattern: '(?<=^\s*|[.?!]\s+)(?<word>[A-Za-z]+)(?:(?<gap>[^\S\x0b]+)\x0b?|(?=[.,;:!?]+(?:\s|$))|(?=\x0b)|$)'
       flags: ''
       class: spell_mode_first_verb
       captures: {word: word, gap: gap}
@@ -85,11 +88,12 @@ text_recognition:
     # the first-word test comes before the spelling test. Outside the mode
     # the frontend's own rule does this from the first word it has spoken;
     # here the first word is spelled and this rule reads it as written. The
-    # first word is the one after a period, a question mark, an exclamation
-    # mark that ends a word, or a clause end. Measured on say.exe: "What is
-    # it?" ends in a period's clause, "Is it out?" in a question's.
+    # first word is the one after a period, a question mark or an exclamation
+    # mark that ends a word; a clause end with no such mark before it starts
+    # no sentence. Measured on say.exe: "What is it?" ends in a period's
+    # clause, "Is it out?" in a question's.
     - id: tn_spell_mode_wh_mark_source
-      pattern: '(?<=(?:^\s*|[.?!]\s+|\x0b\s*)(?<first>[A-Za-z]+)(?=[\s.,;:!?])(?:[^.?!\x0b]|[.?!](?=\S))*)\?(?=\s|$)'
+      pattern: '(?<=(?:^\s*|[.?!]\s+)(?<first>[A-Za-z]+)(?=[\s.,;:!?])(?:[^.?!]|[.?!](?=\S))*)\?(?=\s|$)'
       flags: ''
       class: spell_mode_wh_mark
       captures: {first: first}

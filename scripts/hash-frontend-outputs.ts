@@ -9,7 +9,9 @@
  * public/rules/frontends/manifest.json, and for each the SHA-256 of
  *   - the track (every frame, time and parameters),
  *   - the decisions (every field but the wall-clock timestamp),
- *   - the diagnostics (level, code, message, data).
+ *   - the diagnostics (level, code, message, data),
+ *   - the frames: the track without the ids of the decisions its frames
+ *     name, which a single added decision record renumbers.
  *
  * A corpus entry's own voice and rate are used for the frontend the corpus
  * names (the page's path: rate as a multiple of 180 words per minute, the
@@ -21,6 +23,7 @@
  *     --experimental-specifier-resolution=node \
  *     scripts/hash-frontend-outputs.ts --out <file> [--jobs 12] [--only <part of a corpus file name>]
  *   ... scripts/hash-frontend-outputs.ts --compare <before> <after>
+ *   ... scripts/hash-frontend-outputs.ts --dump <text> [--frontend <id>] [--out <file>]
  *
  * --out writes one line a text and frontend: corpus, id, frontend and the
  * three hashes, sorted. --compare prints the lines that differ and which of
@@ -130,6 +133,12 @@ async function runShard(shard: number, shards: number, out: string): Promise<voi
               .getEntries()
               .map(({ level, code, message, data }) => ({ level, code, message, data })),
           ),
+          // The track again without the ids of the decisions its frames
+          // name: one decision record more or less renumbers them all.
+          createHash("sha256")
+            .update(JSON.stringify(result.track).replace(/"d[0-9]{6,}"/g, '"d"'))
+            .digest("hex")
+            .slice(0, 20),
         ].join(" ");
       } catch (error) {
         hashes = `error ${sha(error instanceof Error ? error.message : String(error))} -`;
@@ -154,8 +163,8 @@ function compare(beforePath: string, afterPath: string): number {
     );
   const before = read(beforePath);
   const after = read(afterPath);
-  const parts = ["track", "decisions", "diagnostics"];
-  const counts = { track: 0, decisions: 0, diagnostics: 0, missing: 0 };
+  const parts = ["track", "decisions", "diagnostics", "frames"];
+  const counts = { track: 0, decisions: 0, diagnostics: 0, frames: 0, missing: 0 };
   let shown = 0;
   for (const key of new Set([...before.keys(), ...after.keys()])) {
     const a = before.get(key);
@@ -165,10 +174,14 @@ function compare(beforePath: string, afterPath: string): number {
       console.log(`${key}\t${a ? "only before" : "only after"}`);
       continue;
     }
-    const differing = parts.filter((_part, index) => a[index] !== b[index]);
+    // A file written before a hash was added has no such column: not compared.
+    const differing = parts.filter(
+      (_part, index) => a[index] !== undefined && b[index] !== undefined && a[index] !== b[index],
+    );
     if (differing.length === 0) continue;
     for (const part of differing) counts[part as "track"] += 1;
-    if (shown < 60) console.log(`${key}\t${differing.join(", ")}`);
+    // Every line whose frames differ is shown; of the others the first 60.
+    if (shown < 60 || differing.includes("frames")) console.log(`${key}\t${differing.join(", ")}`);
     shown += 1;
   }
   console.log(
@@ -188,8 +201,34 @@ async function main(): Promise<void> {
     process.exitCode = compare(argv[at + 1] as string, argv[at + 2] as string);
     return;
   }
+  const dump = arg("dump");
+  if (dump !== undefined) {
+    // What is hashed for one text, written out: to see what a differing hash
+    // differs in (run it on both trees and compare the two outputs).
+    const { textToKlattTrackDetailed } = await import("../src/tts-frontend");
+    const { createProvenanceCollector } = await import("../src/provenance");
+    const provenance = createProvenanceCollector();
+    const result = textToKlattTrackDetailed(dump, undefined, 30, {
+      frontendId: arg("frontend") ?? "dectalk-english",
+      provenance,
+    });
+    const lines = [
+      ...result.track.map((frame) => `frame\t${JSON.stringify(frame)}`),
+      ...provenance
+        .getDecisions()
+        .map(({ timestampMs: _timestamp, ...decision }) => `decision\t${JSON.stringify(decision)}`),
+    ];
+    const dumpOut = arg("out");
+    if (dumpOut) fs.writeFileSync(dumpOut, `${lines.join("\n")}\n`);
+    else console.log(lines.join("\n"));
+    return;
+  }
   const out = arg("out");
-  if (!out) throw new Error("Usage: --out <file> [--jobs N] | --compare <before> <after>");
+  if (!out) {
+    throw new Error(
+      "Usage: --out <file> [--jobs N] | --compare <before> <after> | --dump <text> [--frontend <id>]",
+    );
+  }
   const shard = arg("shard");
   const jobs = Number(arg("jobs") ?? "12");
   if (shard !== undefined) {

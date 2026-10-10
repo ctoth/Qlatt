@@ -317,15 +317,24 @@ functions:
   # silences carry it as punctuation_sent. Measured on say.exe: in "Who is J.
   # Is it Bob? Ask." the "Is" keeps its unstressed form and the question
   # mark is sent as a period; in "Who is he. Is it Bob? Ask." neither.
+  # Nor is the state reset by the period that ends a clause where no such
+  # mark is written (a command inside the text, the clause end character):
+  # that period is the phonetic stage's, and the delimiter routine's clause
+  # end case leaves the state alone. Such a silence knows what is written
+  # where it stands (punctuation_written). Measured on say.exe: in "The sum
+  # [:rate 180] is done." the "is" keeps its unstressed form; in "The sum. Is
+  # done." it is stressed.
   dectalk_ends_sentence:
     params: [item]
     body: >-
       item != null && item.phoneme == 'SIL'
       && get(item, 'punctuationSymbol', null) in ['.', '?', '!']
       && !isTrue(item, 'punctuation_sent')
+      && matches(get(item, 'punctuation_written', '.'), '[.?!]')
     description: Whether a silence is a sentence end that resets the text stage's first-word state.
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:1160, 1195, 1220 and 1236 (ls_task_do_right_punct resets wstate at a period, a question mark, an exclamation mark and a flush)"
+      - "DECtalk 4.63 LTS/ls_task.c:1239-1264 (the clause end character's case sets no wstate); PH/ph_task.c:665-676 (the period that ends pending symbols at a control item is the phonetic stage's)"
       - "DECtalk 4.63 LTS/ls_task.c:2612-2617 (the initial rule reads the period itself), 1516-1519 and 1547-1549 (its two periods are sent as phones)"
       - "DECtalk 4.63 LTS/ls_task.c:1590 (ls_task_set_what_state acts only when the state has been reset)"
 predicates:
@@ -859,6 +868,10 @@ relations:
       # read it as a word's delimiter (an initial's two periods,
       # LTS/ls_task.c:2612-2617).
       punctuation_sent: { kind: boolean }
+      # For a punctuation silence whose mark a text rule supplied: what is
+      # written in the text where it stands (the clause end character for the
+      # period that ends a clause at a command or at the text's end).
+      punctuation_written: { kind: string }
       # A duration the duration dictionary gives the phone (ph_sort.c:192-215),
       # in ms; the duration rules are not applied to it.
       dictionary_duration_ms: { kind: number }

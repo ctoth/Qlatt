@@ -85,6 +85,8 @@ type OrthographyInputToken = {
   isPunctuation: boolean;
   /** A punctuation token that is not in the source text: a text rule supplied it. */
   supplied?: boolean;
+  /** What is written in the source text where a supplied mark stands. */
+  suppliedFor?: string;
   /** A punctuation token a text rule sent itself: it was not read as a delimiter. */
   sentMark?: boolean;
   /** A letter or a digit stands right before the token's span in the source text. */
@@ -492,6 +494,8 @@ function rewriteOrthographyTokens(
   // Punctuation tokens that a text rule supplied: the mark is not in the
   // source text the token comes from (a text's end closed as a sentence).
   const suppliedPunctuation = new Set<string>();
+  // For each of them, what is written in the source text where it stands.
+  const suppliedFor = new Map<string, string>();
   // Punctuation tokens a text rule sent itself (terminal kind 'sent_mark'):
   // the mark was not read as the delimiter of the word before it.
   const sentMarks = new Set<string>();
@@ -557,7 +561,10 @@ function rewriteOrthographyTokens(
           );
           if (on.length > 0) modesAt.set(token.id, on);
         }
-        if (punctuation && !written.includes(word)) suppliedPunctuation.add(token.id);
+        if (punctuation && !written.includes(word)) {
+          suppliedPunctuation.add(token.id);
+          suppliedFor.set(token.id, written);
+        }
         if (start > 0 && /[A-Za-z0-9]/.test(sourceText[start - 1] as string)) {
           writtenAgainst.add(token.id);
         }
@@ -636,6 +643,7 @@ function rewriteOrthographyTokens(
         word,
         isPunctuation: tokenType === "punctuation",
         ...(suppliedPunctuation.has(token.id) ? { supplied: true } : {}),
+        ...(suppliedFor.has(token.id) ? { suppliedFor: suppliedFor.get(token.id) as string } : {}),
         ...(sentMarks.has(token.id) ? { sentMark: true } : {}),
         ...(writtenAgainst.has(token.id) ? { writtenAgainstPrevious: true } : {}),
         ...(stretchEnds.has(token.id) ? { endsWordStretch: true } : {}),
@@ -837,6 +845,7 @@ export function transcribeText(
         symbol: inputToken.symbol ?? word,
         word: word, // Associate punctuation with itself as the 'word'
         ...(inputToken.supplied ? { supplied: true } : {}),
+        ...(inputToken.suppliedFor === undefined ? {} : { suppliedFor: inputToken.suppliedFor }),
         ...(inputToken.sentMark ? { sentMark: true } : {}),
       });
       index += 1;

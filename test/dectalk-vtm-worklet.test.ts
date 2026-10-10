@@ -19,6 +19,7 @@ import {
   vtmEventsToTrack,
 } from "../src/dectalk-vtm-track";
 import type { KlattFrame } from "../src/klatt-interpreter";
+import { parseSemanticsDocument } from "../src/semantics/load-semantics";
 
 interface Message {
   type: string;
@@ -164,9 +165,10 @@ describe("dectalk-vtm processor parameters", () => {
       Object.entries(graph.nodes.vtm.params).map(([param, spec]) => [param, spec.bind]),
     ).toEqual(NODE_PARAMS.map((name) => [name, PACKET_TRACK_KEYS[name] ?? name]));
 
-    const semantics = load(
+    const semantics = parseSemanticsDocument(
       readFileSync("public/experiments/dectalk-vtm/semantics.yaml", "utf8"),
-    ) as {
+      "public/experiments/dectalk-vtm/semantics.yaml",
+    ) as unknown as {
       defaultScheduling: string;
       params: Record<string, { default: number }>;
       realize: Record<string, { expr: string; step: boolean }>;

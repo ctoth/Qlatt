@@ -7,14 +7,12 @@ import { createKlattScheduleCompiler } from "../src/klatt-interpreter";
 import type { BindingSpec } from "../src/klatt-runtime";
 import { createProvenanceCollector } from "../src/provenance";
 import { createConfiguredEvaluator } from "../src/semantics/evaluator-factory";
-import type { SemanticsDocument } from "../src/semantics/types";
+import { parseSemanticsDocument } from "../src/semantics/load-semantics";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { parseYamlString } from "../src/yaml-loader";
 
 const root = resolve(__dirname, "../public/experiments/klatt80-baseline");
-const semantics = parseYamlString<SemanticsDocument>(
-  readFileSync(resolve(root, "semantics.yaml"), "utf8"),
-);
+const semantics = parseSemanticsDocument(readFileSync(resolve(root, "semantics.yaml"), "utf8"));
 const graph = parseYamlString<Parameters<typeof expandFormantBanks>[0]>(
   readFileSync(resolve(root, "graph.yaml"), "utf8"),
 );

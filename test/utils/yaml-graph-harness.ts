@@ -4,7 +4,9 @@ import { describe, expect, it } from "vitest";
 import { proximity } from "../../src/builtin-functions";
 import type { BaconGraph, ParamValueSpec } from "../../src/klatt-runtime";
 import { createConfiguredEvaluator } from "../../src/semantics/evaluator-factory";
+import { expandRealizeEach } from "../../src/semantics/realize-each";
 import type {
+  AuthoredSemanticsDocument,
   EvaluationContext,
   ParamValue,
   RealizationRule,
@@ -488,7 +490,10 @@ function assertSchedule(
 
 export function defineYamlGraphSuite(yamlPath: string): void {
   const suite = readYamlFile<YamlGraphSuite>(yamlPath);
-  const semantics = readYamlFile<SemanticsDocument>(suite.semantics);
+  const semantics = expandRealizeEach(
+    readYamlFile<AuthoredSemanticsDocument>(suite.semantics),
+    suite.semantics,
+  );
   const graph = readYamlFile<BaconGraph>(suite.graph);
   const defaultTol = suite.defaultTol ?? 1e-6;
 

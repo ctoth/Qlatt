@@ -348,9 +348,14 @@ predicates:
     && (current.phoneme != "SIL" || isTrue(current, "written_silence"))
   is_clause_silence: >-
     current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null
-  # A Segment that is not of phonemic text: a word's phone, or a mark's
-  # silence. Letter-to-sound counts its own words only.
-  is_not_phonemic_text: "!isTrue(current, 'phonemic_text')"
+  # A Segment of a word letter-to-sound has in its list of classes, or a
+  # mark's silence: not phonemic text, or phonemic text that stands for a
+  # written word and has that word's classes (a word a text rule spelled; a
+  # word phonemic text was joined to). A bracket's own phones are neither.
+  is_class_word_phone: >-
+    !isTrue(current, 'phonemic_text')
+    || (path(current, 'R:SylStructure.parent.parent') != null
+        && get(path(current, 'R:SylStructure.parent.parent'), 'text_form_classes', null) != null)
   # Never true: the stop of a count that runs to the utterance's start.
   is_never: "false"
   # The first phone of the utterance's second clause, when that clause comes

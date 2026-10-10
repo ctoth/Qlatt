@@ -143,6 +143,7 @@ rules:
             - stress_before_class_start
             - phrase_start_follows
             - morpheme_boundary_after
+            - phonemic_text
             - dictionary_duration_ms
             - written_duration_ms
             - written_pitch
@@ -709,9 +710,16 @@ rules:
       # makes two verbs, and nothing is promoted; "You and, go." sends that
       # of "You".
       # Not measured: a clause that is phonemic text alone before the mark.
-      first: >-
+      # A word a text rule spelled is phonemic text too, but it stands for a
+      # written word and has its classes: in the spelling mode "Are late,"
+      # sends the class of "Are" again (the same trace).
+      first_is_bracket: >-
         first_phone != null && isTrue(first_phone, 'phonemic_text')
-        ? look_ahead_pred(first_phone, 1000, 'is_not_phonemic_text') : first_phone
+        && (path(first_phone, 'R:SylStructure.parent.parent') == null
+            || get(path(first_phone, 'R:SylStructure.parent.parent'), 'text_form_classes', null) == null)
+      first: >-
+        first_is_bracket
+        ? look_ahead_pred(first_phone, 1000, 'is_class_word_phone') : first_phone
       resent_verb: >-
         written_break
         && (dectalk_word_class(first, 'verb') || dectalk_word_class(first, 'ed')

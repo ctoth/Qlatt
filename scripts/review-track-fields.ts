@@ -54,7 +54,8 @@ const sha = (value: unknown): string =>
 
 console.log(`root ${root}; frontend ${frontendId}; dropped: ${[...dropped].join(" ") || "none"}`);
 for (const phrase of phrases) {
-  const { track } = textToKlattTrackDetailed(phrase, 110, 30, { frontendId });
+  // No base pitch is requested: the frontend's voice keeps its own.
+  const { track } = textToKlattTrackDetailed(phrase, undefined, 30, { frontendId });
   const frames = track.map(({ provenance: _provenance, params, ...frame }) => ({
     ...frame,
     params: Object.fromEntries(

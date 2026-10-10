@@ -232,10 +232,45 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
 // Only the child's root document is merged (NOT the base's resolved includes),
 // so the base contributes root-level data (parameters, output, …) while rules/
 // phases come from the child's own (fallback-resolved) include list.
+//
+// A child file that SHADOWS a base include (same relative path as an entry of
+// the base's own `include:` list, e.g. both frontends' pipeline.yaml) inherits
+// that base file's INHERITED_SHADOWED_FILE_KEYS dictionaries key-wise: an entry
+// the child declares replaces the base's entry of that name whole, and every
+// other base entry is inherited. Everything else in a shadowing file (rules,
+// phases, include, string_sets, …) is still the child's alone, and the base
+// file's own nested includes are not followed.
 
 /** Directory portion of a "/"-separated resource path. */
 function dirOfPath(path: string): string {
   return path.substring(0, path.lastIndexOf("/"));
+}
+
+/**
+ * Keyed sections a child file inherits from the base include it shadows.
+ * `string_sets` is not among them: inheriting it would hand an extending
+ * frontend every base set, and a child has no way to decline one.
+ */
+const INHERITED_SHADOWED_FILE_KEYS = ["predicates", "maps", "tags", "relations"] as const;
+
+/**
+ * Lay a child file's INHERITED_SHADOWED_FILE_KEYS over the base file it
+ * shadows: per section, base entries first, child entries replacing by name.
+ */
+function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObject): PlainObject {
+  const merged: PlainObject = { ...childFile };
+  for (const key of INHERITED_SHADOWED_FILE_KEYS) {
+    const baseDict = baseFile[key];
+    if (!isPlainObject(baseDict)) continue;
+    const childDict = childFile[key];
+    merged[key] = {
+      ...(cloneValue(baseDict) as PlainObject),
+      ...(isPlainObject(childDict) ? childDict : {}),
+    };
+  }
+  MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(baseFile), ...MAP_ORIGINS.get(childFile) });
+  RULE_ORIGINS.set(merged, RULE_ORIGINS.get(childFile) ?? {});
+  return merged;
 }
 
 /**
@@ -256,7 +291,25 @@ function deepMergeChildWins(base: unknown, child: unknown): unknown {
 }
 
 /** Base-directory fallback for include resolution under `extends`. */
-type IncludeFallback = { readonly fromDir: string; readonly toDir: string };
+type IncludeFallback = {
+  readonly fromDir: string;
+  readonly toDir: string;
+  /** Absolute paths of the base root document's own `include:` entries. */
+  readonly baseIncludes: ReadonlySet<string>;
+};
+
+function includeFallbackFor(
+  rootPath: string,
+  basePath: string,
+  baseDoc: PlainObject,
+): IncludeFallback {
+  const baseIncludes = Array.isArray(baseDoc.include) ? (baseDoc.include as string[]) : [];
+  return {
+    fromDir: dirOfPath(rootPath),
+    toDir: dirOfPath(basePath),
+    baseIncludes: new Set(baseIncludes.map((relPath) => resolveIncludePath(basePath, relPath))),
+  };
+}
 
 /**
  * Rewrite a child-directory absolute include path to its base-directory
@@ -271,6 +324,18 @@ function fallbackIncludePath(
   const prefix = fallback.fromDir + "/";
   if (!absPath.startsWith(prefix)) return null;
   return fallback.toDir + "/" + absPath.slice(prefix.length);
+}
+
+/**
+ * The base include a child-directory file shadows, or null when the base's
+ * `include:` list has no file at the same relative path.
+ */
+function shadowedBaseIncludePath(
+  absPath: string,
+  fallback: IncludeFallback | undefined,
+): string | null {
+  const basePath = fallbackIncludePath(absPath, fallback);
+  return basePath !== null && fallback?.baseIncludes.has(basePath) ? basePath : null;
 }
 
 /**
@@ -295,8 +360,10 @@ function resolveIncludesSync(
   for (const relPath of includes) {
     let absPath = resolveIncludePath(parentPath, relPath);
     let source: string;
+    let shadowedPath: string | null = null;
     try {
       source = loadYamlSourceSync(absPath);
+      shadowedPath = shadowedBaseIncludePath(absPath, fallback);
     } catch (error) {
       const altPath = fallbackIncludePath(absPath, fallback);
       if (altPath === null) throw error;
@@ -308,7 +375,13 @@ function resolveIncludesSync(
     }
     seenPaths.add(absPath);
 
-    const childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    let childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    if (shadowedPath !== null) {
+      childDocument = inheritShadowedFileSections(
+        parseRulepackDocument(loadYamlSourceSync(shadowedPath), `base rulepack ${shadowedPath}`),
+        childDocument,
+      );
+    }
     const resolvedChild = resolveIncludesSync(childDocument, absPath, seenPaths, fallback);
     resolved = mergeChildIntoRoot(resolved, resolvedChild, absPath);
   }
@@ -345,7 +418,7 @@ function resolveExtendsSync(
   delete merged.extends;
   return {
     doc: merged,
-    fallback: { fromDir: dirOfPath(rootPath), toDir: dirOfPath(basePath) },
+    fallback: includeFallbackFor(rootPath, basePath, baseDoc),
   };
 }
 
@@ -373,7 +446,7 @@ async function resolveExtendsAsync(
   delete merged.extends;
   return {
     doc: merged,
-    fallback: { fromDir: dirOfPath(rootPath), toDir: dirOfPath(basePath) },
+    fallback: includeFallbackFor(rootPath, basePath, baseDoc),
   };
 }
 
@@ -396,8 +469,10 @@ async function resolveIncludesAsync(
   for (const relPath of includes) {
     let absPath = resolveIncludePath(parentPath, relPath);
     let source: string;
+    let shadowedPath: string | null = null;
     try {
       source = await loadYamlSource(absPath);
+      shadowedPath = shadowedBaseIncludePath(absPath, fallback);
     } catch (error) {
       const altPath = fallbackIncludePath(absPath, fallback);
       if (altPath === null) throw error;
@@ -409,7 +484,13 @@ async function resolveIncludesAsync(
     }
     seenPaths.add(absPath);
 
-    const childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    let childDocument = parseRulepackDocument(source, `included rulepack ${absPath}`);
+    if (shadowedPath !== null) {
+      childDocument = inheritShadowedFileSections(
+        parseRulepackDocument(await loadYamlSource(shadowedPath), `base rulepack ${shadowedPath}`),
+        childDocument,
+      );
+    }
     const resolvedChild = await resolveIncludesAsync(childDocument, absPath, seenPaths, fallback);
     resolved = mergeChildIntoRoot(resolved, resolvedChild, absPath);
   }

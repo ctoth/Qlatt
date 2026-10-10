@@ -54,6 +54,10 @@ checkout and streams 16-bit PCM back through nvwave.
   WebAudio graph, which is roughly real time. Streaming is the next step and is
   the reason the protocol already returns sample-accurate word markers.
 - Rate maps the NVDA slider to 0.5x to 2x through the frontend's rate policy.
-  Pitch maps the slider to one octave around 110 Hz by changing the base F0.
+  Pitch maps the slider to a ratio, one octave down to one octave up with 50
+  neutral, sent as the server's `pitchScale`: it multiplies the selected
+  frontend's own voice's base pitch, and the pitch span follows by the same
+  ratio (`public/rules/policy/speaker-profile.yaml`, `pitch_composition`). At
+  50 each frontend speaks at its voice's own pitch.
 - `IndexCommand` is honoured at chunk boundaries: the index fires when the
   audio queued before it has played.

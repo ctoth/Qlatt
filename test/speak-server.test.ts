@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import readline from "node:readline";
 import { describe, expect, it } from "vitest";
-import { wordMarkers } from "../scripts/speak-server";
+import { speakRenderRequest, wordMarkers } from "../scripts/speak-server";
 
 // Protocol pin for scripts/speak-server.ts, the stdio surface that
 // hosts/nvda and other external hosts drive.
@@ -49,6 +49,36 @@ async function withServer<T>(body: (send: (message: object) => Promise<Event[]>)
     await once(child, "exit");
   }
 }
+
+describe("speak-server request mapping", () => {
+  it("requests no pitch when the request names none", () => {
+    const render = speakRenderRequest({ op: "speak", text: "Hello." });
+    expect(render.baseF0).toBeUndefined();
+    expect(render).not.toHaveProperty("pitchScale");
+    expect(render).toMatchObject({ phrase: "Hello.", frontendId: "qlatt-english", rate: 1 });
+  });
+
+  it("passes pitchScale as the relative pitch request, with no base pitch", () => {
+    const render = speakRenderRequest({
+      op: "speak",
+      text: "Hello.",
+      frontendId: "qlatt-beauty",
+      pitchScale: 2,
+    });
+    expect(render.pitchScale).toBe(2);
+    expect(render.baseF0).toBeUndefined();
+    expect(render.frontendId).toBe("qlatt-beauty");
+  });
+
+  it("still accepts baseF0, alone or with pitchScale", () => {
+    expect(speakRenderRequest({ op: "speak", text: "Hello.", baseF0: 160 })).toMatchObject({
+      baseF0: 160,
+    });
+    expect(
+      speakRenderRequest({ op: "speak", text: "Hello.", baseF0: 160, pitchScale: 0.5 }),
+    ).toMatchObject({ baseF0: 160, pitchScale: 0.5 });
+  });
+});
 
 describe("speak-server protocol", () => {
   it("derives one marker per word at the first frame of the word", () => {
@@ -100,6 +130,13 @@ describe("speak-server protocol", () => {
       expect(other.event).toBe("audio");
       expect(other.sampleRate).toBe(16000);
       expect(other.pcm).not.toBe(audio.pcm);
+
+      // A relative pitch is a different render; unity is the render with none.
+      const [higher] = await send({ id: 6, op: "speak", text: "Hello world.", pitchScale: 2 });
+      expect(higher.event).toBe("audio");
+      expect(higher.pcm).not.toBe(audio.pcm);
+      const [unity] = await send({ id: 7, op: "speak", text: "Hello world.", pitchScale: 1 });
+      expect(unity.pcm).toBe(audio.pcm);
 
       const [error] = await send({ id: 3, op: "speak", text: "x", frontendId: "no-such-frontend" });
       expect(error.event).toBe("error");

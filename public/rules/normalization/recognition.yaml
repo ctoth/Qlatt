@@ -29,9 +29,11 @@ text_recognition:
       vocabulary_keys: '[]'
       citations:
         - 'DECtalk 4.63 CMD/cm_text.c:1088-1145 (text between PAR_PHONES_ON_D and PAR_PHONES_OFF_D goes to letter-to-sound as phonemes), CMD/par_def1.h:286-287'
-    # SPELLING MODE (maps.tn_text_modes.spell, laid over the rulepack's maps
-    # when a mode command before the text turned it on). Every word of the
-    # parser's text is spelled, whatever it is made of: the test stands in
+    # SPELLING MODE (maps.tn_text_mode_spans.spell, laid over the rulepack's
+    # maps when a mode command turned it on: the stretches of the parser's
+    # text the mode is on in, each a pair of offsets, from and up to; a rule
+    # here holds for a match that begins inside one). Every word of the
+    # parser's text in the mode is spelled, whatever it is made of: the test stands in
     # front of every other reading of a word, and a word is what stands
     # between white space, less the marks at its end. White space after a
     # word is then a comma's pause, not a word boundary, also when the text
@@ -56,7 +58,8 @@ text_recognition:
       class: spell_mode_first_verb
       captures: {word: word, gap: gap}
       when: >-
-        get(get(maps, 'tn_text_modes', {}), 'spell', 'off') == 'on'
+        get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
         && lower(captures.word) in get(maps, 'tn_first_verbs', {})
       speak: current.text
       vocabulary_keys: '[]'
@@ -69,7 +72,9 @@ text_recognition:
       flags: ''
       class: spell_mode_word
       captures: {word: word, gap: gap}
-      when: "get(get(maps, 'tn_text_modes', {}), 'spell', 'off') == 'on'"
+      when: >-
+        get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
       speak: current.text
       vocabulary_keys: '[]'
       citations:
@@ -89,7 +94,8 @@ text_recognition:
       class: spell_mode_wh_mark
       captures: {first: first}
       when: >-
-        get(get(maps, 'tn_text_modes', {}), 'spell', 'off') == 'on'
+        get(get(maps, 'tn_text_mode_spans', {}), 'spell', [])
+          .exists(span, span[0] <= current.sourceStart && current.sourceStart < span[1])
         && lower(captures.first) in get(maps, 'tn_wh_words', {})
       speak: current.text
       vocabulary_keys: '[]'

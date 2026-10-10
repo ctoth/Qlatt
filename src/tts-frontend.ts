@@ -932,16 +932,30 @@ function buildTextToKlattTrackDetailed(
   // The text parser's output (run above, before the voice was chosen) is the
   // source text.
   if (parsedText) {
-    // The modes a command before the text turned on are laid over the
-    // rulepack's maps for the text rules to read (maps.tn_text_modes).
-    const modes = parsedText.initial.modes ?? [];
+    // The modes the text parser's commands turned on are laid over the
+    // rulepack's maps for the text rules to read
+    // (maps.tn_text_mode_spans): for each mode, the stretches of the parser's
+    // text it is on in, each from an offset up to another. A mode a command
+    // before the text turned on is on from 0; a command inside the text
+    // starts or ends a stretch where it stands.
+    const modeEvents = [
+      { offset: 0, modes: parsedText.initial.modes ?? [] },
+      ...parsedText.modeChanges,
+    ];
+    const modeSpans: Record<string, number[][]> = {};
+    modeEvents.forEach((event, index) => {
+      const end = modeEvents[index + 1]?.offset ?? Number.MAX_SAFE_INTEGER;
+      for (const mode of event.modes) {
+        modeSpans[mode] = [...(modeSpans[mode] ?? []), [event.offset, end]];
+      }
+    });
     const withModes =
-      modes.length > 0
+      Object.keys(modeSpans).length > 0
         ? {
             ...spec,
             maps: {
               ...(spec.maps as Record<string, unknown> | undefined),
-              tn_text_modes: Object.fromEntries(modes.map((mode) => [mode, "on"])),
+              tn_text_mode_spans: modeSpans,
             },
           }
         : spec;

@@ -110,7 +110,7 @@ describe("DECtalk's in-text commands", () => {
 
   it("carries out a definition and a voice command inside a text, and names the command it does not carry out", () => {
     const { decisions, warnings } = run(
-      "The ship came [:dv ap 200] in. [:nb] We went [:mode spell on] down.",
+      "The ship came [:dv ap 200] in. [:nb] We went [:mode math on] down.",
     );
     expect(decisions.map((decision) => decision.type)).toEqual([
       "text_parser_command",

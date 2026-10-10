@@ -1,10 +1,11 @@
 /**
- * DECtalk's spelling mode, [:mode spell on] standing before any spoken text,
- * from text, against the stock say.exe's audio sample for sample, through the
- * page's path (scripts/oracle/dectalk-voice-compare.ts). Two corpora, each
- * written and committed before its export:
+ * DECtalk's spelling mode, [:mode spell on] standing before any spoken text
+ * or inside the text, from text, against the stock say.exe's audio sample for
+ * sample, through the page's path (scripts/oracle/dectalk-voice-compare.ts).
+ * Three corpora, each written and committed before its export:
  *   test/oracle-corpora/dectalk-us-mode-spell-v1.json          (24 texts)
  *   test/oracle-corpora/dectalk-us-mode-spell-classes-v1.json  (24 texts)
+ *   test/oracle-corpora/dectalk-us-mode-inside-text-v1.json    (12 texts)
  *
  * In the mode every word of the text parser's output is spelled, ahead of
  * every other reading of a word (LTS/ls_task.c:688, 1835-1871): each
@@ -23,8 +24,12 @@
  *     spelled "is" or "don't" (PH/ph_sort.c:1283-1302).
  *
  * Text rules do the spelling (public/rules/normalization: recognition.yaml
- * tn_spell_mode_*_source, lexical.yaml tn_spell_mode_*), on when the text
- * parser reports the mode (src/text-parser/frontend.ts initial.modes).
+ * tn_spell_mode_*_source, lexical.yaml tn_spell_mode_*), on in the stretches
+ * of the text the text parser reports the mode for
+ * (src/text-parser/frontend.ts initial.modes and modeChanges; the frontend
+ * lays them over the rules' maps as tn_text_mode_spans). A mode command
+ * inside the text ends the words before it, as any command that sends a
+ * control item does, and the mode holds from there on.
  *
  * NOT_EXACT lists the texts that are not DECtalk's samples, each with what
  * was measured of the difference. A text there that becomes exact fails its
@@ -56,6 +61,12 @@ const corpora = [
       path.join("test", "oracle-corpora", "dectalk-us-mode-spell-classes-v1.json"),
     ),
   },
+  {
+    fixtureDir: path.join("test", "fixtures", "dectalk-mode-inside-text"),
+    corpus: readVoiceCorpus(
+      path.join("test", "oracle-corpora", "dectalk-us-mode-inside-text-v1.json"),
+    ),
+  },
 ];
 
 /** Not DECtalk's samples yet. */
@@ -76,9 +87,6 @@ const NOT_EXACT: Readonly<Record<string, string>> = {
     "[Can go.] stresses go, [Can go, went.] went, [Can, went.] neither. The form-class index " +
     "after a written comma in the spelling mode (LTS/ls_task.c:1269-1275 with 1667-1673) is " +
     "not followed",
-  "sc-24":
-    "the mode command stands inside the text: DECtalk spells from there on; a change of mode " +
-    "inside a text is not carried out and keeps its decision and diagnostic",
 };
 
 const run = (text: string) => {
@@ -140,12 +148,30 @@ describe("DECtalk's mode command", () => {
     expect(alone.warnings).toEqual([]);
   });
 
-  it("keeps a decision and a diagnostic for a mode it does not carry out", () => {
-    const inside = run("The tide [:mode spell on] went out.");
+  it("turns the spelling mode on and off inside a text, from the command on", () => {
+    const inside = run("The tide [:mode spell on] went [:mode spell off] out.");
     expect(inside.commands.map((decision) => decision.type)).toEqual([
+      "text_parser_command",
+      "text_parser_command",
+    ]);
+    expect(inside.commands[0]?.reason).toContain("the mode spell is on for the text from here on");
+    expect(inside.commands[1]?.reason).toContain("the mode spell is off for the text from here on");
+    expect(inside.warnings).toEqual([]);
+    // "The tide" and "out" as outside the mode, "went" spelled between them.
+    const plain = run("The tide. Out.").phonemes.join(" ");
+    const spoken = inside.phonemes.join(" ");
+    expect(spoken.startsWith(run("The tide.").phonemes.slice(0, 5).join(" "))).toBe(true);
+    expect(spoken).not.toBe(plain);
+    // Another mode's set inside a text takes the spelling mode away there.
+    const taken = run("[:mode spell on] The tide [:mode name set] went out.");
+    expect(taken.commands.map((decision) => decision.type)).toEqual([
+      "text_parser_command",
       "text_parser_command_not_carried_out",
     ]);
-    expect(inside.commands[0]?.reason).toContain("a change of the mode spell inside a text");
+    expect(taken.commands[1]?.reason).toContain("taken away from here on");
+  });
+
+  it("keeps a decision and a diagnostic for a mode it does not carry out", () => {
     const other = run("[:mode europe on] The tide went out.");
     expect(other.commands[0]?.reason).toContain("of the modes only spell is ported");
     expect(other.warnings.map((event) => event.code)).toEqual(["W_TEXT_COMMAND_NOT_CARRIED_OUT"]);

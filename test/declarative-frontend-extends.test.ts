@@ -252,6 +252,32 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
     }
   });
 
+  // A child-directory include that is there but cannot be read is an error;
+  // only one that is absent is read from the base directory.
+  it.each([
+    ["synchronous", loadRulepackSpecFromPath],
+    ["asynchronous", preloadRulepackSpecFromPath],
+  ] as const)(
+    "does not fall back to the base for an include that exists but cannot be read (%s loader)",
+    async (_name, load) => {
+      const dir = mkdtempSync(join(tmpdir(), "qlatt-extends-unreadable-"));
+      try {
+        const frontendPath = writeExtendingFrontend(dir, sections);
+        // A directory where the file should be: it exists and reading it fails.
+        mkdirSync(join(dir, "phases", "duration.yaml"), { recursive: true });
+        const error = await Promise.resolve()
+          .then(() => load(frontendPath))
+          .then(
+            () => null,
+            (thrown: Error) => thrown,
+          );
+        expect(error?.message).toMatch(/^E_YAML_READ: '.*\/phases\/duration\.yaml' exists at /);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    },
+  );
+
   it("does not inherit string_sets: the shadowing file's sets are the whole list", () => {
     const beauty = sectionsOf("qlatt-beauty");
     expect(english.string_sets).toHaveProperty("function_words");

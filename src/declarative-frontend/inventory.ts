@@ -5,6 +5,7 @@ import type { AreaFunctionDerivation } from "../provenance";
 import {
   cloneValue,
   isPlainObject,
+  isYamlNotFoundError,
   loadYamlDocumentSync,
   loadYamlSource,
   loadYamlSourceSync,
@@ -445,6 +446,20 @@ function buildInventorySpec(raw: Record<string, unknown>): InventorySpec {
   };
 }
 
+/**
+ * The error for an inventory that could not be loaded: "path unknown" when the
+ * file does not exist, and the loader's own error for anything else.
+ */
+function inventoryPathUnknown(specPath: string, cause: unknown): unknown {
+  if (!isYamlNotFoundError(cause)) return cause;
+  const known = listBundledInventoryPaths();
+  return new Error(
+    `E_INVENTORY_PATH_UNKNOWN: '${specPath}' could not be loaded` +
+      (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
+    { cause },
+  );
+}
+
 export function loadInventorySpecFromPath(specPath: string): InventorySpec {
   const cached = BUNDLED_INVENTORY_CACHE.get(specPath);
   if (cached) return cached;
@@ -452,12 +467,8 @@ export function loadInventorySpecFromPath(specPath: string): InventorySpec {
   let source = "";
   try {
     source = loadYamlSourceSync(specPath);
-  } catch {
-    const known = listBundledInventoryPaths();
-    throw new Error(
-      `E_INVENTORY_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
-    );
+  } catch (cause) {
+    throw inventoryPathUnknown(specPath, cause);
   }
 
   const spec = parseInventorySpec(source);
@@ -472,12 +483,8 @@ export async function preloadInventorySpecFromPath(specPath: string): Promise<In
   let source = "";
   try {
     source = await loadYamlSource(specPath);
-  } catch {
-    const known = listBundledInventoryPaths();
-    throw new Error(
-      `E_INVENTORY_PATH_UNKNOWN: '${specPath}' could not be loaded` +
-        (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
-    );
+  } catch (cause) {
+    throw inventoryPathUnknown(specPath, cause);
   }
 
   // The phonology document is fetched here, so that nothing is read

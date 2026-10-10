@@ -137,6 +137,23 @@ maps:
     # (LTS/ls_task.c:2303-2319, 1547-1558). DECtalk's parser writes
     # `two) . ` for `(back at two)."` inside a quotation.
     stripped_parenthesis_mark: delimiter
+    # A parenthesis, an angle bracket or a curly brace on a word's edge is
+    # stripped and forces a comma, before the word for an opening mark and
+    # after it for a closing one (LTS/l_us_con.c:135-136 and the rows for
+    # the other four, LTS/ls_task.c:2244-2275, 2303-2319). DECtalk's parser
+    # takes them away in its default mode; in its punctuation mode pass
+    # "See the (red) car." has a comma before and after "red" on say.exe.
+    enclosing_marks: comma
+    # A word with one of @ & = # $ * + % in it that is no number is spelled,
+    # each sign by its name (LTS/ls_task.c:4118-4150): in the mode pass
+    # "bob@example.com", "AT&T", "C++", "#42" and "15$" are spelled on
+    # say.exe.
+    sign_words: spelled
+    # Digits with slashes are a part number, not a date
+    # (LTS/ls_task.c:4118-4180): DECtalk's parser rewrites a date before
+    # letter-to-sound sees it, and in the mode pass "3/4/2024" is "three
+    # slash four slash twenty twenty four" on say.exe.
+    slash_dates: part_number
     # A comma, colon or semicolon with an apostrophe on it at a word's end
     # is stripped with the apostrophe and sent by the word's own routine
     # (LTS/ls_task.c:2303-2340, 1547-1549): it ends the clause but is not a

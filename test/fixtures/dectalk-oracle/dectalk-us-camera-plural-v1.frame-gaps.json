@@ -1,0 +1,12 @@
+{
+  "cam-possessive": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cam-plural": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cam-plural-2": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cam-plural-3": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cam-bare": ["B1","AV","AP","A2","A4","A5","AB","A2_AMPLITUDE"],
+  "cam-final-d": ["B1","AV","AP","A2","A3","A4","A5","AB"],
+  "cam-written-z": ["B1","AV","AP","A2","A3","A4","A5","A6","AB"],
+  "cam-two-syllables": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cam-four-syllables": ["B1","AV","AP","A2","A3","A4","A5","A6","AB","A2_AMPLITUDE"],
+  "cam-other-vowel": ["B1","AV","AP","A2","A4","A5","A6","AB","A2_AMPLITUDE"]
+}

@@ -114,6 +114,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   // Words the dictionary holds capitalised and in lower case with different
   // phones ("New" and "new"), by how the word is written.
   "dectalk-us-capitalised-entries-v1.json",
+  // Rule-read words of three syllables that end in "a" or "as": the last
+  // vowel reduces with or without the [z] ("camera", "cameras").
+  "dectalk-us-camera-plural-v1.json",
   // The plural of a letter ("p's"): the text parser writes phonemic z
   // against the letter, with no word boundary before or after it, and a
   // mark right after it is a word.

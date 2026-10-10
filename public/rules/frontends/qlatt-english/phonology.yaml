@@ -1,0 +1,457 @@
+# =============================================================================
+# English phonology: the language's part of a segment inventory.
+#
+# The symbol conventions and the phoneme class table of English, shared by
+# every voice of the language (docs/frontend-document-model.md decision 6). An
+# inventory names this file as its `phonology_path` and supplies the acoustic
+# targets; the loader merges, per target, these fields with the inventory's
+# (docs/inventory-conventions.md, "Layering an inventory over a phonology
+# document"). qlatt-english/inventory.yaml and qlatt-beauty/inventory.yaml both
+# do.
+#
+# What belongs here: a class of the phoneme that is the same for every voice:
+# `type`, the binary features (voicing, height, backness, place, manner), the
+# components of a diphthong (`diph`), the nasal's place (`nasal_place`, and its
+# code `nasal_place_index`), and the coarticulation-resistance class (`dac`,
+# Recasens 1997). A value in Hz, dB or
+# ms is a voice's and stays in its inventory.
+# =============================================================================
+version: v1
+# Engineering convention: CMU/ARPABET symbols and lexical stress suffixes.
+silence_symbol: SIL
+nucleus_types: [vowel]
+symbol_grammar: '[A-Z]+'
+stress_markers: {0: '0', 1: '1', 2: '2'}
+phoneme_targets:
+  IY1:
+    type: vowel
+    hi: true
+    front: true
+    dac: 3  # Recasens 1997
+  IH1:
+    type: vowel
+    hi: true
+    front: true
+    dac: 3  # Recasens 1997
+  EY1:
+    type: vowel
+    mid: true
+    front: true
+    dac: 2  # Recasens 1997
+    diph:
+      - EH1
+      - IH1
+  EH1:
+    type: vowel
+    mid: true
+    front: true
+    dac: 2  # Recasens 1997
+  AE1:
+    type: vowel
+    low: true
+    front: true
+    dac: 2  # Recasens 1997
+  AA1:
+    type: vowel
+    low: true
+    back: true
+    dac: 2  # Recasens 1997
+  AO1:
+    type: vowel
+    mid: true
+    back: true
+    is_back_rounded: true
+    dac: 2  # Recasens 1997
+  OW1:
+    type: vowel
+    mid: true
+    back: true
+    is_back_rounded: true
+    dac: 2  # Recasens 1997
+    diph:
+      - AO1
+      - UH1
+  UH1:
+    type: vowel
+    hi: true
+    back: true
+    is_back_rounded: true
+    dac: 3  # Recasens 1997
+  UW1:
+    type: vowel
+    hi: true
+    back: true
+    is_back_rounded: true
+    dac: 3  # Recasens 1997
+  AH1:
+    type: vowel
+    mid: true
+    central: true
+    dac: 1  # Recasens 1997
+  ER1:
+    type: vowel
+    mid: true
+    central: true
+    rhotic: true
+    dac: 2  # Recasens 1997
+  AY1:
+    type: vowel
+    low: true
+    dac: 2  # Recasens 1997
+    diph:
+      - AA1
+      - IH1
+  AW1:
+    type: vowel
+    low: true
+    dac: 2  # Recasens 1997
+    diph:
+      - AE1
+      - UH1
+  OY1:
+    type: vowel
+    mid: true
+    back: true
+    is_back_rounded: true
+    dac: 2  # Recasens 1997
+    diph:
+      - AO1
+      - IH1
+  AY0:
+    type: vowel
+    low: true
+    dac: 2  # Recasens 1997
+    diph:
+      - AA1
+      - IH1
+  AW0:
+    type: vowel
+    low: true
+    dac: 2  # Recasens 1997
+    diph:
+      - AE1
+      - UH1
+  OY0:
+    type: vowel
+    mid: true
+    back: true
+    is_back_rounded: true
+    dac: 2  # Recasens 1997
+    diph:
+      - AO1
+      - IH1
+  IY0:
+    type: vowel
+    hi: true
+    front: true
+    dac: 3  # Recasens 1997
+  IH0:
+    type: vowel
+    hi: true
+    front: true
+    dac: 3  # Recasens 1997
+  EY0:
+    type: vowel
+    mid: true
+    front: true
+    dac: 2  # Recasens 1997
+    diph:
+      - EH0
+      - IH0
+  EH0:
+    type: vowel
+    mid: true
+    front: true
+    dac: 2  # Recasens 1997
+  AE0:
+    type: vowel
+    low: true
+    front: true
+    dac: 2  # Recasens 1997
+  AA0:
+    type: vowel
+    low: true
+    back: true
+    dac: 2  # Recasens 1997
+  AO0:
+    type: vowel
+    mid: true
+    back: true
+    is_back_rounded: true
+    dac: 2  # Recasens 1997
+  OW0:
+    type: vowel
+    mid: true
+    back: true
+    is_back_rounded: true
+    dac: 2  # Recasens 1997
+    diph:
+      - AO0
+      - UH0
+  UH0:
+    type: vowel
+    hi: true
+    back: true
+    is_back_rounded: true
+    dac: 3  # Recasens 1997
+  UW0:
+    type: vowel
+    hi: true
+    back: true
+    is_back_rounded: true
+    dac: 3  # Recasens 1997
+  AH0:
+    type: vowel
+    mid: true
+    central: true
+    dac: 1  # Recasens 1997
+  ER0:
+    type: vowel
+    mid: true
+    central: true
+    rhotic: true
+    dac: 2  # Recasens 1997
+  S:
+    type: fricative
+    is_obstruent: true
+    voiceless: true
+    alveolar: true
+    dac: 2  # Recasens 1997
+  Z:
+    type: fricative
+    is_obstruent: true
+    voiced: true
+    alveolar: true
+    dac: 2  # Recasens 1997
+  SH:
+    type: fricative
+    is_obstruent: true
+    voiceless: true
+    postalveolar: true
+    dac: 3  # Recasens 1997
+  ZH:
+    type: fricative
+    is_obstruent: true
+    voiced: true
+    postalveolar: true
+    dac: 3  # Recasens 1997
+  F:
+    type: fricative
+    is_obstruent: true
+    voiceless: true
+    labiodental: true
+    dac: 1  # Recasens 1997
+  V:
+    type: fricative
+    is_obstruent: true
+    voiced: true
+    labiodental: true
+    dac: 1  # Recasens 1997
+  TH:
+    type: fricative
+    is_obstruent: true
+    voiceless: true
+    dental: true
+    dac: 1  # Recasens 1997
+  DH:
+    type: fricative
+    is_obstruent: true
+    voiced: true
+    dental: true
+    dac: 1  # Recasens 1997
+  HH:
+    type: fricative
+    is_obstruent: true
+    voiceless: true
+    glottal: true
+    dac: 1  # Recasens 1997
+  M:
+    type: nasal
+    voiced: true
+    bilabial: true
+    nasal_segment: true
+    nasal_place_index: 1  # Klatt 1980 Table I
+    nasal_place: m
+    dac: 1  # Recasens 1997
+  'N':
+    type: nasal
+    voiced: true
+    alveolar: true
+    nasal_segment: true
+    nasal_place_index: 2  # Klatt 1980 Table I
+    nasal_place: n
+    dac: 2  # Recasens 1997
+  NG:
+    type: nasal
+    voiced: true
+    velar: true
+    nasal_segment: true
+    nasal_place_index: 3  # Klatt 1980 Table I
+    nasal_place: ng
+    dac: 3  # Recasens 1997
+  L:
+    type: liquid
+    voiced: true
+    alveolar: true
+    dac: 3  # Recasens 1997
+  R:
+    type: liquid
+    voiced: true
+    rhotic: true
+    dac: 3  # Recasens 1997
+  W:
+    type: glide
+    is_back_rounded: true
+    voiced: true
+    labiovelar: true
+    dac: 1  # Recasens 1997; Volenec 2015
+  'Y':
+    type: glide
+    voiced: true
+    palatal: true
+    dac: 3  # Recasens 1997
+  P:
+    type: silence
+    is_stop_base: true
+  T:
+    type: silence
+    is_stop_base: true
+  K:
+    type: silence
+    is_stop_base: true
+  B:
+    type: silence
+    is_stop_base: true
+  D:
+    type: silence
+    is_stop_base: true
+  G:
+    type: silence
+    is_stop_base: true
+  P_CL:
+    type: stop_closure
+    is_obstruent: true
+    voiceless: true
+    bilabial: true
+    dac: 1  # Recasens 1997
+  T_CL:
+    type: stop_closure
+    is_obstruent: true
+    voiceless: true
+    alveolar: true
+    dac: 2  # Recasens 1997
+  K_CL:
+    type: stop_closure
+    is_obstruent: true
+    voiceless: true
+    velar: true
+    dac: 3  # Recasens 1997
+  B_CL:
+    type: stop_closure
+    is_obstruent: true
+    voiced: true
+    bilabial: true
+    dac: 1  # Recasens 1997
+  D_CL:
+    type: stop_closure
+    is_obstruent: true
+    voiced: true
+    alveolar: true
+    dac: 2  # Recasens 1997
+  G_CL:
+    type: stop_closure
+    is_obstruent: true
+    voiced: true
+    velar: true
+    dac: 3  # Recasens 1997
+  P_REL:
+    type: stop_release
+    is_obstruent: true
+    voiceless: true
+    bilabial: true
+    dac: 1  # Recasens 1997
+  T_REL:
+    type: stop_release
+    is_obstruent: true
+    voiceless: true
+    alveolar: true
+    dac: 2  # Recasens 1997
+  K_REL:
+    type: stop_release
+    is_obstruent: true
+    voiceless: true
+    velar: true
+    dac: 3  # Recasens 1997
+  B_REL:
+    type: stop_release
+    is_obstruent: true
+    voiced: true
+    bilabial: true
+    dac: 1  # Recasens 1997
+  D_REL:
+    type: stop_release
+    is_obstruent: true
+    voiced: true
+    alveolar: true
+    dac: 2  # Recasens 1997
+  G_REL:
+    type: stop_release
+    is_obstruent: true
+    voiced: true
+    velar: true
+    dac: 3  # Recasens 1997
+  P_ASP:
+    type: stop_aspiration
+    is_obstruent: true
+    voiceless: true
+    bilabial: true
+    dac: 1  # Recasens 1997
+  T_ASP:
+    type: stop_aspiration
+    is_obstruent: true
+    voiceless: true
+    alveolar: true
+    dac: 2  # Recasens 1997
+  K_ASP:
+    type: stop_aspiration
+    is_obstruent: true
+    voiceless: true
+    velar: true
+    dac: 3  # Recasens 1997
+  CH_CL:
+    type: stop_closure
+    is_obstruent: true
+    voiceless: true
+    postalveolar: true
+    dac: 3  # Recasens 1997
+  JH_CL:
+    type: stop_closure
+    is_obstruent: true
+    voiced: true
+    postalveolar: true
+    dac: 3  # Recasens 1997
+  CH:
+    type: affricate
+    is_obstruent: true
+    voiceless: true
+    postalveolar: true
+    dac: 3  # Recasens 1997
+  JH:
+    type: affricate
+    is_obstruent: true
+    voiced: true
+    postalveolar: true
+    dac: 3  # Recasens 1997
+  DX:
+    type: flap
+    voiced: true
+    alveolar: true
+    dac: 2  # Recasens 1997
+  SIL:
+    type: silence
+  GS:
+    type: stop_closure
+    is_obstruent: true
+    voiceless: true
+    glottal: true
+    dac: 1        # Recasens 1997: glottal = minimal constraint

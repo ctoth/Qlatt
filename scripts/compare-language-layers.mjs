@@ -21,8 +21,14 @@ for (const key of ["predicates", "functions", "string_sets", "maps"]) {
 }
 // inventory: phonological features vs acoustic targets
 const inv = load(`${fe("qlatt-english")}/inventory.yaml`);
+// An inventory layered over a phonology document (`phonology_path`) has the
+// phonological fields of its targets there: count the fields of both.
+const phonology = inv.phonology_path ? load(`public${inv.phonology_path}`) : null;
 const featKeys = new Map();
-for (const t of Object.values(inv.phoneme_targets))
+for (const t of [
+  ...Object.values(inv.phoneme_targets),
+  ...Object.values(phonology?.phoneme_targets ?? {}),
+])
   for (const [k, v] of Object.entries(t)) {
     const kind = typeof v === "boolean" || k === "type" ? "phonological" : "acoustic";
     featKeys.set(k, kind);

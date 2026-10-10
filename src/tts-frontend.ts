@@ -1037,14 +1037,14 @@ function buildTextToKlattTrackDetailed(
     type: "inventory_selected",
     subject: `inventory:${frontendId}`,
     reason: `Selected frontend inventory '${resources.inventoryPath}'`,
-    citations: [resources.inventoryPath, ...(resources.inventory.citations ?? [])],
+    citations: [...resources.inventoryDocuments, ...(resources.inventory.citations ?? [])],
   });
   const construct = utterance.beginTransaction({
     ruleId: "inventory_materialization",
     phase: "transcribe",
     tag: "inventory",
     reason: "Materialize transcribed phonemes as typed Segment Items",
-    citations: [resources.inventoryPath, ...(resources.inventory.citations ?? [])],
+    citations: [...resources.inventoryDocuments, ...(resources.inventory.citations ?? [])],
     stage: "transcribe",
   });
   construct.dependOn(inventoryDecision.id);
@@ -1093,7 +1093,7 @@ function buildTextToKlattTrackDetailed(
           reason: `Selected inventory target '${selection.selectedKey}' for '${selection.inputPhone}' with stress ${selection.stress ?? "unspecified"} from ${token.sourceTokenId}${selection.defaultDurationMs === undefined ? "" : `; applied declared default duration ${selection.defaultDurationMs} ms`}${selection.areaFunction ? `; derived from area function ${selection.areaFunction.source} using ${selection.areaFunction.model}, speaker ${JSON.stringify(selection.areaFunction.speaker)}` : ""}`,
           inventorySelection: { ...selection, sourceTokenId: token.sourceTokenId },
           citations: [
-            resources.inventoryPath,
+            ...resources.inventoryDocuments,
             ...(selection.areaFunction?.citations ?? []),
             ...(selection.secondaryStressFallback
               ? (resources.inventory.secondary_stress_fallback?.citations ?? [])
@@ -1596,7 +1596,7 @@ function buildTextToKlattTrackDetailed(
     type: "silence_resource_selected",
     subject: `inventory:${frontendId}:${resources.inventory.silence_symbol}`,
     reason: "Selected declared inventory silence target for lowering edges",
-    citations: [resources.inventoryPath],
+    citations: [...resources.inventoryDocuments],
     parents: [inventoryDecision.id],
   });
   const scaledTransition = transitionMs * rate ** -transitionExponent;

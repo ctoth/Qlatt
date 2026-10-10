@@ -107,7 +107,9 @@ Legacy imperative frontend mutators (`rule_K_Context`, `rule_GenerateF0Contour`)
 ### Inventory and graph features
 
 The selected frontend's `inventory_path` is the source of its baseline Segment
-targets. Rules then create versioned feature writes. The latest version is the
+targets: the inventory's acoustic fields, with the phonological fields of the
+phonology document it names (`phonology_path`, `docs/inventory-conventions.md`)
+when it names one. Rules then create versioned feature writes. The latest version is the
 current value used by lowering, while earlier versions and their producing
 decisions remain available to `--item ... --field ...` explanation.
 

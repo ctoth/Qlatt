@@ -56,15 +56,7 @@ const corpus = readVoiceCorpus(
 );
 
 /** Not DECtalk's samples yet. */
-const NOT_EXACT: Readonly<Record<string, string>> = {
-  "pm-24":
-    'the first bracket ends in a vowel and "and" follows it with no word boundary. ' +
-    'DECtalk sends a secondary stress mark ahead of "and" (symbols 102 120 111 ...), and ' +
-    "there its phone sort has the vowel twice where the vowel and the mark stood: the vowel " +
-    "loses the duration and the pitch written on it (22 frames, no pitch command) while the " +
-    "clause is still a sung one. Here the vowel keeps both. Not a matter of the pitch: " +
-    '"[uw] and." differs the same way',
-};
+const NOT_EXACT: Readonly<Record<string, string>> = {};
 
 const run = (text: string) => {
   const provenance = createProvenanceCollector();

@@ -124,9 +124,13 @@ rules:
       next_word_start: >-
         look_ahead_where(current, 100,
           '(candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null) || (candidate.phoneme != "SIL" && !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id))')
+      # The same when the phrase start has become a word boundary (the word
+      # ends its clause): the SPECIALWORD symbol is still the first thing
+      # after the phonemic text. say.exe on "[uw] and.": the UW has the
+      # first-syllable bit (structure word 618) and Rule 5's shortening.
       special_reads_syllabic: >-
         later == null && next_word_start != null && next_word_start.phoneme != 'SIL'
-        && dectalk_phrase_state(next_word_start) == 'alone'
+        && dectalk_phrase_unbounded(next_word_start)
         && 120 in params.policy.timing.syllabic_indices_past_table
       later_in_scan: "later != null || special_reads_syllabic"
     apply:
@@ -210,10 +214,15 @@ rules:
       # (ph_sort2.c:217-220), and the SPECIALWORD symbol ahead of the phrase
       # start reads as one (dectalk_syllable_type). Only the last phone has a
       # value, which the phrase start's own symbol adds.
+      # The same when the phone sort has turned that phrase start into a word
+      # boundary (the word ends its clause, state 'word'): the SPECIALWORD
+      # symbol still stands first, and the last phone has the word
+      # boundary's value. say.exe on "[uwt] and.": UW 0, T 96; on
+      # "[uwtn] and.": T 0, N 96.
       alone_ahead: >-
         boundary_item != null && boundary_item.phoneme != 'SIL'
         && !dectalk_same_word(boundary_item, current)
-        && dectalk_phrase_state(boundary_item) == 'alone'
+        && dectalk_phrase_unbounded(boundary_item)
       last_before_alone: >-
         alone_ahead && dectalk_next(current) != null
         && dectalk_next(current).id == boundary_item.id
@@ -242,7 +251,7 @@ rules:
           # (timing.phrase_start_raised_at_wpm). DECtalk's duration routine
           # prints bou=128 for the T of "dot" in "...and then it rained.",
           # and 160 at 140 words per minute.
-          - when: last_before_alone
+          - when: "last_before_alone && dectalk_phrase_state(boundary_item) == 'alone'"
             value: >-
               params.policy.timing.speaking_rate_wpm <= params.policy.timing.phrase_start_raised_at_wpm
               ? 'vp' : 'pp'
@@ -437,9 +446,13 @@ rules:
         tag: written_pitch
       - field: pitch_command
         op: set
-        value: "number != 0.0 && !dropped ? number : 0.0"
+        # A vowel that took the helper-verb promotion ahead of a word's text
+        # has lost its number, after the mode was read from it
+        # (dectalk_helper_verb_promotion_ahead_of_word).
+        value: "number != 0.0 && !dropped && !isTrue(current, 'class_start_promoted') ? number : 0.0"
         tag: written_pitch
     citations:
+      - "DECtalk 4.63 PH/ph_sort.c:1256-1264, 1283-1302 (the pitch is read for the mode, then lost when an S2 is inserted at its vowel)"
       - "DECtalk 4.63 PH/ph_sort.c:1657-1728 interp_user_f0 (a pitch on a phoneme sets f0mode: SINGING up to 37, else PHONE_TARGETS_SPECIFIED; the two do not mix)"
       - "DECtalk 4.63 PH/ph_sort.c:1969-1984 make_phone (the pitch stays with its phoneme)"
   # With a pitch written on a phoneme the clause has no hat pattern: the

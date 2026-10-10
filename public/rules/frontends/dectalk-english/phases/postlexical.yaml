@@ -139,6 +139,8 @@ rules:
             - word
             - word_initial_consonant
             - helper_verb_promoted
+            - class_start_promoted
+            - stress_before_class_start
             - phrase_start_follows
             - morpheme_boundary_after
             - dictionary_duration_ms
@@ -699,7 +701,17 @@ rules:
         && !(n != null && path(n, 'R:SylStructure.parent.parent') != null
              && isTrue(path(n, 'R:SylStructure.parent.parent'), 'clause_break_before'))
       written_before: "look_back_pred(current, 1000, 'is_written_clause_silence')"
-      first: "written_before == null ? behind(current, current_index) : ahead(written_before, 1)"
+      first_phone: "written_before == null ? behind(current, current_index) : ahead(written_before, 1)"
+      # The first word is letter-to-sound's: phonemic text before it is none
+      # of its words and has no place in its list of classes. Measured on
+      # say.exe (the instrumented build's class trace): "[uw] and, go."
+      # sends the class of "and" (00820040) a second time at the comma, which
+      # makes two verbs, and nothing is promoted; "You and, go." sends that
+      # of "You".
+      # Not measured: a clause that is phonemic text alone before the mark.
+      first: >-
+        first_phone != null && isTrue(first_phone, 'phonemic_text')
+        ? look_ahead_pred(first_phone, 1000, 'is_not_phonemic_text') : first_phone
       resent_verb: >-
         written_break
         && (dectalk_word_class(first, 'verb') || dectalk_word_class(first, 'ed')
@@ -737,6 +749,79 @@ rules:
       - "DECtalk 4.63 LTS/ls_task.c:1269-1275 (at ',', ':' or ';' fc_index is set to 1 and old_fc_index to -1, then the COMMA is sent); ls_task.c:5062-5063, 5284-5285 (a sentence's first word is index 1)"
       - "DECtalk 4.63 LTS/ls_util.c:808-818 (sending a phone first sends WORD_CLASS of fc_struct[fc_index] when the index differs from the last one sent)"
       - "DECtalk 4.63 word classes as PH receives them, printed by the instrumented build: 'Be late, they went.' 00800010, 00000003, 00800010 before the comma; 'To be, they went.' 00811000, 00800010, 00811000; 'He can, they went.' 00802000, 00820408, 00802000"
+
+  # Where the promotion's search for a vowel begins: one symbol before the
+  # word. The class of a word is written at the place of each symbol that
+  # arrives from the word's first on (ph_task.c:590, 598-601). The phone sort
+  # then puts a word boundary at the clause's second place, which moves the
+  # symbols up one place and leaves the classes where they were
+  # (ph_sort.c:460-463; insertphone, ph_sort.c:1774-1790, moves symbols,
+  # durations and pitches only). So the class begins at the symbol before
+  # the word's first. That is the word boundary before it, and nothing shows
+  # of it, unless the word stands right after phonemic text, which has no
+  # word boundary after it (CMD/cm_text.c:1118-1144): then it is the last
+  # phone of that text. This rule marks that phone when the promotion is due
+  # for the word after it; the rules below say what a vowel and a consonant
+  # make of it.
+  # Measured on say.exe (the instrumented build's class trace and its
+  # duration routine's phones): in "[uw] and me." the class of "and"
+  # (00820040) arrives when two symbols are in, and UW has stress 2 and the
+  # AE of "and" none; in "[uwt] and me." UW has none and AE has 2; in
+  # "[uw]do it." the bracket's UW has stress 2 and the UW of "do" has only
+  # the clause's primary stress; "[uw] and go." (two verbs) has neither.
+  dectalk_helper_verb_class_start:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        (current.phoneme != 'SIL' || isTrue(current, 'written_silence'))
+        && has(current.word) && current.word != ''
+    define:
+      n: next
+      # One word with the phonemic text before it, or parted from it by a
+      # phrase start alone.
+      joined: "n != null && isTrue(n, 'word_text_start')"
+      unbounded: >-
+        n != null && n.phoneme != 'SIL' && dectalk_word_start(n)
+        && isTrue(path(n, 'R:SylStructure.parent.parent'), 'phrase_start_unbounded')
+      branch_word: >-
+        (joined || unbounded)
+        && (dectalk_has_class(n, 'verb') || dectalk_has_class(n, 'ed'))
+        && !dectalk_has_class(n, 'noun') && !dectalk_has_class(n, 'adj')
+      clause_end: >-
+        look_ahead_where(current, 1000,
+          'candidate.phoneme == "SIL" && get(candidate, "punctuationSymbol", null) != null')
+      # As in dectalk_helper_verb_promotion, asked of the word's text.
+      branch_words_before: >-
+        n == null ? 0.0
+        : count_back_pred(n, 1000, 'is_clause_silence', 'is_verb_branch_word_start')
+      in_first_branch_word: >-
+        n != null
+        && branch_words_before == (dectalk_word_start(n) ? 0.0 : 1.0)
+        && !isTrue(path(n, 'R:SylStructure.parent.parent'), 'continues_written_word')
+      verbs: "clause_end == null ? 0.0 : get(clause_end, 'clause_verb_count', 0.0)"
+      function_verbs: "clause_end == null ? 0.0 : get(clause_end, 'clause_function_verb_count', 0.0)"
+      settling_clause: >-
+        look_back_where(current, 5000,
+          'candidate.phoneme == "SIL" && (get(candidate, "clause_verb_count", 0.0) > 1.0 || get(candidate, "clause_function_verb_count", 0.0) >= 1.0 || get(candidate, "clause_verb_branch_count", 0.0) > 0.0)')
+      carried: >-
+        settling_clause != null
+        && get(settling_clause, 'clause_verb_count', 0.0) == 1.0
+        && get(settling_clause, 'clause_function_verb_count', 0.0) == 1.0
+        && get(settling_clause, 'clause_verb_branch_count', 0.0) == 0.0
+      flag: "verbs > 1.0 ? false : (verbs == 1.0 && function_verbs == 1.0 ? true : carried)"
+    constraint: "branch_word && clause_end != null && in_first_branch_word && flag"
+    apply:
+      - field: helper_verb_ahead
+        op: set
+        value: "true"
+        tag: stress
+    citations:
+      - "DECtalk 4.63 ph_task.c:590, 598-601 (the held class is written at the place of each arriving symbol)"
+      - "DECtalk 4.63 ph_sort.c:460-463 (a word boundary is inserted at the clause's second place when none is there)"
+      - "DECtalk 4.63 ph_sort.c:1774-1790 insertphone (moves symbols, durations and pitches, not classes)"
+      - "DECtalk 4.63 ph_sort.c:1283-1302 (the search for the first vowel starts at the first symbol with the class)"
+      - "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on symbol by symbol, with no word boundary after it)"
 
   dectalk_helper_verb_promotion:
     kind: scalar
@@ -791,8 +876,22 @@ rules:
         && get(settling_clause, 'clause_verb_branch_count', 0.0) == 0.0
       flag: "verbs > 1.0 ? false : (verbs == 1.0 && function_verbs == 1.0 ? true : carried)"
       stress_now: "get(current, 'stress', 0)"
+      # The phone before the word's text, when the class reaches it
+      # (dectalk_helper_verb_class_start): a vowel there is the first vowel
+      # the sort finds, and the word's own gets nothing.
+      own_text_start: >-
+        isTrue(current, 'word_text_start') ? current
+        : find_within_word(current, "isTrue(current, 'word_text_start')", "behind")
+      text_first: >-
+        own_text_start != null ? own_text_start
+        : (at_word_start ? current : look_back_pred(current, 1000, 'is_dectalk_word_start'))
+      before_text: "text_first == null ? null : behind(text_first, 1)"
+      taken_before_text: >-
+        before_text != null && before_text.type == 'vowel'
+        && isTrue(before_text, 'helper_verb_ahead')
     constraint: >-
       clause_end != null && !text_start_ahead && no_prior_vowel && in_first_branch_word && flag
+      && !taken_before_text
     apply:
       - field: stress
         op: set
@@ -806,6 +905,89 @@ rules:
       - "DECtalk 4.63 ph_task.c:598-626 (promote_helper_verb: a function-word verb that is the clause's only verb)"
       - "DECtalk 4.63 ph_sort.c:1283-1302 (S2 before the first vowel of the first VERB or ED word, flag cleared)"
       - "DECtalk 4.63 ph_defs.h:219-225 (FSTRESS_1 01, FSTRESS_2 02, both = FEMPHASIS)"
+
+  # ... of the vowel: the secondary stress is added to what it has, and the
+  # duration and the pitch written on it are lost. The sort has taken both
+  # from the symbol and cleared them (ph_sort.c:1256-1261) before it inserts
+  # the S2 at the symbol's place; the S2 is then the current symbol, a stress
+  # mark has no use for them, and the vowel, one place on, has none left
+  # (insertphone moves the cleared values, ph_sort.c:1774-1790). The pitch
+  # was read before that (interp_user_f0, ph_sort.c:1264), so the clause is
+  # still a sung one or one of pitch targets: dectalk_pitch_mode gives this
+  # vowel no pitch command and keeps the mode.
+  # Measured on say.exe (its duration routine's phones):
+  # "[uw<400,30>] and [uw<400,10>]." UW 22 frames with stress 2, no pitch,
+  # the second UW 63; "[uw<400>] and go." (two verbs) UW 63 frames.
+  dectalk_helper_verb_promotion_ahead_of_word:
+    kind: scalar
+    select:
+      relation: Segment
+      where: "current.type == 'vowel' && isTrue(current, 'helper_verb_ahead')"
+    define:
+      stress_now: "get(current, 'stress', 0)"
+    apply:
+      - field: stress
+        op: set
+        value: "stress_now == 1 || stress_now == 3 ? 3.0 : 2.0"
+        tag: stress
+      - field: class_start_promoted
+        op: set
+        value: "true"
+        tag: stress
+      - field: stress_before_class_start
+        op: set
+        value: stress_now
+        tag: stress
+      - field: written_duration_ms
+        op: set
+        value: "0.0"
+        tag: stress
+    citations:
+      - "DECtalk 4.63 ph_sort.c:1256-1261 (the symbol's duration and pitch are taken and cleared), 1283-1302 (the S2 is inserted at the first vowel from the symbol on and becomes the current symbol)"
+      - "DECtalk 4.63 ph_sort.c:1774-1790 insertphone (symbols and their durations and pitches move up one place)"
+      - "DECtalk 4.63 ph_defs.h:219-225 (FSTRESS_1 01, FSTRESS_2 02, both = FEMPHASIS)"
+
+  # ... of a phone that is no syllabic, before a word whose phrase start
+  # has no word boundary before it: the sort's test for a vowel reads
+  # its feature table at the symbol's number, and the table has 101 words; at
+  # SPECIALWORD's number (120) the program has a word with the vowel bit set
+  # (31), and at PPSTART's (112) too (60; at WBOUND's, 111, it has 90,
+  # without). English keeps the SPECIALWORD symbol through the sort (its
+  # removal, ph_sort.c:946-985, is the Spanish languages'). So the S2 is
+  # inserted right after this phone, and the phone's own scan for a stress
+  # mark, which comes next, finds it (get_stress_of_conson, called for every
+  # phone that is no syllabic, a written silence included). The phones
+  # before this one have been through the sort already and saw no mark. The
+  # stress still lands on the word's first phone as well
+  # (dectalk_helper_verb_promotion). After a word boundary nothing shows of
+  # this: the boundary stops the scan.
+  # Measured on say.exe: "[uwt] and me." T and AE have stress 2;
+  # "[uwst] and me." S 0, T 2; "[uwtr] and me." T 0, R 2; "[uw_] and me."
+  # the silence 2; "[el] and me." EL 0; "[uwt] and go." (two verbs) T 0.
+  # Not measured: a word with a phrase start and this class that begins with
+  # a consonant, which the S2 would land on.
+  dectalk_helper_verb_mark_before_phrase_start:
+    kind: scalar
+    select:
+      relation: Segment
+      where: >-
+        current.type != 'vowel' && !(current.phoneme in ['EL', 'EM', 'EN'])
+        && isTrue(current, 'helper_verb_ahead')
+    define:
+      n: next
+    constraint: >-
+      n != null && n.phoneme != 'SIL' && dectalk_word_start(n)
+      && dectalk_phrase_unbounded(n)
+    apply:
+      - field: stress
+        op: set
+        value: 2
+        tag: stress
+    citations:
+      - "DECtalk 4.63 ph_sort.c:1288-1296 (the scan for the first vowel tests phone_feature of every symbol, a boundary symbol included)"
+      - "DECtalk 4.63 ph_sort.c:1354-1377, p_us_sr1.c:73-105 get_stress_of_conson (a phone that is no syllabic takes the stress mark right after it)"
+      - "DECtalk 4.63 PH/p_us_rom.h:1047-1150 us_featb (101 words), PH/ph_aloph.c:146 phone_feature; the words after the table in the built say.exe, read by scripts/oracle/dectalk-debug/featb-past-table.ts: 90 at 111, 60 at 112, 31 at 120"
+      - "DECtalk 4.63 ph_defs.h:318 (FVOWEL 04)"
 
   dectalk_word_initial_consonant:
     kind: scalar
@@ -853,9 +1035,26 @@ rules:
       # secondary stress even where the vowel ends with emphasis (its debug
       # build on "They do.", "They have.", "He can. They went.": consonant 2,
       # vowel 3; an exclamation's emphasis gives the consonant 3).
-      stress1: "syl1 ? (get(n1, 'helper_verb_promoted', false) ? 2 : get(n1, 'stress', 0)) : 0"
-      stress2: "syl2 ? (get(n2, 'helper_verb_promoted', false) ? 2 : get(n2, 'stress', 0)) : 0"
-      stress3: "syl3 ? (get(n3, 'helper_verb_promoted', false) ? 2 : get(n3, 'stress', 0)) : 0"
+      #
+      #
+      # Before a vowel that took the promotion ahead of a word's text
+      # (dectalk_helper_verb_promotion_ahead_of_word) the consonant has what
+      # the vowel had without it: the sort reached the consonant before it
+      # reached the vowel, where the S2 is inserted (ph_sort.c:1245,
+      # 1283-1302, 1377). say.exe: "[kuw] and me." K 0, UW 2;
+      # "[b'uw] and me." B 1, UW 3; "[k`uw] and me." K 2, UW 2.
+      stress1: >-
+        syl1 ? (get(n1, 'helper_verb_promoted', false) ? 2
+          : (get(n1, 'class_start_promoted', false) ? get(n1, 'stress_before_class_start', 0)
+          : get(n1, 'stress', 0))) : 0
+      stress2: >-
+        syl2 ? (get(n2, 'helper_verb_promoted', false) ? 2
+          : (get(n2, 'class_start_promoted', false) ? get(n2, 'stress_before_class_start', 0)
+          : get(n2, 'stress', 0))) : 0
+      stress3: >-
+        syl3 ? (get(n3, 'helper_verb_promoted', false) ? 2
+          : (get(n3, 'class_start_promoted', false) ? get(n3, 'stress_before_class_start', 0)
+          : get(n3, 'stress', 0))) : 0
       pair12: "in1 && !syl1 ? dectalk_onset_cluster(current.phoneme, n1.phoneme) : 'none'"
       pair23: "in2 && !syl1 && !syl2 ? dectalk_onset_cluster(n1.phoneme, n2.phoneme) : 'none'"
       # A morpheme boundary or compound joint between the consonant and the
@@ -1443,10 +1642,17 @@ rules:
       # after it is the sonorant: DECtalk's duration routine has AE 38, TX 6,
       # N 15 there. "witness", "Whitney" and "partner" have a syllabic after
       # the /n/ and keep T.
+      # Not before a word that starts a phrase with no word boundary before
+      # it (phonemic text, then "and"): the scan meets
+      # the SPECIALWORD symbol before any boundary, and that reads as a
+      # syllabic (dectalk_rime_boundary, dectalk_syllable_type). say.exe on
+      # "[uwtn] and go.": UW 12, T 9, N 10, the T's boundary bits 0.
+      word_after: "look_ahead_pred(current, 100, 'is_dectalk_word_start')"
       in_final_rime: >-
         find_within_word(current,
           "current.type == 'vowel' || current.phoneme in ['EL', 'EM', 'EN']",
           "ahead") == null
+        && !(word_after != null && dectalk_phrase_unbounded(word_after))
       glottalizing_context: >-
         n != null && (
           n.phoneme == 'L' ||

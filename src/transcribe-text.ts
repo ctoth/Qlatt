@@ -1064,6 +1064,9 @@ export function transcribeText(
               stress: match.stress,
               sourceTokenId: part.tokenId,
               word: part.word,
+              // Phonemic text is no word of letter-to-sound's: it is sent on
+              // symbol by symbol (CMD/cm_text.c:1118-1144).
+              ...(pronResult.source === "phonemic" ? { phonemicText: true } : {}),
               // The last word of phonemic text has no word boundary after it
               // (joinPhonemicText below).
               ...(pronResult.source === "phonemic" &&

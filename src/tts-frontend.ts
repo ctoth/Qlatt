@@ -231,6 +231,8 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
     rules_blocked: { kind: "boolean" },
     written_duration_ms: { kind: "number" },
     written_silence: { kind: "boolean" },
+    // A phone of phonemic text, not of a word letter-to-sound read.
+    phonemic_text: { kind: "boolean" },
     written_pitch: { kind: "number" },
     sourceTokenId: { kind: "string" },
     punctuationSymbol: STRING_OR_NULL,
@@ -1067,6 +1069,7 @@ function buildTextToKlattTrackDetailed(
       construct.set(item, "written_duration_ms", token.writtenDurationMs);
     }
     if (token.writtenSilence) construct.set(item, "written_silence", true);
+    if (token.phonemicText) construct.set(item, "phonemic_text", true);
     if (token.writtenPitch !== undefined) construct.set(item, "written_pitch", token.writtenPitch);
     construct.set(item, "stress", token.stress);
     construct.set(item, "word", token.word);

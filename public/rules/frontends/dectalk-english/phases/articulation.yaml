@@ -202,10 +202,11 @@ frame_programs:
       word_start: { value: "dectalk_word_start(current)", edge: false }
       counted_word:
         # Nor is a word with no word boundary before its phrase start
-        # (phrase state 'alone': the word before is phonemic text).
+        # (the word before is phonemic text); at its clause's end the phrase
+        # start becomes its one word boundary, counted below.
         value: >-
           dectalk_word_start(current) && dectalk_phrase_start(current) != 'vp'
-          && dectalk_phrase_state(current) != 'alone'
+          && !dectalk_phrase_unbounded(current)
         edge: false
       # "to", "and" or "for" at its clause's end is counted a second time: the
       # phone sort turns its PPSTART into another word boundary

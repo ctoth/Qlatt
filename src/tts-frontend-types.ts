@@ -66,6 +66,8 @@ export interface TranscriptionToken {
   writtenPitch?: number;
   /** A silence phonemic text wrote among a word's phones ("[m'uw_n]"). */
   writtenSilence?: boolean;
+  /** The phone is of phonemic text, which letter-to-sound does not read as a word. */
+  phonemicText?: boolean;
   isPunctuation?: boolean;
   symbol?: string;
   duration?: number;

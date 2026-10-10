@@ -243,6 +243,20 @@ functions:
       kept, 'word' dropped; '' for any other word.
     citations:
       - "DECtalk 4.63 ph_sort.c:1055-1070"
+  dectalk_phrase_unbounded:
+    params: [item]
+    body: >-
+      item != null && path(item, 'R:SylStructure.parent.parent') != null
+      && isTrue(path(item, 'R:SylStructure.parent.parent'), 'phrase_start_unbounded')
+    description: >-
+      Whether a Segment's word starts a prepositional phrase right after
+      phonemic text: its SPECIALWORD and PPSTART symbols follow that text's
+      last phone with no word boundary between, whatever becomes of the
+      phrase start afterwards.
+    citations:
+      - "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on symbol by symbol, with no word boundary after it)"
+      - "DECtalk 4.63 LTS/l_us_con.c:1187-1195 (for, and, to are entered with SPECIALWORD and PPSTART)"
+      - "DECtalk 4.63 ph_sort.c:946-985 (the SPECIALWORD symbol is removed for the Spanish languages only)"
   dectalk_word_start:
     params: [item]
     body: >-
@@ -334,6 +348,9 @@ predicates:
     && (current.phoneme != "SIL" || isTrue(current, "written_silence"))
   is_clause_silence: >-
     current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null
+  # A Segment that is not of phonemic text: a word's phone, or a mark's
+  # silence. Letter-to-sound counts its own words only.
+  is_not_phonemic_text: "!isTrue(current, 'phonemic_text')"
   # Never true: the stop of a count that runs to the utterance's start.
   is_never: "false"
   # The first phone of the utterance's second clause, when that clause comes
@@ -385,17 +402,20 @@ predicates:
     && !dectalk_has_class(current, "noun") && !dectalk_has_class(current, "adj")
   # The first Segment of a word DECtalk's number_words counts: one entered
   # with a word boundary, which a verb-phrase start replaces (ph_sort.c:1464).
-  # A word after phonemic text has none either (phrase state 'alone').
+  # A word whose phrase start stands right after phonemic text has none
+  # either. At its clause's end that phrase start becomes its one word
+  # boundary (is_twice_counted_word_start counts it): say.exe on "[uw] and."
+  # has the final D's glottis open as in a clause of two words.
   is_counted_word_start: >-
     dectalk_word_start(current) && dectalk_phrase_start(current) != "vp"
-    && dectalk_phrase_state(current) != "alone"
+    && !dectalk_phrase_unbounded(current)
   # The same with the clause's first word, which always counts: the words
   # that make up number_words. DECtalk itself reports 2 for "I want to go."
   # and 3 for "The president arrived yesterday." (pht0draw's number_words,
   # read from an instrumented build).
   is_number_word_start: >-
     dectalk_word_start(current)
-    && ((dectalk_phrase_start(current) != "vp" && dectalk_phrase_state(current) != "alone")
+    && ((dectalk_phrase_start(current) != "vp" && !dectalk_phrase_unbounded(current))
         || behind(current, 1) == null || behind(current, 1).phoneme == "SIL")
   # A word counted a second time: "to", "and" or "for" at its clause's end.
   # It comes in as word boundary, SPECIALWORD, PPSTART, and the phone sort
@@ -807,6 +827,14 @@ relations:
       clause_verb_branch_count: { kind: number }
       # A vowel the helper-verb promotion gave secondary stress.
       helper_verb_promoted: { kind: boolean }
+      # The last phone before the text of a word the promotion is due for,
+      # with no word boundary between: the word's class begins at it
+      # (ph_sort.c:460-463, dectalk_helper_verb_class_start).
+      helper_verb_ahead: { kind: boolean }
+      # Such a phone that is a vowel, and took the secondary stress; and the
+      # stress it had before, which is what the consonants before it see.
+      class_start_promoted: { kind: boolean }
+      stress_before_class_start: { kind: number }
       # The last phone before a word that keeps a phrase start (ph_sort.c:1487-1496).
       phrase_start_follows: { kind: boolean }
       # An obstruent whose identical neighbour before it was deleted
@@ -833,6 +861,9 @@ relations:
       # of DECtalk's allophones, and no clause boundary (ph_sort.c:1331-1333
       # makes every symbol below MAX_PHONES a phone, silence included).
       written_silence: { kind: boolean }
+      # A phone of phonemic text: no word that letter-to-sound read
+      # (CMD/cm_text.c:1118-1144 sends it on symbol by symbol).
+      phonemic_text: { kind: boolean }
       # A duration written on the phone in phonemic text ("[uw<400>]",
       # CMD/cm_phon.c:225-330, PH/ph_task.c:835-852), in ms; the duration
       # rules are not applied to it either.
@@ -1113,7 +1144,10 @@ phases:
       - dectalk_exclamation_emphasis
       # After both: DECtalk's promotion adds to whatever stress the vowel has.
       - dectalk_clause_verb_summary
+      - dectalk_helper_verb_class_start
       - dectalk_helper_verb_promotion
+      - dectalk_helper_verb_promotion_ahead_of_word
+      - dectalk_helper_verb_mark_before_phrase_start
       - dectalk_word_initial_consonant
       - dectalk_consonant_stress
       # Rule 1a reads the input /dh/, before the dental rule at the end

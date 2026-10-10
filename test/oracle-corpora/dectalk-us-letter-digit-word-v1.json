@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-letter-digit-word-v1",
+  "description": "Plain text, no mode on: a decimal number with letters and digits written against it, which the text parser's decimal rule writes out with the rest left as one word of letters and digits (one letter and one digit, two letters and digits, digits then a letter, three letters and a digit), beside the same letters and digits written apart from the number. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "ld-01", "text": "The gain was 2.5e3 at most.", "group": "joined" },
+    { "id": "ld-02", "text": "The gain was 2.5 e3 at most.", "group": "apart" },
+    { "id": "ld-03", "text": "Set the dial to 0.75k2 first.", "group": "joined" },
+    { "id": "ld-04", "text": "Mix 3.5ml4 with the rest.", "group": "joined" },
+    { "id": "ld-05", "text": "Cut it to 6.25x10 pieces.", "group": "joined" },
+    { "id": "ld-06", "text": "Plan 4.5b12c for the trip.", "group": "joined" },
+    { "id": "ld-07", "text": "They sold 1.2gig8 last week.", "group": "joined" },
+    { "id": "ld-08", "text": "The part is 7.5t now.", "group": "letter-only" }
+  ]
+}

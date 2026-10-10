@@ -742,8 +742,8 @@ export function pronounce(
     };
   }
 
-  // A word of digits, letters, hyphens and slashes that has a digit and a
-  // hyphen or slash, and that the dictionary does not have ("1/2" it has).
+  // A word of digits, letters, hyphens and slashes that has a digit or a
+  // slash, and that the dictionary does not have ("1/2" it has).
   // A fraction by DECtalk's test is spoken as one (LTS/ls_task.c:3688,
   // speakFraction). Any other is a part number (LTS/ls_task.c:4118-4180,
   // LTS/l_us_pr1.c:161-255): each hyphen and slash by its name, each run of
@@ -754,11 +754,16 @@ export function pronounce(
   // "1990-1998" "nineteen ninety dash nineteen ninety eight", "1/1000" "one
   // slash one thousand", "B-52" "b dash fifty two". A slash makes a word a
   // part number as a digit does (:4138-4141): "/usr/bin" is "slash u s r
-  // slash b i n".
+  // slash b i n". The word needs no hyphen: a digit among letters is enough
+  // (:4131-4137, 4156). The text parser writes most such words apart ("b52"
+  // is "b 52"), but not what stands against a decimal number it wrote out:
+  // "2.5e3" is " 2 point 5 e3", and "e3" is "e three" on say.exe
+  // (test/oracle-corpora/dectalk-us-letter-digit-word-v1.json), "ml4" "m l
+  // four", "b12c" "b twelve c".
   if (
     table?.numberPhones &&
     /^[a-z0-9/-]+$/.test(lowerWord) &&
-    (lowerWord.includes("/") || (/[0-9]/.test(lowerWord) && lowerWord.includes("-")))
+    (lowerWord.includes("/") || /[0-9]/.test(lowerWord))
   ) {
     const lists = table.numberPhones;
     const fraction = speakFraction(lowerWord, lists);

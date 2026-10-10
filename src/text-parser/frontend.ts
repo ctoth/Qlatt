@@ -192,8 +192,20 @@ export interface TextParserResult {
      * and the number typed. A voice command after them starts again.
      */
     definition?: { index: number; value: number }[];
+    /**
+     * The modes of the letter-to-sound stage that are on, of those ported
+     * (PORTED_MODES): names of the table's mode_options.
+     */
+    modes?: string[];
   };
 }
+
+/**
+ * The modes of DECtalk's letter-to-sound stage that a mode command before
+ * any spoken text turns on here: spell (LTS/ls_task.c:1835-1871, every word
+ * goes to the spelling routine).
+ */
+export const PORTED_MODES: readonly string[] = ["spell"];
 
 export interface TextParserRunOptions {
   /** Told of each command that is in error or not carried out. */
@@ -571,10 +583,83 @@ export function runTextParser(
             "the clause before it is ended as DECtalk ends it; the command sets the volume of the audio device DECtalk plays through (StereoVolumeControl), not the samples, and there is no such device here",
           );
         } else if (row.routine === "cm_cmd_mode") {
+          // The first word names a mode and the second says on, off or set;
+          // both are words of one option list, the modes first
+          // (CMD/cm_copt.c:2148-2250). A word that is no option is the string
+          // error, a word of the wrong kind the parameter error, and a mode
+          // alone sends nothing and ends no clause.
+          const words = commandTable.options.mode_options ?? [];
+          const actions = ["on", "off", "set"];
+          const typed = command.words.filter((word) => word !== undefined);
+          const mode = words[optionIndex(words, typed[0])];
+          const action = words[optionIndex(words, typed[1])];
+          // Each word in turn: is it an option at all, then is it of the
+          // kind its place takes.
+          const wrong = [
+            { has: typed.length > 0, word: mode, fits: (word: string) => !actions.includes(word) },
+            { has: typed.length > 1, word: action, fits: (word: string) => actions.includes(word) },
+          ].flatMap(({ has, word, fits }) =>
+            !has
+              ? []
+              : word === undefined
+                ? ["string" as const]
+                : fits(word)
+                  ? []
+                  : ["parameter" as const],
+          )[0];
+          if (wrong !== undefined) {
+            speakError(
+              written,
+              commandTable.errorCodes[wrong],
+              wrong === "string"
+                ? "its word is no mode option"
+                : "a mode comes first, then on, off or set",
+            );
+            continue;
+          }
+          if (mode === undefined || action === undefined) {
+            record(
+              "text_parser_command",
+              `The command ${written} (${row.name}) names ${mode === undefined ? "no mode" : `the mode ${mode} and neither on, off nor set`}: nothing is changed and no clause is ended`,
+              [
+                "DECtalk 4.63 CMD/cm_copt.c:2148-2250 (cm_cmd_mode sends the mode and syncs at its second word only)",
+              ],
+            );
+            continue;
+          }
+          const ported = PORTED_MODES.includes(mode);
+          if (!spoken && (ported || action === "set")) {
+            // LTS/ls_util.c:1197-1205: on adds the mode's flag, off takes it
+            // away, and set leaves that flag alone standing.
+            const before = initial.modes ?? [];
+            const kept = action === "set" ? [] : before.filter((name) => name !== mode);
+            const modes = ported && action !== "off" ? [...kept, mode] : kept;
+            if (modes.length > 0) initial.modes = modes;
+            else delete initial.modes;
+            if (ported) {
+              record(
+                "text_parser_command",
+                `The command ${written} (${row.name}) stands before any spoken text: the mode ${mode} is ${action === "off" ? "off" : "on"} for the whole text` +
+                  (action === "set"
+                    ? " (set also takes away every other mode; of those only the modes ported here are taken away)"
+                    : ""),
+                [
+                  "DECtalk 4.63 CMD/cm_copt.c:2148-2250 (cm_cmd_mode)",
+                  "DECtalk 4.63 LTS/ls_util.c:1197-1205 (LTS_MODE_SET, LTS_MODE_CLEAR, LTS_MODE_ABS on the mode flags)",
+                ],
+              );
+              continue;
+            }
+          }
           notCarriedOut(
             written,
             row.name,
-            `the clause before it is ended as DECtalk ends it; the mode (${command.words.filter((word) => word !== undefined).join(" ") || "none named"}) is a flag of DECtalk's letter-to-sound stage (LTS_MODE_SET and LTS_MODE_CLEAR, CMD/cm_copt.c:2148-2260), and no mode but the one a text starts in is ported`,
+            ported
+              ? `the clause before it is ended as DECtalk ends it, but the mode stays: a change of the mode ${mode} inside a text (${action}) is not ported`
+              : `the clause before it is ended as DECtalk ends it; the mode (${mode} ${action}) is a flag of DECtalk's letter-to-sound stage (LTS_MODE_SET and LTS_MODE_CLEAR, CMD/cm_copt.c:2148-2260), and of the modes only ${PORTED_MODES.join(", ")} is ported` +
+                  (action === "set" && !spoken
+                    ? "; the modes that are ported are taken away, as set takes away every other mode"
+                    : ""),
           );
         } else if (row.routine === "cm_cmd_punct") {
           // The clause reader has taken the mode already (clauses.ts), here

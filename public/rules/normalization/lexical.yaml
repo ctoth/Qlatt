@@ -497,6 +497,78 @@ rules:
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:3312-3513 (the amount: dollars, \"and\", cents; a fraction that is not two digits read as a decimal number of dollars :3464-3513; one leading zero of the cents passed over :3410-3412)"
       - "DECtalk 4.63 LTS/l_us_pr1.c:497-749 (ls_proc_do_number and its return value, which picks \"dollar\" or \"dollars\": :605-606)"
+  # A word in the spelling mode (tn_spell_mode_word_source), written out as
+  # one word of phonemic text: each character's name, a word boundary between
+  # two names. A digit's name is the number lists' unit, any other
+  # character's the typing table's (the generated map tn_character_names),
+  # the case folded first; a character with no name there is not spoken.
+  # White space after the word is a comma's pause: a mark the rule sends
+  # (kind 'sent_mark'), which was not read as the word's delimiter and so
+  # does not start the form-class index again as a written comma does.
+  # The written word stands first in the text, between the two marks for it:
+  # the letters have the word's form class. DECtalk has looked every word of
+  # the sentence up before the first is spelled, and the class goes out ahead
+  # of the word's first phone. Measured on say.exe: in "It is out." the
+  # letter I of "is" has the stress the phonetic stage gives a clause's only
+  # verb (S2 ahead of the letter's own S1), and so has the D of "Don't".
+  tn_spell_mode_word:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'spell_mode_word' && current.outputType == 'source'"
+    define:
+      names: >-
+        split(lower(current.payload.word), '').map(char,
+          matches(char, '^[0-9]$')
+            ? vocabulary('tn_number_phonemes', 'units.' + char)
+            : get(maps.tn_character_names, char, '')).filter(name, name != '')
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        (size(names) == 0 ? [] : [{'type': 'terminal', 'kind': 'word',
+          'text': maps.tn_phonemic_text.open + maps.tn_phonemic_text.class_word_open
+            + current.payload.word + maps.tn_phonemic_text.class_word_close
+            + names.join(maps.tn_phonemic_text.word_boundary)
+            + maps.tn_phonemic_text.close}])
+        + (tn_text_or_empty(get(current.payload, 'gap', null)) == '' ? []
+            : [{'type': 'terminal', 'text': ',', 'kind': 'sent_mark'}])
+    citations:
+      - "DECtalk 4.63 LTS/ls_spel.c:100-190 (ls_spel_spell: each character's case folded, a digit from punits[], any other character from the typing table, WBOUND between two characters)"
+      - "DECtalk 4.63 INCLUDE/usa_type.tab (the typing table), LTS/l_us_con.c punits[]"
+      - "DECtalk 4.63 LTS/ls_task.c:5109-5113 (every word of the sentence is looked up first, its class kept in fc_struct[]), LTS/ls_util.c:808-818 (a word's class is sent ahead of its first phone)"
+      - "DECtalk 4.63 LTS/ls_task.c:1281-1290 (in the spelling mode white space after a word sends COMMA)"
+  # An auxiliary that begins a sentence in the spelling mode
+  # (tn_spell_mode_first_verb_source): the word itself, and the comma's pause
+  # for the white space after it.
+  tn_spell_mode_first_verb:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'spell_mode_first_verb' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [terminal]
+      tag: normalization_lexical
+      output: >-
+        [{'type': 'terminal', 'text': lower(current.payload.word)}]
+        + (tn_text_or_empty(get(current.payload, 'gap', null)) == '' ? []
+            : [{'type': 'terminal', 'text': ',', 'kind': 'sent_mark'}])
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:4672-4728 (ls_task_lookup_first_verbs speaks the word and it is finished: the spelling test is not reached)"
+      - "DECtalk 4.63 LTS/ls_task.c:1281-1290 (in the spelling mode white space after a word sends COMMA)"
+  # The question mark of a question-word sentence in the spelling mode
+  # (tn_spell_mode_wh_mark_source): a period.
+  tn_spell_mode_wh_mark:
+    kind: structural
+    select:
+      relation: Normalization
+      where: "current.kind == 'spell_mode_wh_mark' && current.outputType == 'source'"
+    expand_text:
+      allowed_types: [request]
+      tag: normalization_lexical
+      output: "[{'type': 'request', 'kind': 'words', 'payload': {'text': '.'}}]"
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:1196-1208 (a question mark after a sentence that began with a word of whdic is sent as PERIOD)"
   # A pause the text parser asks for (tn_parser_pause_source) is the comma: the
   # phoneme the parser names is the one a written comma gives.
   tn_parser_pause:
@@ -554,4 +626,4 @@ rules:
       - "Allen, Hunnicutt & Klatt 1987; case and whitespace normalization"
 phases:
   - name: normalization_lexical
-    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_lone_period, tn_stripped_parenthesis_mark, tn_silent_mark, tn_stripped_mark, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_clock_time, tn_date_text, tn_plural_number, tn_money_text, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]
+    rules: [tn_dictionary_abbreviation, tn_abbreviation, tn_dotted_capitals, tn_spelled_capitals, tn_whole_word, tn_marked_word, tn_lone_dash, tn_symbol_word, tn_lone_period, tn_stripped_parenthesis_mark, tn_silent_mark, tn_stripped_mark, tn_initialism, tn_initial, tn_bare_number_request, tn_number_token, tn_clock_time, tn_date_text, tn_plural_number, tn_money_text, tn_spell_mode_word, tn_spell_mode_first_verb, tn_spell_mode_wh_mark, tn_parser_pause, tn_parser_phones, tn_parser_clause_end, tn_unmatched_words]

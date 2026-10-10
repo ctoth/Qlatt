@@ -890,6 +890,28 @@ for (const [name, value] of Object.entries(numberPhones)) {
     }
   }
 }
+// The typing table whole, for the text rules: the name the spelling routine
+// speaks for each character (LTS/ls_spel.c:158-170), as the table writes it,
+// which is phonemic text already. One row for each of the 256 character
+// codes, in order. The capitals are left out: the routine folds the case
+// first (ls_spel.c:127). A row for a code past 0x7f is kept when the file
+// read as text still has that character whole.
+const typingRows = [...typingTable.matchAll(/^[ \t]*"([^"]*)",?[ \t]*(?:\/\*.*)?$/gm)].map(
+  (match) => match[1] as string,
+);
+if (typingRows.length !== 256) {
+  throw new Error(
+    `E_TYPING_TABLE: read ${typingRows.length.toString()} rows from usa_type.tab, expected 256`,
+  );
+}
+const typedCharacterNames: Record<string, string> = {};
+typingRows.forEach((row, code) => {
+  const character = String.fromCharCode(code);
+  if (row === "" || code <= 0x20 || code === 0x7f) return;
+  if (character.toLowerCase() !== character) return;
+  if (![...row].every((char) => char.charCodeAt(0) < 0x7f)) return;
+  typedCharacterNames[character] = row;
+});
 const numberPhonemesPath = path.join(path.dirname(outPath), "number-phonemes.yaml");
 fs.writeFileSync(
   numberPhonemesPath,
@@ -908,6 +930,13 @@ fs.writeFileSync(
     "  tn_month_numbers:",
     ...(numberPhones.monthNames ?? []).map(
       (name, index) => `    ${JSON.stringify(name)}: ${JSON.stringify(index.toString())}`,
+    ),
+    "  # The name of each character as the spelling routine speaks it",
+    "  # (INCLUDE/usa_type.tab, LTS/ls_spel.c:158-170): phonemic text, a space in",
+    "  # it a word boundary. A digit is not spoken from here but from `units`.",
+    "  tn_character_names:",
+    ...Object.keys(typedCharacterNames).map(
+      (key) => `    ${JSON.stringify(key)}: ${JSON.stringify(typedCharacterNames[key])}`,
     ),
     "",
   ].join("\n"),

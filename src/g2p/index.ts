@@ -22,6 +22,8 @@ import {
   PHONEME_PARAMETERS_OPEN,
   PHONEME_SYMBOL_BASE,
   PHONEME_SYMBOL_LIMIT,
+  PHONEMIC_CLASS_WORD_CLOSE,
+  PHONEMIC_CLASS_WORD_OPEN,
 } from "../text-parser/phonemes";
 import { ltsDocumentAt } from "./lts-document";
 import { applyLtsRules } from "./lts-engine";
@@ -126,7 +128,8 @@ export function pronounce(
     mask: number,
   ): { formClasses?: string[]; formClassWord?: number; receivedFormClasses?: string[] } => {
     if (!table?.formClassNames) return {};
-    const word = specialClass ?? mask;
+    const fixed = context.classLookup ? undefined : specialClass;
+    const word = fixed ?? mask;
     return {
       formClasses: formClassNamesOf(word, table),
       formClassWord: word,
@@ -196,7 +199,37 @@ export function pronounce(
     // on it, which stay with a phone (a mark's are passed over).
     const symbols: number[] = [];
     const phoneNumbers: number[][] = [];
-    const inner = word.slice(1, -1);
+    // Text a rule composed for a written word may name that word first: the
+    // text then has the word's form class, as this lexicon gives it
+    // (src/text-parser/phonemes.ts PHONEMIC_CLASS_WORD_OPEN).
+    const between = word.slice(1, -1);
+    const classWordEnd = between.startsWith(PHONEMIC_CLASS_WORD_OPEN)
+      ? between.indexOf(PHONEMIC_CLASS_WORD_CLOSE)
+      : -1;
+    const classWord = classWordEnd < 0 ? "" : between.slice(1, classWordEnd);
+    const inner = between.slice(classWordEnd + 1);
+    const classOfWord = (): {
+      formClasses?: string[];
+      formClassWord?: number;
+      receivedFormClasses?: string[];
+    } => {
+      if (classWord === "") return {};
+      const looked = pronounce(classWord, dictLookup, {
+        ...options,
+        context: { ...context, classLookup: true },
+      });
+      return {
+        ...("formClasses" in looked && looked.formClasses
+          ? { formClasses: [...looked.formClasses] }
+          : {}),
+        ...("formClassWord" in looked && looked.formClassWord !== undefined
+          ? { formClassWord: looked.formClassWord }
+          : {}),
+        ...("receivedFormClasses" in looked && looked.receivedFormClasses
+          ? { receivedFormClasses: [...looked.receivedFormClasses] }
+          : {}),
+      };
+    };
     for (let at = 0; at < inner.length; at += 1) {
       const code = inner.charCodeAt(at);
       const symbol =
@@ -235,6 +268,7 @@ export function pronounce(
       source: "phonemic",
       word,
       parts,
+      ...classOfWord(),
       ...(lastMark === NUMBER_WBOUND || lastMark === NUMBER_VPSTART
         ? { wordBoundaryAfter: true }
         : {}),

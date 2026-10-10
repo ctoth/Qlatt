@@ -47,6 +47,13 @@ export interface ClauseContext {
   /** Whether the word is the last one before the punctuation mark. */
   atPunctuation: boolean;
   /**
+   * The word is looked up for its class alone, as DECtalk's text stage looks
+   * every word of a sentence up before it speaks any (LTS/ls_task.c:5109-5113):
+   * the fixed classes its mini dictionary gives a word when the word is
+   * spoken (LTS/ls_task.c:1062-1078) are not given here.
+   */
+  classLookup?: boolean;
+  /**
    * The number word that stands one or two words before this one, as written
    * ("5", "1,000", "1.5"); absent when none does. A unit abbreviation is read
    * by it (table-lts-pronounce.ts numberAbbreviations).

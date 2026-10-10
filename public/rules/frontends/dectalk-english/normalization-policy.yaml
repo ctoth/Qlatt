@@ -177,6 +177,37 @@ maps:
     word_boundary: " "
     verb_phrase: ")"
     pause: ","
+    # The two marks around a written word at the start of phonemic text a
+    # rule composed for it: the text has that word's form class
+    # (src/text-parser/phonemes.ts PHONEMIC_CLASS_WORD_OPEN and _CLOSE).
+    class_word_open: ""
+    class_word_close: ""
+  # The six auxiliaries DECtalk speaks itself as the first word of a sentence
+  # (LTS/ls_task.c:4636-4645 verbs[]), for the text rules of the spelling
+  # mode: such a word is not spelled (tn_spell_mode_first_verb_source). The
+  # same table as params.policy.structure.sentence_initial_auxiliaries of
+  # frontend.yaml, which the rule that stresses the word reads.
+  tn_first_verbs:
+    are: verb
+    had: verb
+    is: verb
+    was: verb
+    were: verb
+    will: verb
+  # The question words: a sentence that begins with one has its question
+  # mark sent as a period (LTS/l_us_con.c:1215-1226 whdic), for the text
+  # rule of the spelling mode (tn_spell_mode_wh_mark_source). The same table
+  # as params.policy.structure.wh_words of frontend.yaml.
+  tn_wh_words:
+    what: wh
+    when: wh
+    where: wh
+    why: wh
+    who: wh
+    how: wh
+    which: wh
+    whose: wh
+    whom: wh
 # A text that does not end in punctuation is still closed as a sentence: when
 # the text is flushed the text task sends a breath break (LTS/ls_task.c:1236-1260,
 # the VT case) and the clause ends as one that ends in a period. Measured on

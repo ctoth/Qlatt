@@ -237,6 +237,18 @@ functions:
     description: Whether a Segment is the first of its word.
     citations:
       - "DECtalk 4.63 PH/ph_task.c:598-600 (a word's class arrives ahead of its first phone)"
+  dectalk_class_start:
+    params: [item]
+    body: >-
+      dectalk_word_start(item)
+      && !isTrue(path(item, 'R:SylStructure.parent.parent'), 'continues_written_word')
+    description: >-
+      Whether a Segment is the first of its written word: where the word's
+      form class arrives. A written word spoken as several words (one spelled
+      letter by letter) has one class, sent once.
+    citations:
+      - "DECtalk 4.63 LTS/ls_util.c:808-818 (WORD_CLASS is sent when the form-class index has moved, once for a written word)"
+      - "DECtalk 4.63 PH/ph_task.c:598-626 (the class is counted when it arrives)"
   # The clause's first allophone after its opening pause: nothing before it,
   # or the silence that ends the clause before. A silence phonemic text wrote
   # is an allophone inside its clause (ph_sort.c:1331-1333): it can be the
@@ -320,10 +332,13 @@ predicates:
   # semicolon), not one DECtalk put in front of a word itself. LTS starts its
   # form-class index again at each of these (LTS/ls_task.c:1255-1256,
   # 1272-1273); a break it inserts leaves the index alone (ls_util.c:824-853).
+  # Nor a comma a text rule sent itself (the pause after a word in the
+  # spelling mode, LTS/ls_task.c:1281-1290, which leaves the index alone too).
   is_written_clause_silence: >-
     current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null
     && !(next != null && path(next, 'R:SylStructure.parent.parent') != null
          && isTrue(path(next, 'R:SylStructure.parent.parent'), 'clause_break_before'))
+    && !(get(current, "punctuationSymbol", null) == "," && isTrue(current, "punctuation_sent"))
   # Phones that stand for two of DECtalk's input phones: a vowel fused with
   # its /r/, and the survivor of a deleted geminate.
   is_fused_vowel: isTrue(current, "fused_with_r")
@@ -332,20 +347,23 @@ predicates:
   # clause (ph_sort.c:1462-1464).
   is_dectalk_word_start: dectalk_word_start(current)
   # ph_task.c:611-614: the first Segment of a word DECtalk counts as a verb.
+  # The class of a written word arrives once, ahead of its first phone: a
+  # word spoken as several (a word spelled letter by letter) is counted at
+  # its first.
   is_verb_count_word_start: >-
-    dectalk_word_start(current)
+    dectalk_class_start(current)
     && (dectalk_has_class(current, "verb") || dectalk_has_class(current, "ed")
         || dectalk_has_class(current, "be") || dectalk_has_class(current, "ing"))
   # ph_task.c:624: a counted verb that is also a function word.
   is_function_verb_word_start: >-
-    dectalk_word_start(current)
+    dectalk_class_start(current)
     && (dectalk_has_class(current, "verb") || dectalk_has_class(current, "ed")
         || dectalk_has_class(current, "be") || dectalk_has_class(current, "ing"))
     && dectalk_has_class(current, "func")
   # ph_sort.c:1272-1284: a word reaches the verb branch only if it is neither a
   # noun nor an adjective.
   is_verb_branch_word_start: >-
-    dectalk_word_start(current)
+    dectalk_class_start(current)
     && (dectalk_has_class(current, "verb") || dectalk_has_class(current, "ed"))
     && !dectalk_has_class(current, "noun") && !dectalk_has_class(current, "adj")
   # The first Segment of a word DECtalk's number_words counts: one entered
@@ -939,6 +957,10 @@ relations:
       # word's part in a conjunction of several words (LTS/proverbs.h).
       clause_end_supplied: [true, false]
       conjunction_sequence: [first, rest]
+      # A word that is not the first of the words its written word is spoken
+      # as (a letter of a spelled word after the first, a number's later
+      # words).
+      continues_written_word: [true, false]
       # The quotation marks and parentheses the written word still has when
       # letter-to-sound parses it (frontend.yaml written_word_marks).
       written_marks: []

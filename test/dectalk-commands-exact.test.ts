@@ -13,6 +13,10 @@
  *     stage (CMD/cm_defs.h:62-69, PH/ph_task.c:710-714), and a rate command
  *     with no number repeats the number its slot holds, here the rate the
  *     text started with (CMD/cm_cmd.c:766-790);
+ *   - a voice command, a rate command and a change of the speaker definition
+ *     inside the text: the text from there on has them, by a parameter scope
+ *     (src/declarative-frontend/hrg/parameter-scope.ts; more texts in
+ *     test/dectalk-commands-inside-text.test.ts);
  *   - the clause end a command makes where it stands inside a sentence
  *     (LTS/ls_task.c:446-470, PH/ph_task.c:657-668);
  *   - the text DECtalk speaks, by default, in place of a command it cannot
@@ -44,26 +48,8 @@ import { normalizeText, textToKlattTrackDetailed } from "../src/tts-frontend";
 const fixtureDir = path.join("test", "fixtures", "dectalk-commands");
 const corpus = readVoiceCorpus(path.join("test", "oracle-corpora", "dectalk-us-commands-v1.json"));
 
-const VOICE_INSIDE =
-  "a voice command after spoken text: the clause before it is ended as DECtalk ends it, but " +
-  "the voice does not change (one voice for a text); equal up to that place";
-const RATE_INSIDE =
-  "a rate command after spoken text: the clause before it is ended, but the rate does not " +
-  "change (one rate for a text); equal up to that place";
-
-/** Not DECtalk's samples yet. */
-const NOT_EXACT: Readonly<Record<string, string>> = {
-  "cv-03": VOICE_INSIDE,
-  "cv-04": VOICE_INSIDE,
-  "cv-05": VOICE_INSIDE,
-  "cv-06": VOICE_INSIDE,
-  "cr-03": RATE_INSIDE,
-  "cr-04": RATE_INSIDE,
-  "cr-08": VOICE_INSIDE,
-  "cn-02":
-    "[:dv ap 200] is recognised and the clause before it is ended, but a change of the " +
-    "speaker definition is not ported",
-};
+/** Not DECtalk's samples yet: none. */
+const NOT_EXACT: Readonly<Record<string, string>> = {};
 
 const run = (text: string) => {
   const provenance = createProvenanceCollector();
@@ -122,24 +108,21 @@ describe("DECtalk's in-text commands", () => {
     expect(warnings).toEqual([]);
   });
 
-  it("names each command it recognises and does not carry out, in a decision and a diagnostic", () => {
+  it("carries out a definition and a voice command inside a text, and names the command it does not carry out", () => {
     const { decisions, warnings } = run(
       "The ship came [:dv ap 200] in. [:nb] We went [:mode spell on] down.",
     );
     expect(decisions.map((decision) => decision.type)).toEqual([
-      "text_parser_command_not_carried_out",
-      "text_parser_command_not_carried_out",
+      "text_parser_command",
+      "text_parser_command",
       "text_parser_command_not_carried_out",
     ]);
     expect(decisions[0]?.reason).toContain("(dv)");
+    expect(decisions[0]?.reason).toContain("for the text from here on");
     expect(decisions[1]?.reason).toContain("(nb)");
-    expect(decisions[1]?.reason).toContain("a voice change inside a text (to betty) is not ported");
+    expect(decisions[1]?.reason).toContain("from here on is spoken by the voice betty");
     expect(decisions[2]?.reason).toContain("(mode)");
-    expect(warnings.map((event) => event.code)).toEqual([
-      "W_TEXT_COMMAND_NOT_CARRIED_OUT",
-      "W_TEXT_COMMAND_NOT_CARRIED_OUT",
-      "W_TEXT_COMMAND_NOT_CARRIED_OUT",
-    ]);
+    expect(warnings.map((event) => event.code)).toEqual(["W_TEXT_COMMAND_NOT_CARRIED_OUT"]);
   });
 
   it("speaks DECtalk's error text for a command in error, and says so", () => {

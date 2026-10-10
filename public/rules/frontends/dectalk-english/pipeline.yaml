@@ -100,14 +100,31 @@ functions:
     description: Frames of a clause pause after the speaking rate is applied; never fewer than two.
     citations:
       - "DECtalk 4.63 p_us_tim.c:261-268 (dpause = mlsh1(dpause, sprat1); a pause shorter than 2 frames is 2)"
+  # The same pause at the rate of another Item's clause: the parameters of
+  # that Item's scope (params_of), not those of the rule's Item.
+  dectalk_pause_frames_for:
+    params: [frames, item]
+    body: >-
+      max([params.policy.timing.rate_scaling.pause_minimum_frames,
+           dectalk_mlsh1(frames, dectalk_sprat1(params_of(item).policy.timing.speaking_rate_wpm))])
+    description: Frames of a clause pause at the speaking rate of the given Segment's clause; never fewer than two.
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:261-268 (dpause = mlsh1(dpause, sprat1); a pause shorter than 2 frames is 2)"
   # Rule 1's pause at the head of a clause, from the clause's first phone.
+  # The rate is the clause's own, whoever asks: the pause is made when that
+  # clause is timed, after a rate command between the two clauses has been
+  # carried out (PH/ph_task.c:665-676 and 710-714). The rule that asks may
+  # stand on the pause Segment of the clause before. Measured on say.exe: in
+  # "The ship came in. [:rate 250] We went down to see it." the first clause
+  # closes with its 94 frames and the second opens with 2, not 4.
   dectalk_clause_initial_pause_frames:
     params: [item]
     body: >-
-      dectalk_pause_frames(
+      dectalk_pause_frames_for(
         dectalk_has(item, 'voiced') || dectalk_has(item, 'obstruent') || dectalk_has(item, 'plosive')
           ? params.policy.timing.pause_frames.clause_initial
-          : params.policy.timing.pause_frames.clause_initial_other)
+          : params.policy.timing.pause_frames.clause_initial_other,
+        item)
     description: Frames of the pause DECtalk puts before a clause whose first phone is the given Segment.
     citations:
       - "DECtalk 4.63 p_us_tim.c:229-232 (dpause = 4 when the next phone is FVOICD, FOBST or FPLOSV, else 5)"

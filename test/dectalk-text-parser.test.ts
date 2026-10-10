@@ -138,15 +138,20 @@ describe("dectalk-english runs its text parser first", () => {
 
   it("takes a command out of the text and says so", () => {
     const decisions = decisionsFor("Say this [:rate 180] and then that.", "dectalk-english");
-    // The command is read against DECtalk's command table and named
-    // (test/dectalk-commands-exact.test.ts has the commands that are
-    // carried out).
-    const named = decisions.filter(
-      (decision) => decision.type === "text_parser_command_not_carried_out",
-    );
+    // The command is read against DECtalk's command table and named. A rate
+    // command inside a text is carried out
+    // (test/dectalk-commands-inside-text.test.ts); one that is not carried
+    // out is named the same way with its own decision type.
+    const named = decisions.filter((decision) => decision.type === "text_parser_command");
     expect(named.map((decision) => decision.reason)).toEqual([
-      'The command "[:rate 180]" (rate) was recognised and taken out of the text; the clause before it is ended, but the rate stays: a rate change inside a text (to 180 words per minute) is not ported',
+      'The command "[:rate 180]" (rate) stands inside the text: the clause before it is ended and the text from here on is spoken at 180 words per minute',
     ]);
+    const mode = decisionsFor("Say this [:mode math on] and then that.", "dectalk-english");
+    expect(
+      mode
+        .filter((decision) => decision.type === "text_parser_command_not_carried_out")
+        .map((decision) => decision.reason.split(";")[0]),
+    ).toEqual(['The command "[:mode math on]" (mode) was recognised and taken out of the text']);
   });
 
   it("speaks a text with a bracket or a very long clause without an error", () => {

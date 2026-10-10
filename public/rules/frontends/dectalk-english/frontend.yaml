@@ -102,6 +102,39 @@ speakers:
   # that come from the definition are then derived again
   # (src/dectalk-speaker-definition.ts, PH/ph_vset.c setspdef).
   definition_path: /rules/frontends/dectalk-english/speaker-definition.json
+  # The rule fields that are words of the speaker definition packet and the
+  # values read with it (setspdef, PH/ph_vset.c:522-880; changeSpeakerValues,
+  # VTM/vtmiont.c:1641-1645). In a text whose voice or definition changes
+  # inside it, each frame carries these for the voice in force when the frame
+  # is sent, with the count of definitions sent so far (`speaker_epoch`):
+  # DECtalk sends the definition when the command is carried out, between
+  # two clauses, while a frame's own words are sent one frame late
+  # (PH/ph_claus.c:754-757). Measured on say.exe's packets: in "The ship came
+  # in. [:nb] We went down to see it." the definition changes one packet
+  # before the packet words of the second clause's first frame.
+  definition_frame_params:
+    - SPD_R4CB
+    - SPD_R4CC
+    - SPD_R5CB
+    - SPD_R5CC
+    - SPD_R4PB
+    - SPD_R5PB
+    - SPD_T0JIT
+    - SPD_R5CA
+    - SPD_R4CA
+    - SPD_R3CA
+    - SPD_R2CA
+    - SPD_R1CA
+    - SPD_NOPEN1
+    - SPD_NOPEN2
+    - SPD_ATURB
+    - SPD_AFGAIN
+    - SPD_AZGAIN
+    - SPD_APGAIN
+    - SPD_SEX
+    - last_voice
+    - NOM_Open_Quo
+    - Tiltm
   # Declarative speaker-field -> frame-param bindings. Each name in this list is
   # BOTH the voice-YAML field and the same-named per-frame Klatt param; the
   # selected voice's value is stamped (absolute set) onto every frame's params,

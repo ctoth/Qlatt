@@ -396,6 +396,13 @@ export interface FrameValues {
   columns: Readonly<Record<string, readonly number[]>>;
   /** On the run's last Item: column values for the instant the run ends. */
   after?: Readonly<Record<string, number>>;
+  /**
+   * In a run that has a unit in a parameter scope (parameter-scope.ts): the
+   * scope in force while each frame is shown, "" for none; as long as a
+   * column. With a program delay that is the scope of the frame being
+   * computed at that time, not of the frame shown.
+   */
+  scopes?: readonly string[];
 }
 
 /** Schema of the feature a program writes: FrameValues and the rules behind them. */
@@ -425,8 +432,9 @@ export const FRAME_VALUES_SCHEMA: FeatureSchema = {
       },
     },
     after: { kind: "object", fields: {}, additional: { kind: "number" } },
+    scopes: { kind: "array", items: { kind: "string" } },
   },
-  optional: ["after"],
+  optional: ["after", "scopes"],
 };
 
 /** The features the frame programs of a rulepack write. */

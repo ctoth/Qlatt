@@ -26,6 +26,7 @@ import { isPlainObject } from "../../yaml-loader";
 import { frameValueIndex, isFrameValues } from "./frame-program";
 import { buildHolmesTransitions, sampleHolmesCurve } from "./holmes-transitions";
 import type { Item } from "./item";
+import { PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
 import { applyScalarOp } from "./scalar-op";
 import type { FeatureValue } from "./types";
 import type { Utterance } from "./utterance";
@@ -258,6 +259,22 @@ export type LowerContext = {
   frameValueFeatures?: readonly string[];
   speakerParams?: Readonly<Record<string, unknown>>;
   speakerSex?: string;
+  /**
+   * By parameter scope (parameter-scope.ts), "" for no scope: what an F0
+   * clause whose commands are in the scope takes in place of `speakerParams`
+   * and `speakerSex`, and the parameters every frame that a frame program ran
+   * in the scope adds to the track (FrameValues.scopes).
+   */
+  scopes?: Readonly<
+    Record<
+      string,
+      {
+        speakerParams?: Readonly<Record<string, unknown>>;
+        speakerSex?: string;
+        frameParams?: Readonly<Record<string, number>>;
+      }
+    >
+  >;
   silence?: {
     symbol: string;
     initialParams: Readonly<Record<string, number>>;
@@ -1984,7 +2001,8 @@ export function lowerToFrames(
       );
       throw new Error("E_HRG_LOWER_F0_MODEL: layered_additive requires the selected F0 model");
     }
-    const f0Model = f0ModelForVoice(context.f0Model, context.speakerSex);
+    const clauseModel = context.f0Model;
+    const f0Model = f0ModelForVoice(clauseModel, context.speakerSex);
     const usesSegmentalControllerClock = f0ControlItems.some(
       (item) => f0Model.layers[String(item.get("layer"))]?.type === "dectalk_segmental",
     );
@@ -2138,11 +2156,18 @@ export function lowerToFrames(
         // The first clause's first controller frame is never emitted, which is
         // the kernel's default lead; a later clause's first frame is the one
         // after the previous clause's last.
+        // A clause whose commands are in a parameter scope is rendered with
+        // that scope's voice: the scope of the command that opens the clause.
+        const opening = f0ControlItems[clauseStarts[clauseIndex] as number];
+        const scopeName = opening?.get(PARAMETER_SCOPE_FEATURE);
+        const scope = typeof scopeName === "string" ? context.scopes?.[scopeName] : undefined;
         const frames = renderLayeredF0(
           clauseCommands,
-          f0Model,
+          scope?.speakerSex !== undefined
+            ? f0ModelForVoice(clauseModel, scope.speakerSex)
+            : f0Model,
           clauseFrames * framePeriod,
-          context.speakerParams,
+          scope?.speakerParams ?? context.speakerParams,
           clauseIndex === 0 ? undefined : 0,
           elapsedControllerFrames,
         );
@@ -2646,6 +2671,17 @@ export function lowerToFrames(
       for (const [key, column] of columns) {
         params[key] = column[frameValueIndex(values, segmentOffsetMs, column.length)] as number;
         if (decisionId) provenance[key] = decisionId;
+      }
+      // What a frame adds to the track for the parameter scope it ran in.
+      if (values.scopes && values.scopes.length > 0 && context.scopes) {
+        const name = values.scopes[frameValueIndex(values, segmentOffsetMs, values.scopes.length)];
+        const added = context.scopes[name ?? ""]?.frameParams;
+        if (added) {
+          for (const [key, value] of Object.entries(added)) {
+            params[key] = value;
+            if (decisionId) provenance[key] = decisionId;
+          }
+        }
       }
     }
   };

@@ -8,6 +8,8 @@ import {
   Utterance,
 } from "./declarative-frontend/hrg";
 import { FRAME_VALUES_SCHEMA, frameValueFeatures } from "./declarative-frontend/hrg/frame-program";
+import type { Item } from "./declarative-frontend/hrg/item";
+import { PARAMETER_SCOPE_FEATURE } from "./declarative-frontend/hrg/parameter-scope";
 import {
   GraphRuleEvaluationOwner,
   runGraphRuleEngine,
@@ -567,6 +569,11 @@ function createStructure(
   segments: readonly ReturnType<Utterance["allItems"]>[number][],
   spec: CompiledRulepack,
   inventory: InventorySpec,
+  /**
+   * Tokens of supplied marks that end a stretch of words without being
+   * counted with it (a clause end a command made by sending a control item).
+   */
+  uncountedEnds: ReadonlySet<string> = new Set(),
 ): void {
   const tables = parseSyllabificationTables(spec.syllabification);
   const byToken = new Map<
@@ -606,7 +613,9 @@ function createStructure(
   for (const token of transcribed) {
     if (token.isPunctuation) {
       if (!token.continuesWrittenWord) {
-        if (token.supplied) clause.endSupplied = true;
+        if (token.supplied && !uncountedEnds.has(token.sourceTokenId.split(":")[0] as string)) {
+          clause.endSupplied = true;
+        }
         clause = newStretch();
         endsAfterWord = false;
       }
@@ -1069,7 +1078,19 @@ function buildTextToKlattTrackDetailed(
   }
   construct.commit();
   onStage?.("segments");
-  createStructure(utterance, transcribed, segments, spec, resources.inventory);
+  // The clause ends a command made by sending a control item
+  // (src/text-parser/frontend.ts itemClauseEnds), by the token of each.
+  const itemEndTokens = new Set<string>();
+  if (parsedText && parsedText.itemClauseEnds.length > 0) {
+    const ends = new Set(parsedText.itemClauseEnds);
+    for (const token of utterance.relation("Token").listItems()) {
+      const sourceId = token.get("sourceNormalizationId");
+      const start =
+        typeof sourceId === "string" ? utterance.getItem(sourceId)?.get("sourceStart") : undefined;
+      if (typeof start === "number" && ends.has(start)) itemEndTokens.add(token.id);
+    }
+  }
+  createStructure(utterance, transcribed, segments, spec, resources.inventory, itemEndTokens);
   onStage?.("structure");
 
   const requestedRate = options.rate ?? 1;
@@ -1128,6 +1149,216 @@ function buildTextToKlattTrackDetailed(
           },
         }),
   };
+  // COMMANDS INSIDE THE TEXT. Each place in the parser's text where a
+  // command changes the voice, an entry of its speaker definition, the rate
+  // or a pause addition starts a parameter scope
+  // (declarative-frontend/hrg/parameter-scope.ts): the state every such
+  // command has left by then, as an overlay on the policy the rules read.
+  // The words, syllables and segments that were written from that place on
+  // are put in the scope, in one transaction a scope, whose decision names
+  // the command and depends on the parser's decision for it.
+  type CommandScope = {
+    name: string;
+    offset: number;
+    decisionIds: string[];
+    voice: ResolvedVoice;
+    speaker: typeof resolvedSpeaker;
+    wordsPerMinute: number | undefined;
+    pauses: { comma: number; period: number } | undefined;
+    /** Speaker definitions sent since the text began, this scope's included. */
+    definitionsSent: number;
+  };
+  const commandScopes: CommandScope[] = [];
+  if (parsedText && registry && selectedVoice && parsedText.changes.length > 0) {
+    let voiceName = selectedVoice.name;
+    let definition = [...(parsedText.initial.definition ?? [])];
+    let scopeRate = wordsPerMinute;
+    let pauses = commandPauses
+      ? { comma: commandPauses.comma ?? 0, period: commandPauses.period ?? 0 }
+      : undefined;
+    let definitionsSent = 0;
+    let carriedRuleFields = selectedVoice.ruleFields;
+    // The parser's decision for the command each part of the state is from.
+    const inForce: {
+      voice?: string;
+      definition: string[];
+      rate?: string;
+      comma?: string;
+      period?: string;
+    } = { definition: [] };
+    for (const change of parsedText.changes) {
+      let sends = false;
+      if (change.voice !== undefined) {
+        if (registry.voices.length === 0 || registry.voices.includes(change.voice)) {
+          // usevoice() loads the voice's own definition (PH/ph_vset.c:433-448).
+          voiceName = change.voice;
+          definition = [];
+          sends = true;
+          inForce.voice = change.decisionId;
+          inForce.definition = [];
+        } else {
+          options.diagnostics?.warn(
+            `The text asks for the voice '${change.voice}', which this frontend does not have; the voice stays`,
+            { voice: change.voice, available: registry.voices },
+            "W_TEXT_COMMAND_VOICE_UNKNOWN",
+          );
+        }
+      }
+      if (change.definition) {
+        definition = [...definition, change.definition];
+        sends = true;
+        inForce.definition.push(change.decisionId);
+      }
+      if (change.rate !== undefined && rateUnit !== undefined) {
+        inForce.rate = change.decisionId;
+        scopeRate =
+          speakingRateWordsPerMinute(
+            recordOrEmpty(policyRecord(spec).rate).words_per_minute,
+            change.rate / rateUnit,
+            frontendId,
+            options.diagnostics,
+            provenance,
+          ) ?? scopeRate;
+      }
+      if (change.pauseAddedMs) {
+        if (change.pauseAddedMs.comma !== undefined) inForce.comma = change.decisionId;
+        if (change.pauseAddedMs.period !== undefined) inForce.period = change.decisionId;
+        pauses = {
+          comma: change.pauseAddedMs.comma ?? pauses?.comma ?? 0,
+          period: change.pauseAddedMs.period ?? pauses?.period ?? 0,
+        };
+      }
+      if (sends) definitionsSent += 1;
+      // A rule field the voice does not give keeps what the voice before it
+      // in the text gave: DECtalk's per-voice values are set by one case a
+      // voice, and a case that leaves a value alone leaves the last voice's
+      // (VTM/vtmiont.c:2899-3430 changeSpeakerValues). Measured on say.exe:
+      // after Dennis, Frank's clause ends with Dennis's glottal spread.
+      const resolved = resolveVoice(registry, voiceName, speakerProfile, definition);
+      const voice: ResolvedVoice = {
+        ...resolved,
+        ruleFields: Object.fromEntries(
+          Object.entries(resolved.ruleFields).map(([name, value]) => [
+            name,
+            value ?? carriedRuleFields[name] ?? null,
+          ]),
+        ),
+      };
+      carriedRuleFields = voice.ruleFields;
+      const state = {
+        voice,
+        speaker: resolveSpeakerProfile({
+          baseF0,
+          speakerOverride,
+          voiceProfile: voice.override,
+          profileSpec: speakerProfile,
+        }),
+        wordsPerMinute: scopeRate,
+        pauses,
+        definitionsSent,
+      };
+      // The commands whose values are in force from here on.
+      const decisionIds = [
+        ...new Set(
+          [
+            inForce.voice,
+            ...inForce.definition,
+            inForce.rate,
+            inForce.comma,
+            inForce.period,
+          ].filter((id): id is string => id !== undefined),
+        ),
+      ];
+      // Commands at one place make one scope.
+      const last = commandScopes.at(-1);
+      if (last && last.offset === change.offset) {
+        Object.assign(last, state, { decisionIds });
+      } else {
+        commandScopes.push({
+          name: `command_${(commandScopes.length + 1).toString()}`,
+          offset: change.offset,
+          decisionIds,
+          ...state,
+        });
+      }
+    }
+    // Where each token was written, from the text item it was made of.
+    const writtenAt = new Map<string, number>();
+    for (const token of utterance.relation("Token").listItems()) {
+      const sourceId = token.get("sourceNormalizationId");
+      const start =
+        typeof sourceId === "string" ? utterance.getItem(sourceId)?.get("sourceStart") : undefined;
+      if (typeof start === "number") writtenAt.set(token.id, start);
+    }
+    const structure = utterance.getRelation("SylStructure");
+    const members = new Map<CommandScope, Set<Item>>();
+    for (const segment of utterance.relation("Segment").listItems()) {
+      // A token spoken as several words names them `<token>:<n>`.
+      const start = writtenAt.get(String(segment.get("sourceTokenId")).split(":")[0] as string);
+      if (start === undefined) continue;
+      const scope = commandScopes.findLast((candidate) => candidate.offset <= start);
+      if (!scope) continue;
+      const items = members.get(scope) ?? new Set<Item>();
+      members.set(scope, items);
+      items.add(segment);
+      for (let node = structure?.node(segment)?.parent; node; node = node.parent) {
+        items.add(node.item);
+      }
+    }
+    for (const [scope, items] of members) {
+      const binding = utterance.beginTransaction({
+        ruleId: `parameter_scope:${scope.name}`,
+        phase: "frontend",
+        tag: "parameter_scope",
+        reason:
+          `From offset ${scope.offset.toString()} of the parser's text the commands inside the text have left: ` +
+          `voice ${scope.voice.name}` +
+          (scope.wordsPerMinute === undefined
+            ? ""
+            : `, ${scope.wordsPerMinute.toString()} words per minute`) +
+          (scope.pauses
+            ? `, ${scope.pauses.comma.toString()} ms more at a comma and ${scope.pauses.period.toString()} ms more at a sentence end`
+            : "") +
+          `; ${items.size.toString()} Items written from there on are in the parameter scope ${scope.name}`,
+        citations: [
+          "DECtalk 4.63 CMD/cm_cmd.c:766-790 (a command in the text is carried out where it stands)",
+          "DECtalk 4.63 PH/ph_task.c:665-676 (the clause before a control item is ended), 710-750 (RATE, CPAUSE, PPAUSE, NEW_SPEAKER, NEW_PARAM hold for what follows)",
+        ],
+        stage: "frontend",
+      });
+      for (const decisionId of scope.decisionIds) binding.dependOn(decisionId);
+      for (const item of items) binding.set(item, PARAMETER_SCOPE_FEATURE, scope.name);
+      binding.commit();
+    }
+  }
+  const scopeOptions =
+    commandScopes.length > 0
+      ? {
+          parameterScopes: Object.fromEntries(
+            commandScopes.map((scope) => [
+              scope.name,
+              {
+                policy: {
+                  speaker: scope.speaker,
+                  ...(Object.keys(scope.voice.ruleFields).length > 0
+                    ? { voice: scope.voice.ruleFields }
+                    : {}),
+                  ...(scope.wordsPerMinute === undefined && !scope.pauses
+                    ? {}
+                    : {
+                        timing: {
+                          ...(scope.wordsPerMinute === undefined
+                            ? {}
+                            : { speaking_rate_wpm: scope.wordsPerMinute }),
+                          ...(scope.pauses ? { pause_added_ms: scope.pauses } : {}),
+                        },
+                      }),
+                },
+              },
+            ]),
+          ),
+        }
+      : {};
   const graphInventory = {
     spec: resources.inventory,
     decisionId: inventoryDecision.id,
@@ -1140,6 +1371,7 @@ function buildTextToKlattTrackDetailed(
     ruleEvaluationOwners.set(spec, evaluationOwner);
   }
   runGraphRuleEngine(utterance, spec, {
+    ...scopeOptions,
     evaluationOwner,
     phases: ["normalize", "postlexical", "structural"],
     parameters: mergedPolicy(spec, speakerPolicy),
@@ -1165,6 +1397,7 @@ function buildTextToKlattTrackDetailed(
 
   // Authored stress must be visible to accent assignment and onset propagation.
   runGraphRuleEngine(utterance, spec, {
+    ...scopeOptions,
     evaluationOwner,
     phases: ["annotation"],
     parameters: mergedPolicy(spec, speakerPolicy),
@@ -1191,6 +1424,7 @@ function buildTextToKlattTrackDetailed(
   const stopReleaseFloorMs = lowering.timeline.duration_floors.stop_release_ms.value;
   const defaultDurationFloorMs = lowering.timeline.duration_floors.default_ms.value;
   runGraphRuleEngine(utterance, spec, {
+    ...scopeOptions,
     evaluationOwner,
     phases: ["duration"],
     parameters: mergedPolicy(spec, {
@@ -1207,6 +1441,7 @@ function buildTextToKlattTrackDetailed(
     onPhaseEnd,
   });
   runGraphRuleEngine(utterance, spec, {
+    ...scopeOptions,
     evaluationOwner,
     phases: ["formant"],
     parameters: mergedPolicy(spec, {
@@ -1220,6 +1455,7 @@ function buildTextToKlattTrackDetailed(
   const f0Policy = recordOrEmpty(policyRecord(spec).f0);
   const f0Range = rate ** -f0Exponent;
   runGraphRuleEngine(utterance, spec, {
+    ...scopeOptions,
     evaluationOwner,
     // Then every phase the rulepack declares after `finalize`: rules that need
     // final durations and times, such as frame programs.
@@ -1257,6 +1493,15 @@ function buildTextToKlattTrackDetailed(
   speakerStamp.dependOn(speakerDecision.id).dependOn(sourceDecision.id);
   for (const item of utterance.relation("Segment").listItems()) {
     if (item.get("active") === false) continue;
+    // A Segment in a command's parameter scope has that scope's voice.
+    const scope =
+      commandScopes.length > 0 && item.has(PARAMETER_SCOPE_FEATURE)
+        ? commandScopes.find(
+            (candidate) => candidate.name === speakerStamp.read(item, PARAMETER_SCOPE_FEATURE),
+          )
+        : undefined;
+    const itemVoice = scope?.voice ?? selectedVoice;
+    const itemSpeaker = scope?.speaker ?? resolvedSpeaker;
     // Project the resolved source/speaker policy via the declarative projection
     // table, using the formant frequencies declared by the active inventory.
     const projectedFields = new Map<string, number>();
@@ -1276,18 +1521,18 @@ function buildTextToKlattTrackDetailed(
         spectral_tilt_offset_db: source.baseline.spectral_tilt_offset_db,
       },
       source.voiceQualityOverrides,
-      resolvedSpeaker.formant_scale,
+      itemSpeaker.formant_scale,
       speakerFormantKeys,
     );
-    if (selectedVoice && registry) {
+    if (itemVoice && registry) {
       for (const field of registry.speakerFrameParams) {
-        const value = selectedVoice.params[field];
+        const value = itemVoice.params[field];
         if (typeof value === "number" && Number.isFinite(value))
           speakerStamp.set(item, field, value);
       }
       if (referenceVoice) {
         for (const mapping of registry.speakerGainOffsets) {
-          const selected = selectedVoice.params[mapping.gain];
+          const selected = itemVoice.params[mapping.gain];
           const reference = referenceVoice.params[mapping.gain];
           const current = item.get(mapping.param);
           if (
@@ -1304,21 +1549,64 @@ function buildTextToKlattTrackDetailed(
   speakerStamp.commit();
   onStage?.("speaker projection");
 
-  let speakerParams: Record<string, unknown> | undefined;
-  if (isLayeredF0Model(spec.f0_model)) {
-    speakerParams = {};
+  // What the F0 model reads of a speaker: the policy's speaker numbers, the
+  // voice's own, and the resolved base F0.
+  const speakerParamsOf = (
+    voice: ResolvedVoice | null,
+    speaker: typeof resolvedSpeaker,
+  ): Record<string, unknown> | undefined => {
+    if (!isLayeredF0Model(spec.f0_model)) return undefined;
+    const params: Record<string, unknown> = {};
     const configured = recordOrEmpty(policyRecord(spec).speaker);
     for (const [key, value] of Object.entries(configured)) {
       const number = readPolicyNumber(value);
-      if (number !== undefined) speakerParams[key] = number;
+      if (number !== undefined) params[key] = number;
     }
-    if (selectedVoice) {
-      Object.assign(speakerParams, selectedVoice.params);
+    if (voice) {
+      Object.assign(params, voice.params);
       // Preserve the declared voice as a reference distinct from the requested profile.
-      speakerParams.voice = selectedVoice.params;
+      params.voice = voice.params;
     }
-    speakerParams.base_f0_hz = resolvedSpeaker.base_f0_hz;
-  }
+    params.base_f0_hz = speaker.base_f0_hz;
+    return params;
+  };
+  const speakerParams = speakerParamsOf(selectedVoice, resolvedSpeaker);
+  // For lowering, by parameter scope: the voice an F0 clause of the scope is
+  // rendered with, and the count of speaker definitions sent, which the
+  // frames of the scope carry as `speaker_epoch` (the synthesizer loads the
+  // definition again when that number changes; DECtalk sends a definition
+  // at a voice command and at a change of one of its entries).
+  // The first definition is sent before the first frame: the count starts
+  // at 1. With it go the fields the frontend names as sent with a
+  // definition (speakers.definition_frame_params), of the voice in force.
+  const definitionFrameParams = (
+    voice: ResolvedVoice | null,
+    definitionsSent: number,
+  ): Record<string, number> => ({
+    speaker_epoch: 1 + definitionsSent,
+    ...Object.fromEntries(
+      (registry?.definitionFrameParams ?? []).flatMap((name) => {
+        const value = voice?.ruleFields[name];
+        return typeof value === "number" ? [[name, value]] : [];
+      }),
+    ),
+  });
+  const loweringScopes =
+    commandScopes.length > 0
+      ? {
+          scopes: Object.fromEntries([
+            ["", { frameParams: definitionFrameParams(selectedVoice, 0) }],
+            ...commandScopes.map((scope) => [
+              scope.name,
+              {
+                speakerParams: speakerParamsOf(scope.voice, scope.speaker),
+                speakerSex: scope.voice.sex,
+                frameParams: definitionFrameParams(scope.voice, scope.definitionsSent),
+              },
+            ]),
+          ]),
+        }
+      : {};
 
   const silence = materializePhonemeTarget(resources.inventory.silence_symbol, {
     inventorySpec: resources.inventory,
@@ -1346,6 +1634,7 @@ function buildTextToKlattTrackDetailed(
     frameValueFeatures: frameValueFeatures(spec.frame_programs),
     speakerParams,
     speakerSex: selectedVoice?.sex,
+    ...loweringScopes,
     silence: {
       symbol: resources.inventory.silence_symbol,
       initialParams: silence.params,

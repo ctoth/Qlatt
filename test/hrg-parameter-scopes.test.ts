@@ -254,6 +254,11 @@ describe("parameter scopes", () => {
         ?.columns?.PACE;
     expect(frames("a")).toEqual([100, 100]);
     expect(frames("d")).toEqual([250, 250]);
+    // A run with a scoped unit says which scope each frame is shown in.
+    const scopes = (id: string): unknown =>
+      (utterance.getItem(id)?.get("pace_frames") as { scopes?: unknown } | undefined)?.scopes;
+    expect(scopes("a")).toEqual(["", ""]);
+    expect(scopes("d")).toEqual(["fast", "fast"]);
   });
 
   it("refuses a scope that is not declared", () => {

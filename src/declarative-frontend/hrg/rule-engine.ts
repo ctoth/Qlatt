@@ -2626,6 +2626,9 @@ function runFrameRules(
     const tailFrames = Math.min(tail, endFrame - firstFrame);
     // The unit's frames have the parameters of its first Item's scope.
     const unitParams = parametersFor(params, members[0], transaction);
+    const first = members[0];
+    const unitScope =
+      unitParams !== params && first ? String(first.get(PARAMETER_SCOPE_FEATURE)) : "";
     return {
       members,
       memberSpans,
@@ -2635,6 +2638,7 @@ function runFrameRules(
       transaction,
       features,
       unitParams,
+      unitScope,
     };
   });
 
@@ -2647,8 +2651,12 @@ function runFrameRules(
   ): { params?: Readonly<Record<string, unknown>> } =>
     unit && unit.unitParams !== params ? { params: unit.unitParams } : {};
   const machineUnits: FrameUnit[] = [];
+  // The scope each machine unit's frames ran in ("" for none), for the frame
+  // values of a run that has a scoped unit.
+  const machineScopes: string[] = [];
   if (leadFrames > 0) {
     machineUnits.push({ features: edgeFeatures, frames: leadFrames, ...scopedParams(units[0]) });
+    machineScopes.push(units[0]?.unitScope ?? "");
   }
   const mainIndex: number[] = [];
   units.forEach((unit, unitIndex) => {
@@ -2658,14 +2666,22 @@ function runFrameRules(
       frames: unit.endFrame - unit.firstFrame - unit.tailFrames,
       ...scopedParams(unit),
     });
+    machineScopes.push(unit.unitScope);
     if (unit.tailFrames > 0) {
+      const after = units[unitIndex + 1] ?? unit;
       machineUnits.push({
         features: edgeFeatures,
         frames: unit.tailFrames,
-        ...scopedParams(units[unitIndex + 1] ?? unit),
+        ...scopedParams(after),
       });
+      machineScopes.push(after.unitScope);
     }
   });
+  const runScopes = machineScopes.some((name) => name !== "")
+    ? machineUnits.flatMap((unit, index) =>
+        new Array<string>(unit.frames).fill(machineScopes[index] as string),
+      )
+    : undefined;
   const results = runFrameProgram({
     registers: program.registers as Record<string, FrameRegisterValue>,
     outputs: program.outputs as Record<string, string>,
@@ -2701,6 +2717,12 @@ function runFrameRules(
   }
   const lead = leadFrames > 0 ? results[0] : undefined;
   const citationsByRule = new Map(rules.map((rule) => [rule.name, rule.citations]));
+  // The places in a run column of the frames an Item shows, `from` to `to`.
+  const columnFrames = (from: number, to: number): number[] =>
+    Array.from(
+      { length: Math.max(0, Math.max(from, to) - from) },
+      (_unused, index) => from + leadFrames + index,
+    );
 
   units.forEach((unit, unitIndex) => {
     const result = results[mainIndex[unitIndex] as number] as FrameUnitResult;
@@ -2734,6 +2756,19 @@ function runFrameRules(
           period_ms: framePeriodMs,
           origin_ms: (from + delayFrames) * framePeriodMs - span.startMs,
           columns,
+          // In a run with a scoped unit: the parameter scope in force while
+          // each of these frames is shown. A frame is shown `delayFrames`
+          // after it was computed, so that is the scope of the frame being
+          // computed then, not of the frame shown; past the run's end, the
+          // last frame's.
+          ...(runScopes
+            ? {
+                scopes: columnFrames(from, to).map(
+                  (frame) =>
+                    runScopes[Math.min(frame + delayFrames, runScopes.length - 1)] as string,
+                ),
+              }
+            : {}),
           // On the unit's first Item: the rules that assigned in this unit
           // (and in the lead-in, when this Item carries it), by unit frame.
           fired:

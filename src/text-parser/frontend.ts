@@ -198,6 +198,37 @@ export interface TextParserResult {
      */
     modes?: string[];
   };
+  /**
+   * What commands inside the text change, in the order of the text: each
+   * holds for the text from `offset` on.
+   */
+  changes: TextParserChange[];
+  /**
+   * Where in the text a clause end stands that a command made by sending a
+   * control item (UTF-16 offsets of the clause-end characters): the words
+   * before it are parsed without it, where a clause end the flush character
+   * made counts as one more of them.
+   */
+  itemClauseEnds: number[];
+}
+
+/**
+ * One command inside a text that changes how the text after it is spoken:
+ * one of a voice, a rate, an addition to a pause, an entry of the speaker
+ * definition.
+ */
+export interface TextParserChange {
+  /** Where in the parser's text the change begins (UTF-16 offset). */
+  offset: number;
+  /** The parser's decision for the command. */
+  decisionId: string;
+  /** A name of the table's voice_names. */
+  voice?: string;
+  /** Words per minute. */
+  rate?: number;
+  pauseAddedMs?: { comma?: number; period?: number };
+  /** An entry's index in the speaker definition and the number typed. */
+  definition?: { index: number; value: number };
 }
 
 /**
@@ -297,9 +328,10 @@ export function runTextParser(
   const clauseEnd = String.fromCharCode(table.clauses.clauseEnd);
   const commandTable = table.commandTable;
   const initial: TextParserResult["initial"] = {};
+  const changes: TextParserChange[] = [];
   let spoken = false;
   let out = "";
-  const record = (type: string, reason: string, citations: string[]): void => {
+  const record = (type: string, reason: string, citations: string[]): string => {
     const decision = provenance.add({
       stage: "transcribe",
       type,
@@ -309,6 +341,31 @@ export function runTextParser(
       parents: [input.id],
     });
     decisionIds.push(decision.id);
+    return decision.id;
+  };
+  // A command inside the text that changes how the text after it is spoken:
+  // the clause before it is ended first (when the command ends one), and the
+  // change holds from the place in the output text that is then reached.
+  const changeFromHere = (
+    change: Omit<TextParserChange, "offset" | "decisionId">,
+    endsClause: boolean,
+    reason: string,
+    citations: string[],
+  ): void => {
+    // Each of these commands sends a control item (endClauseByItem below).
+    if (endsClause) endClauseByItem();
+    const decisionId = record("text_parser_command", reason, citations);
+    changes.push({ offset: out.length, decisionId, ...change });
+  };
+  // A clause end made by a command that sends a control item down the text
+  // pipe, not by the flush character: the words gathered so far are parsed
+  // and spoken, and no character is added to them
+  // (LTS/ls_task.c:404-470, any control item but an index goes to
+  // parse_label), where the flush character is itself one of them (:368-373).
+  const itemClauseEnds: number[] = [];
+  const endClauseByItem = (): void => {
+    itemClauseEnds.push(out.length);
+    out += clauseEnd;
   };
   const notCarriedOut = (written: string, name: string, why: string): void => {
     record(
@@ -469,11 +526,16 @@ export function runTextParser(
             );
             continue;
           }
-          notCarriedOut(
-            written,
-            row.name,
-            `the clause before it is ended, but the voice stays: a voice change inside a text (to ${name}) is not ported`,
+          changeFromHere(
+            { voice: name },
+            endsClause,
+            `The command ${written} (${row.name}) stands inside the text: the clause before it is ended and the text from here on is spoken by the voice ${name}, from that voice's own definition`,
+            [
+              "DECtalk 4.63 CMD/cm_copt.c:2377-2422 (cm_cmd_name), CMD/C_US_CDE.H voice_names[]",
+              "DECtalk 4.63 PH/ph_task.c:665-676 (a control item ends the symbols that are pending with PERIOD), 723-733 (NEW_SPEAKER: usevoice)",
+            ],
           );
+          continue;
         } else if (rate) {
           const [low, high] = commandTable.rate.command;
           const [slowest, fastest] = commandTable.rate.spoken;
@@ -496,11 +558,21 @@ export function runTextParser(
             );
             continue;
           }
-          notCarriedOut(
-            written,
-            row.name,
-            `the clause before it is ended, but the rate stays: a rate change inside a text (to ${value.toString()} words per minute) is not ported`,
+          changeFromHere(
+            { rate: value },
+            endsClause,
+            `The command ${written} (rate) stands inside the text: the clause before it is ended and the text from here on is spoken at ${value.toString()} words per minute` +
+              (command.untyped[0]
+                ? " (no number was typed: the command's number slot still held this one)"
+                : value !== asked
+                  ? ` (${asked.toString()} is outside ${low.toString()} to ${high.toString()} for the command and ${slowest.toString()} to ${fastest.toString()} for the phonemic stage)`
+                  : ""),
+            [
+              "DECtalk 4.63 CMD/cm_copt.c:2332-2376 (cm_cmd_rate), CMD/cm_defs.h:62-69 (the command's limits)",
+              "DECtalk 4.63 PH/ph_task.c:665-676 (a control item ends the symbols that are pending with PERIOD), 710-714 (RATE: sprate)",
+            ],
           );
+          continue;
         } else if (row.routine === "cm_cmd_define") {
           // One word and its number (a list runs once for each pair). The
           // word's place in the option list less one is the entry's index;
@@ -554,11 +626,18 @@ export function runTextParser(
             );
             continue;
           } else {
-            notCarriedOut(
-              written,
-              row.name,
-              `the clause before it is ended, but the voice stays: a change of the speaker definition inside a text (${words[option] ?? ""} to ${(command.numbers[1] ?? 0).toString()}) is not ported`,
+            const value = command.numbers[1] ?? 0;
+            changeFromHere(
+              { definition: { index: option - 1, value } },
+              endsClause,
+              `The command ${written} (${row.name}) stands inside the text: the clause before it is ended and entry ${words[option] ?? ""} of the voice's speaker definition is set to ${value.toString()} for the text from here on (the voice's tuning table is added and the entry's limits hold)`,
+              [
+                "DECtalk 4.63 CMD/cm_copt.c:2840-2887 (cm_cmd_define: the word's place less one is the entry)",
+                "DECtalk 4.63 PH/ph_task.c:665-676 (a control item ends the symbols that are pending with PERIOD), 748-750 (NEW_PARAM: setparam)",
+                "DECtalk 4.63 PH/ph_vset.c:175-232 (setparam), 537-818 (setspdef derives the voice from the definition)",
+              ],
             );
+            continue;
           }
         } else if (row.routine === "cm_cmd_stress") {
           // The pitch command stores a number (pitch_delta) that the
@@ -715,11 +794,23 @@ export function runTextParser(
             );
             continue;
           }
-          notCarriedOut(
-            written,
-            row.name,
-            `the clause before it is ended, but the pauses stay: a change of the ${which} pause inside a text (to ${value.toString()} ms more) is not ported`,
+          changeFromHere(
+            { pauseAddedMs: { [which]: value } },
+            endsClause,
+            `The command ${written} (${row.name}) stands inside the text: the clause before it is ended and ${value.toString()} ms is added to the pause at each ${period ? "sentence end" : "comma"} of the text from here on` +
+              (command.untyped[0]
+                ? " (no number was typed: the command's number slot held this one)"
+                : value !== asked
+                  ? ` (${asked.toString()} is outside ${low.toString()} to ${high.toString()})`
+                  : ""),
+            [
+              period
+                ? "DECtalk 4.63 CMD/cm_copt.c:2484-2506 (cm_cmd_period), CMD/cm_defs.h:71-72 (its limits)"
+                : "DECtalk 4.63 CMD/cm_copt.c:2453-2468 (cm_cmd_comma)",
+              "DECtalk 4.63 PH/ph_task.c:665-676 (a control item ends the symbols that are pending with PERIOD), 717-722 (compause, perpause)",
+            ],
           );
+          continue;
         } else {
           notCarriedOut(
             written,
@@ -729,11 +820,13 @@ export function runTextParser(
               : "DECtalk does not end the clause for it, and nothing is done",
           );
         }
-        if (endsClause) out += clauseEnd;
+        // The sync command sends the flush character itself.
+        if (endsClause && row.sendsItem && row.routine !== "cm_cmd_sync") endClauseByItem();
+        else if (endsClause) out += clauseEnd;
       }
     }
     out += clauseText;
     if ([...clauseText].some((char) => char !== clauseEnd && char.trim() !== "")) spoken = true;
   });
-  return { text: decode(out, marks), decisionIds, initial };
+  return { text: decode(out, marks), decisionIds, initial, changes, itemClauseEnds };
 }

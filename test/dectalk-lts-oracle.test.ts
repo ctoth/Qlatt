@@ -94,6 +94,17 @@ describe("table letter-to-sound, by stage", () => {
     ]);
   });
 
+  // The "camera" rule (LTS/ls_adju.c:980-988, the DGC arm that
+  // LTS/ls_defs.h:681 selects): in a word of three syllables the last vowel
+  // reduces when it ends the word or only a [z] follows it. Each is what
+  // say.exe sends for the word.
+  it("lets the last vowel of a three-syllable word reduce before a final z", () => {
+    expect(ours("tanaka")).toEqual(["T", "AE1", "N", "AX0", "K", "AX0"]);
+    expect(ours("tanakas")).toEqual(["T", "AE1", "N", "AX0", "K", "AX0", "Z"]);
+    expect(ours("tanakad")).toEqual(["T", "AE1", "N", "AX0", "K", "AE0", "D"]);
+    expect(ours("volkas")).toEqual(["V", "OW1", "LL", "K", "AX0", "Z"]);
+  });
+
   it("marks a suffix as a morpheme and writes its letters back", () => {
     // "barked": the D of -ed carries the [+] morpheme flag (0x08).
     const raw = applyLtsRules("barked", table);

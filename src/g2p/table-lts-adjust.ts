@@ -519,10 +519,16 @@ export function adjustLts(
         }
       }
     }
-    // The "camera" rule.
+    // The "camera" rule, as compiled: LTS/ls_defs.h:681 defines DGC, so the
+    // arm at ls_adju.c:984-988 runs and a trailing [z] is stepped over
+    // ("cameras"). say.exe has T AE N AX K AX Z for "Tanakas" and "Tanaka's",
+    // and AE D for "Tanakad".
     if (nsyl === 3) {
-      const lastPhone = head.bp;
-      if (lastPhone.sphone === US_AA && lastPhone.uphone === US_AX) sylp[2].flag &= ~PFBLOCK;
+      let lastPhone = head.bp;
+      if (lastPhone.sphone === US_Z) lastPhone = lastPhone.bp;
+      if (lastPhone !== head && lastPhone.sphone === US_AA && lastPhone.uphone === US_AX) {
+        sylp[2].flag &= ~PFBLOCK;
+      }
     }
   };
 

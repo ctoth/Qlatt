@@ -100,6 +100,16 @@ export function recognizeText(
   // Sticky matching at successive source positions preserves lookaround/anchors
   // in the original input and permits overlapping retries after rejection.
   for (const rule of config.rules) {
+    if (rule.enabled !== undefined) {
+      const enabled = evaluateExpression(rule.enabled, {
+        source: { text },
+        maps: spec.maps,
+        sets: spec.string_sets,
+      });
+      if (typeof enabled !== "boolean")
+        throw new Error(`E_RECOGNITION_RESULT: '${rule.id}' enabled must return a boolean`);
+      if (!enabled) continue;
+    }
     const regex = new RegExp(rule.pattern, `${rule.flags}dy`);
     for (let start = 0; start <= text.length; ) {
       regex.lastIndex = start;

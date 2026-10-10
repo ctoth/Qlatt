@@ -142,6 +142,26 @@ describe("source-backed recognition", () => {
     ).toBe(true);
   });
 
+  it("does not run a rule whose `enabled` is false, and keeps no record of it", () => {
+    const outcomes = (enabled: string) => {
+      const utterance = recognize("12 3", [
+        { ...rule("pair", "[0-9]{2}", "false"), enabled },
+        rule("number", "[0-9]"),
+      ]);
+      return utterance.provenance
+        .getDecisions()
+        .flatMap((entry) =>
+          entry.recognition?.ruleId === "pair" ? [entry.recognition.outcome] : [],
+        );
+    };
+    // The rule runs and `when` rejects its match: one "ineligible" record.
+    expect(outcomes("true")).toEqual(["ineligible"]);
+    // The rule does not run: no record at all, and the other rule is unchanged.
+    expect(outcomes("source.text == 'no such text'")).toEqual([]);
+    expect(() => outcomes("'yes'")).toThrow(/E_RECOGNITION_RESULT/);
+    expect(() => outcomes("current.text == '12'")).toThrow(/E_RECOGNITION_CONFIG/);
+  });
+
   it("recognizes overlapping dates, fractions, decimals, currency and bare numbers in YAML order", () => {
     const utterance = new Utterance(NORMALIZATION_SCHEMA);
     recognizeText("2026-09-08 1/2 3.14 $4.50 42", utterance, loadRulepackSpecFromPath(fixturePath));

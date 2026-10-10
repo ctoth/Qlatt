@@ -47,6 +47,9 @@ export interface NumberPhones {
   months?: readonly (readonly number[])[];
   /** The "oh" of "twenty oh one". */
   oh?: readonly number[];
+  /** "the" and "of", which the date reader adds in the europe mode. */
+  the?: readonly number[];
+  of?: readonly number[];
   /** "half" and "halves", a fraction's denominator 2. */
   half?: readonly number[];
   halves?: readonly number[];

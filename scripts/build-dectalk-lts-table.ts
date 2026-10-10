@@ -369,6 +369,7 @@ for (const [character, comment] of [
   ["'", "Apostrophe"],
   ["+", "Plus sign"],
   [":", "Colon"],
+  ["$", "Dollar sign"],
 ] as const) {
   const row = new RegExp(`"([^"]*)",\\s*/\\*\\s*${comment}\\s*\\*/`).exec(typingTable);
   if (!row) throw new Error(`E_CHARACTER_NAMES: no row '${comment}' in usa_type.tab`);
@@ -392,6 +393,14 @@ if (mathNames["-"] !== "m'An|s" || Object.keys(mathNames).length !== 10) {
     `E_MATH_TABLE: read ${Object.keys(mathNames).length.toString()} signs from l_us_ma1.c math_table[], expected 10`,
   );
 }
+// The europe mode's two number marks, read from the assignments under the
+// mode's test in the text task (LTS/ls_task.c:3083-3086).
+const europeBlock =
+  /modeflag\s*&\s*MODE_EUROPE\s*\)\s*!=\s*0\s*\)\s*\{\s*pLts_t->fchar\s*=\s*'(.)';\s*pLts_t->schar\s*=\s*'(.)';/.exec(
+    read("ls_task.c"),
+  );
+if (!europeBlock) throw new Error("E_EUROPE_MARKS: ls_task.c has no MODE_EUROPE fchar/schar block");
+const europeMarks = { decimal: europeBlock[1] as string, group: europeBlock[2] as string };
 
 // The letters the rule engine reads for a character above 127: it converts
 // each character of the word through ls_fold[] before it looks for a letter
@@ -528,6 +537,10 @@ const numberPhones = {
   monthNames: nameList("months", 12).map(stringConstant),
   months: nameList("pmonths", 12).map(phoneList),
   oh: phoneList("pOH"),
+  // The two words the date reader adds in the europe mode, "the" day "of"
+  // month (LTS/l_us_pr1.c:907-918; pthe[] and pof[], l_us_con.c:1047-1052).
+  the: phoneList("pthe"),
+  of: phoneList("pof"),
   // A fraction's denominator 2 (LTS/l_us_pr1.c:1034-1067).
   half: phoneList("phalf"),
   halves: phoneList("phalves"),
@@ -711,6 +724,11 @@ fs.writeFileSync(
     // The names characters have in a mode of the text, by the mode's word:
     // the math table, as phonemic text.
     modeCharacterNames: { math: mathNames },
+    // The two marks of a number in a mode of the text that changes them: in
+    // the europe mode the number reader takes "," before the fraction and
+    // "." between groups of three digits (LTS/ls_task.c:3080-3086: fchar
+    // and schar, '.' and ',' otherwise).
+    modeNumberMarks: { europe: europeMarks },
     letterFold,
     // The word sequences the text stage's sentence parse takes as one
     // conjunction, in the table's order (LTS/proverbs.h conj_words, read by

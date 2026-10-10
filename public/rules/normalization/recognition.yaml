@@ -560,7 +560,7 @@ text_recognition:
       captures: {word: word}
       when: >-
         get(maps.tn_recognition_policy, 'sign_words', 'split') == 'spelled'
-        && !matches(captures.word, '^[$+][0-9.]')
+        && !matches(captures.word, '^[$+]+[0-9.]')
         && !matches(captures.word, '^[0-9.]+%$')
       speak: current.text
       vocabulary_keys: '[]'

@@ -432,7 +432,7 @@ export function pronounce(
         !/^[0-9.,]+%$/.test(lowerWord) &&
         // Nor a sum of money or a signed number, which the money and sign
         // routines read first (LTS/ls_task.c:3181-3476, LTS/l_us_pr1.c:80-110).
-        !/^[$+][0-9.]/.test(lowerWord))) &&
+        !/^[$+]+[0-9.]/.test(lowerWord))) &&
     !dictLookup(lowerWord)
   ) {
     const letterPhones = table.letterPhones;

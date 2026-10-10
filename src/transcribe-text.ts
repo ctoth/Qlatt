@@ -551,8 +551,12 @@ function rewriteOrthographyTokens(
             writtenBefore?.textId === sourceTextId &&
             ((writtenBefore.start === start && writtenBefore.end === end) ||
               // (A token's text may begin with the white space before its
-              // word: that is no such place.)
-              (writtenBefore.end === start && !/\s/.test(sourceText[start] ?? " ")))
+              // word: that is no such place. Nor is the end of phonemic
+              // text, which is no item of letter-to-sound's: the character
+              // before must be a letter or a digit.)
+              (writtenBefore.end === start &&
+                !/\s/.test(sourceText[start] ?? " ") &&
+                /[A-Za-z0-9]/.test(sourceText[start - 1] ?? " ")))
           ) {
             continuesWritten.add(token.id);
           }

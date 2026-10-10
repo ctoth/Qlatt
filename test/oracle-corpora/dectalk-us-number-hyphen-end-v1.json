@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-number-hyphen-end-v1",
+  "description": "A number with a hyphen written at its end (\"80-\"), which DECtalk's part-number reader speaks as the number and the hyphen's name (LTS/ls_task.c ls_task_part_number, LTS/l_us_pr1.c:161-255). The text parser writes a dollar range that way (\"$80-$120\" leaves it as \"$ 80- $ 120\"): from the fifth messy sweep's m5-073, m5-078 and m5-142. Also the word \"a\" after such a word and after a part number with a hyphen inside it. The first two texts are the sweep's; the others were written for this list.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "nhe-dollar-range", "text": "Rooms are $80-$120 a night in summer.", "group": "dollar-range", "tags": ["messy-sweep-5-m5-073"], "expectedFocus": ["trace"] },
+    { "id": "nhe-dollar-range-2", "text": "Expect to spend $30-$45 on books this term.", "group": "dollar-range", "tags": ["messy-sweep-5-m5-078"], "expectedFocus": ["trace"] },
+    { "id": "nhe-dollar-first", "text": "Rooms are $80- a night.", "group": "dollar-range", "tags": ["a-after"], "expectedFocus": ["trace"] },
+    { "id": "nhe-dollar-second", "text": "Rooms are 80-$120 a night.", "group": "dollar-range", "tags": ["no-first-sign"], "expectedFocus": ["trace"] },
+    { "id": "nhe-inside", "text": "Take 80- of them.", "group": "hyphen-end", "tags": ["two-digits"], "expectedFocus": ["trace"] },
+    { "id": "nhe-one-digit", "text": "Take 8- of them.", "group": "hyphen-end", "tags": ["one-digit"], "expectedFocus": ["trace"] },
+    { "id": "nhe-comma", "text": "Take 80-, then go.", "group": "hyphen-end", "tags": ["before-a-comma"], "expectedFocus": ["trace"] },
+    { "id": "nhe-sentence-end", "text": "They sold 80-.", "group": "hyphen-end", "tags": ["before-a-period"], "expectedFocus": ["trace"] },
+    { "id": "nhe-three-digits", "text": "We counted 250- in all.", "group": "hyphen-end", "tags": ["three-digits"], "expectedFocus": ["trace"] },
+    { "id": "nhe-letter-first", "text": "The x-80- is here.", "group": "hyphen-end", "tags": ["letter-and-digits"], "expectedFocus": ["trace"] },
+    { "id": "nhe-part-a", "text": "Rooms are 80-120 a night.", "group": "a-after", "tags": ["a-after-part-number"], "expectedFocus": ["trace"] },
+    { "id": "nhe-part-a-dollar", "text": "Rooms are $80-120 a night.", "group": "a-after", "tags": ["a-after-part-number"], "expectedFocus": ["trace"] }
+  ]
+}

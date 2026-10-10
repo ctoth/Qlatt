@@ -671,8 +671,11 @@ text_recognition:
     # percent sign after it. A word with a slash in it is one whether or not
     # it has a digit, and the slash may stand first or last ("/usr/bin",
     # "bin/"): the part-number reader takes a slash as it takes a digit.
+    # A hyphen may stand last too ("80-", as DECtalk's text parser leaves the
+    # first amount of "$80-$120"): the reader names every hyphen of the word
+    # (LTS/l_us_pr1.c:168-180), and say.exe has "eighty dash" for "80-".
     - id: tn_part_number_source
-      pattern: '(?<![\w$.,:/-])(?<token>/?[A-Za-z0-9]+(?:[-/][A-Za-z0-9]+)*/?)(?![\w/%-]|[.,][0-9])'
+      pattern: '(?<![\w$.,:/-])(?<token>/?[A-Za-z0-9]+(?:[-/][A-Za-z0-9]+)*[/-]?)(?![\w/%-]|[.,][0-9])'
       flags: ''
       class: number_token
       captures: {token: token}

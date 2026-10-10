@@ -173,6 +173,16 @@ describe("fractions and part numbers in a sentence", () => {
     expect(phones("The zorb-12 now.")).toContain("B IY , D AE SH");
   });
 
+  // LTS/l_us_pr1.c:168-180: every hyphen of the word is named, the last one
+  // too. The text parser writes "$80-$120" as "$ 80- $ 120".
+  it("names a hyphen at the word's end", () => {
+    // (The T of "eighty" is the flap DF after the allophone rules.)
+    expect(phones("Take 80- of them.")).toContain("EY DF IY D AE SH AX V");
+    expect(phones("Rooms are $80-$120 a night.")).toContain(
+      "D AA L RR EY DF IY D AE SH D AA L RR W AH N",
+    );
+  });
+
   it("leaves a day and a month to the other rules", () => {
     expect(phones("On 3-May now.")).not.toContain("D AE SH");
   });

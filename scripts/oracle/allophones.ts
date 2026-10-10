@@ -147,6 +147,9 @@ export const DECTALK_PACKET_CORPUS_FILES: readonly string[] = [
   "dectalk-us-lateral-after-r-v1.json",
   // A part number's class is its first run's, when the dictionary has it.
   "dectalk-us-part-number-class-v1.json",
+  // A number with a hyphen at its end ("80-", as the parser leaves "$80-$120"):
+  // a part number, the hyphen named.
+  "dectalk-us-number-hyphen-end-v1.json",
 ];
 
 /** Every corpus with a packet record. */

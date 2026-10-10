@@ -94,9 +94,12 @@ export interface ClauseContext {
   /**
    * The word right before this one is a plain number, a clock time or a
    * number with an ordinal ending: "am" and "pm" are spelled after the first
-   * two, and a lone "a" is the letter after the first and the last.
+   * two, and a lone "a" is the letter after the first and the last. `part` is
+   * a part number whose first character is a digit ("80-120", "80-"): the
+   * plain-number routine was entered for it, and "a" is the letter after it
+   * too.
    */
-  afterNumber?: "plain" | "time" | "ordinal";
+  afterNumber?: "plain" | "time" | "ordinal" | "part";
 }
 
 /** The context of a word spoken alone. */

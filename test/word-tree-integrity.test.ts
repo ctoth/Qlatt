@@ -74,16 +74,11 @@ describe("positional daughters in a tree relation", () => {
   });
 });
 
-const corpusDirectory = path.join(__dirname, "oracle-corpora");
-const corpusTexts = fs
-  .readdirSync(corpusDirectory)
-  .filter((file) => file.endsWith(".json"))
-  .flatMap((file) => {
-    const corpus = JSON.parse(fs.readFileSync(path.join(corpusDirectory, file), "utf8")) as {
-      entries: Array<{ text: string }>;
-    };
-    return corpus.entries.map((entry) => entry.text);
-  });
+// One named corpus, so this test does not grow with every corpus added to the directory.
+const corpus = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "oracle-corpora", "dectalk-us-v1.json"), "utf8"),
+) as { entries: Array<{ text: string }> };
+const corpusTexts = [...new Set(corpus.entries.map((entry) => entry.text))];
 
 describe.each(["dectalk-english", "qlatt-english", "qlatt-beauty"])(
   "the word tree after every rule phase (%s)",

@@ -282,6 +282,34 @@ realize:
 - `realize`: CEL expressions with explicit dependencies
   - `deps`: Required for topological ordering
   - `ramp: true`: Enables smooth interpolation between frames
+- `realize_each` (optional): realize rules that differ only in one index,
+  written once and generated at load
+
+**Indexed rule families (`realize_each`):**
+
+When several realize rules differ only in a formant number or another single
+index, write the family once. `{n}` is replaced textually in the rule name,
+`expr`, each `deps` item and `description`; the generated rules are merged
+into `realize` when the document is loaded, so the rest of the system sees
+ordinary rules.
+
+```yaml
+realize_each:
+  - index: n
+    over: [2, 3, 4, 5, 6]
+    rules:
+      # Cite the source once, on the template.
+      "parallelGain{n}":
+        expr: "dbToLinear(A{n} + ndbScale.A{n}) * parallelScale"
+        deps: ["A{n}", parallelScale]
+```
+
+Quote any name or `deps` item that contains braces. A generated name may not
+collide with a rule authored under `realize` in the same document; a child
+experiment overrides a parent's generated rule by writing a rule with the
+generated name. Rules whose constants vary per index cannot be templated: the
+substitution is textual and takes one scalar per value. See
+`docs/host-contract.md` §4 for the exact semantics and error codes.
 
 ### Step 2: Define Topology (graph.yaml)
 

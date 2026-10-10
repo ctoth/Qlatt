@@ -19,15 +19,16 @@ import { describe, expect, it } from "vitest";
 import { expandFormantBanks } from "../src/formant-bank";
 import type { BaconGraph } from "../src/klatt-runtime";
 import { createCelEvaluator } from "../src/semantics/cel-evaluator";
+import { parseSemanticsDocument } from "../src/semantics/load-semantics";
 import { registerNumericBuiltins } from "../src/semantics/register-builtins";
 import { createTopologicalEvaluator } from "../src/semantics/topological-evaluator";
-import type { EvaluationContext, SemanticsDocument } from "../src/semantics/types";
+import type { EvaluationContext } from "../src/semantics/types";
 import { parseYamlString } from "../src/yaml-loader";
 
 // Load the real semantics.yaml and graph.yaml, then expand formant banks
 const semanticsPath = resolve(__dirname, "../public/experiments/klatt80-baseline/semantics.yaml");
 const semanticsRaw = readFileSync(semanticsPath, "utf-8");
-const semantics = parseYamlString<SemanticsDocument>(semanticsRaw, semanticsPath);
+const semantics = parseSemanticsDocument(semanticsRaw, semanticsPath);
 
 const graphPath = resolve(__dirname, "../public/experiments/klatt80-baseline/graph.yaml");
 const graphRaw = readFileSync(graphPath, "utf-8");

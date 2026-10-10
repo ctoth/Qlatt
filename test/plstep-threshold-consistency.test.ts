@@ -11,17 +11,14 @@
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { describe, expect, it } from "vitest";
-import type { SemanticsDocument } from "../src/semantics/types";
+import { parseSemanticsDocument } from "../src/semantics/load-semantics";
 import { parseYamlString } from "../src/yaml-loader";
 
 // Load the real YAML files
 const basePath = resolve(__dirname, "../public/experiments/klatt80-baseline");
 
 const semanticsRaw = readFileSync(resolve(basePath, "semantics.yaml"), "utf-8");
-const semantics = parseYamlString<SemanticsDocument>(
-  semanticsRaw,
-  resolve(basePath, "semantics.yaml"),
-);
+const semantics = parseSemanticsDocument(semanticsRaw, resolve(basePath, "semantics.yaml"));
 
 const graphRaw = readFileSync(resolve(basePath, "graph.yaml"), "utf-8");
 const graph = parseYamlString<{

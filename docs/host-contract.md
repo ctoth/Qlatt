@@ -26,7 +26,8 @@ A synthesizer is defined by:
 
 Experiments may `extends` a parent (see `public/experiments/manifest.json`);
 registries, graphs, and semantics merge child-over-parent
-(`src/experiments/load-experiment-config.ts`).
+(`src/experiments/load-experiment-config.ts`). Each semantics document's
+`realize_each` templates (§4) are expanded before that merge.
 
 A frontend is played through one experiment. Its entry in
 `public/rules/frontends/manifest.json` may name a `defaultExperiment`
@@ -159,6 +160,53 @@ predicates/patterns, are added to the calling rule's citations for provenance.
 Rules still require their own citations and application tags. A native host
 consuming the expanded, validated rulepack needs no runtime macro facility;
 a host loading raw YAML must perform equivalent expansion and validation.
+
+**`realize_each` (load-time expansion).** A semantics document may write a
+family of realize rules that differ only in one scalar index once, under the
+optional top-level key `realize_each`
+(reference implementation: `src/semantics/realize-each.ts`):
+
+```yaml
+realize_each:
+  - index: n
+    over: [2, 3, 4]
+    rules:
+      "gain{n}":
+        expr: "active ? dbToLinear(A{n}) : a{n}Linear"
+        deps: [active, "A{n}", "a{n}Linear"]
+        ramp: true
+```
+
+A host loading raw YAML must expand it before step 3 below; a host given an
+already-expanded document needs no such facility. For each entry, for each
+value in `over`, in order:
+
+- Substitute the placeholder `{<index>}` textually in the rule name and in
+  every string field of the rule (`expr`, each `deps` item, `description`).
+  Copy non-string fields (`ramp`, `step`) unchanged. A rule may be a bare CEL
+  string, as under `realize`. `over` values are finite numbers or non-empty
+  strings and are substituted in their string form.
+- Add the generated rule to the document's `realize` map and drop the
+  `realize_each` key. Generated rules follow the authored ones, in entry
+  order, then rule order, then `over` order. Nothing downstream may
+  distinguish a generated rule from an authored one.
+
+Expansion is per document and precedes the `extends` merge (§1): a child
+experiment's concrete rule overrides a parent's generated rule by key, and a
+child's generated rule overrides a parent's rule of the same name.
+
+An entry has exactly the keys `index` (an identifier), `over` and `rules`.
+There is one index per entry; ranges, map-valued items and nesting are not
+part of the construct. A placeholder is a brace pair around one identifier,
+so CEL map literals (`{a: 1}`) pass through. These are load errors:
+
+| Code | Condition |
+| --- | --- |
+| `E_REALIZE_EACH_SHAPE` | `realize_each` is not a list; an entry is not a mapping, has an unknown key, a non-identifier `index`, or an empty or non-mapping `rules`; a rule is neither a string nor a mapping with a string `expr`; `deps` is not a list of strings |
+| `E_REALIZE_EACH_OVER` | `over` is missing, not a list, or empty; an item is not a finite number or non-empty string |
+| `E_REALIZE_EACH_NAME` | A rule name does not contain the entry's placeholder |
+| `E_REALIZE_EACH_PLACEHOLDER` | A string in the entry contains `{name}` for a name other than the entry's `index` |
+| `E_REALIZE_EACH_COLLISION` | A generated name is already authored under `realize` in the same document, or was already generated in it (a repeated `over` value included) |
 
 Per frame, the host derives realized parameter values from the semantics
 document:

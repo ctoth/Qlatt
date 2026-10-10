@@ -107,8 +107,9 @@ eleven sites.
    is about English, not about a voice or a body. Documents: the dictionary,
    normalization components, LTS rules, morphology, phonotactics,
    syllabification tables, stress policy. Declarations inside `pipeline.yaml`:
-   the phonological predicates (`is_sonorant`, `is_coronal`,
-   `is_question_boundary`, twenty-five in `qlatt-english`), the string sets
+   the phonological predicates (`is_sonorant`, `is_coda`,
+   `is_question_boundary`, seven in `qlatt-english`, beside the item-argument
+   functions `voiced`, `coronal`, `same_word`, ... in its `frontend.yaml`), the string sets
    (`function_words`, `ascii_letter`, the place-locus sets), the maps. And
    one column of the inventory: of the seventy keys a `qlatt-english` target
    carries, twenty-three are phonological (`type` and the binary features

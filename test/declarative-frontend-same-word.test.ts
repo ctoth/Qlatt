@@ -191,12 +191,13 @@ describe("bundled DECtalk same-word callers", () => {
     }
   });
 
-  it("keeps Qlatt named predicates intact through beauty inheritance", () => {
+  it("keeps Qlatt's word-text same_word intact through beauty inheritance", () => {
     for (const frontend of ["qlatt-english", "qlatt-beauty"]) {
       const inherited = loadRulepackSpecFromPath(`/rules/frontends/${frontend}/frontend.yaml`);
-      expect(inherited.predicates?.prev_same_word).toBe(
-        "has(prev.word) && has(current.word) && prev.word == current.word",
-      );
+      expect(inherited.functions?.same_word).toMatchObject({
+        params: ["a", "b"],
+        body: "has(a.word) && has(b.word) && a.word == b.word",
+      });
       expect(inherited.functions).not.toHaveProperty("dectalk_same_word");
     }
   });

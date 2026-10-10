@@ -61,3 +61,38 @@ default_profile:
     value: 0
     citations:
       - Klatt & Klatt 1990
+
+# Pitch composition policy: how a requested pitch composes with the level
+# (base_f0_hz) and the span (f0_range_hz) resolved above. src/speaker-profile.ts
+# applies it after the fields are resolved.
+pitch_composition:
+  # A request's pitch as a ratio, where base_f0_hz is a request's pitch in Hz:
+  #   effective base = base_f0_hz * pitch_scale
+  # base_f0_hz is resolved first (an absolute request, else the selected
+  # voice's, else the default), so one ratio moves whichever voice is selected
+  # by the same interval. Unity is no request.
+  pitch_scale:
+    sources: [request.pitch_scale, pitchScale]
+    value: 1
+    citations:
+      - "Ladd 2008 p.204 (F0 = F_R * T * N * r: a speaker's targets are multiples of the reference level F_R)"
+      - "Pierrehumbert 1980 (baseline transform P-hat = (P - B) / B: targets are in baseline units above the baseline)"
+  # Span follows level. A target is a fixed number of baseline units above the
+  # speaker's level, so its height above the level in Hz grows with the level:
+  #   ratio = effective base / reference base
+  #   span  = f0_range_hz * ratio
+  # The reference base is the selected voice's base_f0_hz, or this document's
+  # base_f0_hz value when no voice gives one: at the reference, the span is the
+  # one resolved above. A span the request gives is used as given.
+  # The sources describe how targets compare between speakers of different
+  # levels; using that relation for a requested pitch is an engineering
+  # application of it.
+  span_follows_level:
+    level: base_f0_hz
+    span: f0_range_hz
+    reference_sources: [voice.base_f0_hz]
+    unscaled_span_sources: [request.f0_range_hz]
+    citations:
+      - "Pierrehumbert 1980 Fig 1.20 p.271 (proportional scaling of targets across speakers, in baseline units)"
+      - "Ladd 2008 p.204 (F0 = F_R * T * N * r: between speakers, targets scale with the reference level F_R)"
+      - "Liberman & Pierrehumbert 1984 pp.161, 168-169 (ratios between accent targets are invariant under changes of pitch range)"

@@ -49,6 +49,8 @@ export interface BrowserRenderOptions {
   experimentId?: string;
   rate?: number;
   speaker?: string;
+  /** A requested pitch as a ratio of the base pitch. Absent: 1. */
+  pitchScale?: number;
   transitionMs?: number;
   sampleRate?: number;
   leadTime?: number;

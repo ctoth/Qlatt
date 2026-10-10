@@ -26,6 +26,9 @@
         // A voice of the frontend's registry, as the page's voice selection
         // gives it (test/harness/runtime.js). Absent: the frontend's default.
         speaker,
+        // A requested pitch as a ratio of the base pitch
+        // (/rules/policy/speaker-profile.yaml pitch_composition). Absent: 1.
+        pitchScale,
         transitionMs = 30,
         sampleRate = 48000,
         leadTime = 0.05,
@@ -50,6 +53,7 @@
               frontendId,
               rate,
               ...(speaker ? { speaker } : {}),
+              ...(pitchScale === undefined ? {} : { pitchScale }),
             }).track;
         const totalTime =
           (resolvedTrack.length ? resolvedTrack[resolvedTrack.length - 1].time : 0) +

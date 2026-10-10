@@ -153,7 +153,9 @@ const result = await page.evaluate(
   },
   {
     phrase: payload.phrase ?? "track",
-    baseF0: payload.baseF0 ?? 110,
+    // The track is given, so no base pitch reaches the frontend; keep the
+    // payload's own value or none.
+    baseF0: payload.baseF0 ?? undefined,
     sampleRate,
     leadTime,
     tailTime,

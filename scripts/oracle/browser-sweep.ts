@@ -85,8 +85,8 @@ const server = (flag("server") ?? "build") as "build" | "dev";
 const verbose = argv.includes("--verbose");
 // The frontend's base F0: none, so each voice keeps its own, as say.exe's
 // voices have theirs and as the Node comparison renders; or a number of hertz.
-// The page's Speak passes its "Base F0" box, 110 unless changed, and that
-// replaces the voice's own (Paul's is 122): --base-f0 110 measures that.
+// The page's Speak passes its "Base F0" box, which starts empty, and a number
+// in it replaces the voice's own (Paul's is 122): --base-f0 110 measures that.
 const baseF0 = flag("base-f0") === undefined ? null : Number(flag("base-f0"));
 const corpus = readVoiceCorpus(corpusPath);
 const ids = flags("id");

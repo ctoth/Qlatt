@@ -54,15 +54,10 @@ const fixtureDir = path.join("test", "fixtures", "dectalk-mode-math");
 const corpus = readVoiceCorpus(path.join("test", "oracle-corpora", "dectalk-us-mode-math-v1.json"));
 
 /**
- * Not DECtalk's samples yet. Neither is a difference of the math mode: each
- * text differs in the same way with the mode off.
+ * Not DECtalk's samples yet. It is no difference of the math mode: the text
+ * differs in the same way with the mode off.
  */
 const NOT_EXACT: Readonly<Record<string, string>> = {
-  "mm-08":
-    '"1.5e3": DECtalk\'s parser writes " 1 point 5 e3" and letter-to-sound spells "e3" (IY, ' +
-    "TH R IY); this lexicon reads the word by rule (EH). The same with the mode off: " +
-    '"Use 1.5e3 now." differs, "Use 5 e3 now." (which the parser writes "5 e 3") is exact. ' +
-    'The minus of "2e-4" is right in the mode.',
   "mm-11":
     'two dates in one clause: the text differs from the "and" after the first date on, at ' +
     'the same sample with the mode off ("On 3/8/2001 and 12-25-99." 22285 of 55806); either ' +

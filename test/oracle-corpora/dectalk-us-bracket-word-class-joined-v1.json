@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-bracket-word-class-joined-v1",
+  "description": "A word right after bracketed phonemic text, second list: a word with no phrase start, which is one word with the bracket's phones, after a vowel and after a consonant; and \"and\" after a bracket that ends in two consonants or in a silence. Written before any export and not edited afterwards.",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 11025,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    { "id": "bj-01", "text": "[:phoneme arpabet speak on][uw]do it.", "group": "joined-after-vowel" },
+    { "id": "bj-02", "text": "[:phoneme arpabet speak on][uw]have it.", "group": "joined-after-vowel" },
+    { "id": "bj-03", "text": "[:phoneme arpabet speak on][ax]does it.", "group": "joined-after-vowel" },
+    { "id": "bj-04", "text": "[:phoneme arpabet speak on][k'uw]do it.", "group": "joined-after-vowel" },
+    { "id": "bj-05", "text": "[:phoneme arpabet speak on][uw<400>]do it.", "group": "joined-written-duration" },
+    { "id": "bj-06", "text": "[:phoneme arpabet speak on][uw<400,30>]do it.", "group": "joined-written-pitch" },
+    { "id": "bj-07", "text": "[:phoneme arpabet speak on][uwt]do it.", "group": "joined-after-consonant" },
+    { "id": "bj-08", "text": "[:phoneme arpabet speak on][uw]do it and go.", "group": "joined-two-verbs" },
+    { "id": "bj-09", "text": "[:phoneme arpabet speak on][uwst] and me.", "group": "phrase-start-after-consonants" },
+    { "id": "bj-10", "text": "[:phoneme arpabet speak on][uwks] and me.", "group": "phrase-start-after-consonants" },
+    { "id": "bj-11", "text": "[:phoneme arpabet speak on][uwtr] and me.", "group": "phrase-start-after-consonants" },
+    { "id": "bj-12", "text": "[:phoneme arpabet speak on][uw_] and me.", "group": "phrase-start-after-silence" },
+    { "id": "bj-13", "text": "[:phoneme arpabet speak on]We saw [uw] and me.", "group": "mid-clause" },
+    { "id": "bj-14", "text": "[:phoneme arpabet speak on]Go. [uw] and me.", "group": "second-clause" }
+  ]
+}

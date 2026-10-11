@@ -159,17 +159,28 @@ function concatValue(...values: unknown[]): unknown[] | string {
   return values.map(stringValue).join("");
 }
 
-const regexCache = new Map<string, RegExp>();
+// Compiled once per pattern and flags: rules pass the same few every time.
+const regexCache = new Map<string, Map<string, RegExp>>();
+
+function cachedRegex(source: string, flags = ""): RegExp {
+  let byFlags = regexCache.get(source);
+  if (!byFlags) {
+    byFlags = new Map();
+    regexCache.set(source, byFlags);
+  }
+  let regex = byFlags.get(flags);
+  if (!regex) {
+    regex = new RegExp(source, flags);
+    byFlags.set(flags, regex);
+  }
+  // A kept global or sticky expression remembers where its last match ended.
+  regex.lastIndex = 0;
+  return regex;
+}
 
 /** `matches(s, re)`: whether `s` contains a match of the regular expression `re`. */
 function matchesValue(value: unknown, pattern: unknown): boolean {
-  const source = stringValue(pattern);
-  let regex = regexCache.get(source);
-  if (!regex) {
-    regex = new RegExp(source);
-    regexCache.set(source, regex);
-  }
-  return regex.test(stringValue(value));
+  return cachedRegex(stringValue(pattern)).test(stringValue(value));
 }
 
 /**
@@ -193,10 +204,10 @@ const PURE_FUNCTIONS: Readonly<Record<string, (...args: unknown[]) => unknown>> 
   matches: (value, pattern) => matchesValue(value, pattern),
   regexReplace: (value, pattern, replacement, flags) =>
     stringValue(value).replace(
-      new RegExp(stringValue(pattern), stringValue(flags)),
+      cachedRegex(stringValue(pattern), stringValue(flags)),
       stringValue(replacement),
     ),
-  regexSplit: (value, pattern) => stringValue(value).split(new RegExp(stringValue(pattern))),
+  regexSplit: (value, pattern) => stringValue(value).split(cachedRegex(stringValue(pattern))),
   literalPattern: (values) => {
     if (
       !Array.isArray(values) ||

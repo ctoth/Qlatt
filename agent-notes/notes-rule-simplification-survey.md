@@ -629,6 +629,22 @@ merged #311 without re-reading master's state first. Consequence: tests did
 not run in CI for #311; my 64-test run was on the old deps (branch base
 59270e0b). Stopped; reported to Q; no fix attempted (not the named action).
 DECtalk PR must not be merged onto red master without Q's say.
+19:15 English agent's final report (claims): get 50, isTrue 29, max/min 52;
+corpus compare on final rule files 11004 lines / 0 differing; left
+duration.yaml 200, 372 (nullable inherentDuration). English worktree, local
+and remote branch removed.
+PR #312 (dectalk) open, head 0f3f94b4, 10 files +803/−179, NOT merged
+(master red). Agent claims: get 72, isTrue 10, `get(..,null) == n` 7,
+max/min 75, word_id 3; formant.yaml:164 left because get() reads its default
+first and reordered decision parents (3020 decision-hash lines); corpus 0
+differing; 6 test files 1120 passed incl. dectalk-frame-gate; tsc exit 0 (on
+old TS). My check: scratchpad/check-accessor-diff.mjs over `gh pr diff 312`:
+105 change blocks in rule files, 102 equal under my own rewrite (parens,
+brackets, quotes, whitespace ignored), 3 read by hand = the three
+dectalk_word_id sites, each equivalent given the predicate body (assumes
+Word ids are never ''). My check cannot see a paren-regrouping error.
+Open for Q: fix TS7/vitest5 break or revert #264; wider word_id set (15
+rules gain Taylor citation); two script files to reconcile.
 Local main checkout: stop hook made me commit this note on local master
 (0537ea5d, not pushed; local master ahead 2 / behind 500).
 This notes file was moved to agent-notes/ at 18:38 by something other than

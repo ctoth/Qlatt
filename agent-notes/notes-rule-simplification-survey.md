@@ -740,6 +740,11 @@ tests (= 4909 + 8 "has entries"), frame gate now 8 files of 34-40 s, sum of
 file time 1670 s. No wall gain: 4 workers already saturated. Merged →
 master `652f4330`; CI watcher running, not read. Agent's own report (title
 set comparison) not received.
+22:11 CI read: run 38110036684 "completed success 652f4330", quality,
+native, deploy all success. frame-gate agent's report (claims): title sets
+identical, 1072 before/after; it used git stash too (round-tripped its own
+changes; stash list verified intact, 3 entries). Worktree + local/remote
+branch frame-gate-shards removed.
 Conclusion: with 4 cores, wall ≈ total work / 4. Real levers: drop
 audit-dictionary from default run (−215 s work), per-phrase cost (profile),
 CI job sharding (`vitest --shard` over runners) — last one not asked for.

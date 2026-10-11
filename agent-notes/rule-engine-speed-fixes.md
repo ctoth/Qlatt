@@ -10,8 +10,26 @@ Worktree: `C:\Users\Q\code\Qlatt-dectalk-phrase-profile`. Neither PR is merged b
 
 ## State
 - Branch `engine-local-speedups` created at 652f4330, `npm ci` done.
-- "Before" corpus hash running on the unedited base: scratchpad `hash-base-652f4330.tsv` (about 20 min).
-  No edits to the tree until it finishes.
+- "Before" corpus hash done on the unedited base: scratchpad `hash-base-652f4330.tsv`
+  (3668 texts, 11004 lines, 5 errors; 10m36s with 12 jobs).
+- PR A edits written (uncommitted): `hrg/rule-engine.ts` (policy projection memo), `cel-expressions.ts`
+  (`cachedRegex`, also used by `matches` and `regexSplit`), `hrg/item.ts` (`fitFeatureValue`), and new tests in
+  `test/hrg-schema.test.ts`, `test/normalization-lexical.test.ts`, `test/hrg-rule-engine-select.test.ts`.
+  The new tests pass on the edited tree AND on the exported base sources (20/20 each), so they pin old behaviour.
+- PR A measured so far (uncommitted tree):
+  - `npm run typecheck` exit 0. `npm run check` exits 1 in this worktree only because biome also reads the
+    untracked `scripts/tmp-*` probes (all 22 errors are in them); over `git ls-files` it reports 0 errors and
+    1 warning (`scripts/frication-spectrum.ts`, not touched).
+  - Side by side, `scripts/tmp-ab-run.ts --count 39 --passes 5`, base export vs worktree, two rounds:
+    wall min 214.0 -> 190.9 ms/phrase and 214.3 -> 193.3; cpu min 253.6 -> 238.4 and 249.2 -> 235.6;
+    tracks sha1 78042f98d3d7 and 14713 transactions in all four runs.
+  - Targeted tests: 53 files, 515 tests passed (hrg-*, schema, single-parse, tone-association-compatibility,
+    dectalk-frame-gate-1, declarative-frontend-cel-*, normalization-lexical, normalization-validation,
+    dectalk-commands-exact, dectalk-commands-inside-text).
+  - Corpus compare base vs PR A: 11004 lines, 0 differing in every column; files byte-identical
+    (`engine-speed/hash-pr-a.tsv`).
+- PR A DONE: PR #317, head b9978aaf, pushed, not merged; team lead messaged with the numbers.
+- PR B: not started in code. Branch `lazy-rule-definitions` to be cut from b9978aaf.
 
 - Base sources exported with `git archive` to scratchpad `engine-speed/base` for side-by-side timing
   (`tmp-ab-run.ts` run from there against the worktree's run; no git state touched).

@@ -780,7 +780,23 @@ frames, multi-runner split, the cleanup). Done ~22:45:
   change; tracks not). No stash; never commit scripts/tmp-*.
 - Issue #316 filed: compile frame-rule expressions to closures (first
   attempt blocked by post_wording_guard for "byte-identical"; reworded).
-Still to do: read/merge #315; then multi-runner split (vitest --shard matrix
+23:15 PR #315 run 38112901082, both attempts read: attempt 1 (miss) build
+112 s, npm test 594 s (592 s vitest, sum 2024 s — slow runner, every file
+~1.35x); attempt 2 (hit) build skipped 0 s, npm test 446 s (sum 1509 s),
+passed without the apt install. 321 files, 4906 tests (= −11 audit). Runner
+speed noise is ~±30%, single-run comparisons are weak. Diff read. Merged →
+master `e2176d22`.
+PR #317 (engine-local-speedups) head b9978aaf, +317/−73: read the three src
+diffs — WeakMap projection only for deep-frozen trees; regex cache by
+pattern+flags with lastIndex reset; fitFeatureValue returns REJECTED
+sentinel, second walk builds the same message. Agent claims: corpus
+linesDiffering 0 incl. decisions; 53 files 515 tests; −10% wall per phrase.
+Merged → master `ed1953c3` (its PR quality check was still pending).
+Master CI for e2176d22 / ed1953c3 NOT read yet (the earlier one may be
+cancelled by the pages concurrency group).
+Still to do: remove ci-audit worktree/branches (after assigning the
+multi-runner split); read master CI; PR B (lazy define) from
+engine-speedups; then multi-runner split (vitest --shard matrix
 over the cached build) as a follow-up; read/merge PR A then PR B; measure
 npm test on master after each.
 Conclusion: with 4 cores, wall ≈ total work / 4. Real levers: drop

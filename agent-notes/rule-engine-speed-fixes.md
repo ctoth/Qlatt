@@ -58,6 +58,14 @@ Worktree: `C:\Users\Q\code\Qlatt-dectalk-phrase-profile`. Neither PR is merged b
   - Timing vs PR A side by side was noisy (other agents running): round 1 wall min 201.9 -> 205.8 (medians
     9151 -> 8098 ms/pass), round 2 214.1 -> 198.3 (8704 -> 7913). Rerun more rounds when quiet.
   - `scripts/tmp-define-order.ts`: 139 define entries call vocabulary/number_phonemes/target.
+  - All 132 count-changed texts dumped on both trees (`changed-counts-report.txt`): frames equal in all;
+    records only before: 171 normalization_vocabulary_lookup + 3 normalization_number_composed; "only after"
+    9 lookups and 333 decisions "with additions" were pairing artefacts of my diff script (the same lookup made
+    at another place in the order) - script fixed to pair moved records, rerun in background ->
+    `changed-counts-report-2.txt`. Do not quote the additions number until that rerun is read.
+  - Docs edited: `projects/declarative-frontend/spec.md` 2.8 and the Part 6 normative sentence.
+  - The empty-block check in `declareRuleDefinitions` was added BEFORE the hash and the test run; only the two
+    timing rounds predate it.
 - PR B still owed: rerun voice-quality-port alone, timing rounds, docs (`projects/declarative-frontend/spec.md`
   2.8 and Part 6), rerun changed tests after the empty-block check, commit, push, PR, final report.
 

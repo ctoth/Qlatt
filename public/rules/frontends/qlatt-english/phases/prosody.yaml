@@ -14,10 +14,10 @@ rules:
         - field: effort
           op: set
           value: >-
-            (has(current.isAccentCarrier) && current.isAccentCarrier == true
+            (isTrue(current, 'isAccentCarrier')
               ? params.policy.effort.accent_db : 0.0)
             - params.policy.effort.phrase_fall_db
-              * contour.elapsed_sec / max([contour.phrase_duration_sec, 0.001])
+              * contour.elapsed_sec / max(contour.phrase_duration_sec, 0.001)
           tag: source_contour
     citations:
       - Lienard & Di Benedetto 1999
@@ -54,7 +54,7 @@ rules:
     kind: scalar
     select:
       relation: Segment
-      where: "has(current.isAccentCarrier) && current.isAccentCarrier == true"
+      where: "isTrue(current, 'isAccentCarrier')"
     scan:
       domain: phrase
       reset_break_index: 4
@@ -125,10 +125,10 @@ rules:
       # Nuclear suppression applies only to the H*/H*+L families; all others
       # downstep unconditionally (reduces to pow(downstep_k, accent_idx)).
       downstep_factor: >-
-        ((current.accentType in ['H*', 'H*+L']) && has(current.isNuclearAccent) && current.isNuclearAccent == true)
+        ((current.accentType in ['H*', 'H*+L']) && isTrue(current, 'isNuclearAccent'))
         ? 1.0 : pow(params.policy.f0.downstep_k, accent_idx)
       clamped_height: >-
-        max([params.policy.f0.h_star_height * downstep_factor, params.policy.f0.downstep_floor_fraction])
+        max(params.policy.f0.h_star_height * downstep_factor, params.policy.f0.downstep_floor_fraction)
       target_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
       low_hz: >-
@@ -137,7 +137,7 @@ rules:
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
       prev_f0: prev_point('F0Point')
       lead_hz: >-
-        prev_f0 == null ? high_floor_hz : max([prev_f0.value, high_floor_hz])
+        prev_f0 == null ? high_floor_hz : max(prev_f0.value, high_floor_hz)
     insert_points:
       - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_star }, at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star }
       - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_star_plus_l_peak }, at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_l_peak }
@@ -147,7 +147,7 @@ rules:
       - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_leading }, at: "at_sync(current.sync_left)", value: lead_hz, tag: f0_h_leading }
       - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_plus_downstepped_h_star }, at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_plus_downstepped_h_star }
       - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_star_plus_h_peak }, at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_h_peak }
-      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_star_plus_h_tail }, at: "at_sync(current.sync_right)", value: "max([target_hz, high_floor_hz])", tag: f0_h_star_plus_h_tail }
+      - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_star_plus_h_tail }, at: "at_sync(current.sync_right)", value: "max(target_hz, high_floor_hz)", tag: f0_h_star_plus_h_tail }
       - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_plus_l_star_lead }, at: "at_sync(current.sync_left)", value: lead_hz, tag: f0_h_plus_l_star_lead }
       - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_h_plus_l_star }, at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_h_plus_l_star }
       - { relation: F0Point, tone: { association: tones, bearer: tone_bearer, within: SylStructure, role: f0_l_star }, at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_l_star }
@@ -165,14 +165,14 @@ rules:
       relation: Segment
       where: >-
         current.phoneme != 'SIL'
-        && (has(current.isAccented) ? current.isAccented != true : true)
+        && (!isTrue(current, 'isAccented'))
         && has_voiced_formants(current)
     define:
       prev_f0: prev_point('F0Point')
       base: params.policy.f0.base_hz
       fallback: "prev_f0 == null ? base : prev_f0.value"
       target: >-
-        max([fallback * 0.98, base])
+        max(fallback * 0.98, base)
     insert_point:
       relation: F0Point
       at: at_sync(current.sync_right)
@@ -197,7 +197,7 @@ rules:
       floor_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
       target_hz: >-
-        prev_f0 == null ? floor_hz : max([prev_f0.value, floor_hz])
+        prev_f0 == null ? floor_hz : max(prev_f0.value, floor_hz)
     insert_point:
       relation: F0Point
       at: at_sync(current.sync_left)
@@ -459,7 +459,7 @@ rules:
       final_progress: >-
         contour.elapsed_sec <= final_window_start_sec
         ? 0.0
-        : min([1.0, (contour.elapsed_sec - final_window_start_sec) / final_window_sec])
+        : min(1.0, (contour.elapsed_sec - final_window_start_sec) / final_window_sec)
       ee_total_db: >-
         onset_rise_db + declination_db + final_fall_db
     citations:

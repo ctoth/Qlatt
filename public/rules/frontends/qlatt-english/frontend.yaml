@@ -28,27 +28,27 @@ functions:
   # `x != null &&` in front, as the positional predicates did.
   voiced:
     params: [item]
-    body: has(item.voiced) && item.voiced == true
+    body: isTrue(item, 'voiced')
     citations:
       - "Engineering convention: Qlatt inventory `voiced` flag; extracted unchanged from the is_voiced and prev_is_voiced predicates"
   voiceless:
     params: [item]
-    body: has(item.voiceless) && item.voiceless == true
+    body: isTrue(item, 'voiceless')
     citations:
       - "Engineering convention: Qlatt inventory `voiceless` flag; extracted unchanged from the is_voiceless and prev_is_voiceless predicates"
   bilabial:
     params: [item]
-    body: has(item.bilabial) && item.bilabial == true
+    body: isTrue(item, 'bilabial')
     citations:
       - "Engineering convention: Qlatt inventory `bilabial` place flag; extracted unchanged from the is_bilabial predicate"
   alveolar:
     params: [item]
-    body: has(item.alveolar) && item.alveolar == true
+    body: isTrue(item, 'alveolar')
     citations:
       - "Engineering convention: Qlatt inventory `alveolar` place flag; extracted unchanged from the is_alveolar predicate"
   velar:
     params: [item]
-    body: has(item.velar) && item.velar == true
+    body: isTrue(item, 'velar')
     citations:
       - "Engineering convention: Qlatt inventory `velar` place flag; extracted unchanged from the is_velar predicate"
   # "Coronal" is the disjunction of the alveolar and postalveolar feature flags.
@@ -56,8 +56,8 @@ functions:
   coronal:
     params: [item]
     body: >-
-      (has(item.alveolar) && item.alveolar == true)
-      || (has(item.postalveolar) && item.postalveolar == true)
+      (isTrue(item, 'alveolar'))
+      || (isTrue(item, 'postalveolar'))
     citations:
       - "Engineering convention: coronal is the Qlatt inventory `alveolar` or `postalveolar` place flag; extracted unchanged from the prev/next/both/one_coronal predicates"
   # A word here is the `word` text a Segment carries, not its Word Item:

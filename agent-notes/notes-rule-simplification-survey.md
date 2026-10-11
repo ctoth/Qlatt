@@ -609,6 +609,28 @@ incomplete: 20 `has ? :` sites left (duration 200/354/373; formant 279, 287,
 Agent's "0 remaining" was its script's blind spot. NOT merged; sent the
 agent back with the list (also: get() evaluates its default eagerly — check
 defaults cannot throw). DECtalk: 9 rule files edited, uncommitted, no PR.
+19:08 PR #311 new head 3e9e32fd. I read the follow-up rule diff (all the
+listed sites done, parens stripped, multi-line max/min done); greps on head:
+0 `max([`, 0 `has&&==true`, 0 paren-wrapped calls, 2 has-ternaries left
+(duration.yaml 200, 372: defaults read current.inherentDuration /
+current.duration, eager in get, correctly left). RUN by me on 3e9e32fd:
+5 targeted files, 64 passed. Merged → master `5a5e0529`. CI watcher
+b2wqi3svn running. Agent's corpus comparison on the FINAL tree not yet
+reported (asked for it). Worktree/branch english-accessor-idioms still to
+remove after its reply. DECtalk agent: still no PR at 19:09, 1 node proc.
+19:10 CI for 5a5e0529 FAILED: run 38100906105, quality/quality failure at
+`npm run typecheck`: scripts/check-registry-bindings.ts TS2339 (ts API
+props missing on `typeof import("typescript/lib/version")`), deploy skipped.
+NOT from #311: master was already red. Four dependabot PRs (#297, #296,
+#263, #264) were merged 18:14-18:15 local by someone else; run 38097818047
+on f4334200 (#264: typescript ^5.9.3→^7.0.2, vitest ^4.1.11→^5.0.3, vite,
+biome, lint-staged, playwright-core) fails with the identical errors. I
+merged #311 without re-reading master's state first. Consequence: tests did
+not run in CI for #311; my 64-test run was on the old deps (branch base
+59270e0b). Stopped; reported to Q; no fix attempted (not the named action).
+DECtalk PR must not be merged onto red master without Q's say.
+Local main checkout: stop hook made me commit this note on local master
+(0537ea5d, not pushed; local master ahead 2 / behind 500).
 This notes file was moved to agent-notes/ at 18:38 by something other than
 me (hook text now names agent-notes/<task>.md).
 

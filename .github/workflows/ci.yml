@@ -47,10 +47,27 @@ jobs:
 
       - run: rustup target add wasm32-unknown-unknown
 
-      - run: sudo apt-get update && sudo apt-get install --yes libasound2-dev
-
-      - name: Build node-web-audio-api for the runner
+      # The cached file is the native binary that build:only copies out of
+      # target/release; load-native.cjs loads it in preference to any prebuilt one.
+      - name: Key the node-web-audio-api build
+        id: node-web-audio-api
         run: |
+          source=$(node -p "require('./package-lock.json').packages['node_modules/node-web-audio-api'].resolved.split('/').pop()")
+          rust=$(rustc --version | cut -d' ' -f2)
+          echo "key=node-web-audio-api-${{ runner.os }}-${{ runner.arch }}-rust-$rust-$source" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the node-web-audio-api build
+        id: node-web-audio-api-cache
+        uses: actions/cache@v6
+        with:
+          path: node_modules/node-web-audio-api/node-web-audio-api.build-release.node
+          key: ${{ steps.node-web-audio-api.outputs.key }}
+
+      # libasound2-dev supplies the ALSA headers the build links against.
+      - name: Build node-web-audio-api for the runner
+        if: steps.node-web-audio-api-cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update && sudo apt-get install --yes libasound2-dev
           printf '\n[workspace]\n' >> node_modules/node-web-audio-api/Cargo.toml
           npm --prefix node_modules/node-web-audio-api run build:only
 

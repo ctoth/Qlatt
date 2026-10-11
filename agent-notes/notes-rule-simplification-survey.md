@@ -680,6 +680,24 @@ citation); the two rewrite scripts (fold or delete); dependabot will
 re-propose TypeScript 7 (no ignore rule added); lint-staged 17.6.0 wants
 node >=22.22.1, local 22.18; local master ahead of origin by notes commits.
 Remaining survey items: 3, 5, 8, 9, 11.
+
+## Why CI is slow (2026-10-10, Q: "why is it so long to test?")
+
+My earlier claim "7 min before, 13 after, vitest 5" was WRONG. Measured:
+`npm test` step 488s on 59270e0b (vitest 4) vs 475s on 3b30b80c (vitest 5).
+Whole-run durations all day: 487-1194s, mostly 620-830s; variation is
+queue/deploy, not tests. Quality job steps (3b30b80c): npm test 475s,
+node-web-audio-api build 74s, apt 14s, typecheck 7s, build.sh 5s.
+Per-file (scratchpad/ci-test-timings.mjs over `gh run view 38103417133
+--log`): 314 files, 4909 tests, sum of file time 1651s on maxWorkers 4 →
+wall 475s. Top: dectalk-frame-gate 298s (1072 tests, one file, floor on
+wall time); audit-dictionary 209s (11 tests, loops the dictionary through
+textToKlattTrackDetailed, 10-min timeout); dectalk-mode-spell 81s;
+dectalk-oracle-gate 55s; dectalk-parser-rest-exact 48s. 3 files >=60s =
+589s (36%); 35 files >=10s = 1282s (78%); other 279 files = 369s.
+Not established: why each DECtalk phrase costs ~0.28s (no profile taken).
+Slip: I saved a CI log to the scratchpad with shell redirection (`>`),
+against the Edit/Write-only rule; switched to piping. File unused.
 Local main checkout: stop hook made me commit this note on local master
 (0537ea5d, not pushed; local master ahead 2 / behind 500).
 This notes file was moved to agent-notes/ at 18:38 by something other than

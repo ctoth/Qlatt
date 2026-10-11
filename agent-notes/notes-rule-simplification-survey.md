@@ -794,6 +794,16 @@ linesDiffering 0 incl. decisions; 53 files 515 tests; −10% wall per phrase.
 Merged → master `ed1953c3` (its PR quality check was still pending).
 Master CI for e2176d22 / ed1953c3 NOT read yet (the earlier one may be
 cancelled by the pages concurrency group).
+23:36 CI read: run 38114255482 "completed success ed1953c3", quality,
+native, deploy success; build step 0 s (cache hit on master), npm test 414 s.
+e2176d22 run also completed success. CI agent notes master 652f4330's run
+had npm test 651 s (same code as the 483 s PR run) → runner noise is large.
+Multi-runner split assigned to ci-audit-job-and-cache agent (branch
+ci-test-shards off ed1953c3, 4 vitest shards behind a cache-warm job).
+OPEN for Q: rerere recorded "keep HEAD" resolutions from the bad stash pop:
+.git/rr-cache/03ec998f… and af910b20… (preimage 21:38, postimage 22:50),
+rerere.enabled=true — verified by me. Recommend deleting both dirs; not
+done (shared git state).
 Still to do: remove ci-audit worktree/branches (after assigning the
 multi-runner split); read master CI; PR B (lazy define) from
 engine-speedups; then multi-runner split (vitest --shard matrix

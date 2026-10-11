@@ -29,7 +29,18 @@ Worktree: `C:\Users\Q\code\Qlatt-dectalk-phrase-profile`. Neither PR is merged b
   - Corpus compare base vs PR A: 11004 lines, 0 differing in every column; files byte-identical
     (`engine-speed/hash-pr-a.tsv`).
 - PR A DONE: PR #317, head b9978aaf, pushed, not merged; team lead messaged with the numbers.
-- PR B: not started in code. Branch `lazy-rule-definitions` to be cut from b9978aaf.
+- PR B: branch `lazy-rule-definitions` cut from b9978aaf. Edits written, uncommitted:
+  - `hrg/rule-engine.ts`: `declareRuleDefinitions` (calls the existing `defineLazily` on the rule's own
+    context); removed `constraintFailsOnTrial`, the `trial` option, `TRIAL_REFUSED`, and the eager
+    `context.define`. `beginTransaction` has no side effects, so dropping the trial transaction changes nothing.
+  - `test/hrg-rule-engine-definitions.test.ts` rewritten (7 tests pass; 6 of them fail on the eager base
+    sources, as a control).
+  - typecheck exit 0; biome clean on the two files.
+  - PR A sources exported to scratchpad `engine-speed/pra` for side-by-side timing.
+  - Before-hash for PR B = `engine-speed/hash-pr-a.tsv` (byte-identical to the base hash).
+- PR B still owed: timing, after-hash + compare, classify the decision differences, one phrase shown,
+  targeted tests and pinned values, docs (`projects/declarative-frontend/spec.md` 2.8 and Part 6,
+  `docs/parameter-scheduling.md` line 95 to check), commit, push, PR, final report.
 
 - Base sources exported with `git archive` to scratchpad `engine-speed/base` for side-by-side timing
   (`tmp-ab-run.ts` run from there against the worktree's run; no git state touched).

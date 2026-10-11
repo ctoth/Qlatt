@@ -745,6 +745,27 @@ native, deploy all success. frame-gate agent's report (claims): title sets
 identical, 1072 before/after; it used git stash too (round-tripped its own
 changes; stash list verified intact, 3 entries). Worktree + local/remote
 branch frame-gate-shards removed.
+~22:20 dectalk-phrase-profile report (its measurements, not re-run by me):
+919 frame-gate phrases 279 s single-threaded, mean 304 ms; cost linear in
+segments (32.7 + 8.41 ms/segment, R² 0.994); ~64,360 CEL evals/phrase (2,233
+per segment vs 122-143 for qlatt-english; English 92 ms mean on same texts);
+expression cache 0 misses; no dominant function. Self time: cel-js 35.6%,
+rule-engine 21.3%, HRG graph 14.7%, cel-expressions 8.8%, GC 7.2%,
+provenance 1.8%, rulepack load 0.4%. Inclusive: runFrameRules 36.2%,
+executeMatch 28.8% (evaluateRuleDefinitions 13.9%), commit 10%,
+projectPolicyValues 5.4%, validateFeatureValue 5.0%, regexReplace 2.3%.
+A/B (patched in memory, tracks identical): memoized policy projection +
+cached RegExp + non-throwing union validation −8..−10%; lazy rule
+definitions −8% (changes which reads become decision parents → provenance
+decision); all four −16..−18%. Unmeasured big one: compile frame-rule
+expressions to closures (frame programs are 36%). Per-file fixed cost in
+vitest: importing src/tts-frontend ~2.8 s + first dectalk call ~1.3 s.
+Code sites I confirmed on master: projectPolicyValues called at
+rule-engine.ts:2823-2824 (+2848) per run; evaluateRuleDefinitions :2194
+evaluates every define entry eagerly; item.ts union case tries variants by
+throw/catch; regexReplace (cel-expressions.ts:194-196) builds a new RegExp
+per call. Worktree ../Qlatt-dectalk-phrase-profile kept (probe scripts) until
+Q decides on the fixes.
 Conclusion: with 4 cores, wall ≈ total work / 4. Real levers: drop
 audit-dictionary from default run (−215 s work), per-phrase cost (profile),
 CI job sharding (`vitest --shard` over runners) — last one not asked for.

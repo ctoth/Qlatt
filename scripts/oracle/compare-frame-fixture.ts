@@ -15,7 +15,7 @@
  *   --json <file>         write the per-corpus table as JSON
  *   --write-gaps          rewrite <corpus>.frame-gaps.json from this run
  *
- * --write-gaps is how the gap list test/dectalk-frame-gate.test.ts ratchets
+ * --write-gaps is how the gap list test/dectalk-frame-gate-<n>.test.ts ratchets
  * against is brought up to date after a rule change. Read the diff it makes:
  * a name that appears is a regression.
  *

@@ -1,6 +1,7 @@
 // DECtalk's emitted parameter packets for an oracle corpus, as a checked-in
 // fixture: test/fixtures/dectalk-oracle/<corpus>.frames.json, written by
-// export-frame-fixture.ts and read by test/dectalk-frame-gate.test.ts.
+// export-frame-fixture.ts and read by test/dectalk-frame-gate.test.ts and
+// test/utils/dectalk-frame-gate.ts.
 //
 // One entry a phrase; one column a trace field; each column run-length encoded
 // as [value, count, value, count, ...] because pauses repeat one packet.

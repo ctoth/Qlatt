@@ -1,4 +1,4 @@
-// What the frame gate compares, shared by test/dectalk-frame-gate.test.ts and
+// What the frame gate compares, shared by test/dectalk-frame-gate.test.ts, test/utils/dectalk-frame-gate.ts and
 // compare-frame-fixture.ts so the checked-in gap list and the test cannot
 // disagree about what a gap is.
 //

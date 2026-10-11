@@ -6,7 +6,7 @@
  * Record the parameter packets DECtalk 4.63's phonetic stage emits for every
  * entry of an oracle corpus, as a checked-in fixture. The frontend's track is
  * checked against it, packet by packet, without say.exe
- * (test/dectalk-frame-gate.test.ts).
+ * (test/dectalk-frame-gate.test.ts and its parts test/dectalk-frame-gate-<n>.test.ts).
  *
  * It runs the oracle say.exe with `-lt <file>`, the packet trace written in
  * ph_claus.c:695-744 (one JSON line a packet: 71 samples at 11025 Hz). The

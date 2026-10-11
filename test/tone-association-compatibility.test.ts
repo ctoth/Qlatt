@@ -53,7 +53,7 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // "Gag, gang; go!" (each pause after a clause holds the next clause's four
 // opening frames; the [g] before the comma is released into IX) and "sip sip."
 // (the dummy vowel is six frames, 38.4 ms, with aspiration at 39 dB). Both are
-// checked against DECtalk's packets by test/dectalk-frame-gate.test.ts.
+// checked against DECtalk's packets by test/dectalk-frame-gate-<n>.test.ts.
 // The hat rise and stress impulses as Ph_inton2.c issues them (a stress
 // impulse on every stressed syllabic, sized by its place among the clause's
 // stresses) regenerate all four dectalk-english snapshots: only F0 changes.

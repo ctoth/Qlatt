@@ -67,7 +67,7 @@
     "cmu-pronouncing-dictionary": "^3.0.0",
     "fft.js": "^4.0.4",
     "jmespath": "^0.16.0",
-    "js-yaml": "^5.4.1",
+    "js-yaml": "^5.4.3",
     "node-web-audio-api": "https://codeload.github.com/ctoth/node-web-audio-api/tar.gz/ce3ed1d487a9c2ad4d3090119c208f386a3123f0",
     "toposort": "^2.0.2",
     "zod": "^4.5.4"

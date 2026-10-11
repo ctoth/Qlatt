@@ -816,6 +816,22 @@ ci-test-shards removed.
 Remaining: PR B (lazy define) from engine-speedups in
 ../Qlatt-dectalk-phrase-profile; nightly dictionary-audit workflow has
 never run (first run 07:17 UTC); rerere entries decision.
+PR #319 (lazy-rule-definitions, head dff1e1f1 on 7647bb57), checks all
+pass (read `gh pr checks`). NOT merged: goes beyond what Q approved. I read
+the engine + spec diff: executeMatch now uses the existing defineLazily on
+the match context; constraintFailsOnTrial, the trial option/TRIAL_REFUSED
+and eager context.define removed. Agent's measurements (not re-run):
+compare vs #317 head: frames 0, messages 0 differ; decisions differ on
+10993/11004 lines; track+diagnostics columns differ on 132 lines (ids),
+exactly those where the record COUNT dropped: 165 records gone (162
+normalization_vocabulary_lookup + 3 normalization_number_composed) because
+vocabulary()/number_phonemes() in an unread define entry are no longer
+called. Also: an entry may now read a LATER entry (was Unknown variable);
+an entry that throws only throws when read. Static check: 0 forward refs in
+bundled rulepacks. Speed −5..−10% per phrase (noisy). No pinned value
+regenerated; definitions test rewritten. Its commit mistake (CR stripping in
+spec.md) fixed before push per its report.
+OPEN for Q: accept fewer records + order-free + lazy errors, or constrain.
 OPEN for Q: rerere recorded "keep HEAD" resolutions from the bad stash pop:
 .git/rr-cache/03ec998f… and af910b20… (preimage 21:38, postimage 22:50),
 rerere.enabled=true — verified by me. Recommend deleting both dirs; not

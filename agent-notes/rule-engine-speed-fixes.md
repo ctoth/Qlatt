@@ -66,8 +66,24 @@ Worktree: `C:\Users\Q\code\Qlatt-dectalk-phrase-profile`. Neither PR is merged b
   - Docs edited: `projects/declarative-frontend/spec.md` 2.8 and the Part 6 normative sentence.
   - The empty-block check in `declareRuleDefinitions` was added BEFORE the hash and the test run; only the two
     timing rounds predate it.
-- PR B still owed: rerun voice-quality-port alone, timing rounds, docs (`projects/declarative-frontend/spec.md`
-  2.8 and Part 6), rerun changed tests after the empty-block check, commit, push, PR, final report.
+  - `changed-counts-report-2.txt` (all 132 count-changed texts, frontend defaults): records only before =
+    162 normalization_vocabulary_lookup + 3 normalization_number_composed (= 165 = 7 + 79 + 79); none only
+    after; 9 made at another place in the order; 0 decisions gained a parent; besides ids and parents only
+    `seq` differs; frames equal in all 132.
+  - `test/voice-quality-port.test.ts` rerun alone: passes (26 tests). The two timeouts were machine load.
+  - Timing, three more rounds side by side (machine still shared): wall min 206.2 -> 196.2, 221.7 -> 200.8,
+    208.7 -> 200.2 ms/phrase; cpu min 258.8 -> 229.6, 270.1 -> 236.4, 248.4 -> 234.0; median wall pass
+    8734 -> 7881, 9145 -> 8006, 8910 -> 7893 ms. Same tracks sha1 and transactions.
+  - PR A (#317) was merged by the team lead as ed1953c3; master moved to 7647bb57 (CI/config changes only,
+    no src/public/test). PR B committed, rebased onto 7647bb57, head dff1e1f1, pushed. src/public/test are
+    byte-identical to the commit that was hashed and tested (2a461b8c).
+- PR B OPEN: PR #319, head dff1e1f1 (one commit on master 7647bb57; 3 files: spec.md +7 -2,
+  rule-engine.ts +23 -77, hrg-rule-engine-definitions.test.ts +112 -33). Not merged. CI was queued when opened.
+- Scratchpad junctions to the worktree's node_modules removed (links only). `scripts/tmp-define-order.ts`
+  left untracked in the worktree beside the profiler's tmp probes.
+- CI on #319: native, node-web-audio-api, quality, test (1)-(4) all pass.
+- Final report sent to the team lead. Open decision flagged to them: PR B also removes 165 lookup records
+  over the corpus (unread `vocabulary()`/`number_phonemes()` entries), which is more than a parents change.
 
 - Base sources exported with `git archive` to scratchpad `engine-speed/base` for side-by-side timing
   (`tmp-ab-run.ts` run from there against the worktree's run; no git state touched).
@@ -91,10 +107,17 @@ Worktree: `C:\Users\Q\code\Qlatt-dectalk-phrase-profile`. Neither PR is merged b
   that shadow `current`/`phrase`/bindings are not rejected. Eager and lazy differ for those; the bundled
   rulepacks must be checked for both before PR B (script).
 - `projects/declarative-frontend/spec.md` 2.8 and Part 6 say define is evaluated once per firing, top to bottom.
+- MY MISTAKE, caught before push: the Edit tool rewrote every line ending of `spec.md` (the file has 1058
+  stray CRs), so the first PR B commit touched 2125 lines of it. I had staged and committed after reading only
+  `git status`, not `git diff --numstat`. Fixed by restoring the blob (`git checkout <sha> -- file`), applying
+  a two-hunk zero-context patch with `git apply --unidiff-zero`, and amending the unpushed commit: now 7/2.
+  Before every commit: read `git diff --cached --numstat`.
 
 - `scripts/tmp-define-order.ts` (throwaway, never commit) over the three bundled rulepacks at 652f4330:
   255 define blocks, 3335 entries, 0 forward/self references, 0 names shadowing a context name. Detector has
   no positive control yet (add a count of backward references before quoting it).
 
 ## Next step
-Wait for the base hash; then edit PR A's three files.
+Send the final report. Nothing else owed unless CI on #319 fails or the team lead asks for changes.
+Not verified by me: full `npm test` locally on either PR; behaviour of lazily hidden definition errors
+outside the corpus.

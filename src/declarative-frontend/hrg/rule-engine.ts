@@ -163,11 +163,10 @@ function numericAggregate(args: unknown[], mode: "min" | "max"): number {
 
 type EvaluationContext = {
   values: Record<string, unknown>;
-  /** Add a named value (a rule's `define:` entry) for later expressions. */
-  define: (name: string, value: unknown) => void;
   /**
    * Give every entry of a `define:` block a value that is computed, by
-   * `compute` from the entry's expression, when an expression first reads it.
+   * `compute` from the entry's expression, when an expression first reads it,
+   * and once: an entry nothing reads is never computed.
    */
   defineLazily: (
     definitions: Readonly<Record<string, unknown>>,
@@ -225,16 +224,7 @@ interface EvaluationContextOptions {
   relationName?: string;
   predicates?: Readonly<Record<string, unknown>>;
   inventory?: GraphInventoryResource;
-  /**
-   * A context for trying a rule's constraint on a transaction that is thrown
-   * away (`constraintFailsOnTrial`): the functions that record something
-   * outside the transaction refuse to run in it.
-   */
-  trial?: boolean;
 }
-
-/** Thrown by a function that may not run in a trial context. */
-const TRIAL_REFUSED = new Error("E_HRG_TRIAL_REFUSED");
 
 /** The names an Item view answers beside the Item's features (`view` below). */
 const DERIVED_VIEW_NAMES: ReadonlySet<string> = new Set([
@@ -276,7 +266,6 @@ function buildEvaluationScope(
     relationName,
     predicates = {},
     inventory,
-    trial = false,
   } = options;
   // The Item the expression being evaluated right now is about. One scope
   // serves every context made from it, so the functions that speak of "the
@@ -660,9 +649,6 @@ function buildEvaluationScope(
       ruleIndex,
       cursor,
       functions,
-      define: (name, value) => {
-        values[name] = value;
-      },
       defineLazily: (definitions, compute) => {
         pending = { definitions, compute };
       },
@@ -702,8 +688,6 @@ function buildEvaluationScope(
   // Item position: those that mean "the current Item" read `cursor`.
   const functions: EvaluationContext["functions"] = {
     vocabulary: (table, key) => {
-      // It adds a decision of its own to the utterance's provenance.
-      if (trial) throw TRIAL_REFUSED;
       const invalidLookup = (message: string): never => {
         utterance.diagnostics.error(
           message,
@@ -811,8 +795,6 @@ function buildEvaluationScope(
     // inventory's cited secondary_stress_fallback. A rule that spells the
     // entry's name itself ("AH2") goes past that policy.
     target: (...args) => {
-      // It reports an invalid inventory parameter to the diagnostics.
-      if (trial) throw TRIAL_REFUSED;
       const phoneme = args[0];
       if (!inventory)
         throw new Error(
@@ -2064,14 +2046,10 @@ function executeMatch(
     ...(match.contour ? { contour: match.contour } : {}),
     ...(match.phrase ? { phrase: match.phrase } : {}),
   };
-  const failedOnTrial = constraintFailsOnTrial(utterance, rule, match, contextBase, scopeExtra);
-  const context = failedOnTrial
-    ? null
-    : buildEvaluationContext({ ...contextBase, extra: scopeExtra });
-  if (context) evaluateRuleDefinitions(rule, context);
-  const constraintEvidence =
-    failedOnTrial ?? evaluateCondition(rule.constraint, context as EvaluationContext, predicates);
-  if (!context || !constraintEvidence.matched) {
+  const context = buildEvaluationContext({ ...contextBase, extra: scopeExtra });
+  declareRuleDefinitions(rule, context);
+  const constraintEvidence = evaluateCondition(rule.constraint, context, predicates);
+  if (!constraintEvidence.matched) {
     if (captureTooling)
       utterance._recordRuleAttempt({
         status: "constraint_failed",
@@ -2171,65 +2149,33 @@ function executeMatch(
 }
 
 /**
- * Whether a rule's constraint is false for a match, found without evaluating
- * the definitions the constraint does not read. Returns the evidence of the
- * failed constraint, or null when it holds or could not be tried.
+ * Give a match's context the rule's `define:` entries. An entry is evaluated
+ * when an expression of this match first reads it (the constraint, an effect,
+ * another entry), once, and an entry nothing reads is not evaluated at all.
  *
  * A rule's `define:` block is often shared by many rules (a YAML anchor), and
- * most matches of most rules fail the constraint, which reads a few of the
- * definitions. Evaluating all of them first, for every rule and every Item,
- * was most of the duration phase's time.
+ * a rule reads a few of its entries: most matches fail a constraint that
+ * names one or two, and a rule that fires uses those its own effects name.
+ * Evaluating every entry for every match was most of the duration phase's
+ * time.
  *
  * Evaluation records what it reads on the rule's transaction, and those
- * records become the parents of the decision a firing rule commits. So the
- * trial runs on a transaction of its own, which is thrown away, with each
- * definition computed when it is first read; a constraint that holds is then
- * evaluated again by the caller in the usual way, every definition in order,
- * on the rule's transaction. What a rule commits is therefore unchanged, and
- * a rule that does not fire commits nothing either way. A definition that
- * would throw is not reached when the constraint fails without reading it.
- */
-function constraintFailsOnTrial(
-  utterance: Utterance,
-  rule: Readonly<Record<string, unknown>>,
-  match: Match,
-  contextBase: Omit<EvaluationContextOptions, "extra" | "trial">,
-  scopeExtra: Readonly<Record<string, unknown>>,
-): ConditionEvidence | null {
-  const definitions = rule.define;
-  if (!isPlainObject(definitions) || rule.constraint == null || rule.constraint === "") {
-    return null;
-  }
-  try {
-    const context = buildEvaluationContext({
-      ...contextBase,
-      transaction: utterance.beginTransaction(match.transaction.metadata),
-      extra: scopeExtra,
-      trial: true,
-    });
-    context.defineLazily(definitions, (expression) => evaluate(expression, context));
-    const evidence = evaluateCondition(rule.constraint, context, contextBase.predicates ?? {});
-    return evidence.matched ? null : evidence;
-  } catch {
-    // The usual evaluation follows and reports whatever is wrong.
-    return null;
-  }
-}
-
-/**
- * Evaluate a rule's `define:` entries in order, each seeing the ones before
- * it. They are added to the one context: building a context is the costly
+ * records become the parents of the decision a firing rule commits. So a
+ * decision's parents are what its rule read, not what the block it shares
+ * could have read. An entry that would throw, or that would record something
+ * of its own (`vocabulary`, `target`), does so only when it is read.
+ *
+ * The entries are added to the one context: building a context is the costly
  * part of a match (every navigation function is a closure over it), and one
  * context keeps one view per Item for the whole rule.
  */
-function evaluateRuleDefinitions(
+function declareRuleDefinitions(
   rule: Readonly<Record<string, unknown>>,
   context: EvaluationContext,
 ): void {
-  if (!isPlainObject(rule.define)) return;
-  for (const [name, expression] of Object.entries(rule.define)) {
-    context.define(name, evaluate(expression, context));
-  }
+  // A rule that defines nothing has an empty block; its reads need no check.
+  if (!isPlainObject(rule.define) || Object.keys(rule.define).length === 0) return;
+  context.defineLazily(rule.define, (expression) => evaluate(expression, context));
 }
 
 function selectMatches(

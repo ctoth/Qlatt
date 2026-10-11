@@ -645,6 +645,41 @@ dectalk_word_id sites, each equivalent given the predicate body (assumes
 Word ids are never ''). My check cannot see a paren-regrouping error.
 Open for Q: fix TS7/vitest5 break or revert #264; wider word_id set (15
 rules gain Taylor citation); two script files to reconcile.
+Q: "fix it" (the red master). Worktree ../Qlatt-fix-ts7-typecheck, branch
+fix-ts7-typecheck off 5a5e0529. RUN on new deps: typecheck reproduces the
+TS2339 errors; `npm run explain` dies in ts-node (configuration.js
+`fileExists` of undefined) — TypeScript 7.0.2's package exports only
+lib/version.cjs, no JS compiler API, so ts-node (13 npm scripts, many
+scripts/, 11 refs in test/) cannot work on it. vitest 5.0.3 subset: 3 files
+50 passed. Decision: pin typescript back to ^5.9.3, keep the other bumps
+(fix-forward would mean replacing ts-node everywhere). After pin, RUN:
+npm audit --omit=dev 0 vulns; check exit 0 (1 biome warning,
+frication-spectrum.ts 0.693→Math.LN2, non-fatal); typecheck exit 0;
+check:registry-bindings ok; explain "hi" 582 decisions. Not run locally:
+full npm test on vitest 5, build.sh, vite build. Commit a177b448.
+Surprise: lint-staged 17.6.0 wants node >=22.22.1, local is 22.18 (warning
+only; commit hook still ran). Dependabot will re-propose TS7 — no ignore
+rule added (not asked).
+Next: push, PR, merge, read CI; then merge #312; cleanup both worktrees.
+PR #313 merged → master `9cef4db8`. CI read 19:53: run 38102584908
+"completed success 9cef4db8", quality/native/deploy all success; took ~13
+min (npm test step slower on vitest 5). This run is also the first real CI
+read of #311 on the new deps.
+PR #312's own check was failing: read it — run 38100973714 from 19:11,
+same TS7 typecheck errors, i.e. stale from the red master. Merged #312 at
+0f3f94b4 → master `3b30b80c`. CI for 3b30b80c NOT read yet.
+CI read 20:05: run 38103417133 "completed success 3b30b80c", quality,
+native, deploy all success. Worktrees + local/remote branches
+fix-ts7-typecheck and dectalk-accessor-idioms removed (dectalk worktree
+with --force: deleted the agent's untracked 79-line working notes + a short
+agent-notes file, read first, covered by its report/PR body).
+State: accessor idioms done on all three frontends; master green at
+3b30b80c; no agents, watchers or worktrees of mine remain.
+Open for Q: wider dectalk_word_id set (9 sites, 15 rules gain the Taylor
+citation); the two rewrite scripts (fold or delete); dependabot will
+re-propose TypeScript 7 (no ignore rule added); lint-staged 17.6.0 wants
+node >=22.22.1, local 22.18; local master ahead of origin by notes commits.
+Remaining survey items: 3, 5, 8, 9, 11.
 Local main checkout: stop hook made me commit this note on local master
 (0537ea5d, not pushed; local master ahead 2 / behind 500).
 This notes file was moved to agent-notes/ at 18:38 by something other than

@@ -598,6 +598,19 @@ processes, messaged it both times; at 18:11 it applied the script (7 rule
 files) and started the after-run. Its dry-run counts (unverified): 32 get,
 28 boolean, 40 max/min; mine for get was 52 — reconcile on the diff.
 18:12: second 25-min PR watcher started.
+18:45 PR #311 (english+beauty) open, head 31d739f2, +282/−95, 7 rule files +
+scripts/rewrite-accessor-idioms.ts. Agent claims (unverified): hash compare
+11004 lines, 0 differing (track/decisions/diagnostics/frames); 5 targeted
+test files, 64 passed. I READ the whole rule diff: every changed line is one
+of the three rewrites and looks correct. But grep on the PR head shows it is
+incomplete: 20 `has ? :` sites left (duration 200/354/373; formant 279, 287,
+406-417; structural 203/204/266/267/310/340 half-converted), 11 `max([`/
+`min([` left in the two prosody.yaml, redundant parens around replacements.
+Agent's "0 remaining" was its script's blind spot. NOT merged; sent the
+agent back with the list (also: get() evaluates its default eagerly — check
+defaults cannot throw). DECtalk: 9 rule files edited, uncommitted, no PR.
+This notes file was moved to agent-notes/ at 18:38 by something other than
+me (hook text now names agent-notes/<task>.md).
 
 Merge order may need a rebase if two touch the same file (loader fix and
 inventory both near src loaders; klsyn88 only its semantics.yaml).

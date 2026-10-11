@@ -64,13 +64,44 @@ function activeItems(items: readonly Item[]): Item[] {
   return items.filter((item) => item.get("active") !== false);
 }
 
+/**
+ * The projection of each policy tree that cannot change, by tree: every run
+ * projects the compiled rulepack's parameters, which are frozen all the way
+ * down, and a phrase is several runs. A projection kept here is frozen too,
+ * because every later run's parameters share it.
+ */
+const policyProjections = new WeakMap<object, unknown>();
+
 function projectPolicyValues(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(projectPolicyValues);
-  if (!isPlainObject(value)) return value;
-  if (Object.hasOwn(value, "value")) return projectPolicyValues(value.value);
-  return Object.fromEntries(
-    Object.entries(value).map(([key, nested]) => [key, projectPolicyValues(nested)]),
-  );
+  if (!Array.isArray(value) && !isPlainObject(value)) return value;
+  if (policyProjections.has(value)) return policyProjections.get(value);
+  let read: readonly unknown[];
+  let projected: unknown;
+  if (Array.isArray(value)) {
+    read = value;
+    projected = value.map(projectPolicyValues);
+  } else if (Object.hasOwn(value, "value")) {
+    read = [value.value];
+    projected = projectPolicyValues(value.value);
+  } else {
+    read = Object.values(value);
+    projected = Object.fromEntries(
+      Object.entries(value).map(([key, nested]) => [key, projectPolicyValues(nested)]),
+    );
+  }
+  // Kept only when nothing it was made from can change: the tree is frozen
+  // and each tree below it was kept. What is not a tree is passed through.
+  if (
+    Object.isFrozen(value) &&
+    read.every(
+      (nested) =>
+        (!Array.isArray(nested) && !isPlainObject(nested)) || policyProjections.has(nested),
+    )
+  ) {
+    if (projected !== null && typeof projected === "object") Object.freeze(projected);
+    policyProjections.set(value, projected);
+  }
+  return projected;
 }
 
 function mergeParameterRecords(

@@ -766,6 +766,23 @@ evaluates every define entry eagerly; item.ts union case tries variants by
 throw/catch; regexReplace (cel-expressions.ts:194-196) builds a new RegExp
 per call. Worktree ../Qlatt-dectalk-phrase-profile kept (probe scripts) until
 Q decides on the fixes.
+Q: "approved" (all five: local fixes, lazy define, issue for compiled
+frames, multi-runner split, the cleanup). Done ~22:45:
+- Cleanup in ../Qlatt-ci-audit-job-and-cache run by me: `git rerere forget`
+  said "no remembered resolution" for both (exit 0); `git checkout HEAD --
+  <2 files>` exit 0; status then shows only the agent's 6 M + 2 new files;
+  stash list intact. Agent told to continue. PR #315 open 22:53, head
+  dd005760 (not read yet; needs miss run + hit rerun).
+- Agent engine-speedups launched in ../Qlatt-dectalk-phrase-profile: PR A
+  branch engine-local-speedups off 652f4330 (memoize projectPolicyValues,
+  cache RegExp, non-throwing union validation; all hash columns identical);
+  PR B branch lazy-rule-definitions on top (decisions column expected to
+  change; tracks not). No stash; never commit scripts/tmp-*.
+- Issue #316 filed: compile frame-rule expressions to closures (first
+  attempt blocked by post_wording_guard for "byte-identical"; reworded).
+Still to do: read/merge #315; then multi-runner split (vitest --shard matrix
+over the cached build) as a follow-up; read/merge PR A then PR B; measure
+npm test on master after each.
 Conclusion: with 4 cores, wall ≈ total work / 4. Real levers: drop
 audit-dictionary from default run (−215 s work), per-phrase cost (profile),
 CI job sharding (`vitest --shard` over runners) — last one not asked for.

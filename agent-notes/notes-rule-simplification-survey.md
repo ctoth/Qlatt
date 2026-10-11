@@ -725,6 +725,24 @@ touching those files, no commit, continue on workflow/config/docs.
 Cause one level up: my brief did not forbid stash; memory
 never-reset-to-a-moving-ref updated with the rule for future briefs.
 BLOCKED on Q: how to restore those two files in that worktree.
+CI agent since: all edits written, uncommitted (vitest exclude +
+vitest.audit.config.ts + test:audit; dictionary-audit.yml cron 17 7 * * *;
+actions/cache on node-web-audio-api.build-release.node; AGENTS/README
+lines). It also added a no-stash rule to memory
+git-state-changes-run-alone.md (duplicate of mine; fold later). Subagents
+write task notes into the main checkout's agent-notes/; the stop hook makes
+me commit them on local master.
+21:47 PR #314 (frame-gate-shards) head f625b7a7, +176/−102: read the helper
+and base file — entries dealt by one running index over all corpora into 8
+files, test body unchanged, reason tables moved with comments. PR CI run
+38109476744 success. MEASURED: npm test 483 s (was 475): 322 files, 4917
+tests (= 4909 + 8 "has entries"), frame gate now 8 files of 34-40 s, sum of
+file time 1670 s. No wall gain: 4 workers already saturated. Merged →
+master `652f4330`; CI watcher running, not read. Agent's own report (title
+set comparison) not received.
+Conclusion: with 4 cores, wall ≈ total work / 4. Real levers: drop
+audit-dictionary from default run (−215 s work), per-phrase cost (profile),
+CI job sharding (`vitest --shard` over runners) — last one not asked for.
 Slip: I saved a CI log to the scratchpad with shell redirection (`>`),
 against the Edit/Write-only rule; switched to piping. File unused.
 Local main checkout: stop hook made me commit this note on local master

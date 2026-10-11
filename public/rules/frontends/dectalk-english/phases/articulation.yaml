@@ -334,7 +334,7 @@ frame_programs:
       PS: "r.ps"
       # ph_draw.c:4101-4104. delta_area_gst is only ever reset and
       # delta_area_gstop moves only for a German phone (3994-4014).
-      AG: "max([r.area_g, 0])"
+      AG: "max(r.area_g, 0)"
       # ph_draw.c:4100
       CNK: "r.area_ap + params.policy.voice.CHINK"
       # ph_draw.c:4189
@@ -346,7 +346,7 @@ frame_programs:
       run: "1"
       # ph_draw.c:4106-4117
       AL: "r.area_l"
-      ABLADE: "min([r.area_flap, r.area_b])"
+      ABLADE: "min(r.area_flap, r.area_b)"
       ATB: "r.area_tb"
       # ph_draw.c:4193
       AREA_N: "r.area_n"
@@ -634,7 +634,7 @@ rules:
       && params.policy.voice.vot_speed != 0
     set:
       - register: target_ag
-        value: "min([r.target_ag, params.policy.voice.AGO + 900])"
+        value: "min(r.target_ag, params.policy.voice.AGO + 900)"
         tag: glottal_area
       - { register: agspeed, value: 3, tag: glottal_area }
     citations:
@@ -657,7 +657,7 @@ rules:
     when: "r.vot != 0 && f.index == r.vot - params.policy.articulation.aspiration.close_before_end"
     set:
       - register: target_ag
-        value: "min([r.target_ag, params.policy.voice.AGO + 800])"
+        value: "min(r.target_ag, params.policy.voice.AGO + 800)"
         tag: glottal_area
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:553, 561-562"
@@ -671,7 +671,7 @@ rules:
       && f.index == r.vot - params.policy.articulation.aspiration.last_before_end
     set:
       - register: target_ag
-        value: "min([r.target_ag, params.policy.voice.AGO + 380])"
+        value: "min(r.target_ag, params.policy.voice.AGO + 380)"
         tag: glottal_area
       - register: agspeed
         value: >-
@@ -851,7 +851,7 @@ rules:
       - register: target_ag
         value: >-
           n.stressed ? params.policy.voice.AGUO
-          : min([params.policy.voice.AGUO, 1400])
+          : min(params.policy.voice.AGUO, 1400)
         tag: glottal_area
       - { register: agspeed, value: 1, tag: glottal_area }
       - { register: target_ap, value: 0, tag: glottal_chink }
@@ -1082,7 +1082,7 @@ rules:
     unit: "!u.silence && u.obstruent && !u.plosive && n.voiced && !n.nasal && !n.stop && !n.is_r"
     when: "r.target_ag >= 800 && f.index >= f.count - 8"
     set:
-      - { register: target_ag, value: "min([r.target_ag, 1200])", tag: glottal_area }
+      - { register: target_ag, value: "min(r.target_ag, 1200)", tag: glottal_area }
       - { register: agspeed, value: 1, tag: glottal_area }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:2713-2730"
@@ -1209,8 +1209,8 @@ rules:
       - register: closure
         value: >-
           u.is_affricate
-            ? max([min([r.closure, params.policy.articulation.closure.affricate_max_frames]),
-                   params.policy.articulation.closure.affricate_min_frames])
+            ? max(min(r.closure, params.policy.articulation.closure.affricate_max_frames),
+                  params.policy.articulation.closure.affricate_min_frames)
             : r.closure
         tag: constriction
       - { register: ts_l, value: "u.burst && u.labial ? r.closure : 0", tag: constriction }
@@ -1669,7 +1669,7 @@ rules:
     program: articulation
     when: "r.move_case == 1 && r.area_tb != 0"
     set:
-      - { register: area_tb, value: "max([r.area_tb - 310, r.target_tb])", tag: constriction }
+      - { register: area_tb, value: "max(r.area_tb - 310, r.target_tb)", tag: constriction }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:2820-2828"
   artic_tongue_release_after_burst:
@@ -1741,7 +1741,7 @@ rules:
     program: articulation
     when: "r.move_case == 1 && r.area_l != 0"
     set:
-      - { register: area_l, value: "max([r.area_l - 250, r.target_l])", tag: constriction }
+      - { register: area_l, value: "max(r.area_l - 250, r.target_l)", tag: constriction }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:3169-3180"
   artic_lips_release_after_burst:
@@ -1851,7 +1851,7 @@ rules:
     program: articulation
     when: "r.move_case == 1 && r.area_b != 0"
     set:
-      - { register: area_b, value: "max([r.area_b - 400, r.target_b])", tag: constriction }
+      - { register: area_b, value: "max(r.area_b - 400, r.target_b)", tag: constriction }
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:3333-3344"
   artic_blade_release_after_burst:
@@ -2018,7 +2018,7 @@ rules:
         value: >-
           u.obstruent && r.area_n == 0
             ? (r.dcstep < 9 ? r.dcstep + 1 : r.dcstep)
-            : ((!u.obstruent && f.index > 1) || r.area_n != 0 ? max([r.dcstep - 2, 0]) : r.dcstep)
+            : ((!u.obstruent && f.index > 1) || r.area_n != 0 ? max(r.dcstep - 2, 0) : r.dcstep)
         tag: obstruent_source
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:1338-1372"
@@ -2038,7 +2038,7 @@ rules:
         value: >-
           u.obstruent && r.area_n == 0
             ? (r.dcstep > -9 ? r.dcstep - 1 : r.dcstep)
-            : min([r.dcstep + 2, 0])
+            : min(r.dcstep + 2, 0)
         tag: obstruent_source
     citations:
       - "DECtalk 4.63 PH/ph_draw.c:1388-1414"
@@ -2071,7 +2071,7 @@ rules:
       - register: nasal_step
         value: >-
           u.blade && p.blade ? (r.nasal_step == 0 ? 4 : (r.nasal_step < 7 ? r.nasal_step + 1 : r.nasal_step))
-          : (n.obstruent && f.index >= f.count - 1 && !n.is_dh ? max([r.nasal_step - 2, 0])
+          : (n.obstruent && f.index >= f.count - 1 && !n.is_dh ? max(r.nasal_step - 2, 0)
           : (r.nasal_step < 7 ? r.nasal_step + 2 : r.nasal_step))
         tag: velum
       - { register: area_n, value: "params.policy.articulation.nasalization[r.nasal_step]", tag: velum }
@@ -2108,7 +2108,7 @@ rules:
       - register: nasal_step
         value: >-
           u.sonorant ? r.nasal_step - 1
-          : max([r.nasal_step > 4 ? r.nasal_step - 3 : r.nasal_step - 1, 0])
+          : max(r.nasal_step > 4 ? r.nasal_step - 3 : r.nasal_step - 1, 0)
         tag: velum
       - { register: area_n, value: "params.policy.articulation.nasalization[r.nasal_step]", tag: velum }
     citations:

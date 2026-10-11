@@ -521,7 +521,7 @@ rules:
       scans_in: >-
         fresh ? 0.0
         : (same_stretch ? get(before, 'promotion_scans', 0.0)
-           : max([0.0, get(before, 'promotion_scans', 0.0) - get(before, 'promotion_taken', 0.0)]))
+           : max(0.0, get(before, 'promotion_scans', 0.0) - get(before, 'promotion_taken', 0.0)))
       taken_in: "same_stretch ? get(before, 'promotion_taken', 0.0) : 0.0"
       secondaries_ahead: "count_ahead_pred(current, 1000, 'is_clause_or_phrase_start', 'is_secondary_syllabic')"
       secondaries_in_phrase: >-
@@ -530,7 +530,7 @@ rules:
       promoted: "get(current, 'stress', 0) == 2 && scans_in > secondaries_ahead"
       # The syllabics ahead in this stretch that have been promoted but not
       # yet rewritten: its last ones, one for each open scan.
-      promoted_ahead: "min([scans_in, secondaries_ahead])"
+      promoted_ahead: "min(scans_in, secondaries_ahead)"
       primaries_in_clause: >-
         count_ahead_pred(current, 1000, 'is_stress_count_clause_stop', 'is_primary_syllabic')
         + promoted_ahead
@@ -539,7 +539,7 @@ rules:
       primaries_in_phrase: >-
         dectalk_boundary(current) >= params.policy.timing.boundary.vp ? 0.0
         : count_ahead_pred(current, 1000, 'is_stress_count_phrase_stop', 'is_primary_syllabic')
-          + max([0.0, secondaries_in_phrase - (secondaries_ahead - promoted_ahead)])
+          + max(0.0, secondaries_in_phrase - (secondaries_ahead - promoted_ahead))
       stress_now: "promoted ? 1 : get(current, 'stress', 0)"
       stressed: "stress_now == 1 || stress_now == 2 || stress_now == 3"
       # A phone the dictionary exempts from allophone rules (FBLOCK) jumps over

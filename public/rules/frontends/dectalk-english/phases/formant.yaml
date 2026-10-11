@@ -50,8 +50,7 @@ rules:
       ref_is_front_vowel: >-
         ref != null &&
         ref.type == 'vowel' &&
-        has(ref.front) &&
-        ref.front == true
+        isTrue(ref, 'front')
       ref_is_back_rounded: >-
         ref != null &&
         ref_phoneme in ['AO0', 'AO1', 'OW0', 'OW1', 'OY0', 'OY1', 'UH0', 'UH1', 'UW0', 'UW1', 'OR0', 'OR1', 'UR0', 'UR1', 'W']
@@ -74,7 +73,7 @@ rules:
           - when: phoneme == 'JH'
             value: >-
               following_class == 'front' ? 42 : 45
-          - default: "has(current.A3) ? current.A3 : 0"
+          - default: "get(current, 'A3', 0)"
         tag: fricative_spectrum
       - field: A4
         op: set
@@ -95,14 +94,14 @@ rules:
             value: >-
               following_class == 'front' ? 42 :
               (following_class == 'back_unrounded' ? 51 : 46)
-          - default: "has(current.A4) ? current.A4 : 0"
+          - default: "get(current, 'A4', 0)"
         tag: fricative_spectrum
       - field: A5
         op: set
         dispatch:
           - when: phoneme == 'S'
             value: 50
-          - default: "has(current.A5) ? current.A5 : 0"
+          - default: "get(current, 'A5', 0)"
         tag: fricative_spectrum
       - field: A6
         op: set
@@ -125,7 +124,7 @@ rules:
             value: >-
               following_class == 'front' ? 42 :
               (following_class == 'back_unrounded' ? 44 : 38)
-          - default: "has(current.A6) ? current.A6 : 0"
+          - default: "get(current, 'A6', 0)"
         tag: fricative_spectrum
       - field: AB
         op: set
@@ -142,7 +141,7 @@ rules:
           - when: phoneme == 'DH'
             value: >-
               following_class in ['back_rounded', 'obstruent'] ? 43 : 46
-          - default: "has(current.AB) ? current.AB : 0"
+          - default: "get(current, 'AB', 0)"
         tag: fricative_spectrum
     citations:
       - "DECtalk 4.63 p_us_st1.c (A2-A6/AB selected through ptram + p_amp by following segment class)"

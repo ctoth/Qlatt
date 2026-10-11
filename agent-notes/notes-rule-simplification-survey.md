@@ -800,6 +800,22 @@ e2176d22 run also completed success. CI agent notes master 652f4330's run
 had npm test 651 s (same code as the 483 s PR run) → runner noise is large.
 Multi-runner split assigned to ci-audit-job-and-cache agent (branch
 ci-test-shards off ed1953c3, 4 vitest shards behind a cache-warm job).
+PR #318 (ci-test-shards, head 5b467a47, only ci.yml): read the diff —
+job node-web-audio-api warms the cache (lookup-only restore, build+save on
+miss), `test` matrix shard 1-4 with `vitest run --shard=N/4` and
+fail-on-cache-miss restore, `quality` keeps audit/check/typecheck/
+registry-bindings/wasm/build/Pages upload. I read run 38114390709 both
+attempts: all 7 jobs success; hit attempt 05:26:54→05:30:20 = 206 s. Agent's
+count reconciliation (claim): shards sum to 321+2 files, 4910+2 tests,
+file list identical to `vitest list`. No branch protection (agent: 404).
+Merged → master `7647bb57`. CI read: run 38115365347 "completed success",
+created 05:37:07Z updated 05:40:25Z = 198 s end to end, deploy success
+(first run of deploy behind the new jobs). Was ~10-14 min this morning.
+ci-audit worktree + local/remote branches ci-audit-job-and-cache and
+ci-test-shards removed.
+Remaining: PR B (lazy define) from engine-speedups in
+../Qlatt-dectalk-phrase-profile; nightly dictionary-audit workflow has
+never run (first run 07:17 UTC); rerere entries decision.
 OPEN for Q: rerere recorded "keep HEAD" resolutions from the bad stash pop:
 .git/rr-cache/03ec998f… and af910b20… (preimage 21:38, postimage 22:50),
 rerere.enabled=true — verified by me. Recommend deleting both dirs; not

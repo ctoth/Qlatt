@@ -38,9 +38,28 @@ Worktree: `C:\Users\Q\code\Qlatt-dectalk-phrase-profile`. Neither PR is merged b
   - typecheck exit 0; biome clean on the two files.
   - PR A sources exported to scratchpad `engine-speed/pra` for side-by-side timing.
   - Before-hash for PR B = `engine-speed/hash-pr-a.tsv` (byte-identical to the base hash).
-- PR B still owed: timing, after-hash + compare, classify the decision differences, one phrase shown,
-  targeted tests and pinned values, docs (`projects/declarative-frontend/spec.md` 2.8 and Part 6,
-  `docs/parameter-scheduling.md` line 95 to check), commit, push, PR, final report.
+- PR B measured (uncommitted tree; src unchanged since the hash except nothing):
+  - Corpus compare PR A -> PR B (`engine-speed/hash-pr-b.tsv`, `compare-a-b.txt`):
+    `{"before":11004,"after":11004,"linesDiffering":10993,"track":132,"decisions":10993,"diagnostics":119,"frames":0,"messages":0,"missing":0}`
+    `decisionRecords`: dectalk-english sum -7 (4 texts), qlatt-beauty -79 (64 texts), qlatt-english -79 (64).
+    By frontend (classify-hashes.mjs): decisions differ in 3665 / 3664 / 3664 lines; track differs only in the
+    texts whose record count changed (4 / 64 / 64), diagnostics in 0 / 62 / 57 of those; 0 id-column
+    differences without a count change; 5 error lines, unchanged.
+  - Why counts drop: a `vocabulary()`/`number_phonemes()` call in a define entry nothing reads is no longer
+    made, so its `normalization_vocabulary_lookup` record is not written (seen: "$0.99" on qlatt-english,
+    tn_currency_units["dollar.many"]). Being verified for all 132 texts by `dump-changed-counts.mjs`
+    (background; report in `engine-speed/changed-counts-report.txt`).
+  - "Hello world." dectalk-english, dump diff: 2110 decisions both, no field differs but parents; 150 decisions
+    lose parents (1357 ids of 81773), none gains; 561 same set in another order. Example: segment_2.stress by
+    dectalk_consonant_stress, 18 -> 13 parents (n2/n3 = ahead(current, 2/3) are not read when syl1 holds).
+  - Tests: targeted + all 79 provenance/hash-touching files: 103 files passed, 1 failed:
+    `test/voice-quality-port.test.ts` 2 tests timed out at 30 s while the 12-job hash was running. Must be
+    rerun alone on a quiet machine before saying anything about it. No pinned value needed regenerating.
+  - Timing vs PR A side by side was noisy (other agents running): round 1 wall min 201.9 -> 205.8 (medians
+    9151 -> 8098 ms/pass), round 2 214.1 -> 198.3 (8704 -> 7913). Rerun more rounds when quiet.
+  - `scripts/tmp-define-order.ts`: 139 define entries call vocabulary/number_phonemes/target.
+- PR B still owed: rerun voice-quality-port alone, timing rounds, docs (`projects/declarative-frontend/spec.md`
+  2.8 and Part 6), rerun changed tests after the empty-block check, commit, push, PR, final report.
 
 - Base sources exported with `git archive` to scratchpad `engine-speed/base` for side-by-side timing
   (`tmp-ab-run.ts` run from there against the worktree's run; no git state touched).

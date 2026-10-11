@@ -696,6 +696,21 @@ textToKlattTrackDetailed, 10-min timeout); dectalk-mode-spell 81s;
 dectalk-oracle-gate 55s; dectalk-parser-rest-exact 48s. 3 files >=60s =
 589s (36%); 35 files >=10s = 1282s (78%); other 279 files = 369s.
 Not established: why each DECtalk phrase costs ~0.28s (no profile taken).
+Q: "do it all" (4 options). ~20:25 three agents, worktrees off 3b30b80c:
+- frame-gate-shards (sonnet), ../Qlatt-frame-gate-shards: deal phrase
+  tests across test/dectalk-frame-gate-<n>.test.ts like the sweep gate;
+  title-set identity before/after; PR + its CI.
+- ci-audit-job-and-cache, ../Qlatt-ci-audit-job-and-cache: exclude
+  audit-dictionary from default run + `test:audit` + nightly/dispatch
+  workflow; actions/cache for node-web-audio-api build; miss + hit runs.
+- dectalk-phrase-profile (investigator), ../Qlatt-dectalk-phrase-profile:
+  report only, no commits; why ~0.28 s per DECtalk phrase.
+My own caveat for Q: sharding only removes the 298 s single-file floor;
+total work 1651 s on 4 workers still bounds wall ≈ 410 s; minus audit 209 s
+→ ≈ 360 s. My "4-5 min" estimate was optimistic. Bigger levers: per-phrase
+cost (profile) or splitting `npm test` across parallel CI jobs
+(`vitest --shard`), not asked for yet.
+Next: PR watcher; read diffs; merge; measure npm test step on master.
 Slip: I saved a CI log to the scratchpad with shell redirection (`>`),
 against the Edit/Write-only rule; switched to piping. File unused.
 Local main checkout: stop hook made me commit this note on local master

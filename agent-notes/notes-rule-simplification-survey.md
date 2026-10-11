@@ -711,6 +711,20 @@ total work 1651 s on 4 workers still bounds wall ≈ 410 s; minus audit 209 s
 cost (profile) or splitting `npm test` across parallel CI jobs
 (`vitest --shard`), not asked for yet.
 Next: PR watcher; read diffs; merge; measure npm test step on master.
+~21:40 ci-audit-job-and-cache reported its own error: `git stash` (nothing
+saved) then `git stash pop` popped the SHARED stack's top entry, not its
+own: stash@{0} "On issue-47-cel-builtins: issue-47 preserve unfinished
+implementation before rebase". Pop conflicted, entry kept. I verified
+read-only: stash list still has 3 entries; worktree has UU
+src/builtin-functions.ts (2 marker lines) and UU
+src/declarative-frontend/cel-expressions.ts (4); 2 new .git/rr-cache dirs at
+21:38. Agent's cleanup (`git rerere forget` + `git checkout HEAD -- <2
+files>`) was DENIED by the permission classifier; it asked me to run it. I
+refused (permission laundering) and put it to Q. Agent told: no stash, no
+touching those files, no commit, continue on workflow/config/docs.
+Cause one level up: my brief did not forbid stash; memory
+never-reset-to-a-moving-ref updated with the rule for future briefs.
+BLOCKED on Q: how to restore those two files in that worktree.
 Slip: I saved a CI log to the scratchpad with shell redirection (`>`),
 against the Edit/Write-only rule; switched to piping. File unused.
 Local main checkout: stop hook made me commit this note on local master

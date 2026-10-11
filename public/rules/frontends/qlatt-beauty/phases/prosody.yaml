@@ -93,7 +93,7 @@ rules:
       relation: Segment
       where: >-
         current.phoneme != 'SIL'
-        && (!isTrue(current, 'isAccented'))
+        && !isTrue(current, 'isAccented')
         && has_voiced_formants(current)
     define:
       prev_f0: prev_point('F0Point')
@@ -106,9 +106,9 @@ rules:
       # O'Shaughnessy 1976; Ladd 1985 (+0.5 st /i/, -1.0 st /a/). A small per-vowel
       # nudge of the declination anchor — what makes a contour sound spoken not drawn.
       intrinsic_offset: >-
-        (isTrue(current, 'hi'))
+        isTrue(current, 'hi')
           ? params.policy.f0.intrinsic_pitch_high_hz
-          : ((isTrue(current, 'low'))
+          : (isTrue(current, 'low')
               ? params.policy.f0.intrinsic_pitch_low_hz
               : params.policy.f0.intrinsic_pitch_mid_hz)
       # --- Boundary-tone realization on the final VOICED vowel ---
@@ -132,12 +132,12 @@ rules:
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.question_rise_fraction
       # Statement final lowering: dip below the floor for spoken finality (Ladd 2008).
       final_low_target: >-
-        max([params.policy.f0.base_hz - params.policy.f0.range_hz * params.policy.f0.final_lowering_pull,
-             params.policy.f0.base_hz * params.policy.f0.intrinsic_floor_fraction])
+        max(params.policy.f0.base_hz - params.policy.f0.range_hz * params.policy.f0.final_lowering_pull,
+            params.policy.f0.base_hz * params.policy.f0.intrinsic_floor_fraction)
       # Normal unaccented anchor with the intrinsic overlay, clamped to stay voiced.
       body_target: >-
-        max([decl_target + intrinsic_offset,
-             params.policy.f0.base_hz * params.policy.f0.intrinsic_floor_fraction])
+        max(decl_target + intrinsic_offset,
+            params.policy.f0.base_hz * params.policy.f0.intrinsic_floor_fraction)
       target: "pre_h_pct ? rise_target : (pre_l_pct ? final_low_target : body_target)"
     insert_point:
       relation: F0Point
@@ -190,18 +190,18 @@ rules:
       declination_db: >-
         -params.policy.source_contour.ee_declination_db_per_sec * contour.elapsed_sec
       final_window_sec: >-
-        min([
+        min(
           params.policy.source_contour.ee_final_window_max_sec,
-          max([
+          max(
             params.policy.source_contour.ee_final_window_min_sec,
             contour.phrase_duration_sec * params.policy.source_contour.ee_final_window_ratio
-          ])
-        ])
+          )
+        )
       final_window_start_sec: >-
-        max([
+        max(
           params.policy.source_contour.ee_onset_rise_sec,
           contour.phrase_duration_sec - final_window_sec
-        ])
+        )
       final_fall_db: >-
         contour.elapsed_sec > final_window_start_sec
         ? -(params.policy.source_contour.ee_final_fall_db_per_sec

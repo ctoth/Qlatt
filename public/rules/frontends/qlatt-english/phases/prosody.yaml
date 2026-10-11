@@ -165,7 +165,7 @@ rules:
       relation: Segment
       where: >-
         current.phoneme != 'SIL'
-        && (!isTrue(current, 'isAccented'))
+        && !isTrue(current, 'isAccented')
         && has_voiced_formants(current)
     define:
       prev_f0: prev_point('F0Point')
@@ -271,10 +271,10 @@ rules:
       target_hz: >-
         prev_f0 == null
           ? high_floor_hz
-          : max([
+          : max(
               high_floor_hz,
               prev_f0.value + params.policy.f0.upstep_factor * (ceiling_hz - prev_f0.value)
-            ])
+            )
     insert_point:
       relation: F0Point
       at: at_sync(current.sync_right)
@@ -334,8 +334,8 @@ rules:
       relation: F0Point
       at: at_sync(current.sync_left)
       value: >-
-        min([(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiceless_onset_raise,
-             params.policy.f0.base_hz + params.policy.f0.range_hz])
+        min((prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiceless_onset_raise,
+            params.policy.f0.base_hz + params.policy.f0.range_hz)
       tag: f0_onset_perturbation
     citations:
       - "O'Shaughnessy 1976"
@@ -360,8 +360,8 @@ rules:
       relation: F0Point
       at: at_sync(current.sync_left)
       value: >-
-        min([(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiced_onset_lower,
-             params.policy.f0.base_hz + params.policy.f0.range_hz])
+        min((prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiced_onset_lower,
+            params.policy.f0.base_hz + params.policy.f0.range_hz)
       tag: f0_onset_perturbation
     citations:
       - "O'Shaughnessy 1976"
@@ -438,18 +438,18 @@ rules:
       declination_db: >-
         -params.policy.source_contour.ee_declination_db_per_sec * contour.elapsed_sec
       final_window_sec: >-
-        min([
+        min(
           params.policy.source_contour.ee_final_window_max_sec,
-          max([
+          max(
             params.policy.source_contour.ee_final_window_min_sec,
             contour.phrase_duration_sec * params.policy.source_contour.ee_final_window_ratio
-          ])
-        ])
+          )
+        )
       final_window_start_sec: >-
-        max([
+        max(
           params.policy.source_contour.ee_onset_rise_sec,
           contour.phrase_duration_sec - final_window_sec
-        ])
+        )
       final_fall_db: >-
         contour.elapsed_sec > final_window_start_sec
         ? -(params.policy.source_contour.ee_final_fall_db_per_sec

@@ -56,8 +56,8 @@ functions:
   coronal:
     params: [item]
     body: >-
-      (isTrue(item, 'alveolar'))
-      || (isTrue(item, 'postalveolar'))
+      isTrue(item, 'alveolar')
+      || isTrue(item, 'postalveolar')
     citations:
       - "Engineering convention: coronal is the Qlatt inventory `alveolar` or `postalveolar` place flag; extracted unchanged from the prev/next/both/one_coronal predicates"
   # A word here is the `word` text a Segment carries, not its Word Item:

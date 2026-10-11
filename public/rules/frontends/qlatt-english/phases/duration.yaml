@@ -351,8 +351,7 @@ rules:
     define:
       fricative_target: target(current.phoneme)
       fricative_floor_ms: >-
-        has(current.fricative_min_ms) ? current.fricative_min_ms :
-        (get(fricative_target, 'fricative_min_ms', 0))
+        get(current, 'fricative_min_ms', get(fricative_target, 'fricative_min_ms', 0))
     apply:
       - field: duration
         op: set
@@ -422,7 +421,7 @@ rules:
       where: current.type == 'stop_aspiration'
     define:
       weak_scale: >-
-        (isTrue(current, 'weak')) ? params.policy.duration.aspiration_frication_weak_scale : 1.0
+        isTrue(current, 'weak') ? params.policy.duration.aspiration_frication_weak_scale : 1.0
     apply:
       - field: AF
         op: set

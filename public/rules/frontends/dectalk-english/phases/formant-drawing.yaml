@@ -1303,16 +1303,16 @@ rules:
     program: formants
     at: start
     set:
-      - { register: dur_F1, value: "min([r.dur_F1, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_F2, value: "min([r.dur_F2, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_F3, value: "min([r.dur_F3, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_B2, value: "min([r.dur_B2, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_B3, value: "min([r.dur_B3, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: bou_F1, value: "max([r.bou_F1, 0])", tag: formant_ramp }
-      - { register: bou_F2, value: "max([r.bou_F2, 0])", tag: formant_ramp }
-      - { register: bou_F3, value: "max([r.bou_F3, 0])", tag: formant_ramp }
-      - { register: bou_B2, value: "max([r.bou_B2, 0])", tag: formant_ramp }
-      - { register: bou_B3, value: "max([r.bou_B3, 0])", tag: formant_ramp }
+      - { register: dur_F1, value: "min(r.dur_F1, f.count, params.policy.timing.frames.ms130)", tag: formant_ramp }
+      - { register: dur_F2, value: "min(r.dur_F2, f.count, params.policy.timing.frames.ms130)", tag: formant_ramp }
+      - { register: dur_F3, value: "min(r.dur_F3, f.count, params.policy.timing.frames.ms130)", tag: formant_ramp }
+      - { register: dur_B2, value: "min(r.dur_B2, f.count, params.policy.timing.frames.ms130)", tag: formant_ramp }
+      - { register: dur_B3, value: "min(r.dur_B3, f.count, params.policy.timing.frames.ms130)", tag: formant_ramp }
+      - { register: bou_F1, value: "max(r.bou_F1, 0)", tag: formant_ramp }
+      - { register: bou_F2, value: "max(r.bou_F2, 0)", tag: formant_ramp }
+      - { register: bou_F3, value: "max(r.bou_F3, 0)", tag: formant_ramp }
+      - { register: bou_B2, value: "max(r.bou_B2, 0)", tag: formant_ramp }
+      - { register: bou_B3, value: "max(r.bou_B3, 0)", tag: formant_ramp }
     citations:
       - "DECtalk 4.63 PH/p_us_st1.c:794-802"
   # ftran = dftran * durtran with dftran = mlsh1((bouval - tarcur) << 3,
@@ -1607,21 +1607,21 @@ rules:
     program: formants
     at: start
     set:
-      - { register: dur_F1, value: "min([r.dur_F1, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_F2, value: "min([r.dur_F2, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_F3, value: "min([r.dur_F3, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_B2, value: "min([r.dur_B2, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
-      - { register: dur_B3, value: "min([r.dur_B3, f.count, params.policy.timing.frames.ms130])", tag: formant_ramp }
+      - { register: dur_F1, value: "min(r.dur_F1, f.count, params.policy.timing.frames.ms130)", tag: formant_ramp }
+      - { register: dur_F2, value: "min(r.dur_F2, f.count, params.policy.timing.frames.ms130)", tag: formant_ramp }
+      - { register: dur_F3, value: "min(r.dur_F3, f.count, params.policy.timing.frames.ms130)", tag: formant_ramp }
+      - { register: dur_B2, value: "min(r.dur_B2, f.count, params.policy.timing.frames.ms130)", tag: formant_ramp }
+      - { register: dur_B3, value: "min(r.dur_B3, f.count, params.policy.timing.frames.ms130)", tag: formant_ramp }
       - { register: tback_F1, value: "f.count - r.dur_F1", tag: formant_ramp }
       - { register: tback_F2, value: "f.count - r.dur_F2", tag: formant_ramp }
       - { register: tback_F3, value: "f.count - r.dur_F3", tag: formant_ramp }
       - { register: tback_B2, value: "f.count - r.dur_B2", tag: formant_ramp }
       - { register: tback_B3, value: "f.count - r.dur_B3", tag: formant_ramp }
-      - { register: bou_F1, value: "max([r.bou_F1, 0])", tag: formant_ramp }
-      - { register: bou_F2, value: "max([r.bou_F2, 0])", tag: formant_ramp }
-      - { register: bou_F3, value: "max([r.bou_F3, 0])", tag: formant_ramp }
-      - { register: bou_B2, value: "max([r.bou_B2, 0])", tag: formant_ramp }
-      - { register: bou_B3, value: "max([r.bou_B3, 0])", tag: formant_ramp }
+      - { register: bou_F1, value: "max(r.bou_F1, 0)", tag: formant_ramp }
+      - { register: bou_F2, value: "max(r.bou_F2, 0)", tag: formant_ramp }
+      - { register: bou_F3, value: "max(r.bou_F3, 0)", tag: formant_ramp }
+      - { register: bou_B2, value: "max(r.bou_B2, 0)", tag: formant_ramp }
+      - { register: bou_B3, value: "max(r.bou_B3, 0)", tag: formant_ramp }
     citations:
       - "DECtalk 4.63 PH/p_us_st1.c:1199-1209"
   fd_backward_ramp:

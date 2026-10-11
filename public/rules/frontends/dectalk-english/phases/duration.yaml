@@ -496,7 +496,7 @@ rules:
       - field: timing_minimum_frames
         op: set
         value: >-
-          max([3.0, stress == 0.0 ? floor(durmin / 2.0) : durmin - floor(durmin / 4.0)])
+          max(3.0, stress == 0.0 ? floor(durmin / 2.0) : durmin - floor(durmin / 4.0))
         tag: unstressed_floor
     citations:
       - "DECtalk 4.63 p_us_tim.c:432-447 Rule 7 (durmin halved when unstressed, less a quarter when secondary; at least 3 frames)"
@@ -978,7 +978,7 @@ rules:
       where: "current.type == 'stop_closure' && next != null && next.type == 'stop_release'"
     define:
       total: current.timing_frames * params.policy.timing.frame_ms
-      closure: "max([params.policy.timing.frame_ms, total - next.duration])"
+      closure: "max(params.policy.timing.frame_ms, total - next.duration)"
     apply:
       - field: duration
         op: set
@@ -1000,7 +1000,7 @@ rules:
     apply:
       - field: duration
         op: set
-        value: "max([0.0, total - params.policy.timing.frame_ms])"
+        value: "max(0.0, total - params.policy.timing.frame_ms)"
         tag: allophone_duration
     citations:
       - "DECtalk 4.63 p_us_tim.c:940 (one duration per stop allophone; the burst is drawn inside it)"

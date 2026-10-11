@@ -560,15 +560,15 @@ rules:
            : floor(frames / params.policy.f0.stress_delay_divisor))
       hat_here: "isTrue(current, 'hat_begins')"
       floor_delay: >-
-        stress_now > 0 ? (hat_here ? max([stress_delay, hat_delay]) : stress_delay)
+        stress_now > 0 ? (hat_here ? max(stress_delay, hat_delay) : stress_delay)
         : (hat_here ? hat_delay : -params.policy.f0.command_clock_lead_frames)
       dip_delay: >-
-        max([floor_delay, one_word ? -params.policy.f0.question_dip_early_frames_one_word
-                                   : -params.policy.f0.question_dip_early_frames])
+        max(floor_delay, one_word ? -params.policy.f0.question_dip_early_frames_one_word
+                                  : -params.policy.f0.question_dip_early_frames)
       rise_delay: >-
-        max([dip_delay, one_word ? frames
-                                 : floor(frames / params.policy.f0.stress_delay_divisor)
-                                   - params.policy.f0.question_rise_back_frames])
+        max(dip_delay, one_word ? frames
+                                : floor(frames / params.policy.f0.stress_delay_divisor)
+                                  - params.policy.f0.question_rise_back_frames)
     constraint: "reached && get(current, 'rime_boundary', '') == 'question'"
     insert:
       relation: Tilt
@@ -684,7 +684,7 @@ rules:
         ? -params.policy.f0.hat_rise_early_frames
         : floor(get(ref_la, 'timing_frames', 0.0) / params.policy.f0.hat_rise_delay_divisor)
       delay_frames: >-
-        isTrue(current, 'hat_begins') ? max([own_delay, hat_delay]) : own_delay
+        isTrue(current, 'hat_begins') ? max(own_delay, hat_delay) : own_delay
     constraint: "reached && stress_now > 0"
     insert:
       relation: Tilt
@@ -1214,18 +1214,18 @@ rules:
       declination_db: >-
         -params.policy.source_contour.ee_declination_db_per_sec * contour.elapsed_sec
       final_window_sec: >-
-        min([
+        min(
           params.policy.source_contour.ee_final_window_max_sec,
-          max([
+          max(
             params.policy.source_contour.ee_final_window_min_sec,
             contour.phrase_duration_sec * params.policy.source_contour.ee_final_window_ratio
-          ])
-        ])
+          )
+        )
       final_window_start_sec: >-
-        max([
+        max(
           params.policy.source_contour.ee_onset_rise_sec,
           contour.phrase_duration_sec - final_window_sec
-        ])
+        )
       final_fall_db: >-
         contour.elapsed_sec > final_window_start_sec
         ? -(params.policy.source_contour.ee_final_fall_db_per_sec
@@ -1235,7 +1235,7 @@ rules:
       final_progress: >-
         contour.elapsed_sec <= final_window_start_sec
         ? 0.0
-        : min([1.0, (contour.elapsed_sec - final_window_start_sec) / final_window_sec])
+        : min(1.0, (contour.elapsed_sec - final_window_start_sec) / final_window_sec)
       ee_total_db: >-
         onset_rise_db + declination_db + final_fall_db
     citations:

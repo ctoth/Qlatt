@@ -152,8 +152,8 @@ rules:
           target: eh
           duration: eh.duration
           inherentDuration: eh.inherentDuration
-          minimumDuration: "has(eh.minimumDuration) ? eh.minimumDuration : eh.duration"
-          voiced: "has(eh.voiced) ? eh.voiced : true"
+          minimumDuration: "get(eh, 'minimumDuration', eh.duration)"
+          voiced: "get(eh, 'voiced', true)"
     citations:
       - "DECtalk 4.63 LTS/ls_task.c:4640 verbs[] ({\"had\"}, { US_HX, S2, US_EH, US_D, SIL })"
       - "DECtalk 4.63 LTS/ls_task.c:4672-4728 ls_task_lookup_first_verbs (first word after a sentence end)"
@@ -521,8 +521,8 @@ rules:
           target: full
           duration: full.duration
           inherentDuration: full.inherentDuration
-          minimumDuration: "has(full.minimumDuration) ? full.minimumDuration : full.duration"
-          voiced: "has(full.voiced) ? full.voiced : true"
+          minimumDuration: "get(full, 'minimumDuration', full.duration)"
+          voiced: "get(full, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_sort.c:1076-1084 (unreduce the vowel in \"for, to, into\": F RR -> F OR, T UH -> T UW)"
 
@@ -595,7 +595,7 @@ rules:
     define:
       prev_primary_or_boundary: >-
         look_back_where(current, 100,
-          '(candidate.type == "vowel" && has(candidate.stress) && candidate.stress == 1) || (candidate.phoneme == "SIL" && !isTrue(candidate, "written_silence"))')
+          '(candidate.type == "vowel" && get(candidate, "stress", null) == 1) || (candidate.phoneme == "SIL" && !isTrue(candidate, "written_silence"))')
       next_primary_or_boundary: "look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')"
       prior_vowel_in_word: >-
         find_within_word(current,
@@ -608,7 +608,7 @@ rules:
         look_ahead_where(current, 100,
           '!isTrue(candidate, "written_silence") && (candidate.phoneme == "SIL" || !(path(candidate, "R:SylStructure.parent.parent") != null && path(source, "R:SylStructure.parent.parent") != null && path(candidate, "R:SylStructure.parent.parent").id == path(source, "R:SylStructure.parent.parent").id))')
       in_last_word: "after_word == null || after_word.phoneme == 'SIL'"
-      already_primary: "has(current.stress) && current.stress == 1"
+      already_primary: "get(current, 'stress', null) == 1"
     constraint: "!already_primary && no_primary_in_clause && in_last_word && prior_vowel_in_word == null"
     apply:
       - field: stress
@@ -1201,8 +1201,8 @@ rules:
           target: iy
           duration: iy.duration
           inherentDuration: iy.inherentDuration
-          minimumDuration: "has(iy.minimumDuration) ? iy.minimumDuration : iy.duration"
-          voiced: "has(iy.voiced) ? iy.voiced : true"
+          minimumDuration: "get(iy, 'minimumDuration', iy.duration)"
+          voiced: "get(iy, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:735-748 (Rule 1a: AX with a boundary, after a word-initial DH, before a syllabic -> IY)"
 
@@ -1244,8 +1244,8 @@ rules:
           target: eh
           duration: eh.duration
           inherentDuration: eh.inherentDuration
-          minimumDuration: "has(eh.minimumDuration) ? eh.minimumDuration : eh.duration"
-          voiced: "has(eh.voiced) ? eh.voiced : true"
+          minimumDuration: "get(eh, 'minimumDuration', eh.duration)"
+          voiced: "get(eh, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:765-781 (Rule 1c: after a silence, AE N D -> EH N D when AE and D are unstressed or !Cite_It)"
       - "DECtalk 4.63 ph_aloph.c:486-501 (docitation = nphonetot < 10; Cite_It = MODE_CITATION && docitation; Cite_It = TRUE when sprate < 100)"
@@ -1303,8 +1303,8 @@ rules:
           target: eh
           duration: eh.duration
           inherentDuration: eh.inherentDuration
-          minimumDuration: "has(eh.minimumDuration) ? eh.minimumDuration : eh.duration"
-          voiced: "has(eh.voiced) ? eh.voiced : true"
+          minimumDuration: "get(eh, 'minimumDuration', eh.duration)"
+          voiced: "get(eh, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:801-814 (AE before T, FWBNEXT on the AE and on the phone before it, !Cite_It: AE -> EH)"
       - "DECtalk 4.63 ph_aloph.c:486-501 (docitation = nphonetot < 10; Cite_It = MODE_CITATION && docitation; Cite_It = TRUE when sprate < 100)"
@@ -1340,8 +1340,8 @@ rules:
           target: iy
           duration: iy.duration
           inherentDuration: iy.inherentDuration
-          minimumDuration: "has(iy.minimumDuration) ? iy.minimumDuration : iy.duration"
-          voiced: "has(iy.voiced) ? iy.voiced : true"
+          minimumDuration: "get(iy, 'minimumDuration', iy.duration)"
+          voiced: "get(iy, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:754-762 (AX that is the clause's first phone, before a silence, in a cited clause -> IY)"
       - "DECtalk 4.63 ph_aloph.c:486-501 (docitation = nphonetot < 10; Cite_It = MODE_CITATION && docitation; Cite_It = TRUE when sprate < 100)"
@@ -1440,10 +1440,10 @@ rules:
           phoneme: assim_name
           type: at.type
           target: at
-          duration: "min([current.duration, at.duration])"
+          duration: "min(current.duration, at.duration)"
           inherentDuration: at.inherentDuration
-          minimumDuration: "has(at.minimumDuration) ? at.minimumDuration : at.duration"
-          voiced: "has(at.voiced) ? at.voiced : (current.phoneme == 'Z')"
+          minimumDuration: "get(at, 'minimumDuration', at.duration)"
+          voiced: "get(at, 'voiced', current.phoneme == 'Z')"
     citations:
       - "DECtalk 4.63 ph_aloph.c:715-722 (A4: /s/ -> SH, /z/ -> ZH before /SH/)"
       - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_SH/US_ZH postalveolar fricative targets)"
@@ -1503,7 +1503,7 @@ rules:
         p != null && (p.type in ['vowel', 'glide', 'liquid', 'nasal']) &&
         !(p.phoneme in ['M', 'N', 'NG'])
       prev_is_stressed_vowel: >-
-        p != null && p.type == 'vowel' && (has(p.stress) && p.stress == 1)
+        p != null && p.type == 'vowel' && (get(p, 'stress', null) == 1)
       next_syllabic: >-
         n != null && (n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN'])
       next_word_boundary: >-
@@ -1528,10 +1528,10 @@ rules:
           phoneme: "'DF'"
           type: df.type
           target: df
-          duration: "min([current.duration, df.duration])"
+          duration: "min(current.duration, df.duration)"
           inherentDuration: df.inherentDuration
-          minimumDuration: "has(df.minimumDuration) ? df.minimumDuration : df.duration"
-          voiced: "has(df.voiced) ? df.voiced : true"
+          minimumDuration: "get(df, 'minimumDuration', df.duration)"
+          voiced: "get(df, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:958-1040 (A18 flapping rule: unstressed intervocalic /t/ -> DF, number_words >= 3 gate)"
       - "DECtalk 4.63 ph_defs.h (FSYLL/FSON1/FNASAL feature definitions used by the trigger)"
@@ -1562,7 +1562,7 @@ rules:
         p != null && (p.type in ['vowel', 'glide', 'liquid', 'nasal']) &&
         !(p.phoneme in ['M', 'N', 'NG'])
       prev_is_stressed_vowel: >-
-        p != null && p.type == 'vowel' && (has(p.stress) && p.stress == 1)
+        p != null && p.type == 'vowel' && (get(p, 'stress', null) == 1)
       next_syllabic: >-
         n != null && (n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN'])
       next_word_boundary: >-
@@ -1587,10 +1587,10 @@ rules:
           phoneme: "'DX'"
           type: dx.type
           target: dx
-          duration: "min([current.duration, dx.duration])"
+          duration: "min(current.duration, dx.duration)"
           inherentDuration: dx.inherentDuration
-          minimumDuration: "has(dx.minimumDuration) ? dx.minimumDuration : dx.duration"
-          voiced: "has(dx.voiced) ? dx.voiced : true"
+          minimumDuration: "get(dx, 'minimumDuration', dx.duration)"
+          voiced: "get(dx, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:958-1040 (A18 flapping rule: unstressed intervocalic /d/ -> DX, number_words >= 3 gate)"
       - "DECtalk 4.63 ph_defs.h (FSYLL/FSON1/FNASAL feature definitions used by the trigger)"
@@ -1631,8 +1631,8 @@ rules:
           target: ch
           duration: ch.duration
           inherentDuration: ch.inherentDuration
-          minimumDuration: "has(ch.minimumDuration) ? ch.minimumDuration : ch.duration"
-          voiced: "has(ch.voiced) ? ch.voiced : false"
+          minimumDuration: "get(ch, 'minimumDuration', ch.duration)"
+          voiced: "get(ch, 'voiced', false)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:878-891 (palatalize /t/ -> CH before unstressed /y/)"
       - "DECtalk 4.63 p_all_ph.h:71,80 (USP_YU = US_YU, USP_YX = US_Y palatal glide)"
@@ -1660,8 +1660,8 @@ rules:
           target: jh
           duration: jh.duration
           inherentDuration: jh.inherentDuration
-          minimumDuration: "has(jh.minimumDuration) ? jh.minimumDuration : jh.duration"
-          voiced: "has(jh.voiced) ? jh.voiced : true"
+          minimumDuration: "get(jh, 'minimumDuration', jh.duration)"
+          voiced: "get(jh, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:878-891 (palatalize /d/ -> JH before unstressed /y/)"
       - "DECtalk 4.63 p_all_ph.h:71,80 (USP_YU = US_YU, USP_YX = US_Y palatal glide)"
@@ -1756,10 +1756,10 @@ rules:
           phoneme: glot_target
           type: gt.type
           target: gt
-          duration: "min([current.duration, gt.duration])"
+          duration: "min(current.duration, gt.duration)"
           inherentDuration: gt.inherentDuration
-          minimumDuration: "has(gt.minimumDuration) ? gt.minimumDuration : gt.duration"
-          voiced: "has(gt.voiced) ? gt.voiced : false"
+          minimumDuration: "get(gt, 'minimumDuration', gt.duration)"
+          voiced: "get(gt, 'voiced', false)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:912-927 (glottalize /t/ -> TX when preceded by a sonorant, else -> D, in a glottalizing context)"
       - "DECtalk 4.63 ph_defs.h (FLABIAL/FSON1/FSON2 feature definitions used by the trigger)"
@@ -1802,8 +1802,8 @@ rules:
           target: uw
           duration: uw.duration
           inherentDuration: uw.inherentDuration
-          minimumDuration: "has(uw.minimumDuration) ? uw.minimumDuration : uw.duration"
-          voiced: "has(uw.voiced) ? uw.voiced : true"
+          minimumDuration: "get(uw, 'minimumDuration', uw.duration)"
+          voiced: "get(uw, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:928-937 (T, then UH, unstressed, before a syllabic or silence: UH -> UW)"
       - "DECtalk 4.63 ph_aloph.c:912 with ph_defs.h:316,339 (the /t/ rules apply when the phone two back is not syllabic)"
@@ -1881,8 +1881,8 @@ rules:
           target: en
           duration: en.duration
           inherentDuration: en.inherentDuration
-          minimumDuration: "has(en.minimumDuration) ? en.minimumDuration : en.duration"
-          voiced: "has(en.voiced) ? en.voiced : true"
+          minimumDuration: "get(en, 'minimumDuration', en.duration)"
+          voiced: "get(en, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:1042-1051 (Rule 3a: after TX, an unstressed vowel (not /UW/) + nasal collapse to syllabic EN)"
       - "DECtalk 4.63 ph_defs.h (FNASAL nasal feature = M/N/NG)"
@@ -1910,10 +1910,10 @@ rules:
           phoneme: "'DZ'"
           type: dz.type
           target: dz
-          duration: "min([current.duration, dz.duration])"
+          duration: "min(current.duration, dz.duration)"
           inherentDuration: dz.inherentDuration
-          minimumDuration: "has(dz.minimumDuration) ? dz.minimumDuration : dz.duration"
-          voiced: "has(dz.voiced) ? dz.voiced : true"
+          minimumDuration: "get(dz, 'minimumDuration', dz.duration)"
+          voiced: "get(dz, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:1066-1082 (Rule 4: unstressed /dh/ -> DZ after /t,tx,d/)"
       - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_DZ dentalized-stop target)"
@@ -1968,8 +1968,8 @@ rules:
           target: d
           duration: d.duration
           inherentDuration: d.inherentDuration
-          minimumDuration: "has(d.minimumDuration) ? d.minimumDuration : d.duration"
-          voiced: "has(d.voiced) ? d.voiced : true"
+          minimumDuration: "get(d, 'minimumDuration', d.duration)"
+          voiced: "get(d, 'voiced', true)"
           voiced_from_t: "true"
     citations:
       - "DECtalk 4.63 p_us_tim.c:627-638 (Rule 9: [nt] postvocalic cluster; the /t/ becomes [d] before an early syllabic)"
@@ -2033,7 +2033,7 @@ rules:
           (p.phoneme in ['AA', 'AH'] ? 'AR' :
           (p.phoneme in ['OW', 'AO'] ? 'OR' :
           (p.phoneme in ['UW', 'UH'] ? 'UR' : ''))))))
-      prev_stressed: "has(p.stress) && p.stress == 1"
+      prev_stressed: "get(p, 'stress', null) == 1"
       fused_name: >-
         fused_base == '' ? '' :
         (fused_base == 'RR' ? 'RR' :
@@ -2064,8 +2064,8 @@ rules:
           target: fv
           duration: fv.duration
           inherentDuration: fv.inherentDuration
-          minimumDuration: "has(fv.minimumDuration) ? fv.minimumDuration : fv.duration"
-          voiced: "has(fv.voiced) ? fv.voiced : true"
+          minimumDuration: "get(fv, 'minimumDuration', fv.duration)"
+          voiced: "get(fv, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:835-872 (A13 postvocalic vowel+R fusion: prev vowel rewritten to rhotic vowel, /R/ deleted)"
       - "DECtalk 4.63 ph_aloph.c:823-824 (postvocalic gate: (FSTRESS|FWINITC) IS_MINUS && prev FVOWEL+)"
@@ -2124,8 +2124,8 @@ rules:
           target: at
           duration: at.duration
           inherentDuration: at.inherentDuration
-          minimumDuration: "has(at.minimumDuration) ? at.minimumDuration : at.duration"
-          voiced: "has(at.voiced) ? at.voiced : true"
+          minimumDuration: "get(at, 'minimumDuration', at.duration)"
+          voiced: "get(at, 'voiced', true)"
     citations:
       - "DECtalk 4.63 ph_aloph.c:821-870 (Rule 2: postvocalic allophones of /R/ and /LL/)"
       - "DECtalk 4.63 p_us_rom.h us_maltar, us_inhdr, us_mindur (US_LX, US_RX targets)"

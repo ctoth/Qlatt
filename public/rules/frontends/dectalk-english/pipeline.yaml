@@ -55,11 +55,11 @@ functions:
   dectalk_sprat0:
     params: [wpm]
     body: >-
-      max([params.policy.timing.rate_scaling.sprat0_minimum,
-           wpm > params.policy.timing.rate_scaling.linear_above
-             ? params.policy.timing.rate_scaling.linear_above
-               + floor((wpm - params.policy.timing.rate_scaling.linear_above) / 2.0)
-             : wpm])
+      max(params.policy.timing.rate_scaling.sprat0_minimum,
+          wpm > params.policy.timing.rate_scaling.linear_above
+            ? params.policy.timing.rate_scaling.linear_above
+              + floor((wpm - params.policy.timing.rate_scaling.linear_above) / 2.0)
+            : wpm)
     description: DECtalk's sprat0, the rate with its part above 250 halved and a floor of 75.
     citations:
       - "DECtalk 4.63 PH/ph_timng.c:238-247 (sprat0 = 250 + ((sprate - 250) >> 1) above 250)"
@@ -95,8 +95,8 @@ functions:
   dectalk_pause_frames:
     params: [frames]
     body: >-
-      max([params.policy.timing.rate_scaling.pause_minimum_frames,
-           dectalk_mlsh1(frames, dectalk_sprat1(params.policy.timing.speaking_rate_wpm))])
+      max(params.policy.timing.rate_scaling.pause_minimum_frames,
+          dectalk_mlsh1(frames, dectalk_sprat1(params.policy.timing.speaking_rate_wpm)))
     description: Frames of a clause pause after the speaking rate is applied; never fewer than two.
     citations:
       - "DECtalk 4.63 p_us_tim.c:261-268 (dpause = mlsh1(dpause, sprat1); a pause shorter than 2 frames is 2)"
@@ -105,8 +105,8 @@ functions:
   dectalk_pause_frames_for:
     params: [frames, item]
     body: >-
-      max([params.policy.timing.rate_scaling.pause_minimum_frames,
-           dectalk_mlsh1(frames, dectalk_sprat1(params_of(item).policy.timing.speaking_rate_wpm))])
+      max(params.policy.timing.rate_scaling.pause_minimum_frames,
+          dectalk_mlsh1(frames, dectalk_sprat1(params_of(item).policy.timing.speaking_rate_wpm)))
     description: Frames of a clause pause at the speaking rate of the given Segment's clause; never fewer than two.
     citations:
       - "DECtalk 4.63 p_us_tim.c:261-268 (dpause = mlsh1(dpause, sprat1); a pause shorter than 2 frames is 2)"
@@ -192,7 +192,7 @@ functions:
   dectalk_has_class:
     params: [item, name]
     body: >-
-      item != null && path(item, 'R:SylStructure.parent.parent') != null
+      dectalk_word_id(item) != ''
       && !isTrue(path(item, 'R:SylStructure.parent.parent'), 'clause_break_before')
       && name in get(path(item, 'R:SylStructure.parent.parent'), 'form_classes', [])
     description: >-
@@ -363,7 +363,7 @@ predicates:
   # word phonemic text was joined to). A bracket's own phones are neither.
   is_class_word_phone: >-
     !isTrue(current, 'phonemic_text')
-    || (path(current, 'R:SylStructure.parent.parent') != null
+    || (dectalk_word_id(current) != ''
         && get(path(current, 'R:SylStructure.parent.parent'), 'text_form_classes', null) != null)
   # Never true: the stop of a count that runs to the utterance's start.
   is_never: "false"
@@ -384,7 +384,7 @@ predicates:
   # spelling mode, LTS/ls_task.c:1281-1290, which leaves the index alone too).
   is_written_clause_silence: >-
     current.phoneme == "SIL" && get(current, "punctuationSymbol", null) != null
-    && !(next != null && path(next, 'R:SylStructure.parent.parent') != null
+    && !(dectalk_word_id(next) != ''
          && isTrue(path(next, 'R:SylStructure.parent.parent'), 'clause_break_before'))
     && !(get(current, "punctuationSymbol", null) == "," && isTrue(current, "punctuation_sent"))
   # Phones that stand for two of DECtalk's input phones: a vowel fused with
@@ -508,9 +508,9 @@ predicates:
     || (dectalk_word_start(current) && dectalk_phrase_start(current) == "vp"
         && behind(current, 1) != null && isTrue(behind(current, 1), "morpheme_boundary_after"))
   is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
-  is_stressed_vowel: 'current.type == "vowel" && has(current.stress) && current.stress == 1'
+  is_stressed_vowel: 'current.type == "vowel" && get(current, "stress", null) == 1'
   is_stressed_vowel_or_boundary: >-
-    (current.type == "vowel" && has(current.stress) && current.stress == 1)
+    (current.type == "vowel" && get(current, "stress", null) == 1)
     || (current.phoneme == "SIL" && !isTrue(current, "written_silence"))
   is_syllabic_or_boundary: >-
     current.type == "vowel" || current.phoneme in ["EL", "EM", "EN"]

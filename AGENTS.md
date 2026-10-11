@@ -75,6 +75,9 @@ pwsh -File build.ps1          # Windows
 # Full Vitest suite (requires the WASM build above in this exact checkout)
 npm test
 
+# Dictionary audit (test/audit-dictionary.test.ts; excluded from npm test, runs nightly in CI)
+npm run test:audit
+
 # Run dev server
 npm run dev                    # Vite server at http://localhost:8000
 

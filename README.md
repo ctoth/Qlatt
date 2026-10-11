@@ -46,6 +46,7 @@ The harness exposes a `Frontend` selector. Available bundled frontends:
 
 ```bash
 npm test                        # run the Vitest suite
+npm run test:audit              # run the dictionary audit (not part of npm test)
 npm run test:golden             # run golden audio comparisons
 npm run build                   # production build
 npm run build:dict              # rebuild public/cmu-dictionary.json

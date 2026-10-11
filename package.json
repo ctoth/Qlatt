@@ -35,6 +35,7 @@
     "build:worklets": "tsc -p tsconfig.worklets.json",
     "check:registry-bindings": "node --experimental-strip-types scripts/check-registry-bindings.ts",
     "test": "npm run check:registry-bindings && vitest run",
+    "test:audit": "vitest run --config vitest.audit.config.ts",
     "typecheck:core": "tsc -p tsconfig.core.json --noEmit",
     "typecheck:audio": "tsc -p tsconfig.audio.json --noEmit",
     "typecheck:golden": "tsc -p tsconfig.golden.json --noEmit",

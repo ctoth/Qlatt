@@ -17,6 +17,6 @@ Use these documents as the main entry points into the codebase:
 ## CLI Tools
 
 - `npm run explain -- "<phrase>"` — provenance trace of the full TTS pipeline.
-- `npm run tts-dsl -- <subcommand>` — rule engine inspector (run, validate, explain, diff, why-not).
+- `npm run tts-dsl -- <subcommand>` — rule engine inspector (phases, field, why-not, replay, explain).
 - `scripts/render-phrase.ts` — offline WAV rendering via node-web-audio-api or Playwright.
 - `scripts/oracle/` — DECtalk oracle pipeline: build reference binary, render corpora, compare audio.

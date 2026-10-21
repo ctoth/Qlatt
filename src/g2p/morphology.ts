@@ -5,13 +5,13 @@
  * Citation: Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5
  */
 
-import { loadYamlDocumentSync } from "../yaml-loader";
 import type { StressHint } from "./stress";
 import type { PhonotacticsData } from "./syllabify";
 import type { DictLookup, MorphologyCycle, PronunciationResult } from "./types";
 
 export interface MorphologyContext {
   path: string;
+  data: MorphologyData;
   phonotactics: PhonotacticsData;
 }
 
@@ -55,7 +55,7 @@ interface ConfiguredValue<T> {
   estimate?: string;
 }
 
-interface MorphologyData {
+export interface MorphologyData {
   phonotactics_path: string;
   suffixes: SuffixEntry[];
   prefixes: PrefixEntry[];
@@ -65,18 +65,6 @@ interface MorphologyData {
     consonant_undoubling_minimum_root_length: ConfiguredValue<number>;
     silent_e_letter: ConfiguredValue<string>;
   };
-}
-
-// --- Load affix tables from YAML ---
-
-const morphologyCache = new Map<string, MorphologyData>();
-
-function getMorphologyData(path: string): MorphologyData {
-  const cached = morphologyCache.get(path);
-  if (cached) return cached;
-  const data = loadYamlDocumentSync<MorphologyData>(path);
-  morphologyCache.set(path, data);
-  return data;
 }
 
 // --- Condition classes for contextual allomorphs (loaded from phonotactics.yaml) ---
@@ -226,7 +214,7 @@ export function decomposeClitic(
   if (!word) return null;
 
   const lowerWord = word.toLowerCase();
-  const data = getMorphologyData(morphology.path);
+  const data = morphology.data;
   for (const clitic of data.clitics) {
     if (!lowerWord.endsWith(clitic.spelling)) continue;
 
@@ -267,7 +255,7 @@ export function decomposeWord(
   if (!word) return null;
 
   const lowerWord = word.toLowerCase();
-  const data = getMorphologyData(morphology.path);
+  const data = morphology.data;
   if (word.length < data.heuristics.minimum_word_length.value) return null;
 
   // Try suffixes first (already ordered longest-first in YAML).
@@ -357,11 +345,14 @@ export function decomposeWord(
  *
  * Citation: Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5
  */
-export function getStressHintForWord(word: string, morphologyPath: string): StressHint | undefined {
+export function getStressHintForWord(
+  word: string,
+  morphology: MorphologyContext,
+): StressHint | undefined {
   if (!word) return undefined;
 
   const lowerWord = word.toLowerCase();
-  const data = getMorphologyData(morphologyPath);
+  const data = morphology.data;
   if (word.length < data.heuristics.minimum_word_length.value) return undefined;
 
   for (const suffix of data.suffixes) {

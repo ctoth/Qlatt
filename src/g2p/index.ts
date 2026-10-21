@@ -1109,7 +1109,7 @@ export function pronounce(
     };
   }
   // Both generated sources reach the same lexical stage before inventory materialization.
-  const stressHint = getStressHintForWord(lowerWord, options.morphology.path);
+  const stressHint = getStressHintForWord(lowerWord, options.morphology);
   const lexicalStress = stressPronunciation(generated.phonemes, {
     stress: options.stress,
     wordId: lowerWord,

@@ -34,13 +34,15 @@ it("keeps declared morphology phonotactics separate and rejects incompatible str
   const spec = loadBundledRulepackSpec("qlatt-english");
   const base = loadFrontendResources(spec);
   const read = yaml.loadYamlDocumentSync;
-  const morphology = read<Record<string, unknown>>(base.morphology.path);
+  const morphology = {
+    ...base.morphology.data,
+    phonotactics_path: "/fixture/morphology-phonotactics.yaml",
+  };
   const policy = read<Record<string, unknown>>(base.stress.path);
   const separate = structuredClone(base.morphology.phonotactics);
   separate.voicing_classes.voiceless_finals = [];
   const spy = vi.spyOn(yaml, "loadYamlDocumentSync").mockImplementation((path) => {
-    if (path === "/fixture/morphology.yaml")
-      return { ...morphology, phonotactics_path: "/fixture/morphology-phonotactics.yaml" };
+    if (path === "/fixture/morphology.yaml") return morphology;
     if (path === "/fixture/morphology-phonotactics.yaml") return separate;
     if (path === "/fixture/bad-stress.yaml")
       return { ...policy, phonotactics_path: spec.inventory_path };
@@ -52,6 +54,8 @@ it("keeps declared morphology phonotactics separate and rejects incompatible str
       morphology_path: "/fixture/morphology.yaml",
     });
     expect(selected.morphology.phonotactics).toBe(separate);
+    expect(selected.morphology.data).toBe(morphology);
+    expect(loadFrontendResources(spec).morphology.data).toBe(base.morphology.data);
     expect(selected.stress).toBe(base.stress);
     const lookup = (word: string) => (word === "walk" ? ["W", "AO1", "K"] : null);
     expect(decomposeWord("walked", lookup, base.morphology)?.phonemes.at(-1)).toBe("T");

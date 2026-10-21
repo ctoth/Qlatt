@@ -43,7 +43,11 @@ it("reports the original finite peak and both signs of clipping once", () => {
   const bytes = fs.readFileSync(wav);
   expect([bytes.readInt16LE(44), bytes.readInt16LE(46)]).toEqual([32767, -32767]);
   expect(diagnostics.getEntries()).toEqual([
-    expect.objectContaining({ level: "warn", code: "W_PCM_CLIPPING", data: { path: wav, ...stats } }),
+    expect.objectContaining({
+      level: "warn",
+      code: "W_PCM_CLIPPING",
+      data: { path: wav, ...stats },
+    }),
   ]);
 });
 
@@ -81,7 +85,12 @@ async function renderReport(samples: number[], wav: string, encode = true) {
 it("persists encoding evidence and one clipping diagnostic with existing diagnostics", async () => {
   const wav = outputPath();
   const report = await renderReport([0, 1.5, -2], wav);
-  expect(report.wavEncoding).toEqual({ path: wav, finitePeak: 2, clippedSamples: 2, invalidSamples: 0 });
+  expect(report.wavEncoding).toEqual({
+    path: wav,
+    finitePeak: 2,
+    clippedSamples: 2,
+    invalidSamples: 0,
+  });
   expect(report.diagnostics).toEqual([
     { code: "EXISTING" },
     expect.objectContaining({ code: "W_PCM_CLIPPING", data: report.wavEncoding }),

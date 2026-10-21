@@ -17,6 +17,7 @@ import os from "node:os";
 import path from "node:path";
 import { type Browser, chromium } from "playwright-core";
 import { build, createServer as createViteServer, preview } from "vite";
+import type { TextToKlattTrackOptions } from "../tts-frontend.ts";
 import type { RenderPayload } from "./types.ts";
 
 export type BrowserRenderServer = "dev" | "build";
@@ -40,7 +41,8 @@ export interface BrowserSessionOptions {
 }
 
 /** What the page's `renderOfflineRuntime` takes (test/render-runtime-offline.html). */
-export interface BrowserRenderOptions {
+export interface BrowserRenderOptions
+  extends Pick<TextToKlattTrackOptions, "speaker" | "voiceQuality" | "directionTrack"> {
   phrase: string;
   /** Absent or null: none, the voice keeps its own. */
   baseF0?: number | null;
@@ -48,7 +50,6 @@ export interface BrowserRenderOptions {
   frontendId?: string;
   experimentId?: string;
   rate?: number;
-  speaker?: string;
   /** A requested pitch as a ratio of the base pitch. Absent: 1. */
   pitchScale?: number;
   transitionMs?: number;

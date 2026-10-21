@@ -24,9 +24,11 @@
         frontendId = "qlatt-english",
         experimentId = "klatt80-baseline",
         rate = 1,
-        // A voice of the frontend's registry, as the page's voice selection
-        // gives it (test/harness/runtime.js). Absent: the frontend's default.
+        // A registry voice or the frontend's existing speaker profile override.
+        // Absent: the frontend's default.
         speaker,
+        voiceQuality,
+        directionTrack,
         // A requested pitch as a ratio of the base pitch
         // (/rules/policy/speaker-profile.yaml pitch_composition). Absent: 1.
         pitchScale,
@@ -46,16 +48,19 @@
         if (!Array.isArray(track)) {
           await preloadF0Filters(F0_FILTERS_WASM_URL);
         }
-        const resolvedTrack = Array.isArray(track)
-          ? track
+        const frontend = Array.isArray(track)
+          ? undefined
           : // A base F0 of null reaches the frontend as absent (null is how a
             // driver's JSON says none).
             textToKlattTrackDetailed(phrase, baseF0 ?? undefined, transitionMs, {
               frontendId,
               rate,
-              ...(speaker ? { speaker } : {}),
+              speaker,
+              voiceQuality,
+              directionTrack,
               ...(pitchScale === undefined ? {} : { pitchScale }),
-            }).track;
+            });
+        const resolvedTrack = frontend ? frontend.track : track;
         const totalTime =
           (resolvedTrack.length ? resolvedTrack[resolvedTrack.length - 1].time : 0) +
           leadTime +
@@ -120,6 +125,10 @@
           experimentId,
           rate,
           speaker,
+          pitchScale,
+          voiceQuality,
+          directionTrack,
+          resolvedSpeaker: frontend?.resolvedSpeaker,
           transitionMs,
           sampleRate,
           leadTime,

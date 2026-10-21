@@ -18,4 +18,6 @@ LF already has module citations. Oversampled-glottal-source and aerodynamic-mode
 
 # Next step
 
-Publish for hosted CI and independent Claude review, respond to review, and let the supervisor merge and update #73 bookkeeping.
+PR #374 Claude review found the impulsive header understated the adaptation: the C source runs the resonator within its four-times-rate loop (`parwv.c:103`), while Rust computes coefficients using a four-times-domain open length and applies the recurrence once per base-rate sample (`impulsive-source/src/lib.rs:66–70,96`). Accepted the finding and clarified that effective bandwidth differs. No numeric retuning or runtime change is part of this documentation slice.
+
+Initial-head hosted CI passed all seven checks. Push the documentation response and await final hosted CI and supervisor review verification; supervisor owns merge and #73 bookkeeping. No local CI run.

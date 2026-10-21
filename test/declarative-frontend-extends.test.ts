@@ -12,6 +12,7 @@ import {
   preloadRulepackSpecFromPath,
   rulepackMapOrigins,
   rulepackParameterOrigins,
+  rulepackRuleDocumentSpans,
   rulepackRuleOrigins,
 } from "../src/declarative-frontend/rule-pack";
 import { getVoiceRegistry, resolveVoice } from "../src/dectalk-voice";
@@ -183,6 +184,84 @@ function writeExtendingFrontend(dir: string, sections: Dict, rootOverrides: Dict
   );
   return frontendPath.replace(/\\/g, "/");
 }
+
+describe("direct rule errors through composition", () => {
+  for (const asynchronous of [false, true]) {
+    for (const included of [false, true]) {
+      const mode = `${asynchronous ? "async" : "sync"}, ${included ? "include" : "root"}`;
+      it(`locates authored errors before throwing (${mode})`, async () => {
+        const dir = mkdtempSync(join(tmpdir(), "qlatt-rule-locations-"));
+        try {
+          const rules = {
+            unknown_path_relation: {
+              kind: "scalar",
+              select: { relation: "Segment", where: "path(current, 'R:Missing') != null" },
+              constraint: { expr: "current.phonem == 'AA'" },
+              aply: [],
+              apply: [
+                {
+                  field: "duration",
+                  op: "set",
+                  value: "current.duration",
+                  tag: "duration_floor",
+                },
+              ],
+              citations: ["Klatt 1976"],
+            },
+          };
+          const frontend = writeExtendingFrontend(
+            dir,
+            included ? { rules } : {},
+            included ? {} : { rules },
+          );
+          const resource = included ? `${dir.replace(/\\/g, "/")}/pipeline.yaml` : frontend;
+          const authored = parseYamlString(readFileSync(resource, "utf8"), resource);
+          const entries = yamlDocumentSpans(authored);
+          const key = entries.find(
+            (entry) => entry.value.path.join(".") === "rules.unknown_path_relation.aply",
+          )?.key;
+          const value = entries.find(
+            (entry) => entry.value.path.join(".") === "rules.unknown_path_relation.select.where",
+          )?.value;
+          const semanticValue = entries.find(
+            (entry) => entry.value.path.join(".") === "rules.unknown_path_relation.constraint.expr",
+          )?.value;
+          expect(key).toBeDefined();
+          expect(value).toBeDefined();
+          expect(semanticValue).toBeDefined();
+          let failure: unknown;
+          try {
+            if (asynchronous) await preloadRulepackSpecFromPath(frontend);
+            else loadRulepackSpecFromPath(frontend);
+          } catch (error) {
+            failure = error;
+          }
+          expect(failure).toBeInstanceOf(Error);
+          const lines = String(failure).split("\n");
+          expect(
+            lines.find((line) =>
+              line.includes("E_RULE_FIELD_UNKNOWN at rules.unknown_path_relation.aply:"),
+            ),
+          ).toContain(`[${resource}:${key?.line}:${key?.column}]`);
+          expect(
+            lines.find((line) =>
+              line.includes("E_CEL_INVALID at rules.unknown_path_relation.select.where:"),
+            ),
+          ).toContain(`[${resource}:${value?.line}:${value?.column}]`);
+          expect(
+            lines.find((line) =>
+              line.includes(
+                "E_RULE_FEATURE_UNKNOWN at rules.unknown_path_relation.constraint.expr:",
+              ),
+            ),
+          ).toContain(`[${resource}:${semanticValue?.line}:${semanticValue?.column}]`);
+        } finally {
+          rmSync(dir, { recursive: true, force: true });
+        }
+      });
+    }
+  }
+});
 
 describe("authored parameter origins through composition", () => {
   const baseResource = "/rules/frontends/qlatt-english/frontend.yaml";
@@ -491,20 +570,33 @@ describe("declarative frontend extends: rules of a shadowing file", () => {
   function expectPhasedRuleInheritance(child: CompiledRulepack, dir: string): void {
     const rules = (child as RulepackFixture).rules;
     const origins = rulepackRuleOrigins(child);
+    const spans = rulepackRuleDocumentSpans(child);
     // Undefined by the child and named by one of its phases: inherited, and
     // attributed to the base file the body was read from.
     for (const name of ["tobi_accent", "f0_continuation_rise", "accent_index_in_phrase"]) {
       expect(rules[name], name).toEqual(english.rules[name]);
       expect(origins[name], name).toBe(ENGLISH_PROSODY);
+      expect(
+        spans.find((entry) => entry.value.path.join(".") === `rules.${name}.select.where`)?.value
+          .resource,
+      ).toBe(ENGLISH_PROSODY);
     }
     // The child's own definition replaces the base's whole.
     expect((rules.tobi_baseline_init as Dict).citations).toEqual(ownBaseline.citations);
     expect(rules.tobi_baseline_init).not.toEqual(english.rules.tobi_baseline_init);
     expect(origins.tobi_baseline_init).toBe(`${dir.replace(/\\/g, "/")}/phases/prosody.yaml`);
+    expect(
+      spans.find((entry) => entry.value.path.join(".") === "rules.tobi_baseline_init.select.where")
+        ?.value.resource,
+    ).toBe(origins.tobi_baseline_init);
     // A base rule the child phases nowhere is not inherited.
     expect(english.rules).toHaveProperty("vocal_effort");
     expect(rules).not.toHaveProperty("vocal_effort");
     expect(origins).not.toHaveProperty("vocal_effort");
+    expect(spans.some((entry) => entry.value.path[1] === "vocal_effort")).toBe(false);
+    expect(spans.some((entry) => entry.value.path.some((part) => typeof part === "number"))).toBe(
+      false,
+    );
   }
 
   it("inherits an undefined, phased base rule; the child's definition wins (synchronous loader)", () => {

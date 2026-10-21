@@ -1,4 +1,9 @@
-import { cloneValue, isPlainObject, type YamlDocumentSpan } from "../yaml-loader";
+import {
+  cloneValue,
+  isPlainObject,
+  type YamlDocumentSpan,
+  type YamlNodeSpans,
+} from "../yaml-loader";
 import { CEL_FUNCTION_CATALOG, validateExpressionSyntax } from "./cel-expressions";
 import {
   FRAME_COUNTERS,
@@ -3894,6 +3899,7 @@ function validateLocusTables(
 }
 
 export type ValidateDslSpecOptions = {
+  documentSpans?: readonly YamlNodeSpans[];
   inventoryPhonemes?: Iterable<string>;
   parameterSchemaDeclared?: boolean;
   requireLoweringSpec?: boolean;
@@ -4633,10 +4639,37 @@ export function assertValidSpec(
   spec: PlainObject,
   options: ValidateDslSpecOptions = {},
 ): ValidationDiagnostic[] {
-  const diagnostics = validateDslSpec(spec, options);
+  const diagnostics = validateDslSpec(spec, options).map((diagnostic) => {
+    const parts = diagnostic.path.split(".");
+    const matches = (options.documentSpans ?? []).filter(
+      (entry) => entry.value.path.join(".") === diagnostic.path,
+    );
+    // Dotted authored keys can collide with nested paths; never guess between them.
+    const origin = matches.length === 1 ? matches[0] : undefined;
+    const exact = origin?.value.path.every((part, index) => part === parts[index]);
+    // Semantic and syntax diagnostics share these direct expression paths.
+    // A diagnostic code alone cannot distinguish an expression from a field name.
+    const expressionPath =
+      /^rules\.[^.]+\.(?:define\.[^.]+|(?:select\.where|constraint)(?:\.not)*(?:\.expr)?)$/.test(
+        diagnostic.path,
+      );
+    const documentSpan =
+      origin && exact
+        ? diagnostic.code === "E_CEL_INVALID" || expressionPath
+          ? origin.value
+          : origin.key
+        : undefined;
+    return { ...diagnostic, ...(documentSpan ? { documentSpan } : {}) };
+  });
   const errors = diagnostics.filter((d) => d.severity === "error");
   if (errors.length > 0) {
-    const detail = errors.map((d) => `${d.code} at ${d.path}: ${d.message}`).join("\n");
+    const detail = errors
+      .map((d) => {
+        const span = d.documentSpan;
+        const location = span ? ` [${span.resource}:${span.line}:${span.column}]` : "";
+        return `${d.code} at ${d.path}: ${d.message}${location}`;
+      })
+      .join("\n");
     throw new Error(`Invalid declarative frontend spec:\n${detail}`);
   }
   return diagnostics;

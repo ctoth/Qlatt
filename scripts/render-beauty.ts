@@ -112,11 +112,17 @@ async function main(): Promise<void> {
   });
 
   // 2. Compile the named affect preset + degree into its V/A/D + VQ substrate.
+  const resources = loadFrontendResources(loadBundledRulepackSpec(frontendId));
+  const library = resources.affectPresets?.library;
+  if (!library) {
+    throw new Error(`E_FRONTEND_CONFIG: frontend '${frontendId}' requires affect_presets`);
+  }
   const isNeutral = affectName === "neutral" || degree === 0;
-  const affect = isNeutral ? neutralAffect() : compileAffect(affectName, degree, { sex });
+  const affect = isNeutral
+    ? neutralAffect(library)
+    : compileAffect(library, affectName, degree, { sex });
 
   // 3. Apply the affect delta to the assembled track (NEUTRAL_VQ = identity).
-  const resources = loadFrontendResources(loadBundledRulepackSpec(frontendId));
   const { track, citations } = applyAffectToTrack(frontend.track, affect, {
     frontendId,
     rdPolicy: resources.vqChannels?.rdPolicy,

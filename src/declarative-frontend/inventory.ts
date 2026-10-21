@@ -1,6 +1,7 @@
 import type { Diagnostics } from "../diagnostics";
 import { ltsDocumentAt } from "../g2p/lts-document";
 import { loadStressPolicy } from "../g2p/stress-policy";
+import { type AffectLibrary, parseAffectPresets } from "../input/affect-presets";
 import { type RdPolicy, readRdPolicy } from "../input/rd-policy";
 import type { AreaFunctionDerivation } from "../provenance";
 import { parseSourceContourDocument, type SourceContourSpec } from "../source-contour";
@@ -76,6 +77,7 @@ export type FrontendResources = {
   sourceContour?: { path: string; spec: SourceContourSpec };
   textParser?: { config: TextParserConfig; table: TextParserTable };
   vqChannels?: { path: string; rdPolicy: RdPolicy };
+  affectPresets?: { path: string; library: AffectLibrary };
 };
 
 const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
@@ -852,6 +854,12 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   const textParserConfig = parseTextParserConfig(spec);
   if (textParserConfig) requireAsset(textParserConfig.tablePath, "text_parser.table_path");
   const declaredResources = isPlainObject(spec.resources) ? spec.resources : {};
+  const affectPresetsPath =
+    declaredResources.affect_presets == null
+      ? undefined
+      : requireAsset(declaredResources.affect_presets, "affect_presets", (path) =>
+          parseAffectPresets(loadYamlDocumentSync(path)),
+        );
   const vqChannelsPath =
     declaredResources.vq_channels == null
       ? undefined
@@ -867,6 +875,14 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     morphologyPath,
     stressPolicyPath,
     dictionaryPath: typeof spec.dictionary_path === "string" ? spec.dictionary_path : undefined,
+    ...(affectPresetsPath === undefined
+      ? {}
+      : {
+          affectPresets: {
+            path: affectPresetsPath,
+            library: FRONTEND_ASSET_CACHE.get(affectPresetsPath) as AffectLibrary,
+          },
+        }),
     ...(vqChannelsPath === undefined
       ? {}
       : {

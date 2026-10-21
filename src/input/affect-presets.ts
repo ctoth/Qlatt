@@ -1,4 +1,4 @@
-import { isPlainObject, loadYamlDocumentSync } from "../yaml-loader";
+import { isPlainObject } from "../yaml-loader";
 import type { AffectPreset } from "./affect";
 import { VQ_FIELDS } from "./vq-channels";
 
@@ -128,12 +128,8 @@ export function parseAffectPresets(document: unknown): AffectLibrary {
   };
 }
 
-export const AFFECT_LIBRARY = parseAffectPresets(
-  loadYamlDocumentSync("/rules/affect/presets.yaml"),
-);
-
 /** Piecewise linear evaluation; the asset declares the curve and endpoint clamp values. */
-export function affectDegree(value: number, curve = AFFECT_LIBRARY.degree): number {
+export function affectDegree(value: number, curve: AffectLibrary["degree"]): number {
   const points = curve.points;
   if (!Number.isFinite(value) || value <= points[0][0]) return points[0][1];
   for (let index = 1; index < points.length; index++) {

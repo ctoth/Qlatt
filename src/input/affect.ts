@@ -32,7 +32,7 @@ import {
   type DecisionRecord,
   type ProvenanceCollector,
 } from "../provenance";
-import { AFFECT_LIBRARY, affectDegree } from "./affect-presets";
+import { type AffectLibrary, affectDegree } from "./affect-presets";
 import type { DimensionalVector, SpeakerSex, VoiceQualityDelta } from "./direction-track";
 import {
   materializeVoiceQualityDelta,
@@ -93,16 +93,14 @@ export interface CompileAffectOptions {
   parents?: string[];
 }
 
-export const AFFECT_PRESETS: ReadonlyMap<string, AffectPreset> = AFFECT_LIBRARY.presets;
-
 /** List every authorable preset name (clinical bare names included). */
-export function listAffectPresetNames(): string[] {
-  return [...AFFECT_PRESETS.keys(), ...AFFECT_LIBRARY.variants.keys()];
+export function listAffectPresetNames(library: AffectLibrary): string[] {
+  return [...library.presets.keys(), ...library.variants.keys()];
 }
 
 /** True if `name` is a clinical state that needs a sex to resolve. */
-export function isClinicalSexRequired(name: string): boolean {
-  return AFFECT_LIBRARY.variants.has(name);
+export function isClinicalSexRequired(library: AffectLibrary, name: string): boolean {
+  return library.variants.has(name);
 }
 
 /**
@@ -111,17 +109,21 @@ export function isClinicalSexRequired(name: string): boolean {
  * sex is supplied (Kaczmarek-Majer_2024 sex-inversion). Also accepts the
  * already-specific clinical variant names directly.
  */
-export function resolveAffectPreset(name: string, sex?: SpeakerSex): AffectPreset {
-  const variants = AFFECT_LIBRARY.variants.get(name);
+export function resolveAffectPreset(
+  library: AffectLibrary,
+  name: string,
+  sex?: SpeakerSex,
+): AffectPreset {
+  const variants = library.variants.get(name);
   if (variants && !sex)
     throw new Error(
       `Clinical affect preset '${name}' requires a speaker sex. Provide options.sex or voice.sex.`,
     );
   const resolved = variants ? variants.get(sex!) : name;
-  const preset = resolved === undefined ? undefined : AFFECT_PRESETS.get(resolved);
+  const preset = resolved === undefined ? undefined : library.presets.get(resolved);
   if (!preset)
     throw new Error(
-      `Unknown affect preset '${name}'. Known: ${listAffectPresetNames().join(", ")}`,
+      `Unknown affect preset '${name}'. Known: ${listAffectPresetNames(library).join(", ")}`,
     );
   return preset;
 }
@@ -132,19 +134,20 @@ export function resolveAffectPreset(name: string, sex?: SpeakerSex): AffectPrese
  * the VQ delta toward neutral; degree 0 (or the "neutral" preset) ⇒ identity.
  */
 export function compileAffect(
+  library: AffectLibrary,
   name: string,
   degree = 1,
   options: CompileAffectOptions = {},
 ): CompiledAffect {
-  const preset = resolveAffectPreset(name, options.sex);
-  const scaledDegree = affectDegree(degree);
+  const preset = resolveAffectPreset(library, name, options.sex);
+  const scaledDegree = affectDegree(degree, library.degree);
   const provenance = options.provenance ?? createProvenanceCollector();
   const curve = provenance.add({
     stage: "frontend",
     type: "affect_degree_scaled",
     subject: options.subject ?? "utterance",
     reason: `Affect '${name}' degree ${degree} mapped to ${scaledDegree} by the declared degree curve (engineering estimate).`,
-    citations: [...AFFECT_LIBRARY.degree.citations],
+    citations: [...library.degree.citations],
     parents: options.parents,
   });
   const records = [curve];
@@ -181,6 +184,6 @@ export function compileAffect(
 }
 
 /** The neutral compiled affect (the (c) empty-direction base case). */
-export function neutralAffect(): CompiledAffect {
-  return compileAffect("neutral", 0);
+export function neutralAffect(library: AffectLibrary): CompiledAffect {
+  return compileAffect(library, "neutral", 0);
 }

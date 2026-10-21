@@ -24,6 +24,7 @@ import type { DecisionRecord, ProvenanceCollector } from "../provenance";
 import { createProvenanceCollector } from "../provenance";
 import type { CompiledAffect } from "./affect";
 import { compileAffect } from "./affect";
+import type { AffectLibrary } from "./affect-presets";
 import type {
   AffectSpec,
   AnchorRange,
@@ -120,6 +121,8 @@ export interface ParseResult {
 export interface ParseOptions {
   /** Optional injected provenance collector (else one is created). */
   provenance?: ProvenanceCollector;
+  frontendId?: string;
+  affectLibrary?: AffectLibrary;
 }
 
 const DELTA_FIELDS = Object.fromEntries(
@@ -336,6 +339,7 @@ export function parseDirectionInput(
       "utterance",
       sex,
       undefined,
+      options,
     );
     dir.precedence = 0;
     dir.declarationOrder = -1;
@@ -349,7 +353,7 @@ export function parseDirectionInput(
     const span = spans[declarationOrder];
     if (!span) continue;
     const range = resolveAnchor(span.anchor, score);
-    const lowered = lowerSpan(provenance, span, range, sex, globalAffectDecisionId);
+    const lowered = lowerSpan(provenance, span, range, sex, globalAffectDecisionId, options);
     for (const direction of lowered) {
       direction.anchor = span.anchor;
       direction.spanId = span.id;
@@ -486,9 +490,15 @@ function lowerAffect(
   scope: "utterance" | TokenRange,
   sex: VoiceIdentity["sex"],
   parentId: string | undefined,
+  options: ParseOptions,
 ): Direction {
   const degree = spec.degree ?? 1;
-  const compiled = compileAffect(spec.preset, degree, {
+  if (!options.affectLibrary) {
+    throw new Error(
+      `E_FRONTEND_CONFIG: frontend '${options.frontendId ?? "programmatic"}' requires affect_presets`,
+    );
+  }
+  const compiled = compileAffect(options.affectLibrary, spec.preset, degree, {
     sex,
     provenance,
     subject: scope === "utterance" ? "utterance" : tokenSubject(scope),
@@ -531,6 +541,7 @@ function lowerSpan(
   range: TokenRange,
   sex: VoiceIdentity["sex"],
   globalAffectDecisionId: string | undefined,
+  options: ParseOptions,
 ): Direction[] {
   const out: Direction[] = [];
   const subject = tokenSubject(range);
@@ -558,7 +569,15 @@ function lowerSpan(
 
   if (span.affect) {
     out.push(
-      lowerAffect(provenance, span.affect, "local_affect", range, sex, globalAffectDecisionId),
+      lowerAffect(
+        provenance,
+        span.affect,
+        "local_affect",
+        range,
+        sex,
+        globalAffectDecisionId,
+        options,
+      ),
     );
   }
 

@@ -4,12 +4,12 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
-  AFFECT_PRESETS,
   compileAffect,
   isClinicalSexRequired,
   neutralAffect,
   resolveAffectPreset,
 } from "../src/input/affect";
+import { parseAffectPresets } from "../src/input/affect-presets";
 import type { DirectionInput, DirectionTrack } from "../src/input/direction-track";
 import {
   NEUTRAL_DIMENSIONS,
@@ -26,6 +26,10 @@ import {
   tokenizeScore,
 } from "../src/input/parse";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const library = parseAffectPresets(loadYamlDocumentSync("/rules/affect/presets.yaml"));
+const affectOptions = { frontendId: "fixture", affectLibrary: library };
 
 describe("input contract — Direction Track schema", () => {
   it("round-trips syllable stress and rejects invalid indices and levels", () => {
@@ -320,7 +324,7 @@ describe("input contract — authored syllable stress", () => {
 
 describe("input contract — neutral base case", () => {
   it("neutralAffect() is the identity dimensional + VQ vector", () => {
-    const n = neutralAffect();
+    const n = neutralAffect(library);
     expect(n.dimensions).toEqual(NEUTRAL_DIMENSIONS);
     expect(n.vq).toEqual(NEUTRAL_VQ);
   });
@@ -337,7 +341,7 @@ describe("input contract — neutral base case", () => {
   });
 
   it("degree 0 of any preset collapses to the neutral vector", () => {
-    const zero = compileAffect("angry", 0);
+    const zero = compileAffect(library, "angry", 0);
     expect(zero.dimensions).toEqual(NEUTRAL_DIMENSIONS);
     expect(zero.vq).toEqual(NEUTRAL_VQ);
   });
@@ -345,7 +349,7 @@ describe("input contract — neutral base case", () => {
 
 describe("input contract — affect compiler (cited presets)", () => {
   it("compiles 'angry' to the cited V/A/D + Rd/F0 deltas (Rutledge/France/Murray)", () => {
-    const c = compileAffect("angry", 1);
+    const c = compileAffect(library, "angry", 1);
     // Dimensional: negative valence, high arousal, dominant (doc 03 §1a).
     expect(c.dimensions.valence).toBeLessThan(0);
     expect(c.dimensions.arousal).toBeGreaterThan(0.5);
@@ -360,7 +364,7 @@ describe("input contract — affect compiler (cited presets)", () => {
   });
 
   it("compiles 'tender' to a positive-valence breathy substrate (doc 03 §6 composite)", () => {
-    const c = compileAffect("tender", 1);
+    const c = compileAffect(library, "tender", 1);
     expect(c.dimensions.valence).toBeGreaterThan(0);
     expect(c.dimensions.arousal).toBeLessThan(0); // low-arousal intimate
     expect(c.vq.rdDelta).toBeGreaterThan(0); // breathy (Gobl)
@@ -369,8 +373,8 @@ describe("input contract — affect compiler (cited presets)", () => {
   });
 
   it("scales linearly with degree (the continuous styledegree knob)", () => {
-    const half = compileAffect("angry", 0.5);
-    const full = compileAffect("angry", 1);
+    const half = compileAffect(library, "angry", 0.5);
+    const full = compileAffect(library, "angry", 1);
     // additive field rdDelta: half is half of full
     expect(half.vq.rdDelta).toBeCloseTo(full.vq.rdDelta / 2, 6);
     // multiplicative field f0Scale: interpolated from 1
@@ -380,13 +384,13 @@ describe("input contract — affect compiler (cited presets)", () => {
   });
 
   it("every preset in the library carries at least one citation", () => {
-    for (const [name, preset] of AFFECT_PRESETS) {
+    for (const [name, preset] of library.presets) {
       expect(preset.citations.length, `preset '${name}' must be cited`).toBeGreaterThan(0);
     }
   });
 
   it("covers all five preset groups (emotion, epistemic, pragmatic, speech_act, clinical)", () => {
-    const groups = new Set([...AFFECT_PRESETS.values()].map((p) => p.group));
+    const groups = new Set([...library.presets.values()].map((p) => p.group));
     expect(groups).toEqual(
       new Set(["emotion", "epistemic", "pragmatic", "speech_act", "clinical"]),
     );
@@ -395,8 +399,8 @@ describe("input contract — affect compiler (cited presets)", () => {
 
 describe("input contract — clinical sex-inversion (Kaczmarek-Majer 2024)", () => {
   it("manic_male and manic_female are acoustically INVERTED", () => {
-    const male = compileAffect("manic", 1, { sex: "male" });
-    const female = compileAffect("manic", 1, { sex: "female" });
+    const male = compileAffect(library, "manic", 1, { sex: "male" });
+    const female = compileAffect(library, "manic", 1, { sex: "female" });
 
     // Loudness inverts: male louder (+), female quieter (-).
     expect(male.vq.intensityBoost).toBeGreaterThan(0);
@@ -421,9 +425,9 @@ describe("input contract — clinical sex-inversion (Kaczmarek-Majer 2024)", () 
   });
 
   it("a clinical preset REQUIRES a sex parameter (throws without one)", () => {
-    expect(isClinicalSexRequired("manic")).toBe(true);
-    expect(() => compileAffect("manic", 1)).toThrow(/sex/i);
-    expect(() => resolveAffectPreset("depressive")).toThrow(/sex/i);
+    expect(isClinicalSexRequired(library, "manic")).toBe(true);
+    expect(() => compileAffect(library, "manic", 1)).toThrow(/sex/i);
+    expect(() => resolveAffectPreset(library, "depressive")).toThrow(/sex/i);
   });
 });
 
@@ -546,7 +550,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
         global: { affect: { preset: "sad", degree: 0.8 } },
       },
     };
-    const result = parseDirectionInput(input);
+    const result = parseDirectionInput(input, affectOptions);
 
     const affectDir = result.directions.find((d) => d.kind === "global_affect");
     expect(affectDir).toBeDefined();
@@ -581,7 +585,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
         ],
       },
     };
-    const result = parseDirectionInput(input);
+    const result = parseDirectionInput(input, affectOptions);
     const globalDir = result.directions.find((d) => d.kind === "global_affect")!;
     const localDir = result.directions.find((d) => d.kind === "local_affect")!;
 
@@ -599,7 +603,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
         global: { voice: { sex: "female" }, affect: { preset: "manic" } },
       },
     };
-    const result = parseDirectionInput(base);
+    const result = parseDirectionInput(base, affectOptions);
     const dir = result.directions.find((d) => d.kind === "global_affect")!;
     expect(dir.affect?.resolvedSex).toBe("female");
     expect(dir.affect?.vq.intensityBoost).toBeLessThan(0); // female mania = quieter
@@ -609,7 +613,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
       score: { text: "x" },
       directionTrack: { version: "1", global: { affect: { preset: "manic" } } },
     };
-    expect(() => parseDirectionInput(noSex)).toThrow(/sex/i);
+    expect(() => parseDirectionInput(noSex, affectOptions)).toThrow(/sex/i);
   });
 
   it("a gesture span lowers to a cited gesture direction with a scaled delta", () => {
@@ -644,7 +648,7 @@ describe("input contract — inline shorthand is demoted to a lifter", () => {
     expect(spans[0].anchor.start).toBe(2);
 
     // and the lifted track parses + lowers end to end
-    const result = parseDirectionInput(input);
+    const result = parseDirectionInput(input, affectOptions);
     expect(result.directions.some((d) => d.kind === "global_affect")).toBe(true);
     expect(result.directions.some((d) => d.kind === "emphasis")).toBe(true);
   });

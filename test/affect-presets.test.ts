@@ -1,20 +1,85 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { load } from "js-yaml";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { AFFECT_PRESETS, compileAffect } from "../src/input/affect";
+import { describe, expect, it } from "vitest";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import { compileAffect } from "../src/input/affect";
+import { parseAffectPresets } from "../src/input/affect-presets";
+import { parseDirectionInput } from "../src/input/parse";
 import { createProvenanceCollector } from "../src/provenance";
+import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
 
-afterEach(() => {
-  vi.doUnmock("../src/yaml-loader");
-  vi.resetModules();
-});
+const library = parseAffectPresets(loadYamlDocumentSync("/rules/affect/presets.yaml"));
 
 describe("declarative affect presets", () => {
+  it("inherits the declared library and leaves DECtalk's role absent", () => {
+    const english = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+    const beauty = loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty"));
+    expect(english.affectPresets?.path).toBe("/rules/affect/presets.yaml");
+    expect(english.affectPresets?.library.presets.has("tender")).toBe(true);
+    expect(beauty.affectPresets?.library).toBe(english.affectPresets?.library);
+    const dectalk = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
+    expect(dectalk.affectPresets).toBeUndefined();
+  });
+
+  it("requires the role only when a global or local named affect consumes it", () => {
+    const input = { score: { text: "hello" }, directionTrack: { version: "1" as const } };
+    const options = { frontendId: "dectalk-english" };
+    expect(parseDirectionInput(input, options).directions).toEqual([]);
+    const affect = { preset: "tender" };
+    for (const directionTrack of [
+      { version: "1" as const, global: { affect } },
+      {
+        version: "1" as const,
+        spans: [{ id: "local", anchor: { unit: "word" as const, start: 0 }, affect }],
+      },
+    ]) {
+      expect(() => parseDirectionInput({ ...input, directionTrack }, options)).toThrow(
+        "E_FRONTEND_CONFIG: frontend 'dectalk-english' requires affect_presets",
+      );
+    }
+    expect(() =>
+      textToKlattTrackDetailed("hello", undefined, undefined, {
+        frontendId: "dectalk-english",
+        directionTrack: { version: "1", global: { affect } },
+      }),
+    ).toThrow("E_FRONTEND_CONFIG: frontend 'dectalk-english' requires affect_presets");
+  });
+
+  it("uses the supplied library's names and degree curve through direction parsing", () => {
+    const selected = parseAffectPresets({
+      presets: [{ ...library.presets.get("tender"), name: "selected" }],
+      variants: {},
+      degree: {
+        points: [
+          [0, 0],
+          [0.5, 0.2],
+          [1, 1],
+        ],
+        citations: ["engineering estimate"],
+      },
+    });
+    const parsed = parseDirectionInput(
+      {
+        score: { text: "hello" },
+        directionTrack: {
+          version: "1",
+          global: { affect: { preset: "selected", degree: 0.5 } },
+        },
+      },
+      { frontendId: "selected", affectLibrary: selected },
+    );
+    expect(parsed.directions[0].affect?.degree).toBe(0.2);
+    expect(parsed.directions[0].affect?.label).toBe("selected");
+    expect(() => compileAffect(selected, "tender")).toThrow(/Unknown affect preset/);
+  });
+
   it("preserves every preset's dimensions, channels, and citations at boundary and intermediate degrees", () => {
-    const values = [...AFFECT_PRESETS.keys()].flatMap((name) =>
+    const values = [...library.presets.keys()].flatMap((name) =>
       [-1, 0, 0.25, 0.7, 1, 2].map((degree) => {
-        const { dimensions, vq, citations } = compileAffect(name, degree);
+        const { dimensions, vq, citations } = compileAffect(library, name, degree);
         return { name, degree, dimensions, vq, citations };
       }),
     );
@@ -24,47 +89,32 @@ describe("declarative affect presets", () => {
   it("loads the complete cited library from YAML", () => {
     const source = readFileSync("public/rules/affect/presets.yaml", "utf8");
     const document = load(source) as { presets: { name: string; citations: string[] }[] };
-    expect(document.presets.map((preset) => preset.name)).toEqual([...AFFECT_PRESETS.keys()]);
+    expect(document.presets.map((preset) => preset.name)).toEqual([...library.presets.keys()]);
     expect(document.presets.every((preset) => preset.citations.length > 0)).toBe(true);
     expect(source.includes("# engineering estimate")).toBe(true);
   });
 
-  it("rejects unknown voice-quality fields at load time", async () => {
-    vi.doMock("../src/yaml-loader", async (importOriginal) => {
-      const original = await importOriginal<typeof import("../src/yaml-loader")>();
-      return {
-        ...original,
-        loadYamlDocumentSync(path: string) {
-          if (path !== "/rules/affect/presets.yaml") return original.loadYamlDocumentSync(path);
-          return {
-            degree: {
-              points: [
-                [0, 0],
-                [1, 1],
-              ],
-              citations: ["engineering estimate"],
-            },
-            variants: {},
-            presets: [
-              {
-                name: "typo",
-                group: "emotion",
-                dimensions: { valence: 0, arousal: 0, dominance: 0 },
-                vq: { f0Scael: 1 },
-                citations: ["engineering estimate"],
-              },
-            ],
-          };
-        },
-      };
-    });
-    await expect(import("../src/input/affect")).rejects.toThrow(/f0Scael/);
+  it("rejects unknown voice-quality fields when parsing a supplied document", () => {
+    expect(() =>
+      parseAffectPresets({
+        degree: library.degree,
+        variants: {},
+        presets: [
+          {
+            name: "typo",
+            group: "emotion",
+            dimensions: { valence: 0, arousal: 0, dominance: 0 },
+            vq: { f0Scael: 1 },
+            citations: ["engineering estimate"],
+          },
+        ],
+      }),
+    ).toThrow(/f0Scael/);
   });
 
   it("emits a cited preset application into the supplied provenance collector", () => {
     const provenance = createProvenanceCollector();
-    // The new collector option is the behavior under test.
-    compileAffect("happy", 0.7, { provenance } as Parameters<typeof compileAffect>[2]);
+    compileAffect(library, "happy", 0.7, { provenance });
     const records = provenance.getDecisions();
     expect(
       records.some(
@@ -79,7 +129,7 @@ describe("declarative affect presets", () => {
 
 it("exposes engineering estimates as uncited provenance decisions", () => {
   const provenance = createProvenanceCollector();
-  compileAffect("tender", 0.7, { provenance });
+  compileAffect(library, "tender", 0.7, { provenance });
   expect(
     provenance
       .getDecisions()

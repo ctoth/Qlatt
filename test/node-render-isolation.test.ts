@@ -170,6 +170,7 @@ it("matches fresh renders through concurrent A/B and A replay with isolated runt
     const parsed = await fresh.render({
       ...a,
       frontendId: "dectalk-english",
+      experimentId: "dectalk-english",
       phrase: "Dr. 25 cats.",
     });
     const detailed = frontend.mock.results.at(-1)?.value;

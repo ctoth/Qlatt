@@ -20,4 +20,6 @@ Origins live beside existing byte/capture arrays. The existing synchronous parse
 # Next step
 Hosted quality119308447707 requested one fixture expression wrap after the response; applied its exact formatting. No behavior changed in that correction.
 
+Shard3 job119309791470 then rejected my new DECtalk fixture with E_FRONTEND_VOCABULARY: it inherited klatt80-baseline experiment from the shared request. Set its experiment to the existing dectalk-english pairing, as the server's frontend default already does. Production validation is unchanged; other six checks passed.
+
 Read replacement hosted validation. Supervisor owns independent verification and merge. Full index/scoped-command/live acceptance remains open.

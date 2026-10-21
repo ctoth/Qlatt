@@ -22,6 +22,7 @@ Hosted shard3 exposed two fixture assumptions: a fixed source line shifted by25,
 and renameVocabulary cloned a compiled spec without its compiler side metadata.
 Updated the real line and compiled the renamed fixture against its corresponding
 renamed inventory through the existing loader. Production validation is unchanged.
+Applied hosted job119236825300's exact chained-spy formatter layout.
 
 ## Decisions and why
 - Retain authored declarations and bare enum/name lists; validation currently reads

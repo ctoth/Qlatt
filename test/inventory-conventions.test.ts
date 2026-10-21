@@ -103,9 +103,11 @@ it("preserves prosody and silence edges for a fixture frontend with renamed acou
   const alternateInventory = renameVocabulary(resources.inventory) as typeof resources.inventory;
   const inventoryPath = "/fixture/renamed-acoustic-inventory.yaml";
   const loadSource = yamlLoader.loadYamlSourceSync;
-  const sourceSpy = vi.spyOn(yamlLoader, "loadYamlSourceSync").mockImplementation((path) =>
-    path === inventoryPath ? JSON.stringify(alternateInventory) : loadSource(path),
-  );
+  const sourceSpy = vi
+    .spyOn(yamlLoader, "loadYamlSourceSync")
+    .mockImplementation((path) =>
+      path === inventoryPath ? JSON.stringify(alternateInventory) : loadSource(path),
+    );
   let resourceSpy: ReturnType<typeof vi.spyOn> | undefined;
   try {
     const alternate = rulepackModule.compileRuleEngineSpec({

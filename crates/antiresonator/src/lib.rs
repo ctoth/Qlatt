@@ -1,3 +1,7 @@
+//! Two-zero audio antiresonator using reciprocal resonator coefficients.
+//! Reference: klsyn88 `c/parwv.c`, `setzeroabc` (coefficient inversion).
+//! Local gain and invalid-parameter bypass handling are implemented below.
+
 use core::f32::consts::PI;
 
 #[repr(C)]

@@ -1,3 +1,7 @@
+//! Normalized bipolar square glottal source evaluated at the base sample rate.
+//! Reference: klsyn88 `c/parwv.c`, `square_source` and `pitch_synch_par_reset`.
+//! Open-phase length and minimum duration are adapted to base-rate samples.
+
 use klatt_wasm_common::export_alloc_fns;
 
 export_alloc_fns!();

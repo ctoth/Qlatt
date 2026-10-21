@@ -1,3 +1,7 @@
+//! Two-pole audio resonator using the klsyn88 coefficient convention.
+//! Reference: klsyn88 `c/parwv.c`, `setabc` (frequency/bandwidth coefficients).
+//! Local gain and invalid-parameter bypass handling are implemented below.
+
 use core::f32::consts::PI;
 
 #[repr(C)]

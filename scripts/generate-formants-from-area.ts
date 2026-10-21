@@ -7,8 +7,9 @@ import { parseArgs } from "node:util";
 import { dump, load } from "js-yaml";
 import { z } from "zod";
 import {
+  type InventorySpec,
   loadFrontendResources,
-  parseInventorySpec,
+  loadInventorySpecFromPath,
 } from "../src/declarative-frontend/inventory.ts";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack.ts";
 import { resolveSpeakerProfile, type SpeakerProfileSpec } from "../src/speaker-profile.ts";
@@ -43,12 +44,12 @@ export const areaDocumentSchema = z.object({
 export function generate(
   areaSource: string,
   inventorySource: string,
+  inventory: InventorySpec,
   sourcePath: string,
   profileSpec: SpeakerProfileSpec,
   overrides: Record<string, number> = {},
 ) {
   const data = areaDocumentSchema.parse(load(areaSource));
-  const inventory = parseInventorySpec(inventorySource);
   const resolved = resolveSpeakerProfile({ profileSpec, speakerOverride: overrides });
   const speaker = Object.fromEntries(
     ["tract_length_scale", "pharynx_scale", "mouth_scale"].map((key) => [key, resolved[key]]),
@@ -172,6 +173,7 @@ export function main(args: string[]) {
   const result = generate(
     readFileSync(values.areas, "utf8"),
     readFileSync(values.inventory, "utf8"),
+    loadInventorySpecFromPath(values.inventory),
     values.areas,
     speakerProfile.spec,
     speaker,

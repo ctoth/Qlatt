@@ -51,10 +51,7 @@ const voice = {
 
 type Doc = Record<string, unknown>;
 const parse = (inventory: Doc, phonologyDoc: Doc = phonology) =>
-  parseInventorySpec(JSON.stringify(inventory), (path) => {
-    expect(path).toBe(PHONOLOGY_PATH);
-    return JSON.stringify(phonologyDoc);
-  });
+  parseInventorySpec(JSON.stringify(inventory), JSON.stringify(phonologyDoc));
 /** The same inventory written as one document, the form without the key. */
 const flat = (): Doc => {
   const { phonology_path: _path, ...own } = voice;
@@ -92,10 +89,7 @@ describe("inventory layered over a phonology document", () => {
   });
 
   it("is the inventory the two documents make written as one", () => {
-    const loadNothing = () => {
-      throw new Error("an inventory without phonology_path reads no second document");
-    };
-    const single = parseInventorySpec(JSON.stringify(flat()), loadNothing);
+    const single = parseInventorySpec(JSON.stringify(flat()));
     expect(parse(voice)).toEqual(single);
     expect(Object.keys(single)).not.toContain("phonology_path");
     expect(Object.keys(parse(voice))).toEqual(Object.keys(single));
@@ -143,13 +137,11 @@ describe("inventory layered over a phonology document", () => {
     expect(() => parse(voice, conventionsOnly)).toThrow(/E_INVENTORY_PHONOLOGY_SCHEMA/);
   });
 
-  it("rejects a phonology_path that is not a path or cannot be read", () => {
+  it("rejects an invalid phonology_path or missing supplied phonology source", () => {
     expect(() => parse({ ...voice, phonology_path: 7 })).toThrow(/E_INVENTORY_PHONOLOGY_PATH/);
-    expect(() =>
-      parseInventorySpec(JSON.stringify(voice), () => {
-        throw new Error("no such file");
-      }),
-    ).toThrow(/E_INVENTORY_PHONOLOGY_PATH.*\/fixture\/phonology\.yaml/);
+    expect(() => parseInventorySpec(JSON.stringify(voice))).toThrow(
+      /E_INVENTORY_PHONOLOGY_PATH.*\/fixture\/phonology\.yaml.*supplied phonology source/,
+    );
   });
 
   it("still requires the conventions from one of the two documents", () => {

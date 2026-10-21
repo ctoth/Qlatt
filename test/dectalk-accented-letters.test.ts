@@ -14,6 +14,8 @@
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import type { LtsTableDocument } from "../src/g2p/table-lts-pronounce";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
@@ -71,10 +73,9 @@ describe("the generated tables", () => {
   });
 
   it("hold the dictionary's entries with a byte above 127 under that character", () => {
-    const dictionary = JSON.parse(readFileSync("public/dectalk-dictionary.json", "utf8")) as Record<
-      string,
-      string
-    >;
+    const lexicon = loadFrontendResources(loadBundledRulepackSpec("dectalk-english")).lexicon;
+    if (!lexicon) throw new Error("E_FRONTEND_CONFIG: dectalk-english requires resources.lexicon");
+    const dictionary = lexicon.dictionary;
     expect(dictionary["exposé"]).toBe("EH2 K S P OW0 Z EY1");
     expect(Object.keys(dictionary).some((key) => key.includes("�"))).toBe(false);
   });

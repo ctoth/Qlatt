@@ -1,6 +1,6 @@
 /**
  * validate-dectalk-dict.ts — Validate the converted DECtalk dictionary
- * (`public/dectalk-dictionary.json`) against the dectalk-english inventory.
+ * (the declared lexicon) against the dectalk-english inventory.
  *
  * Checks (all reported; exit code 1 if any hard failure):
  *   1. Every emitted phoneme symbol is a valid key in
@@ -18,13 +18,17 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
 import { convertPhonemeField } from "./build-dectalk-dict.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, "..");
 
-const DICT_PATH = path.join(root, "public", "dectalk-dictionary.json");
+const frontend = loadYamlDocumentSync<{ resources: { lexicon: string } }>(
+  path.join(root, "public", "rules", "frontends", "dectalk-english", "frontend.yaml"),
+);
+const DICT_PATH = path.resolve(root, "public", frontend.resources.lexicon.replace(/^\/+/, ""));
 const INVENTORY_PATH = path.join(
   root,
   "public",

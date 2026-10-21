@@ -4655,7 +4655,7 @@ export function assertValidSpec(
       );
     const documentSpan =
       origin && exact
-        ? expressionPath
+        ? diagnostic.code === "E_CEL_INVALID" || expressionPath
           ? origin.value
           : origin.key
         : undefined;

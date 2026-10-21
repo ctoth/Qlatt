@@ -250,7 +250,9 @@ describe("direct rule errors through composition", () => {
           ).toContain(`[${resource}:${value?.line}:${value?.column}]`);
           expect(
             lines.find((line) =>
-              line.includes("E_RULE_FEATURE_UNKNOWN at rules.unknown_path_relation.constraint.expr:"),
+              line.includes(
+                "E_RULE_FEATURE_UNKNOWN at rules.unknown_path_relation.constraint.expr:",
+              ),
             ),
           ).toContain(`[${resource}:${semanticValue?.line}:${semanticValue?.column}]`);
         } finally {

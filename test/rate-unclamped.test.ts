@@ -58,7 +58,10 @@ describe("continuation and undershoot rate policy", () => {
           frontendId,
           rate: 4,
         });
-      const original = f0Policy(spec).continuation_rise_hz as { value: number; citations: string[] };
+      const original = f0Policy(spec).continuation_rise_hz as {
+        value: number;
+        citations: string[];
+      };
       const shipped = speak();
       f0Policy(spec).continuation_rise_hz = { ...original, value: 24 };
       expect(frameValues(speak().track)).toEqual(frameValues(shipped.track));
@@ -150,9 +153,9 @@ describe("continuation and undershoot rate policy", () => {
     expect(records[0].reason).toContain(`rate_undershoot_factor=${factor}`);
     expect(records[0].citations.length).toBeGreaterThan(0);
     expect(
-      diagnostics.getEntries().filter(
-        (entry) => entry.level === "warn" && entry.code?.includes("UNDERSHOOT"),
-      ),
+      diagnostics
+        .getEntries()
+        .filter((entry) => entry.level === "warn" && entry.code?.includes("UNDERSHOOT")),
     ).toEqual([]);
   });
 });

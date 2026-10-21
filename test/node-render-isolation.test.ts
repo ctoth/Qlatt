@@ -1,9 +1,11 @@
 import { createHash } from "node:crypto";
 import { expect, it, vi } from "vitest";
 import * as configModule from "../src/experiments/load-experiment-config";
+import * as f0Module from "../src/f0-filters-loader";
 import * as runtimeModule from "../src/klatt-runtime";
 import { createNodeRuntimeBackend } from "../src/rendering/backends/node-runtime";
 import type { RenderPayload, RenderRequest } from "../src/rendering/types";
+import * as frontendModule from "../src/tts-frontend";
 
 function audioHash(payload: RenderPayload) {
   return createHash("sha256")
@@ -14,6 +16,8 @@ function audioHash(payload: RenderPayload) {
 it("matches fresh renders through concurrent A/B and A replay with isolated runtime state", async () => {
   const config = vi.spyOn(configModule, "loadExperimentConfig");
   const runtime = vi.spyOn(runtimeModule, "createKlattRuntime");
+  const preload = vi.spyOn(f0Module, "preloadF0Filters");
+  const frontend = vi.spyOn(frontendModule, "textToKlattTrackDetailed");
   const timings: Array<Record<string, number>> = [];
   const warm = createNodeRuntimeBackend({
     keepWarm: true,
@@ -73,6 +77,13 @@ it("matches fresh renders through concurrent A/B and A replay with isolated runt
       }
     }
     const calls = runtime.mock.calls.map(([options]) => options);
+    expect(preload).toHaveBeenCalledTimes(3);
+    for (const [index, call] of calls.entries()) {
+      expect(preload.mock.calls[index][0]).toBe(call.assetLoader);
+      expect(preload.mock.invocationCallOrder[index]).toBeLessThan(
+        frontend.mock.invocationCallOrder[index],
+      );
+    }
     expect(new Set(calls.map((options) => options.audioContext)).size).toBe(3);
     expect(new Set(calls.map((options) => options.diagnostics)).size).toBe(3);
     expect(Object.isFrozen((await config.mock.results[0].value).graph.nodes)).toBe(true);

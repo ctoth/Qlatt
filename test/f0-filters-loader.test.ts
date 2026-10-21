@@ -10,6 +10,7 @@
  */
 
 import fs, { readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -21,6 +22,7 @@ import {
   setF0FilterWasmBytes,
 } from "../src/f0-filters-loader";
 import { createBrowserRuntimeAssetLoader } from "../src/runtime-assets/browser-loader";
+import { createNodeRuntimeAssetLoader } from "../src/runtime-assets/node-loader";
 
 // Status codes mirrored from crates/f0-filters/src/lib.rs.
 const RENDER_ERR_SCALARS = -1;
@@ -45,6 +47,29 @@ function writeF64(exports: ReturnType<typeof getF0FilterExports>, values: number
 }
 
 describe("f0-filters-loader", () => {
+  it("loads through the explicit Node worklet root with a different CWD probe", async () => {
+    vi.resetModules();
+    const fresh = await import("../src/f0-filters-loader");
+    const root = resolve(WASM_PATH, "..");
+    const cwd = vi.spyOn(process, "cwd").mockReturnValue(tmpdir());
+    try {
+      const loader = await createNodeRuntimeAssetLoader(root);
+      try {
+        const load = vi.spyOn(loader, "loadWasmModule");
+        await fresh.preloadF0Filters(loader);
+        expect(load).toHaveBeenCalledExactlyOnceWith("f0-filters.wasm");
+        expect(fresh.isF0FilterLoaded()).toBe(true);
+        expect(typeof fresh.getF0FilterExports().render_f0).toBe("function");
+        await fresh.preloadF0Filters(loader);
+        expect(load).toHaveBeenCalledTimes(1);
+      } finally {
+        await loader.dispose?.();
+      }
+    } finally {
+      cwd.mockRestore();
+    }
+  });
+
   it("uses the selected browser loader and preserves failure and loaded-state behavior", async () => {
     vi.resetModules();
     const fresh = await import("../src/f0-filters-loader");

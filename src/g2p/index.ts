@@ -27,8 +27,10 @@ import {
 } from "../text-parser/phonemes";
 import { ltsDocumentAt } from "./lts-document";
 import { applyLtsRules } from "./lts-engine";
+import type { MorphologyContext } from "./morphology";
 import { decomposeClitic, decomposeWord, getStressHintForWord } from "./morphology";
 import { stressPronunciation } from "./stress";
+import type { StressContext } from "./stress-policy";
 import { conjunctionRoles } from "./table-conjunctions";
 import { type ClauseContext, chooseHomograph, loneWordContext } from "./table-homograph";
 import {
@@ -97,8 +99,8 @@ export function pronounce(
   dictLookup: DictLookup,
   options: {
     ltsPath: string;
-    morphologyPath: string;
-    stressPolicyPath: string;
+    morphology: MorphologyContext;
+    stress: StressContext;
     /** The word's place among its neighbours; a word alone when absent. */
     context?: ClauseContext;
   },
@@ -1087,13 +1089,13 @@ export function pronounce(
   }
 
   // 2. Apply configured clitics using their shared suffix allomorph rules
-  const cliticResult = decomposeClitic(lowerWord, dictLookup, options.morphologyPath);
+  const cliticResult = decomposeClitic(lowerWord, dictLookup, options.morphology);
   if (cliticResult) {
     return cliticResult;
   }
 
   // 3. Try morphological decomposition (affix stripping + dict root)
-  let generated = decomposeWord(lowerWord, dictLookup, options.morphologyPath);
+  let generated = decomposeWord(lowerWord, dictLookup, options.morphology);
   if (!generated) {
     if (!options.ltsPath) {
       throw new Error(
@@ -1107,9 +1109,9 @@ export function pronounce(
     };
   }
   // Both generated sources reach the same lexical stage before inventory materialization.
-  const stressHint = getStressHintForWord(lowerWord, options.morphologyPath);
+  const stressHint = getStressHintForWord(lowerWord, options.morphology.path);
   const lexicalStress = stressPronunciation(generated.phonemes, {
-    policyPath: options.stressPolicyPath,
+    stress: options.stress,
     wordId: lowerWord,
     hint: stressHint,
     morphology: generated.morphology,
@@ -1132,8 +1134,8 @@ export function pronounceClause(
   dictLookup: DictLookup,
   options: {
     ltsPath: string;
-    morphologyPath: string;
-    stressPolicyPath: string;
+    morphology: MorphologyContext;
+    stress: StressContext;
     /**
      * False when the mark that ends the run is not in the text (a text's end
      * closed as a sentence): the last word then does not stand against

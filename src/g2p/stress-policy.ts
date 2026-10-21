@@ -3,9 +3,9 @@ import {
   validateExpressionSyntax,
 } from "../declarative-frontend/cel-expressions";
 import { expandCelMacros, parseCelMacroBlock } from "../declarative-frontend/cel-macros";
-import { isPlainObject, loadYamlDocumentSync } from "../yaml-loader";
+import { isPlainObject } from "../yaml-loader";
 import type { LexicalCategory } from "./lexical-stress-types";
-import { loadPhonotacticsSync } from "./syllabify";
+import type { PhonotacticsData } from "./syllabify";
 
 export const STRESS_OPERATIONS = [
   "consonant_extrametricality",
@@ -38,6 +38,12 @@ export interface StressPolicy {
   cycle: StressRule[];
   word: StressRule[];
 }
+export interface StressContext {
+  path: string;
+  policy: StressPolicy;
+  phonotactics: PhonotacticsData;
+}
+
 const variables = [
   "longVowel",
   "codaCount",
@@ -62,7 +68,7 @@ function strings(value: unknown, label: string): string[] {
   return value;
 }
 /** Reuses #47 macro expansion and CEL validation; there is no stress expression interpreter. */
-export function parseStressPolicy(raw: unknown): StressPolicy {
+export function parseStressPolicy(raw: unknown, phonotactics: PhonotacticsData): StressPolicy {
   if (!isPlainObject(raw)) return invalid("expected a mapping");
   if (raw.model !== "hayes-1982" || typeof raw.id !== "string" || !raw.id) {
     return invalid("expected a named hayes-1982 policy");
@@ -152,7 +158,6 @@ export function parseStressPolicy(raw: unknown): StressPolicy {
   const longVowels = strings(raw.long_vowels, "long_vowels");
   const shortFinalVowels = strings(raw.short_final_vowels, "short_final_vowels");
   const sonorants = strings(raw.sonorants, "sonorants");
-  const phonotactics = loadPhonotacticsSync(raw.phonotactics_path);
   if (
     !Array.isArray(phonotactics.vowels) ||
     !phonotactics.vowels.length ||
@@ -173,18 +178,4 @@ export function parseStressPolicy(raw: unknown): StressPolicy {
     cycle,
     word,
   };
-}
-const policies = new Map<string, StressPolicy>();
-export function loadStressPolicy(path: string): StressPolicy {
-  if (!path) return invalid("resolved stress policy path is required");
-  const cached = policies.get(path);
-  if (cached) return cached;
-  let policy: StressPolicy;
-  try {
-    policy = parseStressPolicy(loadYamlDocumentSync<unknown>(path));
-  } catch (error) {
-    return invalid(`${path}: ${String(error)}`);
-  }
-  policies.set(path, policy);
-  return policy;
 }

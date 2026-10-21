@@ -15,6 +15,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { dectalkAllophoneName, parsePhonemeLog } from "../scripts/oracle/allophones";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { pronounce } from "../src/g2p";
 import { applyLtsRules, type LtsTable } from "../src/g2p/table-lts";
 import { receivedFormClassWord } from "../src/g2p/table-lts-pronounce";
@@ -32,11 +34,7 @@ const fixture = readJson<{ entries: Record<string, string> }>(
 );
 const dictionary = readJson<Record<string, string>>("public", "dectalk-dictionary.json");
 const lookup = (word: string): string[] | null => dictionary[word]?.split(" ") ?? null;
-const options = {
-  ltsPath: "/rules/frontends/dectalk-english/lts-table.json",
-  morphologyPath: "/rules/frontends/qlatt-english/morphology.yaml",
-  stressPolicyPath: "/rules/frontends/qlatt-english/stress-policy.yaml",
-};
+const options = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
 
 const KNOWN_GAPS: Readonly<Record<string, string>> = {};
 

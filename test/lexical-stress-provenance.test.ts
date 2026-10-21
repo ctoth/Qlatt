@@ -1,9 +1,12 @@
 import { expect, it } from "vitest";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
 import { createProvenanceCollector } from "../src/provenance";
 import { transcribeText } from "../src/transcribe-text";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+
+const resources = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
 
 it("explains inherited secondary stress through a neutral derivation", () => {
   const provenance = createProvenanceCollector();
@@ -14,8 +17,8 @@ it("explains inherited secondary stress through a neutral derivation", () => {
     dictLookup: (word) =>
       word === "celebration" ? ["S", "EH2", "L", "AH0", "B", "R", "EY1", "SH", "AH0", "N"] : null,
     ltsPath: "/rules/frontends/qlatt-english/lts-rules.yaml",
-    morphologyPath: "/rules/frontends/qlatt-english/morphology.yaml",
-    stressPolicyPath: "/rules/frontends/qlatt-english/stress-policy.yaml",
+    morphology: resources.morphology,
+    stress: resources.stress,
   });
   expect(tokens.some((token) => token.phoneme === "EH" && token.stress === 2)).toBe(true);
   const inherited = provenance
@@ -36,8 +39,8 @@ it("links inherited, reassigned, exception and fallback stress to each distinct 
     dictLookup: (word) => (word === "kind" ? ["K", "AY1", "N", "D"] : null),
     dictionaryMap: {},
     ltsPath: "/rules/frontends/qlatt-english/lts-rules.yaml",
-    morphologyPath: "/rules/frontends/qlatt-english/morphology.yaml",
-    stressPolicyPath: "/rules/frontends/qlatt-english/stress-policy.yaml",
+    morphology: resources.morphology,
+    stress: resources.stress,
   });
   const decisions = provenance.getDecisions();
   const stress = decisions.filter((decision) => decision.type.startsWith("stress_"));

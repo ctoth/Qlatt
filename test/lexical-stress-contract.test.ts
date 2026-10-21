@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import type { StressDomain, StressSyllable } from "../src/g2p/lexical-stress-types";
 import { assignMetricalStress } from "../src/g2p/metrical-stress";
 import { stressPronunciation } from "../src/g2p/stress";
-import { loadStressPolicy, parseStressPolicy } from "../src/g2p/stress-policy";
+import { parseStressPolicy } from "../src/g2p/stress-policy";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
+import { resources } from "./g2p-fixture";
 
-const path = "/rules/frontends/qlatt-english/stress-policy.yaml";
-const policy = loadStressPolicy(path);
+const { path, policy, phonotactics } = resources.stress;
 const syllable = (id: number, long = false, coda: string[] = []): StressSyllable => ({
   id: `s${id}`,
   nucleus: long ? "EY" : "AH",
@@ -140,7 +140,7 @@ describe("Hayes (1982) derivational controls; supplied phonological quantity, Am
     const result = stressPronunciation(
       ["K", "AA", "N", "D", "AH", "N", "S", "EY", "SH", "AH", "N"],
       {
-        policyPath: path,
+        stress: resources.stress,
         exception: {
           stress: ["secondary", "unstressed", "primary", "unstressed"],
           reason:
@@ -196,8 +196,13 @@ describe("stress resource and input contracts", () => {
   it("does not mutate a caller's macro citation arrays while parsing", () => {
     const raw = loadYamlDocumentSync<unknown>(path);
     const before = JSON.stringify(raw);
-    parseStressPolicy(raw);
+    parseStressPolicy(raw, phonotactics);
     expect(JSON.stringify(raw) === before).toBe(true);
+  });
+  it("rejects incompatible supplied phonotactics", () => {
+    expect(() =>
+      parseStressPolicy(loadYamlDocumentSync(path), { ...phonotactics, vowels: [] }),
+    ).toThrow(/E_STRESS_POLICY/);
   });
   it.each([
     [
@@ -236,21 +241,15 @@ describe("stress resource and input contracts", () => {
         raw.long_vowels = ["NOT_A_VOWEL"];
       },
     ],
-    [
-      "incompatible phonotactics resource",
-      (raw: RawPolicy) => {
-        raw.phonotactics_path = "/rules/frontends/qlatt-english/inventory.yaml";
-      },
-    ],
   ])("rejects %s", (_name, mutate) => {
     const raw = structuredClone(loadYamlDocumentSync<RawPolicy>(path));
     mutate(raw);
-    expect(() => parseStressPolicy(raw)).toThrow(/E_STRESS_POLICY/);
+    expect(() => parseStressPolicy(raw, phonotactics)).toThrow(/E_STRESS_POLICY/);
   });
   it("rejects malformed supplied nuclei instead of silently reinterpreting them", () => {
     expect(() =>
       stressPronunciation(["AH"], {
-        policyPath: path,
+        stress: resources.stress,
         underlying: [{ ...syllable(0), nucleus: "NOT_A_VOWEL" }],
       }),
     ).toThrow(/E_STRESS_INPUT/);
@@ -258,7 +257,7 @@ describe("stress resource and input contracts", () => {
   it("rejects an uncited exception", () => {
     expect(() =>
       stressPronunciation(["AH"], {
-        policyPath: path,
+        stress: resources.stress,
         exception: { stress: ["primary"], reason: "test", citations: [] },
       }),
     ).toThrow(/E_STRESS_EXCEPTION/);

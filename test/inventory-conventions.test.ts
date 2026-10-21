@@ -11,7 +11,6 @@ import { syllabify } from "../src/g2p/syllabify";
 import { createProvenanceCollector } from "../src/provenance";
 import { transcribeText } from "../src/transcribe-text";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
-import * as yamlModule from "../src/yaml-loader";
 
 const base = loadInventorySpecFromPath("/rules/frontends/qlatt-english/inventory.yaml");
 
@@ -61,21 +60,18 @@ it("records and diagnoses a pronunciation symbol rejected by the selected gramma
 });
 
 it("keeps multi-character onset symbols distinct", () => {
-  const spy = vi
-    .spyOn(yamlModule, "loadYamlDocumentSync")
-    .mockReturnValue({ vowels: ["A"], legal_onsets: ["TH R"] });
-  try {
-    expect(syllabify(["A", "TH", "R", "A"], "/fixture/onset-collision.yaml")).toEqual([
-      ["A"],
-      ["TH", "R", "A"],
-    ]);
-    expect(syllabify(["A", "T", "HR", "A"], "/fixture/onset-collision.yaml")).toEqual([
-      ["A", "T"],
-      ["HR", "A"],
-    ]);
-  } finally {
-    spy.mockRestore();
-  }
+  const phonotactics = {
+    ...inventoryModule.loadFrontendResources(
+      rulepackModule.loadBundledRulepackSpec("qlatt-english"),
+    ).stress.phonotactics,
+    vowels: ["A"],
+    legal_onsets: ["TH R"],
+  };
+  expect(syllabify(["A", "TH", "R", "A"], phonotactics)).toEqual([["A"], ["TH", "R", "A"]]);
+  expect(syllabify(["A", "T", "HR", "A"], phonotactics)).toEqual([
+    ["A", "T"],
+    ["HR", "A"],
+  ]);
 });
 
 // Rename vocabulary in both inventory and declarative rules, leaving function

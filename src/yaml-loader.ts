@@ -82,7 +82,9 @@ function parseYamlValue(source: string, identity: YamlSourceIdentity): unknown {
         visit(pair.value, [...path, name], pair.key);
       }
     } else if (isSeq(node)) {
-      node.items.forEach((item, index) => visit(item, [...path, index]));
+      node.items.forEach((item, index) => {
+        visit(item, [...path, index]);
+      });
     }
     // Aliases are not traversed: their target is indexed at its authored path.
   }

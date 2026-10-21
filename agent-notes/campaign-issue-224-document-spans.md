@@ -14,6 +14,8 @@ Use one parseDocument call with LineCounter and explicit YAML 1.2 core options. 
 
 The main checkout's installed dependencies are older than the current lock. Do not use those installed versions as evidence of candidate parity. A browser absence test names the old parser's exception; update that assertion to the new parser while preserving the no-fallback behavior.
 
+Hosted quality job 119086571135 found an expression-bodied forEach callback and test object formatting. Corrected the callback to a block and applied the reported formatting; no parser behavior changed. Other hosted checks and Claude review are pending.
+
 # Next step
 
 Existing loaders now parse once through yaml, with explicit rulepack resource/role context and a serializable span accessor on uncomposed documents. Added coordinate, alias, malformed-input, independent-load and all public rules/experiments value-parity coverage in the existing loader test. Updated the parser-specific browser error-name assertion. No local tests or CI run. Publish for hosted CI and Claude review; composition propagation and all later #224 acceptance remain open.

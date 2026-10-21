@@ -31,10 +31,30 @@ describe("document spans", () => {
       endLine: 2,
       endColumn: 9,
     });
-    expect(at("root", "nested").value).toMatchObject({ line: 2, column: 11, endLine: 2, endColumn: 13 });
-    expect(at("root", "list", 0).value).toMatchObject({ line: 4, column: 7, endLine: 4, endColumn: 12 });
-    expect(at("root", "flow", 1).value).toMatchObject({ line: 5, column: 15, endLine: 5, endColumn: 18 });
-    expect(at("root", "text").value).toMatchObject({ line: 6, column: 9, endLine: 9, endColumn: 1 });
+    expect(at("root", "nested").value).toMatchObject({
+      line: 2,
+      column: 11,
+      endLine: 2,
+      endColumn: 13,
+    });
+    expect(at("root", "list", 0).value).toMatchObject({
+      line: 4,
+      column: 7,
+      endLine: 4,
+      endColumn: 12,
+    });
+    expect(at("root", "flow", 1).value).toMatchObject({
+      line: 5,
+      column: 15,
+      endLine: 5,
+      endColumn: 18,
+    });
+    expect(at("root", "text").value).toMatchObject({
+      line: 6,
+      column: 9,
+      endLine: 9,
+      endColumn: 1,
+    });
     expect(JSON.parse(JSON.stringify(index))).toEqual(index);
     expect(Object.isFrozen(index)).toBe(true);
     expect(Object.keys(document as object)).toEqual(["root"]);
@@ -60,7 +80,10 @@ describe("document spans", () => {
   it("keeps repeated resource loads and same-role documents independently addressable", () => {
     const first = parseYamlString("a: 1\n", "first", identity);
     const second = parseYamlString("\na: 2\n", "second", identity);
-    const other = parseYamlString("a: 3\n", "other", { ...identity, resource: "/rules/other.yaml" });
+    const other = parseYamlString("a: 3\n", "other", {
+      ...identity,
+      resource: "/rules/other.yaml",
+    });
     expect(yamlDocumentSpans(first)[1].value).toMatchObject({ ...identity, line: 1 });
     expect(yamlDocumentSpans(second)[1].value).toMatchObject({ ...identity, line: 2 });
     expect(yamlDocumentSpans(other)[1].value.resource).toBe("/rules/other.yaml");
@@ -88,7 +111,11 @@ function yamlFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true })
     .flatMap((entry) => {
       const filename = path.join(directory, entry.name);
-      return entry.isDirectory() ? yamlFiles(filename) : /\.ya?ml$/.test(entry.name) ? [filename] : [];
+      return entry.isDirectory()
+        ? yamlFiles(filename)
+        : /\.ya?ml$/.test(entry.name)
+          ? [filename]
+          : [];
     })
     .sort();
 }
@@ -106,7 +133,11 @@ describe("bundled YAML parser parity", () => {
     const asynchronous = await loadYamlDocument(filename);
     expect(asynchronous).toStrictEqual(sync);
     expect(yamlDocumentSpans(asynchronous)).toEqual(yamlDocumentSpans(sync));
-    expect(yamlDocumentSpans(sync)[0].value).toMatchObject({ resource: filename, role: null, path: [] });
+    expect(yamlDocumentSpans(sync)[0].value).toMatchObject({
+      resource: filename,
+      role: null,
+      path: [],
+    });
   });
 });
 

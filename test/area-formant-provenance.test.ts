@@ -55,10 +55,14 @@ it("carries geometry and model through inventory selection into the decision DAG
 
 it("rejects a derived target without cited geometry, while retaining table targets", () => {
   const source = loadYamlSourceSync(path);
-  expect(() => inventoryModule.parseInventorySpec(source)).not.toThrow();
+  const inventory = inventoryModule.loadInventorySpecFromPath(path);
+  const phonologyPath = inventoryModule.inventoryPhonologyPath(inventory);
+  const phonology = phonologyPath === undefined ? undefined : loadYamlSourceSync(phonologyPath);
+  expect(() => inventoryModule.parseInventorySpec(source, phonology)).not.toThrow();
   expect(() =>
     inventoryModule.parseInventorySpec(
       source.replace("  IY1:", "  IY1:\n    derived_from: area_function"),
+      phonology,
     ),
   ).toThrow(/area_function/);
 });

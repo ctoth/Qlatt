@@ -387,21 +387,20 @@ function buildLayeredInventorySpec(
 }
 
 /**
- * Parse an inventory document. When it names a `phonology_path`, that document
- * is read with `loadPhonologySource` and merged in first.
+ * Parse an inventory document, layering explicitly supplied phonology source
+ * when it names a `phonology_path`. Acquisition belongs to the loaders below.
  */
 export function parseInventorySpec(
   source: string,
-  loadPhonologySource: (path: string) => string = loadYamlSourceSync,
+  phonologySource?: string,
 ): InventorySpec {
   const raw = parseInventoryDocument(source);
   const phonologyPath = declaredPhonologyPath(raw);
   if (phonologyPath === undefined) return buildInventorySpec(raw);
-  let phonologySource = "";
-  try {
-    phonologySource = loadPhonologySource(phonologyPath);
-  } catch (cause) {
-    throw phonologyUnreadable(phonologyPath, cause);
+  if (phonologySource === undefined) {
+    throw new Error(
+      `E_INVENTORY_PHONOLOGY_PATH: '${phonologyPath}' requires supplied phonology source`,
+    );
   }
   return buildLayeredInventorySpec(raw, phonologySource, phonologyPath);
 }
@@ -511,7 +510,16 @@ export function loadInventorySpecFromPath(specPath: string): InventorySpec {
     throw inventoryPathUnknown(specPath, cause);
   }
 
-  const spec = parseInventorySpec(source);
+  const phonologyPath = declaredPhonologyPath(parseInventoryDocument(source));
+  let phonologySource: string | undefined;
+  if (phonologyPath !== undefined) {
+    try {
+      phonologySource = loadYamlSourceSync(phonologyPath);
+    } catch (cause) {
+      throw phonologyUnreadable(phonologyPath, cause);
+    }
+  }
+  const spec = parseInventorySpec(source, phonologySource);
   BUNDLED_INVENTORY_CACHE.set(specPath, spec);
   return spec;
 }
@@ -530,7 +538,7 @@ export async function preloadInventorySpecFromPath(specPath: string): Promise<In
   // The phonology document is fetched here, so that nothing is read
   // synchronously on this path.
   const phonologyPath = declaredPhonologyPath(parseInventoryDocument(source));
-  let phonologySource = "";
+  let phonologySource: string | undefined;
   if (phonologyPath !== undefined) {
     try {
       phonologySource = await loadYamlSource(phonologyPath);
@@ -538,7 +546,7 @@ export async function preloadInventorySpecFromPath(specPath: string): Promise<In
       throw phonologyUnreadable(phonologyPath, cause);
     }
   }
-  const spec = parseInventorySpec(source, () => phonologySource);
+  const spec = parseInventorySpec(source, phonologySource);
   BUNDLED_INVENTORY_CACHE.set(specPath, spec);
   return spec;
 }

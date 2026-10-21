@@ -112,7 +112,7 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 | `--stage <stages>` | Comma-separated filter: `transcribe`, `rules`, `prosody`, `semantics`, `interpreter`, `runtime`, `frontend` |
 | `--subject <pat>` | Filter by subject (exact or `prefix*` wildcard) |
 | `--range <spec>` | Filter by `seq:START-END`, `time:START-END`, `token:START-END`, or `id:START-END` |
-| `--why <id>` | Show ancestry chain for a decision (e.g., `--why d000045`); bypasses stage, subject and range filters |
+| `--why <id>` | Show ancestry chain and joined rules' compiled select/constraint/apply blocks (e.g., `--why d000045`); bypasses stage, subject and range filters. Whole blocks do not identify selected branches or contributing literals. |
 | `--base-f0 <Hz>` | Requested base pitch (default: none; the frontend's voice keeps its own) |
 | `--transition-ms <ms>` | Formant transition override (default: selected frontend policy) |
 | `--strict-citations` | Exit code 2 if any decisions in the full run lack citations, regardless of display filters or selected ancestry; displayed summaries still describe the selected output |

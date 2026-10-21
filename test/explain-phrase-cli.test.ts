@@ -19,6 +19,10 @@ interface ExplainPayload {
   decisions: DecisionRecord[];
   tooling: {
     ruleSources: Record<string, YamlDocumentSpan>;
+    ruleExpressions: Record<
+      string,
+      { ruleId: string; select: unknown; constraint: unknown; apply: unknown }
+    >;
     replay: { matches: boolean } | null;
   };
 }
@@ -165,12 +169,14 @@ describe("explain phrase cli", () => {
     expect(payload.whyDecisionId).toBe(inventory.id);
     expect(payload.decisions).toEqual([inventory]);
     expect(payload.tooling.ruleSources).toEqual({});
+    expect(payload.tooling.ruleExpressions).toEqual({});
   });
 
   it("links rule decisions to transcribe ancestry in why output", async () => {
     const explain = await runCli(["--phrase", "hello world", "--format", "json"]);
     expect(explain.code).toBe(0);
     const explainPayload = parseExplainPayload(explain.stdout);
+    expect(explainPayload.tooling.ruleExpressions).toEqual({});
     const rewrite = explainPayload.decisions.find(
       (decision) =>
         decision.stage === "rules" &&
@@ -200,6 +206,16 @@ describe("explain phrase cli", () => {
     expect(span).toBeDefined();
     expect(span.path[0]).toBe("rules");
     expect(span.path).toHaveLength(2);
+    const ruleId = String(span.path[1]);
+    const compiledRule = loadBundledRulepackSpec().rules[ruleId];
+    expect(compiledRule).toBeDefined();
+    const expressions = {
+      ruleId,
+      select: compiledRule.select ?? null,
+      constraint: compiledRule.constraint ?? null,
+      apply: compiledRule.apply ?? null,
+    };
+    expect(whyPayload.tooling.ruleExpressions[rewrite.id]).toEqual(expressions);
     const declaration = rulepackRuleDocumentSpans(loadBundledRulepackSpec()).find(
       (entry) => entry.value.path.length === 2 && entry.value.path[1] === span.path[1],
     );
@@ -208,6 +224,12 @@ describe("explain phrase cli", () => {
       explainPayload.tooling.ruleSources[rewrite.id],
     );
     const selectedIds = new Set(whyPayload.decisions.map((decision) => decision.id));
+    expect(Object.keys(whyPayload.tooling.ruleExpressions).every((id) => selectedIds.has(id))).toBe(
+      true,
+    );
+    for (const [id, entry] of Object.entries(whyPayload.tooling.ruleExpressions)) {
+      expect(whyPayload.tooling.ruleSources[id].path[1]).toBe(entry.ruleId);
+    }
     expect(Object.keys(whyPayload.tooling.ruleSources).every((id) => selectedIds.has(id))).toBe(
       true,
     );
@@ -215,6 +237,9 @@ describe("explain phrase cli", () => {
     expect(text.code).toBe(0);
     expect(text.stdout.split("\n").find((line) => line.startsWith(`#${rewrite.seq} `))).toContain(
       ` | rule: ${span.resource}:${span.line}:${span.column}`,
+    );
+    expect(text.stdout).toContain(
+      `compiled rule expressions (whole blocks, not selected branches): ${JSON.stringify(expressions)}`,
     );
   });
 

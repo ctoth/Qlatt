@@ -18,6 +18,10 @@ passes (session ae49eacb-508e-46a1-9842-c2fe79ae804f): no actionable findings.
 Accepted without code changes. Existing nested nullable support and finer nested
 error coordinates were observations without shipped producers, outside this slice.
 Replacement hosted quality/native/audio checks passed; test shards remain pending.
+Hosted shard3 exposed two fixture assumptions: a fixed source line shifted by25,
+and renameVocabulary cloned a compiled spec without its compiler side metadata.
+Updated the real line and compiled the renamed fixture against its corresponding
+renamed inventory through the existing loader. Production validation is unchanged.
 
 ## Decisions and why
 - Retain authored declarations and bare enum/name lists; validation currently reads

@@ -1111,7 +1111,7 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
         entry.value.path.join(".") === "relations.Segment.scalars.duration.floor_fallback.value",
     );
     expect(baseRelation?.value.resource).toBe("/rules/frontends/qlatt-english/pipeline.yaml");
-    expect(baseRelation?.key?.line).toBe(450);
+    expect(baseRelation?.key?.line).toBe(475);
     for (const path of ["maps.phoneme_aspiration_map.P_CL", "tags.duration_floor"]) {
       expect(spans.find((entry) => entry.value.path.join(".") === path)?.value.resource).toBe(
         "/rules/frontends/qlatt-english/pipeline.yaml",

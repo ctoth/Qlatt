@@ -100,13 +100,11 @@ it("preserves prosody and silence edges for a fixture frontend with renamed acou
   const resources = rulepackModule.loadFrontendResources(spec);
   const alternate = renameVocabulary(spec) as typeof spec;
   const alternateInventory = renameVocabulary(resources.inventory) as typeof resources.inventory;
-  const resourceSpy = vi
-    .spyOn(rulepackModule, "resolveFrontend")
-    .mockReturnValue({
-      spec: alternate,
-      resources: { ...resources, inventory: alternateInventory },
-      voices: {},
-    });
+  const resourceSpy = vi.spyOn(rulepackModule, "resolveFrontend").mockReturnValue({
+    spec: alternate,
+    resources: { ...resources, inventory: alternateInventory },
+    voices: {},
+  });
   try {
     const result = textToKlattTrackDetailed(phrase);
     expect(result.track.map(({ time, phoneme, params }) => ({ time, phoneme, params }))).toEqual(
@@ -182,13 +180,11 @@ it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
     expect(inventory.target_feature_exclusions).toEqual(["dur", "SW", "type"]);
     const target = Object.values(inventory.phoneme_targets)[0];
     target.fixture_note = "target metadata";
-    const spy = vi
-      .spyOn(rulepackModule, "resolveFrontend")
-      .mockReturnValue({
-        spec: rulepackModule.loadBundledRulepackSpec(frontendId),
-        resources: { ...resources, inventory },
-        voices: {},
-      });
+    const spy = vi.spyOn(rulepackModule, "resolveFrontend").mockReturnValue({
+      spec: rulepackModule.loadBundledRulepackSpec(frontendId),
+      resources: { ...resources, inventory },
+      voices: {},
+    });
     try {
       const control = textToKlattTrackDetailed("hello", undefined, undefined, { frontendId });
       const controlFeatures = control.utterance.schemaDefinition().itemTypes.segment.features;

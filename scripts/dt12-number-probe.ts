@@ -26,9 +26,7 @@ import {
   loadBundledRulepackSpec,
   loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
-import {
-  normalizeGraphText as normalizeText,
-} from "../src/declarative-frontend/source-recognition";
+import { normalizeGraphText as normalizeText } from "../src/declarative-frontend/source-recognition";
 
 // dectalk-english declares its own normalization tables + pipeline (DATA).
 const DECTALK_CONFIG = loadBundledRulepackSpec("dectalk-english");

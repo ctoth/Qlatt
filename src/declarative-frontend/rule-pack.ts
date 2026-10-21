@@ -6,8 +6,8 @@ import {
 import {
   getVoiceRegistry,
   type VoiceDocument,
-  voiceNameInRegistry,
   type VoiceRegistry,
+  voiceNameInRegistry,
   voiceRuleRegistry,
   withVoiceRulePolicy,
 } from "../dectalk-voice";
@@ -37,15 +37,15 @@ import {
   loadYamlSourceSync,
   parseYamlString,
   resolveIncludePath,
-  yamlDocumentSpans,
   type YamlNodeSpans,
+  yamlDocumentSpans,
 } from "../yaml-loader";
 import type { CelMacroDefinition } from "./cel-macros";
 import {
   type FrontendResources,
+  type InventorySpec,
   inventoryPhonologyPath,
   inventoryPhonologyReference,
-  type InventorySpec,
   parseInventorySpec,
 } from "./inventory";
 import {
@@ -1223,7 +1223,6 @@ export async function preloadBundledRulepackSpec(
   return preloadRulepackSpecFromPath(resolveBundledRulepackPath(frontendId));
 }
 
-
 const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
 const FRONTEND_ASSET_CACHE = new Map<string, unknown>();
 
@@ -1790,7 +1789,13 @@ export type ResolvedFrontend = Readonly<{
 function requestedVoices(spec: CompiledRulepack, selectedVoice?: string): string[] {
   const registry = getVoiceRegistry(spec);
   return registry
-    ? [...new Set([registry.default, ...registry.voices, ...(selectedVoice ? [selectedVoice] : [])])]
+    ? [
+        ...new Set([
+          registry.default,
+          ...registry.voices,
+          ...(selectedVoice ? [selectedVoice] : []),
+        ]),
+      ]
     : [];
 }
 
@@ -1819,7 +1824,10 @@ export async function preloadFrontend(
   const voices: Record<string, VoiceDocument> = Object.create(null);
   if (registry) {
     for (const name of requestedVoices(spec, selectedVoice)) {
-      voices[voiceNameInRegistry(registry, name)] = await preloadFrontendVoiceDocument(registry, name);
+      voices[voiceNameInRegistry(registry, name)] = await preloadFrontendVoiceDocument(
+        registry,
+        name,
+      );
     }
   }
   return freezeRecursively({ spec, resources, voices });

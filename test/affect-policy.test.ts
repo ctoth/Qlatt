@@ -26,7 +26,10 @@ describe("affect policy validation", () => {
   it("preserves own names that overlap object prototype properties", () => {
     const data = document();
     const preset = data.presets[0];
-    data.presets = [{ ...preset, name: "__proto__" }, { ...preset, name: "toString" }];
+    data.presets = [
+      { ...preset, name: "__proto__" },
+      { ...preset, name: "toString" },
+    ];
     data.variants = JSON.parse('{"constructor":{"male":"__proto__","female":"toString"}}');
     const library = parseAffectPresets(data);
     expect(Object.getPrototypeOf(library.presets)).toBeNull();

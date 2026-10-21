@@ -12,6 +12,8 @@ Capture phase entries and direct fields only. Offset child phase lookup indices 
 
 # Surprises
 
+Quality job119184420112 rejected the new fixture's invocation/body formatting. Applied its multiline layout; no production changes or local CI. The unrelated existing approximate-ln2 warning is outside this change.
+
 Other agents own normalization file moves and resource acquisition. Preserve their work. Topology has no nonempty bundled producer found and remains outside this slice.
 
 # Next step

@@ -341,7 +341,8 @@ describe("display-formatter", () => {
     expect(text).toContain("F2 range: 1500.0 - 2322.0 Hz");
   });
 
-  it("signal_flow summarizes branch and lfMode usage", () => {
+  it("signal_flow summarizes branch and declared track source controls", async () => {
+    const { semantics } = await loadExperimentConfig("klatt80-baseline");
     const run: RunInfo = {
       phrase: "test",
       baseF0: 100,
@@ -354,9 +355,37 @@ describe("display-formatter", () => {
       ],
     };
     const section: DisplaySection = { id: "signal", source: "signal_flow" };
-    const text = formatSection(section, makeState({ run })).join("\n");
+    const text = formatSection(section, makeState({ run, semantics })).join("\n");
     expect(text).toContain("SW=1: 1 frames, 0.100s");
-    expect(text).toContain("LF modes:");
+    expect(text).toContain("Track source controls: lfMode=1: 0.200s");
+    expect(text).toContain("Track source controls: sourceMode=1: 0.200s");
+  });
+
+  it.each([
+    ["qlatt-beauty", "sourceMode=1: 1.000s"],
+    ["dectalk-english", "sourceMode=0: 1.000s"],
+    ["klsyn88", "ss=2: 1.000s"],
+    ["dectalk-vtm", "(no experiment source-control policy)"],
+  ])("%s displays its selected source control defaults", async (id, expected) => {
+    const { semantics } = await loadExperimentConfig(id);
+    const run: RunInfo = {
+      phrase: "test",
+      baseF0: 100,
+      sessionId: 1,
+      startTime: 0,
+      track: [{ time: 0 }, { time: 1 }],
+    };
+    const section: DisplaySection = { id: "signal", source: "signal_flow" };
+    const state = makeState({ run, semantics });
+    expect(formatSection(section, state).join("\n")).toContain(expected);
+    if (id === "klsyn88") {
+      expect(formatSection(section, state).join("\n")).not.toContain("lfMode");
+      expect(semantics.analysis!.source_modes!.citations[0]).toContain("engineering convention");
+      state.sliderParams.ss = 4;
+      expect(formatSection(section, state).join("\n")).toContain("ss=4: 1.000s");
+      state.sliderParams.ss = Infinity;
+      expect(formatSection(section, state).join("\n")).toContain("ss=2: 1.000s");
+    }
   });
 
   it("gain_derivation formats computed gain ranges", async () => {

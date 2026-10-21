@@ -6,10 +6,35 @@ import {
   analyzeStopReleases,
   analyzeTrackGains,
   findVoicingIssues,
+  summarizeSourceControl,
 } from "../../src/track-analysis";
 import { loadYamlDocumentSync } from "../../src/yaml-loader";
 
 describe("track conformance authority", () => {
+  it("counts a selected source control with held values and duration weighting", () => {
+    const track = [
+      { time: 0, params: { lfMode: 4 } },
+      { time: 1, params: { selected: 3 } },
+      { time: 3, params: { selected: NaN } },
+      { time: 4, params: { selected: Infinity } },
+      { time: 5, params: { selected: 4 } },
+      { time: 5 },
+    ];
+    expect(summarizeSourceControl(track, "selected", 2)).toEqual({
+      counts: { 2: 1, 3: 3, 4: 2 },
+      seconds: { 2: 1, 3: 4 },
+    });
+    expect(summarizeSourceControl(track, "lfMode", 0)).toEqual({
+      counts: { 4: 6 },
+      seconds: { 4: 5 },
+    });
+    expect(summarizeSourceControl(track, "selected", NaN)).toEqual({
+      counts: { 3: 3, 4: 2 },
+      seconds: { 3: 4 },
+    });
+    expect(summarizeSourceControl([], "selected", 2)).toEqual({ counts: {}, seconds: {} });
+  });
+
   it("inherits display policy and applies selected warning thresholds", async () => {
     const { graph, semantics } = await loadExperimentConfig("klatt80-baseline");
     const child = await loadExperimentConfig("test-inherit");

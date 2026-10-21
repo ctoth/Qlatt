@@ -5,6 +5,10 @@ bacon: "0.1"
 name: klsyn88
 
 analysis:
+  source_modes:
+    params: [ss]
+    citations:
+      - "engineering convention: summarize held numeric track source controls using their declared defaults; not evidence of audible source activity"
   metrics:
     voicing_params: [AV, AVS]
     silence_phoneme: SIL

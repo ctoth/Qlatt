@@ -1,8 +1,8 @@
 import type { BaconGraph, Registry } from "../klatt-runtime";
 import { normalizePath, readFileFromFsSync } from "../path-utils";
-import { loadSemanticsDocument, loadSemanticsDocumentOrNull } from "../semantics/load-semantics";
-import type { SemanticsDocument } from "../semantics/types";
-import { loadYamlDocument, loadYamlDocumentOrNull } from "../yaml-loader";
+import { loadSemanticsDocumentOrNull } from "../semantics/load-semantics";
+import type { SemanticsConstants, SemanticsDocument } from "../semantics/types";
+import { isPlainObject, loadYamlDocumentOrNull } from "../yaml-loader";
 import { assertFrontendVocabulary } from "./frontend-vocabulary";
 
 type ExperimentManifestEntry = {
@@ -20,27 +20,14 @@ export interface ExperimentConfig {
   registry: Registry;
 }
 
-type SemanticsConstants = NonNullable<SemanticsDocument["constants"]>;
-type NestedConstants = Exclude<SemanticsConstants[string], string | number | boolean>;
-
-function isNestedConstants(
-  value: SemanticsConstants[string] | undefined,
-): value is NestedConstants {
-  return value != null && typeof value === "object";
-}
-
 function mergeConstants(parent: SemanticsConstants, child: SemanticsConstants): SemanticsConstants {
   const result: SemanticsConstants = { ...parent };
   for (const [key, value] of Object.entries(child)) {
-    if (isNestedConstants(value)) {
-      const inherited = result[key];
-      result[key] = {
-        ...(isNestedConstants(inherited) ? inherited : {}),
-        ...value,
-      };
-    } else {
-      result[key] = value;
-    }
+    const inherited = result[key];
+    result[key] =
+      isPlainObject(inherited) && isPlainObject(value)
+        ? mergeConstants(inherited as SemanticsConstants, value as SemanticsConstants)
+        : value;
   }
   return result;
 }
@@ -101,33 +88,58 @@ export async function loadExperimentConfig(
 }
 
 async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
-  const manifest = await loadJsonDocument<ExperimentManifest>("/experiments/manifest.json");
-  const entry = manifest?.experiments?.find((candidate) => candidate.id === experimentId);
-  const basePath = `/experiments/${experimentId}`;
-
-  const [childGraph, childSemantics, childRegistry] = await Promise.all([
-    loadYamlDocumentOrNull<BaconGraph>(`${basePath}/graph.yaml`),
-    loadSemanticsDocumentOrNull(`${basePath}/semantics.yaml`),
-    loadYamlDocumentOrNull<Registry>(`${basePath}/registry.yaml`),
-  ]);
-
-  if (!entry?.extends) {
-    if (!childGraph || !childSemantics || !childRegistry) {
-      throw new Error(`Incomplete experiment config for '${experimentId}'`);
+  const manifestPath = "/experiments/manifest.json";
+  const manifest = await loadJsonDocument<ExperimentManifest>(manifestPath);
+  if (!Array.isArray(manifest?.experiments)) {
+    throw new Error(`E_EXPERIMENT_MANIFEST: '${manifestPath}' requires experiments`);
+  }
+  const entries = new Map<string, ExperimentManifestEntry>();
+  for (const entry of manifest.experiments) {
+    if (!isPlainObject(entry) || typeof entry.id !== "string" || !entry.id.trim()) {
+      throw new Error(`E_EXPERIMENT_MANIFEST: '${manifestPath}' requires nonempty experiment IDs`);
     }
-    return { graph: childGraph, semantics: childSemantics, registry: childRegistry };
+    if (entries.has(entry.id)) {
+      throw new Error(
+        `E_EXPERIMENT_MANIFEST: '${manifestPath}' duplicate experiment '${entry.id}'`,
+      );
+    }
+    if (
+      entry.extends !== undefined &&
+      (typeof entry.extends !== "string" || !entry.extends.trim())
+    ) {
+      throw new Error(`E_EXPERIMENT_MANIFEST: '${manifestPath}' invalid parent for '${entry.id}'`);
+    }
+    entries.set(entry.id, entry);
   }
 
-  const parentBase = `/experiments/${entry.extends}`;
-  const [parentGraph, parentSemantics, parentRegistry] = await Promise.all([
-    loadYamlDocument<BaconGraph>(`${parentBase}/graph.yaml`),
-    loadSemanticsDocument(`${parentBase}/semantics.yaml`),
-    loadYamlDocument<Registry>(`${parentBase}/registry.yaml`),
-  ]);
+  async function resolve(id: string, ancestors: readonly string[]): Promise<ExperimentConfig> {
+    const chain = [...ancestors, id];
+    const context = `'${manifestPath}': ${chain.join(" -> ")}`;
+    if (ancestors.includes(id)) throw new Error(`E_EXPERIMENT_CYCLE: ${context}`);
+    const entry = entries.get(id);
+    if (!entry) throw new Error(`E_EXPERIMENT_UNKNOWN: ${context}`);
+    const parent = entry.extends === undefined ? null : await resolve(entry.extends, chain);
+    const basePath = `/experiments/${id}`;
 
-  return {
-    graph: childGraph || parentGraph,
-    semantics: mergeSemantics(parentSemantics, childSemantics),
-    registry: mergeRegistry(parentRegistry, childRegistry),
-  };
+    const [childGraph, childSemantics, childRegistry] = await Promise.all([
+      loadYamlDocumentOrNull<BaconGraph>(`${basePath}/graph.yaml`),
+      loadSemanticsDocumentOrNull(`${basePath}/semantics.yaml`),
+      loadYamlDocumentOrNull<Registry>(`${basePath}/registry.yaml`),
+    ]);
+
+    if (!parent) {
+      if (!childGraph || !childSemantics || !childRegistry) {
+        throw new Error(`Incomplete experiment config for '${id}' (${context})`);
+      }
+      return { graph: childGraph, semantics: childSemantics, registry: childRegistry };
+    }
+
+    return {
+      graph: childGraph ?? parent.graph,
+      semantics: mergeSemantics(parent.semantics, childSemantics),
+      registry: mergeRegistry(parent.registry, childRegistry),
+    };
+  }
+
+  return resolve(experimentId, []);
 }

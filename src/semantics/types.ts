@@ -10,11 +10,15 @@ export type CelExpression = string;
 /** Parameter value types */
 export type ParamValue = number | string | boolean;
 
+/** Plain document data; nested mappings, arrays and null retain their CEL shape. */
+export type ConstantValue = ParamValue | null | ConstantValue[] | { [key: string]: ConstantValue };
+export type SemanticsConstants = Record<string, ConstantValue>;
+
 /** Context for expression evaluation */
 export interface EvaluationContext {
   diagnostics?: Diagnostics;
   params: Record<string, ParamValue>;
-  constants: Record<string, ParamValue | Record<string, ParamValue>>;
+  constants: SemanticsConstants;
   [key: string]: unknown;
 }
 
@@ -55,7 +59,7 @@ export interface SemanticsDocument {
    *  update frames at the 5 ms update rate. */
   defaultScheduling?: "step" | "ramp";
   params?: Record<string, ParamDefinition>;
-  constants?: Record<string, ParamValue | Record<string, ParamValue>>;
+  constants?: SemanticsConstants;
   realize?: Record<string, RealizationRule | CelExpression>;
 }
 

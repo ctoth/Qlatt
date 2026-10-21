@@ -205,8 +205,17 @@ describe("direct rule errors through composition", () => {
           const rules = {
             unknown_path_relation: {
               kind: "scalar",
-              select: { relation: "Segment", where: "path(current, 'R:Missing') != null" },
-              constraint: { expr: "fixture_outer(current)" },
+              select: {
+                relation: "Segment",
+                where: { all: ["path(current, 'R:Missing') != null"] },
+              },
+              constraint: {
+                all: [
+                  { expr: "fixture_outer(current)" },
+                  { any: [{ not: "curent.duration" }, { not: { expr: "current.phonem" } }] },
+                  { predicate: "missing_fixture_predicate" },
+                ],
+              },
               aply: [],
               apply: [
                 {
@@ -219,7 +228,9 @@ describe("direct rule errors through composition", () => {
                 {
                   field: "duration",
                   op: "set",
-                  dispatch: [{ when: "current.phonem == 'AA'", value: "current.duration" }],
+                  dispatch: [
+                    { when: { all: ["current.phonem == 'AA'"] }, value: "current.duration" },
+                  ],
                   tag: "duration_floor",
                 },
                 {
@@ -258,10 +269,12 @@ describe("direct rule errors through composition", () => {
             (entry) => entry.value.path.join(".") === "rules.unknown_path_relation.aply",
           )?.key;
           const value = entries.find(
-            (entry) => entry.value.path.join(".") === "rules.unknown_path_relation.select.where",
+            (entry) =>
+              entry.value.path.join(".") === "rules.unknown_path_relation.select.where.all.0",
           )?.value;
           const semanticValue = entries.find(
-            (entry) => entry.value.path.join(".") === "rules.unknown_path_relation.constraint.expr",
+            (entry) =>
+              entry.value.path.join(".") === "rules.unknown_path_relation.constraint.all.0.expr",
           )?.value;
           expect(key).toBeDefined();
           expect(value).toBeDefined();
@@ -282,13 +295,13 @@ describe("direct rule errors through composition", () => {
           ).toContain(`[${resource}:${key?.line}:${key?.column}]`);
           expect(
             lines.find((line) =>
-              line.includes("E_CEL_INVALID at rules.unknown_path_relation.select.where:"),
+              line.includes("E_CEL_INVALID at rules.unknown_path_relation.select.where.all[0]:"),
             ),
           ).toContain(`[${resource}:${value?.line}:${value?.column}]`);
           expect(
             lines.find((line) =>
               line.includes(
-                "E_RULE_FEATURE_UNKNOWN at rules.unknown_path_relation.constraint.expr:",
+                "E_RULE_FEATURE_UNKNOWN at rules.unknown_path_relation.constraint.all[0].expr:",
               ),
             ),
           ).toContain(`[${resource}:${semanticValue?.line}:${semanticValue?.column}]`);
@@ -304,6 +317,24 @@ describe("direct rule errors through composition", () => {
           // CEL syntax errors include a multiline source highlight before the location suffix.
           const diagnosticBlocks = String(failure).split(/\n(?=[EW]_[A-Z_]+ at )/);
           for (const [code, path, authoredPath, position] of [
+            [
+              "E_CEL_INVALID",
+              "constraint.all[1].any[0].not",
+              "constraint.all.1.any.0.not",
+              "value",
+            ],
+            [
+              "E_RULE_FEATURE_UNKNOWN",
+              "constraint.all[1].any[1].not.expr",
+              "constraint.all.1.any.1.not.expr",
+              "value",
+            ],
+            [
+              "E_PREDICATE_UNKNOWN",
+              "constraint.all[2].predicate",
+              "constraint.all.2.predicate",
+              "key",
+            ],
             ["E_CEL_INVALID", "apply[0].value", "apply.0.value", "value"],
             ["E_RULE_APPLY_FIELD_UNKNOWN", "apply[0].valu", "apply.0.valu", "key"],
             ["E_RULE_FEATURE_UNKNOWN", "apply[3].value", "apply.3.template.value", "value"],
@@ -316,8 +347,8 @@ describe("direct rule errors through composition", () => {
             ],
             [
               "E_RULE_FEATURE_UNKNOWN",
-              "apply[1].dispatch[0].when",
-              "apply.1.dispatch.0.when",
+              "apply[1].dispatch[0].when.all[0]",
+              "apply.1.dispatch.0.when.all.0",
               "value",
             ],
           ] as const) {

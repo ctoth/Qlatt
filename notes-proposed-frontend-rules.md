@@ -3,7 +3,7 @@
 **Date:** 2026-02-26
 **Based on:** reports/scout-current-frontend-rules.md, reports/scout-paper-inventory-for-rules.md
 
-## Progress
+## Historical progress (2026-02-26 snapshot)
 
 **Starting state:** 15 rules across 4 phases
 **After 4 batches:** 42 rules (27 new rules added)
@@ -17,21 +17,27 @@
 
 **Test suite:** 257 passed, 1 pre-existing failure
 
-## Remaining (13 rules — most need upstream features)
+## Implemented entries verified 2026-10-21
 
-### Feasible with effort (~5):
-- t_flapping: model acoustically by adjusting T_CL/T_REL params in V_T_V context
+These five former proposals have implementations in the selected Qlatt English frontend. Its [frontend declaration](public/rules/frontends/qlatt-english/frontend.yaml) imports the phase files, and its [pipeline](public/rules/frontends/qlatt-english/pipeline.yaml) lists the named rules for execution.
+
+| Former proposal | Current implementation |
+| --- | --- |
+| `t_flapping` | [`t_flapping`](public/rules/frontends/qlatt-english/phases/postlexical.yaml) replaces eligible T with DX, rather than adjusting closure/release parameters. |
+| `t_glottalization` | [`t_glottalization`](public/rules/frontends/qlatt-english/phases/postlexical.yaml) replaces eligible T with GS. |
+| `polysyllabic_shortening` | [`polysyllabic_shortening`](public/rules/frontends/qlatt-english/phases/duration.yaml) multiplies vowel duration when `word_syllable_count > 1`. |
+| `f0_downstep` | [`accent_index_in_phrase` and `tobi_accent`](public/rules/frontends/qlatt-english/phases/prosody.yaml) assign accent indices and use a downstep factor in F0 point values. |
+| `dac_coarticulation_scaling` | [`vcv_coarticulation`](public/rules/frontends/qlatt-english/phases/formant.yaml) uses a DAC-derived weight to blend F1–F3 toward flanking-vowel targets. |
+
+## Other historical proposals (not re-audited here)
+
+The following eight entries retain their 2026-02-26 proposal wording. Their implementation status and stated prerequisites have not been rechecked; this list does not establish that they remain unimplemented.
+
 - td_cluster_deletion: suppress T/D in coda clusters via splice
 - progressive_phrase_final_lengthening: upgrade existing rule to apply progressively
-- polysyllabic_shortening: approximate by counting vowels in word via look_back/ahead
 - stable_transition_duration: insert transition segments (complex structural)
-
-### Need upstream features (~8):
 - accent_priority_by_pos: needs POS tags on word tokens
-- f0_downstep: needs tone tracking (H/L sequence state)
 - f0_emphasis_boost: needs focus/emphasis marking
 - word_initial_unstressed_polysyllabic: needs reliable syllable count
 - phrasal_accent_lengthening: needs accent assignment
-- dac_coarticulation_scaling: needs DAC values on consonant inventory
-- t_glottalization: needs glottal stop phoneme in inventory
 - tr_dr_affrication: needs modified affricate phonemes

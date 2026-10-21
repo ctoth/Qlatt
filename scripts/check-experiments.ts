@@ -9,7 +9,9 @@ for (const { id } of manifest.experiments) {
     const config = await loadExperimentConfig(id);
     console.log(`${id}: expanded graph, bindings and semantic references checked`);
     for (const { definition, source } of config.unreachable) {
-      console.log(`${id}: unreachable ${definition} (${source.resource}:${source.line ?? "?"} ${source.path.join(".")})`);
+      console.log(
+        `${id}: unreachable ${definition} (${source.resource}:${source.line ?? "?"} ${source.path.join(".")})`,
+      );
     }
   } catch (error) {
     console.error(`${id}: ${String(error)}`);

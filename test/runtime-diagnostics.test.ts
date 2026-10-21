@@ -1,8 +1,8 @@
-import { createPreparedRuntime, type RuntimeFixtureOptions } from "./runtime-fixture";
 import { describe, expect, it, vi } from "vitest";
 import { createDiagnostics } from "../src/diagnostics";
-import { type KlattRuntimeOptions } from "../src/klatt-runtime";
+import type { KlattRuntimeOptions } from "../src/klatt-runtime";
 import { createProvenanceCollector } from "../src/provenance";
+import { createPreparedRuntime, type RuntimeFixtureOptions } from "./runtime-fixture";
 
 function fixture() {
   const diagnostics = createDiagnostics();
@@ -21,7 +21,10 @@ function fixture() {
       audioWorklet: { addModule: vi.fn() },
     } as unknown as AudioContext,
     graph: { bacon: "0.1", nodes: { out: { type: "gain" } }, outputs: ["out"] },
-    registry: { bacon: "0.1", primitives: { gain: { native: "GainNode", params: { gain: { type: "float", default: 1 } } } } },
+    registry: {
+      bacon: "0.1",
+      primitives: { gain: { native: "GainNode", params: { gain: { type: "float", default: 1 } } } },
+    },
     semantics: { name: "test", params: {} },
   };
   return { options, diagnostics, node };
@@ -110,7 +113,6 @@ describe("runtime structural diagnostics", () => {
   it("preserves allowed count/port defaults and applies a valid binding", async () => {
     const { options, diagnostics, node } = fixture();
     options.graph.connections = [["out", "out"]];
-    options.semantics.params = { volume: { type: "float" } };
     options.graph.nodes.out.params = { gain: { bind: "volume" } };
     options.semantics.params = { volume: { type: "float", default: 0.5 } };
     const runtime = await createPreparedRuntime(options);
@@ -364,7 +366,6 @@ describe("runtime structural diagnostics", () => {
 
   it("retains nonfinite requested values and distinct affected binding contexts", async () => {
     const { options, diagnostics, node } = fixture();
-    options.semantics.params = { volume: { type: "float" } };
     options.graph.nodes.out.params = { gain: { bind: "volume" } };
     options.graph.nodes.other = { type: "gain", params: { gain: { bind: "volume" } } };
     options.semantics.params = { volume: { type: "float", default: 0.5 } };

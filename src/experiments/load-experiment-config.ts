@@ -4,7 +4,15 @@ import { loadSemanticsDocumentOrNull } from "../semantics/load-semantics";
 import type { SemanticsConstants, SemanticsDocument } from "../semantics/types";
 import { isPlainObject, loadYamlDocumentOrNull } from "../yaml-loader";
 import { assertFrontendVocabulary } from "./frontend-vocabulary";
-import { type ConfigSources, composeSources, constantReplacements, documentSources, type PreparedExperimentConfig, prepareExperimentConfig, sourcePath } from "./prepare-experiment-config";
+import {
+  type ConfigSources,
+  composeSources,
+  constantReplacements,
+  documentSources,
+  type PreparedExperimentConfig,
+  prepareExperimentConfig,
+  sourcePath,
+} from "./prepare-experiment-config";
 
 type ExperimentManifestEntry = {
   id: string;
@@ -147,13 +155,32 @@ async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
       registry: mergeRegistry(parent.registry, childRegistry),
       sources: {
         graph: childGraph ? sources.graph : parent.sources!.graph,
-        registry: childRegistry ? composeSources(parent.sources!.registry, sources.registry,
-          Object.keys(childRegistry.primitives ?? {}).map((name) => sourcePath(["primitives", name]))) : parent.sources!.registry,
-        semantics: childSemantics ? composeSources(parent.sources!.semantics, sources.semantics, [
-          ...Object.keys(childSemantics).filter((key) => !["params", "realize", "constants"].includes(key)).map((key) => sourcePath([key])),
-          ...["params", "realize"].flatMap((key) => Object.keys(childSemantics[key as "params" | "realize"] ?? {}).map((name) => sourcePath([key, name]))),
-          ...constantReplacements(parent.semantics.constants ?? {}, childSemantics.constants ?? {}),
-        ]) : parent.sources!.semantics,
+        registry: childRegistry
+          ? composeSources(
+              parent.sources!.registry,
+              Object.fromEntries(
+                Object.entries(sources.registry).filter(
+                  ([path]) => path === "/primitives" || path.startsWith("/primitives/"),
+                ),
+              ),
+              Object.keys(childRegistry.primitives ?? {}).map((name) =>
+                sourcePath(["primitives", name]),
+              ),
+            )
+          : parent.sources!.registry,
+        semantics: childSemantics
+          ? composeSources(parent.sources!.semantics, sources.semantics, [
+              ...Object.keys(childSemantics)
+                .filter((key) => !["params", "realize", "constants"].includes(key))
+                .map((key) => sourcePath([key])),
+              ...["params", "realize"].flatMap((key) =>
+                Object.keys(childSemantics[key as "params" | "realize"] ?? {}).map((name) =>
+                  sourcePath([key, name]),
+                ),
+              ),
+              ...constantReplacements(parent.semantics.constants ?? {}, childSemantics.constants ?? {}),
+            ])
+          : parent.sources!.semantics,
       },
     };
   }

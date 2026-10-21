@@ -328,7 +328,8 @@ describe("parseSemanticsDocument", () => {
       '        citations: ["engineering estimate: fixture {n}"]',
     ].join("\n");
 
-    expect(parseSemanticsDocument(yaml, "fixture.yaml")).toEqual({
+    const parsed = parseSemanticsDocument(yaml, "fixture.yaml");
+    expect(parsed).toEqual({
       name: "fixture",
       realize: {
         base: "1.0",
@@ -346,6 +347,17 @@ describe("parseSemanticsDocument", () => {
         },
       },
     });
+    for (const name of ["gain2", "gain3"]) {
+      expect(yamlLoader.yamlDocumentSpans(parsed)).toContainEqual(
+        expect.objectContaining({
+          value: expect.objectContaining({
+            path: ["realize", name, "expr"],
+            resource: "fixture.yaml",
+            line: 9,
+          }),
+        }),
+      );
+    }
     expect(() => parseSemanticsDocument(`${yaml}\n  - index: n\n`, "fixture.yaml")).toThrow(
       /^E_REALIZE_EACH_OVER fixture\.yaml: realize_each\[1\]\.over:/,
     );

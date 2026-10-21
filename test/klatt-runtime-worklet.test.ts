@@ -1,4 +1,3 @@
-import { createPreparedRuntime } from "./runtime-fixture";
 /**
  * Tests for waitForNodeReady in klatt-runtime.ts
  *
@@ -10,6 +9,7 @@ import { createPreparedRuntime } from "./runtime-fixture";
 import { describe, expect, it, vi } from "vitest";
 import { waitForNodeReady } from "../src/klatt-runtime";
 import { initWasmModule } from "../src/worklets/wasm-utils";
+import { createPreparedRuntime } from "./runtime-fixture";
 
 // ---------------------------------------------------------------------------
 // Mock AudioWorkletNode with a controllable MessagePort

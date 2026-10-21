@@ -7,6 +7,10 @@ export type RuntimeFixtureOptions = ExperimentConfig & Omit<KlattRuntimeOptions,
 /** Programmatic tests cross the same explicit preparation boundary as loaded experiments. */
 export async function createPreparedRuntime(options: RuntimeFixtureOptions) {
   const { graph, semantics, registry, sources, ...host } = options;
-  const config = prepareExperimentConfig({ graph, semantics, registry, sources }, "runtime fixture", host.diagnostics);
+  const config = prepareExperimentConfig(
+    { graph, semantics, registry, sources },
+    "runtime fixture",
+    host.diagnostics,
+  );
   return createKlattRuntime({ ...host, config });
 }

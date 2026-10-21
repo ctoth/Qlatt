@@ -1,8 +1,8 @@
-import { createPreparedRuntime } from "./runtime-fixture";
 import { describe, expect, it, vi } from "vitest";
 import { createDiagnostics } from "../src/diagnostics";
 import { createKlattInterpreter, type KlattFrame } from "../src/klatt-interpreter";
 import type { SemanticsDocument } from "../src/semantics/types";
+import { createPreparedRuntime } from "./runtime-fixture";
 
 async function fixture(semantics: SemanticsDocument) {
   const diagnostics = createDiagnostics();
@@ -24,7 +24,10 @@ async function fixture(semantics: SemanticsDocument) {
     audioContext,
     diagnostics,
     semantics,
-    registry: { bacon: "0.1", primitives: { gain: { native: "GainNode", params: { gain: { type: "float", default: 1 } } } } },
+    registry: {
+      bacon: "0.1",
+      primitives: { gain: { native: "GainNode", params: { gain: { type: "float", default: 1 } } } },
+    },
     graph: { bacon: "0.1", nodes: { out: { type: "gain", params: { gain: { bind: "volume" } } } } },
   });
   const interpreter = createKlattInterpreter({ audioContext, runtime, semantics });
@@ -89,7 +92,10 @@ describe("realization degradation", () => {
   });
 
   it.each([NaN, Infinity, -1])("rejects invalid start time %s", async (start) => {
-    const { interpreter, gain } = await fixture({ name: "test", params: { volume: { type: "float" } } });
+    const { interpreter, gain } = await fixture({
+      name: "test",
+      params: { volume: { type: "float" } },
+    });
     expect(() => interpreter.scheduleTrack([{ time: 0, params: { volume: 0.25 } }], start)).toThrow(
       /timing/i,
     );
@@ -97,7 +103,10 @@ describe("realization degradation", () => {
   });
 
   it("rejects backwards interior timing and accepts equal-time markers", async () => {
-    const { interpreter, gain } = await fixture({ name: "test", params: { volume: { type: "float" } } });
+    const { interpreter, gain } = await fixture({
+      name: "test",
+      params: { volume: { type: "float" } },
+    });
     expect(() =>
       interpreter.scheduleTrack(
         [
@@ -236,7 +245,10 @@ describe("realization degradation", () => {
   });
 
   it("reports malformed parameter frames while retaining valid final timing", async () => {
-    const { interpreter, diagnostics, gain } = await fixture({ name: "test", params: { volume: { type: "float" } } });
+    const { interpreter, diagnostics, gain } = await fixture({
+      name: "test",
+      params: { volume: { type: "float" } },
+    });
     diagnostics.clear();
     interpreter.scheduleTrack(
       [
@@ -267,7 +279,10 @@ describe("realization degradation", () => {
     { time: -1, params: {} },
     { time: Infinity, params: {} },
   ])("rejects invalid final timing before cancelling the existing schedule: %s", async (final) => {
-    const { interpreter, gain, diagnostics } = await fixture({ name: "test", params: { volume: { type: "float" } } });
+    const { interpreter, gain, diagnostics } = await fixture({
+      name: "test",
+      params: { volume: { type: "float" } },
+    });
     interpreter.scheduleTrack(
       [
         { time: 0, params: { volume: 0.25 } },

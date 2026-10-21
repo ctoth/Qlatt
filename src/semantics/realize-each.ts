@@ -247,9 +247,13 @@ export function expandRealizeEach(
         const prefix = ["realize_each", entryIndex, "rules", nameTemplate];
         for (const span of yamlDocumentSpans(document)) {
           if (prefix.every((part, index) => span.value.path[index] === part)) {
-            spans.push({ ...span, value: {
-              ...span.value, path: ["realize", name, ...span.value.path.slice(prefix.length)],
-            } });
+            spans.push({
+              ...span,
+              value: {
+                ...span.value,
+                path: ["realize", name, ...span.value.path.slice(prefix.length)],
+              },
+            });
           }
         }
       }

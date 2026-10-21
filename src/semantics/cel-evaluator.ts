@@ -78,12 +78,19 @@ export function createCelEvaluator(): CelEvaluator {
         return undefined;
       };
       const visit = (value: unknown, locals = new Set<string>()): void => {
-        if (Array.isArray(value)) { for (const child of value) visit(child, locals); }
-        else if (value && typeof value === "object" && "op" in value) {
+        if (Array.isArray(value)) {
+          for (const child of value) visit(child, locals);
+        } else if (value && typeof value === "object" && "op" in value) {
           const node = value as ASTNode;
           const reference = path(node);
-          if (reference) { if (!locals.has(reference[0])) result.push(reference); return; }
-          if (node.op === "rcall" && ["map", "filter", "all", "exists", "exists_one"].includes(node.args[0])) {
+          if (reference) {
+            if (!locals.has(reference[0])) result.push(reference);
+            return;
+          }
+          if (
+            node.op === "rcall" &&
+            ["map", "filter", "all", "exists", "exists_one"].includes(node.args[0])
+          ) {
             visit(node.args[1], locals);
             const [binding, ...body] = node.args[2];
             const scope = new Set(locals);

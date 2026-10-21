@@ -1,8 +1,8 @@
 import {
+  type Registry as BaconRegistry,
   checkGraph,
   checkRegistry,
   type Graph,
-  type Registry as BaconRegistry,
   Validator,
 } from "@bacon/core/pure";
 import commonSchema from "@bacon/core/schemas/common.schema.json" with { type: "json" };
@@ -29,7 +29,9 @@ export interface PreparedExperimentConfig extends ExperimentConfig {
 }
 
 export function sourcePath(parts: readonly (string | number)[]): string {
-  return parts.map((part) => `/${String(part).replaceAll("~", "~0").replaceAll("/", "~1")}`).join("");
+  return parts
+    .map((part) => `/${String(part).replaceAll("~", "~0").replaceAll("/", "~1")}`)
+    .join("");
 }
 
 export function documentSources(document: unknown, resource: string): DocumentSources {
@@ -46,14 +48,21 @@ export function composeSources(
   replacementPaths: readonly string[],
 ): DocumentSources {
   return {
-    ...Object.fromEntries(Object.entries(parent).filter(([path]) =>
-      !replacementPaths.some((prefix) => path === prefix || path.startsWith(`${prefix}/`)),
-    )),
+    ...Object.fromEntries(
+      Object.entries(parent).filter(
+        ([path]) =>
+          !replacementPaths.some((prefix) => path === prefix || path.startsWith(`${prefix}/`)),
+      ),
+    ),
     ...child,
   };
 }
 
-export function constantReplacements(parent: unknown, child: unknown, path = "/constants"): string[] {
+export function constantReplacements(
+  parent: unknown,
+  child: unknown,
+  path = "/constants",
+): string[] {
   if (isPlainObject(parent) && isPlainObject(child)) {
     return Object.entries(child).flatMap(([key, value]) =>
       constantReplacements(parent[key], value, `${path}${sourcePath([key])}`),
@@ -92,7 +101,9 @@ export function prepareExperimentConfig(
     const source = owner(role, path);
     const detail = `${label}: ${source.resource}${source.line ? `:${source.line}:${source.column}` : ""} ${path}: ${message}`;
     diagnostics?.error(
-      detail, { ...data, source, field: path, consequence: "operation rejected" }, code,
+      detail,
+      { ...data, source, field: path, consequence: "operation rejected" },
+      code,
     );
     throw new Error(`${code}: ${detail}`);
   };
@@ -104,33 +115,59 @@ export function prepareExperimentConfig(
       for (const direction of ["inputs", "outputs"] as const) {
         const count = primitive[direction];
         if (count !== undefined && (!Number.isInteger(count) || count < 0)) {
-          reject("registry", `${field}/${direction}`, `Invalid ${direction} count for '${id}'`,
-            "runtime.invalid_count", {
-              nodeId: id, primitive: node.type, field: direction, requestedValue: count,
-            });
+          reject(
+            "registry",
+            `${field}/${direction}`,
+            `Invalid ${direction} count for '${id}'`,
+            "runtime.invalid_count",
+            {
+              nodeId: id,
+              primitive: node.type,
+              field: direction,
+              requestedValue: count,
+            },
+          );
         }
       }
-      if ((primitive.worklet || primitive.wasm) && primitive.inputs === 0 && primitive.outputs === 0) {
-        reject("registry", field, `Worklet '${id}' must have inputs or outputs`, "runtime.invalid_count");
+      if (
+        (primitive.worklet || primitive.wasm) &&
+        primitive.inputs === 0 &&
+        primitive.outputs === 0
+      ) {
+        reject(
+          "registry",
+          field,
+          `Worklet '${id}' must have inputs or outputs`,
+          "runtime.invalid_count",
+        );
       }
       if ((primitive.wasm || primitive.category?.includes("worklet")) && !primitive.worklet) {
-        reject("registry", field, `Missing required worklet/WASM declaration for '${id}'`,
-          "runtime.invalid_primitive");
+        reject(
+          "registry",
+          field,
+          `Missing required worklet/WASM declaration for '${id}'`,
+          "runtime.invalid_primitive",
+        );
       }
       if (primitive.native !== undefined || primitive.category === "webaudio") {
         try {
           getNativeNodeConstructor(primitive.native, node.type, () => {});
         } catch (error) {
           reject("registry", field, String(error), "runtime.invalid_primitive", {
-            nodeId: id, primitive: node.type, native: primitive.native,
+            nodeId: id,
+            primitive: node.type,
+            native: primitive.native,
           });
         }
       }
     }
     for (const [name, value] of Object.entries(node.params ?? {})) {
       if (typeof value === "object" && value !== null && "expr" in value) {
-        reject("graph", sourcePath(["nodes", id, "params", name]),
-          "Inline expressions ({ expr: ... }) are not supported; use a realize rule in semantics.yaml");
+        reject(
+          "graph",
+          sourcePath(["nodes", id, "params", name]),
+          "Inline expressions ({ expr: ... }) are not supported; use a realize rule in semantics.yaml",
+        );
       }
     }
   }
@@ -167,26 +204,43 @@ export function prepareExperimentConfig(
     }
   }
   const validator = new Validator({
-    common: commonSchema, graph: graphSchema, registry: registrySchema,
+    common: commonSchema,
+    graph: graphSchema,
+    registry: registrySchema,
   });
   for (const role of ["registry", "graph"] as const) {
     const issues = validator.validate(role, config[role]);
     if (issues.length) {
-      reject(role, issues[0].path, issues[0].message,
+      reject(
+        role,
+        issues[0].path,
+        issues[0].message,
         /port|connections|outputs|inputs/.test(issues[0].path)
-          ? "runtime.invalid_port" : "E_EXPERIMENT_CONFIG");
+          ? "runtime.invalid_port"
+          : "E_EXPERIMENT_CONFIG",
+      );
     }
   }
   for (const issue of checkRegistry(registry as BaconRegistry)) {
     if (issue.severity === "error") {
-      reject("registry", issue.path, issue.message,
-        /ports/.test(issue.path) ? "runtime.invalid_port" : "E_EXPERIMENT_CONFIG");
+      reject(
+        "registry",
+        issue.path,
+        issue.message,
+        /ports/.test(issue.path) ? "runtime.invalid_port" : "E_EXPERIMENT_CONFIG",
+      );
     }
   }
   for (const issue of checkGraph(graph as Graph, { registry: registry as BaconRegistry })) {
     if (issue.severity === "error") {
-      reject("graph", issue.path, issue.message,
-        /connections|outputs|inputs/.test(issue.path) ? "runtime.invalid_port" : "E_EXPERIMENT_CONFIG");
+      reject(
+        "graph",
+        issue.path,
+        issue.message,
+        /connections|outputs|inputs/.test(issue.path)
+          ? "runtime.invalid_port"
+          : "E_EXPERIMENT_CONFIG",
+      );
     }
   }
   const { celEvaluator, topoEvaluator } = createConfiguredEvaluator();
@@ -206,16 +260,28 @@ export function prepareExperimentConfig(
     const roots = new Set(references.map(([root]) => root));
     for (const reference of references) {
       const [root, ...tail] = reference;
-      if (!Object.hasOwn(params, root) && !Object.hasOwn(constants, root) && !Object.hasOwn(rules, root)) {
-        reject("semantics", `${field}/expr`,
-          `Unknown semantic reference '${reference.join(".")}'`, "E_SEMANTICS_REFERENCE");
+      if (
+        !Object.hasOwn(params, root) &&
+        !Object.hasOwn(constants, root) &&
+        !Object.hasOwn(rules, root)
+      ) {
+        reject(
+          "semantics",
+          `${field}/expr`,
+          `Unknown semantic reference '${reference.join(".")}'`,
+          "E_SEMANTICS_REFERENCE",
+        );
       }
       if (Object.hasOwn(constants, root)) {
         let value: unknown = constants[root];
         for (const member of tail) {
           if (value === null || typeof value !== "object" || !Object.hasOwn(value, member)) {
-            reject("semantics", `${field}/expr`,
-              `Unknown constant '${reference.join(".")}'`, "E_SEMANTICS_REFERENCE");
+            reject(
+              "semantics",
+              `${field}/expr`,
+              `Unknown constant '${reference.join(".")}'`,
+              "E_SEMANTICS_REFERENCE",
+            );
           }
           value = (value as Record<string, unknown>)[member];
         }
@@ -224,21 +290,31 @@ export function prepareExperimentConfig(
     // A name can refer to an input before a same-name realization replaces it.
     // Authored deps select that realization explicitly; otherwise input names
     // do not imply ordering edges (for example effortVoiced reads input F0).
-    const actual = [...roots].filter((root) =>
-      Object.hasOwn(rules, root) && !Object.hasOwn(constants, root) &&
-      (!Object.hasOwn(params, root) || definition.deps?.includes(root)),
+    const actual = [...roots].filter(
+      (root) =>
+        Object.hasOwn(rules, root) &&
+        !Object.hasOwn(constants, root) &&
+        (!Object.hasOwn(params, root) || definition.deps?.includes(root)),
     );
     for (const dep of definition.deps ?? []) {
       if (!roots.has(dep)) {
-        reject("semantics", `${field}/deps`,
-          `Declared dependency '${dep}' is not referenced`, "E_SEMANTICS_DEPENDENCY");
+        reject(
+          "semantics",
+          `${field}/deps`,
+          `Declared dependency '${dep}' is not referenced`,
+          "E_SEMANTICS_DEPENDENCY",
+        );
       }
     }
     if (definition.deps !== undefined) {
       for (const dep of actual) {
         if (!definition.deps.includes(dep)) {
-          reject("semantics", `${field}/deps`,
-            `Missing declared dependency '${dep}'`, "E_SEMANTICS_DEPENDENCY");
+          reject(
+            "semantics",
+            `${field}/deps`,
+            `Missing declared dependency '${dep}'`,
+            "E_SEMANTICS_DEPENDENCY",
+          );
         }
       }
     }
@@ -260,15 +336,23 @@ export function prepareExperimentConfig(
     for (const [name, value] of Object.entries(node.params ?? {})) {
       if (typeof value !== "object" || value === null || !("bind" in value)) continue;
       if (!Object.hasOwn(params, value.bind) && !Object.hasOwn(rules, value.bind)) {
-        reject("graph", sourcePath(["nodes", id, "params", name]),
-          `Unresolved binding '${value.bind}'`, "E_SEMANTICS_BINDING");
+        reject(
+          "graph",
+          sourcePath(["nodes", id, "params", name]),
+          `Unresolved binding '${value.bind}'`,
+          "E_SEMANTICS_BINDING",
+        );
       }
       mark(value.bind);
     }
   }
   const unreachable = (["realize", "params"] as const).flatMap((field) =>
-    Object.keys(semantics[field] ?? {}).filter((name) => !live.has(name)).map((name) => ({
-      definition: `${field}.${name}`, source: owner("semantics", sourcePath([field, name])),
-    })));
+    Object.keys(semantics[field] ?? {})
+      .filter((name) => !live.has(name))
+      .map((name) => ({
+        definition: `${field}.${name}`,
+        source: owner("semantics", sourcePath([field, name])),
+      })),
+  );
   return { ...config, sources, unreachable };
 }

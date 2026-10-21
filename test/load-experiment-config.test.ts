@@ -82,6 +82,11 @@ realize_each:
       },
       [{ id: "grandchild", extends: "child" }],
       {
+        // This inheritance fixture replaces the whole graph; use a coherent
+        // root without baseline formulas that depend on its formant macro.
+        "/experiments/klatt80-baseline/graph.yaml": "bacon: '0.1'\nnodes: {}\n",
+        "/experiments/klatt80-baseline/registry.yaml": "bacon: '0.1'\nprimitives: {}\n",
+        "/experiments/klatt80-baseline/semantics.yaml": "name: fixture\nparams: {}\n",
         "/experiments/grandchild/semantics.yaml": `
 params:
   local: { default: 4 }

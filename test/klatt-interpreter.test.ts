@@ -18,7 +18,9 @@ import {
   type TelemetryEvent,
 } from "../src/klatt-interpreter";
 import type { BaconGraph, BindingSpec, KlattRuntime } from "../src/klatt-runtime";
+import { loadSemanticsDocumentSync } from "../src/semantics/load-semantics";
 import type { SemanticsDocument } from "../src/semantics/types";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 // ---------------------------------------------------------------------------
 // Helpers: minimal mocks for AudioContext / AudioParam / KlattRuntime
@@ -371,9 +373,26 @@ describe("PLSTEP state tracking", () => {
     "dectalk-english",
     "test-inherit",
   ])(
-    "preserves the bundled %s policy and amplitude through experiment loading",
+    "preserves the bundled %s PLSTEP policy and amplitude",
     async (experimentId) => {
-      const { semantics } = await loadExperimentConfig(experimentId);
+      let semantics: SemanticsDocument;
+      if (experimentId === "stevens91") {
+        await expect(loadExperimentConfig(experimentId)).rejects.toThrow(
+          /E_SEMANTICS_REFERENCE.*\/realize\/fricA7\/expr.*'A7'/,
+        );
+        const child = loadYamlDocumentSync<Record<string, unknown>>(
+          "/experiments/stevens91/semantics.yaml",
+        );
+        expect(Object.hasOwn(child, "plstep")).toBe(false);
+        // The authored inherited policy remains independently testable with a
+        // mock runtime; this does not admit the invalid experiment to a host.
+        semantics = {
+          ...minimalSemantics(),
+          plstep: loadSemanticsDocumentSync("/experiments/klatt80-baseline/semantics.yaml").plstep,
+        };
+      } else {
+        ({ semantics } = await loadExperimentConfig(experimentId));
+      }
       const events: TelemetryEvent[] = [];
       const interpreter = createKlattInterpreter({
         audioContext: mockAudioContext(),

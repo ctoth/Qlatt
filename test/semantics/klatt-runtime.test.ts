@@ -1,7 +1,7 @@
-import { createPreparedRuntime } from "../runtime-fixture";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { type BaconGraph, type Registry } from "../../src/klatt-runtime";
+import type { BaconGraph, Registry } from "../../src/klatt-runtime";
 import type { SemanticsDocument } from "../../src/semantics/types";
+import { createPreparedRuntime } from "../runtime-fixture";
 
 // Mock AudioContext for testing
 class MockAudioContext {

@@ -1,6 +1,9 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
-import { loadExperimentConfig, type ExperimentConfig } from "../src/experiments/load-experiment-config";
+import {
+  type ExperimentConfig,
+  loadExperimentConfig,
+} from "../src/experiments/load-experiment-config";
 import { prepareExperimentConfig } from "../src/experiments/prepare-experiment-config";
 import { loadSemanticsDocumentSync } from "../src/semantics/load-semantics";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
@@ -10,15 +13,34 @@ const manifest = JSON.parse(readFileSync("public/experiments/manifest.json", "ut
   experiments: { id: string }[];
 };
 const authored = (): ExperimentConfig => ({
-  graph: { bacon: "0.1", nodes: { gain: { type: "gain", params: { gain: { bind: "result" } } } }, outputs: ["gain"] },
-  registry: { bacon: "0.1", primitives: { gain: { native: "GainNode", params: { gain: { type: "float", default: 1 } } } } },
-  semantics: { name: "fixture", params: { input: { default: 1 } }, realize: {
-    result: "intermediate * 2", intermediate: "input + 1", dead: "input - 1",
-  } },
+  graph: {
+    bacon: "0.1",
+    nodes: { gain: { type: "gain", params: { gain: { bind: "result" } } } },
+    outputs: ["gain"],
+  },
+  registry: {
+    bacon: "0.1",
+    primitives: { gain: { native: "GainNode", params: { gain: { type: "float", default: 1 } } } },
+  },
+  semantics: {
+    name: "fixture",
+    params: { input: { default: 1 } },
+    realize: {
+      result: "intermediate * 2",
+      intermediate: "input + 1",
+      dead: "input - 1",
+    },
+  },
 });
 
 describe("checked experiment preparation", () => {
   it.each(manifest.experiments)("checks every resolved manifest entry: $id", async ({ id }) => {
+    if (id === "stevens91") {
+      await expect(loadExperimentConfig(id)).rejects.toThrow(
+        /E_SEMANTICS_REFERENCE: stevens91: \/experiments\/klatt80-baseline\/semantics\.yaml:1119:.*\/realize\/fricA7\/expr: Unknown semantic reference 'A7'/,
+      );
+      return;
+    }
     const config = await loadExperimentConfig(id);
     expect(config.graph.meta?.formantBanks).toBeUndefined();
     expect(JSON.parse(JSON.stringify(config))).toEqual(config);
@@ -37,7 +59,9 @@ describe("checked experiment preparation", () => {
     const baseline = await loadExperimentConfig("klatt80-baseline");
     expect(baseline.graph.nodes.cascadeF1).toBeDefined();
     expect(baseline.graph.connections).toContainEqual(["tp", "cascadeF1"]);
-    expect(baseline.sources.graph["/nodes/cascadeF1"].resource).toContain("klatt80-baseline/graph.yaml");
+    expect(baseline.sources.graph["/nodes/cascadeF1"].resource).toContain(
+      "klatt80-baseline/graph.yaml",
+    );
     expect(await loadExperimentConfig("klatt80-baseline")).toEqual(baseline);
   });
 
@@ -46,7 +70,12 @@ describe("checked experiment preparation", () => {
     config.graph.connections = [["missing", "gain"]];
     const createGain = vi.fn();
     const addModule = vi.fn();
-    await expect(createPreparedRuntime({ ...config, audioContext: { createGain, audioWorklet: { addModule } } as unknown as AudioContext })).rejects.toThrow(/missing/);
+    await expect(
+      createPreparedRuntime({
+        ...config,
+        audioContext: { createGain, audioWorklet: { addModule } } as unknown as AudioContext,
+      }),
+    ).rejects.toThrow(/missing/);
     expect(createGain).not.toHaveBeenCalled();
     expect(addModule).not.toHaveBeenCalled();
   });
@@ -61,10 +90,14 @@ describe("checked experiment preparation", () => {
   it("rejects invalid bindings, references and dishonest dependencies with source fields", () => {
     const binding = authored();
     binding.graph.nodes.gain.params = { gain: { bind: "absent" } };
-    expect(() => prepareExperimentConfig(binding, "selected")).toThrow(/selected:.*graph.*nodes\/gain\/params\/gain.*absent/);
+    expect(() => prepareExperimentConfig(binding, "selected")).toThrow(
+      /selected:.*graph.*nodes\/gain\/params\/gain.*absent/,
+    );
     const reference = authored();
     reference.semantics.realize!.result = "missing + 1";
-    expect(() => prepareExperimentConfig(reference)).toThrow(/E_SEMANTICS_REFERENCE.*realize\/result\/expr.*missing/);
+    expect(() => prepareExperimentConfig(reference)).toThrow(
+      /E_SEMANTICS_REFERENCE.*realize\/result\/expr.*missing/,
+    );
     reference.semantics.realize!.result = "unknownFunction(input)";
     expect(() => prepareExperimentConfig(reference)).toThrow(/E_SEMANTICS_EXPRESSION/);
     reference.semantics.realize!.result = { expr: "intermediate", deps: ["dead"] };
@@ -74,7 +107,13 @@ describe("checked experiment preparation", () => {
   it("retains inherited source owners rather than attributing them to the child", async () => {
     const config = await loadExperimentConfig("test-inherit");
     expect(config.sources.graph[""].resource).toContain("klatt80-baseline/graph.yaml");
-    expect(config.sources.semantics["/params/AV/default"].resource).toContain("test-inherit/semantics.yaml");
-    expect(config.sources.semantics["/realize/voiceGain/expr"].resource).toContain("klatt80-baseline/semantics.yaml");
+    expect(config.sources.semantics["/params/AV/default"].resource).toContain(
+      "test-inherit/semantics.yaml",
+    );
+    expect(config.sources.semantics["/realize/voiceGain/expr"].resource).toContain(
+      "klatt80-baseline/semantics.yaml",
+    );
+    const dectalk = await loadExperimentConfig("dectalk-english");
+    expect(dectalk.sources.registry["/bacon"].resource).toContain("klatt80-baseline/registry.yaml");
   });
 });

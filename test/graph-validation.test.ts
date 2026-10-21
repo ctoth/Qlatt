@@ -1,4 +1,3 @@
-import { createPreparedRuntime } from "./runtime-fixture";
 /**
  * Tests for graph validation in createPreparedRuntime.
  *
@@ -10,6 +9,7 @@ import { createPreparedRuntime } from "./runtime-fixture";
  */
 import { describe, expect, it } from "vitest";
 import type { BaconGraph, Registry } from "../src/klatt-runtime";
+import { createPreparedRuntime } from "./runtime-fixture";
 import type { SemanticsDocument } from "../src/semantics/types";
 
 // ---------------------------------------------------------------------------

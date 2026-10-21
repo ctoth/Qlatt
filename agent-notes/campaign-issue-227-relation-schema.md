@@ -11,6 +11,9 @@ No local CI steps. Preserve other agents' TTS policy/acquisition and checked-mar
 Implemented checked shape side metadata, TTS consumption and three owning pipeline
 declarations. Existing fixtures cover nullable/nested shapes, bare declarations,
 all three control-window schemas and sync/async authored error coordinates.
+Integrated master normally and published PR439. Initial hosted quality job
+119231460407 reported import order and one fixture array wrap; applied its exact
+corrections. Private Claude review is active; remaining hosted checks are pending.
 
 ## Decisions and why
 - Retain authored declarations and bare enum/name lists; validation currently reads
@@ -27,5 +30,4 @@ The initially named relationAllowsFeatureValue does not exist; the actual curren
 reader is relationHasDeclaredTypeField and tests key presence only.
 
 ## Next step
-Integrate current master preserving PR434/435, publish,
-complete hosted CI/Claude review and response, then hand merge to supervisor.
+Complete hosted CI/Claude review and response, then hand merge to supervisor.

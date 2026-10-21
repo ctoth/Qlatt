@@ -54,7 +54,9 @@ describe("rulepack metadata preservation", () => {
     (frontend) => {
       const spec = loadBundledRulepackSpec(frontend);
       const shape = rulepackRelationFeatureSchemas(spec).Segment.control_windows;
-      const windows = [{ target: "next", prefix_ms: 20, fields: { F2: { op: "mul", value: 0.8 } } }];
+      const windows = [
+        { target: "next", prefix_ms: 20, fields: { F2: { op: "mul", value: 0.8 } } },
+      ];
       expect(shape.kind).toBe("array");
       expect(validateFeatureValue("Segment", "control_windows", windows, shape)).toEqual(windows);
       expect(

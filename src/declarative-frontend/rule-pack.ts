@@ -61,8 +61,8 @@ import {
   type DiagnosticDocumentSpans,
   type DocumentSpanOrigin,
   type RelationFeatureSchemas,
-  validatedRelationFeatureSchemas,
   type ValidationDiagnostic,
+  validatedRelationFeatureSchemas,
 } from "./validation";
 
 type PlainObject = Record<string, unknown>;

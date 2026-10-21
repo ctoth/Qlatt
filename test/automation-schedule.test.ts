@@ -146,7 +146,7 @@ describe("host-neutral automation contract", () => {
       } as unknown as KlattRuntime,
       semantics: doc,
     });
-    const prepared = interpreter.prepareTrack(track, 0);
+    const prepared = interpreter.prepareTrack(track);
     interpreter.schedulePrepared(prepared, 0.125);
     expect(calls).toEqual(expected);
     expect(provenance.getDecisions()).toHaveLength(4);

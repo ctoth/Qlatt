@@ -69,7 +69,13 @@ describe("dectalk-vtm experiment renders DECtalk's packets", () => {
       delaySamples: 72,
       resampling: "kaiser-windowed-sinc",
     });
-    const decisions = provenance.getDecisions();
+    const allDecisions = provenance.getDecisions();
+    const scheduling = allDecisions.filter((decision) => decision.stage === "interpreter");
+    expect(scheduling.length).toBeGreaterThan(0);
+    expect(scheduling.every((decision) => decision.type === "schedule_mode_selected")).toBe(true);
+    expect(scheduling[0].reason).toContain("compiled schedule time");
+    expect(scheduling[0].timestampMs).toBeUndefined();
+    const decisions = allDecisions.filter((decision) => decision.stage === "runtime");
     expect(decisions.map((decision) => decision.type)).toEqual([
       "dectalk_vtm_run_started",
       "dectalk_vtm_speaker_loaded",

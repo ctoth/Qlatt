@@ -252,6 +252,16 @@ function markPolicyPathUsed(policyState: PolicyValidationState, path: string): v
   }
 }
 
+function markStructuredPolicyReferences(value: unknown, state: PolicyValidationState): void {
+  if (typeof value === "string") {
+    for (const path of collectPolicyReferencePaths(value)) markPolicyPathUsed(state, path);
+  } else if (Array.isArray(value)) {
+    for (const entry of value) markStructuredPolicyReferences(entry, state);
+  } else if (isPlainObject(value)) {
+    for (const entry of Object.values(value)) markStructuredPolicyReferences(entry, state);
+  }
+}
+
 function containsCriticalIdentifier(expression: string): boolean {
   return CRITICAL_IDENTIFIER_PATTERN.test(expression);
 }
@@ -2804,6 +2814,28 @@ function validateRules(
           `Rule '${name}' splice.insert[${i}]`,
         );
         const insertSpec = r.splice.insert[i];
+        if (isPlainObject(insertSpec)) {
+          // Match applySplice's evaluated surfaces; copy metadata is not CEL.
+          const segment = isPlainObject(insertSpec.segment) ? insertSpec.segment : null;
+          const template = segment ?? insertSpec;
+          if (typeof template.target === "string") {
+            markStructuredPolicyReferences(template.target, policyState);
+          }
+          const fields =
+            segment && isPlainObject(segment.fields)
+              ? {
+                  ...segment.fields,
+                  ...(Object.hasOwn(segment, "phoneme") ? { phoneme: segment.phoneme } : {}),
+                }
+              : template;
+          for (const [field, value] of Object.entries(fields)) {
+            if (
+              ["copy_from", "copy_fields", "outside_structure", "target", "fields"].includes(field)
+            )
+              continue;
+            markStructuredPolicyReferences(value, policyState);
+          }
+        }
         if (isPlainObject(insertSpec) && Object.hasOwn(insertSpec, "control_windows")) {
           validateControlWindowTemplate(
             insertSpec.control_windows,

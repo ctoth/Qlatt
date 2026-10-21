@@ -20,7 +20,7 @@ and bounded Frame reconciliation retain their existing scope.
 | Generic references | Adopted direction: schemas declare foreign keys, checked against resolved documents. | #227 owns static checks and checked identities. #141 loads the referenced closure; #224 supplies source spans. |
 | Language ownership | Adopted universal package boundary: language owns linguistic declarations; voices own acoustic targets and voice policy. | #141 implements resource ownership; #248 owns package/dependency identity; #82 distributes the result. |
 | Inventory and policy overrides | Adopted for #167: explicit keyed overrides; missing entries inherit. | #167 constructs the effective request view using the resolved documents. It does not repurpose duplicate-rejecting include. |
-| Ordered rule resources | Adopted for #167: a supplied resource replaces the corresponding resource whole; an absent resource inherits. | #167 selects resources; #227 checks the resulting executable definitions and ordering. No concatenation or implicit rule interleaving. |
+| Ordered rule resources | Adopted for #167: a supplied resource replaces its corresponding resource slot whole; an absent resource inherits. | #169 retains the declared shared-before-variety resource order; #167 selects the variety resource whole. No per-rule merging or implicit interleaving. #227 checks the resulting executable definitions and ordering. |
 | Selection time | Prepare bundle resources at load; select one effective variety per request. | #167 retains options > Direction Track voice > selected voice > frontend default precedence. Later text-command variety switching is outside this scope. |
 | Derived function features | The adopted attribute/Frame work continues; wholesale migration of the proposal's speech helpers is not approved by this disposition. | #230/#261 evaluator and #227 compiler boundaries remain. Assess individual helper migrations against current source before changing bindings. |
 | Numeric composition and Frame migration | Existing bounded decisions remain adopted. | #229 owns scalar ordering/numeric folds; #228 owns Frame migration. Neither is a prerequisite for the first data-only schema extraction. |
@@ -43,13 +43,16 @@ existing item/transaction enforcement remains responsible for runtime writes.
 Keep source declaration metadata alongside checked identities; do not add a
 parallel speech-specific schema validator inside the runtime.
 
-The current compile entry point is `rule-pack.ts:595–606`: parse, validate,
-record diagnostics, freeze. Extend that path under #227. Preserve the distinction
-between declarations and runtime parameter values; defaults synthesized during
-parsing are not proof that an author supplied a static parameter schema.
+The shipped synchronous loader is `rule-pack.ts:648–694`; its asynchronous
+preloader is `:727–772`. Both resolve inheritance/includes and accent policy,
+then parse, validate with required lowering/tag vocabulary, record diagnostics
+and freeze/cache. The programmatic `compileRuleEngineSpec` at `:595–606` parses,
+validates and freezes without that loading sequence. #227 must cover all three
+paths. Preserve the distinction between declarations and runtime parameter
+values; synthesized defaults do not prove an author supplied a static schema.
 
 Generic references start with actual document fields and target key sets.
-For example, `src/experiments/frontend-vocabulary.ts:13–25,29–59` checks lowering
+For example, `src/experiments/frontend-vocabulary.ts:13–25,29–55` checks lowering
 columns and source-contour targets against the expanded experiment parameters.
 The generic checker must preserve that expanded target vocabulary and the
 separate required-input check; a simple foreign-key lookup does not replace both.
@@ -132,6 +135,13 @@ replaced values. Test alternating and concurrent requests against the same loade
 base, as #167 already requires. Keep actual voice-quality composition unchanged:
 `input/direction-track.ts:329–346` multiplies some fields and adds others.
 
+The initial empty `gam` bundle in #167 precedes #169's postlexical split. In that
+later split, the retained shared resource runs before the selected variety
+resource within the declared phase. Replace only the corresponding variety
+resource whole, without merging individual rules or interleaving lists. The
+split must preserve the original General American execution order and output;
+whole-resource replacement does not waive #169's `gam` equivalence requirement.
+
 ## Delivery and dependencies
 
 Estimates below are planning bounds, excluding tests; they are not authorization
@@ -157,6 +167,6 @@ languages, all scalar migrations, or a new native frontend.
 
 This disposition leaves no new product question for its bounded scope. Detailed
 formats stay with their named owners; speculative mechanisms in the proposals
-remain proposals. Synchronize #249/#141/#167/#227/#248 issue contracts with this
+remain proposals. Synchronize #249/#141/#167/#169/#227/#248 issue contracts with this
 matrix before treating those issues as fully reconciled. This document alone
 does not complete their implementation or close #249's remaining bookkeeping.

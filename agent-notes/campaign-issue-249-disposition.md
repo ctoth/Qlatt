@@ -22,12 +22,20 @@ the decision document. Source paths and line ranges refer to that revision.
 
 # Surprises
 
+Claude review of PR #332 found three documentation corrections. I treated
+whole-resource replacement as excluding #169's separately declared shared then
+variety ordering; the contract instead replaces the selected variety resource
+whole while preserving shared resource order. I also named the programmatic
+compile helper without the two shipped loading paths, and overstated one source
+range (frontend-vocabulary ends at line 55). Corrected those statements and added
+#169 to issue synchronization. No runtime change or additional adoption.
+
 DECtalk's shared stress/morphology paths are required by the loader but its
 compiled-table pronouncer returns before those execution steps. Preserve its
 fidelity behavior when resource requirements move to the selected kernel.
 
 # Next step
 
-Commit and push a PR for Claude review and hosted CI. No local CI.
-Supervisor handles issue synchronization
+Push the bundled review response for PR #332 and read replacement CI. No local CI.
+Supervisor handles final review, issue synchronization
 and merge; documentation does not claim runtime work or all of #249 complete.

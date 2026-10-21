@@ -254,9 +254,10 @@ export async function loadYamlSource(specPath: string): Promise<string> {
 
   if (typeof fetch === "function") {
     for (const attempt of attempts) {
-      // Under Node a path that is not a URL has no base to resolve against:
-      // the filesystem probe above was the whole answer.
-      if (isNodeRuntime() && !ABSOLUTE_URL.test(attempt)) continue;
+      // Node paths without a URL base and explicit file URLs were answered by
+      // the filesystem above, including absence.
+      if (isNodeRuntime() && (!ABSOLUTE_URL.test(attempt) || /^file:/i.test(attempt.trim())))
+        continue;
       // The server already said there is no such resource: no second request.
       if (isAbsentSyncResource(attempt)) continue;
       let response: Response;

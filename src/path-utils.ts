@@ -5,14 +5,14 @@ import url from "node:url";
 /**
  * Normalize a resource path for both browser and Node environments.
  *
- * - Preserves explicit HTTP(S) URLs after trimming whitespace
+ * - Preserves explicit HTTP(S) and file URLs after trimming whitespace
  * - Strips leading "/public" prefix (Vite serves public/ at root)
  * - Prepends BASE_URL for subpath deployments (e.g. GitHub Pages at /Qlatt/)
  * - Converts backslashes to forward slashes
  */
 export function normalizePath(rawPath: string): string {
   const trimmed = rawPath.trim();
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (/^(https?:\/\/|file:)/i.test(trimmed)) return trimmed;
   const base = (typeof import.meta !== "undefined" && import.meta.env?.BASE_URL) || "/";
   let normalized = trimmed.replace(/\\/g, "/");
   if (normalized.startsWith("/public/")) {
@@ -37,6 +37,7 @@ export function isNodeRuntime(): boolean {
 
 /**
  * Resolve a resource path to an actual filesystem path when running under Node.
+ * Explicit file URLs use only their native path; HTTP(S) URLs have no file path.
  *
  * Probes:
  * 1. The raw specPath itself (if absolute)
@@ -47,6 +48,18 @@ export function isNodeRuntime(): boolean {
  */
 export function resolveFileFromFsSync(specPath: string): string | null {
   if (!isNodeRuntime()) return null;
+  if (/^https?:\/\//i.test(specPath.trim())) return null;
+  if (/^file:/i.test(specPath.trim())) {
+    const filePath = url.fileURLToPath(specPath.trim());
+    try {
+      fs.statSync(filePath);
+      return filePath;
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code === "ENOENT" || code === "ENOTDIR") return null;
+      throw error;
+    }
+  }
 
   const packageRoot = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "..");
   const normalized = normalizePath(specPath);

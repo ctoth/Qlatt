@@ -1,10 +1,13 @@
 import fs, { readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { load as loadYaml } from "js-yaml";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { readBinaryFromFsSync, readFileFromFsSync } from "../src/path-utils";
 import {
   loadYamlDocument,
+  loadYamlDocumentOrNull,
   loadYamlDocumentSync,
   loadYamlSource,
   loadYamlSourceSync,
@@ -30,6 +33,57 @@ it("anchors logical resources to the package and retains absolute native files",
   } finally {
     cwd.mockRestore();
     fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+it("reads file URLs through native paths and keeps missing files out of fetch", async () => {
+  const dir = fs.mkdtempSync(path.join(tmpdir(), "qlatt file url "));
+  const file = path.join(dir, "custom #1.yaml");
+  fs.writeFileSync(file, "selected: file\n");
+  const uri = pathToFileURL(file).href;
+  const missing = pathToFileURL(path.join(file, "missing.yaml")).href;
+  const fetch = vi.spyOn(globalThis, "fetch");
+  try {
+    expect(loadYamlDocumentSync(uri)).toEqual({ selected: "file" });
+    expect(await loadYamlDocument(uri)).toEqual({ selected: "file" });
+    expect(Buffer.from(readBinaryFromFsSync(uri)!)).toEqual(readFileSync(file));
+    expect(await loadYamlDocumentOrNull(missing)).toBeNull();
+    expect(
+      await loadYamlDocumentOrNull(pathToFileURL(path.join(dir, "absent.yaml")).href),
+    ).toBeNull();
+    expect(() => loadYamlSourceSync(missing)).toThrow("E_YAML_PATH_UNKNOWN:");
+    expect(fetch).not.toHaveBeenCalled();
+    const stat = vi.spyOn(fs, "statSync");
+    const exists = vi.spyOn(fs, "existsSync");
+    expect(readFileFromFsSync("https://assets.example.test/file.yaml")).toBeNull();
+    expect(stat).not.toHaveBeenCalled();
+    expect(exists).not.toHaveBeenCalled();
+    stat.mockRestore();
+    exists.mockRestore();
+  } finally {
+    fetch.mockRestore();
+    vi.restoreAllMocks();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+it("preserves file URL conversion and permission errors", async () => {
+  const uri = pathToFileURL(
+    path.resolve("public/rules/frontends/qlatt-english/frontend.yaml"),
+  ).href;
+  await expect(loadYamlSource(`${uri}%2Fchild`)).rejects.toMatchObject({
+    cause: { code: "ERR_INVALID_FILE_URL_PATH" },
+  });
+  const cause = Object.assign(new Error("permission denied"), { code: "EACCES" });
+  const stat = vi.spyOn(fs, "statSync").mockImplementation(() => {
+    throw cause;
+  });
+  try {
+    expect(() => readFileFromFsSync(uri)).toThrow(cause);
+    await expect(loadYamlDocumentOrNull(uri)).rejects.toMatchObject({ cause });
+    expect(() => loadYamlSourceSync(uri)).toThrow("E_YAML_READ:");
+  } finally {
+    stat.mockRestore();
   }
 });
 

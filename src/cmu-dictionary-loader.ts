@@ -62,6 +62,8 @@ export async function preloadCmuDictionaryFromPath(specPath: string): Promise<Cm
 
   if (typeof fetch === "function") {
     for (const attempt of attempts) {
+      // Node file URLs were answered by the filesystem, including absence.
+      if (isNodeRuntime() && /^file:/i.test(attempt.trim())) continue;
       let response: Response;
       try {
         response = await fetch(attempt);

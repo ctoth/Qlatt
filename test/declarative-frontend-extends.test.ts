@@ -198,11 +198,15 @@ describe("resource declarations across inheritance", () => {
     it(`normalizes child aliases before inheritance (${asynchronous ? "async" : "sync"})`, async () => {
       const dir = mkdtempSync(join(tmpdir(), "qlatt-resource-alias-"));
       try {
-        const path = writeExtendingFrontend(dir, {}, {
-          inventory_path: "/rules/frontends/qlatt-beauty/inventory.yaml",
-          source_contour_path: null,
-          resources: { lexicon: null },
-        });
+        const path = writeExtendingFrontend(
+          dir,
+          {},
+          {
+            inventory_path: "/rules/frontends/qlatt-beauty/inventory.yaml",
+            source_contour_path: null,
+            resources: { lexicon: null },
+          },
+        );
         const compiled = asynchronous
           ? await preloadRulepackSpecFromPath(path)
           : loadRulepackSpecFromPath(path);

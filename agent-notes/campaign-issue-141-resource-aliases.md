@@ -32,6 +32,8 @@ now preserve its other roles. Lowering fixtures read canonical inventory referen
 Warnings reuse the existing RULEPACK_DIAGNOSTICS map through composition; no new
 cache. Authored YAML spans are read from the original parsed document before alias
 normalization. Programmatic voice preprocessing retains its existing input behavior.
+Hosted quality job119166357822 found formatting differences in four edited fixture
+files. Applied the exact emitted wraps/indentation; no production behavior changed.
 
 # Next step
 

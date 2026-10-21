@@ -126,18 +126,20 @@ it("keeps number character maps with their selected arrays at the same source pa
   );
 });
 
-it.each(["resources.lts", "resources.morphology", "resources.stress_policy", "normalization.phases"])(
-  "rejects a frontend missing %s at resource load",
-  (asset) => {
-    const spec: Record<string, unknown> = structuredClone(loadBundledRulepackSpec("qlatt-english"));
-    const [section, field] = asset.split(".");
-    if (field) delete (spec[section] as Record<string, unknown>)[field];
-    else delete spec[section];
-    expect(() => loadFrontendResources(spec)).toThrow(
-      new RegExp(`E_FRONTEND_CONFIG.*${asset.replace("resources.", "")}`),
-    );
-  },
-);
+it.each([
+  "resources.lts",
+  "resources.morphology",
+  "resources.stress_policy",
+  "normalization.phases",
+])("rejects a frontend missing %s at resource load", (asset) => {
+  const spec: Record<string, unknown> = structuredClone(loadBundledRulepackSpec("qlatt-english"));
+  const [section, field] = asset.split(".");
+  if (field) delete (spec[section] as Record<string, unknown>)[field];
+  else delete spec[section];
+  expect(() => loadFrontendResources(spec)).toThrow(
+    new RegExp(`E_FRONTEND_CONFIG.*${asset.replace("resources.", "")}`),
+  );
+});
 
 it.each(["lts", "morphology", "stress_policy"])(
   "names an unavailable %s at resource load",
@@ -148,19 +150,16 @@ it.each(["lts", "morphology", "stress_policy"])(
   },
 );
 
-it.each(["morphology", "stress_policy"])(
-  "requires %s to select phonotactics",
-  (asset) => {
-    const spec = structuredClone(loadBundledRulepackSpec("qlatt-english"));
-    const directory = mkdtempSync(join(tmpdir(), "qlatt-g2p-"));
-    temporaryDirectories.push(directory);
-    const path = join(directory, "resource.yaml");
-    writeFileSync(path, "version: v1\n");
-    expect(() =>
-      loadFrontendResources({ ...spec, resources: { ...spec.resources, [asset]: path } }),
-    ).toThrow(new RegExp(`E_FRONTEND_CONFIG.*${asset}.phonotactics_path`));
-  },
-);
+it.each(["morphology", "stress_policy"])("requires %s to select phonotactics", (asset) => {
+  const spec = structuredClone(loadBundledRulepackSpec("qlatt-english"));
+  const directory = mkdtempSync(join(tmpdir(), "qlatt-g2p-"));
+  temporaryDirectories.push(directory);
+  const path = join(directory, "resource.yaml");
+  writeFileSync(path, "version: v1\n");
+  expect(() =>
+    loadFrontendResources({ ...spec, resources: { ...spec.resources, [asset]: path } }),
+  ).toThrow(new RegExp(`E_FRONTEND_CONFIG.*${asset}.phonotactics_path`));
+});
 
 it("uses the selected rulepack vocabulary without leaking into later calls", () => {
   const original = loadBundledRulepackSpec("qlatt-english");

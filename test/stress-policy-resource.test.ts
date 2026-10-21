@@ -11,7 +11,10 @@ it("rejects a generated-pronunciation frontend without a resolved stress policy"
   expect(() =>
     loadFrontendResources({
       ...loadBundledRulepackSpec("qlatt-english"),
-      resources: { ...loadBundledRulepackSpec("qlatt-english").resources, stress_policy: undefined },
+      resources: {
+        ...loadBundledRulepackSpec("qlatt-english").resources,
+        stress_policy: undefined,
+      },
     }),
   ).toThrow(/E_FRONTEND_CONFIG.*stress_policy/);
 });

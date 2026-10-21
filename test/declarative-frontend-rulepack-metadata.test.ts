@@ -23,9 +23,9 @@ describe("rulepack metadata preservation", () => {
     expect(source).toEqual(before);
     expect(parseDslSpec(spec)).toEqual(spec);
     expect(parseDslSpec({ ...source, resources: { [role]: null } }).resources[role]).toBeNull();
-    expect(parseDslSpec({ ...source, resources: { [role]: "/canonical.yaml" } }).resources[role]).toBe(
-      "/canonical.yaml",
-    );
+    expect(
+      parseDslSpec({ ...source, resources: { [role]: "/canonical.yaml" } }).resources[role],
+    ).toBe("/canonical.yaml");
   });
 
   it("retains alias warnings through programmatic compilation", () => {
@@ -47,7 +47,9 @@ describe("rulepack metadata preservation", () => {
     expect(
       getRulepackValidationDiagnostics(compileRuleEngineSpec("source_contour_path: /legacy.yaml")),
     ).toEqual(
-      getRulepackValidationDiagnostics(compileRuleEngineSpec({ source_contour_path: "/legacy.yaml" })),
+      getRulepackValidationDiagnostics(
+        compileRuleEngineSpec({ source_contour_path: "/legacy.yaml" }),
+      ),
     );
   });
 

@@ -221,9 +221,12 @@ export function prepareExperimentConfig(
         }
       }
     }
+    // A name can refer to an input before a same-name realization replaces it.
+    // Authored deps select that realization explicitly; otherwise input names
+    // do not imply ordering edges (for example effortVoiced reads input F0).
     const actual = [...roots].filter((root) =>
       Object.hasOwn(rules, root) && !Object.hasOwn(constants, root) &&
-      (root !== name || !Object.hasOwn(params, root)),
+      (!Object.hasOwn(params, root) || definition.deps?.includes(root)),
     );
     for (const dep of definition.deps ?? []) {
       if (!roots.has(dep)) {
@@ -240,7 +243,7 @@ export function prepareExperimentConfig(
       }
     }
     dependencies.set(name, [...roots].filter((root) => !Object.hasOwn(constants, root)));
-    rules[name] = { ...definition, deps: actual };
+    rules[name] = { ...definition, deps: definition.deps ?? actual };
   }
   try {
     topoEvaluator.getEvaluationOrder(semantics);

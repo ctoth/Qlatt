@@ -362,8 +362,8 @@ describe("loadExperimentConfig with realize_each", () => {
   /** Load `child` (which extends `parent`) through the real loader over in-memory documents. */
   async function loadChild(parentSemantics: unknown, childSemantics: unknown) {
     const documents: Record<string, unknown> = {
-      "/experiments/parent/graph.yaml": { name: "graph", nodes: {}, connections: [] },
-      "/experiments/parent/registry.yaml": { primitives: {} },
+      "/experiments/parent/graph.yaml": { bacon: "0.1", name: "graph", nodes: {}, connections: [] },
+      "/experiments/parent/registry.yaml": { bacon: "0.1", primitives: {} },
       "/experiments/parent/semantics.yaml": parentSemantics,
       "/experiments/child/semantics.yaml": childSemantics,
     };
@@ -405,6 +405,7 @@ describe("loadExperimentConfig with realize_each", () => {
 
   const parent = {
     name: "parent",
+    params: { A2: { default: 1 }, A3: { default: 1 }, A4: { default: 1 }, A5: { default: 1 } },
     realize: { base: "1.0" },
     realize_each: [
       {
@@ -432,15 +433,15 @@ describe("loadExperimentConfig with realize_each", () => {
 
     expect(Object.hasOwn(semantics, "realize_each")).toBe(false);
     expect(semantics.realize).toEqual({
-      base: "1.0",
+      base: { expr: "1.0", deps: [] },
       gain2: {
         expr: "base * A2",
         deps: ["base", "A2"],
         citations: ["engineering estimate: parent fixture"],
       },
       gain3: { expr: "0.5 * A3", deps: ["A3"] },
-      gain4: "2.0 * A4",
-      gain5: "2.0 * A5",
+      gain4: { expr: "2.0 * A4", deps: [] },
+      gain5: { expr: "2.0 * A5", deps: [] },
     });
   });
 

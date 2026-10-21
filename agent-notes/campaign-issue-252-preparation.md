@@ -12,6 +12,10 @@ shared fixture adapter. Manifest, macro endpoint, isolation, semantic dependency
 and source-owner regressions added. Integrated master 3927be2b. The sole conflict
 was the named-port fixture: retained both new connections and all selection-reason
 expectations from #440, with this branch's explicit preparation helper.
+PR #443 is open. Claude reviews the full initial range in session 52843,
+transcript 6fac53b6-0f07-49a9-92c3-100000000443. Hosted verification found the
+copied Bacon lock's vulnerable AJV/fast-uri versions; updated compatible lock
+records to 8.20.0/3.1.9 using published registry integrity values.
 
 # Decisions and why
 
@@ -34,9 +38,15 @@ Two scripts expanded already-loaded data; they now consume prepared data directl
 The realize-map dump reports one honestly labeled prepared map. Existing dynamic
 failure fixtures now use registered sqrt with invalid input, preserving runtime
 error behavior while unknown functions are rejected by preparation.
+The initial dependency checker wrongly interpreted input names as mandatory
+same-name realization dependencies. Baseline effortVoiced explicitly reads input
+F0/AV/AVS before their realization. Preserve authored dependency lists and infer
+only unambiguous realization references; retain required intermediate checks.
+The existing realize_each loader fixture also needed declared Bacon documents,
+its A2–A5 inputs, and prepared realization-object expectations.
 
 # Next step
 
-Commit and integrate current master, publish for hosted CI and full Claude review.
+Push scoped hosted-failure corrections and finish Claude review/response.
 Root owns independent review gate and normal merge. Historical model failures,
 if exposed by validation, must be reported with evidence before expanding scope.

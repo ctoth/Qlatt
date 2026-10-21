@@ -2,7 +2,7 @@
 Thread declared affect preset libraries through existing consumers, a bounded #141 slice.
 
 # State
-Implemented from c7a47b7f. Qlatt declares affect_presets; existing resource acquisition parses/caches it. Affect helpers require the parsed library, parser options carry it only to named-affect consumers, and TTS/render-beauty supply the selected resource. PR #355 awaits final CI and Claude review; no local CI run.
+Implemented from c7a47b7f. Qlatt declares affect_presets; existing resource acquisition parses/caches it. Affect helpers require the parsed library, parser options carry it only to named-affect consumers, and TTS/render-beauty supply the selected resource. PR #355 responds to Claude's manifest finding and awaits replacement CI; no local CI run.
 
 # Decisions and why
 - Smallest change: roughly 90-140 production lines plus 100-180 fixture lines. Reuse FrontendResources, requireAsset and its existing cache; no new resolver or cache.
@@ -16,5 +16,7 @@ The old unknown-channel fixture depended on import-time loading; it now calls th
 
 Initial hosted quality job 119055685746 reported one import ordering error at src/input/affect.ts:35. Corrected the named-import order exactly as emitted; no behavior change.
 
+Accepted Claude's stale-manifest finding, independently verified by the supervisor and hosted job 119056059710: removing the global preset load also removes DECtalk's read of /rules/affect/presets.yaml. I left that obsolete import dependency in its resource manifest. Corrected the manifest to reflect declared-resource acquisition; Qlatt and Beauty still consume their declared library. No generator or new guard was added.
+
 # Next step
-Inspect replacement hosted CI and respond to independent Claude review. #141 remains open.
+Inspect replacement hosted CI and await supervisor verification/merge. #141 remains open.

@@ -59,8 +59,15 @@ The revised candidate and accepted Claude response are published. Initial shard1
 also exposed manifests missing the new shared include and a newer control-window
 fixture expecting the old direct source ID. Added the actual acquired paths and
 used the existing ancestry assertion, retaining numeric and diagnostic checks.
-The unphased-rule audit still treats requested frame_copy as never executed;
-reported that explicit consumer boundary to the supervisor before changing it.
+The supervisor approved explicit host-requested accounting in the existing
+unphased audit: shared FRAME_COPY_RULE names the real TTS consumer; only the
+normalized pure definition shape is exempt. Effects, constraints and unknown
+fields still require phase membership. Existing audit fixture covers plain,
+explicitly requested, scalar-effect and structural-delete cases.
+Shard4 also exposed two replay fixtures using the pre-Frame schema and a numeric
+declaration assertion still targeting stored Frame fields. Replay now uses the
+same schema as construction; emitted columns are checked against their actual
+selected output declaration, retaining event-schema/no-numeric-write assertions.
 Await replacement hosted results and the pending loader integration.
 Measurement acceptance remains outstanding; do not merge or close #243 on the
 strength of old baseline reports or hosted correctness checks alone.

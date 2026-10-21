@@ -725,7 +725,9 @@ describe("frame rules in the rule engine", () => {
       "tank_target_shut c",
       "tank_approach c",
     ]);
-    expect(replayJournal(SCHEMA, utterance.journal()).graphDigest()).toBe(utterance.graphDigest());
+    expect(replayJournal(withFrameSchema(SCHEMA), utterance.journal()).graphDigest()).toBe(
+      utterance.graphDigest(),
+    );
   });
 
   it("gives an Item that starts inside a frame the frames it overlaps", () => {
@@ -930,7 +932,9 @@ describe("frame values in lowering", () => {
       { rule: "tank_target_shut", first: 0, last: 0, count: 1, lead_in: false, tail: true },
       { rule: "tank_approach", first: 0, last: 0, count: 1, lead_in: false, tail: true },
     ]);
-    expect(replayJournal(SCHEMA, utterance.journal()).graphDigest()).toBe(utterance.graphDigest());
+    expect(replayJournal(withFrameSchema(SCHEMA), utterance.journal()).graphDigest()).toBe(
+      utterance.graphDigest(),
+    );
   });
 
   it("gives the columns named in `after` a value at the instant the run ends", () => {

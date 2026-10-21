@@ -6,7 +6,7 @@ import {
   readLowerOptions,
   Utterance,
 } from "./declarative-frontend/hrg";
-import { withFrameSchema } from "./declarative-frontend/hrg/frame";
+import { FRAME_COPY_RULE, withFrameSchema } from "./declarative-frontend/hrg/frame";
 import { FRAME_VALUES_SCHEMA, frameValueFeatures } from "./declarative-frontend/hrg/frame-program";
 import type { Item } from "./declarative-frontend/hrg/item";
 import { PARAMETER_SCOPE_FEATURE } from "./declarative-frontend/hrg/parameter-scope";
@@ -1452,7 +1452,7 @@ function buildTextToKlattTrackDetailed(
     },
   };
   const lowered = lowerToFrames(utterance, lowerOptions, {
-    frameCopy: checkRequestedAttributes(spec, "frame_copy"),
+    frameCopy: checkRequestedAttributes(spec, FRAME_COPY_RULE),
     speakerDecisionId: speakerDecision.id,
     frontendId: options.frontendPath ?? frontendId,
     rdPolicy: resources.vqChannels?.rdPolicy,

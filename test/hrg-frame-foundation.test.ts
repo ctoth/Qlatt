@@ -68,13 +68,13 @@ function fixture(initialSilenceMs = 50) {
 
 describe("Frame foundation", () => {
   it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
-    "declares every emitted %s Frame parameter in the bundled schema",
+    "declares every emitted %s parameter in the selected output columns",
     (frontendId) => {
       const spec = loadBundledRulepackSpec(frontendId);
       const { track } = textToKlattTrackDetailed("hello world", 110, 30, { frontendId });
-      const relation = spec.relations.Frames;
+      const columns = readLowerOptions(spec.output.lowering).columns;
       const missing = [...new Set(track.flatMap((row) => Object.keys(row.params)))].filter(
-        (key) => !Object.hasOwn(relation.features ?? {}, key),
+        (key) => !columns.includes(key),
       );
       expect(missing).toEqual([]);
     },

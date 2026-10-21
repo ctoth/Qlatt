@@ -7,6 +7,8 @@ import type { AttributeEvidence, CheckedAttributes } from "./requested-attribute
 import type { FeatureSchema, HrgSchema } from "./types";
 import type { Utterance } from "./utterance";
 
+export const FRAME_COPY_RULE = "frame_copy";
+
 export function withFrameSchema(schema: HrgSchema, columns: readonly string[] = []): HrgSchema {
   const numeric: FeatureSchema = {
     kind: "union",

@@ -1313,14 +1313,16 @@ export function lowerToFrames(
   };
   /**
    * Build one edge transition, applying each caller's exact edge arithmetic and
-   * clamps so the four blend/locus sites share a single window computation.
+   * clamps so the blend, sonorant, and locus sites share one window computation.
    * A "leading" edge (segment head) runs the window [0, min(spanMs, dur - EDGE)]
    * and is dropped unless that end is positive; a "trailing" edge (segment tail)
    * runs [max(EDGE, dur - spanMs), dur] and is dropped unless that start falls
    * before the segment end. EDGE is the validated positive policy value, so the
-   * historic dead `startMs <= 0` sub-guard is not reproduced. `build` receives
-   * the resolved window and returns the transition body (choosing its own
-   * fields / linearFields / omitted endMs) or null to skip the append.
+   * historic dead `startMs <= 0` sub-guard is not reproduced. The pure `build`
+   * callback receives the applied window, or the requested window when dropped
+   * so diagnostics can identify effective fields. It returns the transition
+   * body (choosing fields / linearFields / omitted endMs) or null to skip it.
+   * The helper returns true only when it appends a transition.
    */
   const addLinearTransition = (
     item: Item,

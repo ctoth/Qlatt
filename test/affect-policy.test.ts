@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 import { affectDegree, parseAffectPresets } from "../src/input/affect-presets";
 
 function document() {
-  return load(readFileSync("public/rules/affect/presets.yaml", "utf8")) as {
+  const source = readFileSync("public/rules/frontends/qlatt-english/policy/affect-presets.yaml", "utf8");
+  return load(source) as {
     degree: { points: number[][]; citations: string[] };
     variants: Record<string, Record<string, string>>;
     presets: {

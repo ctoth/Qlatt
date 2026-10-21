@@ -6,10 +6,10 @@ import { createDiagnostics } from "../src/diagnostics";
 import { applyAffectToTrack } from "../src/input/apply-affect";
 import { neutralVoiceQualityDelta } from "../src/input/direction-track";
 import { projectRd, readRdPolicy } from "../src/input/rd-policy";
-import { parseVoiceQualityChannels } from "../src/input/vq-channels";
-import { loadYamlDocumentSync } from "../src/yaml-loader";
 
-const channels = parseVoiceQualityChannels(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
+const english = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+if (!english.vqChannels) throw new Error("expected declared VQ resource");
+const channels = english.vqChannels.channels;
 const NEUTRAL_VQ = neutralVoiceQualityDelta(channels);
 
 const policy = readRdPolicy({
@@ -19,9 +19,8 @@ const context = { frontendId: "fixture", rdPolicy: policy, vqChannels: channels 
 
 describe("declared effective Rd policy", () => {
   it("inherits declared VQ resources and permits an undeclared role", () => {
-    const english = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
     const beauty = loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty"));
-    expect(english.vqChannels?.path).toBe("/rules/policy/vq-channels.yaml");
+    expect(english.vqChannels?.path).toBe("/rules/frontends/qlatt-english/policy/vq-channels.yaml");
     expect(beauty.vqChannels?.rdPolicy).toBe(english.vqChannels?.rdPolicy);
     const dectalk = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
     expect(dectalk.vqChannels).toBeUndefined();

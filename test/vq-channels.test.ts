@@ -16,11 +16,16 @@ describe("declarative voice-quality channels", () => {
     try {
       const presetPath = join(directory, "presets.yaml");
       const channelPath = join(directory, "channels.yaml");
-      const document = loadYamlDocumentSync("/rules/policy/vq-channels.yaml");
+      const spec = loadBundledRulepackSpec("qlatt-english");
+      const selected = loadFrontendResources(spec);
+      if (!selected.vqChannels || !selected.affectPresets) {
+        throw new Error("expected declared VQ and affect resources");
+      }
+      const document = loadYamlDocumentSync(selected.vqChannels.path);
       if (!isPlainObject(document) || !Array.isArray(document.channels)) {
         throw new Error("expected channels document");
       }
-      writeFileSync(presetPath, JSON.stringify(loadYamlDocumentSync("/rules/affect/presets.yaml")));
+      writeFileSync(presetPath, JSON.stringify(loadYamlDocumentSync(selected.affectPresets.path)));
       writeFileSync(
         channelPath,
         JSON.stringify({
@@ -30,10 +35,9 @@ describe("declarative voice-quality channels", () => {
           ),
         }),
       );
-      const spec = loadBundledRulepackSpec("qlatt-english");
       const first = loadFrontendResources({
         ...spec,
-        resources: { affect_presets: presetPath, vq_channels: "/rules/policy/vq-channels.yaml" },
+        resources: { affect_presets: presetPath, vq_channels: selected.vqChannels.path },
       });
       expect(first.affectPresets?.library.presets.has("tender")).toBe(true);
       expect(first.vqChannels?.channels.some((row) => row.channel === "f0Scale")).toBe(true);
@@ -89,7 +93,7 @@ backend_param: TEST
 citations:
   - "engineering estimate: extension regression"
 `);
-      const document = loadYamlDocumentSync("/rules/policy/vq-channels.yaml");
+      const document = loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml");
       if (!isPlainObject(document) || !Array.isArray(document.channels)) {
         throw new Error("expected channels document");
       }

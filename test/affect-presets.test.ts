@@ -7,19 +7,21 @@ import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { compileAffect } from "../src/input/affect";
 import { parseAffectPresets, validateAffectPresetChannels } from "../src/input/affect-presets";
 import { parseDirectionInput } from "../src/input/parse";
-import { parseVoiceQualityChannels } from "../src/input/vq-channels";
 import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
-import { loadYamlDocumentSync } from "../src/yaml-loader";
 
-const library = parseAffectPresets(loadYamlDocumentSync("/rules/affect/presets.yaml"));
-const channels = parseVoiceQualityChannels(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
+const english = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+if (!english.affectPresets || !english.vqChannels) {
+  throw new Error("expected declared VQ and affect resources");
+}
+const affectResource = english.affectPresets;
+const library = affectResource.library;
+const channels = english.vqChannels.channels;
 
 describe("declarative affect presets", () => {
   it("inherits the declared library and leaves DECtalk's role absent", () => {
-    const english = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
     const beauty = loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty"));
-    expect(english.affectPresets?.path).toBe("/rules/affect/presets.yaml");
+    expect(english.affectPresets?.path).toBe("/rules/frontends/qlatt-english/policy/affect-presets.yaml");
     expect(english.affectPresets?.library.presets.has("tender")).toBe(true);
     expect(beauty.affectPresets?.library).toBe(english.affectPresets?.library);
     const dectalk = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
@@ -89,7 +91,7 @@ describe("declarative affect presets", () => {
   });
 
   it("loads the complete cited library from YAML", () => {
-    const source = readFileSync("public/rules/affect/presets.yaml", "utf8");
+    const source = readFileSync(`public${affectResource.path}`, "utf8");
     const document = load(source) as { presets: { name: string; citations: string[] }[] };
     expect(document.presets.map((preset) => preset.name)).toEqual([...library.presets.keys()]);
     expect(document.presets.every((preset) => preset.citations.length > 0)).toBe(true);

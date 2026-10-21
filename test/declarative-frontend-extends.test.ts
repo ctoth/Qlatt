@@ -335,8 +335,7 @@ describe("direct rule errors through composition", () => {
             ["E_PATTERN_OPTION_UNSUPPORTED", "sequence[0].optional", "sequence.0.optional", "key"],
           ] as const) {
             const source = entries.find(
-              (entry) =>
-                entry.value.path.join(".") === `patterns.fixture_pattern.${authoredPath}`,
+              (entry) => entry.value.path.join(".") === `patterns.fixture_pattern.${authoredPath}`,
             )?.[position];
             expect(source).toBeDefined();
             const block = diagnosticBlocks.find((entry) =>

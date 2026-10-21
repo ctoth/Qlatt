@@ -4,7 +4,7 @@ Retain pattern expression and option locations in the existing diagnostic side m
 
 # State
 
-Started from PR407 final 0cc1e671 while supervisor sequences its merge. Implemented six added production lines and extended the existing fixture with semantic/syntax expression coordinates, macro ancestry and an option-key control. No local CI; hosted validation pending.
+Started from PR407 final 0cc1e671; that prerequisite has merged. Implemented six added production lines and extended the existing fixture with semantic/syntax expression coordinates, macro ancestry and an option-key control. Six initial hosted checks passed; quality job119157119892 requested one callback formatting correction, applied exactly. No local CI; replacement hosted validation pending.
 
 # Decisions and why
 

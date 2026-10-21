@@ -9,6 +9,10 @@ Audit written in docs/formant-bank-constraint.md, with generated-name, preflight
 direct-caller, authored-consumer and interpreter/analysis evidence.
 Smallest change: approximately 100 lines of documentation tracing generated names,
 consumers and existing rejection behavior. No implementation or tests change.
+PR: https://github.com/ctoth/Qlatt/pull/324. Claude review completed and its gate
+passed. Accepted the four citation-range corrections verified by the supervisor:
+klsyn88 nodes, count-gated frequency rule, parameter entries and extra edges.
+Those ranges now include the complete referenced blocks; the recommendation is unchanged.
 
 ## Decisions and why
 Recommend retaining/documenting the check: bank names do not enter generated names,
@@ -22,5 +26,5 @@ preflight; it would not silently overwrite them in the current implementation.
 Absent macro data is accepted, while a present empty bank map is rejected.
 
 ## Next step
-Push the documentation commit and open a PR for Claude review; respond to findings.
+Push the review response, then await supervisor's final review and current-head CI.
 Use PR CI; no local CI steps or new tests for this documentation-only delivery.

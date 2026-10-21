@@ -14,7 +14,7 @@ in this check: it counts map entries (`src/formant-bank.ts:180–190`).
 The constraint applies when `graph.meta.formantBanks` exists. An absent macro is
 accepted without expansion (`src/formant-bank.ts:353–359`); a present empty map
 fails the same cardinality check. Hand-authored graphs remain possible: klsyn88
-declares its cascade and parallel nodes directly (`public/experiments/klsyn88/graph.yaml:179–309`).
+declares its cascade and parallel nodes directly (`public/experiments/klsyn88/graph.yaml:155–312`).
 Thus this is not a restriction on how many resonators a synthesizer can contain.
 
 ## Generated namespace
@@ -26,13 +26,13 @@ the bank's formants by index, then generates the following shared names.
 | --- | --- |
 | `cascadeF{N}` | `formant-bank.ts:369–392`; resonator binds `F{N}`/`B{N}`. |
 | `parallelF{N}`, `parallelF{N}Gain` | `formant-bank.ts:395–414`; resonator and gain, when `parallelSource` exists. |
-| `cascadeF{N}Frequency` | `formant-bank.ts:376–390`; optional count-gated CEL rule and cascade frequency binding. |
-| `F{N}`, `B{N}`, `A{N}` | `formant-bank.ts:460–481`; global semantics parameter entries; amplitude exists for parallel formants. |
+| `cascadeF{N}Frequency` | `formant-bank.ts:378–391`; optional count-gated CEL rule and cascade frequency binding. |
+| `F{N}`, `B{N}`, `A{N}` | `formant-bank.ts:460–485`; global semantics parameter entries; amplitude exists for parallel formants. |
 | `a{N}Linear` | `semantics/pfe-codegen.ts:38–91`; generated realization rule, bound by the gain unless `linearGainParam` overrides it. |
 
 The generated chain and parallel edges use these same node names
 (`src/formant-bank.ts:425–446`). Extra authored connections are appended unchanged
-(`451–454`). `cascadeOutput` can name an authored return node; it does not rename
+(`453–455`). `cascadeOutput` can name an authored return node; it does not rename
 the generated resonator (`428`, `434`). `linearGainParam` changes the gain binding
 (`411`), but expansion still generates PFE rules (`494–495`).
 

@@ -31,6 +31,7 @@
     "/rules/frontends/dectalk-english/speakers/ursula.yaml",
     "/rules/frontends/dectalk-english/speakers/wendy.yaml",
     "/rules/frontends/dectalk-english/text-parser-table.json",
+    "/rules/frontends/manifest.json",
     "/rules/languages/english/normalization/components.yaml",
     "/rules/languages/english/normalization/currency.yaml",
     "/rules/languages/english/normalization/date.yaml",

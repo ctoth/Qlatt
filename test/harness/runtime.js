@@ -1,8 +1,8 @@
 // test/harness/runtime.js — Runtime lifecycle: init, start, stop, speak
 
 import {
+  preloadBundledRulepackPath,
   preloadFrontend,
-  resolveBundledRulepackPath,
 } from "../../src/declarative-frontend/rule-pack.ts";
 import { preloadF0Filters } from "../../src/f0-filters-loader.ts";
 import { createDiagnosticsEngine } from "../../src/harness-diagnostics/index.ts";
@@ -78,7 +78,7 @@ function stageTimer() {
  */
 export async function warmFrontend(frontendId, phrase) {
   const speaker = getSelectedSpeaker();
-  await preloadFrontend(resolveBundledRulepackPath(frontendId), speaker);
+  await preloadFrontend(await preloadBundledRulepackPath(frontendId), speaker);
   const options = { frontendId };
   if (speaker) options.speaker = speaker;
   textToKlattTrack(phrase, undefined, undefined, options);

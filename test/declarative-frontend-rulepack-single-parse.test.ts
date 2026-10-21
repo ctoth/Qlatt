@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
 import {
-  BUNDLED_FRONTEND_RULEPACK_PATHS,
+  listBundledFrontendIds,
   loadRulepackSpecFromPath,
+  resolveBundledRulepackPath,
 } from "../src/declarative-frontend/rule-pack";
 
 /**
@@ -17,9 +18,9 @@ import {
  * frontend rulepack (qlatt-english / dectalk-english / qlatt-beauty).
  */
 describe("declarative frontend rulepack single-parse", () => {
-  for (const [frontendId, specPath] of Object.entries(BUNDLED_FRONTEND_RULEPACK_PATHS)) {
+  for (const frontendId of listBundledFrontendIds()) {
     it(`parseDslSpec is idempotent on the merged ${frontendId} spec`, () => {
-      const compiled = loadRulepackSpecFromPath(specPath);
+      const compiled = loadRulepackSpecFromPath(resolveBundledRulepackPath(frontendId));
       const reparsed = parseDslSpec(compiled);
       expect(JSON.stringify(reparsed)).toBe(JSON.stringify(compiled));
     });

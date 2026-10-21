@@ -50,7 +50,7 @@ describe("harness runtime replacement", () => {
 
     await loadNewRuntimeConfig();
 
-    expect(state.newRuntimeSemantics?.params.AV.default).toBe(50);
+    expect(state.newRuntimeSemantics?.params?.AV.default).toBe(50);
     expect(state.newRuntimeGraph?.name).toBe("klatt80-synth");
     expect(state.newRuntimeRegistry?.primitives["tilt-filter"]).toBeDefined();
     expect(state.currentExperimentId).toBe("test-inherit");

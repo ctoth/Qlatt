@@ -21,10 +21,10 @@ Error: Cannot find package '@bacon/core' imported from C:\Users\Q\code\Qlatt-cam
 
 Both WASM comparators completed within their existing tolerances. At 22050 Hz and 256 samples, resonator maxDelta=0.00000187047980833039, rmsError=0.0000010582808756434203, maxRelError=0.000014346770331340953. Antiresonator maxDelta=0.002229056500027582, rmsError=0.00017063198707248313, maxRelError=0.000006840450690992893; its relative error satisfies the existing combined tolerance. LF maxDelta=0.000009876618568424589, rmsError=0.000005580095066490851 (threshold 0.00001). This is tolerance evidence, not byte identity, and the whole command failed.
 
-Removing the prior merged worktree from its own working directory left an empty directory after Windows denied removing the current directory. Its worktree registration and branch were removed; cleanup will remove only the verified empty directory from outside it.
+Removing the prior merged worktree from its own working directory left an empty directory after Windows denied removing the current directory. Its registration and branch were removed; the verified empty directory was subsequently removed from outside it.
 
 ## Next step
-Root receives the complete result for issue bookkeeping. No source or golden files changed; preserve this evidence until root instructs cleanup.
+Publish this evidence-only PR, obtain private Claude review and record the implementer response. Root owns final review, hosted CI, merge and issue bookkeeping. No further local golden execution.
 
 ## Setup correction and completed run
 Removed only this checkout's verified node_modules junction; preserved316 stayed unchanged. Ran `HUSKY=0 npm ci --no-audit --no-fund` in this checkout (PowerShell environment assignment), which installed 85 packages and exited 0, including pinned @bacon/core 394603ae81eed7e5a279a2a263055461a57ce21c with its normal prepare build. npm warned that lint-staged17.6.0 requires Node>=22.22.1 while the installed Node is22.18.0; no lint-staged gate was run. Husky installation was skipped to avoid shared-hook changes.
@@ -32,3 +32,59 @@ Removed only this checkout's verified node_modules junction; preserved316 stayed
 Copied only the existing native binary into this checkout's new dependency directory. Source and destination SHA256 both `06EDB9BCAC123EA4A1BC3A59EA77908412D23DD2D64B301609C6E93A5FF93E03`. The native package matches locked fork ce3ed1d487a9c2ad4d3090119c208f386a3123f0.
 
 Executed `npm run test:golden` again after correcting setup; exit 0. Comparator numbers were identical to those recorded above; phrase rendering completed without additional output. Raw first attempt: tool chunk2059c9. Completed attempt: exec session27008, chunks116ebb and347dc3. No production, test, workflow, golden, or lockfile edit. The first failure is retained as setup evidence rather than hidden by the successful run.
+
+## Captured completed-command output
+The following is a transcription of the complete merged stdout/stderr emitted by `npm run test:golden` in tool chunk116ebb. The preceding setup hash/status output is described above. Completion chunk347dc3 contained only a blank line and reported process exit code 0. No command was rerun to produce this transcription.
+
+```text
+> qlatt@0.1.0 test:golden
+> node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/run-golden.ts
+
+(node:117852) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm/transpile-only", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:117852) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:134792) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm/transpile-only", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:134792) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+{
+  "sampleRate": 22050,
+  "results": [
+    {
+      "name": "resonator",
+      "length": 256,
+      "maxDelta": 0.00000187047980833039,
+      "rmsError": 0.0000010582808756434203,
+      "maxAbsExpected": 0.130376368,
+      "maxRelError": 0.000014346770331340953
+    },
+    {
+      "name": "antiresonator",
+      "length": 256,
+      "maxDelta": 0.002229056500027582,
+      "rmsError": 0.00017063198707248313,
+      "maxAbsExpected": 325.863981881,
+      "maxRelError": 0.000006840450690992893
+    }
+  ]
+}
+(node:39768) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm/transpile-only", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39768) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+{
+  "sampleRate": 22050,
+  "length": 256,
+  "maxDelta": 0.000009876618568424589,
+  "rmsError": 0.000005580095066490851
+}
+(node:108100) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm/transpile-only", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:108100) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+```

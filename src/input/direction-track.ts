@@ -156,13 +156,13 @@ export type AnchorRange =
       end?: number;
     };
 
-/** Emphasis directive (pitch-accent strength). Cited Pierrehumbert_1980. */
+/** Authored emphasis label recorded by the Direction Track input contract. */
 export interface EmphasisDirective {
   /** "reduced" | "none" | "moderate" | "strong" — accent prominence. */
   level: "reduced" | "none" | "moderate" | "strong";
 }
 
-/** Prosodic break directive (pre-boundary lengthening + pause). Cited Crystal_House_1988. */
+/** Authored break request recorded by the Direction Track input contract. */
 export interface BreakDirective {
   /** Break strength index 0..4 (ToBI-style). */
   strength: 0 | 1 | 2 | 3 | 4;

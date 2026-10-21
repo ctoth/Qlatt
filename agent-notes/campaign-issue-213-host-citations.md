@@ -4,7 +4,7 @@ Complete the remaining embedded voice/emphasis/break attribution correction in #
 
 # State
 
-Implemented approved bounded slice from 0a6045ac. Only parse.ts, existing input.test.ts, and this note changed; other agents' work is preserved.
+Implemented approved bounded slice from 0a6045ac. Own parse.ts, existing input.test.ts, this note, and the supervisor-authorized two-comment correction in direction-track.ts; other agents' work is preserved.
 
 # Decisions and why
 
@@ -19,3 +19,5 @@ Local dependencies remain unavailable in fresh worktrees and the main checkout's
 # Next step
 
 PR #383 hosted quality job 119101459054 reported two formatter errors in parse.ts and input.test.ts and exited 1. Applied the exact citation-array, mapped-array, and predicate reflows. No behavior changes or local CI rerun. Focused regressions cover host attribution and record payloads/stages/subjects/parents, plus alternate preset citations with exact global/local preset-application ancestry. Await replacement hosted CI and independent Claude review; supervisor owns merge and full #213 acceptance assessment.
+
+Claude completed two-pass review with no blocking defects and accepted the configured affect citation/parent coverage. Accepted its stale-comment finding: emphasis/break type comments still attributed authored requests to the replaced paper references and described acoustic effects. Correct those two comments to the authored-label/request contract, retaining every input field. Supervisor verifies the final four-file range; no runtime change or additional local gate.

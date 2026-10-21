@@ -32,6 +32,11 @@ Hosted shard2 job119223121789 found the comparison report's inventory hash stale
 after adding declarations. The full generated report differed on that line only;
 the generated target fragment matched. Confirmed the normalized source hash using
 the generator's existing SHA-256 calculation and updated that report metadata.
+Accepted Claude's one source-verified documentation finding: inventory-conventions
+still described inference and omitted required target_features in its examples
+and phonology-key list. Updated the authoring contract and examples. The two-pass
+review found no code defects in initial410d6339; supervisor verifies subsequent
+formatter/hash/documentation deltas before final gate and merge.
 
 ## Next step
 Publish for hosted CI and full Claude review, correct actual scoped findings,

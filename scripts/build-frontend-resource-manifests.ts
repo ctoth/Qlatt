@@ -55,23 +55,29 @@ export function manifestPath(frontendId: string): string {
   return path.join(frontendsDir, frontendId, "resources.json");
 }
 
-export function frontendIds(): string[] {
+function frontendEntries(): { id: string; entryPoint: string }[] {
   const manifest = JSON.parse(
     fs.readFileSync(path.join(frontendsDir, "manifest.json"), "utf8"),
   ) as {
-    frontends: { id: string }[];
+    frontends: { id: string; entryPoint: string }[];
   };
-  return manifest.frontends.map((frontend) => frontend.id);
+  return manifest.frontends;
+}
+
+export function frontendIds(): string[] {
+  return frontendEntries().map((frontend) => frontend.id);
 }
 
 /**
- * The voices a frontend registers (`speakers.voices` in its frontend.yaml), or
+ * The voices a frontend registers (`speakers.voices` in its entryPoint), or
  * one unnamed voice for a frontend without a registry. Read here with the
  * filesystem, not with the frontend's loaders, so that this script's own read
  * is not recorded as the frontend's.
  */
 function registeredVoices(frontendId: string): (string | undefined)[] {
-  const frontendPath = path.join(frontendsDir, frontendId, "frontend.yaml");
+  const entry = frontendEntries().find((frontend) => frontend.id === frontendId);
+  if (!entry) throw new Error(`E_FRONTEND_ID_UNKNOWN: '${frontendId}' is not in the catalogue`);
+  const frontendPath = path.join(frontendsDir, frontendId, entry.entryPoint);
   const spec = parseYamlString(fs.readFileSync(frontendPath, "utf8"), frontendPath) as {
     speakers?: { default?: unknown; voices?: unknown };
   } | null;

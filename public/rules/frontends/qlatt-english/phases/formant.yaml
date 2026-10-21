@@ -345,7 +345,7 @@ rules:
             value: "params.policy.formant.burst_amplitudes.{field}.alveolar"
           - when: velar(current)
             value: "params.policy.formant.burst_amplitudes.{field}.velar"
-          - default: "has(current.?{field}) ? current.{field} : 0"
+          - default: "get(current, '{field}', 0)"
         tag: burst_spectrum
     citations:
       - Blumstein & Stevens 1979 (burst spectral invariance)

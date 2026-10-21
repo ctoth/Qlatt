@@ -11,7 +11,8 @@ try {
   const { loadExperimentConfig } = (await server.ssrLoadModule(
     "/src/experiments/load-experiment-config.ts",
   )) as typeof import("../src/experiments/load-experiment-config");
-  const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis!.metrics!;
+  const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis!
+    .metrics!;
 
   // Compare against the pre-change golden before accepting the nasal model.
   // The old golden must first pass on the exact base checkout (recorded in PR).

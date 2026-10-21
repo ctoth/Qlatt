@@ -104,7 +104,9 @@ describe("summarizeTrackMetrics", () => {
     for (const id of ["test-inherit", "dectalk-english", "qlatt-beauty", "klsyn88"]) {
       const selected = (await loadExperimentConfig(id)).semantics.analysis!.metrics!;
       expect(selected.citations[0]).toContain("engineering convention");
-      expect(summarizeTrackMetrics([{ time: 0, params: { AVS: 1 } }], selected).voicedEvents).toBe(1);
+      expect(summarizeTrackMetrics([{ time: 0, params: { AVS: 1 } }], selected).voicedEvents).toBe(
+        1,
+      );
     }
     const vtm = await loadExperimentConfig("dectalk-vtm");
     expect(vtm.semantics.analysis).toBeUndefined();
@@ -119,7 +121,9 @@ describe("summarizeTrackMetrics", () => {
       }),
     ]);
     const controlDiagnostics = createDiagnostics();
-    expect(summarizeRenderTrack(track, policy, controlDiagnostics, "klatt80-baseline")).toMatchObject({
+    expect(
+      summarizeRenderTrack(track, policy, controlDiagnostics, "klatt80-baseline"),
+    ).toMatchObject({
       voicedEvents: 0,
       totalTime: 1,
     });

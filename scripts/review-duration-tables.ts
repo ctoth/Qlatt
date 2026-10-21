@@ -33,7 +33,8 @@ if (mode === "capture" || mode === "golden") {
     const { loadExperimentConfig } = (await server.ssrLoadModule(
       "/src/experiments/load-experiment-config.ts",
     )) as typeof import("../src/experiments/load-experiment-config");
-    const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis!.metrics!;
+    const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis!
+      .metrics!;
     const corpus = JSON.parse(
       readFileSync(resolve(root, "test/phrase-sets/linguistic.json"), "utf8"),
     ) as {

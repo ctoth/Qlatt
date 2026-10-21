@@ -277,7 +277,10 @@ export function buildTimeline(track: TrackEvent[]): string[] {
   return lines;
 }
 
-export function summarizeTrack(track: TrackEvent[], policy: TrackMetricsPolicy): {
+export function summarizeTrack(
+  track: TrackEvent[],
+  policy: TrackMetricsPolicy,
+): {
   events: number;
   totalTime: number;
   voicedEvents: number;

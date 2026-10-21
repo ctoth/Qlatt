@@ -49,7 +49,10 @@ function collectFiniteParam(frames: FrameLike[], key: string): number[] {
     .filter((value) => Number.isFinite(value));
 }
 
-export function summarizeTrackMetrics(track: FrameLike[], policy: TrackMetricsPolicy): TrackMetrics {
+export function summarizeTrackMetrics(
+  track: FrameLike[],
+  policy: TrackMetricsPolicy,
+): TrackMetrics {
   const safeTrack = Array.isArray(track) ? track : [];
   const voiced = safeTrack.filter((frame) => isVoicedFrame(frame, policy));
   const voicedF0 = collectPositiveParam(safeTrack, "F0");

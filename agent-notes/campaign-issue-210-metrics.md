@@ -2,7 +2,7 @@
 Complete #210's shared voiced/silent track classification slice using the selected experiment's existing analysis configuration. Switch/source-mode interpretation remains separate.
 
 # State
-Approved by supervisor under campaign authorization. Isolated base 403bccec; implementation and focused regressions complete, ready to publish. No local tests/CI run.
+Approved by supervisor under campaign authorization. Isolated base 403bccec; PR #388 published. No local tests/CI run. Hosted quality job 119116847134 reported six formatting-only file errors; exact emitted reflows applied, with no behavior changes. Independent Claude review and replacement hosted CI pending.
 
 # Decisions and why
 Smallest coherent change: about 150–200 production/caller lines, 15–25 YAML lines and 90–130 focused regression lines. Add cited metrics data to the three existing analysis owners, require it explicitly in both analyzers, and classify only finite positive declared voicing parameters. Preserve unrelated F0/formant aggregation algorithms. Thread actual selected semantics through runtime/harness/render paths; fixed-baseline corpus tools explicitly load their baseline policy, without a fallback registry.
@@ -17,4 +17,4 @@ The former metrics API counted positive infinity as voiced; the shared finite ch
 Actual size is about 130 production/caller additions plus 15 YAML lines and approximately 110 test additions across 29 existing files. Most files only add the explicit baseline argument. The rendering wrapper alone handles absent policy; required-policy analyzers retain numeric results. Untracked lint callers are intentionally untouched.
 
 # Next step
-Publish for hosted CI and independent Claude review, then respond to findings. Supervisor owns merge; full #210 stays open for switch/source-mode interpretation. Preserve other agents and untracked lint/measurement files.
+Read replacement hosted CI and respond to independent Claude review. Supervisor owns merge; full #210 stays open for switch/source-mode interpretation. Preserve other agents and untracked lint/measurement files.

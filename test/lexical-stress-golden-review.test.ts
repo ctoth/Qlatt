@@ -43,7 +43,10 @@ it("reviews each corpus change with a legacy acoustic-mapping control", () => {
     control.legacyTarget = true;
     const legacy = {
       phrase,
-      ...summarizeTrackMetrics(textToKlattTrackDetailed(phrase, corpus.baseF0).track, metricsPolicy),
+      ...summarizeTrackMetrics(
+        textToKlattTrackDetailed(phrase, corpus.baseF0).track,
+        metricsPolicy,
+      ),
     };
     control.legacyTarget = false;
     const old = before.summaries[index];

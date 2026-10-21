@@ -4618,7 +4618,7 @@ export function validateDslSpec(
     diagnostics.push(
       makeDiagnostic(
         "W_POLICY_PARAM_UNUSED",
-        `Policy parameter 'params.policy.${leafPath}' is declared but unused`,
+        `Policy parameter 'params.policy.${leafPath}' has no reference in analyzed expressions`,
         `parameters.policy.${leafPath}`,
         "warning",
       ),

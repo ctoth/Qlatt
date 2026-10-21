@@ -236,6 +236,7 @@ describe("render request frontend options", () => {
         repoRoot: process.cwd(),
         engine: "runtime",
         browserExecutablePath: chromePath,
+        log: (line) => process.stderr.write(`${line}\n`),
       });
       try {
         const plain = {

@@ -14,7 +14,7 @@ This is an *explainable* synthesizer. Every decision the system makes — which 
 
 This is enforced through three interlocking systems:
 
-**Provenance** (`src/provenance.ts`, `src/tts-frontend-provenance.ts`):
+**Provenance** (`src/provenance.ts`):
 - `ProvenanceCollector` records a `DecisionRecord` for every pipeline decision
 - Each record has: `stage`, `type`, `subject`, `reason`, `citations[]`, `parents[]`
 - Records form a DAG: inventory selection → rule match → rule rewrite, linked by parent IDs
@@ -112,11 +112,33 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 | `--stage <stages>` | Comma-separated filter: `transcribe`, `rules`, `prosody`, `semantics`, `interpreter`, `runtime`, `frontend` |
 | `--subject <pat>` | Filter by subject (exact or `prefix*` wildcard) |
 | `--range <spec>` | Filter by `seq:START-END`, `time:START-END`, `token:START-END`, or `id:START-END` |
-| `--why <id>` | Show ancestry chain for a decision (e.g., `--why d000045`) |
+| `--why <id>` | Show ancestry chain for a decision (e.g., `--why d000045`); bypasses stage, subject and range filters |
 | `--base-f0 <Hz>` | Requested base pitch (default: none; the frontend's voice keeps its own) |
 | `--transition-ms <ms>` | Formant transition duration (default: 30) |
-| `--strict-citations` | Exit code 2 if any decisions lack citations |
+| `--strict-citations` | Exit code 2 if the selected ancestry or filtered output window contains uncited decisions; does not check excluded decisions |
+| `--strict` | Exit code 2 before synthesis if rulepack validation emits warnings |
+| `--phrase <text>` | Explicit phrase; takes precedence over positional phrase words |
 | `--out <file>` | Write output to file instead of stdout |
+| `--item <id>` | Item to inspect with `--field` or `--why-not` (required for either); does not filter the decision list |
+| `--field <key>` | Show field history for an item |
+| `--why-not <rule>` | Show why a specific rule did not fire |
+| `--field-phase <phase>` | Replay this phase for field inspection; omission inspects the final utterance |
+| `--field-boundary before\|after` | Boundary used with `--field-phase` (default: `after`) |
+| `--phase-views` | Include phase boundary checkpoints in output |
+| `--verify-replay` | Report original/replayed graph digests and whether they match; a mismatch alone does not change the exit code |
+| `--tooling-only` | With JSON output, emit only the tooling object (field, why-not, checkpoints and replay); no effect on text output |
+| `--frontend <id>` | Frontend rulepack ID (default: `qlatt-english`) |
+| `--speaker <name>` | Voice name from the selected frontend's speaker registry |
+
+Use `--format json` for full field history, checkpoint details and replay digests. Text output summarizes the field version count, checkpoint count and replay match result.
+
+In PowerShell, invoke Node directly with an explicit phrase to avoid npm argument-forwarding differences:
+
+```powershell
+node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/explain-phrase.ts --phrase "hello world" --format json
+```
+
+These are the same Node loader arguments as `npm run explain`. Phrase words such as `json` are legitimate text; the CLI does not infer lost flags from their spelling.
 
 ## Testing Audio in Chrome
 

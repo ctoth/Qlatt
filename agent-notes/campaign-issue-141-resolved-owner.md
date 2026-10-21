@@ -8,7 +8,10 @@ resources into transcription, and freeze the resolved plain resource graph (#141
 Isolated from #431 final efd9f220, then fast-forwarded to merged c2ba906d,
 including #430 read-error preservation. Acquisition moved (557 lines), resource
 freezing and combined entry points added; caller/fixture adaptation complete.
-Ready for hosted CI and independent review. No local CI. Other agents are active.
+Published PR #433 at 9e9ad567; Claude full-PR review is running. GitHub reported
+a conflict against #429, so CI did not start. Integrated master 36953f15, retaining
+its foreach error-source implementation and fixture while selecting the relocated
+owner imports in the single fixture import conflict. No local CI.
 
 # Decisions and why
 

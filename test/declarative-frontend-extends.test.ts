@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { dump as dumpYaml, load as loadYaml } from "js-yaml";
 import { describe, expect, it } from "vitest";
+import { ForeachExpansionError } from "../src/declarative-frontend/parser";
 import {
   loadFrontendResources,
   loadFrontendVoiceDocument,
@@ -608,6 +609,77 @@ describe("direct rule errors through composition", () => {
       });
     }
   }
+});
+
+describe("foreach parser error locations", () => {
+  it.each([
+    ["extra", { foreach: [{}], template: {}, extra: true }, ["extra"], "key"],
+    ["empty", { foreach: [], template: {} }, ["foreach"], "value"],
+    ["template", { foreach: [{}], template: [] }, ["template"], "value"],
+    ["map", { foreach: [7], template: {} }, ["foreach", 0], "value"],
+    ["binding", { foreach: [{ field: [] }], template: {} }, ["foreach", 0, "field"], "value"],
+    ["missing", { foreach: [{}] }, ["template"], "value"],
+  ] as const)("locates %s error before validation", async (label, directive, tail, position) => {
+    const dir = mkdtempSync(join(tmpdir(), "qlatt-foreach-error-"));
+    try {
+      const path = writeExtendingFrontend(dir, {
+        tags: { fixture: "Fixture assignment" },
+        rules: {
+          fixture_foreach: {
+            kind: "scalar",
+            select: { relation: "Segment", where: "true" },
+            apply: [
+              {
+                field: "F2",
+                op: "set",
+                tag: "fixture",
+                dispatch: [
+                  {
+                    foreach: [{ value: 1 }, { value: 2 }],
+                    template: { when: "false", value: "{value}" },
+                  },
+                  directive,
+                ],
+              },
+            ],
+            citations: ["Engineering fixture: malformed existing foreach directive"],
+          },
+        },
+      });
+      const resource = join(dir, "pipeline.yaml").replace(/\\/g, "/");
+      const authoredPath = ["rules", "fixture_foreach", "apply", 0, "dispatch", 1, ...tail];
+      const span = yamlDocumentSpans(
+        parseYamlString(readFileSync(resource, "utf8"), resource),
+      ).find((entry) => JSON.stringify(entry.value.path) === JSON.stringify(authoredPath))?.[
+        position
+      ];
+      for (const load of [loadRulepackSpecFromPath, preloadRulepackSpecFromPath]) {
+        let caught: unknown;
+        try {
+          await load(path);
+        } catch (error) {
+          caught = error;
+        }
+        expect(caught).toBeInstanceOf(Error);
+        const error = caught as Error;
+        expect(error.message).toContain("E_FOREACH_INVALID:");
+        const parserError = error instanceof ForeachExpansionError ? error : error.cause;
+        expect(parserError).toBeInstanceOf(ForeachExpansionError);
+        expect((parserError as ForeachExpansionError).path).toEqual(authoredPath);
+        if (label === "missing") {
+          expect(span).toBeUndefined();
+          expect(error.message).not.toContain(resource);
+        } else {
+          expect(span).toBeDefined();
+          expect(error.message).toBe(
+            `${(parserError as Error).message} [${resource}:${span!.line}:${span!.column}]`,
+          );
+        }
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("phase source locations through composition", () => {

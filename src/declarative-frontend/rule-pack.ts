@@ -50,6 +50,7 @@ import {
 } from "./inventory";
 import {
   DSL_ROOT_KEYS,
+  ForeachExpansionError,
   type NormalizedDslSpec,
   normalizeResourceAliases,
   parseDslSpec,
@@ -846,15 +847,31 @@ function parseComposedRulepack(
     compiled: readonly (string | number)[];
     authored: readonly (string | number)[];
   }[] = [];
-  const spec = parseDslSpec(
-    withVoiceRulePolicy(merged, voices),
-    (path, macros) => {
-      calls.set(path, macros);
-    },
-    (compiled, authored) => {
-      paths.push({ compiled, authored });
-    },
-  );
+  let spec: NormalizedDslSpec;
+  try {
+    spec = parseDslSpec(
+      withVoiceRulePolicy(merged, voices),
+      (path, macros) => {
+        calls.set(path, macros);
+      },
+      (compiled, authored) => {
+        paths.push({ compiled, authored });
+      },
+    );
+  } catch (error) {
+    if (!(error instanceof ForeachExpansionError)) throw error;
+    const matches = (RULE_DOCUMENT_SPANS.get(merged) ?? []).filter((entry) => {
+      const path = sourceLookupPath(entry);
+      return (
+        path.length === error.path.length && path.every((part, index) => part === error.path[index])
+      );
+    });
+    const span = matches.length === 1 ? matches[0][error.position] : undefined;
+    if (!span) throw error;
+    throw new Error(`${error.message} [${span.resource}:${span.line}:${span.column}]`, {
+      cause: error,
+    });
+  }
   const bodies = FUNCTION_BODY_SPANS.get(merged) ?? [];
   const originsOf = (macros: readonly CelMacroDefinition[]): readonly DocumentSpanOrigin[] =>
     Object.freeze(

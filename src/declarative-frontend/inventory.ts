@@ -10,6 +10,7 @@ import {
   parseAffectPresets,
   validateAffectPresetChannels,
 } from "../input/affect-presets";
+import { type InlineMarkers, parseInlineMarkers } from "../input/inline";
 import { type RdPolicy, readRdPolicy } from "../input/rd-policy";
 import { parseVoiceQualityChannels, type VoiceQualityChannel } from "../input/vq-channels";
 import type { AreaFunctionDerivation } from "../provenance";
@@ -88,6 +89,7 @@ export type FrontendResources = {
     rdPolicy: RdPolicy;
   };
   affectPresets?: { path: string; library: AffectLibrary };
+  inlineMarkers?: InlineMarkers;
 };
 
 const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
@@ -933,6 +935,9 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   }
   return {
     inventory,
+    ...(Object.hasOwn(spec, "inline_markers")
+      ? { inlineMarkers: parseInlineMarkers(spec.inline_markers) }
+      : {}),
     inventoryPath,
     inventoryDocuments:
       phonologyPath === undefined ? [inventoryPath] : [inventoryPath, phonologyPath],

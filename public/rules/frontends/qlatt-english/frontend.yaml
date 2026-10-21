@@ -1,4 +1,16 @@
 version: v13-cel
+inline_markers:
+  global_affect:
+    open: "(("
+    close: "))"
+    degree_separator: "@"
+    selection: first
+  emphasis:
+    open: "*"
+    close: "*"
+    level: strong
+  citations:
+    - "engineering convention: optional inline shorthand lifts authored markers into the authoritative Direction Track"
 resources:
   lexicon: /cmu-dictionary.json
   vq_channels: /rules/frontends/qlatt-english/policy/vq-channels.yaml

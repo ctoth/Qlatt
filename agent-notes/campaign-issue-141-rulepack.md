@@ -5,8 +5,8 @@ for the next bounded #141 resource-ownership slice.
 
 # State
 
-Implemented from b5000767 after #368 merged. Hosted CI and Claude review are
-outstanding. No local CI run.
+Implemented from b5000767 after #368 merged. PR #371 awaits Claude review and
+replacement hosted CI. No local CI run.
 
 # Decisions and why
 
@@ -25,6 +25,14 @@ Alias migration, remaining resource closure and linguistic-resource placement
 remain outside this slice; #141 stays open.
 
 # Surprises
+
+Hosted quality requested one collapsed filter expression after the local fixture
+variable became shorter. Hosted shard 1 also exposed an existing browser fixture
+that assumed importing rule-pack populated the inventory cache: it required a
+known-path suffix even with no loaded inventory. inventory.ts:480–486 emits that
+suffix only when the cache has entries. Updated the fixture to accept the
+optional suffix while retaining the message and not-found cause checks; no
+production change was needed for either failure.
 
 The implementation is smaller than estimated: 28 production additions and 50
 removals, with explicit resolver/config changes in existing fixtures. Missing

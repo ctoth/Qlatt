@@ -36,9 +36,7 @@ describe("declarative frontend rulepack shape", () => {
   });
 
   it("contains no imperative rule.op handlers", () => {
-    const opRules = Object.entries(qlattRulepack.rules).filter(
-      ([, rule]) => ruleOp(rule) != null,
-    );
+    const opRules = Object.entries(qlattRulepack.rules).filter(([, rule]) => ruleOp(rule) != null);
     expect(opRules).toHaveLength(0);
   });
 });

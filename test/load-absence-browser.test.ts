@@ -171,7 +171,7 @@ describe("a rule pack or inventory path", () => {
     for (const [code, specPath, load] of cases) {
       const error = await failure(() => load(specPath));
       expect(error.message, load.name).toMatch(
-        new RegExp(`^${code}: '${specPath}' could not be loaded \\(known: `),
+        new RegExp(`^${code}: '${specPath}' could not be loaded(?: \\(known: .+\\))?$`),
       );
       expect(isYamlNotFoundError(error.cause), load.name).toBe(true);
     }

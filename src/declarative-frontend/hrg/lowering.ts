@@ -14,7 +14,7 @@
  */
 
 import { describeRenderStatus, getF0FilterExports, RENDER_OK } from "../../f0-filters-loader";
-import { projectRd } from "../../input/rd-policy";
+import { projectRd, type RdPolicy } from "../../input/rd-policy";
 import {
   VQ_FIELDS,
   VQ_MULTIPLICATIVE_FIELDS,
@@ -253,6 +253,8 @@ export interface LowerOptions {
 }
 
 export type LowerContext = {
+  frontendId?: string;
+  rdPolicy?: RdPolicy;
   f0Model?: LayeredF0ModelConfig;
   /**
    * Segment features that hold per-frame column values written by frame
@@ -2711,9 +2713,14 @@ export function lowerToFrames(
         }
       }
       if (affect.values.rdDelta !== 0) {
+        if (!context.rdPolicy) {
+          throw new Error(
+            `E_FRONTEND_CONFIG: frontend '${context.frontendId ?? options.id ?? "programmatic"}' requires vq_channels`,
+          );
+        }
         Object.assign(
           params,
-          projectRd(params, affect.values.rdDelta, {
+          projectRd(params, affect.values.rdDelta, context.rdPolicy, {
             speakerParams: context.speakerParams,
             diagnostics: utterance.diagnostics,
             itemId: item.id,

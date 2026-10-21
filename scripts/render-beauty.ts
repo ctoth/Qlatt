@@ -39,6 +39,8 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { AudioWorkletNode as NodeAudioWorkletNode, OfflineAudioContext } from "node-web-audio-api";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory.ts";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack.ts";
 import { createDiagnostics } from "../src/diagnostics.ts";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config.ts";
 import { compileAffect, neutralAffect } from "../src/input/affect.ts";
@@ -114,7 +116,11 @@ async function main(): Promise<void> {
   const affect = isNeutral ? neutralAffect() : compileAffect(affectName, degree, { sex });
 
   // 3. Apply the affect delta to the assembled track (NEUTRAL_VQ = identity).
-  const { track, citations } = applyAffectToTrack(frontend.track, affect);
+  const resources = loadFrontendResources(loadBundledRulepackSpec(frontendId));
+  const { track, citations } = applyAffectToTrack(frontend.track, affect, {
+    frontendId,
+    rdPolicy: resources.vqChannels?.rdPolicy,
+  });
 
   console.log(
     `render-beauty: phrase="${phrase}" affect=${affect.label}@${degree} ` +

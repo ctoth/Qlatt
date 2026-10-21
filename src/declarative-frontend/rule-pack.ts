@@ -627,9 +627,21 @@ function validationInventoryPhonemes(inventory: InventorySpec | null): string[] 
 }
 
 function recordDiagnostics(spec: CompiledRulepack, diagnostics: ValidationDiagnostic[]): void {
+  const origins = rulepackParameterOrigins(spec);
   RULEPACK_DIAGNOSTICS.set(
     spec,
-    Object.freeze(diagnostics.map((diagnostic) => Object.freeze({ ...diagnostic }))),
+    Object.freeze(
+      diagnostics.map((diagnostic) => {
+        const parts = diagnostic.path.split(".");
+        const matches = origins.filter((entry) => entry.value.path.join(".") === diagnostic.path);
+        // Dotted authored keys can collide with nested paths; never guess between them.
+        const origin = matches.length === 1 ? matches[0] : undefined;
+        const documentSpan = origin?.value.path.every((part, index) => part === parts[index])
+          ? origin.key
+          : undefined;
+        return Object.freeze({ ...diagnostic, ...(documentSpan ? { documentSpan } : {}) });
+      }),
+    ),
   );
 }
 

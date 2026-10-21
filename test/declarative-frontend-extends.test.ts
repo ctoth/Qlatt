@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import {
   type CompiledRulepack,
+  getRulepackValidationDiagnostics,
   loadBundledRulepackSpec,
   loadRulepackSpecFromPath,
   preloadRulepackSpecFromPath,
@@ -217,6 +218,7 @@ describe("authored parameter origins through composition", () => {
           {
             parameters: {
               policy: {
+                rate: { default: { value: 1.1 } },
                 f0: {
                   downstep_k: { value: 0.7, citations: ["Engineering fixture: child override"] },
                   boundary_l_pct_fraction: 0.1,
@@ -239,6 +241,15 @@ describe("authored parameter origins through composition", () => {
         );
         expect(expected).toBeDefined();
         expect(origin(child, pathOf("downstep_k.value"))).toEqual(expected);
+        const warnings = getRulepackValidationDiagnostics(child);
+        const ratePath = "parameters.policy.rate.default";
+        const rateWarning = warnings.find((entry) => entry.path === ratePath);
+        expect(rateWarning?.documentSpan).toEqual(origin(child, ratePath)?.key);
+        expect(rateWarning?.documentSpan?.resource).toBe(filename);
+        expect(
+          warnings.find((entry) => entry.path === "parameters.policy.rate.undershoot_coefficient")
+            ?.documentSpan?.resource,
+        ).toBe(baseResource);
         expect(origin(child, pathOf("downstep_floor_fraction.value"))?.value.resource).toBe(
           baseResource,
         );
@@ -270,6 +281,11 @@ describe("authored parameter origins through composition", () => {
   it("does not assign root locations to generated voice values", () => {
     const dectalk = loadBundledRulepackSpec("dectalk-english");
     expect(dectalk.parameters).toHaveProperty("policy.voice");
+    expect(
+      getRulepackValidationDiagnostics(dectalk)
+        .filter((entry) => entry.path.startsWith("parameters.policy.voice."))
+        .every((entry) => entry.documentSpan === undefined),
+    ).toBe(true);
     expect(rulepackParameterOrigins(dectalk).some((entry) => entry.value.path[2] === "voice")).toBe(
       false,
     );

@@ -25,8 +25,10 @@ describe("rulepack lint", () => {
       );
       expect(diagnostics.some((diagnostic) => diagnostic.severity === "warning")).toBe(true);
       for (const diagnostic of diagnostics) {
+        const span = diagnostic.documentSpan;
+        const location = span ? ` [${span.resource}:${span.line}:${span.column}]` : "";
         expect(ordinary.stdout).toContain(
-          `${id}: ${diagnostic.code} at ${diagnostic.path}: ${diagnostic.message}`,
+          `${id}: ${diagnostic.code} at ${diagnostic.path}: ${diagnostic.message}${location}\n`,
         );
       }
     }

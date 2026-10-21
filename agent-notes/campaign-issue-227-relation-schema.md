@@ -13,7 +13,11 @@ declarations. Existing fixtures cover nullable/nested shapes, bare declarations,
 all three control-window schemas and sync/async authored error coordinates.
 Integrated master normally and published PR439. Initial hosted quality job
 119231460407 reported import order and one fixture array wrap; applied its exact
-corrections. Private Claude review is active; remaining hosted checks are pending.
+corrections. Claude reviewed the complete nine-file initial 2f861c7d range in two
+passes (session ae49eacb-508e-46a1-9842-c2fe79ae804f): no actionable findings.
+Accepted without code changes. Existing nested nullable support and finer nested
+error coordinates were observations without shipped producers, outside this slice.
+Replacement hosted quality/native/audio checks passed; test shards remain pending.
 
 ## Decisions and why
 - Retain authored declarations and bare enum/name lists; validation currently reads
@@ -30,4 +34,4 @@ The initially named relationAllowsFeatureValue does not exist; the actual curren
 reader is relationHasDeclaredTypeField and tests key presence only.
 
 ## Next step
-Complete hosted CI/Claude review and response, then hand merge to supervisor.
+Complete final hosted CI, then hand merge to supervisor. Issue227 remains open.

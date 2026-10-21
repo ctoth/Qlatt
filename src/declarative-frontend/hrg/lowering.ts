@@ -480,17 +480,23 @@ function resolveWindowSpan(
   value: { readonly [key: string]: FeatureValue },
   durationMs: number,
   earliestStartMs = 0,
-): { startMs: number; endMs: number } | null {
+): { startMs: number; endMs: number; requested: { startMs: number; endMs: number } } | null {
   const prefixMs = finiteFeatureNumber(value.prefix_ms);
   if (prefixMs != null) {
     const endMs = Math.max(0, Math.min(durationMs, prefixMs));
-    return endMs > 0 ? { startMs: 0, endMs } : null;
+    return endMs > 0 ? { startMs: 0, endMs, requested: { startMs: 0, endMs: prefixMs } } : null;
   }
   const suffixMs = finiteFeatureNumber(value.suffix_ms);
   if (suffixMs != null) {
     const spanMs = Math.max(0, Math.min(durationMs, suffixMs));
     const startMs = Math.max(0, durationMs - spanMs);
-    return durationMs > startMs ? { startMs, endMs: durationMs } : null;
+    return durationMs > startMs
+      ? {
+          startMs,
+          endMs: durationMs,
+          requested: { startMs: durationMs - suffixMs, endMs: durationMs },
+        }
+      : null;
   }
   const startMsValue = finiteFeatureNumber(value.start_ms);
   const endMsValue = finiteFeatureNumber(value.end_ms);
@@ -500,7 +506,16 @@ function resolveWindowSpan(
   const rawEndMs = endMsValue ?? durationMs * Math.max(0, Math.min(1, endRatio ?? 1));
   const startMs = Math.max(earliestStartMs, Math.min(durationMs, rawStartMs));
   const endMs = Math.max(startMs, Math.max(earliestStartMs, Math.min(durationMs, rawEndMs)));
-  return endMs > startMs ? { startMs, endMs } : null;
+  return endMs > startMs
+    ? {
+        startMs,
+        endMs,
+        requested: {
+          startMs: startMsValue ?? durationMs * (startRatio ?? 0),
+          endMs: endMsValue ?? durationMs * (endRatio ?? 1),
+        },
+      }
+    : null;
 }
 
 function resolveControlField(
@@ -1715,7 +1730,7 @@ export function lowerToFrames(
         `E_HRG_LOWER_CONTROL_WINDOW: Segment '${sourceItem.id}' has unstamped controls`,
       );
     }
-    rawWindows.forEach((rawWindow) => {
+    rawWindows.forEach((rawWindow, windowIndex) => {
       if (!isFeatureObject(rawWindow)) {
         utterance.diagnostics.error(
           "Control window is not a typed object",
@@ -1769,8 +1784,27 @@ export function lowerToFrames(
         );
         throw error;
       }
+      const { requested, ...applied } = span;
+      if (requested.startMs !== applied.startMs || requested.endMs !== applied.endMs) {
+        utterance.diagnostics.warn(
+          "Authored control window was shortened to the target interval bounds",
+          {
+            sourceItemId: sourceItem.id,
+            targetItemId: targetTiming.item.id,
+            windowIndex,
+            tag: rawWindow.tag,
+            requested,
+            applied,
+            reason: "target_interval_bounds",
+            fields: Object.keys(fields),
+            parents: [windowWrite.decisionId],
+            citations: windowWrite.citations,
+          },
+          "HRG_LOWER_CONTROL_WINDOW_LIMITED",
+        );
+      }
       const resolved: ResolvedControlWindow = {
-        ...span,
+        ...applied,
         fields,
         decisionId: windowWrite.decisionId,
       };

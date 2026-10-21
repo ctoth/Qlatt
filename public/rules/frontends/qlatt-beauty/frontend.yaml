@@ -35,7 +35,8 @@
 # those shared files land in one place.
 # =============================================================================
 extends: qlatt-english
-inventory_path: /rules/frontends/qlatt-beauty/inventory.yaml
+resources:
+  inventory: /rules/frontends/qlatt-beauty/inventory.yaml
 include:
   - /rules/normalization/components.yaml
   - normalization-policy.yaml

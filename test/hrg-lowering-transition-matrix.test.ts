@@ -82,7 +82,8 @@ function readFixture(
     !Array.isArray(parsed.reconstructedGraph.items) ||
     !isPlainObject(parsed.oldProduction) ||
     !Array.isArray(parsed.oldProduction.sourceFrames) ||
-    typeof spec.inventory_path !== "string" ||
+    !isPlainObject(spec.resources) ||
+    typeof spec.resources.inventory !== "string" ||
     !isPlainObject(spec.output)
   ) {
     throw new Error("transition matrix fixture/spec invalid");
@@ -92,7 +93,7 @@ function readFixture(
     ...currentPolicy,
     columns: historicalLoweringColumns(parsed, currentPolicy.columns),
   };
-  const inventoryPath = spec.inventory_path;
+  const inventoryPath = spec.resources.inventory;
   const segments = parsed.reconstructedGraph.items.flatMap((item): BaselineSegment[] => {
     if (!isPlainObject(item) || item.type !== "segment" || typeof item.id !== "string") return [];
     const phoneme = latestFeature(item, "phoneme");

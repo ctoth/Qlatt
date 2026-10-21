@@ -71,13 +71,11 @@ it.each(["{", "null"])("reports invalid JSON LTS document %s through its owner",
   temporaryDirectories.push(directory);
   const path = join(directory, "resource.json");
   writeFileSync(path, source);
-  expect(() =>
-    loadFrontendResources({ ...loadBundledRulepackSpec("qlatt-english"), lts_path: path }),
-  ).toThrow(/E_FRONTEND_CONFIG.*lts_path/);
+  const spec = loadBundledRulepackSpec("qlatt-english");
+  const selected = { ...spec, resources: { ...spec.resources, lts: path } };
+  expect(() => loadFrontendResources(selected)).toThrow(/E_FRONTEND_CONFIG.*lts/);
   if (source === "null") {
-    expect(() =>
-      loadFrontendResources({ ...loadBundledRulepackSpec("qlatt-english"), lts_path: path }),
-    ).toThrow(
+    expect(() => loadFrontendResources(selected)).toThrow(
       expect.objectContaining({
         cause: expect.objectContaining({ message: expect.stringMatching(/E_YAML_SCHEMA/) }),
       }),
@@ -128,29 +126,29 @@ it("keeps number character maps with their selected arrays at the same source pa
   );
 });
 
-it.each(["lts_path", "morphology_path", "stress_policy_path", "normalization.phases"])(
+it.each(["resources.lts", "resources.morphology", "resources.stress_policy", "normalization.phases"])(
   "rejects a frontend missing %s at resource load",
   (asset) => {
     const spec: Record<string, unknown> = structuredClone(loadBundledRulepackSpec("qlatt-english"));
     const [section, field] = asset.split(".");
     if (field) delete (spec[section] as Record<string, unknown>)[field];
     else delete spec[section];
-    expect(() => loadFrontendResources(spec)).toThrow(new RegExp(`E_FRONTEND_CONFIG.*${asset}`));
+    expect(() => loadFrontendResources(spec)).toThrow(
+      new RegExp(`E_FRONTEND_CONFIG.*${asset.replace("resources.", "")}`),
+    );
   },
 );
 
-it.each(["lts_path", "morphology_path", "stress_policy_path"])(
+it.each(["lts", "morphology", "stress_policy"])(
   "names an unavailable %s at resource load",
   (asset) => {
-    const spec: Record<string, unknown> = structuredClone(loadBundledRulepackSpec("qlatt-english"));
-    const [section, field] = asset.split(".");
-    if (field) (spec[section] as Record<string, unknown>)[field] = "/missing-g2p-asset.yaml";
-    else spec[section] = "/missing-g2p-asset.yaml";
+    const spec = structuredClone(loadBundledRulepackSpec("qlatt-english"));
+    spec.resources[asset] = "/missing-g2p-asset.yaml";
     expect(() => loadFrontendResources(spec)).toThrow(new RegExp(`E_FRONTEND_CONFIG.*${asset}`));
   },
 );
 
-it.each(["morphology_path", "stress_policy_path"])(
+it.each(["morphology", "stress_policy"])(
   "requires %s to select phonotactics",
   (asset) => {
     const spec = structuredClone(loadBundledRulepackSpec("qlatt-english"));
@@ -158,10 +156,9 @@ it.each(["morphology_path", "stress_policy_path"])(
     temporaryDirectories.push(directory);
     const path = join(directory, "resource.yaml");
     writeFileSync(path, "version: v1\n");
-    const dependency = asset === "morphology_path" ? "morphology" : "stress_policy";
-    expect(() => loadFrontendResources({ ...spec, [asset]: path })).toThrow(
-      new RegExp(`E_FRONTEND_CONFIG.*${dependency}.phonotactics_path`),
-    );
+    expect(() =>
+      loadFrontendResources({ ...spec, resources: { ...spec.resources, [asset]: path } }),
+    ).toThrow(new RegExp(`E_FRONTEND_CONFIG.*${asset}.phonotactics_path`));
   },
 );
 

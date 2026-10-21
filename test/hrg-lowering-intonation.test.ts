@@ -155,7 +155,8 @@ function readFixture(): {
     !isPlainObject(parsed.oldProduction.controlScore) ||
     !Array.isArray(parsed.oldProduction.controlScore.f0_layer_commands) ||
     !isPlainObject(parsed.oldProduction.speakerParams) ||
-    typeof spec.inventory_path !== "string" ||
+    !isPlainObject(spec.resources) ||
+    typeof spec.resources.inventory !== "string" ||
     !isPlainObject(spec.f0_model) ||
     !isPlainObject(spec.output)
   ) {
@@ -184,7 +185,7 @@ function readFixture(): {
     ...fullPolicy,
     columns: fullPolicy.columns.filter((column) => !programColumns.has(column) || recorded(column)),
   };
-  const inventory = loadInventorySpecFromPath(spec.inventory_path).phoneme_targets;
+  const inventory = loadInventorySpecFromPath(spec.resources.inventory).phoneme_targets;
   const segments = parsed.reconstructedGraph.items.flatMap((item): BaselineSegment[] => {
     if (!isPlainObject(item) || item.type !== "segment" || typeof item.id !== "string") return [];
     const phoneme = latestFeature(item, "phoneme");

@@ -347,7 +347,7 @@ describe("source-backed recognition", () => {
     }
     // #150 is independently delivered. This same test exercises its stronger
     // contract on an integration tree and automatically once that policy lands.
-    if (Object.hasOwn(loadBundledRulepackSpec("qlatt-english"), "stress_policy_path")) {
+    if (Object.hasOwn(loadBundledRulepackSpec("qlatt-english").resources, "stress_policy")) {
       const stress = utterance.provenance
         .getDecisions()
         .filter(

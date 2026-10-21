@@ -77,13 +77,11 @@ describe("declarative frontend extends (qlatt-beauty ← qlatt-english)", () => 
     expect(beauty.transcription).toEqual(english.transcription);
   });
 
-  it("inherits base *_path scalars the child omits", () => {
-    // beauty omits lts_path / morphology_path / speaker_profile_path /
-    // source_contour_path, so they resolve to the base's values.
-    expect(beauty.lts_path).toBe(english.lts_path);
-    expect(beauty.morphology_path).toBe(english.morphology_path);
-    expect(beauty.speaker_profile_path).toBe(english.speaker_profile_path);
-    expect(beauty.source_contour_path).toBe(english.source_contour_path);
+  it("inherits base resource roles the child omits", () => {
+    expect(beauty.resources.lts).toBe(english.resources.lts);
+    expect(beauty.resources.morphology).toBe(english.resources.morphology);
+    expect(beauty.resources.speaker_profile).toBe(english.resources.speaker_profile);
+    expect(beauty.resources.source_contour).toBe(english.resources.source_contour);
   });
 
   it("resolves shared phase rule bodies via include base-dir fallback", () => {
@@ -149,8 +147,8 @@ describe("declarative frontend extends (qlatt-beauty ← qlatt-english)", () => 
     expect(beauty.output.lowering.timeline).toEqual(english.output.lowering.timeline);
   });
 
-  it("overrides inventory_path with the child's own inventory", () => {
-    expect(beauty.inventory_path).toBe("/rules/frontends/qlatt-beauty/inventory.yaml");
+  it("overrides resources.inventory with the child's own inventory", () => {
+    expect(beauty.resources.inventory).toBe("/rules/frontends/qlatt-beauty/inventory.yaml");
   });
 
   it("keeps beauty's own pipeline (voice-quality) and prosody phase rules", () => {
@@ -194,6 +192,55 @@ function writeExtendingFrontend(dir: string, sections: Dict, rootOverrides: Dict
   );
   return frontendPath.replace(/\\/g, "/");
 }
+
+describe("resource declarations across inheritance", () => {
+  for (const asynchronous of [false, true]) {
+    it(`normalizes child aliases before inheritance (${asynchronous ? "async" : "sync"})`, async () => {
+      const dir = mkdtempSync(join(tmpdir(), "qlatt-resource-alias-"));
+      try {
+        const path = writeExtendingFrontend(dir, {}, {
+          inventory_path: "/rules/frontends/qlatt-beauty/inventory.yaml",
+          source_contour_path: null,
+          resources: { lexicon: null },
+        });
+        const compiled = asynchronous
+          ? await preloadRulepackSpecFromPath(path)
+          : loadRulepackSpecFromPath(path);
+        const base = loadBundledRulepackSpec("qlatt-english");
+        expect(compiled.resources.inventory).toBe("/rules/frontends/qlatt-beauty/inventory.yaml");
+        expect(compiled.resources.source_contour).toBeNull();
+        expect(compiled.resources.lexicon).toBeNull();
+        expect(compiled.resources.lts).toBe(base.resources.lts);
+        expect(Object.hasOwn(compiled, "inventory_path")).toBe(false);
+        const resources = loadFrontendResources(compiled);
+        expect(resources.sourceContour).toBeUndefined();
+        expect(resources.lexicon).toBeUndefined();
+        expect(resources.lts.document).toBe(loadFrontendResources(base).lts.document);
+        expect(
+          getRulepackValidationDiagnostics(compiled)
+            .filter((entry) => entry.code === "W_FRONTEND_RESOURCE_ALIAS")
+            .map((entry) => entry.path),
+        ).toEqual(["inventory_path", "source_contour_path"]);
+        expect(base.resources.source_contour).toBe(
+          "/rules/frontends/qlatt-english/policy/source-contour.yaml",
+        );
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+  }
+
+  it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
+    "ships %s without aliases",
+    (frontend) => {
+      expect(
+        getRulepackValidationDiagnostics(loadBundledRulepackSpec(frontend)).filter(
+          (entry) => entry.code === "W_FRONTEND_RESOURCE_ALIAS",
+        ),
+      ).toEqual([]);
+    },
+  );
+});
 
 describe("direct rule errors through composition", () => {
   for (const asynchronous of [false, true]) {

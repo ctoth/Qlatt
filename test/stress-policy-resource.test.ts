@@ -11,9 +11,9 @@ it("rejects a generated-pronunciation frontend without a resolved stress policy"
   expect(() =>
     loadFrontendResources({
       ...loadBundledRulepackSpec("qlatt-english"),
-      stress_policy_path: undefined,
+      resources: { ...loadBundledRulepackSpec("qlatt-english").resources, stress_policy: undefined },
     }),
-  ).toThrow(/E_FRONTEND_CONFIG.*stress_policy_path/);
+  ).toThrow(/E_FRONTEND_CONFIG.*stress_policy/);
 });
 it.each(["qlatt-english", "qlatt-beauty"])(
   "resolves the inherited stress resource for %s",
@@ -27,9 +27,12 @@ it("reports a missing resolved policy through the resource owner", () => {
   expect(() =>
     loadFrontendResources({
       ...loadBundledRulepackSpec("qlatt-english"),
-      stress_policy_path: "/rules/frontends/qlatt-english/no-such-stress-policy.yaml",
+      resources: {
+        ...loadBundledRulepackSpec("qlatt-english").resources,
+        stress_policy: "/rules/frontends/qlatt-english/no-such-stress-policy.yaml",
+      },
     }),
-  ).toThrow(/E_FRONTEND_CONFIG.*stress_policy_path/);
+  ).toThrow(/E_FRONTEND_CONFIG.*stress_policy/);
 });
 
 it("keeps DECtalk table suffix pronunciation without shared contexts", () => {
@@ -79,14 +82,20 @@ it("still acquires explicitly declared shared resources for a table frontend", (
     throw new Error("Qlatt fixture requires shared contexts");
   const selected = loadFrontendResources({
     ...spec,
-    morphology_path: shared.morphology.path,
-    stress_policy_path: shared.stress.path,
+    resources: {
+      ...spec.resources,
+      morphology: shared.morphology.path,
+      stress_policy: shared.stress.path,
+    },
   });
   expect(selected.morphology?.data).toBe(shared.morphology.data);
   expect(selected.stress).toBe(shared.stress);
   expect(() =>
-    loadFrontendResources({ ...spec, stress_policy_path: "/missing-shared-stress.yaml" }),
-  ).toThrow(/E_FRONTEND_CONFIG.*stress_policy_path/);
+    loadFrontendResources({
+      ...spec,
+      resources: { ...spec.resources, stress_policy: "/missing-shared-stress.yaml" },
+    }),
+  ).toThrow(/E_FRONTEND_CONFIG.*stress_policy/);
 });
 
 it("keeps declared morphology phonotactics separate and rejects incompatible stress data", () => {
@@ -105,13 +114,13 @@ it("keeps declared morphology phonotactics separate and rejects incompatible str
     if (path === "/fixture/morphology.yaml") return morphology;
     if (path === "/fixture/morphology-phonotactics.yaml") return separate;
     if (path === "/fixture/bad-stress.yaml")
-      return { ...policy, phonotactics_path: spec.inventory_path };
+      return { ...policy, phonotactics_path: spec.resources.inventory };
     return read(path);
   });
   try {
     const selected = loadFrontendResources({
       ...spec,
-      morphology_path: "/fixture/morphology.yaml",
+      resources: { ...spec.resources, morphology: "/fixture/morphology.yaml" },
     });
     if (!selected.morphology) throw new Error("Fixture requires selected morphology");
     expect(selected.morphology.phonotactics).toBe(separate);
@@ -122,8 +131,11 @@ it("keeps declared morphology phonotactics separate and rejects incompatible str
     expect(decomposeWord("walked", lookup, base.morphology)?.phonemes.at(-1)).toBe("T");
     expect(decomposeWord("walked", lookup, selected.morphology)?.phonemes.at(-1)).toBe("D");
     expect(() =>
-      loadFrontendResources({ ...spec, stress_policy_path: "/fixture/bad-stress.yaml" }),
-    ).toThrow(/E_FRONTEND_CONFIG.*stress_policy_path/);
+      loadFrontendResources({
+        ...spec,
+        resources: { ...spec.resources, stress_policy: "/fixture/bad-stress.yaml" },
+      }),
+    ).toThrow(/E_FRONTEND_CONFIG.*stress_policy/);
   } finally {
     spy.mockRestore();
   }

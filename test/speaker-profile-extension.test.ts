@@ -20,7 +20,10 @@ const profilePath = "test/fixtures/speaker-profile/extended.yaml";
 
 describe("declarative speaker profile fields", () => {
   it("keeps an undeclared profile absent until synthesis requires it", () => {
-    const spec = { ...qlattRulepack, speaker_profile_path: null };
+    const spec = {
+      ...qlattRulepack,
+      resources: { ...qlattRulepack.resources, speaker_profile: null },
+    };
     expect(loadFrontendResources(spec).speakerProfile).toBeUndefined();
     const spy = vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
     try {
@@ -35,7 +38,7 @@ describe("declarative speaker profile fields", () => {
   it("uses the frontend's profile fields for voice selection and provenance", () => {
     const spy = vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue({
       ...qlattRulepack,
-      speaker_profile_path: profilePath,
+      resources: { ...qlattRulepack.resources, speaker_profile: profilePath },
       speakers: {
         dir: "test/fixtures/speaker-profile",
         default: "voice",

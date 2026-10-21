@@ -18,7 +18,12 @@ import {
   preloadInventorySpecFromPath,
   preloadVoiceRuleDocuments,
 } from "./inventory";
-import { DSL_ROOT_KEYS, type NormalizedDslSpec, parseDslSpec } from "./parser";
+import {
+  DSL_ROOT_KEYS,
+  type NormalizedDslSpec,
+  normalizeResourceAliases,
+  parseDslSpec,
+} from "./parser";
 import {
   assertValidSpec,
   type DiagnosticDocumentSpans,
@@ -91,23 +96,26 @@ export function rulepackMapOrigins(
 
 /** Parse a rulepack YAML source into a raw object document (no DSL normalization). */
 function parseRulepackDocument(source: string, label: string): PlainObject {
-  const document = parseYamlString(source, label, {
+  const authored = parseYamlString(source, label, {
     resource: label.replace(/^(included|base) rulepack /, ""),
     role: "rulepack",
   });
-  if (!isPlainObject(document)) {
+  if (!isPlainObject(authored)) {
     throw new Error(`E_RULEPACK_DOCUMENT: ${label} must be a YAML object document`);
   }
+  const aliases: ValidationDiagnostic[] = [];
+  const document = normalizeResourceAliases(authored, aliases);
+  RULEPACK_DIAGNOSTICS.set(document, aliases);
   PARAMETER_ORIGINS.set(
     document,
     Object.freeze(
-      yamlDocumentSpans(document).filter((entry) => entry.value.path[0] === "parameters"),
+      yamlDocumentSpans(authored).filter((entry) => entry.value.path[0] === "parameters"),
     ),
   );
   RULE_DOCUMENT_SPANS.set(
     document,
     Object.freeze(
-      yamlDocumentSpans(document).filter(
+      yamlDocumentSpans(authored).filter(
         (entry) =>
           entry.value.path[0] === "rules" &&
           (entry.value.path.every((part) => typeof part === "string") ||
@@ -120,7 +128,7 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
   FUNCTION_BODY_SPANS.set(
     document,
     Object.freeze(
-      yamlDocumentSpans(document).filter(
+      yamlDocumentSpans(authored).filter(
         ({ value: { path } }) => path.length === 3 && path[0] === "functions" && path[2] === "body",
       ),
     ),
@@ -213,6 +221,10 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
   if (!isPlainObject(merged)) {
     throw new Error("E_RULEPACK_COMPILE: normalized root must remain an object");
   }
+  RULEPACK_DIAGNOSTICS.set(merged, [
+    ...(RULEPACK_DIAGNOSTICS.get(root) ?? []),
+    ...(RULEPACK_DIAGNOSTICS.get(child) ?? []),
+  ]);
   // Includes do not merge parameters; the cloned root retains their authored locations.
   PARAMETER_ORIGINS.set(merged, PARAMETER_ORIGINS.get(root) ?? NO_PARAMETER_ORIGINS);
   FUNCTION_BODY_SPANS.set(
@@ -415,6 +427,7 @@ function inheritPhasedShadowedRules(resolved: PlainObject): void {
  */
 function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObject): PlainObject {
   const merged: PlainObject = { ...childFile };
+  RULEPACK_DIAGNOSTICS.set(merged, RULEPACK_DIAGNOSTICS.get(childFile) ?? []);
   for (const key of INHERITED_SHADOWED_FILE_KEYS) {
     const baseDict = baseFile[key];
     if (!isPlainObject(baseDict)) continue;
@@ -583,6 +596,10 @@ function resolveExtendsSync(
   const baseSource = loadYamlSourceSync(basePath);
   const baseDoc = parseRulepackDocument(baseSource, `base rulepack ${basePath}`);
   const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
+  RULEPACK_DIAGNOSTICS.set(merged, [
+    ...(RULEPACK_DIAGNOSTICS.get(baseDoc) ?? []),
+    ...(RULEPACK_DIAGNOSTICS.get(rootDoc) ?? []),
+  ]);
   PARAMETER_ORIGINS.set(merged, mergeParameterOrigins(baseDoc, rootDoc));
   RULE_DOCUMENT_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, RULE_DOCUMENT_SPANS));
   FUNCTION_BODY_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, FUNCTION_BODY_SPANS));
@@ -614,6 +631,10 @@ async function resolveExtendsAsync(
   const baseSource = await loadYamlSource(basePath);
   const baseDoc = parseRulepackDocument(baseSource, `base rulepack ${basePath}`);
   const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
+  RULEPACK_DIAGNOSTICS.set(merged, [
+    ...(RULEPACK_DIAGNOSTICS.get(baseDoc) ?? []),
+    ...(RULEPACK_DIAGNOSTICS.get(rootDoc) ?? []),
+  ]);
   PARAMETER_ORIGINS.set(merged, mergeParameterOrigins(baseDoc, rootDoc));
   RULE_DOCUMENT_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, RULE_DOCUMENT_SPANS));
   FUNCTION_BODY_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, FUNCTION_BODY_SPANS));
@@ -784,14 +805,20 @@ function parseComposedRulepack(
 
 export function compileRuleEngineSpec(source: unknown): CompiledRulepack {
   const parameterSchemaDeclared = isPlainObject(source) && Object.hasOwn(source, "parameters");
-  const spec = parseDslSpec(withVoiceRulePolicy(source, loadVoiceRuleDocuments(source)));
+  const aliases: ValidationDiagnostic[] = [];
+  const voiced = withVoiceRulePolicy(source, loadVoiceRuleDocuments(source));
+  const authored = typeof voiced === "string" ? parseYamlString(voiced, "dsl spec") : voiced;
+  const document = isPlainObject(authored) ? normalizeResourceAliases(authored, aliases) : authored;
+  const spec = parseDslSpec(document);
   const inventory =
-    typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
+    typeof spec.resources.inventory === "string"
+      ? loadInventorySpecFromPath(spec.resources.inventory)
+      : null;
   const diagnostics = assertValidSpec(spec, {
     inventoryPhonemes: validationInventoryPhonemes(inventory),
     parameterSchemaDeclared,
   });
-  recordDiagnostics(spec, diagnostics);
+  recordDiagnostics(spec, [...aliases, ...diagnostics]);
   freezeRecursively(spec);
   return spec;
 }
@@ -870,7 +897,9 @@ export function loadRulepackSpecFromPath(specPath: string): CompiledRulepack {
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
   const inventory =
-    typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
+    typeof spec.resources.inventory === "string"
+      ? loadInventorySpecFromPath(spec.resources.inventory)
+      : null;
   const diagnostics = assertValidSpec(spec, {
     inventoryPhonemes: validationInventoryPhonemes(inventory),
     documentSpans: [...rulepackParameterOrigins(spec), ...rulepackRuleDocumentSpans(spec)],
@@ -878,7 +907,7 @@ export function loadRulepackSpecFromPath(specPath: string): CompiledRulepack {
     requireTagVocabulary: true,
     requireSyllabification: true,
   });
-  recordDiagnostics(spec, diagnostics);
+  recordDiagnostics(spec, [...(RULEPACK_DIAGNOSTICS.get(merged) ?? []), ...diagnostics]);
   freezeRecursively(spec);
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;
@@ -957,8 +986,8 @@ export async function preloadRulepackSpecFromPath(specPath: string): Promise<Com
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
   const inventory =
-    typeof spec.inventory_path === "string"
-      ? await preloadInventorySpecFromPath(spec.inventory_path)
+    typeof spec.resources.inventory === "string"
+      ? await preloadInventorySpecFromPath(spec.resources.inventory)
       : null;
   const diagnostics = assertValidSpec(spec, {
     inventoryPhonemes: validationInventoryPhonemes(inventory),
@@ -967,7 +996,7 @@ export async function preloadRulepackSpecFromPath(specPath: string): Promise<Com
     requireTagVocabulary: true,
     requireSyllabification: true,
   });
-  recordDiagnostics(spec, diagnostics);
+  recordDiagnostics(spec, [...(RULEPACK_DIAGNOSTICS.get(merged) ?? []), ...diagnostics]);
   freezeRecursively(spec);
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;

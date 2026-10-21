@@ -24,7 +24,7 @@ describe("source contour projection policy", () => {
     loadFrontendResources(frontend);
     const text = yaml.loadYamlSourceSync(fixturePath);
     const path = "/test/async-source-contour.yaml";
-    const selected = { ...frontend, source_contour_path: path };
+    const selected = { ...frontend, resources: { ...frontend.resources, source_contour: path } };
     const fetch = vi.fn().mockResolvedValue(new Response(text));
     vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
     vi.stubGlobal("fetch", fetch);
@@ -44,7 +44,7 @@ describe("source contour projection policy", () => {
 
   it("allows absent optional contour resources until a consumer requires them", async () => {
     const frontend = rulepack.loadBundledRulepackSpec("qlatt-english");
-    const selected = { ...frontend, source_contour_path: null };
+    const selected = { ...frontend, resources: { ...frontend.resources, source_contour: null } };
     expect(loadFrontendResources(selected).sourceContour).toBeUndefined();
     await expect(preloadFrontendSourceContour(selected)).resolves.toBeUndefined();
     vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(selected);
@@ -62,7 +62,7 @@ describe("source contour projection policy", () => {
     const spec = rulepack.loadBundledRulepackSpec("qlatt-english");
     vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue({
       ...spec,
-      source_contour_path: fixturePath,
+      resources: { ...spec.resources, source_contour: fixturePath },
     });
     const result = textToKlattTrackDetailed("hello", 110, 30);
     const frames = result.track.filter((frame) => frame.phoneme && frame.phoneme !== "SIL");
@@ -128,7 +128,7 @@ describe("source contour projection policy", () => {
     const path = "/test/invalid-target-source-contour.yaml";
     vi.spyOn(rulepack, "preloadBundledRulepackSpec").mockResolvedValue({
       ...frontend,
-      source_contour_path: path,
+      resources: { ...frontend.resources, source_contour: path },
     });
     vi.spyOn(yaml, "loadYamlDocument").mockImplementation(async (path) =>
       path === "/test/invalid-target-source-contour.yaml" ? document : loadDocument(path),

@@ -20,7 +20,7 @@ describe("annotation phase: syllable count and cluster position", () => {
   it("maps every Qlatt inventory phone and normalization alias except silence", () => {
     const spec = loadBundledRulepackSpec("qlatt-english");
     const tables = parseSyllabificationTables(spec.syllabification)!;
-    const inventory = loadInventorySpecFromPath(spec.inventory_path as string);
+    const inventory = loadInventorySpecFromPath(spec.resources.inventory as string);
     for (const phone of [
       ...Object.keys(inventory.phoneme_targets),
       ...Object.keys(inventory.normalization_aliases ?? {}),

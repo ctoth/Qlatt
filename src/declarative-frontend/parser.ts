@@ -1,7 +1,43 @@
 import { cloneValue, isPlainObject, parseYamlString } from "../yaml-loader";
 import { expandSpecCelMacros, type MacroExpansionObserver, parseCelMacroBlock } from "./cel-macros";
+import type { ValidationDiagnostic } from "./validation";
 
 type PlainObject = Record<string, unknown>;
+const RESOURCE_ALIASES = {
+  inventory_path: "inventory",
+  lts_path: "lts",
+  morphology_path: "morphology",
+  stress_policy_path: "stress_policy",
+  dictionary_path: "lexicon",
+  speaker_profile_path: "speaker_profile",
+  source_contour_path: "source_contour",
+} as const;
+
+/** Normalize one authored document before inheritance; never mutate the input. */
+export function normalizeResourceAliases(
+  source: PlainObject,
+  diagnostics: ValidationDiagnostic[] = [],
+): PlainObject {
+  if (!Object.keys(RESOURCE_ALIASES).some((alias) => Object.hasOwn(source, alias))) return source;
+  const document = { ...source };
+  const resources = isPlainObject(source.resources) ? { ...source.resources } : {};
+  for (const [alias, role] of Object.entries(RESOURCE_ALIASES)) {
+    if (!Object.hasOwn(source, alias)) continue;
+    diagnostics.push({
+      code: "W_FRONTEND_RESOURCE_ALIAS",
+      severity: "warning",
+      path: alias,
+      message: `${alias} is deprecated; declare resources.${role} instead`,
+    });
+    // Presence, including explicit null, wins over an alias in the same document.
+    if (!Object.hasOwn(resources, role)) resources[role] = source[alias];
+    delete document[alias];
+  }
+  if (Object.keys(resources).length || Object.hasOwn(source, "resources")) {
+    document.resources = resources;
+  }
+  return document;
+}
 export type RulePathObserver = (
   compiled: readonly (string | number)[],
   authored: readonly (string | number)[],
@@ -265,6 +301,7 @@ function expandForeachValue(
 
 export const DSL_ROOT_KEYS = new Set([
   "version",
+  "resources",
   "inventory_path",
   "lts_path",
   "morphology_path",
@@ -496,7 +533,7 @@ export function parseDslSpec(
     throw new Error("DSL spec must be an object or YAML object document");
   }
   const raw = expandSpecCelMacros(
-    parsed,
+    normalizeResourceAliases(parsed),
     parseCelMacroBlock(parsed.functions),
     observeMacroExpansion,
   );
@@ -525,14 +562,8 @@ export function parseDslSpec(
     ...extraRootFields,
     functions: cloneObject(raw.functions),
     version: raw.version ?? null,
-    inventory_path: asString(raw.inventory_path, null),
-    lts_path: asString(raw.lts_path, null),
-    morphology_path: asString(raw.morphology_path, null),
-    stress_policy_path: asString(raw.stress_policy_path, null),
+    resources: cloneObject(raw.resources),
     accent_policy_path: asString(raw.accent_policy_path, null),
-    dictionary_path: asString(raw.dictionary_path, null),
-    speaker_profile_path: asString(raw.speaker_profile_path, null),
-    source_contour_path: asString(raw.source_contour_path, null),
     normalization: cloneObject(raw.normalization),
     ...(Object.hasOwn(raw, "text_recognition")
       ? { text_recognition: cloneValue(raw.text_recognition) }

@@ -7,7 +7,7 @@ inside the table and Elovitz consumers (#141).
 
 Fresh branch from ad91bc80. Implementation complete: 43 production additions /
 59 removals and 79 existing fixture additions / 43 removals. Actual callers,
-remaining path references and owned diff inspected; publishing for hosted CI.
+remaining path references and owned diff inspected; PR #392 published.
 
 # Decisions and why
 
@@ -27,6 +27,8 @@ outside this slice; #141 stays open. Other agents' changes are preserved.
 Existing resource fixtures cover same-path explicit document overrides, and
 Elovitz fixtures cover distinct documents with different context-symbol patterns.
 The table decoder, .json classification and pronunciation arithmetic are retained.
+Hosted quality job119122611488 found one formatter error in the fixture import.
+Applied its exact single-line import formatting; no behavioral change or local CI.
 
 # Next step
 

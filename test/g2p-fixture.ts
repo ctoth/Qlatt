@@ -2,10 +2,7 @@ import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { normalizeGraphText } from "../src/declarative-frontend/source-recognition";
 import { pronounce as pronounceWithResources } from "../src/g2p";
-import {
-  applyLtsRules as applyConfiguredLtsRules,
-  type LtsRulesData,
-} from "../src/g2p/lts-engine";
+import { applyLtsRules as applyConfiguredLtsRules, type LtsRulesData } from "../src/g2p/lts-engine";
 import { assignStress as assignConfiguredStress, type StressHint } from "../src/g2p/stress";
 import {
   isVowel as isConfiguredVowel,

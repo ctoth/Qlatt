@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import url from "node:url";
 
 /**
  * Normalize a resource path for both browser and Node environments.
@@ -36,12 +37,15 @@ export function isNodeRuntime(): boolean {
  *
  * Probes:
  * 1. The raw specPath itself (if absolute)
- * 2. `cwd()/public/<relativePath>`
- * 3. `cwd()/<relativePath>`
+ * 2. Source package `public/<relativePath>`
+ * 3. Source package `<relativePath>`
+ * Relative logical resource names use the package anchor; custom native files
+ * must be absolute. The current working directory is not an asset root.
  */
 export function resolveFileFromFsSync(specPath: string): string | null {
   if (!isNodeRuntime()) return null;
 
+  const packageRoot = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "..");
   const normalized = normalizePath(specPath);
   const relativePath = normalized.replace(/^\/+/, "");
   const candidates = new Set<string>();
@@ -50,8 +54,8 @@ export function resolveFileFromFsSync(specPath: string): string | null {
     candidates.add(specPath);
   }
   if (relativePath.length > 0) {
-    candidates.add(path.resolve(process.cwd(), "public", relativePath));
-    candidates.add(path.resolve(process.cwd(), relativePath));
+    candidates.add(path.resolve(packageRoot, "public", relativePath));
+    candidates.add(path.resolve(packageRoot, relativePath));
   }
 
   for (const candidate of candidates) {
@@ -70,8 +74,8 @@ export function resolveFileFromFsSync(specPath: string): string | null {
  *
  * Probes several candidate paths derived from the given specPath:
  * 1. The raw specPath itself (if absolute)
- * 2. Resolved under `cwd()/public/<relativePath>`
- * 3. Resolved under `cwd()/<relativePath>`
+ * 2. Resolved under the source package's `public/<relativePath>`
+ * 3. Resolved under the source package's `<relativePath>`
  *
  * Returns null in non-Node environments or when no candidate exists.
  * Read failures after resolution propagate to the caller.

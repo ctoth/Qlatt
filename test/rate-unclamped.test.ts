@@ -181,7 +181,7 @@ describe("reference rate normalization", () => {
       const spec = structuredClone(rulepack.loadBundledRulepackSpec(frontendId));
       durationPolicy(spec).rate_reference = { value: 2, citations };
       vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-        spec,
+        spec: rulepack.compileRuleEngineSpec(spec),
         resources: rulepack.loadFrontendResources(spec),
         voices: {},
       });
@@ -274,7 +274,7 @@ describe("frontend rate defaults", () => {
       const spec = structuredClone(rulepack.loadBundledRulepackSpec(frontendId));
       ratePolicy(spec).default.value = 1.5;
       vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-        spec,
+        spec: rulepack.compileRuleEngineSpec(spec),
         resources: rulepack.loadFrontendResources(spec),
         voices: {},
       });

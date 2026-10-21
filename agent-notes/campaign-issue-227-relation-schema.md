@@ -23,6 +23,9 @@ and renameVocabulary cloned a compiled spec without its compiler side metadata.
 Updated the real line and compiled the renamed fixture against its corresponding
 renamed inventory through the existing loader. Production validation is unchanged.
 Applied hosted job119236825300's exact chained-spy formatter layout.
+Shard2 then exposed the same cloned-spec assumption in two valid DECtalk rate
+fixtures. Both now compile their configured clone before resolver delivery;
+their policies, real inventory and downstream output assertions stay unchanged.
 
 ## Decisions and why
 - Retain authored declarations and bare enum/name lists; validation currently reads

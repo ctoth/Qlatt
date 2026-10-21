@@ -15,6 +15,7 @@
 import { getAudioParam } from "./audio-param-utils";
 import { createDiagnostics, type Diagnostics } from "./diagnostics";
 import type { BindingSpec, KlattRuntime } from "./klatt-runtime";
+import type { ProvenanceCollector } from "./provenance";
 import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
 import { createRealizationDiagnostics } from "./semantics/realization-diagnostics";
 import type { EvaluationContext, ParamValue, SemanticsDocument } from "./semantics/types";
@@ -79,6 +80,8 @@ export type PreparedTrack = {
 };
 
 export interface KlattScheduleCompilerOptions {
+  /** Records compiled mode selection, not playback time or value ancestry. */
+  provenance?: ProvenanceCollector;
   sampleRate: number;
   semantics: SemanticsDocument;
   bindingMap: ReadonlyMap<string, readonly BindingSpec[]>;
@@ -92,6 +95,7 @@ export interface KlattScheduleCompiler {
 }
 
 export interface KlattInterpreterOptions {
+  provenance?: ProvenanceCollector;
   diagnostics?: Diagnostics;
   audioContext: AudioContext;
   runtime: KlattRuntime;
@@ -452,12 +456,32 @@ export function createKlattScheduleCompiler(
         if (valid) {
           // Ramp bindings: setValueAtTime at frame 0, linearRamp thereafter.
           // Frame 0 must use setValueAtTime to establish the automation anchor.
+          const mode = binding.ramp && i > 0 ? "ramp" : "step";
           schedule.push({
             time: t,
             target: { nodeId: binding.nodeId, paramName: binding.paramName },
             value,
-            mode: binding.ramp && i > 0 ? "ramp" : "step",
+            mode,
           });
+          if (options.provenance) {
+            const selection =
+              i === 0 && binding.ramp
+                ? "first-frame anchor"
+                : stepParams.has(binding.name)
+                  ? "realize rule step: true"
+                  : rampParams.has(binding.name)
+                    ? "realize rule ramp: true"
+                    : `defaultScheduling: ${semantics.defaultScheduling ?? "absent (step)"}`;
+            options.provenance.add({
+              stage: "interpreter",
+              type: "schedule_mode_selected",
+              subject: `binding:${binding.nodeId}.${binding.paramName}`,
+              reason: `${semantics.name}: ${binding.name} (${binding.source}) value ${value}, frame ${i}, compiled schedule time ${t}s: ${mode} selected by ${selection}; not playback time`,
+              citations: [
+                "docs/host-contract.md section 5 (automation mode selection and first-frame anchor)",
+              ],
+            });
+          }
         }
       }
     }

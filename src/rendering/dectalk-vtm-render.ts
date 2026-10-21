@@ -45,7 +45,7 @@ export interface DectalkVtmRenderOptions {
   repoRoot: string;
   track: KlattFrame[];
   sampleRate: number;
-  /** Receives a decision record for each choice the node reports. */
+  /** Receives interpreter mode selections and each choice the node reports. */
   provenance?: ProvenanceCollector;
   /**
    * The frontend the track came from. The experiment is then loaded as the
@@ -124,6 +124,7 @@ export async function renderDectalkVtmTrack(
     runtime.connectToDestination();
     try {
       const interpreter = createKlattInterpreter({
+        provenance,
         audioContext: ctx as unknown as AudioContext,
         runtime,
         semantics: config.semantics,

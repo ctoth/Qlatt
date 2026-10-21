@@ -1341,7 +1341,7 @@ function buildTextToKlattTrackDetailed(
         },
         directionTrack: options.directionTrack,
       },
-      { provenance },
+      { provenance, frontendId, affectLibrary: resources.affectPresets?.library },
     );
     attachDirectionsToUtterance(parsed, utterance);
   }

@@ -124,7 +124,7 @@ export interface VoiceIdentity {
  * Absent ⇒ neutral.
  */
 export interface AffectSpec {
-  /** Named preset (see affect.ts AFFECT_PRESETS). */
+  /** Named preset from the selected frontend's affect library. */
   preset: AffectCategory;
   /** Intensity in [0, 1]; 0 ⇒ neutral, 1 ⇒ full preset. Defaults to 1. */
   degree?: number;

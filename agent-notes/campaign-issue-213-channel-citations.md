@@ -18,4 +18,4 @@ The fresh worktree has no node_modules. Supervisor verified the main checkout's 
 
 # Next step
 
-Publish for hosted CI and independent Claude review; respond to findings. No local CI run or dependency installation. Supervisor owns merge and #213 partial-scope bookkeeping.
+PR #380 hosted quality job 119095298802 reported `test/input.test.ts format` and exited 1: the configured-channel fixture's map object required multiline formatting. Applied the exact reflow; no behavior change or local CI rerun. Independent Claude review is in progress. Push the correction and await replacement CI and review feedback. Supervisor owns merge and #213 partial-scope bookkeeping.

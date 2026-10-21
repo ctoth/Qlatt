@@ -494,7 +494,10 @@ describe("input contract — anchor resolution + span precedence", () => {
 describe("input contract — directions emit cited DecisionRecords (HRG-compatible)", () => {
   it("attributes pitch, rate, and VQ to only their selected configured channel entries", () => {
     const configured = parseVoiceQualityChannels({
-      channels: channels.map((row) => ({ ...row, citations: [`authored:${row.channel}`, "shared"] })),
+      channels: channels.map((row) => ({
+        ...row,
+        citations: [`authored:${row.channel}`, "shared"],
+      })),
     });
     const cases: { fields: Partial<DirectionSpan>; keys: string[]; kind: string }[] = [
       { fields: { pitch: { semitones: 12 } }, keys: ["f0Scale"], kind: "pitch" },

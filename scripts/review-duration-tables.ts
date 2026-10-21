@@ -30,6 +30,10 @@ if (mode === "capture" || mode === "golden") {
     const { summarizeTrackMetrics } = (await server.ssrLoadModule(
       "/src/analysis/track-metrics.ts",
     )) as typeof import("../src/analysis/track-metrics");
+    const { loadExperimentConfig } = (await server.ssrLoadModule(
+      "/src/experiments/load-experiment-config.ts",
+    )) as typeof import("../src/experiments/load-experiment-config");
+    const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis!.metrics!;
     const corpus = JSON.parse(
       readFileSync(resolve(root, "test/phrase-sets/linguistic.json"), "utf8"),
     ) as {
@@ -82,6 +86,7 @@ if (mode === "capture" || mode === "golden") {
               phrase,
               ...summarizeTrackMetrics(
                 textToKlattTrackDetailed(phrase, corpus.baseF0, 30, { rate }).track,
+                metricsPolicy,
               ),
             })),
           };

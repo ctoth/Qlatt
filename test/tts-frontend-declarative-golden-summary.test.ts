@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import { summarizeTrackMetrics } from "../src/analysis/track-metrics";
+import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
 import { textToKlattTrack } from "../src/tts-frontend";
+
+const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis!.metrics!;
 
 type Corpus = {
   name: string;
@@ -49,7 +52,7 @@ function summarizePhrase(phrase: string, baseF0: number): PhraseSummary {
   const track = textToKlattTrack(phrase, baseF0);
   return {
     phrase,
-    ...summarizeTrackMetrics(track),
+    ...summarizeTrackMetrics(track, metricsPolicy),
   };
 }
 

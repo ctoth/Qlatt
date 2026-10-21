@@ -266,7 +266,11 @@ export async function speakWithNewRuntime(track, baseF0) {
   });
 
   const trackDuration = state.newInterpreter.getTrackDuration();
-  console.log("[QLATT] Track summary", summarizeTrack(track));
+  const metricsPolicy = state.newRuntimeSemantics?.analysis?.metrics;
+  console.log(
+    "[QLATT] Track summary",
+    metricsPolicy ? summarizeTrack(track, metricsPolicy) : "(no experiment metrics policy)",
+  );
   const parallelSummary = summarizeParallel(track);
   console.log("[QLATT] Parallel summary", parallelSummary);
   if (parallelSummary.parallelEvents > 0 && parallelSummary.swOn === 0) {

@@ -44,6 +44,26 @@ function makeCheckResult(overrides: Partial<CheckResult>): CheckResult {
 
 const checkSection: DisplaySection = { id: "checks", source: "check_results" };
 
+it("uses selected metrics in the track display and marks undeclared metrics unavailable", async () => {
+  const run: RunInfo = {
+    phrase: "test",
+    baseF0: 100,
+    sessionId: 1,
+    startTime: 0,
+    track: [{ time: 0, params: { voice: 1, AV: 0 } }],
+  };
+  const section: DisplaySection = { id: "summary", source: "track_summary" };
+  const { semantics } = await loadExperimentConfig("klatt80-baseline");
+  const control = formatSection(section, makeState({ run, semantics }));
+  expect(control).toContain("Voiced events: 0");
+  semantics.analysis!.metrics!.voicing_params = ["voice"];
+  expect(formatSection(section, makeState({ run, semantics }))).toContain("Voiced events: 1");
+  const vtm = await loadExperimentConfig("dectalk-vtm");
+  expect(formatSection(section, makeState({ run, semantics: vtm.semantics }))).toEqual([
+    "(no experiment metrics policy)",
+  ]);
+});
+
 describe("display-formatter", () => {
   // 1. check_results section: pass shows [OK]
   it("check_results section: pass shows [OK]", () => {

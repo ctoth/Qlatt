@@ -1,4 +1,5 @@
 import { createDiagnostics } from "../../diagnostics.ts";
+import { loadExperimentConfig } from "../../experiments/load-experiment-config.ts";
 import { textToKlattTrackDetailed } from "../../tts-frontend.ts";
 import { summarizeTrack } from "../track-summary.ts";
 import type { RenderBackend, RenderPayload, RenderRequest } from "../types.ts";
@@ -10,6 +11,7 @@ export const trackOnlyBackend: RenderBackend = {
   },
   async render(request: RenderRequest): Promise<RenderPayload> {
     const diagnostics = createDiagnostics({ maxEntries: 1000 });
+    const config = await loadExperimentConfig(request.experimentId, request.frontendId);
     const frontend = textToKlattTrackDetailed(
       request.phrase,
       request.baseF0,
@@ -46,7 +48,12 @@ export const trackOnlyBackend: RenderBackend = {
       tailTime: request.tailTime,
       length: Math.max(1, Math.ceil(totalTime * request.sampleRate)),
       metrics: { rms: 0, peak: 0 },
-      trackSummary: summarizeTrack(track),
+      trackSummary: summarizeTrack(
+        track,
+        config.semantics.analysis?.metrics,
+        diagnostics,
+        request.experimentId,
+      ),
       diagnostics: diagnostics.getEntries(),
       samples: [],
     };

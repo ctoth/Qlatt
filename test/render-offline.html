@@ -7,30 +7,14 @@
   </head>
   <body>
     <script type="module">
+      import { createDiagnostics } from "../src/diagnostics.ts";
+      import { loadExperimentConfig } from "../src/experiments/load-experiment-config.ts";
       import { preloadF0Filters } from "../src/f0-filters-loader.ts";
       import { KlattSynth } from "../src/klatt-synth.ts";
+      import { summarizeTrack } from "../src/rendering/track-summary.ts";
       import { textToKlattTrackDetailed } from "../src/tts-frontend.ts";
 
       const F0_FILTERS_WASM_URL = `${import.meta.env.BASE_URL}worklets/f0-filters.wasm`;
-
-      function summarizeTrack(track) {
-        const totalTime = track.length ? track[track.length - 1].time : 0;
-        const voiced = track.filter(
-          (event) => (event.params?.AV ?? 0) > 0 || (event.params?.AVS ?? 0) > 0
-        );
-        const f0Values = track
-          .map((event) => event.params?.F0 ?? 0)
-          .filter((v) => v > 0);
-        const f0Min = f0Values.length ? Math.min(...f0Values) : 0;
-        const f0Max = f0Values.length ? Math.max(...f0Values) : 0;
-        return {
-          events: track.length,
-          totalTime,
-          voicedEvents: voiced.length,
-          f0Min,
-          f0Max,
-        };
-      }
 
       async function renderOffline({
         phrase,
@@ -199,6 +183,10 @@
           }
         }
 
+        // The legacy synthesizer implements the fixed Klatt80 graph.
+        const config = await loadExperimentConfig("klatt80-baseline");
+        const diagnostics = createDiagnostics();
+        const trackSummary = summarizeTrack(resolvedTrack, config.semantics.analysis?.metrics, diagnostics, "klatt80-baseline");
         return {
           phrase,
           baseF0,
@@ -212,7 +200,8 @@
           length,
           metrics: { rms, peak },
           agc: applyAgc ? { target, scale: agcScale, mode: agcMode } : undefined,
-          trackSummary: summarizeTrack(resolvedTrack),
+          trackSummary,
+          diagnostics: diagnostics.getEntries(),
           track: includeTrack ? resolvedTrack : undefined,
           telemetry: includeTelemetry ? telemetry : undefined,
           samples,

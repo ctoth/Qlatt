@@ -167,6 +167,20 @@ describe("render request frontend options", () => {
         const result = direct(req);
         for (const backend of [warm, trackOnlyBackend]) {
           const rendered = await backend.render(req);
+          if (req.experimentId === "dectalk-vtm") {
+            expect(rendered.trackSummary).toBeUndefined();
+            expect(rendered.diagnostics).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({
+                  level: "info",
+                  code: "I_TRACK_METRICS_UNAVAILABLE",
+                  data: { experimentId: req.experimentId },
+                }),
+              ]),
+            );
+          } else {
+            expect(rendered.trackSummary?.events).toBe(result.track.length);
+          }
           expect(rendered.track).toEqual(result.track);
           expect(rendered.resolvedSpeaker).toEqual(result.resolvedSpeaker);
           expect(rendered.speaker).toEqual(req.speaker);
@@ -257,6 +271,7 @@ describe("render request frontend options", () => {
           expect(payload.directionTrack).toEqual(req.directionTrack);
           expect(payload.speaker).toEqual(req.speaker);
           expect(payload.voiceQuality).toBe(req.voiceQuality);
+          expect(payload.trackSummary?.events).toBe(expected.track.length);
         }
         await expect(
           session.render(

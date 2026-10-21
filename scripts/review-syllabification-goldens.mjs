@@ -10,6 +10,8 @@ import { pathToFileURL } from "node:url";
 const source = (name) => import(pathToFileURL(resolve("src", name)).href);
 const { textToKlattTrackDetailed } = await source("tts-frontend.ts");
 const { summarizeTrackMetrics } = await source("analysis/track-metrics.ts");
+const { loadExperimentConfig } = await source("experiments/load-experiment-config.ts");
+const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis.metrics;
 const output = { corpora: [], tones: [] };
 function render(phrase, baseF0, options) {
   const { track, utterance } = textToKlattTrackDetailed(phrase, baseF0, 30, options);
@@ -52,7 +54,7 @@ for (const name of ["declarative-corpus-summary", "crystal-tempo-corpus-summary"
   const golden = JSON.parse(readFileSync(`test/golden/${name}.json`, "utf8"));
   const summaries = golden.summaries.map(({ phrase }) => {
     const { track, segments } = render(phrase, golden.baseF0, { rate: golden.rate });
-    return { phrase, metrics: summarizeTrackMetrics(track), segments };
+    return { phrase, metrics: summarizeTrackMetrics(track, metricsPolicy), segments };
   });
   output.corpora.push({ name, summaries });
 }

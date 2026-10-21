@@ -2,8 +2,11 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { expect, it, vi } from "vitest";
 import { summarizeTrackMetrics } from "../src/analysis/track-metrics";
 import type { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
+import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
 import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+
+const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis!.metrics!;
 
 const control = vi.hoisted(() => ({ legacyTarget: false }));
 vi.mock("../src/declarative-frontend/inventory", async (importOriginal) => {
@@ -36,11 +39,11 @@ it("reviews each corpus change with a legacy acoustic-mapping control", () => {
     control.legacyTarget = false;
     const provenance = createProvenanceCollector();
     const candidate = textToKlattTrackDetailed(phrase, corpus.baseF0, 30, { provenance });
-    const summary = { phrase, ...summarizeTrackMetrics(candidate.track) };
+    const summary = { phrase, ...summarizeTrackMetrics(candidate.track, metricsPolicy) };
     control.legacyTarget = true;
     const legacy = {
       phrase,
-      ...summarizeTrackMetrics(textToKlattTrackDetailed(phrase, corpus.baseF0).track),
+      ...summarizeTrackMetrics(textToKlattTrackDetailed(phrase, corpus.baseF0).track, metricsPolicy),
     };
     control.legacyTarget = false;
     const old = before.summaries[index];

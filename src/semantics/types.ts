@@ -46,8 +46,15 @@ export interface PlstepPolicy {
   citations: string[];
 }
 
+/** Experiment-owned classification of authored track metadata, not measured audio. */
+export interface TrackMetricsPolicy {
+  voicing_params: string[];
+  silence_phoneme: string;
+  citations: string[];
+}
+
 /** Experiment-owned display thresholds, with their cited or estimated basis. */
-export type TrackAnalysisPolicy = Record<
+export type TrackAnalysisPolicy = { metrics?: TrackMetricsPolicy } & Record<
   "maxVoicingIssues" | "lowParallelScale" | "lowParallelGain",
   { value: number; basis: string }
 >;

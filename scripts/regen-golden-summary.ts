@@ -1,6 +1,9 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { summarizeTrackMetrics } from "../src/analysis/track-metrics";
+import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
 import { textToKlattTrack } from "../src/tts-frontend";
+
+const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis!.metrics!;
 
 type Corpus = { name: string; baseF0: number; phrases: string[] };
 
@@ -8,7 +11,7 @@ const corpus = JSON.parse(readFileSync("test/phrase-sets/linguistic.json", "utf8
 
 const summaries = corpus.phrases.map((phrase) => ({
   phrase,
-  ...summarizeTrackMetrics(textToKlattTrack(phrase, corpus.baseF0)),
+  ...summarizeTrackMetrics(textToKlattTrack(phrase, corpus.baseF0), metricsPolicy),
 }));
 
 const golden = {

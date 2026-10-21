@@ -28,7 +28,10 @@
 import assert from "node:assert/strict";
 import { readFileSync, writeFileSync } from "node:fs";
 import { summarizeTrackMetrics } from "../src/analysis/track-metrics";
+import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
 import { textToKlattTrack } from "../src/tts-frontend";
+
+const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis!.metrics!;
 
 type Metrics = ReturnType<typeof summarizeTrackMetrics>;
 type Golden = {
@@ -59,7 +62,7 @@ function review(goldenPath: string, title: string) {
       before.rate == null
         ? textToKlattTrack(old.phrase, before.baseF0)
         : textToKlattTrack(old.phrase, before.baseF0, 30, { rate: before.rate });
-    const metrics = summarizeTrackMetrics(track);
+    const metrics = summarizeTrackMetrics(track, metricsPolicy);
     const changed = (Object.keys(metrics) as (keyof Metrics)[]).filter(
       (key) => Math.abs(metrics[key] - old[key]) > TOLERANCE,
     );

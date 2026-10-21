@@ -79,10 +79,18 @@ describe("lexicon sources in decision records", () => {
 
   it("keeps the shared names in a frontend with the shared lexicon", () => {
     const records = decisions("qlatt-english");
-    expect(wordRecord(records, "is").reason).toBe("Used CMU dictionary pronunciation for 'is'");
-    expect(wordRecord(records, "is").citations).toEqual(["CMU Pronouncing Dictionary"]);
+    const policy = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"))
+      .pronunciationLayers!;
+    const order = policy.order.join(" -> ");
+    expect(wordRecord(records, "is").reason).toBe(
+      `Used CMU dictionary pronunciation for 'is'; selected layer dictionary using declared order ${order}`,
+    );
+    expect(wordRecord(records, "is").citations).toEqual([
+      "CMU Pronouncing Dictionary",
+      ...policy.citations,
+    ]);
     expect(wordRecord(records, "zorblat").reason).toBe(
-      "Word 'zorblat' not in dictionary; used Elovitz LTS + configured lexical stress",
+      `Word 'zorblat' not in dictionary; used Elovitz LTS + configured lexical stress; selected layer lts using declared order ${order}`,
     );
   });
 

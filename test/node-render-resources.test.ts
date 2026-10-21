@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createNodeRenderResources } from "../src/rendering/backends/node-render-resources";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
+import { createNodeRenderResources } from "../src/rendering/backends/node-render-resources";
 import { createNodeRuntimeAssetLoader } from "../src/runtime-assets/node-loader";
 
 vi.mock("../src/experiments/load-experiment-config", () => ({ loadExperimentConfig: vi.fn() }));

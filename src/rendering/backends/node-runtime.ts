@@ -3,9 +3,9 @@ import { AudioWorkletNode as NodeAudioWorkletNode, OfflineAudioContext } from "n
 import { createDiagnostics } from "../../diagnostics.ts";
 import { createKlattInterpreter } from "../../klatt-interpreter.ts";
 import { createKlattRuntime } from "../../klatt-runtime.ts";
+import { textToKlattTrackDetailed } from "../../tts-frontend.ts";
 import { summarizeTrack } from "../track-summary.ts";
 import type { RenderBackend, RenderPayload, RenderRequest } from "../types.ts";
-import { textToKlattTrackDetailed } from "../../tts-frontend.ts";
 import { createNodeRenderResources, loadNodeRenderResources } from "./node-render-resources.ts";
 
 function deriveNodeNoiseSeed(baseSeed: number, nodeId: string): number {

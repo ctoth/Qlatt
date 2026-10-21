@@ -15,8 +15,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { readVtmFixture } from "../scripts/oracle/dectalk-vtm-fixture";
-import { renderDectalkVtmTrack, renderToInt16 } from "../src/rendering/dectalk-vtm-render";
 import { defaultExperimentFor, type FrontendManifest } from "../src/experiments/frontend-pairing";
+import { renderDectalkVtmTrack, renderToInt16 } from "../src/rendering/dectalk-vtm-render";
 import { PLAYBACK_LEAD_SEC } from "../src/track-playback";
 import { textToKlattTrack } from "../src/tts-frontend";
 

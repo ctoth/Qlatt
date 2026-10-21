@@ -13,4 +13,4 @@ Smallest complete change: move the seven existing modules, update relative impor
 Current source has additional oracle/browser-session and DECtalk VTM callers beyond the original issue inventory. Include them in the same path migration.
 
 ## Next step
-Commit/push and open a PR closing #79. Await PR CI and Claude review, respond to findings, and record any validation limitations; supervisor owns merge.
+PR #325 is open. Claude reviewed the complete PR range with no findings; the supervisor confirmed the review gate passed. Implementer response: accepted, with no behavior changes requested. The initial quality job reported 20 import-order errors; corrected those imports after relocation, including the remaining displaced imports in dectalk-vtm-render.test.ts whose diagnostic exceeded the log limit. No local CI rerun. Await replacement PR CI and supervisor review of this import-only correction; supervisor owns merge.

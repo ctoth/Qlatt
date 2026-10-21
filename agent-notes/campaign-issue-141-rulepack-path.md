@@ -5,8 +5,8 @@ Remove the generic rulepack path default while preserving explicit frontend sele
 # State
 
 Fresh isolated branch from origin/master at 8203114c. Constant, loader signatures,
-actual callers and dump script read. Implementation complete; publishing for
-hosted CI and Claude review. No local CI ran.
+actual callers and dump script read. PR #405 published. Claude completed its full
+review with no actionable defects; accepted without code changes. No local CI ran.
 
 # Decisions and why
 
@@ -22,4 +22,5 @@ None. Dictionary harness acquisition remains a separate task.
 
 # Next step
 
-Publish for hosted CI and Claude review. Supervisor owns merge; #141 stays open.
+Await final-head hosted CI and supervisor verification. Supervisor owns merge;
+#141 stays open.

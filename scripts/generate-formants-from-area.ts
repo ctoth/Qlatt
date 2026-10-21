@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { dump, load } from "js-yaml";
+import { dump } from "js-yaml";
 import { z } from "zod";
 import type { InventorySpec } from "../src/declarative-frontend/inventory.ts";
 import {
@@ -13,6 +13,7 @@ import {
   loadInventorySpecFromPath,
 } from "../src/declarative-frontend/rule-pack.ts";
 import { resolveSpeakerProfile, type SpeakerProfileSpec } from "../src/speaker-profile.ts";
+import { parseYamlString } from "../src/yaml-loader.ts";
 import { deriveFormants, MODEL_ID, scaleGeometry } from "./area-formants.ts";
 
 const citations = z.array(z.string().trim().min(1)).min(1);
@@ -49,7 +50,7 @@ export function generate(
   profileSpec: SpeakerProfileSpec,
   overrides: Record<string, number> = {},
 ) {
-  const data = areaDocumentSchema.parse(load(areaSource));
+  const data = areaDocumentSchema.parse(parseYamlString(areaSource, sourcePath));
   const resolved = resolveSpeakerProfile({ profileSpec, speakerOverride: overrides });
   const speaker = Object.fromEntries(
     ["tract_length_scale", "pharynx_scale", "mouth_scale"].map((key) => [key, resolved[key]]),
@@ -164,7 +165,9 @@ export function main(args: string[]) {
   )
     throw new Error("outputs must be distinct from each other and all inputs");
   const speaker = values.speaker
-    ? z.record(z.string(), z.number().finite()).parse(load(readFileSync(values.speaker, "utf8")))
+    ? z
+        .record(z.string(), z.number().finite())
+        .parse(parseYamlString(readFileSync(values.speaker, "utf8"), values.speaker))
     : {};
   const { speakerProfile } = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
   if (!speakerProfile) {

@@ -74,7 +74,7 @@ function activeItems(items: readonly Item[]): Item[] {
  */
 const policyProjections = new WeakMap<object, unknown>();
 
-function projectPolicyValues(value: unknown): unknown {
+export function projectPolicyValues(value: unknown): unknown {
   if (!Array.isArray(value) && !isPlainObject(value)) return value;
   if (policyProjections.has(value)) return policyProjections.get(value);
   let read: readonly unknown[];
@@ -106,7 +106,7 @@ function projectPolicyValues(value: unknown): unknown {
   return projected;
 }
 
-function mergeParameterRecords(
+export function mergeParameterRecords(
   base: Readonly<Record<string, unknown>>,
   override: Readonly<Record<string, unknown>>,
 ): Record<string, unknown> {

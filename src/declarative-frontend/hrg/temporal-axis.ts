@@ -72,7 +72,10 @@ export class TemporalAxis {
    *   commit is being applied, so a failed commit can restore the axis. A
    *   standalone axis gets a private log that never captures.
    */
-  constructor(private readonly undo: UndoLog = new UndoLog()) {
+  constructor(
+    private readonly undo: UndoLog = new UndoLog(),
+    private readonly changed: () => void = () => {},
+  ) {
     this.start = this.addOrder(START_ORDER, null);
     this.end = this.addOrder(END_ORDER, null);
   }
@@ -94,6 +97,7 @@ export class TemporalAxis {
     const key = orderKey(order);
     this.marks.set(id, mark);
     this.idByOrder.set(key, id);
+    this.changed();
     this.undo.record(() => {
       this.marks.delete(id);
       this.idByOrder.delete(key);
@@ -137,6 +141,7 @@ export class TemporalAxis {
       finite[index].order = { kind: "FINITE", rank, id: finite[index].id };
       this.idByOrder.set(orderKey(finite[index].order), finite[index].id);
     }
+    this.changed();
   }
 
   createBetween(leftId: string, rightId: string, creationDecisionId: string | null): TemporalMark {
@@ -209,6 +214,7 @@ export class TemporalAxis {
     if (!mark) return false;
     const previousTime = mark.time;
     mark.time = Number.isFinite(timeMs) ? timeMs : null;
+    this.changed();
     this.undo.record(() => {
       mark.time = previousTime;
     });

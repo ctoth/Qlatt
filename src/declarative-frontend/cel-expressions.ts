@@ -1,7 +1,7 @@
-import { Environment } from "@marcbachmann/cel-js";
+import { type ASTNode, Environment, type ParseResult } from "@marcbachmann/cel-js";
 import { builtinCeil, builtinFloor, builtinMod, builtinRound } from "../builtin-functions";
 
-type CompiledCelExpression = (context?: Record<string, unknown>) => unknown;
+type CompiledCelExpression = ParseResult;
 
 export type ExpressionValidationOptions = {
   relationNames?: Iterable<string>;
@@ -596,4 +596,42 @@ export function evaluateExpression(
     return result;
   }
   return coerceResult(compiled(isRecord(context) ? context : {}));
+}
+
+/** Read-only HRG helpers supported by requested attributes; no effectful kernels. */
+export const PURE_ATTRIBUTE_HELPERS = [
+  "path", "assoc", "ahead", "behind", "midpoint", "at_ratio", "at_sync", "at_offset",
+] as const;
+
+export interface CheckedPureExpression {
+  readonly expression: string;
+  /** CEL may honestly infer dyn for an Item field; it is not a concrete type. */
+  readonly type: string;
+}
+
+/** Use the existing parser/checker, including its actual call nodes, for purity. */
+export function checkPureExpression(
+  expression: string,
+  variables: Iterable<string>,
+): CheckedPureExpression {
+  const parsed = compileExpression(expression);
+  const allowed = new Set<string>([
+    ...CEL_FUNCTION_CATALOG.filter((entry) => entry.binding !== "context").map((entry) => entry.name),
+    ...PURE_ATTRIBUTE_HELPERS,
+  ]);
+  const visit = (value: unknown): void => {
+    if (Array.isArray(value)) {
+      for (const child of value) visit(child);
+    } else if (value && typeof value === "object" && "op" in value) {
+      const node = value as ASTNode;
+      if ((node.op === "call" || node.op === "rcall") && !allowed.has(node.args[0])) {
+        throw new Error(`E_ATTRIBUTE_IMPURE: '${node.args[0]}' is not a pure attribute operation`);
+      }
+      visit(node.args);
+    }
+  };
+  visit(parsed.ast);
+  const checked = checkEnvironment(variables).check(expression);
+  if (!checked.valid) throw checked.error ?? new Error("E_ATTRIBUTE_CEL: invalid expression");
+  return Object.freeze({ expression, type: checked.type ?? "dyn" });
 }

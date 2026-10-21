@@ -94,6 +94,10 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 // the first had no word-final rime. Its durations are now DECtalk's (S 22,
 // IH 18, P 14, S 19, IH 22, P 14 frames), checked packet by packet by the
 // frame gate's dectalk-us-repeated-words-v1 "Sip sip.".
+// #205 corrects Qlatt syllable membership. The two "blue balloon" hashes change:
+// the final-syllable duration rule now reaches balloon's L/UW (English +95 ms,
+// Beauty +54 ms). The other ten hashes match d3759609, including all DECtalk cases.
+// See agent-notes/campaign-issue-205.md and scripts/review-syllabification-goldens.mjs.
 describe("tone association preserves the existing frontend tracks", () => {
   for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
     it.each(["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."])(

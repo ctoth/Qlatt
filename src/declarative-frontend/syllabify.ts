@@ -5,8 +5,8 @@
 // onset-cluster / nucleus / affix TABLES supplied as DATA by a frontend config
 // and annotates each phone token with its syllable structure.  It contains NO
 // hardcoded phoneme, cluster, or affix lists -- every linguistic fact lives in
-// the `SyllabificationTables` passed in.  A frontend that declares no
-// syllabification tables gets a no-op (the engine never calls this).
+// the `SyllabificationTables` passed in. Executable frontends must declare
+// tables; low-level programmatic rule fixtures may omit them.
 //
 // Algorithm: DECtalk 4.63 ph_syl.c ph_syllab() (L876-1069) operating BACKWARD
 // over one word -- affix-stripping (us_common_affixes) then maximal-onset using
@@ -45,9 +45,9 @@ export type SyllableAnnotation = {
 
 /**
  * Validate and normalize a raw `syllabification:` config block into tables.
- * Returns null when the block is absent/empty so the caller treats syllabify as
- * a no-op.  Throws on a malformed (present-but-wrong-shape) block so config
- * errors surface loudly.
+ * Returns null for absent/empty nuclei in low-level callers. Executable frontend
+ * loaders require a valid block before this parser is called. Throws on other
+ * malformed (present-but-wrong-shape) blocks so config errors surface loudly.
  */
 export function parseSyllabificationTables(raw: unknown): SyllabificationTables | null {
   if (raw == null) return null;

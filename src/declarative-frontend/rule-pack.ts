@@ -686,6 +686,7 @@ export function loadRulepackSpecFromPath(
     inventoryPhonemes: validationInventoryPhonemes(inventory),
     requireLoweringSpec: true,
     requireTagVocabulary: true,
+    requireSyllabification: true,
   });
   recordDiagnostics(spec, diagnostics);
   freezeRecursively(spec);
@@ -764,6 +765,7 @@ export async function preloadRulepackSpecFromPath(
     inventoryPhonemes: validationInventoryPhonemes(inventory),
     requireLoweringSpec: true,
     requireTagVocabulary: true,
+    requireSyllabification: true,
   });
   recordDiagnostics(spec, diagnostics);
   freezeRecursively(spec);

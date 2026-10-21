@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Item } from "../src/declarative-frontend/hrg";
+import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  basePhonemeSymbol,
+  parseSyllabificationTables,
+  syllabifyWord,
+} from "../src/declarative-frontend/syllabify";
 import { textToKlattTrack, textToKlattTrackDetailed } from "../src/tts-frontend";
 
 function activeSegments(result: ReturnType<typeof textToKlattTrackDetailed>): Item[] {
@@ -10,6 +17,80 @@ function activeSegments(result: ReturnType<typeof textToKlattTrackDetailed>): It
 }
 
 describe("annotation phase: syllable count and cluster position", () => {
+  it("maps every Qlatt inventory phone and normalization alias except silence", () => {
+    const spec = loadBundledRulepackSpec("qlatt-english");
+    const tables = parseSyllabificationTables(spec.syllabification)!;
+    const inventory = loadInventorySpecFromPath(spec.inventory_path as string);
+    for (const phone of [
+      ...Object.keys(inventory.phoneme_targets),
+      ...Object.keys(inventory.normalization_aliases ?? {}),
+    ]) {
+      const base = basePhonemeSymbol(phone);
+      if (base !== inventory.silence_symbol) expect(tables.ascky[base], phone).toBeDefined();
+    }
+    expect(tables.ascky.SIL).toBeUndefined();
+    expect(syllabifyWord(["K", "AE1", "T"], tables).map((a) => a.role)).toEqual([
+      "onset",
+      "nucleus",
+      "coda",
+    ]);
+    expect(syllabifyWord(["B", "AH0", "N", "AE1", "N", "AH0"], tables)).toEqual([
+      { syllableIndex: 0, role: "onset", positionInWord: "first", syllableCount: 3 },
+      { syllableIndex: 0, role: "nucleus", positionInWord: "first", syllableCount: 3 },
+      { syllableIndex: 1, role: "onset", positionInWord: "medial", syllableCount: 3 },
+      { syllableIndex: 1, role: "nucleus", positionInWord: "medial", syllableCount: 3 },
+      { syllableIndex: 2, role: "onset", positionInWord: "last", syllableCount: 3 },
+      { syllableIndex: 2, role: "nucleus", positionInWord: "last", syllableCount: 3 },
+    ]);
+    expect(syllabifyWord(["N", "ER1", "S"], tables)[1].role).toBe("nucleus");
+  });
+
+  it.each(["qlatt-english", "qlatt-beauty"])(
+    "preserves per-word shared identity and source ancestry for %s",
+    (frontendId) => {
+      const result = textToKlattTrackDetailed("cat banana", undefined, undefined, { frontendId });
+      const words = result.utterance.relation("Word").listItems();
+      expect(words.map((word) => word.get("text"))).toEqual(["cat", "banana"]);
+      for (const [index, word] of words.entries()) {
+        const syllables = word.nodes.get("SylStructure")!.daughters;
+        expect(syllables.map((node) => node.item.get("positionInWord"))).toEqual(
+          index === 0 ? ["only"] : ["first", "medial", "last"],
+        );
+        for (const syllable of syllables) {
+          expect(result.utterance.relation("Syllable").nodesById.get(syllable.item.id)!.item).toBe(
+            syllable.item,
+          );
+          const vowels = syllable.daughters.filter(
+            (node) => node.item.get("type") === "vowel" && node.item.get("active") !== false,
+          );
+          expect(vowels).toHaveLength(1);
+          const segment = vowels[0].item;
+          expect(result.utterance.relation("Segment").nodesById.get(segment.id)!.item).toBe(
+            segment,
+          );
+          // Structural splices retain the original source node, even when its
+          // active replacement is another daughter of the same syllable.
+          const originalVowels = syllable.daughters.filter(
+            ({ item }) =>
+              item.get("type") === "vowel" &&
+              result.utterance.associatedItems(item, "source_token").length > 0,
+          );
+          expect(originalVowels).toHaveLength(1);
+          const original = originalVowels[0].item;
+          expect(result.utterance.relation("Segment").nodesById.get(original.id)!.item).toBe(
+            original,
+          );
+          expect(
+            result.utterance.associatedItems(original, "source_token").map((item) => item.id),
+          ).toEqual([`token_${index}`]);
+        }
+      }
+      expect(loadBundledRulepackSpec(frontendId).syllabification).toEqual(
+        loadBundledRulepackSpec("qlatt-english").syllabification,
+      );
+    },
+  );
+
   // Suppress console.warn from frontend diagnostics during tests.
   const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 

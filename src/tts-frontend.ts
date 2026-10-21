@@ -53,7 +53,7 @@ import {
   type SpeakerProfileOverride,
 } from "./speaker-profile";
 import { projectSpeakerFields } from "./speaker-projection";
-import { parseTextParserConfig, runTextParser } from "./text-parser/frontend";
+import { runTextParser } from "./text-parser/frontend";
 import type { TextScope } from "./text-scopes";
 import { transcribeText } from "./transcribe-text";
 import type { KlattFrame, TranscriptionConfig, TranscriptionToken } from "./tts-frontend-types";
@@ -751,12 +751,15 @@ function createStructure(
 export function normalizeText(text: string, frontendId = "qlatt-english"): string {
   const spec = loadBundledRulepackSpec(frontendId);
   // The same text the frontend speaks: after its text parser, when it has one.
-  const textParser = parseTextParserConfig(spec);
+  if (spec.text_parser == null) return normalizeGraphText(text, spec);
+  const resources = loadFrontendResources(spec);
+  const textParser = resources.textParser;
   if (!textParser) return normalizeGraphText(text, spec);
-  const dictionaryPath = loadFrontendResources(spec).dictionaryPath;
+  const dictionaryPath = resources.dictionaryPath;
   const dictionary = dictionaryPath ? loadCmuDictionaryFromPathSync(dictionaryPath) : undefined;
   const parsed = runTextParser(
-    textParser,
+    textParser.config,
+    textParser.table,
     text,
     (word) => dictionary !== undefined && Object.hasOwn(dictionary, word),
     createProvenanceCollector(),
@@ -812,7 +815,7 @@ function buildTextToKlattTrackDetailed(
   // before any spoken text sets the voice and the rate of the whole text:
   // so it runs before the voice is chosen. The voice and the rate that were
   // asked for are the state the text starts in, as say.exe's are.
-  const textParser = parseTextParserConfig(spec);
+  const textParser = resources.textParser;
   const rateUnit = readPolicyNumber(
     recordOrEmpty(recordOrEmpty(policyRecord(spec).rate).words_per_minute).unit,
   );
@@ -820,7 +823,8 @@ function buildTextToKlattTrackDetailed(
     readPolicyNumber(recordOrEmpty(policyRecord(spec).duration).rate_reference) || 1;
   const parsedText = textParser
     ? runTextParser(
-        textParser,
+        textParser.config,
+        textParser.table,
         inputText,
         (word) => dictionary !== undefined && Object.hasOwn(dictionary, word),
         provenance,

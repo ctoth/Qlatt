@@ -4,7 +4,7 @@ Map frame set and multi-point insert paths to authored locations, including exac
 
 # State
 
-Started from PR415 final 271f9385; that prerequisite has merged. Implemented 12 added production lines and 51 existing fixture lines covering frame unit/when/set value versus register keys and singular/plural point value/when versus relation keys. Quality job119172303669 requested two formatting corrections in the classifier and fixture; applied exactly. No local CI; replacement hosted validation pending.
+Started from PR415 final 271f9385; that prerequisite merged as 75e8a66a. Implemented 12 added production lines and 51 existing fixture lines covering frame unit/when/set value versus register keys and singular/plural point value/when versus relation keys. Quality job119172303669 requested two formatting corrections in the classifier and fixture; applied exactly. Claude reviewed the full PR through 237f060d and found no defects; accepted, with no further code changes. Alias and whole-entry location observations were explicitly not findings and remain outside this slice. No local CI; hosted validation owns the final head.
 
 # Decisions and why
 
@@ -16,4 +16,4 @@ Other agents own normalization changes. Preserve their edits during integration.
 
 # Next step
 
-Publish stacked on #415 for hosted CI; supervisor reviews after prerequisite merge. Respond to Claude review. Keep #224 open.
+Await final-head hosted CI and supervisor merge. The prerequisite #415 is merged and the review response is complete. Keep #224 open.

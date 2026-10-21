@@ -12,7 +12,8 @@ import {
   FRAME_GROUP_COUNTERS,
   FRAME_UNIT_NAMES,
 } from "./hrg/frame-program";
-import type { FeatureSchema } from "./hrg/types";
+import { compileHrgSchema, HrgSchemaError } from "./hrg/schema";
+import type { FeatureSchema, HrgSchema } from "./hrg/types";
 import { parseRecognitionConfig } from "./recognition-config";
 import * as S from "./struct-schema";
 
@@ -38,6 +39,11 @@ export type RelationFeatureSchemas = Readonly<
   Record<string, Readonly<Record<string, FeatureSchema>>>
 >;
 const RELATION_FEATURE_SCHEMAS = new WeakMap<object, RelationFeatureSchemas>();
+const HRG_SCHEMAS = new WeakMap<object, HrgSchema>();
+
+export function validatedHrgSchema(spec: object): HrgSchema | undefined {
+  return HRG_SCHEMAS.get(spec);
+}
 
 /** Compiler side metadata; authored declarations retain their expression-facing shape. */
 export function validatedRelationFeatureSchemas(spec: object): RelationFeatureSchemas {
@@ -4445,6 +4451,14 @@ export function validateDslSpec(
   options: ValidateDslSpecOptions = {},
 ): ValidationDiagnostic[] {
   const diagnostics: ValidationDiagnostic[] = [];
+  if (Object.hasOwn(spec, "schema")) {
+    try {
+      HRG_SCHEMAS.set(spec, compileHrgSchema(spec.schema));
+    } catch (cause) {
+      if (!(cause instanceof HrgSchemaError)) throw cause;
+      diagnostics.push(makeDiagnostic("E_HRG_SCHEMA", cause.message, cause.path));
+    }
+  }
   const phases = Array.isArray(spec.phases) ? (spec.phases as PhaseSpec[]) : [];
   const rules = isPlainObject(spec.rules) ? spec.rules : {};
   const patterns = isPlainObject(spec.patterns) ? spec.patterns : {};

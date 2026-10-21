@@ -26,7 +26,7 @@ describe("declarative speaker profile fields", () => {
     };
     expect(loadFrontendResources(spec).speakerProfile).toBeUndefined();
     const spy = vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-      spec,
+      spec: rulepack.compileRuleEngineSpec(spec),
       resources: loadFrontendResources(spec),
       voices: {},
     });
@@ -50,7 +50,7 @@ describe("declarative speaker profile fields", () => {
       },
     };
     const spy = vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-      spec,
+      spec: rulepack.compileRuleEngineSpec(spec),
       resources: loadFrontendResources(spec),
       voices: {},
     });

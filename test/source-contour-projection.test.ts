@@ -48,7 +48,7 @@ describe("source contour projection policy", () => {
     expect(loadFrontendResources(selected).sourceContour).toBeUndefined();
     await expect(preloadFrontendSourceContour(selected)).resolves.toBeUndefined();
     vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-      spec: selected,
+      spec: rulepack.compileRuleEngineSpec(selected),
       resources: loadFrontendResources(selected),
       voices: {},
     });
@@ -69,7 +69,7 @@ describe("source contour projection policy", () => {
       resources: { ...spec.resources, source_contour: fixturePath },
     };
     vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-      spec: selected,
+      spec: rulepack.compileRuleEngineSpec(selected),
       resources: loadFrontendResources(selected),
       voices: {},
     });

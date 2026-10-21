@@ -12,6 +12,7 @@ import {
   loadFrontendVoiceDocument,
   loadRulepackSpecFromPath,
   preloadRulepackSpecFromPath,
+  rulepackHrgSchema,
   rulepackMapOrigins,
   rulepackParameterOrigins,
   rulepackRuleDocumentSpans,
@@ -194,6 +195,37 @@ function writeExtendingFrontend(dir: string, sections: Dict, rootOverrides: Dict
 
 describe("resource declarations across inheritance", () => {
   for (const asynchronous of [false, true]) {
+    it(`compiles inherited static schema with authored errors (${asynchronous ? "async" : "sync"})`, async () => {
+      const dir = mkdtempSync(join(tmpdir(), "qlatt-static-schema-"));
+      try {
+        const path = writeExtendingFrontend(
+          dir,
+          {},
+          { schema: { itemTypes: { segment: { features: { custom: { kind: "array" } } } } } },
+        );
+        const authored = parseYamlString(readFileSync(path, "utf8"), path);
+        const location = yamlDocumentSpans(authored).find(
+          (entry) => entry.value.path.join(".") === "schema.itemTypes.segment.features.custom",
+        )?.key;
+        let failure: unknown;
+        try {
+          if (asynchronous) await preloadRulepackSpecFromPath(path);
+          else loadRulepackSpecFromPath(path);
+        } catch (error) {
+          failure = error;
+        }
+        expect(String(failure)).toContain(
+          "E_HRG_SCHEMA at schema.itemTypes.segment.features.custom",
+        );
+        expect(String(failure)).toContain(`[${path}:${location?.line}:${location?.column}]`);
+        const base = rulepackHrgSchema(loadBundledRulepackSpec("qlatt-english"));
+        const child = rulepackHrgSchema(loadBundledRulepackSpec("qlatt-beauty"));
+        expect(child).toEqual(base);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
     it(`normalizes child aliases before inheritance (${asynchronous ? "async" : "sync"})`, async () => {
       const dir = mkdtempSync(join(tmpdir(), "qlatt-resource-alias-"));
       try {

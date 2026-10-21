@@ -16,15 +16,14 @@ import {
   type ProvenanceCollector,
   type ProvenanceStage,
 } from "../../provenance";
-import { compileFeatureSchema } from "./feature-schema";
 import { Item } from "./item";
 import { PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
 import { Relation } from "./relation";
+import { compileHrgSchema } from "./schema";
 import { TemporalAxis, type TemporalMark } from "./temporal-axis";
 import { HrgTransaction } from "./transaction";
 import type {
   AssociationWrite,
-  FeatureSchema,
   FeatureValue,
   FeatureWrite,
   FeatureWriteInput,
@@ -46,42 +45,6 @@ import { UndoLog } from "./undo-log";
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
-}
-
-function compileHrgSchema(input: HrgSchema): HrgSchema {
-  const itemTypes: Record<string, { features: Readonly<Record<string, FeatureSchema>> }> = {};
-  for (const [itemType, itemSchema] of Object.entries(input.itemTypes)) {
-    const features: Record<string, FeatureSchema> = {};
-    for (const [feature, featureSchema] of Object.entries(itemSchema.features)) {
-      features[feature] = compileFeatureSchema(featureSchema);
-    }
-    // An Item of any type may be in a parameter scope (parameter-scope.ts).
-    features[PARAMETER_SCOPE_FEATURE] ??= { kind: "string" };
-    itemTypes[itemType] = Object.freeze({ features: Object.freeze(features) });
-  }
-
-  const relations: Record<string, { kind: "list" | "tree"; itemTypes: readonly string[] }> = {};
-  for (const [relationName, relationSchema] of Object.entries(input.relations)) {
-    if (relationSchema.itemTypes.length === 0) {
-      throw new Error(
-        `E_HRG_SCHEMA_RELATION_EMPTY: relation '${relationName}' requires an allowed item type`,
-      );
-    }
-    const allowed = Object.freeze([...new Set(relationSchema.itemTypes)]);
-    for (const itemType of allowed) {
-      if (!Object.hasOwn(itemTypes, itemType)) {
-        throw new Error(
-          `E_HRG_SCHEMA_RELATION_ITEM_TYPE: relation '${relationName}' references undeclared item type '${itemType}'`,
-        );
-      }
-    }
-    relations[relationName] = Object.freeze({ kind: relationSchema.kind, itemTypes: allowed });
-  }
-
-  return Object.freeze({
-    itemTypes: Object.freeze(itemTypes),
-    relations: Object.freeze(relations),
-  });
 }
 
 export class Utterance {
@@ -113,7 +76,26 @@ export class Utterance {
   constructor(schema: HrgSchema, provenance?: ProvenanceCollector, diagnostics?: Diagnostics) {
     this.provenance = provenance ?? createProvenanceCollector();
     this.diagnostics = diagnostics ?? createDiagnostics();
-    this.schema = compileHrgSchema(schema);
+    const compiled = compileHrgSchema(schema);
+    // Add the runtime-owned scope after all declared and dynamic features.
+    this.schema = Object.freeze({
+      ...compiled,
+      itemTypes: Object.freeze(
+        Object.fromEntries(
+          Object.entries(compiled.itemTypes).map(([name, item]) => [
+            name,
+            Object.freeze({
+              features: Object.freeze({
+                ...item.features,
+                [PARAMETER_SCOPE_FEATURE]: item.features[PARAMETER_SCOPE_FEATURE] ?? {
+                  kind: "string" as const,
+                },
+              }),
+            }),
+          ]),
+        ),
+      ),
+    });
   }
 
   /** Never reused, even after rollback. Pure requests only observe committed state. */

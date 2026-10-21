@@ -369,7 +369,7 @@ describe("voice rule fields in the frontend", () => {
       speakers: SPEAKERS,
     };
     return vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-      spec,
+      spec: rulepack.compileRuleEngineSpec(spec),
       resources: rulepack.loadFrontendResources(spec),
       voices: {},
     });

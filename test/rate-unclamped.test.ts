@@ -66,11 +66,7 @@ describe("continuation and undershoot rate policy", () => {
     "%s requires referenced continuation values and preserves their scaling metadata",
     (frontendId) => {
       const spec = structuredClone(rulepack.loadBundledRulepackSpec(frontendId));
-      vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-        spec,
-        resources: rulepack.loadFrontendResources(spec),
-        voices: {},
-      });
+      configuredFrontend(spec);
       const speak = () =>
         textToKlattTrackDetailed("hello, world; hello: world", undefined, undefined, {
           frontendId,
@@ -250,11 +246,7 @@ describe("reference rate normalization", () => {
   ])("rejects malformed supplied reference %j", (reference) => {
     const spec = structuredClone(rulepack.loadBundledRulepackSpec("qlatt-english"));
     durationPolicy(spec).rate_reference = reference;
-    vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-      spec,
-      resources: rulepack.loadFrontendResources(spec),
-      voices: {},
-    });
+    configuredFrontend(spec);
     expect(() => textToKlattTrack("hello", undefined, undefined, { rate: 1 })).toThrow(
       "E_RATE_REFERENCE_INVALID",
     );
@@ -266,11 +258,7 @@ describe("reference rate normalization", () => {
   ])("rejects normalization of %s by %s outside finite positive numbers", (rate, reference) => {
     const spec = structuredClone(rulepack.loadBundledRulepackSpec("qlatt-english"));
     durationPolicy(spec).rate_reference = { value: reference, citations };
-    vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-      spec,
-      resources: rulepack.loadFrontendResources(spec),
-      voices: {},
-    });
+    configuredFrontend(spec);
     expect(() => textToKlattTrack("hello", undefined, undefined, { rate })).toThrow(
       "E_RATE_INVALID",
     );
@@ -322,11 +310,7 @@ describe("frontend rate defaults", () => {
     (value) => {
       const spec = structuredClone(rulepack.loadBundledRulepackSpec("qlatt-english"));
       ratePolicy(spec).default.value = value;
-      vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-        spec,
-        resources: rulepack.loadFrontendResources(spec),
-        voices: {},
-      });
+      configuredFrontend(spec);
       for (const rate of [undefined, 1]) {
         expect(() => textToKlattTrack("hello", undefined, undefined, { rate })).toThrow(
           "E_POLICY_REQUIRED",
@@ -337,11 +321,7 @@ describe("frontend rate defaults", () => {
 
   it("requires a cited default declaration", () => {
     const spec = structuredClone(rulepack.loadBundledRulepackSpec("qlatt-english"));
-    vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-      spec,
-      resources: rulepack.loadFrontendResources(spec),
-      voices: {},
-    });
+    configuredFrontend(spec);
     ratePolicy(spec).default.citations = [];
     expect(() => textToKlattTrack("hello")).toThrow("E_POLICY_REQUIRED");
     delete ratePolicy(spec).default;
@@ -369,11 +349,7 @@ describe("frontend transition defaults", () => {
     const spec = structuredClone(rulepack.loadBundledRulepackSpec(request.frontendId));
     ratePolicy(spec).default.value = 1.5;
     hrg.readLowerOptions(spec.output.lowering).transitions.default_transition_ms.value = 60;
-    vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-      spec,
-      resources: rulepack.loadFrontendResources(spec),
-      voices: {},
-    });
+    configuredFrontend(spec);
     expect(browserRenderOptions(request).transitionMs).toBeUndefined();
     expect(browserRenderOptions(request).rate).toBeUndefined();
     const result = await trackOnlyBackend.render(request);
@@ -391,11 +367,7 @@ describe("frontend transition defaults", () => {
       const policy = hrg.readLowerOptions(spec.output.lowering);
       // Deliberately differs from the bundled 30 ms to expose a masked default.
       policy.transitions.default_transition_ms.value = 60;
-      vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
-        spec,
-        resources: rulepack.loadFrontendResources(spec),
-        voices: {},
-      });
+      configuredFrontend(spec);
       const lower = vi.spyOn(hrg, "lowerToFrames");
       const options = { frontendId, rate: 2 };
       const implicit = textToKlattTrackDetailed("hello world", 110, undefined, options).track;

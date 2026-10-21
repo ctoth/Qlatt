@@ -49,7 +49,7 @@ npm test                        # run the Vitest suite
 npm run test:audit              # run the dictionary audit (not part of npm test)
 npm run test:golden             # run golden audio comparisons
 npm run build                   # production build
-npm run build:dict              # rebuild public/cmu-dictionary.json
+npm run build:dict              # rebuild the declared English lexicon
 npm run audit:dict-miss         # scan for dictionary misses in a phrase set
 ```
 
@@ -117,7 +117,8 @@ Text → normalizeText() → transcribeText() → [inventory lookup]
 
 - `src/tts-frontend.ts` — orchestrates frontend resource selection, constructs one typed `Utterance`, runs graph-native rules, and invokes final lowering once.
 - `src/declarative-frontend/hrg/` — owns Item identity, relations, temporal state, typed feature history, transactions, rule execution, replay, explanation, and the sole frontend-to-frame lowerer.
-- `public/rules/frontends/<frontend-id>/` — each frontend is a self-contained package with `frontend.yaml`, `pipeline.yaml`, `inventory.yaml`, `lts-rules.yaml`, and `phases/*.yaml`.
+- `public/rules/frontends/<frontend-id>/` — frontend declarations, acoustic inventories, voice policies and phases.
+- `public/rules/languages/english/` — shared English lexicon, LTS, morphology, stress, phonotactics and phonology, selected by existing resource declarations.
 - `public/experiments/` — synthesizer configurations (`registry.yaml`, `graph.yaml`, `semantics.yaml`). Active configs: `klatt80-baseline`, `dectalk-english`, `klsyn88`, `stevens91`.
 - `src/semantics/` — evaluates CEL expressions in dependency order to realize AudioParam values.
 - `src/declarative-frontend/` — compiles immutable frontend/rulepack data; its `hrg/` owner executes that program.

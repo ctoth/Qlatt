@@ -207,7 +207,7 @@ describe("the inventory loaders read the phonology document", () => {
 });
 
 describe("the bundled inventories", () => {
-  const ENGLISH_PHONOLOGY = "/rules/frontends/qlatt-english/phonology.yaml";
+  const ENGLISH_PHONOLOGY = "/rules/languages/english/phonology.yaml";
   const resources = (frontendId: string) =>
     loadFrontendResources(loadBundledRulepackSpec(frontendId));
   // The fields the phonology document holds: the class of a phoneme, never a

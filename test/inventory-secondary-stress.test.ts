@@ -11,18 +11,15 @@
  * speak. The rule now asks by phoneme and stress (`target(phoneme, stress)`).
  */
 
-import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   loadInventorySpecFromPath,
   materializePhonemeTarget,
 } from "../src/declarative-frontend/inventory";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import { loadCmuDictionary } from "./utils/cmudict-audit";
 
-const dictionary = JSON.parse(fs.readFileSync("public/cmu-dictionary.json", "utf8")) as Record<
-  string,
-  string
->;
+const dictionary = loadCmuDictionary();
 const FRONTENDS = ["qlatt-english", "qlatt-beauty"];
 const DIGITS = "9876543210123456";
 

@@ -55,7 +55,7 @@ language's column from a shared document by naming it:
 ```yaml
 # public/rules/frontends/qlatt-beauty/inventory.yaml
 version: v1
-phonology_path: /rules/frontends/qlatt-english/phonology.yaml
+phonology_path: /rules/languages/english/phonology.yaml
 default_duration_ms: 30
 base_params: { ... }
 phoneme_targets:
@@ -63,7 +63,7 @@ phoneme_targets:
 ```
 
 ```yaml
-# public/rules/frontends/qlatt-english/phonology.yaml
+# public/rules/languages/english/phonology.yaml
 version: v1
 silence_symbol: SIL
 nucleus_types: [vowel]

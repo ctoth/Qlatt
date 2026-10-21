@@ -13,12 +13,12 @@ inline_markers:
     - "engineering convention: optional inline shorthand lifts authored markers into the authoritative Direction Track"
 resources:
   inventory: /rules/frontends/qlatt-english/inventory.yaml
-  lts: /rules/frontends/qlatt-english/lts-rules.yaml
-  morphology: /rules/frontends/qlatt-english/morphology.yaml
-  stress_policy: /rules/frontends/qlatt-english/stress-policy.yaml
+  lts: /rules/languages/english/lts-rules.yaml
+  morphology: /rules/languages/english/morphology.yaml
+  stress_policy: /rules/languages/english/stress-policy.yaml
   speaker_profile: /rules/frontends/qlatt-english/policy/speaker-profile.yaml
   source_contour: /rules/frontends/qlatt-english/policy/source-contour.yaml
-  lexicon: /cmu-dictionary.json
+  lexicon: /rules/languages/english/cmu-dictionary.json
   vq_channels: /rules/frontends/qlatt-english/policy/vq-channels.yaml
   affect_presets: /rules/frontends/qlatt-english/policy/affect-presets.yaml
 # Qlatt's existing phonotactics.yaml vowel/onset policy, encoded for syllabifyWord.

@@ -4,7 +4,7 @@ target_feature_exclusions: [dur, SW, type]
 # `dac` are the language's: phonology.yaml, merged under these acoustic targets
 # by the loader (docs/inventory-conventions.md, "Layering an inventory over a
 # phonology document"). A field may be in one of the two documents, never both.
-phonology_path: /rules/frontends/qlatt-english/phonology.yaml
+phonology_path: /rules/languages/english/phonology.yaml
 default_duration_ms: 30 # engineering estimate: duration for a target without dur
 secondary_stress_fallback:
   target: 1

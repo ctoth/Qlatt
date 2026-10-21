@@ -42,7 +42,7 @@ describe("transcribe-text", () => {
     it("uses each frontend's declared lexicon and inherits Qlatt's selection", () => {
       const beauty = loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty"));
       const dectalk = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
-      expect(resources.lexicon?.path).toBe("/cmu-dictionary.json");
+      expect(resources.lexicon?.path).toBe("/rules/languages/english/cmu-dictionary.json");
       expect(beauty.lexicon?.dictionary).toBe(resources.lexicon?.dictionary);
       expect(dectalk.lexicon?.path).toBe("/dectalk-dictionary.json");
       expect(dectalk.lexicon?.dictionary).not.toBe(resources.lexicon?.dictionary);

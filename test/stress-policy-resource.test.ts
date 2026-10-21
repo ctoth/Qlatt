@@ -22,7 +22,7 @@ it.each(["qlatt-english", "qlatt-beauty"])(
   "resolves the inherited stress resource for %s",
   (frontend) => {
     const resources = loadFrontendResources(loadBundledRulepackSpec(frontend));
-    expect(resources.stress?.path).toBe("/rules/frontends/qlatt-english/stress-policy.yaml");
+    expect(resources.stress?.path).toBe("/rules/languages/english/stress-policy.yaml");
     expect(loadFrontendResources(loadBundledRulepackSpec(frontend)).stress).toBe(resources.stress);
   },
 );

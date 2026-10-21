@@ -1,34 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { loadYamlDocumentSync } from "../src/yaml-loader";
-import { isVowel, syllabify } from "./g2p-fixture";
-
-const PHONOTACTICS_PATH = "/rules/frontends/qlatt-english/phonotactics.yaml";
-
-interface PhonotacticsData {
-  version: string;
-  citations: string[];
-  vowels: string[];
-  legal_onsets: string[];
-  voicing_classes: {
-    voiceless_finals: string[];
-    td_finals: string[];
-    sibilant_finals: string[];
-    voiceless_consonants: string[];
-  };
-}
+import { isVowel, phonotactics, syllabify } from "./g2p-fixture";
 
 function isLegalOnset(consonants: string[]): boolean {
   if (consonants.length <= 1) return true;
-  const data = loadYamlDocumentSync<PhonotacticsData>(PHONOTACTICS_PATH);
+  const data = phonotactics;
   const key = consonants.join(" ");
   return new Set(data.legal_onsets).has(key);
 }
 
 describe("phonotactics.yaml", () => {
   it("lists the sixteen qlatt-english vowels, then the seven only dectalk-english has", () => {
-    const data = loadYamlDocumentSync<PhonotacticsData>(PHONOTACTICS_PATH);
-    // dectalk-english shares this file through the morphology and stress
-    // policy; a root whose only vowel is RR ("nurse") must count as a syllable.
+    const data = phonotactics;
+    // The data retains these DECtalk symbols; DECtalk's compiled-table path
+    // does not acquire or execute the shared morphology/stress policy.
     expect(data.vowels).toEqual([
       ...["AA", "AE", "AH", "AO", "AW", "AX", "AY", "EH"],
       ...["ER", "EY", "IH", "IY", "OW", "OY", "UH", "UW"],
@@ -37,7 +21,7 @@ describe("phonotactics.yaml", () => {
   });
 
   it("contains exactly 28 legal onset clusters", () => {
-    const data = loadYamlDocumentSync<PhonotacticsData>(PHONOTACTICS_PATH);
+    const data = phonotactics;
     expect(data.legal_onsets).toHaveLength(28);
   });
 
@@ -52,7 +36,7 @@ describe("phonotactics.yaml", () => {
   });
 
   it("voicing classes contain expected phonemes", () => {
-    const data = loadYamlDocumentSync<PhonotacticsData>(PHONOTACTICS_PATH);
+    const data = phonotactics;
     expect(data.voicing_classes.voiceless_finals).toContain("CH");
     expect(data.voicing_classes.td_finals).toContain("T");
     expect(data.voicing_classes.sibilant_finals).toContain("Z");

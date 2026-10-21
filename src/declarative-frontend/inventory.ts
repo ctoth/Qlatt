@@ -834,7 +834,7 @@ export async function preloadFrontendSourceContour(
   if (!isPlainObject(spec)) {
     throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
   }
-  const path = spec.source_contour_path;
+  const path = isPlainObject(spec.resources) ? spec.resources.source_contour : undefined;
   if (path == null) return undefined;
   if (typeof path !== "string" || !path.trim()) {
     throw new Error("E_FRONTEND_CONFIG: source_contour is required");
@@ -857,9 +857,10 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   if (!isPlainObject(spec)) {
     throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
   }
-  const inventoryPath = spec.inventory_path;
+  const declaredResources = isPlainObject(spec.resources) ? spec.resources : {};
+  const inventoryPath = declaredResources.inventory;
   if (typeof inventoryPath !== "string" || inventoryPath.length === 0) {
-    throw new Error("E_FRONTEND_SPEC: inventory_path is required");
+    throw new Error("E_FRONTEND_SPEC: resources.inventory is required");
   }
   const requireAsset = (
     value: unknown,
@@ -880,7 +881,7 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     return value;
   };
   // Pronunciation and number normalization consume this same parsed document.
-  const ltsPath = requireAsset(spec.lts_path, "lts_path", (path) => {
+  const ltsPath = requireAsset(declaredResources.lts, "lts", (path) => {
     const document: unknown = path.endsWith(".json")
       ? JSON.parse(loadYamlSourceSync(path))
       : loadYamlDocumentSync<unknown>(path);
@@ -892,8 +893,8 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   const tablePronouncer =
     ltsPath.endsWith(".json") && isLtsTableDocument(FRONTEND_ASSET_CACHE.get(ltsPath));
   let morphology: MorphologyContext | undefined;
-  if (!tablePronouncer || spec.morphology_path != null) {
-    const path = requireAsset(spec.morphology_path, "morphology_path");
+  if (!tablePronouncer || declaredResources.morphology != null) {
+    const path = requireAsset(declaredResources.morphology, "morphology");
     const data = FRONTEND_ASSET_CACHE.get(path);
     const phonotacticsPath = requireAsset(
       isPlainObject(data) ? data.phonotactics_path : undefined,
@@ -906,8 +907,8 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     };
   }
   let stress: StressContext | undefined;
-  if (!tablePronouncer || spec.stress_policy_path != null) {
-    const path = requireAsset(spec.stress_policy_path, "stress_policy_path", (path) => {
+  if (!tablePronouncer || declaredResources.stress_policy != null) {
+    const path = requireAsset(declaredResources.stress_policy, "stress_policy", (path) => {
       const raw = loadYamlDocumentSync(path);
       const phonotacticsPath = requireAsset(
         isPlainObject(raw) ? raw.phonotactics_path : undefined,
@@ -942,15 +943,15 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   const inventory = loadInventorySpecFromPath(inventoryPath);
   const phonologyPath = inventoryPhonologyPath(inventory);
   const speakerProfilePath =
-    spec.speaker_profile_path == null
+    declaredResources.speaker_profile == null
       ? undefined
-      : requireAsset(spec.speaker_profile_path, "speaker_profile", (path) =>
+      : requireAsset(declaredResources.speaker_profile, "speaker_profile", (path) =>
           parseSpeakerProfileDocument(loadYamlDocumentSync(path)),
         );
   const sourceContourPath =
-    spec.source_contour_path == null
+    declaredResources.source_contour == null
       ? undefined
-      : requireAsset(spec.source_contour_path, "source_contour", (path) =>
+      : requireAsset(declaredResources.source_contour, "source_contour", (path) =>
           parseSourceContourDocument(loadYamlDocumentSync(path)),
         );
   const textParserConfig = parseTextParserConfig(spec);
@@ -960,8 +961,7 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
       ? undefined
       : requireAsset(speakers.definition_path, "speakers.definition_path");
   if (textParserConfig) requireAsset(textParserConfig.tablePath, "text_parser.table_path");
-  const declaredResources = isPlainObject(spec.resources) ? spec.resources : {};
-  const lexiconReference = declaredResources.lexicon ?? spec.dictionary_path;
+  const lexiconReference = declaredResources.lexicon;
   const lexiconPath =
     lexiconReference == null
       ? undefined

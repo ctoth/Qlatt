@@ -52,8 +52,7 @@ describe("transcribe-text", () => {
       const diagnostics = createDiagnostics();
       const noLexicon = {
         ...compiledSpec,
-        resources: {},
-        dictionary_path: null,
+        resources: { ...compiledSpec.resources, lexicon: null },
         skip_dictionary: true,
       };
       expect(loadFrontendResources(noLexicon).lexicon).toBeUndefined();
@@ -85,7 +84,7 @@ describe("transcribe-text", () => {
       expect(() =>
         loadFrontendResources({
           ...compiledSpec,
-          resources: { lexicon: "/missing-declared-lexicon.json" },
+          resources: { ...compiledSpec.resources, lexicon: "/missing-declared-lexicon.json" },
         }),
       ).toThrow("E_FRONTEND_CONFIG: lexicon could not load '/missing-declared-lexicon.json'");
     });

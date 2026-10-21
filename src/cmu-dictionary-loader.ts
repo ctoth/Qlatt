@@ -98,7 +98,7 @@ export async function preloadCmuDictionaryFromPath(specPath: string): Promise<Cm
  *
  * Mirrors {@link loadYamlSourceSync}'s strategy (sync XHR in the browser, sync
  * filesystem read under Node) so the synchronous TTS pipeline can load a
- * per-frontend dictionary declared via `dictionary_path`. Caches per path in
+ * per-frontend dictionary declared via `resources.lexicon`. Caches per path in
  * the same {@link DICTIONARY_CACHE} the async loader uses, so a path loaded
  * either way is shared. Generic: a path -> a parsed flat word->pron map.
  */

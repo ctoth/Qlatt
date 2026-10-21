@@ -105,10 +105,9 @@ describe("lexicon sources in decision records", () => {
     const transcription: TranscriptionConfig = spec.transcription;
     const sources = { ...transcription.sources };
     delete sources.dictionary;
-    const noLexicon: typeof spec & { resources: Record<string, string> } = {
+    const noLexicon: typeof spec = {
       ...spec,
-      resources: {},
-      dictionary_path: null,
+      resources: { ...spec.resources, lexicon: null },
     };
     expect(() =>
       transcribeText("hello", {

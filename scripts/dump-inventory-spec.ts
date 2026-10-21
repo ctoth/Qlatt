@@ -5,7 +5,7 @@
  * ======================
  * Prints the complete materialized InventorySpec of a frontend as JSON, loaded
  * the way the app loads it: the compiled rulepack names the inventory
- * (`inventory_path`) and `loadFrontendResources` resolves it, with every
+ * (`resources.inventory`) and `loadFrontendResources` resolves it, with every
  * document the inventory layers over (`phonology_path`) already merged.
  *
  * It is the identity control for a change to how inventories are stored: the

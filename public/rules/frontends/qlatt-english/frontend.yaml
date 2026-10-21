@@ -12,6 +12,12 @@ inline_markers:
   citations:
     - "engineering convention: optional inline shorthand lifts authored markers into the authoritative Direction Track"
 resources:
+  inventory: /rules/frontends/qlatt-english/inventory.yaml
+  lts: /rules/frontends/qlatt-english/lts-rules.yaml
+  morphology: /rules/frontends/qlatt-english/morphology.yaml
+  stress_policy: /rules/frontends/qlatt-english/stress-policy.yaml
+  speaker_profile: /rules/frontends/qlatt-english/policy/speaker-profile.yaml
+  source_contour: /rules/frontends/qlatt-english/policy/source-contour.yaml
   lexicon: /cmu-dictionary.json
   vq_channels: /rules/frontends/qlatt-english/policy/vq-channels.yaml
   affect_presets: /rules/frontends/qlatt-english/policy/affect-presets.yaml
@@ -100,14 +106,8 @@ syllabification:
     DX: "&"
     GS: "q"
 accent_policy_path: /rules/frontends/qlatt-english/policy/accent-policy.yaml
-inventory_path: /rules/frontends/qlatt-english/inventory.yaml
-lts_path: /rules/frontends/qlatt-english/lts-rules.yaml
-morphology_path: /rules/frontends/qlatt-english/morphology.yaml
 normalization:
   phases: [normalization_lexical, normalization_currency, normalization_time, normalization_date, normalization_decimal_fraction, normalization_number_requests, normalization_number_groups, normalization_terminal_words]
-stress_policy_path: /rules/frontends/qlatt-english/stress-policy.yaml
-speaker_profile_path: /rules/frontends/qlatt-english/policy/speaker-profile.yaml
-source_contour_path: /rules/frontends/qlatt-english/policy/source-contour.yaml
 functions:
   has_voiced_formants:
     params: [item]

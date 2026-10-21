@@ -131,7 +131,8 @@ function loadPolicyAndInventory(frontendId: string): {
   const spec: unknown = loadBundledRulepackSpec(frontendId);
   if (
     !isPlainObject(spec) ||
-    typeof spec.inventory_path !== "string" ||
+    !isPlainObject(spec.resources) ||
+    typeof spec.resources.inventory !== "string" ||
     !isPlainObject(spec.output) ||
     !isPlainObject(spec.output.lowering)
   ) {
@@ -147,7 +148,7 @@ function loadPolicyAndInventory(frontendId: string): {
     throw new Error("compiled lowering columns/timeline missing");
   }
   return {
-    inventoryPath: spec.inventory_path,
+    inventoryPath: spec.resources.inventory,
     policy: {
       columns: lowering.columns,
       transitions: transitions(lowering.transitions),

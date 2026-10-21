@@ -37,7 +37,11 @@ describe("declarative voice-quality channels", () => {
       );
       const first = loadFrontendResources({
         ...spec,
-        resources: { affect_presets: presetPath, vq_channels: selected.vqChannels.path },
+        resources: {
+          ...spec.resources,
+          affect_presets: presetPath,
+          vq_channels: selected.vqChannels.path,
+        },
       });
       expect(first.affectPresets?.library.presets.has("tender")).toBe(true);
       expect(first.vqChannels?.channels.some((row) => row.channel === "f0Scale")).toBe(true);
@@ -46,7 +50,7 @@ describe("declarative voice-quality channels", () => {
       expect(() =>
         loadFrontendResources({
           ...spec,
-          resources: { affect_presets: presetPath, vq_channels: channelPath },
+          resources: { ...spec.resources, affect_presets: presetPath, vq_channels: channelPath },
         }),
       ).toThrow("unknown voice-quality channel f0Scale");
     } finally {

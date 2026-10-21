@@ -60,10 +60,14 @@ function latestFeature(item: Readonly<Record<string, unknown>>, key: string): un
 
 function loadSegmentType(frontendId: string, phoneme: string): string {
   const spec: unknown = loadBundledRulepackSpec(frontendId);
-  if (!isPlainObject(spec) || typeof spec.inventory_path !== "string") {
+  if (
+    !isPlainObject(spec) ||
+    !isPlainObject(spec.resources) ||
+    typeof spec.resources.inventory !== "string"
+  ) {
     throw new Error("compiled frontend inventory path missing");
   }
-  const targets = loadInventorySpecFromPath(spec.inventory_path).phoneme_targets;
+  const targets = loadInventorySpecFromPath(spec.resources.inventory).phoneme_targets;
   const target = targets[phoneme] ?? targets[`${phoneme}0`] ?? targets[`${phoneme}1`];
   if (!target || typeof target.type !== "string") {
     throw new Error(`selected inventory type for '${phoneme}' missing`);
@@ -295,8 +299,8 @@ describe("HRG lowering production event timing", () => {
     resolveTimes(utterance, segments, baseline.timings, policy);
 
     const expected = expectedBoundaryFrames(baseline, policy);
-    const inventoryPath = loadBundledRulepackSpec(frontendId).inventory_path;
-    if (!inventoryPath) throw new Error("fixture inventory path missing");
+    const inventoryPath = loadBundledRulepackSpec(frontendId).resources.inventory;
+    if (typeof inventoryPath !== "string") throw new Error("fixture inventory path missing");
     const inventory = loadInventorySpecFromPath(inventoryPath);
     const silence = materializePhonemeTarget(inventory.silence_symbol, {
       inventorySpec: inventory,

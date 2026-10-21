@@ -6,7 +6,8 @@ Move compile-time and runtime voice YAML acquisition into the existing resource 
 
 Fresh branch from 5c18e8d1. Implementation complete: 126 production additions /
 37 removals, 113 existing fixture additions / 20 removals. Source, real callers
-and owned diff inspected. PR #402 published; Claude reviewing. No local CI ran.
+and owned diff inspected. PR #402 published; Claude completed two passes with no
+correctness defects. Accepted the review; no speculative changes. No local CI ran.
 
 # Decisions and why
 
@@ -29,8 +30,11 @@ Other agents' changes are preserved. Voice YAML parsing/IO is removed entirely
 from dectalk-voice; broader resource closure and aliases remain unfinished #141.
 Hosted quality job119144833347 reported imported-name ordering in inventory.ts
 and one fixture call wrap. Applied those exact formatter corrections; no behavior change.
+Integrated origin/master after #400. The actual composition-helper conflict is
+resolved with #400's macro and template-path observers plus this branch's explicit
+voice documents. Its authored/compiled path mapping and related tests are retained.
 
 # Next step
 
-Await hosted CI/Claude and respond to actual findings.
+Await final integration CI and supervisor verification of the conflict resolution.
 Supervisor owns merge; #141 remains open.

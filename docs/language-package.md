@@ -1,6 +1,9 @@
 # The language package
 
-Status: proposal, 2026-09-08, for Q's decision. Expands decision 6 of
+Status: language ownership direction adopted on 2026-10-20; the role redesign,
+multilingual algorithms and delivery ladder below remain proposals. See the
+[decision matrix](frontend-model-decisions.md) for scope and implementation owners.
+Expands decision 6 of
 `docs/frontend-document-model.md`. Companion to `docs/attribute-model.md`.
 
 ## The one-sentence version

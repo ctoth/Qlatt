@@ -12,8 +12,8 @@ import {
   formatPlstepEventsRelative,
   formatRange,
   formatTelemetry,
-  summarizeLfMode,
   summarizeParallel,
+  summarizeSourceControl,
   summarizeTrack,
 } from "../track-analysis";
 import type {
@@ -186,17 +186,25 @@ function formatSignalFlow(state: DisplayState): string[] {
   const track = state.run?.track;
   if (!track || track.length === 0) return ["(no track data)"];
   const parallel = summarizeParallel(track);
-  const lfMode = summarizeLfMode(track, Math.round(Number(state.sliderParams.lfMode ?? 0)));
   const timing = findTimingMismatches(track, state.telemetryMax);
-  const lfSummary = Object.entries(lfMode.seconds)
-    .filter(([, seconds]) => Number.isFinite(seconds) && seconds > 0)
-    .map(([mode, seconds]) => `lfMode${mode}=${seconds.toFixed(3)}s`)
-    .join(" ");
+  const sourcePolicy = state.semantics?.analysis?.source_modes;
+  const sourceLines = sourcePolicy?.params.map((parameter) => {
+    const slider = state.sliderParams[parameter];
+    const initial = Number.isFinite(slider)
+      ? slider
+      : Number(state.semantics?.params?.[parameter]?.default);
+    const summary = summarizeSourceControl(track, parameter, initial);
+    const values = Object.entries(summary.seconds)
+      .filter(([, seconds]) => Number.isFinite(seconds) && seconds > 0)
+      .map(([mode, seconds]) => `${parameter}=${mode}: ${seconds.toFixed(3)}s`)
+      .join(" ");
+    return `Track source controls: ${values || `${parameter}: none observed`}`;
+  });
 
   return [
     `SW=1: ${parallel.swOn} frames, ${parallel.swOnSeconds.toFixed(3)}s (${parallel.swOnShare.toFixed(1)}%)`,
     `Parallel-marked events: ${parallel.parallelEvents}; SW=0 frames: ${parallel.swOff}`,
-    lfSummary ? `LF modes: ${lfSummary}` : "LF modes: none observed",
+    ...(sourceLines ?? ["(no experiment source-control policy)"]),
     ...(timing.length > 0 ? timing : ["No branch timing mismatches detected"]),
   ];
 }

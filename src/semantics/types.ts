@@ -54,7 +54,10 @@ export interface TrackMetricsPolicy {
 }
 
 /** Experiment-owned display thresholds, with their cited or estimated basis. */
-export type TrackAnalysisPolicy = { metrics?: TrackMetricsPolicy } & Record<
+export type TrackAnalysisPolicy = {
+  metrics?: TrackMetricsPolicy;
+  source_modes?: { params: string[]; citations: string[] };
+} & Record<
   "maxVoicingIssues" | "lowParallelScale" | "lowParallelGain",
   { value: number; basis: string }
 >;

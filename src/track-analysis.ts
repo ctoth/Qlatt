@@ -344,17 +344,19 @@ export function summarizeParallel(track: TrackEvent[]): {
   };
 }
 
-export function summarizeLfMode(
+export function summarizeSourceControl(
   track: TrackEvent[],
-  fallbackMode = 0,
+  parameter: string,
+  fallbackMode: number,
 ): { counts: Record<number, number>; seconds: Record<number, number> } {
-  const counts: Record<number, number> = { 0: 0, 1: 0, 2: 0 };
-  const seconds: Record<number, number> = { 0: 0, 1: 0, 2: 0 };
-  let current = Number.isFinite(fallbackMode) ? Math.round(fallbackMode) : 0;
+  const counts: Record<number, number> = {};
+  const seconds: Record<number, number> = {};
+  let current = Number.isFinite(fallbackMode) ? Math.round(fallbackMode) : undefined;
   for (let i = 0; i < track.length; i += 1) {
     const event = track[i];
-    const lfMode = getParam(event.params, "lfMode", Number.NaN);
-    if (Number.isFinite(lfMode)) current = Math.round(lfMode);
+    const value = getParam(event.params, parameter, Number.NaN);
+    if (Number.isFinite(value)) current = Math.round(value);
+    if (current === undefined) continue;
     counts[current] = (counts[current] || 0) + 1;
     const duration = i < track.length - 1 ? track[i + 1].time - event.time : 0;
     if (Number.isFinite(duration) && duration > 0)

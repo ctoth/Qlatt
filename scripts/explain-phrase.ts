@@ -80,6 +80,7 @@ type ExplainPayload = {
   summary: ExplainSummary;
   tooling: {
     ruleSources: Record<string, YamlDocumentSpan>;
+    vocabularySources: Record<string, YamlDocumentSpan>;
     ruleExpressions: Record<
       string,
       { ruleId: string; rule: Record<string, unknown>; pattern: unknown }
@@ -421,8 +422,12 @@ function renderText(payload: ExplainPayload, verbose: boolean): string {
     const citations = decision.citations.length > 0 ? decision.citations.join("; ") : "<none>";
     const span = payload.tooling.ruleSources[decision.id];
     const location = span ? ` | rule: ${span.resource}:${span.line}:${span.column}` : "";
+    const vocabularySpan = payload.tooling.vocabularySources[decision.id];
+    const vocabularyLocation = vocabularySpan
+      ? ` | vocabulary: ${vocabularySpan.resource}:${vocabularySpan.line}:${vocabularySpan.column}`
+      : "";
     lines.push(
-      `#${decision.seq} [${decision.stage}] [${decision.type}] ${decision.subject} ${decision.reason} | citations: ${citations}${location}`,
+      `#${decision.seq} [${decision.stage}] [${decision.type}] ${decision.subject} ${decision.reason} | citations: ${citations}${location}${vocabularyLocation}`,
     );
     const expressions = payload.tooling.ruleExpressions[decision.id];
     if (expressions) {
@@ -567,8 +572,9 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       }
     }
 
+    const documentSpans = rulepackRuleDocumentSpans(rulepack);
     const declarations = new Map<string, YamlDocumentSpan>();
-    for (const entry of rulepackRuleDocumentSpans(rulepack)) {
+    for (const entry of documentSpans) {
       const parts = entry.value.path;
       if (parts.length === 2 && parts[0] === "rules" && typeof parts[1] === "string" && entry.key) {
         declarations.set(parts[1], entry.key);
@@ -576,6 +582,22 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
     }
     const selectedIds = new Set(decisions.map((decision) => decision.id));
     const ruleSources: Record<string, YamlDocumentSpan> = {};
+    const vocabularySources: Record<string, YamlDocumentSpan> = {};
+    for (const decision of decisions) {
+      const lookup = decision.vocabularyLookup;
+      if (!lookup) continue;
+      const matches = documentSpans.filter(({ value }) => {
+        const parts = value.path;
+        return (
+          value.resource === lookup.resource &&
+          parts.length === 3 &&
+          parts[0] === "maps" &&
+          parts[1] === lookup.table &&
+          parts[2] === lookup.key
+        );
+      });
+      if (matches.length === 1) vocabularySources[decision.id] = matches[0].value;
+    }
     const ruleExpressions: ExplainPayload["tooling"]["ruleExpressions"] = {};
     // Join actual committed IDs; frame programs may contain several fired rules,
     // so their synthetic rule IDs are not treated as individual rule names.
@@ -607,6 +629,7 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       args.whyDecisionId,
       {
         ruleSources,
+        vocabularySources,
         ruleExpressions,
         field: fieldExplanation,
         whyNot,

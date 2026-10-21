@@ -211,6 +211,58 @@ function fixture(): Utterance {
 }
 
 describe("HRG lowering Affect projection", () => {
+  it.each([
+    { phoneme: "REST", type: "pause", declared: true, eligible: true },
+    { phoneme: "EH", type: "silence", declared: true, eligible: false },
+    { phoneme: "REST", type: "silence", declared: false, eligible: false },
+  ])("scales declared pause identity: $phoneme/$type, context=$declared", (testCase) => {
+    for (const pauseScale of [1, 1.5]) {
+      const utterance = fixture();
+      const firstSegment = utterance.relation("Segment").listItems()[0];
+      const globalAffect = utterance.relation("Affect").listItems()[0];
+      if (!firstSegment || !globalAffect) throw new Error("pause fixture Items missing");
+      firstSegment.set("phoneme", testCase.phoneme, META);
+      firstSegment.set("type", testCase.type, META);
+      const durationScale = 1.25;
+      globalAffect.set(
+        "delta",
+        { ...compileAffect("angry", 1).vq, durationScale, pauseScale },
+        META,
+      );
+      const policy = {
+        ...POLICY,
+        timeline: {
+          ...POLICY.timeline,
+          initial_silence_ms: { value: 10 },
+          final_silence_ms: { value: 20 },
+        },
+      };
+      const lowered = lowerToFrames(utterance, policy, {
+        ...(testCase.declared
+          ? {
+              silence: {
+                symbol: "REST",
+                initialParams: params(),
+                finalParams: params(),
+                decisionId: globalAffect.latestWrite("delta")!.decisionId,
+              },
+            }
+          : {}),
+      });
+      const first = lowered.frames.find((frame) => frame.segmentId === "segment-0");
+      const second = lowered.frames.find((frame) => frame.segmentId === "segment-1");
+      if (!first || !second) throw new Error("pause fixture frames missing");
+      const edgeScale = durationScale * pauseScale;
+      const firstDuration = 100 * durationScale * (testCase.eligible ? pauseScale : 1);
+      const secondDuration = 100 * durationScale;
+      expect(first.time).toBeCloseTo((10 * edgeScale) / 1000, 9);
+      expect(second.time).toBeCloseTo((10 * edgeScale + firstDuration) / 1000, 9);
+      expect(lowered.totalMs).toBeCloseTo(30 * edgeScale + firstDuration + secondDuration, 9);
+      expect(utterance.axis.start.time).toBe(0);
+      expect(utterance.axis.end.time).toBe(200);
+    }
+  });
+
   it("composes global and field-wise winning local deltas over graph-linked Words", () => {
     const angry = compileAffect("angry", 1).vq;
     const utterance = fixture();

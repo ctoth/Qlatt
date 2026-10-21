@@ -1,3 +1,5 @@
+import type { TextToKlattTrackDetailedResult, TextToKlattTrackOptions } from "../tts-frontend.ts";
+
 export interface RenderMetrics {
   rms: number;
   peak: number;
@@ -17,7 +19,13 @@ export interface RenderTrackSummary {
   f0Span: number;
 }
 
-export interface RenderPayload {
+export interface RenderPayload
+  extends Pick<
+    TextToKlattTrackOptions,
+    "speaker" | "pitchScale" | "voiceQuality" | "directionTrack"
+  > {
+  /** The profile actually resolved by the frontend for this request. */
+  resolvedSpeaker?: TextToKlattTrackDetailedResult["resolvedSpeaker"];
   phrase: string;
   baseF0?: number;
   engine?: string;
@@ -36,7 +44,8 @@ export interface RenderPayload {
   samples: number[];
 }
 
-export interface RenderRequest {
+export interface RenderRequest
+  extends Pick<TextToKlattTrackOptions, "speaker" | "voiceQuality" | "directionTrack"> {
   /** Node-backend measurement controls, applied explicitly to every frame. */
   nodeParameterOverrides?: Record<string, number>;
   repoRoot: string;
@@ -49,12 +58,6 @@ export interface RenderRequest {
    */
   pitchScale?: number;
   frontendId: string;
-  /**
-   * A voice of the frontend's registry (`speakers.voices`), given to the
-   * frontend as the page gives its voice selection. Absent: the frontend's
-   * default voice.
-   */
-  speaker?: string;
   experimentId: string;
   engine: string;
   rate: number;

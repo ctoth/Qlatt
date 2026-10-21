@@ -10,8 +10,9 @@ export function browserRenderOptions(request: RenderRequest): BrowserRenderOptio
     frontendId: request.frontendId,
     experimentId: request.experimentId,
     rate: request.rate,
-    // The voice goes to the frontend as the page's voice selection gives it.
-    ...(request.speaker ? { speaker: request.speaker } : {}),
+    ...(request.speaker === undefined ? {} : { speaker: request.speaker }),
+    voiceQuality: request.voiceQuality,
+    directionTrack: request.directionTrack,
     ...(request.pitchScale === undefined ? {} : { pitchScale: request.pitchScale }),
     transitionMs: request.transitionMs,
     sampleRate: request.sampleRate,
@@ -35,9 +36,17 @@ export const browserRuntimeBackend: RenderBackend = {
     }
     // The legacy page's driver takes no voice; rendering the default voice
     // under another voice's name would be a wrong answer.
-    if (request.speaker && request.engine !== "runtime") {
+    if (request.speaker !== undefined && request.engine !== "runtime") {
       throw new Error(
         `The browser render backend cannot select a voice for the ${request.engine} engine (--speaker ${request.speaker}). Use --engine runtime or --host node.`,
+      );
+    }
+    if (
+      request.engine !== "runtime" &&
+      (request.voiceQuality !== undefined || request.directionTrack !== undefined)
+    ) {
+      throw new Error(
+        `The browser render backend cannot apply voiceQuality or directionTrack for the ${request.engine} engine. Use --engine runtime or --host node.`,
       );
     }
     const session = await openBrowserSession({

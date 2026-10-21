@@ -17,6 +17,7 @@ import os from "node:os";
 import path from "node:path";
 import { type Browser, chromium } from "playwright-core";
 import { build, createServer as createViteServer, preview } from "vite";
+import type { TextToKlattTrackOptions } from "../tts-frontend.ts";
 import type { RenderPayload } from "./types.ts";
 
 export type BrowserRenderServer = "dev" | "build";
@@ -40,7 +41,8 @@ export interface BrowserSessionOptions {
 }
 
 /** What the page's `renderOfflineRuntime` takes (test/render-runtime-offline.html). */
-export interface BrowserRenderOptions {
+export interface BrowserRenderOptions
+  extends Pick<TextToKlattTrackOptions, "speaker" | "voiceQuality" | "directionTrack"> {
   phrase: string;
   /** Absent or null: none, the voice keeps its own. */
   baseF0?: number | null;
@@ -48,7 +50,6 @@ export interface BrowserRenderOptions {
   frontendId?: string;
   experimentId?: string;
   rate?: number;
-  speaker?: string;
   /** A requested pitch as a ratio of the base pitch. Absent: 1. */
   pitchScale?: number;
   transitionMs?: number;
@@ -105,7 +106,7 @@ function delay(ms: number): Promise<void> {
   });
 }
 
-type Served = { port: number; close(): Promise<void> };
+type Served = { port: number; base: string; close(): Promise<void> };
 
 function portOf(address: unknown): number | null {
   return address && typeof address === "object" && "port" in address
@@ -135,7 +136,7 @@ async function serveDev(root: string, port: number | undefined): Promise<Served>
     await server.close();
     throw new Error("Failed to start Vite server for offline render.");
   }
-  return { port: listening, close: () => server.close() };
+  return { port: listening, base: server.config.base, close: () => server.close() };
 }
 
 async function serveBuild(
@@ -170,6 +171,7 @@ async function serveBuild(
     }
     return {
       port: listening,
+      base: server.config.base,
       close: async () => {
         await server.close();
         removeBuild();
@@ -274,7 +276,7 @@ export async function openBrowserSession(options: BrowserSessionOptions): Promis
     });
     log("[browser:driver] browser launched");
     const launched = browser;
-    const url = `http://127.0.0.1:${served.port.toString()}/${OFFLINE_PAGES[options.engine]}`;
+    const url = `http://127.0.0.1:${served.port.toString()}${served.base}${OFFLINE_PAGES[options.engine]}`;
     const openPage = async () => {
       const opened = await launched.newPage();
       opened.setDefaultTimeout(120000);

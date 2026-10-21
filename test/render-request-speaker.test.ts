@@ -7,14 +7,20 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { readWavInt16 } from "../scripts/oracle/dectalk-vtm-fixture";
 import {
   browserRenderOptions,
   browserRuntimeBackend,
 } from "../src/rendering/backends/browser-runtime";
-import { nodeRuntimeBackend } from "../src/rendering/backends/node-runtime";
+import {
+  createNodeRuntimeBackend,
+  nodeRuntimeBackend,
+} from "../src/rendering/backends/node-runtime";
+import { trackOnlyBackend } from "../src/rendering/backends/track-only";
+import { openBrowserSession, resolveChromePath } from "../src/rendering/browser-session";
 import type { RenderRequest } from "../src/rendering/types";
+import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 const fixtureDir = path.join("crates", "dectalk-vtm", "tests", "fixtures");
 
@@ -94,7 +100,7 @@ describe("render request speaker", () => {
     expect(browserRenderOptions({ ...request("she."), ...browser })).not.toHaveProperty("speaker");
     // The driver gives it to the frontend as the page's voice selection does.
     const page = fs.readFileSync(path.join("test", "render-runtime-offline.html"), "utf8");
-    expect(page).toContain("...(speaker ? { speaker } : {}),");
+    expect(page).toContain("resolvedSpeaker: frontend?.resolvedSpeaker,");
   });
 
   it("the browser backend refuses a voice for the legacy page, which cannot select one", async () => {
@@ -107,4 +113,160 @@ describe("render request speaker", () => {
       }),
     ).rejects.toThrow(/cannot select a voice/);
   });
+});
+
+function direct(req: RenderRequest) {
+  return textToKlattTrackDetailed(req.phrase, req.baseF0, req.transitionMs, {
+    frontendId: req.frontendId,
+    rate: req.rate,
+    speaker: req.speaker,
+    pitchScale: req.pitchScale,
+    voiceQuality: req.voiceQuality,
+    directionTrack: req.directionTrack,
+  });
+}
+
+const performanceRequest: RenderRequest = {
+  ...request("See me."),
+  frontendId: "qlatt-beauty",
+  experimentId: "qlatt-beauty",
+  includeTrack: true,
+  baseF0: 140,
+  pitchScale: 1.1,
+  speaker: { base_f0_hz: 180 },
+  voiceQuality: "breathy",
+  directionTrack: {
+    version: "1",
+    global: { affect: { preset: "happy", degree: 0.4 } },
+    spans: [{ id: "opening", anchor: { unit: "word", start: 0 }, pitch: { semitones: 2 } }],
+  },
+};
+
+describe("render request frontend options", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("matches direct frames and resolved profiles through warm Node and track-only A/B/A", async () => {
+    const warm = createNodeRuntimeBackend({ keepWarm: true });
+    const plain = {
+      ...performanceRequest,
+      speaker: undefined,
+      voiceQuality: undefined,
+      directionTrack: undefined,
+    };
+    const expected = direct(performanceRequest);
+    expect(expected.track).not.toEqual(direct(plain).track);
+    // Existing policy selects request.base_f0_hz before positional baseF0.
+    expect(expected.resolvedSpeaker.base_f0_hz).toBeCloseTo(198);
+    try {
+      for (const req of [
+        performanceRequest,
+        plain,
+        performanceRequest,
+        { ...request("she.", "betty"), includeTrack: true },
+      ]) {
+        const result = direct(req);
+        for (const backend of [warm, trackOnlyBackend]) {
+          const rendered = await backend.render(req);
+          expect(rendered.track).toEqual(result.track);
+          expect(rendered.resolvedSpeaker).toEqual(result.resolvedSpeaker);
+          expect(rendered.speaker).toEqual(req.speaker);
+          expect(rendered.voiceQuality).toBe(req.voiceQuality);
+          expect(rendered.directionTrack).toEqual(req.directionTrack);
+          expect(rendered.pitchScale).toBe(req.pitchScale);
+          expect(rendered).not.toHaveProperty("utterance");
+          expect(rendered).not.toHaveProperty("provenance");
+        }
+      }
+    } finally {
+      await warm.dispose();
+    }
+  }, 120000);
+
+  it.each([
+    { speaker: "nobody" },
+    { voiceQuality: "not-a-preset" },
+    {
+      directionTrack: {
+        version: "1",
+        spans: [
+          {
+            id: "bad",
+            anchor: { unit: "syllable", word: 99, start: 0 },
+            stress: { level: 1 },
+          },
+        ],
+      },
+    },
+  ] satisfies Array<Partial<RenderRequest>>)(
+    "preserves the frontend error for %j",
+    async (options) => {
+      const req = { ...request("she."), ...options };
+      let message = "";
+      try {
+        direct(req);
+      } catch (error) {
+        message = (error as Error).message;
+      }
+      expect(message).not.toBe("");
+      for (const backend of [nodeRuntimeBackend, trackOnlyBackend]) {
+        await expect(backend.render(req)).rejects.toThrow(message);
+      }
+    },
+  );
+
+  it.each(["voiceQuality", "directionTrack"] as const)(
+    "rejects %s on the legacy browser driver",
+    async (field) => {
+      await expect(
+        browserRuntimeBackend.render({
+          ...request("See me."),
+          engine: "legacy",
+          allowBrowserRender: true,
+          [field]: performanceRequest[field],
+        }),
+      ).rejects.toThrow(/cannot apply voiceQuality or directionTrack/);
+    },
+  );
+
+  const chromePath =
+    resolveChromePath() ??
+    ["/usr/bin/google-chrome", "/usr/bin/chromium"].find((p) => fs.existsSync(p));
+  it.skipIf(!chromePath)(
+    "serializes directions and profile overrides through the actual browser page",
+    async () => {
+      // Exercise the /Qlatt/ base used by the hosted workflow as well as serialization.
+      vi.stubEnv("GITHUB_ACTIONS", "true");
+      const session = await openBrowserSession({
+        repoRoot: process.cwd(),
+        engine: "runtime",
+        browserExecutablePath: chromePath,
+        log: (line) => process.stderr.write(`${line}\n`),
+      });
+      try {
+        const plain = {
+          ...performanceRequest,
+          speaker: undefined,
+          voiceQuality: undefined,
+          directionTrack: undefined,
+        };
+        for (const req of [performanceRequest, plain, performanceRequest]) {
+          const payload = await session.render(browserRenderOptions(req));
+          const expected = direct(req);
+          expect(payload.track).toEqual(expected.track);
+          expect(payload.resolvedSpeaker).toEqual(expected.resolvedSpeaker);
+          expect(payload.directionTrack).toEqual(req.directionTrack);
+          expect(payload.speaker).toEqual(req.speaker);
+          expect(payload.voiceQuality).toBe(req.voiceQuality);
+        }
+        await expect(
+          session.render(
+            browserRenderOptions({ ...performanceRequest, voiceQuality: "not-a-preset" }),
+          ),
+        ).rejects.toThrow(/not-a-preset/);
+      } finally {
+        await session.close();
+      }
+    },
+    120000,
+  );
 });

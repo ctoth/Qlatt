@@ -8,8 +8,7 @@
  * measures is cached afterwards.
  *
  * Reports, in order:
- *   import_ms     importing the frontend modules (this loads and validates the
- *                 default frontend, rule-pack.ts QLATT_ENGLISH_RULEPACK)
+ *   import_ms     importing the frontend modules
  *   load_ms       loadBundledRulepackSpec(<frontend>): read, resolve includes,
  *                 expand macros, normalize, validate, freeze
  *   first_ms      the first textToKlattTrackDetailed call (dictionary, first

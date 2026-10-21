@@ -4,6 +4,7 @@ import {
   type InventorySpec,
   materializePhonemeTarget,
 } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
 import { createProvenanceCollector } from "../src/provenance";
 import { transcribeText } from "../src/transcribe-text";
@@ -82,6 +83,7 @@ it("bounds expected dictionary misses and retains cited pronunciation decisions"
   const diagnostics = createDiagnostics();
   const provenance = createProvenanceCollector();
   const tokens = transcribeText(Array(250).fill("blorf").join(" "), {
+    compiledSpec: loadBundledRulepackSpec("qlatt-english"),
     diagnostics,
     provenance,
     dictionaryMap: {},
@@ -109,6 +111,7 @@ it("bounds expected dictionary misses and retains cited pronunciation decisions"
 it("warns when an empty dictionary pronunciation becomes SIL, with an exact lookup control", () => {
   const diagnostics = createDiagnostics();
   const tokens = transcribeText("hello lost", {
+    compiledSpec: loadBundledRulepackSpec("qlatt-english"),
     diagnostics,
     dictionaryMap: {},
     dictLookup: (word) => (word === "hello" ? ["HH", "EH1", "L", "OW0"] : []),

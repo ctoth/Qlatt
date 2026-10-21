@@ -5,8 +5,10 @@
  */
 import { describe, expect, it } from "vitest";
 import { readLowerOptions } from "../src/declarative-frontend/hrg/lowering";
-import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
+
+const qlattRulepack = loadBundledRulepackSpec("qlatt-english");
 
 interface TranscriptionFixture {
   diagnostic_symbols: Record<string, string[]>;
@@ -37,7 +39,7 @@ function readTranscriptionFixture(value: unknown): TranscriptionFixture {
 }
 
 describe("YAML frontend config — output section", () => {
-  const output = readLowerOptions(QLATT_ENGLISH_RULEPACK.output.lowering);
+  const output = readLowerOptions(qlattRulepack.output.lowering);
 
   it("lowering output section exists", () => {
     expect(output).toBeDefined();
@@ -100,7 +102,7 @@ describe("YAML frontend config — output section", () => {
 });
 
 describe("YAML frontend config — transcription section", () => {
-  const transcription = readTranscriptionFixture(QLATT_ENGLISH_RULEPACK.transcription);
+  const transcription = readTranscriptionFixture(qlattRulepack.transcription);
 
   it("transcription section exists", () => {
     expect(transcription).toBeDefined();

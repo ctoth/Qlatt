@@ -7,9 +7,11 @@ import {
 } from "../src/declarative-frontend/hrg/rule-engine";
 import {
   compileRuleEngineSpec,
-  QLATT_ENGLISH_RULEPACK,
+  loadBundledRulepackSpec,
 } from "../src/declarative-frontend/rule-pack";
 import { qlattInventoryResource } from "./utils/qlatt-english-inventory";
+
+const qlattRulepack = loadBundledRulepackSpec("qlatt-english");
 
 const SCHEMA = {
   itemTypes: {
@@ -252,14 +254,13 @@ describe("graph-native rule engine select/scalar execution", () => {
     if (!stop) throw new Error("missing stop fixture");
     stop.set("inherentDuration", 100, INPUT);
     const spec = compileRuleEngineSpec({
-      parameters: { ...QLATT_ENGLISH_RULEPACK.parameters, scale: 0.25 },
+      parameters: { ...qlattRulepack.parameters, scale: 0.25 },
       relations: {
         Segment: {
           type: "base",
           features: { type: ["vowel", "stop"], inherentDuration: [], durationFloor: [] },
           scalars: {
-            duration: (QLATT_ENGLISH_RULEPACK.relations.Segment.scalars as Record<string, unknown>)
-              .duration,
+            duration: (qlattRulepack.relations.Segment.scalars as Record<string, unknown>).duration,
           },
         },
       },

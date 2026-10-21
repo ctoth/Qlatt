@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+
+const qlattRulepack = loadBundledRulepackSpec("qlatt-english");
 
 function ruleOp(rule: unknown): unknown {
   if (!rule || typeof rule !== "object") return undefined;
@@ -16,9 +18,9 @@ function ruleSelectRelation(rule: unknown): unknown {
 
 describe("declarative frontend rulepack shape", () => {
   it("expresses duration heuristics as declarative select/apply rules", () => {
-    const stress = QLATT_ENGLISH_RULEPACK.rules.stress_duration;
-    const short = QLATT_ENGLISH_RULEPACK.rules.vowel_shortening;
-    const boundary = QLATT_ENGLISH_RULEPACK.rules.pre_boundary_lengthening;
+    const stress = qlattRulepack.rules.stress_duration;
+    const short = qlattRulepack.rules.vowel_shortening;
+    const boundary = qlattRulepack.rules.pre_boundary_lengthening;
 
     expect(ruleOp(stress)).toBeFalsy();
     expect(ruleOp(short)).toBeFalsy();
@@ -34,7 +36,7 @@ describe("declarative frontend rulepack shape", () => {
   });
 
   it("contains no imperative rule.op handlers", () => {
-    const opRules = Object.entries(QLATT_ENGLISH_RULEPACK.rules).filter(
+    const opRules = Object.entries(qlattRulepack.rules).filter(
       ([, rule]) => ruleOp(rule) != null,
     );
     expect(opRules).toHaveLength(0);

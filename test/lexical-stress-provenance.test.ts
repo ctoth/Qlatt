@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
 import { createProvenanceCollector } from "../src/provenance";
 import { transcribeText } from "../src/transcribe-text";
@@ -7,6 +8,7 @@ import { textToKlattTrackDetailed } from "../src/tts-frontend";
 it("explains inherited secondary stress through a neutral derivation", () => {
   const provenance = createProvenanceCollector();
   const tokens = transcribeText("celebrationness", {
+    compiledSpec: loadBundledRulepackSpec("qlatt-english"),
     provenance,
     dictionaryMap: {},
     dictLookup: (word) =>
@@ -28,6 +30,7 @@ it("links inherited, reassigned, exception and fallback stress to each distinct 
   const provenance = createProvenanceCollector();
   const diagnostics = createDiagnostics();
   const tokens = transcribeText("kindness kindation kindness", {
+    compiledSpec: loadBundledRulepackSpec("qlatt-english"),
     provenance,
     diagnostics,
     dictLookup: (word) => (word === "kind" ? ["K", "AY1", "N", "D"] : null),

@@ -1,11 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import * as inventory from "../src/declarative-frontend/inventory";
-import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+
+const qlattRulepack = loadBundledRulepackSpec("qlatt-english");
 
 describe("speaker formant capabilities", () => {
   it("carries the speaker scale to F11 declared by the active frontend inventory", () => {
-    const resources = inventory.loadFrontendResources(QLATT_ENGLISH_RULEPACK);
+    const resources = inventory.loadFrontendResources(qlattRulepack);
     const extendedResources = {
       ...resources,
       inventory: {

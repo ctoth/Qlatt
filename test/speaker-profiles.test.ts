@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrack } from "../src/tts-frontend";
 import { isPlainObject } from "../src/yaml-loader";
+
+const qlattRulepack = loadBundledRulepackSpec("qlatt-english");
 
 interface CitedSpeakerValue {
   value: number;
@@ -43,7 +45,7 @@ function readSpeakerPolicy(value: unknown): SpeakerPolicy {
   };
 }
 
-const resources = loadFrontendResources(QLATT_ENGLISH_RULEPACK);
+const resources = loadFrontendResources(qlattRulepack);
 const speaker = readSpeakerPolicy(resources.speakerProfile?.spec.default_profile);
 
 describe("speaker profile context", () => {

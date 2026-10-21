@@ -5,6 +5,7 @@ import {
   loadBundledRulepackSpec,
   rulepackRuleDocumentSpans,
 } from "../src/declarative-frontend/rule-pack";
+import type { DiagnosticDocumentSpans } from "../src/declarative-frontend/validation";
 import type { DecisionRecord } from "../src/provenance";
 import * as frontend from "../src/tts-frontend";
 import type { YamlDocumentSpan } from "../src/yaml-loader";
@@ -29,7 +30,12 @@ interface ExplainPayload {
     vocabularySources: Record<string, YamlDocumentSpan>;
     ruleExpressions: Record<
       string,
-      { ruleId: string; rule: Record<string, unknown>; pattern: unknown }
+      {
+        ruleId: string;
+        rule: Record<string, unknown>;
+        pattern: unknown;
+        sources: readonly DiagnosticDocumentSpans[];
+      }
     >;
     replay: { matches: boolean } | null;
   };
@@ -416,6 +422,7 @@ describe("explain phrase cli", () => {
   it.each([
     ["hello world", "duration_floor_from_inventory"],
     ["Did you see the red car?", "palatalization_dy"],
+    ["hello world", "vocal_effort"],
   ])("explains %s through compiled %s", async (phrase, expectedRule) => {
     const explain = await runCli(["--phrase", phrase, "--format", "json"]);
     expect(explain.code).toBe(0);
@@ -455,13 +462,32 @@ describe("explain phrase cli", () => {
       rule: compiledRule,
       pattern:
         typeof compiledRule.match === "string" ? rulepack.patterns[compiledRule.match] : null,
+      sources: rulepackRuleDocumentSpans(rulepack).filter((entry) => {
+        const parts = entry.compiledPath ?? entry.value.path;
+        return (
+          (parts[0] === "rules" && parts[1] === ruleId) ||
+          (parts[0] === "patterns" && parts[1] === compiledRule.match)
+        );
+      }),
     };
     expect(whyPayload.tooling.ruleExpressions[rewrite.id]).toEqual(expressions);
-    expect(expressions.rule.define).not.toEqual({});
+    expect(expressions.sources.length).toBeGreaterThan(0);
+    if (expectedRule !== "vocal_effort") expect(expressions.rule.define).not.toEqual({});
+    if (expectedRule === "vocal_effort") {
+      const callSite = expressions.sources.find(
+        (entry) => entry.value.path.join(".") === "rules.vocal_effort.select.where",
+      );
+      expect(callSite?.value.resource).toBe("/rules/frontends/qlatt-english/phases/prosody.yaml");
+      expect(callSite?.parents?.[0].documentSpan).toMatchObject({
+        resource: "/rules/frontends/qlatt-english/frontend.yaml",
+        path: ["functions", "has_voiced_formants", "body"],
+      });
+    }
     if (expectedRule === "palatalization_dy") {
       expect(expressions.rule.splice).not.toBeNull();
       expect(expressions.pattern).toBeDefined();
       expect(expressions.pattern).not.toBeNull();
+      expect(expressions.sources.some((entry) => entry.value.path[0] === "patterns")).toBe(true);
     }
     const declaration = rulepackRuleDocumentSpans(loadBundledRulepackSpec()).find(
       (entry) => entry.value.path.length === 2 && entry.value.path[1] === span.path[1],

@@ -18,6 +18,7 @@ import {
   loadBundledRulepackSpec,
   rulepackRuleDocumentSpans,
 } from "../src/declarative-frontend/rule-pack";
+import type { DiagnosticDocumentSpans } from "../src/declarative-frontend/validation";
 import {
   applyRange,
   createProvenanceCollector,
@@ -94,7 +95,12 @@ type ExplainPayload = {
     vocabularySources: Record<string, YamlDocumentSpan>;
     ruleExpressions: Record<
       string,
-      { ruleId: string; rule: Record<string, unknown>; pattern: unknown }
+      {
+        ruleId: string;
+        rule: Record<string, unknown>;
+        pattern: unknown;
+        sources: readonly DiagnosticDocumentSpans[];
+      }
     >;
     field: FieldExplanation | null;
     whyNot: WhyNotRuleResult | null;
@@ -661,6 +667,15 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
             rule,
             pattern:
               typeof rule.match === "string" ? (rulepack.patterns[rule.match] ?? null) : null,
+            sources: documentSpans.filter((entry) => {
+              const parts = entry.compiledPath ?? entry.value.path;
+              return (
+                (parts[0] === "rules" && parts[1] === ruleId) ||
+                (typeof rule.match === "string" &&
+                  parts[0] === "patterns" &&
+                  parts[1] === rule.match)
+              );
+            }),
           };
         }
       }

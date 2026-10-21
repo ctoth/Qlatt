@@ -135,7 +135,11 @@ export class Utterance {
    * field initializers run in order and the axis records its inverses here.
    */
   private readonly undo = new UndoLog();
-  readonly axis = new TemporalAxis(this.undo);
+  private generation = 0n;
+  private applying = false;
+  readonly axis = new TemporalAxis(this.undo, () => {
+    this.generation++;
+  });
   private readonly schema: HrgSchema;
   private readonly items = new Map<string, Item>();
   private readonly relations = new Map<string, Relation>();
@@ -153,6 +157,13 @@ export class Utterance {
     this.provenance = provenance ?? createProvenanceCollector();
     this.diagnostics = diagnostics ?? createDiagnostics();
     this.schema = compileHrgSchema(schema);
+  }
+
+  /** Never reused, even after rollback. Pure requests only observe committed state. */
+  committedGeneration(): bigint {
+    if (this.applying)
+      throw new Error("E_ATTRIBUTE_UNCOMMITTED: atomic graph mutation in progress");
+    return this.generation;
   }
 
   /**
@@ -295,6 +306,7 @@ export class Utterance {
       timestampMs: decision.timestampMs,
     });
     item._push(write);
+    if (this.items.get(item.id) === item) this.generation++;
     this.undo.record(() => item._popWrite(write));
     return write;
   };
@@ -332,6 +344,7 @@ export class Utterance {
       }),
     });
     relation._pushWrite(write);
+    this.generation++;
     return write;
   };
 
@@ -373,6 +386,7 @@ export class Utterance {
       }),
     });
     this.pushHistory(this.associationHistoryByEdge, key, write);
+    this.generation++;
     return write;
   }
 
@@ -414,6 +428,7 @@ export class Utterance {
     }
     const item = this._createDetachedItem(type, id);
     this.items.set(id, item);
+    this.generation++;
     return item;
   }
 
@@ -443,6 +458,7 @@ export class Utterance {
     });
     item._setCreationDecision(decision.id);
     this.items.set(item.id, item);
+    this.generation++;
     this.undo.record(() => {
       this.items.delete(item.id);
       item._clearCreationDecision();
@@ -474,6 +490,7 @@ export class Utterance {
       this.undo,
     );
     this.relations.set(name, created);
+    this.generation++;
     return created;
   }
 
@@ -617,6 +634,19 @@ export class Utterance {
    * `E_HRG_ROLLBACK_FAILED` (with the rollback error as `cause`).
    */
   _commitAtomically<T>(metadata: TransactionMetadata, apply: () => T): T {
+    if (this.applying) throw new Error("E_HRG_UNDO_NESTED: an undo capture is already open");
+    this.applying = true;
+    try {
+      return this.applyAtomically(metadata, apply);
+    } finally {
+      // UndoLog stops capturing before invoking inverses. Keep the whole lifetime
+      // inaccessible, and never let a rollback return to a speculative cache key.
+      this.generation++;
+      this.applying = false;
+    }
+  }
+
+  private applyAtomically<T>(metadata: TransactionMetadata, apply: () => T): T {
     this.undo.begin();
     let result: T;
     try {
@@ -768,6 +798,7 @@ export class Utterance {
       ...this.stampedTail(history.length, decision),
     });
     this.pushHistory(this.anchorHistoryByItemId, item.id, write);
+    this.generation++;
     return write;
   }
 

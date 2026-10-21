@@ -39,9 +39,7 @@ export function defaultExperimentFor(
       : declared === undefined
         ? "declares no default experiment"
         : `names invalid or unavailable default experiment '${String(declared)}'`;
-    throw new Error(
-      `E_FRONTEND_DEFAULT_EXPERIMENT: frontend '${frontendId}' ${reason}`,
-    );
+    throw new Error(`E_FRONTEND_DEFAULT_EXPERIMENT: frontend '${frontendId}' ${reason}`);
   }
   return declared;
 }

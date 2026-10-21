@@ -703,6 +703,104 @@ describe("phase source locations through composition", () => {
 });
 
 describe("macro source ancestry", () => {
+  it.each([false, true])(
+    "keeps alias define origins and caller macro parents (invalid: %s)",
+    (invalid) => {
+      const dir = mkdtempSync(join(tmpdir(), "qlatt-define-alias-"));
+      try {
+        const define = { check: invalid ? "current.phonem" : "fixture_alias_check(current)" };
+        const rule = () => ({
+          kind: "scalar",
+          select: { relation: "Segment", where: "true" },
+          define,
+          apply: [{ field: "duration", op: "add", value: "0", tag: "stress" }],
+          citations: ["Engineering fixture: shared define expressions"],
+        });
+        const path = writeExtendingFrontend(dir, {
+          rules: { fixture_anchor: rule(), fixture_alias: rule() },
+          functions: {
+            fixture_alias_check: { params: ["item"], body: "has(item.F1)", citations: ["Fixture"] },
+          },
+        });
+        const resource = join(dir, "pipeline.yaml").replace(/\\/g, "/");
+        const authored = yamlDocumentSpans(parseYamlString(readFileSync(resource, "utf8"), resource));
+        const source = authored.find(
+          (entry) => entry.value.path.join(".") === "rules.fixture_anchor.define.check",
+        )!;
+        const alias = authored.find(
+          (entry) => entry.value.path.join(".") === "rules.fixture_alias.define",
+        )!;
+        expect(alias.aliasTarget?.path).toEqual(["rules", "fixture_anchor", "define"]);
+        if (invalid) {
+          let message = "";
+          try {
+            loadRulepackSpecFromPath(path);
+          } catch (error) {
+            message = String(error);
+          }
+          expect(
+            message
+              .split("\n")
+              .find((line) =>
+                line.startsWith("E_RULE_FEATURE_UNKNOWN at rules.fixture_alias.define.check:"),
+              ),
+          ).toContain(`[${resource}:${source.value.line}:${source.value.column}]`);
+        } else {
+          const spans = rulepackRuleDocumentSpans(loadRulepackSpecFromPath(path));
+          const projected = spans.find(
+            (entry) => entry.compiledPath?.join(".") === "rules.fixture_alias.define.check",
+          )!;
+          expect(projected.value).toMatchObject(source.value);
+          expect(projected.parents?.[0].documentSpan.path).toEqual([
+            "functions",
+            "fixture_alias_check",
+            "body",
+          ]);
+          expect(projected.parents?.[0].documentSpan.resource).toBe(resource);
+          expect(
+            spans.find((entry) => entry.value.path.join(".") === "rules.fixture_alias.define")
+              ?.aliasTarget,
+          ).toMatchObject(alias.aliasTarget!);
+        }
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    },
+  );
+
+  it("keeps inherited alias ownership when a child replaces the anchor rule", () => {
+    const dir = mkdtempSync(join(tmpdir(), "qlatt-timing-alias-"));
+    try {
+      const root = readYamlFile(`${FRONTENDS_DIR}/dectalk-english/frontend.yaml`);
+      const base = loadBundledRulepackSpec("dectalk-english");
+      mkdirSync(join(dir, "phases"));
+      writeFileSync(
+        join(dir, "frontend.yaml"),
+        dumpYaml({ extends: "dectalk-english", include: root.include }),
+      );
+      const name = "dectalk_timing_2_clause_final_rime";
+      writeFileSync(
+        join(dir, "phases/duration.yaml"),
+        dumpYaml({ rules: { [name]: base.rules[name] } }),
+      );
+      const child = loadRulepackSpecFromPath(join(dir, "frontend.yaml").replace(/\\/g, "/"));
+      const spans = rulepackRuleDocumentSpans(child);
+      const aliasName = "dectalk_timing_3_non_phrase_final_syllabic";
+      const projected = spans.find(
+        (entry) => entry.compiledPath?.join(".") === `rules.${aliasName}.define.wpm`,
+      )!;
+      expect(projected.value.path).toEqual(["rules", name, "define", "wpm"]);
+      expect(projected.value.resource).toBe("/rules/frontends/dectalk-english/phases/duration.yaml");
+      expect(
+        spans.find(
+          (entry) => !entry.compiledPath && entry.value.path.join(".") === `rules.${name}.define.wpm`,
+        )?.value.resource,
+      ).toBe(join(dir, "phases/duration.yaml").replace(/\\/g, "/"));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("keeps the bundled call site primary and selects an overriding function body", () => {
     const sourcePath = "rules.vocal_effort.select.where";
     const base = rulepackRuleDocumentSpans(loadBundledRulepackSpec()).find(

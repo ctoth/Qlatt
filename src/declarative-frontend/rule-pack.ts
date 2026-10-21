@@ -43,6 +43,10 @@ const RULE_DOCUMENT_SPANS = new WeakMap<object, readonly DiagnosticDocumentSpans
 const FUNCTION_BODY_SPANS = new WeakMap<object, readonly YamlNodeSpans[]>();
 const NO_PARAMETER_ORIGINS: readonly YamlNodeSpans[] = Object.freeze([]);
 
+function sourceLookupPath(entry: DiagnosticDocumentSpans): readonly (string | number)[] {
+  return entry.compiledPath ?? entry.value.path;
+}
+
 /**
  * Winning authored root-parameter locations, with original document paths.
  * Generated accent/voice values and other compiled surfaces are not covered.
@@ -77,7 +81,7 @@ function mergeParameterOrigins(
     return true;
   }
   return Object.freeze([
-    ...(origins.get(base) ?? NO_PARAMETER_ORIGINS).filter((entry) => !replaced(entry.value.path)),
+    ...(origins.get(base) ?? NO_PARAMETER_ORIGINS).filter((entry) => !replaced(sourceLookupPath(entry))),
     ...(origins.get(child) ?? NO_PARAMETER_ORIGINS),
   ]);
 }
@@ -105,6 +109,28 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
   }
   const aliases: ValidationDiagnostic[] = [];
   const document = normalizeResourceAliases(authored, aliases);
+  const authoredSpans = yamlDocumentSpans(authored);
+  const defineAliases = authoredSpans.flatMap((alias) => {
+    const path = alias.value.path;
+    const target = alias.aliasTarget?.path;
+    if (path.length !== 3 || path[0] !== "rules" || path[2] !== "define" || !target) return [];
+    return authoredSpans.flatMap((entry) => {
+      const childPath = entry.value.path;
+      if (
+        childPath.length !== target.length + 1 ||
+        typeof childPath[target.length] !== "string" ||
+        !target.every((part, index) => part === childPath[index])
+      ) {
+        return [];
+      }
+      return [
+        Object.freeze({
+          ...entry,
+          compiledPath: Object.freeze([...path, childPath[target.length]]),
+        }),
+      ];
+    });
+  });
   RULEPACK_DIAGNOSTICS.set(document, aliases);
   PARAMETER_ORIGINS.set(
     document,
@@ -114,8 +140,8 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
   );
   RULE_DOCUMENT_SPANS.set(
     document,
-    Object.freeze(
-      yamlDocumentSpans(authored).filter(
+    Object.freeze([
+      ...authoredSpans.filter(
         (entry) =>
           entry.value.path[0] === "predicates" ||
           entry.value.path[0] === "patterns" ||
@@ -135,7 +161,8 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
               entry.value.path[2] === "constraint" ||
               (entry.value.path[2] === "select" && entry.value.path[3] === "where"))),
       ),
-    ),
+      ...defineAliases,
+    ]),
   );
   FUNCTION_BODY_SPANS.set(
     document,
@@ -470,7 +497,8 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
     merged,
     Object.freeze([
       ...(RULE_DOCUMENT_SPANS.get(childFile) ?? []),
-      ...(RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter(({ value: { path } }) => {
+      ...(RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter((entry) => {
+        const path = sourceLookupPath(entry);
         if (
           typeof path[0] !== "string" ||
           !INHERITED_SHADOWED_FILE_KEYS.some((key) => key === path[0]) ||
@@ -494,7 +522,7 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
           rule: cloneValue(rule),
           origin: baseOrigins[name] as string,
           spans: (RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter(
-            (entry) => entry.value.path[0] === "rules" && entry.value.path[1] === name,
+            (entry) => sourceLookupPath(entry)[0] === "rules" && sourceLookupPath(entry)[1] === name,
           ),
         },
       ]),
@@ -808,8 +836,8 @@ function parseComposedRulepack(
       }),
     );
   const spans = RULE_DOCUMENT_SPANS.get(merged) ?? [];
-  const pathOf = (entry: YamlNodeSpans) =>
-    entry.value.path
+  const pathOf = (entry: DiagnosticDocumentSpans) =>
+    sourceLookupPath(entry)
       .map((part, index) =>
         typeof part === "number" ? `[${part}]` : `${index > 0 ? "." : ""}${part}`,
       )
@@ -819,7 +847,7 @@ function parseComposedRulepack(
     const macros = calls.get(path);
     if (
       !macros ||
-      entry.value.path.some((part) => typeof part === "string" && /[.\[\]]/.test(part)) ||
+      sourceLookupPath(entry).some((part) => typeof part === "string" && /[.\[\]]/.test(part)) ||
       spans.filter((candidate) => pathOf(candidate) === path).length !== 1
     ) {
       return entry;
@@ -829,7 +857,7 @@ function parseComposedRulepack(
   });
   const sources = new Map<string, DiagnosticDocumentSpans[]>();
   for (const entry of authoredSpans) {
-    const key = JSON.stringify(entry.value.path);
+    const key = JSON.stringify(sourceLookupPath(entry));
     sources.set(key, [...(sources.get(key) ?? []), entry]);
   }
   const compiledSpans = authoredSpans.filter(

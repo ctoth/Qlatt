@@ -1,16 +1,38 @@
-import { readdirSync, readFileSync } from "node:fs";
+import fs, { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { load as loadYaml } from "js-yaml";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   loadYamlDocument,
   loadYamlDocumentSync,
+  loadYamlSource,
+  loadYamlSourceSync,
   parseYamlString,
   yamlDocumentSpans,
 } from "../src/yaml-loader";
 
 it("parses a YAML mapping through the shared loader", () => {
   expect(parseYamlString<{ value: number }>("value: 43\n")).toEqual({ value: 43 });
+});
+
+it("preserves filesystem read causes in synchronous and asynchronous YAML errors", async () => {
+  const filename = path.resolve("public/rules/frontends/qlatt-english/frontend.yaml");
+  const cause = Object.assign(new Error("permission denied"), { code: "EACCES", path: filename });
+  const read = vi.spyOn(fs, "readFileSync").mockImplementation(() => {
+    throw cause;
+  });
+  try {
+    expect(() => loadYamlSourceSync(filename)).toThrow("E_YAML_READ:");
+    try {
+      loadYamlSourceSync(filename);
+    } catch (error) {
+      expect((error as Error).cause).toBe(cause);
+    }
+    await expect(loadYamlSource(filename)).rejects.toMatchObject({ cause });
+    await expect(loadYamlSource(filename)).rejects.toThrow("E_YAML_READ:");
+  } finally {
+    read.mockRestore();
+  }
 });
 
 describe("document spans", () => {

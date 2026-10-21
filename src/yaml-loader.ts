@@ -1,10 +1,5 @@
 import { isAlias, isMap, isNode, isScalar, isSeq, LineCounter, parseDocument } from "yaml";
-import {
-  isNodeRuntime,
-  normalizePath,
-  readFileFromFsSync,
-  resolveFileFromFsSync,
-} from "./path-utils";
+import { isNodeRuntime, normalizePath, readFileFromFsSync } from "./path-utils";
 import { isAbsentResourceAnswer, requestFailureDetail, requestTextSync } from "./resource-answer";
 import {
   isAbsentSyncResource,
@@ -163,6 +158,14 @@ function parseYaml<T = unknown>(
   return parsed as T;
 }
 
+function readYamlFile(specPath: string, attempt: string): string | null {
+  try {
+    return readFileFromFsSync(attempt);
+  } catch (cause) {
+    throw new Error(`E_YAML_READ: '${specPath}' could not be read via '${attempt}'`, { cause });
+  }
+}
+
 /**
  * Throws {@link YamlNotFoundError} when the resource does not exist, and a
  * different error when it exists but could not be read or the request for it
@@ -205,14 +208,10 @@ export function loadYamlSourceSync(specPath: string): string {
   }
 
   for (const attempt of attempts) {
-    const fromFs = readFileFromFsSync(attempt);
+    const fromFs = readYamlFile(specPath, attempt);
     if (typeof fromFs === "string") {
       noteSyncResourceRequest(specPath);
       return fromFs;
-    }
-    const existing = resolveFileFromFsSync(attempt);
-    if (existing !== null) {
-      throw new Error(`E_YAML_READ: '${specPath}' exists at '${existing}' but could not be read`);
     }
   }
 
@@ -239,12 +238,8 @@ export async function loadYamlSource(specPath: string): Promise<string> {
   // In Node/test/CLI, prefer filesystem paths to avoid failed fetch() probes.
   if (isNodeRuntime()) {
     for (const attempt of attempts) {
-      const fromFs = readFileFromFsSync(attempt);
+      const fromFs = readYamlFile(specPath, attempt);
       if (typeof fromFs === "string") return fromFs;
-      const existing = resolveFileFromFsSync(attempt);
-      if (existing !== null) {
-        throw new Error(`E_YAML_READ: '${specPath}' exists at '${existing}' but could not be read`);
-      }
     }
   }
 

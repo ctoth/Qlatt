@@ -850,7 +850,9 @@ describe("input contract — inline shorthand is demoted to a lifter", () => {
     const control = parseInline("((angry@0.2)) I *said* ((calm-2@.75)) no", policy);
     expect(control.score.text).toBe(input.score.text);
     expect(control.directionTrack.global?.affect).toEqual({ preset: "angry", degree: 0.2 });
-    expect(control.directionTrack.spans?.[0].anchor).toEqual(input.directionTrack.spans?.[0].anchor);
+    expect(control.directionTrack.spans?.[0].anchor).toEqual(
+      input.directionTrack.spans?.[0].anchor,
+    );
   });
 
   it("leaves numeric and hyphenated preset authority with the supplied affect library", () => {
@@ -879,20 +881,17 @@ describe("input contract — inline shorthand is demoted to a lifter", () => {
     "((angry@))",
     "(())",
     "((angry@.2@.3))",
-  ])(
-    "preserves malformed marker %s and anchors following words",
-    (literal) => {
-      const input = parseInline(`${literal} plain *yes*`, policy);
-      expect(input.score.text).toBe(`${literal} plain yes`);
-      expect(input.directionTrack.global).toBeUndefined();
-      expect(input.directionTrack.spans?.[0].anchor).toEqual({ unit: "word", start: 2 });
-      expect(parseDirectionInput(input, affectOptions).score.tokens).toEqual([
-        literal,
-        "plain",
-        "yes",
-      ]);
-    },
-  );
+  ])("preserves malformed marker %s and anchors following words", (literal) => {
+    const input = parseInline(`${literal} plain *yes*`, policy);
+    expect(input.score.text).toBe(`${literal} plain yes`);
+    expect(input.directionTrack.global).toBeUndefined();
+    expect(input.directionTrack.spans?.[0].anchor).toEqual({ unit: "word", start: 2 });
+    expect(parseDirectionInput(input, affectOptions).score.tokens).toEqual([
+      literal,
+      "plain",
+      "yes",
+    ]);
+  });
 
   it("rejects malformed selected declarations at resource acquisition", () => {
     const invalid = [

@@ -8,10 +8,39 @@ import {
   loadBundledRulepackSpec,
 } from "../src/declarative-frontend/rule-pack";
 import { normalizeGraphText } from "../src/declarative-frontend/source-recognition";
+import { ltsDocumentAt } from "../src/g2p/lts-document";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const temporaryDirectories: string[] = [];
 afterEach(() => {
   for (const directory of temporaryDirectories.splice(0)) rmSync(directory, { recursive: true });
+});
+
+it("decodes and reuses the selected generated JSON LTS document", () => {
+  const resources = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
+  const document = ltsDocumentAt(resources.ltsPath);
+  expect(document).toEqual(JSON.parse(readFileSync(`public${resources.ltsPath}`, "utf8")));
+  expect(ltsDocumentAt(resources.ltsPath)).toBe(document);
+});
+
+it("retains YAML rule-list decoding and cache identity", () => {
+  const resources = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+  const document = ltsDocumentAt(resources.ltsPath);
+  expect(document).toEqual(loadYamlDocumentSync(resources.ltsPath));
+  expect(ltsDocumentAt(resources.ltsPath)).toBe(document);
+});
+
+it.each(["{", "null"])("reports invalid JSON LTS document %s through its owner", (source) => {
+  const directory = mkdtempSync(join(tmpdir(), "qlatt-lts-json-"));
+  temporaryDirectories.push(directory);
+  const path = join(directory, "resource.json");
+  writeFileSync(path, source);
+  expect(() =>
+    loadFrontendResources({ ...loadBundledRulepackSpec("qlatt-english"), lts_path: path }),
+  ).toThrow(/E_FRONTEND_CONFIG.*lts_path/);
+  if (source === "null") {
+    expect(() => ltsDocumentAt(path)).toThrow(/E_YAML_SCHEMA/);
+  }
 });
 
 it.each(["lts_path", "morphology_path", "stress_policy_path", "normalization.phases"])(

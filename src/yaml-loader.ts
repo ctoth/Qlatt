@@ -37,7 +37,10 @@ const DOCUMENT_SPANS = new WeakMap<object, readonly YamlNodeSpans[]>();
 const NO_DOCUMENT_SPANS: readonly YamlNodeSpans[] = Object.freeze([]);
 
 /** Carry authored locations through a transformation that returns a new object. */
-export function withYamlDocumentSpans<T extends object>(document: T, spans: readonly YamlNodeSpans[]): T {
+export function withYamlDocumentSpans<T extends object>(
+  document: T,
+  spans: readonly YamlNodeSpans[],
+): T {
   DOCUMENT_SPANS.set(document, spans);
   return document;
 }

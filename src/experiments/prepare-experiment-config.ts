@@ -318,7 +318,10 @@ export function prepareExperimentConfig(
         }
       }
     }
-    dependencies.set(name, [...roots].filter((root) => !Object.hasOwn(constants, root)));
+    dependencies.set(
+      name,
+      [...roots].filter((root) => !Object.hasOwn(constants, root)),
+    );
     rules[name] = { ...definition, deps: definition.deps ?? actual };
   }
   try {

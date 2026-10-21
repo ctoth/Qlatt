@@ -178,7 +178,10 @@ async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
                   sourcePath([key, name]),
                 ),
               ),
-              ...constantReplacements(parent.semantics.constants ?? {}, childSemantics.constants ?? {}),
+              ...constantReplacements(
+                parent.semantics.constants ?? {},
+                childSemantics.constants ?? {},
+              ),
             ])
           : parent.sources!.semantics,
       },

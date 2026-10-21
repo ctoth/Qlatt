@@ -9,7 +9,8 @@ let validatedFrontend = null;
 
 async function validateSelectedFrontend() {
   const frontendId = document.getElementById("frontendSelect")?.value || "qlatt-english";
-  if (validatedSemantics === state.newRuntimeConfig?.semantics && validatedFrontend === frontendId) return;
+  if (validatedSemantics === state.newRuntimeConfig?.semantics && validatedFrontend === frontendId)
+    return;
   try {
     await assertFrontendVocabulary(frontendId, {
       graph: state.newRuntimeConfig?.graph,

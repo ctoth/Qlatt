@@ -9,8 +9,8 @@
  */
 import { describe, expect, it } from "vitest";
 import type { BaconGraph, Registry } from "../src/klatt-runtime";
-import { createPreparedRuntime } from "./runtime-fixture";
 import type { SemanticsDocument } from "../src/semantics/types";
+import { createPreparedRuntime } from "./runtime-fixture";
 
 // ---------------------------------------------------------------------------
 // Minimal mocks — validation fires before any AudioContext/worklet methods
@@ -109,12 +109,14 @@ describe("graph param spec validation", () => {
       },
     };
 
-    await expect(createPreparedRuntime({
+    await expect(
+      createPreparedRuntime({
         audioContext: createFullMockAudioContext(),
         semantics: minimalSemantics,
         graph,
         registry: minimalRegistry,
-      })).resolves.toBeDefined();
+      }),
+    ).resolves.toBeDefined();
   });
 
   it("accepts literal number param spec without error", async () => {
@@ -130,12 +132,14 @@ describe("graph param spec validation", () => {
       },
     };
 
-    await expect(createPreparedRuntime({
+    await expect(
+      createPreparedRuntime({
         audioContext: createFullMockAudioContext(),
         semantics: minimalSemantics,
         graph,
         registry: minimalRegistry,
-      })).resolves.toBeDefined();
+      }),
+    ).resolves.toBeDefined();
   });
 });
 
@@ -227,11 +231,13 @@ describe("connectToDestination", () => {
       outputs: ["nonExistentNode"],
     };
 
-    await expect(createPreparedRuntime({
-      audioContext: ctx,
-      semantics: minimalSemantics,
-      graph,
-      registry: minimalRegistry,
-    })).rejects.toThrow(/nonExistentNode/);
+    await expect(
+      createPreparedRuntime({
+        audioContext: ctx,
+        semantics: minimalSemantics,
+        graph,
+        registry: minimalRegistry,
+      }),
+    ).rejects.toThrow(/nonExistentNode/);
   });
 });

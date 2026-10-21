@@ -113,9 +113,7 @@ export function applyAffectToTrack(
     // --- Rd channel (breathy/pressed) via RdPhraseOffset ------------------
     if (vq.rdDelta !== 0) {
       if (!context.rdPolicy) {
-        throw new Error(
-          `E_FRONTEND_CONFIG: frontend '${context.frontendId}' requires vq_channels`,
-        );
+        throw new Error(`E_FRONTEND_CONFIG: frontend '${context.frontendId}' requires vq_channels`);
       }
       Object.assign(params, projectRd(params, vq.rdDelta, context.rdPolicy));
     }

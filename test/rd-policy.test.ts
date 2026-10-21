@@ -1,8 +1,8 @@
 import { load as loadYaml } from "js-yaml";
 import { describe, expect, it } from "vitest";
-import { createDiagnostics } from "../src/diagnostics";
 import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import { createDiagnostics } from "../src/diagnostics";
 import { applyAffectToTrack } from "../src/input/apply-affect";
 import { NEUTRAL_VQ } from "../src/input/direction-track";
 import { projectRd, readRdPolicy } from "../src/input/rd-policy";

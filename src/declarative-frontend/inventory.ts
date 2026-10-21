@@ -1,7 +1,7 @@
 import type { Diagnostics } from "../diagnostics";
 import { ltsDocumentAt } from "../g2p/lts-document";
 import { loadStressPolicy } from "../g2p/stress-policy";
-import { readRdPolicy, type RdPolicy } from "../input/rd-policy";
+import { type RdPolicy, readRdPolicy } from "../input/rd-policy";
 import type { AreaFunctionDerivation } from "../provenance";
 import { parseSourceContourDocument, type SourceContourSpec } from "../source-contour";
 import { parseSpeakerProfileDocument, type SpeakerProfileSpec } from "../speaker-profile";

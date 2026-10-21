@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import type { FeatureSchema, HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { compileAffect } from "../src/input/affect";
-import { readRdPolicy } from "../src/input/rd-policy";
-import { loadYamlDocumentSync } from "../src/yaml-loader";
 import {
   attachDirectionsToUtterance,
   DIRECTION_ITEM_SCHEMA,
   parseDirectionInput,
 } from "../src/input/parse";
+import { readRdPolicy } from "../src/input/rd-policy";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const rdPolicy = readRdPolicy(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
 const context = { frontendId: "fixture", rdPolicy };

@@ -2455,6 +2455,23 @@ output:
     overlays:
       operation_order: [voice_quality, timed_controls, f0]
 transcription:
+  compound_recovery:
+    max_span: 0
+    joiners: []
+    citations:
+      - "DECtalk 4.63 LTS/ls_task.c:2161: search the written word; do not join separately written words"
+  dictionary_candidates:
+    order: [exact, strip-alternate-suffix]
+    citations:
+      - "Engineering compatibility: retain exact lookup and the existing adapter's explicit alternate-suffix fallback for the DECtalk dictionary"
+  empty_pronunciation:
+    duration_ms: 50
+    citations:
+      - "Engineering fallback: preserve an empty pronunciation as 50 ms of silence"
+  diagnostic_symbol_delimiters:
+    characters: "/"
+    citations:
+      - "Engineering convention: diagnostic helper trims edge slashes; diagnostic symbol utterances are disabled for this frontend"
   # A text made only of phoneme symbols is ordinary text here: "B." is the
   # letter. DECtalk takes phonemes only inside brackets, and only after
   # [:phoneme on]: the mode starts off (CMD/Cmd_init.c:87) and the parser
@@ -2471,6 +2488,12 @@ transcription:
   #
   # What this frontend's lexicon is, for the decision record of each word.
   sources:
+    number:
+      name: DECtalk number phone lists
+      citation: "DECtalk 4.63 LTS/l_us_pr1.c (ls_proc_do_number, ls_proc_do_4_digits) with the phone lists of LTS/l_us_con.c"
+    phonemic:
+      name: DECtalk phonemic text
+      citation: "DECtalk 4.63 CMD/cm_text.c:1118-1144 (phonemic text is sent on as phonemes) with the character table usa_ascky_rev of INCLUDE/usa_phon.tab:70"
     dictionary:
       name: DECtalk dictionary
       citation: "DECtalk 4.63 dapi/src/dic/Dic_us.txt, converted by scripts/build-dectalk-dict.ts (/rules/frontends/dectalk-english/dectalk-dictionary.json)"

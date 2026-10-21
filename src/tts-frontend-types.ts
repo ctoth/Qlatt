@@ -107,11 +107,28 @@ export const LEXICON_SOURCE_KEYS = [
   "number-abbreviation",
   "hyphenated",
   "mode-character",
+  "diagnostic-symbol",
+  "number",
+  "phonemic",
 ] as const;
 export type LexiconSourceKey = (typeof LEXICON_SOURCE_KEYS)[number];
 export type LexiconSource = { name: string; citation: string };
 
+export const DICTIONARY_CANDIDATE_OPERATIONS = [
+  "exact",
+  "prepend-apostrophe",
+  "append-apostrophe",
+  "strip-trailing-apostrophe",
+  "append-period",
+  "strip-alternate-suffix",
+] as const;
+export type DictionaryCandidateOperation = (typeof DICTIONARY_CANDIDATE_OPERATIONS)[number];
+
 export type TranscriptionConfig = {
+  compound_recovery?: { max_span: number; joiners: string[]; citations: string[] };
+  dictionary_candidates?: { order: DictionaryCandidateOperation[]; citations: string[] };
+  empty_pronunciation?: { duration_ms: number; citations: string[] };
+  diagnostic_symbol_delimiters?: { characters: string; citations: string[] };
   diagnostic_symbols?: Record<string, string[]>;
   /**
    * Whether a text made only of `diagnostic_symbols` is spoken as those
@@ -120,11 +137,9 @@ export type TranscriptionConfig = {
    */
   diagnostic_symbol_input?: boolean;
   /**
-   * Whether a word the dictionary lacks is also looked up with an apostrophe
-   * added in front or at its end ("cuse" finds "'cuse"), or with a period
-   * added ("cr" finds "cr."). On unless a frontend says false; such a
-   * frontend looks a word up as written and, on a miss, without the
-   * apostrophes at its ends, and its text rules keep an abbreviation's period.
+   * Legacy flag selecting the written-word apostrophe handling path: false
+   * looks up the written word before stripping edge apostrophes on a miss.
+   * Candidate transformations and compound recovery have independent policies.
    */
   elided_apostrophe_lookup?: boolean;
   /**

@@ -1,8 +1,113 @@
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { load as loadYaml } from "js-yaml";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { parseYamlString } from "../src/yaml-loader";
+import {
+  loadYamlDocument,
+  loadYamlDocumentSync,
+  parseYamlString,
+  yamlDocumentSpans,
+} from "../src/yaml-loader";
 
-it("parses a YAML mapping through the installed js-yaml module shape", () => {
+it("parses a YAML mapping through the shared loader", () => {
   expect(parseYamlString<{ value: number }>("value: 43\n")).toEqual({ value: 43 });
+});
+
+describe("document spans", () => {
+  const source =
+    "root:\n  nested: 43\n  list:\n    - first\n  flow: [one, two]\n  text: |\n    line one\n    line two\n";
+  const identity = { resource: "/rules/example.yaml", role: "rulepack" };
+
+  it("indexes mapping keys, values, block and flow sequences and multiline scalars", () => {
+    const document = parseYamlString(source, "example", identity);
+    const index = yamlDocumentSpans(document);
+    const at = (...keys: (string | number)[]) =>
+      index.find((entry) => JSON.stringify(entry.value.path) === JSON.stringify(keys))!;
+    expect(at("root", "nested").key).toEqual({
+      ...identity,
+      path: ["root", "nested"],
+      line: 2,
+      column: 3,
+      endLine: 2,
+      endColumn: 9,
+    });
+    expect(at("root", "nested").value).toMatchObject({ line: 2, column: 11, endLine: 2, endColumn: 13 });
+    expect(at("root", "list", 0).value).toMatchObject({ line: 4, column: 7, endLine: 4, endColumn: 12 });
+    expect(at("root", "flow", 1).value).toMatchObject({ line: 5, column: 15, endLine: 5, endColumn: 18 });
+    expect(at("root", "text").value).toMatchObject({ line: 6, column: 9, endLine: 9, endColumn: 1 });
+    expect(JSON.parse(JSON.stringify(index))).toEqual(index);
+    expect(Object.isFrozen(index)).toBe(true);
+    expect(Object.keys(document as object)).toEqual(["root"]);
+    expect(document).toStrictEqual(loadYaml(source));
+  });
+
+  it("keeps alias occurrences separate from the anchor's authored path", () => {
+    const source = "original: &shared\n  amount: 43\ncopy: *shared\nliteral: { <<: *shared }\n";
+    const document = parseYamlString(source, "aliases", identity);
+    const index = yamlDocumentSpans(document);
+    const original = index.find((entry) => entry.value.path.join(".") === "original")!;
+    const copy = index.find((entry) => entry.value.path.join(".") === "copy")!;
+    expect(copy.value).toMatchObject({ line: 3, column: 7, endLine: 3, endColumn: 14 });
+    expect(copy.aliasTarget).toEqual(original.value);
+    expect(document).toStrictEqual({
+      original: { amount: 43 },
+      copy: { amount: 43 },
+      literal: { "<<": { amount: 43 } },
+    });
+    expect(document).toStrictEqual(loadYaml(source));
+  });
+
+  it("keeps repeated resource loads and same-role documents independently addressable", () => {
+    const first = parseYamlString("a: 1\n", "first", identity);
+    const second = parseYamlString("\na: 2\n", "second", identity);
+    const other = parseYamlString("a: 3\n", "other", { ...identity, resource: "/rules/other.yaml" });
+    expect(yamlDocumentSpans(first)[1].value).toMatchObject({ ...identity, line: 1 });
+    expect(yamlDocumentSpans(second)[1].value).toMatchObject({ ...identity, line: 2 });
+    expect(yamlDocumentSpans(other)[1].value.resource).toBe("/rules/other.yaml");
+    expect(yamlDocumentSpans({})).toEqual([]);
+  });
+
+  it.each(["a: [\n", "a: 1\na: 2\n", "a: *missing\n", "a: 1\n---\na: 2\n"])(
+    "rejects invalid input rather than consuming parser recovery: %s",
+    (source) => {
+      expect(() => parseYamlString(source)).toThrow();
+    },
+  );
+
+  it("distinguishes no document from explicit null", () => {
+    expect(() => parseYamlString("# only a comment\n")).toThrow(
+      "expected a document, but the input is empty",
+    );
+    expect(() => parseYamlString("~\n", "null")).toThrow(
+      "E_YAML_SCHEMA: 'null' resolved to empty document",
+    );
+  });
+});
+
+function yamlFiles(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true })
+    .flatMap((entry) => {
+      const filename = path.join(directory, entry.name);
+      return entry.isDirectory() ? yamlFiles(filename) : /\.ya?ml$/.test(entry.name) ? [filename] : [];
+    })
+    .sort();
+}
+
+describe("bundled YAML parser parity", () => {
+  const files = ["public/rules", "public/experiments"].flatMap(yamlFiles);
+  it.each(files)("preserves parsed values and types for %s", (filename) => {
+    const source = readFileSync(filename, "utf8");
+    expect(parseYamlString(source, filename)).toStrictEqual(loadYaml(source));
+  });
+
+  it("exposes identical metadata through sync and async existing loaders", async () => {
+    const filename = "public/rules/frontends/qlatt-english/frontend.yaml";
+    const sync = loadYamlDocumentSync(filename);
+    const asynchronous = await loadYamlDocument(filename);
+    expect(asynchronous).toStrictEqual(sync);
+    expect(yamlDocumentSpans(asynchronous)).toEqual(yamlDocumentSpans(sync));
+    expect(yamlDocumentSpans(sync)[0].value).toMatchObject({ resource: filename, role: null, path: [] });
+  });
 });
 
 describe("loadYamlDocumentOrNull", () => {

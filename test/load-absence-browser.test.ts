@@ -142,7 +142,7 @@ describe.each([
 
   it("is an error, not a fallback, when the child's file is not valid YAML", async () => {
     const { load } = await loadBeauty({ [BEAUTY_POLICY]: NOT_YAML });
-    expect((await failure(load)).name).toBe("YAMLException");
+    expect((await failure(load)).name).toBe("YAMLParseError");
   }, 120000);
 });
 

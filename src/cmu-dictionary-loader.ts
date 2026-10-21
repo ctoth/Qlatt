@@ -9,7 +9,6 @@ import {
 } from "./sync-resource-cache";
 
 export type CmuDictionary = Record<string, string>;
-export const DEFAULT_CMU_DICTIONARY_PATH = "/cmu-dictionary.json";
 
 function parseDictionary(source: string, label: string): CmuDictionary {
   let parsed: unknown;
@@ -42,13 +41,10 @@ function normalizeAttempts(specPath: string): string[] {
 }
 
 export function listBundledCmuDictionaryPaths(): string[] {
-  const known = new Set<string>([...DICTIONARY_CACHE.keys(), DEFAULT_CMU_DICTIONARY_PATH]);
-  return [...known].sort();
+  return [...DICTIONARY_CACHE.keys()].sort();
 }
 
-export async function preloadCmuDictionaryFromPath(
-  specPath: string = DEFAULT_CMU_DICTIONARY_PATH,
-): Promise<CmuDictionary> {
+export async function preloadCmuDictionaryFromPath(specPath: string): Promise<CmuDictionary> {
   const cached = DICTIONARY_CACHE.get(specPath);
   if (cached) return cached;
 

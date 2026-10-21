@@ -185,9 +185,9 @@ Text → normalizeText() → transcribeText() → [inventory lookup]
    - **Interpreter**: Schedules track frames to AudioParams
    - Uses CEL expressions for parameter derivation (semantics evaluation)
 
-4. **Legacy Synthesizer** (`src/klatt-synth.ts`)
-   - Standalone implementation with hardcoded graph topology
-   - Used by test harness, parallel to runtime system
+4. **Offline Rendering** (`src/rendering/`)
+   - Node and browser adapters use the declarative runtime system
+   - The standalone legacy synthesizer and its offline page have been retired
 
 ### Declarative Configuration (Bacon IR)
 
@@ -252,9 +252,12 @@ Shared utilities in `crates/klatt-wasm-common/`.
 `src/builtin-functions.ts` is the single source of truth for:
 - `dbToLinear()` - Klatt dB conversion (6 dB per doubling)
 - `proximity()` - Formant proximity correction
-- `ndbScale` - Source amplitude scale factors (includes G0 compensation)
 
 These are registered with the CEL evaluator for use in semantics expressions.
+
+Source amplitude scale factors (`ndbScale`, including G0 compensation) belong to
+the selected experiment's `semantics.yaml`. Per-formant bank scales belong to
+`graph.yaml` and feed generated PFE realization rules.
 
 ## Documentation
 

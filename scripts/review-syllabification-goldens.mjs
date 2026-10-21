@@ -57,7 +57,12 @@ for (const name of ["declarative-corpus-summary", "crystal-tempo-corpus-summary"
   output.corpora.push({ name, summaries });
 }
 for (const frontendId of ["qlatt-english", "qlatt-beauty", "dectalk-english"]) {
-  for (const phrase of ["The cat sat.", "Did Bob buy a blue balloon?", "Gag, gang; go!", "sip sip."]) {
+  for (const phrase of [
+    "The cat sat.",
+    "Did Bob buy a blue balloon?",
+    "Gag, gang; go!",
+    "sip sip.",
+  ]) {
     const { track, segments } = render(phrase, frontendId === "qlatt-beauty" ? undefined : 110, {
       frontendId,
     });

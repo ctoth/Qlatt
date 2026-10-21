@@ -89,6 +89,8 @@ export interface PathResult {
  * (tests, tooling) omit them and get a plain in-memory read.
  */
 export interface PathHooks {
+  /** The attempted edge, including a failed lookup, before continuing the walk. */
+  onAttempt?: (from: HrgNode, operation: string, to: HrgNode | null) => void;
   /** Called with each node successfully stepped onto (not the start node). */
   onStep?: (node: HrgNode) => void;
   /** How to read the terminal feature; defaults to `item.get(key)`. */
@@ -117,7 +119,9 @@ export function evalPath(start: HrgNode, path: string, hooks?: PathHooks): PathR
   let node: HrgNode | null = start;
   for (const op of navSegments) {
     if (!node) break;
-    node = step(node, op);
+    const from = node;
+    node = step(from, op);
+    hooks?.onAttempt?.(from, op, node);
     if (node) hooks?.onStep?.(node);
   }
 

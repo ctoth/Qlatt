@@ -283,6 +283,12 @@ function getTranscriptionConfig(spec: CompiledRulepack): TranscriptionConfig | u
     : undefined;
   return {
     diagnostic_symbols: diagnosticSymbols,
+    compound_recovery: value.compound_recovery as TranscriptionConfig["compound_recovery"],
+    dictionary_candidates:
+      value.dictionary_candidates as TranscriptionConfig["dictionary_candidates"],
+    empty_pronunciation: value.empty_pronunciation as TranscriptionConfig["empty_pronunciation"],
+    diagnostic_symbol_delimiters:
+      value.diagnostic_symbol_delimiters as TranscriptionConfig["diagnostic_symbol_delimiters"],
     // Passed as written; requireTranscriptionTables refuses a non-boolean.
     ...(value.diagnostic_symbol_input !== undefined
       ? { diagnostic_symbol_input: value.diagnostic_symbol_input as boolean }

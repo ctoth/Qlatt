@@ -818,6 +818,13 @@ export function rulepackRelationFeatureSchemas(spec: CompiledRulepack): Relation
 
 const BUNDLED_RULEPACK_CACHE = new Map<string, CompiledRulepack>();
 const RULEPACK_DIAGNOSTICS = new WeakMap<object, readonly ValidationDiagnostic[]>();
+const VALIDATED_RULEPACKS = new WeakSet<object>();
+
+/** Successful compiler validation, including its original inventory/schema context. */
+export function assertCompiledRulepack(spec: CompiledRulepack): void {
+  if (!VALIDATED_RULEPACKS.has(spec))
+    throw new Error("E_RULEPACK_UNCHECKED: compile the rulepack before requesting attributes");
+}
 
 function validationInventoryPhonemes(inventory: InventorySpec | null): string[] | undefined {
   if (!inventory) return undefined;
@@ -832,6 +839,7 @@ function validationInventoryPhonemes(inventory: InventorySpec | null): string[] 
 }
 
 function recordDiagnostics(spec: CompiledRulepack, diagnostics: ValidationDiagnostic[]): void {
+  VALIDATED_RULEPACKS.add(spec);
   RULEPACK_DIAGNOSTICS.set(
     spec,
     Object.freeze(diagnostics.map((diagnostic) => Object.freeze({ ...diagnostic }))),

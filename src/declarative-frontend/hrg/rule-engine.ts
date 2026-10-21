@@ -74,7 +74,7 @@ function activeItems(items: readonly Item[]): Item[] {
  */
 const policyProjections = new WeakMap<object, unknown>();
 
-function projectPolicyValues(value: unknown): unknown {
+export function projectPolicyValues(value: unknown): unknown {
   if (!Array.isArray(value) && !isPlainObject(value)) return value;
   if (policyProjections.has(value)) return policyProjections.get(value);
   let read: readonly unknown[];
@@ -106,7 +106,7 @@ function projectPolicyValues(value: unknown): unknown {
   return projected;
 }
 
-function mergeParameterRecords(
+export function mergeParameterRecords(
   base: Readonly<Record<string, unknown>>,
   override: Readonly<Record<string, unknown>>,
 ): Record<string, unknown> {
@@ -162,6 +162,21 @@ function numericAggregate(args: unknown[], mode: "min" | "max"): number {
   );
   return mode === "min" ? Math.min(...values) : Math.max(...values);
 }
+
+/** Fixed computations shared by transactional and requested expression contexts. */
+export const PURE_GRAPH_MATH = {
+  max: (...args: unknown[]) => numericAggregate(args, "max"),
+  min: (...args: unknown[]) => numericAggregate(args, "min"),
+  exp: (value: unknown) => Math.exp(Number(value)),
+  sqrt: (value: unknown) => Math.sqrt(Number(value)),
+  abs: (value: unknown) => Math.abs(Number(value)),
+  log: (value: unknown) => Math.log(Number(value)),
+  pow: (value: unknown, exponent: unknown) => Number(value) ** Number(exponent),
+  contains: (container: unknown, candidate: unknown) =>
+    typeof container === "string"
+      ? container.includes(String(candidate))
+      : Array.isArray(container) && container.includes(candidate),
+};
 
 type EvaluationContext = {
   values: Record<string, unknown>;
@@ -779,17 +794,7 @@ function buildEvaluationScope(
     total: (name) => relationItems(name).length,
     // The parameters as another Item's scope gives them (parameter-scope.ts).
     params_of: (value) => parametersFor(params, resolveItem(value), transaction),
-    max: (...args) => numericAggregate(args, "max"),
-    min: (...args) => numericAggregate(args, "min"),
-    exp: (value) => Math.exp(Number(value)),
-    sqrt: (value) => Math.sqrt(Number(value)),
-    abs: (value) => Math.abs(Number(value)),
-    log: (value) => Math.log(Number(value)),
-    pow: (value, exponent) => Number(value) ** Number(exponent),
-    contains: (container, candidate) =>
-      typeof container === "string"
-        ? container.includes(String(candidate))
-        : Array.isArray(container) && container.includes(candidate),
+    ...PURE_GRAPH_MATH,
     merge,
     // target(key) reads the inventory entry of that name. target(phoneme,
     // stress) selects a phoneme's entry for a lexical stress the way the

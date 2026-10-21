@@ -1136,7 +1136,30 @@ output:
     overlays:
       operation_order: [voice_quality, timed_controls, f0]
 transcription:
+  compound_recovery:
+    max_span: 4
+    joiners: ["-", "'"]
+    citations:
+      - "Engineering convention: recover up to four normalized words using CMU dictionary hyphen/apostrophe entries, longest span first"
+  dictionary_candidates:
+    order: [exact, prepend-apostrophe, append-apostrophe, strip-trailing-apostrophe, append-period, strip-alternate-suffix]
+    citations:
+      - "Engineering convention: CMU dictionary adapter exact, elision, abbreviation and alternate-entry lookup order"
+  empty_pronunciation:
+    duration_ms: 50
+    citations:
+      - "Engineering fallback: preserve an empty pronunciation as 50 ms of silence"
+  diagnostic_symbol_delimiters:
+    characters: "/"
+    citations:
+      - "Engineering convention: trim repeated edge slashes from diagnostic phone symbols"
   sources:
+    diagnostic-symbol:
+      name: Diagnostic symbol input
+      citation: "Engineering convention: direct configured symbol-to-phoneme mapping for explicit segment-list utterances"
+    spelling:
+      name: Configured letter names
+      citation: "Allen et al. 1987 Ch.2-3 (symbol strings pronounced as LETTER-* morphs)"
     dictionary:
       name: CMU dictionary
       citation: CMU Pronouncing Dictionary

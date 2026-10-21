@@ -56,13 +56,18 @@ export function whyRelationMembership(
 }
 
 /**
- * The decision chain behind a lowered frame parameter at time `timeSec`.
- * Returns [] if no frame covers the time or the param has no provenance there.
+ * The decision chain behind the lowered frame selected by frameIndexAt.
+ * Endpoint frames remain selected outside their times; this does not interpolate
+ * or explain scheduled audio. Returns [] for no frames or missing provenance.
  */
-export function whyParamAt(track: LoweredTrack, param: string, timeSec: number): DecisionRecord[] {
+export function whyParamAt(
+  track: Pick<LoweredTrack, "frames" | "utterance">,
+  param: string,
+  timeSec: number,
+): DecisionRecord[] {
   const index = frameIndexAt(track, timeSec);
   if (index < 0) return [];
-  const decisionId = track.provenanceByFrame[index]?.[param];
+  const decisionId = track.frames[index]?.provenance?.[param];
   if (!decisionId) return [];
   return decisionChain(track.utterance.provenance, decisionId);
 }

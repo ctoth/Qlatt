@@ -113,6 +113,7 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 | `--subject <pat>` | Filter by subject (exact or `prefix*` wildcard) |
 | `--range <spec>` | Filter by `seq:START-END`, `time:START-END`, `token:START-END`, or `id:START-END` |
 | `--why <id>` | Show ancestry chain and joined compiled rules with their referenced patterns (e.g., `--why d000045`); bypasses stage, subject and range filters. Whole definitions do not identify selected branches or contributing literals. |
+| `--why-param <P> --at <ms>` | Query lowered frame ancestry and report its selected time/value; bypasses stage, subject and range filters, and cannot combine with `--why`. Milliseconds must be finite and nonnegative. No interpolation or scheduled-value claim. |
 | `--base-f0 <Hz>` | Requested base pitch (default: none; the frontend's voice keeps its own) |
 | `--transition-ms <ms>` | Formant transition override (default: selected frontend policy) |
 | `--strict-citations` | Exit code 2 if any decisions in the full run lack citations, regardless of display filters or selected ancestry; displayed summaries still describe the selected output |
@@ -131,6 +132,7 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 | `--speaker <name>` | Voice name from the selected frontend's speaker registry |
 
 Use `--format json` for full field history, checkpoint details and replay digests. Text output summarizes the field version count, checkpoint count and replay match result.
+Parameter queries expose `tooling.parameter` in JSON. Selection uses the latest frame at/before the requested time (with the lowerer's tolerance); before the first frame it selects the first, and after the last it retains the last. Missing parameter provenance yields an empty ancestry; a missing value is reported as unavailable.
 
 Valued options accept both `--flag value` and `--flag=value`; equals signs inside the value are preserved. Bare boolean flags (`--strict`, `--strict-citations`, `--verbose`, `--phase-views`, `--verify-replay`, `--tooling-only`) do not consume following phrase words; use `--flag=true` or `--flag=false` for explicit boolean values.
 

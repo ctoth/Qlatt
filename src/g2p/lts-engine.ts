@@ -19,8 +19,6 @@
  * Citation: Elovitz, Johnson, McHugh & Shore (1976). NRL Report 7948.
  */
 
-import { ltsDocumentAt } from "./lts-document";
-
 // ── Types ──────────────────────────────────────────────────────────────
 
 interface LtsRule {
@@ -30,7 +28,7 @@ interface LtsRule {
   phonemes: string[];
 }
 
-interface LtsRulesData {
+export interface LtsRulesData {
   context_symbols: Record<string, string>;
   raw_regex?: boolean;
   rules_by_letter: Record<string, LtsRule[]>;
@@ -38,19 +36,7 @@ interface LtsRulesData {
 
 // ── Module-level state (lazy init) ─────────────────────────────────────
 
-const rulesCache = new Map<string, { data: LtsRulesData; contextCache: Map<string, RegExp> }>();
-
-function loadRules(rulesPath: string): { data: LtsRulesData; contextCache: Map<string, RegExp> } {
-  const cached = rulesCache.get(rulesPath);
-  if (cached) return cached;
-
-  const data = ltsDocumentAt(rulesPath) as LtsRulesData;
-  const contextCache = new Map<string, RegExp>();
-  const entry = { data, contextCache };
-  rulesCache.set(rulesPath, entry);
-
-  return entry;
-}
+const rulesCache = new Map<LtsRulesData, Map<string, RegExp>>();
 
 // ── Context pattern compilation ────────────────────────────────────────
 
@@ -165,11 +151,15 @@ function tryRule(
  *               Case-insensitive.
  * @returns Array of Qlatt ARPAbet phoneme strings (no stress digits).
  */
-export function applyLtsRules(word: string, rulesPath: string): string[] {
+export function applyLtsRules(word: string, data: LtsRulesData): string[] {
   if (!word || word.length === 0) return [];
 
-  const loaded = loadRules(rulesPath);
-  const { context_symbols, rules_by_letter, raw_regex } = loaded.data;
+  let contextCache = rulesCache.get(data);
+  if (!contextCache) {
+    contextCache = new Map<string, RegExp>();
+    rulesCache.set(data, contextCache);
+  }
+  const { context_symbols, rules_by_letter, raw_regex } = data;
   const rawRegex = raw_regex === true;
 
   // Pad with spaces (word boundary markers)
@@ -190,7 +180,7 @@ export function applyLtsRules(word: string, rulesPath: string): string[] {
 
     let matched = false;
     for (const rule of rules) {
-      const consumed = tryRule(rule, input, pos, context_symbols, loaded.contextCache, rawRegex);
+      const consumed = tryRule(rule, input, pos, context_symbols, contextCache, rawRegex);
       if (consumed > 0) {
         elovitzPhonemes.push(...rule.phonemes);
         pos += consumed;

@@ -16,7 +16,7 @@ it("explains inherited secondary stress through a neutral derivation", () => {
     dictionaryMap: {},
     dictLookup: (word) =>
       word === "celebration" ? ["S", "EH2", "L", "AH0", "B", "R", "EY1", "SH", "AH0", "N"] : null,
-    ltsPath: "/rules/frontends/qlatt-english/lts-rules.yaml",
+    lts: resources.lts,
     morphology: resources.morphology,
     stress: resources.stress,
   });
@@ -38,7 +38,7 @@ it("links inherited, reassigned, exception and fallback stress to each distinct 
     diagnostics,
     dictLookup: (word) => (word === "kind" ? ["K", "AY1", "N", "D"] : null),
     dictionaryMap: {},
-    ltsPath: "/rules/frontends/qlatt-english/lts-rules.yaml",
+    lts: resources.lts,
     morphology: resources.morphology,
     stress: resources.stress,
   });

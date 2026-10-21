@@ -1,5 +1,6 @@
 import type { Utterance } from "./declarative-frontend/hrg";
 import type { CompiledRulepack } from "./declarative-frontend/rule-pack";
+import type { LtsContext } from "./g2p/lts-document";
 import type { MorphologyContext } from "./g2p/morphology";
 import type { StressContext } from "./g2p/stress-policy";
 import type { ProvenanceCollector } from "./provenance";
@@ -162,8 +163,8 @@ export type TranscriptionOptions = {
   diagnostics?: import("./diagnostics").Diagnostics | null;
   provenance?: ProvenanceCollector | null;
   transcriptionConfig?: TranscriptionConfig;
-  ltsPath?: string;
   /** Explicit parsed resource overrides; paths alone cannot select dependencies. */
+  lts?: LtsContext;
   morphology?: MorphologyContext;
   stress?: StressContext;
   dictLookup?: (word: string) => string[] | null;

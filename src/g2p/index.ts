@@ -25,8 +25,8 @@ import {
   PHONEMIC_CLASS_WORD_CLOSE,
   PHONEMIC_CLASS_WORD_OPEN,
 } from "../text-parser/phonemes";
-import { ltsDocumentAt } from "./lts-document";
-import { applyLtsRules } from "./lts-engine";
+import type { LtsContext } from "./lts-document";
+import { applyLtsRules, type LtsRulesData } from "./lts-engine";
 import type { MorphologyContext } from "./morphology";
 import { decomposeClitic, decomposeWord, getStressHintForWord } from "./morphology";
 import { stressPronunciation } from "./stress";
@@ -36,7 +36,6 @@ import { type ClauseContext, chooseHomograph, loneWordContext } from "./table-ho
 import {
   formClassNamesOf,
   isLtsTableDocument,
-  type LtsTableDocument,
   pronounceWithLtsTableDetailed,
   receivedFormClassWord,
   startsVerbPhrase,
@@ -72,21 +71,6 @@ const WORD_SYMBOLS: ReadonlySet<number> = new Set([
   NUMBER_COMMA,
 ]);
 
-// A letter-to-sound file is either a rule list (lts-engine.ts) or a compiled
-// table with its own stress assignment (table-lts-pronounce.ts). The file's
-// `format` says which; null records a rule list.
-const ltsTables = new Map<string, LtsTableDocument | null>();
-
-function ltsTableAt(path: string): LtsTableDocument | null {
-  const cached = ltsTables.get(path);
-  if (cached !== undefined) return cached;
-  // A table is a JSON document; a rule list is YAML and its engine loads it.
-  const document = path.endsWith(".json") ? ltsDocumentAt(path) : null;
-  const table = isLtsTableDocument(document) ? document : null;
-  ltsTables.set(path, table);
-  return table;
-}
-
 /**
  * Pronounce a single word using the multi-layer G2P pipeline.
  *
@@ -98,7 +82,7 @@ export function pronounce(
   word: string,
   dictLookup: DictLookup,
   options: {
-    ltsPath: string;
+    lts: LtsContext;
     morphology: MorphologyContext;
     stress: StressContext;
     /** The word's place among its neighbours; a word alone when absent. */
@@ -111,7 +95,10 @@ export function pronounce(
 
   const lowerWord = word.toLowerCase();
 
-  const table = options.ltsPath ? ltsTableAt(options.ltsPath) : null;
+  const table =
+    options.lts.path.endsWith(".json") && isLtsTableDocument(options.lts.document)
+      ? options.lts.document
+      : null;
   const context = options.context ?? loneWordContext();
   // A table that records form classes gives every word a list, empty for a
   // word it does not know. A fixed class wins over the dictionary's
@@ -1097,13 +1084,13 @@ export function pronounce(
   // 3. Try morphological decomposition (affix stripping + dict root)
   let generated = decomposeWord(lowerWord, dictLookup, options.morphology);
   if (!generated) {
-    if (!options.ltsPath) {
+    if (!options.lts.path) {
       throw new Error(
         `E_LTS_PATH_MISSING: word '${word}' not in dictionary and no ltsPath configured`,
       );
     }
     generated = {
-      phonemes: applyLtsRules(lowerWord, options.ltsPath),
+      phonemes: applyLtsRules(lowerWord, options.lts.document as LtsRulesData),
       source: "lts-rules",
       word: lowerWord,
     };
@@ -1133,7 +1120,7 @@ export function pronounceClause(
   words: readonly string[],
   dictLookup: DictLookup,
   options: {
-    ltsPath: string;
+    lts: LtsContext;
     morphology: MorphologyContext;
     stress: StressContext;
     /**
@@ -1173,7 +1160,10 @@ export function pronounceClause(
     modes?: readonly (readonly string[] | undefined)[];
   },
 ): PronunciationResult[] {
-  const table = options.ltsPath ? ltsTableAt(options.ltsPath) : null;
+  const table =
+    options.lts.path.endsWith(".json") && isLtsTableDocument(options.lts.document)
+      ? options.lts.document
+      : null;
   // Without words of two entries no word depends on another.
   if (!table?.homographs) return words.map((word) => pronounce(word, dictLookup, options));
   const verbBit = table?.formClassNames ? table.formClassNames.indexOf("verb") : -1;

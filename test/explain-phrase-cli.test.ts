@@ -32,6 +32,57 @@ async function runCli(args: string[]) {
 }
 
 describe("explain phrase cli", () => {
+  it.each([
+    "--verbose",
+    "--strict-citations",
+    "--phase-views",
+    "--verify-replay",
+    "--tooling-only",
+  ])("keeps positional phrase words after %s", async (flag) => {
+    const before = await runCli([flag, "hello", "world", "--format=json"]);
+    const after = await runCli(["hello", "world", flag, "--format=json"]);
+    expect(before.code).toBe(0);
+    expect(after.code).toBe(0);
+    expect(before.stdout).toBe(after.stdout);
+  });
+
+  it("keeps a phrase after strict and accepts explicit boolean values", async () => {
+    const strict = await runCli(["--strict", "hello", "--format=json"]);
+    expect(strict.code).toBe(2);
+    expect(strict.stderr).toContain("strict failed: rulepack validation emitted");
+    const disabled = await runCli(["--strict=false", "hello", "--format=json"]);
+    expect(disabled.code).toBe(0);
+    const enabled = await runCli(["--strict=true", "hello", "--format=json"]);
+    expect(enabled.code).toBe(2);
+    expect(enabled.stderr).toBe(strict.stderr);
+  });
+
+  it("preserves equals inside values and explicit phrase precedence", async () => {
+    const spy = vi.spyOn(frontend, "textToKlattTrackDetailed");
+    try {
+      const equals = await runCli([
+        "ignored",
+        "--phrase=hello=world",
+        "--format=json",
+        "--stage=transcribe",
+      ]);
+      expect(equals.code).toBe(0);
+      expect(spy.mock.calls[0][0]).toBe("hello=world");
+      const spaced = await runCli([
+        "--phrase",
+        "hello=world",
+        "--format",
+        "json",
+        "--stage",
+        "transcribe",
+      ]);
+      expect(spaced.code).toBe(0);
+      expect(equals.stdout).toBe(spaced.stdout);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it("supports stage + range filtering in json output", async () => {
     const result = await runCli([
       "--phrase",

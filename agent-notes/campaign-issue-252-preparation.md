@@ -9,7 +9,9 @@ Started from c7412517 in an isolated worktree. Source/caller/fixture audit compl
 implementation completed for first hosted verification. No local CI. All runtime
 callers now pass prepared config; test callers explicitly prepare through a small
 shared fixture adapter. Manifest, macro endpoint, isolation, semantic dependency
-and source-owner regressions added. Integrating merged port provenance before PR.
+and source-owner regressions added. Integrated master 3927be2b. The sole conflict
+was the named-port fixture: retained both new connections and all selection-reason
+expectations from #440, with this branch's explicit preparation helper.
 
 # Decisions and why
 

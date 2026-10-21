@@ -516,6 +516,13 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     }
     return index;
   }
+  // Describe the authored choice only after the resolved connection succeeds.
+  function portSelection(ref: PortRef): string {
+    const requested = typeof ref === "string" ? undefined : ref.port;
+    if (requested === undefined) return "omitted port defaults to 0";
+    if (typeof requested === "number") return `explicit numeric port ${requested}`;
+    return `named port '${requested}' in primitive '${graph.nodes[getNodeId(ref)].type}'`;
+  }
   for (const connection of graph.connections ?? []) {
     const [from, to] = Array.isArray(connection) ? connection : [connection.from, connection.to];
     portIndex(from, "out");
@@ -814,6 +821,8 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
           subject: `connection:${fromId}->${toId}`,
           reason: `${graph.name ?? "unnamed graph"}: connected ${fromId}[${fromPort}] -> ${
             toParamName !== undefined ? `${toId}.${toParamName} (AudioParam)` : `${toId}[${toPort}]`
+          }; source: ${portSelection(fromRef)}${
+            toParamName === undefined ? `; destination: ${portSelection(toRef)}` : ""
           }`,
           citations: [
             "docs/host-contract.md: Runtime structural failures (graph ports and destinations)",
@@ -982,7 +991,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
         stage: "runtime",
         type: "connection_resolved",
         subject: `connection:${nodeId}->destination`,
-        reason: `${graph.name ?? "unnamed graph"}: connected ${nodeId}[${outputPort}] -> audioContext.destination`,
+        reason: `${graph.name ?? "unnamed graph"}: connected ${nodeId}[${outputPort}] -> audioContext.destination; source: ${portSelection(outputRef)}`,
         citations: [
           "docs/host-contract.md: Runtime structural failures (graph ports and destinations)",
         ],

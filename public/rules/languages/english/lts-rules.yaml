@@ -2,6 +2,17 @@ version: v1
 citations:
   - "Elovitz, Johnson, McHugh & Shore (1976). NRL Report 7948."
   - "Reference implementation: https://github.com/greg-kennedy/p5-NRL-TextToPhoneme"
+input_policy:
+  # Engineering compatibility policy: preserve the existing English table input contract.
+  # Case conversion is locale-independent and applied per Unicode scalar.
+  case_mode: upper
+  boundary_marker: ' '
+  categories:
+    NUMBER: '0123456789'
+  fallback: PUNCT
+  filtered_markers: ['< >', '<,>', '<.>', '<?>', '<->']
+  citations:
+    - 'Engineering convention: existing English LTS case, boundary, category and marker handling'
 context_symbols:
   '#': '[AEIOUY]+'
   '*': '[BCDFGHJKLMNPQRSTVWXZ]+'

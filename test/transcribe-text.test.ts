@@ -4,6 +4,7 @@ import {
   loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
+import type { LtsRulesData } from "../src/g2p/lts-engine";
 import { createProvenanceCollector } from "../src/provenance";
 import {
   getDiagnosticSymbolPronunciation,
@@ -31,6 +32,40 @@ describe("transcribe-text", () => {
   });
 
   describe("transcribeText", () => {
+    it("forwards the selected collector and original case to YAML LTS", () => {
+      const document = structuredClone(resources.lts.document) as LtsRulesData;
+      document.input_policy.case_mode = "preserve";
+      document.rules_by_letter = {
+        B: [{ left: "", letters: "Blorf", right: "", phonemes: ["K", "AE", "T"] }],
+      };
+      const diagnostics = createDiagnostics();
+      const tokens = transcribeText("Blorf blorf", {
+        ...selected,
+        dictionaryMap: {},
+        diagnostics,
+        lts: { path: resources.lts.path, document },
+      });
+      expect(
+        tokens.filter((token) => token.word === "Blorf").map((token) => token.phoneme),
+      ).toEqual(["K", "AE", "T"]);
+      expect(
+        diagnostics.getEntries().filter((entry) => entry.code === "LTS_UNMATCHED_INPUT"),
+      ).toEqual([
+        expect.objectContaining({
+          data: expect.objectContaining({
+            word: "blorf",
+            frontend: "qlatt-english",
+            resource: resources.lts.path,
+            affected: [..."blorf"].map((character, position) => ({
+              character,
+              position,
+              reason: "no-rule-category",
+            })),
+          }),
+        }),
+      ]);
+    });
+
     it("uses declared compound span and joiner order, with no-match and exact-word controls", () => {
       const dictionaryMap = {
         "blorf~snarp~plim": "K AE1 T",

@@ -226,15 +226,20 @@ describe("runtime structural diagnostics", () => {
     options.registry.primitives.gain.outputs = 2;
     options.registry.primitives.gain.ports = { second: { direction: "out", index: 1 } };
     options.graph.outputs = [{ node: "out", port: "second" }];
-    options.graph.connections = [{ from: { node: "out", port: "second" }, to: "out" }];
+    options.graph.connections = [
+      { from: { node: "out", port: "second" }, to: "out" },
+      { from: { node: "out", port: 0 }, to: { node: "out", param: "gain" } },
+    ];
     const runtime = await createPreparedRuntime(options);
     runtime.connectToDestination();
     expect(node.connect).toHaveBeenCalledWith(node, 1, 0);
+    expect(node.connect).toHaveBeenCalledWith(node.gain, 0);
     expect(node.connect).toHaveBeenCalledWith(options.audioContext.destination, 1);
     const records = options.provenance.getDecisions();
     expect(records.map((record) => record.reason)).toEqual([
-      "named-ports: connected out[1] -> out[0]",
-      "named-ports: connected out[1] -> audioContext.destination",
+      "named-ports: connected out[1] -> out[0]; source: named port 'second' in primitive 'gain'; destination: omitted port defaults to 0",
+      "named-ports: connected out[0] -> out.gain (AudioParam); source: explicit numeric port 0",
+      "named-ports: connected out[1] -> audioContext.destination; source: named port 'second' in primitive 'gain'",
     ]);
     for (const record of records) {
       expect(record.stage).toBe("runtime");
@@ -326,7 +331,7 @@ describe("runtime structural diagnostics", () => {
     expect(node.connect).toHaveBeenCalledWith(node.gain, 0);
     expect(options.provenance.getDecisions()).toHaveLength(1);
     expect(options.provenance.getDecisions()[0].reason).toBe(
-      "unnamed graph: connected out[0] -> out.gain (AudioParam)",
+      "unnamed graph: connected out[0] -> out.gain (AudioParam); source: omitted port defaults to 0",
     );
     expect(diagnostics.getEntries()).toEqual([]);
   });

@@ -36,12 +36,23 @@ it("honors an explicit pronunciation document at the same source path", () => {
   const spec = loadBundledRulepackSpec("qlatt-english");
   const resources = loadFrontendResources(spec);
   const options = { compiledSpec: spec, dictionaryMap: {} };
-  expect(transcribeText("blorf", options).length).toBeGreaterThan(0);
+  expect(
+    transcribeText("blorf", options).some(
+      (token) => token.phoneme !== resources.inventory.silence_symbol,
+    ),
+  ).toBe(true);
   const document = structuredClone(resources.lts.document) as LtsRulesData;
   document.rules_by_letter = {};
   expect(
     transcribeText("blorf", { ...options, lts: { path: resources.lts.path, document } }),
-  ).toEqual([]);
+  ).toEqual([
+    expect.objectContaining({
+      phoneme: resources.inventory.silence_symbol,
+      stress: null,
+      duration: 50,
+      word: "blorf",
+    }),
+  ]);
 });
 
 it.each(["{", "null"])("reports invalid JSON LTS document %s through its owner", (source) => {

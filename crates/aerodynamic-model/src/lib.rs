@@ -1,3 +1,10 @@
+//! Approximate HL-to-KL aerodynamic control mapping.
+//! Existing model references: Stevens & Bickley (1991), "Constraints among
+//! parameters simplify control of Klatt formant synthesizer"; Stevens (1998),
+//! "Acoustic Phonetics".
+//! Local pressure/flow approximations drive source amplitudes, B1, nasal
+//! pole/zero controls, and open-quotient/spectral-tilt proxies.
+
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::missing_safety_doc)]
 

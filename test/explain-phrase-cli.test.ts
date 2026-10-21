@@ -60,37 +60,42 @@ describe("explain phrase cli", () => {
     });
     const index = detailed.track.findIndex(
       (frame, i) =>
-        frame.phoneme === "AE" &&
-        frame.provenance?.F1 &&
-        detailed.track[i + 1]?.time > frame.time,
+        frame.phoneme === "AE" && frame.provenance?.F1 && detailed.track[i + 1]?.time > frame.time,
     );
     expect(index).toBeGreaterThanOrEqual(0);
     const frame = detailed.track[index];
     const atMs = (frame.time + detailed.track[index + 1].time) * 500;
-    const result = await runCli([
-      "cat",
-      "--why-param=F1",
-      `--at=${atMs}`,
-      "--format=json",
-      "--stage=runtime",
-      "--subject=does-not-match",
-      "--range=seq:0-0",
-    ]);
-    expect(result.code).toBe(0);
-    const payload = parseExplainPayload(result.stdout);
-    expect(payload.tooling.parameter).toEqual({
-      layer: "lowered",
-      name: "F1",
-      requestedTimeMs: atMs,
-      frameTimeMs: frame.time * 1000,
-      value: frame.params.F1,
-    });
-    expect(payload.decisions[0].id).toBe(frame.provenance?.F1);
-    const ids = new Set(payload.decisions.map((decision) => decision.id));
-    expect(payload.decisions.length).toBeGreaterThan(1);
-    expect(
-      payload.decisions.every((decision) => (decision.parents ?? []).every((id) => ids.has(id))),
-    ).toBe(true);
+    const spy = vi.spyOn(frontend, "textToKlattTrackDetailed");
+    try {
+      const result = await runCli([
+        "cat",
+        "--why-param=F1",
+        `--at=${atMs}`,
+        "--format=json",
+        "--stage=runtime",
+        "--subject=does-not-match",
+        "--range=seq:0-0",
+      ]);
+      expect(result.code).toBe(0);
+      const actual = spy.mock.results[0].value as ReturnType<typeof frontend.textToKlattTrackDetailed>;
+      const selected = actual.track.findLast((entry) => entry.time <= atMs / 1000)!;
+      const payload = parseExplainPayload(result.stdout);
+      expect(payload.tooling.parameter).toEqual({
+        layer: "lowered",
+        name: "F1",
+        requestedTimeMs: atMs,
+        frameTimeMs: selected.time * 1000,
+        value: selected.params.F1,
+      });
+      expect(payload.decisions[0].id).toBe(selected.provenance?.F1);
+      const ids = new Set(payload.decisions.map((decision) => decision.id));
+      expect(payload.decisions.length).toBeGreaterThan(1);
+      expect(
+        payload.decisions.every((decision) => (decision.parents ?? []).every((id) => ids.has(id))),
+      ).toBe(true);
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it.each(["text", "dot", "html"])("labels %s parameter queries as lowered", async (format) => {
@@ -107,7 +112,10 @@ describe("explain phrase cli", () => {
       [1e6, detailed.track.at(-1)!],
     ] as const) {
       const result = await runCli([
-        "cat", "--why-param=NOT_A_PARAM", `--at=${at}`, "--format=json",
+        "cat",
+        "--why-param=NOT_A_PARAM",
+        `--at=${at}`,
+        "--format=json",
       ]);
       expect(result.code).toBe(0);
       const payload = parseExplainPayload(result.stdout);

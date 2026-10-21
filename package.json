@@ -34,6 +34,7 @@
     "preview": "vite preview",
     "build:worklets": "tsc -p tsconfig.worklets.json",
     "check:registry-bindings": "node --experimental-strip-types scripts/check-registry-bindings.ts",
+    "check:citations": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/check-strict-citations.ts",
     "test": "npm run check:registry-bindings && vitest run",
     "test:audit": "vitest run --config vitest.audit.config.ts",
     "typecheck:core": "tsc -p tsconfig.core.json --noEmit",

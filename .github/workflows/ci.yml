@@ -135,6 +135,8 @@ jobs:
       # The production build ships public/worklets/*.wasm, which this rebuilds.
       - run: bash build.sh
 
+      - run: npm run check:citations
+
       - run: npm run build
 
       - if: inputs.upload-pages

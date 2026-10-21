@@ -24,17 +24,19 @@ A synthesizer is defined by:
 | `semantics.yaml` | Qlatt | Input params, constants, CEL realize rules, scheduling flags |
 | Frontend packages (`public/rules/frontends/`) | Qlatt | Text→frames pipeline (out of scope here; the frames boundary below is the cut) |
 
-Experiments may `extends` a parent (see `public/experiments/manifest.json`);
+Backends may `extends` a parent endpoint (see `public/packages/*.json`);
 registries, graphs, and semantics merge child-over-parent
 (`src/experiments/load-experiment-config.ts`). Each semantics document's
 `realize_each` templates (§4) are expanded before that merge.
 
-A frontend is played through one experiment. Its entry in
-`public/rules/frontends/manifest.json` may name a `defaultExperiment`
-(`dectalk-english` names `dectalk-vtm`); without one, its default is the
-experiment with its own id, and a frontend with neither keeps whatever
-experiment is selected (`src/experiments/frontend-pairing.ts`). An experiment
-must declare every column the frontend lowers
+A frontend is played through one backend. Its package entry declares a
+`defaultBackend` endpoint (`dectalk-english` names its `dectalk-vtm` backend)
+for omitted selection. An explicit selection is retained; the backend-owning
+package must declare that frontend/backend combination in `supportedPairs`.
+Unsupported pairs fail with `E_SYNTH_PAIRING`; neither matching ids nor a
+dependency declaration implies compatibility. See
+[the package contract](package-resource-contract.md). A backend must also
+declare every column the frontend lowers
 (`src/experiments/frontend-vocabulary.ts`), including columns it does not read.
 
 ## 2. The frames boundary

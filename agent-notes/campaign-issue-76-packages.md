@@ -2,7 +2,7 @@
 Replace both bundled frontend/backend catalogues with adopted per-package manifests and one discovery owner for #76; enforce explicit supported pairs without weakening vocabulary checks.
 
 # State
-Published as PR #470 at initial 3adab60d, based on merged #467 (6a39902f). Its clean owned worktree/local/remote branch was removed. Claude full-PR review is running, session 8fa2b461-8074-4843-8304-0544e4f847cc. No local CI was run.
+Published as PR #470 at initial 3adab60d, based on merged #467 (6a39902f). Its clean owned worktree/local/remote branch was removed. Claude completed its full 35-file PR review, session 8fa2b461-8074-4843-8304-0544e4f847cc; process11076 exited successfully. Implementer response below; supervisor owns the independent final check and ledger/gate. No local CI was run.
 
 # Decisions and why
 - Smallest approved coherent delivery: 400–550 production lines with 80–120 removals, 210–300 manifest data lines and 150–230 existing fixture lines. Replace both authoritative catalogues rather than adding a pairing overlay.
@@ -21,6 +21,12 @@ The existing harness fixture now expects E_SYNTH_PAIRING when an explicit DECtal
 The recorder's own voice discovery now occurs before recording starts, so moving its catalogue reads onto the shared owner does not count script setup as frontend activity. Synchronous frontend resolution itself reads the selected index/manifests; the three audit manifests reflect that closure.
 
 Initial hosted quality job119367123752 stopped on six formatter-only diagnostics in my edits (loader signature, discovery wrapping, three fixtures and harness condition). Applied the exact emitted formatting through apply_patch; no local formatter or CI run. Typecheck had not run in that job. Other hosted checks were still running.
+
+Accepted both Claude findings after reading their actual producers. The frontend change listener called applyFrontendDefault before refreshing voices; the newly required unsupported-pair error skipped that refresh. Start the existing refresh/prepare promise before applying the pairing selection, preserving its error and the explicit backend without leaving the prior frontend's voice dropdown. No new worker/state/guard.
+
+Updated only the stale catalogue/inference statements in tracked AGENTS.md and docs/host-contract.md to package backend inheritance, defaultBackend and supportedPairs. The user's dirty main-checkout host-contract.md was not touched. Claude's existing hardcoded speaker entrypoint observation remains outside this slice, as do artifact/nested-reference work and any unmeasured duplicate acquisition optimization. No new machinery for nonfindings.
+
+Replacement eb1e30f9 quality/native/node checks passed; runtime shards were pending at response. Final response commit requires its own hosted checks. Review covered initial3adab60d against mergebase6a39902f; the supervisor separately checks formatting and this response delta.
 
 # Next step
 Publish for hosted CI and full Claude review, respond to actual findings, and send the exact final head for supervisor verification/merge. Keep #76 open until its acceptance is checked; nested URL ownership, portable identities, graph metadata reconciliation and artifacts remain separately owned.

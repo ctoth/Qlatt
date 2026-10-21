@@ -6,7 +6,7 @@ resource owner, with parsed context passed through pronunciation (#141).
 # State
 
 Fresh isolated branch from origin/master 0a6045ac. Implementation and caller
-adaptations complete; owned diff inspected, preparing hosted CI/Claude publication.
+adaptations complete; PR #384 published for hosted CI and Claude review.
 
 # Decisions and why
 
@@ -36,9 +36,12 @@ existing g2p-resources fixture before publication.
 The stress composite is cached once, while morphology keeps its own declared
 phonotactics. Existing fixtures now exercise this separation, repeat loading,
 explicit parsed overrides and incompatible parser input. No local CI has run.
+Initial hosted quality found three formatting errors and the obsolete YAML
+mock import in the converted pure syllabification fixture. Removed that import
+and applied the emitted formatting; replacement hosted CI remains pending.
 
 # Next step
 
-Commit/push and publish for hosted CI and Claude; respond to actual results.
+Await hosted CI and Claude; respond to actual results.
 Supervisor owns merge/cleanup. Raw morphology and LTS acquisition remain out of
 scope, as does removing DECtalk's temporary required shared resource declarations.

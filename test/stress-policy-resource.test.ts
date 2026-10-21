@@ -47,7 +47,10 @@ it("keeps declared morphology phonotactics separate and rejects incompatible str
     return read(path);
   });
   try {
-    const selected = loadFrontendResources({ ...spec, morphology_path: "/fixture/morphology.yaml" });
+    const selected = loadFrontendResources({
+      ...spec,
+      morphology_path: "/fixture/morphology.yaml",
+    });
     expect(selected.morphology.phonotactics).toBe(separate);
     expect(selected.stress).toBe(base.stress);
     const lookup = (word: string) => (word === "walk" ? ["W", "AO1", "K"] : null);
@@ -66,7 +69,7 @@ it("honors explicitly supplied parsed transcription contexts", () => {
   const resources = loadFrontendResources(spec);
   const stress = structuredClone(resources.stress);
   stress.policy.longVowels = ["NOT_A_VOWEL"];
-  expect(() =>
-    transcribeText("blorf", { compiledSpec: spec, dictionaryMap: {}, stress }),
-  ).toThrow(/E_STRESS_PHONOTACTICS/);
+  expect(() => transcribeText("blorf", { compiledSpec: spec, dictionaryMap: {}, stress })).toThrow(
+    /E_STRESS_PHONOTACTICS/,
+  );
 });

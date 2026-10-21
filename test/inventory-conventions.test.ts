@@ -11,7 +11,6 @@ import { syllabify } from "../src/g2p/syllabify";
 import { createProvenanceCollector } from "../src/provenance";
 import { transcribeText } from "../src/transcribe-text";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
-import * as yamlModule from "../src/yaml-loader";
 
 const base = loadInventorySpecFromPath("/rules/frontends/qlatt-english/inventory.yaml");
 
@@ -62,15 +61,13 @@ it("records and diagnoses a pronunciation symbol rejected by the selected gramma
 
 it("keeps multi-character onset symbols distinct", () => {
   const phonotactics = {
-    ...inventoryModule.loadFrontendResources(rulepackModule.loadBundledRulepackSpec("qlatt-english"))
-      .stress.phonotactics,
+    ...inventoryModule.loadFrontendResources(
+      rulepackModule.loadBundledRulepackSpec("qlatt-english"),
+    ).stress.phonotactics,
     vowels: ["A"],
     legal_onsets: ["TH R"],
   };
-  expect(syllabify(["A", "TH", "R", "A"], phonotactics)).toEqual([
-    ["A"],
-    ["TH", "R", "A"],
-  ]);
+  expect(syllabify(["A", "TH", "R", "A"], phonotactics)).toEqual([["A"], ["TH", "R", "A"]]);
   expect(syllabify(["A", "T", "HR", "A"], phonotactics)).toEqual([
     ["A", "T"],
     ["HR", "A"],

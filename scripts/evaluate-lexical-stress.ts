@@ -69,7 +69,11 @@ export function evaluateLexicalStress() {
       if (!variants.length) throw new Error(`Missing frozen evaluation reference: ${word}`);
       const phones = variants[0].map((phone) => phone.replace(/[012]$/, ""));
       const hint = getStressHintForWord(word, resources.morphology.path);
-      const reference = stressPronunciation(phones, { stress: resources.stress, wordId: word, hint });
+      const reference = stressPronunciation(phones, {
+        stress: resources.stress,
+        wordId: word,
+        hint,
+      });
       // No whole-word OR root dictionary access: both old and new use the same bare LTS phones.
       const generated = pronounce(word, () => null, resources);
       if (generated.source !== "lts-rules")

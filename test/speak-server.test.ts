@@ -83,16 +83,15 @@ describe("speak-server request mapping", () => {
 });
 
 describe("speak-server protocol", () => {
-  it("derives one marker per word at the first frame of the word", () => {
-    const track = [
-      { time: 0, word: "hello", params: {} },
-      { time: 0.1, word: "hello", params: {} },
-      { time: 0.2, word: "world", params: {} },
-      { time: 0.3, word: ".", params: {} },
-      { time: 0.4, params: {} },
+  it("maps each occurrence to samples without deduplicating its spelling", () => {
+    const occurrences = [
+      { time: 0, wordId: "first", word: "hello" },
+      { time: 0.2, wordId: "second", word: "hello" },
+      { time: 0.2, wordId: "third", word: "world" },
     ];
-    expect(wordMarkers(track, 0.02, 1000)).toEqual([
+    expect(wordMarkers(occurrences, 0.02, 1000)).toEqual([
       { kind: "word", word: "hello", sample: 20 },
+      { kind: "word", word: "hello", sample: 220 },
       { kind: "word", word: "world", sample: 220 },
     ]);
   });
@@ -117,6 +116,11 @@ describe("speak-server protocol", () => {
       expect(markers.map((marker) => marker.word)).toEqual(["hello", "world"]);
       expect(markers[0].sample).toBeLessThan(markers[1].sample);
       expect(markers[1].sample).toBeLessThan(Number(audio.samples));
+      const [repeated] = await send({ id: 8, op: "speak", text: "Very very." });
+      const repeatedMarkers = repeated.markers as Array<{ word: string; sample: number }>;
+      expect(repeatedMarkers.map((marker) => marker.word)).toEqual(["very", "very"]);
+      expect(repeatedMarkers[0].sample).toBeLessThan(repeatedMarkers[1].sample);
+      expect(repeatedMarkers[1].sample).toBeLessThan(Number(repeated.samples));
       let peak = 0;
       for (let i = 0; i < pcm.length; i += 2) peak = Math.max(peak, Math.abs(pcm.readInt16LE(i)));
       expect(peak).toBeGreaterThan(1000);

@@ -11,6 +11,13 @@ export interface WavEncodingStats {
   invalidSamples: number;
 }
 
+/** One canonical spoken Word at its first rendered frame, before lead padding. */
+export interface WordOccurrence {
+  wordId: string;
+  word: string;
+  time: number;
+}
+
 export interface RenderTrackSummary {
   events: number;
   totalTime: number;
@@ -50,6 +57,8 @@ export interface RenderPayload
   trackSummary?: RenderTrackSummary;
   diagnostics?: unknown;
   track?: unknown;
+  /** Node runtime projection supplied with includeTrack; not source offsets. */
+  wordOccurrences?: WordOccurrence[];
   samples: number[];
 }
 

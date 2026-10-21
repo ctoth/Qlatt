@@ -215,7 +215,7 @@ function yamlFiles(directory: string): string[] {
 }
 
 describe("bundled YAML parser parity", () => {
-  const files = ["public/rules", "public/experiments"].flatMap(yamlFiles);
+  const files = ["public/rules", "public/experiments", "public/diagnostics"].flatMap(yamlFiles);
   it.each(files)("preserves parsed values and types for %s", (filename) => {
     const source = readFileSync(filename, "utf8");
     expect(parseYamlString(source, filename)).toStrictEqual(loadYaml(source));

@@ -1,6 +1,6 @@
 // Parse and validate diagnostics YAML config into DiagConfig.
 
-import { load as loadYaml } from "js-yaml";
+import { parseYamlString } from "../yaml-loader";
 import type {
   CheckDef,
   DiagConfig,
@@ -31,7 +31,7 @@ const VALID_SEVERITIES = new Set(["info", "warn", "error"]);
 const VALID_AGGREGATES = new Set(["last", "max", "min"]);
 
 export function parseDiagConfig(source: string): DiagConfig {
-  const raw = loadYaml(source);
+  const raw = parseYamlString(source, "diagnostics config");
   if (!raw || typeof raw !== "object") {
     throw new Error("Diagnostics config must be a YAML mapping");
   }

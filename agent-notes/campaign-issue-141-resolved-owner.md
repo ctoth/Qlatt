@@ -55,6 +55,12 @@ correctness finding was reported; no new guard or compatibility shim added.
 Hosted quality on the review-response head found one remaining fixture conversion:
 the preset citation assertion still used Map iteration (TS2488 at input.test.ts:402).
 It now uses Object.entries on the selected preset record, preserving the assertion.
+The runtime shard then exposed a separate fake-browser setup error for Beauty:
+the fixture served only prefixed URLs, but extends resolves its parent ID to the
+existing bundled path. Serve the manifest documents at that path too, with the
+same rewritten body so runtime resources remain isolated under the fixture prefix.
+The failure was E_YAML_PATH_UNKNOWN for qlatt-english/frontend.yaml; production
+inheritance and resource resolution are unchanged.
 
 # Next step
 

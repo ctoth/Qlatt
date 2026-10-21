@@ -121,9 +121,12 @@ describe("primed resources", () => {
     const entry = `${prefix}frontends/${id}/frontend.yaml`;
     const files: Record<string, string> = {};
     for (const resource of readManifest(id)) {
-      files[replacePaths(resource)] = replacePaths(
+      const source = replacePaths(
         fs.readFileSync(path.join("public", resource), "utf8"),
       );
+      files[replacePaths(resource)] = source;
+      // extends resolves bundled frontend IDs before reading their relative includes.
+      files[resource] = source;
     }
     const { blocking, parallel } = stubBrowser(files);
     vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);

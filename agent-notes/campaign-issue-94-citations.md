@@ -1,19 +1,16 @@
-# Issue 94: full-run citation checking
+# Issue 94: full-corpus citation command
 
 ## Goal
-Make explain's strict-citations exit status independent of display filters. This is one bounded slice of #94; keep that issue open for coverage, corpus and lint work.
+Check complete provenance for the full linguistic corpus across every bundled/inherited frontend, with optional frontend selection; expose the requested package command and hosted CI step.
 
 ## State
-Started from merged #104 at 18810328. Implemented a separate full-run citation summary and updated both documentation references. Existing CLI test covers stage, range, empty subject window and ancestry selections, each with an uncited fixture and non-strict control. No new API or validation framework. Tests have not been run locally; hosted CI owns validation.
+Implemented from origin/master 11840871 in an isolated worktree. The active test file passed: npx vitest run test/strict-citations-check.test.ts (eight cases). Actual limited corpus runs cover all frontends and individual Beauty/DECtalk selection; a mocked synthesis regression verifies full corpus enumeration without duplicating the hosted full-corpus gate. No other local CI steps run.
 
 ## Decisions and why
-- scripts/explain-phrase.ts captures allDecisions before filtering but currently gates on payload.summary after filtering. Compute a separate summary from allDecisions for strict checking; preserve displayed decisions and summary.
-- Test hidden uncited decisions and an empty selected window by wrapping the real frontend in a scoped Vitest spy and adding one uncited decision to its existing collector. Restore the spy; preserve non-strict behavior. No production injection API.
-- Update AGENTS.md and docs/README.md together after #104, whose deliberately accurate old filtered-window wording would otherwise become stale.
-- Do not implement coverage/lint/CI scope in this slice. Existing ordered-writer warnings need source-backed disposition, and Frame attempt reporting currently omits failed attempts.
+Smallest change: about 35-55 script lines, 60-90 focused test lines and one package/workflow entry each. Default to listBundledFrontendIds; validate optional --frontend; identify frontend in summaries and uncited entries. Keep --limit for focused invocation, but package/CI run without it. Reuse full getDecisions after the existing frontend call; normalization is already included. Preserve exits 0/2/1. Run in quality after the existing WASM build supplies f0-filters.wasm. No new build, validation framework, warning suppression, or strict-lint CI activation. Keep #94 open for the unclassified lint gate.
 
 ## Surprises
-None in this slice. No local CI steps run.
+None yet. Full all-frontend corpus citation status will be established by the requested hosted gate, not assumed from earlier limited tests.
 
 ## Next step
-Commit/push/open a PR referencing #94 without closing it, then respond to Claude review. Hosted CI owns validation.
+Publish for hosted full-corpus CI and Claude review, then respond to findings. Keep strict lint CI excluded and #94 open.

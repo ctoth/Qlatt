@@ -70,11 +70,16 @@ describe("dectalk-vtm experiment renders DECtalk's packets", () => {
       resampling: "kaiser-windowed-sinc",
     });
     const allDecisions = provenance.getDecisions();
-    const scheduling = allDecisions.filter((decision) => decision.stage === "interpreter");
+    const scheduling = allDecisions.filter(
+      (decision) => decision.type === "schedule_mode_selected",
+    );
     expect(scheduling.length).toBeGreaterThan(0);
-    expect(scheduling.every((decision) => decision.type === "schedule_mode_selected")).toBe(true);
     expect(scheduling[0].reason).toContain("compiled schedule time");
     expect(scheduling[0].timestampMs).toBeUndefined();
+    const bindings = allDecisions.filter((decision) => decision.type === "binding_resolved");
+    expect(bindings.length).toBeGreaterThan(0);
+    expect(bindings.every((decision) => decision.stage === "interpreter")).toBe(true);
+    expect(bindings[0].reason).toContain("resolved to available AudioParam");
     const decisions = allDecisions.filter((decision) => decision.stage === "runtime");
     expect(decisions.map((decision) => decision.type)).toEqual([
       "dectalk_vtm_run_started",

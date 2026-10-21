@@ -68,6 +68,11 @@ function freezeMetadata(metadata: TransactionMetadata): TransactionMetadata {
   }
   return Object.freeze({
     ...metadata,
+    // The existing annotation phase includes prosodic labels as well as structure.
+    ...(metadata.stage === undefined &&
+    (metadata.phase === "prosody" || metadata.phase === "annotation")
+      ? { stage: "prosody" as const }
+      : {}),
     citations: Object.freeze([...metadata.citations]),
   });
 }

@@ -28,6 +28,25 @@ const META = {
 };
 
 describe("HRG atomic transactions", () => {
+  it.each([
+    { phase: "annotation", stage: undefined, expected: "prosody" },
+    { phase: "prosody", stage: undefined, expected: "prosody" },
+    { phase: "duration", stage: undefined, expected: "rules" },
+    { phase: "prosody", stage: "frontend" as const, expected: "frontend" },
+  ])("uses the phase stage unless explicitly overridden: %j", ({ phase, stage, expected }) => {
+    const utterance = new Utterance(SCHEMA);
+    const segment = utterance.createItem("segment", "s1");
+    const transaction = utterance.beginTransaction({ ...META, phase, stage });
+    transaction.set(segment, "phoneme", "AA");
+    transaction.append("Segment", segment);
+    const entry = transaction.commit();
+    expect(utterance.provenance.getDecisions().map((decision) => decision.stage)).toEqual([
+      expected,
+      expected,
+    ]);
+    expect(entry.metadata.stage).toBe(stage ?? (phase === "duration" ? undefined : "prosody"));
+  });
+
   it("rejects a bad multi-write batch without partial graph, provenance, or journal mutation", () => {
     const diagnostics = createDiagnostics();
     const utterance = new Utterance(SCHEMA, undefined, diagnostics);

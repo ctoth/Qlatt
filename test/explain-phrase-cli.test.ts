@@ -46,6 +46,40 @@ async function runCli(args: string[]) {
 }
 
 describe("explain phrase cli", () => {
+  it("selects cited prosody decisions and preserves replay", async () => {
+    const result = await runCli([
+      "The quick brown fox jumps over the lazy dog.",
+      "--stage=prosody",
+      "--format=json",
+      "--strict-citations",
+      "--verify-replay",
+    ]);
+    expect(result.code).toBe(0);
+    const payload = parseExplainPayload(result.stdout);
+    expect(payload.decisions.length).toBeGreaterThan(0);
+    expect(payload.decisions.every((decision) => decision.stage === "prosody")).toBe(true);
+    expect(
+      payload.decisions.some((decision) => decision.reason.startsWith("assign_accent ")),
+    ).toBe(true);
+    expect(payload.decisions.some((decision) => decision.reason.startsWith("tobi_accent "))).toBe(
+      true,
+    );
+    expect(payload.tooling.replay?.matches).toBe(true);
+  });
+
+  it("prioritizes emitted rule overwrites in compact text", async () => {
+    const json = await runCli(["hello world", "--format=json"]);
+    const compact = await runCli(["hello world"]);
+    expect(json.code).toBe(0);
+    expect(compact.code).toBe(0);
+    const expected = parseExplainPayload(json.stdout).decisions.filter(
+      (decision) => decision.type === "feature_overwrite" && decision.stage === "rules",
+    );
+    expect(expected.length).toBeGreaterThan(0);
+    expect(compact.stdout).toContain(`#${expected[0].seq} [rules] [feature_overwrite]`);
+    expect(compact.stdout).not.toContain("[feature_write]");
+  });
+
   it.each(["rules", "no-such-stage"])(
     "exports a self-contained selected HTML DAG: %s",
     async (stage) => {

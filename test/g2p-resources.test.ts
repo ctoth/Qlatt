@@ -7,6 +7,7 @@ import {
   compileRuleEngineSpec,
   loadBundledRulepackSpec,
   loadFrontendResources,
+  preloadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import {
   NORMALIZATION_SCHEMA,
@@ -41,6 +42,24 @@ it("retains YAML rule-list decoding and cache identity", () => {
   expect(loadFrontendResources(loadBundledRulepackSpec("qlatt-english")).lts.document).toBe(
     document,
   );
+});
+
+it("validates YAML LTS policy through both resource acquisition paths", async () => {
+  const spec = loadBundledRulepackSpec("qlatt-english");
+  const data = structuredClone(loadFrontendResources(spec).lts.document) as LtsRulesData;
+  const directory = mkdtempSync(join(tmpdir(), "qlatt-lts-policy-"));
+  temporaryDirectories.push(directory);
+  const path = join(directory, "resource.yaml");
+  writeFileSync(path, JSON.stringify({ ...data, input_policy: undefined }));
+  const selected = { ...spec, resources: { ...spec.resources, lts: path } };
+  const error = expect.objectContaining({
+    message: expect.stringMatching(/E_FRONTEND_CONFIG.*lts/),
+    cause: expect.objectContaining({ message: expect.stringMatching(/E_LTS_POLICY/) }),
+  });
+  expect(() => loadFrontendResources(selected)).toThrow(error);
+  await expect(preloadFrontendResources(selected)).rejects.toThrow(error);
+  const beauty = loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty"));
+  expect(beauty.lts.document).toBe(loadFrontendResources(spec).lts.document);
 });
 
 it("honors an explicit pronunciation document at the same source path", () => {

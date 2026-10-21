@@ -183,7 +183,7 @@ describe("primed resources", () => {
     const morphology = "/async-owner-error/morphology.yaml";
     const missing = "/async-owner-error/missing-phonotactics.yaml";
     const { blocking } = stubBrowser({
-      [lts]: "version: fixture\n",
+      [lts]: fs.readFileSync("public/rules/languages/english/lts-rules.yaml", "utf8"),
       [morphology]: `phonotactics_path: ${missing}\n`,
     });
     vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);

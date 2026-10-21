@@ -44,7 +44,7 @@ describe("source contour projection policy", () => {
 
   it("allows absent optional contour resources until a consumer requires them", async () => {
     const frontend = rulepack.loadBundledRulepackSpec("qlatt-english");
-    const selected = { ...frontend, source_contour_path: undefined };
+    const selected = { ...frontend, source_contour_path: null };
     expect(loadFrontendResources(selected).sourceContour).toBeUndefined();
     await expect(preloadFrontendSourceContour(selected)).resolves.toBeUndefined();
     vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(selected);

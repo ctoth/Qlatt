@@ -93,7 +93,7 @@ it("runs in plain Node and emits all four formants, bandwidths, comparisons and 
 it("rejects invalid scales and missing geometry instead of silently defaulting", () => {
   expect(() =>
     generate(`${source}\nversion: v1\n`, inventory, inventorySpec, sourcePath, profileSpec),
-  ).toThrow(`E_YAML_PARSE: '${sourcePath}':`);
+  ).toThrow("Map keys must be unique");
   expect(() =>
     generate(source, inventory, inventorySpec, sourcePath, profileSpec, { pharynx_scale: 0 }),
   ).toThrow(/scale/);

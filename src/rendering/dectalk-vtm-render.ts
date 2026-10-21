@@ -124,6 +124,7 @@ export async function renderDectalkVtmTrack(
     runtime.connectToDestination();
     try {
       const interpreter = createKlattInterpreter({
+        provenance,
         audioContext: ctx as unknown as AudioContext,
         runtime,
         semantics: config.semantics,

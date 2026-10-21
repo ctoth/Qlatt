@@ -196,6 +196,7 @@ describe("direct rule errors through composition", () => {
             unknown_path_relation: {
               kind: "scalar",
               select: { relation: "Segment", where: "path(current, 'R:Missing') != null" },
+              constraint: { expr: "current.phonem == 'AA'" },
               aply: [],
               apply: [
                 {
@@ -222,8 +223,12 @@ describe("direct rule errors through composition", () => {
           const value = entries.find(
             (entry) => entry.value.path.join(".") === "rules.unknown_path_relation.select.where",
           )?.value;
+          const semanticValue = entries.find(
+            (entry) => entry.value.path.join(".") === "rules.unknown_path_relation.constraint.expr",
+          )?.value;
           expect(key).toBeDefined();
           expect(value).toBeDefined();
+          expect(semanticValue).toBeDefined();
           let failure: unknown;
           try {
             if (asynchronous) await preloadRulepackSpecFromPath(frontend);
@@ -243,6 +248,11 @@ describe("direct rule errors through composition", () => {
               line.includes("E_CEL_INVALID at rules.unknown_path_relation.select.where:"),
             ),
           ).toContain(`[${resource}:${value?.line}:${value?.column}]`);
+          expect(
+            lines.find((line) =>
+              line.includes("E_RULE_FEATURE_UNKNOWN at rules.unknown_path_relation.constraint.expr:"),
+            ),
+          ).toContain(`[${resource}:${semanticValue?.line}:${semanticValue?.column}]`);
         } finally {
           rmSync(dir, { recursive: true, force: true });
         }

@@ -4647,9 +4647,15 @@ export function assertValidSpec(
     // Dotted authored keys can collide with nested paths; never guess between them.
     const origin = matches.length === 1 ? matches[0] : undefined;
     const exact = origin?.value.path.every((part, index) => part === parts[index]);
+    // Semantic and syntax diagnostics share these direct expression paths.
+    // A diagnostic code alone cannot distinguish an expression from a field name.
+    const expressionPath =
+      /^rules\.[^.]+\.(?:define\.[^.]+|(?:select\.where|constraint)(?:\.not)*(?:\.expr)?)$/.test(
+        diagnostic.path,
+      );
     const documentSpan =
       origin && exact
-        ? diagnostic.code === "E_CEL_INVALID"
+        ? expressionPath
           ? origin.value
           : origin.key
         : undefined;

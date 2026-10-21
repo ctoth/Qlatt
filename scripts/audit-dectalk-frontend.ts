@@ -250,7 +250,6 @@ function main(): void {
   lines.push(
     "4. Decide whether `us_burdr[]` should become an explicit inventory field so burst timing is directly traceable instead of hidden inside procedural splices.",
   );
-  lines.push("5. Add a declarative speaker roster if we want parity beyond Paul.");
 
   console.log(lines.join("\n"));
 }

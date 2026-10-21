@@ -12,7 +12,7 @@ Report the actual declared registry directory, default and voice count in the au
 
 # Surprises
 
-Claude's two-pass review found two remaining stale references: the audit's roster checklist and a harness test comment naming the removed pitch source. Both were verified against the declared roster and Paul voice resource, then corrected. No runtime findings.
+Claude's review found stale roster claims in both audit lists and a harness test comment naming the removed pitch source. All were verified against the declared roster and Paul voice resource, then corrected. No runtime findings.
 
 # Next step
 

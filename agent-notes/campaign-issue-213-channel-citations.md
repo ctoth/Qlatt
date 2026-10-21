@@ -4,7 +4,7 @@ Use configured channel citations for pitch, rate, and direct voice-quality direc
 
 # State
 
-Implemented approved bounded slice from base 23842f68. Only parse.ts, input.test.ts, and this note are owned. Existing pitch/rate/VQ records now carry selected channel citations, channel names/frontend identity in their reason, and explicit host-convention attribution.
+Implemented approved bounded slice from base 23842f68. Owned paths are parse.ts, input.test.ts, this note, and the supervisor-authorized one-line TTS caller correction. Existing pitch/rate/VQ records now carry selected channel citations, channel names/frontend identity in their reason, and explicit host-convention attribution.
 
 # Decisions and why
 
@@ -18,4 +18,6 @@ The fresh worktree has no node_modules. Supervisor verified the main checkout's 
 
 # Next step
 
-PR #380 hosted quality job 119095298802 reported `test/input.test.ts format` and exited 1: the configured-channel fixture's map object required multiline formatting. Applied the exact reflow; no behavior change or local CI rerun. Independent Claude review is in progress. Push the correction and await replacement CI and review feedback. Supervisor owns merge and #213 partial-scope bookkeeping.
+PR #380 hosted quality job 119095298802 reported `test/input.test.ts format` and exited 1: the configured-channel fixture's map object required multiline formatting. Applied the exact reflow; no behavior change or local CI rerun.
+
+Accepted both Claude findings. The real TTS custom-frontend path loaded the selected spec but passed the default frontend ID to direction parsing; corrected it to `options.frontendPath ?? frontendId`, matching transcription and final lowering. Extended the existing custom accent-policy fixture with pitch and asserted the actual path in its provenance. Replaced weak per-key reason substring checks with an exact channel-entry suffix assertion, so `durationScale` in the preexisting numeric reason cannot satisfy the evidence check. No numeric/algebra or ancestry changes. Push the response and await replacement CI and supervisor review verification. Supervisor owns merge and #213 partial-scope bookkeeping.

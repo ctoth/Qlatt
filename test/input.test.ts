@@ -246,6 +246,7 @@ describe("input contract — authored syllable stress", () => {
           version: "1",
           spans: [
             { id: "meter", anchor: { unit: "syllable", word: 0, start: 0 }, stress: { level: 1 } },
+            { id: "pitch", anchor: { unit: "word", start: 0 }, pitch: { semitones: 1 } },
           ],
         },
       });
@@ -257,6 +258,10 @@ describe("input contract — authored syllable stress", () => {
         )!;
       expect(nucleus.get("stress")).toBe(1);
       expect(nucleus.get("isAccentCarrier")).toBe(false);
+      const pitch = result.utterance.provenance
+        .getDecisions()
+        .find((decision) => decision.type === "pitch");
+      expect(pitch?.reason).toContain(`frontend '${frontendPath}' vq_channels entries: f0Scale`);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -537,8 +542,9 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
       expect(
         direction.citations.some((citation) => citation.startsWith("Engineering convention:")),
       ).toBe(true);
-      expect(direction.decision.reason).toContain("frontend 'alternate' vq_channels entries:");
-      for (const key of keys) expect(direction.decision.reason).toContain(key);
+      expect(direction.decision.reason.split("; frontend ").at(-1)).toBe(
+        `'alternate' vq_channels entries: ${keys.join(", ")}`,
+      );
     }
   });
 

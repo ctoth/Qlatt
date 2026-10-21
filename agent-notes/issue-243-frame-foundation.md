@@ -69,5 +69,8 @@ declaration assertion still targeting stored Frame fields. Replay now uses the
 same schema as construction; emitted columns are checked against their actual
 selected output declaration, retaining event-schema/no-numeric-write assertions.
 Await replacement hosted results and the pending loader integration.
+The completed 66d shard1 resource diff records only Beauty's own relative shared
+include, not the base spelling. Removed that extra manifest path; the earlier
+async base-path failure was fallback after the missing child fixture resource.
 Measurement acceptance remains outstanding; do not merge or close #243 on the
 strength of old baseline reports or hosted correctness checks alone.

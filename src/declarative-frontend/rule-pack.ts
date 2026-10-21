@@ -47,7 +47,7 @@ export function rulepackParameterOrigins(spec: CompiledRulepack): readonly YamlN
   return PARAMETER_ORIGINS.get(spec) ?? NO_PARAMETER_ORIGINS;
 }
 
-/** Authored rule/predicate spans, compiled rule paths, and macro body parents. */
+/** Authored rule/predicate/pattern spans, compiled rule paths, and macro body parents. */
 export function rulepackRuleDocumentSpans(
   spec: CompiledRulepack,
 ): readonly DiagnosticDocumentSpans[] {
@@ -110,6 +110,7 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
       yamlDocumentSpans(document).filter(
         (entry) =>
           entry.value.path[0] === "predicates" ||
+          entry.value.path[0] === "patterns" ||
           (entry.value.path[0] === "rules" &&
             (entry.value.path.every((part) => typeof part === "string") ||
               (entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number") ||
@@ -784,6 +785,7 @@ function parseComposedRulepack(
   const compiledSpans = authoredSpans.filter(
     (entry) =>
       entry.value.path[0] === "predicates" ||
+      entry.value.path[0] === "patterns" ||
       entry.value.path.every((part) => typeof part === "string"),
   );
   for (const { compiled, authored } of paths) {

@@ -251,10 +251,23 @@ describe("direct rule errors through composition", () => {
           const predicates = {
             fixture_invalid: { all: ["curent.duration", { expr: "fixture_bad(current)" }] },
           };
+          const patterns = {
+            fixture_pattern: {
+              relation: "Segment",
+              sequence: [
+                {
+                  capture: "x",
+                  where: { all: ["current.phonem", "curent.duration"] },
+                  optional: true,
+                },
+              ],
+              constraint: { expr: "fixture_outer(current)" },
+            },
+          };
           const frontend = writeExtendingFrontend(
             dir,
-            included ? { rules, functions, predicates } : {},
-            included ? {} : { rules, functions, predicates },
+            included ? { rules, functions, predicates, patterns } : {},
+            included ? {} : { rules, functions, predicates, patterns },
           );
           const resource = included ? `${dir.replace(/\\/g, "/")}/pipeline.yaml` : frontend;
           const authored = parseYamlString(readFileSync(resource, "utf8"), resource);
@@ -310,6 +323,28 @@ describe("direct rule errors through composition", () => {
           }
           // CEL syntax errors include a multiline source highlight before the location suffix.
           const diagnosticBlocks = String(failure).split(/\n(?=[EW]_[A-Z_]+ at )/);
+          for (const [code, path, authoredPath, position] of [
+            [
+              "E_RULE_FEATURE_UNKNOWN",
+              "sequence[0].where.all[0]",
+              "sequence.0.where.all.0",
+              "value",
+            ],
+            ["E_CEL_INVALID", "sequence[0].where.all[1]", "sequence.0.where.all.1", "value"],
+            ["E_RULE_FEATURE_UNKNOWN", "constraint.expr", "constraint.expr", "value"],
+            ["E_PATTERN_OPTION_UNSUPPORTED", "sequence[0].optional", "sequence.0.optional", "key"],
+          ] as const) {
+            const source = entries.find(
+              (entry) =>
+                entry.value.path.join(".") === `patterns.fixture_pattern.${authoredPath}`,
+            )?.[position];
+            expect(source).toBeDefined();
+            const block = diagnosticBlocks.find((entry) =>
+              entry.includes(`${code} at patterns.fixture_pattern.${path}:`),
+            );
+            expect(block).toContain(`[${resource}:${source?.line}:${source?.column}]`);
+            if (path === "constraint.expr") expect(block).toContain("macro body [");
+          }
           for (const [path, authoredPath] of [
             ["all[0]", "all.0"],
             ["all[1].expr", "all.1.expr"],

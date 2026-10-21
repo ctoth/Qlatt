@@ -24,3 +24,8 @@ Use these documents as the main entry points into the codebase:
 For PowerShell argument forwarding and the complete explain flag reference, see [Explain Tool Reference](../AGENTS.md#explain-tool-reference). The documented direct Node invocation accepts `--phrase "..."` explicitly. `--strict-citations` checks all decisions in the full run, independently of the displayed output window or ancestry.
 
 Explain text, including `--why`, appends authored rule-declaration locations for decisions joined through committed rule transactions. JSON exposes the same locations by decision ID in `tooling.ruleSources`; literal origins and macro-body ancestry are not included.
+
+With `--why`, text also prints the full compiled rule and its referenced pattern;
+JSON exposes them by decision ID in `tooling.ruleExpressions`. These normalized,
+expanded definitions are distinct from authored YAML and do not identify which
+dispatch branch or individual literals contributed to the decision.

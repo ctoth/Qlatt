@@ -80,6 +80,10 @@ type ExplainPayload = {
   summary: ExplainSummary;
   tooling: {
     ruleSources: Record<string, YamlDocumentSpan>;
+    ruleExpressions: Record<
+      string,
+      { ruleId: string; rule: Record<string, unknown>; pattern: unknown }
+    >;
     field: FieldExplanation | null;
     whyNot: WhyNotRuleResult | null;
     checkpoints: readonly PhaseViewSummary[] | null;
@@ -305,6 +309,12 @@ function renderText(payload: ExplainPayload, verbose: boolean): string {
     lines.push(
       `#${decision.seq} [${decision.stage}] [${decision.type}] ${decision.subject} ${decision.reason} | citations: ${citations}${location}`,
     );
+    const expressions = payload.tooling.ruleExpressions[decision.id];
+    if (expressions) {
+      lines.push(
+        `  compiled rule and pattern (whole definitions, not selected branches): ${JSON.stringify(expressions)}`,
+      );
+    }
   }
 
   if (!verbose && compact.truncated > 0) {
@@ -451,13 +461,25 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
     }
     const selectedIds = new Set(decisions.map((decision) => decision.id));
     const ruleSources: Record<string, YamlDocumentSpan> = {};
+    const ruleExpressions: ExplainPayload["tooling"]["ruleExpressions"] = {};
     // Join actual committed IDs; frame programs may contain several fired rules,
     // so their synthetic rule IDs are not treated as individual rule names.
     for (const transaction of detailed.utterance.journal()) {
       const span = declarations.get(transaction.metadata.ruleId);
       if (!span) continue;
       for (const id of transaction.decisionIds) {
-        if (selectedIds.has(id)) ruleSources[id] = span;
+        if (!selectedIds.has(id)) continue;
+        ruleSources[id] = span;
+        const ruleId = transaction.metadata.ruleId;
+        const rule = rulepack.rules[ruleId];
+        if (args.whyDecisionId && rule) {
+          ruleExpressions[id] = {
+            ruleId,
+            rule,
+            pattern:
+              typeof rule.match === "string" ? (rulepack.patterns[rule.match] ?? null) : null,
+          };
+        }
       }
     }
 
@@ -470,6 +492,7 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       args.whyDecisionId,
       {
         ruleSources,
+        ruleExpressions,
         field: fieldExplanation,
         whyNot,
         checkpoints: args.includePhaseViews

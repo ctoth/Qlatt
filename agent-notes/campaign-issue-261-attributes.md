@@ -51,6 +51,9 @@ Hosted shard 3 at d72e95ec passed all seven requested-attribute tests. Its suppl
 graph fixture reported 10.157 ms across order permutations and uncached comparisons,
 four evaluations per order and zero transactions. This is fixture evidence only;
 the review corrections still require their own hosted results.
+Review-correction quality job119213264077 requested two import layout corrections
+in requested-attributes.ts. Applied its exact order and single-line import through
+apply_patch; no local CI rerun.
 
 ## Next step
 Push the accepted review corrections and inspect hosted CI on their exact head.

@@ -1,9 +1,5 @@
 import { isPlainObject } from "../../yaml-loader";
-import {
-  type CheckedPureExpression,
-  checkPureExpression,
-  ItemViewType,
-} from "../cel-expressions";
+import { type CheckedPureExpression, checkPureExpression, ItemViewType } from "../cel-expressions";
 import {
   assertCompiledRulepack,
   type CompiledRulepack,
@@ -16,8 +12,8 @@ import { evalPath, isNavOp } from "./path";
 import {
   GraphRuleEvaluationOwner,
   mergeParameterRecords,
-  projectPolicyValues,
   PURE_GRAPH_MATH,
+  projectPolicyValues,
 } from "./rule-engine";
 import type { Utterance } from "./utterance";
 

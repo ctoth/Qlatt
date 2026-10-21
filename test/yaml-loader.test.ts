@@ -1,4 +1,5 @@
 import fs, { readdirSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { load as loadYaml } from "js-yaml";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -13,6 +14,23 @@ import {
 
 it("parses a YAML mapping through the shared loader", () => {
   expect(parseYamlString<{ value: number }>("value: 43\n")).toEqual({ value: 43 });
+});
+
+it("anchors logical resources to the package and retains absolute native files", () => {
+  const source = readFileSync("public/rules/frontends/qlatt-english/frontend.yaml", "utf8");
+  const dir = fs.mkdtempSync(path.join(tmpdir(), "qlatt-root-"));
+  const custom = path.join(dir, "custom.yaml");
+  fs.writeFileSync(custom, "selected: custom\n");
+  const cwd = vi.spyOn(process, "cwd").mockReturnValue(dir);
+  try {
+    expect(loadYamlSourceSync("/rules/frontends/qlatt-english/frontend.yaml")).toBe(source);
+    expect(loadYamlSourceSync("public/rules/frontends/qlatt-english/frontend.yaml")).toBe(source);
+    expect(loadYamlDocumentSync(custom)).toEqual({ selected: "custom" });
+    expect(() => loadYamlSourceSync("custom.yaml")).toThrow("E_YAML_PATH_UNKNOWN");
+  } finally {
+    cwd.mockRestore();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 it("preserves filesystem read causes in synchronous and asynchronous YAML errors", async () => {

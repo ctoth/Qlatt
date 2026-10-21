@@ -1,4 +1,10 @@
+import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { expect, it, vi } from "vitest";
 import * as configModule from "../src/experiments/load-experiment-config";
 import * as f0Module from "../src/f0-filters-loader";
@@ -12,6 +18,53 @@ function audioHash(payload: RenderPayload) {
     .update(Buffer.from(new Float32Array(payload.samples).buffer))
     .digest("hex");
 }
+
+it("renders through the CLI from a temporary working directory", () => {
+  const repoRoot = fileURLToPath(new URL("../", import.meta.url));
+  const loader = createRequire(import.meta.url).resolve("ts-node/esm/transpile-only");
+  const dir = mkdtempSync(join(tmpdir(), "qlatt-render-root-"));
+  const report = join(dir, "render.json");
+  const wav = join(dir, "render.wav");
+  try {
+    const run = spawnSync(
+      process.execPath,
+      [
+        "--loader",
+        pathToFileURL(loader).href,
+        "--experimental-specifier-resolution=node",
+        resolve(repoRoot, "scripts/render-phrase.ts"),
+        "--phrase",
+        "See me.",
+        "--host",
+        "node",
+        "--frontend-id",
+        "qlatt-beauty",
+        "--experiment-id",
+        "qlatt-beauty",
+        "--out-json",
+        report,
+        "--out-wav",
+        wav,
+        "--compare-golden",
+        "0",
+      ],
+      {
+        cwd: dir,
+        encoding: "utf8",
+        env: { ...process.env, TS_NODE_PROJECT: resolve(repoRoot, "tsconfig.json") },
+      },
+    );
+    expect(run.status, run.stderr).toBe(0);
+    const payload = JSON.parse(readFileSync(report, "utf8")) as RenderPayload;
+    expect(payload.frontendId).toBe("qlatt-beauty");
+    expect(payload.samples.length).toBeGreaterThan(0);
+    expect(payload.samples.every(Number.isFinite)).toBe(true);
+    expect(payload.metrics.peak).toBeGreaterThan(0);
+    expect(readFileSync(wav).subarray(0, 4).toString()).toBe("RIFF");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}, 60_000);
 
 it("matches fresh renders through concurrent A/B and A replay with isolated runtime state", async () => {
   const config = vi.spyOn(configModule, "loadExperimentConfig");

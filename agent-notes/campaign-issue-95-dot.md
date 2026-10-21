@@ -9,7 +9,7 @@ Smallest change: about 40–55 production lines, 35–50 existing CLI test lines
 Graphviz's DOT language and escString documentation require escaped quotes and doubled literal backslashes; label newlines use backslash-n. References: https://graphviz.org/doc/info/lang.html and https://graphviz.org/docs/attr-types/escString/.
 
 # Surprises
-None. IDs are collector sequence IDs scoped to one run, not stable cross-run identifiers.
+Hosted quality job 119157046517 rejected formatter layout in the quote helper and parameterized test; applied its exact reflows and explicit two-space regex quantifiers suggested by lint. Six other hosted checks passed the initial head. IDs are collector sequence IDs scoped to one run, not stable cross-run identifiers.
 
 # Next step
 Publish for hosted CI and independent Claude review, then respond to findings. No local CI or test commands run.

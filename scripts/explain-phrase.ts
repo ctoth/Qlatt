@@ -309,7 +309,10 @@ function renderDot(payload: ExplainPayload): string {
   };
   // DOT quoted labels use escString, not JSON escape sequences.
   const quote = (value: string) =>
-    `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r\n|\r|\n/g, "\\n")}"`;
+    `"${value
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\r\n|\r|\n/g, "\\n")}"`;
   const selected = new Set(payload.decisions.map((decision) => decision.id));
   const edges: string[] = [];
   let omitted = 0;

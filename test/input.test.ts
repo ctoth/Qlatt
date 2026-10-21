@@ -3,6 +3,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import {
   compileAffect,
   isClinicalSexRequired,
@@ -17,7 +19,7 @@ import {
   parseDirectionTrack,
   serializeDirectionTrack,
 } from "../src/input/direction-track";
-import { parseInline } from "../src/input/inline";
+import { parseInline, parseInlineMarkers } from "../src/input/inline";
 import {
   effectiveSpanFieldAt,
   parseDirectionInput,
@@ -805,8 +807,11 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
 });
 
 describe("input contract — inline shorthand is demoted to a lifter", () => {
+  const spec = loadBundledRulepackSpec("qlatt-english");
+  const policy = loadFrontendResources(spec).inlineMarkers!;
+
   it("lifts ((preset@degree)) + *emphasis* into a Direction Track, not the source of truth", () => {
-    const input = parseInline("((angry@0.7)) I said *no* to you");
+    const input = parseInline("((angry@0.7)) I said *no* to you", policy);
     expect(input.score.text).toBe("I said no to you");
     expect(input.directionTrack.global?.affect).toEqual({ preset: "angry", degree: 0.7 });
 
@@ -820,5 +825,90 @@ describe("input contract — inline shorthand is demoted to a lifter", () => {
     const result = parseDirectionInput(input, affectOptions);
     expect(result.directions.some((d) => d.kind === "global_affect")).toBe(true);
     expect(result.directions.some((d) => d.kind === "emphasis")).toBe(true);
+  });
+
+  it("inherits the bundled policy and leaves undeclared syntax unavailable", () => {
+    expect(loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty")).inlineMarkers).toEqual(
+      policy,
+    );
+    const without = Object.fromEntries(
+      Object.entries(spec).filter(([key]) => key !== "inline_markers"),
+    );
+    expect(loadFrontendResources(without).inlineMarkers).toBeUndefined();
+  });
+
+  it("uses literal configurable delimiters, degree separator, level and last-global selection", () => {
+    const selected = parseInlineMarkers({
+      ...policy,
+      global_affect: { open: "[[", close: "]]", degree_separator: "+", selection: "last" },
+      emphasis: { open: "$[", close: "]$", level: "moderate" },
+    });
+    const input = parseInline("[[angry+0.2]] I $[said]$ [[calm-2+.75]] no", selected);
+    expect(input.score.text).toBe("I said no");
+    expect(input.directionTrack.global?.affect).toEqual({ preset: "calm-2", degree: 0.75 });
+    expect(input.directionTrack.spans).toEqual([
+      { id: "inline_emph_0", anchor: { unit: "word", start: 1 }, emphasis: { level: "moderate" } },
+    ]);
+    const control = parseInline("((angry@0.2)) I *said* ((calm-2@.75)) no", policy);
+    expect(control.score.text).toBe(input.score.text);
+    expect(control.directionTrack.global?.affect).toEqual({ preset: "angry", degree: 0.2 });
+    expect(control.directionTrack.spans?.[0].anchor).toEqual(
+      input.directionTrack.spans?.[0].anchor,
+    );
+  });
+
+  it("leaves numeric and hyphenated preset authority with the supplied affect library", () => {
+    const preset = { ...library.presets.get("angry")!, name: "angry-2" };
+    const selectedLibrary = {
+      ...library,
+      presets: new Map([...library.presets, [preset.name, preset]]),
+    };
+    const input = parseInline("((angry-2@.5)) *no*", policy);
+    expect(input.directionTrack.global?.affect).toEqual({ preset: "angry-2", degree: 0.5 });
+    const result = parseDirectionInput(input, { ...affectOptions, affectLibrary: selectedLibrary });
+    expect(result.directions.some((direction) => direction.kind === "global_affect")).toBe(true);
+    expect(() => parseDirectionInput(input, affectOptions)).toThrow(
+      "Unknown affect preset 'angry-2'",
+    );
+    expect(parseInline("((2)) no", policy).directionTrack.global?.affect).toEqual({ preset: "2" });
+  });
+
+  it.each([
+    "*left",
+    "right*",
+    "**",
+    "a*b",
+    "((angry",
+    "((angry@bad))",
+    "((angry@))",
+    "(())",
+    "((angry@.2@.3))",
+  ])("preserves malformed marker %s and anchors following words", (literal) => {
+    const input = parseInline(`${literal} plain *yes*`, policy);
+    expect(input.score.text).toBe(`${literal} plain yes`);
+    expect(input.directionTrack.global).toBeUndefined();
+    expect(input.directionTrack.spans?.[0].anchor).toEqual({ unit: "word", start: 2 });
+    expect(parseDirectionInput(input, affectOptions).score.tokens).toEqual([
+      literal,
+      "plain",
+      "yes",
+    ]);
+  });
+
+  it("rejects malformed selected declarations at resource acquisition", () => {
+    const invalid = [
+      null,
+      {},
+      { ...policy, citations: [] },
+      { ...policy, emphasis: { ...policy.emphasis, open: "" } },
+      { ...policy, emphasis: { ...policy.emphasis, close: 3 } },
+      { ...policy, emphasis: { ...policy.emphasis, level: "loud" } },
+      { ...policy, global_affect: { ...policy.global_affect, selection: "middle" } },
+      { ...policy, global_affect: { ...policy.global_affect, degree_separator: " " } },
+      { ...policy, global_affect: { ...policy.global_affect, degree_separator: "(" } },
+      { ...policy, emphasis: { ...policy.emphasis, open: "((" } },
+    ];
+    for (const inline_markers of invalid)
+      expect(() => loadFrontendResources({ ...spec, inline_markers })).toThrow(/E_INLINE_MARKERS/);
   });
 });

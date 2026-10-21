@@ -2,11 +2,11 @@
 // Reproducible transcription into Qlatt's existing consonant inventory. This
 // changes boundary metadata only; modern steady-state targets are retained.
 import { readFileSync, writeFileSync } from "node:fs";
-import { load } from "js-yaml";
+import { parseYamlString } from "../src/yaml-loader.ts";
 
 const path = "public/rules/frontends/qlatt-english/inventory.yaml";
 const text = readFileSync(path, "utf8");
-const inventory = load(text);
+const inventory = parseYamlString(text, path);
 const newline = text.includes("\r\n") ? "\r\n" : "\n";
 // rank, fixed F1/F2/F3 (Hz), F1/F2 proportion, F3 proportion, external/internal ms.
 const rows = {
@@ -77,6 +77,6 @@ for (const [phone, source] of assignments) {
 }
 let updated = text;
 for (const [before, after] of replacements) updated = updated.replace(before, after);
-load(updated); // Validate the complete candidate before writing any bytes.
+parseYamlString(updated, path); // Validate the complete candidate before writing any bytes.
 writeFileSync(path, updated, "utf8");
 console.log(`Holmes inventory targets updated: ${replacements.length}`);

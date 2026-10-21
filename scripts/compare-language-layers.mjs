@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
-import { load as yamlLoad } from "js-yaml";
+import { parseYamlString } from "../src/yaml-loader.ts";
 
 const fe = (id) => `public/rules/frontends/${id}`;
-const load = (p) => (existsSync(p) ? yamlLoad(readFileSync(p, "utf8")) : null);
+const load = (p) => (existsSync(p) ? parseYamlString(readFileSync(p, "utf8"), p) : null);
 const A = load(`${fe("qlatt-english")}/pipeline.yaml`);
 const B = load(`${fe("dectalk-english")}/pipeline.yaml`);
 for (const key of ["predicates", "functions", "string_sets", "maps"]) {

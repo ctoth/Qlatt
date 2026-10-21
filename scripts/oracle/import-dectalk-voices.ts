@@ -43,13 +43,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import * as yaml from "js-yaml";
 import {
   OWN_BLOCK_VOICE,
   type SpeakerDefinition,
   type SpeakerDefinitionData,
   voiceFieldsOfDefinition,
 } from "../../src/dectalk-speaker-definition.ts";
+import { parseYamlString } from "../../src/yaml-loader";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const argv = process.argv.slice(2);
@@ -602,7 +602,7 @@ for (const [voiceNumber, [voice, structName]] of VOICES.entries()) {
     process.stdout.write(`wrote ${target}\n`);
     continue;
   }
-  const current = (yaml.load(fs.readFileSync(target, "utf8")) ?? {}) as Record<string, unknown>;
+  const current = parseYamlString<Record<string, unknown>>(fs.readFileSync(target, "utf8"), target);
   for (const [key, value] of Object.entries(file.fields)) {
     if (current[key] !== value) {
       differences.push(`${voice}.${key}: ${String(current[key])} -> ${String(value)}`);

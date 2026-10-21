@@ -1,6 +1,10 @@
 import { isAlias, isMap, isNode, isScalar, isSeq, LineCounter, parseDocument } from "yaml";
-import { isNodeRuntime, normalizePath, readFileFromFsSync } from "./path-utils";
-import { isAbsentResourceAnswer, requestFailureDetail, requestTextSync } from "./resource-answer";
+import { isNodeRuntime, normalizePath, readFileFromFsSync } from "./path-utils.ts";
+import {
+  isAbsentResourceAnswer,
+  requestFailureDetail,
+  requestTextSync,
+} from "./resource-answer.ts";
 import {
   isAbsentSyncResource,
   keepSyncResource,
@@ -8,7 +12,7 @@ import {
   noteSynchronousFetch,
   noteSyncResourceRequest,
   primedSyncResource,
-} from "./sync-resource-cache";
+} from "./sync-resource-cache.ts";
 
 type PlainObject = Record<string, unknown>;
 

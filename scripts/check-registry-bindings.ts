@@ -1,8 +1,8 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { load } from "js-yaml";
 import ts from "typescript";
+import { parseYamlString } from "../src/yaml-loader.ts";
 import { readWorkspaceMetadata, wasmArtifacts } from "./build-wasm.ts";
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -87,7 +87,7 @@ export function checkRegistryBindings(root: string): string[] {
   if (registries.length === 0) throw new Error("No registry files found under public/");
   return registries.flatMap((path) =>
     validateRegistryBindings(
-      load(readFileSync(path, "utf8")),
+      parseYamlString(readFileSync(path, "utf8"), path),
       wasmFiles,
       workletFiles,
       relative(root, path),

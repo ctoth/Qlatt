@@ -18,8 +18,8 @@
  * (scripts/build-frontend-resource-manifests.ts).
  */
 
-import { normalizePath } from "./path-utils";
-import { isAbsentResourceAnswer } from "./resource-answer";
+import { normalizePath } from "./path-utils.ts";
+import { isAbsentResourceAnswer } from "./resource-answer.ts";
 
 const primed = new Map<string, string>();
 /** Paths and URLs the server said have no resource behind them. */

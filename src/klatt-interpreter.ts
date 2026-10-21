@@ -335,6 +335,7 @@ export function createKlattScheduleCompiler(
     // Functions are registered with CEL evaluator separately (lines 117-120)
     const context: EvaluationContext = {
       diagnostics,
+      provenance: options.provenance,
       params: flatContext as Record<string, ParamValue>,
       constants: semantics.constants ?? {},
     };

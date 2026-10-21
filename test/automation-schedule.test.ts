@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createKlattInterpreter, createKlattScheduleCompiler } from "../src/klatt-interpreter";
 import type { BindingSpec, KlattRuntime } from "../src/klatt-runtime";
 import { createProvenanceCollector } from "../src/provenance";
+import { loadSemanticsDocumentSync } from "../src/semantics/load-semantics";
 import type { SemanticsDocument } from "../src/semantics/types";
 
 // Executable examples of docs/host-contract.md section 5.
@@ -26,6 +27,27 @@ function semantics(defaultScheduling?: "step" | "ramp", override = {}): Semantic
 }
 
 describe("host-neutral automation contract", () => {
+  it("forwards the collector to the loaded Laine realization owner", () => {
+    const doc = loadSemanticsDocumentSync("public/experiments/laine88/semantics.yaml");
+    const provenance = createProvenanceCollector();
+    const compiler = createKlattScheduleCompiler({
+      semantics: doc,
+      provenance,
+      bindingMap: new Map(),
+      sampleRate: 8000,
+    });
+    expect(compiler.compileSchedule([{ time: 0, params: { NFC: 6 } }])).toEqual([]);
+    const records = provenance.getDecisions();
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({
+      stage: "semantics",
+      type: "realization_evaluated",
+      subject: "realize:NFC",
+      reason: "laine88: NFC evaluated 4 => 4",
+      citations: ["Laine 1988 Fig. 18"],
+    });
+  });
+
   it.each([
     ["ramp default", "ramp", {}, "ramp"],
     ["step override", "ramp", { step: true }, "step"],

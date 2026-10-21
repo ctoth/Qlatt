@@ -132,7 +132,7 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
         const rule = realize[name];
         if (!rule) continue;
 
-        const ruleObj = typeof rule === "string" ? { expr: rule } : rule;
+        const ruleObj: RealizationRule = typeof rule === "string" ? { expr: rule } : rule;
 
         try {
           const celContext: EvaluationContext = {
@@ -141,6 +141,15 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
           };
           const value = celEvaluator.evaluate(ruleObj.expr, celContext);
           result.values[name] = value as ParamValue;
+          if (context.provenance && ruleObj.citations?.length) {
+            context.provenance.add({
+              stage: "semantics",
+              type: "realization_evaluated",
+              subject: `realize:${name}`,
+              reason: `${semantics.name}: ${name} evaluated ${ruleObj.expr} => ${String(value)}`,
+              citations: ruleObj.citations,
+            });
+          }
         } catch (e) {
           result.errors.push({
             name,

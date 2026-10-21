@@ -64,13 +64,14 @@ export function auditCitations(root: string) {
   );
   const counts: Record<string, Record<Entry["status"] | "total", number>> = {};
   for (const entry of entries) {
-    const count = (counts[entry.category] ??= {
+    counts[entry.category] ??= {
       total: 0,
       present: 0,
       absent: 0,
       invalid: 0,
       "no-slot": 0,
-    });
+    };
+    const count = counts[entry.category];
     count.total += 1;
     count[entry.status] += 1;
   }

@@ -20,6 +20,7 @@ import {
   RENDER_OK,
   setF0FilterWasmBytes,
 } from "../src/f0-filters-loader";
+import { createBrowserRuntimeAssetLoader } from "../src/runtime-assets/browser-loader";
 
 // Status codes mirrored from crates/f0-filters/src/lib.rs.
 const RENDER_ERR_SCALARS = -1;
@@ -44,6 +45,30 @@ function writeF64(exports: ReturnType<typeof getF0FilterExports>, values: number
 }
 
 describe("f0-filters-loader", () => {
+  it("uses the selected browser loader and preserves failure and loaded-state behavior", async () => {
+    vi.resetModules();
+    const fresh = await import("../src/f0-filters-loader");
+    const loader = createBrowserRuntimeAssetLoader("/Qlatt/worklets/");
+    const fetch = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(null, { status: 503 }))
+      .mockResolvedValueOnce(new Response(wasmBytes()));
+    try {
+      await expect(fresh.preloadF0Filters(loader)).rejects.toThrow(
+        "Failed to load WASM module 'f0-filters.wasm' (503)",
+      );
+      expect(fresh.isF0FilterLoaded()).toBe(false);
+      await fresh.preloadF0Filters(loader);
+      expect(fresh.isF0FilterLoaded()).toBe(true);
+      expect(typeof fresh.getF0FilterExports().render_f0).toBe("function");
+      await fresh.preloadF0Filters(loader);
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(fetch.mock.calls[0][0]).toMatch(/^\/Qlatt\/worklets\/f0-filters\.wasm\?v=\d+$/);
+    } finally {
+      fetch.mockRestore();
+    }
+  });
+
   it("preserves the original binary read failure instead of reporting a missing build", async () => {
     vi.resetModules();
     const fresh = await import("../src/f0-filters-loader");

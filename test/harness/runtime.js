@@ -9,6 +9,7 @@ import { createDiagnosticsEngine } from "../../src/harness-diagnostics/index.ts"
 import { parseDiagConfig } from "../../src/harness-diagnostics/schema.ts";
 import { createKlattInterpreter } from "../../src/klatt-interpreter.ts";
 import { createKlattRuntime } from "../../src/klatt-runtime.ts";
+import { createBrowserRuntimeAssetLoader } from "../../src/runtime-assets/browser-loader.ts";
 import { summarizeBranchSwitch, summarizeTrack } from "../../src/track-analysis.ts";
 import { contextGate, endPlayback, playTrack, untilAdvanced } from "../../src/track-playback.ts";
 import { textToKlattTrack, textToKlattTrackDetailed } from "../../src/tts-frontend";
@@ -90,7 +91,7 @@ export async function speak() {
   // The layered-additive F0 renderer (dectalk-english) calls a synchronous
   // WASM kernel; in the browser its bytes must be fetched and injected before
   // the synchronous textToKlattTrack() below. Idempotent after the first call.
-  await preloadF0Filters(`${state.WORKLET_BASE_PATH}f0-filters.wasm`);
+  await preloadF0Filters(createBrowserRuntimeAssetLoader(state.WORKLET_BASE_PATH));
   timer.mark("f0Filters");
   // Selected voice (string name) comes from the frontend's declarative speakers
   // registry; null when the active frontend has no registry, in which case we

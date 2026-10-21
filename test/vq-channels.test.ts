@@ -93,7 +93,9 @@ backend_param: TEST
 citations:
   - "engineering estimate: extension regression"
 `);
-      const document = loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml");
+      const document = loadYamlDocumentSync(
+        "/rules/frontends/qlatt-english/policy/vq-channels.yaml",
+      );
       if (!isPlainObject(document) || !Array.isArray(document.channels)) {
         throw new Error("expected channels document");
       }

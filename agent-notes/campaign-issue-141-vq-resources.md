@@ -4,7 +4,8 @@ Move Qlatt's VQ and affect resources to their declared frontend owner for #141.
 
 # State
 
-Implemented from ea238464 after #361 merged. Preparing PR; no local CI run.
+Implemented from ea238464 after #361 merged. PR #363 awaits Claude review and
+replacement hosted CI; no local CI run.
 Both moved files retain their original Git blob IDs and filesystem SHA-256
 hashes. Declarations, sorted manifests and existing fixtures use the new paths.
 
@@ -20,6 +21,10 @@ fixtures where their current context supports it. Historical notes stay intact.
 
 # Surprises
 
+Hosted quality reported three formatter errors: I left longer resource-path
+expressions unwrapped in affect-policy, affect-presets and vq-channels fixtures.
+Applied the exact emitted line wraps; no runtime or data change was required.
+
 No executable core path loads or current documentation references needed edits.
 Fixture changes use resolved resources where the selected frontend was already
 available; parser-only fixtures retain explicit documents at the new paths.
@@ -28,4 +33,4 @@ the longer paths and existing fixture setup, plus the two unchanged data moves.
 
 # Next step
 
-Commit/push a PR for hosted CI and Claude review. #141 remains open.
+Inspect replacement hosted CI and respond to Claude review. #141 remains open.

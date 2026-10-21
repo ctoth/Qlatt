@@ -21,7 +21,9 @@ const channels = english.vqChannels.channels;
 describe("declarative affect presets", () => {
   it("inherits the declared library and leaves DECtalk's role absent", () => {
     const beauty = loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty"));
-    expect(english.affectPresets?.path).toBe("/rules/frontends/qlatt-english/policy/affect-presets.yaml");
+    expect(english.affectPresets?.path).toBe(
+      "/rules/frontends/qlatt-english/policy/affect-presets.yaml",
+    );
     expect(english.affectPresets?.library.presets.has("tender")).toBe(true);
     expect(beauty.affectPresets?.library).toBe(english.affectPresets?.library);
     const dectalk = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));

@@ -211,17 +211,21 @@ describe("authored parameter origins through composition", () => {
     async (mode) => {
       const dir = mkdtempSync(join(tmpdir(), "qlatt-parameter-origins-"));
       try {
-        const filename = writeExtendingFrontend(dir, {}, {
-          parameters: {
-            policy: {
-              f0: {
-                downstep_k: { value: 0.7, citations: ["Engineering fixture: child override"] },
-                boundary_l_pct_fraction: 0.1,
+        const filename = writeExtendingFrontend(
+          dir,
+          {},
+          {
+            parameters: {
+              policy: {
+                f0: {
+                  downstep_k: { value: 0.7, citations: ["Engineering fixture: child override"] },
+                  boundary_l_pct_fraction: 0.1,
+                },
+                accent_assignment: { metrical_stress_overrides_word_class: { value: false } },
               },
-              accent_assignment: { metrical_stress_overrides_word_class: { value: false } },
             },
           },
-        });
+        );
         const child =
           mode === "sync"
             ? loadRulepackSpecFromPath(filename)
@@ -235,14 +239,18 @@ describe("authored parameter origins through composition", () => {
         );
         expect(expected).toBeDefined();
         expect(origin(child, pathOf("downstep_k.value"))).toEqual(expected);
-        expect(origin(child, pathOf("downstep_floor_fraction.value"))?.value.resource).toBe(baseResource);
+        expect(origin(child, pathOf("downstep_floor_fraction.value"))?.value.resource).toBe(
+          baseResource,
+        );
         expect(origin(child, pathOf("downstep_k.citations.0"))?.value.resource).toBe(filename);
         expect(origin(child, pathOf("downstep_k.citations.1"))).toBeUndefined();
         expect(origin(child, pathOf("boundary_l_pct_fraction"))?.value.resource).toBe(filename);
         expect(origin(child, pathOf("boundary_l_pct_fraction.value"))).toBeUndefined();
         expect(origin(child, pathOf("boundary_l_pct_fraction.citations"))).toBeUndefined();
         expect(
-          rulepackParameterOrigins(child).some((entry) => entry.value.path[2] === "accent_assignment"),
+          rulepackParameterOrigins(child).some(
+            (entry) => entry.value.path[2] === "accent_assignment",
+          ),
         ).toBe(false);
         const policy = (child.parameters as { policy: Dict }).policy;
         expect(policy.accent_assignment).toHaveProperty(
@@ -262,7 +270,9 @@ describe("authored parameter origins through composition", () => {
   it("does not assign root locations to generated voice values", () => {
     const dectalk = loadBundledRulepackSpec("dectalk-english");
     expect(dectalk.parameters).toHaveProperty("policy.voice");
-    expect(rulepackParameterOrigins(dectalk).some((entry) => entry.value.path[2] === "voice")).toBe(false);
+    expect(rulepackParameterOrigins(dectalk).some((entry) => entry.value.path[2] === "voice")).toBe(
+      false,
+    );
   });
 });
 

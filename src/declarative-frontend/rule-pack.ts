@@ -7,8 +7,8 @@ import {
   loadYamlSourceSync,
   parseYamlString,
   resolveIncludePath,
-  yamlDocumentSpans,
   type YamlNodeSpans,
+  yamlDocumentSpans,
 } from "../yaml-loader";
 import {
   type InventorySpec,

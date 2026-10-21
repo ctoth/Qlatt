@@ -52,9 +52,13 @@ The supplied affect-library fixture still spread the former Map; it now extends
 the record into a null-prototype object. Removed the newly added transcription
 spy fixture that merely mirrored the deleted acquisition call. No runtime
 correctness finding was reported; no new guard or compatibility shim added.
+Hosted quality on the review-response head found one remaining fixture conversion:
+the preset citation assertion still used Map iteration (TS2488 at input.test.ts:402).
+It now uses Object.entries on the selected preset record, preserving the assertion.
 
 # Next step
 
-Publish for hosted CI and independent Claude review; respond to concrete findings.
+Await replacement hosted CI after the fixture correction. Claude review and its
+implementer response are complete; the supervisor independently checked the range.
 Supervisor owns final review/merge. #141 acceptance checks and URL/discovery work
 remain outstanding; this delivery does not close the issue.

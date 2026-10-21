@@ -399,7 +399,7 @@ describe("input contract — affect compiler (cited presets)", () => {
   });
 
   it("every preset in the library carries at least one citation", () => {
-    for (const [name, preset] of library.presets) {
+    for (const [name, preset] of Object.entries(library.presets)) {
       expect(preset.citations.length, `preset '${name}' must be cited`).toBeGreaterThan(0);
     }
   });

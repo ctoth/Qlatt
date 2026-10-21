@@ -226,7 +226,7 @@ describe("HRG lowering control windows", () => {
       const warnings = utterance.diagnostics
         .getEntries()
         .filter((entry) => entry.code === "HRG_LOWER_CONTROL_WINDOW_LIMITED");
-      return { lowered, warnings, write, release, vowel };
+      return { utterance, lowered, warnings, write, release, vowel };
     };
     const clipped = render(bounds);
     const intact = render({ start_ms: 0, end_ms: 154 });
@@ -251,7 +251,7 @@ describe("HRG lowering control windows", () => {
     const onset = clipped.lowered.frames.find((frame) => frame.segmentId === clipped.vowel.id);
     expect(onset?.time).toBeCloseTo((19.2 + 83 + 7) / 1000, 9);
     expect(onset?.params.AH).toBe(48);
-    expect(onset?.provenance?.AH).toBe(clipped.write.decisionId);
+    expectFrameSource(clipped.utterance, onset?.provenance?.AH, clipped.write.decisionId);
   });
 
   it("keeps initial-silence access and empty-window reporting", () => {

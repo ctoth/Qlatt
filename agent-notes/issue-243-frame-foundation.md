@@ -55,6 +55,12 @@ fixtures. Newer frame-program outputs also write the existing parameter maps;
 the emitter retains their actual source IDs without requiring synthetic writes.
 
 ## Next step
-Publish the integrated revision for hosted CI and full-PR Claude review.
+The revised candidate and accepted Claude response are published. Initial shard1
+also exposed manifests missing the new shared include and a newer control-window
+fixture expecting the old direct source ID. Added the actual acquired paths and
+used the existing ancestry assertion, retaining numeric and diagnostic checks.
+The unphased-rule audit still treats requested frame_copy as never executed;
+reported that explicit consumer boundary to the supervisor before changing it.
+Await replacement hosted results and the pending loader integration.
 Measurement acceptance remains outstanding; do not merge or close #243 on the
 strength of old baseline reports or hosted correctness checks alone.

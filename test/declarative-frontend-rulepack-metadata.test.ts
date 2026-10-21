@@ -1,14 +1,59 @@
 import { describe, expect, it } from "vitest";
 import { validateFeatureValue } from "../src/declarative-frontend/hrg/item";
+import { PARAMETER_SCOPE_FEATURE } from "../src/declarative-frontend/hrg/parameter-scope";
+import { Utterance } from "../src/declarative-frontend/hrg/utterance";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
 import {
   compileRuleEngineSpec,
   getRulepackValidationDiagnostics,
   loadBundledRulepackSpec,
+  rulepackHrgSchema,
   rulepackRelationFeatureSchemas,
 } from "../src/declarative-frontend/rule-pack";
 
 describe("rulepack metadata preservation", () => {
+  it("compiles static Item and relation declarations before runtime scope enrichment", () => {
+    const spec = compileRuleEngineSpec({
+      schema: {
+        itemTypes: { fixture: { features: { first: { kind: "number" } } } },
+        relations: { Fixture: { kind: "list", itemTypes: ["fixture"] } },
+      },
+    });
+    const schema = rulepackHrgSchema(spec);
+    expect(Object.isFrozen(schema.itemTypes.fixture.features)).toBe(true);
+    expect(schema.itemTypes.fixture.features[PARAMETER_SCOPE_FEATURE]).toBeUndefined();
+    const utterance = new Utterance({
+      ...schema,
+      itemTypes: {
+        fixture: {
+          features: { ...schema.itemTypes.fixture.features, last: { kind: "boolean" } },
+        },
+      },
+    });
+    expect(Object.keys(utterance.schemaDefinition().itemTypes.fixture.features)).toEqual([
+      "first",
+      "last",
+      PARAMETER_SCOPE_FEATURE,
+    ]);
+    expect(utterance.schemaDefinition().relations.Fixture).toEqual(schema.relations.Fixture);
+  });
+
+  it.each([
+    null,
+    { itemTypes: [], relations: {} },
+    { itemTypes: { bad: { features: [] } }, relations: {} },
+    { itemTypes: {}, relations: { Bad: { kind: "list", itemTypes: "missing" } } },
+    { itemTypes: {}, relations: { Bad: { kind: "list", itemTypes: ["missing"] } } },
+    { itemTypes: {}, relations: { Bad: { kind: "invalid", itemTypes: [] } } },
+  ])("rejects malformed authored static schema %j", (schema) => {
+    expect(() => compileRuleEngineSpec({ schema })).toThrow("E_HRG_SCHEMA at schema");
+  });
+
+  it("locates a malformed programmatic YAML schema declaration", () => {
+    const source = "schema: {itemTypes: [], relations: {}}";
+    expect(() => compileRuleEngineSpec(source)).toThrow("[dsl spec:1:1]");
+  });
+
   it("compiles typed shapes without replacing authored feature declarations", () => {
     const features = {
       type: ["vowel", "stop"],
@@ -53,6 +98,9 @@ describe("rulepack metadata preservation", () => {
     "loads the authored control-window schema for %s",
     (frontend) => {
       const spec = loadBundledRulepackSpec(frontend);
+      const baseline = rulepackHrgSchema(spec);
+      expect(baseline.itemTypes.word.features.text).toEqual({ kind: "string" });
+      expect(baseline.relations.SylStructure.itemTypes).toEqual(["word", "syllable", "segment"]);
       const shape = rulepackRelationFeatureSchemas(spec).Segment.control_windows;
       const windows = [
         { target: "next", prefix_ms: 20, fields: { F2: { op: "mul", value: 0.8 } } },

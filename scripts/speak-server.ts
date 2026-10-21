@@ -9,7 +9,8 @@
  * Requests:
  *   {"id": 1, "op": "speak", "text": "Hello world.",
  *    "frontendId"?: "qlatt-english", "experimentId"?: "klatt80-baseline",
- *    "rate"?: 1.0, "pitchScale"?: 1.0, "baseF0"?: 110, "sampleRate"?: 22050}
+ *    "rate"?: 1.0, "pitchScale"?: 1.0, "baseF0"?: 110, "sampleRate"?: 22050,
+ *    "leadTime"?: 0.02, "tailTime"?: 0.05}
  *   {"id": 2, "op": "hello"}      -> capabilities
  *   {"op": "quit"}
  *
@@ -60,6 +61,9 @@ export type SpeakRequest = {
   pitchScale?: number;
   baseF0?: number;
   sampleRate?: number;
+  /** Render padding in seconds; absent values preserve the server defaults. */
+  leadTime?: number;
+  tailTime?: number;
 };
 type Request = SpeakRequest | { id?: number | string; op: "hello" } | { op: "quit" };
 
@@ -104,8 +108,8 @@ export function speakRenderRequest(request: SpeakRequest): RenderRequest {
     engine: "runtime",
     rate: request.rate,
     sampleRate: request.sampleRate ?? 22050,
-    leadTime: 0.02,
-    tailTime: 0.05,
+    leadTime: request.leadTime ?? 0.02,
+    tailTime: request.tailTime ?? 0.05,
     includeTrack: true,
     noiseSeed: 20260214,
     persistWav: true,

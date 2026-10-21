@@ -1,4 +1,4 @@
-"""Exercise cancellation in the actual driver without NVDA or audio hardware."""
+"""Exercise padding and cancellation in the actual driver without NVDA or audio hardware."""
 
 import importlib.util
 import pathlib
@@ -66,6 +66,46 @@ class CancellationTests(unittest.TestCase):
 
     def speak(self, text, index):
         self.driver.speak([text, commands.IndexCommand(index)])
+
+    def test_padding_belongs_to_first_and_last_nonempty_chunks(self):
+        self.driver.speak([
+            commands.IndexCommand(0), "one", commands.IndexCommand(1),
+            "two", commands.IndexCommand(2), "three", commands.IndexCommand(3),
+            commands.IndexCommand(4),
+        ])
+        self.workers[0]()
+        self.assertEqual(self.driver._server.speak.call_args_list, [
+            unittest.mock.call("one", "qlatt-english", 1.0, 1.0, 0.02, 0),
+            unittest.mock.call("two", "qlatt-english", 1.0, 1.0, 0, 0),
+            unittest.mock.call("three", "qlatt-english", 1.0, 1.0, 0, 0.05),
+        ])
+        self.assertEqual(
+            [call.kwargs["index"] for call in notifications.synthIndexReached.notify.call_args_list],
+            [0, 1, 2, 3, 4],
+        )
+
+    def test_single_spoken_chunk_keeps_both_padding_values(self):
+        self.speak("only", 1)
+        self.workers[0]()
+        self.driver._server.speak.assert_called_once_with("only", "qlatt-english", 1.0, 1.0, 0.02, 0.05)
+
+    def test_index_only_sequence_does_not_render(self):
+        self.driver.speak([commands.IndexCommand(1), commands.IndexCommand(2)])
+        self.workers[0]()
+        self.driver._server.speak.assert_not_called()
+        self.assertEqual(
+            [call.kwargs["index"] for call in notifications.synthIndexReached.notify.call_args_list],
+            [1, 2],
+        )
+
+    def test_server_adapter_forwards_padding(self):
+        server = driver_module.QlattServer.__new__(driver_module.QlattServer)
+        server.request = Mock(return_value=[{"event": "audio", "pcm": "", "sampleRate": 22050}])
+        server.speak("text", "qlatt-english", 1, 1, 0, 0.05)
+        server.request.assert_called_once_with(
+            "speak", text="text", frontendId="qlatt-english", rate=1, pitchScale=1,
+            leadTime=0, tailTime=0.05,
+        )
 
     def test_replacement_while_rendering_discards_old_pcm_and_notifications(self):
         self.speak("old", 1)

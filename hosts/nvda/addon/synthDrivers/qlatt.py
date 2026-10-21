@@ -111,8 +111,11 @@ class QlattServer:
             if event.get("event") in ("done", "error", "hello"):
                 return events
 
-    def speak(self, text, frontend, rate, pitch_scale):
-        events = self.request("speak", text=text, frontendId=frontend, rate=rate, pitchScale=pitch_scale)
+    def speak(self, text, frontend, rate, pitch_scale, lead_time=0.02, tail_time=0.05):
+        events = self.request(
+            "speak", text=text, frontendId=frontend, rate=rate, pitchScale=pitch_scale,
+            leadTime=lead_time, tailTime=tail_time,
+        )
         for event in events:
             if event.get("event") == "error":
                 raise RuntimeError(event.get("message", "render failed"))
@@ -254,13 +257,17 @@ class SynthDriver(SynthDriver):
 
     def _speak_chunks(self, chunks, cancelled):
         with self._lock:
-            for text, index, rate_setting, pitch_setting in chunks:
+            # Index-only chunks do not render, so they cannot own padding.
+            spoken_chunks = [position for position, chunk in enumerate(chunks) if chunk[0]]
+            for position, (text, index, rate_setting, pitch_setting) in enumerate(chunks):
                 if cancelled.is_set():
                     break
                 if text:
                     try:
                         pcm, markers, sample_rate = self._server.speak(
-                            text, self._voice, self._rate_scale(rate_setting), self._pitch_scale(pitch_setting)
+                            text, self._voice, self._rate_scale(rate_setting), self._pitch_scale(pitch_setting),
+                            0.02 if position == spoken_chunks[0] else 0,
+                            0.05 if position == spoken_chunks[-1] else 0,
                         )
                     except Exception:
                         log.exception("qlatt render failed for %r", text)

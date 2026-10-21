@@ -58,9 +58,9 @@ describe("explain phrase cli", () => {
     const payload = parseExplainPayload(result.stdout);
     expect(payload.decisions.length).toBeGreaterThan(0);
     expect(payload.decisions.every((decision) => decision.stage === "prosody")).toBe(true);
-    expect(
-      payload.decisions.some((decision) => decision.reason.startsWith("assign_accent ")),
-    ).toBe(true);
+    expect(payload.decisions.some((decision) => decision.reason.startsWith("assign_accent "))).toBe(
+      true,
+    );
     expect(payload.decisions.some((decision) => decision.reason.startsWith("tobi_accent "))).toBe(
       true,
     );

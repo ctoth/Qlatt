@@ -8,10 +8,10 @@ type InventoryDoc = {
 };
 
 type FrontendDoc = {
-  parameters?: {
-    policy?: {
-      speaker?: Record<string, unknown>;
-    };
+  speakers?: {
+    dir: string;
+    default: string;
+    voices: string[];
   };
 };
 
@@ -55,20 +55,6 @@ function countMatching(
 
 function listRuleNames(doc: RuleFile): string[] {
   return Object.keys(doc.rules ?? {});
-}
-
-function readPolicyNumber(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (
-    value &&
-    typeof value === "object" &&
-    "value" in value &&
-    typeof (value as { value?: unknown }).value === "number" &&
-    Number.isFinite((value as { value: number }).value)
-  ) {
-    return (value as { value: number }).value;
-  }
-  return null;
 }
 
 function main(): void {
@@ -146,9 +132,7 @@ function main(): void {
     /smooth|backward|carryover|th|dh/i.test(name),
   );
 
-  const speakerPolicy = frontend.parameters?.policy?.speaker ?? {};
-  const speakerFieldCount = Object.keys(speakerPolicy).length;
-  const baseF0Hz = readPolicyNumber((speakerPolicy as Record<string, unknown>).base_f0_hz);
+  const speakers = frontend.speakers;
 
   const lines: string[] = [];
   lines.push("DECtalk Frontend Audit");
@@ -185,7 +169,9 @@ function main(): void {
   lines.push(`- formant rules: ${formantRuleNames.length}`);
   lines.push(`- prosody rules: ${prosodyRuleNames.length}`);
   lines.push(
-    `- speaker policy fields: ${speakerFieldCount}${baseF0Hz != null ? ` (base_f0_hz=${baseF0Hz})` : ""}`,
+    speakers
+      ? `- speaker registry: ${speakers.dir} (${speakers.voices.length} declared voices; default=${speakers.default})`
+      : "- speaker registry: not declared",
   );
   lines.push("");
   lines.push("Likely gaps:");
@@ -233,12 +219,6 @@ function main(): void {
   if (exactFeatureMirrors === 0) {
     lines.push(
       "- `us_featb[]`/`us_place[]` are not preserved 1:1 in the declarative inventory. We keep coarse type/feature booleans, but not the original feature-table surface for rule parity auditing.",
-    );
-  }
-
-  if (speakerFieldCount > 0) {
-    lines.push(
-      "- The frontend has only a single baked speaker policy surface (effectively Paul defaults). DECtalk’s wider speaker table family is not yet exposed as a declarative speaker roster.",
     );
   }
 

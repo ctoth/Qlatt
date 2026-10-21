@@ -51,6 +51,19 @@ async function withServer<T>(body: (send: (message: object) => Promise<Event[]>)
 }
 
 describe("speak-server request mapping", () => {
+  it("preserves padding defaults and forwards explicit zero padding", () => {
+    expect(speakRenderRequest({ op: "speak", text: "Hello." })).toMatchObject({
+      leadTime: 0.02,
+      tailTime: 0.05,
+    });
+    expect(
+      speakRenderRequest({ op: "speak", text: "Hello.", leadTime: 0, tailTime: 0 }),
+    ).toMatchObject({ leadTime: 0, tailTime: 0 });
+    expect(
+      speakRenderRequest({ op: "speak", text: "Hello.", leadTime: 0.01, tailTime: 0.03 }),
+    ).toMatchObject({ leadTime: 0.01, tailTime: 0.03 });
+  });
+
   it("requests no pitch when the request names none", () => {
     const render = speakRenderRequest({ op: "speak", text: "Hello." });
     expect(render.baseF0).toBeUndefined();

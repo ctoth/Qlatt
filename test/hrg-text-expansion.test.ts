@@ -58,7 +58,7 @@ describe("untimed text expansion", () => {
       "['kept', 'changed'].map(key, {'type': 'terminal', 'text': vocabulary('words', key)})",
     );
     const basePath = resolveBundledRulepackPath("qlatt-english");
-    const output = loadRulepackSpecFromPath(basePath).output;
+    const { output, syllabification } = loadRulepackSpecFromPath(basePath);
     const childPath = "/fixture-vocabulary-origins.yaml";
     const originalLoad = yamlLoader.loadYamlSourceSync;
     const mock = vi.spyOn(yamlLoader, "loadYamlSourceSync").mockImplementation((path) => {
@@ -66,6 +66,7 @@ describe("untimed text expansion", () => {
         return JSON.stringify({
           ...spec,
           output,
+          syllabification,
           tags: { normalization: "Normalization fixture" },
           maps: { words: { kept: "base", changed: "old" } },
         });

@@ -65,7 +65,9 @@ describe("annotation phase: syllable count and cluster position", () => {
           );
           expect(vowels).toHaveLength(1);
           const segment = vowels[0].item;
-          expect(result.utterance.relation("Segment").nodesById.get(segment.id)!.item).toBe(segment);
+          expect(result.utterance.relation("Segment").nodesById.get(segment.id)!.item).toBe(
+            segment,
+          );
           // Structural splices retain the original source node, even when its
           // active replacement is another daughter of the same syllable.
           const originalVowels = syllable.daughters.filter(
@@ -75,7 +77,9 @@ describe("annotation phase: syllable count and cluster position", () => {
           );
           expect(originalVowels).toHaveLength(1);
           const original = originalVowels[0].item;
-          expect(result.utterance.relation("Segment").nodesById.get(original.id)!.item).toBe(original);
+          expect(result.utterance.relation("Segment").nodesById.get(original.id)!.item).toBe(
+            original,
+          );
           expect(
             result.utterance.associatedItems(original, "source_token").map((item) => item.id),
           ).toEqual([`token_${index}`]);

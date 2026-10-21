@@ -28,19 +28,21 @@ describe("declarative frontend rule-pack includes", () => {
         return dump(document);
       };
       const realPath = (path: string) => path.replace(/fixture-205-[^/]+\.yaml$/, "frontend.yaml");
-      const syncSpy = vi.spyOn(yamlLoader, "loadYamlSourceSync").mockImplementation(
-        (path) => rewrite(path, sync(realPath(path))),
-      );
-      const asyncSpy = vi.spyOn(yamlLoader, "loadYamlSource").mockImplementation(
-        async (path) => rewrite(path, await asyncLoad(realPath(path))),
-      );
+      const syncSpy = vi
+        .spyOn(yamlLoader, "loadYamlSourceSync")
+        .mockImplementation((path) => rewrite(path, sync(realPath(path))));
+      const asyncSpy = vi
+        .spyOn(yamlLoader, "loadYamlSource")
+        .mockImplementation(async (path) => rewrite(path, await asyncLoad(realPath(path))));
       try {
         expect(() =>
-        loadRulepackSpecFromPath(`/rules/frontends/qlatt-english/fixture-205-${kind}-sync.yaml`),
-      ).toThrow(/E_SYLLABIFICATION_INVALID/);
+          loadRulepackSpecFromPath(`/rules/frontends/qlatt-english/fixture-205-${kind}-sync.yaml`),
+        ).toThrow(/E_SYLLABIFICATION_INVALID/);
         await expect(
-        preloadRulepackSpecFromPath(`/rules/frontends/qlatt-english/fixture-205-${kind}-async.yaml`),
-      ).rejects.toThrow(/E_SYLLABIFICATION_INVALID/);
+          preloadRulepackSpecFromPath(
+            `/rules/frontends/qlatt-english/fixture-205-${kind}-async.yaml`,
+          ),
+        ).rejects.toThrow(/E_SYLLABIFICATION_INVALID/);
       } finally {
         syncSpy.mockRestore();
         asyncSpy.mockRestore();

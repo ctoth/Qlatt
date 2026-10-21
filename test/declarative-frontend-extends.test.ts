@@ -22,7 +22,6 @@ interface F0Policy {
   base_hz: PolicyLeaf;
   range_hz: PolicyLeaf;
   female_base_hz?: PolicyLeaf;
-  sag_depth_fraction: PolicyLeaf;
   question_rise_fraction: PolicyLeaf;
   downstep_k: unknown;
 }
@@ -102,9 +101,8 @@ describe("declarative frontend extends (qlatt-beauty ← qlatt-english)", () => 
 
   it("adds its own f0 leaves onto the inherited base f0 block", () => {
     // Child-only leaves added onto the inherited f0 block:
-    expect(beauty.parameters.policy.f0.sag_depth_fraction.value).toBe(0.35);
     expect(beauty.parameters.policy.f0.question_rise_fraction.value).toBe(0.9);
-    expect((english.parameters.policy.f0 as Partial<F0Policy>).sag_depth_fraction).toBeUndefined();
+    expect((english.parameters.policy.f0 as Partial<F0Policy>).question_rise_fraction).toBeUndefined();
     // Inherited f0 leaves the child does not touch:
     expect(beauty.parameters.policy.f0.downstep_k).toEqual(english.parameters.policy.f0.downstep_k);
     // The pitch level and span are the speaker's, not a frontend override:

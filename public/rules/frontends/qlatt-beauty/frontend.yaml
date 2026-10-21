@@ -24,7 +24,7 @@
 #   - its `speakers:` registry: the voices of this frontend. The default voice
 #     (speakers/beauty.yaml) gives the pitch level and span the prosody rules
 #     read as params.policy.f0.base_hz and params.policy.f0.range_hz.
-#   - the policy.f0 delta below (intrinsic pitch, sagging transitions,
+#   - the policy.f0 delta below (intrinsic pitch,
 #     question rise, final lowering) and the output columns delta (adds GO, DI).
 #
 # Everything NOT declared here is inherited from qlatt-english. Includes are
@@ -92,17 +92,6 @@ parameters:
         value: 0.7
         citations:
           - "Engineering estimate: micro-prosody overlay clamps at 0.7*floor to stay voiced"
-      # --- Sagging transition (Ladd 2008 / Pierrehumbert 1980) ---
-      # Between two successive H accents the contour must SAG (dip then rise),
-      # not run as a straight line. We approximate the Fujisaki bend within the
-      # point-interpolation renderer by stamping a mid-valley point between an
-      # accent peak and the next accent. Fraction of the local peak-to-base gap.
-      sag_depth_fraction:
-        value: 0.35
-        citations:
-          - "Ladd 2008 (sagging transition between accents, not linear interp)"
-          - "Pierrehumbert 1980 (interpolation dips between H targets)"
-          - "Fujisaki (damped 2nd-order response curves the inter-accent valley)"
       # --- Final lowering (Ladd 2008 separate from downstep) ---
       # The nuclear (final) accent dips below the k-downstep prediction. Applied
       # as a multiplicative pull of the nuclear peak toward the floor.

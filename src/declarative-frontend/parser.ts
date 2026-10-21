@@ -2,6 +2,10 @@ import { cloneValue, isPlainObject, parseYamlString } from "../yaml-loader";
 import { expandSpecCelMacros, type MacroExpansionObserver, parseCelMacroBlock } from "./cel-macros";
 
 type PlainObject = Record<string, unknown>;
+export type RulePathObserver = (
+  compiled: readonly (string | number)[],
+  authored: readonly (string | number)[],
+) => void;
 
 type NormalizedPhase = {
   name: string;
@@ -87,10 +91,14 @@ function substituteFieldPlaceholders(value: unknown, fieldName: string): unknown
   return value;
 }
 
-function expandForEachField(entries: unknown[]): PlainObject[] {
+function expandForEachField(
+  entries: unknown[],
+  observe?: (output: number, input: number) => void,
+): PlainObject[] {
   const out: PlainObject[] = [];
-  for (const entry of entries) {
+  for (const [inputIndex, entry] of entries.entries()) {
     if (!isPlainObject(entry) || !Object.hasOwn(entry, "for_each_field")) {
+      observe?.(out.length, inputIndex);
       out.push(cloneObject(entry));
       continue;
     }
@@ -112,6 +120,7 @@ function expandForEachField(entries: unknown[]): PlainObject[] {
     for (const fieldName of fields as string[]) {
       const cloned = cloneValue(template) as PlainObject;
       const substituted = substituteFieldPlaceholders(cloned, fieldName) as PlainObject;
+      observe?.(out.length, inputIndex);
       out.push(substituted);
     }
   }
@@ -164,11 +173,18 @@ function isForeachDirective(entry: unknown): boolean {
   return isPlainObject(entry) && Object.hasOwn(entry, "foreach");
 }
 
-function expandForeachArray(entries: unknown[]): unknown[] {
+function expandForeachArray(
+  entries: unknown[],
+  authored: readonly (string | number)[],
+  compiled: readonly (string | number)[],
+  observe?: RulePathObserver,
+): unknown[] {
   const out: unknown[] = [];
-  for (const entry of entries) {
+  for (const [inputIndex, entry] of entries.entries()) {
     if (!isForeachDirective(entry)) {
-      out.push(expandForeachValue(entry));
+      out.push(
+        expandForeachValue(entry, [...authored, inputIndex], [...compiled, out.length], observe),
+      );
       continue;
     }
     const directive = entry as PlainObject;
@@ -213,19 +229,35 @@ function expandForeachArray(entries: unknown[]): unknown[] {
       const cloned = cloneValue(template);
       const substituted = substituteBindings(cloned, bindings);
       // Recurse to allow nested foreach inside a template.
-      out.push(expandForeachValue(substituted));
+      out.push(
+        expandForeachValue(
+          substituted,
+          [...authored, inputIndex, "template"],
+          [...compiled, out.length],
+          observe,
+        ),
+      );
     }
   }
   return out;
 }
 
-function expandForeachValue(value: unknown): unknown {
+function expandForeachValue(
+  value: unknown,
+  authored: readonly (string | number)[] = [],
+  compiled: readonly (string | number)[] = [],
+  observe?: RulePathObserver,
+): unknown {
+  observe?.(compiled, authored);
   if (Array.isArray(value)) {
-    return expandForeachArray(value);
+    return expandForeachArray(value, authored, compiled, observe);
   }
   if (isPlainObject(value)) {
     return Object.fromEntries(
-      Object.entries(value).map(([key, entry]) => [key, expandForeachValue(entry)]),
+      Object.entries(value).map(([key, entry]) => [
+        key,
+        expandForeachValue(entry, [...authored, key], [...compiled, key], observe),
+      ]),
     );
   }
   return value;
@@ -356,12 +388,40 @@ function normalizePattern(pattern: unknown): PlainObject {
   };
 }
 
-function normalizeRule(ruleInput: unknown): PlainObject {
+function normalizeRule(ruleInput: unknown, observe?: RulePathObserver): PlainObject {
   if (!isPlainObject(ruleInput)) return {};
   // Expand any `foreach` template directives before field normalization so the
   // engine and validation never see the directive itself. Structure-preserving
   // when no directive is present.
-  const rule = expandForeachValue(ruleInput) as PlainObject;
+  const paths: { compiled: readonly (string | number)[]; authored: readonly (string | number)[] }[] = [];
+  const rule = expandForeachValue(
+    ruleInput,
+    [],
+    [],
+    observe
+      ? (compiled, authored) => {
+          paths.push({ compiled, authored });
+        }
+      : undefined,
+  ) as PlainObject;
+  const apply = Array.isArray(rule.apply)
+    ? expandForEachField(
+        rule.apply,
+        observe
+          ? (output, input) => {
+              for (const { compiled, authored } of paths) {
+                if (
+                  compiled[0] === "apply" &&
+                  compiled[1] === input &&
+                  compiled[2] !== "for_each_field"
+                ) {
+                  observe(["apply", output, ...compiled.slice(2)], authored);
+                }
+              }
+            }
+          : undefined,
+      )
+    : [];
   const define = isPlainObject(rule.define)
     ? Object.fromEntries(
         Object.entries(rule.define)
@@ -393,7 +453,7 @@ function normalizeRule(ruleInput: unknown): PlainObject {
           };
         })()
       : null,
-    apply: Array.isArray(rule.apply) ? expandForEachField(rule.apply) : [],
+    apply,
     contour: isPlainObject(rule.contour) ? cloneObject(rule.contour) : null,
     scan: isPlainObject(rule.scan) ? cloneObject(rule.scan) : null,
     splice: isPlainObject(rule.splice) ? cloneObject(rule.splice) : null,
@@ -416,7 +476,11 @@ function normalizeRule(ruleInput: unknown): PlainObject {
   };
 }
 
-export function parseDslSpec(source: unknown, observeMacroExpansion?: MacroExpansionObserver) {
+export function parseDslSpec(
+  source: unknown,
+  observeMacroExpansion?: MacroExpansionObserver,
+  observeRulePath?: RulePathObserver,
+) {
   const parsed = typeof source === "string" ? parseYamlString(source, "dsl spec") : source;
   if (!isPlainObject(parsed)) {
     throw new Error("DSL spec must be an object or YAML object document");
@@ -502,7 +566,17 @@ export function parseDslSpec(source: unknown, observeMacroExpansion?: MacroExpan
     ),
     phases: phases.map((phase) => normalizePhase(phase)),
     rules: Object.fromEntries(
-      Object.entries(rules).map(([name, rule]) => [name, normalizeRule(rule)]),
+      Object.entries(rules).map(([name, rule]) => [
+        name,
+        normalizeRule(
+          rule,
+          observeRulePath
+            ? (compiled, authored) => {
+                observeRulePath(["rules", name, ...compiled], ["rules", name, ...authored]);
+              }
+            : undefined,
+        ),
+      ]),
     ),
     interpolation: {
       scalars: cloneObject(interpolation.scalars),

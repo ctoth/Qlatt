@@ -21,6 +21,7 @@ export type DocumentSpanOrigin = Readonly<{
 }>;
 export type DiagnosticDocumentSpans = YamlNodeSpans & {
   readonly parents?: readonly DocumentSpanOrigin[];
+  readonly compiledPath?: readonly (string | number)[];
 };
 export type ValidationDiagnostic = {
   code: string;
@@ -4649,7 +4650,7 @@ export function assertValidSpec(
 ): ValidationDiagnostic[] {
   const diagnostics = validateDslSpec(spec, options).map((diagnostic) => {
     const matches = (options.documentSpans ?? []).filter((entry) => {
-      const path = entry.value.path
+      const path = (entry.compiledPath ?? entry.value.path)
         .map((part, index) =>
           typeof part === "number" ? `[${part}]` : `${index > 0 ? "." : ""}${part}`,
         )
@@ -4658,7 +4659,7 @@ export function assertValidSpec(
     });
     const origin = matches.length === 1 ? matches[0] : undefined;
     // Literal punctuation in a key cannot be distinguished in diagnostic paths.
-    const exact = origin?.value.path.every(
+    const exact = (origin?.compiledPath ?? origin?.value.path)?.every(
       (part) => typeof part === "number" || !/[.\[\]]/.test(part),
     );
     // Semantic and syntax diagnostics share these direct expression paths.

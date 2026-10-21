@@ -45,40 +45,11 @@ export function rulepackParameterOrigins(spec: CompiledRulepack): readonly YamlN
   return PARAMETER_ORIGINS.get(spec) ?? NO_PARAMETER_ORIGINS;
 }
 
-/** Authored direct/unchanged-index paths, with actual macro bodies as source parents. */
+/** Authored spans, compiled lookup paths for apply templates, and macro body parents. */
 export function rulepackRuleDocumentSpans(
   spec: CompiledRulepack,
 ): readonly DiagnosticDocumentSpans[] {
   return RULE_DOCUMENT_SPANS.get(spec) ?? NO_PARAMETER_ORIGINS;
-}
-
-function unchangedRuleSpans(document: PlainObject): readonly YamlNodeSpans[] {
-  const containsForeach = (value: unknown): boolean => {
-    if (Array.isArray(value)) {
-      return value.some(
-        (entry) =>
-          (isPlainObject(entry) && Object.hasOwn(entry, "foreach")) || containsForeach(entry),
-      );
-    }
-    return isPlainObject(value) && Object.values(value).some(containsForeach);
-  };
-  const expanded = new Set<string>();
-  for (const [name, rule] of Object.entries(isPlainObject(document.rules) ? document.rules : {})) {
-    if (!isPlainObject(rule) || !Array.isArray(rule.apply)) continue;
-    if (
-      containsForeach(rule.apply) ||
-      rule.apply.some((entry) => isPlainObject(entry) && Object.hasOwn(entry, "for_each_field"))
-    ) {
-      expanded.add(name);
-    }
-  }
-  return Object.freeze(
-    (RULE_DOCUMENT_SPANS.get(document) ?? []).filter(
-      (entry) =>
-        !entry.value.path.some((part) => typeof part === "number") ||
-        !expanded.has(String(entry.value.path[1])),
-    ),
-  );
 }
 
 /** Follow deepMergeChildWins: arrays/scalars replace, objects retain untouched siblings. */
@@ -739,9 +710,16 @@ export function getRulepackValidationDiagnostics(
 
 function parseComposedRulepack(merged: PlainObject): NormalizedDslSpec {
   const calls = new Map<string, readonly CelMacroDefinition[]>();
-  const spec = parseDslSpec(withVoiceRulePolicy(merged), (path, macros) => {
-    calls.set(path, macros);
-  });
+  const paths: { compiled: readonly (string | number)[]; authored: readonly (string | number)[] }[] = [];
+  const spec = parseDslSpec(
+    withVoiceRulePolicy(merged),
+    (path, macros) => {
+      calls.set(path, macros);
+    },
+    (compiled, authored) => {
+      paths.push({ compiled, authored });
+    },
+  );
   const bodies = FUNCTION_BODY_SPANS.get(merged) ?? [];
   const originsOf = (macros: readonly CelMacroDefinition[]): readonly DocumentSpanOrigin[] =>
     Object.freeze(
@@ -756,31 +734,40 @@ function parseComposedRulepack(merged: PlainObject): NormalizedDslSpec {
         ];
       }),
     );
-  const spans = unchangedRuleSpans(merged);
+  const spans = RULE_DOCUMENT_SPANS.get(merged) ?? [];
   const pathOf = (entry: YamlNodeSpans) =>
     entry.value.path
       .map((part, index) =>
         typeof part === "number" ? `[${part}]` : `${index > 0 ? "." : ""}${part}`,
       )
       .join("");
-  RULE_DOCUMENT_SPANS.set(
-    spec,
-    Object.freeze(
-      spans.map((entry) => {
-        const path = pathOf(entry);
-        const macros = calls.get(path);
-        if (
-          !macros ||
-          entry.value.path.some((part) => typeof part === "string" && /[.\[\]]/.test(part)) ||
-          spans.filter((candidate) => pathOf(candidate) === path).length !== 1
-        ) {
-          return entry;
-        }
-        const parents = originsOf(macros);
-        return parents.length ? Object.freeze({ ...entry, parents }) : entry;
-      }),
-    ),
+  const authoredSpans = spans.map((entry) => {
+    const path = pathOf(entry);
+    const macros = calls.get(path);
+    if (
+      !macros ||
+      entry.value.path.some((part) => typeof part === "string" && /[.\[\]]/.test(part)) ||
+      spans.filter((candidate) => pathOf(candidate) === path).length !== 1
+    ) {
+      return entry;
+    }
+    const parents = originsOf(macros);
+    return parents.length ? Object.freeze({ ...entry, parents }) : entry;
+  });
+  const sources = new Map<string, DiagnosticDocumentSpans[]>();
+  for (const entry of authoredSpans) {
+    const key = JSON.stringify(entry.value.path);
+    sources.set(key, [...(sources.get(key) ?? []), entry]);
+  }
+  const compiledSpans = authoredSpans.filter((entry) =>
+    entry.value.path.every((part) => typeof part === "string"),
   );
+  for (const { compiled, authored } of paths) {
+    const matches = sources.get(JSON.stringify(authored)) ?? [];
+    if (matches.length !== 1) continue;
+    compiledSpans.push(Object.freeze({ ...matches[0], compiledPath: Object.freeze([...compiled]) }));
+  }
+  RULE_DOCUMENT_SPANS.set(spec, Object.freeze(compiledSpans));
   return spec;
 }
 

@@ -206,6 +206,7 @@ function formatMeterReadings(state: DisplayState): string[] {
 function formatGainDerivation(state: DisplayState): string[] {
   const track = state.run?.track;
   if (!track || track.length === 0) return ["(no track data)"];
+  if (!state.semantics) return ["(no experiment semantics)"];
   const analysis = analyzeTrackGains(
     track,
     state.sliderParams,

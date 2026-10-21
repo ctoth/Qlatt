@@ -1,10 +1,7 @@
 // Track analysis module for Qlatt TTS diagnostics
 // Extracted from test-harness.html for maintainability
 
-import { expandFormantBanks } from "./formant-bank";
-import type { BaconGraph } from "./klatt-runtime";
 import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
-import { loadSemanticsDocumentSync } from "./semantics/load-semantics";
 import type { ParamValue, SemanticsDocument } from "./semantics/types";
 import { loadYamlDocumentSync } from "./yaml-loader";
 
@@ -493,24 +490,12 @@ export function updateRange(range: Range | null, value: number): Range | null {
   return range;
 }
 
-let baselineSemantics: SemanticsDocument | undefined;
-
-function getBaselineSemantics(): SemanticsDocument {
-  if (!baselineSemantics) {
-    const semantics = loadSemanticsDocumentSync("/experiments/klatt80-baseline/semantics.yaml");
-    const graph = loadYamlDocumentSync<BaconGraph>("/experiments/klatt80-baseline/graph.yaml");
-    expandFormantBanks(graph, semantics);
-    baselineSemantics = semantics;
-  }
-  return baselineSemantics;
-}
-
 /** Report magnitudes from the selected experiment's expanded realization rules. */
 export function analyzeTrackGains(
   track: TrackEvent[],
   synthParams: Record<string, TrackNumeric>,
   sampleRate = 48000,
-  semantics: SemanticsDocument = getBaselineSemantics(),
+  semantics: SemanticsDocument,
 ): { ranges: TrackGainRanges; warnings: string[]; parallelScale: number } | null {
   if (!track || track.length === 0) return null;
   const ranges: TrackGainRanges = {

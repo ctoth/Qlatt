@@ -9,7 +9,7 @@ Smallest change: about 25–40 production lines and 35–55 existing fixture lin
 This is partial #90: required citations for every rule, typed source kinds, portable build-time catalog, constants metadata, and Bacon-owned registry validation remain separate. No runtime papers dependency or new collector.
 
 # Surprises
-None.
+Hosted quality job 119182973720 requested two formatting reflows: the normalization signature and the authored realize_each fixture. Applied the exact emitted layouts; no behavior change or local CI run.
 
 # Next step
 Publish for hosted CI and Claude review. No local CI or test commands run.

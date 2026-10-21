@@ -17,7 +17,10 @@ import {
 import { expandRealizeEach } from "./realize-each";
 import type { AuthoredSemanticsDocument, SemanticsDocument } from "./types";
 
-function normalizeSemantics(document: AuthoredSemanticsDocument, source: string): SemanticsDocument {
+function normalizeSemantics(
+  document: AuthoredSemanticsDocument,
+  source: string,
+): SemanticsDocument {
   const expanded = expandRealizeEach(document, source);
   for (const [name, rule] of Object.entries(expanded.realize ?? {})) {
     if (typeof rule !== "object" || rule === null || !("citations" in rule)) continue;

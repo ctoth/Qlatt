@@ -299,9 +299,7 @@ describe("parseSemanticsDocument", () => {
     async (citations) => {
       const authored = {
         name: "fixture",
-        realize_each: [
-          { index: "n", over: [2], rules: { "gain{n}": { expr: "1", citations } } },
-        ],
+        realize_each: [{ index: "n", over: [2], rules: { "gain{n}": { expr: "1", citations } } }],
       };
       vi.spyOn(yamlLoader, "loadYamlDocument").mockResolvedValue(authored);
       vi.spyOn(yamlLoader, "loadYamlDocumentOrNull").mockResolvedValue(authored);

@@ -7,8 +7,9 @@
  * call-chain async, we instantiate the module synchronously
  * (`new WebAssembly.Module` / `new WebAssembly.Instance`) once and reuse it.
  *
- * - In Node (CLI / tests): the wasm bytes are read lazily via `fs.readFileSync`
- *   from `public/worklets/f0-filters.wasm`.
+ * - The Node audio renderer preloads bytes through its selected asset loader.
+ *   Other Node callers retain the lazy `fs.readFileSync` fallback from
+ *   `public/worklets/f0-filters.wasm`.
  * - In the browser: call `setF0FilterWasmBytes(bytes)` once during app init
  *   (after a one-time async fetch) before the first synthesis call.
  */
@@ -72,13 +73,13 @@ export function isF0FilterLoaded(): boolean {
 }
 
 /**
- * Browser preload: fetch the f0-filters WASM once and inject its bytes so the
+ * Preload the f0-filters WASM through the selected loader and inject its bytes so the
  * synchronous `renderLayeredF0` path can instantiate it without an await.
  *
  * Idempotent — a no-op once bytes are already loaded. Call this during app /
  * harness init (or at the start of any synthesis entry point) BEFORE the first
- * synchronous `textToKlattTrack` / `renderLayeredF0`. In Node the filesystem
- * path is used automatically and this is unnecessary.
+ * synchronous `textToKlattTrack` / `renderLayeredF0`. Node callers without a
+ * preload retain the automatic synchronous filesystem fallback.
  *
  * @param assetLoader Selected worklet asset loader; owns fetching and load errors.
  */

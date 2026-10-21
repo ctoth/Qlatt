@@ -4,7 +4,7 @@ Locate direct rule define expressions supplied by YAML map aliases, preserving a
 
 # State
 
-Started from PR423 final 0448c469; prerequisite merged as 614a07a1. Implemented 48 changed production lines and about 100 existing fixture lines: projected expression errors, caller macro ancestry, preserved alias occurrence, and actual DECtalk shadow ownership. Fixture formatting and the real shadow control account for the test estimate increase; no production scope expansion. No local CI; hosted validation pending.
+Started from PR423 final 0448c469; prerequisite merged as 614a07a1. Implemented 48 changed production lines and about 100 existing fixture lines: projected expression errors, caller macro ancestry, preserved alias occurrence, and actual DECtalk shadow ownership. Fixture formatting and the real shadow control account for the test estimate increase; no production scope expansion. Claude reviewed all three PR files and found no defects; accepted with no further code changes. Supervisor verified the formatter delta through 842c4039. No local CI; final-head hosted validation pending.
 
 # Decisions and why
 
@@ -18,4 +18,4 @@ Other agents own normalization resource moves and loader acquisition. Preserve t
 
 # Next step
 
-Await hosted CI and Claude review, respond, then supervisor merges. Keep #224 open.
+Review response is complete. Await final-head hosted CI and supervisor merge. Keep #224 open.

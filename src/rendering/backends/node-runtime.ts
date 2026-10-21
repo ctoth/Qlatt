@@ -170,7 +170,12 @@ export function createNodeRuntimeBackend({
             tailTime: request.tailTime,
             length,
             metrics: { rms, peak },
-            trackSummary: summarizeTrack(track),
+            trackSummary: summarizeTrack(
+              track,
+              config.semantics.analysis?.metrics,
+              diagnostics,
+              request.experimentId,
+            ),
             diagnostics: diagnostics.getEntries(),
             samples,
           };

@@ -5,6 +5,11 @@ bacon: "0.1"
 name: klsyn88
 
 analysis:
+  metrics:
+    voicing_params: [AV, AVS]
+    silence_phoneme: SIL
+    citations:
+      - "engineering convention: classify authored track metadata by finite positive AV/AVS, with unvoiced SIL as silence; not measured acoustic voicing"
   maxVoicingIssues:
     value: 6
     basis: "engineering estimate: retained diagnostic display cap"

@@ -46,7 +46,8 @@ export interface RenderPayload
   metrics: RenderMetrics;
   /** Present only after WAV encoding; absence does not certify unclipped audio. */
   wavEncoding?: WavEncodingStats & { path: string };
-  trackSummary: RenderTrackSummary;
+  /** Absent when the selected experiment declares no metrics policy. */
+  trackSummary?: RenderTrackSummary;
   diagnostics?: unknown;
   track?: unknown;
   samples: number[];

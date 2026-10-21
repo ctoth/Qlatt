@@ -1,6 +1,9 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { summarizeTrackMetrics } from "../src/analysis/track-metrics";
+import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
 import { textToKlattTrack } from "../src/tts-frontend";
+
+const metricsPolicy = (await loadExperimentConfig("klatt80-baseline")).semantics.analysis!.metrics!;
 
 const corpusPath = "test/phrase-sets/linguistic.json";
 const outPath = "test/golden/declarative-corpus-summary.json";
@@ -17,7 +20,7 @@ if (phrases.length === 0) {
 
 const summaries = phrases.map((phrase: string) => {
   const track = textToKlattTrack(phrase, baseF0);
-  const metrics = summarizeTrackMetrics(track);
+  const metrics = summarizeTrackMetrics(track, metricsPolicy);
 
   return {
     phrase,

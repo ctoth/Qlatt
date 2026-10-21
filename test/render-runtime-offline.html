@@ -135,7 +135,7 @@
           tailTime,
           length,
           metrics: { rms, peak },
-          trackSummary: summarizeTrack(resolvedTrack),
+          trackSummary: summarizeTrack(resolvedTrack, config.semantics.analysis?.metrics, diagnostics, experimentId),
           track: includeTrack ? resolvedTrack : undefined,
           samples,
           samplesBase64,

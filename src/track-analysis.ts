@@ -1,8 +1,14 @@
 // Track analysis module for Qlatt TTS diagnostics
 // Extracted from test-harness.html for maintainability
 
+import { isVoicedFrame } from "./analysis/track-metrics";
 import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
-import type { ParamValue, SemanticsDocument, TrackAnalysisPolicy } from "./semantics/types";
+import type {
+  ParamValue,
+  SemanticsDocument,
+  TrackAnalysisPolicy,
+  TrackMetricsPolicy,
+} from "./semantics/types";
 
 type Range = { min: number; max: number };
 type TrackNumeric = number | bigint | undefined;
@@ -271,7 +277,10 @@ export function buildTimeline(track: TrackEvent[]): string[] {
   return lines;
 }
 
-export function summarizeTrack(track: TrackEvent[]): {
+export function summarizeTrack(
+  track: TrackEvent[],
+  policy: TrackMetricsPolicy,
+): {
   events: number;
   totalTime: number;
   voicedEvents: number;
@@ -279,7 +288,7 @@ export function summarizeTrack(track: TrackEvent[]): {
   f0Max: number;
 } {
   const totalTime = track.length ? track[track.length - 1].time : 0;
-  const voiced = track.filter((e) => getParam(e.params, "AV") > 0 || getParam(e.params, "AVS") > 0);
+  const voiced = track.filter((frame) => isVoicedFrame(frame, policy));
   const f0Values = track.map((e) => getParam(e.params, "F0")).filter((v) => v > 0);
   return {
     events: track.length,

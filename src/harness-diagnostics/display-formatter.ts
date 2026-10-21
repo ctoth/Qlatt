@@ -127,7 +127,9 @@ function formatTrackSummary(state: DisplayState): string[] {
   if (!state.run || !state.run.track || state.run.track.length === 0) {
     return ["(no track data)"];
   }
-  const summary = summarizeTrack(state.run.track);
+  const policy = state.semantics?.analysis?.metrics;
+  if (!policy) return ["(no experiment metrics policy)"];
+  const summary = summarizeTrack(state.run.track, policy);
   return [
     `Events: ${summary.events}`,
     `Total time: ${summary.totalTime.toFixed(3)}s`,

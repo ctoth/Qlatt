@@ -1,3 +1,5 @@
+import type { TrackMetricsPolicy } from "../semantics/types";
+
 type FrameLike = {
   time?: unknown;
   phoneme?: unknown;
@@ -28,10 +30,11 @@ function mean(values: number[]): number {
   return values.reduce((acc, value) => acc + value, 0) / values.length;
 }
 
-export function isVoicedFrame(frame: FrameLike): boolean {
-  const av = Number(frame?.params?.AV ?? 0);
-  const avs = Number(frame?.params?.AVS ?? 0);
-  return av > 0 || avs > 0;
+export function isVoicedFrame(frame: FrameLike, policy: TrackMetricsPolicy): boolean {
+  return policy.voicing_params.some((key) => {
+    const value = Number(frame?.params?.[key] ?? 0);
+    return Number.isFinite(value) && value > 0;
+  });
 }
 
 function collectPositiveParam(frames: FrameLike[], key: string): number[] {
@@ -46,9 +49,12 @@ function collectFiniteParam(frames: FrameLike[], key: string): number[] {
     .filter((value) => Number.isFinite(value));
 }
 
-export function summarizeTrackMetrics(track: FrameLike[]): TrackMetrics {
+export function summarizeTrackMetrics(
+  track: FrameLike[],
+  policy: TrackMetricsPolicy,
+): TrackMetrics {
   const safeTrack = Array.isArray(track) ? track : [];
-  const voiced = safeTrack.filter(isVoicedFrame);
+  const voiced = safeTrack.filter((frame) => isVoicedFrame(frame, policy));
   const voicedF0 = collectPositiveParam(safeTrack, "F0");
   const voicedF1 = collectPositiveParam(voiced, "F1");
   const voicedF2 = collectPositiveParam(voiced, "F2");
@@ -67,11 +73,11 @@ export function summarizeTrackMetrics(track: FrameLike[]): TrackMetrics {
     const delta = nextTime - curTime;
     if (!Number.isFinite(delta) || delta <= 0) continue;
 
-    if (isVoicedFrame(cur)) {
+    if (isVoicedFrame(cur, policy)) {
       voicedTime += delta;
       continue;
     }
-    if (cur?.phoneme === "SIL") {
+    if (cur?.phoneme === policy.silence_phoneme) {
       silenceTime += delta;
       continue;
     }

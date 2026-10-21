@@ -373,7 +373,26 @@ describe("display-formatter", () => {
     expect(formatSection(section, makeState({ run }))).toEqual(["(no experiment semantics)"]);
   });
 
-  it("voicing_issues reports clean track when none found", () => {
+  it("reports unavailable analysis policy for the selected VTM experiment", async () => {
+    const { semantics } = await loadExperimentConfig("dectalk-vtm");
+    const run: RunInfo = {
+      phrase: "test",
+      baseF0: 100,
+      sessionId: 1,
+      startTime: 0,
+      track: [{ time: 0, params: { F0: 120, AF: 0 } }],
+    };
+    for (const source of ["gain_derivation", "voicing_issues"] as const) {
+      const section: DisplaySection = { id: source, source };
+      expect(formatSection(section, makeState({ semantics }))).toEqual(["(no track data)"]);
+      expect(formatSection(section, makeState({ run, semantics }))).toEqual([
+        "(no experiment analysis policy)",
+      ]);
+    }
+  });
+
+  it("voicing_issues reports clean track when none found", async () => {
+    const { semantics } = await loadExperimentConfig("klatt80-baseline");
     const run: RunInfo = {
       phrase: "test",
       baseF0: 100,
@@ -385,7 +404,7 @@ describe("display-formatter", () => {
       ],
     };
     const section: DisplaySection = { id: "voicing", source: "voicing_issues" };
-    const text = formatSection(section, makeState({ run })).join("\n");
+    const text = formatSection(section, makeState({ run, semantics })).join("\n");
     expect(text).toContain("No voicing inconsistencies detected");
   });
 });

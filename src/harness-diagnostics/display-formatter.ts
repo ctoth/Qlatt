@@ -207,11 +207,13 @@ function formatGainDerivation(state: DisplayState): string[] {
   const track = state.run?.track;
   if (!track || track.length === 0) return ["(no track data)"];
   if (!state.semantics) return ["(no experiment semantics)"];
+  if (!state.semantics.analysis) return ["(no experiment analysis policy)"];
   const analysis = analyzeTrackGains(
     track,
     state.sliderParams,
     state.sampleRate || 48000,
     state.semantics,
+    state.semantics.analysis,
   );
   if (!analysis) return ["(no gain data)"];
   const { ranges, warnings, parallelScale } = analysis;
@@ -269,7 +271,8 @@ function formatTrackEvents(section: DisplaySection, state: DisplayState): string
 function formatVoicingIssues(state: DisplayState): string[] {
   const track = state.run?.track;
   if (!track || track.length === 0) return ["(no track data)"];
-  const issues = findVoicingIssues(track, state.sliderParams);
+  if (!state.semantics?.analysis) return ["(no experiment analysis policy)"];
+  const issues = findVoicingIssues(track, state.sliderParams, state.semantics.analysis);
   return issues.length > 0 ? issues : ["No voicing inconsistencies detected"];
 }
 

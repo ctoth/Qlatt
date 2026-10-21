@@ -2,8 +2,7 @@
 // Extracted from test-harness.html for maintainability
 
 import { createConfiguredEvaluator } from "./semantics/evaluator-factory";
-import type { ParamValue, SemanticsDocument } from "./semantics/types";
-import { loadYamlDocumentSync } from "./yaml-loader";
+import type { ParamValue, SemanticsDocument, TrackAnalysisPolicy } from "./semantics/types";
 
 type Range = { min: number; max: number };
 type TrackNumeric = number | bigint | undefined;
@@ -112,32 +111,23 @@ function getParam(params: TrackParams | undefined, key: string, fallback = 0): n
   return toFiniteNumber(params?.[key], fallback);
 }
 
-type TrackReference = {
+export type TrackReference = {
   citations: string[];
   targets: Record<string, StopReleaseExpected>;
   conformance: Record<
-    | "durationToleranceMs"
-    | "amplitudeToleranceDb"
-    | "plstepWindowSeconds"
-    | "plstepAfGateDb"
-    | "maxVoicingIssues"
-    | "lowParallelScale"
-    | "lowParallelGain",
+    "durationToleranceMs" | "amplitudeToleranceDb" | "plstepWindowSeconds" | "plstepAfGateDb",
     { value: number; basis: string }
   >;
 };
-const reference = loadYamlDocumentSync<TrackReference>(
-  "/experiments/klatt80-baseline/reference/table-iii.yaml",
-);
-export const KLATT80_EXPECTED = reference.targets;
-const conformance = reference.conformance;
 
 // Analyze stop releases in track
 export function analyzeStopReleases(
   track: TrackEvent[],
+  reference: TrackReference,
   plstepEvents: unknown[] = [],
   runStartTime = 0,
 ): StopReleaseAnalysis[] {
+  const conformance = reference.conformance;
   const releases: StopReleaseAnalysis[] = [];
   const isStopRelease = (ph: string | undefined): ph is string =>
     ph?.includes("_REL") || ph?.includes("_ASP") || false;
@@ -149,7 +139,7 @@ export function analyzeStopReleases(
 
     const nextEvent = track[i + 1];
     const duration = nextEvent ? (nextEvent.time - event.time) * 1000 : 0;
-    const expected = phoneme ? KLATT80_EXPECTED[phoneme] : undefined;
+    const expected = phoneme ? reference.targets[phoneme] : undefined;
     const p = event.params || {};
 
     const plstepMatch = plstepEvents.find((candidate): candidate is PlstepEvent => {
@@ -386,6 +376,7 @@ export function collectParamRange(
 export function findVoicingIssues(
   track: TrackEvent[],
   fallback: Partial<Record<string, number>> | undefined,
+  conformance: TrackAnalysisPolicy,
 ): string[] {
   const issues: string[] = [];
   const state: Record<string, number> = {
@@ -496,6 +487,7 @@ export function analyzeTrackGains(
   synthParams: Record<string, TrackNumeric>,
   sampleRate = 48000,
   semantics: SemanticsDocument,
+  conformance: TrackAnalysisPolicy,
 ): { ranges: TrackGainRanges; warnings: string[]; parallelScale: number } | null {
   if (!track || track.length === 0) return null;
   const ranges: TrackGainRanges = {

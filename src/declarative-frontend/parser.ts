@@ -421,7 +421,11 @@ export function parseDslSpec(source: unknown, observeMacroExpansion?: MacroExpan
   if (!isPlainObject(parsed)) {
     throw new Error("DSL spec must be an object or YAML object document");
   }
-  const raw = expandSpecCelMacros(parsed, parseCelMacroBlock(parsed.functions), observeMacroExpansion);
+  const raw = expandSpecCelMacros(
+    parsed,
+    parseCelMacroBlock(parsed.functions),
+    observeMacroExpansion,
+  );
   if (Object.hasOwn(raw, "streams")) {
     throw new Error("E_LEGACY_STREAMS: 'streams' is no longer accepted; declare 'relations'");
   }

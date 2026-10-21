@@ -454,7 +454,10 @@ function expandValue(
   if (typeof value === "string") {
     const called = calledMacroNames(value, new Set(macros.keys()));
     if (called.length === 0) return value;
-    observe?.(path, [...new Set(called)].map((name) => macros.get(name)!));
+    observe?.(
+      path,
+      [...new Set(called)].map((name) => macros.get(name)!),
+    );
     for (const name of called) {
       for (const citation of macros.get(name)?.citations ?? []) citations.add(citation);
     }

@@ -4686,8 +4686,9 @@ export function assertValidSpec(
   if (errors.length > 0) {
     const parentLocations = (parents: readonly DocumentSpanOrigin[]): string =>
       parents
-        .map(({ documentSpan: span, parents: ancestors }) =>
-          `\n  macro body [${span.resource}:${span.line}:${span.column}]${parentLocations(ancestors)}`,
+        .map(
+          ({ documentSpan: span, parents: ancestors }) =>
+            `\n  macro body [${span.resource}:${span.line}:${span.column}]${parentLocations(ancestors)}`,
         )
         .join("");
     const detail = errors

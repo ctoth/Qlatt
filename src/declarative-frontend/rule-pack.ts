@@ -46,7 +46,9 @@ export function rulepackParameterOrigins(spec: CompiledRulepack): readonly YamlN
 }
 
 /** Authored direct/unchanged-index paths, with actual macro bodies as source parents. */
-export function rulepackRuleDocumentSpans(spec: CompiledRulepack): readonly DiagnosticDocumentSpans[] {
+export function rulepackRuleDocumentSpans(
+  spec: CompiledRulepack,
+): readonly DiagnosticDocumentSpans[] {
   return RULE_DOCUMENT_SPANS.get(spec) ?? NO_PARAMETER_ORIGINS;
 }
 

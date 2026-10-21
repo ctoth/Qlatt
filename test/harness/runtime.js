@@ -75,7 +75,7 @@ export function warmFrontend(frontendId, phrase) {
   const speaker = getSelectedSpeaker();
   const options = { rate: 1, frontendId };
   if (speaker) options.speaker = speaker;
-  textToKlattTrack(phrase, undefined, 30, options);
+  textToKlattTrack(phrase, undefined, undefined, options);
 }
 
 export async function speak() {
@@ -93,7 +93,7 @@ export async function speak() {
   const { phrase, baseF0, options } = readSpeakRequest(document, getSelectedSpeaker());
   if (!phrase) return;
   // No base F0 is passed unless the box holds one: the voice's own applies.
-  const { track, resolvedSpeaker } = textToKlattTrackDetailed(phrase, baseF0, 30, options);
+  const { track, resolvedSpeaker } = textToKlattTrackDetailed(phrase, baseF0, undefined, options);
   timer.mark("textToTrack");
   await speakWithNewRuntime(track, resolvedSpeaker.base_f0_hz);
   timer.mark("runtimeAndSchedule");

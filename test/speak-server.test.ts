@@ -54,6 +54,7 @@ describe("speak-server request mapping", () => {
   it("requests no pitch when the request names none", () => {
     const render = speakRenderRequest({ op: "speak", text: "Hello." });
     expect(render.baseF0).toBeUndefined();
+    expect(render).not.toHaveProperty("transitionMs");
     expect(render).not.toHaveProperty("pitchScale");
     expect(render).toMatchObject({ phrase: "Hello.", frontendId: "qlatt-english", rate: 1 });
   });

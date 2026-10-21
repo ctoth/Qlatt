@@ -318,7 +318,9 @@ export function parseDirectionInput(
         `Voice identity${global.voice.name ? ` '${global.voice.name}'` : ""}` +
         `${global.voice.sex ? ` (${global.voice.sex})` : ""}` +
         `${global.voice.baseF0Hz ? ` baseF0=${global.voice.baseF0Hz}Hz` : ""}`,
-      citations: ["Engineering convention: Direction Track records authored voice identity metadata"],
+      citations: [
+        "Engineering convention: Direction Track records authored voice identity metadata",
+      ],
     });
     directions.push({
       id: decision.id,

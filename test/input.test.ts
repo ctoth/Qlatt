@@ -515,7 +515,11 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
       },
     });
     expect(
-      result.directions.map((direction) => [direction.kind, direction.hrgRelation, direction.label]),
+      result.directions.map((direction) => [
+        direction.kind,
+        direction.hrgRelation,
+        direction.label,
+      ]),
     ).toEqual([
       ["voice_identity", "Affect", "authored"],
       ["emphasis", "Intonation", "strong"],
@@ -748,7 +752,8 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
     ] as const) {
       const preset = result.decisions.find(
         (decision) =>
-          decision.type === "affect_preset_applied" && decision.subject === direction.decision.subject,
+          decision.type === "affect_preset_applied" &&
+          decision.subject === direction.decision.subject,
       )!;
       expect(preset.reason).toContain(`'${name}' resolved to '${name}'`);
       expect(preset.citations).toEqual([`configured:${name}`]);

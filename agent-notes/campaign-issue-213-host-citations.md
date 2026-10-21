@@ -18,4 +18,4 @@ Local dependencies remain unavailable in fresh worktrees and the main checkout's
 
 # Next step
 
-Commit/push for independent Claude review and hosted CI. Focused regressions cover host attribution and record payloads/stages/subjects/parents, plus alternate preset citations with exact global/local preset-application ancestry. Tests are authored but not locally run; no failing-test run is claimed. Supervisor owns merge and full #213 acceptance assessment.
+PR #383 hosted quality job 119101459054 reported two formatter errors in parse.ts and input.test.ts and exited 1. Applied the exact citation-array, mapped-array, and predicate reflows. No behavior changes or local CI rerun. Focused regressions cover host attribution and record payloads/stages/subjects/parents, plus alternate preset citations with exact global/local preset-application ancestry. Await replacement hosted CI and independent Claude review; supervisor owns merge and full #213 acceptance assessment.

@@ -114,7 +114,7 @@ export function speakRenderRequest(request: SpeakRequest): RenderRequest {
     frontendId,
     experimentId,
     engine: "runtime",
-    rate: request.rate ?? 1,
+    rate: request.rate,
     sampleRate: request.sampleRate ?? 22050,
     leadTime: 0.02,
     tailTime: 0.05,

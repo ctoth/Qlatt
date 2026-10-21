@@ -1225,6 +1225,10 @@ parameters:
         - "DECtalk 4.63 PH/ph_setar.c:421, 559-567, 629; ph_defs.h:466-469"
         - "DECtalk 4.63 PH/ph_vset.c:712; P_us_vdf1.h us_paul"
     rate:
+      default:
+        value: 1
+        citations:
+          - "Engineering default: preserve the existing unit speaking-rate multiplier when omitted"
       # What the API's rate means for this frontend: DECtalk's speaking rate in
       # words per minute, written to timing.speaking_rate_wpm. With this
       # declared the rules are the only thing a rate changes; the three

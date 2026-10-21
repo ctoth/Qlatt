@@ -21,6 +21,83 @@ const PHRASE = "The quick brown fox jumps over the lazy dog.";
 
 afterEach(() => vi.restoreAllMocks());
 
+// Default selection adds provenance, so unrelated downstream decision IDs shift.
+function frameValues(track: KlattFrame[]) {
+  return track.map(({ provenance: _provenance, ...frame }) => frame);
+}
+
+function ratePolicy(spec: rulepack.CompiledRulepack) {
+  return (
+    spec.parameters.policy as {
+      rate: Record<string, { value: unknown; citations: string[] }>;
+    }
+  ).rate;
+}
+
+describe("frontend rate defaults", () => {
+  it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
+    "%s uses a changed cited default and preserves explicit overrides",
+    (frontendId) => {
+      const spec = structuredClone(rulepack.loadBundledRulepackSpec(frontendId));
+      ratePolicy(spec).default.value = 1.5;
+      vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
+      const implicit = textToKlattTrackDetailed("hello world", undefined, undefined, {
+        frontendId,
+      });
+      const explicit = textToKlattTrack("hello world", undefined, undefined, {
+        frontendId,
+        rate: 1.5,
+      });
+      expect(frameValues(implicit.track)).toEqual(frameValues(explicit));
+      expect(frameValues(implicit.track)).not.toEqual(
+        frameValues(textToKlattTrack("hello world", undefined, undefined, { frontendId, rate: 1 })),
+      );
+      expect(
+        implicit.utterance.provenance
+          .getDecisions()
+          .find((entry) => entry.type === "speaking_rate_default"),
+      ).toMatchObject({
+        reason: "Selected policy.rate.default = 1.5",
+        citations: ratePolicy(spec).default.citations,
+      });
+      if (frontendId === "dectalk-english") {
+        expect(
+          frameValues(
+            textToKlattTrack("[:ra 180] hello world", undefined, undefined, { frontendId }),
+          ),
+        ).toEqual(
+          frameValues(
+            textToKlattTrack("hello world", undefined, undefined, { frontendId, rate: 1 }),
+          ),
+        );
+      }
+    },
+  );
+
+  it.each([undefined, 0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
+    "rejects invalid default %s even with an explicit override",
+    (value) => {
+      const spec = structuredClone(rulepack.loadBundledRulepackSpec("qlatt-english"));
+      ratePolicy(spec).default.value = value;
+      vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
+      for (const rate of [undefined, 1]) {
+        expect(() => textToKlattTrack("hello", undefined, undefined, { rate })).toThrow(
+          "E_POLICY_REQUIRED",
+        );
+      }
+    },
+  );
+
+  it("requires a cited default declaration", () => {
+    const spec = structuredClone(rulepack.loadBundledRulepackSpec("qlatt-english"));
+    vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
+    ratePolicy(spec).default.citations = [];
+    expect(() => textToKlattTrack("hello")).toThrow("E_POLICY_REQUIRED");
+    delete ratePolicy(spec).default;
+    expect(() => textToKlattTrack("hello")).toThrow("E_POLICY_REQUIRED");
+  });
+});
+
 describe("frontend transition defaults", () => {
   it("preserves omission through rendering request adapters", async () => {
     const request: RenderRequest = {
@@ -29,7 +106,6 @@ describe("frontend transition defaults", () => {
       frontendId: "qlatt-english",
       experimentId: "klatt80-baseline",
       engine: "runtime",
-      rate: 1,
       sampleRate: 22050,
       leadTime: 0,
       tailTime: 0,
@@ -40,12 +116,17 @@ describe("frontend transition defaults", () => {
       renderHost: "auto",
     };
     const spec = structuredClone(rulepack.loadBundledRulepackSpec(request.frontendId));
+    ratePolicy(spec).default.value = 1.5;
     hrg.readLowerOptions(spec.output.lowering).transitions.default_transition_ms.value = 60;
     vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
     expect(browserRenderOptions(request).transitionMs).toBeUndefined();
+    expect(browserRenderOptions(request).rate).toBeUndefined();
     const result = await trackOnlyBackend.render(request);
     expect(result.transitionMs).toBeUndefined();
-    expect(result.track).toEqual(textToKlattTrack(request.phrase, undefined, 60));
+    expect(result.rate).toBeUndefined();
+    expect(frameValues(result.track as KlattFrame[])).toEqual(
+      frameValues(textToKlattTrack(request.phrase, undefined, 60, { rate: 1.5 })),
+    );
   });
 
   it.each(["qlatt-english", "qlatt-beauty"])(
@@ -155,6 +236,6 @@ describe("speaking rate limits", () => {
   it("leaves the default rate untouched", () => {
     const explicit = render(1);
     const implicit = textToKlattTrack(PHRASE, 110, 30, { frontendId: "qlatt-english" });
-    expect(implicit).toEqual(explicit);
+    expect(frameValues(implicit)).toEqual(frameValues(explicit));
   });
 });

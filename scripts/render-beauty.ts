@@ -26,7 +26,7 @@
  *   --experiment-id <id>       Experiment/graph (default qlatt-beauty)
  *   --base-f0 <Hz>             Base F0 override
  *   --transition-ms <ms>       Formant transition override (default: frontend policy)
- *   --rate <x>                 Speaking rate (default 1)
+ *   --rate <x>                 Speaking rate (default: frontend policy)
  *   --sample-rate <Hz>         Output sample rate (default 48000)
  *   --lead-time <s>            Silence lead (default 0.05)
  *   --tail-time <s>            Silence tail (default 0.2)
@@ -73,7 +73,7 @@ const frontendId = args.get("frontend-id") ?? "qlatt-beauty";
 const experimentId = args.get("experiment-id") ?? "qlatt-beauty";
 const baseF0 = args.has("base-f0") ? Number(args.get("base-f0")) : undefined;
 const transitionMs = args.has("transition-ms") ? Number(args.get("transition-ms")) : undefined;
-const rate = Number(args.get("rate") ?? 1);
+const rate = args.has("rate") ? Number(args.get("rate")) : undefined;
 const sampleRate = Number(args.get("sample-rate") ?? 48000);
 const leadTime = Number(args.get("lead-time") ?? 0.05);
 const tailTime = Number(args.get("tail-time") ?? 0.2);

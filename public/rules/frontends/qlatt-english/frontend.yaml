@@ -188,6 +188,10 @@ include:
 parameters:
   policy:
     rate:
+      default:
+        value: 1
+        citations:
+          - "Engineering default: preserve the existing unit speaking-rate multiplier when omitted"
       undershoot_coefficient:
         value: 0.3
         citations:

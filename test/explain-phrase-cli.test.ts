@@ -212,7 +212,8 @@ describe("explain phrase cli", () => {
     const expressions = {
       ruleId,
       rule: compiledRule,
-      pattern: typeof compiledRule.match === "string" ? rulepack.patterns[compiledRule.match] : null,
+      pattern:
+        typeof compiledRule.match === "string" ? rulepack.patterns[compiledRule.match] : null,
     };
     expect(whyPayload.tooling.ruleExpressions[rewrite.id]).toEqual(expressions);
     expect(expressions.rule.define).not.toEqual({});

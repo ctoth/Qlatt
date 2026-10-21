@@ -4,6 +4,8 @@ Add #95's bounded compiled rule-expression display to explain --why using the ex
 # State
 PR #404 on isolated base 8203114c. Initial hosted checks passed. Claude found that the three-field projection omitted actual rule definitions and effects; response implemented below. No local CI. Other agents own unrelated work; preserve it.
 
+Replacement quality job 119152861839 reported two formatter-only ternary line reflows, in scripts/explain-phrase.ts and its existing test. Applied the exact emitted reflows with no behavior change; replacement hosted CI pending.
+
 # Decisions and why
 Smallest change: about 25–40 production lines, 30–45 existing fixture lines and 3–5 documentation lines. Include decision-keyed ruleExpressions with ruleId, the full compiled rule and its referenced compiled pattern only for --why, using actual transaction metadata and selected decision IDs. Reuse the already loaded rulepack; no evaluator, source reload, new join or provenance fields.
 

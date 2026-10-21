@@ -476,7 +476,8 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
           ruleExpressions[id] = {
             ruleId,
             rule,
-            pattern: typeof rule.match === "string" ? (rulepack.patterns[rule.match] ?? null) : null,
+            pattern:
+              typeof rule.match === "string" ? (rulepack.patterns[rule.match] ?? null) : null,
           };
         }
       }

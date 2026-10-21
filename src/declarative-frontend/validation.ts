@@ -4659,7 +4659,7 @@ export function assertValidSpec(
       /^rules\.[^.]+\.(?:define\.[^.]+|(?:select\.where|constraint)(?:\.not)*(?:\.expr)?)$/.test(
         diagnostic.path,
       ) ||
-      /^rules\.[^.]+\.apply\[\d+\]\.(?:value|dispatch\[\d+\]\.(?:value|default|when(?:\.not)*(?:\.expr)?))$/.test(
+      /^rules\.[^.]+\.apply\[\d+\]\.(?:value(?:[.\[]|$)|dispatch\[\d+\]\.(?:(?:value|default)(?:[.\[]|$)|when(?:\.not)*(?:\.expr)?$))/.test(
         diagnostic.path,
       );
     const documentSpan =

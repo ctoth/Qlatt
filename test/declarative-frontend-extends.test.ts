@@ -212,6 +212,12 @@ describe("direct rule errors through composition", () => {
                   dispatch: [{ when: "current.phonem == 'AA'", value: "current.duration" }],
                   tag: "duration_floor",
                 },
+                {
+                  field: "duration",
+                  op: "set",
+                  value: { fields: { duration: { value: "current.phonem" } } },
+                  tag: "duration_floor",
+                },
               ],
               citations: ["Klatt 1976"],
             },
@@ -267,6 +273,12 @@ describe("direct rule errors through composition", () => {
           for (const [code, path, authoredPath, position] of [
             ["E_CEL_INVALID", "apply[0].value", "apply.0.value", "value"],
             ["E_RULE_APPLY_FIELD_UNKNOWN", "apply[0].valu", "apply.0.valu", "key"],
+            [
+              "E_RULE_FEATURE_UNKNOWN",
+              "apply[2].value.fields.duration.value",
+              "apply.2.value.fields.duration.value",
+              "value",
+            ],
             [
               "E_RULE_FEATURE_UNKNOWN",
               "apply[1].dispatch[0].when",

@@ -3,6 +3,7 @@
  */
 
 import type { Diagnostics } from "../diagnostics";
+import type { ProvenanceCollector } from "../provenance";
 
 /** CEL expression string */
 export type CelExpression = string;
@@ -17,6 +18,7 @@ export type SemanticsConstants = Record<string, ConstantValue>;
 /** Context for expression evaluation */
 export interface EvaluationContext {
   diagnostics?: Diagnostics;
+  provenance?: ProvenanceCollector;
   params: Record<string, ParamValue>;
   constants: SemanticsConstants;
   [key: string]: unknown;

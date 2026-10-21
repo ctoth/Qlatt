@@ -80,7 +80,7 @@ export type PreparedTrack = {
 };
 
 export interface KlattScheduleCompilerOptions {
-  /** Records compiled mode selection, not playback time or value ancestry. */
+  /** Records cited realization results and compiled mode selection, without playback time or value ancestry. */
   provenance?: ProvenanceCollector;
   sampleRate: number;
   semantics: SemanticsDocument;
@@ -335,6 +335,7 @@ export function createKlattScheduleCompiler(
     // Functions are registered with CEL evaluator separately (lines 117-120)
     const context: EvaluationContext = {
       diagnostics,
+      provenance: options.provenance,
       params: flatContext as Record<string, ParamValue>,
       constants: semantics.constants ?? {},
     };

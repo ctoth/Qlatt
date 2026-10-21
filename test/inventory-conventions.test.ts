@@ -13,6 +13,7 @@ import { syllabify } from "../src/g2p/syllabify";
 import { createProvenanceCollector } from "../src/provenance";
 import { transcribeText } from "../src/transcribe-text";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import * as yamlLoader from "../src/yaml-loader";
 
 const base = loadInventorySpecFromPath("/rules/frontends/qlatt-english/inventory.yaml");
 
@@ -98,14 +99,26 @@ it("preserves prosody and silence edges for a fixture frontend with renamed acou
   const control = textToKlattTrackDetailed(phrase);
   const spec = rulepackModule.loadBundledRulepackSpec("qlatt-english");
   const resources = rulepackModule.loadFrontendResources(spec);
-  const alternate = renameVocabulary(spec) as typeof spec;
+  const renamed = renameVocabulary(spec) as typeof spec;
   const alternateInventory = renameVocabulary(resources.inventory) as typeof resources.inventory;
-  const resourceSpy = vi.spyOn(rulepackModule, "resolveFrontend").mockReturnValue({
-    spec: alternate,
-    resources: { ...resources, inventory: alternateInventory },
-    voices: {},
-  });
+  const inventoryPath = "/fixture/renamed-acoustic-inventory.yaml";
+  const loadSource = yamlLoader.loadYamlSourceSync;
+  const sourceSpy = vi
+    .spyOn(yamlLoader, "loadYamlSourceSync")
+    .mockImplementation((path) =>
+      path === inventoryPath ? JSON.stringify(alternateInventory) : loadSource(path),
+    );
+  let resourceSpy: ReturnType<typeof vi.spyOn> | undefined;
   try {
+    const alternate = rulepackModule.compileRuleEngineSpec({
+      ...renamed,
+      resources: { ...renamed.resources, inventory: inventoryPath },
+    });
+    resourceSpy = vi.spyOn(rulepackModule, "resolveFrontend").mockReturnValue({
+      spec: alternate,
+      resources: { ...resources, inventory: alternateInventory },
+      voices: {},
+    });
     const result = textToKlattTrackDetailed(phrase);
     expect(result.track.map(({ time, phoneme, params }) => ({ time, phoneme, params }))).toEqual(
       control.track.map(({ time, phoneme, params }) => ({
@@ -117,7 +130,8 @@ it("preserves prosody and silence edges for a fixture frontend with renamed acou
     expect(result.track.some((frame) => frame.phoneme === "pause")).toBe(true);
     expect(result.track.at(-1)?.phoneme).toBe("pause");
   } finally {
-    resourceSpy.mockRestore();
+    resourceSpy?.mockRestore();
+    sourceSpy.mockRestore();
   }
 });
 

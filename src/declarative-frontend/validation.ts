@@ -5,12 +5,15 @@ import {
   type YamlNodeSpans,
 } from "../yaml-loader";
 import { CEL_FUNCTION_CATALOG, validateExpressionSyntax } from "./cel-expressions";
+import { compileFeatureSchema } from "./hrg/feature-schema";
 import {
   FRAME_COUNTERS,
   FRAME_FUNCTIONS,
   FRAME_GROUP_COUNTERS,
   FRAME_UNIT_NAMES,
 } from "./hrg/frame-program";
+import { compileHrgSchema, HrgSchemaError } from "./hrg/schema";
+import type { FeatureSchema, HrgSchema } from "./hrg/types";
 import { parseRecognitionConfig } from "./recognition-config";
 import * as S from "./struct-schema";
 
@@ -32,6 +35,20 @@ export type ValidationDiagnostic = {
   documentSpanParents?: readonly DocumentSpanOrigin[];
 };
 type PlainObject = Record<string, unknown>;
+export type RelationFeatureSchemas = Readonly<
+  Record<string, Readonly<Record<string, FeatureSchema>>>
+>;
+const RELATION_FEATURE_SCHEMAS = new WeakMap<object, RelationFeatureSchemas>();
+const HRG_SCHEMAS = new WeakMap<object, HrgSchema>();
+
+export function validatedHrgSchema(spec: object): HrgSchema | undefined {
+  return HRG_SCHEMAS.get(spec);
+}
+
+/** Compiler side metadata; authored declarations retain their expression-facing shape. */
+export function validatedRelationFeatureSchemas(spec: object): RelationFeatureSchemas {
+  return RELATION_FEATURE_SCHEMAS.get(spec) ?? Object.freeze({});
+}
 type PhaseSpec = {
   name: string;
   after: string[];
@@ -347,6 +364,7 @@ function validateRelations(
   const relations = isPlainObject(spec.relations) ? spec.relations : {};
   const relationNames = Object.keys(relations);
   const relationByName = new Map();
+  const featureSchemas: Record<string, Readonly<Record<string, FeatureSchema>>> = {};
 
   for (const name of relationNames) {
     relationByName.set(name, relations[name]);
@@ -381,6 +399,28 @@ function validateRelations(
       );
     }
     const fields = relationDeclaredFields(relationByName, name);
+    const compiled: Record<string, FeatureSchema> = {};
+    for (const [field, declaration] of Object.entries(
+      isPlainObject(relation.features) ? relation.features : {},
+    )) {
+      if (!isPlainObject(declaration)) continue;
+      try {
+        const shape = compileFeatureSchema(declaration);
+        compiled[field] =
+          declaration.nullable === true
+            ? compileFeatureSchema({ kind: "union", variants: [shape, { kind: "null" }] })
+            : shape;
+      } catch (error) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_FEATURE_SCHEMA",
+            error instanceof Error ? error.message : String(error),
+            `${path}.features.${field}`,
+          ),
+        );
+      }
+    }
+    featureSchemas[name] = Object.freeze(compiled);
     const scalars = isPlainObject(relation.scalars) ? relation.scalars : {};
     for (const [field, scalar] of Object.entries(scalars)) {
       if (!isPlainObject(scalar) || scalar.floor_field === undefined) continue;
@@ -396,6 +436,7 @@ function validateRelations(
     }
   }
 
+  RELATION_FEATURE_SCHEMAS.set(spec, Object.freeze(featureSchemas));
   return relationByName;
 }
 
@@ -4410,6 +4451,14 @@ export function validateDslSpec(
   options: ValidateDslSpecOptions = {},
 ): ValidationDiagnostic[] {
   const diagnostics: ValidationDiagnostic[] = [];
+  if (Object.hasOwn(spec, "schema")) {
+    try {
+      HRG_SCHEMAS.set(spec, compileHrgSchema(spec.schema));
+    } catch (cause) {
+      if (!(cause instanceof HrgSchemaError)) throw cause;
+      diagnostics.push(makeDiagnostic("E_HRG_SCHEMA", cause.message, cause.path));
+    }
+  }
   const phases = Array.isArray(spec.phases) ? (spec.phases as PhaseSpec[]) : [];
   const rules = isPlainObject(spec.rules) ? spec.rules : {};
   const patterns = isPlainObject(spec.patterns) ? spec.patterns : {};

@@ -61,7 +61,10 @@ import {
   assertValidSpec,
   type DiagnosticDocumentSpans,
   type DocumentSpanOrigin,
+  type RelationFeatureSchemas,
   type ValidationDiagnostic,
+  validatedHrgSchema,
+  validatedRelationFeatureSchemas,
 } from "./validation";
 
 type PlainObject = Record<string, unknown>;
@@ -181,6 +184,7 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
           entry.value.path[0] === "predicates" ||
           entry.value.path[0] === "patterns" ||
           entry.value.path[0] === "relations" ||
+          entry.value.path[0] === "schema" ||
           entry.value.path[0] === "maps" ||
           entry.value.path[0] === "string_sets" ||
           entry.value.path[0] === "tags" ||
@@ -811,6 +815,17 @@ async function resolveIncludesAsync(
 
 export type CompiledRulepack = Readonly<NormalizedDslSpec>;
 
+export function rulepackRelationFeatureSchemas(spec: CompiledRulepack): RelationFeatureSchemas {
+  return validatedRelationFeatureSchemas(spec);
+}
+
+/** Checked static Item/relation declarations; runtime enrichment remains explicit. */
+export function rulepackHrgSchema(spec: CompiledRulepack) {
+  const schema = validatedHrgSchema(spec);
+  if (!schema) throw new Error("E_FRONTEND_CONFIG: schema is required for TTS construction");
+  return schema;
+}
+
 const BUNDLED_RULEPACK_CACHE = new Map<string, CompiledRulepack>();
 const RULEPACK_DIAGNOSTICS = new WeakMap<object, readonly ValidationDiagnostic[]>();
 const VALIDATED_RULEPACKS = new WeakSet<object>();
@@ -969,6 +984,7 @@ export function compileRuleEngineSpec(source: unknown): CompiledRulepack {
   const diagnostics = assertValidSpec(spec, {
     inventoryPhonemes: validationInventoryPhonemes(inventory),
     parameterSchemaDeclared,
+    documentSpans: yamlDocumentSpans(authored).filter((entry) => entry.value.path[0] === "schema"),
   });
   recordDiagnostics(spec, [...aliases, ...diagnostics]);
   freezeRecursively(spec);

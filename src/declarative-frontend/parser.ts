@@ -320,6 +320,7 @@ function expandForeachValue(
 
 export const DSL_ROOT_KEYS = new Set([
   "version",
+  "schema",
   "resources",
   "accent_policy_path",
   "normalization",
@@ -574,6 +575,7 @@ export function parseDslSpec(
 
   return {
     ...extraRootFields,
+    ...(Object.hasOwn(raw, "schema") ? { schema: cloneValue(raw.schema) } : {}),
     functions: cloneObject(raw.functions),
     version: raw.version ?? null,
     resources: cloneObject(raw.resources),

@@ -25,6 +25,8 @@ import {
   loadFrontendVoiceDocument,
   resolveBundledRulepackPath,
   resolveFrontend,
+  rulepackHrgSchema,
+  rulepackRelationFeatureSchemas,
 } from "./declarative-frontend/rule-pack";
 import {
   NORMALIZATION_SCHEMA,
@@ -93,143 +95,16 @@ export type TextToKlattTrackDetailedResult = {
 
 const ruleEvaluationOwners = new WeakMap<CompiledRulepack, GraphRuleEvaluationOwner>();
 
-const STRING_OR_NULL: FeatureSchema = {
-  kind: "union",
-  variants: [{ kind: "string" }, { kind: "null" }],
-};
-const NUMBER_OR_NULL: FeatureSchema = {
-  kind: "union",
-  variants: [{ kind: "number" }, { kind: "null" }],
-};
-const CONTROL_FIELD_SCHEMA: FeatureSchema = {
-  kind: "union",
-  variants: [
-    { kind: "number" },
-    {
-      kind: "object",
-      fields: {
-        op: { kind: "string", values: ["set", "add", "mul", "max", "min", "unset"] },
-        value: { kind: "number" },
-      },
-      optional: ["value"],
-    },
-  ],
-};
-const CONTROL_WINDOW_SCHEMA: FeatureSchema = {
-  kind: "object",
-  fields: {
-    target: { kind: "string", values: ["current", "next", "prev"] },
-    start_ms: { kind: "number" },
-    end_ms: { kind: "number" },
-    start_ratio: { kind: "number" },
-    end_ratio: { kind: "number" },
-    prefix_ms: { kind: "number" },
-    suffix_ms: { kind: "number" },
-    fields: { kind: "object", fields: {}, additional: CONTROL_FIELD_SCHEMA },
-    tag: { kind: "string" },
-  },
-  optional: [
-    "target",
-    "start_ms",
-    "end_ms",
-    "start_ratio",
-    "end_ratio",
-    "prefix_ms",
-    "suffix_ms",
-    "fields",
-    "tag",
-  ],
-};
-
-/**
- * A Segment feature the rulepack declares with a type:
- * `name: { kind: number | string | boolean, nullable?: true, values?: [...] }`.
- * A feature declared as a bare list is a name only and gets no schema here.
- */
-function declaredFeatureSchema(declaration: unknown): FeatureSchema | undefined {
-  if (!isPlainObject(declaration)) return undefined;
-  let schema: FeatureSchema;
-  if (declaration.kind === "number") schema = { kind: "number" };
-  else if (declaration.kind === "boolean") schema = { kind: "boolean" };
-  else if (declaration.kind === "string") {
-    const values = Array.isArray(declaration.values)
-      ? declaration.values.filter((value): value is string => typeof value === "string")
-      : undefined;
-    schema = values && values.length > 0 ? { kind: "string", values } : { kind: "string" };
-  } else {
-    throw new Error(
-      `E_FEATURE_KIND_UNKNOWN: Segment feature kind '${String(declaration.kind)}' is not number, string or boolean`,
-    );
-  }
-  return declaration.nullable === true
-    ? { kind: "union", variants: [schema, { kind: "null" }] }
-    : schema;
-}
-
 function buildUtteranceSchema(
   inventory: InventorySpec,
   spec: CompiledRulepack,
   channels: Parameters<typeof buildDirectionItemSchema>[0],
 ): HrgSchema {
+  const declared = rulepackHrgSchema(spec);
   const segmentFeatures: Record<string, FeatureSchema> = {
-    phoneme: { kind: "string" },
-    type: { kind: "string" },
-    word: { kind: "string" },
-    morpheme_boundary_after: { kind: "boolean" },
-    // The first phone of the word's own text, after phones joined to it.
-    word_text_start: { kind: "boolean" },
-    rules_blocked: { kind: "boolean" },
-    written_duration_ms: { kind: "number" },
-    written_silence: { kind: "boolean" },
-    // A phone of phonemic text, not of a word letter-to-sound read.
-    phonemic_text: { kind: "boolean" },
-    written_pitch: { kind: "number" },
-    sourceTokenId: { kind: "string" },
-    punctuationSymbol: STRING_OR_NULL,
-    // The mark was sent by a text rule, not read as a word's delimiter.
-    punctuation_sent: { kind: "boolean" },
-    // For a mark a text rule supplied: what is written where it stands.
-    punctuation_written: { kind: "string" },
-    stress: NUMBER_OR_NULL,
-    duration: { kind: "number" },
-    durationFloor: { kind: "number" },
-    vot_from_table: { kind: "boolean" },
-    inherentDuration: NUMBER_OR_NULL,
-    active: { kind: "boolean" },
-    inventorySW: { kind: "number" },
-    minimumDuration: { kind: "number" },
-    word_syllable_count: { kind: "number" },
-    cluster_position: { kind: "number" },
-    syllable_index: { kind: "number" },
-    syllable_role: STRING_OR_NULL,
-    syllable_position_in_word: { kind: "string" },
-    isFunctionWord: { kind: "boolean" },
-    isContentWord: { kind: "boolean" },
-    isAccented: { kind: "boolean" },
-    isAccentCarrier: { kind: "boolean" },
-    isNuclearAccent: { kind: "boolean" },
-    accentType: STRING_OR_NULL,
-    accentIndexInPhrase: { kind: "number" },
-    breakIndex: { kind: "number" },
-    initialBoundaryTone: STRING_OR_NULL,
-    phraseAccent: STRING_OR_NULL,
-    boundaryTone: STRING_OR_NULL,
-    control_windows: { kind: "array", items: CONTROL_WINDOW_SCHEMA },
-    transition_ms: { kind: "number" },
-    nucleus_duration_ms: { kind: "number" },
-    dummy_vowel: { kind: "boolean" },
-    weak: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
-    glottal: { kind: "union", variants: [{ kind: "boolean" }, { kind: "null" }] },
+    ...declared.itemTypes.segment.features,
+    ...rulepackRelationFeatureSchemas(spec).Segment,
   };
-  const segmentRelation = spec.relations.Segment;
-  const declared =
-    isPlainObject(segmentRelation) && isPlainObject(segmentRelation.features)
-      ? segmentRelation.features
-      : {};
-  for (const [key, declaration] of Object.entries(declared)) {
-    const schema = declaredFeatureSchema(declaration);
-    if (schema) segmentFeatures[key] = schema;
-  }
   for (const key of frameValueFeatures(spec.frame_programs)) {
     segmentFeatures[key] = FRAME_VALUES_SCHEMA;
   }
@@ -238,95 +113,35 @@ function buildUtteranceSchema(
   for (const [key, schema] of Object.entries(inventory.target_features)) {
     if (!targetFeatureExclusions.has(key)) segmentFeatures[key] = schema;
   }
-  const pointFeatures = {
-    value: { kind: "number" },
-    tag: { kind: "string" },
-    layer: { kind: "string" },
-    duration_frames: { kind: "number" },
-    profile_points: { kind: "array", items: { kind: "number" } },
-    active: { kind: "boolean" },
-  } as const;
   return {
     itemTypes: {
       ...NORMALIZATION_SCHEMA.itemTypes,
-      token: {
-        features: {
-          word: { kind: "string" },
-          tokenType: { kind: "string", values: ["word", "punctuation"] },
-          punctuationSymbol: STRING_OR_NULL,
-          pronunciationKey: STRING_OR_NULL,
-          active: { kind: "boolean" },
-          sourceNormalizationId: { kind: "string" },
-        },
-      },
-      word: {
-        features: {
-          text: { kind: "string" },
-          tokenIndex: { kind: "number" },
-          form_classes: { kind: "array", items: { kind: "string" } },
-          // The classes before the lexicon hands them to the phonetic rules.
-          text_form_classes: { kind: "array", items: { kind: "string" } },
-          // The marks the frontend names that the written word has at its
-          // start or its end (transcription.written_word_marks).
-          written_marks: { kind: "array", items: { kind: "string" } },
-          // The written word's place among the words between two punctuation
-          // marks, from 1, and how many there are.
-          clause_word_index: { kind: "number" },
-          clause_word_count: { kind: "number" },
-          // The word's place among the stretch's words as they are spoken one
-          // by one; 0 for a word the routine before it read ahead.
-          clause_spoken_index: { kind: "number" },
-          // The stretch of words ends at the text's end, where no mark is
-          // written (a text rule supplied the one that closes it).
-          clause_end_supplied: { kind: "boolean" },
-          // The word's part in a conjunction of several words.
-          conjunction_sequence: { kind: "string", values: ["first", "rest"] },
-          // A later word of the words one written word is spoken as.
-          continues_written_word: { kind: "boolean" },
-          // Set by a frontend's rules: the word can carry a clause break, its
-          // place in the stretch has one, and a break stands before it.
-          break_marker: { kind: "boolean" },
-          break_slot: { kind: "boolean" },
-          clause_break_before: { kind: "boolean" },
-          phrase_start: { kind: "string", values: ["vp", "pp"] },
-          // The word before is phonemic text: no word boundary stands before
-          // this word's phrase start.
-          phrase_start_unbounded: { kind: "boolean" },
-          // What a frontend's rules make of a prepositional-phrase start in
-          // its context (kept, dropped, or kept with no word boundary before it).
-          phrase_start_state: { kind: "string", values: ["pp", "word", "alone"] },
-        },
-      },
-      syllable: {
-        features: {
-          index: { kind: "number" },
-          stress: NUMBER_OR_NULL,
-          positionInWord: { kind: "string" },
-        },
-      },
+      token: declared.itemTypes.token,
+      word: declared.itemTypes.word,
+      syllable: declared.itemTypes.syllable,
       segment: { features: segmentFeatures },
       tone: TONE_ITEM_SCHEMA,
-      f0Point: { features: pointFeatures },
-      phraseCommand: { features: pointFeatures },
-      tilt: { features: pointFeatures },
+      f0Point: declared.itemTypes.f0Point,
+      phraseCommand: declared.itemTypes.phraseCommand,
+      tilt: declared.itemTypes.tilt,
       direction: buildDirectionItemSchema(channels),
-      transition: { features: { active: { kind: "boolean" } } },
+      transition: declared.itemTypes.transition,
     },
     relations: {
       ...NORMALIZATION_SCHEMA.relations,
-      Token: { kind: "list", itemTypes: ["token"] },
-      Word: { kind: "list", itemTypes: ["word"] },
-      Syllable: { kind: "list", itemTypes: ["syllable"] },
+      Token: declared.relations.Token,
+      Word: declared.relations.Word,
+      Syllable: declared.relations.Syllable,
       Tone: { kind: "list", itemTypes: ["tone"] },
-      Segment: { kind: "list", itemTypes: ["segment"] },
-      SylStructure: { kind: "tree", itemTypes: ["word", "syllable", "segment"] },
-      Transition: { kind: "list", itemTypes: ["transition"] },
+      Segment: declared.relations.Segment,
+      SylStructure: declared.relations.SylStructure,
+      Transition: declared.relations.Transition,
       Intonation: { kind: "list", itemTypes: ["direction"] },
-      Tilt: { kind: "list", itemTypes: ["tilt"] },
-      PhraseCommand: { kind: "list", itemTypes: ["phraseCommand"] },
+      Tilt: declared.relations.Tilt,
+      PhraseCommand: declared.relations.PhraseCommand,
       Affect: { kind: "list", itemTypes: ["direction"] },
       Break: { kind: "list", itemTypes: ["direction"] },
-      F0Point: { kind: "list", itemTypes: ["f0Point"] },
+      F0Point: declared.relations.F0Point,
     },
   };
 }

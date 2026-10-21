@@ -11,7 +11,10 @@ import {
 import type { DictLookup } from "../src/g2p/types";
 
 // These behavior fixtures explicitly select one frontend; shared code has no defaults.
-export const resources = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+const selected = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+if (!selected.stress || !selected.morphology)
+  throw new Error("Qlatt fixtures require shared G2P contexts");
+export const resources = { ...selected, stress: selected.stress, morphology: selected.morphology };
 export const phonotactics = resources.stress.phonotactics;
 export const pronounce = (word: string, lookup: DictLookup) =>
   pronounceWithResources(word, lookup, resources);

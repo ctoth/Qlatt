@@ -60,10 +60,12 @@ it("records and diagnoses a pronunciation symbol rejected by the selected gramma
 });
 
 it("keeps multi-character onset symbols distinct", () => {
+  const { stress } = inventoryModule.loadFrontendResources(
+    rulepackModule.loadBundledRulepackSpec("qlatt-english"),
+  );
+  if (!stress) throw new Error("Qlatt fixture requires stress context");
   const phonotactics = {
-    ...inventoryModule.loadFrontendResources(
-      rulepackModule.loadBundledRulepackSpec("qlatt-english"),
-    ).stress.phonotactics,
+    ...stress.phonotactics,
     vowels: ["A"],
     legal_onsets: ["TH R"],
   };

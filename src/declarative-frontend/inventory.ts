@@ -11,6 +11,7 @@ import type { LtsContext } from "../g2p/lts-document";
 import type { MorphologyContext, MorphologyData } from "../g2p/morphology";
 import { parseStressPolicy, type StressContext } from "../g2p/stress-policy";
 import type { PhonotacticsData } from "../g2p/syllabify";
+import { isLtsTableDocument } from "../g2p/table-lts-pronounce";
 import {
   type AffectLibrary,
   parseAffectPresets,
@@ -81,8 +82,8 @@ export type FrontendResources = {
    */
   inventoryDocuments: readonly string[];
   lts: LtsContext;
-  morphology: MorphologyContext;
-  stress: StressContext;
+  morphology?: MorphologyContext;
+  stress?: StressContext;
   /** Selected pronunciation dictionary; an absent role uses letter-to-sound. */
   lexicon?: { path: string; dictionary: CmuDictionary };
   speakerProfile?: { path: string; spec: SpeakerProfileSpec };
@@ -888,25 +889,39 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     }
     return document;
   });
-  const morphologyPath = requireAsset(spec.morphology_path, "morphology_path");
-  const morphology = FRONTEND_ASSET_CACHE.get(morphologyPath);
-  const morphologyPhonotacticsPath = requireAsset(
-    isPlainObject(morphology) ? morphology.phonotactics_path : undefined,
-    "morphology.phonotactics_path",
-  );
-  const stressPolicyPath = requireAsset(spec.stress_policy_path, "stress_policy_path", (path) => {
-    const raw = loadYamlDocumentSync(path);
+  const tablePronouncer =
+    ltsPath.endsWith(".json") && isLtsTableDocument(FRONTEND_ASSET_CACHE.get(ltsPath));
+  let morphology: MorphologyContext | undefined;
+  if (!tablePronouncer || spec.morphology_path != null) {
+    const path = requireAsset(spec.morphology_path, "morphology_path");
+    const data = FRONTEND_ASSET_CACHE.get(path);
     const phonotacticsPath = requireAsset(
-      isPlainObject(raw) ? raw.phonotactics_path : undefined,
-      "stress_policy.phonotactics_path",
+      isPlainObject(data) ? data.phonotactics_path : undefined,
+      "morphology.phonotactics_path",
     );
-    const phonotactics = FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData;
-    try {
-      return { path, policy: parseStressPolicy(raw, phonotactics), phonotactics };
-    } catch (cause) {
-      throw new Error(`E_STRESS_POLICY: ${path}: ${String(cause)}`, { cause });
-    }
-  });
+    morphology = {
+      path,
+      data: data as MorphologyData,
+      phonotactics: FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData,
+    };
+  }
+  let stress: StressContext | undefined;
+  if (!tablePronouncer || spec.stress_policy_path != null) {
+    const path = requireAsset(spec.stress_policy_path, "stress_policy_path", (path) => {
+      const raw = loadYamlDocumentSync(path);
+      const phonotacticsPath = requireAsset(
+        isPlainObject(raw) ? raw.phonotactics_path : undefined,
+        "stress_policy.phonotactics_path",
+      );
+      const phonotactics = FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData;
+      try {
+        return { path, policy: parseStressPolicy(raw, phonotactics), phonotactics };
+      } catch (cause) {
+        throw new Error(`E_STRESS_POLICY: ${path}: ${String(cause)}`, { cause });
+      }
+    });
+    stress = FRONTEND_ASSET_CACHE.get(path) as StressContext;
+  }
   const normalization = isPlainObject(spec.normalization) ? spec.normalization : {};
   if (!Array.isArray(normalization.phases) || !normalization.phases.length)
     throw new Error("E_FRONTEND_CONFIG: normalization.phases is required");
@@ -993,12 +1008,8 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     inventoryDocuments:
       phonologyPath === undefined ? [inventoryPath] : [inventoryPath, phonologyPath],
     lts: { path: ltsPath, document: FRONTEND_ASSET_CACHE.get(ltsPath) },
-    morphology: {
-      path: morphologyPath,
-      data: morphology as MorphologyData,
-      phonotactics: FRONTEND_ASSET_CACHE.get(morphologyPhonotacticsPath) as PhonotacticsData,
-    },
-    stress: FRONTEND_ASSET_CACHE.get(stressPolicyPath) as StressContext,
+    ...(morphology === undefined ? {} : { morphology }),
+    ...(stress === undefined ? {} : { stress }),
     ...(speakerDefinitionPath === undefined
       ? {}
       : {

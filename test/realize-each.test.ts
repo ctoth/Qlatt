@@ -1,8 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { expandFormantBanks } from "../src/formant-bank";
-import { parseSemanticsDocument } from "../src/semantics/load-semantics";
+import {
+  loadSemanticsDocument,
+  loadSemanticsDocumentOrNull,
+  loadSemanticsDocumentSync,
+  parseSemanticsDocument,
+} from "../src/semantics/load-semantics";
 import { expandRealizeEach, RealizeEachError } from "../src/semantics/realize-each";
 import type { AuthoredSemanticsDocument } from "../src/semantics/types";
+import * as yamlLoader from "../src/yaml-loader";
 
 function document(overrides: Partial<AuthoredSemanticsDocument> = {}): AuthoredSemanticsDocument {
   return {
@@ -286,6 +292,26 @@ describe("expandRealizeEach errors", () => {
 });
 
 describe("parseSemanticsDocument", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it.each([null, [], [" "], [3], "source"])(
+    "rejects invalid expanded citations through every load path: %j",
+    async (citations) => {
+      const authored = {
+        name: "fixture",
+        realize_each: [{ index: "n", over: [2], rules: { "gain{n}": { expr: "1", citations } } }],
+      };
+      vi.spyOn(yamlLoader, "loadYamlDocument").mockResolvedValue(authored);
+      vi.spyOn(yamlLoader, "loadYamlDocumentOrNull").mockResolvedValue(authored);
+      vi.spyOn(yamlLoader, "loadYamlDocumentSync").mockReturnValue(authored);
+      const error = /E_SEMANTICS_CITATIONS fixture.yaml: realize.gain2.citations/;
+      await expect(loadSemanticsDocument("fixture.yaml")).rejects.toThrow(error);
+      await expect(loadSemanticsDocumentOrNull("fixture.yaml")).rejects.toThrow(error);
+      expect(() => loadSemanticsDocumentSync("fixture.yaml")).toThrow(error);
+      expect(() => parseSemanticsDocument(JSON.stringify(authored), "fixture.yaml")).toThrow(error);
+    },
+  );
+
   it("expands realize_each written in YAML and names the source in errors", () => {
     const yaml = [
       "name: fixture",
@@ -299,14 +325,25 @@ describe("parseSemanticsDocument", () => {
       '        expr: "base * A{n}"',
       '        deps: [base, "A{n}"]',
       "        step: true",
+      '        citations: ["engineering estimate: fixture {n}"]',
     ].join("\n");
 
     expect(parseSemanticsDocument(yaml, "fixture.yaml")).toEqual({
       name: "fixture",
       realize: {
         base: "1.0",
-        gain2: { expr: "base * A2", deps: ["base", "A2"], step: true },
-        gain3: { expr: "base * A3", deps: ["base", "A3"], step: true },
+        gain2: {
+          expr: "base * A2",
+          deps: ["base", "A2"],
+          step: true,
+          citations: ["engineering estimate: fixture 2"],
+        },
+        gain3: {
+          expr: "base * A3",
+          deps: ["base", "A3"],
+          step: true,
+          citations: ["engineering estimate: fixture 3"],
+        },
       },
     });
     expect(() => parseSemanticsDocument(`${yaml}\n  - index: n\n`, "fixture.yaml")).toThrow(
@@ -373,7 +410,13 @@ describe("loadExperimentConfig with realize_each", () => {
       {
         index: "n",
         over: [2, 3, 4],
-        rules: { "gain{n}": { expr: "base * A{n}", deps: ["base", "A{n}"] } },
+        rules: {
+          "gain{n}": {
+            expr: "base * A{n}",
+            deps: ["base", "A{n}"],
+            citations: ["engineering estimate: parent fixture"],
+          },
+        },
       },
     ],
   };
@@ -390,7 +433,11 @@ describe("loadExperimentConfig with realize_each", () => {
     expect(Object.hasOwn(semantics, "realize_each")).toBe(false);
     expect(semantics.realize).toEqual({
       base: "1.0",
-      gain2: { expr: "base * A2", deps: ["base", "A2"] },
+      gain2: {
+        expr: "base * A2",
+        deps: ["base", "A2"],
+        citations: ["engineering estimate: parent fixture"],
+      },
       gain3: { expr: "0.5 * A3", deps: ["A3"] },
       gain4: "2.0 * A4",
       gain5: "2.0 * A5",

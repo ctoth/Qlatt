@@ -181,6 +181,20 @@ export function createNodeRuntimeBackend({
           };
           if (request.includeTrack) {
             payload.track = track;
+            payload.wordOccurrences = [];
+            const seenWords = new Set<string>();
+            const words = frontend.utterance.getRelation("Word");
+            for (const frame of track) {
+              const segment = frame.segmentId
+                ? frontend.utterance.getItem(frame.segmentId)
+                : undefined;
+              const word = segment?.node("SylStructure")?.parent?.parent?.item;
+              if (!word || !words?.node(word) || seenWords.has(word.id)) continue;
+              const text = word.get("text");
+              if (typeof text !== "string" || !/[\p{L}\p{N}]/u.test(text)) continue;
+              seenWords.add(word.id);
+              payload.wordOccurrences.push({ wordId: word.id, word: text, time: frame.time });
+            }
           }
           mark("payload");
           onTimings?.(request, timings);

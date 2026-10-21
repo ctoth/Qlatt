@@ -29,8 +29,8 @@
  *   {"id": 1, "event": "done"}
  * or {"id": 1, "event": "error", "message": "..."}.
  *
- * Word markers are the first frame of each word in the frontend track
- * (KlattFrame.word), offset by the render lead time, so a host can raise
+ * Word markers are the first frame of each canonical Word occurrence,
+ * offset by the render lead time, so a host can raise
  * word-boundary events as playback passes each sample position.
  *
  * Run:
@@ -45,9 +45,8 @@ import {
   listBundledFrontendIds,
 } from "../src/declarative-frontend/rule-pack.ts";
 import { createNodeRuntimeBackend } from "../src/rendering/backends/node-runtime.ts";
-import type { RenderRequest } from "../src/rendering/types.ts";
+import type { RenderRequest, WordOccurrence } from "../src/rendering/types.ts";
 import { toInt16 } from "../src/rendering/write-wav.ts";
-import type { KlattFrame } from "../src/tts-frontend-types.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -74,26 +73,15 @@ const DEFAULT_EXPERIMENT_BY_FRONTEND: Readonly<Record<string, string>> = {
 
 /** Sample offset of the first frame of every spoken word, in render-output samples. */
 export function wordMarkers(
-  track: readonly KlattFrame[],
+  occurrences: readonly WordOccurrence[],
   leadTime: number,
   sampleRate: number,
 ): WordMarker[] {
-  const markers: WordMarker[] = [];
-  let previous: string | undefined;
-  for (const frame of track) {
-    const word = frame.word;
-    // Punctuation reaches the track as its own word token; hosts want
-    // boundaries of spoken words only.
-    if (typeof word === "string" && /[\p{L}\p{N}]/u.test(word) && word !== previous) {
-      markers.push({
-        kind: "word",
-        word,
-        sample: Math.round((leadTime + frame.time) * sampleRate),
-      });
-    }
-    previous = word;
-  }
-  return markers;
+  return occurrences.map(({ word, time }) => ({
+    kind: "word",
+    word,
+    sample: Math.round((leadTime + time) * sampleRate),
+  }));
 }
 
 function write(message: Record<string, unknown>): void {
@@ -134,7 +122,6 @@ async function speak(
   const { sampleRate, leadTime } = renderRequest;
   const payload = await backend.render(renderRequest);
   const pcm = toInt16(payload.samples);
-  const track = Array.isArray(payload.track) ? (payload.track as KlattFrame[]) : [];
   write({
     id: request.id,
     event: "audio",
@@ -142,7 +129,7 @@ async function speak(
     format: "s16le",
     channels: 1,
     samples: pcm.length,
-    markers: wordMarkers(track, leadTime, sampleRate),
+    markers: wordMarkers(payload.wordOccurrences ?? [], leadTime, sampleRate),
     pcm: Buffer.from(pcm.buffer, pcm.byteOffset, pcm.byteLength).toString("base64"),
   });
   write({ id: request.id, event: "done" });

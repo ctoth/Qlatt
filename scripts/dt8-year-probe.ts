@@ -9,12 +9,15 @@
  *           l_us_pr1.c:367-398 (ls_proc_do_4_digits).
  */
 
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { normalizeGraphText as normalizeText } from "../src/declarative-frontend/source-recognition";
 
 // dectalk-english declares its own normalization tables + pipeline (DATA).
 const DECTALK_CONFIG = loadBundledRulepackSpec("dectalk-english");
 const QLATT_CONFIG = loadBundledRulepackSpec("qlatt-english");
+const dectalkResources = loadFrontendResources(DECTALK_CONFIG);
+const qlattResources = loadFrontendResources(QLATT_CONFIG);
 
 const inputs = [
   "in 1984",
@@ -47,7 +50,7 @@ let failures = 0;
 
 console.log("=== dectalk-english (year policy ON) ===");
 for (const input of inputs) {
-  const out = normalizeText(input, DECTALK_CONFIG);
+  const out = normalizeText(input, DECTALK_CONFIG, { lts: dectalkResources.lts });
   const expected = dectalkExpect[input];
   const status = expected === undefined ? "    " : out === expected ? "PASS" : "FAIL";
   if (status === "FAIL") failures++;
@@ -71,7 +74,7 @@ const qlattExpect: Record<string, string> = {
   "code 0100": "code one hundred",
 };
 for (const input of inputs) {
-  const out = normalizeText(input, QLATT_CONFIG);
+  const out = normalizeText(input, QLATT_CONFIG, { lts: qlattResources.lts });
   const expected = qlattExpect[input];
   const status = expected === undefined ? "    " : out === expected ? "PASS" : "FAIL";
   if (status === "FAIL") failures++;

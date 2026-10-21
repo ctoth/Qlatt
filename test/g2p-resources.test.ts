@@ -2,14 +2,21 @@ import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "n
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, expect, it } from "vitest";
+import { Utterance } from "../src/declarative-frontend/hrg";
 import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import {
   compileRuleEngineSpec,
   loadBundledRulepackSpec,
 } from "../src/declarative-frontend/rule-pack";
-import { normalizeGraphText } from "../src/declarative-frontend/source-recognition";
-import { ltsDocumentAt } from "../src/g2p/lts-document";
+import {
+  NORMALIZATION_SCHEMA,
+  normalizeGraphText,
+  normalizeSourceItems,
+  recognizeText,
+} from "../src/declarative-frontend/source-recognition";
 import type { LtsRulesData } from "../src/g2p/lts-engine";
+import { numberPhonemicText } from "../src/g2p/number-phonemic-text";
+import { isLtsTableDocument } from "../src/g2p/table-lts-pronounce";
 import { transcribeText } from "../src/transcribe-text";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
@@ -22,14 +29,18 @@ it("decodes and reuses the selected generated JSON LTS document", () => {
   const resources = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
   const { path, document } = resources.lts;
   expect(document).toEqual(JSON.parse(readFileSync(`public${path}`, "utf8")));
-  expect(ltsDocumentAt(path)).toBe(document);
+  expect(loadFrontendResources(loadBundledRulepackSpec("dectalk-english")).lts.document).toBe(
+    document,
+  );
 });
 
 it("retains YAML rule-list decoding and cache identity", () => {
   const resources = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
   const { path, document } = resources.lts;
   expect(document).toEqual(loadYamlDocumentSync(path));
-  expect(ltsDocumentAt(path)).toBe(document);
+  expect(loadFrontendResources(loadBundledRulepackSpec("qlatt-english")).lts.document).toBe(
+    document,
+  );
 });
 
 it("honors an explicit pronunciation document at the same source path", () => {
@@ -64,8 +75,55 @@ it.each(["{", "null"])("reports invalid JSON LTS document %s through its owner",
     loadFrontendResources({ ...loadBundledRulepackSpec("qlatt-english"), lts_path: path }),
   ).toThrow(/E_FRONTEND_CONFIG.*lts_path/);
   if (source === "null") {
-    expect(() => ltsDocumentAt(path)).toThrow(/E_YAML_SCHEMA/);
+    expect(() =>
+      loadFrontendResources({ ...loadBundledRulepackSpec("qlatt-english"), lts_path: path }),
+    ).toThrow(
+      expect.objectContaining({
+        cause: expect.objectContaining({ message: expect.stringMatching(/E_YAML_SCHEMA/) }),
+      }),
+    );
   }
+});
+
+it("requires LTS data only when normalization consumes number phone lists", () => {
+  const spec = loadBundledRulepackSpec("dectalk-english");
+  const { lts } = loadFrontendResources(spec);
+  expect(normalizeGraphText("hello", spec)).toBe("hello");
+  expect(() => normalizeGraphText("$3.50", spec)).toThrow(/E_NUMBER_PHONEMES/);
+  expect(normalizeGraphText("$3.50", spec, { lts })).toContain(
+    numberPhonemicText("3", "cardinal", lts),
+  );
+  const graph = new Utterance(NORMALIZATION_SCHEMA);
+  recognizeText("$3.50", graph, spec);
+  const path = "/selected-number-context.json";
+  normalizeSourceItems(graph, spec, { lts: { ...lts, path } });
+  const decisions = graph.provenance
+    .getDecisions()
+    .filter((decision) => decision.type === "normalization_number_composed");
+  expect(decisions.length).toBeGreaterThan(0);
+  expect(decisions.every((decision) => decision.reason.includes(path))).toBe(true);
+});
+
+it("keeps number character maps with their selected arrays at the same source path", () => {
+  const spec = loadBundledRulepackSpec("dectalk-english");
+  const { lts } = loadFrontendResources(spec);
+  const document = lts.document;
+  if (!isLtsTableDocument(document) || !document.phonemeCharacters) {
+    throw new Error("Selected DECtalk fixture requires phoneme characters");
+  }
+  const phonemeCharacters = [...document.phonemeCharacters];
+  for (let code = 32; code < 127; code += 1) {
+    phonemeCharacters[code] = document.phonemeCharacters[158 - code];
+  }
+  const override = { path: lts.path, document: { ...document, phonemeCharacters } };
+  const normal = numberPhonemicText("3", "cardinal", lts);
+  const changed = numberPhonemicText("3", "cardinal", override);
+  expect(normal).not.toBeNull();
+  expect(changed).not.toBe(normal);
+  expect(numberPhonemicText("3", "cardinal", lts)).toBe(normal);
+  expect(normalizeGraphText("$3.50", spec, { lts: override })).not.toBe(
+    normalizeGraphText("$3.50", spec, { lts }),
+  );
 });
 
 it.each(["lts_path", "morphology_path", "stress_policy_path", "normalization.phases"])(

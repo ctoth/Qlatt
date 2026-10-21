@@ -12,7 +12,7 @@
  * number-phonemes.yaml. A word boundary inside the number is a space.
  */
 
-import { ltsDocumentAt } from "./lts-document";
+import type { LtsContext } from "./lts-document";
 import { isLtsTableDocument } from "./table-lts-pronounce";
 import { fourDigits, speakNumber, speakYear } from "./table-number";
 
@@ -20,11 +20,11 @@ import { fourDigits, speakNumber, speakYear } from "./table-number";
 export const NUMBER_PHONEMIC_FORMS = ["cardinal", "ordinal", "year", "four_digits"] as const;
 export type NumberPhonemicForm = (typeof NUMBER_PHONEMIC_FORMS)[number];
 
-const characterMaps = new Map<string, ReadonlyMap<number, string>>();
+const characterMaps = new Map<readonly (number | null)[], ReadonlyMap<number, string>>();
 
 /** The first printable character that stands for each symbol. */
-function charactersOf(path: string, characters: readonly (number | null)[]) {
-  const cached = characterMaps.get(path);
+function charactersOf(characters: readonly (number | null)[]) {
+  const cached = characterMaps.get(characters);
   if (cached) return cached;
   const map = new Map<number, string>();
   for (let code = 32; code < 127; code += 1) {
@@ -33,14 +33,14 @@ function charactersOf(path: string, characters: readonly (number | null)[]) {
       map.set(symbol, String.fromCharCode(code));
     }
   }
-  characterMaps.set(path, map);
+  characterMaps.set(characters, map);
   return map;
 }
 
 /**
  * `digits` (decimal digits, or groups of three with commas for `cardinal` and
  * `ordinal`) read in `form` from the number phone lists of the table at
- * `ltsPath`:
+ * the selected LTS context:
  *
  *   cardinal     "23" twenty three, "100" one hundred
  *   ordinal      "23" twenty third (ls_proc_do_number with its ordinal flag)
@@ -53,11 +53,11 @@ function charactersOf(path: string, characters: readonly (number | null)[]) {
 export function numberPhonemicText(
   digits: string,
   form: NumberPhonemicForm,
-  ltsPath: string,
+  lts: LtsContext,
 ): string | null {
-  const table = ltsDocumentAt(ltsPath);
+  const table = lts.document;
   if (!isLtsTableDocument(table) || !table.numberPhones || !table.phonemeCharacters) {
-    throw new Error(`E_NUMBER_PHONEMES: '${ltsPath}' has no number phone lists`);
+    throw new Error(`E_NUMBER_PHONEMES: '${lts.path}' has no number phone lists`);
   }
   const lists = table.numberPhones;
   const fourDigitText = /^[0-9]{4}$/.test(digits);
@@ -72,7 +72,7 @@ export function numberPhonemicText(
             ? speakYear(digits, lists)
             : fourDigits(digits, lists);
   if (!symbols) return null;
-  const characters = charactersOf(ltsPath, table.phonemeCharacters);
+  const characters = charactersOf(table.phonemeCharacters);
   return symbols
     .map((symbol) => {
       const char = characters.get(symbol);

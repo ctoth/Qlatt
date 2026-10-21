@@ -1,3 +1,4 @@
+import type { LtsContext } from "../g2p/lts-document";
 import type { RecognitionEvidence } from "../provenance";
 import { evaluateExpression } from "./cel-expressions";
 import { type HrgSchema, type Item, Utterance } from "./hrg";
@@ -277,13 +278,14 @@ export function recognizeText(
 export function normalizeSourceItems(
   utterance: Utterance,
   spec: CompiledRulepack,
-  options: { captureTooling?: boolean } = {},
+  options: { captureTooling?: boolean; lts?: LtsContext } = {},
 ): SourceTranscriptionInput[] {
   if (!parseRecognitionConfig(spec))
     throw new Error("E_RECOGNITION_CONFIG: text_recognition is required");
   if (Array.isArray(spec.normalization.phases)) {
     runGraphRuleEngine(utterance, spec, {
       phases: spec.normalization.phases as string[],
+      lts: options.lts,
       ...(options.captureTooling === undefined ? {} : { captureTooling: options.captureTooling }),
     });
     return utterance
@@ -308,10 +310,14 @@ export function normalizeSourceItems(
 }
 
 /** Public text-only projection of the same graph path used by transcription. */
-export function normalizeGraphText(text: string, spec: CompiledRulepack): string {
+export function normalizeGraphText(
+  text: string,
+  spec: CompiledRulepack,
+  options: { lts?: LtsContext } = {},
+): string {
   const utterance = new Utterance(NORMALIZATION_SCHEMA);
   recognizeText(text, utterance, spec);
-  return normalizeSourceItems(utterance, spec)
+  return normalizeSourceItems(utterance, spec, options)
     .map((entry) => entry.word)
     .join(" ");
 }

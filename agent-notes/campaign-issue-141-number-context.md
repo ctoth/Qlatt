@@ -6,7 +6,8 @@ Pass selected LTS data into number normalization and remove its implicit acquisi
 
 Fresh isolated branch from origin/master after #392. Implementation complete:
 56 production additions / 51 removals; 63 existing fixture additions / 5 removals.
-Source, actual callers and final owned diff inspected. Publishing for hosted CI.
+PR #396 published; initial-head hosted CI passed. Source, actual callers and
+owned diff inspected. Claude completed its two-pass review.
 
 # Decisions and why
 
@@ -25,8 +26,12 @@ owner's error cause. Tests retain JSON/YAML value and identity coverage, and add
 consumer-only missing data, same-path character-array overrides, and selected-path
 provenance. Existing public normalization fixtures cover money and dates.
 Other agents' files and branches remain untouched. No local CI ran.
+Accepted Claude's diagnostic wording finding: I retained the old missing-path
+message after changing the condition to missing context. The selected DECtalk
+frontend does declare a path. Corrected the message to name the unsupplied context
+and tightened the existing assertion; routing and E_NUMBER_PHONEMES are unchanged.
 
 # Next step
 
-Await hosted CI and Claude; respond to actual findings.
+Await final-head hosted CI and supervisor verification of the review response.
 Supervisor owns review and merge; #141 remains open.

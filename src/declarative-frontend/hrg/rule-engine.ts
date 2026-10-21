@@ -753,7 +753,7 @@ function buildEvaluationScope(
       if (!(NUMBER_PHONEMIC_FORMS as readonly string[]).includes(form))
         return invalid(`unknown form '${form}'`);
       if (!isPlainObject(params.lts) || typeof params.lts.path !== "string")
-        return invalid("the frontend has no letter-to-sound table (lts_path)");
+        return invalid("selected LTS context was not supplied");
       const lts = { path: params.lts.path, document: params.lts.document };
       const text = numberPhonemicText(digits, form as NumberPhonemicForm, lts);
       if (text === null) return invalid(`'${digits}' is not read as ${form}`);

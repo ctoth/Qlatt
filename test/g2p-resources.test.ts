@@ -89,7 +89,9 @@ it("requires LTS data only when normalization consumes number phone lists", () =
   const spec = loadBundledRulepackSpec("dectalk-english");
   const { lts } = loadFrontendResources(spec);
   expect(normalizeGraphText("hello", spec)).toBe("hello");
-  expect(() => normalizeGraphText("$3.50", spec)).toThrow(/E_NUMBER_PHONEMES/);
+  expect(() => normalizeGraphText("$3.50", spec)).toThrow(
+    /E_NUMBER_PHONEMES: selected LTS context was not supplied/,
+  );
   expect(normalizeGraphText("$3.50", spec, { lts })).toContain(
     numberPhonemicText("3", "cardinal", lts),
   );

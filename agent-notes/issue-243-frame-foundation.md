@@ -38,6 +38,11 @@ comments. No new guards or speculative NaN machinery were added. Historical
 binary artifacts remain unchanged and revised measurement acceptance is pending.
 
 ## Decisions and why
+- Approved timeout investigation correction: replace the existing edge-history
+  map with source-keyed buckets of the same edge histories (25–40 production
+  lines plus8–15 existing fixture lines), preserving order, digest and rollback.
+  Reuse outputTimingByItem for duration (3–6lines). No second index/cache or
+  timeout increase; measured attribution remains unknown.
 - Smallest approved revision: 240–340 production lines including deletions,
   15–25 YAML, 100–150 existing fixture lines and 20–35 documentation lines.
 - Complete event/clock/metadata/Frames effects before numeric evaluation; retain
@@ -70,6 +75,11 @@ an absent constraint undefined. Accept both nullish representations on the same
 explicit inert keys. Shard4's12-text signed-number corpus test exceeded its
 existing30000ms limit; reported the actual timeout without changing the limit.
 The source of that timing result is not established; performance remains open.
+Implemented source-keyed association history without duplicate storage; latest
+queries visit only that source's edges. Existing replay fixture now interleaves
+sources and names, checks inactive/order-preserving results and exact digest;
+rollback fixture checks empty latest history after undo. Existing output timing
+entries carry the original duration for ratio calculation. No local tests run.
 The revised candidate and accepted Claude response are published. Initial shard1
 also exposed manifests missing the new shared include and a newer control-window
 fixture expecting the old direct source ID. Added the actual acquired paths and

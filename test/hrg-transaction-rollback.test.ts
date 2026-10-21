@@ -195,6 +195,7 @@ describe("HRG transaction commit rollback", () => {
       expect(utterance.sylStructure.writes()).toHaveLength(before.treeWrites);
       expect(utterance.associatedItems(s1, "link")).toEqual([]);
       expect(utterance.associationWrites(s1, "link", s2)).toEqual([]);
+      expect(utterance.latestAssociationWrites(s1, "link")).toEqual([]);
       expect(utterance.axis.getMarkTime(utterance.axis.start.id)).toBe(0);
       expect(utterance.axis.marks.size).toBe(before.markCount);
       expect(utterance.temporalAnchor(s1)).toBeUndefined();

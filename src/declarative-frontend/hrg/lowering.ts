@@ -1989,7 +1989,7 @@ export function lowerToFrames(
   };
   const globalAffect = resolveAffect();
   const affectByItem = new Map(timings.map((timing) => [timing.item, resolveAffect(timing.item)]));
-  const outputTimingByItem = new Map<Item, { startMs: number; scale: number }>();
+  const outputTimingByItem = new Map<Item, { startMs: number; scale: number; durationMs: number }>();
   const outputTimingParentsByItem = new Map<Item, string[]>();
   const globalClockParents = [
     ...(globalAffect?.parents.durationScale ?? []),
@@ -2049,7 +2049,11 @@ export function lowerToFrames(
       );
     }
     const outputScale = segmentScale * outputClockRatio;
-    outputTimingByItem.set(timing.item, { startMs: outputCursorMs, scale: outputScale });
+    outputTimingByItem.set(timing.item, {
+      startMs: outputCursorMs,
+      scale: outputScale,
+      durationMs: timing.durationMs,
+    });
     const scaleParents = [
       ...(affect?.parents.durationScale ?? []),
       ...(isPause ? (affect?.parents.pauseScale ?? []) : []),
@@ -3069,7 +3073,7 @@ export function lowerToFrames(
       clock.set(
         frameItem,
         "segmentRatio",
-        segmentOffsetMs / timings.find((timing) => timing.item === item)!.durationMs,
+        segmentOffsetMs / outputTimingByItem.get(item)!.durationMs,
       );
     } else {
       const firstAnchor = timings[0] && utterance.intervalAnchor(timings[0].item);

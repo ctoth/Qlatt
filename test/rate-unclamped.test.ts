@@ -33,8 +33,13 @@ describe("frontend rate defaults", () => {
       const spec = structuredClone(rulepack.loadBundledRulepackSpec(frontendId));
       spec.parameters.policy.rate.default.value = 1.5;
       vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
-      const implicit = textToKlattTrackDetailed("hello world", undefined, undefined, { frontendId });
-      const explicit = textToKlattTrack("hello world", undefined, undefined, { frontendId, rate: 1.5 });
+      const implicit = textToKlattTrackDetailed("hello world", undefined, undefined, {
+        frontendId,
+      });
+      const explicit = textToKlattTrack("hello world", undefined, undefined, {
+        frontendId,
+        rate: 1.5,
+      });
       expect(frameValues(implicit.track)).toEqual(frameValues(explicit));
       expect(frameValues(implicit.track)).not.toEqual(
         frameValues(textToKlattTrack("hello world", undefined, undefined, { frontendId, rate: 1 })),
@@ -49,9 +54,13 @@ describe("frontend rate defaults", () => {
       });
       if (frontendId === "dectalk-english") {
         expect(
-          frameValues(textToKlattTrack("[:ra 180] hello world", undefined, undefined, { frontendId })),
+          frameValues(
+            textToKlattTrack("[:ra 180] hello world", undefined, undefined, { frontendId }),
+          ),
         ).toEqual(
-          frameValues(textToKlattTrack("hello world", undefined, undefined, { frontendId, rate: 1 })),
+          frameValues(
+            textToKlattTrack("hello world", undefined, undefined, { frontendId, rate: 1 }),
+          ),
         );
       }
     },

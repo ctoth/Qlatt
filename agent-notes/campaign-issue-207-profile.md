@@ -4,7 +4,7 @@ Declare and validate DECtalk segmental F0 profile roles for the remaining #207 s
 
 # State
 
-Authorized isolated branch campaign/issue-207-profile from origin/master 11840871. Planned 35–55 production/type lines, 3 YAML lines, and 65–100 focused test lines; actual change is 34 production/type lines, 3 YAML lines, and 57 test lines. Model declarations and command-length validation implemented. Tests cover absent/malformed/reordered declarations, voice overlays, invalid lengths, and equivalent three/four-value rendering. Local rendering tests not run: this fresh worktree lacks target/wasm32-unknown-unknown/release/f0_filters.wasm; hosted CI will build and test.
+Authorized isolated branch campaign/issue-207-profile from origin/master 11840871. Planned 35–55 production/type lines, 3 YAML lines, and 65–100 focused test lines; actual change is 34 production/type lines, 3 YAML lines, and 57 test lines. Model declarations and command-length validation implemented. Tests cover absent/malformed/reordered declarations, voice overlays, invalid lengths, and equivalent three/four-value rendering. Tests were not run locally; hosted CI owns validation.
 
 # Decisions and why
 
@@ -16,8 +16,8 @@ Authorized isolated branch campaign/issue-207-profile from origin/master 1184087
 
 # Surprises
 
-None.
+Claude found the previous local-test explanation checked the wrong WASM path. Accepted: src/f0-filters-loader.ts:100 reads public/worklets/f0-filters.wasm, not the target directory named in the note. Corrected the validation statement without running local CI or changing code/tests.
 
 # Next step
 
-Push for hosted CI and supervisor Claude review; respond to findings. The pause slice is already merged in #334.
+Push the note correction and await final-head hosted CI and supervisor merge. The pause slice is already merged in #334.

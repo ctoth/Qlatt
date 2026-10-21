@@ -51,21 +51,21 @@ async function withServer<T>(body: (send: (message: object) => Promise<Event[]>)
 }
 
 describe("speak-server request mapping", () => {
-  it("preserves padding defaults and forwards explicit zero padding", () => {
-    expect(speakRenderRequest({ op: "speak", text: "Hello." })).toMatchObject({
+  it("preserves padding defaults and forwards explicit zero padding", async () => {
+    expect(await speakRenderRequest({ op: "speak", text: "Hello." })).toMatchObject({
       leadTime: 0.02,
       tailTime: 0.05,
     });
     expect(
-      speakRenderRequest({ op: "speak", text: "Hello.", leadTime: 0, tailTime: 0 }),
+      await speakRenderRequest({ op: "speak", text: "Hello.", leadTime: 0, tailTime: 0 }),
     ).toMatchObject({ leadTime: 0, tailTime: 0 });
     expect(
-      speakRenderRequest({ op: "speak", text: "Hello.", leadTime: 0.01, tailTime: 0.03 }),
+      await speakRenderRequest({ op: "speak", text: "Hello.", leadTime: 0.01, tailTime: 0.03 }),
     ).toMatchObject({ leadTime: 0.01, tailTime: 0.03 });
   });
 
-  it("requests no pitch when the request names none", () => {
-    const render = speakRenderRequest({ op: "speak", text: "Hello." });
+  it("requests no pitch when the request names none", async () => {
+    const render = await speakRenderRequest({ op: "speak", text: "Hello." });
     expect(render.baseF0).toBeUndefined();
     expect(render).not.toHaveProperty("transitionMs");
     expect(render).not.toHaveProperty("pitchScale");
@@ -73,8 +73,8 @@ describe("speak-server request mapping", () => {
     expect(render).toMatchObject({ phrase: "Hello.", frontendId: "qlatt-english" });
   });
 
-  it("passes pitchScale as the relative pitch request, with no base pitch", () => {
-    const render = speakRenderRequest({
+  it("passes pitchScale as the relative pitch request, with no base pitch", async () => {
+    const render = await speakRenderRequest({
       op: "speak",
       text: "Hello.",
       frontendId: "qlatt-beauty",
@@ -85,13 +85,32 @@ describe("speak-server request mapping", () => {
     expect(render.frontendId).toBe("qlatt-beauty");
   });
 
-  it("still accepts baseF0, alone or with pitchScale", () => {
-    expect(speakRenderRequest({ op: "speak", text: "Hello.", baseF0: 160 })).toMatchObject({
+  it("still accepts baseF0, alone or with pitchScale", async () => {
+    expect(await speakRenderRequest({ op: "speak", text: "Hello.", baseF0: 160 })).toMatchObject({
       baseF0: 160,
     });
     expect(
-      speakRenderRequest({ op: "speak", text: "Hello.", baseF0: 160, pitchScale: 0.5 }),
+      await speakRenderRequest({ op: "speak", text: "Hello.", baseF0: 160, pitchScale: 0.5 }),
     ).toMatchObject({ baseF0: 160, pitchScale: 0.5 });
+  });
+
+  it("uses declared defaults while preserving an explicit backend", async () => {
+    const automatic = await speakRenderRequest({
+      op: "speak",
+      text: "Hi",
+      frontendId: "dectalk-english",
+    });
+    expect(automatic.experimentId).toBe("dectalk-vtm");
+    const explicit = await speakRenderRequest({
+      op: "speak",
+      text: "Hi",
+      frontendId: "dectalk-english",
+      experimentId: "dectalk-english",
+    });
+    expect(explicit.experimentId).toBe("dectalk-english");
+    await expect(
+      speakRenderRequest({ op: "speak", text: "Hi", frontendId: "missing" }),
+    ).rejects.toThrow(/E_FRONTEND_DEFAULT_EXPERIMENT/);
   });
 });
 
@@ -140,6 +159,11 @@ describe("speak-server protocol", () => {
       const [hello] = await send({ id: 1, op: "hello" });
       expect(hello.event).toBe("hello");
       expect(hello.frontends).toEqual(expect.arrayContaining(["qlatt-english", "dectalk-english"]));
+      expect(hello.experiments).toEqual({
+        "qlatt-english": "klatt80-baseline",
+        "dectalk-english": "dectalk-vtm",
+        "qlatt-beauty": "qlatt-beauty",
+      });
 
       const events = await send({ id: 2, op: "speak", text: "Hello world." });
       expect(events.map((event) => event.event)).toEqual(["audio", "done"]);

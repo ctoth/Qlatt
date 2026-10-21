@@ -4,10 +4,8 @@
  *
  * The pairing is data: a frontend's entry in
  * `public/rules/frontends/manifest.json` may name a `defaultExperiment`.
- * Without that field the experiment with the frontend's own id is its
- * default, if there is one; otherwise the frontend has no default and the
- * current selection stands (qlatt-english plays through whatever experiment
- * is selected).
+ * No id equality or baseline fallback supplies an undeclared default.
+ * Callers retain an explicitly selected experiment instead of applying a default.
  */
 
 export interface FrontendManifestEntry {
@@ -25,24 +23,21 @@ export interface FrontendManifest {
 
 /**
  * The default experiment of a frontend among the experiments on offer, or
- * null when it has none. A `defaultExperiment` that names an experiment not
+ * an error when it has none. A `defaultExperiment` that names an experiment not
  * on offer is an error in the manifests, not a reason to fall back silently.
  */
 export function defaultExperimentFor(
   frontendId: string,
   manifest: FrontendManifest | null | undefined,
   experimentIds: readonly string[],
-): string | null {
+): string {
   const entry = manifest?.frontends?.find((candidate) => candidate.id === frontendId);
   const declared = entry?.defaultExperiment;
-  if (declared !== undefined) {
-    if (typeof declared !== "string" || !experimentIds.includes(declared)) {
-      throw new Error(
-        `E_FRONTEND_DEFAULT_EXPERIMENT: frontend '${frontendId}' names default experiment ` +
-          `'${String(declared)}', which is not in the experiment manifest`,
-      );
-    }
-    return declared;
+  if (typeof declared !== "string" || !declared.trim() || !experimentIds.includes(declared)) {
+    throw new Error(
+      `E_FRONTEND_DEFAULT_EXPERIMENT: frontend '${frontendId}' names default experiment ` +
+        `'${String(declared)}', which is not in the experiment manifest`,
+    );
   }
-  return experimentIds.includes(frontendId) ? frontendId : null;
+  return declared;
 }

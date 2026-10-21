@@ -54,7 +54,7 @@ if (!chromePath) {
 
 const url = args.get("url") ?? "http://localhost:8000/";
 const phrase = args.get("phrase") ?? "hello world";
-const experimentId = args.get("experiment-id") ?? "klatt80-baseline";
+const experimentId = args.get("experiment-id");
 const frontendId = args.get("frontend-id") ?? "qlatt-english";
 // Absent: the page's Base F0 box stays empty, and the voice keeps its own.
 const baseF0Arg = args.get("base-f0");
@@ -104,12 +104,12 @@ try {
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
   await page.waitForFunction(() => window.__qlatt != null, { timeout: 60000 });
   await page.waitForFunction(
-    () => document.querySelector("#experimentSelect option[value='klatt80-baseline']") != null,
+    () => document.getElementById("experimentSelect")?.value,
     { timeout: 60000 },
   );
 
-  await page.selectOption("#experimentSelect", experimentId);
   await page.selectOption("#frontendSelect", frontendId);
+  if (experimentId !== undefined) await page.selectOption("#experimentSelect", experimentId);
   await page.fill("#phrase", phrase);
   if (baseF0 !== null) {
     await page.fill("#baseF0", String(baseF0));
@@ -168,7 +168,7 @@ try {
   const result = {
     url,
     phrase,
-    experimentId,
+    experimentId: snapshot.selectedExperiment,
     frontendId,
     baseF0,
     rate,

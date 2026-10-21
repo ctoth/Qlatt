@@ -227,7 +227,7 @@ try {
           phrase: entry.text,
           baseF0,
           frontendId,
-          experimentId: experimentFor(frontendId),
+          experimentId: await experimentFor(frontendId),
           rate: wpm / NEUTRAL_RATE_WPM,
           speaker: voice,
           transitionMs: entry.transitionMs ?? corpus.defaults?.transitionMs ?? 30,

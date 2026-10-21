@@ -17,6 +17,8 @@ import {
 type ExperimentManifestEntry = {
   id: string;
   extends?: string;
+  name?: string;
+  description?: string;
 };
 
 type ExperimentManifest = {
@@ -97,7 +99,7 @@ export async function loadExperimentConfig(
   return config;
 }
 
-async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
+export async function loadExperimentManifest(): Promise<{ experiments: ExperimentManifestEntry[] }> {
   const manifestPath = "/experiments/manifest.json";
   const manifest = await loadJsonDocument<ExperimentManifest>(manifestPath);
   if (!Array.isArray(manifest?.experiments)) {
@@ -121,6 +123,13 @@ async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
     }
     entries.set(entry.id, entry);
   }
+  return { experiments: [...entries.values()] };
+}
+
+async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
+  const manifestPath = "/experiments/manifest.json";
+  const manifest = await loadExperimentManifest();
+  const entries = new Map(manifest.experiments.map((entry) => [entry.id, entry]));
 
   async function resolve(id: string, ancestors: readonly string[]): Promise<ExperimentConfig> {
     const chain = [...ancestors, id];

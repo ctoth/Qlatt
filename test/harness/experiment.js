@@ -1,11 +1,17 @@
 // test/harness/experiment.js — Experiment manifest loading and config management
 
+import { preloadBundledFrontendManifest } from "../../src/declarative-frontend/rule-pack.ts";
+import { defaultExperimentFor } from "../../src/experiments/frontend-pairing.ts";
 import { assertFrontendVocabulary } from "../../src/experiments/frontend-vocabulary.ts";
-import { loadExperimentConfig } from "../../src/experiments/load-experiment-config.ts";
+import {
+  loadExperimentConfig,
+  loadExperimentManifest as readExperimentManifest,
+} from "../../src/experiments/load-experiment-config.ts";
 import { state } from "./state.js";
 
 let validatedSemantics = null;
 let validatedFrontend = null;
+let explicitExperimentSelection = false;
 
 async function validateSelectedFrontend() {
   const frontendId = document.getElementById("frontendSelect")?.value || "qlatt-english";
@@ -26,15 +32,14 @@ async function validateSelectedFrontend() {
 
 export function getSelectedExperiment() {
   const select = document.getElementById("experimentSelect");
-  return select ? select.value : "klatt80-baseline";
+  if (!select?.value) throw new Error("E_FRONTEND_DEFAULT_EXPERIMENT: no experiment selected");
+  return select.value;
 }
 
 export async function loadExperimentManifest() {
   const select = document.getElementById("experimentSelect");
   try {
-    const res = await fetch("./experiments/manifest.json");
-    if (!res.ok) throw new Error("Failed to fetch manifest");
-    state.experimentManifest = await res.json();
+    state.experimentManifest = await readExperimentManifest();
     // Populate dropdown
     select.innerHTML = "";
     for (const exp of state.experimentManifest.experiments) {
@@ -44,38 +49,63 @@ export async function loadExperimentManifest() {
       option.title = exp.description;
       select.appendChild(option);
     }
-    // Default to first experiment
-    if (state.experimentManifest.experiments.length > 0) {
-      select.value = state.experimentManifest.experiments[0].id;
-    }
+    select.selectedIndex = -1;
+    explicitExperimentSelection = false;
     console.log(
       "[QLATT] Experiment manifest loaded:",
       state.experimentManifest.experiments.map((e) => e.id),
     );
   } catch (err) {
     console.error("[QLATT] Failed to load experiment manifest:", err);
-    // Fallback to hardcoded default
-    select.innerHTML = '<option value="klatt80-baseline">klatt80-baseline</option>';
+    state.status.textContent = `Status: ${err.message}`;
+    throw err;
   }
 }
 
 /**
  * Load the frontend manifest, which says which experiment each frontend is
- * paired with by default (src/experiments/frontend-pairing.ts). Without it the
- * pairing falls back to the same-id rule.
+ * paired with by default (src/experiments/frontend-pairing.ts).
+ * Missing defaults are configuration errors.
  */
 export async function loadFrontendManifest() {
   try {
-    const res = await fetch("./rules/frontends/manifest.json");
-    if (!res.ok) throw new Error("Failed to fetch frontend manifest");
-    state.frontendManifest = await res.json();
+    state.frontendManifest = await preloadBundledFrontendManifest();
   } catch (err) {
     console.error("[QLATT] Failed to load frontend manifest:", err);
     state.frontendManifest = null;
+    state.status.textContent = `Status: ${err.message}`;
+    throw err;
   }
 }
 
 export function onExperimentChange() {
+  explicitExperimentSelection = true;
+  invalidateSelectedExperiment();
+}
+
+/** Automatic defaults follow the frontend until the user chooses a backend. */
+export function applyFrontendDefault() {
+  if (explicitExperimentSelection) return;
+  const frontend = document.getElementById("frontendSelect");
+  const experiment = document.getElementById("experimentSelect");
+  if (!frontend || !experiment) return;
+  try {
+    const selected = defaultExperimentFor(
+      frontend.value,
+      state.frontendManifest,
+      (state.experimentManifest?.experiments ?? []).map((entry) => entry.id),
+    );
+    if (experiment.value !== selected) {
+      experiment.value = selected;
+      invalidateSelectedExperiment();
+    }
+  } catch (err) {
+    state.status.textContent = `Status: ${err.message}`;
+    throw err;
+  }
+}
+
+function invalidateSelectedExperiment() {
   const selected = getSelectedExperiment();
   if (selected !== state.currentExperimentId) {
     // Clear cached config so it reloads on next play

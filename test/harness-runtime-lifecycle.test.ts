@@ -6,6 +6,33 @@ describe("harness runtime replacement", () => {
     vi.resetModules();
   });
 
+  it("follows frontend defaults until an actual backend choice", async () => {
+    vi.stubGlobal("AudioContext", class MockAudioContext {});
+    vi.stubGlobal("window", {});
+    const frontend = { value: "qlatt-english" };
+    const experiment = { value: "", selectedIndex: 0, innerHTML: "", appendChild: vi.fn() };
+    vi.stubGlobal("document", {
+      createElement: () => ({}),
+      getElementById: (id: string) =>
+        id === "frontendSelect" ? frontend : id === "experimentSelect" ? experiment : null,
+    });
+    const { applyFrontendDefault, onExperimentChange, loadExperimentManifest, loadFrontendManifest } =
+      await import("./harness/experiment.js");
+    await loadExperimentManifest();
+    await loadFrontendManifest();
+    expect(experiment.selectedIndex).toBe(-1);
+    applyFrontendDefault();
+    expect(experiment.value).toBe("klatt80-baseline");
+    frontend.value = "dectalk-english";
+    applyFrontendDefault();
+    expect(experiment.value).toBe("dectalk-vtm");
+    experiment.value = "dectalk-english";
+    onExperimentChange();
+    frontend.value = "qlatt-english";
+    applyFrontendDefault();
+    expect(experiment.value).toBe("dectalk-english");
+  });
+
   it("destroys diagnostics before releasing an experiment runtime", async () => {
     vi.stubGlobal("AudioContext", class MockAudioContext {});
     vi.stubGlobal("window", {});

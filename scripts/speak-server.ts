@@ -47,8 +47,10 @@ import readline from "node:readline";
 import { fileURLToPath } from "node:url";
 import {
   DEFAULT_FRONTEND_ID,
-  listBundledFrontendIds,
+  loadBundledFrontendManifest,
 } from "../src/declarative-frontend/rule-pack.ts";
+import { defaultExperimentFor } from "../src/experiments/frontend-pairing.ts";
+import { loadExperimentManifest } from "../src/experiments/load-experiment-config.ts";
 import { createNodeRuntimeBackend } from "../src/rendering/backends/node-runtime.ts";
 import type { RenderPayload, RenderRequest, WordOccurrence } from "../src/rendering/types.ts";
 import { toInt16 } from "../src/rendering/write-wav.ts";
@@ -75,12 +77,6 @@ type Request = SpeakRequest | { id?: number | string; op: "hello" } | { op: "qui
 
 export type WordMarker = { kind: "word"; word: string; sample: number };
 export type IndexMarker = { kind: "index"; index: number; sample: number };
-
-const DEFAULT_EXPERIMENT_BY_FRONTEND: Readonly<Record<string, string>> = {
-  "qlatt-english": "klatt80-baseline",
-  "qlatt-beauty": "qlatt-beauty",
-  "dectalk-english": "dectalk-english",
-};
 
 /** Sample offset of the first frame of every spoken word, in render-output samples. */
 export function wordMarkers(
@@ -118,10 +114,15 @@ export function indexMarkers(
 }
 
 /** The render a speak request asks for. */
-export function speakRenderRequest(request: SpeakRequest): RenderRequest {
+export async function speakRenderRequest(request: SpeakRequest): Promise<RenderRequest> {
   const frontendId = request.frontendId ?? DEFAULT_FRONTEND_ID;
   const experimentId =
-    request.experimentId ?? DEFAULT_EXPERIMENT_BY_FRONTEND[frontendId] ?? "klatt80-baseline";
+    request.experimentId ??
+    defaultExperimentFor(
+      frontendId,
+      loadBundledFrontendManifest(),
+      (await loadExperimentManifest()).experiments.map((entry) => entry.id),
+    );
   return {
     repoRoot,
     phrase: request.text,
@@ -147,7 +148,7 @@ async function speak(
   request: SpeakRequest,
   backend: ReturnType<typeof createNodeRuntimeBackend>,
 ): Promise<void> {
-  const renderRequest = speakRenderRequest(request);
+  const renderRequest = await speakRenderRequest(request);
   const { sampleRate, leadTime } = renderRequest;
   const payload = await backend.render(renderRequest);
   const pcm = toInt16(payload.samples);
@@ -204,12 +205,19 @@ async function main(): Promise<void> {
       }
       if (request.op === "quit") break;
       if (request.op === "hello") {
+        const manifest = loadBundledFrontendManifest();
+        const experimentIds = (await loadExperimentManifest()).experiments.map((entry) => entry.id);
         write({
           id: request.id,
           event: "hello",
-          frontends: listBundledFrontendIds(),
+          frontends: manifest.frontends.map(({ id }) => id).sort(),
           defaultFrontendId: DEFAULT_FRONTEND_ID,
-          experiments: DEFAULT_EXPERIMENT_BY_FRONTEND,
+          experiments: Object.fromEntries(
+            manifest.frontends.map(({ id }) => [
+              id,
+              defaultExperimentFor(id, manifest, experimentIds),
+            ]),
+          ),
           format: "s16le",
         });
         continue;

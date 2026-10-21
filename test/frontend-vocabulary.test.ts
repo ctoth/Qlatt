@@ -71,17 +71,26 @@ describe("frontend/experiment pairing", () => {
     }
   ).experiments.map((experiment) => experiment.id);
 
-  it("pairs each frontend with the experiment its manifest entry names, else its own id", () => {
+  it("uses only declared manifest defaults, with no same-id inference", () => {
     expect(defaultExperimentFor("dectalk-english", frontendManifest, experimentIds)).toBe(
       "dectalk-vtm",
     );
     expect(defaultExperimentFor("qlatt-beauty", frontendManifest, experimentIds)).toBe(
       "qlatt-beauty",
     );
-    // No experiment of that id and no declared default: the selection stands.
-    expect(defaultExperimentFor("qlatt-english", frontendManifest, experimentIds)).toBeNull();
-    // Without a manifest the same-id rule still applies.
-    expect(defaultExperimentFor("dectalk-english", null, experimentIds)).toBe("dectalk-english");
+    expect(defaultExperimentFor("qlatt-english", frontendManifest, experimentIds)).toBe(
+      "klatt80-baseline",
+    );
+    expect(() => defaultExperimentFor("dectalk-english", null, experimentIds)).toThrow(
+      /E_FRONTEND_DEFAULT_EXPERIMENT/,
+    );
+    expect(() =>
+      defaultExperimentFor(
+        "dectalk-english",
+        { frontends: [{ id: "dectalk-english" }] },
+        experimentIds,
+      ),
+    ).toThrow(/E_FRONTEND_DEFAULT_EXPERIMENT/);
     expect(() =>
       defaultExperimentFor(
         "x",
@@ -94,7 +103,6 @@ describe("frontend/experiment pairing", () => {
   it("every frontend's default experiment declares the frontend's columns", async () => {
     for (const frontend of frontendManifest.frontends ?? []) {
       const experimentId = defaultExperimentFor(frontend.id, frontendManifest, experimentIds);
-      if (experimentId === null) continue;
       await expect(
         loadExperimentConfig(experimentId, frontend.id),
         `${frontend.id} / ${experimentId}`,

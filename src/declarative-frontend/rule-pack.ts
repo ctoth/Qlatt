@@ -11,6 +11,7 @@ import {
   voiceRuleRegistry,
   withVoiceRulePolicy,
 } from "../dectalk-voice";
+import type { FrontendManifestEntry } from "../experiments/frontend-pairing";
 import { parseLtsRulesData } from "../g2p/lts-engine";
 import type { MorphologyContext, MorphologyData } from "../g2p/morphology";
 import { parseStressPolicy, type StressContext } from "../g2p/stress-policy";
@@ -986,12 +987,14 @@ export function compileRuleEngineSpec(source: unknown): CompiledRulepack {
 }
 
 /** The existing bundled catalogue, not a package dependency/pairing registry. */
-function frontendCatalogue(source: string): Map<string, string> {
+type BundledFrontendManifest = { frontends: (FrontendManifestEntry & { entryPoint: string })[] };
+
+function frontendCatalogue(source: string): BundledFrontendManifest {
   const manifest: unknown = JSON.parse(source);
   if (!isPlainObject(manifest) || !Array.isArray(manifest.frontends)) {
     throw new Error(`E_FRONTEND_MANIFEST: '${FRONTEND_MANIFEST_PATH}' requires frontends`);
   }
-  const paths = new Map<string, string>();
+  const entries = new Map<string, FrontendManifestEntry & { entryPoint: string }>();
   for (const entry of manifest.frontends) {
     if (
       !isPlainObject(entry) ||
@@ -1002,9 +1005,28 @@ function frontendCatalogue(source: string): Map<string, string> {
     ) {
       throw new Error(`E_FRONTEND_MANIFEST: each frontend requires nonempty id and entryPoint`);
     }
-    if (paths.has(entry.id)) {
+    if (entries.has(entry.id)) {
       throw new Error(`E_FRONTEND_MANIFEST: duplicate frontend '${entry.id}'`);
     }
+    entries.set(entry.id, { ...entry, id: entry.id, entryPoint: entry.entryPoint });
+  }
+  return { frontends: [...entries.values()] };
+}
+
+export function loadBundledFrontendManifest(): BundledFrontendManifest {
+  return frontendCatalogue(loadYamlSourceSync(FRONTEND_MANIFEST_PATH));
+}
+
+export async function preloadBundledFrontendManifest(): Promise<BundledFrontendManifest> {
+  const source = await loadYamlSource(FRONTEND_MANIFEST_PATH);
+  const manifest = frontendCatalogue(source);
+  keepSyncResource(FRONTEND_MANIFEST_PATH, source);
+  return manifest;
+}
+
+function cataloguePaths(manifest: BundledFrontendManifest): Map<string, string> {
+  const paths = new Map<string, string>();
+  for (const entry of manifest.frontends) {
     const directory = resolveIncludePath(FRONTEND_MANIFEST_PATH, `${entry.id}/`);
     paths.set(entry.id, resolveIncludePath(directory, entry.entryPoint));
   }
@@ -1022,12 +1044,12 @@ function catalogueRulepackPath(paths: ReadonlyMap<string, string>, frontendId: s
 }
 
 export function listBundledFrontendIds(): string[] {
-  return [...frontendCatalogue(loadYamlSourceSync(FRONTEND_MANIFEST_PATH)).keys()].sort();
+  return [...cataloguePaths(loadBundledFrontendManifest()).keys()].sort();
 }
 
 export function resolveBundledRulepackPath(frontendId: string = DEFAULT_FRONTEND_ID): string {
   return catalogueRulepackPath(
-    frontendCatalogue(loadYamlSourceSync(FRONTEND_MANIFEST_PATH)),
+    cataloguePaths(loadBundledFrontendManifest()),
     frontendId,
   );
 }
@@ -1036,16 +1058,13 @@ export function resolveBundledRulepackPath(frontendId: string = DEFAULT_FRONTEND
 export async function preloadBundledRulepackPath(
   frontendId: string = DEFAULT_FRONTEND_ID,
 ): Promise<string> {
-  const source = await loadYamlSource(FRONTEND_MANIFEST_PATH);
-  const catalogue = frontendCatalogue(source);
-  keepSyncResource(FRONTEND_MANIFEST_PATH, source);
-  return catalogueRulepackPath(catalogue, frontendId);
+  return catalogueRulepackPath(cataloguePaths(await preloadBundledFrontendManifest()), frontendId);
 }
 
 export function listBundledRulepackPaths(): string[] {
   const known = new Set<string>([
     ...BUNDLED_RULEPACK_CACHE.keys(),
-    ...frontendCatalogue(loadYamlSourceSync(FRONTEND_MANIFEST_PATH)).values(),
+    ...cataloguePaths(loadBundledFrontendManifest()).values(),
   ]);
   return [...known].sort();
 }

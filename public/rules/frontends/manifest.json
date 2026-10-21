@@ -4,7 +4,8 @@
       "id": "qlatt-english",
       "name": "Qlatt English",
       "description": "English TTS frontend with declarative rule phases",
-      "entryPoint": "frontend.yaml"
+      "entryPoint": "frontend.yaml",
+      "defaultExperiment": "klatt80-baseline"
     },
     {
       "id": "dectalk-english",
@@ -17,7 +18,8 @@
       "id": "qlatt-beauty",
       "name": "Qlatt Beauty",
       "description": "Beauty-first English TTS frontend",
-      "entryPoint": "frontend.yaml"
+      "entryPoint": "frontend.yaml",
+      "defaultExperiment": "qlatt-beauty"
     }
   ]
 }

@@ -10,10 +10,8 @@
  */
 
 import { performance } from "node:perf_hooks";
-import {
-  DEFAULT_CMU_DICTIONARY_PATH,
-  preloadCmuDictionaryFromPath,
-} from "../src/cmu-dictionary-loader";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrack } from "../src/tts-frontend";
 
 // ---- Configuration ----
@@ -28,12 +26,15 @@ async function main() {
 
   console.log("=== textToKlattTrack() Performance Profile ===\n");
 
-  // Step 1: Load dictionary and get words
-  console.log("Loading CMU dictionary...");
+  // Step 1: Load frontend resources and get words from its declared lexicon
+  console.log("Loading Qlatt frontend resources...");
   const t0 = performance.now();
-  const dict = await preloadCmuDictionaryFromPath(DEFAULT_CMU_DICTIONARY_PATH);
-  const dictLoadTime = performance.now() - t0;
-  console.log(`Dictionary loaded in ${dictLoadTime.toFixed(1)}ms`);
+  const { lexicon } = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+  if (!lexicon)
+    throw new Error("E_FRONTEND_CONFIG: frontend 'qlatt-english' requires role 'lexicon'");
+  const resourcesLoadTime = performance.now() - t0;
+  console.log(`Frontend resources loaded in ${resourcesLoadTime.toFixed(1)}ms`);
+  const dict = lexicon.dictionary;
 
   const allWords = Object.keys(dict);
   console.log(`Dictionary size: ${allWords.length} words`);

@@ -2,10 +2,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  DEFAULT_CMU_DICTIONARY_PATH,
-  preloadCmuDictionaryFromPath,
-} from "../src/cmu-dictionary-loader";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrack } from "../src/tts-frontend";
 
 type ParsedArgs = {
@@ -112,8 +110,10 @@ export async function runDictionaryMissScan(argv: string[]): Promise<number> {
     };
 
     try {
-      const dictionary = await preloadCmuDictionaryFromPath(DEFAULT_CMU_DICTIONARY_PATH);
-      const allWords = Object.keys(dictionary).sort();
+      const { lexicon } = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+      if (!lexicon)
+        throw new Error("E_FRONTEND_CONFIG: frontend 'qlatt-english' requires role 'lexicon'");
+      const allWords = Object.keys(lexicon.dictionary).sort();
       const words = args.full ? allWords : allWords.slice(0, args.limit);
 
       logger.info(

@@ -203,8 +203,8 @@ describe("a dictionary path", () => {
 
   it("that does not exist is 'path unknown': the HTML page is not parsed as the dictionary", async () => {
     for (const load of await loaders()) {
-      expect((await failure(() => load(DICTIONARY))).message, load.name).toMatch(
-        /^E_CMU_DICT_PATH_UNKNOWN: '\/no-such-dictionary\.json' could not be loaded/,
+      expect((await failure(() => load(DICTIONARY))).message, load.name).toBe(
+        `E_CMU_DICT_PATH_UNKNOWN: '${DICTIONARY}' could not be loaded`,
       );
     }
   });

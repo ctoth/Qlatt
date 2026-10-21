@@ -176,14 +176,14 @@ it("matches fresh renders through concurrent A/B and A replay with isolated runt
     expect(detailed.sourceOrigins).toBeDefined();
     expect(parsed.sourceSpans?.some((span) => span.start === 0 && span.end === 3)).toBe(true);
     expect(parsed.sourceSpans?.some((span) => span.start === 4 && span.end === 6)).toBe(true);
-    const partFrames = (parsed.track as frontendModule.TextToKlattTrackDetailedResult["track"]).filter(
-      (frame) => {
-        const tokenId = frame.segmentId
-          ? detailed.utterance.getItem(frame.segmentId)?.get("sourceTokenId")
-          : undefined;
-        return typeof tokenId === "string" && tokenId.includes(":");
-      },
-    );
+    const partFrames = (
+      parsed.track as frontendModule.TextToKlattTrackDetailedResult["track"]
+    ).filter((frame) => {
+      const tokenId = frame.segmentId
+        ? detailed.utterance.getItem(frame.segmentId)?.get("sourceTokenId")
+        : undefined;
+      return typeof tokenId === "string" && tokenId.includes(":");
+    });
     expect(partFrames.length).toBeGreaterThan(0);
     for (const frame of partFrames) {
       expect(

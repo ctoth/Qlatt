@@ -18,4 +18,6 @@ Existing Word occurrence projection excludes punctuation and unowned frames, so 
 Origins live beside existing byte/capture arrays. The existing synchronous parser machine holds the current pass's working input origins and retained capture origins; output origins follow each actual output buffer, including lookahead's temporary output. There is no separate resolver/cache or parser algorithm.
 
 # Next step
+Hosted quality119308447707 requested one fixture expression wrap after the response; applied its exact formatting. No behavior changed in that correction.
+
 Read replacement hosted validation. Supervisor owns independent verification and merge. Full index/scoped-command/live acceptance remains open.

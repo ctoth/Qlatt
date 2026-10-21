@@ -11,5 +11,7 @@ The YAML walker emits one entry per authored node. Include dictionary collisions
 # Surprises
 None established. Topology has no bundled declaration producer and is outside this change.
 
+Claude reviewed the full three-file PR451 range 4cba779c..69fca6f9 in session 1d493d0a-9d02-49f2-b110-ae6cf364ee2d and found no actionable defects. Implementer accepts the review without code changes. Rebuilding projections has an unmeasured cost; no speculative cache or guard added. Root independently verified the source and review. Response recorded at a natural measurement boundary, after the separate PR256 baseline Node run completed.
+
 # Next step
-Publish for hosted CI and Claude review. PR256 remains held separately for fresh measurements.
+Await final-head hosted CI and supervisor merge. PR256 measurements continue separately; its baseline Node report completed successfully.

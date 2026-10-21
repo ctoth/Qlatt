@@ -3019,8 +3019,8 @@ export function lowerToFrames(
   };
 }
 
-/** Index of the frame covering `timeSec` (the greatest frame time <= timeSec). */
-export function frameIndexAt(track: LoweredTrack, timeSec: number): number {
+/** Latest frame at/before timeSec (with tolerance), or the first if all are later; no interpolation. */
+export function frameIndexAt(track: Pick<LoweredTrack, "frames">, timeSec: number): number {
   if (track.frames.length === 0) return -1;
   const epsilon = 1e-9;
   let chosen = 0;

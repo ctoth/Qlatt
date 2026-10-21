@@ -18,6 +18,13 @@ interface ExplainPayload {
   };
   decisions: DecisionRecord[];
   tooling: {
+    parameter: {
+      layer: "lowered";
+      name: string;
+      requestedTimeMs: number;
+      frameTimeMs: number | null;
+      value: number | null;
+    } | null;
     ruleSources: Record<string, YamlDocumentSpan>;
     vocabularySources: Record<string, YamlDocumentSpan>;
     ruleExpressions: Record<
@@ -47,6 +54,89 @@ async function runCli(args: string[]) {
 }
 
 describe("explain phrase cli", () => {
+  it("queries an actual lowered vowel frame in milliseconds and retains its ancestry", async () => {
+    const detailed = frontend.textToKlattTrackDetailed("cat", undefined, undefined, {
+      captureTooling: true,
+    });
+    const index = detailed.track.findIndex(
+      (frame, i) =>
+        frame.phoneme === "AE" && frame.provenance?.F1 && detailed.track[i + 1]?.time > frame.time,
+    );
+    expect(index).toBeGreaterThanOrEqual(0);
+    const frame = detailed.track[index];
+    const atMs = (frame.time + detailed.track[index + 1].time) * 500;
+    const spy = vi.spyOn(frontend, "textToKlattTrackDetailed");
+    try {
+      const result = await runCli([
+        "cat",
+        "--why-param=F1",
+        `--at=${atMs}`,
+        "--format=json",
+        "--stage=runtime",
+        "--subject=does-not-match",
+        "--range=seq:0-0",
+      ]);
+      expect(result.code).toBe(0);
+      const actual = spy.mock.results[0].value as ReturnType<
+        typeof frontend.textToKlattTrackDetailed
+      >;
+      const selected = actual.track.findLast((entry) => entry.time <= atMs / 1000)!;
+      const payload = parseExplainPayload(result.stdout);
+      expect(payload.tooling.parameter).toEqual({
+        layer: "lowered",
+        name: "F1",
+        requestedTimeMs: atMs,
+        frameTimeMs: selected.time * 1000,
+        value: selected.params.F1,
+      });
+      expect(payload.decisions[0].id).toBe(selected.provenance?.F1);
+      const ids = new Set(payload.decisions.map((decision) => decision.id));
+      expect(payload.decisions.length).toBeGreaterThan(1);
+      expect(
+        payload.decisions.every((decision) => (decision.parents ?? []).every((id) => ids.has(id))),
+      ).toBe(true);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it.each(["text", "dot", "html"])("labels %s parameter queries as lowered", async (format) => {
+    const result = await runCli(["cat", "--why-param=F1", "--at=340", `--format=${format}`]);
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain("Lowered frame query: F1 at 340 ms; selected frame");
+    expect(result.stdout).toContain("No interpolation or scheduled audio value.");
+  });
+
+  it("retains endpoint selection and reports unknown parameters without invented ancestry", async () => {
+    const detailed = frontend.textToKlattTrackDetailed("cat", undefined, undefined);
+    for (const [at, frame] of [
+      [0, detailed.track[0]],
+      [1e6, detailed.track.at(-1)!],
+    ] as const) {
+      const result = await runCli([
+        "cat",
+        "--why-param=NOT_A_PARAM",
+        `--at=${at}`,
+        "--format=json",
+      ]);
+      expect(result.code).toBe(0);
+      const payload = parseExplainPayload(result.stdout);
+      expect(payload.tooling.parameter?.frameTimeMs).toBe(frame.time * 1000);
+      expect(payload.tooling.parameter?.value).toBeNull();
+      expect(payload.decisions).toEqual([]);
+    }
+  });
+
+  it.each([
+    ["--why-param=F1"],
+    ["--at=340"],
+    ["--why-param=F1", "--at=NaN"],
+    ["--why-param=F1", "--at=-1"],
+    ["--why-param=F1", "--at=0", "--why=d000001"],
+  ])("rejects incomplete or ambiguous parameter query %j", async (...args) => {
+    expect((await runCli(["cat", ...args])).code).toBe(1);
+  });
+
   it("selects cited prosody decisions and preserves replay", async () => {
     const result = await runCli([
       "The quick brown fox jumps over the lazy dog.",

@@ -6,7 +6,7 @@ Utterance. `normalizeGraphText(text, compiledSpec)` projects this path to a stri
 `normalizeText(text, frontendId)` remains the bundled-frontend entry point.
 The old G2P number-reader helpers and imperative dispatcher have been removed.
 
-`public/rules/normalization/components.yaml` composes the shared components.
+`public/rules/languages/english/normalization/components.yaml` composes the shared components.
 Each frontend selects its recognition conventions in `normalization-policy.yaml`.
 An alternative frontend can include or replace individual components, vocabulary
 maps and recognition declarations. No frontend-name branches select speech rules

@@ -187,7 +187,7 @@ functions:
       - "Taylor, Black & Caley 2001 (heterogeneous relation graphs: a Segment's Syllable through SylStructure)"
       - "Engineering convention: same-syllable test extracted unchanged from hertz_nucleus_timing"
 include:
-  - /rules/normalization/components.yaml
+  - /rules/languages/english/normalization/components.yaml
   - normalization-policy.yaml
   - pipeline.yaml
   - phases/orthography.yaml

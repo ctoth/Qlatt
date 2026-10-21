@@ -2,7 +2,7 @@
  * Marks that stand alone or stay in a word in the dectalk-english frontend:
  * a period that is a word, a mark after a stripped parenthesis, a period
  * before a comma, words of slashes and hyphens, and a word with two periods
- * on it (public/rules/normalization/recognition.yaml, the rules from
+ * on it (public/rules/languages/english/normalization/recognition.yaml, the rules from
  * tn_stripped_parenthesis_mark_source to tn_dotted_word_source).
  *
  * Every expected reading was measured on DECtalk 4.63 say.exe, as the symbols

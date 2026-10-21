@@ -535,7 +535,7 @@ export function speakOrdinalNumber(text: string, lists: NumberPhones): number[] 
  * A dollar amount (:3181), a date word (:3612), a clock time (:3622) and a
  * number with a plural ending (:3936) are not read here: the frontend's text
  * rules write them out as phonemic text
- * (public/rules/normalization/lexical.yaml tn_money_text, tn_date_text,
+ * (public/rules/languages/english/normalization/lexical.yaml tn_money_text, tn_date_text,
  * tn_clock_time and tn_plural_number). speakMoney and speakPluralNumber stay
  * for an amount and a plural number with a sign on them (speakSignedNumber);
  * an amount before a word that takes "dollars" behind it is read by

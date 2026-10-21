@@ -63,7 +63,7 @@ text_parser:
 normalization:
   phases: [normalization_lexical, normalization_currency, normalization_time, normalization_date, normalization_decimal_fraction, normalization_number_requests, normalization_number_groups, normalization_terminal_words]
 include:
-  - /rules/normalization/components.yaml
+  - /rules/languages/english/normalization/components.yaml
   - normalization-policy.yaml
   - dictionary-abbreviations.yaml
   - number-phonemes.yaml

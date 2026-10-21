@@ -727,6 +727,7 @@ export function transcribeText(
   const lts = options.lts ?? resources.lts;
   const morphology = options.morphology ?? resources.morphology;
   const stress = options.stress ?? resources.stress;
+  const pronunciationLayers = resources.pronunciationLayers;
   const cfg = options.transcriptionConfig ?? getSpecTranscriptionConfig(compiledSpec);
   const transcriptionTables = requireTranscriptionTables(cfg);
   const effectiveDictLookup =
@@ -835,6 +836,7 @@ export function transcribeText(
         effectiveDictLookup,
         {
           lts,
+          pronunciationLayers,
           morphology,
           stress,
           frontendId: options.frontendId,
@@ -943,6 +945,7 @@ export function transcribeText(
             ? ((consumedWords === 1 ? inClause.get(index) : undefined) ??
               pronounce(sourceWord, effectiveDictLookup, {
                 lts,
+                pronunciationLayers,
                 morphology,
                 stress,
                 frontendId: options.frontendId,
@@ -954,6 +957,13 @@ export function transcribeText(
                 word: sourceWord.toLowerCase(),
               };
 
+      const selectedLayer =
+        "pronunciationLayer" in pronResult ? pronResult.pronunciationLayer : undefined;
+      const dictionaryAttempted =
+        !selectedLayer ||
+        (pronunciationLayers &&
+          pronunciationLayers.order.indexOf("dictionary") <
+            pronunciationLayers.order.indexOf(selectedLayer));
       // Select provenance citation based on which layer handled the word
       let decisionType: string;
       let reason: string;
@@ -1013,13 +1023,22 @@ export function transcribeText(
       } else {
         const used = lexiconSource("lts-rules");
         decisionType = "fallback_pronunciation_selected";
-        reason = `Word '${sourceWord}' not in dictionary; used ${used.name}`;
+        reason = dictionaryAttempted
+          ? `Word '${sourceWord}' not in dictionary; used ${used.name}`
+          : `Selected ${used.name} for '${sourceWord}' before dictionary lookup`;
         citations = [used.citation];
-        dictionaryMisses.push({
-          word: sourceWord,
-          token: inputToken.tokenId,
-          applied: pronResult.source,
-        });
+        if (dictionaryAttempted) {
+          dictionaryMisses.push({
+            word: sourceWord,
+            token: inputToken.tokenId,
+            applied: pronResult.source,
+          });
+        }
+      }
+
+      if (selectedLayer && pronunciationLayers) {
+        reason += `; selected layer ${selectedLayer} using declared order ${pronunciationLayers.order.join(" -> ")}`;
+        citations = [...citations, ...pronunciationLayers.citations];
       }
 
       const pronunciationDecision = provenance?.add({

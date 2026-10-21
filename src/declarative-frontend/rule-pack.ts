@@ -16,6 +16,7 @@ import type { MorphologyContext, MorphologyData } from "../g2p/morphology";
 import { parseStressPolicy, type StressContext } from "../g2p/stress-policy";
 import type { PhonotacticsData } from "../g2p/syllabify";
 import { isLtsTableDocument } from "../g2p/table-lts-pronounce";
+import { parsePronunciationLayers } from "../g2p/types";
 import {
   type AffectLibrary,
   parseAffectPresets,
@@ -1738,6 +1739,13 @@ function assembleFrontendResources(
     inventoryDocuments:
       phonologyPath === undefined ? [inventoryPath] : [inventoryPath, phonologyPath],
     lts: { path: ltsPath, document: FRONTEND_ASSET_CACHE.get(ltsPath) },
+    ...(!ltsPath.endsWith(".json") || !isLtsTableDocument(FRONTEND_ASSET_CACHE.get(ltsPath))
+      ? {
+          pronunciationLayers: parsePronunciationLayers(
+            isPlainObject(spec.transcription) ? spec.transcription.pronunciation_layers : undefined,
+          ),
+        }
+      : {}),
     ...(morphology === undefined ? {} : { morphology }),
     ...(stress === undefined ? {} : { stress }),
     ...(speakerDefinitionPath === undefined

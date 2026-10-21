@@ -44,6 +44,25 @@ it("retains YAML rule-list decoding and cache identity", () => {
   );
 });
 
+it("validates selected generic layer order through both acquisition paths", async () => {
+  const spec = loadBundledRulepackSpec("qlatt-english");
+  const selected = {
+    ...spec,
+    transcription: {
+      ...spec.transcription,
+      pronunciation_layers: { order: ["lts"], citations: ["fixture"] },
+    },
+  };
+  expect(() => loadFrontendResources(selected)).toThrow("E_G2P_LAYERS");
+  await expect(preloadFrontendResources(selected)).rejects.toThrow("E_G2P_LAYERS");
+  expect(
+    loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty")).pronunciationLayers,
+  ).toEqual(loadFrontendResources(spec).pronunciationLayers);
+  expect(
+    loadFrontendResources(loadBundledRulepackSpec("dectalk-english")).pronunciationLayers,
+  ).toBeUndefined();
+});
+
 it("validates YAML LTS policy through both resource acquisition paths", async () => {
   const spec = loadBundledRulepackSpec("qlatt-english");
   const data = structuredClone(loadFrontendResources(spec).lts.document) as LtsRulesData;

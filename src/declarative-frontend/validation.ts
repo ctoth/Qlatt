@@ -246,7 +246,7 @@ function markPolicyPathUsed(policyState: PolicyValidationState, path: string): v
   }
   const prefix = `${path}.`;
   for (const leafPath of policyState.leafPaths) {
-    if (leafPath.startsWith(prefix)) {
+    if (leafPath.startsWith(prefix) || path.startsWith(`${leafPath}.`)) {
       policyState.usedLeafPaths.add(leafPath);
     }
   }

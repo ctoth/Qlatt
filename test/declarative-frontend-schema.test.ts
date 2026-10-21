@@ -682,6 +682,41 @@ rules:
     expect(codes.includes("E_POLICY_LITERAL_CRITICAL")).toBe(true);
   });
 
+  it("marks a cited policy group used by a child read without marking prefix siblings", () => {
+    const spec = parseDslSpec({
+      parameters: {
+        policy: {
+          timing: { frame_ms: 6.4, citations: ["engineering estimate: fixture"] },
+          time: { value: 1, citations: ["engineering estimate: fixture"] },
+          timing_extra: { value: 1, citations: ["engineering estimate: fixture"] },
+        },
+      },
+      relations: { phone: { type: "base", scalars: { duration: {} } } },
+      rules: {
+        use_policy_group: {
+          kind: "scalar",
+          select: { relation: "phone", where: "true" },
+          apply: [
+            {
+              field: "duration",
+              op: "set",
+              value: "params.policy.timing.frame_ms",
+              tag: "policy",
+            },
+          ],
+          citations: ["engineering estimate: fixture"],
+        },
+      },
+      phases: [{ name: "duration", rules: ["use_policy_group"] }],
+    });
+    const diagnostics = validateDslSpec(spec);
+    expect(diagnostics.filter((d) => d.severity === "error")).toEqual([]);
+    expect(diagnostics.filter((d) => d.code === "W_POLICY_PARAM_UNUSED").map((d) => d.path)).toEqual([
+      "parameters.policy.time",
+      "parameters.policy.timing_extra",
+    ]);
+  });
+
   it("emits uncited and unused policy warnings", () => {
     const spec = parseDslSpec({
       parameters: {

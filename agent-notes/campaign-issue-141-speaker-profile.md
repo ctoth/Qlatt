@@ -28,9 +28,11 @@ updated that owned declaration to the new path (the existing manifest test
 checks the recorded resource set). The new profile's SHA-256 matches the old
 file byte-for-byte: 9808508D3AADF74C3939FFFBD3D1F0C74277C50897F5BFC3A0D16D29874DA0AB.
 Dependencies are absent, so no local test run or dependency installation.
+PR #337 quality job 119023953660 requested four formatting corrections; applied
+its exact emitted wraps. Claude review and replacement CI are pending.
 
 # Next step
 
-Implementation and caller tests updated; commit/push for PR CI and Claude
-review. No local CI duplication. #141 remains open for other consumers, resources
+Implementation and caller tests pushed; respond to PR #337 review and read CI.
+No local CI duplication. #141 remains open for other consumers, resources
 aliases, async closure, ownership relocation and import-time loads.

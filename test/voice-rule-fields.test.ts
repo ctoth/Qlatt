@@ -118,7 +118,9 @@ function levels(voice: string | null): unknown {
     spec,
     voice === null
       ? {}
-      : { parameters: { policy: { voice: resolveVoice(registry, voice, profileSpec).ruleFields } } },
+      : {
+          parameters: { policy: { voice: resolveVoice(registry, voice, profileSpec).ruleFields } },
+        },
   );
   const frames = utterance.getItem("a")?.get("tank_frames") as
     | { columns: { LEVEL: number[] } }

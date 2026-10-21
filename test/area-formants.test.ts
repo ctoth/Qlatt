@@ -29,7 +29,10 @@ describe("offline wave-reflection formants", () => {
     });
   });
   it("recovers four quarter-wave resonances and the analytic lossy-tube bandwidth", () => {
-    const result = deriveFormants(scaleGeometry(tube, resolveSpeakerProfile({ profileSpec })), model);
+    const result = deriveFormants(
+      scaleGeometry(tube, resolveSpeakerProfile({ profileSpec })),
+      model,
+    );
     result.forEach((resonance, index) => {
       expect(resonance.frequency_hz).toBeCloseTo((2 * index + 1) * 500, 0);
       // Fant's pole damping convention B = alpha*c/pi.

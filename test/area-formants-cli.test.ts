@@ -90,10 +90,15 @@ it("rejects invalid scales and missing geometry instead of silently defaulting",
   expect(() => generate(source, inventory, sourcePath, profileSpec, { pharynx_scale: 0 })).toThrow(
     /scale/,
   );
-  expect(() => generate(source, inventory, sourcePath, profileSpec, { pharynx_sclae: 0.8 })).toThrow(
-    /scale/,
-  );
   expect(() =>
-    generate(source.replace("areas_cm2: [0.33", "areas_cm2: [0"), inventory, sourcePath, profileSpec),
+    generate(source, inventory, sourcePath, profileSpec, { pharynx_sclae: 0.8 }),
+  ).toThrow(/scale/);
+  expect(() =>
+    generate(
+      source.replace("areas_cm2: [0.33", "areas_cm2: [0"),
+      inventory,
+      sourcePath,
+      profileSpec,
+    ),
   ).toThrow();
 });

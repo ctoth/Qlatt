@@ -160,8 +160,9 @@ export function rulepackMapOrigins(
 
 /** Parse authored YAML and normalize resource aliases before document composition. */
 function parseRulepackDocument(source: string, label: string): PlainObject {
+  const resource = label.replace(/^(included|base) rulepack /, "");
   const authored = parseYamlString(source, label, {
-    resource: label.replace(/^(included|base) rulepack /, ""),
+    resource,
     role: "rulepack",
   });
   if (!isPlainObject(authored)) {
@@ -169,6 +170,32 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
   }
   const aliases: ValidationDiagnostic[] = [];
   const document = normalizeResourceAliases(authored, aliases);
+  // Bind each declaration before merging: inherited resources keep their owner.
+  // Includes deliberately remain relative for child-first shadow/fallback.
+  if (isPlainObject(document.resources)) {
+    document.resources = Object.fromEntries(
+      Object.entries(document.resources).map(([role, value]) => [
+        role,
+        resolveResourceReference(resource, value),
+      ]),
+    );
+  }
+  if (Object.hasOwn(document, "accent_policy_path")) {
+    document.accent_policy_path = resolveResourceReference(resource, document.accent_policy_path);
+  }
+  for (const [section, keys] of [
+    ["speakers", ["dir", "definition_path"]],
+    ["text_parser", ["table_path"]],
+  ] as const) {
+    const value = document[section];
+    if (!isPlainObject(value)) continue;
+    document[section] = { ...value };
+    for (const key of keys) {
+      if (Object.hasOwn(value, key)) {
+        (document[section] as PlainObject)[key] = resolveResourceReference(resource, value[key]);
+      }
+    }
+  }
   const authoredSpans = yamlDocumentSpans(authored);
   const defineAliases = authoredSpans.flatMap((alias) => {
     const path = alias.value.path;
@@ -1225,10 +1252,14 @@ function phonologyUnreadable(path: string, cause: unknown): Error {
   return new Error(`E_INVENTORY_PHONOLOGY_PATH: '${path}' could not be loaded`, { cause });
 }
 
-/**
- * The error for an inventory that could not be loaded: "path unknown" when the
- * file does not exist, and the loader's own error for anything else.
- */
+/** Leave malformed declarations intact for the existing owner's validation. */
+function resolveResourceReference(parentPath: string, reference: unknown): unknown {
+  return typeof reference === "string" && reference.trim()
+    ? resolveIncludePath(parentPath, reference)
+    : reference;
+}
+
+/** Preserve the loader error unless the inventory file does not exist. */
 function inventoryPathUnknown(specPath: string, cause: unknown): unknown {
   if (!isYamlNotFoundError(cause)) return cause;
   const known = listBundledInventoryPaths();
@@ -1250,7 +1281,9 @@ export function loadInventorySpecFromPath(specPath: string): InventorySpec {
     throw inventoryPathUnknown(specPath, cause);
   }
 
-  const phonologyPath = inventoryPhonologyReference(source);
+  const reference = inventoryPhonologyReference(source);
+  const phonologyPath =
+    reference === undefined ? undefined : resolveIncludePath(specPath, reference);
   let phonologySource: string | undefined;
   if (phonologyPath !== undefined) {
     try {
@@ -1277,7 +1310,9 @@ export async function preloadInventorySpecFromPath(specPath: string): Promise<In
 
   // The phonology document is fetched here, so that nothing is read
   // synchronously on this path.
-  const phonologyPath = inventoryPhonologyReference(source);
+  const reference = inventoryPhonologyReference(source);
+  const phonologyPath =
+    reference === undefined ? undefined : resolveIncludePath(specPath, reference);
   let phonologySource: string | undefined;
   if (phonologyPath !== undefined) {
     try {
@@ -1295,13 +1330,22 @@ export async function preloadInventorySpecFromPath(specPath: string): Promise<In
 // FrontendResources loader
 // ---------------------------------------------------------------------------
 
+function voiceDocumentPath(directory: string, name: string): string {
+  if (/^(https?:\/\/|file:)/i.test(directory)) {
+    const base = new URL(directory);
+    if (!base.pathname.endsWith("/")) base.pathname += "/";
+    return new URL(`${name}.yaml`, base).href;
+  }
+  return `${directory}/${name}.yaml`;
+}
+
 /** Acquire the actual requested voice, including names in an open registry. */
 export function loadFrontendVoiceDocument(
   registry: VoiceRegistry,
   voiceName: string,
 ): VoiceDocument {
   const name = voiceNameInRegistry(registry, voiceName);
-  const path = `${registry.dir}/${name}.yaml`;
+  const path = voiceDocumentPath(registry.dir, name);
   if (!FRONTEND_ASSET_CACHE.has(path)) {
     FRONTEND_ASSET_CACHE.set(path, freezeRecursively(loadYamlDocumentSync(path)));
   }
@@ -1314,7 +1358,7 @@ export async function preloadFrontendVoiceDocument(
   voiceName: string,
 ): Promise<VoiceDocument> {
   const name = voiceNameInRegistry(registry, voiceName);
-  const path = `${registry.dir}/${name}.yaml`;
+  const path = voiceDocumentPath(registry.dir, name);
   if (!FRONTEND_ASSET_CACHE.has(path)) {
     FRONTEND_ASSET_CACHE.set(path, freezeRecursively(await loadYamlDocument(path)));
   }
@@ -1327,7 +1371,7 @@ export function loadVoiceRuleDocuments(source: unknown): ReadonlyMap<string, Voi
   const documents = new Map<string, VoiceDocument>();
   if (!registry) return documents;
   for (const name of new Set([registry.default, ...registry.voices])) {
-    const path = `${registry.dir}/${name}.yaml`;
+    const path = voiceDocumentPath(registry.dir, name);
     if (!FRONTEND_ASSET_CACHE.has(path)) {
       FRONTEND_ASSET_CACHE.set(path, freezeRecursively(loadYamlDocumentSync(path)));
     }
@@ -1344,7 +1388,7 @@ export async function preloadVoiceRuleDocuments(
   const documents = new Map<string, VoiceDocument>();
   if (!registry) return documents;
   for (const name of new Set([registry.default, ...registry.voices])) {
-    const path = `${registry.dir}/${name}.yaml`;
+    const path = voiceDocumentPath(registry.dir, name);
     if (!FRONTEND_ASSET_CACHE.has(path)) {
       FRONTEND_ASSET_CACHE.set(path, freezeRecursively(await loadYamlDocument(path)));
     }
@@ -1428,7 +1472,7 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     const path = requireAsset(declaredResources.morphology, "morphology");
     const data = FRONTEND_ASSET_CACHE.get(path);
     const phonotacticsPath = requireAsset(
-      isPlainObject(data) ? data.phonotactics_path : undefined,
+      resolveResourceReference(path, isPlainObject(data) ? data.phonotactics_path : undefined),
       "morphology.phonotactics_path",
     );
     morphology = {
@@ -1442,12 +1486,13 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     const path = requireAsset(declaredResources.stress_policy, "stress_policy", (path) => {
       const raw = loadYamlDocumentSync(path);
       const phonotacticsPath = requireAsset(
-        isPlainObject(raw) ? raw.phonotactics_path : undefined,
+        resolveResourceReference(path, isPlainObject(raw) ? raw.phonotactics_path : undefined),
         "stress_policy.phonotactics_path",
       );
       const phonotactics = FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData;
       try {
-        return { path, policy: parseStressPolicy(raw, phonotactics), phonotactics };
+        const policy = { ...parseStressPolicy(raw, phonotactics), phonotacticsPath };
+        return { path, policy, phonotactics };
       } catch (cause) {
         throw new Error(`E_STRESS_POLICY: ${path}: ${String(cause)}`, { cause });
       }
@@ -1557,7 +1602,7 @@ export async function preloadFrontendResources(spec: unknown): Promise<FrontendR
     const path = await requireAsset(declaredResources.morphology, "morphology");
     const data = FRONTEND_ASSET_CACHE.get(path);
     const phonotacticsPath = await requireAsset(
-      isPlainObject(data) ? data.phonotactics_path : undefined,
+      resolveResourceReference(path, isPlainObject(data) ? data.phonotactics_path : undefined),
       "morphology.phonotactics_path",
     );
     morphology = {
@@ -1574,12 +1619,13 @@ export async function preloadFrontendResources(spec: unknown): Promise<FrontendR
       async (path) => {
         const raw = await loadYamlDocument(path);
         const phonotacticsPath = await requireAsset(
-          isPlainObject(raw) ? raw.phonotactics_path : undefined,
+          resolveResourceReference(path, isPlainObject(raw) ? raw.phonotactics_path : undefined),
           "stress_policy.phonotactics_path",
         );
         const phonotactics = FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData;
         try {
-          return { path, policy: parseStressPolicy(raw, phonotactics), phonotactics };
+          const policy = { ...parseStressPolicy(raw, phonotactics), phonotacticsPath };
+          return { path, policy, phonotactics };
         } catch (cause) {
           throw new Error(`E_STRESS_POLICY: ${path}: ${String(cause)}`, { cause });
         }
@@ -1693,7 +1739,11 @@ function assembleFrontendResources(
     vqChannelsPath?: string;
   },
 ): FrontendResources {
-  const phonologyPath = inventoryPhonologyPath(inventory);
+  const phonologyReference = inventoryPhonologyPath(inventory);
+  const phonologyPath =
+    phonologyReference === undefined
+      ? undefined
+      : resolveIncludePath(inventoryPath, phonologyReference);
   const vqChannels =
     vqChannelsPath === undefined
       ? undefined

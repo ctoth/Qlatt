@@ -13,7 +13,10 @@
  */
 
 import fs from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { dump, load } from "js-yaml";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   frontendIds,
@@ -26,6 +29,7 @@ import {
   preloadFrontendResources,
   preloadFrontendSourceContour,
   resolveFrontend,
+  rulepackRuleOrigins,
 } from "../src/declarative-frontend/rule-pack";
 import * as paths from "../src/path-utils";
 import {
@@ -114,6 +118,170 @@ describe("primed resources", () => {
     });
     return { blocking, parallel };
   }
+
+  /** Relocate the real bundled documents, changing only known reference slots. */
+  function relativeDocument(resource: string, source: string): string {
+    if (!resource.endsWith(".yaml")) return source;
+    const document = load(source) as Record<string, unknown>;
+    const relative = (value: unknown) =>
+      typeof value === "string" && value.startsWith("/rules/")
+        ? path.posix.relative(path.posix.dirname(resource), value)
+        : value;
+    const resources = document.resources as Record<string, unknown> | undefined;
+    if (resources) {
+      document.resources = Object.fromEntries(
+        Object.entries(resources).map(([role, value]) => [role, relative(value)]),
+      );
+    }
+    for (const key of ["accent_policy_path", "phonology_path", "phonotactics_path"]) {
+      if (Object.hasOwn(document, key)) document[key] = relative(document[key]);
+    }
+    for (const [section, keys] of [
+      ["speakers", ["dir", "definition_path"]],
+      ["text_parser", ["table_path"]],
+    ] as const) {
+      const nested = document[section] as Record<string, unknown> | undefined;
+      for (const key of keys) {
+        if (nested && Object.hasOwn(nested, key)) nested[key] = relative(nested[key]);
+      }
+    }
+    if (Array.isArray(document.include)) document.include = document.include.map(relative);
+    return dump(document);
+  }
+
+  it.each(["http-sync", "http-async", "file-sync", "file-async"])(
+    "%s: acquires relative frontend resources and nested dependencies from their documents",
+    async (mode) => {
+      const dir = fs.mkdtempSync(path.join(tmpdir(), "qlatt-relative # "));
+      const base = mode.startsWith("file")
+        ? pathToFileURL(dir + path.sep).href
+        : `https://resources.example/${mode}/`;
+      const url = (resource: string) => new URL(resource.slice(1), base).href;
+      const files: Record<string, string> = {};
+      try {
+        for (const resource of readManifest("qlatt-english")) {
+          const source = relativeDocument(
+            resource,
+            fs.readFileSync(path.join("public", resource), "utf8"),
+          );
+          files[url(resource)] = source;
+          if (mode.startsWith("file")) {
+            const target = path.join(dir, resource);
+            fs.mkdirSync(path.dirname(target), { recursive: true });
+            fs.writeFileSync(target, source);
+          }
+        }
+        const requests = mode.startsWith("http") ? stubBrowser(files) : undefined;
+        if (requests) vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
+        const entry = url("/rules/frontends/qlatt-english/frontend.yaml");
+        const result = mode.endsWith("async")
+          ? await preloadFrontend(entry)
+          : resolveFrontend(entry);
+        const acquired = result.resources;
+        expect(acquired.inventoryPath).toBe(url("/rules/frontends/qlatt-english/inventory.yaml"));
+        expect(acquired.inventoryDocuments).toEqual([
+          acquired.inventoryPath,
+          url("/rules/languages/english/phonology.yaml"),
+        ]);
+        expect(acquired.lts.path).toBe(url("/rules/languages/english/lts-rules.yaml"));
+        expect(acquired.lexicon?.dictionary.hello).toBeDefined();
+        expect(acquired.morphology?.phonotactics).toBe(acquired.stress?.phonotactics);
+        expect(acquired.stress?.path).toBe(url("/rules/languages/english/stress-policy.yaml"));
+        expect(acquired.stress?.policy.phonotacticsPath).toBe(
+          url("/rules/languages/english/phonotactics.yaml"),
+        );
+        expect(acquired.sourceContour?.path).toBe(
+          url("/rules/frontends/qlatt-english/policy/source-contour.yaml"),
+        );
+        if (requests) {
+          const requested = mode.endsWith("async") ? requests.parallel : requests.blocking;
+          expect(requested).toContain(url("/rules/languages/english/phonotactics.yaml"));
+          expect(requested.every((resource) => resource.startsWith(base))).toBe(true);
+          if (mode.endsWith("async")) expect(requests.blocking).toEqual([]);
+        }
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    },
+    120000,
+  );
+
+  it.each(["sync", "async"])(
+    "%s: keeps inherited resource owners and child-first include shadow/fallback",
+    async (mode) => {
+      const base = `https://resources.example/inherited-${mode}/`;
+      const url = (resource: string) => new URL(resource.slice(1), base).href;
+      const files: Record<string, string> = {};
+      for (const resource of readManifest("qlatt-beauty")) {
+        const source = fs.readFileSync(path.join("public", resource), "utf8");
+        files[resource] = source;
+        if (resource === "/rules/frontends/qlatt-english/frontend.yaml") {
+          const ancestor = load(source) as { resources: Record<string, string> };
+          ancestor.resources.speaker_profile = "policy/speaker-profile.yaml";
+          files[resource] = dump(ancestor);
+        }
+        files[url(resource)] = relativeDocument(resource, source);
+      }
+      const requests = stubBrowser(files);
+      vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
+      const entry = url("/rules/frontends/qlatt-beauty/frontend.yaml");
+      const result = mode === "async" ? await preloadFrontend(entry) : resolveFrontend(entry);
+      expect(result.resources.inventoryPath).toBe(
+        url("/rules/frontends/qlatt-beauty/inventory.yaml"),
+      );
+      expect(result.resources.lts.path).toBe("/rules/languages/english/lts-rules.yaml");
+      expect(result.resources.speakerProfile?.path).toBe(
+        "/rules/frontends/qlatt-english/policy/speaker-profile.yaml",
+      );
+      expect(result.resources.inventoryDocuments).toContain(
+        url("/rules/languages/english/phonology.yaml"),
+      );
+      expect(result.voices.beauty.path).toBe(
+        url("/rules/frontends/qlatt-beauty/speakers/beauty.yaml"),
+      );
+      const origins = rulepackRuleOrigins(result.spec);
+      expect(origins.tobi_accent).toBe(url("/rules/frontends/qlatt-beauty/phases/prosody.yaml"));
+      expect(origins.speech_rate_scaling).toBe(
+        "/rules/frontends/qlatt-english/phases/duration.yaml",
+      );
+      const requested = mode === "async" ? requests.parallel : requests.blocking;
+      expect(requested).toContain(url("/rules/frontends/qlatt-beauty/phases/duration.yaml"));
+      if (mode === "async") expect(requests.blocking).toEqual([]);
+    },
+    120000,
+  );
+
+  it("resolves DECtalk's parser, speaker definition and voice directory beside its frontend", async () => {
+    const base = "https://resources.example/dectalk-relative/";
+    const url = (resource: string) => new URL(resource.slice(1), base).href;
+    const files: Record<string, string> = {};
+    for (const resource of readManifest("dectalk-english")) {
+      files[url(resource)] = relativeDocument(
+        resource,
+        fs.readFileSync(path.join("public", resource), "utf8"),
+      );
+    }
+    const entry = url("/rules/frontends/dectalk-english/frontend.yaml");
+    const frontend = load(files[entry]) as { speakers: { dir: string } };
+    frontend.speakers.dir += "/?revision=1#directory";
+    files[entry] = dump(frontend);
+    const { blocking, parallel } = stubBrowser(files);
+    vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
+    const result = await preloadFrontend(entry);
+    expect(result.resources.textParser?.config.tablePath).toBe(
+      url("/rules/frontends/dectalk-english/text-parser-table.json"),
+    );
+    expect(result.resources.speakerDefinition?.path).toBe(
+      url("/rules/frontends/dectalk-english/speaker-definition.json"),
+    );
+    expect(Object.values(result.voices).length).toBeGreaterThan(0);
+    for (const [name, voice] of Object.entries(result.voices)) {
+      expect(voice.path).toBe(url(`/rules/frontends/dectalk-english/speakers/${name}.yaml`));
+      expect(parallel).toContain(voice.path);
+    }
+    expect(parallel.every((resource) => resource.startsWith(base))).toBe(true);
+    expect(blocking).toEqual([]);
+  });
 
   it.each(frontendIds())("%s: prepares resources without synchronous requests", async (id) => {
     const prefix = `/async-owner-${id}/rules/`;

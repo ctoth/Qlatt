@@ -12,7 +12,7 @@ import {
 import type { TranscriptionConfig } from "../src/tts-frontend-types";
 
 const compiledSpec = loadBundledRulepackSpec("qlatt-english");
-const transcriptionConfig = compiledSpec.transcription;
+const transcriptionConfig = compiledSpec.transcription as TranscriptionConfig;
 const resources = loadFrontendResources(compiledSpec);
 const selected = {
   frontendId: "qlatt-english",
@@ -130,7 +130,7 @@ describe("transcribe-text", () => {
         .find((entry) => entry.type === "symbol_pronunciation_selected")!;
       expect(decision.citations).toEqual(["fixture symbol source"]);
       expect(decision.parents).toHaveLength(1);
-      const parent = provenance.getDecisions().find((entry) => entry.id === decision.parents[0]);
+      const parent = provenance.getDecisions().find((entry) => entry.id === decision.parents?.[0]);
       expect(parent).toBeDefined();
       expect(parent?.subject).toContain("token_0");
     });
@@ -168,11 +168,12 @@ describe("transcribe-text", () => {
       expect(beauty.transcription.dictionary_candidates).toEqual(
         transcriptionConfig.dictionary_candidates,
       );
-      expect(transcriptionConfig.sources.number).toBeUndefined();
+      expect(transcriptionConfig.sources?.number).toBeUndefined();
       expect(() => transcribeText("hello", selected)).not.toThrow();
       const dectalk = loadBundledRulepackSpec("dectalk-english");
-      for (const key of ["number", "phonemic"]) {
-        const config = { ...dectalk.transcription, sources: { ...dectalk.transcription.sources } };
+      const dectalkConfig = dectalk.transcription as TranscriptionConfig;
+      for (const key of ["number", "phonemic"] as const) {
+        const config = { ...dectalkConfig, sources: { ...dectalkConfig.sources } };
         delete config.sources[key];
         expect(() =>
           transcribeText("hello", {
@@ -189,8 +190,8 @@ describe("transcribe-text", () => {
       expect(() =>
         transcribeText("hello", { ...selected, transcriptionConfig: noSpelling }),
       ).toThrow("transcription.sources.spelling");
-      expect(dectalk.transcription.compound_recovery.max_span).toBe(0);
-      expect(dectalk.transcription.dictionary_candidates.order).toEqual([
+      expect(dectalkConfig.compound_recovery?.max_span).toBe(0);
+      expect(dectalkConfig.dictionary_candidates?.order).toEqual([
         "exact",
         "strip-alternate-suffix",
       ]);

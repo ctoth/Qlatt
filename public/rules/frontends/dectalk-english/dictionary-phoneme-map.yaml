@@ -1,0 +1,227 @@
+# Build-time dictionary conversion; no runtime resource acquisition is required.
+enum:
+  citations: ["DECtalk 4.63 INCLUDE/l_us_ph.h:59–116"]
+  values:
+    SIL: 0
+    IY: 1
+    IH: 2
+    EY: 3
+    EH: 4
+    AE: 5
+    AA: 6
+    AY: 7
+    AW: 8
+    AH: 9
+    AO: 10
+    OW: 11
+    OY: 12
+    UH: 13
+    UW: 14
+    RR: 15
+    YU: 16
+    AX: 17
+    IX: 18
+    IR: 19
+    ER: 20
+    AR: 21
+    OR: 22
+    UR: 23
+    W: 24
+    Y: 25
+    R: 26
+    LL: 27
+    HX: 28
+    RX: 29
+    LX: 30
+    M: 31
+    N: 32
+    NX: 33
+    EL: 34
+    DZ: 35
+    EN: 36
+    F: 37
+    V: 38
+    TH: 39
+    DH: 40
+    S: 41
+    Z: 42
+    SH: 43
+    ZH: 44
+    P: 45
+    B: 46
+    T: 47
+    D: 48
+    K: 49
+    G: 50
+    DX: 51
+    TX: 52
+    Q: 53
+    CH: 54
+    JH: 55
+    DF: 56
+arpa:
+  citations: ["DECtalk 4.63 INCLUDE/usa_phon.tab:117–174"]
+  values:
+    - "_ "
+    - iy
+    - ih
+    - ey
+    - eh
+    - ae
+    - aa
+    - ay
+    - aw
+    - ah
+    - ao
+    - ow
+    - oy
+    - uh
+    - uw
+    - rr
+    - yu
+    - ax
+    - ix
+    - ir
+    - er
+    - ar
+    - or
+    - ur
+    - "w "
+    - yx
+    - "r "
+    - ll
+    - hx
+    - rx
+    - lx
+    - "m "
+    - "n "
+    - nx
+    - el
+    - dz
+    - en
+    - "f "
+    - "v "
+    - th
+    - dh
+    - "s "
+    - "z "
+    - sh
+    - zh
+    - "p "
+    - "b "
+    - "t "
+    - "d "
+    - "k "
+    - "g "
+    - dx
+    - tx
+    - "q "
+    - ch
+    - jh
+    - df
+characters:
+  citations: ["DECtalk 4.63 dic/dic.c:96–149 (ENGLISH_US ptab)"]
+  values:
+    e: EY
+    a: AA
+    i: IY
+    E: EH
+    A: AY
+    I: IH
+    O: OY
+    o: OW
+    u: UW
+    "^": AH
+    W: AW
+    Y: YU
+    R: RR
+    c: AO
+    "@": AE
+    U: UH
+    "|": IX
+    x: AX
+    p: P
+    t: T
+    k: K
+    f: F
+    T: TH
+    s: S
+    S: SH
+    C: CH
+    w: W
+    y: Y
+    h: HX
+    l: LL
+    L: EL
+    N: EN
+    b: B
+    d: D
+    g: G
+    v: V
+    D: DH
+    z: Z
+    Z: ZH
+    J: JH
+    m: M
+    n: N
+    G: NX
+    r: R
+    q: Q
+    Q: TX
+    "&": DX
+    F: DF
+    B: IR
+    K: ER
+    P: AR
+    M: OR
+    j: UR
+vowels:
+  # Raw dictionary tokens, before inventory spelling substitutions.
+  values: [iy, ih, ey, eh, ae, aa, ay, aw, ah, ao, ow, oy, uh, uw, rr, yu, ax, ix, ir, er, ar, or, ur]
+  citations: ["Engineering compatibility policy: retain the converter's stress-bearing raw token set"]
+fixups:
+  ax:
+    symbol: AX
+    reason: "Engineering compatibility: retain reduced schwa inventory spelling AX."
+    citations: ["DECtalk 4.63 INCLUDE/l_us_ph.h:76 (AX); Qlatt dectalk-english inventory AX"]
+  yx:
+    symbol: Y
+    reason: "Engineering compatibility: map the raw glide spelling yx to inventory Y."
+    citations: ["DECtalk 4.63 INCLUDE/usa_phon.tab:143 (yx); Qlatt dectalk-english inventory Y"]
+  hx:
+    symbol: HH
+    reason: "Engineering compatibility: retain the raw hx to inventory HH spelling."
+    citations: ["DECtalk 4.63 INCLUDE/usa_phon.tab:146 (hx); Qlatt dectalk-english inventory HH"]
+  ll:
+    symbol: L
+    reason: "Engineering compatibility: retain the raw ll to inventory L spelling."
+    citations: ["DECtalk 4.63 INCLUDE/usa_phon.tab:145 (ll); Qlatt dectalk-english inventory L"]
+  nx:
+    symbol: NG
+    reason: "Engineering compatibility: retain the raw nx to inventory NG spelling."
+    citations: ["DECtalk 4.63 INCLUDE/usa_phon.tab:151 (nx); Qlatt dectalk-english inventory NG"]
+  rx:
+    symbol: R
+    reason: "Engineering compatibility: retain the existing rx/R collapse; no new contrast claim."
+    citations: ["DECtalk 4.63 INCLUDE/usa_phon.tab:147 (rx); Qlatt dectalk-english inventory R"]
+  lx:
+    symbol: L
+    reason: "Engineering compatibility: retain the existing lx/L collapse; no new contrast claim."
+    citations: ["DECtalk 4.63 INCLUDE/usa_phon.tab:148 (lx); Qlatt dectalk-english inventory L"]
+  dz:
+    symbol: D
+    reason: "Engineering compatibility: retain the dentalized-d to D collapse; not source equivalence."
+    citations: ["DECtalk 4.63 INCLUDE/usa_phon.tab:153 (dentalized d); Qlatt dectalk-english inventory D"]
+stress:
+  default: "0"
+  marks: {"'": "1", "`": "2"}
+  citations: ["Engineering compatibility: preserve primary and secondary dictionary stress separately"]
+controls:
+  block_rules: "~"
+  morpheme_boundary: ["#", "*"]
+  word_boundary: " "
+  citations: ["DECtalk 4.63 INCLUDE/phonlist.h; PH/ph_sort.c:1611–1612; PH/ph_aloph.c:563–567"]
+skip:
+  - character: q
+    reason: "Engineering compatibility: retain the existing converter omission of glottal-stop q."
+    citations: ["DECtalk 4.63 INCLUDE/l_us_ph.h:112 (Q); Qlatt dictionary converter compatibility"]

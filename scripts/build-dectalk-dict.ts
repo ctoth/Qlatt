@@ -11,8 +11,8 @@
  * Conversion: DECtalk single-ASCII phoneme codes -> ARPABET (Qlatt inventory)
  * ---------------------------------------------------------------------------
  * The DECtalk phoneme field is a string of one-ASCII-char-per-phoneme codes
- * with inline stress marks. Two chained DECtalk source tables define the
- * char -> ARPABET mapping; both are transcribed verbatim below:
+ * with inline stress marks. Three chained DECtalk source tables define the
+ * char -> ARPABET mapping in the frontend's dictionary-phoneme-map.yaml:
  *
  *   1. ptab[]  (char -> US_* enum name)
  *      C:\Users\Q\src\dectalk\463\dapi\src\dic\dic.c:96-149  (ENGLISH_US block)
@@ -25,13 +25,13 @@
  *      Positionally indexed by the enum value from (2). Verified: idx0 SIL=`_`,
  *      idx1 IY=`iy`, idx9 AH=`ah`, idx33 NX=`nx`, idx56 DF=`df`.
  *
- * The two tables fully determine char -> raw-ARPABET. A small documented FIXUP
+ * The tables fully determine char -> raw-ARPABET. A documented compatibility
  * map then reconciles the raw lowercase DECtalk ARPABET to the exact uppercase
  * symbol set in `public/rules/frontends/dectalk-english/inventory.yaml`
- * (e.g. rr->ER, ax->AX, hx->HH, ll->L, nx->NG, ix->IH, yu->Y+UW).
+ * (e.g. ax->AX, hx->HH, ll->L, nx->NG). RR, IX and YU remain distinct phones.
  *
- * Stress: `'` = primary stress, backtick = secondary stress; both immediately
- * precede the stressed vowel. Primary becomes stress digit 1, secondary digit
+ * Stress: `'` = primary stress, backtick = secondary stress; marks wait across
+ * onset consonants for the next vowel. Primary becomes stress digit 1, secondary digit
  * 2, an unmarked vowel 0. The inventory has no targets named with a 2; its
  * `secondary_stress_fallback` gives a secondary vowel the strong target while
  * the Segment keeps stress 2, which DECtalk's duration and F0 rules read
@@ -40,7 +40,8 @@
  * "many" m`Eni).
  *
  * Boundary/control chars (`~` block-rules, `#` hyphen/compound, `*` morpheme
- * boundary, ` ` word boundary) produce no phoneme and are skipped.
+ * boundary, ` ` word boundary) produce metadata rather than phonemes.
+ * Declared skip characters remain omitted; unknown characters emit diagnostics.
  *
  * Homographs: 254 words have two rows, marked `P` (primary) and `S`
  * (secondary) in the second field. The output is a flat map with the primary
@@ -52,6 +53,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createDiagnostics, type Diagnostics } from "../src/diagnostics";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -65,264 +67,73 @@ const frontend = loadYamlDocumentSync<{ resources: { lexicon: string } }>(
 );
 const OUT_PATH = path.resolve(root, "public", frontend.resources.lexicon.replace(/^\/+/, ""));
 
-// --- Table 2: US_* enum values (l_us_ph.h:59-116) ---------------------------
-// Index into usa_arpa[] is exactly this value.
-const ENUM_VALUE: Record<string, number> = {
-  SIL: 0,
-  IY: 1,
-  IH: 2,
-  EY: 3,
-  EH: 4,
-  AE: 5,
-  AA: 6,
-  AY: 7,
-  AW: 8,
-  AH: 9,
-  AO: 10,
-  OW: 11,
-  OY: 12,
-  UH: 13,
-  UW: 14,
-  RR: 15,
-  YU: 16,
-  AX: 17,
-  IX: 18,
-  IR: 19,
-  ER: 20,
-  AR: 21,
-  OR: 22,
-  UR: 23,
-  W: 24,
-  Y: 25,
-  R: 26,
-  LL: 27,
-  HX: 28,
-  RX: 29,
-  LX: 30,
-  M: 31,
-  N: 32,
-  NX: 33,
-  EL: 34,
-  DZ: 35,
-  EN: 36,
-  F: 37,
-  V: 38,
-  TH: 39,
-  DH: 40,
-  S: 41,
-  Z: 42,
-  SH: 43,
-  ZH: 44,
-  P: 45,
-  B: 46,
-  T: 47,
-  D: 48,
-  K: 49,
-  G: 50,
-  DX: 51,
-  TX: 52,
-  Q: 53,
-  CH: 54,
-  JH: 55,
-  DF: 56,
-};
-
-// --- Table 3: usa_arpa[] (usa_phon.tab:117-174), enum-indexed -----------------
-// Each entry is the 2-char ARPABET for the enum value at that index. Trailing
-// space ' ' (single-char phonemes) is trimmed. Only indices 0..56 are real.
-const USA_ARPA: string[] = [
-  "_ ",
-  "iy",
-  "ih",
-  "ey",
-  "eh",
-  "ae",
-  "aa",
-  "ay",
-  "aw",
-  "ah", // 0-9
-  "ao",
-  "ow",
-  "oy",
-  "uh",
-  "uw",
-  "rr",
-  "yu",
-  "ax",
-  "ix",
-  "ir", // 10-19
-  "er",
-  "ar",
-  "or",
-  "ur",
-  "w ",
-  "yx",
-  "r ",
-  "ll",
-  "hx",
-  "rx", // 20-29
-  "lx",
-  "m ",
-  "n ",
-  "nx",
-  "el",
-  "dz",
-  "en",
-  "f ",
-  "v ",
-  "th", // 30-39
-  "dh",
-  "s ",
-  "z ",
-  "sh",
-  "zh",
-  "p ",
-  "b ",
-  "t ",
-  "d ",
-  "k ", // 40-49
-  "g ",
-  "dx",
-  "tx",
-  "q ",
-  "ch",
-  "jh",
-  "df", // 50-56
-];
-
-// --- Table 1: ptab[] (dic.c:96-149), dict-char -> US_* enum name -------------
-const PTAB: Record<string, string> = {
-  e: "EY",
-  a: "AA",
-  i: "IY",
-  E: "EH",
-  A: "AY",
-  I: "IH",
-  O: "OY",
-  o: "OW",
-  u: "UW",
-  "^": "AH",
-  W: "AW",
-  Y: "YU",
-  R: "RR",
-  c: "AO",
-  "@": "AE",
-  U: "UH",
-  "|": "IX",
-  x: "AX",
-  p: "P",
-  t: "T",
-  k: "K",
-  f: "F",
-  T: "TH",
-  s: "S",
-  S: "SH",
-  C: "CH",
-  w: "W",
-  y: "Y",
-  h: "HX",
-  l: "LL",
-  L: "EL",
-  N: "EN",
-  b: "B",
-  d: "D",
-  g: "G",
-  v: "V",
-  D: "DH",
-  z: "Z",
-  Z: "ZH",
-  J: "JH",
-  m: "M",
-  n: "N",
-  G: "NX",
-  r: "R",
-  q: "Q",
-  Q: "TX",
-  "&": "DX",
-  F: "DF",
-  B: "IR",
-  K: "ER",
-  P: "AR",
-  M: "OR",
-  j: "UR",
-};
-
-// --- Derived: dict-char -> raw lowercase ARPABET -----------------------------
-const CHAR_RAW_ARPA: Record<string, string> = {};
-for (const [ch, name] of Object.entries(PTAB)) {
-  const idx = ENUM_VALUE[name];
-  CHAR_RAW_ARPA[ch] = USA_ARPA[idx].replace(/ /g, "");
+interface Cited {
+  citations: string[];
+}
+interface DictionaryPhonemeMap {
+  enum: Cited & { values: Record<string, number> };
+  arpa: Cited & { values: string[] };
+  characters: Cited & { values: Record<string, string> };
+  vowels: Cited & { values: string[] };
+  fixups: Record<string, Cited & { symbol: string; reason: string }>;
+  stress: Cited & { default: string; marks: Record<string, string> };
+  controls: Cited & { block_rules: string; morpheme_boundary: string[]; word_boundary: string };
+  skip: Array<Cited & { character: string; reason: string }>;
 }
 
-// Raw lowercase ARPABET symbols that ARE vowels (carry a stress digit).
-const VOWEL_RAW = new Set([
-  "iy",
-  "ih",
-  "ey",
-  "eh",
-  "ae",
-  "aa",
-  "ay",
-  "aw",
-  "ah",
-  "ao",
-  "ow",
-  "oy",
-  "uh",
-  "uw",
-  "rr",
-  "yu",
-  "ax",
-  "ix",
-  "ir",
-  "er",
-  "ar",
-  "or",
-  "ur",
-]);
+const mapping = loadYamlDocumentSync<DictionaryPhonemeMap>(
+  path.join(root, "public/rules/frontends/dectalk-english/dictionary-phoneme-map.yaml"),
+);
+for (const declaration of [
+  mapping.enum,
+  mapping.arpa,
+  mapping.characters,
+  mapping.vowels,
+  mapping.stress,
+  mapping.controls,
+  ...Object.values(mapping.fixups),
+  ...mapping.skip,
+]) {
+  if (
+    !Array.isArray(declaration.citations) ||
+    !declaration.citations.length ||
+    !declaration.citations.every((citation) => typeof citation === "string" && citation.trim())
+  )
+    throw new Error("E_DICT_MAPPING: every mapping declaration requires citations");
+}
+for (const entry of [...Object.values(mapping.fixups), ...mapping.skip]) {
+  if (typeof entry.reason !== "string" || !entry.reason.trim())
+    throw new Error("E_DICT_MAPPING: compatibility mappings require a reason");
+}
+const CHAR_RAW_ARPA: Record<string, string> = {};
+for (const [character, name] of Object.entries(mapping.characters.values)) {
+  const index = mapping.enum.values[name];
+  const raw = mapping.arpa.values[index];
+  if (!Number.isInteger(index) || typeof raw !== "string" || !raw.trim())
+    throw new Error(
+      `E_DICT_MAPPING: character '${character}' references invalid table entry '${name}'`,
+    );
+  CHAR_RAW_ARPA[character] = raw.replace(/ /g, "");
+}
+const VOWEL_RAW = new Set(mapping.vowels.values);
+const skipped = new Set(mapping.skip.map((entry) => entry.character));
+const buildDiagnostics = createDiagnostics();
+buildDiagnostics.subscribe((entry) => {
+  if (entry) console.warn(`${entry.code}: ${entry.message} ${JSON.stringify(entry.data)}`);
+});
 
-// --- FIXUP: raw lowercase ARPABET -> Qlatt inventory symbol(s) ----------------
-// Reconciles DECtalk's raw output to the exact key set in
-// dectalk-english/inventory.yaml. Vowels here are returned WITHOUT the stress
-// digit; the digit is appended by mapToken.
-const FIXUP_VOWEL: Record<string, string> = {
-  // rr, ix and yu are inventory phones (RR, IX, YU) and need no fixup. rr and
-  // ix were once folded into ER and IH, which are different DECtalk allophones
-  // (US_ER is the fused vowel of "air"; US_IH is the full vowel of "bit"), and
-  // yu was split into Y + UW.
-  ax: "AX", // reduced schwa -> AX (DECtalk US_AX code 17)
-};
-const FIXUP_CONS: Record<string, string> = {
-  yx: "Y", // Y glide (dict char 'y') -> inventory Y
-  hx: "HH", // -> inventory HH
-  ll: "L", // -> inventory L
-  nx: "NG", // -> inventory NG
-  rx: "R", // allophonic r -> R
-  lx: "L", // allophonic l -> L
-  dz: "D", // dentalized d -> D
-  // df, dx, tx, q kept as uppercase (all are inventory keys: DX, TX, Q;
-  // DF is documented below if it ever appears)
-};
-
-/**
- * Map one raw ARPABET token + its stress digit to inventory symbol(s).
- */
+/** Map a raw token to the declared inventory spelling, retaining vowel stress. */
 function mapToken(raw: string, stress: string): string[] {
-  if (VOWEL_RAW.has(raw)) {
-    const fixed = FIXUP_VOWEL[raw];
-    if (fixed) return [`${fixed}${stress}`];
-    return [`${raw.toUpperCase()}${stress}`];
-  }
-  const fixed = FIXUP_CONS[raw];
-  return [fixed ?? raw.toUpperCase()];
+  const symbol = mapping.fixups[raw]?.symbol ?? raw.toUpperCase();
+  return [VOWEL_RAW.has(raw) ? `${symbol}${stress}` : symbol];
 }
 
 /**
  * Convert one DECtalk phoneme field to a space-joined ARPABET string, empty
  * if the field yields no phonemes.
  */
-export function convertPhonemeField(field: string): string {
-  return convertPhonemeFieldDetailed(field).phones.join(" ");
+export function convertPhonemeField(field: string, diagnostics = buildDiagnostics): string {
+  return convertPhonemeFieldDetailed(field, diagnostics).phones.join(" ");
 }
 
 /**
@@ -339,7 +150,10 @@ export function convertPhonemeField(field: string): string {
  * `wordBreakAfter` holds the indices of the phones that a space stands after:
  * a word boundary inside the entry ("#" is `n'^mbR s`An`, two words).
  */
-export function convertPhonemeFieldDetailed(field: string): {
+export function convertPhonemeFieldDetailed(
+  field: string,
+  diagnostics: Diagnostics = buildDiagnostics,
+): {
   phones: string[];
   rulesBlocked: number[];
   boundaryAfter: number[];
@@ -349,42 +163,44 @@ export function convertPhonemeFieldDetailed(field: string): {
   const rulesBlocked: number[] = [];
   const boundaryAfter: number[] = [];
   const wordBreakAfter: number[] = [];
-  let stress = "0";
+  let stress = mapping.stress.default;
   let blockNext = false;
+  let offset = 0;
   for (const c of field) {
-    if (c === "'") {
-      stress = "1";
+    const at = offset;
+    offset += c.length;
+    const markedStress = mapping.stress.marks[c];
+    if (markedStress !== undefined) {
+      stress = markedStress;
       continue;
-    } // primary stress
-    if (c === "`") {
-      stress = "2";
-      continue;
-    } // secondary stress
-    if (c === "~") {
+    }
+    if (c === mapping.controls.block_rules) {
       blockNext = true;
       continue;
     }
-    if (c === "#" || c === "*") {
+    if (mapping.controls.morpheme_boundary.includes(c)) {
       if (out.length > 0 && !boundaryAfter.includes(out.length - 1)) {
         boundaryAfter.push(out.length - 1);
       }
       continue;
     }
-    if (c === " ") {
+    if (c === mapping.controls.word_boundary) {
       // A word boundary inside an entry.
       if (out.length > 0 && !wordBreakAfter.includes(out.length - 1)) {
         wordBreakAfter.push(out.length - 1);
       }
       continue;
     }
-    // Glottal stop (q / US_Q): a juncture marker between abutting vowels (the
-    // sole occurrence is "minutiae" = mIn'uSi q`i). The dectalk-english Klatt
-    // inventory has no discrete glottal-stop segment, and CMU likewise omits it
-    // (minutiae -> "M IH0 N UW1 SH IY0 AH0", vowels simply abut). Drop it so the
-    // vowels run together, matching both references.
-    if (c === "q") continue;
+    if (skipped.has(c)) continue;
     const raw = CHAR_RAW_ARPA[c];
-    if (raw === undefined) continue; // unknown char: skip (validator reports these)
+    if (raw === undefined) {
+      diagnostics.warn(
+        "Skipped unknown dictionary phoneme character",
+        { field, character: c, offset: at },
+        "DICT_UNKNOWN_CHARACTER",
+      );
+      continue;
+    }
     if (blockNext) rulesBlocked.push(out.length);
     blockNext = false;
     const tokens = mapToken(raw, stress);
@@ -392,7 +208,7 @@ export function convertPhonemeFieldDetailed(field: string): {
     // A stress mark stands before its syllable and may have the onset between
     // it and the vowel ("overrun" is `ovR#~'r^n): it waits for the next phone
     // that carries a stress digit.
-    if (tokens.some((tok) => /[0-9]$/.test(tok))) stress = "0";
+    if (tokens.some((tok) => /[0-9]$/.test(tok))) stress = mapping.stress.default;
   }
   return {
     phones: out,

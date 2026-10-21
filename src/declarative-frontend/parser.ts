@@ -3,6 +3,19 @@ import { expandSpecCelMacros, type MacroExpansionObserver, parseCelMacroBlock } 
 import type { ValidationDiagnostic } from "./validation";
 
 type PlainObject = Record<string, unknown>;
+
+/** An existing foreach failure, with its authored path before expansion. */
+export class ForeachExpansionError extends Error {
+  constructor(
+    message: string,
+    readonly path: readonly (string | number)[],
+    readonly position: "key" | "value" = "value",
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.name = "ForeachExpansionError";
+  }
+}
 const RESOURCE_ALIASES = {
   inventory_path: "inventory",
   lts_path: "lts",
@@ -226,27 +239,32 @@ function expandForeachArray(
     const directive = entry as PlainObject;
     for (const key of Object.keys(directive)) {
       if (key !== "foreach" && key !== "template") {
-        throw new Error(
+        throw new ForeachExpansionError(
           `E_FOREACH_INVALID: a 'foreach' directive may only contain 'foreach' and 'template', got extra key '${key}'`,
+          [...authored, inputIndex, key],
+          "key",
         );
       }
     }
     const items = directive.foreach;
     const template = directive.template;
     if (!Array.isArray(items) || items.length === 0) {
-      throw new Error(
+      throw new ForeachExpansionError(
         `E_FOREACH_INVALID: 'foreach' must be a non-empty array of binding maps, got ${JSON.stringify(items)}`,
+        [...authored, inputIndex, "foreach"],
       );
     }
     if (!isPlainObject(template)) {
-      throw new Error(
+      throw new ForeachExpansionError(
         `E_FOREACH_INVALID: 'foreach' requires an object 'template', got ${JSON.stringify(template)}`,
+        [...authored, inputIndex, "template"],
       );
     }
-    for (const item of items) {
+    for (const [bindingIndex, item] of items.entries()) {
       if (!isPlainObject(item)) {
-        throw new Error(
+        throw new ForeachExpansionError(
           `E_FOREACH_INVALID: 'foreach' items must be binding maps, got ${JSON.stringify(item)}`,
+          [...authored, inputIndex, "foreach", bindingIndex],
         );
       }
       const bindings: Record<string, string> = {};
@@ -256,8 +274,9 @@ function expandForeachArray(
           typeof binding !== "number" &&
           typeof binding !== "boolean"
         ) {
-          throw new Error(
+          throw new ForeachExpansionError(
             `E_FOREACH_INVALID: 'foreach' binding '${key}' must be a scalar (string/number/boolean), got ${JSON.stringify(binding)}`,
+            [...authored, inputIndex, "foreach", bindingIndex, key],
           );
         }
         bindings[key] = String(binding);
@@ -602,17 +621,29 @@ export function parseDslSpec(
     ),
     phases: phases.map((phase) => normalizePhase(phase)),
     rules: Object.fromEntries(
-      Object.entries(rules).map(([name, rule]) => [
-        name,
-        normalizeRule(
-          rule,
-          observeRulePath
-            ? (compiled, authored) => {
-                observeRulePath(["rules", name, ...compiled], ["rules", name, ...authored]);
-              }
-            : undefined,
-        ),
-      ]),
+      Object.entries(rules).map(([name, rule]) => {
+        try {
+          return [
+            name,
+            normalizeRule(
+              rule,
+              observeRulePath
+                ? (compiled, authored) => {
+                    observeRulePath(["rules", name, ...compiled], ["rules", name, ...authored]);
+                  }
+                : undefined,
+            ),
+          ];
+        } catch (error) {
+          if (!(error instanceof ForeachExpansionError)) throw error;
+          throw new ForeachExpansionError(
+            error.message,
+            ["rules", name, ...error.path],
+            error.position,
+            { cause: error },
+          );
+        }
+      }),
     ),
     interpolation: {
       scalars: cloneObject(interpolation.scalars),

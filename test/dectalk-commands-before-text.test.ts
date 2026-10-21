@@ -99,7 +99,7 @@ const run = (text: string, speaker = "paul") => {
 
 const spec = loadRulepackSpecFromPath("/rules/frontends/dectalk-english/frontend.yaml");
 const registry = getVoiceRegistry(spec);
-if (!registry?.definitionPath) throw new Error("the frontend declares no speaker definition data");
+if (!registry) throw new Error("the frontend declares no voice registry");
 const definitionContext = loadFrontendResources(spec).speakerDefinition;
 if (!definitionContext) throw new Error("the frontend supplies no speaker definition context");
 const data = definitionContext.data as SpeakerDefinitionData;

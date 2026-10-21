@@ -66,12 +66,6 @@ export interface VoiceRegistry {
    *  per-voice or per-gain branches. Empty when not declared. */
   speakerGainOffsets: SpeakerGainOffset[];
   /**
-   * Where the names and limits of a speaker definition's entries are
-   * (`speakers.definition_path`), for a frontend whose voice files carry
-   * their definition and whose texts may change it. Absent otherwise.
-   */
-  definitionPath?: string;
-  /**
    * The rule fields that are sent with a speaker definition
    * (`speakers.definition_frame_params`): in a text whose voice changes
    * inside it, each frame carries them for the voice in force when the frame
@@ -260,9 +254,6 @@ export function getVoiceRegistry(frontendSpec: unknown): VoiceRegistry | null {
     definitionFrameParams: Array.isArray(speakers.definition_frame_params)
       ? speakers.definition_frame_params.filter((v): v is string => typeof v === "string")
       : [],
-    ...(typeof speakers.definition_path === "string"
-      ? { definitionPath: speakers.definition_path }
-      : {}),
   };
 }
 

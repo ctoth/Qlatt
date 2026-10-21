@@ -155,6 +155,8 @@ export type TranscriptionConfig = {
 };
 
 export type TranscriptionOptions = {
+  /** Selected frontend identity for resource diagnostics. */
+  frontendId?: string;
   diagnostics?: import("./diagnostics").Diagnostics | null;
   provenance?: ProvenanceCollector | null;
   transcriptionConfig?: TranscriptionConfig;

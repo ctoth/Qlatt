@@ -1,14 +1,22 @@
 import { describe, expect, it } from "vitest";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { normalizeText, textToKlattTrack, transcribeText } from "../src/tts-frontend";
 import {
   getTrackWordOccurrence,
   getTranscriptionWordOccurrence,
 } from "./utils/phonology-conformance";
 
+const compiledSpec = loadBundledRulepackSpec("qlatt-english");
+const selected = {
+  compiledSpec,
+  dictionaryMap: loadFrontendResources(compiledSpec).lexicon?.dictionary,
+};
+
 describe("spelling mode", () => {
   it("spells single-letter runs with letter-name pronunciations", () => {
     const normalized = normalizeText("B A N A N A S!");
-    const transcription = transcribeText(normalized);
+    const transcription = transcribeText(normalized, selected);
 
     expect(getTranscriptionWordOccurrence(transcription, "b", 0)).toEqual(["B", "IY"]);
     expect(getTranscriptionWordOccurrence(transcription, "a", 0)).toEqual(["EY"]);
@@ -24,7 +32,7 @@ describe("spelling mode", () => {
 
   it("keeps ordinary article a out of spelling mode", () => {
     const normalized = normalizeText("a banana");
-    const transcription = transcribeText(normalized);
+    const transcription = transcribeText(normalized, selected);
 
     expect(getTranscriptionWordOccurrence(transcription, "a", 0)).toEqual(["AH"]);
 
@@ -37,7 +45,7 @@ describe("spelling mode", () => {
 
   it("spells dotted initialisms letter by letter", () => {
     const normalized = normalizeText("U.S.A. today");
-    const transcription = transcribeText(normalized);
+    const transcription = transcribeText(normalized, selected);
 
     expect(getTranscriptionWordOccurrence(transcription, "u", 0)).toEqual(["Y", "UW"]);
     expect(getTranscriptionWordOccurrence(transcription, "s", 0)).toEqual(["EH", "S"]);

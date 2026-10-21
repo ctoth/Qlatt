@@ -11,7 +11,6 @@
  * - Provenance tracking for pronunciation decisions
  */
 
-import { DEFAULT_CMU_DICTIONARY_PATH, preloadCmuDictionaryFromPath } from "./cmu-dictionary-loader";
 import type { HrgSchema } from "./declarative-frontend/hrg";
 import { Utterance } from "./declarative-frontend/hrg";
 import { runGraphRuleEngine } from "./declarative-frontend/hrg/rule-engine";
@@ -141,20 +140,11 @@ type RequiredTranscriptionTables = {
   writtenWordMarks?: { open: Record<string, string>; close: Record<string, string> };
 };
 
-// ---------------------------------------------------------------------------
-// CMU dictionary (top-level await, loaded once at module init)
-// ---------------------------------------------------------------------------
-
-const CMU_DICT_MAP: Record<string, string | undefined> = await preloadCmuDictionaryFromPath(
-  DEFAULT_CMU_DICTIONARY_PATH,
-);
-
 /**
  * Build a dictionary lookup adapter over a flat word -> "ARPABET ..." map.
  *
  * Generic: the same elision/apostrophe/trailing-`.`/alternate-pronunciation
- * candidate logic applies to ANY dictionary map (the global CMU default or a
- * per-frontend dictionary loaded from `dictionary_path`). No per-frontend
+ * candidate logic applies to ANY supplied dictionary map. No per-frontend
  * branches — only the backing map differs.
  *
  * Also handles alternate pronunciation entries like "read(1)".
@@ -194,12 +184,6 @@ function makeDictLookup(
     return null;
   };
 }
-
-/**
- * Adapter over the global CMU map. Used by frontends that declare no
- * per-frontend `dictionary_path`.
- */
-const cmuDictLookup: DictLookup = makeDictLookup(CMU_DICT_MAP);
 
 // ---------------------------------------------------------------------------
 // Helper functions
@@ -695,13 +679,10 @@ export function transcribeText(
   options: TranscriptionOptions = {},
 ): TranscriptionToken[] {
   const provenance = options.provenance ?? options.utterance?.provenance ?? null;
-  // Resolve the backing dictionary map for this call: a per-frontend map (from
-  // `dictionary_path`) when supplied, else the global CMU default. Both the
-  // lookup and compound-recovery probe must read the SAME map so a frontend's
-  // dictionary fully replaces the default (no global-map leak in compound
-  // recovery). An explicit `dictLookup` override still wins for the lookup
-  // (used e.g. for diagnostic injection in tests).
-  const effectiveDictMap = options.dictionaryMap ?? CMU_DICT_MAP;
+  // Lookup and compound recovery share the supplied map. Without one, the
+  // empty map sends words to the selected letter-to-sound implementation.
+  // An explicit lookup override remains authoritative for direct lookup.
+  const effectiveDictMap = options.dictionaryMap ?? {};
   const compiledSpec = options.compiledSpec ?? QLATT_ENGLISH_RULEPACK;
   const resources = loadFrontendResources(compiledSpec);
   const ltsPath = options.ltsPath ?? resources.ltsPath;
@@ -711,9 +692,15 @@ export function transcribeText(
   const transcriptionTables = requireTranscriptionTables(cfg);
   const effectiveDictLookup =
     options.dictLookup ??
-    (options.dictionaryMap || !transcriptionTables.elidedApostropheLookup
-      ? makeDictLookup(effectiveDictMap, transcriptionTables.elidedApostropheLookup)
-      : cmuDictLookup);
+    makeDictLookup(effectiveDictMap, transcriptionTables.elidedApostropheLookup);
+  if (options.dictionaryMap === undefined && options.dictLookup === undefined) {
+    const frontendId = options.frontendId ?? "unspecified";
+    options.diagnostics?.info(
+      `Frontend '${frontendId}' has no supplied lexicon; using letter-to-sound`,
+      { frontendId },
+      "I_FRONTEND_NO_LEXICON",
+    );
+  }
 
   // A frontend with its own dictionary or letter-to-sound file says what they
   // are: the shared names would put a source it did not use into the record.

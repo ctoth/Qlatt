@@ -9,6 +9,7 @@
  */
 
 import { describe, expect, it } from "vitest";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector, type DecisionRecord } from "../src/provenance";
 import { transcribeText } from "../src/transcribe-text";
@@ -89,6 +90,7 @@ describe("lexicon sources in decision records", () => {
     expect(() =>
       transcribeText("is", {
         compiledSpec: spec,
+        dictionaryMap: loadFrontendResources(spec).lexicon?.dictionary,
         transcriptionConfig: transcription,
       }),
     ).toThrow(/transcription\.sources\.dictionary, transcription\.sources\.lts-rules/);

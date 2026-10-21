@@ -3,7 +3,6 @@
  * Run via test/lexical-stress-evaluation.test.ts for the repository's Vite resource initialization.
  * Reference: bundled CMU dictionary. Baseline: e3e8b4cf src/g2p/stress.ts count/hint rule.
  */
-import { loadCmuDictionaryFromPathSync } from "../src/cmu-dictionary-loader";
 import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { pronounce } from "../src/g2p";
@@ -56,7 +55,10 @@ function baseline(phones: string[], hint: StressHint | undefined): string[] {
 }
 
 export function evaluateLexicalStress() {
-  const dictionary = loadCmuDictionaryFromPathSync("/cmu-dictionary.json");
+  const { lexicon } = resources;
+  if (!lexicon)
+    throw new Error("E_FRONTEND_CONFIG: frontend 'qlatt-english' requires role 'lexicon'");
+  const dictionary = lexicon.dictionary;
   const keys = Object.keys(dictionary);
   return Object.entries(evaluationWords).flatMap(([family, words]) =>
     words.map((word) => {

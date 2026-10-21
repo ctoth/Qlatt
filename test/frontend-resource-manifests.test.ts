@@ -24,10 +24,14 @@ import {
   recordFrontendResources,
 } from "../scripts/build-frontend-resource-manifests";
 import {
+  listBundledFrontendIds,
   loadBundledRulepackSpec,
+  preloadBundledRulepackPath,
+  preloadBundledRulepackSpec,
   preloadFrontend,
   preloadFrontendResources,
   preloadFrontendSourceContour,
+  resolveBundledRulepackPath,
   resolveFrontend,
   rulepackRuleOrigins,
 } from "../src/declarative-frontend/rule-pack";
@@ -118,6 +122,66 @@ describe("primed resources", () => {
     });
     return { blocking, parallel };
   }
+
+  it.each(["sync", "async"])(
+    "%s: discovers an added catalogue entryPoint",
+    async (mode) => {
+      const manifestPath = "/rules/frontends/manifest.json";
+      const id = `catalogue-fixture-${mode}`;
+      const entry = `/rules/frontends/${id}/selected.yaml`;
+      const files: Record<string, string> = {};
+      for (const resource of readManifest("qlatt-english")) {
+        files[resource] = fs.readFileSync(path.join("public", resource), "utf8");
+      }
+      const manifest = JSON.parse(files[manifestPath]);
+      manifest.frontends.push({ id, entryPoint: "selected.yaml" });
+      files[manifestPath] = JSON.stringify(manifest);
+      files[entry] = "extends: qlatt-english\n";
+      const { blocking, parallel } = stubBrowser(files);
+      vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
+      const spec =
+        mode === "async"
+          ? await preloadBundledRulepackSpec(id)
+          : loadBundledRulepackSpec(id);
+      expect(spec.rules.speech_rate_scaling).toBeDefined();
+      expect(listBundledFrontendIds()).toContain(id);
+      expect(resolveBundledRulepackPath(id)).toBe(entry);
+      expect(resolveBundledRulepackPath()).toBe("/rules/frontends/qlatt-english/frontend.yaml");
+      expect(() => resolveBundledRulepackPath("unknown-catalogue-id")).toThrow(
+        /E_FRONTEND_ID_UNKNOWN.*unknown-catalogue-id/,
+      );
+      if (mode === "async") {
+        const prepared = await preloadFrontend(await preloadBundledRulepackPath(id));
+        const fetched = [...parallel];
+        expect(resolveFrontend(resolveBundledRulepackPath(id))).toEqual(prepared);
+        expect(parallel).toEqual(fetched);
+        expect(parallel.filter((resource) => resource === manifestPath)).toHaveLength(1);
+        expect(blocking).toEqual([]);
+      } else {
+        expect(blocking).toContain(entry);
+        expect(parallel).toEqual([]);
+      }
+    },
+    120000,
+  );
+
+  it.each([
+    {},
+    { frontends: [{ id: "missing-entry" }] },
+    { frontends: [{ id: " ", entryPoint: "frontend.yaml" }] },
+    { frontends: [{ id: "blank-entry", entryPoint: " " }] },
+    {
+      frontends: [
+        { id: "duplicate", entryPoint: "a.yaml" },
+        { id: "duplicate", entryPoint: "b.yaml" },
+      ],
+    },
+  ])("rejects invalid catalogue declarations %j", async (document) => {
+    stubBrowser({ "/rules/frontends/manifest.json": JSON.stringify(document) });
+    vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
+    expect(() => listBundledFrontendIds()).toThrow(/E_FRONTEND_MANIFEST/);
+    await expect(preloadBundledRulepackPath()).rejects.toThrow(/E_FRONTEND_MANIFEST/);
+  });
 
   /** Relocate the real bundled documents, changing only known reference slots. */
   function relativeDocument(resource: string, source: string): string {

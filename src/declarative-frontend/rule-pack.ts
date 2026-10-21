@@ -27,6 +27,7 @@ import { type RdPolicy, readRdPolicy } from "../input/rd-policy";
 import { parseVoiceQualityChannels, type VoiceQualityChannel } from "../input/vq-channels";
 import { parseSourceContourDocument, type SourceContourSpec } from "../source-contour";
 import { parseSpeakerProfileDocument, type SpeakerProfileSpec } from "../speaker-profile";
+import { keepSyncResource } from "../sync-resource-cache";
 import { parseTextParserConfig, type TextParserConfig } from "../text-parser/frontend";
 import type { TextParserTable } from "../text-parser/interpreter";
 import {
@@ -298,13 +299,7 @@ function hasNonEmptyValue(value: unknown): boolean {
 }
 
 export const DEFAULT_FRONTEND_ID = "qlatt-english";
-export const BUNDLED_FRONTEND_RULEPACK_PATHS = Object.freeze({
-  [DEFAULT_FRONTEND_ID]: "/rules/frontends/qlatt-english/frontend.yaml",
-  "dectalk-english": "/rules/frontends/dectalk-english/frontend.yaml",
-  "qlatt-beauty": "/rules/frontends/qlatt-beauty/frontend.yaml",
-} as const);
-
-export type BundledFrontendId = keyof typeof BUNDLED_FRONTEND_RULEPACK_PATHS;
+const FRONTEND_MANIFEST_PATH = "/rules/frontends/manifest.json";
 
 // ---------------------------------------------------------------------------
 // Include resolution: load child specs and merge them into the root spec
@@ -745,7 +740,7 @@ async function resolveExtendsAsync(
   if (typeof baseId !== "string" || baseId.length === 0) {
     return { doc: rootDoc, fallback: undefined };
   }
-  const basePath = resolveBundledRulepackPath(baseId);
+  const basePath = await preloadBundledRulepackPath(baseId);
   const baseSource = await loadYamlSource(basePath);
   const baseDoc = parseRulepackDocument(baseSource, `base rulepack ${basePath}`);
   const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
@@ -990,27 +985,67 @@ export function compileRuleEngineSpec(source: unknown): CompiledRulepack {
   return spec;
 }
 
-export function listBundledFrontendIds(): string[] {
-  return Object.keys(BUNDLED_FRONTEND_RULEPACK_PATHS).sort();
+/** The existing bundled catalogue, not a package dependency/pairing registry. */
+function frontendCatalogue(source: string): Map<string, string> {
+  const manifest: unknown = JSON.parse(source);
+  if (!isPlainObject(manifest) || !Array.isArray(manifest.frontends)) {
+    throw new Error(`E_FRONTEND_MANIFEST: '${FRONTEND_MANIFEST_PATH}' requires frontends`);
+  }
+  const paths = new Map<string, string>();
+  for (const entry of manifest.frontends) {
+    if (
+      !isPlainObject(entry) ||
+      typeof entry.id !== "string" ||
+      !entry.id.trim() ||
+      typeof entry.entryPoint !== "string" ||
+      !entry.entryPoint.trim()
+    ) {
+      throw new Error(`E_FRONTEND_MANIFEST: each frontend requires nonempty id and entryPoint`);
+    }
+    if (paths.has(entry.id)) {
+      throw new Error(`E_FRONTEND_MANIFEST: duplicate frontend '${entry.id}'`);
+    }
+    const directory = resolveIncludePath(FRONTEND_MANIFEST_PATH, `${entry.id}/`);
+    paths.set(entry.id, resolveIncludePath(directory, entry.entryPoint));
+  }
+  return paths;
 }
 
-export function resolveBundledRulepackPath(frontendId: string = DEFAULT_FRONTEND_ID): string {
-  const specPath =
-    BUNDLED_FRONTEND_RULEPACK_PATHS[frontendId as keyof typeof BUNDLED_FRONTEND_RULEPACK_PATHS];
-  if (typeof specPath === "string" && specPath.length > 0) {
-    return specPath;
-  }
-  const known = listBundledFrontendIds();
+function catalogueRulepackPath(paths: ReadonlyMap<string, string>, frontendId: string): string {
+  const specPath = paths.get(frontendId);
+  if (specPath !== undefined) return specPath;
+  const known = [...paths.keys()].sort();
   throw new Error(
     `E_FRONTEND_ID_UNKNOWN: '${frontendId}' is not a bundled frontend` +
       (known.length > 0 ? ` (known: ${known.join(", ")})` : ""),
   );
 }
 
+export function listBundledFrontendIds(): string[] {
+  return [...frontendCatalogue(loadYamlSourceSync(FRONTEND_MANIFEST_PATH)).keys()].sort();
+}
+
+export function resolveBundledRulepackPath(frontendId: string = DEFAULT_FRONTEND_ID): string {
+  return catalogueRulepackPath(
+    frontendCatalogue(loadYamlSourceSync(FRONTEND_MANIFEST_PATH)),
+    frontendId,
+  );
+}
+
+/** Discover without blocking and retain source for subsequent synchronous TTS. */
+export async function preloadBundledRulepackPath(
+  frontendId: string = DEFAULT_FRONTEND_ID,
+): Promise<string> {
+  const source = await loadYamlSource(FRONTEND_MANIFEST_PATH);
+  const catalogue = frontendCatalogue(source);
+  keepSyncResource(FRONTEND_MANIFEST_PATH, source);
+  return catalogueRulepackPath(catalogue, frontendId);
+}
+
 export function listBundledRulepackPaths(): string[] {
   const known = new Set<string>([
     ...BUNDLED_RULEPACK_CACHE.keys(),
-    ...Object.values(BUNDLED_FRONTEND_RULEPACK_PATHS),
+    ...frontendCatalogue(loadYamlSourceSync(FRONTEND_MANIFEST_PATH)).values(),
   ]);
   return [...known].sort();
 }
@@ -1238,7 +1273,7 @@ export function assertBundledRulesPhased(): void {
 export async function preloadBundledRulepackSpec(
   frontendId: string = DEFAULT_FRONTEND_ID,
 ): Promise<CompiledRulepack> {
-  return preloadRulepackSpecFromPath(resolveBundledRulepackPath(frontendId));
+  return preloadRulepackSpecFromPath(await preloadBundledRulepackPath(frontendId));
 }
 
 const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();

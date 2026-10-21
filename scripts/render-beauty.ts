@@ -8,7 +8,7 @@
  *
  * Default (no --affect, or --affect neutral) is the neutral render, which is
  * numerically identical to a plain `render-phrase.ts` render (the (c) base
- * case: NEUTRAL_VQ is the identity transform).
+ * case: the selected channel neutrals give the identity transform).
  *
  * Usage:
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node \
@@ -117,15 +117,20 @@ async function main(): Promise<void> {
   if (!library) {
     throw new Error(`E_FRONTEND_CONFIG: frontend '${frontendId}' requires affect_presets`);
   }
+  const channels = resources.vqChannels?.channels;
+  if (!channels) {
+    throw new Error(`E_FRONTEND_CONFIG: frontend '${frontendId}' requires vq_channels`);
+  }
   const isNeutral = affectName === "neutral" || degree === 0;
   const affect = isNeutral
-    ? neutralAffect(library)
-    : compileAffect(library, affectName, degree, { sex });
+    ? neutralAffect(library, channels)
+    : compileAffect(library, channels, affectName, degree, { sex });
 
-  // 3. Apply the affect delta to the assembled track (NEUTRAL_VQ = identity).
+  // 3. Apply the affect delta to the assembled track (neutral = identity).
   const { track, citations } = applyAffectToTrack(frontend.track, affect, {
     frontendId,
     rdPolicy: resources.vqChannels?.rdPolicy,
+    vqChannels: channels,
   });
 
   console.log(

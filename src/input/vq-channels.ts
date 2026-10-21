@@ -1,4 +1,4 @@
-import { isPlainObject, loadYamlDocumentSync } from "../yaml-loader";
+import { isPlainObject } from "../yaml-loader";
 
 export interface VoiceQualityChannel {
   readonly channel: string;
@@ -74,17 +74,3 @@ export function parseVoiceQualityChannels(document: unknown): readonly VoiceQual
     }),
   );
 }
-
-export const VQ_CHANNELS = parseVoiceQualityChannels(
-  loadYamlDocumentSync("/rules/policy/vq-channels.yaml"),
-);
-export const VQ_FIELDS: readonly string[] = Object.freeze(VQ_CHANNELS.map((row) => row.channel));
-export const VQ_NEUTRAL: Readonly<Record<string, number>> = Object.freeze(
-  Object.fromEntries(VQ_CHANNELS.map((row) => [row.channel, row.neutral])),
-);
-export const VQ_MULTIPLICATIVE_FIELDS: readonly string[] = Object.freeze(
-  VQ_CHANNELS.filter((row) => row.algebra === "mul").map((row) => row.channel),
-);
-export const VQ_PARAM_CHANNELS = Object.freeze(
-  VQ_CHANNELS.filter((row) => row.projection === "param"),
-);

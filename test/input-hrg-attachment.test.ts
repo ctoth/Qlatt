@@ -4,16 +4,18 @@ import { Utterance, whyFeature } from "../src/declarative-frontend/hrg";
 import { parseAffectPresets } from "../src/input/affect-presets";
 import {
   attachDirectionsToUtterance,
-  DIRECTION_ITEM_SCHEMA,
+  buildDirectionItemSchema,
   parseDirectionInput,
 } from "../src/input/parse";
+import { parseVoiceQualityChannels } from "../src/input/vq-channels";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const library = parseAffectPresets(loadYamlDocumentSync("/rules/affect/presets.yaml"));
+const channels = parseVoiceQualityChannels(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
 
 const SCHEMA = {
   itemTypes: {
-    direction: DIRECTION_ITEM_SCHEMA,
+    direction: buildDirectionItemSchema(channels),
   },
   relations: {
     Affect: { kind: "list", itemTypes: ["direction"] },
@@ -44,7 +46,7 @@ describe("Direction Track attachment to static HRG fixtures", () => {
           ],
         },
       },
-      { affectLibrary: library },
+      { affectLibrary: library, vqChannels: channels },
     );
     const utterance = new Utterance(SCHEMA, parsed.provenance);
 

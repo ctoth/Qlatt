@@ -5,15 +5,17 @@ import { compileAffect } from "../src/input/affect";
 import { parseAffectPresets } from "../src/input/affect-presets";
 import {
   attachDirectionsToUtterance,
-  DIRECTION_ITEM_SCHEMA,
+  buildDirectionItemSchema,
   parseDirectionInput,
 } from "../src/input/parse";
 import { readRdPolicy } from "../src/input/rd-policy";
+import { parseVoiceQualityChannels } from "../src/input/vq-channels";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const rdPolicy = readRdPolicy(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
+const channels = parseVoiceQualityChannels(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
 const library = parseAffectPresets(loadYamlDocumentSync("/rules/affect/presets.yaml"));
-const context = { frontendId: "fixture", rdPolicy };
+const context = { frontendId: "fixture", rdPolicy, vqChannels: channels };
 
 const META = {
   ruleId: "fixture",
@@ -50,7 +52,7 @@ function schema(): HrgSchema {
   for (const column of COLUMNS) segmentFeatures[column] = { kind: "number" };
   return {
     itemTypes: {
-      direction: DIRECTION_ITEM_SCHEMA,
+      direction: buildDirectionItemSchema(channels),
       f0Point: { features: { value: { kind: "number" } } },
       segment: { features: segmentFeatures },
       word: { features: { text: { kind: "string" } } },
@@ -76,7 +78,7 @@ function varianceFixture(): Utterance {
         global: { affect: { preset: "angry", degree: 1 } },
       },
     },
-    { affectLibrary: library },
+    { affectLibrary: library, vqChannels: channels },
   );
   const utterance = new Utterance(schema(), parsed.provenance);
   attachDirectionsToUtterance(parsed, utterance);
@@ -161,7 +163,7 @@ function params(): Record<(typeof COLUMNS)[number], number> {
   };
 }
 
-function fixture(): Utterance {
+function fixture(withAffect = true): Utterance {
   const parsed = parseDirectionInput(
     {
       score: { text: "red moon" },
@@ -184,10 +186,10 @@ function fixture(): Utterance {
         ],
       },
     },
-    { affectLibrary: library },
+    { affectLibrary: library, vqChannels: channels },
   );
   const utterance = new Utterance(schema(), parsed.provenance);
-  attachDirectionsToUtterance(parsed, utterance);
+  if (withAffect) attachDirectionsToUtterance(parsed, utterance);
 
   const build = utterance.beginTransaction(META);
   const words = ["red", "moon"].map((text, index) => {
@@ -253,7 +255,7 @@ describe("HRG lowering Affect projection", () => {
       const durationScale = 1.25;
       globalAffect.set(
         "delta",
-        { ...compileAffect(library, "angry", 1).vq, durationScale, pauseScale },
+        { ...compileAffect(library, channels, "angry", 1).vq, durationScale, pauseScale },
         META,
       );
       const policy = {
@@ -291,8 +293,25 @@ describe("HRG lowering Affect projection", () => {
     }
   });
 
+  it("retains the existing formant clamp without a VQ resource or delta", () => {
+    const utterance = fixture(false);
+    const update = utterance.beginTransaction(META);
+    for (const segment of utterance.relation("Segment").listItems()) {
+      update.set(segment, "F1", 0);
+    }
+    update.commit();
+    const lowered = lowerToFrames(utterance, POLICY);
+    expect(lowered.frames.find((frame) => frame.segmentId === "segment-0")?.params.F1).toBe(1);
+    expect(utterance.diagnostics.getEntries()).toContainEqual(
+      expect.objectContaining({
+        code: "HRG_LOWER_VALUE_CLAMPED",
+        data: expect.objectContaining({ key: "F1", requested: 0, clamped: 1 }),
+      }),
+    );
+  });
+
   it("composes global and field-wise winning local deltas over graph-linked Words", () => {
-    const angry = compileAffect(library, "angry", 1).vq;
+    const angry = compileAffect(library, channels, "angry", 1).vq;
     const utterance = fixture();
     const lowered = lowerToFrames(utterance, POLICY, context);
     const first = lowered.frames.find((frame) => frame.segmentId === "segment-0");
@@ -320,7 +339,7 @@ describe("HRG lowering Affect projection", () => {
   });
 
   it("scales completed F0 excursion around its voiced mean with Affect provenance", () => {
-    const angry = compileAffect(library, "angry", 1).vq;
+    const angry = compileAffect(library, channels, "angry", 1).vq;
     const utterance = varianceFixture();
     const lowered = lowerToFrames(utterance, POLICY, context);
     const voiced = lowered.frames.filter((frame) => frame.segmentId != null);
@@ -350,7 +369,11 @@ describe("HRG lowering Affect projection", () => {
     const utterance = varianceFixture();
     const affect = utterance.relation("Affect").listItems()[0];
     if (!affect) throw new Error("variance Affect Item missing");
-    affect.set("delta", { ...compileAffect(library, "angry", 1).vq, f0VarianceScale: -1 }, META);
+    affect.set(
+      "delta",
+      { ...compileAffect(library, channels, "angry", 1).vq, f0VarianceScale: -1 },
+      META,
+    );
 
     expect(() => lowerToFrames(utterance, POLICY, context)).toThrowError(/E_HRG_LOWER_F0_VARIANCE/);
     expect(utterance.diagnostics.getEntries()).toContainEqual(

@@ -5,13 +5,15 @@ import { describe, expect, it } from "vitest";
 import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { compileAffect } from "../src/input/affect";
-import { parseAffectPresets } from "../src/input/affect-presets";
+import { parseAffectPresets, validateAffectPresetChannels } from "../src/input/affect-presets";
 import { parseDirectionInput } from "../src/input/parse";
+import { parseVoiceQualityChannels } from "../src/input/vq-channels";
 import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const library = parseAffectPresets(loadYamlDocumentSync("/rules/affect/presets.yaml"));
+const channels = parseVoiceQualityChannels(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
 
 describe("declarative affect presets", () => {
   it("inherits the declared library and leaves DECtalk's role absent", () => {
@@ -69,17 +71,17 @@ describe("declarative affect presets", () => {
           global: { affect: { preset: "selected", degree: 0.5 } },
         },
       },
-      { frontendId: "selected", affectLibrary: selected },
+      { frontendId: "selected", affectLibrary: selected, vqChannels: channels },
     );
     expect(parsed.directions[0].affect?.degree).toBe(0.2);
     expect(parsed.directions[0].affect?.label).toBe("selected");
-    expect(() => compileAffect(selected, "tender")).toThrow(/Unknown affect preset/);
+    expect(() => compileAffect(selected, channels, "tender")).toThrow(/Unknown affect preset/);
   });
 
   it("preserves every preset's dimensions, channels, and citations at boundary and intermediate degrees", () => {
     const values = [...library.presets.keys()].flatMap((name) =>
       [-1, 0, 0.25, 0.7, 1, 2].map((degree) => {
-        const { dimensions, vq, citations } = compileAffect(library, name, degree);
+        const { dimensions, vq, citations } = compileAffect(library, channels, name, degree);
         return { name, degree, dimensions, vq, citations };
       }),
     );
@@ -94,27 +96,26 @@ describe("declarative affect presets", () => {
     expect(source.includes("# engineering estimate")).toBe(true);
   });
 
-  it("rejects unknown voice-quality fields when parsing a supplied document", () => {
-    expect(() =>
-      parseAffectPresets({
-        degree: library.degree,
-        variants: {},
-        presets: [
-          {
-            name: "typo",
-            group: "emotion",
-            dimensions: { valence: 0, arousal: 0, dominance: 0 },
-            vq: { f0Scael: 1 },
-            citations: ["engineering estimate"],
-          },
-        ],
-      }),
-    ).toThrow(/f0Scael/);
+  it("rejects preset fields outside the selected channel resource", () => {
+    const invalid = parseAffectPresets({
+      degree: library.degree,
+      variants: {},
+      presets: [
+        {
+          name: "typo",
+          group: "emotion",
+          dimensions: { valence: 0, arousal: 0, dominance: 0 },
+          vq: { f0Scael: 1 },
+          citations: ["engineering estimate"],
+        },
+      ],
+    });
+    expect(() => validateAffectPresetChannels(invalid, channels)).toThrow(/f0Scael/);
   });
 
   it("emits a cited preset application into the supplied provenance collector", () => {
     const provenance = createProvenanceCollector();
-    compileAffect(library, "happy", 0.7, { provenance });
+    compileAffect(library, channels, "happy", 0.7, { provenance });
     const records = provenance.getDecisions();
     expect(
       records.some(
@@ -129,7 +130,7 @@ describe("declarative affect presets", () => {
 
 it("exposes engineering estimates as uncited provenance decisions", () => {
   const provenance = createProvenanceCollector();
-  compileAffect(library, "tender", 0.7, { provenance });
+  compileAffect(library, channels, "tender", 0.7, { provenance });
   expect(
     provenance
       .getDecisions()

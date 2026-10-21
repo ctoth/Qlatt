@@ -39,7 +39,7 @@ import type { Diagnostics } from "./diagnostics";
 import type { DirectionTrack } from "./input/direction-track";
 import {
   attachDirectionsToUtterance,
-  DIRECTION_ITEM_SCHEMA,
+  buildDirectionItemSchema,
   parseDirectionInput,
 } from "./input/parse";
 import { createProvenanceCollector, type ProvenanceCollector } from "./provenance";
@@ -221,7 +221,11 @@ function declaredFeatureSchema(declaration: unknown): FeatureSchema | undefined 
     : schema;
 }
 
-function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack): HrgSchema {
+function buildUtteranceSchema(
+  inventory: InventorySpec,
+  spec: CompiledRulepack,
+  channels: Parameters<typeof buildDirectionItemSchema>[0],
+): HrgSchema {
   const segmentFeatures: Record<string, FeatureSchema> = {
     phoneme: { kind: "string" },
     type: { kind: "string" },
@@ -369,7 +373,7 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
       f0Point: { features: pointFeatures },
       phraseCommand: { features: pointFeatures },
       tilt: { features: pointFeatures },
-      direction: DIRECTION_ITEM_SCHEMA,
+      direction: buildDirectionItemSchema(channels),
       transition: { features: { active: { kind: "boolean" } } },
     },
     relations: {
@@ -763,7 +767,11 @@ function buildTextToKlattTrackDetailed(
     /^F[1-9]\d*$/.test(key),
   );
   const provenance = options.provenance ?? createProvenanceCollector();
-  const utteranceSchema = buildUtteranceSchema(resources.inventory, spec);
+  const utteranceSchema = buildUtteranceSchema(
+    resources.inventory,
+    spec,
+    resources.vqChannels?.channels,
+  );
   const utterance = new Utterance(utteranceSchema, provenance, options.diagnostics ?? undefined);
   for (const relationName of Object.keys(utteranceSchema.relations)) {
     utterance.relation(relationName);
@@ -1387,7 +1395,12 @@ function buildTextToKlattTrackDetailed(
         },
         directionTrack: options.directionTrack,
       },
-      { provenance, frontendId, affectLibrary: resources.affectPresets?.library },
+      {
+        provenance,
+        frontendId,
+        affectLibrary: resources.affectPresets?.library,
+        vqChannels: resources.vqChannels?.channels,
+      },
     );
     attachDirectionsToUtterance(parsed, utterance);
   }
@@ -1638,6 +1651,7 @@ function buildTextToKlattTrackDetailed(
   const lowered = lowerToFrames(utterance, lowerOptions, {
     frontendId: options.frontendPath ?? frontendId,
     rdPolicy: resources.vqChannels?.rdPolicy,
+    vqChannels: resources.vqChannels?.channels,
     f0Model: isLayeredF0Model(spec.f0_model) ? spec.f0_model : undefined,
     frameValueFeatures: frameValueFeatures(spec.frame_programs),
     speakerParams,

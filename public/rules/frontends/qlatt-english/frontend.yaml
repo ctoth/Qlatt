@@ -1059,7 +1059,8 @@ parameters:
       # NOTE: voice-quality presets (modal/breathy/pressed/creaky/whispery/falsetto)
       # are NOT declared here. The live source of truth is the source-contour policy
       # at source_contour_path (/rules/policy/source-contour.yaml), loaded by
-      # src/source-contour.ts. A duplicate table formerly lived here but was dead
+      # src/declarative-frontend/inventory.ts and parsed by src/source-contour.ts.
+      # A duplicate table formerly lived here but was dead
       # (nothing reads params.policy.speaker.voice_quality_presets); removed in
       # phase 4 item 2 to keep a single source of truth.
 output:

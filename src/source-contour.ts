@@ -1,8 +1,6 @@
 import type { ResolvedSpeakerProfile } from "./speaker-profile";
 import type { SpeakerProjectionBaseline, SpeakerProjectionRow } from "./speaker-projection";
-import { isPlainObject, loadYamlDocument, loadYamlDocumentSync } from "./yaml-loader";
-
-export const DEFAULT_SOURCE_CONTOUR_PATH = "/rules/policy/source-contour.yaml";
+import { isPlainObject } from "./yaml-loader";
 
 export type SourceContourVoiceQuality = string;
 
@@ -47,7 +45,7 @@ export interface SourceContourSpec {
 }
 
 export interface ResolveSourceContourOptions {
-  spec?: SourceContourSpec;
+  spec: SourceContourSpec;
   requestedQuality?: SourceContourVoiceQuality;
   speaker: ResolvedSpeakerProfile;
   baseF0Hz: number;
@@ -66,8 +64,6 @@ export interface ResolvedSourceContour {
   voiceQualityOverrides?: VoiceQualityOverrides;
   citations: string[];
 }
-
-let sourceContourCache: SourceContourSpec | null = null;
 
 function expectNonEmptyString(value: unknown, label: string): string {
   if (typeof value !== "string" || value.trim().length === 0) {
@@ -179,7 +175,7 @@ function parseProjection(
   return rows.sort((a, b) => a.order - b.order);
 }
 
-function parseSourceContourDocument(value: unknown): SourceContourSpec {
+export function parseSourceContourDocument(value: unknown): SourceContourSpec {
   if (!isPlainObject(value)) {
     throw new Error("E_SOURCE_CONTOUR_SCHEMA: top-level document must be an object");
   }
@@ -222,28 +218,8 @@ function parseSourceContourDocument(value: unknown): SourceContourSpec {
   };
 }
 
-/** Load asynchronously when pairing a frontend with a browser experiment. */
-export async function loadSourceContour(
-  specPath: string = DEFAULT_SOURCE_CONTOUR_PATH,
-): Promise<SourceContourSpec> {
-  return parseSourceContourDocument(await loadYamlDocument(specPath));
-}
-
-export function loadSourceContourSync(
-  specPath: string = DEFAULT_SOURCE_CONTOUR_PATH,
-): SourceContourSpec {
-  if (specPath === DEFAULT_SOURCE_CONTOUR_PATH && sourceContourCache) {
-    return sourceContourCache;
-  }
-  const spec = parseSourceContourDocument(loadYamlDocumentSync(specPath));
-  if (specPath === DEFAULT_SOURCE_CONTOUR_PATH) {
-    sourceContourCache = spec;
-  }
-  return spec;
-}
-
 export function resolveSourceContour(options: ResolveSourceContourOptions): ResolvedSourceContour {
-  const spec = options.spec ?? loadSourceContourSync();
+  const spec = options.spec;
   const presetName = options.requestedQuality ?? spec.default_voice_quality;
   const preset = spec.voice_quality_presets[presetName];
   if (!preset) {
@@ -262,12 +238,9 @@ export function resolveSourceContour(options: ResolveSourceContourOptions): Reso
     effectiveBaseF0Hz:
       preset.f0_scale !== 1.0 ? Math.round(options.baseF0Hz * preset.f0_scale) : options.baseF0Hz,
     presetName,
-    citations: [
-      DEFAULT_SOURCE_CONTOUR_PATH,
-      ...spec.citations,
-      ...spec.baseline.citations,
-      ...preset.citations,
-    ].filter((value, index, all) => all.indexOf(value) === index),
+    citations: [...spec.citations, ...spec.baseline.citations, ...preset.citations].filter(
+      (value, index, all) => all.indexOf(value) === index,
+    ),
     voiceQualityOverrides: Object.fromEntries(
       Object.entries(preset).filter(
         (entry): entry is [string, number] =>

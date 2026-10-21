@@ -3,12 +3,13 @@ import { Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
 import {
   compileRuleEngineSpec,
-  QLATT_ENGLISH_RULEPACK,
+  loadBundledRulepackSpec,
 } from "../src/declarative-frontend/rule-pack";
 
+const qlattRulepack = loadBundledRulepackSpec("qlatt-english");
 const spec = compileRuleEngineSpec({
-  ...QLATT_ENGLISH_RULEPACK,
-  phases: QLATT_ENGLISH_RULEPACK.phases.map((phase) =>
+  ...qlattRulepack,
+  phases: qlattRulepack.phases.map((phase) =>
     phase.name === "duration" ? { name: "duration", rules: ["speech_rate_scaling"] } : phase,
   ),
 });

@@ -15,7 +15,7 @@ import type { HrgSchema } from "./declarative-frontend/hrg";
 import { Utterance } from "./declarative-frontend/hrg";
 import { runGraphRuleEngine } from "./declarative-frontend/hrg/rule-engine";
 import { loadFrontendResources, parseInventorySymbol } from "./declarative-frontend/inventory";
-import { type CompiledRulepack, QLATT_ENGLISH_RULEPACK } from "./declarative-frontend/rule-pack";
+import type { CompiledRulepack } from "./declarative-frontend/rule-pack";
 import type { SourceTranscriptionInput } from "./declarative-frontend/source-recognition";
 import { pronounce, pronounceClause } from "./g2p";
 import type { DictLookup, PronunciationResult } from "./g2p/types";
@@ -32,22 +32,6 @@ import {
 // Citation constants for provenance tracking
 // ---------------------------------------------------------------------------
 
-// The shared English lexicon: what a frontend that declares no
-// `transcription.sources` entry for a source uses. There is no shared spelling
-// source; a frontend whose lexicon spells letters declares its own.
-const SHARED_LEXICON_SOURCES: Partial<Record<LexiconSourceKey, LexiconSource>> = {
-  dictionary: { name: "CMU dictionary", citation: "CMU Pronouncing Dictionary" },
-  "lts-rules": {
-    name: "Elovitz LTS + configured lexical stress",
-    citation:
-      "G2P pipeline: Elovitz LTS (NRL 7948); Hayes (1982), pp. 237–274 (configured lexical stress)",
-  },
-  morphology: {
-    name: "Morphological decomposition",
-    citation:
-      "G2P pipeline: morphological decomposition (Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5)",
-  },
-};
 const SYMBOL_PRONUNCIATION_CITATION =
   "Diagnostic symbol mode: direct ARPABET symbol-to-phoneme mapping for explicit segment-list utterances";
 const LETTER_NAME_PRONUNCIATION_CITATION =
@@ -189,16 +173,22 @@ function makeDictLookup(
 // Helper functions
 // ---------------------------------------------------------------------------
 
-export function isPunctuationToken(word: string): boolean {
-  return isPunctuationTokenWithTables(word, getDefaultTranscriptionTables());
+export function isPunctuationToken(word: string, config: TranscriptionConfig): boolean {
+  return isPunctuationTokenWithTables(word, requireTranscriptionTables(config));
 }
 
-export function getDiagnosticSymbolPronunciation(word: string): string[] | null {
-  return getDiagnosticSymbolPronunciationWithTables(word, getDefaultTranscriptionTables());
+export function getDiagnosticSymbolPronunciation(
+  word: string,
+  config: TranscriptionConfig,
+): string[] | null {
+  return getDiagnosticSymbolPronunciationWithTables(word, requireTranscriptionTables(config));
 }
 
-export function shouldUseDiagnosticSymbolMode(words: string[]): boolean {
-  const tables = getDefaultTranscriptionTables();
+export function shouldUseDiagnosticSymbolMode(
+  words: string[],
+  config: TranscriptionConfig,
+): boolean {
+  const tables = requireTranscriptionTables(config);
   const nonPunctuation = words.filter(
     (word) => word.length > 0 && !isPunctuationTokenWithTables(word, tables),
   );
@@ -250,15 +240,15 @@ function getSpecTranscriptionConfig(specSource: unknown): TranscriptionConfig | 
   return (specSource as { transcription?: TranscriptionConfig })?.transcription;
 }
 
-/** The frontend's declared lexicon sources over the shared English ones. */
+/** The selected frontend's declared lexicon sources. */
 function requireLexiconSources(
   declared: TranscriptionConfig["sources"],
 ): Partial<Record<LexiconSourceKey, LexiconSource>> {
-  if (declared === undefined) return SHARED_LEXICON_SOURCES;
+  if (declared === undefined) return {};
   if (!declared || typeof declared !== "object" || Array.isArray(declared)) {
     throw new Error("E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.sources must be a map");
   }
-  const sources = { ...SHARED_LEXICON_SOURCES };
+  const sources: Partial<Record<LexiconSourceKey, LexiconSource>> = {};
   for (const [key, value] of Object.entries(declared)) {
     if (!(LEXICON_SOURCE_KEYS as readonly string[]).includes(key)) {
       throw new Error(
@@ -355,10 +345,6 @@ function requireTranscriptionTables(
     letterNames: requirePronunciationMap(config.letter_names, "letter_names"),
     punctuationTokens: new Set(requireStringArray(config.punctuation_tokens, "punctuation_tokens")),
   };
-}
-
-function getDefaultTranscriptionTables(): RequiredTranscriptionTables {
-  return requireTranscriptionTables(getSpecTranscriptionConfig(QLATT_ENGLISH_RULEPACK));
 }
 
 function isPunctuationTokenWithTables(word: string, tables: RequiredTranscriptionTables): boolean {
@@ -671,19 +657,19 @@ function rewriteOrthographyTokens(
  * ARPABET symbols.
  *
  * @param text - Normalized text or words owned by normalization Items in options.utterance
- * @param options - Optional provenance collector for decision tracking
+ * @param options - Selected compiled frontend, lexicon and optional provenance collector
  * @returns Flat array of TranscriptionToken objects
  */
 export function transcribeText(
   text: string | readonly SourceTranscriptionInput[],
-  options: TranscriptionOptions = {},
+  options: TranscriptionOptions,
 ): TranscriptionToken[] {
   const provenance = options.provenance ?? options.utterance?.provenance ?? null;
   // Lookup and compound recovery share the supplied map. Without one, the
   // empty map sends words to the selected letter-to-sound implementation.
   // An explicit lookup override remains authoritative for direct lookup.
   const effectiveDictMap = options.dictionaryMap ?? {};
-  const compiledSpec = options.compiledSpec ?? QLATT_ENGLISH_RULEPACK;
+  const compiledSpec = options.compiledSpec;
   const resources = loadFrontendResources(compiledSpec);
   const ltsPath = options.ltsPath ?? resources.ltsPath;
   const morphologyPath = options.morphologyPath ?? resources.morphologyPath;
@@ -702,19 +688,13 @@ export function transcribeText(
     );
   }
 
-  // A frontend with its own dictionary or letter-to-sound file says what they
-  // are: the shared names would put a source it did not use into the record.
-  // The paths are compared as the two rulepacks declare them: loading the
-  // shared frontend's resources here would make every frontend read the
-  // shared letter-to-sound file.
-  const declaredPath = (spec: CompiledRulepack, key: "dictionary_path" | "lts_path"): unknown =>
-    (spec as unknown as Record<string, unknown>)[key] ?? null;
-  const ownsFile = (key: "dictionary_path" | "lts_path"): boolean =>
-    declaredPath(compiledSpec, key) !== declaredPath(QLATT_ENGLISH_RULEPACK, key);
+  // Each selected resource declares its source; another frontend's names
+  // cannot supply provenance for it. LTS and morphology are required resources.
   const undeclared = [
-    ...(ownsFile("dictionary_path") ? ["dictionary"] : []),
-    ...(ownsFile("lts_path") ? ["lts-rules", "morphology"] : []),
-  ].filter((key) => options.compiledSpec && cfg?.sources?.[key as LexiconSourceKey] === undefined);
+    ...(resources.lexicon ? ["dictionary"] : []),
+    "lts-rules",
+    "morphology",
+  ].filter((key) => transcriptionTables.sources[key as LexiconSourceKey] === undefined);
   if (undeclared.length > 0) {
     throw new Error(
       `E_TRANSCRIPTION_CONFIG_REQUIRED: the frontend has its own lexicon files and must declare transcription.sources.${undeclared.join(", transcription.sources.")}`,

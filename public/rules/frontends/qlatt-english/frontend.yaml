@@ -1124,6 +1124,16 @@ output:
     overlays:
       operation_order: [voice_quality, timed_controls, f0]
 transcription:
+  sources:
+    dictionary:
+      name: CMU dictionary
+      citation: CMU Pronouncing Dictionary
+    lts-rules:
+      name: Elovitz LTS + configured lexical stress
+      citation: "G2P pipeline: Elovitz LTS (NRL 7948); Hayes (1982), pp. 237–274 (configured lexical stress)"
+    morphology:
+      name: Morphological decomposition
+      citation: "G2P pipeline: morphological decomposition (Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5)"
   # Standard English letter-name pronunciations for declarative spelling mode.
   # Citation anchor: Allen et al. 1987 Ch.2-3 (LETTER-* morphs for symbol strings).
   letter_names:

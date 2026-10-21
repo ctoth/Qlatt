@@ -14,6 +14,7 @@ import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector, type DecisionRecord } from "../src/provenance";
 import { transcribeText } from "../src/transcribe-text";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import type { TranscriptionConfig } from "../src/tts-frontend-types";
 
 // A dictionary word, a suffixed word, two letter-to-sound words, a spelled
 // letter, a number and an initial.
@@ -83,16 +84,41 @@ describe("lexicon sources in decision records", () => {
     );
   });
 
-  it("refuses a frontend with its own lexicon files and no declared sources", () => {
-    const spec = loadBundledRulepackSpec("dectalk-english");
-    const transcription = { ...(spec.transcription as Record<string, unknown>) };
-    delete transcription.sources;
+  it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
+    "refuses %s lexicon files without declared sources",
+    (frontendId) => {
+      const spec = loadBundledRulepackSpec(frontendId);
+      const transcription = { ...spec.transcription };
+      delete transcription.sources;
+      expect(() =>
+        transcribeText("is", {
+          compiledSpec: spec,
+          dictionaryMap: loadFrontendResources(spec).lexicon?.dictionary,
+          transcriptionConfig: transcription,
+        }),
+      ).toThrow(/transcription\.sources\.dictionary, transcription\.sources\.lts-rules/);
+    },
+  );
+
+  it("requires metadata for an injected dictionary even without a declared lexicon", () => {
+    const spec = loadBundledRulepackSpec("qlatt-english");
+    const transcription: TranscriptionConfig = spec.transcription;
+    const sources = { ...transcription.sources };
+    delete sources.dictionary;
+    const noLexicon: typeof spec & { resources: Record<string, string> } = {
+      ...spec,
+      resources: {},
+      dictionary_path: null,
+    };
     expect(() =>
-      transcribeText("is", {
-        compiledSpec: spec,
-        dictionaryMap: loadFrontendResources(spec).lexicon?.dictionary,
-        transcriptionConfig: transcription,
+      transcribeText("hello", {
+        compiledSpec: noLexicon,
+        transcriptionConfig: { ...transcription, sources },
+        dictionaryMap: {},
+        dictLookup: () => ["HH", "EH1", "L", "OW0"],
       }),
-    ).toThrow(/transcription\.sources\.dictionary, transcription\.sources\.lts-rules/);
+    ).toThrow(
+      "a word was pronounced by 'dictionary' but transcription.sources.dictionary is not declared",
+    );
   });
 });

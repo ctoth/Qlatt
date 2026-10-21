@@ -850,5 +850,3 @@ export async function preloadBundledRulepackSpec(
 ): Promise<CompiledRulepack> {
   return preloadRulepackSpecFromPath(resolveBundledRulepackPath(frontendId));
 }
-
-export const QLATT_ENGLISH_RULEPACK = await preloadBundledRulepackSpec(DEFAULT_FRONTEND_ID);

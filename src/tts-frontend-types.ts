@@ -127,8 +127,8 @@ export type TranscriptionConfig = {
   /**
    * What the frontend's lexicon is, per pronunciation source, for the decision
    * record of a word: `name` goes into the record's reason and `citation` is
-   * its citation. A frontend with its own dictionary or letter-to-sound file
-   * declares these; an undeclared source is the shared English default.
+   * its citation. Each frontend declares the sources for its selected resources;
+   * there is no implicit source metadata from another frontend.
    */
   sources?: Partial<Record<LexiconSourceKey, LexiconSource>>;
   letter_names?: Record<string, string[]>;
@@ -166,7 +166,7 @@ export type TranscriptionOptions = {
   dictLookup?: (word: string) => string[] | null;
   dictionaryMap?: Record<string, string | undefined>;
   utterance?: Utterance;
-  compiledSpec?: CompiledRulepack;
+  compiledSpec: CompiledRulepack;
   /** The rule engine's option for the orthography phase; recorded unless false. */
   captureTooling?: boolean;
   /**

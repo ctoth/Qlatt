@@ -17,6 +17,8 @@ import { createProvenanceCollector } from "../src/provenance";
 import { parseSpeakerProfileDocument } from "../src/speaker-profile";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
+const qlattRulepack = rulepack.loadBundledRulepackSpec("qlatt-english");
+
 const CITATION = "fixture: voice rule fields test";
 const profileSpec = parseSpeakerProfileDocument({ version: "fixture", default_profile: {} });
 const SPEAKERS = {
@@ -272,7 +274,7 @@ describe("voice rule fields in rules", () => {
 describe("voice rule fields in the frontend", () => {
   const fixtureFrontend = () =>
     vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue({
-      ...rulepack.QLATT_ENGLISH_RULEPACK,
+      ...qlattRulepack,
       speakers: SPEAKERS,
     });
 

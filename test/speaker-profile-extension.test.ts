@@ -11,11 +11,13 @@ import {
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
+const qlattRulepack = rulepack.loadBundledRulepackSpec("qlatt-english");
+
 const profilePath = "test/fixtures/speaker-profile/extended.yaml";
 
 describe("declarative speaker profile fields", () => {
   it("keeps an undeclared profile absent until synthesis requires it", () => {
-    const spec = { ...rulepack.QLATT_ENGLISH_RULEPACK, speaker_profile_path: null };
+    const spec = { ...qlattRulepack, speaker_profile_path: null };
     expect(loadFrontendResources(spec).speakerProfile).toBeUndefined();
     const spy = vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
     try {
@@ -29,7 +31,7 @@ describe("declarative speaker profile fields", () => {
 
   it("uses the frontend's profile fields for voice selection and provenance", () => {
     const spy = vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue({
-      ...rulepack.QLATT_ENGLISH_RULEPACK,
+      ...qlattRulepack,
       speaker_profile_path: profilePath,
       speakers: {
         dir: "test/fixtures/speaker-profile",

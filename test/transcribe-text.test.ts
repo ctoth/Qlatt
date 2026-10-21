@@ -10,6 +10,7 @@ import {
 } from "../src/transcribe-text";
 
 const compiledSpec = loadBundledRulepackSpec("qlatt-english");
+const transcriptionConfig = compiledSpec.transcription;
 const resources = loadFrontendResources(compiledSpec);
 const selected = {
   frontendId: "qlatt-english",
@@ -25,6 +26,19 @@ describe("transcribe-text", () => {
   });
 
   describe("transcribeText", () => {
+    it("uses explicitly selected punctuation and diagnostic symbol configuration", () => {
+      const config = {
+        ...transcriptionConfig,
+        punctuation_tokens: ["~"],
+        diagnostic_symbols: { custom: ["K"] },
+      };
+      expect(isPunctuationToken("~", config)).toBe(true);
+      expect(isPunctuationToken(".", config)).toBe(false);
+      expect(getDiagnosticSymbolPronunciation("/custom/", config)).toEqual(["K"]);
+      expect(getDiagnosticSymbolPronunciation("/b/", config)).toBeNull();
+      expect(shouldUseDiagnosticSymbolMode(["/custom/", "~"], config)).toBe(true);
+    });
+
     it("uses each frontend's declared lexicon and inherits Qlatt's selection", () => {
       const beauty = loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty"));
       const dectalk = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
@@ -240,65 +254,65 @@ describe("transcribe-text", () => {
   describe("isPunctuationToken", () => {
     it("returns true for punctuation marks", () => {
       for (const p of [",", ".", "?", "!", ";", ":"]) {
-        expect(isPunctuationToken(p)).toBe(true);
+        expect(isPunctuationToken(p, transcriptionConfig)).toBe(true);
       }
     });
 
     it("returns false for non-punctuation", () => {
-      expect(isPunctuationToken("hello")).toBe(false);
-      expect(isPunctuationToken("")).toBe(false);
-      expect(isPunctuationToken("a")).toBe(false);
+      expect(isPunctuationToken("hello", transcriptionConfig)).toBe(false);
+      expect(isPunctuationToken("", transcriptionConfig)).toBe(false);
+      expect(isPunctuationToken("a", transcriptionConfig)).toBe(false);
     });
   });
 
   describe("getDiagnosticSymbolPronunciation", () => {
     it("maps /b/ to ['B']", () => {
-      expect(getDiagnosticSymbolPronunciation("/b/")).toEqual(["B"]);
+      expect(getDiagnosticSymbolPronunciation("/b/", transcriptionConfig)).toEqual(["B"]);
     });
 
     it("maps /th/ to ['TH']", () => {
-      expect(getDiagnosticSymbolPronunciation("/th/")).toEqual(["TH"]);
+      expect(getDiagnosticSymbolPronunciation("/th/", transcriptionConfig)).toEqual(["TH"]);
     });
 
     it("returns null for unknown symbols", () => {
-      expect(getDiagnosticSymbolPronunciation("/xyz/")).toBeNull();
-      expect(getDiagnosticSymbolPronunciation("hello")).toBeNull();
+      expect(getDiagnosticSymbolPronunciation("/xyz/", transcriptionConfig)).toBeNull();
+      expect(getDiagnosticSymbolPronunciation("hello", transcriptionConfig)).toBeNull();
     });
 
     it("strips leading/trailing slashes and lowercases", () => {
-      expect(getDiagnosticSymbolPronunciation("///B///")).toEqual(["B"]);
+      expect(getDiagnosticSymbolPronunciation("///B///", transcriptionConfig)).toEqual(["B"]);
     });
   });
 
   describe("shouldUseDiagnosticSymbolMode", () => {
     it("returns true when all non-punctuation words are diagnostic symbols", () => {
-      expect(shouldUseDiagnosticSymbolMode(["/b/", "/d/"])).toBe(true);
+      expect(shouldUseDiagnosticSymbolMode(["/b/", "/d/"], transcriptionConfig)).toBe(true);
     });
 
     it("returns false when any word is not a diagnostic symbol", () => {
-      expect(shouldUseDiagnosticSymbolMode(["/b/", "hello"])).toBe(false);
+      expect(shouldUseDiagnosticSymbolMode(["/b/", "hello"], transcriptionConfig)).toBe(false);
     });
 
     it("returns false for empty input", () => {
-      expect(shouldUseDiagnosticSymbolMode([])).toBe(false);
+      expect(shouldUseDiagnosticSymbolMode([], transcriptionConfig)).toBe(false);
     });
 
     it("ignores punctuation tokens when checking", () => {
-      expect(shouldUseDiagnosticSymbolMode(["/b/", "."])).toBe(true);
+      expect(shouldUseDiagnosticSymbolMode(["/b/", "."], transcriptionConfig)).toBe(true);
     });
   });
 
   describe("bundled YAML transcription helpers", () => {
-    it("uses the bundled YAML punctuation table by default", () => {
+    it("uses the selected bundled YAML punctuation table", () => {
       for (const p of [",", ".", "?", "!", ";", ":"]) {
-        expect(isPunctuationToken(p)).toBe(true);
+        expect(isPunctuationToken(p, transcriptionConfig)).toBe(true);
       }
-      expect(isPunctuationToken("/b/")).toBe(false);
+      expect(isPunctuationToken("/b/", transcriptionConfig)).toBe(false);
     });
 
-    it("uses the bundled YAML diagnostic symbol table by default", () => {
-      expect(getDiagnosticSymbolPronunciation("/b/")).toEqual(["B"]);
-      expect(getDiagnosticSymbolPronunciation("/zh/")).toEqual(["ZH"]);
+    it("uses the selected bundled YAML diagnostic symbol table", () => {
+      expect(getDiagnosticSymbolPronunciation("/b/", transcriptionConfig)).toEqual(["B"]);
+      expect(getDiagnosticSymbolPronunciation("/zh/", transcriptionConfig)).toEqual(["ZH"]);
     });
   });
 });

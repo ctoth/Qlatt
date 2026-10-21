@@ -42,6 +42,7 @@ it("records and diagnoses a pronunciation symbol rejected by the selected gramma
   const provenance = createProvenanceCollector();
   const diagnostics = createDiagnostics();
   const tokens = transcribeText("hello", {
+    compiledSpec: rulepackModule.loadBundledRulepackSpec("qlatt-english"),
     provenance,
     diagnostics,
     dictionaryMap: {},
@@ -133,6 +134,7 @@ it("transcribes a Unicode alphabet and custom stress markers without altering ph
     .mockReturnValue({ ...resources, inventory });
   try {
     const result = transcribeText("hello .", {
+      compiledSpec: spec,
       dictionaryMap: {},
       dictLookup: () => ["ə_strong", "ŋ"],
     });

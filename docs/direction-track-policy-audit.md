@@ -20,7 +20,7 @@ verified claims about the cited papers. Residual implementation remains #46.
    to an already selected command rate (`tts-frontend.ts:872,1214–1236,1283–1289`).
 3. With no words-per-minute mapping, the relative rate becomes the generic
    `rate`. It is supplied to duration rules as `policy.duration.rate_scale`.
-   Qlatt's `speech_rate` rule scales each category by `rate^-elasticity`, where
+   Qlatt's `speech_rate_scaling` rule scales each category by `rate^-elasticity`, where
    elasticity is a ratio of logarithms of the declared fast/slow means. Vowels
    have elasticity one. Punctuation pauses use inverse rate
    (`public/rules/frontends/qlatt-english/phases/duration.yaml:443–485`).
@@ -64,7 +64,7 @@ duration floors/caps and initial/final silence policy remain authoritative.
 Local timing projection occurs after duration rules, so this example does not
 promise that a pre-projection duration floor remains a final-output floor.
 Leading/trailing silence uses the global Affect scale, not a word-local winner
-(`lowering.ts:1965–1999,2021`).
+(`lowering.ts:1965–1999,2022`).
 
 Qlatt declares undershoot coefficient 0.3, continuation exponent 0.5, and
 transition exponent 1 (`qlatt-english/frontend.yaml:209–222`). At generic rate 2,
@@ -79,7 +79,7 @@ words per minute and sets generic `rate=1`. Its cited neutral reference is 1
 (`dectalk-english/frontend.yaml:1283–1286`). Its duration controller consumes
 the mapped rate, so the Qlatt power-law example must not be transplanted into
 DECtalk. The declared controller/output frame-period ratio can also alter the
-final clock (`lowering.ts:1985–1993`). Existing parser command behavior remains
+final clock (`lowering.ts:1986–1994`). Existing parser command behavior remains
 part of compatibility; the audit does not propose new bounds or conversions.
 
 ## Vocabulary and owner map
@@ -127,8 +127,8 @@ must remain distinguishable at the authored-input boundary.
 
 ## Provenance contract
 
-The local affect decision directly parents the global affect decision when
-present, and also parents the configured preset application (`parse.ts:525–528`).
+The local affect decision lists the global affect decision as a direct parent
+when present, alongside the configured preset application (`parse.ts:525–528`).
 Do not replace the direct edge with only a preset ancestor. The preset compiler
 receives that global parent as well (`parse.ts:508–512`). HRG attachment depends
 on the direction decision before creating/writing the shared Item (`:396–455`).

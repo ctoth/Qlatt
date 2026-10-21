@@ -9,6 +9,8 @@ import {
 } from "../src/declarative-frontend/rule-pack";
 import { normalizeGraphText } from "../src/declarative-frontend/source-recognition";
 import { ltsDocumentAt } from "../src/g2p/lts-document";
+import type { LtsRulesData } from "../src/g2p/lts-engine";
+import { transcribeText } from "../src/transcribe-text";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const temporaryDirectories: string[] = [];
@@ -18,16 +20,39 @@ afterEach(() => {
 
 it("decodes and reuses the selected generated JSON LTS document", () => {
   const resources = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
-  const document = ltsDocumentAt(resources.ltsPath);
-  expect(document).toEqual(JSON.parse(readFileSync(`public${resources.ltsPath}`, "utf8")));
-  expect(ltsDocumentAt(resources.ltsPath)).toBe(document);
+  const { path, document } = resources.lts;
+  expect(document).toEqual(JSON.parse(readFileSync(`public${path}`, "utf8")));
+  expect(ltsDocumentAt(path)).toBe(document);
 });
 
 it("retains YAML rule-list decoding and cache identity", () => {
   const resources = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
-  const document = ltsDocumentAt(resources.ltsPath);
-  expect(document).toEqual(loadYamlDocumentSync(resources.ltsPath));
-  expect(ltsDocumentAt(resources.ltsPath)).toBe(document);
+  const { path, document } = resources.lts;
+  expect(document).toEqual(loadYamlDocumentSync(path));
+  expect(ltsDocumentAt(path)).toBe(document);
+});
+
+it("honors an explicit pronunciation document at the same source path", () => {
+  const spec = loadBundledRulepackSpec("qlatt-english");
+  const resources = loadFrontendResources(spec);
+  const options = { compiledSpec: spec, dictionaryMap: {} };
+  expect(
+    transcribeText("blorf", options).some(
+      (token) => token.phoneme !== resources.inventory.silence_symbol,
+    ),
+  ).toBe(true);
+  const document = structuredClone(resources.lts.document) as LtsRulesData;
+  document.rules_by_letter = {};
+  expect(
+    transcribeText("blorf", { ...options, lts: { path: resources.lts.path, document } }),
+  ).toEqual([
+    expect.objectContaining({
+      phoneme: resources.inventory.silence_symbol,
+      stress: null,
+      duration: 50,
+      word: "blorf",
+    }),
+  ]);
 });
 
 it.each(["{", "null"])("reports invalid JSON LTS document %s through its owner", (source) => {

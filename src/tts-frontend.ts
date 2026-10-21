@@ -1064,7 +1064,7 @@ function buildTextToKlattTrackDetailed(
     utterance,
     compiledSpec: spec,
     transcriptionConfig,
-    ltsPath: resources.ltsPath,
+    lts: resources.lts,
     morphology: resources.morphology,
     stress: resources.stress,
     diagnostics: options.diagnostics,

@@ -671,7 +671,7 @@ export function transcribeText(
   const effectiveDictMap = options.dictionaryMap ?? {};
   const compiledSpec = options.compiledSpec;
   const resources = loadFrontendResources(compiledSpec);
-  const ltsPath = options.ltsPath ?? resources.ltsPath;
+  const lts = options.lts ?? resources.lts;
   const morphology = options.morphology ?? resources.morphology;
   const stress = options.stress ?? resources.stress;
   const cfg = options.transcriptionConfig ?? getSpecTranscriptionConfig(compiledSpec);
@@ -771,7 +771,7 @@ export function transcribeText(
         run.map((position) => orthographyWords[position].word),
         effectiveDictLookup,
         {
-          ltsPath,
+          lts,
           morphology,
           stress,
           atWrittenPunctuation,
@@ -881,7 +881,7 @@ export function transcribeText(
           : symbolPronunciation == null
             ? ((consumedWords === 1 ? inClause.get(index) : undefined) ??
               pronounce(sourceWord, effectiveDictLookup, {
-                ltsPath,
+                lts,
                 morphology,
                 stress,
               }))

@@ -1,6 +1,6 @@
 import { type CmuDictionary, loadCmuDictionaryFromPathSync } from "../cmu-dictionary-loader";
 import type { Diagnostics } from "../diagnostics";
-import { ltsDocumentAt } from "../g2p/lts-document";
+import { type LtsContext, ltsDocumentAt } from "../g2p/lts-document";
 import type { MorphologyContext, MorphologyData } from "../g2p/morphology";
 import { parseStressPolicy, type StressContext } from "../g2p/stress-policy";
 import type { PhonotacticsData } from "../g2p/syllabify";
@@ -72,7 +72,7 @@ export type FrontendResources = {
    * (`phonology_path`) when it names one.
    */
   inventoryDocuments: readonly string[];
-  ltsPath: string;
+  lts: LtsContext;
   morphology: MorphologyContext;
   stress: StressContext;
   /** Selected pronunciation dictionary; an absent role uses letter-to-sound. */
@@ -921,7 +921,7 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     inventoryPath,
     inventoryDocuments:
       phonologyPath === undefined ? [inventoryPath] : [inventoryPath, phonologyPath],
-    ltsPath,
+    lts: { path: ltsPath, document: FRONTEND_ASSET_CACHE.get(ltsPath) },
     morphology: {
       path: morphologyPath,
       data: morphology as MorphologyData,

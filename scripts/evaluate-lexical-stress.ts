@@ -6,7 +6,7 @@
 import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { pronounce } from "../src/g2p";
-import { applyLtsRules } from "../src/g2p/lts-engine";
+import { applyLtsRules, type LtsRulesData } from "../src/g2p/lts-engine";
 import { getStressHintForWord } from "../src/g2p/morphology";
 import { type StressHint, stressPronunciation } from "../src/g2p/stress";
 
@@ -29,7 +29,7 @@ export const evaluationWords = {
 } as const;
 
 const resources = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
-const ltsPath = resources.ltsPath;
+const ltsRules = resources.lts.document as LtsRulesData;
 const vowels = new Set(resources.stress.phonotactics.vowels);
 const stressPattern = (phones: string[]) =>
   phones
@@ -78,7 +78,7 @@ export function evaluateLexicalStress() {
       const generated = pronounce(word, () => null, resources);
       if (generated.source !== "lts-rules")
         throw new Error(`Evaluation dictionary bypass failed: ${word}`);
-      const lts = applyLtsRules(word, ltsPath);
+      const lts = applyLtsRules(word, ltsRules);
       const gold = [...new Set(variants.map(stressPattern))];
       const compatibleGold = variants
         .filter(

@@ -2,7 +2,7 @@ import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { normalizeGraphText } from "../src/declarative-frontend/source-recognition";
 import { pronounce as pronounceWithResources } from "../src/g2p";
-import { applyLtsRules as applyConfiguredLtsRules } from "../src/g2p/lts-engine";
+import { applyLtsRules as applyConfiguredLtsRules, type LtsRulesData } from "../src/g2p/lts-engine";
 import { assignStress as assignConfiguredStress, type StressHint } from "../src/g2p/stress";
 import {
   isVowel as isConfiguredVowel,
@@ -15,7 +15,8 @@ export const resources = loadFrontendResources(loadBundledRulepackSpec("qlatt-en
 export const phonotactics = resources.stress.phonotactics;
 export const pronounce = (word: string, lookup: DictLookup) =>
   pronounceWithResources(word, lookup, resources);
-export const applyLtsRules = (word: string) => applyConfiguredLtsRules(word, resources.ltsPath);
+export const applyLtsRules = (word: string) =>
+  applyConfiguredLtsRules(word, resources.lts.document as LtsRulesData);
 export const assignStress = (phones: string[], hint?: StressHint) =>
   assignConfiguredStress(phones, resources.stress, hint);
 export const isVowel = (phone: string) => isConfiguredVowel(phone, phonotactics);

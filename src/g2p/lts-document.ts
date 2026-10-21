@@ -1,13 +1,16 @@
 /**
  * A frontend's letter-to-sound file, parsed once.
  *
- * The file is asked for three times: when the frontend's resources are checked
- * (declarative-frontend/inventory.ts), by the table pronouncer (index.ts) and
- * by the rule-list engine (lts-engine.ts). A compiled table is a few hundred
- * kilobytes, so the three share one parsed document.
+ * The frontend resource owner passes the document to pronunciation consumers.
+ * Number normalization still acquires it here; both share this parsed document.
  */
 
 import { loadYamlDocumentSync, loadYamlSourceSync } from "../yaml-loader";
+
+export interface LtsContext {
+  path: string;
+  document: unknown;
+}
 
 const documents = new Map<string, unknown>();
 

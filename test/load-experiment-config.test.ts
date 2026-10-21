@@ -82,6 +82,11 @@ realize_each:
       },
       [{ id: "grandchild", extends: "child" }],
       {
+        // This inheritance fixture replaces the whole graph; use a coherent
+        // root without baseline formulas that depend on its formant macro.
+        "/experiments/klatt80-baseline/graph.yaml": "bacon: '0.1'\nnodes: {}\n",
+        "/experiments/klatt80-baseline/registry.yaml": "bacon: '0.1'\nprimitives: {}\n",
+        "/experiments/klatt80-baseline/semantics.yaml": "name: fixture\nparams: {}\n",
         "/experiments/grandchild/semantics.yaml": `
 params:
   local: { default: 4 }
@@ -92,16 +97,16 @@ realize:
   generated1: 'local * 3'
 `,
         "/experiments/grandchild/registry.yaml":
-          "primitives:\n  local: { native: OscillatorNode }\n",
+          "primitives:\n  local: { native: ConstantSourceNode }\n",
         "/experiments/grandchild/graph.yaml": "bacon: '0.1'\nnodes: { local: { type: local } }\n",
       },
       "grandchild",
     );
     expect(config.semantics.params?.local).toEqual({ default: 4 });
-    expect(config.semantics.realize?.localResult).toBe("local * 2");
-    expect(config.semantics.realize?.generated1).toBe("local * 3");
-    expect(config.semantics.realize?.generated2).toBe("local + 2");
-    expect(config.registry.primitives.local).toEqual({ native: "OscillatorNode" });
+    expect(config.semantics.realize?.localResult).toMatchObject({ expr: "local * 2" });
+    expect(config.semantics.realize?.generated1).toMatchObject({ expr: "local * 3" });
+    expect(config.semantics.realize?.generated2).toMatchObject({ expr: "local + 2" });
+    expect(config.registry.primitives.local).toEqual({ native: "ConstantSourceNode" });
     expect(config.graph.nodes).toEqual({ local: { type: "local" } });
     expect(config.semantics.constants?.tree).toEqual({
       nested: { keep: 2, change: 5 },

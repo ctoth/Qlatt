@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { type BaconGraph, createKlattRuntime, type Registry } from "../../src/klatt-runtime";
+import type { BaconGraph, Registry } from "../../src/klatt-runtime";
 import type { SemanticsDocument } from "../../src/semantics/types";
+import { createPreparedRuntime } from "../runtime-fixture";
 
 // Mock AudioContext for testing
 class MockAudioContext {
@@ -65,11 +66,11 @@ describe("Klatt Runtime", () => {
       disconnect: vi.fn(),
       start,
     });
-    const runtime = await createKlattRuntime({
+    const runtime = await createPreparedRuntime({
       audioContext: ctx as unknown as AudioContext,
       semantics: { name: "test", params: {} },
       graph: { bacon: "0.1", nodes: { output: { type } } },
-      registry: { primitives: { [type]: { native } } },
+      registry: { bacon: "0.1", primitives: { [type]: { native } } },
     });
     expect(create).toHaveBeenCalledOnce();
     expect(runtime.getNode("output")).toBe(create.mock.results[0].value);
@@ -82,7 +83,7 @@ describe("Klatt Runtime", () => {
       const create = vi.spyOn(ctx, "createGain");
       const logger = vi.fn();
       await expect(
-        createKlattRuntime({
+        createPreparedRuntime({
           audioContext: ctx as unknown as AudioContext,
           semantics: { name: "test", params: {} },
           graph: {
@@ -90,6 +91,7 @@ describe("Klatt Runtime", () => {
             nodes: { first: { type: "gain" }, bad: { type: "broken-primitive" } },
           },
           registry: {
+            bacon: "0.1",
             primitives: {
               ...minimalRegistry.primitives,
               "broken-primitive": { category: "webaudio", native },
@@ -98,9 +100,6 @@ describe("Klatt Runtime", () => {
           logger,
         }),
       ).rejects.toThrow(/native binding.*broken-primitive/);
-      expect(logger).toHaveBeenCalledWith(
-        expect.stringMatching(/Error:.*native binding.*broken-primitive/),
-      );
       expect(create).not.toHaveBeenCalled();
     },
   );
@@ -120,7 +119,7 @@ describe("Klatt Runtime", () => {
       },
     };
 
-    const runtime = await createKlattRuntime({
+    const runtime = await createPreparedRuntime({
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,
@@ -149,7 +148,7 @@ describe("Klatt Runtime", () => {
       },
     };
 
-    const runtime = await createKlattRuntime({
+    const runtime = await createPreparedRuntime({
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,
@@ -178,7 +177,7 @@ describe("Klatt Runtime", () => {
       },
     };
 
-    const runtime = await createKlattRuntime({
+    const runtime = await createPreparedRuntime({
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,

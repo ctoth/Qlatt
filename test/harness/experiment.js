@@ -9,13 +9,14 @@ let validatedFrontend = null;
 
 async function validateSelectedFrontend() {
   const frontendId = document.getElementById("frontendSelect")?.value || "qlatt-english";
-  if (validatedSemantics === state.newRuntimeSemantics && validatedFrontend === frontendId) return;
+  if (validatedSemantics === state.newRuntimeConfig?.semantics && validatedFrontend === frontendId)
+    return;
   try {
     await assertFrontendVocabulary(frontendId, {
-      graph: state.newRuntimeGraph,
-      semantics: state.newRuntimeSemantics,
+      graph: state.newRuntimeConfig?.graph,
+      semantics: state.newRuntimeConfig?.semantics,
     });
-    validatedSemantics = state.newRuntimeSemantics;
+    validatedSemantics = state.newRuntimeConfig?.semantics;
     validatedFrontend = frontendId;
   } catch (err) {
     state.status.textContent = `Status: ${err.message}`;
@@ -78,9 +79,7 @@ export function onExperimentChange() {
   const selected = getSelectedExperiment();
   if (selected !== state.currentExperimentId) {
     // Clear cached config so it reloads on next play
-    state.newRuntimeGraph = null;
-    state.newRuntimeSemantics = null;
-    state.newRuntimeRegistry = null;
+    state.newRuntimeConfig = null;
     // Also clear runtime and interpreter since they depend on config
     if (state.diagEngine) {
       state.diagEngine.destroy();
@@ -100,9 +99,9 @@ export async function loadNewRuntimeConfig() {
   const experimentId = getSelectedExperiment();
   // Check if already loaded for current experiment
   if (
-    state.newRuntimeGraph &&
-    state.newRuntimeSemantics &&
-    state.newRuntimeRegistry &&
+    state.newRuntimeConfig?.graph &&
+    state.newRuntimeConfig?.semantics &&
+    state.newRuntimeConfig?.registry &&
     state.currentExperimentId === experimentId
   ) {
     await validateSelectedFrontend();
@@ -113,9 +112,7 @@ export async function loadNewRuntimeConfig() {
     // Find this experiment's manifest entry
     const manifest = state.experimentManifest?.experiments?.find((e) => e.id === experimentId);
     const config = await loadExperimentConfig(experimentId);
-    state.newRuntimeGraph = config.graph;
-    state.newRuntimeSemantics = config.semantics;
-    state.newRuntimeRegistry = config.registry;
+    state.newRuntimeConfig = config;
 
     await validateSelectedFrontend();
     state.currentExperimentId = experimentId;
@@ -123,9 +120,9 @@ export async function loadNewRuntimeConfig() {
     console.log("[QLATT] Runtime config loaded", {
       experiment: experimentId,
       extends: manifest?.extends || null,
-      graph: state.newRuntimeGraph?.name,
-      semantics: state.newRuntimeSemantics?.name,
-      primitives: Object.keys(state.newRuntimeRegistry?.primitives ?? {}).length,
+      graph: state.newRuntimeConfig?.graph?.name,
+      semantics: state.newRuntimeConfig?.semantics?.name,
+      primitives: Object.keys(state.newRuntimeConfig?.registry?.primitives ?? {}).length,
     });
   } catch (err) {
     state.status.textContent = `Status: failed to load ${experimentId} config: ${err.message}`;

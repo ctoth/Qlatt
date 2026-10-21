@@ -90,6 +90,7 @@ export async function speak() {
   // The layered-additive F0 renderer (dectalk-english) calls a synchronous
   // WASM kernel; in the browser its bytes must be fetched and injected before
   // the synchronous textToKlattTrack() below. Idempotent after the first call.
+  await loadNewRuntimeConfig();
   await preloadF0Filters(`${state.WORKLET_BASE_PATH}f0-filters.wasm`);
   timer.mark("f0Filters");
   // Selected voice (string name) comes from the frontend's declarative speakers
@@ -119,9 +120,7 @@ export async function initializeNewRuntime() {
       state.status.textContent = "Status: initializing new runtime...";
       state.newRuntime = await createKlattRuntime({
         audioContext: state.ctx,
-        graph: state.newRuntimeGraph,
-        semantics: state.newRuntimeSemantics,
-        registry: state.newRuntimeRegistry,
+        config: state.newRuntimeConfig,
         workletBasePath: state.WORKLET_BASE_PATH,
         logger: (msg) => console.log(msg),
         telemetry: true, // Enable worklet debug metrics
@@ -146,7 +145,7 @@ export async function initializeNewRuntime() {
           playHistory: state.playHistory,
           sessionId: state.sessionId,
           sliderParams: {},
-          semantics: state.newRuntimeSemantics,
+          semantics: state.newRuntimeConfig?.semantics,
         });
         state.diagEngine.subscribe((output) => {
           if (state.useEngineOutput) {
@@ -196,8 +195,8 @@ export async function speakWithNewRuntime(track, baseF0) {
     state.newInterpreter = createKlattInterpreter({
       audioContext: state.ctx,
       runtime: runtime,
-      graph: state.newRuntimeGraph,
-      semantics: state.newRuntimeSemantics,
+      graph: state.newRuntimeConfig?.graph,
+      semantics: state.newRuntimeConfig?.semantics,
       logger: (msg) => console.log(msg),
       telemetryHandler: (event) => {
         // Route interpreter telemetry through handleTelemetry for PLSTEP events
@@ -210,7 +209,7 @@ export async function speakWithNewRuntime(track, baseF0) {
   if (state.specState.analyser) {
     // A graph without those nodes (dectalk-vtm is a single node) is tapped at
     // the first output it declares.
-    const firstOutput = state.newRuntimeGraph?.outputs?.[0];
+    const firstOutput = state.newRuntimeConfig?.graph?.outputs?.[0];
     const firstOutputId = typeof firstOutput === "string" ? firstOutput : firstOutput?.node;
     const outputNode =
       runtime.getNode("masterGain") ??
@@ -271,12 +270,12 @@ export async function speakWithNewRuntime(track, baseF0) {
   });
 
   const trackDuration = state.newInterpreter.getTrackDuration();
-  const metricsPolicy = state.newRuntimeSemantics?.analysis?.metrics;
+  const metricsPolicy = state.newRuntimeConfig?.semantics?.analysis?.metrics;
   console.log(
     "[QLATT] Track summary",
     metricsPolicy ? summarizeTrack(track, metricsPolicy) : "(no experiment metrics policy)",
   );
-  const branchPolicy = state.newRuntimeSemantics?.analysis?.branch_switch;
+  const branchPolicy = state.newRuntimeConfig?.semantics?.analysis?.branch_switch;
   console.log(
     "[QLATT] Branch switch summary",
     branchPolicy

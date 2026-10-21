@@ -76,8 +76,8 @@ it("matches fresh renders through concurrent A/B and A replay with isolated runt
     expect(new Set(calls.map((options) => options.audioContext)).size).toBe(3);
     expect(new Set(calls.map((options) => options.diagnostics)).size).toBe(3);
     expect(Object.isFrozen((await config.mock.results[0].value).graph.nodes)).toBe(true);
-    expect(calls[0].graph).not.toBe(calls[1].graph);
-    expect(calls[0].semantics).not.toBe(calls[1].semantics);
+    expect(calls[0].config.graph).not.toBe(calls[1].config.graph);
+    expect(calls[0].config.semantics).not.toBe(calls[1].config.semantics);
     const baselineA = await fresh.render(a);
     const baselineB = await fresh.render(b);
     expect(audioHash(first)).toBe(audioHash(baselineA));

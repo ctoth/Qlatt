@@ -37,9 +37,16 @@ the normalized absence value, null; no production change or extra guard is
 needed. Q approved this correction after the failure was reported. The four
 runtime shards, native, and node-web-audio-api passed on the original head.
 
+Claude review found no production defects and confirmed the fixture correction.
+The remaining stale YAML comment named source-contour.ts as the loader; it now
+names inventory.ts as loader and source-contour.ts as parser. Accepted this
+documentation correction. The async-first test covers a supported acquisition
+order; the harness itself warms synchronous resources before vocabulary checks.
+Both orders use the existing cache; no additional machinery is needed.
+
 # Next step
 
-Push the fixture correction for hosted CI and await Claude review, then respond
-to the review. No local CI duplication. Whole-closure
+Await final-head hosted CI and supervisor merge after the comment-only review
+response. No local CI duplication. Whole-closure
 resource assembly and remaining implicit resource consumers remain under #141.
 No local tests were run: this isolated worktree has no installed dependencies.

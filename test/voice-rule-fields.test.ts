@@ -250,12 +250,8 @@ describe("voice rule fields at load", () => {
     // An explicit null, not a missing key: the default voice's lift (3) is in
     // the rulepack's parameters and would show through a missing key.
     expect(
-      resolveVoice(
-        registry,
-        "no-lift",
-        profileSpec,
-        loadFrontendVoiceDocument(registry, "no-lift"),
-      ).ruleFields,
+      resolveVoice(registry, "no-lift", profileSpec, loadFrontendVoiceDocument(registry, "no-lift"))
+        .ruleFields,
     ).toEqual({
       register: "chest",
       lift: null,

@@ -6,7 +6,7 @@ Move compile-time and runtime voice YAML acquisition into the existing resource 
 
 Fresh branch from 5c18e8d1. Implementation complete: 126 production additions /
 37 removals, 113 existing fixture additions / 20 removals. Source, real callers
-and owned diff inspected. Publishing for hosted CI and Claude; no local CI ran.
+and owned diff inspected. PR #402 published; Claude reviewing. No local CI ran.
 
 # Decisions and why
 
@@ -27,6 +27,8 @@ The template-path agent confirmed its parseComposedRulepack observer addition is
 independent of this explicit document argument; its observer body is untouched.
 Other agents' changes are preserved. Voice YAML parsing/IO is removed entirely
 from dectalk-voice; broader resource closure and aliases remain unfinished #141.
+Hosted quality job119144833347 reported imported-name ordering in inventory.ts
+and one fixture call wrap. Applied those exact formatter corrections; no behavior change.
 
 # Next step
 

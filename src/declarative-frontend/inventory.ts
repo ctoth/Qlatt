@@ -2,8 +2,8 @@ import { type CmuDictionary, loadCmuDictionaryFromPathSync } from "../cmu-dictio
 import {
   type SpeakerDefinitionContext,
   type VoiceDocument,
-  voiceNameInRegistry,
   type VoiceRegistry,
+  voiceNameInRegistry,
   voiceRuleRegistry,
 } from "../dectalk-voice";
 import type { Diagnostics } from "../diagnostics";

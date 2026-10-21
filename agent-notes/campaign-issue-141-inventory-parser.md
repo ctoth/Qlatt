@@ -6,7 +6,9 @@ inventory to the area-formant generator (#141, bounded partial delivery).
 # State
 
 Isolated from origin/master 17e27f2b. Implementation complete; hosted CI and
-Claude review pending. No local CI.
+Claude completed the full six-file review with no defects; accepted. Supervisor
+independently verified the source, full diff and formatting correction.
+Final hosted CI pending. No local CI.
 Initial quality job119189415271 requested the parser signature on one line;
 applied that formatting-only correction for replacement hosted CI.
 

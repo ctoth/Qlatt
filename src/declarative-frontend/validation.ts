@@ -4671,6 +4671,7 @@ export function assertValidSpec(
         diagnostic.path,
       );
     const stringSetElement = /^string_sets\.[^.]+\[\d+\]$/.test(diagnostic.path);
+    const phaseName = /^phases\[\d+\]\.name$/.test(diagnostic.path);
     const ruleName = /^rules\.([^.]+)\./.exec(diagnostic.path)?.[1];
     const rule = ruleName && isPlainObject(spec.rules) ? spec.rules[ruleName] : undefined;
     const frameRuleExpressionPath =
@@ -4696,7 +4697,7 @@ export function assertValidSpec(
       );
     const documentSpan =
       origin && exact
-        ? diagnostic.code === "E_CEL_INVALID" || expressionPath || stringSetElement
+        ? diagnostic.code === "E_CEL_INVALID" || expressionPath || stringSetElement || phaseName
           ? origin.value
           : origin.key
         : undefined;

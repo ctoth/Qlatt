@@ -124,6 +124,9 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
           entry.value.path[0] === "string_sets" ||
           entry.value.path[0] === "tags" ||
           entry.value.path[0] === "frame_programs" ||
+          (entry.value.path[0] === "phases" &&
+            typeof entry.value.path[1] === "number" &&
+            entry.value.path.length <= 3) ||
           (entry.value.path[0] === "rules" &&
             (entry.value.path.every((part) => typeof part === "string") ||
               (entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number") ||
@@ -247,7 +250,7 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
     merged,
     Object.freeze([
       ...(RULE_DOCUMENT_SPANS.get(root) ?? []),
-      ...(RULE_DOCUMENT_SPANS.get(child) ?? []),
+      ...(RULE_DOCUMENT_SPANS.get(child) ?? []).filter((entry) => entry.value.path[0] !== "phases"),
     ]),
   );
   MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(root), ...MAP_ORIGINS.get(child) });
@@ -301,6 +304,21 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
 
   const childPhases = child.phases as unknown[];
   if (Array.isArray(childPhases) && childPhases.length > 0) {
+    const phaseOffset = Array.isArray(merged.phases) ? merged.phases.length : 0;
+    const phaseSpans = (RULE_DOCUMENT_SPANS.get(child) ?? []).flatMap((entry) => {
+      const path = entry.compiledPath ?? entry.value.path;
+      if (path[0] !== "phases" || typeof path[1] !== "number") return [];
+      return [
+        Object.freeze({
+          ...entry,
+          compiledPath: Object.freeze(["phases", path[1] + phaseOffset, ...path.slice(2)]),
+        }),
+      ];
+    });
+    RULE_DOCUMENT_SPANS.set(
+      merged,
+      Object.freeze([...(RULE_DOCUMENT_SPANS.get(merged) ?? []), ...phaseSpans]),
+    );
     merged.phases = [...(Array.isArray(merged.phases) ? merged.phases : []), ...childPhases];
   }
 
@@ -823,6 +841,7 @@ function parseComposedRulepack(
       entry.value.path[0] === "string_sets" ||
       entry.value.path[0] === "tags" ||
       entry.value.path[0] === "frame_programs" ||
+      entry.value.path[0] === "phases" ||
       entry.value.path.every((part) => typeof part === "string"),
   );
   for (const { compiled, authored } of paths) {
@@ -832,7 +851,19 @@ function parseComposedRulepack(
       Object.freeze({ ...matches[0], compiledPath: Object.freeze([...compiled]) }),
     );
   }
-  RULE_DOCUMENT_SPANS.set(spec, Object.freeze(compiledSpans));
+  // Order diagnostics use a normalized phase name instead of its array index.
+  // Preserve the authored path and do not attribute a duplicate name to one entry.
+  const phaseNames = spec.phases.map((phase) => phase.name);
+  const phaseOrderSpans = compiledSpans.flatMap((entry) => {
+    const path = entry.compiledPath ?? entry.value.path;
+    if (path[0] !== "phases" || typeof path[1] !== "number" || path[2] !== "after") {
+      return [];
+    }
+    const name = phaseNames[path[1]];
+    if (!name || phaseNames.filter((candidate) => candidate === name).length !== 1) return [];
+    return [Object.freeze({ ...entry, compiledPath: Object.freeze(["phases", name, "after"]) })];
+  });
+  RULE_DOCUMENT_SPANS.set(spec, Object.freeze([...compiledSpans, ...phaseOrderSpans]));
   return spec;
 }
 

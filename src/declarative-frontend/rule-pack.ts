@@ -11,6 +11,7 @@ import {
   voiceRuleRegistry,
   withVoiceRulePolicy,
 } from "../dectalk-voice";
+import { parseLtsRulesData } from "../g2p/lts-engine";
 import type { MorphologyContext, MorphologyData } from "../g2p/morphology";
 import { parseStressPolicy, type StressContext } from "../g2p/stress-policy";
 import type { PhonotacticsData } from "../g2p/syllabify";
@@ -1434,7 +1435,9 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     if (document === null || document === undefined) {
       throw new Error(`E_YAML_SCHEMA: '${path}' resolved to empty document`);
     }
-    return document;
+    return path.endsWith(".json") && isLtsTableDocument(document)
+      ? document
+      : parseLtsRulesData(document);
   });
   const tablePronouncer =
     ltsPath.endsWith(".json") && isLtsTableDocument(FRONTEND_ASSET_CACHE.get(ltsPath));
@@ -1561,7 +1564,9 @@ export async function preloadFrontendResources(spec: unknown): Promise<FrontendR
     if (document === null || document === undefined) {
       throw new Error(`E_YAML_SCHEMA: '${path}' resolved to empty document`);
     }
-    return document;
+    return path.endsWith(".json") && isLtsTableDocument(document)
+      ? document
+      : parseLtsRulesData(document);
   });
   const tablePronouncer =
     ltsPath.endsWith(".json") && isLtsTableDocument(FRONTEND_ASSET_CACHE.get(ltsPath));

@@ -17,6 +17,7 @@
  * Citation: Hayes (1982), Extrametricality and English Stress, pp. 237–274.
  */
 
+import type { Diagnostics } from "../diagnostics";
 import {
   PHONEME_PARAMETERS_CLOSE,
   PHONEME_PARAMETERS_OPEN,
@@ -86,6 +87,7 @@ export function pronounce(
     morphology?: MorphologyContext;
     stress?: StressContext;
     frontendId?: string;
+    diagnostics?: Diagnostics | null;
     /** The word's place among its neighbours; a word alone when absent. */
     context?: ClauseContext;
   },
@@ -1096,7 +1098,11 @@ export function pronounce(
       );
     }
     generated = {
-      phonemes: applyLtsRules(lowerWord, options.lts.document as LtsRulesData),
+      phonemes: applyLtsRules(word, options.lts.document as LtsRulesData, {
+        diagnostics: options.diagnostics,
+        frontendId: options.frontendId,
+        resource: options.lts.path,
+      }),
       source: "lts-rules",
       word: lowerWord,
     };
@@ -1135,6 +1141,7 @@ export function pronounceClause(
     morphology?: MorphologyContext;
     stress?: StressContext;
     frontendId?: string;
+    diagnostics?: Diagnostics | null;
     /**
      * False when the mark that ends the run is not in the text (a text's end
      * closed as a sentence): the last word then does not stand against

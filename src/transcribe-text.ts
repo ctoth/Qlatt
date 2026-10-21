@@ -838,6 +838,7 @@ export function transcribeText(
           morphology,
           stress,
           frontendId: options.frontendId,
+          diagnostics: options.diagnostics,
           atWrittenPunctuation,
           ...(endMark === undefined ? {} : { endMark }),
           ...(endMarkSent ? { endMarkSent } : {}),
@@ -945,6 +946,7 @@ export function transcribeText(
                 morphology,
                 stress,
                 frontendId: options.frontendId,
+                diagnostics: options.diagnostics,
               }))
             : {
                 phonemes: symbolPronunciation,

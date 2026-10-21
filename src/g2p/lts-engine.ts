@@ -5,7 +5,7 @@
  * NRL Report 7948, to convert English words to phoneme sequences.
  *
  * Algorithm:
- *   1. Pad input with spaces: " " + WORD + " "
+ *   1. Apply the resource's case mode and generated boundary markers
  *   2. Walk through the padded string character by character
  *   3. At each position, look up rules by the current letter
  *   4. For each rule (first match wins):
@@ -13,11 +13,14 @@
  *      b. Check left context (regex anchored at end of left substring)
  *      c. Check right context (regex anchored at start of right substring)
  *      d. If all match: emit phonemes, advance by rule.letters.length
- *   5. If no rule matches: skip the character
+ *   5. If no rule matches: skip the scalar and summarize dropped original input
  *   6. Filter prosodic markers; symbol normalization (AX/NX/WH) deferred to normalize rule phase
  *
  * Citation: Elovitz, Johnson, McHugh & Shore (1976). NRL Report 7948.
  */
+
+import type { Diagnostics } from "../diagnostics";
+import { isPlainObject } from "../yaml-loader";
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -29,6 +32,14 @@ interface LtsRule {
 }
 
 export interface LtsRulesData {
+  input_policy: {
+    case_mode: "upper" | "lower" | "preserve";
+    boundary_marker: string;
+    categories: Record<string, string>;
+    fallback: string | null;
+    filtered_markers: string[];
+    citations: string[];
+  };
   context_symbols: Record<string, string>;
   raw_regex?: boolean;
   rules_by_letter: Record<string, LtsRule[]>;
@@ -36,18 +47,74 @@ export interface LtsRulesData {
 
 // ── Module-level state (lazy init) ─────────────────────────────────────
 
-const rulesCache = new Map<LtsRulesData, Map<string, RegExp>>();
+const rulesCache = new Map<
+  LtsRulesData,
+  { contexts: Map<string, RegExp>; categories: Map<string, string>; markers: Set<string> }
+>();
+
+/** Validate and prepare the selected YAML document without changing its identity. */
+export function parseLtsRulesData(value: unknown): LtsRulesData {
+  if (rulesCache.has(value as LtsRulesData)) return value as LtsRulesData;
+  function fail(field: string): never {
+    throw new Error(`E_LTS_POLICY: invalid ${field}`);
+  }
+  const strings = (entry: unknown): entry is string[] =>
+    Array.isArray(entry) && entry.every((text) => typeof text === "string" && text.trim());
+  if (!isPlainObject(value) || !isPlainObject(value.input_policy)) fail("input_policy");
+  const policy = value.input_policy;
+  if (!["upper", "lower", "preserve"].includes(policy.case_mode as string)) fail("case_mode");
+  if (typeof policy.boundary_marker !== "string" || [...policy.boundary_marker].length !== 1)
+    fail("boundary_marker");
+  if (!isPlainObject(policy.categories)) fail("categories");
+  if (policy.fallback !== null && (typeof policy.fallback !== "string" || !policy.fallback.trim()))
+    fail("fallback");
+  if (!strings(policy.filtered_markers)) fail("filtered_markers");
+  if (!strings(policy.citations) || policy.citations.length === 0) fail("citations");
+  const categories = new Map<string, string>();
+  for (const [name, members] of Object.entries(policy.categories)) {
+    if (!name.trim() || typeof members !== "string" || !members) fail("categories");
+    for (const character of members) {
+      if (categories.has(character)) fail(`overlapping categories for '${character}'`);
+      categories.set(character, name);
+    }
+  }
+  if (!isPlainObject(value.context_symbols) || !isPlainObject(value.rules_by_letter)) fail("rules");
+  if (Object.values(value.context_symbols).some((entry) => typeof entry !== "string"))
+    fail("context_symbols");
+  if (value.raw_regex !== undefined && typeof value.raw_regex !== "boolean") fail("raw_regex");
+  for (const [key, rules] of Object.entries(value.rules_by_letter)) {
+    if (!key || !Array.isArray(rules)) fail("rules_by_letter");
+    for (const rule of rules) {
+      if (
+        !isPlainObject(rule) ||
+        typeof rule.left !== "string" ||
+        typeof rule.right !== "string" ||
+        typeof rule.letters !== "string" ||
+        !rule.letters ||
+        !strings(rule.phonemes)
+      ) {
+        fail(`rule in '${key}'`);
+      }
+    }
+  }
+  const data = value as unknown as LtsRulesData;
+  rulesCache.set(data, {
+    contexts: new Map(),
+    categories,
+    markers: new Set(data.input_policy.filtered_markers),
+  });
+  return data;
+}
 
 // ── Context pattern compilation ────────────────────────────────────────
 
 /**
- * The context_symbols map from the JSON defines single-character symbols
+ * The resource's context_symbols map defines single-character symbols
  * that expand to regex fragments. A context pattern string is processed
  * character by character: if the character is a known symbol, substitute
  * its regex; otherwise treat it as a literal character.
  *
- * Special case: space ' ' is a literal space (word boundary in the
- * padded input).
+ * Characters absent from that map remain literal, including the configured boundary.
  */
 function compileContextPattern(
   pattern: string,
@@ -96,18 +163,7 @@ function escapeRegex(s: string): string {
 // ── Rule matching ──────────────────────────────────────────────────────
 
 /**
- * Determine which rule category to use for a given character.
- * Letters A-Z use their letter; digits 0-9 use "NUMBER";
- * everything else (space, punctuation) uses "PUNCT".
- */
-function getCategoryForChar(ch: string): string {
-  if (ch >= "A" && ch <= "Z") return ch;
-  if (ch >= "0" && ch <= "9") return "NUMBER";
-  return "PUNCT";
-}
-
-/**
- * Apply a single rule at the given position in the (uppercased, padded) input.
+ * Apply a single rule at the given UTF-16 position in transformed, padded input.
  * Returns the number of characters consumed, or 0 if the rule does not match.
  */
 function tryRule(
@@ -147,40 +203,54 @@ function tryRule(
 /**
  * Apply Elovitz LTS rules to a word and return Qlatt ARPAbet phonemes.
  *
- * @param word - A single English word (no surrounding spaces).
- *               Case-insensitive.
+ * @param word - The original word presented to this engine, before its case conversion.
  * @returns Array of Qlatt ARPAbet phoneme strings (no stress digits).
  */
-export function applyLtsRules(word: string, data: LtsRulesData): string[] {
+export function applyLtsRules(
+  word: string,
+  data: LtsRulesData,
+  options: { diagnostics?: Diagnostics | null; frontendId?: string; resource?: string } = {},
+): string[] {
+  parseLtsRulesData(data);
   if (!word || word.length === 0) return [];
-
-  let contextCache = rulesCache.get(data);
-  if (!contextCache) {
-    contextCache = new Map<string, RegExp>();
-    rulesCache.set(data, contextCache);
-  }
+  const { contexts, categories, markers } = rulesCache.get(data)!;
+  const policy = data.input_policy;
   const { context_symbols, rules_by_letter, raw_regex } = data;
   const rawRegex = raw_regex === true;
 
-  // Pad with spaces (word boundary markers)
-  const input = " " + word.toUpperCase() + " ";
+  // Engineering convention: locale-independent case conversion per Unicode scalar.
+  // Each resulting UTF-16 unit retains its original scalar and UTF-16 offset.
+  const origins: ({ character: string; position: number } | undefined)[] =
+    Array(policy.boundary_marker.length).fill(undefined);
+  let input = policy.boundary_marker;
+  let position = 0;
+  for (const character of word) {
+    const transformed =
+      policy.case_mode === "upper"
+        ? character.toUpperCase()
+        : policy.case_mode === "lower"
+          ? character.toLowerCase()
+          : character;
+    input += transformed;
+    origins.push(...Array(transformed.length).fill({ character, position }));
+    position += character.length;
+  }
+  input += policy.boundary_marker;
+  const dropped = new Map<number, { character: string; position: number; reason: string }>();
   const elovitzPhonemes: string[] = [];
 
   let pos = 0;
   while (pos < input.length) {
-    const ch = input[pos];
-    const category = getCategoryForChar(ch);
-    const rules = rules_by_letter[category];
-
-    if (!rules) {
-      // No rules for this character — skip
-      pos++;
-      continue;
-    }
+    const ch = String.fromCodePoint(input.codePointAt(pos)!);
+    const category = Object.hasOwn(rules_by_letter, ch) ? ch : (categories.get(ch) ?? policy.fallback);
+    const rules =
+      category !== null && Object.hasOwn(rules_by_letter, category)
+        ? rules_by_letter[category]
+        : undefined;
 
     let matched = false;
-    for (const rule of rules) {
-      const consumed = tryRule(rule, input, pos, context_symbols, contextCache, rawRegex);
+    for (const rule of rules ?? []) {
+      const consumed = tryRule(rule, input, pos, context_symbols, contexts, rawRegex);
       if (consumed > 0) {
         elovitzPhonemes.push(...rule.phonemes);
         pos += consumed;
@@ -190,14 +260,33 @@ export function applyLtsRules(word: string, data: LtsRulesData): string[] {
     }
 
     if (!matched) {
-      // No rule matched — skip this character
-      pos++;
+      const origin = origins[pos];
+      if (origin) {
+        dropped.set(origin.position, {
+          ...origin,
+          reason: rules ? "no-match" : "no-rule-category",
+        });
+      }
+      pos += ch.length;
     }
   }
 
   // Filter prosodic markers (not real phonemes).
   // Symbol remapping (AX->AH, NX->NG, WH->W) is now handled by
   // the selected frontend's normalize rule phase.
-  const PROSODIC_MARKERS = new Set(["< >", "<,>", "<.>", "<?>", "<->"]);
-  return elovitzPhonemes.filter((p) => !PROSODIC_MARKERS.has(p));
+  if (dropped.size) {
+    options.diagnostics?.warn(
+      "LTS input characters had no matching pronunciation rule",
+      {
+        word,
+        frontend: options.frontendId,
+        resource: options.resource,
+        positionUnit: "UTF-16",
+        affected: [...dropped.values()],
+        citations: policy.citations,
+      },
+      "LTS_UNMATCHED_INPUT",
+    );
+  }
+  return elovitzPhonemes.filter((p) => !markers.has(p));
 }

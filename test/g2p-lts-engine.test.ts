@@ -1,8 +1,80 @@
 import { describe, expect, it } from "vitest";
-import { applyLtsRules, type LtsRulesData } from "../src/g2p/lts-engine";
+import { createDiagnostics } from "../src/diagnostics";
+import { applyLtsRules, type LtsRulesData, parseLtsRulesData } from "../src/g2p/lts-engine";
 import { resources } from "./g2p-fixture";
 
 const QLATT_LTS_RULES = resources.lts.document as LtsRulesData;
+
+describe("resource input policy", () => {
+  function fixture(): LtsRulesData {
+    return {
+      input_policy: {
+        case_mode: "preserve", boundary_marker: "|", categories: { DIGIT: "١" },
+        fallback: null, filtered_markers: ["MARK"], citations: ["fixture input policy"],
+      },
+      context_symbols: {},
+      rules_by_letter: {
+        "é": [{ left: "|", letters: "é", right: "", phonemes: ["EH", "MARK", "AX"] }],
+        "😀": [{ left: "", letters: "😀", right: "", phonemes: ["HH"] }],
+        DIGIT: [{ left: "", letters: "١", right: "|", phonemes: ["W", "AH", "N"] }],
+      },
+    };
+  }
+
+  it("uses Unicode keys, declared categories/boundaries and marker filtering without normalization", () => {
+    const data = fixture();
+    expect(applyLtsRules("é😀١", data)).toEqual(["EH", "AX", "HH", "W", "AH", "N"]);
+    const alternate = fixture();
+    alternate.input_policy.filtered_markers = ["AX"];
+    expect(applyLtsRules("é", alternate)).toEqual(["EH", "MARK"]);
+    const direct = fixture();
+    direct.rules_by_letter["١"] = [{ left: "", letters: "١", right: "", phonemes: ["D"] }];
+    expect(applyLtsRules("١", direct)).toEqual(["D"]);
+  });
+
+  it.each(["upper", "lower", "preserve"] as const)("honors %s scalar case mode", (mode) => {
+    const data = fixture();
+    data.input_policy.case_mode = mode;
+    data.rules_by_letter["É"] = [{ left: "", letters: "É", right: "", phonemes: ["IY"] }];
+    expect(applyLtsRules(mode === "lower" ? "É" : "é", data)).toEqual(
+      mode === "upper" ? ["IY"] : ["EH", "AX"],
+    );
+  });
+
+  it("summarizes original UTF-16 positions once and excludes only generated boundaries", () => {
+    const data = fixture();
+    data.input_policy.case_mode = "upper";
+    data.input_policy.categories.MISSING = "X";
+    data.rules_by_letter.S = [];
+    const diagnostics = createDiagnostics();
+    expect(applyLtsRules("😀ßX|", data, { diagnostics, resource: "fixture.yaml" })).toEqual(["HH"]);
+    expect(diagnostics.getEntries()).toEqual([
+      expect.objectContaining({ code: "LTS_UNMATCHED_INPUT", data: expect.objectContaining({
+        word: "😀ßX|", resource: "fixture.yaml", positionUnit: "UTF-16",
+        affected: [
+          { character: "ß", position: 2, reason: "no-match" },
+          { character: "X", position: 3, reason: "no-rule-category" },
+          { character: "|", position: 4, reason: "no-rule-category" },
+        ],
+        citations: ["fixture input policy"],
+      }) }),
+    ]);
+    const fallback = fixture();
+    fallback.input_policy.fallback = "OTHER";
+    fallback.rules_by_letter.OTHER = [{ left: "", letters: "?", right: "", phonemes: ["Q"] }];
+    expect(applyLtsRules("?", fallback)).toEqual(["Q"]);
+  });
+
+  it.each([
+    { case_mode: "locale" }, { boundary_marker: "" }, { boundary_marker: "ab" },
+    { categories: { one: "x", two: "x" } }, { fallback: "" },
+    { filtered_markers: [3] }, { citations: [] }, { citations: [" "] },
+  ])("rejects malformed supplied policy %j", (policy) => {
+    const data = fixture();
+    expect(() => parseLtsRulesData({ ...data, input_policy: { ...data.input_policy, ...policy } }))
+      .toThrow("E_LTS_POLICY");
+  });
+});
 
 // Note: Symbol normalization (AX->AH, NX->NG, WH->W) is now handled by
 // the normalize rule phase (public/rules/frontends/qlatt-english/phases/normalize.yaml), not by
@@ -11,6 +83,7 @@ const QLATT_LTS_RULES = resources.lts.document as LtsRulesData;
 describe("context pattern compilation", () => {
   it("keeps compiled patterns with the supplied document", () => {
     const first: LtsRulesData = {
+      input_policy: QLATT_LTS_RULES.input_policy,
       context_symbols: { "#": "[AEIOU]" },
       rules_by_letter: {
         A: [

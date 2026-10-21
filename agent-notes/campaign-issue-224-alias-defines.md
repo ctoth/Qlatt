@@ -12,6 +12,8 @@ Use the loader's actual aliasTarget and direct map children. Preserve the alias 
 
 # Surprises
 
+Hosted shard3 job119192365640 found that the expected fixture span used the parser's default null role while production supplies rulepack. Corrected the fixture parse identity to match production, retaining the full coordinate assertion. Production and default parser role unchanged; no local CI.
+
 Quality job119189525150 requested five formatting corrections in source and fixture. Applied its exact wrapping; semantics unchanged and no local CI.
 
 Other agents own normalization resource moves and loader acquisition. Preserve their changes.

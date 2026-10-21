@@ -724,7 +724,7 @@ describe("macro source ancestry", () => {
         });
         const resource = join(dir, "pipeline.yaml").replace(/\\/g, "/");
         const authored = yamlDocumentSpans(
-          parseYamlString(readFileSync(resource, "utf8"), resource),
+          parseYamlString(readFileSync(resource, "utf8"), resource, { resource, role: "rulepack" }),
         );
         const source = authored.find(
           (entry) => entry.value.path.join(".") === "rules.fixture_anchor.define.check",

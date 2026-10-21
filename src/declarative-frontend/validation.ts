@@ -3865,6 +3865,7 @@ export type ValidateDslSpecOptions = {
   parameterSchemaDeclared?: boolean;
   requireLoweringSpec?: boolean;
   requireTagVocabulary?: boolean;
+  requireSyllabification?: boolean;
 };
 
 function validateLoweringSpec(
@@ -4237,7 +4238,7 @@ function validateLoweringSpec(
 //   onset_clusters: string[] (legal onset clusters in ascky chars)
 //   affixes: string[] (affix strings in ascky chars)
 //   ascky: Record<string, single-char string> (ARPABET symbol -> ascky char)
-// Absent block is fine (frontend opts out of syllabification).
+// Low-level rule fixtures may omit this; executable frontends require tables.
 const SYLL_INVALID = "E_SYLLABIFICATION_INVALID";
 const syllabificationSchema = S.object({
   code: SYLL_INVALID,
@@ -4293,8 +4294,12 @@ const syllabificationSchema = S.object({
   ],
 });
 
-function validateSyllabification(spec: PlainObject, diagnostics: ValidationDiagnostic[]): void {
-  if (!Object.hasOwn(spec, "syllabification")) return;
+function validateSyllabification(
+  spec: PlainObject,
+  diagnostics: ValidationDiagnostic[],
+  required: boolean,
+): void {
+  if (!required && !Object.hasOwn(spec, "syllabification")) return;
   syllabificationSchema(spec.syllabification, "syllabification", diagnostics);
 }
 
@@ -4395,7 +4400,7 @@ export function validateDslSpec(
   }
   validateLoweringSpec(spec, diagnostics, options);
   validateMaps(spec, diagnostics);
-  validateSyllabification(spec, diagnostics);
+  validateSyllabification(spec, diagnostics, options.requireSyllabification === true);
   validatePatterns(spec, relationByName, predicates, policyState, referenceParameters, diagnostics);
   const tagVocabulary = validateTagVocabulary(
     spec,

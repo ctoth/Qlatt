@@ -574,7 +574,6 @@ function createStructure(
   transcribed: readonly TranscriptionToken[],
   segments: readonly ReturnType<Utterance["allItems"]>[number][],
   spec: CompiledRulepack,
-  inventory: InventorySpec,
   /**
    * Tokens of supplied marks that end a stretch of words without being
    * counted with it (a clause end a command made by sending a control item).
@@ -582,6 +581,7 @@ function createStructure(
   uncountedEnds: ReadonlySet<string> = new Set(),
 ): void {
   const tables = parseSyllabificationTables(spec.syllabification);
+  if (!tables) throw new Error("E_SYLLABIFICATION_INVALID: executable frontend requires tables");
   const byToken = new Map<
     string,
     Array<{ token: TranscriptionToken; segment: (typeof segments)[number] }>
@@ -678,35 +678,10 @@ function createStructure(
     }
     transaction.append("Word", word);
     transaction.addRoot("SylStructure", word);
-    const annotations = tables
-      ? syllabifyWord(
-          group.map((entry) => entry.token.phoneme),
-          tables,
-        )
-      : group.map((_entry, index, all) => {
-          const nuclei = all
-            .map((_candidate, candidateIndex) =>
-              inventory.nucleus_types.includes(
-                String(utterance.getItem(`segment_${candidateIndex.toString()}`)?.get("type")),
-              )
-                ? candidateIndex
-                : -1,
-            )
-            .filter((candidateIndex) => candidateIndex >= 0);
-          const syllableIndex = Math.max(
-            0,
-            nuclei.findIndex(
-              (_nucleus, nucleusIndex) =>
-                index <= (nuclei[nucleusIndex + 1] ?? Number.POSITIVE_INFINITY) - 1,
-            ),
-          );
-          return {
-            syllableIndex,
-            role: "onset",
-            positionInWord: nuclei.length <= 1 ? "only" : "medial",
-            syllableCount: Math.max(1, nuclei.length),
-          };
-        });
+    const annotations = syllabifyWord(
+      group.map((entry) => entry.token.phoneme),
+      tables,
+    );
     const syllables = new Map<number, ReturnType<typeof transaction.createItem>>();
     for (let index = 0; index < group.length; index += 1) {
       const annotation = annotations[index];
@@ -1153,7 +1128,7 @@ function buildTextToKlattTrackDetailed(
       if (typeof start === "number" && ends.has(start)) itemEndTokens.add(token.id);
     }
   }
-  createStructure(utterance, transcribed, segments, spec, resources.inventory, itemEndTokens);
+  createStructure(utterance, transcribed, segments, spec, itemEndTokens);
   onStage?.("structure");
 
   const requestedRate = options.rate ?? 1;

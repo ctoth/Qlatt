@@ -3,6 +3,18 @@ import { parseDslSpec } from "../src/declarative-frontend/parser";
 import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
 import { validateDslSpec } from "../src/declarative-frontend/validation";
 
+describe("executable syllabification requirement", () => {
+  it("keeps low-level programmatic rule fixtures independent", () => {
+    expect(() => compileRuleEngineSpec({ rules: {}, phases: [] })).not.toThrow();
+    const spec = parseDslSpec({ rules: {}, phases: [] });
+    expect(
+      validateDslSpec(spec, { requireSyllabification: true }).some(
+        (diagnostic) => diagnostic.code === "E_SYLLABIFICATION_INVALID",
+      ),
+    ).toBe(true);
+  });
+});
+
 const loweringOutput = {
   lowering: {
     id: "test-track-lowering",

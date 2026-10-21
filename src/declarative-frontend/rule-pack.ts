@@ -38,7 +38,10 @@ export function rulepackMapOrigins(
 
 /** Parse a rulepack YAML source into a raw object document (no DSL normalization). */
 function parseRulepackDocument(source: string, label: string): PlainObject {
-  const document = parseYamlString(source, label);
+  const document = parseYamlString(source, label, {
+    resource: label.replace(/^(included|base) rulepack /, ""),
+    role: "rulepack",
+  });
   if (!isPlainObject(document)) {
     throw new Error(`E_RULEPACK_DOCUMENT: ${label} must be a YAML object document`);
   }

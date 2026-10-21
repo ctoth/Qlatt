@@ -4,7 +4,7 @@
 Replace the three-entry TypeScript map with the existing bundled frontend manifest's IDs and entryPoint values.
 
 ## State
-Implemented bounded slice after PR458 merged c7aed264. Fresh isolated branch; no local CI. Publication/hosted validation next.
+PR461 published at b2d53c80 after PR458 merged c7aed264. Private full-PR Claude review running; no local CI. Initial hosted quality job119321038969 found one formatter error in the new fixture's ternary layout; applied its exact one-line reflow. Other initial checks continue.
 
 ## Decisions and why
 - Smallest scope: 70–100 production/caller lines, 60–90 existing fixture lines and one recorded manifest resource in each of three resource lists. Read/validate the existing catalogue through the shared source loader, reuse its primed-source owner, and retain DEFAULT_FRONTEND_ID as one explicit default.

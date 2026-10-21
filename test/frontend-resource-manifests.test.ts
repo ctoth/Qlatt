@@ -140,9 +140,7 @@ describe("primed resources", () => {
       const { blocking, parallel } = stubBrowser(files);
       vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
       const spec =
-        mode === "async"
-          ? await preloadBundledRulepackSpec(id)
-          : loadBundledRulepackSpec(id);
+        mode === "async" ? await preloadBundledRulepackSpec(id) : loadBundledRulepackSpec(id);
       expect(spec.rules.speech_rate_scaling).toBeDefined();
       expect(listBundledFrontendIds()).toContain(id);
       expect(resolveBundledRulepackPath(id)).toBe(entry);

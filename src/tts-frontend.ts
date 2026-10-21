@@ -801,6 +801,11 @@ function buildTextToKlattTrackDetailed(
     throw new Error("E_POLICY_REQUIRED: parameters.policy.rate.default must be positive and cited");
   }
   const requestedRate = options.rate ?? defaultRate;
+  if (!Number.isFinite(requestedRate) || requestedRate <= 0) {
+    throw new Error(
+      `E_RATE_INVALID: rate must be a finite number greater than zero, got ${String(requestedRate)}`,
+    );
+  }
   if (options.rate == null) {
     options.diagnostics?.info(
       "Using the selected frontend's default speaking rate",
@@ -818,8 +823,37 @@ function buildTextToKlattTrackDetailed(
   const rateUnit = readPolicyNumber(
     recordOrEmpty(recordOrEmpty(policyRecord(spec).rate).words_per_minute).unit,
   );
-  const rateReference =
-    readPolicyNumber(recordOrEmpty(policyRecord(spec).duration).rate_reference) || 1;
+  const durationPolicy = recordOrEmpty(policyRecord(spec).duration);
+  let normalizedRate = requestedRate;
+  if (Object.hasOwn(durationPolicy, "rate_reference")) {
+    const reference = durationPolicy.rate_reference;
+    if (
+      !isPlainObject(reference) ||
+      typeof reference.value !== "number" ||
+      !Number.isFinite(reference.value) ||
+      reference.value <= 0 ||
+      !Array.isArray(reference.citations) ||
+      reference.citations.length === 0 ||
+      reference.citations.some((citation) => typeof citation !== "string" || !citation.trim())
+    ) {
+      throw new Error("E_RATE_REFERENCE_INVALID: rate_reference must be finite, positive and cited");
+    }
+    normalizedRate = requestedRate / reference.value;
+    if (!Number.isFinite(normalizedRate) || normalizedRate <= 0) {
+      throw new Error("E_RATE_INVALID: reference-normalized rate must be finite and positive");
+    }
+    if (normalizedRate !== requestedRate) {
+      provenance.add({
+        stage: "frontend",
+        type: "speaking_rate_normalized",
+        subject: `frontend:${frontendId}:speaking_rate`,
+        reason:
+          `Initial request/parser rate: requested=${requestedRate}, reference=${reference.value}, ` +
+          `applied=${normalizedRate}`,
+        citations: reference.citations,
+      });
+    }
+  }
   const parsedText = textParser
     ? runTextParser(
         textParser.config,
@@ -829,9 +863,7 @@ function buildTextToKlattTrackDetailed(
         provenance,
         {
           ...(options.diagnostics ? { diagnostics: options.diagnostics } : {}),
-          ...(rateUnit !== undefined && Number.isFinite(requestedRate)
-            ? { initialRate: Math.round((requestedRate / rateReference) * rateUnit) }
-            : {}),
+          ...(rateUnit !== undefined ? { initialRate: Math.round(normalizedRate * rateUnit) } : {}),
         },
       )
     : null;
@@ -1159,13 +1191,6 @@ function buildTextToKlattTrackDetailed(
   createStructure(utterance, transcribed, segments, spec, itemEndTokens);
   onStage?.("structure");
 
-  if (!Number.isFinite(requestedRate) || requestedRate <= 0) {
-    throw new Error(
-      `E_RATE_INVALID: rate must be a finite number greater than zero, got ${String(requestedRate)}`,
-    );
-  }
-  const durationPolicy = recordOrEmpty(policyRecord(spec).duration);
-  const referenceRate = readPolicyNumber(durationPolicy.rate_reference);
   // No ceiling and no floor: the requested rate is the rate. Duration floors
   // (Klatt 1976 incompressible portion, projected by the duration_floor_* rules)
   // are the only limit on compression, and they are cited per phone.
@@ -1175,9 +1200,7 @@ function buildTextToKlattTrackDetailed(
   const relativeRate =
     commandRate !== undefined && rateUnit !== undefined
       ? commandRate / rateUnit
-      : referenceRate && referenceRate > 0
-        ? requestedRate / referenceRate
-        : requestedRate;
+      : normalizedRate;
   // A frontend whose rules take the speaking rate in words per minute
   // (policy.rate.words_per_minute) gets the rate as the policy value
   // policy.timing.speaking_rate_wpm and nothing else: its own rules say what a

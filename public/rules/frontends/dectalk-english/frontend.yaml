@@ -1278,7 +1278,10 @@ parameters:
       # of the neutral rate. With the reference at 1.0 it is taken as given;
       # rate.words_per_minute above turns it into DECtalk's words per minute,
       # and rate_scale stays 1 for this frontend.
-      rate_reference: 1.0
+      rate_reference:
+        value: 1.0
+        citations:
+          - "Engineering convention: preserve the existing neutral unit reference for API rate multipliers"
       # Duration floors consumed by the duration_floor_* rules. The canonical
       # magnitudes live in output.lowering.timeline.duration_floors (also read by
       # lowerToFrames); tts-frontend injects those values here at runtime, so

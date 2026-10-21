@@ -33,6 +33,10 @@ Initial estimate: 465–625 production lines and 180–240 focused fixture lines
 UndoLog.rollback clears capturing before running inverses; a separate atomic
 lifetime is necessary for committed reads. Detached Items share the stamper but
 must not become cached committed graph inputs.
+Initial hosted quality job119207414923 reported formatting in five authored
+files. Applied the formatter layout through apply_patch; its truncated diagnostic
+required obtaining formatted stdout only. No local checks or formatter writes.
+Claude full-PR review is running in session b47a09cf-295e-4b57-a381-23eecb34ce89.
 
 ## Next step
 Publish for hosted CI and independent Claude review; correct actual findings and

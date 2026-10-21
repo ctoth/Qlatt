@@ -600,7 +600,14 @@ export function evaluateExpression(
 
 /** Read-only HRG helpers supported by requested attributes; no effectful kernels. */
 export const PURE_ATTRIBUTE_HELPERS = [
-  "path", "assoc", "ahead", "behind", "midpoint", "at_ratio", "at_sync", "at_offset",
+  "path",
+  "assoc",
+  "ahead",
+  "behind",
+  "midpoint",
+  "at_ratio",
+  "at_sync",
+  "at_offset",
 ] as const;
 
 export interface CheckedPureExpression {
@@ -616,7 +623,9 @@ export function checkPureExpression(
 ): CheckedPureExpression {
   const parsed = compileExpression(expression);
   const allowed = new Set<string>([
-    ...CEL_FUNCTION_CATALOG.filter((entry) => entry.binding !== "context").map((entry) => entry.name),
+    ...CEL_FUNCTION_CATALOG.filter((entry) => entry.binding !== "context").map(
+      (entry) => entry.name,
+    ),
     ...PURE_ATTRIBUTE_HELPERS,
   ]);
   const visit = (value: unknown): void => {

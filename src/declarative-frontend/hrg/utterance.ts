@@ -137,7 +137,9 @@ export class Utterance {
   private readonly undo = new UndoLog();
   private generation = 0n;
   private applying = false;
-  readonly axis = new TemporalAxis(this.undo, () => { this.generation++; });
+  readonly axis = new TemporalAxis(this.undo, () => {
+    this.generation++;
+  });
   private readonly schema: HrgSchema;
   private readonly items = new Map<string, Item>();
   private readonly relations = new Map<string, Relation>();
@@ -159,7 +161,8 @@ export class Utterance {
 
   /** Never reused, even after rollback. Pure requests only observe committed state. */
   committedGeneration(): bigint {
-    if (this.applying) throw new Error("E_ATTRIBUTE_UNCOMMITTED: atomic graph mutation in progress");
+    if (this.applying)
+      throw new Error("E_ATTRIBUTE_UNCOMMITTED: atomic graph mutation in progress");
     return this.generation;
   }
 

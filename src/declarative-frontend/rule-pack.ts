@@ -785,7 +785,8 @@ const VALIDATED_RULEPACKS = new WeakSet<object>();
 
 /** Successful compiler validation, including its original inventory/schema context. */
 export function assertCompiledRulepack(spec: CompiledRulepack): void {
-  if (!VALIDATED_RULEPACKS.has(spec)) throw new Error("E_RULEPACK_UNCHECKED: compile the rulepack before requesting attributes");
+  if (!VALIDATED_RULEPACKS.has(spec))
+    throw new Error("E_RULEPACK_UNCHECKED: compile the rulepack before requesting attributes");
 }
 
 function validationInventoryPhonemes(inventory: InventorySpec | null): string[] | undefined {

@@ -836,7 +836,9 @@ function buildTextToKlattTrackDetailed(
       reference.citations.length === 0 ||
       reference.citations.some((citation) => typeof citation !== "string" || !citation.trim())
     ) {
-      throw new Error("E_RATE_REFERENCE_INVALID: rate_reference must be finite, positive and cited");
+      throw new Error(
+        "E_RATE_REFERENCE_INVALID: rate_reference must be finite, positive and cited",
+      );
     }
     normalizedRate = requestedRate / reference.value;
     if (!Number.isFinite(normalizedRate) || normalizedRate <= 0) {
@@ -1198,9 +1200,7 @@ function buildTextToKlattTrackDetailed(
   // in words per minute (src/text-parser/frontend.ts).
   const commandRate = parsedText?.initial.rate;
   const relativeRate =
-    commandRate !== undefined && rateUnit !== undefined
-      ? commandRate / rateUnit
-      : normalizedRate;
+    commandRate !== undefined && rateUnit !== undefined ? commandRate / rateUnit : normalizedRate;
   // A frontend whose rules take the speaking rate in words per minute
   // (policy.rate.words_per_minute) gets the rate as the policy value
   // policy.timing.speaking_rate_wpm and nothing else: its own rules say what a

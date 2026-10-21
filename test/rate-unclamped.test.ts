@@ -72,15 +72,15 @@ describe("reference rate normalization", () => {
         }),
       ]);
       if (frontendId === "dectalk-english") {
-        expect(frameValues(speak(1, "[:ra] hello world").track)).toEqual(frameValues(control.track));
+        expect(frameValues(speak(1, "[:ra] hello world").track)).toEqual(
+          frameValues(control.track),
+        );
         const command = speak(1, "[:ra 180] hello world");
         durationPolicy(spec).rate_reference = { value: 1, citations };
         const unchanged = speak(1);
         expect(frameValues(command.track)).toEqual(frameValues(unchanged.track));
         expect(
-          command.utterance.provenance
-            .getDecisions()
-            .some((d) => d.type === "text_parser_command"),
+          command.utterance.provenance.getDecisions().some((d) => d.type === "text_parser_command"),
         ).toBe(true);
       }
       durationPolicy(spec).rate_reference = { value: 1, citations };
@@ -123,7 +123,9 @@ describe("reference rate normalization", () => {
     const spec = structuredClone(rulepack.loadBundledRulepackSpec("qlatt-english"));
     durationPolicy(spec).rate_reference = { value: reference, citations };
     vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
-    expect(() => textToKlattTrack("hello", undefined, undefined, { rate })).toThrow("E_RATE_INVALID");
+    expect(() => textToKlattTrack("hello", undefined, undefined, { rate })).toThrow(
+      "E_RATE_INVALID",
+    );
   });
 });
 

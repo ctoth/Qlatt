@@ -11,4 +11,4 @@ Smallest change: validate requested rate before parser use; read an optional fin
 A bare DECtalk rate command reuses the parser's initial numeric slot, so reference normalization happens before parsing. Tests confirm all three frontends produce the same complete frame values as a direct normalized-rate control (excluding sequential provenance IDs), with correct transition windows. Bare and explicit DECtalk rate commands preserve parser-slot and override behavior. Absent and identity references emit no normalization record; supplied malformed numeric/citation declarations and normalization overflow/underflow fail explicitly. No test failures occurred.
 
 # Next step
-Publish for hosted CI and Claude review, then respond to findings. #160 remains open for continuation policy and undershoot tracing.
+PR #360 is open. Hosted quality119062435297 reported formatting in tts-frontend.ts and the focused rate test; applied its exact reflow, with no runtime change or local CI rerun. Await replacement hosted checks and Claude review, then respond to findings. #160 remains open for continuation policy and undershoot tracing.

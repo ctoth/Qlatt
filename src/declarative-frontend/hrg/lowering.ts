@@ -1989,7 +1989,10 @@ export function lowerToFrames(
   };
   const globalAffect = resolveAffect();
   const affectByItem = new Map(timings.map((timing) => [timing.item, resolveAffect(timing.item)]));
-  const outputTimingByItem = new Map<Item, { startMs: number; scale: number; durationMs: number }>();
+  const outputTimingByItem = new Map<
+    Item,
+    { startMs: number; scale: number; durationMs: number }
+  >();
   const outputTimingParentsByItem = new Map<Item, string[]>();
   const globalClockParents = [
     ...(globalAffect?.parents.durationScale ?? []),

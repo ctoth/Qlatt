@@ -80,6 +80,8 @@ queries visit only that source's edges. Existing replay fixture now interleaves
 sources and names, checks inactive/order-preserving results and exact digest;
 rollback fixture checks empty latest history after undo. Existing output timing
 entries carry the original duration for ratio calculation. No local tests run.
+Hosted quality119276089181 requested the outputTimingByItem type-argument wrap;
+applied the exact emitted formatting. Same Claude conversation reviewing delta.
 The revised candidate and accepted Claude response are published. Initial shard1
 also exposed manifests missing the new shared include and a newer control-window
 fixture expecting the old direct source ID. Added the actual acquired paths and

@@ -2633,19 +2633,36 @@ schema:
         text: {"kind":"string"}
         tokenIndex: {"kind":"number"}
         form_classes: {"kind":"array","items":{"kind":"string"}}
+        # The classes before the lexicon hands them to the phonetic rules.
         text_form_classes: {"kind":"array","items":{"kind":"string"}}
+        # The marks the frontend names that the written word has at its
+        # start or its end (transcription.written_word_marks).
         written_marks: {"kind":"array","items":{"kind":"string"}}
+        # The written word's place among the words between two punctuation
+        # marks, from 1, and how many there are.
         clause_word_index: {"kind":"number"}
         clause_word_count: {"kind":"number"}
+        # The word's place among the stretch's words as they are spoken one
+        # by one; 0 for a word the routine before it read ahead.
         clause_spoken_index: {"kind":"number"}
+        # The stretch of words ends at the text's end, where no mark is
+        # written (a text rule supplied the one that closes it).
         clause_end_supplied: {"kind":"boolean"}
+        # The word's part in a conjunction of several words.
         conjunction_sequence: {"kind":"string","values":["first","rest"]}
+        # A later word of the words one written word is spoken as.
         continues_written_word: {"kind":"boolean"}
+        # Set by a frontend's rules: the word can carry a clause break, its
+        # place in the stretch has one, and a break stands before it.
         break_marker: {"kind":"boolean"}
         break_slot: {"kind":"boolean"}
         clause_break_before: {"kind":"boolean"}
         phrase_start: {"kind":"string","values":["vp","pp"]}
+        # The word before is phonemic text: no word boundary stands before
+        # this word's phrase start.
         phrase_start_unbounded: {"kind":"boolean"}
+        # What a frontend's rules make of a prepositional-phrase start in
+        # its context (kept, dropped, or kept with no word boundary before it).
         phrase_start_state: {"kind":"string","values":["pp","word","alone"]}
     syllable:
       features:
@@ -2658,15 +2675,19 @@ schema:
         type: {"kind":"string"}
         word: {"kind":"string"}
         morpheme_boundary_after: {"kind":"boolean"}
+        # The first phone of the word's own text, after phones joined to it.
         word_text_start: {"kind":"boolean"}
         rules_blocked: {"kind":"boolean"}
         written_duration_ms: {"kind":"number"}
         written_silence: {"kind":"boolean"}
+        # A phone of phonemic text, not of a word letter-to-sound read.
         phonemic_text: {"kind":"boolean"}
         written_pitch: {"kind":"number"}
         sourceTokenId: {"kind":"string"}
         punctuationSymbol: {"kind":"union","variants":[{"kind":"string"},{"kind":"null"}]}
+        # The mark was sent by a text rule, not read as a word's delimiter.
         punctuation_sent: {"kind":"boolean"}
+        # For a mark a text rule supplied: what is written where it stands.
         punctuation_written: {"kind":"string"}
         stress: {"kind":"union","variants":[{"kind":"number"},{"kind":"null"}]}
         duration: {"kind":"number"}

@@ -1,0 +1,21 @@
+{
+  "version": "0.1.0",
+  "id": "klsyn88",
+  "dependsOn": [
+    {
+      "id": "qlatt-english",
+      "version": "0.1.0"
+    }
+  ],
+  "backends": [
+    {
+      "id": "klsyn88",
+      "name": "klsyn88",
+      "description": "Extended Klatt with multiple source types (impulsive, LF, triangular) and pitch-sync modulation",
+      "graph": "../experiments/klsyn88/graph.yaml",
+      "registry": "../experiments/klsyn88/registry.yaml",
+      "semantics": "../experiments/klsyn88/semantics.yaml"
+    }
+  ],
+  "supportedPairs": []
+}

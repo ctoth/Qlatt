@@ -4,7 +4,7 @@
  * build-frontend-resource-manifests.ts
  * ====================================
  * Writes `public/rules/frontends/<id>/resources.json` for every frontend in
- * `public/rules/frontends/manifest.json`: the resources the frontend's
+ * the selected package manifests: the resources the frontend's
  * synchronous pipeline reads when it is loaded cold and speaks one phrase.
  *
  * Why. The list audits the synchronous pipeline's resource dependencies.
@@ -32,6 +32,8 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { findPackageEntry, loadBundledPackages } from "../src/package-discovery";
+import { readFileFromFsSync } from "../src/path-utils";
 import { parseYamlString } from "../src/yaml-loader";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -56,12 +58,11 @@ export function manifestPath(frontendId: string): string {
 }
 
 function frontendEntries(): { id: string; entryPoint: string }[] {
-  const manifest = JSON.parse(
-    fs.readFileSync(path.join(frontendsDir, "manifest.json"), "utf8"),
-  ) as {
-    frontends: { id: string; entryPoint: string }[];
-  };
-  return manifest.frontends;
+  const discovery = loadBundledPackages();
+  return discovery.frontends.map((entry) => {
+    findPackageEntry(discovery.frontends, entry.id, "frontend");
+    return { id: entry.id, entryPoint: entry.source };
+  });
 }
 
 export function frontendIds(): string[] {
@@ -77,8 +78,10 @@ export function frontendIds(): string[] {
 function registeredVoices(frontendId: string): (string | undefined)[] {
   const entry = frontendEntries().find((frontend) => frontend.id === frontendId);
   if (!entry) throw new Error(`E_FRONTEND_ID_UNKNOWN: '${frontendId}' is not in the catalogue`);
-  const frontendPath = path.join(frontendsDir, frontendId, entry.entryPoint);
-  const spec = parseYamlString(fs.readFileSync(frontendPath, "utf8"), frontendPath) as {
+  const frontendPath = entry.entryPoint;
+  const source = readFileFromFsSync(frontendPath);
+  if (source === null) throw new Error(`Unable to read frontend '${frontendPath}'`);
+  const spec = parseYamlString(source, frontendPath) as {
     speakers?: { default?: unknown; voices?: unknown };
   } | null;
   const voices = [spec?.speakers?.default, ...[spec?.speakers?.voices ?? []].flat()].filter(
@@ -89,10 +92,11 @@ function registeredVoices(frontendId: string): (string | undefined)[] {
 
 /** What one frontend reads, recorded in this process. Call once per process. */
 async function record(frontendId: string): Promise<string[]> {
+  const voices = registeredVoices(frontendId);
   const { recordSyncResources } = await import("../src/sync-resource-cache.ts");
   const stop = recordSyncResources();
   const { textToKlattTrack } = await import("../src/tts-frontend.ts");
-  for (const speaker of registeredVoices(frontendId)) {
+  for (const speaker of voices) {
     for (const phrase of MANIFEST_PHRASES) {
       textToKlattTrack(phrase, undefined, 30, { frontendId, rate: 1, speaker });
     }

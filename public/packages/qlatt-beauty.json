@@ -1,0 +1,48 @@
+{
+  "version": "0.1.0",
+  "id": "qlatt-beauty",
+  "dependsOn": [
+    {
+      "id": "qlatt-english",
+      "version": "0.1.0"
+    },
+    {
+      "id": "english",
+      "version": "0.1.0"
+    }
+  ],
+  "frontends": [
+    {
+      "id": "qlatt-beauty",
+      "name": "Qlatt Beauty",
+      "description": "Beauty-first English TTS frontend",
+      "entryPoint": "../rules/frontends/qlatt-beauty/frontend.yaml",
+      "defaultBackend": {
+        "package": "qlatt-beauty",
+        "id": "qlatt-beauty"
+      }
+    }
+  ],
+  "backends": [
+    {
+      "id": "qlatt-beauty",
+      "name": "Qlatt Beauty",
+      "description": "Experimental beauty-first Klatt synthesizer",
+      "graph": "../experiments/qlatt-beauty/graph.yaml",
+      "registry": "../experiments/qlatt-beauty/registry.yaml",
+      "semantics": "../experiments/qlatt-beauty/semantics.yaml"
+    }
+  ],
+  "supportedPairs": [
+    {
+      "frontend": {
+        "package": "qlatt-beauty",
+        "id": "qlatt-beauty"
+      },
+      "backend": {
+        "package": "qlatt-beauty",
+        "id": "qlatt-beauty"
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # DECtalk 4.63 English — primitive registry (child of klatt80-baseline)
 #
-# This experiment `extends: klatt80-baseline` (see public/experiments/manifest.json),
+# This experiment extends klatt80-baseline (see public/packages/dectalk-english.json),
 # so loadExperimentConfig merges these primitives ON TOP of the baseline registry
 # (mergeRegistry, src/experiments/load-experiment-config.ts). It therefore only
 # needs to declare primitives the baseline does NOT provide.

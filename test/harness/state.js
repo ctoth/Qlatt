@@ -15,7 +15,7 @@ export const state = {
   // Experiment
   currentExperimentId: null,
   experimentManifest: null,
-  // public/rules/frontends/manifest.json: frontend ids and default experiments
+  // Selected package endpoints exposed through the existing string-ID view.
   frontendManifest: null,
 
   // Session

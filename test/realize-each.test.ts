@@ -387,11 +387,31 @@ describe("loadExperimentConfig with realize_each", () => {
         // Only the manifest is replaced; modules the loader imports still read
         // their own policy files from disk.
         readFileFromFsSync: (specPath: string) =>
-          specPath === "/experiments/manifest.json"
+          specPath === "/packages/manifest.json"
             ? JSON.stringify({
-                experiments: [{ id: "parent" }, { id: "child", extends: "parent" }],
+                packages: [
+                  { id: "fixture", version: "0.1.0", baseUrl: "./", manifest: "packages/fixture.json" },
+                ],
               })
-            : actual.readFileFromFsSync(specPath),
+            : specPath === "/packages/fixture.json"
+              ? JSON.stringify({
+                  id: "fixture",
+                  version: "0.1.0",
+                  backends: [
+                    {
+                      id: "parent",
+                      graph: "../experiments/parent/graph.yaml",
+                      registry: "../experiments/parent/registry.yaml",
+                      semantics: "../experiments/parent/semantics.yaml",
+                    },
+                    {
+                      id: "child",
+                      extends: { package: "fixture", id: "parent" },
+                      semantics: "../experiments/child/semantics.yaml",
+                    },
+                  ],
+                })
+              : actual.readFileFromFsSync(specPath),
       };
     });
     vi.doMock("../src/yaml-loader", async (importOriginal) => {

@@ -1,0 +1,25 @@
+{
+  "version": "0.1.0",
+  "id": "stevens91",
+  "dependsOn": [
+    {
+      "id": "qlatt-english",
+      "version": "0.1.0"
+    }
+  ],
+  "backends": [
+    {
+      "id": "stevens91",
+      "name": "Stevens 1991 HL Parameters",
+      "description": "HL controls (f1-f4, f0, ag, ac, an, st, pm) mapped to KL controls",
+      "extends": {
+        "package": "qlatt-english",
+        "id": "klatt80-baseline"
+      },
+      "graph": "../experiments/stevens91/graph.yaml",
+      "registry": "../experiments/stevens91/registry.yaml",
+      "semantics": "../experiments/stevens91/semantics.yaml"
+    }
+  ],
+  "supportedPairs": []
+}

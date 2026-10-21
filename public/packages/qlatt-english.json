@@ -1,0 +1,44 @@
+{
+  "version": "0.1.0",
+  "id": "qlatt-english",
+  "dependsOn": [
+    {
+      "id": "english",
+      "version": "0.1.0"
+    }
+  ],
+  "frontends": [
+    {
+      "id": "qlatt-english",
+      "name": "Qlatt English",
+      "description": "English TTS frontend with declarative rule phases",
+      "entryPoint": "../rules/frontends/qlatt-english/frontend.yaml",
+      "defaultBackend": {
+        "package": "qlatt-english",
+        "id": "klatt80-baseline"
+      }
+    }
+  ],
+  "backends": [
+    {
+      "id": "klatt80-baseline",
+      "name": "Klatt80 Baseline",
+      "description": "Klatt 1980 cascade/parallel formant synthesizer",
+      "graph": "../experiments/klatt80-baseline/graph.yaml",
+      "registry": "../experiments/klatt80-baseline/registry.yaml",
+      "semantics": "../experiments/klatt80-baseline/semantics.yaml"
+    }
+  ],
+  "supportedPairs": [
+    {
+      "frontend": {
+        "package": "qlatt-english",
+        "id": "qlatt-english"
+      },
+      "backend": {
+        "package": "qlatt-english",
+        "id": "klatt80-baseline"
+      }
+    }
+  ]
+}

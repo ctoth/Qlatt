@@ -11,10 +11,17 @@ describe("harness runtime replacement", () => {
     vi.stubGlobal("window", {});
     const frontend = { value: "qlatt-english" };
     const experiment = { value: "", selectedIndex: 0, innerHTML: "", appendChild: vi.fn() };
+    const status = { textContent: "" };
     vi.stubGlobal("document", {
       createElement: () => ({}),
       getElementById: (id: string) =>
-        id === "frontendSelect" ? frontend : id === "experimentSelect" ? experiment : null,
+        id === "frontendSelect"
+          ? frontend
+          : id === "experimentSelect"
+            ? experiment
+            : id === "status"
+              ? status
+              : null,
     });
     const {
       applyFrontendDefault,
@@ -33,8 +40,11 @@ describe("harness runtime replacement", () => {
     experiment.value = "dectalk-english";
     onExperimentChange();
     frontend.value = "qlatt-english";
-    applyFrontendDefault();
+    expect(() => applyFrontendDefault()).toThrow(
+      /E_SYNTH_PAIRING.*qlatt-english.*dectalk-english/,
+    );
     expect(experiment.value).toBe("dectalk-english");
+    expect(status.textContent).toContain("E_SYNTH_PAIRING");
   });
 
   it("destroys diagnostics before releasing an experiment runtime", async () => {
@@ -104,7 +114,9 @@ describe("harness runtime replacement", () => {
     await loadNewRuntimeConfig();
     const graph = state.newRuntimeConfig?.graph;
     frontend.value = "dectalk-english";
-    await expect(loadNewRuntimeConfig()).rejects.toThrow(/E_FRONTEND_VOCABULARY.*breathiness/);
+    await expect(loadNewRuntimeConfig()).rejects.toThrow(
+      /E_SYNTH_PAIRING.*dectalk-english.*klatt80-baseline/,
+    );
     frontend.value = "qlatt-english";
     await expect(loadNewRuntimeConfig()).resolves.toBeUndefined();
     expect(state.newRuntimeConfig?.graph).toBe(graph);

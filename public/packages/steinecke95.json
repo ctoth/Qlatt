@@ -1,0 +1,36 @@
+{
+  "version": "0.1.0",
+  "id": "steinecke95",
+  "dependsOn": [
+    {
+      "id": "qlatt-english",
+      "version": "0.1.0"
+    }
+  ],
+  "backends": [
+    {
+      "id": "steinecke95",
+      "name": "Steinecke–Herzel Two-Mass Source",
+      "description": "Pressure-driven vocal folds with left/right tension asymmetry and the Klatt formant tract",
+      "extends": {
+        "package": "qlatt-english",
+        "id": "klatt80-baseline"
+      },
+      "graph": "../experiments/steinecke95/graph.yaml",
+      "registry": "../experiments/steinecke95/registry.yaml",
+      "semantics": "../experiments/steinecke95/semantics.yaml"
+    }
+  ],
+  "supportedPairs": [
+    {
+      "frontend": {
+        "package": "qlatt-english",
+        "id": "qlatt-english"
+      },
+      "backend": {
+        "package": "steinecke95",
+        "id": "steinecke95"
+      }
+    }
+  ]
+}

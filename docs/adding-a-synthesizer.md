@@ -59,7 +59,16 @@ default bundled frontend entrypoint is
 `public/rules/frontends/qlatt-english/frontend.yaml`, which includes the
 frontend-local `pipeline.yaml` and `phases/*.yaml`.
 
-If you add another frontend, register it in `src/declarative-frontend/rule-pack.ts` so callers can select it by `frontendId` instead of hardcoding a path.
+Declare a new frontend/backend in its package manifest under `public/packages/`
+and select that manifest in `public/packages/manifest.json`; no TypeScript map
+needs editing. Use the exact selected release version and declare dependencies,
+owned endpoints, supported frontend/backend pairs and each frontend's default.
+See [the package contract](package-resource-contract.md). The current bundled
+index uses a shared public base; this is not yet a physically extracted package
+distribution or portable source-identity implementation. An inherited backend
+omits documents it inherits; a declared document that cannot be loaded is an
+error. Backend-only inspection is allowed, but rendering requires a supported
+pair and the existing vocabulary validation.
 
 The frontend compiler accepts `relations:` and `select.relation`. The removed
 `streams:`/`select.stream` vocabulary is not a compatibility surface. Every

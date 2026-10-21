@@ -2,7 +2,7 @@
  * Text to DECtalk's samples, the way the page does it: the dectalk-english
  * frontend's track, exactly as `textToKlattTrack` returns it, scheduled by the
  * interpreter onto the experiment the frontend is paired with
- * (`public/rules/frontends/manifest.json`), loaded with the frontend/experiment
+ * (the selected package manifest), loaded with the frontend/experiment
  * vocabulary check. Nothing here reads DECtalk's packets: the fixture supplies
  * only the WAV the stock say.exe wrote for the same text.
  *
@@ -11,11 +11,12 @@
  * does the same.
  */
 
-import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { readVtmFixture } from "../scripts/oracle/dectalk-vtm-fixture";
-import { defaultExperimentFor, type FrontendManifest } from "../src/experiments/frontend-pairing";
+import { loadBundledFrontendManifest } from "../src/declarative-frontend/rule-pack";
+import { defaultExperimentFor } from "../src/experiments/frontend-pairing";
+import { loadBundledPackages } from "../src/package-discovery";
 import { renderDectalkVtmTrack, renderToInt16 } from "../src/rendering/dectalk-vtm-render";
 import { PLAYBACK_LEAD_SEC } from "../src/track-playback";
 import { textToKlattTrack } from "../src/tts-frontend";
@@ -25,14 +26,8 @@ const FRONTEND = "dectalk-english";
 /** The page's lead from the time its context is held at to a track's start. */
 const PAGE_START_DELAY_SEC = PLAYBACK_LEAD_SEC;
 
-const frontendManifest = JSON.parse(
-  readFileSync("public/rules/frontends/manifest.json", "utf8"),
-) as FrontendManifest;
-const experimentIds = (
-  JSON.parse(readFileSync("public/experiments/manifest.json", "utf8")) as {
-    experiments: { id: string }[];
-  }
-).experiments.map((experiment) => experiment.id);
+const frontendManifest = loadBundledFrontendManifest();
+const experimentIds = loadBundledPackages().backends.map((entry) => entry.id);
 
 describe("dectalk-english frontend through its paired experiment", () => {
   const experimentId = defaultExperimentFor(FRONTEND, frontendManifest, experimentIds);

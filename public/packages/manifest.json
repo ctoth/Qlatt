@@ -1,0 +1,58 @@
+{
+  "packages": [
+    {
+      "id": "qlatt-english",
+      "version": "0.1.0",
+      "baseUrl": "./",
+      "manifest": "packages/qlatt-english.json"
+    },
+    {
+      "id": "dectalk-english",
+      "version": "0.1.0",
+      "baseUrl": "./",
+      "manifest": "packages/dectalk-english.json"
+    },
+    {
+      "id": "qlatt-beauty",
+      "version": "0.1.0",
+      "baseUrl": "./",
+      "manifest": "packages/qlatt-beauty.json"
+    },
+    {
+      "id": "klsyn88",
+      "version": "0.1.0",
+      "baseUrl": "./",
+      "manifest": "packages/klsyn88.json"
+    },
+    {
+      "id": "stevens91",
+      "version": "0.1.0",
+      "baseUrl": "./",
+      "manifest": "packages/stevens91.json"
+    },
+    {
+      "id": "laine88",
+      "version": "0.1.0",
+      "baseUrl": "./",
+      "manifest": "packages/laine88.json"
+    },
+    {
+      "id": "steinecke95",
+      "version": "0.1.0",
+      "baseUrl": "./",
+      "manifest": "packages/steinecke95.json"
+    },
+    {
+      "id": "english",
+      "version": "0.1.0",
+      "baseUrl": "./",
+      "manifest": "packages/english.json"
+    },
+    {
+      "id": "qlatt-core-fixtures",
+      "version": "0.1.0",
+      "baseUrl": "./",
+      "manifest": "packages/qlatt-core-fixtures.json"
+    }
+  ]
+}

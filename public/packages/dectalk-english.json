@@ -1,0 +1,70 @@
+{
+  "version": "0.1.0",
+  "id": "dectalk-english",
+  "dependsOn": [
+    {
+      "id": "qlatt-english",
+      "version": "0.1.0"
+    },
+    {
+      "id": "english",
+      "version": "0.1.0"
+    }
+  ],
+  "frontends": [
+    {
+      "id": "dectalk-english",
+      "name": "DECtalk 4.63 English",
+      "description": "DECtalk 4.63 English TTS frontend (extracted from C source)",
+      "entryPoint": "../rules/frontends/dectalk-english/frontend.yaml",
+      "defaultBackend": {
+        "package": "dectalk-english",
+        "id": "dectalk-vtm"
+      }
+    }
+  ],
+  "backends": [
+    {
+      "id": "dectalk-english",
+      "name": "DECtalk 4.63 English",
+      "description": "Klatt 80 synthesizer configured for DECtalk 4.63 English frontend (impulse source, DECtalk defaults)",
+      "extends": {
+        "package": "qlatt-english",
+        "id": "klatt80-baseline"
+      },
+      "graph": "../experiments/dectalk-english/graph.yaml",
+      "registry": "../experiments/dectalk-english/registry.yaml",
+      "semantics": "../experiments/dectalk-english/semantics.yaml"
+    },
+    {
+      "id": "dectalk-vtm",
+      "name": "DECtalk 4.63 Synthesizer",
+      "description": "DECtalk 4.63's own synthesizer (hlsyn and the integer vocal tract model) as one node, driven by DECtalk's PH packet words",
+      "graph": "../experiments/dectalk-vtm/graph.yaml",
+      "registry": "../experiments/dectalk-vtm/registry.yaml",
+      "semantics": "../experiments/dectalk-vtm/semantics.yaml"
+    }
+  ],
+  "supportedPairs": [
+    {
+      "frontend": {
+        "package": "dectalk-english",
+        "id": "dectalk-english"
+      },
+      "backend": {
+        "package": "dectalk-english",
+        "id": "dectalk-english"
+      }
+    },
+    {
+      "frontend": {
+        "package": "dectalk-english",
+        "id": "dectalk-english"
+      },
+      "backend": {
+        "package": "dectalk-english",
+        "id": "dectalk-vtm"
+      }
+    }
+  ]
+}

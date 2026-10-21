@@ -4,6 +4,7 @@ import { preloadBundledFrontendManifest } from "../../src/declarative-frontend/r
 import { defaultExperimentFor } from "../../src/experiments/frontend-pairing.ts";
 import { assertFrontendVocabulary } from "../../src/experiments/frontend-vocabulary.ts";
 import {
+  assertExperimentPair,
   loadExperimentConfig,
   loadExperimentManifest as readExperimentManifest,
 } from "../../src/experiments/load-experiment-config.ts";
@@ -15,9 +16,10 @@ let explicitExperimentSelection = false;
 
 async function validateSelectedFrontend() {
   const frontendId = document.getElementById("frontendSelect")?.value || "qlatt-english";
-  if (validatedSemantics === state.newRuntimeConfig?.semantics && validatedFrontend === frontendId)
-    return;
   try {
+    await assertExperimentPair(frontendId, getSelectedExperiment());
+    if (validatedSemantics === state.newRuntimeConfig?.semantics && validatedFrontend === frontendId)
+      return;
     await assertFrontendVocabulary(frontendId, {
       graph: state.newRuntimeConfig?.graph,
       semantics: state.newRuntimeConfig?.semantics,
@@ -85,20 +87,35 @@ export function onExperimentChange() {
 
 /** Automatic defaults follow the frontend until the user chooses a backend. */
 export function applyFrontendDefault() {
-  if (explicitExperimentSelection) return;
   const frontend = document.getElementById("frontendSelect");
   const experiment = document.getElementById("experimentSelect");
   if (!frontend || !experiment) return;
   try {
-    const selected = defaultExperimentFor(
-      frontend.value,
-      state.frontendManifest,
-      (state.experimentManifest?.experiments ?? []).map((entry) => entry.id),
-    );
-    if (experiment.value !== selected) {
-      experiment.value = selected;
-      invalidateSelectedExperiment();
+    const selected = explicitExperimentSelection
+      ? experiment.value
+      : defaultExperimentFor(
+          frontend.value,
+          state.frontendManifest,
+          (state.experimentManifest?.experiments ?? []).map((entry) => entry.id),
+        );
+    const supported =
+      state.frontendManifest?.frontends.find((entry) => entry.id === frontend.value)
+        ?.supportedExperiments ?? [];
+    experiment.innerHTML = "";
+    for (const entry of state.experimentManifest?.experiments ?? []) {
+      if (!supported.includes(entry.id) && entry.id !== selected) continue;
+      const option = document.createElement("option");
+      option.value = entry.id;
+      option.textContent = `${entry.name ?? entry.id}${supported.includes(entry.id) ? "" : " (unsupported for selected frontend)"}`;
+      option.title = entry.description ?? "";
+      experiment.appendChild(option);
     }
+    experiment.value = selected;
+    invalidateSelectedExperiment();
+    if (!supported.includes(selected))
+      throw new Error(
+        `E_SYNTH_PAIRING: frontend '${frontend.value}' and backend '${selected}' are not a declared supported pair`,
+      );
   } catch (err) {
     state.status.textContent = `Status: ${err.message}`;
     throw err;

@@ -6,7 +6,7 @@
  * A before-and-after control for a change that must not change what any
  * frontend makes of a text: every text of every corpus in
  * test/oracle-corpora, spoken by each frontend of
- * public/rules/frontends/manifest.json, and for each the SHA-256 of
+ * the selected package manifests, and for each the SHA-256 of
  *   - the track (every frame, time and parameters),
  *   - the decisions (every field but the wall-clock timestamp),
  *   - the diagnostics (level, code, message, data),
@@ -40,6 +40,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { listBundledFrontendIds } from "../src/declarative-frontend/rule-pack";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const corporaDir = path.join(repoRoot, "test", "oracle-corpora");
@@ -95,10 +96,7 @@ function corpusTexts(): Text[] {
 }
 
 function frontendIds(): string[] {
-  const manifest = JSON.parse(
-    fs.readFileSync(path.join(repoRoot, "public", "rules", "frontends", "manifest.json"), "utf8"),
-  ) as { frontends: { id: string }[] };
-  return manifest.frontends.map((frontend) => frontend.id);
+  return listBundledFrontendIds();
 }
 
 const sha = (value: unknown): string =>

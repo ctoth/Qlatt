@@ -35,6 +35,11 @@ import {
   resolveFrontend,
   rulepackRuleOrigins,
 } from "../src/declarative-frontend/rule-pack";
+import {
+  findPackageEntry,
+  loadBundledPackages,
+  preloadBundledPackages,
+} from "../src/package-discovery";
 import * as paths from "../src/path-utils";
 import {
   clearPrimedSyncResources,
@@ -126,7 +131,7 @@ describe("primed resources", () => {
   it.each(["sync", "async"])(
     "%s: discovers an added catalogue entryPoint",
     async (mode) => {
-      const manifestPath = "/rules/frontends/manifest.json";
+      const manifestPath = "/packages/manifest.json";
       const id = `catalogue-fixture-${mode}`;
       const entry = `/rules/frontends/${id}/selected.yaml`;
       const files: Record<string, string> = {};
@@ -134,8 +139,27 @@ describe("primed resources", () => {
         files[resource] = fs.readFileSync(path.join("public", resource), "utf8");
       }
       const manifest = JSON.parse(files[manifestPath]);
-      manifest.frontends.push({ id, entryPoint: "selected.yaml" });
+      manifest.packages.push({
+        id,
+        version: "0.1.0",
+        baseUrl: "./",
+        manifest: `packages/${id}.json`,
+      });
       files[manifestPath] = JSON.stringify(manifest);
+      files[`/packages/${id}.json`] = JSON.stringify({
+        id,
+        version: "0.1.0",
+        dependsOn: [{ id: "qlatt-english", version: "0.1.0" }],
+        frontends: [
+          {
+            id,
+            entryPoint: `../rules/frontends/${id}/selected.yaml`,
+            defaultBackend: { package: id, id },
+          },
+        ],
+        backends: [{ id, extends: { package: "qlatt-english", id: "klatt80-baseline" } }],
+        supportedPairs: [{ frontend: { package: id, id }, backend: { package: id, id } }],
+      });
       files[entry] = "extends: qlatt-english\n";
       const { blocking, parallel } = stubBrowser(files);
       vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
@@ -165,20 +189,120 @@ describe("primed resources", () => {
 
   it.each([
     {},
-    { frontends: [{ id: "missing-entry" }] },
-    { frontends: [{ id: " ", entryPoint: "frontend.yaml" }] },
-    { frontends: [{ id: "blank-entry", entryPoint: " " }] },
+    { packages: [{ id: "missing-entry" }] },
+    { packages: [{ id: " ", manifest: "package.json", version: "0.1.0" }] },
+    { packages: [{ id: "blank-entry", manifest: " ", version: "0.1.0" }] },
     {
-      frontends: [
-        { id: "duplicate", entryPoint: "a.yaml" },
-        { id: "duplicate", entryPoint: "b.yaml" },
+      packages: [
+        { id: "duplicate", manifest: "a.json", version: "0.1.0" },
+        { id: "duplicate", manifest: "b.json", version: "0.1.0" },
       ],
     },
   ])("rejects invalid catalogue declarations %j", async (document) => {
-    stubBrowser({ "/rules/frontends/manifest.json": JSON.stringify(document) });
+    stubBrowser({ "/packages/manifest.json": JSON.stringify(document) });
     vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
-    expect(() => listBundledFrontendIds()).toThrow(/E_FRONTEND_MANIFEST/);
-    await expect(preloadBundledRulepackPath()).rejects.toThrow(/E_FRONTEND_MANIFEST/);
+    expect(() => listBundledFrontendIds()).toThrow(/E_PACKAGE_MANIFEST/);
+    await expect(preloadBundledRulepackPath()).rejects.toThrow(/E_PACKAGE_MANIFEST/);
+  });
+
+  it.each([
+    { change: { version: "other" }, error: /does not match selected/ },
+    {
+      change: { dependsOn: [{ id: "missing", version: "0.1.0" }] },
+      error: /missing selected dependency/,
+    },
+    {
+      change: { dependsOn: [{ id: "dependency", version: "other" }] },
+      error: /requires 'other', selected '0.1.0'/,
+    },
+    {
+      change: {
+        backends: [{ id: "backend", extends: { package: "dependency", id: "unknown" } }],
+      },
+      error: /unknown backends endpoint/,
+    },
+    {
+      change: {
+        backends: [{ id: "backend", graph: { package: "undeclared", path: "graph.yaml" } }],
+      },
+      error: /not a declared dependency/,
+    },
+    {
+      change: {
+        supportedPairs: [
+          {
+            frontend: { package: "dependency", id: "frontend" },
+            backend: { package: "dependency", id: "backend" },
+          },
+        ],
+      },
+      error: /must name an owned backend/,
+    },
+    {
+      change: {
+        frontends: [
+          {
+            id: "frontend",
+            entryPoint: "frontend.yaml",
+            defaultBackend: { package: "owner", id: "backend" },
+          },
+        ],
+      },
+      error: /E_SYNTH_PAIRING/,
+    },
+  ])("rejects invalid selected ownership $change", async ({ change, error }) => {
+    stubBrowser({
+      "/packages/manifest.json": JSON.stringify({
+        packages: [
+          { id: "owner", version: "0.1.0", baseUrl: "./", manifest: "packages/owner.json" },
+          { id: "dependency", version: "0.1.0", baseUrl: "./", manifest: "packages/dependency.json" },
+        ],
+      }),
+      "/packages/owner.json": JSON.stringify({
+        id: "owner",
+        version: "0.1.0",
+        dependsOn: [{ id: "dependency", version: "0.1.0" }],
+        backends: [{ id: "backend" }],
+        ...change,
+      }),
+      "/packages/dependency.json": JSON.stringify({ id: "dependency", version: "0.1.0" }),
+    });
+    vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
+    expect(() => loadBundledPackages()).toThrow(error);
+    await expect(preloadBundledPackages()).rejects.toThrow(error);
+  });
+
+  it("resolves declared package-relative documents and rejects ambiguous string aliases", async () => {
+    stubBrowser({
+      "/packages/manifest.json": JSON.stringify({
+        packages: [
+          { id: "owner", version: "0.1.0", baseUrl: "./", manifest: "packages/owner.json" },
+          { id: "dependency", version: "0.1.0", baseUrl: "./", manifest: "packages/dependency.json" },
+        ],
+      }),
+      "/packages/owner.json": JSON.stringify({
+        id: "owner",
+        version: "0.1.0",
+        dependsOn: [{ id: "dependency", version: "0.1.0" }],
+        backends: [
+          { id: "shared", graph: { package: "dependency", path: "models/a%20b/graph.yaml" } },
+        ],
+      }),
+      "/packages/dependency.json": JSON.stringify({
+        id: "dependency",
+        version: "0.1.0",
+        backends: [{ id: "shared" }],
+      }),
+    });
+    vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
+    const discovery = await preloadBundledPackages();
+    expect(
+      findPackageEntry(discovery.backends, { package: "owner", id: "shared" }, "backend")
+        .documents.graph,
+    ).toBe("/models/a b/graph.yaml");
+    expect(() => findPackageEntry(discovery.backends, "shared", "backend")).toThrow(
+      /E_PACKAGE_ENDPOINT.*shared.*ambiguous/,
+    );
   });
 
   /** Relocate the real bundled documents, changing only known reference slots. */

@@ -29,7 +29,7 @@ describe("frontend vocabulary in the real renderer", () => {
   it("rejects the incompatible pair before synthesis", async () => {
     await expect(
       nodeRuntimeBackend.render(request({ experimentId: "klatt80-baseline" })),
-    ).rejects.toThrow(/E_FRONTEND_VOCABULARY.*breathiness/);
+    ).rejects.toThrow(/E_SYNTH_PAIRING.*dectalk-english.*klatt80-baseline/);
   });
 
   it("each DECtalk high-frequency amplitude changes rendered audio", {

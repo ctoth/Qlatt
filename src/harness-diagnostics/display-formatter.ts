@@ -11,7 +11,7 @@ import {
   formatPlstepEventsRelative,
   formatRange,
   formatTelemetry,
-  summarizeParallel,
+  summarizeBranchSwitch,
   summarizeSourceControl,
   summarizeTrack,
 } from "../track-analysis";
@@ -184,7 +184,8 @@ function formatFormantTracking(state: DisplayState): string[] {
 function formatSignalFlow(state: DisplayState): string[] {
   const track = state.run?.track;
   if (!track || track.length === 0) return ["(no track data)"];
-  const parallel = summarizeParallel(track);
+  const branchPolicy = state.semantics?.analysis?.branch_switch;
+  const branch = branchPolicy ? summarizeBranchSwitch(track, branchPolicy) : undefined;
   const sourcePolicy = state.semantics?.analysis?.source_modes;
   const sourceLines = sourcePolicy?.params.map((parameter) => {
     const slider = state.sliderParams[parameter];
@@ -200,8 +201,12 @@ function formatSignalFlow(state: DisplayState): string[] {
   });
 
   return [
-    `SW=1: ${parallel.swOn} frames, ${parallel.swOnSeconds.toFixed(3)}s (${parallel.swOnShare.toFixed(1)}%)`,
-    `Parallel-marked events: ${parallel.parallelEvents}; SW=0 frames: ${parallel.swOff}`,
+    ...(branch && branchPolicy
+      ? [
+          `${branchPolicy.param}=${branchPolicy.value}: ${branch.selectedEvents} frames, ${branch.selectedSeconds.toFixed(3)}s (${branch.selectedShare.toFixed(1)}%)`,
+          `${branchPolicy.param} other finite values: ${branch.otherEvents} frames`,
+        ]
+      : ["(no experiment branch-switch policy)"]),
     ...(sourceLines ?? ["(no experiment source-control policy)"]),
   ];
 }

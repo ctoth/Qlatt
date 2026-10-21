@@ -57,6 +57,7 @@ export interface TrackMetricsPolicy {
 export type TrackAnalysisPolicy = {
   metrics?: TrackMetricsPolicy;
   source_modes?: { params: string[]; citations: string[] };
+  branch_switch?: { param: string; value: number; citations: string[] };
 } & Record<
   "maxVoicingIssues" | "lowParallelScale" | "lowParallelGain",
   { value: number; basis: string }

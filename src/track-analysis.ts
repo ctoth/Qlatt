@@ -299,48 +299,41 @@ export function summarizeTrack(
   };
 }
 
-export function summarizeParallel(track: TrackEvent[]): {
-  swOn: number;
-  swOff: number;
-  parallelEvents: number;
-  swOnSeconds: number;
-  swOnShare: number;
+export function summarizeBranchSwitch(
+  track: TrackEvent[],
+  policy: NonNullable<TrackAnalysisPolicy["branch_switch"]>,
+): {
+  selectedEvents: number;
+  otherEvents: number;
+  selectedSeconds: number;
+  selectedShare: number;
 } {
-  let swOn = 0,
-    swOff = 0,
-    parallelEvents = 0,
-    swOnSeconds = 0,
-    swTotalSeconds = 0;
+  let selectedEvents = 0,
+    otherEvents = 0,
+    selectedSeconds = 0,
+    totalSeconds = 0;
   for (const event of track) {
     const params = event.params;
     if (!params) continue;
-    const sw = getParam(params, "SW", Number.NaN);
-    if (sw === 1) swOn += 1;
-    else if (Number.isFinite(sw)) swOff += 1;
-    const hasParallel =
-      getParam(params, "AN") > 0 ||
-      getParam(params, "AB") > 0 ||
-      ["A1", "A2", "A3", "A4", "A5", "A6"].some((key) => getParam(params, key) > 0) ||
-      getParam(params, "AVS") > 0 ||
-      getParam(params, "AF") > 0;
-    if (hasParallel) parallelEvents += 1;
+    const value = getParam(params, policy.param, Number.NaN);
+    if (value === policy.value) selectedEvents += 1;
+    else if (Number.isFinite(value)) otherEvents += 1;
   }
   for (let i = 0; i < track.length - 1; i += 1) {
     const params = track[i]?.params;
     const duration = track[i + 1].time - track[i].time;
     if (!Number.isFinite(duration) || duration <= 0) continue;
-    const sw = getParam(params, "SW", Number.NaN);
-    if (Number.isFinite(sw)) {
-      swTotalSeconds += duration;
-      if (sw === 1) swOnSeconds += duration;
+    const value = getParam(params, policy.param, Number.NaN);
+    if (Number.isFinite(value)) {
+      totalSeconds += duration;
+      if (value === policy.value) selectedSeconds += duration;
     }
   }
   return {
-    swOn,
-    swOff,
-    parallelEvents,
-    swOnSeconds,
-    swOnShare: swTotalSeconds > 0 ? (swOnSeconds / swTotalSeconds) * 100 : 0,
+    selectedEvents,
+    otherEvents,
+    selectedSeconds,
+    selectedShare: totalSeconds > 0 ? (selectedSeconds / totalSeconds) * 100 : 0,
   };
 }
 

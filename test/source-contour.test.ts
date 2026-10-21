@@ -4,7 +4,7 @@ import { parseSourceContourDocument, resolveSourceContour } from "../src/source-
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { loadYamlDocumentSync, loadYamlSourceSync } from "../src/yaml-loader";
 
-const sourcePath = "/rules/policy/source-contour.yaml";
+const sourcePath = "/rules/frontends/qlatt-english/policy/source-contour.yaml";
 
 describe("source contour", () => {
   it("declares the canonical source contour document", () => {

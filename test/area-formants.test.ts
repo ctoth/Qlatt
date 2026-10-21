@@ -4,7 +4,7 @@ import { parseSpeakerProfileDocument, resolveSpeakerProfile } from "../src/speak
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const profileSpec = parseSpeakerProfileDocument(
-  loadYamlDocumentSync("/rules/policy/speaker-profile.yaml"),
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/speaker-profile.yaml"),
 );
 
 // Analytic closed/open uniform tube, Fant 1960 Eq. A.33-7.

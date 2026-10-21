@@ -1,6 +1,6 @@
 /**
  * Pitch level and pitch span are the speaker's
- * (public/rules/policy/speaker-profile.yaml base_f0_hz and f0_range_hz): the
+ * (the selected frontend's speaker-profile base_f0_hz and f0_range_hz): the
  * prosody rules read them as params.policy.f0.base_hz and
  * params.policy.f0.range_hz. qlatt-beauty's level and span are its default
  * voice's (public/rules/frontends/qlatt-beauty/speakers/beauty.yaml), so a

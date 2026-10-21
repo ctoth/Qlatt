@@ -18,7 +18,7 @@ const BASELINE: SpeakerProjectionBaseline = {
 };
 
 const projection = parseSourceContourDocument(
-  loadYamlDocumentSync("/rules/policy/source-contour.yaml"),
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/source-contour.yaml"),
 ).projection;
 
 function makeTarget(initial: Record<string, unknown> = {}) {

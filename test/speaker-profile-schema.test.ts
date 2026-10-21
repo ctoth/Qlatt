@@ -6,7 +6,7 @@ import { parseSpeakerProfileDocument, resolveSpeakerProfile } from "../src/speak
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { loadYamlDocumentSync, loadYamlSourceSync } from "../src/yaml-loader";
 
-const profilePath = "/rules/policy/speaker-profile.yaml";
+const profilePath = "/rules/frontends/qlatt-english/policy/speaker-profile.yaml";
 const profileSpec = parseSpeakerProfileDocument(loadYamlDocumentSync(profilePath));
 
 describe("speaker profile schema", () => {

@@ -1,7 +1,6 @@
 import { readFileSync } from "node:fs";
 import { load } from "js-yaml";
 import { afterEach, expect, it, vi } from "vitest";
-import { KlattSynth } from "../src/klatt-synth";
 import reference from "./fixtures/primitive-port-reference.json";
 
 interface Processor {
@@ -14,51 +13,6 @@ interface Processor {
   ): boolean;
 }
 afterEach(() => vi.unstubAllGlobals());
-
-it("the standalone synth supplies WASM bytes to every ported worklet", async () => {
-  const bytes = new Map<string, ArrayBuffer>();
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(async (url: string) => {
-      const file = url.split("/").pop()!.split("?")[0];
-      const buffer = new ArrayBuffer(8);
-      bytes.set(file, buffer);
-      return { arrayBuffer: async () => buffer };
-    }),
-  );
-  const created: { name: string; options: AudioWorkletNodeOptions }[] = [];
-  vi.stubGlobal(
-    "AudioWorkletNode",
-    class {
-      port = { onmessage: null };
-      constructor(_ctx: unknown, name: string, options: AudioWorkletNodeOptions) {
-        created.push({ name, options });
-      }
-    },
-  );
-  const ctx = {
-    createGain: () => ({ gain: { value: 0 } }),
-    createConstantSource: () => ({ offset: { value: 0 }, start() {} }),
-  } as unknown as AudioContext;
-  const synth = new KlattSynth(ctx, { noiseSeed: 51 });
-  await synth._loadWasmBytes("/worklets/");
-  synth._createNodes();
-  for (const name of [
-    "impulse-train",
-    "noise-source",
-    "differentiator",
-    "chalker-radiation",
-    "glottal-mod",
-  ]) {
-    expect(bytes.has(`${name}.wasm`)).toBe(true);
-    const nodes = created.filter((entry) => entry.name === `${name}-processor`);
-    expect(nodes.length).toBeGreaterThan(0);
-    for (const node of nodes)
-      expect(node.options.processorOptions.wasmBytes).toBe(bytes.get(`${name}.wasm`));
-  }
-  const noise = created.filter((entry) => entry.name === "noise-source-processor");
-  expect(noise[0].options.processorOptions.seed).not.toBe(noise[1].options.processorOptions.seed);
-});
 
 async function loadProcessor(name: string) {
   vi.resetModules();

@@ -34,24 +34,14 @@ export const browserRuntimeBackend: RenderBackend = {
         "Browser-backed rendering is disabled by default. Pass --allow-browser 1 to opt in.",
       );
     }
-    // The legacy page's driver takes no voice; rendering the default voice
-    // under another voice's name would be a wrong answer.
-    if (request.speaker !== undefined && request.engine !== "runtime") {
+    if (request.engine !== "runtime") {
       throw new Error(
-        `The browser render backend cannot select a voice for the ${request.engine} engine (--speaker ${request.speaker}). Use --engine runtime or --host node.`,
-      );
-    }
-    if (
-      request.engine !== "runtime" &&
-      (request.voiceQuality !== undefined || request.directionTrack !== undefined)
-    ) {
-      throw new Error(
-        `The browser render backend cannot apply voiceQuality or directionTrack for the ${request.engine} engine. Use --engine runtime or --host node.`,
+        `Unsupported render engine '${request.engine}': only runtime is supported. Use --engine runtime.`,
       );
     }
     const session = await openBrowserSession({
       repoRoot: request.repoRoot,
-      engine: request.engine === "runtime" ? "runtime" : "legacy",
+      engine: "runtime",
       browserExecutablePath: request.browserExecutablePath,
       log: (line) => process.stderr.write(`${line}\n`),
     });

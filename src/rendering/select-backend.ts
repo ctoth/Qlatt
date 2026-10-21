@@ -17,8 +17,7 @@ export function selectRenderBackend(request: RenderRequest): RenderBackend {
 
   if (request.persistWav && request.engine !== "runtime") {
     throw new Error(
-      "Only the runtime engine supports default Node offline WAV rendering. " +
-        "Use --engine runtime, or explicitly choose --host browser with --allow-browser 1.",
+      "Only the runtime engine supports offline WAV rendering. Use --engine runtime.",
     );
   }
 

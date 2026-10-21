@@ -91,6 +91,13 @@ node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=nod
 
 Options: `--base-f0`, `--rate`, `--transition-ms`, `--sample-rate`, `--experiment-id`, `--engine`, `--out-json`.
 
+The supported audio engine is `runtime` (the default). Add `--host browser --allow-browser 1`
+to use the runtime browser renderer. For a track report, use `--out-json track.json --include-track 1`.
+The standalone legacy engine, its offline page, and the historical `export-track.mjs`,
+`render-qlatt-track.mjs` and `run-golden-master.mjs` scripts have been retired. Their legacy
+AGC and telemetry options are not runtime options. External `klatt-syn` reference scripts
+and historical golden artifacts remain separate and are retained.
+
 ### Oracle Comparison (DECtalk Reference)
 
 ```bash

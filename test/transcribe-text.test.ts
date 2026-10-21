@@ -3,13 +3,13 @@ import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
 import { createProvenanceCollector } from "../src/provenance";
-import type { TranscriptionConfig } from "../src/tts-frontend-types";
 import {
   getDiagnosticSymbolPronunciation,
   isPunctuationToken,
   shouldUseDiagnosticSymbolMode,
   transcribeText,
 } from "../src/transcribe-text";
+import type { TranscriptionConfig } from "../src/tts-frontend-types";
 
 const compiledSpec = loadBundledRulepackSpec("qlatt-english");
 const transcriptionConfig = compiledSpec.transcription;
@@ -47,7 +47,9 @@ describe("transcribe-text", () => {
       };
       const options = { ...selected, dictionaryMap, transcriptionConfig: config };
       expect(transcribeText("blorf snarp plim", options).map((token) => token.word)).toEqual([
-        "blorf~snarp~plim", "blorf~snarp~plim", "blorf~snarp~plim",
+        "blorf~snarp~plim",
+        "blorf~snarp~plim",
+        "blorf~snarp~plim",
       ]);
       const limited = {
         ...options,
@@ -69,14 +71,21 @@ describe("transcribe-text", () => {
         new Set(["hello", "world"]),
       );
       expect(
-        new Set(transcribeText("blorf snarp", { ...options, dictionaryMap: {} }).map((token) => token.word)),
+        new Set(
+          transcribeText("blorf snarp", { ...options, dictionaryMap: {} }).map(
+            (token) => token.word,
+          ),
+        ),
       ).toEqual(new Set(["blorf", "snarp"]));
     });
 
     it("keeps CMU candidates ordered and permits a declared alternate order", () => {
       const dictionaryMap = {
-        probe: "K AE1 T", "'probe": "B IY1", "probe'": "D UW1",
-        "probe.": "F AO1", "probe(1)": "G OW1",
+        probe: "K AE1 T",
+        "'probe": "B IY1",
+        "probe'": "D UW1",
+        "probe.": "F AO1",
+        "probe(1)": "G OW1",
       };
       const phones = (word: string, map: Record<string, string>, config = transcriptionConfig) =>
         transcribeText(word, { ...selected, dictionaryMap: map, transcriptionConfig: config }).map(
@@ -84,17 +93,23 @@ describe("transcribe-text", () => {
         );
       expect(phones("PROBE", dictionaryMap)).toEqual(["K", "AE", "T"]);
       expect(phones("probe", { "'probe": "B IY1", "probe'": "D UW1", "probe.": "F AO1" })).toEqual([
-        "B", "IY",
+        "B",
+        "IY",
       ]);
       expect(phones("probe", { "probe'": "D UW1", "probe.": "F AO1" })).toEqual(["D", "UW"]);
       expect(phones("probe'", { probe: "K AE1 T" })).toEqual(["K", "AE", "T"]);
       expect(phones("probe", { "probe.": "F AO1" })).toEqual(["F", "AO"]);
       expect(phones("probe(1)", dictionaryMap)).toEqual(["G", "OW"]);
       expect(phones("probe(1)", { probe: "K AE1 T" })).toEqual(["K", "AE", "T"]);
-      expect(phones("probe", dictionaryMap, {
-        ...transcriptionConfig,
-        dictionary_candidates: { order: ["append-period", "exact"], citations: ["fixture order"] },
-      })).toEqual(["F", "AO"]);
+      expect(
+        phones("probe", dictionaryMap, {
+          ...transcriptionConfig,
+          dictionary_candidates: {
+            order: ["append-period", "exact"],
+            citations: ["fixture order"],
+          },
+        }),
+      ).toEqual(["F", "AO"]);
     });
 
     it("uses selected delimiters and citations while preserving the source parent", () => {
@@ -110,9 +125,9 @@ describe("transcribe-text", () => {
       expect(getDiagnosticSymbolPronunciation("~~b~~", config)).toEqual(["B"]);
       expect(getDiagnosticSymbolPronunciation("/b/", config)).toBeNull();
       transcribeText("~~b~~", { ...selected, transcriptionConfig: config, provenance });
-      const decision = provenance.getDecisions().find(
-        (entry) => entry.type === "symbol_pronunciation_selected",
-      )!;
+      const decision = provenance
+        .getDecisions()
+        .find((entry) => entry.type === "symbol_pronunciation_selected")!;
       expect(decision.citations).toEqual(["fixture symbol source"]);
       expect(decision.parents).toHaveLength(1);
       const parent = provenance.getDecisions().find((entry) => entry.id === decision.parents[0]);
@@ -134,11 +149,16 @@ describe("transcribe-text", () => {
       ["diagnostic_symbol_delimiters", { characters: "", citations: ["fixture"] }],
     ])("rejects malformed %s before any dictionary execution", (key, value) => {
       const lookup = vi.fn(() => ["K"]);
-      expect(() => transcribeText("hello", {
-        ...selected,
-        dictLookup: lookup,
-        transcriptionConfig: { ...transcriptionConfig, [key as string]: value } as TranscriptionConfig,
-      })).toThrow("E_TRANSCRIPTION_CONFIG_REQUIRED");
+      expect(() =>
+        transcribeText("hello", {
+          ...selected,
+          dictLookup: lookup,
+          transcriptionConfig: {
+            ...transcriptionConfig,
+            [key as string]: value,
+          } as TranscriptionConfig,
+        }),
+      ).toThrow("E_TRANSCRIPTION_CONFIG_REQUIRED");
       expect(lookup).not.toHaveBeenCalled();
     });
 
@@ -154,31 +174,38 @@ describe("transcribe-text", () => {
       for (const key of ["number", "phonemic"]) {
         const config = { ...dectalk.transcription, sources: { ...dectalk.transcription.sources } };
         delete config.sources[key];
-        expect(() => transcribeText("hello", {
-          compiledSpec: dectalk, dictionaryMap: {}, transcriptionConfig: config,
-        })).toThrow(`transcription.sources.${key}`);
+        expect(() =>
+          transcribeText("hello", {
+            compiledSpec: dectalk,
+            dictionaryMap: {},
+            transcriptionConfig: config,
+          }),
+        ).toThrow(`transcription.sources.${key}`);
       }
       const noSpelling = {
         ...transcriptionConfig,
         sources: { ...transcriptionConfig.sources, spelling: undefined },
       };
-      expect(() => transcribeText("hello", { ...selected, transcriptionConfig: noSpelling })).toThrow(
-        "transcription.sources.spelling",
-      );
+      expect(() =>
+        transcribeText("hello", { ...selected, transcriptionConfig: noSpelling }),
+      ).toThrow("transcription.sources.spelling");
       expect(dectalk.transcription.compound_recovery.max_span).toBe(0);
       expect(dectalk.transcription.dictionary_candidates.order).toEqual([
-        "exact", "strip-alternate-suffix",
+        "exact",
+        "strip-alternate-suffix",
       ]);
       const dectalkOptions = {
         compiledSpec: dectalk,
         dictionaryMap: { blorf: "K AE1 T", "'snarp": "B IY1", "blorf-snarp": "D UW1" },
       };
       expect(transcribeText("'blorf'", dectalkOptions).map((token) => token.phoneme)).toEqual([
-        "K", "AE", "T",
+        "K",
+        "AE",
+        "T",
       ]);
-      expect(new Set(transcribeText("blorf snarp", dectalkOptions).map((token) => token.word))).toEqual(
-        new Set(["blorf", "snarp"]),
-      );
+      expect(
+        new Set(transcribeText("blorf snarp", dectalkOptions).map((token) => token.word)),
+      ).toEqual(new Set(["blorf", "snarp"]));
     });
 
     it("uses explicitly selected punctuation and diagnostic symbol configuration", () => {

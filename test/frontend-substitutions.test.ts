@@ -108,35 +108,38 @@ it("bounds expected dictionary misses and retains cited pronunciation decisions"
   ).toHaveLength(250);
 });
 
-it.each([50, 73])("warns when an empty dictionary pronunciation becomes %s ms SIL, with an exact lookup control", (duration) => {
-  const diagnostics = createDiagnostics();
-  const compiledSpec = loadBundledRulepackSpec("qlatt-english");
-  const policy = { duration_ms: duration, citations: ["fixture empty pronunciation policy"] };
-  const tokens = transcribeText("hello lost", {
-    compiledSpec,
-    transcriptionConfig: { ...compiledSpec.transcription, empty_pronunciation: policy },
-    diagnostics,
-    dictionaryMap: {},
-    dictLookup: (word) => (word === "hello" ? ["HH", "EH1", "L", "OW0"] : []),
-  });
-  expect(tokens.at(-1)).toMatchObject({
-    phoneme: "SIL",
-    duration,
-    word: "lost",
-    sourceTokenId: "token_1",
-  });
-  expect(diagnostics.getEntries()).toEqual([
-    expect.objectContaining({
-      level: "warn",
-      code: "EMPTY_PRONUNCIATION_SILENCE",
-      data: {
-        count: 1,
-        affected: [{ word: "lost", token: "token_1", applied: "SIL", duration }],
-        citations: policy.citations,
-      },
-    }),
-  ]);
-});
+it.each([50, 73])(
+  "warns when an empty dictionary pronunciation becomes %s ms SIL, with an exact lookup control",
+  (duration) => {
+    const diagnostics = createDiagnostics();
+    const compiledSpec = loadBundledRulepackSpec("qlatt-english");
+    const policy = { duration_ms: duration, citations: ["fixture empty pronunciation policy"] };
+    const tokens = transcribeText("hello lost", {
+      compiledSpec,
+      transcriptionConfig: { ...compiledSpec.transcription, empty_pronunciation: policy },
+      diagnostics,
+      dictionaryMap: {},
+      dictLookup: (word) => (word === "hello" ? ["HH", "EH1", "L", "OW0"] : []),
+    });
+    expect(tokens.at(-1)).toMatchObject({
+      phoneme: "SIL",
+      duration,
+      word: "lost",
+      sourceTokenId: "token_1",
+    });
+    expect(diagnostics.getEntries()).toEqual([
+      expect.objectContaining({
+        level: "warn",
+        code: "EMPTY_PRONUNCIATION_SILENCE",
+        data: {
+          count: 1,
+          affected: [{ word: "lost", token: "token_1", applied: "SIL", duration }],
+          citations: policy.citations,
+        },
+      }),
+    ]);
+  },
+);
 
 it("records one cited target selection per initial segment and preserves secondary ancestry", () => {
   const provenance = createProvenanceCollector();

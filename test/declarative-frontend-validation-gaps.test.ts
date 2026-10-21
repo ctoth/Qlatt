@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
-import { validateDslSpec } from "../src/declarative-frontend/validation";
+import { assertValidSpec, validateDslSpec } from "../src/declarative-frontend/validation";
+import { parseYamlString, yamlDocumentSpans } from "../src/yaml-loader";
 
 function diagnosticsFor(source: Record<string, unknown>) {
   return validateDslSpec(parseDslSpec({ parameters: {}, ...source }), {
@@ -33,6 +34,22 @@ function scalarRule(overrides: Record<string, unknown> = {}) {
 }
 
 describe("rulepack load-time validation gaps", () => {
+  it("does not guess a location for ambiguous authored paths or programmatic rules", () => {
+    const source = parseYamlString("rules:\n  'bad.rule':\n    kind: scaler\n", "ambiguous.yaml");
+    const spec = parseDslSpec(source);
+    for (const documentSpans of [undefined, yamlDocumentSpans(source)]) {
+      let failure: unknown;
+      try {
+        assertValidSpec(spec, { documentSpans });
+      } catch (error) {
+        failure = error;
+      }
+      expect(failure).toBeInstanceOf(Error);
+      expect(String(failure)).toContain("E_RULE_KIND_UNKNOWN at rules.bad.rule.kind:");
+      expect(String(failure)).not.toContain("ambiguous.yaml:");
+    }
+  });
+
   it("rejects unknown rule fields, select keys, missing apply fields, and unknown kinds", () => {
     const diagnostics = diagnosticsFor({
       tags,

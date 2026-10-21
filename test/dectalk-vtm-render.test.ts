@@ -74,7 +74,6 @@ describe("dectalk-vtm experiment renders DECtalk's packets", () => {
       (decision) => decision.type === "schedule_mode_selected",
     );
     expect(scheduling.length).toBeGreaterThan(0);
-    expect(scheduling.every((decision) => decision.type === "schedule_mode_selected")).toBe(true);
     expect(scheduling[0].reason).toContain("compiled schedule time");
     expect(scheduling[0].timestampMs).toBeUndefined();
     const bindings = allDecisions.filter((decision) => decision.type === "binding_resolved");

@@ -52,14 +52,17 @@ function allophoneFrames(result: ReturnType<typeof speak>): number[] {
 }
 
 describe("dectalk-english speaking rate", () => {
-  it("rate 1, given or not, is 180 words per minute and says nothing", () => {
+  it("rate 1, given or not, is 180 words per minute and reports only an applied default", () => {
     for (const rate of [1, undefined]) {
       const result = speak(rate);
-      expect(result.rateCodes).toEqual([]);
+      expect(result.rateCodes).toEqual(rate === undefined ? ["I_RATE_DEFAULT"] : []);
       expect(result.decision?.reason).toContain("policy.timing.speaking_rate_wpm = 180");
       expect(result.decision?.citations.join(" ")).toContain("phinit.c:119");
     }
-    expect(speak(undefined).track).toEqual(speak(1).track);
+    // Default selection adds a record, shifting later IDs without changing frames.
+    const values = (rate: number | undefined) =>
+      speak(rate).track.map(({ provenance: _provenance, ...frame }) => frame);
+    expect(values(undefined)).toEqual(values(1));
   });
 
   it("a rate that is a whole number of words per minute is used as it is", () => {

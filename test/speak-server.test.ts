@@ -56,7 +56,8 @@ describe("speak-server request mapping", () => {
     expect(render.baseF0).toBeUndefined();
     expect(render).not.toHaveProperty("transitionMs");
     expect(render).not.toHaveProperty("pitchScale");
-    expect(render).toMatchObject({ phrase: "Hello.", frontendId: "qlatt-english", rate: 1 });
+    expect(render.rate).toBeUndefined();
+    expect(render).toMatchObject({ phrase: "Hello.", frontendId: "qlatt-english" });
   });
 
   it("passes pitchScale as the relative pitch request, with no base pitch", () => {

@@ -791,6 +791,29 @@ function buildTextToKlattTrackDetailed(
   // so it runs before the voice is chosen. The voice and the rate that were
   // asked for are the state the text starts in, as say.exe's are.
   const textParser = resources.textParser;
+  const ratePolicy = recordOrEmpty(policyRecord(spec).rate);
+  const defaultRate = requirePolicyNumber(ratePolicy.default, "rate.default");
+  const defaultRateCitations = policyCitations(ratePolicy.default).filter((citation) =>
+    citation.trim(),
+  );
+  if (defaultRate <= 0 || defaultRateCitations.length === 0) {
+    throw new Error("E_POLICY_REQUIRED: parameters.policy.rate.default must be positive and cited");
+  }
+  const requestedRate = options.rate ?? defaultRate;
+  if (options.rate == null) {
+    options.diagnostics?.info(
+      "Using the selected frontend's default speaking rate",
+      { frontendId, rate: defaultRate },
+      "I_RATE_DEFAULT",
+    );
+    provenance.add({
+      stage: "frontend",
+      type: "speaking_rate_default",
+      subject: "utterance",
+      reason: `Selected policy.rate.default = ${defaultRate}`,
+      citations: defaultRateCitations,
+    });
+  }
   const rateUnit = readPolicyNumber(
     recordOrEmpty(recordOrEmpty(policyRecord(spec).rate).words_per_minute).unit,
   );
@@ -805,8 +828,8 @@ function buildTextToKlattTrackDetailed(
         provenance,
         {
           ...(options.diagnostics ? { diagnostics: options.diagnostics } : {}),
-          ...(rateUnit !== undefined && Number.isFinite(options.rate ?? 1)
-            ? { initialRate: Math.round(((options.rate ?? 1) / rateReference) * rateUnit) }
+          ...(rateUnit !== undefined && Number.isFinite(requestedRate)
+            ? { initialRate: Math.round((requestedRate / rateReference) * rateUnit) }
             : {}),
         },
       )
@@ -1135,7 +1158,6 @@ function buildTextToKlattTrackDetailed(
   createStructure(utterance, transcribed, segments, spec, itemEndTokens);
   onStage?.("structure");
 
-  const requestedRate = options.rate ?? 1;
   if (!Number.isFinite(requestedRate) || requestedRate <= 0) {
     throw new Error(
       `E_RATE_INVALID: rate must be a finite number greater than zero, got ${String(requestedRate)}`,
@@ -1357,7 +1379,6 @@ function buildTextToKlattTrackDetailed(
     onPhaseEnd,
   });
 
-  const ratePolicy = recordOrEmpty(policyRecord(spec).rate);
   const undershoot = requirePolicyNumber(
     ratePolicy.undershoot_coefficient,
     "rate.undershoot_coefficient",

@@ -73,7 +73,7 @@ function stageTimer() {
  */
 export function warmFrontend(frontendId, phrase) {
   const speaker = getSelectedSpeaker();
-  const options = { rate: 1, frontendId };
+  const options = { frontendId };
   if (speaker) options.speaker = speaker;
   textToKlattTrack(phrase, undefined, undefined, options);
 }

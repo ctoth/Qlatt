@@ -60,7 +60,8 @@ export interface RenderRequest
   frontendId: string;
   experimentId: string;
   engine: string;
-  rate: number;
+  /** Absent: the selected frontend's cited rate default. */
+  rate?: number;
   /** Absent: the selected frontend's cited transition default. */
   transitionMs?: number;
   sampleRate: number;

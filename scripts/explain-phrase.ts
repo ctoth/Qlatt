@@ -14,6 +14,7 @@ import {
 import {
   getRulepackValidationDiagnostics,
   loadBundledRulepackSpec,
+  rulepackRuleDocumentSpans,
 } from "../src/declarative-frontend/rule-pack";
 import {
   applyRange,
@@ -23,6 +24,7 @@ import {
   parseRangeSpec,
 } from "../src/provenance";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
+import type { YamlDocumentSpan } from "../src/yaml-loader";
 
 type ExplainFormat = "text" | "json";
 
@@ -77,6 +79,7 @@ type ExplainPayload = {
   decisions: DecisionRecord[];
   summary: ExplainSummary;
   tooling: {
+    ruleSources: Record<string, YamlDocumentSpan>;
     field: FieldExplanation | null;
     whyNot: WhyNotRuleResult | null;
     checkpoints: readonly PhaseViewSummary[] | null;
@@ -297,8 +300,10 @@ function renderText(payload: ExplainPayload, verbose: boolean): string {
 
   for (const decision of compact.displayed) {
     const citations = decision.citations.length > 0 ? decision.citations.join("; ") : "<none>";
+    const span = payload.tooling.ruleSources[decision.id];
+    const location = span ? ` | rule: ${span.resource}:${span.line}:${span.column}` : "";
     lines.push(
-      `#${decision.seq} [${decision.stage}] [${decision.type}] ${decision.subject} ${decision.reason} | citations: ${citations}`,
+      `#${decision.seq} [${decision.stage}] [${decision.type}] ${decision.subject} ${decision.reason} | citations: ${citations}${location}`,
     );
   }
 
@@ -437,6 +442,25 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       }
     }
 
+    const declarations = new Map<string, YamlDocumentSpan>();
+    for (const entry of rulepackRuleDocumentSpans(rulepack)) {
+      const parts = entry.value.path;
+      if (parts.length === 2 && parts[0] === "rules" && typeof parts[1] === "string" && entry.key) {
+        declarations.set(parts[1], entry.key);
+      }
+    }
+    const selectedIds = new Set(decisions.map((decision) => decision.id));
+    const ruleSources: Record<string, YamlDocumentSpan> = {};
+    // Join actual committed IDs; frame programs may contain several fired rules,
+    // so their synthetic rule IDs are not treated as individual rule names.
+    for (const transaction of detailed.utterance.journal()) {
+      const span = declarations.get(transaction.metadata.ruleId);
+      if (!span) continue;
+      for (const id of transaction.decisionIds) {
+        if (selectedIds.has(id)) ruleSources[id] = span;
+      }
+    }
+
     const payload = buildPayload(
       decisions,
       args.phrase,
@@ -445,6 +469,7 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       allDecisions.length,
       args.whyDecisionId,
       {
+        ruleSources,
         field: fieldExplanation,
         whyNot,
         checkpoints: args.includePhaseViews

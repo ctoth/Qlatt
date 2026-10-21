@@ -10,9 +10,11 @@ import {
   loadRulepackSpecFromPath,
   preloadRulepackSpecFromPath,
   rulepackMapOrigins,
+  rulepackParameterOrigins,
   rulepackRuleOrigins,
 } from "../src/declarative-frontend/rule-pack";
 import { getVoiceRegistry, resolveVoice } from "../src/dectalk-voice";
+import { parseYamlString, yamlDocumentSpans } from "../src/yaml-loader";
 
 interface PolicyLeaf {
   value: number;
@@ -161,11 +163,14 @@ function readYamlFile(path: string): Dict {
  * carries the base's phases and string_sets (neither is inherited) plus the
  * given sections.
  */
-function writeExtendingFrontend(dir: string, sections: Dict): string {
+function writeExtendingFrontend(dir: string, sections: Dict, rootOverrides: Dict = {}): string {
   const englishRoot = readYamlFile(`${FRONTENDS_DIR}/qlatt-english/frontend.yaml`);
   const englishPipeline = readYamlFile(`${FRONTENDS_DIR}/qlatt-english/pipeline.yaml`);
   const frontendPath = join(dir, "frontend.yaml");
-  writeFileSync(frontendPath, dumpYaml({ extends: "qlatt-english", include: englishRoot.include }));
+  writeFileSync(
+    frontendPath,
+    dumpYaml({ extends: "qlatt-english", include: englishRoot.include, ...rootOverrides }),
+  );
   writeFileSync(
     join(dir, "pipeline.yaml"),
     dumpYaml({
@@ -177,6 +182,99 @@ function writeExtendingFrontend(dir: string, sections: Dict): string {
   );
   return frontendPath.replace(/\\/g, "/");
 }
+
+describe("authored parameter origins through composition", () => {
+  const baseResource = "/rules/frontends/qlatt-english/frontend.yaml";
+  const pathOf = (name: string) => `parameters.policy.f0.${name}`;
+  const origin = (spec: CompiledRulepack, path: string) =>
+    rulepackParameterOrigins(spec).find((entry) => entry.value.path.join(".") === path);
+
+  it("keeps actual Beauty additions and inherited base siblings at their document locations", () => {
+    const beauty = loadBundledRulepackSpec("qlatt-beauty");
+    const resource = "/rules/frontends/qlatt-beauty/frontend.yaml";
+    const authored = parseYamlString(readFileSync(`public${resource}`, "utf8"), resource, {
+      resource,
+      role: "rulepack",
+    });
+    const expected = yamlDocumentSpans(authored).find(
+      (entry) => entry.value.path.join(".") === pathOf("question_rise_fraction.value"),
+    );
+    expect(expected).toBeDefined();
+    expect(origin(beauty, pathOf("question_rise_fraction.value"))).toEqual(expected);
+    expect(origin(beauty, pathOf("downstep_k.value"))?.value.resource).toBe(baseResource);
+    expect(Object.isFrozen(rulepackParameterOrigins(beauty))).toBe(true);
+    expect(Object.isFrozen(expected?.value.path)).toBe(true);
+  });
+
+  it.each(["sync", "async"])(
+    "keeps winning values through extends and includes (%s)",
+    async (mode) => {
+      const dir = mkdtempSync(join(tmpdir(), "qlatt-parameter-origins-"));
+      try {
+        const filename = writeExtendingFrontend(
+          dir,
+          {},
+          {
+            parameters: {
+              policy: {
+                f0: {
+                  downstep_k: { value: 0.7, citations: ["Engineering fixture: child override"] },
+                  boundary_l_pct_fraction: 0.1,
+                },
+                accent_assignment: { metrical_stress_overrides_word_class: { value: false } },
+              },
+            },
+          },
+        );
+        const child =
+          mode === "sync"
+            ? loadRulepackSpecFromPath(filename)
+            : await preloadRulepackSpecFromPath(filename);
+        const authored = parseYamlString(readFileSync(filename, "utf8"), filename, {
+          resource: filename,
+          role: "rulepack",
+        });
+        const expected = yamlDocumentSpans(authored).find(
+          (entry) => entry.value.path.join(".") === pathOf("downstep_k.value"),
+        );
+        expect(expected).toBeDefined();
+        expect(origin(child, pathOf("downstep_k.value"))).toEqual(expected);
+        expect(origin(child, pathOf("downstep_floor_fraction.value"))?.value.resource).toBe(
+          baseResource,
+        );
+        expect(origin(child, pathOf("downstep_k.citations.0"))?.value.resource).toBe(filename);
+        expect(origin(child, pathOf("downstep_k.citations.1"))).toBeUndefined();
+        expect(origin(child, pathOf("boundary_l_pct_fraction"))?.value.resource).toBe(filename);
+        expect(origin(child, pathOf("boundary_l_pct_fraction.value"))).toBeUndefined();
+        expect(origin(child, pathOf("boundary_l_pct_fraction.citations"))).toBeUndefined();
+        expect(
+          rulepackParameterOrigins(child).some(
+            (entry) => entry.value.path[2] === "accent_assignment",
+          ),
+        ).toBe(false);
+        const policy = (child.parameters as { policy: Dict }).policy;
+        expect(policy.accent_assignment).toHaveProperty(
+          "metrical_stress_overrides_word_class.value",
+          true,
+        );
+        expect((policy.f0 as Dict).downstep_k).toEqual({
+          value: 0.7,
+          citations: ["Engineering fixture: child override"],
+        });
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    },
+  );
+
+  it("does not assign root locations to generated voice values", () => {
+    const dectalk = loadBundledRulepackSpec("dectalk-english");
+    expect(dectalk.parameters).toHaveProperty("policy.voice");
+    expect(rulepackParameterOrigins(dectalk).some((entry) => entry.value.path[2] === "voice")).toBe(
+      false,
+    );
+  });
+});
 
 /**
  * A child file that shadows a base include (same relative path as an entry of

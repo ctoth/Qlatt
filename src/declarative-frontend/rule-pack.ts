@@ -194,7 +194,6 @@ export const BUNDLED_FRONTEND_RULEPACK_PATHS = Object.freeze({
 } as const);
 
 export type BundledFrontendId = keyof typeof BUNDLED_FRONTEND_RULEPACK_PATHS;
-export const DEFAULT_RULEPACK_PATH = BUNDLED_FRONTEND_RULEPACK_PATHS[DEFAULT_FRONTEND_ID];
 
 // ---------------------------------------------------------------------------
 // Include resolution: load child specs and merge them into the root spec
@@ -836,9 +835,7 @@ function rulepackPathUnknown(specPath: string, cause: unknown): unknown {
   );
 }
 
-export function loadRulepackSpecFromPath(
-  specPath: string = DEFAULT_RULEPACK_PATH,
-): CompiledRulepack {
+export function loadRulepackSpecFromPath(specPath: string): CompiledRulepack {
   const cached = BUNDLED_RULEPACK_CACHE.get(specPath);
   if (cached) return cached;
 
@@ -928,9 +925,7 @@ function attachAccentPolicy(spec: PlainObject, source: string, path: string): vo
   };
 }
 
-export async function preloadRulepackSpecFromPath(
-  specPath: string = DEFAULT_RULEPACK_PATH,
-): Promise<CompiledRulepack> {
+export async function preloadRulepackSpecFromPath(specPath: string): Promise<CompiledRulepack> {
   const cached = BUNDLED_RULEPACK_CACHE.get(specPath);
   if (cached) return cached;
 

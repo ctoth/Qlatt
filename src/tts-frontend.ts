@@ -285,9 +285,10 @@ function buildUtteranceSchema(inventory: InventorySpec, spec: CompiledRulepack):
     segmentFeatures[key] = FRAME_VALUES_SCHEMA;
   }
   for (const key of Object.keys(inventory.base_params)) segmentFeatures[key] = { kind: "number" };
+  const targetFeatureExclusions = new Set(inventory.target_feature_exclusions);
   for (const target of Object.values(inventory.phoneme_targets)) {
     for (const [key, value] of Object.entries(target)) {
-      if (key === "dur" || key === "SW" || key === "type") continue;
+      if (targetFeatureExclusions.has(key)) continue;
       const observed = schemaForValue(value);
       const schema =
         observed?.kind === "boolean" ? mergeSchemas([observed, { kind: "null" }]) : observed;

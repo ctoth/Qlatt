@@ -27,6 +27,7 @@ export type InventorySpec = {
   default_duration_ms: number;
   citations?: readonly string[];
   base_params: Record<string, number>;
+  target_feature_exclusions: readonly string[];
   normalization_aliases?: Readonly<Record<string, string>>;
   secondary_stress_fallback?: { target: 0 | 1; citations: string[] };
   phoneme_targets: Record<string, Record<string, unknown>>;
@@ -388,6 +389,14 @@ export function parseInventorySpec(
 function buildInventorySpec(raw: Record<string, unknown>): InventorySpec {
   const phonemeTargets = normalizePhonemeTargets(raw.phoneme_targets);
   if (
+    !Array.isArray(raw.target_feature_exclusions) ||
+    raw.target_feature_exclusions.some((key) => typeof key !== "string" || !key.trim())
+  ) {
+    throw new Error(
+      "E_INVENTORY_SCHEMA: target_feature_exclusions must be an array of non-empty strings",
+    );
+  }
+  if (
     typeof raw.silence_symbol !== "string" ||
     !raw.silence_symbol.trim() ||
     !phonemeTargets[raw.silence_symbol]
@@ -446,6 +455,7 @@ function buildInventorySpec(raw: Record<string, unknown>): InventorySpec {
     default_duration_ms: raw.default_duration_ms,
     citations: [...citations],
     base_params: normalizeBaseParams(raw.base_params),
+    target_feature_exclusions: [...raw.target_feature_exclusions],
     normalization_aliases: normalizeNormalizationAliases(
       raw.normalization_aliases,
       phonemeTargets,

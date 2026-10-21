@@ -11,6 +11,7 @@
 # formant space, with a per-target Rd, by scripts/build-female-inventory.py.
 # =============================================================================
 version: v1
+target_feature_exclusions: [dur, SW, type]
 phonology_path: /rules/frontends/qlatt-english/phonology.yaml
 default_duration_ms: 30 # engineering estimate: duration for a target without dur
 secondary_stress_fallback:

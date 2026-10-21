@@ -1,4 +1,5 @@
 version: v1
+target_feature_exclusions: [dur, SW, type]
 # The symbol conventions and each target's `type`, phonological features and
 # `dac` are the language's: phonology.yaml, merged under these acoustic targets
 # by the loader (docs/inventory-conventions.md, "Layering an inventory over a

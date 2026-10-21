@@ -37,6 +37,7 @@ const phonology = {
 
 const voice = {
   version: "v1",
+  target_feature_exclusions: ["dur", "SW", "type"],
   phonology_path: PHONOLOGY_PATH,
   default_duration_ms: 30,
   citations: ["Fixture voice"],

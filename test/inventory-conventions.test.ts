@@ -148,6 +148,11 @@ it.each([
   ["symbol_grammar", "["],
   ["stress_markers", { 0: "0", 1: "0", 2: "2" }],
   ["default_duration_ms", 0],
+  ["target_feature_exclusions", undefined],
+  ["target_feature_exclusions", "dur"],
+  ["target_feature_exclusions", [null]],
+  ["target_feature_exclusions", [""]],
+  ["target_feature_exclusions", ["  "]],
 ])("rejects invalid %s declarations at load time", (key, value) => {
   expect(() => parseInventorySpec(JSON.stringify({ ...base, [key]: value }))).toThrow(
     /E_INVENTORY_SCHEMA/,
@@ -158,3 +163,55 @@ it("loads a renamed silence target without requiring the English silence label",
   const inventory = renameVocabulary(base);
   expect(parseInventorySpec(JSON.stringify(inventory)).silence_symbol).toBe("pause");
 });
+
+it("accepts an explicit empty target-feature exclusion declaration", () => {
+  const inventory = parseInventorySpec(JSON.stringify({ ...base, target_feature_exclusions: [] }));
+  expect(inventory.target_feature_exclusions).toEqual([]);
+});
+
+it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
+  "%s applies target exclusions only to inferred features",
+  (frontendId) => {
+    const resources = inventoryModule.loadFrontendResources(
+      rulepackModule.loadBundledRulepackSpec(frontendId),
+    );
+    const inventory = structuredClone(resources.inventory);
+    expect(inventory.target_feature_exclusions).toEqual(["dur", "SW", "type"]);
+    const target = Object.values(inventory.phoneme_targets)[0];
+    target.fixture_note = "target metadata";
+    const spy = vi
+      .spyOn(inventoryModule, "loadFrontendResources")
+      .mockReturnValue({ ...resources, inventory });
+    try {
+      const control = textToKlattTrackDetailed("hello", undefined, undefined, { frontendId });
+      const controlFeatures = control.utterance.schemaDefinition().itemTypes.segment.features;
+      expect(controlFeatures.fixture_note).toBeDefined();
+      expect(controlFeatures.dur).toBeUndefined();
+      const materialized = materializePhonemeTarget(inventory.silence_symbol, {
+        inventorySpec: inventory,
+      });
+      inventory.target_feature_exclusions = [
+        ...inventory.target_feature_exclusions,
+        "fixture_note",
+        "F1",
+      ];
+      const excluded = textToKlattTrackDetailed("hello", undefined, undefined, { frontendId });
+      const excludedFeatures = excluded.utterance.schemaDefinition().itemTypes.segment.features;
+      expect(excludedFeatures.fixture_note).toBeUndefined();
+      expect(excludedFeatures.F1).toEqual({ kind: "number" });
+      expect(excludedFeatures.SW).toEqual({ kind: "number" });
+      expect(excludedFeatures.type).toEqual(controlFeatures.type);
+      expect(excluded.track).toEqual(control.track);
+      expect(
+        materializePhonemeTarget(inventory.silence_symbol, { inventorySpec: inventory }),
+      ).toEqual(materialized);
+      inventory.target_feature_exclusions = [];
+      const unexcluded = textToKlattTrackDetailed("hello", undefined, undefined, { frontendId });
+      expect(unexcluded.utterance.schemaDefinition().itemTypes.segment.features.dur).toEqual({
+        kind: "number",
+      });
+    } finally {
+      spy.mockRestore();
+    }
+  },
+);

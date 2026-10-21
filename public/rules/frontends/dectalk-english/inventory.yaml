@@ -1,4 +1,5 @@
 version: v1
+target_feature_exclusions: [dur, SW, type]
 # Engineering convention: CMU/ARPABET symbols and lexical stress suffixes.
 silence_symbol: SIL
 nucleus_types: [vowel]

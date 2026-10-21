@@ -193,6 +193,35 @@ describe("direct rule errors through composition", () => {
         const dir = mkdtempSync(join(tmpdir(), "qlatt-rule-locations-"));
         try {
           const rules = {
+            fixture_frame_rule: {
+              kind: "frame",
+              program: "fixture_frame",
+              unit: "u.missing",
+              when: "r.missing",
+              set: [{ register: "missing", value: "r.missing", tag: "duration_floor" }],
+              citations: ["Fixture source"],
+            },
+            fixture_points: {
+              kind: "point",
+              select: { relation: "Segment", where: "true" },
+              insert_point: {
+                relation: "F0Point",
+                value: "current.phonem",
+                when: "current.phonem",
+                at: "midpoint(current)",
+                tag: "duration_floor",
+              },
+              insert_points: [
+                {
+                  relation: "Missing",
+                  value: "current.phonem",
+                  when: "current.phonem",
+                  at: "midpoint(current)",
+                  tag: "duration_floor",
+                },
+              ],
+              citations: ["Fixture source"],
+            },
             unknown_path_relation: {
               kind: "scalar",
               select: {
@@ -372,6 +401,28 @@ describe("direct rule errors through composition", () => {
           expectLocation("E_MAP_INVALID", "maps.fixture_map.bad", "key");
           expectLocation("E_STRING_SET_INVALID", "string_sets.fixture_set[0]", "value");
           expectLocation("E_TAG_MEANING_INVALID", "tags.fixture_tag", "key");
+          for (const path of ["unit", "when", "set[0].value"]) {
+            expectLocation("E_FRAME_NAME_UNKNOWN", `rules.fixture_frame_rule.${path}`, "value");
+          }
+          expectLocation(
+            "E_FRAME_NAME_UNKNOWN",
+            "rules.fixture_frame_rule.set[0].register",
+            "key",
+          );
+          for (const insert of ["insert_point", "insert_points[0]"]) {
+            for (const field of ["value", "when"]) {
+              expectLocation(
+                "E_RULE_FEATURE_UNKNOWN",
+                `rules.fixture_points.${insert}.${field}`,
+                "value",
+              );
+            }
+          }
+          expectLocation(
+            "E_POINT_RELATION_UNKNOWN",
+            "rules.fixture_points.insert_points[0].relation",
+            "key",
+          );
           for (const path of [
             "unit.all[0]",
             "frame_ms",

@@ -4671,7 +4671,15 @@ export function assertValidSpec(
         diagnostic.path,
       );
     const stringSetElement = /^string_sets\.[^.]+\[\d+\]$/.test(diagnostic.path);
+    const ruleName = /^rules\.([^.]+)\./.exec(diagnostic.path)?.[1];
+    const rule = ruleName && isPlainObject(spec.rules) ? spec.rules[ruleName] : undefined;
+    const frameRuleExpressionPath =
+      isPlainObject(rule) &&
+      rule.kind === "frame" &&
+      /^rules\.[^.]+\.(?:unit|when|set\[\d+\]\.value)$/.test(diagnostic.path);
     const expressionPath =
+      frameRuleExpressionPath ||
+      /^rules\.[^.]+\.(?:insert_point|insert_points\[\d+\])\.(?:value|when)$/.test(diagnostic.path) ||
       frameExpressionPath ||
       /^relations\.[^.]+\.scalars\.[^.]+\.floor_fallback\.value$/.test(diagnostic.path) ||
       /^patterns\.[^.]+\.(?:sequence\[\d+\]\.where|constraint)(?:\.not|\.(?:all|any)\[\d+\])*(?:\.expr)?$/.test(

@@ -639,6 +639,11 @@ function lowerSpan(
       ...(span.pitch.semitones !== undefined ? ["f0Scale"] : []),
       ...(span.pitch.rangeScale !== undefined ? ["f0VarianceScale"] : []),
     ];
+    const attribution = channelAttribution(
+      options,
+      deltaFields,
+      "pitch semitones use 12 per octave; rangeScale directly sets F0 excursion scale",
+    );
     const decision = provenance.add({
       stage: "frontend",
       type: "pitch",
@@ -649,8 +654,8 @@ function lowerSpan(
           ? ` ${signed(span.pitch.semitones)} st (F0×${fmt(f0Scale)})`
           : "") +
         (span.pitch.rangeScale !== undefined ? ` range×${fmt(span.pitch.rangeScale)}` : "") +
-        ` on ${subject}`,
-      citations: ["Pierrehumbert_1980"],
+        ` on ${subject}${attribution.reason}`,
+      citations: attribution.citations,
     });
     out.push({
       id: decision.id,
@@ -669,12 +674,17 @@ function lowerSpan(
     // rate is a speaking-rate multiplier; durationScale is its inverse.
     const durationScale = span.rate > 0 ? 1 / span.rate : 1;
     const delta = materializeVoiceQualityDelta(requireChannels(options), { durationScale });
+    const attribution = channelAttribution(
+      options,
+      ["durationScale"],
+      "positive rate maps to inverse durationScale; nonpositive rate uses neutral durationScale",
+    );
     const decision = provenance.add({
       stage: "frontend",
       type: "rate",
       subject,
-      reason: `Local rate ×${fmt(span.rate)} (durationScale ×${fmt(durationScale)}) on ${subject}`,
-      citations: ["Rutledge_1995"],
+      reason: `Local rate ×${fmt(span.rate)} (durationScale ×${fmt(durationScale)}) on ${subject}${attribution.reason}`,
+      citations: attribution.citations,
     });
     out.push({
       id: decision.id,
@@ -691,12 +701,17 @@ function lowerSpan(
 
   if (span.voiceQuality) {
     const delta = materializeVoiceQualityDelta(requireChannels(options), span.voiceQuality);
+    const attribution = channelAttribution(
+      options,
+      Object.keys(span.voiceQuality),
+      "voice-quality overrides compose configured channels over their neutral values",
+    );
     const decision = provenance.add({
       stage: "frontend",
       type: "voice_quality",
       subject,
-      reason: `Local voice-quality override on ${subject}`,
-      citations: ["Gobl_2003"],
+      reason: `Local voice-quality override on ${subject}${attribution.reason}`,
+      citations: attribution.citations,
     });
     out.push({
       id: decision.id,
@@ -806,6 +821,19 @@ export function effectiveSpanFieldAt<K extends keyof DirectionSpan>(
 // ---------------------------------------------------------------------------
 // helpers
 // ---------------------------------------------------------------------------
+
+function channelAttribution(options: ParseOptions, fields: string[], convention: string) {
+  const rows = requireChannels(options).filter((row) => fields.includes(row.channel));
+  return {
+    reason: `; frontend '${options.frontendId ?? "programmatic"}' vq_channels entries: ${rows.map((row) => row.channel).join(", ") || "none"}`,
+    citations: [
+      ...new Set([
+        ...rows.flatMap((row) => row.citations),
+        `Engineering convention: Direction Track ${convention}`,
+      ]),
+    ],
+  };
+}
 
 function requireChannels(options: ParseOptions): readonly VoiceQualityChannel[] {
   if (!options.vqChannels) {

@@ -1534,12 +1534,11 @@ export function lowerToFrames(
       const next = timings[index + 1];
       if (sonorantF2.backward && next && neighborTypes.has(String(next.item.get(typeKey)))) {
         const nextValue = next.item.get(sonorantF2.key);
-        const transitionSpanMs = Math.min(spanMs, timing.durationMs);
         addLinearTransition(
           timing.item,
           timing.durationMs,
           "trailing",
-          transitionSpanMs,
+          spanMs,
           ({ startMs, endMs }) => {
             if (typeof nextValue !== "number") return null;
             return {
@@ -1688,13 +1687,12 @@ export function lowerToFrames(
           options,
           phonemeKey,
         )) {
-          const spanMs = Math.min(timing.durationMs, formant.spanMs);
           const currentValue = timing.item.get(formant.key);
           addLinearTransition(
             timing.item,
             timing.durationMs,
             "trailing",
-            spanMs,
+            formant.spanMs,
             ({ startMs, endMs }) => {
               if (typeof currentValue !== "number") return null;
               return {

@@ -245,7 +245,7 @@ const byWord = <T>(entries: Map<string, T>): [string, T][] =>
 const dictionaryRows = selectDictionaryRows(dictionaryText);
 const wordFormClasses: Record<string, number> = {};
 // For each dictionary word with a `~` in its phoneme field, the indices (in
-// the word's phones as public/dectalk-dictionary.json has them) of the phones
+// the word's phones as the declared DECtalk lexicon has them) of the phones
 // whose allophone rules DECtalk blocks.
 const wordRuleBlocks: Record<string, number[]> = {};
 // For each dictionary word with a `*` (morpheme boundary) or `#` (compound

@@ -44,7 +44,9 @@ describe("transcribe-text", () => {
       const dectalk = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
       expect(resources.lexicon?.path).toBe("/rules/languages/english/cmu-dictionary.json");
       expect(beauty.lexicon?.dictionary).toBe(resources.lexicon?.dictionary);
-      expect(dectalk.lexicon?.path).toBe("/dectalk-dictionary.json");
+      expect(dectalk.lexicon?.path).toBe(
+        "/rules/frontends/dectalk-english/dectalk-dictionary.json",
+      );
       expect(dectalk.lexicon?.dictionary).not.toBe(resources.lexicon?.dictionary);
     });
 

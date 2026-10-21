@@ -12,7 +12,7 @@
  *     (test/fixtures/dectalk-oracle/dectalk-us-lts-v1.phonemes.json): words
  *     that are not in DECtalk's dictionary, so their class comes from a suffix
  *     rule or is unknown;
- *   - every Nth key of public/dectalk-dictionary.json that is 2 to 10
+ *   - every Nth key of the declared DECtalk lexicon that is 2 to 10
  *     lowercase letters, in alphabetical order, so that about `--count`
  *     remain (default 300);
  *   - the function words the clause rules read (`FUNCTION_WORDS`).
@@ -34,6 +34,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadYamlDocumentSync } from "../../src/yaml-loader";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const argv = process.argv.slice(2);
@@ -73,8 +74,11 @@ const ltsWords = Object.keys(
     "dectalk-us-lts-v1.phonemes.json",
   ).entries,
 );
+const frontend = loadYamlDocumentSync<{ resources: { lexicon: string } }>(
+  path.join(repoRoot, "public", "rules", "frontends", "dectalk-english", "frontend.yaml"),
+);
 const dictionaryWords = Object.keys(
-  readJson<Record<string, string>>("public", "dectalk-dictionary.json"),
+  readJson<Record<string, string>>("public", frontend.resources.lexicon.replace(/^\/+/, "")),
 )
   .filter((word) => /^[a-z]{2,10}$/.test(word))
   .sort();

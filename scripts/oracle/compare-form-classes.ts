@@ -37,9 +37,11 @@ const names = readJson<{ formClassNames: (string | null)[] }>(
   "dectalk-english",
   "lts-table.json",
 ).formClassNames;
-const dictionary = readJson<Record<string, string>>("public", "dectalk-dictionary.json");
-const lookup = (word: string): string[] | null => dictionary[word]?.split(" ") ?? null;
 const options = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
+if (!options.lexicon)
+  throw new Error("E_FRONTEND_CONFIG: dectalk-english requires resources.lexicon");
+const dictionary = options.lexicon.dictionary;
+const lookup = (word: string): string[] | null => dictionary[word]?.split(" ") ?? null;
 const named = (bits: string): string =>
   bits === ""
     ? "unknown"

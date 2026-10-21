@@ -14,6 +14,7 @@ import { type ClauseOptions, readClauses } from "../../src/text-parser/clauses.t
 import { dictionaryLookup } from "../../src/text-parser/dictionary.ts";
 import { encodeWindows1252 } from "../../src/text-parser/frontend.ts";
 import type { TextParserRule, TextParserTable } from "../../src/text-parser/interpreter.ts";
+import { loadYamlDocumentSync } from "../../src/yaml-loader";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -58,7 +59,7 @@ export const visible = (text: string): string =>
     .join("");
 
 export interface PortOptions {
-  /** Ask the frontend's dictionary (public/dectalk-dictionary.json). Default: yes. */
+  /** Ask the frontend's declared dictionary. Default: yes. */
   dictionary?: boolean;
   onHit?: ClauseOptions["onHit"];
 }
@@ -78,10 +79,16 @@ export function textParserPort(options: PortOptions = {}): (text: string) => str
       "utf8",
     ),
   ) as TextParserTable;
+  const frontend = loadYamlDocumentSync<{ resources: { lexicon: string } }>(
+    path.join(repoRoot, "public", "rules", "frontends", "dectalk-english", "frontend.yaml"),
+  );
   const words = new Set(
     Object.keys(
       JSON.parse(
-        fs.readFileSync(path.join(repoRoot, "public", "dectalk-dictionary.json"), "utf8"),
+        fs.readFileSync(
+          path.resolve(repoRoot, "public", frontend.resources.lexicon.replace(/^\/+/, "")),
+          "utf8",
+        ),
       ) as Record<string, unknown>,
     ),
   );

@@ -27,9 +27,11 @@ const fixture = readJson<{
   contexts: Record<string, string[]>;
   entries: Record<string, Record<string, string>>;
 }>("test", "fixtures", "dectalk-oracle", "dectalk-us-homographs-v1.phonemes.json");
-const dictionary = readJson<Record<string, string>>("public", "dectalk-dictionary.json");
-const lookup = (word: string): string[] | null => dictionary[word]?.split(" ") ?? null;
 const options = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
+if (!options.lexicon)
+  throw new Error("E_FRONTEND_CONFIG: dectalk-english requires resources.lexicon");
+const dictionary = options.lexicon.dictionary;
+const lookup = (word: string): string[] | null => dictionary[word]?.split(" ") ?? null;
 
 const KNOWN_GAPS: Readonly<Record<string, string>> = {};
 

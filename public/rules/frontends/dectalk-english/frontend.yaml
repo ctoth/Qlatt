@@ -9,7 +9,7 @@ resources:
   # main dictionary search precedes the LTS rule engine; rules run only on miss).
   # This 13,272-entry dictionary was converted from DECtalk's Dic_us.txt to the
   # same flat word->ARPABET JSON the CMU loader consumes (see scripts/build-dectalk-dict.ts).
-  lexicon: /dectalk-dictionary.json
+  lexicon: /rules/frontends/dectalk-english/dectalk-dictionary.json
   # DECtalk's own source contour preserves its selected source mode.
   source_contour: /rules/frontends/dectalk-english/source-contour.yaml
 # DECtalk's command text parser: the rules that rewrite text (phone numbers,
@@ -2473,7 +2473,7 @@ transcription:
   sources:
     dictionary:
       name: DECtalk dictionary
-      citation: "DECtalk 4.63 dapi/src/dic/Dic_us.txt, converted by scripts/build-dectalk-dict.ts (/dectalk-dictionary.json)"
+      citation: "DECtalk 4.63 dapi/src/dic/Dic_us.txt, converted by scripts/build-dectalk-dict.ts (/rules/frontends/dectalk-english/dectalk-dictionary.json)"
     morphology:
       name: DECtalk suffix stripping against the dictionary
       citation: "DECtalk 4.63 LTS/ls_suff.c (ls_suff_suffix_find, ls_suff_append_pron), as src/g2p/table-suffix.ts"

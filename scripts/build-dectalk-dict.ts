@@ -4,7 +4,7 @@
  * uses (the English frontend's declared CMU lexicon).
  *
  * This is a BUILD TOOL (like build-cmudict.ts), not pipeline/runtime code. It
- * produces a DATA ASSET (`public/dectalk-dictionary.json`). It does NOT wire
+ * produces the frontend's declared lexicon DATA ASSET. It does NOT wire
  * anything into the TTS pipeline.
  *
  * ---------------------------------------------------------------------------
@@ -52,13 +52,18 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, "..");
 
 const DEFAULT_SRC = "C:\\Users\\Q\\src\\dectalk\\463\\dapi\\src\\dic\\Dic_us.txt";
-const OUT_PATH = path.join(root, "public", "dectalk-dictionary.json");
+// Read only the declaration so a missing output can still be built.
+const frontend = loadYamlDocumentSync<{ resources: { lexicon: string } }>(
+  path.join(root, "public", "rules", "frontends", "dectalk-english", "frontend.yaml"),
+);
+const OUT_PATH = path.resolve(root, "public", frontend.resources.lexicon.replace(/^\/+/, ""));
 
 // --- Table 2: US_* enum values (l_us_ph.h:59-116) ---------------------------
 // Index into usa_arpa[] is exactly this value.

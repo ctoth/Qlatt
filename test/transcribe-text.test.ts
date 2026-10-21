@@ -1,5 +1,4 @@
 import { afterAll, describe, expect, it, vi } from "vitest";
-import * as resourceOwner from "../src/declarative-frontend/rule-pack";
 import {
   loadBundledRulepackSpec,
   loadFrontendResources,
@@ -30,16 +29,6 @@ describe("transcribe-text", () => {
   });
 
   describe("transcribeText", () => {
-    it("uses supplied resources without returning to the acquisition owner", () => {
-      const acquire = vi.spyOn(resourceOwner, "loadFrontendResources").mockImplementation(() => {
-        throw new Error("unexpected transcription acquisition");
-      });
-      try {
-        expect(transcribeText("hello", { ...selected, resources })).not.toHaveLength(0);
-      } finally {
-        acquire.mockRestore();
-      }
-    });
     it("uses explicitly selected punctuation and diagnostic symbol configuration", () => {
       const config = {
         ...transcriptionConfig,

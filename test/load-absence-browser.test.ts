@@ -153,15 +153,14 @@ describe("a rule pack or inventory path", () => {
   async function loaders(overrides: Record<string, Answer> = {}) {
     devServer(overrides);
     const rulePack = await import("../src/declarative-frontend/rule-pack");
-    const inventory = await import("../src/declarative-frontend/inventory");
     const { isYamlNotFoundError } = await import("../src/yaml-loader");
     return {
       isYamlNotFoundError,
       cases: [
         ["E_RULESET_PATH_UNKNOWN", MISSING_RULEPACK, rulePack.loadRulepackSpecFromPath],
         ["E_RULESET_PATH_UNKNOWN", MISSING_RULEPACK, rulePack.preloadRulepackSpecFromPath],
-        ["E_INVENTORY_PATH_UNKNOWN", MISSING_INVENTORY, inventory.loadInventorySpecFromPath],
-        ["E_INVENTORY_PATH_UNKNOWN", MISSING_INVENTORY, inventory.preloadInventorySpecFromPath],
+        ["E_INVENTORY_PATH_UNKNOWN", MISSING_INVENTORY, rulePack.loadInventorySpecFromPath],
+        ["E_INVENTORY_PATH_UNKNOWN", MISSING_INVENTORY, rulePack.preloadInventorySpecFromPath],
       ] as const,
     };
   }

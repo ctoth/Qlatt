@@ -14,7 +14,10 @@ its foreach error-source implementation and fixture while selecting the relocate
 owner imports in the single fixture import conflict. No local CI.
 Hosted quality job 119207856330 reported import ordering/formatting after the
 relocation: merged import blocks retained their insertion order. Corrected the
-task-owned import blocks and type-only import; no local formatter/CI run.
+task-owned import blocks and type-only import, then the remaining seven exact
+style diagnostics in job 119208683975; no local formatter/CI run.
+Claude completed the full initial 72-file review (9e9ad567 against c2ba906d).
+Implementer verified and corrected both fixture findings; supervisor gate pending.
 
 # Decisions and why
 
@@ -41,8 +44,14 @@ acquisition. Existing mutation fixtures already clone cached inventory/LTS/stres
 data or parse fresh YAML; production pronunciation/parser loops build separate
 outputs. Affect lookup records retain prototype-like names with own-key access.
 The browser resource fixture now exercises complete async rulepack/resource/voice
-preparation, sync reuse and immutable nested cache values. Transcription has an
-explicit no-acquisition fixture. Temporary migration inspection script removed.
+preparation, sync reuse and immutable nested cache values. Temporary migration
+inspection script removed.
+Review response: the dynamic imports in load-absence-browser still selected the
+removed inventory exports; switched them to its existing rulePack namespace.
+The supplied affect-library fixture still spread the former Map; it now extends
+the record into a null-prototype object. Removed the newly added transcription
+spy fixture that merely mirrored the deleted acquisition call. No runtime
+correctness finding was reported; no new guard or compatibility shim added.
 
 # Next step
 

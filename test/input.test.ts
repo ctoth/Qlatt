@@ -862,7 +862,7 @@ describe("input contract — inline shorthand is demoted to a lifter", () => {
     const preset = { ...library.presets.angry, name: "angry-2" };
     const selectedLibrary = {
       ...library,
-      presets: new Map([...library.presets, [preset.name, preset]]),
+      presets: Object.assign(Object.create(null), library.presets, { [preset.name]: preset }),
     };
     const input = parseInline("((angry-2@.5)) *no*", policy);
     expect(input.directionTrack.global?.affect).toEqual({ preset: "angry-2", degree: 0.5 });

@@ -436,6 +436,9 @@ f0_model:
     # filter_seg_commands() in signed Q14 arithmetic.
     segmental:
       type: dectalk_segmental
+      # Fixed f0-filters ABI; the trailing glottal-gesture flag is optional.
+      profile_roles: [voiceless, plosive, stressed, glottal_gesture]
+      required_profile_count: 3
       # The glottal-stop gesture. A command's fourth flag puts one at its
       # allophone's end (set_tglst, Ph_drwt02.c:4040-4128; the conditions are
       # the segmental rules' in prosody.yaml). Within 7 frames of it F0 is

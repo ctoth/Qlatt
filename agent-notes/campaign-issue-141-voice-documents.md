@@ -6,8 +6,9 @@ Move compile-time and runtime voice YAML acquisition into the existing resource 
 
 Fresh branch from 5c18e8d1. Implementation complete: 126 production additions /
 37 removals, 113 existing fixture additions / 20 removals. Source, real callers
-and owned diff inspected. PR #402 published; Claude completed two passes with no
-correctness defects. Accepted the review; no speculative changes. No local CI ran.
+and owned diff inspected. PR #402 published; Claude completed its review with no
+correctness defects; supervisor independently checked the final delta. Accepted
+the review; no speculative changes. No local CI ran.
 
 # Decisions and why
 

@@ -10,7 +10,7 @@ Implemented from origin/master 2191ee15: 20 changed production lines, 48 added f
 Smallest change: roughly 20-35 production lines splitting the first equals and recognizing the six existing boolean flags, plus 40-60 focused test lines and a short documentation clarification. Keep valued options and explicit phrase precedence. No parser dependency, additional options, DAG rendering, or other issue 95 features. Other agents work in separate worktrees; only task-owned paths will be committed.
 
 ## Surprises
-None.
+PR #343 quality job 119030966577 requested test array/callback formatting. Applied its exact reflow without runtime changes or local CI rerun.
 
 ## Next step
-Push a PR for hosted CI and supervisor-owned Claude review, then respond to review. Keep issue 95 open for its remaining bullets.
+Await replacement hosted CI and supervisor-owned Claude review on PR #343, then respond to review. Keep issue 95 open for its remaining bullets.

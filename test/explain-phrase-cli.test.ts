@@ -32,16 +32,19 @@ async function runCli(args: string[]) {
 }
 
 describe("explain phrase cli", () => {
-  it.each(["--verbose", "--strict-citations", "--phase-views", "--verify-replay", "--tooling-only"])(
-    "keeps positional phrase words after %s",
-    async (flag) => {
-      const before = await runCli([flag, "hello", "world", "--format=json"]);
-      const after = await runCli(["hello", "world", flag, "--format=json"]);
-      expect(before.code).toBe(0);
-      expect(after.code).toBe(0);
-      expect(before.stdout).toBe(after.stdout);
-    },
-  );
+  it.each([
+    "--verbose",
+    "--strict-citations",
+    "--phase-views",
+    "--verify-replay",
+    "--tooling-only",
+  ])("keeps positional phrase words after %s", async (flag) => {
+    const before = await runCli([flag, "hello", "world", "--format=json"]);
+    const after = await runCli(["hello", "world", flag, "--format=json"]);
+    expect(before.code).toBe(0);
+    expect(after.code).toBe(0);
+    expect(before.stdout).toBe(after.stdout);
+  });
 
   it("keeps a phrase after strict and accepts explicit boolean values", async () => {
     const strict = await runCli(["--strict", "hello", "--format=json"]);

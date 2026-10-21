@@ -262,6 +262,8 @@ describe("direct rule errors through composition", () => {
               ),
             ),
           ).toContain(`[${resource}:${semanticValue?.line}:${semanticValue?.column}]`);
+          // CEL syntax errors include a multiline source highlight before the location suffix.
+          const diagnosticBlocks = String(failure).split(/\n(?=[EW]_[A-Z_]+ at )/);
           for (const [code, path, authoredPath, position] of [
             ["E_CEL_INVALID", "apply[0].value", "apply.0.value", "value"],
             ["E_RULE_APPLY_FIELD_UNKNOWN", "apply[0].valu", "apply.0.valu", "key"],
@@ -278,8 +280,8 @@ describe("direct rule errors through composition", () => {
             )?.[position];
             expect(source).toBeDefined();
             expect(
-              lines.find((line) =>
-                line.includes(`${code} at rules.unknown_path_relation.${path}:`),
+              diagnosticBlocks.find((block) =>
+                block.includes(`${code} at rules.unknown_path_relation.${path}:`),
               ),
             ).toContain(`[${resource}:${source?.line}:${source?.column}]`);
           }

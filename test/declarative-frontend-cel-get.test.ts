@@ -51,7 +51,7 @@ describe("get CEL accessor", () => {
     expect(validateExpressionSyntax("get(current, 'stress', 0) > 0")).toBeNull();
   });
 
-  it("preserves every expanded burst amplitude fallback for missing, zero and nonzero fields", () => {
+  it("resolves every expanded burst amplitude fallback for missing, zero and nonzero fields", () => {
     const spec = parseDslSpec(
       readFileSync("public/rules/frontends/qlatt-english/phases/formant.yaml", "utf8"),
     );
@@ -72,13 +72,9 @@ describe("get CEL accessor", () => {
     for (const effect of rule.apply) {
       const expression = effect.dispatch.find((entry) => entry.default !== undefined)!.default!;
       expect(validateExpressionSyntax(expression)).toBeNull();
-      const oldExpression = `has(current.?${effect.field}) ? current.${effect.field} : 0`;
       for (const value of [undefined, 0, 42]) {
         const current = value === undefined ? {} : { [effect.field]: value };
         expect(evaluateExpression(expression, { current })).toBe(value ?? 0);
-        expect(evaluateExpression(expression, { current })).toBe(
-          evaluateExpression(oldExpression, { current }),
-        );
       }
     }
   });

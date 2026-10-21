@@ -202,7 +202,14 @@ describe("direct rule errors through composition", () => {
                 {
                   field: "duration",
                   op: "set",
-                  value: "current.duration",
+                  value: "curent.duration",
+                  valu: "current.duration",
+                  tag: "duration_floor",
+                },
+                {
+                  field: "duration",
+                  op: "set",
+                  dispatch: [{ when: "current.phonem == 'AA'", value: "current.duration" }],
                   tag: "duration_floor",
                 },
               ],
@@ -255,6 +262,26 @@ describe("direct rule errors through composition", () => {
               ),
             ),
           ).toContain(`[${resource}:${semanticValue?.line}:${semanticValue?.column}]`);
+          for (const [code, path, authoredPath, position] of [
+            ["E_CEL_INVALID", "apply[0].value", "apply.0.value", "value"],
+            ["E_RULE_APPLY_FIELD_UNKNOWN", "apply[0].valu", "apply.0.valu", "key"],
+            [
+              "E_RULE_FEATURE_UNKNOWN",
+              "apply[1].dispatch[0].when",
+              "apply.1.dispatch.0.when",
+              "value",
+            ],
+          ] as const) {
+            const source = entries.find(
+              (entry) => entry.value.path.join(".") === `rules.unknown_path_relation.${authoredPath}`,
+            )?.[position];
+            expect(source).toBeDefined();
+            expect(
+              lines.find((line) =>
+                line.includes(`${code} at rules.unknown_path_relation.${path}:`),
+              ),
+            ).toContain(`[${resource}:${source?.line}:${source?.column}]`);
+          }
         } finally {
           rmSync(dir, { recursive: true, force: true });
         }
@@ -594,9 +621,23 @@ describe("declarative frontend extends: rules of a shadowing file", () => {
     expect(rules).not.toHaveProperty("vocal_effort");
     expect(origins).not.toHaveProperty("vocal_effort");
     expect(spans.some((entry) => entry.value.path[1] === "vocal_effort")).toBe(false);
-    expect(spans.some((entry) => entry.value.path.some((part) => typeof part === "number"))).toBe(
-      false,
-    );
+    expect(
+      spans.some((entry) => entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number"),
+    ).toBe(true);
+    for (const name of [
+      "place_f2_locus",
+      "place_rel_copy",
+      "burst_spectral_template",
+      "weak_stop_release_parallel_attenuation",
+    ]) {
+      expect(rules).toHaveProperty(name);
+      expect(
+        spans.some((entry) => entry.value.path[1] === name && typeof entry.value.path[3] === "number"),
+      ).toBe(false);
+      expect(spans.some((entry) => entry.value.path.join(".") === `rules.${name}.select.where`)).toBe(
+        true,
+      );
+    }
   }
 
   it("inherits an undefined, phased base rule; the child's definition wins (synchronous loader)", () => {

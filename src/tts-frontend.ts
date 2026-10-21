@@ -1413,6 +1413,15 @@ function buildTextToKlattTrackDetailed(
     "rate.transition_scale_exponent",
   );
   const formantRate = Math.max(0, (rate - 1) * undershoot);
+  provenance.add({
+    stage: "frontend",
+    type: "rate_undershoot_policy",
+    subject: `frontend:${frontendId}:rate_undershoot_factor`,
+    reason:
+      `Requested rate=${requestedRate}, effective rate=${rate}, coefficient=${undershoot}, ` +
+      `raw product=${(rate - 1) * undershoot}, rate_undershoot_factor=${formantRate}`,
+    citations: policyCitations(ratePolicy.undershoot_coefficient),
+  });
   // Duration floors are projected by the `duration_floor_*` scalar rules at the
   // end of the duration phase (traced, cited). The floor magnitudes live in the
   // frontend's `output.lowering.timeline.duration_floors` block and are passed
@@ -1450,6 +1459,27 @@ function buildTextToKlattTrackDetailed(
   });
   const f0Policy = recordOrEmpty(policyRecord(spec).f0);
   const f0Range = rate ** -f0Exponent;
+  const continuationPolicy: Record<string, unknown> = {};
+  const continuationChanges: string[] = [];
+  const continuationCitations = policyCitations(ratePolicy.f0_range_exponent);
+  for (const key of ["continuation_rise_hz", "continuation_minor_rise_hz"]) {
+    if (!Object.hasOwn(f0Policy, key)) continue;
+    const entry = f0Policy[key];
+    const base = requirePolicyNumber(entry, `f0.${key}`);
+    const value = base * f0Range;
+    continuationPolicy[key] = isPlainObject(entry) ? { ...entry, value } : value;
+    continuationChanges.push(`${key}: ${base} -> ${value}`);
+    continuationCitations.push(...policyCitations(entry));
+  }
+  if (f0Range !== 1 && continuationChanges.length > 0) {
+    provenance.add({
+      stage: "frontend",
+      type: "continuation_policy_scaled",
+      subject: `frontend:${frontendId}:continuation`,
+      reason: `Rate ${rate}, exponent ${f0Exponent}, scale ${f0Range}; ${continuationChanges.join("; ")}`,
+      citations: [...new Set(continuationCitations)],
+    });
+  }
   runGraphRuleEngine(utterance, spec, {
     ...scopeOptions,
     evaluationOwner,
@@ -1469,9 +1499,7 @@ function buildTextToKlattTrackDetailed(
         ...(Number.isFinite(resolvedSpeaker.f0_range_hz)
           ? { range_hz: resolvedSpeaker.f0_range_hz }
           : {}),
-        continuation_rise_hz: (readPolicyNumber(f0Policy.continuation_rise_hz) ?? 8) * f0Range,
-        continuation_minor_rise_hz:
-          (readPolicyNumber(f0Policy.continuation_minor_rise_hz) ?? 5) * f0Range,
+        ...continuationPolicy,
       },
     }),
     inventory: graphInventory,

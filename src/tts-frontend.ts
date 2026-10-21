@@ -18,6 +18,7 @@ import {
   type InventoryParameterFallback,
   type InventorySpec,
   loadFrontendResources,
+  loadFrontendVoiceDocument,
   materializePhonemeTarget,
   reportInventoryParameterFallbacks,
 } from "./declarative-frontend/inventory";
@@ -890,11 +891,14 @@ function buildTextToKlattTrackDetailed(
     );
   }
   const { path: speakerProfilePath, spec: speakerProfile } = resources.speakerProfile;
+  const selectedVoiceName =
+    commandVoice ?? (typeof options.speaker === "string" ? options.speaker : registry?.default);
   const selectedVoice: ResolvedVoice | null = registry
     ? resolveVoice(
         registry,
-        commandVoice ?? (typeof options.speaker === "string" ? options.speaker : registry.default),
+        selectedVoiceName ?? registry.default,
         speakerProfile,
+        loadFrontendVoiceDocument(registry, selectedVoiceName ?? registry.default),
         // Entries of the voice's speaker definition that commands before any
         // spoken text changed (src/text-parser/frontend.ts).
         parsedText?.initial.definition ?? [],
@@ -1272,6 +1276,7 @@ function buildTextToKlattTrackDetailed(
                   registry,
                   name,
                   speakerProfile,
+                  loadFrontendVoiceDocument(registry, name),
                   definition,
                   resources.speakerDefinition,
                 ),
@@ -1525,7 +1530,14 @@ function buildTextToKlattTrackDetailed(
     onPhaseEnd,
   });
 
-  const referenceVoice = registry ? resolveVoice(registry, registry.default, speakerProfile) : null;
+  const referenceVoice = registry
+    ? resolveVoice(
+        registry,
+        registry.default,
+        speakerProfile,
+        loadFrontendVoiceDocument(registry, registry.default),
+      )
+    : null;
   const speakerStamp = utterance.beginTransaction({
     ruleId: "speaker_source_projection",
     phase: "frontend",

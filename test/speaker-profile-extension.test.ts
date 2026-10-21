@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import {
+  loadFrontendResources,
+  loadFrontendVoiceDocument,
+} from "../src/declarative-frontend/inventory";
 import * as rulepack from "../src/declarative-frontend/rule-pack";
 import { resolveVoice } from "../src/dectalk-voice";
 import { createProvenanceCollector } from "../src/provenance";
@@ -65,17 +68,19 @@ describe("declarative speaker profile fields", () => {
 
   it("carries a declared voice field through overrides and source resolution", () => {
     const profileSpec = parseSpeakerProfileDocument(loadYamlDocumentSync(profilePath));
+    const registry = {
+      dir: "test/fixtures/speaker-profile",
+      default: "voice",
+      voices: ["voice"],
+      ruleFields: {},
+      speakerFrameParams: [],
+      speakerGainOffsets: [],
+    };
     const voice = resolveVoice(
-      {
-        dir: "test/fixtures/speaker-profile",
-        default: "voice",
-        voices: ["voice"],
-        ruleFields: {},
-        speakerFrameParams: [],
-        speakerGainOffsets: [],
-      },
+      registry,
       "voice",
       profileSpec,
+      loadFrontendVoiceDocument(registry, "voice"),
     );
     expect(voice.override).toEqual({ oq_default: 0.6 });
     expect(voice.params.unrelated_param).toBe(42);

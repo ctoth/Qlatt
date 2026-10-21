@@ -2,8 +2,8 @@
 //
 // Voice DATA lives entirely in YAML under a frontend's speaker registry
 // (frontend.yaml `speakers:` block -> `dir` of per-voice YAML files). This
-// module contains ONLY generic infrastructure: it reads a voice name, loads
-// the corresponding YAML file, and exposes the raw parameter record plus the
+// module contains ONLY generic infrastructure: it reads a voice name, consumes
+// its supplied document, and exposes the raw parameter record plus the
 // speaker-profile override fields declared by the profile policy. There are NO per-voice
 // branches and NO hardcoded voice values here — every voice is just a file.
 //
@@ -18,7 +18,7 @@ import {
   voiceFieldsOfDefinition,
 } from "./dectalk-speaker-definition";
 import type { SpeakerProfileOverride, SpeakerProfileSpec } from "./speaker-profile";
-import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
+import { isPlainObject } from "./yaml-loader";
 
 /** One declarative per-voice gain offset binding: the voice-YAML gain field
  *  `gain` is applied as a Paul-relative additive dB offset onto the per-frame
@@ -49,6 +49,11 @@ export type VoiceRuleFields = Record<string, number | string | null>;
 export interface SpeakerDefinitionContext {
   path: string;
   data: unknown;
+}
+
+export interface VoiceDocument {
+  path: string;
+  document: unknown;
 }
 
 export interface VoiceRegistry {
@@ -175,12 +180,10 @@ export function readVoiceRuleFields(
   return values;
 }
 
-function loadVoiceDocument(
-  registry: VoiceRegistry,
-  name: string,
-): [string, Record<string, unknown>] {
-  const docPath = `${registry.dir}/${name}.yaml`;
-  const doc = loadYamlDocumentSync<Record<string, unknown>>(docPath);
+function readVoiceDocument({
+  path: docPath,
+  document: doc,
+}: VoiceDocument): [string, Record<string, unknown>] {
   if (!isPlainObject(doc)) {
     throw new Error(`E_VOICE_SCHEMA: voice file '${docPath}' is not a mapping`);
   }
@@ -188,16 +191,13 @@ function loadVoiceDocument(
 }
 
 /**
- * For a rulepack source whose `speakers` block declares `rule_fields`: check
- * every registered voice against them and return the source with the default
- * voice's values at `parameters.policy.voice`, so that load-time validation
- * knows the paths rules may read. At run time the selected voice's values
- * replace them. A source without rule fields is returned as it is.
+ * Validate the declarations before acquisition. A source without rule fields
+ * needs no voice documents; a reserved voice policy fails before any load.
  */
-export function withVoiceRulePolicy<T>(source: T): T {
-  if (!isPlainObject(source)) return source;
+export function voiceRuleRegistry(source: unknown): VoiceRegistry | null {
+  if (!isPlainObject(source)) return null;
   const registry = getVoiceRegistry(source);
-  if (!registry || Object.keys(registry.ruleFields).length === 0) return source;
+  if (!registry || Object.keys(registry.ruleFields).length === 0) return null;
   const parameters = isPlainObject(source.parameters) ? source.parameters : {};
   const policy = isPlainObject(parameters.policy) ? parameters.policy : {};
   if (policy.voice !== undefined) {
@@ -206,9 +206,23 @@ export function withVoiceRulePolicy<T>(source: T): T {
         "rule fields (speakers.rule_fields) and may not be written in the rulepack",
     );
   }
+  return registry;
+}
+
+/** Check every registered document and supply the default voice's rule values. */
+export function withVoiceRulePolicy<T>(
+  source: T,
+  documents?: ReadonlyMap<string, VoiceDocument>,
+): T {
+  const registry = voiceRuleRegistry(source);
+  if (!registry || !isPlainObject(source)) return source;
+  const parameters = isPlainObject(source.parameters) ? source.parameters : {};
+  const policy = isPlainObject(parameters.policy) ? parameters.policy : {};
   let defaults: VoiceRuleFields | null = null;
   for (const name of new Set([registry.default, ...registry.voices])) {
-    const [docPath, doc] = loadVoiceDocument(registry, name);
+    const selected = documents?.get(name);
+    if (!selected) throw new Error(`E_VOICE_SCHEMA: voice document '${name}' was not supplied`);
+    const [docPath, doc] = readVoiceDocument(selected);
     const values = readVoiceRuleFields(registry.ruleFields, doc, docPath);
     if (name === registry.default) defaults = values;
   }
@@ -307,26 +321,20 @@ function toNumberRecord(doc: Record<string, unknown>): Record<string, number> {
 /**
  * Resolve a voice by name against a frontend's voice registry.
  *
- * Generic: loads `<registry.dir>/<voiceName>.yaml` and maps its numeric fields.
+ * Generic: consumes the selected document and maps its numeric fields.
  * Throws E_VOICE_UNKNOWN if the name is not in the registry.
  */
 export function resolveVoice(
   registry: VoiceRegistry,
   voiceName: string,
   profileSpec: SpeakerProfileSpec,
+  selectedDocument: VoiceDocument,
   /** Changes to the voice's speaker definition, in the order they were asked. */
   definitionChanges: readonly DefinitionChange[] = [],
   definitionContext?: SpeakerDefinitionContext,
 ): ResolvedVoice {
-  const name = voiceName.trim().toLowerCase();
-  if (registry.voices.length > 0 && !registry.voices.includes(name)) {
-    throw new Error(
-      `E_VOICE_UNKNOWN: voice '${voiceName}' is not registered. ` +
-        `Available: ${registry.voices.join(", ")}`,
-    );
-  }
-
-  const [docPath, loaded] = loadVoiceDocument(registry, name);
+  const name = voiceNameInRegistry(registry, voiceName);
+  const [docPath, loaded] = readVoiceDocument(selectedDocument);
   const doc =
     definitionChanges.length > 0
       ? withDefinitionChanges(definitionContext, docPath, loaded, definitionChanges)
@@ -351,4 +359,17 @@ export function resolveVoice(
   const sex = typeof doc.sex === "string" ? doc.sex : undefined;
 
   return { name, sex, override, params, ruleFields, citations };
+}
+
+/** Preserve registered-name checking before a caller acquires a selected document. */
+export function voiceNameInRegistry(registry: VoiceRegistry, voiceName: string): string {
+  const name = voiceName.trim().toLowerCase();
+  if (registry.voices.length > 0 && !registry.voices.includes(name)) {
+    throw new Error(
+      `E_VOICE_UNKNOWN: voice '${voiceName}' is not registered. ` +
+        `Available: ${registry.voices.join(", ")}`,
+    );
+  }
+
+  return name;
 }

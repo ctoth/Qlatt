@@ -11,6 +11,11 @@ import type { HrgSchema } from "../src/declarative-frontend/hrg";
 import { Utterance } from "../src/declarative-frontend/hrg";
 import { FRAME_VALUES_SCHEMA } from "../src/declarative-frontend/hrg/frame-program";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
+import {
+  loadFrontendVoiceDocument,
+  loadVoiceRuleDocuments,
+  preloadVoiceRuleDocuments,
+} from "../src/declarative-frontend/inventory";
 import * as rulepack from "../src/declarative-frontend/rule-pack";
 import { getVoiceRegistry, resolveVoice, withVoiceRulePolicy } from "../src/dectalk-voice";
 import { createProvenanceCollector } from "../src/provenance";
@@ -121,7 +126,16 @@ function levels(voice: string | null): unknown {
     voice === null
       ? {}
       : {
-          parameters: { policy: { voice: resolveVoice(registry, voice, profileSpec).ruleFields } },
+          parameters: {
+            policy: {
+              voice: resolveVoice(
+                registry,
+                voice,
+                profileSpec,
+                loadFrontendVoiceDocument(registry, voice),
+              ).ruleFields,
+            },
+          },
         },
   );
   const frames = utterance.getItem("a")?.get("tank_frames") as
@@ -131,8 +145,48 @@ function levels(voice: string | null): unknown {
 }
 
 describe("voice rule fields at load", () => {
+  it("shares owner documents across async compilation and runtime selection", async () => {
+    const documents = await preloadVoiceRuleDocuments(TANK_SPEC);
+    const registry = getVoiceRegistry(TANK_SPEC);
+    if (!registry) throw new Error("fixture registry missing");
+    const selected = loadFrontendVoiceDocument(registry, "high");
+    expect(selected.document).toBe(documents.get("high")?.document);
+    expect(loadVoiceRuleDocuments(TANK_SPEC).get("high")?.document).toBe(selected.document);
+    expect(withVoiceRulePolicy(TANK_SPEC, documents)).toEqual(
+      withVoiceRulePolicy(TANK_SPEC, loadVoiceRuleDocuments(TANK_SPEC)),
+    );
+  });
+
+  it("acquires requested names in open registries and consumes supplied data", () => {
+    const registry = getVoiceRegistry({ speakers: { ...SPEAKERS, voices: [] } });
+    if (!registry) throw new Error("fixture registry missing");
+    const selected = loadFrontendVoiceDocument(registry, " HIGH ");
+    const supplied = {
+      path: selected.path,
+      document: { register: "head", lift: 11, citations: [CITATION] },
+    };
+    expect(resolveVoice(registry, " HIGH ", profileSpec, supplied).ruleFields.lift).toBe(11);
+    expect(resolveVoice(registry, "high", profileSpec, selected).ruleFields.lift).toBe(7);
+  });
+
+  it("does not acquire documents without rule fields or before reserved-policy errors", () => {
+    const source = { speakers: { dir: "/missing-voices", default: "absent" } };
+    expect(loadVoiceRuleDocuments(source).size).toBe(0);
+    expect(withVoiceRulePolicy(source)).toBe(source);
+    expect(() =>
+      loadVoiceRuleDocuments({
+        ...TANK_SPEC,
+        speakers: { ...SPEAKERS, dir: "/missing-voices" },
+        parameters: { policy: { voice: {} } },
+      }),
+    ).toThrow(/E_VOICE_POLICY_RESERVED/);
+  });
+
   it("puts the default voice's fields at parameters.policy.voice", () => {
-    const withPolicy = withVoiceRulePolicy(TANK_SPEC) as typeof TANK_SPEC & {
+    const withPolicy = withVoiceRulePolicy(
+      TANK_SPEC,
+      loadVoiceRuleDocuments(TANK_SPEC),
+    ) as typeof TANK_SPEC & {
       parameters: { policy: { voice: unknown } };
     };
     expect(withPolicy.parameters.policy.voice).toEqual({ register: "chest", lift: 3 });
@@ -195,18 +249,33 @@ describe("voice rule fields at load", () => {
     if (!registry) throw new Error("fixture registry missing");
     // An explicit null, not a missing key: the default voice's lift (3) is in
     // the rulepack's parameters and would show through a missing key.
-    expect(resolveVoice(registry, "no-lift", profileSpec).ruleFields).toEqual({
+    expect(
+      resolveVoice(registry, "no-lift", profileSpec, loadFrontendVoiceDocument(registry, "no-lift"))
+        .ruleFields,
+    ).toEqual({
       register: "chest",
       lift: null,
     });
-    expect(resolveVoice(registry, "high", profileSpec).ruleFields).toEqual({
+    expect(
+      resolveVoice(registry, "high", profileSpec, loadFrontendVoiceDocument(registry, "high"))
+        .ruleFields,
+    ).toEqual({
       register: "head",
       lift: 7,
     });
     const level = (voice: string): unknown => {
       const utterance = oneSegment();
       runGraphRuleEngine(utterance, compiled, {
-        parameters: { policy: { voice: resolveVoice(registry, voice, profileSpec).ruleFields } },
+        parameters: {
+          policy: {
+            voice: resolveVoice(
+              registry,
+              voice,
+              profileSpec,
+              loadFrontendVoiceDocument(registry, voice),
+            ).ruleFields,
+          },
+        },
       });
       const frames = utterance.getItem("a")?.get("tank_frames") as
         | { columns: { LEVEL: number[] } }

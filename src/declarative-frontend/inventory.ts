@@ -1,5 +1,11 @@
 import { type CmuDictionary, loadCmuDictionaryFromPathSync } from "../cmu-dictionary-loader";
-import type { SpeakerDefinitionContext } from "../dectalk-voice";
+import {
+  type SpeakerDefinitionContext,
+  type VoiceDocument,
+  type VoiceRegistry,
+  voiceNameInRegistry,
+  voiceRuleRegistry,
+} from "../dectalk-voice";
 import type { Diagnostics } from "../diagnostics";
 import type { LtsContext } from "../g2p/lts-document";
 import type { MorphologyContext, MorphologyData } from "../g2p/morphology";
@@ -774,6 +780,51 @@ export function materializePhonemeTarget(
 // ---------------------------------------------------------------------------
 // FrontendResources loader
 // ---------------------------------------------------------------------------
+
+/** Acquire the actual requested voice, including names in an open registry. */
+export function loadFrontendVoiceDocument(
+  registry: VoiceRegistry,
+  voiceName: string,
+): VoiceDocument {
+  const name = voiceNameInRegistry(registry, voiceName);
+  const path = `${registry.dir}/${name}.yaml`;
+  if (!FRONTEND_ASSET_CACHE.has(path)) {
+    FRONTEND_ASSET_CACHE.set(path, loadYamlDocumentSync(path));
+  }
+  return { path, document: FRONTEND_ASSET_CACHE.get(path) };
+}
+
+/** Raw programmatic specs need only their declared voice rule documents here. */
+export function loadVoiceRuleDocuments(source: unknown): ReadonlyMap<string, VoiceDocument> {
+  const registry = voiceRuleRegistry(source);
+  const documents = new Map<string, VoiceDocument>();
+  if (!registry) return documents;
+  for (const name of new Set([registry.default, ...registry.voices])) {
+    const path = `${registry.dir}/${name}.yaml`;
+    if (!FRONTEND_ASSET_CACHE.has(path)) {
+      FRONTEND_ASSET_CACHE.set(path, loadYamlDocumentSync(path));
+    }
+    documents.set(name, { path, document: FRONTEND_ASSET_CACHE.get(path) });
+  }
+  return documents;
+}
+
+/** Async compilation acquires the same documents through the same owner cache. */
+export async function preloadVoiceRuleDocuments(
+  source: unknown,
+): Promise<ReadonlyMap<string, VoiceDocument>> {
+  const registry = voiceRuleRegistry(source);
+  const documents = new Map<string, VoiceDocument>();
+  if (!registry) return documents;
+  for (const name of new Set([registry.default, ...registry.voices])) {
+    const path = `${registry.dir}/${name}.yaml`;
+    if (!FRONTEND_ASSET_CACHE.has(path)) {
+      FRONTEND_ASSET_CACHE.set(path, await loadYamlDocument(path));
+    }
+    documents.set(name, { path, document: FRONTEND_ASSET_CACHE.get(path) });
+  }
+  return documents;
+}
 
 /** Acquire the contour asynchronously for browser vocabulary checks. */
 export async function preloadFrontendSourceContour(

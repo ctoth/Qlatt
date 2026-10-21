@@ -1,4 +1,4 @@
-import { withVoiceRulePolicy } from "../dectalk-voice";
+import { type VoiceDocument, withVoiceRulePolicy } from "../dectalk-voice";
 import {
   cloneValue,
   isPlainObject,
@@ -14,7 +14,9 @@ import type { CelMacroDefinition } from "./cel-macros";
 import {
   type InventorySpec,
   loadInventorySpecFromPath,
+  loadVoiceRuleDocuments,
   preloadInventorySpecFromPath,
+  preloadVoiceRuleDocuments,
 } from "./inventory";
 import { DSL_ROOT_KEYS, type NormalizedDslSpec, parseDslSpec } from "./parser";
 import {
@@ -708,14 +710,17 @@ export function getRulepackValidationDiagnostics(
   return RULEPACK_DIAGNOSTICS.get(spec) ?? Object.freeze([]);
 }
 
-function parseComposedRulepack(merged: PlainObject): NormalizedDslSpec {
+function parseComposedRulepack(
+  merged: PlainObject,
+  voices: ReadonlyMap<string, VoiceDocument>,
+): NormalizedDslSpec {
   const calls = new Map<string, readonly CelMacroDefinition[]>();
   const paths: {
     compiled: readonly (string | number)[];
     authored: readonly (string | number)[];
   }[] = [];
   const spec = parseDslSpec(
-    withVoiceRulePolicy(merged),
+    withVoiceRulePolicy(merged, voices),
     (path, macros) => {
       calls.set(path, macros);
     },
@@ -778,7 +783,7 @@ function parseComposedRulepack(merged: PlainObject): NormalizedDslSpec {
 
 export function compileRuleEngineSpec(source: unknown): CompiledRulepack {
   const parameterSchemaDeclared = isPlainObject(source) && Object.hasOwn(source, "parameters");
-  const spec = parseDslSpec(withVoiceRulePolicy(source));
+  const spec = parseDslSpec(withVoiceRulePolicy(source, loadVoiceRuleDocuments(source)));
   const inventory =
     typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
   const diagnostics = assertValidSpec(spec, {
@@ -860,7 +865,7 @@ export function loadRulepackSpecFromPath(
       merged.accent_policy_path,
     );
   }
-  const spec = parseComposedRulepack(merged);
+  const spec = parseComposedRulepack(merged, loadVoiceRuleDocuments(merged));
   PARAMETER_ORIGINS.set(spec, PARAMETER_ORIGINS.get(merged) ?? NO_PARAMETER_ORIGINS);
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
@@ -949,7 +954,7 @@ export async function preloadRulepackSpecFromPath(
       merged.accent_policy_path,
     );
   }
-  const spec = parseComposedRulepack(merged);
+  const spec = parseComposedRulepack(merged, await preloadVoiceRuleDocuments(merged));
   PARAMETER_ORIGINS.set(spec, PARAMETER_ORIGINS.get(merged) ?? NO_PARAMETER_ORIGINS);
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));

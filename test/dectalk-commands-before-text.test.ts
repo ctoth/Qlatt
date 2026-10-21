@@ -45,7 +45,10 @@ import {
   isExact,
   readVoiceCorpus,
 } from "../scripts/oracle/dectalk-voice-compare";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import {
+  loadFrontendResources,
+  loadFrontendVoiceDocument,
+} from "../src/declarative-frontend/inventory";
 import { loadRulepackSpecFromPath } from "../src/declarative-frontend/rule-pack";
 import {
   changeDefinition,
@@ -103,6 +106,7 @@ if (!registry) throw new Error("the frontend declares no voice registry");
 const definitionContext = loadFrontendResources(spec).speakerDefinition;
 if (!definitionContext) throw new Error("the frontend supplies no speaker definition context");
 const data = definitionContext.data as SpeakerDefinitionData;
+const paulDocument = loadFrontendVoiceDocument(registry, "paul");
 const at = (name: string): number => data.names.indexOf(name);
 
 describe("a speaker definition and the voice setspdef() makes of it", () => {
@@ -147,6 +151,7 @@ describe("a speaker definition and the voice setspdef() makes of it", () => {
       registry,
       "paul",
       profileSpec,
+      paulDocument,
       [
         { index: at("AP"), value: 200 },
         { index: at("PR"), value: 50 },
@@ -158,14 +163,14 @@ describe("a speaker definition and the voice setspdef() makes of it", () => {
     expect(changed.params.f0_scale_factor).toBe(2050);
     expect(changed.params.base_f0_hz).toBe(200);
     // The voice as it is without a change.
-    expect(resolveVoice(registry, "paul", profileSpec).params.f0_minimum).toBe(1100);
+    expect(resolveVoice(registry, "paul", profileSpec, paulDocument).params.f0_minimum).toBe(1100);
   });
 
   it("requires definition context only for changes and reuses owner data", () => {
     expect(loadFrontendResources(spec).speakerDefinition?.data).toBe(data);
-    expect(() => resolveVoice(registry, "paul", profileSpec)).not.toThrow();
+    expect(() => resolveVoice(registry, "paul", profileSpec, paulDocument)).not.toThrow();
     expect(() =>
-      resolveVoice(registry, "paul", profileSpec, [{ index: at("AP"), value: 200 }]),
+      resolveVoice(registry, "paul", profileSpec, paulDocument, [{ index: at("AP"), value: 200 }]),
     ).toThrow(/E_VOICE_DEFINITION: selected speaker-definition context was not supplied/);
   });
 });

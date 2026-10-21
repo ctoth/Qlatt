@@ -187,6 +187,9 @@ describe("primed resources", () => {
         expect(acquired.lexicon?.dictionary.hello).toBeDefined();
         expect(acquired.morphology?.phonotactics).toBe(acquired.stress?.phonotactics);
         expect(acquired.stress?.path).toBe(url("/rules/languages/english/stress-policy.yaml"));
+        expect(acquired.stress?.policy.phonotacticsPath).toBe(
+          url("/rules/languages/english/phonotactics.yaml"),
+        );
         expect(acquired.sourceContour?.path).toBe(
           url("/rules/frontends/qlatt-english/policy/source-contour.yaml"),
         );

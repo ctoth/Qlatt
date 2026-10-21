@@ -1491,7 +1491,8 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
       );
       const phonotactics = FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData;
       try {
-        return { path, policy: parseStressPolicy(raw, phonotactics), phonotactics };
+        const policy = { ...parseStressPolicy(raw, phonotactics), phonotacticsPath };
+        return { path, policy, phonotactics };
       } catch (cause) {
         throw new Error(`E_STRESS_POLICY: ${path}: ${String(cause)}`, { cause });
       }
@@ -1623,7 +1624,8 @@ export async function preloadFrontendResources(spec: unknown): Promise<FrontendR
         );
         const phonotactics = FRONTEND_ASSET_CACHE.get(phonotacticsPath) as PhonotacticsData;
         try {
-          return { path, policy: parseStressPolicy(raw, phonotactics), phonotactics };
+          const policy = { ...parseStressPolicy(raw, phonotactics), phonotacticsPath };
+          return { path, policy, phonotactics };
         } catch (cause) {
           throw new Error(`E_STRESS_POLICY: ${path}: ${String(cause)}`, { cause });
         }

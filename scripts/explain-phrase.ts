@@ -107,6 +107,14 @@ function defaultIo(): CliIo {
 function parseArgv(argv: string[]): ParsedArgs {
   const flags = new Map<string, string>();
   const positional: string[] = [];
+  const booleanFlags = new Set([
+    "strict",
+    "strict-citations",
+    "verbose",
+    "phase-views",
+    "verify-replay",
+    "tooling-only",
+  ]);
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -114,7 +122,17 @@ function parseArgv(argv: string[]): ParsedArgs {
       positional.push(arg);
       continue;
     }
-    const key = arg.slice(2);
+    const option = arg.slice(2);
+    const equals = option.indexOf("=");
+    if (equals !== -1) {
+      flags.set(option.slice(0, equals), option.slice(equals + 1));
+      continue;
+    }
+    const key = option;
+    if (booleanFlags.has(key)) {
+      flags.set(key, "true");
+      continue;
+    }
     const next = argv[i + 1];
     if (next != null && !next.startsWith("--")) {
       flags.set(key, next);

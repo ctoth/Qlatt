@@ -132,6 +132,8 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 
 Use `--format json` for full field history, checkpoint details and replay digests. Text output summarizes the field version count, checkpoint count and replay match result.
 
+Valued options accept both `--flag value` and `--flag=value`; equals signs inside the value are preserved. Bare boolean flags (`--strict`, `--strict-citations`, `--verbose`, `--phase-views`, `--verify-replay`, `--tooling-only`) do not consume following phrase words; use `--flag=true` or `--flag=false` for explicit boolean values.
+
 In PowerShell, invoke Node directly with an explicit phrase to avoid npm argument-forwarding differences:
 
 ```powershell

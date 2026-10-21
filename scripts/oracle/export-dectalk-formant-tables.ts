@@ -35,7 +35,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import * as yaml from "js-yaml";
+import { stringify } from "yaml";
+import { parseYamlString } from "../../src/yaml-loader";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const argv = process.argv.slice(2);
@@ -81,7 +82,7 @@ const frontendPath = path.join(
   "dectalk-english",
   "frontend.yaml",
 );
-const frontend = yaml.load(fs.readFileSync(frontendPath, "utf8")) as {
+const frontend = parseYamlString(fs.readFileSync(frontendPath, "utf8"), frontendPath) as {
   parameters: { policy: { timing: { phonemes: string[] }; formant_drawing?: unknown } };
 };
 // l_all_ph.h US_<name> in code order, as check-dectalk-timing-policy.ts verifies.
@@ -189,7 +190,12 @@ if (argv.includes("--check")) {
   process.exit(differences.length === 0 ? 0 : 1);
 }
 
-const flow = (value: unknown): string => yaml.dump(value, { flowLevel: 0, lineWidth: -1 }).trim();
+const flow = (value: unknown): string =>
+  stringify(value, {
+    collectionStyle: "flow",
+    lineWidth: 0,
+    flowCollectionPadding: false,
+  }).trim();
 const lines: string[] = [
   "      # Generated from DECtalk 4.63 dapi/src/PH/p_us_rom.h by",
   "      # scripts/oracle/export-dectalk-formant-tables.ts --write. Do not edit:",

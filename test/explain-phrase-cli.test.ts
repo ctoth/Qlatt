@@ -3,9 +3,11 @@ import { runExplainCli } from "../scripts/explain-phrase";
 import {
   getRulepackValidationDiagnostics,
   loadBundledRulepackSpec,
+  rulepackRuleDocumentSpans,
 } from "../src/declarative-frontend/rule-pack";
 import type { DecisionRecord } from "../src/provenance";
 import * as frontend from "../src/tts-frontend";
+import type { YamlDocumentSpan } from "../src/yaml-loader";
 
 interface ExplainPayload {
   rangeApplied?: string;
@@ -15,6 +17,10 @@ interface ExplainPayload {
     uncitedCount: number;
   };
   decisions: DecisionRecord[];
+  tooling: {
+    ruleSources: Record<string, YamlDocumentSpan>;
+    replay: { matches: boolean } | null;
+  };
 }
 
 function parseExplainPayload(json: string): ExplainPayload {
@@ -158,6 +164,7 @@ describe("explain phrase cli", () => {
     const payload = parseExplainPayload(result.stdout);
     expect(payload.whyDecisionId).toBe(inventory.id);
     expect(payload.decisions).toEqual([inventory]);
+    expect(payload.tooling.ruleSources).toEqual({});
   });
 
   it("links rule decisions to transcribe ancestry in why output", async () => {
@@ -174,11 +181,41 @@ describe("explain phrase cli", () => {
     expect(rewrite).toBeTruthy();
     if (!rewrite) throw new Error("expected feature overwrite decision");
 
-    const why = await runCli(["--phrase", "hello world", "--format", "json", "--why", rewrite.id]);
+    const why = await runCli([
+      "--phrase",
+      "hello world",
+      "--format",
+      "json",
+      "--why",
+      rewrite.id,
+      "--verify-replay",
+    ]);
     expect(why.code).toBe(0);
     const whyPayload = parseExplainPayload(why.stdout);
     expect(whyPayload.decisions.length).toBeGreaterThan(1);
     expect(whyPayload.decisions.some((decision) => decision.stage === "transcribe")).toBe(true);
+    expect(whyPayload.decisions.find((decision) => decision.id === rewrite.id)).toEqual(rewrite);
+    expect(whyPayload.tooling.replay?.matches).toBe(true);
+    const span = whyPayload.tooling.ruleSources[rewrite.id];
+    expect(span).toBeDefined();
+    expect(span.path[0]).toBe("rules");
+    expect(span.path).toHaveLength(2);
+    const declaration = rulepackRuleDocumentSpans(loadBundledRulepackSpec()).find(
+      (entry) => entry.value.path.length === 2 && entry.value.path[1] === span.path[1],
+    );
+    expect(span).toEqual(declaration?.key);
+    expect(whyPayload.tooling.ruleSources[rewrite.id]).toEqual(
+      explainPayload.tooling.ruleSources[rewrite.id],
+    );
+    const selectedIds = new Set(whyPayload.decisions.map((decision) => decision.id));
+    expect(Object.keys(whyPayload.tooling.ruleSources).every((id) => selectedIds.has(id))).toBe(
+      true,
+    );
+    const text = await runCli(["--phrase", "hello world", "--why", rewrite.id, "--verbose"]);
+    expect(text.code).toBe(0);
+    expect(text.stdout.split("\n").find((line) => line.startsWith(`#${rewrite.seq} `))).toContain(
+      ` | rule: ${span.resource}:${span.line}:${span.column}`,
+    );
   });
 
   it("uses diagnostic symbol pronunciation for explicit segment lists", async () => {

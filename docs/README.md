@@ -22,3 +22,5 @@ Use these documents as the main entry points into the codebase:
 - `scripts/oracle/` — DECtalk oracle pipeline: build reference binary, render corpora, compare audio.
 
 For PowerShell argument forwarding and the complete explain flag reference, see [Explain Tool Reference](../AGENTS.md#explain-tool-reference). The documented direct Node invocation accepts `--phrase "..."` explicitly. `--strict-citations` checks all decisions in the full run, independently of the displayed output window or ancestry.
+
+Explain text, including `--why`, appends authored rule-declaration locations for decisions joined through committed rule transactions. JSON exposes the same locations by decision ID in `tooling.ruleSources`; literal origins and macro-body ancestry are not included.

@@ -5,8 +5,10 @@ dictionary locations from its builder and readers, as a bounded part of #141.
 
 # State
 
-Isolated at origin/master 0eeb2f6b. Implementation complete; hosted CI and Claude
-review pending. No local CI. Adapter/reference diff is 57 additions / 28 removals
+Isolated at origin/master 0eeb2f6b. Implementation complete; Claude completed its
+full review with no defects; accepted. Supervisor independently verified the
+diff, source, blob identity and selected lexicon parser. Hosted CI pending.
+No local CI. Adapter/reference diff is 57 additions / 28 removals
 outside this note and the unchanged data move.
 
 # Decisions and why
@@ -29,5 +31,4 @@ blank line, immediately removed; the resulting blob matches exactly.
 
 # Next step
 
-Publish for hosted CI and Claude review, then respond to findings. Supervisor
-owns merge; #141 remains open.
+Await final CI and supervisor merge; #141 remains open.

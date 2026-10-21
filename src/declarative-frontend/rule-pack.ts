@@ -47,7 +47,7 @@ export function rulepackParameterOrigins(spec: CompiledRulepack): readonly YamlN
   return PARAMETER_ORIGINS.get(spec) ?? NO_PARAMETER_ORIGINS;
 }
 
-/** Authored spans, compiled lookup paths for expanded rules, and macro body parents. */
+/** Authored rule/predicate spans, compiled rule paths, and macro body parents. */
 export function rulepackRuleDocumentSpans(
   spec: CompiledRulepack,
 ): readonly DiagnosticDocumentSpans[] {
@@ -109,11 +109,12 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
     Object.freeze(
       yamlDocumentSpans(document).filter(
         (entry) =>
-          entry.value.path[0] === "rules" &&
-          (entry.value.path.every((part) => typeof part === "string") ||
-            (entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number") ||
-            entry.value.path[2] === "constraint" ||
-            (entry.value.path[2] === "select" && entry.value.path[3] === "where")),
+          entry.value.path[0] === "predicates" ||
+          (entry.value.path[0] === "rules" &&
+            (entry.value.path.every((part) => typeof part === "string") ||
+              (entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number") ||
+              entry.value.path[2] === "constraint" ||
+              (entry.value.path[2] === "select" && entry.value.path[3] === "where"))),
       ),
     ),
   );
@@ -426,7 +427,19 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
   }
   MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(baseFile), ...MAP_ORIGINS.get(childFile) });
   RULE_ORIGINS.set(merged, RULE_ORIGINS.get(childFile) ?? {});
-  RULE_DOCUMENT_SPANS.set(merged, RULE_DOCUMENT_SPANS.get(childFile) ?? NO_PARAMETER_ORIGINS);
+  const childPredicates = isPlainObject(childFile.predicates) ? childFile.predicates : {};
+  RULE_DOCUMENT_SPANS.set(
+    merged,
+    Object.freeze([
+      ...(RULE_DOCUMENT_SPANS.get(childFile) ?? []),
+      ...(RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter(
+        ({ value: { path } }) =>
+          path[0] === "predicates" &&
+          typeof path[1] === "string" &&
+          !Object.hasOwn(childPredicates, path[1]),
+      ),
+    ]),
+  );
   FUNCTION_BODY_SPANS.set(merged, FUNCTION_BODY_SPANS.get(childFile) ?? NO_PARAMETER_ORIGINS);
   const baseOrigins = RULE_ORIGINS.get(baseFile) ?? {};
   INHERITABLE_SHADOWED_RULES.set(
@@ -438,7 +451,7 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
           rule: cloneValue(rule),
           origin: baseOrigins[name] as string,
           spans: (RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter(
-            (entry) => entry.value.path[1] === name,
+            (entry) => entry.value.path[0] === "rules" && entry.value.path[1] === name,
           ),
         },
       ]),
@@ -768,8 +781,10 @@ function parseComposedRulepack(
     const key = JSON.stringify(entry.value.path);
     sources.set(key, [...(sources.get(key) ?? []), entry]);
   }
-  const compiledSpans = authoredSpans.filter((entry) =>
-    entry.value.path.every((part) => typeof part === "string"),
+  const compiledSpans = authoredSpans.filter(
+    (entry) =>
+      entry.value.path[0] === "predicates" ||
+      entry.value.path.every((part) => typeof part === "string"),
   );
   for (const { compiled, authored } of paths) {
     const matches = sources.get(JSON.stringify(authored)) ?? [];

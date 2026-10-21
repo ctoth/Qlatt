@@ -256,11 +256,15 @@ describe("direct rule errors through composition", () => {
           const functions = {
             fixture_inner: { params: ["item"], body: "item.phonem == 'AA'" },
             fixture_outer: { params: ["item"], body: "fixture_inner(item)" },
+            fixture_bad: { params: ["item"], body: "curent.duration" },
+          };
+          const predicates = {
+            fixture_invalid: { all: ["curent.duration", { expr: "fixture_bad(current)" }] },
           };
           const frontend = writeExtendingFrontend(
             dir,
-            included ? { rules, functions } : {},
-            included ? {} : { rules, functions },
+            included ? { rules, functions, predicates } : {},
+            included ? {} : { rules, functions, predicates },
           );
           const resource = included ? `${dir.replace(/\\/g, "/")}/pipeline.yaml` : frontend;
           const authored = parseYamlString(readFileSync(resource, "utf8"), resource);
@@ -305,7 +309,7 @@ describe("direct rule errors through composition", () => {
               ),
             ),
           ).toContain(`[${resource}:${semanticValue?.line}:${semanticValue?.column}]`);
-          for (const name of ["fixture_outer", "fixture_inner"]) {
+          for (const name of ["fixture_outer", "fixture_inner", "fixture_bad"]) {
             const body = entries.find(
               (entry) => entry.value.path.join(".") === `functions.${name}.body`,
             )?.value;
@@ -316,6 +320,21 @@ describe("direct rule errors through composition", () => {
           }
           // CEL syntax errors include a multiline source highlight before the location suffix.
           const diagnosticBlocks = String(failure).split(/\n(?=[EW]_[A-Z_]+ at )/);
+          for (const [path, authoredPath] of [
+            ["all[0]", "all.0"],
+            ["all[1].expr", "all.1.expr"],
+          ]) {
+            const source = entries.find(
+              (entry) =>
+                entry.value.path.join(".") === `predicates.fixture_invalid.${authoredPath}`,
+            )?.value;
+            expect(source).toBeDefined();
+            expect(
+              diagnosticBlocks.find((block) =>
+                block.includes(`E_CEL_INVALID at predicates.fixture_invalid.${path}:`),
+              ),
+            ).toContain(`[${resource}:${source?.line}:${source?.column}]`);
+          }
           for (const [code, path, authoredPath, position] of [
             [
               "E_CEL_INVALID",
@@ -559,7 +578,7 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
     },
   };
 
-  function expectKeywiseInheritance(child: Dict): void {
+  function expectKeywiseInheritance(child: Dict, spec: CompiledRulepack, dir: string): void {
     for (const [section, declared] of Object.entries(sections)) {
       const compiled = child[section] as Dict;
       const base = english[section];
@@ -578,13 +597,29 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
     expect(Object.keys(english.maps.phoneme_release_map as Dict).length).toBeGreaterThan(1);
     const syllable = (child.relations as Record<string, { features: Dict }>).Syllable;
     expect(Object.keys(syllable.features)).toEqual(["index", "fixtureFeature"]);
+    const spans = rulepackRuleDocumentSpans(spec);
+    const resource = `${dir.replace(/\\/g, "/")}/pipeline.yaml`;
+    const authored = yamlDocumentSpans(parseYamlString(readFileSync(resource, "utf8"), resource));
+    for (const name of ["is_sonorant", "is_fixture_nasal"]) {
+      const matches = spans.filter((entry) => entry.value.path.join(".") === `predicates.${name}`);
+      expect(matches).toHaveLength(1);
+      const source = authored.find((entry) => entry.value.path.join(".") === `predicates.${name}`);
+      expect(matches[0].value.line).toBe(source?.value.line);
+      expect(matches[0].value.column).toBe(source?.value.column);
+      expect(matches[0].value.resource).toBe(resource);
+    }
+    const inherited = spans.find(
+      (entry) => entry.value.path.join(".") === "predicates.is_pausable_consonant",
+    );
+    expect(inherited?.value.resource).toBe("/rules/frontends/qlatt-english/pipeline.yaml");
+    expect(inherited?.value.line).toBe(12);
   }
 
   it("adds, overrides and inherits entries by key (synchronous loader)", () => {
     const dir = mkdtempSync(join(tmpdir(), "qlatt-extends-sections-"));
     try {
       const child = loadRulepackSpecFromPath(writeExtendingFrontend(dir, sections));
-      expectKeywiseInheritance(child as unknown as Dict);
+      expectKeywiseInheritance(child as unknown as Dict, child, dir);
       // Origins follow the file an entry was read from.
       const origins = rulepackMapOrigins(child);
       expect(origins.phoneme_aspiration_map.P_CL).toBe(
@@ -601,7 +636,7 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
     const dir = mkdtempSync(join(tmpdir(), "qlatt-extends-sections-"));
     try {
       const child = await preloadRulepackSpecFromPath(writeExtendingFrontend(dir, sections));
-      expectKeywiseInheritance(child as unknown as Dict);
+      expectKeywiseInheritance(child as unknown as Dict, child, dir);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

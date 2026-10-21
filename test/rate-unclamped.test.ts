@@ -26,12 +26,20 @@ function frameValues(track: KlattFrame[]) {
   return track.map(({ provenance: _provenance, ...frame }) => frame);
 }
 
+function ratePolicy(spec: rulepack.CompiledRulepack) {
+  return (
+    spec.parameters.policy as {
+      rate: Record<string, { value: unknown; citations: string[] }>;
+    }
+  ).rate;
+}
+
 describe("frontend rate defaults", () => {
   it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
     "%s uses a changed cited default and preserves explicit overrides",
     (frontendId) => {
       const spec = structuredClone(rulepack.loadBundledRulepackSpec(frontendId));
-      spec.parameters.policy.rate.default.value = 1.5;
+      ratePolicy(spec).default.value = 1.5;
       vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
       const implicit = textToKlattTrackDetailed("hello world", undefined, undefined, {
         frontendId,
@@ -50,7 +58,7 @@ describe("frontend rate defaults", () => {
           .find((entry) => entry.type === "speaking_rate_default"),
       ).toMatchObject({
         reason: "Selected policy.rate.default = 1.5",
-        citations: spec.parameters.policy.rate.default.citations,
+        citations: ratePolicy(spec).default.citations,
       });
       if (frontendId === "dectalk-english") {
         expect(
@@ -70,7 +78,7 @@ describe("frontend rate defaults", () => {
     "rejects invalid default %s even with an explicit override",
     (value) => {
       const spec = structuredClone(rulepack.loadBundledRulepackSpec("qlatt-english"));
-      spec.parameters.policy.rate.default.value = value;
+      ratePolicy(spec).default.value = value;
       vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
       for (const rate of [undefined, 1]) {
         expect(() => textToKlattTrack("hello", undefined, undefined, { rate })).toThrow(
@@ -83,9 +91,9 @@ describe("frontend rate defaults", () => {
   it("requires a cited default declaration", () => {
     const spec = structuredClone(rulepack.loadBundledRulepackSpec("qlatt-english"));
     vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
-    spec.parameters.policy.rate.default.citations = [];
+    ratePolicy(spec).default.citations = [];
     expect(() => textToKlattTrack("hello")).toThrow("E_POLICY_REQUIRED");
-    delete spec.parameters.policy.rate.default;
+    delete ratePolicy(spec).default;
     expect(() => textToKlattTrack("hello")).toThrow("E_POLICY_REQUIRED");
   });
 });
@@ -108,7 +116,7 @@ describe("frontend transition defaults", () => {
       renderHost: "auto",
     };
     const spec = structuredClone(rulepack.loadBundledRulepackSpec(request.frontendId));
-    spec.parameters.policy.rate.default.value = 1.5;
+    ratePolicy(spec).default.value = 1.5;
     hrg.readLowerOptions(spec.output.lowering).transitions.default_transition_ms.value = 60;
     vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
     expect(browserRenderOptions(request).transitionMs).toBeUndefined();

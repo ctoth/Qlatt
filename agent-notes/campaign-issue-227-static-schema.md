@@ -9,6 +9,10 @@ Authorized scope stacked on PR439, pending its merge. Estimated110–160 TS addi
 Implemented the shared schema compiler, declarations in Qlatt/DECtalk roots
 (Beauty inherits), TTS composition, and existing metadata/extends fixtures.
 Included PR439's renamed-inventory fixture corrections through51c0c99d.
+Also integrated439's configured DECtalk rate correction7e525a1c. Existing resolver
+fixtures in rate, speaker profile, source contour and voice rule tests now compile
+their configured declarations. Mutable rate fixtures compile at request time so
+their subsequent policy edits still reach the intended runtime diagnostics.
 
 ## Decisions and why
 - Reuse existing HrgSchema/FeatureSchema compilation with authored input checks.

@@ -1,4 +1,4 @@
-import { cloneValue, isPlainObject } from "../yaml-loader";
+import { cloneValue, isPlainObject, type YamlDocumentSpan } from "../yaml-loader";
 import { CEL_FUNCTION_CATALOG, validateExpressionSyntax } from "./cel-expressions";
 import {
   FRAME_COUNTERS,
@@ -15,6 +15,7 @@ export type ValidationDiagnostic = {
   message: string;
   path: string;
   severity: DiagnosticSeverity;
+  documentSpan?: YamlDocumentSpan;
 };
 type PlainObject = Record<string, unknown>;
 type PhaseSpec = {

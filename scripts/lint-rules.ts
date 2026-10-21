@@ -31,7 +31,11 @@ export function runRuleLint(
       // and lowering requirements. Reuse its diagnostics rather than revalidate.
       const spec = loadBundledRulepackSpec(id);
       for (const diagnostic of getRulepackValidationDiagnostics(spec)) {
-        io.stdout(`${id}: ${diagnostic.code} at ${diagnostic.path}: ${diagnostic.message}\n`);
+        const span = diagnostic.documentSpan;
+        const location = span ? ` [${span.resource}:${span.line}:${span.column}]` : "";
+        io.stdout(
+          `${id}: ${diagnostic.code} at ${diagnostic.path}: ${diagnostic.message}${location}\n`,
+        );
         if (diagnostic.severity === "warning") warnings += 1;
       }
     } catch (error) {

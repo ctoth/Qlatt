@@ -366,7 +366,11 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
       (diagnostic) => diagnostic.severity === "warning",
     );
     for (const warning of warnings) {
-      io.stderr(`rulepack warning ${warning.code} at ${warning.path}: ${warning.message}\n`);
+      const span = warning.documentSpan;
+      const location = span ? ` [${span.resource}:${span.line}:${span.column}]` : "";
+      io.stderr(
+        `rulepack warning ${warning.code} at ${warning.path}: ${warning.message}${location}\n`,
+      );
     }
     if (args.strict && warnings.length > 0) {
       io.stderr(`strict failed: rulepack validation emitted ${warnings.length} warning(s)\n`);

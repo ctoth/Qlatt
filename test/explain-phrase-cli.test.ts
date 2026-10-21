@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { runExplainCli } from "../scripts/explain-phrase";
+import {
+  getRulepackValidationDiagnostics,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
 import type { DecisionRecord } from "../src/provenance";
 import * as frontend from "../src/tts-frontend";
 
@@ -253,6 +257,12 @@ describe("explain phrase cli", () => {
     const normal = await runCli(["--phrase", "hello", "--format", "json"]);
     expect(normal.code).toBe(0);
     expect(normal.stderr).toContain("rulepack warning W_");
+    const warning = getRulepackValidationDiagnostics(loadBundledRulepackSpec()).find(
+      (entry) => entry.path === "parameters.policy.rate.default",
+    );
+    expect(warning?.documentSpan).toBeDefined();
+    const span = warning!.documentSpan!;
+    expect(normal.stderr).toContain(` [${span.resource}:${span.line}:${span.column}]\n`);
 
     const strict = await runCli(["--phrase", "hello", "--format", "json", "--strict"]);
     expect(strict.code).toBe(2);

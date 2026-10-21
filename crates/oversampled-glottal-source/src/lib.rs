@@ -1,3 +1,10 @@
+//! Glottal source bank based on klsyn88 `c/parwv.c` source and pitch-reset routines.
+//! Flutter and diplophonia extensions carry the existing inline attribution to
+//! Klatt & Klatt (1990), "Analysis, synthesis, and perception of voice quality
+//! variations among female and male talkers".
+//! Fixed virtual-rate processing and output decimation are local engineering
+//! adaptations; the source and extension details are documented below.
+
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::missing_safety_doc)]
 

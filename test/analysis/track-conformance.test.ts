@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 import { loadExperimentConfig } from "../../src/experiments/load-experiment-config";
 import { expandFormantBanks } from "../../src/formant-bank";
 import type { TrackReference } from "../../src/track-analysis";
-import { analyzeStopReleases, analyzeTrackGains, findVoicingIssues } from "../../src/track-analysis";
+import {
+  analyzeStopReleases,
+  analyzeTrackGains,
+  findVoicingIssues,
+} from "../../src/track-analysis";
 import { loadYamlDocumentSync } from "../../src/yaml-loader";
 
 describe("track conformance authority", () => {
@@ -18,10 +22,14 @@ describe("track conformance authority", () => {
     }));
     expect(findVoicingIssues(invalidVoicing, {}, policy)).toHaveLength(6);
     expect(
-      findVoicingIssues(invalidVoicing, {}, {
-        ...policy,
-        maxVoicingIssues: { ...policy.maxVoicingIssues, value: 2 },
-      }),
+      findVoicingIssues(
+        invalidVoicing,
+        {},
+        {
+          ...policy,
+          maxVoicingIssues: { ...policy.maxVoicingIssues, value: 2 },
+        },
+      ),
     ).toHaveLength(2);
     expandFormantBanks(graph, semantics);
     const track = [{ time: 0, params: { SW: 1, AF: 0, AVS: 0, GO: 0, parallelScale: 0.1 } }];

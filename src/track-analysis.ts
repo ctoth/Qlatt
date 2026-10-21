@@ -115,10 +115,7 @@ export type TrackReference = {
   citations: string[];
   targets: Record<string, StopReleaseExpected>;
   conformance: Record<
-    | "durationToleranceMs"
-    | "amplitudeToleranceDb"
-    | "plstepWindowSeconds"
-    | "plstepAfGateDb",
+    "durationToleranceMs" | "amplitudeToleranceDb" | "plstepWindowSeconds" | "plstepAfGateDb",
     { value: number; basis: string }
   >;
 };

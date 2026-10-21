@@ -6,7 +6,7 @@ three existing display thresholds from experiment semantics (#210/#141 slice).
 # State
 
 Fresh isolated branch from origin/master 23842f68. Implementation and owned diff
-inspection complete; preparing PR publication for hosted CI and Claude review.
+inspection complete; PR378 published, hosted CI and Claude review in progress.
 
 # Decisions and why
 
@@ -34,7 +34,11 @@ parallelScale parameter and GO=0 so the unchanged low-gain branch is exercised.
 No local CI has run. Production delta is smaller than estimated: 20 additions
 and 14 removals, plus the YAML relocation and existing regression fixtures.
 
+Hosted quality job119093814981 found formatting in the reference type union and
+conformance fixture import/call. I used line breaks that differed from the
+formatter; applied the exact emitted changes. No behavior change or local rerun.
+
 # Next step
 
-Commit/push and publish for Claude and hosted CI.
+Push the formatter correction, then respond to Claude and hosted CI results.
 Supervisor owns merge; other agents' work must remain intact.

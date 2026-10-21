@@ -38,7 +38,7 @@ extends: qlatt-english
 resources:
   inventory: /rules/frontends/qlatt-beauty/inventory.yaml
 include:
-  - /rules/normalization/components.yaml
+  - /rules/languages/english/normalization/components.yaml
   - normalization-policy.yaml
   - pipeline.yaml
   - phases/orthography.yaml

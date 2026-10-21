@@ -28,7 +28,7 @@
  * (src/g2p/index.ts modeName, the table's modeCharacterNames), for the
  * modes on where a word stands (transcribe-text.ts textModes); the text
  * rule that spells a word in the spelling mode reads them from
- * maps.tn_math_names (public/rules/normalization/lexical.yaml
+ * maps.tn_math_names (public/rules/languages/english/normalization/lexical.yaml
  * tn_spell_mode_word).
  *
  * NOT_EXACT lists the texts that are not DECtalk's samples, each with what

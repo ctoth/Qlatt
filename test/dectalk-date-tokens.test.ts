@@ -1,7 +1,7 @@
 /**
  * Date words as DECtalk's command text parser writes them ("3-May",
  * "23-Aug-1984"), written out by the dectalk-english text rules as phonemic
- * text (public/rules/normalization/lexical.yaml tn_date_text, after the
+ * text (public/rules/languages/english/normalization/lexical.yaml tn_date_text, after the
  * recognition rule tn_date_text_source) against DECtalk's phoneme log for the
  * same text
  * (test/fixtures/dectalk-oracle/dectalk-us-date-tokens-v1.phonemes.json,

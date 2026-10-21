@@ -19,7 +19,7 @@ export function readingFixture(
   const phases: Record<string, unknown>[] = [];
   for (const name of [...components, "numbers"]) {
     const component = parseYamlString(
-      readFileSync(`public/rules/normalization/${name}.yaml`, "utf8"),
+      readFileSync(`public/rules/languages/english/normalization/${name}.yaml`, "utf8"),
       name,
     ) as Record<string, unknown>;
     for (const key of ["maps", "rules", "functions", "relations", "tags"]) {

@@ -21,7 +21,7 @@
  * punctuation_written), and the frontend's dectalk_ends_sentence reads that
  * (public/rules/frontends/dectalk-english/pipeline.yaml). The spelling
  * mode's two first-word rules read the text itself
- * (public/rules/normalization/recognition.yaml tn_spell_mode_first_verb_source
+ * (public/rules/languages/english/normalization/recognition.yaml tn_spell_mode_first_verb_source
  * and tn_spell_mode_wh_mark_source).
  *
  * The fixtures are the say.exe WAVs alone

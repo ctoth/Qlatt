@@ -35,7 +35,7 @@
  *     commas for white space do not cut it, and the clause break before a
  *     conjunction is spoken on top of that comma, as an empty clause.
  *
- * Text rules do the spelling (public/rules/normalization: recognition.yaml
+ * Text rules do the spelling (public/rules/languages/english/normalization: recognition.yaml
  * tn_spell_mode_*_source, lexical.yaml tn_spell_mode_*), on in the stretches
  * of the text the text parser reports the mode for
  * (src/text-parser/frontend.ts initial.modes and modeChanges; the frontend

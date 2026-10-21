@@ -29,7 +29,7 @@
  * five" (me-20, me-22).
  *
  * The parser's side is src/text-parser (frontend.ts PORTED_MODES); the date
- * word is a text rule (public/rules/normalization/lexical.yaml tn_date_text);
+ * word is a text rule (public/rules/languages/english/normalization/lexical.yaml tn_date_text);
  * the number words are kept whole by text rules that run only for a text
  * with the mode on in it (recognition.yaml tn_europe_*_source, `enabled`) and
  * read by the lexicon with the mode's two marks (src/g2p/index.ts, the

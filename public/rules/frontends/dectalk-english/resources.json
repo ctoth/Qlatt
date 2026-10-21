@@ -31,13 +31,13 @@
     "/rules/frontends/dectalk-english/speakers/ursula.yaml",
     "/rules/frontends/dectalk-english/speakers/wendy.yaml",
     "/rules/frontends/dectalk-english/text-parser-table.json",
-    "/rules/normalization/components.yaml",
-    "/rules/normalization/currency.yaml",
-    "/rules/normalization/date.yaml",
-    "/rules/normalization/decimal-fraction.yaml",
-    "/rules/normalization/lexical.yaml",
-    "/rules/normalization/numbers.yaml",
-    "/rules/normalization/recognition.yaml",
-    "/rules/normalization/time.yaml"
+    "/rules/languages/english/normalization/components.yaml",
+    "/rules/languages/english/normalization/currency.yaml",
+    "/rules/languages/english/normalization/date.yaml",
+    "/rules/languages/english/normalization/decimal-fraction.yaml",
+    "/rules/languages/english/normalization/lexical.yaml",
+    "/rules/languages/english/normalization/numbers.yaml",
+    "/rules/languages/english/normalization/recognition.yaml",
+    "/rules/languages/english/normalization/time.yaml"
   ]
 }

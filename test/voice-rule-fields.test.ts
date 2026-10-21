@@ -16,7 +16,7 @@ import {
   loadVoiceRuleDocuments,
   preloadFrontendVoiceDocument,
   preloadVoiceRuleDocuments,
-} from "../src/declarative-frontend/inventory";
+} from "../src/declarative-frontend/rule-pack";
 import * as rulepack from "../src/declarative-frontend/rule-pack";
 import { getVoiceRegistry, resolveVoice, withVoiceRulePolicy } from "../src/dectalk-voice";
 import * as paths from "../src/path-utils";
@@ -363,11 +363,17 @@ describe("voice rule fields in rules", () => {
 });
 
 describe("voice rule fields in the frontend", () => {
-  const fixtureFrontend = () =>
-    vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue({
+  const fixtureFrontend = () => {
+    const spec = {
       ...qlattRulepack,
       speakers: SPEAKERS,
+    };
+    return vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
+      spec,
+      resources: rulepack.loadFrontendResources(spec),
+      voices: {},
     });
+  };
 
   it("records the selected voice's fields with the voice's and the fields' citations", () => {
     const spy = fixtureFrontend();

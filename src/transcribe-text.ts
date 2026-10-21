@@ -14,7 +14,7 @@
 import type { HrgSchema } from "./declarative-frontend/hrg";
 import { Utterance } from "./declarative-frontend/hrg";
 import { runGraphRuleEngine } from "./declarative-frontend/hrg/rule-engine";
-import { loadFrontendResources, parseInventorySymbol } from "./declarative-frontend/inventory";
+import { parseInventorySymbol } from "./declarative-frontend/inventory";
 import type { CompiledRulepack } from "./declarative-frontend/rule-pack";
 import type { SourceTranscriptionInput } from "./declarative-frontend/source-recognition";
 import { pronounce, pronounceClause } from "./g2p";
@@ -670,7 +670,7 @@ export function transcribeText(
   // An explicit lookup override remains authoritative for direct lookup.
   const effectiveDictMap = options.dictionaryMap ?? {};
   const compiledSpec = options.compiledSpec;
-  const resources = loadFrontendResources(compiledSpec);
+  const resources = options.resources;
   const lts = options.lts ?? resources.lts;
   const morphology = options.morphology ?? resources.morphology;
   const stress = options.stress ?? resources.stress;

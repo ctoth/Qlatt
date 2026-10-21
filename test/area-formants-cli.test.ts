@@ -5,10 +5,8 @@ import { join } from "node:path";
 import { dump, load } from "js-yaml";
 import { expect, it } from "vitest";
 import { areaDocumentSchema, generate } from "../scripts/generate-formants-from-area";
-import {
-  loadInventorySpecFromPath,
-  parseInventorySpec,
-} from "../src/declarative-frontend/inventory";
+import { parseInventorySpec } from "../src/declarative-frontend/inventory";
+import { loadInventorySpecFromPath } from "../src/declarative-frontend/rule-pack";
 import { parseSpeakerProfileDocument } from "../src/speaker-profile";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 

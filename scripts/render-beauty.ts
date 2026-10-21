@@ -39,8 +39,10 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { AudioWorkletNode as NodeAudioWorkletNode, OfflineAudioContext } from "node-web-audio-api";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory.ts";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack.ts";
+import {
+  loadFrontendResources,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack.ts";
 import { createDiagnostics } from "../src/diagnostics.ts";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config.ts";
 import { compileAffect, neutralAffect } from "../src/input/affect.ts";

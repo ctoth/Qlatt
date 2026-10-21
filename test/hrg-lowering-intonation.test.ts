@@ -9,8 +9,10 @@ import type {
 } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-frontend/hrg";
 import { f0ModelForVoice, renderLayeredF0 } from "../src/declarative-frontend/hrg/lowering";
-import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadInventorySpecFromPath,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 
 const META = {

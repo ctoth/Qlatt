@@ -2,11 +2,11 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
+import { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
 import {
   loadInventorySpecFromPath,
-  materializePhonemeTarget,
-} from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 
 const SCHEMA = {

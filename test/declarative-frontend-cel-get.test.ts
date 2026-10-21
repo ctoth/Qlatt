@@ -4,7 +4,7 @@ import {
   evaluateExpression,
   validateExpressionSyntax,
 } from "../src/declarative-frontend/cel-expressions";
-import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
+import { loadInventorySpecFromPath } from "../src/declarative-frontend/rule-pack";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
 
 /**

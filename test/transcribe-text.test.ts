@@ -1,7 +1,10 @@
 import { afterAll, describe, expect, it, vi } from "vitest";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadFrontendResources,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
+import * as resourceOwner from "../src/declarative-frontend/rule-pack";
 import {
   getDiagnosticSymbolPronunciation,
   isPunctuationToken,
@@ -15,6 +18,7 @@ const resources = loadFrontendResources(compiledSpec);
 const selected = {
   frontendId: "qlatt-english",
   compiledSpec,
+  resources: loadFrontendResources(compiledSpec),
   dictionaryMap: resources.lexicon?.dictionary,
 };
 
@@ -26,6 +30,16 @@ describe("transcribe-text", () => {
   });
 
   describe("transcribeText", () => {
+    it("uses supplied resources without returning to the acquisition owner", () => {
+      const acquire = vi.spyOn(resourceOwner, "loadFrontendResources").mockImplementation(() => {
+        throw new Error("unexpected transcription acquisition");
+      });
+      try {
+        expect(transcribeText("hello", { ...selected, resources })).not.toHaveLength(0);
+      } finally {
+        acquire.mockRestore();
+      }
+    });
     it("uses explicitly selected punctuation and diagnostic symbol configuration", () => {
       const config = {
         ...transcriptionConfig,
@@ -58,7 +72,11 @@ describe("transcribe-text", () => {
         skip_dictionary: true,
       };
       expect(loadFrontendResources(noLexicon).lexicon).toBeUndefined();
-      const options = { compiledSpec: noLexicon, frontendId: "no-lexicon" };
+      const options = {
+        compiledSpec: noLexicon,
+        resources: loadFrontendResources(noLexicon),
+        frontendId: "no-lexicon",
+      };
       const tokens = transcribeText("adl tabatabai", { ...options, diagnostics });
       expect(tokens).toEqual(transcribeText("adl tabatabai", { ...options, dictionaryMap: {} }));
       expect(new Set(tokens.map((token) => token.word))).toEqual(new Set(["adl", "tabatabai"]));

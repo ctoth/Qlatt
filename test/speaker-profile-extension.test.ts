@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   loadFrontendResources,
   loadFrontendVoiceDocument,
-} from "../src/declarative-frontend/inventory";
+} from "../src/declarative-frontend/rule-pack";
 import * as rulepack from "../src/declarative-frontend/rule-pack";
 import { resolveVoice } from "../src/dectalk-voice";
 import { createProvenanceCollector } from "../src/provenance";
@@ -25,7 +25,11 @@ describe("declarative speaker profile fields", () => {
       resources: { ...qlattRulepack.resources, speaker_profile: null },
     };
     expect(loadFrontendResources(spec).speakerProfile).toBeUndefined();
-    const spy = vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(spec);
+    const spy = vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
+      spec,
+      resources: loadFrontendResources(spec),
+      voices: {},
+    });
     try {
       expect(() => textToKlattTrackDetailed("hello")).toThrow(
         /E_FRONTEND_CONFIG.*qlatt-english.*speaker_profile/,
@@ -36,7 +40,7 @@ describe("declarative speaker profile fields", () => {
   });
 
   it("uses the frontend's profile fields for voice selection and provenance", () => {
-    const spy = vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue({
+    const spec = {
       ...qlattRulepack,
       resources: { ...qlattRulepack.resources, speaker_profile: profilePath },
       speakers: {
@@ -44,6 +48,11 @@ describe("declarative speaker profile fields", () => {
         default: "voice",
         voices: ["voice"],
       },
+    };
+    const spy = vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
+      spec,
+      resources: loadFrontendResources(spec),
+      voices: {},
     });
     try {
       const provenance = createProvenanceCollector();

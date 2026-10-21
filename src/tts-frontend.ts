@@ -17,15 +17,14 @@ import { TONE_ITEM_SCHEMA } from "./declarative-frontend/hrg/tone-association";
 import {
   type InventoryParameterFallback,
   type InventorySpec,
-  loadFrontendResources,
-  loadFrontendVoiceDocument,
   materializePhonemeTarget,
   reportInventoryParameterFallbacks,
 } from "./declarative-frontend/inventory";
 import {
   type CompiledRulepack,
-  loadBundledRulepackSpec,
-  loadRulepackSpecFromPath,
+  loadFrontendVoiceDocument,
+  resolveBundledRulepackPath,
+  resolveFrontend,
 } from "./declarative-frontend/rule-pack";
 import {
   NORMALIZATION_SCHEMA,
@@ -729,9 +728,8 @@ function createStructure(
 }
 
 export function normalizeText(text: string, frontendId = "qlatt-english"): string {
-  const spec = loadBundledRulepackSpec(frontendId);
+  const { spec, resources } = resolveFrontend(resolveBundledRulepackPath(frontendId));
   // The same text the frontend speaks: after its text parser, when it has one.
-  const resources = loadFrontendResources(spec);
   const textParser = resources.textParser;
   if (!textParser) return normalizeGraphText(text, spec, { lts: resources.lts });
   const dictionary = resources.lexicon?.dictionary;
@@ -755,11 +753,11 @@ function buildTextToKlattTrackDetailed(
   const frontendId = options.frontendId ?? "qlatt-english";
   if (options.frontendPath && options.frontendId)
     throw new Error("E_FRONTEND_SELECTION: select frontendPath or frontendId, not both");
-  const spec = options.frontendPath
-    ? loadRulepackSpecFromPath(options.frontendPath)
-    : loadBundledRulepackSpec(frontendId);
+  const { spec, resources } = resolveFrontend(
+    options.frontendPath ?? resolveBundledRulepackPath(frontendId),
+    typeof options.speaker === "string" ? options.speaker : undefined,
+  );
   const lowering = readLowerOptions(spec.output.lowering);
-  const resources = loadFrontendResources(spec);
   // The active inventory declares the synthesizer parameters available to this frontend.
   const speakerFormantKeys = Object.keys(resources.inventory.base_params).filter((key) =>
     /^F[1-9]\d*$/.test(key),
@@ -1064,6 +1062,7 @@ function buildTextToKlattTrackDetailed(
   });
   onStage?.("normalization phases");
   const transcribed = transcribeText(normalized, {
+    resources,
     frontendId: options.frontendPath ?? frontendId,
     captureTooling,
     ...(textModeSpans ? { textModeSpans } : {}),

@@ -3,8 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { load } from "js-yaml";
 import { describe, expect, it } from "vitest";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadFrontendResources,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
 import { parseDirectionInput } from "../src/input/parse";
 import { parseVoiceQualityChannels } from "../src/input/vq-channels";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
@@ -43,7 +45,7 @@ describe("declarative voice-quality channels", () => {
           vq_channels: selected.vqChannels.path,
         },
       });
-      expect(first.affectPresets?.library.presets.has("tender")).toBe(true);
+      expect(first.affectPresets?.library.presets.tender).toBeDefined();
       expect(first.vqChannels?.channels.some((row) => row.channel === "f0Scale")).toBe(true);
       expect(first.vqChannels?.rdPolicy.min).toBe(0.3);
       rmSync(presetPath);

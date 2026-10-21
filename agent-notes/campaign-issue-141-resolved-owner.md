@@ -1,0 +1,45 @@
+# Goal
+
+Consolidate frontend acquisition in the existing rule-pack owner, pass resolved
+resources into transcription, and freeze the resolved plain resource graph (#141).
+
+# State
+
+Isolated from #431 final efd9f220, then fast-forwarded to merged c2ba906d,
+including #430 read-error preservation. Acquisition moved (557 lines), resource
+freezing and combined entry points added; caller/fixture adaptation complete.
+Ready for hosted CI and independent review. No local CI. Other agents are active.
+
+# Decisions and why
+
+Smallest approved scope: 180–280 changed production lines plus 550–620 moved
+acquisition lines, import adapters and 80–140 existing fixture lines. Move the
+existing inventory/resource caches and loaders into rule-pack.ts; inventory keeps
+parsing and materialization. Preserve compile-only entry points and error causes.
+Combined sync/async resolution prepares resources and declared/default/selected
+voices. Later arbitrary voices use the same owner. Transcription requires resolved
+resources and retains explicit overrides and dictionary lookup behavior.
+Convert affect lookup Maps to null-prototype records with own-key lookup so the
+existing recursive freeze can cover parsed plain data without a new map framework.
+Inspect mutation consumers and clone task-owned fixture inputs where necessary.
+No new cache, resolver, manifest or protocol. URL identity #248 and discovery #76
+remain separate; this does not claim all #141 acceptance is complete.
+
+# Surprises
+
+Acquisition imports span 60 named-import sites plus namespace mocks. Existing
+rate, voice, contour, speaker-profile and inventory fixtures intercepted the old
+separate loaders; they now intercept the combined resolver. The Unicode
+transcription fixture directly supplies its alternate inventory instead of mocking
+acquisition. Existing mutation fixtures already clone cached inventory/LTS/stress
+data or parse fresh YAML; production pronunciation/parser loops build separate
+outputs. Affect lookup records retain prototype-like names with own-key access.
+The browser resource fixture now exercises complete async rulepack/resource/voice
+preparation, sync reuse and immutable nested cache values. Transcription has an
+explicit no-acquisition fixture. Temporary migration inspection script removed.
+
+# Next step
+
+Publish for hosted CI and independent Claude review; respond to concrete findings.
+Supervisor owns final review/merge. #141 acceptance checks and URL/discovery work
+remain outstanding; this delivery does not close the issue.

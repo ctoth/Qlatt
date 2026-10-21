@@ -17,8 +17,10 @@
  *     scripts/compare-inventory-fields.ts <frontendA> <frontendB>
  */
 
-import { loadFrontendResources } from "../src/declarative-frontend/inventory.ts";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack.ts";
+import {
+  loadFrontendResources,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack.ts";
 
 const [idA, idB] = process.argv.slice(2);
 if (!idA || !idB) {

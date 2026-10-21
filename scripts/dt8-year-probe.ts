@@ -9,8 +9,10 @@
  *           l_us_pr1.c:367-398 (ls_proc_do_4_digits).
  */
 
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadFrontendResources,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
 import { normalizeGraphText as normalizeText } from "../src/declarative-frontend/source-recognition";
 
 // dectalk-english declares its own normalization tables + pipeline (DATA).

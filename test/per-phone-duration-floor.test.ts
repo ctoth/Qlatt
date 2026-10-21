@@ -4,11 +4,11 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { type HrgSchema, Utterance } from "../src/declarative-frontend/hrg";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
+import { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
 import {
   loadInventorySpecFromPath,
-  materializePhonemeTarget,
-} from "../src/declarative-frontend/inventory";
-import { compileRuleEngineSpec } from "../src/declarative-frontend/rule-pack";
+  compileRuleEngineSpec,
+} from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 

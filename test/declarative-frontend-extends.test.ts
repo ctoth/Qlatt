@@ -6,8 +6,6 @@ import { describe, expect, it } from "vitest";
 import {
   loadFrontendResources,
   loadFrontendVoiceDocument,
-} from "../src/declarative-frontend/inventory";
-import {
   type CompiledRulepack,
   getRulepackValidationDiagnostics,
   loadBundledRulepackSpec,

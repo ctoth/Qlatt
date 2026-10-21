@@ -21,11 +21,12 @@ import {
   recordFrontendResources,
 } from "../scripts/build-frontend-resource-manifests";
 import {
-  loadFrontendResources,
+  loadBundledRulepackSpec,
+  preloadFrontend,
   preloadFrontendResources,
   preloadFrontendSourceContour,
-} from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+  resolveFrontend,
+} from "../src/declarative-frontend/rule-pack";
 import * as paths from "../src/path-utils";
 import {
   clearPrimedSyncResources,
@@ -117,7 +118,7 @@ describe("primed resources", () => {
   it.each(frontendIds())("%s: prepares resources without synchronous requests", async (id) => {
     const prefix = `/async-owner-${id}/rules/`;
     const replacePaths = (text: string) => text.replaceAll("/rules/", prefix);
-    const spec = JSON.parse(replacePaths(JSON.stringify(loadBundledRulepackSpec(id))));
+    const entry = `${prefix}frontends/${id}/frontend.yaml`;
     const files: Record<string, string> = {};
     for (const resource of readManifest(id)) {
       files[replacePaths(resource)] = replacePaths(
@@ -126,13 +127,21 @@ describe("primed resources", () => {
     }
     const { blocking, parallel } = stubBrowser(files);
     vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
-    const acquired = await preloadFrontendResources(spec);
+    const prepared = await preloadFrontend(entry);
+    const { spec, resources: acquired } = prepared;
     expect(blocking).toEqual([]);
     expect(parallel).toContain(acquired.inventoryPath);
     expect(parallel).toContain(acquired.lts.path);
     expect(parallel).toContain(acquired.lexicon?.path);
     const fetched = [...parallel];
-    const sync = loadFrontendResources(spec);
+    const resolved = resolveFrontend(entry);
+    const sync = resolved.resources;
+    expect(resolved.spec).toBe(spec);
+    expect(resolved.voices).toEqual(prepared.voices);
+    for (const [name, voice] of Object.entries(prepared.voices)) {
+      expect(resolved.voices[name].document).toBe(voice.document);
+      expect(Object.isFrozen(voice.document)).toBe(true);
+    }
     expect(sync).toEqual(acquired);
     expect(sync.inventory).toBe(acquired.inventory);
     expect(sync.lts.document).toBe(acquired.lts.document);
@@ -140,6 +149,22 @@ describe("primed resources", () => {
     expect(sync.stress).toBe(acquired.stress);
     expect(sync.vqChannels?.channels).toBe(acquired.vqChannels?.channels);
     expect(sync.affectPresets?.library).toBe(acquired.affectPresets?.library);
+    expect(Object.isFrozen(prepared)).toBe(true);
+    expect(Object.isFrozen(acquired)).toBe(true);
+    expect(Object.isFrozen(acquired.inventory.phoneme_targets)).toBe(true);
+    expect(Object.isFrozen(acquired.lts.document)).toBe(true);
+    expect(() => {
+      acquired.inventory.base_params.F1 = -1;
+    }).toThrow(TypeError);
+    if (acquired.lexicon) {
+      expect(Object.isFrozen(acquired.lexicon.dictionary)).toBe(true);
+    }
+    if (acquired.affectPresets) {
+      const library = acquired.affectPresets.library;
+      expect(Object.isFrozen(library.presets)).toBe(true);
+      expect(Object.isFrozen(library.presets.tender.vq)).toBe(true);
+      expect(() => Object.assign(library.presets, { tender: undefined })).toThrow(TypeError);
+    }
     if (id === "dectalk-english") {
       expect(acquired.morphology).toBeUndefined();
       expect(acquired.stress).toBeUndefined();

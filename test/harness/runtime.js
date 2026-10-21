@@ -1,11 +1,9 @@
 // test/harness/runtime.js — Runtime lifecycle: init, start, stop, speak
 
 import {
-  preloadFrontendResources,
-  preloadFrontendVoiceDocument,
-} from "../../src/declarative-frontend/inventory.ts";
-import { preloadBundledRulepackSpec } from "../../src/declarative-frontend/rule-pack.ts";
-import { getVoiceRegistry } from "../../src/dectalk-voice.ts";
+  preloadFrontend,
+  resolveBundledRulepackPath,
+} from "../../src/declarative-frontend/rule-pack.ts";
 import { preloadF0Filters } from "../../src/f0-filters-loader.ts";
 import { createDiagnosticsEngine } from "../../src/harness-diagnostics/index.ts";
 import { parseDiagConfig } from "../../src/harness-diagnostics/schema.ts";
@@ -79,15 +77,7 @@ function stageTimer() {
  */
 export async function warmFrontend(frontendId, phrase) {
   const speaker = getSelectedSpeaker();
-  const spec = await preloadBundledRulepackSpec(frontendId);
-  await preloadFrontendResources(spec);
-  const registry = getVoiceRegistry(spec);
-  if (registry) {
-    const names = new Set([registry.default, ...registry.voices, ...(speaker ? [speaker] : [])]);
-    for (const name of names) {
-      await preloadFrontendVoiceDocument(registry, name);
-    }
-  }
+  await preloadFrontend(resolveBundledRulepackPath(frontendId), speaker);
   const options = { frontendId };
   if (speaker) options.speaker = speaker;
   textToKlattTrack(phrase, undefined, undefined, options);

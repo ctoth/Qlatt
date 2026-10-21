@@ -22,8 +22,10 @@
  */
 
 import { writeFileSync } from "node:fs";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory.ts";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack.ts";
+import {
+  loadFrontendResources,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack.ts";
 
 /** Recursively sort object keys so serialization is order-independent. */
 function stableSort(value: unknown): unknown {

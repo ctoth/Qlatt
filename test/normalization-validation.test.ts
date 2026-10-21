@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import * as celExpressions from "../src/declarative-frontend/cel-expressions";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import {
+  loadFrontendResources,
   compileRuleEngineSpec,
   loadBundledRulepackSpec,
 } from "../src/declarative-frontend/rule-pack";
@@ -73,6 +73,7 @@ describe("graph normalization declarations (supersede legacy #14/#15 dispatcher 
     expect(normalized).toBe("hello ~ world");
     const tokens = transcribeText(normalized, {
       compiledSpec: spec,
+      resources: loadFrontendResources(spec),
       dictionaryMap: loadFrontendResources(spec).lexicon?.dictionary,
     });
     expect(tokens.filter((token) => token.isPunctuation).map((token) => token.symbol)).toEqual([

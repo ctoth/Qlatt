@@ -1,6 +1,8 @@
 import { readLowerOptions } from "../declarative-frontend/hrg/lowering";
-import { preloadFrontendSourceContour } from "../declarative-frontend/inventory";
-import { preloadBundledRulepackSpec } from "../declarative-frontend/rule-pack";
+import {
+  preloadFrontendSourceContour,
+  preloadBundledRulepackSpec,
+} from "../declarative-frontend/rule-pack";
 import { expandFormantBanks } from "../formant-bank";
 import type { ExperimentConfig } from "./load-experiment-config";
 

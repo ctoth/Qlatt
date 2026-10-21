@@ -1,3 +1,9 @@
+import {
+  loadFrontendResources,
+  compileRuleEngineSpec,
+  loadBundledRulepackSpec,
+  loadRulepackSpecFromPath,
+} from "../src/declarative-frontend/rule-pack";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -6,11 +12,6 @@ import {
   Utterance,
   whyFeature,
 } from "../src/declarative-frontend/hrg";
-import {
-  compileRuleEngineSpec,
-  loadBundledRulepackSpec,
-  loadRulepackSpecFromPath,
-} from "../src/declarative-frontend/rule-pack";
 import {
   NORMALIZATION_SCHEMA,
   normalizeSourceItems,
@@ -60,6 +61,7 @@ describe("source-backed recognition", () => {
     transcribeText(normalizeSourceItems(utterance, spec), {
       utterance,
       compiledSpec: spec,
+      resources: loadFrontendResources(spec),
       dictionaryMap: { hello: "HH EH1 L OW0" },
     });
     const pronunciation = utterance.provenance

@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadFrontendResources,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrack } from "../src/tts-frontend";
 import { isPlainObject } from "../src/yaml-loader";
 

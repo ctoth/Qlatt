@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadFrontendResources,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
 
 // The accent / break / tune prosody policy loaders were removed in Phase 5.3:
 // their data is now inlined in the declarative annotation-phase rules

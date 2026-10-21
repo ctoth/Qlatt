@@ -10,8 +10,10 @@
  */
 
 import { performance } from "node:perf_hooks";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadFrontendResources,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrack } from "../src/tts-frontend";
 
 // ---- Configuration ----

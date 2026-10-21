@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadFrontendResources,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
 import { normalizeText, textToKlattTrack, transcribeText } from "../src/tts-frontend";
 import {
   FULL_PIPELINE_WORD_CASES,
@@ -15,6 +17,7 @@ import {
 const compiledSpec = loadBundledRulepackSpec("qlatt-english");
 const selected = {
   compiledSpec,
+  resources: loadFrontendResources(compiledSpec),
   dictionaryMap: loadFrontendResources(compiledSpec).lexicon?.dictionary,
 };
 

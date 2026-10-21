@@ -3,8 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadFrontendResources,
+  loadBundledRulepackSpec,
+} from "../src/declarative-frontend/rule-pack";
 import {
   compileAffect,
   isClinicalSexRequired,
@@ -404,7 +406,7 @@ describe("input contract — affect compiler (cited presets)", () => {
   });
 
   it("covers all five preset groups (emotion, epistemic, pragmatic, speech_act, clinical)", () => {
-    const groups = new Set([...library.presets.values()].map((p) => p.group));
+    const groups = new Set(Object.values(library.presets).map((p) => p.group));
     expect(groups).toEqual(
       new Set(["emotion", "epistemic", "pragmatic", "speech_act", "clinical"]),
     );
@@ -721,7 +723,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
     const configured = parseAffectPresets({
       degree: library.degree,
       variants: {},
-      presets: [...library.presets.values()].map((preset) => ({
+      presets: Object.values(library.presets).map((preset) => ({
         ...preset,
         citations: [`configured:${preset.name}`],
       })),
@@ -858,7 +860,7 @@ describe("input contract — inline shorthand is demoted to a lifter", () => {
   });
 
   it("leaves numeric and hyphenated preset authority with the supplied affect library", () => {
-    const preset = { ...library.presets.get("angry")!, name: "angry-2" };
+    const preset = { ...library.presets.angry, name: "angry-2" };
     const selectedLibrary = {
       ...library,
       presets: new Map([...library.presets, [preset.name, preset]]),

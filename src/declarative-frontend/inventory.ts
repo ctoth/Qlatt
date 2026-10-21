@@ -1,6 +1,6 @@
 import { type CmuDictionary, loadCmuDictionaryFromPathSync } from "../cmu-dictionary-loader";
 import type { Diagnostics } from "../diagnostics";
-import { type LtsContext, ltsDocumentAt } from "../g2p/lts-document";
+import type { LtsContext } from "../g2p/lts-document";
 import type { MorphologyContext, MorphologyData } from "../g2p/morphology";
 import { parseStressPolicy, type StressContext } from "../g2p/stress-policy";
 import type { PhonotacticsData } from "../g2p/syllabify";
@@ -823,8 +823,16 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     }
     return value;
   };
-  // The pronouncers read the same parsed document (g2p/lts-document.ts).
-  const ltsPath = requireAsset(spec.lts_path, "lts_path", ltsDocumentAt);
+  // Pronunciation and number normalization consume this same parsed document.
+  const ltsPath = requireAsset(spec.lts_path, "lts_path", (path) => {
+    const document: unknown = path.endsWith(".json")
+      ? JSON.parse(loadYamlSourceSync(path))
+      : loadYamlDocumentSync<unknown>(path);
+    if (document === null || document === undefined) {
+      throw new Error(`E_YAML_SCHEMA: '${path}' resolved to empty document`);
+    }
+    return document;
+  });
   const morphologyPath = requireAsset(spec.morphology_path, "morphology_path");
   const morphology = FRONTEND_ASSET_CACHE.get(morphologyPath);
   const morphologyPhonotacticsPath = requireAsset(

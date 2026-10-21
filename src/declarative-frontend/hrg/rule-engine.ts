@@ -1,3 +1,4 @@
+import type { LtsContext } from "../../g2p/lts-document";
 import {
   NUMBER_PHONEMIC_FORMS,
   type NumberPhonemicForm,
@@ -33,6 +34,7 @@ import type { Utterance } from "./utterance";
 export { PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
 
 export interface GraphRuleEngineOptions {
+  lts?: LtsContext;
   phases?: readonly string[];
   parameters?: Readonly<Record<string, unknown>>;
   /** The overlay of each parameter scope, by the scope's name (parameter-scope.ts). */
@@ -750,16 +752,17 @@ function buildEvaluationScope(
         return invalid("digits and form must be strings");
       if (!(NUMBER_PHONEMIC_FORMS as readonly string[]).includes(form))
         return invalid(`unknown form '${form}'`);
-      if (typeof params.ltsPath !== "string")
-        return invalid("the frontend has no letter-to-sound table (lts_path)");
-      const text = numberPhonemicText(digits, form as NumberPhonemicForm, params.ltsPath);
+      if (!isPlainObject(params.lts) || typeof params.lts.path !== "string")
+        return invalid("selected LTS context was not supplied");
+      const lts = { path: params.lts.path, document: params.lts.document };
+      const text = numberPhonemicText(digits, form as NumberPhonemicForm, lts);
       if (text === null) return invalid(`'${digits}' is not read as ${form}`);
       const source = items[cursor.index];
       const decision = utterance.provenance.add({
         stage: "rules",
         type: "normalization_number_composed",
         subject: source?.id ?? digits,
-        reason: `${transaction.metadata.ruleId} read '${digits}' as ${form} from the number phone lists of ${params.ltsPath}: ${text}`,
+        reason: `${transaction.metadata.ruleId} read '${digits}' as ${form} from the number phone lists of ${lts.path}: ${text}`,
         citations: [...transaction.metadata.citations],
         parents: source
           ? source.featureKeys().flatMap((field) => {
@@ -2811,7 +2814,7 @@ export function runGraphRuleEngine(
     maps: spec.maps,
     mapOrigins: rulepackMapOrigins(spec),
     transcription: spec.transcription,
-    ltsPath: spec.lts_path,
+    lts: options.lts,
   });
   // Each declared scope's parameters, made once: the run's with the scope's
   // overlay laid over them. Every one of them, and the run's own, carries

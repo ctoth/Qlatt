@@ -1226,8 +1226,7 @@ export function unphasedRules(
               "splice",
               "insert_point",
               "insert_f0_layer",
-            ].includes(key) &&
-            value === null
+            ].includes(key) && value === null
           );
         })
       ) {

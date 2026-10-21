@@ -4,7 +4,7 @@ Map frame set and multi-point insert paths to authored locations, including exac
 
 # State
 
-Started from PR415 final 271f9385 while supervisor sequences its merge. Implemented 12 added production lines and 51 existing fixture lines covering frame unit/when/set value versus register keys and singular/plural point value/when versus relation keys. No local CI; hosted validation pending.
+Started from PR415 final 271f9385; that prerequisite has merged. Implemented 12 added production lines and 51 existing fixture lines covering frame unit/when/set value versus register keys and singular/plural point value/when versus relation keys. Quality job119172303669 requested two formatting corrections in the classifier and fixture; applied exactly. No local CI; replacement hosted validation pending.
 
 # Decisions and why
 

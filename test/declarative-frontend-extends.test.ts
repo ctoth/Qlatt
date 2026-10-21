@@ -404,11 +404,7 @@ describe("direct rule errors through composition", () => {
           for (const path of ["unit", "when", "set[0].value"]) {
             expectLocation("E_FRAME_NAME_UNKNOWN", `rules.fixture_frame_rule.${path}`, "value");
           }
-          expectLocation(
-            "E_FRAME_NAME_UNKNOWN",
-            "rules.fixture_frame_rule.set[0].register",
-            "key",
-          );
+          expectLocation("E_FRAME_NAME_UNKNOWN", "rules.fixture_frame_rule.set[0].register", "key");
           for (const insert of ["insert_point", "insert_points[0]"]) {
             for (const field of ["value", "when"]) {
               expectLocation(

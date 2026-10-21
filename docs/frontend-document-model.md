@@ -1,6 +1,8 @@
 # The frontend document model
 
-Status: proposal, 2026-09-08, for Q's decision. Companion to
+Status: proposal with bounded decisions adopted on 2026-10-20; see the
+[decision matrix](frontend-model-decisions.md) for the authoritative scope.
+The remaining mechanisms below are proposals. Companion to
 `docs/attribute-model.md`, which defines what a value is. This document
 defines what a frontend is, what the compiler is allowed to know, and where
 each kind of speech knowledge lives. It reshapes #141 and adds one row to the

@@ -1343,7 +1343,10 @@ export function lowerToFrames(
     // window to establish whether any transition was actually requested.
     const transition = build(dropped ? requested : applied);
     if (!transition) return false;
-    const fields = [...Object.keys(transition.fields), ...Object.keys(transition.linearFields ?? {})];
+    const fields = [
+      ...Object.keys(transition.fields),
+      ...Object.keys(transition.linearFields ?? {}),
+    ];
     if (spanMs > 0 && fields.length > 0 && (dropped || applied.endMs - applied.startMs < spanMs)) {
       utterance.diagnostics.warn(
         dropped

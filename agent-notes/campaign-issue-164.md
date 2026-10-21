@@ -13,4 +13,4 @@ Smallest change: 50-65 production lines in the helper/callers plus focused exist
 Calling the old leading-locus builder earlier without changing its applied flag would alter acoustic output. Claude should explicitly check that path.
 
 ## Next step
-Push PR for CI and Claude review. Keep #164 open. Review must confirm dropped leading locus still prevents closure/glue output; the new 200ms-edge test asserts unchanged F3 on all four neighboring items, with the existing 20ms policy control retained.
+PR #328 is open; Claude review is in progress. The initial quality job reported a single line-wrap correction for the diagnostic fields array; applied that formatting correction without rerunning local CI. Await replacement CI and Claude review. Keep #164 open. Review must confirm dropped leading locus still prevents closure/glue output; the new 200ms-edge test asserts unchanged F3 on all four neighboring items, with the existing 20ms policy control retained.

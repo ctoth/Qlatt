@@ -7,6 +7,8 @@ import {
   loadYamlSourceSync,
   parseYamlString,
   resolveIncludePath,
+  yamlDocumentSpans,
+  type YamlNodeSpans,
 } from "../yaml-loader";
 import {
   type InventorySpec,
@@ -23,6 +25,38 @@ const MAP_ORIGINS = new WeakMap<object, MapOrigins>();
 /** Rule name -> resource path of the file whose `rules:` block declares it (#219). */
 type RuleOrigins = Readonly<Record<string, string>>;
 const RULE_ORIGINS = new WeakMap<object, RuleOrigins>();
+const PARAMETER_ORIGINS = new WeakMap<object, readonly YamlNodeSpans[]>();
+const NO_PARAMETER_ORIGINS: readonly YamlNodeSpans[] = Object.freeze([]);
+
+/**
+ * Winning authored root-parameter locations, with original document paths.
+ * Generated accent/voice values and other compiled surfaces are not covered.
+ * The immutable entries are serializable; object identity only locates the index.
+ */
+export function rulepackParameterOrigins(spec: CompiledRulepack): readonly YamlNodeSpans[] {
+  return PARAMETER_ORIGINS.get(spec) ?? NO_PARAMETER_ORIGINS;
+}
+
+/** Follow deepMergeChildWins: arrays/scalars replace, objects retain untouched siblings. */
+function mergeParameterOrigins(base: PlainObject, child: PlainObject): readonly YamlNodeSpans[] {
+  function replaced(path: readonly (string | number)[]): boolean {
+    let baseValue: unknown = base;
+    let childValue: unknown = child;
+    for (const key of path) {
+      if (!isPlainObject(baseValue) || !isPlainObject(childValue)) return true;
+      if (!Object.hasOwn(childValue, key)) return false;
+      baseValue = baseValue[key];
+      childValue = childValue[key];
+    }
+    return true;
+  }
+  return Object.freeze([
+    ...(PARAMETER_ORIGINS.get(base) ?? NO_PARAMETER_ORIGINS).filter(
+      (entry) => !replaced(entry.value.path),
+    ),
+    ...(PARAMETER_ORIGINS.get(child) ?? NO_PARAMETER_ORIGINS),
+  ]);
+}
 
 /** Loader-derived rule origins: which rulepack file declared each rule. */
 export function rulepackRuleOrigins(spec: CompiledRulepack): RuleOrigins {
@@ -45,6 +79,12 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
   if (!isPlainObject(document)) {
     throw new Error(`E_RULEPACK_DOCUMENT: ${label} must be a YAML object document`);
   }
+  PARAMETER_ORIGINS.set(
+    document,
+    Object.freeze(
+      yamlDocumentSpans(document).filter((entry) => entry.value.path[0] === "parameters"),
+    ),
+  );
   MAP_ORIGINS.set(
     document,
     Object.fromEntries(
@@ -134,6 +174,8 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
   if (!isPlainObject(merged)) {
     throw new Error("E_RULEPACK_COMPILE: normalized root must remain an object");
   }
+  // Includes do not merge parameters; the cloned root retains their authored locations.
+  PARAMETER_ORIGINS.set(merged, PARAMETER_ORIGINS.get(root) ?? NO_PARAMETER_ORIGINS);
   MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(root), ...MAP_ORIGINS.get(child) });
   RULE_ORIGINS.set(merged, { ...RULE_ORIGINS.get(root), ...RULE_ORIGINS.get(child) });
   INHERITABLE_SHADOWED_RULES.set(merged, {
@@ -473,6 +515,7 @@ function resolveExtendsSync(
   const baseSource = loadYamlSourceSync(basePath);
   const baseDoc = parseRulepackDocument(baseSource, `base rulepack ${basePath}`);
   const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
+  PARAMETER_ORIGINS.set(merged, mergeParameterOrigins(baseDoc, rootDoc));
   MAP_ORIGINS.set(
     merged,
     deepMergeChildWins(
@@ -501,6 +544,7 @@ async function resolveExtendsAsync(
   const baseSource = await loadYamlSource(basePath);
   const baseDoc = parseRulepackDocument(baseSource, `base rulepack ${basePath}`);
   const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
+  PARAMETER_ORIGINS.set(merged, mergeParameterOrigins(baseDoc, rootDoc));
   MAP_ORIGINS.set(
     merged,
     deepMergeChildWins(
@@ -680,6 +724,7 @@ export function loadRulepackSpecFromPath(
     );
   }
   const spec = parseDslSpec(withVoiceRulePolicy(merged));
+  PARAMETER_ORIGINS.set(spec, PARAMETER_ORIGINS.get(merged) ?? NO_PARAMETER_ORIGINS);
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
@@ -711,6 +756,16 @@ function attachAccentPolicy(spec: PlainObject, source: string, path: string): vo
   }
   const parameters = isPlainObject(spec.parameters) ? spec.parameters : {};
   const existing = isPlainObject(parameters.policy) ? parameters.policy : {};
+  // This whole subtree is synthesized below; no prior root declaration still owns it.
+  PARAMETER_ORIGINS.set(
+    spec,
+    Object.freeze(
+      (PARAMETER_ORIGINS.get(spec) ?? NO_PARAMETER_ORIGINS).filter(
+        ({ value: { path } }) =>
+          !(path[0] === "parameters" && path[1] === "policy" && path[2] === "accent_assignment"),
+      ),
+    ),
+  );
   spec.parameters = {
     ...parameters,
     policy: {
@@ -757,6 +812,7 @@ export async function preloadRulepackSpecFromPath(
     );
   }
   const spec = parseDslSpec(withVoiceRulePolicy(merged));
+  PARAMETER_ORIGINS.set(spec, PARAMETER_ORIGINS.get(merged) ?? NO_PARAMETER_ORIGINS);
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));

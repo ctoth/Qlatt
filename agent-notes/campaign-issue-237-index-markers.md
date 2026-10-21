@@ -2,7 +2,7 @@
 Deliver #237 index requests through the existing server and NVDA playback path without splitting speech at each index.
 
 # State
-Implemented from merged master2448a9f4 after #456; preparing publication. Owned origins worktree and branches removed cleanly. Existing fixtures cover UTF-16/whitespace, repeated-source server mapping, same-sample ordering, PCM slicing, rate/pitch padding boundaries, index-only input and canceled callbacks. No local CI; hosted validation and Claude review pending.
+PR #460 open from merged master2448a9f4 after #456. Owned origins worktree and branches removed cleanly. Existing fixtures cover UTF-16/whitespace, repeated-source server mapping, same-sample ordering, PCM slicing, rate/pitch padding boundaries, index-only input and canceled callbacks. Hosted quality119319999502 requested one assertion wrap; applied its exact formatting. No local CI. Claude full review active, session3ac4d4d6-fdde-4fcf-af16-3c6c0d6bd02e; hosted runtime checks pending.
 
 # Decisions and why
 - Smallest approved change: about110–160 production lines in speak-server.ts and qlatt.py, plus100–160 lines in existing TS/Python fixtures. Existing raw sourceSpans select the first frame starting at or after each requested UTF-16 offset; no eligible frame means PCM end.

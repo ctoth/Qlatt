@@ -117,9 +117,9 @@ describe("speak-server protocol", () => {
       { kind: "index", index: 9, sample: 420 },
       { kind: "index", index: 10, sample: 600 },
     ]);
-    expect(indexMarkers(indexes, [], 0.02, 1000, 600).every((marker) => marker.sample === 600)).toBe(
-      true,
-    );
+    expect(
+      indexMarkers(indexes, [], 0.02, 1000, 600).every((marker) => marker.sample === 600),
+    ).toBe(true);
   });
 
   it("maps each occurrence to samples without deduplicating its spelling", () => {

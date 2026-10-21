@@ -13,7 +13,10 @@ import {
   browserRenderOptions,
   browserRuntimeBackend,
 } from "../src/rendering/backends/browser-runtime";
-import { createNodeRuntimeBackend, nodeRuntimeBackend } from "../src/rendering/backends/node-runtime";
+import {
+  createNodeRuntimeBackend,
+  nodeRuntimeBackend,
+} from "../src/rendering/backends/node-runtime";
 import { trackOnlyBackend } from "../src/rendering/backends/track-only";
 import { openBrowserSession, resolveChromePath } from "../src/rendering/browser-session";
 import type { RenderRequest } from "../src/rendering/types";
@@ -192,19 +195,22 @@ describe("render request frontend options", () => {
         ],
       },
     },
-  ] satisfies Array<Partial<RenderRequest>>)("preserves the frontend error for %j", async (options) => {
-    const req = { ...request("she."), ...options };
-    let message = "";
-    try {
-      direct(req);
-    } catch (error) {
-      message = (error as Error).message;
-    }
-    expect(message).not.toBe("");
-    for (const backend of [nodeRuntimeBackend, trackOnlyBackend]) {
-      await expect(backend.render(req)).rejects.toThrow(message);
-    }
-  });
+  ] satisfies Array<Partial<RenderRequest>>)(
+    "preserves the frontend error for %j",
+    async (options) => {
+      const req = { ...request("she."), ...options };
+      let message = "";
+      try {
+        direct(req);
+      } catch (error) {
+        message = (error as Error).message;
+      }
+      expect(message).not.toBe("");
+      for (const backend of [nodeRuntimeBackend, trackOnlyBackend]) {
+        await expect(backend.render(req)).rejects.toThrow(message);
+      }
+    },
+  );
 
   it.each(["voiceQuality", "directionTrack"] as const)(
     "rejects %s on the legacy browser driver",

@@ -20,7 +20,10 @@ export interface RenderTrackSummary {
 }
 
 export interface RenderPayload
-  extends Pick<TextToKlattTrackOptions, "speaker" | "pitchScale" | "voiceQuality" | "directionTrack"> {
+  extends Pick<
+    TextToKlattTrackOptions,
+    "speaker" | "pitchScale" | "voiceQuality" | "directionTrack"
+  > {
   /** The profile actually resolved by the frontend for this request. */
   resolvedSpeaker?: TextToKlattTrackDetailedResult["resolvedSpeaker"];
   phrase: string;

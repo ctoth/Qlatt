@@ -47,7 +47,7 @@ import {
 import type { RenderRequest } from "../src/rendering/types.ts";
 import { toInt16 } from "../src/rendering/write-wav.ts";
 import type { KlattFrame } from "../src/tts-frontend-types.ts";
-import { createNodeRuntimeBackend } from "./rendering/backends/node-runtime.ts";
+import { createNodeRuntimeBackend } from "../src/rendering/backends/node-runtime.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 

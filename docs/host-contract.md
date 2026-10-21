@@ -10,7 +10,7 @@ without reading the TypeScript reference implementation.
 
 Reference hosts today: the browser (WebAudio + AudioWorklet,
 `src/klatt-runtime.ts` / `src/klatt-interpreter.ts`) and Node
-(`node-web-audio-api`, `scripts/rendering/backends/node-runtime.ts`). A native
+(`node-web-audio-api`, `src/rendering/backends/node-runtime.ts`). A native
 host (e.g. Rust + miniaudio) is the intended third.
 
 ## 1. Document set
@@ -348,7 +348,7 @@ not established by the paper's aperture-dependent impedance measurements.
   for screen-reader use; end-to-end latency is a feature.)
 - Noise-generating primitives take an explicit seed (`noise-source` derives
   per-node seeds from a base seed; see
-  `scripts/rendering/backends/node-runtime.ts`) so renders are reproducible.
+  `src/rendering/backends/node-runtime.ts`) so renders are reproducible.
 
 ## 7. Conformance
 
@@ -557,7 +557,7 @@ that is not an integer is rounded; one that is not finite or does not fit a
 end of the run, and a host must forward such messages to its diagnostic sink
 (`createKlattRuntime` does). The node also reports each run start (rate,
 delay, conversion method with its citations) and each speaker definition load
-at level `info`; `scripts/rendering/dectalk-vtm-render.ts` turns those into
+at level `info`; `src/rendering/dectalk-vtm-render.ts` turns those into
 provenance decisions. The run start carries `startFrame`, the number of
 samples the node had produced when the run began: hosts round a scheduled
 start time to a sample differently (for a start at 551.25 samples the Node

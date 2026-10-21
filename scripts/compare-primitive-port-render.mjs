@@ -37,7 +37,7 @@ try {
     );
   }
   const { nodeRuntimeBackend } = await server.ssrLoadModule(
-    "/scripts/rendering/backends/node-runtime.ts",
+    "/src/rendering/backends/node-runtime.ts",
   );
   for (const experimentId of ["klatt80-baseline", "qlatt-beauty"]) {
     const request = {

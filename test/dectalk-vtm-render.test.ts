@@ -14,7 +14,7 @@ import {
   dectalkVtmDelaySamples,
   renderDectalkVtmTrack,
   renderToInt16,
-} from "../scripts/rendering/dectalk-vtm-render";
+} from "../src/rendering/dectalk-vtm-render";
 import { vtmEventsToTrack } from "../src/dectalk-vtm-track";
 import { createProvenanceCollector } from "../src/provenance";
 

@@ -9,7 +9,7 @@
  * Chrome or Edge runs them from a production build, where every other
  * measurement goes through Node.
  *
- * What is rendered. scripts/rendering/browser-session.ts builds the app for
+ * What is rendered. src/rendering/browser-session.ts builds the app for
  * production with the offline render page as a second entry, serves it with
  * `vite preview` on its own port, and drives the page in a headless browser.
  * Each text is one OfflineAudioContext with a fresh runtime, scheduled the
@@ -58,7 +58,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DECTALK_SAMPLE_RATE, FRAME_SAMPLES } from "../../src/dectalk-vtm-track.ts";
-import { openBrowserSession, payloadSamples } from "../rendering/browser-session.ts";
+import { openBrowserSession, payloadSamples } from "../../src/rendering/browser-session.ts";
 import { runLivePage } from "./browser-live-page.ts";
 import {
   compareVoiceEntry,

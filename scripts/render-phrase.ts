@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { RenderRequest } from "../src/rendering/types.ts";
 import { writeWav } from "../src/rendering/write-wav.ts";
-import { selectRenderBackend } from "./rendering/select-backend.ts";
+import { selectRenderBackend } from "../src/rendering/select-backend.ts";
 
 const args = new Map<string, string>();
 for (let i = 2; i < process.argv.length; i += 1) {

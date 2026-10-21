@@ -1,5 +1,5 @@
 import { expect, it, type MockInstance, vi } from "vitest";
-import { nodeRuntimeBackend } from "../scripts/rendering/backends/node-runtime";
+import { nodeRuntimeBackend } from "../src/rendering/backends/node-runtime";
 import { getAudioParam } from "../src/audio-param-utils";
 import * as interpreterModule from "../src/klatt-interpreter";
 

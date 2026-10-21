@@ -18,7 +18,7 @@ import {
   readRecordedSpeakerPackets,
   readVtmFixture,
 } from "../scripts/oracle/dectalk-vtm-fixture";
-import { renderDectalkVtmTrack, renderToInt16 } from "../scripts/rendering/dectalk-vtm-render";
+import { renderDectalkVtmTrack, renderToInt16 } from "../src/rendering/dectalk-vtm-render";
 import { SPEAKER_SHARED, SPEAKER_WORDS, vtmEventsToTrack } from "../src/dectalk-vtm-track";
 import { textToKlattTrack } from "../src/tts-frontend";
 

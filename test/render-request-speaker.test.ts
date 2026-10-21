@@ -12,8 +12,8 @@ import { readWavInt16 } from "../scripts/oracle/dectalk-vtm-fixture";
 import {
   browserRenderOptions,
   browserRuntimeBackend,
-} from "../scripts/rendering/backends/browser-runtime";
-import { nodeRuntimeBackend } from "../scripts/rendering/backends/node-runtime";
+} from "../src/rendering/backends/browser-runtime";
+import { nodeRuntimeBackend } from "../src/rendering/backends/node-runtime";
 import type { RenderRequest } from "../src/rendering/types";
 
 const fixtureDir = path.join("crates", "dectalk-vtm", "tests", "fixtures");

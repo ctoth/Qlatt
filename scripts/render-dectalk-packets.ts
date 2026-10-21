@@ -36,7 +36,7 @@ import { fileURLToPath } from "node:url";
 import { DECTALK_SAMPLE_RATE, vtmEventsToTrack } from "../src/dectalk-vtm-track.ts";
 import { createProvenanceCollector } from "../src/provenance.ts";
 import { listVtmFixtures, readVtmFixture } from "./oracle/dectalk-vtm-fixture.ts";
-import { renderDectalkVtmTrack, renderToInt16 } from "./rendering/dectalk-vtm-render.ts";
+import { renderDectalkVtmTrack, renderToInt16 } from "../src/rendering/dectalk-vtm-render.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);

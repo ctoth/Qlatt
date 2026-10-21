@@ -1,4 +1,4 @@
-import type { RenderBackend, RenderPayload, RenderRequest } from "../../../src/rendering/types.ts";
+import type { RenderBackend, RenderPayload, RenderRequest } from "../types.ts";
 import { type BrowserRenderOptions, openBrowserSession } from "../browser-session.ts";
 
 /** What a render request asks of the page's offline driver. */

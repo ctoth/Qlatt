@@ -13,7 +13,7 @@ import path from "node:path";
 import { AudioWorkletNode as NodeAudioWorkletNode, OfflineAudioContext } from "node-web-audio-api";
 import { describe, expect, it } from "vitest";
 import { readVtmFixture } from "../scripts/oracle/dectalk-vtm-fixture";
-import { packetCount } from "../scripts/rendering/dectalk-vtm-render";
+import { packetCount } from "../src/rendering/dectalk-vtm-render";
 import { FRAME_SAMPLES } from "../src/dectalk-vtm-track";
 import { createDiagnostics } from "../src/diagnostics";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config";

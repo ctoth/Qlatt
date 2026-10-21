@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { writeWav } from "../src/rendering/write-wav";
 import { measureFricatives } from "./frication-spectrum";
-import { nodeRuntimeBackend } from "./rendering/backends/node-runtime.ts";
+import { nodeRuntimeBackend } from "../src/rendering/backends/node-runtime.ts";
 
 /** Execute through Vitest so the normal Vite resource environment is present. */
 export async function renderFricationComparison(

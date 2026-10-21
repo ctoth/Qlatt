@@ -17,7 +17,7 @@ import os from "node:os";
 import path from "node:path";
 import { type Browser, chromium } from "playwright-core";
 import { build, createServer as createViteServer, preview } from "vite";
-import type { RenderPayload } from "../../src/rendering/types.ts";
+import type { RenderPayload } from "./types.ts";
 
 export type BrowserRenderServer = "dev" | "build";
 

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { expect, it, vi } from "vitest";
-import { createNodeRuntimeBackend } from "../scripts/rendering/backends/node-runtime";
+import { createNodeRuntimeBackend } from "../src/rendering/backends/node-runtime";
 import * as configModule from "../src/experiments/load-experiment-config";
 import * as runtimeModule from "../src/klatt-runtime";
 import type { RenderPayload, RenderRequest } from "../src/rendering/types";

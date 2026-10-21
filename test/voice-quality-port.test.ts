@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { nodeRuntimeBackend } from "../scripts/rendering/backends/node-runtime";
+import { nodeRuntimeBackend } from "../src/rendering/backends/node-runtime";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
 import { textToKlattTrack } from "../src/tts-frontend";
 

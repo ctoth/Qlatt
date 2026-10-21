@@ -1,7 +1,7 @@
-import { createDiagnostics } from "../../../src/diagnostics.ts";
-import { summarizeTrack } from "../../../src/rendering/track-summary.ts";
-import type { RenderBackend, RenderPayload, RenderRequest } from "../../../src/rendering/types.ts";
-import { textToKlattTrackDetailed } from "../../../src/tts-frontend.ts";
+import { createDiagnostics } from "../../diagnostics.ts";
+import { summarizeTrack } from "../track-summary.ts";
+import type { RenderBackend, RenderPayload, RenderRequest } from "../types.ts";
+import { textToKlattTrackDetailed } from "../../tts-frontend.ts";
 
 export const trackOnlyBackend: RenderBackend = {
   id: "track-only",

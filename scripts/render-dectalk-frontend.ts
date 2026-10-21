@@ -47,7 +47,7 @@ import {
 import type { KlattFrame } from "../src/klatt-interpreter.ts";
 import { textToKlattTrackDetailed } from "../src/tts-frontend.ts";
 import { readVtmFixture } from "./oracle/dectalk-vtm-fixture.ts";
-import { renderDectalkVtmTrack } from "./rendering/dectalk-vtm-render.ts";
+import { renderDectalkVtmTrack } from "../src/rendering/dectalk-vtm-render.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);

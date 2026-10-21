@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createNodeRenderResources } from "../scripts/rendering/backends/node-render-resources";
+import { createNodeRenderResources } from "../src/rendering/backends/node-render-resources";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
 import { createNodeRuntimeAssetLoader } from "../src/runtime-assets/node-loader";
 

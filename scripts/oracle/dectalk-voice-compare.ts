@@ -19,7 +19,7 @@ import {
 } from "../../src/experiments/frontend-pairing.ts";
 import { PLAYBACK_LEAD_SEC } from "../../src/track-playback.ts";
 import { textToKlattTrack } from "../../src/tts-frontend.ts";
-import { renderDectalkVtmTrack, renderToInt16 } from "../rendering/dectalk-vtm-render.ts";
+import { renderDectalkVtmTrack, renderToInt16 } from "../../src/rendering/dectalk-vtm-render.ts";
 import { readWavInt16 } from "./dectalk-vtm-fixture.ts";
 import type { OracleCorpusDocument, OracleCorpusEntry } from "./types.ts";
 

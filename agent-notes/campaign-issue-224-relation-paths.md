@@ -10,10 +10,12 @@ Started from PR410 final 7259b6a8; that prerequisite has merged. Implemented rel
 
 Reuse the existing document side metadata. Shadowed includes replace relations by whole name, like predicates; source metadata must select the same winner. Preserve authored scalar paths and classify only floor_fallback.value as an expression. Do not add macro expansion, missing-key fallback or runtime machinery.
 
+Accepted Claude's full four-file review through 8b0e7fef: no defects. The additional negative-assertion suggestion is an observation, not a demonstrated failure; no new guard requested. This response changes only the task note.
+
 # Surprises
 
 Other agents own separate changes; preserve those during integration.
 
 # Next step
 
-Publish stacked on #410 for hosted CI; supervisor reviews after prerequisite merge. Respond to Claude review. Keep #224 open.
+Await final-head hosted CI and supervisor merge. Start the separately approved four-root metadata slice in its own worktree. Keep #224 open.

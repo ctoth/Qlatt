@@ -127,6 +127,8 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
           (entry.value.path[0] === "rules" &&
             (entry.value.path.every((part) => typeof part === "string") ||
               (entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number") ||
+              entry.value.path[2] === "set" ||
+              entry.value.path[2] === "insert_points" ||
               entry.value.path[2] === "constraint" ||
               (entry.value.path[2] === "select" && entry.value.path[3] === "where"))),
       ),

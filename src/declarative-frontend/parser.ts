@@ -436,6 +436,8 @@ function normalizeRule(ruleInput: unknown, observe?: RulePathObserver): PlainObj
           paths.push({ compiled, authored });
           if (
             (compiled[0] === "constraint" ||
+              compiled[0] === "set" ||
+              compiled[0] === "insert_points" ||
               (compiled[0] === "select" && compiled[1] === "where")) &&
             compiled.some((part) => typeof part === "number")
           ) {

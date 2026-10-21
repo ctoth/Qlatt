@@ -356,7 +356,7 @@ describe("runtime structural diagnostics", () => {
     expect(node.connect).toHaveBeenCalledWith(node.gain, 0);
     expect(options.provenance.getDecisions()).toHaveLength(1);
     expect(options.provenance.getDecisions()[0].reason).toBe(
-      "unnamed graph: connected out[0] -> out.gain (AudioParam)",
+      "unnamed graph: connected out[0] -> out.gain (AudioParam); source: omitted port defaults to 0",
     );
     expect(diagnostics.getEntries()).toEqual([]);
   });

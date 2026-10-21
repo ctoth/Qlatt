@@ -57,7 +57,9 @@ describe("declarative voice-quality channels", () => {
       ...options,
       directionTrack: { version: "1", global: { voice: {} } },
     });
-    expect(directed.track).toEqual(baseline.track);
+    const acousticFrames = (track: typeof baseline.track) =>
+      track.map(({ time, phoneme, params }) => ({ time, phoneme, params }));
+    expect(acousticFrames(directed.track)).toEqual(acousticFrames(baseline.track));
     const input = {
       score: { text: "hello" },
       directionTrack: {

@@ -18,5 +18,7 @@ Source inspection found that the preexisting unconditional neutral affect object
 
 Initial quality job 119063670778 reported one formatter error in test/apply-affect.test.ts:18. Applied the emitted wrapper line break; no behavior change.
 
+At 9a17b57f, quality job 119063962342 reported TS18046 in the deferred invalid-channel assertion: I accessed the unknown-typed document property inside the callback instead of retaining its checked array in a local. Test shard 3 job 119064034981 reported unequal DECtalk tracks because I compared provenance IDs between an undirected run and a run that records voice_identity. The diff changes decision IDs (for example d001024 to d001032), and parse.ts records that extra direction before subsequent stages. Correct the fixtures by capturing the narrowed array and comparing acoustic frames (time, phoneme, params), without changing production behavior or provenance generation.
+
 # Next step
 Inspect replacement hosted CI and respond to independent Claude review. #141 remains open for relocation and remaining resource ownership.

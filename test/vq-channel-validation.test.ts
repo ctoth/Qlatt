@@ -18,13 +18,14 @@ it.each([
   if (!isPlainObject(document) || !Array.isArray(document.channels)) {
     throw new Error("expected channels document");
   }
-  const first: unknown = document.channels[0];
+  const channels = document.channels;
+  const first: unknown = channels[0];
   if (!isPlainObject(first)) throw new Error("expected channel record");
   expect(first[field]).not.toEqual(value);
   expect(() =>
     parseVoiceQualityChannels({
       ...document,
-      channels: [{ ...first, [field]: value }, ...document.channels.slice(1)],
+      channels: [{ ...first, [field]: value }, ...channels.slice(1)],
     }),
   ).toThrow("E_VQ_CHANNEL_SCHEMA");
 });

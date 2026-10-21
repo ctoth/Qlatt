@@ -40,18 +40,30 @@ describe("transcribe-text", () => {
       };
       const diagnostics = createDiagnostics();
       const tokens = transcribeText("Blorf blorf", {
-        ...selected, dictionaryMap: {}, diagnostics,
+        ...selected,
+        dictionaryMap: {},
+        diagnostics,
         lts: { path: resources.lts.path, document },
       });
-      expect(tokens.filter((token) => token.word === "Blorf").map((token) => token.phoneme))
-        .toEqual(["K", "AE", "T"]);
-      expect(diagnostics.getEntries().filter((entry) => entry.code === "LTS_UNMATCHED_INPUT"))
-        .toEqual([expect.objectContaining({ data: expect.objectContaining({
-          word: "blorf", frontend: "qlatt-english", resource: resources.lts.path,
-          affected: [..."blorf"].map((character, position) => ({
-            character, position, reason: "no-rule-category",
-          })),
-        }) })]);
+      expect(
+        tokens.filter((token) => token.word === "Blorf").map((token) => token.phoneme),
+      ).toEqual(["K", "AE", "T"]);
+      expect(
+        diagnostics.getEntries().filter((entry) => entry.code === "LTS_UNMATCHED_INPUT"),
+      ).toEqual([
+        expect.objectContaining({
+          data: expect.objectContaining({
+            word: "blorf",
+            frontend: "qlatt-english",
+            resource: resources.lts.path,
+            affected: [..."blorf"].map((character, position) => ({
+              character,
+              position,
+              reason: "no-rule-category",
+            })),
+          }),
+        }),
+      ]);
     });
 
     it("uses declared compound span and joiner order, with no-match and exact-word controls", () => {

@@ -220,8 +220,9 @@ export function applyLtsRules(
 
   // Engineering convention: locale-independent case conversion per Unicode scalar.
   // Each resulting UTF-16 unit retains its original scalar and UTF-16 offset.
-  const origins: ({ character: string; position: number } | undefined)[] =
-    Array(policy.boundary_marker.length).fill(undefined);
+  const origins: ({ character: string; position: number } | undefined)[] = Array(
+    policy.boundary_marker.length,
+  ).fill(undefined);
   let input = policy.boundary_marker;
   let position = 0;
   for (const character of word) {
@@ -242,7 +243,9 @@ export function applyLtsRules(
   let pos = 0;
   while (pos < input.length) {
     const ch = String.fromCodePoint(input.codePointAt(pos)!);
-    const category = Object.hasOwn(rules_by_letter, ch) ? ch : (categories.get(ch) ?? policy.fallback);
+    const category = Object.hasOwn(rules_by_letter, ch)
+      ? ch
+      : (categories.get(ch) ?? policy.fallback);
     const rules =
       category !== null && Object.hasOwn(rules_by_letter, category)
         ? rules_by_letter[category]

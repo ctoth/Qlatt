@@ -9,12 +9,16 @@ describe("resource input policy", () => {
   function fixture(): LtsRulesData {
     return {
       input_policy: {
-        case_mode: "preserve", boundary_marker: "|", categories: { DIGIT: "١" },
-        fallback: null, filtered_markers: ["MARK"], citations: ["fixture input policy"],
+        case_mode: "preserve",
+        boundary_marker: "|",
+        categories: { DIGIT: "١" },
+        fallback: null,
+        filtered_markers: ["MARK"],
+        citations: ["fixture input policy"],
       },
       context_symbols: {},
       rules_by_letter: {
-        "é": [{ left: "|", letters: "é", right: "", phonemes: ["EH", "MARK", "AX"] }],
+        é: [{ left: "|", letters: "é", right: "", phonemes: ["EH", "MARK", "AX"] }],
         "😀": [{ left: "", letters: "😀", right: "", phonemes: ["HH"] }],
         DIGIT: [{ left: "", letters: "١", right: "|", phonemes: ["W", "AH", "N"] }],
       },
@@ -49,15 +53,20 @@ describe("resource input policy", () => {
     const diagnostics = createDiagnostics();
     expect(applyLtsRules("😀ßX|", data, { diagnostics, resource: "fixture.yaml" })).toEqual(["HH"]);
     expect(diagnostics.getEntries()).toEqual([
-      expect.objectContaining({ code: "LTS_UNMATCHED_INPUT", data: expect.objectContaining({
-        word: "😀ßX|", resource: "fixture.yaml", positionUnit: "UTF-16",
-        affected: [
-          { character: "ß", position: 2, reason: "no-match" },
-          { character: "X", position: 3, reason: "no-rule-category" },
-          { character: "|", position: 4, reason: "no-rule-category" },
-        ],
-        citations: ["fixture input policy"],
-      }) }),
+      expect.objectContaining({
+        code: "LTS_UNMATCHED_INPUT",
+        data: expect.objectContaining({
+          word: "😀ßX|",
+          resource: "fixture.yaml",
+          positionUnit: "UTF-16",
+          affected: [
+            { character: "ß", position: 2, reason: "no-match" },
+            { character: "X", position: 3, reason: "no-rule-category" },
+            { character: "|", position: 4, reason: "no-rule-category" },
+          ],
+          citations: ["fixture input policy"],
+        }),
+      }),
     ]);
     const fallback = fixture();
     fallback.input_policy.fallback = "OTHER";
@@ -66,13 +75,19 @@ describe("resource input policy", () => {
   });
 
   it.each([
-    { case_mode: "locale" }, { boundary_marker: "" }, { boundary_marker: "ab" },
-    { categories: { one: "x", two: "x" } }, { fallback: "" },
-    { filtered_markers: [3] }, { citations: [] }, { citations: [" "] },
+    { case_mode: "locale" },
+    { boundary_marker: "" },
+    { boundary_marker: "ab" },
+    { categories: { one: "x", two: "x" } },
+    { fallback: "" },
+    { filtered_markers: [3] },
+    { citations: [] },
+    { citations: [" "] },
   ])("rejects malformed supplied policy %j", (policy) => {
     const data = fixture();
-    expect(() => parseLtsRulesData({ ...data, input_policy: { ...data.input_policy, ...policy } }))
-      .toThrow("E_LTS_POLICY");
+    expect(() =>
+      parseLtsRulesData({ ...data, input_policy: { ...data.input_policy, ...policy } }),
+    ).toThrow("E_LTS_POLICY");
   });
 });
 

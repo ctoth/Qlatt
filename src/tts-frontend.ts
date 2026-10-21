@@ -1586,6 +1586,8 @@ function buildTextToKlattTrackDetailed(
     },
   };
   const lowered = lowerToFrames(utterance, lowerOptions, {
+    frontendId: options.frontendPath ?? frontendId,
+    rdPolicy: resources.vqChannels?.rdPolicy,
     f0Model: isLayeredF0Model(spec.f0_model) ? spec.f0_model : undefined,
     frameValueFeatures: frameValueFeatures(spec.frame_programs),
     speakerParams,

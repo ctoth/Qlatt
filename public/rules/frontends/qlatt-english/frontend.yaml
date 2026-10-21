@@ -1,4 +1,6 @@
 version: v13-cel
+resources:
+  vq_channels: /rules/policy/vq-channels.yaml
 # Qlatt's existing phonotactics.yaml vowel/onset policy, encoded for syllabifyWord.
 # Encoding characters are engineering identifiers, not an additional phone inventory.
 # No affix stripping: src/g2p/syllabify.ts uses maximum onset alone.

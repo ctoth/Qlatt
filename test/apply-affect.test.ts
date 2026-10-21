@@ -1,8 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { compileAffect, neutralAffect } from "../src/input/affect";
-import { applyAffectToTrack, isNeutralDelta } from "../src/input/apply-affect";
+import { applyAffectToTrack as applyWithPolicy, isNeutralDelta } from "../src/input/apply-affect";
+import { readRdPolicy } from "../src/input/rd-policy";
 import type { KlattFrame } from "../src/tts-frontend-types";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const rdPolicy = readRdPolicy(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
+function applyAffectToTrack(
+  track: Parameters<typeof applyWithPolicy>[0],
+  affect: Parameters<typeof applyWithPolicy>[1],
+) {
+  return applyWithPolicy(track, affect, { frontendId: "qlatt-beauty", rdPolicy });
+}
 
 /**
  * A small synthetic two-vowel track that carries the parameters the affect

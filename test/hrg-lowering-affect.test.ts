@@ -2,11 +2,16 @@ import { describe, expect, it } from "vitest";
 import type { FeatureSchema, HrgSchema, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { compileAffect } from "../src/input/affect";
+import { readRdPolicy } from "../src/input/rd-policy";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
 import {
   attachDirectionsToUtterance,
   DIRECTION_ITEM_SCHEMA,
   parseDirectionInput,
 } from "../src/input/parse";
+
+const rdPolicy = readRdPolicy(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
+const context = { frontendId: "fixture", rdPolicy };
 
 const META = {
   ruleId: "fixture",
@@ -211,6 +216,20 @@ function fixture(): Utterance {
 }
 
 describe("HRG lowering Affect projection", () => {
+  it("uses the supplied Rd bounds and names a missing consuming resource", () => {
+    const narrowed = readRdPolicy({
+      effective_rd: { min: 0.6, max: 0.8, citations: ["Fant_1997"] },
+    });
+    const lowered = lowerToFrames(fixture(), POLICY, { ...context, rdPolicy: narrowed });
+    const first = lowered.frames.find((frame) => frame.segmentId === "segment-0");
+    expect(first).toBeDefined();
+    if (!first) throw new Error("fixture segment missing");
+    expect(first.params.Rd + first.params.RdPhraseOffset).toBeCloseTo(0.6);
+    expect(() => lowerToFrames(fixture(), POLICY, { frontendId: "without-vq" })).toThrow(
+      "E_FRONTEND_CONFIG: frontend 'without-vq' requires vq_channels",
+    );
+  });
+
   it.each([
     { phoneme: "REST", type: "pause", declared: true, eligible: true },
     { phoneme: "EH", type: "silence", declared: true, eligible: false },
@@ -238,6 +257,7 @@ describe("HRG lowering Affect projection", () => {
         },
       };
       const lowered = lowerToFrames(utterance, policy, {
+        ...context,
         ...(testCase.declared
           ? {
               silence: {
@@ -266,7 +286,7 @@ describe("HRG lowering Affect projection", () => {
   it("composes global and field-wise winning local deltas over graph-linked Words", () => {
     const angry = compileAffect("angry", 1).vq;
     const utterance = fixture();
-    const lowered = lowerToFrames(utterance, POLICY);
+    const lowered = lowerToFrames(utterance, POLICY, context);
     const first = lowered.frames.find((frame) => frame.segmentId === "segment-0");
     const second = lowered.frames.find((frame) => frame.segmentId === "segment-1");
     if (!first || !second) throw new Error("lowered Segment frames missing");
@@ -294,7 +314,7 @@ describe("HRG lowering Affect projection", () => {
   it("scales completed F0 excursion around its voiced mean with Affect provenance", () => {
     const angry = compileAffect("angry", 1).vq;
     const utterance = varianceFixture();
-    const lowered = lowerToFrames(utterance, POLICY);
+    const lowered = lowerToFrames(utterance, POLICY, context);
     const voiced = lowered.frames.filter((frame) => frame.segmentId != null);
     const first = voiced[0];
     const second = voiced[1];
@@ -324,7 +344,7 @@ describe("HRG lowering Affect projection", () => {
     if (!affect) throw new Error("variance Affect Item missing");
     affect.set("delta", { ...compileAffect("angry", 1).vq, f0VarianceScale: -1 }, META);
 
-    expect(() => lowerToFrames(utterance, POLICY)).toThrowError(/E_HRG_LOWER_F0_VARIANCE/);
+    expect(() => lowerToFrames(utterance, POLICY, context)).toThrowError(/E_HRG_LOWER_F0_VARIANCE/);
     expect(utterance.diagnostics.getEntries()).toContainEqual(
       expect.objectContaining({
         code: "HRG_LOWER_F0_VARIANCE_REJECTED",

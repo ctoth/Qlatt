@@ -1,6 +1,7 @@
 import type { Diagnostics } from "../diagnostics";
 import { ltsDocumentAt } from "../g2p/lts-document";
 import { loadStressPolicy } from "../g2p/stress-policy";
+import { readRdPolicy, type RdPolicy } from "../input/rd-policy";
 import type { AreaFunctionDerivation } from "../provenance";
 import { parseSourceContourDocument, type SourceContourSpec } from "../source-contour";
 import { parseSpeakerProfileDocument, type SpeakerProfileSpec } from "../speaker-profile";
@@ -74,6 +75,7 @@ export type FrontendResources = {
   speakerProfile?: { path: string; spec: SpeakerProfileSpec };
   sourceContour?: { path: string; spec: SourceContourSpec };
   textParser?: { config: TextParserConfig; table: TextParserTable };
+  vqChannels?: { path: string; rdPolicy: RdPolicy };
 };
 
 const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
@@ -849,6 +851,13 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
         );
   const textParserConfig = parseTextParserConfig(spec);
   if (textParserConfig) requireAsset(textParserConfig.tablePath, "text_parser.table_path");
+  const declaredResources = isPlainObject(spec.resources) ? spec.resources : {};
+  const vqChannelsPath =
+    declaredResources.vq_channels == null
+      ? undefined
+      : requireAsset(declaredResources.vq_channels, "vq_channels", (path) =>
+          readRdPolicy(loadYamlDocumentSync(path)),
+        );
   return {
     inventory,
     inventoryPath,
@@ -858,6 +867,14 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     morphologyPath,
     stressPolicyPath,
     dictionaryPath: typeof spec.dictionary_path === "string" ? spec.dictionary_path : undefined,
+    ...(vqChannelsPath === undefined
+      ? {}
+      : {
+          vqChannels: {
+            path: vqChannelsPath,
+            rdPolicy: FRONTEND_ASSET_CACHE.get(vqChannelsPath) as RdPolicy,
+          },
+        }),
     ...(textParserConfig === null
       ? {}
       : {

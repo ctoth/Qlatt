@@ -60,8 +60,9 @@ citations:
       });
       expect(parsed.directions[0].delta?.testChannel).toBe(delta);
       expect(
-        applyAffectToTrack([{ time: 0, phoneme: "EH", params: { TEST: 10 } }], vq).track[0].params
-          .TEST,
+        applyAffectToTrack([{ time: 0, phoneme: "EH", params: { TEST: 10 } }], vq, {
+          frontendId: "fixture",
+        }).track[0].params.TEST,
       ).toBe(expected);
       const utterance = new Utterance(
         {

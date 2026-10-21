@@ -1,30 +1,39 @@
 import { load as loadYaml } from "js-yaml";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createDiagnostics } from "../src/diagnostics";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { applyAffectToTrack } from "../src/input/apply-affect";
 import { NEUTRAL_VQ } from "../src/input/direction-track";
 import { projectRd, readRdPolicy } from "../src/input/rd-policy";
 
-vi.mock("../src/yaml-loader", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../src/yaml-loader")>();
-  return {
-    ...actual,
-    loadYamlDocumentSync: <T = unknown>(path: string): T => {
-      const document = actual.loadYamlDocumentSync<T>(path);
-      if (path !== "/rules/policy/vq-channels.yaml") return document;
-      // Change the declared YAML bounds, preserving the other channel policy.
-      return {
-        ...document,
-        effective_rd: loadYaml("min: 0.5\nmax: 1.5\ncitations: [Fant_1997]\n"),
-      };
-    },
-  };
+const policy = readRdPolicy({
+  effective_rd: loadYaml("min: 0.5\nmax: 1.5\ncitations: [Fant_1997]\n"),
 });
+const context = { frontendId: "fixture", rdPolicy: policy };
 
 describe("declared effective Rd policy", () => {
+  it("inherits declared VQ resources and permits an undeclared role", () => {
+    const english = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+    const beauty = loadFrontendResources(loadBundledRulepackSpec("qlatt-beauty"));
+    expect(english.vqChannels?.path).toBe("/rules/policy/vq-channels.yaml");
+    expect(beauty.vqChannels?.rdPolicy).toBe(english.vqChannels?.rdPolicy);
+    const dectalk = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
+    expect(dectalk.vqChannels).toBeUndefined();
+  });
+
+  it("requires the role only when a nonzero Rd delta consumes it", () => {
+    const track = [{ time: 0, params: { Rd: 0.7 } }];
+    const absent = { frontendId: "without-vq" };
+    expect(applyAffectToTrack(track, NEUTRAL_VQ, absent).track).toEqual(track);
+    expect(() => applyAffectToTrack(track, { ...NEUTRAL_VQ, rdDelta: 1 }, absent)).toThrow(
+      "E_FRONTEND_CONFIG: frontend 'without-vq' requires vq_channels",
+    );
+  });
+
   it("resolves Rd from the speaker profile and records the resolution", () => {
     const diagnostics = createDiagnostics();
-    expect(projectRd({}, 0.1, { speakerParams: { Rd: 1 }, diagnostics })).toEqual({
+    expect(projectRd({}, 0.1, policy, { speakerParams: { Rd: 1 }, diagnostics })).toEqual({
       Rd: 1,
       RdPhraseOffset: expect.closeTo(0.1),
     });
@@ -33,7 +42,7 @@ describe("declared effective Rd policy", () => {
 
   it("records the declared clamp bounds in diagnostics", () => {
     const diagnostics = createDiagnostics();
-    projectRd({ Rd: 0.7 }, 10, { diagnostics });
+    projectRd({ Rd: 0.7 }, 10, policy, { diagnostics });
     expect(diagnostics.getEntries()).toEqual([
       expect.objectContaining({
         level: "warn",
@@ -45,7 +54,7 @@ describe("declared effective Rd policy", () => {
   it.each([undefined, Number.NaN, Number.POSITIVE_INFINITY])("diagnoses unresolved Rd %s", (Rd) => {
     const diagnostics = createDiagnostics();
     const params: Record<string, number> = Rd === undefined ? {} : { Rd };
-    expect(() => projectRd(params, 1, { diagnostics })).toThrow("E_RD_MISSING");
+    expect(() => projectRd(params, 1, policy, { diagnostics })).toThrow("E_RD_MISSING");
     expect(diagnostics.getEntries().map((entry) => entry.code)).toContain("E_RD_MISSING");
   });
 
@@ -62,16 +71,17 @@ describe("declared effective Rd policy", () => {
     [10, 1.5],
     [-10, 0.5],
   ])("clamps delta %s to the YAML bound %s", (rdDelta, bound) => {
-    const { track } = applyAffectToTrack([{ time: 0, params: { Rd: 0.7, RdPhraseOffset: 0.1 } }], {
-      ...NEUTRAL_VQ,
-      rdDelta,
-    });
+    const { track } = applyAffectToTrack(
+      [{ time: 0, params: { Rd: 0.7, RdPhraseOffset: 0.1 } }],
+      { ...NEUTRAL_VQ, rdDelta },
+      context,
+    );
     expect(track[0].params.Rd + track[0].params.RdPhraseOffset).toBeCloseTo(bound);
   });
 
   it("fails with a diagnostic when no Rd was resolved", () => {
     expect(() =>
-      applyAffectToTrack([{ time: 0, params: {} }], { ...NEUTRAL_VQ, rdDelta: 1 }),
+      applyAffectToTrack([{ time: 0, params: {} }], { ...NEUTRAL_VQ, rdDelta: 1 }, context),
     ).toThrow("E_RD_MISSING");
   });
 });

@@ -41,7 +41,7 @@
 import type { KlattFrame } from "../tts-frontend-types";
 import type { CompiledAffect } from "./affect";
 import { NEUTRAL_VQ, type VoiceQualityDelta } from "./direction-track";
-import { projectRd } from "./rd-policy";
+import { projectRd, type RdPolicy } from "./rd-policy";
 import { VQ_PARAM_CHANNELS } from "./vq-channels";
 
 /** Result of applying an affect: the new track plus the citations consumed. */
@@ -64,6 +64,7 @@ function isCompiledAffect(value: CompiledAffect | VoiceQualityDelta): value is C
 export function applyAffectToTrack(
   track: readonly KlattFrame[],
   affect: CompiledAffect | VoiceQualityDelta,
+  context: { frontendId: string; rdPolicy?: RdPolicy },
 ): AffectApplication {
   const vq: VoiceQualityDelta = isCompiledAffect(affect) ? affect.vq : affect;
   const baseCitations = isCompiledAffect(affect) ? affect.citations : [];
@@ -111,7 +112,12 @@ export function applyAffectToTrack(
 
     // --- Rd channel (breathy/pressed) via RdPhraseOffset ------------------
     if (vq.rdDelta !== 0) {
-      Object.assign(params, projectRd(params, vq.rdDelta));
+      if (!context.rdPolicy) {
+        throw new Error(
+          `E_FRONTEND_CONFIG: frontend '${context.frontendId}' requires vq_channels`,
+        );
+      }
+      Object.assign(params, projectRd(params, vq.rdDelta, context.rdPolicy));
     }
 
     for (const row of VQ_PARAM_CHANNELS) {

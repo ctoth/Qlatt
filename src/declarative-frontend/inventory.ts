@@ -390,10 +390,7 @@ function buildLayeredInventorySpec(
  * Parse an inventory document, layering explicitly supplied phonology source
  * when it names a `phonology_path`. Acquisition belongs to the loaders below.
  */
-export function parseInventorySpec(
-  source: string,
-  phonologySource?: string,
-): InventorySpec {
+export function parseInventorySpec(source: string, phonologySource?: string): InventorySpec {
   const raw = parseInventoryDocument(source);
   const phonologyPath = declaredPhonologyPath(raw);
   if (phonologyPath === undefined) return buildInventorySpec(raw);

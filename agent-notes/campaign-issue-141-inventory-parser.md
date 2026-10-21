@@ -7,6 +7,8 @@ inventory to the area-formant generator (#141, bounded partial delivery).
 
 Isolated from origin/master 17e27f2b. Implementation complete; hosted CI and
 Claude review pending. No local CI.
+Initial quality job119189415271 requested the parser signature on one line;
+applied that formatting-only correction for replacement hosted CI.
 
 # Decisions and why
 

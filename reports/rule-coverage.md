@@ -10,7 +10,7 @@ Recognition is reported separately from actual provenance outcomes. A disabled r
 
 ## dectalk-english
 
-Compiled rulepack SHA-256: c3ce60e311eb143e866f3c132851233938e6eb2d350db295a142ee12ef0d56e1.
+Compiled rulepack SHA-256: 6e8cedfe8e37fbbe9d28689bcb46d3e98fc842886ed6cbf81cfd68a7afea558f.
 
 | Phase | Rule | Fires / firing units | Recorded attempts | Most common failure |
 | --- | --- | ---: | ---: | --- |
@@ -588,7 +588,7 @@ Compiled rulepack SHA-256: c3ce60e311eb143e866f3c132851233938e6eb2d350db295a142e
 
 ## qlatt-beauty
 
-Compiled rulepack SHA-256: 9410c6e19bc224190d13a2bfae1295e020a60b7a7b5b1647f1835fb2d47af646.
+Compiled rulepack SHA-256: 1940072669b4fea7af144eb4e18592605c6d50c9a0c8f69c2ca748546c184bc8.
 
 | Phase | Rule | Fires / firing units | Recorded attempts | Most common failure |
 | --- | --- | ---: | ---: | --- |
@@ -650,7 +650,7 @@ Compiled rulepack SHA-256: 9410c6e19bc224190d13a2bfae1295e020a60b7a7b5b1647f1835
 | formant | place_f2_locus | 120 | 627 | select_where_failed (507) |
 | formant | place_rel_copy | 61 | 627 | select_where_failed (566) |
 | duration | polysyllabic_shortening | 110 | 627 | select_where_failed (517) |
-| duration | pre_boundary_lengthening | 265 | 627 | select_where_failed (258) |
+| duration | pre_boundary_lengthening | 307 | 627 | select_where_failed (258) |
 | duration | punctuation_pause | 45 | 627 | select_where_failed (582) |
 | formant | r_f3_lowering | 25 | 627 | select_where_failed (602) |
 | structural | remap_stops_to_closures | 81 | 480 | select_where_failed (399) |
@@ -864,7 +864,7 @@ Compiled rulepack SHA-256: 9410c6e19bc224190d13a2bfae1295e020a60b7a7b5b1647f1835
 
 ## qlatt-english
 
-Compiled rulepack SHA-256: d163bfe6a0e99da25c5c37a62fc234999fc8a7797cf0359544a1f51c8b491a29.
+Compiled rulepack SHA-256: 01b4006fc4dfe8b8692c92b9a7fe69337b7c6cec70ff8be11030dab0d80e9861.
 
 | Phase | Rule | Fires / firing units | Recorded attempts | Most common failure |
 | --- | --- | ---: | ---: | --- |
@@ -925,7 +925,7 @@ Compiled rulepack SHA-256: d163bfe6a0e99da25c5c37a62fc234999fc8a7797cf0359544a1f
 | formant | place_f2_locus | 120 | 627 | select_where_failed (507) |
 | formant | place_rel_copy | 61 | 627 | select_where_failed (566) |
 | duration | polysyllabic_shortening | 110 | 627 | select_where_failed (517) |
-| duration | pre_boundary_lengthening | 265 | 627 | select_where_failed (258) |
+| duration | pre_boundary_lengthening | 307 | 627 | select_where_failed (258) |
 | duration | punctuation_pause | 45 | 627 | select_where_failed (582) |
 | formant | r_f3_lowering | 25 | 627 | select_where_failed (602) |
 | structural | remap_stops_to_closures | 81 | 480 | select_where_failed (399) |

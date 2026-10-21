@@ -612,6 +612,84 @@ describe("direct rule errors through composition", () => {
   }
 });
 
+describe("phase source locations through composition", () => {
+  it.each([false, true])("keeps nested include phase coordinates (async: %s)", async (asynchronous) => {
+    const dir = mkdtempSync(join(tmpdir(), "qlatt-phase-origins-"));
+    try {
+      const base = loadBundledRulepackSpec();
+      const root = readYamlFile(`${FRONTENDS_DIR}/qlatt-english/frontend.yaml`);
+      const resource = writeExtendingFrontend(dir, {}, {
+        include: [...(root.include as string[]), "first.yaml", "last.yaml"],
+        phases: [{ name: "fixture_root" }],
+      });
+      writeFileSync(
+        join(dir, "first.yaml"),
+        dumpYaml({ phases: [{ name: "fixture_first" }], include: ["nested.yaml"] }),
+      );
+      const nested = join(dir, "nested.yaml").replace(/\\/g, "/");
+      writeFileSync(
+        nested,
+        dumpYaml({
+          phases: [
+            {
+              name: "fixture_nested",
+              after: ["fixture_last", "missing_phase"],
+              rules: [7, "missing_rule"],
+              resolve_points: [7, "missing_point"],
+              resolve_scalars: [7, "missing_scalar"],
+            },
+          ],
+        }),
+      );
+      const last = join(dir, "last.yaml").replace(/\\/g, "/");
+      writeFileSync(
+        last,
+        dumpYaml({ phases: [{ name: "fixture_last" }, { name: "fixture_root" }] }),
+      );
+      let message = "";
+      try {
+        if (asynchronous) await preloadRulepackSpecFromPath(resource);
+        else loadRulepackSpecFromPath(resource);
+      } catch (error) {
+        message = String(error);
+      }
+      const spans = yamlDocumentSpans(parseYamlString(readFileSync(nested, "utf8"), nested));
+      const phaseIndex = base.phases.length + 2;
+      for (const [code, path, field] of [
+        ["E_PHASE_ORDER_VIOLATION", `phases[${phaseIndex}].after`, "after"],
+        ["E_PHASE_ORDER_VIOLATION", "phases.fixture_nested.after", "after"],
+        ["E_RULE_UNKNOWN", `phases[${phaseIndex}].rules`, "rules"],
+        [
+          "E_PHASE_RESOLVE_POINT_RELATION_INVALID",
+          `phases[${phaseIndex}].resolve_points`,
+          "resolve_points",
+        ],
+        ["E_PHASE_RESOLVE_SCALAR_UNKNOWN", `phases[${phaseIndex}].resolve_scalars`, "resolve_scalars"],
+      ]) {
+        const span = spans.find((entry) => entry.value.path.join(".") === `phases.0.${field}`)!.key!;
+        expect(message.split("\n").find((line) => line.startsWith(`${code} at ${path}:`))).toContain(
+          `[${nested}:${span.line}:${span.column}]`,
+        );
+      }
+      const name = yamlDocumentSpans(parseYamlString(readFileSync(last, "utf8"), last)).find(
+        (entry) => entry.value.path.join(".") === "phases.1.name",
+      )!.value;
+      expect(
+        message
+          .split("\n")
+          .find((line) => line.startsWith(`E_PHASE_NAME_DUP at phases[${phaseIndex + 2}].name:`)),
+      ).toContain(`[${last}:${name.line}:${name.column}]`);
+      const retained = rulepackRuleDocumentSpans(base).filter(
+        (entry) => entry.value.path[0] === "phases" && entry.value.path[2] === "rules",
+      );
+      expect(retained.length).toBeGreaterThan(0);
+      expect(retained.every((entry) => entry.value.path.length === 3)).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("macro source ancestry", () => {
   it("keeps the bundled call site primary and selects an overriding function body", () => {
     const sourcePath = "rules.vocal_effort.select.where";

@@ -11,7 +11,14 @@ nucleus_types: [vowel]
 symbol_grammar: '[A-Z]+'
 stress_markers: {0: '0', 1: '1', 2: '2'}
 default_duration_ms: 30 # engineering estimate for targets without dur
+target_feature_exclusions: [dur, SW, type]
 ```
+
+`target_feature_exclusions` is a required array of non-empty field names; `[]`
+explicitly excludes nothing. It belongs to the inventory and skips only inference
+of Segment features from raw targets. It does not remove `base_params` features or
+change materialization: `dur` supplies duration, `SW` supplies `inventorySW`, and
+`type` supplies the already-declared Segment type.
 
 `silence_symbol` must name a target with a positive `dur`. Its parameters inherit
 `base_params` and supply the initial and final lowering edges. Declare source-off

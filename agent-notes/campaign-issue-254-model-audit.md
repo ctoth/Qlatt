@@ -29,5 +29,7 @@ the four-zero variant; name Beauty output-stage gains; fix prose spacing and
 the baseline, two-mass, DECtalk graph and symmetric-model source references.
 Verified these against the page image and actual source before editing.
 Claude session: 3faf954b-5c15-4797-87af-cda65dc0b838; no files edited by reviewer.
-Initial quality/native/Node checks passed; final hosted CI remains pending.
+Supervisor correction: the vocabulary fixture asserts nonzero sample-difference
+energy, not perceptual audibility. Narrowed the report after reading the test.
+Initial head passed all seven checks; final hosted CI remains pending.
 Commit response, then hand final head to supervisor for gate and merge.

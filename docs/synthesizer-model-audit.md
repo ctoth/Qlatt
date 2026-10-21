@@ -148,8 +148,8 @@ Those selectors establish the configured fallback. Comments asserting a mode 3
 runtime defect have not been verified by a current reproduction in this audit.
 
 `test/frontend-vocabulary-render.test.ts` exercises the selected DECtalk frontend
-with this model, rejects its unsupported baseline pairing, and compares audible
-control effects for A9/A10 and NFC. The tests' concrete scope does not establish
+with this model, rejects its unsupported baseline pairing, and checks rendered
+sample differences for A9/A10 and NFC. The tests' concrete scope does not establish
 full DECtalk acoustic equivalence or validate every compatible-looking field.
 
 Disposition: keep the frontend/model adapter distinct from the VTM port below.

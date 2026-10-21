@@ -2,7 +2,7 @@
 Forward existing render padding so NVDA chunks keep only exterior utterance padding (#237).
 
 # State
-Implementation starting from master 325df1b1 in an isolated worktree. No local CI.
+PR #453 is open from master 325df1b1. Implementation and existing fixtures are committed; hosted CI and full Claude review pending. No local CI.
 
 # Decisions and why
 - Smallest change: optional existing leadTime/tailTime server fields, Python forwarding, first/last nonempty chunk selection; about 25–40 production lines and 45–70 existing fixture lines.
@@ -13,4 +13,4 @@ Implementation starting from master 325df1b1 in an isolated worktree. No local C
 None.
 
 # Next step
-Implement scoped forwarding and fixtures, publish for hosted CI and full Claude review; supervisor owns merge.
+Read hosted CI and full Claude review, respond to findings; supervisor owns independent verification and merge.

@@ -1930,9 +1930,9 @@ export function lowerToFrames(
     leadingAxisMs * globalAffect.values.durationScale * outputClockRatio;
   for (const timing of timings) {
     const affect = affectByItem.get(timing.item) ?? globalAffect;
-    const segmentScale =
-      affect.values.durationScale *
-      (timing.item.get(typeKey) === "silence" ? affect.values.pauseScale : 1);
+    const isPause =
+      context.silence !== undefined && timing.item.get(phonemeKey) === context.silence.symbol;
+    const segmentScale = affect.values.durationScale * (isPause ? affect.values.pauseScale : 1);
     if (!Number.isFinite(segmentScale) || segmentScale <= 0) {
       utterance.diagnostics.error(
         "Segment Affect duration/pause projection must be finite and positive",

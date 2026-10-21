@@ -711,10 +711,9 @@ rules:
     });
     const diagnostics = validateDslSpec(spec);
     expect(diagnostics.filter((d) => d.severity === "error")).toEqual([]);
-    expect(diagnostics.filter((d) => d.code === "W_POLICY_PARAM_UNUSED").map((d) => d.path)).toEqual([
-      "parameters.policy.time",
-      "parameters.policy.timing_extra",
-    ]);
+    expect(
+      diagnostics.filter((d) => d.code === "W_POLICY_PARAM_UNUSED").map((d) => d.path),
+    ).toEqual(["parameters.policy.time", "parameters.policy.timing_extra"]);
   });
 
   it("emits uncited and unused policy warnings", () => {

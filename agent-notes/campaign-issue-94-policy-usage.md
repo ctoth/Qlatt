@@ -10,7 +10,7 @@ Implemented a one-line usage condition change and a focused schema regression fr
 Smallest change: one condition in markPolicyPathUsed (roughly three production lines), plus 30-45 lines in the existing schema tests. Treat a child reference as use of its cited ancestor using dot boundaries; preserve unused unrelated groups and similar-prefix siblings. No warning suppression, other diagnostic categories, or strict-lint CI activation. Keep #94 open.
 
 ## Surprises
-None.
+PR #339 quality job 119027222622 requested assertion formatting only. Applied its exact reflow; no runtime change or local CI rerun.
 
 ## Next step
-Publish for hosted CI and independent Claude review, then respond to review. Keep remaining warning categories and strict-lint CI out of this slice.
+Await replacement hosted CI and supervisor-owned independent Claude review on PR #339, then respond to review. Keep remaining warning categories and strict-lint CI out of this slice.

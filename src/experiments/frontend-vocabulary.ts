@@ -1,7 +1,7 @@
 import { readLowerOptions } from "../declarative-frontend/hrg/lowering";
+import { preloadFrontendSourceContour } from "../declarative-frontend/inventory";
 import { preloadBundledRulepackSpec } from "../declarative-frontend/rule-pack";
 import { expandFormantBanks } from "../formant-bank";
-import { loadSourceContour } from "../source-contour";
 import type { ExperimentConfig } from "./load-experiment-config";
 
 export interface VocabularyMismatch {
@@ -42,9 +42,12 @@ export async function assertFrontendVocabulary(
         `missing required params: [${missingRequiredParams.join(", ")}]`,
     );
   }
-  const source = await loadSourceContour(spec.source_contour_path ?? undefined);
+  const source = await preloadFrontendSourceContour(spec);
+  if (!source) {
+    throw new Error(`E_FRONTEND_CONFIG: frontend '${frontendId}' requires source_contour`);
+  }
   const projectionMismatch = checkVocabulary(
-    source.projection.map((row) => row.target_param),
+    source.spec.projection.map((row) => row.target_param),
     experimentConfig,
   );
   if (projectionMismatch.undeclaredColumns.length) {

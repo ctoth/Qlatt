@@ -43,12 +43,7 @@ import {
   parseDirectionInput,
 } from "./input/parse";
 import { createProvenanceCollector, type ProvenanceCollector } from "./provenance";
-import {
-  DEFAULT_SOURCE_CONTOUR_PATH,
-  loadSourceContourSync,
-  resolveSourceContour,
-  type SourceContourVoiceQuality,
-} from "./source-contour";
+import { resolveSourceContour, type SourceContourVoiceQuality } from "./source-contour";
 import {
   collectPitchCompositionCitations,
   collectSpeakerProfileCitations,
@@ -945,17 +940,19 @@ function buildTextToKlattTrackDetailed(
     });
   }
 
-  const sourcePath = spec.source_contour_path ?? DEFAULT_SOURCE_CONTOUR_PATH;
+  const sourceContour = resources.sourceContour;
+  if (!sourceContour) {
+    throw new Error(
+      `E_FRONTEND_CONFIG: frontend '${options.frontendPath ?? frontendId}' requires source_contour`,
+    );
+  }
   const source = resolveSourceContour({
-    spec: loadSourceContourSync(sourcePath),
+    spec: sourceContour.spec,
     requestedQuality: options.voiceQuality,
     speaker: resolvedSpeaker,
     baseF0Hz: resolvedSpeaker.base_f0_hz,
   });
-  source.citations = [
-    sourcePath,
-    ...source.citations.filter((citation) => citation !== DEFAULT_SOURCE_CONTOUR_PATH),
-  ];
+  source.citations = [sourceContour.path, ...source.citations];
   const sourceDecision = provenance.add({
     stage: "frontend",
     type: "source_contour_selected",

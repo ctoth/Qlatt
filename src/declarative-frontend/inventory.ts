@@ -2,11 +2,13 @@ import type { Diagnostics } from "../diagnostics";
 import { ltsDocumentAt } from "../g2p/lts-document";
 import { loadStressPolicy } from "../g2p/stress-policy";
 import type { AreaFunctionDerivation } from "../provenance";
+import { parseSourceContourDocument, type SourceContourSpec } from "../source-contour";
 import { parseSpeakerProfileDocument, type SpeakerProfileSpec } from "../speaker-profile";
 import {
   cloneValue,
   isPlainObject,
   isYamlNotFoundError,
+  loadYamlDocument,
   loadYamlDocumentSync,
   loadYamlSource,
   loadYamlSourceSync,
@@ -68,6 +70,7 @@ export type FrontendResources = {
    */
   dictionaryPath?: string;
   speakerProfile?: { path: string; spec: SpeakerProfileSpec };
+  sourceContour?: { path: string; spec: SourceContourSpec };
 };
 
 const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
@@ -744,6 +747,28 @@ export function materializePhonemeTarget(
 // FrontendResources loader
 // ---------------------------------------------------------------------------
 
+/** Acquire the contour asynchronously for browser vocabulary checks. */
+export async function preloadFrontendSourceContour(
+  spec: unknown,
+): Promise<FrontendResources["sourceContour"]> {
+  if (!isPlainObject(spec)) {
+    throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
+  }
+  const path = spec.source_contour_path;
+  if (path == null) return undefined;
+  if (typeof path !== "string" || !path.trim()) {
+    throw new Error("E_FRONTEND_CONFIG: source_contour is required");
+  }
+  try {
+    if (!FRONTEND_ASSET_CACHE.has(path)) {
+      FRONTEND_ASSET_CACHE.set(path, parseSourceContourDocument(await loadYamlDocument(path)));
+    }
+  } catch (cause) {
+    throw new Error(`E_FRONTEND_CONFIG: source_contour could not load '${path}'`, { cause });
+  }
+  return { path, spec: FRONTEND_ASSET_CACHE.get(path) as SourceContourSpec };
+}
+
 /**
  * Load inventory and resource paths from a parsed frontend.yaml spec.
  * Every resource path originates in the spec — no hardcoded defaults.
@@ -813,6 +838,12 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
       : requireAsset(spec.speaker_profile_path, "speaker_profile", (path) =>
           parseSpeakerProfileDocument(loadYamlDocumentSync(path)),
         );
+  const sourceContourPath =
+    spec.source_contour_path == null
+      ? undefined
+      : requireAsset(spec.source_contour_path, "source_contour", (path) =>
+          parseSourceContourDocument(loadYamlDocumentSync(path)),
+        );
   return {
     inventory,
     inventoryPath,
@@ -822,6 +853,14 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     morphologyPath,
     stressPolicyPath,
     dictionaryPath: typeof spec.dictionary_path === "string" ? spec.dictionary_path : undefined,
+    ...(sourceContourPath === undefined
+      ? {}
+      : {
+          sourceContour: {
+            path: sourceContourPath,
+            spec: FRONTEND_ASSET_CACHE.get(sourceContourPath) as SourceContourSpec,
+          },
+        }),
     ...(speakerProfilePath === undefined
       ? {}
       : {

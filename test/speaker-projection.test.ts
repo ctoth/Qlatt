@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { loadSourceContourSync, type VoiceQualityOverrides } from "../src/source-contour";
+import { parseSourceContourDocument, type VoiceQualityOverrides } from "../src/source-contour";
 import { projectSpeakerFields, type SpeakerProjectionBaseline } from "../src/speaker-projection";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 /**
  * Locks the declarative speaker/source projection table (phase 4 item 3) to the
@@ -16,7 +17,9 @@ const BASELINE: SpeakerProjectionBaseline = {
   spectral_tilt_offset_db: 3,
 };
 
-const projection = loadSourceContourSync().projection;
+const projection = parseSourceContourDocument(
+  loadYamlDocumentSync("/rules/policy/source-contour.yaml"),
+).projection;
 
 function makeTarget(initial: Record<string, unknown> = {}) {
   const store = new Map<string, unknown>(Object.entries(initial));

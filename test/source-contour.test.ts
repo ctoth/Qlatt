@@ -1,17 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 import { createProvenanceCollector } from "../src/provenance";
-import {
-  DEFAULT_SOURCE_CONTOUR_PATH,
-  loadSourceContourSync,
-  resolveSourceContour,
-} from "../src/source-contour";
+import { parseSourceContourDocument, resolveSourceContour } from "../src/source-contour";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
-import { loadYamlSourceSync } from "../src/yaml-loader";
+import { loadYamlDocumentSync, loadYamlSourceSync } from "../src/yaml-loader";
+
+const sourcePath = "/rules/policy/source-contour.yaml";
 
 describe("source contour", () => {
   it("declares the canonical source contour document", () => {
-    const source = loadYamlSourceSync(DEFAULT_SOURCE_CONTOUR_PATH);
-    const spec = loadSourceContourSync();
+    const source = loadYamlSourceSync(sourcePath);
+    const spec = parseSourceContourDocument(loadYamlDocumentSync(sourcePath));
 
     expect(source).toContain("version: v1");
     expect(spec.version).toBe("v1");
@@ -21,7 +19,9 @@ describe("source contour", () => {
   });
 
   it("loads and resolves the quality names declared by fixture YAML", () => {
-    const spec = loadSourceContourSync("/test/fixtures/source-contour-open-presets.yaml");
+    const spec = parseSourceContourDocument(
+      loadYamlDocumentSync("/test/fixtures/source-contour-open-presets.yaml"),
+    );
 
     expect(spec.default_voice_quality).toBe("harsh");
     expect(Object.keys(spec.voice_quality_presets)).toEqual(["harsh"]);
@@ -42,7 +42,7 @@ describe("source contour", () => {
   });
 
   it("projects the modal YAML values into track frames", () => {
-    const spec = loadSourceContourSync();
+    const spec = parseSourceContourDocument(loadYamlDocumentSync(sourcePath));
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     try {
@@ -65,7 +65,7 @@ describe("source contour", () => {
   });
 
   it("resolves the current LF baseline and falsetto preset behavior", () => {
-    const spec = loadSourceContourSync();
+    const spec = parseSourceContourDocument(loadYamlDocumentSync(sourcePath));
 
     const modal = resolveSourceContour({
       spec,
@@ -126,7 +126,7 @@ describe("source contour", () => {
       .find((entry) => entry.type === "source_contour_selected");
     expect(decision).toBeDefined();
     expect(decision?.stage).toBe("frontend");
-    expect(decision?.citations).toContain(DEFAULT_SOURCE_CONTOUR_PATH);
+    expect(decision?.citations).toContain(sourcePath);
     expect(decision?.reason).toContain("preset=breathy");
     expect(decision?.reason).toContain("source_mode=1");
   });

@@ -71,8 +71,7 @@ function object(value: unknown, context: string): Record<string, unknown> {
   return value;
 }
 function text(value: unknown, context: string): string {
-  if (typeof value !== "string" || !value.trim())
-    invalid(context, "requires a nonempty string");
+  if (typeof value !== "string" || !value.trim()) invalid(context, "requires a nonempty string");
   return value;
 }
 function entries(value: unknown, context: string): unknown[] {
@@ -87,8 +86,7 @@ function endpoint(value: unknown, context: string): PackageEndpoint {
 function reference(value: unknown, context: string): ResourceReference {
   const relative = (path: unknown) => {
     const result = text(path, context);
-    if (/^(?:[a-z][a-z\d+.-]*:|[/\\])/i.test(result))
-      invalid(context, "requires a relative URL");
+    if (/^(?:[a-z][a-z\d+.-]*:|[/\\])/i.test(result)) invalid(context, "requires a relative URL");
     return result;
   };
   if (typeof value === "string") return relative(value);
@@ -98,9 +96,7 @@ function reference(value: unknown, context: string): ResourceReference {
 function metadata(item: Record<string, unknown>, context: string) {
   return {
     ...(item.name === undefined ? {} : { name: text(item.name, context) }),
-    ...(item.description === undefined
-      ? {}
-      : { description: text(item.description, context) }),
+    ...(item.description === undefined ? {} : { description: text(item.description, context) }),
   };
 }
 function selections(source: string): Selection[] {
@@ -159,7 +155,9 @@ function parsePackage(source: string, selected: Selection): SelectedPackage {
       ...(entry.extends === undefined ? {} : { extends: endpoint(entry.extends, selected.id) }),
       ...(entry.graph === undefined ? {} : { graph: reference(entry.graph, selected.id) }),
       ...(entry.registry === undefined ? {} : { registry: reference(entry.registry, selected.id) }),
-      ...(entry.semantics === undefined ? {} : { semantics: reference(entry.semantics, selected.id) }),
+      ...(entry.semantics === undefined
+        ? {}
+        : { semantics: reference(entry.semantics, selected.id) }),
     })),
     supportedPairs: entries(item.supportedPairs, selected.id).map((value) => {
       const pair = object(value, selected.id);

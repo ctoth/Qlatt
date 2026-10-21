@@ -74,7 +74,10 @@ function mergeSemantics(
   return merged;
 }
 
-export async function assertExperimentPair(frontendId: string, experimentId: string): Promise<void> {
+export async function assertExperimentPair(
+  frontendId: string,
+  experimentId: string,
+): Promise<void> {
   const discovery = await preloadBundledPackages();
   assertSupportedPair(
     discovery,

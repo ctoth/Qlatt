@@ -255,7 +255,12 @@ describe("primed resources", () => {
       "/packages/manifest.json": JSON.stringify({
         packages: [
           { id: "owner", version: "0.1.0", baseUrl: "./", manifest: "packages/owner.json" },
-          { id: "dependency", version: "0.1.0", baseUrl: "./", manifest: "packages/dependency.json" },
+          {
+            id: "dependency",
+            version: "0.1.0",
+            baseUrl: "./",
+            manifest: "packages/dependency.json",
+          },
         ],
       }),
       "/packages/owner.json": JSON.stringify({
@@ -277,7 +282,12 @@ describe("primed resources", () => {
       "/packages/manifest.json": JSON.stringify({
         packages: [
           { id: "owner", version: "0.1.0", baseUrl: "./", manifest: "packages/owner.json" },
-          { id: "dependency", version: "0.1.0", baseUrl: "./", manifest: "packages/dependency.json" },
+          {
+            id: "dependency",
+            version: "0.1.0",
+            baseUrl: "./",
+            manifest: "packages/dependency.json",
+          },
         ],
       }),
       "/packages/owner.json": JSON.stringify({
@@ -297,8 +307,8 @@ describe("primed resources", () => {
     vi.spyOn(paths, "isNodeRuntime").mockReturnValue(false);
     const discovery = await preloadBundledPackages();
     expect(
-      findPackageEntry(discovery.backends, { package: "owner", id: "shared" }, "backend")
-        .documents.graph,
+      findPackageEntry(discovery.backends, { package: "owner", id: "shared" }, "backend").documents
+        .graph,
     ).toBe("/models/a b/graph.yaml");
     expect(() => findPackageEntry(discovery.backends, "shared", "backend")).toThrow(
       /E_PACKAGE_ENDPOINT.*shared.*ambiguous/,

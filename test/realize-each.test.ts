@@ -390,7 +390,12 @@ describe("loadExperimentConfig with realize_each", () => {
           specPath === "/packages/manifest.json"
             ? JSON.stringify({
                 packages: [
-                  { id: "fixture", version: "0.1.0", baseUrl: "./", manifest: "packages/fixture.json" },
+                  {
+                    id: "fixture",
+                    version: "0.1.0",
+                    baseUrl: "./",
+                    manifest: "packages/fixture.json",
+                  },
                 ],
               })
             : specPath === "/packages/fixture.json"

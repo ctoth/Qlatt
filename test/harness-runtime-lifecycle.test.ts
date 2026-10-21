@@ -40,9 +40,7 @@ describe("harness runtime replacement", () => {
     experiment.value = "dectalk-english";
     onExperimentChange();
     frontend.value = "qlatt-english";
-    expect(() => applyFrontendDefault()).toThrow(
-      /E_SYNTH_PAIRING.*qlatt-english.*dectalk-english/,
-    );
+    expect(() => applyFrontendDefault()).toThrow(/E_SYNTH_PAIRING.*qlatt-english.*dectalk-english/);
     expect(experiment.value).toBe("dectalk-english");
     expect(status.textContent).toContain("E_SYNTH_PAIRING");
   });

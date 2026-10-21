@@ -1,9 +1,9 @@
 # Qlatt synthesizer driver for NVDA.
 #
 # Drives scripts/speak-server.ts in the Qlatt checkout over stdin/stdout. The
-# server renders each text chunk to 16-bit PCM and returns word-boundary
-# markers; this driver plays the PCM through nvwave and raises NVDA's index
-# notifications as playback passes each IndexCommand.
+# server renders text to 16-bit PCM and returns word/index markers. The driver
+# keeps indexes within one render until a rate/pitch boundary, then raises
+# index notifications from nvwave playback callbacks at their sample positions.
 #
 # Configuration is a JSON file next to this driver, qlatt.json:
 #   {"repo": "C:\\path\\to\\Qlatt", "node": "node", "frontend": "qlatt-english"}
@@ -111,12 +111,14 @@ class QlattServer:
             if event.get("event") in ("done", "error", "hello"):
                 return events
 
-    def speak(self, text, frontend, rate, pitch_scale, lead_time=None, tail_time=None):
+    def speak(self, text, frontend, rate, pitch_scale, lead_time=None, tail_time=None, indexes=None):
         padding = {}
         if lead_time is not None:
             padding["leadTime"] = lead_time
         if tail_time is not None:
             padding["tailTime"] = tail_time
+        if indexes:
+            padding["indexes"] = indexes
         events = self.request(
             "speak", text=text, frontendId=frontend, rate=rate, pitchScale=pitch_scale,
             **padding,
@@ -224,23 +226,26 @@ class SynthDriver(SynthDriver):
     # --- speaking -------------------------------------------------------
 
     def speak(self, speechSequence):
-        chunks = []  # (text, index_after_chunk, rate_setting, pitch_setting)
+        chunks = []  # (text, UTF-16 index requests, rate_setting, pitch_setting)
         text_parts = []
+        indexes = []
         rate_setting = self._rate
         pitch_setting = self._pitch
-        pending_index = None
 
-        def flush(index=None):
-            text = "".join(text_parts).strip()
+        def flush():
+            text = "".join(text_parts)
             text_parts.clear()
-            if text or index is not None:
-                chunks.append((text, index, rate_setting, pitch_setting))
+            if text or indexes:
+                chunks.append((text, list(indexes), rate_setting, pitch_setting))
+            indexes.clear()
 
         for item in speechSequence:
             if isinstance(item, str):
                 text_parts.append(item)
             elif isinstance(item, IndexCommand):
-                flush(item.index)
+                # Python counts code points; the server's raw Source offsets are UTF-16.
+                offset = len("".join(text_parts).encode("utf-16-le", "surrogatepass")) // 2
+                indexes.append({"index": item.index, "offset": offset})
             elif isinstance(item, RateCommand):
                 flush()
                 rate_setting = max(0, min(100, self._rate + item.offset))
@@ -264,7 +269,7 @@ class SynthDriver(SynthDriver):
         with self._lock:
             # Index-only chunks do not render, so they cannot own padding.
             spoken_chunks = [position for position, chunk in enumerate(chunks) if chunk[0]]
-            for position, (text, index, rate_setting, pitch_setting) in enumerate(chunks):
+            for position, (text, indexes, rate_setting, pitch_setting) in enumerate(chunks):
                 if cancelled.is_set():
                     break
                 if text:
@@ -273,21 +278,45 @@ class SynthDriver(SynthDriver):
                             text, self._voice, self._rate_scale(rate_setting), self._pitch_scale(pitch_setting),
                             None if position == spoken_chunks[0] else 0,
                             None if position == spoken_chunks[-1] else 0,
+                            indexes,
                         )
                     except Exception:
                         log.exception("qlatt render failed for %r", text)
                         pcm = b""
                     if pcm and not cancelled.is_set():
-                        self._player.feed(pcm)
-                if index is not None and not cancelled.is_set():
-                    # Raise the index once everything queued so far has played.
+                        cursor = 0
+                        index_markers = [marker for marker in markers if marker["kind"] == "index"]
+                        marker_position = 0
+                        while marker_position < len(index_markers) and not cancelled.is_set():
+                            sample = index_markers[marker_position]["sample"]
+                            reached = []
+                            while (marker_position < len(index_markers)
+                                   and index_markers[marker_position]["sample"] == sample):
+                                reached.append(index_markers[marker_position]["index"])
+                                marker_position += 1
+                            end = sample * 2  # The server returns mono s16le PCM.
+                            self._player.feed(
+                                pcm[cursor:end],
+                                onDone=lambda reached=tuple(reached): self._notify_indexes(reached, cancelled),
+                            )
+                            cursor = end
+                        if cursor < len(pcm) and not cancelled.is_set():
+                            self._player.feed(pcm[cursor:])
+                        continue
+                if indexes and not cancelled.is_set():
+                    # Index-only input (or a failed render) retains its after-queued-audio behavior.
                     self._player.sync()
-                    if not cancelled.is_set():
-                        synthIndexReached.notify(synth=self, index=index)
+                    self._notify_indexes([entry["index"] for entry in indexes], cancelled)
             if not cancelled.is_set():
                 self._player.idle()
                 if not cancelled.is_set():
                     synthDoneSpeaking.notify(synth=self)
+
+    def _notify_indexes(self, indexes, cancelled):
+        for index in indexes:
+            if cancelled.is_set():
+                break
+            synthIndexReached.notify(synth=self, index=index)
 
     def cancel(self):
         self._cancelled.set()

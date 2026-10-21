@@ -10,7 +10,8 @@
  *   {"id": 1, "op": "speak", "text": "Hello world.",
  *    "frontendId"?: "qlatt-english", "experimentId"?: "klatt80-baseline",
  *    "rate"?: 1.0, "pitchScale"?: 1.0, "baseF0"?: 110, "sampleRate"?: 22050,
- *    "leadTime"?: 0.02, "tailTime"?: 0.05}
+ *    "leadTime"?: 0.02, "tailTime"?: 0.05,
+ *    "indexes"?: [{"index": 5, "offset": 6}]}
  *   {"id": 2, "op": "hello"}      -> capabilities
  *   {"op": "quit"}
  *
@@ -33,6 +34,9 @@
  * Word markers are the first frame of each canonical Word occurrence,
  * offset by the render lead time, so a host can raise
  * word-boundary events as playback passes each sample position.
+ * Requested indexes use raw UTF-16 offsets in text and return kind:index markers
+ * at the first owned frame starting at/after the offset, or PCM end when none
+ * remains. Equal-sample indexes retain request order alongside word markers.
  *
  * Run:
  *   node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/speak-server.ts
@@ -46,7 +50,7 @@ import {
   listBundledFrontendIds,
 } from "../src/declarative-frontend/rule-pack.ts";
 import { createNodeRuntimeBackend } from "../src/rendering/backends/node-runtime.ts";
-import type { RenderRequest, WordOccurrence } from "../src/rendering/types.ts";
+import type { RenderPayload, RenderRequest, WordOccurrence } from "../src/rendering/types.ts";
 import { toInt16 } from "../src/rendering/write-wav.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -64,10 +68,13 @@ export type SpeakRequest = {
   /** Render padding in seconds; absent values preserve the server defaults. */
   leadTime?: number;
   tailTime?: number;
+  /** Positions in the original request text, measured in UTF-16 code units. */
+  indexes?: { index: number; offset: number }[];
 };
 type Request = SpeakRequest | { id?: number | string; op: "hello" } | { op: "quit" };
 
 export type WordMarker = { kind: "word"; word: string; sample: number };
+export type IndexMarker = { kind: "index"; index: number; sample: number };
 
 const DEFAULT_EXPERIMENT_BY_FRONTEND: Readonly<Record<string, string>> = {
   "qlatt-english": "klatt80-baseline",
@@ -90,6 +97,24 @@ export function wordMarkers(
 
 function write(message: Record<string, unknown>): void {
   process.stdout.write(`${JSON.stringify(message)}\n`);
+}
+
+/** The first owned frame at/after an offset, or the end of PCM for trailing indexes. */
+export function indexMarkers(
+  indexes: NonNullable<SpeakRequest["indexes"]>,
+  spans: NonNullable<RenderPayload["sourceSpans"]>,
+  leadTime: number,
+  sampleRate: number,
+  samples: number,
+): IndexMarker[] {
+  return indexes.map(({ index, offset }) => {
+    const frame = spans.find((span) => span.start >= offset);
+    return {
+      kind: "index",
+      index,
+      sample: frame ? Math.round((leadTime + frame.time) * sampleRate) : samples,
+    };
+  });
 }
 
 /** The render a speak request asks for. */
@@ -133,7 +158,16 @@ async function speak(
     format: "s16le",
     channels: 1,
     samples: pcm.length,
-    markers: wordMarkers(payload.wordOccurrences ?? [], leadTime, sampleRate),
+    markers: [
+      ...wordMarkers(payload.wordOccurrences ?? [], leadTime, sampleRate),
+      ...indexMarkers(
+        request.indexes ?? [],
+        payload.sourceSpans ?? [],
+        leadTime,
+        sampleRate,
+        pcm.length,
+      ),
+    ].sort((left, right) => left.sample - right.sample),
     pcm: Buffer.from(pcm.buffer, pcm.byteOffset, pcm.byteLength).toString("base64"),
   });
   write({ id: request.id, event: "done" });

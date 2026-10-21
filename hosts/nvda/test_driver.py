@@ -16,6 +16,7 @@ class BaseDriver:
 class Command:
     def __init__(self, index):
         self.index = index
+        self.offset = index
 
 
 commands = types.SimpleNamespace(**{
@@ -51,7 +52,12 @@ class CancellationTests(unittest.TestCase):
         self.driver._lock = threading.Lock()
         self.driver._player = Mock()
         self.driver._server = Mock()
-        self.driver._server.speak.return_value = (b"pcm", [], 22050)
+        def render(text, frontend, rate, pitch, lead, tail, indexes):
+            return b"pcm!", [dict(kind="index", index=entry["index"], sample=2) for entry in indexes], 22050
+
+        self.render = render
+        self.driver._server.speak.side_effect = render
+        self.driver._player.feed.side_effect = lambda data, onDone=None: onDone() if onDone else None
         notifications.synthIndexReached.reset_mock()
         notifications.synthDoneSpeaking.reset_mock()
         self.workers = []
@@ -67,18 +73,18 @@ class CancellationTests(unittest.TestCase):
     def speak(self, text, index):
         self.driver.speak([text, commands.IndexCommand(index)])
 
-    def test_padding_belongs_to_first_and_last_nonempty_chunks(self):
+    def test_three_indexes_share_one_render_and_keep_equal_sample_order(self):
         self.driver.speak([
-            commands.IndexCommand(0), "one", commands.IndexCommand(1),
-            "two", commands.IndexCommand(2), "three", commands.IndexCommand(3),
+            commands.IndexCommand(0), "one ", commands.IndexCommand(1),
+            "two ", commands.IndexCommand(2), "three", commands.IndexCommand(3),
             commands.IndexCommand(4),
         ])
         self.workers[0]()
-        self.assertEqual(self.driver._server.speak.call_args_list, [
-            unittest.mock.call("one", "qlatt-english", 1.0, 1.0, None, 0),
-            unittest.mock.call("two", "qlatt-english", 1.0, 1.0, 0, 0),
-            unittest.mock.call("three", "qlatt-english", 1.0, 1.0, 0, None),
-        ])
+        self.driver._server.speak.assert_called_once_with(
+            "one two three", "qlatt-english", 1.0, 1.0, None, None,
+            [{"index": index, "offset": offset} for index, offset in enumerate([0, 4, 8, 13, 13])],
+        )
+        self.driver._player.feed.assert_called_once()
         self.assertEqual(
             [call.kwargs["index"] for call in notifications.synthIndexReached.notify.call_args_list],
             [0, 1, 2, 3, 4],
@@ -87,7 +93,30 @@ class CancellationTests(unittest.TestCase):
     def test_single_spoken_chunk_keeps_both_padding_values(self):
         self.speak("only", 1)
         self.workers[0]()
-        self.driver._server.speak.assert_called_once_with("only", "qlatt-english", 1.0, 1.0, None, None)
+        self.driver._server.speak.assert_called_once_with(
+            "only", "qlatt-english", 1.0, 1.0, None, None, [{"index": 1, "offset": 4}],
+        )
+
+    def test_utf16_offsets_preserve_astral_text_and_whitespace(self):
+        self.driver.speak([" 😀 ", commands.IndexCommand(7), "hello", commands.IndexCommand(8)])
+        self.workers[0]()
+        self.driver._server.speak.assert_called_once_with(
+            " 😀 hello", "qlatt-english", 1.0, 1.0, None, None,
+            [{"index": 7, "offset": 4}, {"index": 8, "offset": 9}],
+        )
+
+    def test_rate_pitch_boundaries_keep_settings_and_exterior_padding(self):
+        self.driver.speak([
+            "one", commands.IndexCommand(1), commands.RateCommand(50),
+            "two", commands.IndexCommand(2), commands.PitchCommand(-50),
+            "three", commands.IndexCommand(3),
+        ])
+        self.workers[0]()
+        self.assertEqual(self.driver._server.speak.call_args_list, [
+            unittest.mock.call("one", "qlatt-english", 1.0, 1.0, None, 0, [{"index": 1, "offset": 3}]),
+            unittest.mock.call("two", "qlatt-english", 2.0, 1.0, 0, 0, [{"index": 2, "offset": 3}]),
+            unittest.mock.call("three", "qlatt-english", 2.0, 0.5, 0, None, [{"index": 3, "offset": 5}]),
+        ])
 
     def test_index_only_sequence_does_not_render(self):
         self.driver.speak([commands.IndexCommand(1), commands.IndexCommand(2)])
@@ -98,13 +127,14 @@ class CancellationTests(unittest.TestCase):
             [1, 2],
         )
 
-    def test_server_adapter_forwards_padding(self):
+    def test_server_adapter_forwards_padding_and_indexes(self):
         server = driver_module.QlattServer.__new__(driver_module.QlattServer)
         server.request = Mock(return_value=[{"event": "audio", "pcm": "", "sampleRate": 22050}])
-        server.speak("text", "qlatt-english", 1, 1, 0, None)
+        indexes = [{"index": 9, "offset": 4}]
+        server.speak("text", "qlatt-english", 1, 1, 0, None, indexes)
         server.request.assert_called_once_with(
             "speak", text="text", frontendId="qlatt-english", rate=1, pitchScale=1,
-            leadTime=0,
+            leadTime=0, indexes=indexes,
         )
         server.request.reset_mock()
         server.speak("text", "qlatt-english", 1, 1)
@@ -127,9 +157,9 @@ class CancellationTests(unittest.TestCase):
         self.driver._player.feed.assert_not_called()
         notifications.synthIndexReached.notify.assert_not_called()
         notifications.synthDoneSpeaking.notify.assert_not_called()
-        self.driver._server.speak.side_effect = None
+        self.driver._server.speak.side_effect = self.render
         self.workers[1]()
-        self.driver._player.feed.assert_called_once_with(b"pcm")
+        self.assertEqual(self.driver._player.feed.call_args.args, (b"pcm!",))
         notifications.synthIndexReached.notify.assert_called_once_with(synth=self.driver, index=2)
         notifications.synthDoneSpeaking.notify.assert_called_once_with(synth=self.driver)
 
@@ -141,10 +171,10 @@ class CancellationTests(unittest.TestCase):
         notifications.synthDoneSpeaking.notify.assert_not_called()
 
     def test_cancel_during_sync_suppresses_index_and_done(self):
-        self.speak("old", 1)
+        self.driver.speak([commands.IndexCommand(1)])
         self.driver._player.sync.side_effect = self.driver.cancel
         self.workers[0]()
-        self.driver._player.feed.assert_called_once_with(b"pcm")
+        self.driver._player.feed.assert_not_called()
         notifications.synthIndexReached.notify.assert_not_called()
         notifications.synthDoneSpeaking.notify.assert_not_called()
 
@@ -154,6 +184,29 @@ class CancellationTests(unittest.TestCase):
         self.workers[0]()
         notifications.synthIndexReached.notify.assert_called_once_with(synth=self.driver, index=1)
         notifications.synthDoneSpeaking.notify.assert_not_called()
+
+    def test_pcm_is_split_at_markers_and_replaced_callbacks_are_suppressed(self):
+        self.driver._server.speak.side_effect = None
+        self.driver._server.speak.return_value = (
+            b"01234567", [
+                {"kind": "word", "word": "one", "sample": 0},
+                {"kind": "index", "index": 1, "sample": 0},
+                {"kind": "index", "index": 2, "sample": 2},
+                {"kind": "index", "index": 3, "sample": 2},
+            ], 22050,
+        )
+        callbacks = []
+        self.driver._player.feed.side_effect = lambda data, onDone=None: callbacks.append(onDone) if onDone else None
+        self.driver._player.idle.side_effect = lambda: None
+        self.driver.speak(["one", commands.IndexCommand(1), commands.IndexCommand(2), commands.IndexCommand(3)])
+        self.workers[0]()
+        self.assertEqual([call.args[0] for call in self.driver._player.feed.call_args_list], [b"", b"0123", b"4567"])
+        notifications.synthIndexReached.notify.assert_not_called()
+        callbacks[0]()
+        notifications.synthIndexReached.notify.assert_called_once_with(synth=self.driver, index=1)
+        self.speak("replacement", 4)
+        callbacks[1]()
+        notifications.synthIndexReached.notify.assert_called_once_with(synth=self.driver, index=1)
 
 
 if __name__ == "__main__":

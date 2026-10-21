@@ -53,7 +53,7 @@ import {
   type SpeakerProfileOverride,
 } from "./speaker-profile";
 import { projectSpeakerFields } from "./speaker-projection";
-import { runTextParser } from "./text-parser/frontend";
+import { parseTextParserConfig, runTextParser } from "./text-parser/frontend";
 import type { TextScope } from "./text-scopes";
 import { transcribeText } from "./transcribe-text";
 import type { KlattFrame, TranscriptionConfig, TranscriptionToken } from "./tts-frontend-types";
@@ -751,7 +751,7 @@ function createStructure(
 export function normalizeText(text: string, frontendId = "qlatt-english"): string {
   const spec = loadBundledRulepackSpec(frontendId);
   // The same text the frontend speaks: after its text parser, when it has one.
-  if (spec.text_parser == null) return normalizeGraphText(text, spec);
+  if (!parseTextParserConfig(spec)) return normalizeGraphText(text, spec);
   const resources = loadFrontendResources(spec);
   const textParser = resources.textParser;
   if (!textParser) return normalizeGraphText(text, spec);

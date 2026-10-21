@@ -5,7 +5,10 @@ Partial #237 delivery; no protocol, chunking, spelling or live-NVDA claims.
 
 # State
 
-Isolated from master 447d28f5; implementing the supervisor-approved slice.
+PR #448, isolated from master 447d28f5. Claude reviewed the complete four-file
+447d28f5..2e06d2a1 range with no correctness findings; implementer accepts review.
+Claude could not run its GitHub commands; implementer separately confirmed the
+PR head and four changed files with gh pr view/diff. Supervisor owns final gate.
 
 # Decisions and why
 
@@ -25,5 +28,9 @@ also had no cancellation recheck.
 
 # Next step
 
-Commit and publish; use hosted CI, full Claude review, implementer response and
-supervisor independent gate/merge. Keep #237 open for its broader acceptance.
+Review session c7c360c1-94ef-4efe-a5aa-b79fb305874b. No speculative locking change:
+the reviewer noted a pre-existing check/action window but could not establish
+NVDA audio behavior without its implementation. This slice does not claim full
+cancellation atomicity. Fixtures establish the named blocking-call cases only.
+Await final hosted CI and supervisor independent gate/merge. Keep #237 open for
+broader acceptance, including live NVDA behavior.

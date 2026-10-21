@@ -68,7 +68,7 @@ export function evaluateLexicalStress() {
         .map((key) => dictionary[key].split(/\s+/));
       if (!variants.length) throw new Error(`Missing frozen evaluation reference: ${word}`);
       const phones = variants[0].map((phone) => phone.replace(/[012]$/, ""));
-      const hint = getStressHintForWord(word, resources.morphology.path);
+      const hint = getStressHintForWord(word, resources.morphology);
       const reference = stressPronunciation(phones, {
         stress: resources.stress,
         wordId: word,

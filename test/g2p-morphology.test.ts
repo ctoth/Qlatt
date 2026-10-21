@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { decomposeWord, getStressHintForWord } from "../src/g2p/morphology";
 import type { DictLookup } from "../src/g2p/types";
-import { loadYamlDocumentSync } from "../src/yaml-loader";
 import { resources } from "./g2p-fixture";
-
-const QLATT_MORPHOLOGY_PATH = resources.morphology.path;
 
 // Mock dictionary for testing
 const mockDict: Record<string, string[]> = {
@@ -176,43 +173,29 @@ describe("decomposeWord", () => {
 
 describe("getStressHintForWord", () => {
   it("returns forcing-penult hint for -ation words", () => {
-    expect(getStressHintForWord("celebration", QLATT_MORPHOLOGY_PATH)).toEqual({
+    expect(getStressHintForWord("celebration", resources.morphology)).toEqual({
       stressType: "forcing",
       stressTarget: "penult",
     });
+    const morphology = structuredClone(resources.morphology);
+    morphology.data.suffixes = [];
+    expect(getStressHintForWord("celebration", morphology)).toBeUndefined();
+    expect(decomposeWord("walked", mockLookup, morphology)).toBeNull();
   });
 
   it("returns non-affecting hint for -ness words", () => {
-    expect(getStressHintForWord("kindness", QLATT_MORPHOLOGY_PATH)).toEqual({
+    expect(getStressHintForWord("kindness", resources.morphology)).toEqual({
       stressType: "non_affecting",
     });
   });
 
   it("returns undefined when no configured suffix matches", () => {
-    expect(getStressHintForWord("blorf", QLATT_MORPHOLOGY_PATH)).toBeUndefined();
+    expect(getStressHintForWord("blorf", resources.morphology)).toBeUndefined();
   });
 });
 
 describe("morphology YAML contract", () => {
-  interface AffixConfig {
-    spelling: string;
-    condition_class: string;
-    output_phonemes: string[];
-    citations: string[];
-  }
-
-  interface MorphologyConfig {
-    suffixes: AffixConfig[];
-    prefixes: AffixConfig[];
-    clitics: Array<{
-      spelling: string;
-      allomorph_spelling: string;
-      citations: string[];
-    }>;
-    heuristics: Record<string, { value: unknown; citations?: string[]; estimate?: string }>;
-  }
-
-  const data = loadYamlDocumentSync<MorphologyConfig>(QLATT_MORPHOLOGY_PATH);
+  const data = resources.morphology.data;
 
   it("declares spelling, condition, output, and citations for every affix", () => {
     for (const affix of [...data.suffixes, ...data.prefixes]) {

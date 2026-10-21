@@ -1,7 +1,7 @@
 import { type CmuDictionary, loadCmuDictionaryFromPathSync } from "../cmu-dictionary-loader";
 import type { Diagnostics } from "../diagnostics";
 import { ltsDocumentAt } from "../g2p/lts-document";
-import type { MorphologyContext } from "../g2p/morphology";
+import type { MorphologyContext, MorphologyData } from "../g2p/morphology";
 import { parseStressPolicy, type StressContext } from "../g2p/stress-policy";
 import type { PhonotacticsData } from "../g2p/syllabify";
 import {
@@ -924,6 +924,7 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     ltsPath,
     morphology: {
       path: morphologyPath,
+      data: morphology as MorphologyData,
       phonotactics: FRONTEND_ASSET_CACHE.get(morphologyPhonotacticsPath) as PhonotacticsData,
     },
     stress: FRONTEND_ASSET_CACHE.get(stressPolicyPath) as StressContext,

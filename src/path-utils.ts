@@ -76,9 +76,11 @@ export function resolveFileFromFsSync(specPath: string): string | null {
 
   for (const candidate of candidates) {
     try {
-      if (fs.existsSync(candidate)) return candidate;
-    } catch {
-      // Ignore individual filesystem probe failures.
+      fs.statSync(candidate);
+      return candidate;
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== "ENOENT" && code !== "ENOTDIR") throw error;
     }
   }
 

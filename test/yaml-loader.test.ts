@@ -67,10 +67,10 @@ it("reads file URLs through native paths and keeps missing files out of fetch", 
   }
 });
 
-it("preserves file URL conversion and permission errors", async () => {
-  const uri = pathToFileURL(
-    path.resolve("public/rules/frontends/qlatt-english/frontend.yaml"),
-  ).href;
+it("preserves file URL conversion and native resource probe errors", async () => {
+  const native = path.resolve("public/rules/frontends/qlatt-english/frontend.yaml");
+  const uri = pathToFileURL(native).href;
+  const paths = [uri, native, "/rules/frontends/qlatt-english/frontend.yaml"];
   await expect(loadYamlSource(`${uri}%2Fchild`)).rejects.toMatchObject({
     cause: { code: "ERR_INVALID_FILE_URL_PATH" },
   });
@@ -79,9 +79,21 @@ it("preserves file URL conversion and permission errors", async () => {
     throw cause;
   });
   try {
-    expect(() => readFileFromFsSync(uri)).toThrow(cause);
-    await expect(loadYamlDocumentOrNull(uri)).rejects.toMatchObject({ cause });
-    expect(() => loadYamlSourceSync(uri)).toThrow("E_YAML_READ:");
+    for (const resource of paths) {
+      expect(() => readFileFromFsSync(resource)).toThrow(cause);
+      expect(() => readBinaryFromFsSync(resource)).toThrow(cause);
+      await expect(loadYamlDocumentOrNull(resource)).rejects.toMatchObject({ cause });
+      expect(() => loadYamlSourceSync(resource)).toThrow("E_YAML_READ:");
+    }
+    for (const code of ["ENOENT", "ENOTDIR"]) {
+      stat.mockImplementation(() => {
+        throw Object.assign(new Error("absent resource"), { code });
+      });
+      for (const resource of paths) {
+        expect(readFileFromFsSync(resource)).toBeNull();
+        await expect(loadYamlDocumentOrNull(resource)).resolves.toBeNull();
+      }
+    }
   } finally {
     stat.mockRestore();
   }

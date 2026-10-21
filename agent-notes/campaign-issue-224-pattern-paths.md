@@ -10,10 +10,12 @@ Started from PR407 final 0cc1e671; that prerequisite has merged. Implemented six
 
 Pattern normalization preserves sequence indices and condition paths. Reuse existing source capture, macro ancestry and condition classification. Includes merge pattern names; root extends preserves winning leaf origins. A shadowing include does not inherit base patterns, and that contract remains unchanged. Missing-key sequence-node diagnostics remain outside this slice; no blanket location fallback.
 
+Accepted Claude's full four-file review through 93053051: no actionable defects. Normalization, authored indices, key/value selection, shadowing and macro ancestry were reviewed. This response changes only the note; supervisor reconciles the current PR base and completes the review gate.
+
 # Surprises
 
 Other agents own separate signature changes; preserve their edits during integration.
 
 # Next step
 
-Publish stacked on #407 for hosted CI; supervisor reviews the slice after that prerequisite merges. Respond to Claude findings. Keep #224 open.
+Await final-head hosted CI and supervisor merge. Begin the separately approved relation-location slice in its own worktree. Keep #224 open.

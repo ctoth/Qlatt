@@ -4,7 +4,7 @@ Join executed vocabulary reads to authored map-value locations in explain text/J
 
 # State
 
-Started from origin/master f8437836. Implemented the exact resource/typed-path join and text/JSON output, with existing CLI coverage for the real dotted abbreviation key, exact value coordinates, why/replay preservation, and filtered output. No local CI; hosted validation pending.
+Started from origin/master f8437836. Implemented the exact resource/typed-path join and text/JSON output, with existing CLI coverage for the real dotted abbreviation key, exact value coordinates, why/replay preservation, and filtered output. Claude reviewed the full four-file PR and found no defects; accepted with no code changes. Initial seven hosted checks passed. No local CI; final response commit awaits hosted validation.
 
 # Decisions and why
 
@@ -16,4 +16,4 @@ Other agents have added rule expressions and HTML output to explain. Preserve th
 
 # Next step
 
-Implement, publish for hosted CI and Claude review, respond, then supervisor merges. Keep #224 open.
+Await final-head hosted CI and supervisor merge. Review response is complete. Keep #224 open.

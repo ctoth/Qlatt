@@ -46,6 +46,67 @@ async function runCli(args: string[]) {
 }
 
 describe("explain phrase cli", () => {
+  it.each(["rules", "no-such-stage"])("exports a self-contained selected HTML DAG: %s", async (stage) => {
+    const args = ["hello world", `--stage=${stage}`];
+    const json = await runCli([...args, "--format=json"]);
+    const html = await runCli([...args, "--format=html"]);
+    expect(json.code).toBe(0);
+    expect(html.code).toBe(0);
+    const { decisions } = parseExplainPayload(json.stdout);
+    const ids = new Set(decisions.map((decision) => decision.id));
+    expect([...html.stdout.matchAll(/<li id="detail-([^"]+)">/g)].map((match) => match[1])).toEqual([
+      ...ids,
+    ]);
+    const expectedEdges: string[] = [];
+    let omitted = 0;
+    for (const decision of decisions) {
+      expect(html.stdout).toContain(
+        `<a href="#detail-${decision.id}" aria-label="Details for ${decision.id}">`,
+      );
+      expect(html.stdout).toContain(`${decision.stage}: ${decision.type}`);
+      for (const parent of decision.parents ?? []) {
+        if (ids.has(parent)) expectedEdges.push(`${parent}->${decision.id}`);
+        else omitted += 1;
+      }
+    }
+    expect(
+      [...html.stdout.matchAll(/data-parent="([^"]+)" data-child="([^"]+)"/g)].map(
+        (match) => `${match[1]}->${match[2]}`,
+      ),
+    ).toEqual(expectedEdges);
+    expect(html.stdout).toContain(`omitted external parent links: ${omitted}`);
+    expect(html.stdout.match(/marker-end="url\(#arrow\)"/g) ?? []).toHaveLength(expectedEdges.length);
+    expect(html.stdout).toContain('href="#details"');
+    expect(html.stdout).toContain("IDs belong to this run.");
+    expect(html.stdout).not.toMatch(/<script|<link|\ssrc=/i);
+  });
+
+  it("escapes authored HTML and includes full reasons and citations in ancestry details", async () => {
+    const phrase = 'hello <world> & "again"';
+    const json = await runCli(["--phrase", phrase, "--format=json"]);
+    expect(json.code).toBe(0);
+    const child = parseExplainPayload(json.stdout).decisions.find(
+      (decision) => (decision.parents?.length ?? 0) > 0,
+    )!;
+    const args = ["--phrase", phrase, "--why", child.id];
+    const why = parseExplainPayload((await runCli([...args, "--format=json"])).stdout);
+    const html = await runCli([...args, "--format=html"]);
+    expect(html.code).toBe(0);
+    expect(html.stdout).toContain("hello &lt;world&gt; &amp; &quot;again&quot;");
+    expect(html.stdout).not.toContain("<world>");
+    const escape = (value: string) =>
+      value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    for (const decision of why.decisions) {
+      expect(html.stdout).toContain(`<p>${escape(decision.reason)}</p>`);
+      expect(html.stdout).toContain(`Citations: ${escape(decision.citations.join("; ") || "(none)")}`);
+    }
+    expect(html.stdout).toContain("omitted external parent links: 0");
+  });
+
   it.each([
     { selection: [] },
     { selection: ["--stage=rules"] },

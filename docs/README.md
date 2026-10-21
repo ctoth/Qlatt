@@ -27,6 +27,8 @@ Explain text, including `--why`, appends authored rule-declaration locations for
 
 Use `--format dot --out decisions.dot` to export the selected provenance DAG for Graphviz.
 DOT uses current-run IDs and stage colors, and reports parent links omitted by selection.
+Use `--format html --out decisions.html` for a self-contained SVG DAG and linked text details.
+HTML columns show stages and rows follow sequence, not time; citations remain text, and no network resources are required.
 With `--why`, text also prints the full compiled rule and its referenced pattern;
 JSON exposes them by decision ID in `tooling.ruleExpressions`. These normalized,
 expanded definitions are distinct from authored YAML and do not identify which

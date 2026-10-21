@@ -26,7 +26,7 @@ import {
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import type { YamlDocumentSpan } from "../src/yaml-loader";
 
-type ExplainFormat = "text" | "json" | "dot";
+type ExplainFormat = "text" | "json" | "dot" | "html";
 
 type ParsedArgs = {
   phrase: string;
@@ -155,8 +155,8 @@ function parseArgv(argv: string[]): ParsedArgs {
   }
 
   const format = (flags.get("format") ?? "text").toLowerCase();
-  if (format !== "text" && format !== "json" && format !== "dot") {
-    throw new Error(`Unsupported format '${format}'. Use text, json or dot.`);
+  if (format !== "text" && format !== "json" && format !== "dot" && format !== "html") {
+    throw new Error(`Unsupported format '${format}'. Use text, json, dot or html.`);
   }
 
   // Absent: no base pitch is requested, and the frontend's voice keeps its own.
@@ -296,17 +296,18 @@ function selectCompactDecisions(decisions: DecisionRecord[]): {
   };
 }
 
+// Presentation colors only; stages and IDs remain explicit in both graph formats.
+const STAGE_COLORS: Record<ProvenanceStage, string> = {
+  transcribe: "#d9edf7",
+  rules: "#dff0d8",
+  prosody: "#fcf8e3",
+  semantics: "#eadcf4",
+  interpreter: "#fce5cd",
+  runtime: "#f2dede",
+  frontend: "#eeeeee",
+};
+
 function renderDot(payload: ExplainPayload): string {
-  // Presentation colors only; stages and IDs remain explicit in every node label.
-  const colors: Record<ProvenanceStage, string> = {
-    transcribe: "#d9edf7",
-    rules: "#dff0d8",
-    prosody: "#fcf8e3",
-    semantics: "#eadcf4",
-    interpreter: "#fce5cd",
-    runtime: "#f2dede",
-    frontend: "#eeeeee",
-  };
   // DOT quoted labels use escString, not JSON escape sequences.
   const quote = (value: string) =>
     `"${value
@@ -332,10 +333,85 @@ function renderDot(payload: ExplainPayload): string {
     const nodeLabel = `${decision.id}\n${decision.stage}: ${decision.type}\n${decision.subject}`;
     const tooltip = `${decision.reason} | citations: ${decision.citations.join("; ")}`;
     lines.push(
-      `  ${quote(decision.id)} [label=${quote(nodeLabel)}, tooltip=${quote(tooltip)}, fillcolor="${colors[decision.stage]}"];`,
+      `  ${quote(decision.id)} [label=${quote(nodeLabel)}, tooltip=${quote(tooltip)}, fillcolor="${STAGE_COLORS[decision.stage]}"];`,
     );
   }
   return [...lines, ...edges, "}"].join("\n");
+}
+
+function renderHtml(payload: ExplainPayload): string {
+  const escape = (value: string) =>
+    value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  const stages = Object.keys(STAGE_COLORS) as ProvenanceStage[];
+  const decisions = [...payload.decisions].sort((left, right) => left.seq - right.seq);
+  // Fixed stage columns and sequence rows are presentation coordinates, not timing.
+  const positions = new Map(
+    decisions.map((decision, index) => [
+      decision.id,
+      { x: stages.indexOf(decision.stage) * 260 + 20, y: index * 80 + 50 },
+    ]),
+  );
+  const edges: string[] = [];
+  let omitted = 0;
+  for (const decision of decisions) {
+    const child = positions.get(decision.id)!;
+    for (const parentId of decision.parents ?? []) {
+      const parent = positions.get(parentId);
+      if (!parent) {
+        omitted += 1;
+        continue;
+      }
+      const x1 = parent.x + 110;
+      const y1 = parent.y + 48;
+      const x2 = child.x + 110;
+      const y2 = child.y;
+      edges.push(
+        `<path data-parent="${escape(parentId)}" data-child="${escape(decision.id)}" d="M${x1},${y1} C${x1},${y1 + 20} ${x2},${y2 - 20} ${x2},${y2}" fill="none" stroke="#555" marker-end="url(#arrow)"/>`,
+      );
+    }
+  }
+  const nodes = decisions.map((decision) => {
+    const { x, y } = positions.get(decision.id)!;
+    return `<a href="#detail-${escape(decision.id)}" aria-label="Details for ${escape(decision.id)}">
+<title>${escape(`${decision.id}: ${decision.type} — ${decision.subject}`)}</title>
+<rect x="${x}" y="${y}" width="220" height="48" rx="4" fill="${STAGE_COLORS[decision.stage]}" stroke="#333"/>
+<text x="${x + 8}" y="${y + 18}">${escape(decision.id)}</text>
+<text x="${x + 8}" y="${y + 36}">${escape(decision.type.slice(0, 26))}</text></a>`;
+  });
+  const details = decisions.map((decision) => {
+    const parents = (decision.parents ?? []).map((parent) =>
+      positions.has(parent)
+        ? `<a href="#detail-${escape(parent)}">${escape(parent)}</a>`
+        : `${escape(parent)} (outside selection)`,
+    );
+    return `<li id="detail-${escape(decision.id)}">
+<h3>${escape(`${decision.id} — ${decision.stage}: ${decision.type}`)}</h3>
+<p>Subject: ${escape(decision.subject)}</p><p>${escape(decision.reason)}</p>
+<p>Citations: ${escape(decision.citations.join("; ") || "(none)")}</p>
+<p>Parents: ${parents.join(", ") || "(none)"}</p></li>`;
+  });
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance decisions</title><style>
+body { font-family: system-ui, sans-serif; color: #222; background: white; margin: 1rem; }
+.graph { overflow: auto; border: 1px solid #777; max-height: 70vh; }
+svg text { font: 13px monospace; fill: #222; }
+a:focus { outline: 3px solid #005fcc; } li:target { outline: 3px solid #005fcc; }
+li { padding: .5rem; overflow-wrap: anywhere; } p { white-space: pre-wrap; }
+</style></head><body><h1>Provenance decisions</h1><p>${escape(payload.phrase)}</p>
+<p>Selected decision subset: ${decisions.length}/${payload.totalDecisionCount}; omitted external parent links: ${omitted}.
+IDs belong to this run. Columns show stages; rows follow decision sequence, not elapsed time. Arrows point from parent to child.</p>
+<p><a href="#details">Skip graph to decision details</a></p><div class="graph" tabindex="0" role="region" aria-label="Scrollable decision graph">
+<svg xmlns="http://www.w3.org/2000/svg" width="${stages.length * 260}" height="${decisions.length * 80 + 60}" aria-label="Selected provenance DAG">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker></defs>
+${stages.map((stage, index) => `<text x="${index * 260 + 20}" y="25">${stage}</text>`).join("\n")}
+${edges.join("\n")}
+${nodes.join("\n")}
+</svg></div><h2 id="details">Decision details</h2><ol>${details.join("\n")}</ol></body></html>`;
 }
 
 function renderText(payload: ExplainPayload, verbose: boolean): string {
@@ -554,7 +630,9 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
         ? JSON.stringify(args.toolingOnly ? payload.tooling : payload, null, 2)
         : args.format === "dot"
           ? renderDot(payload)
-          : renderText(payload, args.verbose);
+          : args.format === "html"
+            ? renderHtml(payload)
+            : renderText(payload, args.verbose);
 
     if (args.outPath) {
       fs.mkdirSync(path.dirname(args.outPath), { recursive: true });

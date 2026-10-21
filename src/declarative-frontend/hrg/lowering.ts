@@ -63,6 +63,9 @@ const isClockedCommandLayer = (type: LayerType | undefined): boolean =>
 
 type LayerConfig = {
   type: LayerType;
+  /** Fixed positional flag ABI of the owning segmental model, including optional trailing roles. */
+  profile_roles?: readonly string[];
+  required_profile_count?: number;
   decay?: DecayMode;
   initial_decay_divisor?: number;
   termination_threshold?: number;
@@ -735,6 +738,28 @@ export function renderLayeredF0(
   const maxHz = requireFiniteNumber(model.output_clamp?.max_hz, "f0_model.output_clamp.max_hz");
 
   const layerNames = Object.keys(model.layers);
+  // f0-filters/src/lib.rs: DectalkSegmentalState::render_frame reads offsets
+  // 0/1/2 as voiceless/plosive/stressed; DectalkGlottalState reads offset 3.
+  // Validate the effective model, including voice overlays, before packing it.
+  const segmentalRoles = ["voiceless", "plosive", "stressed", "glottal_gesture"];
+  for (const name of layerNames) {
+    const layer = model.layers[name];
+    if (layer.type !== "dectalk_segmental") continue;
+    if (
+      !Array.isArray(layer.profile_roles) ||
+      layer.profile_roles.length !== segmentalRoles.length ||
+      !segmentalRoles.every((role, index) => layer.profile_roles?.[index] === role)
+    ) {
+      throw new Error(
+        `E_HRG_LOWER_F0_MODEL: f0_model.layers.${name}.profile_roles must be [${segmentalRoles.join(", ")}]`,
+      );
+    }
+    if (layer.required_profile_count !== 3) {
+      throw new Error(
+        `E_HRG_LOWER_F0_MODEL: f0_model.layers.${name}.required_profile_count must be 3`,
+      );
+    }
+  }
   const commandsByLayer = new Map<string, F0LayerCommand[]>();
   for (const name of layerNames) commandsByLayer.set(name, []);
   for (const command of commands) {
@@ -881,10 +906,13 @@ export function renderLayeredF0(
         config.type === "profile" || dectalkSegmental || config.type === "dectalk_user_target"
           ? (command.profilePoints?.length ?? 0)
           : 0;
-      // A fourth flag marks a glottal-stop gesture at the allophone's end.
-      if (dectalkSegmental && profileCount !== 3 && profileCount !== 4) {
+      if (
+        dectalkSegmental &&
+        (profileCount < config.required_profile_count! ||
+          profileCount > config.profile_roles!.length)
+      ) {
         throw new Error(
-          `E_HRG_LOWER_F0_MODEL: f0_control.${name}.profilePoints requires [voiceless, plosive, stressed] and optionally [glottal gesture]`,
+          `E_HRG_LOWER_F0_MODEL: f0_control.${name}.profilePoints requires ${config.required_profile_count} to ${config.profile_roles!.length} values in declared profile_roles order`,
         );
       }
       if (profileCount > 0 && command.profilePoints) profilePool.push(...command.profilePoints);

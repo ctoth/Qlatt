@@ -8,6 +8,7 @@ import type {
   LowerOptions,
 } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-frontend/hrg";
+import { f0ModelForVoice, renderLayeredF0 } from "../src/declarative-frontend/hrg/lowering";
 import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
@@ -19,6 +20,62 @@ const META = {
   reason: "captured layered-intonation fixture",
   citations: ["Klatt 1982"],
 };
+
+describe("DECtalk segmental profile declaration", () => {
+  it.each([
+    { field: "profile_roles", value: undefined },
+    { field: "profile_roles", value: "voiceless,plosive,stressed,glottal_gesture" },
+    { field: "profile_roles", value: ["voiceless", "plosive", "stressed"] },
+    { field: "profile_roles", value: ["plosive", "voiceless", "stressed", "glottal_gesture"] },
+    { field: "required_profile_count", value: undefined },
+    { field: "required_profile_count", value: 4 },
+  ])("rejects invalid $field declaration $value even without commands", ({ field, value }) => {
+    const { f0Model, speakerParams } = readFixture();
+    const segmental = { ...f0Model.layers.segmental };
+    Reflect.set(segmental, field, value);
+    const model = { ...f0Model, layers: { ...f0Model.layers, segmental } };
+    expect(() => renderLayeredF0([], model, 0.1, speakerParams)).toThrow(
+      `f0_model.layers.segmental.${field}`,
+    );
+  });
+
+  it("validates the voice's effective role order", () => {
+    const { f0Model, speakerParams } = readFixture();
+    const model = f0ModelForVoice(
+      {
+        ...f0Model,
+        by_sex: {
+          fixture: {
+            layers: {
+              segmental: {
+                profile_roles: ["plosive", "voiceless", "stressed", "glottal_gesture"],
+              },
+            },
+          },
+        },
+      },
+      "fixture",
+    );
+    expect(() => renderLayeredF0([], model, 0.1, speakerParams)).toThrow("profile_roles");
+  });
+
+  it("renders three flags identically to an explicit zero fourth flag", () => {
+    const { f0Model, speakerParams } = readFixture();
+    const render = (profilePoints: number[]) =>
+      renderLayeredF0(
+        [{ layer: "segmental", time: 0, value: 50, durationFrames: 20, profilePoints }],
+        f0Model,
+        0.1,
+        speakerParams,
+      );
+    const three = render([1, 0, 0]);
+    expect(three.length).toBeGreaterThan(0);
+    expect(three.every((point) => Number.isFinite(point.f0))).toBe(true);
+    expect(render([1, 0, 0, 0])).toEqual(three);
+    expect(() => render([1, 0])).toThrow("profilePoints requires 3 to 4");
+    expect(() => render([1, 0, 0, 0, 0])).toThrow("profilePoints requires 3 to 4");
+  });
+});
 
 type BaselineCommand = {
   durationFrames?: number;

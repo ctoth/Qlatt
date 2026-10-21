@@ -5,8 +5,8 @@ dictionary-miss scripts consume the selected Qlatt frontend's lexicon (#141).
 
 # State
 
-Isolated from origin/master at 3d631294. Implemented the approved bounded slice;
-preparing publication for hosted CI and independent Claude review.
+Isolated from origin/master at 3d631294. PR373 is published; hosted CI and
+independent Claude review are in progress.
 
 # Decisions and why
 
@@ -26,8 +26,12 @@ The existing browser absence fixture resets modules before acquiring its two
 loaders. Its cold-cache assertion now checks the exact missing-path message,
 without a fabricated CMU suggestion. No local CI runs; PR CI owns validation.
 
+Hosted quality job119083468778 required the profile script's missing-lexicon
+throw on the following line. I wrote the conditional on one line; corrected
+that formatting only. No behavior change or local CI rerun.
+
 # Next step
 
-Owned diff inspected: loader, two scripts, existing absence fixture, and this
-note. Commit, push, and open the PR for CI and Claude review. Respond to review
-and report the exact head to the supervisor; do not merge this branch myself.
+Push the formatting response, then await hosted CI and Claude review. Respond
+to review and report the exact head to the supervisor; do not merge this branch
+myself.

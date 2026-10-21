@@ -30,7 +30,8 @@ async function main() {
   console.log("Loading Qlatt frontend resources...");
   const t0 = performance.now();
   const { lexicon } = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
-  if (!lexicon) throw new Error("E_FRONTEND_CONFIG: frontend 'qlatt-english' requires role 'lexicon'");
+  if (!lexicon)
+    throw new Error("E_FRONTEND_CONFIG: frontend 'qlatt-english' requires role 'lexicon'");
   const resourcesLoadTime = performance.now() - t0;
   console.log(`Frontend resources loaded in ${resourcesLoadTime.toFixed(1)}ms`);
   const dict = lexicon.dictionary;

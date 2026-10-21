@@ -130,6 +130,8 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 | `--frontend <id>` | Frontend rulepack ID (default: `qlatt-english`) |
 | `--speaker <name>` | Voice name from the selected frontend's speaker registry |
 
+Use `--format json` for full field history, checkpoint details and replay digests. Text output summarizes the field version count, checkpoint count and replay match result.
+
 In PowerShell, invoke Node directly with an explicit phrase to avoid npm argument-forwarding differences:
 
 ```powershell

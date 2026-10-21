@@ -38,11 +38,7 @@ describe("harness runtime replacement", () => {
     const status = { textContent: "" };
     vi.stubGlobal("document", {
       getElementById: vi.fn((id: string) =>
-        id === "experimentSelect"
-          ? { value: "test-inherit" }
-          : id === "status"
-            ? status
-            : null,
+        id === "experimentSelect" ? { value: "test-inherit" } : id === "status" ? status : null,
       ),
     });
     const { state } = await import("./harness/state.js");

@@ -5,11 +5,13 @@ Deliver the browser-harness consolidation slice of #251, using the shared experi
 # State
 
 Implemented from base 95d3165a: harness change adds 5 lines and removes 77;
-existing lifecycle test gains 25 lines for the bundled inheritance fixture.
+existing lifecycle test gains a bundled inheritance fixture case.
 Own this note, test/harness/experiment.js,
 test/harness-runtime-lifecycle.test.ts, and the existing state.d.ts declarations.
 Dependencies are absent in this
 worktree, so no local test was run; validation awaits PR CI on PR #329.
+CI job 119012794351 requested one fixture ternary formatting correction;
+applied its exact diff. Replacement CI and Claude review are pending.
 
 # Decisions and why
 

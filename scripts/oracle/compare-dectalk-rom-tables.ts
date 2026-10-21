@@ -25,7 +25,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import * as yaml from "js-yaml";
+import { parseYamlString } from "../../src/yaml-loader";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const argv = process.argv.slice(2);
@@ -79,11 +79,17 @@ const f0segtars = readTable(rom, "us_f0segtars");
 const maltar = readTable(rom, "us_maltar");
 const MALTAR_BLOCKS = ["F1", "F2", "F3", "B1", "B2", "B3"];
 
-const inventoryDoc = yaml.load(
-  fs.readFileSync(
-    path.join(repoRoot, "public", "rules", "frontends", "dectalk-english", "inventory.yaml"),
-    "utf8",
-  ),
+const inventoryPath = path.join(
+  repoRoot,
+  "public",
+  "rules",
+  "frontends",
+  "dectalk-english",
+  "inventory.yaml",
+);
+const inventoryDoc = parseYamlString(
+  fs.readFileSync(inventoryPath, "utf8"),
+  inventoryPath,
 ) as Record<string, unknown>;
 // The inventory's target table is the top-level map that holds phoneme entries.
 const targets = (Object.values(inventoryDoc).find(

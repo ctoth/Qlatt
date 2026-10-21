@@ -27,7 +27,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import * as yaml from "js-yaml";
+import { parseYamlString } from "../../src/yaml-loader";
 import { wordsPastTable } from "./dectalk-debug/featb-past-table.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -86,12 +86,17 @@ for (const match of header.matchAll(/^#define\s+US_([A-Z]+)\s+(\d+)\b/gm)) {
   if (code > 0 && code < 59 && names[code] === undefined) names[code] = match[1];
 }
 
-const frontend = yaml.load(
-  fs.readFileSync(
-    path.join(repoRoot, "public", "rules", "frontends", "dectalk-english", "frontend.yaml"),
-    "utf8",
-  ),
-) as { parameters: { policy: { timing: Record<string, unknown> } } };
+const frontendPath = path.join(
+  repoRoot,
+  "public",
+  "rules",
+  "frontends",
+  "dectalk-english",
+  "frontend.yaml",
+);
+const frontend = parseYamlString(fs.readFileSync(frontendPath, "utf8"), frontendPath) as {
+  parameters: { policy: { timing: Record<string, unknown> } };
+};
 const timing = frontend.parameters.policy.timing;
 
 const differences: string[] = [];

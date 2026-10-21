@@ -25,8 +25,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import * as yaml from "js-yaml";
-import { isPlainObject } from "../src/yaml-loader";
+import { isPlainObject, parseYamlString } from "../src/yaml-loader";
 
 type Finding = {
   file: string;
@@ -75,7 +74,7 @@ const phasesDir = path.join(frontendDir, "phases");
 for (const name of fs.readdirSync(phasesDir).filter((file) => file.endsWith(".yaml"))) {
   const filePath = path.join(phasesDir, name);
   const source = fs.readFileSync(filePath, "utf8");
-  const doc = yaml.load(source) as { rules?: Record<string, unknown> } | null;
+  const doc = parseYamlString(source, filePath) as { rules?: Record<string, unknown> } | null;
   const rules = (doc?.rules ?? doc ?? {}) as Record<string, unknown>;
   for (const [ruleId, rule] of Object.entries(rules)) {
     if (!rule || typeof rule !== "object") continue;
@@ -113,7 +112,7 @@ const frontendPath = path.join(frontendDir, "frontend.yaml");
 let ltsPath: string | undefined;
 if (fs.existsSync(frontendPath)) {
   const source = fs.readFileSync(frontendPath, "utf8");
-  const frontend = yaml.load(source);
+  const frontend = parseYamlString(source, frontendPath);
   if (
     isPlainObject(frontend) &&
     isPlainObject(frontend.resources) &&

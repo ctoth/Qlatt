@@ -158,9 +158,18 @@ describe("host-neutral automation contract", () => {
     const prepared = interpreter.prepareTrack(track);
     interpreter.schedulePrepared(prepared, 0.125);
     expect(calls).toEqual(expected);
-    expect(provenance.getDecisions()).toHaveLength(4);
-    expect(provenance.getDecisions()[0].reason).toContain("compiled schedule time 0s");
-    expect(provenance.getDecisions()[0].timestampMs).toBeUndefined();
+    const decisions = provenance.getDecisions();
+    const resolved = decisions.filter((decision) => decision.type === "binding_resolved");
+    expect(resolved.map((decision) => decision.subject)).toEqual([
+      "binding:amplitude.gain",
+      "binding:branch.gain",
+    ]);
+    expect(resolved[0].reason).toContain("level resolved to available AudioParam amplitude.gain");
+    expect(resolved[0].timestampMs).toBeUndefined();
+    const modes = decisions.filter((decision) => decision.type === "schedule_mode_selected");
+    expect(modes).toHaveLength(4);
+    expect(modes[0].reason).toContain("compiled schedule time 0s");
+    expect(modes[0].timestampMs).toBeUndefined();
     const buffer = await ctx.startRendering();
     expect(buffer.getChannelData(0)[1000]).toBeCloseTo(0.25, 5);
     expect(buffer.getChannelData(0)[3000]).toBeCloseTo(0.5, 5);

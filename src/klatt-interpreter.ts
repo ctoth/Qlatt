@@ -548,6 +548,15 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       const nodeParams = params.get(target.nodeId) ?? new Map<string, AudioParam>();
       nodeParams.set(target.paramName, param);
       params.set(target.nodeId, nodeParams);
+      options.provenance?.add({
+        stage: "interpreter",
+        type: "binding_resolved",
+        subject: `binding:${target.nodeId}.${target.paramName}`,
+        reason: `${options.semantics.name}: ${name} resolved to available AudioParam ${target.nodeId}.${target.paramName}`,
+        citations: [
+          "docs/host-contract.md section 5 (interpreter resolves available WebAudio targets)",
+        ],
+      });
     }
   }
   // Telemetry of a compile is kept with the prepared track and passed on when

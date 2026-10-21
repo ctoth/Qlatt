@@ -4,8 +4,8 @@ import {
   evaluateExpression,
   validateExpressionSyntax,
 } from "../src/declarative-frontend/cel-expressions";
-import { loadInventorySpecFromPath } from "../src/declarative-frontend/inventory";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
+import { loadInventorySpecFromPath } from "../src/declarative-frontend/rule-pack";
 
 /**
  * #47: the safe optional-field accessor.

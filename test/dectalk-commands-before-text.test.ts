@@ -48,8 +48,8 @@ import {
 import {
   loadFrontendResources,
   loadFrontendVoiceDocument,
-} from "../src/declarative-frontend/inventory";
-import { loadRulepackSpecFromPath } from "../src/declarative-frontend/rule-pack";
+  loadRulepackSpecFromPath,
+} from "../src/declarative-frontend/rule-pack";
 import {
   changeDefinition,
   type SpeakerDefinitionData,

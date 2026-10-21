@@ -1,6 +1,8 @@
 import { afterAll, describe, expect, it, vi } from "vitest";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
 import { createProvenanceCollector } from "../src/provenance";
 import {
@@ -17,6 +19,7 @@ const resources = loadFrontendResources(compiledSpec);
 const selected = {
   frontendId: "qlatt-english",
   compiledSpec,
+  resources: loadFrontendResources(compiledSpec),
   dictionaryMap: resources.lexicon?.dictionary,
 };
 
@@ -171,6 +174,7 @@ describe("transcribe-text", () => {
       expect(transcriptionConfig.sources?.number).toBeUndefined();
       expect(() => transcribeText("hello", selected)).not.toThrow();
       const dectalk = loadBundledRulepackSpec("dectalk-english");
+      const dectalkResources = loadFrontendResources(dectalk);
       const dectalkConfig = dectalk.transcription as TranscriptionConfig;
       for (const key of ["number", "phonemic"] as const) {
         const config = { ...dectalkConfig, sources: { ...dectalkConfig.sources } };
@@ -178,6 +182,7 @@ describe("transcribe-text", () => {
         expect(() =>
           transcribeText("hello", {
             compiledSpec: dectalk,
+            resources: dectalkResources,
             dictionaryMap: {},
             transcriptionConfig: config,
           }),
@@ -197,6 +202,7 @@ describe("transcribe-text", () => {
       ]);
       const dectalkOptions = {
         compiledSpec: dectalk,
+        resources: dectalkResources,
         dictionaryMap: { blorf: "K AE1 T", "'snarp": "B IY1", "blorf-snarp": "D UW1" },
       };
       expect(transcribeText("'blorf'", dectalkOptions).map((token) => token.phoneme)).toEqual([
@@ -241,7 +247,11 @@ describe("transcribe-text", () => {
         skip_dictionary: true,
       };
       expect(loadFrontendResources(noLexicon).lexicon).toBeUndefined();
-      const options = { compiledSpec: noLexicon, frontendId: "no-lexicon" };
+      const options = {
+        compiledSpec: noLexicon,
+        resources: loadFrontendResources(noLexicon),
+        frontendId: "no-lexicon",
+      };
       const tokens = transcribeText("adl tabatabai", { ...options, diagnostics });
       expect(tokens).toEqual(transcribeText("adl tabatabai", { ...options, dictionaryMap: {} }));
       expect(new Set(tokens.map((token) => token.word))).toEqual(new Set(["adl", "tabatabai"]));

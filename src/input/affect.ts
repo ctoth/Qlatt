@@ -96,12 +96,12 @@ export interface CompileAffectOptions {
 
 /** List every authorable preset name (clinical bare names included). */
 export function listAffectPresetNames(library: AffectLibrary): string[] {
-  return [...library.presets.keys(), ...library.variants.keys()];
+  return [...Object.keys(library.presets), ...Object.keys(library.variants)];
 }
 
 /** True if `name` is a clinical state that needs a sex to resolve. */
 export function isClinicalSexRequired(library: AffectLibrary, name: string): boolean {
-  return library.variants.has(name);
+  return Object.hasOwn(library.variants, name);
 }
 
 /**
@@ -115,13 +115,16 @@ export function resolveAffectPreset(
   name: string,
   sex?: SpeakerSex,
 ): AffectPreset {
-  const variants = library.variants.get(name);
+  const variants = Object.hasOwn(library.variants, name) ? library.variants[name] : undefined;
   if (variants && !sex)
     throw new Error(
       `Clinical affect preset '${name}' requires a speaker sex. Provide options.sex or voice.sex.`,
     );
-  const resolved = variants ? variants.get(sex!) : name;
-  const preset = resolved === undefined ? undefined : library.presets.get(resolved);
+  const resolved = variants ? (Object.hasOwn(variants, sex!) ? variants[sex!] : undefined) : name;
+  const preset =
+    resolved !== undefined && Object.hasOwn(library.presets, resolved)
+      ? library.presets[resolved]
+      : undefined;
   if (!preset)
     throw new Error(
       `Unknown affect preset '${name}'. Known: ${listAffectPresetNames(library).join(", ")}`,

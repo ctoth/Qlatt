@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import * as rulepack from "../src/declarative-frontend/rule-pack";
 import {
   loadFrontendResources,
   preloadFrontendSourceContour,
-} from "../src/declarative-frontend/inventory";
-import * as rulepack from "../src/declarative-frontend/rule-pack";
+} from "../src/declarative-frontend/rule-pack";
 import { assertFrontendVocabulary } from "../src/experiments/frontend-vocabulary";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
 import * as paths from "../src/path-utils";
@@ -47,7 +47,11 @@ describe("source contour projection policy", () => {
     const selected = { ...frontend, resources: { ...frontend.resources, source_contour: null } };
     expect(loadFrontendResources(selected).sourceContour).toBeUndefined();
     await expect(preloadFrontendSourceContour(selected)).resolves.toBeUndefined();
-    vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue(selected);
+    vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
+      spec: selected,
+      resources: loadFrontendResources(selected),
+      voices: {},
+    });
     expect(() => textToKlattTrackDetailed("hello", 110, 30)).toThrow(
       /E_FRONTEND_CONFIG: frontend 'qlatt-english' requires source_contour/,
     );
@@ -60,9 +64,14 @@ describe("source contour projection policy", () => {
 
   it("projects a fixture-only source field into frames in declared order with provenance", () => {
     const spec = rulepack.loadBundledRulepackSpec("qlatt-english");
-    vi.spyOn(rulepack, "loadBundledRulepackSpec").mockReturnValue({
+    const selected = {
       ...spec,
       resources: { ...spec.resources, source_contour: fixturePath },
+    };
+    vi.spyOn(rulepack, "resolveFrontend").mockReturnValue({
+      spec: selected,
+      resources: loadFrontendResources(selected),
+      voices: {},
     });
     const result = textToKlattTrackDetailed("hello", 110, 30);
     const frames = result.track.filter((frame) => frame.phoneme && frame.phoneme !== "SIL");

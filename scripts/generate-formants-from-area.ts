@@ -6,12 +6,12 @@ import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { dump, load } from "js-yaml";
 import { z } from "zod";
+import type { InventorySpec } from "../src/declarative-frontend/inventory.ts";
 import {
-  type InventorySpec,
+  loadBundledRulepackSpec,
   loadFrontendResources,
   loadInventorySpecFromPath,
-} from "../src/declarative-frontend/inventory.ts";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack.ts";
+} from "../src/declarative-frontend/rule-pack.ts";
 import { resolveSpeakerProfile, type SpeakerProfileSpec } from "../src/speaker-profile.ts";
 import { deriveFormants, MODEL_ID, scaleGeometry } from "./area-formants.ts";
 

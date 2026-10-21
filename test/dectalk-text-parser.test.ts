@@ -16,8 +16,10 @@ import {
   recordedClauses,
   textParserPort,
 } from "../scripts/oracle/text-parser-port";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector } from "../src/provenance";
 import { runTextParser } from "../src/text-parser/frontend";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";

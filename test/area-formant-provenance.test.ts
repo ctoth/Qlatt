@@ -1,5 +1,6 @@
 import { expect, it, vi } from "vitest";
 import * as inventoryModule from "../src/declarative-frontend/inventory";
+import * as resourceOwner from "../src/declarative-frontend/rule-pack";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
@@ -14,7 +15,7 @@ const geometry = {
 };
 
 it("carries geometry and model through inventory selection into the decision DAG", () => {
-  const original = inventoryModule.loadInventorySpecFromPath(path);
+  const original = resourceOwner.loadInventorySpecFromPath(path);
   const inventory = {
     ...original,
     phoneme_targets: {
@@ -28,10 +29,11 @@ it("carries geometry and model through inventory selection into the decision DAG
       },
     },
   };
-  const resources = inventoryModule.loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
+  const spec = loadBundledRulepackSpec("qlatt-english");
+  const resources = resourceOwner.loadFrontendResources(spec);
   const spy = vi
-    .spyOn(inventoryModule, "loadFrontendResources")
-    .mockReturnValue({ ...resources, inventory });
+    .spyOn(resourceOwner, "resolveFrontend")
+    .mockReturnValue({ spec, resources: { ...resources, inventory }, voices: {} });
   const provenance = createProvenanceCollector();
   try {
     textToKlattTrackDetailed("see", 110, 30, { provenance });
@@ -55,7 +57,7 @@ it("carries geometry and model through inventory selection into the decision DAG
 
 it("rejects a derived target without cited geometry, while retaining table targets", () => {
   const source = loadYamlSourceSync(path);
-  const inventory = inventoryModule.loadInventorySpecFromPath(path);
+  const inventory = resourceOwner.loadInventorySpecFromPath(path);
   const phonologyPath = inventoryModule.inventoryPhonologyPath(inventory);
   const phonology = phonologyPath === undefined ? undefined : loadYamlSourceSync(phonologyPath);
   expect(() => inventoryModule.parseInventorySpec(source, phonology)).not.toThrow();

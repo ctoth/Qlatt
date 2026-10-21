@@ -22,8 +22,10 @@
  * actual source behavior.
  */
 
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { normalizeGraphText as normalizeText } from "../src/declarative-frontend/source-recognition";
 
 // dectalk-english declares its own normalization tables + pipeline (DATA).

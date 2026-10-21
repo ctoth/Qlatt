@@ -2,9 +2,10 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import {
   compileAffect,
   isClinicalSexRequired,
@@ -398,13 +399,13 @@ describe("input contract — affect compiler (cited presets)", () => {
   });
 
   it("every preset in the library carries at least one citation", () => {
-    for (const [name, preset] of library.presets) {
+    for (const [name, preset] of Object.entries(library.presets)) {
       expect(preset.citations.length, `preset '${name}' must be cited`).toBeGreaterThan(0);
     }
   });
 
   it("covers all five preset groups (emotion, epistemic, pragmatic, speech_act, clinical)", () => {
-    const groups = new Set([...library.presets.values()].map((p) => p.group));
+    const groups = new Set(Object.values(library.presets).map((p) => p.group));
     expect(groups).toEqual(
       new Set(["emotion", "epistemic", "pragmatic", "speech_act", "clinical"]),
     );
@@ -721,7 +722,7 @@ describe("input contract — directions emit cited DecisionRecords (HRG-compatib
     const configured = parseAffectPresets({
       degree: library.degree,
       variants: {},
-      presets: [...library.presets.values()].map((preset) => ({
+      presets: Object.values(library.presets).map((preset) => ({
         ...preset,
         citations: [`configured:${preset.name}`],
       })),
@@ -858,10 +859,10 @@ describe("input contract — inline shorthand is demoted to a lifter", () => {
   });
 
   it("leaves numeric and hyphenated preset authority with the supplied affect library", () => {
-    const preset = { ...library.presets.get("angry")!, name: "angry-2" };
+    const preset = { ...library.presets.angry, name: "angry-2" };
     const selectedLibrary = {
       ...library,
-      presets: new Map([...library.presets, [preset.name, preset]]),
+      presets: Object.assign(Object.create(null), library.presets, { [preset.name]: preset }),
     };
     const input = parseInline("((angry-2@.5)) *no*", policy);
     expect(input.directionTrack.global?.affect).toEqual({ preset: "angry-2", degree: 0.5 });

@@ -3,10 +3,8 @@
  * an inventoryResolver for tests that exercise structural rules.
  */
 import type { Utterance } from "../../src/declarative-frontend/hrg";
-import {
-  loadInventorySpecFromPath,
-  materializePhonemeTarget,
-} from "../../src/declarative-frontend/inventory";
+import { materializePhonemeTarget } from "../../src/declarative-frontend/inventory";
+import { loadInventorySpecFromPath } from "../../src/declarative-frontend/rule-pack";
 
 const QLATT_INVENTORY_PATH = "/rules/frontends/qlatt-english/inventory.yaml";
 

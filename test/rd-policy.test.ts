@@ -1,7 +1,9 @@
 import { load as loadYaml } from "js-yaml";
 import { describe, expect, it } from "vitest";
-import { loadFrontendResources } from "../src/declarative-frontend/inventory";
-import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import {
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+} from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
 import { applyAffectToTrack } from "../src/input/apply-affect";
 import { neutralVoiceQualityDelta } from "../src/input/direction-track";

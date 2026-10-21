@@ -12,10 +12,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import {
-  loadInventorySpecFromPath,
-  materializePhonemeTarget,
-} from "../src/declarative-frontend/inventory";
+import { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
+import { loadInventorySpecFromPath } from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { loadCmuDictionary } from "./utils/cmudict-audit";
 

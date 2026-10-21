@@ -103,7 +103,10 @@ describe("Frame foundation", () => {
   it("memoizes authored F1 copying and projects its actual source ancestry without writes", () => {
     const { utterance, items, options } = fixture();
     options.transitions.blend.keys = [];
-    const program = checkRequestedAttributes(loadBundledRulepackSpec("qlatt-english"), "frame_copy");
+    const program = checkRequestedAttributes(
+      loadBundledRulepackSpec("qlatt-english"),
+      "frame_copy",
+    );
     const result = lowerToFrames(utterance, options, { frameCopy: program });
     const index = result.frames.findIndex((row) => row.segmentId === "s0");
     const row = result.frames[index];
@@ -119,7 +122,8 @@ describe("Frame foundation", () => {
     expect(chain.map((record) => record.id)).not.toContain(items[0].latestWrite("F2")!.decisionId);
     expect(frame.latestWrite("F1")).toBeUndefined();
     expect(
-      utterance.journal()
+      utterance
+        .journal()
         .filter((entry) => entry.metadata.ruleId.startsWith("lowering."))
         .map((entry) => entry.metadata.ruleId),
     ).not.toContain("lowering.frame_copy");

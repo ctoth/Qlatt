@@ -15,6 +15,9 @@ do not supply a checked program keep imperative copying; no fake checked handle.
 Existing Frame fixtures now distinguish clock writes from evaluated numbers and
 exercise memoization, source spans, actual dependency ancestry and public IDs.
 No local CI, browser runs or measurements have been executed.
+Initial hosted quality job 119258167959 reported four formatting/import-order
+errors in lowering and two existing fixtures. Applied its exact layouts; no
+production behavior changed by this correction. Test shards still pending.
 
 ## Decisions and why
 - Smallest approved revision: 240–340 production lines including deletions,

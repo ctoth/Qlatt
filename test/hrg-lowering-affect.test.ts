@@ -10,10 +10,10 @@ import {
   buildDirectionItemSchema,
   parseDirectionInput,
 } from "../src/input/parse";
-import { expectFrameSource } from "./utils/frame-provenance";
 import { readRdPolicy } from "../src/input/rd-policy";
 import { parseVoiceQualityChannels } from "../src/input/vq-channels";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
+import { expectFrameSource } from "./utils/frame-provenance";
 
 const rdPolicy = readRdPolicy(
   loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml"),

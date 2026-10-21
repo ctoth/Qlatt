@@ -21,14 +21,14 @@ import type { KlattFrame } from "../../tts-frontend-types";
 import { isPlainObject } from "../../yaml-loader";
 import { emitFrame, FrameValues, recordFrameEvaluation } from "./frame";
 import { frameValueIndex, isFrameValues } from "./frame-program";
+import { buildHolmesTransitions, sampleHolmesCurve } from "./holmes-transitions";
+import type { Item } from "./item";
+import { PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
 import {
   type AttributeEvidence,
   type CheckedAttributes,
   RequestedAttributes,
 } from "./requested-attributes";
-import { buildHolmesTransitions, sampleHolmesCurve } from "./holmes-transitions";
-import type { Item } from "./item";
-import { PARAMETER_SCOPE_FEATURE } from "./parameter-scope";
 import { applyScalarOp } from "./scalar-op";
 import type { FeatureValue } from "./types";
 import type { Utterance } from "./utterance";
@@ -2054,7 +2054,9 @@ export function lowerToFrames(
       ...(affect?.parents.durationScale ?? []),
       ...(isPause ? (affect?.parents.pauseScale ?? []) : []),
     ];
-    outputTimingParentsByItem.set(timing.item, [...new Set([...outputCursorParents, ...scaleParents])]);
+    outputTimingParentsByItem.set(timing.item, [
+      ...new Set([...outputCursorParents, ...scaleParents]),
+    ]);
     const durationWrite = timing.item.latestWrite(durationKey);
     outputCursorParents = [
       ...new Set([
@@ -2943,9 +2945,14 @@ export function lowerToFrames(
     for (const key of ["F1", "F2", "F3"]) {
       const requested = params[key];
       if (typeof requested !== "number" || requested >= 1) continue;
-      writeValue(params, key, 1, "affect", [provenance[key]], [
-        "Qlatt engineering bound: formants >= 1 Hz",
-      ]);
+      writeValue(
+        params,
+        key,
+        1,
+        "affect",
+        [provenance[key]],
+        ["Qlatt engineering bound: formants >= 1 Hz"],
+      );
       utterance.diagnostics.warn(
         "Affect projection clamped a formant frequency above zero",
         { itemId: item.id, key, requested, clamped: 1, min: 1 },

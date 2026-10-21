@@ -45,7 +45,7 @@ export function rulepackParameterOrigins(spec: CompiledRulepack): readonly YamlN
   return PARAMETER_ORIGINS.get(spec) ?? NO_PARAMETER_ORIGINS;
 }
 
-/** Authored rule/predicate/pattern spans, compiled rule paths, and macro body parents. */
+/** Authored rule/predicate/pattern/relation spans, compiled rule paths, and macro parents. */
 export function rulepackRuleDocumentSpans(
   spec: CompiledRulepack,
 ): readonly DiagnosticDocumentSpans[] {
@@ -109,6 +109,7 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
         (entry) =>
           entry.value.path[0] === "predicates" ||
           entry.value.path[0] === "patterns" ||
+          entry.value.path[0] === "relations" ||
           (entry.value.path[0] === "rules" &&
             (entry.value.path.every((part) => typeof part === "string") ||
               (entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number") ||
@@ -427,17 +428,20 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
   }
   MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(baseFile), ...MAP_ORIGINS.get(childFile) });
   RULE_ORIGINS.set(merged, RULE_ORIGINS.get(childFile) ?? {});
-  const childPredicates = isPlainObject(childFile.predicates) ? childFile.predicates : {};
   RULE_DOCUMENT_SPANS.set(
     merged,
     Object.freeze([
       ...(RULE_DOCUMENT_SPANS.get(childFile) ?? []),
-      ...(RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter(
-        ({ value: { path } }) =>
-          path[0] === "predicates" &&
-          typeof path[1] === "string" &&
-          !Object.hasOwn(childPredicates, path[1]),
-      ),
+      ...(RULE_DOCUMENT_SPANS.get(baseFile) ?? []).filter(({ value: { path } }) => {
+        if (
+          (path[0] !== "predicates" && path[0] !== "relations") ||
+          typeof path[1] !== "string"
+        ) {
+          return false;
+        }
+        const childEntries = childFile[path[0]];
+        return !isPlainObject(childEntries) || !Object.hasOwn(childEntries, path[1]);
+      }),
     ]),
   );
   FUNCTION_BODY_SPANS.set(merged, FUNCTION_BODY_SPANS.get(childFile) ?? NO_PARAMETER_ORIGINS);
@@ -782,6 +786,7 @@ function parseComposedRulepack(merged: PlainObject): NormalizedDslSpec {
     (entry) =>
       entry.value.path[0] === "predicates" ||
       entry.value.path[0] === "patterns" ||
+      entry.value.path[0] === "relations" ||
       entry.value.path.every((part) => typeof part === "string"),
   );
   for (const { compiled, authored } of paths) {

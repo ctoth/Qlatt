@@ -264,10 +264,21 @@ describe("direct rule errors through composition", () => {
               constraint: { expr: "fixture_outer(current)" },
             },
           };
+          const fixtureRelations = {
+            Fixture: {
+              type: "parallel",
+              scalars: {
+                duration: {
+                  floor_field: "missingFloor",
+                  floor_fallback: { value: "current.missingFloor", citations: ["Fixture source"] },
+                },
+              },
+            },
+          };
           const frontend = writeExtendingFrontend(
             dir,
-            included ? { rules, functions, predicates, patterns } : {},
-            included ? {} : { rules, functions, predicates, patterns },
+            included ? { rules, functions, predicates, patterns, relations: fixtureRelations } : {},
+            included ? {} : { rules, functions, predicates, patterns, relations: fixtureRelations },
           );
           const resource = included ? `${dir.replace(/\\/g, "/")}/pipeline.yaml` : frontend;
           const authored = parseYamlString(readFileSync(resource, "utf8"), resource);
@@ -323,6 +334,19 @@ describe("direct rule errors through composition", () => {
           }
           // CEL syntax errors include a multiline source highlight before the location suffix.
           const diagnosticBlocks = String(failure).split(/\n(?=[EW]_[A-Z_]+ at )/);
+          for (const [code, path, position] of [
+            ["E_SCALAR_FLOOR_FIELD_UNKNOWN", "floor_field", "key"],
+            ["E_RULE_FEATURE_UNKNOWN", "floor_fallback.value", "value"],
+          ] as const) {
+            const fullPath = `relations.Fixture.scalars.duration.${path}`;
+            const source = entries.find((entry) => entry.value.path.join(".") === fullPath)?.[
+              position
+            ];
+            expect(source).toBeDefined();
+            expect(
+              diagnosticBlocks.find((block) => block.includes(`${code} at ${fullPath}:`)),
+            ).toContain(`[${resource}:${source?.line}:${source?.column}]`);
+          }
           for (const [code, path, authoredPath, position] of [
             [
               "E_RULE_FEATURE_UNKNOWN",
@@ -624,10 +648,14 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
     const spans = rulepackRuleDocumentSpans(spec);
     const resource = `${dir.replace(/\\/g, "/")}/pipeline.yaml`;
     const authored = yamlDocumentSpans(parseYamlString(readFileSync(resource, "utf8"), resource));
-    for (const name of ["is_sonorant", "is_fixture_nasal"]) {
-      const matches = spans.filter((entry) => entry.value.path.join(".") === `predicates.${name}`);
+    for (const path of [
+      "predicates.is_sonorant",
+      "predicates.is_fixture_nasal",
+      "relations.Syllable.features.fixtureFeature",
+    ]) {
+      const matches = spans.filter((entry) => entry.value.path.join(".") === path);
       expect(matches).toHaveLength(1);
-      const source = authored.find((entry) => entry.value.path.join(".") === `predicates.${name}`);
+      const source = authored.find((entry) => entry.value.path.join(".") === path);
       expect(matches[0].value.line).toBe(source?.value.line);
       expect(matches[0].value.column).toBe(source?.value.column);
       expect(matches[0].value.resource).toBe(resource);
@@ -637,6 +665,12 @@ describe("declarative frontend extends: keyed sections of a shadowing file", () 
     );
     expect(inherited?.value.resource).toBe("/rules/frontends/qlatt-english/pipeline.yaml");
     expect(inherited?.value.line).toBe(12);
+    const baseRelation = spans.find(
+      (entry) =>
+        entry.value.path.join(".") === "relations.Segment.scalars.duration.floor_fallback.value",
+    );
+    expect(baseRelation?.value.resource).toBe("/rules/frontends/qlatt-english/pipeline.yaml");
+    expect(baseRelation?.key?.line).toBe(450);
   }
 
   it("adds, overrides and inherits entries by key (synchronous loader)", () => {

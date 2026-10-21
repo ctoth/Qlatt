@@ -14,7 +14,7 @@ it.each([
   ["unit", ""],
   ["backend_param", ""],
 ] as const)("rejects invalid %s when parsing the selected resource (%s)", (field, value) => {
-  const document = loadYamlDocumentSync("/rules/policy/vq-channels.yaml");
+  const document = loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml");
   if (!isPlainObject(document) || !Array.isArray(document.channels)) {
     throw new Error("expected channels document");
   }

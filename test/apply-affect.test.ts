@@ -8,9 +8,15 @@ import { parseVoiceQualityChannels } from "../src/input/vq-channels";
 import type { KlattFrame } from "../src/tts-frontend-types";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
-const rdPolicy = readRdPolicy(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
-const channels = parseVoiceQualityChannels(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
-const library = parseAffectPresets(loadYamlDocumentSync("/rules/affect/presets.yaml"));
+const rdPolicy = readRdPolicy(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml"),
+);
+const channels = parseVoiceQualityChannels(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml"),
+);
+const library = parseAffectPresets(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/affect-presets.yaml"),
+);
 function applyAffectToTrack(
   track: Parameters<typeof applyWithPolicy>[0],
   affect: Parameters<typeof applyWithPolicy>[1],

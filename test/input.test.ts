@@ -29,8 +29,12 @@ import { parseVoiceQualityChannels } from "../src/input/vq-channels";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
-const library = parseAffectPresets(loadYamlDocumentSync("/rules/affect/presets.yaml"));
-const channels = parseVoiceQualityChannels(loadYamlDocumentSync("/rules/policy/vq-channels.yaml"));
+const library = parseAffectPresets(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/affect-presets.yaml"),
+);
+const channels = parseVoiceQualityChannels(
+  loadYamlDocumentSync("/rules/frontends/qlatt-english/policy/vq-channels.yaml"),
+);
 const NEUTRAL_VQ = neutralVoiceQualityDelta(channels);
 const affectOptions = { frontendId: "fixture", affectLibrary: library, vqChannels: channels };
 

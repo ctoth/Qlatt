@@ -171,7 +171,7 @@ it("accepts an explicit empty target-feature exclusion declaration", () => {
 });
 
 it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
-  "%s applies target exclusions only to inferred features",
+  "%s applies target exclusions only to declared target features",
   (frontendId) => {
     const resources = rulepackModule.loadFrontendResources(
       rulepackModule.loadBundledRulepackSpec(frontendId),
@@ -180,6 +180,7 @@ it.each(["qlatt-english", "qlatt-beauty", "dectalk-english"])(
     expect(inventory.target_feature_exclusions).toEqual(["dur", "SW", "type"]);
     const target = Object.values(inventory.phoneme_targets)[0];
     target.fixture_note = "target metadata";
+    inventory.target_features = { ...inventory.target_features, fixture_note: { kind: "string" } };
     const spy = vi.spyOn(rulepackModule, "resolveFrontend").mockReturnValue({
       spec: rulepackModule.loadBundledRulepackSpec(frontendId),
       resources: { ...resources, inventory },

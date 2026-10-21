@@ -6,7 +6,7 @@ one-release authored path aliases with warnings (#141).
 # State
 
 Isolated branch from PR408 final 8ec65ce9. Implementation and fixture migration
-complete; preparing PR. Source and owned diff inspected. No local CI runs.
+complete; PR #413 published. Source and owned diff inspected. No local CI runs.
 Production delta is 96 additions / 36 removals across three existing modules;
 fixtures add 187 lines / remove 67. Bundled declarations and the current lexical
 stress documentation use the canonical roles. Broader #141 acceptance remains open.
@@ -35,5 +35,5 @@ normalization. Programmatic voice preprocessing retains its existing input behav
 
 # Next step
 
-Publish for hosted CI and Claude review, then respond to concrete findings.
+Await hosted CI and Claude review, then respond to concrete findings.
 Supervisor owns merge; #141 stays open.

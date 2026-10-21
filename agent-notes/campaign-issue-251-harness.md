@@ -9,7 +9,7 @@ existing lifecycle test gains 25 lines for the bundled inheritance fixture.
 Own this note, test/harness/experiment.js,
 test/harness-runtime-lifecycle.test.ts, and the existing state.d.ts declarations.
 Dependencies are absent in this
-worktree, so no local test was run; validation awaits PR CI.
+worktree, so no local test was run; validation awaits PR CI on PR #329.
 
 # Decisions and why
 
@@ -36,4 +36,4 @@ and relocation are outside this slice. No URL, asset, API, or schema changes.
 
 # Next step
 
-Commit and push the PR, read CI, then respond to Claude review. Supervisor owns merge.
+Read PR #329 CI, then respond to Claude review. Supervisor owns merge.

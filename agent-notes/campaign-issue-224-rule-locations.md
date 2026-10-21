@@ -11,6 +11,7 @@ Started from origin/master a54237ac8bddcc459997887e88b0c16aa20109df. Implemented
 Reuse YamlNodeSpans and existing merge semantics. Carry direct non-indexed rule locations through includes, child/base root merges and deferred shadow-rule inheritance. Enrich before assertValidSpec formats errors; preserve policy warning locations. Unknown authored keys use key positions; direct expression errors use the authored expression value position. No source guess for an absent field, ambiguous path or indexed expanded effect. Macro call sites can retain their authored location; body-parent ancestry remains pending.
 
 # Surprises
+Hosted quality job 119107086835 rejected formatting in the validation import/conditional and two test assertions. Applied its exact wrapping corrections; no behavior change or local CI run.
 
 Real foreach directives in the base formant rules shift effect indices, so indexed origins must not be matched naively. Other agents are active; preserve their work.
 

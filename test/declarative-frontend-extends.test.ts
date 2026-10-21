@@ -565,8 +565,8 @@ describe("declarative frontend extends: rules of a shadowing file", () => {
       expect(rules[name], name).toEqual(english.rules[name]);
       expect(origins[name], name).toBe(ENGLISH_PROSODY);
       expect(
-        spans.find((entry) => entry.value.path.join(".") === `rules.${name}.select.where`)
-          ?.value.resource,
+        spans.find((entry) => entry.value.path.join(".") === `rules.${name}.select.where`)?.value
+          .resource,
       ).toBe(ENGLISH_PROSODY);
     }
     // The child's own definition replaces the base's whole.
@@ -582,7 +582,9 @@ describe("declarative frontend extends: rules of a shadowing file", () => {
     expect(rules).not.toHaveProperty("vocal_effort");
     expect(origins).not.toHaveProperty("vocal_effort");
     expect(spans.some((entry) => entry.value.path[1] === "vocal_effort")).toBe(false);
-    expect(spans.some((entry) => entry.value.path.some((part) => typeof part === "number"))).toBe(false);
+    expect(spans.some((entry) => entry.value.path.some((part) => typeof part === "number"))).toBe(
+      false,
+    );
   }
 
   it("inherits an undefined, phased base rule; the child's definition wins (synchronous loader)", () => {

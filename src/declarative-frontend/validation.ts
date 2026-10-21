@@ -1,4 +1,9 @@
-import { cloneValue, isPlainObject, type YamlDocumentSpan, type YamlNodeSpans } from "../yaml-loader";
+import {
+  cloneValue,
+  isPlainObject,
+  type YamlDocumentSpan,
+  type YamlNodeSpans,
+} from "../yaml-loader";
 import { CEL_FUNCTION_CATALOG, validateExpressionSyntax } from "./cel-expressions";
 import {
   FRAME_COUNTERS,
@@ -4642,11 +4647,12 @@ export function assertValidSpec(
     // Dotted authored keys can collide with nested paths; never guess between them.
     const origin = matches.length === 1 ? matches[0] : undefined;
     const exact = origin?.value.path.every((part, index) => part === parts[index]);
-    const documentSpan = origin && exact
-      ? diagnostic.code === "E_CEL_INVALID"
-        ? origin.value
-        : origin.key
-      : undefined;
+    const documentSpan =
+      origin && exact
+        ? diagnostic.code === "E_CEL_INVALID"
+          ? origin.value
+          : origin.key
+        : undefined;
     return { ...diagnostic, ...(documentSpan ? { documentSpan } : {}) };
   });
   const errors = diagnostics.filter((d) => d.severity === "error");

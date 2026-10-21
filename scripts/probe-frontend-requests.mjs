@@ -1,21 +1,20 @@
 // probe-frontend-requests.mjs
 // ===========================
 // Opens the harness page in a headless browser, selects each named frontend,
-// waits for its warm-up (test/harness/warmup.js: the resources of its manifest
-// are fetched, then one short utterance is compiled), and prints
+// waits for its warm-up (test/harness/warmup.js: declared resources are acquired
+// asynchronously, then one short utterance is compiled), and prints
 //   - the status of every request whose URL matches --match,
 //   - every YAML or JSON request the server answered "no such file" (404, 410,
 //     or a 200 with an HTML page, which is what a dev server sends): a frontend
 //     that extends another asks for each include in its own directory first,
 //     so these are expected,
 //   - every other request that failed or was answered with 400 or above,
-//   - the warm-up report: resources primed, resources the manifest listed that
-//     the server does not have or that could not be fetched, and resources
-//     read with a blocking request because the manifest did not list them.
+//   - the warm-up report: any resources still read with a blocking request
+//     and any paired experiment configuration error.
 //
 // It shows whether a browser finds every document a frontend's inventory is
-// made of. Exits 1 when a request failed, a manifest lists a file the server
-// does not have, or a warm-up did not finish (a "no such file" answer taken
+// made of. Exits 1 when a request failed or a warm-up did not finish
+// (a "no such file" answer taken
 // for the file's content shows up as that).
 //
 // Usage (dev server running, e.g. `npx vite --port 8137`):
@@ -111,9 +110,8 @@ for (const frontendId of frontends) {
     continue;
   }
   console.log(
-    `${frontendId}: primed=${report.primed} absent=${JSON.stringify(report.absent)} failed=${JSON.stringify(report.failed)} unprimed=${JSON.stringify(report.unprimed)} configError=${JSON.stringify(report.configError)}`,
+    `${frontendId}: unprimed=${JSON.stringify(report.unprimed)} configError=${JSON.stringify(report.configError)}`,
   );
-  if (report.failed.length > 0 || report.absent.length > 0) ok = false;
 }
 await browser.close();
 

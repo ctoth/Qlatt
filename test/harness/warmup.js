@@ -6,27 +6,22 @@
 // This does the same work when the page loads and when the frontend is
 // changed:
 //
-//   1. fetch the frontend's resource manifest and prime every resource in
-//      parallel, so that the synchronous loaders make no request
-//      (src/sync-resource-cache.ts; resources.json beside frontend.yaml);
-//   2. import the runtime module, whose own module-level loads then happen
-//      here instead of in the click;
-//   3. fetch the F0 filter kernel;
-//   4. in idle time, run one short utterance through the frontend so that the
-//      rule pack is loaded, validated and compiled;
-//   5. load the paired experiment's configuration.
+//   1. import the runtime module;
+//   2. fetch the F0 filter kernel;
+//   3. in idle time, asynchronously acquire the declared frontend resources
+//      and selected voices, then run one short utterance through the frontend;
+//   4. load the paired experiment's configuration.
 //
-// Step 4 still blocks the main thread while it compiles; it does so when the
+// Step 3 still blocks the main thread while it compiles; it does so when the
 // user has just chosen a frontend, not when they press Speak.
 
 import { preloadF0Filters } from "../../src/f0-filters-loader.ts";
-import { isAbsentResourceAnswer } from "../../src/resource-answer.ts";
-import { primeSyncResources, takeSynchronousFetches } from "../../src/sync-resource-cache.ts";
+import { takeSynchronousFetches } from "../../src/sync-resource-cache.ts";
 import { loadNewRuntimeConfig } from "./experiment.js";
 import { state } from "./state.js";
 import { idle } from "./warmup-wait.js";
 
-/** The utterance compiled in step 4. Its audio is never played. */
+/** The utterance compiled in step 3. Its audio is never played. */
 const WARMUP_PHRASE = "a.";
 
 const warmed = new Map();
@@ -41,19 +36,6 @@ async function warm(frontendId, loadRuntimeModule) {
     last = now;
   };
 
-  // No manifest: nothing is primed and the loaders read as before. A manifest
-  // that is there but could not be fetched or parsed fails the warm-up.
-  let resources = [];
-  const manifestUrl = `./rules/frontends/${frontendId}/resources.json`;
-  const response = await fetch(manifestUrl);
-  if (!isAbsentResourceAnswer(response.status, response.headers.get("content-type"))) {
-    if (!response.ok) throw new Error(`${manifestUrl}: HTTP ${response.status}`);
-    resources = (await response.json()).resources ?? [];
-  }
-  // absent: listed, but the server has no such file. failed: the request failed.
-  const { absent, failed } = await primeSyncResources(resources);
-  mark("prime");
-
   const { warmFrontend } = await loadRuntimeModule();
   mark("runtimeModule");
   await preloadF0Filters(`${state.WORKLET_BASE_PATH}f0-filters.wasm`);
@@ -63,10 +45,9 @@ async function warm(frontendId, loadRuntimeModule) {
   await idle();
   mark("idleWait");
   takeSynchronousFetches();
-  warmFrontend(frontendId, WARMUP_PHRASE);
+  await warmFrontend(frontendId, WARMUP_PHRASE);
   mark("compile");
-  // What the manifest did not cover and was therefore read with a blocking
-  // request during the compile.
+  // Any blocking request left after declared resource acquisition.
   const unprimed = takeSynchronousFetches();
 
   // The paired experiment's graph, semantics and registry, and the check
@@ -83,9 +64,6 @@ async function warm(frontendId, loadRuntimeModule) {
 
   const report = {
     frontendId,
-    primed: resources.length - failed.length - absent.length,
-    absent,
-    failed,
     unprimed,
     configError,
     timings,

@@ -7,10 +7,9 @@
  * `public/rules/frontends/manifest.json`: the resources the frontend's
  * synchronous pipeline reads when it is loaded cold and speaks one phrase.
  *
- * Why. In a browser those resources are read with synchronous XMLHttpRequest,
- * one after another, inside the first Speak. With the list in hand a page can
- * fetch them in parallel beforehand (src/sync-resource-cache.ts,
- * test/harness/warmup.js) and the first Speak makes no request.
+ * Why. The list audits the synchronous pipeline's resource dependencies.
+ * Browser warmup acquires declared resources through the asynchronous owner
+ * (test/harness/runtime.js), rather than fetching this manifest.
  *
  * How. Nothing is listed by hand: each frontend is loaded in a fresh process
  * (module caches are per process, and frontends share resources) with the

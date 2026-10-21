@@ -54,12 +54,9 @@ it("reads file URLs through native paths and keeps missing files out of fetch", 
     expect(() => loadYamlSourceSync(missing)).toThrow("E_YAML_PATH_UNKNOWN:");
     expect(fetch).not.toHaveBeenCalled();
     const stat = vi.spyOn(fs, "statSync");
-    const exists = vi.spyOn(fs, "existsSync");
     expect(readFileFromFsSync("https://assets.example.test/file.yaml")).toBeNull();
     expect(stat).not.toHaveBeenCalled();
-    expect(exists).not.toHaveBeenCalled();
     stat.mockRestore();
-    exists.mockRestore();
   } finally {
     fetch.mockRestore();
     vi.restoreAllMocks();

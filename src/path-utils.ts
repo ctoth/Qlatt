@@ -96,7 +96,7 @@ export function resolveFileFromFsSync(specPath: string): string | null {
  * 3. Resolved under the source package's `<relativePath>`
  *
  * Returns null in non-Node environments or when no candidate exists.
- * Read failures after resolution propagate to the caller.
+ * Non-absence probe errors and read failures propagate to the caller.
  */
 export function readFileFromFsSync(specPath: string): string | null {
   const resolved = resolveFileFromFsSync(specPath);
@@ -108,8 +108,8 @@ export function readFileFromFsSync(specPath: string): string | null {
  * Attempt to read a binary file from the filesystem synchronously.
  *
  * Uses the same path probing strategy as `readFileFromFsSync`, but returns the
- * raw bytes as an ArrayBuffer for WASM and other binary assets. Read failures
- * after resolution propagate to the caller.
+ * raw bytes as an ArrayBuffer for WASM and other binary assets. Non-absence
+ * probe errors and read failures propagate to the caller.
  */
 export function readBinaryFromFsSync(specPath: string): ArrayBuffer | null {
   const resolved = resolveFileFromFsSync(specPath);

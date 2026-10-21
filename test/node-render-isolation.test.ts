@@ -107,6 +107,19 @@ it("matches fresh renders through concurrent A/B and A replay with isolated runt
   try {
     const [first, other] = await Promise.all([warm.render(a), warm.render(b)]);
     const replay = await warm.render(a);
+    expect(first.sourceSpans?.length).toBeGreaterThan(0);
+    expect(replay.sourceSpans).toEqual(first.sourceSpans);
+    expect(first.sourceSpans?.some((span) => span.start === 0 && span.end === 3)).toBe(true);
+    // tn_word_source owns the non-whitespace token, including its final period.
+    expect(first.sourceSpans?.some((span) => span.start === 4 && span.end === 7)).toBe(true);
+    for (const span of first.sourceSpans ?? []) {
+      expect(span.end).toBeLessThanOrEqual(a.phrase.length);
+      expect(
+        (first.track as frontendModule.TextToKlattTrackDetailedResult["track"]).some(
+          (frame) => frame.segmentId === span.segmentId && frame.time === span.time,
+        ),
+      ).toBe(true);
+    }
     expect(config).toHaveBeenCalledTimes(1);
     expect(timings).toHaveLength(3);
     for (const stages of timings) {
@@ -154,6 +167,32 @@ it("matches fresh renders through concurrent A/B and A replay with isolated runt
     expect(first.diagnostics).not.toBe(replay.diagnostics);
     await expect(warm.render({ ...a, frontendId: "missing" })).rejects.toThrow();
     expect(audioHash(await warm.render(a))).toBe(audioHash(baselineA));
+    const parsed = await fresh.render({
+      ...a,
+      frontendId: "dectalk-english",
+      experimentId: "dectalk-english",
+      phrase: "Dr. 25 cats.",
+    });
+    const detailed = frontend.mock.results.at(-1)?.value;
+    expect(detailed.sourceOrigins).toBeDefined();
+    expect(parsed.sourceSpans?.some((span) => span.start === 0 && span.end === 3)).toBe(true);
+    expect(parsed.sourceSpans?.some((span) => span.start === 4 && span.end === 6)).toBe(true);
+    const partFrames = (
+      parsed.track as frontendModule.TextToKlattTrackDetailedResult["track"]
+    ).filter((frame) => {
+      const tokenId = frame.segmentId
+        ? detailed.utterance.getItem(frame.segmentId)?.get("sourceTokenId")
+        : undefined;
+      return typeof tokenId === "string" && tokenId.includes(":");
+    });
+    expect(partFrames.length).toBeGreaterThan(0);
+    for (const frame of partFrames) {
+      expect(
+        parsed.sourceSpans?.some(
+          (span) => span.segmentId === frame.segmentId && span.time === frame.time,
+        ),
+      ).toBe(true);
+    }
   } finally {
     await warm.dispose();
     await fresh.dispose();

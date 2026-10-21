@@ -22,6 +22,7 @@ import {
 } from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector } from "../src/provenance";
 import { runTextParser } from "../src/text-parser/frontend";
+import { originSpan } from "../src/text-parser/interpreter";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import * as yaml from "../src/yaml-loader";
 
@@ -78,6 +79,131 @@ describe("dectalk text parser", () => {
 });
 
 describe("dectalk-english runs its text parser first", () => {
+  const parseOrigins = (text: string) => {
+    const resources = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
+    const parser = resources.textParser;
+    if (!parser) throw new Error("DECtalk fixture must declare a text parser");
+    return runTextParser(
+      parser.config,
+      parser.table,
+      text,
+      (word) =>
+        resources.lexicon !== undefined && Object.hasOwn(resources.lexicon.dictionary, word),
+      createProvenanceCollector(),
+    );
+  };
+
+  it("keeps raw origins of generated titles and copied captures without changing parsed coordinates", () => {
+    const text = "Dr. Smith is here.";
+    const parsed = parseOrigins(text);
+    expect(parsed.text).toContain("Doctor Smith");
+    expect(parsed.origins).toHaveLength(parsed.text.length);
+    const doctor = parsed.text.indexOf("Doctor");
+    expect(originSpan(parsed.origins, doctor, doctor + 6)).toEqual({ start: 0, end: 3 });
+    const smith = parsed.text.indexOf("Smith");
+    expect(originSpan(parsed.origins, smith, smith + 5)).toEqual({ start: 4, end: 9 });
+    const result = textToKlattTrackDetailed(text, undefined, 30, { frontendId: "dectalk-english" });
+    expect(result.sourceOrigins).toEqual(parsed.origins);
+    const sourceText = result.utterance.relation("SourceText").listItems()[0];
+    expect(sourceText.get("text")).toBe(parsed.text);
+    const sources = result.utterance.relation("Normalization").listItems();
+    const copied = sources.find((item) => item.get("text") === "Smith");
+    expect(copied?.get("sourceStart")).toBe(smith);
+  });
+
+  it("keeps distinct repeated copies and astral UTF-16 widths", () => {
+    const text = "😀 Hello Hello.";
+    const parsed = parseOrigins(text);
+    expect(parsed.text).toContain("Hello Hello");
+    const first = parsed.text.indexOf("Hello");
+    const second = parsed.text.indexOf("Hello", first + 1);
+    expect(originSpan(parsed.origins, first, first + 5)).toEqual({ start: 3, end: 8 });
+    expect(originSpan(parsed.origins, second, second + 5)).toEqual({ start: 9, end: 14 });
+    expect(parsed.origins.slice(first, first + 5)).toEqual(
+      Array.from({ length: 5 }, (_, index) => ({ start: index + 3, end: index + 4 })),
+    );
+  });
+
+  it("carries origins through chained filename and phone-number rewrites", () => {
+    const filename = parseOrigins("Open readme.txt now.");
+    expect(filename.text).toContain("readme");
+    const txt = filename.text.indexOf("txt");
+    expect(txt).toBeGreaterThan(0);
+    expect(originSpan(filename.origins, txt, txt + 3)).toEqual({ start: 12, end: 15 });
+    const now = filename.text.indexOf("now");
+    expect(originSpan(filename.origins, now, now + 3)).toEqual({ start: 16, end: 19 });
+    const phoneText = "Call 555 1234.";
+    const phone = parseOrigins(phoneText);
+    expect(phone.text).toContain("5 5 5");
+    expect(phone.origins).toHaveLength(phone.text.length);
+    const digits = phone.text.indexOf("5 5 5");
+    expect(originSpan(phone.origins, digits, digits + 5)).toEqual({ start: 5, end: 8 });
+  });
+
+  it("maps generated command speech to its bracket and keeps later text in raw coordinates", () => {
+    const text = "Say this [:rate 180] and then that.";
+    const parsed = parseOrigins(text);
+    const after = parsed.text.indexOf("and");
+    expect(originSpan(parsed.origins, after, after + 3)).toEqual({
+      start: text.indexOf("and"),
+      end: text.indexOf("and") + 3,
+    });
+    const bad = "Hello [:notacommand] world.";
+    const result = parseOrigins(bad);
+    const bracket = { start: bad.indexOf("["), end: bad.indexOf("]") + 1 };
+    expect(result.origins).toContainEqual(bracket);
+    const world = result.text.indexOf("world");
+    expect(originSpan(result.origins, world, world + 5)).toEqual({ start: 21, end: 26 });
+  });
+
+  it("keeps origins aligned for recorded rewrites and appended ending characters", () => {
+    for (const text of [
+      "Hello",
+      "Hello.",
+      "Dr. Smith is here.",
+      "Open readme.txt now.",
+      "Call 555 1234.",
+    ]) {
+      const parsed = parseOrigins(text);
+      expect(parsed.origins).toHaveLength(parsed.text.length);
+      for (const span of parsed.origins) {
+        expect(span.start).toBeGreaterThanOrEqual(0);
+        expect(span.end).toBeGreaterThanOrEqual(span.start);
+        expect(span.end).toBeLessThanOrEqual(text.length);
+      }
+    }
+    const parsed = parseOrigins("Hello");
+    expect(parsed.origins.at(-1)).toEqual({ start: 5, end: 5 });
+  });
+
+  it("keeps raw positions through pass-through mode and rolling clauses", () => {
+    const passText = "[:punct pass] The tide went out (at noon).";
+    const pass = parseOrigins(passText);
+    const tide = pass.text.indexOf("tide");
+    expect(tide).toBeGreaterThan(0);
+    expect(originSpan(pass.origins, tide, tide + 4)).toEqual({
+      start: passText.indexOf("tide"),
+      end: passText.indexOf("tide") + 4,
+    });
+    const long = `${"the long road went on and on past the low hills ".repeat(8)}to the sea.`;
+    const parsed = parseOrigins(long);
+    expect(parsed.origins).toHaveLength(parsed.text.length);
+    const sea = parsed.text.lastIndexOf("sea");
+    expect(sea).toBeGreaterThan(300);
+    expect(originSpan(parsed.origins, sea, sea + 3)).toEqual({
+      start: long.lastIndexOf("sea"),
+      end: long.lastIndexOf("sea") + 3,
+    });
+  });
+
+  it("leaves the origin bridge absent when Source coordinates already refer to the request", () => {
+    const result = textToKlattTrackDetailed("Hello.", undefined, 30, {
+      frontendId: "qlatt-english",
+    });
+    expect(result.sourceOrigins).toBeUndefined();
+    expect(result.utterance.relation("SourceText").listItems()[0].get("text")).toBe("Hello.");
+  });
+
   it("reuses the resource-owned table and executes without acquiring YAML", () => {
     const spec = loadBundledRulepackSpec("dectalk-english");
     const parser = loadFrontendResources(spec).textParser;

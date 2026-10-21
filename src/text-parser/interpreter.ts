@@ -18,6 +18,29 @@
 
 import type { CommandTable } from "./commands";
 
+/** Half-open UTF-16 coordinates in the original request, separate from parser offsets. */
+export interface RawTextSpan {
+  start: number;
+  end: number;
+}
+
+/** The source of a range of output characters, or its insertion boundary. */
+export function originSpan(
+  origins: readonly RawTextSpan[],
+  start: number,
+  end: number,
+): RawTextSpan {
+  const selected = origins.slice(start, end);
+  if (selected.length === 0) {
+    const position = origins[start]?.start ?? origins[start - 1]?.end ?? 0;
+    return { start: position, end: position };
+  }
+  return {
+    start: Math.min(...selected.map((span) => span.start)),
+    end: Math.max(...selected.map((span) => span.end)),
+  };
+}
+
 /** A rule table as scripts/build-dectalk-text-parser.ts writes it. */
 export interface TextParserTable {
   sections: readonly number[];
@@ -92,6 +115,8 @@ export type DictionaryState = 0 | 1 | 2;
 
 /** One run of a rule section over a clause. */
 export interface PassOptions {
+  /** One original-request span per input byte; omitted for standalone byte callers. */
+  origins?: readonly RawTextSpan[];
   /** The caller's language bit and mode bit (cm_text.c:845-888). */
   language: number;
   mode: number;
@@ -109,6 +134,7 @@ export interface PassOptions {
 /** What a pass wrote, and how many bytes of its input it read. */
 export interface PassResult {
   output: number[];
+  origins: RawTextSpan[];
   consumed: number;
 }
 
@@ -226,6 +252,9 @@ interface Machine {
   compiled: readonly Uint8Array[];
   /** match_array: the saved strings $0 to $9. */
   captures: number[][];
+  captureOrigins: RawTextSpan[][];
+  /** Origins of the current pass's working input, moved with chained rewrites. */
+  inputOrigins: RawTextSpan[];
   /** The word lists: each entry's word and what it stands for. */
   dictionaries: readonly (readonly DictionaryEntry[])[];
 }
@@ -714,6 +743,10 @@ function matchSetsWithRanges(
   if (totalLength >= 1) {
     // As written (:5980): from input_pos, not from the current position.
     machine.captures[8] = input.slice(ret.inputPos, ret.inputPos + totalLength);
+    machine.captureOrigins[8] = machine.inputOrigins.slice(
+      ret.inputPos,
+      ret.inputPos + totalLength,
+    );
   }
   void lookahead;
   return totalLength;
@@ -868,6 +901,8 @@ function buildString(
   range: RangeValue,
   state: number,
   inRuleIndex: number,
+  generatedOrigin: RawTextSpan,
+  builtOrigins: RawTextSpan[],
 ): number[] | null {
   let ruleP = ret.rule;
   const endOfAction = at(rule, inRuleIndex + 2);
@@ -905,17 +940,20 @@ function buildString(
         const count = at(rule, ruleP);
         ruleP += 1;
         for (let i = 0; i < count; i += 1) built.push(at(rule, ruleP + i));
+        builtOrigins.push(...Array.from({ length: count }, () => generatedOrigin));
         ruleP += count;
         break;
       }
       case BIN_RESTORE:
         ruleP += 1;
         built.push(...(machine.captures[at(rule, ruleP)] ?? []));
+        builtOrigins.push(...(machine.captureOrigins[at(rule, ruleP)] ?? []));
         ruleP += 1;
         break;
       case BIN_HEXADECIMAL:
         ruleP += 1;
         built.push(at(rule, ruleP));
+        builtOrigins.push(generatedOrigin);
         ruleP += 1;
         break;
       default:
@@ -939,9 +977,28 @@ function performAction(
   saveNum: number,
   dictStateFlag: number,
   inRuleIndex: number,
+  outputOrigins: RawTextSpan[],
 ): void {
   const from = ret.outputPos;
   const count = ret.outputOffset;
+  const generatedOrigin = originSpan(
+    machine.inputOrigins,
+    ret.inputPos,
+    ret.inputPos + ret.inputOffset,
+  );
+  const builtOrigins: RawTextSpan[] = [];
+  const build = (operation: number): number[] | null =>
+    buildString(
+      machine,
+      rule,
+      output,
+      ret,
+      range,
+      operation,
+      inRuleIndex,
+      generatedOrigin,
+      builtOrigins,
+    );
   // par_insert_string (:3120-3130): after before before, by the state's flags.
   let action = state;
   if (state === BIN_INSERT) {
@@ -961,6 +1018,11 @@ function performAction(
       }
       machine.captures[7] = input.slice(ret.inputPos, ret.inputPos + ret.inputOffset);
       machine.captures[8] = output.slice(from, from + count).map((char) => char ?? 0);
+      machine.captureOrigins[7] = machine.inputOrigins.slice(
+        ret.inputPos,
+        ret.inputPos + ret.inputOffset,
+      );
+      machine.captureOrigins[8] = outputOrigins.slice(from, from + count);
       // The C searches for a string: it ends at the first NUL.
       const end = machine.captures[8].indexOf(0);
       const word = end < 0 ? machine.captures[8] : machine.captures[8].slice(0, end);
@@ -974,6 +1036,7 @@ function performAction(
       };
       if (found) {
         machine.captures[9] = [...found];
+        machine.captureOrigins[9] = found.map(() => generatedOrigin);
         if (at(rule, inRuleIndex) & BIN_DICT_HIT_FAIL) {
           failed();
           return;
@@ -981,7 +1044,7 @@ function performAction(
         // The hit action matches again from the start of the word.
         ret.inputOffset = 0;
         ret.outputOffset = 0;
-        matchRule(machine, rule, BIN_COPY, input, output, ret, dictStateFlag);
+        matchRule(machine, rule, BIN_COPY, input, output, ret, dictStateFlag, outputOrigins);
         ret.rule = at(rule, inRuleIndex + 4) + 1;
         return;
       }
@@ -992,7 +1055,7 @@ function performAction(
       }
       ret.inputOffset = 0;
       ret.outputOffset = 0;
-      matchRule(machine, rule, BIN_COPY, input, output, ret, dictStateFlag);
+      matchRule(machine, rule, BIN_COPY, input, output, ret, dictStateFlag, outputOrigins);
       return;
     }
     case BIN_WORD: {
@@ -1018,7 +1081,7 @@ function performAction(
     }
     case BIN_STATUS: {
       // par_status_string (:3951-3972).
-      const built = buildString(machine, rule, output, ret, range, BIN_STATUS, inRuleIndex);
+      const built = build(BIN_STATUS);
       ret.parserFlag = parseInteger(built ?? []);
       return;
     }
@@ -1033,46 +1096,58 @@ function performAction(
         return;
       }
       machine.captures[saveNum] = output.slice(from, from + count);
+      machine.captureOrigins[saveNum] = outputOrigins.slice(from, from + count);
       return;
     case BIN_REPLACE: {
       // par_replace_string (:2726-2820).
-      const built = buildString(machine, rule, output, ret, range, BIN_REPLACE, inRuleIndex);
+      const built = build(BIN_REPLACE);
       if (!built) return;
       for (let i = 0; i < built.length; i += 1) output[from + i] = built[i];
+      for (let i = 0; i < built.length; i += 1) outputOrigins[from + i] = builtOrigins[i];
       ret.outputOffset = built.length;
       return;
     }
     case BIN_INSERT: {
       // par_insert_string (:3102-3200): between each two characters.
-      const built = buildString(machine, rule, output, ret, range, BIN_INSERT, inRuleIndex);
+      const built = build(BIN_INSERT);
       if (!built) return;
       const original = output.slice(from, from + count);
+      const originalOrigins = outputOrigins.slice(from, from + count);
       const spread: number[] = [];
+      const spreadOrigins: RawTextSpan[] = [];
       original.forEach((char, index) => {
         if (index > 0) spread.push(...built);
+        if (index > 0) spreadOrigins.push(...builtOrigins);
         spread.push(char);
+        spreadOrigins.push(originalOrigins[index]);
       });
       // (n - 1) * (length + 1) + 1 characters; a match of nothing gives -length.
       const newLength = (count - 1) * (built.length + 1) + 1;
       for (let i = 0; i < spread.length; i += 1) output[from + i] = spread[i];
+      for (let i = 0; i < spread.length; i += 1) outputOrigins[from + i] = spreadOrigins[i];
       ret.outputOffset = newLength;
       return;
     }
     case INSERT_AFTER: {
       // par_insert_string_after (:3231-3317).
-      const built = buildString(machine, rule, output, ret, range, INSERT_AFTER, inRuleIndex);
+      const built = build(INSERT_AFTER);
       if (!built) return;
       for (let i = 0; i < built.length; i += 1) output[from + count + i] = built[i];
+      for (let i = 0; i < built.length; i += 1) outputOrigins[from + count + i] = builtOrigins[i];
       ret.outputOffset += built.length;
       return;
     }
     case INSERT_BEFORE: {
       // par_insert_string_before (:3318-3411).
-      const built = buildString(machine, rule, output, ret, range, INSERT_BEFORE, inRuleIndex);
+      const built = build(INSERT_BEFORE);
       if (!built) return;
       const original = output.slice(from, from + count);
+      const originalOrigins = outputOrigins.slice(from, from + count);
       for (let i = 0; i < built.length; i += 1) output[from + i] = built[i];
       for (let i = 0; i < original.length; i += 1) output[from + built.length + i] = original[i];
+      for (let i = 0; i < built.length; i += 1) outputOrigins[from + i] = builtOrigins[i];
+      for (let i = 0; i < original.length; i += 1)
+        outputOrigins[from + built.length + i] = originalOrigins[i];
       ret.outputOffset += built.length;
       return;
     }
@@ -1095,6 +1170,7 @@ function matchRule(
   output: number[],
   ret: ReturnValue,
   dictStateFlag = 0,
+  outputOrigins: RawTextSpan[] = [],
 ): void {
   const lengthOfInput = input.length;
   const newRet: ReturnValue = {
@@ -1126,7 +1202,7 @@ function matchRule(
     // first byte, where their flags (0x0100 and above) can never be set, so
     // its body is taken to start at offset 12.
     newRet.rule = 12;
-    matchRule(machine, target, BIN_END_OF_RULE, input, output, newRet);
+    matchRule(machine, target, BIN_END_OF_RULE, input, output, newRet, 0, outputOrigins);
     newRet.rule = ruleP;
     if (newRet.inputPos + newRet.inputOffset > lengthOfInput) {
       ret.value = newRet.optional === 1 ? OPT_FAIL : END_OF_STRING;
@@ -1173,10 +1249,12 @@ function matchRule(
         const fromIn = newRet.inputPos + newRet.inputOffset;
         const toOut = newRet.outputPos + newRet.outputOffset;
         for (let i = 0; i < matched; i += 1) output[toOut + i] = at(input, fromIn + i);
+        for (let i = 0; i < matched; i += 1)
+          outputOrigins[toOut + i] = machine.inputOrigins[fromIn + i];
         newRet.outputOffset += matched;
         newRet.inputOffset += matched;
       } else {
-        matchRule(machine, rule, operation, input, output, newRet);
+        matchRule(machine, rule, operation, input, output, newRet, 0, outputOrigins);
         // The call above writes newRet.value.
         if ((newRet.value as number) === END_OF_STRING) {
           if (newRet.optional === 1) {
@@ -1221,6 +1299,7 @@ function matchRule(
         saveStateNum,
         dictStateFlag,
         inRuleIndex,
+        outputOrigins,
       );
     }
     ret.parserFlag = newRet.parserFlag;
@@ -1267,6 +1346,8 @@ export function createTextParser(table: TextParserTable): TextParser {
     table,
     compiled: table.rules.map((rule) => fromHex(rule.bytes)),
     captures: Array.from({ length: 10 }, () => []),
+    captureOrigins: Array.from({ length: 10 }, () => []),
+    inputOrigins: [],
     dictionaries: table.dictionaries.map((list) => list.map(dictionaryEntry)),
   };
   const parser: TextParser = {
@@ -1292,6 +1373,10 @@ function processInput(
   }
   const numRules = table.rules.length;
   const output: number[] = [];
+  const outputOrigins: RawTextSpan[] = [];
+  machine.inputOrigins = options.origins
+    ? [...options.origins]
+    : newInput.map((_, index) => ({ start: index, end: index + 1 }));
   let newRet: ReturnValue = {
     inputPos: 0,
     inputOffset: 0,
@@ -1324,6 +1409,7 @@ function processInput(
       let i = 0;
       while (isWhite(at(newInput, ipos + i)) && at(newInput, ipos + i) !== 0) {
         if (i === 0) output[opos] = at(newInput, ipos);
+        if (i === 0) outputOrigins[opos] = machine.inputOrigins[ipos];
         i += 1;
       }
       newRet.inputOffset += i;
@@ -1395,7 +1481,7 @@ function processInput(
       }
       const rule = machine.compiled[currentRuleNumber];
       newRet.rule = entry.body as number;
-      matchRule(machine, rule, BIN_END_OF_RULE, newInput, output, newRet);
+      matchRule(machine, rule, BIN_END_OF_RULE, newInput, output, newRet, 0, outputOrigins);
       // The status flag goes back to the caller (:1427).
       parser.parserFlag = newRet.parserFlag;
 
@@ -1463,11 +1549,17 @@ function processInput(
               saveRet.outputPos + saveRet.outputOffset + outputSize,
             );
             const wordStart = saveRet.inputPos + saveRet.inputOffset;
+            const writtenOrigins = outputOrigins.slice(
+              saveRet.outputPos + saveRet.outputOffset,
+              saveRet.outputPos + saveRet.outputOffset + outputSize,
+            );
             if (outputSize > inputSize) {
               const sizeDiff = outputSize - inputSize;
               if (saveRet.inputOffset > sizeDiff) {
                 for (let i = 0; i < outputSize; i += 1)
                   newInput[wordStart - sizeDiff + i] = written[i];
+                for (let i = 0; i < outputSize; i += 1)
+                  machine.inputOrigins[wordStart - sizeDiff + i] = writtenOrigins[i];
                 newRet.inputOffset = saveRet.inputOffset - sizeDiff;
                 newRet.outputOffset = saveRet.outputOffset;
                 saveRet.inputOffset -= sizeDiff;
@@ -1475,24 +1567,32 @@ function processInput(
                 const matchEnd = newRet.inputOffset + newRet.inputPos;
                 for (let i = newInput.length + sizeDiff; i > matchEnd; i -= 1) {
                   newInput[i] = at(newInput, i - sizeDiff);
+                  machine.inputOrigins[i] = machine.inputOrigins[i - sizeDiff];
                   dictHit[i] = at(dictHit, i - sizeDiff);
                 }
                 // The C moves the terminating NUL too; here the array ends.
                 while (newInput.length > 0 && newInput[newInput.length - 1] === 0) newInput.pop();
+                machine.inputOrigins.length = newInput.length;
                 newInputDiff += sizeDiff;
                 for (let i = 0; i < outputSize; i += 1) newInput[wordStart + i] = written[i];
+                for (let i = 0; i < outputSize; i += 1)
+                  machine.inputOrigins[wordStart + i] = writtenOrigins[i];
                 hitRet.inputOffset += sizeDiff;
                 newRet.inputOffset = saveRet.inputOffset;
                 newRet.outputOffset = saveRet.outputOffset;
               }
             } else if (inputSize === outputSize) {
               for (let i = 0; i < inputSize; i += 1) newInput[wordStart + i] = written[i];
+              for (let i = 0; i < inputSize; i += 1)
+                machine.inputOrigins[wordStart + i] = writtenOrigins[i];
               newRet.inputOffset = saveRet.inputOffset;
               newRet.outputOffset = saveRet.outputOffset;
             } else {
               const sizeDiff = inputSize - outputSize;
               for (let i = 0; i < outputSize; i += 1)
                 newInput[wordStart + sizeDiff + i] = written[i];
+              for (let i = 0; i < outputSize; i += 1)
+                machine.inputOrigins[wordStart + sizeDiff + i] = writtenOrigins[i];
               newRet.inputOffset = saveRet.inputOffset + sizeDiff;
               newRet.outputOffset = saveRet.outputOffset;
             }
@@ -1524,6 +1624,7 @@ function processInput(
       let i = 0;
       while (!isWhite(at(newInput, ipos + i)) && at(newInput, ipos + i) !== 0) {
         output[opos + i] = at(newInput, ipos + i);
+        outputOrigins[opos + i] = machine.inputOrigins[ipos + i];
         i += 1;
       }
       newRet.inputOffset += i;
@@ -1535,6 +1636,7 @@ function processInput(
       { length: newRet.outputPos + newRet.outputOffset },
       (_, index) => output[index] ?? 0,
     ),
+    origins: outputOrigins.slice(0, newRet.outputPos + newRet.outputOffset),
     // :1746: where the pass left off, in the input as it was given.
     consumed: newRet.inputPos + newRet.inputOffset - newInputDiff,
   };

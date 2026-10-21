@@ -12,11 +12,11 @@
 
 import type { ProvenanceCollector } from "../provenance";
 import type { TextScopeSource } from "../text-scopes";
-import { clauseTexts, PUNCTUATION_PASS, readClauses } from "./clauses";
+import { clauseOutputs, PUNCTUATION_PASS, readClauses } from "./clauses";
 import { commandScopes } from "./command-scopes";
 import { newCommandSlots, optionIndex, type ReadCommand } from "./commands";
 import { dictionaryLookup } from "./dictionary";
-import type { TextParserTable } from "./interpreter";
+import type { RawTextSpan, TextParserTable } from "./interpreter";
 import { phonemeCharacters, type ReadPhonemes } from "./phonemes";
 
 export interface TextParserPass {
@@ -115,8 +115,16 @@ const TO_BYTE = new Map(Object.entries(WINDOWS_1252).map(([byte, char]) => [char
 
 /** The text as the bytes the parser reads, one character of the result per byte. */
 export function encodeWindows1252(text: string): string {
-  return [...text]
+  return encodedInput(text).text;
+}
+
+function encodedInput(text: string): { text: string; origins: RawTextSpan[] } {
+  let position = 0;
+  const origins: RawTextSpan[] = [];
+  const encoded = [...text]
     .map((char) => {
+      origins.push({ start: position, end: position + char.length });
+      position += char.length;
       const code = char.codePointAt(0) ?? 0;
       if (code < 0x80 || (code >= 0xa0 && code <= 0xff)) return char;
       const byte = TO_BYTE.get(char);
@@ -125,6 +133,7 @@ export function encodeWindows1252(text: string): string {
       return String.fromCharCode(byte ?? 0x20);
     })
     .join("");
+  return { text: encoded, origins };
 }
 
 /** The parser's output as text; its own marks stay as they are. */
@@ -164,6 +173,8 @@ function readable(text: string, table: TextParserTable): string {
 export interface TextParserResult {
   /** The text as the rules leave it, clauses joined. */
   text: string;
+  /** Original-request UTF-16 origins, one per character of `text`; Source offsets stay in `text`. */
+  origins: RawTextSpan[];
   /** The decisions that led to it: the input, then each rewrite. */
   decisionIds: string[];
   /**
@@ -289,6 +300,7 @@ export function runTextParser(
     body: string;
     clausesBefore: number;
     read: readonly ReadCommand[];
+    origin: RawTextSpan;
     phonemes?: { read: ReadPhonemes; speak: boolean };
   }> = [];
   const marks = new Set([
@@ -306,7 +318,10 @@ export function runTextParser(
     citations: [config.tablePath],
   });
   const decisionIds = [input.id];
-  const clauses = readClauses(table, encodeWindows1252(text) + config.ending, {
+  const encoded = encodedInput(text);
+  const endOrigin = { start: text.length, end: text.length };
+  const clauses = readClauses(table, encoded.text + config.ending, {
+    origins: [...encoded.origins, ...[...config.ending].map(() => endOrigin)],
     language: config.language,
     punctuationSection: config.punctuation.section,
     punctuationMode: config.punctuation.mode,
@@ -334,23 +349,29 @@ export function runTextParser(
       decisionIds.push(decision.id);
     },
     commandSlots: slots,
-    onCommand: (body, clausesBefore, read) => {
-      brackets.push({ body, clausesBefore, read });
+    onCommand: (body, clausesBefore, read, origin) => {
+      brackets.push({ body, clausesBefore, read, origin });
     },
-    onPhonemes: (body, clausesBefore, read, speak) => {
-      brackets.push({ body, clausesBefore, read: [], phonemes: { read, speak } });
+    onPhonemes: (body, clausesBefore, read, speak, origin) => {
+      brackets.push({ body, clausesBefore, read: [], phonemes: { read, speak }, origin });
     },
   });
 
   // The text that goes on: the clauses in order, and before each clause what
   // the commands that stood in front of it put into the text.
-  const texts = clauseTexts(table, clauses);
+  const texts = clauseOutputs(table, clauses);
   const clauseEnd = String.fromCharCode(table.clauses.clauseEnd);
   const commandTable = table.commandTable;
   const initial: TextParserResult["initial"] = {};
   const changes: TextParserChange[] = [];
   let spoken = false;
   let out = "";
+  const origins: RawTextSpan[] = [];
+  let bracketOrigin = endOrigin;
+  const appendGenerated = (value: string, origin = bracketOrigin): void => {
+    out += value;
+    origins.push(...[...value].map(() => origin));
+  };
   const record = (type: string, reason: string, citations: string[]): string => {
     const decision = provenance.add({
       stage: "transcribe",
@@ -385,7 +406,7 @@ export function runTextParser(
   const itemClauseEnds: number[] = [];
   const endClauseByItem = (): void => {
     itemClauseEnds.push(out.length);
-    out += clauseEnd;
+    appendGenerated(clauseEnd, { start: bracketOrigin.start, end: bracketOrigin.start });
   };
   const notCarriedOut = (written: string, name: string, why: string): string => {
     const decisionId = record(
@@ -423,12 +444,13 @@ export function runTextParser(
       { written, error: what },
       "W_TEXT_COMMAND_ERROR",
     );
-    out += clauseEnd + errorText + clauseEnd;
+    appendGenerated(clauseEnd + errorText + clauseEnd);
     spoken = true;
   };
   texts.forEach((clauseText, index) => {
     for (const bracket of brackets) {
       if (bracket.clausesBefore !== index) continue;
+      bracketOrigin = bracket.origin;
       if (bracket.phonemes) {
         // Phonemic text in a bracket: its symbols go on as phonemic text
         // between the table's two marks, when phonemes are spoken. On an
@@ -436,10 +458,11 @@ export function runTextParser(
         const { read, speak } = bracket.phonemes;
         const shown = quoted(`[${decode(bracket.body, marks)}]`);
         if (speak && read.phonemes.length > 0) {
-          out +=
+          appendGenerated(
             String.fromCharCode(table.clauses.phonesOn) +
-            phonemeCharacters(read.phonemes) +
-            String.fromCharCode(table.clauses.phonesOff);
+              phonemeCharacters(read.phonemes) +
+              String.fromCharCode(table.clauses.phonesOff),
+          );
           spoken = true;
         }
         record(
@@ -611,7 +634,8 @@ export function runTextParser(
               `The command ${written} (${row.name}) has no word: nothing is changed`,
               ["DECtalk 4.63 CMD/cm_copt.c:2847-2848 (cm_cmd_define with no parameter)"],
             );
-            if (endsClause) out += clauseEnd;
+            if (endsClause)
+              appendGenerated(clauseEnd, { start: bracketOrigin.start, end: bracketOrigin.start });
             continue;
           }
           const option = optionIndex(words, command.words[0]);
@@ -874,14 +898,18 @@ export function runTextParser(
         }
         // The sync command sends the flush character itself.
         if (endsClause && row.sendsItem && row.routine !== "cm_cmd_sync") endClauseByItem();
-        else if (endsClause) out += clauseEnd;
+        else if (endsClause)
+          appendGenerated(clauseEnd, { start: bracketOrigin.start, end: bracketOrigin.start });
       }
     }
-    out += clauseText;
-    if ([...clauseText].some((char) => char !== clauseEnd && char.trim() !== "")) spoken = true;
+    out += clauseText.text;
+    origins.push(...clauseText.origins);
+    if ([...clauseText.text].some((char) => char !== clauseEnd && char.trim() !== ""))
+      spoken = true;
   });
   return {
     text: decode(out, marks),
+    origins,
     decisionIds,
     initial,
     changes,

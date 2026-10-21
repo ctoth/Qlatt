@@ -118,14 +118,15 @@ eleven sites.
    `voiced`, `alveolar`, `back`, `rhotic`, ...) and forty-seven are acoustic
    (`F1`, `B1`, `AV`, `dur`, the frication constants, ...). The phonological
    column is the English phoneme class table and is language; the acoustic
-   columns are a voice. Today `qlatt-english` owns all of it,
-   `public/rules/normalization/` is shared through `include`, and
-   `dectalk-english/frontend.yaml:7` points its stress policy at
+   columns are a voice. In the pre-cleanup snapshot, `qlatt-english` owned all of it,
+   `public/rules/normalization/` was shared through `include`, and
+   `dectalk-english/frontend.yaml:7` pointed its stress policy at
    `qlatt-english` while replacing the LTS rules, dictionary, phoneme symbols
    (63 against 59, 51 shared), and predicates (four, two of which restate
    `qlatt-english`'s `is_question_boundary` and `is_stressed_vowel` with
    different quoting) with DECtalk's own for fidelity. Even the fidelity
-   frontend re-declares the language-level predicates it shares.
+   frontend re-declared the language-level predicates it shared. The unused
+   DECtalk stress-policy reference has since been removed.
 
    Proposal: an `english` package holds the language documents, the
    phonological predicates, the string sets and maps, and the phoneme class
@@ -256,8 +257,9 @@ Counted on master `72df9d66`, 2026-09-08.
 slots. Under this model it is decision 3 and nothing else: declare
 `resources:`, build the one resolver, delete the six import-time loads and
 every `DEFAULT_*_PATH`, move the files under their owners. The ownership
-test needs no exception list once decision 6 lands; until then it lists
-`dectalk-english`'s stress policy as the one known cross-package reference.
+test needs no exception list once decision 6 lands. The original plan listed
+`dectalk-english`'s stress policy as a temporary cross-package exception;
+that unused declaration has since been removed.
 #78 then threads one asset root through one resolver.
 
 ## Sequencing

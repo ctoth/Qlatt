@@ -54,8 +54,13 @@ import {
 import { getVoiceRegistry, resolveVoice } from "../src/dectalk-voice";
 import { createDiagnostics } from "../src/diagnostics";
 import { createProvenanceCollector } from "../src/provenance";
+import { parseSpeakerProfileDocument } from "../src/speaker-profile";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const profileSpec = parseSpeakerProfileDocument(
+  loadYamlDocumentSync("/rules/frontends/dectalk-english/policy/speaker-profile.yaml"),
+);
 
 const fixtureDir = path.join("test", "fixtures", "dectalk-commands-before-text");
 const corpus = readVoiceCorpus(
@@ -135,7 +140,7 @@ describe("a speaker definition and the voice setspdef() makes of it", () => {
   });
 
   it("derives the pitch floor and range from AP and PR", () => {
-    const changed = resolveVoice(registry, "paul", undefined, [
+    const changed = resolveVoice(registry, "paul", profileSpec, [
       { index: at("AP"), value: 200 },
       { index: at("PR"), value: 50 },
     ]);
@@ -144,7 +149,7 @@ describe("a speaker definition and the voice setspdef() makes of it", () => {
     expect(changed.params.f0_scale_factor).toBe(2050);
     expect(changed.params.base_f0_hz).toBe(200);
     // The voice as it is without a change.
-    expect(resolveVoice(registry, "paul").params.f0_minimum).toBe(1100);
+    expect(resolveVoice(registry, "paul", profileSpec).params.f0_minimum).toBe(1100);
   });
 });
 

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
 import { DEFAULT_SOURCE_CONTOUR_PATH } from "../src/source-contour";
-import { DEFAULT_SPEAKER_PROFILE_PATH } from "../src/speaker-profile";
 
 // The accent / break / tune prosody policy loaders were removed in Phase 5.3:
 // their data is now inlined in the declarative annotation-phase rules
@@ -10,7 +9,6 @@ import { DEFAULT_SPEAKER_PROFILE_PATH } from "../src/speaker-profile";
 
 describe("policy path layout", () => {
   it("keeps reusable policy under the shared policy directory", () => {
-    expect(DEFAULT_SPEAKER_PROFILE_PATH).toBe("/rules/policy/speaker-profile.yaml");
     expect(DEFAULT_SOURCE_CONTOUR_PATH).toBe("/rules/policy/source-contour.yaml");
   });
 

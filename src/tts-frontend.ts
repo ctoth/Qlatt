@@ -52,8 +52,6 @@ import {
 import {
   collectPitchCompositionCitations,
   collectSpeakerProfileCitations,
-  DEFAULT_SPEAKER_PROFILE_PATH,
-  loadSpeakerProfileSync,
   type ResolvedSpeakerProfile,
   resolveSpeakerProfile,
   resolveSpeakerProfileDetailed,
@@ -851,8 +849,12 @@ function buildTextToKlattTrackDetailed(
       );
     }
   }
-  const speakerProfilePath = spec.speaker_profile_path ?? DEFAULT_SPEAKER_PROFILE_PATH;
-  const speakerProfile = loadSpeakerProfileSync(speakerProfilePath);
+  if (!resources.speakerProfile) {
+    throw new Error(
+      `E_FRONTEND_CONFIG: frontend '${options.frontendPath ?? frontendId}' requires speaker_profile`,
+    );
+  }
+  const { path: speakerProfilePath, spec: speakerProfile } = resources.speakerProfile;
   const selectedVoice: ResolvedVoice | null = registry
     ? resolveVoice(
         registry,

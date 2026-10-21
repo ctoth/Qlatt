@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { dump as dumpYaml, load as loadYaml } from "js-yaml";
 import { describe, expect, it } from "vitest";
+import { loadFrontendResources } from "../src/declarative-frontend/inventory";
 import {
   type CompiledRulepack,
   loadBundledRulepackSpec,
@@ -116,7 +117,9 @@ describe("declarative frontend extends (qlatt-beauty ← qlatt-english)", () => 
     expect(voices?.default).toBe("beauty");
     expect(getVoiceRegistry(english)).toBeNull();
     if (!voices) throw new Error("qlatt-beauty has no voice registry");
-    expect(resolveVoice(voices, voices.default).override).toEqual({
+    const { speakerProfile } = loadFrontendResources(beauty);
+    if (!speakerProfile) throw new Error("qlatt-beauty has no speaker profile");
+    expect(resolveVoice(voices, voices.default, speakerProfile.spec).override).toEqual({
       base_f0_hz: 138,
       f0_range_hz: 95,
     });

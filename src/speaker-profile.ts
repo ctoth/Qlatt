@@ -1,6 +1,4 @@
-import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
-
-export const DEFAULT_SPEAKER_PROFILE_PATH = "/rules/policy/speaker-profile.yaml";
+import { isPlainObject } from "./yaml-loader";
 
 export interface SpeakerProfileFieldSpec {
   value: number;
@@ -43,7 +41,7 @@ export interface ResolveSpeakerProfileOptions {
   pitchScale?: number;
   speakerOverride?: SpeakerProfileOverride;
   voiceProfile?: SpeakerProfileOverride;
-  profileSpec?: SpeakerProfileSpec;
+  profileSpec: SpeakerProfileSpec;
 }
 
 /** What the pitch composition policy did to the level and the span. */
@@ -78,8 +76,6 @@ export interface SpeakerProfileResolution {
   issues: SpeakerProfileIssue[];
 }
 
-let speakerProfileCache: SpeakerProfileSpec | null = null;
-
 function expectNonEmptyString(value: unknown, label: string): string {
   if (typeof value !== "string" || value.trim().length === 0) {
     throw new Error(`E_SPEAKER_PROFILE_SCHEMA: '${label}' must be a non-empty string`);
@@ -113,7 +109,7 @@ function parseFieldSpec(value: unknown, label: string): SpeakerProfileFieldSpec 
   };
 }
 
-function parseSpeakerProfileDocument(value: unknown): SpeakerProfileSpec {
+export function parseSpeakerProfileDocument(value: unknown): SpeakerProfileSpec {
   if (!isPlainObject(value)) {
     throw new Error("E_SPEAKER_PROFILE_SCHEMA: top-level document must be an object");
   }
@@ -268,24 +264,10 @@ function composePitch(
   };
 }
 
-export function loadSpeakerProfileSync(
-  specPath: string = DEFAULT_SPEAKER_PROFILE_PATH,
-): SpeakerProfileSpec {
-  if (specPath === DEFAULT_SPEAKER_PROFILE_PATH && speakerProfileCache) {
-    return speakerProfileCache;
-  }
-
-  const spec = parseSpeakerProfileDocument(loadYamlDocumentSync(specPath));
-  if (specPath === DEFAULT_SPEAKER_PROFILE_PATH) {
-    speakerProfileCache = spec;
-  }
-  return spec;
-}
-
 export function resolveSpeakerProfileDetailed(
   options: ResolveSpeakerProfileOptions,
 ): SpeakerProfileResolution {
-  const profileSpec = options.profileSpec ?? loadSpeakerProfileSync();
+  const profileSpec = options.profileSpec;
   const defaults = profileSpec.default_profile;
   const sources = {
     request: options.speakerOverride,

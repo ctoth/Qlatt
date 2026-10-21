@@ -19,6 +19,7 @@
     "/rules/frontends/dectalk-english/phases/prosody.yaml",
     "/rules/frontends/dectalk-english/phases/structural.yaml",
     "/rules/frontends/dectalk-english/pipeline.yaml",
+    "/rules/frontends/dectalk-english/policy/speaker-profile.yaml",
     "/rules/frontends/dectalk-english/source-contour.yaml",
     "/rules/frontends/dectalk-english/speaker-definition.json",
     "/rules/frontends/dectalk-english/speakers/betty.yaml",
@@ -42,7 +43,6 @@
     "/rules/normalization/numbers.yaml",
     "/rules/normalization/recognition.yaml",
     "/rules/normalization/time.yaml",
-    "/rules/policy/speaker-profile.yaml",
     "/rules/policy/vq-channels.yaml"
   ]
 }

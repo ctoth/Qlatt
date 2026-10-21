@@ -2,6 +2,7 @@ import type { Diagnostics } from "../diagnostics";
 import { ltsDocumentAt } from "../g2p/lts-document";
 import { loadStressPolicy } from "../g2p/stress-policy";
 import type { AreaFunctionDerivation } from "../provenance";
+import { parseSpeakerProfileDocument, type SpeakerProfileSpec } from "../speaker-profile";
 import {
   cloneValue,
   isPlainObject,
@@ -66,6 +67,7 @@ export type FrontendResources = {
    * a path -> a map -> lookup. Frontends without it keep the global behavior.
    */
   dictionaryPath?: string;
+  speakerProfile?: { path: string; spec: SpeakerProfileSpec };
 };
 
 const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
@@ -805,6 +807,12 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
   }
   const inventory = loadInventorySpecFromPath(inventoryPath);
   const phonologyPath = inventoryPhonologyPath(inventory);
+  const speakerProfilePath =
+    spec.speaker_profile_path == null
+      ? undefined
+      : requireAsset(spec.speaker_profile_path, "speaker_profile", (path) =>
+          parseSpeakerProfileDocument(loadYamlDocumentSync(path)),
+        );
   return {
     inventory,
     inventoryPath,
@@ -814,5 +822,13 @@ export function loadFrontendResources(spec: unknown): FrontendResources {
     morphologyPath,
     stressPolicyPath,
     dictionaryPath: typeof spec.dictionary_path === "string" ? spec.dictionary_path : undefined,
+    ...(speakerProfilePath === undefined
+      ? {}
+      : {
+          speakerProfile: {
+            path: speakerProfilePath,
+            spec: FRONTEND_ASSET_CACHE.get(speakerProfilePath) as SpeakerProfileSpec,
+          },
+        }),
   };
 }

@@ -6,6 +6,12 @@ import { dump, load } from "js-yaml";
 import { expect, it } from "vitest";
 import { areaDocumentSchema, generate } from "../scripts/generate-formants-from-area";
 import { parseInventorySpec } from "../src/declarative-frontend/inventory";
+import { parseSpeakerProfileDocument } from "../src/speaker-profile";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const profileSpec = parseSpeakerProfileDocument(
+  loadYamlDocumentSync("/rules/policy/speaker-profile.yaml"),
+);
 
 const sourcePath = "data/area-functions/story-1996.yaml";
 const source = readFileSync(sourcePath, "utf8");
@@ -68,7 +74,7 @@ it("runs in plain Node and emits all four formants, bandwidths, comparisons and 
     expect(text).toContain("ΔP&B");
     expect(text).toContain("| IY (IY1) | 4 |");
     expect(text).toContain("radiation resistance");
-    const scaled = generate(source, inventory, sourcePath, {
+    const scaled = generate(source, inventory, sourcePath, profileSpec, {
       tract_length_scale: 0.8,
       pharynx_scale: 0.65,
       mouth_scale: 0.95,
@@ -81,9 +87,18 @@ it("runs in plain Node and emits all four formants, bandwidths, comparisons and 
 }, 30000);
 
 it("rejects invalid scales and missing geometry instead of silently defaulting", () => {
-  expect(() => generate(source, inventory, sourcePath, { pharynx_scale: 0 })).toThrow(/scale/);
-  expect(() => generate(source, inventory, sourcePath, { pharynx_sclae: 0.8 })).toThrow(/scale/);
+  expect(() => generate(source, inventory, sourcePath, profileSpec, { pharynx_scale: 0 })).toThrow(
+    /scale/,
+  );
   expect(() =>
-    generate(source.replace("areas_cm2: [0.33", "areas_cm2: [0"), inventory, sourcePath),
+    generate(source, inventory, sourcePath, profileSpec, { pharynx_sclae: 0.8 }),
+  ).toThrow(/scale/);
+  expect(() =>
+    generate(
+      source.replace("areas_cm2: [0.33", "areas_cm2: [0"),
+      inventory,
+      sourcePath,
+      profileSpec,
+    ),
   ).toThrow();
 });

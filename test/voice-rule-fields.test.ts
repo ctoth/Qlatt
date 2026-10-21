@@ -14,9 +14,11 @@ import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine"
 import * as rulepack from "../src/declarative-frontend/rule-pack";
 import { getVoiceRegistry, resolveVoice, withVoiceRulePolicy } from "../src/dectalk-voice";
 import { createProvenanceCollector } from "../src/provenance";
+import { parseSpeakerProfileDocument } from "../src/speaker-profile";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";
 
 const CITATION = "fixture: voice rule fields test";
+const profileSpec = parseSpeakerProfileDocument({ version: "fixture", default_profile: {} });
 const SPEAKERS = {
   dir: "test/fixtures/voice-rule-fields",
   default: "low",
@@ -116,7 +118,9 @@ function levels(voice: string | null): unknown {
     spec,
     voice === null
       ? {}
-      : { parameters: { policy: { voice: resolveVoice(registry, voice).ruleFields } } },
+      : {
+          parameters: { policy: { voice: resolveVoice(registry, voice, profileSpec).ruleFields } },
+        },
   );
   const frames = utterance.getItem("a")?.get("tank_frames") as
     | { columns: { LEVEL: number[] } }
@@ -189,12 +193,18 @@ describe("voice rule fields at load", () => {
     if (!registry) throw new Error("fixture registry missing");
     // An explicit null, not a missing key: the default voice's lift (3) is in
     // the rulepack's parameters and would show through a missing key.
-    expect(resolveVoice(registry, "no-lift").ruleFields).toEqual({ register: "chest", lift: null });
-    expect(resolveVoice(registry, "high").ruleFields).toEqual({ register: "head", lift: 7 });
+    expect(resolveVoice(registry, "no-lift", profileSpec).ruleFields).toEqual({
+      register: "chest",
+      lift: null,
+    });
+    expect(resolveVoice(registry, "high", profileSpec).ruleFields).toEqual({
+      register: "head",
+      lift: 7,
+    });
     const level = (voice: string): unknown => {
       const utterance = oneSegment();
       runGraphRuleEngine(utterance, compiled, {
-        parameters: { policy: { voice: resolveVoice(registry, voice).ruleFields } },
+        parameters: { policy: { voice: resolveVoice(registry, voice, profileSpec).ruleFields } },
       });
       const frames = utterance.getItem("a")?.get("tank_frames") as
         | { columns: { LEVEL: number[] } }

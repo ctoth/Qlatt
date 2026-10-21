@@ -17,11 +17,7 @@ import {
   OWN_BLOCK_VOICE,
   voiceFieldsOfDefinition,
 } from "./dectalk-speaker-definition";
-import {
-  loadSpeakerProfileSync,
-  type SpeakerProfileOverride,
-  type SpeakerProfileSpec,
-} from "./speaker-profile";
+import type { SpeakerProfileOverride, SpeakerProfileSpec } from "./speaker-profile";
 import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
 /** One declarative per-voice gain offset binding: the voice-YAML gain field
@@ -321,7 +317,7 @@ function toNumberRecord(doc: Record<string, unknown>): Record<string, number> {
 export function resolveVoice(
   registry: VoiceRegistry,
   voiceName: string,
-  profileSpec: SpeakerProfileSpec = loadSpeakerProfileSync(),
+  profileSpec: SpeakerProfileSpec,
   /** Changes to the voice's speaker definition, in the order they were asked. */
   definitionChanges: readonly DefinitionChange[] = [],
 ): ResolvedVoice {

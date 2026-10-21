@@ -10,11 +10,16 @@ import { describe, expect, it } from "vitest";
 import { createDiagnostics } from "../src/diagnostics";
 import { createProvenanceCollector } from "../src/provenance";
 import {
-  loadSpeakerProfileSync,
+  parseSpeakerProfileDocument,
   resolveSpeakerProfileDetailed,
   type SpeakerProfileSpec,
 } from "../src/speaker-profile";
 import { type TextToKlattTrackOptions, textToKlattTrackDetailed } from "../src/tts-frontend";
+import { loadYamlDocumentSync } from "../src/yaml-loader";
+
+const englishProfile = parseSpeakerProfileDocument(
+  loadYamlDocumentSync("/rules/policy/speaker-profile.yaml"),
+);
 
 const STATEMENT = "The cat sat on the mat.";
 const QUESTION = "Are you home?";
@@ -142,7 +147,7 @@ describe("an unusable pitch ratio", () => {
   );
 
   it("a base that gives a non-positive ratio leaves the span unscaled", () => {
-    const resolution = resolveSpeakerProfileDetailed({ baseF0: -110 });
+    const resolution = resolveSpeakerProfileDetailed({ profileSpec: englishProfile, baseF0: -110 });
     expect(resolution.issues.map((issue) => issue.code)).toEqual(["W_SPEAKER_PITCH_RATIO_INVALID"]);
     expect(resolution.profile.f0_range_hz).toBe(80);
     expect(resolution.pitch?.ratio).toBe(1);
@@ -161,6 +166,7 @@ describe("the pitch composition record", () => {
   it("resolves the reference, the effective base, the ratio and the span", () => {
     expect(
       resolveSpeakerProfileDetailed({
+        profileSpec: englishProfile,
         voiceProfile: { base_f0_hz: 138, f0_range_hz: 95 },
         pitchScale: 2,
       }).pitch,
@@ -187,7 +193,7 @@ describe("the pitch composition record", () => {
     expect(decision?.reason).toContain("effective_base_hz=276 (base 138 x pitch_scale 2)");
     expect(decision?.reason).toContain("ratio=2");
     expect(decision?.reason).toContain("span_hz=190 (span 95 x ratio)");
-    const composition = loadSpeakerProfileSync().pitch_composition;
+    const composition = englishProfile.pitch_composition;
     expect(composition).toBeDefined();
     expect(decision?.citations).toEqual(
       expect.arrayContaining([
@@ -212,7 +218,7 @@ describe("the pitch composition record", () => {
 
 describe("the profile document's pitch_composition", () => {
   it("declares pitch_scale and the span policy with citations", () => {
-    const composition = loadSpeakerProfileSync().pitch_composition;
+    const composition = englishProfile.pitch_composition;
     expect(composition?.pitch_scale.value).toBe(1);
     expect(composition?.pitch_scale.sources).toEqual(["request.pitch_scale", "pitchScale"]);
     expect(composition?.pitch_scale.citations.length).toBeGreaterThan(0);
@@ -226,7 +232,7 @@ describe("the profile document's pitch_composition", () => {
   });
 
   it("is what scales: a profile without it resolves fields only, and reports a requested scale", () => {
-    const { pitch_composition: _composition, ...fieldsOnly } = loadSpeakerProfileSync();
+    const { pitch_composition: _composition, ...fieldsOnly } = englishProfile;
     const profileSpec: SpeakerProfileSpec = fieldsOnly;
     const resolution = resolveSpeakerProfileDetailed({ profileSpec, baseF0: 220, pitchScale: 2 });
     expect(resolution.pitch).toBeNull();

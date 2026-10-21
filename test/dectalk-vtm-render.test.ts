@@ -80,7 +80,19 @@ describe("dectalk-vtm experiment renders DECtalk's packets", () => {
     expect(bindings.length).toBeGreaterThan(0);
     expect(bindings.every((decision) => decision.stage === "interpreter")).toBe(true);
     expect(bindings[0].reason).toContain("resolved to available AudioParam");
-    const decisions = allDecisions.filter((decision) => decision.stage === "runtime");
+    const connections = allDecisions.filter((decision) => decision.type === "connection_resolved");
+    expect(connections).toHaveLength(1);
+    expect(connections[0]).toMatchObject({
+      stage: "runtime",
+      subject: "connection:vtm->destination",
+      reason: "dectalk-vtm-synth: connected vtm[0] -> audioContext.destination",
+      citations: [
+        "docs/host-contract.md: Runtime structural failures (graph ports and destinations)",
+      ],
+    });
+    const decisions = allDecisions.filter(
+      (decision) => decision.stage === "runtime" && decision.type !== "connection_resolved",
+    );
     expect(decisions.map((decision) => decision.type)).toEqual([
       "dectalk_vtm_run_started",
       "dectalk_vtm_speaker_loaded",

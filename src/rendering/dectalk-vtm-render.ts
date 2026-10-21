@@ -107,6 +107,7 @@ export async function renderDectalkVtmTrack(
     const ctx = new OfflineAudioContext(1, length, sampleRate);
     const runtime = await createKlattRuntime({
       diagnostics,
+      provenance,
       audioContext: ctx as unknown as AudioContext,
       graph: config.graph,
       semantics: config.semantics,

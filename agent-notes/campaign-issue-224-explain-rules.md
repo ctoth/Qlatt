@@ -8,7 +8,7 @@ Started from origin/master 8a5d86b5. Implemented the declaration-only journal jo
 The journal's metadata.ruleId and decisionIds identify ordinary rule writes. Match only exact authored ['rules', ruleId] declarations; do not attribute a multi-rule frame transaction to every fired rule. Put locations beside decisions in the tooling payload, never in DecisionRecord or replay data. Missing declarations remain absent. This covers declaration locations, not literal origins or macro ancestry.
 
 # Surprises
-None. Other agents are active; preserve their changes.
+Hosted quality job 119116980309 rejected one test assertion's wrapping. Applied the exact requested multiline toBe(true) format; no behavior change or local CI run. Other agents are active; preserve their changes.
 
 # Next step
 Publish for hosted CI and Claude review. Keep #224 open.

@@ -208,7 +208,9 @@ describe("explain phrase cli", () => {
       explainPayload.tooling.ruleSources[rewrite.id],
     );
     const selectedIds = new Set(whyPayload.decisions.map((decision) => decision.id));
-    expect(Object.keys(whyPayload.tooling.ruleSources).every((id) => selectedIds.has(id))).toBe(true);
+    expect(Object.keys(whyPayload.tooling.ruleSources).every((id) => selectedIds.has(id))).toBe(
+      true,
+    );
     const text = await runCli(["--phrase", "hello world", "--why", rewrite.id, "--verbose"]);
     expect(text.code).toBe(0);
     expect(text.stdout.split("\n").find((line) => line.startsWith(`#${rewrite.seq} `))).toContain(

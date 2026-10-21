@@ -6,7 +6,10 @@ using existing frontend resource declarations (#141).
 # State
 
 Isolated branch from origin/master f8437836. Implementation complete; source and
-data identity inspected. Hosted CI and Claude review remain pending. No local CI.
+data identity inspected. Initial hosted CI found one stale report hash; corrected
+below. Claude completed its full review with no defects; accepted. Supervisor
+independently checked the original diff. Replacement hosted CI remains pending.
+No local CI.
 Changes outside this note: six renames, 80 additions / 78 removals in declarations,
 scripts, existing fixtures and current documentation. No runtime source changes.
 
@@ -36,6 +39,13 @@ phonotactics d9e4cc8735c84ffae967e5ab7a2eb3b4e520b8f4.
 The other two rename diffs change only their phonotactics_path line. apply_patch
 requires a nonempty move hunk; the one-line dictionary was moved with a temporary
 leading blank line and that line immediately removed, yielding the matching blob.
+Initial shard 2 job119176496351 failed the existing area-formant report equality:
+the inventory's moved phonology reference changes its normalized-text SHA-256.
+I missed this derived metadata reference. The producer hashes the whole inventory
+text; its unchanged generated-value assertion passed. Updated only the comparison
+report's inventory hash to e64a2d728ce664cd975bd633228a4ffdcef745906a365ef90423eb9dbfb032b5,
+verified independently using the producer's CRLF normalization. No metrics or
+test expectations were weakened.
 
 # Next step
 

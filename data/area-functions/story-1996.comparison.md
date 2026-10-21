@@ -3,7 +3,7 @@
 Model: wave-reflection-fant-loss-v1. Speaker: {"tract_length_scale":1,"pharynx_scale":1,"mouth_scale":1}.
 
 Geometry: data/area-functions/story-1996.yaml; SHA-256 e2e33438376db26803200e50c3dd090b840e4d86c2a5f70896e5026582b07204.
-Inventory SHA-256: c57ccb86a5fb3c0a1c83b5fd591a9173596830ca132913177cdab31f70121539.
+Inventory SHA-256: e64a2d728ce664cd975bd633228a4ffdcef745906a365ef90423eb9dbfb032b5.
 
 All values and signed differences are Hz (generated minus reference). P&B = Peterson & Barney adult male means. Missing F4, /o/ and /l/ P&B comparisons are shown as —. /l/ is a lateral control. OW is compared to the inventory's static target, not its trajectory.
 

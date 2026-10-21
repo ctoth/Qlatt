@@ -4,7 +4,7 @@ Add structured citations to four DECtalk policy nodes without changing values. S
 
 # State
 
-The actual DECtalk 4.63 sources were read: INCLUDE/l_all_ph.h:42 defines PFUSA=1, :55 describes packet composition, :61-119 defines SIL and all 58 US allophone codes; INCLUDE/cmd.h:60 defines PSFONT=8. PH/ph_task.c:711-712 supplies the minimum rate 50. PH/ph_draw.c:4071-4073 changes glottal-area speed at rates >=350.
+The actual DECtalk 4.63 sources were read: INCLUDE/l_all_ph.h:42 defines PFUSA=1, :55 describes packet composition, :61-119 defines SIL and all 58 US allophone codes; INCLUDE/cmd.h:60 defines PSFONT=8. PH/ph_task.c:711-712 supplies the minimum rate 50. PH/ph_draw.c:4072-4074 changes glottal-area speed at rates >=350.
 
 # Decisions and why
 
@@ -12,8 +12,8 @@ Wrap phone_font, the complete unchanged phone_code map, ported_minimum and porte
 
 # Surprises
 
-None.
+Claude identified an inaccurate C source line range. Accepted: corrected the new citation and adjacent existing rate-bound comment to lines 4072-4074 after reading the condition and assignment. No policy values changed.
 
 # Next step
 
-Scoped metadata edits complete. Commit/publish for hosted CI and Claude review. Supervisor owns merge.
+Review correction complete; publish for final-head hosted CI. Supervisor owns merge.

@@ -1253,7 +1253,7 @@ parameters:
           citations:
             - "DECtalk 4.63 PH/ph_task.c:711-712 (SLOWTALK: sprate = deadstop(rate, 50, 550))"
         # Rates whose rate-dependent rules are all in this rulepack. Not ported:
-        # 350 and above, ph_draw.c:4069-4072 (the glottal area's speed is
+        # 350 and above, ph_draw.c:4072-4074 (the glottal area's speed is
         # forced to 1).
         # Below 100 the citation rules are in (timing.citation_below_wpm).
         # What else the source tests there changes nothing this frontend
@@ -1269,7 +1269,7 @@ parameters:
         ported_maximum:
           value: 349
           citations:
-            - "Engineering port coverage boundary: below the unported DECtalk 4.63 PH/ph_draw.c:4071-4073 sprate >=350 glottal-area speed rule"
+            - "Engineering port coverage boundary: below the unported DECtalk 4.63 PH/ph_draw.c:4072-4074 sprate >=350 glottal-area speed rule"
       undershoot_coefficient:
         value: 0.3
         citations:

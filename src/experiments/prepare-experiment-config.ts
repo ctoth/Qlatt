@@ -255,7 +255,7 @@ export function prepareExperimentConfig(
     try {
       references = celEvaluator.references(definition.expr);
     } catch (error) {
-      reject("semantics", `${field}/expr`, String(error), "E_SEMANTICS_EXPRESSION");
+      return reject("semantics", `${field}/expr`, String(error), "E_SEMANTICS_EXPRESSION");
     }
     const roots = new Set(references.map(([root]) => root));
     for (const reference of references) {

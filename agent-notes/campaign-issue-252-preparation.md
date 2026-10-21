@@ -71,6 +71,11 @@ not an unchecked runtime path. No model formulas, dummy controls, or pruning add
 Hosted quality at 808f62ed exposed seven remaining format/import errors,
 including diagnostics omitted from the prior log. Applied their exact emitted
 edits; the audit is clear. Runtime checks and final typecheck remain pending.
+The next hosted run passed formatting and found three typecheck causes: a stale
+dump console variable, a catch branch whose throwing helper did not establish
+definite assignment, and mocked loader results missing prepared metadata. Fixed
+the output label, made the throwing branch explicitly return, and updated both
+existing mocks with plain source/unreachable fields; no behavior expansion.
 
 # Next step
 

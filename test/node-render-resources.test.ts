@@ -19,7 +19,9 @@ describe("server-owned render resources", () => {
     vi.mocked(loadExperimentConfig).mockResolvedValue({
       graph: { bacon: "0.1", nodes: {}, connections: [] },
       semantics: { name: "test" },
-      registry: { primitives: {} },
+      registry: { bacon: "0.1", primitives: {} },
+      sources: { graph: {}, registry: {}, semantics: {} },
+      unreachable: [],
     });
     vi.mocked(createNodeRuntimeAssetLoader).mockResolvedValue({
       dispose,
@@ -87,7 +89,9 @@ describe("server-owned render resources", () => {
     vi.mocked(loadExperimentConfig).mockResolvedValue({
       graph: { bacon: "0.1", nodes: {}, connections: [] },
       semantics: { name: "updated" },
-      registry: { primitives: {} },
+      registry: { bacon: "0.1", primitives: {} },
+      sources: { graph: {}, registry: {}, semantics: {} },
+      unreachable: [],
     });
     expect(await resources.get(request)).toBe(first);
     await resources.dispose();

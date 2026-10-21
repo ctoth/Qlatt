@@ -155,8 +155,7 @@ async function main(argv: string[]): Promise<number> {
   if (args.out) {
     writeFileSync(args.out, text);
     console.log(
-      `${args.experimentId}: ${Object.keys(loaded).length} loaded rules, ` +
-        `${Object.keys(semantics.realize ?? {}).length} after formant banks -> ${args.out}`,
+      `${args.experimentId}: ${Object.keys(semantics.realize ?? {}).length} prepared rules -> ${args.out}`,
     );
   } else {
     process.stdout.write(text);

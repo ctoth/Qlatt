@@ -1,4 +1,29 @@
+import { isPlainObject } from "../yaml-loader";
 import type { LexicalStressResult } from "./lexical-stress-types";
+
+export type PronunciationLayer = "dictionary" | "clitic" | "morphology" | "lts";
+export interface PronunciationLayers {
+  order: PronunciationLayer[];
+  citations: string[];
+}
+
+export function parsePronunciationLayers(value: unknown): PronunciationLayers {
+  const supported = ["dictionary", "clitic", "morphology", "lts"];
+  if (
+    !isPlainObject(value) ||
+    !Array.isArray(value.order) ||
+    value.order.length !== supported.length ||
+    new Set(value.order).size !== supported.length ||
+    !value.order.every((layer) => supported.includes(layer)) ||
+    !Array.isArray(value.citations) ||
+    !value.citations.length ||
+    !value.citations.every((citation) => typeof citation === "string" && citation.trim())
+  )
+    throw new Error(
+      "E_G2P_LAYERS: pronunciation_layers requires all four supported layers once and citations",
+    );
+  return { order: [...value.order] as PronunciationLayer[], citations: [...value.citations] };
+}
 
 export type PronunciationSource =
   | "dictionary"
@@ -29,6 +54,8 @@ export interface PronunciationPart {
 }
 
 export interface PronunciationResult {
+  /** Generic pipeline layer chosen by the selected resource's order. */
+  pronunciationLayer?: PronunciationLayer;
   phonemes: string[];
   source: PronunciationSource;
   word: string;

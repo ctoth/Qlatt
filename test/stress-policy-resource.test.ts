@@ -69,7 +69,10 @@ it("requires shared contexts when an explicit non-table override consumes them",
   const shared = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
   const options = {
     compiledSpec: spec,
-    resources: loadFrontendResources(spec),
+    resources: {
+      ...loadFrontendResources(spec),
+      pronunciationLayers: shared.pronunciationLayers,
+    },
     frontendId: "dectalk-english",
     dictionaryMap: {},
     lts: shared.lts,

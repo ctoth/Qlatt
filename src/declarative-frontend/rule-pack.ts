@@ -45,7 +45,7 @@ export function rulepackParameterOrigins(spec: CompiledRulepack): readonly YamlN
   return PARAMETER_ORIGINS.get(spec) ?? NO_PARAMETER_ORIGINS;
 }
 
-/** Authored spans, compiled lookup paths for apply templates, and macro body parents. */
+/** Authored spans, compiled lookup paths for expanded rules, and macro body parents. */
 export function rulepackRuleDocumentSpans(
   spec: CompiledRulepack,
 ): readonly DiagnosticDocumentSpans[] {
@@ -109,7 +109,9 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
         (entry) =>
           entry.value.path[0] === "rules" &&
           (entry.value.path.every((part) => typeof part === "string") ||
-            (entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number")),
+            (entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number") ||
+            entry.value.path[2] === "constraint" ||
+            (entry.value.path[2] === "select" && entry.value.path[3] === "where")),
       ),
     ),
   );

@@ -4662,13 +4662,13 @@ export function assertValidSpec(
     const exact = (origin?.compiledPath ?? origin?.value.path)?.every(
       (part) => typeof part === "number" || !/[.\[\]]/.test(part),
     );
-    // Semantic and syntax diagnostics share these direct expression paths.
+    // Semantic and syntax diagnostics share these expression leaf paths.
     // A diagnostic code alone cannot distinguish an expression from a field name.
     const expressionPath =
-      /^rules\.[^.]+\.(?:define\.[^.]+|(?:select\.where|constraint)(?:\.not)*(?:\.expr)?)$/.test(
+      /^rules\.[^.]+\.(?:define\.[^.]+|(?:select\.where|constraint)(?:\.not|\.(?:all|any)\[\d+\])*(?:\.expr)?)$/.test(
         diagnostic.path,
       ) ||
-      /^rules\.[^.]+\.apply\[\d+\]\.(?:value(?:[.\[]|$)|dispatch\[\d+\]\.(?:(?:value|default)(?:[.\[]|$)|when(?:\.not)*(?:\.expr)?$))/.test(
+      /^rules\.[^.]+\.apply\[\d+\]\.(?:value(?:[.\[]|$)|dispatch\[\d+\]\.(?:(?:value|default)(?:[.\[]|$)|when(?:\.not|\.(?:all|any)\[\d+\])*(?:\.expr)?$))/.test(
         diagnostic.path,
       );
     const documentSpan =

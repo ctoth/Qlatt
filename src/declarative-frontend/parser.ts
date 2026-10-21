@@ -404,6 +404,13 @@ function normalizeRule(ruleInput: unknown, observe?: RulePathObserver): PlainObj
     observe
       ? (compiled, authored) => {
           paths.push({ compiled, authored });
+          if (
+            (compiled[0] === "constraint" ||
+              (compiled[0] === "select" && compiled[1] === "where")) &&
+            compiled.some((part) => typeof part === "number")
+          ) {
+            observe(compiled, authored);
+          }
         }
       : undefined,
   ) as PlainObject;

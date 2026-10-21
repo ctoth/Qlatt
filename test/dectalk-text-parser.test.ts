@@ -87,7 +87,8 @@ describe("dectalk-english runs its text parser first", () => {
       parser.config,
       parser.table,
       text,
-      (word) => resources.lexicon !== undefined && Object.hasOwn(resources.lexicon.dictionary, word),
+      (word) =>
+        resources.lexicon !== undefined && Object.hasOwn(resources.lexicon.dictionary, word),
       createProvenanceCollector(),
     );
   };
@@ -196,7 +197,9 @@ describe("dectalk-english runs its text parser first", () => {
   });
 
   it("leaves the origin bridge absent when Source coordinates already refer to the request", () => {
-    const result = textToKlattTrackDetailed("Hello.", undefined, 30, { frontendId: "qlatt-english" });
+    const result = textToKlattTrackDetailed("Hello.", undefined, 30, {
+      frontendId: "qlatt-english",
+    });
     expect(result.sourceOrigins).toBeUndefined();
     expect(result.utterance.relation("SourceText").listItems()[0].get("text")).toBe("Hello.");
   });

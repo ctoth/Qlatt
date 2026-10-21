@@ -2,7 +2,7 @@
 Preserve original UTF-16 origins through the existing command parser for #237 host marker projection.
 
 # State
-Implementation and existing fixtures ready from master 5302e73d in an isolated worktree; no local CI. Publishing for hosted validation and full Claude review.
+PR #456 is open from master 5302e73d. Full Claude review is active (61e0cef4-c040-4284-a18a-409eeaf3ab5a). Initial hosted quality job119303749838 found three formatting diagnostics; exact emitted wraps/indentation corrected. Runtime checks pending; no local CI.
 
 # Decisions and why
 - Smallest approved scope: parallel half-open origin spans through existing byte/capture operations, clause assembly and command output; about 260–380 parser lines, 30–50 existing boundary lines and 140–200 existing fixture lines.

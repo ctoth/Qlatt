@@ -25,7 +25,11 @@ export interface RawTextSpan {
 }
 
 /** The source of a range of output characters, or its insertion boundary. */
-export function originSpan(origins: readonly RawTextSpan[], start: number, end: number): RawTextSpan {
+export function originSpan(
+  origins: readonly RawTextSpan[],
+  start: number,
+  end: number,
+): RawTextSpan {
   const selected = origins.slice(start, end);
   if (selected.length === 0) {
     const position = origins[start]?.start ?? origins[start - 1]?.end ?? 0;
@@ -739,7 +743,10 @@ function matchSetsWithRanges(
   if (totalLength >= 1) {
     // As written (:5980): from input_pos, not from the current position.
     machine.captures[8] = input.slice(ret.inputPos, ret.inputPos + totalLength);
-    machine.captureOrigins[8] = machine.inputOrigins.slice(ret.inputPos, ret.inputPos + totalLength);
+    machine.captureOrigins[8] = machine.inputOrigins.slice(
+      ret.inputPos,
+      ret.inputPos + totalLength,
+    );
   }
   void lookahead;
   return totalLength;

@@ -460,8 +460,8 @@ export function runTextParser(
         if (speak && read.phonemes.length > 0) {
           appendGenerated(
             String.fromCharCode(table.clauses.phonesOn) +
-            phonemeCharacters(read.phonemes) +
-            String.fromCharCode(table.clauses.phonesOff),
+              phonemeCharacters(read.phonemes) +
+              String.fromCharCode(table.clauses.phonesOff),
           );
           spoken = true;
         }
@@ -904,7 +904,8 @@ export function runTextParser(
     }
     out += clauseText.text;
     origins.push(...clauseText.origins);
-    if ([...clauseText.text].some((char) => char !== clauseEnd && char.trim() !== "")) spoken = true;
+    if ([...clauseText.text].some((char) => char !== clauseEnd && char.trim() !== ""))
+      spoken = true;
   });
   return {
     text: decode(out, marks),

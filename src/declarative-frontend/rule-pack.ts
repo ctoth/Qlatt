@@ -10,13 +10,19 @@ import {
   type YamlNodeSpans,
   yamlDocumentSpans,
 } from "../yaml-loader";
+import type { CelMacroDefinition } from "./cel-macros";
 import {
   type InventorySpec,
   loadInventorySpecFromPath,
   preloadInventorySpecFromPath,
 } from "./inventory";
 import { DSL_ROOT_KEYS, type NormalizedDslSpec, parseDslSpec } from "./parser";
-import { assertValidSpec, type ValidationDiagnostic } from "./validation";
+import {
+  assertValidSpec,
+  type DiagnosticDocumentSpans,
+  type DocumentSpanOrigin,
+  type ValidationDiagnostic,
+} from "./validation";
 
 type PlainObject = Record<string, unknown>;
 
@@ -26,7 +32,8 @@ const MAP_ORIGINS = new WeakMap<object, MapOrigins>();
 type RuleOrigins = Readonly<Record<string, string>>;
 const RULE_ORIGINS = new WeakMap<object, RuleOrigins>();
 const PARAMETER_ORIGINS = new WeakMap<object, readonly YamlNodeSpans[]>();
-const RULE_DOCUMENT_SPANS = new WeakMap<object, readonly YamlNodeSpans[]>();
+const RULE_DOCUMENT_SPANS = new WeakMap<object, readonly DiagnosticDocumentSpans[]>();
+const FUNCTION_BODY_SPANS = new WeakMap<object, readonly YamlNodeSpans[]>();
 const NO_PARAMETER_ORIGINS: readonly YamlNodeSpans[] = Object.freeze([]);
 
 /**
@@ -38,8 +45,10 @@ export function rulepackParameterOrigins(spec: CompiledRulepack): readonly YamlN
   return PARAMETER_ORIGINS.get(spec) ?? NO_PARAMETER_ORIGINS;
 }
 
-/** Direct rule paths and unchanged-index apply paths; expanded effects and macro bodies are absent. */
-export function rulepackRuleDocumentSpans(spec: CompiledRulepack): readonly YamlNodeSpans[] {
+/** Authored direct/unchanged-index paths, with actual macro bodies as source parents. */
+export function rulepackRuleDocumentSpans(
+  spec: CompiledRulepack,
+): readonly DiagnosticDocumentSpans[] {
   return RULE_DOCUMENT_SPANS.get(spec) ?? NO_PARAMETER_ORIGINS;
 }
 
@@ -130,6 +139,14 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
           entry.value.path[0] === "rules" &&
           (entry.value.path.every((part) => typeof part === "string") ||
             (entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number")),
+      ),
+    ),
+  );
+  FUNCTION_BODY_SPANS.set(
+    document,
+    Object.freeze(
+      yamlDocumentSpans(document).filter(
+        ({ value: { path } }) => path.length === 3 && path[0] === "functions" && path[2] === "body",
       ),
     ),
   );
@@ -224,6 +241,13 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
   }
   // Includes do not merge parameters; the cloned root retains their authored locations.
   PARAMETER_ORIGINS.set(merged, PARAMETER_ORIGINS.get(root) ?? NO_PARAMETER_ORIGINS);
+  FUNCTION_BODY_SPANS.set(
+    merged,
+    Object.freeze([
+      ...(FUNCTION_BODY_SPANS.get(root) ?? []),
+      ...(FUNCTION_BODY_SPANS.get(child) ?? []),
+    ]),
+  );
   RULE_DOCUMENT_SPANS.set(
     merged,
     Object.freeze([
@@ -429,6 +453,7 @@ function inheritShadowedFileSections(baseFile: PlainObject, childFile: PlainObje
   MAP_ORIGINS.set(merged, { ...MAP_ORIGINS.get(baseFile), ...MAP_ORIGINS.get(childFile) });
   RULE_ORIGINS.set(merged, RULE_ORIGINS.get(childFile) ?? {});
   RULE_DOCUMENT_SPANS.set(merged, RULE_DOCUMENT_SPANS.get(childFile) ?? NO_PARAMETER_ORIGINS);
+  FUNCTION_BODY_SPANS.set(merged, FUNCTION_BODY_SPANS.get(childFile) ?? NO_PARAMETER_ORIGINS);
   const baseOrigins = RULE_ORIGINS.get(baseFile) ?? {};
   INHERITABLE_SHADOWED_RULES.set(
     merged,
@@ -586,6 +611,7 @@ function resolveExtendsSync(
   const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
   PARAMETER_ORIGINS.set(merged, mergeParameterOrigins(baseDoc, rootDoc));
   RULE_DOCUMENT_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, RULE_DOCUMENT_SPANS));
+  FUNCTION_BODY_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, FUNCTION_BODY_SPANS));
   MAP_ORIGINS.set(
     merged,
     deepMergeChildWins(
@@ -616,6 +642,7 @@ async function resolveExtendsAsync(
   const merged = deepMergeChildWins(baseDoc, rootDoc) as PlainObject;
   PARAMETER_ORIGINS.set(merged, mergeParameterOrigins(baseDoc, rootDoc));
   RULE_DOCUMENT_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, RULE_DOCUMENT_SPANS));
+  FUNCTION_BODY_SPANS.set(merged, mergeParameterOrigins(baseDoc, rootDoc, FUNCTION_BODY_SPANS));
   MAP_ORIGINS.set(
     merged,
     deepMergeChildWins(
@@ -710,6 +737,53 @@ export function getRulepackValidationDiagnostics(
   return RULEPACK_DIAGNOSTICS.get(spec) ?? Object.freeze([]);
 }
 
+function parseComposedRulepack(merged: PlainObject): NormalizedDslSpec {
+  const calls = new Map<string, readonly CelMacroDefinition[]>();
+  const spec = parseDslSpec(withVoiceRulePolicy(merged), (path, macros) => {
+    calls.set(path, macros);
+  });
+  const bodies = FUNCTION_BODY_SPANS.get(merged) ?? [];
+  const originsOf = (macros: readonly CelMacroDefinition[]): readonly DocumentSpanOrigin[] =>
+    Object.freeze(
+      macros.flatMap((macro) => {
+        const matches = bodies.filter((entry) => entry.value.path[1] === macro.name);
+        if (matches.length !== 1) return [];
+        return [
+          Object.freeze({
+            documentSpan: matches[0].value,
+            parents: originsOf(macro.dependencies),
+          }),
+        ];
+      }),
+    );
+  const spans = unchangedRuleSpans(merged);
+  const pathOf = (entry: YamlNodeSpans) =>
+    entry.value.path
+      .map((part, index) =>
+        typeof part === "number" ? `[${part}]` : `${index > 0 ? "." : ""}${part}`,
+      )
+      .join("");
+  RULE_DOCUMENT_SPANS.set(
+    spec,
+    Object.freeze(
+      spans.map((entry) => {
+        const path = pathOf(entry);
+        const macros = calls.get(path);
+        if (
+          !macros ||
+          entry.value.path.some((part) => typeof part === "string" && /[.\[\]]/.test(part)) ||
+          spans.filter((candidate) => pathOf(candidate) === path).length !== 1
+        ) {
+          return entry;
+        }
+        const parents = originsOf(macros);
+        return parents.length ? Object.freeze({ ...entry, parents }) : entry;
+      }),
+    ),
+  );
+  return spec;
+}
+
 export function compileRuleEngineSpec(source: unknown): CompiledRulepack {
   const parameterSchemaDeclared = isPlainObject(source) && Object.hasOwn(source, "parameters");
   const spec = parseDslSpec(withVoiceRulePolicy(source));
@@ -794,9 +868,8 @@ export function loadRulepackSpecFromPath(
       merged.accent_policy_path,
     );
   }
-  const spec = parseDslSpec(withVoiceRulePolicy(merged));
+  const spec = parseComposedRulepack(merged);
   PARAMETER_ORIGINS.set(spec, PARAMETER_ORIGINS.get(merged) ?? NO_PARAMETER_ORIGINS);
-  RULE_DOCUMENT_SPANS.set(spec, unchangedRuleSpans(merged));
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
@@ -884,9 +957,8 @@ export async function preloadRulepackSpecFromPath(
       merged.accent_policy_path,
     );
   }
-  const spec = parseDslSpec(withVoiceRulePolicy(merged));
+  const spec = parseComposedRulepack(merged);
   PARAMETER_ORIGINS.set(spec, PARAMETER_ORIGINS.get(merged) ?? NO_PARAMETER_ORIGINS);
-  RULE_DOCUMENT_SPANS.set(spec, unchangedRuleSpans(merged));
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));

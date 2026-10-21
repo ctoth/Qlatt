@@ -15,12 +15,20 @@ import { parseRecognitionConfig } from "./recognition-config";
 import * as S from "./struct-schema";
 
 export type DiagnosticSeverity = "error" | "warning";
+export type DocumentSpanOrigin = Readonly<{
+  documentSpan: YamlDocumentSpan;
+  parents: readonly DocumentSpanOrigin[];
+}>;
+export type DiagnosticDocumentSpans = YamlNodeSpans & {
+  readonly parents?: readonly DocumentSpanOrigin[];
+};
 export type ValidationDiagnostic = {
   code: string;
   message: string;
   path: string;
   severity: DiagnosticSeverity;
   documentSpan?: YamlDocumentSpan;
+  documentSpanParents?: readonly DocumentSpanOrigin[];
 };
 type PlainObject = Record<string, unknown>;
 type PhaseSpec = {
@@ -3899,7 +3907,7 @@ function validateLocusTables(
 }
 
 export type ValidateDslSpecOptions = {
-  documentSpans?: readonly YamlNodeSpans[];
+  documentSpans?: readonly DiagnosticDocumentSpans[];
   inventoryPhonemes?: Iterable<string>;
   parameterSchemaDeclared?: boolean;
   requireLoweringSpec?: boolean;
@@ -4668,15 +4676,26 @@ export function assertValidSpec(
           ? origin.value
           : origin.key
         : undefined;
-    return { ...diagnostic, ...(documentSpan ? { documentSpan } : {}) };
+    return {
+      ...diagnostic,
+      ...(documentSpan ? { documentSpan } : {}),
+      ...(documentSpan && origin?.parents ? { documentSpanParents: origin.parents } : {}),
+    };
   });
   const errors = diagnostics.filter((d) => d.severity === "error");
   if (errors.length > 0) {
+    const parentLocations = (parents: readonly DocumentSpanOrigin[]): string =>
+      parents
+        .map(
+          ({ documentSpan: span, parents: ancestors }) =>
+            `\n  macro body [${span.resource}:${span.line}:${span.column}]${parentLocations(ancestors)}`,
+        )
+        .join("");
     const detail = errors
       .map((d) => {
         const span = d.documentSpan;
         const location = span ? ` [${span.resource}:${span.line}:${span.column}]` : "";
-        return `${d.code} at ${d.path}: ${d.message}${location}`;
+        return `${d.code} at ${d.path}: ${d.message}${location}${parentLocations(d.documentSpanParents ?? [])}`;
       })
       .join("\n");
     throw new Error(`Invalid declarative frontend spec:\n${detail}`);

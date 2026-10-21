@@ -16,6 +16,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadFrontendResources } from "../../src/declarative-frontend/inventory";
+import { loadBundledRulepackSpec } from "../../src/declarative-frontend/rule-pack";
 import { pronounce } from "../../src/g2p";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -37,11 +39,7 @@ const names = readJson<{ formClassNames: (string | null)[] }>(
 ).formClassNames;
 const dictionary = readJson<Record<string, string>>("public", "dectalk-dictionary.json");
 const lookup = (word: string): string[] | null => dictionary[word]?.split(" ") ?? null;
-const options = {
-  ltsPath: "/rules/frontends/dectalk-english/lts-table.json",
-  morphologyPath: "/rules/frontends/qlatt-english/morphology.yaml",
-  stressPolicyPath: "/rules/frontends/qlatt-english/stress-policy.yaml",
-};
+const options = loadFrontendResources(loadBundledRulepackSpec("dectalk-english"));
 const named = (bits: string): string =>
   bits === ""
     ? "unknown"

@@ -9,9 +9,9 @@
  * descriptors instead of trapping.
  */
 
-import { readFileSync } from "node:fs";
+import fs, { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   describeRenderStatus,
   getF0FilterExports,
@@ -44,6 +44,27 @@ function writeF64(exports: ReturnType<typeof getF0FilterExports>, values: number
 }
 
 describe("f0-filters-loader", () => {
+  it("preserves the original binary read failure instead of reporting a missing build", async () => {
+    vi.resetModules();
+    const fresh = await import("../src/f0-filters-loader");
+    const cause = Object.assign(new Error("permission denied"), { code: "EACCES", path: WASM_PATH });
+    const read = vi.spyOn(fs, "readFileSync").mockImplementation(() => {
+      throw cause;
+    });
+    try {
+      let failure: unknown;
+      try {
+        fresh.getF0FilterExports();
+      } catch (error) {
+        failure = error;
+      }
+      expect(failure).toBe(cause);
+      expect(fresh.isF0FilterLoaded()).toBe(false);
+    } finally {
+      read.mockRestore();
+    }
+  });
+
   it("loads working exports in Node via the filesystem", () => {
     const exports = getF0FilterExports();
     expect(typeof exports.render_f0).toBe("function");

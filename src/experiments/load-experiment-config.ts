@@ -141,6 +141,5 @@ async function loadConfig(experimentId: string): Promise<ExperimentConfig> {
     };
   }
 
-  // Runtime macro expansion mutates its inputs; never expose retained source documents.
-  return structuredClone(await resolve(experimentId, []));
+  return resolve(experimentId, []);
 }

@@ -23,7 +23,11 @@ Load manifest once, validate IDs, then resolve each single-parent chain bottom-u
 Keep params/realize/primitives whole-entry replacement and graph whole-document
 replacement. Constants merge recursively only when both operands are plain maps;
 arrays, null and scalars replace. Keep existing per-document realize_each expansion.
-Return detached data so callers cannot mutate documents retained by a loader.
+The YAML loader reparses each call; its resource cache holds strings, not parsed
+documents (yaml-loader.ts:174–198; sync-resource-cache.ts:24). Recursive resolution
+therefore already returns fresh data. Claude identified the final structuredClone
+as redundant; accepted that finding and removed it. The reload isolation fixture
+still checks the actual caller contract without requiring an extra copy.
 
 ## Surprises
 Malformed/empty optional YAML already throws; preserve the existing loader errors.

@@ -16,6 +16,14 @@ their subsequent policy edits still reach the intended runtime diagnostics.
 Integrated439's correction9aadbc82: each request compiles a fresh cloned source,
 removing compiler-generated voice policy before regeneration. This fixes the
 actual readonly-policy and reserved-voice fixture failures without runtime edits.
+Claude completed two passes over the original eleven files and the four-file
+fixture delta throughcf4578a6 (session dcad206c-c8ad-405c-9e51-348ac0d5ff7e).
+Accepted the live-fixture freeze finding, already corrected infe083fff; the
+reserved generated voice policy was independently exposed by hosted CI and
+corrected in the same helper. No other production findings. Reviewer explicitly
+withdrew its initial claim that no fixture lost compiler metadata. The three
+other migrated fixture files start from Qlatt (no generated voice policy); the
+voice-rule fixture then supplies its authored SPEAKERS registry for first compilation.
 
 ## Decisions and why
 - Reuse existing HrgSchema/FeatureSchema compilation with authored input checks.
@@ -31,5 +39,5 @@ actual readonly-policy and reserved-voice fixture failures without runtime edits
 None yet.
 
 ## Next step
-Publish for hosted CI and private Claude review/response; integrate master after
+Await final hosted CI and supervisor review of the correction; retarget after
 PR439 merges. Full227 remains open for other schema owners/reference work.

@@ -4,8 +4,8 @@ import type { HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
 import {
-  loadInventorySpecFromPath,
   loadBundledRulepackSpec,
+  loadInventorySpecFromPath,
 } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 

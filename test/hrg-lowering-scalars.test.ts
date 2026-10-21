@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import type { FeatureSchema, HrgSchema, Item, LowerOptions } from "../src/declarative-frontend/hrg";
 import { lowerToFrames, Utterance } from "../src/declarative-frontend/hrg";
 import {
-  loadInventorySpecFromPath,
   loadBundledRulepackSpec,
+  loadInventorySpecFromPath,
 } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 import { historicalLoweringColumns } from "./historical-lowering-columns";

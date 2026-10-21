@@ -5,11 +5,11 @@ import { dump as dumpYaml, load as loadYaml } from "js-yaml";
 import { describe, expect, it } from "vitest";
 import { ForeachExpansionError } from "../src/declarative-frontend/parser";
 import {
-  loadFrontendResources,
-  loadFrontendVoiceDocument,
   type CompiledRulepack,
   getRulepackValidationDiagnostics,
   loadBundledRulepackSpec,
+  loadFrontendResources,
+  loadFrontendVoiceDocument,
   loadRulepackSpecFromPath,
   preloadRulepackSpecFromPath,
   rulepackMapOrigins,

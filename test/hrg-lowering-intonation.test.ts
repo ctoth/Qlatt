@@ -10,8 +10,8 @@ import type {
 import { lowerToFrames, readLowerOptions, Utterance } from "../src/declarative-frontend/hrg";
 import { f0ModelForVoice, renderLayeredF0 } from "../src/declarative-frontend/hrg/lowering";
 import {
-  loadInventorySpecFromPath,
   loadBundledRulepackSpec,
+  loadInventorySpecFromPath,
 } from "../src/declarative-frontend/rule-pack";
 import { isPlainObject } from "../src/yaml-loader";
 

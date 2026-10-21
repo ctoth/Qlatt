@@ -11,13 +11,13 @@ import type { HrgSchema } from "../src/declarative-frontend/hrg";
 import { Utterance } from "../src/declarative-frontend/hrg";
 import { FRAME_VALUES_SCHEMA } from "../src/declarative-frontend/hrg/frame-program";
 import { runGraphRuleEngine } from "../src/declarative-frontend/hrg/rule-engine";
+import * as rulepack from "../src/declarative-frontend/rule-pack";
 import {
   loadFrontendVoiceDocument,
   loadVoiceRuleDocuments,
   preloadFrontendVoiceDocument,
   preloadVoiceRuleDocuments,
 } from "../src/declarative-frontend/rule-pack";
-import * as rulepack from "../src/declarative-frontend/rule-pack";
 import { getVoiceRegistry, resolveVoice, withVoiceRulePolicy } from "../src/dectalk-voice";
 import * as paths from "../src/path-utils";
 import { createProvenanceCollector } from "../src/provenance";

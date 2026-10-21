@@ -11,10 +11,10 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { inventoryPhonologyPath, parseInventorySpec } from "../src/declarative-frontend/inventory";
 import {
+  loadBundledRulepackSpec,
   loadFrontendResources,
   loadInventorySpecFromPath,
   preloadInventorySpecFromPath,
-  loadBundledRulepackSpec,
 } from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";

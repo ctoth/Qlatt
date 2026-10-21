@@ -4,8 +4,8 @@
  * Reference: bundled CMU dictionary. Baseline: e3e8b4cf src/g2p/stress.ts count/hint rule.
  */
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { pronounce } from "../src/g2p";
 import { applyLtsRules, type LtsRulesData } from "../src/g2p/lts-engine";

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 
 // The accent / break / tune prosody policy loaders were removed in Phase 5.3:

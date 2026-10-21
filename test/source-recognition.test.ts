@@ -1,9 +1,3 @@
-import {
-  loadFrontendResources,
-  compileRuleEngineSpec,
-  loadBundledRulepackSpec,
-  loadRulepackSpecFromPath,
-} from "../src/declarative-frontend/rule-pack";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -12,6 +6,12 @@ import {
   Utterance,
   whyFeature,
 } from "../src/declarative-frontend/hrg";
+import {
+  compileRuleEngineSpec,
+  loadBundledRulepackSpec,
+  loadFrontendResources,
+  loadRulepackSpecFromPath,
+} from "../src/declarative-frontend/rule-pack";
 import {
   NORMALIZATION_SCHEMA,
   normalizeSourceItems,

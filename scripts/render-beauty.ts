@@ -40,8 +40,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { AudioWorkletNode as NodeAudioWorkletNode, OfflineAudioContext } from "node-web-audio-api";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack.ts";
 import { createDiagnostics } from "../src/diagnostics.ts";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config.ts";

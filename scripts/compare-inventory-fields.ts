@@ -18,8 +18,8 @@
  */
 
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack.ts";
 
 const [idA, idB] = process.argv.slice(2);

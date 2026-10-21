@@ -1,6 +1,6 @@
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { normalizeGraphText } from "../src/declarative-frontend/source-recognition";
 import { pronounce as pronounceWithResources } from "../src/g2p";

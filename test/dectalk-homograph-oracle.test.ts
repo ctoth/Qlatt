@@ -16,8 +16,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { dectalkAllophoneName, parsePhonemeLog } from "../scripts/oracle/allophones";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { pronounceClause } from "../src/g2p";
 

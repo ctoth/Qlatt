@@ -12,8 +12,8 @@
  * Read-only. Does NOT modify any baselines.
  */
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { readFileFromFsSync } from "../src/path-utils";
 import { createProvenanceCollector } from "../src/provenance";

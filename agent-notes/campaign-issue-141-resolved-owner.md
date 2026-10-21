@@ -12,6 +12,9 @@ Published PR #433 at 9e9ad567; Claude full-PR review is running. GitHub reported
 a conflict against #429, so CI did not start. Integrated master 36953f15, retaining
 its foreach error-source implementation and fixture while selecting the relocated
 owner imports in the single fixture import conflict. No local CI.
+Hosted quality job 119207856330 reported import ordering/formatting after the
+relocation: merged import blocks retained their insertion order. Corrected the
+task-owned import blocks and type-only import; no local formatter/CI run.
 
 # Decisions and why
 

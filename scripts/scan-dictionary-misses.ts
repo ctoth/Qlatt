@@ -3,8 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector } from "../src/provenance";
 import { textToKlattTrack } from "../src/tts-frontend";

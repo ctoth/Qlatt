@@ -23,8 +23,8 @@
 
 import { writeFileSync } from "node:fs";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack.ts";
 
 /** Recursively sort object keys so serialization is order-independent. */

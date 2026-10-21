@@ -1,6 +1,6 @@
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 
 const lexicon = loadFrontendResources(loadBundledRulepackSpec("dectalk-english")).lexicon;

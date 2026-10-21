@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import * as celExpressions from "../src/declarative-frontend/cel-expressions";
 import {
-  loadFrontendResources,
   compileRuleEngineSpec,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { normalizeGraphText } from "../src/declarative-frontend/source-recognition";
 import { transcribeText } from "../src/transcribe-text";

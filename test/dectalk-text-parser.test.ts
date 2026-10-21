@@ -17,8 +17,8 @@ import {
   textParserPort,
 } from "../scripts/oracle/text-parser-port";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector } from "../src/provenance";
 import { runTextParser } from "../src/text-parser/frontend";

@@ -1,7 +1,7 @@
 import { expect, it, vi } from "vitest";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { pronounce } from "../src/g2p";
 import { decomposeWord } from "../src/g2p/morphology";

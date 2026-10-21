@@ -32,7 +32,7 @@ import {
   type DecisionRecord,
   type ProvenanceCollector,
 } from "../provenance";
-import { type AffectLibrary, affectDegree } from "./affect-presets";
+import { affectDegree, type AffectLibrary } from "./affect-presets";
 import type { DimensionalVector, SpeakerSex, VoiceQualityDelta } from "./direction-track";
 import {
   materializeVoiceQualityDelta,

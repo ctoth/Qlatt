@@ -11,8 +11,8 @@
 
 import { performance } from "node:perf_hooks";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrack } from "../src/tts-frontend";
 

@@ -1,7 +1,7 @@
 import { expect } from "vitest";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../../src/declarative-frontend/rule-pack";
 
 export interface Frame {

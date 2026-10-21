@@ -4,9 +4,9 @@ import { join } from "node:path";
 import { afterEach, expect, it } from "vitest";
 import { Utterance } from "../src/declarative-frontend/hrg";
 import {
-  loadFrontendResources,
   compileRuleEngineSpec,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import {
   NORMALIZATION_SCHEMA,

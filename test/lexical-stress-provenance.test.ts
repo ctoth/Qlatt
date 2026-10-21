@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
 import { createProvenanceCollector } from "../src/provenance";

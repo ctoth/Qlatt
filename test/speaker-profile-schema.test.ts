@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector } from "../src/provenance";
 import { parseSpeakerProfileDocument, resolveSpeakerProfile } from "../src/speaker-profile";

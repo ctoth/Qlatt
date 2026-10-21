@@ -3,8 +3,8 @@ import { readFileSync } from "node:fs";
 import { load } from "js-yaml";
 import { describe, expect, it } from "vitest";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { compileAffect } from "../src/input/affect";
 import { parseAffectPresets, validateAffectPresetChannels } from "../src/input/affect-presets";

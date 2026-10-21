@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
+import * as rulepack from "../src/declarative-frontend/rule-pack";
 import {
   loadFrontendResources,
   loadFrontendVoiceDocument,
 } from "../src/declarative-frontend/rule-pack";
-import * as rulepack from "../src/declarative-frontend/rule-pack";
 import { resolveVoice } from "../src/dectalk-voice";
 import { createProvenanceCollector } from "../src/provenance";
 import {

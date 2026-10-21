@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { normalizeText, textToKlattTrack, transcribeText } from "../src/tts-frontend";
 import { PHONOLOGY_PROBE_CASES } from "./fixtures/phonology-probes";

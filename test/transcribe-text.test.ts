@@ -1,10 +1,10 @@
 import { afterAll, describe, expect, it, vi } from "vitest";
+import * as resourceOwner from "../src/declarative-frontend/rule-pack";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
-import * as resourceOwner from "../src/declarative-frontend/rule-pack";
 import {
   getDiagnosticSymbolPronunciation,
   isPunctuationToken,

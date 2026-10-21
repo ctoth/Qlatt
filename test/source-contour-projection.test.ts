@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import * as rulepack from "../src/declarative-frontend/rule-pack";
 import {
   loadFrontendResources,
   preloadFrontendSourceContour,
 } from "../src/declarative-frontend/rule-pack";
-import * as rulepack from "../src/declarative-frontend/rule-pack";
 import { assertFrontendVocabulary } from "../src/experiments/frontend-vocabulary";
 import { loadExperimentConfig } from "../src/experiments/load-experiment-config";
 import * as paths from "../src/path-utils";

@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { load } from "js-yaml";
 import { describe, expect, it } from "vitest";
-import { affectDegree, parseAffectPresets } from "../src/input/affect-presets";
 import { resolveAffectPreset } from "../src/input/affect";
+import { affectDegree, parseAffectPresets } from "../src/input/affect-presets";
 
 function document() {
   const source = readFileSync(

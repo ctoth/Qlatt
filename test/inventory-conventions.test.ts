@@ -1,10 +1,13 @@
 import { expect, it, vi } from "vitest";
-import { materializePhonemeTarget, parseInventorySpec } from "../src/declarative-frontend/inventory";
+import {
+  materializePhonemeTarget,
+  parseInventorySpec,
+} from "../src/declarative-frontend/inventory";
+import * as rulepackModule from "../src/declarative-frontend/rule-pack";
 import {
   loadFrontendResources,
   loadInventorySpecFromPath,
 } from "../src/declarative-frontend/rule-pack";
-import * as rulepackModule from "../src/declarative-frontend/rule-pack";
 import { createDiagnostics } from "../src/diagnostics";
 import { syllabify } from "../src/g2p/syllabify";
 import { createProvenanceCollector } from "../src/provenance";

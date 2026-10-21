@@ -15,8 +15,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import type { LtsTableDocument } from "../src/g2p/table-lts-pronounce";
 import { textToKlattTrackDetailed } from "../src/tts-frontend";

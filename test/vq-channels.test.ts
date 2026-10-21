@@ -4,8 +4,8 @@ import { join } from "node:path";
 import { load } from "js-yaml";
 import { describe, expect, it } from "vitest";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { parseDirectionInput } from "../src/input/parse";
 import { parseVoiceQualityChannels } from "../src/input/vq-channels";

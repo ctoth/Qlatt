@@ -6,8 +6,8 @@ import {
 import {
   getVoiceRegistry,
   type VoiceDocument,
-  type VoiceRegistry,
   voiceNameInRegistry,
+  type VoiceRegistry,
   voiceRuleRegistry,
   withVoiceRulePolicy,
 } from "../dectalk-voice";
@@ -37,15 +37,15 @@ import {
   loadYamlSourceSync,
   parseYamlString,
   resolveIncludePath,
-  type YamlNodeSpans,
   yamlDocumentSpans,
+  type YamlNodeSpans,
 } from "../yaml-loader";
 import type { CelMacroDefinition } from "./cel-macros";
 import {
   type FrontendResources,
-  type InventorySpec,
   inventoryPhonologyPath,
   inventoryPhonologyReference,
+  type InventorySpec,
   parseInventorySpec,
 } from "./inventory";
 import {

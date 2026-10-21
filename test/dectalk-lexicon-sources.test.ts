@@ -10,8 +10,8 @@
 
 import { describe, expect, it } from "vitest";
 import {
-  loadFrontendResources,
   loadBundledRulepackSpec,
+  loadFrontendResources,
 } from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector, type DecisionRecord } from "../src/provenance";
 import { transcribeText } from "../src/transcribe-text";

@@ -37,6 +37,9 @@ Initial hosted quality job119207414923 reported formatting in five authored
 files. Applied the formatter layout through apply_patch; its truncated diagnostic
 required obtaining formatted stdout only. No local checks or formatter writes.
 Claude full-PR review is running in session b47a09cf-295e-4b57-a381-23eecb34ce89.
+Initial test shard3 job119207509989 rejected every fixture because its definition
+name `optional` collides with CEL's registered optional namespace. Renamed that
+fixture definition to `missingValue`; production namespace validation unchanged.
 
 ## Next step
 Publish for hosted CI and independent Claude review; correct actual findings and

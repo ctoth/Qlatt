@@ -24,7 +24,7 @@ const definitions = {
   shared: "own * params.scale",
   sum: "shared + shared",
   branch: "own > 0 ? shared : current.missing",
-  optional: "has(current.missing) ? current.missing : 7",
+  missingValue: "has(current.missing) ? current.missing : 7",
   neighbor: "path(current, 'n.duration')",
   member: "ahead(current, 1)",
   linked: "size(assoc(current, 'link'))",
@@ -136,7 +136,7 @@ describe("requested attributes on supplied graphs", () => {
 
   it("records failed feature, topology, association, and temporal reads, then invalidates them", () => {
     const { graph, item, request } = fixture();
-    expect(request.evaluate(item, "optional").evidence?.reads).toContainEqual(
+    expect(request.evaluate(item, "missingValue").evidence?.reads).toContainEqual(
       expect.objectContaining({ kind: "feature", value: { present: false, value: undefined } }),
     );
     expect(request.evaluate(item, "neighbor").evidence?.reads).toContainEqual(
@@ -149,7 +149,7 @@ describe("requested attributes on supplied graphs", () => {
       expect.objectContaining({ kind: "temporal", value: null }),
     );
     item.set("missing", 15, meta);
-    expect(request.evaluate(item, "optional").value).toBe(15);
+    expect(request.evaluate(item, "missingValue").value).toBe(15);
     const second = graph.createItem("segment", "second");
     second.set("duration", 20, meta);
     graph.segments.append(second, meta);

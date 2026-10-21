@@ -7,8 +7,10 @@ Started from origin/master 5e83dda7. Implemented expansion-time typed path mappi
 # Decisions and why
 Record mappings while output entries are appended, composing foreach followed by for_each_field. Preserve original document paths and coordinates; use a separate compiled lookup path. Keep macro ancestry tied to the same authored expression. No runtime literal join, evaluator or second compiler.
 
+Claude reviewed all six PR files at 2b038498 and reported no defects; accepted. The accessor wording observation is accurate: unchanged apply entries also receive compiledPath. Leave the brief comment unchanged because it describes the template use without claiming exclusivity. Defer the unmeasured observer-free path allocation observation; there is no demonstrated performance defect and no additional machinery is requested. The subsequent 8727223b code delta is formatting only.
+
 # Surprises
 The former exclusion scanner omitted every indexed location in an apply array containing a template. It is removed; only actual emitted paths with one authored source are now indexed. Source coordinates and authored paths remain unchanged. Other agents are active; preserve their edits.
 
 # Next step
-Publish hosted CI and Claude review, respond to confirmed findings. Keep #224 open.
+Await final hosted CI and supervisor merge. Keep #224 open; the next condition-array slice awaits source verification and approval.

@@ -12,8 +12,8 @@ Report the actual declared registry directory, default and voice count in the au
 
 # Surprises
 
-None.
+Claude's two-pass review found two remaining stale references: the audit's roster checklist and a harness test comment naming the removed pitch source. Both were verified against the declared roster and Paul voice resource, then corrected. No runtime findings.
 
 # Next step
 
-Scoped edits complete. No local tests or CI steps run. Commit and publish for hosted CI and Claude review. Supervisor owns merge; #94 stays open.
+Review corrections complete. No local tests or CI steps run. Push corrections for hosted CI and final review confirmation. Supervisor owns merge; #94 stays open.

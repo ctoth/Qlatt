@@ -236,9 +236,6 @@ function main(): void {
   lines.push(
     "- `us_featb[]` / `us_place[]` -> reuse `C:/Users/Q/src/dectalk/463/scripts/extract_features.py` -> mirror raw feature/place metadata into `public/rules/frontends/dectalk-english/inventory.yaml` so future rules can match the original DECtalk feature surface directly.",
   );
-  lines.push(
-    "- speaker tables (`ph_vset.c` / extracted speaker data) -> reuse `C:/Users/Q/src/dectalk/463/scripts/extract_speakers.py` and `convert_speakers.py` -> expose a declarative speaker roster in `public/rules/frontends/dectalk-english/frontend.yaml`.",
-  );
   lines.push("");
   lines.push("Priority porting targets:");
   lines.push(

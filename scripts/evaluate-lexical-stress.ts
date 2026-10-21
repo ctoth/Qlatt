@@ -30,7 +30,9 @@ export const evaluationWords = {
 
 const selected = loadFrontendResources(loadBundledRulepackSpec("qlatt-english"));
 if (!selected.stress || !selected.morphology) {
-  throw new Error("E_FRONTEND_CONFIG: frontend 'qlatt-english' requires stress_policy and morphology");
+  throw new Error(
+    "E_FRONTEND_CONFIG: frontend 'qlatt-english' requires stress_policy and morphology",
+  );
 }
 const resources = { ...selected, stress: selected.stress, morphology: selected.morphology };
 const ltsRules = resources.lts.document as LtsRulesData;

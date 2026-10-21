@@ -7,7 +7,7 @@ Remove DECtalk's unused shared morphology/stress dependencies while preserving t
 Fresh branch from 6675ed72. Implementation complete: 59 production additions /
 30 removals, 74 fixture additions / 7 removals and 11 declaration/manifest removals.
 Owner, selected-table predicate, shared consumers, explicit overrides and owned
-diff inspected. Publishing for hosted CI/Claude. No local CI ran.
+diff inspected. PR #408 published; Claude reviewing. No local CI ran.
 
 # Decisions and why
 
@@ -26,6 +26,8 @@ Existing Qlatt fixtures explicitly narrow their selected contexts. DECtalk's tab
 suffix fixture confirms the unchanged cats pronunciation and morphology provenance.
 Existing resource fixtures cover missing shared contexts on explicit non-table
 overrides, acquisition of declared table-frontend resources, and Qlatt errors.
+Hosted quality job119156643823 reported one formatter wrap in the evaluation
+script's error. Applied its exact correction; no behavior change.
 
 # Next step
 

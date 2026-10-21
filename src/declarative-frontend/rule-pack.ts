@@ -38,9 +38,38 @@ export function rulepackParameterOrigins(spec: CompiledRulepack): readonly YamlN
   return PARAMETER_ORIGINS.get(spec) ?? NO_PARAMETER_ORIGINS;
 }
 
-/** Direct authored rule paths only; expanded indexed effects and macro bodies are not mapped. */
+/** Direct rule paths and unchanged-index apply paths; expanded effects and macro bodies are absent. */
 export function rulepackRuleDocumentSpans(spec: CompiledRulepack): readonly YamlNodeSpans[] {
   return RULE_DOCUMENT_SPANS.get(spec) ?? NO_PARAMETER_ORIGINS;
+}
+
+function unchangedRuleSpans(document: PlainObject): readonly YamlNodeSpans[] {
+  const containsForeach = (value: unknown): boolean => {
+    if (Array.isArray(value)) {
+      return value.some(
+        (entry) =>
+          (isPlainObject(entry) && Object.hasOwn(entry, "foreach")) || containsForeach(entry),
+      );
+    }
+    return isPlainObject(value) && Object.values(value).some(containsForeach);
+  };
+  const expanded = new Set<string>();
+  for (const [name, rule] of Object.entries(isPlainObject(document.rules) ? document.rules : {})) {
+    if (!isPlainObject(rule) || !Array.isArray(rule.apply)) continue;
+    if (
+      containsForeach(rule.apply) ||
+      rule.apply.some((entry) => isPlainObject(entry) && Object.hasOwn(entry, "for_each_field"))
+    ) {
+      expanded.add(name);
+    }
+  }
+  return Object.freeze(
+    (RULE_DOCUMENT_SPANS.get(document) ?? []).filter(
+      (entry) =>
+        !entry.value.path.some((part) => typeof part === "number") ||
+        !expanded.has(String(entry.value.path[1])),
+    ),
+  );
 }
 
 /** Follow deepMergeChildWins: arrays/scalars replace, objects retain untouched siblings. */
@@ -99,7 +128,8 @@ function parseRulepackDocument(source: string, label: string): PlainObject {
       yamlDocumentSpans(document).filter(
         (entry) =>
           entry.value.path[0] === "rules" &&
-          entry.value.path.every((part) => typeof part === "string"),
+          (entry.value.path.every((part) => typeof part === "string") ||
+            (entry.value.path[2] === "apply" && typeof entry.value.path[3] === "number")),
       ),
     ),
   );
@@ -766,7 +796,7 @@ export function loadRulepackSpecFromPath(
   }
   const spec = parseDslSpec(withVoiceRulePolicy(merged));
   PARAMETER_ORIGINS.set(spec, PARAMETER_ORIGINS.get(merged) ?? NO_PARAMETER_ORIGINS);
-  RULE_DOCUMENT_SPANS.set(spec, RULE_DOCUMENT_SPANS.get(merged) ?? NO_PARAMETER_ORIGINS);
+  RULE_DOCUMENT_SPANS.set(spec, unchangedRuleSpans(merged));
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
@@ -774,7 +804,7 @@ export function loadRulepackSpecFromPath(
     typeof spec.inventory_path === "string" ? loadInventorySpecFromPath(spec.inventory_path) : null;
   const diagnostics = assertValidSpec(spec, {
     inventoryPhonemes: validationInventoryPhonemes(inventory),
-    documentSpans: [...rulepackParameterOrigins(spec), ...(RULE_DOCUMENT_SPANS.get(merged) ?? [])],
+    documentSpans: [...rulepackParameterOrigins(spec), ...rulepackRuleDocumentSpans(spec)],
     requireLoweringSpec: true,
     requireTagVocabulary: true,
     requireSyllabification: true,
@@ -856,7 +886,7 @@ export async function preloadRulepackSpecFromPath(
   }
   const spec = parseDslSpec(withVoiceRulePolicy(merged));
   PARAMETER_ORIGINS.set(spec, PARAMETER_ORIGINS.get(merged) ?? NO_PARAMETER_ORIGINS);
-  RULE_DOCUMENT_SPANS.set(spec, RULE_DOCUMENT_SPANS.get(merged) ?? NO_PARAMETER_ORIGINS);
+  RULE_DOCUMENT_SPANS.set(spec, unchangedRuleSpans(merged));
   MAP_ORIGINS.set(spec, MAP_ORIGINS.get(merged) ?? {});
   freezeRecursively(MAP_ORIGINS.get(spec));
   RULE_ORIGINS.set(spec, Object.freeze({ ...RULE_ORIGINS.get(merged) }));
@@ -866,7 +896,7 @@ export async function preloadRulepackSpecFromPath(
       : null;
   const diagnostics = assertValidSpec(spec, {
     inventoryPhonemes: validationInventoryPhonemes(inventory),
-    documentSpans: [...rulepackParameterOrigins(spec), ...(RULE_DOCUMENT_SPANS.get(merged) ?? [])],
+    documentSpans: [...rulepackParameterOrigins(spec), ...rulepackRuleDocumentSpans(spec)],
     requireLoweringSpec: true,
     requireTagVocabulary: true,
     requireSyllabification: true,

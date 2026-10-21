@@ -4640,17 +4640,26 @@ export function assertValidSpec(
   options: ValidateDslSpecOptions = {},
 ): ValidationDiagnostic[] {
   const diagnostics = validateDslSpec(spec, options).map((diagnostic) => {
-    const parts = diagnostic.path.split(".");
-    const matches = (options.documentSpans ?? []).filter(
-      (entry) => entry.value.path.join(".") === diagnostic.path,
-    );
-    // Dotted authored keys can collide with nested paths; never guess between them.
+    const matches = (options.documentSpans ?? []).filter((entry) => {
+      const path = entry.value.path
+        .map((part, index) =>
+          typeof part === "number" ? `[${part}]` : `${index > 0 ? "." : ""}${part}`,
+        )
+        .join("");
+      return path === diagnostic.path;
+    });
     const origin = matches.length === 1 ? matches[0] : undefined;
-    const exact = origin?.value.path.every((part, index) => part === parts[index]);
+    // Literal punctuation in a key cannot be distinguished in diagnostic paths.
+    const exact = origin?.value.path.every(
+      (part) => typeof part === "number" || !/[.\[\]]/.test(part),
+    );
     // Semantic and syntax diagnostics share these direct expression paths.
     // A diagnostic code alone cannot distinguish an expression from a field name.
     const expressionPath =
       /^rules\.[^.]+\.(?:define\.[^.]+|(?:select\.where|constraint)(?:\.not)*(?:\.expr)?)$/.test(
+        diagnostic.path,
+      ) ||
+      /^rules\.[^.]+\.apply\[\d+\]\.(?:value(?:[.\[]|$)|dispatch\[\d+\]\.(?:(?:value|default)(?:[.\[]|$)|when(?:\.not)*(?:\.expr)?$))/.test(
         diagnostic.path,
       );
     const documentSpan =
